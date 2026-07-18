@@ -42,8 +42,9 @@ references:
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-Un solo barrido sinusoidal exponencial mide por completo un sistema
-débilmente no lineal. Tras la deconvolución, los productos de distorsión de
+Un solo barrido sinusoidal exponencial caracteriza a la vez la respuesta
+lineal y todos los órdenes de distorsión armónica de un sistema débilmente
+no lineal. Tras la deconvolución, los productos de distorsión de
 orden `n` se empaquetan en respuestas al impulso separadas que *preceden* a
 la respuesta lineal con el adelanto fijo (Farina 2000)
 
@@ -85,9 +86,9 @@ from phonometry import swept_sine_distortion, synchronized_sweep_signal
 fs, f1, f2, seconds = 48000, 20.0, 6000.0, 4.0
 x = synchronized_sweep_signal(fs, f1, f2, seconds)   # reproducir esto...
 # ... grabar la respuesta del dispositivo en `y` (con su cola de caída) ...
-res = swept_sine_distortion(y, fs, f1, f2, seconds, n_harmonics=5)
+res = swept_sine_distortion(y, fs, f1, f2, seconds, n_harmonics=3)
 
-res.harmonic_responses    # H1..H5 complejas sobre res.frequencies
+res.harmonic_responses    # H1..H3 complejas sobre res.frequencies
 res.thd, res.thd_frequencies
 res.distortion_ratios     # |Hn(n f)| / |H1(f)| por orden
 res.plot()                # magnitudes |Hn| + THD(f)
@@ -118,8 +119,10 @@ ax.loglog(res.thd_frequencies, 100.0 * res.distortion_ratios[0],
           ls="--", label="2º armónico d2(f)")
 ax.loglog(res.thd_frequencies, 100.0 * res.distortion_ratios[1],
           ls="--", label="3er armónico d3(f)")
-ax.axhline(100.0 * (a2 / 2.0) / h1, ls=":", label="Nivel de Chebyshev a2/2")
-ax.axhline(100.0 * (a3 / 4.0) / h1, ls=":", label="Nivel de Chebyshev a3/4")
+ax.axhline(100.0 * (a2 / 2.0) / h1, ls=":",
+           label="Asíntota de Chebyshev (a2/2)/H1")
+ax.axhline(100.0 * (a3 / 4.0) / h1, ls=":",
+           label="Asíntota de Chebyshev (a3/4)/H1")
 ax.set_xlabel("Frecuencia de excitación [Hz]")
 ax.set_ylabel("Distorsión respecto al fundamental [%]")
 ax.legend()
@@ -224,7 +227,7 @@ tau_g = group_delay(H, fs)             # -(1/2pi) dphi/df, en segundos
 phi_x = excess_phase(H)                # unwrap(arg H) - phi_min
 
 res = phase_decomposition(H, fs)       # todo sobre un mismo eje
-res.excess_group_delay                 # la parte de latencia pura, s
+res.excess_group_delay                 # la parte paso-todo, en s
 res.plot()                             # magnitud, fases, retardos de grupo
 ```
 
@@ -260,7 +263,8 @@ gruesas.
   miden la distorsión de un tono estacionario a una frecuencia; el
   separador por barrido devuelve las mismas razones como función continua
   de la frecuencia, con una sola medición.
-- Las utilidades de fase operan sobre cualquier respuesta unilateral: una
-  `rfft` de una RI medida, la `response` de una estimación con
+- Las utilidades de fase operan sobre cualquier respuesta unilateral
+  *compleja*: una `rfft` de una RI medida, o la `response` de una estimación con
   [`transfer_function`](/phonometry/es/guides/electroacoustics/) sobre una
-  malla uniforme, o una magnitud objetivo de diseño para ecualización.
+  malla uniforme. Solo `minimum_phase` acepta además un array de magnitud
+  a secas, p. ej. una magnitud objetivo de diseño para ecualización.

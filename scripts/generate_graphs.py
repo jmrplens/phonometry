@@ -593,8 +593,8 @@ _ES_EXACT = {
     "Total THD(f)": "THD(f) total",
     "2nd harmonic d₂(f)": "2º armónico d₂(f)",
     "3rd harmonic d₃(f)": "3er armónico d₃(f)",
-    "Chebyshev level a₂/2": "Nivel de Chebyshev a₂/2",
-    "Chebyshev level a₃/4": "Nivel de Chebyshev a₃/4",
+    "Chebyshev asymptote (a₂/2)/H₁": "Asíntota de Chebyshev (a₂/2)/H₁",
+    "Chebyshev asymptote (a₃/4)/H₁": "Asíntota de Chebyshev (a₃/4)/H₁",
     "one sweep separates every distortion order;\n"
     "each rolls off where its product n·f crosses the 3 kHz corner":
         "un solo barrido separa cada orden de distorsión;\n"
@@ -3737,10 +3737,10 @@ def generate_swept_sine_thd(output_dir: str) -> None:
               label="3rd harmonic d₃(f)")
     ax.axhline(100.0 * (a2 / 2.0) / h1_ref, color=COLOR_SECONDARY,
                linestyle=":", linewidth=1.2, alpha=0.8,
-               label="Chebyshev level a₂/2")
+               label="Chebyshev asymptote (a₂/2)/H₁")
     ax.axhline(100.0 * (a3 / 4.0) / h1_ref, color=COLOR_TERTIARY,
                linestyle=":", linewidth=1.2, alpha=0.8,
-               label="Chebyshev level a₃/4")
+               label="Chebyshev asymptote (a₃/4)/H₁")
     ax.set_xlabel("Excitation frequency [Hz]")
     ax.set_ylabel("Distortion re fundamental [%]")
     ax.set_title("Swept-Sine Harmonic Distortion by Order (Farina / Novak)",

@@ -23,6 +23,9 @@ if TYPE_CHECKING:
     from ..electroacoustics.frequency_response import FrequencyResponseResult
     from ..electroacoustics.swept_sine import SweptSineDistortionResult
 
+#: Shared frequency-axis label of the electroacoustics renderers.
+_FREQ_LABEL = "Frequency [Hz]"
+
 def plot_harmonic_distortion(
     result: "HarmonicDistortionResult", ax: Axes | None = None, **kwargs: Any
 ) -> Axes:
@@ -103,7 +106,7 @@ def plot_frequency_response(
 
     if ax is not None:
         _magnitude(ax)
-        ax.set_xlabel("Frequency [Hz]")
+        ax.set_xlabel(_FREQ_LABEL)
         ax.set_title(f"Frequency response ({result.estimator})")
         return ax
 
@@ -115,7 +118,7 @@ def plot_frequency_response(
     axes[1].grid(True, which="both", alpha=0.3)
     axes[2].semilogx(freqs[pos], coh[pos], color=_C_TERTIARY)
     axes[2].set_ylabel(r"Coherence $\gamma^2$")
-    axes[2].set_xlabel("Frequency [Hz]")
+    axes[2].set_xlabel(_FREQ_LABEL)
     axes[2].set_ylim(0.0, 1.05)
     axes[2].grid(True, which="both", alpha=0.3)
     return axes
@@ -180,7 +183,7 @@ def plot_swept_sine_distortion(
             label=f"$|H_{{{order}}}(f)|$",
         )
     axes[0].set_ylabel("Magnitude [dB]")
-    axes[0].set_xlabel("Frequency [Hz]")
+    axes[0].set_xlabel(_FREQ_LABEL)
     axes[0].set_title(
         f"Harmonic frequency responses ({result.method} sweep)"
     )

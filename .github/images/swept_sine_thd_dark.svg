@@ -1299,10 +1299,10 @@ L 705.498438 28.318125
    <g id="legend_1">
     <g id="patch_7">
      <path d="M 58.000781 380.013438 
-L 181.629844 380.013438 
-Q 183.429844 380.013438 183.429844 378.213437 
-L 183.429844 311.609922 
-Q 183.429844 309.809922 181.629844 309.809922 
+L 228.770156 380.013438 
+Q 230.570156 380.013438 230.570156 378.213437 
+L 230.570156 311.609922 
+Q 230.570156 309.809922 228.770156 309.809922 
 L 58.000781 309.809922 
 Q 56.200781 309.809922 56.200781 311.609922 
 L 56.200781 378.213437 
@@ -1344,7 +1344,7 @@ L 77.800781 357.600625
 " style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #d62728; stroke-opacity: 0.8; stroke-width: 1.2"/>
     </g>
     <g id="text_13">
-     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="85.000781" y="360.750625" transform="rotate(-0 85.000781 360.750625)">Chebyshev level a₂/2</text>
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="85.000781" y="360.750625" transform="rotate(-0 85.000781 360.750625)">Chebyshev asymptote (a₂/2)/H₁</text>
     </g>
     <g id="line2d_96">
      <path d="M 59.800781 371.101328 
@@ -1353,7 +1353,7 @@ L 77.800781 371.101328
 " style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #2ca02c; stroke-opacity: 0.8; stroke-width: 1.2"/>
     </g>
     <g id="text_14">
-     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="85.000781" y="374.251328" transform="rotate(-0 85.000781 374.251328)">Chebyshev level a₃/4</text>
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="85.000781" y="374.251328" transform="rotate(-0 85.000781 374.251328)">Chebyshev asymptote (a₃/4)/H₁</text>
     </g>
    </g>
   </g>

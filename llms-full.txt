@@ -8500,8 +8500,9 @@ the `'phase'` estimator is literally the slope of the
 
 # Swept-sine distortion and phase utilities (Farina / Novak)
 
-A single exponential sine sweep measures a weakly nonlinear system
-completely. After deconvolution, the distortion products of order `n` pack
+A single exponential sine sweep characterises the linear response and
+every harmonic distortion order of a weakly nonlinear system at once.
+After deconvolution, the distortion products of order `n` pack
 into separate impulse responses that *precede* the linear response by the
 fixed advance (Farina 2000)
 
@@ -8548,9 +8549,9 @@ from phonometry import swept_sine_distortion, synchronized_sweep_signal
 fs, f1, f2, seconds = 48000, 20.0, 6000.0, 4.0
 x = synchronized_sweep_signal(fs, f1, f2, seconds)   # play this...
 # ... record the device response into `y` (include the decay tail) ...
-res = swept_sine_distortion(y, fs, f1, f2, seconds, n_harmonics=5)
+res = swept_sine_distortion(y, fs, f1, f2, seconds, n_harmonics=3)
 
-res.harmonic_responses    # complex H1..H5 on res.frequencies
+res.harmonic_responses    # complex H1..H3 on res.frequencies
 res.thd, res.thd_frequencies
 res.distortion_ratios     # |Hn(n f)| / |H1(f)| per order
 res.plot()                # |Hn| magnitudes + THD(f)
@@ -8649,7 +8650,7 @@ tau_g = group_delay(H, fs)             # -(1/2pi) dphi/df, seconds
 phi_x = excess_phase(H)                # unwrap(arg H) - phi_min
 
 res = phase_decomposition(H, fs)       # everything on one axis
-res.excess_group_delay                 # the pure-latency part, seconds
+res.excess_group_delay                 # the all-pass part, in seconds
 res.plot()                             # magnitude, phases, group delays
 ```
 
@@ -8682,10 +8683,11 @@ grids.
 - [`thd` / `harmonic_analysis`](electroacoustics.md) measure distortion
   from a steady tone at one frequency; the sweep separator returns the same
   ratios as a continuous function of frequency, from one measurement.
-- The phase utilities operate on any one-sided response: an `rfft` of a
-  measured IR, the `response` of a
-  [`transfer_function`](electroacoustics.md) estimate on a uniform grid, or
-  a design target magnitude for equalization.
+- The phase utilities operate on any one-sided *complex* response: an
+  `rfft` of a measured IR, or the `response` of a
+  [`transfer_function`](electroacoustics.md) estimate on a uniform grid.
+  `minimum_phase` alone also accepts a plain magnitude array, e.g. a
+  design target for equalization.
 
 ## References
 
@@ -9639,7 +9641,7 @@ cycle and warn on use; they are removed in 4.0.
 | `AlignedImpulseResponseResult` | `dataclass` | **Aligned IR pair.**<br>• `aligned`, `reference`, `delay` [s], `delay_samples`<br>• `.plot()`: overlay | `res.aligned, res.delay_samples` |
 | `EnvelopeResult` | `dataclass` | **Envelope analysis.**<br>• `times` [s], `envelope`, `phase` [rad, unwrapped], `instantaneous_frequency` [Hz]<br>• `fs` (output rate), `signal`, `signal_fs`, `decimation_factor`, `antialias`<br>• `.plot()`: signal + envelope, instantaneous frequency | `res.envelope, res.instantaneous_frequency` |
 | `minimum_phase` | `function` | **Minimum-phase response from \|H\| via the real cepstrum (B&P 13.1.4).**<br>• `response`: one-sided response or plain magnitude, rfft layout (DC–Nyquist)<br>• `oversample`: trig-interpolated cepstral anti-aliasing factor (Default: 8)<br>Input phase ignored; magnitude zeros floored at 1e-15 of the peak | `h_min = minimum_phase(np.abs(H))`<br><br>• complex minimum-phase response, same bins |
-| `group_delay` | `function` | **Group delay τ_g = −(1/2π)·dφ/df of a sampled response.**<br>• `response`: one-sided complex, rfft layout<br>• `fs` [Hz]<br>Unwrapped phase, central differences; needs < π phase advance per bin | `tau = group_delay(H, fs)  # seconds per bin` |
+| `group_delay` | `function` | **Group delay τ_g = −(1/2π)·dφ/df of a sampled response.**<br>• `response`: one-sided complex, rfft layout<br>• `fs` [Hz]<br>Unwrapped phase, central differences; needs < π phase advance per bin | `tau = group_delay(H, fs)  # seconds` |
 | `excess_phase` | `function` | **Excess (all-pass) phase: unwrap(arg H) − φ_min.**<br>• `response`: one-sided complex, rfft layout<br>• `oversample` (Default: 8)<br>0 for minimum phase, −2πf·t₀ for pure latency; the realizability limit of any stable causal inverse | `phi_x = excess_phase(H)  # rad, 0 at DC` |
 | `phase_decomposition` | `function` | **Minimum-phase / all-pass decomposition of a response.**<br>• `response`: one-sided complex, rfft layout (e.g. `np.fft.rfft(ir)`)<br>• `fs` [Hz]<br>• `oversample` (Default: 8) | `res = phase_decomposition(np.fft.rfft(ir), fs)`<br><br>• `PhaseDecompositionResult` |
 | `PhaseDecompositionResult` | `dataclass` | **Phase decomposition.**<br>• `frequencies` [Hz], `magnitude`, `phase` (measured, unwrapped, 0 at DC)<br>• `minimum_phase`, `excess_phase` [rad], `group_delay`, `excess_group_delay` [s]<br>• `minimum_phase_response` (complex), `fs`<br>• `.plot()`: magnitude, phases, group delays | `res.excess_phase, res.excess_group_delay` |

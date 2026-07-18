@@ -90,6 +90,20 @@ def test_synchronized_sweep_band_and_duration_validation() -> None:
         ph.synchronized_sweep_signal(FS, F1, F2, SECONDS, fade=0.7)
 
 
+def test_synchronized_sweep_rejects_bad_amplitude() -> None:
+    for bad in (0.0, -1.0, float("inf")):
+        with pytest.raises(ValueError, match="amplitude"):
+            ph.synchronized_sweep_signal(FS, F1, F2, SECONDS, amplitude=bad)
+
+
+def test_empty_thd_grid_raises_actionably() -> None:
+    """f1 above fs/4: every order-2 product would exceed Nyquist."""
+    f1, f2, seconds = 13000.0, 20000.0, 0.5
+    x = ph.synchronized_sweep_signal(FS, f1, f2, seconds)
+    with pytest.raises(ValueError, match="order-2 product"):
+        ph.swept_sine_distortion(x, FS, f1, f2, seconds, n_harmonics=2)
+
+
 def test_synchronized_sweep_amplitude_and_fade() -> None:
     x = ph.synchronized_sweep_signal(FS, F1, F2, SECONDS, amplitude=0.25)
     assert 0.24 < np.max(np.abs(x)) <= 0.25 + 1e-12
@@ -264,10 +278,12 @@ def test_dc_offset_is_removed_by_default() -> None:
 def test_validation_errors() -> None:
     x = ph.synchronized_sweep_signal(FS, F1, F2, SECONDS)
     rec = _polynomial_recording(x)
+    two_dimensional = rec.reshape(2, -1)
     with pytest.raises(ValueError, match="one-dimensional"):
-        ph.swept_sine_distortion(rec.reshape(2, -1), FS, F1, F2, SECONDS)
+        ph.swept_sine_distortion(two_dimensional, FS, F1, F2, SECONDS)
+    not_finite = np.full(rec.size, np.nan)
     with pytest.raises(ValueError, match="finite"):
-        ph.swept_sine_distortion(np.full(rec.size, np.nan), FS, F1, F2, SECONDS)
+        ph.swept_sine_distortion(not_finite, FS, F1, F2, SECONDS)
     with pytest.raises(ValueError, match="method"):
         ph.swept_sine_distortion(rec, FS, F1, F2, SECONDS, method="nope")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="n_harmonics"):

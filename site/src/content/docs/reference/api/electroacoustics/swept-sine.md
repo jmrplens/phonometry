@@ -9,8 +9,9 @@ sidebar:
 
 Harmonic-distortion separation with exponential sweeps (Farina / Novak).
 
-A single exponential sine sweep characterises a weakly nonlinear system
-completely: after deconvolution, the distortion products of order `n`
+A single exponential sine sweep characterises the linear response and
+every harmonic distortion order of a weakly nonlinear system at once:
+after deconvolution, the distortion products of order `n`
 pack into separate impulse responses that *precede* the linear response by
 the fixed advance (Farina, AES 108th Convention, 2000)
 
@@ -112,7 +113,7 @@ capped at `f2` by the inverse filter).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the inputs are invalid, or if `ir_length` (explicit or default) cannot fit between the harmonic arrivals -- lengthen the sweep, lower `n_harmonics` or pass a shorter `ir_length`. |
+| ValueError | If the inputs are invalid; if `ir_length` (explicit or default) cannot fit between the harmonic arrivals -- lengthen the sweep, lower `n_harmonics` or pass a shorter `ir_length`; if `method="farina"` is asked for orders beyond the anticausal span of its linear deconvolution; or if no excitation frequency has a measurable order-2 product (`f1` above `fs/4`, where every order-2 product would exceed Nyquist). |
 
 ## SweptSineDistortionResult
 

@@ -2,8 +2,9 @@
 """
 Harmonic-distortion separation with exponential sweeps (Farina / Novak).
 
-A single exponential sine sweep characterises a weakly nonlinear system
-completely: after deconvolution, the distortion products of order ``n``
+A single exponential sine sweep characterises the linear response and
+every harmonic distortion order of a weakly nonlinear system at once:
+after deconvolution, the distortion products of order ``n``
 pack into separate impulse responses that *precede* the linear response by
 the fixed advance (Farina, AES 108th Convention, 2000)
 
@@ -147,13 +148,14 @@ def synchronized_sweep_signal(
     f1_v = _positive(f1, "f1")
     _validate_sweep_band(fs_v, f1_v, float(f2))
     seconds_v = _positive(seconds, "seconds")
+    amplitude_v = _positive(amplitude, "amplitude")
     if not 0.0 <= fade < 0.5:
         raise ValueError("fade must be in [0, 0.5)")
     rate = _sweep_rate(f1_v, float(f2), seconds_v)
     duration = rate * np.log(float(f2) / f1_v)
     n = int(np.ceil(duration * fs_v))
     t = np.arange(n) / fs_v
-    sweep: NDArray[np.float64] = float(amplitude) * np.sin(
+    sweep: NDArray[np.float64] = amplitude_v * np.sin(
         2.0 * np.pi * f1_v * rate * np.exp(t / rate)
     )
     if fade > 0.0:
@@ -303,7 +305,6 @@ def _window_harmonics(
     buffer: "NDArray[np.float64]",
     delays_samples: "NDArray[np.float64]",
     ir_length: int,
-    fs: float,
 ) -> tuple["NDArray[np.float64]", "NDArray[np.complex128]"]:
     """Extract each harmonic IR and its response (Novak Sec. A.2.5).
 
@@ -359,6 +360,14 @@ def _thd_curves(
     if upper_band is not None:
         f_max = min(f_max, upper_band / 2.0)
     grid = (frequencies >= f1) & (frequencies <= f_max)
+    if not np.any(grid):
+        raise ValueError(
+            f"no excitation-frequency bin has a measurable order-2 "
+            f"product: the THD grid [{f1:.6g}, {f_max:.6g}] Hz is empty at "
+            f"the {frequencies[1]:.6g}-Hz window resolution. Lower 'f1' "
+            "(the order-2 product must stay below Nyquist) or raise "
+            "'ir_length' for a finer grid."
+        )
     thd_freqs = frequencies[grid]
     fundamental = np.abs(responses[0][grid])
     ratios = np.zeros((max(n_orders - 1, 0), thd_freqs.size), dtype=np.float64)
@@ -382,6 +391,113 @@ def _default_ir_length(min_spacing: int) -> int:
     if capped < _MIN_IR_LENGTH:
         return capped  # let the caller raise with the sizing message
     return int(2 ** int(np.floor(np.log2(capped))))
+
+
+def _validated_recording(
+    recorded: "NDArray[np.float64] | list[float]",
+) -> "NDArray[np.float64]":
+    rec = np.asarray(recorded, dtype=np.float64)
+    if rec.ndim != 1:
+        raise ValueError("'recorded' must be one-dimensional.")
+    if not np.all(np.isfinite(rec)):
+        raise ValueError("'recorded' must be finite.")
+    return rec
+
+
+def _sweep_timing(
+    method: str, fs: float, f1: float, f2: float, seconds: float
+) -> tuple[float, float, int]:
+    """Return ``(rate L, duration T, sweep_samples)`` for either generator.
+
+    Mirrors the exact quantization of the matching excitation:
+    :func:`synchronized_sweep_signal` rounds the rate (Novak Eq. 49) and
+    lasts ``ceil(T*fs)`` samples; :func:`phonometry.sweep_signal` rounds
+    the duration to ``round(seconds*fs)`` samples.
+    """
+    if method == "synchronized":
+        rate = _sweep_rate(f1, f2, seconds)
+        duration = float(rate * np.log(f2 / f1))
+        return rate, duration, int(np.ceil(duration * fs))
+    sweep_samples = int(round(seconds * fs))
+    duration = sweep_samples / fs
+    return duration / float(np.log(f2 / f1)), duration, sweep_samples
+
+
+def _harmonic_window(
+    ir_length: int | None,
+    delays_samples: "NDArray[np.float64]",
+    n_orders: int,
+) -> int:
+    """Resolve and validate the per-order window length, in samples.
+
+    The window (explicit, or the largest power of two that fits) must not
+    exceed the spacing between the two closest arrivals -- orders
+    ``n_orders - 1`` and ``n_orders`` -- or the windows would overlap.
+    """
+    min_spacing = int(np.floor(delays_samples[-1] - delays_samples[-2]))
+    if ir_length is not None:
+        window = int(ir_length)
+        if window < _MIN_IR_LENGTH:
+            raise ValueError(
+                f"'ir_length' must be at least {_MIN_IR_LENGTH} samples."
+            )
+    else:
+        window = _default_ir_length(min_spacing)
+        if window < _MIN_IR_LENGTH:
+            raise ValueError(
+                f"the harmonic windows would be {window} samples long "
+                f"(minimum {_MIN_IR_LENGTH}); the two closest arrivals are "
+                f"only {min_spacing} samples apart. Lengthen the sweep or "
+                "lower 'n_harmonics'."
+            )
+    if window > min_spacing:
+        raise ValueError(
+            f"'ir_length' ({window}) exceeds the {min_spacing}-sample "
+            f"spacing between orders {n_orders - 1} and {n_orders}; the "
+            "windows would overlap. Shorten 'ir_length', lengthen the "
+            "sweep or lower 'n_harmonics'."
+        )
+    return window
+
+
+def _check_farina_span(
+    delays_samples: "NDArray[np.float64]",
+    window: int,
+    sweep_samples: int,
+    f1: float,
+    f2: float,
+    n_orders: int,
+) -> None:
+    """Reject orders the linear Farina deconvolution cannot hold.
+
+    The Farina buffer is a linear convolution: its anticausal span is only
+    inverse-filter-length - 1 = ``sweep_samples - 1`` samples. An order
+    arriving beyond it (n > f2/f1, up to the window half-width) would wrap
+    onto the causal linear response and read back a spurious copy of H1.
+    """
+    anticausal = sweep_samples - 1
+    if delays_samples[-1] + window / 2.0 <= anticausal:
+        return
+    if delays_samples[-1] > anticausal:
+        cause = (
+            f"method='farina' can only separate orders up to the "
+            f"sweep frequency ratio f2/f1 = {f2 / f1:.2f}: "
+            f"order {n_orders} arrives {delays_samples[-1]:.0f} "
+            f"samples before the linear response, beyond the "
+            f"{anticausal}-sample anticausal span of the linear "
+            "deconvolution. Lower 'n_harmonics' or widen the "
+            "sweep band."
+        )
+    else:
+        cause = (
+            f"the {window}-sample window around the order-"
+            f"{n_orders} arrival ({delays_samples[-1]:.0f} samples "
+            f"before the linear response) does not fit the "
+            f"{anticausal}-sample anticausal span of the linear "
+            "Farina deconvolution. Shorten 'ir_length', lower "
+            "'n_harmonics' or lengthen the sweep."
+        )
+    raise ValueError(cause)
 
 
 def swept_sine_distortion(
@@ -447,16 +563,15 @@ def swept_sine_distortion(
         inverse filter into the impulse response (Novak et al. 2015,
         Sec. A.2.3).
     :return: A :class:`SweptSineDistortionResult`.
-    :raises ValueError: If the inputs are invalid, or if ``ir_length``
+    :raises ValueError: If the inputs are invalid; if ``ir_length``
         (explicit or default) cannot fit between the harmonic arrivals --
         lengthen the sweep, lower ``n_harmonics`` or pass a shorter
-        ``ir_length``.
+        ``ir_length``; if ``method="farina"`` is asked for orders beyond
+        the anticausal span of its linear deconvolution; or if no
+        excitation frequency has a measurable order-2 product (``f1``
+        above ``fs/4``, where every order-2 product would exceed Nyquist).
     """
-    rec = np.asarray(recorded, dtype=np.float64)
-    if rec.ndim != 1:
-        raise ValueError("'recorded' must be one-dimensional.")
-    if not np.all(np.isfinite(rec)):
-        raise ValueError("'recorded' must be finite.")
+    rec = _validated_recording(recorded)
     fs_v = _positive(fs, "fs")
     f1_v = _positive(f1, "f1")
     f2_v = _positive(f2, "f2")
@@ -469,15 +584,9 @@ def swept_sine_distortion(
     if n_orders < 2:
         raise ValueError("'n_harmonics' must be at least 2.")
 
-    if method == "synchronized":
-        rate = _sweep_rate(f1_v, f2_v, seconds_v)
-        duration = rate * np.log(f2_v / f1_v)
-        sweep_samples = int(np.ceil(duration * fs_v))
-    else:
-        # sweep_signal quantizes the duration to round(seconds*fs) samples.
-        sweep_samples = int(round(seconds_v * fs_v))
-        duration = sweep_samples / fs_v
-        rate = duration / np.log(f2_v / f1_v)
+    rate, duration, sweep_samples = _sweep_timing(
+        method, fs_v, f1_v, f2_v, seconds_v
+    )
     if rec.size < sweep_samples:
         raise ValueError(
             f"'recorded' has {rec.size} samples but the sweep lasts "
@@ -487,57 +596,11 @@ def swept_sine_distortion(
 
     orders = np.arange(1, n_orders + 1, dtype=np.float64)
     delays_samples = rate * np.log(orders) * fs_v
-    min_spacing = int(np.floor((delays_samples[-1] - delays_samples[-2])))
-    if ir_length is not None:
-        window = int(ir_length)
-        if window < _MIN_IR_LENGTH:
-            raise ValueError(
-                f"'ir_length' must be at least {_MIN_IR_LENGTH} samples."
-            )
-    else:
-        window = _default_ir_length(min_spacing)
-        if window < _MIN_IR_LENGTH:
-            raise ValueError(
-                f"the harmonic windows would be {window} samples long "
-                f"(minimum {_MIN_IR_LENGTH}); the two closest arrivals are "
-                f"only {min_spacing} samples apart. Lengthen the sweep or "
-                "lower 'n_harmonics'."
-            )
-    if window > min_spacing:
-        raise ValueError(
-            f"'ir_length' ({window}) exceeds the {min_spacing}-sample "
-            f"spacing between orders {n_orders - 1} and {n_orders}; the "
-            "windows would overlap. Shorten 'ir_length', lengthen the "
-            "sweep or lower 'n_harmonics'."
-        )
+    window = _harmonic_window(ir_length, delays_samples, n_orders)
     if method == "farina":
-        # The Farina buffer is a linear convolution: its anticausal span is
-        # only inverse-filter-length - 1 = sweep_samples - 1 samples. An
-        # order arriving beyond it (n > f2/f1, up to the window half-width)
-        # would wrap onto the causal linear response and read back a
-        # spurious copy of H1.
-        anticausal = sweep_samples - 1
-        if delays_samples[-1] + window / 2.0 > anticausal:
-            if delays_samples[-1] > anticausal:
-                cause = (
-                    f"method='farina' can only separate orders up to the "
-                    f"sweep frequency ratio f2/f1 = {f2_v / f1_v:.2f}: "
-                    f"order {n_orders} arrives {delays_samples[-1]:.0f} "
-                    f"samples before the linear response, beyond the "
-                    f"{anticausal}-sample anticausal span of the linear "
-                    "deconvolution. Lower 'n_harmonics' or widen the "
-                    "sweep band."
-                )
-            else:
-                cause = (
-                    f"the {window}-sample window around the order-"
-                    f"{n_orders} arrival ({delays_samples[-1]:.0f} samples "
-                    f"before the linear response) does not fit the "
-                    f"{anticausal}-sample anticausal span of the linear "
-                    "Farina deconvolution. Shorten 'ir_length', lower "
-                    "'n_harmonics' or lengthen the sweep."
-                )
-            raise ValueError(cause)
+        _check_farina_span(
+            delays_samples, window, sweep_samples, f1_v, f2_v, n_orders
+        )
 
     signal = rec / amplitude_v
     if remove_dc:
@@ -552,7 +615,7 @@ def swept_sine_distortion(
             signal, fs_v, f1_v, f2_v, seconds_v, fade_v
         )
 
-    irs, responses = _window_harmonics(buffer, delays_samples, window, fs_v)
+    irs, responses = _window_harmonics(buffer, delays_samples, window)
     frequencies = np.fft.rfftfreq(window, 1.0 / fs_v)
     thd_freqs, thd, ratios = _thd_curves(
         frequencies, responses, fs_v, f1_v, f2_v, method

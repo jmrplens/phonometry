@@ -2,8 +2,9 @@
 
 # Swept-sine distortion and phase utilities (Farina / Novak)
 
-A single exponential sine sweep measures a weakly nonlinear system
-completely. After deconvolution, the distortion products of order `n` pack
+A single exponential sine sweep characterises the linear response and
+every harmonic distortion order of a weakly nonlinear system at once.
+After deconvolution, the distortion products of order `n` pack
 into separate impulse responses that *precede* the linear response by the
 fixed advance (Farina 2000)
 
@@ -50,9 +51,9 @@ from phonometry import swept_sine_distortion, synchronized_sweep_signal
 fs, f1, f2, seconds = 48000, 20.0, 6000.0, 4.0
 x = synchronized_sweep_signal(fs, f1, f2, seconds)   # play this...
 # ... record the device response into `y` (include the decay tail) ...
-res = swept_sine_distortion(y, fs, f1, f2, seconds, n_harmonics=5)
+res = swept_sine_distortion(y, fs, f1, f2, seconds, n_harmonics=3)
 
-res.harmonic_responses    # complex H1..H5 on res.frequencies
+res.harmonic_responses    # complex H1..H3 on res.frequencies
 res.thd, res.thd_frequencies
 res.distortion_ratios     # |Hn(n f)| / |H1(f)| per order
 res.plot()                # |Hn| magnitudes + THD(f)
@@ -151,7 +152,7 @@ tau_g = group_delay(H, fs)             # -(1/2pi) dphi/df, seconds
 phi_x = excess_phase(H)                # unwrap(arg H) - phi_min
 
 res = phase_decomposition(H, fs)       # everything on one axis
-res.excess_group_delay                 # the pure-latency part, seconds
+res.excess_group_delay                 # the all-pass part, in seconds
 res.plot()                             # magnitude, phases, group delays
 ```
 
@@ -184,10 +185,11 @@ grids.
 - [`thd` / `harmonic_analysis`](electroacoustics.md) measure distortion
   from a steady tone at one frequency; the sweep separator returns the same
   ratios as a continuous function of frequency, from one measurement.
-- The phase utilities operate on any one-sided response: an `rfft` of a
-  measured IR, the `response` of a
-  [`transfer_function`](electroacoustics.md) estimate on a uniform grid, or
-  a design target magnitude for equalization.
+- The phase utilities operate on any one-sided *complex* response: an
+  `rfft` of a measured IR, or the `response` of a
+  [`transfer_function`](electroacoustics.md) estimate on a uniform grid.
+  `minimum_phase` alone also accepts a plain magnitude array, e.g. a
+  design target for equalization.
 
 ## References
 

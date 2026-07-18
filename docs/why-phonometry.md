@@ -7,7 +7,7 @@ differentiator is not the list of features but how they are built: every
 metric is implemented from the governing standard's text, and the standard's
 own reference values and acceptance limits are transcribed into the test
 suite and enforced in CI. This page explains that approach with a concrete
-case study — time weighting under **IEC 61672-1:2013** — and summarizes what
+case study (time weighting under **IEC 61672-1:2013**) and summarizes what
 is conformance-tested today. The time-weighting analysis was originally
 published in [issue #38](https://github.com/jmrplens/phonometry/issues/38).
 
@@ -31,7 +31,7 @@ left half-plane ($s = -1/\tau$).
 | Behavior | True IEC time weighting | Closer to a block integrator ($L_{eq,\tau}$) |
 
 A pole on the negative real axis corresponds to a decaying exponential impulse
-response ($h(t) \propto e^{-t/\tau}$) — exactly what "exponential time
+response ($h(t) \propto e^{-t/\tau}$), exactly what "exponential time
 weighting" means: past events are forgotten exponentially. A pole on the
 positive real axis grows without bound; block-resetting hides this but changes
 the measurement's nature.
@@ -63,7 +63,7 @@ library):**
 
 phonometry maintains high precision across all test cases. The block-based
 approach deviates significantly (> 0.8 dB) for the 50 ms burst because 125 ms
-blocks cannot resolve short transient events accurately — the result depends on
+blocks cannot resolve short transient events accurately; the result depends on
 how the burst aligns with the block boundaries.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.svg" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
@@ -108,7 +108,7 @@ plt.show()
   meter behavior, one level per sample), use phonometry's
   [`time_weighting`](time-weighting.md).
 - If you need **block-averaged Leq per interval**, that is a different, equally
-  valid metric — you can compute it with [`leq`](levels.md) over consecutive
+  valid metric; you can compute it with [`leq`](levels.md) over consecutive
   slices.
 - Both approaches are useful; they just answer different questions. The
   discrepancy reported in issue #38 comes from comparing a continuous envelope
@@ -132,8 +132,8 @@ from the official text into the test suite, so any regression fails CI:
 | ISO 1996-1:2016 | `lden()`, `ldn()` and `composite_rating_level()` against hand-computed formula values | `tests/test_environmental.py` |
 | IEC 60942:2017 Table 2 | Calibrator short-term stability limits (frequency-dependent, class 1) in `sensitivity()` | `tests/test_calibration_validation.py` |
 
-The full numerical report — the expected value and the value the library
-computes for every check, regenerated on every pull request — is published
+The full numerical report (the expected value and the value the library
+computes for every check, regenerated on every pull request) is published
 as [CONFORMANCE.md](CONFORMANCE.md).
 
 Beyond IEC 61252-style noise dose (`sound_exposure()`, `lex_8h()`), the same
@@ -158,7 +158,7 @@ up to 16 kHz at common audio rates via internal oversampling (see
   the standards' tolerance tables.
 
 If your work needs numbers you can defend against a standard's tolerance
-table — measurement reports, environmental assessments, instrument
-cross-checks — that verification layer is what phonometry is for. The
+table (measurement reports, environmental assessments, instrument
+cross-checks) that verification layer is what phonometry is for. The
 sources behind it are collected in the [Bibliography](references.md),
 every entry with a verified DOI or official publisher link.

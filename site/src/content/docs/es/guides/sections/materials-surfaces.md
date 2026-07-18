@@ -25,8 +25,8 @@ cuatro micrófonos, su pérdida de transmisión (ASTM E2611).
 convierte la resistividad al flujo medida en *predicciones*: los modelos de
 fluido equivalente de Delany-Bazley, Miki y Johnson-Champoux-Allard dan la
 impedancia característica y el número de onda de un material poroso, y una
-pila de capas por matrices de transferencia — porosas, de aire, perforadas,
-microperforadas (Maa) y de membrana — predice la absorción de una
+pila de capas por matrices de transferencia (porosas, de aire, perforadas,
+microperforadas de Maa y de membrana) predice la absorción de una
 construcción completa, a cualquier ángulo de incidencia y en campo difuso,
 antes de construir nada.
 

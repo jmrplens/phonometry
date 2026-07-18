@@ -10,8 +10,8 @@ normas. Su elemento diferenciador no es la lista de funcionalidades, sino cómo
 están construidas: cada métrica se implementa a partir del texto de la norma
 que la rige, y los valores de referencia y límites de aceptación de la propia
 norma se transcriben a la batería de tests y se exigen en CI. Esta página
-explica ese enfoque con un caso de estudio concreto — la ponderación temporal
-según **IEC 61672-1:2013** — y resume qué está verificado por conformidad hoy.
+explica ese enfoque con un caso de estudio concreto (la ponderación temporal
+según **IEC 61672-1:2013**) y resume qué está verificado por conformidad hoy.
 El análisis de la ponderación temporal se publicó originalmente en la
 [incidencia #38](https://github.com/jmrplens/phonometry/issues/38).
 
@@ -35,7 +35,7 @@ semiplano izquierdo ($s = -1/\tau$).
 | Comportamiento | Ponderación temporal IEC verdadera | Más cercano a un integrador por bloques ($L_{eq,\tau}$) |
 
 Un polo en el eje real negativo corresponde a una respuesta al impulso
-exponencial decreciente ($h(t) \propto e^{-t/\tau}$) — exactamente lo que
+exponencial decreciente ($h(t) \propto e^{-t/\tau}$), exactamente lo que
 significa "ponderación temporal exponencial": los eventos pasados se olvidan
 exponencialmente. Un polo en el eje real positivo crece sin límite; el reinicio
 por bloques lo oculta, pero cambia la naturaleza de la medición.
@@ -67,8 +67,8 @@ requiere esa librería):**
 
 phonometry mantiene alta precisión en todos los casos. El enfoque por bloques
 se desvía significativamente (más de 0,8 dB) en la ráfaga de 50 ms porque los
-bloques de 125 ms no pueden resolver con precisión eventos transitorios cortos
-— el resultado depende de cómo se alinee la ráfaga con los límites de los
+bloques de 125 ms no pueden resolver con precisión eventos transitorios cortos;
+el resultado depende de cómo se alinee la ráfaga con los límites de los
 bloques.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es.svg" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de referencia de la Tabla 4 de IEC 61672-1" width="80%" loading="eager" />
@@ -82,7 +82,7 @@ de la Tabla 4 (discontinua) dentro de 0,1 dB para ráfagas de 200/50/10 ms.*
   (comportamiento de sonómetro, un nivel por muestra), usa
   [`time_weighting`](/phonometry/es/guides/time-weighting/) de phonometry.
 - Si necesitas un **Leq promediado por bloques por intervalo**, esa es una
-  métrica distinta e igualmente válida — puedes calcularla con
+  métrica distinta e igualmente válida; puedes calcularla con
   [`leq`](/phonometry/es/guides/levels/) sobre segmentos consecutivos.
 - Ambos enfoques son útiles; simplemente responden preguntas distintas. La
   discrepancia reportada en la incidencia #38 proviene de comparar una
@@ -108,8 +108,8 @@ que cualquier regresión hace fallar la CI:
 | ISO 1996-1:2016 | `lden()`, `ldn()` y `composite_rating_level()` frente a valores de las fórmulas calculados a mano | `tests/test_environmental.py` |
 | IEC 60942:2017 Tabla 2 | Límites de estabilidad a corto plazo del calibrador (dependientes de la frecuencia, clase 1) en `sensitivity()` | `tests/test_calibration_validation.py` |
 
-El informe numérico completo — el valor esperado y el valor que calcula la
-librería para cada comprobación, regenerado en cada pull request — está
+El informe numérico completo (el valor esperado y el valor que calcula la
+librería para cada comprobación, regenerado en cada pull request) está
 publicado como [informe de conformidad](/phonometry/es/reference/conformance/).
 
 Más allá de la dosis de ruido al estilo IEC 61252 (`sound_exposure()`,
@@ -130,15 +130,15 @@ interno (consulta
   phonometry para sus cálculos de niveles ponderados en lugar de
   reimplementarlos.
 - **MoSQITo** se centra en métricas psicoacústicas de calidad sonora
-  (sonoridad, sharpness —agudeza—, aspereza). Complementa a phonometry en lugar de
+  (sonoridad, sharpness o agudeza, aspereza). Complementa a phonometry en lugar de
   solaparse con ella: no cubre la metrología de niveles sonoros (filtros de
   ponderación, ponderación temporal, Leq/SEL/Lden, calibración) y no declara
   verificación por conformidad frente a las tablas de tolerancias de las
   normas.
 
 Si tu trabajo necesita números que puedas defender frente a la tabla de
-tolerancias de una norma — informes de medición, evaluaciones ambientales,
-contrastes con instrumentos — esa capa de verificación es la razón de ser de
+tolerancias de una norma (informes de medición, evaluaciones ambientales,
+contrastes con instrumentos) esa capa de verificación es la razón de ser de
 phonometry. Las fuentes que la sustentan están reunidas en la
 [Bibliografía](/phonometry/es/reference/bibliography/), cada entrada con un
 DOI verificado o un enlace oficial del editor.

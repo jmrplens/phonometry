@@ -182,7 +182,7 @@ Part 36 test window), over path lengths to 7620 m, and is reciprocal
 ## 6. Airport noise: the NPD engine (ECAC Doc 29)
 
 The ECAC Doc 29 airport-noise method describes an aircraft with **noise-power-
-distance (NPD)** tables — the event level (`LAmax` or `SEL`) of steady straight
+distance (NPD)** tables give the event level (`LAmax` or `SEL`) of steady straight
 flight versus engine power and slant distance. `npd_level` reads an event level
 for an arbitrary power and distance, interpolating **linearly in power**
 (Eq. 4-3) and **log-linearly in distance** (Eq. 4-4), extrapolating from the
@@ -240,17 +240,17 @@ The full ECAC Doc 29 single-event calculation places a flight path's noise at a
 receiver by breaking the path into segments and, for each, correcting the NPD
 baseline level (§4.3-4.5):
 
-- **`impedance_adjustment(T, p)`** — corrects the NPD data from their reference
+- **`impedance_adjustment(T, p)`**: corrects the NPD data from their reference
   air impedance (409.81 N·s/m³) to the aerodrome's temperature and pressure
   (Eq. 4-6/4-7; +0.074 dB under the standard atmosphere).
-- **`lateral_attenuation(β, ℓ)`** — excess lateral attenuation over soft ground
+- **`lateral_attenuation(β, ℓ)`**: excess lateral attenuation over soft ground
   (Eq. 4-18/4-19, AIR-5662).
-- **`engine_installation_correction(φ, mounting)`** — lateral-directivity term
+- **`engine_installation_correction(φ, mounting)`**: lateral-directivity term
   for wing/fuselage/propeller installations (Eq. 4-15/4-16).
-- **`duration_correction(Vref, Vseg)`** — the speed/duration adjustment for
+- **`duration_correction(Vref, Vseg)`**: the speed/duration adjustment for
   exposure levels (Eq. 4-14).
-- **`noise_fraction(q, λ, dλ)`** — the finite-segment energy fraction (Eq. 4-20).
-- **`start_of_roll_directivity(ψ, dSOR, engine)`** — the rearward jet/turboprop
+- **`noise_fraction(q, λ, dλ)`**: the finite-segment energy fraction (Eq. 4-20).
+- **`start_of_roll_directivity(ψ, dSOR, engine)`**: the rearward jet/turboprop
   directivity behind takeoff ground-roll segments (Eq. 4-22/4-24/4-25). Pass a
   boolean `ground_roll` mask to `event_level`/`noise_contour` to flag the takeoff
   ground-roll segments; behind them the reduced (q = 0) noise fraction and `ΔSOR`
@@ -436,9 +436,9 @@ performance tolerances. SAE ARP 5534:2021, *Application of Pure-Tone
 Atmospheric Absorption Losses to One-Third-Octave-Band Data*: the SAE-Method
 band attenuation (Eqs. 7–10), with the pure-tone coefficient from ISO 9613-1.
 ECAC Doc 29, 4th ed., Vol 2 (2016): the NPD event-level interpolation (§4.2) and
-the single-event segment calculation — duration (§4.5.1), engine installation
-(§4.5.3), lateral attenuation (§4.5.4, AIR-5662), the finite-segment noise
-fraction (§4.5.6), the start-of-roll directivity (§4.5.7) and segment summation
-(§4.3) — through to ground-grid noise contours, with the impedance adjustment
+the single-event segment calculation (duration, §4.5.1; engine installation,
+§4.5.3; lateral attenuation, §4.5.4, AIR-5662; the finite-segment noise
+fraction, §4.5.6; the start-of-roll directivity, §4.5.7; and segment summation,
+§4.3) through to ground-grid noise contours, with the impedance adjustment
 (§4.2.1). The single-event chain is validated against the ECAC Doc 29 5th ed.
 Vol 3 Part 1 reference workbook.

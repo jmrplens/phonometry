@@ -241,7 +241,7 @@ The ambient-noise spectrum level (dB re 1 µPa²/Hz) is the energy sum of the tw
 physically grounded Wenz components: **wind / sea-surface** noise via the "rule
 of fives" ($51.02 - (5/3)\,10\,(\lg f_{\text{kHz}} - \lg(U/5))$: the historical "25 dB (5 × 5)" anchor at 1 kHz for 5 knots is re 20 µPa, i.e. $25 + 20 \lg 20 \approx 51.02$ dB re 1 µPa) and
 **Mellen thermal** noise ($4 \pi k T \rho f^2 / c$, dominant above ~50 kHz). A
-**shipping** spectrum may be supplied by the caller — for example one predicted
+**shipping** spectrum may be supplied by the caller, for example one predicted
 by the traffic model in §6.
 
 <picture>

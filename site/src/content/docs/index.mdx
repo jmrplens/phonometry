@@ -1,9 +1,9 @@
 ---
 title: phonometry
-description: Acoustic measurement toolkit for Python — filter banks, weighting, levels, psychoacoustics, speech intelligibility and sound intensity, conformance-tested against IEC, ISO, ECMA and DIN standards.
+description: Acoustic measurement toolkit for Python covering filter banks, weighting, levels, psychoacoustics, speech intelligibility and sound intensity, conformance-tested against IEC, ISO, ECMA and DIN standards.
 template: splash
 hero:
-  tagline: Acoustic measurement in Python — octave-band analysis, A/C/G/Z weighting, Leq/SEL/Lden, Zwicker loudness, STI and sound intensity, every metric conformance-tested against its standard.
+  tagline: Acoustic measurement in Python: octave-band analysis, A/C/G/Z weighting, Leq/SEL/Lden, Zwicker loudness, STI and sound intensity, every metric conformance-tested against its standard.
   actions:
     - text: Get started
       link: /phonometry/getting-started/
@@ -18,13 +18,13 @@ import { CardGrid, Card } from '@astrojs/starlight/components';
 
 <CardGrid>
   <Card title="Conformance-tested" icon="approve-check">
-    Every metric is verified in CI against its standard's own tolerance tables and test vectors: IEC 61260-1, IEC 61672-1, IEC 61252, IEC 60942, IEC 60268-16, IEC 61043, ISO 532-1, ISO 532-2, ISO 532-3, ISO 226, ISO 1996, ISO 7196, ISO 9614-1/2, ISO 9613-1/2, ISO 9612, ISO 18233, ISO 3382-1/2/3, ISO 3741, ISO 3744, ISO 3746, ISO 354, ISO 10140, ISO 16283-1/2/3, EN 12354-1/2, ISO 12999-1, ISO 717-1/2, ECMA-418-1, ECMA-418-2 and DIN 45692 — 37 standards.
+    Every metric is verified in CI against its standard's own tolerance tables and test vectors: IEC 61260-1, IEC 61672-1, IEC 61252, IEC 60942, IEC 60268-16, IEC 61043, ISO 532-1, ISO 532-2, ISO 532-3, ISO 226, ISO 1996, ISO 7196, ISO 9614-1/2, ISO 9613-1/2, ISO 9612, ISO 18233, ISO 3382-1/2/3, ISO 3741, ISO 3744, ISO 3746, ISO 354, ISO 10140, ISO 16283-1/2/3, EN 12354-1/2, ISO 12999-1, ISO 717-1/2, ECMA-418-1, ECMA-418-2 and DIN 45692, for 37 standards in total.
   </Card>
   <Card title="Sound level metering" icon="magnifier">
     Fractional octave banks (five SOS architectures), A/C/G/Z weighting, Fast/Slow/Impulse ballistics, Leq/LAeq, percentiles, LCpeak, SEL, noise dose, Lden and octave spectrograms.
   </Card>
   <Card title="Psychoacoustics & speech" icon="comment">
-    Loudness in sones three ways — Zwicker (ISO 532-1, full Annex B validation), Moore-Glasberg stationary and time-varying (ISO 532-2/3) and Sottek Hearing Model (ECMA-418-2) — plus DIN 45692 sharpness, ECMA-418-2 tonality and roughness, equal-loudness contours, tone prominence (TNR/PR) and STI/STIPA per IEC 60268-16 Ed. 5.
+    Loudness in sones three ways, Zwicker (ISO 532-1, full Annex B validation), Moore-Glasberg stationary and time-varying (ISO 532-2/3) and Sottek Hearing Model (ECMA-418-2), plus DIN 45692 sharpness, ECMA-418-2 tonality and roughness, equal-loudness contours, tone prominence (TNR/PR) and STI/STIPA per IEC 60268-16 Ed. 5.
   </Card>
   <Card title="Field measurement" icon="rocket">
     p-p sound intensity with ISO 9614-1 field indicators, calibrated SPL with IEC 60942 stability checks, stateful real-time block processing and vectorized multichannel.
@@ -36,6 +36,6 @@ import { CardGrid, Card } from '@astrojs/starlight/components';
     Device-independent emission level LW by five routes: enveloping-surface sound pressure (ISO 3744/3746), the reverberation-room precision method with Waterhouse and C1/C2 corrections (ISO 3741), intensity scanning with field indicators and achieved grade (ISO 9614-2), the precision anechoic-room method (ISO 3745) and precision intensity scanning (ISO 9614-3).
   </Card>
   <Card title="Outdoor propagation & exposure" icon="open-book">
-    Atmospheric absorption α(f) (ISO 9613-1) and the ISO 9613-2 general method — geometrical divergence, atmospheric absorption, ground effect and barrier screening with a per-term octave-band breakdown — plus daily occupational noise exposure LEX,8h by task, job and full-day strategies with Annex C uncertainty (ISO 9612).
+    Atmospheric absorption α(f) (ISO 9613-1) and the ISO 9613-2 general method (geometrical divergence, atmospheric absorption, ground effect and barrier screening with a per-term octave-band breakdown) plus daily occupational noise exposure LEX,8h by task, job and full-day strategies with Annex C uncertainty (ISO 9612).
   </Card>
 </CardGrid>

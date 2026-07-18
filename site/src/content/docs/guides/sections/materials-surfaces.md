@@ -25,8 +25,8 @@ the measured flow resistivity into *predictions*: the Delany-Bazley, Miki and
 Johnson-Champoux-Allard equivalent-fluid models give a porous material's
 characteristic impedance and wavenumber, and a transfer-matrix stack of
 porous, air, perforated, microperforated (Maa) and membrane layers predicts
-the absorption of a whole construction — at any incidence angle and in a
-diffuse field — before anything is built.
+the absorption of a whole construction, at any incidence angle and in a
+diffuse field, before anything is built.
 
 [Surface Scattering, Diffusion and In-situ Absorption](/phonometry/guides/surface-scattering/)
 moves from samples to *surfaces*, asking not how much energy a surface

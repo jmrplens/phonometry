@@ -80,8 +80,8 @@ pk = underwater.peak_sound_pressure_level(pressure)     # dB re 1 µPa
 ```
 
 To re-reference a level between the underwater (1 µPa) and airborne (20 µPa)
-conventions — a `20·lg(20) ≈ 26.02` dB shift, **not** an energy/intensity
-equivalence — use `underwater_to_in_air_spl` / `in_air_to_underwater_spl`. For
+conventions (a `20·lg(20) ≈ 26.02` dB shift, **not** an energy/intensity
+equivalence) use `underwater_to_in_air_spl` / `in_air_to_underwater_spl`. For
 background-noise subtraction, reuse the ISO 3744 `background_noise_correction`
 (`K1`) helper.
 

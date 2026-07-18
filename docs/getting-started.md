@@ -36,7 +36,7 @@ pip install -e ./phonometry
 
 ## The processing chain at a glance
 
-Every phonometry analysis is some subset of one pipeline — take the raw
+Every phonometry analysis is some subset of one pipeline: take the raw
 signal, convert it to physical units, weight it in frequency, split it into
 standardized bands, smooth it in time and reduce it to metrics:
 
@@ -127,7 +127,7 @@ safe to pass `wavfile.read` output directly.
 
 ## Where to go next
 
-- [Filter Banks](filter-banks.md) — choose an architecture and inspect responses
-- [Calibration and dBFS](calibration.md) — get real-world SPL values
-- [API Reference](api-reference.md) — every parameter of every function
-- [Bibliography](references.md) — the books and papers behind every guide, each with a verified link
+- [Filter Banks](filter-banks.md): choose an architecture and inspect responses
+- [Calibration and dBFS](calibration.md): get real-world SPL values
+- [API Reference](api-reference.md): every parameter of every function
+- [Bibliography](references.md): the books and papers behind every guide, each with a verified link

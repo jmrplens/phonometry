@@ -153,7 +153,7 @@ synchronized sweep the phases of `H_n` are system properties; with
 | `harmonic_responses` | Complex `H_n(f)`, shape `(n_harmonics, len(frequencies))`. |
 | `harmonic_irs` | Windowed harmonic impulse responses, shape `(n_harmonics, ir_length)`; each is centred in its window (time zero at sample `ir_length // 2`). |
 | `delays` | Arrival advances `L*ln(n)` of each order before the linear response, in seconds. |
-| `thd_frequencies` | Excitation-frequency axis of [`thd`](/phonometry/reference/api/electroacoustics/distortion/#thd), in Hz. |
+| `thd_frequencies` | Excitation-frequency axis of the THD curve, Hz. |
 | `thd` | Total harmonic distortion at each excitation frequency `f`: `sqrt(sum_n \|H_n(n*f)\|**2) / \|H1(f)\|` over the orders available below Nyquist and inside their deconvolved band. |
 | `distortion_ratios` | Per-order ratios `\|H_n(n*f)\| / \|H1(f)\|` on `thd_frequencies`; row `k` is order `k + 2`. An order reads 0 where its product `n*f` leaves the valid band. |
 | `fs` | Sample rate, in Hz. |
@@ -209,7 +209,7 @@ phases measured by [`swept_sine_distortion`](/phonometry/reference/api/electroac
 system under test rather than of the excitation. The rounding adjusts
 the duration slightly: the generated signal lasts
 `T = L*ln(f2/f1)` seconds rather than exactly `seconds` (the
-difference is under half a period of `f1`).
+difference is at most `ln(f2/f1)/2` periods of `f1`).
 
 **Parameters**
 

@@ -282,6 +282,37 @@ def test_validation_errors() -> None:
         ph.swept_sine_distortion(rec, FS, F1, F2, SECONDS, n_harmonics=2500)
 
 
+def test_farina_rejects_orders_beyond_the_sweep_ratio() -> None:
+    """Orders arriving beyond the anticausal span must raise, not wrap.
+
+    With f2/f1 = 2 the order-3 arrival L*ln(3) exceeds the sweep duration:
+    in the linear Farina deconvolution its window would wrap onto the
+    causal linear response and read back a spurious copy of H1.
+    """
+    fs, f1, f2, seconds = 48000, 1000.0, 2000.0, 1.0
+    x = ph.sweep_signal(fs, f1, f2, seconds)
+    rec = np.concatenate([x, np.zeros(4096)])
+    with pytest.raises(ValueError, match="anticausal"):
+        ph.swept_sine_distortion(
+            rec, fs, f1, f2, seconds, method="farina", n_harmonics=3,
+            ir_length=1024,
+        )
+    # The synchronized path handles the same request: absent orders read
+    # only the deconvolution floor, never a copy of the linear response.
+    xs = ph.synchronized_sweep_signal(fs, f1, f2, seconds)
+    res = ph.swept_sine_distortion(
+        xs, fs, f1, f2, seconds, n_harmonics=3, ir_length=1024
+    )
+    band = (res.frequencies > 1.2 * f1) & (res.frequencies < 1.8 * f2)
+    assert float(np.max(np.abs(res.harmonic_responses[2][band]))) < 0.05
+
+
+def test_explicit_ir_length_below_minimum_has_its_own_message() -> None:
+    x = ph.synchronized_sweep_signal(FS, F1, F2, SECONDS)
+    with pytest.raises(ValueError, match="'ir_length' must be at least"):
+        ph.swept_sine_distortion(x, FS, F1, F2, SECONDS, ir_length=8)
+
+
 def test_ir_length_explicit_and_windows_centered() -> None:
     x = ph.synchronized_sweep_signal(FS, F1, F2, SECONDS)
     res = ph.swept_sine_distortion(

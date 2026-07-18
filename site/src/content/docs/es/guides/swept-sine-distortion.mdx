@@ -131,9 +131,9 @@ plt.show()
 El oráculo detrás de la implementación es el polinomio sin memoria: excitar
 `y = x + a2·x² + a3·x³` con un barrido unitario debe devolver, por las
 identidades de Chebyshev, `|H1| = 1 + 3a3/4`, `|H2| = a2/2` (fase `-π/2`),
-`|H3| = a3/4` (fase `π`) y `THD = √((a2/2)² + (a3/4)²)/(1 + 3a3/4)`. La
-suite de conformidad fija los cuatro valores, y la misma THD medida tono a
-tono con `phonometry.thd` coincide al 0,1 %.
+`|H3| = a3/4` (fase `π`) y `THD = √((a2/2)² + (a3/4)²)/(1 + 3a3/4)`. Las
+suites de tests y de conformidad fijan los cuatro valores, y la misma THD
+medida tono a tono con `phonometry.thd` coincide al 0,1 %.
 
 ## 2. El barrido sincronizado (Novak et al. 2015)
 

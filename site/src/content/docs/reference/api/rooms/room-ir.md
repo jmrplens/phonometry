@@ -26,7 +26,10 @@ Two excitation families are implemented:
   recording with the time-reversed, amplitude-compensated sweep (B.5,
   Figure B.2). Because a low-to-high sweep places distortion products at
   negative arrival times, harmonic distortion is separated from the linear
-  IR and discarded by keeping only the causal part (B.5).
+  IR and discarded by keeping only the causal part (B.5). To *analyse*
+  those discarded products instead (per-order harmonic responses and
+  THD(f) from the same recording), see
+  [`phonometry.swept_sine_distortion`](/phonometry/reference/api/electroacoustics/swept-sine/#swept_sine_distortion).
 
 * **Maximum-length sequence (Annex A)** -- an order-`N` binary sequence of
   length `2**N - 1` generated with a linear-feedback shift register

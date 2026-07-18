@@ -131,9 +131,9 @@ plt.show()
 The oracle behind the implementation is the memoryless polynomial: driving
 `y = x + a2·x² + a3·x³` with a unit sweep must return, by the Chebyshev
 identities, `|H1| = 1 + 3a3/4`, `|H2| = a2/2` (phase `-π/2`), `|H3| = a3/4`
-(phase `π`) and `THD = √((a2/2)² + (a3/4)²)/(1 + 3a3/4)`. The conformance
-suite pins all four, and the same THD measured tone by tone with
-`phonometry.thd` agrees to 0.1 %.
+(phase `π`) and `THD = √((a2/2)² + (a3/4)²)/(1 + 3a3/4)`. The test and
+conformance suites pin all four, and the same THD measured tone by tone
+with `phonometry.thd` agrees to 0.1 %.
 
 ## 2. The synchronized sweep (Novak et al. 2015)
 

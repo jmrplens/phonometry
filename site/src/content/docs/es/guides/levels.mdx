@@ -33,6 +33,8 @@ references:
     note: "Las definiciones de presión sonora, energía y nivel que sostienen Leq, SEL y las medidas de dosis (ISBN 978-0-471-84789-2)."
 ---
 
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
 Métricas de ruido ambiental calculadas directamente sobre la señal cruda
 (calibrada).
 
@@ -123,7 +125,7 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 # LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (eventos) > L50 (mediana) > L90 (fondo)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_es.svg" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_es_dark.svg" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_es.svg" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" width="80%" loading="eager" />
 
 *L10 sigue los picos de los eventos, L50 el nivel mediano y L90 el fondo.*
 
@@ -268,7 +270,7 @@ de modo que los eventos de cualquier duración resultan directamente
 comparables, y $N$ eventos idénticos se suman como $+10\log_{10}N$. Es el
 bloque básico de los modelos de ruido aeroportuario y ferroviario.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_es.svg" alt="Historia del nivel del paso de un vehículo con su Leq sobre el evento completo y el bloque SEL de un segundo con la misma energía" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_es_dark.svg" alt="Historia del nivel del paso de un vehículo con su Leq sobre el evento completo y el bloque SEL de un segundo con la misma energía" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_es.svg" alt="Historia del nivel del paso de un vehículo con su Leq sobre el evento completo y el bloque SEL de un segundo con la misma energía" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -354,7 +356,7 @@ r = environmental.composite_rating_level([(63.2, 12, 0.0),    # día
                             (51.4, 8, 10.0)])   # noche (+10) == environmental.lden
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_es.svg" alt="Perfil LAeq urbano sintético de 24 horas con las bandas de día, tarde y noche, los niveles por periodo ponderados con +5 y +10 dB y el Lden resultante" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_es_dark.svg" alt="Perfil LAeq urbano sintético de 24 horas con las bandas de día, tarde y noche, los niveles por periodo ponderados con +5 y +10 dB y el Lden resultante" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_es.svg" alt="Perfil LAeq urbano sintético de 24 horas con las bandas de día, tarde y noche, los niveles por periodo ponderados con +5 y +10 dB y el Lden resultante" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -404,7 +406,7 @@ plt.show()
 
 Dónde pones el micrófono cambia el número: ISO 1996-2 fija las posiciones del receptor y sus correcciones de fachada. El diagrama es contexto de medida; aplica las correcciones a tus niveles antes del análisis:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement_es.svg" alt="Posiciones de medida de ruido ambiental según ISO 1996-2: campo libre, a 2 m de la fachada y enrasado, con sus correcciones" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement_es_dark.svg" alt="Posiciones de medida de ruido ambiental según ISO 1996-2: campo libre, a 2 m de la fachada y enrasado, con sus correcciones" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement_es.svg" alt="Posiciones de medida de ruido ambiental según ISO 1996-2: campo libre, a 2 m de la fachada y enrasado, con sus correcciones" width="92%" />
 
 Combínalo con `laeq()` por periodo para ir de grabaciones a Lden, y con los
 veredictos `tone_to_noise_ratio()` / `prominence_ratio()` de
@@ -431,7 +433,7 @@ marca una banda que supera a ambas vecinas en 15/8/5 dB (baja/media/alta), y
 `tonal_adjustment_from_mean_audibility` mapea la audibilidad media de ISO/PAS 20065
 a $K_t$ (Tabla J.1).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility_es.svg" alt="Ajuste tonal Kt de ISO 1996-2 como función a tramos de la audibilidad tonal: cero por debajo de 4 dB, creciendo linealmente hasta 6 dB entre 4 y 10 dB, y 6 dB por encima, con los cuatro ejemplos resueltos del Anexo C.5 y un tono de rango medio marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility_es_dark.svg" alt="Ajuste tonal Kt de ISO 1996-2 como función a tramos de la audibilidad tonal: cero por debajo de 4 dB, creciendo linealmente hasta 6 dB entre 4 y 10 dB, y 6 dB por encima, con los cuatro ejemplos resueltos del Anexo C.5 y un tono de rango medio marcados" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility_es.svg" alt="Ajuste tonal Kt de ISO 1996-2 como función a tramos de la audibilidad tonal: cero por debajo de 4 dB, creciendo linealmente hasta 6 dB entre 4 y 10 dB, y 6 dB por encima, con los cuatro ejemplos resueltos del Anexo C.5 y un tono de rango medio marcados" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -496,7 +498,7 @@ levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5
 # levels: (bandas, ventanas) — listo para pcolormesh(times, freq, levels)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example_es.png" alt="Espectrograma en tercios de octava de un barrido logarítmico con dos ráfagas de tono" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example_es_dark.png" alt="Espectrograma en tercios de octava de un barrido logarítmico con dos ráfagas de tono" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example_es.png" alt="Espectrograma en tercios de octava de un barrido logarítmico con dos ráfagas de tono" width="80%" />
 
 *Un barrido logarítmico y dos ráfagas de tono, resueltos en el tiempo y en
 bandas normalizadas de tercio de octava.*

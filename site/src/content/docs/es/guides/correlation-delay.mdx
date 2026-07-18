@@ -22,6 +22,8 @@ references:
     note: "El marco GCC, las ponderaciones de la Tabla I con sus condiciones y el procesador de máxima verosimilitud (Hannan-Thomson)."
 ---
 
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
 Donde los [estimadores espectrales calibrados](/phonometry/es/guides/spectral-analysis/)
 describen una señal en frecuencia, esta página cubre sus equivalentes en el
 dominio del tiempo dentro de `phonometry.metrology`: estimaciones de
@@ -112,7 +114,7 @@ el artículo asocia a cada una:
 | `'phat'` | `1/|Gxy|` | Idealmente una delta en el retardo para ruidos incorrelacionados (su ecuación 23), pero la ponderación ignora la relación señal-ruido, así que las bandas sin señal aportan fase aleatoria de magnitud unidad. Necesita potencia de señal en toda la banda de análisis. |
 | `'ml'` | `γ²/(|Gxy|·(1-γ²))` | El procesador de máxima verosimilitud de Hannan-Thomson: un PHAT atenuado por la varianza de fase que cada banda realmente soporta. Alcanza la cota de Cramér-Rao; la opción segura cuando la señal no llena la banda. |
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay_es.svg" alt="Correlación cruzada normalizada de un par de señales coloreadas de dos sensores frente al retardo en milisegundos: el correlador directo muestra un pico ancho alrededor del retardo verdadero de 20 muestras mientras que la curva GCC-PHAT colapsa en una espiga afilada exactamente sobre la línea discontinua del retardo verdadero" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay_es_dark.svg" alt="Correlación cruzada normalizada de un par de señales coloreadas de dos sensores frente al retardo en milisegundos: el correlador directo muestra un pico ancho alrededor del retardo verdadero de 20 muestras mientras que la curva GCC-PHAT colapsa en una espiga afilada exactamente sobre la línea discontinua del retardo verdadero" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay_es.svg" alt="Correlación cruzada normalizada de un par de señales coloreadas de dos sensores frente al retardo en milisegundos: el correlador directo muestra un pico ancho alrededor del retardo verdadero de 20 muestras mientras que la curva GCC-PHAT colapsa en una espiga afilada exactamente sobre la línea discontinua del retardo verdadero" width="82%" loading="eager" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>

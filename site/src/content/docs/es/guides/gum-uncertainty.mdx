@@ -29,6 +29,8 @@ references:
     note: "El balance de reproducibilidad específico de la acústica de la edificación para magnitudes de número único, complemento aparte de la maquinaria general de la GUM."
 ---
 
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
 Todo resultado de medida está incompleto sin una declaración de su
 incertidumbre. La *Guía para la expresión de la incertidumbre de medida* ofrece
 dos formas de propagar las incertidumbres de las entradas de un modelo de
@@ -41,7 +43,7 @@ distribuciones de probabilidad completas. Coinciden para modelos lineales y
 divergen, de forma reveladora, cuando el modelo es no lineal o las entradas se
 alejan de la gaussiana.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_uncertainty_es.svg" alt="Desde un modelo de medida compartido y sus estimaciones de entrada e incertidumbres típicas, dos vías paralelas: la ley de propagación de la GUM (coeficientes de sensibilidad, combinación en cuadratura, grados de libertad efectivos de Welch-Satterthwaite, incertidumbre expandida U igual a k por uc) y el método de Monte Carlo (muestrear cada entrada de su PDF, propagar M ensayos, tomar el intervalo de cobertura simétrico en probabilidad al 95 por ciento)" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_uncertainty_es_dark.svg" alt="Desde un modelo de medida compartido y sus estimaciones de entrada e incertidumbres típicas, dos vías paralelas: la ley de propagación de la GUM (coeficientes de sensibilidad, combinación en cuadratura, grados de libertad efectivos de Welch-Satterthwaite, incertidumbre expandida U igual a k por uc) y el método de Monte Carlo (muestrear cada entrada de su PDF, propagar M ensayos, tomar el intervalo de cobertura simétrico en probabilidad al 95 por ciento)" style="width:88%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_uncertainty_es.svg" alt="Desde un modelo de medida compartido y sus estimaciones de entrada e incertidumbres típicas, dos vías paralelas: la ley de propagación de la GUM (coeficientes de sensibilidad, combinación en cuadratura, grados de libertad efectivos de Welch-Satterthwaite, incertidumbre expandida U igual a k por uc) y el método de Monte Carlo (muestrear cada entrada de su PDF, propagar M ensayos, tomar el intervalo de cobertura simétrico en probabilidad al 95 por ciento)" width="88%" loading="eager" />
 
 ## 1. La ley de propagación de la incertidumbre (GUM, cláusula 5)
 
@@ -165,7 +167,7 @@ es la referencia: el propio Suplemento 1 (cláusula 8) considera el marco de
 la GUM validado precisamente cuando coincide con el resultado de Monte Carlo,
 y superado por este cuando no coincide.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget_es.svg" alt="Dos paneles para el ejemplo del nivel ponderado A. Izquierda: el balance de incertidumbre de la GUM, un diagrama de barras horizontales de la contribución de cada entrada a la incertidumbre combinada con una línea discontinua en uc de 0,407 dB. Derecha: el histograma de salida de Monte Carlo superpuesto con la gaussiana de la GUM y el intervalo de cobertura del 95 por ciento sombreado; el título indica Y igual a 74,00 dB, U igual a 0,86 dB, k igual a 2,11" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget_es_dark.svg" alt="Dos paneles para el ejemplo del nivel ponderado A. Izquierda: el balance de incertidumbre de la GUM, un diagrama de barras horizontales de la contribución de cada entrada a la incertidumbre combinada con una línea discontinua en uc de 0,407 dB. Derecha: el histograma de salida de Monte Carlo superpuesto con la gaussiana de la GUM y el intervalo de cobertura del 95 por ciento sombreado; el título indica Y igual a 74,00 dB, U igual a 0,86 dB, k igual a 2,11" style="width:96%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget_es.svg" alt="Dos paneles para el ejemplo del nivel ponderado A. Izquierda: el balance de incertidumbre de la GUM, un diagrama de barras horizontales de la contribución de cada entrada a la incertidumbre combinada con una línea discontinua en uc de 0,407 dB. Derecha: el histograma de salida de Monte Carlo superpuesto con la gaussiana de la GUM y el intervalo de cobertura del 95 por ciento sombreado; el título indica Y igual a 74,00 dB, U igual a 0,86 dB, k igual a 2,11" width="96%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>

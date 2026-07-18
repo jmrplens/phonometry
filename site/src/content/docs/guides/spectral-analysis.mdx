@@ -22,6 +22,8 @@ references:
     note: "The overlapped-segment variance formula behind the effective number of averages (Bendat & Piersol Section 11.5.2.2, Ref. 11)."
 ---
 
+import ThemeImage from '../../../components/ThemeImage.astro';
+
 A spectrum without its uncertainty is half a measurement. This page covers the
 Welch spectral estimators of `phonometry.metrology` that report, next to the
 spectrum itself, the statistical quality of the estimate following Bendat &
@@ -95,7 +97,7 @@ a larger random error; the two requirements on segment length pull in
 opposite directions, which is exactly the trade-off the reported numbers make
 visible.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psd_confidence_smoothing.svg" alt="Welch power spectral density of pink noise in dB per Hz over 20 Hz to 20 kHz, with the 95 percent chi-square confidence band shaded around the estimate, the 1/3-octave smoothed curve on top and the exact -3.01 dB per octave power law as a dashed reference line" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psd_confidence_smoothing_dark.svg" alt="Welch power spectral density of pink noise in dB per Hz over 20 Hz to 20 kHz, with the 95 percent chi-square confidence band shaded around the estimate, the 1/3-octave smoothed curve on top and the exact -3.01 dB per octave power law as a dashed reference line" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psd_confidence_smoothing.svg" alt="Welch power spectral density of pink noise in dB per Hz over 20 Hz to 20 kHz, with the 95 percent chi-square confidence band shaded around the estimate, the 1/3-octave smoothed curve on top and the exact -3.01 dB per octave power law as a dashed reference line" width="82%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>

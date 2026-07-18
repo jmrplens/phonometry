@@ -12,6 +12,7 @@ references:
 ---
 
 import Video from '../../../../components/Video.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La medición precisa de SPL requiere capturar la energía en ventanas temporales
 específicas. phonometry implementa las constantes de tiempo exactas de la norma
@@ -36,7 +37,7 @@ escalón, la envolvente alcanza el 63 % de su valor final en un τ y ~99,97 %
 tras 8τ — por eso los análisis de nivel descartan los primeros instantes de una
 grabación.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting_es.svg" alt="La cadena del detector exponencial: la presión de banda se eleva al cuadrado, se suaviza con un paso bajo RC de un polo con constante de tiempo tau y se convierte a decibelios, con las constantes de tiempo Fast, Slow e Impulse indicadas" style="width:88%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting_es_dark.svg" alt="La cadena del detector exponencial: la presión de banda se eleva al cuadrado, se suaviza con un paso bajo RC de un polo con constante de tiempo tau y se convierte a decibelios, con las constantes de tiempo Fast, Slow e Impulse indicadas" style="width:88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting_es.svg" alt="La cadena del detector exponencial: la presión de banda se eleva al cuadrado, se suaviza con un paso bajo RC de un polo con constante de tiempo tau y se convierte a decibelios, con las constantes de tiempo Fast, Slow e Impulse indicadas" width="88%" loading="eager" />
 
 ## 2. Las tres ponderaciones temporales
 
@@ -53,7 +54,7 @@ grabación.
   description="Una ráfaga de tono excita el detector exponencial RC: el condensador se carga y se descarga mientras las agujas de los medidores Fast, Slow e Impulse siguen cada una su propia balística, y las tres trazas de nivel se construyen debajo mostrando el ataque rápido, el promedio lento y la retención asimétrica del modo Impulse."
 />
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es.svg" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es_dark.svg" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es.svg" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -156,7 +157,7 @@ sobre los valores de referencia de la norma — el ejemplo de abajo verifica la
 fila de la ráfaga Fast de 200 ms; la batería de CI cubre la Tabla 4 completa,
 de 1 s a 1 ms en F y de 1 s a 2 ms en S, con límites de aceptación de clase 1:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es.svg" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es_dark.svg" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es.svg" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>

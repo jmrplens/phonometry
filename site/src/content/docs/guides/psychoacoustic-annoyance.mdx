@@ -29,6 +29,8 @@ references:
     note: "The open MATLAB reference (open-source software) used as the numeric oracle for the fluctuation-strength cross-checks on this page."
 ---
 
+import ThemeImage from '../../../components/ThemeImage.astro';
+
 How *annoying* a sound is depends on more than how loud it is. Fastl & Zwicker,
 *Psychoacoustics: Facts and Models*, combine four psychoacoustic sensations —
 **loudness**, **sharpness**, **roughness** and **fluctuation strength** — into a
@@ -39,7 +41,7 @@ consumes — both the closed form for amplitude-modulated broadband noise
 (Eq. 10.2) and the Osses et al. (2016) signal model — and the signal
 convenience that derives all four sensations from a recording.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance.svg" alt="Psychoacoustic annoyance PA against percentile loudness N5 for three sensation profiles: a neutral baseline where PA equals N5, a sharp sound and a rough-and-fluctuating sound both lifted above the baseline, with the worked example PA = 30.82 marked" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance_dark.svg" alt="Psychoacoustic annoyance PA against percentile loudness N5 for three sensation profiles: a neutral baseline where PA equals N5, a sharp sound and a rough-and-fluctuating sound both lifted above the baseline, with the worked example PA = 30.82 marked" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance.svg" alt="Psychoacoustic annoyance PA against percentile loudness N5 for three sensation profiles: a neutral baseline where PA equals N5, a sharp sound and a rough-and-fluctuating sound both lifted above the baseline, with the worked example PA = 30.82 marked" width="82%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -150,7 +152,7 @@ Fastl & Zwicker models; the normative Sottek-model fluctuation strength of
 ECMA-418-2 Clause 9 lives in
 [Sound Quality Metrics](/phonometry/guides/sound-quality/).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength.svg" alt="Fluctuation strength versus modulation frequency on a log axis: the closed-form AM broadband-noise curve and the AM-tone signal-model sweep both show a band-pass characteristic peaking at 4 Hz" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength_dark.svg" alt="Fluctuation strength versus modulation frequency on a log axis: the closed-form AM broadband-noise curve and the AM-tone signal-model sweep both show a band-pass characteristic peaking at 4 Hz" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength.svg" alt="Fluctuation strength versus modulation frequency on a log axis: the closed-form AM broadband-noise curve and the AM-tone signal-model sweep both show a band-pass characteristic peaking at 4 Hz" width="82%" />
 
 <details>
 <summary>Show the code for this figure</summary>

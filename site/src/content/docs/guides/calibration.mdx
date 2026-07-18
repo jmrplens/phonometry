@@ -18,6 +18,8 @@ references:
     note: "The laboratory verification procedure behind the recommended periodic checks."
 ---
 
+import ThemeImage from '../../../components/ThemeImage.astro';
+
 phonometry can return results in physical **Sound Pressure Level (dB SPL)** or
 digital **decibels relative to Full Scale (dBFS)**.
 
@@ -39,7 +41,7 @@ the recorded calibration tone in digital units. `sensitivity()` is
 exactly that equation. The factor is valid as long as nothing in the chain
 changes — touch the gain knob and you must recalibrate.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup.svg" alt="Calibration chain: sound calibrator coupled on the microphone, preamplifier, ADC and sensitivity producing pascals per digital unit" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_dark.svg" alt="Calibration chain: sound calibrator coupled on the microphone, preamplifier, ADC and sensitivity producing pascals per digital unit" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup.svg" alt="Calibration chain: sound calibrator coupled on the microphone, preamplifier, ADC and sensitivity producing pascals per digital unit" width="92%" loading="eager" />
 
 ## Physical Calibration (Sound Level Meter)
 
@@ -116,7 +118,7 @@ Without `fs` the check is skipped. Override the limit with
 The check catches exactly what ruins field calibrations — a loose coupler,
 wind, handling noise:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability.png" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_dark.png" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability.png" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" width="80%" />
 
 <details>
 <summary>Show the code for this figure</summary>

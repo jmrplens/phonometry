@@ -29,6 +29,8 @@ references:
     note: "The domain-specific reproducibility budget for building-acoustics single-number ratings, a separate companion to the general GUM machinery."
 ---
 
+import ThemeImage from '../../../components/ThemeImage.astro';
+
 Every measurement result is incomplete without a statement of its uncertainty.
 The *Guide to the Expression of Uncertainty in Measurement* gives two ways to
 propagate the uncertainties of the inputs of a measurement model
@@ -40,7 +42,7 @@ coefficients; the second propagates the whole probability distributions
 numerically. They agree for linear models and diverge, informatively, when the
 model is non-linear or the inputs are far from Gaussian.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_uncertainty.svg" alt="From a shared measurement model and its input estimates and standard uncertainties, two parallel lanes: the GUM law of propagation (sensitivity coefficients, combined in quadrature, Welch-Satterthwaite effective degrees of freedom, expanded uncertainty U equals k times uc) and the Monte Carlo method (draw each input from its PDF, propagate M trials, take the probabilistically symmetric 95 percent coverage interval)" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_uncertainty_dark.svg" alt="From a shared measurement model and its input estimates and standard uncertainties, two parallel lanes: the GUM law of propagation (sensitivity coefficients, combined in quadrature, Welch-Satterthwaite effective degrees of freedom, expanded uncertainty U equals k times uc) and the Monte Carlo method (draw each input from its PDF, propagate M trials, take the probabilistically symmetric 95 percent coverage interval)" style="width:88%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_uncertainty.svg" alt="From a shared measurement model and its input estimates and standard uncertainties, two parallel lanes: the GUM law of propagation (sensitivity coefficients, combined in quadrature, Welch-Satterthwaite effective degrees of freedom, expanded uncertainty U equals k times uc) and the Monte Carlo method (draw each input from its PDF, propagate M trials, take the probabilistically symmetric 95 percent coverage interval)" width="88%" loading="eager" />
 
 ## 1. The law of propagation of uncertainty (GUM clause 5)
 
@@ -160,7 +162,7 @@ Supplement 1 (clause 8) treats the GUM framework as validated precisely when
 it agrees with the Monte Carlo result, and as superseded by it when it does
 not.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget.svg" alt="Two panels for the A-weighted level example. Left: the GUM uncertainty budget, a horizontal bar chart of each input's contribution to the combined uncertainty with a dashed line at uc of 0.407 dB. Right: the Monte Carlo output histogram overlaid with the GUM Gaussian and the shaded 95 percent coverage interval; the title reads Y equals 74.00 dB, U equals 0.86 dB, k equals 2.11" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget_dark.svg" alt="Two panels for the A-weighted level example. Left: the GUM uncertainty budget, a horizontal bar chart of each input's contribution to the combined uncertainty with a dashed line at uc of 0.407 dB. Right: the Monte Carlo output histogram overlaid with the GUM Gaussian and the shaded 95 percent coverage interval; the title reads Y equals 74.00 dB, U equals 0.86 dB, k equals 2.11" style="width:96%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget.svg" alt="Two panels for the A-weighted level example. Left: the GUM uncertainty budget, a horizontal bar chart of each input's contribution to the combined uncertainty with a dashed line at uc of 0.407 dB. Right: the Monte Carlo output histogram overlaid with the GUM Gaussian and the shaded 95 percent coverage interval; the title reads Y equals 74.00 dB, U equals 0.86 dB, k equals 2.11" width="96%" />
 
 <details>
 <summary>Show the code for this figure</summary>

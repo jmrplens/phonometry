@@ -26,20 +26,22 @@ references:
     note: "The streamed frequency and time weightings are the same designs this standard governs; the carried state keeps the class and tolerance claims of the Frequency Weighting and Time Weighting pages valid in streaming use."
 ---
 
+import ThemeImage from '../../../components/ThemeImage.astro';
+
 Some measurements never fit in memory: an hour-long environmental recording,
 a live monitor that must report levels while the microphone is still
 capturing, or an embedded logger that only ever sees one buffer at a time. In
 all of these the signal has to be processed block by block — and the filters
 must behave exactly as if they had seen the whole signal at once.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing.svg" alt="Two lanes comparing block processing with the filter state carried across blocks, giving one continuous envelope, versus reset each block, where the envelope restarts from zero at every seam" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_dark.svg" alt="Two lanes comparing block processing with the filter state carried across blocks, giving one continuous envelope, versus reset each block, where the envelope restarts from zero at every seam" style="width:86%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing.svg" alt="Two lanes comparing block processing with the filter state carried across blocks, giving one continuous envelope, versus reset each block, where the envelope restarts from zero at every seam" width="86%" loading="eager" />
 
 The `OctaveFilterBank`, `WeightingFilter` (for A, C, or Z-weighting) and
 `TimeWeighting` classes support block (streaming) processing: the internal
 filter state is carried between calls, so concatenated block outputs match a
 single full-signal pass.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity.svg" alt="Stateful block processing matching the continuous result versus independent blocks restarting the filter transient at each boundary" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_dark.svg" alt="Stateful block processing matching the continuous result versus independent blocks restarting the filter transient at each boundary" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity.svg" alt="Stateful block processing matching the continuous result versus independent blocks restarting the filter transient at each boundary" width="80%" />
 
 *With `stateful=True` the concatenated block outputs match the continuous
 result exactly; without state, every block boundary restarts the filter

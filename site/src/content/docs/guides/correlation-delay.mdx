@@ -22,6 +22,8 @@ references:
     note: "The GCC framework, the Table I weightings and their conditions, and the maximum-likelihood (Hannan-Thomson) processor."
 ---
 
+import ThemeImage from '../../../components/ThemeImage.astro';
+
 Where the [calibrated spectral estimators](/phonometry/guides/spectral-analysis/) describe a
 signal in frequency, this page covers their time-domain counterparts in
 `phonometry.metrology`: **auto- and cross-correlation** estimates with the
@@ -109,7 +111,7 @@ attaches to each:
 | `'phat'` | `1/|Gxy|` | Ideally a delta at the delay for uncorrelated noises (their Eq. 23) — but the weight ignores the signal-to-noise ratio, so bands without signal contribute unit-magnitude random phase. It needs signal power across the analysis band. |
 | `'ml'` | `γ²/(|Gxy|·(1-γ²))` | The Hannan-Thomson maximum-likelihood processor: a PHAT weighted down by the phase variance each band actually carries. Attains the Cramér-Rao bound; the safe default when the signal does not fill the band. |
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay.svg" alt="Normalized cross-correlation of a colored two-sensor signal pair against lag in milliseconds: the direct correlator shows a broad peak around the true 20-sample delay while the GCC-PHAT curve collapses to a sharp spike exactly on the dashed true-delay line" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay_dark.svg" alt="Normalized cross-correlation of a colored two-sensor signal pair against lag in milliseconds: the direct correlator shows a broad peak around the true 20-sample delay while the GCC-PHAT curve collapses to a sharp spike exactly on the dashed true-delay line" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay.svg" alt="Normalized cross-correlation of a colored two-sensor signal pair against lag in milliseconds: the direct correlator shows a broad peak around the true 20-sample delay while the GCC-PHAT curve collapses to a sharp spike exactly on the dashed true-delay line" width="82%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>

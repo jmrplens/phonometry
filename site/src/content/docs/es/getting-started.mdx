@@ -3,6 +3,8 @@ title: "Primeros pasos"
 description: "Instala phonometry y ejecuta tu primer análisis de octava fraccional."
 ---
 
+import ThemeImage from '../../../components/ThemeImage.astro';
+
 ## Instalación
 
 **Opción 1: Desde PyPI (recomendada)**
@@ -41,7 +43,7 @@ Todo análisis con phonometry es un subconjunto de una misma cadena: tomar la
 señal cruda, convertirla a unidades físicas, ponderarla en frecuencia, dividirla
 en bandas normalizadas, suavizarla en el tiempo y reducirla a métricas:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_signal_chain_es.svg" alt="Cadena de procesado de phonometry: señal, calibración, ponderación frecuencial, banco de filtros de octava, ponderación temporal y métricas, con la norma verificada en cada etapa" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_signal_chain_es_dark.svg" alt="Cadena de procesado de phonometry: señal, calibración, ponderación frecuencial, banco de filtros de octava, ponderación temporal y métricas, con la norma verificada en cada etapa" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_signal_chain_es.svg" alt="Cadena de procesado de phonometry: señal, calibración, ponderación frecuencial, banco de filtros de octava, ponderación temporal y métricas, con la norma verificada en cada etapa" width="92%" loading="eager" />
 
 Cada etapa es una función o clase independiente que puedes usar por separado;
 las guías las recorren de izquierda a derecha ([Calibración](/phonometry/es/guides/calibration/) →
@@ -70,7 +72,7 @@ print(f"SPL [dB]: {spl}")
 # SPL [dB]: [46.88395351 47.96774897 49.04991279 ...]  — ~90.7 dB en 100 Hz y ~90.9 dB en 1 kHz
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_es.svg" alt="Análisis en tercios de octava de una señal multitono con la PSD cruda de fondo" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_es_dark.svg" alt="Análisis en tercios de octava de una señal multitono con la PSD cruda de fondo" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_es.svg" alt="Análisis en tercios de octava de una señal multitono con la PSD cruda de fondo" width="80%" />
 
 *Ejemplo de análisis espectral en tercios de octava de una señal compleja.*
 

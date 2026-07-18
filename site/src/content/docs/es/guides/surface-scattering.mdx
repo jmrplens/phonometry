@@ -4,6 +4,7 @@ description: "Cómo devuelve una superficie el sonido incidente: el coeficiente 
 ---
 
 import Video from '../../../../components/Video.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Cómo devuelve una superficie el sonido incidente —cuánto dispersa fuera de la
 dirección especular, con qué uniformidad reparte lo que dispersa y cuánto
@@ -32,7 +33,7 @@ muestra de ensayo montada sobre una plataforma giratoria y mantenida
 reflexión especular coherente en fase), cada una con y sin una placa base
 reflectante.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_es.svg" alt="Montaje de dispersión de incidencia aleatoria de ISO 17497-1: una cámara reverberante con la muestra de ensayo sobre una plataforma giratoria, un brazo de altavoz giratorio y un micrófono, midiendo el tiempo de reverberación con la muestra inmóvil (que da la absorción de incidencia aleatoria) y en rotación (que da la absorción especular), a partir de los cuales se deriva el coeficiente de dispersión" style="width:92%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_es_dark.svg" alt="Montaje de dispersión de incidencia aleatoria de ISO 17497-1: una cámara reverberante con la muestra de ensayo sobre una plataforma giratoria, un brazo de altavoz giratorio y un micrófono, midiendo el tiempo de reverberación con la muestra inmóvil (que da la absorción de incidencia aleatoria) y en rotación (que da la absorción especular), a partir de los cuales se deriva el coeficiente de dispersión" style="width:92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_es.svg" alt="Montaje de dispersión de incidencia aleatoria de ISO 17497-1: una cámara reverberante con la muestra de ensayo sobre una plataforma giratoria, un brazo de altavoz giratorio y un micrófono, midiendo el tiempo de reverberación con la muestra inmóvil (que da la absorción de incidencia aleatoria) y en rotación (que da la absorción especular), a partir de los cuales se deriva el coeficiente de dispersión" width="92%" loading="eager" />
 
 **Absorción a partir del tiempo de reverberación (cláusula 6).** Cada situación se
 convierte en un coeficiente de absorción de Sabine con el propio término de
@@ -97,7 +98,7 @@ print(np.round(result.scattering[[0, 6, 12]], 3))   # [0.011 0.428 0.844]
 result.plot()   # s(f) en eje de frecuencia logarítmico, de 0 a 1 (requiere matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_es.svg" alt="El coeficiente de dispersión de incidencia aleatoria s de una superficie difusora sobre las 13 bandas de tercio de octava de 250 a 4000 Hz, creciendo suavemente desde casi cero a baja frecuencia hasta 0,84 a 4 kHz" style="width:88%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_es_dark.svg" alt="El coeficiente de dispersión de incidencia aleatoria s de una superficie difusora sobre las 13 bandas de tercio de octava de 250 a 4000 Hz, creciendo suavemente desde casi cero a baja frecuencia hasta 0,84 a 4 kHz" style="width:88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_es.svg" alt="El coeficiente de dispersión de incidencia aleatoria s de una superficie difusora sobre las 13 bandas de tercio de octava de 250 a 4000 Hz, creciendo suavemente desde casi cero a baja frecuencia hasta 0,84 a 4 kHz" width="88%" />
 
 *El coeficiente de dispersión asciende con la frecuencia: a baja frecuencia el
 relieve de la superficie es pequeño frente a la longitud de onda y la reflexión
@@ -161,7 +162,7 @@ reflejado, no cuánto se dispersa. Un goniómetro barre un receptor sobre un arc
 polar y registra el nivel reflejado $L_i$ en cada ángulo; el coeficiente es la
 autocorrelación normalizada de la distribución de energía polar.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer_es.svg" alt="Goniómetro de difusión en campo libre de ISO 17497-2: una muestra de ensayo sobre una plataforma giratoria, una fuente de altavoz fija y un arco semicircular de micrófonos receptores muestreando la respuesta polar reflejada, a partir de la cual se calcula el coeficiente de difusión por autocorrelación" style="width:92%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer_es_dark.svg" alt="Goniómetro de difusión en campo libre de ISO 17497-2: una muestra de ensayo sobre una plataforma giratoria, una fuente de altavoz fija y un arco semicircular de micrófonos receptores muestreando la respuesta polar reflejada, a partir de la cual se calcula el coeficiente de difusión por autocorrelación" style="width:92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer_es.svg" alt="Goniómetro de difusión en campo libre de ISO 17497-2: una muestra de ensayo sobre una plataforma giratoria, una fuente de altavoz fija y un arco semicircular de micrófonos receptores muestreando la respuesta polar reflejada, a partir de la cual se calcula el coeficiente de difusión por autocorrelación" width="92%" />
 
 **Autocorrelación (fórmula (5)).** Para $n$ receptores con espaciado angular
 igual, con $p_i = 10^{L_i/10}$ la energía de banda en el receptor $i$,
@@ -232,7 +233,7 @@ print(round(result.coefficient, 2))   # 0.82
 result.plot()   # respuesta polar reflejada, d en el título (requiere matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar_es.svg" alt="Un diagrama polar del nivel de presión sonora reflejado de una superficie difusora sobre 37 receptores de -90 a 90 grados, con la respuesta repartida casi uniformemente en ángulo, dando un coeficiente de difusión por autocorrelación d de aproximadamente 0,82" style="width:72%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar_es_dark.svg" alt="Un diagrama polar del nivel de presión sonora reflejado de una superficie difusora sobre 37 receptores de -90 a 90 grados, con la respuesta repartida casi uniformemente en ángulo, dando un coeficiente de difusión por autocorrelación d de aproximadamente 0,82" style="width:72%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar_es.svg" alt="Un diagrama polar del nivel de presión sonora reflejado de una superficie difusora sobre 37 receptores de -90 a 90 grados, con la respuesta repartida casi uniformemente en ángulo, dando un coeficiente de difusión por autocorrelación d de aproximadamente 0,82" width="72%" />
 
 *La energía reflejada llena todo el semicírculo en lugar de concentrarse en un
 lóbulo especular, de modo que el coeficiente de difusión por autocorrelación es
@@ -332,7 +333,7 @@ respuesta al impulso en un micrófono a la altura $d_m$. Las componentes
 Adrienne; su función de transferencia da el factor de reflexión y de ahí la
 absorción.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction_es.svg" alt="Absorción in situ de pavimentos por la técnica de sustracción de ISO 13472-1: un altavoz a 1,25 m y un micrófono a 0,25 m sobre la superficie del pavimento, con los trayectos de rayo directo y reflejado por el pavimento y una medición de referencia en campo libre, con la componente reflejada aislada por una ventana temporal de Adrienne" style="width:92%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction_es_dark.svg" alt="Absorción in situ de pavimentos por la técnica de sustracción de ISO 13472-1: un altavoz a 1,25 m y un micrófono a 0,25 m sobre la superficie del pavimento, con los trayectos de rayo directo y reflejado por el pavimento y una medición de referencia en campo libre, con la componente reflejada aislada por una ventana temporal de Adrienne" style="width:92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction_es.svg" alt="Absorción in situ de pavimentos por la técnica de sustracción de ISO 13472-1: un altavoz a 1,25 m y un micrófono a 0,25 m sobre la superficie del pavimento, con los trayectos de rayo directo y reflejado por el pavimento y una medición de referencia en campo libre, con la componente reflejada aislada por una ventana temporal de Adrienne" width="92%" />
 
 **Divergencia geométrica (cláusula 4.1).** La onda reflejada recorre más camino
 que la directa, así que se atenúa por el factor de divergencia geométrica
@@ -417,7 +418,7 @@ print(np.round(result.absorption[[0, 6, 12]], 2))  # [0.31 0.65 1.  ]
 result.plot()   # diagrama de barras alpha(f) en 250-4000 Hz (requiere matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption_es.svg" alt="Un espectro de absorción de pavimento in situ en tercios de octava calculado por la vía del factor de reflexión a partir de una reflexión de pavimento sintética, creciendo desde cerca de 0,3 a 250 Hz hasta casi 1,0 por encima de 2 kHz" style="width:88%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption_es_dark.svg" alt="Un espectro de absorción de pavimento in situ en tercios de octava calculado por la vía del factor de reflexión a partir de una reflexión de pavimento sintética, creciendo desde cerca de 0,3 a 250 Hz hasta casi 1,0 por encima de 2 kHz" style="width:88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption_es.svg" alt="Un espectro de absorción de pavimento in situ en tercios de octava calculado por la vía del factor de reflexión a partir de una reflexión de pavimento sintética, creciendo desde cerca de 0,3 a 250 Hz hasta casi 1,0 por encima de 2 kHz" width="88%" />
 
 *La absorción crece con la frecuencia porque la superficie refleja menos energía
 de alta frecuencia, exactamente como dicta el factor de reflexión paso-bajo
@@ -487,7 +488,7 @@ y los ayudantes de validez; el propio DSP de la función de transferencia es la
 rutina de tubo de impedancia `two_microphone_impedance` (véase la
 [guía de Materiales acústicos](/phonometry/es/guides/materials/)).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_spot_tube_es.svg" alt="Método puntual de ISO 13472-2: un tubo circular corto sellado sobre la superficie del pavimento con un altavoz en la parte superior y dos micrófonos enrasados en la pared del tubo con espaciado s, midiendo la absorción de 250 a 1600 Hz mediante el método de la función de transferencia de dos micrófonos de ISO 10534-2" style="width:92%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_spot_tube_es_dark.svg" alt="Método puntual de ISO 13472-2: un tubo circular corto sellado sobre la superficie del pavimento con un altavoz en la parte superior y dos micrófonos enrasados en la pared del tubo con espaciado s, midiendo la absorción de 250 a 1600 Hz mediante el método de la función de transferencia de dos micrófonos de ISO 10534-2" style="width:92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_spot_tube_es.svg" alt="Método puntual de ISO 13472-2: un tubo circular corto sellado sobre la superficie del pavimento con un altavoz en la parte superior y dos micrófonos enrasados en la pared del tubo con espaciado s, midiendo la absorción de 250 a 1600 Hz mediante el método de la función de transferencia de dos micrófonos de ISO 10534-2" width="92%" />
 
 **Límites de onda plana (cláusula 5.4).** El tubo solo soporta ondas planas por
 debajo de

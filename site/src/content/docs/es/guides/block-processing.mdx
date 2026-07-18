@@ -26,20 +26,22 @@ references:
     note: "Las ponderaciones frecuenciales y temporales en streaming son los mismos diseños que rige esta norma; el estado transportado mantiene válidas en streaming las afirmaciones de clase y tolerancia de las páginas de ponderación frecuencial y temporal."
 ---
 
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
 Algunas mediciones nunca caben en memoria: una grabación ambiental de una hora,
 un monitor en vivo que debe informar niveles mientras el micrófono sigue
 capturando, o un registrador embebido que solo ve un búfer cada vez. En todos
 esos casos la señal tiene que procesarse bloque a bloque — y los filtros deben
 comportarse exactamente como si hubieran visto la señal completa de una vez.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_es.svg" alt="Dos carriles que comparan el procesado por bloques conservando el estado del filtro entre bloques, con una envolvente continua, frente a reiniciarlo en cada bloque, donde la envolvente arranca desde cero en cada unión" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_es_dark.svg" alt="Dos carriles que comparan el procesado por bloques conservando el estado del filtro entre bloques, con una envolvente continua, frente a reiniciarlo en cada bloque, donde la envolvente arranca desde cero en cada unión" style="width:86%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_es.svg" alt="Dos carriles que comparan el procesado por bloques conservando el estado del filtro entre bloques, con una envolvente continua, frente a reiniciarlo en cada bloque, donde la envolvente arranca desde cero en cada unión" width="86%" loading="eager" />
 
 Las clases `OctaveFilterBank`, `WeightingFilter` (para ponderación A, C o Z) y
 `TimeWeighting` admiten procesado por bloques (streaming): el estado interno del
 filtro se conserva entre llamadas, de modo que las salidas concatenadas por
 bloques coinciden con una única pasada sobre la señal completa.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_es.svg" alt="Procesado por bloques con estado igual al resultado continuo frente a bloques independientes que reinician el transitorio" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_es_dark.svg" alt="Procesado por bloques con estado igual al resultado continuo frente a bloques independientes que reinician el transitorio" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_es.svg" alt="Procesado por bloques con estado igual al resultado continuo frente a bloques independientes que reinician el transitorio" width="80%" />
 
 *Con `stateful=True` las salidas concatenadas por bloques coinciden exactamente
 con el resultado continuo; sin estado, cada frontera de bloque reinicia el

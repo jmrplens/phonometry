@@ -18,6 +18,8 @@ references:
     note: "El procedimiento de verificación de laboratorio que sustenta las comprobaciones periódicas recomendadas."
 ---
 
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
 phonometry puede devolver resultados en **nivel de presión sonora físico
 (dB SPL)** o en **decibelios relativos a fondo de escala digital (dBFS)**.
 
@@ -39,7 +41,7 @@ del tono de calibración grabado, en unidades digitales.
 `sensitivity()` es exactamente esa ecuación. El factor vale mientras
 nada cambie en la cadena — si tocas la ganancia, recalibra.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_es.svg" alt="Cadena de calibración: calibrador acústico acoplado al micrófono, preamplificador, ADC y sensitivity produciendo pascales por unidad digital" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_es_dark.svg" alt="Cadena de calibración: calibrador acústico acoplado al micrófono, preamplificador, ADC y sensitivity produciendo pascales por unidad digital" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_es.svg" alt="Cadena de calibración: calibrador acústico acoplado al micrófono, preamplificador, ADC y sensitivity produciendo pascales por unidad digital" width="92%" loading="eager" />
 
 ## Calibración física (sonómetro)
 
@@ -117,7 +119,7 @@ límite con `max_fluctuation_db` o desactiva con `validate=False`.
 La comprobación caza justo lo que arruina las calibraciones de campo — un acoplador flojo,
 viento, ruido de manipulación:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_es.png" alt="Nivel con ponderación F de un tono de calibración estable frente a otro con AM del 3 % contra el límite de ±0,07 dB de clase 1 de IEC 60942" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_es_dark.png" alt="Nivel con ponderación F de un tono de calibración estable frente a otro con AM del 3 % contra el límite de ±0,07 dB de clase 1 de IEC 60942" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_es.png" alt="Nivel con ponderación F de un tono de calibración estable frente a otro con AM del 3 % contra el límite de ±0,07 dB de clase 1 de IEC 60942" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>

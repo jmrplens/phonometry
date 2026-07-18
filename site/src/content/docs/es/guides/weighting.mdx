@@ -35,11 +35,13 @@ references:
     note: "La definición de polos y ceros de la ponderación G (Tabla 1), verificada frente a todos los valores nominales de respuesta de la Tabla 2 (0,25 Hz a 315 Hz)."
 ---
 
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
 Las curvas de ponderación frecuencial simulan la sensibilidad del oído humano.
 A, C y Z están especificadas en **IEC 61672-1:2013**; la curva G de
 infrasonido, en **ISO 7196:1995**.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_es.svg" alt="Curvas de ponderación A, C y Z con zoom de la región positiva de la curva A (+1,27 dB en 2,5 kHz)" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_es_dark.svg" alt="Curvas de ponderación A, C y Z con zoom de la región positiva de la curva A (+1,27 dB en 2,5 kHz)" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_es.svg" alt="Curvas de ponderación A, C y Z con zoom de la región positiva de la curva A (+1,27 dB en 2,5 kHz)" width="80%" loading="eager" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -94,7 +96,7 @@ medios-graves. Ambas se normalizan a exactamente 0 dB en 1 kHz. Z es la
 ausencia de ponderación. La derivación completa de polos y ceros está en la
 página de [Teoría](/phonometry/es/reference/theory/signal-analysis/).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting_es.svg" alt="Líneas isofónicas según ISO 226 a la izquierda, con la isófona de 40 fonios resaltada; a la derecha la curva de ponderación A superpuesta a la isófona de 40 fonios invertida, mostrando que A es la isófona volteada congelada en un filtro realizable" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting_es_dark.svg" alt="Líneas isofónicas según ISO 226 a la izquierda, con la isófona de 40 fonios resaltada; a la derecha la curva de ponderación A superpuesta a la isófona de 40 fonios invertida, mostrando que A es la isófona volteada congelada en un filtro realizable" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting_es.svg" alt="Líneas isofónicas según ISO 226 a la izquierda, con la isófona de 40 fonios resaltada; a la derecha la curva de ponderación A superpuesta a la isófona de 40 fonios invertida, mostrando que A es la isófona volteada congelada en un filtro realizable" width="92%" />
 
 ### Una breve historia: A, B, C y Z
 
@@ -186,7 +188,7 @@ recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 g_weighted = metrology.weighting_filter(recording, fs, curve='G')
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_es.svg" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_es_dark.svg" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_es.svg" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -265,7 +267,7 @@ ponderación a una frecuencia interna sobremuestreada —hasta 8×, alcanzando
 a ×2)— y diezma de vuelta, manteniendo la respuesta dentro de las tolerancias
 de clase 1 hasta 16 kHz (error ≈ −0,5 dB a 12,5 kHz para fs = 48 kHz).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_es.svg" alt="Precisión en alta frecuencia de la ponderación A a 48 kHz: curva analítica frente a bilineal simple y diseño sobremuestreado, con error" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_es_dark.svg" alt="Precisión en alta frecuencia de la ponderación A a 48 kHz: curva analítica frente a bilineal simple y diseño sobremuestreado, con error" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_es.svg" alt="Precisión en alta frecuencia de la ponderación A a 48 kHz: curva analítica frente a bilineal simple y diseño sobremuestreado, con error" width="80%" />
 
 *El diseño bilineal simple (rojo) cruza la tolerancia de clase 1 cerca de
 12,5 kHz; el diseño sobremuestreado (azul) se mantiene junto a la curva analítica.*
@@ -374,7 +376,7 @@ límites de desviación inferior/superior (un límite inferior de `-inf` signifi
 que solo se aplica el superior). Los límites cualifican la *desviación* respecto
 al objetivo de diseño, por lo que son idénticos para A, C y Z.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_class_mask_es.svg" alt="Desviaciones de las ponderaciones A y C a 48 kHz dentro del corredor de aceptación de clase 1 de la Tabla 3 de IEC 61672-1, con los límites más amplios de clase 2 punteados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_class_mask_es_dark.svg" alt="Desviaciones de las ponderaciones A y C a 48 kHz dentro del corredor de aceptación de clase 1 de la Tabla 3 de IEC 61672-1, con los límites más amplios de clase 2 punteados" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_class_mask_es.svg" alt="Desviaciones de las ponderaciones A y C a 48 kHz dentro del corredor de aceptación de clase 1 de la Tabla 3 de IEC 61672-1, con los límites más amplios de clase 2 punteados" width="80%" />
 
 *Los diseños sobremuestreados A y C (azul, morado) se mantienen cerca de
 desviación cero, holgadamente dentro del corredor de clase 1 (sombreado); los

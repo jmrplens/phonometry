@@ -58,6 +58,7 @@ references:
 ---
 
 import Video from '../../../../components/Video.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Las métricas de nivel dicen cuánta *presión sonora* hay; la sonoridad dice
 cuán fuerte la *percibe* realmente quien escucha. Esta página cubre las tres
@@ -82,7 +83,7 @@ pendientes de enmascaramiento dependientes del nivel — y produce la
 que 2 sonos. Por definición, un tono de 1 kHz a 40 dB SPL es 1 sono, y cada
 +10 fonios duplica el valor en sonos.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_es.svg" alt="Cadena de sonoridad de Zwicker ISO 532-1: 28 niveles de banda de tercio de octava, transmisión y agrupación de bandas críticas inferiores, sonoridad de núcleo de las 20 bandas críticas, sonoridad específica sobre Bark, integrada en la sonoridad total N en sonos y el nivel de sonoridad en fonios" style="width:78%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_es_dark.svg" alt="Cadena de sonoridad de Zwicker ISO 532-1: 28 niveles de banda de tercio de octava, transmisión y agrupación de bandas críticas inferiores, sonoridad de núcleo de las 20 bandas críticas, sonoridad específica sobre Bark, integrada en la sonoridad total N en sonos y el nivel de sonoridad en fonios" style="width:78%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_es.svg" alt="Cadena de sonoridad de Zwicker ISO 532-1: 28 niveles de banda de tercio de octava, transmisión y agrupación de bandas críticas inferiores, sonoridad de núcleo de las 20 bandas críticas, sonoridad específica sobre Bark, integrada en la sonoridad total N en sonos y el nivel de sonoridad en fonios" width="78%" loading="eager" />
 
 <Video
   name="anim_specific_loudness"
@@ -92,7 +93,7 @@ que 2 sonos. Por definición, un tono de 1 kHz a 40 dB SPL es 1 sono, y cada
   description="El patrón de sonoridad específica de una banda estrecha de 1 kHz se construye sobre el eje de Bark mientras el nivel de banda sube de 45 a 85 dB, y el área bajo el patrón se integra en la sonoridad total en sonios."
 />
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_es.svg" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_es_dark.svg" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" style="width:80%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_es.svg" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" width="80%" />
 
 *Mismo nivel de banda, sonoridad muy distinta: la energía repartida entre
 muchas bandas críticas (rojo) suma muchos más sonos que el mismo nivel
@@ -198,7 +199,7 @@ freqs, spl = psychoacoustics.equal_loudness_contour(40.0)   # la clásica isofó
 phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonios
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es.svg" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es_dark.svg" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es.svg" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -249,7 +250,7 @@ Los cuatro métodos están anclados de modo que un **tono de 1 kHz a 40 dB SPL
 es ≈ 1 sono**; los valores no son intercambiables dígito a dígito porque los
 modelos difieren en sus filtros auditivos y en su suma de sonoridad.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_es.svg" alt="Sonoridad de un tono de 1 kHz en función del nivel para los modelos de Zwicker, Moore-Glasberg y Sottek, todos pasando por 1 sono a 40 dB SPL" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_es_dark.svg" alt="Sonoridad de un tono de 1 kHz en función del nivel para los modelos de Zwicker, Moore-Glasberg y Sottek, todos pasando por 1 sono a 40 dB SPL" style="width:80%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_es.svg" alt="Sonoridad de un tono de 1 kHz en función del nivel para los modelos de Zwicker, Moore-Glasberg y Sottek, todos pasando por 1 sono a 40 dB SPL" width="80%" />
 
 *Los tres modelos coinciden en el ancla de 1 sono / 40 dB y divergen con el
 nivel: Zwicker duplica el valor en sonos cada +10 fonios, mientras que el modelo
@@ -388,7 +389,7 @@ print(f"sonoridad de largo plazo superada el 5% del tiempo: {res.percentiles[5.0
 res.plot()   # sonoridad de corto plazo S'(t) y de largo plazo S''(t) frente al tiempo
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_es.svg" alt="Trazas de sonoridad de corto plazo y de largo plazo de Moore-Glasberg para un pulso de tono, mostrando el ataque rápido de la sonoridad de corto plazo y la relajación más lenta de la de largo plazo" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_es_dark.svg" alt="Trazas de sonoridad de corto plazo y de largo plazo de Moore-Glasberg para un pulso de tono, mostrando el ataque rápido de la sonoridad de corto plazo y la relajación más lenta de la de largo plazo" style="width:80%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_es.svg" alt="Trazas de sonoridad de corto plazo y de largo plazo de Moore-Glasberg para un pulso de tono, mostrando el ataque rápido de la sonoridad de corto plazo y la relajación más lenta de la de largo plazo" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -459,7 +460,7 @@ print(res.specific_loudness.shape)          # (53,) sonoridad específica media 
 res.plot()   # sonoridad específica media N'(z) + N(l) dependiente del tiempo a 187.5 Hz
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es.svg" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es_dark.svg" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es.svg" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>

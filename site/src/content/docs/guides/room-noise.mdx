@@ -1,7 +1,45 @@
 ---
 title: "Room-noise criteria (NC / RC Mark II)"
 description: "The ANSI/ASA S12.2-2019 room-noise ratings: the Noise Criteria (NC) tangency method over the Table 1 curves, and the Room Criteria Mark II (RC) rating with its rumble/hiss/neutral spectral tag (Annex D)."
+references:
+  - type: article
+    authors: ["Beranek, L. L."]
+    year: 1957
+    title: "Revised criteria for noise in buildings"
+    journal: "Noise Control"
+    volume: 3
+    issue: 1
+    pages: "19-27"
+    doi: "10.1121/1.2369239"
+    note: "The paper that introduced the NC curves and the speech-interference reasoning behind them."
+  - type: article
+    authors: ["Kosten, C. W.", "van Os, G. J."]
+    year: 1962
+    title: "Community reaction criteria for external noises"
+    journal: "The Control of Noise (National Physical Laboratory Symposium No. 12)"
+    pages: "373-387"
+    url: "https://openlibrary.org/books/OL58781133M"
+    note: "The paper that introduced the NR curve family the text contrasts with NC. Published by Her Majesty's Stationery Office; the linked record is the Open Library page."
+  - type: article
+    authors: ["Blazier, W. E."]
+    year: 1997
+    title: "RC Mark II: A refined procedure for rating the noise of heating, ventilating, and air-conditioning (HVAC) systems in buildings"
+    journal: "Noise Control Engineering Journal"
+    volume: 45
+    issue: 6
+    pages: "243-250"
+    doi: "10.3397/1.2828446"
+    note: "The refined RC procedure, with its neutral-spectrum rationale and the rumble/hiss regions, that ANSI/ASA S12.2 Annex D codifies."
+  - type: standard
+    organization: "Acoustical Society of America"
+    year: 2019
+    title: "Criteria for evaluating room noise"
+    designation: "ANSI/ASA S12.2-2019"
+    url: "https://webstore.ansi.org/standards/asa/ansiasas122019"
+    note: "The normative NC curves and tangency method (Table 1), plus, from the informative Annex D, the RC Mark II curves (Table D.1), the mid-frequency-average rating (clause D.4) and the neutral/rumble/hiss spectral tag (clause D.3), that this module implements."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 Steady background noise in an occupied room — from ventilation, diffusers or
 distant traffic — is rated against a family of **octave-band criterion curves**.
@@ -11,7 +49,7 @@ rating by the tangency method, and the **Room Criteria Mark II (RC)** rating
 with its rumble/hiss spectral tag. Both work on octave-band sound pressure
 levels over the ten bands from 16 Hz to 8000 Hz.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_noise.svg" alt="The two ANSI S12.2 rating methods from one octave-band spectrum: on the left the NC tangency method (from the Table 1 curves, the NC value in each band, then NC equals the highest curve touched, giving NC-NN with a governing band); on the right the RC Mark II method (the mid-frequency average LMF of the 500, 1000 and 2000 Hz levels rounded to give RC-NN, then the spectral tag R for rumble, H for hiss or N for neutral by the clause D.3 deviation rules)" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_noise_dark.svg" alt="The two ANSI S12.2 rating methods from one octave-band spectrum: on the left the NC tangency method (from the Table 1 curves, the NC value in each band, then NC equals the highest curve touched, giving NC-NN with a governing band); on the right the RC Mark II method (the mid-frequency average LMF of the 500, 1000 and 2000 Hz levels rounded to give RC-NN, then the spectral tag R for rumble, H for hiss or N for neutral by the clause D.3 deviation rules)" style="width:94%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_noise.svg" alt="The two ANSI S12.2 rating methods from one octave-band spectrum: on the left the NC tangency method (from the Table 1 curves, the NC value in each band, then NC equals the highest curve touched, giving NC-NN with a governing band); on the right the RC Mark II method (the mid-frequency average LMF of the 500, 1000 and 2000 Hz levels rounded to give RC-NN, then the spectral tag R for rumble, H for hiss or N for neutral by the clause D.3 deviation rules)" width="94%" loading="eager" />
 
 ## 1. Noise Criteria — the tangency method
 
@@ -76,7 +114,7 @@ The strong low-frequency content of this spectrum lifts the 63–250 Hz bands
 well above the reference curve, so the noise is tagged $R$ (rumble) — the
 subjective "throb" of an oversized air handler.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria.svg" alt="Two panels for the same ventilation-dominated room spectrum. Left: the measured octave-band levels over the NC curve family, with a red diamond marking the tangent point at 250 Hz that sets the NC-42.5 rating. Right: the same spectrum over the reference RC-35 curve, with the low-frequency bands rising through the shaded rumble tolerance (plus 5 dB below 500 Hz) so the noise is classified RC-35(R), and the hiss tolerance (plus 3 dB at and above 1000 Hz) shaded for comparison" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria_dark.svg" alt="Two panels for the same ventilation-dominated room spectrum. Left: the measured octave-band levels over the NC curve family, with a red diamond marking the tangent point at 250 Hz that sets the NC-42.5 rating. Right: the same spectrum over the reference RC-35 curve, with the low-frequency bands rising through the shaded rumble tolerance (plus 5 dB below 500 Hz) so the noise is classified RC-35(R), and the hiss tolerance (plus 3 dB at and above 1000 Hz) shaded for comparison" style="width:96%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria.svg" alt="Two panels for the same ventilation-dominated room spectrum. Left: the measured octave-band levels over the NC curve family, with a red diamond marking the tangent point at 250 Hz that sets the NC-42.5 rating. Right: the same spectrum over the reference RC-35 curve, with the low-frequency bands rising through the shaded rumble tolerance (plus 5 dB below 500 Hz) so the noise is classified RC-35(R), and the hiss tolerance (plus 3 dB at and above 1000 Hz) shaded for comparison" width="96%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -166,38 +204,6 @@ points at the terminal end: diffuser and grille face velocities or a
 throttled damper close to the outlet, and it is the range that masks
 speech. A neutral tag (`N`) means the level can still be wrong, but the
 character is right: reduce the whole spectrum rather than reshape it.
-
-## References
-
-- Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise
-  Control*, 3(1), 19-27.
-  [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
-  The paper that introduced the NC curves and the speech-interference
-  reasoning behind them.
-- Kosten, C. W., & van Os, G. J. (1962). Community reaction criteria for
-  external noises. In *The Control of Noise* (National Physical Laboratory
-  Symposium No. 12, pp. 373-387). Her Majesty's Stationery Office.
-  [Open Library record](https://openlibrary.org/books/OL58781133M).
-  The paper that introduced the NR curve family the text contrasts
-  with NC.
-- Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
-  noise of heating, ventilating, and air-conditioning (HVAC) systems in
-  buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
-  [doi:10.3397/1.2828446](https://doi.org/10.3397/1.2828446).
-  The refined RC procedure, with its neutral-spectrum rationale and the
-  rumble/hiss regions, that ANSI/ASA S12.2 Annex D codifies.
-- Acoustical Society of America. (2019). *Criteria for evaluating room
-  noise* (ANSI/ASA S12.2-2019).
-  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansiasas122019).
-  The normative NC curves and tangency method, plus the RC Mark II
-  procedure of its informative Annex D, that this module implements.
-
-## Standards
-
-ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise* — the
-normative NC curves and tangency method (Table 1), and, from the informative
-Annex D, the RC Mark II curves (Table D.1), the mid-frequency-average rating
-(clause D.4) and the neutral/rumble/hiss spectral tag (clause D.3).
 
 ## See also
 

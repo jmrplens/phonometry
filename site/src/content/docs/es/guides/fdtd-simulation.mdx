@@ -1,7 +1,26 @@
 ---
 title: "Simulación de ondas FDTD 2D"
 description: "Un solucionador acústico 2D determinista por diferencias finitas en el dominio del tiempo sobre una malla escalonada presión-velocidad: fuentes gaussianas, tonales y de señal arbitraria, sondas de presión, obstáculos rasterizados, contornos rígidos, de impedancia y absorbentes, y un resultado congelado con historias de sonda, instantáneas del campo y un método plot, siguiendo el capítulo 4 de Attenborough y Van Renterghem (2021)."
+references:
+  - type: book
+    authors: ["Attenborough, K.", "Van Renterghem, T."]
+    year: 2021
+    title: "Predicting outdoor sound"
+    edition: "2.ª ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9780429470806"
+    note: "Capítulo 4: el modelo FDTD presión-velocidad de referencia implementado aquí, desde las ecuaciones de gobierno (4.3-4.4) y la actualización leapfrog escalonada (4.11-4.12) hasta la condición de Courant (4.13-4.14), el análisis del error de fase (4.15) y las condiciones de contorno rígida y de impedancia finita (4.32-4.35). El módulo implementa este método numérico de libro, no una norma de medida, con este capítulo como formulación de referencia citable."
+  - type: book
+    authors: ["Kuttruff, H."]
+    year: 2016
+    title: "Room acoustics"
+    edition: "6.ª ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9781315372150"
+    note: "La sección 3.5 sitúa los métodos ondulatorios en el dominio del tiempo entre las aproximaciones numéricas a la ecuación de onda en recintos, y el capítulo 3 da los modos normales de sala rígida usados como oráculo analítico."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La mayor parte de phonometry predice un **número**: un nivel, un tiempo de
 reverberación, una pérdida por transmisión. El dominio `simulation` calcula el
@@ -25,7 +44,7 @@ las animaciones FDTD de esta documentación, promocionado a API pública con
 fuentes, sondas de presión, obstáculos rasterizados, condiciones de contorno
 por lado y un objeto de resultado congelado.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_es.svg" alt="Flujo desde la definición del dominio (mapas de velocidad del sonido y densidad con el paso de malla dx) y la geometría (máscara de obstáculos y condiciones de contorno por lado), pasando por las fuentes inyectadas en celdas, la actualización leapfrog en malla escalonada de velocidad y presión y la condición de estabilidad de Courant, hasta el FDTDResult congelado con historias de sonda, instantáneas del campo y un método plot" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_es_dark.svg" alt="Flujo desde la definición del dominio (mapas de velocidad del sonido y densidad con el paso de malla dx) y la geometría (máscara de obstáculos y condiciones de contorno por lado), pasando por las fuentes inyectadas en celdas, la actualización leapfrog en malla escalonada de velocidad y presión y la condición de estabilidad de Courant, hasta el FDTDResult congelado con historias de sonda, instantáneas del campo y un método plot" style="width:86%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_es.svg" alt="Flujo desde la definición del dominio (mapas de velocidad del sonido y densidad con el paso de malla dx) y la geometría (máscara de obstáculos y condiciones de contorno por lado), pasando por las fuentes inyectadas en celdas, la actualización leapfrog en malla escalonada de velocidad y presión y la condición de estabilidad de Courant, hasta el FDTDResult congelado con historias de sonda, instantáneas del campo y un método plot" width="86%" loading="eager" />
 
 ## 1. El esquema: una ecuación de onda sobre una malla
 
@@ -146,6 +165,41 @@ recintos de forma irregular, refracción en un gradiente de velocidad del
 sonido. Una sola ejecución captura **todas las frecuencias a la vez** (un
 pulso excita toda la banda; una FFT de una sonda da el espectro), donde un
 método en el dominio de la frecuencia necesita una resolución por frecuencia.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation_es.png" alt="Dos paneles. Izquierda: una instantánea del campo de presión en un dominio de 3 por 2 metros con una barrera rígida vertical delgada, mostrando el frente directo, la reflexión que vuelve hacia la fuente y la onda difractada en el borde de la barrera, con la fuente marcada con una estrella y dos sondas con puntos. Derecha: la historia de presión en ambas sondas; la sonda con visión directa muestra el pulso directo y la reflexión de la barrera, la sonda en sombra una llegada difractada más débil y retardada" width="96%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import simulation
+
+# Un campo libre de 3.0 x 2.0 m (bordes absorbentes) con una barrera
+# rígida delgada: la sonda A ve el pulso directo más la reflexión de la
+# barrera, la sonda B queda en sombra y solo recibe la onda difractada.
+mask = np.zeros((200, 300), dtype=bool)
+mask[60:, 150:154] = True
+res = simulation.fdtd_simulation(
+    343.0, 0.01, 9.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, width=3.0e-4)],
+    probes=[(100, 100), (240, 100)],
+    obstacle_mask=mask,
+    boundaries="absorbing", absorbing_layer_cells=30,
+    snapshot_every=75,
+)
+
+fig, (ax_f, ax_p) = plt.subplots(
+    1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
+res.plot(kind="snapshot", frame=7, ax=ax_f)
+res.plot(ax=ax_p)
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
 A la inversa, cuando existe una forma cerrada validada (reverberación
 estadística, atenuación en exteriores de ISO 9613-2, fuentes imagen en una
 sala rectangular), la forma cerrada es miles de veces más barata: este
@@ -220,40 +274,6 @@ campo libre y caída cilíndrica, el eco de la fuente imagen de una pared
 rígida, el coeficiente de reflexión de impedancia anterior y la propia
 relación de dispersión.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation_es.png" alt="Dos paneles. Izquierda: una instantánea del campo de presión en un dominio de 3 por 2 metros con una barrera rígida vertical delgada, mostrando el frente directo, la reflexión que vuelve hacia la fuente y la onda difractada en el borde de la barrera, con la fuente marcada con una estrella y dos sondas con puntos. Derecha: la historia de presión en ambas sondas; la sonda con visión directa muestra el pulso directo y la reflexión de la barrera, la sonda en sombra una llegada difractada más débil y retardada" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation_es_dark.png" alt="Dos paneles. Izquierda: una instantánea del campo de presión en un dominio de 3 por 2 metros con una barrera rígida vertical delgada, mostrando el frente directo, la reflexión que vuelve hacia la fuente y la onda difractada en el borde de la barrera, con la fuente marcada con una estrella y dos sondas con puntos. Derecha: la historia de presión en ambas sondas; la sonda con visión directa muestra el pulso directo y la reflexión de la barrera, la sonda en sombra una llegada difractada más débil y retardada" style="width:96%">
-
-<details>
-<summary>Mostrar el código de esta figura</summary>
-
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-from phonometry import simulation
-
-# Un campo libre de 3.0 x 2.0 m (bordes absorbentes) con una barrera
-# rígida delgada: la sonda A ve el pulso directo más la reflexión de la
-# barrera, la sonda B queda en sombra y solo recibe la onda difractada.
-mask = np.zeros((200, 300), dtype=bool)
-mask[60:, 150:154] = True
-res = simulation.fdtd_simulation(
-    343.0, 0.01, 9.0e-3, shape=(200, 300),
-    sources=[simulation.GaussianPulse(ix=60, iy=100, width=3.0e-4)],
-    probes=[(100, 100), (240, 100)],
-    obstacle_mask=mask,
-    boundaries="absorbing", absorbing_layer_cells=30,
-    snapshot_every=75,
-)
-
-fig, (ax_f, ax_p) = plt.subplots(
-    1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
-res.plot(kind="snapshot", frame=7, ax=ax_f)
-res.plot(ax=ax_p)
-plt.tight_layout()
-plt.show()
-```
-
-</details>
-
 El `FDTDResult` congelado lleva el eje temporal, las historias de presión por
 sonda, las posiciones de las sondas en metros, los metadatos de la malla, las
 fuentes, las instantáneas opcionales del campo con sus tiempos y la máscara
@@ -261,34 +281,8 @@ de obstáculos; su `.plot()` dibuja las historias de las sondas, y
 `.plot(kind="snapshot")` representa un campo registrado con la geometría
 superpuesta.
 
-## Referencias
-
-- Attenborough, K., y Van Renterghem, T. (2021). *Predicting outdoor sound*
-  (2.ª ed.). CRC Press.
-  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
-  Capítulo 4: el modelo FDTD presión-velocidad de referencia implementado
-  aquí, desde las ecuaciones de gobierno (4.3-4.4) y la actualización
-  leapfrog escalonada (4.11-4.12) hasta la condición de Courant (4.13-4.14),
-  el análisis del error de fase (4.15) y las condiciones de contorno rígida
-  y de impedancia finita (4.32-4.35).
-- Kuttruff, H. (2016). *Room acoustics* (6.ª ed.). CRC Press.
-  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
-  La sección 3.5 sitúa los métodos ondulatorios en el dominio del tiempo
-  entre las aproximaciones numéricas a la ecuación de onda en recintos, y el
-  capítulo 3 da los modos normales de sala rígida usados como oráculo
-  analítico.
-
-## Normas y fuentes
-
-El módulo implementa un método numérico de libro, no una norma de medida: la
-discretización, el límite de estabilidad y las condiciones de contorno siguen
-el capítulo 4 de Attenborough y Van Renterghem (2021) como formulación de
-referencia citable. La validación se ancla a formas cerradas
-(autofrecuencias de caja rígida, expansión cilíndrica, fuentes imagen, el
-coeficiente de reflexión a incidencia normal y la relación de dispersión del
-esquema); dos de esos anclajes se ejecutan en el
-[informe de conformidad](/phonometry/reference/conformance/).
-
 ## Véase también
 
+- [Informe de conformidad](/phonometry/es/reference/conformance/): dos de los anclajes
+  de validación en forma cerrada del §4 se ejecutan ahí.
 - Referencia de la API: [`simulation.fdtd`](/phonometry/es/reference/api/simulation/fdtd/).

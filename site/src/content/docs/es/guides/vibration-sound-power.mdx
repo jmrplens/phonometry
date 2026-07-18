@@ -1,7 +1,32 @@
 ---
 title: "Potencia sonora desde vibración (ISO/TS 7849)"
 description: "La estimación según ISO/TS 7849 de la potencia sonora aérea a partir de la vibración superficial de una máquina: la potencia radiada P = Z_c⟨v²⟩Sε, el nivel de velocidad y su calibración, la media sobre la superficie, el factor de radiación ε y el nivel de potencia sonora L_W = L_v + 10 lg(S/S0) + 10 lg(ε) + 10 lg(411/400) — límite superior de la Parte 1 (ε=1) y valor de ingeniería de la Parte 2."
+references:
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
+    year: 2005
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "3.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/b137728"
+    note: "El tratamiento de la eficiencia de radiación que sustenta la sección 3: la coincidencia, la cancelación por debajo de la frecuencia crítica y la radiación de placas finitas. ISBN 978-3-540-22696-3."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
+    designation: "ISO/TS 7849-1:2009"
+    url: "https://www.iso.org/standard/40537.html"
+    note: "El método de límite superior con ε = 1: la potencia radiada P = Z_c⟨v²⟩Sε (Fórmula 6), el nivel de velocidad y su calibración (Fórmulas 3, 8), la media sobre la superficie (Fórmulas 10/11), la corrección por vibración extraña (Tabla 2) y el nivel de potencia sonora con el término fijo de impedancia (Fórmula 12). La conformidad se ancla en el ejemplo de calibración de la propia norma."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 2: Engineering method including determination of the adequate radiation factor"
+    designation: "ISO/TS 7849-2:2009"
+    url: "https://www.iso.org/standard/40538.html"
+    note: "El método de ingeniería con un factor de radiación medido por bandas (Fórmula 4/8) y su nivel de potencia sonora (Fórmula 15). La conformidad incluye el round-trip exacto entre el factor de radiación y L_W = 10 lg(P/P₀)."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La potencia sonora aérea que una máquina radia a través de la vibración
 estructural de su superficie exterior puede estimarse a partir de la velocidad
@@ -28,7 +53,7 @@ referencia `Z_{c,0} = 400 N·s/m³` dan el término fijo `10 lg(411/400) =
 0,118 dB`. Este módulo alimenta las normas de fuente estructural y de predicción
 en edificación (ISO 9611, EN 15657, EN 12354-5).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power_es.svg" alt="Nivel de potencia sonora radiada por banda de octava, comparando el límite superior de la ISO/TS 7849-1 (factor de radiación igual a uno) con el valor de ingeniería de la ISO/TS 7849-2 (factor de radiación medido)" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power_es_dark.svg" alt="Nivel de potencia sonora radiada por banda de octava, comparando el límite superior de la ISO/TS 7849-1 (factor de radiación igual a uno) con el valor de ingeniería de la ISO/TS 7849-2 (factor de radiación medido)" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power_es.svg" alt="Nivel de potencia sonora radiada por banda de octava, comparando el límite superior de la ISO/TS 7849-1 (factor de radiación igual a uno) con el valor de ingeniería de la ISO/TS 7849-2 (factor de radiación medido)" width="82%" loading="eager" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -134,41 +159,6 @@ sustituye el `ε = 1` fijo por un `εⱼ` banda a banda determinado a partir de 
 referencia de la potencia radiada (intensidad ISO 9614), tras lo cual la
 medición de velocidad puede repetirse a bajo coste en máquinas nominalmente
 idénticas.
-
-## Referencias
-
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound: Structural vibrations and sound radiation at audio frequencies*
-  (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
-  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
-  El tratamiento de la eficiencia de radiación que sustenta la sección 3: la
-  coincidencia, la cancelación por debajo de la frecuencia crítica y la
-  radiación de placas finitas.
-- International Organization for Standardization. (2009). *Acoustics —
-  Determination of airborne sound power levels emitted by machinery using
-  vibration measurement — Part 1: Survey method using a fixed radiation
-  factor* (ISO/TS 7849-1:2009).
-  [Catálogo iso.org](https://www.iso.org/standard/40537.html).
-  El método de límite superior con `ε = 1`.
-- International Organization for Standardization. (2009). *Acoustics —
-  Determination of airborne sound power levels emitted by machinery using
-  vibration measurement — Part 2: Engineering method including determination
-  of the adequate radiation factor* (ISO/TS 7849-2:2009).
-  [Catálogo iso.org](https://www.iso.org/standard/40538.html).
-  El método de ingeniería con un factor de radiación medido por bandas.
-
-## Normas
-
-ISO/TS 7849-1:2009 (*survey method using a fixed radiation factor*) e
-ISO/TS 7849-2:2009 (*engineering method including determination of the adequate
-radiation factor*), *Acoustics — Determination of airborne sound power levels
-emitted by machinery using vibration measurement*: la potencia radiada
-`P = Z_c⟨v²⟩Sε` (Fórmula 6), el nivel de velocidad y su calibración (Fórmulas 3,
-8), la media sobre la superficie (Fórmulas 10/11), la corrección por vibración
-extraña (Tabla 2), el factor de radiación (Fórmula 4/8) y el nivel de potencia
-sonora (Fórmulas 12/15). La conformidad se ancla en el ejemplo de calibración de
-la propia norma, el round-trip exacto entre el factor de radiación y
-`L_W = 10 lg(P/P₀)`, y el término fijo de impedancia.
 
 ## Véase también
 

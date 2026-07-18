@@ -1,7 +1,74 @@
 ---
 title: "Acústica de salas"
 description: "Adquisición de la respuesta al impulso (ISO 18233), parámetros de sala EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), métricas de habla en oficinas diáfanas (ISO 3382-3) y absorción sonora en cámara reverberante (ISO 354)."
+references:
+  - type: book
+    authors: ["Kuttruff, H."]
+    year: 2016
+    title: "Room acoustics"
+    edition: "6.ª ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9781315372150"
+    note: "La monografía de referencia que sustenta esta página: la teoría estadística de los campos sonoros en decaimiento, la frecuencia de Schroeder y los parámetros perceptivos de sala del §2."
+  - type: article
+    authors: ["Schroeder, M. R."]
+    year: 1965
+    title: "New method of measuring reverberation time"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 37
+    issue: 3
+    pages: "409-412"
+    doi: "10.1121/1.1909343"
+    note: "El método de integración hacia atrás que convierte la respuesta al impulso al cuadrado en la curva suave de decaimiento del §2."
+  - type: article
+    authors: ["Hak, C. C. J. M.", "Wenmaekers, R. H. C.", "van Luxemburg, L. C. J."]
+    year: 2012
+    title: "Measuring room impulse responses: Impact of the decay range on derived room acoustic parameters"
+    journal: "Acta Acustica united with Acustica"
+    volume: 98
+    issue: 6
+    pages: "907-915"
+    doi: "10.3813/aaa.918574"
+    note: "El análisis de la INR que sustenta la discusión del rango dinámico y los indicadores de validez endurecidos del §2."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces"
+    designation: "ISO 3382-1:2009"
+    url: "https://www.iso.org/standard/40979.html"
+    note: "Las definiciones de parámetros, los requisitos de posiciones y las diferencias apenas perceptibles del §2."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2008
+    title: "Acoustics — Measurement of room acoustic parameters — Part 2: Reverberation time in ordinary rooms"
+    designation: "ISO 3382-2:2008"
+    url: "https://www.iso.org/standard/36201.html"
+    note: "Los grados de precisión, los recuentos de posiciones y la distancia mínima a la fuente de la discusión sobre promediado del §1."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2012
+    title: "Acoustics — Measurement of room acoustic parameters — Part 3: Open plan offices"
+    designation: "ISO 3382-3:2012"
+    url: "https://www.iso.org/standard/46520.html"
+    note: "Las magnitudes de privacidad del habla en oficinas diáfanas del §3."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2006
+    title: "Acoustics — Application of new measurement methods in building and room acoustics"
+    designation: "ISO 18233:2006"
+    url: "https://www.iso.org/standard/40408.html"
+    note: "La adquisición por barrido sinusoidal y MLS del §1."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2003
+    title: "Acoustics — Measurement of sound absorption in a reverberation room"
+    designation: "ISO 354:2003"
+    url: "https://www.iso.org/standard/34545.html"
+    note: "La medición de absorción en cámara reverberante del §4."
 ---
+
+import Video from '../../../../components/Video.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La acústica de salas parte de una única medición: la **respuesta al impulso**
 (RI) entre una fuente y un receptor. Fíltrala en bandas e intégrala, y da el
@@ -59,7 +126,7 @@ deriva de temperatura) y no admite tanta potencia como un barrido.
 excitación deba ser periódica o el hardware favorezca una señal de dos
 niveles.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ir_measurement_es.svg" alt="Cadena de medición indirecta ISO 18233: una excitación (barrido ESS o MLS) alimenta un altavoz en la sala, un micrófono capta la respuesta y la deconvolución (correlación o filtro inverso) recupera la respuesta al impulso" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ir_measurement_es_dark.svg" alt="Cadena de medición indirecta ISO 18233: una excitación (barrido ESS o MLS) alimenta un altavoz en la sala, un micrófono capta la respuesta y la deconvolución (correlación o filtro inverso) recupera la respuesta al impulso" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ir_measurement_es.svg" alt="Cadena de medición indirecta ISO 18233: una excitación (barrido ESS o MLS) alimenta un altavoz en la sala, un micrófono capta la respuesta y la deconvolución (correlación o filtro inverso) recupera la respuesta al impulso" width="92%" loading="eager" />
 
 ```python
 import numpy as np
@@ -100,7 +167,7 @@ frecuencias altas a lo largo de toda la señal, mientras que la MLS es una
 secuencia de dos niveles con espectro plano — visible como la magnitud
 casi constante de la derecha.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals_es.png" alt="Señales de excitación ISO 18233: la forma de onda del barrido sinusoidal exponencial y su espectrograma con el ascenso exponencial de frecuencia, y una secuencia de longitud máxima con su espectro de magnitud plano" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals_es_dark.png" alt="Señales de excitación ISO 18233: la forma de onda del barrido sinusoidal exponencial y su espectrograma con el ascenso exponencial de frecuencia, y una secuencia de longitud máxima con su espectro de magnitud plano" style="width:96%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals_es.png" alt="Señales de excitación ISO 18233: la forma de onda del barrido sinusoidal exponencial y su espectrograma con el ascenso exponencial de frecuencia, y una secuencia de longitud máxima con su espectro de magnitud plano" width="96%" />
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -139,9 +206,15 @@ envolvente log-magnitud con la curva de decaimiento de energía de Schroeder
 abajo — el decaimiento recto cuya pendiente se convierte en el tiempo de
 reverberación del §2.
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: el barrido exponencial cruza la sala mientras su espectrograma se construye con copias retardadas de las reflexiones, y después el filtro inverso colapsa toda la grabación en la respuesta al impulso" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: el barrido exponencial cruza la sala mientras su espectrograma se construye con copias retardadas de las reflexiones, y después el filtro inverso colapsa toda la grabación en la respuesta al impulso" style="width:88%"></video>
+<Video
+  name="anim_sweep_deconvolution"
+  width={2400}
+  height={1350}
+  title="Medición con barrido y deconvolución a la respuesta al impulso"
+  description="Un barrido exponencial cruza una sala dibujada mientras se construye el espectrograma de la grabación, con las reflexiones discretas apareciendo como copias retardadas de la cresta principal; después el filtro inverso colapsa toda la grabación en la respuesta al impulso."
+/>
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response_es.png" alt="Respuesta al impulso de la sala recuperada: la forma de onda normalizada con el sonido directo y las reflexiones etiquetadas, y debajo la envolvente log-magnitud en dB con la curva de decaimiento de energía de Schroeder" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response_es_dark.png" alt="Respuesta al impulso de la sala recuperada: la forma de onda normalizada con el sonido directo y las reflexiones etiquetadas, y debajo la envolvente log-magnitud en dB con la curva de decaimiento de energía de Schroeder" style="width:88%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response_es.png" alt="Respuesta al impulso de la sala recuperada: la forma de onda normalizada con el sonido directo y las reflexiones etiquetadas, y debajo la envolvente log-magnitud en dB con la curva de decaimiento de energía de Schroeder" width="88%" />
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -181,9 +254,7 @@ fuente, de micrófono y de combinaciones fuente–micrófono según el grado de
 exactitud (control / ingeniería / precisión) y pide posiciones de micrófono
 que eviten las colocaciones simétricas.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_es.svg" alt="Configuración de medición de acústica de salas: una planta de la sala en vista superior con dos posiciones de fuente (altavoz) y seis posiciones de micrófono con las reglas de separación de ISO 3382-1, y la tabla de ISO 3382-2 con el número mínimo de posiciones para los grados de control, ingeniería y precisión" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_es_dark.svg" alt="Configuración de medición de acústica de salas: una planta de la sala en vista superior con dos posiciones de fuente (altavoz) y seis posiciones de micrófono con las reglas de separación de ISO 3382-1, y la tabla de ISO 3382-2 con el número mínimo de posiciones para los grados de control, ingeniería y precisión" style="width:94%">
-
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: al cambiar la altura del micrófono varía el retardo entre el sonido directo y la reflexión del suelo y el filtro en peine de la respuesta en frecuencia se mueve con él; por eso importa la posición de medición cerca de superficies reflectantes" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: al cambiar la altura del micrófono varía el retardo entre el sonido directo y la reflexión del suelo y el filtro en peine de la respuesta en frecuencia se mueve con él; por eso importa la posición de medición cerca de superficies reflectantes" style="width:88%"></video>
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_es.svg" alt="Configuración de medición de acústica de salas: una planta de la sala en vista superior con dos posiciones de fuente (altavoz) y seis posiciones de micrófono con las reglas de separación de ISO 3382-1, y la tabla de ISO 3382-2 con el número mínimo de posiciones para los grados de control, ingeniería y precisión" width="94%" />
 
 **Promediar entre posiciones.** El parámetro por banda que se informa es la
 media aritmética sobre todas las combinaciones fuente-micrófono, y la
@@ -198,8 +269,17 @@ media:
   casi el mismo campo sonoro dos veces, así que el promedio parece más
   estable de lo que es. El mínimo de 1 m a cualquier superficie evita, a
   su vez, el refuerzo de presión junto a un contorno (y el filtro en peine
-  de la animación anterior) que colorea todo lo que graba un micrófono
+  de la animación de más abajo) que colorea todo lo que graba un micrófono
   demasiado cercano.
+
+<Video
+  name="anim_comb_filtering"
+  width={2400}
+  height={1350}
+  title="Filtro en peine por una única reflexión del suelo"
+  description="El sonido directo y una reflexión del suelo llegan al micrófono; al cambiar la altura del micrófono varía el retardo entre los dos caminos y el filtro en peine de la respuesta en frecuencia se mueve con él, y por eso importa la posición de medición cerca de superficies reflectantes."
+/>
+
 - **Colocaciones simétricas.** En una sala geométricamente simétrica, las
   posiciones especulares reciben patrones de reflexión especulares;
   promediarlas no añade información nueva. Por eso la ISO 3382-2 pide
@@ -280,9 +360,15 @@ tiene una **diferencia apenas perceptible** (ISO 3382-1 Tabla A.1: EDT 5 %,
 C80 1 dB, D50 0,05, Ts 10 ms) que fija con qué precisión merece la pena
 informarlo.
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: la energía de la cola de la respuesta al impulso al cuadrado se rellena desde el final mientras la integral hacia atrás avanza hacia t = 0, y la curva de caída de Schroeder emerge en un eje inferior que termina con las rectas de regresión T20 y T30" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: la energía de la cola de la respuesta al impulso al cuadrado se rellena desde el final mientras la integral hacia atrás avanza hacia t = 0, y la curva de caída de Schroeder emerge en un eje inferior que termina con las rectas de regresión T20 y T30" style="width:88%"></video>
+<Video
+  name="anim_schroeder"
+  width={2400}
+  height={1350}
+  title="Integración hacia atrás de Schroeder de la respuesta al impulso al cuadrado"
+  description="La energía de la cola de la respuesta al impulso al cuadrado se rellena desde el final mientras la integral hacia atrás avanza hacia t = 0, y la curva de decaimiento de Schroeder emerge en un eje inferior, terminando con las rectas de regresión T20 y T30."
+/>
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_es.png" alt="Respuesta al impulso al cuadrado con su curva de decaimiento integrada hacia atrás de Schroeder, y las ventanas de regresión EDT, T20 y T30 marcadas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_es_dark.png" alt="Respuesta al impulso al cuadrado con su curva de decaimiento integrada hacia atrás de Schroeder, y las ventanas de regresión EDT, T20 y T30 marcadas" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_es.png" alt="Respuesta al impulso al cuadrado con su curva de decaimiento integrada hacia atrás de Schroeder, y las ventanas de regresión EDT, T20 y T30 marcadas" width="80%" />
 
 *La RI al cuadrado dentada (gris) se integra hasta la curva suave de
 Schroeder (azul); las ventanas EDT, T20 y T30 se ajustan sobre esa curva y
@@ -410,7 +496,13 @@ fijas crece hasta dominar el mapa de presión RMS, fuera de resonancia la
 sala sigue respondiendo, pero el campo forzado se mantiene débil y nunca
 se organiza en ese patrón nodal (2,1).
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: simulación FDTD 2D de una sala de 5 por 3,5 metros excitada en el modo (2,1) de 84 Hz y en una frecuencia fuera de modo; en resonancia un patrón de onda estacionaria con líneas nodales fijas crece hasta dominar el mapa de presión RMS, fuera de resonancia la respuesta forzada se mantiene débil y desorganizada" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: simulación FDTD 2D de una sala de 5 por 3,5 metros excitada en el modo (2,1) de 84 Hz y en una frecuencia fuera de modo; en resonancia un patrón de onda estacionaria con líneas nodales fijas crece hasta dominar el mapa de presión RMS, fuera de resonancia la respuesta forzada se mantiene débil y desorganizada" style="width:88%"></video>
+<Video
+  name="anim_fdtd_room_modes"
+  width={2400}
+  height={1350}
+  title="Excitación en modo y fuera de modo en una sala rígida (FDTD 2D)"
+  description="Simulación FDTD 2D de una sala rígida de 5 por 3,5 metros excitada en el modo (2,1) de 84 Hz y en una frecuencia fuera de modo, lado a lado. En resonancia un patrón de onda estacionaria con líneas nodales fijas crece hasta dominar el mapa de presión RMS; fuera de resonancia la respuesta forzada se mantiene débil y nunca se organiza en esa estructura nodal."
+/>
 
 ### Parámetros de `room_parameters()`
 
@@ -453,9 +545,7 @@ distracción** rD (STI = 0,50) y la **distancia de privacidad** rP
 Las buenas oficinas empujan rD por debajo de ~5 m; las malas dejan el habla
 molesta más allá de 10 m.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_plan_es.svg" alt="Línea de medición de oficina diáfana ISO 3382-3 desde la fuente a 1 m a lo largo de posiciones de 2 m a 16 m, que alimenta las cuatro magnitudes de índice único D2,S, Lp,A,S,4m, rD y rP" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_plan_es_dark.svg" alt="Línea de medición de oficina diáfana ISO 3382-3 desde la fuente a 1 m a lo largo de posiciones de 2 m a 16 m, que alimenta las cuatro magnitudes de índice único D2,S, Lp,A,S,4m, rD y rP" style="width:86%">
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_es.svg" alt="Decaimiento espacial en oficina abierta: nivel de habla ponderado A y STI frente a la distancia a la fuente en eje logarítmico, con la regresión D2,S, el marcador Lp,A,S,4m a 4 m y los cruces de distancia rD y rP" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_es_dark.svg" alt="Decaimiento espacial en oficina abierta: nivel de habla ponderado A y STI frente a la distancia a la fuente en eje logarítmico, con la regresión D2,S, el marcador Lp,A,S,4m a 4 m y los cruces de distancia rD y rP" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_plan_es.svg" alt="Línea de medición de oficina diáfana ISO 3382-3 desde la fuente a 1 m a lo largo de posiciones de 2 m a 16 m, que alimenta las cuatro magnitudes de índice único D2,S, Lp,A,S,4m, rD y rP" width="86%" />
 
 ```python
 import numpy as np
@@ -469,6 +559,8 @@ m = room.open_plan_metrics(r, lp, sti)
 print(round(m.d2s, 1), round(m.lp_as_4m, 1))         # 7.0 dB, 51.0 dB
 print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 ```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_es.svg" alt="Decaimiento espacial en oficina abierta: nivel de habla ponderado A y STI frente a la distancia a la fuente en eje logarítmico, con la regresión D2,S, el marcador Lp,A,S,4m a 4 m y los cruces de distancia rD y rP" width="80%" />
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -629,59 +721,6 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
   nivel que sustentan los niveles de las salas emisora/receptora.
 - [Teoría](/phonometry/es/reference/theory/rooms-buildings/) — la integración de Schroeder, las ventanas de
   regresión y la derivación de la curva de referencia.
+- [Informe de conformidad](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md): los decaimientos en forma cerrada y las
+  definiciones de parámetros frente a los que se validan las implementaciones de ISO 18233 / ISO 3382 / ISO 354.
 - Referencia de la API: [`room.room_acoustics`](/phonometry/es/reference/api/rooms/room-acoustics/), [`room.room_ir`](/phonometry/es/reference/api/rooms/room-ir/) y [`room.open_plan`](/phonometry/es/reference/api/rooms/open-plan/).
-
-## Referencias
-
-- Kuttruff, H. (2016). *Room acoustics* (6.ª ed.). CRC Press.
-  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
-  La monografía de referencia que sustenta esta página: la teoría estadística de
-  los campos sonoros en decaimiento, la frecuencia de Schroeder y los
-  parámetros perceptivos de sala del §2.
-- Schroeder, M. R. (1965). New method of measuring reverberation time.
-  *The Journal of the Acoustical Society of America*, 37(3), 409-412.
-  [doi:10.1121/1.1909343](https://doi.org/10.1121/1.1909343).
-  El método de integración hacia atrás que convierte la respuesta al
-  impulso al cuadrado en la curva suave de decaimiento del §2.
-- Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).
-  Measuring room impulse responses: Impact of the decay range on derived
-  room acoustic parameters. *Acta Acustica united with Acustica*, 98(6),
-  907-915. [doi:10.3813/aaa.918574](https://doi.org/10.3813/aaa.918574).
-  El análisis de la INR que sustenta la discusión del rango dinámico y los
-  indicadores de validez endurecidos del §2.
-- International Organization for Standardization. (2009). *Acoustics —
-  Measurement of room acoustic parameters — Part 1: Performance spaces*
-  (ISO 3382-1:2009).
-  [Catálogo iso.org](https://www.iso.org/standard/40979.html).
-  Las definiciones de parámetros, los requisitos de posiciones y las
-  diferencias apenas perceptibles del §2.
-- International Organization for Standardization. (2008). *Acoustics —
-  Measurement of room acoustic parameters — Part 2: Reverberation time in
-  ordinary rooms* (ISO 3382-2:2008).
-  [Catálogo iso.org](https://www.iso.org/standard/36201.html).
-  Los grados de precisión, los recuentos de posiciones y la distancia
-  mínima a la fuente de la discusión sobre promediado del §1.
-- International Organization for Standardization. (2012). *Acoustics —
-  Measurement of room acoustic parameters — Part 3: Open plan offices*
-  (ISO 3382-3:2012).
-  [Catálogo iso.org](https://www.iso.org/standard/46520.html).
-  Las magnitudes de privacidad del habla en oficinas diáfanas del §3.
-- International Organization for Standardization. (2006). *Acoustics —
-  Application of new measurement methods in building and room acoustics*
-  (ISO 18233:2006).
-  [Catálogo iso.org](https://www.iso.org/standard/40408.html).
-  La adquisición por barrido sinusoidal y MLS del §1.
-- International Organization for Standardization. (2003). *Acoustics —
-  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
-  [Catálogo iso.org](https://www.iso.org/standard/34545.html).
-  La medición de absorción en cámara reverberante del §4.
-
-## Normas
-
-ISO 18233:2006 (aplicación de nuevos métodos de medición — la
-adquisición de respuestas al impulso por barrido y MLS); ISO 3382-1:2009 e
-ISO 3382-2:2008 (tiempo de reverberación y parámetros de sala desde el
-decaimiento de Schroeder); ISO 3382-3:2012 (métricas de habla en oficinas
-abiertas); ISO 354:2003 (absorción sonora en cámara reverberante). Validado
-frente a decaimientos de forma cerrada y las definiciones de parámetros de
-las propias normas.

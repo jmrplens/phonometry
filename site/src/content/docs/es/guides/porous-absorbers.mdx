@@ -1,7 +1,88 @@
 ---
 title: "Absorbentes porosos y multicapa"
 description: "Predicción de la absorción a partir de los parámetros del material: los modelos porosos de Delany-Bazley, Miki y Johnson-Champoux-Allard, el solucionador multicapa por matrices de transferencia con capas perforadas, microperforadas (Maa) y de membrana, y la integral de Paris de incidencia aleatoria."
+references:
+  - type: book
+    authors: ["Mechel, F. P. (Ed.)"]
+    year: 2008
+    title: "Formulas of acoustics"
+    edition: "2.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-540-76833-3"
+    note: "Secciones D.3-D.6 (reflexión en capas, esquema multicapa, integrales de campo difuso) y G.11 (relaciones empíricas de porosos)."
+  - type: book
+    authors: ["Bies, D. A.", "Hansen, C. H.", "Howard, C. Q."]
+    year: 2018
+    title: "Engineering noise control"
+    edition: "5.ª ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9781351228152"
+    note: "Apéndice D: propiedades de materiales porosos, juegos de coeficientes de la tabla D.1 y las recursiones de construcciones en capas D.91-D.99."
+  - type: book
+    authors: ["Cox, T. J.", "D'Antonio, P."]
+    year: 2017
+    title: "Acoustic absorbers and diffusers: Theory, design and application"
+    edition: "3.ª ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9781315369211"
+    note: "Modelado por matrices de transferencia (secc. 2.6), modelos porosos (secc. 6.5) y ecuaciones de diseño de absorbentes resonantes (seccs. 7.3/7.5)."
+  - type: book
+    authors: ["Attenborough, K.", "Van Renterghem, T."]
+    year: 2021
+    title: "Predicting outdoor sound"
+    edition: "2.ª ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9780429470806"
+    note: "Capítulo 5: modelos de impedancia de suelos, incluida la familia JCA."
+  - type: book
+    authors: ["Hopkins, C."]
+    year: 2007
+    title: "Sound insulation"
+    publisher: "Butterworth-Heinemann"
+    doi: "10.4324/9780080550473"
+    note: "Sección 1.3.2.2: el modelo de gas equivalente y la forma SI de Delany-Bazley."
+  - type: article
+    authors: ["Miki, Y."]
+    year: 1990
+    title: "Acoustical properties of porous materials — Modifications of Delany-Bazley models"
+    journal: "Journal of the Acoustical Society of Japan (E)"
+    volume: 11
+    issue: 1
+    pages: "19-24"
+    doi: "10.1250/ast.11.19"
+    note: "La regresión positivo-real implementada en miki."
+  - type: article
+    authors: ["Maa, D.-Y."]
+    year: 1998
+    title: "Potential of microperforated panel absorber"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 104
+    issue: 5
+    pages: "2861-2866"
+    doi: "10.1121/1.423870"
+    note: "La impedancia exacta del MPP (ec. 2), las correcciones de extremo, las fórmulas de diseño y el ejemplo de la fig. 5 fijado en los tests."
+  - type: article
+    authors: ["Johnson, D. L.", "Koplik, J.", "Dashen, R."]
+    year: 1987
+    title: "Theory of dynamic permeability and tortuosity in fluid-saturated porous media"
+    journal: "Journal of Fluid Mechanics"
+    volume: 176
+    pages: "379-402"
+    doi: "10.1017/S0022112087000727"
+    note: "El modelo de tortuosidad dinámica tras la densidad efectiva JCA."
+  - type: article
+    authors: ["Delany, M. E.", "Bazley, E. N."]
+    year: 1970
+    title: "Acoustical properties of fibrous absorbent materials"
+    journal: "Applied Acoustics"
+    volume: 3
+    issue: 2
+    pages: "105-116"
+    doi: "10.1016/0003-682X(70)90031-9"
+    note: "Las relaciones empíricas originales y su validez declarada."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 A partir de la **resistividad al flujo** de un material poroso — la magnitud
 que mide el [banco de flujo](/phonometry/es/guides/materials/) — los modelos
@@ -128,7 +209,7 @@ recíproca por construcción, $\det T = 1$ — en `transfer_matrix`, lista para
 la [maquinaria ASTM E2611](/phonometry/es/guides/materials/)
 (`TransferMatrix`).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/porous_absorber_designs_es.svg" alt="Absorción predicha en incidencia normal de cuatro construcciones de 50 mm: una capa porosa absorbe en banda ancha desde frecuencias medias, un panel microperforado sobre cámara presenta su pico cerca de 700 Hz, un panel perforado sobre poroso cerca de 500 Hz y una membrana sobre cámara con poroso cerca de 175 Hz; las líneas verticales punteadas marcan las resonancias de forma cerrada de Helmholtz y de membrana" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/porous_absorber_designs_es_dark.svg" alt="Absorción predicha en incidencia normal de cuatro construcciones de 50 mm: una capa porosa absorbe en banda ancha desde frecuencias medias, un panel microperforado sobre cámara presenta su pico cerca de 700 Hz, un panel perforado sobre poroso cerca de 500 Hz y una membrana sobre cámara con poroso cerca de 175 Hz; las líneas verticales punteadas marcan las resonancias de forma cerrada de Helmholtz y de membrana" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/porous_absorber_designs_es.svg" alt="Absorción predicha en incidencia normal de cuatro construcciones de 50 mm: una capa porosa absorbe en banda ancha desde frecuencias medias, un panel microperforado sobre cámara presenta su pico cerca de 700 Hz, un panel perforado sobre poroso cerca de 500 Hz y una membrana sobre cámara con poroso cerca de 175 Hz; las líneas verticales punteadas marcan las resonancias de forma cerrada de Helmholtz y de membrana" width="80%" loading="eager" />
 
 *Cuatro construcciones, un mismo presupuesto de 50 mm: la capa porosa
 funciona en banda ancha pero decae a baja frecuencia; los diseños
@@ -278,7 +359,9 @@ resistividades altas, cámaras compartimentadas o revestimientos resonantes
 delgados; para capas porosas gruesas y ligeras integre el modelo volumétrico
 con `diffuse_field_absorption` (Mechel secc. D.6).
 
-**Dónde se comprobaron los números.** Los modelos están fijados dígito a
+**Dónde se comprobaron los números.** Ningún estándar rige estos modelos
+de predicción; son métodos de libro y de revista implementados en sala
+limpia desde las fuentes de las referencias de más abajo. Los modelos están fijados dígito a
 dígito a las tablas de coeficientes impresas (Bies tabla D.1, Miki
 ecs. 30–34), el solucionador a las formas cerradas anteriores y a la
 recuperación por `TransferMatrix` de la
@@ -289,58 +372,10 @@ forma cerrada de reacción local. Tres erratas encontradas en las fuentes
 durante este trabajo están registradas en el
 [registro de erratas](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md).
 
-## Referencias
+## Véase también
 
-- Mechel, F. P. (Ed.). (2008). *Formulas of acoustics* (2.ª ed.). Springer.
-  [doi:10.1007/978-3-540-76833-3](https://doi.org/10.1007/978-3-540-76833-3).
-  Secciones D.3–D.6 (reflexión en capas, esquema multicapa, integrales de
-  campo difuso) y G.11 (relaciones empíricas de porosos).
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2018). *Engineering noise
-  control* (5.ª ed.). CRC Press.
-  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
-  Apéndice D: propiedades de materiales porosos, juegos de coeficientes de
-  la tabla D.1 y las recursiones de construcciones en capas D.91–D.99.
-- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
-  Theory, design and application* (3.ª ed.). CRC Press.
-  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
-  Modelado por matrices de transferencia (secc. 2.6), modelos porosos
-  (secc. 6.5) y ecuaciones de diseño de absorbentes resonantes
-  (seccs. 7.3/7.5).
-- Attenborough, K., & Van Renterghem, T. (2021). *Predicting
-  outdoor sound* (2.ª ed.). CRC Press.
-  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
-  Capítulo 5: modelos de impedancia de suelos, incluida la familia JCA.
-- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
-  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
-  Sección 1.3.2.2: el modelo de gas equivalente y la forma SI de
-  Delany–Bazley.
-- Miki, Y. (1990). Acoustical properties of porous materials —
-  Modifications of Delany–Bazley models. *Journal of the Acoustical Society
-  of Japan (E)*, 11(1), 19–24.
-  [doi:10.1250/ast.11.19](https://doi.org/10.1250/ast.11.19).
-  La regresión positivo-real implementada en `miki`.
-- Maa, D.-Y. (1998). Potential of microperforated panel absorber.
-  *Journal of the Acoustical Society of America*, 104(5), 2861–2866.
-  [doi:10.1121/1.423870](https://doi.org/10.1121/1.423870).
-  La impedancia exacta del MPP (ec. 2), las correcciones de extremo, las
-  fórmulas de diseño y el ejemplo de la fig. 5 fijado en los tests.
-- Johnson, D. L., Koplik, J., & Dashen, R. (1987). Theory of dynamic
-  permeability and tortuosity in fluid-saturated porous media. *Journal of
-  Fluid Mechanics*, 176, 379–402.
-  [doi:10.1017/S0022112087000727](https://doi.org/10.1017/S0022112087000727).
-  El modelo de tortuosidad dinámica tras la densidad efectiva JCA.
-- Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous
-  absorbent materials. *Applied Acoustics*, 3(2), 105–116.
-  [doi:10.1016/0003-682X(70)90031-9](https://doi.org/10.1016/0003-682X(70)90031-9).
-  Las relaciones empíricas originales y su validez declarada.
-
-## Normas
-
-Ningún estándar rige estos modelos de predicción; son métodos de libro y de
-revista (Mechel; Bies, Hansen & Howard; Cox & D'Antonio; Attenborough & Van
-Renterghem; Miki 1990; Maa 1998; Johnson et al. 1987) implementados en
-sala limpia desde las fuentes citadas. Las normas de medida con las que
-conectan — ISO 9053-1/-2 (resistividad al flujo), ISO 10534-1/-2 y
-ASTM E2611 (tubo de impedancia), ISO 354 / ISO 11654 (absorción de
-incidencia aleatoria y su valoración) — viven en
-[Materiales acústicos](/phonometry/es/guides/materials/).
+- [Materiales acústicos](/phonometry/es/guides/materials/): las normas de
+  medida con las que conectan estos modelos de predicción, a saber,
+  ISO 9053-1/-2 (resistividad al flujo), ISO 10534-1/-2 y ASTM E2611 (tubo
+  de impedancia) e ISO 354 / ISO 11654 (absorción de incidencia aleatoria y
+  su valoración).

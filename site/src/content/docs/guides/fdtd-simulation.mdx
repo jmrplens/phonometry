@@ -1,7 +1,26 @@
 ---
 title: "2D FDTD wave simulation"
 description: "A deterministic 2D acoustic finite-difference time-domain solver on a staggered pressure-velocity grid: Gaussian, tone and arbitrary-signal sources, pressure probes, rasterised obstacles, rigid, impedance and absorbing boundaries, and a frozen result with probe histories, field snapshots and a plot method, following Attenborough & Van Renterghem (2021) chapter 4."
+references:
+  - type: book
+    authors: ["Attenborough, K.", "Van Renterghem, T."]
+    year: 2021
+    title: "Predicting outdoor sound"
+    edition: "2nd ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9780429470806"
+    note: "Chapter 4: the pressure-velocity FDTD reference model implemented here, from the governing equations (4.3-4.4) and the staggered leapfrog update (4.11-4.12) through the Courant condition (4.13-4.14), the phase-error analysis (4.15) and the rigid and finite-impedance boundary conditions (4.32-4.35). The module implements this textbook numerical method rather than a measurement standard, with this chapter as the citable reference formulation."
+  - type: book
+    authors: ["Kuttruff, H."]
+    year: 2016
+    title: "Room acoustics"
+    edition: "6th ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9781315372150"
+    note: "Section 3.5 places time-domain wave-based methods among the numerical approaches to the wave equation in enclosures, and chapter 3 gives the rigid-room normal modes used as the analytic oracle."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 Most of phonometry predicts a **number**: a level, a reverberation time, a
 transmission loss. The `simulation` domain computes the **wave field
@@ -23,7 +42,7 @@ animations of this documentation, promoted to a public API with sources,
 pressure probes, rasterised obstacles, per-side boundary conditions and a
 frozen result object.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd.svg" alt="Pipeline from the domain definition (sound-speed and density maps with the grid spacing dx) and the geometry (obstacle mask and per-side boundary conditions), through the sources injected at grid cells, the staggered-grid leapfrog update of velocity and pressure, and the Courant stability condition, to the frozen FDTDResult with probe histories, field snapshots and a plot method" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_dark.svg" alt="Pipeline from the domain definition (sound-speed and density maps with the grid spacing dx) and the geometry (obstacle mask and per-side boundary conditions), through the sources injected at grid cells, the staggered-grid leapfrog update of velocity and pressure, and the Courant stability condition, to the frozen FDTDResult with probe histories, field snapshots and a plot method" style="width:86%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd.svg" alt="Pipeline from the domain definition (sound-speed and density maps with the grid spacing dx) and the geometry (obstacle mask and per-side boundary conditions), through the sources injected at grid cells, the staggered-grid leapfrog update of velocity and pressure, and the Courant stability condition, to the frozen FDTDResult with probe histories, field snapshots and a plot method" width="86%" loading="eager" />
 
 ## 1. The scheme: a wave equation on a grid
 
@@ -138,7 +157,43 @@ paths, scattering from obstacles, modal behaviour of odd-shaped enclosures,
 refraction through a sound-speed gradient. One run captures **all
 frequencies at once** (a pulse excites the whole band; one FFT of a probe
 yields the spectrum), where a frequency-domain method needs one solve per
-frequency. Conversely, when a validated closed form exists (statistical
+frequency.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation.png" alt="Two panels. Left: a snapshot of the pressure field in a 3 by 2 metre domain with a thin vertical rigid barrier, showing the direct wavefront, the reflection travelling back towards the source and the wave diffracted around the barrier edge, with the source marked by a star and two probes by dots. Right: the pressure history at both probes; the line-of-sight probe shows the direct pulse and the barrier reflection, the shadowed probe a weaker, delayed diffracted arrival" width="96%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import simulation
+
+# A 3.0 x 2.0 m free field (absorbing edges) with a thin rigid barrier:
+# probe A sees the direct pulse plus the barrier reflection, probe B sits
+# in the shadow and only receives the wave diffracted around the edge.
+mask = np.zeros((200, 300), dtype=bool)
+mask[60:, 150:154] = True
+res = simulation.fdtd_simulation(
+    343.0, 0.01, 9.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, width=3.0e-4)],
+    probes=[(100, 100), (240, 100)],
+    obstacle_mask=mask,
+    boundaries="absorbing", absorbing_layer_cells=30,
+    snapshot_every=75,
+)
+
+fig, (ax_f, ax_p) = plt.subplots(
+    1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
+res.plot(kind="snapshot", frame=7, ax=ax_f)
+res.plot(ax=ax_p)
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
+Conversely, when a validated closed form exists (statistical
 reverberation, ISO 9613-2 outdoor attenuation, image sources in a rectangular
 room) the closed form is thousands of times cheaper: this solver is the
 cross-check and the demonstrator, not the replacement. The oracle works both
@@ -206,72 +261,14 @@ solver to analytic oracles: box and duct eigenfrequencies, free-field
 arrival times and cylindrical decay, the rigid-wall image echo, the
 impedance reflection coefficient above and the dispersion relation itself.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation.png" alt="Two panels. Left: a snapshot of the pressure field in a 3 by 2 metre domain with a thin vertical rigid barrier, showing the direct wavefront, the reflection travelling back towards the source and the wave diffracted around the barrier edge, with the source marked by a star and two probes by dots. Right: the pressure history at both probes; the line-of-sight probe shows the direct pulse and the barrier reflection, the shadowed probe a weaker, delayed diffracted arrival" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation_dark.png" alt="Two panels. Left: a snapshot of the pressure field in a 3 by 2 metre domain with a thin vertical rigid barrier, showing the direct wavefront, the reflection travelling back towards the source and the wave diffracted around the barrier edge, with the source marked by a star and two probes by dots. Right: the pressure history at both probes; the line-of-sight probe shows the direct pulse and the barrier reflection, the shadowed probe a weaker, delayed diffracted arrival" style="width:96%">
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-from phonometry import simulation
-
-# A 3.0 x 2.0 m free field (absorbing edges) with a thin rigid barrier:
-# probe A sees the direct pulse plus the barrier reflection, probe B sits
-# in the shadow and only receives the wave diffracted around the edge.
-mask = np.zeros((200, 300), dtype=bool)
-mask[60:, 150:154] = True
-res = simulation.fdtd_simulation(
-    343.0, 0.01, 9.0e-3, shape=(200, 300),
-    sources=[simulation.GaussianPulse(ix=60, iy=100, width=3.0e-4)],
-    probes=[(100, 100), (240, 100)],
-    obstacle_mask=mask,
-    boundaries="absorbing", absorbing_layer_cells=30,
-    snapshot_every=75,
-)
-
-fig, (ax_f, ax_p) = plt.subplots(
-    1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
-res.plot(kind="snapshot", frame=7, ax=ax_f)
-res.plot(ax=ax_p)
-plt.tight_layout()
-plt.show()
-```
-
-</details>
-
 The frozen `FDTDResult` carries the time axis, the per-probe pressure
 histories, the probe positions in metres, the grid metadata, the sources,
 the optional field snapshots with their times and the obstacle mask; its
 `.plot()` draws the probe histories, and `.plot(kind="snapshot")` renders
 one recorded field with the geometry overlaid.
 
-## References
-
-- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
-  (2nd ed.). CRC Press.
-  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
-  Chapter 4: the pressure-velocity FDTD reference model implemented here,
-  from the governing equations (4.3-4.4) and the staggered leapfrog update
-  (4.11-4.12) through the Courant condition (4.13-4.14), the phase-error
-  analysis (4.15) and the rigid and finite-impedance boundary conditions
-  (4.32-4.35).
-- Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press.
-  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
-  Section 3.5 places time-domain wave-based methods among the numerical
-  approaches to the wave equation in enclosures, and chapter 3 gives the
-  rigid-room normal modes used as the analytic oracle.
-
-## Standards and sources
-
-The module implements a textbook numerical method rather than a measurement
-standard: the discretisation, stability bound and boundary conditions follow
-Attenborough & Van Renterghem (2021) chapter 4 as the citable reference
-formulation. Validation is anchored to closed forms (rigid-box
-eigenfrequencies, cylindrical spreading, image sources, the normal-incidence
-reflection coefficient and the scheme's dispersion relation); two of those
-anchors run in the [conformance report](/phonometry/reference/conformance/).
-
 ## See also
 
+- [Conformance report](/phonometry/reference/conformance/): two of the closed-form
+  validation anchors of §4 run there.
 - API reference: [`simulation.fdtd`](/phonometry/reference/api/simulation/fdtd/).

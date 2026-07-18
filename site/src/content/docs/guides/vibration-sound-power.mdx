@@ -1,7 +1,32 @@
 ---
 title: "Sound power from surface vibration (ISO/TS 7849)"
 description: "The ISO/TS 7849 estimation of airborne sound power from a machine's surface vibration: the radiated power P = Z_c⟨v²⟩Sε, the velocity level and its calibration, the surface mean, the radiation factor ε, and the sound power level L_W = L_v + 10 lg(S/S0) + 10 lg(ε) + 10 lg(411/400) — Part 1 upper limit (ε=1) and Part 2 engineering value."
+references:
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
+    year: 2005
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "3rd ed."
+    publisher: "Springer"
+    doi: "10.1007/b137728"
+    note: "The radiation-efficiency treatment behind section 3: coincidence, the cancellation below the critical frequency and the radiation of finite plates. ISBN 978-3-540-22696-3."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
+    designation: "ISO/TS 7849-1:2009"
+    url: "https://www.iso.org/standard/40537.html"
+    note: "The upper-limit method with ε = 1: the radiated power P = Z_c⟨v²⟩Sε (Formula 6), the velocity level and its calibration (Formulae 3, 8), the mean over the surface (Formulae 10/11), the extraneous correction (Table 2) and the sound power level with the fixed impedance term (Formula 12). Conformance is anchored on the standard's own worked calibration example."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 2: Engineering method including determination of the adequate radiation factor"
+    designation: "ISO/TS 7849-2:2009"
+    url: "https://www.iso.org/standard/40538.html"
+    note: "The engineering method with a measured band-wise radiation factor (Formula 4/8) and its sound power level (Formula 15). Conformance includes the exact round-trip between the radiation factor and L_W = 10 lg(P/P₀)."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 The airborne sound power a machine radiates through the structure-borne
 vibration of its outer surface can be estimated from the surface vibratory
@@ -26,7 +51,7 @@ reference `Z_{c,0} = 400 N·s/m³` give the fixed `10 lg(411/400) = 0.118 dB`
 term. This module feeds the structure-borne source and building prediction
 standards (ISO 9611, EN 15657, EN 12354-5).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power.svg" alt="Radiated sound power level per octave band, comparing the ISO/TS 7849-1 upper limit (radiation factor of one) with the ISO/TS 7849-2 engineering value (measured radiation factor)" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power_dark.svg" alt="Radiated sound power level per octave band, comparing the ISO/TS 7849-1 upper limit (radiation factor of one) with the ISO/TS 7849-2 engineering value (measured radiation factor)" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power.svg" alt="Radiated sound power level per octave band, comparing the ISO/TS 7849-1 upper limit (radiation factor of one) with the ISO/TS 7849-2 engineering value (measured radiation factor)" width="82%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -129,41 +154,6 @@ fixed `ε = 1`
 with a band-by-band `εⱼ` determined from one reference measurement of the
 radiated power (ISO 9614 intensity), after which the velocity survey can be
 repeated cheaply on nominally identical machines.
-
-## References
-
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound: Structural vibrations and sound radiation at audio frequencies*
-  (3rd ed.). Springer. ISBN 978-3-540-22696-3.
-  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
-  The radiation-efficiency treatment behind section 3: coincidence, the
-  cancellation below the critical frequency and the radiation of finite
-  plates.
-- International Organization for Standardization. (2009). *Acoustics —
-  Determination of airborne sound power levels emitted by machinery using
-  vibration measurement — Part 1: Survey method using a fixed radiation
-  factor* (ISO/TS 7849-1:2009).
-  [iso.org catalogue](https://www.iso.org/standard/40537.html).
-  The upper-limit method with `ε = 1`.
-- International Organization for Standardization. (2009). *Acoustics —
-  Determination of airborne sound power levels emitted by machinery using
-  vibration measurement — Part 2: Engineering method including determination
-  of the adequate radiation factor* (ISO/TS 7849-2:2009).
-  [iso.org catalogue](https://www.iso.org/standard/40538.html).
-  The engineering method with a measured band-wise radiation factor.
-
-## Standards
-
-ISO/TS 7849-1:2009 (*survey method using a fixed radiation
-factor*) and ISO/TS 7849-2:2009 (*engineering method including determination of
-the adequate radiation factor*), *Acoustics — Determination of airborne sound
-power levels emitted by machinery using vibration measurement*: the radiated
-power `P = Z_c⟨v²⟩Sε` (Formula 6), the velocity level and its calibration
-(Formulae 3, 8), the mean over the surface (Formulae 10/11), the extraneous
-correction (Table 2), the radiation factor (Formula 4/8) and the sound power
-level (Formulae 12/15). Conformance is anchored on the standard's own worked
-calibration example, the exact round-trip between the radiation factor and
-`L_W = 10 lg(P/P₀)`, and the fixed impedance term.
 
 ## See also
 

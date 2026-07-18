@@ -1,7 +1,25 @@
 ---
 title: "Installed structure-borne sound (EN 12354-5)"
 description: "The EN 12354-5:2009 prediction of the sound pressure level in a receiving room from building service equipment injecting structure-borne sound: the coupling term D_C from source and receiver mobilities (Formula 19b-e), the installed power L_Ws,inst = L_Ws,c − D_C (Formula 18b), and the per-path normalised SPL with its energetic total (Formulae 18a/17)."
+references:
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
+    year: 2005
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "3rd ed."
+    publisher: "Springer"
+    doi: "10.1007/b137728"
+    note: "The source-receiver mobility coupling and the structure-borne transmission across junctions behind the coupling term and the path model. ISBN 978-3-540-22696-3."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2009
+    title: "Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 5: Sound levels due to service equipment"
+    designation: "EN 12354-5:2009"
+    url: "https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-building-from-the-performance-of-elements-sounds-levels-due-to-the-service-equipment"
+    note: "The coupling term (clause 4.4.3, Formulae 19a-19e), the installed structure-borne power level (Formula 18b), the structure-to-airborne adjustment term (clause 4.4.4, Formulae 20a/20b), and the normalised sound pressure level per path and its energetic combination (Formulae 18a, 17). Conformance is anchored on the coupling-term force-source limit and the standard's own Annex I worked examples: the whirlpool bath of I.2 (Table I.6a: mobility correction and path 11) and the flushing cistern of I.3 (Tables I.8/I.9: source conversion, all four transmission paths, the Formula 17 total and its 29 dB(A) closure), within the ±0.15 dB rounding of the printed one-decimal intermediates. D_sa and R_ij,ref are inputs (from measurement / EN 12354-1 / Annexes D and F). The linked catalogue record is the BSI Knowledge page for BS EN 12354-5:2009; since revised as EN 12354-5:2023 (https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sounds-levels-due-to-the-service-equipment)."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 **EN 12354-5:2009** predicts the sound pressure level in a receiving room caused
 by building service equipment (pumps, fans, lifts, water installations) that
@@ -18,7 +36,7 @@ characteristic reception-plate level `L_Ws,n` to the actual receiver,
 `L_Ws,inst = L_Ws,n + 10 lg(Y_∞,i / Y_∞,rec)` with `Y_∞,rec = 5·10⁻⁶ m/(N·s)`;
 with the source mobility instead it yields `L_Ws,c` (Annex I.3, Table I.8).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne.svg" alt="The EN 12354-5 cascade per octave band: characteristic power, installed power after the coupling term, per-path sound pressure levels and their energetic total" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne_dark.svg" alt="The EN 12354-5 cascade per octave band: characteristic power, installed power after the coupling term, per-path sound pressure levels and their energetic total" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne.svg" alt="The EN 12354-5 cascade per octave band: characteristic power, installed power after the coupling term, per-path sound pressure levels and their energetic total" width="82%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -86,7 +104,7 @@ element itself and every element the vibration reaches across the junctions.
 Each excited-element/radiating-element pair `i→j` is a transmission path with
 its own adjustment term and flanking index:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_installed_paths.svg" alt="EN 12354-5 installation paths: a pump on resilient mounts injects structure-borne power into the floor slab, the excited floor radiates into the receiving room below, a second path travels along the slab into the flanking wall, and the prediction cascade runs from the characteristic power to the normalised sound pressure level" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_installed_paths_dark.svg" alt="EN 12354-5 installation paths: a pump on resilient mounts injects structure-borne power into the floor slab, the excited floor radiates into the receiving room below, a second path travels along the slab into the flanking wall, and the prediction cascade runs from the characteristic power to the normalised sound pressure level" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_installed_paths.svg" alt="EN 12354-5 installation paths: a pump on resilient mounts injects structure-borne power into the floor slab, the excited floor radiates into the receiving room below, a second path travels along the slab into the flanking wall, and the prediction cascade runs from the characteristic power to the normalised sound pressure level" width="92%" />
 
 Each transmission path `i→j` gives a normalised sound pressure level from the
 installed power, the structure-to-airborne adjustment term `D_sa`, the flanking
@@ -122,31 +140,6 @@ print(round(res.overall_level, 1))       # band-summed level [dB]
 The `InstalledSourceResult` carries the per-path levels, the total per band, the
 installed power level and `.overall_level`, and its `.plot()` draws the whole
 cascade.
-
-## References
-
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound: Structural vibrations and sound radiation at audio frequencies*
-  (3rd ed.). Springer. ISBN 978-3-540-22696-3.
-  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
-  The source-receiver mobility coupling and the structure-borne transmission
-  across junctions behind the coupling term and the path model.
-
-## Standards
-
-EN 12354-5:2009, *Building acoustics — Estimation of acoustic
-performance of buildings from the performance of elements — Part 5: Sound levels
-due to service equipment*: the coupling term (clause 4.4.3, Formulae 19a-19e),
-the installed structure-borne power level (Formula 18b), the structure-to-
-airborne adjustment term (clause 4.4.4, Formulae 20a/20b), and the normalised
-sound pressure level per path and its energetic combination (Formulae 18a, 17).
-Conformance is anchored on the coupling-term force-source limit and the
-standard's own Annex I worked examples: the whirlpool bath of I.2
-(Table I.6a: mobility correction and path 11) and the flushing cistern of I.3
-(Tables I.8/I.9: source conversion, all four transmission paths, the
-Formula 17 total and its 29 dB(A) closure), within the ±0.15 dB rounding of
-the printed one-decimal intermediates. `D_sa` and `R_ij,ref` are inputs (from
-measurement / EN 12354-1 / Annexes D and F).
 
 ## See also
 

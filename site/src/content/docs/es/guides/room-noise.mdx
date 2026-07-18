@@ -1,7 +1,45 @@
 ---
 title: "Criterios de ruido de salas (NC / RC Mark II)"
 description: "Las calificaciones de ruido de salas de ANSI/ASA S12.2-2019: el método de tangencia de los criterios de ruido (NC) sobre las curvas de la Tabla 1, y la calificación Room Criteria Mark II (RC) con su etiqueta espectral de retumbo/siseo/neutro (Anexo D)."
+references:
+  - type: article
+    authors: ["Beranek, L. L."]
+    year: 1957
+    title: "Revised criteria for noise in buildings"
+    journal: "Noise Control"
+    volume: 3
+    issue: 1
+    pages: "19-27"
+    doi: "10.1121/1.2369239"
+    note: "El artículo que introdujo las curvas NC y el razonamiento de interferencia con el habla que hay detrás."
+  - type: article
+    authors: ["Kosten, C. W.", "van Os, G. J."]
+    year: 1962
+    title: "Community reaction criteria for external noises"
+    journal: "The Control of Noise (National Physical Laboratory Symposium No. 12)"
+    pages: "373-387"
+    url: "https://openlibrary.org/books/OL58781133M"
+    note: "El artículo que introdujo la familia de curvas NR con la que el texto contrasta NC. Publicado por Her Majesty's Stationery Office; la ficha enlazada es la página de Open Library."
+  - type: article
+    authors: ["Blazier, W. E."]
+    year: 1997
+    title: "RC Mark II: A refined procedure for rating the noise of heating, ventilating, and air-conditioning (HVAC) systems in buildings"
+    journal: "Noise Control Engineering Journal"
+    volume: 45
+    issue: 6
+    pages: "243-250"
+    doi: "10.3397/1.2828446"
+    note: "El procedimiento RC refinado, con su razonamiento de espectro neutro y las regiones de retumbo y siseo, que el Anexo D de ANSI/ASA S12.2 codifica."
+  - type: standard
+    organization: "Acoustical Society of America"
+    year: 2019
+    title: "Criteria for evaluating room noise"
+    designation: "ANSI/ASA S12.2-2019"
+    url: "https://webstore.ansi.org/standards/asa/ansiasas122019"
+    note: "Las curvas NC normativas y el método de tangencia (Tabla 1), más, del Anexo D informativo, las curvas RC Mark II (Tabla D.1), la calificación por media de frecuencias medias (cláusula D.4) y la etiqueta espectral neutro/retumbo/siseo (cláusula D.3), que implementa este módulo."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 El ruido de fondo estacionario de una sala ocupada — de la ventilación, los
 difusores o el tráfico lejano — se califica frente a una familia de **curvas de
@@ -12,7 +50,7 @@ tangencia, y la calificación **Room Criteria Mark II (RC)** con su etiqueta
 espectral de retumbo/siseo. Ambas trabajan sobre niveles de presión sonora por
 banda de octava en las diez bandas de 16 Hz a 8000 Hz.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_noise_es.svg" alt="Los dos métodos de calificación de ANSI S12.2 a partir de un espectro por bandas de octava: a la izquierda el método de tangencia NC (de las curvas de la Tabla 1, el valor NC en cada banda, después NC es la curva más alta tocada, dando NC-NN con una banda determinante); a la derecha el método RC Mark II (la media de frecuencias medias LMF de los niveles de 500, 1000 y 2000 Hz redondeada para dar RC-NN, después la etiqueta espectral R de retumbo, H de siseo o N de neutro por las reglas de desviación de la cláusula D.3)" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_noise_es_dark.svg" alt="Los dos métodos de calificación de ANSI S12.2 a partir de un espectro por bandas de octava: a la izquierda el método de tangencia NC (de las curvas de la Tabla 1, el valor NC en cada banda, después NC es la curva más alta tocada, dando NC-NN con una banda determinante); a la derecha el método RC Mark II (la media de frecuencias medias LMF de los niveles de 500, 1000 y 2000 Hz redondeada para dar RC-NN, después la etiqueta espectral R de retumbo, H de siseo o N de neutro por las reglas de desviación de la cláusula D.3)" style="width:94%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_noise_es.svg" alt="Los dos métodos de calificación de ANSI S12.2 a partir de un espectro por bandas de octava: a la izquierda el método de tangencia NC (de las curvas de la Tabla 1, el valor NC en cada banda, después NC es la curva más alta tocada, dando NC-NN con una banda determinante); a la derecha el método RC Mark II (la media de frecuencias medias LMF de los niveles de 500, 1000 y 2000 Hz redondeada para dar RC-NN, después la etiqueta espectral R de retumbo, H de siseo o N de neutro por las reglas de desviación de la cláusula D.3)" width="94%" loading="eager" />
 
 ## 1. Criterios de ruido — el método de tangencia
 
@@ -78,7 +116,7 @@ El fuerte contenido de baja frecuencia de este espectro eleva las bandas de
 63–250 Hz muy por encima de la curva de referencia, así que el ruido se etiqueta
 como $R$ (retumbo) — el "zumbido" subjetivo de una climatizadora sobredimensionada.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria_es.svg" alt="Dos paneles para el mismo espectro de sala dominado por la ventilación. Izquierda: los niveles medidos por banda de octava sobre la familia de curvas NC, con un rombo rojo que marca el punto de tangencia a 250 Hz que fija la calificación NC-42,5. Derecha: el mismo espectro sobre la curva de referencia RC-35, con las bandas de baja frecuencia atravesando la tolerancia de retumbo sombreada (más 5 dB por debajo de 500 Hz) de modo que el ruido se clasifica como RC-35(R), y la tolerancia de siseo (más 3 dB a 1000 Hz y por encima) sombreada para comparar" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria_es_dark.svg" alt="Dos paneles para el mismo espectro de sala dominado por la ventilación. Izquierda: los niveles medidos por banda de octava sobre la familia de curvas NC, con un rombo rojo que marca el punto de tangencia a 250 Hz que fija la calificación NC-42,5. Derecha: el mismo espectro sobre la curva de referencia RC-35, con las bandas de baja frecuencia atravesando la tolerancia de retumbo sombreada (más 5 dB por debajo de 500 Hz) de modo que el ruido se clasifica como RC-35(R), y la tolerancia de siseo (más 3 dB a 1000 Hz y por encima) sombreada para comparar" style="width:96%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria_es.svg" alt="Dos paneles para el mismo espectro de sala dominado por la ventilación. Izquierda: los niveles medidos por banda de octava sobre la familia de curvas NC, con un rombo rojo que marca el punto de tangencia a 250 Hz que fija la calificación NC-42,5. Derecha: el mismo espectro sobre la curva de referencia RC-35, con las bandas de baja frecuencia atravesando la tolerancia de retumbo sombreada (más 5 dB por debajo de 500 Hz) de modo que el ruido se clasifica como RC-35(R), y la tolerancia de siseo (más 3 dB a 1000 Hz y por encima) sombreada para comparar" width="96%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -172,40 +210,6 @@ y rejillas o una compuerta estrangulada cerca de la salida, y es el rango
 que enmascara el habla. Una etiqueta neutra (`N`) significa que el nivel
 aún puede estar mal, pero el carácter es correcto: reduce todo el espectro
 en lugar de remodelarlo.
-
-## Referencias
-
-- Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise
-  Control*, 3(1), 19-27.
-  [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
-  El artículo que introdujo las curvas NC y el razonamiento de
-  interferencia con el habla que hay detrás.
-- Kosten, C. W., & van Os, G. J. (1962). Community reaction criteria for
-  external noises. In *The Control of Noise* (National Physical Laboratory
-  Symposium No. 12, pp. 373-387). Her Majesty's Stationery Office.
-  [Ficha en Open Library](https://openlibrary.org/books/OL58781133M).
-  El artículo que introdujo la familia de curvas NR con la que el texto
-  contrasta NC.
-- Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
-  noise of heating, ventilating, and air-conditioning (HVAC) systems in
-  buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
-  [doi:10.3397/1.2828446](https://doi.org/10.3397/1.2828446).
-  El procedimiento RC refinado, con su razonamiento de espectro neutro y
-  las regiones de retumbo y siseo, que el Anexo D de ANSI/ASA S12.2
-  codifica.
-- Acoustical Society of America. (2019). *Criteria for evaluating room
-  noise* (ANSI/ASA S12.2-2019).
-  [Tienda ANSI](https://webstore.ansi.org/standards/asa/ansiasas122019).
-  Las curvas NC normativas y el método de tangencia, más el procedimiento
-  RC Mark II de su Anexo D informativo, que implementa este módulo.
-
-## Normas
-
-ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise* — las
-curvas NC normativas y el método de tangencia (Tabla 1), y, del Anexo D
-informativo, las curvas RC Mark II (Tabla D.1), la calificación por media de
-frecuencias medias (cláusula D.4) y la etiqueta espectral neutro/retumbo/siseo
-(cláusula D.3).
 
 ## Véase también
 

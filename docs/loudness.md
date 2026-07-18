@@ -25,15 +25,13 @@ doubles the sone value.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker.svg" alt="ISO 532-1 Zwicker loudness chain: 28 one-third-octave band levels, transmission and lower-critical-band grouping, core loudness of the 20 critical bands, specific loudness over Bark, integrated into total loudness N in sones and loudness level in phons" width="78%"></picture>
 
+The animation below shows that integration at work: as the band level of a
+1 kHz narrowband sound steps up, the specific-loudness pattern N'(z) grows
+along the Bark axis and the area under it is the total loudness in sones.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_specific_loudness_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_specific_loudness.gif" alt="Animation: the specific-loudness pattern of a 1 kHz narrowband sound builds along the Bark axis as the band level steps from 45 to 85 dB, and the area under the pattern integrates to the total loudness in sones" width="640" height="360" loading="lazy"></picture>
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_specific_loudness.webm)
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" width="80%"></picture>
-
-*Same band level, very different loudness: energy spread over many critical
-bands (red) sums to far more sones than the same level concentrated in one
-band (blue). The area under N'(z) is the total loudness.*
 
 ```python
 import numpy as np
@@ -58,6 +56,12 @@ res = psychoacoustics.loudness_zwicker_from_spectrum(levels_28, field="diffuse")
 
 res.plot()   # N'(z) over the Bark scale — the specific-loudness pattern (needs matplotlib)
 ```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" width="80%"></picture>
+
+*Same band level, very different loudness: energy spread over many critical
+bands (red) sums to far more sones than the same level concentrated in one
+band (blue). The area under N'(z) is the total loudness.*
 
 <details>
 <summary>Show the code for this figure</summary>

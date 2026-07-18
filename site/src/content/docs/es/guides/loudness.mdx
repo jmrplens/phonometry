@@ -85,6 +85,11 @@ que 2 sonos. Por definición, un tono de 1 kHz a 40 dB SPL es 1 sono, y cada
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_es.svg" alt="Cadena de sonoridad de Zwicker ISO 532-1: 28 niveles de banda de tercio de octava, transmisión y agrupación de bandas críticas inferiores, sonoridad de núcleo de las 20 bandas críticas, sonoridad específica sobre Bark, integrada en la sonoridad total N en sonos y el nivel de sonoridad en fonios" width="78%" loading="eager" />
 
+La animación de abajo muestra esa integración en acción: al subir el nivel
+de banda de un sonido de banda estrecha de 1 kHz, el patrón de sonoridad
+específica N'(z) crece a lo largo del eje de Bark y el área bajo él es la
+sonoridad total en sonos.
+
 <Video
   name="anim_specific_loudness"
   width={2400}
@@ -92,13 +97,6 @@ que 2 sonos. Por definición, un tono de 1 kHz a 40 dB SPL es 1 sono, y cada
   title="Cómo la sonoridad específica se integra en la sonoridad total"
   description="El patrón de sonoridad específica de una banda estrecha de 1 kHz se construye sobre el eje de Bark mientras el nivel de banda sube de 45 a 85 dB, y el área bajo el patrón se integra en la sonoridad total en sonios."
 />
-
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_es.svg" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" width="80%" />
-
-*Mismo nivel de banda, sonoridad muy distinta: la energía repartida entre
-muchas bandas críticas (rojo) suma muchos más sonos que el mismo nivel
-concentrado en una sola banda (azul). El área bajo N'(z) es la sonoridad
-total.*
 
 ```python
 import numpy as np
@@ -124,6 +122,13 @@ res = psychoacoustics.loudness_zwicker_from_spectrum(levels_28, field="diffuse")
 
 res.plot()   # N'(z) sobre la escala Bark — el patrón de sonoridad específica (requiere matplotlib)
 ```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_es.svg" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" width="80%" />
+
+*Mismo nivel de banda, sonoridad muy distinta: la energía repartida entre
+muchas bandas críticas (rojo) suma muchos más sonos que el mismo nivel
+concentrado en una sola banda (azul). El área bajo N'(z) es la sonoridad
+total.*
 
 <details>
 <summary>Mostrar el código de esta figura</summary>

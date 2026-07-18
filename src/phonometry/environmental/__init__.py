@@ -30,6 +30,15 @@ from .outdoor_propagation import (
     outdoor_propagation_attenuation,
     predicted_receiver_level,
 )
+from .ground_barriers import (
+    BarrierInsertionLoss,
+    SphericalGroundResult,
+    barrier_insertion_loss,
+    fresnel_number,
+    ground_effect,
+    kurze_anderson_attenuation,
+    spherical_reflection_coefficient,
+)
 from .wind_turbine_noise import (
     WindTurbineNoiseWarning,
     WindTurbineTonalityResult,
@@ -87,6 +96,13 @@ __all__ = [
 
     "AtmosphericAbsorptionWarning",
     "Barrier",
+    "BarrierInsertionLoss",
+    "SphericalGroundResult",
+    "barrier_insertion_loss",
+    "fresnel_number",
+    "ground_effect",
+    "kurze_anderson_attenuation",
+    "spherical_reflection_coefficient",
     "DEFAULT_FREQUENCIES",
     "ImpulseProminenceResult",
     "ImpulseProminenceWarning",

@@ -17,9 +17,9 @@ frequencies and Q factors; a corner at infinity collapses its stage to unity
 (Table 3 NOTEs). Wk (vertical whole-body) and Wd (horizontal) of
 ISO 2631-1, Wm (buildings, ISO 2631-2), Wb (rail, ISO 2631-4), Wc/We/Wj
 (seat-back, rotational, head) and Wh (hand-arm, ISO 5349-1) plus Wf (motion
-sickness) are all implemented from the exact cascade — the filter is applied
-as the exact complex response via FFT (magnitude *and* phase), not a
-bilinear-warped digital approximation — and the ISO 8041-1 Annex B design-goal
+sickness) are all implemented from the exact cascade (the filter is applied
+as the exact complex response via FFT, magnitude *and* phase, not a
+bilinear-warped digital approximation) and the ISO 8041-1 Annex B design-goal
 tables (B.1–B.9) are reproduced to 0.1 %.
 
 The weighted metrics follow ISO 2631-1:1997: running rms with linear or
@@ -43,7 +43,7 @@ rows.
 Repeated shocks damage the lumbar spine through peak compression rather than
 average energy, so ISO 2631-5:2018 replaces the Wk weighting with the
 seat-to-spine transfer function of clause 5.2 (Formula 1: one complex zero and
-six complex pole pairs, unity at DC, resonance near 5 Hz —
+six complex pole pairs, unity at DC, resonance near 5 Hz,
 $|H| \approx 1.54$ at 5 Hz) and accumulates the positive spinal-response peaks with a
 sixth-power (Palmgren-Miner) dose (clause 5.3, Formulae 3/4):
 

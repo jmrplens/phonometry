@@ -1,6 +1,32 @@
 ---
 title: "Psychoacoustic annoyance and fluctuation strength"
 description: "The Fastl & Zwicker psychoacoustic annoyance PA = N5·(1 + √(wS² + wFR²)) from loudness, sharpness, roughness and fluctuation strength (Eqs 16.2–16.4), the closed form for AM broadband noise (Eq. 10.2) and the Osses 2016 fluctuation-strength signal model."
+references:
+  - type: book
+    authors: ["Fastl, H.", "Zwicker, E."]
+    year: 2007
+    title: "Psychoacoustics: Facts and models"
+    edition: "3rd ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-540-68888-4"
+    note: "The source of the psychoacoustic-annoyance model of section 2 (Eqs 16.2-16.4, chapter 16; origin Widmann 1992) and of the closed-form fluctuation strength for AM broadband noise of section 3.1 (Eq. 10.2, chapter 10)."
+  - type: article
+    authors: ["Osses Vecchi, A.", "García León, R.", "Kohlrausch, A."]
+    year: 2016
+    title: "Modelling the sensation of fluctuation strength"
+    journal: "Proceedings of Meetings on Acoustics"
+    volume: 28
+    pages: "050005"
+    doi: "10.1121/2.0000410"
+    note: "The fluctuation-strength signal model implemented in section 3.2 (clean-room, with no numeric standard, calibrated to 1 vacil at the reference AM tone), including the Table 1 literature values used as its cross-check."
+  - type: web
+    authors: ["Felix Greco, G.", "Merino-Martínez, R.", "Osses, A.", "Lotinga, M. J. B."]
+    year: 2025
+    title: "SQAT: A sound quality analysis toolbox for MATLAB"
+    siteName: "GitHub"
+    url: "https://github.com/ggrecow/SQAT"
+    doi: "10.5281/zenodo.7934709"
+    note: "The open MATLAB reference (open-source software) used as the numeric oracle for the fluctuation-strength cross-checks on this page."
 ---
 
 How *annoying* a sound is depends on more than how loud it is. Fastl & Zwicker,
@@ -216,40 +242,6 @@ level (it spreads the modulated energy across bands) — quote the closed form
 `fluctuation_strength_am_noise` (§3.1) for that stimulus.
 :::
 
-## References
-
-- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
-  (3rd ed.). Springer.
-  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
-  The source of the psychoacoustic-annoyance model of section 2
-  (Eqs 16.2–16.4, chapter 16) and of the closed-form fluctuation strength for
-  AM broadband noise of §3.1 (Eq. 10.2, chapter 10).
-- Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016). Modelling the
-  sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*,
-  28, 050005. [doi:10.1121/2.0000410](https://doi.org/10.1121/2.0000410).
-  The fluctuation-strength signal model implemented in §3.2, including the
-  Table 1 literature values used as its cross-check.
-- Felix Greco, G., Merino-Martínez, R., Osses, A., & Lotinga, M. J. B.
-  (2025). *SQAT: a sound quality analysis toolbox for MATLAB* (open-source
-  software). [github.com/ggrecow/SQAT](https://github.com/ggrecow/SQAT),
-  [doi:10.5281/zenodo.7934709](https://doi.org/10.5281/zenodo.7934709).
-  The open MATLAB reference used as the numeric oracle for the
-  fluctuation-strength cross-checks on this page.
-
-## Standards
-
-Fastl & Zwicker (2007, 3rd ed.), *Psychoacoustics: Facts and Models* (Springer):
-psychoacoustic annoyance `PA = N5·(1 + √(wS² + wFR²))` with the sharpness weighting
-`wS` and roughness/fluctuation weighting `wFR` (Eqs 16.2–16.4; origin
-Widmann 1992), and the closed form for the fluctuation strength of
-amplitude-modulated broadband noise (Eq. 10.2). The fluctuation-strength signal
-model follows Osses García & Kohlrausch (2016), *Modelling the sensation of
-fluctuation strength* (ICA 2016) — clean-room, with no numeric standard:
-calibrated to `1 vacil` at the reference AM tone and cross-checked against the
-paper's Table 1 literature trends and the open SQAT reference oracle. The four
-sensations reuse the library's ISO 532-1 loudness, DIN 45692 sharpness and
-ECMA-418-2 roughness (see [Loudness](/phonometry/guides/loudness/) and
-[Sound Quality Metrics](/phonometry/guides/sound-quality/)).
 
 ## See also
 

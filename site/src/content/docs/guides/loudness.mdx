@@ -1,7 +1,63 @@
 ---
 title: "Loudness"
 description: "Loudness in sones: Zwicker (ISO 532-1), Moore-Glasberg (ISO 532-2), time-varying Moore-Glasberg-Schlittenlacher (ISO 532-3) and the Sottek Hearing Model loudness of ECMA-418-2, plus the ISO 226:2023 equal-loudness contours."
+references:
+  - type: book
+    authors: ["Fastl, H.", "Zwicker, E."]
+    year: 2007
+    title: "Psychoacoustics: Facts and models"
+    edition: "3rd ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-540-68888-4"
+    note: "The critical-band and masking psychoacoustics behind the Zwicker model and the loudness sensation the newer models refine."
+  - type: article
+    authors: ["Fletcher, H.", "Munson, W. A."]
+    year: 1933
+    title: "Loudness, its definition, measurement and calculation"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 5
+    issue: 2
+    pages: "82-108"
+    doi: "10.1121/1.1915637"
+    note: "The original equal-loudness measurements behind the loudness-level concept of the pure-tone section."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2023
+    title: "Acoustics — Normal equal-loudness-level contours"
+    designation: "ISO 226:2023"
+    url: "https://www.iso.org/standard/83117.html"
+    note: "The contour model and Table 1 parameters behind the pure-tone loudness levels: the contours (Formula 1), the loudness level of pure tones (Formula 2) and the hearing threshold."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Acoustics — Methods for calculating loudness — Part 1: Zwicker method"
+    designation: "ISO 532-1:2017"
+    url: "https://www.iso.org/standard/63077.html"
+    note: "Stationary and time-varying loudness in sones from the normative Annex A.4 reference program, with the N5/N10 percentile loudness, validated against the Annex B set."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Acoustics — Methods for calculating loudness — Part 2: Moore-Glasberg method"
+    designation: "ISO 532-2:2017"
+    url: "https://www.iso.org/standard/63078.html"
+    note: "Stationary loudness from roex excitation patterns on the ERB-number scale, with explicit binaural summation."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2023
+    title: "Acoustics — Methods for calculating loudness — Part 3: Moore-Glasberg-Schlittenlacher method"
+    designation: "ISO 532-3:2023"
+    url: "https://www.iso.org/standard/69856.html"
+    note: "Time-varying short-term and long-term loudness and the peak N_max."
+  - type: standard
+    organization: "Ecma International"
+    year: 2025
+    title: "Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing human perception based on the Sottek Hearing Model)"
+    designation: "ECMA-418-2, 4th ed."
+    url: "https://ecma-international.org/publications-and-standards/standards/ecma-418/"
+    note: "The Sottek Hearing Model loudness (sone_HMS)."
 ---
+
+import Video from '../../../components/Video.astro';
 
 Level metrics tell you how much *sound pressure* there is; loudness tells you
 how loud a listener actually *perceives* it. This page covers the three
@@ -24,11 +80,17 @@ analysis on the 24 Bark scale, level-dependent masking slopes — and outputs
 By definition a 1 kHz tone at 40 dB SPL is 1 sone, and every +10 phon
 doubles the sone value.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker.svg" alt="ISO 532-1 Zwicker loudness chain: 28 one-third-octave band levels, transmission and lower-critical-band grouping, core loudness of the 20 critical bands, specific loudness over Bark, integrated into total loudness N in sones and loudness level in phons" style="width:78%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_dark.svg" alt="ISO 532-1 Zwicker loudness chain: 28 one-third-octave band levels, transmission and lower-critical-band grouping, core loudness of the 20 critical bands, specific loudness over Bark, integrated into total loudness N in sones and loudness level in phons" style="width:78%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker.svg" alt="ISO 532-1 Zwicker loudness chain: 28 one-third-octave band levels, transmission and lower-critical-band grouping, core loudness of the 20 critical bands, specific loudness over Bark, integrated into total loudness N in sones and loudness level in phons" style="width:78%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_dark.svg" alt="ISO 532-1 Zwicker loudness chain: 28 one-third-octave band levels, transmission and lower-critical-band grouping, core loudness of the 20 critical bands, specific loudness over Bark, integrated into total loudness N in sones and loudness level in phons" style="width:78%" />
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_specific_loudness.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_specific_loudness_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: the specific-loudness pattern of a 1 kHz narrowband sound builds along the Bark axis as the band level steps from 45 to 85 dB, and the area under the pattern integrates to the total loudness in sones" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_specific_loudness_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_specific_loudness_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: the specific-loudness pattern of a 1 kHz narrowband sound builds along the Bark axis as the band level steps from 45 to 85 dB, and the area under the pattern integrates to the total loudness in sones" style="width:88%"></video>
+<Video
+  name="anim_specific_loudness"
+  width={2400}
+  height={1350}
+  title="How specific loudness integrates to total loudness"
+  description="The specific-loudness pattern of a 1 kHz narrowband sound builds along the Bark axis as the band level steps from 45 to 85 dB, and the area under the pattern integrates to the total loudness in sones."
+/>
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_dark.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_dark.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" style="width:80%" />
 
 *Same band level, very different loudness: energy spread over many critical
 bands (red) sums to far more sones than the same level concentrated in one
@@ -130,7 +192,7 @@ freqs, spl = psychoacoustics.equal_loudness_contour(40.0)   # the classic 40-pho
 phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -182,7 +244,7 @@ All four methods are anchored so a **1 kHz tone at 40 dB SPL is ≈ 1 sone**; th
 are not interchangeable digit-for-digit because the models differ in their
 auditory filters and their loudness summation.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison.svg" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing through 1 sone at 40 dB SPL" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_dark.svg" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing through 1 sone at 40 dB SPL" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison.svg" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing through 1 sone at 40 dB SPL" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_dark.svg" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing through 1 sone at 40 dB SPL" style="width:80%" />
 
 *The three models agree at the 1 sone / 40 dB anchor and diverge with level:
 Zwicker doubles the sone value every +10 phon, while the Sottek model grows
@@ -319,7 +381,7 @@ print(f"long-term loudness exceeded 5% of the time: {res.percentiles[5.0]:.3f} s
 res.plot()   # short-term S'(t) and long-term S''(t) loudness vs time
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness.svg" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_dark.svg" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness.svg" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_dark.svg" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" style="width:80%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -390,7 +452,7 @@ print(res.specific_loudness.shape)          # (53,) average specific loudness N'
 res.plot()   # average specific loudness N'(z) + time-dependent N(l) at 187.5 Hz
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness.svg" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_dark.svg" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness.svg" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" style="width:80%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_dark.svg" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" style="width:80%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -432,39 +494,6 @@ Returns an `EcmaLoudness`: `loudness` (N, sone_HMS), `specific_loudness`
 (N′(z), 53 bands), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
 (N(l) at 187.5 Hz), `field`.
 
-## References
-
-- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
-  (3rd ed.). Springer.
-  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
-  The critical-band and masking psychoacoustics behind the Zwicker model and
-  the loudness sensation the newer models refine.
-- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
-  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
-  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
-  The original equal-loudness measurements behind the loudness-level concept
-  of the pure-tone section.
-- International Organization for Standardization. (2023). *Acoustics —
-  Normal equal-loudness-level contours* (ISO 226:2023).
-  [iso.org catalogue](https://www.iso.org/standard/83117.html).
-  The contour model and Table 1 parameters behind the pure-tone loudness
-  levels.
-
-## Standards
-
-ISO 532-1:2017, *Acoustics — Methods for calculating
-loudness — Part 1: Zwicker method* — stationary and time-varying loudness in
-sones from the normative Annex A.4 reference program, with the N5/N10
-percentile loudness, validated against the Annex B set. ISO 532-2:2017,
-*... Part 2: Moore-Glasberg method* — stationary loudness from roex excitation
-patterns on the ERB-number scale, with explicit binaural summation.
-ISO 532-3:2023, *... Part 3: Moore-Glasberg-Schlittenlacher method* —
-time-varying short-term and long-term loudness and the peak N_max.
-ISO 226:2023, *Acoustics — Normal equal-loudness-level contours* — the
-contours (Formula 1), the loudness level of pure tones (Formula 2) and the
-hearing threshold. ECMA-418-2:2025, *Psychoacoustic metrics for ITT
-equipment — Part 2 (methods for describing human perception based on the
-Sottek Hearing Model)* — the Sottek Hearing Model loudness (sone_HMS).
 
 ## See also
 

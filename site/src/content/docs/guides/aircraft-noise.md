@@ -1,6 +1,63 @@
 ---
 title: "Aircraft noise: Effective Perceived Noise Level"
 description: "The ICAO Annex 16 Vol. I Appendix 2 Effective Perceived Noise Level (EPNL): perceived noisiness and PNL, the tone correction by the slope method, the 10 dB-down duration correction, and the IEC 61265 measurement-system verifier."
+references:
+  - type: standard
+    organization: "International Civil Aviation Organization"
+    year: 2017
+    title: "Annex 16 to the Convention on International Civil Aviation: Environmental protection — Volume I: Aircraft noise"
+    designation: "8th ed."
+    url: "https://store.icao.int/en/annex-16-environmental-protection-volume-i-aircraft-noise"
+    note: "The normative Appendix 2 EPNL procedure implemented by the noisiness, tone correction and EPNL sections."
+  - type: standard
+    organization: "International Civil Aviation Organization"
+    year: 2018
+    title: "Environmental technical manual — Volume I: Procedures for the noise certification of aircraft"
+    designation: "Doc 9501, 3rd ed."
+    url: "https://store.icao.int/en/environmental-technical-manual-volume-1-procedures-for-the-noise-certification-of-aircraft-doc-9501-1"
+    note: "The worked examples (Table 3-7 tone correction, Table 4-4 integrated-method EPNL) used as the numeric oracles."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 1995
+    title: "Electroacoustics — Instruments for measurement of aircraft noise — Performance requirements for systems to measure one-third-octave-band sound pressure levels in noise certification of transport-category aeroplanes"
+    designation: "IEC 61265:1995"
+    url: "https://webstore.iec.ch/en/publication/5076"
+    note: "The measurement-system tolerances checked by the verifier. Since revised as IEC 61265:2018; the 1995 edition is the implemented one."
+  - type: standard
+    organization: "SAE International"
+    year: 2013
+    title: "Application of pure-tone atmospheric absorption losses to one-third octave-band data"
+    designation: "SAE ARP 5534, reaffirmed 2021"
+    url: "https://www.sae.org/standards/content/arp5534/"
+    note: "The SAE-Method band attenuation of the atmospheric-absorption section, with the pure-tone coefficient from ISO 9613-1."
+  - type: standard
+    organization: "SAE International"
+    year: 2012
+    title: "Standard values of atmospheric absorption as a function of temperature and humidity"
+    designation: "SAE ARP 866B, stabilized 2012"
+    url: "https://www.sae.org/standards/content/arp866b/"
+    note: "The predecessor SAE atmospheric-absorption practice, source of the 50 dB-limited Approximate Method the SAE Method is contrasted with."
+  - type: standard
+    organization: "SAE International"
+    year: 2006
+    title: "Method for predicting lateral attenuation of airplane noise"
+    designation: "SAE AIR 5662"
+    url: "https://www.sae.org/standards/content/air5662/"
+    note: "The soft-ground lateral-attenuation model that Doc 29 adopts (section 4.5.4) in the single-event contour section."
+  - type: report
+    organization: "European Civil Aviation Conference"
+    year: 2016
+    title: "Report on standard method of computing noise contours around civil airports, Volume 2: Technical guide"
+    number: "ECAC.CEAC Doc 29, 4th ed."
+    url: "https://www.ecac-ceac.org/images/documents/ECAC-Doc_29_4th_edition_Dec_2016_Volume_2.pdf"
+    note: "The NPD event-level interpolation (section 4.2) and the single-event segment calculation (impedance adjustment, duration, engine installation, lateral attenuation, noise fraction, start-of-roll directivity, summation) behind the airport noise sections, up to the ground-grid noise contours. Free PDF on the ECAC documents page."
+  - type: report
+    organization: "European Civil Aviation Conference"
+    year: 2026
+    title: "Report on standard method of computing noise contours around civil airports, Volume 3: Reference cases and verification framework"
+    number: "ECAC.CEAC Doc 29, 5th ed."
+    url: "https://www.ecac-ceac.org/images/documents/ECAC-CEAC-DOC_29_5th_Edition-REPORT_ON_STANDARD_METHOD_OF_COMPUTING_NOISE_CONTOURS_AROUND_CIVIL_AIRPORTS-Volume_3-REFERENCE_CASES_AND_VERIFICATION_FRAMEWORK.pdf"
+    note: "The Part 1 reference workbook the single-event chain is validated against. Free PDF on the ECAC documents page."
 ---
 
 The **Effective Perceived Noise Level (EPNL)** is the noise-certification metric
@@ -306,66 +363,6 @@ geometry behind takeoff roll, the Eq. 4-13b average runway-segment speed and
 the recommended 30 m floor on NPD lookups. Seven branch-covering receptor
 events of the reference workbook are reproduced end-to-end in the test suite.
 
-## References
-
-- International Civil Aviation Organization. (2017). *Annex 16 to the
-  Convention on International Civil Aviation: Environmental protection —
-  Volume I: Aircraft noise* (8th ed.).
-  [ICAO store](https://store.icao.int/en/annex-16-environmental-protection-volume-i-aircraft-noise).
-  The normative Appendix 2 EPNL procedure implemented by the noisiness, tone
-  correction and EPNL sections.
-- International Civil Aviation Organization. (2018). *Environmental technical
-  manual — Volume I: Procedures for the noise certification of aircraft*
-  (Doc 9501, 3rd ed.).
-  [ICAO store](https://store.icao.int/en/environmental-technical-manual-volume-1-procedures-for-the-noise-certification-of-aircraft-doc-9501-1).
-  The worked examples (Table 3-7 tone correction, Table 4-4 integrated-method
-  EPNL) used as the numeric oracles.
-- International Electrotechnical Commission. (1995). *Electroacoustics —
-  Instruments for measurement of aircraft noise — Performance requirements for
-  systems to measure one-third-octave-band sound pressure levels in noise
-  certification of transport-category aeroplanes* (IEC 61265:1995; since
-  revised as [IEC 61265:2018](https://webstore.iec.ch/en/publication/32635),
-  the 1995 edition is the implemented one).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5076).
-  The measurement-system tolerances checked by the verifier.
-- SAE International. (2013). *Application of pure-tone atmospheric absorption
-  losses to one-third octave-band data* (SAE ARP 5534, reaffirmed 2021).
-  [sae.org](https://www.sae.org/standards/content/arp5534/).
-  The SAE-Method band attenuation of the atmospheric-absorption section.
-- SAE International. (2012). *Standard values of atmospheric absorption as a
-  function of temperature and humidity* (SAE ARP 866B, stabilized 2012).
-  [sae.org](https://www.sae.org/standards/content/arp866b/).
-  The predecessor SAE atmospheric-absorption practice, source of the 50
-  dB-limited Approximate Method the SAE Method is contrasted with.
-- SAE International. (2006). *Method for predicting lateral attenuation of
-  airplane noise* (SAE AIR 5662).
-  [sae.org](https://www.sae.org/standards/content/air5662/).
-  The soft-ground lateral-attenuation model that Doc 29 §4.5.4 adopts in the
-  single-event contour section.
-- European Civil Aviation Conference. (2016). *Report on standard method of
-  computing noise contours around civil airports* (ECAC.CEAC Doc 29, 4th ed.),
-  Volume 2: Technical guide.
-  [ECAC documents page](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements),
-  [free PDF](https://www.ecac-ceac.org/images/documents/ECAC-Doc_29_4th_edition_Dec_2016_Volume_2.pdf).
-  The NPD interpolation and the single-event segment chain of the airport
-  noise sections.
-- European Civil Aviation Conference. (2026). *Report on standard method of
-  computing noise contours around civil airports* (ECAC.CEAC Doc 29, 5th ed.),
-  Volume 3: Reference cases and verification framework.
-  [ECAC documents page](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements),
-  [free PDF](https://www.ecac-ceac.org/images/documents/ECAC-CEAC-DOC_29_5th_Edition-REPORT_ON_STANDARD_METHOD_OF_COMPUTING_NOISE_CONTOURS_AROUND_CIVIL_AIRPORTS-Volume_3-REFERENCE_CASES_AND_VERIFICATION_FRAMEWORK.pdf).
-  The reference workbook the single-event chain is validated against.
-
-## Standards
-
-ICAO Annex 16 Vol. I Appendix 2 (EPNL procedure), ICAO Doc 9501
-ETM Vol. I (worked-example oracles), IEC 61265:1995 (measurement-system
-tolerances), SAE ARP 5534:2021 (SAE-Method band absorption; pure-tone coefficient
-from ISO 9613-1), ECAC Doc 29 4th ed. Vol 2 §4.2 (NPD event-level
-interpolation), the single-event segment calculation (impedance adjustment,
-duration, engine installation, lateral attenuation, noise fraction, start-of-roll
-directivity, summation) and ground-grid noise contours, validated against the
-Doc 29 5th ed. Vol 3 Part 1 reference workbook.
 
 ## See also
 

@@ -1,7 +1,74 @@
 ---
 title: "Vibración en humanos"
 description: "Exposición a vibración de cuerpo completo y mano-brazo: las ponderaciones frecuenciales de ISO 8041-1, el valor eficaz ponderado y las medidas de dosis de ISO 2631-1 (VDV, MTVV, MSDV, factor de cresta), el valor total de vibración y la exposición diaria de 8 horas A(8), con la orientación de exposición de ISO 5349 y los valores de acción y límite de la Directiva 2002/44/CE."
+references:
+  - type: book
+    authors: ["Griffin, M. J."]
+    year: 1996
+    title: "Handbook of human vibration"
+    publisher: "Academic Press"
+    url: "https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2"
+    note: "ISBN 978-0-12-303041-2. La monografía de referencia sobre vibración de cuerpo completo y transmitida a la mano: la biodinámica, la incomodidad y la evidencia de efectos sobre la salud que sustentan las ponderaciones, las medidas de dosis y la orientación exposición-respuesta de esta página."
+  - type: book
+    authors: ["Mansfield, N. J."]
+    year: 2004
+    title: "Human response to vibration"
+    publisher: "CRC Press"
+    url: "https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390"
+    note: "ISBN 978-0-415-28239-0. Un manual moderno y compacto sobre las cadenas de evaluación de ISO 2631-1 e ISO 5349, de la percepción y el confort a los límites de exposición laborales."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Human response to vibration — Measuring instrumentation — Part 1: General purpose vibration meters"
+    designation: "ISO 8041-1:2017"
+    url: "https://www.iso.org/standard/70648.html"
+    note: "Las definiciones de las ponderaciones frecuenciales y sus tolerancias, que siguen las ponderaciones implementadas."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Mechanical vibration and shock — Evaluation of human exposure to whole-body vibration — Part 1: General requirements"
+    designation: "ISO 2631-1:1997"
+    url: "https://www.iso.org/standard/7612.html"
+    note: "La evaluación de cuerpo completo: el valor eficaz ponderado, las medidas de dosis y el valor total de vibración."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2003
+    title: "Mechanical vibration and shock — Evaluation of human exposure to whole-body vibration — Part 2: Vibration in buildings (1 Hz to 80 Hz)"
+    designation: "ISO 2631-2:2003"
+    url: "https://www.iso.org/standard/23012.html"
+    note: "Vibración en edificios: la ponderación Wm."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2001
+    title: "Mechanical vibration and shock — Evaluation of human exposure to whole-body vibration — Part 4: Guidelines for the evaluation of the effects of vibration and rotational motion on passenger and crew comfort in fixed-guideway transport systems"
+    designation: "ISO 2631-4:2001"
+    url: "https://www.iso.org/standard/32178.html"
+    note: "Confort de marcha ferroviaria: la ponderación Wb."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2001
+    title: "Mechanical vibration — Measurement and evaluation of human exposure to hand-transmitted vibration — Part 1: General requirements"
+    designation: "ISO 5349-1:2001"
+    url: "https://www.iso.org/standard/32355.html"
+    note: "Vibración transmitida a la mano: los requisitos generales de la evaluación."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2001
+    title: "Mechanical vibration — Measurement and evaluation of human exposure to hand-transmitted vibration — Part 2: Practical guidance for measurement at the workplace"
+    designation: "ISO 5349-2:2001"
+    url: "https://www.iso.org/standard/27511.html"
+    note: "Vibración transmitida a la mano: guía práctica para la medición en el puesto de trabajo."
+  - type: report
+    organization: "European Parliament and Council"
+    year: 2002
+    title: "Directive 2002/44/EC on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (vibration)"
+    number: "Directiva 2002/44/CE"
+    institution: "Official Journal of the European Union"
+    url: "https://eur-lex.europa.eu/eli/dir/2002/44/oj/eng"
+    note: "Los valores de acción y límite de exposición contra los que se evalúa la exposición diaria A(8)."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La vibración transmitida a una persona se evalúa con la misma cadena de medida
 sea cual sea su origen: la aceleración se **pondera en frecuencia** para reflejar
@@ -17,7 +84,7 @@ completo, **ISO 2631-2** a la vibración en edificios, **ISO 2631-4** al confort
 de marcha ferroviaria e **ISO 5349-1/-2** a la vibración transmitida a la mano.
 Esta página recorre toda la cadena.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration_es.svg" alt="Cadena de medida de vibración de cuerpo completo: un acelerómetro triaxial en la interfaz asiento/cuerpo de una persona sentada mide la aceleración x, y y z; cada eje se limita en banda y se pondera en frecuencia (Wk vertical, Wd horizontal) según ISO 8041-1, se reduce a un valor eficaz ponderado a_w y VDV según ISO 2631-1, se combina en el valor total de vibración a_v, se normaliza a la exposición diaria A(8) y se evalúa frente al VAE y el VLE de la Directiva 2002/44/CE" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration_es_dark.svg" alt="Cadena de medida de vibración de cuerpo completo: un acelerómetro triaxial en la interfaz asiento/cuerpo de una persona sentada mide la aceleración x, y y z; cada eje se limita en banda y se pondera en frecuencia (Wk vertical, Wd horizontal) según ISO 8041-1, se reduce a un valor eficaz ponderado a_w y VDV según ISO 2631-1, se combina en el valor total de vibración a_v, se normaliza a la exposición diaria A(8) y se evalúa frente al VAE y el VLE de la Directiva 2002/44/CE" style="width:94%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration_es.svg" alt="Cadena de medida de vibración de cuerpo completo: un acelerómetro triaxial en la interfaz asiento/cuerpo de una persona sentada mide la aceleración x, y y z; cada eje se limita en banda y se pondera en frecuencia (Wk vertical, Wd horizontal) según ISO 8041-1, se reduce a un valor eficaz ponderado a_w y VDV según ISO 2631-1, se combina en el valor total de vibración a_v, se normaliza a la exposición diaria A(8) y se evalúa frente al VAE y el VLE de la Directiva 2002/44/CE" width="94%" loading="eager" />
 
 ## 1. Ponderaciones frecuenciales (ISO 8041-1)
 
@@ -51,7 +118,7 @@ Los factores reproducen las tablas de objetivo de diseño del Anexo B de
 ISO 8041-1 con sus cuatro cifras significativas: `Wk` presenta una meseta cerca
 de −6 dB por debajo de 2 Hz, alcanza +0,46 dB cerca de 6,3 Hz y decae por encima.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_weighting_es.svg" alt="La ponderación vertical de cuerpo completo Wk en decibelios de 0,4 a 100 Hz: una meseta cerca de -6 dB por debajo de 2 Hz, un pequeño pico de +0,5 dB cerca de 6 Hz y una caída hasta cerca de -21 dB a 100 Hz" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_weighting_es_dark.svg" alt="La ponderación vertical de cuerpo completo Wk en decibelios de 0,4 a 100 Hz: una meseta cerca de -6 dB por debajo de 2 Hz, un pequeño pico de +0,5 dB cerca de 6 Hz y una caída hasta cerca de -21 dB a 100 Hz" style="width:88%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_weighting_es.svg" alt="La ponderación vertical de cuerpo completo Wk en decibelios de 0,4 a 100 Hz: una meseta cerca de -6 dB por debajo de 2 Hz, un pequeño pico de +0,5 dB cerca de 6 Hz y una caída hasta cerca de -21 dB a 100 Hz" width="88%" />
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -143,7 +210,7 @@ print(round(result.overall, 3))          # 0.555  m/s^2 (a_w)
 print(result.weighted.round(3))          # W_i * a_i por banda
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighted_acceleration_es.svg" alt="Un espectro de aceleración de asiento de vehículo medido (gris) y su contribución ponderada por Wk (azul) sobre los tercios de octava de 1 a 80 Hz: la ponderación atenúa las bandas bajas y altas pero deja el rango de 4 a 8 Hz casi inalterado, dando un valor eficaz ponderado a_w de aproximadamente 1,03 m/s^2" style="width:90%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighted_acceleration_es_dark.svg" alt="Un espectro de aceleración de asiento de vehículo medido (gris) y su contribución ponderada por Wk (azul) sobre los tercios de octava de 1 a 80 Hz: la ponderación atenúa las bandas bajas y altas pero deja el rango de 4 a 8 Hz casi inalterado, dando un valor eficaz ponderado a_w de aproximadamente 1,03 m/s^2" style="width:90%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighted_acceleration_es.svg" alt="Un espectro de aceleración de asiento de vehículo medido (gris) y su contribución ponderada por Wk (azul) sobre los tercios de octava de 1 a 80 Hz: la ponderación atenúa las bandas bajas y altas pero deja el rango de 4 a 8 Hz casi inalterado, dando un valor eficaz ponderado a_w de aproximadamente 1,03 m/s^2" width="90%" />
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -266,7 +333,7 @@ print(round(result.a8, 2))                 # 3.61  m/s^2
 print(result.assessment.zone)             # 'action'  (2.5 <= A(8) < 5.0)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/daily_vibration_exposure_es.svg" alt="Un diagrama de barras de las tres exposiciones parciales de mano-brazo (cerca de 2,3, 2,1 y 1,8 m/s^2) y la A(8) combinada de 3,61 m/s^2, con el valor de acción de exposición de la Directiva 2002/44/CE en 2,5 y el valor límite de exposición en 5,0 m/s^2 marcados como líneas horizontales; la exposición diaria se sitúa en la zona de acción entre ambos" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/daily_vibration_exposure_es_dark.svg" alt="Un diagrama de barras de las tres exposiciones parciales de mano-brazo (cerca de 2,3, 2,1 y 1,8 m/s^2) y la A(8) combinada de 3,61 m/s^2, con el valor de acción de exposición de la Directiva 2002/44/CE en 2,5 y el valor límite de exposición en 5,0 m/s^2 marcados como líneas horizontales; la exposición diaria se sitúa en la zona de acción entre ambos" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/daily_vibration_exposure_es.svg" alt="Un diagrama de barras de las tres exposiciones parciales de mano-brazo (cerca de 2,3, 2,1 y 1,8 m/s^2) y la A(8) combinada de 3,61 m/s^2, con el valor de acción de exposición de la Directiva 2002/44/CE en 2,5 y el valor límite de exposición en 5,0 m/s^2 marcados como líneas horizontales; la exposición diaria se sitúa en la zona de acción entre ambos" width="82%" />
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -321,30 +388,6 @@ de acción y límite de la directiva son la base de cualquier criterio de
 exposición. Para la exposición de cuerpo completo, `energy_equivalent_acceleration`
 da la magnitud energético-equivalente de ISO 2631-1 ec. (B.3) entre periodos de
 distinta magnitud y duración.
-
-## Referencias
-
-- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
-  ISBN 978-0-12-303041-2.
-  [Página del editor](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
-  La monografía de referencia sobre vibración de cuerpo completo y transmitida
-  a la mano: la biodinámica, la incomodidad y la evidencia de efectos sobre
-  la salud que sustentan las ponderaciones, las medidas de dosis y la
-  orientación exposición-respuesta de esta página.
-- Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
-  ISBN 978-0-415-28239-0.
-  [Página del editor](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).
-  Un manual moderno y compacto sobre las cadenas de evaluación de ISO 2631-1 e
-  ISO 5349, de la percepción y el confort a los límites de exposición
-  laborales.
-
-## Normas
-
-ISO 8041-1:2017 (definiciones de ponderación y tolerancias);
-ISO 2631-1:1997 (evaluación de cuerpo completo); ISO 2631-2:2003 (edificios,
-`Wm`); ISO 2631-4:2001 (confort de marcha ferroviaria, `Wb`); ISO 5349-1:2001 e
-ISO 5349-2:2001 (vibración transmitida a la mano); Directiva 2002/44/CE (valores
-de acción y límite de exposición).
 
 ## Véase también
 

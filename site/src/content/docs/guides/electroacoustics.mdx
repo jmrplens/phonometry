@@ -1,7 +1,60 @@
 ---
 title: "Electroacoustics: distortion and frequency response"
 description: "IEC 60268-3 distortion — total and nth-order harmonic distortion, THD+N and SINAD through the AES17 measurement bandwidth, the per-order modulation and difference-frequency intermodulation, dynamic intermodulation (DIM) and the ITU-R 468 weighted THD — plus the Bendat & Piersol H1/H2 frequency-response estimators and ordinary coherence, and the IEC 60268-4/-5 sensitivity conventions (dB re 1 V/Pa, the 1 W / 1 m free-field normalization)."
+references:
+  - type: book
+    authors: ["Beranek, L. L.", "Mellow, T. J."]
+    year: 2012
+    title: "Acoustics: Sound fields and transducers"
+    publisher: "Academic Press"
+    doi: "10.1016/C2011-0-05897-0"
+    note: "ISBN 978-0-12-391421-7. The transducer physics behind section 5: loudspeaker radiation, on-axis pressure and the near-field to far-field transition."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Sound system equipment – Part 3: Amplifiers"
+    designation: "IEC 60268-3:2013"
+    url: "https://webstore.iec.ch/en/publication/1220"
+    note: "Clauses 14.12.2-14.12.11: total harmonic distortion THD_F/THD_R (the 14.12.3.2 formula defines the R form), nth-order harmonic distortion d_n, the per-order modulation (d_m,n) and difference-frequency (d_d,n) intermodulation, total difference-frequency distortion, dynamic intermodulation (DIM) and the ITU-R BS.468-4 / IEC 60268-1 weighted THD."
+  - type: standard
+    organization: "Audio Engineering Society"
+    year: 2015
+    title: "AES standard method for digital audio engineering — Measurement of digital audio equipment"
+    designation: "AES17-2015"
+    url: "https://www.aes.org/publications/standards/search.cfm?docID=21"
+    note: "Clauses 5.2.5, 5.2.8 and 6.3.1: the THD+N ratio via the standard notch filter and the standard measurement bandwidth; SINAD is derived from it. Since revised as AES17-2020 (same catalogue page); the 2015 edition is the implemented one."
+  - type: standard
+    organization: "International Telecommunication Union"
+    year: 1986
+    title: "Measurement of audio-frequency noise voltage level in sound broadcasting"
+    designation: "Recommendation ITU-R BS.468-4"
+    url: "https://www.itu.int/rec/R-REC-BS.468/en"
+    note: "The weighting-network nominal response behind the weighted THD (the IEC 60268-1 Appendix A curve)."
+  - type: book
+    authors: ["Bendat, J. S.", "Piersol, A. G."]
+    year: 2010
+    title: "Random data: Analysis and measurement procedures"
+    edition: "4th ed."
+    publisher: "Wiley"
+    doi: "10.1002/9781118032428"
+    note: "ISBN 978-0-470-24877-5. The H1 and H2 frequency-response estimators and the ordinary coherence γ² of section 4."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2018
+    title: "Sound system equipment – Part 4: Microphones"
+    designation: "IEC 60268-4:2018"
+    url: "https://webstore.iec.ch/en/publication/32039"
+    note: "Clause 11 (sensitivity and sensitivity level): the microphone conventions of section 5, cited for context rather than implemented as code."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2003
+    title: "Sound system equipment – Part 5: Loudspeakers"
+    designation: "IEC 60268-5:2003"
+    url: "https://webstore.iec.ch/en/publication/1223"
+    note: "Clauses 7.1, 20.3 and 20.4 (measurement distance, characteristic sensitivity and its level): the loudspeaker conventions of section 5, cited for context rather than implemented as code."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 Two staples of audio-equipment characterisation, from a captured signal: how much
 an amplifier or transducer **distorts** a test tone, and what **frequency
@@ -11,7 +64,9 @@ through the AES17 measurement bandwidth, the per-order modulation and
 difference-frequency intermodulation, dynamic intermodulation (DIM) and the
 ITU-R 468 weighted THD — and the Bendat & Piersol frequency-response estimators
 `H1`/`H2` with the ordinary coherence `γ²`. Every quantity has an exact analytic
-oracle, so the numbers are verifiable rather than tuned. A closing section
+oracle (synthetic signals with known harmonic and intermodulation amplitudes, a
+clipped-sine Fourier oracle, a full DIM test-signal synthesis, and a known LTI
+path), so the numbers are verifiable rather than tuned. A closing section
 covers the sensitivity conventions of IEC 60268-4 (microphones) and
 IEC 60268-5 (loudspeakers), where most cross-datasheet comparisons go wrong.
 
@@ -34,7 +89,7 @@ total). The tones should fall on FFT bins — use coherent sampling (an integer
 number of periods) or a low-leakage window — so the amplitudes are read without
 spectral leakage.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/distortion.svg" alt="Magnitude spectrum of a 1 kHz single-tone test in dB relative to the fundamental, with the first five harmonics marked above a broadband noise floor, annotated with THD (F), THD (R), THD+N and SINAD" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/distortion_dark.svg" alt="Magnitude spectrum of a 1 kHz single-tone test in dB relative to the fundamental, with the first five harmonics marked above a broadband noise floor, annotated with THD (F), THD (R), THD+N and SINAD" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/distortion.svg" alt="Magnitude spectrum of a 1 kHz single-tone test in dB relative to the fundamental, with the first five harmonics marked above a broadband noise floor, annotated with THD (F), THD (R), THD+N and SINAD" width="82%" loading="eager" />
 
 ```python
 from phonometry import electroacoustics
@@ -185,7 +240,7 @@ $$
 for a noiseless linear path both recover the true response and `γ² = 1`. Additive
 output noise biases `H2` upward and pulls the coherence down to `SNR/(1+SNR)`.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/frequency_response.svg" alt="Bode magnitude of an estimated H1 frequency response tracking the true response of a band-pass system, with the ordinary coherence below dropping towards the band edges where the output signal is weak relative to noise" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/frequency_response_dark.svg" alt="Bode magnitude of an estimated H1 frequency response tracking the true response of a band-pass system, with the ordinary coherence below dropping towards the band edges where the output signal is weak relative to noise" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/frequency_response.svg" alt="Bode magnitude of an estimated H1 frequency response tracking the true response of a band-pass system, with the ordinary coherence below dropping towards the band edges where the output signal is weak relative to noise" width="82%" />
 
 ```python
 from phonometry import electroacoustics
@@ -231,7 +286,7 @@ Distortion and response figures only compare across devices when the
 constantly: the microphone reference level and the loudspeaker
 power-and-distance normalization.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_loudspeaker_freefield.svg" alt="Free-field loudspeaker sensitivity measurement per IEC 60268-5: a loudspeaker on a stand in an anechoic room, driven by an amplifier at 2.83 V, with a measurement microphone at the reference distance r = 1 m on the reference axis, and the governing relations: characteristic sensitivity as Lp at 1 m for 1 W into the rated impedance, the Up = sqrt(R times 1 W) drive voltage, the inverse-distance referral Lp(1 m) = Lp(r) + 20 lg(r / 1 m), and the IEC 60268-4 microphone sensitivity in mV/Pa or dB re 1 V/Pa" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_loudspeaker_freefield_dark.svg" alt="Free-field loudspeaker sensitivity measurement per IEC 60268-5: a loudspeaker on a stand in an anechoic room, driven by an amplifier at 2.83 V, with a measurement microphone at the reference distance r = 1 m on the reference axis, and the governing relations: characteristic sensitivity as Lp at 1 m for 1 W into the rated impedance, the Up = sqrt(R times 1 W) drive voltage, the inverse-distance referral Lp(1 m) = Lp(r) + 20 lg(r / 1 m), and the IEC 60268-4 microphone sensitivity in mV/Pa or dB re 1 V/Pa" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_loudspeaker_freefield.svg" alt="Free-field loudspeaker sensitivity measurement per IEC 60268-5: a loudspeaker on a stand in an anechoic room, driven by an amplifier at 2.83 V, with a measurement microphone at the reference distance r = 1 m on the reference axis, and the governing relations: characteristic sensitivity as Lp at 1 m for 1 W into the rated impedance, the Up = sqrt(R times 1 W) drive voltage, the inverse-distance referral Lp(1 m) = Lp(r) + 20 lg(r / 1 m), and the IEC 60268-4 microphone sensitivity in mV/Pa or dB re 1 V/Pa" width="92%" />
 
 **Microphones (IEC 60268-4 clause 11).** The sensitivity `M` is the output
 voltage per unit sound pressure, quoted in mV/Pa; the sensitivity *level* is
@@ -262,37 +317,6 @@ hide in that sentence:
   multi-way cabinet the near field may not have ended yet, and the quoted
   "1 m" figure is then a referred quantity, not what a microphone placed at
   1 m would read.
-
-## References
-
-- Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and
-  transducers*. Academic Press. ISBN 978-0-12-391421-7.
-  [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
-  The transducer physics behind section 5: loudspeaker radiation, on-axis
-  pressure and the near-field to far-field transition.
-
-## Standards
-
-IEC 60268-3:2013, *Sound system equipment – Part 3: Amplifiers*
-(clauses 14.12.2–14.12.11): total harmonic distortion `THD_F`/`THD_R` (the
-14.12.3.2 formula defines the R form), nth-order harmonic distortion `dₙ`, the
-per-order modulation (`d_m,n`) and difference-frequency (`d_d,n`)
-intermodulation, total difference-frequency distortion, dynamic intermodulation
-(DIM) and the ITU-R BS.468-4 / IEC 60268-1 weighted THD. AES17-2015,
-*Measurement of digital audio equipment* (clauses 5.2.5, 5.2.8 and 6.3.1): the
-THD+N ratio via the standard notch filter and the standard measurement
-bandwidth; SINAD is derived from it. ITU-R BS.468-4: the weighting-network
-nominal response. Bendat & Piersol (2010), *Random Data: Analysis and
-Measurement Procedures* (4th ed., Wiley): the `H1` and `H2` frequency-response
-estimators and the ordinary coherence `γ²`. IEC 60268-4:2018, *Sound system
-equipment – Part 4: Microphones* (clause 11: sensitivity and sensitivity
-level) and IEC 60268-5:2003, *Sound system equipment – Part 5: Loudspeakers*
-(clauses 7.1, 20.3 and 20.4: measurement distance, characteristic sensitivity
-and its level): the sensitivity conventions of section 5, cited for context
-rather than implemented as code. All quantities are verified against
-exact analytic oracles (synthetic signals with known harmonic/intermodulation
-amplitudes, a clipped-sine Fourier oracle, a full DIM test-signal synthesis,
-and a known LTI path).
 
 ## See also
 

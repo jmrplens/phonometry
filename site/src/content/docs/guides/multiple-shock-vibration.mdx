@@ -1,7 +1,24 @@
 ---
 title: "Multiple-shock whole-body vibration (ISO 2631-5)"
 description: "The ISO 2631-5:2018 spinal-response model for whole-body vibration containing multiple shocks: the seat-to-spine transfer function and acceleration dose of Clause 5, and the compressive stress, cumulative stress variable R and Weibull probability of lumbar injury of Annex C."
+references:
+  - type: book
+    authors: ["Griffin, M. J."]
+    year: 1996
+    title: "Handbook of human vibration"
+    publisher: "Academic Press"
+    url: "https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2"
+    note: "ISBN 978-0-12-303041-2. Background on whole-body shock exposure, spinal biodynamics and the lumbar health effects that the ISO 2631-5 dose model quantifies."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2018
+    title: "Mechanical vibration and shock — Evaluation of human exposure to whole-body vibration — Part 5: Method for evaluation of vibration containing multiple shocks"
+    designation: "ISO 2631-5:2018"
+    url: "https://www.iso.org/standard/50905.html"
+    note: "The seat-to-spine transfer function (clause 5.2, Formula 1), the acceleration and daily dose (clause 5.3, Formulae 3-5) and the Annex C assessment of adverse health effects (Formulae C.1, C.3-C.5, Tables C.1/C.2)."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 Vibration that contains repeated **mechanical shocks** — off-road vehicles,
 high-speed marine craft, earth-moving machinery — loads the lumbar spine far
@@ -25,7 +42,7 @@ belong to the Annex A finite-element model. In case of doubt the delineation
 is quantitative: when the band-limited vertical peak acceleration exceeds
 9.81 m/s² (1 g, the free-fall threshold), clause 5 and Annex C apply.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5.svg" alt="Flow from the vertical seat acceleration az(t) through the spinal response, the acceleration dose Dz and daily dose Dzd, the compressive stress Sd, the age-cumulated stress variable R, and the Weibull probability of lumbar injury" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_dark.svg" alt="Flow from the vertical seat acceleration az(t) through the spinal response, the acceleration dose Dz and daily dose Dzd, the compressive stress Sd, the age-cumulated stress variable R, and the Weibull probability of lumbar injury" style="width:86%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5.svg" alt="Flow from the vertical seat acceleration az(t) through the spinal response, the acceleration dose Dz and daily dose Dzd, the compressive stress Sd, the age-cumulated stress variable R, and the Weibull probability of lumbar injury" width="86%" loading="eager" />
 
 ## 1. Spinal response (clause 5.2)
 
@@ -121,7 +138,7 @@ print(round(result.risk, 2))               # 0.46
 print(round(result.probability, 2))        # 0.03
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock.svg" alt="Left: the seat-to-spine transmissibility rising to about 1.6 near a 5 Hz resonance then rolling off to near zero by 80 Hz. Right: the Weibull probability of lumbar injury versus the stress variable R for male and female, with the 10, 50 and 90 percent risk levels and the Annex C male example at R = 1.22, about 37 percent" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock_dark.svg" alt="Left: the seat-to-spine transmissibility rising to about 1.6 near a 5 Hz resonance then rolling off to near zero by 80 Hz. Right: the Weibull probability of lumbar injury versus the stress variable R for male and female, with the 10, 50 and 90 percent risk levels and the Annex C male example at R = 1.22, about 37 percent" style="width:96%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock.svg" alt="Left: the seat-to-spine transmissibility rising to about 1.6 near a 5 Hz resonance then rolling off to near zero by 80 Hz. Right: the Weibull probability of lumbar injury versus the stress variable R for male and female, with the 10, 50 and 90 percent risk levels and the Annex C male example at R = 1.22, about 37 percent" width="96%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -158,23 +175,6 @@ and the horizontal spinal model of the withdrawn 2004 edition is not reinstated,
 so horizontal whole-body exposure is assessed instead with the r.m.s.,
 running-r.m.s./MTVV and VDV metrics of
 [Human Vibration](/phonometry/guides/human-vibration/) (ISO 2631-1).
-
-## References
-
-- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
-  ISBN 978-0-12-303041-2.
-  [Publisher page](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
-  Background on whole-body shock exposure, spinal biodynamics and the
-  lumbar health effects that the ISO 2631-5 dose model quantifies.
-
-## Standards
-
-ISO 2631-5:2018, *Mechanical vibration and shock — Evaluation of
-human exposure to whole-body vibration — Part 5: Method for evaluation of
-vibration containing multiple shocks* — the seat-to-spine transfer function
-(clause 5.2, Formula 1), the acceleration and daily dose (clause 5.3,
-Formulae 3-5) and the Annex C assessment of adverse health effects (Formulae
-C.1, C.3-C.5, Tables C.1/C.2).
 
 ## See also
 

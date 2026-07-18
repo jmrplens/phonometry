@@ -1,7 +1,66 @@
 ---
 title: "Propagación del sonido en exteriores"
 description: "Absorción atmosférica del sonido (ISO 9613-1) y método general ISO 9613-2 para la propagación del sonido en exteriores desde una fuente puntual: divergencia geométrica, absorción atmosférica, efecto del suelo, apantallamiento por barreras y corrección meteorológica, con un desglose por términos de la atenuación en bandas de octava."
+references:
+  - type: book
+    authors: ["Salomons, E. M."]
+    year: 2001
+    title: "Computational atmospheric acoustics"
+    publisher: "Kluwer Academic Publishers"
+    doi: "10.1007/978-94-010-0660-6"
+    note: "ISBN 978-1-4020-0390-5. La teoría ondulatoria (ecuación parabólica, fast field program, refracción y turbulencia) que cuantifica lo que aproximan la hipótesis de condiciones favorables y el factor K_met."
+  - type: book
+    authors: ["Attenborough, K.", "Van Renterghem, T."]
+    year: 2021
+    title: "Predicting outdoor sound"
+    edition: "2.ª ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9780429470806"
+    note: "Los modelos de impedancia del suelo, el coeficiente de reflexión de onda esférica que explica el mínimo del suelo de la sección 2 y los efectos meteorológicos sobre las barreras."
+  - type: article
+    authors: ["Maekawa, Z."]
+    year: 1968
+    title: "Noise reduction by screens"
+    journal: "Applied Acoustics"
+    volume: 1
+    issue: 3
+    pages: "157-173"
+    doi: "10.1016/0003-682X(68)90020-0"
+    note: "El ábaco de atenuación de pantallas frente al número de Fresnel del que desciende el término de difracción de la Ec. (14)."
+  - type: report
+    authors: ["Kephalopoulos, S.", "Paviotti, M.", "Anfosso-Lédée, F."]
+    year: 2012
+    title: "Common noise assessment methods in Europe (CNOSSOS-EU)"
+    number: "EUR 25379 EN"
+    institution: "Oficina de Publicaciones de la Unión Europea"
+    doi: "10.2788/31776"
+    url: "https://publications.jrc.ec.europa.eu/repository/handle/JRC72550"
+    note: "El marco común de la UE contrastado con la ISO 9613-2 en la sección 3."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere"
+    designation: "ISO 9613-1:1993"
+    url: "https://www.iso.org/standard/17426.html"
+    note: "El coeficiente de atenuación de tono puro implementado en la sección 1: alfa (Ec. (5)) con las frecuencias de relajación del oxígeno y el nitrógeno (Ec. (3)/(4)), la conversión de humedad del anexo B y las frecuencias centrales exactas de la Tabla 1 (Ec. (6), Nota 5)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 2: General method of calculation"
+    designation: "ISO 9613-2:1996"
+    url: "https://www.iso.org/standard/20649.html"
+    note: "La cadena de atenuación implementada en la sección 2: el nivel en el receptor a favor del viento (Ec. (3)/(4)) compuesto por la divergencia geométrica (Ec. (7)), la absorción atmosférica (Ec. (8)), el efecto del suelo (Ec. (9), Tabla 3) con su alternativa ponderada A (Ec. (10)/(11)), el apantallamiento por barreras (Ecs. (12)-(17)) y la corrección meteorológica (Ec. (21)/(22)). En 2024 se publicó una edición revisada; este módulo implementa el método de 1996."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2003
+    title: "Acoustics — Measurement of sound absorption in a reverberation room"
+    designation: "ISO 354:2003"
+    url: "https://www.iso.org/standard/34545.html"
+    note: "Solo la conversión m = alfa/(10 lg e) del apartado 8.1.2.1 en que se basa air_attenuation_m; el método en cámara reverberante se trata en la guía de Acústica de salas."
 ---
+
+import Video from '../../../../components/Video.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Predecir el ruido que una fuente lejana entrega a un receptor en exteriores es
 un ejercicio de contabilidad: se parte de la **potencia sonora** de la fuente y
@@ -42,7 +101,7 @@ décadas de 50 Hz a 10 kHz y —al fijar la humedad la $f_{rO}$— barrer la hum
 desplaza un pico de relajación por la banda, así que el aire más seco no siempre
 es el que menos absorbe.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha_es.svg" alt="Coeficiente de atenuación atmosférica de tono puro alfa de la ISO 9613-1 en dB/km frente a la frecuencia en ejes log-log, para cuatro combinaciones de temperatura y humedad, mostrando el crecimiento f-cuadrado en baja frecuencia y el decaimiento de relajación dependiente de la humedad" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha_es_dark.svg" alt="Coeficiente de atenuación atmosférica de tono puro alfa de la ISO 9613-1 en dB/km frente a la frecuencia en ejes log-log, para cuatro combinaciones de temperatura y humedad, mostrando el crecimiento f-cuadrado en baja frecuencia y el decaimiento de relajación dependiente de la humedad" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha_es.svg" alt="Coeficiente de atenuación atmosférica de tono puro alfa de la ISO 9613-1 en dB/km frente a la frecuencia en ejes log-log, para cuatro combinaciones de temperatura y humedad, mostrando el crecimiento f-cuadrado en baja frecuencia y el decaimiento de relajación dependiente de la humedad" width="80%" loading="eager" />
 
 *La curva seca de 20 °C / 10 % absorbe más a frecuencias medias, pero las curvas
 húmedas la superan por debajo de ~200 Hz: la firma de la relajación.*
@@ -146,7 +205,7 @@ aplicándose con $K_{met} = 1$: $D_z$ cae de forma continua desde
 $10 \lg 3 \approx 4{,}8$ dB en incidencia rasante hasta cero al aumentar el
 margen libre, sin bajar nunca de cero.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry_es.svg" alt="Geometría fuente-barrera-receptor de la ISO 9613-2: una fuente puntual a altura hs, una barrera cuyo borde superior divide el recorrido en dss y dsr, y un receptor a altura hr, con el rayo directo bloqueado y el rayo difractado sobre el borde, la diferencia de camino z y la fórmula de Dz" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry_es_dark.svg" alt="Geometría fuente-barrera-receptor de la ISO 9613-2: una fuente puntual a altura hs, una barrera cuyo borde superior divide el recorrido en dss y dsr, y un receptor a altura hr, con el rayo directo bloqueado y el rayo difractado sobre el borde, la diferencia de camino z y la fórmula de Dz" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry_es.svg" alt="Geometría fuente-barrera-receptor de la ISO 9613-2: una fuente puntual a altura hs, una barrera cuyo borde superior divide el recorrido en dss y dsr, y un receptor a altura hr, con el rayo directo bloqueado y el rayo difractado sobre el borde, la diferencia de camino z y la fórmula de Dz" width="92%" />
 
 ### Los cuatro términos de atenuación
 
@@ -184,7 +243,7 @@ ayuda más a alta frecuencia (longitud de onda corta) hasta saturar en el límit
 la absorción atmosférica solo muerde a 8 kHz y la caída del suelo vive en las
 bandas medias.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_es.svg" alt="Desglose por bandas de octava de la atenuación ISO 9613-2 como barra apilada de Adiv, Aatm, Agr y Abar con el total A superpuesto, para un recorrido de 200 m sobre suelo poroso con una barrera de 4 m" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_es_dark.svg" alt="Desglose por bandas de octava de la atenuación ISO 9613-2 como barra apilada de Adiv, Aatm, Agr y Abar con el total A superpuesto, para un recorrido de 200 m sobre suelo poroso con una barrera de 4 m" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_es.svg" alt="Desglose por bandas de octava de la atenuación ISO 9613-2 como barra apilada de Adiv, Aatm, Agr y Abar con el total A superpuesto, para un recorrido de 200 m sobre suelo poroso con una barrera de 4 m" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -302,7 +361,7 @@ diferencia de camino $\delta = r_2 - r_1$ (aproximadamente $2 h_s h_r / d$
 para un recorrido rasante en campo lejano): en fase suman hasta $+6$ dB; con
 $\delta = \lambda/2$ sobre un plano rígido se cancelan en un mínimo abrupto.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection_es.svg" alt="Una fuente puntual a altura hs y un micrófono receptor a altura hr sobre un plano de suelo rayado; un rayo directo r1 los conecta y un rayo reflejado rebota en el punto especular con ángulos rasantes iguales; la reflexión se despliega como un rayo recto discontinuo r2 desde una fuente imagen fantasma reflejada bajo el suelo, y las anotaciones dan la diferencia de camino delta = r2 menos r1, la fase de interferencia 2 pi delta entre lambda más la fase de la reflexión, la ganancia en fase de hasta +6 dB y el mínimo profundo a media longitud de onda sobre suelo duro" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection_es_dark.svg" alt="Una fuente puntual a altura hs y un micrófono receptor a altura hr sobre un plano de suelo rayado; un rayo directo r1 los conecta y un rayo reflejado rebota en el punto especular con ángulos rasantes iguales; la reflexión se despliega como un rayo recto discontinuo r2 desde una fuente imagen fantasma reflejada bajo el suelo, y las anotaciones dan la diferencia de camino delta = r2 menos r1, la fase de interferencia 2 pi delta entre lambda más la fase de la reflexión, la ganancia en fase de hasta +6 dB y el mínimo profundo a media longitud de onda sobre suelo duro" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection_es.svg" alt="Una fuente puntual a altura hs y un micrófono receptor a altura hr sobre un plano de suelo rayado; un rayo directo r1 los conecta y un rayo reflejado rebota en el punto especular con ángulos rasantes iguales; la reflexión se despliega como un rayo recto discontinuo r2 desde una fuente imagen fantasma reflejada bajo el suelo, y las anotaciones dan la diferencia de camino delta = r2 menos r1, la fase de interferencia 2 pi delta entre lambda más la fase de la reflexión, la ganancia en fase de hasta +6 dB y el mínimo profundo a media longitud de onda sobre suelo duro" width="92%" />
 
 Sobre suelo acústicamente duro ($G = 0$) el coeficiente de reflexión se
 mantiene próximo a $+1$ en todas las octavas, la suma a longitudes de onda
@@ -325,7 +384,13 @@ reflejada en el suelo se suma a la directa. Abajo, una fuente de 400 Hz a
 y el nivel muestreado sobre un arco converge al modelo de fuente imagen de dos
 caminos, con sus mínimos incluidos.
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: simulación FDTD 2D de una fuente puntual de 400 Hz a 1,5 metros sobre suelo rígido; los frentes de onda directo y reflejado en el suelo interfieren y se forma un patrón de lóbulos, la fuente imagen fantasma bajo el suelo explica la geometría y el nivel sobre un arco de 8 metros converge al modelo de fuente imagen de dos caminos con sus mínimos previstos" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: simulación FDTD 2D de una fuente puntual de 400 Hz a 1,5 metros sobre suelo rígido; los frentes de onda directo y reflejado en el suelo interfieren y se forma un patrón de lóbulos, la fuente imagen fantasma bajo el suelo explica la geometría y el nivel sobre un arco de 8 metros converge al modelo de fuente imagen de dos caminos con sus mínimos previstos" style="width:88%"></video>
+<Video
+  name="anim_fdtd_ground_effect"
+  width={2400}
+  height={1350}
+  title="Interferencia por efecto del suelo sobre suelo rígido (FDTD 2D)"
+  description="Simulación FDTD 2D de una fuente puntual de 400 Hz a 1,5 metros sobre suelo rígido. Los frentes de onda directo y reflejado en el suelo interfieren y se forma un patrón de lóbulos, la fuente imagen fantasma bajo el suelo explica la geometría y el nivel muestreado sobre un arco de 8 metros converge al modelo de fuente imagen de dos caminos con sus mínimos previstos."
+/>
 
 ### `Barrier` y el término de apantallamiento
 
@@ -344,7 +409,13 @@ sobre el borde y rellena la zona de sombra, mientras que a 500 Hz la sombra es
 profunda y nítida. Una barrera solo funciona cuando la longitud de onda es
 corta frente a la diferencia de camino.
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: simulación FDTD 2D de una fuente puntual tras una barrera rígida delgada de 2,5 metros sobre suelo reflectante, a 100 Hz y 500 Hz lado a lado; la longitud de onda larga se difracta sobre el borde y rellena la zona de sombra con una pérdida por inserción de unos 8 dB, mientras que la corta produce una sombra profunda y limpia de unos 17 dB" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: simulación FDTD 2D de una fuente puntual tras una barrera rígida delgada de 2,5 metros sobre suelo reflectante, a 100 Hz y 500 Hz lado a lado; la longitud de onda larga se difracta sobre el borde y rellena la zona de sombra con una pérdida por inserción de unos 8 dB, mientras que la corta produce una sombra profunda y limpia de unos 17 dB" style="width:88%"></video>
+<Video
+  name="anim_fdtd_barrier"
+  width={2400}
+  height={1350}
+  title="Difracción en una barrera a 100 Hz y 500 Hz (FDTD 2D)"
+  description="Simulación FDTD 2D de una fuente puntual tras una barrera rígida delgada de 2,5 metros sobre suelo reflectante, a 100 Hz y 500 Hz lado a lado. La longitud de onda larga se difracta sobre el borde y rellena la zona de sombra con una pérdida por inserción de unos 8 dB, mientras que la corta produce una sombra profunda y limpia de unos 17 dB."
+/>
 
 ### Parámetros de `outdoor_propagation_attenuation()`
 
@@ -485,61 +556,6 @@ para cómo $\alpha$ alimenta la ISO 354, y la
 [guía de exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/)
 para la exposición ocupacional (ISO 9612) que consume niveles
 ponderados A.
-
-## Referencias
-
-- Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
-  Academic Publishers. ISBN 978-1-4020-0390-5.
-  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
-  La teoría ondulatoria (ecuación parabólica, fast field program, refracción
-  y turbulencia) que cuantifica lo que aproximan la hipótesis de condiciones
-  favorables y el factor $K_{met}$.
-- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
-  (2.ª ed.). CRC Press.
-  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
-  Los modelos de impedancia del suelo, el coeficiente de reflexión de onda
-  esférica que explica el mínimo del suelo de la sección 2 y los efectos
-  meteorológicos sobre las barreras.
-- Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
-  157-173.
-  [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
-  El ábaco de atenuación de pantallas frente al número de Fresnel del que
-  desciende el término de difracción de la Ec. (14).
-- Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
-  assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Oficina de
-  Publicaciones de la Unión Europea.
-  [doi:10.2788/31776](https://doi.org/10.2788/31776),
-  [repositorio del JRC](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550).
-  El marco común de la UE contrastado con la ISO 9613-2 en la sección 3.
-- International Organization for Standardization. (1993). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 1: Calculation of
-  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
-  [Catálogo iso.org](https://www.iso.org/standard/17426.html).
-  El coeficiente de atenuación de tono puro implementado en la sección 1.
-- International Organization for Standardization. (1996). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 2: General method
-  of calculation* (ISO 9613-2:1996; en 2024 se publicó una edición revisada,
-  este módulo implementa el método de 1996).
-  [Catálogo iso.org](https://www.iso.org/standard/20649.html).
-  La cadena de atenuación implementada en la sección 2.
-
-## Normas
-
-ISO 9613-1:1993, *Acoustics — Attenuation of sound during
-propagation outdoors — Part 1: Calculation of the absorption of sound by the
-atmosphere* — el coeficiente de atenuación de tono puro $\alpha$ (Ec. (5)) con
-las frecuencias de relajación del oxígeno y el nitrógeno (Ec. (3)/(4)), la
-conversión de humedad del anexo B y las frecuencias centrales exactas de la
-Tabla 1 (Ec. (6), Nota 5). ISO 9613-2:1996, *Acoustics — Attenuation of sound
-during propagation outdoors — Part 2: General method of calculation* — el nivel
-en el receptor a favor del viento (Ec. (3)/(4)) compuesto por la divergencia
-geométrica (Ec. (7)), la absorción atmosférica (Ec. (8)), el efecto del suelo
-(Ec. (9), Tabla 3) con su alternativa ponderada A (Ec. (10)/(11)), el
-apantallamiento por barreras (Ecs. (12)–(17)) y la corrección meteorológica
-(Ec. (21)/(22)). ISO 354:2003, *Acoustics — Measurement of sound absorption in
-a reverberation room* — solo la conversión $m = \alpha/(10 \lg e)$ del apartado
-8.1.2.1 en que se basa `air_attenuation_m`; el método en cámara reverberante se trata en la
-[guía de Acústica de salas](/phonometry/es/guides/room-acoustics/).
 
 ## Véase también
 

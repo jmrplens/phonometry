@@ -60,6 +60,9 @@ references:
     note: "The Part 1 reference workbook the single-event chain is validated against. The linked PDF is the free download; the volumes are catalogued on the ECAC documents page (https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements)."
 ---
 
+import Video from '../../../components/Video.astro';
+import ThemeImage from '../../../components/ThemeImage.astro';
+
 The **Effective Perceived Noise Level (EPNL)** is the noise-certification metric
 for transport-category aircraft. It condenses a half-second one-third-octave
 spectral time history of a flyover into a single number, in EPNdB, through five
@@ -105,7 +108,7 @@ integrates `PNLT` over the 10 dB-down window (the records nearest to
 `PNLTM − 10` on each side) normalised to 10 s, so `EPNL = PNLTM + D` with the
 duration correction `D`.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/epnl.svg" alt="Aircraft-flyover perceived-noise-level time history: PNL and the tone-corrected PNLT versus time, with the maximum PNLTM marked and the 10 dB-down integration window shaded, annotated with the resulting EPNL and duration correction" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/epnl_dark.svg" alt="Aircraft-flyover perceived-noise-level time history: PNL and the tone-corrected PNLT versus time, with the maximum PNLTM marked and the 10 dB-down integration window shaded, annotated with the resulting EPNL and duration correction" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/epnl.svg" alt="Aircraft-flyover perceived-noise-level time history: PNL and the tone-corrected PNLT versus time, with the maximum PNLTM marked and the 10 dB-down integration window shaded, annotated with the resulting EPNL and duration correction" width="82%" loading="eager" />
 
 ```python
 from phonometry import aircraft
@@ -160,7 +163,14 @@ print(report["passed"], report["checks"])
 
 ## Atmospheric absorption (SAE ARP 5534)
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption.svg" alt="Aircraft atmospheric absorption versus frequency for two path lengths; the SAE-Method band attenuation stays below the pure-tone mid-band value at high absorption" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption_dark.svg" alt="Aircraft atmospheric absorption versus frequency for two path lengths; the SAE-Method band attenuation stays below the pure-tone mid-band value at high absorption" style="width:82%">
+Correcting a measured flyover to reference atmospheric conditions needs the
+one-third-octave-band attenuation over the path. The pure-tone coefficient is
+the ISO 9613-1 one (identical, per ARP 5534 §3.1) provided by `air_attenuation`;
+`sae_band_attenuation` adds the **SAE Method** (ARP 5534 §3.2.2) mapping the
+pure-tone mid-band path attenuation `δ_t = α·s` to the band attenuation `δ_B`,
+consistent with the Exact Method well beyond the 50 dB Approximate-Method limit.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption.svg" alt="Aircraft atmospheric absorption versus frequency for two path lengths; the SAE-Method band attenuation stays below the pure-tone mid-band value at high absorption" width="82%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -188,13 +198,6 @@ plt.show()
 
 </details>
 
-Correcting a measured flyover to reference atmospheric conditions needs the
-one-third-octave-band attenuation over the path. The pure-tone coefficient is
-the ISO 9613-1 one (identical, per ARP 5534 §3.1) provided by `air_attenuation`;
-`sae_band_attenuation` adds the **SAE Method** (ARP 5534 §3.2.2) mapping the
-pure-tone mid-band path attenuation `δ_t = α·s` to the band attenuation `δ_B`,
-consistent with the Exact Method well beyond the 50 dB Approximate-Method limit.
-
 ```python
 import numpy as np
 from phonometry import aircraft
@@ -209,7 +212,12 @@ Valid roughly 6–32 °C, 20–95 % RH (14 CFR Part 36 window), to 7620 m, recip
 
 ## Airport noise: the NPD engine (ECAC Doc 29)
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise.svg" alt="Noise-power-distance curves for two engine power settings, the event level falling log-linearly with slant distance between the tabulated nodes" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise_dark.svg" alt="Noise-power-distance curves for two engine power settings, the event level falling log-linearly with slant distance between the tabulated nodes" style="width:82%">
+The ECAC Doc 29 airport-noise method describes an aircraft with **noise-power-
+distance (NPD)** tables. `npd_level` reads the event level (`LAmax`/`SEL`) for an
+arbitrary power and distance, interpolating linearly in power (Eq. 4-3) and
+log-linearly in slant distance (Eq. 4-4).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise.svg" alt="Noise-power-distance curves for two engine power settings, the event level falling log-linearly with slant distance between the tabulated nodes" width="82%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -239,11 +247,6 @@ plt.show()
 
 </details>
 
-The ECAC Doc 29 airport-noise method describes an aircraft with **noise-power-
-distance (NPD)** tables. `npd_level` reads the event level (`LAmax`/`SEL`) for an
-arbitrary power and distance, interpolating linearly in power (Eq. 4-3) and
-log-linearly in slant distance (Eq. 4-4).
-
 ```python
 from phonometry import aircraft
 
@@ -258,7 +261,15 @@ This is the NPD engine underneath the method.
 
 ## Airport noise contours (single event)
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour.png" alt="Single-event SEL contour of a departure: an elongated footprint along the flight track, loudest near the ground roll" style="width:90%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour_dark.png" alt="Single-event SEL contour of a departure: an elongated footprint along the flight track, loudest near the ground roll" style="width:90%">
+The full single-event calculation breaks a flight path into segments and
+corrects the NPD baseline per segment (§4.3-4.5): `impedance_adjustment` (T, p),
+`lateral_attenuation` (β,ℓ), `engine_installation_correction` (φ, mounting),
+`duration_correction`, the finite-segment `noise_fraction` and, behind takeoff
+ground-roll segments, `start_of_roll_directivity` (ΔSOR). `event_level`
+assembles and sums them into `SEL`/`LAmax`, and `noise_contour` evaluates it over
+a ground grid (mark the ground-roll segments with a `ground_roll` mask).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour.png" alt="Single-event SEL contour of a departure: an elongated footprint along the flight track, loudest near the ground roll" width="90%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -291,26 +302,24 @@ plt.show()
 
 </details>
 
-The full single-event calculation breaks a flight path into segments and
-corrects the NPD baseline per segment (§4.3-4.5): `impedance_adjustment` (T, p),
-`lateral_attenuation` (β,ℓ), `engine_installation_correction` (φ, mounting),
-`duration_correction`, the finite-segment `noise_fraction` and, behind takeoff
-ground-roll segments, `start_of_roll_directivity` (ΔSOR). `event_level`
-assembles and sums them into `SEL`/`LAmax`, and `noise_contour` evaluates it over
-a ground grid (mark the ground-roll segments with a `ground_roll` mask).
-
 The mechanism behind these ground corrections is two-path interference: the
 direct wave and its ground reflection. Below, a 400 Hz source 1.5 m above a
 rigid plane forms the lobe pattern, with the image source ghosted below the
 ground and a receiver sitting in an interference dip.
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground; the direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level on an 8 metre arc converges to the two-path image-source model with its predicted nulls" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground; the direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level on an 8 metre arc converges to the two-path image-source model with its predicted nulls" style="width:88%"></video>
+<Video
+  name="anim_fdtd_ground_effect"
+  width={2400}
+  height={1350}
+  title="Ground-effect interference over rigid ground (2D FDTD)"
+  description="A 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground. The direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level sampled on an 8 metre arc converges to the two-path image-source model with its predicted nulls."
+/>
 
 The start-of-roll directivity is the lobed rearward radiation of jet-exhaust
 noise: strongest near an azimuth ψ ≈ 120° from the nose, falling off abeam
 (ψ = 90°) and directly behind (ψ = 180°).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor.svg" alt="Polar diagram of the start-of-roll directivity ΔSOR over the rearward semicircle for turbofan-jet and turboprop aircraft, both showing a lobe near 120° from the nose" style="width:75%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor_dark.svg" alt="Polar diagram of the start-of-roll directivity ΔSOR over the rearward semicircle for turbofan-jet and turboprop aircraft, both showing a lobe near 120° from the nose" style="width:75%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor.svg" alt="Polar diagram of the start-of-roll directivity ΔSOR over the rearward semicircle for turbofan-jet and turboprop aircraft, both showing a lobe near 120° from the nose" width="75%" />
 
 <details>
 <summary>Show the code for this figure</summary>

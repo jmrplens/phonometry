@@ -14,6 +14,10 @@ and when to reach for each: an enveloping *pressure* surface in the field
 accuracy — the precision grades in an *anechoic room* (ISO 3745) and by
 precision *intensity* scanning (ISO 9614-3).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.gif" alt="Animation: the same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.webm)
+
 ## Choosing a method
 
 All deliver the same quantity — a per-band `LW` and an A-weighted total
@@ -72,10 +76,6 @@ plt.show()
 ```
 
 </details>
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.gif" alt="Animation: the same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.webm)
 
 ### A decision path
 
@@ -473,7 +473,11 @@ which is why the intensity method tolerates background noise that would
 defeat the pressure methods. A p-p probe (see the
 [Sound Intensity guide](intensity.md)) is swept continuously over each of
 `N` segments of a surface enclosing the source, reporting the segment-averaged
-signed normal intensity `<In,i>`. The partial powers sum to the total:
+signed normal intensity `<In,i>`.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="A two-microphone p-p sound intensity probe: two pressure microphones separated by a spacer, from which the pressure gradient and hence the normal intensity are estimated" width="70%"></picture>
+
+The partial powers sum to the total:
 
 $$
 P_i = \langle I_{n,i} \rangle\ S_i, \qquad P = \sum_i P_i, \qquad
@@ -501,8 +505,6 @@ grade 3) must exceed `FpI` (criterion 1); `F+/- ≤ 3 dB` is criterion 2
 (mandatory for grade 2); and the two repeated sweeps must agree within the
 Table 2 limit `s` per segment (criterion 3). A band is **engineering** grade
 when criteria 1, 2 and 3 hold, **survey** when 1 and 3 hold, else `none`.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="A two-microphone p-p sound intensity probe: two pressure microphones separated by a spacer, from which the pressure gradient and hence the normal intensity are estimated" width="70%"></picture>
 
 ```python
 import numpy as np

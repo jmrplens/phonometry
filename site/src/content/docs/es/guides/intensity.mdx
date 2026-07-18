@@ -1,7 +1,33 @@
 ---
 title: "Intensidad sonora (p-p)"
 description: "Intensidad sonora con dos micrófonos según IEC 61043 con los indicadores de campo de ISO 9614-1."
+references:
+  - type: book
+    authors: ["Fahy, F. J."]
+    year: 1995
+    title: "Sound intensity"
+    edition: "2.ª ed."
+    publisher: "E&FN Spon"
+    doi: "10.4324/9780203475386"
+    note: "ISBN 978-0-419-19810-9. La monografía sobre la materia: intensidad activa y reactiva, el estimador p-p y el presupuesto de error por desfase que hay detrás de esta página."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 1993
+    title: "Electroacoustics — Instruments for the measurement of sound intensity — Measurements with pairs of pressure sensing microphones"
+    designation: "IEC 61043:1993"
+    url: "https://webstore.iec.ch/en/publication/4353"
+    note: "Adoptada en Europa como EN 61043:1994. La norma de instrumentación: el estimador por espectro cruzado con dos micrófonos, el ensayo de intensidad residual detrás de δpI0, los requisitos de clase 1 / clase 2, y la corrección del sesgo por diferencias finitas con su límite de ancho de banda utilizable (cláusula 7.3, Tabla 3)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Determination of sound power levels of noise sources using sound intensity — Part 1: Measurement at discrete points"
+    designation: "ISO 9614-1:1993"
+    url: "https://www.iso.org/standard/17427.html"
+    note: "El índice presión-intensidad, los indicadores de campo F2 a F4 del Anexo A, el criterio de capacidad dinámica (Anexo B) y la regla de los 0,5 m de distancia de la superficie."
 ---
+
+import Video from '../../../../components/Video.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La *presión* sonora dice cuánto suena un punto; la **intensidad sonora** dice
 hacia dónde *va* la energía. Es el flujo de potencia acústica (W/m²), una
@@ -29,7 +55,7 @@ $$
 I(f) = -\ \frac{\mathrm{Im}\lbrace G_{12}(f)\rbrace}{2\pi f\ \rho_0\ \Delta r}
 $$
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_es.svg" alt="Sonda de intensidad p-p de dos micrófonos con la distancia del separador y el eje de medición" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_es_dark.svg" alt="Sonda de intensidad p-p de dos micrófonos con la distancia del separador y el eje de medición" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_es.svg" alt="Sonda de intensidad p-p de dos micrófonos con la distancia del separador y el eje de medición" width="92%" loading="eager" />
 
 ```python
 import numpy as np
@@ -50,9 +76,7 @@ print(res.frequency, res.intensity_level)                  # por banda
 res.plot()   # Lp frente a LI por banda + el índice presión-intensidad (requiere matplotlib)
 ```
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: una sonda p-p de dos micrófonos con fasores giratorios de presión y velocidad; la flecha de intensidad instantánea cambia de sentido mientras su promedio se estabiliza en un flujo neto para la onda progresiva y en cero para la onda estacionaria" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: una sonda p-p de dos micrófonos con fasores giratorios de presión y velocidad; la flecha de intensidad instantánea cambia de sentido mientras su promedio se estabiliza en un flujo neto para la onda progresiva y en cero para la onda estacionaria" style="width:88%"></video>
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_es.svg" alt="Niveles de presión e intensidad en tercios de octava para una onda plana progresiva frente a una onda estacionaria" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_es_dark.svg" alt="Niveles de presión e intensidad en tercios de octava para una onda plana progresiva frente a una onda estacionaria" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_es.svg" alt="Niveles de presión e intensidad en tercios de octava para una onda plana progresiva frente a una onda estacionaria" width="92%" />
 
 *Izquierda: en una onda plana progresiva toda la presión se transporta —
 L_I ≈ L_p. Derecha: una onda estacionaria no transporta (casi) energía neta —
@@ -105,6 +129,19 @@ plt.show()
 
 </details>
 
+El mismo contraste se despliega de forma dinámica abajo: los fasores de
+presión y velocidad de una onda progresiva y de una estacionaria, con la
+intensidad instantánea promediando a un flujo neto en un caso y a cero en el
+otro.
+
+<Video
+  name="anim_instantaneous_intensity"
+  width={2400}
+  height={1350}
+  title="Fasores de intensidad instantánea: onda progresiva frente a estacionaria"
+  description="Una sonda p-p de dos micrófonos con fasores giratorios de presión y velocidad; la flecha de intensidad instantánea cambia de sentido mientras su promedio se estabiliza en un flujo neto para la onda progresiva y en cero para la onda estacionaria."
+/>
+
 ## Saber cuándo fiarse del número
 
 Dos límites físicos acotan toda medición p-p, y el objeto de resultado incluye
@@ -145,7 +182,13 @@ ld = emission.dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 �
 print(ld, ld > fi.f2)                                      # 8.0 True (criterio 1)
 ```
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia sonora L_W" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia sonora L_W" style="width:88%"></video>
+<Video
+  name="anim_intensity_scan_power"
+  width={2400}
+  height={1350}
+  title="Barrido de intensidad sobre una caja de medición"
+  description="Una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia sonora L_W."
+/>
 
 ### El margen sobre el índice residual
 
@@ -235,40 +278,6 @@ sonda-separador-analizador, no a los micrófonos por sí solos.
 Consulta [Teoría](/phonometry/es/reference/theory/signal-analysis/) para las derivaciones y
 [Calibración](/phonometry/es/guides/calibration/) para el escalado absoluto de
 los dos canales.
-
-## Referencias
-
-- Fahy, F. J. (1995). *Sound intensity* (2.ª ed.). E&FN Spon.
-  ISBN 978-0-419-19810-9.
-  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
-  La monografía sobre la materia: intensidad activa y reactiva, el estimador
-  p-p y el presupuesto de error por desfase que hay detrás de esta página.
-- International Electrotechnical Commission. (1993). *Electroacoustics —
-  Instruments for the measurement of sound intensity — Measurements with
-  pairs of pressure sensing microphones* (IEC 61043:1993; adoptada en Europa
-  como EN 61043:1994).
-  [Tienda IEC](https://webstore.iec.ch/en/publication/4353).
-  La norma de instrumentación: el estimador por espectro cruzado, el ensayo
-  de intensidad residual detrás de `δpI0` y los requisitos de clase 1 /
-  clase 2.
-- International Organization for Standardization. (1993). *Acoustics —
-  Determination of sound power levels of noise sources using sound
-  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
-  [Catálogo iso.org](https://www.iso.org/standard/17427.html).
-  Los indicadores de campo F2 a F4, el criterio de capacidad dinámica y la
-  regla de los 0,5 m de distancia de la superficie.
-
-## Normas
-
-IEC 61043:1993 (EN 61043:1994), *Electroacoustics —
-Instruments for the measurement of sound intensity — Measurements with pairs
-of pressure sensing microphones* — el estimador de intensidad por espectro
-cruzado con dos micrófonos, la corrección del sesgo por diferencias finitas
-y el límite de ancho de banda utilizable (cláusula 7.3, Tabla 3). ISO 9614-1:1993,
-*Acoustics — Determination of sound power levels of noise sources using sound
-intensity — Part 1: Measurement at discrete points* — el índice
-presión-intensidad, los indicadores de campo F2, F3 y F4 del Anexo A y el
-criterio de capacidad dinámica (Anexo B).
 
 ## Véase también
 

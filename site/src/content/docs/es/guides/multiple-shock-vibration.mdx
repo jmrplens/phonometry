@@ -1,7 +1,24 @@
 ---
 title: "Vibración con choques múltiples (ISO 2631-5)"
 description: "El modelo de respuesta espinal de ISO 2631-5:2018 para la vibración de cuerpo completo con choques múltiples: la función de transferencia asiento-columna y la dosis de aceleración de la cláusula 5, y la tensión compresiva, la variable de tensión acumulada R y la probabilidad de lesión lumbar de Weibull del Anexo C."
+references:
+  - type: book
+    authors: ["Griffin, M. J."]
+    year: 1996
+    title: "Handbook of human vibration"
+    publisher: "Academic Press"
+    url: "https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2"
+    note: "ISBN 978-0-12-303041-2. Contexto sobre la exposición a choques de cuerpo completo, la biodinámica espinal y los efectos lumbares sobre la salud que cuantifica el modelo de dosis de ISO 2631-5."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2018
+    title: "Mechanical vibration and shock — Evaluation of human exposure to whole-body vibration — Part 5: Method for evaluation of vibration containing multiple shocks"
+    designation: "ISO 2631-5:2018"
+    url: "https://www.iso.org/standard/50905.html"
+    note: "La función de transferencia asiento-columna (cláusula 5.2, Fórmula 1), la dosis de aceleración y diaria (cláusula 5.3, Fórmulas 3-5) y la evaluación de efectos sobre la salud del Anexo C (Fórmulas C.1, C.3-C.5, Tablas C.1/C.2)."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La vibración que contiene **choques mecánicos** repetidos — vehículos todoterreno,
 embarcaciones rápidas, maquinaria de movimiento de tierras — carga la columna
@@ -28,7 +45,7 @@ En caso de duda, la delimitación es cuantitativa: cuando la aceleración de
 pico vertical limitada en banda supera 9,81 m/s² (1 g, el umbral de caída
 libre), se aplican la cláusula 5 y el Anexo C.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_es.svg" alt="Flujo desde la aceleración vertical del asiento az(t) hasta la respuesta espinal, la dosis de aceleración Dz y la dosis diaria Dzd, la tensión compresiva Sd, la variable de tensión R acumulada con la edad, y la probabilidad de lesión lumbar de Weibull" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_es_dark.svg" alt="Flujo desde la aceleración vertical del asiento az(t) hasta la respuesta espinal, la dosis de aceleración Dz y la dosis diaria Dzd, la tensión compresiva Sd, la variable de tensión R acumulada con la edad, y la probabilidad de lesión lumbar de Weibull" style="width:86%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_es.svg" alt="Flujo desde la aceleración vertical del asiento az(t) hasta la respuesta espinal, la dosis de aceleración Dz y la dosis diaria Dzd, la tensión compresiva Sd, la variable de tensión R acumulada con la edad, y la probabilidad de lesión lumbar de Weibull" width="86%" loading="eager" />
 
 ## 1. Respuesta espinal (cláusula 5.2)
 
@@ -126,7 +143,7 @@ print(round(result.risk, 2))               # 0.46
 print(round(result.probability, 2))        # 0.03
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock_es.svg" alt="Izquierda: la transmisibilidad asiento-columna sube hasta cerca de 1,6 en una resonancia de 5 Hz y luego cae casi a cero en 80 Hz. Derecha: la probabilidad de lesión lumbar de Weibull frente a la variable de tensión R para hombre y mujer, con los niveles de riesgo del 10, 50 y 90 por ciento y el ejemplo masculino del Anexo C en R = 1,22, en torno al 37 por ciento" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock_es_dark.svg" alt="Izquierda: la transmisibilidad asiento-columna sube hasta cerca de 1,6 en una resonancia de 5 Hz y luego cae casi a cero en 80 Hz. Derecha: la probabilidad de lesión lumbar de Weibull frente a la variable de tensión R para hombre y mujer, con los niveles de riesgo del 10, 50 y 90 por ciento y el ejemplo masculino del Anexo C en R = 1,22, en torno al 37 por ciento" style="width:96%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock_es.svg" alt="Izquierda: la transmisibilidad asiento-columna sube hasta cerca de 1,6 en una resonancia de 5 Hz y luego cae casi a cero en 80 Hz. Derecha: la probabilidad de lesión lumbar de Weibull frente a la variable de tensión R para hombre y mujer, con los niveles de riesgo del 10, 50 y 90 por ciento y el ejemplo masculino del Anexo C en R = 1,22, en torno al 37 por ciento" width="96%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -163,24 +180,6 @@ a la compresión espinal, y el modelo espinal horizontal de la edición de 2004,
 retirada, no se restablece, de modo que la exposición horizontal de cuerpo
 completo se evalúa con las métricas eficaz, eficaz móvil/MTVV y VDV de
 [Vibración en humanos](/phonometry/es/guides/human-vibration/) (ISO 2631-1).
-
-## Referencias
-
-- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
-  ISBN 978-0-12-303041-2.
-  [Página del editor](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
-  Contexto sobre la exposición a choques de cuerpo completo, la biodinámica
-  espinal y los efectos lumbares sobre la salud que cuantifica el modelo de
-  dosis de ISO 2631-5.
-
-## Normas
-
-ISO 2631-5:2018, *Mechanical vibration and shock — Evaluation of
-human exposure to whole-body vibration — Part 5: Method for evaluation of
-vibration containing multiple shocks* — la función de transferencia
-asiento-columna (cláusula 5.2, Fórmula 1), la dosis de aceleración y diaria
-(cláusula 5.3, Fórmulas 3-5) y la evaluación de efectos sobre la salud del
-Anexo C (Fórmulas C.1, C.3-C.5, Tablas C.1/C.2).
 
 ## Véase también
 

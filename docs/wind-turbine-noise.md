@@ -85,11 +85,6 @@ and stays out of scope.
 
 ## 2. Tonal audibility
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tonality_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tonality.svg" alt="A wind-turbine narrowband spectrum with a discrete tone near 200 Hz standing above a shaped broadband floor, the critical band about the tone shaded, the masking-noise level drawn as a horizontal line, and the tonal audibility annotated" width="82%">
-</picture>
-
 From a narrowband spectrum (1–2 Hz resolution), the lines in the **critical
 band** about the tone,
 
@@ -111,6 +106,27 @@ $$
 $$
 
 reported when `ΔL_a ≥ −3 dB`; a tone is audible when `ΔL_a > 0`.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tonality_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/wind_turbine_tonality.svg" alt="A wind-turbine narrowband spectrum with a discrete tone near 200 Hz standing above a shaped broadband floor, the critical band about the tone shaded, the masking-noise level drawn as a horizontal line, and the tonal audibility annotated" width="82%">
+</picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+from phonometry import environmental
+
+df = 2.0
+freqs = np.arange(50.0, 400.0 + df, df)
+levels = 42.0 - 6.0 * np.log10(freqs / 100.0)
+levels[int(np.argmin(np.abs(freqs - 200.0)))] += 22.0   # blade-passing-style tone
+environmental.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
+```
+
+</details>
 
 ```python
 import numpy as np
@@ -140,22 +156,6 @@ candidate. The audibility formula is the ISO 1996-2 Annex C one; what is
 specific to IEC 61400-11 is the determination of the tone and masking levels
 and the Zwicker critical band from the spectrum. For a rating adjustment
 `K_T`, pass the mean audibility to the ISO 1996-2 `tonal_adjustment`.
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import numpy as np
-from phonometry import environmental
-
-df = 2.0
-freqs = np.arange(50.0, 400.0 + df, df)
-levels = 42.0 - 6.0 * np.log10(freqs / 100.0)
-levels[int(np.argmin(np.abs(freqs - 200.0)))] += 22.0   # blade-passing-style tone
-environmental.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
-```
-
-</details>
 
 ## References
 

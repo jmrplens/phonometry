@@ -1,7 +1,75 @@
 ---
 title: "Potencia sonora"
 description: "Nivel de potencia sonora LW por cinco vías: presión sonora sobre superficie envolvente (ISO 3744/3746), el método de precisión en sala reverberante con las correcciones de Waterhouse y C1/C2 (ISO 3741), el barrido de intensidad con indicadores de campo y grado alcanzado (ISO 9614-2), el método de precisión en sala anecoica (ISO 3745) y el barrido de intensidad de precisión (ISO 9614-3)."
+references:
+  - type: book
+    authors: ["Fahy, F. J."]
+    year: 1995
+    title: "Sound intensity"
+    edition: "2.ª ed."
+    publisher: "E&FN Spon"
+    doi: "10.4324/9780203475386"
+    note: "ISBN 978-0-419-19810-9. La monografía sobre el flujo de energía sonora: por qué la intensidad separa la energía que sale de la fuente de la energía estacionaria que solo pasa, detrás de los métodos de barrido de las secciones 3 y 5."
+  - type: book
+    authors: ["Beranek, L. L.", "Mellow, T. J."]
+    year: 2012
+    title: "Acoustics: Sound fields and transducers"
+    publisher: "Academic Press"
+    doi: "10.1016/C2011-0-05897-0"
+    note: "ISBN 978-0-12-391421-7. Radiación y campos sonoros: las relaciones entre presión y potencia en campo libre y campo difuso sobre las que descansan los métodos de superficie envolvente y de sala reverberante."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2019
+    title: "Acoustics — Determination of sound power levels of noise sources — Guidelines for the use of basic standards"
+    designation: "ISO 3740:2019"
+    url: "https://www.iso.org/standard/45107.html"
+    note: "La guía de selección detrás de 'Elegir un método': grados, entornos y criterios de tamaño de fuente y de ruido de fondo para toda la familia."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms"
+    designation: "ISO 3741:2010"
+    url: "https://www.iso.org/standard/52053.html"
+    note: "El método en sala reverberante de la sección 2: los métodos directo (Ec. 20) y de comparación con las correcciones de Waterhouse y meteorológicas y los criterios de cualificación de la Tabla 1."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Engineering methods for an essentially free field over a reflecting plane"
+    designation: "ISO 3744:2010"
+    url: "https://www.iso.org/standard/52055.html"
+    note: "El método de superficie envolvente de la sección 1: las áreas de la semiesfera y la caja, las correcciones K1/K2, las posiciones de micrófono del Anexo B y la ponderación A del Anexo E."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2012
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for anechoic rooms and hemi-anechoic rooms"
+    designation: "ISO 3745:2012"
+    url: "https://www.iso.org/standard/45362.html"
+    note: "El método de precisión en sala anecoica de la sección 4: el nivel de potencia de la cláusula 8, la corrección de fondo por posición (Ec. 11), las correcciones meteorológicas y los conjuntos de micrófonos normalizados."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Survey method using an enveloping measurement surface over a reflecting plane"
+    designation: "ISO 3746:2010"
+    url: "https://www.iso.org/standard/52056.html"
+    note: "El grado de inspección de la sección 1, que comparte las fórmulas de superficie envolvente con criterios más laxos."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Determination of sound power levels of noise sources using sound intensity — Part 2: Measurement by scanning"
+    designation: "ISO 9614-2:1996"
+    url: "https://www.iso.org/standard/21247.html"
+    note: "El método de barrido de la sección 3: las potencias parciales, los indicadores de campo FpI y F+/- y los criterios de grado."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2002
+    title: "Acoustics — Determination of sound power levels of noise sources using sound intensity — Part 3: Precision method for measurement by scanning"
+    designation: "ISO 9614-3:2002"
+    url: "https://www.iso.org/standard/24012.html"
+    note: "El método de barrido de grado 1 de la sección 5, sus indicadores de campo y el marcado de no aplicable de la cláusula 9.2."
 ---
+
+import Video from '../../../../components/Video.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La presión *sonora* depende de dónde te sitúes y de la sala en la que estés;
 la **potencia** sonora no. El nivel de potencia sonora `LW` es la energía
@@ -15,6 +83,14 @@ envolvente de *presión* en campo (ISO 3744/3746), el campo difuso de una
 superficie (ISO 9614-2) y —para la máxima exactitud— los grados de precisión
 en una *sala anecoica* (ISO 3745) y mediante el *barrido* de intensidad de
 precisión (ISO 9614-3).
+
+<Video
+  name="anim_power_two_rooms"
+  width={2400}
+  height={1350}
+  title="La misma fuente, dos salas, una potencia sonora"
+  description="La misma fuente en una cámara anecoica y en una cámara reverberante produce presiones de micrófono distintas, y las fórmulas de campo libre y campo difuso convergen al mismo nivel de potencia sonora L_W."
+/>
 
 ## Elegir un método
 
@@ -37,7 +113,7 @@ energía de fondo estacionaria a costa de una sonda de dos micrófonos y una
 comprobación de validez por banda. El resto de la página recorre cada uno por
 turno.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_es.svg" alt="Las tres vías de potencia sonora en paralelo: una superficie envolvente de presión sobre un plano reflectante (ISO 3744/3746), una fuente en una sala reverberante muestreada por micrófonos (ISO 3741) y una sonda de intensidad barriendo una superficie alrededor de la fuente (ISO 9614-2)" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_es_dark.svg" alt="Las tres vías de potencia sonora en paralelo: una superficie envolvente de presión sobre un plano reflectante (ISO 3744/3746), una fuente en una sala reverberante muestreada por micrófonos (ISO 3741) y una sonda de intensidad barriendo una superficie alrededor de la fuente (ISO 9614-2)" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_es.svg" alt="Las tres vías de potencia sonora en paralelo: una superficie envolvente de presión sobre un plano reflectante (ISO 3744/3746), una fuente en una sala reverberante muestreada por micrófonos (ISO 3741) y una sonda de intensidad barriendo una superficie alrededor de la fuente (ISO 9614-2)" width="92%" loading="eager" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -75,8 +151,6 @@ plt.show()
 ```
 
 </details>
-
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: la misma fuente en una cámara anecoica y en una cámara reverberante produce presiones de micrófono distintas, y las fórmulas de campo libre y campo difuso convergen al mismo nivel de potencia sonora L_W" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: la misma fuente en una cámara anecoica y en una cámara reverberante produce presiones de micrófono distintas, y las fórmulas de campo libre y campo difuso convergen al mismo nivel de potencia sonora L_W" style="width:88%"></video>
 
 ### Una ruta de decisión
 
@@ -171,7 +245,7 @@ para dos y tres planos), y una caja de un plano es `S = 4(ab + bc + ca)` con
 posiciones de micrófono, un criterio de fondo de 3 dB en lugar de 6 dB, y
 validez hasta `K2 ≤ 7 dB` en lugar de 4 dB.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces_es.svg" alt="Superficies de medición de ISO 3744: una semiesfera de radio r envolviendo una fuente compacta sobre un plano reflectante, y un paralelepípedo recto (caja) a la distancia de medición d alrededor de una fuente grande, ambas con las posiciones de micrófono marcadas" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces_es_dark.svg" alt="Superficies de medición de ISO 3744: una semiesfera de radio r envolviendo una fuente compacta sobre un plano reflectante, y un paralelepípedo recto (caja) a la distancia de medición d alrededor de una fuente grande, ambas con las posiciones de micrófono marcadas" style="width:88%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces_es.svg" alt="Superficies de medición de ISO 3744: una semiesfera de radio r envolviendo una fuente compacta sobre un plano reflectante, y un paralelepípedo recto (caja) a la distancia de medición d alrededor de una fuente grande, ambas con las posiciones de micrófono marcadas" width="88%" />
 
 ```python
 import numpy as np
@@ -203,7 +277,7 @@ print(np.round(res.sound_power_level, 1))               # LW por banda
 res.plot()   # barras de nivel de potencia sonora por banda; LWA en el título (requiere matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result_es.svg" alt="El espectro de nivel de potencia sonora por superficie envolvente del ejemplo de semiesfera de ISO 3744, una barra por banda de octava de 63 Hz a 8 kHz con pico cerca de 500 Hz, con el total ponderado A de 92,4 dB(A) en el título" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result_es_dark.svg" alt="El espectro de nivel de potencia sonora por superficie envolvente del ejemplo de semiesfera de ISO 3744, una barra por banda de octava de 63 Hz a 8 kHz con pico cerca de 500 Hz, con el total ponderado A de 92,4 dB(A) en el título" style="width:88%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result_es.svg" alt="El espectro de nivel de potencia sonora por superficie envolvente del ejemplo de semiesfera de ISO 3744, una barra por banda de octava de 63 Hz a 8 kHz con pico cerca de 500 Hz, con el total ponderado A de 92,4 dB(A) en el título" width="88%" />
 
 *Una barra por banda: la presión superficial promediada en energía menos las
 correcciones de fondo (`K1`) y ambiental (`K2`) más el término de superficie
@@ -386,7 +460,7 @@ print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 rev.plot()   # espectro LW de la sala reverberante; LWA en el título (requiere matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result_es.svg" alt="El espectro de nivel de potencia sonora en cámara reverberante del ejemplo de ISO 3741, una barra por banda de tercio de octava de 100 Hz a 10 kHz descendiendo suavemente con la frecuencia, con el total ponderado A de 92,1 dB(A) en el título" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result_es_dark.svg" alt="El espectro de nivel de potencia sonora en cámara reverberante del ejemplo de ISO 3741, una barra por banda de tercio de octava de 100 Hz a 10 kHz descendiendo suavemente con la frecuencia, con el total ponderado A de 92,1 dB(A) en el título" style="width:88%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result_es.svg" alt="El espectro de nivel de potencia sonora en cámara reverberante del ejemplo de ISO 3741, una barra por banda de tercio de octava de 100 Hz a 10 kHz descendiendo suavemente con la frecuencia, con el total ponderado A de 92,1 dB(A) en el título" width="88%" />
 
 *El nivel medio de la sala llevado a través de los términos de área de
 absorción, de Waterhouse y meteorológicos de la Ec. 20 da el `LW(f)` por tercio
@@ -483,14 +557,24 @@ derrotaría a los métodos de presión. Una sonda p-p (véase la
 [guía de Intensidad sonora](/phonometry/es/guides/intensity/)) se barre de forma
 continua sobre cada uno de los `N` segmentos de una superficie que encierra la
 fuente, informando de la intensidad normal con signo promediada por segmento
-`<In,i>`. Las potencias parciales suman el total:
+`<In,i>`.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_es.svg" alt="Una sonda de intensidad sonora p-p de dos micrófonos: dos micrófonos de presión separados por un separador, a partir de los cuales se estima el gradiente de presión y, por tanto, la intensidad normal" width="70%" />
+
+Las potencias parciales suman el total:
 
 $$
 P_i = \langle I_{n,i} \rangle\ S_i, \qquad P = \sum_i P_i, \qquad
 L_W = 10 \log_{10}\frac{P}{P_0},\quad P_0 = 1\ \text{pW} .
 $$
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia sonora L_W" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia sonora L_W" style="width:88%"></video>
+<Video
+  name="anim_intensity_scan_power"
+  width={2400}
+  height={1350}
+  title="Barrido de intensidad sobre una caja de medición"
+  description="Una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia sonora L_W."
+/>
 
 Una banda en la que `P < 0` (flujo neto entrante, de una fuente más fuerte
 fuera de la superficie) es **no determinable** y se informa como `NaN`. Dos
@@ -511,8 +595,6 @@ para el grado 3) debe superar `FpI` (criterio 1); `F+/- ≤ 3 dB` es el criterio
 dentro del límite `s` de la Tabla 2 por segmento (criterio 3). Una banda es de
 grado **ingeniería** cuando se cumplen los criterios 1, 2 y 3, de **inspección**
 cuando se cumplen 1 y 3, y en caso contrario `none`.
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_es.svg" alt="Una sonda de intensidad sonora p-p de dos micrófonos: dos micrófonos de presión separados por un separador, a partir de los cuales se estima el gradiente de presión y, por tanto, la intensidad normal" style="width:70%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_es_dark.svg" alt="Una sonda de intensidad sonora p-p de dos micrófonos: dos micrófonos de presión separados por un separador, a partir de los cuales se estima el gradiente de presión y, por tanto, la intensidad normal" style="width:70%">
 
 ```python
 import numpy as np
@@ -541,7 +623,7 @@ print(list(res.achieved_grade))                         # grado por banda
 res.plot()   # espectro LW; bandas no positivas (indeterminables) con trama (requiere matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_es.svg" alt="El espectro de nivel de potencia sonora por barrido de intensidad del ejemplo de ISO 9614-2, una barra por banda de octava de 125 Hz a 4 kHz todas cerca de 85 dB, con el total ponderado A de 90,9 dB(A) en el título" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_es_dark.svg" alt="El espectro de nivel de potencia sonora por barrido de intensidad del ejemplo de ISO 9614-2, una barra por banda de octava de 125 Hz a 4 kHz todas cerca de 85 dB, con el total ponderado A de 90,9 dB(A) en el título" style="width:88%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_es.svg" alt="El espectro de nivel de potencia sonora por barrido de intensidad del ejemplo de ISO 9614-2, una barra por banda de octava de 125 Hz a 4 kHz todas cerca de 85 dB, con el total ponderado A de 90,9 dB(A) en el título" width="88%" />
 
 *Las potencias parciales `<In,i>·Si` de los seis segmentos suman el `LW` de
 cada banda; aquí todas las bandas tienen potencia neta positiva y superan los
@@ -628,7 +710,7 @@ la contraparte de grado 1 del método de superficie envolvente de la Sección 1,
 coordenadas de micrófono normalizadas, una corrección por ruido de fondo por
 posición y una corrección meteorológica explícita.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_precision_anechoic_es.svg" alt="Potencia sonora de precisión de ISO 3745 en una sala anecoica: paredes revestidas de cuñas, el dispositivo bajo ensayo en el centro y un conjunto hemisférico de micrófonos a un radio fijo, con el nivel de potencia sonora formado a partir de la presión promediada en la superficie más las correcciones de área, ruido de fondo y meteorológica" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_precision_anechoic_es_dark.svg" alt="Potencia sonora de precisión de ISO 3745 en una sala anecoica: paredes revestidas de cuñas, el dispositivo bajo ensayo en el centro y un conjunto hemisférico de micrófonos a un radio fijo, con el nivel de potencia sonora formado a partir de la presión promediada en la superficie más las correcciones de área, ruido de fondo y meteorológica" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_precision_anechoic_es.svg" alt="Potencia sonora de precisión de ISO 3745 en una sala anecoica: paredes revestidas de cuñas, el dispositivo bajo ensayo en el centro y un conjunto hemisférico de micrófonos a un radio fijo, con el nivel de potencia sonora formado a partir de la presión promediada en la superficie más las correcciones de área, ruido de fondo y meteorológica" width="92%" />
 
 **Nivel de potencia sonora (Cláusula 8).** El nivel de potencia sonora por banda es
 el nivel de presión promediado en la superficie más el término de superficie y las
@@ -705,7 +787,7 @@ print(round(result.sound_power_level_a, 1))   # 89.3
 result.plot()   # espectro LW, LWA en el título (requiere matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power_es.svg" alt="El espectro de nivel de potencia sonora de precisión de una máquina con pico en frecuencias medias medida sobre el conjunto hemisférico de ISO 3745, una barra por banda con pico cerca de 1 kHz, con el total ponderado A de 89,3 dB(A) en el título" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power_es_dark.svg" alt="El espectro de nivel de potencia sonora de precisión de una máquina con pico en frecuencias medias medida sobre el conjunto hemisférico de ISO 3745, una barra por banda con pico cerca de 1 kHz, con el total ponderado A de 89,3 dB(A) en el título" style="width:88%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power_es.svg" alt="El espectro de nivel de potencia sonora de precisión de una máquina con pico en frecuencias medias medida sobre el conjunto hemisférico de ISO 3745, una barra por banda con pico cerca de 1 kHz, con el total ponderado A de 89,3 dB(A) en el título" width="88%" />
 
 *Una barra por banda: la presión promediada en la superficie más las correcciones
 de área, ruido de fondo y meteorológica dan `LW(f)`, y la suma energética ponderada
@@ -755,7 +837,7 @@ intensidad normal sobre una superficie que encierra la fuente, pero con un barri
 continuo, criterios de indicadores de campo más estrictos y un presupuesto de
 incertidumbre explícito.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan_es.svg" alt="Barrido de intensidad sonora de precisión de ISO 9614-3: una fuente encerrada por una superficie de medición dividida en segmentos, una sonda de intensidad de dos micrófonos barrida a lo largo de un recorrido en serpentina sobre cada segmento, y la potencia sonora formada sumando la intensidad normal por el área del segmento, sujeta a los criterios de aceptación de los indicadores de campo" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan_es_dark.svg" alt="Barrido de intensidad sonora de precisión de ISO 9614-3: una fuente encerrada por una superficie de medición dividida en segmentos, una sonda de intensidad de dos micrófonos barrida a lo largo de un recorrido en serpentina sobre cada segmento, y la potencia sonora formada sumando la intensidad normal por el área del segmento, sujeta a los criterios de aceptación de los indicadores de campo" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan_es.svg" alt="Barrido de intensidad sonora de precisión de ISO 9614-3: una fuente encerrada por una superficie de medición dividida en segmentos, una sonda de intensidad de dos micrófonos barrida a lo largo de un recorrido en serpentina sobre cada segmento, y la potencia sonora formada sumando la intensidad normal por el área del segmento, sujeta a los criterios de aceptación de los indicadores de campo" width="92%" />
 
 **Potencia y nivel (Cláusula 7).** La potencia parcial de cada segmento es
 $P_i = I_{n,i}\,S_i$; el total $P = \sum_i P_i$ da
@@ -802,7 +884,7 @@ print(round(result.sound_power_level_a, 1))   # 80.6
 result.plot()   # espectro LW; la banda no aplicable con trama (requiere matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_es.svg" alt="El espectro de nivel de potencia sonora del barrido de intensidad de precisión sobre cinco bandas de tercio de octava, cuatro barras determinadas y una banda de 250 Hz con trama y en gris marcada como no aplicable porque su intensidad neta es negativa, con el total ponderado A de 80,6 dB(A) en el título" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_es_dark.svg" alt="El espectro de nivel de potencia sonora del barrido de intensidad de precisión sobre cinco bandas de tercio de octava, cuatro barras determinadas y una banda de 250 Hz con trama y en gris marcada como no aplicable porque su intensidad neta es negativa, con el total ponderado A de 80,6 dB(A) en el título" style="width:88%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_es.svg" alt="El espectro de nivel de potencia sonora del barrido de intensidad de precisión sobre cinco bandas de tercio de octava, cuatro barras determinadas y una banda de 250 Hz con trama y en gris marcada como no aplicable porque su intensidad neta es negativa, con el total ponderado A de 80,6 dB(A) en el título" width="88%" />
 
 *La banda de 250 Hz da un neto negativo (más energía entrando que saliendo), así que
 ISO 9614-3 la declara no aplicable —la figura la trama y la agrisa mientras las
@@ -871,64 +953,3 @@ plt.show()
   C1/C2.
 - Referencia de la API: [`emission.sound_power`](/phonometry/es/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](/phonometry/es/reference/api/power/sound-power-reverberation/) y [`emission.sound_power_intensity`](/phonometry/es/reference/api/power/sound-power-intensity/).
 
-## Referencias
-
-- Fahy, F. J. (1995). *Sound intensity* (2.ª ed.). E&FN Spon.
-  ISBN 978-0-419-19810-9.
-  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
-  La monografía sobre el flujo de energía sonora: por qué la intensidad
-  separa la energía que sale de la fuente de la energía estacionaria que
-  solo pasa, detrás de los métodos de barrido de las secciones 3 y 5.
-- Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and
-  transducers*. Academic Press. ISBN 978-0-12-391421-7.
-  [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
-  Radiación y campos sonoros: las relaciones entre presión y potencia en
-  campo libre y campo difuso sobre las que descansan los métodos de
-  superficie envolvente y de sala reverberante.
-- International Organization for Standardization. (2019). *Acoustics —
-  Determination of sound power levels of noise sources — Guidelines for the
-  use of basic standards* (ISO 3740:2019).
-  [Catálogo iso.org](https://www.iso.org/standard/45107.html).
-  La guía de selección detrás de "Elegir un método": grados, entornos y
-  criterios de tamaño de fuente y de ruido de fondo para toda la familia.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for reverberation test
-  rooms* (ISO 3741:2010).
-  [Catálogo iso.org](https://www.iso.org/standard/52053.html).
-  El método en sala reverberante de la sección 2.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Engineering methods for an essentially free
-  field over a reflecting plane* (ISO 3744:2010).
-  [Catálogo iso.org](https://www.iso.org/standard/52055.html).
-  El método de superficie envolvente de la sección 1.
-- International Organization for Standardization. (2012). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for anechoic rooms and
-  hemi-anechoic rooms* (ISO 3745:2012).
-  [Catálogo iso.org](https://www.iso.org/standard/45362.html).
-  El método de precisión en sala anecoica de la sección 4.
-
-## Normas
-
-ISO 3744:2010, *Acoustics — Determination of sound power levels
-and sound energy levels of noise sources using sound pressure — Engineering
-methods for an essentially free field over a reflecting plane* — el método de
-superficie envolvente: las áreas de la semiesfera y la caja, las correcciones
-`K1`/`K2`, las posiciones de micrófono del Anexo B y la ponderación A del
-Anexo E. ISO 3746:2010, *… Survey method using an enveloping measurement
-surface over a reflecting plane* — el grado de inspección que comparte las
-mismas fórmulas con criterios más laxos. ISO 3741:2010, *… Precision methods
-for reverberation test rooms* — los métodos directo (Ec. 20) y de comparación
-con las correcciones de Waterhouse y meteorológicas y los criterios de
-cualificación de la Tabla 1. ISO 3745:2012, *… Precision methods for anechoic
-rooms and hemi-anechoic rooms* — el nivel de potencia de la cláusula 8, la
-corrección de fondo por posición (Ec. 11), las correcciones meteorológicas y
-los conjuntos de micrófonos normalizados. ISO 9614-2:1996, *Acoustics —
-Determination of sound power levels of noise sources using sound intensity —
-Part 2: Measurement by scanning* — las potencias parciales, los indicadores de
-campo `FpI` y `F+/-` y los criterios de grado. ISO 9614-3:2002, *… Part 3:
-Precision method for measurement by scanning* — el método de barrido de
-grado 1, sus indicadores de campo y el marcado de no aplicable de la
-cláusula 9.2.

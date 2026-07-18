@@ -1,7 +1,33 @@
 ---
 title: "Sound Intensity (p-p)"
 description: "Two-microphone sound intensity per IEC 61043 with the ISO 9614-1 field indicators."
+references:
+  - type: book
+    authors: ["Fahy, F. J."]
+    year: 1995
+    title: "Sound intensity"
+    edition: "2nd ed."
+    publisher: "E&FN Spon"
+    doi: "10.4324/9780203475386"
+    note: "ISBN 978-0-419-19810-9. The monograph on the subject: active and reactive intensity, the p-p estimator and the phase-mismatch error budget behind this page."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 1993
+    title: "Electroacoustics — Instruments for the measurement of sound intensity — Measurements with pairs of pressure sensing microphones"
+    designation: "IEC 61043:1993"
+    url: "https://webstore.iec.ch/en/publication/4353"
+    note: "Adopted in Europe as EN 61043:1994. The instrument standard: the two-microphone cross-spectral estimator, the residual-intensity test behind δpI0, the class 1 / class 2 requirements, and the finite-difference bias correction with its usable-bandwidth bound (clause 7.3, Table 3)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Determination of sound power levels of noise sources using sound intensity — Part 1: Measurement at discrete points"
+    designation: "ISO 9614-1:1993"
+    url: "https://www.iso.org/standard/17427.html"
+    note: "The pressure-intensity index, the Annex A field indicators F2 to F4, the dynamic-capability criterion (Annex B) and the 0.5 m surface-distance rule."
 ---
+
+import Video from '../../../components/Video.astro';
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 Sound *pressure* tells you how loud a point is; sound **intensity** tells
 you where the energy is *going*. It is the acoustic power flux (W/m²), a
@@ -28,7 +54,7 @@ $$
 I(f) = -\,\frac{\mathrm{Im}\{G_{12}(f)\}}{2\pi f\,\rho_0\,\Delta r}
 $$
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="Two-microphone p-p intensity probe with the spacer distance and the measurement axis" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_dark.svg" alt="Two-microphone p-p intensity probe with the spacer distance and the measurement axis" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="Two-microphone p-p intensity probe with the spacer distance and the measurement axis" width="92%" loading="eager" />
 
 ```python
 import numpy as np
@@ -49,9 +75,7 @@ print(res.frequency, res.intensity_level)                  # per band
 res.plot()   # Lp vs LI per band + the pressure-intensity index (needs matplotlib)
 ```
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a two-microphone p-p probe with rotating pressure and velocity phasors; the instantaneous intensity arrow flips while its running average settles to a net flow for the progressive wave and to zero for the standing wave" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a two-microphone p-p probe with rotating pressure and velocity phasors; the instantaneous intensity arrow flips while its running average settles to a net flow for the progressive wave and to zero for the standing wave" style="width:88%"></video>
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.svg" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.svg" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.svg" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%" />
 
 *Left: in a plane progressive wave all pressure is transported —
 L_I ≈ L_p. Right: a standing wave carries (almost) no net energy — the
@@ -104,6 +128,18 @@ plt.show()
 
 </details>
 
+The same contrast plays out dynamically below: the pressure and velocity
+phasors of a progressive and a standing wave, with the instantaneous
+intensity averaging to a net flow in one case and to zero in the other.
+
+<Video
+  name="anim_instantaneous_intensity"
+  width={2400}
+  height={1350}
+  title="Instantaneous intensity phasors: progressive versus standing wave"
+  description="A two-microphone p-p probe with rotating pressure and velocity phasors; the instantaneous intensity arrow flips while its running average settles to a net flow for the progressive wave and to zero for the standing wave."
+/>
+
 ## Knowing when to trust the number
 
 Two physical limits bound every p-p measurement, and the result object
@@ -143,7 +179,13 @@ ld = emission.dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 �
 print(ld, ld > fi.f2)                                      # 8.0 True (criterion 1)
 ```
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W" style="width:88%"></video>
+<Video
+  name="anim_intensity_scan_power"
+  width={2400}
+  height={1350}
+  title="Intensity scanning over a measurement box"
+  description="A p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W."
+/>
 
 ### The margin over the residual index
 
@@ -227,40 +269,6 @@ the microphones alone.
 
 See [Theory](/phonometry/reference/theory/signal-analysis/) for the derivations and [Calibration](/phonometry/guides/calibration/)
 for absolute scaling of the two channels.
-
-## References
-
-- Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
-  ISBN 978-0-419-19810-9.
-  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
-  The monograph on the subject: active and reactive intensity, the p-p
-  estimator and the phase-mismatch error budget behind this page.
-- International Electrotechnical Commission. (1993). *Electroacoustics —
-  Instruments for the measurement of sound intensity — Measurements with
-  pairs of pressure sensing microphones* (IEC 61043:1993; adopted in Europe
-  as EN 61043:1994).
-  [IEC webstore](https://webstore.iec.ch/en/publication/4353).
-  The instrument standard: the cross-spectral estimator, the
-  residual-intensity test behind `δpI0` and the class 1 / class 2
-  requirements.
-- International Organization for Standardization. (1993). *Acoustics —
-  Determination of sound power levels of noise sources using sound
-  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
-  [iso.org catalogue](https://www.iso.org/standard/17427.html).
-  The field indicators F2 to F4, the dynamic-capability criterion and the
-  0.5 m surface-distance rule.
-
-## Standards
-
-IEC 61043:1993 (EN 61043:1994), *Electroacoustics —
-Instruments for the measurement of sound intensity — Measurements with pairs
-of pressure sensing microphones* — the two-microphone cross-spectral
-intensity estimator, the finite-difference bias correction and the
-usable-bandwidth bound (clause 7.3,
-Table 3). ISO 9614-1:1993, *Acoustics — Determination of sound power levels
-of noise sources using sound intensity — Part 1: Measurement at discrete
-points* — the pressure-intensity index, the Annex A field indicators F2, F3
-and F4, and the dynamic-capability criterion (Annex B).
 
 ## See also
 

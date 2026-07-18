@@ -1,7 +1,66 @@
 ---
 title: "Outdoor Sound Propagation"
 description: "Atmospheric absorption of sound (ISO 9613-1) and the ISO 9613-2 general method for outdoor sound propagation from a point source: geometrical divergence, atmospheric absorption, ground effect, barrier screening and the meteorological correction, with a per-term octave-band attenuation breakdown."
+references:
+  - type: book
+    authors: ["Salomons, E. M."]
+    year: 2001
+    title: "Computational atmospheric acoustics"
+    publisher: "Kluwer Academic Publishers"
+    doi: "10.1007/978-94-010-0660-6"
+    note: "ISBN 978-1-4020-0390-5. The wave-based theory (parabolic equation, fast field program, refraction and turbulence) that quantifies what the favourable-condition assumption and the K_met factor approximate."
+  - type: book
+    authors: ["Attenborough, K.", "Van Renterghem, T."]
+    year: 2021
+    title: "Predicting outdoor sound"
+    edition: "2nd ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9780429470806"
+    note: "Ground impedance models, the spherical-wave reflection coefficient behind the ground dip of section 2, and the meteorological effects on barriers."
+  - type: article
+    authors: ["Maekawa, Z."]
+    year: 1968
+    title: "Noise reduction by screens"
+    journal: "Applied Acoustics"
+    volume: 1
+    issue: 3
+    pages: "157-173"
+    doi: "10.1016/0003-682X(68)90020-0"
+    note: "The screen-attenuation chart against Fresnel number that Eq. (14)'s diffraction term descends from."
+  - type: report
+    authors: ["Kephalopoulos, S.", "Paviotti, M.", "Anfosso-Lédée, F."]
+    year: 2012
+    title: "Common noise assessment methods in Europe (CNOSSOS-EU)"
+    number: "EUR 25379 EN"
+    institution: "Publications Office of the European Union"
+    doi: "10.2788/31776"
+    url: "https://publications.jrc.ec.europa.eu/repository/handle/JRC72550"
+    note: "The common EU framework contrasted with ISO 9613-2 in section 3."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere"
+    designation: "ISO 9613-1:1993"
+    url: "https://www.iso.org/standard/17426.html"
+    note: "The implemented pure-tone attenuation coefficient of section 1: alpha (Eq. (5)) with the oxygen and nitrogen relaxation frequencies (Eq. (3)/(4)), the Annex B humidity conversion and the exact Table 1 midbands (Eq. (6), Note 5)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 2: General method of calculation"
+    designation: "ISO 9613-2:1996"
+    url: "https://www.iso.org/standard/20649.html"
+    note: "The implemented attenuation chain of section 2: the downwind receiver level (Eq. (3)/(4)) assembled from geometrical divergence (Eq. (7)), atmospheric absorption (Eq. (8)), the ground effect (Eq. (9), Table 3) with its A-weighted alternative (Eq. (10)/(11)), barrier screening (Eqs. (12)-(17)) and the meteorological correction (Eq. (21)/(22)). A revised edition was published in 2024; this module implements the 1996 method."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2003
+    title: "Acoustics — Measurement of sound absorption in a reverberation room"
+    designation: "ISO 354:2003"
+    url: "https://www.iso.org/standard/34545.html"
+    note: "Only the clause 8.1.2.1 conversion m = alpha/(10 lg e) behind air_attenuation_m; the reverberation-room method itself is covered in the Room Acoustics guide."
 ---
+
+import Video from '../../../components/Video.astro';
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 Predicting the noise a distant source delivers to a receiver outdoors is a
 book-keeping exercise: start from the source **sound power** and subtract, band
@@ -39,7 +98,7 @@ $\alpha$ climbs about two decades from 50 Hz to 10 kHz, and — because humidity
 sets $f_{rO}$ — sweeping the humidity moves a relaxation peak across the band, so
 the driest air is not always the least absorbing.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha.svg" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency on log-log axes, for four temperature and humidity combinations, showing the f-squared low-frequency growth and the humidity-dependent relaxation roll-off" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha_dark.svg" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency on log-log axes, for four temperature and humidity combinations, showing the f-squared low-frequency growth and the humidity-dependent relaxation roll-off" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha.svg" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency on log-log axes, for four temperature and humidity combinations, showing the f-squared low-frequency growth and the humidity-dependent relaxation roll-off" width="80%" loading="eager" />
 
 *The dry 20 °C / 10 % curve absorbs most at mid frequencies, but the humid
 curves overtake it below ~200 Hz — the relaxation signature.*
@@ -139,7 +198,7 @@ passes *above* the top edge, the standard gives $z$ a negative sign
 $K_{met} = 1$: $D_z$ falls continuously from $10 \lg 3 \approx 4.8$ dB at
 grazing incidence to zero as the clearance deepens, never below zero.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry.svg" alt="ISO 9613-2 source-barrier-receiver geometry: a point source at height hs, a barrier whose top edge splits the path into dss and dsr, and a receiver at height hr, with the blocked direct ray and the diffracted ray over the edge, the path difference z and the Dz formula" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry_dark.svg" alt="ISO 9613-2 source-barrier-receiver geometry: a point source at height hs, a barrier whose top edge splits the path into dss and dsr, and a receiver at height hr, with the blocked direct ray and the diffracted ray over the edge, the path difference z and the Dz formula" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry.svg" alt="ISO 9613-2 source-barrier-receiver geometry: a point source at height hs, a barrier whose top edge splits the path into dss and dsr, and a receiver at height hr, with the blocked direct ray and the diffracted ray over the edge, the path difference z and the Dz formula" width="92%" />
 
 ### The four attenuation terms
 
@@ -175,7 +234,7 @@ barrier helps most at high frequency (short wavelength) until it saturates at th
 cap, atmospheric absorption bites only at 8 kHz, and the ground dip lives in the
 mid bands.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown.svg" alt="ISO 9613-2 per-octave-band attenuation breakdown as a stacked bar of Adiv, Aatm, Agr and Abar with the total A overlaid, for a 200 m path over porous ground with a 4 m barrier" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_dark.svg" alt="ISO 9613-2 per-octave-band attenuation breakdown as a stacked bar of Adiv, Aatm, Agr and Abar with the total A overlaid, for a 200 m path over porous ground with a 4 m barrier" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown.svg" alt="ISO 9613-2 per-octave-band attenuation breakdown as a stacked bar of Adiv, Aatm, Agr and Abar with the total A overlaid, for a 200 m path over porous ground with a 4 m barrier" width="80%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -290,7 +349,7 @@ difference $\delta = r_2 - r_1$ (about $2 h_s h_r / d$ for a grazing far-field
 path): in phase they add up to $+6$ dB; at $\delta = \lambda/2$ over a rigid
 plane they cancel into a sharp dip.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection.svg" alt="A point source at height hs and a receiver microphone at height hr over a hatched ground plane; a straight direct ray r1 connects them and a reflected ray bounces at the specular point with equal grazing angles; the reflection is unfolded as a dashed straight ray r2 from a ghosted image source mirrored below the ground, and the annotations give the path difference delta = r2 minus r1, the interference phase 2 pi delta over lambda plus the reflection phase, the in-phase gain of up to +6 dB and the deep dip at half a wavelength over hard ground" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection_dark.svg" alt="A point source at height hs and a receiver microphone at height hr over a hatched ground plane; a straight direct ray r1 connects them and a reflected ray bounces at the specular point with equal grazing angles; the reflection is unfolded as a dashed straight ray r2 from a ghosted image source mirrored below the ground, and the annotations give the path difference delta = r2 minus r1, the interference phase 2 pi delta over lambda plus the reflection phase, the in-phase gain of up to +6 dB and the deep dip at half a wavelength over hard ground" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection.svg" alt="A point source at height hs and a receiver microphone at height hr over a hatched ground plane; a straight direct ray r1 connects them and a reflected ray bounces at the specular point with equal grazing angles; the reflection is unfolded as a dashed straight ray r2 from a ghosted image source mirrored below the ground, and the annotations give the path difference delta = r2 minus r1, the interference phase 2 pi delta over lambda plus the reflection phase, the in-phase gain of up to +6 dB and the deep dip at half a wavelength over hard ground" width="92%" />
 
 Over acoustically hard ground ($G = 0$) the reflection coefficient stays close
 to $+1$ in every octave, the long-wavelength sum is fully constructive, and the
@@ -310,7 +369,13 @@ wave adds to the direct one. Below, a 400 Hz source 1.5 m over rigid ground
 builds the lobe pattern of that interference, and the level sampled on an arc
 converges to the two-path image-source model, dips included.
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground; the direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level on an 8 metre arc converges to the two-path image-source model with its predicted nulls" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground; the direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level on an 8 metre arc converges to the two-path image-source model with its predicted nulls" style="width:88%"></video>
+<Video
+  name="anim_fdtd_ground_effect"
+  width={2400}
+  height={1350}
+  title="Ground-effect interference over rigid ground (2D FDTD)"
+  description="A 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground. The direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level sampled on an 8 metre arc converges to the two-path image-source model with its predicted nulls."
+/>
 
 ### `Barrier` and the screening term
 
@@ -327,7 +392,13 @@ The simulation below shows why $D_z$ grows with frequency: against the same
 the shadow zone, while at 500 Hz the shadow is deep and sharp. A barrier only
 works when the wavelength is short next to the path difference.
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side; the long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 8 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side; the long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 8 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB" style="width:88%"></video>
+<Video
+  name="anim_fdtd_barrier"
+  width={2400}
+  height={1350}
+  title="Barrier diffraction at 100 Hz and 500 Hz (2D FDTD)"
+  description="A 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side. The long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 8 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB."
+/>
 
 ### `outdoor_propagation_attenuation()` parameters
 
@@ -457,60 +528,6 @@ See the [Theory](/phonometry/reference/theory/environment-transport/) page for t
 [Room Acoustics guide](/phonometry/guides/room-acoustics/) for how $\alpha$ feeds
 ISO 354, and the [Occupational Noise Exposure guide](/phonometry/guides/occupational-exposure/) for the ISO 9612 occupational
 exposure that consumes A-weighted levels.
-
-## References
-
-- Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
-  Academic Publishers. ISBN 978-1-4020-0390-5.
-  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
-  The wave-based theory (parabolic equation, fast field program, refraction
-  and turbulence) that quantifies what the favourable-condition assumption
-  and the $K_{met}$ factor approximate.
-- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
-  (2nd ed.). CRC Press.
-  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
-  Ground impedance models, the spherical-wave reflection coefficient behind
-  the ground dip of section 2, and the meteorological effects on barriers.
-- Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
-  157-173.
-  [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
-  The screen-attenuation chart against Fresnel number that Eq. (14)'s
-  diffraction term descends from.
-- Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
-  assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Publications
-  Office of the European Union.
-  [doi:10.2788/31776](https://doi.org/10.2788/31776),
-  [JRC repository](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550).
-  The common EU framework contrasted with ISO 9613-2 in section 3.
-- International Organization for Standardization. (1993). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 1: Calculation of
-  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
-  [iso.org catalogue](https://www.iso.org/standard/17426.html).
-  The implemented pure-tone attenuation coefficient of section 1.
-- International Organization for Standardization. (1996). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 2: General method
-  of calculation* (ISO 9613-2:1996; a revised edition was published in 2024,
-  this module implements the 1996 method).
-  [iso.org catalogue](https://www.iso.org/standard/20649.html).
-  The implemented attenuation chain of section 2.
-
-## Standards
-
-ISO 9613-1:1993, *Acoustics — Attenuation of sound during
-propagation outdoors — Part 1: Calculation of the absorption of sound by the
-atmosphere* — the pure-tone attenuation coefficient $\alpha$ (Eq. (5)) with the
-oxygen and nitrogen relaxation frequencies (Eq. (3)/(4)), the Annex B humidity
-conversion and the exact Table 1 midbands (Eq. (6), Note 5). ISO 9613-2:1996,
-*Acoustics — Attenuation of sound during propagation outdoors — Part 2: General
-method of calculation* — the downwind receiver level (Eq. (3)/(4)) assembled
-from geometrical divergence (Eq. (7)), atmospheric absorption (Eq. (8)), the
-ground effect (Eq. (9), Table 3) with its A-weighted alternative
-(Eq. (10)/(11)), barrier screening (Eqs. (12)–(17)) and the meteorological
-correction (Eq. (21)/(22)). ISO 354:2003, *Acoustics — Measurement of sound
-absorption in a reverberation room* — only the clause 8.1.2.1 conversion
-$m = \alpha/(10 \lg e)$ behind `air_attenuation_m`; the reverberation-room
-method itself is covered in the
-[Room Acoustics guide](/phonometry/guides/room-acoustics/).
 
 ## See also
 

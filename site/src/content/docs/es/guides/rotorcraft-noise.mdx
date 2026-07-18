@@ -1,7 +1,54 @@
 ---
 title: "Ruido de rotorcraft: el método del hemisferio"
 description: "El método del hemisferio de ECAC Doc 32 / NORAH2: el modelo de fuente por hemisferio, sus ajustes de propagación, la interpolación entre condiciones de vuelo y la cinemática de trayectoria, el evento único SEL, LASmax y EPNL con contornos en malla de tierra, y la maquinaria de terreno y apantallamiento del plano medio del suelo."
+references:
+  - type: report
+    organization: "European Civil Aviation Conference"
+    year: 2026
+    title: "Report on standard method of computing rotorcraft noise contours"
+    number: "ECAC.CEAC Doc 32, 1.ª ed."
+    url: "https://www.ecac-ceac.org/images/documents/ECAC-CEAC-DOC_32-REPORT_ON_STANDARD_METHOD_OF_COMPUTING_ROTORCRAFT_NOISE_CONTOURS.pdf"
+    note: "El método estándar de contornos de rotorcraft cuyo modelo de fuente por hemisferio y ajustes de propagación implementa esta página. El PDF enlazado es la descarga gratuita; el documento está catalogado en la página de documentos de ECAC (https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements)."
+  - type: report
+    authors: ["Olsen, H.", "Tuinstra, M.", "van Oosten, N."]
+    year: 2024
+    title: "Rotorcraft noise modelling guidance"
+    number: "Research Project NOISE SC01, entregable D1.5d, contrato EASA.2020.FC.06"
+    institution: "European Union Aviation Safety Agency"
+    url: "https://www.easa.europa.eu/en/downloads/132005/en"
+    note: "La guía a nivel de ecuación (Ec. 13-35) que sustenta la implementación, con los valores de atenuación de la Tabla 4 y los hemisferios de referencia usados como oráculos. Alcance implementado (§A.3-A.5): el hemisferio de ruido, el ensanchamiento esférico, la atenuación atmosférica (ISO 9613-1, Tabla 4), el efecto de suelo de Chien-Soroka (impedancia de Delany-Bazley, resistividad de flujo CNOSSOS), la interpolación entre condiciones de vuelo (Ec. 3-10), la cinemática de la trayectoria (Ec. 16-21 / Doc 32 Ec. 8-10), el tiempo registrado (Ec. 22), las métricas de evento único SEL/LASmax y EPNL (Doc 32 Ec. 27/28, ICAO Anexo 16 Ap. 2), el plano medio del suelo y las alturas equivalentes (Ec. 36-40), la resistividad de flujo media logarítmica (Ec. 41) y la cadena de apantallamiento por terreno (Ec. 42-47 con los apéndices de caminos de ruido de la guía; filiación CNOSSOS-EU). El tratamiento de fuente en hover, ralentí y rodaje (§A.3.5) queda fuera de la implementación. El PDF enlazado es la descarga gratuita; el proyecto está catalogado en la página del proyecto en EASA (https://www.easa.europa.eu/en/research-projects/environmental-research-rotorcraft-noise)."
+  - type: article
+    authors: ["Chien, C. F.", "Soroka, W. W."]
+    year: 1975
+    title: "Sound propagation along an impedance plane"
+    journal: "Journal of Sound and Vibration"
+    volume: 43
+    issue: 1
+    pages: "9-20"
+    doi: "10.1016/0022-460X(75)90200-X"
+    note: "La solución de interferencia de dos rayos sobre un plano de impedancia que sustenta el ajuste de efecto de suelo."
+  - type: article
+    authors: ["Delany, M. E.", "Bazley, E. N."]
+    year: 1970
+    title: "Acoustical properties of fibrous absorbent materials"
+    journal: "Applied Acoustics"
+    volume: 3
+    issue: 2
+    pages: "105-116"
+    doi: "10.1016/0003-682X(70)90031-9"
+    note: "El modelo de impedancia de un parámetro (resistividad de flujo) que evalúa el efecto de suelo."
+  - type: report
+    authors: ["Kephalopoulos, S.", "Paviotti, M.", "Anfosso-Lédée, F."]
+    year: 2012
+    title: "Common noise assessment methods in Europe (CNOSSOS-EU)"
+    number: "EUR 25379 EN"
+    institution: "Oficina de Publicaciones de la Unión Europea"
+    doi: "10.2788/31776"
+    url: "https://publications.jrc.ec.europa.eu/repository/handle/JRC72550"
+    note: "Las clases de suelo por resistividad de flujo 'A'-'H' que acepta ground_effect_adjustment."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 El ruido de los helicópteros es muy directivo, así que el método de **ECAC
 Doc 32** describe la fuente con un **hemisferio de ruido**: niveles de presión
@@ -29,7 +76,14 @@ h.plot()                                          # directividad proa-popa
 
 ## Ajustes de propagación
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_ground_effect_es.svg" alt="Ajuste por efecto de suelo de rotorcraft frente a la frecuencia de 1/3 de octava para suelo duro y blando, con refuerzo a baja frecuencia, un valle de interferencia profundo y la región incoherente de alta frecuencia" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_ground_effect_es_dark.svg" alt="Ajuste por efecto de suelo de rotorcraft frente a la frecuencia de 1/3 de octava para suelo duro y blando, con refuerzo a baja frecuencia, un valle de interferencia profundo y la región incoherente de alta frecuencia" style="width:82%">
+El nivel del hemisferio a 60 m se lleva al receptor con tres ajustes (§A.4):
+`spherical_spreading_adjustment` (`ΔLs = −20·log10(r/60)`, Ec. 24),
+`atmospheric_adjustment` (`ΔLa = −α(f)·(r − 60)` con el coeficiente de
+ISO 9613-1, Ec. 26/27) y `ground_effect_adjustment` (interferencia directo/
+reflejado sobre un plano de impedancia, Chien-Soroka Ec. 28-35, con la impedancia
+de Delany-Bazley y las clases de resistividad de flujo CNOSSOS `"A"`-`"H"`).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_ground_effect_es.svg" alt="Ajuste por efecto de suelo de rotorcraft frente a la frecuencia de 1/3 de octava para suelo duro y blando, con refuerzo a baja frecuencia, un valle de interferencia profundo y la región incoherente de alta frecuencia" width="82%" loading="eager" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -59,13 +113,6 @@ plt.show()
 ```
 
 </details>
-
-El nivel del hemisferio a 60 m se lleva al receptor con tres ajustes (§A.4):
-`spherical_spreading_adjustment` (`ΔLs = −20·log10(r/60)`, Ec. 24),
-`atmospheric_adjustment` (`ΔLa = −α(f)·(r − 60)` con el coeficiente de
-ISO 9613-1, Ec. 26/27) y `ground_effect_adjustment` (interferencia directo/
-reflejado sobre un plano de impedancia, Chien-Soroka Ec. 28-35, con la impedancia
-de Delany-Bazley y las clases de resistividad de flujo CNOSSOS `"A"`-`"H"`).
 
 ```python
 import numpy as np
@@ -155,7 +202,7 @@ res.la_max, res.sel, res.epnl         # LASmax, SEL, EPNL
 res.plot()                            # el historial temporal LA(t)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_flyover_event_es.svg" alt="Nivel ponderado A frente al tiempo registrado para un sobrevuelo nivelado de rotorcraft: subida suave hasta LASmax sobre la ventana de 10 dB de caída y descenso más lento, anotado con el SEL y el EPNL del evento" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_flyover_event_es_dark.svg" alt="Nivel ponderado A frente al tiempo registrado para un sobrevuelo nivelado de rotorcraft: subida suave hasta LASmax sobre la ventana de 10 dB de caída y descenso más lento, anotado con el SEL y el EPNL del evento" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_flyover_event_es.svg" alt="Nivel ponderado A frente al tiempo registrado para un sobrevuelo nivelado de rotorcraft: subida suave hasta LASmax sobre la ventana de 10 dB de caída y descenso más lento, anotado con el SEL y el EPNL del evento" width="82%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -256,7 +303,7 @@ res.adjustment                         # por banda, sustituye al ΔLg plano
 res.plot()                             # la geometría de la sección
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_terrain_screening_es.svg" alt="Sección de apantallamiento por terreno con una fuente de helicóptero, una colina que bloquea la línea de visión al micrófono y el camino difractado sobre su cresta, sobre el ajuste por banda de suelo y apantallamiento comparado con el peine de suelo plano" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_terrain_screening_es_dark.svg" alt="Sección de apantallamiento por terreno con una fuente de helicóptero, una colina que bloquea la línea de visión al micrófono y el camino difractado sobre su cresta, sobre el ajuste por banda de suelo y apantallamiento comparado con el peine de suelo plano" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_terrain_screening_es.svg" alt="Sección de apantallamiento por terreno con una fuente de helicóptero, una colina que bloquea la línea de visión al micrófono y el camino difractado sobre su cresta, sobre el ajuste por banda de suelo y apantallamiento comparado con el peine de suelo plano" width="82%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -339,55 +386,6 @@ pública del prototipo no incluye un caso de apantallamiento reconstruible
 (el marco de su modelo de terreno no pudo fijarse a las salidas publicadas),
 así que la cadena de difracción se ancla en las formas cerradas y en su
 filiación CNOSSOS-EU.
-
-## Referencias
-
-- European Civil Aviation Conference. (2026). *Report on standard method of
-  computing rotorcraft noise contours* (ECAC.CEAC Doc 32, 1.ª ed.).
-  [Página de documentos de ECAC](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements),
-  [PDF gratuito](https://www.ecac-ceac.org/images/documents/ECAC-CEAC-DOC_32-REPORT_ON_STANDARD_METHOD_OF_COMPUTING_ROTORCRAFT_NOISE_CONTOURS.pdf).
-  El método estándar de contornos de rotorcraft cuyo modelo de fuente por
-  hemisferio y ajustes de propagación implementa esta página.
-- Olsen, H., Tuinstra, M., & van Oosten, N. (2024). *Rotorcraft noise
-  modelling guidance* (Research Project NOISE SC01, entregable D1.5d,
-  contrato EASA.2020.FC.06). European Union Aviation Safety Agency.
-  [Página del proyecto en EASA](https://www.easa.europa.eu/en/research-projects/environmental-research-rotorcraft-noise),
-  [PDF gratuito](https://www.easa.europa.eu/en/downloads/132005/en).
-  La guía a nivel de ecuación (Ec. 13-35) que sustenta la implementación, con los
-  valores de atenuación de la Tabla 4 y los hemisferios de referencia usados
-  como oráculos.
-- Chien, C. F., & Soroka, W. W. (1975). Sound propagation along an impedance
-  plane. *Journal of Sound and Vibration*, 43(1), 9-20.
-  [doi:10.1016/0022-460X(75)90200-X](https://doi.org/10.1016/0022-460X(75)90200-X).
-  La solución de interferencia de dos rayos sobre un plano de impedancia que sustenta
-  el ajuste de efecto de suelo.
-- Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous
-  absorbent materials. *Applied Acoustics*, 3(2), 105-116.
-  [doi:10.1016/0003-682X(70)90031-9](https://doi.org/10.1016/0003-682X(70)90031-9).
-  El modelo de impedancia de un parámetro (resistividad de flujo) que evalúa
-  el efecto de suelo.
-- Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
-  assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Oficina de
-  Publicaciones de la Unión Europea.
-  [doi:10.2788/31776](https://doi.org/10.2788/31776),
-  [repositorio del JRC](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550).
-  Las clases de suelo por resistividad de flujo `"A"`-`"H"` que acepta
-  `ground_effect_adjustment`.
-
-## Normas
-
-ECAC Doc 32, 1ª ed. (contornos de ruido de rotorcraft); guía de
-modelado NORAH2 (EASA.2020.FC.06 SC01.D1.5d) §A.3-A.5: el hemisferio de ruido, el
-ensanchamiento esférico, la atenuación atmosférica (ISO 9613-1, Tabla 4), el
-efecto de suelo de Chien-Soroka (impedancia de Delany-Bazley, resistividad de
-flujo CNOSSOS), la interpolación entre condiciones de vuelo (Ec. 3-10), la
-cinemática de la trayectoria (Ec. 16-21 / Doc 32 Ec. 8-10), el tiempo
-registrado (Ec. 22), las métricas de evento único SEL/LASmax y EPNL (Doc 32
-Ec. 27/28, ICAO Anexo 16 Ap. 2), el plano medio del suelo y las alturas
-equivalentes (Ec. 36-40), la resistividad de flujo media logarítmica (Ec. 41)
-y la cadena de apantallamiento por terreno (Ec. 42-47 con los apéndices de
-caminos de ruido de la guía; filiación CNOSSOS-EU). El tratamiento de fuente
-en hover, ralentí y rodaje (guía §A.3.5) queda fuera de la implementación.
 
 ## Véase también
 

@@ -1,7 +1,74 @@
 ---
 title: "Human Vibration"
 description: "Whole-body and hand-arm vibration exposure: the ISO 8041-1 frequency weightings, the ISO 2631-1 weighted r.m.s. and dose measures (VDV, MTVV, MSDV, crest factor), the vibration total value and the 8-hour daily exposure A(8), with the ISO 5349 exposure guidance and the action and limit values of Directive 2002/44/EC."
+references:
+  - type: book
+    authors: ["Griffin, M. J."]
+    year: 1996
+    title: "Handbook of human vibration"
+    publisher: "Academic Press"
+    url: "https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2"
+    note: "ISBN 978-0-12-303041-2. The standard monograph on whole-body and hand-transmitted vibration: the biodynamics, discomfort and health-effect evidence behind the weightings, dose measures and exposure-response guidance on this page."
+  - type: book
+    authors: ["Mansfield, N. J."]
+    year: 2004
+    title: "Human response to vibration"
+    publisher: "CRC Press"
+    url: "https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390"
+    note: "ISBN 978-0-415-28239-0. A compact modern textbook on the ISO 2631-1 and ISO 5349 evaluation chains, from perception and comfort to the occupational exposure limits."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Human response to vibration — Measuring instrumentation — Part 1: General purpose vibration meters"
+    designation: "ISO 8041-1:2017"
+    url: "https://www.iso.org/standard/70648.html"
+    note: "The frequency-weighting definitions and tolerances the implemented weightings follow."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Mechanical vibration and shock — Evaluation of human exposure to whole-body vibration — Part 1: General requirements"
+    designation: "ISO 2631-1:1997"
+    url: "https://www.iso.org/standard/7612.html"
+    note: "The whole-body evaluation: the weighted r.m.s. and dose measures and the vibration total value."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2003
+    title: "Mechanical vibration and shock — Evaluation of human exposure to whole-body vibration — Part 2: Vibration in buildings (1 Hz to 80 Hz)"
+    designation: "ISO 2631-2:2003"
+    url: "https://www.iso.org/standard/23012.html"
+    note: "Vibration in buildings: the Wm weighting."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2001
+    title: "Mechanical vibration and shock — Evaluation of human exposure to whole-body vibration — Part 4: Guidelines for the evaluation of the effects of vibration and rotational motion on passenger and crew comfort in fixed-guideway transport systems"
+    designation: "ISO 2631-4:2001"
+    url: "https://www.iso.org/standard/32178.html"
+    note: "Rail ride comfort: the Wb weighting."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2001
+    title: "Mechanical vibration — Measurement and evaluation of human exposure to hand-transmitted vibration — Part 1: General requirements"
+    designation: "ISO 5349-1:2001"
+    url: "https://www.iso.org/standard/32355.html"
+    note: "Hand-transmitted vibration: the general requirements of the evaluation."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2001
+    title: "Mechanical vibration — Measurement and evaluation of human exposure to hand-transmitted vibration — Part 2: Practical guidance for measurement at the workplace"
+    designation: "ISO 5349-2:2001"
+    url: "https://www.iso.org/standard/27511.html"
+    note: "Hand-transmitted vibration: practical guidance for measurement at the workplace."
+  - type: report
+    organization: "European Parliament and Council"
+    year: 2002
+    title: "Directive 2002/44/EC on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (vibration)"
+    number: "Directive 2002/44/EC"
+    institution: "Official Journal of the European Union"
+    url: "https://eur-lex.europa.eu/eli/dir/2002/44/oj/eng"
+    note: "The exposure action and limit values the daily exposure A(8) is assessed against."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 Vibration transmitted to a person is evaluated with the same measurement chain
 whatever its origin: the acceleration is **frequency-weighted** to reflect how
@@ -17,7 +84,7 @@ of analog filters; **ISO 2631-1** applies them to whole-body vibration,
 and **ISO 5349-1/-2** to hand-transmitted vibration. This page covers the whole
 chain.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Whole-body vibration measurement chain: a triaxial accelerometer at the seat/body interface of a seated person measures the x, y and z acceleration; each axis is band-limited and frequency-weighted (Wk vertical, Wd horizontal) per ISO 8041-1, reduced to a weighted r.m.s. a_w and VDV per ISO 2631-1, combined into the vibration total value a_v, normalised to the daily exposure A(8) and assessed against the EAV and ELV of Directive 2002/44/EC" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration_dark.svg" alt="Whole-body vibration measurement chain: a triaxial accelerometer at the seat/body interface of a seated person measures the x, y and z acceleration; each axis is band-limited and frequency-weighted (Wk vertical, Wd horizontal) per ISO 8041-1, reduced to a weighted r.m.s. a_w and VDV per ISO 2631-1, combined into the vibration total value a_v, normalised to the daily exposure A(8) and assessed against the EAV and ELV of Directive 2002/44/EC" style="width:94%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Whole-body vibration measurement chain: a triaxial accelerometer at the seat/body interface of a seated person measures the x, y and z acceleration; each axis is band-limited and frequency-weighted (Wk vertical, Wd horizontal) per ISO 8041-1, reduced to a weighted r.m.s. a_w and VDV per ISO 2631-1, combined into the vibration total value a_v, normalised to the daily exposure A(8) and assessed against the EAV and ELV of Directive 2002/44/EC" width="94%" loading="eager" />
 
 ## 1. Frequency weightings (ISO 8041-1)
 
@@ -49,7 +116,7 @@ The factors reproduce the ISO 8041-1 Annex B design-goal tables to their four
 significant figures: `Wk` plateaus near −6 dB below 2 Hz, peaks at +0.46 dB near
 6.3 Hz and rolls off above.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_weighting.svg" alt="The whole-body vertical weighting Wk in decibels over 0.4 to 100 Hz: a plateau near -6 dB below 2 Hz, a small +0.5 dB peak near 6 Hz and a roll-off to about -21 dB at 100 Hz" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_weighting_dark.svg" alt="The whole-body vertical weighting Wk in decibels over 0.4 to 100 Hz: a plateau near -6 dB below 2 Hz, a small +0.5 dB peak near 6 Hz and a roll-off to about -21 dB at 100 Hz" style="width:88%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_weighting.svg" alt="The whole-body vertical weighting Wk in decibels over 0.4 to 100 Hz: a plateau near -6 dB below 2 Hz, a small +0.5 dB peak near 6 Hz and a roll-off to about -21 dB at 100 Hz" width="88%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -140,7 +207,7 @@ print(round(result.overall, 3))          # 0.555  m/s^2 (a_w)
 print(result.weighted.round(3))          # W_i * a_i per band
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighted_acceleration.svg" alt="A measured vehicle-seat acceleration spectrum (grey) and its Wk-weighted contribution (blue) over the one-third octaves from 1 to 80 Hz: the weighting attenuates the low and high bands but leaves the 4 to 8 Hz range nearly unchanged, giving a weighted r.m.s. a_w of about 1.03 m/s^2" style="width:90%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighted_acceleration_dark.svg" alt="A measured vehicle-seat acceleration spectrum (grey) and its Wk-weighted contribution (blue) over the one-third octaves from 1 to 80 Hz: the weighting attenuates the low and high bands but leaves the 4 to 8 Hz range nearly unchanged, giving a weighted r.m.s. a_w of about 1.03 m/s^2" style="width:90%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighted_acceleration.svg" alt="A measured vehicle-seat acceleration spectrum (grey) and its Wk-weighted contribution (blue) over the one-third octaves from 1 to 80 Hz: the weighting attenuates the low and high bands but leaves the 4 to 8 Hz range nearly unchanged, giving a weighted r.m.s. a_w of about 1.03 m/s^2" width="90%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -261,7 +328,7 @@ print(round(result.a8, 2))                 # 3.61  m/s^2
 print(result.assessment.zone)             # 'action'  (2.5 <= A(8) < 5.0)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/daily_vibration_exposure.svg" alt="A bar chart of the three partial hand-arm exposures (about 2.3, 2.1 and 1.8 m/s^2) and the combined A(8) of 3.61 m/s^2, with the Directive 2002/44/EC exposure action value at 2.5 and exposure limit value at 5.0 m/s^2 marked as horizontal lines; the daily exposure sits in the action zone between them" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/daily_vibration_exposure_dark.svg" alt="A bar chart of the three partial hand-arm exposures (about 2.3, 2.1 and 1.8 m/s^2) and the combined A(8) of 3.61 m/s^2, with the Directive 2002/44/EC exposure action value at 2.5 and exposure limit value at 5.0 m/s^2 marked as horizontal lines; the daily exposure sits in the action zone between them" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/daily_vibration_exposure.svg" alt="A bar chart of the three partial hand-arm exposures (about 2.3, 2.1 and 1.8 m/s^2) and the combined A(8) of 3.61 m/s^2, with the Directive 2002/44/EC exposure action value at 2.5 and exposure limit value at 5.0 m/s^2 marked as horizontal lines; the daily exposure sits in the action zone between them" width="82%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -314,28 +381,6 @@ The standards deliberately define no safe limit — `A(8)` and the directive's
 action and limit values are the basis for any exposure criterion. For whole-body
 exposure, `energy_equivalent_acceleration` gives the ISO 2631-1 Eq. (B.3)
 energy-equivalent magnitude across periods of different magnitude and duration.
-
-## References
-
-- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
-  ISBN 978-0-12-303041-2.
-  [Publisher page](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
-  The standard monograph on whole-body and hand-transmitted vibration:
-  the biodynamics, discomfort and health-effect evidence behind the
-  weightings, dose measures and exposure-response guidance on this page.
-- Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
-  ISBN 978-0-415-28239-0.
-  [Publisher page](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).
-  A compact modern textbook on the ISO 2631-1 and ISO 5349 evaluation chains,
-  from perception and comfort to the occupational exposure limits.
-
-## Standards
-
-ISO 8041-1:2017 (weighting definitions and tolerances);
-ISO 2631-1:1997 (whole-body evaluation); ISO 2631-2:2003 (buildings, `Wm`);
-ISO 2631-4:2001 (rail ride comfort, `Wb`); ISO 5349-1:2001 and ISO 5349-2:2001
-(hand-transmitted vibration); Directive 2002/44/EC (exposure action and limit
-values).
 
 ## See also
 

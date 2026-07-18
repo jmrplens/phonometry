@@ -1,0 +1,12 @@
+---
+/**
+ * Default Starlight article body plus the unified per-page bibliography.
+ * References render inside the slot so they inherit the .sl-markdown-content
+ * typography and land at the very end of the article, after all authored
+ * sections. The matching table-of-contents entry comes from src/routeData.ts.
+ */
+import Default from '@astrojs/starlight/components/MarkdownContent.astro';
+import References from './References.astro';
+---
+
+<Default><slot /><References /></Default>

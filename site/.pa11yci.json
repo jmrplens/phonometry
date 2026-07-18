@@ -45,6 +45,12 @@
     "http://localhost:4321/phonometry/guides/sections/rooms-buildings/",
     "http://localhost:4321/phonometry/guides/sections/room-acoustics/",
     "http://localhost:4321/phonometry/es/guides/sections/rooms-buildings/",
-    "http://localhost:4321/phonometry/es/guides/sections/room-acoustics/"
+    "http://localhost:4321/phonometry/es/guides/sections/room-acoustics/",
+    "http://localhost:4321/phonometry/guides/aircraft-noise/",
+    "http://localhost:4321/phonometry/es/guides/aircraft-noise/",
+    "http://localhost:4321/phonometry/guides/psychoacoustic-annoyance/",
+    "http://localhost:4321/phonometry/es/guides/psychoacoustic-annoyance/",
+    "http://localhost:4321/phonometry/guides/surface-scattering/",
+    "http://localhost:4321/phonometry/es/guides/surface-scattering/"
   ]
 }

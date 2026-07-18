@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Docs site: unified per-page references. Guides can declare a typed
+  bibliography in the page frontmatter (standard, book, article, web and
+  report entries with DOI and publisher-catalogue links) and the site renders
+  one localized, alphabetized APA-7 "References" section at the end of the
+  article, wired into the "On this page" panel. Three guide pairs (EN + ES)
+  pilot the migration with verified links for every entry: loudness, aircraft
+  noise and psychoacoustic annoyance.
+- Docs site: accessible animation embed (`Video.astro`). Wraps the existing
+  four-variant WebM convention (EN/ES, light/dark, lazy poster) and adds a
+  required accessible name and textual description, a visible localized
+  download link, an in-element textual fallback and keyboard-operable
+  controls; the loudness and surface-scattering guides embed through it.
+
 - Correlation, time-delay estimation and Hilbert envelope (Bendat & Piersol,
   Random Data 4e; Knapp & Carter 1976): `correlation` (auto/cross via
   zero-padded FFT with the biased, unbiased and coefficient normalizations,
@@ -440,6 +453,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Docs site build and assets: a postbuild step recompresses the raster images
+  the site serves (the social card drops from 663 KiB to 337 KiB, sources
+  untouched), prerendered pages render four at a time, the pa11y audit covers
+  the six migrated guide URLs, and the programme-loudness page titles were
+  shortened to satisfy the html-validate long-title gate.
 - The multiple-shock whole-body vibration module (ISO 2631-5:2018) now
   documents its axis scope: the spinal-response model is vertical-axis only by
   design (clause 4a neglects the horizontal contributions to spinal

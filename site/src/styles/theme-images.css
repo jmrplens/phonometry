@@ -1,18 +1,21 @@
 /* Show the figure variant that matches the active Starlight theme.
    Figures are generated in both themes by scripts/generate_graphs.py (make graphs).
-   The same light-only/dark-only switch covers the Tier-1 animation <video>s. */
+   The same light-only/dark-only switch covers the Tier-1 animation <video>s,
+   raw or wrapped in the <figure> emitted by src/components/Video.astro. */
 [data-theme='light'] img.dark-only,
-[data-theme='light'] video.dark-only {
+[data-theme='light'] video.dark-only,
+[data-theme='light'] figure.dark-only {
   display: none;
 }
 
 [data-theme='dark'] img.light-only,
-[data-theme='dark'] video.light-only {
+[data-theme='dark'] video.light-only,
+[data-theme='dark'] figure.light-only {
   display: none;
 }
 
-/* Tier-1 animations embedded as autoplaying, looping, muted WebM with native
-   controls (a keyboard-accessible pause/stop for the motion, WCAG 2.2.2).
+/* Tier-1 animations embedded as looping, muted, never-autoplaying WebM with
+   native controls (keyboard-accessible playback control, WCAG 2.2.2).
    Match the figure treatment: centred block, rounded, never wider than the
    reading column. Authored inline as <video style="width:88%">; the
    responsive tiers below give videos the same widths as the detailed

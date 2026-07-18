@@ -1,5 +1,5 @@
 ---
-title: "Programme loudness and true peak (ITU-R BS.1770 / EBU R 128)"
+title: "Programme loudness and true peak (BS.1770 / EBU R 128)"
 description: "The ITU-R BS.1770-5 programme-loudness algorithm and the EBU R 128 normalisation practice: K-weighting, gated integrated loudness in LUFS, the EBU Mode momentary and short-term meters of Tech 3341, the Tech 3342 loudness range and the oversampled true-peak level in dBTP."
 ---
 

@@ -1,5 +1,5 @@
 ---
-title: "Sonoridad de programa y pico verdadero (UIT-R BS.1770 / EBU R 128)"
+title: "Sonoridad de programa y pico verdadero (BS.1770 / R 128)"
 description: "El algoritmo de sonoridad de programa de la Rec. UIT-R BS.1770-5 y la práctica de normalización de EBU R 128: ponderación K, sonoridad integrada con puertas en LUFS, los medidores momentáneo y de corto plazo del modo EBU de Tech 3341, el rango de sonoridad de Tech 3342 y el nivel de pico verdadero por sobremuestreo en dBTP."
 ---
 

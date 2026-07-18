@@ -209,6 +209,17 @@ export default defineConfig({
     '/guides/psychoacoustics/': `${basePath}/guides/loudness/`,
     '/es/guides/psychoacoustics/': `${basePath}/es/guides/loudness/`,
   },
+  build: {
+    // Render prerendered pages in parallel batches (default is 1 at a time).
+    // At ~340 pages the static-generation phase is a small slice of the
+    // build today; the win grows with the page count and it never hurts.
+    // The dominant phase (content sync, ~18 s) cannot be cached while
+    // starlight-links-validator is enabled: the plugin clears the content
+    // layer cache on every build so its remark pass sees every page and the
+    // link map stays complete. That is the validation gate working as
+    // designed, not a regression.
+    concurrency: 4,
+  },
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeKatex, rehypeTableAlign],
@@ -239,6 +250,9 @@ export default defineConfig({
         Header: './src/components/Header.astro',
         // Linked group labels + non-collapsible sidebar.
         Sidebar: './src/components/Sidebar.astro',
+        // Default article body plus the unified APA-7 references section
+        // rendered from the typed frontmatter bibliography.
+        MarkdownContent: './src/components/MarkdownContent.astro',
       },
       customCss: [
         './src/styles/katex.css',

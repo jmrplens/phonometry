@@ -1,6 +1,32 @@
 ---
 title: "Molestia psicoacústica e intensidad de fluctuación"
 description: "La molestia psicoacústica de Fastl y Zwicker PA = N5·(1 + √(wS² + wFR²)) a partir de sonoridad, nitidez, aspereza e intensidad de fluctuación (Ecs 16.2–16.4), la forma cerrada para ruido de banda ancha AM (Ec. 10.2) y el modelo de señal de intensidad de fluctuación de Osses 2016."
+references:
+  - type: book
+    authors: ["Fastl, H.", "Zwicker, E."]
+    year: 2007
+    title: "Psychoacoustics: Facts and models"
+    edition: "3.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-540-68888-4"
+    note: "La fuente del modelo de molestia psicoacústica de la sección 2 (Ecs 16.2-16.4, capítulo 16; origen Widmann 1992) y de la forma cerrada de la intensidad de fluctuación para ruido de banda ancha AM de la sección 3.1 (Ec. 10.2, capítulo 10)."
+  - type: article
+    authors: ["Osses Vecchi, A.", "García León, R.", "Kohlrausch, A."]
+    year: 2016
+    title: "Modelling the sensation of fluctuation strength"
+    journal: "Proceedings of Meetings on Acoustics"
+    volume: 28
+    pages: "050005"
+    doi: "10.1121/2.0000410"
+    note: "El modelo de señal de la intensidad de fluctuación implementado en la sección 3.2 (presentado en el ICA 2016; clean-room, sin norma numérica, calibrado a 1 vacil en el tono AM de referencia), incluidos los valores de su Tabla 1 usados como contraste."
+  - type: web
+    authors: ["Felix Greco, G.", "Merino-Martínez, R.", "Osses, A.", "Lotinga, M. J. B."]
+    year: 2025
+    title: "SQAT: A sound quality analysis toolbox for MATLAB"
+    siteName: "GitHub"
+    url: "https://github.com/ggrecow/SQAT"
+    doi: "10.5281/zenodo.7934709"
+    note: "La referencia abierta en MATLAB (software de código abierto) usada como oráculo numérico de las comprobaciones de intensidad de fluctuación de esta página."
 ---
 
 Lo *molesto* que resulta un sonido depende de algo más que de su sonoridad.
@@ -220,42 +246,6 @@ Para **ruido de banda ancha AM** el modelo de señal sobreestima el nivel absolu
 (reparte la energía modulada entre las bandas) — cite la forma cerrada
 `fluctuation_strength_am_noise` (§3.1) para ese estímulo.
 :::
-
-## Referencias
-
-- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
-  (3.ª ed.). Springer.
-  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
-  La fuente del modelo de molestia psicoacústica de la sección 2
-  (Ecs 16.2–16.4, capítulo 16) y de la forma cerrada de la intensidad de
-  fluctuación para ruido de banda ancha AM de §3.1 (Ec. 10.2, capítulo 10).
-- Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016). Modelling the
-  sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*,
-  28, 050005. [doi:10.1121/2.0000410](https://doi.org/10.1121/2.0000410).
-  El modelo de señal de la intensidad de fluctuación implementado en §3.2,
-  incluidos los valores de su Tabla 1 usados como contraste.
-- Felix Greco, G., Merino-Martínez, R., Osses, A., & Lotinga, M. J. B.
-  (2025). *SQAT: a sound quality analysis toolbox for MATLAB* (software de
-  código abierto). [github.com/ggrecow/SQAT](https://github.com/ggrecow/SQAT),
-  [doi:10.5281/zenodo.7934709](https://doi.org/10.5281/zenodo.7934709).
-  La referencia abierta en MATLAB usada como oráculo numérico de las
-  comprobaciones de intensidad de fluctuación de esta página.
-
-## Normas
-
-Fastl y Zwicker (2007, 3.ª ed.), *Psychoacoustics: Facts and Models* (Springer): la
-molestia psicoacústica `PA = N5·(1 + √(wS² + wFR²))` con la ponderación de nitidez
-`wS` y la ponderación de aspereza/fluctuación `wFR` (Ecs 16.2–16.4; origen
-Widmann 1992), y la forma cerrada para la intensidad de fluctuación del ruido de
-banda ancha modulado en amplitud (Ec. 10.2). El modelo de señal de intensidad de
-fluctuación sigue a Osses García y Kohlrausch (2016), *Modelling the sensation of
-fluctuation strength* (ICA 2016) — clean-room, sin norma numérica: calibrado a
-`1 vacil` en el tono AM de referencia y contrastado con las tendencias de la
-literatura de la Tabla 1 del artículo y el oráculo de referencia abierto SQAT.
-Las cuatro sensaciones reutilizan la sonoridad ISO 532-1, la nitidez DIN 45692 y
-la aspereza ECMA-418-2 de la biblioteca (véase
-[Sonoridad](/phonometry/es/guides/loudness/) y
-[Métricas de calidad sonora](/phonometry/es/guides/sound-quality/)).
 
 ## Véase también
 

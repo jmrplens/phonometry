@@ -520,12 +520,12 @@ surface.
 - Sonar equation: Urick, *Principles of Underwater Sound*.
 - Seabed reflection: Medwin & Clay, *Fundamentals of Acoustical Oceanography*
   (Rayleigh fluid–fluid reflection coefficient).
-- Ambient noise: Wenz (1962); Carey & Evans, *Ocean Ambient Noise* (2011) — the
+- Ambient noise: Wenz (1962); Carey & Evans, *Ocean Ambient Noise* (2011), for the
   wind "rule of fives" and the Mellen thermal-noise derivation.
 - Ship-traffic source level: MacGillivray & de Jong (2021),
   *J. Mar. Sci. Eng.* 9(4) 369 (CC-BY, JOMOPANS-ECHO), which also reproduces
   RANDI 3.1 and Wales & Heitmeyer (2002).
 - Numerical solvers: Jensen, Kuperman, Porter & Schmidt,
-  *Computational Ocean Acoustics* (2nd ed., Springer 2011) — normal modes
+  *Computational Ocean Acoustics* (2nd ed., Springer 2011), for normal modes
   (Ch. 5), ray tracing (Ch. 3) and the split-step Fourier parabolic equation
   (Ch. 6).

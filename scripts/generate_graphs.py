@@ -716,6 +716,14 @@ _ES_EXACT = {
     "Agr — ground": "Agr — suelo",
     "Abar — barrier": "Abar — barrera",
     "A — total": "A — total",
+    "Spherical-Wave Ground Effect (Weyl-Van der Pol)":
+        "Efecto suelo de onda esférica (Weyl-Van der Pol)",
+    "Level re free field [dB]": "Nivel respecto al campo libre [dB]",
+    "Fresh snow (10 kPa·s·m⁻²)": "Nieve reciente (10 kPa·s·m⁻²)",
+    "Forest floor (50 kPa·s·m⁻²)": "Suelo forestal (50 kPa·s·m⁻²)",
+    "Grassland (200 kPa·s·m⁻²)": "Pradera (200 kPa·s·m⁻²)",
+    "Asphalt (20 000 kPa·s·m⁻²)": "Asfalto (20 000 kPa·s·m⁻²)",
+    "Hard-ground limit (+6 dB)": "Límite de suelo rígido (+6 dB)",
     "ISO 9612 Task-Based Exposure (Annex D)":
         "Exposición por tareas (ISO 9612, Anexo D)",
     "LEX,8h contribution [dB]": "Contribución a LEX,8h [dB]",
@@ -5685,6 +5693,48 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
     plt.close()
 
 
+def generate_ground_effect_spherical(output_dir: str) -> None:
+    """Spherical-wave ground effect (Weyl-Van der Pol) for four ground types."""
+    print("Generating ground_effect_spherical.png...")
+    import warnings as _warnings
+
+    from phonometry import ground_effect
+
+    freqs = np.geomspace(50.0, 4000.0, 400)
+    # Effective flow resistivities (kPa s/m2 -> Pa s/m2) after Attenborough Ch. 2
+    # / Salomons Sec. 3.1: fresh snow, forest floor, grassland and a near-hard
+    # surface (asphalt / compacted soil).
+    grounds = [
+        ("Fresh snow (10 kPa·s·m⁻²)", 10e3, COLOR_TERTIARY),
+        ("Forest floor (50 kPa·s·m⁻²)", 50e3, "#9467bd"),
+        ("Grassland (200 kPa·s·m⁻²)", 200e3, COLOR_PRIMARY),
+        ("Asphalt (20 000 kPa·s·m⁻²)", 20000e3, COLOR_SECONDARY),
+    ]
+    fig, ax = plt.subplots(figsize=(11, 6.4))
+    with _warnings.catch_warnings():
+        _warnings.simplefilter("ignore")
+        for label, sigma, color in grounds:
+            res = ground_effect(freqs, 1.0, 1.5, 50.0, flow_resistivity=sigma)
+            ax.plot(freqs, res.excess_attenuation, color=color, linewidth=1.8,
+                    label=label, zorder=3)
+    ax.axhline(6.0, color=COLOR_FG, linestyle=":", linewidth=1.0, alpha=0.7,
+               label="Hard-ground limit (+6 dB)")
+    ax.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.6)
+    ax.set_xscale("log")
+    ax.set_title("Spherical-Wave Ground Effect (Weyl-Van der Pol)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Level re free field [dB]")
+    ax.set_xlim(50.0, 4000.0)
+    ax.set_ylim(-20.0, 8.0)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower left", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "ground_effect_spherical.png")
+    plt.close()
+
+
 def generate_exposure_uncertainty(output_dir: str) -> None:
     """ISO 9612 Annex D task-based exposure with its expanded uncertainty."""
     print("Generating exposure_uncertainty.png...")
@@ -7096,6 +7146,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Outdoor propagation & occupational exposure (ISO 9613-1/2, ISO 9612)
     generate_air_absorption_alpha,
     generate_outdoor_attenuation_breakdown,
+    generate_ground_effect_spherical,
     generate_exposure_uncertainty,
     # Materials: absorption rating, airflow resistance, impedance tube
     # (ISO 11654, ISO 9053-1/-2, ISO 10534-1/-2, ASTM E2611)

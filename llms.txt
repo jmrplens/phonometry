@@ -46,6 +46,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/guides/insulation-lab/)
 - [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/guides/insulation-prediction/)
 - [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/guides/outdoor-propagation/)
+- [Spherical ground effect and advanced barriers (Attenborough / Salomons / Bies)](https://jmrplens.github.io/phonometry/guides/ground-barriers/)
 - [Sound Power](https://jmrplens.github.io/phonometry/guides/sound-power/)
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/)
 - [Calibrated spectral analysis (Bendat & Piersol)](https://jmrplens.github.io/phonometry/guides/spectral-analysis/)

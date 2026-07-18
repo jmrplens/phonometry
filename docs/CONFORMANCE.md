@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **306/306 conformance checks pass** across 38 domains and 181 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **312/312 conformance checks pass** across 39 domains and 187 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -652,6 +652,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bendat & Piersol, Random Data 4e Sec. 13.1.4 (Hilbert relation) | Min-phase reconstruction of a strictly min-phase biquad, max err, rad | 0 rad (+/-0 rad) | 0 rad | 0 rad | &#9989; |
 | First-order allpass closed form (1-a^2)/(1+2a cos w+a^2) | Group delay of the a = 0.5 allpass at w = pi/2, samples | 0.6 (+/-0.00001) | 0.6 | 0 | &#9989; |
 | All-pass decomposition of a pure latency (B&P Sec. 13.1.4) | Excess group delay of a biquad delayed 7.25 samples, samples | 7.25 (+/-0) | 7.25 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Spherical ground &amp; barriers (Attenborough / Salomons / Bies)</b>: 100% (6/6)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Attenborough 2e Eq. (2.40c) (spherical Q, hard-ground limit) | abs(Q) as Z grows large (Rp -> 1 so (1 - Rp) -> 0 and Q -> 1) | 1 (+/-0.000001) | 1 | 0 | &#9989; |
+| Salomons 2001 Sec. 3.4 (two-ray field over a rigid ground) | dL enhancement at small path difference (constructive, +6 dB) | 6.0206 dB (+/-0.1 dB) | 6.0205 dB | 0 dB | &#9989; |
+| Salomons 2001 Eq. (D.59) (plane-wave Rp, grazing incidence) | Re(Rp) at grazing (hs, hr -> 0, cos(theta) -> 0 so Rp -> -1) | -1 (+/-0.001) | -1 | 0 | &#9989; |
+| Bies 5e Eq. (5.138) (Kurze-Anderson, N -> 0) | Barrier attenuation at the shadow boundary N = 0 | 5 dB (+/-0 dB) | 5 dB | 0 dB | &#9989; |
+| Bies 5e Eq. (5.138) (Kurze-Anderson, large-N slope) | Delta(N=10) - Delta(N=1) vs the 10 lg(10) = 10 dB decade growth | 10 dB (+/-0.5 dB) | 9.8845 dB | -0.116 dB | &#9989; |
+| Attenborough 2e Eqs. (9.19)-(9.20) (rigid half-plane, shadow boundary) | Exact thin-screen insertion loss at grazing (field halved, 6 dB) | 6.0206 dB (+/-0.6 dB) | 5.7932 dB | -0.227 dB | &#9989; |
 
 </details>
 

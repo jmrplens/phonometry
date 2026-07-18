@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Spherical-wave ground effect and advanced barrier diffraction
+  (`phonometry.environmental.ground_barriers`). `ground_effect` predicts the
+  excess attenuation over a finite-impedance ground from the Weyl-Van der Pol
+  spherical-wave reflection coefficient `Q = Rp + (1 - Rp) F(w)` (Attenborough
+  & Van Renterghem 2021 Eq. 2.40; Salomons 2001 Eqs. D.57-D.60), with the
+  boundary-loss factor through the scaled complementary error function
+  (`scipy.special.wofz`) and the ground impedance taken either directly or from
+  the Delany-Bazley / Miki porous models of `phonometry.materials`.
+  `barrier_insertion_loss` adds wave-theoretic screening beyond the ISO 9613-2
+  `Dz` term: the Kurze-Anderson closed form in the Fresnel number (Bies 2017
+  Eq. 5.138), the exact rigid half-plane (the flat-wedge limit of the MacDonald
+  / Hadden & Pierce solution, Attenborough Eqs. 9.19-9.20), thick barriers by
+  double-edge diffraction (Bies Eq. 5.157) and the coherent four-path barrier
+  on the ground combining the source/receiver images with the spherical-wave
+  `Q`. Both results expose `.plot()` (excess attenuation and insertion loss vs
+  frequency). Anchored by the analytic limits (hard ground `Q -> 1` and the
+  `+6 dB` enhancement, grazing `Rp -> -1`, Kurze-Anderson `5 dB` at `N = 0`,
+  the exact half-plane `6 dB` at the shadow boundary) as tests and conformance
+  checks, with a new EN/ES guide and GitHub theory page.
 - Docs site: unified per-page references. Guides can declare a typed
   bibliography in the page frontmatter (standard, book, article, web and
   report entries with DOI and publisher-catalogue links) and the site renders

@@ -525,13 +525,15 @@ it; the list grows as guides gain their References sections.
   The wave-based theory of outdoor sound (parabolic equation, fast field
   program, refraction, turbulence) behind the engineering approximations of
   ISO 9613-2.
-  Cited by [Outdoor Sound Propagation](outdoor-propagation.md).
+  Cited by [Outdoor Sound Propagation](outdoor-propagation.md) and
+  [Spherical ground effect and advanced barriers](ground-barriers.md).
 - Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
   (2nd ed.). CRC Press.
   [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
   Ground impedance models, the spherical-wave reflection coefficient behind
   the ground dip, and meteorological effects on barriers.
-  Cited by [Outdoor Sound Propagation](outdoor-propagation.md) and
+  Cited by [Outdoor Sound Propagation](outdoor-propagation.md),
+  [Spherical ground effect and advanced barriers](ground-barriers.md) and
   [Porous and Multilayer Absorbers](porous-absorbers.md).
   the ground dip, meteorological effects on barriers, and the chapter 4
   pressure-velocity FDTD reference model.
@@ -542,7 +544,20 @@ it; the list grows as guides gain their References sections.
   [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
   The screen-attenuation chart against Fresnel number that barrier
   engineering formulas descend from.
-  Cited by [Outdoor Sound Propagation](outdoor-propagation.md).
+  Cited by [Outdoor Sound Propagation](outdoor-propagation.md) and
+  [Spherical ground effect and advanced barriers](ground-barriers.md).
+- Kurze, U. J., & Anderson, G. S. (1971). Sound attenuation by barriers.
+  *Applied Acoustics*, 4(1), 35-53.
+  [doi:10.1016/0003-682X(71)90024-7](https://doi.org/10.1016/0003-682X(71)90024-7).
+  The closed-form fit to Maekawa's chart in the Fresnel number.
+  Cited by [Spherical ground effect and advanced barriers](ground-barriers.md).
+- Hadden, W. J., & Pierce, A. D. (1981). Sound diffraction around screens and
+  wedges for arbitrary point source locations. *Journal of the Acoustical
+  Society of America*, 69(5), 1266-1276.
+  [doi:10.1121/1.385809](https://doi.org/10.1121/1.385809).
+  The exact wedge-diffraction solution whose flat-wedge (thin-screen) limit
+  the barrier insertion loss uses.
+  Cited by [Spherical ground effect and advanced barriers](ground-barriers.md).
 - Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
   assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Publications
   Office of the European Union.

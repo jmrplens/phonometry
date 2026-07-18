@@ -1,6 +1,6 @@
 ---
 title: "Outdoor sound"
-description: "Sound on its way through open air and the character of what arrives: the ISO 9613 outdoor-propagation model with its per-term attenuation breakdown, and the NT ACOU 112 prominence and adjustment for impulsive sounds."
+description: "Sound on its way through open air and the character of what arrives: the ISO 9613 outdoor-propagation model with its per-term attenuation breakdown, the wave-acoustic spherical ground effect and advanced barrier diffraction, and the NT ACOU 112 prominence and adjustment for impulsive sounds."
 ---
 
 Outdoor sound assessment has two halves: predicting the level a source
@@ -16,6 +16,14 @@ and barrier screening, with a meteorological correction for long-term
 averages. The page keeps the per-term breakdown visible, so a prediction is
 never a black box: you can see exactly which mechanism buys how many decibels
 at which frequency.
+
+[Spherical ground effect and advanced barriers](/phonometry/guides/ground-barriers/)
+goes underneath the ISO 9613-2 fits to the wave acoustics they approximate: the
+Weyl-Van der Pol spherical-wave reflection coefficient of a finite-impedance
+ground, and barrier diffraction by the Kurze-Anderson Fresnel number, the exact
+rigid half-plane, thick barriers and the coherent four-path barrier on the
+ground, all resolving the frequency-dependent interference the octave-band terms
+smooth away.
 
 [Impulsive-sound prominence (NT ACOU 112)](/phonometry/guides/impulse-prominence/)
 is the assessment half. Noise containing distinct impulses (hammering,
@@ -40,6 +48,10 @@ section.
 - [Outdoor Sound Propagation](/phonometry/guides/outdoor-propagation/):
   ISO 9613-1 atmospheric absorption and the ISO 9613-2 general method with a
   per-term octave-band attenuation breakdown.
+- [Spherical ground effect and advanced barriers](/phonometry/guides/ground-barriers/):
+  the Weyl-Van der Pol spherical-wave ground reflection and wave-theoretic
+  barrier diffraction (Kurze-Anderson, exact rigid half-plane, thick barriers
+  and the coherent four-path barrier on the ground).
 - [Impulsive-sound prominence (NT ACOU 112)](/phonometry/guides/impulse-prominence/):
   the predicted prominence of impulsive sounds and the graduated LAeq
   adjustment KI.

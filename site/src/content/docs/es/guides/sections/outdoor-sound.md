@@ -1,6 +1,6 @@
 ---
 title: "Sonido en exteriores"
-description: "El sonido en su camino por el aire libre y el carácter de lo que llega: el modelo de propagación en exteriores ISO 9613 con su desglose de atenuación término a término, y la prominencia y el ajuste por sonidos impulsivos de NT ACOU 112."
+description: "El sonido en su camino por el aire libre y el carácter de lo que llega: el modelo de propagación en exteriores ISO 9613 con su desglose de atenuación término a término, el efecto suelo esférico por acústica ondulatoria y la difracción de barreras avanzada, y la prominencia y el ajuste por sonidos impulsivos de NT ACOU 112."
 ---
 
 La evaluación del sonido en exteriores tiene dos mitades: predecir el nivel
@@ -17,6 +17,14 @@ una corrección meteorológica para promedios a largo plazo. La página mantiene
 visible el desglose término a término, de modo que una predicción nunca es
 una caja negra: se ve exactamente qué mecanismo compra cuántos decibelios a
 qué frecuencia.
+
+[Efecto suelo esférico y barreras avanzadas](/phonometry/es/guides/ground-barriers/)
+baja de los ajustes de ISO 9613-2 a la acústica ondulatoria que aproximan: el
+coeficiente de reflexión de onda esférica de Weyl-Van der Pol de un suelo de
+impedancia finita, y la difracción de barreras por el número de Fresnel de
+Kurze-Anderson, el semiplano rígido exacto, las barreras gruesas y la barrera
+coherente de cuatro caminos sobre el suelo, resolviendo la interferencia
+dependiente de la frecuencia que los términos por banda de octava suavizan.
 
 [Prominencia de sonidos impulsivos (NT ACOU 112)](/phonometry/es/guides/impulse-prominence/)
 es la mitad de evaluación. El ruido con impulsos claros (martilleo,
@@ -40,6 +48,10 @@ y las fuentes que alimentan un cálculo de propagación en
 - [Propagación del sonido en exteriores](/phonometry/es/guides/outdoor-propagation/):
   la absorción atmosférica de ISO 9613-1 y el método general de ISO 9613-2
   con desglose de atenuación por término y banda de octava.
+- [Efecto suelo esférico y barreras avanzadas](/phonometry/es/guides/ground-barriers/):
+  la reflexión de onda esférica de Weyl-Van der Pol en el suelo y la difracción
+  de barreras por teoría ondulatoria (Kurze-Anderson, semiplano rígido exacto,
+  barreras gruesas y la barrera coherente de cuatro caminos sobre el suelo).
 - [Prominencia de sonidos impulsivos (NT ACOU 112)](/phonometry/es/guides/impulse-prominence/):
   la prominencia predicha de los sonidos impulsivos y el ajuste graduado KI
   del LAeq.

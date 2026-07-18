@@ -46,6 +46,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/guides/insulation-lab/)
 - [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/guides/insulation-prediction/)
 - [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/guides/outdoor-propagation/)
+- [Spherical ground effect and advanced barriers (Attenborough / Salomons / Bies)](https://jmrplens.github.io/phonometry/guides/ground-barriers/)
 - [Sound Power](https://jmrplens.github.io/phonometry/guides/sound-power/)
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/)
 - [Calibrated spectral analysis (Bendat & Piersol)](https://jmrplens.github.io/phonometry/guides/spectral-analysis/)
@@ -6786,6 +6787,187 @@ method itself is covered in the [Room Acoustics guide](https://jmrplens.github.i
 ---
 
 
+<!-- source: docs/ground-barriers.md | canonical: https://jmrplens.github.io/phonometry/guides/ground-barriers/ -->
+
+# Spherical ground effect and advanced barriers (Attenborough / Salomons / Bies)
+
+The [ISO 9613-2 general method](https://jmrplens.github.io/phonometry/guides/outdoor-propagation/) folds the ground and
+barrier terms into tabulated, energy-based corrections. This page covers the
+underlying wave acoustics in `phonometry.environmental.ground_barriers`: the
+**spherical-wave reflection coefficient** of a finite-impedance ground
+(Weyl-Van der Pol) and the **wave-theoretic diffraction** of a screen, both in
+a homogeneous (non-refracting, non-turbulent) atmosphere. These are the physical
+core of the Nord2000 / CNOSSOS ground and barrier models, and they show the
+frequency-dependent interference structure the octave-band `Agr`/`Dz` terms
+smooth away.
+
+## 1. Spherical-wave ground effect (Weyl-Van der Pol)
+
+The sound field of a point source above a locally reacting ground is the sum of
+a direct wave and a reflected wave weighted by the **spherical-wave reflection
+coefficient** `Q` (Attenborough Eq. 2.40a; Salomons Eq. 3.2):
+
+$$
+p = \frac{e^{ikR_1}}{4\pi R_1} + Q\,\frac{e^{ikR_2}}{4\pi R_2},
+$$
+
+with `R1` the source-receiver distance and `R2` the image-source distance. The
+coefficient (Attenborough Eq. 2.40c; Salomons Eq. D.58) corrects the plane-wave
+coefficient `Rp` for the curvature of the wavefront:
+
+$$
+Q = R_p + (1 - R_p)\,F(w), \qquad
+R_p = \frac{Z\cos\theta - 1}{Z\cos\theta + 1},
+$$
+
+$$
+F(w) = 1 + i\sqrt{\pi}\,w\,e^{-w^2}\operatorname{erfc}(-iw), \qquad
+w = \sqrt{\tfrac{i k R_2}{2}}\left(\cos\theta + \tfrac{1}{Z}\right).
+$$
+
+Here `Z` is the ground surface impedance normalized by `ρc`, `θ` is the angle of
+incidence from the ground normal (`cos θ = (hs + hr)/R2`), and the boundary-loss
+factor `F(w)` is written through the scaled complementary error function
+`e^{-w²} erfc(-iw)`, i.e. the Faddeeva function `scipy.special.wofz`. The second
+term of `Q` is the *ground wave* that keeps the field finite at grazing
+incidence, where `Rp → -1` and a plane-wave model would predict silence
+(Salomons Eq. D.59, D.60, D.57).
+
+The relative sound level (the *excess attenuation*, dB re free field) is
+(Salomons Eq. 3.4):
+
+$$
+\Delta L = 20\lg\!\left|\,1 + Q\,\frac{R_1}{R_2}\,e^{i k (R_2 - R_1)}\,\right|.
+$$
+
+```python
+import numpy as np
+from phonometry import ground_effect
+
+bands = np.array([63., 125., 250., 500., 1000., 2000., 4000., 8000.])
+
+# Grassland (effective flow resistivity sigma = 200 kPa.s/m^2), source 1 m and
+# receiver 1.5 m high, 50 m apart. The impedance comes from the Delany-Bazley
+# porous model of phonometry.materials (a semi-infinite ground).
+res = ground_effect(bands, 1.0, 1.5, 50.0, flow_resistivity=2e5)
+print(res.excess_attenuation)     # the ground dip (dB re free field)
+print(res.reflection_coefficient) # complex Q per band
+res.plot()                        # excess attenuation vs frequency
+```
+
+The ground impedance is either derived from an effective `flow_resistivity`
+(via the `delany_bazley` or `miki` model of
+[`phonometry.materials`](porous-absorber.md), which model a semi-infinite porous
+ground) or supplied directly as a normalized complex `impedance` (a scalar,
+per-band array, or a `PorousMediumResult`), so a measured surface impedance in
+the `e^{-iωt}` convention (a passive ground has `Im(Z) < 0`, as the porous
+models return) can be used unchanged.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_effect_spherical_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_effect_spherical.svg" alt="Excess attenuation (level re free field) against frequency on a log axis for four ground types. Fresh snow (10 kPa) dips deepest and lowest in frequency, near minus 9 dB around 180 Hz; forest floor (50 kPa) and grassland (200 kPa) have progressively shallower, higher-frequency dips; asphalt (20000 kPa) hugs the plus 6 dB hard-ground enhancement limit until a deep dip near 3 kHz. A dotted line marks the plus 6 dB hard-ground limit and a solid line the 0 dB free field" width="90%"></picture>
+
+**Limits reproduced by the implementation** (each a pinned test or conformance
+anchor): an acoustically hard ground (`|Z| → ∞`) gives `Rp → 1`, `|w| → 0`,
+`F → 1` and `Q → 1`, so `ΔL` reaches `+6 dB` in phase; the effective flow
+resistivity `σ → ∞` tends to that hard ground; grazing incidence
+(`hs, hr → 0`) gives `Rp → -1`; and the ground effect is reciprocal under an
+exchange of source and receiver heights.
+
+## 2. Advanced barrier diffraction
+
+Three levels of screening beyond the ISO 9613-2 `Dz` term are provided by
+`barrier_insertion_loss` and its building blocks.
+
+**Kurze-Anderson closed form.** The insertion loss of a thin screen as a
+function of the Fresnel number `N = (2/λ)(A + B − d)` (Bies Eq. 5.134, with `A`
+and `B` the two segments of the shortest source-edge-receiver path and `d` the
+straight distance) is (Bies Eq. 5.138; Kurze & Anderson 1971):
+
+$$
+\Delta = 5 + 20\lg\!\left(\frac{\sqrt{2\pi N}}{\tanh\sqrt{2\pi N}}\right)\;\text{dB},
+$$
+
+which tends to `5 dB` at the shadow boundary `N → 0` and approximates Maekawa's
+point-source curve within about 1.5 dB.
+
+```python
+from phonometry import barrier_insertion_loss, kurze_anderson_attenuation
+
+kurze_anderson_attenuation(0.0)     # 5.0 dB at the shadow boundary
+
+# A 4 m barrier 50 m from a 1 m source, receiver 1.5 m high at 100 m.
+il = barrier_insertion_loss(bands, 1.0, 50.0, 4.0, 100.0, 1.5,
+                            method="kurze_anderson")
+il.plot()                           # insertion loss vs frequency
+```
+
+**Exact rigid half-plane.** With `method="exact"` the wave-theoretic insertion
+loss of a rigid thin screen is used: the compact Fresnel-integral form of the
+MacDonald / Hadden & Pierce solution (Attenborough Eqs. 9.19-9.20), built from
+the auxiliary Fresnel functions. It gives `6 dB` at the shadow boundary (the
+field is exactly halved, the flat-wedge limit) and tracks Kurze-Anderson through
+the shadow zone.
+
+**Thick barriers.** A `thickness` (top width `e`) lengthens the diffracted path
+to `A + e + B`, the double-edge Fresnel number `N = (2/λ)(A + B + e − d)` of
+Bies Eq. 5.157, so a thick barrier or a soil mound attenuates monotonically more
+than the thin screen of the same height.
+
+**Coherent barrier on the ground.** With a `ground_impedance` (or a
+`ground_flow_resistivity`) the four source-image / receiver-image diffracted
+paths are combined coherently, each ground reflection weighted by the
+spherical-wave coefficient `Q` above (Attenborough Ch. 9; Bies Sec. 5.3.5). This
+exposes the ground-barrier interference structure that a purely energetic sum of
+`Agr` and `Dz` cannot. As a first-order simplification a single `Q` (over the
+overall source-receiver geometry) weights every bounce rather than a separate
+coefficient per image path; the model is coherent and reciprocal but not a full
+boundary-element solution.
+
+```python
+il = barrier_insertion_loss(bands, 1.0, 50.0, 4.0, 100.0, 1.5,
+                            method="exact", ground_flow_resistivity=2e5)
+il.ground        # True: the four-path coherent ground model was applied
+il.plot()
+```
+
+## Relation to ISO 9613-2
+
+The tabulated `Agr` and `Dz` of the [ISO 9613-2 method](https://jmrplens.github.io/phonometry/guides/outdoor-propagation/)
+are octave-band, energy-based engineering fits; `ground_effect` and
+`barrier_insertion_loss` are their narrowband wave-acoustic counterparts. Over
+hard ground both agree on the `+6 dB` enhancement and the `5 dB` grazing barrier
+floor, but only the wave models resolve the interference dips that move with
+geometry, frequency and ground impedance, which is why they are the natural
+infrastructure for the meteorological schemes of Nord2000 and CNOSSOS.
+
+## References
+
+- Attenborough, K., & Van Renterghem, T. (2021). *Predicting Outdoor Sound*
+  (2nd ed.). CRC Press. ISBN 978-1-138-30655-2.
+  [doi:10.1201/9780429470141](https://doi.org/10.1201/9780429470141).
+  Chapter 2 (spherical-wave reflection over an impedance ground, the
+  Weyl-Van der Pol equation and the boundary-loss factor) and Chapter 9
+  (outdoor noise barriers, the MacDonald and Hadden & Pierce diffraction
+  solutions).
+- Salomons, E. M. (2001). *Computational Atmospheric Acoustics*. Kluwer
+  Academic. ISBN 978-1-4020-0390-5.
+  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
+  Chapter 3 and Appendix D (the two-ray field, the plane- and spherical-wave
+  reflection coefficients, and the numerical distance).
+- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering Noise
+  Control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0. Sections 5.2.3
+  (spherical-wave ground reflection) and 5.3.5-5.3.7 (Fresnel number,
+  Kurze-Anderson, thin- and thick-barrier diffraction and terrain shielding).
+- Kurze, U. J., & Anderson, G. S. (1971). Sound attenuation by barriers.
+  *Applied Acoustics*, 4(1), 35-53.
+  [doi:10.1016/0003-682X(71)90024-7](https://doi.org/10.1016/0003-682X(71)90024-7).
+- Hadden, W. J., & Pierce, A. D. (1981). Sound diffraction around screens and
+  wedges for arbitrary point source locations. *Journal of the Acoustical
+  Society of America*, 69(5), 1266-1276.
+  [doi:10.1121/1.385809](https://doi.org/10.1121/1.385809).
+
+---
+
+
 <!-- source: docs/sound-power.md | canonical: https://jmrplens.github.io/phonometry/guides/sound-power/ -->
 
 # Sound Power
@@ -9385,6 +9567,13 @@ cycle and warn on use; they are removed in 4.0.
 | `predicted_receiver_level` | `function` | **Predicted octave-band receiver level (ISO 9613-2 Eq. 3/6).**<br>• `sound_power_level` Lw [dB]<br>• same geometry/ground/barrier/atmosphere params as `outdoor_propagation_attenuation`<br>• `directivity_index` Di, `d_omega` DΩ [dB]<br>• `c0`: subtract Cmet (Default: None) | `lp = predicted_receiver_level(lw, 200, 2, 2, bands)`<br><br>• LfT(DW) = Lw + Dc − A per band [dB] |
 | `OutdoorAttenuation` | `dataclass` | **Per-band ISO 9613-2 attenuation breakdown.**<br>• `frequencies` [Hz]<br>• `a_div`, `a_atm`, `a_gr`, `a_bar` [dB]<br>• `a_total` = Adiv+Aatm+Agr+Abar [dB]<br>• `d_omega` [dB] | `att.a_div, att.a_bar, att.a_total` |
 | `DEFAULT_FREQUENCIES` | `tuple` | **ISO 9613-2 nominal octave bands.**<br>(no parameters) | `DEFAULT_FREQUENCIES  # (63, …, 8000)` |
+| `ground_effect` | `function` | **Spherical-wave ground effect ΔL (Weyl-Van der Pol; Attenborough 2e Eq. 2.40, Salomons Eq. 3.4).**<br>• `frequencies` [Hz], `source_height` hs, `receiver_height` hr, `distance` [m]<br>• `impedance` (normalized) or `flow_resistivity` σ [Pa·s/m²]<br>• `model` 'delany_bazley'/'miki' | `r = ground_effect(bands, 1, 1.5, 50, flow_resistivity=2e5)`<br><br>• `SphericalGroundResult` (ΔL, Q, Rp, F) |
+| `spherical_reflection_coefficient` | `function` | **Spherical-wave reflection coefficient Q = Rp + (1−Rp)F(w) (Attenborough Eq. 2.40c; Salomons Eq. D.58).**<br>• `frequencies`, `normalized_impedance`, `source_height`, `receiver_height`, `distance` | `q = spherical_reflection_coefficient(bands, 12-6j, 1, 1.5, 50)` |
+| `SphericalGroundResult` | `dataclass` | **Spherical-wave ground-effect result.**<br>• `excess_attenuation` ΔL [dB re free field]<br>• `reflection_coefficient` Q, `plane_reflection_coefficient` Rp, `boundary_loss` F<br>• `r_direct`, `r_reflected` [m]<br>• `.plot()` | `r.excess_attenuation, r.reflection_coefficient` |
+| `fresnel_number` | `function` | **Barrier Fresnel number N = (2/λ)(A+B−d) (Bies 5e Eq. 5.134).**<br>• `source_to_edge` A, `edge_to_receiver` B, `direct_distance` d [m]<br>• `frequencies` [Hz] | `n = fresnel_number(101, 101, 200, bands)` |
+| `kurze_anderson_attenuation` | `function` | **Kurze-Anderson barrier attenuation (Bies Eq. 5.138).**<br>• `fresnel_number` N | `kurze_anderson_attenuation(0.0)  # 5 dB` |
+| `barrier_insertion_loss` | `function` | **Barrier insertion loss: Kurze-Anderson / exact half-plane / coherent ground four-path (Attenborough Ch. 9, Bies 5.3.5-5.3.7).**<br>• `frequencies`, `source_height`, `barrier_distance`, `barrier_height`, `receiver_distance`, `receiver_height`<br>• `method` 'exact'/'kurze_anderson'<br>• `thickness` e [m] (thick barrier)<br>• `ground_impedance` or `ground_flow_resistivity` | `il = barrier_insertion_loss(bands, 1, 50, 4, 100, 1.5, ground_flow_resistivity=2e5)`<br><br>• `BarrierInsertionLoss` |
+| `BarrierInsertionLoss` | `dataclass` | **Per-band barrier insertion loss.**<br>• `insertion_loss` [dB], `fresnel_number`, `method`, `ground`<br>• `.plot()` (IL vs frequency) | `il.insertion_loss` |
 | `task_based_exposure` | `function` | **Task-based daily exposure LEX,8h + U (ISO 9612 Clause 9).**<br>• `tasks`: sequence of `Task`<br>• `instrument`: 'class1'/'class2'/'personal_exposimeter' (Default)<br>• `u3` [dB] (Default: 1.0)<br>• `include_duration_uncertainty` (Default: True)<br>• `warn` (Default: True) | `res = task_based_exposure(tasks)`<br><br>• `ExposureResult` with per-task breakdown |
 | `job_based_exposure` | `function` | **Job-based daily exposure LEX,8h + U (ISO 9612 Clause 10).**<br>• `samples` Lp,A,eqT [dB]<br>• `effective_duration_hours` Te [h]<br>• `instrument`, `u3`<br>• `n_workers`/`sample_duration_hours`: Table 1 check | `res = job_based_exposure(samples, 7.5)`<br><br>• `ExposureResult` (Eq C.9 / Table C.4 budget) |
 | `full_day_exposure` | `function` | **Full-day daily exposure LEX,8h + U (ISO 9612 Clause 11).**<br>• `samples` whole-day Lp,A,eqT [dB]<br>• `effective_duration_hours` Te [h]<br>• `instrument`, `u3`, `warn` | `res = full_day_exposure(samples, 9.25)`<br><br>• `ExposureResult`; 3 samples spanning ≥3 dB advise |

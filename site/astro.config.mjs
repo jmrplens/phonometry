@@ -480,6 +480,7 @@ export default defineConfig({
               items: [
                 { slug: 'guides/sections/outdoor-sound', attrs: { 'data-group-link': true } },
                 'guides/outdoor-propagation',
+                'guides/ground-barriers',
                 'guides/impulse-prominence',
               ],
             },

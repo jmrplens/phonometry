@@ -3,6 +3,8 @@ title: "Surface Scattering, Diffusion and In-situ Absorption"
 description: "How a surface returns incident sound: the random-incidence scattering coefficient in a reverberation room (ISO 17497-1), the autocorrelation diffusion coefficient from a free-field goniometer (ISO 17497-2), and in-situ road-surface absorption by the subtraction technique (ISO 13472-1) and the spot-tube method (ISO 13472-2)."
 ---
 
+import Video from '../../../components/Video.astro';
+
 How a surface returns incident sound — how much it scatters away from the
 specular direction, how uniformly it spreads what it scatters, and how much it
 absorbs — is measured by a family of dedicated methods. The **reverberation
@@ -28,7 +30,7 @@ mounted on a turntable and held **stationary**, and with the turntable
 **rotating** (which averages the phase-coherent specular reflection away), each
 with and without a reflecting base plate.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb.svg" alt="ISO 17497-1 random-incidence scattering setup: a reverberation room with the test sample on a turntable, a rotating loudspeaker boom and a microphone, measuring reverberation time with the sample stationary (giving the random-incidence absorption) and rotating (giving the specular absorption), from which the scattering coefficient is derived" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_dark.svg" alt="ISO 17497-1 random-incidence scattering setup: a reverberation room with the test sample on a turntable, a rotating loudspeaker boom and a microphone, measuring reverberation time with the sample stationary (giving the random-incidence absorption) and rotating (giving the specular absorption), from which the scattering coefficient is derived" style="width:92%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb.svg" alt="ISO 17497-1 random-incidence scattering setup: a reverberation room with the test sample on a turntable, a rotating loudspeaker boom and a microphone, measuring reverberation time with the sample stationary (giving the random-incidence absorption) and rotating (giving the specular absorption), from which the scattering coefficient is derived" style="width:92%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_dark.svg" alt="ISO 17497-1 random-incidence scattering setup: a reverberation room with the test sample on a turntable, a rotating loudspeaker boom and a microphone, measuring reverberation time with the sample stationary (giving the random-incidence absorption) and rotating (giving the specular absorption), from which the scattering coefficient is derived" style="width:92%" />
 
 **Absorption from reverberation time (Clause 6).** Each situation converts to a
 Sabine absorption coefficient with the standard's own air-attenuation term:
@@ -91,7 +93,7 @@ print(np.round(result.scattering[[0, 6, 12]], 3))   # [0.011 0.428 0.844]
 result.plot()   # s(f) on a log-frequency axis, 0 to 1 (needs matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient.svg" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_dark.svg" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" style="width:88%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient.svg" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" style="width:88%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_dark.svg" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" style="width:88%" />
 
 *The scattering coefficient climbs with frequency: at low frequency the surface
 relief is small compared with the wavelength and the reflection stays specular
@@ -155,7 +157,7 @@ reflected sound, not how much is scattered. A goniometer sweeps a receiver over 
 polar arc and records the reflected level $L_i$ at each angle; the coefficient is
 the normalised autocorrelation of the polar energy distribution.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer.svg" alt="ISO 17497-2 free-field diffusion goniometer: a test sample on a turntable, a fixed loudspeaker source, and a semicircular arc of receiver microphones sampling the reflected polar response, from which the autocorrelation diffusion coefficient is computed" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer_dark.svg" alt="ISO 17497-2 free-field diffusion goniometer: a test sample on a turntable, a fixed loudspeaker source, and a semicircular arc of receiver microphones sampling the reflected polar response, from which the autocorrelation diffusion coefficient is computed" style="width:92%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer.svg" alt="ISO 17497-2 free-field diffusion goniometer: a test sample on a turntable, a fixed loudspeaker source, and a semicircular arc of receiver microphones sampling the reflected polar response, from which the autocorrelation diffusion coefficient is computed" style="width:92%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_diffusion_goniometer_dark.svg" alt="ISO 17497-2 free-field diffusion goniometer: a test sample on a turntable, a fixed loudspeaker source, and a semicircular arc of receiver microphones sampling the reflected polar response, from which the autocorrelation diffusion coefficient is computed" style="width:92%" />
 
 **Autocorrelation (Formula (5)).** For $n$ receivers at equal angular spacing,
 with $p_i = 10^{L_i/10}$ the band energy at receiver $i$,
@@ -176,7 +178,13 @@ plane wavefront hits a flat rigid panel and a Schroeder diffuser (an N = 7
 quadratic-residue profile), and the scattered energy on the receiver arc turns
 a collimated specular beam (d = 0.32) into a wide fan (d = 0.63).
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side; the flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side; the flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63" style="width:88%"></video>
+<Video
+  name="anim_fdtd_diffusion"
+  width={2400}
+  height={1350}
+  title="Flat panel versus Schroeder diffuser in a 2D FDTD simulation"
+  description="A 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side. The flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63."
+/>
 
 ```python
 from phonometry import materials
@@ -217,7 +225,7 @@ print(round(result.coefficient, 2))   # 0.82
 result.plot()   # polar reflected response, d in the title (needs matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar.svg" alt="A polar plot of the reflected sound-pressure level of a diffusing surface over 37 receivers from -90 to 90 degrees, the response spread almost uniformly over angle, giving an autocorrelation diffusion coefficient d of about 0.82" style="width:72%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar_dark.svg" alt="A polar plot of the reflected sound-pressure level of a diffusing surface over 37 receivers from -90 to 90 degrees, the response spread almost uniformly over angle, giving an autocorrelation diffusion coefficient d of about 0.82" style="width:72%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar.svg" alt="A polar plot of the reflected sound-pressure level of a diffusing surface over 37 receivers from -90 to 90 degrees, the response spread almost uniformly over angle, giving an autocorrelation diffusion coefficient d of about 0.82" style="width:72%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar_dark.svg" alt="A polar plot of the reflected sound-pressure level of a diffusing surface over 37 receivers from -90 to 90 degrees, the response spread almost uniformly over angle, giving an autocorrelation diffusion coefficient d of about 0.82" style="width:72%" />
 
 *The reflected energy fills the whole semicircle rather than concentrating in a
 specular lobe, so the autocorrelation diffusion coefficient is high
@@ -313,7 +321,7 @@ the impulse response at a microphone at height $d_m$. The **incident** and
 **reflected** components are separated in time with an Adrienne window; their
 transfer function gives the reflection factor and hence the absorption.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction.svg" alt="ISO 13472-1 in-situ road absorption by the subtraction technique: a loudspeaker at 1.25 m and a microphone at 0.25 m above the road surface, with the direct and road-reflected ray paths and a free-field reference measurement, the reflected component isolated by an Adrienne time window" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction_dark.svg" alt="ISO 13472-1 in-situ road absorption by the subtraction technique: a loudspeaker at 1.25 m and a microphone at 0.25 m above the road surface, with the direct and road-reflected ray paths and a free-field reference measurement, the reflected component isolated by an Adrienne time window" style="width:92%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction.svg" alt="ISO 13472-1 in-situ road absorption by the subtraction technique: a loudspeaker at 1.25 m and a microphone at 0.25 m above the road surface, with the direct and road-reflected ray paths and a free-field reference measurement, the reflected component isolated by an Adrienne time window" style="width:92%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insitu_subtraction_dark.svg" alt="ISO 13472-1 in-situ road absorption by the subtraction technique: a loudspeaker at 1.25 m and a microphone at 0.25 m above the road surface, with the direct and road-reflected ray paths and a free-field reference measurement, the reflected component isolated by an Adrienne time window" style="width:92%" />
 
 **Geometrical spreading (Clause 4.1).** The reflected wave travels farther than
 the direct wave, so it is attenuated by the geometrical-spreading factor
@@ -397,7 +405,7 @@ print(np.round(result.absorption[[0, 6, 12]], 2))  # [0.31 0.65 1.  ]
 result.plot()   # alpha(f) bar chart over 250-4000 Hz (needs matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption.svg" alt="An in-situ one-third-octave road-surface absorption spectrum computed by the reflection-factor route from a synthetic road reflection, rising from about 0.3 at 250 Hz to near 1.0 above 2 kHz" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption_dark.svg" alt="An in-situ one-third-octave road-surface absorption spectrum computed by the reflection-factor route from a synthetic road reflection, rising from about 0.3 at 250 Hz to near 1.0 above 2 kHz" style="width:88%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption.svg" alt="An in-situ one-third-octave road-surface absorption spectrum computed by the reflection-factor route from a synthetic road reflection, rising from about 0.3 at 250 Hz to near 1.0 above 2 kHz" style="width:88%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption_dark.svg" alt="An in-situ one-third-octave road-surface absorption spectrum computed by the reflection-factor route from a synthetic road reflection, rising from about 0.3 at 250 Hz to near 1.0 above 2 kHz" style="width:88%" />
 
 *The absorption rises with frequency because the surface reflects less of the
 high-frequency energy, exactly as the low-pass reflection factor $r_0(f)$
@@ -466,7 +474,7 @@ ISO 10534-2. The library provides the spot-method geometry and validity helpers;
 the transfer-function DSP itself is the impedance-tube routine
 `two_microphone_impedance` (see the [Acoustic Materials guide](/phonometry/guides/materials/)).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_spot_tube.svg" alt="ISO 13472-2 spot method: a short circular tube sealed onto the road surface with a loudspeaker at the top and two microphones flush in the tube wall at spacing s, measuring absorption over 250 to 1600 Hz via the ISO 10534-2 two-microphone transfer-function method" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_spot_tube_dark.svg" alt="ISO 13472-2 spot method: a short circular tube sealed onto the road surface with a loudspeaker at the top and two microphones flush in the tube wall at spacing s, measuring absorption over 250 to 1600 Hz via the ISO 10534-2 two-microphone transfer-function method" style="width:92%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_spot_tube.svg" alt="ISO 13472-2 spot method: a short circular tube sealed onto the road surface with a loudspeaker at the top and two microphones flush in the tube wall at spacing s, measuring absorption over 250 to 1600 Hz via the ISO 10534-2 two-microphone transfer-function method" style="width:92%" /><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_spot_tube_dark.svg" alt="ISO 13472-2 spot method: a short circular tube sealed onto the road surface with a loudspeaker at the top and two microphones flush in the tube wall at spacing s, measuring absorption over 250 to 1600 Hz via the ISO 10534-2 two-microphone transfer-function method" style="width:92%" />
 
 **Plane-wave limits (Clause 5.4).** The tube supports only plane waves below
 

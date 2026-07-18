@@ -1,6 +1,110 @@
 ---
 title: "Medio ambiente y transporte"
 description: "Descriptores ambientales, ajustes por sonidos impulsivos, propagación en exteriores, exposición laboral y determinación de la potencia sonora detrás de phonometry."
+references:
+  - type: book
+    authors: ["Salomons, E. M."]
+    year: 2001
+    title: "Computational atmospheric acoustics"
+    publisher: "Kluwer Academic Publishers"
+    doi: "10.1007/978-94-010-0660-6"
+    note: "ISBN 978-1-4020-0390-5. La teoría ondulatoria de la propagación en exteriores que sustenta las aproximaciones de ingeniería de la sección de ISO 9613-2."
+  - type: book
+    authors: ["Attenborough, K.", "Van Renterghem, T."]
+    year: 2021
+    title: "Predicting outdoor sound"
+    edition: "2.ª ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9780429470806"
+    note: "La impedancia del suelo y los efectos meteorológicos que subyacen a los términos de efecto del suelo y de barrera."
+  - type: article
+    authors: ["Maekawa, Z."]
+    year: 1968
+    title: "Noise reduction by screens"
+    journal: "Applied Acoustics"
+    volume: 1
+    issue: 3
+    pages: "157-173"
+    doi: "10.1016/0003-682X(68)90020-0"
+    note: "El ábaco de atenuación de pantallas del que descienden las fórmulas de pérdida por inserción de barreras."
+  - type: book
+    authors: ["Fahy, F. J."]
+    year: 1995
+    title: "Sound intensity"
+    edition: "2.ª ed."
+    publisher: "E&FN Spon"
+    doi: "10.4324/9780203475386"
+    note: "ISBN 978-0-419-19810-9. La física de la intensidad que sustenta los métodos de barrido: la intensidad activa y el presupuesto de error p-p."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2016
+    title: "Acoustics — Description, measurement and assessment of environmental noise — Part 1: Basic quantities and assessment procedures"
+    designation: "ISO 1996-1:2016"
+    url: "https://www.iso.org/standard/59765.html"
+    note: "El nivel de calificación compuesto y los ajustes de la Tabla A.1 de la sección de descriptores."
+  - type: standard
+    organization: "Nordtest"
+    year: 2002
+    title: "Acoustics: Prominence of impulsive sounds and for adjustment of LAeq"
+    designation: "NT ACOU 112:2002"
+    url: "https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/"
+    note: "La prominencia por tasa de crecimiento y el ajuste del LAeq de la sección de sonidos impulsivos."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2022
+    title: "Acoustics — Description, measurement and assessment of environmental noise — Part 3: Objective method for the measurement of prominence of impulsive sounds and for adjustment of LAeq"
+    designation: "ISO/PAS 1996-3:2022"
+    url: "https://www.iso.org/standard/77035.html"
+    note: "El sucesor ISO construido sobre la prominencia de la NT ACOU 112."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere"
+    designation: "ISO 9613-1:1993"
+    url: "https://www.iso.org/standard/17426.html"
+    note: "El coeficiente de atenuación de tono puro y su física de relajación."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 2: General method of calculation"
+    designation: "ISO 9613-2:1996"
+    url: "https://www.iso.org/standard/20649.html"
+    note: "La cadena de atenuación (divergencia, aire, suelo, barrera) de la sección del método general. Revisada en 2024; el método de 1996 es el implementado."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of occupational noise exposure — Engineering method"
+    designation: "ISO 9612:2009"
+    url: "https://www.iso.org/standard/41718.html"
+    note: "Las tres estrategias de medición y el presupuesto de incertidumbre del Anexo C de la sección laboral."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Engineering methods for an essentially free field over a reflecting plane"
+    designation: "ISO 3744:2010"
+    url: "https://www.iso.org/standard/52055.html"
+    note: "El método de superficie envolvente con sus correcciones de ruido de fondo y de campo reverberante."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2012
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for anechoic rooms and hemi-anechoic rooms"
+    designation: "ISO 3745:2012"
+    url: "https://www.iso.org/standard/45362.html"
+    note: "El método de precisión en sala anecoica con sus correcciones meteorológicas y sus mallas de micrófonos."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms"
+    designation: "ISO 3741:2010"
+    url: "https://www.iso.org/standard/52053.html"
+    note: "El método de campo difuso con la corrección de Waterhouse y el método de comparación."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Determination of sound power levels of noise sources using sound intensity — Part 1: Measurement at discrete points"
+    designation: "ISO 9614-1:1993"
+    url: "https://www.iso.org/standard/17427.html"
+    note: "Los indicadores de campo y el criterio de capacidad dinámica compartidos por los métodos de barrido de intensidad."
 ---
 
 Esta página reúne la teoría del ruido ambiental y en exteriores: los descriptores de evaluación de jornada completa y el ajuste por sonidos impulsivos, la absorción atmosférica, el método general de propagación en exteriores, la exposición al ruido en el trabajo con su presupuesto de incertidumbre, y los métodos de determinación de la potencia sonora. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/).
@@ -283,87 +387,3 @@ marcan. Una intensidad normal uniforme recupera la potencia exactamente
 segmente la superficie.
 
 Consulta la [guía de potencia sonora](/phonometry/es/guides/sound-power/) para su uso.
-
-## Referencias
-
-- Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
-  Academic Publishers. ISBN 978-1-4020-0390-5.
-  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
-  La teoría ondulatoria de la propagación en exteriores que sustenta las
-  aproximaciones de ingeniería de la sección de ISO 9613-2.
-- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
-  (2.ª ed.). CRC Press.
-  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
-  La impedancia del suelo y los efectos meteorológicos que subyacen a los
-  términos de efecto del suelo y de barrera.
-- Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
-  157-173.
-  [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
-  El ábaco de atenuación de pantallas del que descienden las fórmulas de
-  pérdida por inserción de barreras.
-- Fahy, F. J. (1995). *Sound intensity* (2.ª ed.). E&FN Spon.
-  ISBN 978-0-419-19810-9.
-  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
-  La física de la intensidad que sustenta los métodos de barrido: la intensidad
-  activa y el presupuesto de error p-p.
-- International Organization for Standardization. (2016). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 1:
-  Basic quantities and assessment procedures* (ISO 1996-1:2016).
-  [Catálogo iso.org](https://www.iso.org/standard/59765.html).
-  El nivel de calificación compuesto y los ajustes de la Tabla A.1 de la
-  sección de descriptores.
-- Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for
-  adjustment of LAeq* (método Nordtest NT ACOU 112).
-  [nordtest.info](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/).
-  La prominencia por tasa de crecimiento y el ajuste del LAeq de la sección
-  de sonidos impulsivos.
-- International Organization for Standardization. (2022). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 3:
-  Objective method for the measurement of prominence of impulsive sounds and
-  for adjustment of LAeq* (ISO/PAS 1996-3:2022).
-  [Catálogo iso.org](https://www.iso.org/standard/77035.html).
-  El sucesor ISO construido sobre la prominencia de la NT ACOU 112.
-- International Organization for Standardization. (1993). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 1: Calculation of
-  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
-  [Catálogo iso.org](https://www.iso.org/standard/17426.html).
-  El coeficiente de atenuación de tono puro y su física de relajación.
-- International Organization for Standardization. (1996). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 2: General method
-  of calculation* (ISO 9613-2:1996; revisada en 2024, el método de 1996 es el
-  implementado).
-  [Catálogo iso.org](https://www.iso.org/standard/20649.html).
-  La cadena de atenuación (divergencia, aire, suelo, barrera) de la sección
-  del método general.
-- International Organization for Standardization. (2009). *Acoustics —
-  Determination of occupational noise exposure — Engineering method*
-  (ISO 9612:2009). [Catálogo iso.org](https://www.iso.org/standard/41718.html).
-  Las tres estrategias de medición y el presupuesto de incertidumbre del
-  Anexo C de la sección laboral.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Engineering methods for an essentially free
-  field over a reflecting plane* (ISO 3744:2010).
-  [Catálogo iso.org](https://www.iso.org/standard/52055.html).
-  El método de superficie envolvente con sus correcciones de ruido de fondo
-  y de campo reverberante.
-- International Organization for Standardization. (2012). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for anechoic rooms and
-  hemi-anechoic rooms* (ISO 3745:2012).
-  [Catálogo iso.org](https://www.iso.org/standard/45362.html).
-  El método de precisión en sala anecoica con sus correcciones
-  meteorológicas y sus mallas de micrófonos.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for reverberation test
-  rooms* (ISO 3741:2010).
-  [Catálogo iso.org](https://www.iso.org/standard/52053.html).
-  El método de campo difuso con la corrección de Waterhouse y el método de
-  comparación.
-- International Organization for Standardization. (1993). *Acoustics —
-  Determination of sound power levels of noise sources using sound
-  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
-  [Catálogo iso.org](https://www.iso.org/standard/17427.html).
-  Los indicadores de campo y el criterio de capacidad dinámica compartidos
-  por los métodos de barrido de intensidad.

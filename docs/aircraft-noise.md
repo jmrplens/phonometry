@@ -122,6 +122,15 @@ print(report["passed"], report["checks"])
 
 ## 5. Atmospheric absorption (SAE ARP 5534)
 
+Correcting a measured flyover spectrum to reference atmospheric conditions
+needs the one-third-octave-band attenuation over the path. The pure-tone
+coefficient is the ISO 9613-1 one (identical, per ARP 5534 §3.1) already
+provided by `air_attenuation`; `sae_band_attenuation` adds the **SAE Method**
+(ARP 5534 §3.2.2), a regression that maps the pure-tone mid-band path-length
+attenuation `δ_t = α·s` to the band attenuation `δ_B` and stays consistent with
+the ISO/ANSI Exact Method well beyond the 50 dB limit of the older Approximate
+Method.
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption_dark.svg">
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption.svg" alt="Aircraft atmospheric absorption versus frequency for two path lengths: the SAE-Method one-third-octave-band attenuation rises with frequency and stays below the pure-tone mid-band value at high absorption" width="82%">
@@ -153,15 +162,6 @@ plt.show()
 
 </details>
 
-Correcting a measured flyover spectrum to reference atmospheric conditions
-needs the one-third-octave-band attenuation over the path. The pure-tone
-coefficient is the ISO 9613-1 one (identical, per ARP 5534 §3.1) already
-provided by `air_attenuation`; `sae_band_attenuation` adds the **SAE Method**
-(ARP 5534 §3.2.2), a regression that maps the pure-tone mid-band path-length
-attenuation `δ_t = α·s` to the band attenuation `δ_B` and stays consistent with
-the ISO/ANSI Exact Method well beyond the 50 dB limit of the older Approximate
-Method.
-
 ```python
 import numpy as np
 from phonometry import aircraft
@@ -180,6 +180,13 @@ Part 36 test window), over path lengths to 7620 m, and is reciprocal
 (source↔receiver).
 
 ## 6. Airport noise: the NPD engine (ECAC Doc 29)
+
+The ECAC Doc 29 airport-noise method describes an aircraft with **noise-power-
+distance (NPD)** tables — the event level (`LAmax` or `SEL`) of steady straight
+flight versus engine power and slant distance. `npd_level` reads an event level
+for an arbitrary power and distance, interpolating **linearly in power**
+(Eq. 4-3) and **log-linearly in distance** (Eq. 4-4), extrapolating from the
+terminal segments beyond the tabulated envelope.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise_dark.svg">
@@ -214,13 +221,6 @@ plt.show()
 
 </details>
 
-The ECAC Doc 29 airport-noise method describes an aircraft with **noise-power-
-distance (NPD)** tables — the event level (`LAmax` or `SEL`) of steady straight
-flight versus engine power and slant distance. `npd_level` reads an event level
-for an arbitrary power and distance, interpolating **linearly in power**
-(Eq. 4-3) and **log-linearly in distance** (Eq. 4-4), extrapolating from the
-terminal segments beyond the tabulated envelope.
-
 ```python
 from phonometry import aircraft
 
@@ -235,6 +235,26 @@ curve.plot()   # NPD curve with the tabulated nodes (needs matplotlib)
 ```
 
 ## 7. Airport noise contours (single event)
+
+The full ECAC Doc 29 single-event calculation places a flight path's noise at a
+receiver by breaking the path into segments and, for each, correcting the NPD
+baseline level (§4.3-4.5):
+
+- **`impedance_adjustment(T, p)`** — corrects the NPD data from their reference
+  air impedance (409.81 N·s/m³) to the aerodrome's temperature and pressure
+  (Eq. 4-6/4-7; +0.074 dB under the standard atmosphere).
+- **`lateral_attenuation(β, ℓ)`** — excess lateral attenuation over soft ground
+  (Eq. 4-18/4-19, AIR-5662).
+- **`engine_installation_correction(φ, mounting)`** — lateral-directivity term
+  for wing/fuselage/propeller installations (Eq. 4-15/4-16).
+- **`duration_correction(Vref, Vseg)`** — the speed/duration adjustment for
+  exposure levels (Eq. 4-14).
+- **`noise_fraction(q, λ, dλ)`** — the finite-segment energy fraction (Eq. 4-20).
+- **`start_of_roll_directivity(ψ, dSOR, engine)`** — the rearward jet/turboprop
+  directivity behind takeoff ground-roll segments (Eq. 4-22/4-24/4-25). Pass a
+  boolean `ground_roll` mask to `event_level`/`noise_contour` to flag the takeoff
+  ground-roll segments; behind them the reduced (q = 0) noise fraction and `ΔSOR`
+  are applied (Eq. 4-9).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour_dark.png">
@@ -271,26 +291,6 @@ plt.show()
 ```
 
 </details>
-
-The full ECAC Doc 29 single-event calculation places a flight path's noise at a
-receiver by breaking the path into segments and, for each, correcting the NPD
-baseline level (§4.3-4.5):
-
-- **`impedance_adjustment(T, p)`** — corrects the NPD data from their reference
-  air impedance (409.81 N·s/m³) to the aerodrome's temperature and pressure
-  (Eq. 4-6/4-7; +0.074 dB under the standard atmosphere).
-- **`lateral_attenuation(β, ℓ)`** — excess lateral attenuation over soft ground
-  (Eq. 4-18/4-19, AIR-5662).
-- **`engine_installation_correction(φ, mounting)`** — lateral-directivity term
-  for wing/fuselage/propeller installations (Eq. 4-15/4-16).
-- **`duration_correction(Vref, Vseg)`** — the speed/duration adjustment for
-  exposure levels (Eq. 4-14).
-- **`noise_fraction(q, λ, dλ)`** — the finite-segment energy fraction (Eq. 4-20).
-- **`start_of_roll_directivity(ψ, dSOR, engine)`** — the rearward jet/turboprop
-  directivity behind takeoff ground-roll segments (Eq. 4-22/4-24/4-25). Pass a
-  boolean `ground_roll` mask to `event_level`/`noise_contour` to flag the takeoff
-  ground-roll segments; behind them the reduced (q = 0) noise fraction and `ΔSOR`
-  are applied (Eq. 4-9).
 
 The mechanism behind these ground corrections is two-path interference: the
 direct wave and its ground reflection. Below, a 400 Hz source 1.5 m above a

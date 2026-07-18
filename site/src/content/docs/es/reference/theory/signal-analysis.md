@@ -1,6 +1,75 @@
 ---
 title: "Análisis de señal"
 description: "Diseño de bancos de filtros, ponderaciones frecuenciales, integración temporal, métricas de nivel y exposición, intensidad sonora y el marco de incertidumbre del GUM detrás de phonometry."
+references:
+  - type: book
+    authors: ["Oppenheim, A. V.", "Schafer, R. W."]
+    year: 2010
+    title: "Discrete-time signal processing"
+    edition: "3.ª ed."
+    publisher: "Pearson"
+    url: "https://openlibrary.org/isbn/9780131988422"
+    note: "ISBN 978-0-13-198842-2. La teoría de filtros digitales que sustenta las cascadas SOS, la transformada bilineal y el diezmado multitasa de la sección de diseño del banco de filtros."
+  - type: web
+    authors: ["Smith, J. O."]
+    title: "Introduction to digital filters with audio applications"
+    siteName: "Center for Computer Research in Music and Acoustics (CCRMA), Universidad de Stanford"
+    url: "https://ccrma.stanford.edu/~jos/filters/"
+    note: "Libro en línea gratuito y complementario sobre los prototipos clásicos de filtro y sus respuestas en magnitud."
+  - type: book
+    authors: ["Fahy, F. J."]
+    year: 1995
+    title: "Sound intensity"
+    edition: "2.ª ed."
+    publisher: "E&FN Spon"
+    doi: "10.4324/9780203475386"
+    note: "ISBN 978-0-419-19810-9. La física del estimador p-p: la intensidad activa, el sesgo por diferencia finita y el presupuesto de error por desfase."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2014
+    title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications"
+    designation: "IEC 61260-1:2014"
+    url: "https://webstore.iec.ch/en/publication/5063"
+    note: "Las definiciones en base 10 de frecuencia central y bordes de banda de la sección de bandas de octava y las máscaras de clase contra las que se verifican los bancos."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    url: "https://webstore.iec.ch/en/publication/5708"
+    note: "Las curvas de ponderación A/C/Z, la integración temporal exponencial y las definiciones de SEL y LCpeak de la sección de métricas de evento."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 1993
+    title: "Electroacoustics — Instruments for the measurement of sound intensity — Measurements with pairs of pressure sensing microphones"
+    designation: "IEC 61043:1993"
+    url: "https://webstore.iec.ch/en/publication/4353"
+    note: "La norma de instrumentación p-p, adoptada en Europa como EN 61043:1994: el estimador por espectro cruzado y el índice presión-intensidad residual que sustentan la capacidad dinámica."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Determination of sound power levels of noise sources using sound intensity — Part 1: Measurement at discrete points"
+    designation: "ISO 9614-1:1993"
+    url: "https://www.iso.org/standard/17427.html"
+    note: "Los indicadores de superficie F2–F4 que generalizan el índice presión-intensidad sobre una superficie de medición."
+  - type: standard
+    organization: "Joint Committee for Guides in Metrology"
+    year: 2008
+    title: "Evaluation of measurement data — Guide to the expression of uncertainty in measurement"
+    designation: "JCGM 100:2008, la GUM"
+    publisher: "BIPM"
+    url: "https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf"
+    doi: "10.59161/JCGM100-2008E"
+    note: "La ley de propagación de la incertidumbre y la incertidumbre expandida de Welch–Satterthwaite de la sección de la GUM. El PDF enlazado es la descarga gratuita."
+  - type: standard
+    organization: "Joint Committee for Guides in Metrology"
+    year: 2008
+    title: "Evaluation of measurement data — Supplement 1 to the \"Guide to the expression of uncertainty in measurement\" — Propagation of distributions using a Monte Carlo method"
+    designation: "JCGM 101:2008"
+    publisher: "BIPM"
+    url: "https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf"
+    doi: "10.59161/JCGM101-2008"
+    note: "La propagación de distribuciones mediante Monte Carlo y su construcción del intervalo de cobertura. El PDF enlazado es la descarga gratuita."
 ---
 
 Esta página reúne la teoría de la propia cadena de medición: las bandas fraccionales de octava normalizadas y los bancos de filtros en el dominio temporal que las implementan, las curvas de ponderación frecuencial, la integración temporal, las métricas de nivel, de evento y de exposición, la intensidad sonora y el marco de incertidumbre del GUM que sustenta cada magnitud medida. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/).
@@ -346,63 +415,3 @@ ejemplo del bloque patrón del Anexo H.1 de la GUM da
 $k = t_{0{,}99}(\nu_{\mathrm{eff}} = 16) = 2{,}92$ y $U_{99} = 93$ nm.
 
 Consulta la [guía de incertidumbre de medida](/phonometry/es/guides/gum-uncertainty/) para su uso.
-
-## Referencias
-
-- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
-  (3.ª ed.). Pearson. ISBN 978-0-13-198842-2.
-  [Ficha en Open Library](https://openlibrary.org/isbn/9780131988422).
-  La teoría de filtros digitales que sustenta las cascadas SOS, la transformada
-  bilineal y el diezmado multitasa de la sección de diseño del banco de
-  filtros.
-- Smith, J. O. *Introduction to digital filters with audio applications*
-  (libro en línea). Center for Computer Research in Music and Acoustics
-  (CCRMA), Universidad de Stanford.
-  [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
-  Tratamiento gratuito y complementario de los prototipos clásicos de filtro
-  y sus respuestas en magnitud.
-- Fahy, F. J. (1995). *Sound intensity* (2.ª ed.). E&FN Spon.
-  ISBN 978-0-419-19810-9.
-  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
-  La física del estimador p-p: la intensidad activa, el sesgo por diferencia
-  finita y el presupuesto de error por desfase.
-- International Electrotechnical Commission. (2014). *Electroacoustics —
-  Octave-band and fractional-octave-band filters — Part 1: Specifications*
-  (IEC 61260-1:2014).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/5063).
-  Las definiciones en base 10 de frecuencia central y bordes de banda de la
-  sección de bandas de octava y las máscaras de clase contra las que se
-  verifican los bancos.
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/5708).
-  Las curvas de ponderación A/C/Z, la integración temporal exponencial y las
-  definiciones de SEL y LCpeak de la sección de métricas de evento.
-- International Electrotechnical Commission. (1993). *Electroacoustics —
-  Instruments for the measurement of sound intensity — Measurements with
-  pairs of pressure sensing microphones* (IEC 61043:1993; adoptada en Europa
-  como EN 61043:1994).
-  [Tienda IEC](https://webstore.iec.ch/en/publication/4353).
-  La norma de instrumentación p-p: el estimador por espectro cruzado y el
-  índice presión-intensidad residual que sustentan la capacidad dinámica.
-- International Organization for Standardization. (1993). *Acoustics —
-  Determination of sound power levels of noise sources using sound
-  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
-  [Catálogo iso.org](https://www.iso.org/standard/17427.html).
-  Los indicadores de superficie F2–F4 que generalizan el índice
-  presión-intensidad sobre una superficie de medición.
-- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
-  data — Guide to the expression of uncertainty in measurement* (JCGM
-  100:2008, la GUM). BIPM.
-  [doi:10.59161/JCGM100-2008E](https://doi.org/10.59161/JCGM100-2008E),
-  [PDF gratuito](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf).
-  La ley de propagación de la incertidumbre y la incertidumbre expandida de
-  Welch–Satterthwaite de la sección de la GUM.
-- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
-  data — Supplement 1 to the "Guide to the expression of uncertainty in
-  measurement" — Propagation of distributions using a Monte Carlo method*
-  (JCGM 101:2008). BIPM.
-  [doi:10.59161/JCGM101-2008](https://doi.org/10.59161/JCGM101-2008),
-  [PDF gratuito](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf).
-  La propagación de distribuciones mediante Monte Carlo y su construcción
-  del intervalo de cobertura.

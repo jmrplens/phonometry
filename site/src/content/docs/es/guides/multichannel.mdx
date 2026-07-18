@@ -1,0 +1,169 @@
+---
+title: "Multicanal y rendimiento"
+description: "Análisis multicanal vectorizado y notas de rendimiento."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2014
+    title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications"
+    designation: "IEC 61260-1:2014"
+    url: "https://webstore.iec.ch/en/publication/5063"
+    note: "Las definiciones de banda con las que se filtra cada canal; la ruta multicanal las procesa por lotes sin cambios. El soporte multicanal no añade contenido normativo propio: cada canal se filtra exactamente como prescribe la norma monocanal, y la vectorización solo agrupa el cálculo a lo largo del eje de canales."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    url: "https://webstore.iec.ch/en/publication/5708"
+    note: "La semántica de ponderación e integración temporal aplicada por canal, exactamente como prescribe la norma monocanal."
+---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
+## Soporte multicanal
+
+phonometry soporta de forma nativa señales multicanal (estéreo, 5.1, arrays de
+micrófonos…) mediante **operaciones totalmente vectorizadas**. Los arrays de
+entrada con forma `(N_channels, N_samples)` se procesan en paralelo, con
+ganancias de rendimiento significativas frente a bucles iterativos.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel_es.svg" alt="Análisis estéreo: ruido rosa y barrido logarítmico resueltos por canal en tercios de octava" width="80%" loading="eager" />
+
+*Análisis simultáneo de una señal estéreo: canal izquierdo (ruido rosa) vs canal
+derecho (barrido senoidal logarítmico).*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import chirp
+from phonometry import metrology
+
+# Señal estéreo de prueba: ruido rosa a la izquierda, barrido logarítmico a la derecha
+fs, duration = 48000, 5
+t = np.linspace(0, duration, fs * duration, endpoint=False)
+rng = np.random.default_rng(42)
+spec = np.fft.rfft(rng.standard_normal(t.size))
+spec[1:] /= np.sqrt(np.arange(1, spec.size))   # conformado 1/f: ruido rosa
+left = np.fft.irfft(spec, t.size)
+right = chirp(t, f0=50, t1=duration, f1=10000, method="logarithmic")
+
+x = np.stack([left, right])                    # (2, n_samples)
+spl, freq = metrology.octave_filter(x, fs, fraction=3, limits=[20, 20000])
+
+fig, axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
+for ax, levels, name in zip(axes, spl, ["Izquierdo: ruido rosa", "Derecho: barrido logarítmico"]):
+    ax.semilogx(freq, levels, marker="o", label=name)
+    ax.set_ylabel("Nivel [dB]")
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend()
+axes[-1].set_xlabel("Frecuencia [Hz]")
+plt.show()
+```
+
+</details>
+
+La convención es consistente en toda la librería: el tiempo siempre es el
+**último eje**. Aplica a `octave_filter`, `OctaveFilterBank`, `weighting_filter`,
+`time_weighting`, `leq`, `laeq`, `ln_levels` y `spectrogram`.
+
+```python
+import numpy as np
+from phonometry import metrology
+
+# Dos canales calibrados en Pa para que la guía funcione por sí sola
+fs = 48000
+t = np.arange(fs) / fs
+left = 0.2 * np.sin(2 * np.pi * 1000 * t)
+right = 0.1 * np.sin(2 * np.pi * 500 * t)
+
+stereo = np.stack([left, right])          # (2, n_samples)
+spl, freq = metrology.octave_filter(stereo, fs, fraction=3)
+# spl tiene forma (2, n_bands): una fila por canal
+```
+
+## Formas aceptadas, de un vistazo
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multichannel_es.svg" alt="Flujo de formas de array: una entrada 1-D (muestras,) se reduce a un escalar y una entrada 2-D (canales, muestras) se reduce a (canales,), porque la operación actúa sobre el último eje mientras el eje de canal se conserva" width="80%" />
+
+| Entrada | Se interpreta como | Salida típica |
+| :--- | :--- | :--- |
+| Array 1D `(n,)` | un canal | nivel escalar / `(bands,)` |
+| Array 2D `(ch, n)` | `ch` canales de `n` muestras cada uno | niveles `(ch,)` / `(ch, bands)` |
+| lista de floats | un canal (se convierte) | como 1D |
+| `(ch, n)` en `spectrogram` | STFT multicanal | `(ch, bands, frames)` |
+
+Todo se vectoriza a lo largo del eje inicial de canales — un único diseño de
+filtro se aplica a todos los canales en una sola llamada a SciPy, así que 8
+canales cuestan mucho menos que 8 ejecuciones separadas. Convención: **canales
+primero**, como la mayoría del código DSP (`soundfile` devuelve `(n, ch)`:
+transpón con `x.T`).
+
+## Semántica por canal
+
+El procesado multicanal es estrictamente por canal: nunca se mezcla, suma ni
+promedia nada a través del eje de canales. Tres consecuencias que conviene
+explicitar:
+
+- **Combinar canales es decisión tuya.** Los niveles vuelven uno por canal.
+  Si necesitas un nivel promedio del array (por ejemplo los niveles
+  promediados por posición de las normas de acústica de salas), combina
+  energías tú mismo: `10 * np.log10(np.mean(10 ** (spl / 10), axis=0))`,
+  nunca la media aritmética de los valores en dB (ver
+  [Niveles](/phonometry/es/guides/levels/) para el porqué).
+- **Un `calibration_factor` significa una sensibilidad.** El factor escalar
+  multiplica todos los canales, lo que solo es correcto si todos comparten
+  la misma sensibilidad. Para un array de micrófonos con calibraciones
+  individuales, escala primero las filas, `x * factors[:, None]`, y deja
+  `calibration_factor` en 1.
+- **Las clases con estado guardan un estado por canal.** En el procesado por
+  bloques el array de estado se ajusta al número de canales y un cambio del
+  número de canales lo reinicia; ver
+  [Procesado por bloques](/phonometry/es/guides/block-processing/).
+
+## Rendimiento: vectorización y caché
+
+La clase `OctaveFilterBank` está muy optimizada para procesado en tiempo real y
+por lotes. Usa vectorización NumPy para manejar arrays de audio multicanal
+(p. ej. arrays de micrófonos de 64 canales) sin bucles Python explícitos.
+
+```python
+import numpy as np
+from phonometry import metrology
+
+# Dos canales calibrados en Pa para que la guía funcione por sí sola
+fs = 48000
+t = np.arange(fs) / fs
+left = 0.2 * np.sin(2 * np.pi * 1000 * t)
+right = 0.1 * np.sin(2 * np.pi * 500 * t)
+stereo = np.stack([left, right])          # (2, n_samples)
+
+bank = metrology.OctaveFilterBank(fs=48000, fraction=3, filter_type='butter')
+
+# Propiedades calculadas
+# bank.freq (centros), bank.freq_d (bordes inferiores), bank.freq_u (superiores), bank.sos
+
+# Procesar múltiples señales de forma eficiente
+stream = [stereo]                 # tu secuencia de tramas multicanal
+for frame in stream:
+    # detrend=True (por defecto) elimina el offset DC y mejora la precisión en graves
+    spl, freq = bank.filter(frame, detrend=True)
+```
+
+Notas adicionales de rendimiento:
+
+- **Caché de diseño**: `octave_filter()` reutiliza los diseños del banco entre
+  llamadas con parámetros idénticos (caché LRU de 32 entradas), así que llamarla
+  en bucle no rediseña el banco cada vez. `OctaveFilterBank` te da control
+  explícito sobre el ciclo de vida del diseño.
+- **Diezmado multitasa**: las bandas graves se filtran a una frecuencia diezmada,
+  lo que es a la vez más rápido y numéricamente más estable (consulta
+  [Teoría](/phonometry/es/reference/theory/signal-analysis/)).
+- **numba opcional**: el kernel del modo `impulse` de la ponderación temporal se
+  compila JIT cuando numba está instalado (`pip install phonometry[perf]`).
+
+## Véase también
+
+- Referencia de la API: [`phonometry`](/phonometry/es/reference/api/filters/phonometry/) y [`metrology.core`](/phonometry/es/reference/api/filters/core/).

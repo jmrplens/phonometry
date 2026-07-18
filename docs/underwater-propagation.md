@@ -11,6 +11,18 @@ the underwater reference levels (ISO 18405/17208/18406) in
 
 ## 1. Transmission loss
 
+The transmission loss is
+
+$$
+TL = \text{spreading} + \alpha R .
+$$
+
+Geometrical spreading is $20 \lg R$ (spherical), $10 \lg R$ (cylindrical) or
+spherical up to a transition range $R_0$ and cylindrical beyond it
+(`"practical"`). The volume absorption coefficient $\alpha$ (dB/km) comes from one of three models: **Francois–Garrison**
+(1982, the default and reference), **Ainslie–McColm** (1998, a legible
+simplification) or **Thorp** (1967, frequency-only).
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_transmission_loss_dark.svg">
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_transmission_loss.svg" alt="Underwater transmission loss versus range at 10 kHz: the total loss with the geometrical-spreading and volume-absorption contributions drawn separately, loss increasing downward" width="82%">
@@ -36,18 +48,6 @@ plt.show()
 
 </details>
 
-The transmission loss is
-
-$$
-TL = \text{spreading} + \alpha R .
-$$
-
-Geometrical spreading is $20 \lg R$ (spherical), $10 \lg R$ (cylindrical) or
-spherical up to a transition range $R_0$ and cylindrical beyond it
-(`"practical"`). The volume absorption coefficient $\alpha$ (dB/km) comes from one of three models: **Francois–Garrison**
-(1982, the default and reference), **Ainslie–McColm** (1998, a legible
-simplification) or **Thorp** (1967, frequency-only).
-
 ```python
 import numpy as np
 from phonometry import underwater
@@ -72,6 +72,14 @@ tl.plot()   # TL vs range with the spreading/absorption split (needs matplotlib)
 
 ## 2. Speed of sound in sea water
 
+`sea_water_sound_speed(T, S, depth, model=…)` evaluates the sound speed with the
+**UNESCO / Chen–Millero** equation (default, the international standard, in the
+Wong & Zhu 1995 ITS-90 form), **Del Grosso** (1974) or **Mackenzie** (1981). The
+UNESCO and Del Grosso equations use pressure, so depth is first converted with
+the Leroy & Parthiot (1998) formula (`depth_to_pressure`). The three agree to
+within ~1 m/s in their common domain; Mackenzie's canonical check value is
+`1550.744 m/s` at 25 °C, 35 ppt, 1000 m.
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_sound_speed_dark.svg">
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_sound_speed.svg" alt="A sea-water sound-speed profile computed with the UNESCO equation: a warm mixed layer near the surface, a thermocline where the speed drops, a sound-channel axis at the minimum, and the speed rising again with pressure at depth" width="62%">
@@ -94,14 +102,6 @@ plt.show()
 ```
 
 </details>
-
-`sea_water_sound_speed(T, S, depth, model=…)` evaluates the sound speed with the
-**UNESCO / Chen–Millero** equation (default, the international standard, in the
-Wong & Zhu 1995 ITS-90 form), **Del Grosso** (1974) or **Mackenzie** (1981). The
-UNESCO and Del Grosso equations use pressure, so depth is first converted with
-the Leroy & Parthiot (1998) formula (`depth_to_pressure`). The three agree to
-within ~1 m/s in their common domain; Mackenzie's canonical check value is
-`1550.744 m/s` at 25 °C, 35 ppt, 1000 m.
 
 ```python
 import numpy as np
@@ -128,6 +128,20 @@ can cross entire oceans.
 
 ## 3. Sonar equation
 
+The sonar equation combines the performance terms into the **signal excess**
+$SE$ (detection when $SE \ge 0$) and the **figure of merit** (the maximum
+allowable transmission loss at $SE = 0$):
+
+$$
+SE = SL - TL - (NL - DI) - DT \ \ \text{(passive)},
+$$
+
+$$
+SE = SL - 2\,TL + TS - (NL - DI) - DT \ \ \text{(active, monostatic)},
+$$
+
+or reverberation-limited with $RL$ in place of $NL - DI$.
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_dark.svg">
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation.svg" alt="The passive sonar equation: signal excess falling with transmission loss, crossing zero (the detection limit) at the figure of merit" width="82%">
@@ -152,20 +166,6 @@ plt.show()
 
 </details>
 
-The sonar equation combines the performance terms into the **signal excess**
-$SE$ (detection when $SE \ge 0$) and the **figure of merit** (the maximum
-allowable transmission loss at $SE = 0$):
-
-$$
-SE = SL - TL - (NL - DI) - DT \ \ \text{(passive)},
-$$
-
-$$
-SE = SL - 2\,TL + TS - (NL - DI) - DT \ \ \text{(active, monostatic)},
-$$
-
-or reverberation-limited with $RL$ in place of $NL - DI$.
-
 ```python
 import numpy as np
 from phonometry import underwater
@@ -187,6 +187,12 @@ Sonar, propagation and ambient levels are in dB re a plane wave of 1 µPa rms
 the source convention, dB re 1 µPa²/Hz **at 1 m**.
 
 ## 4. Seabed reflection loss
+
+A plane wave striking the seabed reflects with the fluid–fluid **Rayleigh
+reflection coefficient** (Medwin & Clay). For a faster bottom ($c_2 > c_1$) there
+is a **critical grazing angle** $\varphi_c = \arccos(c_1/c_2)$, below which
+the wave is totally reflected ($|R| = 1$, zero loss). The bottom loss is
+$BL = -20 \lg |R|$.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_dark.svg">
@@ -212,12 +218,6 @@ plt.show()
 
 </details>
 
-A plane wave striking the seabed reflects with the fluid–fluid **Rayleigh
-reflection coefficient** (Medwin & Clay). For a faster bottom ($c_2 > c_1$) there
-is a **critical grazing angle** $\varphi_c = \arccos(c_1/c_2)$, below which
-the wave is totally reflected ($|R| = 1$, zero loss). The bottom loss is
-$BL = -20 \lg |R|$.
-
 ```python
 import numpy as np
 from phonometry import underwater
@@ -236,6 +236,13 @@ also exposed directly. The model is lossless (real densities and sound speeds);
 sediment attenuation is out of scope.
 
 ## 5. Ocean ambient noise
+
+The ambient-noise spectrum level (dB re 1 µPa²/Hz) is the energy sum of the two
+physically grounded Wenz components: **wind / sea-surface** noise via the "rule
+of fives" ($51.02 - (5/3)\,10\,(\lg f_{\text{kHz}} - \lg(U/5))$: the historical "25 dB (5 × 5)" anchor at 1 kHz for 5 knots is re 20 µPa, i.e. $25 + 20 \lg 20 \approx 51.02$ dB re 1 µPa) and
+**Mellen thermal** noise ($4 \pi k T \rho f^2 / c$, dominant above ~50 kHz). A
+**shipping** spectrum may be supplied by the caller — for example one predicted
+by the traffic model in §6.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise_dark.svg">
@@ -265,13 +272,6 @@ plt.show()
 
 </details>
 
-The ambient-noise spectrum level (dB re 1 µPa²/Hz) is the energy sum of the two
-physically grounded Wenz components: **wind / sea-surface** noise via the "rule
-of fives" ($51.02 - (5/3)\,10\,(\lg f_{\text{kHz}} - \lg(U/5))$: the historical "25 dB (5 × 5)" anchor at 1 kHz for 5 knots is re 20 µPa, i.e. $25 + 20 \lg 20 \approx 51.02$ dB re 1 µPa) and
-**Mellen thermal** noise ($4 \pi k T \rho f^2 / c$, dominant above ~50 kHz). A
-**shipping** spectrum may be supplied by the caller — for example one predicted
-by the traffic model in §6.
-
 ```python
 import numpy as np
 from phonometry import underwater
@@ -293,6 +293,13 @@ scope (Wenz notes these bands are strongly variable); a shipping spectrum is
 supplied through the `shipping` argument.
 
 ## 6. Ship-traffic source level
+
+When no measured spectrum is available, a ship's underwater source level can be
+**estimated** from its class, speed and length. Three semi-empirical models are
+available: **JOMOPANS-ECHO** (MacGillivray & de Jong 2021, per vessel class,
+validated against 1862 measurements, the default), **RANDI 3.1** and
+**Wales & Heitmeyer** (2002). All return the source spectral-density level and
+the decidecade-band source level.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise_dark.svg">
@@ -323,13 +330,6 @@ plt.show()
 
 </details>
 
-When no measured spectrum is available, a ship's underwater source level can be
-**estimated** from its class, speed and length. Three semi-empirical models are
-available: **JOMOPANS-ECHO** (MacGillivray & de Jong 2021, per vessel class,
-validated against 1862 measurements, the default), **RANDI 3.1** and
-**Wales & Heitmeyer** (2002). All return the source spectral-density level and
-the decidecade-band source level.
-
 ```python
 from phonometry import underwater
 
@@ -351,6 +351,22 @@ below 100 Hz. The implementation is validated to the authors' own reference
 calculator (File S1) to better than 0.01 dB.
 
 ## 7. Numerical solvers (normal modes, rays, parabolic equation)
+
+For range-independent (horizontally stratified) environments the field can be
+computed numerically. Three solvers are provided (Jensen et al.,
+*Computational Ocean Acoustics*):
+
+- **`normal_modes`** solves the depth-separated Sturm-Liouville eigenvalue
+  problem by finite differences and sums the propagating modes into the
+  transmission loss. Validated against the ideal (pressure-release) waveguide's
+  exact modes.
+- **`ray_trace`** integrates the ray-trajectory equations (Runge-Kutta,
+  vectorised over all rays at once) through a sound-speed profile, reflecting at
+  the surface and bottom. Validated against the circular-arc paths of a linear
+  gradient.
+- **`parabolic_equation`** marches the standard (Tappert) PE with the split-step
+  Fourier algorithm. Validated against free-field spherical spreading; it agrees
+  with the normal-mode transmission loss in trend.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_dark.png">
@@ -379,22 +395,6 @@ plt.show()
 ```
 
 </details>
-
-For range-independent (horizontally stratified) environments the field can be
-computed numerically. Three solvers are provided (Jensen et al.,
-*Computational Ocean Acoustics*):
-
-- **`normal_modes`** solves the depth-separated Sturm-Liouville eigenvalue
-  problem by finite differences and sums the propagating modes into the
-  transmission loss. Validated against the ideal (pressure-release) waveguide's
-  exact modes.
-- **`ray_trace`** integrates the ray-trajectory equations (Runge-Kutta,
-  vectorised over all rays at once) through a sound-speed profile, reflecting at
-  the surface and bottom. Validated against the circular-arc paths of a linear
-  gradient.
-- **`parabolic_equation`** marches the standard (Tappert) PE with the split-step
-  Fourier algorithm. Validated against free-field spherical spreading; it agrees
-  with the normal-mode transmission loss in trend.
 
 ```python
 import numpy as np

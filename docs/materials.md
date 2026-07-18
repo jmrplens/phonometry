@@ -350,12 +350,12 @@ downstream of the sample — a two-load (or one-load) measurement recovers the
 sample's transfer matrix, whose entries give the normal-incidence transmission
 loss, reflection and wavenumber:
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_astm_tube_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_astm_tube.svg" alt="ASTM E2611 four-microphone transmission-loss tube: a sound source, two microphones upstream and two downstream of the test specimen at spacings s1 and s2 and offsets l1 and l2, an adjustable termination for the two-load method, the upstream A and B and downstream C and D travelling waves, and the transfer matrix and transmission-loss relations" width="92%"></picture>
-
 $$
 \mathrm{TL} = 20\log_{10}\left|\frac{T_{11} + T_{12}/\rho c
              + \rho c\,T_{21} + T_{22}}{2}\right|.
 $$
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_astm_tube_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_astm_tube.svg" alt="ASTM E2611 four-microphone transmission-loss tube: a sound source, two microphones upstream and two downstream of the test specimen at spacings s1 and s2 and offsets l1 and l2, an adjustable termination for the two-load method, the upstream A and B and downstream C and D travelling waves, and the transfer matrix and transmission-loss relations" width="92%"></picture>
 
 ```python
 import numpy as np
@@ -477,8 +477,6 @@ estimated from inter-laboratory tests to ISO 5725. It is the sound-absorption
 companion of the sound-insulation uncertainty of ISO 12999-1
 ([Field Insulation Measurement and Ratings](insulation-field.md)).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty.svg" alt="ISO 12999-2 sound absorption coefficient uncertainty: the measured alpha_s spectrum over one-third-octave bands from 63 Hz to 5000 Hz with a shaded plus-or-minus U band at coverage factor k = 2, reproducing the standard's worked Table 4 example" width="80%"></picture>
-
 **One-third-octave bands (Clause 5).** For the sound-absorption coefficient the
 reproducibility standard deviation is `σR = m·αs + n` (Formula (1)), and for the
 equivalent absorption area `σR = m·AT + n·S` with `S = 10 m²` (Formula (2)), where
@@ -497,6 +495,8 @@ rating `DLα,NRD` scales with the value (`σR = 0.10·DLα`, `σr = 0.02·DLα`)
 with the Table 3 coverage factor `k` (`k = 2.0` at 95 %, Gaussian). The reported
 `U` is rounded to two decimals for absorption coefficients and one decimal for
 the equivalent area and `DLα,NRD`.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty.svg" alt="ISO 12999-2 sound absorption coefficient uncertainty: the measured alpha_s spectrum over one-third-octave bands from 63 Hz to 5000 Hz with a shaded plus-or-minus U band at coverage factor k = 2, reproducing the standard's worked Table 4 example" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>

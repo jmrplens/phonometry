@@ -27,6 +27,10 @@ changes — touch the gain knob and you must recalibrate.
 
 ## Physical Calibration (Sound Level Meter)
 
+To get accurate SPL measurements from a digital recording, you must first
+calculate the sensitivity of your measurement chain using a reference tone
+(e.g., 94 dB @ 1 kHz).
+
 ```mermaid
 flowchart LR
     A["Calibrator tone\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Recording\ncalibrator_recording"]
@@ -36,10 +40,6 @@ flowchart LR
     F["Measurement\nrecording"] --> E
     E --> G["Levels in dB SPL\n(re 20 µPa)"]
 ```
-
-To get accurate SPL measurements from a digital recording, you must first
-calculate the sensitivity of your measurement chain using a reference tone
-(e.g., 94 dB @ 1 kHz).
 
 ```python
 import numpy as np

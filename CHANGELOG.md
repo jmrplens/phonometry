@@ -13,14 +13,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   bibliography in the page frontmatter (standard, book, article, web and
   report entries with DOI and publisher-catalogue links) and the site renders
   one localized, alphabetized APA-7 "References" section at the end of the
-  article, wired into the "On this page" panel. Three guide pairs (EN + ES)
-  pilot the migration with verified links for every entry: loudness, aircraft
-  noise and psychoacoustic annoyance.
+  article, wired into the "On this page" panel. After the loudness, aircraft
+  noise and psychoacoustic annoyance pilots, every remaining guide and the
+  five theory chapters (EN + ES) migrated their manual References and
+  Standards sections into the typed bibliography, with a verified
+  publisher-catalogue URL or DOI for every entry.
 - Docs site: accessible animation embed (`Video.astro`). Wraps the existing
   four-variant WebM convention (EN/ES, light/dark, lazy poster) and adds a
   required accessible name and textual description, a visible localized
   download link, an in-element textual fallback and keyboard-operable
-  controls; the loudness and surface-scattering guides embed through it.
+  controls. Every guide animation now embeds through it, each with a real
+  textual description of what the clip shows.
+- Docs site: theme-aware figure embed (`ThemeImage.astro`). Takes the light
+  variant URL and one alt text, derives the `_dark` twin and emits the same
+  light-only/dark-only pair the theme switch and the responsive width tiers
+  key on, with native lazy-loading (the page hero opts into eager). All
+  guide, getting-started and why-phonometry figure pairs (EN + ES) embed
+  through it, and the pages became MDX along the way.
+- Docs: media placement pass from the documentation audit. Thirty-eight
+  figure, animation and code-block moves reunite each medium with the prose,
+  formula or snippet that explains it (including the whole inverted
+  underwater-propagation layout and a leftover duplicated code block in the
+  levels guide), applied in lockstep to the GitHub docs and both site
+  languages, with new introductory sentences where a clip had none.
 
 - Correlation, time-delay estimation and Hilbert envelope (Bendat & Piersol,
   Random Data 4e; Knapp & Carter 1976): `correlation` (auto/cross via

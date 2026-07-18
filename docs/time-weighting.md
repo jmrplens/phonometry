@@ -26,6 +26,11 @@ that is why level analyses discard the first instants of a recording.
 
 ## 2. The three time weightings
 
+* **Fast (`fast`):** τ = 125 ms. Standard for noise fluctuations.
+* **Slow (`slow`):** τ = 1000 ms. Standard for steady noise.
+* **Impulse (`impulse`):** **Asymmetric** ballistics. 35 ms rise time for rapid
+  onset capture, 1500 ms decay for readability.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting.gif" alt="Animation: a tone burst driving the RC exponential detector, the capacitor charging and draining, while the Fast, Slow and Impulse meter needles follow their own ballistics" width="640" height="360" loading="lazy"></picture>
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting.webm)
@@ -58,11 +63,6 @@ plt.show()
 ```
 
 </details>
-
-* **Fast (`fast`):** τ = 125 ms. Standard for noise fluctuations.
-* **Slow (`slow`):** τ = 1000 ms. Standard for steady noise.
-* **Impulse (`impulse`):** **Asymmetric** ballistics. 35 ms rise time for rapid
-  onset capture, 1500 ms decay for readability.
 
 ```python
 import numpy as np

@@ -1,6 +1,110 @@
 ---
 title: "Environment and Transport"
 description: "Environmental descriptors, impulsive-sound adjustments, outdoor propagation, occupational exposure and sound power determination behind phonometry."
+references:
+  - type: book
+    authors: ["Salomons, E. M."]
+    year: 2001
+    title: "Computational atmospheric acoustics"
+    publisher: "Kluwer Academic Publishers"
+    doi: "10.1007/978-94-010-0660-6"
+    note: "ISBN 978-1-4020-0390-5. The wave-based outdoor propagation theory behind the engineering approximations of the ISO 9613-2 section."
+  - type: book
+    authors: ["Attenborough, K.", "Van Renterghem, T."]
+    year: 2021
+    title: "Predicting outdoor sound"
+    edition: "2nd ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9780429470806"
+    note: "The ground impedance and meteorological effects underlying the ground-effect and barrier terms."
+  - type: article
+    authors: ["Maekawa, Z."]
+    year: 1968
+    title: "Noise reduction by screens"
+    journal: "Applied Acoustics"
+    volume: 1
+    issue: 3
+    pages: "157-173"
+    doi: "10.1016/0003-682X(68)90020-0"
+    note: "The screen-attenuation chart that the barrier insertion-loss formulas descend from."
+  - type: book
+    authors: ["Fahy, F. J."]
+    year: 1995
+    title: "Sound intensity"
+    edition: "2nd ed."
+    publisher: "E&FN Spon"
+    doi: "10.4324/9780203475386"
+    note: "ISBN 978-0-419-19810-9. The intensity physics behind the scanning methods: active intensity and the p-p error budget."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2016
+    title: "Acoustics — Description, measurement and assessment of environmental noise — Part 1: Basic quantities and assessment procedures"
+    designation: "ISO 1996-1:2016"
+    url: "https://www.iso.org/standard/59765.html"
+    note: "The composite rating level and Table A.1 adjustments of the descriptors section."
+  - type: standard
+    organization: "Nordtest"
+    year: 2002
+    title: "Acoustics: Prominence of impulsive sounds and for adjustment of LAeq"
+    designation: "NT ACOU 112:2002"
+    url: "https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/"
+    note: "The onset-rate prominence and LAeq adjustment of the impulsive-sound section."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2022
+    title: "Acoustics — Description, measurement and assessment of environmental noise — Part 3: Objective method for the measurement of prominence of impulsive sounds and for adjustment of LAeq"
+    designation: "ISO/PAS 1996-3:2022"
+    url: "https://www.iso.org/standard/77035.html"
+    note: "The ISO successor built on the NT ACOU 112 prominence."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere"
+    designation: "ISO 9613-1:1993"
+    url: "https://www.iso.org/standard/17426.html"
+    note: "The pure-tone attenuation coefficient and its relaxation physics."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 2: General method of calculation"
+    designation: "ISO 9613-2:1996"
+    url: "https://www.iso.org/standard/20649.html"
+    note: "The attenuation chain (divergence, air, ground, barrier) of the general-method section. Revised in 2024; the 1996 method is the implemented one."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of occupational noise exposure — Engineering method"
+    designation: "ISO 9612:2009"
+    url: "https://www.iso.org/standard/41718.html"
+    note: "The three measurement strategies and the Annex C uncertainty budget of the occupational section."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Engineering methods for an essentially free field over a reflecting plane"
+    designation: "ISO 3744:2010"
+    url: "https://www.iso.org/standard/52055.html"
+    note: "The enveloping-surface method with its background and reverberant-field corrections."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2012
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for anechoic rooms and hemi-anechoic rooms"
+    designation: "ISO 3745:2012"
+    url: "https://www.iso.org/standard/45362.html"
+    note: "The precision anechoic method with its meteorological corrections and microphone arrays."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms"
+    designation: "ISO 3741:2010"
+    url: "https://www.iso.org/standard/52053.html"
+    note: "The diffuse-field method with the Waterhouse correction and the comparison method."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Determination of sound power levels of noise sources using sound intensity — Part 1: Measurement at discrete points"
+    designation: "ISO 9614-1:1993"
+    url: "https://www.iso.org/standard/17427.html"
+    note: "The field indicators and dynamic-capability criterion shared by the intensity-scanning methods."
 ---
 
 This page collects the theory behind outdoor and environmental noise: the whole-day rating descriptors and the impulsive-sound adjustment, atmospheric absorption, the general outdoor propagation method, occupational noise exposure with its uncertainty budget, and the sound power determination methods. It is part of the [theory reference](/phonometry/reference/theory/).
@@ -267,87 +371,3 @@ uniform normal intensity recovers the power exactly (100 µW over 3.75 m² →
 80.0 dB re 1 pW), independent of how the surface is segmented.
 
 See the [Sound Power guide](/phonometry/guides/sound-power/) for usage.
-
-## References
-
-- Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
-  Academic Publishers. ISBN 978-1-4020-0390-5.
-  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
-  The wave-based outdoor propagation theory behind the engineering
-  approximations of the ISO 9613-2 section.
-- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
-  (2nd ed.). CRC Press.
-  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
-  The ground impedance and meteorological effects underlying the
-  ground-effect and barrier terms.
-- Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
-  157-173.
-  [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
-  The screen-attenuation chart that the barrier insertion-loss formulas
-  descend from.
-- Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
-  ISBN 978-0-419-19810-9.
-  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
-  The intensity physics behind the scanning methods: active intensity and
-  the p-p error budget.
-- International Organization for Standardization. (2016). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 1:
-  Basic quantities and assessment procedures* (ISO 1996-1:2016).
-  [iso.org catalogue](https://www.iso.org/standard/59765.html).
-  The composite rating level and Table A.1 adjustments of the descriptors
-  section.
-- Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for
-  adjustment of LAeq* (Nordtest Method NT ACOU 112).
-  [nordtest.info](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/).
-  The onset-rate prominence and LAeq adjustment of the impulsive-sound
-  section.
-- International Organization for Standardization. (2022). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 3:
-  Objective method for the measurement of prominence of impulsive sounds and
-  for adjustment of LAeq* (ISO/PAS 1996-3:2022).
-  [iso.org catalogue](https://www.iso.org/standard/77035.html).
-  The ISO successor built on the NT ACOU 112 prominence.
-- International Organization for Standardization. (1993). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 1: Calculation of
-  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
-  [iso.org catalogue](https://www.iso.org/standard/17426.html).
-  The pure-tone attenuation coefficient and its relaxation physics.
-- International Organization for Standardization. (1996). *Acoustics —
-  Attenuation of sound during propagation outdoors — Part 2: General method
-  of calculation* (ISO 9613-2:1996; revised in 2024, the 1996 method is the
-  implemented one).
-  [iso.org catalogue](https://www.iso.org/standard/20649.html).
-  The attenuation chain (divergence, air, ground, barrier) of the
-  general-method section.
-- International Organization for Standardization. (2009). *Acoustics —
-  Determination of occupational noise exposure — Engineering method*
-  (ISO 9612:2009). [iso.org catalogue](https://www.iso.org/standard/41718.html).
-  The three measurement strategies and the Annex C uncertainty budget of
-  the occupational section.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Engineering methods for an essentially free
-  field over a reflecting plane* (ISO 3744:2010).
-  [iso.org catalogue](https://www.iso.org/standard/52055.html).
-  The enveloping-surface method with its background and reverberant-field
-  corrections.
-- International Organization for Standardization. (2012). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for anechoic rooms and
-  hemi-anechoic rooms* (ISO 3745:2012).
-  [iso.org catalogue](https://www.iso.org/standard/45362.html).
-  The precision anechoic method with its meteorological corrections and
-  microphone arrays.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for reverberation test
-  rooms* (ISO 3741:2010).
-  [iso.org catalogue](https://www.iso.org/standard/52053.html).
-  The diffuse-field method with the Waterhouse correction and the
-  comparison method.
-- International Organization for Standardization. (1993). *Acoustics —
-  Determination of sound power levels of noise sources using sound
-  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
-  [iso.org catalogue](https://www.iso.org/standard/17427.html).
-  The field indicators and dynamic-capability criterion shared by the
-  intensity-scanning methods.

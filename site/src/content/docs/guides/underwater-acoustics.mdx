@@ -1,6 +1,52 @@
-← [Documentation index](README.md)
+---
+title: "Underwater acoustics: radiated noise and pile driving"
+description: "ISO 18405 reference levels (SPL, SEL, peak) re 1 µPa, the ISO 17208 ship radiated noise level and equivalent monopole source level via the Lloyd's-mirror correction, and the ISO 18406 single-strike, peak and cumulative pile-driving sound exposure."
+references:
+  - type: book
+    authors: ["Urick, R. J."]
+    year: 1983
+    title: "Principles of underwater sound"
+    edition: "3rd ed."
+    publisher: "McGraw-Hill"
+    note: "Reprinted 1996 by Peninsula Publishing. ISBN 978-0-932146-62-5. Open Library record (https://openlibrary.org/books/OL9317725M). The classic treatment of underwater sound levels and of ship radiated noise behind the reference conventions of sections 1-2."
+  - type: book
+    authors: ["Ainslie, M. A."]
+    year: 2010
+    title: "Principles of sonar performance modelling"
+    publisher: "Springer"
+    doi: "10.1007/978-3-540-87662-5"
+    note: "The systematic treatment of underwater acoustical quantities in the line that ISO 18405 standardised; supports the reference levels and the source level of sections 1-2."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Underwater acoustics — Terminology"
+    designation: "ISO 18405:2017"
+    url: "https://www.iso.org/standard/62406.html"
+    note: "The 1 µPa sound-pressure and 1 µPa²·s sound-exposure references and the definitions of sound pressure level, sound exposure level and peak sound pressure level."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2016
+    title: "Underwater acoustics — Quantities and procedures for description and measurement of underwater sound from ships — Part 1: Requirements for precision measurements in deep water used for comparison purposes"
+    designation: "ISO 17208-1:2016"
+    url: "https://www.iso.org/standard/62408.html"
+    note: "The radiated noise level, the deep-water three-hydrophone geometry and the tabulated source-level uncertainty of section 2."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2019
+    title: "Underwater acoustics — Quantities and procedures for description and measurement of underwater sound from ships — Part 2: Determination of source levels from deep water measurements"
+    designation: "ISO 17208-2:2019"
+    url: "https://www.iso.org/standard/62409.html"
+    note: "The equivalent monopole source level via the Lloyd's-mirror surface correction (Formula 3) for a 0.7·draught source depth."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Underwater acoustics — Measurement of radiated underwater sound from percussive pile driving"
+    designation: "ISO 18406:2017"
+    url: "https://www.iso.org/standard/62407.html"
+    note: "The single-strike (Formulae 3–4), peak and cumulative (Formulae 8–9) sound exposure of section 3, and the mean-square sound pressure level (Formula 7) of section 1."
+---
 
-# Underwater acoustics: radiated noise and pile driving (ISO 18405 / 17208 / 18406)
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 Underwater sound is referenced to **1 µPa** (not the 20 µPa of airborne
 acoustics), and its exposure to **1 µPa²·s**. This page covers the ISO 18405
@@ -62,7 +108,7 @@ $$
 −3.01` dB as `u → ∞`. The reported source level is an *equivalent monopole
 broadside* value and must be quoted with its source depth.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_source_level_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_source_level.svg" alt="Ship radiated noise level and equivalent monopole source level versus frequency, with the Lloyd's-mirror surface correction on a twin axis showing its low-frequency divergence and its approach to −3 dB at high frequency" width="82%"></picture>
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_source_level.svg" alt="Ship radiated noise level and equivalent monopole source level versus frequency, with the Lloyd's-mirror surface correction on a twin axis showing its low-frequency divergence and its approach to −3 dB at high frequency" width="82%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -105,7 +151,7 @@ $$
 \qquad\text{and for } N \text{ identical strikes } = \mathrm{SEL_{ss}} + 10\lg N.
 $$
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pile_driving_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pile_driving.svg" alt="A percussive pile-driving strike pressure waveform with its peak marked, and below it the cumulative sound exposure level growing as SEL_ss plus ten times the logarithm of the number of strikes" width="82%"></picture>
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pile_driving.svg" alt="A percussive pile-driving strike pressure waveform with its peak marked, and below it the cumulative sound exposure level growing as SEL_ss plus ten times the logarithm of the number of strikes" width="82%" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -138,33 +184,7 @@ res.plot()   # waveform + cumulative energy (needs matplotlib)
 level, the SPL/Leq and the 90 %-energy pulse duration for one recorded strike;
 `cumulative_sel` sums a sequence of differing per-strike SELs.
 
-## References
+## See also
 
-- Urick, R. J. (1983). *Principles of underwater sound* (3rd ed.).
-  McGraw-Hill; reprinted 1996 by Peninsula Publishing.
-  ISBN 978-0-932146-62-5.
-  [Open Library record](https://openlibrary.org/books/OL9317725M).
-  The classic treatment of underwater sound levels and of ship radiated
-  noise behind the reference conventions of sections 1-2.
-- Ainslie, M. A. (2010). *Principles of sonar performance modelling*.
-  Springer.
-  [doi:10.1007/978-3-540-87662-5](https://doi.org/10.1007/978-3-540-87662-5).
-  The systematic treatment of underwater acoustical quantities in the line
-  that ISO 18405 standardised; supports the reference levels and the source
-  level of sections 1-2.
-
-## Standards
-
-ISO 18405:2017, *Underwater acoustics — Terminology*: the 1 µPa
-sound-pressure and 1 µPa²·s sound-exposure references and the definitions of
-sound pressure level, sound exposure level and peak sound pressure level.
-ISO 17208-1:2016 and ISO 17208-2:2019, *Underwater acoustics — Quantities and
-procedures for description and measurement of underwater sound from ships*: the
-radiated noise level, the deep-water three-hydrophone geometry, the tabulated
-source-level uncertainty and the equivalent monopole source level via the
-Lloyd's-mirror surface correction (Formula 3) for a `0.7·draught` source depth.
-ISO 18406:2017, *Underwater acoustics — Measurement of radiated underwater sound
-from percussive pile driving*: the single-strike (Formulae 3–4), peak and
-cumulative (Formulae 8–9) sound exposure. All quantities are verified against
-exact analytic oracles. General underwater propagation modelling (ray, normal
-mode, parabolic equation) is out of scope here.
+- API reference: [`underwater.acoustics`](/phonometry/reference/api/underwater/acoustics/), [`underwater.pile_driving_noise`](/phonometry/reference/api/underwater/pile-driving-noise/) and [`underwater.ship_radiated_noise`](/phonometry/reference/api/underwater/ship-radiated-noise/).
+- General underwater propagation modelling (ray, normal mode, parabolic equation) is covered in [Underwater sound propagation](/phonometry/guides/underwater-propagation/).

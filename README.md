@@ -37,6 +37,7 @@ Acoustic measurement toolkit for Python: fractional octave-band filter banks, fr
 - 📏 Physical SPL calibration with IEC 60942:2017 stability validation, and dBFS modes
 - 📉 Calibrated spectral analysis (Bendat & Piersol): PSD/CSD with chi-square confidence intervals and random errors, coherent output spectrum & spectral SNR, 1/n-octave smoothing, exact-slope colored-noise generators
 - ⏱️ Correlation & time-delay estimation (Bendat & Piersol, Knapp & Carter): biased/unbiased/coefficient correlation with random errors, GCC with Roth/SCOT/PHAT/ML weightings, sub-sample IR delay & alignment, Hilbert envelope with instantaneous frequency
+- 🌀 Swept-sine distortion & phase utilities: harmonic separation and THD(f) from one exponential sweep (Farina 2000, Novak et al. 2015 synchronized sweep), minimum phase from |H|, group delay & excess phase
 - ⚡ Vectorized multichannel processing and stateful block (real-time) workflows
 
 ## 🚀 Installation
@@ -67,6 +68,7 @@ Or browse the Markdown docs on GitHub:
 | [Speech Transmission](https://github.com/jmrplens/phonometry/blob/main/docs/speech-transmission.md) | STI/STIPA (IEC 60268-16): modulation transfer function, indirect method from impulse responses and direct STIPA measurement |
 | [Speech Intelligibility Index](https://github.com/jmrplens/phonometry/blob/main/docs/speech-intelligibility.md) | SII (ANSI S3.5-1997): band importance, masking and audibility, the index in noise and hearing loss, standard vocal-effort spectra |
 | [Electroacoustics](https://github.com/jmrplens/phonometry/blob/main/docs/electroacoustics.md) | Distortion (IEC 60268-3): THD, nth-order harmonic, THD+N & SINAD (AES17), SMPTE & CCIF intermodulation, DIM and weighted THD; frequency response & coherence (Bendat & Piersol H1/H2) |
+| [Swept-Sine Distortion & Phase](https://github.com/jmrplens/phonometry/blob/main/docs/swept-sine-distortion.md) | Harmonic separation & THD(f) from one exponential sweep (Farina 2000; Novak et al. 2015 synchronized sweep with coherent harmonic phases); minimum phase from \|H\| (real cepstrum), group delay & excess phase |
 | [Calibrated Spectral Analysis](https://github.com/jmrplens/phonometry/blob/main/docs/spectral-analysis.md) | Welch PSD/CSD with effective averages, random errors & chi-square confidence intervals; coherent output spectrum & spectral SNR; 1/n-octave smoothing; colored-noise generators (Bendat & Piersol) |
 | [Programme Loudness](https://github.com/jmrplens/phonometry/blob/main/docs/program-loudness.md) | ITU-R BS.1770-5 programme loudness (K-weighting, gating, multichannel weights incl. Annex 3) and true peak in dBTP; EBU R 128 with the Tech 3341 EBU Mode M/S/I meters and the Tech 3342 loudness range |
 | [Correlation, Time Delay & Envelope](https://github.com/jmrplens/phonometry/blob/main/docs/correlation-delay.md) | Auto/cross-correlation with B&P normalizations & random errors; TDE by direct correlation, cross-spectrum phase slope & Knapp-Carter GCC (Roth/SCOT/PHAT/ML); sub-sample IR delay & alignment; Hilbert envelope & instantaneous frequency |

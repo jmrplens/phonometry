@@ -1,6 +1,6 @@
 ---
 title: "Sources and devices"
-description: "Characterising what emits the sound: sound power determination by pressure, reverberation-room and intensity methods (ISO 3740 and ISO 9614 series), two-microphone sound intensity (IEC 61043), the IEC 60268 distortion and frequency-response metrics of audio equipment, and the ITU-R BS.1770-5 / EBU R 128 programme loudness and true peak."
+description: "Characterising what emits the sound: sound power determination by pressure, reverberation-room and intensity methods (ISO 3740 and ISO 9614 series), two-microphone sound intensity (IEC 61043), the IEC 60268 distortion and frequency-response metrics of audio equipment, swept-sine harmonic separation with THD(f) (Farina / Novak), and the ITU-R BS.1770-5 / EBU R 128 programme loudness and true peak."
 ---
 
 Every prediction elsewhere in this documentation starts from a source
@@ -27,6 +27,12 @@ covers the IEC 60268-3 distortion set (THD, THD+N and SINAD, intermodulation
 and DIM), the H1/H2 frequency-response estimators with coherence, and the
 sensitivity conventions of IEC 60268-4/-5 where datasheet comparisons usually
 go wrong.
+[Swept-sine distortion and phase utilities](/phonometry/guides/swept-sine-distortion/)
+extends the bench with the one-sweep alternative: the Farina / Novak
+harmonic separation that turns a single exponential sweep into the full set
+of harmonic frequency responses and a THD measured as a function of the
+excitation frequency, plus the minimum-phase, group-delay and excess-phase
+utilities that dissect what the measured response's phase is made of.
 
 [Programme loudness](/phonometry/guides/program-loudness/) covers the signal
 the devices carry: the ITU-R BS.1770-5 loudness of a broadcast or streaming
@@ -53,6 +59,10 @@ level a programme, go to
 - [Electroacoustics: distortion and frequency response](/phonometry/guides/electroacoustics/):
   the IEC 60268-3 distortion metrics, frequency-response estimation with
   coherence, and microphone and loudspeaker sensitivity conventions.
+- [Swept-sine distortion and phase utilities](/phonometry/guides/swept-sine-distortion/):
+  harmonic separation and THD(f) from one exponential sweep (Farina /
+  Novak synchronized swept-sine), and minimum phase, group delay and
+  excess phase from a measured response.
 - [Programme loudness and true peak](/phonometry/guides/program-loudness/):
   the ITU-R BS.1770-5 programme loudness and true-peak level with the
   EBU R 128 normalisation practice, EBU Mode metering and loudness range.

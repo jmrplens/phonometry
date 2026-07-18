@@ -54,9 +54,11 @@ it; the list grows as guides gain their References sections.
   Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
   [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
   The statistical error analysis behind the calibrated spectral estimators,
-  the correlation and time-delay formulas and the Hilbert-envelope chapter.
-  Cited by [Calibrated Spectral Analysis](spectral-analysis.md) and
-  [Correlation, Time Delay and Envelope](correlation-delay.md).
+  the correlation and time-delay formulas, the Hilbert-envelope chapter and
+  the log-magnitude/phase Hilbert relation of the minimum-phase utilities.
+  Cited by [Calibrated Spectral Analysis](spectral-analysis.md),
+  [Correlation, Time Delay and Envelope](correlation-delay.md) and
+  [Swept-sine distortion and phase utilities](swept-sine-distortion.md).
 - Knapp, C. H., & Carter, G. C. (1976). The generalized correlation method
   for estimation of time delay. *IEEE Transactions on Acoustics, Speech,
   and Signal Processing*, 24(4), 320-327.
@@ -64,6 +66,26 @@ it; the list grows as guides gain their References sections.
   The GCC framework and the Roth/SCOT/PHAT/maximum-likelihood weightings of
   the time-delay estimators.
   Cited by [Correlation, Time Delay and Envelope](correlation-delay.md).
+- Farina, A. (2000). Simultaneous measurement of impulse response and
+  distortion with a swept-sine technique. *108th AES Convention*, Paris,
+  preprint 5093.
+  [AES E-Library record](https://www.aes.org/e-lib/browse.cfm?elib=10211).
+  The exponential-sweep deconvolution and the L·ln(n) packing of the
+  harmonic impulse responses ahead of the linear one.
+  Cited by [Swept-sine distortion and phase utilities](swept-sine-distortion.md).
+- Novak, A., Lotton, P., & Simon, L. (2015). Synchronized swept-sine:
+  Theory, application and implementation. *Journal of the Audio Engineering
+  Society*, 63(10), 786-798.
+  [doi:10.17743/jaes.2015.0071](https://doi.org/10.17743/jaes.2015.0071).
+  The synchronization condition for coherent harmonic phases, the analytic
+  inverse-filter spectrum and the fractional-sample harmonic separation.
+  Cited by [Swept-sine distortion and phase utilities](swept-sine-distortion.md).
+- Müller, S., & Massarani, P. (2001). Transfer-function measurement with
+  sweeps. *Journal of the Audio Engineering Society*, 49(6), 443-471.
+  [AES E-Library record](https://www.aes.org/e-lib/browse.cfm?elib=10189).
+  The sweep-measurement monograph behind the practice notes: inverse
+  filters, fades and distortion rejection.
+  Cited by [Swept-sine distortion and phase utilities](swept-sine-distortion.md).
 
 ## Measurement instrumentation
 

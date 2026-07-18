@@ -173,6 +173,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | :--- | :--- |
 | [`electroacoustics.distortion`](/phonometry/reference/api/electroacoustics/distortion/) | Distortion metrics for electroacoustic equipment (IEC 60268-3 / AES17). |
 | [`electroacoustics.frequency_response`](/phonometry/reference/api/electroacoustics/frequency-response/) | Frequency-response and coherence estimators (Bendat & Piersol). |
+| [`electroacoustics.swept_sine`](/phonometry/reference/api/electroacoustics/swept-sine/) | Harmonic-distortion separation with exponential sweeps (Farina / Novak). |
 
 ## Program loudness
 
@@ -192,6 +193,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | :--- | :--- |
 | [`metrology.spectra`](/phonometry/reference/api/spectra/spectra/) | Calibrated spectral-density estimation with statistical error analysis. |
 | [`metrology.signals`](/phonometry/reference/api/spectra/signals/) | Deterministic colored-noise test signals. |
+| [`metrology.phase`](/phonometry/reference/api/spectra/phase/) | Phase utilities: minimum phase, group delay and excess phase. |
 
 ## Wave simulation
 

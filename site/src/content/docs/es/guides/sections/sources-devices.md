@@ -1,6 +1,6 @@
 ---
 title: "Fuentes y dispositivos"
-description: "Caracterizar lo que emite el sonido: determinación de la potencia sonora por métodos de presión, cámara reverberante e intensidad (series ISO 3740 e ISO 9614), intensidad sonora con dos micrófonos (IEC 61043), las métricas de distorsión y respuesta en frecuencia de equipos de audio de IEC 60268, y la sonoridad de programa y pico verdadero de UIT-R BS.1770-5 / EBU R 128."
+description: "Caracterizar lo que emite el sonido: determinación de la potencia sonora por métodos de presión, cámara reverberante e intensidad (series ISO 3740 e ISO 9614), intensidad sonora con dos micrófonos (IEC 61043), las métricas de distorsión y respuesta en frecuencia de equipos de audio de IEC 60268, la separación armónica con barridos y THD(f) (Farina / Novak), y la sonoridad de programa y pico verdadero de UIT-R BS.1770-5 / EBU R 128."
 ---
 
 Toda predicción del resto de esta documentación parte de un descriptor de
@@ -29,6 +29,13 @@ micrófonos. Cubre el conjunto de distorsión de IEC 60268-3 (THD, THD+N y
 SINAD, intermodulación y DIM), los estimadores de respuesta en frecuencia
 H1/H2 con la coherencia, y los convenios de sensibilidad de IEC 60268-4/-5,
 donde suelen fallar las comparaciones entre hojas de datos.
+[Distorsión con barridos y utilidades de fase](/phonometry/es/guides/swept-sine-distortion/)
+amplía el banco de pruebas con la alternativa de un solo barrido: la
+separación armónica de Farina / Novak, que convierte un único barrido
+exponencial en el conjunto completo de respuestas en frecuencia armónicas y
+en una THD medida en función de la frecuencia de excitación, más las
+utilidades de fase mínima, retardo de grupo y exceso de fase que diseccionan
+de qué está hecha la fase de la respuesta medida.
 
 [Sonoridad de programa](/phonometry/es/guides/program-loudness/) cubre la
 señal que transportan esos dispositivos: la sonoridad de un programa de
@@ -59,6 +66,10 @@ nivelar un programa, ve a
   las métricas de distorsión de IEC 60268-3, la estimación de la respuesta en
   frecuencia con coherencia, y los convenios de sensibilidad de micrófonos y
   altavoces.
+- [Distorsión con barridos y utilidades de fase](/phonometry/es/guides/swept-sine-distortion/):
+  separación armónica y THD(f) con un solo barrido exponencial (barrido
+  sincronizado de Farina / Novak), y fase mínima, retardo de grupo y exceso
+  de fase de una respuesta medida.
 - [Sonoridad de programa y pico verdadero](/phonometry/es/guides/program-loudness/):
   la sonoridad de programa y el nivel de pico verdadero de UIT-R BS.1770-5
   con la práctica de normalización de EBU R 128, la medición en modo EBU y

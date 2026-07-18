@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **299/299 conformance checks pass** across 37 domains and 174 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **306/306 conformance checks pass** across 38 domains and 181 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -637,6 +637,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 |:---|:---|:---|:---|:---|:---:|
 | Rigid rectangular box eigenfrequency | Mode (1,1) of a 1.0 x 0.7 m rigid box, f = (c/2)*sqrt(1/lx^2 + 1/ly^2), Hz | 299.06 Hz (+/-1.5 Hz) | 298.91 Hz | -0.153 Hz | &#9989; |
 | Free-field pulse arrival delay | Probe-to-probe delay of a pulse over 0.6 m of air, (r2 - r1)/c, ms | 1.749 ms (+/-0.05 ms) | 1.756 ms | 0.007 ms | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Swept-sine distortion &amp; phase utilities (Farina / Novak)</b>: 100% (7/7)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Farina 2000 / Novak et al. 2015 (Chebyshev identity) | 3rd-harmonic response H3 magnitude of a cubic polynomial, re a3/4 | 0.05 (+/-0.0005) | 0.05001 | 0 | &#9989; |
+| Novak et al. 2015, JAES 63(10), Eqs. 18/49 | Synchronized-sweep phase of H3 (Chebyshev: -sin(3wt)), rad | 3.1416 rad (+/-0.005 rad) | 3.1411 rad | 0 rad | &#9989; |
+| Farina 2000, AES 108th Conv. (THD from one sweep) | THD(1 kHz) of the polynomial vs sqrt((a2/2)^2+(a3/4)^2)/(1+3a3/4) | 0.06149 (+/-0.001) | 0.06159 | 0 | &#9989; |
+| Farina 2000 (distortion rejected from the linear IR) | THD floor of a purely linear path (gain 0.5), max over 100-2000 Hz | 0 (+/-0.001) | 0.00033 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Sec. 13.1.4 (Hilbert relation) | Min-phase reconstruction of a strictly min-phase biquad, max err, rad | 0 rad (+/-0 rad) | 0 rad | 0 rad | &#9989; |
+| First-order allpass closed form (1-a^2)/(1+2a cos w+a^2) | Group delay of the a = 0.5 allpass at w = pi/2, samples | 0.6 (+/-0.00001) | 0.6 | 0 | &#9989; |
+| All-pass decomposition of a pure latency (B&P Sec. 13.1.4) | Excess group delay of a biquad delayed 7.25 samples, samples | 7.25 (+/-0) | 7.25 | 0 | &#9989; |
 
 </details>
 

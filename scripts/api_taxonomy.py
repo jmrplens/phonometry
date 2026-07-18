@@ -222,6 +222,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         modules=(
             "phonometry.electroacoustics.distortion",
             "phonometry.electroacoustics.frequency_response",
+            "phonometry.electroacoustics.swept_sine",
         ),
     ),
     Section(
@@ -243,6 +244,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         modules=(
             "phonometry.metrology.spectra",
             "phonometry.metrology.signals",
+            "phonometry.metrology.phase",
         ),
     ),
     Section(

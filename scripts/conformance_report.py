@@ -5287,7 +5287,7 @@ def _numerical_validation_section(filters_ok: bool) -> str:
     lines.append(f"<details{opened}>")
     lines.append(
         f"<summary>{emoji} <b>Numerical validation - filters &amp; "
-        "weightings</b> — class showcase (IEC 61260-1 · IEC 61672-1 · "
+        "weightings</b>: class showcase (IEC 61260-1 · IEC 61672-1 · "
         "ISO 7196)</summary>"
     )
     lines.append("")
@@ -5399,7 +5399,7 @@ def render_markdown() -> tuple[str, int, int]:
         domain_html = domain.replace("&", "&amp;")
         out.append(f"<details{opened}>")
         out.append(
-            f"<summary>{emoji} <b>{domain_html}</b> — {pct:.0f}% "
+            f"<summary>{emoji} <b>{domain_html}</b>: {pct:.0f}% "
             f"({passed_d}/{total_d})</summary>"
         )
         out.append("")

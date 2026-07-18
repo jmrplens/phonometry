@@ -124,6 +124,71 @@ def _format_freq(f: float) -> str:
     return text
 
 
+#: Nominal octave-band centres (IEC 61672 / ISO 266) spanning the acoustic
+#: range, used to label *continuous* logarithmic frequency axes.
+_OCTAVE_NOMINAL: Final = (
+    1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 125.0, 250.0, 500.0,
+    1000.0, 2000.0, 4000.0, 8000.0, 16000.0, 31500.0, 63000.0, 125000.0,
+)
+
+#: Nominal one-third-octave centres for optional unlabelled minor ticks.
+_THIRD_NOMINAL: Final = (
+    1.0, 1.25, 1.6, 2.0, 2.5, 3.15, 4.0, 5.0, 6.3, 8.0, 10.0, 12.5, 16.0,
+    20.0, 25.0, 31.5, 40.0, 50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0,
+    250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0,
+    2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0,
+    12500.0, 16000.0, 20000.0, 25000.0, 31500.0, 40000.0, 50000.0,
+    63000.0, 80000.0, 100000.0, 125000.0,
+)
+
+
+def format_frequency_axis(
+    ax: Axes,
+    fmin: float | None = None,
+    fmax: float | None = None,
+    *,
+    minor: str | None = "thirds",
+) -> None:
+    """Label a *continuous* logarithmic frequency x-axis with band centres.
+
+    Places major ticks at the nominal octave centres (16 Hz, 31.5 Hz, ...,
+    16 kHz) that fall inside the axis range, labels them with the short
+    :func:`_format_freq` form (``1k``, ``2k``, ...) and replaces the default
+    power-of-ten log formatter (``10^2``, ``10^3``) that reads poorly in
+    acoustics.  ``minor="thirds"`` adds unlabelled one-third-octave minor
+    ticks; ``minor=None`` clears the minor ticks.
+
+    The x-axis is switched to a log scale when it is not already one.  The
+    tick set is clipped to the data range: pass ``fmin`` / ``fmax`` to fix it
+    explicitly, otherwise the current axis limits (read after the data has
+    been drawn) are used, so a plot that starts at 100 Hz is never dragged
+    back to 16 Hz.  The function only touches ticks and never changes data.
+    """
+    import matplotlib.ticker as mticker
+
+    if ax.get_xscale() != "log":
+        ax.set_xscale("log")
+    lo, hi = ax.get_xlim()
+    if fmin is not None:
+        lo = fmin
+    if fmax is not None:
+        hi = fmax
+    lo, hi = min(lo, hi), max(lo, hi)
+    majors = [f for f in _OCTAVE_NOMINAL if lo <= f <= hi]
+    ax.xaxis.set_major_locator(mticker.FixedLocator(majors))
+    ax.xaxis.set_major_formatter(
+        mticker.FixedFormatter([_format_freq(f) for f in majors])
+    )
+    if minor == "thirds":
+        minors = [
+            f for f in _THIRD_NOMINAL if lo <= f <= hi and f not in majors
+        ]
+        ax.xaxis.set_minor_locator(mticker.FixedLocator(minors))
+    else:
+        ax.xaxis.set_minor_locator(mticker.NullLocator())
+    ax.xaxis.set_minor_formatter(mticker.NullFormatter())
+
+
 def _band_axis(
     ax: Axes,
     labels_or_freqs: "np.ndarray | Sequence[str] | Sequence[float]",

@@ -33,6 +33,7 @@ from .common import (
     _LEGEND_UPPER_RIGHT,
     _new_axes,
     _new_axes_column,
+    format_frequency_axis,
 )
 
 #: Shared frequency-axis label of the spectral renderers.
@@ -154,6 +155,7 @@ def plot_spectral_density(
     )
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    format_frequency_axis(ax, float(freqs[pos].min()), float(freqs[pos].max()))
     return ax
 
 
@@ -186,9 +188,11 @@ def plot_cross_spectral_density(
         axm.grid(True, which="both", alpha=0.3)
         axm.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
+    fmin, fmax = float(freqs[pos].min()), float(freqs[pos].max())
     if ax is not None:
         _magnitude(ax)
         ax.set_xlabel(_FREQ_LABEL)
+        format_frequency_axis(ax, fmin, fmax)
         return ax
 
     axes = _new_axes_column(3, sharex=True, figsize=(8.0, 7.0))
@@ -217,6 +221,8 @@ def plot_cross_spectral_density(
     axes[2].set_ylim(0.0, 1.05)
     axes[2].set_xlabel(_FREQ_LABEL)
     axes[2].grid(True, which="both", alpha=0.3)
+    for axf in axes:
+        format_frequency_axis(axf, fmin, fmax)
     return axes
 
 
@@ -263,9 +269,11 @@ def plot_coherent_output_spectrum(
         axs.grid(True, which="both", alpha=0.3)
         axs.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
+    fmin, fmax = float(freqs[pos].min()), float(freqs[pos].max())
     if ax is not None:
         _spectra_panel(ax)
         ax.set_xlabel(_FREQ_LABEL)
+        format_frequency_axis(ax, fmin, fmax)
         return ax
 
     axes = _new_axes_column(2, sharex=True, figsize=(8.0, 5.6))
@@ -276,6 +284,8 @@ def plot_coherent_output_spectrum(
     axes[1].set_ylabel("Spectral SNR [dB]")
     axes[1].set_xlabel(_FREQ_LABEL)
     axes[1].grid(True, which="both", alpha=0.3)
+    for axf in axes:
+        format_frequency_axis(axf, fmin, fmax)
     return axes
 
 
@@ -469,10 +479,12 @@ def plot_phase_decomposition(
         axp.grid(True, which="both", alpha=0.3)
         axp.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
+    fmin, fmax = float(freqs[pos].min()), float(freqs[pos].max())
     if ax is not None:
         _phase_panel(ax)
         ax.set_xlabel(_FREQ_LABEL)
         ax.set_title("Phase decomposition")
+        format_frequency_axis(ax, fmin, fmax)
         return ax
 
     axes = _new_axes_column(3, sharex=True, figsize=(8.0, 8.0))
@@ -498,4 +510,6 @@ def plot_phase_decomposition(
     axes[2].set_xlabel(_FREQ_LABEL)
     axes[2].grid(True, which="both", alpha=0.3)
     axes[2].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    for axf in axes:
+        format_frequency_axis(axf, fmin, fmax)
     return axes

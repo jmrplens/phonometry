@@ -17,12 +17,17 @@ from .common import (
     _C_TERTIARY,
     _LEGEND_UPPER_RIGHT,
     _band_axis,
+    _freq_axis,
     _new_axes,
 )
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from ..environmental.outdoor_propagation import OutdoorAttenuation
+    from ..environmental.ground_barriers import (
+        BarrierInsertionLoss,
+        SphericalGroundResult,
+    )
     from ..environmental.measurement import TonalAssessmentResult
     from ..environmental.impulse_prominence import ImpulseProminenceResult
     from ..environmental.wind_turbine_noise import WindTurbineTonalityResult
@@ -179,4 +184,64 @@ def plot_outdoor_attenuation(
     ax.set_title("ISO 9613-2 attenuation breakdown")
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
+    return ax
+
+
+def plot_spherical_ground(
+    result: "SphericalGroundResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Excess attenuation (level re free field) of the spherical-wave ground effect.
+
+    Draws the relative sound level ``dL`` versus frequency with the ``+6 dB``
+    hard-ground enhancement ceiling and the ``0 dB`` free-field reference, so the
+    ground-effect dip and any surface-wave enhancement are both visible.
+
+    :param result: A
+        :class:`~phonometry.environmental.ground_barriers.SphericalGroundResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``dL`` ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    d_l = np.asarray(result.excess_attenuation, dtype=np.float64)
+    ax.plot(freqs, d_l, **{"color": _C_PRIMARY, "lw": 1.4, "marker": "o",
+                           "ms": 3.0, "label": "Excess attenuation $\\Delta L$",
+                           **kwargs})
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8, label="Free field (0 dB)")
+    ax.axhline(6.0, color=_C_REFERENCE, ls="--", lw=0.9,
+               label="Hard-ground limit (+6 dB)")
+    _freq_axis(ax, freqs)
+    ax.set_ylabel("Level re free field [dB]")
+    ax.set_title("Spherical-wave ground effect (Weyl-Van der Pol)")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_barrier_insertion_loss(
+    result: "BarrierInsertionLoss", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Barrier insertion loss versus frequency.
+
+    :param result: A
+        :class:`~phonometry.environmental.ground_barriers.BarrierInsertionLoss`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the insertion-loss ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    il = np.asarray(result.insertion_loss, dtype=np.float64)
+    label = f"Insertion loss ({result.method}{', ground' if result.ground else ''})"
+    ax.plot(freqs, il, **{"color": _C_SECONDARY, "lw": 1.4, "marker": "s",
+                          "ms": 3.0, "label": label, **kwargs})
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    ax.axhline(5.0, color=_C_MUTED, ls=":", lw=0.9,
+               label="Grazing limit (5 dB)")
+    _freq_axis(ax, freqs)
+    ax.set_ylabel("Insertion loss [dB]")
+    ax.set_title("Barrier insertion loss")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
     return ax

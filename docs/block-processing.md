@@ -5,7 +5,7 @@
 Some measurements never fit in memory: an hour-long environmental recording,
 a live monitor that must report levels while the microphone is still
 capturing, or an embedded logger that only ever sees one buffer at a time. In
-all of these the signal has to be processed block by block — and the filters
+all of these the signal has to be processed block by block, and the filters
 must behave exactly as if they had seen the whole signal at once.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing.svg" alt="Two lanes comparing block processing with the filter state carried across blocks, giving one continuous envelope, versus reset each block, where the envelope restarts from zero at every seam" width="86%"></picture>
@@ -68,7 +68,7 @@ options that must be disabled in stateful mode are summarized in the
 
 This example streams a WAV file with [`soundfile`](https://pysoundfile.readthedocs.io/),
 an optional dependency (`pip install soundfile`). Any block source works just as
-well — `scipy.io.wavfile` plus manual slicing, or a live capture callback.
+well: `scipy.io.wavfile` plus manual slicing, or a live capture callback.
 
 ```python
 import soundfile as sf
@@ -104,7 +104,7 @@ for block in audio_blocks:
     envelope = tw.process(block)
 ```
 
-Or manage the state yourself with the functional API — see
+Or manage the state yourself with the functional API; see
 [Time Weighting](time-weighting.md#6-block-processing).
 
 ## Multichannel state
@@ -156,8 +156,8 @@ value the functional API hands back as `initial_state` (see
 
 ## Real-time level meter pattern
 
-The canonical streaming loop — weight, envelope and report block by block
-with all state carried across calls:
+The canonical streaming loop weights, envelopes and reports block by block,
+carrying all state across calls:
 
 ```python
 import numpy as np
@@ -180,7 +180,7 @@ for x in audio_stream(block):            # your capture callback
 | `detrend` | must be `False` | Per-block detrending creates boundary discontinuities |
 | `resample` | must be `False` | The resampler is not stateful |
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
-| `high_accuracy` (weighting) | resolves to `False` by default — the legacy bilinear design, see [Frequency Weighting](weighting.md); explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
+| `high_accuracy` (weighting) | resolves to `False` by default (the legacy bilinear design, see [Frequency Weighting](weighting.md)); explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
 | `steady_ic` | optional | Starts the filters in step-response steady state |
 
 ## References

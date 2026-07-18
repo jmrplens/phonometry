@@ -141,9 +141,9 @@ def test_ground_effect_rejects_non_finite_impedance() -> None:
     # would give inf/inf = NaN in Rp, so it is rejected outright.
     with pytest.raises(ValueError, match="finite"):
         ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=np.inf)
+    inf_z = complex(np.inf, 0.0)
     with pytest.raises(ValueError, match="finite"):
-        spherical_reflection_coefficient(_BANDS, complex(np.inf, 0.0),
-                                         1.0, 1.5, 50.0)
+        spherical_reflection_coefficient(_BANDS, inf_z, 1.0, 1.5, 50.0)
     with pytest.raises(ValueError, match="non-zero"):
         ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=0.0)
 

@@ -32,7 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   missing reportlab raises a clear `ImportError` with the install command,
   mirroring the matplotlib guard behind `.plot()`. The rating results gain a
   `quantity` field ("airborne" or "impact") that selects the report labels and
-  standard reference.
+  standard reference. Rendered example fiches (airborne and impact) are kept
+  under `.github/reports/`, regenerated with `make reports`
+  (`scripts/generate_reports.py`), and linked from the documentation.
 - `enclosure_insertion_loss` now accepts a panel prediction result directly for
   its `panel_transmission_loss` argument, in addition to a per-band array or a
   callable. A `SoundReductionResult` or `ApertureTransmissionResult` (from the

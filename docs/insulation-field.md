@@ -378,6 +378,12 @@ l_nt = [45.0, 47.0, 48.0, 49.0, 51.0, 52.0, 53.0, 54.0,
 building.weighted_impact_rating(l_nt).report("Lnw_fiche.pdf")  # Ln,w (CI)
 ```
 
+Rendered examples of both fiches, regenerated with `make reports`, are kept in
+the repository: the airborne
+[`iso717_airborne_example.pdf`](https://github.com/jmrplens/phonometry/raw/main/.github/reports/iso717_airborne_example.pdf)
+and the impact
+[`iso717_impact_example.pdf`](https://github.com/jmrplens/phonometry/raw/main/.github/reports/iso717_impact_example.pdf).
+
 ### Field façade insulation (ISO 16283-3)
 
 The same source/receiver logic reaches the building **façade**, but now the

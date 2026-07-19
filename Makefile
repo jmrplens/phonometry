@@ -89,6 +89,13 @@ llms:
 api-docs:
 	$(PYTHON) scripts/generate_api_docs.py
 
+# Regenerate the committed example .report() fiches under .github/reports/,
+# which the documentation links to as rendered normative-report examples.
+# Not byte-checked in CI (the embedded vector plot differs by ~1 ULP across
+# CPUs); tests/test_generate_reports.py only checks the generator still works.
+reports:
+	$(PYTHON) scripts/generate_reports.py
+
 # Regenerate the committed, versioned numerical conformance report. The
 # --file-header flag prepends the "do not hand-edit" note; the body is exactly
 # what the CI PR-comment harness computes. CI fails if this drifts (see the
@@ -124,5 +131,5 @@ coverage:
 
 check: lint security test
 
-.PHONY: install lint format security snyk sonar graphs animations posters og \
+.PHONY: install lint format security snyk sonar graphs reports animations posters og \
 	llms api-docs conformance install-hooks test coverage check

@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 import numpy as np
 
 from .common import (
+    _C_EDGE,
     _C_MUTED,
     _C_PRIMARY,
     _C_PRIMARY_LIGHT,
@@ -36,6 +37,8 @@ if TYPE_CHECKING:
     from ..room.room_ir import ImpulseResponseResult
     from ..room.enclosed_space_absorption import ReverberationResult
     from ..room.room_noise import NCResult, RCResult
+    from ..room.image_source import ImageSourceResult
+    from ..room.steady_field import SteadyFieldResult
 
 def plot_room_acoustics(
     result: RoomAcousticsResult, ax: Axes | None = None, **kwargs: Any
@@ -503,3 +506,113 @@ def plot_excitation(
     ax_s.set_ylabel("Frequency [Hz]")
     ax_s.set_title("Spectrogram (exponential frequency rise)")
     return axes
+
+
+def plot_image_source_reflectogram(
+    result: "ImageSourceResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Reflectogram of a synthetic image-source room impulse response.
+
+    Stems each image's amplitude in dB relative to the direct sound against its
+    arrival time, coloured by reflection order (the direct sound at order 0 in
+    the primary colour), with the ``1 / r`` free-field spreading envelope
+    overlaid. For a per-band result the first band is drawn.
+
+    :param result: An :class:`~phonometry.room.image_source.ImageSourceResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the stem ``markerline`` styling.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    times = np.asarray(result.times, dtype=np.float64)
+    amp = np.asarray(result.amplitudes, dtype=np.float64)
+    if amp.ndim == 2:
+        amp = amp[0]
+    orders = np.asarray(result.orders, dtype=np.int_)
+    tiny = np.finfo(np.float64).tiny
+    direct = float(np.max(np.abs(amp))) or 1.0
+    level = 20.0 * np.log10(np.maximum(np.abs(amp), tiny) / direct)
+
+    ms = 1e3 * times
+    order0 = orders == 0
+    # 1/r free-field envelope (direct sound at its own distance is 0 dB).
+    dist = np.asarray(result.distances, dtype=np.float64)
+    d0 = float(dist[int(np.argmin(dist))])
+    envelope = 20.0 * np.log10(np.maximum(d0 / dist, tiny))
+    order_sort = np.argsort(ms)
+    ax.plot(ms[order_sort], envelope[order_sort], color=_C_MUTED, lw=1.0, ls="--",
+            label=r"$1/r$ spreading envelope", zorder=1)
+
+    # Reflections coloured by order (higher orders fade toward grey). A
+    # max_order=0 result has no reflections, so guard the scatter/colorbar
+    # (an empty scatter has undefined colour limits).
+    ref_mask = ~order0
+    if np.any(ref_mask):
+        sc = ax.scatter(ms[ref_mask], level[ref_mask], c=orders[ref_mask],
+                        cmap="viridis", s=14, zorder=3, label="Reflections")
+        ax.vlines(ms[ref_mask], -120.0, level[ref_mask], color=_C_EDGE,
+                  lw=0.4, alpha=0.4, zorder=2)
+        cbar = ax.figure.colorbar(sc, ax=ax, pad=0.02)
+        cbar.set_label("Reflection order")
+    ax.vlines(ms[order0], -120.0, level[order0], color=_C_PRIMARY, lw=1.6,
+              zorder=4)
+    ax.plot(ms[order0], level[order0], "o", color=_C_PRIMARY, ms=7, zorder=5,
+            label="Direct sound", **kwargs)
+
+    lx, ly, lz = result.dimensions
+    finite = level[np.isfinite(level)]
+    ax.set_ylim(bottom=max(-80.0, float(finite.min()) - 3.0) if finite.size else -80.0,
+                top=5.0)
+    ax.set_xlim(left=0.0, right=float(ms.max()) if ms.size else None)
+    ax.set_xlabel("Arrival time [ms]")
+    ax.set_ylabel("Reflection level re direct [dB]")
+    ax.set_title(
+        f"Image-source reflectogram — {lx:g}×{ly:g}×{lz:g} m room, "
+        f"order ≤ {result.max_order}"
+    )
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_steady_field(
+    result: "SteadyFieldResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Steady-state SPL against distance: direct, reverberant and total fields.
+
+    Draws the total level (Bies Equation (6.43)) with its direct ``1/r^2`` and
+    constant reverberant components, and marks the critical distance ``rc``
+    where the two cross.
+
+    :param result: A :class:`~phonometry.room.steady_field.SteadyFieldResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the total-level ``plot`` call.
+    :return: The axes.
+    """
+    import matplotlib.ticker as mticker
+
+    ax = ax if ax is not None else _new_axes()
+    r = np.asarray(result.distances, dtype=np.float64)
+    ax.plot(r, np.asarray(result.direct, dtype=np.float64), color=_C_SECONDARY,
+            ls="--", lw=1.4, label="Direct field")
+    ax.plot(r, np.asarray(result.reverberant, dtype=np.float64),
+            color=_C_TERTIARY, ls=":", lw=1.4, label="Reverberant field")
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("lw", 2.4)
+    ax.plot(r, np.asarray(result.total, dtype=np.float64),
+            label="Total", **kwargs)
+    ax.axvline(result.critical_distance, color=_C_REFERENCE, ls="-.", lw=1.2,
+               label=rf"$r_c$ = {result.critical_distance:.2f} m")
+
+    ax.set_xscale("log")
+    ax.xaxis.set_major_formatter(mticker.ScalarFormatter())
+    ax.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax.set_xlabel("Distance from source [m]")
+    ax.set_ylabel("Sound pressure level [dB]")
+    ax.set_title(
+        f"Steady-state room field — $L_W$ = {result.sound_power_level:g} dB, "
+        f"$R$ = {result.room_constant:.0f} m², $Q$ = {result.directivity:g}"
+    )
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax

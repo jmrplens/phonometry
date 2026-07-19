@@ -70,6 +70,8 @@ export const apiSidebar = {
         'reference/api/rooms/open-plan',
         'reference/api/rooms/reverberation-prediction',
         'reference/api/rooms/enclosed-space-absorption',
+        'reference/api/rooms/image-source',
+        'reference/api/rooms/steady-field',
       ],
     },
     {

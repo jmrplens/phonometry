@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Image-source room impulse response and the steady-state room field
+  (`phonometry.room.image_source` and `phonometry.room.steady_field`).
+  `image_source_rir` synthesises the room impulse response of a rectangular
+  room by mirroring the source in its walls (Kuttruff *Room Acoustics* 4.1,
+  Equations (4.4)-(4.6); Vorländer *Auralization* 11.4; Allen & Berkley 1979):
+  the direct sound plus one delayed, attenuated impulse per image, with the
+  `1/(4 pi r)` spreading, the wall pressure reflection factors `R = sqrt(1 -
+  alpha)` (Vorländer Equation (11.39)) raised to the per-wall reflection counts,
+  and an optional per-band air attenuation `exp(-m r / 2)`. It returns broadband
+  or per-octave-band RIRs plus an exact sub-sample reflection table (times,
+  distances, orders, amplitudes, image positions) and a `.plot()` reflectogram;
+  `audible_image_count` and `reflection_density` give the shoebox image count
+  (Equation (9.23)) and the temporal density `4 pi c^3 t^2 / V` (Equation
+  (4.6)). `steady_state_field` and its parts `room_constant`,
+  `critical_distance`, `schroeder_frequency` and `steady_state_spl` predict the
+  steady-state level `Lp = Lw + 10 lg(Q/(4 pi r^2) + 4/R)` with the room
+  constant `R = S alpha/(1 - alpha)`, the critical distance and the Schroeder
+  frequency `2000 sqrt(T/V)` (Bies *Engineering Noise Control* 6.4, Equations
+  (6.43)-(6.44); Kuttruff 5.6 and Equations (3.44), (5.44)). Anchored by the
+  exact reflection geometry, the audible-image count, the Eyring reverberation
+  time recovered from the synthetic decay (near-cubic limit) and an independent
+  2D FDTD cross-check of the rigid-wall echo and the uniform-damping T60, plus
+  the closed-form steady-field relations, with a new EN/ES guide and GitHub
+  theory page.
 - Spherical-wave ground effect and advanced barrier diffraction
   (`phonometry.environmental.ground_barriers`). `ground_effect` predicts the
   excess attenuation over a finite-impedance ground from the Weyl-Van der Pol

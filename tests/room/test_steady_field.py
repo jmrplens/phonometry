@@ -1,0 +1,141 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""Tests for the steady-state room field (Bies 6.4 / Kuttruff 5.6).
+
+The oracles are the closed forms themselves (room constant, the direct- and
+reverberant-field limits of the steady-state level, the critical distance as
+the exact crossover of the two fields, and the Schroeder frequency) plus the
+one numeric anchor the source texts print: Kuttruff's classroom example
+(V = 200 m3, T = 1 s gives f_s about 140 Hz, Room Acoustics 6th ed. p. 68).
+"""
+
+from __future__ import annotations
+
+import math
+
+import numpy as np
+import pytest
+
+from phonometry import (
+    SteadyFieldResult,
+    critical_distance,
+    room_constant,
+    schroeder_frequency,
+    steady_state_field,
+    steady_state_spl,
+)
+
+
+def test_room_constant_closed_form() -> None:
+    # R = S alpha / (1 - alpha); S = 100, alpha = 0.2 -> 25.
+    assert room_constant(100.0, 0.2) == pytest.approx(25.0)
+    # Live room (small alpha) -> small R; dead room (large alpha) -> large R.
+    assert room_constant(100.0, 0.05) < room_constant(100.0, 0.5)
+
+
+def test_room_constant_per_band() -> None:
+    r = room_constant(150.0, np.array([0.1, 0.2, 0.4]))
+    assert np.allclose(r, 150.0 * np.array([0.1, 0.2, 0.4]) / (1.0 - np.array([0.1, 0.2, 0.4])))
+
+
+def test_room_constant_domain() -> None:
+    with pytest.raises(ValueError, match="strictly in"):
+        room_constant(100.0, 1.0)
+    with pytest.raises(ValueError, match="strictly in"):
+        room_constant(100.0, 0.0)
+    with pytest.raises(ValueError):
+        room_constant(-1.0, 0.2)
+
+
+def test_critical_distance_is_field_crossover() -> None:
+    # rc is where the direct term Q/(4 pi r^2) equals the reverberant term 4/R.
+    R, Q = 25.0, 1.0
+    rc = float(critical_distance(R, directivity=Q))
+    assert rc == pytest.approx(math.sqrt(Q * R / (16.0 * math.pi)))
+    direct = Q / (4.0 * math.pi * rc**2)
+    reverberant = 4.0 / R
+    assert direct == pytest.approx(reverberant)
+
+
+def test_critical_distance_directivity_scaling() -> None:
+    # rc scales as sqrt(Q): a corner source (Q = 8) reaches sqrt(8) further.
+    assert float(critical_distance(30.0, directivity=8.0)) == pytest.approx(
+        math.sqrt(8.0) * float(critical_distance(30.0, directivity=1.0))
+    )
+
+
+def test_schroeder_frequency_kuttruff_classroom() -> None:
+    # Kuttruff Room Acoustics 6e p. 68: V = 200 m3, T = 1 s -> f_s ~ 140 Hz.
+    f_s = float(schroeder_frequency(1.0, 200.0))
+    assert f_s == pytest.approx(2000.0 * math.sqrt(1.0 / 200.0))
+    assert 139.0 < f_s < 143.0
+
+
+def test_steady_state_spl_direct_and_reverberant_limits() -> None:
+    Lw, R = 90.0, 25.0
+    # Far field -> reverberant only: Lp -> Lw + 10 log10(4 / R).
+    far = float(steady_state_spl(Lw, 1000.0, R))
+    assert far == pytest.approx(Lw + 10.0 * math.log10(4.0 / R), abs=1e-3)
+    # Very near -> direct dominates: Lp -> Lw + 10 log10(1 / (4 pi r^2)).
+    r = 0.02
+    near = float(steady_state_spl(Lw, r, R))
+    assert near == pytest.approx(Lw + 10.0 * math.log10(1.0 / (4.0 * math.pi * r**2)), abs=0.2)
+
+
+def test_steady_state_spl_characteristic_impedance_term() -> None:
+    # The optional 10 log10(rho c / 400) term is about +0.14 dB at 20 degC.
+    base = float(steady_state_spl(90.0, 2.0, 25.0))
+    corrected = float(steady_state_spl(90.0, 2.0, 25.0, characteristic_impedance=413.0))
+    assert corrected - base == pytest.approx(10.0 * math.log10(413.0 / 400.0))
+    assert 0.13 < corrected - base < 0.15
+
+
+def test_steady_state_spl_at_critical_distance() -> None:
+    # At rc the total is the incoherent sum of two equal fields: +3 dB over each.
+    Lw, R = 95.0, 40.0
+    rc = float(critical_distance(R))
+    total = float(steady_state_spl(Lw, rc, R))
+    one_field = Lw + 10.0 * math.log10(4.0 / R)
+    assert total == pytest.approx(one_field + 10.0 * math.log10(2.0), abs=1e-6)
+
+
+def test_steady_state_field_bundle() -> None:
+    res = steady_state_field(90.0, 100.0, 0.2)
+    assert isinstance(res, SteadyFieldResult)
+    assert res.room_constant == pytest.approx(25.0)
+    assert res.critical_distance == pytest.approx(math.sqrt(25.0 / (16.0 * math.pi)))
+    # Total is the incoherent sum of the two component fields per distance.
+    d = 10.0 ** (res.direct / 10.0)
+    rv = 10.0 ** (res.reverberant / 10.0)
+    assert np.allclose(res.total, 10.0 * np.log10(d + rv))
+    # The direct field crosses the reverberant one at rc.
+    i = int(np.argmin(np.abs(res.distances - res.critical_distance)))
+    assert abs(res.direct[i] - res.reverberant[i]) < 1.5
+
+
+def test_steady_state_field_custom_distances() -> None:
+    r = np.array([0.5, 1.0, 2.0, 4.0, 8.0])
+    res = steady_state_field(85.0, 200.0, 0.15, distances=r)
+    assert np.array_equal(res.distances, r)
+    # Reverberant field is position-independent.
+    assert np.allclose(res.reverberant, res.reverberant[0])
+
+
+def test_steady_field_validation() -> None:
+    with pytest.raises(ValueError):
+        steady_state_spl(90.0, -1.0, 25.0)
+    with pytest.raises(ValueError):
+        steady_state_spl(90.0, 1.0, -25.0)
+    with pytest.raises(ValueError):
+        schroeder_frequency(-1.0, 200.0)
+    empty = np.array([])
+    with pytest.raises(ValueError):
+        steady_state_field(90.0, 100.0, 0.2, distances=empty)
+
+
+def test_steady_field_plot_smoke() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    res = steady_state_field(90.0, 100.0, 0.2)
+    ax = res.plot()
+    assert ax.get_xlabel() == "Distance from source [m]"

@@ -413,6 +413,7 @@ export default defineConfig({
               items: [
                 { slug: 'guides/sections/room-acoustics', attrs: { 'data-group-link': true } },
                 'guides/room-acoustics',
+                'guides/room-image-sources',
                 'guides/room-noise',
                 'guides/reverberation-prediction',
                 'guides/enclosed-space-absorption',

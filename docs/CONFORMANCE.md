@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **312/312 conformance checks pass** across 39 domains and 187 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **319/319 conformance checks pass** across 39 domains and 193 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -75,7 +75,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room acoustics</b>: 100% (5/5)</summary>
+<summary>&#9989; <b>Room acoustics</b>: 100% (12/12)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -84,6 +84,13 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Eyring (Norris-Eyring, 1930) | Reverberation time T = k·V/(-S·ln(1-ᾱ))  (α=0.2) | 0.548369 s (+/-0.000001 s) | 0.548369 s | 0 s | &#9989; |
 | Arau-Puchades (Acustica 65, 1988, Formula 18) | T (α=0.5/0.1/0.1 per wall pair, dims 8×5×3 m) | 0.812147 s (+/-0.000001 s) | 0.812147 s | 0 s | &#9989; |
 | Model identity (uniform absorption) | Arau-Puchades ≡ Eyring when ᾱ is uniform | 0.548369 s (= Eyring) | 0.548369 s | 0 s | &#9989; |
+| Vorlander Auralization 2e, Eq. (11.38)-(11.39) | Image-source direct-sound amplitude 1/(4πr) and delay r/c (r = 4 m) | 0.0198944 (+/-0) | 0.0198944 | 0 | &#9989; |
+| Kuttruff Room Acoustics 6e, Eq. (9.23) | Audible shoebox image count up to order 10 (= 1560) | 156 (+/-0) | 156 | 0 | &#9989; |
+| Kuttruff Room Acoustics 6e, Eq. (4.6) | Temporal reflection density dN/dt = 4πc³t²/V (t = 0.1 s, V = 120 m³) | 42258.2 1/s (+/-0 1/s) | 42258.2 1/s | 0 1/s | &#9989; |
+| Bies Engineering Noise Control 5e, Eq. (6.44) | Room constant R = Sᾱ/(1-ᾱ)  (S = 100 m², ᾱ = 0.2 → 25 m²) | 25 m² (+/-0 m²) | 25 m² | 0 m² | &#9989; |
+| Bies Engineering Noise Control 5e, Eq. (6.43) | Critical distance rc: direct field = reverberant field (R = 25, Q = 1) | 0.160000 (= reverberant term) | 0.16 | 0 | &#9989; |
+| Kuttruff Room Acoustics 6e, Eq. (3.44) | Schroeder frequency f_s = 2000√(T/V)  (V = 200 m³, T = 1 s) | 141.421 Hz (+/-0 Hz) | 141.421 Hz | 0 Hz | &#9989; |
+| Bies Engineering Noise Control 5e, Eq. (6.43) | Steady-state SPL Lp = Lw + 10lg(Q/4πr² + 4/R)  (Lw=90, r=1, R=25, Q=1) | 83.7945 dB (+/-0 dB) | 83.7945 dB | 0 dB | &#9989; |
 
 </details>
 

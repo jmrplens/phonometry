@@ -48,6 +48,10 @@ inteligibilidad del habla que ofrece una sala la cuantifica el
   la respuesta al impulso (ISO 18233), parámetros de sala (ISO 3382-1/2),
   métricas de oficinas abiertas (ISO 3382-3) y absorción en cámara
   reverberante (ISO 354).
+- [Fuentes imagen y campo estacionario de sala](/phonometry/es/guides/room-image-sources/):
+  la respuesta al impulso determinista por fuentes imagen (Kuttruff/Vorländer)
+  y el nivel estacionario estadístico con la constante de sala, la distancia
+  crítica y la frecuencia de Schroeder (Bies).
 - [Criterios de ruido de salas (NC / RC Mark II)](/phonometry/es/guides/room-noise/):
   las valoraciones NC por tangencia y RC Mark II de ANSI/ASA S12.2-2019.
 - [Predicción del tiempo de reverberación (Sabine, Arau)](/phonometry/es/guides/reverberation-prediction/):

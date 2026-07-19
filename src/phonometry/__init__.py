@@ -640,6 +640,20 @@ from .room.room_acoustics import (
     decay_curve,
     room_parameters,
 )
+from .room.image_source import (
+    ImageSourceResult,
+    audible_image_count,
+    image_source_rir,
+    reflection_density,
+)
+from .room.steady_field import (
+    SteadyFieldResult,
+    critical_distance,
+    room_constant,
+    schroeder_frequency,
+    steady_state_field,
+    steady_state_spl,
+)
 from .materials.sound_absorption import (
     AbsorptionWarning,
     absorption_area,
@@ -1201,6 +1215,16 @@ __all__ = [
     "decay_curve",
     "DecayCurve",
     "RoomAcousticsResult",
+    "image_source_rir",
+    "audible_image_count",
+    "reflection_density",
+    "ImageSourceResult",
+    "room_constant",
+    "critical_distance",
+    "schroeder_frequency",
+    "steady_state_spl",
+    "steady_state_field",
+    "SteadyFieldResult",
     "absorption_area",
     "absorption_coefficient",
     "attenuation_from_alpha",

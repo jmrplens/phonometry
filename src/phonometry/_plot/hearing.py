@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from ..hearing.noise_induced_hearing_loss import HtlanResult, NiptsResult
     from ..hearing.sii import SIIResult
     from ..hearing.sti import STIResult
+    from ..hearing.objective_intelligibility import STOIResult
 
 def plot_sti(result: STIResult, ax: Axes | None = None, **kwargs: Any) -> Axes:
     """Per-band modulation transfer index bars with the STI and rating.
@@ -51,6 +52,45 @@ def plot_sti(result: STIResult, ax: Axes | None = None, **kwargs: Any) -> Axes:
     ax.set_ylabel("Modulation transfer index MTI")
     ax.set_ylim(0.0, 1.0)
     ax.set_title(f"IEC 60268-16 STI = {result.sti:.2f}  (rating {result.rating})")
+    ax.grid(True, axis="y", alpha=0.3)
+    return ax
+
+def plot_stoi(result: "STOIResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """Intermediate intelligibility that averages to the STOI/ESTOI index.
+
+    For STOI the intermediate measure decomposes per one-third-octave band, so
+    the mean correlation per band is drawn as bars; for ESTOI, whose index
+    mixes the bands, the spectral correlation per analysis segment is drawn as
+    a line.
+
+    :param result: A :class:`~phonometry.hearing.objective_intelligibility.STOIResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the underlying :meth:`bar`/:meth:`plot`.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    name = "ESTOI" if result.extended else "STOI"
+    if result.band_scores is not None:
+        freqs = np.asarray(result.band_frequencies, dtype=np.float64)
+        scores = np.asarray(result.band_scores, dtype=np.float64)
+        positions = np.arange(scores.size)
+        kwargs.setdefault("color", _C_PRIMARY)
+        ax.bar(positions, scores, **kwargs)
+        ax.set_xticks(positions)
+        ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+        ax.set_xlabel("One-third-octave band [Hz]")
+        ax.set_ylabel("Mean intermediate correlation")
+    else:
+        scores = np.asarray(result.segment_scores, dtype=np.float64)
+        kwargs.setdefault("color", _C_PRIMARY)
+        ax.plot(np.arange(scores.size), scores, **kwargs)
+        ax.set_xlabel("Analysis segment")
+        ax.set_ylabel("Spectral correlation $d_m$")
+    # The intermediate correlations are cosine-similarity quantities in
+    # [-1, 1] (unlike the [0, 1] ratios of plot_sti/plot_sii), so keep room
+    # for anti-correlated bands rather than clipping them at zero.
+    ax.set_ylim(-1.0, 1.0)
+    ax.set_title(f"{name} = {result.value:.3f}")
     ax.grid(True, axis="y", alpha=0.3)
     return ax
 

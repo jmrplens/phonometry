@@ -129,6 +129,33 @@ print(electroacoustics.weighted_thd(signal, fs, 100.0, weighting="A"))   # A-wei
 print(electroacoustics.itu_r_468_weighting([6300.0]))                    # [+12.2] dB
 ```
 
+### 2.2 Dynamic range and idle channel noise (AES17-2015 6.4)
+
+The two catalogue figures of any converter share the AES17 **CCIR-RMS**
+weighting (5.2.7): the ITU-R BS.468-4 curve shifted by a flat `-5.63` dB so it
+is unity at 2 kHz. **Dynamic range** (6.4.1) drives the device with a 997 Hz
+sine 60 dB below full scale, removes the fundamental with the standard notch
+(5.2.8) and weights the residual noise-plus-distortion, then reports the ratio
+of the full-scale sine to that weighted residual (also known as the
+signal-to-noise ratio). **Idle channel noise** (6.4.2) is the same weighted
+level measured with the device driven by digital zero, reported relative to
+full scale:
+
+```python
+from phonometry import electroacoustics
+
+# Dynamic range: capture the output of the -60 dBFS 997 Hz test, scaled so 1.0
+# is digital full scale.
+dr = electroacoustics.dynamic_range(output, fs, 997.0)     # dB CCIR-RMS
+# Idle channel noise: capture the output with a digital-zero input.
+idle = electroacoustics.idle_channel_noise(idle_output, fs)  # dBFS CCIR-RMS
+```
+
+Both reuse the notch and the ITU-R 468 curve of the THD+N chain, and both are
+measured through the AES17 band (a 20 Hz high-pass plus the standard low-pass
+at `bandwidth`). Because the CCIR-RMS filter reads `-5.63` dB at 1 kHz, a 1 kHz
+tone measures its own dBFS minus 5.63 dB, which pins the weighting exactly.
+
 ## 3. Intermodulation distortion (IEC 60268-3 14.12.7–10)
 
 When two tones pass through a non-linearity they beat against each other,

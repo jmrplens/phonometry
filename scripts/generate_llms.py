@@ -31,6 +31,7 @@ PAGES = [
     ("sound-quality.md", "guides/sound-quality"),
     ("speech-transmission.md", "guides/speech-transmission"),
     ("speech-intelligibility.md", "guides/speech-intelligibility"),
+    ("objective-intelligibility.md", "guides/objective-intelligibility"),
     ("intensity.md", "guides/intensity"),
     ("room-acoustics.md", "guides/room-acoustics"),
     ("room-image-sources.md", "guides/room-image-sources"),

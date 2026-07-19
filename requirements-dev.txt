@@ -7,3 +7,4 @@ pytest-cov>=7.1.0
 pytest-xdist>=3.6.1  # parallel test execution (`pytest -n auto`); coverage is combined across workers by pytest-cov
 matplotlib>=3.10.9  # required by the result-object .plot() tests
 pyoxipng==9.1.1  # deterministic PNG optimizer; pinned so a local `make graphs` emits the same bytes as the figures CI stack
+pystoi>=0.4.1  # test-only external cross-check for STOI/ESTOI (reproduces the authors' MATLAB); the library reimplements from the papers and never imports it at runtime

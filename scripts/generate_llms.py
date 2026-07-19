@@ -33,6 +33,7 @@ PAGES = [
     ("speech-intelligibility.md", "guides/speech-intelligibility"),
     ("intensity.md", "guides/intensity"),
     ("room-acoustics.md", "guides/room-acoustics"),
+    ("room-image-sources.md", "guides/room-image-sources"),
     ("insulation-field.md", "guides/insulation-field"),
     ("insulation-lab.md", "guides/insulation-lab"),
     ("insulation-prediction.md", "guides/insulation-prediction"),

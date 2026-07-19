@@ -82,6 +82,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`room.open_plan`](/phonometry/reference/api/rooms/open-plan/) | Open-plan-office spatial metrics per ISO 3382-3:2012. |
 | [`room.reverberation_prediction`](/phonometry/reference/api/rooms/reverberation-prediction/) | Reverberation-time prediction from room geometry and absorption. |
 | [`room.enclosed_space_absorption`](/phonometry/reference/api/rooms/enclosed-space-absorption/) | Sound absorption in enclosed spaces (EN 12354-6:2003). |
+| [`room.image_source`](/phonometry/reference/api/rooms/image-source/) | Synthetic room impulse response by the image-source method (rectangular room). |
+| [`room.steady_field`](/phonometry/reference/api/rooms/steady-field/) | Steady-state sound field in a room: room constant, critical distance, level. |
 
 ## Building acoustics
 

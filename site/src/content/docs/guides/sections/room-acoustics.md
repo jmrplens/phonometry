@@ -45,6 +45,10 @@ speech intelligibility a room affords is quantified by the
 - [Room Acoustics](/phonometry/guides/room-acoustics/): impulse-response
   acquisition (ISO 18233), room parameters (ISO 3382-1/2), open-plan metrics
   (ISO 3382-3) and reverberation-room absorption (ISO 354).
+- [Image sources and the steady-state room field](/phonometry/guides/room-image-sources/):
+  the deterministic image-source room impulse response (Kuttruff/Vorländer) and
+  the statistical steady-state level with the room constant, critical distance
+  and Schroeder frequency (Bies).
 - [Room-noise criteria (NC / RC Mark II)](/phonometry/guides/room-noise/):
   the ANSI/ASA S12.2-2019 NC tangency and RC Mark II ratings.
 - [Reverberation-time prediction (Sabine, Eyring, Arau)](/phonometry/guides/reverberation-prediction/):

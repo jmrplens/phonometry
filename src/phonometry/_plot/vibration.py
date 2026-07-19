@@ -14,6 +14,7 @@ from .common import (
     _C_SECONDARY,
     _band_axis,
     _new_axes,
+    format_frequency_axis,
 )
 
 if TYPE_CHECKING:
@@ -48,6 +49,7 @@ def plot_vibration_weighting(
     ax.set_ylabel("Weighting factor [dB]")
     ax.set_title(f"Frequency weighting {result.name} (ISO 8041-1)")
     ax.grid(True, which="both", alpha=0.3)
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     return ax
 
 def plot_weighted_spectrum(
@@ -159,6 +161,7 @@ def plot_mobility(
     peak = int(np.argmax(mag))
     ax.plot(freq[peak], mag[peak], "o", color=_C_REFERENCE, zorder=5,
             label=f"peak at {freq[peak]:.1f} Hz")
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
     ax.set_xlabel("Frequency [Hz]")
     ax.set_ylabel("Mobility $|Y|$ [m/(N·s)]")
     ax.set_title("ISO 7626-1 mechanical mobility")
@@ -181,6 +184,7 @@ def plot_transfer_stiffness(
     level = np.asarray(result.level, dtype=np.float64)
     kwargs.setdefault("color", _C_PRIMARY)
     ax.semilogx(freq, level, label=r"$L_k = 20\,\lg(|k_{2,1}|/k_0)$", **kwargs)
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
     ax.set_xlabel("Frequency [Hz]")
     ax.set_ylabel(r"Transfer stiffness level $L_k$ [dB re 1 N/m]")
     ax.set_title("ISO 10846 dynamic transfer stiffness")

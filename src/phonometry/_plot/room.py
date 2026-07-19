@@ -25,6 +25,7 @@ from .common import (
     _new_axes,
     _new_axes_column,
     _time_axis,
+    format_frequency_axis,
 )
 
 if TYPE_CHECKING:
@@ -484,6 +485,7 @@ def plot_excitation(
         ax_f.set_ylabel("Magnitude [dB]")
         ax_f.set_title("Magnitude spectrum (flat)")
         ax_f.grid(True, which="both", alpha=0.3)
+        format_frequency_axis(ax_f, float(freqs[1]), float(freqs[-1]))
         return axes
 
     # Swept sine.

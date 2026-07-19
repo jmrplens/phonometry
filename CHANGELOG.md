@@ -521,6 +521,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Plot readability: continuous logarithmic frequency axes now label the octave
+  band centres present in the data range (16 Hz, 31.5 Hz, ..., 16 kHz shown as
+  `1k`, `2k`, ...) with unlabelled one-third-octave minor ticks, replacing the
+  `10^2` / `10^3` power-of-ten ticks that read poorly in acoustics. A shared
+  `format_frequency_axis` helper drives the change across every `.plot()`
+  renderer and the documentation figures; time, distance, harmonic-order,
+  Fresnel-number, flow-resistivity, modulation-frequency and normalized-
+  frequency axes are unaffected.
 - Docs prose: swept the remaining em-dashes out of the editorial text across
   the GitHub guides, the EN and ES site guides, theory chapters, landings and
   frontmatter descriptions, rewriting each sentence with standard punctuation

@@ -40,6 +40,10 @@ _MATPLOTLIB_HINT = (
     "Rendering the report figure requires matplotlib. Install it with: "
     "pip install phonometry[plot]"
 )
+_SVGLIB_HINT = (
+    "Embedding the report figure as vector graphics requires svglib. Install "
+    "it with: pip install phonometry[report]"
+)
 
 #: Accent and light shades used for the header row and the zebra striping,
 #: matching the validated Annex C fiche prototype.
@@ -65,7 +69,6 @@ def _import_reportlab() -> Any:
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.lib.units import mm
         from reportlab.platypus import (
-            Image,
             Paragraph,
             SimpleDocTemplate,
             Spacer,
@@ -80,7 +83,6 @@ def _import_reportlab() -> Any:
         "ParagraphStyle": ParagraphStyle,
         "getSampleStyleSheet": getSampleStyleSheet,
         "mm": mm,
-        "Image": Image,
         "Paragraph": Paragraph,
         "SimpleDocTemplate": SimpleDocTemplate,
         "Spacer": Spacer,
@@ -89,22 +91,49 @@ def _import_reportlab() -> Any:
     }
 
 
-def _render_figure(
-    result: "WeightedRatingResult | ImpactRatingResult", png_path: str
-) -> None:
-    """Draw the result's native ISO 717 plot to ``png_path`` (Agg, no pyplot)."""
+def _render_figure_drawing(
+    result: "WeightedRatingResult | ImpactRatingResult",
+    target_width: float,
+) -> Any:
+    """Draw the result's ISO 717 plot as a scaled, vector reportlab Drawing.
+
+    The plot is saved to SVG with the text rasterised to vector paths
+    (``svg.fonttype='path'``) and converted with svglib, so the figure stays
+    crisp at any zoom/print resolution. ``target_width`` is in points.
+    """
     try:
+        import matplotlib
         from matplotlib.backends.backend_agg import FigureCanvasAgg
         from matplotlib.figure import Figure
     except ImportError as exc:  # pragma: no cover - exercised via monkeypatch
         raise ImportError(_MATPLOTLIB_HINT) from exc
+    try:
+        from svglib.svglib import svg2rlg
+    except ImportError as exc:  # pragma: no cover - exercised via monkeypatch
+        raise ImportError(_SVGLIB_HINT) from exc
 
-    fig = Figure(figsize=(6.6, 3.4))
-    FigureCanvasAgg(fig)
-    ax = fig.subplots()
-    result.plot(ax=ax)
-    fig.tight_layout()
-    fig.savefig(png_path, dpi=150)
+    svg_fd, svg_path = tempfile.mkstemp(suffix=".svg")
+    os.close(svg_fd)
+    try:
+        fig = Figure(figsize=(6.8, 2.8))
+        FigureCanvasAgg(fig)
+        ax = fig.subplots()
+        result.plot(ax=ax)
+        fig.tight_layout()
+        with matplotlib.rc_context({"svg.fonttype": "path"}):
+            fig.savefig(svg_path, format="svg")
+        drawing = svg2rlg(svg_path)
+    finally:
+        if os.path.exists(svg_path):
+            os.remove(svg_path)
+    if drawing is None or not drawing.width:
+        raise ValueError("Could not convert the report plot to vector graphics.")
+    scale = target_width / drawing.width
+    drawing.scale(scale, scale)
+    drawing.width = drawing.width * scale
+    drawing.height = drawing.height * scale
+    drawing.hAlign = "CENTER"
+    return drawing
 
 
 def _labels(
@@ -234,8 +263,8 @@ def render_iso717_report(
     # A generous leading and trailing space keep the statement line clear of
     # the following paragraph (the prototype overlapped them).
     statement_style = ParagraphStyle(
-        "iso717_result", parent=styles["Normal"], fontSize=15, leading=20,
-        textColor=accent, spaceBefore=2, spaceAfter=10,
+        "iso717_result", parent=styles["Normal"], fontSize=12, leading=15,
+        textColor=accent, spaceBefore=2, spaceAfter=6,
     )
 
     Paragraph = rl["Paragraph"]
@@ -255,85 +284,79 @@ def render_iso717_report(
         Spacer(1, 8),
     ]
 
-    png_fd, png_path = tempfile.mkstemp(suffix=".png")
-    os.close(png_fd)
-    try:
-        _render_figure(result, png_path)
-        flow.append(rl["Image"](png_path, width=170 * mm, height=87 * mm))
-        flow.append(Spacer(1, 4))
+    # Vector plot (svglib) so the curve stays crisp at any resolution.
+    flow.append(_render_figure_drawing(result, 165 * mm))
+    flow.append(Spacer(1, 4))
 
-        annex = "ISO 717-2" if result.quantity == "impact" else "ISO 717-1"
-        flow.append(
-            Paragraph(
-                f"Evaluation table ({annex} Annex C, Table C.1 layout)",
-                heading_style,
-            )
+    annex = "ISO 717-2" if result.quantity == "impact" else "ISO 717-1"
+    flow.append(
+        Paragraph(
+            f"Evaluation table ({annex} Annex C, Table C.1 layout)",
+            heading_style,
         )
-        rows = [
-            [
-                "Frequency\nHz",
-                value_header,
-                "Reference (shifted)\ndB",
-                "Unfav. deviation\ndB",
-            ]
+    )
+    rows = [
+        [
+            "Frequency\nHz",
+            value_header,
+            "Reference (shifted)\ndB",
+            "Unfav. deviation\ndB",
         ]
-        for fk, m, r_, d in zip(centers, measured, shifted, deviations):
-            rows.append(
-                [
-                    f"{int(round(fk))}",
-                    f"{m:.1f}",
-                    f"{r_:.0f}",
-                    f"{d:.1f}" if d > _DEVIATION_EPS else "—",
-                ]
-            )
-        rows.append(["", "", "sum", f"{deviations.sum():.1f}"])
+    ]
+    for fk, m, r_, d in zip(centers, measured, shifted, deviations):
+        rows.append(
+            [
+                f"{int(round(fk))}",
+                f"{m:.1f}",
+                f"{r_:.0f}",
+                f"{d:.1f}" if d > _DEVIATION_EPS else "—",
+            ]
+        )
+    rows.append(["", "", "sum", f"{deviations.sum():.1f}"])
 
-        Table = rl["Table"]
-        TableStyle = rl["TableStyle"]
-        tbl = Table(
-            rows,
-            colWidths=[34 * mm, 26 * mm, 44 * mm, 40 * mm],
-            repeatRows=1,
+    Table = rl["Table"]
+    TableStyle = rl["TableStyle"]
+    tbl = Table(
+        rows,
+        colWidths=[34 * mm, 26 * mm, 44 * mm, 40 * mm],
+        repeatRows=1,
+    )
+    tbl.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), accent),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -2), [colors.white, light]),
+                ("LINEBELOW", (0, 0), (-1, 0), 0.6, accent),
+                ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
+                ("FONTNAME", (2, -1), (-1, -1), "Helvetica-Bold"),
+                ("TOPPADDING", (0, 0), (-1, -1), 1.6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 1.6),
+            ]
         )
-        tbl.setStyle(
-            TableStyle(
-                [
-                    ("BACKGROUND", (0, 0), (-1, 0), accent),
-                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                    ("FONTSIZE", (0, 0), (-1, -1), 8.5),
-                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                    ("ROWBACKGROUNDS", (0, 1), (-1, -2), [colors.white, light]),
-                    ("LINEBELOW", (0, 0), (-1, 0), 0.6, accent),
-                    ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
-                    ("FONTNAME", (2, -1), (-1, -1), "Helvetica-Bold"),
-                    ("TOPPADDING", (0, 0), (-1, -1), 2.5),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
-                ]
-            )
-        )
-        flow.append(tbl)
-        flow.append(Spacer(1, 8))
-        flow.append(Paragraph(_summary_paragraph(result, limit), body_style))
+    )
+    flow.append(tbl)
+    flow.append(Spacer(1, 6))
+    flow.append(Paragraph(_summary_paragraph(result, limit), body_style))
 
-        doc_kwargs = dict(
-            pagesize=rl["A4"],
-            leftMargin=18 * mm,
-            rightMargin=18 * mm,
-            topMargin=16 * mm,
-            bottomMargin=16 * mm,
-            title=title,
-        )
-        # invariant=1 drops the embedded timestamp for a reproducible PDF; the
-        # guard tolerates reportlab builds that do not accept the keyword.
-        try:
-            doc = rl["SimpleDocTemplate"](path, invariant=1, **doc_kwargs)
-        except TypeError:  # pragma: no cover - older reportlab
-            doc = rl["SimpleDocTemplate"](path, **doc_kwargs)
-        doc.build(flow)
-    finally:
-        if os.path.exists(png_path):
-            os.remove(png_path)
+    doc_kwargs = dict(
+        pagesize=rl["A4"],
+        leftMargin=18 * mm,
+        rightMargin=18 * mm,
+        topMargin=15 * mm,
+        bottomMargin=14 * mm,
+        title=title,
+    )
+    # invariant=1 drops the embedded timestamp for a reproducible PDF; the
+    # guard tolerates reportlab builds that do not accept the keyword.
+    try:
+        doc = rl["SimpleDocTemplate"](path, invariant=1, **doc_kwargs)
+    except TypeError:  # pragma: no cover - older reportlab
+        doc = rl["SimpleDocTemplate"](path, **doc_kwargs)
+    doc.build(flow)
 
     return str(path)

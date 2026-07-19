@@ -517,23 +517,31 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ### ImpactRatingResult.report()
 
 ```python
-ImpactRatingResult.report(path: str, *, engine: str = 'reportlab') -> str
+ImpactRatingResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+) -> str
 ```
 
-Render an ISO 717-2 Annex C impact-insulation fiche to a PDF.
+Render an ISO 717-2 impact-insulation fiche to a PDF.
 
-Writes a one-page report reproducing the ISO 717 Annex C layout for
-impact sound: the `Ln,w (CI)` statement, the
-measured-versus-shifted-reference plot (the result's own
-`plot`) and the evaluation table with the sum of unfavourable
-deviations at the foot.
+Writes a one-page accredited-laboratory report for impact sound: the
+standard-basis line, an optional metadata header block, the
+one-third-octave table beside the measured-versus-shifted-reference
+plot (the result's own `plot`), the boxed `Ln,w (CI)` result,
+an optional verdict row and a footer with the fixed disclaimer.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the table uses the ISO 717 Annex C columns (frequency, measured value, shifted reference, unfavourable deviation) instead of the two-column `f \| value` table. |
 
 **Returns:** The written `path` as a `str`.
 
@@ -543,6 +551,79 @@ deviations at the foot.
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or the result was built without the per-band data (`band_centers`, `measured`, `shifted_reference`). |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
+## ReportMetadata
+
+```python
+ReportMetadata(
+    specimen: str | None = None,
+    client: str | None = None,
+    mounted_by: str | None = None,
+    manufacturer: str | None = None,
+    area: float | None = None,
+    mass_per_area: float | None = None,
+    source_volume: float | None = None,
+    receiving_volume: float | None = None,
+    temperature: float | None = None,
+    relative_humidity: float | None = None,
+    pressure: float | None = None,
+    test_room: str | None = None,
+    mounting: str | None = None,
+    measurement_standard: str | None = None,
+    test_date: str | None = None,
+    laboratory: str | None = None,
+    operator: str | None = None,
+    report_id: str | None = None,
+    requirement: float | None = None,
+    notes: str | None = None,
+)
+```
+
+Descriptive metadata for the accredited ISO 717 report fiche.
+
+All fields are optional (default `None`); the report renders only the
+fields that are supplied, so a partially populated instance is valid. The
+numeric fields are validated on construction: when given they must be
+finite and strictly positive, otherwise `ValueError` is raised.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `specimen` | Specimen description printed in the header (the tested element, e.g. `"200 mm concrete wall"`). |
+| `client` | Client the test was carried out for. |
+| `mounted_by` | Who mounted the specimen in the test opening. |
+| `manufacturer` | Manufacturer of the tested element. |
+| `area` | Specimen area `S`, in m^2 (the free test opening area). |
+| `mass_per_area` | Measured mass per unit area, in kg/m^2. |
+| `source_volume` | Source-room volume, in m^3. |
+| `receiving_volume` | Receiving-room volume, in m^3. |
+| `temperature` | Air temperature during the test, in degrees Celsius. |
+| `relative_humidity` | Relative humidity during the test, in %. |
+| `pressure` | Ambient (static) air pressure during the test, in kPa. |
+| `test_room` | Test-room / facility identification. |
+| `mounting` | Mounting condition of the specimen (e.g. the ISO 10140-1 mounting code or a short description). |
+| `measurement_standard` | Measurement standard the spectrum was obtained under (e.g. `"ISO 10140-2"` or `"ISO 16283-1"`); it forms the report's standard-basis line together with the ISO 717 rating part. |
+| `test_date` | Date of the test, as a free-form string. |
+| `laboratory` | Testing laboratory / institute name (footer). |
+| `operator` | Operator who carried out the test (footer signature line). |
+| `report_id` | Report / test number (footer). |
+| `requirement` | Target single-number value the rating is checked against for the verdict row, in dB. For an airborne rating the result passes when it is greater than or equal to the requirement; for an impact rating it passes when it is less than or equal to it (a lower impact level is better). |
+| `notes` | Free-form remarks printed in the footer. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If any supplied numeric field is not finite and strictly positive. |
+
+### ReportMetadata.is_empty()
+
+```python
+ReportMetadata.is_empty() -> bool
+```
+
+Return `True` when no field is set (an all-`None` instance).
 
 ## weighted_impact_improvement
 
@@ -778,22 +859,31 @@ Unfavourable deviations (reference above measurement) are shaded and
 ### WeightedRatingResult.report()
 
 ```python
-WeightedRatingResult.report(path: str, *, engine: str = 'reportlab') -> str
+WeightedRatingResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+) -> str
 ```
 
-Render an ISO 717-1 Annex C sound-insulation fiche to a PDF.
+Render an ISO 717-1 airborne sound-insulation fiche to a PDF.
 
-Writes a one-page report reproducing the ISO 717-1 Annex C layout:
-the `Rw (C; Ctr)` statement, the measured-versus-shifted-reference
-plot (the result's own `plot`) and the Table C.1 evaluation
-table with the sum of unfavourable deviations at the foot.
+Writes a one-page accredited-laboratory report: the standard-basis
+line, an optional metadata header block, the one-third-octave table
+beside the measured-versus-shifted-reference plot (the result's own
+`plot`), the boxed `Rw (C; Ctr)` result, an optional verdict
+row and a footer with the fixed disclaimer.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the table uses the ISO 717 Annex C columns (frequency, measured value, shifted reference, unfavourable deviation) instead of the two-column `f \| value` table. |
 
 **Returns:** The written `path` as a `str`.
 

@@ -1,20 +1,25 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
-"""ISO 717 Annex C sound-insulation rating fiche (reportlab renderer).
+"""ISO 717 sound-insulation rating fiche (reportlab renderer).
 
 Renders a :class:`~phonometry.building.insulation.WeightedRatingResult`
 (airborne, ISO 717-1) or
 :class:`~phonometry.building.insulation.ImpactRatingResult` (impact,
-ISO 717-2) to a one-page PDF that reproduces the ISO 717 Annex C layout:
+ISO 717-2) to a one-page PDF laid out like an accredited-laboratory test
+report (modelled on ISO 10140-2 / ISO 16283 lab reports rated per ISO 717):
 
-* a header and the standard reference line;
-* the single-number statement ``Rw (C; Ctr) = X (a; b) dB`` (airborne) or
-  ``Ln,w (CI) = X (a) dB`` (impact);
-* the measured-versus-shifted-reference plot, drawn by the result's own
-  ``plot(ax=...)`` so the curve is native to the library;
-* the Annex C Table C.1 evaluation table (frequency, measured value, shifted
-  reference, unfavourable deviation) with the sum of unfavourable deviations
-  at the foot;
-* a statement-of-results paragraph.
+* a title and the standard-basis line (measurement standard + ISO 717 rating);
+* an optional metadata header block (client, specimen, room conditions ...),
+  rendered only for the fields supplied on the :class:`ReportMetadata`;
+* a two-panel body with the one-third-octave table on the left and the
+  measured-versus-shifted-reference curve on the right, drawn by the result's
+  own ``plot(ax=...)`` so the curve is native to the library;
+* a boxed single-number result ``Rw (C; Ctr) = X (a; b) dB`` (airborne) or
+  ``Ln,w (CI) = X (y) dB`` (impact);
+* an optional verdict row when a requirement is supplied;
+* a footer identity/disclaimer block.
+
+With ``verbose=True`` the table uses the ISO 717 Annex C columns instead
+(frequency, measured value, shifted reference, unfavourable deviation).
 
 reportlab and matplotlib are soft dependencies imported lazily here; both are
 guarded with an actionable :class:`ImportError`.
@@ -22,11 +27,14 @@ guarded with an actionable :class:`ImportError`.
 
 from __future__ import annotations
 
+import math
 import os
 import tempfile
-from typing import TYPE_CHECKING, Any, Tuple, cast
+from typing import TYPE_CHECKING, Any, List, Tuple, cast
 
 import numpy as np
+
+from .metadata import ReportMetadata
 
 if TYPE_CHECKING:
     from ..building.insulation import ImpactRatingResult, WeightedRatingResult
@@ -50,6 +58,8 @@ _SVGLIB_HINT = (
 _ACCENT_HEX = "#1f4e79"
 _LIGHT_HEX = "#eef2f7"
 _MUTED_HEX = "#555555"
+_VERDICT_OK_HEX = "#1b6e2f"
+_VERDICT_BAD_HEX = "#a11a1a"
 
 #: Maximum sum of unfavourable deviations quoted in the statement (ISO 717-1
 #: Clause 4.4 / ISO 717-2 Clause 4.3): 32,0 dB for the 16 one-third-octave
@@ -59,6 +69,9 @@ _MAX_UNFAVOURABLE_OCTAVE = 10.0
 
 #: Threshold below which an unfavourable deviation is shown as an em dash.
 _DEVIATION_EPS = 0.05
+
+#: Fixed disclaimer always printed in the footer of the fiche.
+_DISCLAIMER = "The results relate only to the tested specimen."
 
 
 def _import_reportlab() -> Any:
@@ -115,12 +128,12 @@ def _render_figure_drawing(
     svg_fd, svg_path = tempfile.mkstemp(suffix=".svg")
     os.close(svg_fd)
     try:
-        fig = Figure(figsize=(5.8, 4.7))
+        fig = Figure(figsize=(6.0, 5.4))
         FigureCanvasAgg(fig)
         ax = fig.subplots()
         result.plot(ax=ax)
-        # The fiche header already states Rw/Ln,w (C; Ctr) and the sum, so the
-        # plot's own title would only duplicate it at a large size.
+        # The fiche states Rw/Ln,w (C; Ctr) in the boxed result, so the plot's
+        # own title would only duplicate it at a large size.
         ax.set_title("")
         fig.tight_layout()
         with matplotlib.rc_context({"svg.fonttype": "path"}):
@@ -142,66 +155,345 @@ def _render_figure_drawing(
 def _labels(
     result: "WeightedRatingResult | ImpactRatingResult",
 ) -> Tuple[str, str, str, str]:
-    """Return ``(title, subtitle, statement, value_header)`` for the quantity."""
+    """Return ``(title, rating_part, statement, value_header)`` for the quantity."""
     if result.quantity == "impact":
         impact = cast("ImpactRatingResult", result)
         title = "Impact sound insulation rating"
-        subtitle = (
-            "Weighted normalized impact sound pressure level "
-            "L<sub>n,w</sub> and spectrum adaptation term. Evaluation per "
-            "ISO 717-2:2020, Clause 4 and Annex C."
-        )
+        rating_part = "ISO 717-2"
         statement = (
             f"L<sub>n,w</sub> (C<sub>I</sub>) = "
             f"<b>{impact.rating} ({impact.ci:+d}) dB</b>"
         )
-        value_header = "Ln\ndB"
+        value_header = "L<sub>n</sub>"
     else:
         airborne = cast("WeightedRatingResult", result)
         title = "Airborne sound insulation rating"
-        subtitle = (
-            "Weighted sound reduction index R<sub>w</sub> and spectrum "
-            "adaptation terms. Evaluation per ISO 717-1:2020, Clause 4 and "
-            "Annex C."
-        )
+        rating_part = "ISO 717-1"
         statement = (
             f"R<sub>w</sub> (C; C<sub>tr</sub>) = "
             f"<b>{airborne.rating} ({airborne.c:+d}; {airborne.ctr:+d}) dB</b>"
         )
-        value_header = "R\ndB"
-    return title, subtitle, statement, value_header
+        value_header = "R"
+    return title, rating_part, statement, value_header
 
 
-def _summary_paragraph(
-    result: "WeightedRatingResult | ImpactRatingResult", limit: float
-) -> str:
-    """Statement-of-results text, worded for airborne or impact sound."""
-    limit_text = f"{limit:.1f}".replace(".", ",")
-    if result.quantity == "impact":
-        return (
-            "Statement of results: the weighted impact rating and the spectrum "
-            "adaptation term are determined by shifting the ISO 717-2 reference "
-            "curve against the one-third-octave spectrum until the sum of "
-            "unfavourable deviations (measurement above the reference) is as "
-            "large as possible but not greater than "
-            f"{limit_text} dB; L<sub>n,w</sub> is the shifted reference value "
-            "at 500 Hz (octave-band ratings are further reduced by 5 dB, "
-            "Clause 4.3.2). Generated by phonometry."
-        )
-    return (
-        "Statement of results: the weighted sound reduction index and the "
-        "spectrum adaptation terms are determined by shifting the ISO 717-1 "
-        "reference curve against the one-third-octave spectrum until the sum of "
-        "unfavourable deviations is as large as possible but not greater than "
-        f"{limit_text} dB; R<sub>w</sub> is the shifted reference value at "
-        "500 Hz. Generated by phonometry."
+def _fmt_num(value: float) -> str:
+    """Format a number with up to one decimal, dropping a trailing ``,0``."""
+    text = f"{float(value):.1f}"
+    if text.endswith(".0"):
+        text = text[:-2]
+    return text.replace(".", ",")
+
+
+def _metadata_pairs(
+    metadata: ReportMetadata,
+) -> Tuple[List[Tuple[str, str]], List[Tuple[str, str]]]:
+    """Build the two ordered (label, value) groups of the header grid.
+
+    Only fields that are set are returned, so empty rows never appear.
+    """
+
+    def group(specs: List[Tuple[str, str | None]]) -> List[Tuple[str, str]]:
+        return [(label, str(value)) for label, value in specs if value is not None]
+
+    identity = group(
+        [
+            ("Client", metadata.client),
+            ("Mounted by", metadata.mounted_by),
+            (
+                "Sample area S [m<super>2</super>]",
+                _fmt_num(metadata.area) if metadata.area is not None else None,
+            ),
+            ("Manufacturer", metadata.manufacturer),
+            ("Description", metadata.specimen),
+            ("Test room", metadata.test_room),
+            ("Date of test", metadata.test_date),
+        ]
     )
+    conditions = group(
+        [
+            (
+                "Source room volume [m<super>3</super>]",
+                _fmt_num(metadata.source_volume)
+                if metadata.source_volume is not None
+                else None,
+            ),
+            (
+                "Receiving room volume [m<super>3</super>]",
+                _fmt_num(metadata.receiving_volume)
+                if metadata.receiving_volume is not None
+                else None,
+            ),
+            (
+                "Temperature [&#176;C]",
+                _fmt_num(metadata.temperature)
+                if metadata.temperature is not None
+                else None,
+            ),
+            (
+                "Relative humidity [%]",
+                _fmt_num(metadata.relative_humidity)
+                if metadata.relative_humidity is not None
+                else None,
+            ),
+            (
+                "Ambient pressure [kPa]",
+                _fmt_num(metadata.pressure)
+                if metadata.pressure is not None
+                else None,
+            ),
+            (
+                "Mass per unit area [kg/m<super>2</super>]",
+                _fmt_num(metadata.mass_per_area)
+                if metadata.mass_per_area is not None
+                else None,
+            ),
+            ("Mounting", metadata.mounting),
+        ]
+    )
+    return identity, conditions
+
+
+def _grid_table(rl: Any, pairs: List[Tuple[str, str]]) -> Any:
+    """Lay an ordered list of (label, value) pairs into a two-column grid.
+
+    Each grid row holds up to two label/value pairs (four table cells:
+    ``label | value | label | value``); a trailing single pair is padded.
+    """
+    mm = rl["mm"]
+    colors = rl["colors"]
+    Paragraph = rl["Paragraph"]
+    Table = rl["Table"]
+    TableStyle = rl["TableStyle"]
+    ParagraphStyle = rl["ParagraphStyle"]
+    styles = rl["getSampleStyleSheet"]()
+    accent = colors.HexColor(_ACCENT_HEX)
+    label_style = ParagraphStyle(
+        "iso717_meta_label", parent=styles["Normal"], fontSize=8,
+        textColor=colors.HexColor(_MUTED_HEX),
+    )
+    value_style = ParagraphStyle(
+        "iso717_meta_value", parent=styles["Normal"], fontSize=8.5,
+        textColor=colors.black,
+    )
+
+    rows: List[List[Any]] = []
+    for i in range(0, len(pairs), 2):
+        left = pairs[i]
+        right = pairs[i + 1] if i + 1 < len(pairs) else ("", "")
+        rows.append(
+            [
+                Paragraph(f"{left[0]}:", label_style) if left[0] else "",
+                Paragraph(left[1], value_style),
+                Paragraph(f"{right[0]}:", label_style) if right[0] else "",
+                Paragraph(right[1], value_style) if right[0] else "",
+            ]
+        )
+    table = Table(
+        rows,
+        colWidths=[36 * mm, 51 * mm, 36 * mm, 51 * mm],
+    )
+    table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                ("TOPPADDING", (0, 0), (-1, -1), 1.2),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 1.2),
+                ("LINEABOVE", (0, 0), (-1, 0), 0.5, accent),
+                ("LINEBELOW", (0, -1), (-1, -1), 0.5, accent),
+            ]
+        )
+    )
+    return table
+
+
+def _value_table(
+    rl: Any,
+    centers: np.ndarray,
+    measured: np.ndarray,
+    shifted: np.ndarray,
+    deviations: np.ndarray,
+    value_header: str,
+    verbose: bool,
+) -> Any:
+    """Build the left-hand one-third-octave table (accredited or Annex C)."""
+    mm = rl["mm"]
+    colors = rl["colors"]
+    Table = rl["Table"]
+    TableStyle = rl["TableStyle"]
+    Paragraph = rl["Paragraph"]
+    ParagraphStyle = rl["ParagraphStyle"]
+    styles = rl["getSampleStyleSheet"]()
+    accent = colors.HexColor(_ACCENT_HEX)
+    light = colors.HexColor(_LIGHT_HEX)
+    thin = colors.HexColor("#c9d4e0")
+
+    head_style = ParagraphStyle(
+        "iso717_thead", parent=styles["Normal"], fontSize=7.2,
+        textColor=colors.white, alignment=1, leading=8.5,
+    )
+
+    if verbose:
+        header = [
+            Paragraph("f [Hz]", head_style),
+            Paragraph(f"Measured {value_header} [dB]", head_style),
+            Paragraph("Shifted ref. [dB]", head_style),
+            Paragraph("Unfav. dev. [dB]", head_style),
+        ]
+        col_widths = [15 * mm, 19 * mm, 18 * mm, 18 * mm]
+    else:
+        header = [
+            Paragraph("Frequency f [Hz]", head_style),
+            Paragraph(f"{value_header} [dB]", head_style),
+        ]
+        col_widths = [40 * mm, 30 * mm]
+
+    rows: List[List[Any]] = [header]
+    for fk, m, r_, d in zip(centers, measured, shifted, deviations):
+        if verbose:
+            rows.append(
+                [
+                    f"{int(round(fk))}",
+                    f"{m:.1f}",
+                    f"{r_:.0f}",
+                    f"{d:.1f}" if d > _DEVIATION_EPS else "—",
+                ]
+            )
+        else:
+            rows.append([f"{int(round(fk))}", f"{m:.1f}"])
+
+    n_data = len(centers)
+    style_cmds: List[Any] = [
+        ("BACKGROUND", (0, 0), (-1, 0), accent),
+        ("FONTSIZE", (0, 1), (-1, -1), 7.5),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ROWBACKGROUNDS", (0, 1), (-1, n_data), [colors.white, light]),
+        ("LINEBELOW", (0, 0), (-1, 0), 0.6, accent),
+        ("TOPPADDING", (0, 0), (-1, -1), 1.4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 1.4),
+        ("BOX", (0, 0), (-1, n_data), 0.5, accent),
+    ]
+    # Thin rule after every third-octave triplet, grouping the table by octave
+    # exactly as the accredited reference report does.
+    for triplet_end in range(3, n_data, 3):
+        style_cmds.append(
+            ("LINEBELOW", (0, triplet_end), (-1, triplet_end), 0.4, thin)
+        )
+    if verbose:
+        rows.append(["", "", "sum", f"{deviations.sum():.1f}"])
+        style_cmds += [
+            ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
+            ("FONTNAME", (2, -1), (-1, -1), "Helvetica-Bold"),
+            ("FONTSIZE", (0, -1), (-1, -1), 7.5),
+        ]
+
+    table = Table(rows, colWidths=col_widths, repeatRows=1)
+    table.setStyle(TableStyle(style_cmds))
+    return table
+
+
+def _verdict(
+    result: "WeightedRatingResult | ImpactRatingResult", requirement: float
+) -> Tuple[str, bool]:
+    """Return the verdict text and a PASS flag for a supplied requirement.
+
+    Airborne ratings pass when the rating meets or exceeds the requirement;
+    impact ratings pass when the rating is at or below it (lower is better).
+    """
+    rating = float(result.rating)
+    req_text = _fmt_num(requirement)
+    if result.quantity == "impact":
+        passed = rating <= requirement
+        text = (
+            f"L<sub>n,w</sub> = {result.rating} dB, required &#8804; "
+            f"{req_text} dB"
+        )
+    else:
+        passed = rating >= requirement
+        text = (
+            f"R<sub>w</sub> = {result.rating} dB, required &#8805; "
+            f"{req_text} dB"
+        )
+    return text, passed
+
+
+def _footer_flow(rl: Any, metadata: ReportMetadata | None) -> List[Any]:
+    """Build the footer identity block plus the always-present disclaimer."""
+    colors = rl["colors"]
+    Paragraph = rl["Paragraph"]
+    Spacer = rl["Spacer"]
+    ParagraphStyle = rl["ParagraphStyle"]
+    styles = rl["getSampleStyleSheet"]()
+    muted = colors.HexColor(_MUTED_HEX)
+
+    ident_style = ParagraphStyle(
+        "iso717_footer", parent=styles["Normal"], fontSize=8.5, leading=12,
+    )
+    sign_style = ParagraphStyle(
+        "iso717_sign", parent=styles["Normal"], fontSize=8.5, leading=16,
+    )
+    disclaimer_style = ParagraphStyle(
+        "iso717_disclaimer", parent=styles["Normal"], fontSize=8,
+        textColor=muted, leading=11,
+    )
+
+    flow: List[Any] = [Spacer(1, 8)]
+    lines: List[str] = []
+    if metadata is not None:
+        if metadata.laboratory:
+            lines.append(f"<b>Laboratory:</b> {metadata.laboratory}")
+        if metadata.report_id:
+            lines.append(f"<b>Report no.:</b> {metadata.report_id}")
+        if metadata.test_date:
+            lines.append(f"<b>Date:</b> {metadata.test_date}")
+        if metadata.notes:
+            lines.append(f"<b>Notes:</b> {metadata.notes}")
+    for line in lines:
+        flow.append(Paragraph(line, ident_style))
+
+    operator = metadata.operator if metadata is not None else None
+    if operator:
+        flow.append(
+            Paragraph(
+                f"Operator: {operator} &nbsp;&nbsp; "
+                "Signature: ______________________________",
+                sign_style,
+            )
+        )
+    elif lines:
+        flow.append(
+            Paragraph(
+                "Signature: ______________________________", sign_style
+            )
+        )
+
+    flow.append(Spacer(1, 4))
+    flow.append(
+        Paragraph(
+            f"<font color='{_ACCENT_HEX}'>&#9632;</font> {_DISCLAIMER}",
+            disclaimer_style,
+        )
+    )
+    flow.append(
+        Paragraph(
+            "<font size=7 color='#888888'>Generated by phonometry.</font>",
+            disclaimer_style,
+        )
+    )
+    return flow
 
 
 def render_iso717_report(
-    result: "WeightedRatingResult | ImpactRatingResult", path: str
+    result: "WeightedRatingResult | ImpactRatingResult",
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    verbose: bool = False,
 ) -> str:
-    """Render an ISO 717 Annex C rating fiche to a PDF at ``path``.
+    """Render an ISO 717 accredited-laboratory rating fiche to a PDF at ``path``.
 
     :param result: A
         :class:`~phonometry.building.insulation.WeightedRatingResult`
@@ -210,6 +502,11 @@ def render_iso717_report(
         ISO 717-2) carrying the per-band ``band_centers``, ``measured`` and
         ``shifted_reference`` curves.
     :param path: Destination path of the PDF file.
+    :param metadata: Optional :class:`ReportMetadata`; ``None`` produces a
+        prediction fiche (body + result + disclaimer, no test metadata).
+    :param verbose: When ``True``, the left table uses the ISO 717 Annex C
+        columns (f, measured, shifted reference, unfavourable deviation);
+        otherwise the accredited two-column ``f | value`` table.
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
@@ -218,7 +515,6 @@ def render_iso717_report(
     colors = rl["colors"]
     mm = rl["mm"]
     accent = colors.HexColor(_ACCENT_HEX)
-    light = colors.HexColor(_LIGHT_HEX)
 
     centers = result.band_centers
     measured = result.measured
@@ -232,11 +528,6 @@ def render_iso717_report(
     measured = np.asarray(measured, dtype=np.float64)
     shifted = np.asarray(shifted, dtype=np.float64)
 
-    limit = (
-        _MAX_UNFAVOURABLE_THIRD
-        if measured.size == 16
-        else _MAX_UNFAVOURABLE_OCTAVE
-    )
     # Unfavourable deviation: reference above measurement (airborne) or
     # measurement above the reference (impact, the opposite sign).
     if result.quantity == "impact":
@@ -244,100 +535,66 @@ def render_iso717_report(
     else:
         deviations = np.maximum(shifted - measured, 0.0)
 
-    title, subtitle, statement, value_header = _labels(result)
+    title, rating_part, statement, value_header = _labels(result)
 
     styles = rl["getSampleStyleSheet"]()
     ParagraphStyle = rl["ParagraphStyle"]
     title_style = ParagraphStyle(
-        "iso717_title", parent=styles["Title"], fontSize=17, textColor=accent,
-        spaceAfter=2, alignment=0,
+        "iso717_title", parent=styles["Title"], fontSize=16, textColor=accent,
+        spaceAfter=1, alignment=0,
     )
-    subtitle_style = ParagraphStyle(
-        "iso717_sub", parent=styles["Normal"], fontSize=9.5,
-        textColor=colors.HexColor(_MUTED_HEX),
-    )
-    body_style = ParagraphStyle(
-        "iso717_body", parent=styles["Normal"], fontSize=9, leading=12,
-    )
-    # A generous leading and trailing space keep the statement line clear of
-    # the following paragraph (the prototype overlapped them).
-    statement_style = ParagraphStyle(
-        "iso717_result", parent=styles["Normal"], fontSize=12, leading=15,
-        textColor=accent, spaceBefore=2, spaceAfter=6,
-    )
-
-    Paragraph = rl["Paragraph"]
-    Spacer = rl["Spacer"]
-    limit_text = f"{limit:.1f}".replace(".", ",")
-
-    flow = [
-        Paragraph(title, title_style),
-        Paragraph(subtitle, subtitle_style),
-        Spacer(1, 6),
-        Paragraph(statement, statement_style),
-        Paragraph(
-            f"Sum of unfavourable deviations = "
-            f"{deviations.sum():.1f} dB (limit {limit_text} dB).",
-            body_style,
-        ),
-        Spacer(1, 8),
-    ]
-
-    Table = rl["Table"]
-    TableStyle = rl["TableStyle"]
-    annex = "ISO 717-2" if result.quantity == "impact" else "ISO 717-1"
-
-    # Condensed evaluation table (ISO 717 Annex C, Table C.1 columns).
-    rows = [["f\nHz", value_header, "Ref.\ndB", "Dev.\ndB"]]
-    for fk, m, r_, d in zip(centers, measured, shifted, deviations):
-        rows.append(
-            [
-                f"{int(round(fk))}",
-                f"{m:.1f}",
-                f"{r_:.0f}",
-                f"{d:.1f}" if d > _DEVIATION_EPS else "—",
-            ]
-        )
-    rows.append(["", "", "sum", f"{deviations.sum():.1f}"])
-    eval_table = Table(
-        rows,
-        colWidths=[18 * mm, 16 * mm, 22 * mm, 22 * mm],
-        repeatRows=1,
-    )
-    eval_table.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), accent),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, -1), 7),
-                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -2), [colors.white, light]),
-                ("LINEBELOW", (0, 0), (-1, 0), 0.6, accent),
-                ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
-                ("FONTNAME", (2, -1), (-1, -1), "Helvetica-Bold"),
-                ("TOPPADDING", (0, 0), (-1, -1), 1.2),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 1.2),
-            ]
-        )
+    basis_style = ParagraphStyle(
+        "iso717_basis", parent=styles["Normal"], fontSize=9.5,
+        textColor=colors.HexColor(_MUTED_HEX), spaceAfter=2,
     )
     caption_style = ParagraphStyle(
         "iso717_caption", parent=styles["Normal"], fontSize=8,
         textColor=accent, spaceAfter=3,
     )
 
-    # Two-column body: the vector plot on the left, the condensed evaluation
-    # table on the right (datasheet-style; ISO 717 Annex C prescribes the
-    # table and the curve, not their arrangement).
-    plot_drawing = _render_figure_drawing(result, 92 * mm)
-    right_cell = [
-        Paragraph(f"Evaluation ({annex} Annex C)", caption_style),
-        eval_table,
+    Paragraph = rl["Paragraph"]
+    Spacer = rl["Spacer"]
+    Table = rl["Table"]
+    TableStyle = rl["TableStyle"]
+
+    measurement_standard = (
+        metadata.measurement_standard if metadata is not None else None
+    )
+    if measurement_standard:
+        basis = (
+            f"{measurement_standard} laboratory measurement of sound "
+            f"insulation. Rating per {rating_part}:2020."
+        )
+    else:
+        basis = f"Sound insulation rating per {rating_part}:2020."
+
+    flow: List[Any] = [
+        Paragraph(title, title_style),
+        Paragraph(basis, basis_style),
     ]
+
+    # Metadata header block (only the supplied fields).
+    if metadata is not None and not metadata.is_empty():
+        identity, conditions = _metadata_pairs(metadata)
+        header_pairs = identity + conditions
+        if header_pairs:
+            flow.append(Spacer(1, 3))
+            flow.append(_grid_table(rl, header_pairs))
+    flow.append(Spacer(1, 8))
+
+    # Two-panel body: the one-third-octave table on the left (~70 mm), the
+    # vector plot on the right filling the rest of the content width.
+    value_table = _value_table(
+        rl, centers, measured, shifted, deviations, value_header, verbose
+    )
+    left_cell = [
+        Paragraph(f"One-third-octave {value_header} [dB]", caption_style),
+        value_table,
+    ]
+    plot_drawing = _render_figure_drawing(result, 100 * mm)
     body_table = Table(
-        [[plot_drawing, right_cell]],
-        colWidths=[95 * mm, 79 * mm],
+        [[left_cell, plot_drawing]],
+        colWidths=[72 * mm, 102 * mm],
     )
     body_table.setStyle(
         TableStyle(
@@ -349,8 +606,61 @@ def render_iso717_report(
         )
     )
     flow.append(body_table)
-    flow.append(Spacer(1, 6))
-    flow.append(Paragraph(_summary_paragraph(result, limit), body_style))
+    flow.append(Spacer(1, 8))
+
+    # Boxed single-number result, with the extended adaptation terms beside it
+    # only when the result actually carries them (never fabricated).
+    result_style = ParagraphStyle(
+        "iso717_result", parent=styles["Normal"], fontSize=13, leading=17,
+        textColor=accent,
+    )
+    extended = _extended_terms(result)
+    box_cells: List[Any] = [Paragraph(statement, result_style)]
+    box_widths = [174 * mm]
+    if extended:
+        ext_style = ParagraphStyle(
+            "iso717_ext", parent=styles["Normal"], fontSize=8.5, leading=12,
+        )
+        box_cells = [
+            Paragraph(statement, result_style),
+            Paragraph("<br/>".join(extended), ext_style),
+        ]
+        box_widths = [104 * mm, 70 * mm]
+    result_box = Table([box_cells], colWidths=box_widths)
+    result_box.setStyle(
+        TableStyle(
+            [
+                ("BOX", (0, 0), (-1, -1), 1.0, accent),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(_LIGHT_HEX)),
+            ]
+        )
+    )
+    flow.append(result_box)
+
+    # Optional verdict row.
+    if metadata is not None and metadata.requirement is not None:
+        text, passed = _verdict(result, metadata.requirement)
+        badge = "PASS" if passed else "FAIL"
+        badge_hex = _VERDICT_OK_HEX if passed else _VERDICT_BAD_HEX
+        verdict_style = ParagraphStyle(
+            "iso717_verdict", parent=styles["Normal"], fontSize=10, leading=14,
+            spaceBefore=4,
+        )
+        flow.append(
+            Paragraph(
+                f"Result vs requirement: {text} &#8594; "
+                f"<b><font color='{badge_hex}'>{badge}</font></b>",
+                verdict_style,
+            )
+        )
+
+    # Footer identity block + disclaimer.
+    flow.extend(_footer_flow(rl, metadata))
 
     doc_kwargs = dict(
         pagesize=rl["A4"],
@@ -369,3 +679,37 @@ def render_iso717_report(
     doc.build(flow)
 
     return str(path)
+
+
+def _extended_terms(
+    result: "WeightedRatingResult | ImpactRatingResult",
+) -> List[str]:
+    """Return the extended spectrum-adaptation terms the result carries, if any.
+
+    The core rating results do not hold the enlarged-range terms, so this is
+    normally empty; it only lists terms that are genuinely present on the
+    object (never fabricated).
+    """
+    terms: List[str] = []
+    airborne_specs = [
+        ("c_50_3150", "C<sub>50-3150</sub>"),
+        ("c_50_5000", "C<sub>50-5000</sub>"),
+        ("c_100_5000", "C<sub>100-5000</sub>"),
+        ("ctr_50_3150", "C<sub>tr,50-3150</sub>"),
+        ("ctr_50_5000", "C<sub>tr,50-5000</sub>"),
+        ("ctr_100_5000", "C<sub>tr,100-5000</sub>"),
+    ]
+    impact_specs = [("ci_50_2500", "C<sub>I,50-2500</sub>")]
+    specs = impact_specs if result.quantity == "impact" else airborne_specs
+    for attr, label in specs:
+        value = getattr(result, attr, None)
+        if value is None:
+            continue
+        try:
+            number = float(value)
+        except (TypeError, ValueError):  # pragma: no cover - defensive
+            continue
+        if not math.isfinite(number):  # pragma: no cover - defensive
+            continue
+        terms.append(f"{label} = {number:+.0f} dB")
+    return terms

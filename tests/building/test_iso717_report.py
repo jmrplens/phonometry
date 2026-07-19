@@ -17,6 +17,7 @@ import pytest
 pytest.importorskip("reportlab")
 
 from phonometry import (  # noqa: E402  (import after importorskip)
+    ReportMetadata,
     WeightedRatingResult,
     single_panel_transmission_loss,
     weighted_impact_rating,
@@ -41,6 +42,14 @@ def _assert_pdf(path: str) -> None:
 
     assert head == _PDF_MAGIC
     assert os.path.getsize(path) > 0
+
+
+def _assert_one_page(path: str) -> None:
+    """The fiche is a single-page PDF beginning with ``%PDF``."""
+    _assert_pdf(path)
+    from pypdf import PdfReader
+
+    assert len(PdfReader(path).pages) == 1
 
 
 def test_airborne_report_writes_pdf(tmp_path) -> None:
@@ -126,3 +135,77 @@ def test_impact_fiche_reproduces_iso717_2_annex_c1(tmp_path) -> None:
         _IMPACT_EXPECTED["unfavourable_sum"], abs=0.05
     )
     _assert_pdf(str(result.report(str(tmp_path / "impact_c1.pdf"))))
+
+
+def _full_metadata(**overrides) -> ReportMetadata:
+    """A fully populated :class:`ReportMetadata` for the accredited fiche."""
+    base = dict(
+        specimen="200 mm reinforced-concrete wall",
+        client="Acoustic Test Client Ltd.",
+        mounted_by="Test laboratory staff",
+        manufacturer="Concrete Works Inc.",
+        area=10.0,
+        mass_per_area=460.0,
+        source_volume=53.0,
+        receiving_volume=51.0,
+        temperature=21.5,
+        relative_humidity=45.0,
+        pressure=101.3,
+        test_room="Transmission suite T1",
+        mounting="Rigid, mortar-sealed perimeter",
+        measurement_standard="ISO 10140-2",
+        test_date="2026-07-18",
+        laboratory="Phonometry Reference Laboratory",
+        operator="J. M. Requena-Plens",
+        report_id="PHN-2026-0042",
+        notes="Engineering method, one-third-octave bands.",
+    )
+    base.update(overrides)
+    return ReportMetadata(**base)
+
+
+def test_full_metadata_renders_one_page(tmp_path) -> None:
+    """A full ReportMetadata renders a one-page accredited fiche."""
+    result = weighted_rating(_AIRBORNE_R)
+    out = tmp_path / "airborne_meta.pdf"
+    result.report(str(out), metadata=_full_metadata())
+    _assert_one_page(str(out))
+
+
+def test_verbose_renders_annex_c_table(tmp_path) -> None:
+    """``verbose=True`` renders the Annex C evaluation table one-pager."""
+    result = weighted_rating(_AIRBORNE_R)
+    out = tmp_path / "airborne_verbose.pdf"
+    result.report(str(out), metadata=_full_metadata(), verbose=True)
+    _assert_one_page(str(out))
+
+
+def test_requirement_pass_and_fail_both_render(tmp_path) -> None:
+    """A PASS and a FAIL requirement both render a one-page fiche."""
+    result = weighted_rating(_AIRBORNE_R)  # Rw = 30 dB
+    passing = tmp_path / "pass.pdf"
+    failing = tmp_path / "fail.pdf"
+    result.report(str(passing), metadata=_full_metadata(requirement=25.0))
+    result.report(str(failing), metadata=_full_metadata(requirement=52.0))
+    _assert_one_page(str(passing))
+    _assert_one_page(str(failing))
+
+
+def test_impact_requirement_verdict_renders(tmp_path) -> None:
+    """An impact fiche with a requirement (lower is better) renders."""
+    result = weighted_impact_rating(_IMPACT_LN)
+    out = tmp_path / "impact_meta.pdf"
+    result.report(
+        str(out),
+        metadata=ReportMetadata(
+            specimen="150 mm slab", measurement_standard="ISO 16283-2",
+            requirement=60.0, laboratory="Phonometry Reference Laboratory",
+        ),
+    )
+    _assert_one_page(str(out))
+
+
+def test_metadata_rejects_negative_area() -> None:
+    """``ReportMetadata`` rejects a non-positive numeric field."""
+    with pytest.raises(ValueError, match="area"):
+        ReportMetadata(area=-5.0)

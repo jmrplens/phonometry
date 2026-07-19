@@ -108,6 +108,8 @@ from .._internal.types import as_float_or_array
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 # --- ISO 717-1 Table 3 reference values ----------------------------------
 
 #: One-third-octave reference values, 100 Hz to 3150 Hz (Table 3).
@@ -309,16 +311,31 @@ class WeightedRatingResult:
 
         return plot_weighted_rating(self, ax=ax, **kwargs)
 
-    def report(self, path: str, *, engine: str = "reportlab") -> str:
-        """Render an ISO 717-1 Annex C sound-insulation fiche to a PDF.
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+    ) -> str:
+        """Render an ISO 717-1 airborne sound-insulation fiche to a PDF.
 
-        Writes a one-page report reproducing the ISO 717-1 Annex C layout:
-        the ``Rw (C; Ctr)`` statement, the measured-versus-shifted-reference
-        plot (the result's own :meth:`plot`) and the Table C.1 evaluation
-        table with the sum of unfavourable deviations at the foot.
+        Writes a one-page accredited-laboratory report: the standard-basis
+        line, an optional metadata header block, the one-third-octave table
+        beside the measured-versus-shifted-reference plot (the result's own
+        :meth:`plot`), the boxed ``Rw (C; Ctr)`` result, an optional verdict
+        row and a footer with the fixed disclaimer.
 
         :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a
+            prediction fiche (body, result and disclaimer only).
         :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table uses the ISO 717 Annex C
+            columns (frequency, measured value, shifted reference,
+            unfavourable deviation) instead of the two-column ``f | value``
+            table.
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or the result
             was built without the per-band data (``band_centers``,
@@ -326,7 +343,9 @@ class WeightedRatingResult:
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``).
         """
-        return _render_iso717(self, path, engine=engine)
+        return _render_iso717(
+            self, path, metadata=metadata, engine=engine, verbose=verbose
+        )
 
 
 @dataclass(frozen=True)
@@ -400,17 +419,31 @@ class ImpactRatingResult:
 
         return plot_impact_rating(self, ax=ax, **kwargs)
 
-    def report(self, path: str, *, engine: str = "reportlab") -> str:
-        """Render an ISO 717-2 Annex C impact-insulation fiche to a PDF.
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+    ) -> str:
+        """Render an ISO 717-2 impact-insulation fiche to a PDF.
 
-        Writes a one-page report reproducing the ISO 717 Annex C layout for
-        impact sound: the ``Ln,w (CI)`` statement, the
-        measured-versus-shifted-reference plot (the result's own
-        :meth:`plot`) and the evaluation table with the sum of unfavourable
-        deviations at the foot.
+        Writes a one-page accredited-laboratory report for impact sound: the
+        standard-basis line, an optional metadata header block, the
+        one-third-octave table beside the measured-versus-shifted-reference
+        plot (the result's own :meth:`plot`), the boxed ``Ln,w (CI)`` result,
+        an optional verdict row and a footer with the fixed disclaimer.
 
         :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a
+            prediction fiche (body, result and disclaimer only).
         :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table uses the ISO 717 Annex C
+            columns (frequency, measured value, shifted reference,
+            unfavourable deviation) instead of the two-column ``f | value``
+            table.
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or the result
             was built without the per-band data (``band_centers``,
@@ -418,7 +451,9 @@ class ImpactRatingResult:
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``).
         """
-        return _render_iso717(self, path, engine=engine)
+        return _render_iso717(
+            self, path, metadata=metadata, engine=engine, verbose=verbose
+        )
 
 
 @dataclass(frozen=True)
@@ -463,7 +498,9 @@ def _render_iso717(
     result: "WeightedRatingResult | ImpactRatingResult",
     path: str,
     *,
+    metadata: "ReportMetadata | None",
     engine: str,
+    verbose: bool,
 ) -> str:
     """Validate the report request and delegate to the reportlab renderer.
 
@@ -488,7 +525,9 @@ def _render_iso717(
         )
     from .._report.iso717 import render_iso717_report
 
-    return render_iso717_report(result, path)
+    return render_iso717_report(
+        result, path, metadata=metadata, verbose=verbose
+    )
 
 
 def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:

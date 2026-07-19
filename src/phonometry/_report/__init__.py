@@ -10,3 +10,7 @@ matplotlib guard behind the ``plot()`` methods.
 """
 
 from __future__ import annotations
+
+from .metadata import ReportMetadata
+
+__all__ = ["ReportMetadata"]

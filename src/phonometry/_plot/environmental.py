@@ -28,6 +28,11 @@ if TYPE_CHECKING:
         BarrierInsertionLoss,
         SphericalGroundResult,
     )
+    from ..environmental.atmospheric_refraction import (
+        AtmosphericPEResult,
+        AtmosphericRayResult,
+        EffectiveSoundSpeedProfile,
+    )
     from ..environmental.measurement import TonalAssessmentResult
     from ..environmental.impulse_prominence import ImpulseProminenceResult
     from ..environmental.wind_turbine_noise import WindTurbineTonalityResult
@@ -244,4 +249,100 @@ def plot_barrier_insertion_loss(
     ax.set_title("Barrier insertion loss")
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_sound_speed_profile(
+    profile: "EffectiveSoundSpeedProfile", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Effective sound-speed profile ``c_eff(z)`` (height on the vertical axis).
+
+    :param profile: An
+        :class:`~phonometry.environmental.atmospheric_refraction.EffectiveSoundSpeedProfile`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the profile ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    z = np.asarray(profile.heights, dtype=np.float64)
+    c = np.asarray(profile.sound_speeds, dtype=np.float64)
+    label = profile.description or "c_eff(z)"
+    ax.plot(c, z, **{"color": _C_PRIMARY, "lw": 1.4, "label": label, **kwargs})
+    ax.set_xlabel("Effective sound speed [m/s]")
+    ax.set_ylabel("Height [m]")
+    ax.set_title("Effective sound-speed profile")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    return ax
+
+
+def plot_atmospheric_rays(
+    result: "AtmosphericRayResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Curved sound-ray paths over the ground (height on the vertical axis).
+
+    :param result: An
+        :class:`~phonometry.environmental.atmospheric_refraction.AtmosphericRayResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to each ray ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    r = np.asarray(result.ranges, dtype=np.float64)
+    z = np.asarray(result.heights, dtype=np.float64)
+    for i in range(r.shape[0]):
+        ax.plot(r[i], z[i], **{"color": _C_PRIMARY, "lw": 0.7, "alpha": 0.7, **kwargs})
+    ax.plot([0.0], [result.source_height], "o", color=_C_REFERENCE, label="Source")
+    ax.axhline(0.0, color=_C_MUTED, lw=1.0)
+    ax.set_xlabel("Range [m]")
+    ax.set_ylabel("Height [m]")
+    ax.set_ylim(bottom=0.0)
+    ax.set_title("Atmospheric ray paths")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="upper right", fontsize="small")
+    return ax
+
+
+def plot_atmospheric_pe(
+    result: "AtmosphericPEResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Parabolic-equation relative-level field over the range-height plane.
+
+    The field is drawn as a single raster image (``imshow``): per-cell vector
+    quads are avoided so the figure stays light and free of moire (the repo's
+    pcolormesh-in-SVG policy).
+
+    :param result: An
+        :class:`~phonometry.environmental.atmospheric_refraction.AtmosphericPEResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to ``imshow``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    r = np.asarray(result.ranges, dtype=np.float64)
+    z = np.asarray(result.heights, dtype=np.float64)
+    dl = np.asarray(result.relative_level, dtype=np.float64)
+    finite = dl[np.isfinite(dl)]
+    vmax = float(np.percentile(finite, 99)) if finite.size else 6.0
+    vmax = max(vmax, 6.0)
+    dl = np.where(np.isfinite(dl), dl, np.nan)
+    img = ax.imshow(
+        dl,
+        **{
+            "cmap": "RdBu_r",
+            "vmin": -30.0,
+            "vmax": vmax,
+            "aspect": "auto",
+            "origin": "lower",
+            "interpolation": "bilinear",
+            "extent": (float(r[0]), float(r[-1]), float(z[0]), float(z[-1])),
+            **kwargs,
+        },
+    )
+    ax.figure.colorbar(img, ax=ax, label="Level re free field [dB]")
+    ax.plot([0.0], [result.source_height], "o", color="k", ms=4.0, label="Source")
+    ax.set_xlabel("Range [m]")
+    ax.set_ylabel("Height [m]")
+    ax.set_title(f"GFPE relative sound level ({result.frequency:.0f} Hz)")
+    ax.legend(loc="upper right", fontsize="small")
     return ax

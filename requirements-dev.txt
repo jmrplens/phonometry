@@ -10,3 +10,4 @@ reportlab>=4  # required by the result-object .report() tests (ISO 717 PDF fiche
 pyoxipng==9.1.1  # deterministic PNG optimizer; pinned so a local `make graphs` emits the same bytes as the figures CI stack
 pystoi>=0.4.1  # test-only external cross-check for STOI/ESTOI (reproduces the authors' MATLAB); the library reimplements from the papers and never imports it at runtime
 svglib>=1.5
+pypdf>=4  # one-page assertion in the ISO 717 report tests

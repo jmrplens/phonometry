@@ -16,6 +16,7 @@ import pytest
 import reference_data as ref
 from phonometry import (
     band_mode_count,
+    coincidence_frequency,
     critical_frequency,
     direction_averaged_level_difference,
     equivalent_absorption_length,
@@ -23,6 +24,7 @@ from phonometry import (
     modal_overlap_factor,
     normalized_flanking_impact_level,
     normalized_flanking_level_difference,
+    plate_bending_stiffness,
     strong_coupling_satisfied,
     total_loss_factor,
     velocity_level_difference,
@@ -307,9 +309,28 @@ def test_indirect_kij_from_flanking_roundtrip() -> None:
 # Validity criteria
 # ---------------------------------------------------------------------------
 def test_critical_frequency() -> None:
-    """fc = c0²/(1.8·cL·h·π) (Formula (20))."""
-    fc = critical_frequency(5500.0, 0.2, speed_of_sound=343.0)
-    assert fc == pytest.approx(343.0**2 / (1.8 * 5500.0 * 0.2 * np.pi))
+    """fc = c0²/(1.8·cL·h) (Formula (20)), checked against two independent oracles.
+
+    (a) Hand-computed value for 6 mm float glass (cL = 5130 m/s):
+    343² / (1.8 · 5130 · 0.006) ≈ 2123.5 Hz. The lower bound guards against a
+    reintroduced spurious π factor (which would give ≈ 676 Hz).
+    (b) Cross-oracle: the constant 1.8 rounds 2π/√12, so for a plate with
+    mutually consistent bending stiffness and mass the result must match the
+    Hopkins Eq. 2.201 coincidence frequency to within that rounding (< 1 %).
+    """
+    # (a) Independent published/hand-computed value for 6 mm float glass.
+    fc = critical_frequency(5130.0, 0.006, speed_of_sound=343.0)
+    assert fc == pytest.approx(2123.5, rel=0.01)
+    assert fc > 1500.0  # a spurious π factor would give ~676 Hz
+
+    # (b) Cross-oracle against the closed-form plate coincidence frequency.
+    e, rho, nu, h = 6.2e10, 2500.0, 0.24, 0.006
+    c_l = np.sqrt(e / (rho * (1.0 - nu**2)))
+    fc_flank = critical_frequency(float(c_l), h, speed_of_sound=343.0)
+    fc_coinc = coincidence_frequency(
+        rho * h, plate_bending_stiffness(e, h, nu), speed_of_sound=343.0
+    )
+    assert fc_flank == pytest.approx(fc_coinc, rel=0.01)
 
 
 def test_strong_coupling_check() -> None:

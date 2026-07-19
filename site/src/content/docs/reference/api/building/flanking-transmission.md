@@ -113,7 +113,11 @@ critical_frequency(
 
 Thin-plate critical frequency `fc` (Part 1, Formula (20)).
 
-`fc = c0² / (1,8 · cL · h · π)` for a homogeneous isotropic element.
+`fc = c0² / (1,8 · cL · h)` for a homogeneous isotropic element. The
+constant 1,8 already carries the `2π/√12` factor of the thin-plate
+dispersion relation, so for a plate whose bending stiffness and mass are
+mutually consistent this equals [`phonometry.coincidence_frequency`](/phonometry/reference/api/vibration/radiation-efficiency/#coincidence_frequency)
+(Hopkins Eq. 2.201) to within the rounding of the constant.
 
 **Parameters**
 

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **353/353 conformance checks pass** across 44 domains and 224 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **354/354 conformance checks pass** across 44 domains and 225 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -144,7 +144,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room &amp; building acoustics</b>: 100% (50/50)</summary>
+<summary>&#9989; <b>Room &amp; building acoustics</b>: 100% (51/51)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -171,6 +171,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 10848-1:2006 Formula (14) | Flanking Kij (simplified) matches closed form | Kij = 1.9897 dB | Kij = 1.9897 dB | exact | &#9989; |
 | ISO 10848-1:2006 Formula (12) | Flanking equivalent absorption length aj at f_ref | aj = 1.2661 m | aj = 1.2661 m | exact | &#9989; |
 | ISO 10848-1:2006 Clause 7.3.1 | Flanking total loss factor η = 2,2/(f·Ts) | η = 0.0044 | η = 0.0044 | exact | &#9989; |
+| ISO 12354-1:2017 Formula (20) vs Hopkins Eq. 2.201 (6 mm glass) | Flanking critical frequency (c0²/1,8·cL·h) vs plate coincidence (c0²/2π · sqrt(m''/B')) | 2107.4 Hz (+/-1%) | 2123.5 Hz | 16.156 Hz | &#9989; |
 | EN 29052-1:1992 Formula 4 | Apparent dynamic stiffness s't = 4π²·m't·fr²  (m't=200 kg/m², fr=25 Hz) | 4.934802 MN/m³ (+/-0.000001 MN/m³) | 4.934802 MN/m³ | 0 MN/m³ | &#9989; |
 | EN 29052-1:1992 clause 8.2 NOTE | Enclosed-gas stiffness s'a·d = 111 MN·mm/m³ (p₀=0,1 MPa, ε=0,9) | 5.55556 MN/m³ (+/-0.0001 MN/m³) | 5.55556 MN/m³ | 0 MN/m³ | &#9989; |
 | EN 29052-1:1992 Formula 2 | Floating-floor natural frequency f0 = (1/2π)√(s'/m')  (s'=10 MN/m³, m'=100 kg/m²) | 50.32921 Hz (+/-0 Hz) | 50.32921 Hz | 0 Hz | &#9989; |

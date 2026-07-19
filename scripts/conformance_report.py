@@ -1713,6 +1713,25 @@ def _chk_iso10848_loss_factor() -> Outcome:
     )
 
 
+@register(
+    "Room & building acoustics",
+    "ISO 12354-1:2017 Formula (20) vs Hopkins Eq. 2.201 (6 mm glass)",
+    "Flanking critical frequency (c0²/1,8·cL·h) vs plate coincidence "
+    "(c0²/2π · sqrt(m''/B'))",
+)
+def _chk_flanking_critical_frequency() -> Outcome:
+    # The 1,8 constant rounds 2π/√12, so for a plate whose bending stiffness
+    # and mass are mutually consistent the two independent formulas must
+    # agree to within that rounding (< 1 %).
+    e, rho, nu, h, c0 = 6.2e10, 2500.0, 0.24, 0.006, 343.0
+    c_l = math.sqrt(e / (rho * (1.0 - nu**2)))
+    fc_flank = ph.critical_frequency(c_l, h, speed_of_sound=c0)
+    fc_coinc = ph.coincidence_frequency(
+        rho * h, ph.plate_bending_stiffness(e, h, nu), speed_of_sound=c0
+    )
+    return numeric(fc_coinc, fc_flank, 0.01, rel=True, unit="Hz", places=1)
+
+
 # --- Dynamic stiffness of resilient materials (EN 29052-1:1992) ---
 @register(
     "Room & building acoustics",

@@ -318,6 +318,38 @@ values (thirds `L'nT,w = 79`, `CI = −11`; octave `54`, `CI = 0`).
 `None`); `weighted_impact_rating()` returns an `ImpactRatingResult` (`rating`,
 `ci` integers, `unfavourable_sum` in dB).
 
+### ISO 717 Annex C report (`.report()`)
+
+Both rating results render a one-page ISO 717 Annex C fiche to PDF through a
+`report(path)` method: the single-number statement, the
+measured-versus-shifted-reference plot (the result's own `.plot()`) and the
+Table C.1 evaluation table with the sum of unfavourable deviations at the foot.
+`WeightedRatingResult.report()` labels the airborne ISO 717-1 fiche
+(`Rw (C; Ctr)`, deviations where the reference is above the measurement);
+`ImpactRatingResult.report()` labels the impact ISO 717-2 fiche (`Ln,w (CI)`,
+deviations the opposite way). `SoundReductionResult.report()` is a convenience
+that rates the predicted `R(f)` and writes its fiche in one call.
+
+Rendering needs reportlab, kept out of the runtime dependencies as the optional
+`phonometry[report]` extra (`pip install phonometry[report]`); a missing
+reportlab raises a clear `ImportError` with the install command, and the plot
+still needs matplotlib (`phonometry[plot]`). Only `engine="reportlab"` is
+supported; any other engine raises `ValueError`.
+
+```python
+from phonometry import building
+
+# Airborne rating from a measured 16-band R spectrum (ISO 717-1 Annex C)
+R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+     28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
+building.weighted_rating(R).report("Rw_fiche.pdf")          # Rw (C; Ctr)
+
+# Impact rating from a measured 16-band L'nT spectrum (ISO 717-2 Annex C)
+l_nt = [45.0, 47.0, 48.0, 49.0, 51.0, 52.0, 53.0, 54.0,
+        55.0, 56.0, 57.0, 58.0, 55.0, 52.0, 49.0, 46.0]
+building.weighted_impact_rating(l_nt).report("Lnw_fiche.pdf")  # Ln,w (CI)
+```
+
 ### Field façade insulation (ISO 16283-3)
 
 The same source/receiver logic reaches the building **façade**, but now the

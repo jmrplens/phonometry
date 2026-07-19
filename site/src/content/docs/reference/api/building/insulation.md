@@ -483,6 +483,7 @@ ImpactRatingResult(
     band_centers: np.ndarray | None = None,
     measured: np.ndarray | None = None,
     shifted_reference: np.ndarray | None = None,
+    quantity: str = 'impact',
 )
 ```
 
@@ -498,6 +499,7 @@ Single-number weighted impact rating and CI (ISO 717-2).
 | `band_centers` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
 | `measured` | The measured impact levels used for the rating (after the one-decimal reduction of Clause 4.3.1), in dB. Defaults to `None`. |
 | `shifted_reference` | Table 3 impact reference curve after the final shift, in dB. Defaults to `None`. |
+| `quantity` | Always `"impact"` (ISO 717-2), selecting the impact labels of the ISO 717 Annex C report. |
 
 ### ImpactRatingResult.plot()
 
@@ -511,6 +513,36 @@ Unfavourable deviations (measurement above the reference, the sign
 opposite to airborne) are shaded and `Ln,w (CI)` annotated.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### ImpactRatingResult.report()
+
+```python
+ImpactRatingResult.report(path: str, *, engine: str = 'reportlab') -> str
+```
+
+Render an ISO 717-2 Annex C impact-insulation fiche to a PDF.
+
+Writes a one-page report reproducing the ISO 717 Annex C layout for
+impact sound: the `Ln,w (CI)` statement, the
+measured-versus-shifted-reference plot (the result's own
+`plot`) and the evaluation table with the sum of unfavourable
+deviations at the foot.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or the result was built without the per-band data (`band_centers`, `measured`, `shifted_reference`). |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
 
 ## weighted_impact_improvement
 
@@ -711,6 +743,7 @@ WeightedRatingResult(
     band_centers: np.ndarray | None = None,
     measured: np.ndarray | None = None,
     shifted_reference: np.ndarray | None = None,
+    quantity: str = 'airborne',
 )
 ```
 
@@ -727,6 +760,7 @@ Single-number weighted rating and adaptation terms (ISO 717-1).
 | `band_centers` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
 | `measured` | The measured band quantities used for the rating (after the one-decimal reduction of Clause 4.4), in dB. Defaults to `None`. |
 | `shifted_reference` | Table 3 reference curve after the final shift, in dB. Defaults to `None`. |
+| `quantity` | `"airborne"` (ISO 717-1, sound reduction index) or `"impact"` (ISO 717-2), selecting the labels of the ISO 717 Annex C report. Defaults to `"airborne"`. |
 
 ### WeightedRatingResult.plot()
 
@@ -740,3 +774,32 @@ Unfavourable deviations (reference above measurement) are shaded and
 `Rw (C; Ctr)` annotated. Requires matplotlib
 (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### WeightedRatingResult.report()
+
+```python
+WeightedRatingResult.report(path: str, *, engine: str = 'reportlab') -> str
+```
+
+Render an ISO 717-1 Annex C sound-insulation fiche to a PDF.
+
+Writes a one-page report reproducing the ISO 717-1 Annex C layout:
+the `Rw (C; Ctr)` statement, the measured-versus-shifted-reference
+plot (the result's own `plot`) and the Table C.1 evaluation
+table with the sum of unfavourable deviations at the foot.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or the result was built without the per-band data (`band_centers`, `measured`, `shifted_reference`). |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |

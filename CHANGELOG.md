@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- ISO 717 sound-insulation ratings can now be exported as a one-page PDF fiche
+  through a `report(path)` method. `WeightedRatingResult.report()` renders the
+  airborne ISO 717-1 Annex C layout (the `Rw (C; Ctr)` statement, the
+  measured-versus-shifted-reference plot and the Table C.1 evaluation table with
+  the sum of unfavourable deviations), and `ImpactRatingResult.report()` renders
+  the impact ISO 717-2 counterpart with the `Ln,w (CI)` statement and the
+  opposite deviation sign. `SoundReductionResult.report()` is a convenience that
+  rates the predicted `R(f)` and writes its fiche in one call. Rendering uses
+  reportlab, added as the optional `phonometry[report]` extra so it stays out of
+  the runtime dependencies; a missing reportlab raises a clear `ImportError`
+  with the install command, mirroring the matplotlib guard behind `.plot()`. The
+  rating results gain a `quantity` field ("airborne" or "impact") that selects
+  the report labels and standard reference.
 - `enclosure_insertion_loss` now accepts a panel prediction result directly for
   its `panel_transmission_loss` argument, in addition to a per-band array or a
   callable. A `SoundReductionResult` or `ApertureTransmissionResult` (from the

@@ -34,7 +34,7 @@ attenuated impulse per image (Kuttruff Equations (4.4)–(4.5),
 Image `i` at distance `r_i` from the receiver arrives at `t_i = r_i / c`
 (Vorländer Equation (11.38)) with amplitude
 
-```
+```text
 A_i = [ Π_walls R_wall^(reflections there) ] · exp(−m r_i / 2) / (4 π r_i)
 ```
 
@@ -74,6 +74,9 @@ print(res.times.size, room.audible_image_count(12) + 1)  # images + direct sourc
 
 # Feed the synthetic RIR straight into the ISO 3382 decay analysis.
 params = room.room_parameters(res.ir, res.fs, limits=None)
+print(bool(params.t30_valid[0]))             # True: the decay window is usable
+# T30 rises toward the Eyring estimate as max_order grows (see below); at a low
+# order the specular tail is truncated, so treat this as an order-limited value.
 print(round(float(params.t30[0]), 2))        # reverberation time, s
 ```
 
@@ -92,11 +95,12 @@ coefficient `m` from `air_attenuation_m`) to add the `exp(−m r / 2)` air loss.
 
 ![Image-source reflectogram: the synthetic room impulse response of a 7x5x3 m room as a cloud of reflections coloured by reflection order, decaying under the 1/r spreading envelope with the direct sound marked at order 0](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/image_source_reflectogram.png)
 
-**Reproducing the statistical decay.** The initial slope of the reverberant
-energy density of the synthetic RIR reproduces the **Eyring** reverberation
-time `T = −24 V ln 10 / (c S ln(1 − ᾱ))` (Kuttruff Equation (5.23)): the mean
-reflection rate `c S / 4 V` equals `(c/2)(1/Lx + 1/Ly + 1/Lz)`, the initial
-decay rate of the specular field. The match is exact only in the near-cubic
+**Reproducing the statistical decay.** The fitted initial decay slope of the
+reverberant energy density of the synthetic RIR recovers the **Eyring**
+reverberation time `T = −24 V ln 10 / (c S ln(1 − ᾱ))` (Kuttruff Equation
+(5.23)): the mean reflection rate `c S / 4 V` equals
+`(c/2)(1/Lx + 1/Ly + 1/Lz)`, so the specular field's initial decay rate is the
+one that defines that `T`. The match is exact only in the near-cubic
 limit; an elongated room sustains energy along its long axis, so its pure
 *specular* decay runs slower than Eyring's diffuse-field estimate (the regime
 the [Fitzroy and Arau-Puchades models](reverberation-prediction.md) correct).
@@ -111,14 +115,14 @@ settles to the sum of a **direct field** that falls with distance and a
 **reverberant field** that (to the diffuse approximation) is the same
 everywhere. The **room constant**
 
-```
+```text
 R = S ᾱ / (1 − ᾱ)                       (Bies Equation (6.44))
 ```
 
 with total boundary area `S` and mean Sabine absorption `ᾱ` measures how much
 reverberant field a given power builds up. The **steady-state level** is
 
-```
+```text
 Lp = Lw + 10 log10( Q / (4 π r²) + 4 / R )   [ + 10 log10(ρc / 400) ]
                                                (Bies Equation (6.43))
 ```
@@ -128,7 +132,7 @@ with the source directivity factor `Q` (1 omnidirectional, 2 on a hard floor,
 (about +0.14 dB at 20 °C) corrects for a characteristic impedance differing
 from 400 Pa·s/m and is omitted by default. The **critical distance**
 
-```
+```text
 rc = √( Q R / (16 π) )
 ```
 
@@ -160,13 +164,15 @@ print(round(float(room.steady_state_spl(90.0, 5.0, 25.0)), 2))    # far-field le
 
 The **Schroeder frequency**
 
-```
+```text
 f_s = 2000 √(T / V)                       (Kuttruff Equation (3.44))
 ```
 
-(`V` in m³, `T` in s) marks the boundary below which discrete room modes rule
-and the diffuse assumptions of `R` and `rc` fail; above it the statistical
-field of this section applies.
+(`V` in m³, `T` in s) roughly marks the modal-to-diffuse transition, a
+heuristic crossover rather than a sharp cutoff: well below it discrete room
+modes dominate and the diffuse assumptions of `R` and `rc` grow unreliable,
+well above it the modes overlap and the statistical field of this section
+holds. In borderline rooms it is worth checking band by band.
 
 ```python
 from phonometry import room

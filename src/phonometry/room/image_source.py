@@ -239,6 +239,137 @@ def _validate_point(
     return p
 
 
+def _resolve_band_maps(
+    reflection: NDArray[np.float64],
+    n_alpha_bands: int,
+    air_attenuation: ArrayLike,
+    freq: np.ndarray | None,
+) -> tuple[NDArray[np.float64], NDArray[np.float64], int, bool]:
+    """Resolve the per-band reflection map, air map, band count and flag.
+
+    Returns ``(reflection, m_bands, n_bands, banded)`` with ``reflection`` and
+    ``m_bands`` broadcast to ``n_bands`` bands (``banded`` False for a single
+    broadband curve).
+
+    :raises ValueError: for a non-finite/negative air attenuation, or an
+        ``absorption`` / ``air_attenuation`` band count that neither is 1 nor
+        matches the resolved band count.
+    """
+    m = np.asarray(air_attenuation, dtype=np.float64)
+    if not np.all(np.isfinite(m)) or np.any(m < 0.0):
+        raise ValueError("'air_attenuation' must be finite and non-negative.")
+    banded = freq is not None or n_alpha_bands > 1 or m.size > 1
+    if freq is not None:
+        n_bands = freq.size
+    elif banded:
+        n_bands = max(n_alpha_bands, m.size)
+    else:
+        n_bands = 1
+    if reflection.shape[1] == 1 and n_bands > 1:
+        reflection = np.broadcast_to(reflection, (6, n_bands)).copy()
+    elif reflection.shape[1] not in (1, n_bands):
+        raise ValueError(
+            f"'absorption' has {reflection.shape[1]} bands but the result has "
+            f"{n_bands}; a per-band 'absorption' must match the band count of "
+            "'frequencies' (or the air attenuation)."
+        )
+    if m.size not in (1, n_bands):
+        raise ValueError(
+            f"'air_attenuation' has {m.size} bands but the result has "
+            f"{n_bands}; they must match."
+        )
+    return reflection, np.broadcast_to(m, (n_bands,)), n_bands, banded
+
+
+def _image_lattice(
+    src: NDArray[np.float64],
+    rcv: NDArray[np.float64],
+    dims: tuple[float, float, float],
+    max_order: int,
+    speed_of_sound: float,
+) -> tuple[NDArray[np.float64], ...]:
+    """Enumerate the shoebox image lattice up to ``max_order`` reflections.
+
+    Returns, sorted by arrival time, ``(times, distances, orders, positions,
+    counts)`` where ``counts`` is the ``(6, n_images)`` per-wall reflection
+    count of each image.
+    """
+    lx, ly, lz = dims
+    xs, x_lo, x_hi = _axis_images(src[0], lx, max_order)
+    ys, y_lo, y_hi = _axis_images(src[1], ly, max_order)
+    zs, z_lo, z_hi = _axis_images(src[2], lz, max_order)
+    order_x = x_lo + x_hi
+    order_y = y_lo + y_hi
+    order_z = z_lo + z_hi
+    # Outer combination with the total-order cut-off, kept vectorised.
+    total_order = (order_x[:, None, None] + order_y[None, :, None]
+                   + order_z[None, None, :])
+    ix, iy, iz = np.nonzero(np.asarray(total_order <= max_order))
+
+    px, py, pz = xs[ix], ys[iy], zs[iz]
+    positions = np.stack([px, py, pz], axis=1)
+    distances = np.sqrt(
+        (px - rcv[0]) ** 2 + (py - rcv[1]) ** 2 + (pz - rcv[2]) ** 2
+    )
+    orders = (order_x[ix] + order_y[iy] + order_z[iz]).astype(np.int_)
+    counts = np.stack(
+        [x_lo[ix], x_hi[ix], y_lo[iy], y_hi[iy], z_lo[iz], z_hi[iz]], axis=0
+    ).astype(np.float64)
+
+    times = distances / speed_of_sound
+    order_idx = np.argsort(times, kind="stable")
+    return (times[order_idx], distances[order_idx], orders[order_idx],
+            positions[order_idx], counts[:, order_idx])
+
+
+def _image_amplitudes(
+    reflection: NDArray[np.float64],
+    counts: NDArray[np.float64],
+    m_bands: NDArray[np.float64],
+    distances: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Per-band per-image amplitude ``prod R^count * exp(-m r / 2)/(4 pi r)``.
+
+    The reflection product is formed in log space so a fully absorbing wall
+    (``R = 0``) is handled by an explicit annihilation mask rather than a
+    ``0 ** 0`` indeterminate form: only images that actually reflect off that
+    wall are zeroed.
+    """
+    with np.errstate(divide="ignore"):
+        log_r = np.log(np.where(reflection > 0.0, reflection, 1.0))
+    reflection_gain = np.exp(log_r.T @ counts)  # (n_bands, n_images)
+    zero_wall = (reflection <= 0.0)[:, :, None]  # (6, n_bands, 1)
+    used = counts[:, None, :] > 0  # (6, 1, n_images)
+    annihilated = np.any(zero_wall & used, axis=0)  # (n_bands, n_images)
+    reflection_gain = np.where(annihilated, 0.0, reflection_gain)
+    spreading = 1.0 / (4.0 * np.pi * distances)
+    air = np.exp(-0.5 * m_bands[:, None] * distances[None, :])
+    return reflection_gain * air * spreading[None, :]
+
+
+def _sample_ir(
+    times: NDArray[np.float64],
+    amp: NDArray[np.float64],
+    fs: int,
+    duration: float | None,
+    n_bands: int,
+) -> NDArray[np.float64]:
+    """Accumulate the per-band impulses at the nearest sample to each delay."""
+    if duration is None:
+        duration = float(times[-1]) + 1.0 / fs
+    else:
+        duration = require_positive(duration, "duration")
+    n_samples = int(np.ceil(duration * fs))
+    if n_samples < 1:
+        raise ValueError("'duration' must cover at least one sample.")
+    sample_idx = np.rint(times * fs).astype(np.int64)
+    inside = sample_idx < n_samples
+    ir = np.zeros((n_bands, n_samples), dtype=np.float64)
+    for b in range(n_bands):
+        np.add.at(ir[b], sample_idx[inside], amp[b, inside])
+    return ir
+
+
 def image_source_rir(
     dimensions: tuple[float, float, float],
     source: ArrayLike,
@@ -314,7 +445,7 @@ def image_source_rir(
         raise ValueError("'max_order' must be non-negative.")
     src = _validate_point(source, dims, "source")
     rcv = _validate_point(receiver, dims, "receiver")
-    if float(np.linalg.norm(src - rcv)) == 0.0:
+    if float(np.linalg.norm(src - rcv)) <= 0.0:
         raise ValueError(
             "source and receiver coincide; the direct path has zero length "
             "and infinite amplitude. Separate them so the direct distance is "
@@ -327,104 +458,15 @@ def image_source_rir(
         freq = np.asarray(frequencies, dtype=np.float64)
         n_freq = freq.size
     reflection, n_alpha_bands = _resolve_walls(absorption, n_freq)
-
-    m = np.asarray(air_attenuation, dtype=np.float64)
-    if not np.all(np.isfinite(m)) or np.any(m < 0.0):
-        raise ValueError("'air_attenuation' must be finite and non-negative.")
-
-    # Resolve the band count and whether the result is banded.
-    if freq is not None:
-        n_bands = freq.size
-    else:
-        n_bands = max(n_alpha_bands, m.size)
-    banded = frequencies is not None or n_alpha_bands > 1 or m.size > 1
-    if not banded:
-        n_bands = 1
-    # Broadcast the per-wall reflection map and air constant to n_bands.
-    if reflection.shape[1] == 1 and n_bands > 1:
-        reflection = np.broadcast_to(reflection, (6, n_bands)).copy()
-    elif reflection.shape[1] not in (1, n_bands):
-        raise ValueError(
-            f"'absorption' has {reflection.shape[1]} bands but the result has "
-            f"{n_bands}; a per-band 'absorption' must match the band count of "
-            "'frequencies' (or the air attenuation)."
-        )
-    m_bands = np.broadcast_to(m, (n_bands,)) if m.size in (1, n_bands) else None
-    if m_bands is None:
-        raise ValueError(
-            f"'air_attenuation' has {m.size} bands but the result has "
-            f"{n_bands}; they must match."
-        )
-
-    # Enumerate the image lattice per axis, then combine.
-    xs, x_lo, x_hi = _axis_images(src[0], lx, max_order)
-    ys, y_lo, y_hi = _axis_images(src[1], ly, max_order)
-    zs, z_lo, z_hi = _axis_images(src[2], lz, max_order)
-
-    order_x = x_lo + x_hi
-    order_y = y_lo + y_hi
-    order_z = z_lo + z_hi
-
-    # Outer combination with the total-order cut-off, kept vectorised.
-    ox = order_x[:, None, None]
-    oy = order_y[None, :, None]
-    oz = order_z[None, None, :]
-    total_order = ox + oy + oz
-    keep = np.asarray(total_order <= max_order)
-    ix, iy, iz = np.nonzero(keep)
-
-    px = xs[ix]
-    py = ys[iy]
-    pz = zs[iz]
-    positions = np.stack([px, py, pz], axis=1)
-    distances = np.sqrt(
-        (px - rcv[0]) ** 2 + (py - rcv[1]) ** 2 + (pz - rcv[2]) ** 2
+    reflection, m_bands, n_bands, banded = _resolve_band_maps(
+        reflection, n_alpha_bands, air_attenuation, freq
     )
-    orders = (order_x[ix] + order_y[iy] + order_z[iz]).astype(np.int_)
 
-    # Per-wall reflection counts of each kept image.
-    counts = np.stack(
-        [x_lo[ix], x_hi[ix], y_lo[iy], y_hi[iy], z_lo[iz], z_hi[iz]], axis=0
-    ).astype(np.float64)
-
-    # Amplitude A_i per band: prod_w R_w^count_w * exp(-m r / 2) / (4 pi r).
-    # log-space product over the six walls keeps R = 0 (fully absorbing wall)
-    # well behaved: any image using that wall is annihilated.
-    with np.errstate(divide="ignore"):
-        log_r = np.log(np.where(reflection > 0.0, reflection, 1.0))
-    # reflection_gain[b, i] = sum_w counts[w, i] * log_r[w, b]
-    reflection_gain = np.exp(log_r.T @ counts)  # (n_bands, n_images)
-    zero_wall = (reflection == 0.0)[:, :, None]  # (6, n_bands, 1)
-    used = counts[:, None, :] > 0  # (6, 1, n_images)
-    annihilated = np.any(zero_wall & used, axis=0)  # (n_bands, n_images)
-    reflection_gain = np.where(annihilated, 0.0, reflection_gain)
-
-    spreading = 1.0 / (4.0 * np.pi * distances)
-    air = np.exp(-0.5 * m_bands[:, None] * distances[None, :])
-    amp = reflection_gain * air * spreading[None, :]  # (n_bands, n_images)
-
-    # Sort by arrival time for a tidy reflection table.
-    times = distances / speed_of_sound
-    order_idx = np.argsort(times, kind="stable")
-    times = times[order_idx]
-    distances = distances[order_idx]
-    orders = orders[order_idx]
-    positions = positions[order_idx]
-    amp = amp[:, order_idx]
-
-    if duration is None:
-        duration = float(times[-1]) + 1.0 / fs
-    else:
-        duration = require_positive(duration, "duration")
-    n_samples = int(np.ceil(duration * fs))
-    if n_samples < 1:
-        raise ValueError("'duration' must cover at least one sample.")
-
-    sample_idx = np.rint(times * fs).astype(np.int64)
-    inside = sample_idx < n_samples
-    ir = np.zeros((n_bands, n_samples), dtype=np.float64)
-    for b in range(n_bands):
-        np.add.at(ir[b], sample_idx[inside], amp[b, inside])
+    times, distances, orders, positions, counts = _image_lattice(
+        src, rcv, dims, max_order, speed_of_sound
+    )
+    amp = _image_amplitudes(reflection, counts, m_bands, distances)
+    ir = _sample_ir(times, amp, fs, duration, n_bands)
 
     if banded:
         ir_out: np.ndarray = ir
@@ -484,5 +526,7 @@ def reflection_density(time: ArrayLike, volume: float, speed_of_sound: float = D
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
     t = np.asarray(time, dtype=np.float64)
-    out = 4.0 * np.pi * speed_of_sound**3 * t**2 / volume
+    # Physical density is zero before the direct sound; clamp negative times
+    # so the t**2 squaring does not report a spurious positive density.
+    out = 4.0 * np.pi * speed_of_sound**3 * np.maximum(t, 0.0) ** 2 / volume
     return float(out) if out.ndim == 0 else out

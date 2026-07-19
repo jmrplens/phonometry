@@ -372,7 +372,7 @@ it; the list grows as guides gain their References sections.
   [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
   The engineering-noise-control reference; its Appendix D collects the
   porous-material coefficient sets and layered-construction recursions, and
-  its Chapter 6 the steady-state room field and room constant.
+  its Chapter 6 covers the steady-state room field and the room constant.
   Cited by [Porous and Multilayer Absorbers](porous-absorbers.md) and
   [Image sources and the steady-state room field](room-image-sources.md).
 - Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous

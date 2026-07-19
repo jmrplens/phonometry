@@ -99,6 +99,9 @@ print(res.times.size == room.audible_image_count(12) + 1)   # images + source
 
 # The synthetic RIR flows straight into the ISO 3382 decay analysis.
 params = room.room_parameters(res.ir, res.fs, limits=None)
+print(bool(params.t30_valid[0]))             # True: the decay window is usable
+# T30 rises toward the Eyring estimate as max_order grows (see below); at a low
+# order the specular tail is truncated, so treat this as an order-limited value.
 print(round(float(params.t30[0]), 2))        # reverberation time, s
 ```
 
@@ -251,10 +254,12 @@ module uses $R$ so that $r_c$ is exactly the crossover of its own
 `steady_state_spl`. Pass `characteristic_impedance=rho_c` to add the Bies
 $10\lg(\rho c / 400)$ term (about +0.14 dB at 20 °C).
 
-**Where the statistics stop.** Below the **Schroeder frequency**
-$f_s = 2000\sqrt{T/V}$ (V in m³, T in s) the room field is ruled by discrete
-modes and the diffuse assumptions of $R$ and $r_c$ fail; above it modes overlap
-and this statistical picture holds.
+**Where the statistics fade.** The **Schroeder frequency**
+$f_s = 2000\sqrt{T/V}$ (V in m³, T in s) roughly marks the modal-to-diffuse
+transition, a heuristic crossover rather than a sharp cutoff: well below it
+discrete modes dominate and the diffuse assumptions of $R$ and $r_c$ grow
+unreliable, well above it the modes overlap and this statistical picture
+holds. Borderline rooms warrant a band-by-band check.
 
 ```python
 from phonometry import room

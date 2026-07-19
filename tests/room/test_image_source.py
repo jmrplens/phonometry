@@ -204,9 +204,9 @@ def test_per_band_result_shapes() -> None:
     assert res.ir.ndim == 2 and res.ir.shape[0] == 3
     assert res.amplitudes.shape[0] == 3
     assert res.frequencies is not None and res.frequencies.size == 3
-    # A more absorbing band decays to a lower total energy.
+    # A more absorbing band decays to a lower total energy, monotonically.
     energies = np.sum(res.ir**2, axis=1)
-    assert energies[0] > energies[2]
+    assert energies[0] > energies[1] > energies[2]
 
 
 def test_per_band_uniform_vector() -> None:
@@ -230,9 +230,9 @@ def test_length_six_is_per_band_with_six_frequencies() -> None:
                            np.array([0.1, 0.15, 0.2, 0.3, 0.45, 0.6]),
                            fs=16000, max_order=5, frequencies=freqs)
     assert res.ir.shape[0] == 6
-    # More absorption at high frequency -> less total energy there.
+    # More absorption at each higher band -> a strictly lower total energy.
     energies = np.sum(res.ir**2, axis=1)
-    assert energies[0] > energies[-1]
+    assert np.all(np.diff(energies) < 0.0)
 
 
 def test_air_attenuation_reduces_late_energy() -> None:
@@ -330,9 +330,10 @@ def test_absorption_above_one_rejected() -> None:
 
 
 def test_absorption_band_count_mismatch_rejected() -> None:
+    alpha = np.full((6, 4), 0.2)  # 4 bands vs 3 frequencies
     with pytest.raises(ValueError, match="bands but the result has"):
         image_source_rir((5.0, 4.0, 3.0), (1.0, 1.0, 1.0), (3.0, 2.0, 1.5),
-                         np.full((6, 4), 0.2), fs=16000, max_order=3,
+                         alpha, fs=16000, max_order=3,
                          frequencies=[250.0, 500.0, 1000.0])
 
 
@@ -357,5 +358,17 @@ def test_reflectogram_plot_smoke() -> None:
     matplotlib.use("Agg")
     res = image_source_rir((5.0, 4.0, 3.0), (1.2, 1.1, 1.3), (3.5, 2.6, 1.7),
                            0.15, fs=16000, max_order=8)
+    ax = res.plot()
+    assert ax.get_xlabel() == "Arrival time [ms]"
+
+
+def test_reflectogram_plot_direct_only() -> None:
+    # max_order=0 has no reflections; the reflectogram must not crash on the
+    # empty scatter / colorbar.
+    import matplotlib
+
+    matplotlib.use("Agg")
+    res = image_source_rir((5.0, 4.0, 3.0), (1.2, 1.1, 1.3), (3.5, 2.6, 1.7),
+                           0.15, fs=16000, max_order=0)
     ax = res.plot()
     assert ax.get_xlabel() == "Arrival time [ms]"

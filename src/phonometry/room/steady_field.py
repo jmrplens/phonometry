@@ -170,13 +170,14 @@ def steady_state_spl(
     """
     lw = np.asarray(sound_power_level, dtype=np.float64)
     r = np.asarray(distance, dtype=np.float64)
-    rc = np.asarray(room_constant, dtype=np.float64)
+    # Named r_const (not rc) to avoid confusion with the critical distance rc.
+    r_const = np.asarray(room_constant, dtype=np.float64)
     directivity = require_positive(directivity, "directivity")
     if np.any(r <= 0.0) or not np.all(np.isfinite(r)):
         raise ValueError("'distance' must be positive and finite.")
-    if np.any(rc <= 0.0) or not np.all(np.isfinite(rc)):
+    if np.any(r_const <= 0.0) or not np.all(np.isfinite(r_const)):
         raise ValueError("'room_constant' must be positive and finite.")
-    bracket = directivity / (4.0 * np.pi * r**2) + 4.0 / rc
+    bracket = directivity / (4.0 * np.pi * r**2) + 4.0 / r_const
     lp = lw + 10.0 * np.log10(bracket)
     if characteristic_impedance is not None:
         rho_c = require_positive(characteristic_impedance, "characteristic_impedance")

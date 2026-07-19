@@ -543,19 +543,21 @@ def plot_image_source_reflectogram(
     ax.plot(ms[order_sort], envelope[order_sort], color=_C_MUTED, lw=1.0, ls="--",
             label=r"$1/r$ spreading envelope", zorder=1)
 
-    # Reflections coloured by order (higher orders fade toward grey).
+    # Reflections coloured by order (higher orders fade toward grey). A
+    # max_order=0 result has no reflections, so guard the scatter/colorbar
+    # (an empty scatter has undefined colour limits).
     ref_mask = ~order0
-    sc = ax.scatter(ms[ref_mask], level[ref_mask], c=orders[ref_mask],
-                    cmap="viridis", s=14, zorder=3, label="Reflections")
-    ax.vlines(ms[ref_mask], -120.0, level[ref_mask], color=_C_EDGE, lw=0.4,
-              alpha=0.4, zorder=2)
+    if np.any(ref_mask):
+        sc = ax.scatter(ms[ref_mask], level[ref_mask], c=orders[ref_mask],
+                        cmap="viridis", s=14, zorder=3, label="Reflections")
+        ax.vlines(ms[ref_mask], -120.0, level[ref_mask], color=_C_EDGE,
+                  lw=0.4, alpha=0.4, zorder=2)
+        cbar = ax.figure.colorbar(sc, ax=ax, pad=0.02)
+        cbar.set_label("Reflection order")
     ax.vlines(ms[order0], -120.0, level[order0], color=_C_PRIMARY, lw=1.6,
               zorder=4)
     ax.plot(ms[order0], level[order0], "o", color=_C_PRIMARY, ms=7, zorder=5,
             label="Direct sound", **kwargs)
-
-    cbar = ax.figure.colorbar(sc, ax=ax, pad=0.02)
-    cbar.set_label("Reflection order")
 
     lx, ly, lz = result.dimensions
     finite = level[np.isfinite(level)]

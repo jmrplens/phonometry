@@ -127,8 +127,9 @@ def test_steady_field_validation() -> None:
         steady_state_spl(90.0, 1.0, -25.0)
     with pytest.raises(ValueError):
         schroeder_frequency(-1.0, 200.0)
+    empty = np.array([])
     with pytest.raises(ValueError):
-        steady_state_field(90.0, 100.0, 0.2, distances=np.array([]))
+        steady_state_field(90.0, 100.0, 0.2, distances=empty)
 
 
 def test_steady_field_plot_smoke() -> None:

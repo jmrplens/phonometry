@@ -100,6 +100,9 @@ print(res.times.size == room.audible_image_count(12) + 1)   # imágenes + fuente
 
 # La RIR sintética entra directa en el análisis de decaimiento de ISO 3382.
 params = room.room_parameters(res.ir, res.fs, limits=None)
+print(bool(params.t30_valid[0]))             # True: la ventana de decaimiento es usable
+# T30 crece hacia la estimación de Eyring al aumentar max_order (ver abajo); a
+# orden bajo la cola especular se trunca, trátalo como un valor limitado por orden.
 print(round(float(params.t30[0]), 2))        # tiempo de reverberación, s
 ```
 
@@ -254,10 +257,12 @@ módulo usa $R$ de modo que $r_c$ es exactamente el cruce de su propio
 `steady_state_spl`. Pasa `characteristic_impedance=rho_c` para añadir el término
 $10\lg(\rho c / 400)$ de Bies (unos +0,14 dB a 20 °C).
 
-**Dónde acaba la estadística.** Por debajo de la **frecuencia de Schroeder**
-$f_s = 2000\sqrt{T/V}$ (V en m³, T en s) el campo de la sala lo gobiernan modos
-discretos y fallan los supuestos difusos de $R$ y $r_c$; por encima los modos se
-solapan y esta imagen estadística se cumple.
+**Dónde se difumina la estadística.** La **frecuencia de Schroeder**
+$f_s = 2000\sqrt{T/V}$ (V en m³, T en s) marca aproximadamente la transición
+modal-a-difuso, un cruce heurístico y no un corte abrupto: bastante por debajo
+dominan los modos discretos y los supuestos difusos de $R$ y $r_c$ pierden
+fiabilidad, bastante por encima los modos se solapan y esta imagen estadística
+se cumple. En salas límite conviene comprobar banda a banda.
 
 ```python
 from phonometry import room

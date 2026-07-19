@@ -4414,8 +4414,8 @@ def generate_aircraft_atmospheric_absorption(output_dir: str) -> None:
     ax.set_axisbelow(True)
     format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     ax.legend(loc="upper left", fontsize=9)
-    ax.text(0.98, 0.05, "25 °C, 70% RH\nsolid: SAE band, dashed: pure-tone mid-band",
-            transform=ax.transAxes, va="bottom", ha="right", fontsize=9,
+    ax.text(0.5, 0.95, "25 °C, 70% RH\nsolid: SAE band, dashed: pure-tone mid-band",
+            transform=ax.transAxes, va="top", ha="center", fontsize=9,
             bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})
     plt.tight_layout()
     save_figure(output_dir, "aircraft_atmospheric_absorption.svg")

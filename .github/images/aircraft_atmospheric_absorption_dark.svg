@@ -689,20 +689,20 @@ L 705.885937 28.318125
    </g>
    <g id="text_19">
     <g id="patch_7">
-     <path d="M 488.481484 371.227672 
-L 692.713984 371.227672 
-Q 695.413984 371.227672 695.413984 368.527672 
-L 695.413984 346.923453 
-Q 695.413984 344.223453 692.713984 344.223453 
-L 488.481484 344.223453 
-Q 485.781484 344.223453 485.781484 346.923453 
-L 485.781484 368.527672 
-Q 485.781484 371.227672 488.481484 371.227672 
+     <path d="M 274.470859 70.528109 
+L 478.703359 70.528109 
+Q 481.403359 70.528109 481.403359 67.828109 
+L 481.403359 46.223891 
+Q 481.403359 43.523891 478.703359 43.523891 
+L 274.470859 43.523891 
+Q 271.770859 43.523891 271.770859 46.223891 
+L 271.770859 67.828109 
+Q 271.770859 70.528109 274.470859 70.528109 
 z
 " style="fill: #555555; opacity: 0.6; stroke: #ffffff; stroke-linejoin: miter"/>
     </g>
-    <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #ffffff" transform="translate(626.009922 354.662223)">25 °C, 70% RH</text>
-    <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #ffffff" transform="translate(488.481484 365.464684)">solid: SAE band, dashed: pure-tone mid-band</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #ffffff" transform="translate(343.235078 53.96266)">25 °C, 70% RH</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #ffffff" transform="translate(274.470859 64.765121)">solid: SAE band, dashed: pure-tone mid-band</text>
    </g>
    <g id="text_20">
     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="376.587109" y="16.318125" transform="rotate(-0 376.587109 16.318125)">Aircraft Atmospheric Absorption (SAE ARP 5534)</text>

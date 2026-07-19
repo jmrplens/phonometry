@@ -73,6 +73,34 @@ def test_callable_requires_frequencies() -> None:
         enclosure_insertion_loss(lambda f: f, 6.0, 5.0, 0.3)
 
 
+def test_panel_result_bridge() -> None:
+    # A predicted SoundReductionResult can be fed straight in; its per-band R
+    # and its frequencies are read from the result, matching an explicit pass.
+    from phonometry import single_panel_transmission_loss
+
+    freqs = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0])
+    panel = single_panel_transmission_loss(freqs, 15.0, critical_frequency=2000.0)
+
+    via_result = enclosure_insertion_loss(panel, 6.0, 5.0, 0.3)
+    via_arrays = enclosure_insertion_loss(
+        panel.transmission_loss, 6.0, 5.0, 0.3, frequencies=freqs
+    )
+    assert np.allclose(via_result.panel_transmission_loss, panel.transmission_loss)
+    assert np.allclose(via_result.frequencies, freqs)
+    assert np.allclose(via_result.insertion_loss, via_arrays.insertion_loss)
+
+
+def test_panel_result_frequencies_override() -> None:
+    # An explicit 'frequencies' wins over the ones carried by the result.
+    from phonometry import single_panel_transmission_loss
+
+    freqs = np.array([125.0, 250.0, 500.0])
+    panel = single_panel_transmission_loss(freqs, 15.0, critical_frequency=2000.0)
+    other = np.array([100.0, 200.0, 400.0])
+    res = enclosure_insertion_loss(panel, 6.0, 5.0, 0.3, frequencies=other)
+    assert np.allclose(res.frequencies, other)
+
+
 def test_result_type_and_plot() -> None:
     res = enclosure_insertion_loss(
         [20.0, 30.0, 40.0], 6.0, 5.0, 0.3,

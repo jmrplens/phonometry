@@ -115,10 +115,13 @@ def _render_figure_drawing(
     svg_fd, svg_path = tempfile.mkstemp(suffix=".svg")
     os.close(svg_fd)
     try:
-        fig = Figure(figsize=(6.8, 2.8))
+        fig = Figure(figsize=(5.8, 4.7))
         FigureCanvasAgg(fig)
         ax = fig.subplots()
         result.plot(ax=ax)
+        # The fiche header already states Rw/Ln,w (C; Ctr) and the sum, so the
+        # plot's own title would only duplicate it at a large size.
+        ax.set_title("")
         fig.tight_layout()
         with matplotlib.rc_context({"svg.fonttype": "path"}):
             fig.savefig(svg_path, format="svg")
@@ -253,10 +256,6 @@ def render_iso717_report(
         "iso717_sub", parent=styles["Normal"], fontSize=9.5,
         textColor=colors.HexColor(_MUTED_HEX),
     )
-    heading_style = ParagraphStyle(
-        "iso717_h2", parent=styles["Heading2"], fontSize=11, textColor=accent,
-        spaceBefore=8, spaceAfter=4,
-    )
     body_style = ParagraphStyle(
         "iso717_body", parent=styles["Normal"], fontSize=9, leading=12,
     )
@@ -284,25 +283,12 @@ def render_iso717_report(
         Spacer(1, 8),
     ]
 
-    # Vector plot (svglib) so the curve stays crisp at any resolution.
-    flow.append(_render_figure_drawing(result, 165 * mm))
-    flow.append(Spacer(1, 4))
-
+    Table = rl["Table"]
+    TableStyle = rl["TableStyle"]
     annex = "ISO 717-2" if result.quantity == "impact" else "ISO 717-1"
-    flow.append(
-        Paragraph(
-            f"Evaluation table ({annex} Annex C, Table C.1 layout)",
-            heading_style,
-        )
-    )
-    rows = [
-        [
-            "Frequency\nHz",
-            value_header,
-            "Reference (shifted)\ndB",
-            "Unfav. deviation\ndB",
-        ]
-    ]
+
+    # Condensed evaluation table (ISO 717 Annex C, Table C.1 columns).
+    rows = [["f\nHz", value_header, "Ref.\ndB", "Dev.\ndB"]]
     for fk, m, r_, d in zip(centers, measured, shifted, deviations):
         rows.append(
             [
@@ -313,33 +299,56 @@ def render_iso717_report(
             ]
         )
     rows.append(["", "", "sum", f"{deviations.sum():.1f}"])
-
-    Table = rl["Table"]
-    TableStyle = rl["TableStyle"]
-    tbl = Table(
+    eval_table = Table(
         rows,
-        colWidths=[34 * mm, 26 * mm, 44 * mm, 40 * mm],
+        colWidths=[18 * mm, 16 * mm, 22 * mm, 22 * mm],
         repeatRows=1,
     )
-    tbl.setStyle(
+    eval_table.setStyle(
         TableStyle(
             [
                 ("BACKGROUND", (0, 0), (-1, 0), accent),
                 ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                 ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("FONTSIZE", (0, 0), (-1, -1), 7),
                 ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                 ("ROWBACKGROUNDS", (0, 1), (-1, -2), [colors.white, light]),
                 ("LINEBELOW", (0, 0), (-1, 0), 0.6, accent),
                 ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
                 ("FONTNAME", (2, -1), (-1, -1), "Helvetica-Bold"),
-                ("TOPPADDING", (0, 0), (-1, -1), 1.6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 1.6),
+                ("TOPPADDING", (0, 0), (-1, -1), 1.2),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 1.2),
             ]
         )
     )
-    flow.append(tbl)
+    caption_style = ParagraphStyle(
+        "iso717_caption", parent=styles["Normal"], fontSize=8,
+        textColor=accent, spaceAfter=3,
+    )
+
+    # Two-column body: the vector plot on the left, the condensed evaluation
+    # table on the right (datasheet-style; ISO 717 Annex C prescribes the
+    # table and the curve, not their arrangement).
+    plot_drawing = _render_figure_drawing(result, 92 * mm)
+    right_cell = [
+        Paragraph(f"Evaluation ({annex} Annex C)", caption_style),
+        eval_table,
+    ]
+    body_table = Table(
+        [[plot_drawing, right_cell]],
+        colWidths=[95 * mm, 79 * mm],
+    )
+    body_table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (0, 0), 0),
+                ("RIGHTPADDING", (-1, 0), (-1, 0), 0),
+            ]
+        )
+    )
+    flow.append(body_table)
     flow.append(Spacer(1, 6))
     flow.append(Paragraph(_summary_paragraph(result, limit), body_style))
 

@@ -795,6 +795,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- `building.critical_frequency` (flanking, ISO 12354-1:2017 Formula (20)) dropped
+  a spurious factor of pi that made the thin-plate critical frequency about 3.14
+  times too low (for example roughly 670 Hz instead of about 2100 Hz for 6 mm
+  glass). The value now matches the closed-form plate coincidence frequency
+  `coincidence_frequency` to within the rounding of the 1.8 constant.
 - Reverberation-time prediction no longer rejects absorption coefficients
   at or above 1 for every model with a blanket `[0, 1)` validator; each
   model now enforces its own mathematical domain. Sabine accepts measured

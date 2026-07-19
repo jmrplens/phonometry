@@ -681,7 +681,11 @@ def critical_frequency(
 ) -> float:
     """Thin-plate critical frequency ``fc`` (Part 1, Formula (20)).
 
-    ``fc = c0² / (1,8 · cL · h · π)`` for a homogeneous isotropic element.
+    ``fc = c0² / (1,8 · cL · h)`` for a homogeneous isotropic element. The
+    constant 1,8 already carries the ``2π/√12`` factor of the thin-plate
+    dispersion relation, so for a plate whose bending stiffness and mass are
+    mutually consistent this equals :func:`phonometry.coincidence_frequency`
+    (Hopkins Eq. 2.201) to within the rounding of the constant.
 
     :param longitudinal_wave_speed: Longitudinal wave speed ``cL``, in m/s.
     :param thickness: Element thickness ``h``, in m.
@@ -692,7 +696,7 @@ def critical_frequency(
     c0 = _positive(speed_of_sound, "speed_of_sound")
     c_l = _positive(longitudinal_wave_speed, "longitudinal_wave_speed")
     h = _positive(thickness, "thickness")
-    return c0**2 / (_CRITICAL_FREQUENCY_CONSTANT * c_l * h * np.pi)
+    return c0**2 / (_CRITICAL_FREQUENCY_CONSTANT * c_l * h)
 
 
 def strong_coupling_satisfied(

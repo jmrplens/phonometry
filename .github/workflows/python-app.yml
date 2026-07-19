@@ -187,37 +187,13 @@ jobs:
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         pip install -e .
-    # The authentic-programme loudness oracle (EBU Tech 3341 cases 7-8 and
-    # Tech 3342 cases 5-6) needs the official EBU loudness test set. Its
-    # licence only covers technical testing, so the audio is never committed:
-    # one matrix cell fetches it from the EBU (cached between runs) and the
-    # tests skip gracefully anywhere the set is absent.
-    - name: Cache the EBU loudness test set
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
-      id: ebu-cache
-      uses: actions/cache@v5
-      with:
-        path: ebu-loudness-test-set
-        key: ebu-loudness-test-set-v04-1
-    - name: Download the EBU loudness test set
-      if: >-
-        matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13' &&
-        steps.ebu-cache.outputs.cache-hit != 'true'
-      continue-on-error: true
-      run: |
-        # The EBU site rejects the default curl agent; a sentinel file is
-        # checked (and the directory dropped on failure) so a bad download
-        # is never cached and the oracle tests skip instead of failing.
-        curl -sfL --retry 3 --retry-all-errors \
-          -A "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0" \
-          -o ebu-set.zip \
-          "https://tech.ebu.ch/files/live/sites/tech/files/shared/testmaterial/ebu-loudness-test-setv04.zip"
-        mkdir -p ebu-loudness-test-set
-        unzip -q ebu-set.zip -d ebu-loudness-test-set
-        rm ebu-set.zip
-        test -f "ebu-loudness-test-set/seq-3341-7_seq-3342-5-24bit.wav" \
-          -a -f "ebu-loudness-test-set/seq-3341-2011-8_seq-3342-6-24bit-v02.wav" \
-          || { rm -rf ebu-loudness-test-set; exit 1; }
+    # The EBU authentic-programme loudness oracle is not fetched in CI: its
+    # audio cannot be redistributed (technical-testing licence, third-party
+    # programme content), so the full-chain test in test_ebu_material_oracle.py
+    # is local-only and skips here. CI still validates the gating and
+    # loudness-range stages against the committed per-block loudness series in
+    # tests/data/broadcast/ (see its README.md), and the K-weighting front end
+    # against the synthesizable EBU cases in test_program_loudness.py.
     - name: Run tests
       # -n auto fans the suite out across the runner's cores via pytest-xdist;
       # pytest-cov combines the per-worker coverage into a single coverage.xml.
@@ -229,7 +205,6 @@ jobs:
         OPENBLAS_NUM_THREADS: "1"
         NUMEXPR_NUM_THREADS: "1"
         VECLIB_MAXIMUM_THREADS: "1"
-        EBU_LOUDNESS_TEST_SET: ${{ github.workspace }}/ebu-loudness-test-set
       run: |
         pytest -n auto --junitxml=test-results-${{ matrix.os }}-${{ matrix.python-version }}.xml --cov=src --cov-report=xml
     - name: Upload Test Results

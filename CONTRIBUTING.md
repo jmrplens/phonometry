@@ -50,6 +50,13 @@ To check coverage locally:
 ```bash
 pytest --cov=src/phonometry --cov-report=term-missing tests/
 ```
+A few tests need reference material that is not committed (its licence forbids
+redistribution) and skip when it is absent. The EBU programme-loudness
+full-chain oracle (`tests/broadcast/test_ebu_material_oracle.py`) needs the free
+[EBU loudness test set](https://tech.ebu.ch/publications/ebu_loudness_test_set):
+drop it under `plan/dsp-sources/ebu-loudness-test-set/` or point
+`EBU_LOUDNESS_TEST_SET` at your copy. CI does not fetch it; the committed
+per-block series in `tests/data/broadcast/` cover the same cases without audio.
 
 ### 4. Documentation Images (auto-generated)
 Every image under `.github/images/` is generated with the library itself by

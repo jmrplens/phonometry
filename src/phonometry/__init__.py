@@ -242,6 +242,7 @@ from .room.room_noise import (
     rc_curve,
     room_criterion,
 )
+from .hearing.objective_intelligibility import STOIResult, stoi
 from .hearing.sii import (
     SIIResult,
     speech_intelligibility_index,
@@ -275,8 +276,10 @@ from .electroacoustics.distortion import (
     ModulationDistortionResult,
     difference_frequency_distortion,
     dynamic_intermodulation_distortion,
+    dynamic_range,
     harmonic_analysis,
     harmonic_distortion,
+    idle_channel_noise,
     itu_r_468_weighting,
     modulation_distortion,
     sinad,
@@ -936,6 +939,8 @@ __all__ = [
     "difference_frequency_distortion",
     "total_difference_frequency_distortion",
     "dynamic_intermodulation_distortion",
+    "dynamic_range",
+    "idle_channel_noise",
     "harmonic_analysis",
     "HarmonicDistortionResult",
     "ModulationDistortionResult",
@@ -1065,6 +1070,8 @@ __all__ = [
     "speech_intelligibility_index",
     "standard_speech_spectrum",
     "SIIResult",
+    "stoi",
+    "STOIResult",
     "noise_criterion",
     "room_criterion",
     "nc_curve",

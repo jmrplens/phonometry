@@ -74,36 +74,6 @@ _DEVIATION_EPS = 0.05
 _DISCLAIMER = "The results relate only to the tested specimen."
 
 
-def _import_reportlab() -> Any:
-    """Import the reportlab names lazily with an actionable error."""
-    try:
-        from reportlab.lib import colors
-        from reportlab.lib.pagesizes import A4
-        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-        from reportlab.lib.units import mm
-        from reportlab.platypus import (
-            Paragraph,
-            SimpleDocTemplate,
-            Spacer,
-            Table,
-            TableStyle,
-        )
-    except ImportError as exc:  # pragma: no cover - exercised via monkeypatch
-        raise ImportError(_REPORTLAB_HINT) from exc
-    return {
-        "colors": colors,
-        "A4": A4,
-        "ParagraphStyle": ParagraphStyle,
-        "getSampleStyleSheet": getSampleStyleSheet,
-        "mm": mm,
-        "Paragraph": Paragraph,
-        "SimpleDocTemplate": SimpleDocTemplate,
-        "Spacer": Spacer,
-        "Table": Table,
-        "TableStyle": TableStyle,
-    }
-
-
 def _render_figure_drawing(
     result: "WeightedRatingResult | ImpactRatingResult",
     target_width: float,
@@ -271,19 +241,19 @@ def _metadata_pairs(
     return identity, conditions
 
 
-def _grid_table(rl: Any, pairs: List[Tuple[str, str]]) -> Any:
+def _grid_table(pairs: List[Tuple[str, str]]) -> Any:
     """Lay an ordered list of (label, value) pairs into a two-column grid.
 
     Each grid row holds up to two label/value pairs (four table cells:
     ``label | value | label | value``); a trailing single pair is padded.
+    Called only after :func:`render_iso717_report` has imported reportlab.
     """
-    mm = rl["mm"]
-    colors = rl["colors"]
-    Paragraph = rl["Paragraph"]
-    Table = rl["Table"]
-    TableStyle = rl["TableStyle"]
-    ParagraphStyle = rl["ParagraphStyle"]
-    styles = rl["getSampleStyleSheet"]()
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Paragraph, Table, TableStyle
+
+    styles = getSampleStyleSheet()
     accent = colors.HexColor(_ACCENT_HEX)
     label_style = ParagraphStyle(
         "iso717_meta_label", parent=styles["Normal"], fontSize=8,
@@ -327,7 +297,6 @@ def _grid_table(rl: Any, pairs: List[Tuple[str, str]]) -> Any:
 
 
 def _value_table(
-    rl: Any,
     centers: np.ndarray,
     measured: np.ndarray,
     shifted: np.ndarray,
@@ -335,14 +304,16 @@ def _value_table(
     value_header: str,
     verbose: bool,
 ) -> Any:
-    """Build the left-hand one-third-octave table (accredited or Annex C)."""
-    mm = rl["mm"]
-    colors = rl["colors"]
-    Table = rl["Table"]
-    TableStyle = rl["TableStyle"]
-    Paragraph = rl["Paragraph"]
-    ParagraphStyle = rl["ParagraphStyle"]
-    styles = rl["getSampleStyleSheet"]()
+    """Build the left-hand one-third-octave table (accredited or Annex C).
+
+    Called only after :func:`render_iso717_report` has imported reportlab.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Paragraph, Table, TableStyle
+
+    styles = getSampleStyleSheet()
     accent = colors.HexColor(_ACCENT_HEX)
     light = colors.HexColor(_LIGHT_HEX)
     thin = colors.HexColor("#c9d4e0")
@@ -437,13 +408,16 @@ def _verdict(
     return text, passed
 
 
-def _footer_flow(rl: Any, metadata: ReportMetadata | None) -> List[Any]:
-    """Build the footer identity block plus the always-present disclaimer."""
-    colors = rl["colors"]
-    Paragraph = rl["Paragraph"]
-    Spacer = rl["Spacer"]
-    ParagraphStyle = rl["ParagraphStyle"]
-    styles = rl["getSampleStyleSheet"]()
+def _footer_flow(metadata: ReportMetadata | None) -> List[Any]:
+    """Build the footer identity block plus the always-present disclaimer.
+
+    Called only after :func:`render_iso717_report` has imported reportlab.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.platypus import Paragraph, Spacer
+
+    styles = getSampleStyleSheet()
     muted = colors.HexColor(_MUTED_HEX)
 
     ident_style = ParagraphStyle(
@@ -503,6 +477,84 @@ def _footer_flow(rl: Any, metadata: ReportMetadata | None) -> List[Any]:
     return flow
 
 
+def _result_box(
+    statement: str,
+    result: "WeightedRatingResult | ImpactRatingResult",
+    styles: Any,
+    accent: Any,
+) -> Any:
+    """The boxed single-number result, with extended terms when carried.
+
+    Called only after :func:`render_iso717_report` has imported reportlab.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Paragraph, Table, TableStyle
+
+    result_style = ParagraphStyle(
+        "iso717_result", parent=styles["Normal"], fontSize=13, leading=17,
+        textColor=accent,
+    )
+    extended = _extended_terms(result)
+    box_cells: List[Any] = [Paragraph(statement, result_style)]
+    box_widths = [174 * mm]
+    if extended:
+        ext_style = ParagraphStyle(
+            "iso717_ext", parent=styles["Normal"], fontSize=8.5, leading=12,
+        )
+        box_cells = [
+            Paragraph(statement, result_style),
+            Paragraph("<br/>".join(extended), ext_style),
+        ]
+        box_widths = [104 * mm, 70 * mm]
+    box = Table([box_cells], colWidths=box_widths)
+    box.setStyle(
+        TableStyle(
+            [
+                ("BOX", (0, 0), (-1, -1), 1.0, accent),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(_LIGHT_HEX)),
+            ]
+        )
+    )
+    return box
+
+
+def _verdict_flow(
+    result: "WeightedRatingResult | ImpactRatingResult",
+    metadata: ReportMetadata | None,
+    styles: Any,
+) -> List[Any]:
+    """The optional PASS/FAIL verdict paragraph when a requirement is given.
+
+    Called only after :func:`render_iso717_report` has imported reportlab.
+    """
+    if metadata is None or metadata.requirement is None:
+        return []
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.platypus import Paragraph
+
+    text, passed = _verdict(result, metadata.requirement)
+    badge = "PASS" if passed else "FAIL"
+    badge_hex = _VERDICT_OK_HEX if passed else _VERDICT_BAD_HEX
+    verdict_style = ParagraphStyle(
+        "iso717_verdict", parent=styles["Normal"], fontSize=10, leading=14,
+        spaceBefore=4,
+    )
+    return [
+        Paragraph(
+            f"Result vs requirement: {text} &#8594; "
+            f"<b><font color='{badge_hex}'>{badge}</font></b>",
+            verdict_style,
+        )
+    ]
+
+
 def render_iso717_report(
     result: "WeightedRatingResult | ImpactRatingResult",
     path: str,
@@ -528,9 +580,20 @@ def render_iso717_report(
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
     """
-    rl = _import_reportlab()
-    colors = rl["colors"]
-    mm = rl["mm"]
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.lib.units import mm
+        from reportlab.platypus import (
+            Paragraph,
+            SimpleDocTemplate,
+            Spacer,
+            Table,
+            TableStyle,
+        )
+    except ImportError as exc:
+        raise ImportError(_REPORTLAB_HINT) from exc
     accent = colors.HexColor(_ACCENT_HEX)
 
     centers = result.band_centers
@@ -554,8 +617,7 @@ def render_iso717_report(
 
     title, rating_part, statement, value_header = _labels(result)
 
-    styles = rl["getSampleStyleSheet"]()
-    ParagraphStyle = rl["ParagraphStyle"]
+    styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         "iso717_title", parent=styles["Title"], fontSize=16, textColor=accent,
         spaceAfter=1, alignment=0,
@@ -568,11 +630,6 @@ def render_iso717_report(
         "iso717_caption", parent=styles["Normal"], fontSize=8,
         textColor=accent, spaceAfter=3,
     )
-
-    Paragraph = rl["Paragraph"]
-    Spacer = rl["Spacer"]
-    Table = rl["Table"]
-    TableStyle = rl["TableStyle"]
 
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
@@ -596,13 +653,13 @@ def render_iso717_report(
         header_pairs = identity + conditions
         if header_pairs:
             flow.append(Spacer(1, 3))
-            flow.append(_grid_table(rl, header_pairs))
+            flow.append(_grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
     # Two-panel body: the one-third-octave table on the left (~70 mm), the
     # vector plot on the right filling the rest of the content width.
     value_table = _value_table(
-        rl, centers, measured, shifted, deviations, value_header, verbose
+        centers, measured, shifted, deviations, value_header, verbose
     )
     left_cell = [
         Paragraph(f"One-third-octave {value_header} [dB]", caption_style),
@@ -625,74 +682,25 @@ def render_iso717_report(
     flow.append(body_table)
     flow.append(Spacer(1, 8))
 
-    # Boxed single-number result, with the extended adaptation terms beside it
-    # only when the result actually carries them (never fabricated).
-    result_style = ParagraphStyle(
-        "iso717_result", parent=styles["Normal"], fontSize=13, leading=17,
-        textColor=accent,
-    )
-    extended = _extended_terms(result)
-    box_cells: List[Any] = [Paragraph(statement, result_style)]
-    box_widths = [174 * mm]
-    if extended:
-        ext_style = ParagraphStyle(
-            "iso717_ext", parent=styles["Normal"], fontSize=8.5, leading=12,
-        )
-        box_cells = [
-            Paragraph(statement, result_style),
-            Paragraph("<br/>".join(extended), ext_style),
-        ]
-        box_widths = [104 * mm, 70 * mm]
-    result_box = Table([box_cells], colWidths=box_widths)
-    result_box.setStyle(
-        TableStyle(
-            [
-                ("BOX", (0, 0), (-1, -1), 1.0, accent),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 8),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-                ("TOPPADDING", (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(_LIGHT_HEX)),
-            ]
-        )
-    )
-    flow.append(result_box)
+    # Boxed single-number result, optional verdict row, footer.
+    flow.append(_result_box(statement, result, styles, accent))
+    flow.extend(_verdict_flow(result, metadata, styles))
+    flow.extend(_footer_flow(metadata))
 
-    # Optional verdict row.
-    if metadata is not None and metadata.requirement is not None:
-        text, passed = _verdict(result, metadata.requirement)
-        badge = "PASS" if passed else "FAIL"
-        badge_hex = _VERDICT_OK_HEX if passed else _VERDICT_BAD_HEX
-        verdict_style = ParagraphStyle(
-            "iso717_verdict", parent=styles["Normal"], fontSize=10, leading=14,
-            spaceBefore=4,
-        )
-        flow.append(
-            Paragraph(
-                f"Result vs requirement: {text} &#8594; "
-                f"<b><font color='{badge_hex}'>{badge}</font></b>",
-                verdict_style,
-            )
-        )
-
-    # Footer identity block + disclaimer.
-    flow.extend(_footer_flow(rl, metadata))
-
-    doc_kwargs = dict(
-        pagesize=rl["A4"],
-        leftMargin=18 * mm,
-        rightMargin=18 * mm,
-        topMargin=15 * mm,
-        bottomMargin=14 * mm,
-        title=title,
-    )
+    doc_kwargs = {
+        "pagesize": A4,
+        "leftMargin": 18 * mm,
+        "rightMargin": 18 * mm,
+        "topMargin": 15 * mm,
+        "bottomMargin": 14 * mm,
+        "title": title,
+    }
     # invariant=1 drops the embedded timestamp for a reproducible PDF; the
     # guard tolerates reportlab builds that do not accept the keyword.
     try:
-        doc = rl["SimpleDocTemplate"](path, invariant=1, **doc_kwargs)
+        doc = SimpleDocTemplate(path, invariant=1, **doc_kwargs)
     except TypeError:  # pragma: no cover - older reportlab
-        doc = rl["SimpleDocTemplate"](path, **doc_kwargs)
+        doc = SimpleDocTemplate(path, **doc_kwargs)
     doc.build(flow)
 
     return str(path)

@@ -88,16 +88,18 @@ def test_panel_result_report_convenience(tmp_path) -> None:
 def test_unknown_engine_rejected(tmp_path) -> None:
     """An unknown rendering engine raises ``ValueError``."""
     result = weighted_rating(_AIRBORNE_R)
+    out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match="engine"):
-        result.report(str(tmp_path / "x.pdf"), engine="weasyprint")
+        result.report(out, engine="weasyprint")
 
 
 def test_missing_band_data_rejected(tmp_path) -> None:
     """A rating built without the per-band curves cannot be reported."""
     bare = WeightedRatingResult(rating=52, c=-1, ctr=-4, unfavourable_sum=30.0)
     assert bare.band_centers is None
+    out = str(tmp_path / "bare.pdf")
     with pytest.raises(ValueError, match="per-band data"):
-        bare.report(str(tmp_path / "bare.pdf"))
+        bare.report(out)
 
 
 def test_airborne_fiche_reproduces_iso717_1_annex_c1(tmp_path) -> None:

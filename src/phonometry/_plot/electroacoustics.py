@@ -15,6 +15,7 @@ from .common import (
     _format_freq,
     _new_axes,
     _new_axes_column,
+    format_frequency_axis,
 )
 
 if TYPE_CHECKING:
@@ -104,10 +105,12 @@ def plot_frequency_response(
         axm.grid(True, which="both", alpha=0.3)
         axm.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
+    fmin, fmax = float(freqs[pos].min()), float(freqs[pos].max())
     if ax is not None:
         _magnitude(ax)
         ax.set_xlabel(_FREQ_LABEL)
         ax.set_title(f"Frequency response ({result.estimator})")
+        format_frequency_axis(ax, fmin, fmax)
         return ax
 
     axes = _new_axes_column(3, sharex=True, figsize=(8.0, 8.0))
@@ -121,6 +124,8 @@ def plot_frequency_response(
     axes[2].set_xlabel(_FREQ_LABEL)
     axes[2].set_ylim(0.0, 1.05)
     axes[2].grid(True, which="both", alpha=0.3)
+    for axf in axes:
+        format_frequency_axis(axf, fmin, fmax)
     return axes
 
 
@@ -161,6 +166,7 @@ def plot_swept_sine_distortion(
         _thd_panel(ax)
         ax.set_xlabel("Excitation frequency [Hz]")
         ax.set_title("Swept-sine THD (Farina / Novak)")
+        format_frequency_axis(ax)
         return ax
 
     axes = _new_axes_column(2, sharex=False, figsize=(8.0, 6.4))
@@ -189,6 +195,8 @@ def plot_swept_sine_distortion(
     )
     axes[0].grid(True, which="both", alpha=0.3)
     axes[0].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    format_frequency_axis(axes[0])
     _thd_panel(axes[1])
     axes[1].set_xlabel("Excitation frequency [Hz]")
+    format_frequency_axis(axes[1])
     return axes

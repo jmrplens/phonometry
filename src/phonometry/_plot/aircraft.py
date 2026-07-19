@@ -15,6 +15,7 @@ from .common import (
     _C_TERTIARY,
     _LEGEND_UPPER_RIGHT,
     _new_axes,
+    format_frequency_axis,
 )
 
 if TYPE_CHECKING:
@@ -83,6 +84,7 @@ def plot_aircraft_band_attenuation(
     ax.set_title("Aircraft atmospheric absorption (SAE ARP 5534)")
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc="upper left", fontsize="small")
+    format_frequency_axis(ax, float(f.min()), float(f.max()))
     return ax
 
 def plot_npd_level(result: "NpdLevelResult", ax: Axes | None = None, **kwargs: Any) -> Axes:

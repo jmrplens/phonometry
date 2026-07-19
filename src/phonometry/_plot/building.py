@@ -23,6 +23,7 @@ from .common import (
     _plot_insulation_bands,
     _plot_rating,
     _require_rating_curve,
+    format_frequency_axis,
 )
 
 if TYPE_CHECKING:
@@ -320,6 +321,8 @@ def plot_installed_structure_borne(
     ax.set_title("EN 12354-5 installed structure-borne sound")
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    if result.frequencies is not None:
+        format_frequency_axis(ax, float(x.min()), float(x.max()))
     return ax
 
 def plot_airborne_prediction(

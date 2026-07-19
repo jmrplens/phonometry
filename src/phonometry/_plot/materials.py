@@ -18,6 +18,7 @@ from .common import (
     _import_pyplot,
     _new_axes,
     _plot_rating,
+    format_frequency_axis,
 )
 
 if TYPE_CHECKING:
@@ -316,6 +317,7 @@ def _absorption_spectrum_axes(
     ax.set_ylim(0.0, 1.05)
     ax.set_title(title)
     ax.grid(True, which="both", alpha=0.3)
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     return ax
 
 
@@ -345,6 +347,7 @@ def plot_porous_medium(
               label=r"$-$Im$(Z_c)/\rho c$")
     ax.loglog(freqs, kn.real, color=_C_REFERENCE, label=r"Re$(k)/k_0$")
     ax.loglog(freqs, -kn.imag, ls="--", color=_C_MUTED, label=r"$-$Im$(k)/k_0$")
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     ax.set_xlabel(_FREQ_LABEL)
     ax.set_ylabel("Normalised characteristic value")
     ax.set_title(

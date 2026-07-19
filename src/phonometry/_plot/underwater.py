@@ -19,6 +19,7 @@ from .common import (
     _LEGEND_UPPER_RIGHT,
     _new_axes,
     _new_axes_column,
+    format_frequency_axis,
 )
 
 if TYPE_CHECKING:
@@ -69,6 +70,9 @@ def plot_ship_source_level(
     twin = ax.twinx()
     twin.semilogx(freqs, dl, ":", color=_C_TERTIARY, label="Surface correction ΔL")
     twin.set_ylabel("Surface correction ΔL [dB]")
+    # After twinx() (it re-initialises the shared x-axis with the default log
+    # locator) so the octave-band labelling is not reset back to 10^n ticks.
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
 
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
@@ -260,6 +264,7 @@ def plot_ambient_noise(
     ax.set_title("Ocean ambient noise")
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    format_frequency_axis(ax, float(f.min()), float(f.max()))
     return ax
 
 def plot_ship_traffic_spectrum(
@@ -286,6 +291,7 @@ def plot_ship_traffic_spectrum(
     ax.set_title("Ship traffic source level")
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    format_frequency_axis(ax, float(f.min()), float(f.max()))
     return ax
 
 def plot_normal_modes(

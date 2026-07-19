@@ -115,6 +115,8 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.room.open_plan",
             "phonometry.room.reverberation_prediction",
             "phonometry.room.enclosed_space_absorption",
+            "phonometry.room.image_source",
+            "phonometry.room.steady_field",
         ),
     ),
     Section(

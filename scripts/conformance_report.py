@@ -541,6 +541,84 @@ def _chk_arau_eyring_identity() -> Outcome:
                    expected_label=f"{eyring:.6f} s (= Eyring)")
 
 
+@register(
+    "Room acoustics",
+    "Vorlander Auralization 2e, Eq. (11.38)-(11.39)",
+    "Image-source direct-sound amplitude 1/(4πr) and delay r/c (r = 4 m)",
+)
+def _chk_image_source_direct() -> Outcome:
+    res = ph.image_source_rir((8.0, 5.0, 3.0), (2.0, 2.5, 1.5),
+                              (6.0, 2.5, 1.5), 0.2, fs=48000, max_order=2)
+    amp = float(np.atleast_1d(res.amplitudes)[0])
+    return numeric(1.0 / (4.0 * math.pi * 4.0), amp, 1e-9, places=7)
+
+
+@register(
+    "Room acoustics",
+    "Kuttruff Room Acoustics 6e, Eq. (9.23)",
+    "Audible shoebox image count up to order 10 (= 1560)",
+)
+def _chk_image_source_count() -> Outcome:
+    computed = float(ph.audible_image_count(10))
+    return numeric(1560.0, computed, 0.0, places=0)
+
+
+@register(
+    "Room acoustics",
+    "Kuttruff Room Acoustics 6e, Eq. (4.6)",
+    "Temporal reflection density dN/dt = 4πc³t²/V (t = 0.1 s, V = 120 m³)",
+)
+def _chk_reflection_density() -> Outcome:
+    computed = float(ph.reflection_density(0.1, 120.0))
+    expected = 4.0 * math.pi * 343.0**3 * 0.1**2 / 120.0
+    return numeric(expected, computed, 1e-6, unit="1/s", places=2)
+
+
+@register(
+    "Room acoustics",
+    "Bies Engineering Noise Control 5e, Eq. (6.44)",
+    "Room constant R = Sᾱ/(1-ᾱ)  (S = 100 m², ᾱ = 0.2 → 25 m²)",
+)
+def _chk_room_constant() -> Outcome:
+    return numeric(25.0, float(ph.room_constant(100.0, 0.2)), 1e-9,
+                   unit="m²", places=6)
+
+
+@register(
+    "Room acoustics",
+    "Bies Engineering Noise Control 5e, Eq. (6.43)",
+    "Critical distance rc: direct field = reverberant field (R = 25, Q = 1)",
+)
+def _chk_critical_distance_crossover() -> Outcome:
+    rc = float(ph.critical_distance(25.0))
+    direct = 1.0 / (4.0 * math.pi * rc**2)
+    reverberant = 4.0 / 25.0
+    return numeric(reverberant, direct, 1e-9, places=6,
+                   expected_label=f"{reverberant:.6f} (= reverberant term)")
+
+
+@register(
+    "Room acoustics",
+    "Kuttruff Room Acoustics 6e, Eq. (3.44)",
+    "Schroeder frequency f_s = 2000√(T/V)  (V = 200 m³, T = 1 s)",
+)
+def _chk_schroeder_frequency() -> Outcome:
+    computed = float(ph.schroeder_frequency(1.0, 200.0))
+    return numeric(2000.0 * math.sqrt(1.0 / 200.0), computed, 1e-6,
+                   unit="Hz", places=3)
+
+
+@register(
+    "Room acoustics",
+    "Bies Engineering Noise Control 5e, Eq. (6.43)",
+    "Steady-state SPL Lp = Lw + 10lg(Q/4πr² + 4/R)  (Lw=90, r=1, R=25, Q=1)",
+)
+def _chk_steady_state_spl() -> Outcome:
+    computed = float(ph.steady_state_spl(90.0, 1.0, 25.0))
+    expected = 90.0 + 10.0 * math.log10(1.0 / (4.0 * math.pi) + 4.0 / 25.0)
+    return numeric(expected, computed, 1e-6, unit="dB", places=4)
+
+
 # ===========================================================================
 # Domain 3 - Psychoacoustics
 # ===========================================================================

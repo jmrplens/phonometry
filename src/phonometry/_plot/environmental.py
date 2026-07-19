@@ -37,6 +37,12 @@ if TYPE_CHECKING:
     from ..environmental.impulse_prominence import ImpulseProminenceResult
     from ..environmental.wind_turbine_noise import WindTurbineTonalityResult
 
+#: Axis labels shared by the atmospheric-refraction figures (height on the
+#: vertical axis, horizontal range on the x-axis).
+_LABEL_HEIGHT_M = "Height [m]"
+_LABEL_RANGE_M = "Range [m]"
+
+
 def plot_wind_turbine_tonality(
     result: "WindTurbineTonalityResult", ax: Axes | None = None, **kwargs: Any
 ) -> Axes:
@@ -269,7 +275,7 @@ def plot_sound_speed_profile(
     label = profile.description or "c_eff(z)"
     ax.plot(c, z, **{"color": _C_PRIMARY, "lw": 1.4, "label": label, **kwargs})
     ax.set_xlabel("Effective sound speed [m/s]")
-    ax.set_ylabel("Height [m]")
+    ax.set_ylabel(_LABEL_HEIGHT_M)
     ax.set_title("Effective sound-speed profile")
     ax.grid(True, alpha=0.3)
     ax.legend(loc="best", fontsize="small")
@@ -294,8 +300,8 @@ def plot_atmospheric_rays(
         ax.plot(r[i], z[i], **{"color": _C_PRIMARY, "lw": 0.7, "alpha": 0.7, **kwargs})
     ax.plot([0.0], [result.source_height], "o", color=_C_REFERENCE, label="Source")
     ax.axhline(0.0, color=_C_MUTED, lw=1.0)
-    ax.set_xlabel("Range [m]")
-    ax.set_ylabel("Height [m]")
+    ax.set_xlabel(_LABEL_RANGE_M)
+    ax.set_ylabel(_LABEL_HEIGHT_M)
     ax.set_ylim(bottom=0.0)
     ax.set_title("Atmospheric ray paths")
     ax.grid(True, alpha=0.3)
@@ -341,8 +347,8 @@ def plot_atmospheric_pe(
     )
     ax.figure.colorbar(img, ax=ax, label="Level re free field [dB]")
     ax.plot([0.0], [result.source_height], "o", color="k", ms=4.0, label="Source")
-    ax.set_xlabel("Range [m]")
-    ax.set_ylabel("Height [m]")
+    ax.set_xlabel(_LABEL_RANGE_M)
+    ax.set_ylabel(_LABEL_HEIGHT_M)
     ax.set_title(f"GFPE relative sound level ({result.frequency:.0f} Hz)")
     ax.legend(loc="upper right", fontsize="small")
     return ax

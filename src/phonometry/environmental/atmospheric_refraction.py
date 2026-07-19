@@ -231,7 +231,7 @@ def ray_curvature_radius(
         angle is not within ``(-90, 90)`` degrees.
     """
     c0 = require_positive(ground_speed, "ground_speed")
-    if not np.isfinite(gradient) or gradient == 0.0:
+    if not (np.isfinite(gradient) and abs(gradient) > 0.0):
         raise ValueError("'gradient' must be finite and non-zero (a curved ray).")
     if abs(launch_angle_deg) >= 90.0:
         raise ValueError("'launch_angle_deg' must be within (-90, 90) degrees.")
@@ -397,14 +397,14 @@ def atmospheric_ray_paths(
         k4z, k4zeta = deriv(z + dr * k3z, zeta + dr * k3zeta, xi)
         z = z + dr / 6.0 * (k1z + 2 * k2z + 2 * k3z + k4z)
         zeta = zeta + dr / 6.0 * (k1zeta + 2 * k2zeta + 2 * k3zeta + k4zeta)
-        # Travel time increment (dt/dr = 1/(xi c^2)) at the new height.
-        cc = _speed_at(np.clip(z, 0.0, None))
-        ray_t[:, s] = ray_t[:, s - 1] + dr / (xi * cc**2)
         # Specular ground reflection: fold z < 0 back up and flip zeta.
         below = z < 0.0
         z = np.where(below, -z, z)
         zeta = np.where(below, -zeta, zeta)
         bounces += below.astype(np.int_)
+        # Travel time increment (dt/dr = 1/(xi c^2)) at the true (folded) height.
+        cc = _speed_at(z)
+        ray_t[:, s] = ray_t[:, s - 1] + dr / (xi * cc**2)
         # Turning points: sign change of the vertical velocity (away from a bounce).
         cur = np.sign(zeta)
         turns += ((cur != prev_dz) & (~below) & (prev_dz != 0)).astype(np.int_)
@@ -603,7 +603,9 @@ def atmospheric_parabolic_equation(
     for step in range(n_r):
         r = ranges[step]
         if r <= 0.0:
-            field[:, step] = np.inf
+            # The source range is physically singular; NaN is masked by
+            # matplotlib and by reductions, unlike +inf which breaks autoscale.
+            field[:, step] = np.nan
         else:
             r1 = np.hypot(r, out_heights - zs)
             with np.errstate(divide="ignore"):

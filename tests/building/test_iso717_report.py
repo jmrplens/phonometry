@@ -22,8 +22,11 @@ from phonometry import (  # noqa: E402  (import after importorskip)
     weighted_impact_rating,
     weighted_rating,
 )
+import numpy as np  # noqa: E402
+
 from reference_data import (  # noqa: E402
     ISO717_1_ANNEX_C_R as _AIRBORNE_R,
+    ISO717_2_ANNEX_C1_EXPECTED as _IMPACT_EXPECTED,
     ISO717_2_ANNEX_C1_LN as _IMPACT_LN,
 )
 
@@ -86,3 +89,40 @@ def test_missing_band_data_rejected(tmp_path) -> None:
     assert bare.band_centers is None
     with pytest.raises(ValueError, match="per-band data"):
         bare.report(str(tmp_path / "bare.pdf"))
+
+
+def test_airborne_fiche_reproduces_iso717_1_annex_c1(tmp_path) -> None:
+    """The airborne fiche reproduces the ISO 717-1:2020 Annex C Table C.1 example.
+
+    The values printed in the standard's worked example are exactly the ones the
+    fiche shows: Rw(C;Ctr) = 30(-2;-3) dB, unfavourable-deviation sum 31,8 dB, the
+    reference curve shifted by -22 dB, and the per-band unfavourable deviations.
+    """
+    result = weighted_rating(_AIRBORNE_R)
+    assert (result.rating, result.c, result.ctr) == (30, -2, -3)
+    assert result.unfavourable_sum == pytest.approx(31.8, abs=0.05)
+    # Reference values shifted by -22 dB (Table C.1, column 3).
+    shifted = np.array([11, 14, 17, 20, 23, 26, 29, 30,
+                        31, 32, 33, 34, 34, 34, 34, 34], float)
+    assert np.allclose(result.shifted_reference, shifted)
+    # Unfavourable deviations (Table C.1, column 4; "-" printed as 0).
+    deviations = np.maximum(result.shifted_reference - result.measured, 0.0)
+    expected = np.array([0, 0, 0, 0, 0.6, 3.3, 4.2, 3.4,
+                        3.0, 1.5, 1.2, 1.5, 0.6, 1.0, 3.0, 8.5], float)
+    assert np.allclose(deviations, expected, atol=0.05)
+    _assert_pdf(str(result.report(str(tmp_path / "airborne_c1.pdf"))))
+
+
+def test_impact_fiche_reproduces_iso717_2_annex_c1(tmp_path) -> None:
+    """The impact fiche reproduces the ISO 717-2 Annex C Table C.1 example.
+
+    Ln,w = 79 dB, CI = -11 dB, unfavourable-deviation sum 28,0 dB (see the note
+    on the 2020 reprint's CI in reference_data).
+    """
+    result = weighted_impact_rating(_IMPACT_LN)
+    assert result.rating == _IMPACT_EXPECTED["ln_w"]
+    assert result.ci == _IMPACT_EXPECTED["ci"]
+    assert result.unfavourable_sum == pytest.approx(
+        _IMPACT_EXPECTED["unfavourable_sum"], abs=0.05
+    )
+    _assert_pdf(str(result.report(str(tmp_path / "impact_c1.pdf"))))

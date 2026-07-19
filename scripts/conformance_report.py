@@ -5884,6 +5884,24 @@ def _chk_side_branch_closed_form() -> Outcome:
 
 @register(
     _NOISE_CONTROL,
+    "Bies 5e Eqs. (8.141)/(8.148) (four-pole insertion loss)",
+    "Insertion loss = transmission loss for the anechoic reference Zs=Zr=rho c/S",
+)
+def _chk_insertion_loss_equals_tl() -> Outcome:
+    from phonometry.noise_control import silencers as _sl
+
+    c, rho, s = 343.0, 1.206, 0.01
+    z = rho * c / s
+    f = np.array([232.0])  # a frequency with a substantial, positive TL
+    t = _sl.expansion_chamber(f, 0.3, 0.04, s).transfer_matrix
+    tl = float(_sl.transmission_loss(t, inlet_area=s, outlet_area=s)[0])
+    il = float(_sl.insertion_loss(t, source_impedance=z, radiation_impedance=z)[0])
+    return numeric(tl, il, 1e-9, unit="dB",
+                   expected_label=f"{tl:.4f} dB (= TL)")
+
+
+@register(
+    _NOISE_CONTROL,
     "Bies 5e Eq. (8.275) (Wells' plenum method)",
     "Plenum TL = -10 lg[S_out(cos0/pi r^2 + (1-a)/(Sw a))] (S_out=.1,r=1,Sw=20,a=.2)",
 )

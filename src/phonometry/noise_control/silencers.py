@@ -35,9 +35,11 @@ internal impedance ``Z_s`` radiating into a termination impedance ``Z_r`` is
 the extra attenuation of inserting the silencer in place of a direct
 connection,
 
-    IL = 20 log10 | (Z_s + Z_r) / (T11 Z_r + T12 + Z_s Z_r T21 + Z_s T22) |,
+    IL = 20 log10 | (T11 Z_r + T12 + Z_s Z_r T21 + Z_s T22) / (Z_s + Z_r) |,
 
-which is ``0`` when the silencer reduces to a through connection (``T = I``).
+which is ``0`` when the silencer reduces to a through connection (``T = I``)
+and equals the transmission loss for the anechoic reference
+``Z_s = rho c / S_in``, ``Z_r = rho c / S_out``.
 
 **Simple expansion chamber.** A chamber of area ``S_exp`` and length ``L``
 between pipes of area ``S_duct`` has the closed-form transmission loss (Bies
@@ -127,7 +129,10 @@ def shunt_matrix(branch_impedance: ArrayLike) -> _Complex:
         raise ValueError("'branch_impedance' must be a non-empty 1-D array.")
     t = np.zeros((zb.size, 2, 2), dtype=np.complex128)
     t[:, 0, 0] = 1.0
-    t[:, 1, 0] = 1.0 / zb
+    # A lossless branch at exact resonance has Z_b -> 0 (it shorts the duct);
+    # 1/Z_b -> infinity gives the ideal infinite attenuation there.
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t[:, 1, 0] = 1.0 / zb
     t[:, 1, 1] = 1.0
     return t
 
@@ -196,8 +201,8 @@ def insertion_loss(
     length) connection between a source of internal impedance ``Z_s`` and a
     radiation (termination) impedance ``Z_r``:
 
-        IL = 20 log10 | (Z_s + Z_r) /
-                        (T11 Z_r + T12 + Z_s Z_r T21 + Z_s T22) |.
+        IL = 20 log10 | (T11 Z_r + T12 + Z_s Z_r T21 + Z_s T22) /
+                        (Z_s + Z_r) |.
 
     :param transfer_matrix: A ``(n_freq, 2, 2)`` compound matrix.
     :param source_impedance: Source internal acoustic impedance ``Z_s``,
@@ -217,9 +222,9 @@ def insertion_loss(
     t12 = transfer_matrix[:, 0, 1]
     t21 = transfer_matrix[:, 1, 0]
     t22 = transfer_matrix[:, 1, 1]
-    denom = t11 * zr + t12 + zs * zr * t21 + zs * t22
+    num = t11 * zr + t12 + zs * zr * t21 + zs * t22
     return np.asarray(
-        20.0 * np.log10(np.abs((zs + zr) / denom)), dtype=np.float64
+        20.0 * np.log10(np.abs(num / (zs + zr))), dtype=np.float64
     )
 
 

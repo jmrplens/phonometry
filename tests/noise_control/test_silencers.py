@@ -92,6 +92,19 @@ def test_insertion_loss_identity_is_zero() -> None:
     assert np.allclose(il, 0.0, atol=1e-12)
 
 
+def test_insertion_loss_equals_tl_for_anechoic_reference() -> None:
+    # The insertion loss with Z_s = rho c / S_in and Z_r = rho c / S_out equals
+    # the (anechoic) transmission loss; a positive, not negative, quantity.
+    c, rho, s = 343.0, 1.206, 0.01
+    z = rho * c / s
+    f = np.linspace(50.0, 1500.0, 400)
+    t = sl.expansion_chamber(f, 0.3, 0.04, s).transfer_matrix
+    tl = sl.transmission_loss(t, inlet_area=s, outlet_area=s)
+    il = sl.insertion_loss(t, source_impedance=z, radiation_impedance=z)
+    assert np.allclose(il, tl, atol=1e-9)
+    assert il.max() > 3.0  # a real silencer gives a positive insertion loss
+
+
 def test_transfer_matrix_reciprocity() -> None:
     # Reciprocal passive elements have det(T) = 1.
     f = np.linspace(50.0, 500.0, 20)

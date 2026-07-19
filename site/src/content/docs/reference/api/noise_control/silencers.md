@@ -42,9 +42,11 @@ internal impedance `Z_s` radiating into a termination impedance `Z_r` is
 the extra attenuation of inserting the silencer in place of a direct
 connection,
 
-    IL = 20 log10 | (Z_s + Z_r) / (T11 Z_r + T12 + Z_s Z_r T21 + Z_s T22) |,
+    IL = 20 log10 | (T11 Z_r + T12 + Z_s Z_r T21 + Z_s T22) / (Z_s + Z_r) |,
 
-which is `0` when the silencer reduces to a through connection (`T = I`).
+which is `0` when the silencer reduces to a through connection (`T = I`)
+and equals the transmission loss for the anechoic reference
+`Z_s = rho c / S_in`, `Z_r = rho c / S_out`.
 
 **Simple expansion chamber.** A chamber of area `S_exp` and length `L`
 between pipes of area `S_duct` has the closed-form transmission loss (Bies

@@ -84,14 +84,17 @@ def test_plenum_per_band() -> None:
 
 
 def test_flow_noise_straight_duct_formula() -> None:
+    # Bies Eq. (8.251), VDI 2081-1: note the -2 constant term.
     f = np.array([250.0])
     u, s = 10.0, 0.04
     res = hvac.flow_noise_straight_duct(f, u, s)
     expected = (
-        7.0 + 50.0 * math.log10(u) + 10.0 * math.log10(s)
+        7.0 + 50.0 * math.log10(u) + 10.0 * math.log10(s) - 2.0
         - 26.0 * math.log10(1.14 + 0.02 * 250.0 / u)
     )
     assert res.values[0] == pytest.approx(expected)
+    # Pinned numeric anchor so the constant cannot silently drift.
+    assert res.values[0] == pytest.approx(35.4347, abs=1e-3)
 
 
 def test_flow_noise_scales_with_velocity() -> None:

@@ -280,8 +280,8 @@ def flow_noise_straight_duct(
 ) -> HvacSpectrumResult:
     """Flow-generated octave-band sound power of a straight duct (Bies Eq. (8.251)).
 
-    ``L_WB = 7 + 50 log10(U) + 10 log10(S) - 26 log10(1.14 + 0.02 f / U)`` in
-    dB re 1e-12 W (VDI 2081-1), for airflow speed ``U`` in a duct of area
+    ``L_WB = 7 + 50 log10(U) + 10 log10(S) - 2 - 26 log10(1.14 + 0.02 f / U)``
+    in dB re 1e-12 W (VDI 2081-1), for airflow speed ``U`` in a duct of area
     ``S``.
 
     :param frequencies: Octave-band centre frequencies ``f``, Hz (1-D array).
@@ -297,6 +297,7 @@ def flow_noise_straight_duct(
         7.0
         + 50.0 * np.log10(u)
         + 10.0 * np.log10(s)
+        - 2.0
         - 26.0 * np.log10(1.14 + 0.02 * f / u)
     )
     return HvacSpectrumResult(
@@ -317,9 +318,12 @@ def flow_noise_bend(
 
     ``L_WB = L_Ws - 10 log10(1 + 0.165 N_s^2) + 30 log10(U) - 103`` with the
     stream power level ``L_Ws = 30 log10(U) + 10 log10(S) + 10 log10(rho) + 117``
-    and the Strouhal number ``N_s = f H / U`` (``H`` the duct height in the
-    plane of the bend). The regeneration scales as ``U^3`` at low ``N_s`` and
-    ``U^5`` at high ``N_s``.
+    (Bies Eq. (8.252)) and the Strouhal number ``N_s = f H / U`` (``H`` the duct
+    height in the plane of the bend). The radiated sound power grows as the
+    sixth power of the stream speed at low ``N_s`` (the inner-corner drag
+    dipole) and the eighth power at high ``N_s`` (the outer-corner shear
+    quadrupole); equivalently, the *efficiency* referenced to the stream power
+    grows as ``U^3`` and ``U^5`` respectively.
 
     :param frequencies: Octave-band centre frequencies ``f``, Hz (1-D array).
     :param flow_velocity: Mean flow speed ``U``, m/s.

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **338/338 conformance checks pass** across 42 domains and 211 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **339/339 conformance checks pass** across 42 domains and 212 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -704,7 +704,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Industrial noise control</b>: 100% (8/8)</summary>
+<summary>&#9989; <b>Industrial noise control</b>: 100% (9/9)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -713,6 +713,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bies 5e Eq. (8.44) / Example 8.1 | Quarter-wave tube tuning f = c/(4 l_e), l_e = 1.516 m -> 56.6 Hz | 56.6 Hz (+/-0.1 Hz) | 56.6 Hz | 0.003 Hz | &#9989; |
 | Bies 5e Eq. (8.46) | Helmholtz resonance f0 = (c/2pi) sqrt(S/(l_e V))  (S=1e-4, l_e=0.02, V=1e-3) | 122.067 Hz (+/-0 Hz) | 122.067 Hz | 0 Hz | &#9989; |
 | Bies 5e Eq. (8.73) | Side-branch TL = 20 lg|1 + rho c/(2 Sd Zb)| (QWT branch, closed form) | 0.1638 dB (+/-0 dB) | 0.1638 dB | 0 dB | &#9989; |
+| Bies 5e Eqs. (8.141)/(8.148) (four-pole insertion loss) | Insertion loss = transmission loss for the anechoic reference Zs=Zr=rho c/S | 6.2498 dB (= TL) | 6.2498 dB | 0 dB | &#9989; |
 | Bies 5e Eq. (8.275) (Wells' plenum method) | Plenum TL = -10 lg[S_out(cos0/pi r^2 + (1-a)/(Sw a))] (S_out=.1,r=1,Sw=20,a=.2) | 12.8541 dB (+/-0 dB) | 12.8541 dB | 0 dB | &#9989; |
 | Bies 5e Table 8.14 (ASHRAE end reflection, flush) | Duct end reflection D = 200 mm at 125 Hz = 10 dB (table node) | 10 dB (+/-0 dB) | 10 dB | 0 dB | &#9989; |
 | Bies 5e Eqs. (7.103), (7.111) (enclosure, fully absorbing limit) | Enclosure correction C -> 10 lg 0.3 = -5.23 dB as alpha_i -> 1 | -5.2288 dB (+/-0.001 dB) | -5.2288 dB | 0 dB | &#9989; |

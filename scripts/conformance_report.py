@@ -5601,6 +5601,92 @@ def _chk_exact_screen_shadow_boundary() -> Outcome:
     return numeric(6.0206, float(il.insertion_loss[0]), 0.6, unit="dB")
 
 
+_PANEL = "Panel & aperture sound insulation (Bies / Hopkins / Cremer)"
+
+
+@register(_PANEL, "Bies 5e Eq. 7.40 (mass law)", "6 dB per octave (500 -> 1000 Hz)")
+def _chk_mass_law_octave_slope() -> Outcome:
+    lo = float(ph.mass_law_transmission_loss(500.0, 20.0, incidence="normal"))
+    hi = float(ph.mass_law_transmission_loss(1000.0, 20.0, incidence="normal"))
+    return numeric(6.0206, hi - lo, 0.01, unit="dB")
+
+
+@register(_PANEL, "Bies 5e Eq. 7.40 (mass law)", "6 dB per doubling of mass")
+def _chk_mass_law_mass_slope() -> Outcome:
+    lo = float(ph.mass_law_transmission_loss(500.0, 20.0, incidence="normal"))
+    hi = float(ph.mass_law_transmission_loss(500.0, 40.0, incidence="normal"))
+    return numeric(6.0206, hi - lo, 0.01, unit="dB")
+
+
+@register(_PANEL, "Bies 5e Eq. 7.42 (field incidence)", "One-third-octave correction 5.5 dB")
+def _chk_field_incidence_correction() -> Outcome:
+    n = float(ph.mass_law_transmission_loss(500.0, 20.0, incidence="normal"))
+    fld = float(ph.mass_law_transmission_loss(500.0, 20.0, incidence="field"))
+    return numeric(5.5, n - fld, 0.001, unit="dB")
+
+
+@register(_PANEL, "Hopkins Eq. 2.201 / Bies Eq. 7.3", "Coincidence frequency, 6 mm glass")
+def _chk_coincidence_frequency_glass() -> Outcome:
+    bp = ph.plate_bending_stiffness(6.2e10, 0.006, 0.24)
+    fc = ph.coincidence_frequency(2500.0 * 0.006, bp)
+    return numeric(2079.0, fc, 0.03, rel=True, unit="Hz")
+
+
+@register(_PANEL, "Cremer Table 5.1", "Thin-plate point impedance Z = 8 sqrt(B' m'')")
+def _chk_plate_point_impedance() -> Outcome:
+    z = ph.infinite_plate_impedance(1.0e4, 10.0)
+    return numeric(8.0 * math.sqrt(1.0e4 * 10.0), z, 1e-6, unit="N.s/m")
+
+
+@register(_PANEL, "Cremer Table 5.1", "Infinite-beam mobility phase -45 deg")
+def _chk_beam_mobility_phase() -> Outcome:
+    y = complex(ph.infinite_beam_mobility(137.0, 200.0, 5.0))
+    return numeric(-45.0, math.degrees(math.atan2(y.imag, y.real)), 1e-6, unit="deg")
+
+
+@register(_PANEL, "Hopkins Eq. 2.229 (Leppington/Maidanik)",
+          "Radiation efficiency at f = 2 fc")
+def _chk_radiation_above_coincidence() -> Outcome:
+    res = ph.radiation_efficiency([4000.0], 1.5, 1.25, 2000.0)
+    return numeric(1.0 / math.sqrt(1.0 - 0.5), float(res.radiation_efficiency[0]),
+                   1e-9)
+
+
+@register(_PANEL, "Bies Eq. 7.62 / Hopkins Eq. 4.73",
+          "Mass-air-mass resonance f0, empty cavity")
+def _chk_mass_spring_mass() -> Outcome:
+    f0 = ph.mass_spring_mass_resonance(12.16, 12.16, 0.1)
+    expected = 60.0 * math.sqrt((12.16 + 12.16) / (12.16 * 12.16 * 0.1))
+    return numeric(expected, f0, 0.005, rel=True, unit="Hz")
+
+
+@register(_PANEL, "Bies Eq. 7.64 (double wall)",
+          "Below f0 = mass law of the combined mass")
+def _chk_double_wall_low_frequency() -> Outcome:
+    f0 = ph.mass_spring_mass_resonance(12.16, 12.16, 0.1)
+    dw = float(ph.double_wall_transmission_loss([0.5 * f0], 12.16, 12.16, 0.1)
+               .transmission_loss[0])
+    ml = float(ph.mass_law_transmission_loss(0.5 * f0, 24.32))
+    return numeric(ml, dw, 1e-6, unit="dB")
+
+
+@register(_PANEL, "Hopkins Eq. 4.92 (composite)",
+          "1 % open area caps R at 10 lg(S/Sa)")
+def _chk_composite_open_area_limit() -> Outcome:
+    r = float(ph.composite_transmission_loss([0.99, 0.01], [60.0, 0.0]))
+    return numeric(10.0 * math.log10(1.0 / 0.01), r, 0.05, unit="dB")
+
+
+@register(_PANEL, "Hopkins Eq. 4.99/4.101 (Gomperts slit)",
+          "Transmission maximum at first resonance")
+def _chk_slit_resonance() -> Outcome:
+    fr = float(ph.slit_resonance_frequencies(0.1, 0.005, orders=1)[0])
+    f = np.linspace(fr - 300.0, fr + 300.0, 601)
+    res = ph.slit_transmission_coefficient(f, 0.005, 0.1, field="normal")
+    peak = float(f[int(np.argmax(res.transmission_coefficient))])
+    return numeric(fr, peak, 15.0, unit="Hz")
+
+
 # ===========================================================================
 # Atmospheric refraction (Salomons rays + GFPE parabolic equation)
 # ===========================================================================

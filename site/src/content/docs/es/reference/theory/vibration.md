@@ -86,3 +86,29 @@ $\Pi = 0{,}37$. El modelo espinal de elementos finitos del Anexo A
 
 Consulta la [guía de vibración en humanos](/phonometry/es/guides/human-vibration/) y la
 [guía de vibración con choques múltiples](/phonometry/es/guides/multiple-shock-vibration/) para su uso.
+
+## Movilidades puntuales y eficiencia de radiación (Cremer 5, Hopkins 2.9)
+
+La potencia vibratoria que una fuerza puntual inyecta en una estructura es
+$W = \tfrac12 |F|^2\,\mathrm{Re}\{Y\}$ (Cremer Ec. 5.23), así que la
+**movilidad** puntual $Y$ (la inversa de la impedancia) gobierna cuánta energía
+absorbe la estructura. Para estructuras infinitas son formas cerradas (Cremer
+Tabla 5.1): una placa delgada infinita es una resistencia pura
+$Z = 8\sqrt{B'\,m''}$ (real, independiente de la frecuencia, con $B'$ la rigidez
+a flexión por unidad de anchura y $m''$ la masa por unidad de superficie), una
+viga infinita tiene $Y = (1-\mathrm{j})/(4 m' c_B)$ (fase de 45 grados,
+decayendo como $\omega^{-1/2}$ a través de la velocidad de flexión $c_B$), y una
+barra longitudinal tiene $Z = \rho c_L S$. Aportan la movilidad de receptor que
+EN 12354-5 necesita cuando no hay medida, y son las contrapartes teóricas de las
+movilidades medidas de ISO 7626. La eficiencia con que una placa en flexión
+radia la potencia aérea es su **eficiencia de radiación** $\sigma$: por debajo de
+la frecuencia crítica radia poco (modos de borde y esquina), y por encima
+$\sigma \to (1 - f_c/f)^{-1/2} \to 1$ (Leppington/Maidanik, Hopkins
+Ec. 2.227-2.230). Como $\sigma$ es exactamente el factor de radiación
+$\varepsilon$ de ISO 7849, predecirla cierra la cadena de potencia sonora a
+partir de la vibración sin una medida de potencia, y alimenta el camino de
+transmisión resonante de la
+[teoría de aislamiento de paneles](/phonometry/es/reference/theory/rooms-buildings/).
+
+Consulta la guía [Predicción del aislamiento de paneles](/phonometry/es/guides/panel-sound-insulation/)
+para su uso.

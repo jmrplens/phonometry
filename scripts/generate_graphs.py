@@ -43,6 +43,25 @@ _ES_EXACT = {
     "GFPE relative sound level": "Nivel sonoro relativo GFPE",
     "Shadow-zone boundary": "Límite de la zona de sombra",
     "Effective sound speed [m/s]": "Velocidad efectiva del sonido [m/s]",
+    "Theoretical panel sound insulation (Bies / Hopkins / Cremer)":
+        "Aislamiento acústico teórico de paneles (Bies / Hopkins / Cremer)",
+    "Single panel: mass law and coincidence":
+        "Panel simple: ley de masas y coincidencia",
+    "Double wall: mass-spring-mass resonance":
+        "Pared doble: resonancia masa-muelle-masa",
+    "Radiation efficiency of a bending plate":
+        "Eficiencia de radiación de una placa en flexión",
+    "Composite wall with a small aperture":
+        "Pared compuesta con una abertura pequeña",
+    "Sound reduction index R [dB]": "Índice de reducción sonora R [dB]",
+    r"Radiation efficiency $\sigma$": r"Eficiencia de radiación $\sigma$",
+    "field-incidence mass law": "ley de masas de campo",
+    "single panel R (Sharp)": "R de panel simple (Sharp)",
+    "double wall R": "R de pared doble",
+    "single leaf (total mass)": "hoja simple (masa total)",
+    "solid wall alone": "pared maciza sola",
+    "wall + 1 % open slit": "pared + rendija 1 % abierta",
+    "open-area limit": "límite de área abierta",
     "Aircraft Atmospheric Absorption (SAE ARP 5534)":
         "Absorción atmosférica aeronáutica (SAE ARP 5534)",
     "Attenuation [dB]": "Atenuación [dB]",
@@ -7328,6 +7347,113 @@ def generate_fdtd_simulation(output_dir: str) -> None:
     plt.close()
 
 
+def generate_panel_insulation_concept(output_dir: str) -> None:
+    """Theoretical panel sound insulation: the four PR-I predictions."""
+    print("Generating panel_insulation_concept.png...")
+    from phonometry import (
+        coincidence_frequency,
+        composite_transmission_loss,
+        double_wall_transmission_loss,
+        mass_law_transmission_loss,
+        mass_spring_mass_resonance,
+        plate_bending_stiffness,
+        radiation_efficiency,
+        single_panel_transmission_loss,
+    )
+
+    bands = np.array(
+        [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
+         1250, 1600, 2000, 2500, 3150, 4000, 5000], dtype=float
+    )
+    fig, axes = plt.subplots(2, 2, figsize=(12, 9))
+
+    # (a) Single panel: field-incidence mass law and the coincidence dip.
+    bp = plate_bending_stiffness(6.2e10, 0.006, 0.24)
+    fc = coincidence_frequency(15.0, bp)
+    ml = mass_law_transmission_loss(bands, 15.0, incidence="field")
+    sharp = single_panel_transmission_loss(
+        bands, 15.0, critical_frequency=fc, loss_factor=0.024
+    )
+    ax = axes[0, 0]
+    ax.semilogx(bands, ml, color=COLOR_TERTIARY, ls="--", lw=1.6,
+                label="field-incidence mass law")
+    ax.semilogx(bands, sharp.transmission_loss, color=COLOR_PRIMARY, lw=2.0,
+                marker="o", markersize=3, label="single panel R (Sharp)")
+    ax.axvline(fc, color=COLOR_SECONDARY, ls=":", lw=1.2, label="$f_c$")
+    ax.set_title("Single panel: mass law and coincidence",
+                 fontweight="bold", pad=10)
+    ax.set_ylabel("Sound reduction index R [dB]")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.legend(loc="upper left", fontsize=9)
+    ax.grid(True, which="both", alpha=0.3)
+    format_frequency_axis(ax, float(bands.min()), float(bands.max()))
+
+    # (b) Double wall: mass-spring-mass resonance and cavity gain.
+    dw = double_wall_transmission_loss(bands, 12.0, 12.0, 0.075)
+    single = mass_law_transmission_loss(bands, 24.0, incidence="field")
+    f0 = mass_spring_mass_resonance(12.0, 12.0, 0.075)
+    ax = axes[0, 1]
+    ax.semilogx(bands, single, color=COLOR_TERTIARY, ls="--", lw=1.6,
+                label="single leaf (total mass)")
+    ax.semilogx(bands, dw.transmission_loss, color=COLOR_PRIMARY, lw=2.0,
+                marker="o", markersize=3, label="double wall R")
+    ax.axvline(f0, color=COLOR_SECONDARY, ls=":", lw=1.2, label="$f_0$")
+    ax.set_title("Double wall: mass-spring-mass resonance",
+                 fontweight="bold", pad=10)
+    ax.set_ylabel("Sound reduction index R [dB]")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.legend(loc="upper left", fontsize=9)
+    ax.grid(True, which="both", alpha=0.3)
+    format_frequency_axis(ax, float(bands.min()), float(bands.max()))
+
+    # (c) Radiation efficiency of a bending plate.
+    sigma = radiation_efficiency(bands, 1.5, 1.25, fc)
+    ax = axes[1, 0]
+    ax.loglog(bands, sigma.radiation_efficiency, color=COLOR_PRIMARY, lw=2.0,
+              marker="o", markersize=3, label=r"$\sigma(f)$")
+    ax.axhline(1.0, color=COLOR_FG, ls=":", lw=0.9, alpha=0.5, label="$\\sigma = 1$")
+    ax.axvline(fc, color=COLOR_SECONDARY, ls=":", lw=1.2, label="$f_c$")
+    ax.set_title("Radiation efficiency of a bending plate",
+                 fontweight="bold", pad=10)
+    ax.set_ylabel(r"Radiation efficiency $\sigma$")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.legend(loc="upper left", fontsize=9)
+    ax.grid(True, which="both", alpha=0.3)
+    format_frequency_axis(ax, float(bands.min()), float(bands.max()))
+
+    # (d) Composite wall with a small aperture (open-area cap).
+    wall = sharp.transmission_loss
+    open_area = 0.01
+    n = bands.size
+    composite = np.array([
+        float(composite_transmission_loss(
+            [1.0 - open_area, open_area], [wall[i], 0.0]))
+        for i in range(n)
+    ])
+    ax = axes[1, 1]
+    ax.semilogx(bands, wall, color=COLOR_PRIMARY, lw=2.0, marker="o",
+                markersize=3, label="solid wall alone")
+    ax.semilogx(bands, composite, color=COLOR_SECONDARY, lw=2.0, marker="s",
+                markersize=3, label="wall + 1 % open slit")
+    ax.axhline(10.0 * np.log10(1.0 / open_area), color=COLOR_FG, ls=":", lw=0.9,
+               alpha=0.5, label="open-area limit")
+    ax.set_title("Composite wall with a small aperture",
+                 fontweight="bold", pad=10)
+    ax.set_ylabel("Sound reduction index R [dB]")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.legend(loc="upper left", fontsize=9)
+    ax.grid(True, which="both", alpha=0.3)
+    format_frequency_axis(ax, float(bands.min()), float(bands.max()))
+
+    fig.suptitle(
+        "Theoretical panel sound insulation (Bies / Hopkins / Cremer)",
+        fontweight="bold", fontsize=14,
+    )
+    plt.tight_layout()
+    save_figure(output_dir, "panel_insulation_concept.png")
+    plt.close()
+
+
 # Every documentation figure, in the order the sequential generator has always
 # produced them. This registry is the single source of truth for both the
 # sequential path (``generate_all``) and the parallel runner (``--jobs``),
@@ -7505,6 +7631,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_rotorcraft_terrain_screening,
     # 2D FDTD wave simulation (public API concept figure).
     generate_fdtd_simulation,
+    # Theoretical panel sound insulation (single/double wall, radiation, slit).
+    generate_panel_insulation_concept,
 )
 
 

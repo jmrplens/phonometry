@@ -31,6 +31,10 @@ ALLOWED_EDGES: set[tuple[str, str]] = {
     # swept-sine distortion reuses the ISO 18233 sweep / Farina
     # inverse-filter machinery of room_ir
     ("electroacoustics", "room"),
+    # predicted panel R reuses the plate coincidence frequency (radiation)
+    ("building", "vibration"),
+    # double-wall cavity fill uses the porous equivalent-fluid model
+    ("building", "materials"),
 }
 
 

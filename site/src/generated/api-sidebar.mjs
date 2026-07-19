@@ -80,6 +80,8 @@ export const apiSidebar = {
       translations: { es: 'Acústica de la edificación' },
       items: [
         'reference/api/building/insulation',
+        'reference/api/building/panel-transmission',
+        'reference/api/building/aperture-transmission',
         'reference/api/building/lab-insulation',
         'reference/api/building/survey-insulation',
         'reference/api/building/intensity-insulation',
@@ -112,6 +114,8 @@ export const apiSidebar = {
       translations: { es: 'Vibración y ruido estructural' },
       items: [
         'reference/api/vibration/mechanical-mobility',
+        'reference/api/vibration/point-mobility',
+        'reference/api/vibration/radiation-efficiency',
         'reference/api/vibration/transfer-stiffness',
         'reference/api/vibration/human-vibration',
         'reference/api/vibration/multiple-shock-vibration',

@@ -439,6 +439,34 @@ def test_third_octave_impact_plot_reads_rating_at_500() -> None:
 # --------------------------------------------------------------------------
 # Every public .plot() must accept and forward a benign styling kwarg
 # --------------------------------------------------------------------------
+_PANEL_BANDS = np.array(
+    [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+     1000, 1250, 1600, 2000, 2500, 3150], dtype=float
+)
+
+
+def _radiation_efficiency() -> ph.RadiationEfficiencyResult:
+    bp = ph.plate_bending_stiffness(6.2e10, 0.006, 0.24)
+    fc = ph.coincidence_frequency(2500.0 * 0.006, bp)
+    return ph.radiation_efficiency(_PANEL_BANDS, 1.5, 1.25, fc)
+
+
+def _single_panel() -> ph.SoundReductionResult:
+    bp = ph.plate_bending_stiffness(6.2e10, 0.006, 0.24)
+    fc = ph.coincidence_frequency(15.0, bp)
+    return ph.single_panel_transmission_loss(
+        _PANEL_BANDS, 15.0, critical_frequency=fc, loss_factor=0.024
+    )
+
+
+def _double_wall() -> ph.SoundReductionResult:
+    return ph.double_wall_transmission_loss(_PANEL_BANDS, 12.0, 12.0, 0.1)
+
+
+def _slit_aperture() -> ph.ApertureTransmissionResult:
+    return ph.slit_transmission_coefficient(_PANEL_BANDS, 0.002, 0.1)
+
+
 _KWARG_PLOT_CASES = [
     ("zwicker", _zwicker_stationary, "line"),
     ("sti", _sti, "bar"),
@@ -466,6 +494,10 @@ _KWARG_PLOT_CASES = [
     ("airborne_insulation", _airborne_insulation, "line"),
     ("impact_insulation", _impact_insulation, "line"),
     ("band_uncertainty", _band_uncertainty, "line"),
+    ("radiation_efficiency", _radiation_efficiency, "line"),
+    ("single_panel", _single_panel, "line"),
+    ("double_wall", _double_wall, "line"),
+    ("slit_aperture", _slit_aperture, "line"),
 ]
 
 

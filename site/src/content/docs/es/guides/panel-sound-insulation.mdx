@@ -1,0 +1,306 @@
+---
+title: "Predicción del aislamiento de paneles (ley de masas, coincidencia, paredes dobles)"
+description: "Aislamiento acústico aéreo teórico de paneles a partir de sus propiedades físicas: ley de masas y valle de coincidencia (Sharp), pared doble masa-muelle-masa, transmisión por rendijas y orificios (Gomperts), eficiencia de radiación de placa (Leppington/Maidanik) y movilidades puntuales de placas y vigas infinitas (Cremer)."
+references:
+  - type: book
+    authors: ["Bies, D. A.", "Hansen, C. H.", "Howard, C. Q."]
+    year: 2017
+    title: "Engineering Noise Control"
+    edition: "5.ª ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9781351228152"
+    note: "Apartado 7.2: la ley de masas (Ec. 7.40/7.42), la frecuencia de coincidencia (Ec. 7.3), el método de panel simple de Sharp (7.2.4.1) y el modelo de pared doble (7.2.6, Ec. 7.62-7.64). ISBN 978-1-4987-2405-0."
+  - type: book
+    authors: ["Hopkins, C."]
+    year: 2007
+    title: "Sound insulation"
+    publisher: "Butterworth-Heinemann"
+    doi: "10.4324/9780080550473"
+    note: "Apartado 2.9 (eficiencia de radiación de placa, Leppington/Maidanik Ec. 2.227-2.230) y apartado 4.3.10 (rendijas, orificios y aberturas, Gomperts Ec. 4.99, Wilson y Soroka Ec. 4.102, composición Ec. 4.92). ISBN 978-0-7506-6526-1."
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
+    year: 2005
+    title: "Structure-Borne Sound"
+    edition: "3.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/b137728"
+    note: "Capítulo 5, Tabla 5.1: la recopilación de impedancias y movilidades puntuales de estructuras infinitas (placa Z = 8 sqrt(B' m''), viga, barra) y la potencia inyectada W = 0.5 |F|^2 Re{Y} (Ec. 5.23). ISBN 978-3-540-22696-3."
+---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
+Un ensayo de laboratorio mide el índice de reducción sonora $R$ de un elemento
+acabado; esta página, en cambio, **predice** $R(f)$ a partir de las propiedades
+físicas de la construcción, de modo que un cerramiento se puede diseñar antes de
+construirlo. Cubre el aislamiento aéreo de un panel simple (la ley de masas y el
+valle de coincidencia), la pared doble (su resonancia masa-muelle-masa), la
+transmisión por rendijas y aberturas que limita cualquier construcción real, la
+eficiencia de radiación de una placa en flexión y las movilidades puntuales que
+fijan la potencia vibratoria que una estructura absorbe. Las magnitudes medidas
+que estas predicciones alimentan están en
+[Predicción del aislamiento (EN 12354)](/phonometry/es/guides/insulation-prediction/)
+y [Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/panel_insulation_concept_es.svg" alt="Cuatro paneles: la ley de masas de panel simple con su valle de coincidencia, la pared doble con la resonancia masa-muelle-masa y la ganancia de cámara, la eficiencia de radiación de la placa creciendo hasta la unidad por encima de la frecuencia crítica, y una pared compuesta cuya rendija abierta del 1 % limita R al límite de área abierta" width="92%" loading="eager" />
+
+## Panel simple: ley de masas y coincidencia (Bies 7.2)
+
+Un panel flexible y poco rígido transmite el sonido al ser movido en bloque por
+la presión incidente; cuanto más pesado y mayor la frecuencia, más se resiste.
+La **ley de masas a incidencia normal** (Bies Ec. 7.40) y su forma de campo
+difuso (Ec. 7.42) son
+
+$$
+TL_0 = 10 \log_{10}\!\left[ 1 + \left(\frac{\pi f\, m''}{\rho_0 c_0}\right)^2 \right],
+\qquad TL = TL_0 - \Delta_{\text{banda}},
+$$
+
+con $m''$ la masa por unidad de superficie y $\Delta_{\text{banda}} = 5{,}5$ dB
+(tercio de octava) o $4{,}0$ dB (octava). Por encima del codo del argumento la
+ley de masas sube **6 dB por octava y 6 dB por duplicar la masa**: los dos
+hechos sobre los que descansa todo cálculo de aislamiento.
+
+Un panel real también es rígido, así que en la **frecuencia de coincidencia
+(crítica)** (Bies Ec. 7.3)
+
+$$
+f_c = \frac{c_0^2}{2\pi}\sqrt{\frac{m''}{B'}}
+    = \frac{0{,}55\, c_0^2}{c_L\, h},
+$$
+
+la longitud de onda de flexión libre iguala la longitud de onda de traza del
+sonido incidente y el panel se vuelve transparente: el **valle de coincidencia**.
+El método de Sharp mantiene la ley de masas de campo hasta $f_c/2$, cae con una
+recta en $\log f$ y desde $f_c$ sigue (Ec. 7.44)
+$TL = 10\lg[1 + (\pi f m''/\rho_0 c_0)^2] + 10\lg(2\eta f/\pi f_c)$ con el factor
+de pérdidas $\eta$. El valle se sitúa en el punto B de la carta de diseño de
+Bies, $TL = 20\lg(f_c m'') + 10\lg\eta - 44$.
+
+```python
+import numpy as np
+from phonometry import (
+    coincidence_frequency, plate_bending_stiffness,
+    single_panel_transmission_loss,
+)
+
+# Vidrio flotado de 6 mm: E = 62 GPa, rho = 2500 kg/m3, nu = 0.24, eta = 0.024.
+bands = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                  1000, 1250, 1600, 2000, 2500, 3150], dtype=float)
+mass = 2500.0 * 0.006                                 # 15 kg/m2
+bp = plate_bending_stiffness(6.2e10, 0.006, 0.24)     # B' [N.m]
+fc = coincidence_frequency(mass, bp)
+print(round(fc))                                      # 2107 Hz (Hopkins declara ~2079)
+
+res = single_panel_transmission_loss(bands, mass, critical_frequency=fc,
+                                     loss_factor=0.024)
+print(round(res.rating().rating))                     # 32  ->  Rw = 32 dB (vidrio 6 mm de catálogo)
+```
+
+El espectro predicho entra directamente en el índice ISO 717-1 mediante
+`res.rating()`, y en EN 12354 como el $R$ de elemento "predicho" allí donde la
+norma exigiría una medida de laboratorio.
+
+## Pared doble: la resonancia masa-muelle-masa (Bies 7.2.6)
+
+Dos hojas separadas por una cámara se comportan como un sistema
+masa-muelle-masa, siendo el aire de la cámara (o el relleno) el muelle. Por
+debajo de su **resonancia** (Bies Ec. 7.62, Hopkins Ec. 4.73)
+
+$$
+f_0 = \frac{1}{2\pi}\sqrt{\frac{s''\,(m_1 + m_2)}{m_1\, m_2}}
+    = 60\sqrt{\frac{m_1 + m_2}{m_1\, m_2\, d}}\quad\text{(cámara de aire vacía)},
+$$
+
+el conjunto se mueve como uno y sigue la ley de masas de la masa *combinada*;
+por encima, las dos leyes de masas se suman, reforzadas por la cámara, hasta la
+frecuencia límite $f_l = c_0/(2\pi d)$ donde el refuerzo satura en 6 dB
+(Ec. 7.64). Un relleno poroso (cualquier
+[`PorousMediumResult`](/phonometry/es/guides/porous-absorbers/)) ablanda la
+cámara y baja $f_0$.
+
+```python
+from phonometry import double_wall_transmission_loss, mass_spring_mass_resonance
+from phonometry import mass_law_transmission_loss, miki
+
+# Dos hojas de 12 kg/m2, cámara de aire de 75 mm.
+f0 = mass_spring_mass_resonance(12.0, 12.0, 0.075)
+print(round(f0))                                          # 89 Hz
+
+# Por debajo de f0 la pared doble iguala la ley de masas de la masa total 24 kg/m2:
+dw = double_wall_transmission_loss(bands, 12.0, 12.0, 0.075)
+print(round(float(dw.transmission_loss[0]), 1),
+      round(float(mass_law_transmission_loss(bands[0], 24.0)), 1))   # iguales
+
+# Un relleno de lana mineral (un modelo poroso de materials) baja la resonancia:
+fill = miki([f0], 7000.0)
+print(round(mass_spring_mass_resonance(12.0, 12.0, 0.075, cavity_medium=fill)))  # < 89 Hz
+```
+
+## Rendijas, orificios y aberturas (Hopkins 4.3.10)
+
+Un pequeño camino de aire es el límite real de cualquier construcción pesada. El
+coeficiente de transmisión de una rendija recta (Gomperts, Hopkins Ec. 4.99) y
+de un orificio circular (Wilson y Soroka, Ec. 4.102) se predicen directamente,
+con las resonancias de la rendija en $d + 2e = z\lambda/2$ (Ec. 4.101). Se
+combinan con la pared en la suma energética ponderada por área (Ec. 4.92)
+
+$$
+R = -10\log_{10}\!\left( \frac{1}{\sum_n S_n} \sum_n S_n\, 10^{-R_n/10} \right),
+$$
+
+de modo que una abertura desnuda de área relativa $S_a/S$ limita la composición
+a $10\lg(S/S_a)$: una abertura del 1 % nunca puede superar los 20 dB, sea cual
+sea la pared.
+
+```python
+from phonometry import (
+    composite_transmission_loss, slit_transmission_coefficient,
+    slit_resonance_frequencies,
+)
+
+# Una rendija de 2 mm x 100 mm de fondo: su transmisión tiene máximos en las
+# resonancias de media longitud de onda del fondo de la rendija.
+print(slit_resonance_frequencies(0.1, 0.002, orders=2).round().tolist())   # [~1500, ~3100]
+
+# Una pared de Rw = 50 dB con el 1 % de su área abierta como rendija queda limitada:
+print(round(float(composite_transmission_loss([0.99, 0.01], [50.0, 0.0])), 1))   # 20.0
+```
+
+## Eficiencia de radiación de una placa en flexión (Hopkins 2.9)
+
+Cuánta potencia aérea radia realmente una placa vibrante por unidad de velocidad
+cuadrática media es su **eficiencia de radiación** $\sigma$: el factor de
+radiación $\varepsilon$ que
+[Potencia sonora a partir de la vibración](/phonometry/es/guides/vibration-sound-power/)
+(ISO 7849) toma en otro caso como entrada medida. Por debajo de la frecuencia
+crítica la placa radia poco (modos de borde y de esquina); por encima
+$\sigma \to 1$ (Leppington/Maidanik, Hopkins Ec. 2.227-2.230):
+
+$$
+\sigma = \frac{1}{\sqrt{1 - f_c/f}} \quad (f > f_c), \qquad \sigma \to 1 .
+$$
+
+```python
+from phonometry import radiation_efficiency, sound_power_from_vibration
+
+# El panel de vidrio de 6 mm (1.5 x 1.25 m) del ejemplo de panel simple anterior.
+sig = radiation_efficiency(bands, 1.5, 1.25, fc)
+print(sig.radiation_efficiency[bands == 2000].round(2))    # ~2.5 (pico en coincidencia)
+
+# Alimenta la predicción directamente a ISO 7849 como el factor de radiación:
+lw = sound_power_from_vibration(velocity_level=80.0, area=1.875,
+                                radiation_factor=sig.radiation_efficiency,
+                                frequencies=bands)
+```
+
+## Movilidades puntuales de estructuras infinitas (Cremer Tabla 5.1)
+
+La potencia vibratoria que inyecta una fuerza puntual es
+$W = \tfrac12 |F|^2\,\mathrm{Re}\{Y\}$ (Cremer Ec. 5.23), así que la **movilidad**
+puntual $Y$ (la inversa de la impedancia) fija cuánta energía absorbe una
+estructura. Para estructuras infinitas son formas cerradas: una placa delgada
+infinita es una resistencia pura $Z = 8\sqrt{B'\,m''}$ (real, independiente de
+la frecuencia), mientras que una viga infinita tiene
+$Y = (1-\mathrm{j})/(4 m' c_B)$ (45 grados, decayendo como $\omega^{-1/2}$).
+Aportan la movilidad de receptor que EN 12354-5 necesita cuando no hay medida, y
+se empaquetan como un [`MobilityResult`](/phonometry/es/guides/mechanical-mobility/)
+de ISO 7626.
+
+```python
+from phonometry import infinite_plate_impedance, infinite_beam_mobility, injected_power
+
+z_plate = infinite_plate_impedance(bp, mass)          # Z = 8 sqrt(B' m'') [N.s/m]
+print(round(z_plate))                                 # real, independiente de la frecuencia
+w = injected_power(force=10.0, mobility=1.0 / z_plate)
+print(round(float(w) * 1e3, 3), "mW")                 # W = |F|^2 / (16 sqrt(B' m''))
+```
+
+<details>
+<summary>Ver el código de la figura conceptual</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import (
+    coincidence_frequency, composite_transmission_loss,
+    double_wall_transmission_loss, mass_law_transmission_loss,
+    mass_spring_mass_resonance, plate_bending_stiffness,
+    radiation_efficiency, single_panel_transmission_loss,
+)
+
+bands = np.array([50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                  1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000], dtype=float)
+fig, ax = plt.subplots(2, 2, figsize=(12, 9))
+
+bp = plate_bending_stiffness(6.2e10, 0.006, 0.24)
+fc = coincidence_frequency(15.0, bp)
+ml = mass_law_transmission_loss(bands, 15.0, incidence="field")
+sp = single_panel_transmission_loss(bands, 15.0, critical_frequency=fc, loss_factor=0.024)
+ax[0, 0].semilogx(bands, ml, "--", label="ley de masas de campo")
+ax[0, 0].semilogx(bands, sp.transmission_loss, "-o", ms=3, label="R de panel simple (Sharp)")
+ax[0, 0].axvline(fc, ls=":", color="r"); ax[0, 0].set_title("Panel simple")
+
+dw = double_wall_transmission_loss(bands, 12.0, 12.0, 0.075)
+ax[0, 1].semilogx(bands, mass_law_transmission_loss(bands, 24.0), "--", label="hoja simple")
+ax[0, 1].semilogx(bands, dw.transmission_loss, "-o", ms=3, label="pared doble")
+ax[0, 1].axvline(mass_spring_mass_resonance(12.0, 12.0, 0.075), ls=":", color="r")
+ax[0, 1].set_title("Pared doble")
+
+sig = radiation_efficiency(bands, 1.5, 1.25, fc)
+ax[1, 0].loglog(bands, sig.radiation_efficiency, "-o", ms=3, label=r"$\sigma(f)$")
+ax[1, 0].axhline(1.0, ls=":"); ax[1, 0].set_title("Eficiencia de radiación")
+
+wall = sp.transmission_loss
+comp = [float(composite_transmission_loss([0.99, 0.01], [w, 0.0])) for w in wall]
+ax[1, 1].semilogx(bands, wall, "-o", ms=3, label="pared maciza")
+ax[1, 1].semilogx(bands, comp, "-s", ms=3, label="pared + rendija 1 %")
+ax[1, 1].axhline(20.0, ls=":"); ax[1, 1].set_title("Compuesta con abertura")
+
+for a in ax.flat:
+    a.set_xlabel("Frecuencia [Hz]"); a.legend(fontsize=8); a.grid(alpha=0.3)
+fig.suptitle("Aislamiento acústico teórico de paneles")
+fig.tight_layout(); plt.show()
+```
+
+</details>
+
+### Parámetros de las funciones
+
+| Parámetro | Tipo | Unidades | Rango / defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `mass_per_area` | float | kg/m² | > 0 | Densidad superficial $m''$ |
+| `critical_frequency` / `bending_stiffness` | float | Hz / N·m | dar uno | Coincidencia $f_c$, o $B'$ para calcularla |
+| `loss_factor` | float | — | > 0, defecto `0.01` | Factor de pérdidas total $\eta$ |
+| `band` | str | — | `'third'` (−5,5 dB) / `'octave'` (−4,0 dB) | Ancho de la corrección de campo |
+| `mass1` / `mass2` | float | kg/m² | > 0 | Densidades superficiales de las hojas |
+| `gap` | float | m | > 0 | Profundidad de cámara $d$ |
+| `cavity_medium` | `PorousMediumResult` | — | defecto `None` | Relleno poroso; baja $f_0$ |
+| `width` / `depth` (rendija) | float | m | > 0 | Anchura $w$ / fondo $d$ de la rendija |
+| `field` / `position` (rendija) | str | — | `'diffuse'`/`'normal'`, `'mid'`/`'edge'` | Campo incidente y posición |
+| `radius` / `depth` (orificio) | float | m | > 0 | Radio $a$ / fondo $d$ del orificio |
+| `areas` / `reduction_indices` | seq | m² / dB | longitud $N$ | Elementos de la composición (1-D o (N, bandas)) |
+| `length_x` / `length_y` | float | m | > 0 | Dimensiones de la placa (radiación) |
+| `boundary` / `baffle` | str | — | `'simply_supported'`/`'clamped'`, `'infinite'`/`'perpendicular'` | Constantes de borde y bafle |
+
+`single_panel_transmission_loss` y `double_wall_transmission_loss` devuelven un
+`SoundReductionResult` (`transmission_loss`, `transmission_coefficient`,
+`critical_frequency` / `resonance_frequency`, `.rating()`, `.plot()`); las
+funciones de rendija y orificio devuelven un `ApertureTransmissionResult`
+(`transmission_coefficient`, `transmission_loss`, `.plot()`);
+`radiation_efficiency` un `RadiationEfficiencyResult` (`radiation_efficiency`,
+`radiation_index`, `.plot()`). Las predicciones arrastran las salvedades de sus
+fuentes (el método de Sharp por encima de $1{,}5\times$ la primera resonancia del
+panel; la rendija sin viscosidad de Gomperts válida para $w < 0{,}3\lambda$;
+"método n.º 1" de Leppington).
+
+## Véase también
+
+- [Predicción del aislamiento (EN 12354)](/phonometry/es/guides/insulation-prediction/):
+  ensambla el $R$ de elemento predicho o medido en el $R'_w$ in situ.
+- [Potencia sonora a partir de la vibración (ISO 7849)](/phonometry/es/guides/vibration-sound-power/):
+  consume la eficiencia de radiación predicha como su factor de radiación.
+- [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/guides/mechanical-mobility/):
+  la contraparte medida de las movilidades puntuales teóricas.
+- [Absorbentes porosos y multicapa](/phonometry/es/guides/porous-absorbers/): los
+  modelos de relleno de cámara que consume una pared doble.
+- Referencia de API: [`building.panel_transmission`](/phonometry/reference/api/building/panel-transmission/), [`building.aperture_transmission`](/phonometry/reference/api/building/aperture-transmission/), [`vibration.radiation_efficiency`](/phonometry/reference/api/vibration/radiation-efficiency/) y [`vibration.point_mobility`](/phonometry/reference/api/vibration/point-mobility/).

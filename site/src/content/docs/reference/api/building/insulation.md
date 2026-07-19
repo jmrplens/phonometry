@@ -623,7 +623,7 @@ finite and strictly positive, otherwise `ValueError` is raised.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If any supplied numeric field is not finite and strictly positive. |
+| ValueError | If a supplied dimension/mass/volume/pressure/requirement is not finite and strictly positive, a temperature is not finite, or a relative humidity is outside 0..100 %. |
 
 ### ReportMetadata.is_empty()
 

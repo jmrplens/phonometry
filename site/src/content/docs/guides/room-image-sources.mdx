@@ -1,0 +1,304 @@
+---
+title: "Image Sources and the Steady-State Room Field"
+description: "The deterministic image-source room impulse response of a rectangular room (Kuttruff, Vorländer) and the statistical steady-state level with the room constant, critical distance and Schroeder frequency (Bies)."
+references:
+  - type: book
+    authors: ["Kuttruff, H."]
+    year: 2016
+    title: "Room acoustics"
+    edition: "6th ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9781315372150"
+    note: "The image-source construction (§4.1), the Eyring reverberation and reverberation distance (§5.5–5.6) and the Schroeder frequency (§3.6) of this page."
+  - type: book
+    authors: ["Vorländer, M."]
+    year: 2020
+    title: "Auralization: Fundamentals of acoustics, modelling, simulation, algorithms and acoustic virtual reality"
+    edition: "2nd ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-030-51202-6"
+    note: "The mirror-source model of §1 (Chapter 11), with the reflection-factor and delay expressions."
+  - type: article
+    authors: ["Allen, J. B.", "Berkley, D. A."]
+    year: 1979
+    title: "Image method for efficiently simulating small-room acoustics"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 65
+    issue: 4
+    pages: "943-950"
+    doi: "10.1121/1.382599"
+    note: "The reflection-count decomposition of the rectangular-room image lattice used in §1."
+  - type: book
+    authors: ["Bies, D. A.", "Hansen, C. H.", "Howard, C. Q."]
+    year: 2017
+    title: "Engineering noise control"
+    edition: "5th ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9781351228152"
+    note: "The steady-state room field and the room constant of §2 (§6.4)."
+---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
+
+Two classical models predict the sound field in a rectangular room before it is
+ever built. The **image-source** model gives the deterministic early reflection
+pattern — the whole room impulse response as a sum of mirror images of the
+source — while the **steady-state** model gives the statistical level a source
+of known power settles to, split into a direct and a reverberant field. This
+page covers both in `phonometry.room`: the first complements the *measured*
+impulse response of the
+[Room Acoustics guide](/phonometry/guides/room-acoustics/) with a synthetic
+one, and the second complements the single decay rate of the
+[Reverberation-time prediction guide](/phonometry/guides/reverberation-prediction/)
+with a level-versus-distance prediction, bridging the
+[sound power](/phonometry/guides/sound-power/) of a source and the level it
+produces indoors.
+
+## 1. Image-source room impulse response
+
+A rigid or absorbing rectangular room — a *shoebox* — reflects a point source in
+its six walls, and each reflection is exactly the free-field sound of a **mirror
+image** of the source. Mirroring a coordinate in a wall
+($S_n = S - 2 d\,\mathbf{n}$) turns the source into a regular lattice of images,
+and the room impulse response is the direct sound plus one delayed, attenuated
+impulse per image,
+
+$$
+g(t) = \sum_n A_n\ \delta(t - t_n), \qquad
+A_n = \frac{1}{4\pi r_n}\ e^{-m r_n / 2} \prod_{\text{walls}} R_w^{\,k_{w,n}},
+\qquad t_n = \frac{r_n}{c}.
+$$
+
+Each image at distance $r_n$ from the receiver arrives at $t_n = r_n/c$ with an
+amplitude built from the $1/(4\pi r_n)$ spherical spreading, the product of the
+wall **pressure reflection factors** $R_w = \sqrt{1 - \alpha_w}$ each raised to
+the number of reflections $k_{w,n}$ that image made off wall $w$, and the air
+pressure loss $e^{-m r_n/2}$ over the path ($m$ the intensity attenuation
+coefficient, so intensity falls as $e^{-m r}$). A shoebox has exactly
+$\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to reflection order
+$i_0$ (1560 at order 10), and the reflection density grows as
+$\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$.
+
+```python
+import numpy as np
+from phonometry import room
+
+# A 7 x 5 x 3 m room, source and receiver off-centre.
+res = room.image_source_rir(
+    dimensions=(7.0, 5.0, 3.0),
+    source=(2.0, 1.6, 1.5),
+    receiver=(5.2, 3.4, 1.7),
+    absorption=0.12,          # uniform wall absorption (scalar)
+    fs=48000,
+    max_order=12,
+)
+
+print(res.ir.shape)                          # (n_samples,) broadband RIR
+print(round(res.direct_time * 1000, 2))      # direct-sound arrival, ms
+print(res.times.size == room.audible_image_count(12) + 1)   # images + source
+
+# The synthetic RIR flows straight into the ISO 3382 decay analysis.
+params = room.room_parameters(res.ir, res.fs, limits=None)
+print(bool(params.t30_valid[0]))             # True: the decay window is usable
+# T30 rises toward the Eyring estimate as max_order grows (see below); at a low
+# order the specular tail is truncated, so treat this as an order-limited value.
+print(round(float(params.t30[0]), 2))        # reverberation time, s
+```
+
+`image_source_rir` returns an `ImageSourceResult`. Its `ir` is the sampled RIR
+(a 1D array broadband, or one row per octave band for per-band absorption),
+while the **exact** sub-sample reflection table stays in `times`, `distances`,
+`orders`, `amplitudes` and `image_positions` — so the geometry is exact
+regardless of the sample rate. The direct sound and the individual early
+reflections are geometric quantities good to machine precision.
+
+The reflectogram below shows the whole pattern: the direct sound at 0 dB, then
+the reflection cloud coloured by reflection order decaying under the $1/r$
+spreading envelope. Order-1 reflections (the six walls) sit just below the
+direct sound; higher orders arrive later, denser and weaker.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/image_source_reflectogram.png" alt="Image-source reflectogram of a 7 by 5 by 3 metre room: the direct sound at 0 dB followed by a cloud of reflections coloured by reflection order that decays under the 1/r spreading envelope, denser and weaker with time" width="88%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import room
+
+res = room.image_source_rir((7.0, 5.0, 3.0), (2.0, 1.6, 1.5),
+                            (5.2, 3.4, 1.7), 0.12, fs=48000, max_order=10)
+
+# One line: the reflectogram (level in dB re direct vs arrival time, by order).
+res.plot()
+plt.show()
+
+# By hand: scatter the reflection amplitudes coloured by order.
+t_ms = np.asarray(res.times) * 1e3
+amp = np.asarray(res.amplitudes)
+level = 20 * np.log10(np.abs(amp) / np.max(np.abs(amp)))
+order = np.asarray(res.orders)
+fig, ax = plt.subplots()
+sc = ax.scatter(t_ms[order > 0], level[order > 0], c=order[order > 0],
+                cmap="viridis", s=18)
+ax.stem([t_ms[order == 0][0]], [0.0])         # direct sound
+fig.colorbar(sc, label="Reflection order")
+ax.set_xlabel("Arrival time [ms]"); ax.set_ylabel("Level re direct [dB]")
+ax.set_xlim(0, 120); ax.set_ylim(-60, 5)
+plt.show()
+```
+
+</details>
+
+**Per band, per wall and with air.** Pass per-band coefficients (a `(6, n_bands)`
+per-wall array, a per-band vector or a `frequencies` list) to synthesise one
+decay per octave band; a length-6 vector sets each wall separately (order
+`x0, xL, y0, yL, z0, zL`); and `air_attenuation` (the intensity coefficient `m`
+from `air_attenuation_m`) adds the `exp(-m r / 2)` air loss that eats the
+high-frequency tail.
+
+```python
+import numpy as np
+from phonometry import room
+
+freqs = [250.0, 500.0, 1000.0, 2000.0]
+alpha = np.array([[0.10, 0.15, 0.25, 0.40]] * 6)     # (6 walls, 4 bands)
+res = room.image_source_rir((7.0, 5.0, 3.0), (2.0, 1.6, 1.5), (5.2, 3.4, 1.7),
+                            alpha, fs=48000, max_order=12, frequencies=freqs)
+print(res.ir.shape)                                  # (4 bands, n_samples)
+print(np.round(np.sum(res.ir ** 2, axis=1), 4))      # more absorption -> less energy
+```
+
+**Reproducing the statistical decay.** The initial decay rate of the synthetic
+RIR reproduces the **Eyring** reverberation time
+$T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$, because the mean reflection rate
+$cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is close only in
+the near-cubic limit: an elongated room sustains energy along its long axis, so
+its pure *specular* decay runs slower than the diffuse-field Eyring estimate —
+exactly the anisotropy the
+[Fitzroy and Arau-Puchades models](/phonometry/guides/reverberation-prediction/)
+were built to correct. The model captures specular reflections only (no
+diffraction, no diffuse scattering) and is exact for real, angle-independent
+wall reflection factors.
+
+### `image_source_rir()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `dimensions` | (float, float, float) | m | all > 0 | Room lengths `(Lx, Ly, Lz)` |
+| `source` / `receiver` | (float, float, float) | m | strictly inside the room | Positions `(x, y, z)` |
+| `absorption` | scalar / (6,) / (n,) / (6, n) | — | `[0, 1]` | Uniform, per-wall, per-band, or per-wall per-band |
+| `fs` | int | Hz | > 0 | Sample rate |
+| `max_order` | int | — | ≥ 0, default 20 | Reflection-order cut-off |
+| `speed_of_sound` | float | m/s | > 0, default 343 | Speed of sound `c` |
+| `air_attenuation` | float or (n,) | 1/m | ≥ 0, default 0 | Air intensity coefficient `m` |
+| `duration` | float, optional | s | > 0 | RIR length (default: last image arrival) |
+| `frequencies` | (n,), optional | Hz | — | Band centres labelling a per-band result |
+
+Returns an `ImageSourceResult` (`ir`, `fs`, `frequencies`, and the exact
+`times`/`distances`/`orders`/`amplitudes`/`image_positions` reflection table)
+with `.plot()` and a `direct_time` property. `audible_image_count(order)` gives
+the shoebox image count and `reflection_density(t, volume)` the density
+$4\pi c^3 t^2 / V$.
+
+## 2. Steady-state room field
+
+When a source of constant sound power runs in a room, the level settles to the
+sum of a **direct field** that falls with distance and a diffuse **reverberant
+field** that is (approximately) the same everywhere. The **room constant**
+$R = S\bar\alpha/(1-\bar\alpha)$ measures how much reverberant field a given
+power builds up, and the steady-state level is
+
+$$
+L_p = L_W + 10 \lg\!\left( \frac{Q}{4\pi r^2} + \frac{4}{R} \right),
+$$
+
+with the source directivity factor $Q$ (1 omnidirectional, 2 on a hard floor,
+4 in an edge, 8 in a corner). The two terms cross at the **critical distance**
+$r_c = \sqrt{Q R / 16\pi}$: closer than $r_c$ the direct field dominates and
+doubling the distance drops the level by 6 dB; farther out the reverberant
+field takes over and moving away barely helps.
+
+```python
+from phonometry import room
+
+field = room.steady_state_field(
+    sound_power_level=90.0,     # Lw, dB re 1 pW
+    surface_area=100.0,          # total boundary area S, m^2
+    mean_absorption=0.2,         # mean Sabine absorption alpha_bar
+)
+print(round(field.room_constant, 1))          # 25.0 m^2
+print(round(field.critical_distance, 2))       # 0.71 m
+field.plot()                                    # direct / reverberant / total vs distance
+```
+
+The `SteadyFieldResult.plot()` draws the direct, reverberant and total levels
+against distance with the critical distance marked: the total curve follows the
+$1/r^2$ direct field near the source and flattens onto the reverberant plateau
+beyond $r_c$. The building blocks are exposed individually, so an emission
+measurement can flow straight into a level prediction:
+
+```python
+from phonometry import room
+
+R = room.room_constant(100.0, 0.2)                     # Bies room constant, 25 m^2
+print(round(float(room.critical_distance(R)), 3))      # 0.705 m (Q = 1)
+print(round(float(room.steady_state_spl(90.0, 5.0, R)), 2))   # level at 5 m, dB
+```
+
+Kuttruff's reverberation distance ($r_c = \sqrt{A/16\pi}$ for $Q = 1$) uses the
+Sabine absorption area $A = S\bar\alpha$ rather than the room constant
+$R = A/(1-\bar\alpha)$; the two coincide for a small $\bar\alpha$, and this
+module uses $R$ so that $r_c$ is exactly the crossover of its own
+`steady_state_spl`. Pass `characteristic_impedance=rho_c` to add the Bies
+$10\lg(\rho c / 400)$ term (about +0.14 dB at 20 °C).
+
+**Where the statistics fade.** The **Schroeder frequency**
+$f_s = 2000\sqrt{T/V}$ (V in m³, T in s) roughly marks the modal-to-diffuse
+transition, a heuristic crossover rather than a sharp cutoff: well below it
+discrete modes dominate and the diffuse assumptions of $R$ and $r_c$ grow
+unreliable, well above it the modes overlap and this statistical picture
+holds. Borderline rooms warrant a band-by-band check.
+
+```python
+from phonometry import room
+print(round(float(room.schroeder_frequency(1.0, 200.0)), 0))   # 141 Hz
+```
+
+### `steady_state_field()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `sound_power_level` | float | dB re 1 pW | — | Source power level `Lw` |
+| `surface_area` | float | m² | > 0 | Total boundary area `S` |
+| `mean_absorption` | float | — | `(0, 1)` | Mean Sabine absorption `alpha_bar` |
+| `distances` | 1D array, optional | m | > 0 | Distance grid (default: `0.1 rc` to `10 rc`) |
+| `directivity` | float | — | > 0, default 1 | Source directivity factor `Q` |
+| `characteristic_impedance` | float, optional | Pa·s/m | > 0 | Adds the `10 lg(rho c / 400)` term |
+
+Returns a `SteadyFieldResult` (`distances`, `direct`, `reverberant`, `total`,
+`critical_distance`, `room_constant`) with `.plot()`. The pieces
+`room_constant`, `critical_distance`, `schroeder_frequency` and
+`steady_state_spl` are also callable directly (each accepting per-band arrays).
+
+## See also
+
+- [Room Acoustics](/phonometry/guides/room-acoustics/): the *measured* impulse
+  response (ISO 18233) and the ISO 3382 parameters the synthetic RIR feeds.
+- [Reverberation-time prediction (Sabine, Eyring, Arau)](/phonometry/guides/reverberation-prediction/):
+  the statistical decay rate the image-source model reproduces, and the
+  anisotropy models beyond it.
+- [Sound absorption in enclosed spaces (EN 12354-6)](/phonometry/guides/enclosed-space-absorption/):
+  the equivalent absorption area behind the mean absorption `alpha_bar`.
+- [Sound Power](/phonometry/guides/sound-power/): the `Lw` that drives the
+  steady-state level.
+- [2D FDTD wave simulation](/phonometry/guides/fdtd-simulation/): the
+  independent wave solver used to cross-check the rigid-wall echo and the decay.
+- [Theory: Rooms and buildings](/phonometry/reference/theory/rooms-buildings/):
+  the image-lattice and steady-state derivations.
+- [Conformance report](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md):
+  the closed forms and worked anchors these implementations are validated
+  against.
+- API reference: [`room.image_source`](/phonometry/reference/api/rooms/image-source/)
+  and [`room.steady_field`](/phonometry/reference/api/rooms/steady-field/).

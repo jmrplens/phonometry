@@ -215,8 +215,22 @@ it; the list grows as guides gain their References sections.
   parameters.
   Cited by [Room Acoustics](room-acoustics.md),
   [Reverberation-time prediction](reverberation-prediction.md),
+  [Image sources and the steady-state room field](room-image-sources.md),
   [Sound absorption in enclosed spaces](enclosed-space-absorption.md) and
   [2D FDTD wave simulation](fdtd-simulation.md).
+- Vorländer, M. (2020). *Auralization: Fundamentals of acoustics, modelling,
+  simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer.
+  [doi:10.1007/978-3-030-51202-6](https://doi.org/10.1007/978-3-030-51202-6).
+  The mirror-source room model and the source-path-receiver auralization
+  chain.
+  Cited by [Image sources and the steady-state room field](room-image-sources.md).
+- Allen, J. B., & Berkley, D. A. (1979). Image method for efficiently
+  simulating small-room acoustics. *The Journal of the Acoustical Society of
+  America*, 65(4), 943-950.
+  [doi:10.1121/1.382599](https://doi.org/10.1121/1.382599).
+  The efficient rectangular-room image-source construction and its
+  reflection-count decomposition.
+  Cited by [Image sources and the steady-state room field](room-image-sources.md).
 - Sabine, W. C. (1922). *Collected papers on acoustics*. Harvard University
   Press.
   [Free scan at the Internet Archive](https://archive.org/details/collectedpaperso00sabi).
@@ -353,12 +367,14 @@ it; the list grows as guides gain their References sections.
   The formula compendium: layer reflection, multilayer schemes, diffuse-field
   absorption integrals and the empirical porous-material relations.
   Cited by [Porous and Multilayer Absorbers](porous-absorbers.md).
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2018). *Engineering noise
+- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
   control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0.
   [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
   The engineering-noise-control reference; its Appendix D collects the
-  porous-material coefficient sets and layered-construction recursions.
-  Cited by [Porous and Multilayer Absorbers](porous-absorbers.md).
+  porous-material coefficient sets and layered-construction recursions, and
+  its Chapter 6 covers the steady-state room field and the room constant.
+  Cited by [Porous and Multilayer Absorbers](porous-absorbers.md) and
+  [Image sources and the steady-state room field](room-image-sources.md).
 - Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous
   absorbent materials. *Applied Acoustics*, 3(2), 105-116.
   [doi:10.1016/0003-682X(70)90031-9](https://doi.org/10.1016/0003-682X(70)90031-9).

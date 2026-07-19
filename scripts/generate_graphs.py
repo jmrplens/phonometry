@@ -621,6 +621,20 @@ _ES_EXACT = {
     "PHAT prewhitens the cross-spectrum and restores it":
         "señal coloreada: el correlador simple ensancha el pico,\n"
         "PHAT preblanquea el espectro cruzado y lo recupera",
+    # Room acoustics: image-source reflectogram (Kuttruff 4.1 / Vorlander 11.4)
+    "Image-Source Room Impulse Response: a 7x5x3 m room (order <= 10)":
+        "Respuesta al impulso por fuentes imagen: sala de 7x5x3 m "
+        "(orden <= 10)",
+    "Reflection order": "Orden de reflexión",
+    "Arrival time [ms]": "Tiempo de llegada [ms]",
+    "Reflection level re direct [dB]": "Nivel de reflexión rel. directo [dB]",
+    r"$1/r$ spreading envelope": r"Envolvente de divergencia $1/r$",
+    "Reflections (image sources)": "Reflexiones (fuentes imagen)",
+    "Direct sound (order 0)": "Sonido directo (orden 0)",
+    "each reflection is a mirror image of the source;\n"
+    "amplitude = product of wall reflection factors / (4 pi r)":
+        "cada reflexión es una imagen especular de la fuente;\n"
+        "amplitud = producto de factores de reflexión de pared / (4 pi r)",
     # Underwater acoustics (ISO 17208 ship radiated noise; ISO 18406 pile driving)
     "Ship Equivalent Monopole Source Level (ISO 17208-2)":
         "Nivel de fuente monopolar equivalente de buque (ISO 17208-2)",
@@ -1257,6 +1271,9 @@ _PNG_FIGURES = frozenset(
         "numerical_propagation",
         "airport_contour",
         "fdtd_simulation",
+        # Dense reflectogram: hundreds of image-source stems/markers make the
+        # SVG far heavier than the raster (as for schroeder_decay above).
+        "image_source_reflectogram",
     }
 )
 
@@ -3949,6 +3966,61 @@ def generate_gcc_phat_delay(output_dir: str) -> None:
             color=COLOR_FG)
     plt.tight_layout()
     save_figure(output_dir, "gcc_phat_delay.svg")
+    plt.close()
+
+
+def generate_image_source_reflectogram(output_dir: str) -> None:
+    """Image-source reflectogram: the synthetic RIR as reflections by order."""
+    print("Generating image_source_reflectogram...")
+    from phonometry import image_source_rir
+
+    dims = (7.0, 5.0, 3.0)
+    res = image_source_rir(dims, (2.0, 1.6, 1.5), (5.2, 3.4, 1.7),
+                           0.12, fs=48000, max_order=10)
+    times = np.asarray(res.times) * 1e3  # ms
+    amp = np.asarray(res.amplitudes)
+    orders = np.asarray(res.orders)
+    direct = float(np.max(np.abs(amp)))
+    level = 20.0 * np.log10(np.maximum(np.abs(amp), 1e-30) / direct)
+    dist = np.asarray(res.distances)
+    d0 = float(dist[int(np.argmin(dist))])
+    envelope = 20.0 * np.log10(np.maximum(d0 / dist, 1e-30))
+
+    window = times <= 120.0
+    fig, ax = plt.subplots(figsize=(10, 6))
+    env_sort = np.argsort(times[window])
+    ax.plot(times[window][env_sort], envelope[window][env_sort],
+            color=COLOR_GRID, linestyle="--", linewidth=1.2,
+            label=r"$1/r$ spreading envelope", zorder=1)
+    is_direct = orders == 0
+    refl = window & ~is_direct
+    sc = ax.scatter(times[refl], level[refl], c=orders[refl], cmap="viridis",
+                    s=18, alpha=0.85, zorder=3,
+                    label="Reflections (image sources)")
+    d = window & is_direct
+    ax.vlines(times[d], -60.0, level[d], color=COLOR_PRIMARY, linewidth=2.0,
+              zorder=4)
+    ax.plot(times[d], level[d], "o", color=COLOR_PRIMARY, ms=9, zorder=5,
+            label="Direct sound (order 0)")
+
+    cbar = fig.colorbar(sc, ax=ax, pad=0.02)
+    cbar.set_label("Reflection order")
+    ax.set_xlabel("Arrival time [ms]")
+    ax.set_ylabel("Reflection level re direct [dB]")
+    ax.set_title("Image-Source Room Impulse Response: a 7x5x3 m room "
+                 "(order <= 10)", fontweight="bold", pad=12)
+    ax.set_xlim(0.0, 120.0)
+    ax.set_ylim(-60.0, 5.0)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    ax.text(0.015, 0.03,
+            "each reflection is a mirror image of the source;\n"
+            "amplitude = product of wall reflection factors / (4 pi r)",
+            transform=ax.transAxes, va="bottom", ha="left", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "image_source_reflectogram.svg")
     plt.close()
 
 
@@ -7244,6 +7316,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Correlation / time-delay estimation: GCC-PHAT vs the direct
     # correlator on a colored signal pair (Knapp & Carter 1976).
     generate_gcc_phat_delay,
+    # Room acoustics: the synthetic image-source room impulse response as a
+    # reflectogram of mirror-image reflections by order (Kuttruff 4.1).
+    generate_image_source_reflectogram,
     # Underwater acoustics: ship radiated noise / monopole source
     # level (ISO 17208) and pile-driving sound exposure (ISO 18406).
     generate_ship_source_level,

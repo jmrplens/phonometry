@@ -56,6 +56,30 @@ $$
 
 The distraction distance rD and privacy distance rP are the distances where a **linear** (not logarithmic) regression of STI against distance crosses 0.50 and 0.20; a non-negative fitted slope (STI not falling with distance) makes them undefined, realising the standard's "can prove impossible to determine" note.
 
+### Image-source room impulse response (Kuttruff 4.1, Vorländer 11)
+
+A rectangular room reflects a point source in its walls; each reflection equals the free-field sound of a **mirror image** of the source. Mirroring a coordinate in a wall ($S_n = S - 2 d\,\mathbf{n}$, Vorländer Eq. 11.36) turns the source into a regular lattice of images, and the room impulse response is the sum of the direct sound and one delayed, attenuated impulse per image (Kuttruff Eqs. 4.4–4.5),
+
+$$
+g(t) = \sum_n A_n\ \delta(t - t_n), \qquad
+A_n = \frac{1}{4\pi r_n}\ e^{-m r_n / 2} \prod_{\text{walls}} R_w^{\,k_{w,n}}, \qquad
+t_n = \frac{r_n}{c},
+$$
+
+with the $1/(4\pi r_n)$ spherical spreading, the product of the wall **pressure reflection factors** $R_w = \sqrt{1 - \alpha_w}$ (Vorländer Eq. 11.39; $|R|^2 = 1-\alpha$ in energy) each raised to the number of reflections $k_{w,n}$ that image made off wall $w$, and the air pressure attenuation $e^{-m r_n/2}$ ($m$ the *intensity* attenuation constant). Along one axis the reflection counts of the image at lattice index $n$ and parity $p$ are $|n-p|$ and $|n|$ off the two walls (Allen & Berkley 1979), so the total order is $\sum_i |2 n_i - p_i|$; a shoebox has $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order $i_0$ (Kuttruff Eq. 9.23), and the reflection density grows as $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$ (Kuttruff Eq. 4.6).
+
+The initial decay rate of the specular reverberant energy recovers the **Eyring** reverberation time $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$ (Kuttruff Eq. 5.23), because the mean reflection rate $cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is exact only near cubic geometry; an elongated room sustains energy along its long axis, so the pure specular decay runs slower than Eyring's diffuse-field estimate (the anisotropy the Fitzroy/Arau-Puchades models correct). The model is specular only — no diffraction or diffuse scattering — and exact only for real, angle-independent reflection factors.
+
+### Steady-state room field (Bies 6.4, Kuttruff 5.6)
+
+A source of constant power sets up a steady level made of a direct field falling with distance and a diffuse **reverberant** field that is (approximately) uniform. With the **room constant** $R = S\bar\alpha/(1-\bar\alpha)$ (Bies Eq. 6.44) and the directivity factor $Q$,
+
+$$
+L_p = L_W + 10 \lg\!\left( \frac{Q}{4\pi r^2} + \frac{4}{R} \right) \left[ + 10 \lg\frac{\rho c}{400} \right] \quad \text{(Bies Eq. 6.43)},
+$$
+
+the optional last term (about $+0.14$ dB at 20 °C) correcting a characteristic impedance away from 400 Pa·s/m. The **critical distance** $r_c = \sqrt{Q R / 16\pi}$ is where the two fields cross; Kuttruff's reverberation distance (Eq. 5.44, $r_c = \sqrt{A/16\pi}$ for $Q=1$) uses the Sabine area $A = S\bar\alpha$ instead of $R = A/(1-\bar\alpha)$, the two coinciding for small $\bar\alpha$. The **Schroeder frequency** $f_s = 2000\sqrt{T/V}$ (Kuttruff Eq. 3.44) roughly marks the modal-to-diffuse transition, a heuristic crossover rather than a sharp cutoff: well below it discrete room modes dominate and these diffuse-field relations grow unreliable, well above it the modes overlap and the relations hold. Borderline rooms still warrant a band-by-band check. See the [Image sources and steady-state field guide](room-image-sources.md).
+
 ### Field insulation and weighted rating (ISO 16283-1, ISO 717-1)
 
 Per one-third-octave band the level difference $D = L_1 - L_2$ (energy-averaged over microphone positions, $L = 10 \log_{10}[(1/n) \sum_i 10^{L_i/10}]$) is normalised two ways: the standardized level difference $D_{nT} = D + 10 \log_{10}(T/T_0)$ with $T_0 = 0.5$ s (so $D_{nT} = D$ when $T = T_0$), and the apparent sound reduction index $R' = D + 10 \log_{10}(S/A)$ with the Sabine absorption area $A = 0.16\ V / T$, hence $R' = D + 10 \log_{10}[S T / (0.16\ V)]$.
@@ -389,7 +413,23 @@ See the [Materials guide](materials.md) for usage.
 - Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press.
   [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
   The statistical decay theory behind backward integration and the Sabine
-  relations used throughout this page.
+  relations used throughout this page, the image-source construction
+  (Section 4.1), the Eyring reverberation and reverberation distance
+  (Sections 5.5–5.6) and the Schroeder frequency (Section 3.6).
+- Vorländer, M. (2020). *Auralization: Fundamentals of acoustics, modelling,
+  simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer.
+  [doi:10.1007/978-3-030-51202-6](https://doi.org/10.1007/978-3-030-51202-6).
+  The image-source / mirror-source model of the impulse-response section
+  (Chapter 11).
+- Allen, J. B., & Berkley, D. A. (1979). Image method for efficiently
+  simulating small-room acoustics. *The Journal of the Acoustical Society of
+  America*, 65(4), 943-950.
+  [doi:10.1121/1.382599](https://doi.org/10.1121/1.382599).
+  The reflection-count decomposition of the rectangular-room image lattice.
+- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
+  control* (5th ed.). CRC Press.
+  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
+  The steady-state room field and the room constant (Section 6.4).
 - Schroeder, M. R. (1965). New method of measuring reverberation time.
   *The Journal of the Acoustical Society of America*, 37(3), 409-412.
   [doi:10.1121/1.1909343](https://doi.org/10.1121/1.1909343).

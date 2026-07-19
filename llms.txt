@@ -42,6 +42,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Speech Intelligibility Index (SII)](https://jmrplens.github.io/phonometry/guides/speech-intelligibility/)
 - [Sound Intensity (p-p method)](https://jmrplens.github.io/phonometry/guides/intensity/)
 - [Room Acoustics](https://jmrplens.github.io/phonometry/guides/room-acoustics/)
+- [Image sources and the steady-state room field (Kuttruff / Vorländer / Bies)](https://jmrplens.github.io/phonometry/guides/room-image-sources/)
 - [Field Insulation Measurement and Ratings](https://jmrplens.github.io/phonometry/guides/insulation-field/)
 - [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/guides/insulation-lab/)
 - [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/guides/insulation-prediction/)

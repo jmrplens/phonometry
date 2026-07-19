@@ -12,6 +12,12 @@ from .enclosed_space_absorption import (
     object_fraction,
     reverberation_time,
 )
+from .image_source import (
+    ImageSourceResult,
+    audible_image_count,
+    image_source_rir,
+    reflection_density,
+)
 from .open_plan import OpenPlanResult, open_plan_metrics
 from .reverberation_prediction import (
     ReverberationModelResult,
@@ -28,6 +34,14 @@ from .room_acoustics import (
     RoomAcousticsResult,
     decay_curve,
     room_parameters,
+)
+from .steady_field import (
+    SteadyFieldResult,
+    critical_distance,
+    room_constant,
+    schroeder_frequency,
+    steady_state_field,
+    steady_state_spl,
 )
 from .room_ir import (
     ImpulseResponseResult,
@@ -49,6 +63,7 @@ from .room_noise import (
 
 __all__ = [
     "DecayCurve",
+    "ImageSourceResult",
     "ImpulseResponseResult",
     "ImpulseResponseWarning",
     "NCResult",
@@ -57,14 +72,18 @@ __all__ = [
     "ReverberationModelResult",
     "ReverberationResult",
     "RoomAcousticsResult",
+    "SteadyFieldResult",
     "air_absorption_area",
     "arau_puchades_reverberation_time",
+    "audible_image_count",
+    "critical_distance",
     "decay_curve",
     "enclosed_space_reverberation",
     "equivalent_absorption_area",
     "eyring_reverberation_time",
     "fitzroy_reverberation_time",
     "hard_object_absorption",
+    "image_source_rir",
     "impulse_response",
     "inverse_filter",
     "mean_absorption",
@@ -76,10 +95,15 @@ __all__ = [
     "object_fraction",
     "open_plan_metrics",
     "rc_curve",
+    "reflection_density",
     "reverberation_time",
     "reverberation_time_models",
+    "room_constant",
     "room_criterion",
     "room_parameters",
     "sabine_reverberation_time",
+    "schroeder_frequency",
+    "steady_state_field",
+    "steady_state_spl",
     "sweep_signal",
 ]

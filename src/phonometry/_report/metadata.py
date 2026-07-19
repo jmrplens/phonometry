@@ -34,8 +34,15 @@ class ReportMetadata:
     :ivar mass_per_area: Measured mass per unit area, in kg/m^2.
     :ivar source_volume: Source-room volume, in m^3.
     :ivar receiving_volume: Receiving-room volume, in m^3.
-    :ivar temperature: Air temperature during the test, in degrees Celsius.
+    :ivar temperature: Air temperature during the test, in degrees Celsius (a
+        single representative value; use the per-room fields below when the
+        source and receiving rooms are reported separately).
     :ivar relative_humidity: Relative humidity during the test, in %.
+    :ivar source_temperature: Source-room air temperature, in degrees Celsius.
+    :ivar source_relative_humidity: Source-room relative humidity, in %.
+    :ivar receiving_temperature: Receiving-room air temperature, in degrees
+        Celsius.
+    :ivar receiving_relative_humidity: Receiving-room relative humidity, in %.
     :ivar pressure: Ambient (static) air pressure during the test, in kPa.
     :ivar test_room: Test-room / facility identification.
     :ivar mounting: Mounting condition of the specimen (e.g. the ISO 10140-1
@@ -67,6 +74,10 @@ class ReportMetadata:
     receiving_volume: float | None = None
     temperature: float | None = None
     relative_humidity: float | None = None
+    source_temperature: float | None = None
+    source_relative_humidity: float | None = None
+    receiving_temperature: float | None = None
+    receiving_relative_humidity: float | None = None
     pressure: float | None = None
     test_room: str | None = None
     mounting: str | None = None
@@ -86,6 +97,10 @@ class ReportMetadata:
         "receiving_volume",
         "temperature",
         "relative_humidity",
+        "source_temperature",
+        "source_relative_humidity",
+        "receiving_temperature",
+        "receiving_relative_humidity",
         "pressure",
         "requirement",
     )

@@ -135,6 +135,22 @@ def _render_figure_drawing(
         # The fiche states Rw/Ln,w (C; Ctr) in the boxed result, so the plot's
         # own title would only duplicate it at a large size.
         ax.set_title("")
+        # Fixed 0-based y-axis like accredited reports (expanded if the data
+        # exceeds the default top), so fiches are visually comparable.
+        default_top = 80.0 if result.quantity == "impact" else 60.0
+        _, data_top = ax.get_ylim()
+        ax.set_ylim(0.0, max(default_top, float(np.ceil(data_top / 10.0) * 10.0)))
+        # Move the legend above the axes, as the reference reports do.
+        handles, labels = ax.get_legend_handles_labels()
+        existing = ax.get_legend()
+        if existing is not None:
+            existing.remove()
+        if handles:
+            ax.legend(
+                handles, labels, loc="lower left",
+                bbox_to_anchor=(0.0, 1.005), ncol=len(handles),
+                frameon=False, fontsize=8, handlelength=1.6, columnspacing=1.2,
+            )
         fig.tight_layout()
         with matplotlib.rc_context({"svg.fonttype": "path"}):
             fig.savefig(svg_path, format="svg")
@@ -210,43 +226,44 @@ def _metadata_pairs(
             ("Date of test", metadata.test_date),
         ]
     )
+    def num(value: float | None) -> str | None:
+        return _fmt_num(value) if value is not None else None
+
+    # Per-room temperature/humidity when supplied; otherwise a single value.
+    per_room_t = (
+        metadata.source_temperature is not None
+        or metadata.receiving_temperature is not None
+    )
+    per_room_rh = (
+        metadata.source_relative_humidity is not None
+        or metadata.receiving_relative_humidity is not None
+    )
     conditions = group(
         [
-            (
-                "Source room volume [m<super>3</super>]",
-                _fmt_num(metadata.source_volume)
-                if metadata.source_volume is not None
-                else None,
-            ),
+            ("Source room volume [m<super>3</super>]", num(metadata.source_volume)),
+            ("Source room temp. [&#176;C]", num(metadata.source_temperature)),
+            ("Source room humidity [%]", num(metadata.source_relative_humidity)),
             (
                 "Receiving room volume [m<super>3</super>]",
-                _fmt_num(metadata.receiving_volume)
-                if metadata.receiving_volume is not None
-                else None,
+                num(metadata.receiving_volume),
+            ),
+            ("Receiving room temp. [&#176;C]", num(metadata.receiving_temperature)),
+            (
+                "Receiving room humidity [%]",
+                num(metadata.receiving_relative_humidity),
             ),
             (
                 "Temperature [&#176;C]",
-                _fmt_num(metadata.temperature)
-                if metadata.temperature is not None
-                else None,
+                None if per_room_t else num(metadata.temperature),
             ),
             (
                 "Relative humidity [%]",
-                _fmt_num(metadata.relative_humidity)
-                if metadata.relative_humidity is not None
-                else None,
+                None if per_room_rh else num(metadata.relative_humidity),
             ),
-            (
-                "Ambient pressure [kPa]",
-                _fmt_num(metadata.pressure)
-                if metadata.pressure is not None
-                else None,
-            ),
+            ("Ambient pressure [kPa]", num(metadata.pressure)),
             (
                 "Mass per unit area [kg/m<super>2</super>]",
-                _fmt_num(metadata.mass_per_area)
-                if metadata.mass_per_area is not None
-                else None,
+                num(metadata.mass_per_area),
             ),
             ("Mounting", metadata.mounting),
         ]

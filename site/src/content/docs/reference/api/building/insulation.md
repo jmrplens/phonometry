@@ -566,6 +566,10 @@ ReportMetadata(
     receiving_volume: float | None = None,
     temperature: float | None = None,
     relative_humidity: float | None = None,
+    source_temperature: float | None = None,
+    source_relative_humidity: float | None = None,
+    receiving_temperature: float | None = None,
+    receiving_relative_humidity: float | None = None,
     pressure: float | None = None,
     test_room: str | None = None,
     mounting: str | None = None,
@@ -598,8 +602,12 @@ finite and strictly positive, otherwise `ValueError` is raised.
 | `mass_per_area` | Measured mass per unit area, in kg/m^2. |
 | `source_volume` | Source-room volume, in m^3. |
 | `receiving_volume` | Receiving-room volume, in m^3. |
-| `temperature` | Air temperature during the test, in degrees Celsius. |
+| `temperature` | Air temperature during the test, in degrees Celsius (a single representative value; use the per-room fields below when the source and receiving rooms are reported separately). |
 | `relative_humidity` | Relative humidity during the test, in %. |
+| `source_temperature` | Source-room air temperature, in degrees Celsius. |
+| `source_relative_humidity` | Source-room relative humidity, in %. |
+| `receiving_temperature` | Receiving-room air temperature, in degrees Celsius. |
+| `receiving_relative_humidity` | Receiving-room relative humidity, in %. |
 | `pressure` | Ambient (static) air pressure during the test, in kPa. |
 | `test_room` | Test-room / facility identification. |
 | `mounting` | Mounting condition of the specimen (e.g. the ISO 10140-1 mounting code or a short description). |

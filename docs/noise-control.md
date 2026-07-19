@@ -20,7 +20,7 @@ two ends (Bies Eq. (8.133); Munjal, *Acoustics of Ducts and Mufflers*), and a
 compound silencer is the ordered matrix product of its elements. A straight
 duct of length `L` and area `S` is (Bies Eq. (8.143), no flow)
 
-```
+```text
 [ cos(kL)            j (rho c / S) sin(kL) ]
 [ j (S / rho c) sin(kL)   cos(kL)          ] ,   k = omega / c,
 ```
@@ -30,7 +30,7 @@ and a side branch of acoustic impedance `Z_b` is the shunt
 the compound matrix `T` (Bies Eq. (8.141); for equal inlet/outlet areas,
 Eq. (8.148))
 
-```
+```text
 TL = 20 log10( (1/2) | T11 + T12/Zc + Zc T21 + T22 | ) ,   Zc = rho c / S,
 ```
 
@@ -44,7 +44,7 @@ A chamber of area `S_exp` and length `L` between pipes of area `S_duct` has the
 closed-form transmission loss (Bies Eq. (8.111)) with area ratio
 `m = S_exp / S_duct`:
 
-```
+```text
 TL = 10 log10[ 1 + (1/4) (m - 1/m)^2 sin^2(kL) ] ,
 ```
 
@@ -118,7 +118,7 @@ A sealed enclosure reduces the radiated noise by its panel transmission loss
 `R`, minus a penalty `C` for the reverberant build-up inside the small, hard
 cavity (Bies Eqs. (7.103), (7.111)):
 
-```
+```text
 IL = R - C ,   C = 10 log10( 0.3 + S_E / R_i ) ,
 ```
 

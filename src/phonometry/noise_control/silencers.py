@@ -149,6 +149,11 @@ def cascade(*matrices: _Complex) -> _Complex:
     """
     if not matrices:
         raise ValueError("cascade() needs at least one matrix.")
+    n = matrices[0].shape[0]
+    if any(m.shape[0] != n for m in matrices[1:]):
+        raise ValueError(
+            "cascade() matrices must share the same frequency grid (n_freq)."
+        )
     total = matrices[0]
     for m in matrices[1:]:
         total = np.matmul(total, m)
@@ -544,6 +549,11 @@ def extended_tube_chamber(
     lb = require_non_negative(outlet_extension, "outlet_extension")
     if s_exp <= s_duct:
         raise ValueError("'chamber_area' must exceed 'pipe_area'.")
+    if la + lb > length:
+        raise ValueError(
+            "the inlet and outlet extensions cannot together exceed the "
+            "chamber length (they would overlap inside the chamber)."
+        )
     annulus = s_exp - s_duct
 
     elements = []

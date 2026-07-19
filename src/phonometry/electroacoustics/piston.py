@@ -94,8 +94,9 @@ def piston_resistance(x: ArrayLike) -> np.ndarray | float:
         raise ValueError("'x' must be non-negative and finite.")
     with np.errstate(invalid="ignore", divide="ignore"):
         out = 1.0 - 2.0 * special.j1(arr) / arr
-    # J1(x)/x -> 1/2 as x -> 0, so R1 -> 0; fill the removable singularity.
-    out = np.where(arr == 0.0, 0.0, out)
+    # J1(x)/x -> 1/2 as x -> 0, so R1 -> 0; the input is validated finite, so
+    # the 0/0 at x = 0 is the only non-finite point and is set to that limit.
+    out = np.where(np.isfinite(out), out, 0.0)
     return out[()] if out.ndim == 0 else out
 
 
@@ -115,8 +116,9 @@ def piston_reactance(x: ArrayLike) -> np.ndarray | float:
         raise ValueError("'x' must be non-negative and finite.")
     with np.errstate(invalid="ignore", divide="ignore"):
         out = 2.0 * special.struve(1, arr) / arr
-    # H1(x)/x -> 0 as x -> 0 (H1 ~ 2 x^2 / 3 pi), so X1 -> 0.
-    out = np.where(arr == 0.0, 0.0, out)
+    # H1(x)/x -> 0 as x -> 0 (H1 ~ 2 x^2 / 3 pi), so X1 -> 0; the 0/0 at x = 0
+    # is the only non-finite point (the input is validated finite).
+    out = np.where(np.isfinite(out), out, 0.0)
     return out[()] if out.ndim == 0 else out
 
 
@@ -140,8 +142,9 @@ def piston_directivity(ka: ArrayLike, theta: ArrayLike) -> np.ndarray | float:
     u = ka_arr * np.sin(theta_arr)
     with np.errstate(invalid="ignore", divide="ignore"):
         out = 2.0 * special.j1(u) / u
-    # 2 J1(u)/u -> 1 as u -> 0 (on-axis, or ka = 0).
-    out = np.where(u == 0.0, 1.0, out)
+    # 2 J1(u)/u -> 1 as u -> 0 (on-axis, or ka = 0): the 0/0 there is the only
+    # non-finite point and is set to that limit.
+    out = np.where(np.isfinite(out), out, 1.0)
     return out[()] if out.ndim == 0 else out
 
 
@@ -155,13 +158,12 @@ def _directivity_index(ka: NDArray[np.float64]) -> NDArray[np.float64]:
     """
     theta = np.linspace(0.0, 0.5 * np.pi, 2001)
     sin_t = np.sin(theta)
-    di = np.empty_like(ka)
-    for i, kai in enumerate(ka):
-        d = np.asarray(piston_directivity(float(kai), theta), dtype=np.float64)
-        integrand = d**2 * sin_t
-        integral = float(np.trapezoid(integrand, theta))
-        di[i] = 10.0 * np.log10(2.0 / integral)
-    return di
+    d = np.asarray(
+        piston_directivity(ka[:, None], theta[None, :]), dtype=np.float64
+    )
+    integrand = d**2 * sin_t[None, :]
+    integral = np.trapezoid(integrand, theta, axis=-1)
+    return np.asarray(10.0 * np.log10(2.0 / integral), dtype=np.float64)
 
 
 @dataclass(frozen=True)

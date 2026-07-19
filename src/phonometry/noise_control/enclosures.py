@@ -80,6 +80,41 @@ class EnclosureResult:
         return plot_enclosure(self, ax=ax, **kwargs)
 
 
+def _resolve_frequencies(
+    frequencies: ArrayLike | None,
+) -> NDArray[np.float64] | None:
+    """Validate an optional 1-D positive frequency grid (Hz)."""
+    if frequencies is None:
+        return None
+    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    if freqs.ndim != 1 or freqs.size == 0:
+        raise ValueError("'frequencies' must be a non-empty 1-D array.")
+    if np.any(freqs <= 0.0) or not np.all(np.isfinite(freqs)):
+        raise ValueError("'frequencies' must be positive and finite.")
+    return freqs
+
+
+def _resolve_panel_r(
+    panel_transmission_loss: ArrayLike | Callable[[NDArray[np.float64]], ArrayLike],
+    freqs: NDArray[np.float64] | None,
+) -> NDArray[np.float64]:
+    """Resolve the panel transmission loss ``R`` into a validated 1-D array."""
+    if callable(panel_transmission_loss):
+        if freqs is None:
+            raise ValueError(
+                "'frequencies' is required when 'panel_transmission_loss' "
+                "is a callable."
+            )
+        r = np.atleast_1d(np.asarray(panel_transmission_loss(freqs), dtype=np.float64))
+    else:
+        r = np.atleast_1d(np.asarray(panel_transmission_loss, dtype=np.float64))
+    if r.ndim != 1 or r.size == 0:
+        raise ValueError("'panel_transmission_loss' must be a non-empty 1-D array.")
+    if not np.all(np.isfinite(r)):
+        raise ValueError("'panel_transmission_loss' must be finite.")
+    return r
+
+
 def enclosure_insertion_loss(
     panel_transmission_loss: ArrayLike | Callable[[NDArray[np.float64]], ArrayLike],
     external_area: float,
@@ -110,29 +145,12 @@ def enclosure_insertion_loss(
     s_e = require_positive(external_area, "external_area")
     s_i = require_positive(internal_area, "internal_area")
 
-    freqs: NDArray[np.float64] | None = None
-    if frequencies is not None:
-        freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-        if freqs.ndim != 1 or freqs.size == 0:
-            raise ValueError("'frequencies' must be a non-empty 1-D array.")
-        if np.any(freqs <= 0.0) or not np.all(np.isfinite(freqs)):
-            raise ValueError("'frequencies' must be positive and finite.")
-
-    if callable(panel_transmission_loss):
-        if freqs is None:
-            raise ValueError(
-                "'frequencies' is required when 'panel_transmission_loss' "
-                "is a callable."
-            )
-        r = np.atleast_1d(np.asarray(panel_transmission_loss(freqs), dtype=np.float64))
-    else:
-        r = np.atleast_1d(np.asarray(panel_transmission_loss, dtype=np.float64))
-    if r.ndim != 1 or r.size == 0:
-        raise ValueError("'panel_transmission_loss' must be a non-empty 1-D array.")
-    if not np.all(np.isfinite(r)):
-        raise ValueError("'panel_transmission_loss' must be finite.")
+    freqs = _resolve_frequencies(frequencies)
+    r = _resolve_panel_r(panel_transmission_loss, freqs)
 
     alpha = np.asarray(internal_absorption, dtype=np.float64)
+    if alpha.ndim > 1:
+        raise ValueError("'internal_absorption' must be a scalar or a 1-D array.")
     if np.any(alpha <= 0.0) or np.any(alpha >= 1.0) or not np.all(np.isfinite(alpha)):
         raise ValueError("'internal_absorption' must lie strictly in (0, 1).")
 

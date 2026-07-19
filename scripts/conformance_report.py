@@ -5869,7 +5869,7 @@ def _chk_helmholtz_resonance() -> Outcome:
 @register(
     _NOISE_CONTROL,
     "Bies 5e Eq. (8.73)",
-    "Side-branch TL = 20 lg|1 + rho c/(2 Sd Zb)| (QWT branch, closed form)",
+    "Side-branch TL = 20 lg abs(1 + rho c/(2 Sd Zb)) (QWT branch, closed form)",
 )
 def _chk_side_branch_closed_form() -> Outcome:
     from phonometry.noise_control import silencers as _sl

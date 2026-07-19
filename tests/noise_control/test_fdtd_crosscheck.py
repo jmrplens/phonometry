@@ -79,8 +79,11 @@ def test_fdtd_matches_expansion_chamber_peak_tl() -> None:
 
 
 def test_fdtd_run_is_deterministic() -> None:
+    # Two independent runs of the (RNG-free) solver must be bit-identical.
     f = _C / (4.0 * _L)
-    assert _transmitted_rms(f) == _transmitted_rms(f)
+    first = _transmitted_rms(f)
+    second = _transmitted_rms(f)
+    assert first == second
 
 
 def test_four_pole_peak_frequency_and_trough() -> None:

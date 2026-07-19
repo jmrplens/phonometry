@@ -41,15 +41,18 @@ def plot_reactive_silencer(
     f = np.asarray(result.frequencies, dtype=np.float64)
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("label", "Transmission loss")
-    ax.plot(f, np.asarray(result.transmission_loss), lw=1.8, **kwargs)
+    kwargs.setdefault("lw", 1.8)
+    ax.plot(f, np.asarray(result.transmission_loss), **kwargs)
     if result.insertion_loss is not None:
         ax.plot(f, np.asarray(result.insertion_loss), color=_C_SECONDARY,
                 lw=1.4, ls="--", label="Insertion loss")
     if result.resonances is not None:
-        for i, fr in enumerate(np.atleast_1d(np.asarray(result.resonances))):
+        labeled = False
+        for fr in np.atleast_1d(np.asarray(result.resonances)):
             if f.min() <= fr <= f.max():
                 ax.axvline(fr, color=_C_TERTIARY, ls=":", lw=1.0,
-                           label="Resonance" if i == 0 else None)
+                           label="Resonance" if not labeled else None)
+                labeled = True
     ax.set_xlabel(_FREQ_LABEL)
     ax.set_ylabel("Loss [dB]")
     ax.set_title(f"Reactive silencer: {result.kind}")
@@ -74,7 +77,10 @@ def plot_hvac_spectrum(
     is_power = result.quantity == "sound_power_level"
     kwargs.setdefault("color", _C_SECONDARY if is_power else _C_PRIMARY)
     kwargs.setdefault("label", result.label)
-    ax.plot(f, np.asarray(result.values), lw=1.8, marker="o", ms=3, **kwargs)
+    kwargs.setdefault("lw", 1.8)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("ms", 3)
+    ax.plot(f, np.asarray(result.values), **kwargs)
     ax.set_xlabel(_FREQ_LABEL)
     ax.set_ylabel(
         "Sound power level [dB re 1 pW]" if is_power else "Attenuation [dB]"
@@ -111,8 +117,10 @@ def plot_enclosure(
             ls=":", marker="^", ms=3, label="Interior correction C")
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("label", "Insertion loss (R - C)")
-    ax.plot(x, np.asarray(result.insertion_loss), lw=1.9, marker="o", ms=3,
-            **kwargs)
+    kwargs.setdefault("lw", 1.9)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("ms", 3)
+    ax.plot(x, np.asarray(result.insertion_loss), **kwargs)
     ax.set_ylabel("Level [dB]")
     ax.set_title("Machine enclosure insertion loss")
     ax.grid(True, which="both", alpha=0.3)

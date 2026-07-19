@@ -78,6 +78,14 @@ def _positive(value: float, name: str) -> float:
     return scalar
 
 
+def _validate_notch_q(notch_q: float) -> float:
+    """Validate the effective notch quality factor (AES17 5.2.8: 1.2 <= Q <= 3)."""
+    q = float(notch_q)
+    if not 1.2 <= q <= 3.0:
+        raise ValueError("'notch_q' must be within the AES17 range [1.2, 3].")
+    return q
+
+
 #: Minimum accepted capture length. A shorter buffer cannot resolve a
 #: fundamental and its harmonics with any useful frequency resolution (a
 #: 16-sample capture was previously accepted and produced meaningless ratios).
@@ -365,8 +373,7 @@ def thd_plus_noise(
     """
     sig = _validate_signal(signal)
     fs_v = _positive(fs, "fs")
-    if not 1.2 <= float(notch_q) <= 3.0:
-        raise ValueError("'notch_q' must be within the AES17 range [1.2, 3].")
+    _validate_notch_q(notch_q)
     if fundamental is None:
         freqs, amp = _amplitude_spectrum(sig, fs_v, window)
         f0 = _fundamental_frequency(freqs, amp)
@@ -526,8 +533,7 @@ def weighted_thd(
     fs_v = _positive(fs, "fs")
     if weighting not in ("468", "A", "C"):
         raise ValueError("'weighting' must be '468', 'A' or 'C'.")
-    if not 1.2 <= float(notch_q) <= 3.0:
-        raise ValueError("'notch_q' must be within the AES17 range [1.2, 3].")
+    _validate_notch_q(notch_q)
     if fundamental is None:
         freqs, amp = _amplitude_spectrum(sig, fs_v, window)
         f0 = _fundamental_frequency(freqs, amp)
@@ -1018,8 +1024,7 @@ def dynamic_range(
     """
     sig = _validate_signal(signal)
     fs_v = _positive(fs, "fs")
-    if not 1.2 <= float(notch_q) <= 3.0:
-        raise ValueError("'notch_q' must be within the AES17 range [1.2, 3].")
+    _validate_notch_q(notch_q)
     reference = _full_scale_rms(full_scale)
     if fundamental is None:
         freqs, amp = _amplitude_spectrum(sig, fs_v, window)

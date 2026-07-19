@@ -86,7 +86,10 @@ def plot_stoi(result: "STOIResult", ax: Axes | None = None, **kwargs: Any) -> Ax
         ax.plot(np.arange(scores.size), scores, **kwargs)
         ax.set_xlabel("Analysis segment")
         ax.set_ylabel("Spectral correlation $d_m$")
-    ax.set_ylim(0.0, 1.0)
+    # The intermediate correlations are cosine-similarity quantities in
+    # [-1, 1] (unlike the [0, 1] ratios of plot_sti/plot_sii), so keep room
+    # for anti-correlated bands rather than clipping them at zero.
+    ax.set_ylim(-1.0, 1.0)
     ax.set_title(f"{name} = {result.value:.3f}")
     ax.grid(True, axis="y", alpha=0.3)
     return ax

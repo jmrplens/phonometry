@@ -146,11 +146,27 @@ def _analysis_window() -> NDArray[np.float64]:
     return np.asarray(np.hanning(_FRAME + 2)[1:-1], dtype=np.float64)
 
 
+def _n_frames(size: int, hop: int) -> int:
+    """Number of length-``_FRAME`` frames at spacing ``hop`` (last edge dropped).
+
+    Matches the reference STOI framing ``range(0, size - _FRAME, hop)`` (the
+    trailing partial frame is excluded, as in the authors' MATLAB / pystoi).
+    """
+    return len(range(0, size - _FRAME, hop))
+
+
 def _frame_signal(sig: NDArray[np.float64], window: NDArray[np.float64],
                   hop: int) -> NDArray[np.float64]:
-    """Stack of ``window``-tapered, ``hop``-spaced frames of length ``_FRAME``."""
-    starts = range(0, sig.size - _FRAME, hop)
-    return np.array([window * sig[i:i + _FRAME] for i in starts], dtype=np.float64)
+    """Stack of ``window``-tapered, ``hop``-spaced frames of length ``_FRAME``.
+
+    Vectorised frame extraction (a single strided gather then one broadcast
+    multiply), numerically identical to windowing each frame in turn.
+    """
+    starts = np.arange(0, sig.size - _FRAME, hop)
+    if starts.size == 0:
+        return np.empty((0, _FRAME), dtype=np.float64)
+    frames = sig[starts[:, None] + np.arange(_FRAME)]
+    return np.asarray(frames * window, dtype=np.float64)
 
 
 def _remove_silent_frames(
@@ -198,11 +214,8 @@ def _band_spectrogram(
     the one-third-octave bands: the square root of the DFT magnitude energy
     summed over each band's bins.
     """
-    hop = _FRAME // 2
-    starts = range(0, sig.size - _FRAME, hop)
-    spectra = np.array(
-        [np.fft.rfft(window * sig[i:i + _FRAME], n=_NFFT) for i in starts]
-    )
+    frames = _frame_signal(sig, window, _FRAME // 2)  # (frames, _FRAME)
+    spectra = np.fft.rfft(frames, n=_NFFT, axis=1)  # one batched transform
     power = np.abs(spectra) ** 2  # (frames, bins)
     band_power = power @ matrix.T  # (frames, bands)
     return np.asarray(np.sqrt(band_power).T, dtype=np.float64)  # (bands, frames)
@@ -308,8 +321,7 @@ def stoi(
     # there is nothing to segment. Checking the frame count here keeps the
     # friendly message (a bare matmul on an empty spectrogram would raise a
     # cryptic shape error instead).
-    n_frames = len(range(0, x.size - _FRAME, _FRAME // 2))
-    if n_frames < _N_SEGMENT:
+    if _n_frames(x.size, _FRAME // 2) < _N_SEGMENT:
         raise ValueError(
             "Too few short-time frames to score (need at least 30 after "
             "silent-frame removal, i.e. about 0.4 s of active speech); check "

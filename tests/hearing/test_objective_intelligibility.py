@@ -105,18 +105,22 @@ def test_resampling_path_runs() -> None:
 
 def test_input_validation() -> None:
     x = _speech_like(6)
+    shorter = x[:-10]
+    two_d = x.reshape(2, -1)
+    with_nan = x.copy()
+    with_nan[0] = np.nan
+    empty = np.array([])
+
     with pytest.raises(ValueError, match="equal length"):
-        stoi(x, x[:-10], FS)
+        stoi(x, shorter, FS)
     with pytest.raises(ValueError, match="1-D"):
-        stoi(x.reshape(2, -1), x.reshape(2, -1), FS)
+        stoi(two_d, two_d, FS)
     with pytest.raises(ValueError, match="positive"):
         stoi(x, x, 0)
     with pytest.raises(ValueError, match="finite"):
-        bad = x.copy()
-        bad[0] = np.nan
-        stoi(x, bad, FS)
+        stoi(x, with_nan, FS)
     with pytest.raises(ValueError, match="non-empty"):
-        stoi(np.array([]), np.array([]), FS)
+        stoi(empty, empty, FS)
 
 
 def test_too_short_signal_raises() -> None:

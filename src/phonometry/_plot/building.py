@@ -45,6 +45,9 @@ if TYPE_CHECKING:
     from ..building.panel_transmission import SoundReductionResult
     from ..building.aperture_transmission import ApertureTransmissionResult
 
+#: Shared x-axis label for the frequency-domain building plots.
+_FREQ_LABEL = "Frequency [Hz]"
+
 def plot_sound_reduction(
     result: "SoundReductionResult", ax: Axes | None = None, **kwargs: Any
 ) -> Axes:
@@ -74,7 +77,7 @@ def plot_sound_reduction(
             label=f"$f_0$ = {result.resonance_frequency:.0f} Hz",
         )
     format_frequency_axis(ax, float(freq.min()), float(freq.max()))
-    ax.set_xlabel("Frequency [Hz]")
+    ax.set_xlabel(_FREQ_LABEL)
     ax.set_ylabel("Sound reduction index $R$ [dB]")
     ax.set_title(f"Predicted sound insulation ({result.model})")
     ax.legend(loc="best", fontsize="small")
@@ -99,7 +102,7 @@ def plot_aperture_transmission(
     ax.semilogx(freq, r, label=f"{result.kind} aperture $R$", **kwargs)
     ax.axhline(0.0, color=_C_MUTED, ls=":", lw=0.9)
     format_frequency_axis(ax, float(freq.min()), float(freq.max()))
-    ax.set_xlabel("Frequency [Hz]")
+    ax.set_xlabel(_FREQ_LABEL)
     ax.set_ylabel("Sound reduction index $R$ [dB]")
     ax.set_title("Aperture sound transmission (Gomperts / Wilson-Soroka)")
     ax.legend(loc="best", fontsize="small")
@@ -280,7 +283,7 @@ def plot_radiated_power(
     opts: dict[str, Any] = {"color": "tab:red", "alpha": 0.8, "label": "$L_W$"}
     opts.update(kwargs)
     ax.bar(positions, l_w, **opts)
-    _band_axis(ax, labels, xlabel="Frequency [Hz]")
+    _band_axis(ax, labels, xlabel=_FREQ_LABEL)
 
     if result.l_w_dba is not None:
         ax.axhline(
@@ -370,7 +373,7 @@ def plot_installed_structure_borne(
     if result.frequencies is not None:
         x = np.asarray(result.frequencies, dtype=np.float64)
         ax.set_xscale("log")
-        ax.set_xlabel("Frequency [Hz]")
+        ax.set_xlabel(_FREQ_LABEL)
     else:
         x = np.arange(1, n_bands + 1, dtype=np.float64)
         ax.set_xlabel("Band")

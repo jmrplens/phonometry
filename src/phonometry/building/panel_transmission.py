@@ -76,6 +76,8 @@ _AIR_DENSITY: float = 1.205
 _GAMMA: float = 1.4
 #: Field-incidence correction ``dB`` (Bies Eq. 7.42), keyed by band width.
 _FIELD_CORRECTION: dict[str, float] = {"third": 5.5, "octave": 4.0}
+#: Error message for a non-positive frequency (shared by the module funcs).
+_FREQ_POSITIVE_MSG = "'frequency' must be positive."
 
 __all__ = [
     "SoundReductionResult",
@@ -127,7 +129,7 @@ def mass_law_transmission_loss(
     rho0 = require_positive(air_density, "air_density")
     f = np.asarray(frequency, dtype=np.float64)
     if np.any(f <= 0.0):
-        raise ValueError("'frequency' must be positive.")
+        raise ValueError(_FREQ_POSITIVE_MSG)
     ratio = np.pi * f * m2 / (rho0 * c0)
     tl = 10.0 * np.log10(1.0 + ratio**2)
     if incidence == "field":
@@ -226,7 +228,7 @@ def single_panel_transmission_loss(
     if f.ndim != 1 or f.size == 0:
         raise ValueError("'frequency' must be a non-empty 1-D array.")
     if np.any(f <= 0.0):
-        raise ValueError("'frequency' must be positive.")
+        raise ValueError(_FREQ_POSITIVE_MSG)
     if critical_frequency is not None:
         fc = require_positive(critical_frequency, "critical_frequency")
     elif bending_stiffness is not None:
@@ -361,7 +363,7 @@ def double_wall_transmission_loss(
     if f.ndim != 1 or f.size == 0:
         raise ValueError("'frequency' must be a non-empty 1-D array.")
     if np.any(f <= 0.0):
-        raise ValueError("'frequency' must be positive.")
+        raise ValueError(_FREQ_POSITIVE_MSG)
 
     f0 = mass_spring_mass_resonance(
         m1, m2, d, cavity_medium=cavity_medium,

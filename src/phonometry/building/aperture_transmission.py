@@ -165,10 +165,14 @@ def slit_transmission_coefficient(
     cos_ke = np.cos(k_big * e)
     kx = k_big * x
     kx_2ke = kx + 2.0 * k_big * e
-    numerator = m * k_big * cos_ke**2
+    # Numerator and denominator are both multiplied by cos^2(Ke) relative to
+    # the printed Eq. 4.99, an identity that removes the division by cos(Ke)
+    # (which vanishes at Ke = pi/2 + n*pi) and keeps tau finite there.
+    numerator = m * k_big * cos_ke**4
     denominator = 2.0 * n**2 * (
-        np.sin(kx_2ke) ** 2 / cos_ke**2
-        + (k_big**2 / (2.0 * n**2)) * (1.0 + np.cos(kx) * np.cos(kx_2ke))
+        np.sin(kx_2ke) ** 2
+        + (k_big**2 / (2.0 * n**2)) * cos_ke**2
+        * (1.0 + np.cos(kx) * np.cos(kx_2ke))
     )
     tau = numerator / denominator
     return ApertureTransmissionResult(
@@ -196,7 +200,10 @@ def slit_resonance_frequencies(
     :param orders: Number of resonance orders ``z = 1..orders`` (>= 1).
     :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).
     :return: The resonance frequencies (Hz), one per order.
-    :raises ValueError: for a non-positive input or ``orders < 1``.
+    :raises ValueError: for a non-positive input, ``orders < 1``, or a slit so
+        wide relative to its depth that the effective depth ``d + 2e`` is
+        non-positive (no resonance exists; ``width`` must be much less than the
+        wavelength).
     """
     d = require_positive(depth, "depth")
     w = require_positive(width, "width")
@@ -211,7 +218,14 @@ def slit_resonance_frequencies(
         for _ in range(50):
             k_big = (2.0 * np.pi * f / c0) * w
             e = (np.log(8.0 / k_big) - _EULER_GAMMA) / np.pi
-            f_new = z * c0 / (2.0 * (d + 2.0 * e * w))
+            effective_depth = d + 2.0 * e * w
+            if effective_depth <= 0.0:
+                raise ValueError(
+                    "slit too wide relative to its depth: the effective depth "
+                    "d + 2e is non-positive, so no resonance exists (the "
+                    "Gomperts slit model requires 'width' << wavelength)."
+                )
+            f_new = z * c0 / (2.0 * effective_depth)
             if abs(f_new - f) < 1e-9 * f:
                 f = f_new
                 break

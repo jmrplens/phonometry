@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **335/335 conformance checks pass** across 41 domains and 207 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **338/338 conformance checks pass** across 42 domains and 210 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -705,6 +705,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bies Eq. 7.64 (double wall) | Below f0 = mass law of the combined mass | 11.6144 dB (+/-0 dB) | 11.6144 dB | 0 dB | &#9989; |
 | Hopkins Eq. 4.92 (composite) | 1 % open area caps R at 10 lg(S/Sa) | 20 dB (+/-0.05 dB) | 19.9996 dB | 0 dB | &#9989; |
 | Hopkins Eq. 4.99/4.101 (Gomperts slit) | Transmission maximum at first resonance | 1544.9615 Hz (+/-15 Hz) | 1542.9615 Hz | -2 Hz | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Atmospheric refraction (Salomons rays / GFPE)</b>: 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Salomons Sec. 4.4 (ray turning height, linear profile) | Turning height of a 10 deg ray vs Rc(1 - cos theta0) (circular arc), m | 26.457 m (+/-0.1 m) | 26.457 m | 0 m | &#9989; |
+| Salomons Eq. (3.4) (GFPE vs spherical-wave ground effect, homogeneous) | PE relative level at 500 m over grassland vs Weyl-Van der Pol, dB | -13.919 dB (+/-0.5 dB) | -13.842 dB | 0.077 dB | &#9989; |
+| Salomons Eq. (3.4) (GFPE hard ground vs two-ray, homogeneous) | PE relative level at 500 m over a rigid ground vs the coherent two-ray, dB | 5.997 dB (+/-0.6 dB) | 5.593 dB | -0.405 dB | &#9989; |
 
 </details>
 

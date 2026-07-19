@@ -6715,7 +6715,7 @@ f_c = \frac{c_0^2}{2\pi}\sqrt{\frac{m''}{B'}} = \frac{0.55\, c_0^2}{c_L\, h},
 $$
 
 the free bending wavelength matches the trace wavelength and the panel goes
-transparent — the **coincidence dip**. Sharp's method holds the field-incidence
+transparent: the **coincidence dip**. Sharp's method holds the field-incidence
 mass law up to $f_c/2$, drops through a straight line in $\log f$, and from $f_c$
 upward follows Eq. 7.44 with the loss factor $\eta$; the dip sits at Bies
 design-chart point B, $TL = 20\lg(f_c m'') + 10\lg\eta - 44$.
@@ -6787,7 +6787,7 @@ $$
 R = -10\log_{10}\!\left( \frac{1}{\sum_n S_n} \sum_n S_n\, 10^{-R_n/10} \right),
 $$
 
-so a bare opening of relative area $S_a/S$ caps the composite at $10\lg(S/S_a)$ —
+so a bare opening of relative area $S_a/S$ caps the composite at $10\lg(S/S_a)$:
 a 1 % opening can never do better than 20 dB, whatever the wall.
 
 ```python
@@ -6807,7 +6807,7 @@ print(round(float(composite_transmission_loss([0.99, 0.01], [50.0, 0.0])), 1))  
 ## Radiation efficiency of a bending plate (Hopkins 2.9)
 
 How much airborne power a vibrating plate radiates per unit mean-square velocity
-is its **radiation efficiency** $\sigma$ — the radiation factor $\varepsilon$
+is its **radiation efficiency** $\sigma$, the radiation factor $\varepsilon$
 that [Sound Power from Surface Vibration](vibration-sound-power.md) (ISO 7849)
 otherwise takes as a measured input. Below the critical frequency the plate
 radiates weakly; above it $\sigma \to 1$ (Leppington/Maidanik, Eqs 2.227-2.230):

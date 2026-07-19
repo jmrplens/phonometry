@@ -89,6 +89,25 @@ def test_slit_resonances_are_half_wavelength_spaced() -> None:
     assert fr[2] / fr[0] == pytest.approx(3.0, rel=0.05)
 
 
+def test_slit_resonance_rejects_wide_shallow_slit() -> None:
+    # A very wide, shallow slit drives the effective depth d + 2e non-positive;
+    # the resonance is undefined and must raise rather than return NaN.
+    with pytest.raises(ValueError, match="too wide"):
+        slit_resonance_frequencies(0.001, 0.2, orders=1)
+
+
+def test_slit_transmission_finite_through_cos_ke_zero() -> None:
+    # The reformulated Eq. 4.99 (no division by cos(Ke)) stays finite where
+    # cos(Ke) crosses zero.
+    import warnings
+
+    f = np.linspace(50.0, 10000.0, 8000)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        tau = slit_transmission_coefficient(f, 0.01, 0.02).transmission_coefficient
+    assert np.all(np.isfinite(tau))
+
+
 def test_slit_reduction_index_from_coefficient() -> None:
     res = slit_transmission_coefficient([500.0], 0.002, 0.1)
     r = transmission_loss_from_coefficient(res.transmission_coefficient)

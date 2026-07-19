@@ -187,7 +187,7 @@ because the end correction `e` depends weakly on frequency.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive input or `orders < 1`. |
+| ValueError | for a non-positive input, `orders < 1`, or a slit so wide relative to its depth that the effective depth `d + 2e` is non-positive (no resonance exists; `width` must be much less than the wavelength). |
 
 ## slit_transmission_coefficient
 

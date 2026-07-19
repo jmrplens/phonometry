@@ -1,0 +1,488 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Synthetic room impulse response by the image-source method (rectangular room).
+
+A rigid-walled (or absorbing) rectangular room -- a *shoebox* -- reflects a
+point source in its six walls. Each reflection is equivalent to the free-field
+sound of a mirror image of the source, so the room impulse response (RIR) is
+the sum of the direct sound and one delayed, attenuated pulse per image
+(Kuttruff, *Room Acoustics* 6th ed., 4.1, Equations (4.4)-(4.5); Vorlander,
+*Auralization* 2nd ed., 11.4, the Allen-Berkley/Borish construction). This is
+the deterministic complement of the statistical reverberation-time formulae of
+:mod:`phonometry.room.reverberation_prediction`: where those give a single
+decay rate, the image-source model gives the whole early reflection pattern and
+the decay it implies.
+
+**Image lattice.** For a room ``[0, Lx] x [0, Ly] x [0, Lz]`` with the source at
+``(xs, ys, zs)``, mirroring a coordinate in a wall (Vorlander Equation (11.36),
+``S_n = S - 2 d n``) turns the source into a regular lattice of images. Along
+one axis the images sit at ``2 n L +- x`` for every integer ``n`` and the two
+mirror parities; the parity index ``p`` and the lattice index ``n`` give the
+number of reflections off the two walls of that axis as ``|n - p|`` (wall at 0)
+and ``|n|`` (wall at ``L``), so the total reflection order of an image is
+``|2 n_x - p_x| + |2 n_y - p_y| + |2 n_z - p_z|`` (Allen & Berkley, *J. Acoust.
+Soc. Am.* 65 (1979) 943). The audible images up to order ``i0`` number
+``(2/3)(2 i0^3 + 3 i0^2 + 4 i0)`` in a shoebox (Kuttruff Equation (9.23)); the
+temporal density of reflections grows as ``dN/dt = 4 pi c^3 t^2 / V``
+(Kuttruff Equation (4.6)).
+
+**Per-image contribution.** Image ``i`` at distance ``r_i`` from the receiver
+arrives at ``t_i = r_i / c`` (Vorlander Equation (11.38)) with amplitude
+
+    A_i = [ product over walls of R_wall ^ (reflections there) ]
+          * exp(-m r_i / 2) / (4 pi r_i),
+
+the ``1 / (4 pi r_i)`` spherical spreading, the product of the wall
+*pressure* reflection factors ``R = sqrt(1 - alpha)`` (Vorlander Equation
+(11.39); ``|R|^2 = 1 - alpha`` in energy, Kuttruff 4.1) each raised to the
+number of reflections that image made off that wall, and the air pressure
+attenuation ``exp(-m r_i / 2)`` over the path (Kuttruff 4.1; ``m`` the
+*intensity* attenuation constant, so intensity falls as ``exp(-m r)``). The RIR
+is the sum of unit impulses at ``t_i`` weighted by ``A_i`` (Kuttruff Equation
+(4.5), ``g(t) = sum_i A_i delta(t - t_i)``), assembled broadband from a single
+absorption set or one curve per octave band from per-band coefficients.
+
+The Schroeder backward integral of the synthetic RIR (see
+:func:`phonometry.room.decay_curve`) reproduces the Eyring reverberation time
+``T = -24 V ln 10 / (c S ln(1 - alpha_bar))`` (Kuttruff Equation (5.23)) of the
+same room to within a few percent, closing the loop between this deterministic
+model and the statistical prediction. The construction is exact only for walls
+whose reflection factor is real and angle-independent (Kuttruff 4.1: exact for
+a specific wall impedance of +-1, a good approximation when the source stands a
+few wavelengths from every wall); it captures specular reflections only, with
+no diffraction or diffuse scattering.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
+from numpy.typing import ArrayLike, NDArray
+
+from .._internal.validation import require_positive
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
+#: Default speed of sound ``c0`` (20 degC dry air), in m/s.
+DEFAULT_SPEED_OF_SOUND = 343.0
+
+#: Wall order for a six-tuple of coefficients: the low and high wall of each
+#: axis. ``x0``/``xL`` are the walls at ``x = 0`` / ``x = Lx`` and so on.
+WALL_ORDER = ("x0", "xL", "y0", "yL", "z0", "zL")
+
+
+def _resolve_walls(
+    absorption: ArrayLike, n_freq: int | None
+) -> tuple[NDArray[np.float64], int]:
+    """Validate the absorption spec into a ``(6, n_bands)`` reflection map.
+
+    Accepts a scalar (uniform on every wall and band), a length-6 per-wall
+    vector, a per-band vector (uniform across walls) or a ``(6, n_bands)``
+    per-wall per-band array. Returns ``(R, n_bands)`` with the *pressure*
+    reflection factor ``R = sqrt(1 - alpha)`` (Vorlander Equation (11.39)),
+    shaped ``(6, n_bands)``.
+
+    ``n_freq`` (the length of the caller's ``frequencies``, or ``None``)
+    disambiguates a length-6 1D array: with a matching ``frequencies`` it is
+    read as a per-band curve (uniform on every wall), otherwise as the six
+    per-wall coefficients. A single band cannot be both, so declaring the
+    bands via ``frequencies`` resolves the collision.
+
+    :raises ValueError: for a non-finite coefficient, a coefficient outside
+        ``[0, 1]`` (a wall cannot reflect more energy than it receives, so
+        unlike the Sabine models the edge-effect ``alpha > 1`` is rejected
+        here), or a shape that is neither a scalar, length 6, a band vector
+        nor ``(6, n_bands)``.
+    """
+    alpha = np.asarray(absorption, dtype=np.float64)
+    if not np.all(np.isfinite(alpha)):
+        raise ValueError("absorption coefficients must be finite.")
+    if np.any(alpha < 0.0) or np.any(alpha > 1.0):
+        raise ValueError(
+            "absorption coefficients must lie in [0, 1]: the image-source "
+            "reflection factor R = sqrt(1 - alpha) has no real value for "
+            "alpha > 1, so the edge-effect coefficients above 1 that Sabine "
+            "tolerates must be capped at 1 here."
+        )
+    if alpha.ndim == 0:
+        walls = np.full((6, 1), float(alpha), dtype=np.float64)
+    elif alpha.ndim == 1 and alpha.shape[0] == 6 and n_freq != 6:
+        # Length 6 with no matching frequencies -> the six per-wall values.
+        walls = alpha[:, np.newaxis]
+    elif alpha.ndim == 1:
+        # A per-band curve, uniform across walls (this branch also handles a
+        # length-6 curve when frequencies declares six bands).
+        walls = np.broadcast_to(alpha, (6, alpha.shape[0])).copy()
+    elif alpha.ndim == 2 and alpha.shape[0] == 6:
+        walls = alpha
+    else:
+        raise ValueError(
+            "'absorption' must be a scalar, a length-6 per-wall vector, a "
+            "per-band vector, or a (6, n_bands) per-wall per-band array; got "
+            f"shape {alpha.shape}."
+        )
+    return np.sqrt(1.0 - walls), walls.shape[1]
+
+
+def _axis_images(
+    coord: float, length: float, max_order: int
+) -> tuple[NDArray[np.float64], NDArray[np.int_], NDArray[np.int_]]:
+    """Image positions and per-wall reflection counts along one axis.
+
+    Enumerates the lattice index ``n`` and parity ``p`` with axial order
+    ``|2 n - p| <= max_order``. Returns ``(positions, counts_low,
+    counts_high)`` where ``counts_low = |n - p|`` reflections off the wall at
+    ``0`` and ``counts_high = |n|`` off the wall at ``length``.
+    """
+    positions: list[float] = []
+    low: list[int] = []
+    high: list[int] = []
+    for n in range(-max_order, max_order + 1):
+        for p in (0, 1):
+            n_low = abs(n - p)
+            n_high = abs(n)
+            if n_low + n_high > max_order:
+                continue
+            positions.append(2.0 * n * length + (1.0 - 2.0 * p) * coord)
+            low.append(n_low)
+            high.append(n_high)
+    return (
+        np.asarray(positions, dtype=np.float64),
+        np.asarray(low, dtype=np.int_),
+        np.asarray(high, dtype=np.int_),
+    )
+
+
+@dataclass(frozen=True)
+class ImageSourceResult:
+    """Synthetic room impulse response by the image-source method.
+
+    ``ir`` is the sampled RIR: a 1D array for a broadband model, or a
+    ``(n_bands, n_samples)`` array with one decay per octave band for per-band
+    absorption. Each image contributes a unit impulse at the nearest sample to
+    its exact arrival time; the exact, sub-sample reflection table is kept
+    separately in ``times`` / ``distances`` / ``orders`` / ``amplitudes`` /
+    ``image_positions`` so the geometry stays exact regardless of ``fs``.
+
+    :ivar ir: Sampled impulse response (Kuttruff Equation (4.5)); shape
+        ``(n_samples,)`` (broadband) or ``(n_bands, n_samples)`` (per band).
+    :ivar fs: Sample rate, Hz.
+    :ivar frequencies: Band centre frequencies, Hz, or ``None`` for a
+        broadband model.
+    :ivar times: Exact arrival time ``t_i = r_i / c`` of every image, s
+        (sorted ascending).
+    :ivar distances: Image-to-receiver distance ``r_i``, m (aligned with
+        ``times``).
+    :ivar orders: Total reflection order of every image (aligned with
+        ``times``).
+    :ivar amplitudes: Exact per-image amplitude ``A_i``; shape ``(n_images,)``
+        (broadband) or ``(n_bands, n_images)`` (per band).
+    :ivar image_positions: Image-source coordinates ``(x, y, z)``, m, shape
+        ``(n_images, 3)`` (aligned with ``times``).
+    :ivar dimensions: Room lengths ``(Lx, Ly, Lz)``, m.
+    :ivar source: Source position ``(x, y, z)``, m.
+    :ivar receiver: Receiver position ``(x, y, z)``, m.
+    :ivar max_order: Reflection-order cut-off used.
+    :ivar speed_of_sound: Speed of sound ``c``, m/s.
+    """
+
+    ir: np.ndarray
+    fs: int
+    frequencies: np.ndarray | None
+    times: np.ndarray
+    distances: np.ndarray
+    orders: np.ndarray
+    amplitudes: np.ndarray
+    image_positions: np.ndarray
+    dimensions: tuple[float, float, float]
+    source: tuple[float, float, float]
+    receiver: tuple[float, float, float]
+    max_order: int
+    speed_of_sound: float
+
+    @property
+    def direct_time(self) -> float:
+        """Arrival time of the direct sound (order 0), s."""
+        return float(self.times[int(np.argmin(self.distances))])
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the reflectogram: reflection level in dB against arrival time.
+
+        Stems the per-image amplitudes (in dB re the direct sound), coloured by
+        reflection order, with the ``1 / r`` free-field envelope overlaid.
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from .._plot.room import plot_image_source_reflectogram
+
+        return plot_image_source_reflectogram(self, ax=ax, **kwargs)
+
+
+def _validate_point(
+    point: ArrayLike, dimensions: tuple[float, float, float], name: str
+) -> NDArray[np.float64]:
+    """Validate a 3-vector strictly inside the room box."""
+    p = np.asarray(point, dtype=np.float64)
+    if p.shape != (3,):
+        raise ValueError(f"'{name}' must be a 3-vector (x, y, z).")
+    if not np.all(np.isfinite(p)):
+        raise ValueError(f"'{name}' coordinates must be finite.")
+    for value, length, axis in zip(p, dimensions, "xyz"):
+        if not 0.0 < value < length:
+            raise ValueError(
+                f"'{name}' coordinate {axis} = {value} lies outside the room "
+                f"(0, {length}); source and receiver must be strictly inside."
+            )
+    return p
+
+
+def image_source_rir(
+    dimensions: tuple[float, float, float],
+    source: ArrayLike,
+    receiver: ArrayLike,
+    absorption: ArrayLike,
+    *,
+    fs: int,
+    max_order: int = 20,
+    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    air_attenuation: ArrayLike = 0.0,
+    duration: float | None = None,
+    frequencies: ArrayLike | None = None,
+) -> ImageSourceResult:
+    """Synthetic room impulse response of a shoebox by the image-source method.
+
+    Builds every image of the source up to reflection order ``max_order``
+    (Vorlander Equation (11.36); Allen & Berkley 1979), then assembles the RIR
+    as the sum of the direct sound and one attenuated, delayed unit impulse per
+    image (Kuttruff Equations (4.4)-(4.5)). Each image at distance ``r`` arrives
+    at ``r / c`` (Vorlander Equation (11.38)) with amplitude
+    ``[prod R_wall^n_wall] exp(-m r / 2) / (4 pi r)``: the ``1 / (4 pi r)``
+    spherical spreading, the product of the wall pressure reflection factors
+    ``R = sqrt(1 - alpha)`` (Vorlander Equation (11.39)) over the reflections
+    the image made, and the air pressure attenuation ``exp(-m r / 2)``.
+
+    With scalar or per-wall ``absorption`` (and no ``frequencies``) the result
+    is a broadband RIR; a per-band ``absorption`` (or a given ``frequencies``)
+    produces one RIR per band. The Schroeder decay of the synthetic RIR
+    reproduces the Eyring reverberation time of the room (Kuttruff Equation
+    (5.23)); feed ``ir`` straight to :func:`phonometry.room.decay_curve` or
+    :func:`phonometry.room.room_parameters`.
+
+    :param dimensions: Room lengths ``(Lx, Ly, Lz)``, m.
+    :param source: Source position ``(x, y, z)``, m, strictly inside the room.
+    :param receiver: Receiver position ``(x, y, z)``, m, strictly inside.
+    :param absorption: Wall absorption coefficient(s) in ``[0, 1]``: a scalar
+        (uniform), a length-6 per-wall vector (order
+        :data:`WALL_ORDER`), a per-band vector, or a ``(6, n_bands)`` per-wall
+        per-band array. A length-6 vector is read as the six per-wall values
+        *unless* ``frequencies`` declares six bands, in which case it is a
+        per-band curve (uniform across walls); use the ``(6, n_bands)`` form
+        for six per-wall values that also vary with frequency.
+    :param fs: Sample rate, Hz.
+    :param max_order: Reflection-order cut-off (total wall reflections). The
+        shoebox has ``(2/3)(2 i0^3 + 3 i0^2 + 4 i0)`` audible images up to
+        order ``i0`` (Kuttruff Equation (9.23)). Default 20.
+    :param speed_of_sound: Speed of sound ``c``, m/s (default
+        :data:`DEFAULT_SPEED_OF_SOUND`).
+    :param air_attenuation: Air *intensity* attenuation constant ``m``, in
+        neper per metre (scalar or per-band); the pressure amplitude of each
+        path is scaled by ``exp(-m r / 2)`` (Kuttruff 4.1). Default 0 (air
+        absorption neglected). Obtain a physical ``m`` from
+        :func:`phonometry.air_absorption.air_attenuation_m`.
+    :param duration: RIR length, s; default the latest image arrival rounded up
+        to the next sample.
+    :param frequencies: Optional band centre frequencies, Hz, labelling a
+        per-band result. When given, its length must match the band count of
+        ``absorption`` (or broadcast against it).
+    :return: An :class:`ImageSourceResult`.
+    :raises ValueError: for a non-positive dimension/sample-rate, a
+        source/receiver outside the room, an absorption outside ``[0, 1]`` or
+        of an unsupported shape, a negative ``air_attenuation``, or a
+        ``frequencies`` length that does not match the band count.
+    """
+    lx = require_positive(float(dimensions[0]), "Lx")
+    ly = require_positive(float(dimensions[1]), "Ly")
+    lz = require_positive(float(dimensions[2]), "Lz")
+    dims = (lx, ly, lz)
+    if fs <= 0:
+        raise ValueError("Sample rate 'fs' must be positive.")
+    speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
+    if max_order < 0:
+        raise ValueError("'max_order' must be non-negative.")
+    src = _validate_point(source, dims, "source")
+    rcv = _validate_point(receiver, dims, "receiver")
+    if float(np.linalg.norm(src - rcv)) == 0.0:
+        raise ValueError(
+            "source and receiver coincide; the direct path has zero length "
+            "and infinite amplitude. Separate them so the direct distance is "
+            "positive."
+        )
+
+    freq: np.ndarray | None = None
+    n_freq: int | None = None
+    if frequencies is not None:
+        freq = np.asarray(frequencies, dtype=np.float64)
+        n_freq = freq.size
+    reflection, n_alpha_bands = _resolve_walls(absorption, n_freq)
+
+    m = np.asarray(air_attenuation, dtype=np.float64)
+    if not np.all(np.isfinite(m)) or np.any(m < 0.0):
+        raise ValueError("'air_attenuation' must be finite and non-negative.")
+
+    # Resolve the band count and whether the result is banded.
+    if freq is not None:
+        n_bands = freq.size
+    else:
+        n_bands = max(n_alpha_bands, m.size)
+    banded = frequencies is not None or n_alpha_bands > 1 or m.size > 1
+    if not banded:
+        n_bands = 1
+    # Broadcast the per-wall reflection map and air constant to n_bands.
+    if reflection.shape[1] == 1 and n_bands > 1:
+        reflection = np.broadcast_to(reflection, (6, n_bands)).copy()
+    elif reflection.shape[1] not in (1, n_bands):
+        raise ValueError(
+            f"'absorption' has {reflection.shape[1]} bands but the result has "
+            f"{n_bands}; a per-band 'absorption' must match the band count of "
+            "'frequencies' (or the air attenuation)."
+        )
+    m_bands = np.broadcast_to(m, (n_bands,)) if m.size in (1, n_bands) else None
+    if m_bands is None:
+        raise ValueError(
+            f"'air_attenuation' has {m.size} bands but the result has "
+            f"{n_bands}; they must match."
+        )
+
+    # Enumerate the image lattice per axis, then combine.
+    xs, x_lo, x_hi = _axis_images(src[0], lx, max_order)
+    ys, y_lo, y_hi = _axis_images(src[1], ly, max_order)
+    zs, z_lo, z_hi = _axis_images(src[2], lz, max_order)
+
+    order_x = x_lo + x_hi
+    order_y = y_lo + y_hi
+    order_z = z_lo + z_hi
+
+    # Outer combination with the total-order cut-off, kept vectorised.
+    ox = order_x[:, None, None]
+    oy = order_y[None, :, None]
+    oz = order_z[None, None, :]
+    total_order = ox + oy + oz
+    keep = np.asarray(total_order <= max_order)
+    ix, iy, iz = np.nonzero(keep)
+
+    px = xs[ix]
+    py = ys[iy]
+    pz = zs[iz]
+    positions = np.stack([px, py, pz], axis=1)
+    distances = np.sqrt(
+        (px - rcv[0]) ** 2 + (py - rcv[1]) ** 2 + (pz - rcv[2]) ** 2
+    )
+    orders = (order_x[ix] + order_y[iy] + order_z[iz]).astype(np.int_)
+
+    # Per-wall reflection counts of each kept image.
+    counts = np.stack(
+        [x_lo[ix], x_hi[ix], y_lo[iy], y_hi[iy], z_lo[iz], z_hi[iz]], axis=0
+    ).astype(np.float64)
+
+    # Amplitude A_i per band: prod_w R_w^count_w * exp(-m r / 2) / (4 pi r).
+    # log-space product over the six walls keeps R = 0 (fully absorbing wall)
+    # well behaved: any image using that wall is annihilated.
+    with np.errstate(divide="ignore"):
+        log_r = np.log(np.where(reflection > 0.0, reflection, 1.0))
+    # reflection_gain[b, i] = sum_w counts[w, i] * log_r[w, b]
+    reflection_gain = np.exp(log_r.T @ counts)  # (n_bands, n_images)
+    zero_wall = (reflection == 0.0)[:, :, None]  # (6, n_bands, 1)
+    used = counts[:, None, :] > 0  # (6, 1, n_images)
+    annihilated = np.any(zero_wall & used, axis=0)  # (n_bands, n_images)
+    reflection_gain = np.where(annihilated, 0.0, reflection_gain)
+
+    spreading = 1.0 / (4.0 * np.pi * distances)
+    air = np.exp(-0.5 * m_bands[:, None] * distances[None, :])
+    amp = reflection_gain * air * spreading[None, :]  # (n_bands, n_images)
+
+    # Sort by arrival time for a tidy reflection table.
+    times = distances / speed_of_sound
+    order_idx = np.argsort(times, kind="stable")
+    times = times[order_idx]
+    distances = distances[order_idx]
+    orders = orders[order_idx]
+    positions = positions[order_idx]
+    amp = amp[:, order_idx]
+
+    if duration is None:
+        duration = float(times[-1]) + 1.0 / fs
+    else:
+        duration = require_positive(duration, "duration")
+    n_samples = int(np.ceil(duration * fs))
+    if n_samples < 1:
+        raise ValueError("'duration' must cover at least one sample.")
+
+    sample_idx = np.rint(times * fs).astype(np.int64)
+    inside = sample_idx < n_samples
+    ir = np.zeros((n_bands, n_samples), dtype=np.float64)
+    for b in range(n_bands):
+        np.add.at(ir[b], sample_idx[inside], amp[b, inside])
+
+    if banded:
+        ir_out: np.ndarray = ir
+        amp_out: np.ndarray = amp
+    else:
+        ir_out = ir[0]
+        amp_out = amp[0]
+
+    return ImageSourceResult(
+        ir=ir_out,
+        fs=int(fs),
+        frequencies=freq,
+        times=times,
+        distances=distances,
+        orders=orders,
+        amplitudes=amp_out,
+        image_positions=positions,
+        dimensions=dims,
+        source=(float(src[0]), float(src[1]), float(src[2])),
+        receiver=(float(rcv[0]), float(rcv[1]), float(rcv[2])),
+        max_order=int(max_order),
+        speed_of_sound=float(speed_of_sound),
+    )
+
+
+def audible_image_count(max_order: int) -> int:
+    """Number of audible shoebox images up to reflection order ``max_order``.
+
+    Kuttruff *Room Acoustics* 6th ed., Equation (9.23):
+    ``(2/3)(2 i0^3 + 3 i0^2 + 4 i0)``. Every image of a rectangular room is
+    audible (no visibility test needed), so this is exactly the number of
+    impulses :func:`image_source_rir` sums at that order.
+
+    :param max_order: Reflection-order cut-off ``i0`` (non-negative).
+    :return: The audible image count.
+    """
+    if max_order < 0:
+        raise ValueError("'max_order' must be non-negative.")
+    i0 = int(max_order)
+    return (2 * (2 * i0**3 + 3 * i0**2 + 4 * i0)) // 3
+
+
+def reflection_density(time: ArrayLike, volume: float, speed_of_sound: float = DEFAULT_SPEED_OF_SOUND) -> np.ndarray | float:
+    """Temporal density of reflections ``dN/dt = 4 pi c^3 t^2 / V``.
+
+    Kuttruff *Room Acoustics* 6th ed., Equation (4.6): the number of image
+    sources per unit time whose spheres of radius ``c t`` sweep the receiver.
+    Independent of room shape. Useful to judge the reflection-order cut-off of
+    :func:`image_source_rir` (the model is complete only while its images keep
+    up with this density).
+
+    :param time: Time after the direct sound, s (scalar or array).
+    :param volume: Room volume ``V``, m3.
+    :param speed_of_sound: Speed of sound ``c``, m/s.
+    :return: ``dN/dt`` in reflections per second.
+    """
+    volume = require_positive(volume, "volume")
+    speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
+    t = np.asarray(time, dtype=np.float64)
+    out = 4.0 * np.pi * speed_of_sound**3 * t**2 / volume
+    return float(out) if out.ndim == 0 else out

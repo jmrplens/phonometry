@@ -123,6 +123,7 @@ export const apiSidebar = {
       items: [
         'reference/api/environment/outdoor-propagation',
         'reference/api/environment/ground-barriers',
+        'reference/api/environment/atmospheric-refraction',
         'reference/api/environment/air-absorption',
         'reference/api/environment/impulse-prominence',
         'reference/api/environment/rating',

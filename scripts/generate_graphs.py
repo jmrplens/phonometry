@@ -37,6 +37,12 @@ _LANG_SUFFIX = ""
 
 _ES_EXACT = {
     "Frequency [Hz]": "Frecuencia [Hz]",
+    "Atmospheric Refraction: Ray Bending and the Acoustic Shadow":
+        "Refracción atmosférica: curvatura de rayos y zona de sombra",
+    "Sound rays (upward refraction)": "Rayos sonoros (refracción hacia arriba)",
+    "GFPE relative sound level": "Nivel sonoro relativo GFPE",
+    "Shadow-zone boundary": "Límite de la zona de sombra",
+    "Effective sound speed [m/s]": "Velocidad efectiva del sonido [m/s]",
     "Aircraft Atmospheric Absorption (SAE ARP 5534)":
         "Absorción atmosférica aeronáutica (SAE ARP 5534)",
     "Attenuation [dB]": "Atenuación [dB]",
@@ -1283,6 +1289,7 @@ _PNG_FIGURES = frozenset(
         "calibration_stability",
         "impulse_response",
         "numerical_propagation",
+        "atmospheric_refraction",
         "airport_contour",
         "fdtd_simulation",
         # Dense reflectogram: hundreds of image-source stems/markers make the
@@ -5902,6 +5909,75 @@ def generate_ground_effect_spherical(output_dir: str) -> None:
     plt.close()
 
 
+def generate_atmospheric_refraction(output_dir: str) -> None:
+    """Atmospheric refraction: curved rays and the GFPE shadow-zone field."""
+    print("Generating atmospheric_refraction.png...")
+    import warnings as _warnings
+
+    from phonometry import (
+        atmospheric_parabolic_equation,
+        atmospheric_ray_paths,
+        log_linear_sound_speed_profile,
+        shadow_zone_distance,
+    )
+
+    # Upward-refracting surface layer (b = -1 m/s) over grassland: rays curve
+    # up and leave an acoustic shadow near the ground (Salomons Sec. 4.4/4.6).
+    c0, b = 340.0, -1.0
+    prof = log_linear_sound_speed_profile(b, ground_speed=c0, max_height=60.0)
+    zs = 2.0
+    fig, axes = plt.subplots(2, 1, figsize=(11, 8.2), sharex=True)
+
+    # (a) Ray fan from a near-ground source.
+    rays = atmospheric_ray_paths(prof, source_height=zs,
+                                 launch_angles_deg=np.linspace(-8.0, 8.0, 17),
+                                 max_range=600.0, n_steps=3000)
+    for i in range(rays.heights.shape[0]):
+        axes[0].plot(rays.ranges[i], rays.heights[i], color=COLOR_PRIMARY,
+                     lw=0.8, alpha=0.7, zorder=2)
+    axes[0].plot([0.0], [zs], "o", color=COLOR_SECONDARY, ms=7, zorder=4,
+                 label="Source")
+    # The linear-gradient shadow distance (grazing ray at hr = zs) as a guide.
+    grad = (prof.speed_at(10.0) - c0) / 10.0
+    x_sh = shadow_zone_distance(float(grad), zs, zs, ground_speed=c0)
+    axes[0].axvline(x_sh, color=COLOR_SECONDARY, ls="--", lw=1.2, zorder=3,
+                    label="Shadow-zone boundary")
+    axes[0].set_ylabel("Height [m]")
+    axes[0].set_ylim(0.0, 40.0)
+    axes[0].set_title("Sound rays (upward refraction)", fontweight="bold", pad=8)
+    axes[0].grid(which="both", color=COLOR_GRID, ls="--", alpha=0.5, zorder=0)
+    axes[0].set_axisbelow(True)
+    axes[0].legend(loc="upper right", fontsize=9)
+
+    # (b) GFPE relative-level field over the same atmosphere and ground.
+    with _warnings.catch_warnings():
+        _warnings.simplefilter("ignore")
+        pe = atmospheric_parabolic_equation(400.0, prof, source_height=zs,
+                                            flow_resistivity=200e3,
+                                            max_range=600.0, max_height=40.0)
+    dl = np.where(np.isfinite(pe.relative_level), pe.relative_level, np.nan)
+    img = axes[1].imshow(
+        dl, cmap="RdBu_r", vmin=-30.0, vmax=6.0, aspect="auto", origin="lower",
+        interpolation="bilinear",
+        extent=(float(pe.ranges[0]), float(pe.ranges[-1]),
+                float(pe.heights[0]), float(pe.heights[-1])),
+        zorder=1,
+    )
+    axes[1].axvline(x_sh, color=COLOR_FG, ls="--", lw=1.2, alpha=0.8, zorder=2)
+    axes[1].plot([0.0], [zs], "o", color="k", ms=6, zorder=3)
+    axes[1].set_ylabel("Height [m]")
+    axes[1].set_xlabel("Range [m]")
+    axes[1].set_ylim(0.0, 40.0)
+    axes[1].set_title("GFPE relative sound level", fontweight="bold", pad=8)
+    fig.colorbar(img, ax=axes[1], label="Level re free field [dB]", pad=0.01)
+
+    fig.suptitle("Atmospheric Refraction: Ray Bending and the Acoustic Shadow",
+                 fontweight="bold", fontsize=13)
+    plt.tight_layout()
+    save_figure(output_dir, "atmospheric_refraction.png")
+    plt.close()
+
+
 def generate_exposure_uncertainty(output_dir: str) -> None:
     """ISO 9612 Annex D task-based exposure with its expanded uncertainty."""
     print("Generating exposure_uncertainty.png...")
@@ -7315,6 +7391,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_air_absorption_alpha,
     generate_outdoor_attenuation_breakdown,
     generate_ground_effect_spherical,
+    generate_atmospheric_refraction,
     generate_exposure_uncertainty,
     # Materials: absorption rating, airflow resistance, impedance tube
     # (ISO 11654, ISO 9053-1/-2, ISO 10534-1/-2, ASTM E2611)

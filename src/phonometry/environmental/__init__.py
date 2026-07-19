@@ -39,6 +39,17 @@ from .ground_barriers import (
     kurze_anderson_attenuation,
     spherical_reflection_coefficient,
 )
+from .atmospheric_refraction import (
+    AtmosphericPEResult,
+    AtmosphericRayResult,
+    EffectiveSoundSpeedProfile,
+    atmospheric_parabolic_equation,
+    atmospheric_ray_paths,
+    linear_sound_speed_profile,
+    log_linear_sound_speed_profile,
+    ray_curvature_radius,
+    shadow_zone_distance,
+)
 from .wind_turbine_noise import (
     WindTurbineNoiseWarning,
     WindTurbineTonalityResult,
@@ -103,6 +114,15 @@ __all__ = [
     "ground_effect",
     "kurze_anderson_attenuation",
     "spherical_reflection_coefficient",
+    "AtmosphericPEResult",
+    "AtmosphericRayResult",
+    "EffectiveSoundSpeedProfile",
+    "atmospheric_parabolic_equation",
+    "atmospheric_ray_paths",
+    "linear_sound_speed_profile",
+    "log_linear_sound_speed_profile",
+    "ray_curvature_radius",
+    "shadow_zone_distance",
     "DEFAULT_FREQUENCIES",
     "ImpulseProminenceResult",
     "ImpulseProminenceWarning",

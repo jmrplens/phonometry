@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Atmospheric refraction: ray tracing and the parabolic equation
+  (`phonometry.environmental.atmospheric_refraction`, also re-exported at the
+  top level). The module is the refracting-atmosphere counterpart of the ocean
+  solvers in `phonometry.underwater.numerical_propagation` and is clean-room
+  from Salomons, *Computational Atmospheric Acoustics* (2001) and Attenborough
+  & Van Renterghem, *Predicting Outdoor Sound* 2e (2021, Ch. 11). Vertical
+  gradients of the effective sound speed `c_eff(z) = c(z) + wind` are built with
+  `linear_sound_speed_profile` and `log_linear_sound_speed_profile` (Salomons
+  Eq. (4.5)). `atmospheric_ray_paths` integrates Snell's law for sound rays
+  (Eq. (4.3)) with a fourth-order Runge-Kutta scheme, reflecting at the ground,
+  and returns the curved ray paths, turning points, travel times and ground
+  reflections; for a linear gradient every ray is an exact circular arc of
+  radius `ray_curvature_radius` and an upward-refracting profile has the
+  closed-form `shadow_zone_distance`. `atmospheric_parabolic_equation` solves
+  the Green's Function Parabolic Equation (GFPE, Salomons Appendix H) with the
+  split-step Fourier algorithm, a Gaussian starter (Eq. (G.64)), a
+  finite-impedance ground condition (Eq. (H.28)) and an absorbing top layer, and
+  returns the relative sound level (dB re free field) over the range-height
+  plane. In a homogeneous atmosphere the GFPE reproduces the exact
+  spherical-wave ground effect (`ground_effect`) to about 0.1 dB; it is
+  reciprocal and, over an upward-refracting profile, resolves the acoustic
+  shadow. Ground impedance is taken directly, from a `PorousMediumResult`, or
+  from an effective flow resistivity via the porous models of
+  `phonometry.materials`. The results expose `.plot()` (the profile, the ray
+  paths and the relative-level field).
+
 - Objective speech intelligibility STOI and ESTOI
   (`phonometry.hearing.objective_intelligibility.stoi`, also `phonometry.stoi`).
   `stoi(clean, degraded, fs)` computes the short-time objective intelligibility

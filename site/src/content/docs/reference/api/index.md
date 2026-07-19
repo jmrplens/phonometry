@@ -131,6 +131,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | :--- | :--- |
 | [`environmental.outdoor_propagation`](/phonometry/reference/api/environment/outdoor-propagation/) | Outdoor sound propagation: ISO 9613-2:1996 general method of calculation. |
 | [`environmental.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/) | Spherical-wave ground effect and advanced barrier diffraction. |
+| [`environmental.atmospheric_refraction`](/phonometry/reference/api/environment/atmospheric-refraction/) | Atmospheric refraction: ray tracing and the parabolic equation (PE). |
 | [`environmental.air_absorption`](/phonometry/reference/api/environment/air-absorption/) | Atmospheric absorption of sound: ISO 9613-1:1993. |
 | [`environmental.impulse_prominence`](/phonometry/reference/api/environment/impulse-prominence/) | Prominence of impulsive sounds and the LAeq adjustment (NT ACOU 112:2002). |
 | [`environmental.rating`](/phonometry/reference/api/environment/rating/) | Environmental noise descriptors per ISO 1996-1:2016. |

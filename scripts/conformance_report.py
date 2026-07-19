@@ -5743,6 +5743,177 @@ def _chk_atm_pe_hard_ground() -> Outcome:
     k = 2.0 * math.pi * freq / 343.0
     two_ray = 20.0 * math.log10(abs(1.0 + (r1 / r2) * cmath.exp(1j * k * (r2 - r1))))
     return numeric(two_ray, float(pe.level_at_height(zr)[i]), 0.6, unit="dB", places=3)
+# Domain - Electroacoustics (baffled piston, Beranek & Mellow 2e)
+# ===========================================================================
+_ELECTROACOUSTICS = "Electroacoustics"
+
+
+@register(
+    _ELECTROACOUSTICS,
+    "Beranek & Mellow 2e Eq. (13.117)",
+    "Piston resistance R1(x) = 1 - 2 J1(x)/x at x = 2ka = 2",
+)
+def _chk_piston_resistance() -> Outcome:
+    return numeric(0.423275, float(ph.piston_resistance(2.0)), 1e-5, places=6)
+
+
+@register(
+    _ELECTROACOUSTICS,
+    "Beranek & Mellow 2e Eq. (13.118)",
+    "Piston reactance X1(x) = 2 H1(x)/x at x = 2ka = 2",
+)
+def _chk_piston_reactance() -> Outcome:
+    return numeric(0.646764, float(ph.piston_reactance(2.0)), 1e-5, places=6)
+
+
+@register(
+    _ELECTROACOUSTICS,
+    "Beranek & Mellow 2e Eq. (13.117) (low-frequency limit)",
+    "R1 -> (ka)^2/2 as ka -> 0 (x = 0.02, ka = 0.01)",
+)
+def _chk_piston_resistance_limit() -> Outcome:
+    ka = 0.01
+    return numeric(ka**2 / 2.0, float(ph.piston_resistance(2.0 * ka)), 1e-4,
+                   rel=True, places=8)
+
+
+@register(
+    _ELECTROACOUSTICS,
+    "Beranek & Mellow 2e Eq. (4.151)",
+    "Radiation mass M = 8 rho a^3 / 3  (a = 0.1 m, rho = 1.206)",
+)
+def _chk_piston_radiation_mass() -> Outcome:
+    res = ph.radiating_piston(0.1, [100.0], density=1.206)
+    return numeric(8.0 * 1.206 * 0.1**3 / 3.0, res.radiation_mass, 1e-9,
+                   unit="kg", places=8)
+
+
+@register(
+    _ELECTROACOUSTICS,
+    "Beranek & Mellow 2e Eq. (13.102), Table 14.1",
+    "First directivity null at ka sin(theta) = 3.8317 (first zero of J1)",
+)
+def _chk_piston_directivity_null() -> Outcome:
+    # ka sin(theta) = 3.8317 at ka = 3.8317, theta = pi/2.
+    d = float(ph.piston_directivity(3.8317059702075125, math.pi / 2.0))
+    return numeric(0.0, d, 1e-6, places=8)
+
+
+@register(
+    _ELECTROACOUSTICS,
+    "Beranek & Mellow 2e §4.19 (half-space baffle)",
+    "Directivity index DI -> 10 lg 2 = 3.01 dB as ka -> 0",
+)
+def _chk_piston_directivity_index() -> Outcome:
+    res = ph.radiating_piston(0.01, [1.0])
+    return numeric(10.0 * math.log10(2.0), float(res.directivity_index[0]),
+                   1e-3, unit="dB")
+
+
+# ===========================================================================
+# Domain - Industrial noise control (Bies 5e; silencers, HVAC, enclosures)
+# ===========================================================================
+_NOISE_CONTROL = "Industrial noise control"
+
+
+@register(
+    _NOISE_CONTROL,
+    "Bies 5e Eq. (8.111)",
+    "Expansion-chamber peak TL = 10 lg[1 + (1/4)(m - 1/m)^2], m = 4 at kL = pi/2",
+)
+def _chk_expansion_chamber_peak() -> Outcome:
+    c, length, s_duct = 343.0, 0.3, 0.01
+    f = np.array([c / (4.0 * length)])  # kL = pi/2
+    res = ph.expansion_chamber(f, length, 4.0 * s_duct, s_duct, speed_of_sound=c)
+    expected = 10.0 * math.log10(1.0 + 0.25 * (4.0 - 0.25) ** 2)
+    return numeric(expected, float(res.transmission_loss[0]), 1e-6, unit="dB")
+
+
+@register(
+    _NOISE_CONTROL,
+    "Bies 5e Eq. (8.111)",
+    "Expansion-chamber trough TL = 0 at kL = pi (chamber transparent)",
+)
+def _chk_expansion_chamber_trough() -> Outcome:
+    c, length, s_duct = 343.0, 0.3, 0.01
+    f = np.array([c / (2.0 * length)])  # kL = pi
+    res = ph.expansion_chamber(f, length, 4.0 * s_duct, s_duct, speed_of_sound=c)
+    return numeric(0.0, float(res.transmission_loss[0]), 1e-9, unit="dB")
+
+
+@register(
+    _NOISE_CONTROL,
+    "Bies 5e Eq. (8.44) / Example 8.1",
+    "Quarter-wave tube tuning f = c/(4 l_e), l_e = 1.516 m -> 56.6 Hz",
+)
+def _chk_quarter_wave_tuning() -> Outcome:
+    area = math.pi * 0.05**2 / 4.0
+    res = ph.quarter_wave_resonator([100.0], area, 1.516, area, speed_of_sound=343.24)
+    assert res.resonances is not None
+    return numeric(56.6, float(res.resonances[0]), 0.1, unit="Hz", places=2)
+
+
+@register(
+    _NOISE_CONTROL,
+    "Bies 5e Eq. (8.46)",
+    "Helmholtz resonance f0 = (c/2pi) sqrt(S/(l_e V))  (S=1e-4, l_e=0.02, V=1e-3)",
+)
+def _chk_helmholtz_resonance() -> Outcome:
+    c = 343.0
+    res = ph.helmholtz_resonator([100.0], 0.01, 1e-4, 0.02, 1e-3, speed_of_sound=c)
+    assert res.resonances is not None
+    expected = c / (2.0 * math.pi) * math.sqrt(1e-4 / (0.02 * 1e-3))
+    return numeric(expected, float(res.resonances[0]), 1e-6, unit="Hz", places=3)
+
+
+@register(
+    _NOISE_CONTROL,
+    "Bies 5e Eq. (8.73)",
+    "Side-branch TL = 20 lg|1 + rho c/(2 Sd Zb)| (QWT branch, closed form)",
+)
+def _chk_side_branch_closed_form() -> Outcome:
+    from phonometry.noise_control import silencers as _sl
+
+    f = np.array([120.0])
+    zb = _sl.quarter_wave_impedance(f, 0.5, 0.002)
+    t = _sl.shunt_matrix(zb)
+    tl = float(_sl.transmission_loss(t, inlet_area=0.01, outlet_area=0.01)[0])
+    closed = 20.0 * math.log10(abs(1.0 + 1.206 * 343.0 / (2.0 * 0.01 * zb[0])))
+    return numeric(closed, tl, 1e-9, unit="dB")
+
+
+@register(
+    _NOISE_CONTROL,
+    "Bies 5e Eq. (8.275) (Wells' plenum method)",
+    "Plenum TL = -10 lg[S_out(cos0/pi r^2 + (1-a)/(Sw a))] (S_out=.1,r=1,Sw=20,a=.2)",
+)
+def _chk_plenum_wells() -> Outcome:
+    tl = float(ph.plenum_attenuation(0.1, 1.0, 20.0, 0.2))
+    direct = 1.0 / (math.pi * 1.0**2)
+    reverb = (1.0 - 0.2) / (20.0 * 0.2)
+    expected = -10.0 * math.log10(0.1 * (direct + reverb))
+    return numeric(expected, tl, 1e-6, unit="dB")
+
+
+@register(
+    _NOISE_CONTROL,
+    "Bies 5e Table 8.14 (ASHRAE end reflection, flush)",
+    "Duct end reflection D = 200 mm at 125 Hz = 10 dB (table node)",
+)
+def _chk_end_reflection_table() -> Outcome:
+    res = ph.end_reflection_loss([125.0], 0.200, termination="flush")
+    return numeric(10.0, float(res.values[0]), 1e-6, unit="dB")
+
+
+@register(
+    _NOISE_CONTROL,
+    "Bies 5e Eqs. (7.103), (7.111) (enclosure, fully absorbing limit)",
+    "Enclosure correction C -> 10 lg 0.3 = -5.23 dB as alpha_i -> 1",
+)
+def _chk_enclosure_floor() -> Outcome:
+    res = ph.enclosure_insertion_loss([40.0], 6.0, 5.0, 0.999999)
+    return numeric(10.0 * math.log10(0.3), float(res.correction[0]), 1e-3,
+                   unit="dB")
 
 
 # ===========================================================================

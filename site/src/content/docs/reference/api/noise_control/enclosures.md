@@ -31,16 +31,18 @@ Bies terms this net reduction the enclosure *noise reduction*; it is the
 insertion loss of the enclosure.
 
 **The panel transmission loss `R` is supplied by the caller** -- measured, or
-predicted by a panel model -- as a per-band array or a callable of frequency.
-This module never predicts `R` itself; it combines a given `R` with the
-interior absorption. The interior room constant reuses
-[`phonometry.room.room_constant`](/phonometry/reference/api/rooms/steady-field/#room_constant).
+predicted by a panel model -- as a per-band array, a callable of frequency, or
+a panel prediction result (a [`phonometry.building.SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult)
+or [`phonometry.building.ApertureTransmissionResult`](/phonometry/reference/api/building/aperture-transmission/#aperturetransmissionresult), matched structurally
+so no dependency on `building` is introduced). This module never predicts
+`R` itself; it combines a given `R` with the interior absorption. The
+interior room constant reuses [`phonometry.room.room_constant`](/phonometry/reference/api/rooms/steady-field/#room_constant).
 
 ## enclosure_insertion_loss
 
 ```python
 enclosure_insertion_loss(
-    panel_transmission_loss: ArrayLike | Callable[[NDArray[np.float64]], ArrayLike],
+    panel_transmission_loss: ArrayLike | Callable[[NDArray[np.float64]], ArrayLike] | PanelTransmissionResult,
     external_area: float,
     internal_area: float,
     internal_absorption: ArrayLike,
@@ -58,7 +60,7 @@ constant `R_i = S_i alpha_i / (1 - alpha_i)`.
 
 | Name | Description |
 | :--- | :--- |
-| `panel_transmission_loss` | Panel transmission loss `R` per band, dB. Either a per-band array (measured or predicted elsewhere) or a callable mapping a frequency array to per-band `R` (then `frequencies` is required). This function does not predict `R`. |
+| `panel_transmission_loss` | Panel transmission loss `R` per band, dB. One of: a per-band array (measured); a callable mapping a frequency array to per-band `R` (then `frequencies` is required); or a panel prediction result carrying `transmission_loss` and `frequencies`, such as the [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) of [`phonometry.single_panel_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#single_panel_transmission_loss) / [`phonometry.double_wall_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#double_wall_transmission_loss) or the [`ApertureTransmissionResult`](/phonometry/reference/api/building/aperture-transmission/#aperturetransmissionresult) of [`phonometry.composite_transmission_loss`](/phonometry/reference/api/building/aperture-transmission/#composite_transmission_loss) (its `frequencies` are then used unless *frequencies* is given). This function does not predict `R` itself. |
 | `external_area` | External enclosure surface area `S_E`, m2. |
 | `internal_area` | Internal surface area `S_i` (including the machine), m2. |
 | `internal_absorption` | Mean interior absorption `alpha_i` in `(0, 1)` (scalar or per-band). |

@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from ..electroacoustics.distortion import HarmonicDistortionResult
     from ..electroacoustics.frequency_response import FrequencyResponseResult
+    from ..electroacoustics.piston import RadiatingPistonResult
     from ..electroacoustics.swept_sine import SweptSineDistortionResult
 
 #: Shared frequency-axis label of the electroacoustics renderers.
@@ -200,3 +201,34 @@ def plot_swept_sine_distortion(
     axes[1].set_xlabel("Excitation frequency [Hz]")
     format_frequency_axis(axes[1])
     return axes
+
+
+def plot_piston_impedance(
+    result: "RadiatingPistonResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Normalized radiation resistance and reactance of a baffled piston.
+
+    Draws the piston resistance ``R1(2ka)`` and reactance ``X1(2ka)`` against
+    ``ka`` on a logarithmic ``ka`` axis (the classic Beranek & Mellow figure):
+    ``R1`` rising to 1, ``X1`` peaking near ``ka ~ 0.5`` then decaying.
+
+    :param result: A :class:`~phonometry.electroacoustics.piston.RadiatingPistonResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the resistance ``Axes.plot`` (its primary curve).
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    ka = np.asarray(result.ka, dtype=np.float64)
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("label", r"$R_1$ (resistance)")
+    ax.semilogx(ka, np.asarray(result.resistance), lw=1.8, **kwargs)
+    ax.semilogx(ka, np.asarray(result.reactance), color=_C_SECONDARY, lw=1.8,
+                ls="--", label=r"$X_1$ (reactance)")
+    ax.axhline(1.0, color=_C_TERTIARY, ls=":", lw=1.0,
+               label=r"$R_1 \to 1$ ($ka \gg 1$)")
+    ax.set_xlabel(r"$ka$")
+    ax.set_ylabel(r"Normalized radiation impedance $Z_r / \rho c S$")
+    ax.set_title("Baffled circular piston radiation impedance")
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    return ax

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **327/327 conformance checks pass** across 41 domains and 201 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **335/335 conformance checks pass** across 41 domains and 207 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -690,13 +690,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Atmospheric refraction (Salomons rays / GFPE)</b>: 100% (3/3)</summary>
+<summary>&#9989; <b>Panel &amp; aperture sound insulation (Bies / Hopkins / Cremer)</b>: 100% (11/11)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
-| Salomons Sec. 4.4 (ray turning height, linear profile) | Turning height of a 10 deg ray vs Rc(1 - cos theta0) (circular arc), m | 26.457 m (+/-0.1 m) | 26.457 m | 0 m | &#9989; |
-| Salomons Eq. (3.4) (GFPE vs spherical-wave ground effect, homogeneous) | PE relative level at 500 m over grassland vs Weyl-Van der Pol, dB | -13.919 dB (+/-0.5 dB) | -13.842 dB | 0.077 dB | &#9989; |
-| Salomons Eq. (3.4) (GFPE hard ground vs two-ray, homogeneous) | PE relative level at 500 m over a rigid ground vs the coherent two-ray, dB | 5.997 dB (+/-0.6 dB) | 5.593 dB | -0.405 dB | &#9989; |
+| Bies 5e Eq. 7.40 (mass law) | 6 dB per octave (500 -> 1000 Hz) | 6.0206 dB (+/-0.01 dB) | 6.02 dB | -0.001 dB | &#9989; |
+| Bies 5e Eq. 7.40 (mass law) | 6 dB per doubling of mass | 6.0206 dB (+/-0.01 dB) | 6.02 dB | -0.001 dB | &#9989; |
+| Bies 5e Eq. 7.42 (field incidence) | One-third-octave correction 5.5 dB | 5.5 dB (+/-0.001 dB) | 5.5 dB | 0 dB | &#9989; |
+| Hopkins Eq. 2.201 / Bies Eq. 7.3 | Coincidence frequency, 6 mm glass | 2079 Hz (+/-3%) | 2107.3639 Hz | 28.364 Hz | &#9989; |
+| Cremer Table 5.1 | Thin-plate point impedance Z = 8 sqrt(B' m'') | 2529.8221 N.s/m (+/-0 N.s/m) | 2529.8221 N.s/m | 0 N.s/m | &#9989; |
+| Cremer Table 5.1 | Infinite-beam mobility phase -45 deg | -45 deg (+/-0 deg) | -45 deg | 0 deg | &#9989; |
+| Hopkins Eq. 2.229 (Leppington/Maidanik) | Radiation efficiency at f = 2 fc | 1.4142 (+/-0) | 1.4142 | 0 | &#9989; |
+| Bies Eq. 7.62 / Hopkins Eq. 4.73 | Mass-air-mass resonance f0, empty cavity | 76.9484 Hz (+/-0.5%) | 76.8521 Hz | -0.096 Hz | &#9989; |
+| Bies Eq. 7.64 (double wall) | Below f0 = mass law of the combined mass | 11.6144 dB (+/-0 dB) | 11.6144 dB | 0 dB | &#9989; |
+| Hopkins Eq. 4.92 (composite) | 1 % open area caps R at 10 lg(S/Sa) | 20 dB (+/-0.05 dB) | 19.9996 dB | 0 dB | &#9989; |
+| Hopkins Eq. 4.99/4.101 (Gomperts slit) | Transmission maximum at first resonance | 1544.9615 Hz (+/-15 Hz) | 1542.9615 Hz | -2 Hz | &#9989; |
 
 </details>
 

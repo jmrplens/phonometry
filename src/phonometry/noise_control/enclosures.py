@@ -36,7 +36,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -82,7 +82,6 @@ class EnclosureResult:
         return plot_enclosure(self, ax=ax, **kwargs)
 
 
-@runtime_checkable
 class PanelTransmissionResult(Protocol):
     """A panel prediction result exposing a per-band transmission loss.
 
@@ -175,13 +174,17 @@ def enclosure_insertion_loss(
     s_e = require_positive(external_area, "external_area")
     s_i = require_positive(internal_area, "internal_area")
 
-    if not callable(panel_transmission_loss) and isinstance(
-        panel_transmission_loss, PanelTransmissionResult
+    if (
+        not callable(panel_transmission_loss)
+        and not isinstance(panel_transmission_loss, (np.ndarray, list, tuple))
+        and hasattr(panel_transmission_loss, "transmission_loss")
+        and hasattr(panel_transmission_loss, "frequencies")
     ):
+        result = cast("PanelTransmissionResult", panel_transmission_loss)
         if frequencies is None:
-            frequencies = panel_transmission_loss.frequencies
+            frequencies = result.frequencies
         panel_transmission_loss = np.asarray(
-            panel_transmission_loss.transmission_loss, dtype=np.float64
+            result.transmission_loss, dtype=np.float64
         )
 
     freqs = _resolve_frequencies(frequencies)

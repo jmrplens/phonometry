@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **338/338 conformance checks pass** across 42 domains and 210 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **353/353 conformance checks pass** across 44 domains and 224 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -716,6 +716,37 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Salomons Sec. 4.4 (ray turning height, linear profile) | Turning height of a 10 deg ray vs Rc(1 - cos theta0) (circular arc), m | 26.457 m (+/-0.1 m) | 26.457 m | 0 m | &#9989; |
 | Salomons Eq. (3.4) (GFPE vs spherical-wave ground effect, homogeneous) | PE relative level at 500 m over grassland vs Weyl-Van der Pol, dB | -13.919 dB (+/-0.5 dB) | -13.842 dB | 0.077 dB | &#9989; |
 | Salomons Eq. (3.4) (GFPE hard ground vs two-ray, homogeneous) | PE relative level at 500 m over a rigid ground vs the coherent two-ray, dB | 5.997 dB (+/-0.6 dB) | 5.593 dB | -0.405 dB | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Electroacoustics</b>: 100% (6/6)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Beranek & Mellow 2e Eq. (13.117) | Piston resistance R1(x) = 1 - 2 J1(x)/x at x = 2ka = 2 | 0.423275 (+/-0.00001) | 0.423275 | 0 | &#9989; |
+| Beranek & Mellow 2e Eq. (13.118) | Piston reactance X1(x) = 2 H1(x)/x at x = 2ka = 2 | 0.646764 (+/-0.00001) | 0.646764 | 0 | &#9989; |
+| Beranek & Mellow 2e Eq. (13.117) (low-frequency limit) | R1 -> (ka)^2/2 as ka -> 0 (x = 0.02, ka = 0.01) | 0.00005 (+/-0.01%) | 0.00005 | 0 | &#9989; |
+| Beranek & Mellow 2e Eq. (4.151) | Radiation mass M = 8 rho a^3 / 3  (a = 0.1 m, rho = 1.206) | 0.003216 kg (+/-0 kg) | 0.003216 kg | 0 kg | &#9989; |
+| Beranek & Mellow 2e Eq. (13.102), Table 14.1 | First directivity null at ka sin(theta) = 3.8317 (first zero of J1) | 0 (+/-0.000001) | 0 | 0 | &#9989; |
+| Beranek & Mellow 2e §4.19 (half-space baffle) | Directivity index DI -> 10 lg 2 = 3.01 dB as ka -> 0 | 3.0103 dB (+/-0.001 dB) | 3.0103 dB | 0 dB | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Industrial noise control</b>: 100% (9/9)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Bies 5e Eq. (8.111) | Expansion-chamber peak TL = 10 lg[1 + (1/4)(m - 1/m)^2], m = 4 at kL = pi/2 | 6.5472 dB (+/-0 dB) | 6.5472 dB | 0 dB | &#9989; |
+| Bies 5e Eq. (8.111) | Expansion-chamber trough TL = 0 at kL = pi (chamber transparent) | 0 dB (+/-0 dB) | 0 dB | 0 dB | &#9989; |
+| Bies 5e Eq. (8.44) / Example 8.1 | Quarter-wave tube tuning f = c/(4 l_e), l_e = 1.516 m -> 56.6 Hz | 56.6 Hz (+/-0.1 Hz) | 56.6 Hz | 0.003 Hz | &#9989; |
+| Bies 5e Eq. (8.46) | Helmholtz resonance f0 = (c/2pi) sqrt(S/(l_e V))  (S=1e-4, l_e=0.02, V=1e-3) | 122.067 Hz (+/-0 Hz) | 122.067 Hz | 0 Hz | &#9989; |
+| Bies 5e Eq. (8.73) | Side-branch TL = 20 lg abs(1 + rho c/(2 Sd Zb)) (QWT branch, closed form) | 0.1638 dB (+/-0 dB) | 0.1638 dB | 0 dB | &#9989; |
+| Bies 5e Eqs. (8.141)/(8.148) (four-pole insertion loss) | Insertion loss = transmission loss for the anechoic reference Zs=Zr=rho c/S | 6.2498 dB (= TL) | 6.2498 dB | 0 dB | &#9989; |
+| Bies 5e Eq. (8.275) (Wells' plenum method) | Plenum TL = -10 lg[S_out(cos0/pi r^2 + (1-a)/(Sw a))] (S_out=.1,r=1,Sw=20,a=.2) | 12.8541 dB (+/-0 dB) | 12.8541 dB | 0 dB | &#9989; |
+| Bies 5e Table 8.14 (ASHRAE end reflection, flush) | Duct end reflection D = 200 mm at 125 Hz = 10 dB (table node) | 10 dB (+/-0 dB) | 10 dB | 0 dB | &#9989; |
+| Bies 5e Eqs. (7.103), (7.111) (enclosure, fully absorbing limit) | Enclosure correction C -> 10 lg 0.3 = -5.23 dB as alpha_i -> 1 | -5.2288 dB (+/-0.001 dB) | -5.2288 dB | 0 dB | &#9989; |
 
 </details>
 

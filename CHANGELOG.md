@@ -67,6 +67,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `W = 0.5 |F|^2 Re{Y}` (Cremer, Heckl & Petersson 2005, *Structure-Borne Sound*
   3e, Table 5.1), the theoretical companions of the measured ISO 7626 mobilities.
 
+- Industrial noise control: silencers, HVAC and machine enclosures, a new
+  `phonometry.noise_control` domain (Bies, Hansen & Howard, *Engineering Noise
+  Control* 5th ed.; Munjal, *Acoustics of Ducts and Mufflers*). `expansion_chamber`,
+  `helmholtz_resonator`, `quarter_wave_resonator` and `extended_tube_chamber`
+  build **reactive silencers** by the one-dimensional four-pole
+  (transmission-matrix) method, returning a `ReactiveSilencerResult` with the
+  transmission loss, the insertion loss for configurable source/radiation
+  impedances, the compound transfer matrix and `.plot()`; the expansion-chamber
+  transmission loss matches the closed form `10 lg[1 + (1/4)(m - 1/m)^2 sin^2 kL]`
+  (Bies Eq. (8.111)) exactly, and the four-pole machinery is available under
+  `phonometry.noise_control` (`duct_matrix`, `shunt_matrix`, `cascade`,
+  `transmission_loss`, `insertion_loss`, `helmholtz_impedance`,
+  `quarter_wave_impedance`). The
+  `noise_control.hvac` module adds the duct end reflection (`end_reflection_loss`,
+  ASHRAE Table 8.14), bend insertion loss (`elbow_insertion_loss`, Table 8.11),
+  the plenum transmission loss by Wells' method (`plenum_attenuation`) and the
+  flow-generated (self) noise of straight ducts and mitred bends
+  (`flow_noise_straight_duct`, `flow_noise_bend`, VDI 2081). `enclosure_insertion_loss`
+  gives the machine-enclosure insertion loss `IL = R - C` (Bies Eqs. (7.103),
+  (7.111)) from a **caller-supplied** panel transmission loss `R` (array or
+  callable; never predicted here) and the interior room constant reused from
+  `phonometry.room.room_constant`. The four-pole expansion chamber is
+  cross-checked against the independent 2D FDTD solver.
+- Radiation of a rigid circular piston in an infinite baffle
+  (`phonometry.electroacoustics.piston`, re-exported at the top level). `radiating_piston`
+  computes the radiation impedance `rho c S (R1 + j X1)` from the piston
+  resistance `R1 = 1 - 2 J1(2ka)/2ka` and reactance `X1 = 2 H1(2ka)/2ka`
+  (Beranek & Mellow, *Acoustics* 2nd ed., Eqs. (13.117), (13.118)), the
+  low-frequency radiation mass `8 rho a^3 / 3` (Eq. (4.151)), the far-field
+  directivity `2 J1(ka sin theta)/(ka sin theta)` and the directivity index,
+  returning a `RadiatingPistonResult` with `.plot()`; the building blocks
+  `piston_resistance`, `piston_reactance` and `piston_directivity` are exposed
+  directly.
 - Objective speech intelligibility STOI and ESTOI
   (`phonometry.hearing.objective_intelligibility.stoi`, also `phonometry.stoi`).
   `stoi(clean, degraded, fs)` computes the short-time objective intelligibility

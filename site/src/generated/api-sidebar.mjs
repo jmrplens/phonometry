@@ -179,6 +179,16 @@ export const apiSidebar = {
         'reference/api/electroacoustics/distortion',
         'reference/api/electroacoustics/frequency-response',
         'reference/api/electroacoustics/swept-sine',
+        'reference/api/electroacoustics/piston',
+      ],
+    },
+    {
+      label: 'Industrial noise control',
+      translations: { es: 'Control de ruido industrial' },
+      items: [
+        'reference/api/noise_control/silencers',
+        'reference/api/noise_control/hvac',
+        'reference/api/noise_control/enclosures',
       ],
     },
     {

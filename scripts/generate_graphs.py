@@ -65,6 +65,9 @@ _ES_EXACT = {
     "Aircraft Atmospheric Absorption (SAE ARP 5534)":
         "Absorción atmosférica aeronáutica (SAE ARP 5534)",
     "Attenuation [dB]": "Atenuación [dB]",
+    "Expansion-chamber transmission loss (Bies Eq. 8.111)":
+        "Pérdida de transmisión de cámara de expansión (Bies Ec. 8.111)",
+    "Area ratio m = Sexp/Sduct": "Relación de áreas m = Sexp/Sduct",
     "Noise-Power-Distance Curves (ECAC Doc 29)":
         "Curvas nivel-potencia-distancia (ECAC Doc 29)",
     "Aircraft Departure SEL Contour (ECAC Doc 29)":
@@ -7454,6 +7457,36 @@ def generate_panel_insulation_concept(output_dir: str) -> None:
     plt.close()
 
 
+def generate_silencer_expansion_chamber(output_dir: str) -> None:
+    """Expansion-chamber transmission loss for four area ratios (Bies 8.111)."""
+    print("Generating silencer_expansion_chamber.svg...")
+    from phonometry import expansion_chamber
+
+    freqs = np.linspace(20.0, 2000.0, 2000)
+    pipe_area, length = 0.01, 0.3
+    ratios = (2.0, 4.0, 8.0, 16.0)
+    colors = (COLOR_PRIMARY, COLOR_SECONDARY, COLOR_TERTIARY, "#9467bd")
+
+    fig, ax = plt.subplots(figsize=(9.0, 5.2))
+    for m, color in zip(ratios, colors):
+        res = expansion_chamber(freqs, length, m * pipe_area, pipe_area)
+        peak = 10.0 * np.log10(1.0 + 0.25 * (m - 1.0 / m) ** 2)
+        ax.plot(freqs, res.transmission_loss, color=color, lw=1.8,
+                label=f"m = {int(m)}  →  {peak:.1f} dB")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Transmission loss [dB]")
+    ax.set_title("Expansion-chamber transmission loss (Bies Eq. 8.111)",
+                 fontweight="bold", pad=10)
+    ax.set_xlim(20.0, 2000.0)
+    ax.set_ylim(0.0, 20.0)
+    format_frequency_axis(ax, 20.0, 2000.0)
+    ax.grid(True, which="both", alpha=0.4)
+    ax.legend(loc="upper right", fontsize="small", title="Area ratio m = Sexp/Sduct")
+    plt.tight_layout()
+    save_figure(output_dir, "silencer_expansion_chamber.svg")
+    plt.close()
+
+
 # Every documentation figure, in the order the sequential generator has always
 # produced them. This registry is the single source of truth for both the
 # sequential path (``generate_all``) and the parallel runner (``--jobs``),
@@ -7633,6 +7666,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_fdtd_simulation,
     # Theoretical panel sound insulation (single/double wall, radiation, slit).
     generate_panel_insulation_concept,
+    generate_silencer_expansion_chamber,
 )
 
 

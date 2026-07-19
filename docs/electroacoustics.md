@@ -289,6 +289,44 @@ hide in that sentence:
   "1 m" figure is then a referred quantity, not what a microphone placed at
   1 m would read.
 
+## 6. Radiating piston: radiation impedance and directivity
+
+The rigid circular **piston in an infinite baffle** is the canonical radiator
+behind a loudspeaker cone, the open end of a duct and the radiation efficiency
+of any finite vibrating surface (Beranek & Mellow §4.19, §13.7). Its mechanical
+radiation impedance is `Z_r = rho c S (R1 + j X1)` with `S = pi a^2` and the
+dimensionless resistance and reactance functions (Eqs. (13.117), (13.118))
+
+```
+R1(x) = 1 - 2 J1(x) / x ,   X1(x) = 2 H1(x) / x ,   x = 2ka,
+```
+
+with `J1` the Bessel function and `H1` the Struve function of order one. At low
+frequency `R1 -> (ka)^2 / 2` and the reactance is mass-like with the radiation
+mass `M_r = 8 rho a^3 / 3` (Eq. (4.151)); at high frequency `R1 -> 1`, `X1 -> 0`
+and the piston radiates as into an infinite tube. The far field follows the
+directivity `D(theta) = 2 J1(ka sin theta) / (ka sin theta)`, whose first null
+is at `ka sin theta = 3.8317`.
+
+```python
+import numpy as np
+from phonometry import radiating_piston
+
+res = radiating_piston(radius=0.1, frequencies=np.geomspace(20, 20000, 200),
+                       angles=np.linspace(0.0, np.pi / 2, 91))
+print(round(res.radiation_mass, 4))               # 8 rho a^3 / 3, kg
+print(round(float(res.directivity_index[0]), 2))  # 3.01 dB half-space limit
+res.plot()                                         # R1 and X1 vs ka
+```
+
+`radiating_piston` returns a `RadiatingPistonResult` with the normalized
+`resistance`/`reactance`, the mechanical `radiation_resistance`/`radiation_reactance`,
+the `radiation_mass`, the `directivity_index`, the far-field `directivity`
+pattern (when `angles` are given) and `.plot()`. The building blocks
+`piston_resistance`, `piston_reactance` and `piston_directivity` are also
+callable directly. The piston is the companion radiator of the
+[industrial noise-control silencers](noise-control.md).
+
 ## References
 
 - Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and

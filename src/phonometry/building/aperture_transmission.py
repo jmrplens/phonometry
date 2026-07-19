@@ -1,0 +1,303 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Sound transmission through slits, holes and apertures (Hopkins 2007, Sound
+Insulation, Section 4.3.10; Gomperts 1964; Wilson & Soroka 1965).
+
+Air paths are the real limit on the sound insulation of an otherwise heavy
+construction: a small slit or hole caps the achievable sound reduction index no
+matter how massive the wall. This module predicts the transmission coefficient
+``tau`` of the two canonical apertures and combines them with the surrounding
+wall into a composite sound reduction index, the practical answer to "why do I
+never reach the catalogue ``Rw``".
+
+**Straight-edged slit (Hopkins Eq. 4.99, Gomperts).** With the acoustic
+wavenumber ``k = 2 pi f / c0``, ``K = k w`` (``w`` slit width), ``X = d / w``
+(``d`` slit depth) and the end correction ``e = (1/pi)(ln(8/K) - 0.57722)``::
+
+    tau = m K cos^2(Ke)
+          / ( 2 n^2 [ sin^2(KX + 2Ke)/cos^2(Ke)
+                      + (K^2 / 2 n^2)(1 + cos(KX) cos(KX + 2Ke)) ] )
+
+where ``m = 8`` (diffuse field) or ``4`` (normal incidence), and ``n = 1`` (slit
+in the middle of a plate) or ``0.5`` (slit along an edge). The model assumes an
+inviscid air path; maxima in ``tau`` (dips in ``R``) occur at the resonances
+``d + 2e = z lambda/2`` (Eq. 4.101, ``z = 1, 2, 3, ...``).
+
+**Circular aperture (Hopkins Eq. 4.102, Wilson & Soroka).** With the piston
+radiation resistance ``R0(2ka) = 1 - 2 J1(2ka)/(2ka)`` and reactance
+``X0(2ka) = 2 H1(2ka)/(2ka)`` (``J1`` Bessel, ``H1`` Struve; radius ``a``,
+depth ``d``)::
+
+    tau = 4 R0 / ( 4 R0^2 [cos(kd) - X0 sin(kd)]^2
+                   + [(R0^2 - X0^2 + 1) sin(kd) + 2 X0 cos(kd)]^2 )
+
+**Composite (Hopkins Eq. 4.92).** For elements of area ``S_n`` and sound
+reduction index ``R_n`` the resultant is the area-weighted energy sum::
+
+    R = -10 lg( (1 / sum S_n) sum S_n 10^(-R_n/10) )
+
+so a bare opening (``R = 0``, ``tau = 1``) of relative area ``S_a/S`` caps the
+composite at ``10 lg(S / S_a)``. This is the same energetic combination used by
+the EN 12354-3/-4 facade model of :mod:`phonometry.building.facade_prediction`.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
+from numpy.typing import ArrayLike
+from scipy.special import j1, struve
+
+from .._internal.validation import require_choice, require_positive
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
+#: Default speed of sound in air ``c0``, m/s (20 degC).
+_SPEED_OF_SOUND: float = 343.0
+#: Euler-Mascheroni constant in the slit end correction (Hopkins Eq. 4.100).
+_EULER_GAMMA: float = 0.57722
+#: Incident-field constant ``m`` (Hopkins Eq. 4.99).
+_FIELD_M: dict[str, float] = {"diffuse": 8.0, "normal": 4.0}
+#: Slit-position constant ``n`` (Hopkins Eq. 4.99).
+_POSITION_N: dict[str, float] = {"mid": 1.0, "edge": 0.5}
+
+__all__ = [
+    "ApertureTransmissionResult",
+    "circular_aperture_transmission_coefficient",
+    "composite_transmission_loss",
+    "slit_resonance_frequencies",
+    "slit_transmission_coefficient",
+    "transmission_loss_from_coefficient",
+]
+
+
+def transmission_loss_from_coefficient(tau: ArrayLike) -> np.ndarray:
+    """Sound reduction index ``R = -10 lg(tau)`` from a transmission coefficient.
+
+    :param tau: Transmission coefficient(s) ``tau`` (> 0). Values above 1 (a
+        resonating aperture that transmits more than the incident intensity)
+        give a negative ``R``.
+    :return: The sound reduction index ``R``, in dB.
+    :raises ValueError: for a non-positive coefficient.
+    """
+    t = np.asarray(tau, dtype=np.float64)
+    if np.any(t <= 0.0):
+        raise ValueError("'tau' must be positive.")
+    return np.asarray(-10.0 * np.log10(t), dtype=np.float64)
+
+
+@dataclass(frozen=True)
+class ApertureTransmissionResult:
+    """Transmission through a slit or circular aperture (Hopkins 4.3.10).
+
+    :ivar frequencies: Band centre frequencies, in hertz.
+    :ivar transmission_coefficient: Transmission coefficient ``tau`` per band.
+    :ivar kind: ``"slit"`` or ``"circular"``.
+    """
+
+    frequencies: np.ndarray
+    transmission_coefficient: np.ndarray
+    kind: str
+
+    @property
+    def transmission_loss(self) -> np.ndarray:
+        """Aperture sound reduction index ``R = -10 lg(tau)`` per band, dB."""
+        return transmission_loss_from_coefficient(self.transmission_coefficient)
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the aperture sound reduction index ``R(f)``.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from .._plot.building import plot_aperture_transmission
+
+        return plot_aperture_transmission(self, ax=ax, **kwargs)
+
+
+def _slit_end_correction(k_big: np.ndarray) -> np.ndarray:
+    """End correction ``e = (1/pi)(ln(8/K) - gamma)`` (Hopkins Eq. 4.100)."""
+    return np.asarray(
+        (np.log(8.0 / k_big) - _EULER_GAMMA) / np.pi, dtype=np.float64
+    )
+
+
+def slit_transmission_coefficient(
+    frequency: ArrayLike,
+    width: float,
+    depth: float,
+    *,
+    field: str = "diffuse",
+    position: str = "mid",
+    speed_of_sound: float = _SPEED_OF_SOUND,
+) -> ApertureTransmissionResult:
+    """Transmission coefficient of a straight-edged slit (Hopkins Eq. 4.99).
+
+    :param frequency: Band centre frequencies ``f``, in hertz (array, > 0).
+    :param width: Slit width ``w``, in m (> 0).
+    :param depth: Slit depth ``d`` (wall thickness across the slit), in m (> 0).
+    :param field: ``"diffuse"`` (``m = 8``) or ``"normal"`` (``m = 4``).
+    :param position: ``"mid"`` (``n = 1``) or ``"edge"`` (``n = 0.5``).
+    :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).
+    :return: An :class:`ApertureTransmissionResult` (kind ``"slit"``).
+    :raises ValueError: for a non-positive input or unknown field/position.
+    """
+    w = require_positive(width, "width")
+    d = require_positive(depth, "depth")
+    c0 = require_positive(speed_of_sound, "speed_of_sound")
+    field = require_choice(field, "field", tuple(_FIELD_M))
+    position = require_choice(position, "position", tuple(_POSITION_N))
+    f = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    if f.ndim != 1 or f.size == 0:
+        raise ValueError("'frequency' must be a non-empty 1-D array.")
+    if np.any(f <= 0.0):
+        raise ValueError("'frequency' must be positive.")
+
+    m = _FIELD_M[field]
+    n = _POSITION_N[position]
+    k = 2.0 * np.pi * f / c0
+    k_big = k * w
+    x = d / w
+    e = _slit_end_correction(k_big)
+    cos_ke = np.cos(k_big * e)
+    kx = k_big * x
+    kx_2ke = kx + 2.0 * k_big * e
+    numerator = m * k_big * cos_ke**2
+    denominator = 2.0 * n**2 * (
+        np.sin(kx_2ke) ** 2 / cos_ke**2
+        + (k_big**2 / (2.0 * n**2)) * (1.0 + np.cos(kx) * np.cos(kx_2ke))
+    )
+    tau = numerator / denominator
+    return ApertureTransmissionResult(
+        frequencies=f,
+        transmission_coefficient=np.asarray(tau, dtype=np.float64),
+        kind="slit",
+    )
+
+
+def slit_resonance_frequencies(
+    depth: float,
+    width: float,
+    *,
+    orders: int = 3,
+    speed_of_sound: float = _SPEED_OF_SOUND,
+) -> np.ndarray:
+    """Slit resonance frequencies ``d + 2e = z lambda/2`` (Hopkins Eq. 4.101).
+
+    Maxima in the transmission coefficient (dips in ``R``) occur where the
+    effective slit depth is a half-wavelength multiple. Solved iteratively
+    because the end correction ``e`` depends weakly on frequency.
+
+    :param depth: Slit depth ``d``, in m (> 0).
+    :param width: Slit width ``w``, in m (> 0).
+    :param orders: Number of resonance orders ``z = 1..orders`` (>= 1).
+    :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).
+    :return: The resonance frequencies (Hz), one per order.
+    :raises ValueError: for a non-positive input or ``orders < 1``.
+    """
+    d = require_positive(depth, "depth")
+    w = require_positive(width, "width")
+    c0 = require_positive(speed_of_sound, "speed_of_sound")
+    if orders < 1:
+        raise ValueError("'orders' must be at least 1.")
+    out = np.empty(orders, dtype=np.float64)
+    for i in range(orders):
+        z = i + 1
+        # Fixed-point iteration on f: f = z c0 / (2 (d + 2 e(f))).
+        f = z * c0 / (2.0 * d)
+        for _ in range(50):
+            k_big = (2.0 * np.pi * f / c0) * w
+            e = (np.log(8.0 / k_big) - _EULER_GAMMA) / np.pi
+            f_new = z * c0 / (2.0 * (d + 2.0 * e * w))
+            if abs(f_new - f) < 1e-9 * f:
+                f = f_new
+                break
+            f = f_new
+        out[i] = f
+    return out
+
+
+def circular_aperture_transmission_coefficient(
+    frequency: ArrayLike,
+    radius: float,
+    depth: float,
+    *,
+    speed_of_sound: float = _SPEED_OF_SOUND,
+) -> ApertureTransmissionResult:
+    """Transmission coefficient of a circular aperture (Hopkins Eq. 4.102).
+
+    :param frequency: Band centre frequencies ``f``, in hertz (array, > 0).
+    :param radius: Aperture radius ``a``, in m (> 0).
+    :param depth: Aperture depth ``d`` (wall thickness), in m (> 0).
+    :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).
+    :return: An :class:`ApertureTransmissionResult` (kind ``"circular"``).
+    :raises ValueError: for a non-positive input.
+    """
+    a = require_positive(radius, "radius")
+    d = require_positive(depth, "depth")
+    c0 = require_positive(speed_of_sound, "speed_of_sound")
+    f = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    if f.ndim != 1 or f.size == 0:
+        raise ValueError("'frequency' must be a non-empty 1-D array.")
+    if np.any(f <= 0.0):
+        raise ValueError("'frequency' must be positive.")
+
+    k = 2.0 * np.pi * f / c0
+    x = 2.0 * k * a
+    r0 = 1.0 - 2.0 * j1(x) / x
+    x0 = 2.0 * struve(1, x) / x
+    kd = k * d
+    term_a = 4.0 * r0**2 * (np.cos(kd) - x0 * np.sin(kd)) ** 2
+    term_b = (
+        (r0**2 - x0**2 + 1.0) * np.sin(kd) + 2.0 * x0 * np.cos(kd)
+    ) ** 2
+    tau = 4.0 * r0 / (term_a + term_b)
+    return ApertureTransmissionResult(
+        frequencies=f,
+        transmission_coefficient=np.asarray(tau, dtype=np.float64),
+        kind="circular",
+    )
+
+
+def composite_transmission_loss(
+    areas: ArrayLike, reduction_indices: ArrayLike
+) -> np.ndarray:
+    """Composite sound reduction index of parallel elements (Hopkins Eq. 4.92).
+
+    ``R = -10 lg( (1/sum S_n) sum S_n 10^(-R_n/10) )`` — the area-weighted
+    energy combination of ``N`` elements (wall, window, slit, open aperture ...)
+    sharing a partition. A bare opening enters with ``R = 0`` (``tau = 1``).
+
+    :param areas: Element areas ``S_n``, in m^2 (1-D, length ``N``, all > 0).
+    :param reduction_indices: Element sound reduction indices ``R_n``, in dB.
+        Either a 1-D array of length ``N`` (one value per element) or a 2-D
+        array of shape ``(N, M)`` (``N`` elements over ``M`` bands).
+    :return: The composite ``R``: a scalar array for 1-D input, or one value
+        per band (length ``M``) for 2-D input.
+    :raises ValueError: for a non-positive area, mismatched shapes, or an
+        empty element set.
+    """
+    s = np.atleast_1d(np.asarray(areas, dtype=np.float64))
+    if s.ndim != 1 or s.size == 0:
+        raise ValueError("'areas' must be a non-empty 1-D array.")
+    if np.any(s <= 0.0) or not np.all(np.isfinite(s)):
+        raise ValueError("'areas' must be positive and finite.")
+    r = np.asarray(reduction_indices, dtype=np.float64)
+    if r.ndim == 1:
+        if r.shape[0] != s.shape[0]:
+            raise ValueError("'reduction_indices' length must match 'areas'.")
+        tau = 10.0 ** (-r / 10.0)
+        total_1d = float(np.sum(s * tau) / np.sum(s))
+        return np.asarray(-10.0 * np.log10(total_1d), dtype=np.float64)
+    if r.ndim == 2:
+        if r.shape[0] != s.shape[0]:
+            raise ValueError(
+                "'reduction_indices' first axis must match 'areas'."
+            )
+        tau = 10.0 ** (-r / 10.0)
+        total_2d = np.sum(s[:, None] * tau, axis=0) / np.sum(s)
+        return np.asarray(-10.0 * np.log10(total_2d), dtype=np.float64)
+    raise ValueError("'reduction_indices' must be 1-D or 2-D.")

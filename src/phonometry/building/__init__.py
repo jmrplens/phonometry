@@ -86,6 +86,22 @@ from .installed_structure_borne import (
     structure_borne_pressure_level_path,
     total_structure_borne_pressure_level,
 )
+from .aperture_transmission import (
+    ApertureTransmissionResult,
+    circular_aperture_transmission_coefficient,
+    composite_transmission_loss,
+    slit_resonance_frequencies,
+    slit_transmission_coefficient,
+    transmission_loss_from_coefficient,
+)
+from .panel_transmission import (
+    SoundReductionResult,
+    double_wall_transmission_loss,
+    field_incidence_correction,
+    mass_law_transmission_loss,
+    mass_spring_mass_resonance,
+    single_panel_transmission_loss,
+)
 from .insulation import (
     AirborneInsulationResult,
     ExtendedImpactRatingResult,
@@ -150,6 +166,7 @@ from .survey_insulation import (
 __all__ = [
     "AirborneInsulationResult",
     "AirbornePredictionResult",
+    "ApertureTransmissionResult",
     "BandUncertainty",
     "COVERAGE_FACTORS",
     "ExtendedImpactRatingResult",
@@ -177,6 +194,7 @@ __all__ = [
     "SurveyAirborneResult",
     "SurveyFacadeResult",
     "SurveyImpactResult",
+    "SoundReductionResult",
     "SurveyServiceEquipmentResult",
     "UncertainValue",
     "VibrationReductionResult",
@@ -188,9 +206,19 @@ __all__ = [
     "background_correction",
     "band_mode_count",
     "band_uncertainty",
+    "circular_aperture_transmission_coefficient",
     "combine_linings",
     "combine_subareas",
     "combine_uncertainties",
+    "composite_transmission_loss",
+    "double_wall_transmission_loss",
+    "field_incidence_correction",
+    "mass_law_transmission_loss",
+    "mass_spring_mass_resonance",
+    "single_panel_transmission_loss",
+    "slit_resonance_frequencies",
+    "slit_transmission_coefficient",
+    "transmission_loss_from_coefficient",
     "characteristic_reception_plate_power",
     "coupling_term",
     "coupling_term_force_source",

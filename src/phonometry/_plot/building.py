@@ -42,6 +42,69 @@ if TYPE_CHECKING:
     from ..building.floor_covering_improvement import FloorCoveringImprovementResult
     from ..building.installed_structure_borne import InstalledSourceResult
     from ..building.structure_borne_power import StructureBornePowerResult
+    from ..building.panel_transmission import SoundReductionResult
+    from ..building.aperture_transmission import ApertureTransmissionResult
+
+def plot_sound_reduction(
+    result: "SoundReductionResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Predicted sound reduction index ``R(f)`` (Bies 7.2).
+
+    :param result: A
+        :class:`~phonometry.building.panel_transmission.SoundReductionResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``R(f)`` curve ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    r = np.asarray(result.transmission_loss, dtype=np.float64)
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("markersize", 3)
+    ax.semilogx(freq, r, label="predicted $R$", **kwargs)
+    if result.critical_frequency is not None:
+        ax.axvline(
+            result.critical_frequency, color=_C_REFERENCE, ls="--", lw=1.0,
+            label=f"$f_c$ = {result.critical_frequency:.0f} Hz",
+        )
+    if result.resonance_frequency is not None:
+        ax.axvline(
+            result.resonance_frequency, color=_C_SECONDARY, ls="--", lw=1.0,
+            label=f"$f_0$ = {result.resonance_frequency:.0f} Hz",
+        )
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Sound reduction index $R$ [dB]")
+    ax.set_title(f"Predicted sound insulation ({result.model})")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+def plot_aperture_transmission(
+    result: "ApertureTransmissionResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Aperture sound reduction index ``R(f) = -10 lg(tau)`` (Hopkins 4.3.10).
+
+    :param result: An
+        :class:`~phonometry.building.aperture_transmission.ApertureTransmissionResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``R(f)`` curve ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    r = np.asarray(result.transmission_loss, dtype=np.float64)
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.semilogx(freq, r, label=f"{result.kind} aperture $R$", **kwargs)
+    ax.axhline(0.0, color=_C_MUTED, ls=":", lw=0.9)
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Sound reduction index $R$ [dB]")
+    ax.set_title("Aperture sound transmission (Gomperts / Wilson-Soroka)")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
 
 def plot_weighted_rating(
     result: "WeightedRatingResult", ax: Axes | None = None, **kwargs: Any

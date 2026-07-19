@@ -3173,6 +3173,68 @@ def _chk_sii_loud_spectrum() -> Outcome:
     return numeric(ref.ANSIS3_5_LOUD_1KHZ, value, 1e-9, unit="dB", places=2)
 
 
+# ---------------------------------------------------------------------------
+# Short-time objective intelligibility (STOI / ESTOI)
+# ---------------------------------------------------------------------------
+_STOI = "Objective intelligibility (STOI / ESTOI)"
+
+
+def _stoi_speech_like(seed: int) -> np.ndarray:
+    """A deterministic speech-like signal at the 10 kHz STOI internal rate."""
+    fs = ph.hearing.objective_intelligibility.SAMPLE_RATE
+    rng = np.random.default_rng(seed)
+    t = np.arange(3 * fs) / fs
+    sig = np.zeros_like(t)
+    for f0 in (200.0, 400.0, 700.0, 1100.0, 1800.0, 2600.0):
+        depth = 0.5 * (1.0 + np.sin(2.0 * np.pi * rng.uniform(2.0, 6.0) * t
+                                    + rng.uniform(0.0, 2.0 * np.pi)))
+        sig += depth * np.sin(2.0 * np.pi * f0 * t + rng.uniform(0.0, 2.0 * np.pi))
+    return np.asarray(sig, dtype=np.float64)
+
+
+@register(
+    _STOI,
+    "Taal et al. 2011 (Eq. 6, degenerate)",
+    "STOI of a signal against itself = 1 (perfect correlation)",
+)
+def _chk_stoi_identity() -> Outcome:
+    x = _stoi_speech_like(1)
+    return numeric(1.0, ph.stoi(x, x, ph.hearing.objective_intelligibility.SAMPLE_RATE).value,
+                   1e-6, places=6)
+
+
+@register(
+    _STOI,
+    "Jensen & Taal 2016 (Eq. 8, degenerate)",
+    "ESTOI of a signal against itself = 1 (perfect spectral correlation)",
+)
+def _chk_estoi_identity() -> Outcome:
+    x = _stoi_speech_like(1)
+    fs = ph.hearing.objective_intelligibility.SAMPLE_RATE
+    return numeric(1.0, ph.stoi(x, x, fs, extended=True).value, 1e-6, places=6)
+
+
+@register(
+    _STOI,
+    "Taal et al. 2011 (monotonicity with SNR)",
+    "STOI rises from -15 dB to +25 dB SNR speech-shaped noise",
+)
+def _chk_stoi_monotonic() -> Outcome:
+    fs = ph.hearing.objective_intelligibility.SAMPLE_RATE
+    x = _stoi_speech_like(2)
+    rng = np.random.default_rng(10)
+    noise = rng.standard_normal(x.size)
+    scale = np.sqrt(np.mean(x**2)) / np.sqrt(np.mean(noise**2))
+    lo = ph.stoi(x, x + scale * 10.0 ** (15.0 / 20.0) * noise, fs).value  # -15 dB
+    hi = ph.stoi(x, x + scale * 10.0 ** (-25.0 / 20.0) * noise, fs).value  # +25 dB
+    return Outcome(
+        expected="STOI(+25 dB) - STOI(-15 dB) > 0.2",
+        computed=f"{hi - lo:.3f} ({lo:.3f} -> {hi:.3f})",
+        delta="0",
+        passed=(hi - lo) > 0.2,
+    )
+
+
 _NTA = "Impulsive-sound prominence (NT ACOU 112)"
 
 
@@ -3887,6 +3949,37 @@ def _chk_coherence_unity() -> Outcome:
     f, g = ph.coherence(x, y, fs)
     band = (f > 100.0) & (f < 5000.0)
     return numeric(1.0, float(np.mean(g[band])), 1e-3, places=6)
+
+
+@register(
+    _ELECTRO,
+    "AES17-2015 (6.4.2 / 5.2.7)",
+    "Idle channel noise, 1 kHz -20 dBFS tone (CCIR-RMS -5.63 dB offset)",
+)
+def _chk_aes17_idle_noise() -> Outcome:
+    fs = _electro_fs()
+    t = np.arange(fs) / fs
+    # 468 is 0 dB at 1 kHz, so CCIR-RMS reads -5.63 dB there: a -20 dBFS tone
+    # measures -25.63 dBFS CCIR-RMS in closed form.
+    sig = _electro_tone(t, 1000.0, 10.0 ** (-20.0 / 20.0))
+    return numeric(-25.63, ph.idle_channel_noise(sig, fs), 1e-2, unit="dB", places=2)
+
+
+@register(
+    _ELECTRO,
+    "AES17-2015 (6.4.1)",
+    "Dynamic range, full-scale reference over a -40 dBFS residual at 2 kHz",
+)
+def _chk_aes17_dynamic_range() -> Outcome:
+    fs = _electro_fs()
+    t = np.arange(fs) / fs
+    # 997 Hz test tone at -60 dBFS plus a lone 2 kHz residual at -40 dBFS: the
+    # CCIR-RMS filter is unity at 2 kHz and the 997 Hz notch is negligible
+    # there, so the ratio of the full-scale sine to the residual is ~40 dB
+    # (a small notch lift aside).
+    sig = _electro_tone(t, 997.0, 10.0 ** (-60.0 / 20.0))
+    sig = sig + _electro_tone(t, 2000.0, 10.0 ** (-40.0 / 20.0))
+    return numeric(40.0, ph.dynamic_range(sig, fs, 997.0), 0.6, unit="dB", places=2)
 
 
 # ===========================================================================

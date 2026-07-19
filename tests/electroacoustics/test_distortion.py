@@ -22,8 +22,10 @@ from phonometry import (
     HarmonicDistortionResult,
     difference_frequency_distortion,
     dynamic_intermodulation_distortion,
+    dynamic_range,
     harmonic_analysis,
     harmonic_distortion,
+    idle_channel_noise,
     modulation_distortion,
     sinad,
     thd,
@@ -443,3 +445,94 @@ def test_dim_full_signal_regression() -> None:
     value = dynamic_intermodulation_distortion(y192, fs)
     assert abs(value - oracle) < 1e-3
     assert oracle > 0.01  # the nonlinearity produces measurable DIM
+
+
+# --------------------------------------------------------------------------- #
+# AES17-2015 6.4 noise measurements (dynamic range, idle channel noise)
+# --------------------------------------------------------------------------- #
+
+def _dbfs_sine_amplitude(dbfs: float) -> float:
+    """Peak amplitude of a sine at ``dbfs`` dBFS (0 dBFS = full-scale sine)."""
+    return 10.0 ** (dbfs / 20.0)
+
+
+def test_idle_channel_noise_1khz_offset_closed_form() -> None:
+    # AES17 6.4.2: the CCIR-RMS weighting (5.2.7) is the 468 curve with a flat
+    # -5.63 dB offset, and the 468 curve is 0 dB at 1 kHz. A 1 kHz sine at
+    # -20 dBFS therefore reads exactly -20 - 5.63 = -25.63 dBFS CCIR-RMS.
+    sig = _dbfs_sine_amplitude(-20.0) * _tone(1000.0)
+    assert idle_channel_noise(sig, FS) == pytest.approx(-25.63, abs=1e-3)
+
+
+def test_idle_channel_noise_2khz_unity() -> None:
+    # The CCIR-RMS filter is unity at 2 kHz (by construction), so a 2 kHz sine
+    # reads its own dBFS to within the 0.03 dB the -5.63 print rounds off.
+    sig = _dbfs_sine_amplitude(-30.0) * _tone(2000.0)
+    assert idle_channel_noise(sig, FS) == pytest.approx(-30.0, abs=0.05)
+
+
+def test_idle_channel_noise_scales_with_level() -> None:
+    # Doubling the idle level raises the reported dBFS by 20*log10(2) = 6.02 dB.
+    base = _dbfs_sine_amplitude(-40.0) * _tone(3150.0)
+    lo = idle_channel_noise(base, FS)
+    hi = idle_channel_noise(2.0 * base, FS)
+    assert hi - lo == pytest.approx(20.0 * math.log10(2.0), abs=1e-6)
+
+
+def test_idle_channel_noise_digital_zero_is_minus_inf() -> None:
+    # Digital zero (silence, 3.14) carries no energy: the level is -inf dBFS.
+    assert idle_channel_noise(np.zeros(N), FS) == -math.inf
+
+
+def test_dynamic_range_closed_form_residual_at_2khz() -> None:
+    # AES17 6.4.1: a 997 Hz tone at -60 dBFS with a lone -40 dBFS residual at
+    # 2 kHz (where the CCIR-RMS filter is unity and the 997 Hz notch is
+    # negligible). DR = ratio of the full-scale sine to the -40 dBFS residual
+    # = 40 dB, to within the small notch/weighting corrections.
+    sig = _dbfs_sine_amplitude(-60.0) * _tone(997.0)
+    sig = sig + _dbfs_sine_amplitude(-40.0) * _tone(2000.0)
+    # The 997 Hz notch trims a little of the 2 kHz residual, lifting DR ~0.4 dB
+    # above the ideal 40 dB.
+    assert dynamic_range(sig, FS, 997.0) == pytest.approx(40.0, abs=0.6)
+
+
+def test_dynamic_range_residual_at_1khz_uses_ccir_offset() -> None:
+    # A lone -40 dBFS residual at 1 kHz is weighted down by the 5.63 dB
+    # CCIR-RMS offset, so the dynamic range reads 40 + 5.63 = 45.63 dB.
+    sig = _dbfs_sine_amplitude(-60.0) * _tone(997.0)
+    sig = sig + _dbfs_sine_amplitude(-40.0) * _tone(1000.0)
+    # The 997 Hz notch also attenuates the nearby 1 kHz residual, lifting DR a
+    # little; check it clears the unweighted 40 dB by at least the offset.
+    assert dynamic_range(sig, FS, 997.0) > 45.0
+
+
+def test_dynamic_range_monotonic_with_noise() -> None:
+    # More residual noise lowers the dynamic range.
+    rng = np.random.default_rng(4)
+    tone = _dbfs_sine_amplitude(-60.0) * _tone(997.0)
+    noise = rng.standard_normal(N)
+    noise /= math.sqrt(float(np.mean(noise**2)))
+    dr_quiet = dynamic_range(tone + 1e-4 * noise, FS, 997.0)
+    dr_noisy = dynamic_range(tone + 1e-3 * noise, FS, 997.0)
+    assert dr_quiet > dr_noisy
+    # A 10x louder noise floor costs 20 dB of dynamic range.
+    assert dr_quiet - dr_noisy == pytest.approx(20.0, abs=1.0)
+
+
+def test_dynamic_range_full_scale_reference() -> None:
+    # Halving the full-scale reference halves the numerator: DR drops 6.02 dB.
+    sig = _dbfs_sine_amplitude(-60.0) * _tone(997.0)
+    sig = sig + _dbfs_sine_amplitude(-40.0) * _tone(2000.0)
+    dr1 = dynamic_range(sig, FS, 997.0, full_scale=1.0)
+    dr2 = dynamic_range(sig, FS, 997.0, full_scale=0.5)
+    assert dr1 - dr2 == pytest.approx(20.0 * math.log10(2.0), abs=1e-6)
+
+
+def test_dynamic_range_rejects_bad_notch_q_and_full_scale() -> None:
+    sig = _dbfs_sine_amplitude(-60.0) * _tone(997.0) + 1e-3 * _tone(2000.0)
+    with pytest.raises(ValueError):
+        dynamic_range(sig, FS, 997.0, notch_q=0.5)
+    with pytest.raises(ValueError):
+        dynamic_range(sig, FS, 997.0, full_scale=0.0)
+    with pytest.raises(ValueError):
+        idle_channel_noise(sig, FS, full_scale=-1.0)

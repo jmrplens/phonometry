@@ -128,7 +128,7 @@ def _render_figure_drawing(
     svg_fd, svg_path = tempfile.mkstemp(suffix=".svg")
     os.close(svg_fd)
     try:
-        fig = Figure(figsize=(6.0, 5.4))
+        fig = Figure(figsize=(5.8, 6.4))
         FigureCanvasAgg(fig)
         ax = fig.subplots()
         result.plot(ax=ax)
@@ -348,7 +348,7 @@ def _value_table(
             Paragraph("Frequency f [Hz]", head_style),
             Paragraph(f"{value_header} [dB]", head_style),
         ]
-        col_widths = [40 * mm, 30 * mm]
+        col_widths = [28 * mm, 28 * mm]
 
     rows: List[List[Any]] = [header]
     for fk, m, r_, d in zip(centers, measured, shifted, deviations):
@@ -367,13 +367,13 @@ def _value_table(
     n_data = len(centers)
     style_cmds: List[Any] = [
         ("BACKGROUND", (0, 0), (-1, 0), accent),
-        ("FONTSIZE", (0, 1), (-1, -1), 7.5),
+        ("FONTSIZE", (0, 1), (-1, -1), 8),
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("ROWBACKGROUNDS", (0, 1), (-1, n_data), [colors.white, light]),
         ("LINEBELOW", (0, 0), (-1, 0), 0.6, accent),
-        ("TOPPADDING", (0, 0), (-1, -1), 1.4),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 1.4),
+        ("TOPPADDING", (0, 0), (-1, -1), 2.6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2.6),
         ("BOX", (0, 0), (-1, n_data), 0.5, accent),
     ]
     # Thin rule after every third-octave triplet, grouping the table by octave
@@ -591,10 +591,10 @@ def render_iso717_report(
         Paragraph(f"One-third-octave {value_header} [dB]", caption_style),
         value_table,
     ]
-    plot_drawing = _render_figure_drawing(result, 100 * mm)
+    plot_drawing = _render_figure_drawing(result, 116 * mm)
     body_table = Table(
         [[left_cell, plot_drawing]],
-        colWidths=[72 * mm, 102 * mm],
+        colWidths=[56 * mm, 118 * mm],
     )
     body_table.setStyle(
         TableStyle(

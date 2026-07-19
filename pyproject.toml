@@ -31,7 +31,7 @@ dependencies = [
 perf = ["numba>=0.65.1"]
 plot = ["matplotlib>=3.10.9"]
 report = ["reportlab>=4", "svglib>=1.5"]
-full = ["numba>=0.65.1", "matplotlib>=3.10.9", "reportlab>=4"]
+full = ["numba>=0.65.1", "matplotlib>=3.10.9", "reportlab>=4", "svglib>=1.5"]
 
 [project.urls]
 "Homepage" = "https://github.com/jmrplens/phonometry"

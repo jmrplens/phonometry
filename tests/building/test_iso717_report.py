@@ -166,6 +166,35 @@ def _full_metadata(**overrides) -> ReportMetadata:
     return ReportMetadata(**base)
 
 
+def test_metadata_allows_non_positive_temperature() -> None:
+    """Test temperatures of 0 C or below are valid (cold field conditions)."""
+    md = ReportMetadata(temperature=-5.0, source_temperature=0.0,
+                        receiving_temperature=-12.3)
+    assert md.temperature == -5.0
+
+
+def test_metadata_rejects_out_of_range_humidity() -> None:
+    """Relative humidity outside 0..100 % is rejected."""
+    with pytest.raises(ValueError, match="humidity"):
+        ReportMetadata(relative_humidity=150.0)
+
+
+def test_report_escapes_xml_specials_in_metadata(tmp_path) -> None:
+    """Metadata with XML specials (& < >) renders without crashing reportlab."""
+    result = weighted_rating(_AIRBORNE_R)
+    md = ReportMetadata(
+        client="Ac & Co <Ltd>",
+        specimen="wall <A> & partition",
+        laboratory="Lab & Sons",
+        operator="A <B>",
+        report_id="R&D-001",
+        measurement_standard="ISO 10140-2 & Annex",
+    )
+    out = tmp_path / "xml.pdf"
+    result.report(str(out), metadata=md)
+    _assert_one_page(str(out))
+
+
 def test_full_metadata_renders_one_page(tmp_path) -> None:
     """A full ReportMetadata renders a one-page accredited fiche."""
     result = weighted_rating(_AIRBORNE_R)

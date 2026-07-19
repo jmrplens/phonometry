@@ -107,7 +107,7 @@ def test_cross_package_edges_are_whitelisted() -> None:
     assert not violations, "unlisted cross-package imports:\n" + "\n".join(violations)
 
 
-def test_plot_modules_only_type_check_domain_imports() -> None:
+def test_render_modules_only_type_check_domain_imports() -> None:
     checked = False
     for sub in ("_plot", "_report"):
         render_dir = SRC / sub

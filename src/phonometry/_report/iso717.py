@@ -21,12 +21,14 @@ report (modelled on ISO 10140-2 / ISO 16283 lab reports rated per ISO 717):
 With ``verbose=True`` the table uses the ISO 717 Annex C columns instead
 (frequency, measured value, shifted reference, unfavourable deviation).
 
-reportlab and matplotlib are soft dependencies imported lazily here; both are
-guarded with an actionable :class:`ImportError`.
+reportlab, matplotlib and svglib are soft dependencies imported lazily here
+(reportlab and svglib ship in the ``phonometry[report]`` extra, matplotlib in
+``phonometry[plot]``); each is guarded with an actionable :class:`ImportError`.
 """
 
 from __future__ import annotations
 
+import html
 import math
 import os
 import tempfile
@@ -180,7 +182,14 @@ def _metadata_pairs(
     """
 
     def group(specs: List[Tuple[str, str | None]]) -> List[Tuple[str, str]]:
-        return [(label, str(value)) for label, value in specs if value is not None]
+        # Values are user-supplied free text; escape XML specials so a '&' or
+        # '<' cannot break reportlab's Paragraph parser. Labels are fixed and
+        # carry intentional markup (e.g. <super>), so they are left as-is.
+        return [
+            (label, html.escape(str(value)))
+            for label, value in specs
+            if value is not None
+        ]
 
     identity = group(
         [
@@ -338,19 +347,23 @@ def _value_table(
         ]
         col_widths = [28 * mm, 28 * mm]
 
+    def d1(value: float) -> str:
+        # One decimal with the comma separator used across the fiche.
+        return f"{value:.1f}".replace(".", ",")
+
     rows: List[List[Any]] = [header]
     for fk, m, r_, d in zip(centers, measured, shifted, deviations):
         if verbose:
             rows.append(
                 [
                     f"{int(round(fk))}",
-                    f"{m:.1f}",
+                    d1(m),
                     f"{r_:.0f}",
-                    f"{d:.1f}" if d > _DEVIATION_EPS else "—",
+                    d1(d) if d > _DEVIATION_EPS else "—",
                 ]
             )
         else:
-            rows.append([f"{int(round(fk))}", f"{m:.1f}"])
+            rows.append([f"{int(round(fk))}", d1(m)])
 
     n_data = len(centers)
     style_cmds: List[Any] = [
@@ -362,7 +375,7 @@ def _value_table(
         ("LINEBELOW", (0, 0), (-1, 0), 0.6, accent),
         ("TOPPADDING", (0, 0), (-1, -1), 2.6),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 2.6),
-        ("BOX", (0, 0), (-1, n_data), 0.5, accent),
+        ("BOX", (0, 0), (-1, -1), 0.5, accent),
     ]
     # Thin rule after every third-octave triplet, grouping the table by octave
     # exactly as the accredited reference report does.
@@ -371,7 +384,7 @@ def _value_table(
             ("LINEBELOW", (0, triplet_end), (-1, triplet_end), 0.4, thin)
         )
     if verbose:
-        rows.append(["", "", "sum", f"{deviations.sum():.1f}"])
+        rows.append(["", "", "sum", d1(float(deviations.sum()))])
         style_cmds += [
             ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
             ("FONTNAME", (2, -1), (-1, -1), "Helvetica-Bold"),
@@ -435,13 +448,13 @@ def _footer_flow(metadata: ReportMetadata | None) -> List[Any]:
     lines: List[str] = []
     if metadata is not None:
         if metadata.laboratory:
-            lines.append(f"<b>Laboratory:</b> {metadata.laboratory}")
+            lines.append(f"<b>Laboratory:</b> {html.escape(metadata.laboratory)}")
         if metadata.report_id:
-            lines.append(f"<b>Report no.:</b> {metadata.report_id}")
+            lines.append(f"<b>Report no.:</b> {html.escape(metadata.report_id)}")
         if metadata.test_date:
-            lines.append(f"<b>Date:</b> {metadata.test_date}")
+            lines.append(f"<b>Date:</b> {html.escape(metadata.test_date)}")
         if metadata.notes:
-            lines.append(f"<b>Notes:</b> {metadata.notes}")
+            lines.append(f"<b>Notes:</b> {html.escape(metadata.notes)}")
     for line in lines:
         flow.append(Paragraph(line, ident_style))
 
@@ -449,7 +462,7 @@ def _footer_flow(metadata: ReportMetadata | None) -> List[Any]:
     if operator:
         flow.append(
             Paragraph(
-                f"Operator: {operator} &nbsp;&nbsp; "
+                f"Operator: {html.escape(operator)} &nbsp;&nbsp; "
                 "Signature: ______________________________",
                 sign_style,
             )
@@ -607,6 +620,11 @@ def render_iso717_report(
     centers = np.asarray(centers, dtype=np.float64)
     measured = np.asarray(measured, dtype=np.float64)
     shifted = np.asarray(shifted, dtype=np.float64)
+    if not centers.shape == measured.shape == shifted.shape:
+        raise ValueError(
+            "render_iso717_report() needs 'band_centers', 'measured' and "
+            "'shifted_reference' of equal length."
+        )
 
     # Unfavourable deviation: reference above measurement (airborne) or
     # measurement above the reference (impact, the opposite sign).
@@ -636,7 +654,7 @@ def render_iso717_report(
     )
     if measurement_standard:
         basis = (
-            f"{measurement_standard} laboratory measurement of sound "
+            f"{html.escape(measurement_standard)} laboratory measurement of sound "
             f"insulation. Rating per {rating_part}:2020."
         )
     else:

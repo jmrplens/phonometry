@@ -60,8 +60,9 @@ class ReportMetadata:
         impact rating it passes when it is less than or equal to it (a lower
         impact level is better).
     :ivar notes: Free-form remarks printed in the footer.
-    :raises ValueError: If any supplied numeric field is not finite and
-        strictly positive.
+    :raises ValueError: If a supplied dimension/mass/volume/pressure/requirement
+        is not finite and strictly positive, a temperature is not finite, or a
+        relative humidity is outside 0..100 %.
     """
 
     specimen: str | None = None
@@ -89,34 +90,56 @@ class ReportMetadata:
     requirement: float | None = None
     notes: str | None = None
 
-    #: Names of the fields validated as finite, strictly positive numbers.
-    _NUMERIC_FIELDS = (
+    #: Numeric fields that must be finite and strictly positive.
+    _POSITIVE_FIELDS = (
         "area",
         "mass_per_area",
         "source_volume",
         "receiving_volume",
-        "temperature",
-        "relative_humidity",
-        "source_temperature",
-        "source_relative_humidity",
-        "receiving_temperature",
-        "receiving_relative_humidity",
         "pressure",
         "requirement",
     )
+    #: Temperature fields: finite, but any sign (0 C or below is a valid test
+    #: condition, e.g. an unheated outdoor facade measurement).
+    _TEMPERATURE_FIELDS = (
+        "temperature",
+        "source_temperature",
+        "receiving_temperature",
+    )
+    #: Relative-humidity fields: finite and within 0..100 %.
+    _HUMIDITY_FIELDS = (
+        "relative_humidity",
+        "source_relative_humidity",
+        "receiving_relative_humidity",
+    )
 
     def __post_init__(self) -> None:
-        """Validate that the supplied numeric fields are finite and positive."""
-        for name in self._NUMERIC_FIELDS:
+        """Validate the supplied numeric fields by physical range."""
+        for name in self._POSITIVE_FIELDS:
             value = getattr(self, name)
-            if value is None:
-                continue
-            number = float(value)
-            if not math.isfinite(number) or number <= 0.0:
+            if value is not None:
+                number = float(value)
+                if not math.isfinite(number) or number <= 0.0:
+                    raise ValueError(
+                        f"ReportMetadata.{name} must be a finite, positive "
+                        f"number when given; got {value!r}."
+                    )
+        for name in self._TEMPERATURE_FIELDS:
+            value = getattr(self, name)
+            if value is not None and not math.isfinite(float(value)):
                 raise ValueError(
-                    f"ReportMetadata.{name} must be a finite, positive number "
-                    f"when given; got {value!r}."
+                    f"ReportMetadata.{name} must be finite when given; "
+                    f"got {value!r}."
                 )
+        for name in self._HUMIDITY_FIELDS:
+            value = getattr(self, name)
+            if value is not None:
+                number = float(value)
+                if not math.isfinite(number) or not 0.0 <= number <= 100.0:
+                    raise ValueError(
+                        f"ReportMetadata.{name} must be a relative humidity in "
+                        f"0..100 % when given; got {value!r}."
+                    )
 
     def is_empty(self) -> bool:
         """Return ``True`` when no field is set (an all-``None`` instance)."""

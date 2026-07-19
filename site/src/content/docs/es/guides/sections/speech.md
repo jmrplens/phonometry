@@ -34,6 +34,12 @@ la pérdida auditiva.
 cubre el método en tercios de octava, incluidos los espectros normalizados de
 habla desde el esfuerzo vocal normal hasta el grito.
 
+Un tercer par de medidas, **STOI** y **ESTOI**, responde a otra pregunta:
+dada una referencia limpia *y* una versión degradada o procesada de la misma
+habla, ¿cómo de inteligible es el resultado? Valoran el propio procesado, por
+lo que son la vara de medir habitual de la reducción de ruido y la separación
+de fuentes.
+
 Los dos conectan de forma natural con el resto de la biblioteca: el STI
 consume las respuestas al impulso de
 [Acústica de salas](/phonometry/es/guides/room-acoustics/), y el SII consume
@@ -48,3 +54,6 @@ los umbrales de audición cuantificados en
 - [Índice de inteligibilidad del habla](/phonometry/es/guides/speech-intelligibility/):
   el método de importancia y audibilidad de banda de ANSI S3.5-1997, en ruido
   y con pérdida auditiva.
+- [Inteligibilidad objetiva (STOI y ESTOI)](/phonometry/es/guides/objective-intelligibility/):
+  las medidas basadas en correlación para habla ruidosa con ponderación
+  tiempo-frecuencia, a partir de un par limpio/degradado.

@@ -1,0 +1,189 @@
+---
+title: "Inteligibilidad objetiva (STOI y ESTOI)"
+description: "Las dos medidas de inteligibilidad objetiva basadas en correlación para habla ruidosa con ponderación tiempo-frecuencia: STOI (Taal et al. 2011), la correlación de envolventes por banda con recorte, y ESTOI (Jensen y Taal 2016), la correlación espectral con normalización por filas y columnas que sigue a los enmascaradores modulados, ambas sobre el mismo procesado inicial a 10 kHz por tercios de octava y segmentos de 384 ms."
+references:
+  - type: article
+    authors: ["Taal, C. H.", "Hendriks, R. C.", "Heusdens, R.", "Jensen, J."]
+    year: 2011
+    title: "An algorithm for intelligibility prediction of time-frequency weighted noisy speech"
+    journal: "IEEE Transactions on Audio, Speech, and Language Processing"
+    volume: 19
+    issue: 7
+    pages: "2125-2136"
+    doi: "10.1109/TASL.2011.2114881"
+    note: "STOI: el procesado inicial común (10 kHz, tramas Hann de 256 muestras, 15 bandas de tercio de octava, segmentos de 384 ms), la normalización y el recorte por relación señal-distorsión (Ecs. 1-4), la correlación de envolventes por banda (Ec. 5) y el índice promediado (Ec. 6)."
+  - type: article
+    authors: ["Taal, C. H.", "Hendriks, R. C.", "Heusdens, R.", "Jensen, J."]
+    year: 2010
+    title: "A short-time objective intelligibility measure for time-frequency weighted noisy speech"
+    journal: "2010 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)"
+    pages: "4214-4217"
+    doi: "10.1109/ICASSP.2010.5495701"
+    note: "La versión corta de congreso de STOI."
+  - type: article
+    authors: ["Jensen, J.", "Taal, C. H."]
+    year: 2016
+    title: "An algorithm for predicting the intelligibility of speech masked by modulated noise maskers"
+    journal: "IEEE/ACM Transactions on Audio, Speech, and Language Processing"
+    volume: 24
+    issue: 11
+    pages: "2009-2022"
+    doi: "10.1109/TASLP.2016.2585878"
+    note: "ESTOI: la normalización en media y varianza de las filas y las columnas del espectrograma de corto plazo (Ecs. 4-7) y el índice intermedio de correlación espectral (Ec. 8)."
+---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
+**STOI** y **ESTOI** son medidas de inteligibilidad objetiva basadas en
+correlación. Cada una compara una referencia limpia con una versión degradada o
+procesada de la misma habla y devuelve un escalar con relación monótona con la
+fracción de palabras que un oyente entendería: `1` cuando la señal degradada
+coincide con la limpia y cerca de `0` para ruido incorrelado. Trabajan
+directamente sobre las dos formas de onda, lo que las convierte en la vara de
+medir habitual para el habla con **ponderación tiempo-frecuencia**: reducción de
+ruido, separación de fuentes y procesado por máscara binaria, donde separar el
+habla limpia de su distorsión no es inmediato.
+
+:::note
+**STOI/ESTOI frente a STI y SII.** STOI y ESTOI necesitan la referencia limpia
+*y* la señal degradada, y valoran el procesado entre ambas. El
+[índice de transmisión del habla](/phonometry/es/guides/speech-transmission/)
+valora un canal de transmisión a partir de su respuesta al impulso, y el
+[índice de inteligibilidad del habla](/phonometry/es/guides/speech-intelligibility/)
+predice la audibilidad a partir de espectros de habla, ruido y umbral. Usa
+STOI/ESTOI cuando dispones de un par antes/después.
+:::
+
+:::caution
+`pystoi` (una reimplementación pública del MATLAB de los autores) se usa solo
+como contraste externo en la batería de pruebas. phonometry reimplementa ambas
+medidas a partir de los dos artículos y nunca importa `pystoi` en tiempo de
+ejecución; ambas coinciden muy por debajo de `1e-3` sobre entradas comunes.
+:::
+
+## 1. El procesado inicial común
+
+Ambas medidas ejecutan el mismo procesado antes de divergir (Taal et al. 2011,
+sección II): remuestreo a **10 kHz**; una transformada de corto plazo de 256
+muestras (25,6 ms) con ventana de Hann y solape del 50 %, rellenada con ceros
+hasta 512 puntos; eliminación de las tramas cuya energía *limpia* está más de
+**40 dB** por debajo de la trama limpia más intensa; una agrupación por **15
+bandas de tercio de octava** de las magnitudes DFT desde un centro mínimo de
+150 Hz; y segmentos de análisis de **384 ms** (30 tramas) como unidad de
+comparación. La frecuencia de muestreo de las entradas es libre, la biblioteca
+remuestrea internamente.
+
+```python
+from phonometry import stoi
+
+d = stoi(clean, degraded, fs)          # STOI, remuestreado a 10 kHz por dentro
+print(round(d.value, 3))               # un escalar en torno a [0, 1]
+print(stoi(clean, clean, fs).value)    # 1.0  (una señal contra sí misma)
+```
+
+## 2. STOI: correlación de envolventes con recorte
+
+Para cada banda y segmento STOI normaliza la envolvente degradada respecto a la
+limpia, la recorta en un límite inferior de relación señal-distorsión
+($\beta = -15$ dB) para que una unidad completamente degradada no pueda arrastrar
+la puntuación por debajo de su suelo, y toma la correlación muestral de ambas
+envolventes (Taal et al. 2011, Ecs. 3-6):
+
+$$
+d_{j,m} = \frac{\sum_n (x_j(n) - \bar{x}_j)\,(\bar{y}_j(n) - \bar{\bar{y}}_j)}
+               {\lVert x_j - \bar{x}_j \rVert\,\lVert \bar{y}_j - \bar{\bar{y}}_j \rVert}.
+$$
+
+El índice es el promedio de esas correlaciones intermedias sobre todas las
+bandas $j$ y segmentos $m$ (Ec. 6). Como la normalización divide una ganancia por
+segmento, STOI es **invariante al nivel de reproducción** de la señal degradada,
+y a mayor SNR corresponde una puntuación monótonamente mayor.
+
+```python
+import numpy as np
+from phonometry import stoi
+
+fs = 10000
+rng = np.random.default_rng(1)
+clean = rng.standard_normal(3 * fs)
+for snr_db in (-10, 0, 10, 20):
+    g = 10.0 ** (-snr_db / 20.0)
+    noisy = clean + g * rng.standard_normal(clean.size)
+    print(snr_db, round(stoi(clean, noisy, fs).value, 3))
+```
+
+El `STOIResult` incluye la correlación media por banda (`band_scores`) y las
+puntuaciones por segmento (`segment_scores`) que promedian a `value`, y su
+`.plot()` dibuja la correlación intermedia por banda.
+
+## 3. ESTOI: correlación espectral para enmascaradores modulados
+
+ESTOI (`extended=True`) sustituye la correlación por banda independiente por una
+conjunta espectro-temporal. Dentro de cada segmento de 384 ms normaliza en media
+y varianza las **filas** del espectrograma (las envolventes de banda) y luego
+sus **columnas** (los espectros por trama), y promedia la correlación de las
+columnas normalizadas (Jensen y Taal 2016, Ecs. 4-8). Hacer competir las
+columnas significa que un enmascarador que deja silencios, donde el habla limpia
+es audible por instantes, recibe crédito por el habla vislumbrada ahí, algo que
+el promedio por banda de STOI apenas capta.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stoi_intelligibility.svg"
+  alt="Dos paneles del índice de inteligibilidad frente al SNR de -15 a 20 dB. Izquierda (STOI): las curvas del enmascarador estacionario y del modulado casi se superponen, de modo que STOI apenas separa los dos enmascaradores. Derecha (ESTOI): la curva del enmascarador modulado queda claramente por encima de la del estacionario en todo el rango de SNR, de modo que ESTOI acredita el habla vislumbrada en los silencios del enmascarador"
+  width="94%"
+/>
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import stoi
+
+fs = 10000
+rng = np.random.default_rng(20)
+t = np.arange(3 * fs) / fs
+# Una señal limpia tipo habla: tonos con modulación de amplitud.
+clean = np.zeros_like(t)
+for f0 in (200.0, 400.0, 700.0, 1100.0, 1800.0, 2600.0):
+    depth = 0.5 * (1.0 + np.sin(2 * np.pi * rng.uniform(2.0, 6.0) * t + rng.uniform(0.0, 2 * np.pi)))
+    clean += depth * np.sin(2 * np.pi * f0 * t + rng.uniform(0.0, 2 * np.pi))
+p_clean = np.sqrt(np.mean(clean ** 2))
+
+base = rng.standard_normal(clean.size)
+gate = 0.5 * (1.0 + np.sign(np.sin(2 * np.pi * 5.0 * t)))   # puerta on/off a 5 Hz
+modulated = base * (0.05 + 0.95 * gate)
+snrs = np.arange(-15.0, 20.1, 5.0)
+
+def curve(masker, extended):
+    p_m = np.sqrt(np.mean(masker ** 2))
+    return [stoi(clean, clean + (p_clean / (p_m * 10.0 ** (s / 20.0))) * masker,
+                 fs, extended=extended).value for s in snrs]
+
+fig, (a, b) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+for ax, extended, title in ((a, False, "STOI"), (b, True, "ESTOI")):
+    ax.plot(snrs, curve(base, extended), "o-", label="Enmascarador estacionario")
+    ax.plot(snrs, curve(modulated, extended), "s--", label="Enmascarador modulado")
+    ax.set_title(title); ax.set_xlabel("SNR [dB]"); ax.set_ylim(0, 1); ax.legend()
+a.set_ylabel("Índice de inteligibilidad")
+plt.show()
+```
+
+</details>
+
+Para ruido aditivo estacionario las dos medidas son intercambiables y STOI es la
+opción ligera por defecto; cuando la interferencia fluctúa en el tiempo, o al
+comparar procesadores que remodelan el habla en tiempo y frecuencia, prefiere
+ESTOI.
+
+## Véase también
+
+- [Índice de transmisión del habla](/phonometry/es/guides/speech-transmission/):
+  valora un canal de transmisión a partir de su respuesta al impulso o de una
+  grabación STIPA.
+- [Índice de inteligibilidad del habla](/phonometry/es/guides/speech-intelligibility/):
+  predice la inteligibilidad a partir de espectros de habla, ruido y umbral.
+- [Bancos de filtros](/phonometry/es/guides/filter-banks/): las bandas de tercio
+  de octava en las que el procesado inicial agrupa la DFT.
+- Referencia de la API: [`hearing.objective_intelligibility`](/phonometry/es/reference/api/speech/objective-intelligibility/).

@@ -1,6 +1,6 @@
 ---
 title: "Electroacústica: distorsión y respuesta en frecuencia"
-description: "Distorsión IEC 60268-3: distorsión armónica total y de orden n, THD+N y SINAD a través del ancho de banda de medición AES17, la intermodulación por órdenes de modulación y por frecuencia diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468, más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria, y las convenciones de sensibilidad de IEC 60268-4/-5 (dB re 1 V/Pa, la normalización de campo libre a 1 W / 1 m)."
+description: "Distorsión IEC 60268-3: distorsión armónica total y de orden n, THD+N y SINAD a través del ancho de banda de medición AES17, la intermodulación por órdenes de modulación y por frecuencia diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468, el rango dinámico y el ruido de canal en reposo de AES17 (ponderación CCIR-RMS), más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria, y las convenciones de sensibilidad de IEC 60268-4/-5 (dB re 1 V/Pa, la normalización de campo libre a 1 W / 1 m)."
 references:
   - type: book
     authors: ["Beranek, L. L.", "Mellow, T. J."]
@@ -187,6 +187,34 @@ print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # red I
 print(electroacoustics.weighted_thd(signal, fs, 100.0, weighting="A"))   # variante ponderada A
 print(electroacoustics.itu_r_468_weighting([6300.0]))                    # [+12.2] dB
 ```
+
+### 2.2 Rango dinámico y ruido de canal en reposo (AES17-2015 6.4)
+
+Las dos cifras de catálogo de cualquier conversor comparten la ponderación
+AES17 **CCIR-RMS** (5.2.7): la curva ITU-R BS.468-4 desplazada un valor plano de
+`-5,63` dB para que sea unidad a 2 kHz. El **rango dinámico** (6.4.1) excita el
+dispositivo con un seno de 997 Hz 60 dB por debajo de plena escala, elimina la
+fundamental con la muesca normalizada (5.2.8) y pondera el residuo de
+ruido-más-distorsión, y luego informa de la razón del seno de plena escala a ese
+residuo ponderado (también conocida como relación señal-ruido). El **ruido de
+canal en reposo** (6.4.2) es el mismo nivel ponderado medido con el dispositivo
+excitado por cero digital, referido a plena escala:
+
+```python
+from phonometry import electroacoustics
+
+# Rango dinámico: captura la salida del ensayo de 997 Hz a -60 dBFS, escalada
+# de modo que 1.0 sea plena escala digital.
+dr = electroacoustics.dynamic_range(output, fs, 997.0)     # dB CCIR-RMS
+# Ruido de canal en reposo: captura la salida con entrada de cero digital.
+idle = electroacoustics.idle_channel_noise(idle_output, fs)  # dBFS CCIR-RMS
+```
+
+Ambas reutilizan la muesca y la curva ITU-R 468 de la cadena de THD+N, y ambas
+se miden a través de la banda AES17 (un paso alto de 20 Hz más el paso bajo
+normalizado en `bandwidth`). Como el filtro CCIR-RMS marca `-5,63` dB a 1 kHz, un
+tono de 1 kHz mide su propio dBFS menos 5,63 dB, lo que fija la ponderación con
+exactitud.
 
 ## 3. Distorsión por intermodulación (IEC 60268-3 14.12.7–10)
 

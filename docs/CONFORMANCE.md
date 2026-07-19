@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **319/319 conformance checks pass** across 39 domains and 193 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **324/324 conformance checks pass** across 40 domains and 198 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -331,6 +331,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
+<summary>&#9989; <b>Objective intelligibility (STOI / ESTOI)</b>: 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Taal et al. 2011 (Eq. 6, degenerate) | STOI of a signal against itself = 1 (perfect correlation) | 1 (+/-0.000001) | 1 | 0 | &#9989; |
+| Jensen & Taal 2016 (Eq. 8, degenerate) | ESTOI of a signal against itself = 1 (perfect spectral correlation) | 1 (+/-0.000001) | 1 | 0 | &#9989; |
+| Taal et al. 2011 (monotonicity with SNR) | STOI rises from -15 dB to +25 dB SNR speech-shaped noise | STOI(+25 dB) - STOI(-15 dB) > 0.2 | 0.462 (0.389 -> 0.851) | 0 | &#9989; |
+
+</details>
+
+<details>
 <summary>&#9989; <b>Impulsive-sound prominence (NT ACOU 112)</b>: 100% (2/2)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
@@ -453,7 +464,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Electroacoustics: distortion &amp; frequency response</b>: 100% (12/12)</summary>
+<summary>&#9989; <b>Electroacoustics: distortion &amp; frequency response</b>: 100% (14/14)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -469,6 +480,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60268-3:2013 (14.12.9) | DIM of the 15 kHz / 3.15 kHz signal (Table 2, 9 products) | 0.168819 (+/-0.0001) | 0.168819 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e | H1 recovers a known first-order IIR gain at 1 kHz | 0.8954 (+/-2%) | 0.8954 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e | Ordinary coherence = 1 for a noiseless LTI path | 1 (+/-0.001) | 1 | 0 | &#9989; |
+| AES17-2015 (6.4.2 / 5.2.7) | Idle channel noise, 1 kHz -20 dBFS tone (CCIR-RMS -5.63 dB offset) | -25.63 dB (+/-0.01 dB) | -25.63 dB | 0 dB | &#9989; |
+| AES17-2015 (6.4.1) | Dynamic range, full-scale reference over a -40 dBFS residual at 2 kHz | 40 dB (+/-0.6 dB) | 40.41 dB | 0.414 dB | &#9989; |
 
 </details>
 

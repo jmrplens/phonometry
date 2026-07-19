@@ -621,6 +621,20 @@ _ES_EXACT = {
     "PHAT prewhitens the cross-spectrum and restores it":
         "señal coloreada: el correlador simple ensancha el pico,\n"
         "PHAT preblanquea el espectro cruzado y lo recupera",
+    # Objective intelligibility: STOI vs ESTOI (Taal 2011 / Jensen & Taal 2016)
+    "Short-Time Objective Intelligibility: STOI vs ESTOI":
+        "Inteligibilidad objetiva de corto plazo: STOI frente a ESTOI",
+    "STOI (Taal et al. 2011)": "STOI (Taal et al. 2011)",
+    "ESTOI (Jensen & Taal 2016)": "ESTOI (Jensen y Taal 2016)",
+    "Stationary masker": "Enmascarador estacionario",
+    "Modulated (5 Hz gated) masker":
+        "Enmascarador modulado (con puerta a 5 Hz)",
+    "SNR [dB]": "SNR [dB]",
+    "Intelligibility index": "Índice de inteligibilidad",
+    "ESTOI rates the modulated masker higher: it credits the\n"
+    "speech glimpsed in the quiet gaps. STOI barely separates them.":
+        "ESTOI valora más alto el enmascarador modulado: acredita el\n"
+        "habla vislumbrada en los silencios. STOI apenas los separa.",
     # Room acoustics: image-source reflectogram (Kuttruff 4.1 / Vorlander 11.4)
     "Image-Source Room Impulse Response: a 7x5x3 m room (order <= 10)":
         "Respuesta al impulso por fuentes imagen: sala de 7x5x3 m "
@@ -3966,6 +3980,67 @@ def generate_gcc_phat_delay(output_dir: str) -> None:
             color=COLOR_FG)
     plt.tight_layout()
     save_figure(output_dir, "gcc_phat_delay.svg")
+    plt.close()
+
+
+def generate_stoi_intelligibility(output_dir: str) -> None:
+    """STOI vs ESTOI over SNR for stationary and modulated maskers."""
+    print("Generating stoi_intelligibility...")
+    from phonometry import stoi
+
+    fs = 10000  # the STOI internal rate: no resampling, faster and exact
+    rng = np.random.default_rng(20)
+    t = np.arange(3 * fs) / fs
+
+    # A speech-like clean signal: amplitude-modulated formant-ish tones.
+    clean = np.zeros_like(t)
+    for f0 in (200.0, 400.0, 700.0, 1100.0, 1800.0, 2600.0):
+        depth = 0.5 * (1.0 + np.sin(2 * np.pi * rng.uniform(2.0, 6.0) * t
+                                    + rng.uniform(0.0, 2 * np.pi)))
+        clean += depth * np.sin(2 * np.pi * f0 * t + rng.uniform(0.0, 2 * np.pi))
+    p_clean = float(np.sqrt(np.mean(clean**2)))
+
+    # Two maskers: a stationary Gaussian noise and the same noise deeply gated
+    # at 5 Hz (a modulated masker with quiet gaps, as in Jensen & Taal 2016).
+    base_noise = rng.standard_normal(clean.size)
+    gate = 0.5 * (1.0 + np.sign(np.sin(2 * np.pi * 5.0 * t)))  # 0/1 square gate
+    modulated = base_noise * (0.05 + 0.95 * gate)
+
+    snrs = np.arange(-15.0, 20.1, 5.0)
+
+    def curve(masker: np.ndarray, extended: bool) -> np.ndarray:
+        p_m = float(np.sqrt(np.mean(masker**2)))
+        out = []
+        for snr in snrs:
+            g = p_clean / (p_m * 10.0 ** (snr / 20.0))
+            out.append(stoi(clean, clean + g * masker, fs, extended=extended).value)
+        return np.asarray(out)
+
+    fig, (ax_stoi, ax_estoi) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+    for ax, extended, title in (
+        (ax_stoi, False, "STOI (Taal et al. 2011)"),
+        (ax_estoi, True, "ESTOI (Jensen & Taal 2016)"),
+    ):
+        ax.plot(snrs, curve(base_noise, extended), "o-", color=COLOR_PRIMARY,
+                linewidth=1.7, label="Stationary masker")
+        ax.plot(snrs, curve(modulated, extended), "s--", color=COLOR_SECONDARY,
+                linewidth=1.7, label="Modulated (5 Hz gated) masker")
+        ax.set_title(title, fontweight="bold")
+        ax.set_xlabel("SNR [dB]")
+        ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+        ax.set_axisbelow(True)
+        ax.set_ylim(0.0, 1.0)
+        ax.legend(loc="upper left", fontsize=9)
+    ax_stoi.set_ylabel("Intelligibility index")
+    ax_estoi.text(0.985, 0.03,
+                  "ESTOI rates the modulated masker higher: it credits the\n"
+                  "speech glimpsed in the quiet gaps. STOI barely separates them.",
+                  transform=ax_estoi.transAxes, va="bottom", ha="right",
+                  fontsize=8.5, color=COLOR_FG)
+    fig.suptitle("Short-Time Objective Intelligibility: STOI vs ESTOI",
+                 fontweight="bold")
+    plt.tight_layout()
+    save_figure(output_dir, "stoi_intelligibility.svg")
     plt.close()
 
 
@@ -7316,6 +7391,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Correlation / time-delay estimation: GCC-PHAT vs the direct
     # correlator on a colored signal pair (Knapp & Carter 1976).
     generate_gcc_phat_delay,
+    # Objective intelligibility: STOI vs ESTOI over SNR for stationary and
+    # modulated maskers (Taal et al. 2011 / Jensen & Taal 2016).
+    generate_stoi_intelligibility,
     # Room acoustics: the synthetic image-source room impulse response as a
     # reflectogram of mirror-image reflections by order (Kuttruff 4.1).
     generate_image_source_reflectogram,

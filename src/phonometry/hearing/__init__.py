@@ -17,6 +17,7 @@ from .occupational_exposure import (
     table_c4_contribution,
     task_based_exposure,
 )
+from .objective_intelligibility import STOIResult, stoi
 from .sii import SIIResult, speech_intelligibility_index, standard_speech_spectrum
 from .sti import STIResult, STIWarning, sti_from_impulse_response, stipa, stipa_signal
 
@@ -46,6 +47,7 @@ __all__ = [
     "SIIResult",
     "STIResult",
     "STIWarning",
+    "STOIResult",
     "Task",
     "TaskContribution",
     "full_day_exposure",
@@ -58,6 +60,7 @@ __all__ = [
     "sti_from_impulse_response",
     "stipa",
     "stipa_signal",
+    "stoi",
     "table_c4_contribution",
     "task_based_exposure",
 ]

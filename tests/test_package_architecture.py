@@ -87,15 +87,20 @@ def test_internal_imports_no_domain_code() -> None:
 def test_cross_package_edges_are_whitelisted() -> None:
     violations = []
     for frm, to, where in _edges():
-        if frm == to or to in ("_internal", "root") or frm in ("root", "_plot"):
+        if frm == to or to in ("_internal", "root") or frm in (
+            "root", "_plot", "_report"
+        ):
             # root modules are unrestricted during the migration; the facade
-            # (__init__, _compat) legitimately imports everything.
+            # (__init__, _compat) legitimately imports everything. _plot and
+            # _report are rendering leaves that reference domain classes only
+            # under TYPE_CHECKING (see the guarantee test below).
             continue
         if to == "metrology":
             continue
-        if to == "_plot":
-            # lazy .plot() imports only; enforced structurally by the fact
-            # that _plot modules import domain classes under TYPE_CHECKING.
+        if to in ("_plot", "_report"):
+            # lazy .plot()/.report() imports only; enforced structurally by the
+            # fact that _plot/_report modules import domain classes under
+            # TYPE_CHECKING.
             continue
         if (frm, to) not in ALLOWED_EDGES:
             violations.append(f"{frm} -> {to} ({where})")
@@ -103,15 +108,22 @@ def test_cross_package_edges_are_whitelisted() -> None:
 
 
 def test_plot_modules_only_type_check_domain_imports() -> None:
-    plot_dir = SRC / "_plot"
-    if not plot_dir.is_dir():
-        pytest.skip("_plot not created yet")
-    for path in plot_dir.glob("*.py"):
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        for node in tree.body:  # module level only
-            if isinstance(node, ast.ImportFrom) and node.level == 2:
-                pytest.fail(f"{path.name}: module-level import of domain code "
-                            "(must live under TYPE_CHECKING)")
+    checked = False
+    for sub in ("_plot", "_report"):
+        render_dir = SRC / sub
+        if not render_dir.is_dir():
+            continue
+        checked = True
+        for path in render_dir.glob("*.py"):
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            for node in tree.body:  # module level only
+                if isinstance(node, ast.ImportFrom) and node.level == 2:
+                    pytest.fail(
+                        f"{sub}/{path.name}: module-level import of domain code "
+                        "(must live under TYPE_CHECKING)"
+                    )
+    if not checked:
+        pytest.skip("neither _plot nor _report created yet")
 
 
 @pytest.mark.parametrize("pkg", sorted(

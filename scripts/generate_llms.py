@@ -38,6 +38,7 @@ PAGES = [
     ("insulation-field.md", "guides/insulation-field"),
     ("insulation-lab.md", "guides/insulation-lab"),
     ("insulation-prediction.md", "guides/insulation-prediction"),
+    ("panel-sound-insulation.md", "guides/panel-sound-insulation"),
     ("outdoor-propagation.md", "guides/outdoor-propagation"),
     ("ground-barriers.md", "guides/ground-barriers"),
     ("sound-power.md", "guides/sound-power"),

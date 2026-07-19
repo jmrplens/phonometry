@@ -401,6 +401,37 @@ incertidumbres por banda (Fórmula B.2).
 Consulta las guías de [acústica de salas](/phonometry/es/guides/room-acoustics/) y de
 [medición del aislamiento en campo](/phonometry/es/guides/insulation-field/) para su uso.
 
+### Predicción del aislamiento de paneles (Bies 7.2, Hopkins 2.9/4.3.10, Cremer 5)
+
+Donde EN 12354 toma el $R$ de elemento como una medida, el índice de reducción
+sonora de un panel también se puede **predecir** a partir de sus propiedades
+físicas. Un panel flexible sigue la ley de masas
+$TL_0 = 10\lg[1 + (\pi f m''/\rho_0 c_0)^2]$ (Bies Ec. 7.40), que sube 6 dB por
+octava y 6 dB por duplicar la masa superficial $m''$; el valor de campo resta
+5,5 dB (tercio de octava). La rigidez añade un **valle de coincidencia** en
+$f_c = (c_0^2/2\pi)\sqrt{m''/B'}$ (Ec. 7.3), donde la longitud de onda de flexión
+libre iguala la de traza acústica. El método de Sharp mantiene la ley de masas
+hasta $f_c/2$, cae linealmente en $\log f$ hasta el valle
+$TL = 20\lg(f_c m'') + 10\lg\eta - 44$ y vuelve a subir por encima de $f_c$ con el
+factor de pérdidas $\eta$ (Ec. 7.44). Una **pared doble** es un sistema
+masa-muelle-masa con la cámara como muelle: por debajo de
+$f_0 = 60\sqrt{(m_1+m_2)/(m_1 m_2 d)}$ (Ec. 7.62) sigue la ley de masas de la
+masa combinada, y por encima las leyes de masas de las dos hojas se suman más el
+término de cámara $20\lg(2kd)$, saturando en +6 dB más allá de
+$f_l = c_0/(2\pi d)$ (Ec. 7.64); un relleno poroso baja $f_0$. Los pequeños
+caminos de aire limitan cualquier construcción: el coeficiente de transmisión de
+una rendija recta (Gomperts, Hopkins Ec. 4.99, con resonancias en
+$d + 2e = z\lambda/2$) o de un orificio circular (Wilson y Soroka, Ec. 4.102) se
+combina con la pared en la suma energética ponderada por área
+$R = -10\lg[(1/\sum S_n)\sum S_n 10^{-R_n/10}]$ (Ec. 4.92), de modo que una
+abertura desnuda de área relativa $S_a/S$ limita la composición a
+$10\lg(S/S_a)$. El camino de transmisión resonante y la radiación de la pared
+doble se apoyan en la eficiencia de radiación de placa y las movilidades
+puntuales de la [teoría de vibración](/phonometry/es/reference/theory/vibration/).
+
+Consulta la guía [Predicción del aislamiento de paneles](/phonometry/es/guides/panel-sound-insulation/)
+para su uso.
+
 ## Dispersión superficial y difusión (ISO 17497-1, ISO 17497-2)
 
 ### Coeficiente de dispersión a incidencia aleatoria (ISO 17497-1)

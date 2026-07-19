@@ -234,6 +234,35 @@ energy-weighted quadrature sum of the band uncertainties (Formula B.2).
 See the [Room Acoustics](room-acoustics.md) and
 [Field Insulation Measurement and Ratings](insulation-field.md) guides for usage.
 
+### Predicted panel sound insulation (Bies 7.2, Hopkins 2.9/4.3.10, Cremer 5)
+
+Where EN 12354 takes the element $R$ as a measurement, the sound reduction index
+of a panel can also be **predicted** from its physical properties. A limp panel
+follows the mass law $TL_0 = 10\lg[1 + (\pi f m''/\rho_0 c_0)^2]$ (Bies Eq. 7.40),
+which rises 6 dB per octave and 6 dB per doubling of the surface mass $m''$; the
+field-incidence value subtracts 5.5 dB (one-third octave). Stiffness adds a
+**coincidence dip** at $f_c = (c_0^2/2\pi)\sqrt{m''/B'}$ (Eq. 7.3), where the free
+bending wavelength matches the acoustic trace wavelength. Sharp's method holds
+the mass law to $f_c/2$, drops linearly in $\log f$ to the dip
+$TL = 20\lg(f_c m'') + 10\lg\eta - 44$ and rises again above $f_c$ with the loss
+factor $\eta$ (Eq. 7.44). A **double wall** is a mass-spring-mass system with the
+cavity as the spring: below $f_0 = 60\sqrt{(m_1+m_2)/(m_1 m_2 d)}$ (Eq. 7.62) it
+follows the mass law of the combined mass, and above it the two leaves' mass laws
+add plus the cavity term $20\lg(2kd)$, saturating at +6 dB beyond
+$f_l = c_0/(2\pi d)$ (Eq. 7.64); a porous fill lowers $f_0$. Small air paths cap
+any construction: the transmission coefficient of a straight slit (Gomperts,
+Hopkins Eq. 4.99, with resonances at $d + 2e = z\lambda/2$) or a circular hole
+(Wilson & Soroka, Eq. 4.102) combines with the wall in the area-weighted energy
+sum $R = -10\lg[(1/\sum S_n)\sum S_n 10^{-R_n/10}]$ (Eq. 4.92), so a bare opening
+of relative area $S_a/S$ limits the composite to $10\lg(S/S_a)$. The resonant
+transmission path and the double-wall radiation draw on the plate radiation
+efficiency and point mobilities of the
+[vibration theory](theory-vibration.md). The prediction is clean-room from Bies,
+Hansen & Howard (2017), Hopkins (2007) and Cremer, Heckl & Petersson (2005).
+
+See the [Predicting Panel Sound Insulation](panel-sound-insulation.md) guide for
+usage.
+
 ## Surface scattering and diffusion (ISO 17497-1, ISO 17497-2)
 
 ### Random-incidence scattering coefficient (ISO 17497-1)

@@ -122,6 +122,22 @@ from .vibration.mechanical_mobility import (
     sdof_mobility_result,
     sdof_receptance,
 )
+from .vibration.point_mobility import (
+    infinite_beam_mobility,
+    infinite_beam_moment_mobility,
+    infinite_beam_point_mobility,
+    infinite_plate_impedance,
+    infinite_plate_mobility,
+    infinite_plate_point_mobility,
+    injected_power,
+    longitudinal_rod_impedance,
+    plate_bending_stiffness,
+)
+from .vibration.radiation_efficiency import (
+    RadiationEfficiencyResult,
+    coincidence_frequency,
+    radiation_efficiency,
+)
 from .vibration.transfer_stiffness import (
     REFERENCE_STIFFNESS,
     TRANSMISSIBILITY_LIMIT,
@@ -483,6 +499,22 @@ from .building.insulation import (
     weighted_impact_rating_extended,
     weighted_rating,
     weighted_rating_extended,
+)
+from .building.panel_transmission import (
+    SoundReductionResult,
+    double_wall_transmission_loss,
+    field_incidence_correction,
+    mass_law_transmission_loss,
+    mass_spring_mass_resonance,
+    single_panel_transmission_loss,
+)
+from .building.aperture_transmission import (
+    ApertureTransmissionResult,
+    circular_aperture_transmission_coefficient,
+    composite_transmission_loss,
+    slit_resonance_frequencies,
+    slit_transmission_coefficient,
+    transmission_loss_from_coefficient,
 )
 from .building.lab_insulation import (
     LabAirborneInsulationResult,
@@ -1636,6 +1668,32 @@ __all__ = [
     "GaussianPulse",
     "CWSource",
     "SignalSource",
+    # Theoretical point mobilities and radiation efficiency (Cremer, Hopkins)
+    "infinite_plate_impedance",
+    "infinite_plate_mobility",
+    "infinite_plate_point_mobility",
+    "infinite_beam_mobility",
+    "infinite_beam_moment_mobility",
+    "infinite_beam_point_mobility",
+    "longitudinal_rod_impedance",
+    "plate_bending_stiffness",
+    "injected_power",
+    "RadiationEfficiencyResult",
+    "coincidence_frequency",
+    "radiation_efficiency",
+    # Predicted panel and aperture sound insulation (Bies, Hopkins)
+    "SoundReductionResult",
+    "mass_law_transmission_loss",
+    "field_incidence_correction",
+    "single_panel_transmission_loss",
+    "double_wall_transmission_loss",
+    "mass_spring_mass_resonance",
+    "ApertureTransmissionResult",
+    "slit_transmission_coefficient",
+    "slit_resonance_frequencies",
+    "circular_aperture_transmission_coefficient",
+    "composite_transmission_loss",
+    "transmission_loss_from_coefficient",
 ]
 
 

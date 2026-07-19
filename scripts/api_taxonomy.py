@@ -126,6 +126,8 @@ _SECTION_LIST: tuple[Section, ...] = (
         label_es="Acústica de la edificación",
         modules=(
             "phonometry.building.insulation",
+            "phonometry.building.panel_transmission",
+            "phonometry.building.aperture_transmission",
             "phonometry.building.lab_insulation",
             "phonometry.building.survey_insulation",
             "phonometry.building.intensity_insulation",
@@ -160,6 +162,8 @@ _SECTION_LIST: tuple[Section, ...] = (
         label_es="Vibración y ruido estructural",
         modules=(
             "phonometry.vibration.mechanical_mobility",
+            "phonometry.vibration.point_mobility",
+            "phonometry.vibration.radiation_efficiency",
             "phonometry.vibration.transfer_stiffness",
             "phonometry.vibration.human_vibration",
             "phonometry.vibration.multiple_shock_vibration",

@@ -34,6 +34,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   from an effective flow resistivity via the porous models of
   `phonometry.materials`. The results expose `.plot()` (the profile, the ray
   paths and the relative-level field).
+- Theoretical panel sound insulation, predicting the airborne sound reduction
+  index `R(f)` from physical properties (`phonometry.building.panel_transmission`
+  and `phonometry.building.aperture_transmission`, re-exported at the top level).
+  `single_panel_transmission_loss` implements the mass law and coincidence dip by
+  Sharp's method (Bies, Hansen & Howard 2017, *Engineering Noise Control* 5e,
+  Section 7.2.4): the field-incidence mass law `TL = 10 lg(1 + (pi f m''/rho0 c0)^2)
+  - 5.5` (rising 6 dB per octave and 6 dB per doubling of mass), the closed-form
+  coincidence frequency `fc = (c0^2/2pi) sqrt(m''/B')`, and the loss-factor-
+  controlled dip. `double_wall_transmission_loss` adds the mass-spring-mass
+  double wall (Section 7.2.6): the resonance `f0 = 60 sqrt((m1+m2)/(m1 m2 d))`,
+  the total-mass law below it and the cavity-boosted sum above, with an optional
+  porous `cavity_medium` (a `materials.PorousMediumResult`) that lowers `f0`.
+  `slit_transmission_coefficient`, `circular_aperture_transmission_coefficient`
+  and `composite_transmission_loss` predict transmission through slits (Gomperts)
+  and holes (Wilson & Soroka) and combine them with the wall in the area-weighted
+  energy sum (Hopkins 2007, *Sound insulation*, Section 4.3.10, Eq. 4.92), so a
+  bare opening of relative area `Sa/S` caps the result at `10 lg(S/Sa)`. Every
+  prediction returns a `SoundReductionResult` / `ApertureTransmissionResult` with
+  `.rating()` (ISO 717-1) and `.plot()`, and is clean-room from the cited books.
+- Plate radiation efficiency and theoretical point mobilities
+  (`phonometry.vibration.radiation_efficiency` and
+  `phonometry.vibration.point_mobility`, also re-exported at the top level).
+  `radiation_efficiency` predicts the frequency-averaged radiation efficiency
+  `sigma(f)` of a bending plate by Leppington/Maidanik "method no. 1" (Hopkins
+  2007, Section 2.9.4, Eqs 2.227-2.230), tending to `(1 - fc/f)^-0.5` above the
+  coincidence frequency `coincidence_frequency`, so it supplies the ISO 7849
+  radiation factor of `sound_power_from_vibration` without a power measurement.
+  `infinite_plate_impedance` / `infinite_beam_mobility` (and the rod, moment and
+  bundled-`MobilityResult` variants) give the closed-form point impedances and
+  mobilities of infinite structures and the injected power
+  `W = 0.5 |F|^2 Re{Y}` (Cremer, Heckl & Petersson 2005, *Structure-Borne Sound*
+  3e, Table 5.1), the theoretical companions of the measured ISO 7626 mobilities.
 
 - Objective speech intelligibility STOI and ESTOI
   (`phonometry.hearing.objective_intelligibility.stoi`, also `phonometry.stoi`).

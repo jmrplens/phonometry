@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from ..vibration.mechanical_mobility import MobilityResult
     from ..vibration.transfer_stiffness import TransferStiffnessResult
     from ..vibration.multiple_shock_vibration import MultipleShockResult
+    from ..vibration.radiation_efficiency import RadiationEfficiencyResult
 
 def plot_vibration_weighting(
     result: "WeightingResponse", ax: Axes | None = None, **kwargs: Any
@@ -191,6 +192,41 @@ def plot_transfer_stiffness(
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
     return ax
+
+def plot_radiation_efficiency(
+    result: "RadiationEfficiencyResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Radiation efficiency ``sigma(f)`` on log-log axes (Hopkins 2.9.4).
+
+    :param result: A
+        :class:`~phonometry.vibration.radiation_efficiency.RadiationEfficiencyResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``sigma`` curve ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    sigma = np.asarray(result.radiation_efficiency, dtype=np.float64)
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("markersize", 3)
+    ax.loglog(freq, sigma, label=r"$\sigma(f)$", **kwargs)
+    ax.axhline(1.0, color=_C_MUTED, ls=":", lw=0.9, label=r"$\sigma = 1$")
+    ax.axvline(
+        result.critical_frequency,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.0,
+        label=f"$f_c$ = {result.critical_frequency:.0f} Hz",
+    )
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel(r"Radiation efficiency $\sigma$")
+    ax.set_title("Plate radiation efficiency (Leppington / Maidanik)")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
 
 def plot_multiple_shock(
     result: "MultipleShockResult", ax: Axes | None = None, **kwargs: Any

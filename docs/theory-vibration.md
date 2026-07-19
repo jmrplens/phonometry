@@ -67,6 +67,32 @@ separate software) is out of scope.
 See the [Human Vibration guide](human-vibration.md) and the
 [Multiple-Shock Vibration guide](multiple-shock-vibration.md) for usage.
 
+## Point mobilities and radiation efficiency (Cremer 5, Hopkins 2.9)
+
+The vibrational power a point force injects into a structure is
+$W = \tfrac12 |F|^2\,\mathrm{Re}\{Y\}$ (Cremer Eq. 5.23), so the driving-point
+**mobility** $Y$ (the reciprocal of the impedance) governs how much energy the
+structure absorbs. For infinite structures these are closed forms (Cremer
+Table 5.1): an infinite thin plate is a pure resistance $Z = 8\sqrt{B'\,m''}$
+(real, frequency independent, with $B'$ the bending stiffness per unit width and
+$m''$ the mass per unit area), an infinite beam has
+$Y = (1-\mathrm{j})/(4 m' c_B)$ (a 45-degree phase, falling as $\omega^{-1/2}$
+through the bending wave speed $c_B$), and a longitudinal rod has
+$Z = \rho c_L S$. These supply the receiver mobility EN 12354-5 needs when no
+measurement exists, and are the theoretical companions of the measured ISO 7626
+mobilities. How efficiently a bending plate then radiates the airborne power is
+its **radiation efficiency** $\sigma$: below the critical frequency it radiates
+weakly (edge and corner modes), and above it $\sigma \to (1 - f_c/f)^{-1/2} \to 1$
+(Leppington/Maidanik, Hopkins Eqs 2.227-2.230). Because $\sigma$ is exactly the
+radiation factor $\varepsilon$ of ISO 7849, predicting it closes the sound-power-
+from-vibration chain without a power measurement, and it drives the resonant
+transmission path of the
+[panel sound insulation theory](theory-rooms-buildings.md). Both are clean-room
+from Cremer, Heckl & Petersson (2005) and Hopkins (2007).
+
+See the [Predicting Panel Sound Insulation guide](panel-sound-insulation.md) for
+usage.
+
 ## References
 
 - Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.

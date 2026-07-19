@@ -428,6 +428,7 @@ export default defineConfig({
                 'guides/insulation-field',
                 'guides/insulation-lab',
                 'guides/insulation-prediction',
+                'guides/panel-sound-insulation',
                 'guides/dynamic-stiffness',
               ],
             },

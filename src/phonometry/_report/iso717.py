@@ -166,11 +166,15 @@ def _labels(
 
 
 def _fmt_num(value: float) -> str:
-    """Format a number with up to one decimal, dropping a trailing ``,0``."""
+    """Format a number with up to one decimal, dropping a trailing ``.0``.
+
+    The fiche is English, so the decimal separator is a period (matching
+    accredited English lab reports such as the Salford reference).
+    """
     text = f"{float(value):.1f}"
     if text.endswith(".0"):
         text = text[:-2]
-    return text.replace(".", ",")
+    return text
 
 
 def _metadata_pairs(
@@ -348,8 +352,8 @@ def _value_table(
         col_widths = [28 * mm, 28 * mm]
 
     def d1(value: float) -> str:
-        # One decimal with the comma separator used across the fiche.
-        return f"{value:.1f}".replace(".", ",")
+        # One decimal, period separator (English fiche), matching _fmt_num.
+        return f"{value:.1f}"
 
     rows: List[List[Any]] = [header]
     for fk, m, r_, d in zip(centers, measured, shifted, deviations):

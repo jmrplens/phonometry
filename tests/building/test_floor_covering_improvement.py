@@ -155,10 +155,12 @@ def test_baruch_2018_published_spectrum_crosscheck() -> None:
     assert dlw_simplified == 15  # matches the paper exactly
     assert dlw_full == 15  # paper prints 16; ISO 717-2 rounding boundary
     assert abs(dlw_full - 16) <= 1 and abs(dlw_simplified - 15) <= 1
-    # The full ISO 16251-1 front-end reproduces the same rating from L0 - L1.
+    # Both spectra reproduce the same rating through the ISO 16251-1 front-end.
     bare = np.full(16, 75.0)
-    res = impact_improvement(bare, bare - baruch_full, freqs)
-    assert res.delta_lw == dlw_full
+    res_full = impact_improvement(bare, bare - baruch_full, freqs)
+    assert res_full.delta_lw == dlw_full
+    res_simplified = impact_improvement(bare, bare - baruch_simplified, freqs)
+    assert res_simplified.delta_lw == dlw_simplified
 
 
 def test_ci_delta_zero_improvement_is_zero() -> None:

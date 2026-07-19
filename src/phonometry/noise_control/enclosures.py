@@ -24,17 +24,19 @@ Bies terms this net reduction the enclosure *noise reduction*; it is the
 insertion loss of the enclosure.
 
 **The panel transmission loss ``R`` is supplied by the caller** -- measured, or
-predicted by a panel model -- as a per-band array or a callable of frequency.
-This module never predicts ``R`` itself; it combines a given ``R`` with the
-interior absorption. The interior room constant reuses
-:func:`phonometry.room.room_constant`.
+predicted by a panel model -- as a per-band array, a callable of frequency, or
+a panel prediction result (a :class:`phonometry.building.SoundReductionResult`
+or :class:`phonometry.building.ApertureTransmissionResult`, matched structurally
+so no dependency on ``building`` is introduced). This module never predicts
+``R`` itself; it combines a given ``R`` with the interior absorption. The
+interior room constant reuses :func:`phonometry.room.room_constant`.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -80,6 +82,23 @@ class EnclosureResult:
         return plot_enclosure(self, ax=ax, **kwargs)
 
 
+@runtime_checkable
+class PanelTransmissionResult(Protocol):
+    """A panel prediction result exposing a per-band transmission loss.
+
+    A frozen result such as :class:`phonometry.building.SoundReductionResult`
+    or :class:`phonometry.building.ApertureTransmissionResult` carries the
+    predicted transmission loss in ``transmission_loss`` and its band centres
+    in ``frequencies``. Matching structurally (a :class:`typing.Protocol`)
+    lets :func:`enclosure_insertion_loss` accept such a result directly without
+    importing the ``building`` package, so ``noise_control`` keeps no
+    dependency on it.
+    """
+
+    transmission_loss: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+
+
 def _resolve_frequencies(
     frequencies: ArrayLike | None,
 ) -> NDArray[np.float64] | None:
@@ -116,7 +135,11 @@ def _resolve_panel_r(
 
 
 def enclosure_insertion_loss(
-    panel_transmission_loss: ArrayLike | Callable[[NDArray[np.float64]], ArrayLike],
+    panel_transmission_loss: (
+        ArrayLike
+        | Callable[[NDArray[np.float64]], ArrayLike]
+        | PanelTransmissionResult
+    ),
     external_area: float,
     internal_area: float,
     internal_absorption: ArrayLike,
@@ -129,9 +152,16 @@ def enclosure_insertion_loss(
     constant ``R_i = S_i alpha_i / (1 - alpha_i)``.
 
     :param panel_transmission_loss: Panel transmission loss ``R`` per band, dB.
-        Either a per-band array (measured or predicted elsewhere) or a callable
-        mapping a frequency array to per-band ``R`` (then ``frequencies`` is
-        required). This function does not predict ``R``.
+        One of: a per-band array (measured); a callable mapping a frequency
+        array to per-band ``R`` (then ``frequencies`` is required); or a panel
+        prediction result carrying ``transmission_loss`` and ``frequencies``,
+        such as the :class:`~phonometry.building.SoundReductionResult` of
+        :func:`phonometry.single_panel_transmission_loss` /
+        :func:`phonometry.double_wall_transmission_loss` or the
+        :class:`~phonometry.building.ApertureTransmissionResult` of
+        :func:`phonometry.composite_transmission_loss` (its ``frequencies`` are
+        then used unless *frequencies* is given). This function does not
+        predict ``R`` itself.
     :param external_area: External enclosure surface area ``S_E``, m2.
     :param internal_area: Internal surface area ``S_i`` (including the machine),
         m2.
@@ -144,6 +174,15 @@ def enclosure_insertion_loss(
     """
     s_e = require_positive(external_area, "external_area")
     s_i = require_positive(internal_area, "internal_area")
+
+    if not callable(panel_transmission_loss) and isinstance(
+        panel_transmission_loss, PanelTransmissionResult
+    ):
+        if frequencies is None:
+            frequencies = panel_transmission_loss.frequencies
+        panel_transmission_loss = np.asarray(
+            panel_transmission_loss.transmission_loss, dtype=np.float64
+        )
 
     freqs = _resolve_frequencies(frequencies)
     r = _resolve_panel_r(panel_transmission_loss, freqs)

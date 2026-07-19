@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `enclosure_insertion_loss` now accepts a panel prediction result directly for
+  its `panel_transmission_loss` argument, in addition to a per-band array or a
+  callable. A `SoundReductionResult` or `ApertureTransmissionResult` (from the
+  panel and aperture models) is matched structurally, so its per-band `R` and
+  band centres feed the enclosure calculation without any dependency of
+  `noise_control` on `building`. The predicted panel `R` and a measured `R`
+  are therefore interchangeable at the enclosure input.
 - Atmospheric refraction: ray tracing and the parabolic equation
   (`phonometry.environmental.atmospheric_refraction`, also re-exported at the
   top level). The module is the refracting-atmosphere counterpart of the ocean

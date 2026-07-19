@@ -278,7 +278,7 @@ found in the sources during this work are recorded in the
   [doi:10.1007/978-3-540-76833-3](https://doi.org/10.1007/978-3-540-76833-3).
   Sections D.3–D.6 (layer reflection, multilayer scheme, diffuse-field
   integrals) and G.11 (empirical porous relations).
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2018). *Engineering noise
+- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
   control* (5th ed.). CRC Press.
   [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
   Appendix D: porous-material properties, Table D.1 coefficient sets and

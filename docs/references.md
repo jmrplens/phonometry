@@ -367,7 +367,7 @@ it; the list grows as guides gain their References sections.
   The formula compendium: layer reflection, multilayer schemes, diffuse-field
   absorption integrals and the empirical porous-material relations.
   Cited by [Porous and Multilayer Absorbers](porous-absorbers.md).
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2018). *Engineering noise
+- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
   control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0.
   [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
   The engineering-noise-control reference; its Appendix D collects the

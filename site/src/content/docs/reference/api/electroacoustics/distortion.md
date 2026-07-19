@@ -121,6 +121,55 @@ sine amplitude.
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
 
+## dynamic_range
+
+```python
+dynamic_range(
+    signal: NDArray[np.float64] | list[float],
+    fs: float,
+    fundamental: float | None = None,
+    *,
+    notch_q: float = 2.0,
+    bandwidth: float | None = 20000.0,
+    full_scale: float = 1.0,
+    window: str = 'hann',
+) -> float
+```
+
+Dynamic range of an audio device (AES17-2015 6.4.1), in dB CCIR-RMS.
+
+The device is driven with a 997 Hz sine 60 dB below full scale; the
+captured output has its fundamental removed by the standard notch filter
+(5.2.8), and the residual noise-plus-distortion is weighted by the
+CCIR-RMS filter (5.2.7) over the AES17 measurement band. The dynamic range
+is the ratio of the maximum output level (a full-scale sine, 6.2.6) to
+that weighted residual level:
+
+`DR = 20 lg( (full_scale / sqrt(2)) / V_residual,CCIR-RMS )`.
+
+It includes all harmonic, inharmonic and noise components and is also
+known as the signal-to-noise ratio (6.4.1 note).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `signal` | Captured output of the device under test (1-D), scaled so that `full_scale` is the digital full-scale peak amplitude. |
+| `fs` | Sample rate, in Hz. |
+| `fundamental` | Test frequency, in Hz; `None` uses the 997 Hz of the standard. |
+| `notch_q` | Effective notch quality factor (AES17 5.2.8: 1.2..3; default 2.0). |
+| `bandwidth` | AES17 measurement bandwidth, in Hz (default 20 kHz; `None` measures the full Nyquist band). |
+| `full_scale` | Digital full-scale peak amplitude (default 1.0). |
+| `window` | FFT window used only for fundamental auto-detection. |
+
+**Returns:** The dynamic range, in dB CCIR-RMS (a positive number).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the inputs are invalid or `notch_q` is out of range. |
+
 ## harmonic_analysis
 
 ```python
@@ -234,6 +283,44 @@ HarmonicDistortionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
 ```
 
 Plot the magnitude spectrum with the harmonics marked.
+
+## idle_channel_noise
+
+```python
+idle_channel_noise(
+    signal: NDArray[np.float64] | list[float],
+    fs: float,
+    *,
+    bandwidth: float | None = 20000.0,
+    full_scale: float = 1.0,
+) -> float
+```
+
+Idle channel noise level (AES17-2015 6.4.2), in dBFS CCIR-RMS.
+
+The weighted output of the device when driven with no signal (a
+short-circuited analogue input or digital zero at the input). The captured
+idle output is weighted by the CCIR-RMS filter (5.2.7) over the AES17
+measurement band and reported relative to full scale:
+
+`L_idle = 20 lg( V_idle,CCIR-RMS / (full_scale / sqrt(2)) )`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `signal` | Captured idle output of the device under test (1-D), scaled so that `full_scale` is the digital full-scale peak amplitude. |
+| `fs` | Sample rate, in Hz. |
+| `bandwidth` | AES17 measurement bandwidth, in Hz (default 20 kHz; `None` measures the full Nyquist band). |
+| `full_scale` | Digital full-scale peak amplitude (default 1.0). |
+
+**Returns:** The idle channel noise level, in dBFS CCIR-RMS (a negative number for any real device).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the inputs are invalid. |
 
 ## itu_r_468_weighting
 

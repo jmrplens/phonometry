@@ -92,6 +92,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         modules=(
             "phonometry.hearing.sti",
             "phonometry.hearing.sii",
+            "phonometry.hearing.objective_intelligibility",
         ),
     ),
     Section(

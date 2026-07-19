@@ -49,6 +49,7 @@ export const apiSidebar = {
       items: [
         'reference/api/speech/sti',
         'reference/api/speech/sii',
+        'reference/api/speech/objective-intelligibility',
       ],
     },
     {

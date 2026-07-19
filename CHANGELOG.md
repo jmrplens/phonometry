@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Objective speech intelligibility STOI and ESTOI
+  (`phonometry.hearing.objective_intelligibility.stoi`, also `phonometry.stoi`).
+  `stoi(clean, degraded, fs)` computes the short-time objective intelligibility
+  (Taal, Hendriks, Heusdens & Jensen 2011, *An Algorithm for Intelligibility
+  Prediction of Time-Frequency Weighted Noisy Speech*, IEEE TASLP 19(7); short
+  version Taal et al. 2010, ICASSP): both signals are resampled to 10 kHz, split
+  into 256-sample Hann frames at 50 % overlap, cleared of the clean frames more
+  than 40 dB below the loudest, grouped into 15 one-third-octave bands from
+  150 Hz, and compared over 384 ms segments by a per-band envelope correlation
+  after a per-segment normalisation and a `-15` dB signal-to-distortion
+  clipping. With `extended=True` it computes ESTOI (Jensen & Taal 2016, IEEE/ACM
+  TASLP 24(11)), which mean- and variance-normalises the short-time spectrogram
+  over both its rows and columns so the intermediate index is a spectral
+  correlation that tracks modulated maskers. The measures return a `STOIResult`
+  with the index `value`, the per-segment and (for STOI) per-band intermediate
+  scores, and a `.plot()`. The implementation is clean-room from the papers and
+  matches `pystoi` (a test-only cross-check, never a runtime dependency) to well
+  under `1e-3`.
+- AES17-2015 noise measurements for audio equipment
+  (`phonometry.electroacoustics.dynamic_range` and `idle_channel_noise`, also
+  re-exported at the top level). `dynamic_range` implements clause 6.4.1 (a
+  997 Hz, -60 dBFS test tone, the standard notch, and the CCIR-RMS weighting of
+  5.2.7, expressed as the ratio of the full-scale sine to the weighted residual)
+  and `idle_channel_noise` implements clause 6.4.2 (the CCIR-RMS-weighted output
+  with the device idle, in dBFS). Both reuse the standard notch and the ITU-R
+  BS.468-4 weighting of the existing THD+N chain; the CCIR-RMS filter is that
+  curve with the standard `-5.63` dB offset (unity at 2 kHz).
 - Image-source room impulse response and the steady-state room field
   (`phonometry.room.image_source` and `phonometry.room.steady_field`).
   `image_source_rir` synthesises the room impulse response of a rectangular

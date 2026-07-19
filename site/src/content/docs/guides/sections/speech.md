@@ -30,6 +30,12 @@ hearing loss.
 covers the one-third-octave-band method, including the standard speech spectra
 for normal to shouted vocal effort.
 
+A third pair of measures, **STOI** and **ESTOI**, answers yet another question:
+given a clean reference *and* a degraded or processed version of the same
+speech, how intelligible is the result? They rate the processing itself,
+which is why they are the standard yardstick for noise reduction and source
+separation.
+
 The two connect back to the rest of the library naturally: the STI consumes
 the impulse responses of
 [Room Acoustics](/phonometry/guides/room-acoustics/), and the SII consumes the
@@ -44,3 +50,6 @@ hearing thresholds quantified in
 - [Speech Intelligibility Index](/phonometry/guides/speech-intelligibility/):
   the ANSI S3.5-1997 band-importance and band-audibility method, in noise and
   in hearing loss.
+- [Objective Intelligibility (STOI & ESTOI)](/phonometry/guides/objective-intelligibility/):
+  the correlation-based measures for time-frequency weighted noisy speech, from
+  a clean/degraded pair.

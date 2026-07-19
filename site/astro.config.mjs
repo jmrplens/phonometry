@@ -388,6 +388,7 @@ export default defineConfig({
                 { slug: 'guides/sections/speech', attrs: { 'data-group-link': true } },
                 'guides/speech-transmission',
                 'guides/speech-intelligibility',
+                'guides/objective-intelligibility',
               ],
             },
             {

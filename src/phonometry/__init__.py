@@ -309,6 +309,13 @@ from .electroacoustics.frequency_response import (
     coherence,
     transfer_function,
 )
+from .electroacoustics.piston import (
+    RadiatingPistonResult,
+    piston_directivity,
+    piston_reactance,
+    piston_resistance,
+    radiating_piston,
+)
 from .electroacoustics.swept_sine import (
     SweptSineDistortionResult,
     swept_sine_distortion,
@@ -918,6 +925,22 @@ from .simulation.fdtd import (
     SignalSource,
     fdtd_simulation,
 )
+from .noise_control.silencers import (
+    ReactiveSilencerResult,
+    expansion_chamber,
+    extended_tube_chamber,
+    helmholtz_resonator,
+    quarter_wave_resonator,
+)
+from .noise_control.hvac import (
+    HvacSpectrumResult,
+    elbow_insertion_loss,
+    end_reflection_loss,
+    flow_noise_bend,
+    flow_noise_straight_duct,
+    plenum_attenuation,
+)
+from .noise_control.enclosures import EnclosureResult, enclosure_insertion_loss
 from ._version import __version__
 
 # Public methods
@@ -993,6 +1016,11 @@ __all__ = [
     "swept_sine_distortion",
     "synchronized_sweep_signal",
     "SweptSineDistortionResult",
+    "radiating_piston",
+    "piston_resistance",
+    "piston_reactance",
+    "piston_directivity",
+    "RadiatingPistonResult",
     "program_loudness",
     "integrated_loudness",
     "loudness_range",
@@ -1694,6 +1722,23 @@ __all__ = [
     "circular_aperture_transmission_coefficient",
     "composite_transmission_loss",
     "transmission_loss_from_coefficient",
+    # Industrial noise control (silencers, HVAC, enclosures). The low-level
+    # four-pole primitives (duct_matrix, shunt_matrix, cascade, transmission_loss,
+    # insertion_loss, ...) stay under phonometry.noise_control to keep the top
+    # level clean and avoid clashing with the underwater transmission_loss.
+    "expansion_chamber",
+    "helmholtz_resonator",
+    "quarter_wave_resonator",
+    "extended_tube_chamber",
+    "ReactiveSilencerResult",
+    "end_reflection_loss",
+    "elbow_insertion_loss",
+    "plenum_attenuation",
+    "flow_noise_straight_duct",
+    "flow_noise_bend",
+    "HvacSpectrumResult",
+    "enclosure_insertion_loss",
+    "EnclosureResult",
 ]
 
 

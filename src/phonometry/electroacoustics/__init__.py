@@ -21,6 +21,13 @@ from .distortion import (
     weighted_thd,
 )
 from .frequency_response import FrequencyResponseResult, coherence, transfer_function
+from .piston import (
+    RadiatingPistonResult,
+    piston_directivity,
+    piston_reactance,
+    piston_resistance,
+    radiating_piston,
+)
 from .swept_sine import (
     SweptSineDistortionResult,
     swept_sine_distortion,
@@ -31,6 +38,7 @@ __all__ = [
     "FrequencyResponseResult",
     "HarmonicDistortionResult",
     "ModulationDistortionResult",
+    "RadiatingPistonResult",
     "SweptSineDistortionResult",
     "coherence",
     "difference_frequency_distortion",
@@ -41,6 +49,10 @@ __all__ = [
     "idle_channel_noise",
     "itu_r_468_weighting",
     "modulation_distortion",
+    "piston_directivity",
+    "piston_reactance",
+    "piston_resistance",
+    "radiating_piston",
     "sinad",
     "swept_sine_distortion",
     "synchronized_sweep_signal",

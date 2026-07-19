@@ -35,6 +35,9 @@ ALLOWED_EDGES: set[tuple[str, str]] = {
     ("building", "vibration"),
     # double-wall cavity fill uses the porous equivalent-fluid model
     ("building", "materials"),
+    # HVAC plenum and machine enclosures reuse the room constant
+    # R = S*alpha/(1 - alpha) of the steady-state room field
+    ("noise_control", "room"),
 }
 
 

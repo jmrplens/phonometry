@@ -518,6 +518,7 @@ export default defineConfig({
             'guides/sound-power',
             'guides/electroacoustics',
             'guides/swept-sine-distortion',
+            'guides/noise-control',
             'guides/program-loudness',
           ],
         },

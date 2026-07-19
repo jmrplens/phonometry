@@ -1,0 +1,161 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""Tests for reactive silencers (Bies §8.8-8.9, four-pole method).
+
+Oracles: the simple-expansion-chamber closed form ``TL = 10 log10[1 + (1/4)
+(m - 1/m)^2 sin^2(kL)]`` (Bies Eq. (8.111)) with its published peak values
+(m = 2 -> 1.94, 4 -> 6.55, 8 -> 12.18, 16 -> 18.10 dB), the four-pole TL
+reducing to the side-branch closed form (Bies Eq. (8.73)), the quarter-wave
+tube tuning ``f = c/(4 l_e)`` (Example 8.1: 56.6 Hz), the Helmholtz resonance
+``f_0 = (c/2 pi) sqrt(S/(l_e V))``, matrix reciprocity, and limiting cases.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+
+from phonometry.noise_control import silencers as sl
+
+
+def _k(f: np.ndarray, c: float = 343.0) -> np.ndarray:
+    return 2.0 * np.pi * f / c
+
+
+def test_expansion_chamber_matches_closed_form() -> None:
+    f = np.linspace(20.0, 2000.0, 2000)
+    for m in (2.0, 4.0, 8.0, 16.0):
+        s_duct, length = 0.01, 0.3
+        res = sl.expansion_chamber(f, length, m * s_duct, s_duct)
+        cf = 10.0 * np.log10(1.0 + 0.25 * (m - 1.0 / m) ** 2 * np.sin(_k(f) * length) ** 2)
+        assert np.allclose(res.transmission_loss, cf, atol=1e-9)
+
+
+@pytest.mark.parametrize(
+    ("m", "peak"), [(2.0, 1.94), (4.0, 6.55), (8.0, 12.18), (16.0, 18.10)]
+)
+def test_expansion_chamber_peaks(m: float, peak: float) -> None:
+    f = np.linspace(20.0, 2000.0, 6000)
+    res = sl.expansion_chamber(f, 0.3, m * 0.01, 0.01)
+    assert res.transmission_loss.max() == pytest.approx(peak, abs=0.02)
+
+
+def test_expansion_chamber_troughs_zero() -> None:
+    # TL = 0 at kL = n pi (chamber transparent, no dissipation).
+    c, length, s_duct = 343.0, 0.3, 0.01
+    f_trough = c / (2.0 * length)  # kL = pi
+    res = sl.expansion_chamber(np.array([f_trough]), length, 0.04, s_duct)
+    assert res.transmission_loss[0] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_side_branch_reduces_to_closed_form() -> None:
+    # A shunt branch Z_b between equal-area ducts: TL = 20 log10|1 + rho c/(2 Sd Zb)|.
+    f = np.linspace(50.0, 500.0, 200)
+    zb = sl.quarter_wave_impedance(f, 0.5, 0.002)
+    t = sl.shunt_matrix(zb)
+    tl = sl.transmission_loss(t, inlet_area=0.01, outlet_area=0.01)
+    closed = 20.0 * np.log10(np.abs(1.0 + 1.206 * 343.0 / (2.0 * 0.01 * zb)))
+    assert np.allclose(tl, closed, atol=1e-9)
+
+
+def test_quarter_wave_tuning_frequency() -> None:
+    # Bies Example 8.1: l_e = 1.516 m, c = 343.24 -> first peak at 56.6 Hz.
+    # Restrict below the third harmonic (169.8 Hz) so the fundamental is the
+    # only resonance in range (all odd harmonics peak equally for a QWT).
+    f = np.linspace(10.0, 120.0, 8000)
+    area = np.pi * 0.05**2 / 4.0
+    res = sl.quarter_wave_resonator(f, area, 1.516, area, speed_of_sound=343.24)
+    peak_f = f[np.argmax(res.transmission_loss)]
+    assert peak_f == pytest.approx(56.6, abs=0.2)
+    assert res.resonances[0] == pytest.approx(56.6, abs=0.1)
+
+
+def test_helmholtz_resonance_frequency() -> None:
+    c, s_neck, le, vol = 343.0, 1e-4, 0.02, 1e-3
+    res = sl.helmholtz_resonator(np.linspace(50.0, 400.0, 50), 0.01, s_neck, le, vol)
+    f0 = c / (2.0 * np.pi) * np.sqrt(s_neck / (le * vol))
+    assert res.resonances[0] == pytest.approx(f0)
+
+
+def test_helmholtz_peak_at_resonance() -> None:
+    # Lossless resonator: TL peaks sharply at f_0.
+    c, s_neck, le, vol = 343.0, 1e-4, 0.02, 1e-3
+    f0 = c / (2.0 * np.pi) * np.sqrt(s_neck / (le * vol))
+    f = np.linspace(0.6 * f0, 1.4 * f0, 4000)
+    res = sl.helmholtz_resonator(f, 0.01, s_neck, le, vol)
+    assert f[np.argmax(res.transmission_loss)] == pytest.approx(f0, rel=0.02)
+
+
+def test_insertion_loss_identity_is_zero() -> None:
+    f = np.linspace(50.0, 500.0, 50)
+    ident = sl.duct_matrix(f, 0.0, 0.01)  # zero-length duct = identity
+    il = sl.insertion_loss(ident, source_impedance=400.0, radiation_impedance=50.0)
+    assert np.allclose(il, 0.0, atol=1e-12)
+
+
+def test_insertion_loss_equals_tl_for_anechoic_reference() -> None:
+    # The insertion loss with Z_s = rho c / S_in and Z_r = rho c / S_out equals
+    # the (anechoic) transmission loss; a positive, not negative, quantity.
+    c, rho, s = 343.0, 1.206, 0.01
+    z = rho * c / s
+    f = np.linspace(50.0, 1500.0, 400)
+    t = sl.expansion_chamber(f, 0.3, 0.04, s).transfer_matrix
+    tl = sl.transmission_loss(t, inlet_area=s, outlet_area=s)
+    il = sl.insertion_loss(t, source_impedance=z, radiation_impedance=z)
+    assert np.allclose(il, tl, atol=1e-9)
+    assert il.max() > 3.0  # a real silencer gives a positive insertion loss
+
+
+def test_transfer_matrix_reciprocity() -> None:
+    # Reciprocal passive elements have det(T) = 1.
+    f = np.linspace(50.0, 500.0, 20)
+    t = sl.expansion_chamber(f, 0.3, 0.04, 0.01).transfer_matrix
+    dets = np.linalg.det(t)
+    assert np.allclose(dets, 1.0, atol=1e-9)
+
+
+def test_cascade_order() -> None:
+    f = np.linspace(50.0, 500.0, 10)
+    a = sl.duct_matrix(f, 0.1, 0.01)
+    b = sl.duct_matrix(f, 0.2, 0.01)
+    # Two concatenated ducts equal one duct of the summed length.
+    both = sl.cascade(a, b)
+    whole = sl.duct_matrix(f, 0.3, 0.01)
+    assert np.allclose(both, whole, atol=1e-9)
+
+
+def test_extended_tube_reduces_to_expansion_chamber() -> None:
+    f = np.linspace(20.0, 2000.0, 500)
+    ext = sl.extended_tube_chamber(f, 0.3, 0.04, 0.01)
+    plain = sl.expansion_chamber(f, 0.3, 0.04, 0.01)
+    assert np.allclose(ext.transmission_loss, plain.transmission_loss, atol=1e-9)
+
+
+def test_extended_tube_fills_trough() -> None:
+    # An inlet extension tuned to L/4 raises the TL at the first chamber trough.
+    c, length = 343.0, 0.4
+    f = np.array([c / (2.0 * length)])  # first plain-chamber trough (TL = 0)
+    plain = sl.expansion_chamber(f, length, 0.04, 0.01)
+    tuned = sl.extended_tube_chamber(
+        f, length, 0.04, 0.01, inlet_extension=length / 4.0
+    )
+    assert plain.transmission_loss[0] == pytest.approx(0.0, abs=1e-9)
+    assert tuned.transmission_loss[0] > 3.0
+
+
+def test_insertion_loss_present_when_impedances_given() -> None:
+    f = np.linspace(50.0, 500.0, 20)
+    res = sl.expansion_chamber(
+        f, 0.3, 0.04, 0.01, source_impedance=4e4, radiation_impedance=5e3
+    )
+    assert res.insertion_loss is not None
+    plain = sl.expansion_chamber(f, 0.3, 0.04, 0.01)
+    assert plain.insertion_loss is None
+
+
+def test_validation() -> None:
+    with pytest.raises(ValueError):
+        sl.expansion_chamber([0.0], 0.3, 0.04, 0.01)
+    with pytest.raises(ValueError):
+        sl.expansion_chamber([100.0], 0.3, -0.04, 0.01)
+    with pytest.raises(ValueError, match="must exceed"):
+        sl.extended_tube_chamber([100.0], 0.3, 0.01, 0.02)

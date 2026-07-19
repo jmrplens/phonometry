@@ -1,0 +1,129 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""Tests for the HVAC duct methods (Bies Chapter 8).
+
+Oracles: exact points of the ASHRAE end-reflection table (Bies Table 8.14) and
+elbow table (Bies Table 8.11), Wells' plenum closed form (Eq. (8.275)) with its
+room-constant reverberant term and limits, and the VDI 2081 flow-noise formulas
+(Eqs. (8.251), (8.254)) evaluated directly.
+"""
+
+from __future__ import annotations
+
+import math
+
+import numpy as np
+import pytest
+
+from phonometry.noise_control import hvac
+
+
+def test_end_reflection_table_nodes_flush() -> None:
+    # Bies Table 8.14, flush: D = 200 mm -> [15, 10, 5, 2, 1, 0] dB.
+    bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
+    res = hvac.end_reflection_loss(bands, 0.200, termination="flush")
+    assert np.allclose(res.values, [15, 10, 5, 2, 1, 0], atol=1e-6)
+
+
+def test_end_reflection_table_nodes_free() -> None:
+    # Bies Table 8.14, free space: D = 150 mm -> [20, 14, 9, 5, 2, 1] dB.
+    bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
+    res = hvac.end_reflection_loss(bands, 0.150, termination="free")
+    assert np.allclose(res.values, [20, 14, 9, 5, 2, 1], atol=1e-6)
+
+
+def test_end_reflection_free_exceeds_flush() -> None:
+    res_flush = hvac.end_reflection_loss([125.0], 0.3, termination="flush")
+    res_free = hvac.end_reflection_loss([125.0], 0.3, termination="free")
+    assert res_free.values[0] > res_flush.values[0]
+
+
+def test_elbow_table_bands() -> None:
+    # Square, no vanes, unlined W = 0.3 m; W/lambda selects the table step.
+    c = 343.0
+    # f such that W/lambda = 0.4 (in 0.28-0.55) -> 5 dB
+    f = 0.4 * c / 0.3
+    res = hvac.elbow_insertion_loss([f], 0.3, bend_type="square")
+    assert res.values[0] == pytest.approx(5.0)
+    # W/lambda < 0.14 -> 0 dB
+    res0 = hvac.elbow_insertion_loss([0.1 * c / 0.3], 0.3)
+    assert res0.values[0] == 0.0
+
+
+def test_elbow_lined_beats_unlined_high_freq() -> None:
+    c = 343.0
+    f = 1.5 * c / 0.3  # W/lambda = 1.5 (1.11-2.22 band)
+    unlined = hvac.elbow_insertion_loss([f], 0.3, bend_type="square").values[0]
+    lined = hvac.elbow_insertion_loss([f], 0.3, bend_type="square", lined=True).values[0]
+    assert lined > unlined  # 10 vs 4 dB
+
+
+def test_elbow_round_rejects_options() -> None:
+    with pytest.raises(ValueError):
+        hvac.elbow_insertion_loss([500.0], 0.3, bend_type="round", lined=True)
+
+
+def test_plenum_wells_closed_form() -> None:
+    # TL = -10 log10[S_out(cos theta/(pi r^2) + (1-alpha)/(S_w alpha))].
+    s_out, r, s_w, alpha = 0.1, 1.0, 20.0, 0.2
+    tl = hvac.plenum_attenuation(s_out, r, s_w, alpha)
+    direct = 1.0 / (math.pi * r**2)
+    reverb = (1.0 - alpha) / (s_w * alpha)
+    expected = -10.0 * math.log10(s_out * (direct + reverb))
+    assert tl == pytest.approx(expected)
+
+
+def test_plenum_more_absorption_more_loss() -> None:
+    a = hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.1)
+    b = hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.5)
+    assert b > a
+
+
+def test_plenum_per_band() -> None:
+    tl = hvac.plenum_attenuation(0.1, 1.0, 20.0, np.array([0.1, 0.3, 0.5]))
+    assert isinstance(tl, np.ndarray) and tl.shape == (3,)
+
+
+def test_flow_noise_straight_duct_formula() -> None:
+    # Bies Eq. (8.251), VDI 2081-1: note the -2 constant term.
+    f = np.array([250.0])
+    u, s = 10.0, 0.04
+    res = hvac.flow_noise_straight_duct(f, u, s)
+    expected = (
+        7.0 + 50.0 * math.log10(u) + 10.0 * math.log10(s) - 2.0
+        - 26.0 * math.log10(1.14 + 0.02 * 250.0 / u)
+    )
+    assert res.values[0] == pytest.approx(expected)
+    # Pinned numeric anchor so the constant cannot silently drift.
+    assert res.values[0] == pytest.approx(35.4347, abs=1e-3)
+
+
+def test_flow_noise_scales_with_velocity() -> None:
+    # Regenerated noise rises steeply with flow speed (dominant 50 log10 U term,
+    # tempered by the frequency term which also depends on U).
+    f = np.array([250.0])
+    levels = [hvac.flow_noise_straight_duct(f, u, 0.04).values[0]
+              for u in (5.0, 10.0, 15.0)]
+    assert levels[0] < levels[1] < levels[2]
+    assert levels[2] - levels[0] > 20.0
+
+
+def test_flow_noise_bend_formula() -> None:
+    f = np.array([500.0])
+    u, s, h, rho = 12.0, 0.04, 0.2, 1.206
+    res = hvac.flow_noise_bend(f, u, s, h, density=rho)
+    lws = 30.0 * math.log10(u) + 10.0 * math.log10(s) + 10.0 * math.log10(rho) + 117.0
+    ns = 500.0 * h / u
+    expected = lws - 10.0 * math.log10(1.0 + 0.165 * ns**2) + 30.0 * math.log10(u) - 103.0
+    assert res.values[0] == pytest.approx(expected)
+
+
+def test_plot_and_validation() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    hvac.end_reflection_loss([125.0, 250.0], 0.3).plot()
+    hvac.flow_noise_straight_duct([250.0, 500.0], 10.0, 0.04).plot()
+    with pytest.raises(ValueError):
+        hvac.end_reflection_loss([125.0], 0.3, termination="bad")
+    with pytest.raises(ValueError):
+        hvac.plenum_attenuation(0.1, 1.0, 20.0, 1.0)

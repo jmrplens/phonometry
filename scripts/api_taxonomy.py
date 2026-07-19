@@ -232,6 +232,17 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.electroacoustics.distortion",
             "phonometry.electroacoustics.frequency_response",
             "phonometry.electroacoustics.swept_sine",
+            "phonometry.electroacoustics.piston",
+        ),
+    ),
+    Section(
+        key="noise_control",
+        label_en="Industrial noise control",
+        label_es="Control de ruido industrial",
+        modules=(
+            "phonometry.noise_control.silencers",
+            "phonometry.noise_control.hvac",
+            "phonometry.noise_control.enclosures",
         ),
     ),
     Section(
@@ -295,6 +306,7 @@ _SECTION_SUBPACKAGES: dict[str, tuple[str, ...]] = {
     "underwater": ("underwater",),
     "power": ("emission",),
     "electroacoustics": ("electroacoustics",),
+    "noise_control": ("noise_control",),
     "broadcast": ("broadcast",),
     "metrology": ("metrology",),
     "spectra": ("metrology",),

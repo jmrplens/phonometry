@@ -90,15 +90,17 @@ class ReverberationSoundPowerResult:
     sound_power_level_a: float
     method: str
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the LW spectrum with the A-weighted total annotated.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.emission import plot_sound_power
 
-        return plot_sound_power(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_sound_power(self, ax=ax, language=language, **kwargs)
 
 
 def _validate_meteorology(temperature: float, static_pressure: float) -> None:

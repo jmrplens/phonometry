@@ -222,6 +222,8 @@ Normalized flanking impact level `Ln,f` (Formula (5)).
 ```python
 FlankingImpactLevelResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -251,6 +253,8 @@ Normalized flanking level difference `Dn,f` (airborne, Formula (4)).
 ```python
 FlankingLevelDifferenceResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -630,7 +634,12 @@ An octave band is bracketed when any of its one-third-octave bands is.
 ### VibrationReductionResult.plot()
 
 ```python
-VibrationReductionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+VibrationReductionResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot `Kij` against frequency.

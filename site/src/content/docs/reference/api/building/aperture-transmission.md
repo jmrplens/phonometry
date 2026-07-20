@@ -78,6 +78,8 @@ Transmission through a slit or circular aperture (Hopkins 4.3.10).
 ```python
 ApertureTransmissionResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

@@ -140,6 +140,8 @@ Return `(octave_freqs, ΔLoct)` via Formula (5) (needs 16 1/3-oct bands).
 ```python
 FloorCoveringImprovementResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

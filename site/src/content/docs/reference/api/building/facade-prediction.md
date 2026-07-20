@@ -209,7 +209,12 @@ Predicted façade airborne insulation (EN 12354-3:2000).
 ### FacadePredictionResult.plot()
 
 ```python
-FacadePredictionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+FacadePredictionResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-element partial indices and the façade `R'` / `D2m,nT`.
@@ -326,7 +331,12 @@ Predicted sound power radiated to the outside by a segment (EN 12354-4).
 ### RadiatedPowerResult.plot()
 
 ```python
-RadiatedPowerResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+RadiatedPowerResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the radiated sound power level `LW` per band.

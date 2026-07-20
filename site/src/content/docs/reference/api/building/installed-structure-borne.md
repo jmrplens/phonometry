@@ -257,7 +257,12 @@ Band-summed total level `10 lg(sum 10^(0.1 L_n,s))`, in dB.
 ### InstalledSourceResult.plot()
 
 ```python
-InstalledSourceResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+InstalledSourceResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-path and total normalised sound pressure levels.

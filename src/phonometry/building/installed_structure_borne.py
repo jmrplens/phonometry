@@ -284,15 +284,17 @@ class InstalledSourceResult:
         lt = np.atleast_1d(np.asarray(self.total_level, dtype=np.float64))
         return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * lt))))
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-path and total normalised sound pressure levels.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_installed_structure_borne
 
-        return plot_installed_structure_borne(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_installed_structure_borne(self, ax=ax, language=language, **kwargs)
 
 
 def installed_source_prediction(

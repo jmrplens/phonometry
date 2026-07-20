@@ -175,15 +175,17 @@ class AirbornePredictionResult:
     paths: tuple[PathContribution, ...]
     dominant: PathContribution
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-path shares of the transmitted energy.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_airborne_prediction
 
-        return plot_airborne_prediction(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_airborne_prediction(self, ax=ax, language=language, **kwargs)
 
 
 @dataclass(frozen=True)
@@ -202,15 +204,17 @@ class ImpactPredictionResult:
     delta_l_w: float
     k_correction: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the Formula 21 terms and the resulting ``L'n,w``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_impact_prediction
 
-        return plot_impact_prediction(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_impact_prediction(self, ax=ax, language=language, **kwargs)
 
 
 def _check_finite(value: float, name: str) -> float:

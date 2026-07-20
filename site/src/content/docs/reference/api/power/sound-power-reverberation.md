@@ -88,6 +88,8 @@ or `'comparison'`.
 ```python
 ReverberationSoundPowerResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

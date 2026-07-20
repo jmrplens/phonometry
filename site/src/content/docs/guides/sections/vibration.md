@@ -40,6 +40,10 @@ From FRF vocabulary to the predicted level in a receiving room.
 - [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/guides/mechanical-mobility/):
   receptance, mobility and accelerance with their reciprocals, and the SDOF
   reference resonator.
+- [Bending-wave transmission at plate junctions (Cremer/Craik/Hopkins)](/phonometry/guides/junction-transmission/):
+  the frequency-independent wave-approach coefficients for rigid X, T, L and
+  in-line junctions, their angular average and the derived coupling loss factor
+  and Kij.
 - [Transfer stiffness of resilient elements (ISO 10846)](/phonometry/guides/transfer-stiffness/):
   the dynamic transfer stiffness of vibration isolators by the direct and
   indirect methods.

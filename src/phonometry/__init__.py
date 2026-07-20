@@ -140,6 +140,17 @@ from .vibration.radiation_efficiency import (
     coincidence_frequency,
     radiation_efficiency,
 )
+from .vibration.junction_transmission import (
+    JunctionTransmissionResult,
+    angular_average_transmission_coefficient,
+    corner_transmission_coefficient,
+    coupling_loss_factor,
+    inline_transmission_coefficient,
+    junction_transmission,
+    junction_wave_parameters,
+    straight_transmission_coefficient,
+    wave_vibration_reduction_index,
+)
 from .vibration.transfer_stiffness import (
     REFERENCE_STIFFNESS,
     TRANSMISSIBILITY_LIMIT,
@@ -1738,6 +1749,16 @@ __all__ = [
     "RadiationEfficiencyResult",
     "coincidence_frequency",
     "radiation_efficiency",
+    # Bending-wave transmission at rigid plate junctions (Cremer, Craik, Hopkins)
+    "JunctionTransmissionResult",
+    "junction_transmission",
+    "junction_wave_parameters",
+    "corner_transmission_coefficient",
+    "straight_transmission_coefficient",
+    "inline_transmission_coefficient",
+    "angular_average_transmission_coefficient",
+    "coupling_loss_factor",
+    "wave_vibration_reduction_index",
     # Predicted panel and aperture sound insulation (Bies, Hopkins)
     "SoundReductionResult",
     "mass_law_transmission_loss",

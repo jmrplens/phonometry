@@ -43,6 +43,10 @@ Del vocabulario de FRF al nivel predicho en la sala receptora.
 - [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/guides/mechanical-mobility/):
   receptancia, movilidad y acelerancia con sus recíprocas, y el resonador de
   referencia de un grado de libertad.
+- [Transmisión de onda de flexión en uniones de placas (Cremer/Craik/Hopkins)](/phonometry/es/guides/junction-transmission/):
+  los coeficientes del enfoque ondulatorio independientes de la frecuencia para
+  uniones rígidas en X, T, L y en línea, su media angular y el factor de
+  pérdidas por acoplamiento y el Kij derivados.
 - [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/guides/transfer-stiffness/):
   la rigidez de transferencia dinámica de aisladores de vibración por los
   métodos directo e indirecto.

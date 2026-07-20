@@ -49,6 +49,9 @@ receptora, que es donde esta sección se encuentra con los modelos de
 - [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/guides/mechanical-mobility/):
   la familia de FRF, las conversiones y el resonador de referencia de un
   grado de libertad.
+- [Transmisión de onda de flexión en uniones de placas (Cremer/Craik/Hopkins)](/phonometry/es/guides/junction-transmission/):
+  los coeficientes del enfoque ondulatorio para uniones rígidas en X, T, L y en
+  línea, su media angular y el factor de pérdidas por acoplamiento y el Kij.
 - [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/guides/transfer-stiffness/):
   rigidez de transferencia dinámica de aisladores por los métodos directo e
   indirecto.

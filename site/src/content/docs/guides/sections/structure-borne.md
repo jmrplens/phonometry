@@ -45,6 +45,9 @@ which is where this section meets the
 
 - [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/guides/mechanical-mobility/):
   the FRF family, conversions and the SDOF reference resonator.
+- [Bending-wave transmission at plate junctions (Cremer/Craik/Hopkins)](/phonometry/guides/junction-transmission/):
+  the wave-approach transmission coefficients for rigid X, T, L and in-line
+  junctions, their angular average and the derived coupling loss factor and Kij.
 - [Transfer stiffness of resilient elements (ISO 10846)](/phonometry/guides/transfer-stiffness/):
   dynamic transfer stiffness of isolators by the direct and indirect methods.
 - [Sound power from surface vibration (ISO/TS 7849)](/phonometry/guides/vibration-sound-power/):

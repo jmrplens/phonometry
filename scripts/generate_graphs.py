@@ -292,6 +292,15 @@ _ES_EXACT = {
         r"Rigidez dinámica por unidad de área $s'$ [MN/m³]",
     r"Natural frequency $f_0$ [Hz]": r"Frecuencia natural $f_0$ [Hz]",
     "design point": "punto de diseño",
+    # junction_transmission figure (Hopkins 5.2.1.3, Cremer/Craik)
+    "Bending-wave transmission at a rigid X-junction (Hopkins 5.2.1.3)":
+        "Transmisión de onda de flexión en una unión X rígida (Hopkins 5.2.1.3)",
+    "Incidence angle [degrees]": "Ángulo de incidencia [grados]",
+    r"Transmission coefficient $\tau$": r"Coeficiente de transmisión $\tau$",
+    r"corner $\tau_{12}(\theta)$": r"esquina $\tau_{12}(\theta)$",
+    r"straight $\tau_{13}(\theta)$": r"recta $\tau_{13}(\theta)$",
+    "corner average": "media esquina",
+    "straight average": "media recta",
     # mechanical_mobility figure (ISO 7626-1)
     "ISO 7626-1 Mechanical Mobility FRFs":
         "FRF de movilidad mecánica ISO 7626-1",
@@ -5354,6 +5363,54 @@ def generate_dynamic_stiffness(output_dir: str) -> None:
     plt.close()
 
 
+def generate_junction_transmission(output_dir: str) -> None:
+    """Hopkins 5.2.1.3 bending-wave transmission at a rigid X-junction."""
+    print("Generating junction_transmission...")
+    from phonometry import junction_transmission
+
+    # X-junction between a 100 mm and a 200 mm concrete plate (cL = 3200 m/s,
+    # rho = 2400 kg/m^3 -> rho_s = 240 and 480 kg/m^2).
+    res = junction_transmission("X", 0.1, 3200.0, 240.0, 0.2, 3200.0, 480.0)
+    assert res.straight is not None and res.straight_average is not None
+    angles = res.angles_deg
+
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.plot(angles, res.corner, color=COLOR_PRIMARY, linewidth=2.0,
+            label=r"corner $\tau_{12}(\theta)$")
+    ax.plot(angles, res.straight, color=COLOR_SECONDARY, linewidth=2.0,
+            label=r"straight $\tau_{13}(\theta)$")
+    ax.axhline(res.corner_average, color=COLOR_PRIMARY, linestyle="--",
+               linewidth=1.3, label="corner average")
+    ax.axhline(res.straight_average, color=COLOR_SECONDARY, linestyle=":",
+               linewidth=1.3, label="straight average")
+
+    ax.set_xlabel("Incidence angle [degrees]")
+    ax.set_ylabel(r"Transmission coefficient $\tau$")
+    ax.set_title(
+        "Bending-wave transmission at a rigid X-junction (Hopkins 5.2.1.3)",
+        fontweight="bold", pad=12,
+    )
+    ax.set_xlim(0.0, 90.0)
+    ax.set_ylim(bottom=0.0)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.legend(loc="upper right", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "X-junction: 100 mm / 200 mm concrete",
+        f"chi = {res.chi:.3f},  psi = {res.psi:.3f}",
+        f"corner avg = {res.corner_average:.4f}",
+        f"straight avg = {res.straight_average:.4f}",
+    ]
+    ax.text(0.015, 0.97, "\n".join(info), transform=ax.transAxes,
+            va="top", ha="left", fontsize=10, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "junction_transmission.svg")
+    plt.close()
+
+
 def generate_mechanical_mobility(output_dir: str) -> None:
     """ISO 7626-1 receptance/mobility/accelerance of a SDOF resonator."""
     print("Generating mechanical_mobility...")
@@ -7539,6 +7596,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_reverberation_models,
     generate_dynamic_stiffness,
     generate_mechanical_mobility,
+    generate_junction_transmission,
     generate_transfer_stiffness,
     generate_vibration_sound_power,
     generate_structure_borne_power,

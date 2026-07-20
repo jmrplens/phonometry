@@ -1,0 +1,160 @@
+---
+title: "Transmisión de onda de flexión en uniones de placas (Cremer / Craik / Hopkins)"
+description: "Los coeficientes de transmisión de onda de flexión independientes de la frecuencia del enfoque ondulatorio para uniones rígidas de placas en X, T, L y en línea (Cremer et al. 1973; Craik 1981/1996; Hopkins 2007, Sección 5.2.1.3): los parámetros de onda chi y psi, los coeficientes de esquina y de tramo recto tau12(theta) y tau13(theta), su media angular en campo difuso, y el factor de pérdidas por acoplamiento SEA y el índice de reducción vibracional Kij derivados."
+references:
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Ungar, E. E."]
+    year: 1973
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "1.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-662-10118-6"
+    note: "La derivación original de los parámetros de onda chi y psi (Ecs. 5.10/5.11 en Hopkins) y del coeficiente de transmisión a incidencia normal de la unión en línea. ISBN 978-3-540-06002-4."
+  - type: book
+    authors: ["Craik, R. J. M."]
+    year: 1996
+    title: "Sound transmission through buildings using statistical energy analysis"
+    publisher: "Gower"
+    note: "El tratamiento SEA de la transmisión sonora en edificios con los coeficientes de transmisión de onda de flexión tabulados para uniones en X, T, L y en línea utilizados aquí (Ecs. 5.12/5.13). ISBN 978-0-566-07572-5."
+  - type: book
+    authors: ["Hopkins, C."]
+    year: 2007
+    title: "Sound insulation"
+    publisher: "Butterworth-Heinemann"
+    doi: "10.4324/9780080550473"
+    note: "La Sección 5.2.1.3 reúne los coeficientes de las uniones rígidas en X, T, L y en línea, la media angular (Ec. 5.6), la relación de consistencia SEA (Ec. 5.7), el factor de pérdidas por acoplamiento (Ec. 2.154) y el Kij del enfoque ondulatorio (Ec. 5.116) implementados en esta página. ISBN 978-0-7506-6526-1."
+---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
+Cuando una onda de flexión que viaja por una pared o un forjado llega a una
+unión rígida con otra placa, parte de su energía se refleja y parte se transmite
+a las placas conectadas. El **enfoque ondulatorio** de Cremer et al. (1973),
+tabulado por Craik (1981, 1996) y recogido en Hopkins (2007, Sección 5.2.1.3),
+da el coeficiente de transmisión en forma cerrada para las cuatro uniones más
+habituales de placas finas, homogéneas e isótropas: las uniones en **X**, **T**,
+**L** y **en línea**. Modelar la unión como una viga sin masa simplemente
+apoyada (articulada) obliga a que una onda de flexión incidente genere solo
+ondas de flexión reflejadas y transmitidas, sin conversión a ondas en el plano,
+y los coeficientes resultantes son **independientes de la frecuencia**. Eso es
+lo que los convierte en entradas convenientes en forma cerrada para el análisis
+estadístico de energía (SEA) y para el modelo de transmisión por flancos de la
+EN 12354, donde alimentan el factor de pérdidas por acoplamiento `etaij` y el
+índice de reducción vibracional `Kij`.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/junction_transmission.svg" alt="Coeficiente de transmisión frente al ángulo de incidencia para una unión rígida en X de una placa de hormigón de 100 mm y otra de 200 mm, mostrando el coeficiente de esquina tau12 y el coeficiente de tramo recto tau13 cayendo desde sus valores a incidencia normal hasta cero en incidencia rasante, con sus medias angulares en campo difuso marcadas como líneas horizontales" width="82%" loading="eager" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import junction_transmission
+
+# Unión en X entre una placa de hormigón de 100 mm y otra de 200 mm (cL = 3200 m/s).
+res = junction_transmission("X", 0.1, 3200.0, 240.0, 0.2, 3200.0, 480.0)
+res.plot(language="es")  # tau(theta) de los caminos de esquina y recto, con medias
+plt.show()
+```
+
+</details>
+
+## 1. Parámetros de onda chi y psi
+
+Con la placa `i` de espesor `h_i`, velocidad de onda cuasi-longitudinal `cL_i` y
+densidad superficial `rho_s,i`, toda la familia de coeficientes depende de solo
+dos razones adimensionales (Cremer et al. 1973):
+
+```
+chi = kB2 / kB1 = (rho_s2 B1 / (rho_s1 B2))**0.25 = sqrt(h1 cL1 / (h2 cL2)) = sqrt(fc2 / fc1)
+psi = B2 kB2**2 / (B1 kB1**2) = (h2 cL2 rho_s2) / (h1 cL1 rho_s1) = (rho_s2 fc1) / (rho_s1 fc2)
+```
+
+`chi` es la razón de números de onda de flexión de las placas (equivalente a la
+raíz cuadrada de la razón de sus frecuencias críticas) y fija el ángulo de corte
+por reflexión total interna `theta_co = arcsin(chi)`; `psi` es la razón de sus
+movilidades de momento flector. Para **placas idénticas** ambos valen 1.
+
+```python
+from phonometry import junction_wave_parameters
+
+chi, psi = junction_wave_parameters(0.1, 3200.0, 240.0, 0.2, 3200.0, 480.0)
+#  -> (sqrt(0.5), 4.0)
+```
+
+## 2. Coeficientes de esquina y de tramo recto
+
+Para una onda incidente sobre la placa 1, la transmisión **alrededor de la
+esquina** (hacia la placa perpendicular 2) es `tau12(theta)` (Ec. 5.12), y la
+transmisión **a través del tramo recto** (hacia la placa colineal 3, solo en las
+uniones en X y en T (1)) es `tau13(theta)` (Ec. 5.13). El coeficiente de esquina
+es cero más allá del ángulo de corte, `tau12(theta) = 0` para `chi < sin(theta)`.
+Las constantes de unión `J1`, `J2`, `J3` seleccionan la geometría:
+
+| Unión | `J1` | `J2` | `J3` |
+|---|---|---|---|
+| X | 1 | 1 | 1 |
+| T (1) | 2 | 0.5 | 0.5 |
+| T (2) | 2 | 2 | — |
+| L | 4 | 1 | — |
+
+El tramo recto no está definido para la unión en T (2) ni para la unión en L.
+
+```python
+import numpy as np
+from phonometry import (
+    corner_transmission_coefficient,
+    straight_transmission_coefficient,
+)
+
+theta = np.radians(np.linspace(0.0, 90.0, 91))
+tau12 = corner_transmission_coefficient(theta, chi, psi, "X")
+tau13 = straight_transmission_coefficient(theta, chi, psi, "X")
+```
+
+## 3. Media angular en campo difuso
+
+En un campo vibracional difuso todos los ángulos de incidencia son igual de
+probables y la intensidad incidente lleva un factor de oblicuidad `cos(theta)`,
+por lo que el coeficiente de transmisión medio es `tau_bar_ij = integral 0..pi/2
+de tau_ij(theta) cos(theta) d(theta)` (Ec. 5.6). Para **placas idénticas** el
+álgebra se reduce a fracciones exactas que sirven de oráculo desde primeros
+principios de la biblioteca:
+
+- esquina y recto de la unión en X: `tau_ij(theta) = cos**2(theta) / 8`, luego `tau_bar_ij = 1/12`;
+- esquina de la unión en L: `tau_ij(theta) = cos**2(theta) / 2`, luego `tau_bar_ij = 1/3`;
+- unión en línea: `tau12(0 grados) = 1` (una placa continua transmite por completo).
+
+```python
+from phonometry import angular_average_transmission_coefficient
+
+angular_average_transmission_coefficient(1.0, 1.0, "X", section="corner")  # 1/12
+angular_average_transmission_coefficient(1.0, 1.0, "L", section="corner")  # 1/3
+```
+
+Las dos direcciones cumplen la relación de consistencia SEA (Ec. 5.7),
+`tau_bar_12 = chi * tau_bar_21`, de modo que solo hace falta calcular una
+dirección.
+
+## 4. Factor de pérdidas por acoplamiento e índice de reducción vibracional
+
+La media angular es el puente hacia los dos descriptores de unión usados en los
+modelos de edificios basados en SEA: el **factor de pérdidas por acoplamiento**
+(Ec. 2.154) `etaij = cg_i L_ij tau_ij / (2 pi**2 f S_i)` y el **índice de
+reducción vibracional** del enfoque ondulatorio (Ec. 5.116)
+`Kij = 10 lg(1 / tau_ij) + 5 lg(fc_j / fc_i)`, que para placas idénticas se
+reduce a `Kij = 10 lg(1 / tau_ij)` -- para la unión en X idéntica,
+`10 lg 12 ~= 10.8 dB`.
+
+```python
+from phonometry import coupling_loss_factor, wave_vibration_reduction_index
+
+eta = coupling_loss_factor(1.0 / 12.0, group_velocity=200.0,
+                           junction_length=4.0, frequency=500.0, plate_area=10.0)
+kij = wave_vibration_reduction_index(1.0 / 12.0)  # 10.79 dB
+```
+
+La contraparte medida de la EN 12354 de `Kij` (a partir de la diferencia de
+niveles de velocidad promediada en dirección) es el `vibration_reduction_index`
+separado de la transmisión por flancos; esta página es el valor *predicho* en
+forma cerrada del enfoque ondulatorio.

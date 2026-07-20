@@ -116,6 +116,7 @@ export const apiSidebar = {
         'reference/api/vibration/mechanical-mobility',
         'reference/api/vibration/point-mobility',
         'reference/api/vibration/radiation-efficiency',
+        'reference/api/vibration/junction-transmission',
         'reference/api/vibration/transfer-stiffness',
         'reference/api/vibration/human-vibration',
         'reference/api/vibration/multiple-shock-vibration',

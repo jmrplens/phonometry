@@ -388,6 +388,19 @@ que las guías incorporan sus secciones de Referencias.
   [Potencia acústica desde vibración](/phonometry/es/guides/vibration-sound-power/),
   [Potencia sonora estructural de equipos](/phonometry/es/guides/structure-borne-power/)
   y [Ruido estructural instalado](/phonometry/es/guides/installed-structure-borne/).
+- Cremer, L., Heckl, M., & Ungar, E. E. (1973). *Structure-borne sound:
+  Structural vibrations and sound radiation at audio frequencies* (1.ª ed.).
+  Springer. ISBN 978-3-540-06002-4.
+  [doi:10.1007/978-3-662-10118-6](https://doi.org/10.1007/978-3-662-10118-6).
+  La derivación original de los parámetros de onda χ y ψ y de los coeficientes
+  de transmisión de onda de flexión para uniones de placas.
+  Citado por [Transmisión de onda de flexión en uniones de placas](/phonometry/es/guides/junction-transmission/).
+- Craik, R. J. M. (1996). *Sound transmission through buildings using
+  statistical energy analysis*. Gower. ISBN 978-0-566-07572-5.
+  El tratamiento SEA de la transmisión aérea y estructural en edificios, con los
+  coeficientes de transmisión de onda de flexión tabulados para uniones en X, T,
+  L y en línea.
+  Citado por [Transmisión de onda de flexión en uniones de placas](/phonometry/es/guides/junction-transmission/).
 - International Organization for Standardization. (2011). *Mechanical
   vibration and shock — Experimental determination of mechanical mobility —
   Part 1: Basic terms and definitions, and transducer specifications*

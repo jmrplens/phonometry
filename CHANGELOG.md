@@ -28,6 +28,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the ISO 4871 declaration fiche (the Annex B dual/single-number table across
   the operating-mode columns, the basic-standard and noise-test-code footnote
   and the verification table), localised in English and Spanish.
+- `vibration.junction_transmission` implements the wave-approach bending-wave
+  transmission coefficients for rigid plate junctions (Cremer et al. 1973;
+  Craik 1981/1996; Hopkins 2007, Section 5.2.1.3). `junction_wave_parameters`
+  returns the dimensionless wave parameters `chi` and `psi` of a plate pair
+  (Eqs 5.10/5.11); `corner_transmission_coefficient` (Eq. 5.12) and
+  `straight_transmission_coefficient` (Eq. 5.13) give the frequency-independent
+  angle-resolved coefficients `tau12(theta)` (around a corner) and
+  `tau13(theta)` (across a straight section) for X, T-junction (1)/(2) and L
+  junctions, `inline_transmission_coefficient` gives the normal-incidence
+  in-line coefficient (Eq. 5.14), and `angular_average_transmission_coefficient`
+  integrates the diffuse-field average (Eq. 5.6). `coupling_loss_factor`
+  (Eq. 2.154) and `wave_vibration_reduction_index` (Eq. 5.116) derive the SEA
+  coupling loss factor and the wave-approach junction `Kij`. The
+  `junction_transmission` builder returns a frozen `JunctionTransmissionResult`
+  (corner and straight curves, their angular averages and a `corner_reduction_index`)
+  with a `.plot()` of `tau` versus incidence angle.
 - `environmental.impulsive_sound` implements the objective impulsive-sound
   prominence method of ISO/PAS 1996-3:2022. `impulsive_sound_adjustment` reads a
   calibrated pressure signal, computes the A-weighted, F time-weighted level

@@ -99,7 +99,12 @@ Predicted ship source-level spectrum.
 ### ShipTrafficSpectrum.plot()
 
 ```python
-ShipTrafficSpectrum.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ShipTrafficSpectrum.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the predicted source spectral-density level versus frequency.

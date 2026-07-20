@@ -129,6 +129,8 @@ Per-strike pile-driving metrics (ISO 18406).
 ```python
 PileStrikeResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```

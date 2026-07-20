@@ -59,7 +59,12 @@ One-third-octave-band atmospheric attenuation over a path (SAE ARP 5534).
 ### AircraftBandAttenuation.plot()
 
 ```python
-AircraftBandAttenuation.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+AircraftBandAttenuation.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the band and pure-tone mid-band attenuation versus frequency.

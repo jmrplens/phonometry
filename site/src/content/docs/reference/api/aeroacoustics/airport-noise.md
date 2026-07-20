@@ -167,7 +167,12 @@ Single-event noise level of an aircraft movement at a receiver.
 ### FlyoverResult.plot()
 
 ```python
-FlyoverResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+FlyoverResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-segment contributions to the event level.
@@ -335,7 +340,12 @@ Single-event noise level over a ground grid (ECAC Doc 29).
 ### NoiseContourResult.plot()
 
 ```python
-NoiseContourResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+NoiseContourResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot filled noise contours over the ground plane.
@@ -435,7 +445,12 @@ NPD event level over a distance sweep at one power (ECAC Doc 29).
 ### NpdLevelResult.plot()
 
 ```python
-NpdLevelResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+NpdLevelResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the interpolated level versus slant distance (log axis).

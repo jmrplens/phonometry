@@ -148,7 +148,12 @@ Equivalent monopole source level of a ship (ISO 17208-2).
 ### ShipSourceLevelResult.plot()
 
 ```python
-ShipSourceLevelResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ShipSourceLevelResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot RNL, source level and the ΔL surface correction vs frequency.

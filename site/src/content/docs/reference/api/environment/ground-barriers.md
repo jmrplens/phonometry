@@ -190,7 +190,12 @@ Per-frequency barrier insertion loss (IL vs frequency).
 ### BarrierInsertionLoss.plot()
 
 ```python
-BarrierInsertionLoss.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+BarrierInsertionLoss.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the insertion loss versus frequency.
@@ -392,7 +397,12 @@ Every array is aligned with `frequencies`.
 ### SphericalGroundResult.plot()
 
 ```python
-SphericalGroundResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SphericalGroundResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the excess attenuation `dL` versus frequency.

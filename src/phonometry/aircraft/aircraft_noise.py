@@ -386,11 +386,12 @@ class EPNLResult:
     epnl: float
     band_limits: "tuple[int, int]"
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the PNL and PNLT time histories with PNLTM and the 10 dB-down band."""
+        from .._i18n import check_language
         from .._plot.aircraft import plot_epnl
 
-        return plot_epnl(self, ax=ax, **kwargs)
+        return plot_epnl(self, ax=ax, language=check_language(language), **kwargs)
 
     def report(
         self,

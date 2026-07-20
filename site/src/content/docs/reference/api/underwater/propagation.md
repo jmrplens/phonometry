@@ -172,7 +172,12 @@ Transmission loss versus range (closed-form).
 ### TransmissionLossResult.plot()
 
 ```python
-TransmissionLossResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+TransmissionLossResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the transmission loss versus range with its two contributions.

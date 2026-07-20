@@ -118,7 +118,12 @@ Normal-mode solution of a range-independent waveguide.
 ### NormalModeResult.plot()
 
 ```python
-NormalModeResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+NormalModeResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the transmission loss versus range (loss increasing downward).
@@ -200,7 +205,12 @@ Parabolic-equation transmission-loss field.
 ### ParabolicEquationResult.plot()
 
 ```python
-ParabolicEquationResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ParabolicEquationResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the transmission-loss field (depth increasing downward).
@@ -271,7 +281,12 @@ Ray-tracing solution through a sound-speed profile.
 ### RayTraceResult.plot()
 
 ```python
-RayTraceResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+RayTraceResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the ray paths (depth increasing downward).

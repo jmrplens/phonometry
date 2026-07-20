@@ -203,15 +203,16 @@ class SphericalGroundResult:
     r_direct: float
     r_reflected: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the excess attenuation ``dL`` versus frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.environmental import plot_spherical_ground
 
-        return plot_spherical_ground(self, ax=ax, **kwargs)
+        return plot_spherical_ground(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def spherical_reflection_coefficient(
@@ -509,15 +510,16 @@ class BarrierInsertionLoss:
     method: str
     ground: bool
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the insertion loss versus frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.environmental import plot_barrier_insertion_loss
 
-        return plot_barrier_insertion_loss(self, ax=ax, **kwargs)
+        return plot_barrier_insertion_loss(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def _validate_barrier_geometry(

@@ -507,6 +507,7 @@ from .building.insulation import (
     weighted_rating,
     weighted_rating_extended,
 )
+from ._report import ReportMetadata
 from .building.panel_transmission import (
     SoundReductionResult,
     double_wall_transmission_loss,
@@ -1534,6 +1535,7 @@ __all__ = [
     "weighted_impact_rating",
     "weighted_impact_rating_extended",
     "weighted_impact_improvement",
+    "ReportMetadata",
     # ISO 16251-1 floor-covering impact sound improvement
     "FloorCoveringImprovementResult",
     "acceleration_level",

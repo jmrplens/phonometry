@@ -108,6 +108,8 @@ from .._internal.types import as_float_or_array
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 # --- ISO 717-1 Table 3 reference values ----------------------------------
 
 #: One-third-octave reference values, 100 Hz to 3150 Hz (Table 3).
@@ -283,6 +285,9 @@ class WeightedRatingResult:
         ``None``.
     :ivar shifted_reference: Table 3 reference curve after the final shift,
         in dB. Defaults to ``None``.
+    :ivar quantity: ``"airborne"`` (ISO 717-1, sound reduction index) or
+        ``"impact"`` (ISO 717-2), selecting the labels of the ISO 717
+        Annex C report. Defaults to ``"airborne"``.
     """
 
     rating: int
@@ -292,6 +297,7 @@ class WeightedRatingResult:
     band_centers: np.ndarray | None = None
     measured: np.ndarray | None = None
     shifted_reference: np.ndarray | None = None
+    quantity: str = "airborne"
 
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
         """Plot the measured curve vs the shifted reference (ISO 717-1).
@@ -304,6 +310,42 @@ class WeightedRatingResult:
         from .._plot.building import plot_weighted_rating
 
         return plot_weighted_rating(self, ax=ax, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+    ) -> str:
+        """Render an ISO 717-1 airborne sound-insulation fiche to a PDF.
+
+        Writes a one-page accredited-laboratory report: the standard-basis
+        line, an optional metadata header block, the one-third-octave table
+        beside the measured-versus-shifted-reference plot (the result's own
+        :meth:`plot`), the boxed ``Rw (C; Ctr)`` result, an optional verdict
+        row and a footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a
+            prediction fiche (body, result and disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table uses the ISO 717 Annex C
+            columns (frequency, measured value, shifted reference,
+            unfavourable deviation) instead of the two-column ``f | value``
+            table.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or the result
+            was built without the per-band data (``band_centers``,
+            ``measured``, ``shifted_reference``).
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        return _render_iso717(
+            self, path, metadata=metadata, engine=engine, verbose=verbose
+        )
 
 
 @dataclass(frozen=True)
@@ -353,6 +395,8 @@ class ImpactRatingResult:
         ``None``.
     :ivar shifted_reference: Table 3 impact reference curve after the final
         shift, in dB. Defaults to ``None``.
+    :ivar quantity: Always ``"impact"`` (ISO 717-2), selecting the impact
+        labels of the ISO 717 Annex C report.
     """
 
     rating: int
@@ -361,6 +405,7 @@ class ImpactRatingResult:
     band_centers: np.ndarray | None = None
     measured: np.ndarray | None = None
     shifted_reference: np.ndarray | None = None
+    quantity: str = "impact"
 
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
         """Plot the measured curve vs the shifted reference (ISO 717-2).
@@ -373,6 +418,42 @@ class ImpactRatingResult:
         from .._plot.building import plot_impact_rating
 
         return plot_impact_rating(self, ax=ax, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+    ) -> str:
+        """Render an ISO 717-2 impact-insulation fiche to a PDF.
+
+        Writes a one-page accredited-laboratory report for impact sound: the
+        standard-basis line, an optional metadata header block, the
+        one-third-octave table beside the measured-versus-shifted-reference
+        plot (the result's own :meth:`plot`), the boxed ``Ln,w (CI)`` result,
+        an optional verdict row and a footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a
+            prediction fiche (body, result and disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table uses the ISO 717 Annex C
+            columns (frequency, measured value, shifted reference,
+            unfavourable deviation) instead of the two-column ``f | value``
+            table.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or the result
+            was built without the per-band data (``band_centers``,
+            ``measured``, ``shifted_reference``).
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        return _render_iso717(
+            self, path, metadata=metadata, engine=engine, verbose=verbose
+        )
 
 
 @dataclass(frozen=True)
@@ -411,6 +492,42 @@ class FacadeInsulationResult:
         from .._plot.building import plot_facade_insulation
 
         return plot_facade_insulation(self, ax=ax, **kwargs)
+
+
+def _render_iso717(
+    result: "WeightedRatingResult | ImpactRatingResult",
+    path: str,
+    *,
+    metadata: "ReportMetadata | None",
+    engine: str,
+    verbose: bool,
+) -> str:
+    """Validate the report request and delegate to the reportlab renderer.
+
+    Shared by :meth:`WeightedRatingResult.report` and
+    :meth:`ImpactRatingResult.report`: it rejects unknown engines and results
+    built without the per-band data, then calls the reportlab renderer (which
+    raises a clear :class:`ImportError` when reportlab is absent).
+    """
+    if engine != "reportlab":
+        raise ValueError(
+            f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+        )
+    if (
+        result.band_centers is None
+        or result.measured is None
+        or result.shifted_reference is None
+    ):
+        raise ValueError(
+            "report() needs the per-band data ('band_centers', 'measured', "
+            "'shifted_reference'); build the rating with weighted_rating() or "
+            "weighted_impact_rating() so they are populated."
+        )
+    from .._report.iso717 import render_iso717_report
+
+    return render_iso717_report(
+        result, path, metadata=metadata, verbose=verbose
+    )
 
 
 def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:

@@ -391,6 +391,69 @@ ISO 717-2 (tercios `L'nT,w = 79`, `CI = −11`; octava `54`, `CI = 0`).
 `None`); `weighted_impact_rating()` devuelve un `ImpactRatingResult` (`rating`,
 `ci` enteros, `unfavourable_sum` en dB).
 
+### Informe de ISO 717 (`.report()`)
+
+Ambos resultados de calificación generan en PDF una ficha de una sola página con
+el formato de un informe de ensayo de laboratorio acreditado mediante el método
+`report(path)`: la línea de norma base (norma de medición más la parte de
+calificación de ISO 717), un bloque de encabezado de metadatos opcional, la
+tabla de tercios de octava junto a la gráfica de la curva medida frente a la
+referencia desplazada (el propio `.plot()` del resultado), el número único en
+un recuadro, una fila de veredicto opcional y un pie con el descargo fijo.
+`WeightedRatingResult.report()` etiqueta la ficha aérea de ISO 717-1
+(`Rw (C; Ctr)`, desviaciones donde la referencia supera a la medida);
+`ImpactRatingResult.report()` etiqueta la ficha de impactos de ISO 717-2
+(`Ln,w (CI)`, con el signo contrario). `SoundReductionResult.report()` es una
+utilidad que califica el `R(f)` predicho y escribe su ficha en una sola llamada.
+
+Los metadatos del informe se pasan como una dataclase congelada `ReportMetadata`
+(todos los campos opcionales; solo se representan los suministrados y los campos
+numéricos deben ser finitos y positivos). Pasar `metadata=None` genera una ficha
+de predicción ligera (solo el cuerpo, el resultado y el descargo). Cuando se
+define `metadata.requirement` se añade una fila de veredicto: una calificación
+aérea aprueba cuando iguala o supera el requisito y una de impactos cuando lo
+iguala o queda por debajo (un nivel de impactos menor es mejor). Con
+`verbose=True` la tabla de dos columnas `f | valor` se cambia por las columnas
+del Anexo C de ISO 717 (frecuencia, valor medido, referencia desplazada,
+desviación desfavorable).
+
+La generación necesita reportlab, mantenido fuera de las dependencias de
+ejecución como el extra opcional `phonometry[report]`
+(`pip install phonometry[report]`); si falta reportlab se lanza un `ImportError`
+claro con el comando de instalación, y la gráfica sigue necesitando matplotlib
+(`phonometry[plot]`). Solo se admite `engine="reportlab"`; cualquier otro motor
+lanza `ValueError`.
+
+```python
+from phonometry import building, ReportMetadata
+
+# Calificación aérea a partir de un espectro R de 16 bandas (ISO 717-1)
+R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+     28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
+metadata = ReportMetadata(
+    specimen="Muro de hormigón armado de 200 mm",
+    client="Cliente de Ensayos Acústicos S.L.",
+    area=10.0, mass_per_area=460.0,
+    source_volume=53.0, receiving_volume=51.0,
+    temperature=21.5, relative_humidity=45.0, pressure=101.3,
+    test_room="Sala de transmisión T1",
+    measurement_standard="ISO 10140-2",
+    test_date="2026-07-18",
+    laboratory="Laboratorio de Referencia phonometry",
+    operator="J. M. Requena-Plens",
+    report_id="PHN-2026-0042",
+    requirement=42.0,          # añade la fila de veredicto PASS/FAIL
+)
+building.weighted_rating(R).report(
+    "Rw_ficha.pdf", metadata=metadata
+)                                                           # Rw (C; Ctr)
+
+# Calificación de impactos a partir de un espectro L'nT de 16 bandas (ISO 717-2)
+l_nt = [45.0, 47.0, 48.0, 49.0, 51.0, 52.0, 53.0, 54.0,
+        55.0, 56.0, 57.0, 58.0, 55.0, 52.0, 49.0, 46.0]
+building.weighted_impact_rating(l_nt).report("Lnw_ficha.pdf")  # Ln,w (CI)
+```
+
 ### Aislamiento a ruido aéreo de fachadas en campo (ISO 16283-3)
 
 La misma lógica fuente/receptor alcanza la **fachada** del edificio, pero ahora

@@ -1,9 +1,9 @@
 ---
 title: phonometry
-description: Toolkit de medición acústica para Python que abarca bancos de filtros, ponderación, niveles, psicoacústica, inteligibilidad del habla e intensidad sonora, verificado por conformidad contra normas IEC, ISO, ECMA y DIN.
+description: Toolkit de medición acústica para Python que abarca la metrología de niveles sonoros, la psicoacústica, salas y edificación, la vibración, el medio ambiente y el transporte, la acústica submarina, la electroacústica y la simulación de ondas, verificado por conformidad frente a 235 normas IEC, ISO, EN, ECMA, ITU, EBU, SAE y OACI.
 template: splash
 hero:
-  tagline: Medición acústica en Python con análisis en bandas de octava, ponderación A/C/G/Z, Leq/SEL/Lden, sonoridad de Zwicker, STI e intensidad sonora; cada métrica verificada contra su norma.
+  tagline: Medición acústica en Python, desde la metrología en bandas de octava y la sonoridad de Zwicker hasta el aislamiento en edificación, el EPNL de aeronaves y la propagación submarina. 371 comprobaciones de conformidad frente a 235 normas, y cada resultado genera su figura y, cuando una norma lo define, una ficha PDF normativa.
   actions:
     - text: Empezar
       link: /phonometry/es/getting-started/
@@ -18,24 +18,33 @@ import { CardGrid, Card } from '@astrojs/starlight/components';
 
 <CardGrid>
   <Card title="Verificado por conformidad" icon="approve-check">
-    Cada métrica se verifica en CI contra las tablas de tolerancia y vectores de prueba de su propia norma: IEC 61260-1, IEC 61672-1, IEC 61252, IEC 60942, IEC 60268-16, IEC 61043, ISO 532-1, ISO 532-2, ISO 532-3, ISO 226, ISO 1996, ISO 7196, ISO 9614-1/2, ISO 9613-1/2, ISO 9612, ISO 18233, ISO 3382-1/2/3, ISO 3741, ISO 3744, ISO 3746, ISO 354, ISO 10140, ISO 16283-1/2/3, EN 12354-1/2, ISO 12999-1, ISO 717-1/2, ECMA-418-1, ECMA-418-2 y DIN 45692, en total 37 normas.
+    Cada métrica se verifica en CI frente a las tablas de tolerancia, vectores de prueba y ejemplos resueltos de su propia norma: 371 comprobaciones numéricas en 46 dominios y 235 normas, desde las ponderaciones de IEC 61672-1 y los filtros de IEC 61260-1 hasta la sonoridad ISO 532, los índices globales ISO 717, el EPNL del Anexo 16 de la OACI y EBU R 128, regeneradas en cada pull request y publicadas como informe de conformidad.
   </Card>
-  <Card title="Sonometría" icon="magnifier">
-    Bancos de octava fraccionaria (cinco arquitecturas SOS), ponderación A/C/G/Z, ponderación temporal Fast/Slow/Impulse, Leq/LAeq, percentiles, LCpeak, SEL, dosis de ruido, Lden y espectrogramas de octava.
+  <Card title="Análisis de señal" icon="magnifier">
+    Bancos de octava fraccionaria (cinco arquitecturas SOS), ponderación A/C/G/Z, ponderación temporal Fast/Slow/Impulse, Leq/LAeq, percentiles, LCpeak, SEL, dosis de ruido, Lden y espectrogramas de octava, además de análisis espectral calibrado PSD/CSD, correlación y estimación de retardos, calibración física de SPL con comprobación de estabilidad IEC 60942, incertidumbre GUM y Monte Carlo, procesado por bloques en tiempo real y multicanal vectorizado.
   </Card>
-  <Card title="Psicoacústica y habla" icon="comment">
-    Sonoridad en sonos por tres vías, Zwicker (ISO 532-1, validación completa del Anexo B), Moore-Glasberg estacionaria y variable en el tiempo (ISO 532-2/3) y modelo de Sottek (ECMA-418-2), además de sharpness DIN 45692, tonalidad y aspereza ECMA-418-2, líneas isofónicas, prominencia tonal (TNR/PR) y STI/STIPA según IEC 60268-16 Ed. 5.
+  <Card title="Audición y percepción" icon="comment">
+    Sonoridad en sonos por tres vías (ISO 532-1/2/3 y el modelo de Sottek de ECMA-418-2), sharpness DIN 45692, tonalidad, aspereza y fuerza de fluctuación ECMA-418-2, molestia psicoacústica, líneas isofónicas (ISO 226), prominencia tonal (TNR/PR) y audibilidad, STI/STIPA según IEC 60268-16 Ed. 5 y SII según ANSI S3.5, además de umbrales de audición por edad (ISO 7029), pérdida auditiva inducida por ruido (ISO 1999) y exposición laboral LEX,8h (ISO 9612).
   </Card>
-  <Card title="Medición en campo" icon="rocket">
-    Intensidad sonora p-p con los indicadores de campo de ISO 9614-1, SPL calibrado con comprobación de estabilidad IEC 60942, procesado por bloques en tiempo real y multicanal vectorizado.
+  <Card title="Salas y edificación" icon="open-book">
+    Respuestas al impulso por barrido sinusoidal y MLS (ISO 18233), parámetros de sala EDT/T20/T30/C50/C80/Ts y métricas de oficinas diáfanas (ISO 3382-1/2/3), curvas de criterio de ruido de fondo (ANSI/ASA S12.2), predicción de la reverberación (EN 12354-6), aislamiento en campo y en laboratorio con índices globales (ISO 16283-1/2/3, ISO 10140, ISO 717-1/2), predicción de flancos, fachadas y radiación al exterior (EN 12354-1/2/3/4), incertidumbre de medición (ISO 12999-1) y datos de materiales desde la absorción (ISO 354, ISO 11654) hasta el tubo de impedancia (ISO 10534-2), los modelos de absorbentes porosos y la dispersión y difusión (ISO 17497).
   </Card>
-  <Card title="Acústica de salas y edificación" icon="open-book">
-    Respuestas al impulso por barrido sinusoidal y MLS (ISO 18233), reverberación y parámetros de sala EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), métricas de habla en oficinas diáfanas (ISO 3382-3), aislamiento en campo a ruido aéreo, a impactos y de fachadas con R′w/DnT,w/L′nT,w/D2m,nT,w y C/Ctr/CI (ISO 16283-1/2/3, ISO 717-1/2), caracterización en laboratorio (ISO 10140), predicción de la transmisión por flancos (EN 12354-1/2), incertidumbre de medición (ISO 12999-1) y absorción sonora en cámara reverberante (ISO 354).
+  <Card title="Vibración y ruido estructural" icon="rocket">
+    El vocabulario de FRF de ISO 7626 (receptancia, movilidad, acelerancia), la rigidez de transferencia de aisladores (ISO 10846), la potencia acústica radiada por superficies vibrantes (ISO/TS 7849), la potencia estructural en placa de recepción (EN 15657), la predicción de fuentes instaladas en edificios (EN 12354-5) y la transmisión en uniones, además de la vibración en humanos de cuerpo entero, por choques múltiples y mano-brazo (ISO 2631-1/-5, ISO 5349).
   </Card>
-  <Card title="Potencia acústica" icon="rocket">
-    Nivel de emisión LW independiente del dispositivo por cinco vías: presión sonora sobre superficie envolvente (ISO 3744/3746), el método de precisión en sala reverberante con las correcciones de Waterhouse y C1/C2 (ISO 3741), el barrido de intensidad con indicadores de campo y grado alcanzado (ISO 9614-2), el método de precisión en sala anecoica (ISO 3745) y el barrido de intensidad de precisión (ISO 9614-3).
+  <Card title="Medio ambiente y transporte" icon="open-book">
+    Absorción atmosférica α(f) (ISO 9613-1), el método general de ISO 9613-2 con desglose por término en bandas de octava, efecto del suelo, barreras y refracción atmosférica, ajustes por ruido impulsivo (NT ACOU 112), niveles de evaluación y Lden (ISO 1996), la cadena de certificación EPNL de aeronaves (Anexo 16 de la OACI, IEC 61265, SAE ARP 5534), los contornos aeroportuarios de ECAC Doc 29 sobre la base de datos de flota ANP de la EASA, el método de hemisferios de helicópteros de ECAC Doc 32 y la emisión y audibilidad tonal de aerogeneradores según IEC 61400-11.
   </Card>
-  <Card title="Propagación en exteriores y exposición" icon="open-book">
-    Absorción atmosférica α(f) (ISO 9613-1) y el método general de ISO 9613-2 (divergencia geométrica, absorción atmosférica, efecto del suelo y apantallamiento por barreras con desglose por término en bandas de octava), además de la exposición diaria al ruido laboral LEX,8h por las estrategias de tareas, de puestos de trabajo y de jornada completa con la incertidumbre del Anexo C (ISO 9612).
+  <Card title="Acústica submarina" icon="magnifier">
+    Niveles re 1 µPa (ISO 18405), ruido radiado por buques y nivel de fuente monopolar equivalente (ISO 17208-1/2), exposición por hincado de pilotes (ISO 18406), velocidad del sonido en agua de mar, reflexión en el lecho marino, ruido ambiente de Wenz y JOMOPANS-ECHO, las ecuaciones del sonar pasivo y activo, y pérdidas de transmisión desde las formas cerradas de divergencia más absorción hasta los métodos numéricos de modos normales, trazado de rayos y ecuación parabólica.
+  </Card>
+  <Card title="Fuentes y dispositivos" icon="rocket">
+    Potencia acústica por cinco vías normalizadas (ISO 3744/3746, ISO 3741, ISO 9614-2, ISO 3745, ISO 9614-3), intensidad sonora p-p (IEC 61043) con los indicadores de campo de ISO 9614-1, declaraciones de emisión de ruido ISO 4871, distorsión y respuesta en frecuencia de equipos de audio (IEC 60268-3), THD(f) por barrido sinusoidal (Farina, Novak), características nominales de altavoces y micrófonos (IEC 60268-5/-4), silenciadores, encapsulamientos y ruido de climatización, y sonoridad de programa con pico verdadero (ITU-R BS.1770-5, EBU R 128).
+  </Card>
+  <Card title="Simulación de ondas" icon="comment">
+    Un solver acústico FDTD 2D determinista sobre una malla escalonada de presión y velocidad, con fuentes continuas y de pulso, sondas de presión, obstáculos rasterizados y contornos rígidos, de impedancia o absorbentes por lado, validado frente a oráculos analíticos y utilizable como motor de contraste de los modelos de forma cerrada.
+  </Card>
+  <Card title="Resultados listos para entregar" icon="approve-check">
+    Cada análisis devuelve un dataclass tipado e inmutable cuyo <code>.plot()</code> de una línea genera la figura canónica en inglés o español (<code>language="en"|"es"</code>), y cuando una norma define un formato de informe, un método <code>.report()</code> genera la ficha PDF normativa: ISO 717, ISO 11654, ISO 532-1, EBU R 128, EPNL de la OACI, IEC 61260-1, ISO 4871 e IEC 60268-5/-4. La documentación es íntegramente bilingüe.
   </Card>
 </CardGrid>

@@ -13,9 +13,10 @@ pip install phonometry
 Optional extras:
 
 ```bash
-pip install phonometry[plot]   # matplotlib, for filter response plots and result .plot() methods
-pip install phonometry[perf]  # numba, faster 'impulse' time weighting
-pip install phonometry[full]  # both
+pip install phonometry[plot]    # matplotlib, for filter response plots and result .plot() methods
+pip install phonometry[perf]    # numba, faster 'impulse' time weighting
+pip install phonometry[report]  # reportlab + svglib, so result .report() methods render normative PDF fiches
+pip install phonometry[full]    # all of the above
 ```
 
 **Option 2: Cloning and Installing**
@@ -127,7 +128,17 @@ safe to pass `wavfile.read` output directly.
 
 ## Where to go next
 
+The octave analysis above uses the `metrology` core, one of fifteen domain
+namespaces; the documentation index walks through the rest, from
+psychoacoustics and room, building and vibration acoustics to environmental,
+aircraft and underwater noise, electroacoustics and FDTD wave simulation.
+Every result object exposes a one-line `.plot(language="en"|"es")` figure and,
+where a standard defines a reporting format, a `.report()` method that renders
+the normative PDF fiche.
+
 - [Filter Banks](filter-banks.md): choose an architecture and inspect responses
 - [Calibration and dBFS](calibration.md): get real-world SPL values
+- [Why phonometry](why-phonometry.md): the conformance-first design philosophy
+- [Conformance report](CONFORMANCE.md): the expected and computed value of all 371 checks
 - [API Reference](api-reference.md): every parameter of every function
 - [Bibliography](references.md): the books and papers behind every guide, each with a verified link

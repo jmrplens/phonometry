@@ -619,7 +619,7 @@ fields must lie within 0..100 %. A violation raises `ValueError`.
 | `laboratory` | Testing laboratory / institute name (footer). |
 | `operator` | Operator who carried out the test (footer signature line). |
 | `report_id` | Report / test number (footer). |
-| `requirement` | Target single-number value the rating is checked against for the verdict row, in dB. For an airborne rating the result passes when it is greater than or equal to the requirement; for an impact rating it passes when it is less than or equal to it (a lower impact level is better). |
+| `requirement` | Target single-number value the rating is checked against for the verdict row, in the rating's own unit (dB for the insulation ratings, a dimensionless coefficient for the absorption rating). The result passes when it is greater than or equal to the requirement, except an impact rating passes when it is less than or equal to it (a lower impact level is better). |
 | `notes` | Free-form remarks printed in the footer. |
 
 **Raises**

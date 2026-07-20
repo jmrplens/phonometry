@@ -1,6 +1,6 @@
 ---
 title: "Electroacoustics: distortion and frequency response"
-description: "IEC 60268-3 distortion: total and nth-order harmonic distortion, THD+N and SINAD through the AES17 measurement bandwidth, the per-order modulation and difference-frequency intermodulation, dynamic intermodulation (DIM) and the ITU-R 468 weighted THD, the AES17 dynamic range and idle channel noise (CCIR-RMS weighting), plus the Bendat & Piersol H1/H2 frequency-response estimators and ordinary coherence, and the IEC 60268-4/-5 sensitivity conventions (dB re 1 V/Pa, the 1 W / 1 m free-field normalization)."
+description: "IEC 60268-3 distortion: total and nth-order harmonic distortion, THD+N and SINAD through the AES17 measurement bandwidth, the per-order modulation and difference-frequency intermodulation, dynamic intermodulation (DIM) and the ITU-R 468 weighted THD, the AES17 dynamic range and idle channel noise (CCIR-RMS weighting), plus the Bendat & Piersol H1/H2 frequency-response estimators and ordinary coherence, and the IEC 60268-4/-5 sensitivity conventions (dB re 1 V/Pa, the 1 W / 1 m free-field normalization) with the IEC 60268-4 microphone and IEC 60268-5 loudspeaker rated-characteristics reports."
 references:
   - type: book
     authors: ["Beranek, L. L.", "Mellow, T. J."]
@@ -40,11 +40,11 @@ references:
     note: "ISBN 978-0-470-24877-5. The H1 and H2 frequency-response estimators and the ordinary coherence γ² of section 4."
   - type: standard
     organization: "International Electrotechnical Commission"
-    year: 2018
+    year: 2014
     title: "Sound system equipment – Part 4: Microphones"
-    designation: "IEC 60268-4:2018"
+    designation: "IEC 60268-4:2014"
     url: "https://webstore.iec.ch/en/publication/32039"
-    note: "Clause 11 (sensitivity and sensitivity level): the microphone conventions of section 5, cited for context rather than implemented as code."
+    note: "The rated microphone characteristics of sections 5 and 8: the free-field sensitivity and its level re 1 V/Pa (11.1/11.3), the frequency response and effective frequency range (12.1/12.2), the directional pattern and the directivity index through the 11.2.2 a) diffuse-field integral (13.1/13.2), the overload sound pressure level (15.2), the equivalent sound pressure level due to inherent noise (17) and the rated impedances and power supply (9/10). Since revised as IEC 60268-4:2018 (same catalogue page); the 2014 edition is the implemented one."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2003
@@ -456,6 +456,82 @@ repository; click the preview to open the PDF.
 	caption="Loudspeaker characteristics fiche (LoudspeakerCharacteristics.report), the IEC 60268-5 rated-characteristics table beside the on-axis response, impedance, THD and polar panels drawn to the IEC 60263 25 dB-per-decade and 25 dB reference-circle conventions."
 />
 
+## 8. Microphone characteristics report (IEC 60268-4)
+
+The microphone companion of section 7: the rated characteristics IEC 60268-4
+defines around a measured free-field frequency response gather into a single
+**microphone characteristics** result that renders the standard's
+rated-characteristics data sheet. Four of the numbers are computed from the
+standard's own definitions rather than merely repeated:
+
+- **Sensitivity level** (11.1). The rated free-field sensitivity $M$ (mV/Pa,
+  at the 1 kHz reference frequency of 11.3) as a level,
+  $L_M = 20\lg(M / 1\,\text{V/Pa})$: 12.5 mV/Pa is $-38.1$ dB re 1 V/Pa.
+- **Effective frequency range** (12.2). The band over which the response,
+  normalized to 0 dB at the reference frequency, stays within the stated
+  $\pm$ tolerance; the edges are the interpolated tolerance crossings.
+- **Directivity index** (13.2.2). $D = 20\lg(M_0/M_\mathrm{diff})$ with the
+  diffuse-field sensitivity from the 11.2.2 a) integral over a rotationally
+  symmetric pattern; the ideal cardioid returns $10\lg 3 = 4.8$ dB.
+- **Equivalent noise level** (17.2). The weighted inherent-noise voltage over
+  the rated sensitivity as a sound pressure level,
+  $L_N = 20\lg\bigl((U_N/M)/20\,\mu\text{Pa}\bigr)$, with the
+  signal-to-noise ratio re 1 Pa (94 dB SPL) derived from it. The overload
+  sound pressure level (15.2) is read from a distortion-against-level curve
+  at the stated THD limit.
+
+```python
+import numpy as np
+from phonometry import microphone_characteristics, ReportMetadata
+
+freqs = np.geomspace(20, 20000, 400)
+response = -10 * np.log10(1 + (30.0 / freqs) ** 4)      # low-frequency roll-off
+response -= 10 * np.log10(1 + (freqs / 19000.0) ** 8)   # high-frequency roll-off
+response += 2.0 * np.exp(-(np.log2(freqs / 9000.0) ** 2) / 0.3)  # presence region
+
+angles = np.linspace(0, 179, 359)
+cardioid = 20 * np.log10((1 + np.cos(np.radians(angles))) / 2)
+
+result = microphone_characteristics(
+    freqs, response, 12.5, tolerance_db=3.0,          # 12.5 mV/Pa at 1 kHz
+    rated_impedance=150.0, minimum_load_impedance=1000.0,
+    noise_voltage=1.25e-6,                             # A-weighted, V
+    max_spl_thd_percent=0.5,
+    distortion=(np.linspace(100, 140, 81),
+                0.5 * 10 ** ((np.linspace(100, 140, 81) - 130.0) * 0.08)),
+    polar=(angles, cardioid), polar_frequency=1000.0,
+    powering="Phantom P48 (IEC 61938)", supply_current_ma=3.1,
+)
+print(round(result.sensitivity_level_db, 1))            # -38.1 dB re 1 V/Pa
+print(tuple(round(x) for x in result.effective_range))  # Hz
+print(round(result.directivity_index_db, 1))            # 4.8 dB (cardioid)
+print(round(result.equivalent_noise_level_db, 1))       # dB(A)
+
+result.report("microphone.pdf", metadata=ReportMetadata(measurement_standard="IEC 60268-4"))
+```
+
+`microphone_characteristics` returns a `MicrophoneCharacteristics` with the
+computed `sensitivity_level_db`, `effective_range`, `directivity_index_db`,
+`equivalent_noise_level_db`, `max_spl_db`, `signal_to_noise_ratio_db` and
+`diffuse_field_sensitivity_level_db`, and a `.report()` that writes the fiche.
+The free-field response is drawn with its tolerance band, the
+reference-frequency marker and the effective-range markers to the IEC 60263
+proportion (one frequency decade equal to 25 dB), and the directional pattern
+on the IEC 60263 25 dB reference circle; the inherent-noise spectrum and the
+distortion-against-level curve (with the THD limit and the overload level
+marked) feed the secondary panels. A `requirement` in the metadata is checked
+as a maximum permitted equivalent noise level.
+
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
+
+<ReportPreview
+	name="iec60268_4_microphone_example"
+	title="IEC 60268-4 microphone characteristics example report (PDF)"
+	description="One-page IEC 60268-4 microphone rated-characteristics fiche: a header with the manufacturer and model, the rated-characteristics table (free-field sensitivity in mV/Pa and its level re 1 V/Pa, effective frequency range, rated and minimum load impedances, equivalent noise level, signal-to-noise ratio, maximum SPL at the stated THD limit, directivity index and phantom powering) beside the free-field frequency response with its tolerance band and effective-range markers, and the directional-pattern, inherent-noise-spectrum and distortion panels, all drawn to the IEC 60263 scale conventions."
+	caption="Microphone characteristics fiche (MicrophoneCharacteristics.report), the IEC 60268-4 rated-characteristics table beside the free-field response, with the cardioid directional pattern, inherent-noise and THD-against-level panels drawn to the IEC 60263 25 dB-per-decade and 25 dB reference-circle conventions."
+/>
+
 ## See also
 
 - [Industrial noise control](/phonometry/guides/noise-control/): reactive
@@ -464,4 +540,4 @@ repository; click the preview to open the PDF.
 - [Swept-sine distortion](/phonometry/guides/swept-sine-distortion/): the
   Farina/Novak harmonic separation whose THD(f) feeds the loudspeaker
   distortion panel.
-- API reference: [`electroacoustics.distortion`](/phonometry/reference/api/electroacoustics/distortion/), [`electroacoustics.frequency_response`](/phonometry/reference/api/electroacoustics/frequency-response/), [`electroacoustics.piston`](/phonometry/reference/api/electroacoustics/piston/) and [`electroacoustics.loudspeaker`](/phonometry/reference/api/electroacoustics/loudspeaker/).
+- API reference: [`electroacoustics.distortion`](/phonometry/reference/api/electroacoustics/distortion/), [`electroacoustics.frequency_response`](/phonometry/reference/api/electroacoustics/frequency-response/), [`electroacoustics.piston`](/phonometry/reference/api/electroacoustics/piston/), [`electroacoustics.loudspeaker`](/phonometry/reference/api/electroacoustics/loudspeaker/) and [`electroacoustics.microphone`](/phonometry/reference/api/electroacoustics/microphone/).

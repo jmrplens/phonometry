@@ -83,6 +83,15 @@ list grows as guides gain their References sections.
   The calibrator classes, level tolerances and the short-term stability
   criterion applied to calibration recordings.
   Cited by [Calibration and dBFS](/phonometry/guides/calibration/).
+- International Electrotechnical Commission. (2014). *Sound system equipment —
+  Part 4: Microphones* (IEC 60268-4:2014).
+  [IEC webstore](https://webstore.iec.ch/en/publication/32039).
+  The rated microphone characteristics: free-field sensitivity and its level
+  re 1 V/Pa, the frequency response and the effective frequency range against
+  the tolerance limits, the directional pattern and the directivity index, the
+  overload sound pressure level, the equivalent sound pressure level due to
+  inherent noise, and the rated impedances and power supply.
+  Cited by [Electroacoustics](/phonometry/guides/electroacoustics/).
 - International Electrotechnical Commission. (2007). *Sound system equipment —
   Part 5: Loudspeakers* (IEC 60268-5:2003+A1:2007).
   [IEC webstore](https://webstore.iec.ch/en/publication/1223).

@@ -185,6 +185,7 @@ export const apiSidebar = {
         'reference/api/electroacoustics/swept-sine',
         'reference/api/electroacoustics/piston',
         'reference/api/electroacoustics/loudspeaker',
+        'reference/api/electroacoustics/microphone',
       ],
     },
     {

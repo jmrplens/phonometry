@@ -3903,6 +3903,86 @@ def _chk_harmonic_d2() -> Outcome:
     return numeric(ref.DISTORTION_D2, value, 1e-4, places=6)
 
 
+def _microphone_flat_response() -> "tuple[np.ndarray, np.ndarray]":
+    """Flat 0 dB relative response with ramps crossing -3 dB at 40/18000 Hz."""
+    f = np.geomspace(20.0, 20000.0, 400)
+    rel = np.zeros_like(f)
+    below = f < 63.0
+    rel[below] = -3.0 * (np.log2(63.0 / f[below]) / np.log2(63.0 / 40.0))
+    above = f > 15000.0
+    rel[above] = -3.0 * (np.log2(f[above] / 15000.0) / np.log2(18000.0 / 15000.0))
+    return f, rel
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-4:2014 (11.1/11.3)",
+    "Microphone sensitivity level, 12.5 mV/Pa -> 20 lg 0.0125 dB re 1 V/Pa",
+)
+def _chk_microphone_sensitivity_level() -> Outcome:
+    f, rel = _microphone_flat_response()
+    result = ph.microphone_characteristics(f, rel, 12.5, tolerance_db=3.0)
+    # Hand-computed: 20 lg 0.0125 = -38.061800 dB re 1 V/Pa.
+    return numeric(-38.061800, result.sensitivity_level_db, 1e-5, unit="dB", places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-4:2014 (12.2)",
+    "Effective frequency range = +/-3 dB tolerance crossings (40 Hz / 18 kHz)",
+)
+def _chk_microphone_effective_range() -> Outcome:
+    f, rel = _microphone_flat_response()
+    result = ph.microphone_characteristics(f, rel, 12.5, tolerance_db=3.0)
+    lo, hi = result.effective_range
+    ok = abs(lo - 40.0) <= 5e-3 and abs(hi - 18000.0) <= 2.0
+    return Outcome(
+        expected="40 Hz / 18000 Hz (+/-3 dB tolerance crossings)",
+        computed=f"{lo:.3f} Hz / {hi:.1f} Hz",
+        delta=f"{lo - 40.0:.3f} / {hi - 18000.0:.3f} Hz",
+        passed=ok,
+    )
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-4:2014 (13.2.2)",
+    "Directivity index of the ideal cardioid, 10 lg 3 dB (11.2.2 a integral)",
+)
+def _chk_microphone_cardioid_di() -> Outcome:
+    f, rel = _microphone_flat_response()
+    angles = np.linspace(0.0, 179.9, 1800)
+    pattern = 20.0 * np.log10((1.0 + np.cos(np.radians(angles))) / 2.0)
+    result = ph.microphone_characteristics(
+        f, rel, 12.5, tolerance_db=3.0, polar=(angles, pattern)
+    )
+    di = result.directivity_index_db
+    if di is None:
+        return Outcome(
+            expected="4.771213 dB", computed="None", delta="n/a", passed=False
+        )
+    # Closed form: D = 10 lg 3 = 4.771213 dB.
+    return numeric(4.771213, di, 5e-3, unit="dB", places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-4:2014 (17.2)",
+    "Equivalent noise level, 2.5 uV over 12.5 mV/Pa -> 200 uPa = 20 dB SPL",
+)
+def _chk_microphone_equivalent_noise() -> Outcome:
+    f, rel = _microphone_flat_response()
+    result = ph.microphone_characteristics(
+        f, rel, 12.5, tolerance_db=3.0, noise_voltage=2.5e-6
+    )
+    noise = result.equivalent_noise_level_db
+    if noise is None:
+        return Outcome(
+            expected="20 dB SPL", computed="None", delta="n/a", passed=False
+        )
+    return numeric(20.0, noise, 1e-9, unit="dB SPL", places=6)
+
+
 def _electro_smpte_signal() -> tuple[np.ndarray, float, float]:
     fs = _electro_fs()
     t = np.arange(fs) / fs

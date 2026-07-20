@@ -85,6 +85,16 @@ que las guías incorporan sus secciones de Referencias.
   Las clases de calibrador, las tolerancias de nivel y el criterio de
   estabilidad a corto plazo aplicado a las grabaciones de calibración.
   Citado por [Calibración y dBFS](/phonometry/es/guides/calibration/).
+- International Electrotechnical Commission. (2014). *Sound system equipment —
+  Part 4: Microphones* (IEC 60268-4:2014).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/32039).
+  Las características nominales del micrófono: sensibilidad en campo libre y su
+  nivel re 1 V/Pa, la respuesta en frecuencia y el rango de frecuencias
+  efectivo frente a los límites de tolerancia, el diagrama direccional y el
+  índice de directividad, el nivel de presión sonora de sobrecarga, el nivel de
+  presión sonora equivalente debido al ruido inherente, y las impedancias
+  nominales y la alimentación.
+  Citado por [Electroacústica](/phonometry/es/guides/electroacoustics/).
 - International Electrotechnical Commission. (2007). *Sound system equipment —
   Part 5: Loudspeakers* (IEC 60268-5:2003+A1:2007).
   [Catálogo IEC](https://webstore.iec.ch/en/publication/1223).

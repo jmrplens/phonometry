@@ -1,6 +1,6 @@
 ---
 title: "Electroacústica: distorsión y respuesta en frecuencia"
-description: "Distorsión IEC 60268-3: distorsión armónica total y de orden n, THD+N y SINAD a través del ancho de banda de medición AES17, la intermodulación por órdenes de modulación y por frecuencia diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468, el rango dinámico y el ruido de canal en reposo de AES17 (ponderación CCIR-RMS), más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria, y las convenciones de sensibilidad de IEC 60268-4/-5 (dB re 1 V/Pa, la normalización de campo libre a 1 W / 1 m)."
+description: "Distorsión IEC 60268-3: distorsión armónica total y de orden n, THD+N y SINAD a través del ancho de banda de medición AES17, la intermodulación por órdenes de modulación y por frecuencia diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468, el rango dinámico y el ruido de canal en reposo de AES17 (ponderación CCIR-RMS), más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria, y las convenciones de sensibilidad de IEC 60268-4/-5 (dB re 1 V/Pa, la normalización de campo libre a 1 W / 1 m) con los informes de características nominales de micrófono IEC 60268-4 y de altavoz IEC 60268-5."
 references:
   - type: book
     authors: ["Beranek, L. L.", "Mellow, T. J."]
@@ -40,11 +40,11 @@ references:
     note: "ISBN 978-0-470-24877-5. Los estimadores de respuesta en frecuencia H1 y H2 y la coherencia ordinaria γ² de la sección 4."
   - type: standard
     organization: "International Electrotechnical Commission"
-    year: 2018
+    year: 2014
     title: "Sound system equipment – Part 4: Microphones"
-    designation: "IEC 60268-4:2018"
+    designation: "IEC 60268-4:2014"
     url: "https://webstore.iec.ch/en/publication/32039"
-    note: "Cláusula 11 (sensibilidad y nivel de sensibilidad): las convenciones de micrófono de la sección 5, citadas como contexto y no implementadas como código."
+    note: "Las características nominales de micrófono de las secciones 5 y 8: la sensibilidad en campo libre y su nivel re 1 V/Pa (11.1/11.3), la respuesta en frecuencia y el rango de frecuencias efectivo (12.1/12.2), el diagrama direccional y el índice de directividad mediante la integral de campo difuso de 11.2.2 a) (13.1/13.2), el nivel de presión sonora de sobrecarga (15.2), el nivel de presión sonora equivalente debido al ruido inherente (17) y las impedancias nominales y la alimentación (9/10). Revisada después como IEC 60268-4:2018 (misma página de catálogo); la edición implementada es la de 2014."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2003
@@ -471,6 +471,86 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 	caption="Ficha de características del altavoz (LoudspeakerCharacteristics.report), la tabla de características nominales IEC 60268-5 junto a la respuesta en el eje y los paneles de impedancia, THD y polar trazados según las convenciones de 25 dB por década y de círculo de referencia de 25 dB de IEC 60263."
 />
 
+## 8. Informe de características del micrófono (IEC 60268-4)
+
+El compañero de micrófono de la sección 7: las características nominales que
+IEC 60268-4 define en torno a una respuesta en frecuencia de campo libre medida
+se reúnen en un único resultado de **características del micrófono** que
+representa la ficha de características nominales de la norma. Cuatro de los
+números se calculan a partir de las propias definiciones de la norma en lugar
+de solo repetirse:
+
+- **Nivel de sensibilidad** (11.1). La sensibilidad nominal en campo libre $M$
+  (mV/Pa, a la frecuencia de referencia de 1 kHz de 11.3) como nivel,
+  $L_M = 20\lg(M / 1\,\text{V/Pa})$: 12,5 mV/Pa son $-38{,}1$ dB re 1 V/Pa.
+- **Rango de frecuencias efectivo** (12.2). La banda en la que la respuesta,
+  normalizada a 0 dB en la frecuencia de referencia, se mantiene dentro de la
+  tolerancia $\pm$ declarada; los bordes son los cruces interpolados con la
+  tolerancia.
+- **Índice de directividad** (13.2.2). $D = 20\lg(M_0/M_\mathrm{diff})$ con la
+  sensibilidad de campo difuso de la integral de 11.2.2 a) sobre un diagrama
+  con simetría de revolución; el cardioide ideal devuelve $10\lg 3 = 4{,}8$ dB.
+- **Nivel de ruido equivalente** (17.2). La tensión de ruido inherente
+  ponderada sobre la sensibilidad nominal como nivel de presión sonora,
+  $L_N = 20\lg\bigl((U_N/M)/20\,\mu\text{Pa}\bigr)$, con la relación
+  señal-ruido re 1 Pa (94 dB SPL) derivada de él. El nivel de presión sonora de
+  sobrecarga (15.2) se lee de una curva de distorsión frente a nivel en el
+  límite de THD declarado.
+
+```python
+import numpy as np
+from phonometry import microphone_characteristics, ReportMetadata
+
+freqs = np.geomspace(20, 20000, 400)
+response = -10 * np.log10(1 + (30.0 / freqs) ** 4)      # caída en baja frecuencia
+response -= 10 * np.log10(1 + (freqs / 19000.0) ** 8)   # caída en alta frecuencia
+response += 2.0 * np.exp(-(np.log2(freqs / 9000.0) ** 2) / 0.3)  # región de presencia
+
+angles = np.linspace(0, 179, 359)
+cardioid = 20 * np.log10((1 + np.cos(np.radians(angles))) / 2)
+
+result = microphone_characteristics(
+    freqs, response, 12.5, tolerance_db=3.0,          # 12,5 mV/Pa a 1 kHz
+    rated_impedance=150.0, minimum_load_impedance=1000.0,
+    noise_voltage=1.25e-6,                             # ponderada A, V
+    max_spl_thd_percent=0.5,
+    distortion=(np.linspace(100, 140, 81),
+                0.5 * 10 ** ((np.linspace(100, 140, 81) - 130.0) * 0.08)),
+    polar=(angles, cardioid), polar_frequency=1000.0,
+    powering="Phantom P48 (IEC 61938)", supply_current_ma=3.1,
+)
+print(round(result.sensitivity_level_db, 1))            # -38,1 dB re 1 V/Pa
+print(tuple(round(x) for x in result.effective_range))  # Hz
+print(round(result.directivity_index_db, 1))            # 4,8 dB (cardioide)
+print(round(result.equivalent_noise_level_db, 1))       # dB(A)
+
+result.report("microfono.pdf", metadata=ReportMetadata(measurement_standard="IEC 60268-4"),
+              language="es")
+```
+
+`microphone_characteristics` devuelve un `MicrophoneCharacteristics` con el
+`sensitivity_level_db`, el `effective_range`, el `directivity_index_db`, el
+`equivalent_noise_level_db`, el `max_spl_db`, la `signal_to_noise_ratio_db` y
+el `diffuse_field_sensitivity_level_db` calculados, y un `.report()` que
+escribe la ficha. La respuesta de campo libre se dibuja con su banda de
+tolerancia, el marcador de la frecuencia de referencia y los marcadores del
+rango efectivo según la proporción de IEC 60263 (una década de frecuencia igual
+a 25 dB), y el diagrama direccional sobre el círculo de referencia de 25 dB de
+IEC 60263; el espectro de ruido inherente y la curva de distorsión frente a
+nivel (con el límite de THD y el nivel de sobrecarga marcados) alimentan los
+paneles secundarios. Un `requirement` en los metadatos se comprueba como nivel
+de ruido equivalente máximo permitido.
+
+La ficha de ejemplo se regenera con `make reports` y se conserva renderizada en
+el repositorio; pulsa la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iec60268_4_microphone_example"
+	title="Informe de ejemplo de características del micrófono IEC 60268-4 (PDF)"
+	description="Ficha de características nominales del micrófono IEC 60268-4 de una página: una cabecera con el fabricante y el modelo, la tabla de características nominales (sensibilidad en campo libre en mV/Pa y su nivel re 1 V/Pa, rango de frecuencias efectivo, impedancias nominal y de carga mínima, nivel de ruido equivalente, relación señal-ruido, SPL máximo en el límite de THD declarado, índice de directividad y alimentación phantom) junto a la respuesta en frecuencia de campo libre con su banda de tolerancia y los marcadores del rango efectivo, y los paneles de diagrama direccional, espectro de ruido inherente y distorsión, todos trazados según las convenciones de escala de IEC 60263."
+	caption="Ficha de características del micrófono (MicrophoneCharacteristics.report), la tabla de características nominales IEC 60268-4 junto a la respuesta de campo libre, con el diagrama direccional cardioide y los paneles de ruido inherente y THD frente a nivel trazados según las convenciones de 25 dB por década y de círculo de referencia de 25 dB de IEC 60263."
+/>
+
 ## Véase también
 
 - [Control de ruido industrial](/phonometry/es/guides/noise-control/):
@@ -479,4 +559,4 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 - [Distorsión con barrido sinusoidal](/phonometry/es/guides/swept-sine-distortion/):
   la separación armónica de Farina/Novak cuya THD(f) alimenta el panel de
   distorsión del altavoz.
-- Referencia de la API: [`electroacoustics.distortion`](/phonometry/es/reference/api/electroacoustics/distortion/), [`electroacoustics.frequency_response`](/phonometry/es/reference/api/electroacoustics/frequency-response/), [`electroacoustics.piston`](/phonometry/es/reference/api/electroacoustics/piston/) y [`electroacoustics.loudspeaker`](/phonometry/es/reference/api/electroacoustics/loudspeaker/).
+- Referencia de la API: [`electroacoustics.distortion`](/phonometry/es/reference/api/electroacoustics/distortion/), [`electroacoustics.frequency_response`](/phonometry/es/reference/api/electroacoustics/frequency-response/), [`electroacoustics.piston`](/phonometry/es/reference/api/electroacoustics/piston/), [`electroacoustics.loudspeaker`](/phonometry/es/reference/api/electroacoustics/loudspeaker/) y [`electroacoustics.microphone`](/phonometry/es/reference/api/electroacoustics/microphone/).

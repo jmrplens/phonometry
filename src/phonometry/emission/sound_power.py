@@ -48,6 +48,8 @@ from .._internal.warnings import PhonometryWarning, _warn_renamed
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .declaration import NoiseEmissionDeclaration
+
 _S0 = 1.0  #: Reference area, in square metres (ISO 3744, 8.2.5).
 
 Grade = Literal["engineering", "survey"]
@@ -179,6 +181,75 @@ class SoundPowerResult:
 
         check_language(language)
         return plot_sound_power(self, ax=ax, language=language, **kwargs)
+
+    def declare(
+        self,
+        *,
+        uncertainty: float | None = None,
+        mode: str = "Operating mode 1",
+        emission_pressure_level: float | None = None,
+        emission_pressure_uncertainty: float | None = None,
+        verification_level: float | None = None,
+        machine: str | None = None,
+        operating_conditions: str | None = None,
+        noise_test_code: str | None = None,
+        basic_standards: str | tuple[str, ...] = (),
+        form: str = "dual-number",
+    ) -> "NoiseEmissionDeclaration":
+        """Build an ISO 4871:1996 noise-emission declaration from this result.
+
+        Wraps the A-weighted sound power level ``LWA`` of this measurement as the
+        declared measured value ``L_WA`` of a single operating mode, with the
+        uncertainty ``K_WA`` defaulting to the result's own expanded uncertainty
+        ``U`` (ISO 3744/3746 clause 9.5). The declared single-number value is
+        ``L_WAd = L_WA + K_WA`` (ISO 4871 clause 3.15).
+
+        :param uncertainty: ``K_WA`` in decibels; defaults to this result's
+            expanded uncertainty :attr:`uncertainty`.
+        :param mode: Operating-mode label for the declaration column.
+        :param emission_pressure_level: Optional A-weighted emission sound
+            pressure level ``L_pA`` at a work station, in decibels re 20 uPa.
+        :param emission_pressure_uncertainty: ``K_pA`` in decibels; required
+            with ``emission_pressure_level``.
+        :param verification_level: Optional verification measurement ``L_1`` of
+            the A-weighted sound power level (ISO 4871 clause 6).
+        :param machine: Machine identification (clause 5 a).
+        :param operating_conditions: Operating/mounting conditions (clause 5 c).
+        :param noise_test_code: Noise test code the values were determined to
+            (clause 5 b).
+        :param basic_standards: Basic emission standard(s) used (clause 5 b).
+        :param form: ``"dual-number"`` (default) or ``"single-number"``.
+        :return: A single-mode
+            :class:`~phonometry.emission.declaration.NoiseEmissionDeclaration`.
+        :raises ValueError: If the A-weighted sound power level is not finite
+            (several bands were combined without ``frequencies``).
+        """
+        from .declaration import NoiseEmissionDeclaration, OperatingModeDeclaration
+
+        lwa = float(self.sound_power_level_a)
+        if not np.isfinite(lwa):
+            raise ValueError(
+                "declare() needs a finite A-weighted sound power level; supply "
+                "'frequencies' to sound_power_pressure(...) so LWA is defined."
+            )
+        k = float(self.uncertainty if uncertainty is None else uncertainty)
+        return NoiseEmissionDeclaration(
+            modes=(
+                OperatingModeDeclaration(
+                    mode=mode,
+                    sound_power_level=lwa,
+                    sound_power_uncertainty=k,
+                    emission_pressure_level=emission_pressure_level,
+                    emission_pressure_uncertainty=emission_pressure_uncertainty,
+                    verification_level=verification_level,
+                ),
+            ),
+            machine=machine,
+            operating_conditions=operating_conditions,
+            noise_test_code=noise_test_code,
+            basic_standards=basic_standards,
+            form=form,  # type: ignore[arg-type]
+        )
 
 
 def background_noise_correction(

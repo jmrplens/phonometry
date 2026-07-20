@@ -571,6 +571,10 @@ from .building.survey_insulation import (
     survey_service_equipment_level,
 )
 from .room.open_plan import OpenPlanResult, open_plan_metrics
+from .emission.declaration import (
+    NoiseEmissionDeclaration,
+    OperatingModeDeclaration,
+)
 from .emission.sound_power import (
     MeteorologicalCorrection,
     PrecisionCriteria,
@@ -1440,6 +1444,9 @@ __all__ = [
     "environmental_correction",
     "SoundPowerResult",
     "SoundPowerWarning",
+    # ISO 4871 noise emission declaration
+    "NoiseEmissionDeclaration",
+    "OperatingModeDeclaration",
     "sound_power_reverberation",
     "sound_power_comparison",
     "ReverberationSoundPowerResult",

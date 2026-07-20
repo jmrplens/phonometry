@@ -63,10 +63,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   with the takeoff/landing ground-roll masks). `AnpDatabase`/`AnpAircraft` feed
   both straight into the existing `event_level`/`noise_contour` chain, so noise
   levels and contours can be computed from actual aircraft instead of only
-  synthetic NPD input. Called without a path the loader uses a small curated
-  subset shipped with the package (a heavy jet, a narrowbody and a propeller
-  type); pointed at a directory it reads a full ANP export the user has
-  downloaded. Result objects expose `.plot()`.
+  synthetic NPD input. Called without a path the loader uses the full EASA ANP
+  database (archive version 2.3, 155 aircraft types) bundled with the package;
+  pointed at a directory it reads any other ANP CSV export. Result objects
+  expose `.plot()`.
 - Every `.report()` fiche accepts a `language` argument (`'en'` default, `'es'`):
   Spanish strings and a comma decimal separator.
 - The `.plot()` renderers of the building, noise-control and emission result

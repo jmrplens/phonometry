@@ -28,7 +28,10 @@ from phonometry.aircraft import (  # noqa: E402
 
 _FT_M = 0.3048
 _KT_MS = 0.514444
-_EMBEDDED = ("747100", "727200", "PA31")
+#: Representative aircraft with both NPD data and a fixed-point profile: a heavy
+#: jet (wing), a narrowbody (fuselage) and a propeller aircraft.
+_REPRESENTATIVE = ("747100", "727200", "PA31")
+_DB = load_anp_database()
 
 
 def _npd_oracle() -> list[dict[str, str]]:
@@ -37,54 +40,59 @@ def _npd_oracle() -> list[dict[str, str]]:
     return list(csv.DictReader(text.splitlines(), delimiter=";"))
 
 
-def _npd_id_of(aircraft_id: str) -> str:
-    return load_anp_database().aircraft(aircraft_id).npd_id
-
-
-def test_database_contains_curated_subset() -> None:
-    db = load_anp_database()
-    assert db.aircraft_ids == sorted(_EMBEDDED)
+def test_database_loads_full_fleet() -> None:
+    ids = _DB.aircraft_ids
+    assert len(ids) > 100  # full EASA ANP v2.3 (155 aircraft types)
+    for rep in _REPRESENTATIVE:
+        assert rep in ids
+    assert "A320-211" in ids  # a modern narrowbody present in the full DB
 
 
 def test_metadata_and_mounting_mapping() -> None:
-    db = load_anp_database()
-    assert db.aircraft("747100").mounting == "wing"
-    assert db.aircraft("727200").mounting == "fuselage"
-    assert db.aircraft("PA31").mounting == "propeller"
-    assert db.aircraft("747100").num_engines == 4
-    assert "747" in db.aircraft("747100").description
+    assert _DB.aircraft("747100").mounting == "wing"
+    assert _DB.aircraft("727200").mounting == "fuselage"
+    assert _DB.aircraft("PA31").mounting == "propeller"
+    assert _DB.aircraft("747100").num_engines == 4
+    assert "747" in _DB.aircraft("747100").description
 
 
 def test_npd_round_trip_is_exact() -> None:
     """Every tabulated (power, distance) node is recovered to machine precision."""
-    db = load_anp_database()
-    npd_to_acft = {_npd_id_of(a): a for a in _EMBEDDED}
+    npd_ids = {_DB.aircraft(a).npd_id: a for a in _REPRESENTATIVE}
     dist_cols = [c for c in _npd_oracle()[0] if c.startswith("L_") and c.endswith("ft")]
     checked = 0
     for row in _npd_oracle():
-        acft = npd_to_acft[row["NPD_ID"]]
-        curves = db.npd_curves(acft, row["Op Mode"], row["Noise Metric"])
+        if row["NPD_ID"] not in npd_ids or row["Noise Metric"] not in ("SEL", "LAmax"):
+            continue
+        curves = _DB.npd_curves(npd_ids[row["NPD_ID"]], row["Op Mode"], row["Noise Metric"])
         power = float(row["Power Setting"])
         for col in dist_cols:
             d_m = float(col[2:-2]) * _FT_M
             expected = float(row[col])
             got = float(curves.level(power, d_m)[0])
-            assert got == pytest.approx(expected, abs=1e-9), (acft, row["Op Mode"], col)
+            assert got == pytest.approx(expected, abs=1e-9), (row["NPD_ID"], col)
             checked += 1
     assert checked > 100  # all three aircraft, both metrics, both operations
 
 
 def test_npd_log_midpoint_interpolation() -> None:
     """Between two nodes the level is log-linear in distance (Doc 29 Eq. 4-4)."""
-    curves = load_anp_database().npd_curves("747100", "departure", "SEL")
+    curves = _DB.npd_curves("747100", "departure", "SEL")
     d0, d1 = curves.distances[0], curves.distances[1]
     mid = float(curves.level(curves.powers[0], np.sqrt(d0 * d1))[0])
     assert mid == pytest.approx(0.5 * (curves.levels[0, 0] + curves.levels[0, 1]), abs=1e-9)
 
 
+def test_modern_aircraft_has_npd_but_no_fixed_point_profile() -> None:
+    """A320-211 ships only procedural steps: NPD loads, the profile guard fires."""
+    curves = _DB.npd_curves("A320-211", "departure", "SEL")
+    assert curves.levels.shape[1] == 10
+    with pytest.raises(KeyError, match="procedural-step"):
+        _DB.profile("A320-211", "departure")
+
+
 def test_profile_units_and_ground_roll_mask() -> None:
-    db = load_anp_database()
-    dep = db.profile("747100", "departure")
+    dep = _DB.profile("747100", "departure")
     assert isinstance(dep, AnpProfile)
     assert dep.path.shape[1] == 5
     # First departure point of 747100: distance 0 ft, altitude 0 ft, TAS 35 kt.
@@ -94,28 +102,27 @@ def test_profile_units_and_ground_roll_mask() -> None:
     # Only the initial zero-altitude segment is takeoff ground roll.
     assert dep.ground_roll[0] and not dep.ground_roll[1:].any()
     assert not dep.landing_roll.any()
-    arr = db.profile("747100", "arrival")
+    arr = _DB.profile("747100", "arrival")
     # Landing rollout: the trailing zero-altitude segments, no takeoff roll.
     assert arr.landing_roll[-1] and not arr.ground_roll.any()
 
 
-@pytest.mark.parametrize("aircraft_id", _EMBEDDED)
+@pytest.mark.parametrize("aircraft_id", _REPRESENTATIVE)
 @pytest.mark.parametrize("operation", ["departure", "arrival"])
 def test_event_level_finite(aircraft_id: str, operation: str) -> None:
-    db = load_anp_database()
-    fr = db.event_level(aircraft_id, [500.0, 600.0, 0.0], operation, metric="exposure")
+    fr = _DB.event_level(aircraft_id, [500.0, 600.0, 0.0], operation, metric="exposure")
     assert np.isfinite(fr.level)
-    assert db.aircraft(aircraft_id).event_level(
+    # The aircraft-object accessor matches the database method.
+    assert _DB.aircraft(aircraft_id).event_level(
         [500.0, 600.0, 0.0], operation, metric="maximum").level == pytest.approx(
-        db.event_level(aircraft_id, [500.0, 600.0, 0.0], operation,
-                       metric="maximum").level)
+        _DB.event_level(aircraft_id, [500.0, 600.0, 0.0], operation,
+                        metric="maximum").level)
 
 
 def test_noise_contour_smoke() -> None:
-    db = load_anp_database()
     x = np.linspace(-2000.0, 8000.0, 30)
     y = np.linspace(-3000.0, 3000.0, 25)
-    contour = db.noise_contour("747100", "departure", x=x, y=y, metric="exposure")
+    contour = _DB.noise_contour("747100", "departure", x=x, y=y, metric="exposure")
     assert contour.level.shape == (y.size, x.size)
     assert np.isfinite(contour.level).all()
     # Loudest near the track (y = 0), quieter far to the side.
@@ -138,27 +145,23 @@ def test_external_directory_load(tmp_path: object) -> None:
 
 
 def test_error_paths() -> None:
-    db = load_anp_database()
     with pytest.raises(KeyError):
-        db.aircraft("NOPE")
+        _DB.aircraft("NOPE")
     with pytest.raises(ValueError, match="metric"):
-        db.npd_curves("747100", "departure", "EPNL")
+        _DB.npd_curves("747100", "departure", "EPNL")
     with pytest.raises(ValueError, match="operation"):
-        db.npd_curves("747100", "sideways", "SEL")
-    with pytest.raises(KeyError, match="procedural-step"):
-        # A320-211 exists in the full DB but not in the curated subset; use a
-        # curated aircraft and an absent stage length to hit the profile guard.
-        db.profile("PA31", "departure", stage_length=9)
+        _DB.npd_curves("747100", "sideways", "SEL")
+    with pytest.raises(KeyError):
+        _DB.profile("PA31", "departure", stage_length=9)
 
 
 def test_plot_smoke_en_es() -> None:
-    db = load_anp_database()
-    npd = db.npd_curves("747100", "departure", "SEL")
+    npd = _DB.npd_curves("747100", "departure", "SEL")
     assert isinstance(npd, AnpNpdCurves)
     ax = npd.plot()
     assert "747100" in ax.get_title()
     npd.plot(language="es")
-    prof = db.profile("747100", "departure")
+    prof = _DB.profile("747100", "departure")
     ax2 = prof.plot(language="es")
     assert ax2.get_xlabel().startswith("Distancia")
     with pytest.raises(ValueError, match="Unknown language"):
@@ -167,4 +170,4 @@ def test_plot_smoke_en_es() -> None:
 
 
 def test_aircraft_object_type() -> None:
-    assert isinstance(load_anp_database().aircraft("PA31"), AnpAircraft)
+    assert isinstance(_DB.aircraft("PA31"), AnpAircraft)

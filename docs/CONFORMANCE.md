@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **364/364 conformance checks pass** across 46 domains and 232 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **355/355 conformance checks pass** across 44 domains and 226 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -132,15 +132,13 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Intensity &amp; sound power</b>: 100% (6/6)</summary>
+<summary>&#9989; <b>Intensity &amp; sound power</b>: 100% (4/4)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | IEC 61043:1994 Clause 5 | Plane-wave intensity I = p^2 / (rho c) | 0.00238 W/m^2 (+/-1.5%) | 0.00239 W/m^2 | 0 W/m^2 | &#9989; |
 | ISO 3744:2010 Eq. 18 | Monopole hemisphere recovers LW (r=4 m) | 95 dB (+/-0 dB) | 95 dB | 0 dB | &#9989; |
 | ISO 9614-2:1996 Eq. 12 | Intensity scan recovers LW of an enclosed source | 90 dB (+/-0.000001 dB) | 90 dB | 0 dB | &#9989; |
-| ISO 4871:1996 clause 3.15 / Annex B | Declared L_WAd = L_WA + K_WA (Annex B, L_WA=88, K_WA=2) | 90 dB (+/-0 dB) | 90 dB | 0 dB | &#9989; |
-| ISO 4871:1996 clause 6.2 | Single-machine verification boundary L_1 <= L_WAd | L_1=90 verified, L_1=91 rejected (L_WAd=90) | 90->True, 91->False | boundary L_1 = L_WAd | &#9989; |
 | ISO 3741:2010 Eq. 20 | Reverberation-room method inverts to a known LW | 0 dB error | 0 dB | 0 dB | &#9989; |
 
 </details>
@@ -351,16 +349,6 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 |:---|:---|:---|:---|:---|:---:|
 | NT ACOU 112:2002 Formula 1 | Predicted prominence, OR=1000 dB/s, LD=30 dB | 11.9542 (+/-0.0001) | 11.9542 | 0 | &#9989; |
 | NT ACOU 112:2002 Formula 2 | Adjustment KI to LAeq at prominence P=10 | 9 dB (+/-0 dB) | 9 dB | 0 dB | &#9989; |
-
-</details>
-
-<details>
-<summary>&#9989; <b>Impulsive-sound prominence (ISO/PAS 1996-3)</b>: 100% (2/2)</summary>
-
-| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
-|:---|:---|:---|:---|:---|:---:|
-| ISO/PAS 1996-3:2022 3.5 | Onset rate of a 30 dB ramp over 0.30 s | 100 dB/s (+/-0 dB/s) | 100 dB/s | 0 dB/s | &#9989; |
-| ISO/PAS 1996-3:2022 Formula 3 | Adjustment KI of the ramp onset | 7.1176 dB (+/-0 dB) | 7.1176 dB | 0 dB | &#9989; |
 
 </details>
 
@@ -577,7 +565,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b>: 100% (14/14)</summary>
+<summary>&#9989; <b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b>: 100% (15/15)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -589,6 +577,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ECAC Doc 29 start-of-roll directivity (turboprop) | ΔSOR behind a takeoff ground-roll segment (turboprop, Eq. 4-24b), dB | 1.0943 dB (+/-0.01 dB) | 1.0944 dB | 0 dB | &#9989; |
 | ECAC Doc 29 workbook event assembly (JETFDS/R03, behind SOR) | Energy sum of the reference per-segment SELs vs the B-1 event total, dB | 74.73 dB (+/-0.01 dB) | 74.733 dB | 0.003 dB | &#9989; |
 | SAE ARP 5534 band-attenuation continuity | SAE-Method δ_B at the 150 dB branch split (Eq. 7 vs Eq. 8), dB | 123.95 dB (+/-0.01 dB) | 123.953 dB | 0.003 dB | &#9989; |
+| EASA ANP database round-trip | Interpolated NPD level at a tabulated node vs the published ANP value, dB | 98.8 dB (+/-0 dB) | 98.8 dB | 0 dB | &#9989; |
 | ECAC Doc 29 NPD interpolation | Log-linear NPD level at the log-midpoint distance (Eq. 4-4), dB | 97 dB (+/-0 dB) | 97 dB | 0 dB | &#9989; |
 | SAE ARP 5534 pure-tone coefficient (ISO 9613-1) | Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m | 0.006186 dB/m (+/-0 dB/m) | 0.006186 dB/m | 0 dB/m | &#9989; |
 | ICAO Annex 16 Vol. I App. 2 Table A2-3 | Perceived noisiness at SPL(b), 1 kHz band, in noys | 1 (+/-0) | 1 | 0 | &#9989; |
@@ -718,20 +707,6 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bies Eq. 7.64 (double wall) | Below f0 = mass law of the combined mass | 11.6144 dB (+/-0 dB) | 11.6144 dB | 0 dB | &#9989; |
 | Hopkins Eq. 4.92 (composite) | 1 % open area caps R at 10 lg(S/Sa) | 20 dB (+/-0.05 dB) | 19.9996 dB | 0 dB | &#9989; |
 | Hopkins Eq. 4.99/4.101 (Gomperts slit) | Transmission maximum at first resonance | 1544.9615 Hz (+/-15 Hz) | 1542.9615 Hz | -2 Hz | &#9989; |
-
-</details>
-
-<details>
-<summary>&#9989; <b>Bending-wave plate-junction transmission (Cremer / Craik / Hopkins)</b>: 100% (6/6)</summary>
-
-| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
-|:---|:---|:---|:---|:---|:---:|
-| Hopkins Eq. 5.12 (identical plates) | X-junction corner tau12(0 deg) = 1/8 | 0.125 (+/-0) | 0.125 | 0 | &#9989; |
-| Hopkins Eqs 5.12 + 5.6 (identical plates) | X-junction corner angular average = 1/12 | 0.0833 (+/-0) | 0.0833 | 0 | &#9989; |
-| Hopkins Eqs 5.12 + 5.6 (identical plates) | L-junction corner angular average = 1/3 | 0.3333 (+/-0) | 0.3333 | 0 | &#9989; |
-| Hopkins Eq. 5.14 (identical plates) | In-line junction tau12(0 deg) = 1 | 1 (+/-0) | 1 | 0 | &#9989; |
-| Hopkins Eq. 5.7 (SEA consistency) | X-junction reciprocity tau_bar_12 / tau_bar_21 = chi | 1.5 (+/-0) | 1.5 | 0 | &#9989; |
-| Hopkins Eq. 5.116 (identical plates) | X-junction vibration reduction index = 10 lg(12) | 10.7918 dB (+/-0 dB) | 10.7918 dB | 0 dB | &#9989; |
 
 </details>
 

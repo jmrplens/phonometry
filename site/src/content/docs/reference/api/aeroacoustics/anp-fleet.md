@@ -28,10 +28,9 @@ and exposes, for a given aircraft identifier and operation:
   the NPD curves and the profile straight into the existing Doc 29 functions.
 
 [`load_anp_database`](/phonometry/reference/api/aeroacoustics/anp-fleet/#load_anp_database) returns an [`AnpDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase). Called without a path
-it loads a small curated subset shipped with the package (a heavy jet, a
-narrowbody and a propeller aircraft, see `aircraft/data/anp/PROVENANCE.md`);
-pointed at a directory it reads a full ANP CSV export the user has downloaded
-under the database's own licence.
+it loads the full EASA ANP database (archive version 2.3) shipped with the
+package (see `aircraft/data/anp/PROVENANCE.md`); pointed at a directory it
+reads any other ANP CSV export the user provides.
 
 Only the fixed-point trajectories are read as ready-to-use profiles; procedural
 step profiles (which require the ICAO Doc 9911 / Doc 29 Vol 2 flight-mechanics
@@ -401,7 +400,7 @@ Load an EASA ANP database (aircraft, NPD curves and default profiles).
 
 | Name | Description |
 | :--- | :--- |
-| `path` | Directory of an ANP CSV export (the `ANP*_Aircraft.csv`, `*_NPD_data.csv`, `*_Default_fixed_point_profiles.csv` tables). If `None` (default), loads the small curated subset shipped with the package (see `aircraft/data/anp/PROVENANCE.md`). |
+| `path` | Directory of an ANP CSV export (the `*Aircraft.csv`, `*NPD_data.csv`, `*fixed_point_profiles.csv` tables). If `None` (default), loads the full EASA ANP database v2.3 shipped with the package (see `aircraft/data/anp/PROVENANCE.md`). |
 
 **Returns:** An [`AnpDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase).
 

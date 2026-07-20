@@ -112,15 +112,16 @@ class SIIResult:
     disturbance: np.ndarray
     masking: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-band audibility weighted by importance, with the SII.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.hearing import plot_sii
 
-        return plot_sii(self, ax=ax, **kwargs)
+        return plot_sii(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def standard_speech_spectrum(vocal_effort: str = "normal") -> np.ndarray:

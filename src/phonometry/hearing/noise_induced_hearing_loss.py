@@ -94,15 +94,16 @@ class NiptsResult:
     spread_upper: np.ndarray
     spread_lower: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the NIPTS spectrum with the fractile band over frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.hearing import plot_nipts
 
-        return plot_nipts(self, ax=ax, **kwargs)
+        return plot_nipts(self, ax=ax, language=check_language(language), **kwargs)
 
 
 @dataclass(frozen=True)
@@ -132,15 +133,16 @@ class HtlanResult:
     nipts: np.ndarray
     threshold: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the age, noise and combined threshold components over frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.hearing import plot_htlan
 
-        return plot_htlan(self, ax=ax, **kwargs)
+        return plot_htlan(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:

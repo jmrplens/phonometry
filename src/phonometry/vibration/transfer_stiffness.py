@@ -312,15 +312,16 @@ class TransferStiffnessResult:
             self.transfer_stiffness, self.frequencies, "dynamic_stiffness", target
         )
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the transfer-stiffness level ``L_k(f)``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.vibration import plot_transfer_stiffness
 
-        return plot_transfer_stiffness(self, ax=ax, **kwargs)
+        return plot_transfer_stiffness(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def indirect_transfer_stiffness_result(

@@ -271,15 +271,16 @@ class WeightingResponse:
     magnitude: Real
     magnitude_db: Real
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the weighting factor (dB) versus frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
+        from .._i18n import check_language
         from .._plot.vibration import plot_vibration_weighting
 
-        return plot_vibration_weighting(self, ax=ax, **kwargs)
+        return plot_vibration_weighting(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def frequency_weighting(name: str, frequencies: ArrayLike) -> WeightingResponse:
@@ -372,15 +373,16 @@ class WeightedSpectrum:
     weighted: Real
     overall: float
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the unweighted and weighted band spectra with ``a_w``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
+        from .._i18n import check_language
         from .._plot.vibration import plot_weighted_spectrum
 
-        return plot_weighted_spectrum(self, ax=ax, **kwargs)
+        return plot_weighted_spectrum(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def weighted_acceleration(
@@ -805,15 +807,16 @@ class DailyVibrationExposure:
     partials: Real
     assessment: ExposureAssessment
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the partial exposures against the EAV / ELV thresholds.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
+        from .._i18n import check_language
         from .._plot.vibration import plot_daily_exposure
 
-        return plot_daily_exposure(self, ax=ax, **kwargs)
+        return plot_daily_exposure(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def daily_vibration_exposure(

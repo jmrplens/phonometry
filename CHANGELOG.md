@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   objects accept a `language` keyword (`"en"`, the default, or `"es"`). Spanish
   renders localised axis labels, titles and legends with comma decimal
   separators; English output is unchanged.
+- The `.plot()` methods of the psychoacoustics, hearing and vibration results
+  accept a `language` keyword (`"en"`, the default, or `"es"`). Spanish renders
+  the axis labels, titles and legends in Spanish and switches the decimal
+  separator to a comma; English output is unchanged.
 - IEC 61260-1 filter class compliance can now be exported as a one-page PDF
   fiche. A new `filter_class_compliance(bank, *, num_points=..., edition=...)`
   runs the same verification as `verify_filter_class` and returns a frozen

@@ -1030,11 +1030,12 @@ class ToneAudibilityResult:
         """Tone frequency of the decisive (most audible) tone, in Hz."""
         return float(self.tone_frequencies[int(np.argmax(self.audibilities))])
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-tone audibility ``ΔL`` against tone frequency."""
+        from .._i18n import check_language
         from .._plot.psychoacoustics import plot_tone_audibility
 
-        return plot_tone_audibility(self, ax=ax, **kwargs)
+        return plot_tone_audibility(self, ax=ax, language=check_language(language), **kwargs)
 
 
 # Module named ``tone_audibility`` (distinct from the ISO 1996-2 Annex C

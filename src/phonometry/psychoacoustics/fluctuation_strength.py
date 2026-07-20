@@ -199,11 +199,12 @@ class FluctuationStrengthResult:
     bark_axis: "NDArray[np.float64]"
     time_dependent: "NDArray[np.float64]"
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the specific fluctuation strength against critical-band rate."""
+        from .._i18n import check_language
         from .._plot.psychoacoustics import plot_fluctuation_strength
 
-        return plot_fluctuation_strength(self, ax=ax, **kwargs)
+        return plot_fluctuation_strength(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def _bandpass_envelope_filter(fs: float) -> Any:

@@ -147,6 +147,7 @@ ZwickerLoudness.report(
     metadata: ReportMetadata | None = None,
     engine: str = 'reportlab',
     verbose: bool = False,
+    language: str = 'en',
 ) -> str
 ```
 
@@ -167,6 +168,7 @@ and a footer with the fixed disclaimer.
 | `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum permitted loudness in sone. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform signature; it has no effect on the single-layout loudness fiche. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
 
 **Returns:** The written `path` as a `str`.
 

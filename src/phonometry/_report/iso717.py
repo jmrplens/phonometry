@@ -38,6 +38,7 @@ from typing import TYPE_CHECKING, Any, List, Tuple, cast
 
 import numpy as np
 
+from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
     _LIGHT_HEX,
@@ -68,11 +69,12 @@ _Y_TOP_IMPACT = 80.0
 
 def _labels(
     result: "WeightedRatingResult | ImpactRatingResult",
+    language: str = "en",
 ) -> Tuple[str, str, str, str]:
     """Return ``(title, rating_part, statement, value_header)`` for the quantity."""
     if result.quantity == "impact":
         impact = cast("ImpactRatingResult", result)
-        title = "Impact sound insulation rating"
+        title = t("title.impact", language)
         rating_part = "ISO 717-2"
         statement = (
             f"L<sub>n,w</sub> (C<sub>I</sub>) = "
@@ -81,7 +83,7 @@ def _labels(
         value_header = "L<sub>n</sub>"
     else:
         airborne = cast("WeightedRatingResult", result)
-        title = "Airborne sound insulation rating"
+        title = t("title.airborne", language)
         rating_part = "ISO 717-1"
         statement = (
             f"R<sub>w</sub> (C; C<sub>tr</sub>) = "
@@ -93,6 +95,7 @@ def _labels(
 
 def _metadata_pairs(
     metadata: ReportMetadata,
+    language: str = "en",
 ) -> Tuple[List[Tuple[str, str]], List[Tuple[str, str]]]:
     """Build the two ordered (label, value) groups of the header grid.
 
@@ -111,21 +114,22 @@ def _metadata_pairs(
 
     identity = group(
         [
-            ("Client", metadata.client),
-            ("Mounted by", metadata.mounted_by),
+            (t("meta.client", language), metadata.client),
+            (t("meta.mounted_by", language), metadata.mounted_by),
             (
-                "Sample area S [m<super>2</super>]",
-                fmt_num(metadata.area) if metadata.area is not None else None,
+                t("meta.sample_area", language),
+                fmt_num(metadata.area, language)
+                if metadata.area is not None else None,
             ),
-            ("Manufacturer", metadata.manufacturer),
-            ("Description", metadata.specimen),
-            ("Test room", metadata.test_room),
-            ("Date of test", metadata.test_date),
+            (t("meta.manufacturer", language), metadata.manufacturer),
+            (t("meta.description", language), metadata.specimen),
+            (t("meta.test_room", language), metadata.test_room),
+            (t("meta.date_of_test", language), metadata.test_date),
         ]
     )
 
     def num(value: float | None) -> str | None:
-        return fmt_num(value) if value is not None else None
+        return fmt_num(value, language) if value is not None else None
 
     # Per-room temperature/humidity when supplied; otherwise a single value.
     per_room_t = (
@@ -138,32 +142,38 @@ def _metadata_pairs(
     )
     conditions = group(
         [
-            ("Source room volume [m<super>3</super>]", num(metadata.source_volume)),
-            ("Source room temp. [&#176;C]", num(metadata.source_temperature)),
-            ("Source room humidity [%]", num(metadata.source_relative_humidity)),
+            (t("meta.source_volume", language), num(metadata.source_volume)),
+            (t("meta.source_temp", language), num(metadata.source_temperature)),
             (
-                "Receiving room volume [m<super>3</super>]",
+                t("meta.source_humidity", language),
+                num(metadata.source_relative_humidity),
+            ),
+            (
+                t("meta.receiving_volume", language),
                 num(metadata.receiving_volume),
             ),
-            ("Receiving room temp. [&#176;C]", num(metadata.receiving_temperature)),
             (
-                "Receiving room humidity [%]",
+                t("meta.receiving_temp", language),
+                num(metadata.receiving_temperature),
+            ),
+            (
+                t("meta.receiving_humidity", language),
                 num(metadata.receiving_relative_humidity),
             ),
             (
-                "Temperature [&#176;C]",
+                t("meta.temperature", language),
                 None if per_room_t else num(metadata.temperature),
             ),
             (
-                "Relative humidity [%]",
+                t("meta.relative_humidity", language),
                 None if per_room_rh else num(metadata.relative_humidity),
             ),
-            ("Ambient pressure [kPa]", num(metadata.pressure)),
+            (t("meta.ambient_pressure", language), num(metadata.pressure)),
             (
-                "Mass per unit area [kg/m<super>2</super>]",
+                t("meta.mass_per_area", language),
                 num(metadata.mass_per_area),
             ),
-            ("Mounting", metadata.mounting),
+            (t("meta.mounting", language), metadata.mounting),
         ]
     )
     return identity, conditions
@@ -176,6 +186,7 @@ def _value_table(
     deviations: np.ndarray,
     value_header: str,
     verbose: bool,
+    language: str = "en",
 ) -> Any:
     """Build the left-hand one-third-octave table (accredited or Annex C).
 
@@ -198,22 +209,28 @@ def _value_table(
 
     if verbose:
         header = [
-            Paragraph("f [Hz]", head_style),
-            Paragraph(f"Measured {value_header} [dB]", head_style),
-            Paragraph("Shifted ref. [dB]", head_style),
-            Paragraph("Unfav. dev. [dB]", head_style),
+            Paragraph(t("table.f_hz", language), head_style),
+            Paragraph(
+                t("table.measured_value", language).format(vh=value_header),
+                head_style,
+            ),
+            Paragraph(t("table.shifted_ref_db", language), head_style),
+            Paragraph(t("table.unfav_dev_db", language), head_style),
         ]
         col_widths = [15 * mm, 19 * mm, 18 * mm, 18 * mm]
     else:
         header = [
-            Paragraph("Frequency f [Hz]", head_style),
-            Paragraph(f"{value_header} [dB]", head_style),
+            Paragraph(t("table.frequency", language), head_style),
+            Paragraph(
+                t("table.value_db", language).format(vh=value_header), head_style
+            ),
         ]
         col_widths = [28 * mm, 28 * mm]
 
     def d1(value: float) -> str:
-        # One decimal, period separator (English fiche), matching fmt_num.
-        return f"{value:.1f}"
+        # One decimal, locale-aware separator (period for English, matching
+        # fmt_num; comma for Spanish).
+        return format_number(value, language, decimals=1)
 
     rows: List[List[Any]] = [header]
     for fk, m, r_, d in zip(centers, measured, shifted, deviations):
@@ -222,7 +239,7 @@ def _value_table(
                 [
                     f"{int(round(fk))}",
                     d1(m),
-                    f"{r_:.0f}",
+                    format_number(r_, language, decimals=0),
                     d1(d) if d > _DEVIATION_EPS else "—",
                 ]
             )
@@ -248,7 +265,9 @@ def _value_table(
             ("LINEBELOW", (0, triplet_end), (-1, triplet_end), 0.4, thin)
         )
     if verbose:
-        rows.append(["", "", "sum", d1(float(deviations.sum()))])
+        rows.append(
+            ["", "", t("table.sum", language), d1(float(deviations.sum()))]
+        )
         style_cmds += [
             ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
             ("FONTNAME", (2, -1), (-1, -1), "Helvetica-Bold"),
@@ -261,7 +280,9 @@ def _value_table(
 
 
 def _verdict(
-    result: "WeightedRatingResult | ImpactRatingResult", requirement: float
+    result: "WeightedRatingResult | ImpactRatingResult",
+    requirement: float,
+    language: str = "en",
 ) -> Tuple[str, bool]:
     """Return the verdict text and a PASS flag for a supplied requirement.
 
@@ -269,18 +290,16 @@ def _verdict(
     impact ratings pass when the rating is at or below it (lower is better).
     """
     rating = float(result.rating)
-    req_text = fmt_num(requirement)
+    req_text = fmt_num(requirement, language)
     if result.quantity == "impact":
         passed = rating <= requirement
-        text = (
-            f"L<sub>n,w</sub> = {result.rating} dB, required &#8804; "
-            f"{req_text} dB"
+        text = t("iso717.verdict.impact", language).format(
+            rating=result.rating, req=req_text
         )
     else:
         passed = rating >= requirement
-        text = (
-            f"R<sub>w</sub> = {result.rating} dB, required &#8805; "
-            f"{req_text} dB"
+        text = t("iso717.verdict.airborne", language).format(
+            rating=result.rating, req=req_text
         )
     return text, passed
 
@@ -325,6 +344,7 @@ def render_iso717_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
+    language: str = "en",
 ) -> str:
     """Render an ISO 717 accredited-laboratory rating fiche to a PDF at ``path``.
 
@@ -376,7 +396,7 @@ def render_iso717_report(
     else:
         deviations = np.maximum(shifted - measured, 0.0)
 
-    title, rating_part, statement, value_header = _labels(result)
+    title, rating_part, statement, value_header = _labels(result, language)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
 
@@ -384,12 +404,11 @@ def render_iso717_report(
         metadata.measurement_standard if metadata is not None else None
     )
     if measurement_standard:
-        basis = (
-            f"{html.escape(measurement_standard)} laboratory measurement of sound "
-            f"insulation. Rating per {rating_part}:2020."
+        basis = t("basis.iso717.with_standard", language).format(
+            standard=html.escape(measurement_standard), part=rating_part
         )
     else:
-        basis = f"Sound insulation rating per {rating_part}:2020."
+        basis = t("basis.iso717.plain", language).format(part=rating_part)
 
     flow: List[Any] = [
         Paragraph(title, title_style),
@@ -398,7 +417,7 @@ def render_iso717_report(
 
     # Metadata header block (only the supplied fields).
     if metadata is not None and not metadata.is_empty():
-        identity, conditions = _metadata_pairs(metadata)
+        identity, conditions = _metadata_pairs(metadata, language)
         header_pairs = identity + conditions
         if header_pairs:
             flow.append(Spacer(1, 3))
@@ -408,15 +427,18 @@ def render_iso717_report(
     # Two-panel body: the one-third-octave table on the left (~70 mm), the
     # vector plot on the right filling the rest of the content width.
     value_table = _value_table(
-        centers, measured, shifted, deviations, value_header, verbose
+        centers, measured, shifted, deviations, value_header, verbose, language
     )
     left_cell = [
-        Paragraph(f"One-third-octave {value_header} [dB]", caption_style),
+        Paragraph(
+            t("caption.one_third_octave_value", language).format(vh=value_header),
+            caption_style,
+        ),
         value_table,
     ]
     y_top = _Y_TOP_IMPACT if result.quantity == "impact" else _Y_TOP_AIRBORNE
     plot_drawing = render_figure_drawing(
-        result.plot, 116 * mm, y_top=y_top, expand_step=10.0
+        result.plot, 116 * mm, y_top=y_top, expand_step=10.0, language=language
     )
     flow.append(two_panel_body(left_cell, plot_drawing))
     flow.append(Spacer(1, 8))
@@ -424,8 +446,8 @@ def render_iso717_report(
     # Boxed single-number result, optional verdict row, footer.
     flow.append(result_box(statement, styles, accent, _extended_terms(result)))
     if metadata is not None and metadata.requirement is not None:
-        text, passed = _verdict(result, metadata.requirement)
-        flow.extend(verdict_flow(text, passed, styles))
-    flow.extend(footer_flow(metadata))
+        text, passed = _verdict(result, metadata.requirement, language)
+        flow.extend(verdict_flow(text, passed, styles, language))
+    flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)

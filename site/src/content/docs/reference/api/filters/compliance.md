@@ -191,6 +191,7 @@ FilterComplianceResult.report(
     metadata: ReportMetadata | None = None,
     engine: str = 'reportlab',
     verbose: bool = False,
+    language: str = 'en',
 ) -> str
 ```
 
@@ -210,6 +211,7 @@ class-compliance result, an optional verdict row against a supplied
 | `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). A supplied `required_class` drives the verdict row. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform signature; it has no effect on the single-layout filter-compliance fiche. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
 
 **Returns:** The written `path` as a `str`.
 

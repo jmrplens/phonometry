@@ -556,6 +556,7 @@ class ProgramLoudnessResult:
         metadata: "ReportMetadata | None" = None,
         engine: str = "reportlab",
         verbose: bool = False,
+        language: str = "en",
     ) -> str:
         """Render an EBU R 128 programme-loudness compliance fiche to a PDF.
 
@@ -576,11 +577,16 @@ class ProgramLoudnessResult:
         :param engine: Rendering back end; only ``"reportlab"`` is supported.
         :param verbose: Accepted for a uniform signature; it has no effect on
             the single-layout programme-loudness fiche.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``).
         """
+        from .._i18n import check_language
+
+        check_language(language)
         if engine != "reportlab":
             raise ValueError(
                 f"Unknown report engine {engine!r}; only 'reportlab' is supported."
@@ -588,7 +594,7 @@ class ProgramLoudnessResult:
         from .._report.broadcast import render_program_loudness_report
 
         return render_program_loudness_report(
-            self, path, metadata=metadata, verbose=verbose
+            self, path, metadata=metadata, verbose=verbose, language=language
         )
 
 

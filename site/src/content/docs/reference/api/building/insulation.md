@@ -523,6 +523,7 @@ ImpactRatingResult.report(
     metadata: ReportMetadata | None = None,
     engine: str = 'reportlab',
     verbose: bool = False,
+    language: str = 'en',
 ) -> str
 ```
 
@@ -542,6 +543,7 @@ an optional verdict row and a footer with the fixed disclaimer.
 | `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table uses the ISO 717 Annex C columns (frequency, measured value, shifted reference, unfavourable deviation) instead of the two-column `f \| value` table. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
 
 **Returns:** The written `path` as a `str`.
 
@@ -879,6 +881,7 @@ WeightedRatingResult.report(
     metadata: ReportMetadata | None = None,
     engine: str = 'reportlab',
     verbose: bool = False,
+    language: str = 'en',
 ) -> str
 ```
 
@@ -898,6 +901,7 @@ row and a footer with the fixed disclaimer.
 | `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table uses the ISO 717 Annex C columns (frequency, measured value, shifted reference, unfavourable deviation) instead of the two-column `f \| value` table. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
 
 **Returns:** The written `path` as a `str`.
 

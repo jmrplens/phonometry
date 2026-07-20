@@ -191,3 +191,35 @@ def test_report_escapes_xml_specials_in_metadata(tmp_path) -> None:
     out = tmp_path / "xml.pdf"
     result.report(str(out), metadata=md)
     _assert_one_page(str(out))
+
+
+def _extract_text(path: str) -> str:
+    """The concatenated text of every page (for language assertions)."""
+    from pypdf import PdfReader
+
+    return "\n".join(page.extract_text() for page in PdfReader(path).pages)
+
+
+def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
+    """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    import re
+
+    result = weighted_absorption_from_third_octave(_THIRD_OCTAVE_ALPHA_S)
+    out = tmp_path / "absorption_es.pdf"
+    result.report(
+        str(out),
+        metadata=ReportMetadata(requirement=0.55, temperature=21.4),
+        language="es",
+    )
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "Índice de absorción acústica" in text
+    assert "CUMPLE" in text
+    assert re.search(r"\d,\d", text) is not None  # comma decimal separator
+
+
+def test_unknown_language_rejected(tmp_path) -> None:
+    """An unknown fiche language raises ``ValueError``."""
+    result = weighted_absorption_from_third_octave(_THIRD_OCTAVE_ALPHA_S)
+    with pytest.raises(ValueError, match="language"):
+        result.report(str(tmp_path / "bad.pdf"), language="xx")

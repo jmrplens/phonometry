@@ -37,6 +37,7 @@ from __future__ import annotations
 import html
 from typing import TYPE_CHECKING, Any, List, Tuple
 
+from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
     _MUTED_HEX,
@@ -56,22 +57,10 @@ from .metadata import ReportMetadata
 if TYPE_CHECKING:
     from ..aircraft.aircraft_noise import EPNLResult
 
-#: Static reference atmosphere of ICAO Annex 16 Vol. I Appendix 2 (the
-#: conditions the certification EPNL is referred to). This is an informational
-#: strip, never a claim of measured atmospherics.
-_REFERENCE_CONDITIONS = (
-    "Reference conditions: 25 &#176;C, 70% relative humidity, sea level, zero "
-    "wind, ISA (ICAO Annex 16 Vol I App. 2)."
-)
 
-#: Footer note distinguishing the computational result from a State certificate.
-_CERTIFICATE_DISCLAIMER = (
-    "This is a computational EPNL result per ICAO Annex 16 Vol I Appendix 2; it "
-    "is not an official State noise certificate (e.g. EASA Form 45)."
-)
-
-
-def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
+def _metadata_pairs(
+    metadata: ReportMetadata, language: str = "en"
+) -> List[Tuple[str, str]]:
     """Build the ordered (label, value) pairs of the certification header grid.
 
     Only fields that are set are returned. EPNL is an aircraft-flyover metric,
@@ -80,11 +69,11 @@ def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
     (aircraft, type-certificate holder, applicant, measurement point).
     """
     specs: List[Tuple[str, str | None]] = [
-        ("Aircraft", metadata.specimen),
-        ("Manufacturer / TC holder", metadata.manufacturer),
-        ("Applicant", metadata.client),
-        ("Measurement point", metadata.test_room),
-        ("Date of test", metadata.test_date),
+        (t("meta.aircraft", language), metadata.specimen),
+        (t("meta.manufacturer_tc", language), metadata.manufacturer),
+        (t("meta.applicant", language), metadata.client),
+        (t("meta.measurement_point", language), metadata.test_room),
+        (t("meta.date_of_test", language), metadata.test_date),
     ]
     return [
         (label, html.escape(str(value)))
@@ -93,7 +82,9 @@ def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
     ]
 
 
-def _metric_rows(result: "EPNLResult") -> List[Tuple[str, str]]:
+def _metric_rows(
+    result: "EPNLResult", language: str = "en"
+) -> List[Tuple[str, str]]:
     """The intermediate EPNL quantities shown in the left-hand metrics table.
 
     These are informational: PNLTM, the duration correction ``D``, the 10
@@ -102,23 +93,35 @@ def _metric_rows(result: "EPNLResult") -> List[Tuple[str, str]]:
     """
     k_first, k_last = result.band_limits
     rows = [
-        ("PNLTM [PNdB]", fmt_num(result.pnltm)),
-        ("Duration correction D [dB]", fmt_num(result.duration_correction)),
-        ("10 dB-down window (records)", f"{k_first + 1}&#8211;{k_last + 1}"),
+        (t("metric.pnltm", language), fmt_num(result.pnltm, language)),
+        (
+            t("metric.duration_correction", language),
+            fmt_num(result.duration_correction, language),
+        ),
+        (
+            t("metric.window_10db_down", language),
+            f"{k_first + 1}&#8211;{k_last + 1}",
+        ),
     ]
     if abs(result.bandsharing_adjustment) > 1e-9:
         rows.append(
-            ("Bandsharing adjustment [dB]", fmt_num(result.bandsharing_adjustment))
+            (
+                t("metric.bandsharing", language),
+                fmt_num(result.bandsharing_adjustment, language),
+            )
         )
     return rows
 
 
-def _statement(result: "EPNLResult") -> str:
+def _statement(result: "EPNLResult", language: str = "en") -> str:
     """The boxed single-number statement ``EPNL = X EPNdB``."""
-    return f"EPNL = <b>{result.epnl:.1f} EPNdB</b>"
+    epnl = format_number(result.epnl, language, decimals=1)
+    return f"EPNL = <b>{epnl} EPNdB</b>"
 
 
-def _verdict_rows(result: "EPNLResult", limit: float) -> List[Tuple[str, str, str, str]]:
+def _verdict_rows(
+    result: "EPNLResult", limit: float, language: str = "en"
+) -> List[Tuple[str, str, str, str]]:
     """The Level | Limit | Margin compliance row for a supplied EPNL limit.
 
     The EPNL passes at or below the certification limit; the limit cell also
@@ -128,9 +131,12 @@ def _verdict_rows(result: "EPNLResult", limit: float) -> List[Tuple[str, str, st
     status = "pass" if float(result.epnl) <= limit else "fail"
     return [
         (
-            "EPNL [EPNdB]",
-            f"{result.epnl:.1f}",
-            f"&#8804; {fmt_num(limit)} (margin {margin:+.1f})",
+            t("metric.epnl", language),
+            format_number(result.epnl, language, decimals=1),
+            t("epnl.limit_cell", language).format(
+                limit=fmt_num(limit, language),
+                margin=decimal_comma(f"{margin:+.1f}", language),
+            ),
             status,
         )
     ]
@@ -142,6 +148,7 @@ def render_annex16_epnl_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
+    language: str = "en",
 ) -> str:
     """Render an ICAO Annex 16 EPNL certification fiche to a PDF at ``path``.
 
@@ -171,21 +178,17 @@ def render_annex16_epnl_report(
     accent = colors.HexColor(_ACCENT_HEX)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    title = "Aircraft noise certification - EPNL result"
+    title = t("title.epnl", language)
 
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
     )
     if measurement_standard:
-        basis = (
-            f"{html.escape(measurement_standard)}. Effective Perceived Noise "
-            "Level per ICAO Annex 16, Volume I, Appendix 2."
+        basis = t("basis.epnl.with_standard", language).format(
+            standard=html.escape(measurement_standard)
         )
     else:
-        basis = (
-            "Effective Perceived Noise Level (EPNL) per ICAO Annex 16, "
-            "Volume I, Appendix 2."
-        )
+        basis = t("basis.epnl.plain", language)
 
     muted_strip_style = ParagraphStyle(
         "fiche_reference_conditions", parent=getSampleStyleSheet()["Normal"],
@@ -199,25 +202,33 @@ def render_annex16_epnl_report(
     ]
 
     if metadata is not None and not metadata.is_empty():
-        header_pairs = _metadata_pairs(metadata)
+        header_pairs = _metadata_pairs(metadata, language)
         if header_pairs:
             flow.append(Spacer(1, 3))
             flow.append(grid_table(header_pairs))
-    flow.append(Paragraph(_REFERENCE_CONDITIONS, muted_strip_style))
+    flow.append(
+        Paragraph(t("epnl.reference_conditions", language), muted_strip_style)
+    )
     flow.append(Spacer(1, 8))
 
-    flow.append(Paragraph("Intermediate quantities", caption_style))
-    flow.append(metrics_table(_metric_rows(result), col_widths=[48 * mm, 26 * mm]))
+    flow.append(
+        Paragraph(t("caption.intermediate_quantities", language), caption_style)
+    )
+    flow.append(
+        metrics_table(
+            _metric_rows(result, language), col_widths=[48 * mm, 26 * mm]
+        )
+    )
     flow.append(Spacer(1, 8))
 
     # Full-width, landscape PNLT-vs-time plot (self-scaling axis).
     plot_drawing = render_figure_drawing(
-        result.plot, 174 * mm, y_top=None, figsize=(9.2, 4.2)
+        result.plot, 174 * mm, y_top=None, figsize=(9.2, 4.2), language=language
     )
     flow.append(plot_drawing)
     flow.append(Spacer(1, 8))
 
-    flow.append(result_box(_statement(result), styles, accent))
+    flow.append(result_box(_statement(result, language), styles, accent))
 
     limit = (
         float(metadata.requirement)
@@ -226,16 +237,24 @@ def render_annex16_epnl_report(
     )
     if limit is not None:
         flow.append(Spacer(1, 6))
-        flow.append(Paragraph("Certification limit", caption_style))
-        flow.append(compliance_table(_verdict_rows(result, limit)))
+        flow.append(
+            Paragraph(t("caption.certification_limit", language), caption_style)
+        )
+        flow.append(
+            compliance_table(
+                _verdict_rows(result, limit, language), language=language
+            )
+        )
 
-    flow.extend(footer_flow(metadata))
+    flow.extend(footer_flow(metadata, language))
 
     disclaimer_style = ParagraphStyle(
         "fiche_certificate_disclaimer", parent=getSampleStyleSheet()["Normal"],
         fontSize=7.5, leading=10, textColor=colors.HexColor(_MUTED_HEX),
         spaceBefore=2,
     )
-    flow.append(Paragraph(_CERTIFICATE_DISCLAIMER, disclaimer_style))
+    flow.append(
+        Paragraph(t("epnl.certificate_disclaimer", language), disclaimer_style)
+    )
 
     return build_document(path, flow, title)

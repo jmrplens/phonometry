@@ -346,7 +346,10 @@ Rendering needs reportlab, kept out of the runtime dependencies as the optional
 `phonometry[report]` extra (`pip install phonometry[report]`); a missing
 reportlab raises a clear `ImportError` with the install command, and the plot
 still needs matplotlib (`phonometry[plot]`). Only `engine="reportlab"` is
-supported; any other engine raises `ValueError`.
+supported; any other engine raises `ValueError`. The fiche renders in English by
+default; pass `language="es"` for a Spanish fiche (translated fixed strings and
+a comma decimal separator), e.g.
+`building.weighted_rating(R).report("Rw_fiche_es.pdf", language="es")`.
 
 ```python
 from phonometry import building, ReportMetadata

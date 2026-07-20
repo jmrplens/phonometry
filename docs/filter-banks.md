@@ -593,7 +593,9 @@ worst-margin band's measured relative attenuation overlaid on the class
 corridor, and the boxed overall class-compliance result. Pass a `required_class`
 on the `ReportMetadata` to add a PASS/FAIL verdict row (a bank "meets class N"
 when its achieved class is at least as strict, i.e. a class index of N or
-lower).
+lower). The fiche renders in English by default; pass `language="es"` for a
+Spanish fiche (translated fixed strings and a comma decimal separator), e.g.
+`result.report("iec61260_es.pdf", language="es")`.
 
 ```python
 from phonometry import OctaveFilterBank, ReportMetadata, filter_class_compliance

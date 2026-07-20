@@ -130,6 +130,7 @@ class ZwickerLoudness:
         metadata: "ReportMetadata | None" = None,
         engine: str = "reportlab",
         verbose: bool = False,
+        language: str = "en",
     ) -> str:
         """Render an ISO 532-1 Zwicker loudness fiche to a PDF.
 
@@ -148,11 +149,16 @@ class ZwickerLoudness:
         :param engine: Rendering back end; only ``"reportlab"`` is supported.
         :param verbose: Accepted for a uniform signature; it has no effect on
             the single-layout loudness fiche.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``).
         """
+        from .._i18n import check_language
+
+        check_language(language)
         if engine != "reportlab":
             raise ValueError(
                 f"Unknown report engine {engine!r}; only 'reportlab' is supported."
@@ -160,7 +166,7 @@ class ZwickerLoudness:
         from .._report.iso532 import render_iso532_report
 
         return render_iso532_report(
-            self, path, metadata=metadata, verbose=verbose
+            self, path, metadata=metadata, verbose=verbose, language=language
         )
 
 

@@ -46,9 +46,11 @@ from .._internal.types import as_float_or_array
 from .._internal.warnings import PhonometryWarning, _warn_renamed
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
 
-    from .declaration import NoiseEmissionDeclaration
+    from .declaration import DeclarationForm, NoiseEmissionDeclaration
 
 _S0 = 1.0  #: Reference area, in square metres (ISO 3744, 8.2.5).
 
@@ -193,8 +195,8 @@ class SoundPowerResult:
         machine: str | None = None,
         operating_conditions: str | None = None,
         noise_test_code: str | None = None,
-        basic_standards: str | tuple[str, ...] = (),
-        form: str = "dual-number",
+        basic_standards: "str | Sequence[str]" = (),
+        form: "DeclarationForm" = "dual-number",
     ) -> "NoiseEmissionDeclaration":
         """Build an ISO 4871:1996 noise-emission declaration from this result.
 
@@ -248,7 +250,7 @@ class SoundPowerResult:
             operating_conditions=operating_conditions,
             noise_test_code=noise_test_code,
             basic_standards=basic_standards,
-            form=form,  # type: ignore[arg-type]
+            form=form,
         )
 
 

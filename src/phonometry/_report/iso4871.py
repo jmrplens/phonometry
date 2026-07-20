@@ -104,7 +104,11 @@ def _footnote(declaration: "NoiseEmissionDeclaration", language: str = "en") -> 
 
 def _fmt_level(value: float, language: str = "en") -> str:
     """A declared level, rounded to the nearest decibel (ISO 4871 3.15/3.16)."""
-    return format_number(round(value), language, decimals=0)
+    # Reuse the model's halves-up rounding so the printed value matches the
+    # declared quantity exactly (Python's round() is round-half-to-even).
+    from ..emission.declaration import _round_db
+
+    return format_number(_round_db(value), language, decimals=0)
 
 
 def _dual_rows(

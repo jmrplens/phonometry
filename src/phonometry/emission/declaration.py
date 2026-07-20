@@ -150,9 +150,8 @@ class OperatingModeDeclaration:
 
         ``None`` when no emission sound pressure level is declared for the mode.
         """
-        if self.emission_pressure_level is None:
+        if self.emission_pressure_level is None or self.emission_pressure_uncertainty is None:
             return None
-        assert self.emission_pressure_uncertainty is not None  # pairing enforced
         return _round_db(self.emission_pressure_level) + _round_db(
             self.emission_pressure_uncertainty
         )

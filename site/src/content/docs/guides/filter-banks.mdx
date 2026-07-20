@@ -15,7 +15,7 @@ references:
     title: "Electroacoustics — Octave-band and fractional-octave-band filters"
     designation: "IEC 61260:1995"
     url: "https://webstore.iec.ch/en/publication/5065"
-    note: "The withdrawn first edition whose Table 1 supplies the stricter class 0 mask offered by edition=\"1995\", and the band-edge convention on which every bank places its −3 dB points."
+    note: "The withdrawn first edition whose Table 1 supplies the stricter class 0 mask offered by edition='1995', and the band-edge convention on which every bank places its −3 dB points."
   - type: standard
     organization: "American National Standards Institute"
     year: 2004
@@ -48,6 +48,7 @@ references:
 ---
 
 import ThemeImage from '../../../components/ThemeImage.astro';
+import ReportPreview from '../../../components/ReportPreview.astro';
 
 phonometry supports several filter types, each with its own transfer function
 characteristic. All banks place their **−3 dB points on the ANSI S1.11 band
@@ -630,6 +631,66 @@ deliberate opt-ins whose purpose (steeper roll-off, linear phase) works against
 the class mask. Away from these settings (very high `fraction` or near-Nyquist
 bands), always re-run `verify_filter_class` to confirm the class you need, and
 raise the order if a band needs more margin.
+
+### IEC 61260-1 filter compliance report (`.report()`)
+
+`filter_class_compliance(bank)` wraps the same verification as a result object
+that exposes `.plot()` and `.report()`, so a type-test verdict can be rendered
+as a one-page accredited fiche. The fiche lists every band's achieved class and
+its binding margin, overlays the worst-margin band's measured relative
+attenuation on the class corridor, and boxes the overall class-compliance
+result. Pass a `required_class` on the `ReportMetadata` to add a PASS/FAIL
+verdict row (a bank "meets class N" when its achieved class is at least as
+strict, i.e. a class index of N or lower).
+
+```python
+from phonometry import (
+    OctaveFilterBank,
+    ReportMetadata,
+    filter_class_compliance,
+)
+
+bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+result = filter_class_compliance(bank)   # overall_class == 1
+
+result.report(
+    "iec61260.pdf",
+    metadata=ReportMetadata(
+        specimen="1/1-octave filter bank",
+        measurement_standard="IEC 61260-1:2014",
+        required_class=1,                # class 1 (or stricter) required
+    ),
+)                                        # -> Class 1 - COMPLIES, PASS
+```
+
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
+
+<ReportPreview
+	name="iec61260_filter_example"
+	title="IEC 61260-1 filter class compliance example report (PDF)"
+	description="One-page filter-class-compliance fiche: a metadata header, a per-band classification table listing each octave band's achieved class and binding margin, the worst-margin band's measured relative attenuation overlaid on the green class-1 acceptance corridor, the boxed Class 1 - COMPLIES (margin +0.40 dB) result and a PASS verdict against the required class 1."
+	caption="Filter class compliance fiche (FilterComplianceResult.report), achieved class with the binding margin in dB and the measured relative attenuation over the Table 1 corridor."
+/>
+
+Passing `edition="1995"` verifies against the older IEC 61260:1995 /
+ANSI S1.11-2004 mask, which keeps the stricter **class 0** that the 2014 edition
+dropped, so a modest order-6 bank can be certified to class 0:
+
+```python
+bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
+result = filter_class_compliance(bank, edition="1995")   # overall_class == 0
+result.report("iec61260_1995.pdf",
+              metadata=ReportMetadata(measurement_standard="IEC 61260:1995",
+                                      required_class=0))   # -> Class 0 - COMPLIES
+```
+
+<ReportPreview
+	name="iec61260_filter_1995_example"
+	title="IEC 61260:1995 class-0 filter compliance example report (PDF)"
+	description="One-page filter-class-compliance fiche under the 1995 edition: a per-band classification table showing every octave band achieving class 0, the measured relative attenuation overlaid on the green class-0 acceptance corridor, the boxed Class 0 - COMPLIES (margin +0.15 dB) result and a PASS verdict against the required class 0."
+	caption="Class 0 is retained by the IEC 61260:1995 / ANSI S1.11-2004 edition (edition='1995'); the 2014 edition keeps only classes 1 and 2."
+/>
 
 ## 7. Signal Decomposition and Stability
 

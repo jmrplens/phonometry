@@ -79,7 +79,7 @@ def test_class1_bank_reports_complies(tmp_path) -> None:
 
 def test_1995_edition_reports_class0(tmp_path) -> None:
     """The 1995 edition keeps class 0; a high-order bank renders a Class 0 fiche."""
-    bank = OctaveFilterBank(fs=48000, fraction=1, order=8, limits=[250, 4000])
+    bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
     result = filter_class_compliance(bank, edition="1995")
     assert result.edition == "1995"
     assert result.overall_class == 0
@@ -138,3 +138,20 @@ def test_non_compliant_bank_renders(tmp_path) -> None:
     out = tmp_path / "noncompliant.pdf"
     result.report(str(out))
     _assert_one_page(str(out))
+
+
+def test_empty_bands_result_is_graceful() -> None:
+    """A zero-band result reports no classes and fails clearly, not with IndexError."""
+    import numpy as np
+    from phonometry.metrology.compliance import FilterComplianceResult
+
+    empty = FilterComplianceResult(
+        overall_class=None, bands=(), fraction=1, edition="2014",
+        sos=(), band_frequencies=np.asarray([], dtype=float), factors=(),
+        fs=48000.0, num_points=2048,
+    )
+    assert empty.available_classes() == []
+    with pytest.raises(ValueError, match="no bands"):
+        empty.reference_class()
+    with pytest.raises(ValueError, match="no bands"):
+        empty.report("/dev/null")

@@ -358,8 +358,11 @@ class FilterComplianceResult:
 
         Reads the ``margin_class<n>_db`` keys of a band verdict, so it reflects
         the edition (the 1995 edition adds class 0; the 2014 edition keeps only
-        classes 1 and 2).
+        classes 1 and 2). An empty result (a bank with no bands in range)
+        carries no verdicts, so this returns an empty list.
         """
+        if not self.bands:
+            return []
         prefix, suffix = "margin_class", "_db"
         return sorted(
             int(key[len(prefix):-len(suffix)])
@@ -372,10 +375,19 @@ class FilterComplianceResult:
 
         The achieved overall class when the bank complies, else the loosest
         class of the edition (the one it comes closest to meeting).
+
+        :raises ValueError: If the result carries no bands, so there is no
+            reference class to report.
         """
         if self.overall_class is not None:
             return self.overall_class
-        return max(self.available_classes())
+        classes = self.available_classes()
+        if not classes:
+            raise ValueError(
+                "This filter-compliance result has no bands, so it has no "
+                "reference class; check the bank's frequency limits."
+            )
+        return max(classes)
 
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
         """Plot the worst-margin band against its class-limit corridor.

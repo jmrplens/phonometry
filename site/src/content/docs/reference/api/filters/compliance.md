@@ -148,7 +148,8 @@ The performance classes carried by the per-band verdict dictionaries.
 
 Reads the `margin_class<n>_db` keys of a band verdict, so it reflects
 the edition (the 1995 edition adds class 0; the 2014 edition keeps only
-classes 1 and 2).
+classes 1 and 2). An empty result (a bank with no bands in range)
+carries no verdicts, so this returns an empty list.
 
 ### FilterComplianceResult.plot()
 
@@ -174,6 +175,12 @@ The class whose corridor the fiche/plot overlays.
 
 The achieved overall class when the bank complies, else the loosest
 class of the edition (the one it comes closest to meeting).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the result carries no bands, so there is no reference class to report. |
 
 ### FilterComplianceResult.report()
 

@@ -616,7 +616,7 @@ ANSI S1.11-2004 mask, which keeps the stricter **class 0** that the 2014 edition
 dropped; a higher-order bank can then be certified to class 0:
 
 ```python
-bank = OctaveFilterBank(fs=48000, fraction=1, order=8, limits=[250, 4000])
+bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
 result = filter_class_compliance(bank, edition="1995")   # overall_class == 0
 result.report(
     "iec61260_1995.pdf",

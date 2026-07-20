@@ -260,13 +260,13 @@ def _filter_class_1995_example() -> Tuple[object, ReportMetadata, str]:
 
     IEC 61260-1:2014 dropped class 0; the older IEC 61260:1995 /
     ANSI S1.11-2004 retains it. Selecting ``edition="1995"`` verifies against
-    that mask, and a higher-order (order 8) octave bank clears the stricter
+    that mask, and the default (order 6) octave bank clears the stricter
     class 0, so the fiche boxes a Class 0 COMPLIES result.
     """
-    bank = ph.OctaveFilterBank(fs=48000, fraction=1, order=8, limits=[250, 4000])
+    bank = ph.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
     result = ph.filter_class_compliance(bank, edition="1995")
     metadata = ReportMetadata(
-        specimen="1/1-octave filter bank (high order)",
+        specimen="1/1-octave filter bank",
         client="Example client",
         manufacturer="Example instruments",
         test_room="Electroacoustics laboratory (example)",

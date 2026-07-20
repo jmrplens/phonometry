@@ -136,7 +136,8 @@ def plot_filter_class(
 
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("lw", 1.6)
-    ax.plot(omega[win], delta_a[win], label="Measured $\\Delta A$", **kwargs)
+    kwargs.setdefault("label", "Measured $\\Delta A$")
+    ax.plot(omega[win], delta_a[win], **kwargs)
 
     violated = (delta_a < lower - 1e-9) | (finite_upper & (delta_a > upper + 1e-9))
     viol_win = violated & win

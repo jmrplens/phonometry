@@ -675,10 +675,10 @@ repository; click the preview to open the PDF.
 
 Passing `edition="1995"` verifies against the older IEC 61260:1995 /
 ANSI S1.11-2004 mask, which keeps the stricter **class 0** that the 2014 edition
-dropped, so a higher-order bank can be certified to class 0:
+dropped, so a modest order-6 bank can be certified to class 0:
 
 ```python
-bank = OctaveFilterBank(fs=48000, fraction=1, order=8, limits=[250, 4000])
+bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
 result = filter_class_compliance(bank, edition="1995")   # overall_class == 0
 result.report("iec61260_1995.pdf",
               metadata=ReportMetadata(measurement_standard="IEC 61260:1995",

@@ -47,9 +47,14 @@ def plot_epnl(result: "EPNLResult", ax: Axes | None = None, **kwargs: Any) -> Ax
     ax = ax if ax is not None else _new_axes()
     t = np.asarray(result.times, dtype=np.float64)
     kf, kl = result.band_limits
+    # Draw the shaded window first and below the curves (zorder=0), and use a
+    # pale fill colour directly rather than a low alpha: the PDF vector backend
+    # (svglib) does not preserve alpha, so a translucent fill would render solid
+    # and hide the PNL/PNLT traces. A light face keeps both curves readable.
+    ax.axvspan(t[kf], t[kl], facecolor="#d7eccb", edgecolor="none", zorder=0,
+               label="10 dB-down window")
     ax.plot(t, np.asarray(result.pnl), color=_C_MUTED, lw=1.0, ls="--", label="PNL")
     ax.plot(t, np.asarray(result.pnlt), **{"color": _C_PRIMARY, "lw": 1.4, "label": "PNLT", **kwargs})
-    ax.axvspan(t[kf], t[kl], color=_C_TERTIARY, alpha=0.15, label="10 dB-down window")
     km = int(np.argmax(np.asarray(result.pnlt)))
     ax.plot([t[km]], [result.pnltm], "o", color=_C_REFERENCE,
             label=f"PNLTM = {result.pnltm:.1f} PNdB")

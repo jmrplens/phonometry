@@ -1,0 +1,252 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Tests for the ISO 4871:1996 noise-emission declaration and its ``.report()``
+fiche (declaration model + PDF rendering).
+
+The declaration model is checked against ISO 4871's own definitions and Annex B
+example: the declared single-number value is ``L_WAd = L_WA + K_WA`` (clause
+3.15), the dual/single forms are the same declaration, and verification passes
+or fails at the clause 6.2 boundary ``L_1 <= L_WAd``. The rendering itself is a
+feature, so those tests assert only structural facts: a valid one-page PDF,
+translated Spanish output, and rejected engines/languages.
+"""
+
+from __future__ import annotations
+
+import math
+import os
+import pickle
+
+import numpy as np
+import pytest
+
+from phonometry import (
+    NoiseEmissionDeclaration,
+    OperatingModeDeclaration,
+    ReportMetadata,
+    sound_power_pressure,
+)
+
+_PDF_MAGIC = b"%PDF"
+
+
+def _annex_b_modes() -> tuple[OperatingModeDeclaration, OperatingModeDeclaration]:
+    """The ISO 4871:1996 Annex B.2 dual-number example (Type 990, Model 11-TC)."""
+    mode1 = OperatingModeDeclaration(
+        "Operating mode 1", 88.0, 2.0,
+        emission_pressure_level=78.0, emission_pressure_uncertainty=2.0,
+    )
+    mode2 = OperatingModeDeclaration(
+        "Operating mode 2", 95.0, 2.0,
+        emission_pressure_level=86.0, emission_pressure_uncertainty=2.0,
+    )
+    return mode1, mode2
+
+
+def _annex_b_declaration(**kwargs) -> NoiseEmissionDeclaration:
+    return NoiseEmissionDeclaration(
+        _annex_b_modes(),
+        machine="Type 990, Model 11-TC",
+        operating_conditions="50 Hz, 230 V, rated load",
+        basic_standards="ISO 3744",
+        **kwargs,
+    )
+
+
+def _assert_one_page(path: str) -> None:
+    from pypdf import PdfReader
+
+    with open(path, "rb") as handle:
+        assert handle.read(4) == _PDF_MAGIC
+    assert os.path.getsize(path) > 0
+    assert len(PdfReader(path).pages) == 1
+
+
+def _extract_text(path: str) -> str:
+    from pypdf import PdfReader
+
+    return "\n".join(page.extract_text() for page in PdfReader(path).pages)
+
+
+# --- ISO 4871 definitions (clause 3.15/3.16) against Annex B -----------------
+
+
+def test_declared_value_is_measured_plus_uncertainty() -> None:
+    """L_WAd = L_WA + K_WA rounded to the nearest decibel (clause 3.15/3.16).
+
+    Annex B.2 (L_WA = 88, K_WA = 2) gives the Annex B.1 single-number L_WAd = 90;
+    the second mode gives 97. The emission pressure levels give 80 and 88.
+    """
+    mode1, mode2 = _annex_b_modes()
+    assert mode1.declared_sound_power_level == 90
+    assert mode2.declared_sound_power_level == 97
+    assert mode1.declared_emission_pressure_level == 80
+    assert mode2.declared_emission_pressure_level == 88
+
+
+def test_declared_value_rounds_to_nearest_decibel() -> None:
+    """A non-integer measurement + uncertainty is rounded to the nearest dB."""
+    mode = OperatingModeDeclaration("m", 87.6, 2.4)
+    # 88 (rounded L) + 2 (rounded K) = 90.
+    assert mode.declared_sound_power_level == 90
+
+
+def test_verification_passes_and_fails_at_the_clause_6_2_boundary() -> None:
+    """Clause 6.2: verified iff L_1 <= L_WAd (boundary L_1 == L_WAd passes)."""
+    at_boundary = OperatingModeDeclaration("m", 88.0, 2.0, verification_level=90.0)
+    just_over = OperatingModeDeclaration("m", 88.0, 2.0, verification_level=91.0)
+    under = OperatingModeDeclaration("m", 88.0, 2.0, verification_level=87.0)
+    assert at_boundary.verified is True
+    assert just_over.verified is False
+    assert under.verified is True
+
+
+def test_no_verification_measurement_yields_none() -> None:
+    """Without a verification measurement the verdict is undefined (None)."""
+    mode1, _ = _annex_b_modes()
+    assert mode1.verified is None
+
+
+# --- model validation --------------------------------------------------------
+
+
+def test_emission_pressure_pair_must_be_given_together() -> None:
+    """A lone emission-pressure level (no uncertainty) is rejected."""
+    with pytest.raises(ValueError, match="given together"):
+        OperatingModeDeclaration("m", 88.0, 2.0, emission_pressure_level=78.0)
+
+
+def test_negative_uncertainty_is_rejected() -> None:
+    """The uncertainty K must be finite and non-negative."""
+    with pytest.raises(ValueError, match="non-negative"):
+        OperatingModeDeclaration("m", 88.0, -1.0)
+
+
+def test_non_finite_level_is_rejected() -> None:
+    """A non-finite sound power level is rejected."""
+    with pytest.raises(ValueError, match="finite"):
+        OperatingModeDeclaration("m", math.nan, 2.0)
+
+
+def test_declaration_requires_at_least_one_mode() -> None:
+    """A declaration with no operating mode is rejected."""
+    with pytest.raises(ValueError, match="at least one operating mode"):
+        NoiseEmissionDeclaration(())
+
+
+def test_unknown_form_is_rejected() -> None:
+    """An unknown declaration form is rejected."""
+    with pytest.raises(ValueError, match="dual-number"):
+        NoiseEmissionDeclaration(_annex_b_modes(), form="triple")  # type: ignore[arg-type]
+
+
+def test_basic_standards_string_is_wrapped() -> None:
+    """A single basic-standard string is stored as a one-tuple."""
+    decl = NoiseEmissionDeclaration(_annex_b_modes(), basic_standards="ISO 3744")
+    assert decl.basic_standards == ("ISO 3744",)
+
+
+def test_declaration_is_picklable() -> None:
+    """The frozen declaration round-trips through pickle."""
+    decl = _annex_b_declaration()
+    assert pickle.loads(pickle.dumps(decl)).modes[0].declared_sound_power_level == 90
+
+
+# --- SoundPowerResult.declare bridge ----------------------------------------
+
+
+def test_declare_from_sound_power_result() -> None:
+    """SoundPowerResult.declare wraps LWA as L_WA with the result's uncertainty."""
+    # Monopole hemisphere at r = 1 m: Lp = LW - 10 lg(2 pi r^2); recover LW.
+    r = 1.0
+    lw = 90.0
+    lp = lw - 10.0 * math.log10(2.0 * math.pi * r**2)
+    result = sound_power_pressure(np.full((10, 1), lp), "hemisphere", radius=r)
+    decl = result.declare(uncertainty=2.0, machine="Pump X", basic_standards="ISO 3744")
+    mode = decl.modes[0]
+    assert mode.sound_power_level == pytest.approx(lw, abs=1e-6)
+    assert mode.sound_power_uncertainty == 2.0
+    assert mode.declared_sound_power_level == 92  # 90 + 2
+    # The default K is the result's own expanded uncertainty.
+    assert result.declare().modes[0].sound_power_uncertainty == pytest.approx(
+        result.uncertainty
+    )
+
+
+def test_declare_requires_finite_lwa() -> None:
+    """declare() needs a finite A-weighted sound power level."""
+    # Several bands without frequencies leave LWA undefined (NaN).
+    result = sound_power_pressure(np.full((10, 3), 70.0), "hemisphere", radius=1.0)
+    assert not math.isfinite(result.sound_power_level_a)
+    with pytest.raises(ValueError, match="finite A-weighted"):
+        result.declare()
+
+
+# --- rendering ---------------------------------------------------------------
+
+
+def test_dual_number_report_renders_one_page(tmp_path) -> None:
+    """A dual-number declaration renders a valid one-page fiche."""
+    pytest.importorskip("reportlab")
+    decl = _annex_b_declaration(noise_test_code="ISO 3746 test code")
+    out = tmp_path / "iso4871.pdf"
+    returned = decl.report(str(out))
+    assert returned == str(out)
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "DECLARED DUAL-NUMBER" in text
+    assert "Operating mode 1" in text
+    assert "ISO 3744" in text
+
+
+def test_single_number_report_renders_one_page(tmp_path) -> None:
+    """A single-number declaration renders its L_WAd table."""
+    pytest.importorskip("reportlab")
+    decl = _annex_b_declaration(form="single-number")
+    out = tmp_path / "iso4871_single.pdf"
+    decl.report(str(out))
+    _assert_one_page(str(out))
+    assert "DECLARED SINGLE-NUMBER" in _extract_text(str(out))
+
+
+def test_verification_verdict_renders_both_ways(tmp_path) -> None:
+    """A passing and a failing verification both render in the verdict table."""
+    pytest.importorskip("reportlab")
+    mode1 = OperatingModeDeclaration("Operating mode 1", 88.0, 2.0, verification_level=89.0)
+    mode2 = OperatingModeDeclaration("Operating mode 2", 95.0, 2.0, verification_level=98.0)
+    decl = NoiseEmissionDeclaration((mode1, mode2), basic_standards="ISO 3744")
+    out = tmp_path / "iso4871_verify.pdf"
+    decl.report(str(out), metadata=ReportMetadata(report_id="PHN-4871"))
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "Verification" in text
+    assert "PASS" in text
+    assert "FAIL" in text
+
+
+def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
+    """language="es" renders a one-page Spanish fiche."""
+    pytest.importorskip("reportlab")
+    decl = _annex_b_declaration()
+    out = tmp_path / "iso4871_es.pdf"
+    decl.report(str(out), language="es")
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "Declaración de emisión sonora" in text
+    assert "DOBLE NÚMERO" in text
+
+
+def test_unknown_engine_rejected(tmp_path) -> None:
+    """An unknown rendering engine raises ValueError."""
+    pytest.importorskip("reportlab")
+    decl = _annex_b_declaration()
+    out = str(tmp_path / "x.pdf")
+    with pytest.raises(ValueError, match="engine"):
+        decl.report(out, engine="weasyprint")
+
+
+def test_unknown_language_rejected(tmp_path) -> None:
+    """An unknown fiche language raises ValueError."""
+    decl = _annex_b_declaration()
+    with pytest.raises(ValueError, match="language"):
+        decl.report(str(tmp_path / "bad.pdf"), language="xx")

@@ -1160,6 +1160,33 @@ def _chk_intensity_scan_lw() -> Outcome:
     return numeric(90.0, float(res.sound_power_level[0]), 1e-6, unit="dB", places=6)
 
 
+@register(
+    "Intensity & sound power",
+    "ISO 4871:1996 clause 3.15 / Annex B",
+    "Declared L_WAd = L_WA + K_WA (Annex B, L_WA=88, K_WA=2)",
+)
+def _chk_iso4871_declared_value() -> Outcome:
+    mode = ph.OperatingModeDeclaration("Operating mode 1", 88.0, 2.0)
+    return numeric(90.0, float(mode.declared_sound_power_level), 0.0, unit="dB", places=1)
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 4871:1996 clause 6.2",
+    "Single-machine verification boundary L_1 <= L_WAd",
+)
+def _chk_iso4871_verification() -> Outcome:
+    at_boundary = ph.OperatingModeDeclaration("m", 88.0, 2.0, verification_level=90.0)
+    just_over = ph.OperatingModeDeclaration("m", 88.0, 2.0, verification_level=91.0)
+    ok = at_boundary.verified is True and just_over.verified is False
+    return Outcome(
+        expected="L_1=90 verified, L_1=91 rejected (L_WAd=90)",
+        computed=f"90->{at_boundary.verified}, 91->{just_over.verified}",
+        delta="boundary L_1 = L_WAd",
+        passed=ok,
+    )
+
+
 def _reverb_bracket(
     t60: np.ndarray, volume: float, surface: float, freq: np.ndarray,
     theta: float, ps: float,

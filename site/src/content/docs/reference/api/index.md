@@ -176,6 +176,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`emission.sound_power_reverberation`](/phonometry/reference/api/power/sound-power-reverberation/) | Sound power level of a noise source measured in a reverberation test room: ISO 3741:2010 (precision method, accuracy grade 1). |
 | [`emission.intensity`](/phonometry/reference/api/power/intensity/) | Two-microphone (p-p) sound intensity per IEC 61043:1994 and the ISO 9614-1:1993 field indicators. |
 | [`emission.vibration_sound_power`](/phonometry/reference/api/power/vibration-sound-power/) | Airborne sound power from surface vibration (ISO/TS 7849-1/-2:2009). |
+| [`emission.declaration`](/phonometry/reference/api/power/declaration/) | ISO 4871:1996 declaration of noise emission values of machinery and equipment. |
 
 ## Electroacoustics
 

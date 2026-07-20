@@ -423,6 +423,13 @@ from .aircraft.airport_noise import (
     npd_level,
     start_of_roll_directivity,
 )
+from .aircraft.anp_fleet import (
+    AnpAircraft,
+    AnpDatabase,
+    AnpNpdCurves,
+    AnpProfile,
+    load_anp_database,
+)
 from .aircraft.rotorcraft_noise import (
     FlightPathKinematics,
     MeanGroundPlaneResult,
@@ -1107,6 +1114,11 @@ __all__ = [
     "noise_contour",
     "FlyoverResult",
     "NoiseContourResult",
+    "load_anp_database",
+    "AnpDatabase",
+    "AnpAircraft",
+    "AnpNpdCurves",
+    "AnpProfile",
     "RotorcraftHemisphere",
     "hemisphere_source_level",
     "spherical_spreading_adjustment",

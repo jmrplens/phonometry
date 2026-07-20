@@ -1,0 +1,156 @@
+ACFT_ID;Description;Engine Type;Number Of Engines;Weight Class;Owner Category;Max Gross Takeoff Weight (lb);Max Gross Landing Weight (lb);Max Landing Distance (ft);Max Sea Level Static Thrust (lb);Noise Chapter;NPD_ID;Power Parameter;Approach Spectral Class ID;Departure Spectral Class ID;Lateral Directivity Identifier
+1900D;Beech 1900D / PT6A67;Turboprop;2;Large;Commercial;16950;14940;1696;3367;1;PT6A67;CNT (lb);213;109;Prop
+707;Boeing 707-120 / JT3C;Jet;4;Heavy;Commercial;302400;188900;6682;10120;1;JT4A;CNT (lb);208;107;Wing
+707120;Boeing 707-120B / JT3D-3;Jet;4;Heavy;Commercial;302400;188900;6893;14850;1;JT3D;CNT (lb);208;107;Wing
+707320;Boeing 707-320B / JT3D-7;Jet;4;Heavy;Commercial;334000;247000;5622;19000;1;JT3D;CNT (lb);208;107;Wing
+707QN;Boeing 707-320B / JT3D-7QN;Jet;4;Heavy;Commercial;334000;247000;5622;19000;2;JT3DQ;CNT (lb);208;106;Wing
+717200;Boeing 717-200 / BR 715;Jet;2;Large;Commercial;121000;110000;4600;18000;3;BR715;CNT (lb);203;105;Fuselage
+720;Boeing 720 / JT3C;Jet;4;Large;Commercial;223500;155600;4871;10120;1;JT4A;CNT (lb);208;107;Wing
+720B;Boeing 720B / JT3D-3;Jet;4;Large;Commercial;234000;175000;5717;18000;1;JT3D;CNT (lb);208;107;Wing
+727100;Boeing 727-100 / JT8D-7;Jet;3;Large;Commercial;169500;142500;4867;14000;1;3JT8D;CNT (lb);201;101;Fuselage
+727200;Boeing 727-200 / JT8D-7;Jet;3;Large;Commercial;217600;163300;5571;11895;1;3JT8D;CNT (lb);201;101;Fuselage
+727D15;Boeing 727-200 / JT8D-15;Jet;3;Large;Commercial;208000;169000;4922;15500;1;3JT8D;CNT (lb);201;101;Fuselage
+727D17;Boeing 727-200 / JT8D-17;Jet;3;Large;Commercial;208000;169000;5444;16000;2;3JT8DQ;CNT (lb);201;101;Fuselage
+727EM1;FEDX 727-100 / JT8D-7;Jet;3;Large;Commercial;169500;142500;4867;14000;3;3JT8E7;CNT (lb);201;101;Fuselage
+727EM2;FEDX 727-200 / JT8D-15;Jet;3;Large;Commercial;208000;169000;4922;15500;3;3JT8E5;CNT (lb);201;101;Fuselage
+727Q15;Boeing 727-200 / JT8D-15QN;Jet;3;Large;Commercial;208000;169000;4922;15500;2;3JT8DQ;CNT (lb);201;101;Fuselage
+727Q7;Boeing 727-100 / JT8D-7QN;Jet;3;Large;Commercial;169500;142500;4867;14000;2;3JT8DQ;CNT (lb);201;101;Fuselage
+727Q9;Boeing 727-200 / JT8D-9;Jet;3;Large;Commercial;191000;160000;5444;14500;2;3JT8DQ;CNT (lb);201;101;Fuselage
+727QF;UPS 727-100 22C 25C;Jet;3;Large;Commercial;169000;142500;4448;15380;3;TAY651;CNT (lb);201;101;Fuselage
+737;Boeing 737 / JT8D-9;Jet;2;Large;Commercial;109000;98000;3900;14500;1;2JT8DW;CNT (lb);201;101;Wing
+737300;Boeing 737-300 / CFM56-3B-1;Jet;2;Large;Commercial;135000;114000;4580;20000;3;CFM563;CNT (lb);202;102;Wing
+7373B2;Boeing 737-300 / CFM56-3B-2;Jet;2;Large;Commercial;139500;114000;4580;22000;3;CFM563;CNT (lb);202;102;Wing
+737400;Boeing 737-400 / CFM56-3C-1;Jet;2;Large;Commercial;150000;124000;5062;23500;3;CFM563;CNT (lb);202;102;Wing
+737500;Boeing 737-500 / CFM56-3C-1;Jet;2;Large;Commercial;133500;111000;4551;20000;3;CFM563;CNT (lb);202;102;Wing
+737700;Boeing 737-700 / CFM56-7B24;Jet;2;Large;Commercial;154500;129200;4445;24000;3;CF567B;CNT (lb);206;104;Wing
+737800;Boeing 737-800 / CFM56-7B26;Jet;2;Large;Commercial;174200;146300;5435;26300;3;CF567B;CNT (lb);206;104;Wing
+7378MAX;Boeing 737 MAX 8 / CFM Leap1B-27;Jet;2;Large;Commercial;181200;152800;4965;26400;4;7378MAX;CNT (lb);216;103;Wing
+737D17;Boeing 737-200 / JT8D-17;Jet;2;Large;Commercial;124000;107000;4244;16000;2;2JT8QW;CNT (lb);201;101;Wing
+737N17;Boeing 737-200 / JT8D-17 Nordam B737 LGW Hushkit;Jet;2;Large;Commercial;124000;107000;4244;16000;3;2JT8DN;CNT (lb);202;104;Wing
+737N9;Boeing 737 / JT8D-9 Nordam B737 LGW Hushkit;Jet;2;Large;Commercial;109000;98000;3900;14500;3;2JT8DN;CNT (lb);202;104;Wing
+737QN;Boeing 737 / JT8D-9QN;Jet;2;Large;Commercial;109000;98000;3900;14500;2;2JT8QW;CNT (lb);201;101;Wing
+747100;Boeing 747-100 / JT9DBD;Jet;4;Heavy;Commercial;733000;516600;5727;33042;2;JT9DBD;CNT (lb);209;107;Wing
+74710Q;Boeing 747-100 / JT9D-7QN;Jet;4;Heavy;Commercial;733000;564000;6200;45500;3;JT9DFL;CNT (lb);207;107;Wing
+747200;Boeing 747-200 / JT9D-7;Jet;4;Heavy;Commercial;775000;564000;6200;45500;3;JT9DFL;CNT (lb);207;107;Wing
+74720A;Boeing 747-200 / JT9D-7A;Jet;4;Heavy;Commercial;785000;564000;6200;46300;3;JT9D7Q;CNT (lb);207;107;Wing
+74720B;Boeing 747-200 / JT9D-7Q;Jet;4;Heavy;Commercial;800000;630000;6200;53000;3;JT9D7Q;CNT (lb);207;107;Wing
+747400;Boeing 747-400 / PW4056;Jet;4;Heavy;Commercial;875000;652000;6989;56800;3;PW4056;CNT (lb);207;107;Wing
+7478;Boeing 747-8F / GEnx-2B67;Jet;4;Heavy;Commercial;987000;757000;7900;68000;4;GENX67;CNT (lb);205;107;Wing
+747SP;Boeing 747SP / JT9D-7;Jet;4;Heavy;Commercial;702000;475000;5911;45500;3;JT9DFL;CNT (lb);207;107;Wing
+757300;Boeing 757-300 / RB211-535E4B;Jet;2;Large;Commercial;275000;224000;5651;43100;3;RR535E;CNT (lb);203;103;Wing
+757PW;Boeing 757-200 / PW2037;Jet;2;Large;Commercial;255000;210000;4790;38300;3;PW2037;CNT (lb);203;103;Wing
+757RR;Boeing 757-200 / RB211-535E4;Jet;2;Large;Commercial;255000;210000;4640;40100;3;RR535E;CNT (lb);203;103;Wing
+767300;Boeing 767-300 / CF6-80A;Jet;2;Heavy;Commercial;407000;320000;4710;60000;3;2CF680;CNT (lb);203;103;Wing
+767400;Boeing 767-400ER / CF6-80C2B(F) ;Jet;2;Heavy;Commercial;450000;340000;6000;58685;3;CF680C;CNT (lb);205;102;Wing
+767CF6;Boeing 767-200 / CF6-80A;Jet;2;Heavy;Commercial;315500;270000;4700;48000;3;2CF680;CNT (lb);203;103;Wing
+767JT9;Boeing 767-200 / JT9D-7R4D;Jet;2;Heavy;Commercial;351000;270000;4744;48000;3;2CF680;CNT (lb);203;103;Wing
+777200;Boeing 777-200 / GE90-76B;Jet;2;Heavy;Commercial;656000;470000;4450;90000;3;GE90;CNT (lb);205;105;Wing
+777300;Boeing 777-300 / Trent 892;Jet;2;Heavy;Commercial;660000;524000;6012;77000;0;TRENT8;CNT (lb);203;105;Wing
+7773ER;Boeing 777-300ER / GE90-115B-EIS;Jet;2;Heavy;Commercial;775000;554000;5805;115000;3;GE9015;CNT (lb);204;107;Wing
+7878R;Boeing 787-8 / Trent 1000-C/01;Jet;2;Heavy;Commercial;502500;380000;5090;70000;4;T1KBFP;CNT (lb);205;103;Wing
+A300-622R;Airbus A300-622R / PW4158;Jet;2;Heavy;Commercial;378533;308647;4735;58000;3;PW4158;CNT (lb);202;103;Wing
+A300B4-203;Airbus A300B4-200 / CF6-50C2;Jet;2;Heavy;Commercial;364000;295000;5367;52500;3;2CF650;CNT (lb);203;103;Wing
+A310-304;Airbus A310-304 / GE CF6-80C2A2;Jet;2;Heavy;Commercial;346126;273373;4682;53500;3;A310;CNT (lb);204;103;Wing
+A319-131;Airbus A319-131 / V2522-A5 ;Jet;2;Large;Commercial;166449;137789;4364;22000;3;V2522A;CNT (lb);205;103;Wing
+A320-211;Airbus A320-211 / CFM56-5A1;Jet;2;Large;Commercial;169756;142198;4753;25000;3;CFM565;CNT (lb);202;103;Wing
+A320-232;Airbus A320-232 / V2527-A5 ;Jet;2;Large;Commercial;169756;145505;4917;26500;3;V2527A;CNT (lb);205;103;Wing
+A321-232;Airbus A321-232 / IAE V2530-A5;Jet;2;Large;Commercial;196211;166449;5587;30000;3;V2530;CNT (lb);202;103;Wing
+A330-301;Airbus A330-301 / GE CF6-80 E1A2;Jet;2;Heavy;Commercial;478400;383604;5966;67500;3;CF680E;CNT (lb);202;102;Wing
+A330-343;Airbus A330-343 / RR Trent 772B;Jet;2;Heavy;Commercial;513677;412264;5512;71100;3;TRENT7;CNT (lb);205;102;Wing
+A340-211;Airbus A340-211 / CFM56-5C2;Jet;4;Heavy;Commercial;573200;399036;5900;31200;3;CF565C;CNT (lb);206;107;Wing
+A340-642;Airbus A340-642 / RR Trent 556;Jet;4;Heavy;Commercial;804687;564383;6919;56000;4;TRENT5;CNT (lb);205;102;Wing
+A350-941;Airbus A350-941 / RR Trent XWB-84;Jet;2;Heavy;Commercial;610681;456356;6558;84200;4;A350-941;CNT (lb);239;139;Wing
+A380-841;Airbus A380-841 / RR Trent 970;Jet;4;Heavy;Commercial;1254430;862007;6752;70000;4;TRENT9;CNT (lb);205;105;Wing
+A380-861;Airbus A380-861 / EA GP7270;Jet;4;Heavy;Commercial;1254430;862007;6837;70000;4;GP7270;CNT (lb);206;105;Wing
+ATR72;Avions de Transport Regional ATR 72-212A / PW127F;Turboprop;2;Large;Commercial;50710;49270;3360;7587;4;ATR72;CNT (lb);240;140;Prop
+BAC111;BAC 111 / SPEY MK511-14;Jet;2;Large;Commercial;89600;82000;4449;11400;2;2JT8D;CNT (lb);201;101;Fuselage
+BAE146;BAe 146-200 / ALF502R-5;Jet;4;Large;Commercial;93000;81000;3770;6970;3;AL502R;CNT (lb);206;108;Wing
+BAE300;BAe 146-300 / ALF502R-5;Jet;4;Large;Commercial;97500;84500;3960;6970;3;AL502R;CNT (lb);206;108;Wing
+BEC58P;Raytheon BARON 58P / TS10-520-L;Piston;2;Small;General Aviation;6100;6100;2733;779;0;TSIO52;CNT (% of Max Static Thrust);215;109;Prop
+C130;Lockheed C-130 Hercules / T56-A-15;Turboprop;4;Large;Military;155000;135000;4850;8026;3;T56A15;CNT (% of Max Static Thrust);234;112;Prop
+C130E;Lockheed C-130E Hercules / T56-A-7;Turboprop;4;Large;Military;155000;130000;4670;7063;0;T56A7;CNT (% of Max Static Thrust);214;112;Prop
+CIT3;Cessna Citation III / TFE731-3-100S;Jet;2;Large;General Aviation;20000;17000;2770;3650;3;TF7313;CNT (lb);216;113;Fuselage
+CL600;Canadair CL-600 / ALF502L;Jet;2;Large;General Aviation;36000;33000;3300;7500;3;AL502L;CNT (lb);216;113;Fuselage
+CL601;Canadair CL-601 / CF34-3A;Jet;2;Large;General Aviation;43100;36000;3550;9220;3;CF34;CNT (lb);216;113;Fuselage
+CNA172;Cessna 172R / Lycoming IO-360-L2A;Piston;1;Small;General Aviation;2450;2450;1695;436;0;IO360L;CNT (% of Max Static Thrust);215;109;Prop
+CNA182;Cessna 182H / Continental O-470-R;Piston;1;Small;General Aviation;2800;2800;1544;965;2;O470R;CNT (lb);215;113;Prop
+CNA206;Cessna 206H / Lycoming IO-540-AC;Piston;1;Small;General Aviation;3600;3600;1880;798;0;IO540;Other (RPM);215;109;Prop
+CNA208;Cessna 208 / PT6A-114;Turboprop;1;Small;General Aviation;8750;8500;1740;2300;3;PT6A114;CNT (lb);210;109;Prop
+CNA20T;Cessna T206H / Lycoming TIO-540-AJ1A;Piston;1;Small;General Aviation;3600;3600;1880;825;0;TIO540;Other (RPM);215;109;Prop
+CNA441;Cessna CONQUEST II / TPE331-8;Turboprop;2;Small;Commercial;9900;9400;1939;1535;0;TPE331;CNT (% of Max Static Thrust);210;111;Prop
+CNA500;Cessna Citation II / JT15D-4;Jet;2;Large;General Aviation;14700;14000;3050;2500;3;JT15D1;CNT (lb);216;113;Fuselage
+CNA510;Cessna Mustang Model 510 / PW615F;Jet;2;Small;Commercial;8645;7200;3010;1466;0;PW615F;CNT (lb);203;113;Fuselage
+CNA525C;Cessna Citation CJ4 525C / FJ44-4A;Jet;2;Small;Commercial;16950;15500;3010;3600;4;FJ44-4;CNT (lb);235;136;Fuselage
+CNA55B;Cessna 550 Citation Bravo / PW530A;Jet;2;Large;General Aviation;14800;13500;3010;2863;0;PW530A;CNT (lb);203;113;Fuselage
+CNA560E;Cessna Citation Encore 560 / PW535A;Jet;2;Small;Commercial;16300;13680;3000;3313;3;2PW535;CNT (lb);238;138;Fuselage
+CNA560U;Cessna Citation Ultra 560 / JT15D-5D;Jet;2;Small;Commercial;16300;13680;2700;3029;3;2J155D;CNT (lb);237;113;Fuselage
+CNA560XL;Cessna Citation Excel 560 / PW545A;Jet;2;Small;Commercial;20000;16830;3000;3824;3;PW545A;CNT (lb);238;137;Fuselage
+CNA680;Cessna Citation Sovereign 680 / PW306C;Jet;2;Small;Commercial;30000;24390;3010;5749;3;PW306C;CNT (lb);236;136;Fuselage
+CNA750;Cessna Citation X / Rolls Royce Allison AE3007C;Jet;2;Large;General Aviation;35700;31800;3500;6407;3;AE300C;CNT (lb);202;105;Fuselage
+CONCRD;Concorde / OLY593;Jet;4;Heavy;Commercial;400000;245000;10600;38100;0;OLY593;CNT (lb);206;106;Wing
+CRJ9-ER;Bombardier CL-600-2D15 / CL-600-2D24 / CF34-8C5;Jet;2;Large;Commercial;82500;73500;5779;13525;3;CF348C5;CNT (lb);216;113;Fuselage
+CRJ9-LR;Bombardier CL-600-2D15 / CL-600-2D24 / CF34-8C5;Jet;2;Large;Commercial;84500;75100;5680;13525;3;CF348C5;CNT (lb);216;113;Fuselage
+CVR580;Convair CV-580 / ALL 501-D15;Turboprop;2;Large;Commercial;58000;52000;4256;8100;0;501D13;CNT (% of Max Static Thrust);214;112;Prop
+DC1010;McDonnell Douglas DC10-10 / CF6-6D;Jet;3;Heavy;Commercial;455000;363000;5820;40000;3;CF66D;CNT (lb);203;101;Wing
+DC1030;McDonnell Douglas DC10-30 / CF6-50C2;Jet;3;Heavy;Commercial;572000;403000;5418;53200;3;CF66D;CNT (lb);203;101;Wing
+DC1040;McDonnell Douglas DC10-40 / JT9D-20;Jet;3;Heavy;Commercial;555000;403000;6020;49400;3;CF66D;CNT (lb);203;101;Wing
+DC3;Douglas DC-3 / R1820-86;Piston;2;Large;Commercial;28000;24500;2222;3120;0;2R2800;CNT (% of Max Static Thrust);213;110;Prop
+DC6;Douglas DC-6 / R2800-CB17;Piston;4;Large;Commercial;106000;95000;3010;4180;0;4R2800;CNT (% of Max Static Thrust);213;110;Prop
+DC820;Douglas DC-8-20 / JT4A;Jet;4;Heavy;Commercial;317600;194400;6527;11850;1;JT4A;CNT (lb);208;107;Wing
+DC850;Douglas DC-8-50 / JT3D-3B;Jet;4;Heavy;Commercial;325000;240000;5400;18000;1;JT3D;CNT (lb);208;107;Wing
+DC860;Douglas DC-8-60 / JT3D-7;Jet;4;Heavy;Commercial;355000;275000;5310;19000;1;JT3D;CNT (lb);208;107;Wing
+DC870;Douglas DC-8-70 / CFM56-2C-5;Jet;4;Heavy;Commercial;355000;258000;6500;22000;3;CFM562;CNT (lb);206;106;Wing
+DC8QN;Douglas DC-8-60 / JT3D-7QN;Jet;4;Heavy;Commercial;355000;275000;5310;19000;2;JT3DQ;CNT (lb);208;106;Wing
+DC910;McDonnell Douglas DC-9-10 / JT8D-7;Jet;2;Large;Commercial;90700;81700;5030;14000;1;2JT8D;CNT (lb);201;101;Fuselage
+DC930;McDonnell Douglas DC-9-30 / JT8D-9;Jet;2;Large;Commercial;114000;102000;4680;14500;1;2JT8D;CNT (lb);201;101;Fuselage
+DC93LW;McDonnell Douglas DC-9-30 / JT8D-9 w /  ABS Lightweight hushkit;Jet;2;Large;Commercial;114000;102000;4680;14500;3;2JT8DL;CNT (lb);201;101;Fuselage
+DC950;McDonnell Douglas DC-9-50 / JT8D-17;Jet;2;Large;Commercial;121000;110000;4880;16000;2;2JT8DQ;CNT (lb);201;101;Fuselage
+DC95HW;McDonnell Douglas DC-9-50 / JT8D17 w /  ABS Heavyweight hushkit;Jet;2;Large;Commercial;121000;110000;4880;16000;3;2JT8DH;CNT (lb);201;101;Fuselage
+DC9Q7;McDonnell Douglas DC-9-10 / JT8D-7QN;Jet;2;Large;Commercial;90700;81700;5030;14000;2;2JT8DQ;CNT (lb);201;101;Fuselage
+DC9Q9;McDonnell Douglas DC-9-30 / JT8D-9QN;Jet;2;Large;Commercial;114000;102000;4680;14500;2;2JT8DQ;CNT (lb);201;101;Fuselage
+DHC6;De Havilland DASH 6 / PT6A-27;Turboprop;2;Small;Commercial;12500;12300;1500;2000;0;PT6A27;CNT (% of Max Static Thrust);210;109;Prop
+DHC6QP;De Havilland DASH 6 / PT6A-27 Raisbeck Quiet PropMod;Turboprop;2;Small;Commercial;12500;12300;1500;2000;0;RAISQP;CNT (% of Max Static Thrust);210;109;Prop
+DHC7;De Havilland DASH 7 / PT6A-50;Turboprop;4;Large;Commercial;41000;39000;2150;2850;3;PT6A50;CNT (% of Max Static Thrust);213;112;Prop
+DHC8;Bombardier de Havilland DASH 8-100 / PW121;Turboprop;2;Large;Commercial;34500;33900;3000;4750;3;PW120;CNT (% of Max Static Thrust);213;112;Prop
+DHC830;Bombardier de Havilland DASH 8-300 / PW123;Turboprop;2;Large;Commercial;43000;42000;3500;4918;3;PW120;CNT (% of Max Static Thrust);213;112;Prop
+DO228;Dornier 228-202 / TPE 311-5;Turboprop;2;Large;Commercial;13669;13448;2375;2240;3;TPE331-5;CNT (lb);216;110;Prop
+DO328;Dornier 328-100 / PW119C;Turboprop;2;Large;Commercial;30843;29167;3825;6745;3;PW119C;CNT (lb);214;109;Prop
+ECLIPSE500;Eclipse 500 / PW610F;Jet;2;Small;General Aviation;6000;5600;2389;1031;3;PW610F;CNT (lb);201;103;Fuselage
+EMB120;Embraer 120 ER / Pratt & Whitney PW118;Turboprop;2;Large;Commercial;26433;25794;5571;4000;3;EPW118;CNT (lb);213;109;Prop
+EMB145;Embraer 145 ER / Allison AE3007;Jet;2;Large;Commercial;45420;41230;4232;7500;3;AE3007;CNT (lb);216;113;Fuselage
+EMB14L;Embraer 145 LR / Allison AE3007A1;Jet;2;Large;Commercial;48500;42550;4232;7500;3;AE3007;CNT (lb);216;113;Fuselage
+EMB170;Embraer ERJ170-100;Jet;2;Large;Commercial;82012;72312;4029;13800;3;CF348E;CNT (lb);216;113;Wing
+EMB175;Embraer ERJ170-200;Jet;2;Large;Commercial;85517;74957;4130;13800;3;CF348E;CNT (lb);216;113;Wing
+EMB190;Embraer ERJ190-100;Jet;2;Large;Commercial;114199;97003;4081;18500;3;CF3410E;CNT (lb);205;105;Wing
+EMB195;Embraer ERJ190-200;Jet;2;Large;Commercial;115280;100972;4183;18500;3;CF3410E;CNT (lb);205;105;Wing
+F10062;Fokker 100 / TAY 620-15;Jet;2;Large;Commercial;95000;85500;4560;13900;3;TAY620;CNT (lb);201;101;Fuselage
+F10065;Fokker 100 / TAY 650-15;Jet;2;Large;Commercial;98000;88000;4704;15100;3;TAY650;CNT (lb);201;101;Fuselage
+F28MK2;Fokker F-28-2000 / RB183MK555;Jet;2;Large;Commercial;65000;59000;3540;9850;2;RB183;CNT (lb);216;104;Fuselage
+F28MK4;Fokker F-28-4000 / RB183MK555;Jet;2;Large;Commercial;73000;64000;3546;9900;2;RB183P;CNT (lb);216;104;Fuselage
+FAL20;Dassault FALCON 20 / CF700-2D-2;Jet;2;Large;General Aviation;28700;27300;2490;4500;2;CF700;CNT (lb);203;113;Fuselage
+GII;Gulfstream GII / SPEY 511-8;Jet;2;Large;General Aviation;64800;58500;3200;11400;2;SPEYHK;CNT (lb);216;104;Fuselage
+GIIB;Gulfstream GIIB / GIII - SPEY 511-8;Jet;2;Large;General Aviation;69700;58500;3250;11400;2;SPEYHK;CNT (lb);216;104;Fuselage
+GIV;Gulfstream GIV-SP / TAY 611-8;Jet;2;Large;General Aviation;74600;66000;3190;13850;3;TAYGIV;CNT (lb);203;113;Fuselage
+GV;Gulfstream GV / BR 710;Jet;2;Large;General Aviation;90500;75300;2760;14750;3;BR710;CNT (lb);205;105;Fuselage
+HS748A;Hawker Siddeley HS-748 / DART MK532-2;Turboprop;2;Large;Commercial;46500;43000;3360;5150;2;RDA532;CNT (% of Max Static Thrust);212;110;Prop
+IA1125;IAI-1125 ASTRA / TFE731-3A;Jet;2;Large;General Aviation;23500;20700;3689;3700;3;TF7313;CNT (lb);216;113;Fuselage
+L1011;Lockheed Martin L-1011 / RB211-22B;Jet;3;Heavy;Commercial;430000;358000;5693;42000;3;RB2112;CNT (lb);203;101;Wing
+L10115;Lockheed Martin L-1011-500 / RB211-224B;Jet;3;Heavy;Commercial;510000;368000;6800;50000;3;RB2112;CNT (lb);203;101;Wing
+L188;Lockheed L-188C / ALL 501-D13;Turboprop;4;Large;Commercial;116000;98100;4960;8000;0;T56A7;CNT (% of Max Static Thrust);214;112;Prop
+LEAR25;Learjet 25 / CJ610-8;Jet;2;Large;General Aviation;15000;13500;2620;2950;2;CJ610;CNT (lb);202;113;Fuselage
+LEAR35;Learjet 36 / TFE731-2;Jet;2;Large;General Aviation;18300;15300;3076;3500;3;TF7312;CNT (lb);216;113;Fuselage
+MD11GE;McDonnell Douglas MD-11 / CF6-80C2D1F;Jet;3;Heavy;Commercial;682400;433300;5131;61500;3;2CF68D;CNT (lb);203;103;Wing
+MD11PW;McDonnell Douglas MD-11 / PW 4460;Jet;3;Heavy;Commercial;682400;433300;4681;60000;3;PW4460;CNT (lb);203;103;Wing
+MD81;McDonnell Douglas MD-81 / JT8D-209;Jet;2;Large;Commercial;140000;128000;4860;19300;3;2JT8D2;CNT (lb);204;104;Fuselage
+MD82;McDonnell Douglas MD-82 / JT8D-217A;Jet;2;Large;Commercial;149500;130000;4920;20900;3;2JT8D2;CNT (lb);204;104;Fuselage
+MD83;McDonnell Douglas MD-83 / JT8D-219;Jet;2;Large;Commercial;160000;139500;5200;21700;3;2JT8D2;CNT (lb);204;104;Fuselage
+MD9025;McDonnell Douglas MD-90 / V2525-D5;Jet;2;Large;Commercial;156000;142000;3000;25000;3;V2525;CNT (lb);205;105;Fuselage
+MD9028;McDonnell Douglas MD-90 / V2528-D5;Jet;2;Large;Commercial;156000;142000;3000;28000;3;V2525;CNT (lb);205;105;Fuselage
+MU3001;Mitsubishi MU300-10 Diamond II / JT15D-5;Jet;2;Large;General Aviation;14100;13200;2800;2500;3;JT15D5;CNT (lb);203;113;Fuselage
+PA28;Piper Warrior PA-28-161 / O-320-D3G;Piston;1;Small;General Aviation;2325;2325;1695;400;0;O320D3;Other (RPM);213;113;Prop
+PA30;Piper Twin Comanche PA-30 / IO-320-B1A;Piston;2;Small;General Aviation;3600;3600;1654;777;0;IO320B;CNT (lb);213;113;Prop
+PA31;Piper Navajo Chieftain PA-31-350 / TIO-5;Piston;2;Small;General Aviation;7000;7000;1850;1481;0;TIO542;Other (RPM);213;109;Prop
+PA42;Piper PA-42 / PT6A-41;Turboprop;2;Small;General Aviation;11200;10330;3300;1800;3;PT6A41;CNT (lb);213;109;Prop
+SABR80;NA Sabreliner 80;Jet;2;Large;General Aviation;33720;27290;2490;3962;2;CF700;CNT (lb);203;113;Fuselage
+SD330;Short SD3-30 / PT6A-45AR;Turboprop;2;Large;Commercial;22900;22600;3650;2670;3;PT6A45;CNT (% of Max Static Thrust);211;109;Prop
+SF340;Saab SF340B / CT7-9B;Turboprop;2;Large;Commercial;27300;26500;3470;4067;3;CT75;CNT (% of Max Static Thrust);211;110;Prop

@@ -55,6 +55,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `.plot()`. `sound_pressure_level_history` and `detect_onsets` expose the
   level-history and onset-analysis stages, the latter accepting an
   `"upper_half"` onset-rate variant for pass-bys.
+- EASA ANP fleet database bridge in `phonometry.aircraft.anp_fleet`:
+  `load_anp_database` reads the Aircraft Noise and Performance (ANP) CSV tables
+  and exposes, for a real aircraft type and operation, its Noise-Power-Distance
+  curves (`AnpNpdCurves`, `LAmax`/`SEL` versus distance per power setting) and
+  its default fixed-point trajectory (`AnpProfile`, a ready Doc 29 flight path
+  with the takeoff/landing ground-roll masks). `AnpDatabase`/`AnpAircraft` feed
+  both straight into the existing `event_level`/`noise_contour` chain, so noise
+  levels and contours can be computed from actual aircraft instead of only
+  synthetic NPD input. Called without a path the loader uses the full EASA ANP
+  database (archive version 2.3, 155 aircraft types) bundled with the package;
+  pointed at a directory it reads any other ANP CSV export. Result objects
+  expose `.plot()`.
 - Every `.report()` fiche accepts a `language` argument (`'en'` default, `'es'`):
   Spanish strings and a comma decimal separator.
 - The `.plot()` renderers of the building, noise-control and emission result

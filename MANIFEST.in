@@ -1,1 +1,2 @@
 include VERSION
+recursive-include src/phonometry/aircraft/data/anp *.csv *.md

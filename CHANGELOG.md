@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Raised the dependency floors to the current releases: `numpy>=2.5.1` and
+  `scipy>=1.18.0` (in `pyproject.toml` and `requirements.txt`), so the declared
+  minimums match the versions the figures and CI already run against.
+
 ### Added
 
 - Every `.report()` fiche accepts a `language` argument (`'en'` default, `'es'`):

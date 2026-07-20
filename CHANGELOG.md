@@ -17,6 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `emission.NoiseEmissionDeclaration` and `emission.OperatingModeDeclaration`
+  model the ISO 4871:1996 declaration of noise emission values of machinery and
+  equipment: the dual-number form (a measured A-weighted sound power level
+  `L_WA` and its uncertainty `K_WA`, optionally an emission sound pressure level
+  `L_pA` at a work station) and the derived single-number value
+  `L_WAd = L_WA + K_WA` (clause 3.15), with the single-machine verification
+  verdict of clause 6.2 (`L_1 <= L_WAd`). `SoundPowerResult.declare()` builds a
+  declaration straight from a measured sound power. A `.report()` method renders
+  the ISO 4871 declaration fiche (the Annex B dual/single-number table across
+  the operating-mode columns, the basic-standard and noise-test-code footnote
+  and the verification table), localised in English and Spanish.
 - `environmental.impulsive_sound` implements the objective impulsive-sound
   prominence method of ISO/PAS 1996-3:2022. `impulsive_sound_adjustment` reads a
   calibrated pressure signal, computes the A-weighted, F time-weighted level

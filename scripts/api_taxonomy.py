@@ -223,6 +223,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.emission.sound_power_reverberation",
             "phonometry.emission.intensity",
             "phonometry.emission.vibration_sound_power",
+            "phonometry.emission.declaration",
         ),
     ),
     Section(

@@ -3,6 +3,11 @@
 
 from __future__ import annotations
 
+from .declaration import (
+    DeclarationForm,
+    NoiseEmissionDeclaration,
+    OperatingModeDeclaration,
+)
 from .intensity import (
     FieldIndicators,
     IntensityResult,
@@ -51,10 +56,13 @@ from .vibration_sound_power import (
 )
 
 __all__ = [
+    "DeclarationForm",
     "FieldIndicators",
     "IntensityResult",
     "MeteorologicalCorrection",
     "NORMALIZED_IMPEDANCE",
+    "NoiseEmissionDeclaration",
+    "OperatingModeDeclaration",
     "PrecisionCriteria",
     "PrecisionFieldIndicators",
     "PrecisionIntensityResult",

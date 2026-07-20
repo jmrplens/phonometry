@@ -66,10 +66,18 @@ references:
     designation: "ISO 9614-3:2002"
     url: "https://www.iso.org/standard/24012.html"
     note: "El método de barrido de grado 1 de la sección 5, sus indicadores de campo y el marcado de no aplicable de la cláusula 9.2."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Declaration and verification of noise emission values of machinery and equipment"
+    designation: "ISO 4871:1996"
+    url: "https://www.iso.org/standard/10868.html"
+    note: "La declaración de la sección 6: las formas de doble/único número, L_WAd = L_WA + K_WA (cláusula 3.15) y la verificación de la cláusula 6.2."
 ---
 
 import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 La presión *sonora* depende de dónde te sitúes y de la sala en la que estés;
 la **potencia** acústica no. El nivel de potencia acústica `LW` es la energía
@@ -935,6 +943,85 @@ plt.show()
 ```
 
 </details>
+
+## 6. Declarar la emisión sonora (ISO 4871)
+
+Un nivel de potencia acústica medido todavía no es una *declaración*. La norma
+ISO 4871:1996 rige la declaración de emisión sonora que un fabricante imprime en
+la documentación técnica: qué magnitudes se declaran, en qué forma y cómo se
+verifica un valor declarado. La magnitud preferida es el nivel de potencia
+acústica ponderado A `L_WA`, acompañado opcionalmente del nivel de presión
+acústica de emisión ponderado A `L_pA` en un puesto de trabajo.
+
+Una declaración adopta una de dos formas alternativas (cláusula 4):
+
+- la forma de **doble número** (cláusula 3.16): el valor medido `L_WA` y su
+  incertidumbre `K_WA` indicados juntos pero por separado; y
+- la forma de **número único** (cláusula 3.15): el valor declarado derivado
+  `L_WAd = L_WA + K_WA`, un límite superior que es improbable que las mediciones
+  repetidas superen al nivel de confianza indicado.
+
+`K_WA` combina la incertidumbre de medición (reproducibilidad) y, para un lote,
+la dispersión de producción; para una sola máquina `K = 1,645 sigma_R`
+(anexo A.2.2). Un
+[`NoiseEmissionDeclaration`](/phonometry/es/reference/api/power/sound-power/)
+contiene una o varias declaraciones por modo de funcionamiento y genera la
+ficha ISO 4871 mediante `.report()`. La vía más rápida es `declare()`
+directamente a partir de una potencia acústica medida:
+
+```python
+import numpy as np
+import phonometry as ph
+from phonometry import ReportMetadata
+
+# ... un LWA medido según ISO 3744 ...
+result = ph.sound_power_pressure(levels, "hemisphere", radius=1.0,
+                                 frequencies=freqs)
+
+declaration = result.declare(
+    uncertainty=2.0,                 # K_WA en dB (por defecto la U expandida)
+    machine="Type 990, Model 11-TC",
+    operating_conditions="50 Hz, 230 V, carga nominal",
+    basic_standards="ISO 3744",
+    verification_level=result.sound_power_level_a,  # L_1 para la cláusula 6.2
+)
+declaration.report(
+    "iso4871.pdf",
+    metadata=ReportMetadata(measurement_standard="ISO 3744"),
+    language="es",
+)   # -> L_WAd = L_WA + K_WA, verificado cuando L_1 <= L_WAd
+```
+
+O se construye la declaración directamente, reproduciendo el ejemplo del anexo B
+de ISO 4871 (dos modos de funcionamiento, `L_WA = 88` y `95` dB con `K_WA = 2`
+dB, que dan los valores declarados `L_WAd = 90` y `97` dB):
+
+```python
+mode1 = ph.OperatingModeDeclaration(
+    "Operating mode 1", sound_power_level=88.0, sound_power_uncertainty=2.0,
+    emission_pressure_level=78.0, emission_pressure_uncertainty=2.0,
+    verification_level=89.0,          # cumple: 89 <= 90
+)
+mode2 = ph.OperatingModeDeclaration(
+    "Operating mode 2", sound_power_level=95.0, sound_power_uncertainty=2.0,
+    emission_pressure_level=86.0, emission_pressure_uncertainty=2.0,
+    verification_level=98.0,          # no cumple: 98 > 97
+)
+ph.NoiseEmissionDeclaration(
+    (mode1, mode2), machine="Type 990, Model 11-TC",
+    basic_standards=("ISO 3744", "ISO 11202"), form="dual-number",
+).report("iso4871.pdf", language="es")
+```
+
+La ficha de ejemplo se regenera con `make reports` y se conserva renderizada en
+el repositorio; pulse la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso4871_declaration_example"
+	title="Informe de ejemplo de declaración de emisión sonora ISO 4871 (PDF)"
+	description="Ficha de declaración de emisión sonora ISO 4871 de una página: una cabecera con la identificación de la máquina y las condiciones de funcionamiento, la tabla declarada de doble número en dos columnas de modo de funcionamiento con el nivel de potencia acústica ponderado A medido L_WA, su incertidumbre K_WA, el nivel de presión acústica de emisión L_pA y el valor declarado derivado L_WAd = L_WA + K_WA (90 y 97 dB), la nota del código de ensayo de ruido y las normas básicas, y una tabla de verificación de la cláusula 6.2 donde el modo 1 cumple y el modo 2 no cumple."
+	caption="Ficha de declaración de emisión sonora (NoiseEmissionDeclaration.report), la tabla de doble número del anexo B de ISO 4871 con el valor declarado L_WAd = L_WA + K_WA y el veredicto de verificación de la cláusula 6.2."
+/>
 
 ## Véase también
 

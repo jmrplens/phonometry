@@ -705,6 +705,55 @@ evaluated per band per clause 8.6). `uncertainty` is the expanded
 uncertainty
 `U = 2*sqrt(sigma_R0^2 + sigma_omc^2)` (95 %, ISO 3744 clause 9.5).
 
+### SoundPowerResult.declare()
+
+```python
+SoundPowerResult.declare(
+    *,
+    uncertainty: float | None = None,
+    mode: str = 'Operating mode 1',
+    emission_pressure_level: float | None = None,
+    emission_pressure_uncertainty: float | None = None,
+    verification_level: float | None = None,
+    machine: str | None = None,
+    operating_conditions: str | None = None,
+    noise_test_code: str | None = None,
+    basic_standards: str | Sequence[str] = (),
+    form: DeclarationForm = 'dual-number',
+) -> NoiseEmissionDeclaration
+```
+
+Build an ISO 4871:1996 noise-emission declaration from this result.
+
+Wraps the A-weighted sound power level `LWA` of this measurement as the
+declared measured value `L_WA` of a single operating mode, with the
+uncertainty `K_WA` defaulting to the result's own expanded uncertainty
+`U` (ISO 3744/3746 clause 9.5). The declared single-number value is
+`L_WAd = L_WA + K_WA` (ISO 4871 clause 3.15).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `uncertainty` | `K_WA` in decibels; defaults to this result's expanded uncertainty `uncertainty`. |
+| `mode` | Operating-mode label for the declaration column. |
+| `emission_pressure_level` | Optional A-weighted emission sound pressure level `L_pA` at a work station, in decibels re 20 uPa. |
+| `emission_pressure_uncertainty` | `K_pA` in decibels; required with `emission_pressure_level`. |
+| `verification_level` | Optional verification measurement `L_1` of the A-weighted sound power level (ISO 4871 clause 6). |
+| `machine` | Machine identification (clause 5 a). |
+| `operating_conditions` | Operating/mounting conditions (clause 5 c). |
+| `noise_test_code` | Noise test code the values were determined to (clause 5 b). |
+| `basic_standards` | Basic emission standard(s) used (clause 5 b). |
+| `form` | `"dual-number"` (default) or `"single-number"`. |
+
+**Returns:** A single-mode [`NoiseEmissionDeclaration`](/phonometry/reference/api/power/declaration/#noiseemissiondeclaration).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the A-weighted sound power level is not finite (several bands were combined without `frequencies`). |
+
 ### SoundPowerResult.plot()
 
 ```python

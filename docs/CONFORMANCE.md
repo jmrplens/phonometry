@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **356/356 conformance checks pass** across 45 domains and 226 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **358/358 conformance checks pass** across 45 domains and 227 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -132,13 +132,15 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Intensity &amp; sound power</b>: 100% (4/4)</summary>
+<summary>&#9989; <b>Intensity &amp; sound power</b>: 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | IEC 61043:1994 Clause 5 | Plane-wave intensity I = p^2 / (rho c) | 0.00238 W/m^2 (+/-1.5%) | 0.00239 W/m^2 | 0 W/m^2 | &#9989; |
 | ISO 3744:2010 Eq. 18 | Monopole hemisphere recovers LW (r=4 m) | 95 dB (+/-0 dB) | 95 dB | 0 dB | &#9989; |
 | ISO 9614-2:1996 Eq. 12 | Intensity scan recovers LW of an enclosed source | 90 dB (+/-0.000001 dB) | 90 dB | 0 dB | &#9989; |
+| ISO 4871:1996 clause 3.15 / Annex B | Declared L_WAd = L_WA + K_WA (Annex B, L_WA=88, K_WA=2) | 90 dB (+/-0 dB) | 90 dB | 0 dB | &#9989; |
+| ISO 4871:1996 clause 6.2 | Single-machine verification boundary L_1 <= L_WAd | L_1=90 verified, L_1=91 rejected (L_WAd=90) | 90->True, 91->False | boundary L_1 = L_WAd | &#9989; |
 | ISO 3741:2010 Eq. 20 | Reverberation-room method inverts to a known LW | 0 dB error | 0 dB | 0 dB | &#9989; |
 
 </details>

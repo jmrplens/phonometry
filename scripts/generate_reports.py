@@ -280,6 +280,51 @@ def _filter_class_1995_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iec61260_filter_1995_example.pdf"
 
 
+def _iso4871_declaration_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 4871 fiche: a dual-number machinery noise-emission declaration.
+
+    Reproduces the ISO 4871:1996 Annex B.2 example (Type 990, Model 11-TC): two
+    operating modes with a measured A-weighted sound power level and an
+    uncertainty of 2 dB, giving declared values L_WAd = 90 and 97 dB (Annex B.1),
+    plus emission sound pressure levels at the work station. A verification
+    measurement is added per mode: mode 1 passes (89 <= 90) and mode 2 fails
+    (98 > 97), exercising the clause 6.2 verdict both ways.
+    """
+    mode1 = ph.OperatingModeDeclaration(
+        mode="Operating mode 1",
+        sound_power_level=88.0,
+        sound_power_uncertainty=2.0,
+        emission_pressure_level=78.0,
+        emission_pressure_uncertainty=2.0,
+        verification_level=89.0,
+    )
+    mode2 = ph.OperatingModeDeclaration(
+        mode="Operating mode 2",
+        sound_power_level=95.0,
+        sound_power_uncertainty=2.0,
+        emission_pressure_level=86.0,
+        emission_pressure_uncertainty=2.0,
+        verification_level=98.0,
+    )
+    result = ph.NoiseEmissionDeclaration(
+        modes=(mode1, mode2),
+        machine="Type 990, Model 11-TC",
+        operating_conditions="50 Hz, 230 V, rated load",
+        noise_test_code="ISO 3746 test code (example)",
+        basic_standards=("ISO 3744", "ISO 11202"),
+        form="dual-number",
+    )
+    metadata = ReportMetadata(
+        measurement_standard="ISO 3744",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-4871",
+        notes="Declaration reproduces the ISO 4871:1996 Annex B example machine.",
+    )
+    return result, metadata, "iso4871_declaration_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -291,6 +336,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _epnl_example,
     _filter_class_example,
     _filter_class_1995_example,
+    _iso4871_declaration_example,
 ]
 
 

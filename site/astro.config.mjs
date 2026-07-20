@@ -544,6 +544,7 @@ export default defineConfig({
                 'reference/theory/signal-analysis',
                 'reference/theory/perception',
                 'reference/theory/rooms-buildings',
+                'reference/theory/materials-surfaces',
                 'reference/theory/environment-transport',
                 'reference/theory/vibration',
               ],

@@ -1,0 +1,156 @@
+---
+title: "Bending-wave transmission at plate junctions (Cremer / Craik / Hopkins)"
+description: "The wave-approach, frequency-independent bending-wave transmission coefficients for rigid X, T, L and in-line plate junctions (Cremer et al. 1973; Craik 1981/1996; Hopkins 2007, Section 5.2.1.3): the wave parameters chi and psi, the corner and straight-section coefficients tau12(theta) and tau13(theta), their diffuse-field angular average, and the derived SEA coupling loss factor and vibration reduction index Kij."
+references:
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Ungar, E. E."]
+    year: 1973
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "1st ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-662-10118-6"
+    note: "The original derivation of the wave parameters chi and psi (Eqs 5.10/5.11 in Hopkins) and the in-line normal-incidence transmission coefficient. ISBN 978-3-540-06002-4."
+  - type: book
+    authors: ["Craik, R. J. M."]
+    year: 1996
+    title: "Sound transmission through buildings using statistical energy analysis"
+    publisher: "Gower"
+    note: "The SEA treatment of building sound transmission with the tabulated bending-wave transmission coefficients for X, T, L and in-line junctions used here (Eqs 5.12/5.13). ISBN 978-0-566-07572-5."
+  - type: book
+    authors: ["Hopkins, C."]
+    year: 2007
+    title: "Sound insulation"
+    publisher: "Butterworth-Heinemann"
+    doi: "10.4324/9780080550473"
+    note: "Section 5.2.1.3 collects the rigid X, T, L and in-line junction coefficients, the angular average (Eq. 5.6), the SEA consistency relationship (Eq. 5.7), the coupling loss factor (Eq. 2.154) and the wave-approach Kij (Eq. 5.116) implemented on this page. ISBN 978-0-7506-6526-1."
+---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
+
+When a bending wave travelling on a wall or floor reaches a rigid junction with
+another plate, part of its energy is reflected and part is transmitted into the
+connected plates. The **wave approach** of Cremer et al. (1973), tabulated by
+Craik (1981, 1996) and collected in Hopkins (2007, Section 5.2.1.3), gives the
+transmission coefficient in closed form for the four most common junctions of
+thin, homogeneous, isotropic plates: the **X**, **T**, **L** and **in-line**
+junctions. Modelling the junction as a simply supported (pinned) massless beam
+forces an incident bending wave to generate only reflected and transmitted
+*bending* waves, with no conversion to in-plane waves, and the resulting
+coefficients are **independent of frequency**. That is what makes them
+convenient closed-form inputs for statistical energy analysis (SEA) and for the
+EN 12354 flanking-transmission model, where they feed the coupling loss factor
+`etaij` and the vibration reduction index `Kij`.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/junction_transmission.svg" alt="Transmission coefficient versus incidence angle for a rigid X-junction of a 100 mm and a 200 mm concrete plate, showing the corner coefficient tau12 and the straight-section coefficient tau13 falling from their normal-incidence values to zero at grazing incidence, with their diffuse-field angular averages marked as horizontal lines" width="82%" loading="eager" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import junction_transmission
+
+# X-junction between a 100 mm and a 200 mm concrete plate (cL = 3200 m/s).
+res = junction_transmission("X", 0.1, 3200.0, 240.0, 0.2, 3200.0, 480.0)
+res.plot()  # tau(theta) for the corner and straight paths, with averages
+plt.show()
+```
+
+</details>
+
+## 1. Wave parameters chi and psi
+
+With plate `i` of thickness `h_i`, quasi-longitudinal wave speed `cL_i` and
+surface density `rho_s,i`, the whole family of coefficients depends on just two
+dimensionless ratios (Cremer et al. 1973):
+
+```
+chi = kB2 / kB1 = (rho_s2 B1 / (rho_s1 B2))**0.25 = sqrt(h1 cL1 / (h2 cL2)) = sqrt(fc2 / fc1)
+psi = B2 kB2**2 / (B1 kB1**2) = (h2 cL2 rho_s2) / (h1 cL1 rho_s1) = (rho_s2 fc1) / (rho_s1 fc2)
+```
+
+`chi` is the ratio of the plates' bending wavenumbers (equivalently the square
+root of their critical-frequency ratio) and sets the total-internal-reflection
+cut-off angle `theta_co = arcsin(chi)`; `psi` is the ratio of their
+bending-moment mobilities. For **identical plates** both are 1.
+
+```python
+from phonometry import junction_wave_parameters
+
+chi, psi = junction_wave_parameters(0.1, 3200.0, 240.0, 0.2, 3200.0, 480.0)
+#  -> (sqrt(0.5), 4.0)
+```
+
+## 2. Corner and straight-section coefficients
+
+For an incident wave on plate 1, transmission **around the corner** (into the
+perpendicular plate 2) is `tau12(theta)` (Eq. 5.12), and transmission **across
+the straight section** (into the collinear plate 3, X- and T-junction (1) only)
+is `tau13(theta)` (Eq. 5.13). The corner coefficient is zero beyond the cut-off,
+`tau12(theta) = 0` for `chi < sin(theta)`. The junction constants `J1`, `J2`,
+`J3` select the geometry:
+
+| Junction | `J1` | `J2` | `J3` |
+|---|---|---|---|
+| X | 1 | 1 | 1 |
+| T-junction (1) | 2 | 0.5 | 0.5 |
+| T-junction (2) | 2 | 2 | — |
+| L | 4 | 1 | — |
+
+The straight section is undefined for the T-junction (2) and the L-junction.
+
+```python
+import numpy as np
+from phonometry import (
+    corner_transmission_coefficient,
+    straight_transmission_coefficient,
+)
+
+theta = np.radians(np.linspace(0.0, 90.0, 91))
+tau12 = corner_transmission_coefficient(theta, chi, psi, "X")
+tau13 = straight_transmission_coefficient(theta, chi, psi, "X")
+```
+
+## 3. Diffuse-field angular average
+
+In a diffuse vibration field every angle of incidence is equally probable and
+the incident intensity carries a `cos(theta)` obliquity factor, so the average
+transmission coefficient is `tau_bar_ij = integral 0..pi/2 of tau_ij(theta)
+cos(theta) d(theta)` (Eq. 5.6). For **identical plates** the algebra collapses
+to exact fractions that serve as the library's first-principles oracle:
+
+- X-junction corner and straight: `tau_ij(theta) = cos**2(theta) / 8`, so `tau_bar_ij = 1/12`;
+- L-junction corner: `tau_ij(theta) = cos**2(theta) / 2`, so `tau_bar_ij = 1/3`;
+- in-line junction: `tau12(0 deg) = 1` (a continuous plate transmits fully).
+
+```python
+from phonometry import angular_average_transmission_coefficient
+
+angular_average_transmission_coefficient(1.0, 1.0, "X", section="corner")  # 1/12
+angular_average_transmission_coefficient(1.0, 1.0, "L", section="corner")  # 1/3
+```
+
+The two directions obey the SEA consistency relationship (Eq. 5.7),
+`tau_bar_12 = chi * tau_bar_21`, so only one direction needs to be computed.
+
+## 4. Coupling loss factor and vibration reduction index
+
+The angular average is the bridge to the two junction descriptors used in
+SEA-based building models: the **coupling loss factor** (Eq. 2.154)
+`etaij = cg_i L_ij tau_ij / (2 pi**2 f S_i)` and the wave-approach **vibration
+reduction index** (Eq. 5.116) `Kij = 10 lg(1 / tau_ij) + 5 lg(fc_j / fc_i)`,
+which for identical plates reduces to `Kij = 10 lg(1 / tau_ij)` -- for the
+identical X-junction, `10 lg 12 ~= 10.8 dB`.
+
+```python
+from phonometry import coupling_loss_factor, wave_vibration_reduction_index
+
+eta = coupling_loss_factor(1.0 / 12.0, group_velocity=200.0,
+                           junction_length=4.0, frequency=500.0, plate_area=10.0)
+kij = wave_vibration_reduction_index(1.0 / 12.0)  # 10.79 dB
+```
+
+The measured, EN 12354 counterpart of `Kij` (from the direction-averaged
+velocity level difference) is the separate flanking-transmission
+`vibration_reduction_index`; this page is the closed-form *predicted* value from
+the wave approach.

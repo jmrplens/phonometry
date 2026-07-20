@@ -455,6 +455,7 @@ export default defineConfig({
               items: [
                 { slug: 'guides/sections/structure-borne', attrs: { 'data-group-link': true } },
                 'guides/mechanical-mobility',
+                'guides/junction-transmission',
                 'guides/transfer-stiffness',
                 'guides/vibration-sound-power',
                 'guides/structure-borne-power',

@@ -125,6 +125,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`vibration.mechanical_mobility`](/phonometry/reference/api/vibration/mechanical-mobility/) | Mechanical mobility and the frequency-response-function family (ISO 7626-1:2011). |
 | [`vibration.point_mobility`](/phonometry/reference/api/vibration/point-mobility/) | Point mobilities and impedances of infinite structures (Cremer, Heckl & Petersson 2005, Chapter 5, Table 5.1). |
 | [`vibration.radiation_efficiency`](/phonometry/reference/api/vibration/radiation-efficiency/) | Radiation efficiency of a plate in bending (Hopkins 2007, Sound Insulation, Section 2.9; Leppington et al. |
+| [`vibration.junction_transmission`](/phonometry/reference/api/vibration/junction-transmission/) | Bending-wave transmission coefficients for rigid plate junctions (Hopkins 2007, *Sound Insulation*, Section 5.2.1.3; Cremer et al. |
 | [`vibration.transfer_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/) | Dynamic transfer stiffness of resilient elements (ISO 10846-1/-2/-3). |
 | [`vibration.human_vibration`](/phonometry/reference/api/vibration/human-vibration/) | Human exposure to whole-body and hand-transmitted vibration. |
 | [`vibration.multiple_shock_vibration`](/phonometry/reference/api/vibration/multiple-shock-vibration/) | Whole-body vibration containing multiple shocks (ISO 2631-5:2018). |

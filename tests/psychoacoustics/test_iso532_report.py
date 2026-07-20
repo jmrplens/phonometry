@@ -62,9 +62,10 @@ def test_loudness_report_writes_pdf(tmp_path) -> None:
 
 def test_unknown_engine_rejected(tmp_path) -> None:
     """An unknown rendering engine raises ``ValueError``."""
+    result = _result()
     out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match="engine"):
-        _result().report(out, engine="weasyprint")
+        result.report(out, engine="weasyprint")
 
 
 def test_full_metadata_renders_one_page(tmp_path) -> None:

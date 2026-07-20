@@ -197,6 +197,57 @@ def grid_table(pairs: List[Tuple[str, str]]) -> Any:
     return table
 
 
+def document_styles(accent: Any) -> Tuple[Any, Any, Any, Any]:
+    """Return ``(stylesheet, title_style, basis_style, caption_style)``.
+
+    The title (accent, 16 pt), the standard-basis line (muted, 9.5 pt) and the
+    left-panel caption (accent, 8 pt) are identical across every fiche, so they
+    are built once here. The base stylesheet is returned too, as the result box
+    and verdict helpers take it. Called only after the renderer has imported
+    reportlab.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        "fiche_title", parent=styles["Title"], fontSize=16, textColor=accent,
+        spaceAfter=1, alignment=0,
+    )
+    basis_style = ParagraphStyle(
+        "fiche_basis", parent=styles["Normal"], fontSize=9.5,
+        textColor=colors.HexColor(_MUTED_HEX), spaceAfter=2,
+    )
+    caption_style = ParagraphStyle(
+        "fiche_caption", parent=styles["Normal"], fontSize=8,
+        textColor=accent, spaceAfter=3,
+    )
+    return styles, title_style, basis_style, caption_style
+
+
+def two_panel_body(left_cell: Any, plot_drawing: Any) -> Any:
+    """Assemble the two-panel body: a left cell (~56 mm) beside the plot.
+
+    Every fiche puts a table or metrics list on the left and the result's own
+    vector plot on the right; the column widths and cell alignment are shared.
+    Called only after the renderer has imported reportlab.
+    """
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Table, TableStyle
+
+    body = Table([[left_cell, plot_drawing]], colWidths=[56 * mm, 118 * mm])
+    body.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (0, 0), 0),
+                ("RIGHTPADDING", (-1, 0), (-1, 0), 0),
+            ]
+        )
+    )
+    return body
+
+
 def metrics_table(rows: List[Tuple[str, str]], *, col_widths: Any = None) -> Any:
     """A compact two-column ``metric | value`` table for a non-band fiche.
 

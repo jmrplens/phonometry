@@ -106,7 +106,7 @@ def _metric_rows(result: "EPNLResult") -> List[Tuple[str, str]]:
         ("Duration correction D [dB]", fmt_num(result.duration_correction)),
         ("10 dB-down window (records)", f"{k_first + 1}&#8211;{k_last + 1}"),
     ]
-    if result.bandsharing_adjustment != 0.0:
+    if abs(result.bandsharing_adjustment) > 1e-9:
         rows.append(
             ("Bandsharing adjustment [dB]", fmt_num(result.bandsharing_adjustment))
         )

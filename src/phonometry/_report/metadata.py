@@ -24,10 +24,11 @@ class ReportMetadata:
     All fields are optional (default ``None``); the report renders only the
     fields that are supplied, so a partially populated instance is valid. The
     numeric fields are validated on construction by physical range: the
-    dimension, mass, volume, pressure and requirement fields must be finite and
-    strictly positive; the temperature fields need only be finite (0 degrees
-    Celsius or below is a valid test condition); and the relative-humidity
-    fields must lie within 0..100 %. A violation raises :class:`ValueError`.
+    dimension, mass, volume and pressure fields must be finite and strictly
+    positive; the temperature and requirement fields need only be finite (0
+    degrees Celsius or below is a valid test condition, and a programme-loudness
+    target in LUFS is negative); and the relative-humidity fields must lie
+    within 0..100 %. A violation raises :class:`ValueError`.
 
     :ivar specimen: Specimen description printed in the header (the tested
         element, e.g. ``"200 mm concrete wall"``).
@@ -60,15 +61,18 @@ class ReportMetadata:
     :ivar report_id: Report / test number (footer).
     :ivar requirement: Target single-number value the verdict row compares the
         rating against, expressed in the rating's own unit (e.g. dB, a
-        dimensionless absorption coefficient, or sone). The pass direction is
+        dimensionless absorption coefficient, sone, or a programme-loudness
+        level in LUFS). It need only be finite (a loudness target in LUFS is
+        negative), so its sign is not constrained. The pass direction is
         defined by each rating's ``report`` method: quantities where more is
         better (airborne insulation, absorption) pass at or above the
         requirement, and quantities where less is better (impact level,
-        loudness, aircraft noise) pass at or below it.
+        loudness, aircraft noise) pass at or below it; the programme-loudness
+        fiche reads it as the target level and passes within a tolerance.
     :ivar notes: Free-form remarks printed in the footer.
-    :raises ValueError: If a supplied dimension/mass/volume/pressure/requirement
-        is not finite and strictly positive, a temperature is not finite, or a
-        relative humidity is outside 0..100 %.
+    :raises ValueError: If a supplied dimension/mass/volume/pressure is not
+        finite and strictly positive, a temperature or requirement is not
+        finite, or a relative humidity is outside 0..100 %.
     """
 
     specimen: str | None = None
@@ -103,14 +107,17 @@ class ReportMetadata:
         "source_volume",
         "receiving_volume",
         "pressure",
-        "requirement",
     )
-    #: Temperature fields: finite, but any sign (0 C or below is a valid test
-    #: condition, e.g. an unheated outdoor facade measurement).
-    _TEMPERATURE_FIELDS = (
+    #: Fields that need only be finite, of any sign: the test temperatures (0 C
+    #: or below is a valid condition, e.g. an unheated outdoor facade) and the
+    #: requirement (a target such as a programme-loudness level in LUFS is
+    #: legitimately negative, so only its finiteness is checked here; each
+    #: rating's ``report`` gives it a physical meaning and pass direction).
+    _FINITE_FIELDS = (
         "temperature",
         "source_temperature",
         "receiving_temperature",
+        "requirement",
     )
     #: Relative-humidity fields: finite and within 0..100 %.
     _HUMIDITY_FIELDS = (
@@ -139,7 +146,7 @@ class ReportMetadata:
                 name, lambda x: math.isfinite(x) and x > 0.0,
                 "a finite, positive number",
             )
-        for name in self._TEMPERATURE_FIELDS:
+        for name in self._FINITE_FIELDS:
             self._require(name, math.isfinite, "finite")
         for name in self._HUMIDITY_FIELDS:
             self._require(

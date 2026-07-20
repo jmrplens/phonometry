@@ -234,6 +234,54 @@ Object-based audio (Annex 4) is measured by rendering to a loudspeaker
 configuration first and metering the render; the rendering itself is out of
 scope here.
 
+## EBU R 128 report (`.report()`)
+
+`ProgramLoudnessResult.report(path)` renders a one-page PDF compliance fiche
+laid out like a broadcast loudness-delivery sheet: a standard-basis line, an
+optional metadata header block, a full-width compliance table
+(`Metric | Measured | Target / Limit | Result`) and, below it, the full-width
+loudness-vs-time plot (the result's own `.plot()`, with the momentary and
+short-term traces, the integrated line and the LRA band). The verdict is driven
+**only** by the integrated loudness and the maximum true peak; the loudness
+range and the momentary/short-term maxima are shown as informational rows (an
+en dash in the Result column, never a pass/fail colour). A boxed
+`I = X LUFS (LRA = Y LU, max TP = Z dBTP)` single number, a combined PASS/FAIL
+verdict and a footer with the fixed disclaimer close the sheet.
+
+The stacked layout (compliance table on top, plot below) differs from the
+narrow two-panel body of the other fiches because the compliance table needs
+four columns and the loudness-vs-time trace is landscape. It uses the same
+`ReportMetadata` container and rendering engine as the
+[ISO 717 insulation fiche](insulation-field.md#report-metadata-reportmetadata);
+a supplied `requirement` is read as the target programme loudness in LUFS
+(defaulting to the EBU R 128 −23.0 LUFS), and the fiche passes when the
+integrated loudness is within ±0.5 LU of it and the true peak is at or below
+−1.0 dBTP. Rendering needs reportlab (`pip install phonometry[report]`); only
+`engine="reportlab"` is supported.
+
+```python
+from phonometry import broadcast, ReportMetadata
+
+res = broadcast.program_loudness(x, fs)   # a finished stereo programme
+res.report(
+    "loudness_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Reference tone sequence",
+        measurement_standard="EBU R 128",
+        laboratory="Phonometry Reference Laboratory",
+        requirement=-23.0,                # target programme loudness (LUFS)
+    ),
+)                                          # I (LUFS), LRA (LU), true peak (dBTP)
+```
+
+The example fiche, regenerated with `make reports`, is kept rendered in the
+repository. Click the preview to open the PDF:
+
+[![EBU R 128 programme-loudness example report: metadata header, a four-column compliance table with the integrated loudness and maximum true peak carrying the verdict and the loudness range and momentary/short-term maxima as informational rows, the full-width loudness-vs-time plot, the boxed I = -22.6 LUFS (LRA = 10.0 LU, max TP = -20.0 dBTP) single number and a PASS verdict against the -23.0 LUFS target](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.pdf)
+
+*Programme-loudness compliance fiche (`ProgramLoudnessResult.report`), I in
+LUFS with LRA in LU and true peak in dBTP.*
+
 ## 7. Validation
 
 Every synthesizable "minimum requirements" signal of EBU Tech 3341 (cases

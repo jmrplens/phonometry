@@ -155,7 +155,7 @@ radiation_factor(
 
 A-weighted radiation factor `epsilon` (ISO/TS 7849-1 Eq. 4, -2 Eq. 8).
 
-`epsilon = P / (Z_c <v**2> S)` — the sound-radiation efficiency, from an
+`epsilon = P / (Z_c <v**2> S)`, the sound-radiation efficiency, from an
 independently measured radiated power (ISO 9614), the surface area and the
 mean-square vibratory velocity.
 
@@ -249,7 +249,7 @@ velocity_level_from_acceleration(
 
 Velocity level from a sinusoidal acceleration (ISO/TS 7849-1, Eq. 8).
 
-`L_v = 20 lg( a_peak / (2 pi f v0 sqrt(2)) )` — used to convert a
+`L_v = 20 lg( a_peak / (2 pi f v0 sqrt(2)) )`, used to convert a
 calibration acceleration to the equivalent r.m.s. velocity level.
 
 **Parameters**

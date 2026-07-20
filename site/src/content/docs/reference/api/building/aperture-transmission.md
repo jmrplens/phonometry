@@ -137,7 +137,7 @@ composite_transmission_loss(
 
 Composite sound reduction index of parallel elements (Hopkins Eq. 4.92).
 
-`R = -10 lg( (1/sum S_n) sum S_n 10^(-R_n/10) )` — the area-weighted
+`R = -10 lg( (1/sum S_n) sum S_n 10^(-R_n/10) )`, the area-weighted
 energy combination of `N` elements (wall, window, slit, open aperture ...)
 sharing a partition. A bare opening enters with `R = 0` (`tau = 1`).
 

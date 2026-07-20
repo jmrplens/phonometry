@@ -19,21 +19,21 @@ it tabulates *standard uncertainties* `u` derived from inter-laboratory tests
 **Three measurement situations (Clause 5.2)** fix which standard deviation is the
 standard uncertainty `u`:
 
-- **A** — laboratory characterisation (ISO 10140); `u` = reproducibility `σR`.
-- **B** — same location, different teams; `u` = in-situ `σsitu`.
-- **C** — same location, same operator/equipment repeated; `u` = repeatability `σr`.
+- **A**: laboratory characterisation (ISO 10140); `u` = reproducibility `σR`.
+- **B**: same location, different teams; `u` = in-situ `σsitu`.
+- **C**: same location, same operator/equipment repeated; `u` = repeatability `σr`.
 
 **Tabulated standard uncertainties** (one-third-octave and single-number):
 
-- Airborne `R`/`R'`/`Dn`/`DnT` — Table 2 (bands) and Table 3 (ratings).
-- Impact `Ln`/`L'n`/`L'nT` — Table 4 (bands, situations B/C only) and Table 5
+- Airborne `R`/`R'`/`Dn`/`DnT`: Table 2 (bands) and Table 3 (ratings).
+- Impact `Ln`/`L'n`/`L'nT`: Table 4 (bands, situations B/C only) and Table 5
   (ratings). ISO 12999-1:2020 Table 4 has **no 500 Hz band** (the 2014 edition did).
-- Reduction of impact noise by floor coverings `ΔL`/`ΔLw` — Table 6 (bands) and
+- Reduction of impact noise by floor coverings `ΔL`/`ΔLw`: Table 6 (bands) and
   Table 7 (rating), situation A only.
-- Upper 95 % limit of airborne reproducibility `σR95` — Annex D Tables D.1/D.2
+- Upper 95 % limit of airborne reproducibility `σR95`: Annex D Tables D.1/D.2
   (situation A; informative). In ISO 12999-1:2014 these were extra columns of
   Tables 2/3.
-- Maximum repeatability standard deviation for lab self-verification — Table 1.
+- Maximum repeatability standard deviation for lab self-verification: Table 1.
 
 **Expansion (Clause 8).** `U = k·u` (Formula 2) with the coverage factor `k` of
 Table 8 (a minimum of `k = 1` is enforced). Declaring conformity with a
@@ -135,7 +135,7 @@ combine_uncertainties(*components: float) -> float
 Combine independent standard uncertainties in quadrature (Formula C.2).
 
 `uc = sqrt(Σ u_i²)` for uncorrelated contributions with unit sensitivity
-coefficients — also the model/reality combination of Formula (A.2).
+coefficients, also the model/reality combination of Formula (A.2).
 
 **Parameters**
 
@@ -236,7 +236,7 @@ level; a minimum of `k = 1` is enforced (Clause 8).
 maximum_repeatability_standard_deviation() -> BandUncertainty
 ```
 
-Return Table 1 — maximum repeatability standard deviation per band (Clause 5.8).
+Return Table 1, the maximum repeatability standard deviation per band (Clause 5.8).
 
 A laboratory verifies its own procedure when the repeatability standard
 deviation of `nx` repeated measurements stays below these values.
@@ -279,7 +279,7 @@ reduce_by_independent_measurements(u: float, m: int) -> float
 
 Reduce a standard uncertainty by `m` independent measurements (Formula A.7).
 
-`u_reduced = u / sqrt(m)` — measurements by different persons with different
+`u_reduced = u / sqrt(m)`: measurements by different persons with different
 equipment lower the in-situ uncertainty.
 
 **Parameters**
@@ -307,7 +307,7 @@ satisfies_lower_requirement(
 
 Test a minimum requirement with one-sided uncertainty (Formula 5).
 
-Returns `True` when `value − U > requirement` — e.g. an apparent sound
+Returns `True` when `value − U > requirement`, e.g. an apparent sound
 reduction index `R'w` provably exceeds a minimum. `U` should be computed
 with the one-sided coverage factor.
 
@@ -323,7 +323,7 @@ satisfies_upper_requirement(
 
 Test a maximum requirement with one-sided uncertainty (Formula 4).
 
-Returns `True` when `value + U < requirement` — e.g. a normalized impact
+Returns `True` when `value + U < requirement`, e.g. a normalized impact
 level `L'n,w` provably stays below a maximum. `U` should be computed with
 the one-sided coverage factor.
 

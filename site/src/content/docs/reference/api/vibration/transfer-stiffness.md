@@ -10,7 +10,7 @@ sidebar:
 Dynamic transfer stiffness of resilient elements (ISO 10846-1/-2/-3).
 
 The vibro-acoustic transfer property of a resilient element (a vibration
-isolator, mount, bellows or hose) is its **dynamic transfer stiffness** — the
+isolator, mount, bellows or hose) is its **dynamic transfer stiffness**: the
 frequency-dependent ratio of the *blocking force* phasor `F2,b` on the output
 (receiver) side to the displacement phasor `u1` on the input (source) side,
 with the output blocked (ISO 10846-1, 3.7):
@@ -35,9 +35,9 @@ negligible, the **loss factor** is the tangent of the phase angle of `k2,1`
 
 Two laboratory methods determine `k2,1`:
 
-* **Direct method** (ISO 10846-2) — measure the blocked output force `F2,b`
+* **Direct method** (ISO 10846-2): measure the blocked output force `F2,b`
   and the input displacement `u1` directly: `k2,1 = F2,b / u1`.
-* **Indirect method** (ISO 10846-3) — load the output with a compact blocking
+* **Indirect method** (ISO 10846-3): load the output with a compact blocking
   mass `m2` and measure the vibration transmissibility `T = u2/u1`; the
   blocking force is the mass's inertia force (ISO 10846-3, Equation 1):
 
@@ -212,7 +212,7 @@ transfer_stiffness_direct(
 
 Dynamic transfer stiffness by the direct method (ISO 10846-2).
 
-`k2,1 = F2,b / u1` — the blocked output force phasor over the input
+`k2,1 = F2,b / u1`, the blocked output force phasor over the input
 displacement phasor.
 
 **Parameters**
@@ -244,7 +244,7 @@ transfer_stiffness_indirect(
 
 Dynamic transfer stiffness by the indirect method (ISO 10846-3, Eq. 1).
 
-`k2,1 = -(2 pi f)**2 (m2 + mf) T` — the blocking force is the inertia
+`k2,1 = -(2 pi f)**2 (m2 + mf) T`: the blocking force is the inertia
 force of a compact blocking mass `m2` (plus the output flange mass
 `mf`), derived from the measured vibration transmissibility `T = u2/u1`.
 Valid for `T << 1` (i.e. well above the mass/spring resonance).
@@ -253,8 +253,8 @@ Valid for `T << 1` (i.e. well above the mass/spring resonance).
 Formula (1) is required accurate within 1 dB, i.e. within 12 % of the
 calculated stiffness magnitude. This holds only where Inequality (2) is
 met: `DeltaL1,2 = La1 - La2 >= 20 dB`, i.e. `|T| <= 0.1`
-([`TRANSMISSIBILITY_LIMIT`](/phonometry/reference/api/vibration/transfer-stiffness/#transmissibility_limit)). Bands with `|T|` above that limit —
-routine near or below the mass/spring resonance — trigger a
+([`TRANSMISSIBILITY_LIMIT`](/phonometry/reference/api/vibration/transfer-stiffness/#transmissibility_limit)). Bands with `|T|` above that limit
+(routine near or below the mass/spring resonance) trigger a
 [`PhonometryWarning`](/phonometry/reference/api/filters/phonometry/#phonometrywarning); treat those bands as outside the
 valid frequency range of the test arrangement. The upper frequency limit
 `f3` additionally requires the blocking mass to vibrate as a rigid

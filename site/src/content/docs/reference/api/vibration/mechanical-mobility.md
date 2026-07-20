@@ -37,7 +37,7 @@ K (dyn. stiffness) = 1 / H
 
 These element-wise reciprocals are the **free** quantities of ISO 7626-1,
 3.1.4; the *blocked* matrix quantities of Table 1 do not invert element-wise
-(`Z_ij != 1/Y_ij` for multi-coordinate systems) — see [`convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf).
+(`Z_ij != 1/Y_ij` for multi-coordinate systems); see [`convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf).
 
 [`convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf) moves between any two of the six FRFs through the receptance
 pivot. A **driving-point** FRF has the response and force at the same point
@@ -79,7 +79,7 @@ Convert a frequency-response function between any two kinds (Table 1).
 
 :::note
 The force-per-motion kinds returned here are arithmetic reciprocals of
-the motion-per-force FRFs — the **free** quantities of ISO 7626-1,
+the motion-per-force FRFs: the **free** quantities of ISO 7626-1,
 3.1.4 (all other response coordinates unconstrained). They coincide
 with the **blocked** matrix quantities of Table 1 only for a scalar
 (single-coordinate) system: blocked matrices do not invert
@@ -383,7 +383,7 @@ sdof_receptance(
 
 Receptance of a viscously damped SDOF resonator (closed form).
 
-`H(omega) = 1 / (k - omega**2 m + j omega c)` — the textbook
+`H(omega) = 1 / (k - omega**2 m + j omega c)`, the textbook
 single-degree-of-freedom reference, expressed in the FRF taxonomy of
 ISO 7626-1 (Table 1 / 3.1.2 definitions).
 

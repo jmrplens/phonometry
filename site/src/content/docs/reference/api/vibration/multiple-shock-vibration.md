@@ -28,7 +28,7 @@ measured seat acceleration `az(t)` to the spinal response acceleration
 *conditioned* input: `H` has unity transmissibility at 0 Hz, so any DC
 offset in the record (e.g. the gravity component of a non-AC-coupled
 accelerometer) passes straight into `Az(t)` and corrupts the response
-peaks — remove the mean (high-pass) before processing. The acceleration
+peaks; remove the mean (high-pass) before processing. The acceleration
 dose is
 `Dz = 1.07 * (sum_i Az,i**6)**(1/6)` over the positive response peaks
 (Formula 3), scaled to a daily dose `Dzd = Dz * (td/tm)**(1/6)` (Formula 4/5).
@@ -349,8 +349,8 @@ seat acceleration in the frequency domain and returns the time-domain
 response by the inverse transform.
 
 The input must be **conditioned (DC-removed)**: the transfer function is
-unity at 0 Hz by design (clause 5.2), so a DC offset — e.g. the 1 g
-gravity component of a DC-coupled accelerometer — is passed unattenuated
+unity at 0 Hz by design (clause 5.2), so a DC offset (e.g. the 1 g
+gravity component of a DC-coupled accelerometer) is passed unattenuated
 and produces a spurious constant shift in `Az(t)` that corrupts the
 positive response peaks of the dose. Subtract the mean (or high-pass) of
 `az(t)` before calling.

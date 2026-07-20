@@ -6,7 +6,7 @@ Field survey method for sound insulation and service-equipment noise
 This is the **survey (control) method**: a fast, octave-band field procedure
 for dwellings and rooms of comparable size (up to 150 m³). It trades the
 resolution of the ISO 16283 engineering method (:mod:`phonometry.insulation`)
-for speed — a single hand-held integrating sound level meter swept through the
+for speed: a single hand-held integrating sound level meter swept through the
 room. It measures airborne and impact sound insulation between rooms, façade
 sound insulation, and the sound pressure level from building service equipment.
 Clause references and the reverberation-index table follow the 2021 edition;
@@ -15,8 +15,8 @@ EN ISO 10052:2004+A1:2010.
 
 **Reverberation index (Clause 3.3).** The correction for the receiving room is
 carried by a single quantity, the reverberation index ``k = 10 lg(T/T0)`` dB
-with the reference reverberation time ``T0 = 0,5 s``. It may be **measured** —
-pass the reverberation time ``T`` per band to :func:`reverberation_index` — or,
+with the reference reverberation time ``T0 = 0,5 s``. It may be **measured** (pass
+the reverberation time ``T`` per band to :func:`reverberation_index`) or,
 in a control survey, **estimated** from the room type and volume with
 :func:`estimate_reverberation_index` (Clause 6.5, Tables 3 and 4).
 
@@ -43,7 +43,7 @@ difference ``D2m = L1,2m - L2`` (Clause 3.13), the standardized
 ``D2m,n = D2m + k + 10 lg(A0 T0 / (0,16 V))`` (Clause 3.15).
 
 **Service equipment (Clauses 3.16-3.18).** From three A- or C-weighted sound
-pressure levels — one near a room corner, two in the reverberant field — the
+pressure levels (one near a room corner, two in the reverberant field) the
 service-equipment level ``LXY = 10 lg[(1/3) sum 10^(0,1 LXY,i)]``
 (Clause 3.16), its standardized form ``LXY,nT = LXY - k`` (Clause 3.17) and
 normalized form ``LXY,n = LXY - k - 10 lg(A0 T0 / (0,16 V))`` (Clause 3.18).
@@ -238,10 +238,10 @@ def estimate_reverberation_index(
     :param volume: Receiving-room volume ``V``, in m³ (0 < V <= 150).
     :param room: Room-type key (see above).
     :param weighted: When ``True`` return the single A-/C-weighted index (the
-        Table 4 ``A, C`` column) instead of the five octave-band values — for
+        Table 4 ``A, C`` column) instead of the five octave-band values, for
         globally weighted service-equipment noise (Clause 3.17).
     :return: The reverberation index ``k`` per octave band (125-2000 Hz), in
-        dB — or the scalar A-/C-weighted index when ``weighted`` is ``True``.
+        dB, or the scalar A-/C-weighted index when ``weighted`` is ``True``.
     :raises ValueError: If ``volume`` is not in ``(0, 150]``, or ``room`` is
         not tabulated for that volume range.
     """
@@ -562,9 +562,9 @@ def survey_service_equipment_level(
     10 lg(A0 T0 / (0,16 V))`` (Clause 3.18). ``X`` is the frequency weighting
     (A or C) and ``Y`` the time weighting (F, S or Leq).
 
-    :param measurements: The three A- or C-weighted levels, in dB — either
+    :param measurements: The three A- or C-weighted levels, in dB; either
         three scalars, or a ``(3, bands)`` array for a banded analysis.
-    :param reverberation_index: Reverberation index ``k``, in dB — a scalar
+    :param reverberation_index: Reverberation index ``k``, in dB; a scalar
         for a weighted level, or one value per band; for a global weighted
         level ``k`` is taken from the mean of the 500/1000/2000 Hz octave
         reverberation times (Clause 3.17).

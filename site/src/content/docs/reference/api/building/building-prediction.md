@@ -25,7 +25,7 @@ apparent weighted rating (`R'w` airborne, `L'n,w` impact). The simplified
 model is exact for `RA` and a good approximation for `R'w` (Part 1
 Clause 4.4.1), with a reported standard deviation of about 2 dB (Clause 5).
 
-**Airborne — Formula (26).** The apparent weighted sound reduction index is the
+**Airborne, Formula (26).** The apparent weighted sound reduction index is the
 energetic sum of the direct path `Dd` and, for every flanking element, the
 three flanking paths `Ff`, `Df` and `Fd`:
 
@@ -38,7 +38,7 @@ with the direct path `RDd,w = Rs,w + ΔRDd,w` (Formula 27) and each flanking
 path (Formula 28a) `Rij,w = (Ri,w + Rj,w)/2 + ΔRij,w + Kij + 10 lg(Ss/(l0·lf))`
 where `l0 = 1 m` is the reference coupling length.
 
-**Junctions — Annex E.** The vibration reduction index `Kij` of rigid cross
+**Junctions, Annex E.** The vibration reduction index `Kij` of rigid cross
 (E.3) and T (E.4) junctions, junctions with flexible interlayers (E.5),
 lightweight façade junctions (E.6), junctions of lightweight double-leaf walls
 with homogeneous elements (E.7) or with other coupled double-leaf walls (E.8),
@@ -47,7 +47,7 @@ ratio `M = lg(m'⊥,i / m'i)`. A minimum value `Kij,min` follows from
 the Kij,min relation of Clause 4.4.2 (printed as Eq. (23)
 in the BS EN 12354-1:2000 edition).
 
-**Impact — Formula (21).** `L'n,w = Ln,w,eq − ΔLw + K` with the bare-floor
+**Impact, Formula (21).** `L'n,w = Ln,w,eq − ΔLw + K` with the bare-floor
 equivalent level `Ln,w,eq` (Annex B `164 − 35 lg(m'/m'0)`), the covering
 improvement `ΔLw` (ISO 717-2) and the flanking correction `K` from Table 1.
 
@@ -120,7 +120,7 @@ equivalent_impact_level(mass_per_area: float) -> float
 
 Bare-floor equivalent weighted impact level `Ln,w,eq` (Part 2, Annex B).
 
-`Ln,w,eq = 164 − 35 lg(m'/m'0)` with `m'0 = 1 kg/m²` — the closed form
+`Ln,w,eq = 164 − 35 lg(m'/m'0)` with `m'0 = 1 kg/m²`, the closed form
 used in the Annex E worked example for a homogeneous concrete floor. The
 Annex B relation is stated for homogeneous floors of 100 kg/m² to
 600 kg/m²; outside that envelope the value is an extrapolation and a
@@ -174,7 +174,7 @@ the flanking element) and `KFd`/`KDf` to
 `10 lg[lf·l0·(1/SF + 1/Ss)]` (flanking and separating element), via
 [`junction_min_vibration_reduction`](/phonometry/reference/api/building/building-prediction/#junction_min_vibration_reduction). Without `flanking_area` the
 per-path floors cannot be formed from the available geometry, so the raw
-`k_ff`/`k_fd`/`k_df` are used unchanged — compute the floors
+`k_ff`/`k_fd`/`k_df` are used unchanged; compute the floors
 yourself (or call [`flanking_path`](/phonometry/reference/api/building/building-prediction/#flanking_path) with `kij_min`) in that case to
 stay within Clause 4.4.2.
 
@@ -544,7 +544,7 @@ standardized_impact_level(l_prime_n_w: float, volume: float) -> float
 Standardized apparent impact level `L'nT,w` (EN 12354-2 Formula 3).
 
 `L'nT,w = L'n,w − 10 lg(0,16·V/(A0·T0)) = L'n,w − 10 lg(0,032·V)` with
-`A0 = 10 m²` and `T0 = 0,5 s` — the exact Formula (3) form. The
+`A0 = 10 m²` and `T0 = 0,5 s`, the exact Formula (3) form. The
 standard's own Annex E.3 worked example rounds the factor to
 `10 lg(V/30)` (1/0,032 = 31,25 ≈ 30), 0,18 dB below the exact form;
 both round to the same integer rating in E.3.
@@ -577,7 +577,7 @@ standardized_level_difference(
 Standardized level difference `DnT,w` from `R'w` (EN 12354-1 Formula 5b).
 
 `DnT = R' + 10 lg(0,16·V/(T0·Ss)) = R' + 10 lg(0,32·V/Ss)` with
-`T0 = 0,5 s` — the exact Formula (5b) form, applied to the weighted
+`T0 = 0,5 s`, the exact Formula (5b) form, applied to the weighted
 single numbers of the simplified model (Clause 4.4). The Annex H.3 worked
 example rounds the factor to `10 lg(V/(3·Ss))` (1/0,32 = 3,125 ≈ 3),
 printing `52,2 + 1,6 = 53,8 dB` where the exact form gives 53,6 dB;

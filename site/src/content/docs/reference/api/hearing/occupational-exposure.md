@@ -7,7 +7,7 @@ sidebar:
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-Occupational noise exposure — measurement strategies and uncertainty (ISO 9612:2009).
+Occupational noise exposure: measurement strategies and uncertainty (ISO 9612:2009).
 
 ISO 9612:2009 is the engineering method (accuracy grade 2) for determining a
 worker's daily noise exposure level `LEX,8h` from measurements of the
@@ -28,7 +28,7 @@ the normative **Annex C** uncertainty budget.
   `LEX,8h = Lp,A,eqTe + 10 lg(Te/T0)` (Eq 12). The minimum cumulative
   measurement duration follows Table 1.
 - *Full-day* (Clause 11): three (or more) whole-day measurements averaged (Eq 11),
-  then Eq 13 — the same arithmetic as the job method.
+  then Eq 13, the same arithmetic as the job method.
 
 **Uncertainty (Annex C, normative).** Combined `u^2 = sum c_i^2 u_i^2` (C.1),
 expanded `U = k*u` with `k = 1.65` for a one-sided 95 % confidence interval
@@ -84,7 +84,7 @@ Daily noise exposure level and its expanded uncertainty (ISO 9612:2009).
 | `combined_standard_uncertainty` | Combined standard uncertainty `u` (Eq C.1), dB. |
 | `expanded_uncertainty` | Expanded uncertainty `U = 1.65*u` for a one-sided 95 % confidence interval, dB. |
 | `strategy` | `"task"`, `"job"` or `"full_day"`. |
-| `upper_limit` | `LEX,8h + U` — the value 95 % of readings fall below. |
+| `upper_limit` | `LEX,8h + U`, the value 95 % of readings fall below. |
 
 ### ExposureResult.plot()
 

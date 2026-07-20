@@ -74,7 +74,7 @@ _A0_LAB = 10.0
 _SABINE = 0.16
 
 #: Fixed correction (dB) applied when the signal-to-background margin is at
-#: most 6 dB — the limit of measurement (ISO 10140-4:2010, Clause 4.3).
+#: most 6 dB, the limit of measurement (ISO 10140-4:2010, Clause 4.3).
 _BACKGROUND_CAP = 1.3
 
 #: Signal-to-background margins (dB) bounding Formula (4) of ISO 10140-4:2010

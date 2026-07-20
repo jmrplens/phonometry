@@ -924,10 +924,10 @@ def event_level(
 ) -> FlyoverResult:
     """Single-event noise level of a flight path at a receiver (ECAC Doc 29).
 
-    Assembles the segment event levels (Eq. 4-8/4-9) — NPD baseline plus the
+    Assembles the segment event levels (Eq. 4-8/4-9), the NPD baseline plus the
     duration, engine-installation, lateral-attenuation and finite-segment
     (noise-fraction) corrections, and the start-of-roll directivity behind takeoff
-    ground-roll segments — and combines them into the exposure level ``SEL``
+    ground-roll segments, and combines them into the exposure level ``SEL``
     (energy sum, Eq. 4-11) or the maximum level (Eq. 4-10).
 
     :param path: Flight-path points, shape ``(N, 5)``: columns ``x, y, z`` (m),

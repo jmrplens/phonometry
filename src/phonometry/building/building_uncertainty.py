@@ -12,21 +12,21 @@ it tabulates *standard uncertainties* ``u`` derived from inter-laboratory tests
 **Three measurement situations (Clause 5.2)** fix which standard deviation is the
 standard uncertainty ``u``:
 
-- **A** — laboratory characterisation (ISO 10140); ``u`` = reproducibility ``σR``.
-- **B** — same location, different teams; ``u`` = in-situ ``σsitu``.
-- **C** — same location, same operator/equipment repeated; ``u`` = repeatability ``σr``.
+- **A**: laboratory characterisation (ISO 10140); ``u`` = reproducibility ``σR``.
+- **B**: same location, different teams; ``u`` = in-situ ``σsitu``.
+- **C**: same location, same operator/equipment repeated; ``u`` = repeatability ``σr``.
 
 **Tabulated standard uncertainties** (one-third-octave and single-number):
 
-- Airborne ``R``/``R'``/``Dn``/``DnT`` — Table 2 (bands) and Table 3 (ratings).
-- Impact ``Ln``/``L'n``/``L'nT`` — Table 4 (bands, situations B/C only) and Table 5
+- Airborne ``R``/``R'``/``Dn``/``DnT``: Table 2 (bands) and Table 3 (ratings).
+- Impact ``Ln``/``L'n``/``L'nT``: Table 4 (bands, situations B/C only) and Table 5
   (ratings). ISO 12999-1:2020 Table 4 has **no 500 Hz band** (the 2014 edition did).
-- Reduction of impact noise by floor coverings ``ΔL``/``ΔLw`` — Table 6 (bands) and
+- Reduction of impact noise by floor coverings ``ΔL``/``ΔLw``: Table 6 (bands) and
   Table 7 (rating), situation A only.
-- Upper 95 % limit of airborne reproducibility ``σR95`` — Annex D Tables D.1/D.2
+- Upper 95 % limit of airborne reproducibility ``σR95``: Annex D Tables D.1/D.2
   (situation A; informative). In ISO 12999-1:2014 these were extra columns of
   Tables 2/3.
-- Maximum repeatability standard deviation for lab self-verification — Table 1.
+- Maximum repeatability standard deviation for lab self-verification: Table 1.
 
 **Expansion (Clause 8).** ``U = k·u`` (Formula 2) with the coverage factor ``k`` of
 Table 8 (a minimum of ``k = 1`` is enforced). Declaring conformity with a
@@ -71,7 +71,7 @@ _FREQ_IMPACT: Tuple[float, ...] = (
 )
 
 # --------------------------------------------------------------------------- #
-# Table 1 — Maximum standard deviation of repeatability (Clause 5.8).
+# Table 1: Maximum standard deviation of repeatability (Clause 5.8).
 # --------------------------------------------------------------------------- #
 _TABLE1: Tuple[float, ...] = (
     4.0, 3.5, 3.0, 2.6, 2.2, 1.9, 1.7, 1.5, 1.4, 1.3, 1.3,
@@ -79,7 +79,7 @@ _TABLE1: Tuple[float, ...] = (
 )
 
 # --------------------------------------------------------------------------- #
-# Table 2 — Airborne one-third-octave (Clause 7.2). Columns A/B/C = σR/σsitu/σr.
+# Table 2: Airborne one-third-octave (Clause 7.2). Columns A/B/C = σR/σsitu/σr.
 # --------------------------------------------------------------------------- #
 _TABLE2_A: Tuple[float, ...] = (
     6.8, 4.6, 3.8, 3.0, 2.7, 2.4, 2.1, 1.8, 1.8, 1.8, 1.8,
@@ -95,7 +95,7 @@ _TABLE2_C: Tuple[float, ...] = (
 )
 
 # --------------------------------------------------------------------------- #
-# Table 4 — Impact one-third-octave (Clause 7.3). Situations B/C only, no 500 Hz.
+# Table 4: Impact one-third-octave (Clause 7.3). Situations B/C only, no 500 Hz.
 # --------------------------------------------------------------------------- #
 _TABLE4_B: Tuple[float, ...] = (
     3.2, 2.8, 2.4, 2.0, 1.6, 1.4, 1.3, 1.2, 1.2, 1.2,
@@ -107,7 +107,7 @@ _TABLE4_C: Tuple[float, ...] = (
 )
 
 # --------------------------------------------------------------------------- #
-# Table 6 — Reduction of impact noise by floor coverings ΔL (Clause 7.4).
+# Table 6: Reduction of impact noise by floor coverings ΔL (Clause 7.4).
 # Situation A only.
 # --------------------------------------------------------------------------- #
 _TABLE6_A: Tuple[float, ...] = (
@@ -116,7 +116,7 @@ _TABLE6_A: Tuple[float, ...] = (
 )
 
 # --------------------------------------------------------------------------- #
-# Annex D Table D.1 — σR95 airborne one-third-octave (situation A upper limit).
+# Annex D Table D.1: σR95 airborne one-third-octave (situation A upper limit).
 # --------------------------------------------------------------------------- #
 _TABLED1: Tuple[float, ...] = (
     11.7, 6.7, 5.9, 5.0, 5.0, 3.8, 3.3, 3.3, 3.3, 3.3, 3.3,
@@ -139,7 +139,7 @@ _BAND_TABLES: Dict[
 # Tables 3 (airborne), 5 (impact), 7 (reduction); Annex D Table D.2 (σR95).
 # --------------------------------------------------------------------------- #
 _SINGLE: Dict[str, Tuple[Tuple[float | None, float | None, float | None], float | None]] = {
-    # Airborne — Table 3 (A/B/C) and Table D.2 (σR95, situation A).
+    # Airborne: Table 3 (A/B/C) and Table D.2 (σR95, situation A).
     "r_w": ((1.2, 0.9, 0.4), 2.0),
     "r_w+c_100_3150": ((1.3, 0.9, 0.5), 2.1),
     "r_w+c_100_5000": ((1.3, 1.1, 0.5), 2.1),
@@ -148,15 +148,15 @@ _SINGLE: Dict[str, Tuple[Tuple[float | None, float | None, float | None], float 
     "r_w+ctr_100_3150": ((1.5, 1.1, 0.7), 2.4),
     "r_w+ctr_100_5000": ((1.5, 1.1, 0.7), 2.4),
     "r_w+ctr_50_3150": ((1.5, 1.3, 1.0), 2.4),
-    # NOTE: σsitu(B)=1.0 here is anomalous — it is *lower* than the 50-3150 row
+    # NOTE: σsitu(B)=1.0 here is anomalous: it is *lower* than the 50-3150 row
     # above (B=1.3) and equal to its own σr(C)=1.0, breaking the otherwise
     # monotonic pattern. Verified digit-by-digit against the ISO 12999-1:2020(E)
     # Table 3 (standard page 8): the standard normatively prints 1,5 / 1,0 / 1,0.
     "r_w+ctr_50_5000": ((1.5, 1.0, 1.0), 2.4),
-    # Impact — Table 5 (situation A values are estimates, footnote a).
+    # Impact: Table 5 (situation A values are estimates, footnote a).
     "ln_w": ((1.5, 1.0, 0.5), None),
     "ln_w+ci": ((1.5, 1.0, 0.6), None),
-    # Reduction — Table 7 (situation A only).
+    # Reduction: Table 7 (situation A only).
     "delta_lw": ((1.1, None, None), None),
 }
 
@@ -178,7 +178,7 @@ _ALIASES: Dict[str, str] = {
 _SITUATION_INDEX: Dict[str, int] = {"A": 0, "B": 1, "C": 2}
 
 # --------------------------------------------------------------------------- #
-# Table 8 — Coverage factors (Clause 8). Keyed by confidence level (fraction).
+# Table 8: Coverage factors (Clause 8). Keyed by confidence level (fraction).
 # --------------------------------------------------------------------------- #
 _COVERAGE_TWO_SIDED: Dict[float, float] = {
     0.68: 1.00, 0.80: 1.28, 0.90: 1.65, 0.95: 1.96, 0.99: 2.58, 0.999: 3.29,
@@ -355,7 +355,7 @@ def single_number_uncertainty(
 
 
 def maximum_repeatability_standard_deviation() -> BandUncertainty:
-    """Return Table 1 — maximum repeatability standard deviation per band (Clause 5.8).
+    """Return Table 1, the maximum repeatability standard deviation per band (Clause 5.8).
 
     A laboratory verifies its own procedure when the repeatability standard
     deviation of ``nx`` repeated measurements stays below these values.
@@ -458,7 +458,7 @@ def combine_uncertainties(*components: float) -> float:
     """Combine independent standard uncertainties in quadrature (Formula C.2).
 
     ``uc = sqrt(Σ u_i²)`` for uncorrelated contributions with unit sensitivity
-    coefficients — also the model/reality combination of Formula (A.2).
+    coefficients, also the model/reality combination of Formula (A.2).
 
     :param components: Standard-uncertainty contributions, in dB (non-negative).
     :raises ValueError: No components, or a negative component.
@@ -496,7 +496,7 @@ def prediction_input_uncertainty(
 def reduce_by_independent_measurements(u: float, m: int) -> float:
     """Reduce a standard uncertainty by ``m`` independent measurements (Formula A.7).
 
-    ``u_reduced = u / sqrt(m)`` — measurements by different persons with different
+    ``u_reduced = u / sqrt(m)``: measurements by different persons with different
     equipment lower the in-situ uncertainty.
 
     :param u: Standard uncertainty of a single measurement, in dB (non-negative).
@@ -557,7 +557,7 @@ def satisfies_lower_requirement(
 ) -> bool:
     """Test a minimum requirement with one-sided uncertainty (Formula 5).
 
-    Returns ``True`` when ``value − U > requirement`` — e.g. an apparent sound
+    Returns ``True`` when ``value − U > requirement``, e.g. an apparent sound
     reduction index ``R'w`` provably exceeds a minimum. ``U`` should be computed
     with the one-sided coverage factor.
     """
@@ -571,7 +571,7 @@ def satisfies_upper_requirement(
 ) -> bool:
     """Test a maximum requirement with one-sided uncertainty (Formula 4).
 
-    Returns ``True`` when ``value + U < requirement`` — e.g. a normalized impact
+    Returns ``True`` when ``value + U < requirement``, e.g. a normalized impact
     level ``L'n,w`` provably stays below a maximum. ``U`` should be computed with
     the one-sided coverage factor.
     """

@@ -26,7 +26,7 @@ Garrison, JASA 72 (1982) via Medwin & Clay; Ainslie & McColm, JASA 103 (1998);
 Thorp (1967) via Etter (2003). Absorption is validated by the mutual agreement of
 Francois-Garrison and Ainslie-McColm (~10 % as the latter's paper states;
 marginally exceeded at the extreme corners of the stated domain, e.g. 10.4 % at
-T = −6 °C / 1 MHz and 12.3 % at z = 7 km — a property of the published
+T = −6 °C / 1 MHz and 12.3 % at z = 7 km, a property of the published
 simplification, both transcriptions verified digit-for-digit).
 
 ## seawater_absorption

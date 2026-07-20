@@ -52,8 +52,8 @@ def sensitivity(
     When ``fs`` is provided (and ``validate`` is True), the recording's
     stability is checked the way IEC 60942:2017 specifies for the calibrator
     itself (5.3.3): levels are measured with time-weighting F and the
-    *short-term level fluctuation* — the absolute difference between each of
-    the maximum and minimum levels and the mean level — must not exceed the
+    *short-term level fluctuation* (the absolute difference between each of
+    the maximum and minimum levels and the mean level) must not exceed the
     Table 2 acceptance limit for the calibrator class (class 1: 0.07 dB at
     and above 160 Hz, relaxed to 0.10 dB above 63 Hz and below 160 Hz, and to
     0.20 dB for the 31,5-63 Hz rows where the F time-weighting itself ripples;

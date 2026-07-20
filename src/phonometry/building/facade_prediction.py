@@ -8,7 +8,7 @@ area-weighted by ``Sᵢ/S`` (small elements / air paths enter through their
 element-normalized level difference ``Dn,e`` with the reference area
 ``A₀ = 10 m²``):
 
-**EN 12354-3 — outdoor → indoor (façade sound insulation).** The apparent
+**EN 12354-3, outdoor → indoor (façade sound insulation).** The apparent
 sound reduction index of a façade for diffuse incidence (Formula 10)::
 
     R' = -10 lg( Σ τe,i )         τe,i = (Sᵢ/S)·10^(-Rᵢ/10)   (Formula 15)
@@ -23,7 +23,7 @@ standardized level difference at 2 m (Formula 13)::
 with the façade-shape term ``ΔLfs`` (Annex C; 0 dB for a flat reflecting
 façade).
 
-**EN 12354-4 — indoor → outdoor (sound radiated to the outside).** The sound
+**EN 12354-4, indoor → outdoor (sound radiated to the outside).** The sound
 power level radiated by a segment (Formulas 2-3)::
 
     R' = -10 lg( Σ (Sᵢ/S)·10^(-Rᵢ/10) + Σ (A₀/S)·10^(-Dn,e,i/10) )
@@ -41,7 +41,7 @@ follows from the simplified Annex E attenuation ``Atot`` of a finite radiating
 side and ``Lp = LW - Atot``.
 
 Single-number ratings reuse EN ISO 717-1 via :func:`phonometry.weighted_rating`
-(exact for ``R'w + Ctr``, a good approximation for ``R'w`` — Part 3 NOTE 7).
+(exact for ``R'w + Ctr``, a good approximation for ``R'w``, Part 3 NOTE 7).
 
 Clause/formula citations refer to EN 12354-3:2000 or EN 12354-4:2000.
 """
@@ -389,7 +389,7 @@ def outdoor_attenuation(width: float, height: float, distance: float) -> float:
     return float(-10.0 * log10(corridor))  # (E.2a)
 
 
-#: EN 12354-3:2000 Annex C, Figure C.2 — façade-shape level difference ΔLfs
+#: EN 12354-3:2000 Annex C, Figure C.2: façade-shape level difference ΔLfs
 #: (dB). Keyed by shape; each value maps the line-of-sight height bin
 #: (0: < 1,5 m; 1: 1,5 m to 2,5 m; 2: > 2,5 m) to the (αw ≤ 0,3; 0,6; ≥ 0,9)
 #: triple, or None where the figure prints "does not apply". The 2017 edition
@@ -438,7 +438,7 @@ def facade_shape_level_difference(
     :param line_of_sight: Height of the line of sight from the source at the
         façade plane, in m (bins: below 1,5 m; 1,5 m to 2,5 m; above 2,5 m).
     :param absorption: Weighted absorption coefficient ``αw`` of the underside
-        above the façade (default 0,3 — reflecting).
+        above the façade (default 0,3; reflecting).
     :return: ``ΔLfs``, in dB.
     :raises ValueError: For an unknown shape, a negative height/absorption, or
         a shape/height combination the figure marks "does not apply".
@@ -480,8 +480,8 @@ def outdoor_level(
     of side power levels and their attenuations, or scalars for a single side; a
     scalar broadcasts against an array (e.g. several sides, one common ``Atot``).
 
-    :param l_w: Radiated power level(s) ``LW`` (dB) — scalar or per side.
-    :param attenuation: Attenuation(s) ``Atot`` (dB) — scalar or per side.
+    :param l_w: Radiated power level(s) ``LW`` (dB), scalar or per side.
+    :param attenuation: Attenuation(s) ``Atot`` (dB), scalar or per side.
     :return: Exterior sound pressure level ``Lp`` in dB.
     """
     lw = np.atleast_1d(np.asarray(l_w, dtype=np.float64))

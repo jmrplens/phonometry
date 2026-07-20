@@ -10,7 +10,7 @@ sidebar:
 Impact-sound improvement of floor coverings on a small mock-up (ISO 16251-1:2014).
 
 Laboratory method for the **improvement of impact sound insulation** `ΔL` of a
-soft, locally-reacting floor covering (carpet, PVC, linoleum — ISO 10140-1
+soft, locally-reacting floor covering (carpet, PVC, linoleum; ISO 10140-1
 Annex H category I) laid on a small concrete mock-up plate and excited by a
 standard tapping machine. The two rooms of the ISO 10140 series are removed and
 the floor is replaced by a softly-supported concrete plate; instead of the
@@ -20,7 +20,7 @@ locally-reacting coverings this acceleration-level difference equals the ISO
 10140 impact sound reduction (Clause 4).
 
 **Acceleration level (Formula (1)).** `La = 10 lg[(1/Tm) ∫ a(t)²/a0² dt]` dB,
-with the reference acceleration `a0 = 1e-6 m/s²` — i.e. `La = 10 lg(⟨a²⟩/a0²)`.
+with the reference acceleration `a0 = 1e-6 m/s²`, i.e. `La = 10 lg(⟨a²⟩/a0²)`.
 
 **Background correction (Formula (2)).** Each measured level `L'` is corrected
 against the background `Lb` per accelerometer position, by the margin
@@ -42,7 +42,7 @@ the three one-third-octave values in each octave.
 **Weighted improvement.** `ΔLw` is the ISO 717-2 weighted reduction of impact
 sound pressure level (Clause 6.5), computed with the heavyweight reference floor
 via [`phonometry.weighted_impact_improvement`](/phonometry/reference/api/building/insulation/#weighted_impact_improvement) on the 16 rating bands
-100 Hz to 3150 Hz — a wider clause 6.3 spectrum (18 bands 100-5000 Hz,
+100 Hz to 3150 Hz; a wider clause 6.3 spectrum (18 bands 100-5000 Hz,
 optionally extended to 50 Hz) is rated on that sub-range. The statement of
 results (Clause 8 e)) also carries the spectrum adaptation term `CI,Δ`
 (ISO 717-2:2020 Formula (A.4)) via
@@ -95,7 +95,7 @@ Correct a measured level for background noise (ISO 16251-1 Formula (2)).
 | `signal_and_background` | Measured level `L'` (with background) per band, in dB. |
 | `background` | Background-noise level `Lb` per band, in dB. |
 
-**Returns:** `(corrected, limited)` — the corrected levels `L` per band, in dB, and a boolean mask of bands at the 1,3 dB limit of measurement (report as `> ΔL`).
+**Returns:** `(corrected, limited)`: the corrected levels `L` per band, in dB, and a boolean mask of bands at the 1,3 dB limit of measurement (report as `> ΔL`).
 
 **Raises**
 
@@ -171,17 +171,17 @@ and accelerometer positions) or, for the raw measurement, as a
 `(positions, bands)` array. The standard's order of operations is followed:
 the background correction (Formula (2)) is applied **per position**, then the
 level difference `ΔLt,a = L0 − L1` (Formula (3)), then the arithmetic mean
-over positions `ΔL = mean(ΔLt,a)` (Formula (4)) — necessary because Formula
+over positions `ΔL = mean(ΔLt,a)` (Formula (4)), necessary because Formula
 (2) is non-linear, so correcting must precede averaging.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `bare` | Bare-plate acceleration level `L0`, in dB — `(bands,)` or `(positions, bands)`. |
-| `with_covering` | Level with the specimen `L1`, in dB — same shape as `bare`. |
+| `bare` | Bare-plate acceleration level `L0`, in dB; `(bands,)` or `(positions, bands)`. |
+| `with_covering` | Level with the specimen `L1`, in dB; same shape as `bare`. |
 | `frequencies` | One-third-octave band centre frequencies, in Hz (`(bands,)`). |
-| `background` | Optional background-noise level `Lb`, in dB — `(bands,)` (applied to every position) or `(positions, bands)`. When given, `L0` and `L1` are background-corrected (Formula (2)) per position before the difference, and bands where any position hits the 1,3 dB limit are flagged. |
+| `background` | Optional background-noise level `Lb`, in dB; `(bands,)` (applied to every position) or `(positions, bands)`. When given, `L0` and `L1` are background-corrected (Formula (2)) per position before the difference, and bands where any position hits the 1,3 dB limit are flagged. |
 
 **Returns:** [`FloorCoveringImprovementResult`](/phonometry/reference/api/building/floor-covering-improvement/#floorcoveringimprovementresult) (`ΔL` per band).
 

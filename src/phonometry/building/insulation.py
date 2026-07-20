@@ -63,7 +63,7 @@ source this module forms, from the level 2 m in front of the façade
 ``D2m,nT = D2m + 10 lg(T/T0)`` with ``T0 = 0,5 s`` (Clause 3.15) and
 normalized form ``D2m,n = D2m - 10 lg(A/A0)`` with the Sabine absorption
 area ``A = 0,16 V/T`` (Clause 3.17) and reference ``A0 = 10 m²``
-(Clause 3.16) — the global loudspeaker / traffic quantities
+(Clause 3.16): the global loudspeaker / traffic quantities
 ``Dls,2m,*`` / ``Dtr,2m,*``. When a surface level ``L1,s`` (microphone on
 the test element) with the element area ``S`` and volume are given it
 forms the apparent sound reduction index
@@ -1160,7 +1160,7 @@ def weighted_impact_rating(
     )
 
 
-#: ISO 717-2:2020 Table 4 — normalized impact sound pressure level ``Ln,r,0`` of
+#: ISO 717-2:2020 Table 4: normalized impact sound pressure level ``Ln,r,0`` of
 #: the heavyweight reference floor, 16 one-third-octave bands 100 Hz to 3150 Hz,
 #: in dB. Its weighted rating is ``Ln,r,0,w = 78 dB`` (Clause 5.2).
 _IMPACT_REFERENCE_FLOOR = (
@@ -1185,7 +1185,7 @@ def weighted_impact_improvement(
     the ISO 717-2 weighted rating of ``Ln,r`` from :func:`weighted_impact_rating`.
 
     :param delta_l: The reduction of impact sound pressure level ``ΔL`` per band,
-        in dB — 16 one-third-octave values from 100 Hz to 3150 Hz (e.g. from a
+        in dB; 16 one-third-octave values from 100 Hz to 3150 Hz (e.g. from a
         floor-covering measurement to ISO 10140-3 or ISO 16251-1).
     :return: The weighted reduction ``ΔLw``, in dB (rounded, per ISO 717-2).
     :raises ValueError: If ``delta_l`` is not 16 one-third-octave values, or is
@@ -1217,7 +1217,7 @@ def impact_improvement_adaptation_term(
     Clause 8 e) requires this term in the statement of results.
 
     :param delta_l: The reduction of impact sound pressure level ``ΔL`` per
-        band, in dB — 16 one-third-octave values from 100 Hz to 3150 Hz.
+        band, in dB; 16 one-third-octave values from 100 Hz to 3150 Hz.
     :return: The spectrum adaptation term ``CI,Δ``, in dB (integer).
     :raises ValueError: If ``delta_l`` is not 16 one-third-octave values, or
         is non-finite.
@@ -1367,7 +1367,7 @@ def weighted_rating_extended(
     bands of the enlarged range (Clause 4.5 with Annex B).
 
     With ``one_decimal=True`` the reference-curve shift runs in 0,1 dB steps
-    and every reduction keeps one decimal place — the variant Clauses 4.4/4.5
+    and every reduction keeps one decimal place; the variant Clauses 4.4/4.5
     prescribe "for the expression of uncertainty" and ISO 12999-1:2020
     Annex B requires for the uncertainty of single-number values.
 

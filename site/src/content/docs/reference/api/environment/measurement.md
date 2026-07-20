@@ -37,7 +37,7 @@ audibility `ΔL` to `Kt` (0–6 dB).
 
 **Residual-noise correction (Clause 10.4).**
 `L = 10 lg(10^(L'/10) − 10^(Lres/10))` (Formula (16)); with a residual
-within 3 dB of the measured level no correction is allowed — the
+within 3 dB of the measured level no correction is allowed; the
 *uncorrected* measured level `L'` is then the reportable value, as an upper
 bound of the specific sound. [`gaussian_residual_level`](/phonometry/reference/api/environment/measurement/#gaussian_residual_level) estimates the
 residual from percentile levels (Annex I, Formulae (I.1)/(I.2)).
@@ -181,7 +181,7 @@ one of `l90` / `l95`.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If not exactly one of `l90` / `l95` is given, the inputs are not finite, or the percentile ordering is inverted (`L90`/`L95` cannot exceed `L50` — almost certainly swapped arguments, which the squared spread would otherwise hide). |
+| ValueError | If not exactly one of `l90` / `l95` is given, the inputs are not finite, or the percentile ordering is inverted (`L90`/`L95` cannot exceed `L50`, almost certainly swapped arguments, which the squared spread would otherwise hide). |
 
 ## RepeatedMeasurementResult
 
@@ -202,7 +202,7 @@ Energy-mean level and its uncertainty from repeats (Formulae (17)–(20)).
 | :--- | :--- |
 | `mean_level` | Energy-mean level `Lk = 10 lg((1/N)·Σ 10^(0.1·Li))`, dB (Formula (18)). |
 | `standard_uncertainty` | Standard uncertainty `uk` by the primary route, Formulae (17)+(19): the sample standard deviation `sk` of the energy values `10^(0.1·Li)` mapped back to level, `uk = 10 lg(10^(0.1·Lk) + sk) − Lk`, in dB. |
-| `approximate_uncertainty` | The Note 2 substitute (Formula (20)), `√(Σ(Li − Lk)²/(N − 1))`, in dB — valid only when the spread of the `Li` is small; it grossly inflates for spread levels. |
+| `approximate_uncertainty` | The Note 2 substitute (Formula (20)), `√(Σ(Li − Lk)²/(N − 1))`, in dB; valid only when the spread of the `Li` is small; it grossly inflates for spread levels. |
 | `n` | Number of measurements. |
 
 ## residual_correction_uncertainty
@@ -290,7 +290,7 @@ Residual-noise-corrected level (ISO 1996-2:2017 Clause 10.4).
 
 | Name | Description |
 | :--- | :--- |
-| `corrected_level` | The corrected level `L` (Formula (16)), in dB. When `reliable` is `False` the standard allows *no* correction — this value is then informative only (it estimates the source from below) and must not be reported as the result. |
+| `corrected_level` | The corrected level `L` (Formula (16)), in dB. When `reliable` is `False` the standard allows *no* correction; this value is then informative only (it estimates the source from below) and must not be reported as the result. |
 | `reportable_upper_bound` | The *measured* level `L'`, in dB. When the margin is 3 dB or less, §10.4 permits reporting the measured level as an upper bound of the specific sound level; this field carries that reportable value. |
 | `margin` | `L' − Lres`, in dB (measured minus residual). |
 | `reliable` | `True` when the residual is more than 3 dB below the measured level; `False` when no correction is allowed and only the uncorrected `L'` may be reported, as an upper bound. |
@@ -400,7 +400,7 @@ flagged.
 :::note
 Annex K defines the thresholds for 25 Hz to 10 kHz only. Bands
 supplied outside that span are extrapolated with the nearest rule
-(15 dB below 25 Hz, 5 dB above 10 kHz) — outside the standard.
+(15 dB below 25 Hz, 5 dB above 10 kHz), outside the standard.
 :::
 
 **Parameters**

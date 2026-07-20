@@ -42,7 +42,7 @@ This module is the resilient-layer characterisation feeding the floating-floor
 term of the EN 12354-2 impact model
 (:mod:`phonometry.building.building_prediction`). It does **not** feed
 ISO 16251-1 (:mod:`phonometry.building.floor_covering_improvement`), whose
-scope is limited to soft, locally-reacting floor coverings — floating floors
+scope is limited to soft, locally-reacting floor coverings; floating floors
 are explicitly excluded there.
 """
 
@@ -162,7 +162,7 @@ def installed_dynamic_stiffness(
       criterion ``s't >> s'a`` (clause 8.2). This implementation applies its own
       engineering threshold: ``s'a`` below 10 % of ``s't`` is treated as
       negligible and ``s' = s't`` (a :class:`DynamicStiffnessWarning` is
-      emitted); above it the result is ``nan`` — the method cannot resolve
+      emitted); above it the result is ``nan``, as the method cannot resolve
       ``s'``.
 
     :param apparent_stiffness: Apparent dynamic stiffness ``s't``, in N/m3.

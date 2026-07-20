@@ -81,7 +81,7 @@ def plate_bending_stiffness(
 ) -> float:
     """Bending stiffness of a thin plate per unit width (Cremer Eq. 4.22).
 
-    ``B' = E h**3 / (12 (1 - nu**2))`` — the plate bending stiffness ``B'`` in
+    ``B' = E h**3 / (12 (1 - nu**2))``, the plate bending stiffness ``B'`` in
     N.m used throughout this module and by the coincidence frequency of
     :func:`phonometry.vibration.radiation_efficiency.coincidence_frequency`.
 
@@ -233,7 +233,7 @@ def infinite_beam_mobility(
     """Point mobility of an infinite beam in bending (Cremer Table 5.1).
 
     ``Y = (1 - j) / (4 m' cB)`` for a force at the centre and
-    ``Y = (1 - j) / (m' cB)`` for a force at a free end — the reciprocal of
+    ``Y = (1 - j) / (m' cB)`` for a force at a free end, the reciprocal of
     :func:`infinite_beam_impedance`. The mobility falls as ``omega**(-1/2)``.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
@@ -255,7 +255,7 @@ def infinite_beam_moment_mobility(
     """Moment (rotational) mobility of an infinite beam (Cremer Eq. 5.75).
 
     ``Y_M = omega (1 + j) / (4 B kB)`` with the bending wavenumber
-    ``kB = omega / cB`` — the angular velocity per unit applied moment at the
+    ``kB = omega / cB``, the angular velocity per unit applied moment at the
     driving point.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
@@ -283,7 +283,7 @@ def longitudinal_rod_impedance(
 ) -> float:
     """Point impedance of an infinite rod in longitudinal motion (Table 5.1).
 
-    ``Z = rho cL S`` — real and frequency independent.
+    ``Z = rho cL S``, real and frequency independent.
 
     :param density: Material density ``rho``, in kg/m^3.
     :param longitudinal_wave_speed: Longitudinal wave speed ``cL``, in m/s.
@@ -321,7 +321,7 @@ def longitudinal_rod_mobility(
 def injected_power(force: ArrayLike, mobility: ArrayLike) -> NDArray[np.float64]:
     """Time-averaged vibrational power injected by a point force (Cremer 5.23).
 
-    ``W = 0.5 |F|**2 Re{Y}`` — only the real part (conductance) of the mobility
+    ``W = 0.5 |F|**2 Re{Y}``: only the real part (conductance) of the mobility
     carries power; the reactive part stores near-field energy.
 
     :param force: Point-force amplitude ``F`` (peak, scalar or array), in N.

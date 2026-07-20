@@ -31,7 +31,7 @@ and the plate loss factor follows from its structural reverberation time ``Ts``
 injects a different power into a different receiver; feeding ``L_Ws`` directly
 into EN 12354-5 as a characteristic level mis-states the receiving-room level
 by up to ~20 dB. EN 15657 derives the plate-independent source quantities from
-two test plates — a *low-mobility* plate (its point mobility and loss factor
+two test plates: a *low-mobility* plate (its point mobility and loss factor
 are unchanged by the source) and a *high-mobility* plate (loaded by the
 source):
 
@@ -373,7 +373,7 @@ def source_mobility_from_levels(
 ) -> np.ndarray:
     """Equivalent source mobility magnitude (EN 15657:2018, Formula 19).
 
-    ``|Y_S,eq|**2 / Y0**2 = 10^((L_vf,eq - L_Fb,eq)/10) * 1e-6`` — the ratio
+    ``|Y_S,eq|**2 / Y0**2 = 10^((L_vf,eq - L_Fb,eq)/10) * 1e-6``, the ratio
     of the free-velocity (re 1e-9 m/s) and blocked-force (re 1e-6 N)
     references makes the constant ``(1e-9/1e-6)**2 = 1e-6``.
 
@@ -394,7 +394,7 @@ def source_mobility_from_levels(
 def mean_free_velocity_level(levels: ArrayLike) -> float:
     """Mean free velocity level over positions (ISO 9611:1996, equation (9)).
 
-    ``L̄vx = 10 lg[(1/N) sum 10^(Lvxi/10)]`` — the energy mean of the
+    ``L̄vx = 10 lg[(1/N) sum 10^(Lvxi/10)]``, the energy mean of the
     free-velocity levels measured at the ``N`` contact/attachment points of
     one direction ``x``, each in dB re the ISO 9611 free-velocity reference
     ``v0 = 5e-8 m/s`` (clause 7). The arithmetic is the energetic average

@@ -117,17 +117,17 @@ def _metadata_pairs(
         return fmt_num(value, language) if value is not None else None
 
     specs: List[Tuple[str, str | None]] = [
-        (t("meta.client", language), metadata.client),
-        (t("meta.manufacturer", language), metadata.manufacturer),
-        (t("meta.description", language), metadata.specimen),
-        (t("meta.sample_area", language), num(metadata.area)),
-        (t("meta.mounted_by", language), metadata.mounted_by),
-        (t("meta.mounting", language), metadata.mounting),
-        (t("meta.test_room", language), metadata.test_room),
-        (t("meta.date_of_test", language), metadata.test_date),
-        (t("meta.temperature", language), num(metadata.temperature)),
-        (t("meta.relative_humidity", language), num(metadata.relative_humidity)),
-        (t("meta.ambient_pressure", language), num(metadata.pressure)),
+        (t("Client", language), metadata.client),
+        (t("Manufacturer", language), metadata.manufacturer),
+        (t("Description", language), metadata.specimen),
+        (t("Sample area S [m<super>2</super>]", language), num(metadata.area)),
+        (t("Mounted by", language), metadata.mounted_by),
+        (t("Mounting", language), metadata.mounting),
+        (t("Test room", language), metadata.test_room),
+        (t("Date of test", language), metadata.test_date),
+        (t("Temperature [&#176;C]", language), num(metadata.temperature)),
+        (t("Relative humidity [%]", language), num(metadata.relative_humidity)),
+        (t("Ambient pressure [kPa]", language), num(metadata.pressure)),
     ]
     # Values are user-supplied free text; escape XML specials so a '&' or '<'
     # cannot break reportlab's Paragraph parser. Labels carry intentional markup.
@@ -160,15 +160,15 @@ def _value_table(
 
     if verbose:
         header = [
-            Paragraph(t("table.f_hz", language), head_style),
-            Paragraph(t("table.practical_alpha_p", language), head_style),
-            Paragraph(t("table.shifted_ref", language), head_style),
-            Paragraph(t("table.unfav_dev", language), head_style),
+            Paragraph(t("f [Hz]", language), head_style),
+            Paragraph(t("Practical &#945;<sub>p</sub>", language), head_style),
+            Paragraph(t("Shifted ref.", language), head_style),
+            Paragraph(t("Unfav. dev.", language), head_style),
         ]
         col_widths = [15 * mm, 20 * mm, 17 * mm, 18 * mm]
     else:
         header = [
-            Paragraph(t("table.frequency", language), head_style),
+            Paragraph(t("Frequency f [Hz]", language), head_style),
             Paragraph("&#945;<sub>p</sub>", head_style),
         ]
         col_widths = [28 * mm, 28 * mm]
@@ -190,7 +190,7 @@ def _value_table(
     style_cmds = _base_table_style(accent, light, len(centers))
     if verbose:
         rows.append(
-            ["", "", t("table.sum", language), _d2(float(deviations.sum()), language)]
+            ["", "", t("sum", language), _d2(float(deviations.sum()), language)]
         )
         style_cmds += [
             ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
@@ -227,7 +227,7 @@ def _third_octave_table(
     head_style = _thead_style()
 
     header = [
-        Paragraph(t("table.frequency", language), head_style),
+        Paragraph(t("Frequency f [Hz]", language), head_style),
         Paragraph("&#945;<sub>s</sub>", head_style),
         Paragraph("&#945;<sub>p</sub>", head_style),
     ]
@@ -257,18 +257,18 @@ def _extended_terms(
 ) -> List[str]:
     """The absorption class, shape indicator and applied shift shown by the box."""
     terms = [
-        t("iso11654.absorption_class", language).format(
+        t("Absorption class: {value}", language).format(
             value=html.escape(result.absorption_class)
         )
     ]
     if result.shape_indicator:
         terms.append(
-            t("iso11654.shape_indicator", language).format(
+            t("Shape indicator: {value}", language).format(
                 value=result.shape_indicator
             )
         )
     terms.append(
-        t("iso11654.applied_shift", language).format(
+        t("Applied shift: {value}", language).format(
             value=format_number(result.shift, language, decimals=2)
         )
     )
@@ -280,7 +280,7 @@ def _verdict(
 ) -> Tuple[str, bool]:
     """Verdict text and PASS flag: absorption passes at or above the requirement."""
     passed = float(result.alpha_w) >= requirement
-    text = t("iso11654.verdict", language).format(
+    text = t("&#945;<sub>w</sub> = {value}, required &#8805; {req}", language).format(
         value=format_number(result.alpha_w, language, decimals=2),
         req=format_number(requirement, language, decimals=2),
     )
@@ -332,17 +332,17 @@ def render_iso11654_report(
     deviations = np.maximum(shifted - measured, 0.0)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    title = t("title.absorption", language)
+    title = t("Sound absorption rating", language)
 
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
     )
     if measurement_standard:
-        basis = t("basis.iso11654.with_standard", language).format(
+        basis = t("{standard} laboratory measurement of sound absorption. Rating per ISO 11654:1997.", language).format(
             standard=html.escape(measurement_standard)
         )
     else:
-        basis = t("basis.iso11654.plain", language)
+        basis = t("Sound absorption rating per ISO 11654:1997.", language)
 
     flow: List[Any] = [
         Paragraph(title, title_style),
@@ -369,12 +369,12 @@ def render_iso11654_report(
             measured,
             language,
         )
-        caption = t("caption.one_third_octave_alpha", language)
+        caption = t("One-third-octave &#945;<sub>s</sub>, octave &#945;<sub>p</sub>", language)
     else:
         value_table = _value_table(
             centers, measured, shifted, deviations, verbose, language
         )
-        caption = t("caption.octave_alpha_p", language)
+        caption = t("Octave-band &#945;<sub>p</sub>", language)
     left_cell = [
         Paragraph(caption, caption_style),
         value_table,

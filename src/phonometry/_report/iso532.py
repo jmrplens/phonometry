@@ -61,11 +61,11 @@ def _metadata_pairs(
     identity fields are used.
     """
     specs: List[Tuple[str, str | None]] = [
-        (t("meta.client", language), metadata.client),
-        (t("meta.signal", language), metadata.specimen),
-        (t("meta.manufacturer", language), metadata.manufacturer),
-        (t("meta.test_room", language), metadata.test_room),
-        (t("meta.date_of_test", language), metadata.test_date),
+        (t("Client", language), metadata.client),
+        (t("Signal", language), metadata.specimen),
+        (t("Manufacturer", language), metadata.manufacturer),
+        (t("Test room", language), metadata.test_room),
+        (t("Date of test", language), metadata.test_date),
     ]
     return [
         (label, html.escape(str(value)))
@@ -79,16 +79,16 @@ def _metric_rows(
 ) -> List[Tuple[str, str]]:
     """The scalar loudness results shown in the left-hand metrics table."""
     rows = [
-        (t("metric.total_loudness", language), fmt_num(result.loudness, language)),
+        (t("Total loudness N [sone]", language), fmt_num(result.loudness, language)),
         (
-            t("metric.loudness_level", language),
+            t("Loudness level L<sub>N</sub> [phon]", language),
             fmt_num(result.loudness_level, language),
         ),
     ]
     if result.n5 is not None:
-        rows.append((t("metric.n5", language), fmt_num(result.n5, language)))
+        rows.append((t("N<sub>5</sub> [sone]", language), fmt_num(result.n5, language)))
     if result.n10 is not None:
-        rows.append((t("metric.n10", language), fmt_num(result.n10, language)))
+        rows.append((t("N<sub>10</sub> [sone]", language), fmt_num(result.n10, language)))
     return rows
 
 
@@ -111,7 +111,7 @@ def _verdict(
     loudness is better), so the sign rule is the opposite of the airborne one.
     """
     passed = float(result.loudness) <= requirement
-    text = t("iso532.verdict", language).format(
+    text = t("N = {value} sone, required &#8804; {req} sone", language).format(
         value=format_number(result.loudness, language, decimals=1),
         req=fmt_num(requirement, language),
     )
@@ -153,17 +153,17 @@ def render_iso532_report(
     accent = colors.HexColor(_ACCENT_HEX)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    title = t("title.loudness", language)
+    title = t("Loudness rating", language)
 
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
     )
     if measurement_standard:
-        basis = t("basis.iso532.with_standard", language).format(
+        basis = t("{standard} loudness. Rating per ISO 532-1:2017 (Zwicker method).", language).format(
             standard=html.escape(measurement_standard)
         )
     else:
-        basis = t("basis.iso532.plain", language)
+        basis = t("Loudness rating per ISO 532-1:2017 (Zwicker method).", language)
 
     flow: List[Any] = [
         Paragraph(title, title_style),
@@ -178,7 +178,7 @@ def render_iso532_report(
     flow.append(Spacer(1, 8))
 
     left_cell = [
-        Paragraph(t("caption.loudness_results", language), caption_style),
+        Paragraph(t("Loudness results", language), caption_style),
         metrics_table(_metric_rows(result, language)),
     ]
     # Non-band plot (specific loudness N' over Bark): self-scaling axis.

@@ -25,42 +25,32 @@ if TYPE_CHECKING:
 
 _FREQ_LABEL = "Frequency [Hz]"
 
-#: English -> {language: string} lookup for the fixed labels/titles/legends of
-#: the noise-control renderers. English ids map to themselves so ``_t(key,
-#: "en")`` returns the verbatim original string.
-_STRINGS: dict[str, dict[str, str]] = {
-    "Frequency [Hz]": {"en": "Frequency [Hz]", "es": "Frecuencia [Hz]"},
-    "Band": {"en": "Band", "es": "Banda"},
-    "Transmission loss": {"en": "Transmission loss", "es": "Pérdida por transmisión"},
-    "Insertion loss": {"en": "Insertion loss", "es": "Pérdida por inserción"},
-    "Resonance": {"en": "Resonance", "es": "Resonancia"},
-    "Loss [dB]": {"en": "Loss [dB]", "es": "Pérdida [dB]"},
-    "Reactive silencer": {"en": "Reactive silencer", "es": "Silenciador reactivo"},
-    "Sound power level [dB re 1 pW]": {
-        "en": "Sound power level [dB re 1 pW]",
-        "es": "Nivel de potencia acústica [dB re 1 pW]",
-    },
-    "Attenuation [dB]": {"en": "Attenuation [dB]", "es": "Atenuación [dB]"},
-    "Panel R": {"en": "Panel R", "es": "R del panel"},
-    "Interior correction C": {
-        "en": "Interior correction C",
-        "es": "Corrección interior C",
-    },
-    "Insertion loss (R - C)": {
-        "en": "Insertion loss (R - C)",
-        "es": "Pérdida por inserción (R - C)",
-    },
-    "Level [dB]": {"en": "Level [dB]", "es": "Nivel [dB]"},
-    "Machine enclosure insertion loss": {
-        "en": "Machine enclosure insertion loss",
-        "es": "Pérdida por inserción de encapsulado de máquina",
-    },
+#: Spanish translations of the fixed labels/titles/legends rendered by the
+#: noise-control ``.plot()`` renderers, keyed by their verbatim English
+#: text. ``_t`` returns the English key unchanged for any language other
+#: than ``"es"``, so the English output is byte-for-byte identical to the
+#: pre-i18n renderers.
+_STRINGS: dict[str, str] = {
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Band": "Banda",
+    "Transmission loss": "Pérdida por transmisión",
+    "Insertion loss": "Pérdida por inserción",
+    "Resonance": "Resonancia",
+    "Loss [dB]": "Pérdida [dB]",
+    "Reactive silencer": "Silenciador reactivo",
+    "Sound power level [dB re 1 pW]": "Nivel de potencia acústica [dB re 1 pW]",
+    "Attenuation [dB]": "Atenuación [dB]",
+    "Panel R": "R del panel",
+    "Interior correction C": "Corrección interior C",
+    "Insertion loss (R - C)": "Pérdida por inserción (R - C)",
+    "Level [dB]": "Nivel [dB]",
+    "Machine enclosure insertion loss": "Pérdida por inserción de encapsulado de máquina",
 }
 
 
-def _t(key: str, language: str) -> str:
-    """Look up the localised string for ``key`` (falls back to ``key``)."""
-    return _STRINGS.get(key, {}).get(language, key)
+def _t(text: str, language: str = "en") -> str:
+    """Localise a fixed string; English is returned verbatim (byte-identical)."""
+    return _STRINGS.get(text, text) if language == "es" else text
 
 
 def plot_reactive_silencer(

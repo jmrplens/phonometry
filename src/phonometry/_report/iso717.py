@@ -74,7 +74,7 @@ def _labels(
     """Return ``(title, rating_part, statement, value_header)`` for the quantity."""
     if result.quantity == "impact":
         impact = cast("ImpactRatingResult", result)
-        title = t("title.impact", language)
+        title = t("Impact sound insulation rating", language)
         rating_part = "ISO 717-2"
         statement = (
             f"L<sub>n,w</sub> (C<sub>I</sub>) = "
@@ -83,7 +83,7 @@ def _labels(
         value_header = "L<sub>n</sub>"
     else:
         airborne = cast("WeightedRatingResult", result)
-        title = t("title.airborne", language)
+        title = t("Airborne sound insulation rating", language)
         rating_part = "ISO 717-1"
         statement = (
             f"R<sub>w</sub> (C; C<sub>tr</sub>) = "
@@ -114,17 +114,17 @@ def _metadata_pairs(
 
     identity = group(
         [
-            (t("meta.client", language), metadata.client),
-            (t("meta.mounted_by", language), metadata.mounted_by),
+            (t("Client", language), metadata.client),
+            (t("Mounted by", language), metadata.mounted_by),
             (
-                t("meta.sample_area", language),
+                t("Sample area S [m<super>2</super>]", language),
                 fmt_num(metadata.area, language)
                 if metadata.area is not None else None,
             ),
-            (t("meta.manufacturer", language), metadata.manufacturer),
-            (t("meta.description", language), metadata.specimen),
-            (t("meta.test_room", language), metadata.test_room),
-            (t("meta.date_of_test", language), metadata.test_date),
+            (t("Manufacturer", language), metadata.manufacturer),
+            (t("Description", language), metadata.specimen),
+            (t("Test room", language), metadata.test_room),
+            (t("Date of test", language), metadata.test_date),
         ]
     )
 
@@ -142,38 +142,38 @@ def _metadata_pairs(
     )
     conditions = group(
         [
-            (t("meta.source_volume", language), num(metadata.source_volume)),
-            (t("meta.source_temp", language), num(metadata.source_temperature)),
+            (t("Source room volume [m<super>3</super>]", language), num(metadata.source_volume)),
+            (t("Source room temp. [&#176;C]", language), num(metadata.source_temperature)),
             (
-                t("meta.source_humidity", language),
+                t("Source room humidity [%]", language),
                 num(metadata.source_relative_humidity),
             ),
             (
-                t("meta.receiving_volume", language),
+                t("Receiving room volume [m<super>3</super>]", language),
                 num(metadata.receiving_volume),
             ),
             (
-                t("meta.receiving_temp", language),
+                t("Receiving room temp. [&#176;C]", language),
                 num(metadata.receiving_temperature),
             ),
             (
-                t("meta.receiving_humidity", language),
+                t("Receiving room humidity [%]", language),
                 num(metadata.receiving_relative_humidity),
             ),
             (
-                t("meta.temperature", language),
+                t("Temperature [&#176;C]", language),
                 None if per_room_t else num(metadata.temperature),
             ),
             (
-                t("meta.relative_humidity", language),
+                t("Relative humidity [%]", language),
                 None if per_room_rh else num(metadata.relative_humidity),
             ),
-            (t("meta.ambient_pressure", language), num(metadata.pressure)),
+            (t("Ambient pressure [kPa]", language), num(metadata.pressure)),
             (
-                t("meta.mass_per_area", language),
+                t("Mass per unit area [kg/m<super>2</super>]", language),
                 num(metadata.mass_per_area),
             ),
-            (t("meta.mounting", language), metadata.mounting),
+            (t("Mounting", language), metadata.mounting),
         ]
     )
     return identity, conditions
@@ -209,20 +209,20 @@ def _value_table(
 
     if verbose:
         header = [
-            Paragraph(t("table.f_hz", language), head_style),
+            Paragraph(t("f [Hz]", language), head_style),
             Paragraph(
-                t("table.measured_value", language).format(vh=value_header),
+                t("Measured {vh} [dB]", language).format(vh=value_header),
                 head_style,
             ),
-            Paragraph(t("table.shifted_ref_db", language), head_style),
-            Paragraph(t("table.unfav_dev_db", language), head_style),
+            Paragraph(t("Shifted ref. [dB]", language), head_style),
+            Paragraph(t("Unfav. dev. [dB]", language), head_style),
         ]
         col_widths = [15 * mm, 19 * mm, 18 * mm, 18 * mm]
     else:
         header = [
-            Paragraph(t("table.frequency", language), head_style),
+            Paragraph(t("Frequency f [Hz]", language), head_style),
             Paragraph(
-                t("table.value_db", language).format(vh=value_header), head_style
+                t("{vh} [dB]", language).format(vh=value_header), head_style
             ),
         ]
         col_widths = [28 * mm, 28 * mm]
@@ -266,7 +266,7 @@ def _value_table(
         )
     if verbose:
         rows.append(
-            ["", "", t("table.sum", language), d1(float(deviations.sum()))]
+            ["", "", t("sum", language), d1(float(deviations.sum()))]
         )
         style_cmds += [
             ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
@@ -293,12 +293,12 @@ def _verdict(
     req_text = fmt_num(requirement, language)
     if result.quantity == "impact":
         passed = rating <= requirement
-        text = t("iso717.verdict.impact", language).format(
+        text = t("L<sub>n,w</sub> = {rating} dB, required &#8804; {req} dB", language).format(
             rating=result.rating, req=req_text
         )
     else:
         passed = rating >= requirement
-        text = t("iso717.verdict.airborne", language).format(
+        text = t("R<sub>w</sub> = {rating} dB, required &#8805; {req} dB", language).format(
             rating=result.rating, req=req_text
         )
     return text, passed
@@ -404,11 +404,11 @@ def render_iso717_report(
         metadata.measurement_standard if metadata is not None else None
     )
     if measurement_standard:
-        basis = t("basis.iso717.with_standard", language).format(
+        basis = t("{standard} laboratory measurement of sound insulation. Rating per {part}:2020.", language).format(
             standard=html.escape(measurement_standard), part=rating_part
         )
     else:
-        basis = t("basis.iso717.plain", language).format(part=rating_part)
+        basis = t("Sound insulation rating per {part}:2020.", language).format(part=rating_part)
 
     flow: List[Any] = [
         Paragraph(title, title_style),
@@ -431,7 +431,7 @@ def render_iso717_report(
     )
     left_cell = [
         Paragraph(
-            t("caption.one_third_octave_value", language).format(vh=value_header),
+            t("One-third-octave {vh} [dB]", language).format(vh=value_header),
             caption_style,
         ),
         value_table,

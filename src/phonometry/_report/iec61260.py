@@ -69,10 +69,10 @@ def _basis(metadata: ReportMetadata | None, edition: str, language: str = "en") 
         metadata.measurement_standard if metadata is not None else None
     )
     if measurement_standard:
-        return t("basis.iec61260.with_standard", language).format(
+        return t("{standard} type test. Conformance to {table}.", language).format(
             standard=html.escape(measurement_standard), table=table
         )
-    return t("basis.iec61260.plain", language).format(table=table)
+    return t("Conformance to {table}.", language).format(table=table)
 
 
 def _metadata_pairs(
@@ -85,11 +85,11 @@ def _metadata_pairs(
     field labels the tested filter or analyser.
     """
     specs: List[Tuple[str, str | None]] = [
-        (t("meta.client", language), metadata.client),
-        (t("meta.filter_instrument", language), metadata.specimen),
-        (t("meta.manufacturer", language), metadata.manufacturer),
-        (t("meta.test_facility", language), metadata.test_room),
-        (t("meta.date_of_test", language), metadata.test_date),
+        (t("Client", language), metadata.client),
+        (t("Filter / instrument", language), metadata.specimen),
+        (t("Manufacturer", language), metadata.manufacturer),
+        (t("Test facility", language), metadata.test_room),
+        (t("Date of test", language), metadata.test_date),
     ]
     return [
         (label, html.escape(str(value)))
@@ -113,9 +113,9 @@ def _metric_rows(
     for band in result.bands:
         band_class = band["class"]
         class_text = (
-            t("iec61260.class_none", language)
+            t("none", language)
             if band_class is None
-            else t("iec61260.class_n", language).format(n=band_class)
+            else t("Class {n}", language).format(n=band_class)
         )
         margin = float(band[key])
         freq = format_number(float(band["freq"]), language, decimals=0)
@@ -128,13 +128,13 @@ def _statement(result: "FilterComplianceResult", language: str = "en") -> str:
     """The boxed class-compliance statement with the binding margin."""
     if result.overall_class is not None:
         margin = _binding_margin(result, result.overall_class)
-        return t("iec61260.statement.complies", language).format(
+        return t("Class <b>{cls}</b> - COMPLIES &nbsp; (margin {margin} dB)", language).format(
             cls=result.overall_class,
             margin=decimal_comma(f"{margin:+.2f}", language),
         )
     classes = "/".join(str(c) for c in result.available_classes())
     margin = _binding_margin(result, result.reference_class())
-    return t("iec61260.statement.does_not_comply", language).format(
+    return t("<b>Does not comply</b> with class {classes} &nbsp; (closest margin {margin} dB)", language).format(
         classes=classes,
         margin=decimal_comma(f"{margin:+.2f}", language),
     )
@@ -153,11 +153,11 @@ def _verdict(
         result.overall_class is not None and result.overall_class <= required_class
     )
     achieved = (
-        t("iec61260.class_none", language)
+        t("none", language)
         if result.overall_class is None
         else str(result.overall_class)
     )
-    text = t("iec61260.verdict", language).format(
+    text = t("Achieved class {achieved}, required class {required}", language).format(
         achieved=achieved, required=required_class
     )
     return text, passed
@@ -198,7 +198,7 @@ def render_iec61260_report(
     accent = colors.HexColor(_ACCENT_HEX)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    title = t("title.filter_class", language)
+    title = t("Filter class compliance", language)
 
     flow: List[Any] = [
         Paragraph(title, title_style),
@@ -220,7 +220,7 @@ def render_iec61260_report(
     )
     flow.append(
         Paragraph(
-            t("iec61260.basis_strip", language).format(
+            t("{fraction} bank, sampling rate f<sub>s</sub> = {fs} Hz; relative attenuation referenced to the mid-band level (IEC 61260-1 Formula 8).", language).format(
                 fraction=_fraction_label(result.fraction),
                 fs=format_number(result.fs, language, decimals=0),
             ),
@@ -232,7 +232,7 @@ def render_iec61260_report(
     # Two-panel body: the per-band classification table on the left, the
     # mask-overlay plot (self-scaling dB axis) on the right.
     left_cell = [
-        Paragraph(t("caption.per_band_classification", language), caption_style),
+        Paragraph(t("Per-band classification", language), caption_style),
         metrics_table(_metric_rows(result, language)),
     ]
     plot_drawing = render_figure_drawing(

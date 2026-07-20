@@ -28,41 +28,36 @@ if TYPE_CHECKING:
 #: Shared frequency-axis label of the electroacoustics renderers.
 _FREQ_LABEL = "Frequency [Hz]"
 
-_STRINGS = {
-    "freq": {"en": "Frequency [Hz]", "es": "Frecuencia [Hz]"},
-    "magnitude": {"en": "Magnitude [dB]", "es": "Magnitud [dB]"},
-    "phase": {"en": "Phase [deg]", "es": "Fase [grados]"},
-    "coherence": {"en": r"Coherence $\gamma^2$", "es": r"Coherencia $\gamma^2$"},
-    "harmonic_order": {"en": "Harmonic order n  (f = n·f₁)",
-                       "es": "Orden del armónico n  (f = n·f₁)"},
-    "level_re_fund": {"en": "Level re fundamental [dB]",
-                      "es": "Nivel respecto al fundamental [dB]"},
-    "harmonics": {"en": "Harmonics", "es": "Armónicos"},
-    "fr_title": {"en": "Frequency response", "es": "Respuesta en frecuencia"},
-    "and_coherence": {"en": " and coherence", "es": " y coherencia"},
-    "thd_pct": {"en": "THD [%]", "es": "THD [%]"},
-    "excitation_freq": {"en": "Excitation frequency [Hz]",
-                        "es": "Frecuencia de excitación [Hz]"},
-    "swept_thd_title": {"en": "Swept-sine THD (Farina / Novak)",
-                        "es": "THD de barrido sinusoidal (Farina / Novak)"},
-    "harmonic_resp_title_with_method": {
-        "en": "Harmonic frequency responses ({method} sweep)",
-        "es": "Respuestas en frecuencia de los armónicos (barrido {method})"},
-    "piston_resistance": {"en": r"$R_1$ (resistance)",
-                          "es": r"$R_1$ (resistencia)"},
-    "piston_reactance": {"en": r"$X_1$ (reactance)",
-                         "es": r"$X_1$ (reactancia)"},
-    "piston_ylabel": {"en": r"Normalized radiation impedance $Z_r / \rho c S$",
-                      "es": r"Impedancia de radiación normalizada $Z_r / \rho c S$"},
-    "piston_title": {"en": "Baffled circular piston radiation impedance",
-                     "es": "Impedancia de radiación de un pistón circular con pantalla"},
+#: Spanish translations of the fixed strings rendered by the
+#: electroacoustics ``.plot()`` renderers, keyed by their verbatim English
+#: text. ``_t`` returns the English key unchanged for any language other
+#: than ``"es"``, so the English output is byte-for-byte identical to the
+#: pre-i18n renderers.
+_STRINGS: dict[str, str] = {
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Magnitude [dB]": "Magnitud [dB]",
+    "Phase [deg]": "Fase [grados]",
+    r"Coherence $\gamma^2$": r"Coherencia $\gamma^2$",
+    "Harmonic order n  (f = n·f₁)": "Orden del armónico n  (f = n·f₁)",
+    "Level re fundamental [dB]": "Nivel respecto al fundamental [dB]",
+    "Harmonics": "Armónicos",
+    "Frequency response": "Respuesta en frecuencia",
+    " and coherence": " y coherencia",
+    "THD [%]": "THD [%]",
+    "Excitation frequency [Hz]": "Frecuencia de excitación [Hz]",
+    "Swept-sine THD (Farina / Novak)": "THD de barrido sinusoidal (Farina / Novak)",
+    "Harmonic frequency responses ({method} sweep)": "Respuestas en frecuencia de los armónicos (barrido {method})",
+    "$R_1$ (resistance)": "$R_1$ (resistencia)",
+    "$X_1$ (reactance)": "$X_1$ (reactancia)",
+    r"Normalized radiation impedance $Z_r / \rho c S$": r"Impedancia de radiación normalizada $Z_r / \rho c S$",
+    "Baffled circular piston radiation impedance": "Impedancia de radiación de un pistón circular con pantalla",
 }
 
 
-def _t(key: str, language: str, **fmt: Any) -> str:
-    """Return the localised fixed string for *key* (optionally ``str.format``ed)."""
-    text = _STRINGS[key][language]
-    return text.format(**fmt) if fmt else text
+def _t(text: str, language: str = "en", **fmt: Any) -> str:
+    """Localise a fixed string; English is returned verbatim (byte-identical)."""
+    s = _STRINGS.get(text, text) if language == "es" else text
+    return s.format(**fmt) if fmt else s
 
 
 def plot_harmonic_distortion(
@@ -92,7 +87,7 @@ def plot_harmonic_distortion(
 
     ax.vlines(orders, -160.0, levels_db, color=_C_PRIMARY, lw=1.5)
     kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("label", _t("harmonics", language))
+    kwargs.setdefault("label", _t("Harmonics", language))
     ax.plot(orders, levels_db, "o", **kwargs)
     for order, level in zip(orders, levels_db):
         if level > -160.0:
@@ -104,8 +99,8 @@ def plot_harmonic_distortion(
                 ha="center",
                 fontsize="x-small",
             )
-    ax.set_xlabel(_t("harmonic_order", language))
-    ax.set_ylabel(_t("level_re_fund", language))
+    ax.set_xlabel(_t("Harmonic order n  (f = n·f₁)", language))
+    ax.set_ylabel(_t("Level re fundamental [dB]", language))
     ax.set_xticks(orders)
     ax.set_ylim(bottom=-160.0, top=10.0)
     thd_f = decimal_comma(f"{result.thd_f * 100.0:.3g}", language)
@@ -152,15 +147,15 @@ def plot_frequency_response(
     def _magnitude(axm: Axes) -> None:
         kwargs.setdefault("label", f"|H| ({result.estimator})")
         axm.semilogx(freqs[pos], mag[pos], color=color, **kwargs)
-        axm.set_ylabel(_t("magnitude", language))
+        axm.set_ylabel(_t("Magnitude [dB]", language))
         axm.grid(True, which="both", alpha=0.3)
         axm.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
     fmin, fmax = float(freqs[pos].min()), float(freqs[pos].max())
     if ax is not None:
         _magnitude(ax)
-        ax.set_xlabel(_t("freq", language))
-        ax.set_title(f"{_t('fr_title', language)} ({result.estimator})")
+        ax.set_xlabel(_t("Frequency [Hz]", language))
+        ax.set_title(f"{_t('Frequency response', language)} ({result.estimator})")
         format_frequency_axis(ax, fmin, fmax)
         localize_axes(ax, language)
         return ax
@@ -168,15 +163,15 @@ def plot_frequency_response(
     axes = _new_axes_column(3, sharex=True, figsize=(8.0, 8.0))
     _magnitude(axes[0])
     axes[0].set_title(
-        f"{_t('fr_title', language)} ({result.estimator})"
-        f"{_t('and_coherence', language)}"
+        f"{_t('Frequency response', language)} ({result.estimator})"
+        f"{_t(' and coherence', language)}"
     )
     axes[1].semilogx(freqs[pos], phase_deg[pos], color=_C_SECONDARY)
-    axes[1].set_ylabel(_t("phase", language))
+    axes[1].set_ylabel(_t("Phase [deg]", language))
     axes[1].grid(True, which="both", alpha=0.3)
     axes[2].semilogx(freqs[pos], coh[pos], color=_C_TERTIARY)
-    axes[2].set_ylabel(_t("coherence", language))
-    axes[2].set_xlabel(_t("freq", language))
+    axes[2].set_ylabel(_t(r"Coherence $\gamma^2$", language))
+    axes[2].set_xlabel(_t("Frequency [Hz]", language))
     axes[2].set_ylim(0.0, 1.05)
     axes[2].grid(True, which="both", alpha=0.3)
     for axf in axes:
@@ -218,14 +213,14 @@ def plot_swept_sine_distortion(
             100.0 * np.maximum(result.thd, tiny),
             **kwargs,
         )
-        axt.set_ylabel(_t("thd_pct", language))
+        axt.set_ylabel(_t("THD [%]", language))
         axt.grid(True, which="both", alpha=0.3)
         axt.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
     if ax is not None:
         _thd_panel(ax)
-        ax.set_xlabel(_t("excitation_freq", language))
-        ax.set_title(_t("swept_thd_title", language))
+        ax.set_xlabel(_t("Excitation frequency [Hz]", language))
+        ax.set_title(_t("Swept-sine THD (Farina / Novak)", language))
         format_frequency_axis(ax)
         localize_axes(ax, language)
         return ax
@@ -249,17 +244,17 @@ def plot_swept_sine_distortion(
             lw=1.6 if k == 0 else 1.2,
             label=f"$|H_{{{order}}}(f)|$",
         )
-    axes[0].set_ylabel(_t("magnitude", language))
-    axes[0].set_xlabel(_t("freq", language))
+    axes[0].set_ylabel(_t("Magnitude [dB]", language))
+    axes[0].set_xlabel(_t("Frequency [Hz]", language))
     axes[0].set_title(
-        _t("harmonic_resp_title_with_method", language, method=result.method)
+        _t("Harmonic frequency responses ({method} sweep)", language, method=result.method)
     )
     axes[0].grid(True, which="both", alpha=0.3)
     axes[0].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     format_frequency_axis(axes[0])
     localize_axes(axes[0], language)
     _thd_panel(axes[1])
-    axes[1].set_xlabel(_t("excitation_freq", language))
+    axes[1].set_xlabel(_t("Excitation frequency [Hz]", language))
     format_frequency_axis(axes[1])
     localize_axes(axes[1], language)
     return axes
@@ -286,15 +281,15 @@ def plot_piston_impedance(
     ax = ax if ax is not None else _new_axes()
     ka = np.asarray(result.ka, dtype=np.float64)
     kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("label", _t("piston_resistance", language))
+    kwargs.setdefault("label", _t("$R_1$ (resistance)", language))
     ax.semilogx(ka, np.asarray(result.resistance), lw=1.8, **kwargs)
     ax.semilogx(ka, np.asarray(result.reactance), color=_C_SECONDARY, lw=1.8,
-                ls="--", label=_t("piston_reactance", language))
+                ls="--", label=_t("$X_1$ (reactance)", language))
     ax.axhline(1.0, color=_C_TERTIARY, ls=":", lw=1.0,
                label=r"$R_1 \to 1$ ($ka \gg 1$)")
     ax.set_xlabel(r"$ka$")
-    ax.set_ylabel(_t("piston_ylabel", language))
-    ax.set_title(_t("piston_title", language))
+    ax.set_ylabel(_t(r"Normalized radiation impedance $Z_r / \rho c S$", language))
+    ax.set_title(_t("Baffled circular piston radiation impedance", language))
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)

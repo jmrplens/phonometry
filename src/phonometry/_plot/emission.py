@@ -29,44 +29,28 @@ if TYPE_CHECKING:
     from ..emission.sound_power_intensity import SoundPowerIntensityResult
     from ..emission.sound_power_reverberation import ReverberationSoundPowerResult
 
-#: English -> {language: string} lookup for the fixed labels/titles/legends of
-#: the emission-domain renderers. English ids map to themselves so ``_t(key,
-#: "en")`` returns the verbatim original string.
-_STRINGS: dict[str, dict[str, str]] = {
-    "Band": {"en": "Band", "es": "Banda"},
-    "Sound power level LW [dB]": {
-        "en": "Sound power level LW [dB]",
-        "es": "Nivel de potencia acústica LW [dB]",
-    },
-    "sound power spectrum": {
-        "en": "sound power spectrum",
-        "es": "espectro de potencia acústica",
-    },
-    "Non-positive band": {"en": "Non-positive band", "es": "Banda no positiva"},
-    "Pressure level Lp": {"en": "Pressure level Lp", "es": "Nivel de presión Lp"},
-    "Intensity level LI": {
-        "en": "Intensity level LI",
-        "es": "Nivel de intensidad LI",
-    },
-    "Level [dB]": {"en": "Level [dB]", "es": "Nivel [dB]"},
-    "Pressure-intensity index δpI [dB]": {
-        "en": "Pressure-intensity index δpI [dB]",
-        "es": "Índice presión-intensidad δpI [dB]",
-    },
-    r"Sound power level $L_W$ [dB re 1 pW]": {
-        "en": r"Sound power level $L_W$ [dB re 1 pW]",
-        "es": r"Nivel de potencia acústica $L_W$ [dB re 1 pW]",
-    },
-    "ISO/TS 7849 sound power from surface vibration": {
-        "en": "ISO/TS 7849 sound power from surface vibration",
-        "es": "Potencia sonora por vibración superficial ISO/TS 7849",
-    },
+#: Spanish translations of the fixed labels/titles/legends rendered by the
+#: emission-domain ``.plot()`` renderers, keyed by their verbatim English
+#: text. ``_t`` returns the English key unchanged for any language other
+#: than ``"es"``, so the English output is byte-for-byte identical to the
+#: pre-i18n renderers.
+_STRINGS: dict[str, str] = {
+    "Band": "Banda",
+    "Sound power level LW [dB]": "Nivel de potencia acústica LW [dB]",
+    "sound power spectrum": "espectro de potencia acústica",
+    "Non-positive band": "Banda no positiva",
+    "Pressure level Lp": "Nivel de presión Lp",
+    "Intensity level LI": "Nivel de intensidad LI",
+    "Level [dB]": "Nivel [dB]",
+    "Pressure-intensity index δpI [dB]": "Índice presión-intensidad δpI [dB]",
+    "Sound power level $L_W$ [dB re 1 pW]": "Nivel de potencia acústica $L_W$ [dB re 1 pW]",
+    "ISO/TS 7849 sound power from surface vibration": "Potencia sonora por vibración superficial ISO/TS 7849",
 }
 
 
-def _t(key: str, language: str) -> str:
-    """Look up the localised string for ``key`` (falls back to ``key``)."""
-    return _STRINGS.get(key, {}).get(language, key)
+def _t(text: str, language: str = "en") -> str:
+    """Localise a fixed string; English is returned verbatim (byte-identical)."""
+    return _STRINGS.get(text, text) if language == "es" else text
 
 
 def plot_sound_power(

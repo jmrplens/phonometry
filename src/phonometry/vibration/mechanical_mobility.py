@@ -384,7 +384,7 @@ class MobilityResult:
     @property
     def magnitude(self) -> np.ndarray:
         """Mobility magnitude ``|Y|``, in m/(N.s)."""
-        return np.abs(self.mobility)
+        return np.asarray(np.abs(self.mobility), dtype=np.float64)
 
     @property
     def phase(self) -> np.ndarray:

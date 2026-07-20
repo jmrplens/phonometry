@@ -71,11 +71,11 @@ def _metadata_pairs(
     the specimen field labels the tested programme.
     """
     specs: List[Tuple[str, str | None]] = [
-        (t("meta.client", language), metadata.client),
-        (t("meta.programme", language), metadata.specimen),
-        (t("meta.manufacturer", language), metadata.manufacturer),
-        (t("meta.test_room", language), metadata.test_room),
-        (t("meta.date_of_test", language), metadata.test_date),
+        (t("Client", language), metadata.client),
+        (t("Programme", language), metadata.specimen),
+        (t("Manufacturer", language), metadata.manufacturer),
+        (t("Test room", language), metadata.test_room),
+        (t("Date of test", language), metadata.test_date),
     ]
     return [
         (label, html.escape(str(value)))
@@ -122,12 +122,12 @@ def _compliance_rows(
     delta = integrated - target
     i_status, tp_status, _ = _status(result, target)
     tol = decimal_comma(f"{_TOLERANCE_LU:g}", language)
-    informational = t("status.informational", language)
+    informational = t("informational", language)
     return [
         (
-            t("metric.integrated_loudness", language),
+            t("Integrated (Programme) Loudness", language),
             f"{format_number(integrated, language, decimals=1)} LUFS",
-            t("broadcast.limit.integrated", language).format(
+            t("{target} LUFS &#177;{tol} LU (&#916; {delta} LU)", language).format(
                 target=format_number(target, language, decimals=1),
                 tol=tol,
                 delta=decimal_comma(f"{delta:+.1f}", language),
@@ -135,27 +135,27 @@ def _compliance_rows(
             i_status,
         ),
         (
-            t("metric.max_true_peak", language),
+            t("Maximum True Peak", language),
             f"{format_number(true_peak, language, decimals=1)} dBTP",
-            t("broadcast.limit.true_peak", language).format(
+            t("&#8804; {limit} dBTP", language).format(
                 limit=format_number(_MAX_TRUE_PEAK_DBTP, language, decimals=1)
             ),
             tp_status,
         ),
         (
-            t("metric.loudness_range", language),
+            t("Loudness Range (LRA)", language),
             f"{format_number(float(result.loudness_range), language, decimals=1)} LU",
             informational,
             "info",
         ),
         (
-            t("metric.max_momentary", language),
+            t("Max Momentary", language),
             f"{format_number(float(result.max_momentary), language, decimals=1)} LUFS",
             informational,
             "info",
         ),
         (
-            t("metric.max_short_term", language),
+            t("Max Short-term", language),
             f"{format_number(float(result.max_short_term), language, decimals=1)} LUFS",
             informational,
             "info",
@@ -184,7 +184,7 @@ def _verdict(
     tolerance and the true peak is at or below the permitted ceiling.
     """
     _i_status, _tp_status, passed = _status(result, target)
-    text = t("broadcast.verdict", language).format(
+    text = t("Compliant when I is within {target} &#177;{tol} LU and true peak &#8804; {tp} dBTP", language).format(
         target=format_number(target, language, decimals=1),
         tol=decimal_comma(f"{_TOLERANCE_LU:g}", language),
         tp=format_number(_MAX_TRUE_PEAK_DBTP, language, decimals=1),
@@ -228,17 +228,17 @@ def render_program_loudness_report(
     accent = colors.HexColor(_ACCENT_HEX)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    title = t("title.program_loudness", language)
+    title = t("Programme loudness compliance", language)
 
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
     )
     if measurement_standard:
-        basis = t("basis.broadcast.with_standard", language).format(
+        basis = t("{standard} programme loudness. Rating per EBU R 128 / ITU-R BS.1770-5 (K-weighting, gated).", language).format(
             standard=html.escape(measurement_standard)
         )
     else:
-        basis = t("basis.broadcast.plain", language)
+        basis = t("Programme loudness per EBU R 128 / ITU-R BS.1770-5 (K-weighting, gated).", language)
 
     target = (
         float(metadata.requirement)
@@ -258,7 +258,7 @@ def render_program_loudness_report(
             flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
-    flow.append(Paragraph(t("caption.compliance_summary", language), caption_style))
+    flow.append(Paragraph(t("Compliance summary", language), caption_style))
     flow.append(
         compliance_table(_compliance_rows(result, target, language), language=language)
     )
@@ -280,7 +280,7 @@ def render_program_loudness_report(
         fontSize=7.5, leading=10, textColor=colors.HexColor(_MUTED_HEX),
         spaceBefore=6,
     )
-    flow.append(Paragraph(t("broadcast.basis_strip", language), basis_strip_style))
+    flow.append(Paragraph(t("Gating -70 LUFS absolute / -10 LU relative (ITU-R BS.1770); 1 LU = 1 dB; true peak per EBU Tech 3341; LRA per EBU Tech 3342 (not recommended for programmes under 60 s).", language), basis_strip_style))
     flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)

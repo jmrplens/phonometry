@@ -14,21 +14,24 @@ if TYPE_CHECKING:
 
     from ..simulation.fdtd import FDTDResult
 
-_STRINGS = {
-    "time_ms": {"en": "Time [ms]", "es": "Tiempo [ms]"},
-    "pressure_pa": {"en": "Pressure [Pa]", "es": "Presión [Pa]"},
-    "snapshot_title": {"en": "FDTD pressure field at t = {t_txt} ms",
-                       "es": "Campo de presión FDTD en t = {t_txt} ms"},
-    "probe_title": {"en": "FDTD probe pressure",
-                    "es": "Presión en las sondas FDTD"},
-    "probe_label": {"en": "probe", "es": "sonda"},
+#: Spanish translations of the fixed strings rendered by the simulation
+#: ``.plot()`` renderers, keyed by their verbatim English text. ``_t``
+#: returns the English key unchanged for any language other than ``"es"``,
+#: so the English output is byte-for-byte identical to the pre-i18n
+#: renderers.
+_STRINGS: dict[str, str] = {
+    "Time [ms]": "Tiempo [ms]",
+    "Pressure [Pa]": "Presión [Pa]",
+    "FDTD pressure field at t = {t_txt} ms": "Campo de presión FDTD en t = {t_txt} ms",
+    "FDTD probe pressure": "Presión en las sondas FDTD",
+    "probe": "sonda",
 }
 
 
-def _t(key: str, language: str, **fmt: Any) -> str:
-    """Return the localised fixed string for *key* (optionally ``str.format``ed)."""
-    text = _STRINGS[key][language]
-    return text.format(**fmt) if fmt else text
+def _t(text: str, language: str = "en", **fmt: Any) -> str:
+    """Localise a fixed string; English is returned verbatim (byte-identical)."""
+    s = _STRINGS.get(text, text) if language == "es" else text
+    return s.format(**fmt) if fmt else s
 
 
 def plot_fdtd_probes(
@@ -47,16 +50,16 @@ def plot_fdtd_probes(
 
     ax = ax if ax is not None else _new_axes()
     t_ms = np.asarray(result.times, dtype=np.float64) * 1000.0
-    label = _t("probe_label", language)
+    label = _t("probe", language)
     for k in range(result.pressures.shape[0]):
         x, y = result.probe_positions[k]
         px = format_number(x, language, decimals=2)
         py = format_number(y, language, decimals=2)
         ax.plot(t_ms, result.pressures[k],
                 label=f"{label} ({px}, {py}) m", **kwargs)
-    ax.set_xlabel(_t("time_ms", language))
-    ax.set_ylabel(_t("pressure_pa", language))
-    ax.set_title(_t("probe_title", language))
+    ax.set_xlabel(_t("Time [ms]", language))
+    ax.set_ylabel(_t("Pressure [Pa]", language))
+    ax.set_title(_t("FDTD probe pressure", language))
     ax.grid(True, alpha=0.3)
     if result.pressures.shape[0]:
         ax.legend(loc="upper right", fontsize="small")
@@ -118,11 +121,11 @@ def plot_fdtd_snapshot(
         x, y = result.probe_positions[k]
         ax.plot(x, y, marker="o", markersize=5, color=_C_MUTED,
                 markeredgecolor="black", linestyle="none")
-    ax.figure.colorbar(img, ax=ax, label=_t("pressure_pa", language))
+    ax.figure.colorbar(img, ax=ax, label=_t("Pressure [Pa]", language))
     ax.set_xlabel("x [m]")
     ax.set_ylabel("y [m]")
     t_ms = float(result.snapshot_times[frame]) * 1000.0
     t_txt = format_number(t_ms, language, decimals=2)
-    ax.set_title(_t("snapshot_title", language, t_txt=t_txt))
+    ax.set_title(_t("FDTD pressure field at t = {t_txt} ms", language, t_txt=t_txt))
     localize_axes(ax, language)
     return ax

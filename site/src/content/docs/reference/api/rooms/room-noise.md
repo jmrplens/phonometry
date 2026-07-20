@@ -77,7 +77,12 @@ Result of a Noise Criteria (NC) rating (ANSI/ASA S12.2-2019, tangency).
 ### NCResult.plot()
 
 ```python
-NCResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+NCResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the measured spectrum against the NC curves.
@@ -171,7 +176,12 @@ The room-criterion label in the `RC-NN(A)` form (clause D.3.5).
 ### RCResult.plot()
 
 ```python
-RCResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+RCResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the measured spectrum against the reference RC Mark II curve.

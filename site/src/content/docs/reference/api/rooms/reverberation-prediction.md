@@ -274,7 +274,12 @@ The five reverberation-time curves keyed by model name.
 ### ReverberationModelResult.plot()
 
 ```python
-ReverberationModelResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ReverberationModelResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the reverberation-time curves of the five models.

@@ -114,7 +114,12 @@ Dynamic stiffness of a resilient layer and the floating-floor resonance.
 ### DynamicStiffnessResult.plot()
 
 ```python
-DynamicStiffnessResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+DynamicStiffnessResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot `f0(s')` with this design point marked.

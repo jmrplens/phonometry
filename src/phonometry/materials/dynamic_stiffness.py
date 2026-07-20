@@ -246,15 +246,17 @@ class DynamicStiffnessResult:
     floor_mass_per_area: float
     natural_frequency: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot ``f0(s')`` with this design point marked.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.materials import plot_dynamic_stiffness
 
-        return plot_dynamic_stiffness(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_dynamic_stiffness(self, ax=ax, language=language, **kwargs)
 
 
 def floating_floor_resonance(

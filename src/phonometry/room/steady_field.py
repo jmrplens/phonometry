@@ -211,16 +211,18 @@ class SteadyFieldResult:
     sound_power_level: float
     directivity: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot direct, reverberant and total SPL against distance.
 
         Marks the critical distance ``rc`` where the direct and reverberant
         fields cross. Requires matplotlib (``pip install phonometry[plot]``);
         returns the :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.room import plot_steady_field
 
-        return plot_steady_field(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_steady_field(self, ax=ax, language=language, **kwargs)
 
 
 def steady_state_field(

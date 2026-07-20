@@ -105,7 +105,12 @@ Weighted sound absorption rating (ISO 11654:1997).
 ### AbsorptionRatingResult.plot()
 
 ```python
-AbsorptionRatingResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+AbsorptionRatingResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the practical curve vs the shifted reference (ISO 11654).

@@ -232,7 +232,7 @@ class AbsorptionRatingResult:
             return f"{self.alpha_w:.2f}({self.shape_indicator})"
         return f"{self.alpha_w:.2f}"
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the practical curve vs the shifted reference (ISO 11654).
 
         Unfavourable deviations (measured below the shifted reference) are
@@ -240,9 +240,11 @@ class AbsorptionRatingResult:
         (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
+        from .._i18n import check_language
         from .._plot.materials import plot_weighted_absorption
 
-        return plot_weighted_absorption(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_weighted_absorption(self, ax=ax, language=language, **kwargs)
 
     def report(
         self,

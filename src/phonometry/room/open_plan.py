@@ -84,7 +84,7 @@ class OpenPlanResult:
     rd: float
     rp: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the spatial decay of speech with ``rD``/``rP`` marked.
 
         Redraws the Clause 6.2 regression line from ``d2s`` and
@@ -92,9 +92,11 @@ class OpenPlanResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.room import plot_open_plan
 
-        return plot_open_plan(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_open_plan(self, ax=ax, language=language, **kwargs)
 
 
 def _linear_fit(x: np.ndarray, y: np.ndarray) -> Tuple[float, float]:

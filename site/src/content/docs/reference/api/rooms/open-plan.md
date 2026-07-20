@@ -91,7 +91,12 @@ Single-number open-plan-office quantities (ISO 3382-3:2012, Cl. 4).
 ### OpenPlanResult.plot()
 
 ```python
-OpenPlanResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+OpenPlanResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the spatial decay of speech with `rD`/`rP` marked.

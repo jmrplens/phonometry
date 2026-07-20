@@ -349,15 +349,17 @@ class ScatteringResult:
     random_incidence: Real
     specular: Real
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the scattering coefficient ``s`` versus frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
+        from .._i18n import check_language
         from .._plot.materials import plot_scattering_coefficient
 
-        return plot_scattering_coefficient(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_scattering_coefficient(self, ax=ax, language=language, **kwargs)
 
 
 def scattering_coefficient_spectrum(
@@ -417,15 +419,17 @@ class DiffusionResult:
     levels: Real
     coefficient: float
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the polar response with the diffusion coefficient annotated.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         polar :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
+        from .._i18n import check_language
         from .._plot.materials import plot_diffusion_polar
 
-        return plot_diffusion_polar(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_diffusion_polar(self, ax=ax, language=language, **kwargs)
 
 
 def directional_diffusion(

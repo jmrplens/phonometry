@@ -96,15 +96,17 @@ class NCResult:
     frequencies: np.ndarray
     levels: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the measured spectrum against the NC curves.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.room import plot_noise_criterion
 
-        return plot_noise_criterion(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_noise_criterion(self, ax=ax, language=language, **kwargs)
 
 
 @dataclass(frozen=True)
@@ -132,15 +134,17 @@ class RCResult:
         """The room-criterion label in the ``RC-NN(A)`` form (clause D.3.5)."""
         return f"RC-{self.rating}({self.classification})"
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the measured spectrum against the reference RC Mark II curve.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.room import plot_room_criterion
 
-        return plot_room_criterion(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_room_criterion(self, ax=ax, language=language, **kwargs)
 
 
 def nc_curve(index: float) -> np.ndarray:

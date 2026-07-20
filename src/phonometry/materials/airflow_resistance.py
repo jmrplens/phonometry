@@ -142,15 +142,17 @@ class StaticAirflowResult:
     linear_coefficient: float
     quadratic_coefficient: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the fitted ``dp(u)`` curve with the evaluation point.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.materials import plot_static_airflow
 
-        return plot_static_airflow(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_static_airflow(self, ax=ax, language=language, **kwargs)
 
 
 def linear_airflow_velocity(volume_flow_rate: float, area: float) -> float:

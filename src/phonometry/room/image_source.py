@@ -208,7 +208,7 @@ class ImageSourceResult:
         """Arrival time of the direct sound (order 0), s."""
         return float(self.times[int(np.argmin(self.distances))])
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the reflectogram: reflection level in dB against arrival time.
 
         Stems the per-image amplitudes (in dB re the direct sound), coloured by
@@ -216,9 +216,11 @@ class ImageSourceResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.room import plot_image_source_reflectogram
 
-        return plot_image_source_reflectogram(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_image_source_reflectogram(self, ax=ax, language=language, **kwargs)
 
 
 def _validate_point(

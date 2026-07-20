@@ -97,7 +97,12 @@ return of [`decay_curve`](/phonometry/reference/api/rooms/room-acoustics/#decay_
 ### DecayCurve.plot()
 
 ```python
-DecayCurve.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+DecayCurve.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the decay curve with optional straight T-fit overlays.
@@ -199,6 +204,8 @@ above 10 % indicate an unreliable, non-straight decay.
 ```python
 RoomAcousticsResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```

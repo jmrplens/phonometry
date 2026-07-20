@@ -198,7 +198,12 @@ Absorption area and reverberation time of an enclosed space (Clause 4).
 ### ReverberationResult.plot()
 
 ```python
-ReverberationResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ReverberationResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the reverberation time over the octave bands.

@@ -43,6 +43,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   selected when present, a single available profile is used, and an ambiguous
   request raises listing the identifiers. Duplicate or non-consecutive point
   numbers within a profile now raise instead of silently corrupting the path.
+- `aircraft.event_level` and `aircraft.noise_contour` apply the ECAC Doc 29
+  Vol 2 §4.5.2 bank-angle sign to the correct observer side: the depression
+  angle is now `φ = β + ε` for observers to starboard (right of the flight
+  direction) and `φ = β − ε` for observers to port. The sign was inverted, so
+  the lateral-directivity (engine-installation) correction of every banked
+  segment was mirrored between the inside and outside of a turn.
 
 ### Changed
 

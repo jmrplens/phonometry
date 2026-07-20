@@ -132,7 +132,7 @@ ground-roll segments, and combines them into the exposure level `SEL`
 | `pressure` | Aerodrome air pressure, in kPa (impedance adjustment). |
 | `ground_roll` | Optional boolean mask of length `N-1` marking takeoff ground-roll segments; these receive the start-of-roll directivity `ΔSOR` and reduced noise fraction behind the aircraft (§4.5.6-4.5.7). |
 | `landing_roll` | Optional boolean mask of length `N-1` marking landing rollout segments; ahead of them the reduced fraction (Eq. 4-21b), the nearest-end lateral geometry and no directivity term apply (§4.5.5-4.5.6). |
-| `bank` | Optional per-segment bank angle `ε` in degrees (length `N-1`); the depression angle becomes `φ = β − ε` with the §4.5.2 sign convention (positive for observers to starboard of the track). |
+| `bank` | Optional per-segment bank angle `ε` in degrees (length `N-1`), measured counter-clockwise about the roll axis (positive in a left turn, starboard wing up); the depression angle becomes `φ = β + ε` for observers to starboard (right) of the track and `φ = β − ε` for observers to port (§4.5.2). |
 
 **Returns:** A [`FlyoverResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#flyoverresult). If every segment is degenerate (zero length) the level is `-inf`.
 

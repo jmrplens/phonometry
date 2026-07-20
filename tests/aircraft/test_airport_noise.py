@@ -467,16 +467,58 @@ def test_npd_floor_observer_on_track() -> None:
 
 def test_bank_angle_side_asymmetry() -> None:
     # L2: with bank, starboard and port receivers see different Delta_I
-    # (phi = beta -/+ epsilon per section 4.5.2); without bank they are equal.
+    # (phi = beta +/- epsilon per section 4.5.2); without bank they are equal.
     path = [[0.0, 0.0, 300.0, 10000.0, _VREF], [3000.0, 0.0, 400.0, 10000.0, _VREF]]
-    right = event_level(path, [1500.0, 500.0, 0.0], _NP, _ND, _NSEL, _NMAX, bank=[10.0]).level
-    left = event_level(path, [1500.0, -500.0, 0.0], _NP, _ND, _NSEL, _NMAX, bank=[10.0]).level
-    same_r = event_level(path, [1500.0, 500.0, 0.0], _NP, _ND, _NSEL, _NMAX).level
-    same_l = event_level(path, [1500.0, -500.0, 0.0], _NP, _ND, _NSEL, _NMAX).level
-    assert right != pytest.approx(left)
-    assert same_r == pytest.approx(same_l)
+    port = event_level(path, [1500.0, 500.0, 0.0], _NP, _ND, _NSEL, _NMAX, bank=[10.0]).level
+    stbd = event_level(path, [1500.0, -500.0, 0.0], _NP, _ND, _NSEL, _NMAX, bank=[10.0]).level
+    same_p = event_level(path, [1500.0, 500.0, 0.0], _NP, _ND, _NSEL, _NMAX).level
+    same_s = event_level(path, [1500.0, -500.0, 0.0], _NP, _ND, _NSEL, _NMAX).level
+    assert port != pytest.approx(stbd)
+    assert same_p == pytest.approx(same_s)
     with pytest.raises(ValueError, match="bank"):
         event_level(path, [0.0, 500.0, 0.0], _NP, _ND, _NSEL, _NMAX, bank=[1.0, 2.0])
+
+
+def test_bank_angle_sign_follows_doc29_sides() -> None:
+    # Doc 29 section 4.5.2: phi = beta + eps for observers to starboard (right
+    # of the flight direction) and phi = beta - eps for observers to port.
+    # Level segment along +x at 300 m altitude, 400 m lateral offset:
+    # beta = arctan(300/400) = 36.87 deg; with eps = 20 deg the starboard
+    # receiver sees phi = 56.87 deg and the port receiver phi = 16.87 deg.
+    s1 = np.array([0.0, 0.0, 300.0])
+    s2 = np.array([1000.0, 0.0, 300.0])
+    starboard = np.array([500.0, -400.0, 0.0])  # right of the +x heading
+    port = np.array([500.0, 400.0, 0.0])        # left of the +x heading
+    *_, beta_s, phi_s, _ = _segment_geometry(s1, s2, starboard, bank_deg=20.0)
+    *_, beta_p, phi_p, _ = _segment_geometry(s1, s2, port, bank_deg=20.0)
+    assert beta_s == pytest.approx(36.87, abs=0.01)
+    assert beta_p == pytest.approx(36.87, abs=0.01)
+    assert phi_s == pytest.approx(56.87, abs=0.01)  # beta + eps (starboard)
+    assert phi_p == pytest.approx(16.87, abs=0.01)  # beta - eps (port)
+    # eps = 0 regression: phi falls back to the equivalent elevation angle.
+    *_, beta0, phi0, _ = _segment_geometry(s1, s2, starboard, bank_deg=0.0)
+    assert phi0 == pytest.approx(beta0)
+
+
+def test_banked_segment_installation_favours_starboard() -> None:
+    # Integration: eps > 0 (left turn, starboard wing up) increases phi on the
+    # starboard side, so Delta_I recovers towards 0 dB there and the starboard
+    # receiver reads a higher level than the mirrored port receiver, for both
+    # wing- and fuselage-mounted engines (the inverted sign mirrored banked
+    # contours). Propeller aircraft have no installation effect, so no
+    # asymmetry appears.
+    path = [[0.0, 0.0, 300.0, 10000.0, _VREF], [3000.0, 0.0, 300.0, 10000.0, _VREF]]
+    for mounting in ("wing", "fuselage"):
+        stbd = event_level(path, [1500.0, -500.0, 0.0], _NP, _ND, _NSEL, _NMAX,
+                           mounting=mounting, bank=[15.0]).level
+        port = event_level(path, [1500.0, 500.0, 0.0], _NP, _ND, _NSEL, _NMAX,
+                           mounting=mounting, bank=[15.0]).level
+        assert stbd > port, mounting
+    stbd = event_level(path, [1500.0, -500.0, 0.0], _NP, _ND, _NSEL, _NMAX,
+                       mounting="propeller", bank=[15.0]).level
+    port = event_level(path, [1500.0, 500.0, 0.0], _NP, _ND, _NSEL, _NMAX,
+                       mounting="propeller", bank=[15.0]).level
+    assert stbd == pytest.approx(port)
 
 
 def test_noise_contour_accepts_bank() -> None:

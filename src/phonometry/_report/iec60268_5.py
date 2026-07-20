@@ -249,8 +249,11 @@ def _response_drawing(
 
     top = float(np.ceil((max(float(np.max(spl)), ref + tol) + 2.0) / 5.0) * 5.0)
     bottom = top - _RESPONSE_SPAN_DB
-    ax.axhspan(ref - tol, ref + tol, color="#1f4e79", alpha=0.12,
-               label=t("Tolerance ±{tol} dB", language).format(
+    # The PDF vector backend (svglib) does not preserve alpha, so a translucent
+    # fill would render as a solid block that hides the response curve. Draw a
+    # pale opaque tolerance band below the curves (zorder=0) instead.
+    ax.axhspan(ref - tol, ref + tol, facecolor="#d3e2f2", edgecolor="none",
+               zorder=0, label=t("Tolerance ±{tol} dB", language).format(
                    tol=fmt_num(tol, language)))
     ax.axhline(ref, color="#1f4e79", lw=0.8, ls="--")
     ax.axhline(ref - 10.0, color="#a11a1a", lw=0.8, ls=":",

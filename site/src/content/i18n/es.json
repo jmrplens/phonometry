@@ -1,5 +1,6 @@
 {
   "phonometry.references.title": "Referencias",
+  "phonometry.report.download": "Descargar el informe (PDF)",
   "phonometry.video.download": "Descargar la animación (WebM)",
   "phonometry.video.fallback": "Tu navegador no puede reproducir vídeo incrustado. Descarga la animación:"
 }

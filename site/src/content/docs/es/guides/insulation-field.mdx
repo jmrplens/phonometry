@@ -68,6 +68,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Esta guía continúa desde la [guía de Acústica de salas](/phonometry/es/guides/room-acoustics/):
 la misma respuesta al impulso, medida a ambos lados de un cerramiento, da su
@@ -453,6 +454,41 @@ l_nt = [45.0, 47.0, 48.0, 49.0, 51.0, 52.0, 53.0, 54.0,
         55.0, 56.0, 57.0, 58.0, 55.0, 52.0, 49.0, 46.0]
 building.weighted_impact_rating(l_nt).report("Lnw_ficha.pdf")  # Ln,w (CI)
 ```
+
+Ambas fichas de ejemplo se regeneran con `make reports` y se conservan
+renderizadas en el repositorio; pulsa cualquier vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso717_airborne_example"
+	title="Informe de ejemplo aéreo ISO 717-1 (PDF)"
+	description="Ficha de aislamiento a ruido aéreo de una página: una cabecera de metadatos (cliente, muestra, superficie de la probeta, volúmenes de las salas, temperatura y humedad por sala, presión ambiente y montaje), la tabla de R en tercios de octava junto a la curva medida frente a la referencia desplazada, el resultado de un solo número Rw (C; Ctr) en caja y una fila de veredicto CUMPLE frente al requisito de 30 dB."
+	caption="Ficha de índice aéreo (WeightedRatingResult.report), Rw (C; Ctr)."
+/>
+
+<ReportPreview
+	name="iso717_impact_example"
+	title="Informe de ejemplo de impactos ISO 717-2 (PDF)"
+	description="Ficha de aislamiento a ruido de impactos con el mismo formato acreditado para el nivel de presión de ruido de impactos normalizado Ln: la cabecera de metadatos, la tabla de Ln en tercios de octava junto a la curva medida frente a la referencia desplazada con la lectura a 500 Hz, el resultado de un solo número Ln,w (CI) en caja y una fila de veredicto NO CUMPLE frente al requisito de 53 dB (un nivel de impacto más bajo es mejor)."
+	caption="Ficha de índice de impactos (ImpactRatingResult.report), Ln,w (CI)."
+/>
+
+#### Metadatos del informe (`ReportMetadata`)
+
+Todos los campos son opcionales y solo se renderizan los que se aportan, de modo
+que el mismo objeto genera una ficha acreditada completa y una ficha ligera de
+predicción. Los campos numéricos se validan al construir el objeto según su
+rango físico.
+
+| Campo | Tipo | Se renderiza como |
+| --- | --- | --- |
+| `specimen`, `client`, `mounted_by`, `manufacturer` | `str` | Identidad de cabecera del elemento ensayado y para quién / quién lo montó |
+| `area`, `mass_per_area` | `float > 0` | Superficie de la probeta $S$ (m²) y masa por unidad de superficie medida (kg/m²) |
+| `source_volume`, `receiving_volume` | `float > 0` | Volúmenes de las salas (m³) |
+| `temperature`, `relative_humidity`, `pressure` | `float` | Clima representativo único: temperatura del aire (°C, cualquier signo), humedad relativa (0–100 %), presión ambiente (kPa, > 0) |
+| `source_temperature`, `source_relative_humidity`, `receiving_temperature`, `receiving_relative_humidity` | `float` | Clima por sala cuando la sala emisora y la receptora se informan por separado (mismos rangos que arriba) |
+| `test_room`, `mounting`, `measurement_standard`, `test_date` | `str` | Instalación, condición de montaje, norma de medición (forma la línea de base normativa) y fecha de ensayo |
+| `laboratory`, `operator`, `report_id`, `notes` | `str` | Pie: institución, línea de firma del operador, número de informe y observaciones libres |
+| `requirement` | `float > 0` | Valor objetivo de un solo número; añade la fila de veredicto (el aéreo cumple si es mayor o igual, el de impactos si es menor o igual) |
 
 ### Aislamiento a ruido aéreo de fachadas en campo (ISO 16283-3)
 

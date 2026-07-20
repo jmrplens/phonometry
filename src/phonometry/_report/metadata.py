@@ -58,12 +58,13 @@ class ReportMetadata:
     :ivar laboratory: Testing laboratory / institute name (footer).
     :ivar operator: Operator who carried out the test (footer signature line).
     :ivar report_id: Report / test number (footer).
-    :ivar requirement: Target single-number value the rating is checked
-        against for the verdict row, in the rating's own unit (dB for the
-        insulation ratings, a dimensionless coefficient for the absorption
-        rating). The result passes when it is greater than or equal to the
-        requirement, except an impact rating passes when it is less than or
-        equal to it (a lower impact level is better).
+    :ivar requirement: Target single-number value the verdict row compares the
+        rating against, expressed in the rating's own unit (e.g. dB, a
+        dimensionless absorption coefficient, or sone). The pass direction is
+        defined by each rating's ``report`` method: quantities where more is
+        better (airborne insulation, absorption) pass at or above the
+        requirement, and quantities where less is better (impact level,
+        loudness, aircraft noise) pass at or below it.
     :ivar notes: Free-form remarks printed in the footer.
     :raises ValueError: If a supplied dimension/mass/volume/pressure/requirement
         is not finite and strictly positive, a temperature is not finite, or a

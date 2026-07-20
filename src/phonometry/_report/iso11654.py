@@ -38,14 +38,15 @@ import numpy as np
 from ._layout import (
     _ACCENT_HEX,
     _LIGHT_HEX,
-    _MUTED_HEX,
     _REPORTLAB_HINT,
     build_document,
+    document_styles,
     fmt_num,
     footer_flow,
     grid_table,
     render_figure_drawing,
     result_box,
+    two_panel_body,
     verdict_flow,
 )
 from .metadata import ReportMetadata
@@ -227,9 +228,8 @@ def render_iso11654_report(
     """
     try:
         from reportlab.lib import colors
-        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.lib.units import mm
-        from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
+        from reportlab.platypus import Paragraph, Spacer
     except ImportError as exc:
         raise ImportError(_REPORTLAB_HINT) from exc
     accent = colors.HexColor(_ACCENT_HEX)
@@ -245,20 +245,8 @@ def render_iso11654_report(
     # Unfavourable deviation: measured practical coefficient below the curve.
     deviations = np.maximum(shifted - measured, 0.0)
 
-    styles = getSampleStyleSheet()
+    styles, title_style, basis_style, caption_style = document_styles(accent)
     title = "Sound absorption rating"
-    title_style = ParagraphStyle(
-        "iso11654_title", parent=styles["Title"], fontSize=16, textColor=accent,
-        spaceAfter=1, alignment=0,
-    )
-    basis_style = ParagraphStyle(
-        "iso11654_basis", parent=styles["Normal"], fontSize=9.5,
-        textColor=colors.HexColor(_MUTED_HEX), spaceAfter=2,
-    )
-    caption_style = ParagraphStyle(
-        "iso11654_caption", parent=styles["Normal"], fontSize=8,
-        textColor=accent, spaceAfter=3,
-    )
 
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
@@ -291,20 +279,7 @@ def render_iso11654_report(
     plot_drawing = render_figure_drawing(
         result.plot, 116 * mm, y_top=1.0, expand_step=None
     )
-    body_table = Table(
-        [[left_cell, plot_drawing]],
-        colWidths=[56 * mm, 118 * mm],
-    )
-    body_table.setStyle(
-        TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (0, 0), 0),
-                ("RIGHTPADDING", (-1, 0), (-1, 0), 0),
-            ]
-        )
-    )
-    flow.append(body_table)
+    flow.append(two_panel_body(left_cell, plot_drawing))
     flow.append(Spacer(1, 8))
 
     flow.append(result_box(_statement(result), styles, accent, _extended_terms(result)))

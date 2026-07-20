@@ -59,6 +59,7 @@ references:
 
 import Video from '../../../components/Video.astro';
 import ThemeImage from '../../../components/ThemeImage.astro';
+import ReportPreview from '../../../components/ReportPreview.astro';
 
 Level metrics tell you how much *sound pressure* there is; loudness tells you
 how loud a listener actually *perceives* it. This page covers the three
@@ -180,6 +181,45 @@ N(t) traces stay inside the standard's per-sample 5 % tolerance band.
 Returns a `ZwickerLoudness` dataclass: `loudness` (N, sones), `loudness_level`
 (phon), `specific` (N′(z), 240 bins of 0.1 Bark), and for time-varying runs
 `n5`, `n10`, `time`, `loudness_vs_time` (500 Hz trace).
+
+### ISO 532-1 report (`.report()`)
+
+`ZwickerLoudness.report(path)` renders a one-page PDF fiche laid out like an
+accredited loudness report: a standard-basis line, an optional metadata header
+block, a compact metrics table (total loudness *N*, loudness level *L*<sub>N</sub>,
+and the *N*<sub>5</sub>/*N*<sub>10</sub> percentiles for a time-varying result)
+beside the specific-loudness pattern *N*′(z) (the result's own `.plot()`), the
+boxed `N = X sone (LN = Y phon)` single number, an optional verdict row and a
+footer with the fixed disclaimer. It uses the same `ReportMetadata` container
+and rendering engine as the [ISO 717 insulation fiche](/phonometry/guides/insulation-field/#iso-717-report-report);
+a supplied `requirement` is read as the maximum permitted loudness in sone (a
+lower loudness passes). Rendering needs reportlab
+(`pip install phonometry[report]`); only `engine="reportlab"` is supported.
+
+```python
+from phonometry import psychoacoustics, ReportMetadata
+
+res = psychoacoustics.loudness_zwicker_from_spectrum(levels_28, field="free")
+res.report(
+    "loudness_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Household appliance, steady operating noise",
+        measurement_standard="ISO 532-1 method 1",
+        laboratory="Phonometry Reference Laboratory",
+        requirement=12.0,             # maximum permitted loudness (sone)
+    ),
+)                                     # N (sone) and LN (phon)
+```
+
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
+
+<ReportPreview
+	name="iso532_loudness_example"
+	title="ISO 532-1 loudness example report (PDF)"
+	description="One-page loudness fiche: a metadata header, a metrics table with total loudness N and loudness level LN, the specific-loudness pattern over the critical-band rate, the boxed N = 8.2 sone (LN = 70.4 phon) single-number result and a PASS verdict against a 12 sone limit."
+	caption="Zwicker loudness fiche (ZwickerLoudness.report), N in sone with LN in phon."
+/>
 
 ## Loudness level of pure tones (ISO 226:2023)
 

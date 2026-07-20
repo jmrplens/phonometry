@@ -59,6 +59,7 @@ references:
 
 import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Las métricas de nivel dicen cuánta *presión sonora* hay; la sonoridad dice
 cuán fuerte la *percibe* realmente quien escucha. Esta página cubre las tres
@@ -187,6 +188,47 @@ Devuelve un dataclass `ZwickerLoudness`: `loudness` (N, sonos),
 `loudness_level` (fonios), `specific` (N′(z), 240 bins de 0,1 Bark) y, para los
 análisis variables en el tiempo, `n5`, `n10`, `time`, `loudness_vs_time`
 (traza a 500 Hz).
+
+### Informe de ISO 532-1 (`.report()`)
+
+`ZwickerLoudness.report(path)` renderiza una ficha PDF de una página con el
+formato de un informe de sonoridad acreditado: la línea de base normativa, un
+bloque opcional de metadatos de cabecera, una tabla compacta de métricas
+(sonoridad total *N*, nivel de sonoridad *L*<sub>N</sub> y los percentiles
+*N*<sub>5</sub>/*N*<sub>10</sub> para un resultado variable en el tiempo) junto
+al patrón de sonoridad específica *N*′(z) (el propio `.plot()` del resultado),
+el número único `N = X sono (LN = Y fonio)` en caja, una fila opcional de
+veredicto y un pie con el descargo fijo. Usa el mismo contenedor
+`ReportMetadata` y el mismo motor de renderizado que la
+[ficha de aislamiento de ISO 717](/phonometry/es/guides/insulation-field/#informe-de-iso-717-report);
+un `requirement` aportado se lee como la sonoridad máxima admisible en sonos
+(una sonoridad menor cumple). El renderizado necesita reportlab
+(`pip install phonometry[report]`); solo se admite `engine="reportlab"`.
+
+```python
+from phonometry import psychoacoustics, ReportMetadata
+
+res = psychoacoustics.loudness_zwicker_from_spectrum(levels_28, field="free")
+res.report(
+    "ficha_sonoridad.pdf",
+    metadata=ReportMetadata(
+        specimen="Electrodoméstico, ruido de funcionamiento estable",
+        measurement_standard="ISO 532-1 método 1",
+        laboratory="Laboratorio de referencia Phonometry",
+        requirement=12.0,             # sonoridad máxima admisible (sonos)
+    ),
+)                                     # N (sonos) y LN (fonios)
+```
+
+La ficha de ejemplo se regenera con `make reports` y se conserva renderizada en
+el repositorio; pulsa la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso532_loudness_example"
+	title="Informe de ejemplo de sonoridad ISO 532-1 (PDF)"
+	description="Ficha de sonoridad de una página: una cabecera de metadatos, una tabla de métricas con la sonoridad total N y el nivel de sonoridad LN, el patrón de sonoridad específica sobre la tasa de banda crítica, el resultado de un solo número N = 8.2 sono (LN = 70.4 fonio) en caja y una fila de veredicto CUMPLE frente a un límite de 12 sonos."
+	caption="Ficha de sonoridad de Zwicker (ZwickerLoudness.report), N en sonos con LN en fonios."
+/>
 
 ## Nivel de sonoridad de tonos puros (ISO 226:2023)
 

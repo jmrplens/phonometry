@@ -1,6 +1,6 @@
 ---
 title: "Salas y edificación"
-description: "El sonido dentro de las salas y a través de los edificios: medición y predicción acústica de salas (ISO 3382, EN 12354-6), aislamiento acústico medido en campo y en laboratorio y predicho con EN 12354, y la caracterización de materiales y superficies acústicas."
+description: "El sonido dentro de las salas y a través de los edificios: medición y predicción acústica de salas (ISO 3382, EN 12354-6), y aislamiento acústico medido en campo y en laboratorio y predicho con EN 12354."
 ---
 
 Esta sección cubre el sonido en el entorno construido, y se divide por una
@@ -15,14 +15,10 @@ sonido aéreo y de impacto transmiten una partición y sus caminos de flancos,
 medido en campo (ISO 16283) o en laboratorio (ISO 10140) y predicho a partir
 de datos de elemento (EN 12354).
 
-Ambas mitades descansan sobre los mismos datos de material. Las páginas de
-**materiales y superficies** caracterizan lo que muros, absorbentes y
-pavimentos hacen realmente con el sonido: coeficientes de absorción y sus
-índices globales, resistencia al flujo de aire, impedancia superficial,
-dispersión y difusión. Esos coeficientes son las entradas que consumen las
-predicciones de sala, y los índices de elemento son las entradas que consumen
-las predicciones de aislamiento, así que la sección forma un bucle: medir el
-material, predecir el edificio, verificar en campo.
+Ambas mitades consumen coeficientes medidos en otro lugar: la sección de
+[Materiales y superficies](/phonometry/es/guides/sections/materials-surfaces/)
+caracteriza los datos de absorción, impedancia y dispersión en los que se
+apoyan las predicciones de sala y de aislamiento de esta sección.
 
 Empieza por [Acústica de salas](/phonometry/es/guides/room-acoustics/): la
 respuesta al impulso que adquiere y los parámetros que deriva son el
@@ -71,15 +67,3 @@ laboratorio y predicho a partir de datos de elemento.
 - [Rigidez dinámica de materiales resilientes (EN 29052-1)](/phonometry/es/guides/dynamic-stiffness/):
   la medición por resonancia de placa de carga detrás de toda predicción de
   suelo flotante.
-
-## [Materiales y superficies](/phonometry/es/guides/sections/materials-surfaces/)
-
-Lo que materiales y superficies hacen con el sonido, medido en laboratorio e
-in situ.
-
-- [Materiales acústicos](/phonometry/es/guides/materials/): el índice
-  ponderado de absorción de ISO 11654, la resistencia al flujo de aire
-  (ISO 9053-1/-2) y el tubo de impedancia (ISO 10534-1/-2, ASTM E2611).
-- [Dispersión superficial, difusión y absorción in situ](/phonometry/es/guides/surface-scattering/):
-  coeficientes de dispersión (ISO 17497-1) y difusión (ISO 17497-2), y
-  absorción in situ de pavimentos (ISO 13472-1/-2).

@@ -164,7 +164,12 @@ is the usable-bandwidth bound `0,1*c/spacing` (bias \< ~0,3 dB).
 ### IntensityResult.plot()
 
 ```python
-IntensityResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+IntensityResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot Lp vs LI per band with the pressure-intensity index.

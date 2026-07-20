@@ -284,7 +284,12 @@ Predicted airborne sound reduction index `R(f)` of a construction.
 ### SoundReductionResult.plot()
 
 ```python
-SoundReductionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SoundReductionResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the predicted sound reduction index `R(f)`.

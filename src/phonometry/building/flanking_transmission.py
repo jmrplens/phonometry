@@ -320,15 +320,17 @@ class VibrationReductionResult:
             bracketed=oct_bracketed,
         )
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot ``Kij`` against frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_vibration_reduction
 
-        return plot_vibration_reduction(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_vibration_reduction(self, ax=ax, language=language, **kwargs)
 
 
 def _validate_octave_triples(freq_groups: np.ndarray) -> None:
@@ -558,14 +560,14 @@ class FlankingLevelDifferenceResult:
     d_n_f: np.ndarray
     rating: WeightedRatingResult | None
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot ``Dn,f`` against the shifted ISO 717-1 reference curve."""
         if self.rating is None:
             raise ValueError(
                 "No single-number rating is available to plot (need 16 "
                 "one-third-octave or 5 octave bands)."
             )
-        return self.rating.plot(ax=ax, **kwargs)
+        return self.rating.plot(ax=ax, language=language, **kwargs)
 
 
 @dataclass(frozen=True)
@@ -580,14 +582,14 @@ class FlankingImpactLevelResult:
     l_n_f: np.ndarray
     rating: ImpactRatingResult | None
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot ``Ln,f`` against the shifted ISO 717-2 reference curve."""
         if self.rating is None:
             raise ValueError(
                 "No single-number rating is available to plot (need 16 "
                 "one-third-octave or 5 octave bands)."
             )
-        return self.rating.plot(ax=ax, **kwargs)
+        return self.rating.plot(ax=ax, language=language, **kwargs)
 
 
 def normalized_flanking_level_difference(

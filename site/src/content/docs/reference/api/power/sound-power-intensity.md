@@ -152,6 +152,8 @@ and more than one band).
 ```python
 SoundPowerIntensityResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

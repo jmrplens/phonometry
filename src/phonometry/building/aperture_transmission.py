@@ -107,15 +107,17 @@ class ApertureTransmissionResult:
         """Aperture sound reduction index ``R = -10 lg(tau)`` per band, dB."""
         return transmission_loss_from_coefficient(self.transmission_coefficient)
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the aperture sound reduction index ``R(f)``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_aperture_transmission
 
-        return plot_aperture_transmission(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_aperture_transmission(self, ax=ax, language=language, **kwargs)
 
 
 def _slit_end_correction(k_big: np.ndarray) -> np.ndarray:

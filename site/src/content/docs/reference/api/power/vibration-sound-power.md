@@ -297,6 +297,8 @@ Sound power radiated by surface vibration (ISO/TS 7849).
 ```python
 VibrationSoundPowerResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

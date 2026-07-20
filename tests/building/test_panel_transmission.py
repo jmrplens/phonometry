@@ -203,3 +203,23 @@ def test_double_wall_degenerate_f0_above_fl_is_partitioned() -> None:
 def test_double_wall_rejects_bad_input() -> None:
     with pytest.raises(ValueError, match="gap"):
         double_wall_transmission_loss(BANDS, 10.0, 10.0, -0.1)
+
+
+def test_plot_language_spanish_and_validation() -> None:
+    # The .plot() renderer accepts a language option: Spanish localises the
+    # axis labels and title, and an unknown code is rejected up front.
+    m = 15.0
+    bp = plate_bending_stiffness(6.2e10, 0.006, 0.24)
+    fc = coincidence_frequency(m, bp)
+    res = single_panel_transmission_loss(BANDS, m, critical_frequency=fc,
+                                         loss_factor=0.024)
+    ax = res.plot(language="es")
+    assert "Frecuencia" in ax.get_xlabel()
+    assert "reducción acústica" in ax.get_ylabel()
+    assert "Aislamiento" in ax.get_title()
+    # English (the default) stays byte-for-byte the original text.
+    ax_en = res.plot()
+    assert ax_en.get_xlabel() == "Frequency [Hz]"
+    assert ax_en.get_ylabel() == "Sound reduction index $R$ [dB]"
+    with pytest.raises(ValueError, match="Unknown language"):
+        res.plot(language="xx")

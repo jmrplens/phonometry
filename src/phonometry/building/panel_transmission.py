@@ -193,15 +193,17 @@ class SoundReductionResult:
         """
         return self.rating().report(path, **kwargs)
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the predicted sound reduction index ``R(f)``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_sound_reduction
 
-        return plot_sound_reduction(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_sound_reduction(self, ax=ax, language=language, **kwargs)
 
 
 def single_panel_transmission_loss(

@@ -78,7 +78,12 @@ Predicted apparent airborne insulation (EN 12354-1:2000, Formula 26).
 ### AirbornePredictionResult.plot()
 
 ```python
-AirbornePredictionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+AirbornePredictionResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-path shares of the transmitted energy.
@@ -323,7 +328,12 @@ Predicted apparent impact insulation (EN 12354-2:2000, Formula 21).
 ### ImpactPredictionResult.plot()
 
 ```python
-ImpactPredictionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ImpactPredictionResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the Formula 21 terms and the resulting `L'n,w`.

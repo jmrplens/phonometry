@@ -10,6 +10,7 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..metrology.compliance import FilterComplianceResult
     from ..metrology.correlation import (
         AlignedImpulseResponseResult,
         CorrelationResult,
@@ -30,6 +31,7 @@ from .common import (
     _C_PRIMARY_LIGHT,
     _C_REFERENCE,
     _C_SECONDARY,
+    _C_TERTIARY,
     _LEGEND_UPPER_RIGHT,
     _new_axes,
     _new_axes_column,
@@ -38,6 +40,139 @@ from .common import (
 
 #: Shared frequency-axis label of the spectral renderers.
 _FREQ_LABEL = "Frequency [Hz]"
+
+
+# ---------------------------------------------------------------------------
+# IEC 61260-1 filter class compliance
+# ---------------------------------------------------------------------------
+
+
+def _worst_band_index(result: "FilterComplianceResult") -> int:
+    """Index of the band with the smallest margin to the reference class."""
+    key = f"margin_class{result.reference_class()}_db"
+    margins = [float(band[key]) for band in result.bands]
+    return int(np.argmin(margins))
+
+
+def plot_filter_class(
+    result: "FilterComplianceResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Measured relative attenuation of the binding band over its class corridor.
+
+    Selects the worst-margin band (the one whose margin to the achieved class
+    is smallest, or, when the bank meets no class, the band that misses the
+    loosest class by the most) and draws its measured relative attenuation
+    ``ΔA`` against the normalized frequency ``f / f_m`` on a logarithmic axis.
+    The acceptance corridor of the reference class is shaded green (between the
+    lower and upper limits of Table 1) and any part of the measured curve that
+    leaves the corridor is marked red, following the MATLAB
+    ``octaveFilter.visualize`` convention.
+
+    :param result: A
+        :class:`~phonometry.metrology.compliance.FilterComplianceResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the measured-curve ``plot`` call.
+    :return: The axes.
+    """
+    from scipy import signal
+
+    from ..metrology.compliance import class_limits
+
+    ax = ax if ax is not None else _new_axes()
+    cls = result.reference_class()
+    idx = _worst_band_index(result)
+    fm = float(result.band_frequencies[idx])
+    fsd = result.fs / float(result.factors[idx])
+    sos = np.asarray(result.sos[idx], dtype=np.float64)
+
+    # Recompute the relative attenuation exactly as verify_filter_class does:
+    # -20 lg|H| minus the attenuation at the exact mid-band frequency.
+    eps = np.finfo(float).eps
+    w, h = signal.sosfreqz(sos, worN=result.num_points, fs=fsd)
+    attenuation = -20.0 * np.log10(np.abs(h) + eps)
+    _, h_ref = signal.sosfreqz(sos, worN=np.array([fm]), fs=fsd)
+    a_ref = float(-20.0 * np.log10(np.abs(h_ref[0]) + eps))
+    delta_a = attenuation - a_ref
+    omega = w / fm
+
+    keep = omega > 0.0
+    omega, delta_a = omega[keep], delta_a[keep]
+    order = np.argsort(omega)
+    omega, delta_a = omega[order], delta_a[order]
+
+    lower, upper = class_limits(result.fraction, cls, omega, edition=result.edition)
+
+    # Symmetric log window centred on the mid-band (f / f_m = 1).
+    omega_max = float(omega[-1])
+    lo_x, hi_x = 1.0 / omega_max, omega_max
+    win = (omega >= lo_x) & (omega <= hi_x)
+    if not np.any(win):
+        # Degenerate band (mid-band at or above the decimated Nyquist), so the
+        # symmetric window is empty; fail clearly instead of a cryptic reduction.
+        raise ValueError(
+            "Cannot plot the filter class corridor: the mid-band frequency is at "
+            "or above the analysis Nyquist, so the f/f_m window is empty."
+        )
+    finite_upper = np.isfinite(upper)
+
+    # Scale the axis to the mask, not to the measured curve: a steep bank
+    # reaches hundreds of dB of attenuation deep in the stop-band, which would
+    # squash the corridor to a sliver. The measured curve is allowed to leave
+    # the top; what matters is that it stays inside the green corridor.
+    corridor_top = float(np.max(lower[win]))
+    y_top = max(20.0, float(np.ceil((corridor_top + 8.0) / 10.0) * 10.0))
+    y_bot = min(-2.0, float(np.floor(np.min(delta_a[win]) - 1.0)))
+
+    # Green acceptance corridor; the upper limit is +inf in the stop-band
+    # (unbounded attenuation allowed), so it is clipped to the axis top there.
+    upper_fill = np.where(finite_upper, upper, y_top)
+    ax.fill_between(
+        omega[win], lower[win], upper_fill[win], color=_C_TERTIARY, alpha=0.18,
+        lw=0.0, label=f"Class {cls} pass corridor",
+    )
+    ax.plot(omega[win], lower[win], color=_C_TERTIARY, lw=1.0, ls="--")
+    fin = win & finite_upper
+    ax.plot(omega[fin], upper[fin], color=_C_TERTIARY, lw=1.0, ls="--")
+
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("lw", 1.6)
+    kwargs.setdefault("label", "Measured $\\Delta A$")
+    ax.plot(omega[win], delta_a[win], **kwargs)
+
+    violated = (delta_a < lower - 1e-9) | (finite_upper & (delta_a > upper + 1e-9))
+    viol_win = violated & win
+    if np.any(viol_win):
+        ax.plot(
+            omega[viol_win], delta_a[viol_win], ls="", marker="o", ms=3.5,
+            color=_C_REFERENCE, label="Out of tolerance",
+        )
+
+    ax.axvline(1.0, color=_C_MUTED, ls=":", lw=1.0)
+    _normalized_frequency_axis(ax, lo_x, hi_x)
+    ax.set_xlim(lo_x, hi_x)
+    ax.set_ylim(y_bot, y_top)
+    ax.set_xlabel("Normalised frequency $f\\,/\\,f_m$")
+    ax.set_ylabel("Relative attenuation [dB]")
+    ax.set_title(
+        f"IEC 61260-1 class {cls} mask — $f_m$ = {fm:.0f} Hz"
+    )
+    ax.legend(loc="upper center", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def _normalized_frequency_axis(ax: Axes, lo: float, hi: float) -> None:
+    """Label a logarithmic ``f / f_m`` axis with plain decimal ratios."""
+    import matplotlib.ticker as mticker
+
+    ax.set_xscale("log")
+    ticks = [t for t in (0.25, 0.5, 0.7, 1.0, 1.4, 2.0, 4.0) if lo <= t <= hi]
+    ax.xaxis.set_major_locator(mticker.FixedLocator(ticks))
+    ax.xaxis.set_major_formatter(
+        mticker.FixedFormatter([f"{t:g}" for t in ticks])
+    )
+    ax.xaxis.set_minor_formatter(mticker.NullFormatter())
+
 
 def plot_uncertainty_budget(
     result: "UncertaintyResult", ax: Axes | None = None, **kwargs: Any

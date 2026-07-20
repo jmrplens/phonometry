@@ -30,7 +30,9 @@ from .environmental.measurement import (
     expanded_uncertainty as environmental_expanded_uncertainty,
 )
 from .metrology.compliance import (
+    FilterComplianceResult,
     class_limits,
+    filter_class_compliance,
     verify_aircraft_noise_system,
     verify_filter_class,
     verify_weighting_class,
@@ -1611,6 +1613,8 @@ __all__ = [
     "RepeatedMeasurementResult",
     "CalibrationWarning",
     "verify_filter_class",
+    "filter_class_compliance",
+    "FilterComplianceResult",
     "verify_aircraft_noise_system",
     "class_limits",
     "verify_weighting_class",

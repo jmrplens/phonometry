@@ -579,6 +579,7 @@ ReportMetadata(
     operator: str | None = None,
     report_id: str | None = None,
     requirement: float | None = None,
+    required_class: int | None = None,
     notes: str | None = None,
 )
 ```
@@ -621,13 +622,14 @@ within 0..100 %. A violation raises `ValueError`.
 | `operator` | Operator who carried out the test (footer signature line). |
 | `report_id` | Report / test number (footer). |
 | `requirement` | Target single-number value the verdict row compares the rating against, expressed in the rating's own unit (e.g. dB, a dimensionless absorption coefficient, sone, or a programme-loudness level in LUFS). It need only be finite (a loudness target in LUFS is negative), so its sign is not constrained. The pass direction is defined by each rating's `report` method: quantities where more is better (airborne insulation, absorption) pass at or above the requirement, and quantities where less is better (impact level, loudness, aircraft noise) pass at or below it; the programme-loudness fiche reads it as the target level and passes within a tolerance. |
+| `required_class` | Target performance-class index for a class-compliance verdict (the IEC 61260-1 filter fiche): `0`, `1` or `2`, where class 0 is the strictest. When supplied, the fiche's verdict passes if the achieved overall class is at least as strict as this class (a smaller or equal class index). `None` (the default) prints no verdict row. |
 | `notes` | Free-form remarks printed in the footer. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a supplied dimension/mass/volume/pressure is not finite and strictly positive, a temperature or requirement is not finite, or a relative humidity is outside 0..100 %. |
+| ValueError | If a supplied dimension/mass/volume/pressure is not finite and strictly positive, a temperature or requirement is not finite, a relative humidity is outside 0..100 %, or a required class is not one of 0, 1, 2. |
 
 ### ReportMetadata.is_empty()
 

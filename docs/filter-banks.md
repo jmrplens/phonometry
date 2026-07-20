@@ -584,6 +584,55 @@ the class mask. Away from these settings (very high `fraction` or near-Nyquist
 bands), always re-run `verify_filter_class` to confirm the class you need, and
 raise the order if a band needs more margin.
 
+### IEC 61260-1 filter compliance report (`.report()`)
+
+`filter_class_compliance(bank)` wraps the same verification as a result object
+that exposes `.plot()` and `.report()`, so a type-test verdict can be rendered
+as a one-page accredited fiche: a per-band classification table, the
+worst-margin band's measured relative attenuation overlaid on the class
+corridor, and the boxed overall class-compliance result. Pass a `required_class`
+on the `ReportMetadata` to add a PASS/FAIL verdict row (a bank "meets class N"
+when its achieved class is at least as strict, i.e. a class index of N or
+lower).
+
+```python
+from phonometry import OctaveFilterBank, ReportMetadata, filter_class_compliance
+
+bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+result = filter_class_compliance(bank)   # overall_class == 1
+
+result.report(
+    "iec61260.pdf",
+    metadata=ReportMetadata(
+        specimen="1/1-octave filter bank",
+        measurement_standard="IEC 61260-1:2014",
+        required_class=1,                # class 1 (or stricter) required
+    ),
+)                                        # -> Class 1 - COMPLIES, PASS
+```
+
+Passing `edition="1995"` verifies against the older IEC 61260:1995 /
+ANSI S1.11-2004 mask, which keeps the stricter **class 0** that the 2014 edition
+dropped; a higher-order bank can then be certified to class 0:
+
+```python
+bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
+result = filter_class_compliance(bank, edition="1995")   # overall_class == 0
+result.report(
+    "iec61260_1995.pdf",
+    metadata=ReportMetadata(
+        measurement_standard="IEC 61260:1995",
+        required_class=0,                # class 0 (1995 edition) required
+    ),
+)                                        # -> Class 0 - COMPLIES, PASS
+```
+
+Both rendered example fiches live under `.github/reports/` (regenerated with
+`make reports`): the 2014-edition class-1
+[`iec61260_filter_example.pdf`](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61260_filter_example.pdf)
+and the 1995-edition class-0
+[`iec61260_filter_1995_example.pdf`](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61260_filter_1995_example.pdf).
+
 ## 7. Signal Decomposition and Stability
 
 By setting `sigbands=True`, you can retrieve the time-domain components of each

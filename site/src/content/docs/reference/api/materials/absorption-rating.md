@@ -118,6 +118,44 @@ shaded and `alpha_w` annotated. Requires matplotlib
 The rating as reported in Clause 5.3, e.g. `"0.60(M)"` or
 `"0.60"` when no shape indicator applies.
 
+### AbsorptionRatingResult.report()
+
+```python
+AbsorptionRatingResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+) -> str
+```
+
+Render an ISO 11654 sound-absorption rating fiche to a PDF.
+
+Writes a one-page accredited absorption report: the standard-basis
+line, an optional metadata header block, the octave-band `alpha_p`
+table beside the practical-versus-shifted-reference plot (the result's
+own `plot`), the boxed `alpha_w` result with its absorption
+class, an optional verdict row and a footer with the fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). A supplied `requirement` is read as the minimum `alpha_w`. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the table adds the ISO 11654 evaluation columns (practical coefficient, shifted reference, unfavourable deviation) instead of the two-column `f \| alpha_p` table. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
 ## OCTAVE_BANDS
 
 *Constant* (`tuple`).

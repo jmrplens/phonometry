@@ -115,10 +115,15 @@ NPD curves for this aircraft (see [`AnpDatabase.npd_curves`](/phonometry/referen
 ### AnpAircraft.profile()
 
 ```python
-AnpAircraft.profile(operation: str, stage_length: int = 1) -> AnpProfile
+AnpAircraft.profile(
+    operation: str,
+    stage_length: int = 1,
+    *,
+    profile_id: str | None = None,
+) -> AnpProfile
 ```
 
-Default fixed-point profile (see [`AnpDatabase.profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprofile)).
+Fixed-point profile (see [`AnpDatabase.profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprofile)).
 
 ## AnpDatabase
 
@@ -127,7 +132,7 @@ AnpDatabase(
     aircraft: Mapping[str, dict[str, str]],
     npd: Mapping[tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]],
     distances: NDArray[np.float64],
-    profiles: Mapping[tuple[str, str, int], tuple[str, NDArray[np.float64]]],
+    profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
 )
 ```
 
@@ -263,10 +268,18 @@ AnpDatabase.profile(
     aircraft_id: str,
     operation: str,
     stage_length: int = 1,
+    *,
+    profile_id: str | None = None,
 ) -> AnpProfile
 ```
 
-Default fixed-point trajectory for an aircraft, operation and stage length.
+Fixed-point trajectory for an aircraft, operation and stage length.
+
+Aircraft may ship several fixed-point profiles for the same operation
+and stage length (e.g. weight variants). With `profile_id=None` the
+`"DEFAULT"` profile is selected when present; otherwise the single
+available profile is used, and an ambiguous request (several profiles,
+none named `"DEFAULT"`) raises listing the identifiers.
 
 **Parameters**
 
@@ -275,6 +288,7 @@ Default fixed-point trajectory for an aircraft, operation and stage length.
 | `aircraft_id` | ANP aircraft identifier. |
 | `operation` | `"departure"`/`"D"` or `"arrival"`/`"A"`. |
 | `stage_length` | ANP stage length (default 1). |
+| `profile_id` | Optional ANP profile identifier (e.g. `"DEFAULT"`, `"3000LB"`); `None` (default) selects as described above. |
 
 **Returns:** An [`AnpProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile) (a Doc 29 flight path with ground-roll masks).
 
@@ -282,7 +296,8 @@ Default fixed-point trajectory for an aircraft, operation and stage length.
 
 | Exception | When |
 | :--- | :--- |
-| KeyError | If the aircraft is unknown or has no fixed-point profile for the request. |
+| KeyError | If the aircraft is unknown, has no fixed-point profile for the request, or `profile_id` is not among the available ones. |
+| ValueError | If `profile_id` is `None` and several profiles exist with none of them named `"DEFAULT"`. |
 
 ## AnpNpdCurves
 

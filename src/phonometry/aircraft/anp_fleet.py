@@ -226,9 +226,11 @@ class AnpAircraft:
         """NPD curves for this aircraft (see :meth:`AnpDatabase.npd_curves`)."""
         return self._database.npd_curves(self.aircraft_id, operation, metric)
 
-    def profile(self, operation: str, stage_length: int = 1) -> AnpProfile:
-        """Default fixed-point profile (see :meth:`AnpDatabase.profile`)."""
-        return self._database.profile(self.aircraft_id, operation, stage_length)
+    def profile(self, operation: str, stage_length: int = 1, *,
+                profile_id: "str | None" = None) -> AnpProfile:
+        """Fixed-point profile (see :meth:`AnpDatabase.profile`)."""
+        return self._database.profile(self.aircraft_id, operation, stage_length,
+                                      profile_id=profile_id)
 
     def event_level(
         self, observer: "NDArray[np.float64] | list[float]", operation: str, *,
@@ -265,7 +267,7 @@ class AnpDatabase:
         aircraft: "Mapping[str, dict[str, str]]",
         npd: "Mapping[tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]]",
         distances: "NDArray[np.float64]",
-        profiles: "Mapping[tuple[str, str, int], tuple[str, NDArray[np.float64]]]",
+        profiles: "Mapping[tuple[str, str, str, int], NDArray[np.float64]]",
     ) -> None:
         self._aircraft = dict(aircraft)
         self._npd = dict(npd)
@@ -328,31 +330,60 @@ class AnpDatabase:
             power_parameter=m.get("Power Parameter", ""),
             powers=powers, distances=self._distances, levels=levels)
 
-    def profile(self, aircraft_id: str, operation: str, stage_length: int = 1) -> AnpProfile:
-        """Default fixed-point trajectory for an aircraft, operation and stage length.
+    def profile(self, aircraft_id: str, operation: str, stage_length: int = 1, *,
+                profile_id: "str | None" = None) -> AnpProfile:
+        """Fixed-point trajectory for an aircraft, operation and stage length.
+
+        Aircraft may ship several fixed-point profiles for the same operation
+        and stage length (e.g. weight variants). With ``profile_id=None`` the
+        ``"DEFAULT"`` profile is selected when present; otherwise the single
+        available profile is used, and an ambiguous request (several profiles,
+        none named ``"DEFAULT"``) raises listing the identifiers.
 
         :param aircraft_id: ANP aircraft identifier.
         :param operation: ``"departure"``/``"D"`` or ``"arrival"``/``"A"``.
         :param stage_length: ANP stage length (default 1).
+        :param profile_id: Optional ANP profile identifier (e.g. ``"DEFAULT"``,
+            ``"3000LB"``); ``None`` (default) selects as described above.
         :return: An :class:`AnpProfile` (a Doc 29 flight path with ground-roll masks).
-        :raises KeyError: If the aircraft is unknown or has no fixed-point profile
-            for the request.
+        :raises KeyError: If the aircraft is unknown, has no fixed-point profile
+            for the request, or ``profile_id`` is not among the available ones.
+        :raises ValueError: If ``profile_id`` is ``None`` and several profiles
+            exist with none of them named ``"DEFAULT"``.
         """
         if aircraft_id not in self._aircraft:
             raise KeyError(
                 f"aircraft {aircraft_id!r} not in this ANP database "
                 f"(available: {self.aircraft_ids}).")
         op = _operation_code(operation)
-        key = (aircraft_id, op, int(stage_length))
-        if key not in self._profiles:
-            avail = sorted(sl for (a, o, sl) in self._profiles
-                           if a == aircraft_id and o == op)
+        stage = int(stage_length)
+        ids = sorted(pid for (a, o, pid, sl) in self._profiles
+                     if a == aircraft_id and o == op and sl == stage)
+        if not ids:
+            avail = sorted({sl for (a, o, _pid, sl) in self._profiles
+                            if a == aircraft_id and o == op})
             raise KeyError(
                 f"no fixed-point profile for aircraft {aircraft_id!r}, operation "
                 f"{op!r}, stage length {stage_length} (available stage lengths: "
                 f"{avail}). Aircraft with only procedural-step profiles are not "
                 f"supported by this bridge.")
-        profile_id, path = self._profiles[key]
+        if profile_id is not None:
+            pid = str(profile_id)
+            if pid not in ids:
+                raise KeyError(
+                    f"no fixed-point profile {pid!r} for aircraft "
+                    f"{aircraft_id!r}, operation {op!r}, stage length "
+                    f"{stage_length} (available profiles: {ids}).")
+        elif "DEFAULT" in ids:
+            pid = "DEFAULT"
+        elif len(ids) == 1:
+            pid = ids[0]
+        else:
+            raise ValueError(
+                f"aircraft {aircraft_id!r}, operation {op!r}, stage length "
+                f"{stage_length} has several fixed-point profiles and none is "
+                f"'DEFAULT': {ids}. Pass profile_id= to choose one.")
+        path = self._profiles[(aircraft_id, op, pid, stage)]
         # Ground-roll segments run along the runway: both endpoints at field
         # elevation. Tabulated ground points sit at exactly 0 m and the lowest
         # airborne point is above 150 m, so a 1 m threshold separates them.
@@ -361,8 +392,8 @@ class AnpDatabase:
         ground_roll = seg_zero & (op == "D")
         landing_roll = seg_zero & (op == "A")
         return AnpProfile(
-            aircraft_id=aircraft_id, operation=op, profile_id=profile_id,
-            stage_length=int(stage_length), path=path,
+            aircraft_id=aircraft_id, operation=op, profile_id=pid,
+            stage_length=stage, path=path,
             ground_roll=ground_roll, landing_roll=landing_roll)
 
     def _doc29_inputs(
@@ -492,30 +523,42 @@ def _parse_npd(
 
 def _parse_profiles(
     text: str,
-) -> "dict[tuple[str, str, int], tuple[str, NDArray[np.float64]]]":
-    """Parse fixed-point profiles into ``{(acft, op, stage): (profile_id, path)}``.
+) -> "dict[tuple[str, str, str, int], NDArray[np.float64]]":
+    """Parse fixed-point profiles into ``{(acft, op, profile_id, stage): path}``.
 
     The path is the Doc 29 ``(N, 5)`` array ``x, y, z, power, speed`` in SI units,
-    ordered by point number.
+    ordered by point number. Each profile is keyed by its full ANP identity
+    (aircraft, operation, profile identifier, stage length), so aircraft with
+    several fixed-point profiles for the same operation and stage length (e.g.
+    weight variants) stay separate. Point numbers must be unique and consecutive
+    within each profile; a violation means rows from distinct profiles collided
+    (or the CSV is malformed), so it raises instead of silently interleaving.
     """
     rows = _rows(text)
-    grouped: dict[tuple[str, str, int], list[tuple[int, list[float]]]] = {}
-    label: dict[tuple[str, str, int], str] = {}
+    grouped: dict[tuple[str, str, str, int], list[tuple[int, list[float]]]] = {}
     for row in rows:
-        key = (row["ACFT_ID"], row["Op Type"], int(float(row["Stage Length"])))
+        key = (row["ACFT_ID"], row["Op Type"], row["Profile_ID"],
+               int(float(row["Stage Length"])))
         point = int(float(row["Point Number"]))
         x = float(row["Distance (ft)"]) * _FT_M
         z = float(row["Altitude AFE (ft)"]) * _FT_M
         speed = float(row["TAS (kt)"]) * _KT_MS
         power = float(row["Power Setting"])
         grouped.setdefault(key, []).append((point, [x, 0.0, z, power, speed]))
-        label[key] = row["Profile_ID"]
-    profiles: dict[tuple[str, str, int], tuple[str, NDArray[np.float64]]] = {}
+    profiles: dict[tuple[str, str, str, int], NDArray[np.float64]] = {}
     for key, pts in grouped.items():
         pts.sort(key=lambda e: e[0])
+        numbers = [p[0] for p in pts]
+        if numbers != list(range(numbers[0], numbers[0] + len(numbers))):
+            acft, op, pid, stage = key
+            raise ValueError(
+                f"fixed-point profile for aircraft {acft!r}, operation {op!r}, "
+                f"profile {pid!r}, stage length {stage} has duplicate or "
+                f"non-consecutive point numbers {numbers}; the table is "
+                f"malformed.")
         path = np.asarray([p[1] for p in pts], dtype=np.float64)
         path.flags.writeable = False  # exposed by reference on AnpProfile
-        profiles[key] = (label[key], path)
+        profiles[key] = path
     return profiles
 
 

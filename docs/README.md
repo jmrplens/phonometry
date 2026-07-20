@@ -72,7 +72,8 @@ Full documentation for phonometry. Also available as a website:
 - [Theory](theory.md): standards, math and design decisions, split by domain
   - [Signal analysis](theory-signal-analysis.md): filter banks, weightings, time integration, level and exposure metrics, sound intensity, GUM uncertainty
   - [Perception and hearing](theory-perception.md): equal-loudness contours, loudness models, sound quality, tone prominence, STI/SII, hearing statistics
-  - [Rooms and buildings](theory-rooms-buildings.md): room acoustics, noise criteria, insulation and ratings, flanking, scattering, materials
+  - [Rooms and buildings](theory-rooms-buildings.md): room acoustics, noise criteria, insulation and ratings, flanking prediction
+  - [Materials and surfaces](theory-materials-surfaces.md): scattering and diffusion, in-situ road-surface absorption, absorption ratings, airflow resistance, impedance tube
   - [Environment and transport](theory-environment-transport.md): environmental descriptors, impulsive adjustment, outdoor propagation, occupational exposure, sound power
   - [Vibration](theory-vibration.md): human vibration weightings and metrics, multiple-shock spinal model
 - [Why phonometry](why-phonometry.md): IEC compliance vs other libraries

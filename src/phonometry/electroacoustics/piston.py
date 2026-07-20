@@ -206,16 +206,21 @@ class RadiatingPistonResult:
     speed_of_sound: float
     density: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
         """Plot the normalized piston resistance and reactance against ``ka``.
 
         Reproduces the classic Beranek & Mellow figure: ``R1`` rising to 1 and
         ``X1`` peaking then decaying, over the ``ka`` range of the result.
         Requires matplotlib (``pip install phonometry[plot]``).
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
         """
+        from .._i18n import check_language
         from .._plot.electroacoustics import plot_piston_impedance
 
-        return plot_piston_impedance(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_piston_impedance(self, ax=ax, language=language, **kwargs)
 
 
 def radiating_piston(

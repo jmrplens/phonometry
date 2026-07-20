@@ -268,7 +268,12 @@ EBU Mode loudness measurement of a programme (BS.1770-5 / EBU R 128).
 ### ProgramLoudnessResult.plot()
 
 ```python
-ProgramLoudnessResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ProgramLoudnessResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot momentary and short-term loudness over time, with the
@@ -276,6 +281,12 @@ integrated loudness and the loudness range annotated.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 
 ### ProgramLoudnessResult.report()
 

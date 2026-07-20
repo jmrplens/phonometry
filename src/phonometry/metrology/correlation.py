@@ -182,11 +182,17 @@ class CorrelationResult:
             dtype=np.float64,
         )
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
-        """Plot the correlation estimate against the lag in seconds."""
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
+        """Plot the correlation estimate against the lag in seconds.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        """
+        from .._i18n import check_language
         from .._plot.metrology import plot_correlation
 
-        return plot_correlation(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_correlation(self, ax=ax, language=language, **kwargs)
 
 
 def correlation(
@@ -447,11 +453,17 @@ class TimeDelayResult:
     signal_bandwidth: float | None
     fs: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
-        """Plot the correlation function with the estimated delay marked."""
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
+        """Plot the correlation function with the estimated delay marked.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        """
+        from .._i18n import check_language
         from .._plot.metrology import plot_time_delay
 
-        return plot_time_delay(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_time_delay(self, ax=ax, language=language, **kwargs)
 
 
 def _gcc_weight(
@@ -818,11 +830,18 @@ class AlignedImpulseResponseResult:
     delay_samples: float
     fs: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
-        """Plot the reference and the aligned impulse response."""
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
+        """Plot the reference and the aligned impulse response.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        """
+        from .._i18n import check_language
         from .._plot.metrology import plot_aligned_impulse_response
 
-        return plot_aligned_impulse_response(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_aligned_impulse_response(self, ax=ax, language=language,
+                                             **kwargs)
 
 
 def _fractional_advance(

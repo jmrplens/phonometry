@@ -286,6 +286,7 @@ FDTDResult.plot(
     *,
     kind: str = 'probes',
     frame: int = -1,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -299,6 +300,7 @@ Plot the probe histories or one recorded field snapshot.
 | `ax` | Existing axes, or `None` to create a figure. |
 | `kind` | `"probes"` (default) draws the per-probe pressure time histories; `"snapshot"` renders one recorded pressure field with the geometry overlaid (`imshow` raster). |
 | `frame` | Snapshot index for `kind="snapshot"` (default: the last recorded frame). |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the underlying `plot`/`imshow`. |
 
 **Returns:** The axes.

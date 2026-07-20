@@ -82,12 +82,17 @@ class EnvelopeResult:
     antialias: bool
 
     def plot(
-        self, ax: "Axes | None" = None, **kwargs: Any
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
     ) -> "Axes | NDArray[Any]":
-        """Plot the signal with its envelope and the instantaneous frequency."""
+        """Plot the signal with its envelope and the instantaneous frequency.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        """
+        from .._i18n import check_language
         from .._plot.metrology import plot_envelope
 
-        return plot_envelope(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_envelope(self, ax=ax, language=language, **kwargs)
 
 
 def _decimate_envelope(

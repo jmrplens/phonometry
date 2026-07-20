@@ -22,9 +22,25 @@ if TYPE_CHECKING:
 
     from ..broadcast.program_loudness import ProgramLoudnessResult
 
+_STRINGS = {
+    "momentary": {"en": "Momentary (400 ms)", "es": "Momentánea (400 ms)"},
+    "short_term": {"en": "Short-term (3 s)", "es": "Corto plazo (3 s)"},
+    "time_s": {"en": "Time [s]", "es": "Tiempo [s]"},
+    "loudness_lufs": {"en": "Loudness [LUFS]", "es": "Sonoridad [LUFS]"},
+    "title": {"en": "Programme loudness (EBU R 128)",
+              "es": "Sonoridad de programa (EBU R 128)"},
+    "integrated": {"en": "Integrated", "es": "Integrada"},
+}
+
+
+def _t(key: str, language: str) -> str:
+    """Return the localised fixed string for *key*."""
+    return _STRINGS[key][language]
+
 
 def plot_program_loudness(
-    result: "ProgramLoudnessResult", ax: Axes | None = None, **kwargs: Any
+    result: "ProgramLoudnessResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
 ) -> Axes:
     """EBU Mode loudness over time (ITU-R BS.1770-5 / EBU R 128).
 
@@ -34,17 +50,21 @@ def plot_program_loudness(
 
     :param result: A :class:`~phonometry.broadcast.ProgramLoudnessResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the short-term ``plot``.
     :return: The axes.
     """
+    from .._i18n import format_number, localize_axes
+
     ax = ax if ax is not None else _new_axes()
     if math.isfinite(result.lra_low) and math.isfinite(result.lra_high):
+        lra = format_number(result.loudness_range, language, decimals=1)
         ax.axhspan(
             result.lra_low,
             result.lra_high,
             color=_C_SECONDARY,
             alpha=0.15,
-            label=f"LRA {result.loudness_range:.1f} LU",
+            label=f"LRA {lra} LU",
         )
     if result.momentary.size:
         ax.plot(
@@ -52,24 +72,25 @@ def plot_program_loudness(
             result.momentary,
             color=_C_MUTED,
             linewidth=1.0,
-            label="Momentary (400 ms)",
+            label=_t("momentary", language),
         )
     if result.short_term.size:
         kwargs.setdefault("color", _C_PRIMARY)
         kwargs.setdefault("linewidth", 2.0)
-        kwargs.setdefault("label", "Short-term (3 s)")
+        kwargs.setdefault("label", _t("short_term", language))
         ax.plot(
             result.short_term_time,
             result.short_term,
             **kwargs,
         )
     if math.isfinite(result.integrated):
+        integ = format_number(result.integrated, language, decimals=1)
         ax.axhline(
             result.integrated,
             color=_C_REFERENCE,
             linestyle="--",
             linewidth=1.6,
-            label=f"Integrated {result.integrated:.1f} LUFS",
+            label=f"{_t('integrated', language)} {integ} LUFS",
         )
     finite = np.concatenate(
         [
@@ -81,9 +102,10 @@ def plot_program_loudness(
         low = float(np.min(finite))
         high = float(np.max(finite))
         ax.set_ylim(low - 5.0, high + 5.0)
-    ax.set_xlabel("Time [s]")
-    ax.set_ylabel("Loudness [LUFS]")
-    ax.set_title("Programme loudness (EBU R 128)")
+    ax.set_xlabel(_t("time_s", language))
+    ax.set_ylabel(_t("loudness_lufs", language))
+    ax.set_title(_t("title", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize=9)
+    localize_axes(ax, language)
     return ax

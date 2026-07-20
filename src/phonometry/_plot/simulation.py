@@ -14,35 +14,59 @@ if TYPE_CHECKING:
 
     from ..simulation.fdtd import FDTDResult
 
+_STRINGS = {
+    "time_ms": {"en": "Time [ms]", "es": "Tiempo [ms]"},
+    "pressure_pa": {"en": "Pressure [Pa]", "es": "Presión [Pa]"},
+    "snapshot_title": {"en": "FDTD pressure field at t = {t_txt} ms",
+                       "es": "Campo de presión FDTD en t = {t_txt} ms"},
+    "probe_title": {"en": "FDTD probe pressure",
+                    "es": "Presión en las sondas FDTD"},
+    "probe_label": {"en": "probe", "es": "sonda"},
+}
+
+
+def _t(key: str, language: str, **fmt: Any) -> str:
+    """Return the localised fixed string for *key* (optionally ``str.format``ed)."""
+    text = _STRINGS[key][language]
+    return text.format(**fmt) if fmt else text
+
 
 def plot_fdtd_probes(
-    result: "FDTDResult", ax: Axes | None = None, **kwargs: Any
+    result: "FDTDResult", ax: Axes | None = None, *, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Pressure time history at each probe of an FDTD run.
 
     :param result: A :class:`~phonometry.simulation.fdtd.FDTDResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to ``Axes.plot``.
     :return: The axes.
     """
+    from .._i18n import format_number, localize_axes
+
     ax = ax if ax is not None else _new_axes()
     t_ms = np.asarray(result.times, dtype=np.float64) * 1000.0
+    label = _t("probe_label", language)
     for k in range(result.pressures.shape[0]):
         x, y = result.probe_positions[k]
+        px = format_number(x, language, decimals=2)
+        py = format_number(y, language, decimals=2)
         ax.plot(t_ms, result.pressures[k],
-                label=f"probe ({x:.2f}, {y:.2f}) m", **kwargs)
-    ax.set_xlabel("Time [ms]")
-    ax.set_ylabel("Pressure [Pa]")
-    ax.set_title("FDTD probe pressure")
+                label=f"{label} ({px}, {py}) m", **kwargs)
+    ax.set_xlabel(_t("time_ms", language))
+    ax.set_ylabel(_t("pressure_pa", language))
+    ax.set_title(_t("probe_title", language))
     ax.grid(True, alpha=0.3)
     if result.pressures.shape[0]:
         ax.legend(loc="upper right", fontsize="small")
+    localize_axes(ax, language)
     return ax
 
 
 def plot_fdtd_snapshot(
     result: "FDTDResult", ax: Axes | None = None, *, frame: int = -1,
-    **kwargs: Any
+    language: str = "en", **kwargs: Any
 ) -> Axes:
     """One recorded pressure-field snapshot with the geometry overlaid.
 
@@ -54,10 +78,13 @@ def plot_fdtd_snapshot(
         recorded snapshots.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param frame: Snapshot index (default: the last recorded frame).
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to ``imshow``.
     :return: The axes.
     :raises ValueError: If the result holds no snapshots.
     """
+    from .._i18n import format_number, localize_axes
+
     if result.snapshots is None or result.snapshot_times is None:
         raise ValueError("the result holds no snapshots; rerun the "
                          "simulation with snapshot_every set")
@@ -91,9 +118,11 @@ def plot_fdtd_snapshot(
         x, y = result.probe_positions[k]
         ax.plot(x, y, marker="o", markersize=5, color=_C_MUTED,
                 markeredgecolor="black", linestyle="none")
-    ax.figure.colorbar(img, ax=ax, label="Pressure [Pa]")
+    ax.figure.colorbar(img, ax=ax, label=_t("pressure_pa", language))
     ax.set_xlabel("x [m]")
     ax.set_ylabel("y [m]")
     t_ms = float(result.snapshot_times[frame]) * 1000.0
-    ax.set_title(f"FDTD pressure field at t = {t_ms:.2f} ms")
+    t_txt = format_number(t_ms, language, decimals=2)
+    ax.set_title(_t("snapshot_title", language, t_txt=t_txt))
+    localize_axes(ax, language)
     return ax

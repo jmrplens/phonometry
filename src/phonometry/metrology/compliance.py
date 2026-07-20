@@ -389,7 +389,8 @@ class FilterComplianceResult:
             )
         return max(classes)
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
         """Plot the worst-margin band against its class-limit corridor.
 
         Draws the measured relative attenuation of the binding band over the
@@ -397,10 +398,14 @@ class FilterComplianceResult:
         loosest) class; see :func:`phonometry._plot.metrology.plot_filter_class`.
         Requires matplotlib (``pip install phonometry[plot]``) and returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
         """
+        from .._i18n import check_language
         from .._plot.metrology import plot_filter_class
 
-        return plot_filter_class(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_filter_class(self, ax=ax, language=language, **kwargs)
 
     def report(
         self,

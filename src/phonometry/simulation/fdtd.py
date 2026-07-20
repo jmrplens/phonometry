@@ -642,7 +642,7 @@ class FDTDResult:
         return nx * self.dx, ny * self.dx
 
     def plot(self, ax: "Axes | None" = None, *, kind: str = "probes",
-             frame: int = -1, **kwargs: Any) -> "Axes":
+             frame: int = -1, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the probe histories or one recorded field snapshot.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -651,17 +651,22 @@ class FDTDResult:
             field with the geometry overlaid (``imshow`` raster).
         :param frame: Snapshot index for ``kind="snapshot"`` (default: the
             last recorded frame).
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the underlying ``plot``/``imshow``.
         :return: The axes.
         """
+        from .._i18n import check_language
+
+        check_language(language)
         if kind == "probes":
             from .._plot.simulation import plot_fdtd_probes
 
-            return plot_fdtd_probes(self, ax=ax, **kwargs)
+            return plot_fdtd_probes(self, ax=ax, language=language, **kwargs)
         if kind == "snapshot":
             from .._plot.simulation import plot_fdtd_snapshot
 
-            return plot_fdtd_snapshot(self, ax=ax, frame=frame, **kwargs)
+            return plot_fdtd_snapshot(self, ax=ax, frame=frame,
+                                      language=language, **kwargs)
         raise ValueError("kind must be 'probes' or 'snapshot'")
 
 

@@ -869,11 +869,17 @@ class HarmonicDistortionResult:
     thd_plus_noise: float
     sinad_db: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
-        """Plot the magnitude spectrum with the harmonics marked."""
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
+        """Plot the magnitude spectrum with the harmonics marked.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        """
+        from .._i18n import check_language
         from .._plot.electroacoustics import plot_harmonic_distortion
 
-        return plot_harmonic_distortion(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_harmonic_distortion(self, ax=ax, language=language, **kwargs)
 
 
 def harmonic_analysis(

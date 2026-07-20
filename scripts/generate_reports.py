@@ -199,6 +199,38 @@ def _program_loudness_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "ebu_r128_loudness_example.pdf"
 
 
+def _epnl_example() -> Tuple[object, ReportMetadata, str]:
+    """EPNL fiche: an ICAO Annex 16 aircraft-noise-certification result.
+
+    A deterministic synthetic half-second flyover: a broadband spectral shape
+    peaking near 400 Hz swept by a Gaussian temporal gain (the aircraft
+    approaching and receding) with a 2500 Hz fan tone that adds the tone
+    correction, giving a valid ``EPNLResult`` with a peak PNLTM near mid-record
+    and a clear 10 dB-down window. The requirement is a plausible certification
+    EPNL limit the example passes.
+    """
+    k, dt = 24, 0.5
+    idx = np.arange(k)
+    shape = 15.0 * np.exp(-((np.log10(ph.aircraft.NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5)
+    gain = 24.0 * np.exp(-((idx - 12.0) ** 2) / (2 * 3.5**2)) - 3.0
+    spectra = (46.0 + shape)[None, :] + gain[:, None]
+    spectra[:, 17] += 10.0 * np.exp(-((idx - 12.0) ** 2) / (2 * 4.0**2))  # 2500 Hz tone
+    result = ph.effective_perceived_noise_level(spectra, dt)
+    metadata = ReportMetadata(
+        specimen="Example twin-turbofan transport (synthetic flyover)",
+        manufacturer="Example Aircraft Company",
+        client="Example Aircraft Company",
+        test_room="Flyover reference point",
+        measurement_standard="ICAO Annex 16 Vol I Amendment 14 Chapter 4",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-EPNL",
+        requirement=101.0,
+    )
+    return result, metadata, "icao_epnl_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -207,6 +239,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _absorption_example,
     _loudness_example,
     _program_loudness_example,
+    _epnl_example,
 ]
 
 

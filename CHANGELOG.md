@@ -65,6 +65,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   momentary/short-term maxima are shown as informational characterising
   measures. `ReportMetadata.requirement` now accepts any finite value, since a
   programme-loudness target in LUFS is negative.
+- Aircraft-noise EPNL results can now be exported as a one-page ICAO Annex 16
+  certification fiche through `EPNLResult.report(path)`: a standard-basis line
+  (ICAO Annex 16 Vol. I Appendix 2), a TCDSN-style metadata header (aircraft,
+  manufacturer / type-certificate holder, applicant, measurement point), a
+  metrics table of the informational intermediate quantities (the peak `PNLTM`,
+  the duration correction `D`, the 10 dB-down record window and, when non-zero,
+  the bandsharing adjustment) above the result's own landscape
+  `PNLT`-versus-time plot, the boxed `EPNL = X EPNdB` result, a
+  Level | Limit | Margin verdict row when a certification limit is supplied
+  (the EPNL passes at or below it), a static reference-conditions strip and a
+  footer noting the result is computational and not an official State noise
+  certificate. It reuses the shared `ReportMetadata` and reportlab back end of
+  the other fiches, and does not reproduce any type-certificate data sheet. A
+  rendered example fiche is kept under `.github/reports/`, regenerated with
+  `make reports`, and linked from the documentation.
 - `enclosure_insertion_loss` now accepts a panel prediction result directly for
   its `panel_transmission_loss` argument, in addition to a per-band array or a
   callable. A `SoundReductionResult` or `ApertureTransmissionResult` (from the

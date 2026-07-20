@@ -100,6 +100,52 @@ aircraft.effective_perceived_noise_level(spectra, dt).plot()
 
 </details>
 
+### ICAO EPNL report (`.report()`)
+
+`EPNLResult.report(path)` renders a one-page PDF fiche laid out like an
+aircraft-noise-certification data sheet: a standard-basis line (ICAO Annex 16
+Vol. I Appendix 2), an optional TCDSN-style metadata header (aircraft,
+manufacturer / type-certificate holder, applicant, measurement point), a
+metrics table of the informational intermediate quantities (the peak `PNLTM`,
+the duration correction `D`, the 10 dB-down record window and, when non-zero,
+the bandsharing adjustment) above the full-width landscape `PNLT`-versus-time
+plot (the result's own `.plot()`), the boxed `EPNL = X EPNdB` single number, a
+Level | Limit | Margin verdict row when a certification limit is supplied, a
+static reference-conditions strip (25 °C, 70 % RH, sea level, zero wind, ISA)
+and a footer with the fixed disclaimer. It uses the same `ReportMetadata`
+container (documented under [Field
+insulation](insulation-field.md#report-metadata-reportmetadata)) and rendering
+engine as the ISO 717 insulation fiche; a supplied `requirement` is read as the
+certification EPNL limit in EPNdB (the EPNL passes at or below it), and
+`metadata=None` produces a lightweight prediction fiche with no verdict row.
+Rendering needs reportlab (`pip install phonometry[report]`); only
+`engine="reportlab"` is supported. The fiche is a computational EPNL result and
+is not an official State noise certificate; it does not reproduce any TCDSN.
+
+```python
+from phonometry import effective_perceived_noise_level, ReportMetadata
+
+# spectra: a (K, 24) array of one-third-octave band levels sampled every dt s
+res = effective_perceived_noise_level(spectra, dt=0.5)
+res.report(
+    "epnl_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Example twin-turbofan transport",
+        manufacturer="Example Aircraft Company",
+        measurement_standard="ICAO Annex 16 Vol I Amendment 14 Chapter 4",
+        laboratory="Phonometry Reference Laboratory",
+        requirement=101.0,          # certification EPNL limit (EPNdB)
+    ),
+)                                   # EPNL (EPNdB) with PNLTM and D
+```
+
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository:
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/icao_epnl_example.pdf"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/icao_epnl_example.png" alt="One-page ICAO Annex 16 EPNL certification fiche: a metadata header, a reference-conditions strip, an intermediate-quantities table (PNLTM, duration correction D, 10 dB-down window), the landscape PNL/PNLT time-history plot, the boxed EPNL = 98.3 EPNdB single-number result and a PASS verdict against a 101 EPNdB limit" width="70%"></a>
+</p>
+
 ## 4. Measurement-system verification (IEC 61265)
 
 `verify_aircraft_noise_system` checks a supplied set of measured performance

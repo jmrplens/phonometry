@@ -15,8 +15,13 @@ import pytest
 
 pytest.importorskip("reportlab")
 
+import numpy as np  # noqa: E402  (import after importorskip)
+
 from phonometry import ReportMetadata  # noqa: E402  (import after importorskip)
-from phonometry.materials import weighted_absorption  # noqa: E402
+from phonometry.materials import (  # noqa: E402
+    weighted_absorption,
+    weighted_absorption_from_third_octave,
+)
 
 from reference_data import (  # noqa: E402
     ISO11654_ANNEX_A1_ALPHA_P as _A1_ALPHA_P,
@@ -29,6 +34,13 @@ from reference_data import (  # noqa: E402
 )
 
 _PDF_MAGIC = b"%PDF"
+
+# Fifteen one-third-octave alpha_s (200 Hz to 5000 Hz) whose octave means are
+# the Annex A.2 practical coefficients (0.35, 1.00, 0.65, 0.60, 0.55).
+_THIRD_OCTAVE_ALPHA_S = (
+    0.30, 0.35, 0.40, 1.00, 1.00, 1.00, 0.62, 0.66, 0.67,
+    0.58, 0.60, 0.62, 0.53, 0.55, 0.57,
+)
 
 
 def _assert_pdf(path: str) -> None:
@@ -80,6 +92,41 @@ def test_fiche_reproduces_iso11654_annex_a2(tmp_path) -> None:
     assert result.alpha_w == pytest.approx(_A2_ALPHA_W)
     assert result.shape_indicator == _A2_INDICATOR
     _assert_one_page(str(result.report(str(tmp_path / "a2.pdf"))))
+
+
+def test_third_octave_fiche_renders_and_round_trips(tmp_path) -> None:
+    """A rating built from one-third-octave alpha_s renders the full-table fiche.
+
+    The retained alpha_s round-trips on the result, and the accredited
+    one-third-octave table renders a valid one-page PDF.
+    """
+    result = weighted_absorption_from_third_octave(_THIRD_OCTAVE_ALPHA_S)
+    np.testing.assert_allclose(result.third_octave_alpha_s, _THIRD_OCTAVE_ALPHA_S)
+    np.testing.assert_allclose(
+        result.third_octave_bands,
+        [200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500,
+         3150, 4000, 5000],
+    )
+    out = tmp_path / "third_octave.pdf"
+    result.report(str(out))
+    _assert_one_page(str(out))
+
+
+def test_third_octave_fiche_with_metadata(tmp_path) -> None:
+    """The one-third-octave fiche renders one page with a full metadata header."""
+    result = weighted_absorption_from_third_octave(_THIRD_OCTAVE_ALPHA_S)
+    out = tmp_path / "third_octave_meta.pdf"
+    result.report(str(out), metadata=_full_metadata(requirement=0.55))
+    _assert_one_page(str(out))
+
+
+def test_plain_rating_without_alpha_s_still_renders(tmp_path) -> None:
+    """A plain weighted_absorption result (alpha_s None) falls back and renders."""
+    result = weighted_absorption(_A2_ALPHA_P)
+    assert result.third_octave_alpha_s is None
+    out = tmp_path / "plain.pdf"
+    result.report(str(out))
+    _assert_one_page(str(out))
 
 
 def test_verbose_renders_evaluation_table(tmp_path) -> None:

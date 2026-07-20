@@ -10,9 +10,14 @@ room measurement per ISO 354 rated per ISO 11654):
 * an optional metadata header block (client, specimen, sample area, mounting,
   room conditions ...), rendered only for the fields supplied on the
   :class:`ReportMetadata`;
-* a two-panel body with the octave-band ``alpha_p`` table on the left and the
+* a two-panel body with an absorption table on the left and the
   practical-versus-shifted-reference curve on the right, drawn by the result's
-  own ``plot(ax=...)`` so the curve is native to the library;
+  own ``plot(ax=...)`` so the curve is native to the library. When the rating
+  retained its one-third-octave input (from
+  :func:`~phonometry.materials.weighted_absorption_from_third_octave`), the left
+  table is the full ISO 354 one-third-octave ``alpha_s`` table with ``alpha_p``
+  on the octave rows, as accredited certificates print it; otherwise it is the
+  octave-band ``alpha_p`` table;
 * a boxed single-number result ``alpha_w = X (shape) dB`` with the absorption
   class and applied shift alongside;
 * an optional verdict row when a minimum ``alpha_w`` requirement is supplied;
@@ -56,6 +61,44 @@ if TYPE_CHECKING:
 
 #: Threshold below which an unfavourable deviation is shown as an em dash.
 _DEVIATION_EPS = 0.005
+
+
+def _d2(value: float) -> str:
+    """Two decimals, period separator (English fiche), matching the 0,05 grid."""
+    return f"{value:.2f}"
+
+
+def _thead_style() -> Any:
+    """The shared accent table-header paragraph style (white, centred, 7.2 pt)."""
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+
+    styles = getSampleStyleSheet()
+    return ParagraphStyle(
+        "iso11654_thead", parent=styles["Normal"], fontSize=7.2,
+        textColor=colors.white, alignment=1, leading=8.5,
+    )
+
+
+def _base_table_style(accent: Any, light: Any, n_data: int) -> List[Any]:
+    """The accredited-table command list shared by every left-panel table.
+
+    Accent header row with a rule below it, zebra striping over the ``n_data``
+    body rows, centred cells and the light box, matching the validated fiche.
+    """
+    from reportlab.lib import colors
+
+    return [
+        ("BACKGROUND", (0, 0), (-1, 0), accent),
+        ("FONTSIZE", (0, 1), (-1, -1), 8),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ROWBACKGROUNDS", (0, 1), (-1, n_data), [colors.white, light]),
+        ("LINEBELOW", (0, 0), (-1, 0), 0.6, accent),
+        ("TOPPADDING", (0, 0), (-1, -1), 3.0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3.0),
+        ("BOX", (0, 0), (-1, -1), 0.5, accent),
+    ]
 
 
 def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
@@ -104,18 +147,12 @@ def _value_table(
     Called only after :func:`render_iso11654_report` has imported reportlab.
     """
     from reportlab.lib import colors
-    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph, Table, TableStyle
 
-    styles = getSampleStyleSheet()
     accent = colors.HexColor(_ACCENT_HEX)
     light = colors.HexColor(_LIGHT_HEX)
-
-    head_style = ParagraphStyle(
-        "iso11654_thead", parent=styles["Normal"], fontSize=7.2,
-        textColor=colors.white, alignment=1, leading=8.5,
-    )
+    head_style = _thead_style()
 
     if verbose:
         header = [
@@ -132,38 +169,23 @@ def _value_table(
         ]
         col_widths = [28 * mm, 28 * mm]
 
-    def d2(value: float) -> str:
-        # Two decimals, period separator (English fiche), matching the 0,05 grid.
-        return f"{value:.2f}"
-
     rows: List[List[Any]] = [header]
     for fk, m, r_, d in zip(centers, measured, shifted, deviations):
         if verbose:
             rows.append(
                 [
                     f"{int(round(fk))}",
-                    d2(m),
-                    d2(r_),
-                    d2(d) if d > _DEVIATION_EPS else "—",
+                    _d2(m),
+                    _d2(r_),
+                    _d2(d) if d > _DEVIATION_EPS else "—",
                 ]
             )
         else:
-            rows.append([f"{int(round(fk))}", d2(m)])
+            rows.append([f"{int(round(fk))}", _d2(m)])
 
-    n_data = len(centers)
-    style_cmds: List[Any] = [
-        ("BACKGROUND", (0, 0), (-1, 0), accent),
-        ("FONTSIZE", (0, 1), (-1, -1), 8),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, n_data), [colors.white, light]),
-        ("LINEBELOW", (0, 0), (-1, 0), 0.6, accent),
-        ("TOPPADDING", (0, 0), (-1, -1), 3.0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 3.0),
-        ("BOX", (0, 0), (-1, -1), 0.5, accent),
-    ]
+    style_cmds = _base_table_style(accent, light, len(centers))
     if verbose:
-        rows.append(["", "", "sum", d2(float(deviations.sum()))])
+        rows.append(["", "", "sum", _d2(float(deviations.sum()))])
         style_cmds += [
             ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
             ("FONTNAME", (2, -1), (-1, -1), "Helvetica-Bold"),
@@ -172,6 +194,46 @@ def _value_table(
 
     table = Table(rows, colWidths=col_widths, repeatRows=1)
     table.setStyle(TableStyle(style_cmds))
+    return table
+
+
+def _third_octave_table(
+    bands: np.ndarray,
+    alpha_s: np.ndarray,
+    measured: np.ndarray,
+) -> Any:
+    """Build the combined one-third-octave ``f | alpha_s | alpha_p`` table.
+
+    The accredited ISO 354 convention (Fellert, Mueller-BBM, Peutz): every
+    one-third-octave band 200 Hz to 5000 Hz carries its measured ``alpha_s``,
+    and the octave practical coefficient ``alpha_p`` is printed only on the
+    matching octave-centre row (250, 500, 1000, 2000, 4000 Hz), the middle of
+    each one-third-octave triple. Called only after :func:`render_iso11654_report`
+    has imported reportlab.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Paragraph, Table, TableStyle
+
+    accent = colors.HexColor(_ACCENT_HEX)
+    light = colors.HexColor(_LIGHT_HEX)
+    head_style = _thead_style()
+
+    header = [
+        Paragraph("Frequency f [Hz]", head_style),
+        Paragraph("&#945;<sub>s</sub>", head_style),
+        Paragraph("&#945;<sub>p</sub>", head_style),
+    ]
+    col_widths = [24 * mm, 16 * mm, 16 * mm]
+
+    rows: List[List[Any]] = [header]
+    for j, (fk, a_s) in enumerate(zip(bands, alpha_s)):
+        # The middle of each triple is the octave centre carrying alpha_p.
+        octave_cell = _d2(measured[j // 3]) if j % 3 == 1 else ""
+        rows.append([f"{int(round(fk))}", _d2(a_s), octave_cell])
+
+    table = Table(rows, colWidths=col_widths, repeatRows=1)
+    table.setStyle(TableStyle(_base_table_style(accent, light, len(bands))))
     return table
 
 
@@ -271,9 +333,24 @@ def render_iso11654_report(
             flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
-    value_table = _value_table(centers, measured, shifted, deviations, verbose)
+    # The accredited default (Fellert et al.) shows the full one-third-octave
+    # alpha_s table with alpha_p on the octave rows when the input alpha_s was
+    # retained; verbose keeps the octave evaluation columns, and without alpha_s
+    # the plain octave alpha_p table is used.
+    alpha_s = result.third_octave_alpha_s
+    bands = result.third_octave_bands
+    if not verbose and alpha_s is not None and bands is not None:
+        value_table = _third_octave_table(
+            np.asarray(bands, dtype=np.float64),
+            np.asarray(alpha_s, dtype=np.float64),
+            measured,
+        )
+        caption = "One-third-octave &#945;<sub>s</sub>, octave &#945;<sub>p</sub>"
+    else:
+        value_table = _value_table(centers, measured, shifted, deviations, verbose)
+        caption = "Octave-band &#945;<sub>p</sub>"
     left_cell = [
-        Paragraph("Octave-band &#945;<sub>p</sub>", caption_style),
+        Paragraph(caption, caption_style),
         value_table,
     ]
     plot_drawing = render_figure_drawing(

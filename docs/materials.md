@@ -90,8 +90,24 @@ print(materials.absorption_class(0.85))       # B
 `weighted_absorption` accepts the five octave-band $\alpha_p$ values (as a
 sequence or a `{frequency: value}` mapping); pass the fifteen one-third-octave
 $\alpha_s$ values to `practical_absorption_coefficient` first if you are starting
-from raw ISO 354 data. The result carries the shifted reference curve and the
-per-band deviations, and its `.plot()` renders the figure above.
+from raw ISO 354 data. To keep the one-third-octave $\alpha_s$ on the result (so
+the fiche can print the full table every accredited ISO 354 certificate carries),
+rate it in one step with `weighted_absorption_from_third_octave(alpha_s)`, which
+forms $\alpha_p$, rates it and retains the input $\alpha_s$ and its band centres
+(`third_octave_alpha_s`, `third_octave_bands`). The result carries the shifted
+reference curve and the per-band deviations, and its `.plot()` renders the figure
+above.
+
+```python
+from phonometry import materials
+
+# Fifteen one-third-octave alpha_s (200 Hz to 5000 Hz), as an ISO 354 report gives
+alpha_s = [0.30, 0.35, 0.40, 1.00, 1.00, 1.00, 0.62, 0.66, 0.67,
+           0.58, 0.60, 0.62, 0.53, 0.55, 0.57]
+result = materials.weighted_absorption_from_third_octave(alpha_s)
+print(result.rating_label)          # 0.60(M)
+print(result.third_octave_alpha_s)  # the input alpha_s, retained for the fiche
+```
 
 ### ISO 11654 report (`.report()`)
 
@@ -101,7 +117,11 @@ rated per ISO 11654): a standard-basis line, an optional metadata header block,
 the octave-band $\alpha_p$ table beside the practical-versus-shifted-reference
 plot (the result's own `.plot()`), the boxed $\alpha_w$ single number with its
 absorption class and applied shift, an optional verdict row and a footer with
-the fixed disclaimer. It uses the same `ReportMetadata` container (documented
+the fixed disclaimer. When the rating was built with
+`weighted_absorption_from_third_octave`, the left table becomes the full ISO 354
+one-third-octave $\alpha_s$ table with the octave $\alpha_p$ on the matching
+rows, exactly as accredited certificates print it. It uses the same
+`ReportMetadata` container (documented
 under [Field insulation](insulation-field.md#report-metadata-reportmetadata))
 and rendering engine as the ISO 717 insulation fiche; passing
 `metadata=None` produces a lightweight prediction fiche, and a supplied
@@ -114,7 +134,11 @@ Rendering needs reportlab (`pip install phonometry[report]`); only
 ```python
 from phonometry import materials, ReportMetadata
 
-result = materials.weighted_absorption([0.35, 1.00, 0.65, 0.60, 0.55])
+# Rate from the fifteen one-third-octave alpha_s so the fiche prints the full
+# ISO 354 table; materials.weighted_absorption([...]) also works from alpha_p.
+alpha_s = [0.30, 0.35, 0.40, 1.00, 1.00, 1.00, 0.62, 0.66, 0.67,
+           0.58, 0.60, 0.62, 0.53, 0.55, 0.57]
+result = materials.weighted_absorption_from_third_octave(alpha_s)
 result.report(
     "alpha_w_fiche.pdf",
     metadata=ReportMetadata(
@@ -131,7 +155,7 @@ result.report(
 The example fiche, regenerated with `make reports`, is kept rendered in the
 repository. Click the preview to open the PDF:
 
-[![ISO 11654 absorption example report: metadata header, octave-band practical-coefficient table beside the practical-versus-shifted-reference plot, boxed alpha_w = 0.60 (M) with absorption class C and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso11654_absorption_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso11654_absorption_example.pdf)
+[![ISO 11654 absorption example report: metadata header, the full one-third-octave alpha_s table with the octave alpha_p on the matching rows beside the practical-versus-shifted-reference plot, boxed alpha_w = 0.60 (M) with absorption class C and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso11654_absorption_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso11654_absorption_example.pdf)
 
 *Weighted absorption fiche (`AbsorptionRatingResult.report`), $\alpha_w$ with its class.*
 

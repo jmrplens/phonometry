@@ -112,10 +112,18 @@ def _impact_example() -> Tuple[object, ReportMetadata, str]:
 
 def _absorption_example() -> Tuple[object, ReportMetadata, str]:
     """Absorption fiche: an ISO 11654 weighted sound absorption rating."""
-    # Octave practical coefficients giving alpha_w = 0.60 with an M shape
-    # indicator (ISO 11654 Annex A.2 shape); a broadband porous absorber.
-    alpha_p = (0.35, 1.00, 0.65, 0.60, 0.55)
-    result = ph.materials.weighted_absorption(alpha_p)
+    # The fifteen one-third-octave alpha_s (200 Hz to 5000 Hz) an accredited
+    # ISO 354 certificate reports, whose octave means are the practical
+    # coefficients (0.35, 1.00, 0.65, 0.60, 0.55) giving alpha_w = 0.60 with an
+    # M shape indicator (ISO 11654 Annex A.2 shape); a broadband porous absorber.
+    alpha_s = (
+        0.30, 0.35, 0.40,   # 250 Hz octave -> alpha_p 0.35
+        1.00, 1.00, 1.00,   # 500 Hz octave -> alpha_p 1.00
+        0.62, 0.66, 0.67,   # 1000 Hz octave -> alpha_p 0.65
+        0.58, 0.60, 0.62,   # 2000 Hz octave -> alpha_p 0.60
+        0.53, 0.55, 0.57,   # 4000 Hz octave -> alpha_p 0.55
+    )
+    result = ph.materials.weighted_absorption_from_third_octave(alpha_s)
     metadata = ReportMetadata(
         specimen="50 mm porous absorber over a 100 mm air gap",
         client="Example client",

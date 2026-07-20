@@ -171,9 +171,25 @@ print(materials.absorption_class(0.85))       # B
 `weighted_absorption` acepta los cinco valores de $\alpha_p$ por banda de octava
 (como una secuencia o un mapeo `{frecuencia: valor}`); pasa antes los quince
 valores de $\alpha_s$ de tercio de octava a `practical_absorption_coefficient`
-si partes de datos brutos de ISO 354. El resultado lleva la curva de referencia
-desplazada y las desviaciones por banda, y su `.plot()` genera la figura de
-arriba.
+si partes de datos brutos de ISO 354. Para conservar los $\alpha_s$ de tercio de
+octava en el resultado (de modo que la ficha pueda imprimir la tabla completa que
+lleva todo certificado ISO 354 acreditado), valora en un solo paso con
+`weighted_absorption_from_third_octave(alpha_s)`, que forma $\alpha_p$, lo valora
+y retiene el $\alpha_s$ de entrada y sus frecuencias centrales
+(`third_octave_alpha_s`, `third_octave_bands`). El resultado lleva la curva de
+referencia desplazada y las desviaciones por banda, y su `.plot()` genera la
+figura de arriba.
+
+```python
+from phonometry import materials
+
+# Quince alpha_s de tercio de octava (200 Hz a 5000 Hz), como los da un informe ISO 354
+alpha_s = [0.30, 0.35, 0.40, 1.00, 1.00, 1.00, 0.62, 0.66, 0.67,
+           0.58, 0.60, 0.62, 0.53, 0.55, 0.57]
+result = materials.weighted_absorption_from_third_octave(alpha_s)
+print(result.rating_label)          # 0.60(M)
+print(result.third_octave_alpha_s)  # el alpha_s de entrada, retenido para la ficha
+```
 
 ### Informe de ISO 11654 (`.report()`)
 
@@ -184,7 +200,11 @@ normativa, un bloque opcional de metadatos de cabecera, la tabla de $\alpha_p$
 por banda de octava junto a la curva práctica frente a la referencia desplazada
 (el propio `.plot()` del resultado), el número único $\alpha_w$ en caja con su
 clase de absorción y el desplazamiento aplicado, una fila opcional de veredicto
-y un pie con el descargo fijo. Usa el mismo contenedor `ReportMetadata` y el
+y un pie con el descargo fijo. Cuando la valoración se construyó con
+`weighted_absorption_from_third_octave`, la tabla de la izquierda pasa a ser la
+tabla completa de $\alpha_s$ de tercio de octava de ISO 354 con el $\alpha_p$ de
+octava en las filas correspondientes, tal como la imprimen los certificados
+acreditados. Usa el mismo contenedor `ReportMetadata` y el
 mismo motor de renderizado que la [ficha de aislamiento de ISO 717](/phonometry/es/guides/insulation-field/#informe-de-iso-717-report);
 pasar `metadata=None` produce una ficha ligera de predicción, y un `requirement`
 aportado se lee como el $\alpha_w$ mínimo para el veredicto CUMPLE/NO CUMPLE.
@@ -196,7 +216,11 @@ admite `engine="reportlab"`.
 ```python
 from phonometry import materials, ReportMetadata
 
-result = materials.weighted_absorption([0.35, 1.00, 0.65, 0.60, 0.55])
+# Valora desde los quince alpha_s de tercio de octava para que la ficha imprima la
+# tabla completa de ISO 354; materials.weighted_absorption([...]) también sirve desde alpha_p.
+alpha_s = [0.30, 0.35, 0.40, 1.00, 1.00, 1.00, 0.62, 0.66, 0.67,
+           0.58, 0.60, 0.62, 0.53, 0.55, 0.57]
+result = materials.weighted_absorption_from_third_octave(alpha_s)
 result.report(
     "ficha_alpha_w.pdf",
     metadata=ReportMetadata(
@@ -216,7 +240,7 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 <ReportPreview
 	name="iso11654_absorption_example"
 	title="Informe de ejemplo de absorción ISO 11654 (PDF)"
-	description="Ficha de absorción de una página: una cabecera de metadatos (cliente, muestra, superficie de la probeta, montaje, temperatura, humedad y presión de la cámara reverberante), la tabla de coeficientes prácticos por banda de octava junto a la curva práctica frente a la referencia desplazada, el resultado de un solo número alpha_w = 0.60 (M) en caja con la clase de absorción C y el desplazamiento aplicado, y una fila de veredicto CUMPLE frente al requisito de 0.55."
+	description="Ficha de absorción de una página: una cabecera de metadatos (cliente, muestra, superficie de la probeta, montaje, temperatura, humedad y presión de la cámara reverberante), la tabla completa de alpha_s de tercio de octava con el alpha_p de octava en las filas correspondientes junto a la curva práctica frente a la referencia desplazada, el resultado de un solo número alpha_w = 0.60 (M) en caja con la clase de absorción C y el desplazamiento aplicado, y una fila de veredicto CUMPLE frente al requisito de 0.55."
 	caption="Ficha de absorción ponderada (AbsorptionRatingResult.report), alpha_w con su clase."
 />
 

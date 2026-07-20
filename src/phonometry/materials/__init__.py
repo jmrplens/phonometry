@@ -11,6 +11,7 @@ from .absorption_rating import (
     absorption_class,
     practical_absorption_coefficient,
     weighted_absorption,
+    weighted_absorption_from_third_octave,
 )
 from .absorption_uncertainty import (
     AbsorptionUncertaintyResult,
@@ -296,5 +297,6 @@ __all__ = [
     "two_microphone_impedance",
     "wave_decomposition",
     "weighted_absorption",
+    "weighted_absorption_from_third_octave",
     "weighted_coefficient_uncertainty",
 ]

@@ -82,15 +82,16 @@ class ImpulseProminenceResult:
     prominence: float
     adjustment: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the adjustment curve ``KI(P)`` with the impulses marked.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.environmental import plot_impulse_prominence
 
-        return plot_impulse_prominence(self, ax=ax, **kwargs)
+        return plot_impulse_prominence(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def predicted_prominence(

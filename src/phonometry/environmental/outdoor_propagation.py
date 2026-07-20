@@ -152,15 +152,16 @@ class OutdoorAttenuation:
     a_total: NDArray[np.float64]
     d_omega: NDArray[np.float64]
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the stacked per-band attenuation terms with the total.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.environmental import plot_outdoor_attenuation
 
-        return plot_outdoor_attenuation(self, ax=ax, **kwargs)
+        return plot_outdoor_attenuation(self, ax=ax, language=check_language(language), **kwargs)
 
 
 # --------------------------------------------------------------------------- #

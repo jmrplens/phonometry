@@ -89,11 +89,12 @@ class EffectiveSoundSpeedProfile:
         return np.asarray(np.interp(z, self.heights, self.sound_speeds),
                           dtype=np.float64)
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the effective sound-speed profile (height on the vertical axis)."""
+        from .._i18n import check_language
         from .._plot.environmental import plot_sound_speed_profile
 
-        return plot_sound_speed_profile(self, ax=ax, **kwargs)
+        return plot_sound_speed_profile(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def linear_sound_speed_profile(
@@ -303,11 +304,12 @@ class AtmosphericRayResult:
     ground_reflections: "NDArray[np.int_]"
     source_height: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the curved ray paths (height on the vertical axis)."""
+        from .._i18n import check_language
         from .._plot.environmental import plot_atmospheric_rays
 
-        return plot_atmospheric_rays(self, ax=ax, **kwargs)
+        return plot_atmospheric_rays(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def atmospheric_ray_paths(
@@ -451,11 +453,12 @@ class AtmosphericPEResult:
         i = int(np.argmin(np.abs(self.heights - float(height))))
         return np.asarray(self.relative_level[i], dtype=np.float64)
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the relative-level field over the range-height plane."""
+        from .._i18n import check_language
         from .._plot.environmental import plot_atmospheric_pe
 
-        return plot_atmospheric_pe(self, ax=ax, **kwargs)
+        return plot_atmospheric_pe(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def _resolve_pe_impedance(

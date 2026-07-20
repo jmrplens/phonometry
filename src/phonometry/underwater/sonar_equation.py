@@ -78,11 +78,12 @@ class SonarEquationResult:
     target_strength: "float | None"
     reverberation_limited: bool
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot signal excess versus transmission loss with the detection limit."""
+        from .._i18n import check_language
         from .._plot.underwater import plot_sonar_equation
 
-        return plot_sonar_equation(self, ax=ax, **kwargs)
+        return plot_sonar_equation(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def passive_sonar_equation(

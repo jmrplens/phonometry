@@ -59,7 +59,12 @@ Composite ambient-noise spectrum (Wenz framework).
 ### AmbientNoiseResult.plot()
 
 ```python
-AmbientNoiseResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+AmbientNoiseResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the composite spectrum and its components versus frequency.

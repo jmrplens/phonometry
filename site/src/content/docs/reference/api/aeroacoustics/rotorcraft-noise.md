@@ -293,7 +293,12 @@ inconsistent with its use; ECAC Doc 32 Eq. 10 states the correct
 ### FlightPathKinematics.plot()
 
 ```python
-FlightPathKinematics.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+FlightPathKinematics.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the speed and angle profiles along the track.
@@ -534,7 +539,12 @@ The plane height `a·d + b` at `distance`, in metres.
 ### MeanGroundPlaneResult.plot()
 
 ```python
-MeanGroundPlaneResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+MeanGroundPlaneResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the terrain section and the fitted mean ground plane.
@@ -743,7 +753,12 @@ A rotorcraft single-event time history at a receiver (Doc 32 §6.1).
 ### RotorcraftEventResult.plot()
 
 ```python
-RotorcraftEventResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+RotorcraftEventResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the A-weighted level time history with its event metrics.
@@ -795,7 +810,12 @@ by reversing the hemisphere azimuth angle.
 ### RotorcraftHemisphere.plot()
 
 ```python
-RotorcraftHemisphere.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+RotorcraftHemisphere.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the hemisphere directivity for one band (polar section).
@@ -827,6 +847,8 @@ Rotorcraft single-event noise level over a ground grid (Doc 32 §6.3).
 ```python
 RotorcraftNoiseContourResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -961,7 +983,12 @@ Ground and screening over a terrain section (guidance §A.4.4-A.4.5).
 ### TerrainScreeningResult.plot()
 
 ```python
-TerrainScreeningResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+TerrainScreeningResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the section geometry: terrain, line of sight and sound path.

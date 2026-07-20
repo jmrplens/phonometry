@@ -13,7 +13,7 @@
 # Bump these together with a fresh `make graphs` regeneration (generate the
 # figures with exactly this stack, then commit both). Generated from the
 # maintainer's venv that produced the committed figures.
-matplotlib==3.11.0
+matplotlib==3.11.1
 fonttools==4.63.0
 numpy==2.5.1
 scipy==1.18.0

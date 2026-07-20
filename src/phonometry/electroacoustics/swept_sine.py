@@ -221,7 +221,7 @@ class SweptSineDistortionResult:
         return int(self.harmonic_responses.shape[0])
 
     def plot(
-        self, ax: "Axes | None" = None, **kwargs: Any
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
     ) -> "Axes | NDArray[Any]":
         """Plot the harmonic responses and the THD(f).
 
@@ -229,10 +229,15 @@ class SweptSineDistortionResult:
         their own frequency axes, and the total harmonic distortion in %
         against the excitation frequency. With ``ax`` given, only the THD
         panel is drawn on it.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
         """
+        from .._i18n import check_language
         from .._plot.electroacoustics import plot_swept_sine_distortion
 
-        return plot_swept_sine_distortion(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_swept_sine_distortion(self, ax=ax, language=language,
+                                          **kwargs)
 
 
 def _analytic_inverse_spectrum(

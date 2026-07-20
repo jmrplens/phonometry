@@ -224,6 +224,8 @@ Minimum-phase / all-pass decomposition of a frequency response.
 ```python
 PhaseDecompositionResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```
@@ -233,3 +235,9 @@ Plot the magnitude, the phase decomposition and the group delay.
 Three stacked panels: `|H|` in dB, the measured / minimum /
 excess phases, and the total and excess group delays. With `ax`
 given, only the phase panel is drawn on it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |

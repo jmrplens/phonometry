@@ -358,11 +358,17 @@ class SpectralDensityResult:
     overlap: float
     scaling: str
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
-        """Plot the spectral density in dB with its confidence band."""
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
+        """Plot the spectral density in dB with its confidence band.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        """
+        from .._i18n import check_language
         from .._plot.metrology import plot_spectral_density
 
-        return plot_spectral_density(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_spectral_density(self, ax=ax, language=language, **kwargs)
 
 
 def power_spectral_density(
@@ -501,12 +507,18 @@ class CrossSpectralDensityResult:
     scaling: str
 
     def plot(
-        self, ax: "Axes | None" = None, **kwargs: Any
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
     ) -> "Axes | NDArray[Any]":
-        """Plot the magnitude, phase (with ±σ band) and coherence."""
+        """Plot the magnitude, phase (with ±σ band) and coherence.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        """
+        from .._i18n import check_language
         from .._plot.metrology import plot_cross_spectral_density
 
-        return plot_cross_spectral_density(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_cross_spectral_density(self, ax=ax, language=language,
+                                           **kwargs)
 
 
 def cross_spectral_density(
@@ -636,12 +648,18 @@ class CoherentOutputSpectrumResult:
     scaling: str
 
     def plot(
-        self, ax: "Axes | None" = None, **kwargs: Any
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
     ) -> "Axes | NDArray[Any]":
-        """Plot the output/coherent/noise spectra and the spectral SNR."""
+        """Plot the output/coherent/noise spectra and the spectral SNR.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        """
+        from .._i18n import check_language
         from .._plot.metrology import plot_coherent_output_spectrum
 
-        return plot_coherent_output_spectrum(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_coherent_output_spectrum(self, ax=ax, language=language,
+                                             **kwargs)
 
 
 def coherent_output_spectrum(

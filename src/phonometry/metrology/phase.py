@@ -258,17 +258,21 @@ class PhaseDecompositionResult:
     fs: float
 
     def plot(
-        self, ax: "Axes | None" = None, **kwargs: Any
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
     ) -> "Axes | NDArray[Any]":
         """Plot the magnitude, the phase decomposition and the group delay.
 
         Three stacked panels: ``|H|`` in dB, the measured / minimum /
         excess phases, and the total and excess group delays. With ``ax``
         given, only the phase panel is drawn on it.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
         """
+        from .._i18n import check_language
         from .._plot.metrology import plot_phase_decomposition
 
-        return plot_phase_decomposition(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_phase_decomposition(self, ax=ax, language=language, **kwargs)
 
 
 def phase_decomposition(

@@ -93,11 +93,19 @@ Estimated frequency response of an input/output path (Bendat & Piersol).
 ```python
 FrequencyResponseResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```
 
 Plot the Bode magnitude/phase and the coherence.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 
 ## transfer_function
 

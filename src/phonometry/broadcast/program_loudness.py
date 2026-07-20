@@ -538,16 +538,21 @@ class ProgramLoudnessResult:
     channel_weights: np.ndarray
     fs: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
         """Plot momentary and short-term loudness over time, with the
         integrated loudness and the loudness range annotated.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
         """
+        from .._i18n import check_language
         from .._plot.broadcast import plot_program_loudness
 
-        return plot_program_loudness(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_program_loudness(self, ax=ax, language=language, **kwargs)
 
     def report(
         self,

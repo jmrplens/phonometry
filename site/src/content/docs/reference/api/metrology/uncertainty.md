@@ -136,7 +136,12 @@ Result of the Monte Carlo method (Guide 98-3-1, Supplement 1).
 ### MonteCarloResult.plot()
 
 ```python
-MonteCarloResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+MonteCarloResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the output histogram with the coverage interval marked.
@@ -144,6 +149,12 @@ Plot the output histogram with the coverage interval marked.
 Needs the raw output sample, so call `monte_carlo(...,
 keep_samples=True)`. Requires matplotlib (`pip install
 phonometry[plot]`); returns the `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 
 ## Quantity
 
@@ -255,13 +266,24 @@ Coverage factor `k` and expanded uncertainty `U = k*uc`.
 ### UncertaintyResult.plot()
 
 ```python
-UncertaintyResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+UncertaintyResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the uncertainty budget (per-input contributions).
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 
 ## UncertaintyWarning
 

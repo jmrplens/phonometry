@@ -1,0 +1,156 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+
+"""EN/ES language option of the metrology ``.plot()`` renderers.
+
+Each result exposes ``plot(language=...)``; ``"es"`` must produce Spanish
+labels/titles and ``language="xx"`` must raise a clear ``ValueError``. The
+English default is covered elsewhere (and must stay byte-identical).
+"""
+
+from __future__ import annotations
+
+import matplotlib
+
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
+
+import phonometry as ph  # noqa: E402
+from phonometry.metrology import uncertainty as u  # noqa: E402
+
+FS = 48000
+RNG = np.random.default_rng(20260720)
+
+
+def _white(n: int = 4096) -> np.ndarray:
+    return RNG.standard_normal(n)
+
+
+def _titles(obj: object) -> str:
+    axes = obj if isinstance(obj, np.ndarray) else [obj]
+    return " || ".join(a.get_title() for a in axes)
+
+
+def _labels(obj: object) -> str:
+    axes = obj if isinstance(obj, np.ndarray) else [obj]
+    parts = []
+    for a in axes:
+        parts += [a.get_xlabel(), a.get_ylabel()]
+        leg = a.get_legend()
+        if leg is not None:
+            parts += [t.get_text() for t in leg.get_texts()]
+    return " || ".join(parts)
+
+
+def _add4(a: float, b: float, c: float, d: float) -> float:
+    return a + b + c + d
+
+
+def test_spectral_density_es_and_bad_language() -> None:
+    res = ph.power_spectral_density(_white(), FS, nperseg=1024)
+    ax = res.plot(language="es")
+    assert "Densidad espectral de Welch" in ax.get_title()
+    assert ax.get_xlabel() == "Frecuencia [Hz]"
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
+def test_cross_spectral_density_es() -> None:
+    x = _white()
+    y = np.roll(x, 17) + 0.1 * _white()
+    axes = ph.cross_spectral_density(x, y, FS).plot(language="es")
+    assert "Densidad espectral cruzada (Bendat y Piersol)" in _titles(axes)
+    assert "Fase [grados]" in _labels(axes)
+    plt.close("all")
+
+
+def test_coherent_output_spectrum_es() -> None:
+    x = _white()
+    y = np.roll(x, 17) + 0.1 * _white()
+    axes = ph.coherent_output_spectrum(x, y, FS).plot(language="es")
+    assert "Espectro de salida coherente" in _titles(axes)
+    assert "SNR espectral [dB]" in _labels(axes)
+    plt.close("all")
+
+
+def test_correlation_es() -> None:
+    res = ph.correlation(_white(), fs=FS, max_lag=0.01)
+    ax = res.plot(language="es")
+    assert ax.get_title() == "Estimación de autocorrelación (Bendat y Piersol)"
+    assert ax.get_xlabel() == "Retardo [s]"
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
+def test_time_delay_es() -> None:
+    x = _white(8192)
+    y = np.roll(x, 12)
+    res = ph.time_delay(x, y, FS, nperseg=2048, signal_bandwidth=FS / 2.0)
+    ax = res.plot(language="es")
+    assert ax.get_title().startswith("Estimación del retardo temporal")
+    plt.close("all")
+
+
+def test_aligned_impulse_response_es() -> None:
+    ref = np.zeros(256)
+    ref[100] = 1.0
+    res = ph.align_impulse_responses(np.roll(ref, 5), ref, FS)
+    ax = res.plot(language="es")
+    assert "Alineación de la respuesta al impulso" in ax.get_title()
+    assert "RI de referencia" in _labels(ax)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
+def test_envelope_es() -> None:
+    axes = ph.envelope(_white(), FS).plot(language="es")
+    assert "Envolvente de Hilbert (Bendat y Piersol Cap. 13)" in _titles(axes)
+    assert "Frecuencia instantánea [Hz]" in _labels(axes)
+    plt.close("all")
+
+
+def test_phase_decomposition_es() -> None:
+    resp = np.fft.rfft(np.exp(-np.arange(1024) / 50.0))
+    axes = ph.phase_decomposition(resp, fs=FS).plot(language="es")
+    assert "Descomposición fase mínima / pasa-todo" in _titles(axes)
+    assert "Fase medida" in _labels(axes)
+    plt.close("all")
+
+
+def test_uncertainty_budget_es() -> None:
+    result = u.combine_uncertainty(_add4, [u.Quantity(0.0, 1.0) for _ in range(4)])
+    ax = result.plot(language="es")
+    assert ax.get_title().startswith("Presupuesto de incertidumbre (GUM)")
+    assert "incertidumbre combinada" in ax.get_xlabel()
+    plt.close("all")
+    with pytest.raises(ValueError):
+        result.plot(language="xx")
+
+
+def test_monte_carlo_es() -> None:
+    mc = u.monte_carlo(
+        _add4, [u.Quantity(0.0, 1.0, "rectangular") for _ in range(4)],
+        trials=20_000, seed=3, keep_samples=True,
+    )
+    ax = mc.plot(language="es")
+    assert ax.get_ylabel() == "Densidad de probabilidad"
+    assert "Distribución de Monte Carlo" in ax.get_title()
+    plt.close("all")
+
+
+def test_filter_class_es() -> None:
+    from phonometry.metrology.compliance import filter_class_compliance
+
+    bank = ph.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000])
+    res = filter_class_compliance(bank)
+    ax = res.plot(language="es")
+    assert "Máscara clase" in ax.get_title()
+    assert ax.get_ylabel() == "Atenuación relativa [dB]"
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")

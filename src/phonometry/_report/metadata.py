@@ -13,6 +13,7 @@ a full accredited fiche and a lightweight prediction fiche.
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass, fields
 
 
@@ -113,33 +114,33 @@ class ReportMetadata:
         "receiving_relative_humidity",
     )
 
+    def _require(
+        self, name: str, ok: "Callable[[float], bool]", description: str
+    ) -> None:
+        """Raise ``ValueError`` unless a supplied numeric field satisfies ``ok``."""
+        value = getattr(self, name)
+        if value is None:
+            return
+        if not ok(float(value)):
+            raise ValueError(
+                f"ReportMetadata.{name} must be {description} when given; "
+                f"got {value!r}."
+            )
+
     def __post_init__(self) -> None:
         """Validate the supplied numeric fields by physical range."""
         for name in self._POSITIVE_FIELDS:
-            value = getattr(self, name)
-            if value is not None:
-                number = float(value)
-                if not math.isfinite(number) or number <= 0.0:
-                    raise ValueError(
-                        f"ReportMetadata.{name} must be a finite, positive "
-                        f"number when given; got {value!r}."
-                    )
+            self._require(
+                name, lambda x: math.isfinite(x) and x > 0.0,
+                "a finite, positive number",
+            )
         for name in self._TEMPERATURE_FIELDS:
-            value = getattr(self, name)
-            if value is not None and not math.isfinite(float(value)):
-                raise ValueError(
-                    f"ReportMetadata.{name} must be finite when given; "
-                    f"got {value!r}."
-                )
+            self._require(name, math.isfinite, "finite")
         for name in self._HUMIDITY_FIELDS:
-            value = getattr(self, name)
-            if value is not None:
-                number = float(value)
-                if not math.isfinite(number) or not 0.0 <= number <= 100.0:
-                    raise ValueError(
-                        f"ReportMetadata.{name} must be a relative humidity in "
-                        f"0..100 % when given; got {value!r}."
-                    )
+            self._require(
+                name, lambda x: math.isfinite(x) and 0.0 <= x <= 100.0,
+                "a relative humidity in 0..100 %",
+            )
 
     def is_empty(self) -> bool:
         """Return ``True`` when no field is set (an all-``None`` instance)."""

@@ -9,7 +9,7 @@
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
-      <dc:title>Matplotlib v3.11.0, https://matplotlib.org/</dc:title>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
      </cc:Agent>
     </dc:creator>
    </cc:Work>
@@ -989,32 +989,32 @@ L 885.763437 26.318125
    <g id="patch_9">
     <path d="M 505.322038 342.995328 
 L 565.709562 342.995328 
-L 565.709562 304.763958 
-L 505.322038 304.763958 
+L 565.709562 304.763358 
+L 505.322038 304.763358 
 z
 " clip-path="url(#p04e63d34b3)" style="fill: #2ca02c"/>
    </g>
    <g id="patch_10">
     <path d="M 605.967911 342.995328 
 L 666.355435 342.995328 
-L 666.355435 228.150691 
-L 605.967911 228.150691 
+L 666.355435 228.146031 
+L 605.967911 228.146031 
 z
 " clip-path="url(#p04e63d34b3)" style="fill: #7f7f7f"/>
    </g>
    <g id="patch_11">
     <path d="M 706.613784 342.995328 
 L 767.001308 342.995328 
-L 767.001308 155.640856 
-L 706.613784 155.640856 
+L 767.001308 155.636231 
+L 706.613784 155.636231 
 z
 " clip-path="url(#p04e63d34b3)" style="fill: #1f77b4"/>
    </g>
    <g id="patch_12">
     <path d="M 807.259657 342.995328 
 L 867.64718 342.995328 
-L 867.64718 91.472002 
-L 807.259657 91.472002 
+L 867.64718 91.467943 
+L 807.259657 91.467943 
 z
 " clip-path="url(#p04e63d34b3)" style="fill: #d62728"/>
    </g>
@@ -1039,16 +1039,16 @@ L 885.763437 26.318125
 " style="fill: none; stroke: #ffffff; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="text_43">
-    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="535.5158" y="299.194842" transform="rotate(-0 535.5158 299.194842)">0.12</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="535.5158" y="299.194242" transform="rotate(-0 535.5158 299.194242)">0.12</text>
    </g>
    <g id="text_44">
-    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="636.161673" y="222.581575" transform="rotate(-0 636.161673 222.581575)">0.36</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="636.161673" y="222.576915" transform="rotate(-0 636.161673 222.576915)">0.36</text>
    </g>
    <g id="text_45">
-    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="736.807546" y="150.07174" transform="rotate(-0 736.807546 150.07174)">0.59</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="736.807546" y="150.067115" transform="rotate(-0 736.807546 150.067115)">0.59</text>
    </g>
    <g id="text_46">
-    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="837.453419" y="85.902886" transform="rotate(-0 837.453419 85.902886)">0.79</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="837.453419" y="85.898827" transform="rotate(-0 837.453419 85.898827)">0.79</text>
    </g>
    <g id="text_47">
     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="686.484609" y="16.318125" transform="rotate(-0 686.484609 16.318125)">SII vs vocal effort in a fixed noise</text>

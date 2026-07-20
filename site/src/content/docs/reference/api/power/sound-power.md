@@ -718,8 +718,8 @@ SoundPowerResult.declare(
     machine: str | None = None,
     operating_conditions: str | None = None,
     noise_test_code: str | None = None,
-    basic_standards: str | tuple[str, ...] = (),
-    form: str = 'dual-number',
+    basic_standards: str | Sequence[str] = (),
+    form: DeclarationForm = 'dual-number',
 ) -> NoiseEmissionDeclaration
 ```
 

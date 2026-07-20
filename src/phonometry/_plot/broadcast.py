@@ -22,20 +22,24 @@ if TYPE_CHECKING:
 
     from ..broadcast.program_loudness import ProgramLoudnessResult
 
-_STRINGS = {
-    "momentary": {"en": "Momentary (400 ms)", "es": "Momentánea (400 ms)"},
-    "short_term": {"en": "Short-term (3 s)", "es": "Corto plazo (3 s)"},
-    "time_s": {"en": "Time [s]", "es": "Tiempo [s]"},
-    "loudness_lufs": {"en": "Loudness [LUFS]", "es": "Sonoridad [LUFS]"},
-    "title": {"en": "Programme loudness (EBU R 128)",
-              "es": "Sonoridad de programa (EBU R 128)"},
-    "integrated": {"en": "Integrated", "es": "Integrada"},
+#: Spanish translations of the fixed strings rendered by the broadcast
+#: ``.plot()`` renderer, keyed by their verbatim English text. ``_t``
+#: returns the English key unchanged for any language other than ``"es"``,
+#: so the English output is byte-for-byte identical to the pre-i18n
+#: renderer.
+_STRINGS: dict[str, str] = {
+    "Momentary (400 ms)": "Momentánea (400 ms)",
+    "Short-term (3 s)": "Corto plazo (3 s)",
+    "Time [s]": "Tiempo [s]",
+    "Loudness [LUFS]": "Sonoridad [LUFS]",
+    "Programme loudness (EBU R 128)": "Sonoridad de programa (EBU R 128)",
+    "Integrated": "Integrada",
 }
 
 
-def _t(key: str, language: str) -> str:
-    """Return the localised fixed string for *key*."""
-    return _STRINGS[key][language]
+def _t(text: str, language: str = "en") -> str:
+    """Localise a fixed string; English is returned verbatim (byte-identical)."""
+    return _STRINGS.get(text, text) if language == "es" else text
 
 
 def plot_program_loudness(
@@ -72,12 +76,12 @@ def plot_program_loudness(
             result.momentary,
             color=_C_MUTED,
             linewidth=1.0,
-            label=_t("momentary", language),
+            label=_t("Momentary (400 ms)", language),
         )
     if result.short_term.size:
         kwargs.setdefault("color", _C_PRIMARY)
         kwargs.setdefault("linewidth", 2.0)
-        kwargs.setdefault("label", _t("short_term", language))
+        kwargs.setdefault("label", _t("Short-term (3 s)", language))
         ax.plot(
             result.short_term_time,
             result.short_term,
@@ -90,7 +94,7 @@ def plot_program_loudness(
             color=_C_REFERENCE,
             linestyle="--",
             linewidth=1.6,
-            label=f"{_t('integrated', language)} {integ} LUFS",
+            label=f"{_t('Integrated', language)} {integ} LUFS",
         )
     finite = np.concatenate(
         [
@@ -102,9 +106,9 @@ def plot_program_loudness(
         low = float(np.min(finite))
         high = float(np.max(finite))
         ax.set_ylim(low - 5.0, high + 5.0)
-    ax.set_xlabel(_t("time_s", language))
-    ax.set_ylabel(_t("loudness_lufs", language))
-    ax.set_title(_t("title", language))
+    ax.set_xlabel(_t("Time [s]", language))
+    ax.set_ylabel(_t("Loudness [LUFS]", language))
+    ax.set_title(_t("Programme loudness (EBU R 128)", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize=9)
     localize_axes(ax, language)

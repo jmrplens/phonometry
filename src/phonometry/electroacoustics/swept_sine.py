@@ -275,7 +275,7 @@ def _deconvolve_synchronized(
     """
     nfft = int(2 ** np.ceil(np.log2(rec.size + pad)))
     spectrum = np.fft.rfft(rec, nfft) / fs
-    freqs = np.fft.rfftfreq(nfft, 1.0 / fs)
+    freqs = np.asarray(np.fft.rfftfreq(nfft, 1.0 / fs), dtype=np.float64)
     return np.asarray(
         np.fft.irfft(spectrum * _analytic_inverse_spectrum(freqs, rate, f1), nfft),
         dtype=np.float64,
@@ -621,7 +621,7 @@ def swept_sine_distortion(
         )
 
     irs, responses = _window_harmonics(buffer, delays_samples, window)
-    frequencies = np.fft.rfftfreq(window, 1.0 / fs_v)
+    frequencies = np.asarray(np.fft.rfftfreq(window, 1.0 / fs_v), dtype=np.float64)
     thd_freqs, thd, ratios = _thd_curves(
         frequencies, responses, fs_v, f1_v, f2_v, method
     )

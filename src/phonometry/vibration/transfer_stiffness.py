@@ -289,7 +289,7 @@ class TransferStiffnessResult:
     @property
     def magnitude(self) -> np.ndarray:
         """Transfer-stiffness magnitude ``|k2,1|``, in N/m."""
-        return np.abs(self.transfer_stiffness)
+        return np.asarray(np.abs(self.transfer_stiffness), dtype=np.float64)
 
     @property
     def level(self) -> np.ndarray:

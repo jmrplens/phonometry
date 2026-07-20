@@ -48,143 +48,58 @@ if TYPE_CHECKING:
 #: Shared x-axis label for the frequency-domain building plots.
 _FREQ_LABEL = "Frequency [Hz]"
 
-#: English -> {language: string} lookup for the fixed labels/titles/legends of
-#: the building-domain renderers. English ids map to themselves so ``_t(key,
-#: "en")`` returns the verbatim original string.
-_STRINGS: dict[str, dict[str, str]] = {
-    "Frequency [Hz]": {"en": "Frequency [Hz]", "es": "Frecuencia [Hz]"},
-    "Band": {"en": "Band", "es": "Banda"},
-    "Band index": {"en": "Band index", "es": "Índice de banda"},
-    "predicted $R$": {"en": "predicted $R$", "es": "$R$ previsto"},
-    "Sound reduction index $R$ [dB]": {
-        "en": "Sound reduction index $R$ [dB]",
-        "es": "Índice de reducción acústica $R$ [dB]",
-    },
-    "Predicted sound insulation": {
-        "en": "Predicted sound insulation",
-        "es": "Aislamiento acústico previsto",
-    },
-    "aperture $R$": {"en": "aperture $R$", "es": "$R$ de abertura"},
-    "Aperture sound transmission (Gomperts / Wilson-Soroka)": {
-        "en": "Aperture sound transmission (Gomperts / Wilson-Soroka)",
-        "es": "Transmisión sonora por abertura (Gomperts / Wilson-Soroka)",
-    },
-    "Sound reduction index [dB]": {
-        "en": "Sound reduction index [dB]",
-        "es": "Índice de reducción acústica [dB]",
-    },
-    "Sigma unfav.": {"en": "Sigma unfav.", "es": "Σ desfav."},
-    "impact rating": {"en": "impact rating", "es": "índice de impacto"},
-    "Impact sound pressure level [dB]": {
-        "en": "Impact sound pressure level [dB]",
-        "es": "Nivel de presión sonora de impacto [dB]",
-    },
-    "Level difference / reduction index [dB]": {
-        "en": "Level difference / reduction index [dB]",
-        "es": "Diferencia de nivel / índice de reducción [dB]",
-    },
-    "Façade sound insulation (ISO 16283-3)": {
-        "en": "Façade sound insulation (ISO 16283-3)",
-        "es": "Aislamiento acústico de fachada (ISO 16283-3)",
-    },
-    "Reduction index / level difference [dB]": {
-        "en": "Reduction index / level difference [dB]",
-        "es": "Índice de reducción / diferencia de nivel [dB]",
-    },
-    "Façade insulation prediction (EN 12354-3)": {
-        "en": "Façade insulation prediction (EN 12354-3)",
-        "es": "Predicción del aislamiento de fachada (EN 12354-3)",
-    },
-    "Radiated sound power level [dB]": {
-        "en": "Radiated sound power level [dB]",
-        "es": "Nivel de potencia acústica radiada [dB]",
-    },
-    "Radiated sound power (EN 12354-4)": {
-        "en": "Radiated sound power (EN 12354-4)",
-        "es": "Potencia sonora radiada (EN 12354-4)",
-    },
-    "Vibration reduction index $K_{ij}$ [dB]": {
-        "en": "Vibration reduction index $K_{ij}$ [dB]",
-        "es": "Índice de reducción de vibraciones $K_{ij}$ [dB]",
-    },
-    "Vibration reduction index (ISO 10848)": {
-        "en": "Vibration reduction index (ISO 10848)",
-        "es": "Índice de reducción de vibraciones (ISO 10848)",
-    },
-    r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]": {
-        "en": r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]",
-        "es": r"Nivel de potencia estructural $L_{Ws}$ [dB re 1 pW]",
-    },
-    "EN 15657 characteristic structure-borne sound power": {
-        "en": "EN 15657 characteristic structure-borne sound power",
-        "es": "Potencia sonora estructural característica EN 15657",
-    },
-    "paths": {"en": "paths", "es": "trayectos"},
-    r"total $L_{n,s}$": {"en": r"total $L_{n,s}$", "es": r"total $L_{n,s}$"},
-    r"Normalised SPL $L_{n,s}$ [dB]": {
-        "en": r"Normalised SPL $L_{n,s}$ [dB]",
-        "es": r"NPS normalizado $L_{n,s}$ [dB]",
-    },
-    "EN 12354-5 installed structure-borne sound": {
-        "en": "EN 12354-5 installed structure-borne sound",
-        "es": "Ruido estructural instalado EN 12354-5",
-    },
-    "Transmission path": {
-        "en": "Transmission path",
-        "es": "Trayecto de transmisión",
-    },
-    "Share of transmitted energy [%]": {
-        "en": "Share of transmitted energy [%]",
-        "es": "Fracción de energía transmitida [%]",
-    },
-    "flanking prediction": {
-        "en": "flanking prediction",
-        "es": "predicción de transmisión por flancos",
-    },
-    "Level / correction [dB]": {
-        "en": "Level / correction [dB]",
-        "es": "Nivel / corrección [dB]",
-    },
-    "impact prediction": {
-        "en": "impact prediction",
-        "es": "predicción de impacto",
-    },
-    "Airborne sound insulation (ISO 16283-1)": {
-        "en": "Airborne sound insulation (ISO 16283-1)",
-        "es": "Aislamiento a ruido aéreo (ISO 16283-1)",
-    },
-    "Impact sound insulation (ISO 16283-2)": {
-        "en": "Impact sound insulation (ISO 16283-2)",
-        "es": "Aislamiento a ruido de impacto (ISO 16283-2)",
-    },
-    "Standard uncertainty u [dB]": {
-        "en": "Standard uncertainty u [dB]",
-        "es": "Incertidumbre típica u [dB]",
-    },
-    "band uncertainty": {"en": "band uncertainty", "es": "incertidumbre por banda"},
-    "situation": {"en": "situation", "es": "situación"},
-    "sigma_R95 upper limit": {
-        "en": "sigma_R95 upper limit",
-        "es": "límite superior sigma_R95",
-    },
-    "limit of measurement (> delta-L)": {
-        "en": "limit of measurement (> delta-L)",
-        "es": "límite de medición (> delta-L)",
-    },
-    "Improvement of impact sound insulation delta-L [dB]": {
-        "en": "Improvement of impact sound insulation delta-L [dB]",
-        "es": "Mejora del aislamiento a ruido de impacto delta-L [dB]",
-    },
-    "ISO 16251-1 Floor-Covering Impact Sound Improvement": {
-        "en": "ISO 16251-1 Floor-Covering Impact Sound Improvement",
-        "es": "Mejora del aislamiento a ruido de impacto de revestimiento de suelo ISO 16251-1",
-    },
+#: Spanish translations of the fixed labels/titles/legends rendered by the
+#: building-domain ``.plot()`` renderers, keyed by their verbatim English
+#: text. ``_t`` returns the English key unchanged for any language other
+#: than ``"es"``, so the English output is byte-for-byte identical to the
+#: pre-i18n renderers.
+_STRINGS: dict[str, str] = {
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Band": "Banda",
+    "Band index": "Índice de banda",
+    "predicted $R$": "$R$ previsto",
+    "Sound reduction index $R$ [dB]": "Índice de reducción acústica $R$ [dB]",
+    "Predicted sound insulation": "Aislamiento acústico previsto",
+    "aperture $R$": "$R$ de abertura",
+    "Aperture sound transmission (Gomperts / Wilson-Soroka)": "Transmisión sonora por abertura (Gomperts / Wilson-Soroka)",
+    "Sound reduction index [dB]": "Índice de reducción acústica [dB]",
+    "Sigma unfav.": "Σ desfav.",
+    "impact rating": "índice de impacto",
+    "Impact sound pressure level [dB]": "Nivel de presión sonora de impacto [dB]",
+    "Level difference / reduction index [dB]": "Diferencia de nivel / índice de reducción [dB]",
+    "Façade sound insulation (ISO 16283-3)": "Aislamiento acústico de fachada (ISO 16283-3)",
+    "Reduction index / level difference [dB]": "Índice de reducción / diferencia de nivel [dB]",
+    "Façade insulation prediction (EN 12354-3)": "Predicción del aislamiento de fachada (EN 12354-3)",
+    "Radiated sound power level [dB]": "Nivel de potencia acústica radiada [dB]",
+    "Radiated sound power (EN 12354-4)": "Potencia sonora radiada (EN 12354-4)",
+    "Vibration reduction index $K_{ij}$ [dB]": "Índice de reducción de vibraciones $K_{ij}$ [dB]",
+    "Vibration reduction index (ISO 10848)": "Índice de reducción de vibraciones (ISO 10848)",
+    "Structure-borne power level $L_{Ws}$ [dB re 1 pW]": "Nivel de potencia estructural $L_{Ws}$ [dB re 1 pW]",
+    "EN 15657 characteristic structure-borne sound power": "Potencia sonora estructural característica EN 15657",
+    "paths": "trayectos",
+    "total $L_{n,s}$": "total $L_{n,s}$",
+    "Normalised SPL $L_{n,s}$ [dB]": "NPS normalizado $L_{n,s}$ [dB]",
+    "EN 12354-5 installed structure-borne sound": "Ruido estructural instalado EN 12354-5",
+    "Transmission path": "Trayecto de transmisión",
+    "Share of transmitted energy [%]": "Fracción de energía transmitida [%]",
+    "flanking prediction": "predicción de transmisión por flancos",
+    "Level / correction [dB]": "Nivel / corrección [dB]",
+    "impact prediction": "predicción de impacto",
+    "Airborne sound insulation (ISO 16283-1)": "Aislamiento a ruido aéreo (ISO 16283-1)",
+    "Impact sound insulation (ISO 16283-2)": "Aislamiento a ruido de impacto (ISO 16283-2)",
+    "Standard uncertainty u [dB]": "Incertidumbre típica u [dB]",
+    "band uncertainty": "incertidumbre por banda",
+    "situation": "situación",
+    "sigma_R95 upper limit": "límite superior sigma_R95",
+    "limit of measurement (> delta-L)": "límite de medición (> delta-L)",
+    "Improvement of impact sound insulation delta-L [dB]": "Mejora del aislamiento a ruido de impacto delta-L [dB]",
+    "ISO 16251-1 Floor-Covering Impact Sound Improvement": "Mejora del aislamiento a ruido de impacto de revestimiento de suelo ISO 16251-1",
 }
 
 
-def _t(key: str, language: str) -> str:
-    """Look up the localised string for ``key`` (falls back to ``key``)."""
-    return _STRINGS.get(key, {}).get(language, key)
+def _t(text: str, language: str = "en") -> str:
+    """Localise a fixed string; English is returned verbatim (byte-identical)."""
+    return _STRINGS.get(text, text) if language == "es" else text
 
 
 def plot_sound_reduction(

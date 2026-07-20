@@ -41,118 +41,74 @@ from .common import (
 #: Shared frequency-axis label of the spectral renderers.
 _FREQ_LABEL = "Frequency [Hz]"
 
-_STRINGS = {
-    "freq": {"en": "Frequency [Hz]", "es": "Frecuencia [Hz]"},
-    "lag": {"en": "Lag [s]", "es": "Retardo [s]"},
-    "time": {"en": "Time [s]", "es": "Tiempo [s]"},
-    "amplitude": {"en": "Amplitude", "es": "Amplitud"},
-    "magnitude": {"en": "Magnitude [dB]", "es": "Magnitud [dB]"},
-    "phase_deg": {"en": "Phase [deg]", "es": "Fase [grados]"},
-    "phase_rad": {"en": "Phase [rad]", "es": "Fase [rad]"},
-    # Filter class corridor
-    "class_corridor": {"en": "Class {cls} pass corridor",
-                       "es": "Corredor de aceptación clase {cls}"},
-    "measured_da": {"en": "Measured $\\Delta A$", "es": "$\\Delta A$ medida"},
-    "out_of_tol": {"en": "Out of tolerance", "es": "Fuera de tolerancia"},
-    "norm_freq": {"en": "Normalised frequency $f\\,/\\,f_m$",
-                  "es": "Frecuencia normalizada $f\\,/\\,f_m$"},
-    "rel_atten": {"en": "Relative attenuation [dB]",
-                  "es": "Atenuación relativa [dB]"},
-    "class_mask_title": {"en": "IEC 61260-1 class {cls} mask — $f_m$ = {fm} Hz",
-                         "es": "Máscara clase {cls} IEC 61260-1 — $f_m$ = {fm} Hz"},
-    # Uncertainty budget
-    "budget_xlabel": {
-        "en": "Contribution to combined uncertainty $|c_i|\\,u(x_i)$",
-        "es": "Contribución a la incertidumbre combinada $|c_i|\\,u(x_i)$"},
-    "budget_title": {"en": "GUM uncertainty budget — y = {value}",
-                     "es": "Presupuesto de incertidumbre (GUM) — y = {value}"},
-    # Monte Carlo
-    "coverage_interval": {"en": "{pct} % coverage interval",
-                          "es": "Intervalo de cobertura {pct} %"},
-    "output_quantity": {"en": "Output quantity y", "es": "Magnitud de salida y"},
-    "prob_density": {"en": "Probability density", "es": "Densidad de probabilidad"},
-    "mc_title": {
-        "en": "Monte Carlo distribution (GUM Supplement 1) — u(y) = {uy}",
-        "es": "Distribución de Monte Carlo (GUM Suplemento 1) — u(y) = {uy}"},
-    # PSD labels
-    "spectral_density": {"en": "Spectral density [dB re 1/Hz]",
-                         "es": "Densidad espectral [dB re 1/Hz]"},
-    "power_spectrum": {"en": "Power spectrum [dB]",
-                       "es": "Espectro de potencia [dB]"},
-    "psd_confidence": {
-        "en": "{pct} % confidence ($\\chi^2$, $n_d$ = {nd})",
-        "es": "{pct} % de confianza ($\\chi^2$, $n_d$ = {nd})"},
-    "welch_title": {"en": "Welch spectral density — $\\varepsilon_r$ = {er} %",
-                    "es": "Densidad espectral de Welch — $\\varepsilon_r$ = {er} %"},
-    # Cross-spectral density
-    "csd_title": {"en": "Cross-spectral density (Bendat & Piersol)",
-                  "es": "Densidad espectral cruzada (Bendat y Piersol)"},
-    "phase_sd_band": {"en": "$\\pm$ s.d.$[\\hat{\\theta}_{xy}]$ (Eq. 9.52)",
-                      "es": "$\\pm$ d.e.$[\\hat{\\theta}_{xy}]$ (Ec. 9.52)"},
-    # Coherent output spectrum
-    "gyy_output": {"en": "$\\hat{G}_{yy}$ (output)",
-                   "es": "$\\hat{G}_{yy}$ (salida)"},
-    "gnn_noise": {"en": "$\\hat{G}_{nn}$ (noise)",
-                  "es": "$\\hat{G}_{nn}$ (ruido)"},
-    "cos_title": {"en": "Coherent output spectrum (Bendat & Piersol 9.2.2)",
-                  "es": "Espectro de salida coherente (Bendat y Piersol 9.2.2)"},
-    "spectral_snr": {"en": "Spectral SNR [dB]", "es": "SNR espectral [dB]"},
-    # Correlation
-    "corr_coeff": {"en": "Correlation coefficient",
-                   "es": "Coeficiente de correlación"},
-    "correlation_of": {"en": "Correlation ({norm})", "es": "Correlación ({norm})"},
-    "corr_title": {"en": "{kind} estimate (Bendat & Piersol)",
-                   "es": "Estimación de {kind} (Bendat y Piersol)"},
-    "autocorrelation": {"en": "Autocorrelation", "es": "autocorrelación"},
-    "cross-correlation": {"en": "Cross-correlation", "es": "correlación cruzada"},
-    # Time delay
-    "phase_context": {"en": "$\\hat{R}_{xy}(\\tau)$ (context)",
-                      "es": "$\\hat{R}_{xy}(\\tau)$ (contexto)"},
-    "delay_interval": {"en": "95 % interval (Eq. 8.130)",
-                       "es": "Intervalo 95 % (Ec. 8.130)"},
-    "norm_correlation": {"en": "Normalized correlation",
-                         "es": "Correlación normalizada"},
-    "tde_title": {"en": "Time-delay estimate — {method}",
-                  "es": "Estimación del retardo temporal — {method}"},
-    # Aligned impulse response
-    "reference_ir": {"en": "Reference IR", "es": "RI de referencia"},
-    "aligned_ir": {"en": "Aligned IR (delay {n} samples)",
-                   "es": "RI alineada (retardo {n} muestras)"},
-    "ir_align_title": {"en": "Impulse-response alignment (sub-sample)",
-                       "es": "Alineación de la respuesta al impulso (submuestra)"},
-    # Envelope
-    "signal": {"en": "Signal", "es": "Señal"},
-    "envelope": {"en": "Envelope $A(t)$ (Eq. 13.17)",
-                 "es": "Envolvente $A(t)$ (Ec. 13.17)"},
-    "hilbert_title": {"en": "Hilbert envelope (Bendat & Piersol Ch. 13)",
-                      "es": "Envolvente de Hilbert (Bendat y Piersol Cap. 13)"},
-    "inst_freq": {"en": "Instantaneous frequency [Hz]",
-                  "es": "Frecuencia instantánea [Hz]"},
-    # Phase decomposition
-    "measured_phase": {"en": "Measured phase", "es": "Fase medida"},
-    "minimum_phase": {"en": "Minimum phase (from |H|)",
-                      "es": "Fase mínima (de |H|)"},
-    "excess_phase": {"en": "Excess phase (all-pass)",
-                     "es": "Fase de exceso (pasa-todo)"},
-    "phase_decomp_title": {"en": "Phase decomposition",
-                           "es": "Descomposición de fase"},
-    "minphase_title": {"en": "Minimum-phase / all-pass decomposition",
-                       "es": "Descomposición fase mínima / pasa-todo"},
-    "group_delay": {"en": "Group delay", "es": "Retardo de grupo"},
-    "excess_group_delay": {"en": "Excess group delay",
-                           "es": "Retardo de grupo de exceso"},
-    "group_delay_axis": {"en": "Group delay [ms]",
-                         "es": "Retardo de grupo [ms]"},
-    # normalization modes
-    "biased": {"en": "biased", "es": "sesgada"},
-    "unbiased": {"en": "unbiased", "es": "insesgada"},
+#: Spanish translations of the fixed strings rendered by the metrology
+#: ``.plot()`` renderers, keyed by their verbatim English text. ``_t``
+#: returns the English key unchanged for any language other than ``"es"``,
+#: so the English output is byte-for-byte identical to the pre-i18n
+#: renderers.
+_STRINGS: dict[str, str] = {
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Lag [s]": "Retardo [s]",
+    "Time [s]": "Tiempo [s]",
+    "Amplitude": "Amplitud",
+    "Magnitude [dB]": "Magnitud [dB]",
+    "Phase [deg]": "Fase [grados]",
+    "Phase [rad]": "Fase [rad]",
+    "Class {cls} pass corridor": "Corredor de aceptación clase {cls}",
+    r"Measured $\Delta A$": r"$\Delta A$ medida",
+    "Out of tolerance": "Fuera de tolerancia",
+    r"Normalised frequency $f\,/\,f_m$": r"Frecuencia normalizada $f\,/\,f_m$",
+    "Relative attenuation [dB]": "Atenuación relativa [dB]",
+    "IEC 61260-1 class {cls} mask — $f_m$ = {fm} Hz": "Máscara clase {cls} IEC 61260-1 — $f_m$ = {fm} Hz",
+    r"Contribution to combined uncertainty $|c_i|\,u(x_i)$": r"Contribución a la incertidumbre combinada $|c_i|\,u(x_i)$",
+    "GUM uncertainty budget — y = {value}": "Presupuesto de incertidumbre (GUM) — y = {value}",
+    "{pct} % coverage interval": "Intervalo de cobertura {pct} %",
+    "Output quantity y": "Magnitud de salida y",
+    "Probability density": "Densidad de probabilidad",
+    "Monte Carlo distribution (GUM Supplement 1) — u(y) = {uy}": "Distribución de Monte Carlo (GUM Suplemento 1) — u(y) = {uy}",
+    "Spectral density [dB re 1/Hz]": "Densidad espectral [dB re 1/Hz]",
+    "Power spectrum [dB]": "Espectro de potencia [dB]",
+    r"{pct} % confidence ($\chi^2$, $n_d$ = {nd})": r"{pct} % de confianza ($\chi^2$, $n_d$ = {nd})",
+    r"Welch spectral density — $\varepsilon_r$ = {er} %": r"Densidad espectral de Welch — $\varepsilon_r$ = {er} %",
+    "Cross-spectral density (Bendat & Piersol)": "Densidad espectral cruzada (Bendat y Piersol)",
+    r"$\pm$ s.d.$[\hat{\theta}_{xy}]$ (Eq. 9.52)": r"$\pm$ d.e.$[\hat{\theta}_{xy}]$ (Ec. 9.52)",
+    r"$\hat{G}_{yy}$ (output)": r"$\hat{G}_{yy}$ (salida)",
+    r"$\hat{G}_{nn}$ (noise)": r"$\hat{G}_{nn}$ (ruido)",
+    "Coherent output spectrum (Bendat & Piersol 9.2.2)": "Espectro de salida coherente (Bendat y Piersol 9.2.2)",
+    "Spectral SNR [dB]": "SNR espectral [dB]",
+    "Correlation coefficient": "Coeficiente de correlación",
+    "Correlation ({norm})": "Correlación ({norm})",
+    "{kind} estimate (Bendat & Piersol)": "Estimación de {kind} (Bendat y Piersol)",
+    "Autocorrelation": "autocorrelación",
+    "Cross-correlation": "correlación cruzada",
+    r"$\hat{R}_{xy}(\tau)$ (context)": r"$\hat{R}_{xy}(\tau)$ (contexto)",
+    "95 % interval (Eq. 8.130)": "Intervalo 95 % (Ec. 8.130)",
+    "Normalized correlation": "Correlación normalizada",
+    "Time-delay estimate — {method}": "Estimación del retardo temporal — {method}",
+    "Reference IR": "RI de referencia",
+    "Aligned IR (delay {n} samples)": "RI alineada (retardo {n} muestras)",
+    "Impulse-response alignment (sub-sample)": "Alineación de la respuesta al impulso (submuestra)",
+    "Signal": "Señal",
+    "Envelope $A(t)$ (Eq. 13.17)": "Envolvente $A(t)$ (Ec. 13.17)",
+    "Hilbert envelope (Bendat & Piersol Ch. 13)": "Envolvente de Hilbert (Bendat y Piersol Cap. 13)",
+    "Instantaneous frequency [Hz]": "Frecuencia instantánea [Hz]",
+    "Measured phase": "Fase medida",
+    "Minimum phase (from |H|)": "Fase mínima (de |H|)",
+    "Excess phase (all-pass)": "Fase de exceso (pasa-todo)",
+    "Phase decomposition": "Descomposición de fase",
+    "Minimum-phase / all-pass decomposition": "Descomposición fase mínima / pasa-todo",
+    "Group delay": "Retardo de grupo",
+    "Excess group delay": "Retardo de grupo de exceso",
+    "Group delay [ms]": "Retardo de grupo [ms]",
+    "biased": "sesgada",
+    "unbiased": "insesgada",
 }
 
 
-def _t(key: str, language: str, **fmt: Any) -> str:
-    """Return the localised fixed string for *key* (optionally ``str.format``ed)."""
-    text = _STRINGS[key][language]
-    return text.format(**fmt) if fmt else text
+def _t(text: str, language: str = "en", **fmt: Any) -> str:
+    """Localise a fixed string; English is returned verbatim (byte-identical)."""
+    s = _STRINGS.get(text, text) if language == "es" else text
+    return s.format(**fmt) if fmt else s
 
 
 # ---------------------------------------------------------------------------
@@ -244,7 +200,7 @@ def plot_filter_class(
     upper_fill = np.where(finite_upper, upper, y_top)
     ax.fill_between(
         omega[win], lower[win], upper_fill[win], color=_C_TERTIARY, alpha=0.18,
-        lw=0.0, label=_t("class_corridor", language, cls=cls),
+        lw=0.0, label=_t("Class {cls} pass corridor", language, cls=cls),
     )
     ax.plot(omega[win], lower[win], color=_C_TERTIARY, lw=1.0, ls="--")
     fin = win & finite_upper
@@ -252,7 +208,7 @@ def plot_filter_class(
 
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("lw", 1.6)
-    kwargs.setdefault("label", _t("measured_da", language))
+    kwargs.setdefault("label", _t(r"Measured $\Delta A$", language))
     ax.plot(omega[win], delta_a[win], **kwargs)
 
     violated = (delta_a < lower - 1e-9) | (finite_upper & (delta_a > upper + 1e-9))
@@ -260,17 +216,17 @@ def plot_filter_class(
     if np.any(viol_win):
         ax.plot(
             omega[viol_win], delta_a[viol_win], ls="", marker="o", ms=3.5,
-            color=_C_REFERENCE, label=_t("out_of_tol", language),
+            color=_C_REFERENCE, label=_t("Out of tolerance", language),
         )
 
     ax.axvline(1.0, color=_C_MUTED, ls=":", lw=1.0)
     _normalized_frequency_axis(ax, lo_x, hi_x)
     ax.set_xlim(lo_x, hi_x)
     ax.set_ylim(y_bot, y_top)
-    ax.set_xlabel(_t("norm_freq", language))
-    ax.set_ylabel(_t("rel_atten", language))
+    ax.set_xlabel(_t(r"Normalised frequency $f\,/\,f_m$", language))
+    ax.set_ylabel(_t("Relative attenuation [dB]", language))
     ax.set_title(
-        _t("class_mask_title", language, cls=cls,
+        _t("IEC 61260-1 class {cls} mask — $f_m$ = {fm} Hz", language, cls=cls,
            fm=format_number(fm, language, decimals=0))
     )
     ax.legend(loc="upper center", fontsize="small")
@@ -321,9 +277,9 @@ def plot_uncertainty_budget(
     ax.set_yticks(positions)
     ax.set_yticklabels(names)
     ax.invert_yaxis()
-    ax.set_xlabel(_t("budget_xlabel", language))
+    ax.set_xlabel(_t(r"Contribution to combined uncertainty $|c_i|\,u(x_i)$", language))
     value = decimal_comma(f"{result.value:.4g}", language)
-    ax.set_title(_t("budget_title", language, value=value))
+    ax.set_title(_t("GUM uncertainty budget — y = {value}", language, value=value))
     ax.legend(loc="lower right", fontsize="small")
     ax.grid(True, axis="x", alpha=0.3)
     return ax
@@ -359,14 +315,14 @@ def plot_monte_carlo(
     low, high = result.interval
     pct = decimal_comma(f"{100.0 * result.coverage:g}", language)
     ax.axvspan(low, high, color=_C_PRIMARY, alpha=0.12,
-               label=_t("coverage_interval", language, pct=pct))
+               label=_t("{pct} % coverage interval", language, pct=pct))
     value = decimal_comma(f"{result.value:.4g}", language)
     ax.axvline(result.value, color=_C_REFERENCE, ls="--",
                label=f"y = {value}")
-    ax.set_xlabel(_t("output_quantity", language))
-    ax.set_ylabel(_t("prob_density", language))
+    ax.set_xlabel(_t("Output quantity y", language))
+    ax.set_ylabel(_t("Probability density", language))
     uy = decimal_comma(f"{result.standard_uncertainty:.3g}", language)
-    ax.set_title(_t("mc_title", language, uy=uy))
+    ax.set_title(_t("Monte Carlo distribution (GUM Supplement 1) — u(y) = {uy}", language, uy=uy))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
     localize_axes(ax, language)
@@ -382,9 +338,9 @@ def _db10(values: np.ndarray) -> np.ndarray:
 
 def _psd_ylabel(scaling: str, language: str = "en") -> str:
     return (
-        _t("spectral_density", language)
+        _t("Spectral density [dB re 1/Hz]", language)
         if scaling == "density"
-        else _t("power_spectrum", language)
+        else _t("Power spectrum [dB]", language)
     )
 
 
@@ -415,14 +371,14 @@ def plot_spectral_density(
         color=color,
         alpha=0.25,
         lw=0.0,
-        label=_t("psd_confidence", language, pct=pct, nd=nd),
+        label=_t(r"{pct} % confidence ($\chi^2$, $n_d$ = {nd})", language, pct=pct, nd=nd),
     )
     kwargs.setdefault("label", "$\\hat{G}_{xx}(f)$")
     ax.semilogx(freqs[pos], _db10(np.asarray(result.psd)[pos]), color=color, **kwargs)
-    ax.set_xlabel(_t("freq", language))
+    ax.set_xlabel(_t("Frequency [Hz]", language))
     ax.set_ylabel(_psd_ylabel(result.scaling, language))
     er = format_number(100.0 * result.random_error, language, decimals=1)
-    ax.set_title(_t("welch_title", language, er=er))
+    ax.set_title(_t(r"Welch spectral density — $\varepsilon_r$ = {er} %", language, er=er))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
     format_frequency_axis(ax, float(freqs[pos].min()), float(freqs[pos].max()))
@@ -467,14 +423,14 @@ def plot_cross_spectral_density(
     fmin, fmax = float(freqs[pos].min()), float(freqs[pos].max())
     if ax is not None:
         _magnitude(ax)
-        ax.set_xlabel(_t("freq", language))
+        ax.set_xlabel(_t("Frequency [Hz]", language))
         format_frequency_axis(ax, fmin, fmax)
         localize_axes(ax, language)
         return ax
 
     axes = _new_axes_column(3, sharex=True, figsize=(8.0, 7.0))
     _magnitude(axes[0])
-    axes[0].set_title(_t("csd_title", language))
+    axes[0].set_title(_t("Cross-spectral density (Bendat & Piersol)", language))
     phase = np.degrees(result.phase[pos])
     # Cap the drawn band at +/-180 deg: at near-zero coherence the Eq. 9.52
     # s.d. diverges and a literal band would blow the panel's autoscale.
@@ -487,16 +443,16 @@ def plot_cross_spectral_density(
         color=_C_SECONDARY,
         alpha=0.3,
         lw=0.0,
-        label=_t("phase_sd_band", language),
+        label=_t(r"$\pm$ s.d.$[\hat{\theta}_{xy}]$ (Eq. 9.52)", language),
     )
     axes[1].semilogx(freqs[pos], phase, color=color)
-    axes[1].set_ylabel(_t("phase_deg", language))
+    axes[1].set_ylabel(_t("Phase [deg]", language))
     axes[1].grid(True, which="both", alpha=0.3)
     axes[1].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     axes[2].semilogx(freqs[pos], result.coherence[pos], color=_C_MUTED)
     axes[2].set_ylabel("$\\gamma^2_{xy}$")
     axes[2].set_ylim(0.0, 1.05)
-    axes[2].set_xlabel(_t("freq", language))
+    axes[2].set_xlabel(_t("Frequency [Hz]", language))
     axes[2].grid(True, which="both", alpha=0.3)
     for axf in axes:
         format_frequency_axis(axf, fmin, fmax)
@@ -534,7 +490,7 @@ def plot_coherent_output_spectrum(
             freqs[pos],
             _db10(result.output_psd[pos]),
             color=_C_MUTED,
-            label=_t("gyy_output", language),
+            label=_t(r"$\hat{G}_{yy}$ (output)", language),
         )
         kwargs.setdefault(
             "label", "$\\hat{G}_{vv} = \\hat{\\gamma}^2_{xy}\\hat{G}_{yy}$"
@@ -546,7 +502,7 @@ def plot_coherent_output_spectrum(
             _db10(result.noise_psd[pos]),
             color=_C_REFERENCE,
             ls="--",
-            label=_t("gnn_noise", language),
+            label=_t(r"$\hat{G}_{nn}$ (noise)", language),
         )
         axs.set_ylabel(_psd_ylabel(result.scaling, language))
         axs.grid(True, which="both", alpha=0.3)
@@ -555,18 +511,18 @@ def plot_coherent_output_spectrum(
     fmin, fmax = float(freqs[pos].min()), float(freqs[pos].max())
     if ax is not None:
         _spectra_panel(ax)
-        ax.set_xlabel(_t("freq", language))
+        ax.set_xlabel(_t("Frequency [Hz]", language))
         format_frequency_axis(ax, fmin, fmax)
         localize_axes(ax, language)
         return ax
 
     axes = _new_axes_column(2, sharex=True, figsize=(8.0, 5.6))
     _spectra_panel(axes[0])
-    axes[0].set_title(_t("cos_title", language))
+    axes[0].set_title(_t("Coherent output spectrum (Bendat & Piersol 9.2.2)", language))
     axes[1].semilogx(freqs[pos], result.snr_db[pos], color=_C_SECONDARY)
     axes[1].axhline(0.0, color=_C_MUTED, ls=":", lw=1.0)
-    axes[1].set_ylabel(_t("spectral_snr", language))
-    axes[1].set_xlabel(_t("freq", language))
+    axes[1].set_ylabel(_t("Spectral SNR [dB]", language))
+    axes[1].set_xlabel(_t("Frequency [Hz]", language))
     axes[1].grid(True, which="both", alpha=0.3)
     for axf in axes:
         format_frequency_axis(axf, fmin, fmax)
@@ -601,17 +557,17 @@ def plot_correlation(
     kwargs.setdefault("label", f"${symbol}_{{{sub}}}(\\tau)$")
     ax.plot(result.lags, result.values, **kwargs)
     ax.axvline(0.0, color=_C_MUTED, ls=":", lw=1.0)
-    ax.set_xlabel(_t("lag", language))
+    ax.set_xlabel(_t("Lag [s]", language))
     if result.normalization == "coefficient":
-        ax.set_ylabel(_t("corr_coeff", language))
+        ax.set_ylabel(_t("Correlation coefficient", language))
     else:
         norm = (_t(result.normalization, language)
                 if result.normalization in _STRINGS
                 else result.normalization)
-        ax.set_ylabel(_t("correlation_of", language, norm=norm))
-    kind = (_t(result.kind, language) if result.kind in _STRINGS
-            else result.kind.capitalize())
-    ax.set_title(_t("corr_title", language, kind=kind))
+        ax.set_ylabel(_t("Correlation ({norm})", language, norm=norm))
+    kind_en = result.kind.capitalize()
+    kind = _t(kind_en, language) if kind_en in _STRINGS else kind_en
+    ax.set_title(_t("{kind} estimate (Bendat & Piersol)", language, kind=kind))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, alpha=0.3)
     localize_axes(ax, language)
@@ -636,7 +592,7 @@ def plot_time_delay(
     label = {
         "direct": "$\\hat{\\rho}_{xy}(\\tau)$",
         "gcc": f"GCC ({result.weighting})",
-        "phase": _t("phase_context", language),
+        "phase": _t(r"$\hat{R}_{xy}(\tau)$ (context)", language),
     }[result.method]
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("label", label)
@@ -648,7 +604,7 @@ def plot_time_delay(
             color=_C_SECONDARY,
             alpha=0.25,
             lw=0.0,
-            label=_t("delay_interval", language),
+            label=_t("95 % interval (Eq. 8.130)", language),
         )
     tau = decimal_comma(f"{1e3 * result.delay:.4g}", language)
     ax.axvline(
@@ -657,13 +613,13 @@ def plot_time_delay(
         ls="--",
         label=f"$\\hat{{\\tau}}_0$ = {tau} ms",
     )
-    ax.set_xlabel(_t("lag", language))
+    ax.set_xlabel(_t("Lag [s]", language))
     ax.set_ylabel(
-        _t("corr_coeff", language)
+        _t("Correlation coefficient", language)
         if result.method == "direct"
-        else _t("norm_correlation", language)
+        else _t("Normalized correlation", language)
     )
-    ax.set_title(_t("tde_title", language, method=result.method))
+    ax.set_title(_t("Time-delay estimate — {method}", language, method=result.method))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, alpha=0.3)
     localize_axes(ax, language)
@@ -691,14 +647,14 @@ def plot_aligned_impulse_response(
     ax = ax if ax is not None else _new_axes()
     t = np.arange(result.reference.size) / result.fs
     ax.plot(t, result.reference, color=_C_MUTED, lw=1.0,
-            label=_t("reference_ir", language))
+            label=_t("Reference IR", language))
     kwargs.setdefault("color", _C_PRIMARY)
     n = decimal_comma(f"{result.delay_samples:+.3f}", language)
-    kwargs.setdefault("label", _t("aligned_ir", language, n=n))
+    kwargs.setdefault("label", _t("Aligned IR (delay {n} samples)", language, n=n))
     ax.plot(t, result.aligned, lw=1.2, **kwargs)
-    ax.set_xlabel(_t("time", language))
-    ax.set_ylabel(_t("amplitude", language))
-    ax.set_title(_t("ir_align_title", language))
+    ax.set_xlabel(_t("Time [s]", language))
+    ax.set_ylabel(_t("Amplitude", language))
+    ax.set_title(_t("Impulse-response alignment (sub-sample)", language))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, alpha=0.3)
     localize_axes(ax, language)
@@ -727,32 +683,32 @@ def plot_envelope(
     def _envelope_panel(axe: Axes) -> None:
         axe.plot(
             t_signal, result.signal, color=_C_MUTED, lw=0.7,
-            label=_t("signal", language)
+            label=_t("Signal", language)
         )
         kwargs.setdefault("color", _C_PRIMARY)
-        kwargs.setdefault("label", _t("envelope", language))
+        kwargs.setdefault("label", _t("Envelope $A(t)$ (Eq. 13.17)", language))
         axe.plot(result.times, result.envelope, lw=1.8, **kwargs)
-        axe.set_ylabel(_t("amplitude", language))
+        axe.set_ylabel(_t("Amplitude", language))
         axe.grid(True, alpha=0.3)
         axe.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
     if ax is not None:
         _envelope_panel(ax)
-        ax.set_xlabel(_t("time", language))
+        ax.set_xlabel(_t("Time [s]", language))
         localize_axes(ax, language)
         return ax
 
     axes = _new_axes_column(2, sharex=True, figsize=(8.0, 5.6))
     _envelope_panel(axes[0])
-    axes[0].set_title(_t("hilbert_title", language))
+    axes[0].set_title(_t("Hilbert envelope (Bendat & Piersol Ch. 13)", language))
     axes[1].plot(
         result.times,
         result.instantaneous_frequency,
         color=_C_SECONDARY,
         lw=1.0,
     )
-    axes[1].set_ylabel(_t("inst_freq", language))
-    axes[1].set_xlabel(_t("time", language))
+    axes[1].set_ylabel(_t("Instantaneous frequency [Hz]", language))
+    axes[1].set_xlabel(_t("Time [s]", language))
     axes[1].grid(True, alpha=0.3)
     for axf in axes:
         localize_axes(axf, language)
@@ -783,25 +739,25 @@ def plot_phase_decomposition(
 
     def _phase_panel(axp: Axes) -> None:
         kwargs.setdefault("color", _C_PRIMARY)
-        kwargs.setdefault("label", _t("measured_phase", language))
+        kwargs.setdefault("label", _t("Measured phase", language))
         axp.semilogx(freqs[pos], result.phase[pos], **kwargs)
         axp.semilogx(
             freqs[pos], result.minimum_phase[pos], color=_C_SECONDARY,
-            ls="--", label=_t("minimum_phase", language),
+            ls="--", label=_t("Minimum phase (from |H|)", language),
         )
         axp.semilogx(
             freqs[pos], result.excess_phase[pos], color=_C_MUTED,
-            label=_t("excess_phase", language),
+            label=_t("Excess phase (all-pass)", language),
         )
-        axp.set_ylabel(_t("phase_rad", language))
+        axp.set_ylabel(_t("Phase [rad]", language))
         axp.grid(True, which="both", alpha=0.3)
         axp.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
     fmin, fmax = float(freqs[pos].min()), float(freqs[pos].max())
     if ax is not None:
         _phase_panel(ax)
-        ax.set_xlabel(_t("freq", language))
-        ax.set_title(_t("phase_decomp_title", language))
+        ax.set_xlabel(_t("Frequency [Hz]", language))
+        ax.set_title(_t("Phase decomposition", language))
         format_frequency_axis(ax, fmin, fmax)
         localize_axes(ax, language)
         return ax
@@ -813,20 +769,20 @@ def plot_phase_decomposition(
         20.0 * np.log10(np.maximum(result.magnitude[pos], tiny)),
         color=_C_PRIMARY,
     )
-    axes[0].set_ylabel(_t("magnitude", language))
-    axes[0].set_title(_t("minphase_title", language))
+    axes[0].set_ylabel(_t("Magnitude [dB]", language))
+    axes[0].set_title(_t("Minimum-phase / all-pass decomposition", language))
     axes[0].grid(True, which="both", alpha=0.3)
     _phase_panel(axes[1])
     axes[2].semilogx(
         freqs[pos], 1e3 * result.group_delay[pos], color=_C_PRIMARY,
-        label=_t("group_delay", language),
+        label=_t("Group delay", language),
     )
     axes[2].semilogx(
         freqs[pos], 1e3 * result.excess_group_delay[pos], color=_C_MUTED,
-        label=_t("excess_group_delay", language),
+        label=_t("Excess group delay", language),
     )
-    axes[2].set_ylabel(_t("group_delay_axis", language))
-    axes[2].set_xlabel(_t("freq", language))
+    axes[2].set_ylabel(_t("Group delay [ms]", language))
+    axes[2].set_xlabel(_t("Frequency [Hz]", language))
     axes[2].grid(True, which="both", alpha=0.3)
     axes[2].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     for axf in axes:

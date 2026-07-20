@@ -35,113 +35,65 @@ if TYPE_CHECKING:
     from ..underwater.ocean_ambient_noise import AmbientNoiseResult
     from ..underwater.ship_traffic_noise import ShipTrafficSpectrum
 
-#: English and Spanish text for every fixed label/title/legend drawn by this
-#: module's renderers.  English entries are byte-for-byte the original strings.
-_STRINGS: dict[str, dict[str, str]] = {
-    "en": {
-        "source_level_ls": "Source level Ls",
-        "radiated_noise": "Radiated noise level",
-        "freq_hz": "Frequency [Hz]",
-        "level_upam": "Level [dB re 1 µPa·m]",
-        "surface_corr_legend": "Surface correction ΔL",
-        "surface_corr_ylabel": "Surface correction ΔL [dB]",
-        "source_level_title": "ISO 17208-2 equivalent monopole source level",
-        "peak": "Peak",
-        "pressure_pa": "Pressure [Pa]",
-        "time_s": "Time [s]",
-        "pile_title": "ISO 18406 pile strike",
-        "cumulative_energy": "Cumulative energy",
-        "cumulative_energy_norm": "Cumulative energy (norm.)",
-        "pulse_duration": "90 % pulse duration",
-        "sound_speed_ms": "Sound speed [m/s]",
-        "depth_m": "Depth [m]",
-        "sound_speed_title": "Sea-water sound-speed profile",
-        "total_tl": "Total TL",
-        "spreading": "Spreading",
-        "absorption": "Absorption",
-        "range_m": "Range [m]",
-        "tl_db": "Transmission loss [dB]",
-        "underwater_tl_title": "Underwater transmission loss",
-        "signal_excess": "Signal excess",
-        "detection_limit": "Detection limit (SE = 0)",
-        "figure_of_merit": "Figure of merit",
-        "signal_excess_db": "Signal excess [dB]",
-        "sonar_title": "Sonar equation",
-        "bottom_loss": "Bottom loss",
-        "critical_angle": "Critical angle",
-        "grazing_angle": "Grazing angle [°]",
-        "bottom_loss_db": "Bottom loss [dB]",
-        "seabed_title": "Seabed reflection loss",
-        "total": "Total",
-        "wind": "Wind",
-        "thermal": "Thermal",
-        "shipping": "Shipping",
-        "spectrum_level": "Spectrum level [dB re 1 µPa²/Hz]",
-        "ambient_title": "Ocean ambient noise",
-        "source_psd_ylabel": "Source spectral density [dB re 1 µPa²/Hz at 1 m]",
-        "traffic_title": "Ship traffic source level",
-        "modes_word": "modes",
-        "range_km": "Range [km]",
-        "modes_title": "Normal-mode transmission loss",
-        "source": "Source",
-        "raytrace_title": "Ray trace",
-        "pe_title": "Parabolic-equation transmission loss",
-    },
-    "es": {
-        "source_level_ls": "Nivel de fuente Ls",
-        "radiated_noise": "Nivel de ruido radiado",
-        "freq_hz": "Frecuencia [Hz]",
-        "level_upam": "Nivel [dB re 1 µPa·m]",
-        "surface_corr_legend": "Corrección de superficie ΔL",
-        "surface_corr_ylabel": "Corrección de superficie ΔL [dB]",
-        "source_level_title": "Nivel de fuente monopolar equivalente ISO 17208-2",
-        "peak": "Pico",
-        "pressure_pa": "Presión [Pa]",
-        "time_s": "Tiempo [s]",
-        "pile_title": "Golpe de pilote ISO 18406",
-        "cumulative_energy": "Energía acumulada",
-        "cumulative_energy_norm": "Energía acumulada (norm.)",
-        "pulse_duration": "Duración del pulso al 90 %",
-        "sound_speed_ms": "Velocidad del sonido [m/s]",
-        "depth_m": "Profundidad [m]",
-        "sound_speed_title": "Perfil de velocidad del sonido en agua de mar",
-        "total_tl": "TL total",
-        "spreading": "Divergencia",
-        "absorption": "Absorción",
-        "range_m": "Distancia [m]",
-        "tl_db": "Pérdida por transmisión [dB]",
-        "underwater_tl_title": "Pérdida por transmisión submarina",
-        "signal_excess": "Exceso de señal",
-        "detection_limit": "Límite de detección (SE = 0)",
-        "figure_of_merit": "Cifra de mérito",
-        "signal_excess_db": "Exceso de señal [dB]",
-        "sonar_title": "Ecuación del sonar",
-        "bottom_loss": "Pérdida en el fondo",
-        "critical_angle": "Ángulo crítico",
-        "grazing_angle": "Ángulo rasante [°]",
-        "bottom_loss_db": "Pérdida en el fondo [dB]",
-        "seabed_title": "Pérdida por reflexión en el fondo marino",
-        "total": "Total",
-        "wind": "Viento",
-        "thermal": "Térmico",
-        "shipping": "Tráfico marítimo",
-        "spectrum_level": "Nivel espectral [dB re 1 µPa²/Hz]",
-        "ambient_title": "Ruido ambiental oceánico",
-        "source_psd_ylabel": "Densidad espectral de la fuente [dB re 1 µPa²/Hz a 1 m]",
-        "traffic_title": "Nivel de fuente del tráfico marítimo",
-        "modes_word": "modos",
-        "range_km": "Distancia [km]",
-        "modes_title": "Pérdida por transmisión por modos normales",
-        "source": "Fuente",
-        "raytrace_title": "Trazado de rayos",
-        "pe_title": "Pérdida por transmisión por ecuación parabólica",
-    },
+#: Spanish translations of the fixed strings rendered by the underwater
+#: ``.plot()`` renderers, keyed by their verbatim English text.  ``_t``
+#: returns the English key unchanged for any language other than ``"es"``,
+#: so the English output is byte-for-byte identical to the pre-i18n
+#: renderers.
+_STRINGS: dict[str, str] = {
+    "Source level Ls": "Nivel de fuente Ls",
+    "Radiated noise level": "Nivel de ruido radiado",
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Level [dB re 1 µPa·m]": "Nivel [dB re 1 µPa·m]",
+    "Surface correction ΔL": "Corrección de superficie ΔL",
+    "Surface correction ΔL [dB]": "Corrección de superficie ΔL [dB]",
+    "ISO 17208-2 equivalent monopole source level": "Nivel de fuente monopolar equivalente ISO 17208-2",
+    "Peak": "Pico",
+    "Pressure [Pa]": "Presión [Pa]",
+    "Time [s]": "Tiempo [s]",
+    "ISO 18406 pile strike": "Golpe de pilote ISO 18406",
+    "Cumulative energy": "Energía acumulada",
+    "Cumulative energy (norm.)": "Energía acumulada (norm.)",
+    "90 % pulse duration": "Duración del pulso al 90 %",
+    "Sound speed [m/s]": "Velocidad del sonido [m/s]",
+    "Depth [m]": "Profundidad [m]",
+    "Sea-water sound-speed profile": "Perfil de velocidad del sonido en agua de mar",
+    "Total TL": "TL total",
+    "Spreading": "Divergencia",
+    "Absorption": "Absorción",
+    "Range [m]": "Distancia [m]",
+    "Transmission loss [dB]": "Pérdida por transmisión [dB]",
+    "Underwater transmission loss": "Pérdida por transmisión submarina",
+    "Signal excess": "Exceso de señal",
+    "Detection limit (SE = 0)": "Límite de detección (SE = 0)",
+    "Figure of merit": "Cifra de mérito",
+    "Signal excess [dB]": "Exceso de señal [dB]",
+    "Sonar equation": "Ecuación del sonar",
+    "Bottom loss": "Pérdida en el fondo",
+    "Critical angle": "Ángulo crítico",
+    "Grazing angle [°]": "Ángulo rasante [°]",
+    "Bottom loss [dB]": "Pérdida en el fondo [dB]",
+    "Seabed reflection loss": "Pérdida por reflexión en el fondo marino",
+    "Total": "Total",
+    "Wind": "Viento",
+    "Thermal": "Térmico",
+    "Shipping": "Tráfico marítimo",
+    "Spectrum level [dB re 1 µPa²/Hz]": "Nivel espectral [dB re 1 µPa²/Hz]",
+    "Ocean ambient noise": "Ruido ambiental oceánico",
+    "Source spectral density [dB re 1 µPa²/Hz at 1 m]": "Densidad espectral de la fuente [dB re 1 µPa²/Hz a 1 m]",
+    "Ship traffic source level": "Nivel de fuente del tráfico marítimo",
+    "modes": "modos",
+    "Range [km]": "Distancia [km]",
+    "Normal-mode transmission loss": "Pérdida por transmisión por modos normales",
+    "Source": "Fuente",
+    "Ray trace": "Trazado de rayos",
+    "Parabolic-equation transmission loss": "Pérdida por transmisión por ecuación parabólica",
 }
 
 
-def _t(key: str, language: str) -> str:
-    """Localised fixed string for ``key`` (English is the byte-identical default)."""
-    return _STRINGS[language][key]
+def _t(text: str, language: str = "en") -> str:
+    """Localise a fixed string; English is returned verbatim (byte-identical)."""
+    return _STRINGS.get(text, text) if language == "es" else text
 
 
 def plot_ship_source_level(
@@ -169,17 +121,17 @@ def plot_ship_source_level(
     dl = np.asarray(result.surface_correction, dtype=np.float64)
 
     kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("label", _t("source_level_ls", language))
+    kwargs.setdefault("label", _t("Source level Ls", language))
     ax.semilogx(freqs, ls, "o-", **kwargs)
-    ax.semilogx(freqs, rnl, "s--", color=_C_REFERENCE, label=_t("radiated_noise", language))
-    ax.set_xlabel(_t("freq_hz", language))
-    ax.set_ylabel(_t("level_upam", language))
+    ax.semilogx(freqs, rnl, "s--", color=_C_REFERENCE, label=_t("Radiated noise level", language))
+    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Level [dB re 1 µPa·m]", language))
     ax.grid(True, which="both", alpha=0.3)
     ax.set_axisbelow(True)
 
     twin = ax.twinx()
-    twin.semilogx(freqs, dl, ":", color=_C_TERTIARY, label=_t("surface_corr_legend", language))
-    twin.set_ylabel(_t("surface_corr_ylabel", language))
+    twin.semilogx(freqs, dl, ":", color=_C_TERTIARY, label=_t("Surface correction ΔL", language))
+    twin.set_ylabel(_t("Surface correction ΔL [dB]", language))
     # After twinx() (it re-initialises the shared x-axis with the default log
     # locator) so the octave-band labelling is not reset back to 10^n ticks.
     format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
@@ -188,7 +140,7 @@ def plot_ship_source_level(
     tlines, tlabels = twin.get_legend_handles_labels()
     ax.legend(lines + tlines, labels + tlabels, loc="best", fontsize="small")
     ax.set_title(
-        f"{_t('source_level_title', language)} "
+        f"{_t('ISO 17208-2 equivalent monopole source level', language)} "
         f"(d_s = {format_number(result.source_depth, language)} m, "
         f"c = {format_number(result.sound_speed, language, decimals=0)} m/s)"
     )
@@ -226,29 +178,29 @@ def plot_pile_strike(
     def _waveform(axw: Axes) -> None:
         axw.plot(t, pressure, color=color, lw=0.8, **kwargs)
         axw.plot([t[peak_idx]], [pressure[peak_idx]], "o", color=_C_REFERENCE,
-                 label=f"{_t('peak', language)} ({format_number(result.peak_spl, language, decimals=0)} dB re 1 µPa)")
-        axw.set_ylabel(_t("pressure_pa", language))
+                 label=f"{_t('Peak', language)} ({format_number(result.peak_spl, language, decimals=0)} dB re 1 µPa)")
+        axw.set_ylabel(_t("Pressure [Pa]", language))
         axw.grid(True, alpha=0.3)
         axw.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
     if ax is not None:
         _waveform(ax)
-        ax.set_xlabel(_t("time_s", language))
-        ax.set_title(f"{_t('pile_title', language)} (SEL_ss = {format_number(result.single_strike_sel, language, decimals=0)} dB)")
+        ax.set_xlabel(_t("Time [s]", language))
+        ax.set_title(f"{_t('ISO 18406 pile strike', language)} (SEL_ss = {format_number(result.single_strike_sel, language, decimals=0)} dB)")
         localize_axes(ax, language)
         return ax
 
     axes = _new_axes_column(2, sharex=True, figsize=(8.0, 6.0))
     _waveform(axes[0])
     axes[0].set_title(
-        f"{_t('pile_title', language)} (SEL_ss = {format_number(result.single_strike_sel, language, decimals=0)} dB re 1 µPa²·s)"
+        f"{_t('ISO 18406 pile strike', language)} (SEL_ss = {format_number(result.single_strike_sel, language, decimals=0)} dB re 1 µPa²·s)"
     )
-    axes[1].plot(t, cum, color=_C_TERTIARY, label=_t("cumulative_energy", language))
+    axes[1].plot(t, cum, color=_C_TERTIARY, label=_t("Cumulative energy", language))
     for frac in (0.05, 0.95):
         axes[1].axhline(frac, color=_C_MUTED, ls="--", lw=0.8)
-    axes[1].set_ylabel(_t("cumulative_energy_norm", language))
-    axes[1].set_xlabel(_t("time_s", language))
-    axes[1].set_title(f"{_t('pulse_duration', language)} = {format_number(result.pulse_duration * 1e3, language, decimals=0)} ms")
+    axes[1].set_ylabel(_t("Cumulative energy (norm.)", language))
+    axes[1].set_xlabel(_t("Time [s]", language))
+    axes[1].set_title(f"{_t('90 % pulse duration', language)} = {format_number(result.pulse_duration * 1e3, language, decimals=0)} ms")
     axes[1].grid(True, alpha=0.3)
     localize_axes(axes[0], language)
     localize_axes(axes[1], language)
@@ -275,9 +227,9 @@ def plot_sound_speed_profile(
     ax.plot(speed, depth, **{"color": _C_PRIMARY, "lw": 1.4, "label": label, **kwargs})
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
-    ax.set_xlabel(_t("sound_speed_ms", language))
-    ax.set_ylabel(_t("depth_m", language))
-    ax.set_title(_t("sound_speed_title", language))
+    ax.set_xlabel(_t("Sound speed [m/s]", language))
+    ax.set_ylabel(_t("Depth [m]", language))
+    ax.set_title(_t("Sea-water sound-speed profile", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc="lower left", fontsize="small")
     localize_axes(ax, language)
@@ -301,15 +253,15 @@ def plot_transmission_loss(
 
     ax = ax if ax is not None else _new_axes()
     r = np.asarray(result.range_m, dtype=np.float64)
-    label = f"{_t('total_tl', language)} ({decimal_comma(f'{result.frequency / 1000.0:.3g}', language)} kHz)"
+    label = f"{_t('Total TL', language)} ({decimal_comma(f'{result.frequency / 1000.0:.3g}', language)} kHz)"
     ax.plot(r, np.asarray(result.tl), **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
     ax.plot(r, np.asarray(result.spreading), color=_C_MUTED, lw=1.0, ls="--",
-            label=f"{_t('spreading', language)} ({result.law})")
+            label=f"{_t('Spreading', language)} ({result.law})")
     ax.plot(r, np.asarray(result.absorption), color=_C_SECONDARY, lw=1.0, ls=":",
-            label=f"{_t('absorption', language)} ({decimal_comma(f'{result.absorption_coefficient:.3g}', language)} dB/km)")
-    ax.set_xlabel(_t("range_m", language))
-    ax.set_ylabel(_t("tl_db", language))
-    ax.set_title(f"{_t('underwater_tl_title', language)} ({result.model})")
+            label=f"{_t('Absorption', language)} ({decimal_comma(f'{result.absorption_coefficient:.3g}', language)} dB/km)")
+    ax.set_xlabel(_t("Range [m]", language))
+    ax.set_ylabel(_t("Transmission loss [dB]", language))
+    ax.set_title(f"{_t('Underwater transmission loss', language)} ({result.model})")
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
     ax.grid(True, alpha=0.3)
@@ -335,14 +287,14 @@ def plot_sonar_equation(
     tl = np.asarray(result.transmission_loss, dtype=np.float64)
     se = np.asarray(result.signal_excess, dtype=np.float64)
     order = np.argsort(tl)
-    label = f"{_t('signal_excess', language)} ({result.mode})"
+    label = f"{_t('Signal excess', language)} ({result.mode})"
     ax.plot(tl[order], se[order], **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
-    ax.axhline(0.0, color=_C_REFERENCE, ls="--", lw=1.0, label=_t("detection_limit", language))
+    ax.axhline(0.0, color=_C_REFERENCE, ls="--", lw=1.0, label=_t("Detection limit (SE = 0)", language))
     ax.axvline(result.figure_of_merit, color=_C_MUTED, ls=":", lw=1.0,
-               label=f"{_t('figure_of_merit', language)} = {format_number(result.figure_of_merit, language)} dB")
-    ax.set_xlabel(_t("tl_db", language))
-    ax.set_ylabel(_t("signal_excess_db", language))
-    ax.set_title(_t("sonar_title", language))
+               label=f"{_t('Figure of merit', language)} = {format_number(result.figure_of_merit, language)} dB")
+    ax.set_xlabel(_t("Transmission loss [dB]", language))
+    ax.set_ylabel(_t("Signal excess [dB]", language))
+    ax.set_title(_t("Sonar equation", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
@@ -365,13 +317,13 @@ def plot_bottom_loss(
     ax = ax if ax is not None else _new_axes()
     phi = np.asarray(result.grazing_angle, dtype=np.float64)
     loss = np.asarray(result.reflection_loss, dtype=np.float64)
-    ax.plot(phi, loss, **{"color": _C_PRIMARY, "lw": 1.6, "label": _t("bottom_loss", language), **kwargs})
+    ax.plot(phi, loss, **{"color": _C_PRIMARY, "lw": 1.6, "label": _t("Bottom loss", language), **kwargs})
     if result.critical_angle is not None:
         ax.axvline(result.critical_angle, color=_C_REFERENCE, ls="--", lw=1.0,
-                   label=f"{_t('critical_angle', language)} = {format_number(result.critical_angle, language)}°")
-    ax.set_xlabel(_t("grazing_angle", language))
-    ax.set_ylabel(_t("bottom_loss_db", language))
-    ax.set_title(_t("seabed_title", language))
+                   label=f"{_t('Critical angle', language)} = {format_number(result.critical_angle, language)}°")
+    ax.set_xlabel(_t("Grazing angle [°]", language))
+    ax.set_ylabel(_t("Bottom loss [dB]", language))
+    ax.set_title(_t("Seabed reflection loss", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
@@ -393,18 +345,18 @@ def plot_ambient_noise(
 
     ax = ax if ax is not None else _new_axes()
     f = np.asarray(result.frequency, dtype=np.float64)
-    label = f"{_t('total', language)} ({format_number(result.wind_speed_knots, language)} kn)"
+    label = f"{_t('Total', language)} ({format_number(result.wind_speed_knots, language)} kn)"
     ax.plot(f, np.asarray(result.spectrum_level),
             **{"color": _C_PRIMARY, "lw": 1.8, "label": label, **kwargs})
-    ax.plot(f, np.asarray(result.wind), color=_C_SECONDARY, lw=1.0, ls="--", label=_t("wind", language))
-    ax.plot(f, np.asarray(result.thermal), color=_C_TERTIARY, lw=1.0, ls=":", label=_t("thermal", language))
+    ax.plot(f, np.asarray(result.wind), color=_C_SECONDARY, lw=1.0, ls="--", label=_t("Wind", language))
+    ax.plot(f, np.asarray(result.thermal), color=_C_TERTIARY, lw=1.0, ls=":", label=_t("Thermal", language))
     if result.shipping is not None:
         ax.plot(f, np.asarray(result.shipping), color=_C_REFERENCE, lw=1.0, ls="-.",
-                label=_t("shipping", language))
+                label=_t("Shipping", language))
     ax.set_xscale("log")
-    ax.set_xlabel(_t("freq_hz", language))
-    ax.set_ylabel(_t("spectrum_level", language))
-    ax.set_title(_t("ambient_title", language))
+    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Spectrum level [dB re 1 µPa²/Hz]", language))
+    ax.set_title(_t("Ocean ambient noise", language))
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     format_frequency_axis(ax, float(f.min()), float(f.max()))
@@ -434,9 +386,9 @@ def plot_ship_traffic_spectrum(
         label = result.model
     ax.plot(f, psd, **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
     ax.set_xscale("log")
-    ax.set_xlabel(_t("freq_hz", language))
-    ax.set_ylabel(_t("source_psd_ylabel", language))
-    ax.set_title(_t("traffic_title", language))
+    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Source spectral density [dB re 1 µPa²/Hz at 1 m]", language))
+    ax.set_title(_t("Ship traffic source level", language))
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     format_frequency_axis(ax, float(f.min()), float(f.max()))
@@ -460,11 +412,11 @@ def plot_normal_modes(
     ax = ax if ax is not None else _new_axes()
     r = np.asarray(result.ranges, dtype=np.float64)
     tl = np.asarray(result.transmission_loss, dtype=np.float64)
-    label = f"{result.wavenumbers.size} {_t('modes_word', language)} ({format_number(result.frequency, language, decimals=0)} Hz)"
+    label = f"{result.wavenumbers.size} {_t('modes', language)} ({format_number(result.frequency, language, decimals=0)} Hz)"
     ax.plot(r / 1000.0, tl, **{"color": _C_PRIMARY, "lw": 1.2, "label": label, **kwargs})
-    ax.set_xlabel(_t("range_km", language))
-    ax.set_ylabel(_t("tl_db", language))
-    ax.set_title(_t("modes_title", language))
+    ax.set_xlabel(_t("Range [km]", language))
+    ax.set_ylabel(_t("Transmission loss [dB]", language))
+    ax.set_title(_t("Normal-mode transmission loss", language))
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
     ax.grid(True, alpha=0.3)
@@ -489,10 +441,10 @@ def plot_ray_trace(result: "RayTraceResult", ax: Axes | None = None, *, language
     z = np.asarray(result.depths, dtype=np.float64)
     for i in range(r.shape[0]):
         ax.plot(r[i] / 1000.0, z[i], **{"color": _C_PRIMARY, "lw": 0.7, "alpha": 0.7, **kwargs})
-    ax.plot([0.0], [result.source_depth], "o", color=_C_REFERENCE, label=_t("source", language))
-    ax.set_xlabel(_t("range_km", language))
-    ax.set_ylabel(_t("depth_m", language))
-    ax.set_title(_t("raytrace_title", language))
+    ax.plot([0.0], [result.source_depth], "o", color=_C_REFERENCE, label=_t("Source", language))
+    ax.set_xlabel(_t("Range [km]", language))
+    ax.set_ylabel(_t("Depth [m]", language))
+    ax.set_title(_t("Ray trace", language))
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
     ax.grid(True, alpha=0.3)
@@ -539,9 +491,9 @@ def plot_parabolic_equation(
             **kwargs,
         },
     )
-    ax.figure.colorbar(img, ax=ax, label=_t("tl_db", language))
-    ax.set_xlabel(_t("range_km", language))
-    ax.set_ylabel(_t("depth_m", language))
-    ax.set_title(_t("pe_title", language))
+    ax.figure.colorbar(img, ax=ax, label=_t("Transmission loss [dB]", language))
+    ax.set_xlabel(_t("Range [km]", language))
+    ax.set_ylabel(_t("Depth [m]", language))
+    ax.set_title(_t("Parabolic-equation transmission loss", language))
     localize_axes(ax, language)
     return ax

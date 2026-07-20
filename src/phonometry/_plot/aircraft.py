@@ -32,97 +32,58 @@ if TYPE_CHECKING:
         TerrainScreeningResult,
     )
 
-#: English and Spanish text for every fixed label/title/legend drawn by this
-#: module's renderers.  English entries are byte-for-byte the original strings.
-_STRINGS: dict[str, dict[str, str]] = {
-    "en": {
-        "win_10db": "10 dB-down window",
-        "time_s": "Time [s]",
-        "level_pndb": "Level [PNdB]",
-        "sae_band": "SAE band",
-        "puretone_midband": "Pure-tone mid-band (ISO 9613-1)",
-        "freq_hz": "Frequency [Hz]",
-        "atten_db": "Attenuation [dB]",
-        "aircraft_abs_title": "Aircraft atmospheric absorption (SAE ARP 5534)",
-        "tabulated": "Tabulated",
-        "slant_distance": "Slant distance [m]",
-        "event_level": "Event level [dB]",
-        "npd_title": "Noise-power-distance curve (ECAC Doc 29)",
-        "segment_index": "Segment index",
-        "segment_metric": "Segment {metric} [dB]",
-        "flyover_title": "Single-event segment contributions (ECAC Doc 29)",
-        "polar_angle": "Polar angle θ [°]  (0° forward → 180° rearward)",
-        "source_level_60m": "Source level at 60 m [dB]",
-        "hemisphere_title": "Rotorcraft noise hemisphere directivity (ECAC Doc 32)",
-        "contour_title": "Aircraft noise contour (ECAC Doc 29)",
-        "airspeed": "Airspeed $V_A$",
-        "ground_speed": "Ground speed $V_g$",
-        "speed_ms": "Speed [m/s]",
-        "path_angle": "Path angle $\\gamma$",
-        "bank_angle": "Bank angle $\\Phi$",
-        "angle_deg": "Angle [°]",
-        "kinematics_title": "Rotorcraft flight-path kinematics (ECAC Doc 32)",
-        "recorded_time": "Recorded time [s]",
-        "a_level": "A-weighted level [dB(A)]",
-        "rotor_event_title": "Rotorcraft flyover time history (ECAC Doc 32)",
-        "rotor_contour_title": "Rotorcraft noise contour (ECAC Doc 32)",
-        "terrain_profile": "Terrain profile",
-        "mean_ground_plane": "Mean ground plane",
-        "section_distance": "Section distance [m]",
-        "height_m": "Height [m]",
-        "mgp_title": "Mean ground plane (NORAH2 guidance Eq. 36-40)",
-        "line_of_sight": "Line of sight",
-        "diffracted_path": "Diffracted path",
-        "diffraction_edges": "Diffraction edges",
-        "screening_title": "Terrain screening (ECAC Doc 32 / NORAH2 guidance)",
-    },
-    "es": {
-        "win_10db": "Ventana 10 dB por debajo",
-        "time_s": "Tiempo [s]",
-        "level_pndb": "Nivel [PNdB]",
-        "sae_band": "Banda SAE",
-        "puretone_midband": "Banda media de tono puro (ISO 9613-1)",
-        "freq_hz": "Frecuencia [Hz]",
-        "atten_db": "Atenuación [dB]",
-        "aircraft_abs_title": "Absorción atmosférica de aeronaves (SAE ARP 5534)",
-        "tabulated": "Tabulados",
-        "slant_distance": "Distancia oblicua [m]",
-        "event_level": "Nivel del evento [dB]",
-        "npd_title": "Curva ruido-potencia-distancia (ECAC Doc 29)",
-        "segment_index": "Índice de segmento",
-        "segment_metric": "{metric} por segmento [dB]",
-        "flyover_title": "Contribuciones por segmento de un evento único (ECAC Doc 29)",
-        "polar_angle": "Ángulo polar θ [°]  (0° adelante → 180° atrás)",
-        "source_level_60m": "Nivel de fuente a 60 m [dB]",
-        "hemisphere_title": "Directividad del hemisferio de ruido de rotorcraft (ECAC Doc 32)",
-        "contour_title": "Curvas de ruido de aeronaves (ECAC Doc 29)",
-        "airspeed": "Velocidad del aire $V_A$",
-        "ground_speed": "Velocidad respecto al suelo $V_g$",
-        "speed_ms": "Velocidad [m/s]",
-        "path_angle": "Ángulo de trayectoria $\\gamma$",
-        "bank_angle": "Ángulo de alabeo $\\Phi$",
-        "angle_deg": "Ángulo [°]",
-        "kinematics_title": "Cinemática de la trayectoria de rotorcraft (ECAC Doc 32)",
-        "recorded_time": "Tiempo registrado [s]",
-        "a_level": "Nivel ponderado A [dB(A)]",
-        "rotor_event_title": "Historia temporal de sobrevuelo de rotorcraft (ECAC Doc 32)",
-        "rotor_contour_title": "Curvas de ruido de rotorcraft (ECAC Doc 32)",
-        "terrain_profile": "Perfil del terreno",
-        "mean_ground_plane": "Plano medio del suelo",
-        "section_distance": "Distancia de la sección [m]",
-        "height_m": "Altura [m]",
-        "mgp_title": "Plano medio del suelo (guía NORAH2 Ec. 36-40)",
-        "line_of_sight": "Línea de visión",
-        "diffracted_path": "Trayectoria difractada",
-        "diffraction_edges": "Bordes de difracción",
-        "screening_title": "Apantallamiento por terreno (ECAC Doc 32 / guía NORAH2)",
-    },
+#: Spanish translations of the fixed strings rendered by the aircraft
+#: ``.plot()`` renderers, keyed by their verbatim English text.  ``_t``
+#: returns the English key unchanged for any language other than ``"es"``,
+#: so the English output is byte-for-byte identical to the pre-i18n
+#: renderers.
+_STRINGS: dict[str, str] = {
+    "10 dB-down window": "Ventana 10 dB por debajo",
+    "Time [s]": "Tiempo [s]",
+    "Level [PNdB]": "Nivel [PNdB]",
+    "SAE band": "Banda SAE",
+    "Pure-tone mid-band (ISO 9613-1)": "Banda media de tono puro (ISO 9613-1)",
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Attenuation [dB]": "Atenuación [dB]",
+    "Aircraft atmospheric absorption (SAE ARP 5534)": "Absorción atmosférica de aeronaves (SAE ARP 5534)",
+    "Tabulated": "Tabulados",
+    "Slant distance [m]": "Distancia oblicua [m]",
+    "Event level [dB]": "Nivel del evento [dB]",
+    "Noise-power-distance curve (ECAC Doc 29)": "Curva ruido-potencia-distancia (ECAC Doc 29)",
+    "Segment index": "Índice de segmento",
+    "Segment {metric} [dB]": "{metric} por segmento [dB]",
+    "Single-event segment contributions (ECAC Doc 29)": "Contribuciones por segmento de un evento único (ECAC Doc 29)",
+    "Polar angle θ [°]  (0° forward → 180° rearward)": "Ángulo polar θ [°]  (0° adelante → 180° atrás)",
+    "Source level at 60 m [dB]": "Nivel de fuente a 60 m [dB]",
+    "Rotorcraft noise hemisphere directivity (ECAC Doc 32)": "Directividad del hemisferio de ruido de rotorcraft (ECAC Doc 32)",
+    "Aircraft noise contour (ECAC Doc 29)": "Curvas de ruido de aeronaves (ECAC Doc 29)",
+    "Airspeed $V_A$": "Velocidad del aire $V_A$",
+    "Ground speed $V_g$": "Velocidad respecto al suelo $V_g$",
+    "Speed [m/s]": "Velocidad [m/s]",
+    "Path angle $\\gamma$": "Ángulo de trayectoria $\\gamma$",
+    "Bank angle $\\Phi$": "Ángulo de alabeo $\\Phi$",
+    "Angle [°]": "Ángulo [°]",
+    "Rotorcraft flight-path kinematics (ECAC Doc 32)": "Cinemática de la trayectoria de rotorcraft (ECAC Doc 32)",
+    "Recorded time [s]": "Tiempo registrado [s]",
+    "A-weighted level [dB(A)]": "Nivel ponderado A [dB(A)]",
+    "Rotorcraft flyover time history (ECAC Doc 32)": "Historia temporal de sobrevuelo de rotorcraft (ECAC Doc 32)",
+    "Rotorcraft noise contour (ECAC Doc 32)": "Curvas de ruido de rotorcraft (ECAC Doc 32)",
+    "Terrain profile": "Perfil del terreno",
+    "Mean ground plane": "Plano medio del suelo",
+    "Section distance [m]": "Distancia de la sección [m]",
+    "Height [m]": "Altura [m]",
+    "Mean ground plane (NORAH2 guidance Eq. 36-40)": "Plano medio del suelo (guía NORAH2 Ec. 36-40)",
+    "Line of sight": "Línea de visión",
+    "Diffracted path": "Trayectoria difractada",
+    "Diffraction edges": "Bordes de difracción",
+    "Terrain screening (ECAC Doc 32 / NORAH2 guidance)": "Apantallamiento por terreno (ECAC Doc 32 / guía NORAH2)",
 }
 
 
-def _t(key: str, language: str) -> str:
-    """Localised fixed string for ``key`` (English is the byte-identical default)."""
-    return _STRINGS[language][key]
+def _t(text: str, language: str = "en", **fmt: Any) -> str:
+    """Localise a fixed string; English is returned verbatim (byte-identical)."""
+    s = _STRINGS.get(text, text) if language == "es" else text
+    return s.format(**fmt) if fmt else s
 
 
 def plot_epnl(result: "EPNLResult", ax: Axes | None = None, *, language: str = "en",
@@ -149,14 +110,14 @@ def plot_epnl(result: "EPNLResult", ax: Axes | None = None, *, language: str = "
     # (svglib) does not preserve alpha, so a translucent fill would render solid
     # and hide the PNL/PNLT traces. A light face keeps both curves readable.
     ax.axvspan(t[kf], t[kl], facecolor="#d7eccb", edgecolor="none", zorder=0,
-               label=_t("win_10db", language))
+               label=_t("10 dB-down window", language))
     ax.plot(t, np.asarray(result.pnl), color=_C_MUTED, lw=1.0, ls="--", label="PNL")
     ax.plot(t, np.asarray(result.pnlt), **{"color": _C_PRIMARY, "lw": 1.4, "label": "PNLT", **kwargs})
     km = int(np.argmax(np.asarray(result.pnlt)))
     ax.plot([t[km]], [result.pnltm], "o", color=_C_REFERENCE,
             label=f"PNLTM = {format_number(result.pnltm, language)} PNdB")
-    ax.set_xlabel(_t("time_s", language))
-    ax.set_ylabel(_t("level_pndb", language))
+    ax.set_xlabel(_t("Time [s]", language))
+    ax.set_ylabel(_t("Level [PNdB]", language))
     ax.set_title(
         f"ICAO EPNL = {format_number(result.epnl, language)} EPNdB "
         f"(D = {decimal_comma(f'{result.duration_correction:+.1f}', language)} dB)"
@@ -183,15 +144,15 @@ def plot_aircraft_band_attenuation(
 
     ax = ax if ax is not None else _new_axes()
     f = np.asarray(result.frequency, dtype=np.float64)
-    label = f"{_t('sae_band', language)} ({format_number(result.path_length, language, decimals=0)} m)"
+    label = f"{_t('SAE band', language)} ({format_number(result.path_length, language, decimals=0)} m)"
     ax.plot(f, np.asarray(result.band_attenuation),
             **{"color": _C_PRIMARY, "lw": 1.6, "marker": "o", "ms": 3, "label": label, **kwargs})
     ax.plot(f, np.asarray(result.midband_attenuation), color=_C_SECONDARY, lw=1.0, ls="--",
-            label=_t("puretone_midband", language))
+            label=_t("Pure-tone mid-band (ISO 9613-1)", language))
     ax.set_xscale("log")
-    ax.set_xlabel(_t("freq_hz", language))
-    ax.set_ylabel(_t("atten_db", language))
-    ax.set_title(_t("aircraft_abs_title", language))
+    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Attenuation [dB]", language))
+    ax.set_title(_t("Aircraft atmospheric absorption (SAE ARP 5534)", language))
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc="upper left", fontsize="small")
     format_frequency_axis(ax, float(f.min()), float(f.max()))
@@ -217,11 +178,11 @@ def plot_npd_level(result: "NpdLevelResult", ax: Axes | None = None, *, language
     tl = np.asarray(result.table_levels, dtype=np.float64)
     label = f"NPD (P = {decimal_comma(f'{result.power:g}', language)})"
     ax.plot(d, lvl, **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
-    ax.plot(td, tl, "o", color=_C_REFERENCE, ms=4, label=_t("tabulated", language))
+    ax.plot(td, tl, "o", color=_C_REFERENCE, ms=4, label=_t("Tabulated", language))
     ax.set_xscale("log")
-    ax.set_xlabel(_t("slant_distance", language))
-    ax.set_ylabel(_t("event_level", language))
-    ax.set_title(_t("npd_title", language))
+    ax.set_xlabel(_t("Slant distance [m]", language))
+    ax.set_ylabel(_t("Event level [dB]", language))
+    ax.set_title(_t("Noise-power-distance curve (ECAC Doc 29)", language))
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
@@ -253,9 +214,9 @@ def plot_flyover(result: "FlyoverResult", ax: Axes | None = None, *, language: s
     if np.isfinite(result.level):
         ax.axhline(result.level, color=_C_REFERENCE, ls="--", lw=1.2,
                    label=f"Total {metric} = {format_number(result.level, language)} dB")
-    ax.set_xlabel(_t("segment_index", language))
-    ax.set_ylabel(_t("segment_metric", language).format(metric=metric))
-    ax.set_title(_t("flyover_title", language))
+    ax.set_xlabel(_t("Segment index", language))
+    ax.set_ylabel(_t("Segment {metric} [dB]", language, metric=metric))
+    ax.set_title(_t("Single-event segment contributions (ECAC Doc 29)", language))
     ax.grid(True, axis="y", alpha=0.3)
     if np.isfinite(result.level):
         ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
@@ -288,9 +249,9 @@ def plot_rotorcraft_hemisphere(
         np.nanargmax(np.nansum(10.0 ** (grid / 10.0), axis=0)))
     ax.plot(theta, grid[:, idx], **{"color": _C_PRIMARY, "lw": 1.8,
             "label": f"{format_number(freqs[idx], language, decimals=0)} Hz (φ = 0°)", **kwargs})
-    ax.set_xlabel(_t("polar_angle", language))
-    ax.set_ylabel(_t("source_level_60m", language))
-    ax.set_title(_t("hemisphere_title", language))
+    ax.set_xlabel(_t("Polar angle θ [°]  (0° forward → 180° rearward)", language))
+    ax.set_ylabel(_t("Source level at 60 m [dB]", language))
+    ax.set_title(_t("Rotorcraft noise hemisphere directivity (ECAC Doc 32)", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
@@ -322,7 +283,7 @@ def plot_noise_contour(result: "NoiseContourResult", ax: Axes | None = None, *,
     ax.figure.colorbar(cf, ax=ax, label=f"{'SEL' if result.metric == 'exposure' else 'LAmax'} [dB]")
     ax.set_xlabel("x [km]")
     ax.set_ylabel("y [km]")
-    ax.set_title(_t("contour_title", language))
+    ax.set_title(_t("Aircraft noise contour (ECAC Doc 29)", language))
     ax.set_aspect("equal", adjustable="box")
     localize_axes(ax, language)
     return ax
@@ -348,21 +309,21 @@ def plot_flight_path_kinematics(
     ax = ax if ax is not None else _new_axes()
     t = np.asarray(result.times, dtype=np.float64)
     ax.plot(t, result.airspeed, **{"color": _C_PRIMARY, "lw": 1.8,
-            "label": _t("airspeed", language), **kwargs})
+            "label": _t("Airspeed $V_A$", language), **kwargs})
     ax.plot(t, result.ground_speed, **{"color": _C_SECONDARY, "lw": 1.4,
-            "ls": "--", "label": _t("ground_speed", language), **kwargs})
-    ax.set_xlabel(_t("time_s", language))
-    ax.set_ylabel(_t("speed_ms", language))
+            "ls": "--", "label": _t("Ground speed $V_g$", language), **kwargs})
+    ax.set_xlabel(_t("Time [s]", language))
+    ax.set_ylabel(_t("Speed [m/s]", language))
     ax2 = ax.twinx()
     ax2.plot(t, result.path_angle, color=_C_TERTIARY, lw=1.4,
-             label=_t("path_angle", language))
+             label=_t("Path angle $\\gamma$", language))
     ax2.plot(t, result.bank_angle, color=_C_MUTED, lw=1.4, ls=":",
-             label=_t("bank_angle", language))
-    ax2.set_ylabel(_t("angle_deg", language))
+             label=_t("Bank angle $\\Phi$", language))
+    ax2.set_ylabel(_t("Angle [°]", language))
     lines = [*ax.get_lines(), *ax2.get_lines()]
     ax.legend(lines, [str(ln.get_label()) for ln in lines],
               loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.set_title(_t("kinematics_title", language))
+    ax.set_title(_t("Rotorcraft flight-path kinematics (ECAC Doc 32)", language))
     ax.grid(True, alpha=0.3)
     localize_axes(ax, language)
     return ax
@@ -400,10 +361,10 @@ def plot_rotorcraft_event(
     if np.any(window):
         idx = np.nonzero(window)[0]
         ax.axvspan(t[idx[0]], t[idx[-1]], color=_C_PRIMARY, alpha=0.08,
-                   label=_t("win_10db", language))
-    ax.set_xlabel(_t("recorded_time", language))
-    ax.set_ylabel(_t("a_level", language))
-    ax.set_title(_t("rotor_event_title", language))
+                   label=_t("10 dB-down window", language))
+    ax.set_xlabel(_t("Recorded time [s]", language))
+    ax.set_ylabel(_t("A-weighted level [dB(A)]", language))
+    ax.set_title(_t("Rotorcraft flyover time history (ECAC Doc 32)", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
@@ -439,7 +400,7 @@ def plot_rotorcraft_noise_contour(
     ax.figure.colorbar(cf, ax=ax, label=f"{metric} [dB(A)]")
     ax.set_xlabel("x [km]")
     ax.set_ylabel("y [km]")
-    ax.set_title(_t("rotor_contour_title", language))
+    ax.set_title(_t("Rotorcraft noise contour (ECAC Doc 32)", language))
     ax.set_aspect("equal", adjustable="box")
     localize_axes(ax, language)
     return ax
@@ -462,15 +423,15 @@ def plot_mean_ground_plane(
     ax = ax if ax is not None else _new_axes()
     d = np.asarray(result.distances, dtype=np.float64)
     z = np.asarray(result.heights, dtype=np.float64)
-    ax.plot(d, z, **{"color": _C_PRIMARY, "lw": 1.8, "label": _t("terrain_profile", language),
+    ax.plot(d, z, **{"color": _C_PRIMARY, "lw": 1.8, "label": _t("Terrain profile", language),
             **kwargs})
     ax.fill_between(d, z, z.min() - 0.05 * np.ptp(z) - 0.5, color=_C_PRIMARY,
                     alpha=0.08)
     ax.plot(d, result.height(d), color=_C_SECONDARY, lw=1.6, ls="--",
-            label=f"{_t('mean_ground_plane', language)} (a = {format_number(result.slope, language, decimals=3)})")
-    ax.set_xlabel(_t("section_distance", language))
-    ax.set_ylabel(_t("height_m", language))
-    ax.set_title(_t("mgp_title", language))
+            label=f"{_t('Mean ground plane', language)} (a = {format_number(result.slope, language, decimals=3)})")
+    ax.set_xlabel(_t("Section distance [m]", language))
+    ax.set_ylabel(_t("Height [m]", language))
+    ax.set_title(_t("Mean ground plane (NORAH2 guidance Eq. 36-40)", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
@@ -495,28 +456,28 @@ def plot_terrain_screening(
     d = np.asarray(result.distances, dtype=np.float64)
     z = np.asarray(result.heights, dtype=np.float64)
     src, rcv = result.source, result.receiver
-    ax.plot(d, z, **{"color": _C_MUTED, "lw": 1.8, "label": _t("terrain_profile", language),
+    ax.plot(d, z, **{"color": _C_MUTED, "lw": 1.8, "label": _t("Terrain profile", language),
             **kwargs})
     floor = min(z.min(), src[1], rcv[1]) - 0.05 * max(np.ptp(z), 1.0) - 0.5
     ax.fill_between(d, z, floor, color=_C_MUTED, alpha=0.12)
     ax.plot([src[0], rcv[0]], [src[1], rcv[1]], color=_C_REFERENCE, lw=1.2,
-            ls=":", label=_t("line_of_sight", language))
+            ls=":", label=_t("Line of sight", language))
     if result.screened and result.diffraction_points.size:
         pts = np.vstack([[src[0], src[1]], result.diffraction_points,
                          [rcv[0], rcv[1]]])
         ax.plot(pts[:, 0], pts[:, 1], color=_C_PRIMARY, lw=1.8,
-                label=f"{_t('diffracted_path', language)} (δ = {format_number(result.path_difference, language, decimals=2)} m)")
+                label=f"{_t('Diffracted path', language)} (δ = {format_number(result.path_difference, language, decimals=2)} m)")
         ax.plot(result.diffraction_points[:, 0], result.diffraction_points[:, 1],
-                "v", color=_C_SECONDARY, ms=6, label=_t("diffraction_edges", language))
+                "v", color=_C_SECONDARY, ms=6, label=_t("Diffraction edges", language))
     ax.plot(*src, "o", color=_C_PRIMARY, ms=7)
     ax.annotate("S", src, textcoords="offset points", xytext=(0, 8),
                 ha="center", fontsize=10)
     ax.plot(*rcv, "s", color=_C_SECONDARY, ms=6)
     ax.annotate("R", rcv, textcoords="offset points", xytext=(0, 8),
                 ha="center", fontsize=10)
-    ax.set_xlabel(_t("section_distance", language))
-    ax.set_ylabel(_t("height_m", language))
-    ax.set_title(_t("screening_title", language))
+    ax.set_xlabel(_t("Section distance [m]", language))
+    ax.set_ylabel(_t("Height [m]", language))
+    ax.set_title(_t("Terrain screening (ECAC Doc 32 / NORAH2 guidance)", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)

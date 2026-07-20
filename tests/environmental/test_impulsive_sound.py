@@ -249,18 +249,21 @@ def test_level_history_interval_within_range() -> None:
 
 
 def test_rejects_sample_interval_outside_range() -> None:
+    sig = _tone(1000.0, 0.5, 1.0)
     with pytest.raises(ValueError, match="10-25 ms"):
-        iso.sound_pressure_level_history(_tone(1000.0, 0.5, 1.0), FS, dt=0.05)
+        iso.sound_pressure_level_history(sig, FS, dt=0.05)
 
 
 def test_rejects_non_positive_fs() -> None:
+    sig = _tone(1000.0, 0.5, 1.0)
     with pytest.raises(ValueError, match="fs must be positive"):
-        iso.sound_pressure_level_history(_tone(1000.0, 0.5, 1.0), 0.0)
+        iso.sound_pressure_level_history(sig, 0.0)
 
 
 def test_rejects_empty_signal() -> None:
+    empty = np.array([])
     with pytest.raises(ValueError, match="must not be empty"):
-        iso.sound_pressure_level_history(np.array([]), FS)
+        iso.sound_pressure_level_history(empty, FS)
 
 
 def test_detect_onsets_rejects_short_input() -> None:
@@ -311,6 +314,7 @@ def test_plot_spanish_labels() -> None:
 
 
 def test_plot_unknown_language_raises() -> None:
+    result = _result()
     with pytest.raises(ValueError, match="Unknown language"):
-        _result().plot(language="xx")
+        result.plot(language="xx")
     plt.close("all")

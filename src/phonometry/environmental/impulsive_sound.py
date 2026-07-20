@@ -521,9 +521,14 @@ def _plot_impulsive_sound(
         color = "tab:red" if onset.qualifies else "tab:orange"
         ax.plot(onset.time_start, onset.level_start, "o", color=color, ms=6)
         ax.plot(onset.time_end, onset.level_end, "s", color=color, ms=6)
-        # Least-squares onset line across the onset span.
+        # Least-squares onset line across the onset span. Anchor the fitted
+        # slope at the span midpoint (the regression line passes through the
+        # sample centroid, not necessarily the start sample), so the drawn
+        # trend does not overshoot the marked endpoints.
+        t_mid = 0.5 * (onset.time_start + onset.time_end)
+        l_mid = 0.5 * (onset.level_start + onset.level_end)
         line_t = np.array([onset.time_start, onset.time_end])
-        line_l = onset.level_start + onset.onset_rate * (line_t - onset.time_start)
+        line_l = l_mid + onset.onset_rate * (line_t - t_mid)
         ax.plot(line_t, line_l, color=color, lw=1.6, ls="--")
 
     governing = result.governing_onset

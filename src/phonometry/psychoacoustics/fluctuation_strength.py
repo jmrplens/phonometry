@@ -305,7 +305,7 @@ def _analyze(sig: "NDArray[np.float64]") -> tuple["NDArray[np.float64]", "NDArra
             continue
         # Excitation patterns in the frequency domain.
         spec = np.fft.rfft(frame * np.hanning(n))
-        freqs = np.fft.rfftfreq(n, d=1.0 / fs_v)
+        freqs = np.asarray(np.fft.rfftfreq(n, d=1.0 / fs_v), dtype=np.float64)
         mag = np.abs(spec) * 2.0 / n
         # Per-component level (dB SPL) after the ear transmission.
         with np.errstate(divide="ignore"):

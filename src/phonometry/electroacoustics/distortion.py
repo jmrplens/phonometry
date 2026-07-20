@@ -116,7 +116,7 @@ def _amplitude_spectrum(
     w = sp_signal.get_window(window, n, fftbins=True)
     spectrum = np.fft.rfft(signal * w)
     amp = np.abs(spectrum) * 2.0 / np.sum(w)
-    freqs = np.fft.rfftfreq(n, d=1.0 / fs)
+    freqs = np.asarray(np.fft.rfftfreq(n, d=1.0 / fs), dtype=np.float64)
     return freqs, amp
 
 

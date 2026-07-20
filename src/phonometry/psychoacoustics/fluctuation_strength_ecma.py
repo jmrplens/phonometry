@@ -785,7 +785,7 @@ def _amplitudes(envelopes: np.ndarray) -> np.ndarray:
         * a_hat
     )  # Formula 159
     a_lz[a_lz < _A_THRESHOLD] = 0.0  # gate below Formula (161)
-    return a_lz
+    return np.asarray(a_lz, dtype=np.float64)
 
 
 # --------------------------------------------------------------------------

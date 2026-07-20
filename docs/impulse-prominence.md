@@ -116,7 +116,58 @@ plt.xscale("log"); plt.legend(); plt.show()
 
 </details>
 
-## 3. Where the method sits among the standards
+## 3. Objective measurement from a signal (ISO/PAS 1996-3)
+
+NT ACOU 112 takes the onset rate and level difference as inputs. **ISO/PAS
+1996-3:2022** keeps the same prominence and adjustment formulae but adds the
+*objective measurement chain* that reads those quantities straight from a
+calibrated recording. `impulsive_sound_adjustment` A-weights the signal,
+applies time weighting F (`τ` = 125 ms), samples the level history `LpAF`
+every 10-25 ms, detects each onset (the contiguous stretch whose gradient
+exceeds 10 dB/s, merging events less than 50 ms apart), measures its level
+difference `LD = Le − Ls` and its least-squares onset rate `OR`, and returns
+the governing adjustment `KI` with the source category of clause 7:
+*not impulsive* (`KI = 0`), *regular impulsive* (`0 < KI ≤ 5`) or
+*highly impulsive* (`KI > 5`).
+
+The onset detection can be exercised on a level history directly with
+`detect_onsets`, which is convenient for meters that already log `LpAF`:
+
+```python
+import numpy as np
+from phonometry import environmental
+
+# An LpAF history sampled every 20 ms: quiet, a 30 dB rise over 0.30 s, steady.
+dt = 0.02
+levels = np.concatenate([
+    np.full(10, 40.0),
+    40.0 + 30.0 * np.arange(1, 16) / 15,   # a straight 100 dB/s onset to 70 dB
+    np.full(15, 70.0),
+])
+onset = environmental.detect_onsets(levels, dt)[0]
+print(round(onset.onset_rate), round(onset.level_difference))  # 100 30
+print(round(onset.prominence, 2))                              # 8.95
+```
+
+From a calibrated time signal (in pascal) the whole chain runs end to end:
+
+```python
+result = environmental.impulsive_sound_adjustment(signal, fs)
+print(result.category)                  # e.g. 'highly impulsive'
+print(round(result.adjustment, 1))      # KI in dB (0.0 to about 9 dB in typical cases)
+print(round(result.adjusted_laeq, 1))   # LAeq + KI
+```
+
+Because the onset rate and level difference are level *differences*, the
+adjustment is insensitive to the absolute calibration of the meter (clause 8);
+only the reported `LAeq` and the adjusted `LAeq` depend on it. The scope of the
+document states that the adjustment typically falls between 0,0 dB and 9,0 dB;
+the formula itself is not capped, so a very sudden, loud impulse can exceed
+that range. `ImpulsiveSoundResult.plot()` draws the `LpAF` history with the
+detected onsets, the least-squares onset lines and the governing level
+difference marked.
+
+## 4. Where the method sits among the standards
 
 Rating standards traditionally handle impulsiveness by category, not by
 measurement. ISO 1996-1:2016 (Table A.1) adds a fixed 5 dB when the source is

@@ -3270,6 +3270,33 @@ def _chk_impulse_adjustment() -> Outcome:
     return numeric(ref.NTACOU112_ADJUSTMENT_P10, value, 1e-9, unit="dB", places=3)
 
 
+_ISO1996_3 = "Impulsive-sound prominence (ISO/PAS 1996-3)"
+
+
+def _iso1996_3_ramp_onset() -> Any:
+    """Detected onset of a 30 dB LpAF ramp over 0.30 s (dt = 20 ms)."""
+    import numpy as _np
+
+    from phonometry.environmental.impulsive_sound import detect_onsets
+
+    dt = 0.02
+    pre = _np.full(round(0.2 / dt), 40.0)
+    rise = 40.0 + 30.0 * (_np.arange(1, round(0.3 / dt) + 1) / round(0.3 / dt))
+    post = _np.full(round(0.3 / dt), 70.0)
+    return detect_onsets(_np.concatenate([pre, rise, post]), dt)[0]
+
+
+@register(_ISO1996_3, "ISO/PAS 1996-3:2022 3.5", "Onset rate of a 30 dB ramp over 0.30 s")
+def _chk_iso1996_3_onset_rate() -> Outcome:
+    return numeric(ref.ISO1996_3_RAMP_ONSET_RATE, _iso1996_3_ramp_onset().onset_rate, 1e-6, unit="dB/s")
+
+
+@register(_ISO1996_3, "ISO/PAS 1996-3:2022 Formula 3", "Adjustment KI of the ramp onset")
+def _chk_iso1996_3_adjustment() -> Outcome:
+    value = float(ph.impulse_adjustment(_iso1996_3_ramp_onset().prominence))
+    return numeric(ref.ISO1996_3_RAMP_ADJUSTMENT, value, 1e-6, unit="dB", places=4)
+
+
 _RN = "Room noise (ANSI S12.2-2019)"
 
 

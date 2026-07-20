@@ -212,6 +212,14 @@ from .environmental.impulse_prominence import (
     predicted_prominence,
     rating_level,
 )
+from .environmental.impulsive_sound import (
+    ImpulseOnset,
+    ImpulsiveSoundResult,
+    ImpulsiveSoundWarning,
+    detect_onsets,
+    impulsive_sound_adjustment,
+    sound_pressure_level_history,
+)
 from .metrology.uncertainty import (
     MonteCarloResult,
     Quantity,
@@ -1166,6 +1174,12 @@ __all__ = [
     "rating_level",
     "ImpulseProminenceResult",
     "ImpulseProminenceWarning",
+    "ImpulseOnset",
+    "ImpulsiveSoundResult",
+    "ImpulsiveSoundWarning",
+    "detect_onsets",
+    "impulsive_sound_adjustment",
+    "sound_pressure_level_history",
     "seat_to_spine_transfer",
     "spinal_response",
     "response_peaks",

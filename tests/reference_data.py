@@ -848,6 +848,21 @@ NTACOU112_PROMINENCE = 11.9542  # P for onset rate 1000 dB/s, level difference 3
 NTACOU112_ADJUSTMENT_P10 = 9.0  # KI at P = 10
 
 # ---------------------------------------------------------------------------
+# Objective prominence of impulsive sounds - ISO/PAS 1996-3:2022.
+# The standard gives no worked numeric example, so the oracle is derived by
+# hand from its own definitions. A linear LpAF ramp of 30 dB over 0.30 s has,
+# by construction, level difference LD = Le - Ls = 30 dB (3.4) and onset rate
+# OR = 30/0.30 = 100 dB/s (the least-squares slope of a straight ramp, 3.5).
+# The prominence is P = 3*lg(100) + 2*lg(30) = 6 + 2*1.4771213 = 8.9542426
+# (Clause 5, Formula 2) and the adjustment KI = 1.8*(P - 5) = 7.1176366 dB
+# (Clause 6, Formula 3).
+# ---------------------------------------------------------------------------
+ISO1996_3_RAMP_ONSET_RATE = 100.0  # OR, dB/s (30 dB over 0.30 s)
+ISO1996_3_RAMP_LEVEL_DIFFERENCE = 30.0  # LD, dB
+ISO1996_3_RAMP_PROMINENCE = 3.0 * math.log10(100.0) + 2.0 * math.log10(30.0)  # 8.9542426
+ISO1996_3_RAMP_ADJUSTMENT = 1.8 * (ISO1996_3_RAMP_PROMINENCE - 5.0)  # 7.1176366 dB
+
+# ---------------------------------------------------------------------------
 # Room-noise criteria - ANSI/ASA S12.2-2019.
 # Feeding an NC curve of Table 1 back through the tangency method returns its
 # NC value; the RC Mark II curves reproduce Table D.1 (the 63 Hz level of the

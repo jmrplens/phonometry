@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **354/354 conformance checks pass** across 44 domains and 225 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **356/356 conformance checks pass** across 45 domains and 226 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -349,6 +349,16 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 |:---|:---|:---|:---|:---|:---:|
 | NT ACOU 112:2002 Formula 1 | Predicted prominence, OR=1000 dB/s, LD=30 dB | 11.9542 (+/-0.0001) | 11.9542 | 0 | &#9989; |
 | NT ACOU 112:2002 Formula 2 | Adjustment KI to LAeq at prominence P=10 | 9 dB (+/-0 dB) | 9 dB | 0 dB | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Impulsive-sound prominence (ISO/PAS 1996-3)</b>: 100% (2/2)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ISO/PAS 1996-3:2022 3.5 | Onset rate of a 30 dB ramp over 0.30 s | 100 dB/s (+/-0 dB/s) | 100 dB/s | 0 dB/s | &#9989; |
+| ISO/PAS 1996-3:2022 Formula 3 | Adjustment KI of the ramp onset | 7.1176 dB (+/-0 dB) | 7.1176 dB | 0 dB | &#9989; |
 
 </details>
 

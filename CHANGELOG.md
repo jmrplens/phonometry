@@ -35,6 +35,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   standard reference. Rendered example fiches (airborne and impact) are kept
   under `.github/reports/`, regenerated with `make reports`
   (`scripts/generate_reports.py`), and linked from the documentation.
+- ISO 11654 weighted sound absorption ratings can now be exported as a one-page
+  PDF fiche through `AbsorptionRatingResult.report(path)`, laid out like an
+  accredited ISO 354 absorption certificate: a standard-basis line, a metadata
+  header, the octave-band practical-coefficient table beside the
+  practical-versus-shifted-reference plot, the boxed `alpha_w` result with its
+  shape indicator and absorption class, an optional minimum-`alpha_w` verdict
+  and the fixed disclaimer. A new `weighted_absorption_from_third_octave`
+  convenience rates the one-third-octave `alpha_s` spectrum and retains it on
+  the result, so the fiche can also show the full one-third-octave `alpha_s`
+  table (`Frequency | alpha_s | alpha_p`) that accredited certificates carry.
+  It reuses the shared `ReportMetadata` and reportlab back end of the ISO 717
+  fiche.
 - `enclosure_insertion_loss` now accepts a panel prediction result directly for
   its `panel_transmission_loss` argument, in addition to a per-band array or a
   callable. A `SoundReductionResult` or `ApertureTransmissionResult` (from the

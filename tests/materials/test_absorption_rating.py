@@ -41,6 +41,7 @@ from phonometry.materials.absorption_rating import (
     absorption_class,
     practical_absorption_coefficient,
     weighted_absorption,
+    weighted_absorption_from_third_octave,
 )
 
 # ISO 11654:1997 Annex A worked examples (the "Absorber" alpha_p columns).
@@ -264,6 +265,44 @@ def test_end_to_end_from_third_octaves() -> None:
     assert res.shape_indicator == ""
 
 
+def test_from_third_octave_matches_octave_path_and_carries_alpha_s() -> None:
+    # A 15-band alpha_s whose octave means are the A.2 practical coefficients.
+    alpha_s = [
+        0.30, 0.35, 0.40, 1.00, 1.00, 1.00, 0.62, 0.66, 0.67,
+        0.58, 0.60, 0.62, 0.53, 0.55, 0.57,
+    ]
+    res = weighted_absorption_from_third_octave(alpha_s)
+    ref = weighted_absorption(_ANNEX_A2_ALPHA_P)
+    # Same rating as feeding alpha_p directly.
+    assert _almost(res.alpha_w, ref.alpha_w)
+    assert res.shape_indicator == ref.shape_indicator
+    assert res.absorption_class == ref.absorption_class
+    assert res.measured.shape == ref.measured.shape
+    np.testing.assert_allclose(res.measured, ref.measured)
+    # ... but it also carries the one-third-octave input, as given.
+    assert res.third_octave_alpha_s is not None
+    assert res.third_octave_bands is not None
+    np.testing.assert_allclose(res.third_octave_alpha_s, alpha_s)
+    np.testing.assert_allclose(res.third_octave_bands, THIRD_OCTAVE_BANDS)
+    # The octave path leaves the new fields unset (backward compatible).
+    assert ref.third_octave_alpha_s is None
+    assert ref.third_octave_bands is None
+
+
+def test_from_third_octave_accepts_mapping() -> None:
+    seq = [0.10 + 0.05 * i for i in range(15)]
+    mapping = dict(zip(THIRD_OCTAVE_BANDS, seq, strict=True))
+    res_map = weighted_absorption_from_third_octave(mapping)
+    res_seq = weighted_absorption_from_third_octave(seq)
+    assert _almost(res_map.alpha_w, res_seq.alpha_w)
+    np.testing.assert_allclose(res_map.third_octave_alpha_s, seq)
+
+
+def test_from_third_octave_rejects_wrong_length() -> None:
+    with pytest.raises(ValueError):
+        weighted_absorption_from_third_octave([0.5] * 14)
+
+
 def test_weighted_absorption_rejects_multidimensional_input() -> None:
     # A wrongly-shaped (3, 5) array must not be silently flattened (CodeRabbit).
     with pytest.raises(ValueError, match="1-D"):
@@ -296,5 +335,6 @@ def test_public_exports() -> None:
         "AbsorptionRatingResult", "OCTAVE_BANDS", "REFERENCE_CURVE",
         "THIRD_OCTAVE_BANDS", "absorption_class",
         "practical_absorption_coefficient", "weighted_absorption",
+        "weighted_absorption_from_third_octave",
     ):
         assert hasattr(phonometry, name), name

@@ -48,7 +48,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -69,6 +69,7 @@ __all__ = [
     "absorption_class",
     "practical_absorption_coefficient",
     "weighted_absorption",
+    "weighted_absorption_from_third_octave",
 ]
 
 # --- ISO 11654:1997 fixed data ------------------------------------------
@@ -202,6 +203,14 @@ class AbsorptionRatingResult:
         the rating (snapped to the 0,05 grid of Clause 4.1).
     :ivar shifted_reference: Reference curve of Figure 1 after the final
         shift.
+    :ivar third_octave_alpha_s: The fifteen one-third-octave sound absorption
+        coefficients ``alpha_s`` (200 Hz to 5000 Hz, ISO 354) the rating was
+        built from, as given; ``None`` when the rating was formed from octave
+        practical coefficients only. Carried so the fiche can show the full
+        one-third-octave table every accredited ISO 354 certificate reports.
+    :ivar third_octave_bands: The one-third-octave centre frequencies, in Hz,
+        that pair with ``third_octave_alpha_s`` (the module
+        :data:`THIRD_OCTAVE_BANDS`); ``None`` when ``third_octave_alpha_s`` is.
     """
 
     alpha_w: float
@@ -212,6 +221,8 @@ class AbsorptionRatingResult:
     band_centers: NDArray[np.float64]
     measured: NDArray[np.float64]
     shifted_reference: NDArray[np.float64]
+    third_octave_alpha_s: NDArray[np.float64] | None = None
+    third_octave_bands: NDArray[np.float64] | None = None
 
     @property
     def rating_label(self) -> str:
@@ -244,10 +255,13 @@ class AbsorptionRatingResult:
         """Render an ISO 11654 sound-absorption rating fiche to a PDF.
 
         Writes a one-page accredited absorption report: the standard-basis
-        line, an optional metadata header block, the octave-band ``alpha_p``
-        table beside the practical-versus-shifted-reference plot (the result's
-        own :meth:`plot`), the boxed ``alpha_w`` result with its absorption
-        class, an optional verdict row and a footer with the fixed disclaimer.
+        line, an optional metadata header block, an absorption table beside the
+        practical-versus-shifted-reference plot (the result's own :meth:`plot`),
+        the boxed ``alpha_w`` result with its absorption class, an optional
+        verdict row and a footer with the fixed disclaimer. When the rating was
+        built by :func:`weighted_absorption_from_third_octave`, the table is the
+        full ISO 354 one-third-octave ``alpha_s`` table with the octave
+        ``alpha_p`` on the matching rows, as accredited certificates print it.
 
         :param path: Destination path of the PDF file.
         :param metadata: Optional
@@ -371,6 +385,42 @@ def weighted_absorption(
         shifted_reference=np.asarray(
             [u / 20.0 for u in shifted_units], dtype=np.float64
         ),
+    )
+
+
+def weighted_absorption_from_third_octave(
+    third_octave_alpha_s: Mapping[Any, float] | Sequence[float] | ArrayLike,
+) -> AbsorptionRatingResult:
+    """Weighted absorption rating from one-third-octave ``alpha_s`` (ISO 11654).
+
+    Convenience wrapper over :func:`practical_absorption_coefficient` and
+    :func:`weighted_absorption`: it forms the octave practical coefficients
+    ``alpha_p`` (Clause 4.1) from the fifteen one-third-octave coefficients,
+    rates them (Clause 4.2) and returns the same
+    :class:`AbsorptionRatingResult` as :func:`weighted_absorption` would, but
+    with the input ``alpha_s`` and its band centres retained on the result so a
+    fiche can print the full one-third-octave table that every accredited
+    ISO 354 certificate carries.
+
+    :param third_octave_alpha_s: The fifteen one-third-octave coefficients
+        ``alpha_s`` from 200 Hz to 5000 Hz (ISO 354), as a sequence ordered low
+        to high or a mapping keyed by band centre frequency (Hz). Values may
+        exceed 1,00 (reverberation-room measurement); the octave coefficient is
+        capped at 1,00.
+    :returns: A frozen :class:`AbsorptionRatingResult` identical to
+        :func:`weighted_absorption` on the derived ``alpha_p``, additionally
+        carrying ``third_octave_alpha_s`` (the input as given) and
+        ``third_octave_bands`` (:data:`THIRD_OCTAVE_BANDS`).
+    :raises ValueError: if any coefficient is negative or the wrong number of
+        values is supplied.
+    """
+    values = _coerce(third_octave_alpha_s, THIRD_OCTAVE_BANDS, "third_octave_alpha_s")
+    alpha_p = practical_absorption_coefficient(values)
+    result = weighted_absorption(alpha_p)
+    return replace(
+        result,
+        third_octave_alpha_s=np.asarray(values, dtype=np.float64),
+        third_octave_bands=np.asarray(THIRD_OCTAVE_BANDS, dtype=np.float64),
     )
 
 

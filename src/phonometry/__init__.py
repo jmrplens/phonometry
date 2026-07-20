@@ -786,6 +786,7 @@ from .materials.absorption_rating import (
     absorption_class,
     practical_absorption_coefficient,
     weighted_absorption,
+    weighted_absorption_from_third_octave,
 )
 from .environmental.outdoor_propagation import (
     DEFAULT_FREQUENCIES,
@@ -1386,6 +1387,7 @@ __all__ = [
     "absorption_class",
     "practical_absorption_coefficient",
     "weighted_absorption",
+    "weighted_absorption_from_third_octave",
     "DEFAULT_FREQUENCIES",
     "Barrier",
     "BarrierInsertionLoss",

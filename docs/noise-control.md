@@ -27,8 +27,16 @@ duct of length `L` and area `S` is (Bies Eq. (8.143), no flow)
 
 and a side branch of acoustic impedance `Z_b` is the shunt
 `[[1, 0], [1/Z_b, 1]]` (Eq. (8.144)). The **transmission loss** follows from
-the compound matrix `T` (Bies Eq. (8.141); for equal inlet/outlet areas,
-Eq. (8.148))
+the compound matrix `T` with the port impedances `Z1 = rho c / S_in` and
+`Zn = rho c / S_out` (Munjal Eq. (3.27); Bies Eq. (8.141) prints the
+`T11`/`T22` impedance weights of this formula inverted and fails the
+sudden-expansion limit, see the [errata registry](ERRATA.md))
+
+```text
+TL = 10 log10[ (Zn/Z1) (1/4) | T11 + T12/Zn + Z1 T21 + (Z1/Zn) T22 |^2 ] ,
+```
+
+which for equal inlet/outlet areas reduces to (Bies Eq. (8.148))
 
 ```text
 TL = 20 log10( (1/2) | T11 + T12/Zc + Zc T21 + T22 | ) ,   Zc = rho c / S,
@@ -166,7 +174,8 @@ of a decibel (test `tests/noise_control/test_fdtd_crosscheck.py`).
   methods (§8.11–8.17) and the machine-enclosure noise reduction (§7.4).
 - Munjal, M. L. (2014). *Acoustics of ducts and mufflers* (2nd ed.). Wiley.
   [doi:10.1002/9781118443767](https://doi.org/10.1002/9781118443767). The
-  transfer-matrix formulation behind the element matrices.
+  transfer-matrix formulation behind the element matrices and the
+  transmission loss from the compound matrix (Eq. (3.27)).
 - Vér, I. L., & Beranek, L. L. (2006). *Noise and vibration control
   engineering* (2nd ed.). Wiley.
   [doi:10.1002/9780470172568](https://doi.org/10.1002/9780470172568). The

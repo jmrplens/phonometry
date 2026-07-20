@@ -138,10 +138,9 @@ def plot_weighted_absorption(
         measured_label=_t("Practical alpha_p", language),
         ylim=(0.0, 1.05),
         ax=ax,
+        language=language,
         **kwargs,
     )
-    if language == "es":
-        ax.set_xlabel(_t("Frequency [Hz]", language))
     localize_axes(ax, language)
     return ax
 
@@ -165,9 +164,7 @@ def plot_scattering_coefficient(
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("color", _C_PRIMARY)
     ax.plot(freqs, s, **kwargs)
-    _freq_axis(ax, freqs)
-    if language == "es":
-        ax.set_xlabel(_t("Frequency [Hz]", language))
+    _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t("Scattering coefficient s", language))
     # s is normally in [0, 1], but edge effects (Clause 6.3.2) can push it above
     # 1 and those values are kept, not clipped; grow the top so they stay visible.
@@ -224,7 +221,9 @@ def plot_insitu_absorption(
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     alpha = np.asarray(result.absorption, dtype=np.float64)
-    positions = _band_axis(ax, freqs, xlabel=_t("Frequency [Hz]", language))
+    positions = _band_axis(
+        ax, freqs, xlabel=_t("Frequency [Hz]", language), language=language
+    )
     kwargs.setdefault("color", _C_PRIMARY)
     ax.bar(positions, np.nan_to_num(alpha), **kwargs)
     ax.set_ylabel(_t("Absorption coefficient", language))
@@ -390,9 +389,7 @@ def plot_absorption_uncertainty(
         label=f"+/-U (k = {decimal_comma(f'{result.coverage_factor:g}', language)})",
     )
     ax.plot(freqs, value, **kwargs)
-    _freq_axis(ax, freqs)
-    if language == "es":
-        ax.set_xlabel(_t("Frequency [Hz]", language))
+    _freq_axis(ax, freqs, language=language)
     ylabel = _ABSORPTION_QUANTITY_LABELS.get(result.quantity, "Value")
     ax.set_ylabel(_t(ylabel, language))
     if result.quantity != "equivalent_area":

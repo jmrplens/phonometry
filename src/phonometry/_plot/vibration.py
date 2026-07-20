@@ -178,7 +178,7 @@ def plot_weighted_spectrum(
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     raw = np.asarray(result.band_accelerations, dtype=np.float64)
     weighted = np.asarray(result.weighted, dtype=np.float64)
-    positions = _band_axis(ax, freqs)
+    positions = _band_axis(ax, freqs, language=language)
     ax.set_xlabel(_t("freq_hz", language))
     width = 0.4
     # The weighted bars are the primary artist; forward user kwargs there.

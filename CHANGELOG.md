@@ -35,6 +35,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   axis labels, titles and legends in Spanish and switches linear-axis tick
   decimals to a comma; the English output is unchanged. An unsupported code
   raises a clear `ValueError`.
+- The frequency/band axes, the shifted-reference rating figure, the
+  band-level bar chart, the façade x-axis, the ISO 717-2 500 Hz annotation
+  and the time axis shared by every domain's `.plot()` renderers now
+  localise their own axis labels and legend entries for `language="es"`
+  ("Frequency [Hz]" to "Frecuencia [Hz]", "Measured" to "Medido", "Band" to
+  "Banda", and so on), instead of leaving them in English whenever a domain
+  renderer relied on the shared helper for that label. English output is
+  unchanged.
 - IEC 61260-1 filter class compliance can now be exported as a one-page PDF
   fiche. A new `filter_class_compliance(bank, *, num_points=..., edition=...)`
   runs the same verification as `verify_filter_class` and returns a frozen

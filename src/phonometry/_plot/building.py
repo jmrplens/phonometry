@@ -287,6 +287,7 @@ def plot_weighted_rating(
         ),
         ylabel=_t("Sound reduction index [dB]", language),
         ax=ax,
+        language=language,
         **kwargs,
     )
     localize_axes(ax, language)
@@ -331,9 +332,12 @@ def plot_impact_rating(
         ),
         ylabel=_t("Impact sound pressure level [dB]", language),
         ax=ax,
+        language=language,
         **kwargs,
     )
-    _annotate_impact_500(ax, band_centers, reference, int(result.rating))
+    _annotate_impact_500(
+        ax, band_centers, reference, int(result.rating), language=language
+    )
     localize_axes(ax, language)
     return ax
 
@@ -361,7 +365,9 @@ def plot_facade_insulation(
     ax = ax if ax is not None else _new_axes()
     dnt = np.asarray(result.d_2m_nt, dtype=np.float64)
     n = dnt.size
-    x = _facade_x_axis(ax, getattr(result, "frequencies", None), n)
+    x = _facade_x_axis(
+        ax, getattr(result, "frequencies", None), n, language=language
+    )
 
     # D2m,nT first so it is lines[0]; other quantities follow when present.
     curves = [("$D_{2m,nT}$", dnt)]
@@ -410,7 +416,7 @@ def plot_facade_prediction(
     ax = ax if ax is not None else _new_axes()
     r_prime = np.asarray(result.r_prime, dtype=np.float64)
     n = r_prime.size
-    x = _facade_x_axis(ax, result.frequencies, n)
+    x = _facade_x_axis(ax, result.frequencies, n, language=language)
 
     for name, rp in result.element_r.items():
         ax.plot(x, np.asarray(rp, dtype=np.float64), "--", lw=0.9, alpha=0.6, label=name)
@@ -465,7 +471,7 @@ def plot_radiated_power(
     opts: dict[str, Any] = {"color": "tab:red", "alpha": 0.8, "label": "$L_W$"}
     opts.update(kwargs)
     ax.bar(positions, l_w, **opts)
-    _band_axis(ax, labels, xlabel=_t(_FREQ_LABEL, language))
+    _band_axis(ax, labels, xlabel=_t(_FREQ_LABEL, language), language=language)
 
     if result.l_w_dba is not None:
         ax.axhline(
@@ -510,7 +516,7 @@ def plot_vibration_reduction(
     if result.frequencies is not None:
         freqs = np.asarray(result.frequencies, dtype=np.float64)
         ax.plot(freqs, k_ij, **kwargs)
-        _freq_axis(ax, freqs)
+        _freq_axis(ax, freqs, language=language)
     else:
         ax.plot(np.arange(k_ij.size), k_ij, **kwargs)
         ax.set_xlabel(_t("Band index", language))
@@ -548,6 +554,7 @@ def plot_structure_borne_power(
         ax, result.power_level, result.frequencies, result.total_level,
         ylabel=_t(r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]", language),
         title=_t("EN 15657 characteristic structure-borne sound power", language),
+        language=language,
         **kwargs,
     )
     localize_axes(ax, language)
@@ -764,7 +771,7 @@ def plot_band_uncertainty(
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     ax.plot(freqs, u, **kwargs)
-    _freq_axis(ax, freqs)
+    _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t("Standard uncertainty u [dB]", language))
     ax.set_ylim(bottom=0.0)
     quantity = _t("sigma_R95 upper limit", language) if result.upper_limit else "u"
@@ -804,7 +811,7 @@ def plot_floor_covering_improvement(
             color=_C_SECONDARY, ms=9, mfc="none", mew=1.6, zorder=5,
             label=_t("limit of measurement (> delta-L)", language),
         )
-    _freq_axis(ax, freqs)
+    _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t("Improvement of impact sound insulation delta-L [dB]", language))
     ax.set_ylim(bottom=0.0)
     title = _t("ISO 16251-1 Floor-Covering Impact Sound Improvement", language)

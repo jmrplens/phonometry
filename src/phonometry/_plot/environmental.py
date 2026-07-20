@@ -271,7 +271,7 @@ def plot_outdoor_attenuation(
 
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    positions = _band_axis(ax, freqs)
+    positions = _band_axis(ax, freqs, language=language)
     n = freqs.size
 
     # Separate positive and negative cumulative baselines so a negative term
@@ -334,7 +334,7 @@ def plot_spherical_ground(
     ax.axhline(0.0, color=_C_MUTED, lw=0.8, label=_t("free_field", language))
     ax.axhline(6.0, color=_C_REFERENCE, ls="--", lw=0.9,
                label=_t("hard_ground", language))
-    _freq_axis(ax, freqs)
+    _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t("level_re_ff", language))
     ax.set_title(_t("spherical_title", language))
     ax.legend(loc="best", fontsize="small")
@@ -368,7 +368,7 @@ def plot_barrier_insertion_loss(
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     ax.axhline(5.0, color=_C_MUTED, ls=":", lw=0.9,
                label=_t("grazing_limit", language))
-    _freq_axis(ax, freqs)
+    _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t("insertion_loss_db", language))
     ax.set_title(_t("barrier_title", language))
     ax.legend(loc="best", fontsize="small")

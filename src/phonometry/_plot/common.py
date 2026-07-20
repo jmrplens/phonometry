@@ -77,6 +77,29 @@ _LABEL_DEPTH_M: Final = "Depth [m]"
 _LABEL_TL_DB: Final = "Transmission loss [dB]"
 _LABEL_RANGE_KM: Final = "Range [km]"
 
+#: Spanish translations of the handful of fixed strings these *shared*
+#: renderers set directly (axis labels, generic legend entries). Each
+#: ``_plot/<domain>.py`` module carries its own richer ``_STRINGS``/``_t`` for
+#: titles and quantity-specific text; ``_t`` here only covers what common.py
+#: itself draws, so a domain module that passes an already-localised string
+#: through (e.g. an ``xlabel`` built with its own ``_t``) gets it back
+#: unchanged — the lookup misses and falls back to the given text. English is
+#: always a no-op, so the byte-identical English guarantee holds.
+_STRINGS: dict[str, str] = {
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Band": "Banda",
+    "Measured": "Medido",
+    "Shifted reference": "Referencia desplazada",
+    "Unfavourable deviations": "Desviaciones desfavorables",
+    "Time [s]": "Tiempo [s]",
+    "Sample": "Muestra",
+}
+
+
+def _t(text: str, language: str = "en") -> str:
+    """Localise a fixed string; English is returned verbatim (byte-identical)."""
+    return _STRINGS.get(text, text) if language == "es" else text
+
 
 def _import_pyplot() -> Any:
     """Import :mod:`matplotlib.pyplot` lazily with an actionable error."""
@@ -102,7 +125,7 @@ def _new_axes_column(n: int, **kwargs: Any) -> np.ndarray:
     return result
 
 
-def _freq_axis(ax: Axes, freqs: np.ndarray) -> None:
+def _freq_axis(ax: Axes, freqs: np.ndarray, *, language: str = "en") -> None:
     """Configure a logarithmic frequency x-axis labelled with band centres."""
     import matplotlib.ticker as mticker
 
@@ -112,7 +135,7 @@ def _freq_axis(ax: Axes, freqs: np.ndarray) -> None:
     # Suppress the log-scale minor-tick labels (2x10^2, 3x10^2, ...) that would
     # otherwise collide with off-decade band centres such as 750 or 1500 Hz.
     ax.xaxis.set_minor_formatter(mticker.NullFormatter())
-    ax.set_xlabel("Frequency [Hz]")
+    ax.set_xlabel(_t("Frequency [Hz]", language))
 
 
 def _format_freq(f: float) -> str:
@@ -194,6 +217,7 @@ def _band_axis(
     labels_or_freqs: "np.ndarray | Sequence[str] | Sequence[float]",
     *,
     xlabel: str | None = "Frequency [Hz]",
+    language: str = "en",
 ) -> np.ndarray:
     """Categorical band x-axis: evenly spaced positions labelled with centres.
 
@@ -211,7 +235,7 @@ def _band_axis(
     ax.set_xticks(positions)
     ax.set_xticklabels(labels, rotation=45, ha="right")
     if xlabel is not None:
-        ax.set_xlabel(xlabel)
+        ax.set_xlabel(_t(xlabel, language))
     return positions
 
 
@@ -352,6 +376,7 @@ def _plot_rating(
     measured_label: str = "Measured",
     ylim: tuple[float, float] | None = None,
     ax: Axes | None,
+    language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Shared renderer for the shifted-reference rating figures.
@@ -364,10 +389,10 @@ def _plot_rating(
     """
     ax = ax if ax is not None else _new_axes()
     kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("label", measured_label)
+    kwargs.setdefault("label", _t(measured_label, language))
     ax.plot(band_centers, measured, "o-", **kwargs)
     ax.plot(band_centers, reference, "s--", color=_C_REFERENCE,
-            label="Shifted reference")
+            label=_t("Shifted reference", language))
     unfavourable = _unfavourable_mask(measured, reference, impact)
     ax.fill_between(
         band_centers,
@@ -376,10 +401,10 @@ def _plot_rating(
         where=unfavourable.tolist(),
         color=_C_SECONDARY,
         alpha=0.4,
-        label="Unfavourable deviations",
+        label=_t("Unfavourable deviations", language),
         interpolate=True,
     )
-    _freq_axis(ax, band_centers)
+    _freq_axis(ax, band_centers, language=language)
     ax.set_ylabel(ylabel)
     if ylim is not None:
         ax.set_ylim(*ylim)
@@ -410,16 +435,28 @@ def _unfavourable_mask(
 
 
 def _annotate_impact_500(
-    ax: Axes, band_centers: np.ndarray, reference: np.ndarray, rating: int
+    ax: Axes,
+    band_centers: np.ndarray,
+    reference: np.ndarray,
+    rating: int,
+    *,
+    language: str = "en",
 ) -> None:
     """Mark the 500 Hz read value on the reference curve and, when the
     octave-band -5 dB reduction applies (ISO 717-2 Clause 4.3.2), annotate
     the rating as ``read - 5 dB`` so the figure stays normatively truthful.
     """
+    from .._i18n import decimal_comma
+
     if band_centers.size == 0:
         return
     idx = int(np.argmin(np.abs(band_centers - 500.0)))
     read_value = float(reference[idx])
+    read_str = decimal_comma(f"{read_value:.0f}", language)
+    read_label = (
+        f"lectura 500 Hz = {read_str} dB" if language == "es"
+        else f"500 Hz read = {read_str} dB"
+    )
     ax.plot(
         [band_centers[idx]],
         [read_value],
@@ -430,12 +467,18 @@ def _annotate_impact_500(
         mfc="none",
         mew=1.6,
         zorder=5,
-        label=f"500 Hz read = {read_value:.0f} dB",
+        label=read_label,
     )
     offset = rating - read_value
     if abs(offset) >= 0.5:  # octave-band -5 dB rule (Clause 4.3.2)
+        rating_str = decimal_comma(str(rating), language)
+        annotation = (
+            f"índice = {rating_str} dB = {read_str} - 5 dB (regla de octava)"
+            if language == "es"
+            else f"rating = {rating_str} dB = {read_str} - 5 dB (octave rule)"
+        )
         ax.annotate(
-            f"rating = {rating} dB = {read_value:.0f} - 5 dB (octave rule)",
+            annotation,
             xy=(band_centers[idx], read_value),
             xytext=(0.0, -32.0),
             textcoords="offset points",
@@ -462,16 +505,21 @@ def _require_rating_curve(
 
 
 
-def _facade_x_axis(ax: Axes, freqs: "np.ndarray | None", n: int) -> np.ndarray:
+def _facade_x_axis(
+    ax: Axes, freqs: "np.ndarray | None", n: int, *, language: str = "en"
+) -> np.ndarray:
     """Frequency x-axis when centres are known, else a labelled band index."""
     if freqs is None:
         x = np.arange(n, dtype=np.float64)
         ax.set_xticks(x)
-        ax.set_xticklabels([f"Band {i + 1}" for i in range(n)], rotation=45, ha="right")
-        ax.set_xlabel("Band")
+        band_word = _t("Band", language)
+        ax.set_xticklabels(
+            [f"{band_word} {i + 1}" for i in range(n)], rotation=45, ha="right"
+        )
+        ax.set_xlabel(_t("Band", language))
         return x
     x = np.asarray(freqs, dtype=np.float64)
-    _freq_axis(ax, x)
+    _freq_axis(ax, x, language=language)
     return x
 
 
@@ -581,11 +629,13 @@ def _fit_segment(
 # ---------------------------------------------------------------------------
 
 
-def _time_axis(n: int, fs: int | None) -> tuple[np.ndarray, str]:
+def _time_axis(
+    n: int, fs: int | None, *, language: str = "en"
+) -> tuple[np.ndarray, str]:
     """Sample times in seconds when ``fs`` is known, else sample index."""
     if fs:
-        return np.arange(n) / float(fs), "Time [s]"
-    return np.arange(n, dtype=np.float64), "Sample"
+        return np.arange(n) / float(fs), _t("Time [s]", language)
+    return np.arange(n, dtype=np.float64), _t("Sample", language)
 
 
 
@@ -670,25 +720,30 @@ def _plot_band_level_bars(
     *,
     ylabel: str,
     title: str,
+    language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band level bar chart with a band-summed total line (shared helper)."""
+    from .._i18n import decimal_comma
+
     ax = ax if ax is not None else _new_axes()
     lw = np.asarray(levels, dtype=np.float64)
     n = lw.size
     if frequencies is not None:
-        labels = [f"{f:g}" for f in np.asarray(frequencies)]
-        ax.set_xlabel("Frequency [Hz]")
+        labels = [decimal_comma(f"{f:g}", language) for f in np.asarray(frequencies)]
+        ax.set_xlabel(_t("Frequency [Hz]", language))
     else:
         labels = [str(i + 1) for i in range(n)]
-        ax.set_xlabel("Band")
+        ax.set_xlabel(_t("Band", language))
     positions = np.arange(n)
     kwargs.setdefault("color", _C_PRIMARY)
     ax.bar(positions, lw, width=0.7, edgecolor=_C_EDGE, linewidth=0.6, **kwargs)
     ax.set_xticks(positions)
     ax.set_xticklabels(labels)
-    ax.axhline(total_level, color=_C_REFERENCE, ls="--", lw=1.2,
-               label=f"total {total_level:.1f} dB")
+    ax.axhline(
+        total_level, color=_C_REFERENCE, ls="--", lw=1.2,
+        label=f"total {decimal_comma(f'{total_level:.1f}', language)} dB",
+    )
     ax.set_ylabel(ylabel)
     ax.set_title(title)
     ax.legend(loc="best", fontsize="small")

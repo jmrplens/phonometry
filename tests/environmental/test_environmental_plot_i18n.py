@@ -10,6 +10,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
+from phonometry.environmental.ground_barriers import ground_effect
+from phonometry.environmental.outdoor_propagation import (
+    outdoor_propagation_attenuation,
+)
 from phonometry.environmental.wind_turbine_noise import wind_turbine_tonality
 
 
@@ -39,4 +43,30 @@ def test_plot_unknown_language_raises() -> None:
     result = _result()
     with pytest.raises(ValueError, match="Unknown language"):
         result.plot(language="xx")
+    plt.close("all")
+
+
+def test_plot_outdoor_attenuation_spanish_xaxis_label() -> None:
+    # plot_outdoor_attenuation draws its per-band terms through the shared
+    # ``_band_axis`` helper and sets no xlabel of its own, so the Spanish
+    # label only appears once the language is threaded into that helper.
+    result = outdoor_propagation_attenuation(100.0, 2.0, 2.0)
+    ax = result.plot(language="es")
+    assert ax.get_xlabel() == "Frecuencia [Hz]"
+    plt.close("all")
+    ax = result.plot()
+    assert ax.get_xlabel() == "Frequency [Hz]"
+    plt.close("all")
+
+
+def test_plot_spherical_ground_spanish_xaxis_label() -> None:
+    # plot_spherical_ground draws its frequency axis through the shared
+    # ``_freq_axis`` helper without overriding the xlabel afterwards.
+    freqs = np.array([250.0, 500.0, 1000.0, 2000.0])
+    result = ground_effect(freqs, 2.0, 1.5, 20.0, flow_resistivity=2.0e4)
+    ax = result.plot(language="es")
+    assert ax.get_xlabel() == "Frecuencia [Hz]"
+    plt.close("all")
+    ax = result.plot()
+    assert ax.get_xlabel() == "Frequency [Hz]"
     plt.close("all")

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Raised the `scipy` floor in `pyproject.toml` to the current release
+  (`scipy>=1.18.0`), matching the pin `requirements.txt` already carried. The
+  `numpy` floor stays at `>=2.4.4` because the optional `perf` extra pulls
+  numba, which still requires NumPy 2.4 or older; the pure-Python matrix and the
+  figure stack already run on the latest NumPy through their own pins.
+
 ### Added
 
 - Every `.report()` fiche accepts a `language` argument (`'en'` default, `'es'`):

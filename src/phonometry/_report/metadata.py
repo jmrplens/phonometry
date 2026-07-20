@@ -113,7 +113,7 @@ class ReportMetadata:
     #: requirement (a target such as a programme-loudness level in LUFS is
     #: legitimately negative, so only its finiteness is checked here; each
     #: rating's ``report`` gives it a physical meaning and pass direction).
-    _TEMPERATURE_FIELDS = (
+    _FINITE_FIELDS = (
         "temperature",
         "source_temperature",
         "receiving_temperature",
@@ -146,7 +146,7 @@ class ReportMetadata:
                 name, lambda x: math.isfinite(x) and x > 0.0,
                 "a finite, positive number",
             )
-        for name in self._TEMPERATURE_FIELDS:
+        for name in self._FINITE_FIELDS:
             self._require(name, math.isfinite, "finite")
         for name in self._HUMIDITY_FIELDS:
             self._require(

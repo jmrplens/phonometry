@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- IEC 61260-1 filter class compliance can now be exported as a one-page PDF
+  fiche. A new `filter_class_compliance(bank, *, num_points=..., edition=...)`
+  runs the same verification as `verify_filter_class` and returns a frozen
+  `FilterComplianceResult` that packages the verdict with the bank's
+  second-order sections, mid-band frequencies, per-band decimation factors and
+  sampling rate, so it can redraw the measured relative attenuation without
+  keeping a reference to the (possibly stateful) bank. The result exposes the
+  standard pair: `.plot()` draws the worst-margin band's measured relative
+  attenuation over the class acceptance corridor (the pass region shaded green
+  and any out-of-tolerance segment marked red), and `.report(path)` renders the
+  accredited fiche laid out like an electroacoustic type-test report: a
+  standard-basis line naming the IEC 61260 edition, a metadata header block, a
+  per-band classification table (mid-band frequency, achieved class and binding
+  margin) beside the mask-overlay plot, and the boxed `Class n - COMPLIES`
+  result with its binding margin (or a non-compliance statement). `ReportMetadata`
+  gains an optional `required_class` field (0, 1 or 2); when supplied, the fiche
+  adds a PASS/FAIL verdict row that passes when the achieved overall class is at
+  least as strict as the required one. `verify_filter_class` keeps its existing
+  dictionary return unchanged. A rendered example fiche is kept under
+  `.github/reports/`, regenerated with `make reports`
+  (`scripts/generate_reports.py`), and linked from the filter-banks guide.
 - ISO 717 sound-insulation ratings can now be exported as a one-page PDF fiche
   through a `report(path)` method, laid out like an accredited-laboratory test
   report: a standard-basis line, a metadata header block, the one-third-octave

@@ -231,6 +231,30 @@ def _epnl_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "icao_epnl_example.pdf"
 
 
+def _filter_class_example() -> Tuple[object, ReportMetadata, str]:
+    """Filter-compliance fiche: an IEC 61260-1 octave-band class verification.
+
+    The library default (Butterworth order 6) octave bank from 125 Hz to
+    4 kHz clears class 1 across every band, so the fiche boxes a Class 1
+    COMPLIES result and passes the required-class-1 verdict.
+    """
+    bank = ph.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+    result = ph.filter_class_compliance(bank)
+    metadata = ReportMetadata(
+        specimen="1/1-octave filter bank",
+        client="Example client",
+        manufacturer="Example instruments",
+        test_room="Electroacoustics laboratory (example)",
+        measurement_standard="IEC 61260-1:2014",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-61260",
+        required_class=1,
+    )
+    return result, metadata, "iec61260_filter_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -240,6 +264,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _loudness_example,
     _program_loudness_example,
     _epnl_example,
+    _filter_class_example,
 ]
 
 

@@ -800,6 +800,37 @@ the class mask. Away from these settings (very high `fraction` or near-Nyquist
 bands), always re-run `verify_filter_class` to confirm the class you need, and
 raise the order if a band needs more margin.
 
+### IEC 61260-1 filter compliance report (`.report()`)
+
+`filter_class_compliance(bank)` wraps the same verification as a result object
+that exposes `.plot()` and `.report()`, so a type-test verdict can be rendered
+as a one-page accredited fiche: a per-band classification table, the
+worst-margin band's measured relative attenuation overlaid on the class
+corridor, and the boxed overall class-compliance result. Pass a `required_class`
+on the `ReportMetadata` to add a PASS/FAIL verdict row (a bank "meets class N"
+when its achieved class is at least as strict, i.e. a class index of N or
+lower).
+
+```python
+from phonometry import OctaveFilterBank, ReportMetadata, filter_class_compliance
+
+bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+result = filter_class_compliance(bank)   # overall_class == 1
+
+result.report(
+    "iec61260.pdf",
+    metadata=ReportMetadata(
+        specimen="1/1-octave filter bank",
+        measurement_standard="IEC 61260-1:2014",
+        required_class=1,                # class 1 (or stricter) required
+    ),
+)                                        # -> Class 1 - COMPLIES, PASS
+```
+
+The rendered example fiche lives at
+[`.github/reports/iec61260_filter_example.pdf`](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61260_filter_example.pdf)
+(regenerated with `make reports`).
+
 ## 7. Signal Decomposition and Stability
 
 By setting `sigbands=True`, you can retrieve the time-domain components of each

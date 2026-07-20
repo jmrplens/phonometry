@@ -48,6 +48,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 phonometry soporta varios tipos de filtro, cada uno con su propia función de
 transferencia característica. Todos los bancos sitúan sus **puntos de −3 dB en
@@ -649,6 +650,48 @@ abrupta, fase lineal) va en contra de la máscara de clase. Fuera de estos
 ajustes (`fraction` muy alto o bandas cercanas a Nyquist), vuelve a ejecutar
 `verify_filter_class` para confirmar la clase que necesitas, y sube el orden si
 una banda necesita más margen.
+
+### Informe de conformidad de filtro IEC 61260-1 (`.report()`)
+
+`filter_class_compliance(bank)` envuelve la misma verificación en un objeto de
+resultado que expone `.plot()` y `.report()`, de modo que el veredicto del
+ensayo de tipo puede renderizarse como una ficha acreditada de una página. La
+ficha lista la clase alcanzada por cada banda y su margen vinculante, superpone
+la atenuación relativa medida de la banda de peor margen sobre el corredor de la
+clase y encuadra el resultado global de conformidad. Pasa un `required_class` en
+el `ReportMetadata` para añadir una fila de veredicto PASS/FAIL (un banco
+"cumple la clase N" cuando su clase alcanzada es al menos igual de estricta, es
+decir, un índice de clase N o inferior).
+
+```python
+from phonometry import (
+    OctaveFilterBank,
+    ReportMetadata,
+    filter_class_compliance,
+)
+
+bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+result = filter_class_compliance(bank)   # overall_class == 1
+
+result.report(
+    "iec61260.pdf",
+    metadata=ReportMetadata(
+        specimen="Banco de filtros de octava (1/1)",
+        measurement_standard="IEC 61260-1:2014",
+        required_class=1,                # se exige clase 1 (o más estricta)
+    ),
+)                                        # -> Class 1 - COMPLIES, PASS
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; haz clic en la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iec61260_filter_example"
+	title="Informe de ejemplo de conformidad de clase de filtro IEC 61260-1 (PDF)"
+	description="Ficha de conformidad de clase de filtro de una página: una cabecera de metadatos, una tabla de clasificación por bandas con la clase alcanzada y el margen vinculante de cada banda de octava, la atenuación relativa medida de la banda de peor margen superpuesta sobre el corredor de aceptación verde de clase 1, el resultado encuadrado Class 1 - COMPLIES (margin +0.40 dB) y un veredicto PASS frente a la clase 1 exigida."
+	caption="Ficha de conformidad de clase de filtro (FilterComplianceResult.report), clase alcanzada con el margen vinculante en dB y la atenuación relativa medida sobre el corredor de la Tabla 1."
+/>
 
 ## 7. Descomposición de la señal y estabilidad
 

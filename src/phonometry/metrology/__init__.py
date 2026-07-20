@@ -5,7 +5,9 @@ from __future__ import annotations
 
 from .calibration import CalibrationWarning, calculate_sensitivity, sensitivity
 from .compliance import (
+    FilterComplianceResult,
     class_limits,
+    filter_class_compliance,
     verify_aircraft_noise_system,
     verify_filter_class,
     verify_weighting_class,
@@ -75,6 +77,7 @@ __all__ = [
     "CrossSpectralDensityResult",
     "EnvelopeResult",
     "FilterBankWarning",
+    "FilterComplianceResult",
     "MonteCarloResult",
     "OctaveFilterBank",
     "PhaseDecompositionResult",
@@ -95,6 +98,7 @@ __all__ = [
     "cross_spectral_density",
     "envelope",
     "excess_phase",
+    "filter_class_compliance",
     "fractional_octave_smoothing",
     "getansifrequencies",
     "group_delay",

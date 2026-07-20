@@ -72,6 +72,124 @@ by the interpolated stop-band mask. The 2014 edition defines only the
 exactly.
 :::
 
+## filter_class_compliance
+
+```python
+filter_class_compliance(
+    bank: OctaveFilterBank,
+    *,
+    num_points: int = 32768,
+    edition: str = '2014',
+) -> FilterComplianceResult
+```
+
+Verify a filter bank and package the verdict as a reportable result.
+
+Runs [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) and stores the outcome together with the
+bank's second-order sections, mid-band frequencies, per-band decimation
+factors and sampling rate, so the returned object can redraw the measured
+relative attenuation and render an accredited `.report()` fiche without
+keeping a reference to the bank.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `bank` | The filter bank to verify. |
+| `num_points` | Frequency grid points per band (>= 16). |
+| `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0). |
+
+**Returns:** A [`FilterComplianceResult`](/phonometry/reference/api/filters/compliance/#filtercomplianceresult).
+
+## FilterComplianceResult
+
+```python
+FilterComplianceResult(
+    overall_class: int | None,
+    bands: Tuple[Dict[str, Any], ...],
+    fraction: int,
+    edition: str,
+    sos: Tuple[np.ndarray, ...],
+    band_frequencies: np.ndarray,
+    factors: Tuple[int, ...],
+    fs: float,
+    num_points: int,
+)
+```
+
+IEC 61260-1 class-compliance verdict of an [`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank).
+
+Wraps the dictionary of [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) together with the
+minimal filter-bank data needed to redraw the measured relative-attenuation
+curve, so the result exposes the standard `plot` / `report` pair without
+holding a reference to the (possibly stateful) bank.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `overall_class` | The strictest class every band meets (0/1/2), or `None` when at least one band meets no class of the edition. |
+| `bands` | The per-band verdict dictionaries of [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) (one `{"freq", "class", "margin_class<c>_db", ...}` per band), as an immutable tuple. |
+| `fraction` | Bandwidth designator `b` (1 for octave, 3 for one-third-octave). |
+| `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2). |
+| `sos` | Per-band second-order sections of the analysed bank (one array per band), kept so the relative attenuation can be recomputed with `scipy.signal.sosfreqz` exactly as the verifier does. |
+| `band_frequencies` | The exact mid-band frequencies `f_m` in Hz. |
+| `factors` | Per-band decimation factor; the band's processing sample rate is `fs / factor` (the multirate rate the SOS were designed at). Stored because the response must be evaluated at that decimated rate, which the verifier's public return does not expose. |
+| `fs` | The bank's full sampling rate in Hz. |
+| `num_points` | Frequency grid points per band used by the verification, retained so the redrawn curve matches the analysed grid. |
+
+### FilterComplianceResult.plot()
+
+```python
+FilterComplianceResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the worst-margin band against its class-limit corridor.
+
+Draws the measured relative attenuation of the binding band over the
+acceptance corridor of the achieved (or, when non-compliant, the
+loosest) class; see `phonometry._plot.metrology.plot_filter_class`.
+Requires matplotlib (`pip install phonometry[plot]`) and returns the
+`Axes`.
+
+### FilterComplianceResult.report()
+
+```python
+FilterComplianceResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+) -> str
+```
+
+Render an IEC 61260-1 filter-class-compliance fiche to a PDF.
+
+Writes a one-page accredited report: the standard-basis line, an
+optional metadata header block, a per-band classification table beside
+the mask-overlay plot (the result's own `plot`), the boxed
+class-compliance result, an optional verdict row against a supplied
+`required_class` and a footer with the fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). A supplied `required_class` drives the verdict row. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for a uniform signature; it has no effect on the single-layout filter-compliance fiche. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
 ## verify_aircraft_noise_system
 
 ```python

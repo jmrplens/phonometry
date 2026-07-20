@@ -32,13 +32,29 @@ applies (subclause 5.5.6 checks measured deviations at the nominal frequencies).
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Tuple
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 import numpy as np
 from scipy import signal
 
 from .core import OctaveFilterBank
 from .parametric_filters import WeightingFilter
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
+    from .._report.metadata import ReportMetadata
+
+__all__ = [
+    "FilterComplianceResult",
+    "class_limits",
+    "filter_class_compliance",
+    "verify_aircraft_noise_system",
+    "verify_filter_class",
+    "verify_weighting_class",
+    "weighting_class_limits",
+]
 
 _INF = float("inf")
 
@@ -294,6 +310,129 @@ def verify_filter_class(
     overall: int | None = None if None in classes else max(classes)
 
     return {"overall_class": overall, "bands": bands}
+
+
+@dataclass(frozen=True)
+class FilterComplianceResult:
+    """IEC 61260-1 class-compliance verdict of an :class:`OctaveFilterBank`.
+
+    Wraps the dictionary of :func:`verify_filter_class` together with the
+    minimal filter-bank data needed to redraw the measured relative-attenuation
+    curve, so the result exposes the standard ``plot`` / ``report`` pair without
+    holding a reference to the (possibly stateful) bank.
+
+    :ivar overall_class: The strictest class every band meets (0/1/2), or
+        ``None`` when at least one band meets no class of the edition.
+    :ivar bands: The per-band verdict dictionaries of
+        :func:`verify_filter_class` (one ``{"freq", "class",
+        "margin_class<c>_db", ...}`` per band), as an immutable tuple.
+    :ivar fraction: Bandwidth designator ``b`` (1 for octave, 3 for
+        one-third-octave).
+    :ivar edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
+        (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2).
+    :ivar sos: Per-band second-order sections of the analysed bank (one array
+        per band), kept so the relative attenuation can be recomputed with
+        :func:`scipy.signal.sosfreqz` exactly as the verifier does.
+    :ivar band_frequencies: The exact mid-band frequencies ``f_m`` in Hz.
+    :ivar factors: Per-band decimation factor; the band's processing sample
+        rate is ``fs / factor`` (the multirate rate the SOS were designed at).
+        Stored because the response must be evaluated at that decimated rate,
+        which the verifier's public return does not expose.
+    :ivar fs: The bank's full sampling rate in Hz.
+    :ivar num_points: Frequency grid points per band used by the verification,
+        retained so the redrawn curve matches the analysed grid.
+    """
+
+    overall_class: int | None
+    bands: Tuple[Dict[str, Any], ...]
+    fraction: int
+    edition: str
+    sos: Tuple[np.ndarray, ...]
+    band_frequencies: np.ndarray
+    factors: Tuple[int, ...]
+    fs: float
+    num_points: int
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the worst-margin band against its class-limit corridor.
+
+        Draws the measured relative attenuation of the binding band over the
+        acceptance corridor of the achieved (or, when non-compliant, the
+        loosest) class; see :func:`phonometry._plot.metrology.plot_filter_class`.
+        Requires matplotlib (``pip install phonometry[plot]``) and returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from .._plot.metrology import plot_filter_class
+
+        return plot_filter_class(self, ax=ax, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+    ) -> str:
+        """Render an IEC 61260-1 filter-class-compliance fiche to a PDF.
+
+        Writes a one-page accredited report: the standard-basis line, an
+        optional metadata header block, a per-band classification table beside
+        the mask-overlay plot (the result's own :meth:`plot`), the boxed
+        class-compliance result, an optional verdict row against a supplied
+        ``required_class`` and a footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a
+            prediction fiche (body, result and disclaimer only). A supplied
+            ``required_class`` drives the verdict row.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for a uniform signature; it has no effect on
+            the single-layout filter-compliance fiche.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iec61260 import render_iec61260_report
+
+        return render_iec61260_report(self, path, metadata=metadata, verbose=verbose)
+
+
+def filter_class_compliance(
+    bank: OctaveFilterBank, *, num_points: int = 2 ** 15, edition: str = "2014"
+) -> FilterComplianceResult:
+    """Verify a filter bank and package the verdict as a reportable result.
+
+    Runs :func:`verify_filter_class` and stores the outcome together with the
+    bank's second-order sections, mid-band frequencies, per-band decimation
+    factors and sampling rate, so the returned object can redraw the measured
+    relative attenuation and render an accredited ``.report()`` fiche without
+    keeping a reference to the bank.
+
+    :param bank: The filter bank to verify.
+    :param num_points: Frequency grid points per band (>= 16).
+    :param edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
+        (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0).
+    :return: A :class:`FilterComplianceResult`.
+    """
+    verdict = verify_filter_class(bank, num_points, edition=edition)
+    return FilterComplianceResult(
+        overall_class=verdict["overall_class"],
+        bands=tuple(verdict["bands"]),
+        fraction=int(bank.fraction),
+        edition=edition,
+        sos=tuple(np.asarray(s, dtype=np.float64) for s in bank.sos),
+        band_frequencies=np.asarray(bank.freq, dtype=np.float64),
+        factors=tuple(int(f) for f in bank.factor),
+        fs=float(bank.fs),
+        num_points=int(num_points),
+    )
 
 
 # BS EN 61672-1:2013 Table 3 (standard page 22): design-goal frequency

@@ -103,10 +103,12 @@ def plot_sound_power(
     if freqs is None:
         positions = _band_axis(
             ax, [f"{_t('Band', language)} {i + 1}" for i in range(n)],
-            xlabel=_t("Band", language)
+            xlabel=_t("Band", language), language=language,
         )
     else:
-        positions = _band_axis(ax, np.asarray(freqs, dtype=np.float64))
+        positions = _band_axis(
+            ax, np.asarray(freqs, dtype=np.float64), language=language
+        )
 
     # ``negative_band`` (ISO 9614-2) and ``not_applicable_band`` (ISO 9614-3)
     # both flag bands whose net power is non-positive and therefore unusable.
@@ -178,7 +180,7 @@ def plot_intensity(
     kwargs.setdefault("label", _t("Pressure level Lp", language))
     ax.plot(freqs, lp, "o-", **kwargs)
     ax.plot(freqs, li, "s--", color=_C_REFERENCE, label=_t("Intensity level LI", language))
-    _freq_axis(ax, freqs)
+    _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t("Level [dB]", language))
     ax.grid(True, which="both", alpha=0.3)
 
@@ -222,6 +224,7 @@ def plot_vibration_sound_power(
         ax, result.sound_power_level, result.frequencies, result.total_level,
         ylabel=_t(r"Sound power level $L_W$ [dB re 1 pW]", language),
         title=_t("ISO/TS 7849 sound power from surface vibration", language),
+        language=language,
         **kwargs,
     )
     localize_axes(ax, language)

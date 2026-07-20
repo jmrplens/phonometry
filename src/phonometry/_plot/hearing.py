@@ -140,7 +140,7 @@ def plot_sti(
     ax.bar(positions, mti, **kwargs)
     banded = mti.size == len(_STI_BAND_CENTERS)
     if banded:
-        _band_axis(ax, np.asarray(_STI_BAND_CENTERS))
+        _band_axis(ax, np.asarray(_STI_BAND_CENTERS), language=language)
         ax.set_xlabel(_t("freq_hz", language))
     else:
         ax.set_xticks(positions)
@@ -227,7 +227,7 @@ def plot_sii(
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     audibility = np.asarray(result.band_audibility, dtype=np.float64)
     contribution = audibility * np.asarray(result.band_importance, dtype=np.float64)
-    positions = _band_axis(ax, freqs)
+    positions = _band_axis(ax, freqs, language=language)
     ax.set_xlabel(_t("freq_hz", language))
     ax.bar(positions, audibility, color=_C_PRIMARY_LIGHT,
            label=_t("band_audibility_ai", language))
@@ -277,7 +277,7 @@ def plot_age_threshold(
         ax.plot(freqs, np.asarray(result.threshold, dtype=np.float64), "s--",
                 color=_C_REFERENCE, label=_t("fractile", language).format(
                     v=decimal_comma(f"{result.fractile:g}", language)))
-    _freq_axis(ax, freqs)
+    _freq_axis(ax, freqs, language=language)
     ax.set_xlabel(_t("freq_hz", language))
     ax.set_ylabel(_t("threshold_dev_18", language))
     ax.invert_yaxis()  # audiogram convention: worse hearing downward
@@ -316,7 +316,7 @@ def plot_nipts(
         ax.plot(freqs, np.asarray(result.value, dtype=np.float64), "s--",
                 color=_C_REFERENCE, label=_t("fractile", language).format(
                     v=decimal_comma(f"{result.fractile:g}", language)))
-    _freq_axis(ax, freqs)
+    _freq_axis(ax, freqs, language=language)
     ax.set_xlabel(_t("freq_hz", language))
     ax.set_ylabel(_t("nipts_db", language))
     ax.invert_yaxis()  # audiogram convention: worse hearing downward
@@ -352,7 +352,7 @@ def plot_htlan(
     kwargs.setdefault("color", _C_REFERENCE)
     ax.plot(freqs, np.asarray(result.threshold, dtype=np.float64), "s--",
             label=_t("age_noise_htlan", language), **kwargs)
-    _freq_axis(ax, freqs)
+    _freq_axis(ax, freqs, language=language)
     ax.set_xlabel(_t("freq_hz", language))
     ax.set_ylabel(_t("htl_level", language))
     ax.invert_yaxis()  # audiogram convention: worse hearing downward

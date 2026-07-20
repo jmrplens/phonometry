@@ -171,6 +171,7 @@ export const apiSidebar = {
         'reference/api/power/sound-power-reverberation',
         'reference/api/power/intensity',
         'reference/api/power/vibration-sound-power',
+        'reference/api/power/declaration',
       ],
     },
     {

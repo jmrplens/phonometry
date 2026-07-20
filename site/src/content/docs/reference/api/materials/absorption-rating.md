@@ -80,6 +80,8 @@ AbsorptionRatingResult(
     band_centers: NDArray[np.float64],
     measured: NDArray[np.float64],
     shifted_reference: NDArray[np.float64],
+    third_octave_alpha_s: NDArray[np.float64] | None = None,
+    third_octave_bands: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -97,6 +99,8 @@ Weighted sound absorption rating (ISO 11654:1997).
 | `band_centers` | Octave rating-band centre frequencies, in Hz (250 Hz to 4000 Hz). |
 | `measured` | Practical absorption coefficients `alpha_p` used for the rating (snapped to the 0,05 grid of Clause 4.1). |
 | `shifted_reference` | Reference curve of Figure 1 after the final shift. |
+| `third_octave_alpha_s` | The fifteen one-third-octave sound absorption coefficients `alpha_s` (200 Hz to 5000 Hz, ISO 354) the rating was built from, as given; `None` when the rating was formed from octave practical coefficients only. Carried so the fiche can show the full one-third-octave table every accredited ISO 354 certificate reports. |
+| `third_octave_bands` | The one-third-octave centre frequencies, in Hz, that pair with `third_octave_alpha_s` (the module [`THIRD_OCTAVE_BANDS`](/phonometry/reference/api/materials/absorption-rating/#third_octave_bands)); `None` when `third_octave_alpha_s` is. |
 
 ### AbsorptionRatingResult.plot()
 
@@ -133,10 +137,13 @@ AbsorptionRatingResult.report(
 Render an ISO 11654 sound-absorption rating fiche to a PDF.
 
 Writes a one-page accredited absorption report: the standard-basis
-line, an optional metadata header block, the octave-band `alpha_p`
-table beside the practical-versus-shifted-reference plot (the result's
-own `plot`), the boxed `alpha_w` result with its absorption
-class, an optional verdict row and a footer with the fixed disclaimer.
+line, an optional metadata header block, an absorption table beside the
+practical-versus-shifted-reference plot (the result's own `plot`),
+the boxed `alpha_w` result with its absorption class, an optional
+verdict row and a footer with the fixed disclaimer. When the rating was
+built by [`weighted_absorption_from_third_octave`](/phonometry/reference/api/materials/absorption-rating/#weighted_absorption_from_third_octave), the table is the
+full ISO 354 one-third-octave `alpha_s` table with the octave
+`alpha_p` on the matching rows, as accredited certificates print it.
 
 **Parameters**
 
@@ -226,3 +233,36 @@ unfavourable deviations (measured below the shifted curve) is at most
 | `alpha_p` | The five octave practical coefficients for 250, 500, 1000, 2000 and 4000 Hz (e.g. from [`practical_absorption_coefficient`](/phonometry/reference/api/materials/absorption-rating/#practical_absorption_coefficient)), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Inputs are snapped to the 0,05 grid of Clause 4.1. |
 
 **Returns:** A frozen [`AbsorptionRatingResult`](/phonometry/reference/api/materials/absorption-rating/#absorptionratingresult) with `alpha_w`, the shape indicators, the applied shift, the fitted reference curve and the absorption class.
+
+## weighted_absorption_from_third_octave
+
+```python
+weighted_absorption_from_third_octave(
+    third_octave_alpha_s: Mapping[Any, float] | Sequence[float] | ArrayLike,
+) -> AbsorptionRatingResult
+```
+
+Weighted absorption rating from one-third-octave `alpha_s` (ISO 11654).
+
+Convenience wrapper over [`practical_absorption_coefficient`](/phonometry/reference/api/materials/absorption-rating/#practical_absorption_coefficient) and
+[`weighted_absorption`](/phonometry/reference/api/materials/absorption-rating/#weighted_absorption): it forms the octave practical coefficients
+`alpha_p` (Clause 4.1) from the fifteen one-third-octave coefficients,
+rates them (Clause 4.2) and returns the same
+[`AbsorptionRatingResult`](/phonometry/reference/api/materials/absorption-rating/#absorptionratingresult) as [`weighted_absorption`](/phonometry/reference/api/materials/absorption-rating/#weighted_absorption) would, but
+with the input `alpha_s` and its band centres retained on the result so a
+fiche can print the full one-third-octave table that every accredited
+ISO 354 certificate carries.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `third_octave_alpha_s` | The fifteen one-third-octave coefficients `alpha_s` from 200 Hz to 5000 Hz (ISO 354), as a sequence ordered low to high or a mapping keyed by band centre frequency (Hz). Values may exceed 1,00 (reverberation-room measurement); the octave coefficient is capped at 1,00. |
+
+**Returns:** A frozen [`AbsorptionRatingResult`](/phonometry/reference/api/materials/absorption-rating/#absorptionratingresult) identical to [`weighted_absorption`](/phonometry/reference/api/materials/absorption-rating/#weighted_absorption) on the derived `alpha_p`, additionally carrying `third_octave_alpha_s` (the input as given) and `third_octave_bands` ([`THIRD_OCTAVE_BANDS`](/phonometry/reference/api/materials/absorption-rating/#third_octave_bands)).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if any coefficient is negative or the wrong number of values is supplied. |

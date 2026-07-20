@@ -1,6 +1,6 @@
 ---
 title: "Por qué phonometry"
-description: "Verificación de conformidad con IEC 61672-1 y comparación con otras librerías."
+description: "La filosofía de diseño basada en conformidad: un caso de estudio de ponderación temporal IEC 61672-1, 371 comprobaciones frente a 235 normas y comparación con otras librerías."
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
@@ -94,7 +94,8 @@ de la Tabla 4 (discontinua) dentro de 0,1 dB para ráfagas de 200/50/10 ms.*
 El caso de las ráfagas de tono de arriba no es una comprobación aislada. Para
 cada norma que la librería implementa, los valores de referencia y los límites
 de aceptación se transcriben del texto oficial a la batería de tests, de modo
-que cualquier regresión hace fallar la CI:
+que cualquier regresión hace fallar la CI. Una muestra del núcleo de
+metrología:
 
 | Norma | Qué se verifica | Archivo de test |
 | :--- | :--- | :--- |
@@ -108,9 +109,14 @@ que cualquier regresión hace fallar la CI:
 | ISO 1996-1:2016 | `lden()`, `ldn()` y `composite_rating_level()` frente a valores de las fórmulas calculados a mano | `tests/test_environmental.py` |
 | IEC 60942:2017 Tabla 2 | Límites de estabilidad a corto plazo del calibrador (dependientes de la frecuencia, clase 1) en `sensitivity()` | `tests/test_calibration_validation.py` |
 
-El informe numérico completo (el valor esperado y el valor que calcula la
-librería para cada comprobación, regenerado en cada pull request) está
-publicado como [informe de conformidad](/phonometry/es/reference/conformance/).
+La misma disciplina se aplica mucho más allá del núcleo de metrología: hoy la
+batería ejecuta 371 comprobaciones numéricas de conformidad en 46 dominios y
+235 normas, que abarcan la psicoacústica, la acústica de salas y edificación,
+la vibración, el ruido ambiental, aeronáutico y submarino, la electroacústica
+y la sonoridad de radiodifusión. El informe numérico completo (el valor
+esperado y el valor que calcula la librería para cada comprobación, regenerado
+en cada pull request) está publicado como
+[informe de conformidad](/phonometry/es/reference/conformance/).
 
 Más allá de la dosis de ruido al estilo IEC 61252 (`sound_exposure()`,
 `lex_8h()`), la misma mentalidad de "primero la norma" se refleja en la parte

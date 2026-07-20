@@ -1,6 +1,6 @@
 ---
 title: "Why phonometry"
-description: "IEC 61672-1 compliance verification and comparison with other libraries."
+description: "The conformance-first design philosophy: an IEC 61672-1 time-weighting case study, 371 checks against 235 standards, and comparison with other libraries."
 ---
 
 import ThemeImage from '../../../components/ThemeImage.astro';
@@ -90,7 +90,8 @@ how the burst aligns with the block boundaries.
 
 The tone-burst case above is not an isolated check. For each standard the
 library implements, the reference values and acceptance limits are transcribed
-from the official text into the test suite, so any regression fails CI:
+from the official text into the test suite, so any regression fails CI. A
+sample from the metrology core:
 
 | Standard | What is verified | Test file |
 | :--- | :--- | :--- |
@@ -104,9 +105,13 @@ from the official text into the test suite, so any regression fails CI:
 | ISO 1996-1:2016 | `lden()`, `ldn()` and `composite_rating_level()` against hand-computed formula values | `tests/test_environmental.py` |
 | IEC 60942:2017 Table 2 | Calibrator short-term stability limits (frequency-dependent, class 1) in `sensitivity()` | `tests/test_calibration_validation.py` |
 
-The full numerical report (the expected value and the value the library
-computes for every check, regenerated on every pull request) is published
-as [the conformance report](/phonometry/reference/conformance/).
+The same discipline applies far beyond the metrology core: today the suite
+runs 371 numerical conformance checks across 46 domains and 235 standards,
+covering psychoacoustics, room and building acoustics, vibration,
+environmental, aircraft and underwater noise, electroacoustics and broadcast
+loudness. The full numerical report (the expected value and the value the
+library computes for every check, regenerated on every pull request) is
+published as [the conformance report](/phonometry/reference/conformance/).
 
 Beyond IEC 61252-style noise dose (`sound_exposure()`, `lex_8h()`), the same
 standards-first mindset shows up in the numerics: filter banks place their

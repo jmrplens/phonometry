@@ -321,7 +321,7 @@ _ES_EXACT = {
         "Parte 2 ingeniería ($\\varepsilon$ medido)",
     # structure_borne_power figure (EN 15657)
     "EN 15657 Reception-Plate Structure-Borne Sound Power":
-        "Potencia acústica estructural en placa receptora EN 15657",
+        "Potencia sonora estructural en placa receptora EN 15657",
     r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]":
         r"Nivel de potencia estructural $L_{Ws}$ [dB re 1 pW]",
     "low-mobility plate": "placa de baja movilidad",
@@ -517,9 +517,9 @@ _ES_EXACT = {
     "EDT fit (0 to \u221210 dB)": "Ajuste EDT (0 a \u221210 dB)",
     "EDT slope": "Pendiente EDT",
     "ISO 717-1 Weighted Sound Reduction Index (Annex C example)":
-        "\u00cdndice ponderado de reducci\u00f3n sonora (ISO 717-1, ejemplo del Anexo C)",
+        "\u00cdndice ponderado de reducci\u00f3n ac\u00fastica (ISO 717-1, ejemplo del Anexo C)",
     "Apparent sound reduction index R' [dB]":
-        "\u00cdndice de reducci\u00f3n sonora aparente R' [dB]",
+        "\u00cdndice de reducci\u00f3n ac\u00fastica aparente R' [dB]",
     "Measured R' (third octave)": "R' medido (tercios de octava)",
     "Shifted reference curve (ISO 717-1)":
         "Curva de referencia desplazada (ISO 717-1)",

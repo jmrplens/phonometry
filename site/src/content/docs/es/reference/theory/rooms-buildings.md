@@ -404,7 +404,7 @@ Consulta las guías de [acústica de salas](/phonometry/es/guides/room-acoustics
 ### Predicción del aislamiento de paneles (Bies 7.2, Hopkins 2.9/4.3.10, Cremer 5)
 
 Donde EN 12354 toma el $R$ de elemento como una medida, el índice de reducción
-sonora de un panel también se puede **predecir** a partir de sus propiedades
+acústica de un panel también se puede **predecir** a partir de sus propiedades
 físicas. Un panel flexible sigue la ley de masas
 $TL_0 = 10\lg[1 + (\pi f m''/\rho_0 c_0)^2]$ (Bies Ec. 7.40), que sube 6 dB por
 octava y 6 dB por duplicar la masa superficial $m''$; el valor de campo resta

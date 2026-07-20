@@ -379,7 +379,7 @@ que las guías incorporan sus secciones de Referencias.
   Citado por [Movilidad mecánica y la familia de FRF](/phonometry/es/guides/mechanical-mobility/),
   [Rigidez dinámica de transferencia](/phonometry/es/guides/transfer-stiffness/),
   [Potencia acústica desde vibración](/phonometry/es/guides/vibration-sound-power/),
-  [Potencia acústica estructural de equipos](/phonometry/es/guides/structure-borne-power/)
+  [Potencia sonora estructural de equipos](/phonometry/es/guides/structure-borne-power/)
   y [Ruido estructural instalado](/phonometry/es/guides/installed-structure-borne/).
 - International Organization for Standardization. (2011). *Mechanical
   vibration and shock — Experimental determination of mechanical mobility —
@@ -424,7 +424,7 @@ que las guías incorporan sus secciones de Referencias.
   [Catálogo iso.org](https://www.iso.org/standard/17424.html).
   La caracterización por velocidad libre de fuentes montadas
   resilientemente.
-  Citado por [Potencia acústica estructural de equipos](/phonometry/es/guides/structure-borne-power/).
+  Citado por [Potencia sonora estructural de equipos](/phonometry/es/guides/structure-borne-power/).
 
 ## Sonido en exteriores y ruido ambiental
 

@@ -49,7 +49,7 @@ Del vocabulario de FRF al nivel predicho en la sala receptora.
 - [Potencia acústica desde vibración (ISO/TS 7849)](/phonometry/es/guides/vibration-sound-power/):
   potencia aérea radiada a partir de la velocidad superficial y un factor de
   radiación.
-- [Potencia acústica estructural de equipos (EN 15657)](/phonometry/es/guides/structure-borne-power/):
+- [Potencia sonora estructural de equipos (EN 15657)](/phonometry/es/guides/structure-borne-power/):
   el método de la placa de recepción y las magnitudes de fuente
   independientes de la placa.
 - [Ruido estructural instalado (EN 12354-5)](/phonometry/es/guides/installed-structure-borne/):

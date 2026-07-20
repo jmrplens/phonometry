@@ -60,7 +60,7 @@ nivelar un programa, ve a
   sonora con dos micrófonos según IEC 61043 con los indicadores de campo de
   ISO 9614-1.
 - [Potencia acústica](/phonometry/es/guides/sound-power/): el nivel de potencia
-  sonora por superficie envolvente, cámara reverberante, barrido de
+  acústica por superficie envolvente, cámara reverberante, barrido de
   intensidad y los métodos de precisión anecoico y de intensidad.
 - [Electroacústica: distorsión y respuesta en frecuencia](/phonometry/es/guides/electroacoustics/):
   las métricas de distorsión de IEC 60268-3, la estimación de la respuesta en

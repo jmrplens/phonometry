@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Raised the dependency floors to the current releases: `numpy>=2.5.1` and
-  `scipy>=1.18.0` (in `pyproject.toml` and `requirements.txt`), so the declared
-  minimums match the versions the figures and CI already run against.
+- Raised the `scipy` floor in `pyproject.toml` to the current release
+  (`scipy>=1.18.0`), matching the pin `requirements.txt` already carried. The
+  `numpy` floor stays at `>=2.4.4` because the optional `perf` extra pulls
+  numba, which still requires NumPy 2.4 or older; the pure-Python matrix and the
+  figure stack already run on the latest NumPy through their own pins.
 
 ### Added
 

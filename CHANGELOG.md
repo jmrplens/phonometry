@@ -23,6 +23,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (`fc = sqrt(12) c0^2 / (2 pi h cL)`, `c0 = 343 m/s`) and stores them on
   `JunctionTransmissionResult.critical_frequency1`/`critical_frequency2`, and
   `corner_reduction_index` uses the receiving plate's value.
+- The ISO 4871 declared single-number values
+  (`OperatingModeDeclaration.declared_sound_power_level` and
+  `.declared_emission_pressure_level`) now round the sum `L + K` once to the
+  nearest decibel, as clause 3.15 defines (`L_d = L + K`, the sum of the
+  unrounded quantities rounded to the nearest decibel), instead of adding the
+  separately rounded `L` and `K` of the dual-number form (clause 3.16). The
+  previous behaviour could understate the declared value by 1 dB (for example
+  `L_WA = 91.4`, `K_WA = 2.4` gave 93 dB instead of 94 dB) and thereby flip
+  the clause 6.2 verification verdict at the boundary.
 
 ### Changed
 

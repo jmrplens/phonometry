@@ -447,7 +447,8 @@ it; the list grows as guides gain their References sections.
   framework.
   Cited by [Field Insulation Measurement and Ratings](insulation-field.md),
   [Laboratory Insulation Measurement](insulation-lab.md),
-  [Predicting Sound Insulation (EN 12354)](insulation-prediction.md) and
+  [Predicting Sound Insulation (EN 12354)](insulation-prediction.md),
+  [Bending-wave transmission at plate junctions](junction-transmission.md) and
   [Porous and Multilayer Absorbers](porous-absorbers.md).
 - Vigran, T. E. (2008). *Building acoustics*. CRC Press.
   ISBN 978-0-415-42853-8.
@@ -491,6 +492,19 @@ it; the list grows as guides gain their References sections.
   [Sound power from surface vibration](vibration-sound-power.md),
   [Structure-borne sound power of building equipment](structure-borne-power.md)
   and [Installed structure-borne sound from equipment](installed-structure-borne.md).
+- Cremer, L., Heckl, M., & Ungar, E. E. (1973). *Structure-borne sound:
+  Structural vibrations and sound radiation at audio frequencies* (1st ed.).
+  Springer. ISBN 978-3-540-06002-4.
+  [doi:10.1007/978-3-662-10118-6](https://doi.org/10.1007/978-3-662-10118-6).
+  The original derivation of the wave parameters χ and ψ and the bending-wave
+  transmission coefficients for junctions of plates.
+  Cited by [Bending-wave transmission at plate junctions](junction-transmission.md).
+- Craik, R. J. M. (1996). *Sound transmission through buildings using
+  statistical energy analysis*. Gower. ISBN 978-0-566-07572-5.
+  The SEA treatment of airborne and structure-borne transmission in buildings,
+  with the tabulated bending-wave transmission coefficients for X, T, L and
+  in-line junctions.
+  Cited by [Bending-wave transmission at plate junctions](junction-transmission.md).
 - International Organization for Standardization. (2011). *Mechanical
   vibration and shock — Experimental determination of mechanical mobility —
   Part 1: Basic terms and definitions, and transducer specifications*

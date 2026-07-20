@@ -159,15 +159,20 @@ class UncertaintyResult:
         k = coverage_factor(coverage, self.effective_dof)
         return k, k * self.combined_uncertainty
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
         """Plot the uncertainty budget (per-input contributions).
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
         """
+        from .._i18n import check_language
         from .._plot.metrology import plot_uncertainty_budget
 
-        return plot_uncertainty_budget(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_uncertainty_budget(self, ax=ax, language=language, **kwargs)
 
 
 @dataclass(frozen=True)
@@ -192,16 +197,21 @@ class MonteCarloResult:
     trials: int
     samples: np.ndarray | None = field(default=None, repr=False)
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
         """Plot the output histogram with the coverage interval marked.
 
         Needs the raw output sample, so call ``monte_carlo(...,
         keep_samples=True)``. Requires matplotlib (``pip install
         phonometry[plot]``); returns the :class:`~matplotlib.axes.Axes`.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
         """
+        from .._i18n import check_language
         from .._plot.metrology import plot_monte_carlo
 
-        return plot_monte_carlo(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_monte_carlo(self, ax=ax, language=language, **kwargs)
 
 
 def _sensitivity(model: Model, values: np.ndarray, uncertainties: np.ndarray) -> np.ndarray:

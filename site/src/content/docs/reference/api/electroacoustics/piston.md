@@ -199,7 +199,12 @@ Radiation impedance and directivity of a baffled circular piston.
 ### RadiatingPistonResult.plot()
 
 ```python
-RadiatingPistonResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+RadiatingPistonResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the normalized piston resistance and reactance against `ka`.
@@ -207,3 +212,9 @@ Plot the normalized piston resistance and reactance against `ka`.
 Reproduces the classic Beranek & Mellow figure: `R1` rising to 1 and
 `X1` peaking then decaying, over the `ka` range of the result.
 Requires matplotlib (`pip install phonometry[plot]`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |

@@ -153,11 +153,19 @@ remainder `Gnn = (1-γ²xy)·Gyy` (Eq. 9.56), with `Gyy = Gvv + Gnn`
 ```python
 CoherentOutputSpectrumResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```
 
 Plot the output/coherent/noise spectra and the spectral SNR.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 
 ## cross_spectral_density
 
@@ -252,11 +260,19 @@ estimate, as Bendat & Piersol recommend for measured data (Section 9.2).
 ```python
 CrossSpectralDensityResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```
 
 Plot the magnitude, phase (with ±σ band) and coherence.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 
 ## fractional_octave_smoothing
 
@@ -426,7 +442,18 @@ Welch autospectral density with its statistical error (B&P Ch. 8).
 ### SpectralDensityResult.plot()
 
 ```python
-SpectralDensityResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SpectralDensityResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the spectral density in dB with its confidence band.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |

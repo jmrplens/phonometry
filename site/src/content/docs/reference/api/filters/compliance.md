@@ -154,7 +154,12 @@ carries no verdicts, so this returns an empty list.
 ### FilterComplianceResult.plot()
 
 ```python
-FilterComplianceResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+FilterComplianceResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the worst-margin band against its class-limit corridor.
@@ -164,6 +169,12 @@ acceptance corridor of the achieved (or, when non-compliant, the
 loosest) class; see `phonometry._plot.metrology.plot_filter_class`.
 Requires matplotlib (`pip install phonometry[plot]`) and returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 
 ### FilterComplianceResult.reference_class()
 

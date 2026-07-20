@@ -115,11 +115,19 @@ An impulse response aligned onto a reference.
 ```python
 AlignedImpulseResponseResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
 
 Plot the reference and the aligned impulse response.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 
 ## correlation
 
@@ -241,10 +249,21 @@ Auto- or cross-correlation estimate (B&P Sections 5.1, 8.4, 11.4).
 ### CorrelationResult.plot()
 
 ```python
-CorrelationResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+CorrelationResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the correlation estimate against the lag in seconds.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 
 ### CorrelationResult.random_error()
 
@@ -451,7 +470,18 @@ Time-delay estimate between two records.
 ### TimeDelayResult.plot()
 
 ```python
-TimeDelayResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+TimeDelayResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the correlation function with the estimated delay marked.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |

@@ -279,10 +279,21 @@ Harmonic analysis of a signal (IEC 60268-3 / AES17).
 ### HarmonicDistortionResult.plot()
 
 ```python
-HarmonicDistortionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+HarmonicDistortionResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the magnitude spectrum with the harmonics marked.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 
 ## idle_channel_noise
 

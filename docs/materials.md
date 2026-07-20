@@ -93,6 +93,48 @@ $\alpha_s$ values to `practical_absorption_coefficient` first if you are startin
 from raw ISO 354 data. The result carries the shifted reference curve and the
 per-band deviations, and its `.plot()` renders the figure above.
 
+### ISO 11654 report (`.report()`)
+
+`AbsorptionRatingResult.report(path)` renders a one-page PDF fiche laid out like
+an accredited absorption test report (an ISO 354 reverberation-room measurement
+rated per ISO 11654): a standard-basis line, an optional metadata header block,
+the octave-band $\alpha_p$ table beside the practical-versus-shifted-reference
+plot (the result's own `.plot()`), the boxed $\alpha_w$ single number with its
+absorption class and applied shift, an optional verdict row and a footer with
+the fixed disclaimer. It uses the same `ReportMetadata` container (documented
+under [Field insulation](insulation-field.md#report-metadata-reportmetadata))
+and rendering engine as the ISO 717 insulation fiche; passing
+`metadata=None` produces a lightweight prediction fiche, and a supplied
+`requirement` is read as the minimum $\alpha_w$ for the PASS/FAIL verdict.
+Setting `verbose=True` swaps the two-column table for the ISO 11654 evaluation
+columns (practical coefficient, shifted reference, unfavourable deviation).
+Rendering needs reportlab (`pip install phonometry[report]`); only
+`engine="reportlab"` is supported.
+
+```python
+from phonometry import materials, ReportMetadata
+
+result = materials.weighted_absorption([0.35, 1.00, 0.65, 0.60, 0.55])
+result.report(
+    "alpha_w_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="50 mm porous absorber over a 100 mm air gap",
+        area=10.8, mounting="Type A (against a rigid wall)",
+        measurement_standard="ISO 354",
+        temperature=21.4, relative_humidity=54.0,
+        laboratory="Phonometry Reference Laboratory",
+        requirement=0.55,          # adds the PASS/FAIL verdict row
+    ),
+)                                  # alpha_w (shape) + absorption class
+```
+
+The example fiche, regenerated with `make reports`, is kept rendered in the
+repository. Click the preview to open the PDF:
+
+[![ISO 11654 absorption example report: metadata header, octave-band practical-coefficient table beside the practical-versus-shifted-reference plot, boxed alpha_w = 0.60 (M) with absorption class C and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso11654_absorption_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso11654_absorption_example.pdf)
+
+*Weighted absorption fiche (`AbsorptionRatingResult.report`), $\alpha_w$ with its class.*
+
 ## 2. Airflow resistance (ISO 9053-1/-2)
 
 The airflow resistance quantifies how strongly a porous material opposes a steady

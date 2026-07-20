@@ -78,6 +78,7 @@ references:
 
 import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Caracterizar un absorbente o una partición es un ejercicio de laboratorio con
 tres instrumentos distintos detrás. La **cámara reverberante** entrega un espectro
@@ -173,6 +174,51 @@ valores de $\alpha_s$ de tercio de octava a `practical_absorption_coefficient`
 si partes de datos brutos de ISO 354. El resultado lleva la curva de referencia
 desplazada y las desviaciones por banda, y su `.plot()` genera la figura de
 arriba.
+
+### Informe de ISO 11654 (`.report()`)
+
+`AbsorptionRatingResult.report(path)` renderiza una ficha PDF de una página con
+el formato de un informe de ensayo de absorción acreditado (una medición en
+cámara reverberante según ISO 354, valorada según ISO 11654): la línea de base
+normativa, un bloque opcional de metadatos de cabecera, la tabla de $\alpha_p$
+por banda de octava junto a la curva práctica frente a la referencia desplazada
+(el propio `.plot()` del resultado), el número único $\alpha_w$ en caja con su
+clase de absorción y el desplazamiento aplicado, una fila opcional de veredicto
+y un pie con el descargo fijo. Usa el mismo contenedor `ReportMetadata` y el
+mismo motor de renderizado que la [ficha de aislamiento de ISO 717](/phonometry/es/guides/insulation-field/#informe-de-iso-717-report);
+pasar `metadata=None` produce una ficha ligera de predicción, y un `requirement`
+aportado se lee como el $\alpha_w$ mínimo para el veredicto CUMPLE/NO CUMPLE.
+Con `verbose=True` la tabla cambia a las columnas de evaluación de ISO 11654
+(coeficiente práctico, referencia desplazada, desviación desfavorable). El
+renderizado necesita reportlab (`pip install phonometry[report]`); solo se
+admite `engine="reportlab"`.
+
+```python
+from phonometry import materials, ReportMetadata
+
+result = materials.weighted_absorption([0.35, 1.00, 0.65, 0.60, 0.55])
+result.report(
+    "ficha_alpha_w.pdf",
+    metadata=ReportMetadata(
+        specimen="Absorbente poroso de 50 mm sobre cámara de aire de 100 mm",
+        area=10.8, mounting="Tipo A (contra pared rígida)",
+        measurement_standard="ISO 354",
+        temperature=21.4, relative_humidity=54.0,
+        laboratory="Laboratorio de referencia Phonometry",
+        requirement=0.55,          # añade la fila de veredicto CUMPLE/NO CUMPLE
+    ),
+)                                  # alpha_w (forma) + clase de absorción
+```
+
+La ficha de ejemplo se regenera con `make reports` y se conserva renderizada en
+el repositorio; pulsa la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso11654_absorption_example"
+	title="Informe de ejemplo de absorción ISO 11654 (PDF)"
+	description="Ficha de absorción de una página: una cabecera de metadatos (cliente, muestra, superficie de la probeta, montaje, temperatura, humedad y presión de la cámara reverberante), la tabla de coeficientes prácticos por banda de octava junto a la curva práctica frente a la referencia desplazada, el resultado de un solo número alpha_w = 0.60 (M) en caja con la clase de absorción C y el desplazamiento aplicado, y una fila de veredicto CUMPLE frente al requisito de 0.55."
+	caption="Ficha de absorción ponderada (AbsorptionRatingResult.report), alpha_w con su clase."
+/>
 
 ## 2. Resistencia al flujo de aire (ISO 9053-1/-2)
 

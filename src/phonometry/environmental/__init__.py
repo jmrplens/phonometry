@@ -16,6 +16,14 @@ from .impulse_prominence import (
     predicted_prominence,
     rating_level,
 )
+from .impulsive_sound import (
+    ImpulseOnset,
+    ImpulsiveSoundResult,
+    ImpulsiveSoundWarning,
+    detect_onsets,
+    impulsive_sound_adjustment,
+    sound_pressure_level_history,
+)
 from .outdoor_propagation import (
     Barrier,
     DEFAULT_FREQUENCIES,
@@ -126,6 +134,12 @@ __all__ = [
     "DEFAULT_FREQUENCIES",
     "ImpulseProminenceResult",
     "ImpulseProminenceWarning",
+    "ImpulseOnset",
+    "ImpulsiveSoundResult",
+    "ImpulsiveSoundWarning",
+    "detect_onsets",
+    "impulsive_sound_adjustment",
+    "sound_pressure_level_history",
     "OutdoorAttenuation",
     "WindTurbineNoiseWarning",
     "WindTurbineTonalityResult",

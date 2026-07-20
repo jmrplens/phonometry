@@ -130,6 +130,7 @@ export const apiSidebar = {
         'reference/api/environment/atmospheric-refraction',
         'reference/api/environment/air-absorption',
         'reference/api/environment/impulse-prominence',
+        'reference/api/environment/impulsive-sound',
         'reference/api/environment/rating',
         'reference/api/environment/measurement',
       ],

@@ -17,6 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `environmental.impulsive_sound` implements the objective impulsive-sound
+  prominence method of ISO/PAS 1996-3:2022. `impulsive_sound_adjustment` reads a
+  calibrated pressure signal, computes the A-weighted, F time-weighted level
+  history `LpAF`, detects onsets (gradient above 10 dB/s, merging events under
+  50 ms apart), measures each onset's level difference and least-squares onset
+  rate, and returns the governing prominence `P`, the adjustment `KI` and the
+  clause 7 source category (not impulsive / regular impulsive / highly
+  impulsive) plus the adjusted `LAeq`, in an `ImpulsiveSoundResult` with a
+  `.plot()`. `sound_pressure_level_history` and `detect_onsets` expose the
+  level-history and onset-analysis stages, the latter accepting an
+  `"upper_half"` onset-rate variant for pass-bys.
 - Every `.report()` fiche accepts a `language` argument (`'en'` default, `'es'`):
   Spanish strings and a comma decimal separator.
 - The `.plot()` renderers of the building, noise-control and emission result

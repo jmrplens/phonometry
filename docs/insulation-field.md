@@ -318,6 +318,72 @@ values (thirds `L'nT,w = 79`, `CI = −11`; octave `54`, `CI = 0`).
 `None`); `weighted_impact_rating()` returns an `ImpactRatingResult` (`rating`,
 `ci` integers, `unfavourable_sum` in dB).
 
+### ISO 717 report (`.report()`)
+
+Both rating results render a one-page PDF fiche laid out like an
+accredited-laboratory test report through a `report(path)` method: a
+standard-basis line (measurement standard plus the ISO 717 rating part), an
+optional metadata header block, the one-third-octave table beside the
+measured-versus-shifted-reference plot (the result's own `.plot()`), the boxed
+single-number result, an optional verdict row and a footer with the fixed
+disclaimer. `WeightedRatingResult.report()` labels the airborne ISO 717-1 fiche
+(`Rw (C; Ctr)`, deviations where the reference is above the measurement);
+`ImpactRatingResult.report()` labels the impact ISO 717-2 fiche (`Ln,w (CI)`,
+deviations the opposite way). `SoundReductionResult.report()` is a convenience
+that rates the predicted `R(f)` and writes its fiche in one call.
+
+The report metadata is supplied as a `ReportMetadata` frozen dataclass (every
+field optional; only the supplied fields are rendered, and the numeric fields
+must be finite and positive). Passing `metadata=None` produces a lightweight
+prediction fiche (body, result and disclaimer only). When
+`metadata.requirement` is set, a verdict row is added: an airborne rating passes
+when it is at or above the requirement, an impact rating when it is at or below
+it (a lower impact level is better). Setting `verbose=True` swaps the two-column
+`f | value` table for the ISO 717 Annex C columns (frequency, measured value,
+shifted reference, unfavourable deviation).
+
+Rendering needs reportlab, kept out of the runtime dependencies as the optional
+`phonometry[report]` extra (`pip install phonometry[report]`); a missing
+reportlab raises a clear `ImportError` with the install command, and the plot
+still needs matplotlib (`phonometry[plot]`). Only `engine="reportlab"` is
+supported; any other engine raises `ValueError`.
+
+```python
+from phonometry import building, ReportMetadata
+
+# Airborne rating from a measured 16-band R spectrum (ISO 717-1)
+R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+     28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
+metadata = ReportMetadata(
+    specimen="200 mm reinforced-concrete wall",
+    client="Acoustic Test Client Ltd.",
+    area=10.0, mass_per_area=460.0,
+    source_volume=53.0, receiving_volume=51.0,
+    temperature=21.5, relative_humidity=45.0, pressure=101.3,
+    test_room="Transmission suite T1",
+    measurement_standard="ISO 10140-2",
+    test_date="2026-07-18",
+    laboratory="Phonometry Reference Laboratory",
+    operator="J. M. Requena-Plens",
+    report_id="PHN-2026-0042",
+    requirement=42.0,          # adds the PASS/FAIL verdict row
+)
+building.weighted_rating(R).report(
+    "Rw_fiche.pdf", metadata=metadata
+)                                                           # Rw (C; Ctr)
+
+# Impact rating from a measured 16-band L'nT spectrum (ISO 717-2)
+l_nt = [45.0, 47.0, 48.0, 49.0, 51.0, 52.0, 53.0, 54.0,
+        55.0, 56.0, 57.0, 58.0, 55.0, 52.0, 49.0, 46.0]
+building.weighted_impact_rating(l_nt).report("Lnw_fiche.pdf")  # Ln,w (CI)
+```
+
+Rendered examples of both fiches, regenerated with `make reports`, are kept in
+the repository: the airborne
+[`iso717_airborne_example.pdf`](https://github.com/jmrplens/phonometry/raw/main/.github/reports/iso717_airborne_example.pdf)
+and the impact
+[`iso717_impact_example.pdf`](https://github.com/jmrplens/phonometry/raw/main/.github/reports/iso717_impact_example.pdf).
+
 ### Field façade insulation (ISO 16283-3)
 
 The same source/receiver logic reaches the building **façade**, but now the

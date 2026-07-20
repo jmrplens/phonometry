@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- ISO 717 sound-insulation ratings can now be exported as a one-page PDF fiche
+  through a `report(path)` method, laid out like an accredited-laboratory test
+  report: a standard-basis line, a metadata header block, the one-third-octave
+  table beside the measured-versus-shifted-reference plot, a boxed single-number
+  result and a footer with a fixed disclaimer. `WeightedRatingResult.report()`
+  renders the airborne ISO 717-1 fiche (the `Rw (C; Ctr)` result), and
+  `ImpactRatingResult.report()` renders the impact ISO 717-2 counterpart with
+  the `Ln,w (CI)` result and the opposite deviation sign.
+  `SoundReductionResult.report()` is a convenience that rates the predicted
+  `R(f)` and writes its fiche in one call. The report metadata is supplied as a
+  new `ReportMetadata` frozen dataclass (specimen, client, room and climatic
+  conditions, laboratory identity and an optional requirement); every field is
+  optional and only the supplied ones are rendered, so the same object drives a
+  full accredited fiche or, with `metadata=None`, a lightweight prediction
+  fiche. When a requirement is given, the fiche adds a PASS/FAIL verdict row
+  (airborne passes at or above the target, impact at or below it). Passing
+  `verbose=True` swaps the two-column `f | value` table for the ISO 717 Annex C
+  columns (frequency, measured value, shifted reference, unfavourable
+  deviation). Rendering uses reportlab, added as the optional
+  `phonometry[report]` extra so it stays out of the runtime dependencies; a
+  missing reportlab raises a clear `ImportError` with the install command,
+  mirroring the matplotlib guard behind `.plot()`. The rating results gain a
+  `quantity` field ("airborne" or "impact") that selects the report labels and
+  standard reference. Rendered example fiches (airborne and impact) are kept
+  under `.github/reports/`, regenerated with `make reports`
+  (`scripts/generate_reports.py`), and linked from the documentation.
 - `enclosure_insertion_loss` now accepts a panel prediction result directly for
   its `panel_transmission_loss` argument, in addition to a per-band array or a
   callable. A `SoundReductionResult` or `ApertureTransmissionResult` (from the

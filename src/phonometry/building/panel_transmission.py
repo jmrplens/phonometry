@@ -176,6 +176,23 @@ class SoundReductionResult:
 
         return weighted_rating(self.transmission_loss, bands)
 
+    def report(self, path: str, **kwargs: Any) -> str:
+        """Render the ISO 717-1 Annex C rating fiche of ``R(f)`` to a PDF.
+
+        Convenience wrapper delegating to
+        :meth:`~phonometry.building.insulation.WeightedRatingResult.report`
+        on :meth:`rating`; requires the predicted spectrum to be on the 16
+        one-third-octave bands (100 Hz to 3150 Hz) or the 5 octave bands
+        (125 Hz to 2000 Hz).
+
+        :param path: Destination path of the PDF file.
+        :param kwargs: Forwarded to
+            :meth:`~phonometry.building.insulation.WeightedRatingResult.report`
+            (e.g. ``engine``).
+        :return: The written ``path`` as a :class:`str`.
+        """
+        return self.rating().report(path, **kwargs)
+
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
         """Plot the predicted sound reduction index ``R(f)``.
 

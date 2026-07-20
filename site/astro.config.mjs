@@ -432,16 +432,16 @@ export default defineConfig({
                 'guides/dynamic-stiffness',
               ],
             },
-            {
-              label: 'Materials and surfaces',
-              translations: { es: 'Materiales y superficies' },
-              items: [
-                { slug: 'guides/sections/materials-surfaces', attrs: { 'data-group-link': true } },
-                'guides/materials',
-                'guides/porous-absorbers',
-                'guides/surface-scattering',
-              ],
-            },
+          ],
+        },
+        {
+          label: 'Materials and surfaces',
+          translations: { es: 'Materiales y superficies' },
+          items: [
+            { slug: 'guides/sections/materials-surfaces', attrs: { 'data-group-link': true } },
+            'guides/materials',
+            'guides/porous-absorbers',
+            'guides/surface-scattering',
           ],
         },
         {

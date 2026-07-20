@@ -237,6 +237,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.electroacoustics.frequency_response",
             "phonometry.electroacoustics.swept_sine",
             "phonometry.electroacoustics.piston",
+            "phonometry.electroacoustics.loudspeaker",
         ),
     ),
     Section(

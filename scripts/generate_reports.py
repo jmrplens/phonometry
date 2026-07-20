@@ -325,6 +325,71 @@ def _iso4871_declaration_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso4871_declaration_example.pdf"
 
 
+def _loudspeaker_example() -> Tuple[object, ReportMetadata, str]:
+    """IEC 60268-5 fiche: the rated characteristics of a two-way loudspeaker.
+
+    A synthetic on-axis response of an 8 ohm bookshelf loudspeaker: a flat
+    passband near 87 dB with a gentle ripple, a low-frequency roll-off below
+    50 Hz and a high-frequency roll-off above 16 kHz, so the effective frequency
+    range (IEC 60268-5 21.2) sits inside the measured band. The characteristic
+    sensitivity is referred to 1 W into 8 ohm at 1 m (the default 2,83 V drive),
+    and the impedance modulus, the total-harmonic-distortion curve and a baffled
+    circular-piston directivity feed the impedance, THD and polar panels. The
+    requirement is a characteristic sensitivity the example clears.
+    """
+    freqs = np.geomspace(30.0, 24000.0, 320)
+    reference = 87.0
+    spl = reference + 1.2 * np.sin(2.0 * np.log2(freqs / 900.0))
+    spl -= 10.0 * np.log10(1.0 + (50.0 / freqs) ** 6)      # LF roll-off
+    spl -= 10.0 * np.log10(1.0 + (freqs / 16000.0) ** 7)   # HF roll-off
+
+    imp_freqs = np.geomspace(20.0, 20000.0, 260)
+    impedance = (
+        6.6
+        + 24.0 * np.exp(-((np.log2(imp_freqs / 52.0)) ** 2) / 0.12)   # resonance peak
+        + 5.0 * (imp_freqs / 20000.0) ** 1.5                          # voice-coil rise
+    )
+
+    thd_freqs = np.geomspace(50.0, 5000.0, 140)
+    thd_percent = 0.3 + 2.6 * np.exp(-((np.log2(thd_freqs / 70.0)) ** 2) / 0.45)
+
+    angles = np.radians(np.linspace(0.0, 90.0, 46))
+    directivity = ph.radiating_piston(
+        0.075, np.array([1000.0, 2000.0, 4000.0]), angles=angles
+    )
+
+    result = ph.loudspeaker_characteristics(
+        freqs, spl, 8.0,
+        sensitivity_band=(200.0, 4000.0),
+        tolerance_db=3.0,
+        rated_frequency_range=(45.0, 22000.0),
+        rated_noise_power=80.0,
+        rated_sinusoidal_power=120.0,
+        resonance_frequency=52.0,
+        impedance=(imp_freqs, impedance),
+        distortion=(thd_freqs, thd_percent),
+        directivity=directivity,
+        polar_frequency=2000.0,
+    )
+    metadata = ReportMetadata(
+        specimen="Two-way bookshelf loudspeaker, 165 mm woofer",
+        client="Example client",
+        manufacturer="Example audio",
+        test_room="Anechoic chamber (example)",
+        mounting="Free field, on the tweeter axis at 1 m",
+        measurement_standard="IEC 60268-5",
+        temperature=21.0,
+        relative_humidity=45.0,
+        pressure=101.3,
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-60268-5",
+        requirement=84.0,
+    )
+    return result, metadata, "iec60268_5_loudspeaker_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -337,6 +402,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _filter_class_example,
     _filter_class_1995_example,
     _iso4871_declaration_example,
+    _loudspeaker_example,
 ]
 
 

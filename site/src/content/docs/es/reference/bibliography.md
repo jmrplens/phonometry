@@ -85,6 +85,21 @@ que las guías incorporan sus secciones de Referencias.
   Las clases de calibrador, las tolerancias de nivel y el criterio de
   estabilidad a corto plazo aplicado a las grabaciones de calibración.
   Citado por [Calibración y dBFS](/phonometry/es/guides/calibration/).
+- International Electrotechnical Commission. (2007). *Sound system equipment —
+  Part 5: Loudspeakers* (IEC 60268-5:2003+A1:2007).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/1223).
+  Las características nominales del altavoz: impedancia nominal, rango de
+  frecuencias nominal, sensibilidad característica referida a 1 W a 1 m, rango
+  de frecuencias efectivo frente a la banda de -10 dB, índice de directividad y
+  distorsión armónica total frente a la frecuencia.
+  Citado por [Electroacústica](/phonometry/es/guides/electroacoustics/).
+- International Electrotechnical Commission. (1982). *Scales and sizes for
+  plotting frequency characteristics and polar diagrams* (IEC 60263:1982).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/1218).
+  Las proporciones de escala de las gráficas características: una década de
+  frecuencia igual a 25 dB en la ordenada, y el diagrama polar sobre un radio
+  de círculo de referencia de 25 dB.
+  Citado por [Electroacústica](/phonometry/es/guides/electroacoustics/).
 
 ## Potencia acústica e intensidad
 

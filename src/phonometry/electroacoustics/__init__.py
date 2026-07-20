@@ -21,6 +21,7 @@ from .distortion import (
     weighted_thd,
 )
 from .frequency_response import FrequencyResponseResult, coherence, transfer_function
+from .loudspeaker import LoudspeakerCharacteristics, loudspeaker_characteristics
 from .piston import (
     RadiatingPistonResult,
     piston_directivity,
@@ -37,6 +38,7 @@ from .swept_sine import (
 __all__ = [
     "FrequencyResponseResult",
     "HarmonicDistortionResult",
+    "LoudspeakerCharacteristics",
     "ModulationDistortionResult",
     "RadiatingPistonResult",
     "SweptSineDistortionResult",
@@ -48,6 +50,7 @@ __all__ = [
     "harmonic_distortion",
     "idle_channel_noise",
     "itu_r_468_weighting",
+    "loudspeaker_characteristics",
     "modulation_distortion",
     "piston_directivity",
     "piston_reactance",

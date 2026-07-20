@@ -69,11 +69,11 @@ def _metadata_pairs(
     (aircraft, type-certificate holder, applicant, measurement point).
     """
     specs: List[Tuple[str, str | None]] = [
-        (t("meta.aircraft", language), metadata.specimen),
-        (t("meta.manufacturer_tc", language), metadata.manufacturer),
-        (t("meta.applicant", language), metadata.client),
-        (t("meta.measurement_point", language), metadata.test_room),
-        (t("meta.date_of_test", language), metadata.test_date),
+        (t("Aircraft", language), metadata.specimen),
+        (t("Manufacturer / TC holder", language), metadata.manufacturer),
+        (t("Applicant", language), metadata.client),
+        (t("Measurement point", language), metadata.test_room),
+        (t("Date of test", language), metadata.test_date),
     ]
     return [
         (label, html.escape(str(value)))
@@ -93,20 +93,20 @@ def _metric_rows(
     """
     k_first, k_last = result.band_limits
     rows = [
-        (t("metric.pnltm", language), fmt_num(result.pnltm, language)),
+        (t("PNLTM [PNdB]", language), fmt_num(result.pnltm, language)),
         (
-            t("metric.duration_correction", language),
+            t("Duration correction D [dB]", language),
             fmt_num(result.duration_correction, language),
         ),
         (
-            t("metric.window_10db_down", language),
+            t("10 dB-down window (records)", language),
             f"{k_first + 1}&#8211;{k_last + 1}",
         ),
     ]
     if abs(result.bandsharing_adjustment) > 1e-9:
         rows.append(
             (
-                t("metric.bandsharing", language),
+                t("Bandsharing adjustment [dB]", language),
                 fmt_num(result.bandsharing_adjustment, language),
             )
         )
@@ -131,9 +131,9 @@ def _verdict_rows(
     status = "pass" if float(result.epnl) <= limit else "fail"
     return [
         (
-            t("metric.epnl", language),
+            t("EPNL [EPNdB]", language),
             format_number(result.epnl, language, decimals=1),
-            t("epnl.limit_cell", language).format(
+            t("&#8804; {limit} (margin {margin})", language).format(
                 limit=fmt_num(limit, language),
                 margin=decimal_comma(f"{margin:+.1f}", language),
             ),
@@ -178,17 +178,17 @@ def render_annex16_epnl_report(
     accent = colors.HexColor(_ACCENT_HEX)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    title = t("title.epnl", language)
+    title = t("Aircraft noise certification - EPNL result", language)
 
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
     )
     if measurement_standard:
-        basis = t("basis.epnl.with_standard", language).format(
+        basis = t("{standard}. Effective Perceived Noise Level per ICAO Annex 16, Volume I, Appendix 2.", language).format(
             standard=html.escape(measurement_standard)
         )
     else:
-        basis = t("basis.epnl.plain", language)
+        basis = t("Effective Perceived Noise Level (EPNL) per ICAO Annex 16, Volume I, Appendix 2.", language)
 
     muted_strip_style = ParagraphStyle(
         "fiche_reference_conditions", parent=getSampleStyleSheet()["Normal"],
@@ -207,12 +207,12 @@ def render_annex16_epnl_report(
             flow.append(Spacer(1, 3))
             flow.append(grid_table(header_pairs))
     flow.append(
-        Paragraph(t("epnl.reference_conditions", language), muted_strip_style)
+        Paragraph(t("Reference conditions: 25 &#176;C, 70% relative humidity, sea level, zero wind, ISA (ICAO Annex 16 Vol I App. 2).", language), muted_strip_style)
     )
     flow.append(Spacer(1, 8))
 
     flow.append(
-        Paragraph(t("caption.intermediate_quantities", language), caption_style)
+        Paragraph(t("Intermediate quantities", language), caption_style)
     )
     flow.append(
         metrics_table(
@@ -238,7 +238,7 @@ def render_annex16_epnl_report(
     if limit is not None:
         flow.append(Spacer(1, 6))
         flow.append(
-            Paragraph(t("caption.certification_limit", language), caption_style)
+            Paragraph(t("Certification limit", language), caption_style)
         )
         flow.append(
             compliance_table(
@@ -254,7 +254,7 @@ def render_annex16_epnl_report(
         spaceBefore=2,
     )
     flow.append(
-        Paragraph(t("epnl.certificate_disclaimer", language), disclaimer_style)
+        Paragraph(t("This is a computational EPNL result per ICAO Annex 16 Vol I Appendix 2; it is not an official State noise certificate (e.g. EASA Form 45).", language), disclaimer_style)
     )
 
     return build_document(path, flow, title)

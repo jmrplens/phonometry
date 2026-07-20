@@ -29,6 +29,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._report.metadata import ReportMetadata
+
 #: The 24 one-third-octave band centre frequencies (Hz) used by PNL/EPNL.
 NOY_BANDS: "NDArray[np.float64]" = np.array(
     [
@@ -389,6 +391,51 @@ class EPNLResult:
         from .._plot.aircraft import plot_epnl
 
         return plot_epnl(self, ax=ax, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+    ) -> str:
+        """Render an ICAO Annex 16 EPNL certification fiche to a PDF.
+
+        Writes a one-page aircraft-noise-certification data sheet: the
+        standard-basis line (ICAO Annex 16 Vol. I Appendix 2), an optional
+        TCDSN-style metadata header (aircraft, manufacturer / type-certificate
+        holder, applicant, measurement point), a metrics table of the
+        informational intermediate quantities (PNLTM, the duration correction
+        ``D``, the 10 dB-down record window and, when non-zero, the bandsharing
+        adjustment), the result's own landscape PNLT-versus-time :meth:`plot`,
+        the boxed ``EPNL = X EPNdB`` result, a Level | Limit | Margin verdict
+        row when a certification limit is supplied, a static reference-conditions
+        strip and a footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a prediction
+            fiche (metrics, plot and result only, no verdict). A supplied
+            ``requirement`` is read as the certification EPNL limit in EPNdB
+            (the EPNL passes at or below it).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for a uniform signature; it has no effect on
+            the single-layout EPNL fiche.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.annex16_epnl import render_annex16_epnl_report
+
+        return render_annex16_epnl_report(
+            self, path, metadata=metadata, verbose=verbose
+        )
 
 
 def effective_perceived_noise_level(

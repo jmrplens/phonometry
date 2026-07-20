@@ -144,6 +144,49 @@ EPNLResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
 
 Plot the PNL and PNLT time histories with PNLTM and the 10 dB-down band.
 
+### EPNLResult.report()
+
+```python
+EPNLResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+) -> str
+```
+
+Render an ICAO Annex 16 EPNL certification fiche to a PDF.
+
+Writes a one-page aircraft-noise-certification data sheet: the
+standard-basis line (ICAO Annex 16 Vol. I Appendix 2), an optional
+TCDSN-style metadata header (aircraft, manufacturer / type-certificate
+holder, applicant, measurement point), a metrics table of the
+informational intermediate quantities (PNLTM, the duration correction
+`D`, the 10 dB-down record window and, when non-zero, the bandsharing
+adjustment), the result's own landscape PNLT-versus-time `plot`,
+the boxed `EPNL = X EPNdB` result, a Level | Limit | Margin verdict
+row when a certification limit is supplied, a static reference-conditions
+strip and a footer with the fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (metrics, plot and result only, no verdict). A supplied `requirement` is read as the certification EPNL limit in EPNdB (the EPNL passes at or below it). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for a uniform signature; it has no effect on the single-layout EPNL fiche. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
 ## NOY_BANDS
 
 *Constant* (`numpy.ndarray, shape (24,)`).

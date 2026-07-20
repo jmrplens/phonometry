@@ -49,12 +49,20 @@ references:
     organization: "International Electrotechnical Commission"
     year: 2003
     title: "Sound system equipment – Part 5: Loudspeakers"
-    designation: "IEC 60268-5:2003"
+    designation: "IEC 60268-5:2003+A1:2007"
     url: "https://webstore.iec.ch/en/publication/1223"
-    note: "Cláusulas 7.1, 20.3 y 20.4 (distancia de medición, sensibilidad característica y su nivel): las convenciones de altavoz de la sección 5, citadas como contexto y no implementadas como código."
+    note: "Las características nominales de altavoz de la sección 7: la impedancia nominal (16), el rango de frecuencias nominal (19.1), la sensibilidad característica y su nivel referido a 1 W a 1 m (20.3/20.4), el rango de frecuencias efectivo frente a la banda de -10 dB (21.2), el índice de directividad (23.3) y la distorsión armónica total frente a la frecuencia (24.1)."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 1982
+    title: "Scales and sizes for plotting frequency characteristics and polar diagrams"
+    designation: "IEC 60263:1982"
+    url: "https://webstore.iec.ch/en/publication/1218"
+    note: "Las proporciones de escala de las gráficas características de la sección 7: una década de frecuencia igual a 25 dB en la ordenada (cláusula 2) y el diagrama polar trazado sobre un radio de círculo de referencia de 25 dB (cláusula 3)."
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Dos pilares de la caracterización de equipos de audio, a partir de una señal
 capturada: cuánto **distorsiona** un amplificador o un transductor un tono de
@@ -395,9 +403,80 @@ mecánicas, la `radiation_mass`, el `directivity_index`, el patrón de campo lej
 invocables directamente. El pistón es el modelo de radiador complementario de los
 [silenciadores de control de ruido industrial](/phonometry/es/guides/noise-control/).
 
+## 7. Informe de características del altavoz (IEC 60268-5)
+
+Las características nominales que IEC 60268-5 define en torno a una respuesta en
+el eje medida se reúnen en un único resultado de **características del altavoz**
+que representa la ficha de características nominales de la norma. Dos de los
+números se calculan a partir de la respuesta en lugar de solo repetirse:
+
+- **Nivel de sensibilidad característica** (20.3/20.4). El nivel en el eje
+  promediado en una banda declarada, referido a 1 W en la impedancia nominal
+  $R$ a 1 m: $L_M = \overline{L} + 20\lg(d/d_0) + 20\lg(U_p/U)$ con
+  $U_p = \sqrt{R\cdot 1\,\text{W}} = \sqrt R$. La excitación por defecto es ese
+  $\sqrt R$ (2,83 V en 8 Ω), de modo que con una respuesta a 1 m el nivel de
+  sensibilidad es la media de banda.
+- **Rango de frecuencias efectivo** (21.2). La banda en la que la respuesta se
+  mantiene dentro de 10 dB del nivel promediado en la banda de una octava en la
+  región de máxima sensibilidad; los valles más estrechos que 1/9 de octava se
+  desprecian.
+
+```python
+import numpy as np
+from phonometry import loudspeaker_characteristics, radiating_piston, ReportMetadata
+
+freqs = np.geomspace(30, 24000, 320)
+spl = 87.0 + 1.2 * np.sin(2 * np.log2(freqs / 900.0))
+spl -= 10 * np.log10(1 + (50.0 / freqs) ** 6)       # caída en baja frecuencia
+spl -= 10 * np.log10(1 + (freqs / 16000.0) ** 7)    # caída en alta frecuencia
+
+result = loudspeaker_characteristics(
+    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    impedance=(np.geomspace(20, 20000, 260),
+               6.6 + 24 * np.exp(-(np.log2(np.geomspace(20, 20000, 260) / 52.0) ** 2) / 0.12)),
+    distortion=(np.geomspace(50, 5000, 140),
+                0.3 + 2.6 * np.exp(-(np.log2(np.geomspace(50, 5000, 140) / 70.0) ** 2) / 0.45)),
+    directivity=radiating_piston(0.075, np.array([1000.0, 2000.0, 4000.0]),
+                                 angles=np.radians(np.linspace(0, 90, 46))),
+    polar_frequency=2000.0,
+)
+print(round(result.sensitivity_level_db, 1))                 # dB, 1 W / 1 m
+print(tuple(round(x) for x in result.effective_range))       # Hz
+
+result.report("altavoz.pdf", metadata=ReportMetadata(measurement_standard="IEC 60268-5"),
+              language="es")
+```
+
+`loudspeaker_characteristics` devuelve un `LoudspeakerCharacteristics` con el
+`sensitivity_level_db`, el `effective_range`, el `reference_level_db`, la
+`characteristic_sensitivity_pa` y la `minimum_impedance` calculados, y un
+`.report()` que escribe la ficha. La respuesta en el eje se dibuja con su banda
+de tolerancia y los marcadores del rango efectivo según la proporción de
+IEC 60263 (una década de frecuencia igual a 25 dB), y la directividad polar
+sobre el círculo de referencia de 25 dB de IEC 60263. El módulo de impedancia
+(con la línea del 80 % de la nominal), la curva de distorsión armónica total y
+la directividad alimentan los paneles secundarios, reutilizando la directividad
+del [pistón radiante](#6-pistón-radiante-impedancia-de-radiación-y-directividad)
+de la sección 6 y un resultado de
+[distorsión con barrido sinusoidal](/phonometry/es/guides/swept-sine-distortion/)
+para la curva de distorsión.
+
+La ficha de ejemplo se regenera con `make reports` y se conserva renderizada en
+el repositorio; pulsa la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iec60268_5_loudspeaker_example"
+	title="Informe de ejemplo de características del altavoz IEC 60268-5 (PDF)"
+	description="Ficha de características nominales del altavoz IEC 60268-5 de una página: una cabecera con el fabricante y el modelo, la tabla de características nominales (impedancia nominal, sensibilidad característica, rangos de frecuencia efectivo y nominal, frecuencia de resonancia, potencias nominales, impedancia mínima e índice de directividad) junto a la respuesta en frecuencia en el eje con su banda de tolerancia y los marcadores del rango efectivo, y los paneles de impedancia, distorsión armónica total y directividad polar, todos trazados según las convenciones de escala de IEC 60263."
+	caption="Ficha de características del altavoz (LoudspeakerCharacteristics.report), la tabla de características nominales IEC 60268-5 junto a la respuesta en el eje y los paneles de impedancia, THD y polar trazados según las convenciones de 25 dB por década y de círculo de referencia de 25 dB de IEC 60263."
+/>
+
 ## Véase también
 
 - [Control de ruido industrial](/phonometry/es/guides/noise-control/):
   silenciadores reactivos, métodos HVAC de conducto y cerramientos de máquina,
   que comparten el pistón radiante como radiador canónico.
-- Referencia de la API: [`electroacoustics.distortion`](/phonometry/es/reference/api/electroacoustics/distortion/), [`electroacoustics.frequency_response`](/phonometry/es/reference/api/electroacoustics/frequency-response/) y [`electroacoustics.piston`](/phonometry/es/reference/api/electroacoustics/piston/).
+- [Distorsión con barrido sinusoidal](/phonometry/es/guides/swept-sine-distortion/):
+  la separación armónica de Farina/Novak cuya THD(f) alimenta el panel de
+  distorsión del altavoz.
+- Referencia de la API: [`electroacoustics.distortion`](/phonometry/es/reference/api/electroacoustics/distortion/), [`electroacoustics.frequency_response`](/phonometry/es/reference/api/electroacoustics/frequency-response/), [`electroacoustics.piston`](/phonometry/es/reference/api/electroacoustics/piston/) y [`electroacoustics.loudspeaker`](/phonometry/es/reference/api/electroacoustics/loudspeaker/).

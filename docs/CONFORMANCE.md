@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **365/365 conformance checks pass** across 46 domains and 233 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **367/367 conformance checks pass** across 46 domains and 234 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -477,12 +477,14 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Electroacoustics: distortion &amp; frequency response</b>: 100% (14/14)</summary>
+<summary>&#9989; <b>Electroacoustics: distortion &amp; frequency response</b>: 100% (16/16)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | IEC 60268-3:2013 (14.12.3.2) | THD (rel. total RMS, the R convention the clause defines) | 0.112853 (+/-0.0001) | 0.112853 | 0 | &#9989; |
 | Closed-form harmonic synthesis (THD_F convention) | THD (rel. fundamental, the widespread datasheet convention) | 0.113578 (+/-0.0001) | 0.113578 | 0 | &#9989; |
+| IEC 60268-5:2003 (20.3/20.4) | Characteristic sensitivity level, 1 W into 8 ohm at 1 m (flat 90 dB) | 90 dB (+/-0.000001 dB) | 90 dB | 0 dB | &#9989; |
+| IEC 60268-5:2003 (21.2) | Effective frequency range = -10 dB crossings (50 Hz / 18 kHz) | 50 Hz / 18000 Hz (ref -10 dB crossings) | 50.000 Hz / 18000.0 Hz | -0.000 / -0.000 Hz | &#9989; |
 | IEC 60268-3:2013 (14.12.5) | 2nd-order harmonic distortion d2 (rel. total) | 0.099361 (+/-0.0001) | 0.099361 | 0 | &#9989; |
 | IEC 60268-3:2013 (14.12.7.2 g) | Modulation distortion d_m,2 (arithmetic sideband sum over U_2,f2) | 0.16 (+/-0.0001) | 0.16 | 0 | &#9989; |
 | IEC 60268-3:2013 (14.12.7.2 h) | Modulation distortion d_m,3 (arithmetic sideband sum over U_2,f2) | 0.08 (+/-0.0001) | 0.08 | 0 | &#9989; |

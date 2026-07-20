@@ -130,6 +130,59 @@ def _threshold_crossing(
     return float(2.0 ** (_log2(f_in) + frac * (_log2(f_out) - _log2(f_in))))
 
 
+def _fill_narrow_troughs(
+    above: "NDArray[np.bool_]",
+    frequencies: "NDArray[np.float64]",
+    spl_db: "NDArray[np.float64]",
+    threshold: float,
+) -> None:
+    """Mark below-threshold runs narrower than 1/9 octave as in-band (21.2).
+
+    Mutates ``above`` in place. A run is measured by its two threshold crossings
+    (crossing to crossing); interior runs only, since an edge run has no outer
+    crossing to bracket it and never counts as a trough.
+    """
+    n = above.size
+    i = 0
+    while i < n:
+        if above[i]:
+            i += 1
+            continue
+        j = i
+        while j < n and not above[j]:
+            j += 1
+        if 0 < i and j < n:
+            lo_f = _threshold_crossing(
+                frequencies[i - 1], spl_db[i - 1], frequencies[i], spl_db[i], threshold
+            )
+            hi_f = _threshold_crossing(
+                frequencies[j - 1], spl_db[j - 1], frequencies[j], spl_db[j], threshold
+            )
+            if _log2(hi_f / lo_f) < _MIN_TROUGH_OCTAVES:
+                above[i:j] = True
+        i = j
+
+
+def _band_edge(
+    frequencies: "NDArray[np.float64]",
+    spl_db: "NDArray[np.float64]",
+    threshold: float,
+    edge: int,
+    neighbour: int,
+) -> float:
+    """Interpolated threshold crossing between the in-band ``edge`` and ``neighbour``.
+
+    When the in-band region already reaches the measured band end (no outer
+    neighbour), the measured edge frequency is returned.
+    """
+    if not 0 <= neighbour < frequencies.size:
+        return float(frequencies[edge])
+    return _threshold_crossing(
+        frequencies[edge], spl_db[edge], frequencies[neighbour], spl_db[neighbour],
+        threshold,
+    )
+
+
 def _effective_range(
     frequencies: "NDArray[np.float64]", spl_db: "NDArray[np.float64]", reference: float
 ) -> tuple[float, float]:
@@ -140,36 +193,10 @@ def _effective_range(
     side of the peak, or the measured band edge where the response never drops.
     """
     threshold = reference - _EFFECTIVE_DROP_DB
-    above = spl_db >= threshold
-    # Fill troughs narrower than 1/9 octave (measured crossing to crossing).
-    n = above.size
-    i = 0
-    while i < n:
-        if above[i]:
-            i += 1
-            continue
-        j = i
-        while j < n and not above[j]:
-            j += 1
-        # Below-threshold run is samples [i, j-1]; bracket it by its crossings.
-        lo_f = (
-            _threshold_crossing(
-                frequencies[i - 1], spl_db[i - 1], frequencies[i], spl_db[i], threshold
-            )
-            if i > 0
-            else frequencies[i]
-        )
-        hi_f = (
-            _threshold_crossing(
-                frequencies[j - 1], spl_db[j - 1], frequencies[j], spl_db[j], threshold
-            )
-            if j < n
-            else frequencies[j - 1]
-        )
-        if 0 < i and j < n and _log2(hi_f / lo_f) < _MIN_TROUGH_OCTAVES:
-            above[i:j] = True  # neglect the narrow trough
-        i = j
+    above = np.asarray(spl_db >= threshold)
+    _fill_narrow_troughs(above, frequencies, spl_db, threshold)
 
+    n = above.size
     peak = int(np.argmax(spl_db))
     if not above[peak]:  # pragma: no cover - the peak is always >= threshold
         return float(frequencies[peak]), float(frequencies[peak])
@@ -179,22 +206,8 @@ def _effective_range(
     hi_idx = peak
     while hi_idx < n - 1 and above[hi_idx + 1]:
         hi_idx += 1
-    lower = (
-        _threshold_crossing(
-            frequencies[lo_idx], spl_db[lo_idx],
-            frequencies[lo_idx - 1], spl_db[lo_idx - 1], threshold,
-        )
-        if lo_idx > 0
-        else float(frequencies[0])
-    )
-    upper = (
-        _threshold_crossing(
-            frequencies[hi_idx], spl_db[hi_idx],
-            frequencies[hi_idx + 1], spl_db[hi_idx + 1], threshold,
-        )
-        if hi_idx < n - 1
-        else float(frequencies[-1])
-    )
+    lower = _band_edge(frequencies, spl_db, threshold, lo_idx, lo_idx - 1)
+    upper = _band_edge(frequencies, spl_db, threshold, hi_idx, hi_idx + 1)
     return lower, upper
 
 
@@ -358,6 +371,95 @@ def _polar_from_directivity(
     return angles_deg, rel_db, float(freqs[idx]), di
 
 
+def _optional_positive(value: float | None, name: str) -> float | None:
+    """Validate a supplied rated value as finite and positive, else keep ``None``."""
+    return require_positive(value, name) if value is not None else None
+
+
+def _resolve_sensitivity_band(
+    f: "NDArray[np.float64]",
+    spl: "NDArray[np.float64]",
+    sensitivity_band: tuple[float, float] | None,
+) -> tuple[float, float]:
+    """Resolve the characteristic-sensitivity band, defaulting to the peak octave."""
+    if sensitivity_band is None:
+        f_peak = float(f[int(np.argmax(spl))])
+        return (f_peak / _OCTAVE_HALF, f_peak * _OCTAVE_HALF)
+    lo, hi = float(sensitivity_band[0]), float(sensitivity_band[1])
+    if not 0.0 < lo < hi:
+        raise ValueError("'sensitivity_band' must be a positive (lo, hi) with lo < hi.")
+    return (lo, hi)
+
+
+def _characteristic_sensitivity_level(
+    f: "NDArray[np.float64]",
+    spl: "NDArray[np.float64]",
+    band: tuple[float, float],
+    r: float,
+    u: float,
+    d: float,
+) -> float:
+    """Band-mean on-axis level referred to 1 W into ``R`` at 1 m (20.3/20.4)."""
+    in_band = (f >= band[0]) & (f <= band[1])
+    if not np.any(in_band):
+        raise ValueError("'sensitivity_band' selects no on-axis response samples.")
+    band_level = _energetic_mean_db(spl[in_band])
+    # The drive-voltage and distance corrections; U_p = sqrt(R) drives 1 W into R.
+    return float(
+        band_level + 20.0 * np.log10(d) + 20.0 * np.log10(float(np.sqrt(r)) / u)
+    )
+
+
+def _resolve_impedance(
+    impedance: "tuple[ArrayLike, ArrayLike] | None",
+) -> tuple["NDArray[np.float64] | None", "NDArray[np.float64] | None"]:
+    """Validate the optional impedance-modulus curve (16.2)."""
+    if impedance is None:
+        return None, None
+    imp_f, imp_z = _as_curve(impedance[0], impedance[1], "impedance")
+    if np.any(imp_z <= 0.0):
+        raise ValueError("'impedance' modulus must be positive.")
+    return imp_f, imp_z
+
+
+def _resolve_distortion(
+    distortion: "SweptSineDistortionResult | tuple[ArrayLike, ArrayLike] | None",
+) -> tuple["NDArray[np.float64] | None", "NDArray[np.float64] | None"]:
+    """Resolve the optional THD-against-frequency curve, in % (24.1)."""
+    if distortion is None:
+        return None, None
+    if isinstance(distortion, tuple):
+        thd_f, thd_p = _as_curve(distortion[0], distortion[1], "distortion")
+    else:
+        thd_f = np.asarray(distortion.thd_frequencies, dtype=np.float64)
+        thd_p = np.asarray(distortion.thd, dtype=np.float64) * 100.0
+    if np.any(thd_p < 0.0):
+        raise ValueError("'distortion' THD values must be non-negative.")
+    return thd_f, thd_p
+
+
+def _resolve_polar(
+    directivity: "RadiatingPistonResult | None",
+    polar: "tuple[ArrayLike, ArrayLike] | None",
+    polar_frequency: float | None,
+    directivity_index_db: float | None,
+) -> tuple[
+    "NDArray[np.float64] | None", "NDArray[np.float64] | None", float | None, float | None
+]:
+    """Resolve the optional polar response and directivity index (23.1/23.3)."""
+    if directivity is not None:
+        return _polar_from_directivity(directivity, polar_frequency)
+    if polar is None:
+        return None, None, polar_frequency, directivity_index_db
+    p_ang = np.atleast_1d(np.asarray(polar[0], dtype=np.float64))
+    p_db = np.atleast_1d(np.asarray(polar[1], dtype=np.float64))
+    if p_ang.ndim != 1 or p_ang.shape != p_db.shape:
+        raise ValueError("'polar' angles and levels must be 1-D and equal length.")
+    if not (np.all(np.isfinite(p_ang)) and np.all(np.isfinite(p_db))):
+        raise ValueError("'polar' angles and levels must be finite.")
+    return p_ang, p_db, polar_frequency, directivity_index_db
+
+
 def loudspeaker_characteristics(
     frequencies: "ArrayLike",
     spl_db: "ArrayLike",
@@ -420,63 +522,28 @@ def loudspeaker_characteristics(
     """
     f, spl = _as_curve(frequencies, spl_db, "on-axis response")
     r = require_positive(rated_impedance, "rated_impedance")
-    u = require_positive(input_voltage, "input_voltage") if input_voltage is not None else float(np.sqrt(r))
+    u = (
+        require_positive(input_voltage, "input_voltage")
+        if input_voltage is not None
+        else float(np.sqrt(r))
+    )
     d = require_positive(distance, "distance")
     tol = require_positive(tolerance_db, "tolerance_db")
 
     reference = _reference_level(f, spl)
     effective = _effective_range(f, spl, reference)
-
-    if sensitivity_band is None:
-        peak = int(np.argmax(spl))
-        f_peak = f[peak]
-        band = (float(f_peak / _OCTAVE_HALF), float(f_peak * _OCTAVE_HALF))
-    else:
-        lo, hi = float(sensitivity_band[0]), float(sensitivity_band[1])
-        if not (0.0 < lo < hi):
-            raise ValueError("'sensitivity_band' must be a positive (lo, hi) with lo < hi.")
-        band = (lo, hi)
-    in_band = (f >= band[0]) & (f <= band[1])
-    if not np.any(in_band):
-        raise ValueError("'sensitivity_band' selects no on-axis response samples.")
-    band_level = _energetic_mean_db(spl[in_band])
-    # Refer the band level to 1 W into R at 1 m (20.3.2): the drive-voltage and
-    # distance corrections. U_p = sqrt(R) drives 1 W into R.
-    sensitivity_level = (
-        band_level + 20.0 * np.log10(d) + 20.0 * np.log10(float(np.sqrt(r)) / u)
+    band = _resolve_sensitivity_band(f, spl, sensitivity_band)
+    sensitivity_level = _characteristic_sensitivity_level(f, spl, band, r, u, d)
+    imp_f, imp_z = _resolve_impedance(impedance)
+    thd_f, thd_p = _resolve_distortion(distortion)
+    p_ang, p_db, p_freq, di = _resolve_polar(
+        directivity, polar, polar_frequency, directivity_index_db
     )
-
-    imp_f: "NDArray[np.float64] | None" = None
-    imp_z: "NDArray[np.float64] | None" = None
-    if impedance is not None:
-        imp_f, imp_z = _as_curve(impedance[0], impedance[1], "impedance")
-        if np.any(imp_z <= 0.0):
-            raise ValueError("'impedance' modulus must be positive.")
-
-    thd_f: "NDArray[np.float64] | None" = None
-    thd_p: "NDArray[np.float64] | None" = None
-    if distortion is not None:
-        if isinstance(distortion, tuple):
-            thd_f, thd_p = _as_curve(distortion[0], distortion[1], "distortion")
-        else:
-            thd_f = np.asarray(distortion.thd_frequencies, dtype=np.float64)
-            thd_p = np.asarray(distortion.thd, dtype=np.float64) * 100.0
-        if np.any(thd_p < 0.0):
-            raise ValueError("'distortion' THD values must be non-negative.")
-
-    p_ang: "NDArray[np.float64] | None" = None
-    p_db: "NDArray[np.float64] | None" = None
-    p_freq = polar_frequency
-    di = directivity_index_db
-    if directivity is not None:
-        p_ang, p_db, p_freq, di = _polar_from_directivity(directivity, polar_frequency)
-    elif polar is not None:
-        p_ang = np.atleast_1d(np.asarray(polar[0], dtype=np.float64))
-        p_db = np.atleast_1d(np.asarray(polar[1], dtype=np.float64))
-        if p_ang.ndim != 1 or p_ang.shape != p_db.shape:
-            raise ValueError("'polar' angles and levels must be 1-D and equal length.")
-        if not (np.all(np.isfinite(p_ang)) and np.all(np.isfinite(p_db))):
-            raise ValueError("'polar' angles and levels must be finite.")
+    rated_range = (
+        (float(rated_frequency_range[0]), float(rated_frequency_range[1]))
+        if rated_frequency_range is not None
+        else None
+    )
 
     return LoudspeakerCharacteristics(
         frequencies=f,
@@ -487,27 +554,15 @@ def loudspeaker_characteristics(
         sensitivity_band=band,
         tolerance_db=tol,
         reference_level_db=reference,
-        sensitivity_level_db=float(sensitivity_level),
+        sensitivity_level_db=sensitivity_level,
         effective_range=effective,
-        rated_frequency_range=(
-            (float(rated_frequency_range[0]), float(rated_frequency_range[1]))
-            if rated_frequency_range is not None
-            else None
+        rated_frequency_range=rated_range,
+        rated_noise_power=_optional_positive(rated_noise_power, "rated_noise_power"),
+        rated_sinusoidal_power=_optional_positive(
+            rated_sinusoidal_power, "rated_sinusoidal_power"
         ),
-        rated_noise_power=(
-            require_positive(rated_noise_power, "rated_noise_power")
-            if rated_noise_power is not None
-            else None
-        ),
-        rated_sinusoidal_power=(
-            require_positive(rated_sinusoidal_power, "rated_sinusoidal_power")
-            if rated_sinusoidal_power is not None
-            else None
-        ),
-        resonance_frequency=(
-            require_positive(resonance_frequency, "resonance_frequency")
-            if resonance_frequency is not None
-            else None
+        resonance_frequency=_optional_positive(
+            resonance_frequency, "resonance_frequency"
         ),
         impedance_frequencies=imp_f,
         impedance_modulus=imp_z,

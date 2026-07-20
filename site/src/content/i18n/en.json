@@ -1,5 +1,6 @@
 {
   "phonometry.references.title": "References",
+  "phonometry.report.download": "Download the report (PDF)",
   "phonometry.video.download": "Download the animation (WebM)",
   "phonometry.video.fallback": "Your browser cannot play embedded video. Download the animation instead:"
 }

@@ -109,6 +109,7 @@ export const collections = {
     schema: i18nSchema({
       extend: z.object({
         'phonometry.references.title': z.string().optional(),
+        'phonometry.report.download': z.string().optional(),
         'phonometry.video.download': z.string().optional(),
         'phonometry.video.fallback': z.string().optional(),
       }),

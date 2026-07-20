@@ -379,10 +379,32 @@ building.weighted_impact_rating(l_nt).report("Lnw_fiche.pdf")  # Ln,w (CI)
 ```
 
 Rendered examples of both fiches, regenerated with `make reports`, are kept in
-the repository: the airborne
-[`iso717_airborne_example.pdf`](https://github.com/jmrplens/phonometry/raw/main/.github/reports/iso717_airborne_example.pdf)
-and the impact
-[`iso717_impact_example.pdf`](https://github.com/jmrplens/phonometry/raw/main/.github/reports/iso717_impact_example.pdf).
+the repository. Click either preview to open the PDF:
+
+[![Airborne ISO 717-1 example report: metadata header, one-third-octave R table beside the measured-versus-shifted-reference plot, boxed Rw (C; Ctr) and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.png)](https://github.com/jmrplens/phonometry/raw/main/.github/reports/iso717_airborne_example.pdf)
+
+*Airborne rating fiche (`WeightedRatingResult.report`), Rw (C; Ctr).*
+
+[![Impact ISO 717-2 example report: the same accredited layout for the normalized impact level Ln, boxed Ln,w (CI) and a FAIL verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.png)](https://github.com/jmrplens/phonometry/raw/main/.github/reports/iso717_impact_example.pdf)
+
+*Impact rating fiche (`ImpactRatingResult.report`), Ln,w (CI).*
+
+#### Report metadata (`ReportMetadata`)
+
+Every field is optional and only the supplied ones are rendered, so the same
+object drives a full accredited fiche and a lightweight prediction fiche. The
+numeric fields are validated on construction by physical range.
+
+| Field | Type | Rendered as |
+| --- | --- | --- |
+| `specimen`, `client`, `mounted_by`, `manufacturer` | `str` | Header identity of the tested element and who it was tested for / mounted by |
+| `area`, `mass_per_area` | `float > 0` | Sample area *S* (m²) and measured mass per unit area (kg/m²) |
+| `source_volume`, `receiving_volume` | `float > 0` | Room volumes (m³) |
+| `temperature`, `relative_humidity`, `pressure` | `float` | Single representative climate: air temperature (°C, any sign), relative humidity (0–100 %), ambient pressure (kPa, > 0) |
+| `source_temperature`, `source_relative_humidity`, `receiving_temperature`, `receiving_relative_humidity` | `float` | Per-room climate when source and receiving rooms are reported separately (same ranges as above) |
+| `test_room`, `mounting`, `measurement_standard`, `test_date` | `str` | Facility, mounting condition, the measurement standard (forms the standard-basis line) and the test date |
+| `laboratory`, `operator`, `report_id`, `notes` | `str` | Footer: institute, operator signature line, report number and free-form remarks |
+| `requirement` | `float > 0` | Target single number; adds the verdict row (airborne passes at or above it, impact at or below it) |
 
 ### Field façade insulation (ISO 16283-3)
 

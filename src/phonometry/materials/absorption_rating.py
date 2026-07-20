@@ -251,6 +251,7 @@ class AbsorptionRatingResult:
         metadata: "ReportMetadata | None" = None,
         engine: str = "reportlab",
         verbose: bool = False,
+        language: str = "en",
     ) -> str:
         """Render an ISO 11654 sound-absorption rating fiche to a PDF.
 
@@ -272,11 +273,16 @@ class AbsorptionRatingResult:
         :param verbose: When ``True``, the table adds the ISO 11654 evaluation
             columns (practical coefficient, shifted reference, unfavourable
             deviation) instead of the two-column ``f | alpha_p`` table.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``).
         """
+        from .._i18n import check_language
+
+        check_language(language)
         if engine != "reportlab":
             raise ValueError(
                 f"Unknown report engine {engine!r}; only 'reportlab' is supported."
@@ -284,7 +290,7 @@ class AbsorptionRatingResult:
         from .._report.iso11654 import render_iso11654_report
 
         return render_iso11654_report(
-            self, path, metadata=metadata, verbose=verbose
+            self, path, metadata=metadata, verbose=verbose, language=language
         )
 
 

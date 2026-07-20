@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Every `.report()` fiche accepts a `language` argument (`'en'` default, `'es'`):
+  Spanish strings and a comma decimal separator.
 - IEC 61260-1 filter class compliance can now be exported as a one-page PDF
   fiche. A new `filter_class_compliance(bank, *, num_points=..., edition=...)`
   runs the same verification as `verify_filter_class` and returns a frozen

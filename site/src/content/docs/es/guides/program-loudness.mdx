@@ -318,7 +318,10 @@ un `requirement` proporcionado se interpreta como la sonoridad de programa
 objetivo en LUFS (por defecto los −23,0 LUFS de EBU R 128), y la ficha cumple
 cuando la sonoridad integrada está dentro de ±0,5 LU de él y el pico verdadero
 es igual o inferior a −1,0 dBTP. El renderizado necesita reportlab
-(`pip install phonometry[report]`); solo se admite `engine="reportlab"`.
+(`pip install phonometry[report]`); solo se admite `engine="reportlab"`. La
+ficha se genera en inglés por defecto; pasa `language="es"` para una ficha en
+español (cadenas fijas traducidas y coma como separador decimal), p. ej.
+`res.report("loudness_fiche_es.pdf", language="es")`.
 
 ```python
 from phonometry import broadcast, ReportMetadata

@@ -809,7 +809,9 @@ worst-margin band's measured relative attenuation overlaid on the class
 corridor, and the boxed overall class-compliance result. Pass a `required_class`
 on the `ReportMetadata` to add a PASS/FAIL verdict row (a bank "meets class N"
 when its achieved class is at least as strict, i.e. a class index of N or
-lower).
+lower). The fiche renders in English by default; pass `language="es"` for a
+Spanish fiche (translated fixed strings and a comma decimal separator), e.g.
+`result.report("iec61260_es.pdf", language="es")`.
 
 ```python
 from phonometry import OctaveFilterBank, ReportMetadata, filter_class_compliance
@@ -2781,7 +2783,9 @@ footer with the fixed disclaimer. It uses the same `ReportMetadata` container
 and rendering engine as the ISO 717 insulation fiche; a supplied `requirement`
 is read as the maximum permitted loudness in sone (a lower loudness passes).
 Rendering needs reportlab (`pip install phonometry[report]`); only
-`engine="reportlab"` is supported.
+`engine="reportlab"` is supported. The fiche renders in English by default;
+pass `language="es"` for a Spanish fiche (translated fixed strings and a comma
+decimal separator), e.g. `res.report("loudness_fiche_es.pdf", language="es")`.
 
 ```python
 from phonometry import psychoacoustics, ReportMetadata
@@ -5647,7 +5651,10 @@ Rendering needs reportlab, kept out of the runtime dependencies as the optional
 `phonometry[report]` extra (`pip install phonometry[report]`); a missing
 reportlab raises a clear `ImportError` with the install command, and the plot
 still needs matplotlib (`phonometry[plot]`). Only `engine="reportlab"` is
-supported; any other engine raises `ValueError`.
+supported; any other engine raises `ValueError`. The fiche renders in English by
+default; pass `language="es"` for a Spanish fiche (translated fixed strings and
+a comma decimal separator), e.g.
+`building.weighted_rating(R).report("Rw_fiche_es.pdf", language="es")`.
 
 ```python
 from phonometry import building, ReportMetadata

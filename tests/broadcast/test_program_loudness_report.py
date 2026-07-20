@@ -137,3 +137,30 @@ def test_informational_rows_do_not_change_verdict(tmp_path) -> None:
     out = tmp_path / "info.pdf"
     tampered.report(str(out), metadata=ReportMetadata(requirement=-23.0))
     _assert_one_page(str(out))
+
+
+def _extract_text(path: str) -> str:
+    """The concatenated text of every page (for language assertions)."""
+    from pypdf import PdfReader
+
+    return "\n".join(page.extract_text() for page in PdfReader(path).pages)
+
+
+def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
+    """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    import re
+
+    result = _case1_result()
+    out = tmp_path / "program_es.pdf"
+    result.report(str(out), language="es")
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "Conformidad de sonoridad de programa" in text
+    assert re.search(r"\d,\d", text) is not None  # comma decimal separator
+
+
+def test_unknown_language_rejected(tmp_path) -> None:
+    """An unknown fiche language raises ``ValueError``."""
+    result = _case1_result()
+    with pytest.raises(ValueError, match="language"):
+        result.report(str(tmp_path / "bad.pdf"), language="xx")

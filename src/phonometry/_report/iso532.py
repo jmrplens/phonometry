@@ -30,6 +30,7 @@ from __future__ import annotations
 import html
 from typing import TYPE_CHECKING, Any, List, Tuple
 
+from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
     _REPORTLAB_HINT,
@@ -50,7 +51,9 @@ if TYPE_CHECKING:
     from ..psychoacoustics.loudness_zwicker import ZwickerLoudness
 
 
-def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
+def _metadata_pairs(
+    metadata: ReportMetadata, language: str = "en"
+) -> List[Tuple[str, str]]:
     """Build the ordered (label, value) pairs of the loudness header grid.
 
     Only fields that are set are returned. Loudness is a signal metric, so the
@@ -58,11 +61,11 @@ def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
     identity fields are used.
     """
     specs: List[Tuple[str, str | None]] = [
-        ("Client", metadata.client),
-        ("Signal", metadata.specimen),
-        ("Manufacturer", metadata.manufacturer),
-        ("Test room", metadata.test_room),
-        ("Date of test", metadata.test_date),
+        (t("meta.client", language), metadata.client),
+        (t("meta.signal", language), metadata.specimen),
+        (t("meta.manufacturer", language), metadata.manufacturer),
+        (t("meta.test_room", language), metadata.test_room),
+        (t("meta.date_of_test", language), metadata.test_date),
     ]
     return [
         (label, html.escape(str(value)))
@@ -71,37 +74,46 @@ def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
     ]
 
 
-def _metric_rows(result: "ZwickerLoudness") -> List[Tuple[str, str]]:
+def _metric_rows(
+    result: "ZwickerLoudness", language: str = "en"
+) -> List[Tuple[str, str]]:
     """The scalar loudness results shown in the left-hand metrics table."""
     rows = [
-        ("Total loudness N [sone]", fmt_num(result.loudness)),
-        ("Loudness level L<sub>N</sub> [phon]", fmt_num(result.loudness_level)),
+        (t("metric.total_loudness", language), fmt_num(result.loudness, language)),
+        (
+            t("metric.loudness_level", language),
+            fmt_num(result.loudness_level, language),
+        ),
     ]
     if result.n5 is not None:
-        rows.append(("N<sub>5</sub> [sone]", fmt_num(result.n5)))
+        rows.append((t("metric.n5", language), fmt_num(result.n5, language)))
     if result.n10 is not None:
-        rows.append(("N<sub>10</sub> [sone]", fmt_num(result.n10)))
+        rows.append((t("metric.n10", language), fmt_num(result.n10, language)))
     return rows
 
 
-def _statement(result: "ZwickerLoudness") -> str:
+def _statement(result: "ZwickerLoudness", language: str = "en") -> str:
     """The boxed single-number statement ``N = X sone (LN = Y phon)``."""
+    loudness = format_number(result.loudness, language, decimals=1)
+    level = format_number(result.loudness_level, language, decimals=1)
     return (
-        f"N = <b>{result.loudness:.1f} sone</b> &nbsp; "
-        f"(L<sub>N</sub> = {result.loudness_level:.1f} phon)"
+        f"N = <b>{loudness} sone</b> &nbsp; "
+        f"(L<sub>N</sub> = {level} phon)"
     )
 
 
-def _verdict(result: "ZwickerLoudness", requirement: float) -> Tuple[str, bool]:
+def _verdict(
+    result: "ZwickerLoudness", requirement: float, language: str = "en"
+) -> Tuple[str, bool]:
     """Verdict text and PASS flag: loudness passes at or below the requirement.
 
     The requirement is read as a maximum permitted loudness in sone (a lower
     loudness is better), so the sign rule is the opposite of the airborne one.
     """
     passed = float(result.loudness) <= requirement
-    text = (
-        f"N = {result.loudness:.1f} sone, required &#8804; "
-        f"{fmt_num(requirement)} sone"
+    text = t("iso532.verdict", language).format(
+        value=format_number(result.loudness, language, decimals=1),
+        req=fmt_num(requirement, language),
     )
     return text, passed
 
@@ -112,6 +124,7 @@ def render_iso532_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
+    language: str = "en",
 ) -> str:
     """Render an ISO 532-1 Zwicker loudness fiche to a PDF at ``path``.
 
@@ -140,18 +153,17 @@ def render_iso532_report(
     accent = colors.HexColor(_ACCENT_HEX)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    title = "Loudness rating"
+    title = t("title.loudness", language)
 
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
     )
     if measurement_standard:
-        basis = (
-            f"{html.escape(measurement_standard)} loudness. Rating per "
-            "ISO 532-1:2017 (Zwicker method)."
+        basis = t("basis.iso532.with_standard", language).format(
+            standard=html.escape(measurement_standard)
         )
     else:
-        basis = "Loudness rating per ISO 532-1:2017 (Zwicker method)."
+        basis = t("basis.iso532.plain", language)
 
     flow: List[Any] = [
         Paragraph(title, title_style),
@@ -159,25 +171,27 @@ def render_iso532_report(
     ]
 
     if metadata is not None and not metadata.is_empty():
-        header_pairs = _metadata_pairs(metadata)
+        header_pairs = _metadata_pairs(metadata, language)
         if header_pairs:
             flow.append(Spacer(1, 3))
             flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
     left_cell = [
-        Paragraph("Loudness results", caption_style),
-        metrics_table(_metric_rows(result)),
+        Paragraph(t("caption.loudness_results", language), caption_style),
+        metrics_table(_metric_rows(result, language)),
     ]
     # Non-band plot (specific loudness N' over Bark): self-scaling axis.
-    plot_drawing = render_figure_drawing(result.plot, 116 * mm, y_top=None)
+    plot_drawing = render_figure_drawing(
+        result.plot, 116 * mm, y_top=None, language=language
+    )
     flow.append(two_panel_body(left_cell, plot_drawing))
     flow.append(Spacer(1, 8))
 
-    flow.append(result_box(_statement(result), styles, accent))
+    flow.append(result_box(_statement(result, language), styles, accent))
     if metadata is not None and metadata.requirement is not None:
-        text, passed = _verdict(result, metadata.requirement)
-        flow.extend(verdict_flow(text, passed, styles))
-    flow.extend(footer_flow(metadata))
+        text, passed = _verdict(result, metadata.requirement, language)
+        flow.extend(verdict_flow(text, passed, styles, language))
+    flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)

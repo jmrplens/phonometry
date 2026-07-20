@@ -129,7 +129,9 @@ and rendering engine as the ISO 717 insulation fiche; passing
 Setting `verbose=True` swaps the two-column table for the ISO 11654 evaluation
 columns (practical coefficient, shifted reference, unfavourable deviation).
 Rendering needs reportlab (`pip install phonometry[report]`); only
-`engine="reportlab"` is supported.
+`engine="reportlab"` is supported. The fiche renders in English by default;
+pass `language="es"` for a Spanish fiche (translated fixed strings and a comma
+decimal separator), e.g. `result.report("alpha_w_fiche_es.pdf", language="es")`.
 
 ```python
 from phonometry import materials, ReportMetadata

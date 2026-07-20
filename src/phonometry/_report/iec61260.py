@@ -31,6 +31,7 @@ from __future__ import annotations
 import html
 from typing import TYPE_CHECKING, Any, List, Tuple
 
+from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
     _MUTED_HEX,
@@ -57,7 +58,7 @@ def _binding_margin(result: "FilterComplianceResult", cls: int) -> float:
     return min(float(band[key]) for band in result.bands)
 
 
-def _basis(metadata: ReportMetadata | None, edition: str) -> str:
+def _basis(metadata: ReportMetadata | None, edition: str, language: str = "en") -> str:
     """The standard-basis line for the fiche."""
     table = (
         "IEC 61260-1:2014, Table 1"
@@ -68,14 +69,15 @@ def _basis(metadata: ReportMetadata | None, edition: str) -> str:
         metadata.measurement_standard if metadata is not None else None
     )
     if measurement_standard:
-        return (
-            f"{html.escape(measurement_standard)} type test. Conformance to "
-            f"{table}."
+        return t("basis.iec61260.with_standard", language).format(
+            standard=html.escape(measurement_standard), table=table
         )
-    return f"Conformance to {table}."
+    return t("basis.iec61260.plain", language).format(table=table)
 
 
-def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
+def _metadata_pairs(
+    metadata: ReportMetadata, language: str = "en"
+) -> List[Tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
     Only fields that are set are returned. A filter bank is an instrument, so
@@ -83,11 +85,11 @@ def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
     field labels the tested filter or analyser.
     """
     specs: List[Tuple[str, str | None]] = [
-        ("Client", metadata.client),
-        ("Filter / instrument", metadata.specimen),
-        ("Manufacturer", metadata.manufacturer),
-        ("Test facility", metadata.test_room),
-        ("Date of test", metadata.test_date),
+        (t("meta.client", language), metadata.client),
+        (t("meta.filter_instrument", language), metadata.specimen),
+        (t("meta.manufacturer", language), metadata.manufacturer),
+        (t("meta.test_facility", language), metadata.test_room),
+        (t("meta.date_of_test", language), metadata.test_date),
     ]
     return [
         (label, html.escape(str(value)))
@@ -101,38 +103,46 @@ def _fraction_label(fraction: int) -> str:
     return "1/1-octave" if fraction == 1 else f"1/{fraction}-octave"
 
 
-def _metric_rows(result: "FilterComplianceResult") -> List[Tuple[str, str]]:
+def _metric_rows(
+    result: "FilterComplianceResult", language: str = "en"
+) -> List[Tuple[str, str]]:
     """Per-band rows: mid-band frequency vs achieved class and binding margin."""
     cls = result.reference_class()
     key = f"margin_class{cls}_db"
     rows: List[Tuple[str, str]] = []
     for band in result.bands:
         band_class = band["class"]
-        class_text = "none" if band_class is None else f"Class {band_class}"
-        margin = float(band[key])
-        rows.append(
-            (f"{float(band['freq']):.0f} Hz", f"{class_text} ({margin:+.2f} dB)")
+        class_text = (
+            t("iec61260.class_none", language)
+            if band_class is None
+            else t("iec61260.class_n", language).format(n=band_class)
         )
+        margin = float(band[key])
+        freq = format_number(float(band["freq"]), language, decimals=0)
+        margin_text = decimal_comma(f"{margin:+.2f}", language)
+        rows.append((f"{freq} Hz", f"{class_text} ({margin_text} dB)"))
     return rows
 
 
-def _statement(result: "FilterComplianceResult") -> str:
+def _statement(result: "FilterComplianceResult", language: str = "en") -> str:
     """The boxed class-compliance statement with the binding margin."""
     if result.overall_class is not None:
         margin = _binding_margin(result, result.overall_class)
-        return (
-            f"Class <b>{result.overall_class}</b> - COMPLIES &nbsp; "
-            f"(margin {margin:+.2f} dB)"
+        return t("iec61260.statement.complies", language).format(
+            cls=result.overall_class,
+            margin=decimal_comma(f"{margin:+.2f}", language),
         )
     classes = "/".join(str(c) for c in result.available_classes())
     margin = _binding_margin(result, result.reference_class())
-    return (
-        f"<b>Does not comply</b> with class {classes} &nbsp; "
-        f"(closest margin {margin:+.2f} dB)"
+    return t("iec61260.statement.does_not_comply", language).format(
+        classes=classes,
+        margin=decimal_comma(f"{margin:+.2f}", language),
     )
 
 
-def _verdict(result: "FilterComplianceResult", required_class: int) -> Tuple[str, bool]:
+def _verdict(
+    result: "FilterComplianceResult", required_class: int, language: str = "en"
+) -> Tuple[str, bool]:
     """Verdict text and PASS flag against a required class.
 
     A bank meets a required class ``N`` when it achieves a class at least as
@@ -142,8 +152,14 @@ def _verdict(result: "FilterComplianceResult", required_class: int) -> Tuple[str
     passed = (
         result.overall_class is not None and result.overall_class <= required_class
     )
-    achieved = "none" if result.overall_class is None else str(result.overall_class)
-    text = f"Achieved class {achieved}, required class {required_class}"
+    achieved = (
+        t("iec61260.class_none", language)
+        if result.overall_class is None
+        else str(result.overall_class)
+    )
+    text = t("iec61260.verdict", language).format(
+        achieved=achieved, required=required_class
+    )
     return text, passed
 
 
@@ -153,6 +169,7 @@ def render_iec61260_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
+    language: str = "en",
 ) -> str:
     """Render an IEC 61260-1 filter-class-compliance fiche to a PDF at ``path``.
 
@@ -181,15 +198,15 @@ def render_iec61260_report(
     accent = colors.HexColor(_ACCENT_HEX)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    title = "Filter class compliance"
+    title = t("title.filter_class", language)
 
     flow: List[Any] = [
         Paragraph(title, title_style),
-        Paragraph(_basis(metadata, result.edition), basis_style),
+        Paragraph(_basis(metadata, result.edition, language), basis_style),
     ]
 
     if metadata is not None and not metadata.is_empty():
-        header_pairs = _metadata_pairs(metadata)
+        header_pairs = _metadata_pairs(metadata, language)
         if header_pairs:
             flow.append(Spacer(1, 3))
             flow.append(grid_table(header_pairs))
@@ -203,9 +220,10 @@ def render_iec61260_report(
     )
     flow.append(
         Paragraph(
-            f"{_fraction_label(result.fraction)} bank, sampling rate "
-            f"f<sub>s</sub> = {result.fs:.0f} Hz; relative attenuation "
-            "referenced to the mid-band level (IEC 61260-1 Formula 8).",
+            t("iec61260.basis_strip", language).format(
+                fraction=_fraction_label(result.fraction),
+                fs=format_number(result.fs, language, decimals=0),
+            ),
             basis_strip_style,
         )
     )
@@ -214,17 +232,19 @@ def render_iec61260_report(
     # Two-panel body: the per-band classification table on the left, the
     # mask-overlay plot (self-scaling dB axis) on the right.
     left_cell = [
-        Paragraph("Per-band classification", caption_style),
-        metrics_table(_metric_rows(result)),
+        Paragraph(t("caption.per_band_classification", language), caption_style),
+        metrics_table(_metric_rows(result, language)),
     ]
-    plot_drawing = render_figure_drawing(result.plot, 116 * mm, y_top=None)
+    plot_drawing = render_figure_drawing(
+        result.plot, 116 * mm, y_top=None, language=language
+    )
     flow.append(two_panel_body(left_cell, plot_drawing))
     flow.append(Spacer(1, 8))
 
-    flow.append(result_box(_statement(result), styles, accent))
+    flow.append(result_box(_statement(result, language), styles, accent))
     if metadata is not None and metadata.required_class is not None:
-        text, passed = _verdict(result, metadata.required_class)
-        flow.extend(verdict_flow(text, passed, styles))
-    flow.extend(footer_flow(metadata))
+        text, passed = _verdict(result, metadata.required_class, language)
+        flow.extend(verdict_flow(text, passed, styles, language))
+    flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)

@@ -162,8 +162,11 @@ fiche](/phonometry/guides/insulation-field/#iso-717-report-report); a supplied
 `requirement` is read as the certification EPNL limit in EPNdB (the EPNL passes
 at or below it), and `metadata=None` produces a lightweight prediction fiche with
 no verdict row. Rendering needs reportlab (`pip install phonometry[report]`);
-only `engine="reportlab"` is supported. The fiche is a computational EPNL result
-and is not an official State noise certificate; it does not reproduce any TCDSN.
+only `engine="reportlab"` is supported. The fiche renders in English by default;
+pass `language="es"` for a Spanish fiche (translated fixed strings and a comma
+decimal separator), e.g. `res.report("epnl_fiche_es.pdf", language="es")`. The
+fiche is a computational EPNL result and is not an official State noise
+certificate; it does not reproduce any TCDSN.
 
 ```python
 from phonometry import effective_perceived_noise_level, ReportMetadata

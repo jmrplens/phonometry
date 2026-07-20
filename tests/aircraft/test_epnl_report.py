@@ -110,3 +110,30 @@ def test_no_metadata_prediction_fiche(tmp_path) -> None:
     out = tmp_path / "prediction.pdf"
     _flyover().report(str(out))
     _assert_one_page(str(out))
+
+
+def _extract_text(path: str) -> str:
+    """The concatenated text of every page (for language assertions)."""
+    from pypdf import PdfReader
+
+    return "\n".join(page.extract_text() for page in PdfReader(path).pages)
+
+
+def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
+    """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    import re
+
+    result = _flyover()
+    out = tmp_path / "epnl_es.pdf"
+    result.report(str(out), metadata=ReportMetadata(requirement=101.0), language="es")
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "Certificación de ruido de aeronaves" in text
+    assert re.search(r"\d,\d", text) is not None  # comma decimal separator
+
+
+def test_unknown_language_rejected(tmp_path) -> None:
+    """An unknown fiche language raises ``ValueError``."""
+    result = _flyover()
+    with pytest.raises(ValueError, match="language"):
+        result.report(str(tmp_path / "bad.pdf"), language="xx")

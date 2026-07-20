@@ -132,7 +132,9 @@ footer with the fixed disclaimer. It uses the same `ReportMetadata` container
 and rendering engine as the ISO 717 insulation fiche; a supplied `requirement`
 is read as the maximum permitted loudness in sone (a lower loudness passes).
 Rendering needs reportlab (`pip install phonometry[report]`); only
-`engine="reportlab"` is supported.
+`engine="reportlab"` is supported. The fiche renders in English by default;
+pass `language="es"` for a Spanish fiche (translated fixed strings and a comma
+decimal separator), e.g. `res.report("loudness_fiche_es.pdf", language="es")`.
 
 ```python
 from phonometry import psychoacoustics, ReportMetadata

@@ -23,21 +23,26 @@ ocean solvers in :mod:`phonometry.underwater.numerical_propagation`:
   as the ocean ``parabolic_equation``), a Gaussian starter (Salomons
   Eq. (G.64)), an absorbing layer at the top of the grid (Salomons Sec. G.9)
   and a finite-impedance ground condition through the plane-wave reflection
-  coefficient ``R(kz) = (kz Z - k0)/(kz Z + k0)`` (Salomons Eq. (H.28)). It
-  returns the relative sound level (dB re free field) over the range-height
-  plane.
+  coefficient ``R(kz) = (kz Z - k0)/(kz Z + k0)`` plus the surface-wave
+  residue of its pole (Salomons Eqs. (H.28), (H.49)). It returns the relative
+  sound level (dB re free field) over the range-height plane.
 
 For a linear effective sound-speed profile the ray paths are exact circular
 arcs of radius :func:`ray_curvature_radius`, and an upward-refracting linear
 profile has a closed-form :func:`shadow_zone_distance`; both anchor the ray
 model. The PE is anchored against the exact spherical-wave ground effect
 (:func:`phonometry.environmental.ground_effect`) in the homogeneous limit
-(gradient zero), which it reproduces to about 0.1 dB.
+(gradient zero), which it reproduces to a few tenths of a dB on the default
+grid (finer ``height_step`` converges it further).
 
-The ground impedance is taken in the ``e^{-i omega t}`` convention (a passive
-ground has ``Im(Z) < 0``), shared with :mod:`phonometry.environmental.ground_barriers`
-and the porous models of :mod:`phonometry.materials`; heights and ranges are in
-metres, sound speeds in m/s and frequencies in Hz.
+The ground impedance is taken in the ``e^{-i omega t}`` convention of Salomons
+(a passive ground has ``Im(Z) > 0``), shared with
+:mod:`phonometry.environmental.ground_barriers`. The porous models of
+:mod:`phonometry.materials` work in the opposite ``e^{+j omega t}`` convention
+(``Im(Z) < 0``), so an impedance derived from them (``flow_resistivity=`` or a
+``PorousMediumResult``) is conjugated internally before entering the PE ground
+condition. Heights and ranges are in metres, sound speeds in m/s and
+frequencies in Hz.
 """
 
 from __future__ import annotations
@@ -498,7 +503,9 @@ def atmospheric_parabolic_equation(
     (Salomons Appendix H) in range. Each step transforms the field to the
     vertical-wavenumber domain, applies the free-space propagator
     ``exp(i dr (sqrt(ka^2 - kz^2) - ka))`` together with the ground reflection
-    ``R(kz) = (kz Z - k0)/(kz Z + k0)`` (Eq. (H.28)), transforms back and applies
+    ``R(kz) = (kz Z - k0)/(kz Z + k0)`` (Eq. (H.28)), transforms back, adds the
+    surface-wave residue of the reflection pole at ``kz = -k0/Z`` (the third
+    term of Eq. (H.49), present for a passive ground, ``Im(Z) > 0``) and applies
     the refraction phase screen ``exp(i dr (k(z) - ka))`` (Eq. (H.58)). The
     source is a Gaussian starter with its ground image (Eqs. (G.64), (G.76))
     and an absorbing layer at the top of the grid (Sec. G.9) suppresses
@@ -514,8 +521,10 @@ def atmospheric_parabolic_equation(
     normalized complex value/array, or a
     :class:`~phonometry.materials.PorousMediumResult`) or derived from an
     effective ``flow_resistivity`` (Pa s/m2) via the ``model`` porous model.
-    Exactly one of the two must be given, in the ``e^{-i omega t}`` convention
-    (``Im(Z) < 0`` for a passive ground).
+    Exactly one of the two must be given. A plain ``impedance`` value is taken
+    in the ``e^{-i omega t}`` convention (``Im(Z) > 0`` for a passive ground);
+    a ``PorousMediumResult`` or ``flow_resistivity`` is conjugated internally
+    from the materials' ``e^{+j omega t}`` convention.
 
     :param frequency_hz: Source frequency, in Hz.
     :param profile: The effective sound-speed profile.
@@ -581,6 +590,21 @@ def atmospheric_parabolic_equation(
     reflection = (kz * z_imp - k0) / (kz * z_imp + k0)
     refraction = np.exp(1j * dr * (kprof - ka))
 
+    # Surface-wave term of the GFPE step (third term of Salomons Eq. (H.40)/
+    # (H.49)): the residue of the reflection pole at kz = -beta, beta = k0/Z.
+    # The contour of Eq. (H.31) encloses that pole only for Im(Z) > 0 (a
+    # passive ground in the e^{-i omega t} convention), where exp(-i beta z)
+    # decays with height; otherwise the term is absent.
+    beta = k0 / z_imp
+    has_surface_wave = beta.imag < 0.0
+    if has_surface_wave:
+        sw_sq = np.sqrt(ka**2 - beta**2 + 0j)
+        if sw_sq.imag < 0.0:
+            sw_sq = -sw_sq  # decaying branch, as for the spectral propagator
+        sw_propagator = np.exp(1j * dr * (sw_sq - ka))
+        sw_profile = np.exp(-1j * beta * z)
+        sw_profile[m:] = 0.0
+
     # Gaussian starter with the ground image (Eqs. (G.64), (G.76)); the normal-
     # incidence plane-wave reflection coefficient weights the image (Eq. (G.77)).
     cp = (z_imp - 1.0) / (z_imp + 1.0)
@@ -614,12 +638,21 @@ def atmospheric_parabolic_equation(
             with np.errstate(divide="ignore"):
                 field[:, step] = 20.0 * np.log10(np.abs(psi[out_idx]) * r1 / np.sqrt(r))
         # One GFPE step: forward transform, direct + ground-reflected spectrum,
-        # inverse transform, refraction phase screen, then discard wrap-around.
+        # inverse transform, plus the surface-wave residue (Eq. (H.49)), then
+        # the refraction phase screen and discard of the wrap-around.
         spec = dz * mid_fwd * np.fft.fft(psi)
         spec_neg = np.empty_like(spec)
         spec_neg[0] = spec[0]
         spec_neg[1:] = spec[1:][::-1]
-        psi = np.fft.ifft((spec + reflection * spec_neg) * propagator * mid_inv) / dz
+        if has_surface_wave:
+            # Psi(r, beta) = int_0^inf exp(-i beta z') psi(r, z') dz'
+            # (Eq. (H.50) evaluated at the pole), on the same midpoint grid.
+            phi = dz * np.sum(psi * sw_profile)
+            surface = 2j * beta * phi * sw_propagator * sw_profile
+        else:
+            surface = 0.0
+        psi = (np.fft.ifft((spec + reflection * spec_neg) * propagator * mid_inv)
+               / dz + surface)
         psi = refraction * psi
         psi[m:] = 0.0
 

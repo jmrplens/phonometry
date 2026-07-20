@@ -113,7 +113,8 @@ split-step Fourier family as the ocean
 [`parabolic_equation`](/phonometry/guides/underwater-propagation/). Each range
 step transforms the field to the vertical-wavenumber domain, applies the
 free-space propagator together with the finite-impedance ground reflection
-`R(kz) = (kz Z − k0)/(kz Z + k0)` (Salomons Eq. H.28), transforms back and
+`R(kz) = (kz Z − k0)/(kz Z + k0)` (Salomons Eq. H.28), transforms back, adds the
+surface-wave residue of the reflection pole (the third term of Eq. H.49) and
 applies the refraction phase screen `exp(i Δr (k(z) − ka))` (Eq. H.58). The
 source is a **Gaussian starter** with its ground image (Eqs. G.64, G.76) and an
 **absorbing layer** at the top of the grid suppresses top-boundary reflections.
@@ -131,9 +132,11 @@ pe.level_at_height(2.0)   # relative level vs range at 2 m
 ```
 
 The ground impedance is supplied directly (`impedance=`, a normalized complex
-value in the `e^{-iωt}` convention with `Im(Z) < 0` for a passive ground), as a
-`PorousMediumResult`, or from an effective `flow_resistivity` via the
-[porous models](/phonometry/guides/porous-absorbers/) of the materials domain.
+value in the `e^{-iωt}` convention of Salomons, with `Im(Z) > 0` for a passive
+ground), as a `PorousMediumResult`, or from an effective `flow_resistivity` via
+the [porous models](/phonometry/guides/porous-absorbers/) of the materials
+domain; the porous models work in the opposite `e^{+jωt}` convention, so their
+impedance is conjugated internally.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -194,9 +197,9 @@ refraction"):
 
 - **Homogeneous limit → spherical ground effect.** With a zero gradient the
   GFPE field reproduces the exact Weyl-Van der Pol
-  [`ground_effect`](/phonometry/guides/ground-barriers/) at every range, to
-  about **0.1 dB** over grassland, and to the coherent **+6 dB** two-ray
-  enhancement over a rigid ground.
+  [`ground_effect`](/phonometry/guides/ground-barriers/) at every range, to a
+  few tenths of a dB over grassland on the default grid, and to the coherent
+  **+6 dB** two-ray enhancement over a rigid ground.
 - **Exact ray geometry.** For a linear profile the traced ray is a circular arc
   whose fitted radius matches `ray_curvature_radius` to machine precision.
 - **Reciprocity.** Swapping the source and receiver heights leaves the PE level.

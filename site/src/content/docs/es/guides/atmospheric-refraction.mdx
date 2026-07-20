@@ -118,8 +118,9 @@ split-step de Fourier que la
 Cada paso en distancia transforma el campo al dominio del número de onda
 vertical, aplica el propagador de espacio libre junto con la reflexión del suelo
 de impedancia finita `R(kz) = (kz Z − k0)/(kz Z + k0)` (Salomons Ec. H.28),
-transforma de vuelta y aplica la pantalla de fase de refracción
-`exp(i Δr (k(z) − ka))` (Ec. H.58). La fuente es un **arranque gaussiano** con
+transforma de vuelta, añade el residuo de onda de superficie del polo de la
+reflexión (el tercer término de la Ec. H.49) y aplica la pantalla de fase de
+refracción `exp(i Δr (k(z) − ka))` (Ec. H.58). La fuente es un **arranque gaussiano** con
 su imagen en el suelo (Ecs. G.64, G.76) y una **capa absorbente** en la parte
 superior de la malla suprime las reflexiones del contorno superior. El resultado
 es el **nivel sonoro relativo** `ΔL(z, r) = 20 lg(|p| R1)` (dB respecto al campo
@@ -136,10 +137,12 @@ pe.level_at_height(2.0)   # nivel relativo frente a distancia a 2 m
 ```
 
 La impedancia del suelo se proporciona directamente (`impedance=`, un valor
-complejo normalizado en el convenio `e^{-iωt}` con `Im(Z) < 0` para un suelo
-pasivo), como un `PorousMediumResult`, o a partir de una `flow_resistivity`
-efectiva mediante los [modelos porosos](/phonometry/es/guides/porous-absorbers/)
-del dominio de materiales.
+complejo normalizado en el convenio `e^{-iωt}` de Salomons, con `Im(Z) > 0`
+para un suelo pasivo), como un `PorousMediumResult`, o a partir de una
+`flow_resistivity` efectiva mediante los
+[modelos porosos](/phonometry/es/guides/porous-absorbers/) del dominio de
+materiales; los modelos porosos trabajan en el convenio opuesto `e^{+jωt}`, así
+que su impedancia se conjuga internamente.
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -200,9 +203,9 @@ el [informe de conformidad](/phonometry/es/reference/conformance/) (sección
 
 - **Límite homogéneo → efecto suelo esférico.** Con gradiente nulo el campo
   GFPE reproduce el [`ground_effect`](/phonometry/es/guides/ground-barriers/)
-  exacto de Weyl-Van der Pol a cualquier distancia, con unos **0,1 dB** sobre
-  pasto, y el refuerzo coherente de **+6 dB** de los dos rayos sobre un suelo
-  rígido.
+  exacto de Weyl-Van der Pol a cualquier distancia, con unas décimas de dB
+  sobre pasto en la malla por defecto, y el refuerzo coherente de **+6 dB** de
+  los dos rayos sobre un suelo rígido.
 - **Geometría de rayos exacta.** Para un perfil lineal el rayo trazado es un
   arco de círculo cuyo radio ajustado coincide con `ray_curvature_radius` con
   precisión de máquina.

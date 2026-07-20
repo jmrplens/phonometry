@@ -44,10 +44,11 @@ from phonometry.environmental.atmospheric_refraction import (
 from phonometry.environmental.ground_barriers import ground_effect
 
 C0 = 343.0
-# A representative grassland surface impedance (normalized, e^{-i omega t}), so
-# the tests never trip the porous-model out-of-range warning; the same value
-# feeds both the PE and the ground_effect oracle for an apples-to-apples match.
-Z_GRASS = complex(11.0, -8.0)
+# A representative grassland surface impedance (normalized, e^{-i omega t}:
+# Im(Z) > 0 for a passive ground), so the tests never trip the porous-model
+# out-of-range warning; the same value feeds both the PE and the ground_effect
+# oracle for an apples-to-apples match.
+Z_GRASS = complex(11.0, 8.0)
 
 
 # --------------------------------------------------------------------------- #
@@ -207,7 +208,9 @@ def test_pe_reproduces_spherical_ground_effect() -> None:
         for r in ranges
     ])
     band = (ranges >= 50.0) & (ranges <= 1000.0)
-    assert np.max(np.abs(level[band] - oracle[band])) < 0.5
+    # Default grid (dz = lambda/10): a few tenths of a dB; halving dz converges
+    # the long-range tail below 0.3 dB.
+    assert np.max(np.abs(level[band] - oracle[band])) < 0.6
 
 
 @pytest.mark.parametrize(("freq", "zs", "zr"), [(250.0, 1.0, 1.0), (1000.0, 2.0, 5.0)])
@@ -249,6 +252,28 @@ def test_pe_hard_ground_enhancement() -> None:
     assert level[np.argmin(np.abs(ranges - 500.0))] > 5.0  # near +6 dB
 
 
+def test_pe_finite_ground_shows_dip_below_hard_ground() -> None:
+    # Physical anchor: near the Salomons Fig. D.3 dip (grassland, hs = hr = 2 m,
+    # about 395 Hz at r = 100 m) a finite-impedance ground must sit far below
+    # the hard-ground two-ray level at the same low-height geometry. Before the
+    # impedance-convention fix the PE ground condition received the conjugated
+    # (e^{+j omega t}) impedance and the soft-ground dip almost vanished.
+    freq, zs, zr = 395.0, 2.0, 2.0
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        soft = atmospheric_parabolic_equation(freq, _flat_profile(),
+                                              source_height=zs,
+                                              flow_resistivity=2e5,
+                                              max_range=120.0, max_height=50.0)
+    hard = atmospheric_parabolic_equation(freq, _flat_profile(), source_height=zs,
+                                          impedance=complex(1e6, 0.0),
+                                          max_range=120.0, max_height=150.0)
+    i = int(np.argmin(np.abs(soft.ranges - 100.0)))
+    j = int(np.argmin(np.abs(hard.ranges - 100.0)))
+    dip = soft.level_at_height(zr)[i] - hard.level_at_height(zr)[j]
+    assert dip < -8.0  # deep interference dip only the correct convention gives
+
+
 def test_pe_reciprocity() -> None:
     freq = 400.0
     a = atmospheric_parabolic_equation(freq, _flat_profile(), source_height=2.0,
@@ -280,16 +305,17 @@ def test_pe_upward_refraction_shadow() -> None:
 
 def test_pe_flow_resistivity_matches_impedance_path() -> None:
     # Supplying sigma routes through the porous model (Delany-Bazley) to a
-    # surface impedance; passing that same impedance directly is identical. The
-    # low band falls outside the model's published fit range, which raises a
-    # PorousAbsorberWarning by design.
+    # surface impedance; passing that same impedance directly (conjugated by
+    # hand into the e^{-i omega t} convention, since the materials domain works
+    # in e^{+j omega t}) is identical. The low band falls outside the model's
+    # published fit range, which raises a PorousAbsorberWarning by design.
     from phonometry.materials import PorousAbsorberWarning, delany_bazley
 
     freq = 500.0
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", PorousAbsorberWarning)
-        z = complex(delany_bazley(np.array([freq]), 2.0e5,
-                                  speed_of_sound=C0).normalized_impedance[0])
+        z = complex(np.conj(delany_bazley(np.array([freq]), 2.0e5,
+                                          speed_of_sound=C0).normalized_impedance[0]))
         via_sigma = atmospheric_parabolic_equation(
             freq, _flat_profile(), source_height=2.0, flow_resistivity=2.0e5,
             max_range=400.0, max_height=30.0)

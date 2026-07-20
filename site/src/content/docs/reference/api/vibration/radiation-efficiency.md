@@ -167,6 +167,8 @@ Frequency-averaged plate radiation efficiency (Hopkins 2.9.4).
 ```python
 RadiationEfficiencyResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

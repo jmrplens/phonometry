@@ -128,6 +128,8 @@ and `time`/`loudness_vs_time` the 500 Hz loudness-vs-time trace
 ```python
 ZwickerLoudness.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```

@@ -78,6 +78,8 @@ with `bark` the critical-band-rate scale z (0,5..26,5 Bark_HMS) and
 ```python
 EcmaLoudness.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```

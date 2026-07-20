@@ -285,7 +285,12 @@ Multiple-shock health assessment (ISO 2631-5:2018, Clause 5 + Annex C).
 ### MultipleShockResult.plot()
 
 ```python
-MultipleShockResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+MultipleShockResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the injury-probability curve with this assessment's `R`.

@@ -220,7 +220,12 @@ A daily exposure built from several operations, with its assessment.
 ### DailyVibrationExposure.plot()
 
 ```python
-DailyVibrationExposure.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+DailyVibrationExposure.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the partial exposures against the EAV / ELV thresholds.
@@ -696,7 +701,12 @@ A weighted one-third-octave acceleration spectrum and its `a_w`.
 ### WeightedSpectrum.plot()
 
 ```python
-WeightedSpectrum.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+WeightedSpectrum.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the unweighted and weighted band spectra with `a_w`.
@@ -759,7 +769,12 @@ A frequency-weighting magnitude response (ISO 8041-1, Formula (5)).
 ### WeightingResponse.plot()
 
 ```python
-WeightingResponse.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+WeightingResponse.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the weighting factor (dB) versus frequency.

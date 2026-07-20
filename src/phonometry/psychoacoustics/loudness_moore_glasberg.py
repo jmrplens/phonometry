@@ -526,15 +526,16 @@ class MooreGlasbergLoudness:
     field: str
     presentation: str
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the specific loudness N'(i) over the ERB-number scale.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.  See :mod:`._plotting`.
         """
+        from .._i18n import check_language
         from .._plot.psychoacoustics import plot_moore_glasberg_loudness
 
-        return plot_moore_glasberg_loudness(self, ax=ax, **kwargs)
+        return plot_moore_glasberg_loudness(self, ax=ax, language=check_language(language), **kwargs)
 
 
 # ---------------------------------------------------------------------------

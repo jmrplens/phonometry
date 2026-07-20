@@ -99,7 +99,12 @@ All arrays are in dB and aligned with `AUDIOMETRIC_FREQUENCIES`.
 ### AgeThresholdResult.plot()
 
 ```python
-AgeThresholdResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+AgeThresholdResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the median threshold with the fractile band over frequency.

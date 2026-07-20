@@ -380,15 +380,16 @@ class MultipleShockResult:
     peaks: np.ndarray
     risk_thresholds: tuple[float, float, float]
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the injury-probability curve with this assessment's ``R``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.vibration import plot_multiple_shock
 
-        return plot_multiple_shock(self, ax=ax, **kwargs)
+        return plot_multiple_shock(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def multiple_shock_assessment(

@@ -54,7 +54,12 @@ Result of a Speech Intelligibility Index computation (ANSI S3.5-1997).
 ### SIIResult.plot()
 
 ```python
-SIIResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SIIResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-band audibility weighted by importance, with the SII.

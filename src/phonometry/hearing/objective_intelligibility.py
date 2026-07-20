@@ -107,7 +107,7 @@ class STOIResult:
     band_frequencies: NDArray[np.float64]
     sample_rate: int
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the intermediate intelligibility that averages to the index.
 
         For STOI this is the mean correlation per one-third-octave band; for
@@ -115,9 +115,10 @@ class STOIResult:
         analysis segment. Requires matplotlib (``pip install phonometry[plot]``);
         returns the :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.hearing import plot_stoi
 
-        return plot_stoi(self, ax=ax, **kwargs)
+        return plot_stoi(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def _third_octave_matrix() -> tuple[NDArray[np.float64], NDArray[np.float64]]:

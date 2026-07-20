@@ -165,15 +165,16 @@ class AgeThresholdResult:
     spread_lower: np.ndarray
     threshold: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the median threshold with the fractile band over frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.hearing import plot_age_threshold
 
-        return plot_age_threshold(self, ax=ax, **kwargs)
+        return plot_age_threshold(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:

@@ -107,15 +107,16 @@ class STIResult:
     band_levels: np.ndarray | None
     rating: str
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the per-band MTI bars with the STI and rating letter.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.hearing import plot_sti
 
-        return plot_sti(self, ax=ax, **kwargs)
+        return plot_sti(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def _rating(sti: float) -> str:

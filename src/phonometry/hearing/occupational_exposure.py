@@ -281,7 +281,7 @@ class ExposureResult:
         """Upper limit ``LEX,8h + U`` of the one-sided 95 % interval, dB."""
         return self.lex_8h + self.expanded_uncertainty
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-task contributions with the ``LEX,8h`` line.
 
         Only task-based results carry per-task contributions (the job and
@@ -289,9 +289,10 @@ class ExposureResult:
         (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.hearing import plot_occupational_exposure
 
-        return plot_occupational_exposure(self, ax=ax, **kwargs)
+        return plot_occupational_exposure(self, ax=ax, language=check_language(language), **kwargs)
 
 
 # --------------------------------------------------------------------------- #

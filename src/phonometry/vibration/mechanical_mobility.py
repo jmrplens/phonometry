@@ -402,15 +402,16 @@ class MobilityResult:
         """
         return convert_frf(self.mobility, self.frequencies, "mobility", target)
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the mobility magnitude ``|Y(f)|``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.vibration import plot_mobility
 
-        return plot_mobility(self, ax=ax, **kwargs)
+        return plot_mobility(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def sdof_mobility_result(

@@ -154,6 +154,8 @@ Psychoacoustic annoyance and its contributing terms (Fastl & Zwicker).
 ```python
 PsychoacousticAnnoyanceResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

@@ -384,11 +384,11 @@ building.weighted_impact_rating(l_nt).report("Lnw_fiche.pdf")  # Ln,w (CI)
 Rendered examples of both fiches, regenerated with `make reports`, are kept in
 the repository. Click either preview to open the PDF:
 
-[![Airborne ISO 717-1 example report: metadata header, one-third-octave R table beside the measured-versus-shifted-reference plot, boxed Rw (C; Ctr) and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.png)](https://github.com/jmrplens/phonometry/raw/main/.github/reports/iso717_airborne_example.pdf)
+[![Airborne ISO 717-1 example report: metadata header, one-third-octave R table beside the measured-versus-shifted-reference plot, boxed Rw (C; Ctr) and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.pdf)
 
 *Airborne rating fiche (`WeightedRatingResult.report`), Rw (C; Ctr).*
 
-[![Impact ISO 717-2 example report: the same accredited layout for the normalized impact level Ln, boxed Ln,w (CI) and a FAIL verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.png)](https://github.com/jmrplens/phonometry/raw/main/.github/reports/iso717_impact_example.pdf)
+[![Impact ISO 717-2 example report: the same accredited layout for the normalized impact level Ln, boxed Ln,w (CI) and a FAIL verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.pdf)
 
 *Impact rating fiche (`ImpactRatingResult.report`), Ln,w (CI).*
 

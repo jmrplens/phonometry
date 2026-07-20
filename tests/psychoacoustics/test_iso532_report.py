@@ -111,3 +111,35 @@ def test_report_escapes_xml_specials_in_metadata(tmp_path) -> None:
     out = tmp_path / "xml.pdf"
     _result().report(str(out), metadata=md)
     _assert_one_page(str(out))
+
+
+def _extract_text(path: str) -> str:
+    """The concatenated text of every page (for language assertions)."""
+    from pypdf import PdfReader
+
+    return "\n".join(page.extract_text() for page in PdfReader(path).pages)
+
+
+def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
+    """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    import re
+
+    result = _result()
+    out = tmp_path / "loudness_es.pdf"
+    result.report(
+        str(out),
+        metadata=ReportMetadata(specimen="ruido de electrodoméstico"),
+        language="es",
+    )
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "Índice de sonoridad" in text
+    assert "Sonoridad total" in text
+    assert re.search(r"\d,\d", text) is not None  # comma decimal separator
+
+
+def test_unknown_language_rejected(tmp_path) -> None:
+    """An unknown fiche language raises ``ValueError``."""
+    result = _result()
+    with pytest.raises(ValueError, match="language"):
+        result.report(str(tmp_path / "bad.pdf"), language="xx")

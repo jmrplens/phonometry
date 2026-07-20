@@ -240,3 +240,31 @@ def test_metadata_rejects_negative_area() -> None:
     """``ReportMetadata`` rejects a non-positive numeric field."""
     with pytest.raises(ValueError, match="area"):
         ReportMetadata(area=-5.0)
+
+
+def _extract_text(path: str) -> str:
+    """The concatenated text of every page (for language assertions)."""
+    from pypdf import PdfReader
+
+    return "\n".join(page.extract_text() for page in PdfReader(path).pages)
+
+
+def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
+    """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    import re
+
+    result = weighted_rating(_AIRBORNE_R)  # Rw = 30 dB, passes a 25 dB minimum
+    out = tmp_path / "airborne_es.pdf"
+    result.report(str(out), metadata=_full_metadata(requirement=25.0), language="es")
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "Índice de aislamiento acústico a ruido aéreo" in text
+    assert "CUMPLE" in text
+    assert re.search(r"\d,\d", text) is not None  # comma decimal separator
+
+
+def test_unknown_language_rejected(tmp_path) -> None:
+    """An unknown fiche language raises ``ValueError``."""
+    result = weighted_rating(_AIRBORNE_R)
+    with pytest.raises(ValueError, match="language"):
+        result.report(str(tmp_path / "bad.pdf"), language="xx")

@@ -211,7 +211,9 @@ aportado se lee como el $\alpha_w$ mínimo para el veredicto CUMPLE/NO CUMPLE.
 Con `verbose=True` la tabla cambia a las columnas de evaluación de ISO 11654
 (coeficiente práctico, referencia desplazada, desviación desfavorable). El
 renderizado necesita reportlab (`pip install phonometry[report]`); solo se
-admite `engine="reportlab"`.
+admite `engine="reportlab"`. La ficha se genera en inglés por defecto; pasa
+`language="es"` para una ficha en español (cadenas fijas traducidas y coma como
+separador decimal), p. ej. `result.report("alpha_w_fiche_es.pdf", language="es")`.
 
 ```python
 from phonometry import materials, ReportMetadata

@@ -423,7 +423,10 @@ ejecución como el extra opcional `phonometry[report]`
 (`pip install phonometry[report]`); si falta reportlab se lanza un `ImportError`
 claro con el comando de instalación, y la gráfica sigue necesitando matplotlib
 (`phonometry[plot]`). Solo se admite `engine="reportlab"`; cualquier otro motor
-lanza `ValueError`.
+lanza `ValueError`. La ficha se genera en inglés por defecto; pasa
+`language="es"` para una ficha en español (cadenas fijas traducidas y coma como
+separador decimal), p. ej.
+`building.weighted_rating(R).report("Rw_fiche_es.pdf", language="es")`.
 
 ```python
 from phonometry import building, ReportMetadata

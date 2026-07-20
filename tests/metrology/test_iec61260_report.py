@@ -155,3 +155,32 @@ def test_empty_bands_result_is_graceful() -> None:
         empty.reference_class()
     with pytest.raises(ValueError, match="no bands"):
         empty.report("/dev/null")
+
+
+def _extract_text(path: str) -> str:
+    """The concatenated text of every page (for language assertions)."""
+    from pypdf import PdfReader
+
+    return "\n".join(page.extract_text() for page in PdfReader(path).pages)
+
+
+def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
+    """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    import re
+
+    result = filter_class_compliance(_class1_bank())
+    out = tmp_path / "filter_es.pdf"
+    result.report(str(out), metadata=ReportMetadata(required_class=1), language="es")
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "Conformidad de clase de filtro" in text
+    assert "CUMPLE" in text
+    assert re.search(r"\d,\d", text) is not None  # comma decimal margins
+    assert "margen" in text
+
+
+def test_unknown_language_rejected(tmp_path) -> None:
+    """An unknown fiche language raises ``ValueError``."""
+    result = filter_class_compliance(_class1_bank())
+    with pytest.raises(ValueError, match="language"):
+        result.report(str(tmp_path / "bad.pdf"), language="xx")

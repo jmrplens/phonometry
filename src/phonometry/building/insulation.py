@@ -318,6 +318,7 @@ class WeightedRatingResult:
         metadata: "ReportMetadata | None" = None,
         engine: str = "reportlab",
         verbose: bool = False,
+        language: str = "en",
     ) -> str:
         """Render an ISO 717-1 airborne sound-insulation fiche to a PDF.
 
@@ -336,6 +337,8 @@ class WeightedRatingResult:
             columns (frequency, measured value, shifted reference,
             unfavourable deviation) instead of the two-column ``f | value``
             table.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or the result
             was built without the per-band data (``band_centers``,
@@ -344,7 +347,8 @@ class WeightedRatingResult:
             (``pip install phonometry[report]``).
         """
         return _render_iso717(
-            self, path, metadata=metadata, engine=engine, verbose=verbose
+            self, path, metadata=metadata, engine=engine, verbose=verbose,
+            language=language,
         )
 
 
@@ -426,6 +430,7 @@ class ImpactRatingResult:
         metadata: "ReportMetadata | None" = None,
         engine: str = "reportlab",
         verbose: bool = False,
+        language: str = "en",
     ) -> str:
         """Render an ISO 717-2 impact-insulation fiche to a PDF.
 
@@ -444,6 +449,8 @@ class ImpactRatingResult:
             columns (frequency, measured value, shifted reference,
             unfavourable deviation) instead of the two-column ``f | value``
             table.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or the result
             was built without the per-band data (``band_centers``,
@@ -452,7 +459,8 @@ class ImpactRatingResult:
             (``pip install phonometry[report]``).
         """
         return _render_iso717(
-            self, path, metadata=metadata, engine=engine, verbose=verbose
+            self, path, metadata=metadata, engine=engine, verbose=verbose,
+            language=language,
         )
 
 
@@ -501,6 +509,7 @@ def _render_iso717(
     metadata: "ReportMetadata | None",
     engine: str,
     verbose: bool,
+    language: str,
 ) -> str:
     """Validate the report request and delegate to the reportlab renderer.
 
@@ -509,6 +518,9 @@ def _render_iso717(
     built without the per-band data, then calls the reportlab renderer (which
     raises a clear :class:`ImportError` when reportlab is absent).
     """
+    from .._i18n import check_language
+
+    check_language(language)
     if engine != "reportlab":
         raise ValueError(
             f"Unknown report engine {engine!r}; only 'reportlab' is supported."
@@ -526,7 +538,7 @@ def _render_iso717(
     from .._report.iso717 import render_iso717_report
 
     return render_iso717_report(
-        result, path, metadata=metadata, verbose=verbose
+        result, path, metadata=metadata, verbose=verbose, language=language
     )
 
 

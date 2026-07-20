@@ -40,6 +40,7 @@ from typing import TYPE_CHECKING, Any, List, Tuple
 
 import numpy as np
 
+from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
     _LIGHT_HEX,
@@ -63,9 +64,9 @@ if TYPE_CHECKING:
 _DEVIATION_EPS = 0.005
 
 
-def _d2(value: float) -> str:
-    """Two decimals, period separator (English fiche), matching the 0,05 grid."""
-    return f"{value:.2f}"
+def _d2(value: float, language: str = "en") -> str:
+    """Two decimals, locale-aware separator (period for English, comma for ES)."""
+    return format_number(value, language, decimals=2)
 
 
 def _thead_style() -> Any:
@@ -101,7 +102,9 @@ def _base_table_style(accent: Any, light: Any, n_data: int) -> List[Any]:
     ]
 
 
-def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
+def _metadata_pairs(
+    metadata: ReportMetadata, language: str = "en"
+) -> List[Tuple[str, str]]:
     """Build the ordered (label, value) pairs of the absorption header grid.
 
     Only fields that are set are returned, so empty rows never appear. The
@@ -111,20 +114,20 @@ def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
     """
 
     def num(value: float | None) -> str | None:
-        return fmt_num(value) if value is not None else None
+        return fmt_num(value, language) if value is not None else None
 
     specs: List[Tuple[str, str | None]] = [
-        ("Client", metadata.client),
-        ("Manufacturer", metadata.manufacturer),
-        ("Description", metadata.specimen),
-        ("Sample area S [m<super>2</super>]", num(metadata.area)),
-        ("Mounted by", metadata.mounted_by),
-        ("Mounting", metadata.mounting),
-        ("Test room", metadata.test_room),
-        ("Date of test", metadata.test_date),
-        ("Temperature [&#176;C]", num(metadata.temperature)),
-        ("Relative humidity [%]", num(metadata.relative_humidity)),
-        ("Ambient pressure [kPa]", num(metadata.pressure)),
+        (t("meta.client", language), metadata.client),
+        (t("meta.manufacturer", language), metadata.manufacturer),
+        (t("meta.description", language), metadata.specimen),
+        (t("meta.sample_area", language), num(metadata.area)),
+        (t("meta.mounted_by", language), metadata.mounted_by),
+        (t("meta.mounting", language), metadata.mounting),
+        (t("meta.test_room", language), metadata.test_room),
+        (t("meta.date_of_test", language), metadata.test_date),
+        (t("meta.temperature", language), num(metadata.temperature)),
+        (t("meta.relative_humidity", language), num(metadata.relative_humidity)),
+        (t("meta.ambient_pressure", language), num(metadata.pressure)),
     ]
     # Values are user-supplied free text; escape XML specials so a '&' or '<'
     # cannot break reportlab's Paragraph parser. Labels carry intentional markup.
@@ -141,6 +144,7 @@ def _value_table(
     shifted: np.ndarray,
     deviations: np.ndarray,
     verbose: bool,
+    language: str = "en",
 ) -> Any:
     """Build the left-hand octave-band absorption table (accredited or evaluation).
 
@@ -156,15 +160,15 @@ def _value_table(
 
     if verbose:
         header = [
-            Paragraph("f [Hz]", head_style),
-            Paragraph("Practical &#945;<sub>p</sub>", head_style),
-            Paragraph("Shifted ref.", head_style),
-            Paragraph("Unfav. dev.", head_style),
+            Paragraph(t("table.f_hz", language), head_style),
+            Paragraph(t("table.practical_alpha_p", language), head_style),
+            Paragraph(t("table.shifted_ref", language), head_style),
+            Paragraph(t("table.unfav_dev", language), head_style),
         ]
         col_widths = [15 * mm, 20 * mm, 17 * mm, 18 * mm]
     else:
         header = [
-            Paragraph("Frequency f [Hz]", head_style),
+            Paragraph(t("table.frequency", language), head_style),
             Paragraph("&#945;<sub>p</sub>", head_style),
         ]
         col_widths = [28 * mm, 28 * mm]
@@ -175,17 +179,19 @@ def _value_table(
             rows.append(
                 [
                     f"{int(round(fk))}",
-                    _d2(m),
-                    _d2(r_),
-                    _d2(d) if d > _DEVIATION_EPS else "—",
+                    _d2(m, language),
+                    _d2(r_, language),
+                    _d2(d, language) if d > _DEVIATION_EPS else "—",
                 ]
             )
         else:
-            rows.append([f"{int(round(fk))}", _d2(m)])
+            rows.append([f"{int(round(fk))}", _d2(m, language)])
 
     style_cmds = _base_table_style(accent, light, len(centers))
     if verbose:
-        rows.append(["", "", "sum", _d2(float(deviations.sum()))])
+        rows.append(
+            ["", "", t("table.sum", language), _d2(float(deviations.sum()), language)]
+        )
         style_cmds += [
             ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
             ("FONTNAME", (2, -1), (-1, -1), "Helvetica-Bold"),
@@ -201,6 +207,7 @@ def _third_octave_table(
     bands: np.ndarray,
     alpha_s: np.ndarray,
     measured: np.ndarray,
+    language: str = "en",
 ) -> Any:
     """Build the combined one-third-octave ``f | alpha_s | alpha_p`` table.
 
@@ -220,7 +227,7 @@ def _third_octave_table(
     head_style = _thead_style()
 
     header = [
-        Paragraph("Frequency f [Hz]", head_style),
+        Paragraph(t("table.frequency", language), head_style),
         Paragraph("&#945;<sub>s</sub>", head_style),
         Paragraph("&#945;<sub>p</sub>", head_style),
     ]
@@ -229,37 +236,53 @@ def _third_octave_table(
     rows: List[List[Any]] = [header]
     for j, (fk, a_s) in enumerate(zip(bands, alpha_s)):
         # The middle of each triple is the octave centre carrying alpha_p.
-        octave_cell = _d2(measured[j // 3]) if j % 3 == 1 else ""
-        rows.append([f"{int(round(fk))}", _d2(a_s), octave_cell])
+        octave_cell = _d2(measured[j // 3], language) if j % 3 == 1 else ""
+        rows.append([f"{int(round(fk))}", _d2(a_s, language), octave_cell])
 
     table = Table(rows, colWidths=col_widths, repeatRows=1)
     table.setStyle(TableStyle(_base_table_style(accent, light, len(bands))))
     return table
 
 
-def _statement(result: "AbsorptionRatingResult") -> str:
+def _statement(result: "AbsorptionRatingResult", language: str = "en") -> str:
     """The boxed single-number statement ``alpha_w = X (shape)``."""
-    value = f"{result.alpha_w:.2f}"
+    value = format_number(result.alpha_w, language, decimals=2)
     if result.shape_indicator:
         value = f"{value} ({result.shape_indicator})"
     return f"&#945;<sub>w</sub> = <b>{value}</b>"
 
 
-def _extended_terms(result: "AbsorptionRatingResult") -> List[str]:
+def _extended_terms(
+    result: "AbsorptionRatingResult", language: str = "en"
+) -> List[str]:
     """The absorption class, shape indicator and applied shift shown by the box."""
-    terms = [f"Absorption class: {html.escape(result.absorption_class)}"]
+    terms = [
+        t("iso11654.absorption_class", language).format(
+            value=html.escape(result.absorption_class)
+        )
+    ]
     if result.shape_indicator:
-        terms.append(f"Shape indicator: {result.shape_indicator}")
-    terms.append(f"Applied shift: {result.shift:.2f}")
+        terms.append(
+            t("iso11654.shape_indicator", language).format(
+                value=result.shape_indicator
+            )
+        )
+    terms.append(
+        t("iso11654.applied_shift", language).format(
+            value=format_number(result.shift, language, decimals=2)
+        )
+    )
     return terms
 
 
-def _verdict(result: "AbsorptionRatingResult", requirement: float) -> Tuple[str, bool]:
+def _verdict(
+    result: "AbsorptionRatingResult", requirement: float, language: str = "en"
+) -> Tuple[str, bool]:
     """Verdict text and PASS flag: absorption passes at or above the requirement."""
     passed = float(result.alpha_w) >= requirement
-    text = (
-        f"&#945;<sub>w</sub> = {result.alpha_w:.2f}, required &#8805; "
-        f"{requirement:.2f}"
+    text = t("iso11654.verdict", language).format(
+        value=format_number(result.alpha_w, language, decimals=2),
+        req=format_number(requirement, language, decimals=2),
     )
     return text, passed
 
@@ -270,6 +293,7 @@ def render_iso11654_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
+    language: str = "en",
 ) -> str:
     """Render an ISO 11654 absorption-rating fiche to a PDF at ``path``.
 
@@ -308,18 +332,17 @@ def render_iso11654_report(
     deviations = np.maximum(shifted - measured, 0.0)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    title = "Sound absorption rating"
+    title = t("title.absorption", language)
 
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
     )
     if measurement_standard:
-        basis = (
-            f"{html.escape(measurement_standard)} laboratory measurement of sound "
-            "absorption. Rating per ISO 11654:1997."
+        basis = t("basis.iso11654.with_standard", language).format(
+            standard=html.escape(measurement_standard)
         )
     else:
-        basis = "Sound absorption rating per ISO 11654:1997."
+        basis = t("basis.iso11654.plain", language)
 
     flow: List[Any] = [
         Paragraph(title, title_style),
@@ -327,7 +350,7 @@ def render_iso11654_report(
     ]
 
     if metadata is not None and not metadata.is_empty():
-        header_pairs = _metadata_pairs(metadata)
+        header_pairs = _metadata_pairs(metadata, language)
         if header_pairs:
             flow.append(Spacer(1, 3))
             flow.append(grid_table(header_pairs))
@@ -344,25 +367,33 @@ def render_iso11654_report(
             np.asarray(bands, dtype=np.float64),
             np.asarray(alpha_s, dtype=np.float64),
             measured,
+            language,
         )
-        caption = "One-third-octave &#945;<sub>s</sub>, octave &#945;<sub>p</sub>"
+        caption = t("caption.one_third_octave_alpha", language)
     else:
-        value_table = _value_table(centers, measured, shifted, deviations, verbose)
-        caption = "Octave-band &#945;<sub>p</sub>"
+        value_table = _value_table(
+            centers, measured, shifted, deviations, verbose, language
+        )
+        caption = t("caption.octave_alpha_p", language)
     left_cell = [
         Paragraph(caption, caption_style),
         value_table,
     ]
     plot_drawing = render_figure_drawing(
-        result.plot, 116 * mm, y_top=1.0, expand_step=None
+        result.plot, 116 * mm, y_top=1.0, expand_step=None, language=language
     )
     flow.append(two_panel_body(left_cell, plot_drawing))
     flow.append(Spacer(1, 8))
 
-    flow.append(result_box(_statement(result), styles, accent, _extended_terms(result)))
+    flow.append(
+        result_box(
+            _statement(result, language), styles, accent,
+            _extended_terms(result, language),
+        )
+    )
     if metadata is not None and metadata.requirement is not None:
-        text, passed = _verdict(result, metadata.requirement)
-        flow.extend(verdict_flow(text, passed, styles))
-    flow.extend(footer_flow(metadata))
+        text, passed = _verdict(result, metadata.requirement, language)
+        flow.extend(verdict_flow(text, passed, styles, language))
+    flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)

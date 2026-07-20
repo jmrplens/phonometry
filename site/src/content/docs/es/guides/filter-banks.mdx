@@ -661,7 +661,10 @@ la atenuación relativa medida de la banda de peor margen sobre el corredor de l
 clase y encuadra el resultado global de conformidad. Pasa un `required_class` en
 el `ReportMetadata` para añadir una fila de veredicto PASS/FAIL (un banco
 "cumple la clase N" cuando su clase alcanzada es al menos igual de estricta, es
-decir, un índice de clase N o inferior).
+decir, un índice de clase N o inferior). La ficha se genera en inglés por
+defecto; pasa `language="es"` para una ficha en español (cadenas fijas
+traducidas y coma como separador decimal), p. ej.
+`result.report("iec61260_es.pdf", language="es")`.
 
 ```python
 from phonometry import (

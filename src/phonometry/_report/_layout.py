@@ -24,6 +24,7 @@ from typing import Any, Callable, List, Tuple
 
 import numpy as np
 
+from ._i18n import format_number, t
 from .metadata import ReportMetadata
 
 #: Installation hints for the three soft dependencies of the report.
@@ -48,20 +49,16 @@ _MUTED_HEX = "#555555"
 _VERDICT_OK_HEX = "#1b6e2f"
 _VERDICT_BAD_HEX = "#a11a1a"
 
-#: Fixed disclaimer always printed in the footer of the fiche.
-_DISCLAIMER = "The results relate only to the tested specimen."
 
-
-def fmt_num(value: float) -> str:
+def fmt_num(value: float, language: str = "en") -> str:
     """Format a number with up to one decimal, dropping a trailing ``.0``.
 
-    The fiches are English, so the decimal separator is a period (matching
-    accredited English lab reports such as the Salford reference).
+    Delegates to :func:`phonometry._i18n.format_number`, so English keeps a
+    period (matching accredited English lab reports such as the Salford
+    reference) and ``language="es"`` uses a comma, as Spanish reports write
+    numbers.
     """
-    text = f"{float(value):.1f}"
-    if text.endswith(".0"):
-        text = text[:-2]
-    return text
+    return format_number(value, language, decimals=1, trim=True)
 
 
 def render_figure_drawing(
@@ -71,6 +68,7 @@ def render_figure_drawing(
     y_top: float | None,
     expand_step: float | None = None,
     figsize: Tuple[float, float] | None = None,
+    language: str = "en",
 ) -> Any:
     """Draw a result's plot as a scaled, vector reportlab ``Drawing``.
 
@@ -133,6 +131,12 @@ def render_figure_drawing(
                 bbox_to_anchor=(0.0, 1.005), ncol=len(handles),
                 frameon=False, fontsize=8, handlelength=1.6, columnspacing=1.2,
             )
+        # Localise the tick-label decimal separator for Spanish (a no-op for
+        # English, so English figures are byte-for-byte unchanged). Imported
+        # lazily like the matplotlib backend above.
+        from .._i18n import localize_axes
+
+        localize_axes(ax, language)
         fig.tight_layout()
         with matplotlib.rc_context({"svg.fonttype": "path"}):
             fig.savefig(svg_path, format="svg")
@@ -302,7 +306,10 @@ def metrics_table(rows: List[Tuple[str, str]], *, col_widths: Any = None) -> Any
 
 
 def compliance_table(
-    rows: List[Tuple[str, str, str, str]], *, col_widths: Any = None
+    rows: List[Tuple[str, str, str, str]],
+    *,
+    col_widths: Any = None,
+    language: str = "en",
 ) -> Any:
     """A full-width 4-column ``metric | measured | target/limit | result`` table.
 
@@ -345,17 +352,23 @@ def compliance_table(
 
     def _result_markup(status: str) -> str:
         if status == "pass":
-            return f"<font color='{_VERDICT_OK_HEX}'>&#9679; PASS</font>"
+            return (
+                f"<font color='{_VERDICT_OK_HEX}'>&#9679; "
+                f"{t('verdict.pass', language)}</font>"
+            )
         if status == "fail":
-            return f"<font color='{_VERDICT_BAD_HEX}'>&#9679; FAIL</font>"
+            return (
+                f"<font color='{_VERDICT_BAD_HEX}'>&#9679; "
+                f"{t('verdict.fail', language)}</font>"
+            )
         return f"<font color='{_MUTED_HEX}'>&#8211;</font>"
 
     data: List[List[Any]] = [
         [
-            Paragraph("Metric", header_style),
-            Paragraph("Measured", header_style),
-            Paragraph("Target / Limit", header_style),
-            Paragraph("Result", header_style),
+            Paragraph(t("col.metric", language), header_style),
+            Paragraph(t("col.measured", language), header_style),
+            Paragraph(t("col.target_limit", language), header_style),
+            Paragraph(t("col.result", language), header_style),
         ]
     ]
     for metric, measured, limit, status in rows:
@@ -433,7 +446,9 @@ def result_box(
     return box
 
 
-def verdict_flow(text: str, passed: bool, styles: Any) -> List[Any]:
+def verdict_flow(
+    text: str, passed: bool, styles: Any, language: str = "en"
+) -> List[Any]:
     """The PASS/FAIL verdict paragraph for a precomputed comparison.
 
     Each renderer computes ``text`` (the requirement comparison) and ``passed``
@@ -443,22 +458,25 @@ def verdict_flow(text: str, passed: bool, styles: Any) -> List[Any]:
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Paragraph
 
-    badge = "PASS" if passed else "FAIL"
+    badge = t("verdict.pass", language) if passed else t("verdict.fail", language)
     badge_hex = _VERDICT_OK_HEX if passed else _VERDICT_BAD_HEX
     verdict_style = ParagraphStyle(
         "fiche_verdict", parent=styles["Normal"], fontSize=10, leading=14,
         spaceBefore=4,
     )
+    lead = t("verdict.result_vs_requirement", language)
     return [
         Paragraph(
-            f"Result vs requirement: {text} &#8594; "
+            f"{lead}: {text} &#8594; "
             f"<b><font color='{badge_hex}'>{badge}</font></b>",
             verdict_style,
         )
     ]
 
 
-def footer_flow(metadata: ReportMetadata | None) -> List[Any]:
+def footer_flow(
+    metadata: ReportMetadata | None, language: str = "en"
+) -> List[Any]:
     """Build the footer identity block plus the always-present disclaimer.
 
     Called only after the renderer has imported reportlab.
@@ -481,17 +499,32 @@ def footer_flow(metadata: ReportMetadata | None) -> List[Any]:
         textColor=muted, leading=11,
     )
 
+    signature = t("footer.signature", language)
+    sign_blank = f"{signature}: ______________________________"
+
     flow: List[Any] = [Spacer(1, 8)]
     lines: List[str] = []
     if metadata is not None:
         if metadata.laboratory:
-            lines.append(f"<b>Laboratory:</b> {html.escape(metadata.laboratory)}")
+            lines.append(
+                f"<b>{t('footer.laboratory', language)}:</b> "
+                f"{html.escape(metadata.laboratory)}"
+            )
         if metadata.report_id:
-            lines.append(f"<b>Report no.:</b> {html.escape(metadata.report_id)}")
+            lines.append(
+                f"<b>{t('footer.report_no', language)}:</b> "
+                f"{html.escape(metadata.report_id)}"
+            )
         if metadata.test_date:
-            lines.append(f"<b>Date:</b> {html.escape(metadata.test_date)}")
+            lines.append(
+                f"<b>{t('footer.date', language)}:</b> "
+                f"{html.escape(metadata.test_date)}"
+            )
         if metadata.notes:
-            lines.append(f"<b>Notes:</b> {html.escape(metadata.notes)}")
+            lines.append(
+                f"<b>{t('footer.notes', language)}:</b> "
+                f"{html.escape(metadata.notes)}"
+            )
     for line in lines:
         flow.append(Paragraph(line, ident_style))
 
@@ -499,26 +532,26 @@ def footer_flow(metadata: ReportMetadata | None) -> List[Any]:
     if operator:
         flow.append(
             Paragraph(
-                f"Operator: {html.escape(operator)} &nbsp;&nbsp; "
-                "Signature: ______________________________",
+                f"{t('footer.operator', language)}: {html.escape(operator)} "
+                f"&nbsp;&nbsp; {sign_blank}",
                 sign_style,
             )
         )
     elif lines:
-        flow.append(
-            Paragraph("Signature: ______________________________", sign_style)
-        )
+        flow.append(Paragraph(sign_blank, sign_style))
 
     flow.append(Spacer(1, 4))
     flow.append(
         Paragraph(
-            f"<font color='{_ACCENT_HEX}'>&#9632;</font> {_DISCLAIMER}",
+            f"<font color='{_ACCENT_HEX}'>&#9632;</font> "
+            f"{t('footer.disclaimer', language)}",
             disclaimer_style,
         )
     )
     flow.append(
         Paragraph(
-            "<font size=7 color='#888888'>Generated by phonometry.</font>",
+            f"<font size=7 color='#888888'>"
+            f"{t('footer.generated_by', language)}</font>",
             disclaimer_style,
         )
     )

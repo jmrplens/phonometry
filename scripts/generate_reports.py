@@ -169,6 +169,36 @@ def _loudness_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso532_loudness_example.pdf"
 
 
+def _program_loudness_example() -> Tuple[object, ReportMetadata, str]:
+    """Programme-loudness fiche: an EBU R 128 compliance measurement.
+
+    The signal is the EBU Tech 3342 Case 1 loudness-range reference: two 20 s
+    stereo 1 kHz tone segments at -20 and -30 dBFS, giving an integrated
+    loudness near -23 LUFS and a loudness range near 10 LU.
+    """
+    fs = 48000
+    t = np.arange(int(round(20.0 * fs))) / fs
+    tone = np.sin(2.0 * np.pi * 1000.0 * t)
+    seg_hi = 10.0 ** (-20.0 / 20.0) * tone
+    seg_lo = 10.0 ** (-30.0 / 20.0) * tone
+    mono = np.concatenate([seg_hi, seg_lo])
+    signal = np.vstack([mono, mono])
+    result = ph.broadcast.program_loudness(signal, fs)
+    metadata = ReportMetadata(
+        specimen="Reference tone sequence (-20 / -30 dBFS steps)",
+        client="Example broadcaster",
+        manufacturer="Example post-production",
+        test_room="Reference monitoring room (example)",
+        measurement_standard="EBU R 128",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-R128",
+        requirement=-23.0,
+    )
+    return result, metadata, "ebu_r128_loudness_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -176,6 +206,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _impact_example,
     _absorption_example,
     _loudness_example,
+    _program_loudness_example,
 ]
 
 

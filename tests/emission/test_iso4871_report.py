@@ -4,9 +4,11 @@ Tests for the ISO 4871:1996 noise-emission declaration and its ``.report()``
 fiche (declaration model + PDF rendering).
 
 The declaration model is checked against ISO 4871's own definitions and Annex B
-example: the declared single-number value is ``L_WAd = L_WA + K_WA`` (clause
-3.15), the dual/single forms are the same declaration, and verification passes
-or fails at the clause 6.2 boundary ``L_1 <= L_WAd``. The rendering itself is a
+example: the declared single-number value is the sum ``L_WAd = L_WA + K_WA``
+rounded once to the nearest decibel (clause 3.15, not the sum of the separately
+rounded dual-number values of 3.16), the dual/single forms are the same
+declaration, and verification passes or fails at the clause 6.2 boundary
+``L_1 <= L_WAd``. The rendering itself is a
 feature, so those tests assert only structural facts: a valid one-page PDF,
 translated Spanish output, and rejected engines/languages.
 """
@@ -87,8 +89,30 @@ def test_declared_value_is_measured_plus_uncertainty() -> None:
 def test_declared_value_rounds_to_nearest_decibel() -> None:
     """A non-integer measurement + uncertainty is rounded to the nearest dB."""
     mode = OperatingModeDeclaration("m", 87.6, 2.4)
-    # 88 (rounded L) + 2 (rounded K) = 90.
+    # round(87.6 + 2.4) = round(90.0) = 90.
     assert mode.declared_sound_power_level == 90
+
+
+def test_declared_value_rounds_the_sum_not_the_addends() -> None:
+    """Clause 3.15 rounds the sum L + K once, not L and K separately.
+
+    L_WA = 91.4, K_WA = 2.4: the sum is 93.8, so L_WAd = 94; rounding the
+    addends first would give 91 + 2 = 93, one decibel low. The same rule
+    applies to the declared emission sound pressure level.
+    """
+    mode = OperatingModeDeclaration(
+        "m", 91.4, 2.4,
+        emission_pressure_level=81.4, emission_pressure_uncertainty=2.4,
+    )
+    assert mode.declared_sound_power_level == 94
+    assert mode.declared_emission_pressure_level == 84
+
+
+def test_declared_value_ties_round_half_up() -> None:
+    """A sum landing exactly on a half decibel rounds up (halves-up rule)."""
+    mode = OperatingModeDeclaration("m", 92.5, 2.0)
+    # round(94.5) = 95 with the halves-up rule.
+    assert mode.declared_sound_power_level == 95
 
 
 def test_verification_passes_and_fails_at_the_clause_6_2_boundary() -> None:

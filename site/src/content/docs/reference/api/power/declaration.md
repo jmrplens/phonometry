@@ -24,9 +24,9 @@ of two forms selected by the relevant noise test code (clause 4):
   and its associated uncertainty `K`, stated together but separately, both
   rounded to the nearest decibel; and
 * the **single-number** form (clause 3.15): the derived declared value
-  `L_d = L + K`, rounded to the nearest decibel, an upper limit which values
-  from repeated measurements are unlikely to exceed at the stated confidence
-  level.
+  `L_d`, the *sum* `L + K` of the unrounded quantities rounded once to the
+  nearest decibel, an upper limit which values from repeated measurements are
+  unlikely to exceed at the stated confidence level.
 
 `K` combines the measurement uncertainty (reproducibility) and, for a batch,
 the production spread (clauses 3.20 to 3.24; `K = 1,645 sigma_R` for a single
@@ -141,7 +141,7 @@ Holds the measured A-weighted sound power level `L_WA` and its uncertainty
 `K_WA` (ISO 4871 clause 3.16), and optionally the A-weighted emission sound
 pressure level `L_pA` at a work station with its uncertainty `K_pA`
 (clause 3.11). The derived declared single-number values follow from
-`L_d = L + K` (clause 3.15), both rounded to the nearest decibel. When a
+`L_d = L + K` (clause 3.15), the sum rounded to the nearest decibel. When a
 verification measurement `L_1` (an A-weighted sound power level determined
 for verification, clause 6) is supplied, `verified` applies the
 single-machine criterion of clause 6.2 (verified when `L_1 <= L_WAd`).
@@ -169,13 +169,20 @@ single-machine criterion of clause 6.2 (verified when `L_1 <= L_WAd`).
 
 Declared single-number emission pressure level `L_pAd = L_pA + K_pA`.
 
-`None` when no emission sound pressure level is declared for the mode.
+The sum `L_pA + K_pA` rounded once to the nearest decibel (clause
+3.15); `None` when no emission sound pressure level is declared for
+the mode.
 
 ### OperatingModeDeclaration.declared_sound_power_level
 
 *property*
 
 Declared single-number sound power level `L_WAd = L_WA + K_WA` (3.15).
+
+Clause 3.15 defines the declared value as the *sum* of the measured
+value and its uncertainty, rounded to the nearest decibel: the sum is
+formed from the unrounded quantities (clause 3.12) and rounded once,
+not assembled from the separately rounded dual-number values (3.16).
 
 ### OperatingModeDeclaration.verified
 

@@ -47,6 +47,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 La **Rec. UIT-R BS.1770-5** define cómo miden la sonoridad de un programa la
 radiodifusión y el streaming: **ponderación K**, potencia cuadrática media en
@@ -291,6 +292,58 @@ pesos = broadcast.channel_weight([0, 30, -30, 90, -90], [0, 0, 0, 0, 0])
 El audio basado en objetos (Anexo 4) se mide renderizando primero a una
 configuración de altavoces y midiendo el render; el renderizado en sí queda
 fuera de este alcance.
+
+## Informe de EBU R 128 (`.report()`)
+
+`ProgramLoudnessResult.report(path)` renderiza una ficha PDF de una página con
+el formato de una hoja de conformidad de entrega para radiodifusión: la línea
+de norma base, un bloque opcional de metadatos, una tabla de conformidad a todo
+lo ancho (`Métrica | Medido | Objetivo / Límite | Resultado`) y, debajo, la
+gráfica de sonoridad frente al tiempo a todo lo ancho (el propio `.plot()` del
+resultado, con las trazas momentánea y de corto plazo, la línea de la integrada
+y la banda del LRA). El veredicto lo determinan **solo** la sonoridad integrada
+y el pico verdadero máximo; el rango de sonoridad y los máximos
+momentáneo/corto plazo se muestran como filas informativas (una raya en la
+columna Resultado, nunca un color de cumple/no cumple). Un número único
+enmarcado `I = X LUFS (LRA = Y LU, TP máx = Z dBTP)`, un veredicto combinado
+CUMPLE/NO CUMPLE y un pie con el descargo fijo cierran la hoja.
+
+La disposición apilada (tabla de conformidad arriba, gráfica debajo) difiere
+del cuerpo estrecho de dos paneles de las demás fichas porque la tabla de
+conformidad necesita cuatro columnas y la traza de sonoridad frente al tiempo
+es apaisada. Usa el mismo contenedor `ReportMetadata` y el mismo motor de
+renderizado que la
+[ficha de aislamiento de ISO 717](/phonometry/es/guides/insulation-field/#informe-de-iso-717-report);
+un `requirement` proporcionado se interpreta como la sonoridad de programa
+objetivo en LUFS (por defecto los −23,0 LUFS de EBU R 128), y la ficha cumple
+cuando la sonoridad integrada está dentro de ±0,5 LU de él y el pico verdadero
+es igual o inferior a −1,0 dBTP. El renderizado necesita reportlab
+(`pip install phonometry[report]`); solo se admite `engine="reportlab"`.
+
+```python
+from phonometry import broadcast, ReportMetadata
+
+res = broadcast.program_loudness(x, fs)   # un programa estéreo terminado
+res.report(
+    "loudness_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Secuencia de tonos de referencia",
+        measurement_standard="EBU R 128",
+        laboratory="Laboratorio de referencia Phonometry",
+        requirement=-23.0,                # sonoridad de programa objetivo (LUFS)
+    ),
+)                                          # I (LUFS), LRA (LU), pico verdadero (dBTP)
+```
+
+La ficha de ejemplo se regenera con `make reports` y se conserva renderizada en
+el repositorio; pulsa la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="ebu_r128_loudness_example"
+	title="Informe de ejemplo de sonoridad de programa EBU R 128 (PDF)"
+	description="Ficha de conformidad de sonoridad de programa de una página: un bloque de metadatos, una tabla de conformidad de cuatro columnas con la sonoridad integrada y el pico verdadero máximo como veredicto y el rango de sonoridad y los máximos momentáneo/corto plazo como filas informativas, la gráfica de sonoridad frente al tiempo a todo lo ancho, el número único enmarcado I = -22.6 LUFS (LRA = 10.0 LU, TP máx = -20.0 dBTP) y un veredicto CUMPLE frente al objetivo de -23.0 LUFS."
+	caption="Ficha de conformidad de sonoridad de programa (ProgramLoudnessResult.report), I en LUFS con LRA en LU y pico verdadero en dBTP."
+/>
 
 ## 7. Validación
 

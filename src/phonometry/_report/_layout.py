@@ -70,6 +70,7 @@ def render_figure_drawing(
     *,
     y_top: float | None,
     expand_step: float | None = None,
+    figsize: Tuple[float, float] | None = None,
 ) -> Any:
     """Draw a result's plot as a scaled, vector reportlab ``Drawing``.
 
@@ -87,6 +88,10 @@ def render_figure_drawing(
         this step if the data exceeds ``y_top`` (used for dB axes); ``None``
         keeps ``y_top`` exactly (used for a 0..1 coefficient axis). Ignored
         when ``y_top`` is ``None``.
+    :param figsize: Matplotlib figure size ``(width, height)`` in inches;
+        ``None`` keeps the default portrait ``(5.8, 6.4)``. A landscape size
+        (e.g. a wide, short time plot) is passed for a stacked full-width
+        figure.
     """
     try:
         import matplotlib
@@ -102,7 +107,7 @@ def render_figure_drawing(
     svg_fd, svg_path = tempfile.mkstemp(suffix=".svg")
     os.close(svg_fd)
     try:
-        fig = Figure(figsize=(5.8, 6.4))
+        fig = Figure(figsize=figsize if figsize is not None else (5.8, 6.4))
         FigureCanvasAgg(fig)
         ax = fig.subplots()
         plot_fn(ax=ax)
@@ -284,6 +289,91 @@ def metrics_table(rows: List[Tuple[str, str]], *, col_widths: Any = None) -> Any
             [
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                 ("ROWBACKGROUNDS", (0, 0), (-1, -1), [colors.white, light]),
+                ("LINEABOVE", (0, 0), (-1, 0), 0.6, accent),
+                ("LINEBELOW", (0, -1), (-1, -1), 0.6, accent),
+                ("TOPPADDING", (0, 0), (-1, -1), 3.0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 3.0),
+                ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+            ]
+        )
+    )
+    return table
+
+
+def compliance_table(
+    rows: List[Tuple[str, str, str, str]], *, col_widths: Any = None
+) -> Any:
+    """A full-width 4-column ``metric | measured | target/limit | result`` table.
+
+    The stacked-layout fiches (programme loudness, aircraft noise ...) check a
+    result against several limits at once, so they need a wider compliance
+    table than the two-column :func:`metrics_table`. Each row is a
+    ``(metric_label, measured, limit, status)`` tuple where ``status`` is one
+    of ``"pass"``, ``"fail"`` or ``"info"``: a pass renders a filled dot and
+    ``PASS`` in green, a fail a dot and ``FAIL`` in red, and an informational
+    row an en dash in muted grey (never green/red, as it carries no verdict).
+    Same accredited styling as :func:`metrics_table` (accent header row, zebra
+    body rows, thin box). Called only after the renderer has imported reportlab.
+
+    :param rows: Ordered ``(metric, measured, limit, status)`` tuples; the
+        metric/measured/limit strings may carry markup (they are formatted
+        numbers, not user text).
+    :param col_widths: Optional explicit column widths; defaults to
+        ``[64, 36, 50, 24]`` mm (summing to the 174 mm content width).
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Paragraph, Table, TableStyle
+
+    styles = getSampleStyleSheet()
+    accent = colors.HexColor(_ACCENT_HEX)
+    light = colors.HexColor(_LIGHT_HEX)
+    header_style = ParagraphStyle(
+        "fiche_compliance_header", parent=styles["Normal"], fontSize=8.5,
+        leading=11, textColor=colors.white,
+    )
+    cell_style = ParagraphStyle(
+        "fiche_compliance_cell", parent=styles["Normal"], fontSize=8.5,
+        leading=11,
+    )
+    result_style = ParagraphStyle(
+        "fiche_compliance_result", parent=styles["Normal"], fontSize=8.5,
+        leading=11,
+    )
+
+    def _result_markup(status: str) -> str:
+        if status == "pass":
+            return f"<font color='{_VERDICT_OK_HEX}'>&#9679; PASS</font>"
+        if status == "fail":
+            return f"<font color='{_VERDICT_BAD_HEX}'>&#9679; FAIL</font>"
+        return f"<font color='{_MUTED_HEX}'>&#8211;</font>"
+
+    data: List[List[Any]] = [
+        [
+            Paragraph("Metric", header_style),
+            Paragraph("Measured", header_style),
+            Paragraph("Target / Limit", header_style),
+            Paragraph("Result", header_style),
+        ]
+    ]
+    for metric, measured, limit, status in rows:
+        data.append(
+            [
+                Paragraph(metric, cell_style),
+                Paragraph(measured, cell_style),
+                Paragraph(limit, cell_style),
+                Paragraph(_result_markup(status), result_style),
+            ]
+        )
+    table = Table(data, colWidths=col_widths or [64 * mm, 36 * mm, 50 * mm, 24 * mm])
+    table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("BACKGROUND", (0, 0), (-1, 0), accent),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, light]),
                 ("LINEABOVE", (0, 0), (-1, 0), 0.6, accent),
                 ("LINEBELOW", (0, -1), (-1, -1), 0.6, accent),
                 ("TOPPADDING", (0, 0), (-1, -1), 3.0),

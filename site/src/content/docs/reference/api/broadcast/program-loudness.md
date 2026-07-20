@@ -277,6 +277,46 @@ integrated loudness and the loudness range annotated.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### ProgramLoudnessResult.report()
+
+```python
+ProgramLoudnessResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+) -> str
+```
+
+Render an EBU R 128 programme-loudness compliance fiche to a PDF.
+
+Writes a one-page broadcast loudness-compliance sheet: the
+standard-basis line, an optional metadata header block, a full-width
+compliance table (integrated loudness and maximum true peak carry the
+verdict; the loudness range and the momentary/short-term maxima are
+informational), the result's own loudness-vs-time `plot`, the
+boxed `I = X LUFS (LRA = Y LU, max TP = Z dBTP)` result, a combined
+PASS/FAIL verdict row and a footer with the fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a measurement fiche (compliance table, plot and verdict only). A supplied `requirement` is read as the target programme loudness in LUFS (defaulting to the EBU R 128 -23.0 LUFS). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for a uniform signature; it has no effect on the single-layout programme-loudness fiche. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
 ## true_peak_level
 
 ```python

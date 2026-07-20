@@ -47,6 +47,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   table (`Frequency | alpha_s | alpha_p`) that accredited certificates carry.
   It reuses the shared `ReportMetadata` and reportlab back end of the ISO 717
   fiche.
+- ISO 532-1 Zwicker loudness results can now be exported as a one-page PDF fiche
+  through `ZwickerLoudness.report(path)`: a standard-basis line, a metadata
+  header, a compact metrics table (total loudness `N`, loudness level `LN`, and
+  the `N5`/`N10` percentiles for a time-varying result) beside the
+  specific-loudness pattern plot, the boxed `N (LN)` result, an optional
+  maximum-loudness verdict and the fixed disclaimer.
+- Programme-loudness measurements can now be exported as a one-page EBU R128
+  compliance fiche through `ProgramLoudnessResult.report(path)`: a standard-basis
+  line (EBU R128 / ITU-R BS.1770-5), a metadata header, a compliance table
+  (integrated loudness, loudness range, maximum true peak, and the maximum
+  momentary/short-term levels, each with its target/limit and a PASS/FAIL or
+  informational result), the loudness-versus-time plot, the boxed integrated
+  result, a combined verdict (integrated within the target tolerance and true
+  peak at or below -1 dBTP) and a measurement-basis strip. The verdict is driven
+  only by the integrated loudness and the true peak; loudness range and the
+  momentary/short-term maxima are shown as informational characterising
+  measures. `ReportMetadata.requirement` now accepts any finite value, since a
+  programme-loudness target in LUFS is negative.
 - `enclosure_insertion_loss` now accepts a panel prediction result directly for
   its `panel_transmission_loss` argument, in addition to a per-band array or a
   callable. A `SoundReductionResult` or `ApertureTransmissionResult` (from the

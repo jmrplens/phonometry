@@ -588,10 +588,11 @@ Descriptive metadata for the accredited ISO 717 report fiche.
 All fields are optional (default `None`); the report renders only the
 fields that are supplied, so a partially populated instance is valid. The
 numeric fields are validated on construction by physical range: the
-dimension, mass, volume, pressure and requirement fields must be finite and
-strictly positive; the temperature fields need only be finite (0 degrees
-Celsius or below is a valid test condition); and the relative-humidity
-fields must lie within 0..100 %. A violation raises `ValueError`.
+dimension, mass, volume and pressure fields must be finite and strictly
+positive; the temperature and requirement fields need only be finite (0
+degrees Celsius or below is a valid test condition, and a programme-loudness
+target in LUFS is negative); and the relative-humidity fields must lie
+within 0..100 %. A violation raises `ValueError`.
 
 **Attributes**
 
@@ -619,14 +620,14 @@ fields must lie within 0..100 %. A violation raises `ValueError`.
 | `laboratory` | Testing laboratory / institute name (footer). |
 | `operator` | Operator who carried out the test (footer signature line). |
 | `report_id` | Report / test number (footer). |
-| `requirement` | Target single-number value the verdict row compares the rating against, expressed in the rating's own unit (e.g. dB, a dimensionless absorption coefficient, or sone). The pass direction is defined by each rating's `report` method: quantities where more is better (airborne insulation, absorption) pass at or above the requirement, and quantities where less is better (impact level, loudness, aircraft noise) pass at or below it. |
+| `requirement` | Target single-number value the verdict row compares the rating against, expressed in the rating's own unit (e.g. dB, a dimensionless absorption coefficient, sone, or a programme-loudness level in LUFS). It need only be finite (a loudness target in LUFS is negative), so its sign is not constrained. The pass direction is defined by each rating's `report` method: quantities where more is better (airborne insulation, absorption) pass at or above the requirement, and quantities where less is better (impact level, loudness, aircraft noise) pass at or below it; the programme-loudness fiche reads it as the target level and passes within a tolerance. |
 | `notes` | Free-form remarks printed in the footer. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a supplied dimension/mass/volume/pressure/requirement is not finite and strictly positive, a temperature is not finite, or a relative humidity is outside 0..100 %. |
+| ValueError | If a supplied dimension/mass/volume/pressure is not finite and strictly positive, a temperature or requirement is not finite, or a relative humidity is outside 0..100 %. |
 
 ### ReportMetadata.is_empty()
 

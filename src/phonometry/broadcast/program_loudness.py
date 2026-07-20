@@ -51,6 +51,8 @@ from scipy import signal
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from .._internal.peaks import inter_sample_peak
 from .._internal.types import as_float_or_array
 from .._internal.utils import _typesignal
@@ -546,6 +548,48 @@ class ProgramLoudnessResult:
         from .._plot.broadcast import plot_program_loudness
 
         return plot_program_loudness(self, ax=ax, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+    ) -> str:
+        """Render an EBU R 128 programme-loudness compliance fiche to a PDF.
+
+        Writes a one-page broadcast loudness-compliance sheet: the
+        standard-basis line, an optional metadata header block, a full-width
+        compliance table (integrated loudness and maximum true peak carry the
+        verdict; the loudness range and the momentary/short-term maxima are
+        informational), the result's own loudness-vs-time :meth:`plot`, the
+        boxed ``I = X LUFS (LRA = Y LU, max TP = Z dBTP)`` result, a combined
+        PASS/FAIL verdict row and a footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a
+            measurement fiche (compliance table, plot and verdict only). A
+            supplied ``requirement`` is read as the target programme loudness
+            in LUFS (defaulting to the EBU R 128 -23.0 LUFS).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for a uniform signature; it has no effect on
+            the single-layout programme-loudness fiche.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.broadcast import render_program_loudness_report
+
+        return render_program_loudness_report(
+            self, path, metadata=metadata, verbose=verbose
+        )
 
 
 def _lra_edges(short_term: np.ndarray) -> tuple[float, float]:

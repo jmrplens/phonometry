@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **359/359 conformance checks pass** across 45 domains and 228 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **365/365 conformance checks pass** across 46 domains and 233 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -719,6 +719,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bies Eq. 7.64 (double wall) | Below f0 = mass law of the combined mass | 11.6144 dB (+/-0 dB) | 11.6144 dB | 0 dB | &#9989; |
 | Hopkins Eq. 4.92 (composite) | 1 % open area caps R at 10 lg(S/Sa) | 20 dB (+/-0.05 dB) | 19.9996 dB | 0 dB | &#9989; |
 | Hopkins Eq. 4.99/4.101 (Gomperts slit) | Transmission maximum at first resonance | 1544.9615 Hz (+/-15 Hz) | 1542.9615 Hz | -2 Hz | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Bending-wave plate-junction transmission (Cremer / Craik / Hopkins)</b>: 100% (6/6)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Hopkins Eq. 5.12 (identical plates) | X-junction corner tau12(0 deg) = 1/8 | 0.125 (+/-0) | 0.125 | 0 | &#9989; |
+| Hopkins Eqs 5.12 + 5.6 (identical plates) | X-junction corner angular average = 1/12 | 0.0833 (+/-0) | 0.0833 | 0 | &#9989; |
+| Hopkins Eqs 5.12 + 5.6 (identical plates) | L-junction corner angular average = 1/3 | 0.3333 (+/-0) | 0.3333 | 0 | &#9989; |
+| Hopkins Eq. 5.14 (identical plates) | In-line junction tau12(0 deg) = 1 | 1 (+/-0) | 1 | 0 | &#9989; |
+| Hopkins Eq. 5.7 (SEA consistency) | X-junction reciprocity tau_bar_12 / tau_bar_21 = chi | 1.5 (+/-0) | 1.5 | 0 | &#9989; |
+| Hopkins Eq. 5.116 (identical plates) | X-junction vibration reduction index = 10 lg(12) | 10.7918 dB (+/-0 dB) | 10.7918 dB | 0 dB | &#9989; |
 
 </details>
 

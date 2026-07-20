@@ -4,6 +4,7 @@
 declare namespace StarlightApp {
 	interface I18n {
 		'phonometry.references.title': string;
+		'phonometry.report.download': string;
 		'phonometry.video.download': string;
 		'phonometry.video.fallback': string;
 	}

@@ -11,3 +11,4 @@ pyoxipng==9.1.1  # deterministic PNG optimizer; pinned so a local `make graphs` 
 pystoi>=0.4.1  # test-only external cross-check for STOI/ESTOI (reproduces the authors' MATLAB); the library reimplements from the papers and never imports it at runtime
 svglib>=1.5
 pypdf>=4  # one-page assertion in the ISO 717 report tests
+pypdfium2>=4  # rasterizes the .report() PDFs to committed PNG previews (scripts/generate_reports.py); no system Poppler needed

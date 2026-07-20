@@ -32,6 +32,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   previous behaviour could understate the declared value by 1 dB (for example
   `L_WA = 91.4`, `K_WA = 2.4` gave 93 dB instead of 94 dB) and thereby flip
   the clause 6.2 verification verdict at the boundary.
+- `aircraft.load_anp_database` no longer interleaves distinct fixed-point
+  profiles: the parser now keys each trajectory on the full ANP identity
+  (aircraft, operation, profile identifier, stage length) instead of dropping
+  `Profile_ID`, so aircraft shipping several profiles for the same operation
+  and stage length (e.g. `CNA206`/`CNA20T` departures with `DEFAULT` and
+  `3000LB` weight variants) load each profile whole instead of a physically
+  impossible 18-point merge. `AnpDatabase.profile` and `AnpAircraft.profile`
+  gained an optional `profile_id=` keyword; without it the `DEFAULT` profile is
+  selected when present, a single available profile is used, and an ambiguous
+  request raises listing the identifiers. Duplicate or non-consecutive point
+  numbers within a profile now raise instead of silently corrupting the path.
+- `aircraft.event_level` and `aircraft.noise_contour` apply the ECAC Doc 29
+  Vol 2 §4.5.2 bank-angle sign to the correct observer side: the depression
+  angle is now `φ = β + ε` for observers to starboard (right of the flight
+  direction) and `φ = β − ε` for observers to port. The sign was inverted, so
+  the lateral-directivity (engine-installation) correction of every banked
+  segment was mirrored between the inside and outside of a turn.
 
 ### Changed
 

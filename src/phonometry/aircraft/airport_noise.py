@@ -397,22 +397,27 @@ def _segment_angles(
     point ``β = arccos(ℓ/dp)``, which differs from ``atan2(z, ℓ)`` on inclined
     segments. Alongside the segment ``β`` uses that equivalent angle; behind or
     ahead it uses the nearest segment end over the same horizontal offset.
-    The engine-installation depression angle ``φ = β_p − ε`` uses the equivalent
-    angle of the perpendicular point on the EXTENDED line (Eq. 4-17), with the
-    bank angle ``ε`` signed positive for observers to starboard (§4.5.2).
+    The engine-installation depression angle ``φ = β ± ε`` uses the equivalent
+    angle of the perpendicular point on the EXTENDED line (Eq. 4-17): the sign
+    is positive for observers to starboard (right of the flight direction) and
+    negative for observers to port (§4.5.2), with the bank angle ``ε`` measured
+    counter-clockwise about the roll axis (positive in a left turn, starboard
+    wing up).
     """
+    # Observer side: +1 to starboard (right of the flight direction, where the
+    # z-component of the horizontal cross product u × (obs − s1) is negative),
+    # −1 to port, 0 on the ground track (§4.5.2: φ = β + ε to starboard,
+    # φ = β − ε to port).
+    side = -float(np.sign(u[0] * (obs[1] - s1[1]) - u[1] * (obs[0] - s1[0])))
     if lateral <= 0.0:  # directly overhead: elevation/depression are ±90°
         beta = 90.0 if z_near >= 0.0 else -90.0
-        return beta, (90.0 if z_foot >= 0.0 else -90.0) - float(bank_deg)
+        return beta, (90.0 if z_foot >= 0.0 else -90.0) + side * float(bank_deg)
     eq_angle = float(np.degrees(np.arccos(np.clip(lateral / dp, 0.0, 1.0)))) if dp > 0.0 else 90.0
     eq_angle = eq_angle if z_foot >= 0.0 else -eq_angle
     if 0.0 <= q <= length:
         beta = eq_angle
     else:
         beta = float(np.degrees(np.arctan2(z_near, lateral)))
-    # Observer side: starboard is to the right of the flight direction
-    # (right-of-heading has a negative z-component cross product).
-    side = float(np.sign(u[0] * (obs[1] - s1[1]) - u[1] * (obs[0] - s1[0])))
     phi = eq_angle + side * float(bank_deg)
     return beta, phi
 
@@ -690,11 +695,14 @@ def _grid_angles(
     eq_angle = np.where(z_foot >= 0.0, eq_angle, -eq_angle)
     beta = np.where(behind | ahead,
                     np.degrees(np.arctan2(z_near, lateral)), eq_angle)
-    side = np.sign(u[0] * (obs[:, 1] - s1[1]) - u[1] * (obs[:, 0] - s1[0]))
+    # Observer side: +1 to starboard, −1 to port, 0 on the ground track
+    # (§4.5.2: φ = β + ε to starboard, φ = β − ε to port).
+    side = -np.sign(u[0] * (obs[:, 1] - s1[1]) - u[1] * (obs[:, 0] - s1[0]))
     phi = eq_angle + side * eps
     overhead = lateral <= 0.0
     beta = np.where(overhead, np.where(z_near >= 0.0, 90.0, -90.0), beta)
-    phi = np.where(overhead, np.where(z_foot >= 0.0, 90.0, -90.0) - eps, phi)
+    phi = np.where(overhead,
+                   np.where(z_foot >= 0.0, 90.0, -90.0) + side * eps, phi)
     return beta, phi
 
 
@@ -949,8 +957,10 @@ def event_level(
         rollout segments; ahead of them the reduced fraction (Eq. 4-21b), the
         nearest-end lateral geometry and no directivity term apply (§4.5.5-4.5.6).
     :param bank: Optional per-segment bank angle ``ε`` in degrees (length
-        ``N-1``); the depression angle becomes ``φ = β − ε`` with the §4.5.2
-        sign convention (positive for observers to starboard of the track).
+        ``N-1``), measured counter-clockwise about the roll axis (positive in
+        a left turn, starboard wing up); the depression angle becomes
+        ``φ = β + ε`` for observers to starboard (right) of the track and
+        ``φ = β − ε`` for observers to port (§4.5.2).
     :return: A :class:`FlyoverResult`. If every segment is degenerate
         (zero length) the level is ``-inf``.
     :raises ValueError: If the inputs are invalid.

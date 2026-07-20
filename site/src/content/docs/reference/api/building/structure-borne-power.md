@@ -389,6 +389,8 @@ plate-independent source quantities with
 ```python
 StructureBornePowerResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

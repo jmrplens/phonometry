@@ -169,11 +169,13 @@ class FacadePredictionResult:
     c_tr: int | None = None
     frequencies: np.ndarray | None = None
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-element partial indices and the façade ``R'`` / ``D2m,nT``."""
+        from .._i18n import check_language
         from .._plot.building import plot_facade_prediction
 
-        return plot_facade_prediction(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_facade_prediction(self, ax=ax, language=language, **kwargs)
 
 
 @dataclass(frozen=True)
@@ -195,11 +197,13 @@ class RadiatedPowerResult:
     l_w_dba: float | None = None
     frequencies: np.ndarray | None = None
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the radiated sound power level ``LW`` per band."""
+        from .._i18n import check_language
         from .._plot.building import plot_radiated_power
 
-        return plot_radiated_power(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_radiated_power(self, ax=ax, language=language, **kwargs)
 
 
 # A-weighting at octave-band centres 63 Hz .. 8 kHz (IEC 61672-1), for the

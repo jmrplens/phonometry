@@ -29,12 +29,53 @@ if TYPE_CHECKING:
     from ..emission.sound_power_intensity import SoundPowerIntensityResult
     from ..emission.sound_power_reverberation import ReverberationSoundPowerResult
 
+#: English -> {language: string} lookup for the fixed labels/titles/legends of
+#: the emission-domain renderers. English ids map to themselves so ``_t(key,
+#: "en")`` returns the verbatim original string.
+_STRINGS: dict[str, dict[str, str]] = {
+    "Band": {"en": "Band", "es": "Banda"},
+    "Sound power level LW [dB]": {
+        "en": "Sound power level LW [dB]",
+        "es": "Nivel de potencia acústica LW [dB]",
+    },
+    "sound power spectrum": {
+        "en": "sound power spectrum",
+        "es": "espectro de potencia acústica",
+    },
+    "Non-positive band": {"en": "Non-positive band", "es": "Banda no positiva"},
+    "Pressure level Lp": {"en": "Pressure level Lp", "es": "Nivel de presión Lp"},
+    "Intensity level LI": {
+        "en": "Intensity level LI",
+        "es": "Nivel de intensidad LI",
+    },
+    "Level [dB]": {"en": "Level [dB]", "es": "Nivel [dB]"},
+    "Pressure-intensity index δpI [dB]": {
+        "en": "Pressure-intensity index δpI [dB]",
+        "es": "Índice presión-intensidad δpI [dB]",
+    },
+    r"Sound power level $L_W$ [dB re 1 pW]": {
+        "en": r"Sound power level $L_W$ [dB re 1 pW]",
+        "es": r"Nivel de potencia acústica $L_W$ [dB re 1 pW]",
+    },
+    "ISO/TS 7849 sound power from surface vibration": {
+        "en": "ISO/TS 7849 sound power from surface vibration",
+        "es": "Potencia sonora por vibración superficial ISO/TS 7849",
+    },
+}
+
+
+def _t(key: str, language: str) -> str:
+    """Look up the localised string for ``key`` (falls back to ``key``)."""
+    return _STRINGS.get(key, {}).get(language, key)
+
+
 def plot_sound_power(
     result: (
         "SoundPowerResult | ReverberationSoundPowerResult"
         " | SoundPowerIntensityResult | Any"
     ),
     ax: Axes | None = None,
+    language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Sound power level spectrum with the A-weighted total annotated.
@@ -49,16 +90,20 @@ def plot_sound_power(
         ``sound_power_level``, ``sound_power_level_a`` and (optionally)
         ``frequencies`` and ``negative_band``.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the band :meth:`~matplotlib.axes.Axes.bar`.
     :return: The axes.
     """
+    from .._i18n import format_number, localize_axes
+
     ax = ax if ax is not None else _new_axes()
     lw = np.asarray(result.sound_power_level, dtype=np.float64)
     n = lw.size
     freqs = getattr(result, "frequencies", None)
     if freqs is None:
         positions = _band_axis(
-            ax, [f"Band {i + 1}" for i in range(n)], xlabel="Band"
+            ax, [f"{_t('Band', language)} {i + 1}" for i in range(n)],
+            xlabel=_t("Band", language)
         )
     else:
         positions = _band_axis(ax, np.asarray(freqs, dtype=np.float64))
@@ -78,22 +123,29 @@ def plot_sound_power(
     bars = ax.bar(positions, np.nan_to_num(lw), **kwargs)
     _hatch_invalid(bars, neg)
 
-    ax.set_ylabel("Sound power level LW [dB]")
+    ax.set_ylabel(_t("Sound power level LW [dB]", language))
     designation = _sound_power_designation(result)
     lwa = float(result.sound_power_level_a)
     if np.isfinite(lwa):
-        ax.set_title(f"{designation} sound power spectrum  (LWA = {lwa:.1f} dB(A))")
+        ax.set_title(
+            f"{designation} {_t('sound power spectrum', language)}  "
+            f"(LWA = {format_number(lwa, language, decimals=1)} dB(A))"
+        )
     else:
-        ax.set_title(f"{designation} sound power spectrum")
+        ax.set_title(f"{designation} {_t('sound power spectrum', language)}")
     if np.any(neg):
-        ax.plot([], [], color=_C_MUTED, marker="s", ls="", label="Non-positive band")
+        ax.plot([], [], color=_C_MUTED, marker="s", ls="",
+                label=_t("Non-positive band", language))
     if np.any(neg) or "label" in kwargs:
         ax.legend(loc="best", fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
+
 def plot_intensity(
-    result: IntensityResult, ax: Axes | None = None, **kwargs: Any
+    result: IntensityResult, ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Pressure vs intensity level per band with the pressure-intensity index.
 
@@ -104,10 +156,13 @@ def plot_intensity(
     :param result: An :class:`~phonometry.intensity.IntensityResult` with
         per-band data (obtained by requesting a band ``fraction``).
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the pressure-level curve ``plot`` call.
     :return: The axes.
     :raises ValueError: If the result carries no per-band data.
     """
+    from .._i18n import format_number, localize_axes
+
     if result.frequency is None:
         raise ValueError(
             "plot() needs per-band intensity data; call sound_intensity(...) "
@@ -120,11 +175,11 @@ def plot_intensity(
     index = np.asarray(result.pressure_intensity_index, dtype=np.float64)
 
     kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("label", "Pressure level Lp")
+    kwargs.setdefault("label", _t("Pressure level Lp", language))
     ax.plot(freqs, lp, "o-", **kwargs)
-    ax.plot(freqs, li, "s--", color=_C_REFERENCE, label="Intensity level LI")
+    ax.plot(freqs, li, "s--", color=_C_REFERENCE, label=_t("Intensity level LI", language))
     _freq_axis(ax, freqs)
-    ax.set_ylabel("Level [dB]")
+    ax.set_ylabel(_t("Level [dB]", language))
     ax.grid(True, which="both", alpha=0.3)
 
     twin = ax.twinx()
@@ -136,29 +191,38 @@ def plot_intensity(
         alpha=0.25,
         label="δpI = Lp - LI",
     )
-    twin.set_ylabel("Pressure-intensity index δpI [dB]")
+    twin.set_ylabel(_t("Pressure-intensity index δpI [dB]", language))
 
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
     ax.legend(lines + tlines, labels + tlabels, loc="best", fontsize="small")
     ax.set_title(
         "ISO 9614 Lp vs LI  "
-        f"(total δpI = {result.total_pressure_intensity_index:.1f} dB)"
+        f"(total δpI = {format_number(result.total_pressure_intensity_index, language, decimals=1)} dB)"
     )
+    localize_axes(ax, language)
     return ax
 
+
 def plot_vibration_sound_power(
-    result: "VibrationSoundPowerResult", ax: Axes | None = None, **kwargs: Any
+    result: "VibrationSoundPowerResult", ax: Axes | None = None,
+    language: str = "en", **kwargs: Any
 ) -> Axes:
     """Radiated sound power level per band (ISO/TS 7849).
 
     :param result: A :class:`~phonometry.vibration_sound_power.VibrationSoundPowerResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the bar ``plot``.
     :return: The axes.
     """
-    return _plot_band_level_bars(
+    from .._i18n import localize_axes
+
+    ax = _plot_band_level_bars(
         ax, result.sound_power_level, result.frequencies, result.total_level,
-        ylabel=r"Sound power level $L_W$ [dB re 1 pW]",
-        title="ISO/TS 7849 sound power from surface vibration", **kwargs,
+        ylabel=_t(r"Sound power level $L_W$ [dB re 1 pW]", language),
+        title=_t("ISO/TS 7849 sound power from surface vibration", language),
+        **kwargs,
     )
+    localize_axes(ax, language)
+    return ax

@@ -170,7 +170,12 @@ Per-band field airborne sound insulation (ISO 16283-1:2014).
 ### AirborneInsulationResult.plot()
 
 ```python
-AirborneInsulationResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+AirborneInsulationResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-band insulation quantities (`DnT`, `D`, `R'`).
@@ -362,7 +367,12 @@ Per-band field façade sound insulation (ISO 16283-3).
 ### FacadeInsulationResult.plot()
 
 ```python
-FacadeInsulationResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+FacadeInsulationResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-band façade insulation profile (ISO 16283-3).
@@ -465,7 +475,12 @@ Per-band field impact sound insulation (ISO 16283-2).
 ### ImpactInsulationResult.plot()
 
 ```python
-ImpactInsulationResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ImpactInsulationResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-band impact levels (`L'nT` and, if present, `L'n`).
@@ -504,7 +519,12 @@ Single-number weighted impact rating and CI (ISO 717-2).
 ### ImpactRatingResult.plot()
 
 ```python
-ImpactRatingResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ImpactRatingResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the measured curve vs the shifted reference (ISO 717-2).
@@ -862,7 +882,12 @@ Single-number weighted rating and adaptation terms (ISO 717-1).
 ### WeightedRatingResult.plot()
 
 ```python
-WeightedRatingResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+WeightedRatingResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the measured curve vs the shifted reference (ISO 717-1).

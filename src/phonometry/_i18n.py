@@ -77,18 +77,28 @@ def localize_axes(ax: Any, language: str = "en") -> None:
     """
     if language != "es":
         return
-    from matplotlib.ticker import FuncFormatter, NullFormatter
+    from matplotlib.ticker import ScalarFormatter
 
-    def _comma(x: float, _pos: int) -> str:
-        # Match matplotlib's default compact formatting, then swap the point.
-        text = f"{x:g}"
-        return text.replace(".", ",")
+    class _CommaScalarFormatter(ScalarFormatter):
+        """Matplotlib's default numeric formatter with a comma separator.
+
+        Installed as the axis formatter (not wrapped around a detached one, which
+        renders blank labels), so matplotlib keeps its tick locations in sync and
+        the decimal precision stays consistent, e.g. ``1,0`` and ``1,5`` rather
+        than the ``1`` and ``1,5`` a bare ``{x:g}`` would produce.
+        """
+
+        def __call__(self, x: float, pos: Any = None) -> str:
+            return super().__call__(x, pos).replace(".", ",")
 
     for axis in (ax.xaxis, ax.yaxis):
-        # Leave axes whose labels are not plain numbers (log/symlog with the
-        # default LogFormatter, or fixed category labels) untouched.
+        # Only reformat axes still using matplotlib's default auto numeric
+        # formatter. Skip logarithmic / symlog axes (a LogFormatter) and category
+        # axes whose text labels were installed by ``set_xticklabels`` (a
+        # FuncFormatter that maps tick positions to fixed strings), which the
+        # comma formatter would otherwise overwrite with bare positions.
         if axis.get_scale() != "linear":
             continue
-        if isinstance(axis.get_major_formatter(), NullFormatter):
+        if not isinstance(axis.get_major_formatter(), ScalarFormatter):
             continue
-        axis.set_major_formatter(FuncFormatter(_comma))
+        axis.set_major_formatter(_CommaScalarFormatter())

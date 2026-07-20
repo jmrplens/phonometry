@@ -254,15 +254,17 @@ class AirborneInsulationResult:
     dnt: np.ndarray
     r_prime: np.ndarray | None
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-band insulation quantities (``DnT``, ``D``, ``R'``).
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_airborne_insulation
 
-        return plot_airborne_insulation(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_airborne_insulation(self, ax=ax, language=language, **kwargs)
 
 
 @dataclass(frozen=True)
@@ -299,7 +301,7 @@ class WeightedRatingResult:
     shifted_reference: np.ndarray | None = None
     quantity: str = "airborne"
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the measured curve vs the shifted reference (ISO 717-1).
 
         Unfavourable deviations (reference above measurement) are shaded and
@@ -307,9 +309,11 @@ class WeightedRatingResult:
         (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_weighted_rating
 
-        return plot_weighted_rating(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_weighted_rating(self, ax=ax, language=language, **kwargs)
 
     def report(
         self,
@@ -368,15 +372,17 @@ class ImpactInsulationResult:
     l_n_t: np.ndarray
     l_n: np.ndarray | None
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-band impact levels (``L'nT`` and, if present, ``L'n``).
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_impact_insulation
 
-        return plot_impact_insulation(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_impact_insulation(self, ax=ax, language=language, **kwargs)
 
 
 @dataclass(frozen=True)
@@ -411,7 +417,7 @@ class ImpactRatingResult:
     shifted_reference: np.ndarray | None = None
     quantity: str = "impact"
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the measured curve vs the shifted reference (ISO 717-2).
 
         Unfavourable deviations (measurement above the reference, the sign
@@ -419,9 +425,11 @@ class ImpactRatingResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_impact_rating
 
-        return plot_impact_rating(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_impact_rating(self, ax=ax, language=language, **kwargs)
 
     def report(
         self,
@@ -489,7 +497,7 @@ class FacadeInsulationResult:
     r_prime: np.ndarray | None
     frequencies: np.ndarray | None = None
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-band façade insulation profile (ISO 16283-3).
 
         Draws the standardized level difference and any other available
@@ -497,9 +505,11 @@ class FacadeInsulationResult:
         matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_facade_insulation
 
-        return plot_facade_insulation(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_facade_insulation(self, ax=ax, language=language, **kwargs)
 
 
 def _render_iso717(

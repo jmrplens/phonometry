@@ -133,14 +133,16 @@ class HvacSpectrumResult:
     quantity: str
     label: str
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the quantity against a continuous log-frequency axis.
 
         Requires matplotlib (``pip install phonometry[plot]``).
         """
+        from .._i18n import check_language
         from .._plot.noise_control import plot_hvac_spectrum
 
-        return plot_hvac_spectrum(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_hvac_spectrum(self, ax=ax, language=language, **kwargs)
 
 
 def end_reflection_loss(

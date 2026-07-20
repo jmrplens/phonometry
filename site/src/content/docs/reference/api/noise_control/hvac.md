@@ -179,7 +179,12 @@ A per-frequency HVAC quantity (attenuation or regenerated power level).
 ### HvacSpectrumResult.plot()
 
 ```python
-HvacSpectrumResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+HvacSpectrumResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the quantity against a continuous log-frequency axis.

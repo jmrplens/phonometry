@@ -159,3 +159,19 @@ def test_validation() -> None:
         sl.expansion_chamber([100.0], 0.3, -0.04, 0.01)
     with pytest.raises(ValueError, match="must exceed"):
         sl.extended_tube_chamber([100.0], 0.3, 0.01, 0.02)
+
+
+def test_plot_language_spanish_and_validation() -> None:
+    # The reactive-silencer .plot() renderer localises to Spanish and rejects
+    # an unknown language code; English remains the unchanged default.
+    f = np.linspace(20.0, 2000.0, 500)
+    res = sl.expansion_chamber(f, 0.3, 0.04, 0.01)
+    ax = res.plot(language="es")
+    assert "Frecuencia" in ax.get_xlabel()
+    assert "Pérdida" in ax.get_ylabel()
+    assert "Silenciador reactivo" in ax.get_title()
+    ax_en = res.plot()
+    assert ax_en.get_xlabel() == "Frequency [Hz]"
+    assert ax_en.get_ylabel() == "Loss [dB]"
+    with pytest.raises(ValueError, match="Unknown language"):
+        res.plot(language="xx")

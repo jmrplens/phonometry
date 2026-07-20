@@ -203,15 +203,17 @@ class StructureBornePowerResult:
         lw = np.asarray(self.power_level, dtype=np.float64)
         return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * lw))))
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the characteristic structure-borne power level per band.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_structure_borne_power
 
-        return plot_structure_borne_power(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_structure_borne_power(self, ax=ax, language=language, **kwargs)
 
 
 def reception_plate_power(

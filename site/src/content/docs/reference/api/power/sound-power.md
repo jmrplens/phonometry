@@ -443,7 +443,12 @@ applicable bands (`NaN` without `frequencies` and more than one band).
 ### PrecisionIntensityResult.plot()
 
 ```python
-PrecisionIntensityResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+PrecisionIntensityResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the `LW` spectrum; non-applicable bands are hatched/greyed.
@@ -495,6 +500,8 @@ the A-weighted total `LWA` (Eq. C.1).
 ```python
 PrecisionSoundPowerResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -701,7 +708,12 @@ uncertainty
 ### SoundPowerResult.plot()
 
 ```python
-SoundPowerResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SoundPowerResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the LW spectrum with the A-weighted total annotated.

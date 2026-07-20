@@ -433,3 +433,17 @@ def test_k2_over_validity_limit_warns() -> None:
         sound_power_pressure(
             np.full((10, 1), 60.0), "hemisphere", radius=r, absorption_area=10.0
         )
+
+
+def test_plot_language_spanish_and_validation() -> None:
+    # The sound-power .plot() renderer localises to Spanish and rejects an
+    # unknown language code; English remains the unchanged default.
+    levels = np.full((10, 1), 70.0)
+    res = sound_power_pressure(levels, "hemisphere", radius=2.0)
+    ax = res.plot(language="es")
+    assert "potencia acústica" in ax.get_ylabel()
+    assert "espectro de potencia acústica" in ax.get_title()
+    ax_en = res.plot()
+    assert ax_en.get_ylabel() == "Sound power level LW [dB]"
+    with pytest.raises(ValueError, match="Unknown language"):
+        res.plot(language="xx")

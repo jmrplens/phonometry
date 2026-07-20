@@ -105,7 +105,12 @@ One-third-octave-band standard uncertainties (ISO 12999-1 Tables 2/4/6/D.1).
 ### BandUncertainty.plot()
 
 ```python
-BandUncertainty.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+BandUncertainty.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-band standard uncertainty spectrum.

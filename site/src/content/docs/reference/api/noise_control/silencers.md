@@ -235,7 +235,12 @@ Transmission and insertion loss of a reactive silencer over frequency.
 ### ReactiveSilencerResult.plot()
 
 ```python
-ReactiveSilencerResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ReactiveSilencerResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the transmission (and insertion) loss against frequency.

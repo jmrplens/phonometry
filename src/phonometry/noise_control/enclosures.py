@@ -71,15 +71,17 @@ class EnclosureResult:
     internal_area: float
     room_constant: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the panel ``R``, correction ``C`` and net insertion loss.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.noise_control import plot_enclosure
 
-        return plot_enclosure(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_enclosure(self, ax=ax, language=language, **kwargs)
 
 
 class PanelTransmissionResult(Protocol):

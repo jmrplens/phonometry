@@ -168,15 +168,17 @@ class FloorCoveringImprovementResult:
         """Return ``(octave_freqs, ΔLoct)`` via Formula (5) (needs 16 1/3-oct bands)."""
         return improvement_octave_bands(self.improvement, self.frequencies)
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the improvement spectrum ``ΔL`` (with ``ΔLw`` when available).
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.building import plot_floor_covering_improvement
 
-        return plot_floor_covering_improvement(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_floor_covering_improvement(self, ax=ax, language=language, **kwargs)
 
 
 def _rating_slice(frequencies: np.ndarray) -> np.ndarray | None:

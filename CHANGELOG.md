@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Every `.report()` fiche accepts a `language` argument (`'en'` default, `'es'`):
   Spanish strings and a comma decimal separator.
+- The `.plot()` renderers of the building, noise-control and emission result
+  objects accept a `language` keyword (`"en"` by default, or `"es"`). Spanish
+  renders the axis labels, titles and legends with building-acoustics
+  terminology and a comma decimal separator, while English stays exactly as
+  before. A shared `phonometry._i18n` helper module backs the locale-aware
+  number formatting and tick localisation.
 - IEC 61260-1 filter class compliance can now be exported as a one-page PDF
   fiche. A new `filter_class_compliance(bank, *, num_points=..., edition=...)`
   runs the same verification as `verify_filter_class` and returns a frozen

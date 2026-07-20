@@ -48,94 +48,254 @@ if TYPE_CHECKING:
 #: Shared x-axis label for the frequency-domain building plots.
 _FREQ_LABEL = "Frequency [Hz]"
 
+#: English -> {language: string} lookup for the fixed labels/titles/legends of
+#: the building-domain renderers. English ids map to themselves so ``_t(key,
+#: "en")`` returns the verbatim original string.
+_STRINGS: dict[str, dict[str, str]] = {
+    "Frequency [Hz]": {"en": "Frequency [Hz]", "es": "Frecuencia [Hz]"},
+    "Band": {"en": "Band", "es": "Banda"},
+    "Band index": {"en": "Band index", "es": "Índice de banda"},
+    "predicted $R$": {"en": "predicted $R$", "es": "$R$ previsto"},
+    "Sound reduction index $R$ [dB]": {
+        "en": "Sound reduction index $R$ [dB]",
+        "es": "Índice de reducción acústica $R$ [dB]",
+    },
+    "Predicted sound insulation": {
+        "en": "Predicted sound insulation",
+        "es": "Aislamiento acústico previsto",
+    },
+    "aperture $R$": {"en": "aperture $R$", "es": "$R$ de abertura"},
+    "Aperture sound transmission (Gomperts / Wilson-Soroka)": {
+        "en": "Aperture sound transmission (Gomperts / Wilson-Soroka)",
+        "es": "Transmisión sonora por abertura (Gomperts / Wilson-Soroka)",
+    },
+    "Sound reduction index [dB]": {
+        "en": "Sound reduction index [dB]",
+        "es": "Índice de reducción acústica [dB]",
+    },
+    "Sigma unfav.": {"en": "Sigma unfav.", "es": "Σ desfav."},
+    "impact rating": {"en": "impact rating", "es": "índice de impacto"},
+    "Impact sound pressure level [dB]": {
+        "en": "Impact sound pressure level [dB]",
+        "es": "Nivel de presión sonora de impacto [dB]",
+    },
+    "Level difference / reduction index [dB]": {
+        "en": "Level difference / reduction index [dB]",
+        "es": "Diferencia de nivel / índice de reducción [dB]",
+    },
+    "Façade sound insulation (ISO 16283-3)": {
+        "en": "Façade sound insulation (ISO 16283-3)",
+        "es": "Aislamiento acústico de fachada (ISO 16283-3)",
+    },
+    "Reduction index / level difference [dB]": {
+        "en": "Reduction index / level difference [dB]",
+        "es": "Índice de reducción / diferencia de nivel [dB]",
+    },
+    "Façade insulation prediction (EN 12354-3)": {
+        "en": "Façade insulation prediction (EN 12354-3)",
+        "es": "Predicción del aislamiento de fachada (EN 12354-3)",
+    },
+    "Radiated sound power level [dB]": {
+        "en": "Radiated sound power level [dB]",
+        "es": "Nivel de potencia acústica radiada [dB]",
+    },
+    "Radiated sound power (EN 12354-4)": {
+        "en": "Radiated sound power (EN 12354-4)",
+        "es": "Potencia sonora radiada (EN 12354-4)",
+    },
+    "Vibration reduction index $K_{ij}$ [dB]": {
+        "en": "Vibration reduction index $K_{ij}$ [dB]",
+        "es": "Índice de reducción de vibraciones $K_{ij}$ [dB]",
+    },
+    "Vibration reduction index (ISO 10848)": {
+        "en": "Vibration reduction index (ISO 10848)",
+        "es": "Índice de reducción de vibraciones (ISO 10848)",
+    },
+    r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]": {
+        "en": r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]",
+        "es": r"Nivel de potencia estructural $L_{Ws}$ [dB re 1 pW]",
+    },
+    "EN 15657 characteristic structure-borne sound power": {
+        "en": "EN 15657 characteristic structure-borne sound power",
+        "es": "Potencia sonora estructural característica EN 15657",
+    },
+    "paths": {"en": "paths", "es": "trayectos"},
+    r"total $L_{n,s}$": {"en": r"total $L_{n,s}$", "es": r"total $L_{n,s}$"},
+    r"Normalised SPL $L_{n,s}$ [dB]": {
+        "en": r"Normalised SPL $L_{n,s}$ [dB]",
+        "es": r"NPS normalizado $L_{n,s}$ [dB]",
+    },
+    "EN 12354-5 installed structure-borne sound": {
+        "en": "EN 12354-5 installed structure-borne sound",
+        "es": "Ruido estructural instalado EN 12354-5",
+    },
+    "Transmission path": {
+        "en": "Transmission path",
+        "es": "Trayecto de transmisión",
+    },
+    "Share of transmitted energy [%]": {
+        "en": "Share of transmitted energy [%]",
+        "es": "Fracción de energía transmitida [%]",
+    },
+    "flanking prediction": {
+        "en": "flanking prediction",
+        "es": "predicción de transmisión por flancos",
+    },
+    "Level / correction [dB]": {
+        "en": "Level / correction [dB]",
+        "es": "Nivel / corrección [dB]",
+    },
+    "impact prediction": {
+        "en": "impact prediction",
+        "es": "predicción de impacto",
+    },
+    "Airborne sound insulation (ISO 16283-1)": {
+        "en": "Airborne sound insulation (ISO 16283-1)",
+        "es": "Aislamiento a ruido aéreo (ISO 16283-1)",
+    },
+    "Impact sound insulation (ISO 16283-2)": {
+        "en": "Impact sound insulation (ISO 16283-2)",
+        "es": "Aislamiento a ruido de impacto (ISO 16283-2)",
+    },
+    "Standard uncertainty u [dB]": {
+        "en": "Standard uncertainty u [dB]",
+        "es": "Incertidumbre típica u [dB]",
+    },
+    "band uncertainty": {"en": "band uncertainty", "es": "incertidumbre por banda"},
+    "situation": {"en": "situation", "es": "situación"},
+    "sigma_R95 upper limit": {
+        "en": "sigma_R95 upper limit",
+        "es": "límite superior sigma_R95",
+    },
+    "limit of measurement (> delta-L)": {
+        "en": "limit of measurement (> delta-L)",
+        "es": "límite de medición (> delta-L)",
+    },
+    "Improvement of impact sound insulation delta-L [dB]": {
+        "en": "Improvement of impact sound insulation delta-L [dB]",
+        "es": "Mejora del aislamiento a ruido de impacto delta-L [dB]",
+    },
+    "ISO 16251-1 Floor-Covering Impact Sound Improvement": {
+        "en": "ISO 16251-1 Floor-Covering Impact Sound Improvement",
+        "es": "Mejora del aislamiento a ruido de impacto de revestimiento de suelo ISO 16251-1",
+    },
+}
+
+
+def _t(key: str, language: str) -> str:
+    """Look up the localised string for ``key`` (falls back to ``key``)."""
+    return _STRINGS.get(key, {}).get(language, key)
+
+
 def plot_sound_reduction(
-    result: "SoundReductionResult", ax: Axes | None = None, **kwargs: Any
+    result: "SoundReductionResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Predicted sound reduction index ``R(f)`` (Bies 7.2).
 
     :param result: A
         :class:`~phonometry.building.panel_transmission.SoundReductionResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``R(f)`` curve ``plot``.
     :return: The axes.
     """
+    from .._i18n import format_number, localize_axes
+
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     r = np.asarray(result.transmission_loss, dtype=np.float64)
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("markersize", 3)
-    ax.semilogx(freq, r, label="predicted $R$", **kwargs)
+    ax.semilogx(freq, r, label=_t("predicted $R$", language), **kwargs)
     if result.critical_frequency is not None:
         ax.axvline(
             result.critical_frequency, color=_C_REFERENCE, ls="--", lw=1.0,
-            label=f"$f_c$ = {result.critical_frequency:.0f} Hz",
+            label=f"$f_c$ = {format_number(result.critical_frequency, language, decimals=0)} Hz",
         )
     if result.resonance_frequency is not None:
         ax.axvline(
             result.resonance_frequency, color=_C_SECONDARY, ls="--", lw=1.0,
-            label=f"$f_0$ = {result.resonance_frequency:.0f} Hz",
+            label=f"$f_0$ = {format_number(result.resonance_frequency, language, decimals=0)} Hz",
         )
     format_frequency_axis(ax, float(freq.min()), float(freq.max()))
-    ax.set_xlabel(_FREQ_LABEL)
-    ax.set_ylabel("Sound reduction index $R$ [dB]")
-    ax.set_title(f"Predicted sound insulation ({result.model})")
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Sound reduction index $R$ [dB]", language))
+    ax.set_title(f"{_t('Predicted sound insulation', language)} ({result.model})")
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
+
 def plot_aperture_transmission(
-    result: "ApertureTransmissionResult", ax: Axes | None = None, **kwargs: Any
+    result: "ApertureTransmissionResult", ax: Axes | None = None,
+    language: str = "en", **kwargs: Any
 ) -> Axes:
     """Aperture sound reduction index ``R(f) = -10 lg(tau)`` (Hopkins 4.3.10).
 
     :param result: An
         :class:`~phonometry.building.aperture_transmission.ApertureTransmissionResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``R(f)`` curve ``plot``.
     :return: The axes.
     """
+    from .._i18n import localize_axes
+
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     r = np.asarray(result.transmission_loss, dtype=np.float64)
     kwargs.setdefault("color", _C_PRIMARY)
-    ax.semilogx(freq, r, label=f"{result.kind} aperture $R$", **kwargs)
+    ax.semilogx(freq, r, label=f"{result.kind} {_t('aperture $R$', language)}", **kwargs)
     ax.axhline(0.0, color=_C_MUTED, ls=":", lw=0.9)
     format_frequency_axis(ax, float(freq.min()), float(freq.max()))
-    ax.set_xlabel(_FREQ_LABEL)
-    ax.set_ylabel("Sound reduction index $R$ [dB]")
-    ax.set_title("Aperture sound transmission (Gomperts / Wilson-Soroka)")
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Sound reduction index $R$ [dB]", language))
+    ax.set_title(_t("Aperture sound transmission (Gomperts / Wilson-Soroka)", language))
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
+
 def plot_weighted_rating(
-    result: "WeightedRatingResult", ax: Axes | None = None, **kwargs: Any
+    result: "WeightedRatingResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Airborne rating curve vs shifted reference (ISO 717-1).
 
     :param result: A :class:`~phonometry.insulation.WeightedRatingResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the measured-curve ``plot`` call.
     :return: The axes.
     """
+    from .._i18n import format_number, localize_axes
+
     _require_rating_curve(result)
-    return _plot_rating(
+    ax = _plot_rating(
         np.asarray(result.band_centers, dtype=np.float64),
         np.asarray(result.measured, dtype=np.float64),
         np.asarray(result.shifted_reference, dtype=np.float64),
         impact=False,
         title=(
             f"ISO 717-1 Rw (C={result.c:+d}; Ctr={result.ctr:+d}) = "
-            f"{result.rating} dB  (Sigma unfav. = {result.unfavourable_sum:.1f} dB)"
+            f"{result.rating} dB  ({_t('Sigma unfav.', language)} = "
+            f"{format_number(result.unfavourable_sum, language, decimals=1)} dB)"
         ),
-        ylabel="Sound reduction index [dB]",
+        ylabel=_t("Sound reduction index [dB]", language),
         ax=ax,
         **kwargs,
     )
+    localize_axes(ax, language)
+    return ax
+
 
 def plot_impact_rating(
-    result: "ImpactRatingResult", ax: Axes | None = None, **kwargs: Any
+    result: "ImpactRatingResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Impact rating curve vs shifted reference (ISO 717-2).
 
@@ -147,9 +307,12 @@ def plot_impact_rating(
 
     :param result: An :class:`~phonometry.insulation.ImpactRatingResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the measured-curve ``plot`` call.
     :return: The axes.
     """
+    from .._i18n import format_number, localize_axes
+
     _require_rating_curve(result)
     band_centers = np.asarray(result.band_centers, dtype=np.float64)
     reference = np.asarray(result.shifted_reference, dtype=np.float64)
@@ -162,18 +325,22 @@ def plot_impact_rating(
         # the dataclass does not carry which, so the figure uses the neutral
         # "impact rating" label rather than hard-coding one specific symbol.
         title=(
-            f"ISO 717-2 impact rating (CI={result.ci:+d}) = {result.rating} dB"
-            f"  (Sigma unfav. = {result.unfavourable_sum:.1f} dB)"
+            f"ISO 717-2 {_t('impact rating', language)} (CI={result.ci:+d}) = "
+            f"{result.rating} dB  ({_t('Sigma unfav.', language)} = "
+            f"{format_number(result.unfavourable_sum, language, decimals=1)} dB)"
         ),
-        ylabel="Impact sound pressure level [dB]",
+        ylabel=_t("Impact sound pressure level [dB]", language),
         ax=ax,
         **kwargs,
     )
     _annotate_impact_500(ax, band_centers, reference, int(result.rating))
+    localize_axes(ax, language)
     return ax
 
+
 def plot_facade_insulation(
-    result: "FacadeInsulationResult", ax: Axes | None = None, **kwargs: Any
+    result: "FacadeInsulationResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Per-band façade sound-insulation profile (ISO 16283-3).
 
@@ -185,9 +352,12 @@ def plot_facade_insulation(
     :param result: A façade result exposing ``d_2m``, ``d_2m_nt``,
         ``d_2m_n``, ``r_prime`` and (optionally) ``frequencies``.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the primary ``D2m,nT`` curve ``plot`` call.
     :return: The axes.
     """
+    from .._i18n import localize_axes
+
     ax = ax if ax is not None else _new_axes()
     dnt = np.asarray(result.d_2m_nt, dtype=np.float64)
     n = dnt.size
@@ -209,14 +379,17 @@ def plot_facade_insulation(
             opts.update(kwargs)
         ax.plot(x, y, "o-", **opts)
 
-    ax.set_ylabel("Level difference / reduction index [dB]")
-    ax.set_title("Façade sound insulation (ISO 16283-3)")
+    ax.set_ylabel(_t("Level difference / reduction index [dB]", language))
+    ax.set_title(_t("Façade sound insulation (ISO 16283-3)", language))
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
+
 def plot_facade_prediction(
-    result: "FacadePredictionResult", ax: Axes | None = None, **kwargs: Any
+    result: "FacadePredictionResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Predicted façade insulation profile (EN 12354-3:2000).
 
@@ -228,9 +401,12 @@ def plot_facade_prediction(
     :param result: A façade prediction result exposing ``r_prime``,
         ``d_2m_nt``, ``element_r`` and (optionally) ``frequencies``.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the primary ``R'`` curve ``plot`` call.
     :return: The axes.
     """
+    from .._i18n import localize_axes
+
     ax = ax if ax is not None else _new_axes()
     r_prime = np.asarray(result.r_prime, dtype=np.float64)
     n = r_prime.size
@@ -251,14 +427,17 @@ def plot_facade_prediction(
         label="$D_{2m,nT}$",
     )
 
-    ax.set_ylabel("Reduction index / level difference [dB]")
-    ax.set_title("Façade insulation prediction (EN 12354-3)")
+    ax.set_ylabel(_t("Reduction index / level difference [dB]", language))
+    ax.set_title(_t("Façade insulation prediction (EN 12354-3)", language))
     ax.legend(loc="best", fontsize="small", ncol=2)
     ax.grid(True, alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
+
 def plot_radiated_power(
-    result: "RadiatedPowerResult", ax: Axes | None = None, **kwargs: Any
+    result: "RadiatedPowerResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Radiated sound power level ``LW`` per band (EN 12354-4:2000).
 
@@ -268,22 +447,25 @@ def plot_radiated_power(
 
     :param result: A :class:`~phonometry.facade_prediction.RadiatedPowerResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``bar`` call.
     :return: The axes.
     """
+    from .._i18n import format_number, localize_axes
+
     ax = ax if ax is not None else _new_axes()
     l_w = np.asarray(result.l_w, dtype=np.float64)
     n = l_w.size
     positions = np.arange(n, dtype=np.float64)
     if result.frequencies is None:
-        labels = [f"Band {i + 1}" for i in range(n)]
+        labels = [f"{_t('Band', language)} {i + 1}" for i in range(n)]
     else:
         labels = [_format_freq(f) for f in np.asarray(result.frequencies, dtype=np.float64)]
 
     opts: dict[str, Any] = {"color": "tab:red", "alpha": 0.8, "label": "$L_W$"}
     opts.update(kwargs)
     ax.bar(positions, l_w, **opts)
-    _band_axis(ax, labels, xlabel=_FREQ_LABEL)
+    _band_axis(ax, labels, xlabel=_t(_FREQ_LABEL, language))
 
     if result.l_w_dba is not None:
         ax.axhline(
@@ -291,16 +473,19 @@ def plot_radiated_power(
             color="black",
             ls="--",
             lw=1.2,
-            label=f"$L_{{WA}}$ = {result.l_w_dba:.1f} dB(A)",
+            label=f"$L_{{WA}}$ = {format_number(result.l_w_dba, language, decimals=1)} dB(A)",
         )
-    ax.set_ylabel("Radiated sound power level [dB]")
-    ax.set_title("Radiated sound power (EN 12354-4)")
+    ax.set_ylabel(_t("Radiated sound power level [dB]", language))
+    ax.set_title(_t("Radiated sound power (EN 12354-4)", language))
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
+
 def plot_vibration_reduction(
-    result: "VibrationReductionResult", ax: Axes | None = None, **kwargs: Any
+    result: "VibrationReductionResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Vibration reduction index ``Kij`` versus frequency (ISO 10848).
 
@@ -311,9 +496,12 @@ def plot_vibration_reduction(
     :param result: A
         :class:`~phonometry.flanking_transmission.VibrationReductionResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``Kij`` curve ``plot`` call.
     :return: The axes.
     """
+    from .._i18n import format_number, localize_axes
+
     ax = ax if ax is not None else _new_axes()
     k_ij = np.asarray(result.k_ij, dtype=np.float64)
     kwargs.setdefault("marker", "o")
@@ -325,47 +513,61 @@ def plot_vibration_reduction(
         _freq_axis(ax, freqs)
     else:
         ax.plot(np.arange(k_ij.size), k_ij, **kwargs)
-        ax.set_xlabel("Band index")
+        ax.set_xlabel(_t("Band index", language))
     if result.single_number is not None:
         ax.axhline(
             result.single_number,
             color=_C_REFERENCE,
             ls="--",
             lw=1.0,
-            label=rf"$\overline{{K}}_{{ij}}$ = {result.single_number:.1f} dB",
+            label=rf"$\overline{{K}}_{{ij}}$ = {format_number(result.single_number, language, decimals=1)} dB",
         )
-    ax.set_ylabel("Vibration reduction index $K_{ij}$ [dB]")
-    ax.set_title("Vibration reduction index (ISO 10848)")
+    ax.set_ylabel(_t("Vibration reduction index $K_{ij}$ [dB]", language))
+    ax.set_title(_t("Vibration reduction index (ISO 10848)", language))
     ax.grid(True, alpha=0.3)
     ax.legend()
+    localize_axes(ax, language)
     return ax
 
+
 def plot_structure_borne_power(
-    result: "StructureBornePowerResult", ax: Axes | None = None, **kwargs: Any
+    result: "StructureBornePowerResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Characteristic structure-borne sound power level per band (EN 15657).
 
     :param result: A :class:`~phonometry.structure_borne_power.StructureBornePowerResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the bar ``plot``.
     :return: The axes.
     """
-    return _plot_band_level_bars(
+    from .._i18n import localize_axes
+
+    ax = _plot_band_level_bars(
         ax, result.power_level, result.frequencies, result.total_level,
-        ylabel=r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]",
-        title="EN 15657 characteristic structure-borne sound power", **kwargs,
+        ylabel=_t(r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]", language),
+        title=_t("EN 15657 characteristic structure-borne sound power", language),
+        **kwargs,
     )
+    localize_axes(ax, language)
+    return ax
+
 
 def plot_installed_structure_borne(
-    result: "InstalledSourceResult", ax: Axes | None = None, **kwargs: Any
+    result: "InstalledSourceResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Per-path and total normalised structure-borne SPL (EN 12354-5).
 
     :param result: An :class:`~phonometry.installed_structure_borne.InstalledSourceResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the total-level ``plot``.
     :return: The axes.
     """
+    from .._i18n import localize_axes
+
     ax = ax if ax is not None else _new_axes()
     paths = np.atleast_2d(np.asarray(result.path_levels, dtype=np.float64))
     total = np.atleast_1d(np.asarray(result.total_level, dtype=np.float64))
@@ -373,26 +575,29 @@ def plot_installed_structure_borne(
     if result.frequencies is not None:
         x = np.asarray(result.frequencies, dtype=np.float64)
         ax.set_xscale("log")
-        ax.set_xlabel(_FREQ_LABEL)
+        ax.set_xlabel(_t(_FREQ_LABEL, language))
     else:
         x = np.arange(1, n_bands + 1, dtype=np.float64)
-        ax.set_xlabel("Band")
+        ax.set_xlabel(_t("Band", language))
     for k, path in enumerate(paths):
         ax.plot(x, path, color=_C_MUTED, lw=1.0, ls=":", marker=".",
-                label="paths" if k == 0 else None)
+                label=_t("paths", language) if k == 0 else None)
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("lw", 2.2)
-    ax.plot(x, total, label=r"total $L_{n,s}$", **kwargs)
-    ax.set_ylabel(r"Normalised SPL $L_{n,s}$ [dB]")
-    ax.set_title("EN 12354-5 installed structure-borne sound")
+    ax.plot(x, total, label=_t(r"total $L_{n,s}$", language), **kwargs)
+    ax.set_ylabel(_t(r"Normalised SPL $L_{n,s}$ [dB]", language))
+    ax.set_title(_t("EN 12354-5 installed structure-borne sound", language))
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
     if result.frequencies is not None:
         format_frequency_axis(ax, float(x.min()), float(x.max()))
+    localize_axes(ax, language)
     return ax
 
+
 def plot_airborne_prediction(
-    result: "AirbornePredictionResult", ax: Axes | None = None, **kwargs: Any
+    result: "AirbornePredictionResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Per-path shares of the transmitted energy (EN 12354-1).
 
@@ -402,9 +607,12 @@ def plot_airborne_prediction(
     :param result: An
         :class:`~phonometry.building_prediction.AirbornePredictionResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the path :meth:`~matplotlib.axes.Axes.bar`.
     :return: The axes.
     """
+    from .._i18n import format_number, localize_axes
+
     ax = ax if ax is not None else _new_axes()
     contribs = sorted(result.paths, key=lambda c: c.fraction, reverse=True)
     shares = [100.0 * c.fraction for c in contribs]
@@ -415,17 +623,21 @@ def plot_airborne_prediction(
     ax.bar(positions, shares, **kwargs)
     ax.set_xticks(positions)
     ax.set_xticklabels([c.label for c in contribs], rotation=45, ha="right")
-    ax.set_xlabel("Transmission path")
-    ax.set_ylabel("Share of transmitted energy [%]")
+    ax.set_xlabel(_t("Transmission path", language))
+    ax.set_ylabel(_t("Share of transmitted energy [%]", language))
     ax.set_title(
-        f"EN 12354-1 flanking prediction — R'w = {result.r_prime_w:.1f} dB "
-        f"(RDd,w = {result.r_direct_w:.1f} dB)"
+        f"EN 12354-1 {_t('flanking prediction', language)} — R'w = "
+        f"{format_number(result.r_prime_w, language, decimals=1)} dB "
+        f"(RDd,w = {format_number(result.r_direct_w, language, decimals=1)} dB)"
     )
     ax.grid(True, axis="y", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
+
 def plot_impact_prediction(
-    result: "ImpactPredictionResult", ax: Axes | None = None, **kwargs: Any
+    result: "ImpactPredictionResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Terms of the apparent impact-level prediction (EN 12354-2).
 
@@ -436,9 +648,12 @@ def plot_impact_prediction(
     :param result: An
         :class:`~phonometry.building_prediction.ImpactPredictionResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the term :meth:`~matplotlib.axes.Axes.bar`.
     :return: The axes.
     """
+    from .._i18n import format_number, localize_axes
+
     ax = ax if ax is not None else _new_axes()
     labels = ("$L_{n,w,eq}$", r"$-\Delta L_w$", "$+K$", "$L'_{n,w}$")
     values = (
@@ -453,15 +668,19 @@ def plot_impact_prediction(
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     ax.set_xticks(positions)
     ax.set_xticklabels(labels)
-    ax.set_ylabel("Level / correction [dB]")
+    ax.set_ylabel(_t("Level / correction [dB]", language))
     ax.set_title(
-        f"EN 12354-2 impact prediction — L'n,w = {result.l_prime_n_w:.1f} dB"
+        f"EN 12354-2 {_t('impact prediction', language)} — L'n,w = "
+        f"{format_number(result.l_prime_n_w, language, decimals=1)} dB"
     )
     ax.grid(True, axis="y", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
+
 def plot_airborne_insulation(
-    result: "AirborneInsulationResult", ax: Axes | None = None, **kwargs: Any
+    result: "AirborneInsulationResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Per-band airborne insulation quantities (ISO 16283-1).
 
@@ -471,25 +690,32 @@ def plot_airborne_insulation(
 
     :param result: An :class:`~phonometry.insulation.AirborneInsulationResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the primary ``DnT`` curve ``plot`` call.
     :return: The axes.
     """
+    from .._i18n import localize_axes
+
     curves = [
         ("$D_{nT}$", np.asarray(result.dnt, dtype=np.float64)),
         ("$D$", np.asarray(result.d, dtype=np.float64)),
     ]
     if result.r_prime is not None:
         curves.append(("$R'$", np.asarray(result.r_prime, dtype=np.float64)))
-    return _plot_insulation_bands(
+    ax = _plot_insulation_bands(
         curves,
-        ylabel="Level difference / reduction index [dB]",
-        title="Airborne sound insulation (ISO 16283-1)",
+        ylabel=_t("Level difference / reduction index [dB]", language),
+        title=_t("Airborne sound insulation (ISO 16283-1)", language),
         ax=ax,
         **kwargs,
     )
+    localize_axes(ax, language)
+    return ax
+
 
 def plot_impact_insulation(
-    result: "ImpactInsulationResult", ax: Axes | None = None, **kwargs: Any
+    result: "ImpactInsulationResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Per-band impact sound pressure levels (ISO 16283-2).
 
@@ -498,58 +724,74 @@ def plot_impact_insulation(
 
     :param result: An :class:`~phonometry.insulation.ImpactInsulationResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the primary ``L'nT`` curve ``plot`` call.
     :return: The axes.
     """
+    from .._i18n import localize_axes
+
     curves = [("$L'_{nT}$", np.asarray(result.l_n_t, dtype=np.float64))]
     if result.l_n is not None:
         curves.append(("$L'_n$", np.asarray(result.l_n, dtype=np.float64)))
-    return _plot_insulation_bands(
+    ax = _plot_insulation_bands(
         curves,
-        ylabel="Impact sound pressure level [dB]",
-        title="Impact sound insulation (ISO 16283-2)",
+        ylabel=_t("Impact sound pressure level [dB]", language),
+        title=_t("Impact sound insulation (ISO 16283-2)", language),
         ax=ax,
         **kwargs,
     )
+    localize_axes(ax, language)
+    return ax
+
 
 def plot_band_uncertainty(
-    result: "BandUncertainty", ax: Axes | None = None, **kwargs: Any
+    result: "BandUncertainty", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Per-band standard uncertainty of an insulation quantity (ISO 12999-1).
 
     :param result: A
         :class:`~phonometry.building_uncertainty.BandUncertainty`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the uncertainty curve ``plot`` call.
     :return: The axes.
     """
+    from .._i18n import localize_axes
+
     ax = ax if ax is not None else _new_axes()
     freqs, u = result.to_arrays()
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     ax.plot(freqs, u, **kwargs)
     _freq_axis(ax, freqs)
-    ax.set_ylabel("Standard uncertainty u [dB]")
+    ax.set_ylabel(_t("Standard uncertainty u [dB]", language))
     ax.set_ylim(bottom=0.0)
-    quantity = "sigma_R95 upper limit" if result.upper_limit else "u"
+    quantity = _t("sigma_R95 upper limit", language) if result.upper_limit else "u"
     ax.set_title(
-        f"ISO 12999-1 band uncertainty ({quantity}) — "
-        f"{result.measurand}, situation {result.situation}"
+        f"ISO 12999-1 {_t('band uncertainty', language)} ({quantity}) — "
+        f"{result.measurand}, {_t('situation', language)} {result.situation}"
     )
     ax.grid(True, which="both", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
+
 def plot_floor_covering_improvement(
-    result: "FloorCoveringImprovementResult", ax: Axes | None = None, **kwargs: Any
+    result: "FloorCoveringImprovementResult", ax: Axes | None = None,
+    language: str = "en", **kwargs: Any
 ) -> Axes:
     """Impact-sound improvement spectrum ΔL of a floor covering (ISO 16251-1).
 
     :param result: A
         :class:`~phonometry.floor_covering_improvement.FloorCoveringImprovementResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the improvement-curve ``plot`` call.
     :return: The axes.
     """
+    from .._i18n import decimal_comma, localize_axes
+
     ax = ax if ax is not None else _new_axes()
     freqs, dl = result.frequencies, result.improvement
     kwargs.setdefault("color", _C_PRIMARY)
@@ -560,16 +802,17 @@ def plot_floor_covering_improvement(
         ax.plot(
             freqs[result.limited], dl[result.limited], ls="", marker="v",
             color=_C_SECONDARY, ms=9, mfc="none", mew=1.6, zorder=5,
-            label="limit of measurement (> delta-L)",
+            label=_t("limit of measurement (> delta-L)", language),
         )
     _freq_axis(ax, freqs)
-    ax.set_ylabel("Improvement of impact sound insulation delta-L [dB]")
+    ax.set_ylabel(_t("Improvement of impact sound insulation delta-L [dB]", language))
     ax.set_ylim(bottom=0.0)
-    title = "ISO 16251-1 Floor-Covering Impact Sound Improvement"
+    title = _t("ISO 16251-1 Floor-Covering Impact Sound Improvement", language)
     if result.delta_lw is not None:
-        title += f"  (delta-Lw = {result.delta_lw} dB)"
+        title += f"  (delta-Lw = {decimal_comma(str(result.delta_lw), language)} dB)"
     ax.set_title(title)
     ax.grid(True, which="both", alpha=0.3)
     if ax.get_legend_handles_labels()[0]:
         ax.legend()
+    localize_axes(ax, language)
     return ax

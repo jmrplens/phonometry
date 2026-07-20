@@ -99,7 +99,12 @@ Insertion loss of a machine enclosure over frequency (Bies §7.4.2).
 ### EnclosureResult.plot()
 
 ```python
-EnclosureResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+EnclosureResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the panel `R`, correction `C` and net insertion loss.

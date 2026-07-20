@@ -223,7 +223,7 @@ def test_mismatched_sel_lamax_powers_raise() -> None:
     npd = {("NX", "SEL", "D"): sel, ("NX", "LAmax", "D"): lmax}
     path = np.array([[0.0, 0.0, 0.0, 8000.0, 20.0],
                      [1000.0, 0.0, 300.0, 8000.0, 80.0]])
-    profiles = {("X", "D", 1): ("DEFAULT", path)}
+    profiles = {("X", "D", "DEFAULT", 1): path}
     db = AnpDatabase(aircraft=aircraft, npd=npd, distances=distances, profiles=profiles)
     with pytest.raises(ValueError, match="power settings differ"):
         db.event_level("X", [100.0, 100.0, 0.0], "departure")
@@ -245,3 +245,113 @@ def test_plot_smoke_en_es() -> None:
 
 def test_aircraft_object_type() -> None:
     assert isinstance(_DB.aircraft("PA31"), AnpAircraft)
+
+
+# ---------------------------------------------------------------------------
+# Profile identity: Profile_ID is part of the parse key, so aircraft with
+# several fixed-point profiles for the same operation and stage length
+# (weight variants) must not have their points interleaved into one path.
+# ---------------------------------------------------------------------------
+
+_PROFILE_HEADER = ("ACFT_ID;Op Type;Profile_ID;Stage Length;Point Number;"
+                   "Distance (ft);Altitude AFE (ft);TAS (kt);Power Setting")
+
+
+def _profiles_oracle() -> list[dict[str, str]]:
+    """Independent parse of the bundled fixed-point profiles CSV."""
+    text = files("phonometry.aircraft.data.anp").joinpath(
+        "Default_fixed_point_profiles.csv").read_text()
+    return list(csv.DictReader(text.splitlines(), delimiter=";"))
+
+
+def _synthetic_db(tmp_path: object, profile_rows: list[str]) -> AnpDatabase:
+    """Bundled aircraft/NPD tables plus a synthetic fixed-point profile CSV."""
+    import pathlib
+
+    root = pathlib.Path(str(tmp_path))
+    src = files("phonometry.aircraft.data.anp")
+    for name in ("Aircraft.csv", "NPD_data.csv"):
+        (root / name).write_text(src.joinpath(name).read_text())
+    (root / "Default_fixed_point_profiles.csv").write_text(
+        "\n".join([_PROFILE_HEADER, *profile_rows]) + "\n")
+    return load_anp_database(root)
+
+
+def test_colliding_profiles_stay_separate() -> None:
+    """CNA206 D/1 ships DEFAULT and 3000LB: each loads whole, not interleaved."""
+    prof = _DB.profile("CNA206", "departure", 1)
+    assert prof.profile_id == "DEFAULT"
+    assert prof.path.shape[0] == 9  # its own 9 CSV rows, not 9 + 9 merged
+    # A departure climbs: altitude must be non-decreasing (the interleaved
+    # merge produced a sawtooth with negative increments).
+    assert np.all(np.diff(prof.path[:, 2]) >= 0.0)
+    alt = _DB.profile("CNA206", "departure", 1, profile_id="3000LB")
+    assert alt.profile_id == "3000LB"
+    assert alt.path.shape[0] == 9
+    assert np.all(np.diff(alt.path[:, 2]) >= 0.0)
+    # The aircraft-object accessor threads profile_id through.
+    via_acft = _DB.aircraft("CNA206").profile("departure", profile_id="3000LB")
+    assert via_acft.path.shape == alt.path.shape
+
+
+def test_profile_point_counts_match_csv_rows() -> None:
+    """Every bundled profile loads exactly its own CSV rows, nothing merged."""
+    counts: dict[tuple[str, str, str, int], int] = {}
+    for row in _profiles_oracle():
+        key = (row["ACFT_ID"], row["Op Type"], row["Profile_ID"],
+               int(float(row["Stage Length"])))
+        counts[key] = counts.get(key, 0) + 1
+    assert len(counts) > 50  # 77 bundled (aircraft, op, profile, stage) keys
+    for (acft, op, pid, stage), n in counts.items():
+        prof = _DB.profile(acft, op, stage, profile_id=pid)
+        assert prof.path.shape[0] == n, (acft, op, pid, stage)
+        assert prof.profile_id == pid
+
+
+def test_synthetic_two_profile_export_selects_default(tmp_path: object) -> None:
+    """With several profiles per key, DEFAULT wins unless profile_id says else."""
+    db = _synthetic_db(tmp_path, [
+        "747100;D;HEAVY;1;1;0.0;0.0;30.0;40000.0",
+        "747100;D;HEAVY;1;2;5000.0;500.0;150.0;40000.0",
+        "747100;D;DEFAULT;1;1;0.0;0.0;35.0;45000.0",
+        "747100;D;DEFAULT;1;2;6000.0;800.0;160.0;45000.0",
+        "747100;D;DEFAULT;1;3;12000.0;2000.0;180.0;42000.0",
+    ])
+    prof = db.profile("747100", "departure", 1)
+    assert prof.profile_id == "DEFAULT"
+    assert prof.path.shape[0] == 3
+    heavy = db.profile("747100", "departure", 1, profile_id="HEAVY")
+    assert heavy.path.shape[0] == 2
+    assert heavy.path[1, 2] == pytest.approx(500.0 * _FT_M)
+
+
+def test_single_non_default_profile_is_selected(tmp_path: object) -> None:
+    db = _synthetic_db(tmp_path, [
+        "747100;D;ONLY;1;1;0.0;0.0;30.0;40000.0",
+        "747100;D;ONLY;1;2;5000.0;500.0;150.0;40000.0",
+    ])
+    assert db.profile("747100", "departure", 1).profile_id == "ONLY"
+
+
+def test_ambiguous_profiles_without_default_raise(tmp_path: object) -> None:
+    db = _synthetic_db(tmp_path, [
+        "747100;D;LIGHT;1;1;0.0;0.0;30.0;40000.0",
+        "747100;D;LIGHT;1;2;5000.0;500.0;150.0;40000.0",
+        "747100;D;HEAVY;1;1;0.0;0.0;30.0;42000.0",
+        "747100;D;HEAVY;1;2;5000.0;400.0;150.0;42000.0",
+    ])
+    with pytest.raises(ValueError, match=r"'HEAVY', 'LIGHT'"):
+        db.profile("747100", "departure", 1)
+    assert db.profile("747100", "departure", 1,
+                      profile_id="LIGHT").profile_id == "LIGHT"
+    with pytest.raises(KeyError, match="available profiles"):
+        db.profile("747100", "departure", 1, profile_id="NOPE")
+
+
+def test_duplicate_point_numbers_raise(tmp_path: object) -> None:
+    """A malformed table with duplicate point numbers errors instead of merging."""
+    with pytest.raises(ValueError, match="point numbers"):
+        _synthetic_db(tmp_path, [
+            "747100;D;DEFAULT;1;1;0.0;0.0;30.0;40000.0",
+            "747100;D;DEFAULT;1;1;5000.0;500.0;150.0;40000.0",
+        ])

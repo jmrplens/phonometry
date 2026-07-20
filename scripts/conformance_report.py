@@ -3851,6 +3851,48 @@ def _chk_thd_f() -> Outcome:
     return numeric(ref.DISTORTION_THD_F, value, 1e-4, places=6)
 
 
+def _loudspeaker_flat_response() -> "tuple[np.ndarray, np.ndarray]":
+    """Flat 90 dB on-axis response with ramps crossing 80 dB at 50/18000 Hz."""
+    f = np.geomspace(20.0, 20000.0, 400)
+    spl = np.full_like(f, 90.0)
+    below = f < 80.0
+    spl[below] = 90.0 - 10.0 * (np.log2(80.0 / f[below]) / np.log2(80.0 / 50.0))
+    above = f > 15000.0
+    spl[above] = 90.0 - 10.0 * (np.log2(f[above] / 15000.0) / np.log2(18000.0 / 15000.0))
+    return f, spl
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-5:2003 (20.3/20.4)",
+    "Characteristic sensitivity level, 1 W into 8 ohm at 1 m (flat 90 dB)",
+)
+def _chk_loudspeaker_sensitivity() -> Outcome:
+    f, spl = _loudspeaker_flat_response()
+    result = ph.loudspeaker_characteristics(f, spl, 8.0, sensitivity_band=(200.0, 4000.0))
+    # A flat 90 dB response driven at sqrt(8) V (1 W) at 1 m has a
+    # characteristic sensitivity level of 90 dB exactly (the corrections vanish).
+    return numeric(90.0, result.sensitivity_level_db, 1e-6, unit="dB", places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-5:2003 (21.2)",
+    "Effective frequency range = -10 dB crossings (50 Hz / 18 kHz)",
+)
+def _chk_loudspeaker_effective_range() -> Outcome:
+    f, spl = _loudspeaker_flat_response()
+    result = ph.loudspeaker_characteristics(f, spl, 8.0, sensitivity_band=(200.0, 4000.0))
+    lo, hi = result.effective_range
+    ok = abs(lo - 50.0) <= 5e-3 and abs(hi - 18000.0) <= 2.0
+    return Outcome(
+        expected="50 Hz / 18000 Hz (ref -10 dB crossings)",
+        computed=f"{lo:.3f} Hz / {hi:.1f} Hz",
+        delta=f"{lo - 50.0:.3f} / {hi - 18000.0:.3f} Hz",
+        passed=ok,
+    )
+
+
 @register(
     _ELECTRO,
     "IEC 60268-3:2013 (14.12.5)",

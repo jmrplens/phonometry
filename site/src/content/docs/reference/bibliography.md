@@ -83,6 +83,21 @@ list grows as guides gain their References sections.
   The calibrator classes, level tolerances and the short-term stability
   criterion applied to calibration recordings.
   Cited by [Calibration and dBFS](/phonometry/guides/calibration/).
+- International Electrotechnical Commission. (2007). *Sound system equipment —
+  Part 5: Loudspeakers* (IEC 60268-5:2003+A1:2007).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1223).
+  The rated loudspeaker characteristics: rated impedance, rated frequency
+  range, characteristic sensitivity referred to 1 W at 1 m, the effective
+  frequency range against the -10 dB band, the directivity index and the total
+  harmonic distortion against frequency.
+  Cited by [Electroacoustics](/phonometry/guides/electroacoustics/).
+- International Electrotechnical Commission. (1982). *Scales and sizes for
+  plotting frequency characteristics and polar diagrams* (IEC 60263:1982).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1218).
+  The scale proportions of the characteristic graphs: one frequency decade
+  equal to 25 dB on the ordinate, and the polar diagram on a 25 dB
+  reference-circle radius.
+  Cited by [Electroacoustics](/phonometry/guides/electroacoustics/).
 
 ## Sound power and intensity
 

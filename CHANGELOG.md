@@ -17,6 +17,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `electroacoustics.loudspeaker_characteristics` and
+  `electroacoustics.LoudspeakerCharacteristics` gather the rated loudspeaker
+  characteristics of IEC 60268-5:2003+A1:2007 around a measured on-axis
+  response: the characteristic sensitivity level referred to 1 W into the rated
+  impedance at 1 m (clauses 20.3/20.4) and the effective frequency range against
+  the -10 dB band in the region of maximum sensitivity (clause 21.2) are
+  computed from the response, alongside the rated impedance, rated frequency
+  range, rated powers, resonance frequency, the impedance modulus curve, the
+  total-harmonic-distortion curve and the directional/polar response. A
+  `.report()` method renders the IEC 60268-5 rated-characteristics fiche: the
+  rated-characteristics table beside the on-axis response with its tolerance
+  band and effective-range markers, plus the impedance, THD and polar panels,
+  the frequency and polar graphs drawn to the IEC 60263:1982 scale conventions
+  (one frequency decade equal to 25 dB, and the 25 dB polar reference circle),
+  localised in English and Spanish.
 - `emission.NoiseEmissionDeclaration` and `emission.OperatingModeDeclaration`
   model the ISO 4871:1996 declaration of noise emission values of machinery and
   equipment: the dual-number form (a measured A-weighted sound power level

@@ -330,6 +330,10 @@ from .electroacoustics.frequency_response import (
     coherence,
     transfer_function,
 )
+from .electroacoustics.loudspeaker import (
+    LoudspeakerCharacteristics,
+    loudspeaker_characteristics,
+)
 from .electroacoustics.piston import (
     RadiatingPistonResult,
     piston_directivity,
@@ -1055,6 +1059,8 @@ __all__ = [
     "piston_reactance",
     "piston_directivity",
     "RadiatingPistonResult",
+    "loudspeaker_characteristics",
+    "LoudspeakerCharacteristics",
     "program_loudness",
     "integrated_loudness",
     "loudness_range",

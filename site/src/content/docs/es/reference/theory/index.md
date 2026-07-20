@@ -42,7 +42,7 @@ La referencia de teoría explica las normas, las matemáticas y las decisiones d
 - [Descriptores ambientales (ISO 1996-1)](/phonometry/es/reference/theory/environment-transport/#descriptores-ambientales-iso-1996-1)
 - [Prominencia de sonidos impulsivos (NT ACOU 112)](/phonometry/es/reference/theory/environment-transport/#prominencia-de-sonidos-impulsivos-nt-acou-112)
 - [Propagación en exteriores y exposición al ruido en el trabajo (ISO 9613-1/2, ISO 9612)](/phonometry/es/reference/theory/environment-transport/#propagación-en-exteriores-y-exposición-al-ruido-en-el-trabajo-iso-9613-12-iso-9612)
-- [Determinación de la potencia sonora (ISO 3744/3745/3746, ISO 3741, ISO 9614-2/3)](/phonometry/es/reference/theory/environment-transport/#determinación-de-la-potencia-sonora-iso-374437453746-iso-3741-iso-9614-23)
+- [Determinación de la potencia acústica (ISO 3744/3745/3746, ISO 3741, ISO 9614-2/3)](/phonometry/es/reference/theory/environment-transport/#determinación-de-la-potencia-acústica-iso-374437453746-iso-3741-iso-9614-23)
 
 ## [Vibración](/phonometry/es/reference/theory/vibration/)
 

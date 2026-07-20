@@ -46,7 +46,7 @@ Un índice de laboratorio describe un elemento aislado; un edificio también
 transmite el sonido por cada camino de flancos. Esta página cubre la predicción
 EN 12354 del comportamiento in situ a partir de datos de elemento de
 laboratorio: los modelos de flancos aéreo y de impactos de EN 12354-1/2 con sus
-índices de reducción vibracional de unión, y el aislamiento de fachada y la
+índices de reducción de vibraciones de unión, y el aislamiento de fachada y la
 radiación al exterior de EN 12354-3/4. Las magnitudes medidas con las que se
 comprueba el modelo están en
 [Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/);
@@ -95,11 +95,11 @@ R_{ij,w} = \tfrac{R_{i,w} + R_{j,w}}{2} + \Delta R_{ij,w} + K_{ij}
 $$
 
 donde $l_0 = 1$ m es la longitud de acoplamiento de referencia, $l_f$ la longitud
-de acoplamiento de la unión y $K_{ij}$ el **índice de reducción vibracional** de
+de acoplamiento de la unión y $K_{ij}$ el **índice de reducción de vibraciones** de
 la unión (Anexo E, empírico en la relación de masas
 $M = \log_{10}(m'_{\perp,i}/m'_i)$).
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_es.svg" alt="Índices de reducción sonora por camino para el ejemplo del Anexo H.3 de EN 12354-1 y la fracción de energía transmitida de cada camino, mostrando el camino directo dominando en R'w = 52 dB" width="80%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_es.svg" alt="Índices de reducción acústica por camino para el ejemplo del Anexo H.3 de EN 12354-1 y la fracción de energía transmitida de cada camino, mostrando el camino directo dominando en R'w = 52 dB" width="80%" />
 
 ```python
 import numpy as np
@@ -153,7 +153,7 @@ for name, rw, k_ff, k_fd, lf in elements:
                               separating_area=11.5, coupling_length=lf)
 res = building.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
 
-# Índice de reducción sonora por camino y fracción de energía transmitida de cada
+# Índice de reducción acústica por camino y fracción de energía transmitida de cada
 # camino para el resultado del Anexo H.3 calculado arriba.
 labels = [p.label for p in res.paths]
 r_w = [p.r_w for p in res.paths]
@@ -257,7 +257,7 @@ ausente, una fuga alrededor del elemento separador.
 | `label` | str | — | — | Nombre visible del camino |
 | `kind` | str | — | `'Ff'` / `'Df'` / `'Fd'` | Rama de flanco del camino |
 | `r_source` / `r_receive` | float | dB | — | Índices ponderados de los elementos lado emisor / lado receptor |
-| `k_ij` | float | dB | — | Índice de reducción vibracional de la unión para este camino |
+| `k_ij` | float | dB | — | Índice de reducción de vibraciones de la unión para este camino |
 | `separating_area` | float | m² | > 0 | Área del elemento separador `Ss` |
 | `coupling_length` | float | m | > 0 | Longitud de acoplamiento `lf` |
 | `delta_r` | float | dB | def.: `0` | Mejora por revestimiento en este camino |
@@ -296,7 +296,7 @@ tabla de la Figura C.2 para galerías, balcones y terrazas, interpolando sobre
 la absorción del intradós $\alpha_w$). Los índices de un solo número reutilizan
 EN ISO 717-1 (`weighted_rating`).
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_es.svg" alt="Índices de reducción sonora parciales por elemento y la reducción aparente de la fachada R' y la diferencia de nivel estandarizada D2m,nT resultantes para el ejemplo resuelto del Anexo F de EN 12354-3, con la entrada de aire limitando las bandas bajas" width="80%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_es.svg" alt="Índices de reducción acústica parciales por elemento y la reducción aparente de la fachada R' y la diferencia de nivel estandarizada D2m,nT resultantes para el ejemplo resuelto del Anexo F de EN 12354-3, con la entrada de aire limitando las bandas bajas" width="80%" />
 
 ```python
 from phonometry import building
@@ -350,7 +350,7 @@ fig.tight_layout(); plt.show()
 
 </details>
 
-**Parte 4: interior → exterior.** El nivel de potencia sonora radiada por un
+**Parte 4: interior → exterior.** El nivel de potencia acústica radiada por un
 segmento (Fórmula 2) es $L_W = L_{p,in} + C_d - R' + 10 \log_{10}(S/S_0)$ con
 $S_0 = 1$ m² y el término de difusividad del campo interior $C_d$ (Anexo B;
 −6 dB difuso ideal, −5 dB industrial medio). Los huecos son elementos cuya «R»

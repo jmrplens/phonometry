@@ -16,7 +16,7 @@ una etapa en sí, sino la medición de material de apoyo que consume la etapa
 de predicción.
 
 [Medición del aislamiento en laboratorio](/phonometry/es/guides/insulation-lab/)
-cubre la primera etapa: el índice de reducción sonora y el nivel de impacto
+cubre la primera etapa: el índice de reducción acústica y el nivel de impacto
 normalizado de ISO 10140, la alternativa por intensidad sonora de ISO 15186,
 la mejora de revestimientos de suelo sobre maqueta reducida de ISO 16251-1 y
 la transmisión por flancos en laboratorio según ISO 10848.

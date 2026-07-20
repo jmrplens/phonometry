@@ -329,7 +329,7 @@ _ES: dict[str, str] = {
         "la señal del micrófono.",
     # d10 - ISO 3744/3746 sound power measurement surfaces
     "ISO 3744 / 3746 sound power measurement surfaces":
-        "Superficies de medición de potencia sonora (ISO 3744 / 3746)",
+        "Superficies de medición de potencia acústica (ISO 3744 / 3746)",
     "Hemispherical surface": "Superficie hemisférica",
     "Reflecting plane": "Plano reflectante",
     "Measurement surface": "Superficie de medición",
@@ -355,7 +355,7 @@ _ES: dict[str, str] = {
     "A = 0.16 V/T  (Sabine)": "A = 0,16 V/T  (Sabine)",
     "T₀ = 0.5 s , A₀ = 10 m²": "T₀ = 0,5 s , A₀ = 10 m²",
     # d12 - sound power methods comparison
-    "Sound power methods compared": "Métodos de potencia sonora comparados",
+    "Sound power methods compared": "Métodos de potencia acústica comparados",
     "Free field over a reflecting plane":
         "Campo libre sobre plano reflectante",
     "Reverberation test room": "Sala reverberante de ensayo",
@@ -517,7 +517,7 @@ _ES: dict[str, str] = {
         "Tubo sellado sobre la carretera; solo ondas planas por debajo de f_u",
     # d19 - ISO 3745 precision sound power (anechoic / hemi-anechoic room)
     "Precision sound power in an anechoic room (ISO 3745)":
-        "Potencia sonora de precisión en sala anecoica (ISO 3745)",
+        "Potencia acústica de precisión en sala anecoica (ISO 3745)",
     "Reflecting plane (hemi-anechoic)": "Plano reflectante (semianecoica)",
     "Anechoic wedges": "Cuñas anecoicas",
     "Source (DUT)": "Fuente (DUT)",

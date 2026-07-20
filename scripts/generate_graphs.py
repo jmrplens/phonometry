@@ -53,7 +53,7 @@ _ES_EXACT = {
         "Eficiencia de radiación de una placa en flexión",
     "Composite wall with a small aperture":
         "Pared compuesta con una abertura pequeña",
-    "Sound reduction index R [dB]": "Índice de reducción sonora R [dB]",
+    "Sound reduction index R [dB]": "Índice de reducción acústica R [dB]",
     r"Radiation efficiency $\sigma$": r"Eficiencia de radiación $\sigma$",
     "field-incidence mass law": "ley de masas de campo",
     "single panel R (Sharp)": "R de panel simple (Sharp)",
@@ -244,8 +244,8 @@ _ES_EXACT = {
     "Class 2 corridor": "Corredor de clase 2",
     # intensity_insulation figure (ISO 15186-1)
     "ISO 15186-1 Intensity Sound Reduction Index (RI and RI,M)":
-        "Índice de reducción sonora por intensidad ISO 15186-1 (RI y RI,M)",
-    "Sound reduction index [dB]": "Índice de reducción sonora [dB]",
+        "Índice de reducción acústica por intensidad ISO 15186-1 (RI y RI,M)",
+    "Sound reduction index [dB]": "Índice de reducción acústica [dB]",
     "Kc adaptation": "Adaptación Kc",
     "RI (intensity)": "RI (intensidad)",
     # survey_insulation figure (ISO 10052)
@@ -268,9 +268,9 @@ _ES_EXACT = {
     "delta-L (improvement)": "delta-L (mejora)",
     # flanking_transmission figure (ISO 10848)
     "ISO 10848 Junction Vibration Reduction Index":
-        "Índice de reducción vibracional de unión (ISO 10848)",
+        "Índice de reducción de vibraciones de unión (ISO 10848)",
     "Vibration reduction index Kij [dB]":
-        "Índice de reducción vibracional Kij [dB]",
+        "Índice de reducción de vibraciones Kij [dB]",
     "Kij (ISO 10848)": "Kij (ISO 10848)",
     "mean Kij (200-1250 Hz)": "Kij medio (200-1250 Hz)",
     # tonal_audibility figure (ISO 1996-2)
@@ -312,9 +312,9 @@ _ES_EXACT = {
         r"método indirecto $-(2\pi f)^2 m_2 T$",
     # vibration_sound_power figure (ISO/TS 7849)
     "ISO/TS 7849 Sound Power from Surface Vibration":
-        "Potencia sonora desde vibración superficial ISO/TS 7849",
+        "Potencia acústica desde vibración superficial ISO/TS 7849",
     r"Sound power level $L_W$ [dB re 1 pW]":
-        r"Nivel de potencia sonora $L_W$ [dB re 1 pW]",
+        r"Nivel de potencia acústica $L_W$ [dB re 1 pW]",
     "Part 1 upper limit ($\\varepsilon$ = 1)":
         "Parte 1 límite superior ($\\varepsilon$ = 1)",
     "Part 2 engineering ($\\varepsilon$ measured)":
@@ -389,7 +389,7 @@ _ES_EXACT = {
     "felling": "tala",
     "stripping": "descortezado",
     # Precision sound power (ISO 3745 / ISO 9614-3)
-    "Sound power level LW [dB]": "Nivel de potencia sonora LW [dB]",
+    "Sound power level LW [dB]": "Nivel de potencia acústica LW [dB]",
     "Non-applicable band": "Banda no aplicable",
     "Stable tone (good coupling)": "Tono estable (buen acoplamiento)",
     "3% AM tone (loose coupling)": "Tono con AM del 3 % (acoplamiento flojo)",
@@ -517,9 +517,9 @@ _ES_EXACT = {
     "EDT fit (0 to \u221210 dB)": "Ajuste EDT (0 a \u221210 dB)",
     "EDT slope": "Pendiente EDT",
     "ISO 717-1 Weighted Sound Reduction Index (Annex C example)":
-        "\u00cdndice ponderado de reducci\u00f3n sonora (ISO 717-1, ejemplo del Anexo C)",
+        "\u00cdndice ponderado de reducci\u00f3n ac\u00fastica (ISO 717-1, ejemplo del Anexo C)",
     "Apparent sound reduction index R' [dB]":
-        "\u00cdndice de reducci\u00f3n sonora aparente R' [dB]",
+        "\u00cdndice de reducci\u00f3n ac\u00fastica aparente R' [dB]",
     "Measured R' (third octave)": "R' medido (tercios de octava)",
     "Shifted reference curve (ISO 717-1)":
         "Curva de referencia desplazada (ISO 717-1)",
@@ -925,7 +925,7 @@ _ES_EXACT = {
         "extensión del enmascaramiento hacia agudos",
     "1 kHz narrowband": "banda estrecha de 1 kHz",
     "One source, two rooms, one sound power":
-        "Una fuente, dos salas, una única potencia sonora",
+        "Una fuente, dos salas, una única potencia acústica",
     "Anechoic room (ISO 3745)": "Cámara anecoica (ISO 3745)",
     "Reverberation room (ISO 3741)": "Cámara reverberante (ISO 3741)",
     "microphone sphere, r": "esfera de micrófonos, r",
@@ -1115,15 +1115,15 @@ _ES_PATTERNS = [
     (r"^Directional diffusion  d = (.+)  \(ISO 17497-2\)$",
      r"Difusión direccional  d = \1  (ISO 17497-2)"),
     (r"^Precision sound power \(ISO 3745\)  LWA = (.+) dB\(A\)$",
-     r"Potencia sonora de precisión (ISO 3745)  LWA = \1 dB(A)"),
+     r"Potencia acústica de precisión (ISO 3745)  LWA = \1 dB(A)"),
     (r"^Precision intensity scanning \(ISO 9614-3\)  LWA = (.+) dB\(A\)$",
      r"Barrido de intensidad de precisión (ISO 9614-3)  LWA = \1 dB(A)"),
     (r"^Enveloping-surface sound power \(ISO 3744\)  LWA = (.+) dB\(A\)$",
-     r"Potencia sonora por superficie envolvente (ISO 3744)  LWA = \1 dB(A)"),
+     r"Potencia acústica por superficie envolvente (ISO 3744)  LWA = \1 dB(A)"),
     (r"^Reverberation-room sound power \(ISO 3741\)  LWA = (.+) dB\(A\)$",
-     r"Potencia sonora en cámara reverberante (ISO 3741)  LWA = \1 dB(A)"),
+     r"Potencia acústica en cámara reverberante (ISO 3741)  LWA = \1 dB(A)"),
     (r"^Intensity-scanning sound power \(ISO 9614-2\)  LWA = (.+) dB\(A\)$",
-     r"Potencia sonora por barrido de intensidad (ISO 9614-2)  LWA = \1 dB(A)"),
+     r"Potencia acústica por barrido de intensidad (ISO 9614-2)  LWA = \1 dB(A)"),
     # Human-vibration dynamic titles (numeric a_w / A(8))
     (r"^Weighted seat acceleration \(ISO 2631-1\)  (.+)$",
      r"Aceleración ponderada del asiento (ISO 2631-1)  \1"),

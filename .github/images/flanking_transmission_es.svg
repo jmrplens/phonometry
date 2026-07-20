@@ -443,7 +443,7 @@ L 707.379063 37.634427
      </g>
     </g>
     <g id="text_28">
-     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="16.473438" y="211.331478" transform="rotate(-90 16.473438 211.331478)">Índice de reducción vibracional Kij [dB]</text>
+     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="16.473438" y="211.331478" transform="rotate(-90 16.473438 211.331478)">Índice de reducción de vibraciones Kij [dB]</text>
     </g>
    </g>
    <g id="patch_3">
@@ -486,7 +486,7 @@ z
     <text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(597.80456 377.730978)">mean Kij = 9,5 dB</text>
    </g>
    <g id="text_30">
-    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="379.760234" y="18.328125" transform="rotate(-0 379.760234 18.328125)">Índice de reducción vibracional de unión (ISO 10848)</text>
+    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="379.760234" y="18.328125" transform="rotate(-0 379.760234 18.328125)">Índice de reducción de vibraciones de unión (ISO 10848)</text>
    </g>
    <g id="line2d_53">
     <path d="M 52.141406 245.584266 

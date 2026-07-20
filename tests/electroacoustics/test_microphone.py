@@ -175,6 +175,30 @@ def test_front_only_pattern_gives_no_directivity_index() -> None:
     assert result.directivity_index_db is None
 
 
+def test_full_circle_cardioid_gives_same_directivity_index() -> None:
+    """A 0..360 pattern folds onto 0..180: the cardioid still gives 10 lg 3."""
+    f, rel = _flat_response()
+    angles = np.arange(0.0, 360.0, 0.25)
+    angles = angles[angles != 180.0]  # the exact null is -inf dB
+    pattern = 20.0 * np.log10((1.0 + np.cos(np.radians(angles))) / 2.0)
+    result = microphone_characteristics(
+        f, rel, _M_MV, tolerance_db=_TOL, polar=(angles, pattern)
+    )
+    assert result.directivity_index_db == pytest.approx(
+        10.0 * math.log10(3.0), abs=5e-3
+    )
+
+
+def test_front_quarter_beyond_270_gives_no_directivity_index() -> None:
+    """Angles 270..360 fold onto 0..90, too short for the 11.2.2 a) integral."""
+    f, rel = _flat_response()
+    angles = np.linspace(270.0, 360.0, 91)
+    result = microphone_characteristics(
+        f, rel, _M_MV, tolerance_db=_TOL, polar=(angles, np.zeros_like(angles))
+    )
+    assert result.directivity_index_db is None
+
+
 # --- IEC 60268-4 17.2 equivalent noise level and 15.2 overload SPL ------------
 
 
@@ -252,6 +276,42 @@ def test_noise_voltage_and_stated_level_conflict() -> None:
         microphone_characteristics(
             f, rel, _M_MV, noise_voltage=1e-6, equivalent_noise_level_db=14.0
         )
+
+
+def test_nonpositive_frequencies_rejected() -> None:
+    with pytest.raises(ValueError, match="positive and finite"):
+        microphone_characteristics([0.0, 100.0, 1000.0], [0.0, 0.0, 0.0], _M_MV)
+
+
+def test_empty_distortion_rejected() -> None:
+    f, rel = _flat_response()
+    with pytest.raises(ValueError, match="at least two"):
+        microphone_characteristics(f, rel, _M_MV, distortion=([], []))
+
+
+def test_empty_noise_spectrum_rejected() -> None:
+    f, rel = _flat_response()
+    with pytest.raises(ValueError, match="at least two"):
+        microphone_characteristics(f, rel, _M_MV, noise_spectrum=([], []))
+
+
+def test_empty_polar_rejected() -> None:
+    f, rel = _flat_response()
+    with pytest.raises(ValueError, match="at least two angle points"):
+        microphone_characteristics(f, rel, _M_MV, polar=([], []))
+
+
+def test_nonfinite_stated_directivity_index_rejected_with_polar() -> None:
+    """A non-finite stated DI is rejected whether or not a pattern is given."""
+    f, rel = _flat_response()
+    angles = np.linspace(0.0, 180.0, 181)
+    with pytest.raises(ValueError, match="directivity_index_db"):
+        microphone_characteristics(
+            f, rel, _M_MV, polar=(angles, np.zeros_like(angles)),
+            directivity_index_db=float("inf"),
+        )
+    with pytest.raises(ValueError, match="directivity_index_db"):
+        microphone_characteristics(f, rel, _M_MV, directivity_index_db=float("nan"))
 
 
 def test_no_noise_input_gives_no_noise_rows() -> None:

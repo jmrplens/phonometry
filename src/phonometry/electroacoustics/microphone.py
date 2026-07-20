@@ -150,6 +150,20 @@ def _effective_range(
     return lower, upper
 
 
+def _fold_angles_deg(angles_deg: "NDArray[np.float64]") -> "NDArray[np.float64]":
+    """Fold full-circle angles onto the 0..180 half plane (rotational symmetry).
+
+    The 11.2.2 a) integral runs over the polar angle 0..pi; for a rotationally
+    symmetric pattern an angle measured beyond 180 degrees re-measures the
+    polar angle ``360 - angle``, so the rear half of a full-circle measurement
+    folds onto the front half.
+    """
+    return np.asarray(
+        np.where(angles_deg > 180.0, 360.0 - angles_deg, angles_deg),
+        dtype=np.float64,
+    )
+
+
 def _directivity_index_from_polar(
     angles_deg: "NDArray[np.float64]", rel_db: "NDArray[np.float64]"
 ) -> float:
@@ -158,10 +172,16 @@ def _directivity_index_from_polar(
     ``D = 20 lg(M_0 / M_diff)`` with the diffuse-field sensitivity from the
     11.2.2 a) integral, evaluated by the trapezoidal rule over the supplied
     angles. The polar levels are relative to the reference axis (13.1.2), so
-    ``Gamma(theta) = 10 ** (G(theta) / 20)`` with ``Gamma(0) = 1``.
+    ``Gamma(theta) = 10 ** (G(theta) / 20)`` with ``Gamma(0) = 1``. Angles
+    beyond 180 degrees are folded onto ``360 - angle`` first
+    (:func:`_fold_angles_deg`), interleaving both halves of a full-circle
+    measurement into the same 0..pi integral (duplicated folded angles form
+    zero-width trapezoid segments and contribute nothing extra).
     """
-    theta = np.radians(angles_deg)
-    gamma_sq = 10.0 ** (rel_db / 10.0)
+    folded = _fold_angles_deg(angles_deg)
+    order = np.argsort(folded, kind="stable")
+    theta = np.radians(folded[order])
+    gamma_sq = 10.0 ** (rel_db[order] / 10.0)
     ratio = 0.5 * float(np.trapezoid(gamma_sq * np.sin(theta), theta))
     return float(-10.0 * np.log10(ratio))
 
@@ -177,6 +197,8 @@ def _overload_spl(
     distortion-against-level curve; ``None`` when the curve never reaches the
     limit, and the lowest measured level when it already starts above it.
     """
+    if thd_percent.size == 0:  # pragma: no cover - _as_curve enforces two points
+        return None
     if float(thd_percent[0]) >= limit_percent:
         return float(spl_db[0])
     above = thd_percent >= limit_percent
@@ -395,17 +417,20 @@ def _resolve_polar(
     """Resolve the optional directional pattern and directivity index (13.1/13.2).
 
     A stated ``directivity_index_db`` is kept; otherwise it is computed from
-    the pattern via the 11.2.2 a) integral when the supplied angles span at
-    least :data:`_MIN_POLAR_SPAN_DEG` towards the rear.
+    the pattern via the 11.2.2 a) integral when the supplied angles, folded
+    onto the 0..180 half plane, span at least :data:`_MIN_POLAR_SPAN_DEG`
+    towards the rear.
     """
+    if directivity_index_db is not None and not np.isfinite(directivity_index_db):
+        raise ValueError("'directivity_index_db' must be finite.")
     if polar is None:
-        if directivity_index_db is not None and not np.isfinite(directivity_index_db):
-            raise ValueError("'directivity_index_db' must be finite.")
         return None, None, directivity_index_db
     p_ang = np.atleast_1d(np.asarray(polar[0], dtype=np.float64))
     p_db = np.atleast_1d(np.asarray(polar[1], dtype=np.float64))
     if p_ang.ndim != 1 or p_ang.shape != p_db.shape:
         raise ValueError("'polar' angles and levels must be 1-D and equal length.")
+    if p_ang.size < 2:
+        raise ValueError("'polar' needs at least two angle points.")
     if not (np.all(np.isfinite(p_ang)) and np.all(np.isfinite(p_db))):
         raise ValueError("'polar' angles and levels must be finite.")
     if np.any(p_ang < 0.0) or np.any(p_ang > 360.0):
@@ -413,7 +438,7 @@ def _resolve_polar(
     order = np.argsort(p_ang)
     p_ang, p_db = p_ang[order], p_db[order]
     di = directivity_index_db
-    if di is None and float(p_ang[-1]) >= _MIN_POLAR_SPAN_DEG:
+    if di is None and float(np.max(_fold_angles_deg(p_ang))) >= _MIN_POLAR_SPAN_DEG:
         di = _directivity_index_from_polar(p_ang, p_db)
     return p_ang, p_db, di
 

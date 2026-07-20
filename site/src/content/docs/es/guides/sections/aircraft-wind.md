@@ -31,7 +31,7 @@ la trayectoria e integra el historial recibido en el SEL, LASmax y EPNL de
 evento único y sus contornos en malla de tierra.
 
 [Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/guides/wind-turbine-noise/)
-cubre el ensayo de tipo de IEC 61400-11: el **nivel de potencia sonora
+cubre el ensayo de tipo de IEC 61400-11: el **nivel de potencia acústica
 aparente** que refiere la inmisión medida a una fuente puntual equivalente en
 el centro del rotor, y la cadena de audibilidad tonal que decide si un tono
 de paso de pala, multiplicadora o generador es audible sobre su ruido
@@ -53,5 +53,5 @@ audibilidad tonal de
   el modelo de fuente de hemisferio de ruido de ECAC Doc 32, sus ajustes de
   propagación y las métricas y contornos de evento único.
 - [Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/guides/wind-turbine-noise/):
-  el nivel de potencia sonora aparente de IEC 61400-11 y la cadena de
+  el nivel de potencia acústica aparente de IEC 61400-11 y la cadena de
   audibilidad tonal.

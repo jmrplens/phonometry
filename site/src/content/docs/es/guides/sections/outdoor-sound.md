@@ -8,7 +8,7 @@ que una fuente entrega a un receptor lejano, y juzgar el carácter del sonido
 que efectivamente llega. Cada página de esta sección toma una mitad.
 
 [Propagación del sonido en exteriores](/phonometry/es/guides/outdoor-propagation/)
-es la mitad de predicción. Partiendo de la **potencia sonora** de la fuente,
+es la mitad de predicción. Partiendo de la **potencia acústica** de la fuente,
 el método general de ISO 9613-2 resta, banda de octava a banda de octava,
 cada mecanismo que atenúa el sonido por el camino: la divergencia geométrica,
 la absorción atmosférica (suministrada por el coeficiente de tono puro de
@@ -40,7 +40,7 @@ que terminan las evaluaciones se cubren en
 contraparte tonal del ajuste impulsivo en
 [Audibilidad objetiva de tonos en ruido](/phonometry/es/guides/tone-audibility/),
 y las fuentes que alimentan un cálculo de propagación en
-[Potencia sonora](/phonometry/es/guides/sound-power/) y la sección de
+[Potencia acústica](/phonometry/es/guides/sound-power/) y la sección de
 [Aeronaves y energía eólica](/phonometry/es/guides/sections/aircraft-wind/).
 
 ## Páginas de esta sección

@@ -1,6 +1,6 @@
 ---
 title: "Fuentes y dispositivos"
-description: "Caracterizar lo que emite el sonido: determinación de la potencia sonora por métodos de presión, cámara reverberante e intensidad (series ISO 3740 e ISO 9614), intensidad sonora con dos micrófonos (IEC 61043), las métricas de distorsión y respuesta en frecuencia de equipos de audio de IEC 60268, la separación armónica con barridos y THD(f) (Farina / Novak), y la sonoridad de programa y pico verdadero de UIT-R BS.1770-5 / EBU R 128."
+description: "Caracterizar lo que emite el sonido: determinación de la potencia acústica por métodos de presión, cámara reverberante e intensidad (series ISO 3740 e ISO 9614), intensidad sonora con dos micrófonos (IEC 61043), las métricas de distorsión y respuesta en frecuencia de equipos de audio de IEC 60268, la separación armónica con barridos y THD(f) (Farina / Novak), y la sonoridad de programa y pico verdadero de UIT-R BS.1770-5 / EBU R 128."
 ---
 
 Toda predicción del resto de esta documentación parte de un descriptor de
@@ -8,11 +8,11 @@ fuente, y esta sección es donde esos descriptores se miden. Su hilo conductor
 es la **emisión**: números que pertenecen al dispositivo y no a la sala ni a
 la distancia desde la que se escucha.
 
-La magnitud central es la **potencia sonora**: la energía acústica total por
+La magnitud central es la **potencia acústica**: la energía acústica total por
 segundo que radia una fuente. Expresada en decibelios como el nivel de
-potencia sonora, es la cifra que va en una hoja de datos, alimenta una
+potencia acústica, es la cifra que va en una hoja de datos, alimenta una
 predicción de sala o de exteriores y se compara con los límites de emisión
-de ruido. [Potencia sonora](/phonometry/es/guides/sound-power/)
+de ruido. [Potencia acústica](/phonometry/es/guides/sound-power/)
 cubre las cinco rutas normalizadas para obtenerla, desde la superficie
 envolvente de presión de ISO 3744/3746 hasta la cámara reverberante de
 ISO 3741, el barrido de intensidad in situ de ISO 9614-2 y los grados de
@@ -45,7 +45,7 @@ modo EBU, el rango de sonoridad y el nivel de pico verdadero por
 sobremuestreo en dBTP.
 
 Si vienes a medir una máquina, empieza por
-[Potencia sonora](/phonometry/es/guides/sound-power/) y deja que su guía de
+[Potencia acústica](/phonometry/es/guides/sound-power/) y deja que su guía de
 decisión elija la ruta; lee
 [Intensidad sonora (p-p)](/phonometry/es/guides/intensity/) cuando esa ruta
 implique una sonda de intensidad. Si vienes a caracterizar equipos de audio,
@@ -59,8 +59,8 @@ nivelar un programa, ve a
 - [Intensidad sonora (p-p)](/phonometry/es/guides/intensity/): intensidad
   sonora con dos micrófonos según IEC 61043 con los indicadores de campo de
   ISO 9614-1.
-- [Potencia sonora](/phonometry/es/guides/sound-power/): el nivel de potencia
-  sonora por superficie envolvente, cámara reverberante, barrido de
+- [Potencia acústica](/phonometry/es/guides/sound-power/): el nivel de potencia
+  acústica por superficie envolvente, cámara reverberante, barrido de
   intensidad y los métodos de precisión anecoico y de intensidad.
 - [Electroacústica: distorsión y respuesta en frecuencia](/phonometry/es/guides/electroacoustics/):
   las métricas de distorsión de IEC 60268-3, la estimación de la respuesta en

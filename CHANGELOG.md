@@ -791,6 +791,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Spanish acoustics terminology in the figure generators now matches the
+  official UNE-EN wording used by the `.plot()` string tables: "reducción
+  sonora" becomes "reducción acústica" (sound reduction index R, UNE-EN
+  ISO 717-1), "reducción vibracional" becomes "reducción de vibraciones"
+  (vibration reduction index Kij, UNE-EN ISO 10848), and "potencia sonora"
+  becomes "potencia acústica" (sound power level LW, UNE-EN ISO 3740 series).
+  The affected Spanish figures and the Spanish guide prose describing them
+  were regenerated and corrected to match.
 - Plot readability: continuous logarithmic frequency axes now label the octave
   band centres present in the data range (16 Hz, 31.5 Hz, ..., 16 kHz shown as
   `1k`, `2k`, ...) with unlabelled one-third-octave minor ticks, replacing the

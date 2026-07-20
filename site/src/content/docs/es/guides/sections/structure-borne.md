@@ -28,7 +28,7 @@ Dos páginas caracterizan después los elementos del camino.
 mide la rigidez de transferencia dinámica de los aisladores, soportes y
 mangueras que se insertan precisamente para romper el camino de transmisión,
 por los métodos directo e indirecto (transmisibilidad).
-[Potencia sonora desde vibración (ISO/TS 7849)](/phonometry/es/guides/vibration-sound-power/)
+[Potencia acústica desde vibración (ISO/TS 7849)](/phonometry/es/guides/vibration-sound-power/)
 se ocupa de la radiación directa: la potencia aérea estimada desde la
 velocidad superficial y un factor de radiación, sin medición acústica
 alguna.
@@ -52,7 +52,7 @@ receptora, que es donde esta sección se encuentra con los modelos de
 - [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/guides/transfer-stiffness/):
   rigidez de transferencia dinámica de aisladores por los métodos directo e
   indirecto.
-- [Potencia sonora desde vibración (ISO/TS 7849)](/phonometry/es/guides/vibration-sound-power/):
+- [Potencia acústica desde vibración (ISO/TS 7849)](/phonometry/es/guides/vibration-sound-power/):
   potencia aérea radiada desde la velocidad superficial y un factor de
   radiación.
 - [Potencia sonora estructural de equipos (EN 15657)](/phonometry/es/guides/structure-borne-power/):

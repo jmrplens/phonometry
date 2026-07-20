@@ -33,9 +33,9 @@ que las guías incorporan sus secciones de Referencias.
   transducers*. Academic Press. ISBN 978-0-12-391421-7.
   [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
   Campos sonoros, radiación y transductores electroacústicos; sustenta el
-  material de electroacústica y potencia sonora.
+  material de electroacústica y potencia acústica.
   Citado por [Electroacústica](/phonometry/es/guides/electroacoustics/) y
-  [Potencia sonora](/phonometry/es/guides/sound-power/).
+  [Potencia acústica](/phonometry/es/guides/sound-power/).
 
 ## Procesado de señal
 
@@ -86,43 +86,43 @@ que las guías incorporan sus secciones de Referencias.
   estabilidad a corto plazo aplicado a las grabaciones de calibración.
   Citado por [Calibración y dBFS](/phonometry/es/guides/calibration/).
 
-## Potencia sonora e intensidad
+## Potencia acústica e intensidad
 
 - Fahy, F. J. (1995). *Sound intensity* (2.ª ed.). E&FN Spon.
   ISBN 978-0-419-19810-9.
   [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
   La monografía sobre el flujo de energía sonora: intensidad activa y
   reactiva, el estimador p-p y su presupuesto de error por desfase.
-  Citado por [Potencia sonora](/phonometry/es/guides/sound-power/) e
+  Citado por [Potencia acústica](/phonometry/es/guides/sound-power/) e
   [Intensidad sonora (p-p)](/phonometry/es/guides/intensity/).
 - International Organization for Standardization. (2019). *Acoustics —
   Determination of sound power levels of noise sources — Guidelines for the
   use of basic standards* (ISO 3740:2019).
   [Catálogo iso.org](https://www.iso.org/standard/45107.html).
-  La guía de selección de la familia de potencia sonora: grados, entornos y
+  La guía de selección de la familia de potencia acústica: grados, entornos y
   criterios de tamaño de fuente y de ruido de fondo.
-  Citado por [Potencia sonora](/phonometry/es/guides/sound-power/).
+  Citado por [Potencia acústica](/phonometry/es/guides/sound-power/).
 - International Organization for Standardization. (2010). *Acoustics —
   Determination of sound power levels and sound energy levels of noise
   sources using sound pressure — Precision methods for reverberation test
   rooms* (ISO 3741:2010).
   [Catálogo iso.org](https://www.iso.org/standard/52053.html).
   El método de precisión en sala reverberante.
-  Citado por [Potencia sonora](/phonometry/es/guides/sound-power/).
+  Citado por [Potencia acústica](/phonometry/es/guides/sound-power/).
 - International Organization for Standardization. (2010). *Acoustics —
   Determination of sound power levels and sound energy levels of noise
   sources using sound pressure — Engineering methods for an essentially free
   field over a reflecting plane* (ISO 3744:2010).
   [Catálogo iso.org](https://www.iso.org/standard/52055.html).
   El método de ingeniería por superficie envolvente.
-  Citado por [Potencia sonora](/phonometry/es/guides/sound-power/).
+  Citado por [Potencia acústica](/phonometry/es/guides/sound-power/).
 - International Organization for Standardization. (2012). *Acoustics —
   Determination of sound power levels and sound energy levels of noise
   sources using sound pressure — Precision methods for anechoic rooms and
   hemi-anechoic rooms* (ISO 3745:2012).
   [Catálogo iso.org](https://www.iso.org/standard/45362.html).
   El método de precisión en sala anecoica.
-  Citado por [Potencia sonora](/phonometry/es/guides/sound-power/).
+  Citado por [Potencia acústica](/phonometry/es/guides/sound-power/).
 - International Organization for Standardization. (1993). *Acoustics —
   Determination of sound power levels of noise sources using sound
   intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
@@ -378,7 +378,7 @@ que las guías incorporan sus secciones de Referencias.
   radiación y transmisión a través de uniones.
   Citado por [Movilidad mecánica y la familia de FRF](/phonometry/es/guides/mechanical-mobility/),
   [Rigidez dinámica de transferencia](/phonometry/es/guides/transfer-stiffness/),
-  [Potencia sonora desde vibración](/phonometry/es/guides/vibration-sound-power/),
+  [Potencia acústica desde vibración](/phonometry/es/guides/vibration-sound-power/),
   [Potencia sonora estructural de equipos](/phonometry/es/guides/structure-borne-power/)
   y [Ruido estructural instalado](/phonometry/es/guides/installed-structure-borne/).
 - International Organization for Standardization. (2011). *Mechanical
@@ -407,16 +407,16 @@ que las guías incorporan sus secciones de Referencias.
   vibration measurement — Part 1: Survey method using a fixed radiation
   factor* (ISO/TS 7849-1:2009).
   [Catálogo iso.org](https://www.iso.org/standard/40537.html).
-  La potencia sonora de límite superior desde la velocidad superficial con
+  La potencia acústica de límite superior desde la velocidad superficial con
   ε = 1.
-  Citado por [Potencia sonora desde vibración](/phonometry/es/guides/vibration-sound-power/).
+  Citado por [Potencia acústica desde vibración](/phonometry/es/guides/vibration-sound-power/).
 - International Organization for Standardization. (2009). *Acoustics —
   Determination of airborne sound power levels emitted by machinery using
   vibration measurement — Part 2: Engineering method including determination
   of the adequate radiation factor* (ISO/TS 7849-2:2009).
   [Catálogo iso.org](https://www.iso.org/standard/40538.html).
   El método de ingeniería con un factor de radiación medido por bandas.
-  Citado por [Potencia sonora desde vibración](/phonometry/es/guides/vibration-sound-power/).
+  Citado por [Potencia acústica desde vibración](/phonometry/es/guides/vibration-sound-power/).
 - International Organization for Standardization. (1996). *Acoustics —
   Characterization of sources of structure-borne sound with respect to sound
   radiation from connected structures — Measurement of velocity at the
@@ -503,7 +503,7 @@ que las guías incorporan sus secciones de Referencias.
   Part 11: Acoustic noise measurement techniques*
   (IEC 61400-11:2012+AMD1:2018 CSV).
   [Tienda IEC](https://webstore.iec.ch/en/publication/63367).
-  La geometría de potencia sonora aparente, la clasificación por velocidades
+  La geometría de potencia acústica aparente, la clasificación por velocidades
   de viento y la audibilidad tonal de aerogeneradores.
   Citado por [Ruido de aerogeneradores](/phonometry/es/guides/wind-turbine-noise/).
 - International Electrotechnical Commission. (2005). *Wind turbines —

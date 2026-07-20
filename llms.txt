@@ -62,6 +62,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Theory: Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/)
 - [Theory: Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/)
 - [Theory: Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/)
+- [Theory: Materials and Surfaces](https://jmrplens.github.io/phonometry/reference/theory/materials-surfaces/)
 - [Theory: Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/)
 - [Theory: Vibration](https://jmrplens.github.io/phonometry/reference/theory/vibration/)
 - [Why phonometry](https://jmrplens.github.io/phonometry/reference/why-phonometry/)

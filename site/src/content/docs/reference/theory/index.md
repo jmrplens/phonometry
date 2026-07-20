@@ -3,7 +3,7 @@ title: "Theory"
 description: "Standards, math and design decisions behind phonometry."
 ---
 
-The theory reference explains the standards, the mathematics and the design decisions behind every phonometry module. It is split into five domain pages, listed below with the sections each one hosts. Theory for the underwater modules lives with its guides: [Underwater Acoustics](/phonometry/guides/underwater-acoustics/) and [Underwater Propagation](/phonometry/guides/underwater-propagation/).
+The theory reference explains the standards, the mathematics and the design decisions behind every phonometry module. It is split into six domain pages, listed below with the sections each one hosts. Theory for the underwater modules lives with its guides: [Underwater Acoustics](/phonometry/guides/underwater-acoustics/) and [Underwater Propagation](/phonometry/guides/underwater-propagation/).
 
 ## [Signal Analysis](/phonometry/reference/theory/signal-analysis/)
 
@@ -33,9 +33,12 @@ The theory reference explains the standards, the mathematics and the design deci
 
 - [Room noise criteria (ANSI S12.2)](/phonometry/reference/theory/rooms-buildings/#room-noise-criteria-ansi-s122)
 - [Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)](/phonometry/reference/theory/rooms-buildings/#room-and-building-acoustics-iso-18233-iso-3382-iso-16283-iso-10140-en-12354-iso-12999-iso-717-iso-354)
-- [Surface scattering and diffusion (ISO 17497-1, ISO 17497-2)](/phonometry/reference/theory/rooms-buildings/#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2)
-- [In-situ road surface absorption (ISO 13472-1, ISO 13472-2)](/phonometry/reference/theory/rooms-buildings/#in-situ-road-surface-absorption-iso-13472-1-iso-13472-2)
-- [Acoustic material characterisation (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611)](/phonometry/reference/theory/rooms-buildings/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611)
+
+## [Materials and Surfaces](/phonometry/reference/theory/materials-surfaces/)
+
+- [Surface scattering and diffusion (ISO 17497-1, ISO 17497-2)](/phonometry/reference/theory/materials-surfaces/#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2)
+- [In-situ road surface absorption (ISO 13472-1, ISO 13472-2)](/phonometry/reference/theory/materials-surfaces/#in-situ-road-surface-absorption-iso-13472-1-iso-13472-2)
+- [Acoustic material characterisation (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611)](/phonometry/reference/theory/materials-surfaces/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611)
 
 ## [Environment and Transport](/phonometry/reference/theory/environment-transport/)
 

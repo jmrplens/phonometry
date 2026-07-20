@@ -2,7 +2,7 @@
 
 # Theoretical Background
 
-The theory reference explains the standards, the mathematics and the design decisions behind every phonometry module. It is split into five domain pages, listed below with the sections each one hosts. Theory for the underwater modules lives with its guides: [Underwater Acoustics](underwater-acoustics.md) and [Underwater Propagation](underwater-propagation.md).
+The theory reference explains the standards, the mathematics and the design decisions behind every phonometry module. It is split into six domain pages, listed below with the sections each one hosts. Theory for the underwater modules lives with its guides: [Underwater Acoustics](underwater-acoustics.md) and [Underwater Propagation](underwater-propagation.md).
 
 ## [Signal Analysis](theory-signal-analysis.md)
 
@@ -32,9 +32,12 @@ The theory reference explains the standards, the mathematics and the design deci
 
 - [Room noise criteria (ANSI S12.2)](theory-rooms-buildings.md#room-noise-criteria-ansi-s122)
 - [Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)](theory-rooms-buildings.md#room-and-building-acoustics-iso-18233-iso-3382-iso-16283-iso-10140-en-12354-iso-12999-iso-717-iso-354)
-- [Surface scattering and diffusion (ISO 17497-1, ISO 17497-2)](theory-rooms-buildings.md#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2)
-- [In-situ road surface absorption (ISO 13472-1, ISO 13472-2)](theory-rooms-buildings.md#in-situ-road-surface-absorption-iso-13472-1-iso-13472-2)
-- [Acoustic material characterisation (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611)](theory-rooms-buildings.md#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611)
+
+## [Materials and Surfaces](theory-materials-surfaces.md)
+
+- [Surface scattering and diffusion (ISO 17497-1, ISO 17497-2)](theory-materials-surfaces.md#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2)
+- [In-situ road surface absorption (ISO 13472-1, ISO 13472-2)](theory-materials-surfaces.md#in-situ-road-surface-absorption-iso-13472-1-iso-13472-2)
+- [Acoustic material characterisation (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611)](theory-materials-surfaces.md#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611)
 
 ## [Environment and Transport](theory-environment-transport.md)
 

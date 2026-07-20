@@ -53,6 +53,7 @@ PAGES = [
     ("theory-signal-analysis.md", "reference/theory/signal-analysis"),
     ("theory-perception.md", "reference/theory/perception"),
     ("theory-rooms-buildings.md", "reference/theory/rooms-buildings"),
+    ("theory-materials-surfaces.md", "reference/theory/materials-surfaces"),
     ("theory-environment-transport.md", "reference/theory/environment-transport"),
     ("theory-vibration.md", "reference/theory/vibration"),
     ("why-phonometry.md", "reference/why-phonometry"),

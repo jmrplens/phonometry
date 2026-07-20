@@ -3,7 +3,7 @@ title: "Teoría"
 description: "Normas, matemáticas y decisiones de diseño detrás de phonometry."
 ---
 
-La referencia de teoría explica las normas, las matemáticas y las decisiones de diseño detrás de cada módulo de phonometry. Está dividida en cinco páginas por dominio, listadas abajo con las secciones que aloja cada una. La teoría de los módulos submarinos se encuentra junto a sus guías: [Acústica submarina](/phonometry/es/guides/underwater-acoustics/) y [Propagación submarina](/phonometry/es/guides/underwater-propagation/).
+La referencia de teoría explica las normas, las matemáticas y las decisiones de diseño detrás de cada módulo de phonometry. Está dividida en seis páginas por dominio, listadas abajo con las secciones que aloja cada una. La teoría de los módulos submarinos se encuentra junto a sus guías: [Acústica submarina](/phonometry/es/guides/underwater-acoustics/) y [Propagación submarina](/phonometry/es/guides/underwater-propagation/).
 
 ## [Análisis de señal](/phonometry/es/reference/theory/signal-analysis/)
 
@@ -33,9 +33,12 @@ La referencia de teoría explica las normas, las matemáticas y las decisiones d
 
 - [Criterios de ruido de salas (ANSI S12.2)](/phonometry/es/reference/theory/rooms-buildings/#criterios-de-ruido-de-salas-ansi-s122)
 - [Acústica de salas y edificación (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)](/phonometry/es/reference/theory/rooms-buildings/#acústica-de-salas-y-edificación-iso-18233-iso-3382-iso-16283-iso-10140-en-12354-iso-12999-iso-717-iso-354)
-- [Dispersión superficial y difusión (ISO 17497-1, ISO 17497-2)](/phonometry/es/reference/theory/rooms-buildings/#dispersión-superficial-y-difusión-iso-17497-1-iso-17497-2)
-- [Absorción in situ de superficies de carretera (ISO 13472-1, ISO 13472-2)](/phonometry/es/reference/theory/rooms-buildings/#absorción-in-situ-de-superficies-de-carretera-iso-13472-1-iso-13472-2)
-- [Caracterización de materiales acústicos (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611)](/phonometry/es/reference/theory/rooms-buildings/#caracterización-de-materiales-acústicos-iso-11654-iso-9053-12-iso-10534-12-astm-e2611)
+
+## [Materiales y superficies](/phonometry/es/reference/theory/materials-surfaces/)
+
+- [Dispersión superficial y difusión (ISO 17497-1, ISO 17497-2)](/phonometry/es/reference/theory/materials-surfaces/#dispersión-superficial-y-difusión-iso-17497-1-iso-17497-2)
+- [Absorción in situ de superficies de carretera (ISO 13472-1, ISO 13472-2)](/phonometry/es/reference/theory/materials-surfaces/#absorción-in-situ-de-superficies-de-carretera-iso-13472-1-iso-13472-2)
+- [Caracterización de materiales acústicos (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611)](/phonometry/es/reference/theory/materials-surfaces/#caracterización-de-materiales-acústicos-iso-11654-iso-9053-12-iso-10534-12-astm-e2611)
 
 ## [Medio ambiente y transporte](/phonometry/es/reference/theory/environment-transport/)
 

@@ -189,6 +189,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`electroacoustics.swept_sine`](/phonometry/reference/api/electroacoustics/swept-sine/) | Harmonic-distortion separation with exponential sweeps (Farina / Novak). |
 | [`electroacoustics.piston`](/phonometry/reference/api/electroacoustics/piston/) | Radiation of a rigid circular piston set in an infinite baffle. |
 | [`electroacoustics.loudspeaker`](/phonometry/reference/api/electroacoustics/loudspeaker/) | Rated loudspeaker characteristics (IEC 60268-5). |
+| [`electroacoustics.microphone`](/phonometry/reference/api/electroacoustics/microphone/) | Rated microphone characteristics (IEC 60268-4). |
 
 ## Industrial noise control
 

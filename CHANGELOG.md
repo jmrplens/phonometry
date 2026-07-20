@@ -58,6 +58,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the frequency and polar graphs drawn to the IEC 60263:1982 scale conventions
   (one frequency decade equal to 25 dB, and the 25 dB polar reference circle),
   localised in English and Spanish.
+- `electroacoustics.microphone_characteristics` and
+  `electroacoustics.MicrophoneCharacteristics` gather the rated microphone
+  characteristics of IEC 60268-4:2014 around a measured free-field frequency
+  response: the sensitivity level `20 lg(M / 1 V/Pa)` of the rated free-field
+  sensitivity (clauses 11.1/11.3), the effective frequency range against the
+  response tolerance limits (clause 12.2), the directivity index from a
+  rotationally symmetric directional pattern through the clause 11.2.2 a)
+  diffuse-field integral (clause 13.2.2) and the equivalent sound pressure
+  level due to inherent noise from the weighted noise voltage over the rated
+  sensitivity (clause 17.2) are computed from the standard's definitions,
+  alongside the rated and minimum permitted load impedances (clauses
+  10.2/10.3), the overload sound pressure level at a stated THD limit
+  (clauses 14.2/15.2), the derived signal-to-noise ratio re 1 Pa and
+  diffuse-field sensitivity level, and the rated power supply (clause 9.1). A
+  `.report()` method renders the IEC 60268-4 rated-characteristics fiche: the
+  rated-characteristics table beside the free-field response with its
+  tolerance band, reference-frequency and effective-range markers, plus the
+  directional-pattern, inherent-noise-spectrum and distortion-against-level
+  panels, the frequency and polar graphs drawn to the IEC 60263:1982 scale
+  conventions, localised in English and Spanish.
 - `emission.NoiseEmissionDeclaration` and `emission.OperatingModeDeclaration`
   model the ISO 4871:1996 declaration of noise emission values of machinery and
   equipment: the dual-number form (a measured A-weighted sound power level

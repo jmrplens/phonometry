@@ -89,7 +89,12 @@ Daily noise exposure level and its expanded uncertainty (ISO 9612:2009).
 ### ExposureResult.plot()
 
 ```python
-ExposureResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ExposureResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-task contributions with the `LEX,8h` line.

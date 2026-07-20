@@ -112,16 +112,17 @@ class ZwickerLoudness:
     time: np.ndarray | None = None
     loudness_vs_time: np.ndarray | None = None
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes | np.ndarray:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes | np.ndarray:
         """Plot the specific loudness N'(z) over Bark (see :mod:`._plotting`).
 
         Adds a loudness-vs-time panel when the time-varying trace is
         present.  Requires matplotlib (``pip install phonometry[plot]``);
         returns the :class:`~matplotlib.axes.Axes` (or array thereof).
         """
+        from .._i18n import check_language
         from .._plot.psychoacoustics import plot_zwicker_loudness
 
-        return plot_zwicker_loudness(self, ax=ax, **kwargs)
+        return plot_zwicker_loudness(self, ax=ax, language=check_language(language), **kwargs)
 
     def report(
         self,

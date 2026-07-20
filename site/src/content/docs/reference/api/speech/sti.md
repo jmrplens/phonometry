@@ -179,7 +179,12 @@ qualification letter (`A+` .. `U`).
 ### STIResult.plot()
 
 ```python
-STIResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+STIResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-band MTI bars with the STI and rating letter.

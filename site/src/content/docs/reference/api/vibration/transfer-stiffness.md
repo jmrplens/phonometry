@@ -356,7 +356,12 @@ Transfer-stiffness magnitude `|k2,1|`, in N/m.
 ### TransferStiffnessResult.plot()
 
 ```python
-TransferStiffnessResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+TransferStiffnessResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the transfer-stiffness level `L_k(f)`.

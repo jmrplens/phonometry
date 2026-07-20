@@ -196,15 +196,16 @@ class EcmaLoudness:
     loudness_vs_time: np.ndarray
     field: str
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes | np.ndarray:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes | np.ndarray:
         """Plot the average specific loudness N'(z) (see :mod:`._plotting`).
 
         Adds a loudness-vs-time panel.  Requires matplotlib
         (``pip install phonometry[plot]``).
         """
+        from .._i18n import check_language
         from .._plot.psychoacoustics import plot_ecma_loudness
 
-        return plot_ecma_loudness(self, ax=ax, **kwargs)
+        return plot_ecma_loudness(self, ax=ax, language=check_language(language), **kwargs)
 
 
 # --------------------------------------------------------------------------

@@ -745,7 +745,12 @@ Tone frequency of the decisive (most audible) tone, in Hz.
 ### ToneAudibilityResult.plot()
 
 ```python
-ToneAudibilityResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ToneAudibilityResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-tone audibility `ΔL` against tone frequency.

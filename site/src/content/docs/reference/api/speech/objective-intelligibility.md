@@ -110,7 +110,12 @@ Result of a STOI or ESTOI intelligibility computation.
 ### STOIResult.plot()
 
 ```python
-STOIResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+STOIResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the intermediate intelligibility that averages to the index.

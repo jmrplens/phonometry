@@ -102,7 +102,12 @@ All arrays are in dB and aligned with `NIPTS_FREQUENCIES`.
 ### HtlanResult.plot()
 
 ```python
-HtlanResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+HtlanResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the age, noise and combined threshold components over frequency.
@@ -183,7 +188,12 @@ All arrays are in dB and aligned with `NIPTS_FREQUENCIES`.
 ### NiptsResult.plot()
 
 ```python
-NiptsResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+NiptsResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the NIPTS spectrum with the fractile band over frequency.

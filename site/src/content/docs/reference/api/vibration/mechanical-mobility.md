@@ -151,7 +151,12 @@ Mobility phase, in radians.
 ### MobilityResult.plot()
 
 ```python
-MobilityResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+MobilityResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the mobility magnitude `|Y(f)|`.

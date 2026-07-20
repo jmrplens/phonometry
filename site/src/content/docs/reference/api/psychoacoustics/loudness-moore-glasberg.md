@@ -167,7 +167,12 @@ pattern is that of a single ear before binaural inhibition; the total
 ### MooreGlasbergLoudness.plot()
 
 ```python
-MooreGlasbergLoudness.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+MooreGlasbergLoudness.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the specific loudness N'(i) over the ERB-number scale.

@@ -64,6 +64,8 @@ records the assumed sound field.
 ```python
 EcmaTonality.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```

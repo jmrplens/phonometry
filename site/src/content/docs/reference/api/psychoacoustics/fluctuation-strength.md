@@ -176,6 +176,8 @@ Fluctuation strength of a signal (Osses 2016 model).
 ```python
 FluctuationStrengthResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

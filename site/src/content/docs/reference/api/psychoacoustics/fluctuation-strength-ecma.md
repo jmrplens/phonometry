@@ -125,6 +125,8 @@ fluctuation strength F'(l50, z) (Formula 168) of shape
 ```python
 EcmaFluctuationStrength.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```

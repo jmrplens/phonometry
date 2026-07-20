@@ -21,7 +21,7 @@ building. The chain closes the structural-vibroacoustics series:
    actual receiver with the Annex I mobility correction
    ([`installed_power_from_reception_plate`](/phonometry/reference/api/building/installed-structure-borne/#installed_power_from_reception_plate)),
    `L_Ws,inst,i = L_Ws,n + 10 lg(Y_inf,i / Y_inf,rec)` with the reference
-   plate mobility `Y_inf,rec = 5e-6 m/(N.s)` — or equivalently to the
+   plate mobility `Y_inf,rec = 5e-6 m/(N.s)`, or equivalently to the
    characteristic level `L_Ws,c = L_Ws,n + 10 lg(Y_s / Y_inf,rec)` with the
    source mobility (Annex I.3, Table I.8), from which `D_C` is subtracted.
 2. Only part of that power is actually injected into the supporting element; the
@@ -147,7 +147,7 @@ installed_power_from_reception_plate(
 
 Mobility correction of the reception-plate power (EN 12354-5, Annex I).
 
-`L_Ws,inst,i = L_Ws,n,i + 10 lg(Y_inf,i / Y_inf,rec)` — refers the
+`L_Ws,inst,i = L_Ws,n,i + 10 lg(Y_inf,i / Y_inf,rec)`, which refers the
 characteristic reception-plate power level `L_Ws,n` (EN 15657
 Formula (17), re the 10 cm concrete plate `Y_inf,rec = 5e-6 m/(N.s)`)
 to the characteristic mobility `Y_inf,i` of the actual receiving
@@ -221,7 +221,7 @@ Installed structure-borne power level (EN 12354-5, Formula 18b).
 
 | Name | Description |
 | :--- | :--- |
-| `characteristic_power_level` | Characteristic level `L_Ws,c` (per band), in dB — the EN 15657 reception-plate level converted with Formulae (15)/(17) and the source-mobility correction (see the module docstring), **not** the raw plate-injected Formula (14) level. |
+| `characteristic_power_level` | Characteristic level `L_Ws,c` (per band), in dB: the EN 15657 reception-plate level converted with Formulae (15)/(17) and the source-mobility correction (see the module docstring), **not** the raw plate-injected Formula (14) level. |
 | `coupling_term` | Coupling term `D_C,i` (per band), in dB. |
 
 **Returns:** The installed structure-borne power level `L_Ws,inst`, in dB.

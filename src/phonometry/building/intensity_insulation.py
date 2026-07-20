@@ -180,7 +180,7 @@ def adaptation_term_kc(
       ``Kc = 10 lg(1 + Sb2 lambda / (8 V2))`` with the midband wavelength
       ``lambda = c / f`` and ``c = 340 m/s``.
     - **Room-independent approximation (Formula (B.2)):** when neither is
-      supplied, ``Kc = 10 lg(1 + 61,4 / f)`` — the exact reduction of (B.1)
+      supplied, ``Kc = 10 lg(1 + 61,4 / f)``, the exact reduction of (B.1)
       for the reference room ``Sb2 = 117 m²``, ``V2 = 81 m³``.
 
     :param freq: One-third-octave midband frequencies, in Hz.

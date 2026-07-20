@@ -30,7 +30,7 @@ audibility ``ΔL`` to ``Kt`` (0–6 dB).
 
 **Residual-noise correction (Clause 10.4).**
 ``L = 10 lg(10^(L'/10) − 10^(Lres/10))`` (Formula (16)); with a residual
-within 3 dB of the measured level no correction is allowed — the
+within 3 dB of the measured level no correction is allowed; the
 *uncorrected* measured level ``L'`` is then the reportable value, as an upper
 bound of the specific sound. :func:`gaussian_residual_level` estimates the
 residual from percentile levels (Annex I, Formulae (I.1)/(I.2)).
@@ -259,7 +259,7 @@ def tonal_seeking_survey(
     .. note::
         Annex K defines the thresholds for 25 Hz to 10 kHz only. Bands
         supplied outside that span are extrapolated with the nearest rule
-        (15 dB below 25 Hz, 5 dB above 10 kHz) — outside the standard.
+        (15 dB below 25 Hz, 5 dB above 10 kHz), outside the standard.
 
     :param levels: One-third-octave-band time-average levels, in dB.
     :param frequencies: The band centre frequencies, in Hz (same length).
@@ -302,7 +302,7 @@ class ResidualCorrectionResult:
     """Residual-noise-corrected level (ISO 1996-2:2017 Clause 10.4).
 
     :ivar corrected_level: The corrected level ``L`` (Formula (16)), in dB.
-        When ``reliable`` is ``False`` the standard allows *no* correction —
+        When ``reliable`` is ``False`` the standard allows *no* correction;
         this value is then informative only (it estimates the source from
         below) and must not be reported as the result.
     :ivar reportable_upper_bound: The *measured* level ``L'``, in dB. When the
@@ -383,7 +383,7 @@ def gaussian_residual_level(
     :return: The estimated Gaussian residual equivalent level, in dB.
     :raises ValueError: If not exactly one of ``l90`` / ``l95`` is given, the
         inputs are not finite, or the percentile ordering is inverted
-        (``L90``/``L95`` cannot exceed ``L50`` — almost certainly swapped
+        (``L90``/``L95`` cannot exceed ``L50``, almost certainly swapped
         arguments, which the squared spread would otherwise hide).
     """
     median = _finite(l50, "l50")
@@ -512,7 +512,7 @@ class RepeatedMeasurementResult:
         energy values ``10^(0.1·Li)`` mapped back to level,
         ``uk = 10 lg(10^(0.1·Lk) + sk) − Lk``, in dB.
     :ivar approximate_uncertainty: The Note 2 substitute (Formula (20)),
-        ``√(Σ(Li − Lk)²/(N − 1))``, in dB — valid only when the spread of the
+        ``√(Σ(Li − Lk)²/(N − 1))``, in dB; valid only when the spread of the
         ``Li`` is small; it grossly inflates for spread levels.
     :ivar n: Number of measurements.
     """

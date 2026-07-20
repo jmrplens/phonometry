@@ -218,7 +218,7 @@ def sound_intensity(
         ``max_valid_frequency``. The reciprocal diverges as ``k*spacing -> pi``
         (the first spatial-aliasing null at ``c/(2*spacing)``, inside the
         default band range for close spacings), so it is applied only over the
-        probe's usable range — up to ``k*spacing = pi/2`` — and held constant
+        probe's usable range (up to ``k*spacing = pi/2``) and held constant
         beyond, keeping the totals bounded instead of letting a few near-null
         bins dominate them. Default False keeps the exact legacy totals; the
         per-band ``bias_correction`` factor (same clamped definition) is

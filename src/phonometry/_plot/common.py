@@ -83,7 +83,7 @@ _LABEL_RANGE_KM: Final = "Range [km]"
 #: titles and quantity-specific text; ``_t`` here only covers what common.py
 #: itself draws, so a domain module that passes an already-localised string
 #: through (e.g. an ``xlabel`` built with its own ``_t``) gets it back
-#: unchanged — the lookup misses and falls back to the given text. English is
+#: unchanged: the lookup misses and falls back to the given text. English is
 #: always a no-op, so the byte-identical English guarantee holds.
 _STRINGS: dict[str, str] = {
     "Frequency [Hz]": "Frecuencia [Hz]",

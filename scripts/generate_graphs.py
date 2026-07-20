@@ -5017,7 +5017,7 @@ def generate_facade_prediction(output_dir: str) -> None:
 
     x = np.arange(len(bands))
     fig, ax = plt.subplots(figsize=(10, 6.2))
-    # Per-element partial indices Rp: thin, faded — they set the transmission floor.
+    # Per-element partial indices Rp: thin, faded; they set the transmission floor.
     el_colors = [COLOR_PRIMARY, COLOR_SECONDARY, "#9467bd", "#ff7f0e"]
     for (name, rp), colour in zip(result.element_r.items(), el_colors):
         ax.plot(x, rp, "--", color=colour, linewidth=1.1, alpha=0.65,
@@ -10619,7 +10619,7 @@ def animate_power_two_rooms(output_dir: str) -> None:
 def animate_comb_filtering(output_dir: str) -> None:
     """Direct sound plus one floor reflection at a microphone: as the mic
     height changes, the delayed copy shifts and the comb filter in the
-    frequency response moves with it — why measurement position matters
+    frequency response moves with it, which is why measurement position matters
     near reflecting surfaces."""
     T = _translate_str
     c0 = 343.0
@@ -10782,7 +10782,7 @@ def generate_animations(output_dir: str,
     """Render the Tier-1 animations in the active language/theme.
 
     ``names`` (clip stems, e.g. ``anim_schroeder``) restricts the run to a
-    subset — used by ``--anim`` to re-render a single clip after review
+    subset, used by ``--anim`` to re-render a single clip after review
     fixes without paying for the whole batch.
     """
     import shutil

@@ -290,7 +290,7 @@ def inverse_filter(
     if not np.any(band):
         raise ValueError(
             "no frequency bin falls within the sweep band [f1, f2]; the "
-            "sweep is too short for this frequency resolution — increase "
+            "sweep is too short for this frequency resolution; increase "
             "'seconds' or widen the (f1, f2) range."
         )
     gain = float(np.median(np.abs(np.fft.rfft(comp)[band])))

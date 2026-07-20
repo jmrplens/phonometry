@@ -1620,7 +1620,7 @@ def _d_impact(s: SVG, th: Theme) -> None:
         s.mic(bx0 + off, bot - 120, bot, 0.95)
     s.text(bx0 + 400, floor_bot + 42, "Microphone positions", 16, th.muted)
 
-    # Normative relations (right column) — no invented spacing dimensions.
+    # Normative relations (right column); no invented spacing dimensions.
     lx = 648.0
     s.text(lx, 118, "Impact sound insulation", 18, th.fg, bold=True,
            anchor="start")
@@ -2800,8 +2800,8 @@ def _d_uncertainty(s: SVG, th: Theme) -> None:
 def _d_nihl(s: SVG, th: Theme) -> None:
     """Noise-induced hearing loss (ISO 1999:2013): NIPTS and HTLAN.
 
-    Two converging lanes — the age component H (HTLA, database A = ISO 7029)
-    and the noise component N (NIPTS, Formulae 2-7) — combine into the hearing
+    Two converging lanes (the age component H (HTLA, database A = ISO 7029)
+    and the noise component N (NIPTS, Formulae 2-7)) combine into the hearing
     threshold associated with age and noise (HTLAN, Formula 1).
     """
     cx = 450.0
@@ -3518,7 +3518,7 @@ def _d_dosimeter(s: SVG, th: Theme) -> None:
         s.text(x0, y - 10, title, 19, th.fg, "start", bold=True)
         s.text(x0, y + 68, caption, 16, th.muted, "start", italic=True)
 
-    # Strategy 1: task-based — the day split into tasks, >= 3 samples each.
+    # Strategy 1: task-based; the day split into tasks, >= 3 samples each.
     y1 = 190.0
     strip(y1, "Task-based (Clause 9)",
           "split the day into tasks — ≥ 3 samples (│) per task, plus each duration")
@@ -3532,7 +3532,7 @@ def _d_dosimeter(s: SVG, th: Theme) -> None:
             sx = xa + (xb - xa) * frac
             s.line(sx, y1 + 34, sx, y1 + 42, cols[k], 2.2)
 
-    # Strategy 2: job-based — random samples over the homogeneous group.
+    # Strategy 2: job-based; random samples over the homogeneous group.
     y2 = 300.0
     strip(y2, "Job-based (Clause 10)",
           "N ≥ 5 random samples over the homogeneous exposure group")
@@ -3541,7 +3541,7 @@ def _d_dosimeter(s: SVG, th: Theme) -> None:
         s.rect(x0 + bw * frac, y2 + 6, bw * 0.06, 32, th.panel, th.primary,
                rx=4, sw=2)
 
-    # Strategy 3: full-day — the whole shift, repeated on several days.
+    # Strategy 3: full-day; the whole shift, repeated on several days.
     y3 = 410.0
     strip(y3, "Full-day (Clause 11)",
           "the whole shift, at least 3 times (5 if the days differ by > 3 dB)")

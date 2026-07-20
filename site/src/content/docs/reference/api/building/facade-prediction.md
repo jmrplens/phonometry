@@ -15,7 +15,7 @@ area-weighted by `Sᵢ/S` (small elements / air paths enter through their
 element-normalized level difference `Dn,e` with the reference area
 `A₀ = 10 m²`):
 
-**EN 12354-3 — outdoor → indoor (façade sound insulation).** The apparent
+**EN 12354-3, outdoor → indoor (façade sound insulation).** The apparent
 sound reduction index of a façade for diffuse incidence (Formula 10):
 
 ```text
@@ -34,7 +34,7 @@ D2m,nT = R' + ΔLfs + 10 lg( V / (6·T0·S) )      T0 = 0,5 s
 with the façade-shape term `ΔLfs` (Annex C; 0 dB for a flat reflecting
 façade).
 
-**EN 12354-4 — indoor → outdoor (sound radiated to the outside).** The sound
+**EN 12354-4, indoor → outdoor (sound radiated to the outside).** The sound
 power level radiated by a segment (Formulas 2-3):
 
 ```text
@@ -54,7 +54,7 @@ follows from the simplified Annex E attenuation `Atot` of a finite radiating
 side and `Lp = LW - Atot`.
 
 Single-number ratings reuse EN ISO 717-1 via [`phonometry.weighted_rating`](/phonometry/reference/api/building/insulation/#weighted_rating)
-(exact for `R'w + Ctr`, a good approximation for `R'w` — Part 3 NOTE 7).
+(exact for `R'w + Ctr`, a good approximation for `R'w`, Part 3 NOTE 7).
 
 Clause/formula citations refer to EN 12354-3:2000 or EN 12354-4:2000.
 
@@ -92,7 +92,7 @@ open or closed fence).
 | :--- | :--- |
 | `shape` | Façade shape key (see above). |
 | `line_of_sight` | Height of the line of sight from the source at the façade plane, in m (bins: below 1,5 m; 1,5 m to 2,5 m; above 2,5 m). |
-| `absorption` | Weighted absorption coefficient `αw` of the underside above the façade (default 0,3 — reflecting). |
+| `absorption` | Weighted absorption coefficient `αw` of the underside above the façade (default 0,3; reflecting). |
 
 **Returns:** `ΔLfs`, in dB.
 
@@ -266,8 +266,8 @@ scalar broadcasts against an array (e.g. several sides, one common `Atot`).
 
 | Name | Description |
 | :--- | :--- |
-| `l_w` | Radiated power level(s) `LW` (dB) — scalar or per side. |
-| `attenuation` | Attenuation(s) `Atot` (dB) — scalar or per side. |
+| `l_w` | Radiated power level(s) `LW` (dB), scalar or per side. |
+| `attenuation` | Attenuation(s) `Atot` (dB), scalar or per side. |
 
 **Returns:** Exterior sound pressure level `Lp` in dB.
 

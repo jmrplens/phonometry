@@ -48,7 +48,7 @@ engines, reused unchanged.
 **Validity of Kij.** `Kij` rests on a statistical-energy-analysis
 simplification (weak coupling, diffuse vibration fields). This module exposes
 the standard's own applicability checks: the strong-coupling inequality
-(Formula (15)), and — for heavy junctions (Part 4) — the modal density,
+(Formula (15)), and, for heavy junctions (Part 4), the modal density,
 in-band mode count and modal overlap factor (Formulas (5), (4), (6)) whose
 thresholds bracket or exclude unreliable bands.
 

@@ -61,7 +61,7 @@ REFERENCE_SOUND_POWER: float = 1.0e-12
 #: Reference area ``S0``, m2.
 REFERENCE_AREA: float = 1.0
 
-#: ISO/TS 7849-1 Table 2 — correction K1A (dB) for extraneous vibratory velocity
+#: ISO/TS 7849-1 Table 2: correction K1A (dB) for extraneous vibratory velocity
 #: keyed by the integer level difference dLv (dB). dLv >= 10 -> 0; dLv < 3 -> 3.
 _K1A_TABLE: dict[int, float] = {3: 3.0, 4: 2.0, 5: 2.0, 6: 1.0,
                                 7: 1.0, 8: 1.0, 9: 1.0, 10: 0.0}
@@ -90,7 +90,7 @@ def velocity_level_from_acceleration(
 ) -> np.ndarray:
     """Velocity level from a sinusoidal acceleration (ISO/TS 7849-1, Eq. 8).
 
-    ``L_v = 20 lg( a_peak / (2 pi f v0 sqrt(2)) )`` — used to convert a
+    ``L_v = 20 lg( a_peak / (2 pi f v0 sqrt(2)) )``, used to convert a
     calibration acceleration to the equivalent r.m.s. velocity level.
 
     :param peak_acceleration: Peak acceleration ``a_peak`` (scalar or array),
@@ -144,7 +144,7 @@ def radiation_factor(
 ) -> np.ndarray:
     """A-weighted radiation factor ``epsilon`` (ISO/TS 7849-1 Eq. 4, -2 Eq. 8).
 
-    ``epsilon = P / (Z_c <v**2> S)`` — the sound-radiation efficiency, from an
+    ``epsilon = P / (Z_c <v**2> S)``, the sound-radiation efficiency, from an
     independently measured radiated power (ISO 9614), the surface area and the
     mean-square vibratory velocity.
 

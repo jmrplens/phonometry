@@ -54,12 +54,15 @@ regardless of the boundary loss (the ground wave vanishes), and `dL` reaches
 `+6 dB` in phase (Salomons Sec. 3.4); at grazing incidence
 (`hs, hr -> 0`, `cos(theta) -> 0`) `Rp -> -1`; and as the range grows
 (`R2 -> inf`) `|w| -> inf` and `F -> 0`. The ground impedance is taken in
-the `e^{-i omega t}` time convention (a passive ground has `Im(Z) < 0`, as
-the porous models below return); it may be supplied directly or derived from
-the porous models of `phonometry.materials`
+the `e^{-i omega t}` time convention of Salomons, in which a passive ground
+has `Im(Z) > 0`; it may be supplied directly or derived from the porous
+models of `phonometry.materials`
 ([`delany_bazley`](/phonometry/reference/api/materials/porous-absorber/#delany_bazley) / [`miki`](/phonometry/reference/api/materials/porous-absorber/#miki)),
 which model a semi-infinite porous ground whose surface impedance equals the
-characteristic impedance of the medium.
+characteristic impedance of the medium. The materials domain works in the
+opposite `e^{+j omega t}` convention (`Im(Z) < 0` for a passive medium), so
+any impedance obtained from a porous model is conjugated internally before it
+enters the formulas above.
 
 Barrier diffraction
 -------------------
@@ -149,7 +152,7 @@ at `(receiver_distance, receiver_height)`. Three models are available:
 | `receiver_height` | Receiver height, in metres. |
 | `method` | `"kurze_anderson"` or `"exact"`. |
 | `thickness` | Top width `e` of a thick barrier (double diffraction), in metres; `None` for a thin screen. |
-| `ground_impedance` | Normalized ground impedance (or a `PorousMediumResult`) for the coherent ground model (`"exact"` only). |
+| `ground_impedance` | Normalized ground impedance for the coherent ground model (`"exact"` only), in the `e^{-i omega t}` convention (`Im(Z) > 0` for a passive ground); a `PorousMediumResult` is conjugated internally from the materials' `e^{+j omega t}` convention. |
 | `ground_flow_resistivity` | Effective flow resistivity `sigma` (Pa s/m2) for the ground model, as an alternative to `ground_impedance`. |
 | `ground_model` | Porous model for `ground_flow_resistivity`. |
 | `speed_of_sound` | Speed of sound `c`, in m/s. |
@@ -279,7 +282,7 @@ of the materials domain. Exactly one of the two must be given.
 | `source_height` | Source height `hs`, in metres. |
 | `receiver_height` | Receiver height `hr`, in metres. |
 | `distance` | Horizontal source-receiver distance, in metres. |
-| `impedance` | Normalized ground impedance (`e^{-i omega t}` convention, `Im(Z) < 0` for a passive ground), or a `PorousMediumResult`. |
+| `impedance` | Normalized ground impedance (`e^{-i omega t}` convention, `Im(Z) > 0` for a passive ground), or a `PorousMediumResult` (which is conjugated internally from the materials' `e^{+j omega t}` convention). |
 | `flow_resistivity` | Effective flow resistivity `sigma` (Pa s/m2); grassland is about `2e5` (Salomons Sec. 3.1). The porous model raises a [`PorousAbsorberWarning`](/phonometry/reference/api/materials/porous-absorber/#porousabsorberwarning) when the lowest bands fall below its published fit range `0.01 < rho f / sigma < 1` (it still extrapolates a value there). |
 | `model` | Porous model for `flow_resistivity` (`"delany_bazley"` or `"miki"`). |
 | `speed_of_sound` | Speed of sound `c`, in m/s. |
@@ -348,7 +351,7 @@ distance `w = sqrt(i k R2 / 2) (cos(theta) + 1/Z)` (Eq. (D.57)).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz. |
-| `normalized_impedance` | Ground surface impedance normalized by `rho c` (complex, per frequency or scalar), in the `e^{-i omega t}` time convention (a passive ground has `Im(Z) < 0`). |
+| `normalized_impedance` | Ground surface impedance normalized by `rho c` (complex, per frequency or scalar), in the `e^{-i omega t}` time convention (a passive ground has `Im(Z) > 0`). |
 | `source_height` | Source height `hs` above the ground, in metres. |
 | `receiver_height` | Receiver height `hr` above the ground, in metres. |
 | `distance` | Horizontal source-receiver distance, in metres. |

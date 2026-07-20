@@ -117,12 +117,15 @@ La impedancia del suelo se deriva de una `flow_resistivity` efectiva (con el
 modelo `delany_bazley` o `miki` de
 [`phonometry.materials`](/phonometry/es/guides/porous-absorbers/), que modelan
 un suelo poroso semiinfinito) o se suministra directamente como una `impedance`
-compleja normalizada (un escalar, un vector por banda o un `PorousMediumResult`),
-de modo que una impedancia superficial medida en el convenio `e^{-iωt}` (un
-suelo pasivo tiene `Im(Z) < 0`, como devuelven los modelos porosos) se usa sin
-cambios.
+compleja normalizada (un escalar, un vector por banda o un `PorousMediumResult`).
+Un valor de `impedance` directo se toma en el convenio `e^{-iωt}` de Salomons,
+en el que un suelo pasivo tiene `Im(Z) > 0`; los modelos porosos de
+`phonometry.materials` trabajan en el convenio opuesto `e^{+jωt}`
+(`Im(Z) < 0`), así que todo lo obtenido de ellos (una `flow_resistivity` o un
+`PorousMediumResult`) se conjuga internamente antes de entrar en las fórmulas
+de Weyl-Van der Pol.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_effect_spherical_es.svg" alt="Atenuación en exceso (nivel respecto al campo libre) frente a la frecuencia en eje logarítmico para cuatro tipos de suelo. La nieve reciente (10 kPa) cae más profundo y a menor frecuencia, cerca de menos 9 dB alrededor de 180 Hz; el suelo forestal (50 kPa) y la pradera (200 kPa) tienen caídas progresivamente menos profundas y a mayor frecuencia; el asfalto (20000 kPa) se ciñe al límite de realce de suelo rígido de más 6 dB hasta una caída profunda cerca de 3 kHz. Una línea de puntos marca el límite de suelo rígido de más 6 dB y una línea continua el campo libre de 0 dB" width="90%" loading="eager" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_effect_spherical_es.svg" alt="Atenuación en exceso (nivel respecto al campo libre) frente a la frecuencia en eje logarítmico para cuatro tipos de suelo. La nieve reciente (10 kPa) cae más profundo y a menor frecuencia, cerca de menos 18 dB alrededor de 150 Hz; el suelo forestal (50 kPa) llega a unos menos 15 dB cerca de 290 Hz y la pradera (200 kPa) a unos menos 12 dB cerca de 540 Hz; el asfalto (20000 kPa) se ciñe al límite de realce de suelo rígido de más 6 dB hasta una caída profunda cerca de 2,4 kHz. Una línea de puntos marca el límite de suelo rígido de más 6 dB y una línea continua el campo libre de 0 dB" width="90%" loading="eager" />
 
 <details>
 <summary>Ver el código de esta figura</summary>

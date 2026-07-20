@@ -30,21 +30,26 @@ ocean solvers in [`phonometry.underwater.numerical_propagation`](/phonometry/ref
   as the ocean `parabolic_equation`), a Gaussian starter (Salomons
   Eq. (G.64)), an absorbing layer at the top of the grid (Salomons Sec. G.9)
   and a finite-impedance ground condition through the plane-wave reflection
-  coefficient `R(kz) = (kz Z - k0)/(kz Z + k0)` (Salomons Eq. (H.28)). It
-  returns the relative sound level (dB re free field) over the range-height
-  plane.
+  coefficient `R(kz) = (kz Z - k0)/(kz Z + k0)` plus the surface-wave
+  residue of its pole (Salomons Eqs. (H.28), (H.49)). It returns the relative
+  sound level (dB re free field) over the range-height plane.
 
 For a linear effective sound-speed profile the ray paths are exact circular
 arcs of radius [`ray_curvature_radius`](/phonometry/reference/api/environment/atmospheric-refraction/#ray_curvature_radius), and an upward-refracting linear
 profile has a closed-form [`shadow_zone_distance`](/phonometry/reference/api/environment/atmospheric-refraction/#shadow_zone_distance); both anchor the ray
 model. The PE is anchored against the exact spherical-wave ground effect
 ([`phonometry.environmental.ground_effect`](/phonometry/reference/api/environment/ground-barriers/#ground_effect)) in the homogeneous limit
-(gradient zero), which it reproduces to about 0.1 dB.
+(gradient zero), which it reproduces to a few tenths of a dB on the default
+grid (finer `height_step` converges it further).
 
-The ground impedance is taken in the `e^{-i omega t}` convention (a passive
-ground has `Im(Z) < 0`), shared with [`phonometry.environmental.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/)
-and the porous models of `phonometry.materials`; heights and ranges are in
-metres, sound speeds in m/s and frequencies in Hz.
+The ground impedance is taken in the `e^{-i omega t}` convention of Salomons
+(a passive ground has `Im(Z) > 0`), shared with
+[`phonometry.environmental.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/). The porous models of
+`phonometry.materials` work in the opposite `e^{+j omega t}` convention
+(`Im(Z) < 0`), so an impedance derived from them (`flow_resistivity=` or a
+`PorousMediumResult`) is conjugated internally before entering the PE ground
+condition. Heights and ranges are in metres, sound speeds in m/s and
+frequencies in Hz.
 
 ## atmospheric_parabolic_equation
 
@@ -71,7 +76,9 @@ Marches the split-step Fourier solution of the one-way wave equation
 (Salomons Appendix H) in range. Each step transforms the field to the
 vertical-wavenumber domain, applies the free-space propagator
 `exp(i dr (sqrt(ka^2 - kz^2) - ka))` together with the ground reflection
-`R(kz) = (kz Z - k0)/(kz Z + k0)` (Eq. (H.28)), transforms back and applies
+`R(kz) = (kz Z - k0)/(kz Z + k0)` (Eq. (H.28)), transforms back, adds the
+surface-wave residue of the reflection pole at `kz = -k0/Z` (the third
+term of Eq. (H.49), present for a passive ground, `Im(Z) > 0`) and applies
 the refraction phase screen `exp(i dr (k(z) - ka))` (Eq. (H.58)). The
 source is a Gaussian starter with its ground image (Eqs. (G.64), (G.76))
 and an absorbing layer at the top of the grid (Sec. G.9) suppresses
@@ -87,8 +94,10 @@ The ground surface impedance is either supplied through `impedance` (a
 normalized complex value/array, or a
 [`PorousMediumResult`](/phonometry/reference/api/materials/porous-absorber/#porousmediumresult)) or derived from an
 effective `flow_resistivity` (Pa s/m2) via the `model` porous model.
-Exactly one of the two must be given, in the `e^{-i omega t}` convention
-(`Im(Z) < 0` for a passive ground).
+Exactly one of the two must be given. A plain `impedance` value is taken
+in the `e^{-i omega t}` convention (`Im(Z) > 0` for a passive ground);
+a `PorousMediumResult` or `flow_resistivity` is conjugated internally
+from the materials' `e^{+j omega t}` convention.
 
 **Parameters**
 

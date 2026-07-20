@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **371/371 conformance checks pass** across 46 domains and 235 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **372/372 conformance checks pass** across 46 domains and 236 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -696,13 +696,14 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Spherical ground &amp; barriers (Attenborough / Salomons / Bies)</b>: 100% (6/6)</summary>
+<summary>&#9989; <b>Spherical ground &amp; barriers (Attenborough / Salomons / Bies)</b>: 100% (7/7)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | Attenborough 2e Eq. (2.40c) (spherical Q, hard-ground limit) | abs(Q) as Z grows large (Rp -> 1 so (1 - Rp) -> 0 and Q -> 1) | 1 (+/-0.000001) | 1 | 0 | &#9989; |
 | Salomons 2001 Sec. 3.4 (two-ray field over a rigid ground) | dL enhancement at small path difference (constructive, +6 dB) | 6.0206 dB (+/-0.1 dB) | 6.0205 dB | 0 dB | &#9989; |
 | Salomons 2001 Eq. (D.59) (plane-wave Rp, grazing incidence) | Re(Rp) at grazing (hs, hr -> 0, cos(theta) -> 0 so Rp -> -1) | -1 (+/-0.001) | -1 | 0 | &#9989; |
+| Salomons 2001 Fig. D.3 (grassland ground dip, sigma = 200 kPa s/m2) | Minimum dL for hs = hr = 2 m, r = 100 m (dip near 395 Hz), dB | -12.7 dB (+/-0.3 dB) | -12.72 dB | -0.022 dB | &#9989; |
 | Bies 5e Eq. (5.138) (Kurze-Anderson, N -> 0) | Barrier attenuation at the shadow boundary N = 0 | 5 dB (+/-0 dB) | 5 dB | 0 dB | &#9989; |
 | Bies 5e Eq. (5.138) (Kurze-Anderson, large-N slope) | Delta(N=10) - Delta(N=1) vs the 10 lg(10) = 10 dB decade growth | 10 dB (+/-0.5 dB) | 9.8845 dB | -0.116 dB | &#9989; |
 | Attenborough 2e Eqs. (9.19)-(9.20) (rigid half-plane, shadow boundary) | Exact thin-screen insertion loss at grazing (field halved, 6 dB) | 6.0206 dB (+/-0.6 dB) | 5.7932 dB | -0.227 dB | &#9989; |
@@ -748,7 +749,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | Salomons Sec. 4.4 (ray turning height, linear profile) | Turning height of a 10 deg ray vs Rc(1 - cos theta0) (circular arc), m | 26.457 m (+/-0.1 m) | 26.457 m | 0 m | &#9989; |
-| Salomons Eq. (3.4) (GFPE vs spherical-wave ground effect, homogeneous) | PE relative level at 500 m over grassland vs Weyl-Van der Pol, dB | -13.919 dB (+/-0.5 dB) | -13.842 dB | 0.077 dB | &#9989; |
+| Salomons Eq. (3.4) (GFPE vs spherical-wave ground effect, homogeneous) | PE relative level at 500 m over grassland vs Weyl-Van der Pol, dB | -16.368 dB (+/-0.5 dB) | -16.402 dB | -0.035 dB | &#9989; |
 | Salomons Eq. (3.4) (GFPE hard ground vs two-ray, homogeneous) | PE relative level at 500 m over a rigid ground vs the coherent two-ray, dB | 5.997 dB (+/-0.6 dB) | 5.593 dB | -0.405 dB | &#9989; |
 
 </details>

@@ -5777,8 +5777,24 @@ def _chk_hard_ground_6db() -> Outcome:
     "Re(Rp) at grazing (hs, hr -> 0, cos(theta) -> 0 so Rp -> -1)",
 )
 def _chk_grazing_rp_minus_one() -> Outcome:
-    res = ph.ground_effect([500.0], 1e-4, 1e-4, 100.0, impedance=12.0 - 6.0j)
+    res = ph.ground_effect([500.0], 1e-4, 1e-4, 100.0, impedance=12.0 + 6.0j)
     return numeric(-1.0, float(res.plane_reflection_coefficient[0].real), 1e-3)
+
+
+@register(
+    _GROUND_BARRIERS,
+    "Salomons 2001 Fig. D.3 (grassland ground dip, sigma = 200 kPa s/m2)",
+    "Minimum dL for hs = hr = 2 m, r = 100 m (dip near 395 Hz), dB",
+)
+def _chk_salomons_fig_d3_dip() -> Outcome:
+    freqs = [float(f) for f in range(380, 411)]
+    with warnings.catch_warnings():
+        # The bands sit below the Delany-Bazley published fit range for this
+        # sigma; the model extrapolates there by design (Salomons Sec. 3.1).
+        warnings.simplefilter("ignore")
+        res = ph.ground_effect(freqs, 2.0, 2.0, 100.0, flow_resistivity=2e5)
+    return numeric(-12.7, float(res.excess_attenuation.min()), 0.3, unit="dB",
+                   places=2)
 
 
 @register(
@@ -5977,7 +5993,7 @@ def _chk_atm_ray_turning() -> Outcome:
     "PE relative level at 500 m over grassland vs Weyl-Van der Pol, dB",
 )
 def _chk_atm_pe_ground_effect() -> Outcome:
-    freq, zs, zr, z = 250.0, 1.0, 1.0, 11.0 - 8.0j
+    freq, zs, zr, z = 250.0, 1.0, 1.0, 11.0 + 8.0j
     flat = ph.linear_sound_speed_profile(1e-12, ground_speed=343.0, max_height=200.0)
     pe = ph.atmospheric_parabolic_equation(freq, flat, source_height=zs,
                                            impedance=z, max_range=520.0,

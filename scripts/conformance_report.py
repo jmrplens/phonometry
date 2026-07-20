@@ -5862,10 +5862,11 @@ def _chk_junction_reciprocity() -> Outcome:
     return numeric(chi, fwd / rev, 1e-6)
 
 
-@register(_JUNCTION, "Hopkins Eq. 5.116 (identical plates)",
+@register(_JUNCTION, "Hopkins Eq. 5.116 (identical plates, fc_j = f_ref)",
           "X-junction vibration reduction index = 10 lg(12)")
 def _chk_junction_kij() -> Outcome:
-    kij = float(ph.wave_vibration_reduction_index(1.0 / 12.0))
+    # fc_j = f_ref = 1000 Hz cancels the 5 lg(fc_j / f_ref) correction term.
+    kij = float(ph.wave_vibration_reduction_index(1.0 / 12.0, 1000.0))
     return numeric(10.0 * math.log10(12.0), kij, 1e-6, unit="dB")
 
 

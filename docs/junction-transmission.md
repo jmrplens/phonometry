@@ -140,18 +140,24 @@ plate `i` of area `S_i`, bending-wave group velocity `cg_i` and junction length
 and the wave-approach **vibration reduction index** (Eq. 5.116) is
 
 ```
-Kij = 10 lg(1 / τij) + 5 lg(fc_j / fc_i)
+Kij = 10 lg(1 / τij) + 5 lg(fc_j / f_ref),   f_ref = 1000 Hz
 ```
 
-which for identical plates reduces to `Kij = 10 lg(1 / τij)` — for the
-identical X-junction, `10 lg 12 ≈ 10.8 dB`.
+with `fc_j` the critical frequency of the *receiving* plate. Combined with the
+Eq. 5.7 reciprocity this form is symmetric, `Kij = Kji`, as EN 12354 requires
+of the junction descriptor. For the identical 100 mm concrete X-junction
+(`fc ≈ 203 Hz`), `Kij = 10 lg 12 + 5 lg(203 / 1000) ≈ 7.3 dB`.
 
 ```python
-from phonometry import coupling_loss_factor, wave_vibration_reduction_index
+from phonometry import (coupling_loss_factor, junction_transmission,
+                        wave_vibration_reduction_index)
 
 eta = coupling_loss_factor(1.0 / 12.0, group_velocity=200.0,
                            junction_length=4.0, frequency=500.0, plate_area=10.0)
-kij = wave_vibration_reduction_index(1.0 / 12.0)  # 10.79 dB
+res = junction_transmission("X", 0.1, 3200.0, 240.0, 0.1, 3200.0, 240.0)
+kij = wave_vibration_reduction_index(res.corner_average,
+                                     res.critical_frequency2)  # 7.33 dB
+kij = res.corner_reduction_index  # the same, precomputed on the result
 ```
 
 The measured, EN 12354 counterpart of `Kij` (from the direction-averaged

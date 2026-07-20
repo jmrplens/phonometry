@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `vibration.wave_vibration_reduction_index` now implements Hopkins (2007)
+  Eq. 5.116 exactly: `Kij = 10 lg(1/tau_ij) + 5 lg(fc_j/f_ref)` with the
+  reference frequency `f_ref = 1000 Hz`, instead of the previous
+  `5 lg(fc_j/fc_i)` correction term. The old form broke the required symmetry
+  of the junction descriptor (`Kij = Kji`, guaranteed by the Eq. 5.7
+  reciprocity of the angular-average transmission coefficients): an L-junction
+  of 100 mm and 215 mm concrete plates returned 6.81 dB in one direction and
+  8.09 dB in the other where the correct symmetric value is 2.97 dB. The
+  function signature changed accordingly (it now takes the receiving plate's
+  `critical_frequency_receiver` instead of the optional source/receiver pair),
+  `junction_transmission` computes both plates' thin-plate critical frequencies
+  (`fc = sqrt(12) c0^2 / (2 pi h cL)`, `c0 = 343 m/s`) and stores them on
+  `JunctionTransmissionResult.critical_frequency1`/`critical_frequency2`, and
+  `corner_reduction_index` uses the receiving plate's value.
+
 ### Changed
 
 - Raised the `scipy` floor in `pyproject.toml` to the current release

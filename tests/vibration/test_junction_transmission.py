@@ -30,7 +30,9 @@ independent of the implementation:
 * **Reciprocity** (SEA consistency, Eq. 5.7): for the X- and L-junctions the two
   directions must satisfy ``tau_bar_12 = chi tau_bar_21`` exactly.
 * **Cut-off**: the corner coefficient is ``0`` for ``chi < sin(theta)``.
-* **Kij** (Eq. 5.116) with equal critical frequencies is ``10 lg(1 / tau)``.
+* **Kij** (Eq. 5.116) is ``10 lg(1 / tau) + 5 lg(fc_j / f_ref)`` with
+  ``f_ref = 1000 Hz``; combined with the Eq. 5.7 reciprocity it must be
+  symmetric, ``K_ij = K_ji``, for every plate pair and junction type.
 """
 
 from __future__ import annotations
@@ -270,25 +272,84 @@ def test_coupling_loss_factor_broadcasts_over_frequency() -> None:
 # ---------------------------------------------------------------------------
 # Vibration reduction index (Hopkins Eq. 5.116).
 # ---------------------------------------------------------------------------
-def test_kij_identical_plates_is_ten_lg_inverse_tau() -> None:
-    # Identical plates -> fc_j = fc_i, so K = 10 lg(1/tau).
-    assert float(wave_vibration_reduction_index(1.0 / 12.0)) == pytest.approx(
+def _critical_frequency_oracle(thickness: float, wave_speed: float) -> float:
+    # Thin plate: fc = sqrt(12) c0**2 / (2 pi h cL), c0 = 343 m/s.
+    return math.sqrt(12.0) * 343.0**2 / (2.0 * math.pi * thickness * wave_speed)
+
+
+def test_kij_closed_form() -> None:
+    # K = 10 lg(1/tau) + 5 lg(fc_j / 1000), fc_j the receiving plate's fc.
+    tau, fcj = 0.05, 200.0
+    expected = 10.0 * math.log10(1.0 / tau) + 5.0 * math.log10(fcj / 1000.0)
+    assert float(wave_vibration_reduction_index(tau, fcj)) == pytest.approx(expected)
+
+
+def test_kij_at_reference_frequency_is_ten_lg_inverse_tau() -> None:
+    # fc_j = f_ref = 1000 Hz makes the correction term vanish.
+    assert float(wave_vibration_reduction_index(1.0 / 12.0, 1000.0)) == pytest.approx(
         10.0 * math.log10(12.0)
     )
-    assert float(wave_vibration_reduction_index(1.0 / 3.0)) == pytest.approx(
+    assert float(wave_vibration_reduction_index(1.0 / 3.0, 1000.0)) == pytest.approx(
         10.0 * math.log10(3.0)
     )
 
 
-def test_kij_with_critical_frequency_term() -> None:
-    tau, fci, fcj = 0.05, 100.0, 200.0
-    expected = 10.0 * math.log10(1.0 / tau) + 5.0 * math.log10(fcj / fci)
-    assert float(wave_vibration_reduction_index(tau, fci, fcj)) == pytest.approx(expected)
+def test_kij_identical_plates_uses_common_critical_frequency() -> None:
+    # Identical plates: K = 10 lg(1/tau) + 5 lg(fc/1000) with the common fc.
+    fc = _critical_frequency_oracle(0.1, 3200.0)
+    res = junction_transmission("X", 0.1, 3200.0, 240.0, 0.1, 3200.0, 240.0)
+    expected = 10.0 * math.log10(12.0) + 5.0 * math.log10(fc / 1000.0)
+    assert res.corner_reduction_index == pytest.approx(expected)
 
 
-def test_kij_requires_both_or_neither_frequency() -> None:
+def test_kij_rejects_nonpositive_critical_frequency() -> None:
     with pytest.raises(ValueError):
-        wave_vibration_reduction_index(0.1, 100.0, None)
+        wave_vibration_reduction_index(0.1, 0.0)
+    with pytest.raises(ValueError):
+        wave_vibration_reduction_index(0.1, -100.0)
+
+
+def test_kij_l_junction_concrete_oracle_is_symmetric() -> None:
+    # 100 mm (cL 3800, 220 kg/m^2) / 215 mm (cL 3200, 430 kg/m^2) concrete
+    # L-junction: hand evaluation of Eqs 5.6 + 5.12 + 5.116 gives
+    # K_12 = K_21 = 2.966 dB.
+    plate_a = (0.100, 3800.0, 220.0)
+    plate_b = (0.215, 3200.0, 430.0)
+    k_ab = junction_transmission("L", *plate_a, *plate_b).corner_reduction_index
+    k_ba = junction_transmission("L", *plate_b, *plate_a).corner_reduction_index
+    assert k_ab == pytest.approx(k_ba, abs=1e-9)
+    assert k_ab == pytest.approx(2.9664, abs=1e-3)
+
+
+# For a T-junction the reverse direction swaps the junction constants:
+# T1 sends plate 1 (a through plate) into the perpendicular plate 2, so the
+# return path 2 -> 1 is a T2 corner, and vice versa.
+_REVERSE_JUNCTION = {"X": "X", "L": "L", "T1": "T2", "T2": "T1"}
+
+
+@pytest.mark.parametrize("junction", ["X", "L", "T1", "T2"])
+def test_kij_symmetry_over_random_plate_pairs(junction: str) -> None:
+    # Eq. 5.116 with f_ref = 1000 Hz and the Eq. 5.7 reciprocity of the
+    # angular-average tau make K_ij = K_ji for every plate pair.
+    rng = np.random.default_rng(20260721)
+    for _ in range(10):
+        plate_a = (
+            float(rng.uniform(0.05, 0.30)),
+            float(rng.uniform(1500.0, 4000.0)),
+            float(rng.uniform(100.0, 600.0)),
+        )
+        plate_b = (
+            float(rng.uniform(0.05, 0.30)),
+            float(rng.uniform(1500.0, 4000.0)),
+            float(rng.uniform(100.0, 600.0)),
+        )
+        k_ab = junction_transmission(
+            junction, *plate_a, *plate_b
+        ).corner_reduction_index
+        k_ba = junction_transmission(
+            _REVERSE_JUNCTION[junction], *plate_b, *plate_a
+        ).corner_reduction_index
+        assert k_ab == pytest.approx(k_ba, abs=1e-9)
 
 
 # ---------------------------------------------------------------------------
@@ -303,7 +364,12 @@ def test_result_identical_x() -> None:
     assert res.corner_average == pytest.approx(1.0 / 12.0)
     assert res.straight_average == pytest.approx(1.0 / 12.0)
     assert res.corner[0] == pytest.approx(0.125)
-    assert res.corner_reduction_index == pytest.approx(10.0 * math.log10(12.0))
+    fc = _critical_frequency_oracle(0.1, 3200.0)
+    assert res.critical_frequency1 == pytest.approx(fc)
+    assert res.critical_frequency2 == pytest.approx(fc)
+    assert res.corner_reduction_index == pytest.approx(
+        10.0 * math.log10(12.0) + 5.0 * math.log10(fc / 1000.0)
+    )
 
 
 def test_result_l_has_no_straight_section() -> None:

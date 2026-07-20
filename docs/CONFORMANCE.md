@@ -734,7 +734,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Hopkins Eqs 5.12 + 5.6 (identical plates) | L-junction corner angular average = 1/3 | 0.3333 (+/-0) | 0.3333 | 0 | &#9989; |
 | Hopkins Eq. 5.14 (identical plates) | In-line junction tau12(0 deg) = 1 | 1 (+/-0) | 1 | 0 | &#9989; |
 | Hopkins Eq. 5.7 (SEA consistency) | X-junction reciprocity tau_bar_12 / tau_bar_21 = chi | 1.5 (+/-0) | 1.5 | 0 | &#9989; |
-| Hopkins Eq. 5.116 (identical plates) | X-junction vibration reduction index = 10 lg(12) | 10.7918 dB (+/-0 dB) | 10.7918 dB | 0 dB | &#9989; |
+| Hopkins Eq. 5.116 (identical plates, fc_j = f_ref) | X-junction vibration reduction index = 10 lg(12) | 10.7918 dB (+/-0 dB) | 10.7918 dB | 0 dB | &#9989; |
 
 </details>
 

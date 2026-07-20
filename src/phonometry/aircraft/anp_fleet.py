@@ -94,11 +94,15 @@ def _pick(name: str, tables: "Mapping[str, str]") -> str:
     Accepts both the archive naming (``ANP2.3_NPD_data.csv``) and the curated
     subset naming (``NPD_data.csv``).
     """
-    for filename, text in tables.items():
-        if name in filename.lower():
-            return text
-    raise FileNotFoundError(
-        f"no ANP table matching {name!r} found (looked in: {sorted(tables)}).")
+    matches = [f for f in tables if name in f.lower()]
+    if len(matches) > 1:
+        raise ValueError(
+            f"ambiguous ANP table for {name!r}: {sorted(matches)}. Keep a single "
+            f"file per table in the export directory.")
+    if not matches:
+        raise FileNotFoundError(
+            f"no ANP table matching {name!r} found (looked in: {sorted(tables)}).")
+    return tables[matches[0]]
 
 
 def _distances_m(header: "Iterable[str]") -> "NDArray[np.float64]":
@@ -110,7 +114,11 @@ def _distances_m(header: "Iterable[str]") -> "NDArray[np.float64]":
             dist_ft.append(float(c[2:-2]))
     if len(dist_ft) < 2:
         raise ValueError("NPD table has fewer than two 'L_<ft>ft' distance columns.")
-    return np.asarray(dist_ft, dtype=np.float64) * _FT_M
+    distances = np.asarray(dist_ft, dtype=np.float64) * _FT_M
+    if np.any(np.diff(distances) <= 0.0):
+        raise ValueError("NPD 'L_<ft>ft' distance columns must be strictly increasing.")
+    distances.flags.writeable = False  # shared across every AnpNpdCurves
+    return distances
 
 
 @dataclass(frozen=True)
@@ -125,6 +133,9 @@ class AnpNpdCurves:
     :ivar powers: Tabulated engine power settings (1-D, strictly increasing).
     :ivar distances: Tabulated slant distances, in metres (1-D, strictly increasing).
     :ivar levels: Tabulated event levels, shape ``(len(powers), len(distances))``, in dB.
+
+    The ``powers``, ``distances`` and ``levels`` arrays are read-only views shared
+    with the parent database; copy them before mutating.
     """
 
     aircraft_id: str
@@ -167,6 +178,9 @@ class AnpProfile:
         lateral, altitude), engine power setting and true airspeed (m/s).
     :ivar ground_roll: Boolean mask (length ``N-1``) of takeoff ground-roll segments.
     :ivar landing_roll: Boolean mask (length ``N-1``) of landing rollout segments.
+
+    ``path`` is a read-only view shared with the parent database; copy it before
+    mutating.
     """
 
     aircraft_id: str
@@ -321,8 +335,13 @@ class AnpDatabase:
         :param operation: ``"departure"``/``"D"`` or ``"arrival"``/``"A"``.
         :param stage_length: ANP stage length (default 1).
         :return: An :class:`AnpProfile` (a Doc 29 flight path with ground-roll masks).
-        :raises KeyError: If the aircraft has no fixed-point profile for the request.
+        :raises KeyError: If the aircraft is unknown or has no fixed-point profile
+            for the request.
         """
+        if aircraft_id not in self._aircraft:
+            raise KeyError(
+                f"aircraft {aircraft_id!r} not in this ANP database "
+                f"(available: {self.aircraft_ids}).")
         op = _operation_code(operation)
         key = (aircraft_id, op, int(stage_length))
         if key not in self._profiles:
@@ -354,6 +373,14 @@ class AnpDatabase:
         prof = self.profile(aircraft_id, operation, stage_length)
         sel = self.npd_curves(aircraft_id, operation, "SEL")
         lmax = self.npd_curves(aircraft_id, operation, "LAmax")
+        # The Doc 29 chain reads SEL and LAmax on a single (power, distance) grid,
+        # so the two metrics must share power settings. They always do in the ANP
+        # database; this guards a malformed user-supplied export.
+        if not np.array_equal(sel.powers, lmax.powers):
+            raise ValueError(
+                f"SEL and LAmax NPD power settings differ for aircraft "
+                f"{aircraft_id!r}, operation {operation!r}: {sel.powers} vs "
+                f"{lmax.powers}.")
         return acft, prof, sel.powers, sel.distances, sel.levels, lmax.levels
 
     def event_level(
@@ -420,7 +447,8 @@ def _read_tables(path: "Path | str | None") -> "dict[str, str]":
         out: dict[str, str] = {}
         for entry in root.iterdir():
             if entry.name.lower().endswith(".csv"):
-                out[entry.name] = entry.read_text(encoding="utf-8")
+                # utf-8-sig tolerates a leading BOM in exported ANP CSVs.
+                out[entry.name] = entry.read_text(encoding="utf-8-sig")
         return out
     import pathlib
 
@@ -430,7 +458,7 @@ def _read_tables(path: "Path | str | None") -> "dict[str, str]":
     files_found = sorted(directory.glob("*.csv")) + sorted(directory.glob("*.CSV"))
     if not files_found:
         raise FileNotFoundError(f"no .csv ANP tables found in {path!r}.")
-    return {f.name: f.read_text(encoding="utf-8") for f in files_found}
+    return {f.name: f.read_text(encoding="utf-8-sig") for f in files_found}
 
 
 def _parse_npd(
@@ -456,6 +484,8 @@ def _parse_npd(
         entries.sort(key=lambda e: e[0])
         powers = np.asarray([e[0] for e in entries], dtype=np.float64)
         levels_arr = np.asarray([e[1] for e in entries], dtype=np.float64)
+        powers.flags.writeable = False  # exposed by reference on AnpNpdCurves
+        levels_arr.flags.writeable = False
         npd[key] = (powers, levels_arr)
     return npd, distances
 
@@ -483,7 +513,9 @@ def _parse_profiles(
     profiles: dict[tuple[str, str, int], tuple[str, NDArray[np.float64]]] = {}
     for key, pts in grouped.items():
         pts.sort(key=lambda e: e[0])
-        profiles[key] = (label[key], np.asarray([p[1] for p in pts], dtype=np.float64))
+        path = np.asarray([p[1] for p in pts], dtype=np.float64)
+        path.flags.writeable = False  # exposed by reference on AnpProfile
+        profiles[key] = (label[key], path)
     return profiles
 
 
@@ -561,7 +593,12 @@ def _plot_profile(result: AnpProfile, ax: "Axes | None", *,
     x_km = result.path[:, 0] / 1000.0
     z_m = result.path[:, 2]
     ax.plot(x_km, z_m, "-o", ms=3, lw=1.5, **kwargs)
-    roll = np.concatenate([result.ground_roll | result.landing_roll, [False]])
+    # Highlight the runway points: both endpoints of every roll segment, so the
+    # final point of a roll span is not dropped (the masks are per-segment).
+    seg = result.ground_roll | result.landing_roll
+    roll = np.zeros(result.path.shape[0], dtype=bool)
+    roll[:-1] |= seg
+    roll[1:] |= seg
     if roll.any():
         ax.plot(x_km[roll], z_m[roll], "s", ms=6, color="tab:red",
                 label=lab["ground_roll"])

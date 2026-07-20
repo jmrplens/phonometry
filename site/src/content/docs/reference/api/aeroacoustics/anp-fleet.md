@@ -282,7 +282,7 @@ Default fixed-point trajectory for an aircraft, operation and stage length.
 
 | Exception | When |
 | :--- | :--- |
-| KeyError | If the aircraft has no fixed-point profile for the request. |
+| KeyError | If the aircraft is unknown or has no fixed-point profile for the request. |
 
 ## AnpNpdCurves
 
@@ -313,6 +313,9 @@ ANP Noise-Power-Distance curves for one aircraft, metric and operation.
 | `powers` | Tabulated engine power settings (1-D, strictly increasing). |
 | `distances` | Tabulated slant distances, in metres (1-D, strictly increasing). |
 | `levels` | Tabulated event levels, shape `(len(powers), len(distances))`, in dB. |
+
+The `powers`, `distances` and `levels` arrays are read-only views shared
+with the parent database; copy them before mutating.
 
 ### AnpNpdCurves.level()
 
@@ -374,6 +377,9 @@ Default fixed-point trajectory of an ANP aircraft as a Doc 29 flight path.
 | `path` | Flight-path points, shape `(N, 5)`: `x, y, z` (m, along-track, lateral, altitude), engine power setting and true airspeed (m/s). |
 | `ground_roll` | Boolean mask (length `N-1`) of takeoff ground-roll segments. |
 | `landing_roll` | Boolean mask (length `N-1`) of landing rollout segments. |
+
+`path` is a read-only view shared with the parent database; copy it before
+mutating.
 
 ### AnpProfile.plot()
 

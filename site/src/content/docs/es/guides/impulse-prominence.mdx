@@ -156,7 +156,59 @@ plt.xscale("log"); plt.legend(); plt.show()
 
 </details>
 
-## 3. Dónde encaja el método entre las normas
+## 3. Medida objetiva a partir de una señal (ISO/PAS 1996-3)
+
+La NT ACOU 112 toma la tasa de crecimiento y la diferencia de nivel como
+entradas. La **ISO/PAS 1996-3:2022** conserva las mismas fórmulas de
+prominencia y ajuste, pero añade la *cadena de medida objetiva* que lee esas
+magnitudes directamente de una grabación calibrada. `impulsive_sound_adjustment`
+pondera la señal en A, aplica la ponderación temporal F ($\tau$ = 125 ms),
+muestrea el historial de nivel `LpAF` cada 10-25 ms, detecta cada arranque (el
+tramo contiguo cuyo gradiente supera 10 dB/s, fusionando eventos separados menos
+de 50 ms), mide su diferencia de nivel `LD = Le − Ls` y su tasa de crecimiento
+`OR` por mínimos cuadrados, y devuelve el ajuste determinante `KI` con la
+categoría de fuente de la cláusula 7: *no impulsiva* (`KI = 0`), *impulsiva
+regular* (`0 < KI ≤ 5`) o *altamente impulsiva* (`KI > 5`).
+
+La detección de arranques puede ejecutarse directamente sobre un historial de
+nivel con `detect_onsets`, cómodo para sonómetros que ya registran `LpAF`:
+
+```python
+import numpy as np
+from phonometry import environmental
+
+# Historial LpAF muestreado cada 20 ms: silencio, subida de 30 dB en 0,30 s, estable.
+dt = 0.02
+levels = np.concatenate([
+    np.full(10, 40.0),
+    40.0 + 30.0 * np.arange(1, 16) / 15,   # arranque recto de 100 dB/s hasta 70 dB
+    np.full(15, 70.0),
+])
+onset = environmental.detect_onsets(levels, dt)[0]
+print(round(onset.onset_rate), round(onset.level_difference))  # 100 30
+print(round(onset.prominence, 2))                              # 8.95
+```
+
+Desde una señal temporal calibrada (en pascales) la cadena completa se ejecuta
+de principio a fin:
+
+```python
+result = environmental.impulsive_sound_adjustment(signal, fs)
+print(result.category)                  # p. ej. 'highly impulsive'
+print(round(result.adjustment, 1))      # KI en dB (de 0,0 a unos 9 dB en casos típicos)
+print(round(result.adjusted_laeq, 1))   # LAeq + KI
+```
+
+Como la tasa de crecimiento y la diferencia de nivel son *diferencias* de
+nivel, el ajuste es insensible a la calibración absoluta del sonómetro
+(cláusula 8); solo el `LAeq` reportado y el `LAeq` ajustado dependen de ella. El
+alcance del documento indica que el ajuste suele quedar entre 0,0 dB y 9,0 dB;
+la propia fórmula no está acotada, así que un impulso muy súbito e intenso puede
+superar ese rango. `ImpulsiveSoundResult.plot()` dibuja el historial `LpAF` con
+los arranques detectados, las rectas de arranque por mínimos cuadrados y la
+diferencia de nivel determinante marcadas.
+
+## 4. Dónde encaja el método entre las normas
 
 Las normas de evaluación tratan tradicionalmente la impulsividad por
 categorías, no por medición. La ISO 1996-1:2016 (Tabla A.1) suma 5 dB fijos
@@ -184,3 +236,4 @@ añade sobre el `LAeq` medido en el nivel de evaluación, nunca lo sustituye.
 ## Véase también
 
 - Referencia de la API: [`environmental.impulse_prominence`](/phonometry/es/reference/api/environment/impulse-prominence/).
+- Referencia de la API: [`environmental.impulsive_sound`](/phonometry/es/reference/api/environment/impulsive-sound/).

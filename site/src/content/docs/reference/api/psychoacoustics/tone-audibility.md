@@ -45,8 +45,8 @@ running mean, with the −1.76 dB Hanning bandwidth correction), and
 against the parent standard DIN 45681:2005-03.
 
 **Whole-spectrum detection.** [`analyze_spectrum`](/phonometry/reference/api/psychoacoustics/tone-audibility/#analyze_spectrum) runs the full front-end
-over a spectrum — mean narrow-band level per line, peak detection (Clause 5.3.8
-Step 1), tone level, the distinctness test (Clause 5.3.4) and audibility — and
+over a spectrum (mean narrow-band level per line, peak detection (Clause 5.3.8
+Step 1), tone level, the distinctness test (Clause 5.3.4) and audibility) and
 returns the distinct, audible tones. It then applies Step 3: tones sharing a
 critical band have their tone levels energy-summed (Formula (17), via
 [`combined_tone_level`](/phonometry/reference/api/psychoacoustics/tone-audibility/#combined_tone_level), shared lines counted once) into an "FG" entry
@@ -63,7 +63,7 @@ both lie below 1000 Hz, the ear can still resolve them if their spacing exceeds
 `fD = 21·10^(1.2·|lg(fT/212)|^1.8)` Hz (Formulae (18)/(19)); they are then
 rated separately instead of combined. [`two_tone_separation_frequency`](/phonometry/reference/api/psychoacoustics/tone-audibility/#two_tone_separation_frequency) and
 [`resolve_tones_separately`](/phonometry/reference/api/psychoacoustics/tone-audibility/#resolve_tones_separately) implement this branch (Clause 5.3.8), which no
-ISO/PAS 20065 worked example exercises — it is verified against the DIN 45681
+ISO/PAS 20065 worked example exercises; it is verified against the DIN 45681
 Annex J reference program rather than a numeric oracle.
 
 **Uncertainty (Clauses 5.4/6).** [`audibility_uncertainty`](/phonometry/reference/api/psychoacoustics/tone-audibility/#audibility_uncertainty) propagates the
@@ -76,7 +76,7 @@ averaged, the extended uncertainty **shall** be taken into consideration.
 
 **A-weighting.** Clause 5.3.2: unweighted narrow-band spectra "shall" be
 A-weighted per IEC 61672-1 before the analysis. This module is
-weighting-agnostic — pass A-weighted levels (the Annex E oracles are
+weighting-agnostic: pass A-weighted levels (the Annex E oracles are
 A-weighted); it does not apply the weighting itself.
 
 **Application frequency range.** The functions accept any positive tone
@@ -114,7 +114,7 @@ with a positive audibility are returned, bundled by [`assess_tones`](/phonometry
 **Same-band combination (Step 3).** When several audible tones fall in one
 critical band, the clause *requires* their tone levels to be energy-summed
 (Formula (17), shared lines counted once) and the audibility recomputed at
-the frequency of the most audible member — unless *exactly two* tones below
+the frequency of the most audible member, unless *exactly two* tones below
 1000 Hz are spaced further apart than the separation frequency `fD`
 (Formulae (18)/(19)), in which case they stay rated separately. The result
 therefore contains the individual audible tones *plus* one combined "FG"
@@ -124,7 +124,7 @@ entry per multi-tone critical band, mirroring the DIN 45681 Annex I tables;
 (Step 4) is the maximum over all entries, FG entries included.
 
 Reproducing a decisive audibility exactly requires the *complete*
-narrow-band spectrum — a spectrum truncated to a single critical band gives
+narrow-band spectrum; a spectrum truncated to a single critical band gives
 the wrong mean narrow-band level for tones near its edges.
 
 **Parameters**
@@ -288,7 +288,7 @@ combined_tone_level(
 
 Combined tone level `LT` of several tones in one critical band (Formula (17)).
 
-`LTm = 10·lg(Σ 10^(LTm,n/10))` — the energy sum of the tonal lines of all
+`LTm = 10·lg(Σ 10^(LTm,n/10))`, the energy sum of the tonal lines of all
 the tones, each spectral line counted at most once. Use it when more than one
 audible tone falls in a critical band (Clause 5.3.8 Step 3); the group is
 then rated at the frequency of its most audible tone.
@@ -765,15 +765,15 @@ Frequency-difference threshold `fD` for resolving two tones (Formula (19)).
 
 `fD = 21·10^(1.2·|lg(fT/212)|^1.8)` Hz. When *exactly two* tones fall in one
 critical band and both lie below 1000 Hz, the human ear can still tell them
-apart — and they are then rated *separately* rather than combined into a
-single "FG" tone (Formula (17)) — if their frequency difference
+apart (they are then rated *separately* rather than combined into a
+single "FG" tone, Formula (17)) if their frequency difference
 `|fT1 − fT2|` (Formula (18)) exceeds this threshold. `fT` is the frequency
 of the more prominent tone (the larger audibility `ΔL`). The threshold is
 `21 Hz` at `fT = 212 Hz` and grows on either side; Formula (19) is
 stated for `50 Hz < fT < 1000 Hz` (Clause 5.3.8, Annex D, Note 3).
 
 :::note
-No numeric worked example exercises this branch — the Annex E
+No numeric worked example exercises this branch: the Annex E
 combustion-engine spectrum groups *three* tones in its critical band, so
 the "exactly two tones" rule never fires there. The formula and decision
 rule are implemented clean-room from the ISO/PAS 20065 text and verified

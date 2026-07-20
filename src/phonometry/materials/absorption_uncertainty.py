@@ -67,7 +67,7 @@ _REPEATABILITY_FACTOR = 0.6
 #: Measurement conditions selecting σR (reproducibility) or σr (repeatability).
 _CONDITIONS = ("reproducibility", "repeatability")
 
-#: Table 1 (Clause 5) — ``(m, n)`` for Formulae (1)/(2), keyed by one-third-octave
+#: Table 1 (Clause 5): ``(m, n)`` for Formulae (1)/(2), keyed by one-third-octave
 #: midband frequency in Hz (63-5000). Transcribed digit-for-digit from
 #: ISO 12999-2:2020, Table 1.
 _TABLE1: dict[float, tuple[float, float]] = {
@@ -93,7 +93,7 @@ _TABLE1: dict[float, tuple[float, float]] = {
     5000.0: (0.026, 0.060),
 }
 
-#: Table 2 (Clause 6) — ``(m, n)`` for Formula (4), keyed by octave midband
+#: Table 2 (Clause 6): ``(m, n)`` for Formula (4), keyed by octave midband
 #: frequency in Hz (250-4000). Transcribed from ISO 12999-2:2020, Table 2.
 _TABLE2: dict[float, tuple[float, float]] = {
     250.0: (0.059, 0.016),
@@ -109,7 +109,7 @@ _ALPHA_W_SIGMA: dict[str, float] = {"reproducibility": 0.035, "repeatability": 0
 #: Single-number rating ``DLα,NRD`` scale factors (Clause 7, Formulae (8)/(9)).
 _DLALPHA_FACTOR: dict[str, float] = {"reproducibility": 0.10, "repeatability": 0.02}
 
-#: Table 3 (Clause 8) — coverage factors ``k`` for a Gaussian measurand, keyed by
+#: Table 3 (Clause 8): coverage factors ``k`` for a Gaussian measurand, keyed by
 #: confidence level as a fraction. Values are the standard's rounded factors
 #: (1,0 / 1,3 / 1,6 / 2,0 / 2,6 / 3,3), which differ from the Gaussian-exact
 #: factors of ISO 12999-1 Table 8.

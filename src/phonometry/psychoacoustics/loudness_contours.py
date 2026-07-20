@@ -86,7 +86,7 @@ def equal_loudness_contour(phon: float) -> Tuple[np.ndarray, np.ndarray]:
     frequencies of Table 1.
 
     Validity (clause 4.1): 20 phon to 90 phon between 20 Hz and 4 kHz, and
-    up to 80 phon between 5 kHz and 12.5 kHz — above 80 phon the returned
+    up to 80 phon between 5 kHz and 12.5 kHz; above 80 phon the returned
     contour therefore stops at 4 kHz.
 
     :param phon: Loudness level in phons (20 to 90).

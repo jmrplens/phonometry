@@ -7,7 +7,7 @@ source with a **noise hemisphere**: one-third-octave-band sound pressure levels 
 a spherical grid of azimuth ``φ`` and polar angle ``θ`` at a fixed 60 m reference
 distance (at ICAO reference atmospheric conditions). Placing that source at a
 receiver adds the propagation adjustment ``ΔLp = ΔLs + ΔLa + ΔLg (+ ΔLd)``
-(spherical spreading, atmospheric absorption, ground effect and — later — shielding).
+(spherical spreading, atmospheric absorption, ground effect and, later, shielding).
 
 This module provides the source and propagation primitives and the single-event
 method built on them (clean-room, from the NORAH2 guidance SC01.D1.5d, the basis

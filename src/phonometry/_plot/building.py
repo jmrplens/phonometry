@@ -563,8 +563,8 @@ def plot_impact_prediction(
 ) -> Axes:
     """Terms of the apparent impact-level prediction (EN 12354-2).
 
-    Bars for the Formula 21 terms — the bare-floor equivalent level, the
-    covering improvement, the flanking correction — and the resulting
+    Bars for the Formula 21 terms (the bare-floor equivalent level, the
+    covering improvement, the flanking correction) and the resulting
     apparent level ``L'n,w = Ln,w,eq - DLw + K``.
 
     :param result: An

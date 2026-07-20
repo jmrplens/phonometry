@@ -1,6 +1,6 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-Occupational noise exposure — measurement strategies and uncertainty (ISO 9612:2009).
+Occupational noise exposure: measurement strategies and uncertainty (ISO 9612:2009).
 
 ISO 9612:2009 is the engineering method (accuracy grade 2) for determining a
 worker's daily noise exposure level ``LEX,8h`` from measurements of the
@@ -21,7 +21,7 @@ the normative **Annex C** uncertainty budget.
   ``LEX,8h = Lp,A,eqTe + 10 lg(Te/T0)`` (Eq 12). The minimum cumulative
   measurement duration follows Table 1.
 - *Full-day* (Clause 11): three (or more) whole-day measurements averaged (Eq 11),
-  then Eq 13 — the same arithmetic as the job method.
+  then Eq 13, the same arithmetic as the job method.
 
 **Uncertainty (Annex C, normative).** Combined ``u^2 = sum c_i^2 u_i^2`` (C.1),
 expanded ``U = k*u`` with ``k = 1.65`` for a one-sided 95 % confidence interval
@@ -63,7 +63,7 @@ COVERAGE_FACTOR: float = 1.65
 #: Microphone-position standard uncertainty u3 (Clause C.6), dB.
 _U3_DEFAULT: float = 1.0
 
-#: 10/ln(10) — converts a natural-log derivative to dB (the 4.34 of Eq C.5).
+#: 10/ln(10), which converts a natural-log derivative to dB (the 4.34 of Eq C.5).
 _C5_FACTOR: float = 10.0 / np.log(10.0)  # = 4.3429...
 
 InstrumentClass = Literal["class1", "class2", "personal_exposimeter"]
@@ -81,7 +81,7 @@ class OccupationalExposureWarning(PhonometryWarning):
 
 
 # --------------------------------------------------------------------------- #
-# Table C.4 — uncertainty contribution c1*u1 (dB) for job/full-day sampling,
+# Table C.4: uncertainty contribution c1*u1 (dB) for job/full-day sampling,
 # as a function of the number of samples N and the standard uncertainty u1.
 # --------------------------------------------------------------------------- #
 _C4_U1_AXIS: Tuple[float, ...] = (0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0)
@@ -258,7 +258,7 @@ class ExposureResult:
     :ivar expanded_uncertainty: Expanded uncertainty ``U = 1.65*u`` for a
         one-sided 95 % confidence interval, dB.
     :ivar strategy: ``"task"``, ``"job"`` or ``"full_day"``.
-    :ivar upper_limit: ``LEX,8h + U`` — the value 95 % of readings fall below.
+    :ivar upper_limit: ``LEX,8h + U``, the value 95 % of readings fall below.
     """
 
     lex_8h: float
@@ -296,7 +296,7 @@ class ExposureResult:
 
 
 # --------------------------------------------------------------------------- #
-# Strategy 1 — task-based (Clauses 9 and C.2).
+# Strategy 1: task-based (Clauses 9 and C.2).
 # --------------------------------------------------------------------------- #
 def task_based_exposure(
     tasks: Sequence[Task],
@@ -413,7 +413,7 @@ def task_based_exposure(
 
 
 # --------------------------------------------------------------------------- #
-# Strategies 2 and 3 — job-based (Clauses 10, C.3) and full-day (Clauses 11, C.4).
+# Strategies 2 and 3: job-based (Clauses 10, C.3) and full-day (Clauses 11, C.4).
 # --------------------------------------------------------------------------- #
 def _sampled_exposure(
     samples: Sequence[float],

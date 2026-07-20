@@ -1,0 +1,4 @@
+ACFT_ID;Description;Engine Type;Number Of Engines;Weight Class;Owner Category;Max Gross Takeoff Weight (lb);Max Gross Landing Weight (lb);Max Landing Distance (ft);Max Sea Level Static Thrust (lb);Noise Chapter;NPD_ID;Power Parameter;Approach Spectral Class ID;Departure Spectral Class ID;Lateral Directivity Identifier
+747100;Boeing 747-100 / JT9DBD;Jet;4;Heavy;Commercial;733000;516600;5727;33042;2;JT9DBD;CNT (lb);209;107;Wing
+727200;Boeing 727-200 / JT8D-7;Jet;3;Large;Commercial;217600;163300;5571;11895;1;3JT8D;CNT (lb);201;101;Fuselage
+PA31;Piper Navajo Chieftain PA-31-350 / TIO-5;Piston;2;Small;General Aviation;7000;7000;1850;1481;0;TIO542;Other (RPM);213;109;Prop

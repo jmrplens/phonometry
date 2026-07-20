@@ -243,7 +243,7 @@ La distancia de distracción rD y la distancia de privacidad rP son las distanci
 
 ### Aislamiento en campo e índice ponderado (ISO 16283-1, ISO 717-1)
 
-Por banda de tercio de octava, la diferencia de niveles $D = L_1 - L_2$ (promediada en energía sobre las posiciones de micrófono, $L = 10 \log_{10}[(1/n) \sum_i 10^{L_i/10}]$) se normaliza de dos formas: la diferencia de niveles estandarizada $D_{nT} = D + 10 \log_{10}(T/T_0)$ con $T_0 = 0{,}5$ s (de modo que $D_{nT} = D$ cuando $T = T_0$), y el índice de reducción sonora aparente $R' = D + 10 \log_{10}(S/A)$ con el área de absorción de Sabine $A = 0{,}16\ V / T$, por tanto $R' = D + 10 \log_{10}[S T / (0{,}16\ V)]$.
+Por banda de tercio de octava, la diferencia de niveles $D = L_1 - L_2$ (promediada en energía sobre las posiciones de micrófono, $L = 10 \log_{10}[(1/n) \sum_i 10^{L_i/10}]$) se normaliza de dos formas: la diferencia de niveles estandarizada $D_{nT} = D + 10 \log_{10}(T/T_0)$ con $T_0 = 0{,}5$ s (de modo que $D_{nT} = D$ cuando $T = T_0$), y el índice de reducción acústica aparente $R' = D + 10 \log_{10}(S/A)$ con el área de absorción de Sabine $A = 0{,}16\ V / T$, por tanto $R' = D + 10 \log_{10}[S T / (0{,}16\ V)]$.
 
 El índice de un solo número (ISO 717-1, Cláusula 4.4) desplaza la **curva de referencia** de la Tabla 3 en pasos de 1 dB hacia la curva medida hasta que la suma de desviaciones *desfavorables* $\sum_i \max(0, \text{ref}_i + k - \text{meas}_i)$ es máxima pero $\le$ 32,0 dB (16 tercios) o 10,0 dB (5 octavas); el índice $R_w$ es la referencia desplazada a 500 Hz. Los **términos de adaptación espectral** son $C = X_{A1} - X_w$ y $C_{tr} = X_{A2} - X_w$ con $X_{Aj} = -10 \log_{10} \sum_i 10^{(L_{ij} - X_i)/10}$ (espectros de la Tabla 4: n.º 1 ruido rosa, n.º 2 tráfico urbano), cada uno redondeado a un entero. El ejemplo resuelto del Anexo C de ISO 717-1 ($R_w = 30$, $C = -2$, $C_{tr} = -3$, suma desfavorable 31,8 dB) se reproduce exactamente.
 
@@ -282,7 +282,7 @@ NOTA 2).
 Los índices de campo llevan una prima porque incluyen la transmisión por flancos
 alrededor del cerramiento; los índices de laboratorio no, porque una instalación
 cualificada la suprime. El álgebra es por lo demás idéntica, y difiere solo en
-qué magnitud se normaliza. El par a ruido aéreo es el índice de reducción sonora
+qué magnitud se normaliza. El par a ruido aéreo es el índice de reducción acústica
 directo de laboratorio $R = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 10140-2) frente
 al índice aparente de campo $R' = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 16283-1),
 la misma forma cerrada evaluada con el $A$ conocido de la instalación o el
@@ -296,7 +296,7 @@ medición) en 6 dB o por debajo y omitida en 15 dB o por encima (ISO 10140-4,
 Cláusula 4.3), el análogo de laboratorio de la regla 6/10 dB de ISO 16283-1. La
 extensión a fachadas (ISO 16283-3) sustituye el nivel de la sala emisora por el
 nivel 2 m frente a la fachada, $D_{2m} = L_{1,2m} - L_2$, y añade una corrección
-fija por ángulo de incidencia al índice de reducción sonora del elemento, $-1{,}5$
+fija por ángulo de incidencia al índice de reducción acústica del elemento, $-1{,}5$
 dB para el método del altavoz a 45° ($R'_{45°}$) y $-3$ dB para el método de
 tráfico rodado con todos los ángulos ($R'_{tr,s}$); los tres llevan el número
 único a ruido aéreo de ISO 717-1.
@@ -327,7 +327,7 @@ con $R_{i,w}$, $R_{j,w}$ los índices de laboratorio de los dos elementos que se
 encuentran en la unión ($i$ lado emisor, $j$ lado receptor), $\Delta R_{ij,w}$ la
 mejora combinada del trasdosado, $S_s$ la superficie del elemento separador,
 $l_f$ la longitud de acoplamiento de la unión y $l_0 = 1$ m la longitud de
-acoplamiento de referencia. $K_{ij}$ es el **índice de reducción vibracional** de
+acoplamiento de referencia. $K_{ij}$ es el **índice de reducción de vibraciones** de
 la unión (Anexo E), una función empírica de la relación de masas
 $M = \log_{10}(m'_{\perp,i}/m'_i)$: para una unión rígida en cruz
 $K_{13} = 8{,}7 + 17{,}1 M + 5{,}7 M^2$ (a través) y $K_{12} = 8{,}7 + 5{,}7 M^2$

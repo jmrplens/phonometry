@@ -1,6 +1,6 @@
 ---
 title: "Medio ambiente y transporte"
-description: "Descriptores ambientales, ajustes por sonidos impulsivos, propagación en exteriores, exposición laboral y determinación de la potencia sonora detrás de phonometry."
+description: "Descriptores ambientales, ajustes por sonidos impulsivos, propagación en exteriores, exposición laboral y determinación de la potencia acústica detrás de phonometry."
 references:
   - type: book
     authors: ["Salomons, E. M."]
@@ -107,7 +107,7 @@ references:
     note: "Los indicadores de campo y el criterio de capacidad dinámica compartidos por los métodos de barrido de intensidad."
 ---
 
-Esta página reúne la teoría del ruido ambiental y en exteriores: los descriptores de evaluación de jornada completa y el ajuste por sonidos impulsivos, la absorción atmosférica, el método general de propagación en exteriores, la exposición al ruido en el trabajo con su presupuesto de incertidumbre, y los métodos de determinación de la potencia sonora. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/).
+Esta página reúne la teoría del ruido ambiental y en exteriores: los descriptores de evaluación de jornada completa y el ajuste por sonidos impulsivos, la absorción atmosférica, el método general de propagación en exteriores, la exposición al ruido en el trabajo con su presupuesto de incertidumbre, y los métodos de determinación de la potencia acústica. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/).
 
 ## Descriptores ambientales (ISO 1996-1)
 
@@ -276,9 +276,9 @@ nivel efectivo de la jornada (véase la [guía de exposición al ruido en el tra
 Consulta la [guía de Propagación en exteriores](/phonometry/es/guides/outdoor-propagation/)
 y la [guía de exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/) para su uso.
 
-## Determinación de la potencia sonora (ISO 3744/3745/3746, ISO 3741, ISO 9614-2/3)
+## Determinación de la potencia acústica (ISO 3744/3745/3746, ISO 3741, ISO 9614-2/3)
 
-El nivel de potencia sonora $L_W = 10 \log_{10}(P/P_0)$ ($P_0 = 1$ pW) es una
+El nivel de potencia acústica $L_W = 10 \log_{10}(P/P_0)$ ($P_0 = 1$ pW) es una
 magnitud de *emisión*: a diferencia de un nivel de presión, no depende de la
 distancia al receptor ni de la sala. Tres familias de métodos lo recuperan.
 
@@ -386,4 +386,4 @@ marcan. Una intensidad normal uniforme recupera la potencia exactamente
 (100 µW sobre 3,75 m² → 80,0 dB re 1 pW), con independencia de cómo se
 segmente la superficie.
 
-Consulta la [guía de potencia sonora](/phonometry/es/guides/sound-power/) para su uso.
+Consulta la [guía de potencia acústica](/phonometry/es/guides/sound-power/) para su uso.

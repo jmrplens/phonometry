@@ -1,6 +1,6 @@
 ---
-title: "Potencia sonora"
-description: "Nivel de potencia sonora LW por cinco vías: presión sonora sobre superficie envolvente (ISO 3744/3746), el método de precisión en sala reverberante con las correcciones de Waterhouse y C1/C2 (ISO 3741), el barrido de intensidad con indicadores de campo y grado alcanzado (ISO 9614-2), el método de precisión en sala anecoica (ISO 3745) y el barrido de intensidad de precisión (ISO 9614-3)."
+title: "Potencia acústica"
+description: "Nivel de potencia acústica LW por cinco vías: presión sonora sobre superficie envolvente (ISO 3744/3746), el método de precisión en sala reverberante con las correcciones de Waterhouse y C1/C2 (ISO 3741), el barrido de intensidad con indicadores de campo y grado alcanzado (ISO 9614-2), el método de precisión en sala anecoica (ISO 3745) y el barrido de intensidad de precisión (ISO 9614-3)."
 references:
   - type: book
     authors: ["Fahy, F. J."]
@@ -72,7 +72,7 @@ import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La presión *sonora* depende de dónde te sitúes y de la sala en la que estés;
-la **potencia** sonora no. El nivel de potencia sonora `LW` es la energía
+la **potencia** sonora no. El nivel de potencia acústica `LW` es la energía
 acústica total por segundo que radia una fuente, referida a `P0 = 1 pW`, y es
 el descriptor de **emisión** independiente del dispositivo que figura en una
 ficha técnica, alimenta una predicción de sala (EN 12354) o se contrasta con
@@ -88,8 +88,8 @@ precisión (ISO 9614-3).
   name="anim_power_two_rooms"
   width={2400}
   height={1350}
-  title="La misma fuente, dos salas, una potencia sonora"
-  description="La misma fuente en una cámara anecoica y en una cámara reverberante produce presiones de micrófono distintas, y las fórmulas de campo libre y campo difuso convergen al mismo nivel de potencia sonora L_W."
+  title="La misma fuente, dos salas, una potencia acústica"
+  description="La misma fuente en una cámara anecoica y en una cámara reverberante produce presiones de micrófono distintas, y las fórmulas de campo libre y campo difuso convergen al mismo nivel de potencia acústica L_W."
 />
 
 ## Elegir un método
@@ -113,7 +113,7 @@ energía de fondo estacionaria a costa de una sonda de dos micrófonos y una
 comprobación de validez por banda. El resto de la página recorre cada uno por
 turno.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_es.svg" alt="Las tres vías de potencia sonora en paralelo: una superficie envolvente de presión sobre un plano reflectante (ISO 3744/3746), una fuente en una sala reverberante muestreada por micrófonos (ISO 3741) y una sonda de intensidad barriendo una superficie alrededor de la fuente (ISO 9614-2)" width="92%" loading="eager" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_es.svg" alt="Las tres vías de potencia acústica en paralelo: una superficie envolvente de presión sobre un plano reflectante (ISO 3744/3746), una fuente en una sala reverberante muestreada por micrófonos (ISO 3741) y una sonda de intensidad barriendo una superficie alrededor de la fuente (ISO 9614-2)" width="92%" loading="eager" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -145,7 +145,7 @@ for res, style, ms, label in ((pres, "-o", 11, "presión (ISO 3744)"),
                               (comp, ":^", 5, "fuente de referencia (ISO 3741)")):
     ax.semilogx(freqs, res.sound_power_level, style, markersize=ms,
                 label=f"{label}: LWA = {res.sound_power_level_a:.1f} dB")
-ax.set(xlabel="Frecuencia [Hz]", ylabel="Nivel de potencia sonora LW [dB]")
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Nivel de potencia acústica LW [dB]")
 ax.legend()
 plt.show()
 ```
@@ -213,7 +213,7 @@ Coloca la fuente sobre un plano reflectante e imagina una **superficie de
 medición** de área `S` que la envuelve: una semiesfera para una fuente
 compacta, una caja (paralelepípedo recto) para una grande o alargada.
 Muestrea el nivel de presión sonora en un conjunto de posiciones de micrófono
-sobre esa superficie, promédialas en energía, y la potencia sonora se obtiene
+sobre esa superficie, promédialas en energía, y la potencia acústica se obtiene
 porque una superficie suficientemente difusa capta toda la energía radiada:
 
 $$
@@ -274,10 +274,10 @@ print(round(res.sound_power_level_a, 1))                # LWA = 92.4 dB
 print(round(res.uncertainty, 1))                        # U = 3.0 dB (2*sigma_R0)
 print(np.round(res.sound_power_level, 1))               # LW por banda
 
-res.plot()   # barras de nivel de potencia sonora por banda; LWA en el título (requiere matplotlib)
+res.plot()   # barras de nivel de potencia acústica por banda; LWA en el título (requiere matplotlib)
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result_es.svg" alt="El espectro de nivel de potencia sonora por superficie envolvente del ejemplo de semiesfera de ISO 3744, una barra por banda de octava de 63 Hz a 8 kHz con pico cerca de 500 Hz, con el total ponderado A de 92,4 dB(A) en el título" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result_es.svg" alt="El espectro de nivel de potencia acústica por superficie envolvente del ejemplo de semiesfera de ISO 3744, una barra por banda de octava de 63 Hz a 8 kHz con pico cerca de 500 Hz, con el total ponderado A de 92,4 dB(A) en el título" width="88%" />
 
 *Una barra por banda: la presión superficial promediada en energía menos las
 correcciones de fondo (`K1`) y ambiental (`K2`) más el término de superficie
@@ -317,9 +317,9 @@ ax.bar(positions, res.sound_power_level, width=0.7, color="#1f77b4")
 ax.set_xticks(positions)
 ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
 ax.set_xlabel("Frecuencia [Hz]")
-ax.set_ylabel("Nivel de potencia sonora LW [dB]")
+ax.set_ylabel("Nivel de potencia acústica LW [dB]")
 ax.set_title(
-    f"Potencia sonora por superficie envolvente (ISO 3744)  "
+    f"Potencia acústica por superficie envolvente (ISO 3744)  "
     f"LWA = {res.sound_power_level_a:.1f} dB(A)")
 plt.show()
 ```
@@ -403,7 +403,7 @@ reflecting_planes=…, tones=…, grade=…)` devuelve las coordenadas normativa
 
 En una **sala reverberante** cualificada de paredes rígidas el campo es
 difuso, así que un puñado de micrófonos muestrea toda la energía radiada y el
-método alcanza el grado 1. La potencia sonora proviene del nivel medio de la
+método alcanza el grado 1. La potencia acústica proviene del nivel medio de la
 sala `Lp(ST)`, el área de absorción de Sabine `A = (55.26/c)·(V/T60)` y una
 cadena de pequeñas correcciones (ISO 3741 Ec. 20):
 
@@ -460,7 +460,7 @@ print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 rev.plot()   # espectro LW de la sala reverberante; LWA en el título (requiere matplotlib)
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result_es.svg" alt="El espectro de nivel de potencia sonora en cámara reverberante del ejemplo de ISO 3741, una barra por banda de tercio de octava de 100 Hz a 10 kHz descendiendo suavemente con la frecuencia, con el total ponderado A de 92,1 dB(A) en el título" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result_es.svg" alt="El espectro de nivel de potencia acústica en cámara reverberante del ejemplo de ISO 3741, una barra por banda de tercio de octava de 100 Hz a 10 kHz descendiendo suavemente con la frecuencia, con el total ponderado A de 92,1 dB(A) en el título" width="88%" />
 
 *El nivel medio de la sala llevado a través de los términos de área de
 absorción, de Waterhouse y meteorológicos de la Ec. 20 da el `LW(f)` por tercio
@@ -498,9 +498,9 @@ ax.bar(positions, rev.sound_power_level, width=0.7, color="#1f77b4")
 ax.set_xticks(positions)
 ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
 ax.set_xlabel("Frecuencia [Hz]")
-ax.set_ylabel("Nivel de potencia sonora LW [dB]")
+ax.set_ylabel("Nivel de potencia acústica LW [dB]")
 ax.set_title(
-    f"Potencia sonora en cámara reverberante (ISO 3741)  "
+    f"Potencia acústica en cámara reverberante (ISO 3741)  "
     f"LWA = {rev.sound_power_level_a:.1f} dB(A)")
 plt.show()
 ```
@@ -535,7 +535,7 @@ fuente de referencia y su potencia conocida.
 | Parámetro | Tipo | Unidades | Rango / defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | `levels_ref` | array 1D o 2D | dB | coincide con `levels` | SPL medio de sala con la fuente de referencia (RSS) en marcha |
-| `lw_ref` | array 1D | dB | por banda | Potencia sonora conocida `LW(RSS)` de la fuente de referencia |
+| `lw_ref` | array 1D | dB | por banda | Potencia acústica conocida `LW(RSS)` de la fuente de referencia |
 | `background_levels` | array 1D o 2D | dB | coincide con `levels` | Ruido de fondo de la fuente de ensayo; `K1` por banda sobre `Lp(ST)` |
 | `background_levels_ref` | array 1D o 2D | dB | coincide con `levels_ref` | Ruido de fondo de la fuente de **referencia**; `K1` por banda sobre `Lp(RSS)` |
 
@@ -573,7 +573,7 @@ $$
   width={2400}
   height={1350}
   title="Barrido de intensidad sobre una caja de medición"
-  description="Una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia sonora L_W."
+  description="Una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia acústica L_W."
 />
 
 Una banda en la que `P < 0` (flujo neto entrante, de una fuente más fuerte
@@ -623,7 +623,7 @@ print(list(res.achieved_grade))                         # grado por banda
 res.plot()   # espectro LW; bandas no positivas (indeterminables) con trama (requiere matplotlib)
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_es.svg" alt="El espectro de nivel de potencia sonora por barrido de intensidad del ejemplo de ISO 9614-2, una barra por banda de octava de 125 Hz a 4 kHz todas cerca de 85 dB, con el total ponderado A de 90,9 dB(A) en el título" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_es.svg" alt="El espectro de nivel de potencia acústica por barrido de intensidad del ejemplo de ISO 9614-2, una barra por banda de octava de 125 Hz a 4 kHz todas cerca de 85 dB, con el total ponderado A de 90,9 dB(A) en el título" width="88%" />
 
 *Las potencias parciales `<In,i>·Si` de los seis segmentos suman el `LW` de
 cada banda; aquí todas las bandas tienen potencia neta positiva y superan los
@@ -664,9 +664,9 @@ ax.bar(positions, res.sound_power_level, width=0.7, color="#1f77b4")
 ax.set_xticks(positions)
 ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
 ax.set_xlabel("Frecuencia [Hz]")
-ax.set_ylabel("Nivel de potencia sonora LW [dB]")
+ax.set_ylabel("Nivel de potencia acústica LW [dB]")
 ax.set_title(
-    f"Potencia sonora por barrido de intensidad (ISO 9614-2)  "
+    f"Potencia acústica por barrido de intensidad (ISO 9614-2)  "
     f"LWA = {res.sound_power_level_a:.1f} dB(A)")
 plt.show()
 ```
@@ -703,16 +703,16 @@ donde `negative_band`), `surface_pressure_intensity_index` (`FpI`),
 
 ## 4. Grado de precisión, sala anecoica (ISO 3745)
 
-Cuando se requiere la máxima exactitud, ISO 3745 mide la potencia sonora en una
+Cuando se requiere la máxima exactitud, ISO 3745 mide la potencia acústica en una
 **sala anecoica** o **semianecoica** cualificada, donde el campo libre permite que
 un conjunto fijo de micrófonos muestree directamente la presión sonora radiada. Es
 la contraparte de grado 1 del método de superficie envolvente de la Sección 1, con
 coordenadas de micrófono normalizadas, una corrección por ruido de fondo por
 posición y una corrección meteorológica explícita.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_precision_anechoic_es.svg" alt="Potencia sonora de precisión de ISO 3745 en una sala anecoica: paredes revestidas de cuñas, el dispositivo bajo ensayo en el centro y un conjunto hemisférico de micrófonos a un radio fijo, con el nivel de potencia sonora formado a partir de la presión promediada en la superficie más las correcciones de área, ruido de fondo y meteorológica" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_precision_anechoic_es.svg" alt="Potencia acústica de precisión de ISO 3745 en una sala anecoica: paredes revestidas de cuñas, el dispositivo bajo ensayo en el centro y un conjunto hemisférico de micrófonos a un radio fijo, con el nivel de potencia acústica formado a partir de la presión promediada en la superficie más las correcciones de área, ruido de fondo y meteorológica" width="92%" />
 
-**Nivel de potencia sonora (Cláusula 8).** El nivel de potencia sonora por banda es
+**Nivel de potencia acústica (Cláusula 8).** El nivel de potencia acústica por banda es
 el nivel de presión promediado en la superficie más el término de superficie y las
 correcciones:
 
@@ -787,7 +787,7 @@ print(round(result.sound_power_level_a, 1))   # 89.3
 result.plot()   # espectro LW, LWA en el título (requiere matplotlib)
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power_es.svg" alt="El espectro de nivel de potencia sonora de precisión de una máquina con pico en frecuencias medias medida sobre el conjunto hemisférico de ISO 3745, una barra por banda con pico cerca de 1 kHz, con el total ponderado A de 89,3 dB(A) en el título" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power_es.svg" alt="El espectro de nivel de potencia acústica de precisión de una máquina con pico en frecuencias medias medida sobre el conjunto hemisférico de ISO 3745, una barra por banda con pico cerca de 1 kHz, con el total ponderado A de 89,3 dB(A) en el título" width="88%" />
 
 *Una barra por banda: la presión promediada en la superficie más las correcciones
 de área, ruido de fondo y meteorológica dan `LW(f)`, y la suma energética ponderada
@@ -822,9 +822,9 @@ ax.bar(positions, result.sound_power_level, width=0.7, color="#1f77b4")
 ax.set_xticks(positions)
 ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
 ax.set_xlabel("Frecuencia [Hz]")
-ax.set_ylabel("Nivel de potencia sonora LW [dB]")
+ax.set_ylabel("Nivel de potencia acústica LW [dB]")
 ax.set_title(
-    f"Potencia sonora de precisión (ISO 3745)  LWA = {result.sound_power_level_a:.1f} dB(A)")
+    f"Potencia acústica de precisión (ISO 3745)  LWA = {result.sound_power_level_a:.1f} dB(A)")
 plt.show()
 ```
 
@@ -837,7 +837,7 @@ intensidad normal sobre una superficie que encierra la fuente, pero con un barri
 continuo, criterios de indicadores de campo más estrictos y un presupuesto de
 incertidumbre explícito.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan_es.svg" alt="Barrido de intensidad sonora de precisión de ISO 9614-3: una fuente encerrada por una superficie de medición dividida en segmentos, una sonda de intensidad de dos micrófonos barrida a lo largo de un recorrido en serpentina sobre cada segmento, y la potencia sonora formada sumando la intensidad normal por el área del segmento, sujeta a los criterios de aceptación de los indicadores de campo" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan_es.svg" alt="Barrido de intensidad sonora de precisión de ISO 9614-3: una fuente encerrada por una superficie de medición dividida en segmentos, una sonda de intensidad de dos micrófonos barrida a lo largo de un recorrido en serpentina sobre cada segmento, y la potencia acústica formada sumando la intensidad normal por el área del segmento, sujeta a los criterios de aceptación de los indicadores de campo" width="92%" />
 
 **Potencia y nivel (Cláusula 7).** La potencia parcial de cada segmento es
 $P_i = I_{n,i}\,S_i$; el total $P = \sum_i P_i$ da
@@ -884,7 +884,7 @@ print(round(result.sound_power_level_a, 1))   # 80.6
 result.plot()   # espectro LW; la banda no aplicable con trama (requiere matplotlib)
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_es.svg" alt="El espectro de nivel de potencia sonora del barrido de intensidad de precisión sobre cinco bandas de tercio de octava, cuatro barras determinadas y una banda de 250 Hz con trama y en gris marcada como no aplicable porque su intensidad neta es negativa, con el total ponderado A de 80,6 dB(A) en el título" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_es.svg" alt="El espectro de nivel de potencia acústica del barrido de intensidad de precisión sobre cinco bandas de tercio de octava, cuatro barras determinadas y una banda de 250 Hz con trama y en gris marcada como no aplicable porque su intensidad neta es negativa, con el total ponderado A de 80,6 dB(A) en el título" width="88%" />
 
 *La banda de 250 Hz da un neto negativo (más energía entrando que saliendo), así que
 ISO 9614-3 la declara no aplicable; la figura la trama y la agrisa mientras las
@@ -927,7 +927,7 @@ for pos in positions[neg]:
 ax.set_xticks(positions)
 ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
 ax.set_xlabel("Frecuencia [Hz]")
-ax.set_ylabel("Nivel de potencia sonora LW [dB]")
+ax.set_ylabel("Nivel de potencia acústica LW [dB]")
 ax.set_title(
     f"Barrido de intensidad de precisión (ISO 9614-3)  "
     f"LWA = {result.sound_power_level_a:.1f} dB(A)")

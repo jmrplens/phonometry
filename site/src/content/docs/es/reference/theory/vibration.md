@@ -105,7 +105,7 @@ radia la potencia aérea es su **eficiencia de radiación** $\sigma$: por debajo
 la frecuencia crítica radia poco (modos de borde y esquina), y por encima
 $\sigma \to (1 - f_c/f)^{-1/2} \to 1$ (Leppington/Maidanik, Hopkins
 Ec. 2.227-2.230). Como $\sigma$ es exactamente el factor de radiación
-$\varepsilon$ de ISO 7849, predecirla cierra la cadena de potencia sonora a
+$\varepsilon$ de ISO 7849, predecirla cierra la cadena de potencia acústica a
 partir de la vibración sin una medida de potencia, y alimenta el camino de
 transmisión resonante de la
 [teoría de aislamiento de paneles](/phonometry/es/reference/theory/rooms-buildings/).

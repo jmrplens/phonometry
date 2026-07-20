@@ -1,6 +1,6 @@
 ---
 title: "Vibración y ruido estructural"
-description: "La vibración como fuente de ruido en edificios y como exposición humana: el vocabulario de FRF (ISO 7626), la rigidez de transferencia de aisladores (ISO 10846), la potencia sonora desde vibración (ISO/TS 7849), la cadena de equipos EN 15657 y EN 12354-5, y las métricas de vibración en humanos de ISO 2631 e ISO 5349."
+description: "La vibración como fuente de ruido en edificios y como exposición humana: el vocabulario de FRF (ISO 7626), la rigidez de transferencia de aisladores (ISO 10846), la potencia acústica desde vibración (ISO/TS 7849), la cadena de equipos EN 15657 y EN 12354-5, y las métricas de vibración en humanos de ISO 2631 e ISO 5349."
 ---
 
 La vibración importa a la acústica dos veces. Primero como **fuente de
@@ -46,10 +46,10 @@ Del vocabulario de FRF al nivel predicho en la sala receptora.
 - [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/guides/transfer-stiffness/):
   la rigidez de transferencia dinámica de aisladores de vibración por los
   métodos directo e indirecto.
-- [Potencia sonora desde vibración (ISO/TS 7849)](/phonometry/es/guides/vibration-sound-power/):
+- [Potencia acústica desde vibración (ISO/TS 7849)](/phonometry/es/guides/vibration-sound-power/):
   potencia aérea radiada a partir de la velocidad superficial y un factor de
   radiación.
-- [Potencia sonora estructural de equipos (EN 15657)](/phonometry/es/guides/structure-borne-power/):
+- [Potencia acústica estructural de equipos (EN 15657)](/phonometry/es/guides/structure-borne-power/):
   el método de la placa de recepción y las magnitudes de fuente
   independientes de la placa.
 - [Ruido estructural instalado (EN 12354-5)](/phonometry/es/guides/installed-structure-borne/):

@@ -28,13 +28,13 @@ Dos páginas caracterizan después los elementos del camino.
 mide la rigidez de transferencia dinámica de los aisladores, soportes y
 mangueras que se insertan precisamente para romper el camino de transmisión,
 por los métodos directo e indirecto (transmisibilidad).
-[Potencia sonora desde vibración (ISO/TS 7849)](/phonometry/es/guides/vibration-sound-power/)
+[Potencia acústica desde vibración (ISO/TS 7849)](/phonometry/es/guides/vibration-sound-power/)
 se ocupa de la radiación directa: la potencia aérea estimada desde la
 velocidad superficial y un factor de radiación, sin medición acústica
 alguna.
 
 Las dos últimas páginas cierran la cadena sobre la fuente y el receptor.
-[Potencia sonora estructural de equipos (EN 15657)](/phonometry/es/guides/structure-borne-power/)
+[Potencia acústica estructural de equipos (EN 15657)](/phonometry/es/guides/structure-borne-power/)
 mide lo que inyecta una máquina, mediante el método de la placa de recepción,
 y deriva las magnitudes de fuente independientes de la placa (fuerza
 bloqueada, nivel de potencia característico, velocidad libre).
@@ -52,10 +52,10 @@ receptora, que es donde esta sección se encuentra con los modelos de
 - [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/guides/transfer-stiffness/):
   rigidez de transferencia dinámica de aisladores por los métodos directo e
   indirecto.
-- [Potencia sonora desde vibración (ISO/TS 7849)](/phonometry/es/guides/vibration-sound-power/):
+- [Potencia acústica desde vibración (ISO/TS 7849)](/phonometry/es/guides/vibration-sound-power/):
   potencia aérea radiada desde la velocidad superficial y un factor de
   radiación.
-- [Potencia sonora estructural de equipos (EN 15657)](/phonometry/es/guides/structure-borne-power/):
+- [Potencia acústica estructural de equipos (EN 15657)](/phonometry/es/guides/structure-borne-power/):
   el método de la placa de recepción y las magnitudes de fuente
   independientes de la placa.
 - [Ruido estructural instalado (EN 12354-5)](/phonometry/es/guides/installed-structure-borne/):

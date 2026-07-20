@@ -1,6 +1,6 @@
 ---
-title: "Potencia sonora desde vibración (ISO/TS 7849)"
-description: "La estimación según ISO/TS 7849 de la potencia sonora aérea a partir de la vibración superficial de una máquina: la potencia radiada P = Z_c⟨v²⟩Sε, el nivel de velocidad y su calibración, la media sobre la superficie, el factor de radiación ε y el nivel de potencia sonora L_W = L_v + 10 lg(S/S0) + 10 lg(ε) + 10 lg(411/400), con el límite superior de la Parte 1 (ε=1) y el valor de ingeniería de la Parte 2."
+title: "Potencia acústica desde vibración (ISO/TS 7849)"
+description: "La estimación según ISO/TS 7849 de la potencia acústica aérea a partir de la vibración superficial de una máquina: la potencia radiada P = Z_c⟨v²⟩Sε, el nivel de velocidad y su calibración, la media sobre la superficie, el factor de radiación ε y el nivel de potencia acústica L_W = L_v + 10 lg(S/S0) + 10 lg(ε) + 10 lg(411/400), con el límite superior de la Parte 1 (ε=1) y el valor de ingeniería de la Parte 2."
 references:
   - type: book
     authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
@@ -16,19 +16,19 @@ references:
     title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
     designation: "ISO/TS 7849-1:2009"
     url: "https://www.iso.org/standard/40537.html"
-    note: "El método de límite superior con ε = 1: la potencia radiada P = Z_c⟨v²⟩Sε (Fórmula 6), el nivel de velocidad y su calibración (Fórmulas 3, 8), la media sobre la superficie (Fórmulas 10/11), la corrección por vibración extraña (Tabla 2) y el nivel de potencia sonora con el término fijo de impedancia (Fórmula 12). La conformidad se ancla en el ejemplo de calibración de la propia norma."
+    note: "El método de límite superior con ε = 1: la potencia radiada P = Z_c⟨v²⟩Sε (Fórmula 6), el nivel de velocidad y su calibración (Fórmulas 3, 8), la media sobre la superficie (Fórmulas 10/11), la corrección por vibración extraña (Tabla 2) y el nivel de potencia acústica con el término fijo de impedancia (Fórmula 12). La conformidad se ancla en el ejemplo de calibración de la propia norma."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2009
     title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 2: Engineering method including determination of the adequate radiation factor"
     designation: "ISO/TS 7849-2:2009"
     url: "https://www.iso.org/standard/40538.html"
-    note: "El método de ingeniería con un factor de radiación medido por bandas (Fórmula 4/8) y su nivel de potencia sonora (Fórmula 15). La conformidad incluye el round-trip exacto entre el factor de radiación y L_W = 10 lg(P/P₀)."
+    note: "El método de ingeniería con un factor de radiación medido por bandas (Fórmula 4/8) y su nivel de potencia acústica (Fórmula 15). La conformidad incluye el round-trip exacto entre el factor de radiación y L_W = 10 lg(P/P₀)."
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-La potencia sonora aérea que una máquina radia a través de la vibración
+La potencia acústica aérea que una máquina radia a través de la vibración
 estructural de su superficie exterior puede estimarse a partir de la velocidad
 vibratoria de la superficie y un **factor de radiación** `ε` (la eficiencia de
 radiación), sin una medición acústica. La potencia radiada es (ISO/TS 7849-1,
@@ -40,7 +40,7 @@ $$
 
 con `Z_c` la impedancia característica del aire y `⟨v²⟩` la velocidad vibratoria
 cuadrática media sobre el área radiante `S`. Expresada en niveles (nivel de
-velocidad re `v₀ = 5·10⁻⁸ m/s`), el nivel de potencia sonora con ponderación A es
+velocidad re `v₀ = 5·10⁻⁸ m/s`), el nivel de potencia acústica con ponderación A es
 (Fórmula 12 / 15)
 
 $$
@@ -53,7 +53,7 @@ referencia `Z_{c,0} = 400 N·s/m³` dan el término fijo `10 lg(411/400) =
 0,118 dB`. Este módulo alimenta las normas de fuente estructural y de predicción
 en edificación (ISO 9611, EN 15657, EN 12354-5).
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power_es.svg" alt="Nivel de potencia sonora radiada por banda de octava, comparando el límite superior de la ISO/TS 7849-1 (factor de radiación igual a uno) con el valor de ingeniería de la ISO/TS 7849-2 (factor de radiación medido)" width="82%" loading="eager" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power_es.svg" alt="Nivel de potencia acústica radiada por banda de octava, comparando el límite superior de la ISO/TS 7849-1 (factor de radiación igual a uno) con el valor de ingeniería de la ISO/TS 7849-2 (factor de radiación medido)" width="82%" loading="eager" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -76,7 +76,7 @@ fig, ax = plt.subplots()
 ax.bar(x - 0.2, lw_max, width=0.4, label="límite superior Parte 1 ($\\varepsilon$ = 1)")
 ax.bar(x + 0.2, lw_eng, width=0.4, label="ingeniería Parte 2 ($\\varepsilon$ medido)")
 ax.set_xticks(x, [f"{b:g}" for b in bands])
-ax.set(xlabel="Frecuencia [Hz]", ylabel="Nivel de potencia sonora $L_W$ [dB re 1 pW]")
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Nivel de potencia acústica $L_W$ [dB re 1 pW]")
 ax.legend()
 plt.show()
 ```

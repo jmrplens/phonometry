@@ -1,6 +1,6 @@
 ---
 title: "Ruido de aerogeneradores: potencia y audibilidad tonal"
-description: "La emisión acústica de aerogeneradores de la IEC 61400-11: el nivel de potencia sonora aparente referido al centro del rotor y la cadena de audibilidad tonal (banda crítica de Zwicker, nivel de ruido de enmascaramiento y criterio de audibilidad) que decide si un tono discreto es audible."
+description: "La emisión acústica de aerogeneradores de la IEC 61400-11: el nivel de potencia acústica aparente referido al centro del rotor y la cadena de audibilidad tonal (banda crítica de Zwicker, nivel de ruido de enmascaramiento y criterio de audibilidad) que decide si un tono discreto es audible."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -8,7 +8,7 @@ references:
     title: "Wind turbines — Part 11: Acoustic noise measurement techniques"
     designation: "IEC 61400-11:2012+AMD1:2018 CSV"
     url: "https://webstore.iec.ch/en/publication/63367"
-    note: "La edición implementada: la geometría de medida, la clasificación por velocidades de viento y la cadena de audibilidad tonal (potencia sonora aparente Fórmula 26, banda crítica Fórmula 30, nivel de enmascaramiento Fórmula 31, tonalidad/audibilidad Fórmulas 32-34). El flujo completo de medición queda fuera del alcance aquí."
+    note: "La edición implementada: la geometría de medida, la clasificación por velocidades de viento y la cadena de audibilidad tonal (potencia acústica aparente Fórmula 26, banda crítica Fórmula 30, nivel de enmascaramiento Fórmula 31, tonalidad/audibilidad Fórmulas 32-34). El flujo completo de medición queda fuera del alcance aquí."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2005
@@ -28,21 +28,21 @@ references:
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La IEC 61400-11 mide la emisión acústica de un aerogenerador. Esta página cubre
-sus dos magnitudes en forma cerrada: el **nivel de potencia sonora aparente**
+sus dos magnitudes en forma cerrada: el **nivel de potencia acústica aparente**
 referido a una fuente puntual equivalente en el centro del rotor, y la
 **audibilidad tonal** que decide si un tono discreto (paso de pala, multiplicadora,
 generador) es audible por encima del ruido de enmascaramiento.
 
-## Nivel de potencia sonora aparente
+## Nivel de potencia acústica aparente
 
 Con el micrófono de referencia sobre una placa en el suelo a la distancia
 horizontal `R0 = H + D/2` (altura de buje `H`, diámetro de rotor `D`), la
 distancia oblicua al centro del rotor es `R1 = √(H² + R0²)` y el nivel de
-potencia sonora aparente es `L_WA,i = L_p,i − 6 + 10·lg(4π R1²/S0)` por banda
+potencia acústica aparente es `L_WA,i = L_p,i − 6 + 10·lg(4π R1²/S0)` por banda
 (`S0 = 1 m²`), sumado energéticamente sobre las bandas. Los `−6 dB` dan cuenta de
 la duplicación de presión en la placa del suelo.
 
-<ThemeImage loading="eager" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400_es.svg" alt="Alzado de un aerogenerador de eje horizontal con altura de buje H y diámetro de rotor D, un micrófono tumbado sobre una placa plana en el suelo a sotavento a la distancia horizontal R0 = H + D/2 del eje de la torre, la distancia oblicua R1 del centro del rotor al micrófono con el ángulo de inclinación de la placa phi entre 25 y 40 grados, y un mástil meteorológico que mide velocidad y dirección del viento; un recuadro en planta muestra el patrón de la Figura 3 con la posición de referencia a sotavento y tres posiciones opcionales a más y menos 60 grados y a barlovento, y las anotaciones dan R1 igual a la raíz cuadrada de H al cuadrado más R0 al cuadrado y la fórmula de potencia sonora aparente LWA,i = Lp,i menos 6 más 10 lg(4 pi R1 al cuadrado entre S0)" width="94%" />
+<ThemeImage loading="eager" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400_es.svg" alt="Alzado de un aerogenerador de eje horizontal con altura de buje H y diámetro de rotor D, un micrófono tumbado sobre una placa plana en el suelo a sotavento a la distancia horizontal R0 = H + D/2 del eje de la torre, la distancia oblicua R1 del centro del rotor al micrófono con el ángulo de inclinación de la placa phi entre 25 y 40 grados, y un mástil meteorológico que mide velocidad y dirección del viento; un recuadro en planta muestra el patrón de la Figura 3 con la posición de referencia a sotavento y tres posiciones opcionales a más y menos 60 grados y a barlovento, y las anotaciones dan R1 igual a la raíz cuadrada de H al cuadrado más R0 al cuadrado y la fórmula de potencia acústica aparente LWA,i = Lp,i menos 6 más 10 lg(4 pi R1 al cuadrado entre S0)" width="94%" />
 
 ```python
 from phonometry import environmental
@@ -55,7 +55,7 @@ lwa = environmental.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 
 ### Por qué "aparente"
 
-$L_{WA}$ se escribe como un nivel de potencia sonora, pero no lo es en el
+$L_{WA}$ se escribe como un nivel de potencia acústica, pero no lo es en el
 sentido de la ISO 3744 de muestrear el campo de presión sobre una
 superficie envolvente. La norma reduce toda la máquina a una fuente puntual
 equivalente en el centro del rotor y pregunta qué potencia necesitaría esa

@@ -25,7 +25,7 @@ está en sincronía con la librería publicada:
   y G (ISO 7196 A.3) respecto a las curvas nominales, juzgadas en la
   frecuencia determinante con la banda de tolerancia aplicable y el margen.
 - **Una tabla de conformidad por dominio** (niveles, psicoacústica, acústica
-  de salas y de la edificación, potencia sonora, materiales, vibración,
+  de salas y de la edificación, potencia acústica, materiales, vibración,
   incertidumbre, ...): `Norma | Magnitud | Esperado | Calculado | Delta |
   Estado`, donde los valores esperados provienen de los ejemplos resueltos de
   las propias normas o de expresiones en forma cerrada sintetizadas a un resultado

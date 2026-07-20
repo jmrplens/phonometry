@@ -18,7 +18,7 @@ percibido del Anexo 16 de la ICAO, con la maquinaria de contornos de
 aeropuerto de ECAC Doc 29 construida encima; los helicópteros tienen el
 modelo de fuente de hemisferio de ruido de ECAC Doc 32; y los aerogeneradores
 se valoran por
-la potencia sonora aparente y la audibilidad tonal de IEC 61400-11. Lo que
+la potencia acústica aparente y la audibilidad tonal de IEC 61400-11. Lo que
 los une es el patrón: un descriptor de fuente cuidadosamente normalizado más
 ajustes de propagación normalizados.
 
@@ -55,5 +55,5 @@ Fuentes de transporte y energía con métricas de certificación propias.
   el modelo de fuente de hemisferio de ruido de ECAC Doc 32 con sus ajustes
   de propagación.
 - [Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/guides/wind-turbine-noise/):
-  el nivel de potencia sonora aparente de IEC 61400-11 y la cadena de
+  el nivel de potencia acústica aparente de IEC 61400-11 y la cadena de
   audibilidad tonal.

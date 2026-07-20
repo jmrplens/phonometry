@@ -22,7 +22,7 @@ references:
     title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation"
     designation: "ISO 10140-2:2010"
     url: "https://www.iso.org/standard/42088.html"
-    note: "El índice de reducción sonora R de laboratorio con la corrección de ruido de fondo (Cláusula 4.3)."
+    note: "El índice de reducción acústica R de laboratorio con la corrección de ruido de fondo (Cláusula 4.3)."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2010
@@ -43,7 +43,7 @@ references:
     title: "Acoustics — Measurement of sound insulation in buildings and of building elements using sound intensity — Part 1: Laboratory measurements"
     designation: "ISO 15186-1:2000"
     url: "https://www.iso.org/standard/26097.html"
-    note: "El índice de reducción sonora por intensidad R_I, su forma modificada por Kc y la diferencia de niveles normalizada por elemento (laboratorio); la herramienta preferida cuando la transmisión por flancos es alta (cláusula 1)."
+    note: "El índice de reducción acústica por intensidad R_I, su forma modificada por Kc y la diferencia de niveles normalizada por elemento (laboratorio); la herramienta preferida cuando la transmisión por flancos es alta (cláusula 1)."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2003
@@ -71,7 +71,7 @@ references:
     title: "Acoustics — Laboratory measurement of the flanking transmission of airborne and impact sound between adjoining rooms — Part 1: Frame document"
     designation: "ISO 10848-1:2006"
     url: "https://www.iso.org/standard/38284.html"
-    note: "El documento marco de la medición de la transmisión por flancos: definiciones, el índice de reducción vibracional Kij, la longitud de absorción equivalente y los descriptores de flanco normalizados D_n,f / L_n,f que alimentan la predicción EN 12354. Como ISO 10848 no contiene ningún ejemplo numérico resuelto, la conformidad se ancla en identidades de forma cerrada."
+    note: "El documento marco de la medición de la transmisión por flancos: definiciones, el índice de reducción de vibraciones Kij, la longitud de absorción equivalente y los descriptores de flanco normalizados D_n,f / L_n,f que alimentan la predicción EN 12354. Como ISO 10848 no contiene ningún ejemplo numérico resuelto, la conformidad se ancla en identidades de forma cerrada."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2006
@@ -256,7 +256,7 @@ print(round(float(fpi[0]), 1))               # 6.0
 res.plot()   # RI medido vs curva de referencia ISO 717-1 desplazada (necesita matplotlib)
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_es.svg" alt="Índice de reducción sonora por intensidad RI y el índice modificado RI,M a lo largo de las bandas de tercio de octava, con el aumento de adaptación del Anexo B sombreado entre las dos curvas" width="80%" loading="eager" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_es.svg" alt="Índice de reducción acústica por intensidad RI y el índice modificado RI,M a lo largo de las bandas de tercio de octava, con el aumento de adaptación del Anexo B sombreado entre las dos curvas" width="80%" loading="eager" />
 
 *El índice modificado $R_{I,M} = R_I + K_c$ eleva $R_I$ (más en las bandas
 bajas, donde $K_c$ es mayor), de modo que una medición por intensidad reproduce
@@ -293,7 +293,7 @@ ax.fill_between(x, res.r_i, res.r_i_modified, alpha=0.2, label="Adaptación Kc")
 ax.plot(x, res.r_i, "-o", label="RI (intensidad)")
 ax.plot(x, res.r_i_modified, "--s", label="RI,M = RI + Kc")
 ax.set_xticks(x, [str(f) for f in freqs], rotation=45)
-ax.set(xlabel="Frecuencia [Hz]", ylabel="Índice de reducción sonora [dB]",
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Índice de reducción acústica [dB]",
        title=f"RI,w = {res.rating.rating} dB, RI,M,w = {res.rating_modified.rating} dB")
 ax.legend()
 plt.show()
@@ -396,12 +396,12 @@ res.octave_bands()    # (frec. de octava, delta-L_oct) vía Fórmula (5)
 ## Transmisión por flancos en laboratorio (ISO 10848)
 
 ISO 10848:2006/2010 es el método de laboratorio que **mide** el **índice de
-reducción vibracional** de unión $K_{ij}$ que la [predicción EN 12354](/phonometry/es/guides/insulation-prediction/)
+reducción de vibraciones** de unión $K_{ij}$ que la [predicción EN 12354](/phonometry/es/guides/insulation-prediction/)
 toma como entrada, junto con los descriptores globales de flanco $D_{n,f}$
 (aéreo) y $L_{n,f}$ (impacto). Es la contraparte de medición de la función
 empírica `junction_vibration_reduction()` de esa predicción.
 
-**Índice de reducción vibracional (Fórmula (13)).**
+**Índice de reducción de vibraciones (Fórmula (13)).**
 $K_{ij} = \overline{D}_{v,ij} + 10\lg\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, a
 partir de la diferencia de nivel de velocidad promediada en dirección
 $\overline{D}_{v,ij} = \tfrac{1}{2}(D_{v,ij} + D_{v,ji})$ (Fórmula (11), que hace
@@ -419,7 +419,7 @@ los motores de ISO 717. El número único $\overline{K}_{ij}$ es la media
 aritmética entre 200 y 1250 Hz en tercios de octava, o entre 125 y 1000 Hz en
 bandas de octava (Anexo A).
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_es.svg" alt="Índice de reducción vibracional de unión Kij ISO 10848 creciendo entre 100 Hz y 5000 Hz en tercios de octava para una unión rígida en T de dos paredes pesadas, con el Kij medio de un solo número entre 200 y 1250 Hz en línea discontinua" width="80%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_es.svg" alt="Índice de reducción de vibraciones de unión Kij ISO 10848 creciendo entre 100 Hz y 5000 Hz en tercios de octava para una unión rígida en T de dos paredes pesadas, con el Kij medio de un solo número entre 200 y 1250 Hz en línea discontinua" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -494,6 +494,6 @@ res_m.bracketed    # marcas por banda; las bandas acotadas salen del número ún
   de un solo número y su incertidumbre.
 - [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/guides/insulation-prediction/):
   el modelo de flancos que consume los $R$, $L_n$ y $K_{ij}$ de laboratorio.
-- [Potencia sonora](/phonometry/es/guides/sound-power/): los métodos de `LW` que comparten
+- [Potencia acústica](/phonometry/es/guides/sound-power/): los métodos de `LW` que comparten
   la maquinaria del área de absorción de la sala receptora.
 - Referencia de la API: [`building.lab_insulation`](/phonometry/es/reference/api/building/lab-insulation/), [`building.intensity_insulation`](/phonometry/es/reference/api/building/intensity-insulation/) y [`building.flanking_transmission`](/phonometry/es/reference/api/building/flanking-transmission/).

@@ -100,7 +100,7 @@ _STRINGS: dict[str, str] = {
     "Target / Limit": "Objetivo / Límite",
     "Result": "Resultado",
     # --- verdict / status -------------------------------------------------
-    "PASS": "CUMPLE",
+    "PASS": "CUMPLE",  # nosec B105 - report verdict label, not a password
     "FAIL": "NO CUMPLE",
     "Result vs requirement": "Resultado frente a requisito",
     "informational": "informativo",

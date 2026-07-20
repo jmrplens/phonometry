@@ -143,6 +143,7 @@ export const apiSidebar = {
         'reference/api/aeroacoustics/aircraft-noise',
         'reference/api/aeroacoustics/atmospheric-absorption',
         'reference/api/aeroacoustics/airport-noise',
+        'reference/api/aeroacoustics/anp-fleet',
         'reference/api/aeroacoustics/rotorcraft-noise',
         'reference/api/aeroacoustics/wind-turbine-noise',
       ],

@@ -4783,6 +4783,22 @@ def _chk_arp5534_continuity() -> Outcome:
 
 @register(
     _AIRCRAFT,
+    "EASA ANP database round-trip",
+    "Interpolated NPD level at a tabulated node vs the published ANP value, dB",
+)
+def _chk_anp_round_trip() -> Outcome:
+    # Independent oracle: the EASA ANP database's own published NPD values
+    # (curated subset shipped under aircraft/data/anp). At a tabulated
+    # (power, distance) node the loader/interpolation must recover the
+    # published value exactly. Boeing 747-100 (JT9DBD), departure SEL,
+    # 28000 lb corrected net thrust, 2000 ft slant distance = 98.8 dB.
+    curves = ph.load_anp_database().npd_curves("747100", "departure", "SEL")
+    got = float(curves.level(28000.0, 2000.0 * 0.3048)[0])
+    return numeric(98.8, got, 1e-9, unit="dB", places=4)
+
+
+@register(
+    _AIRCRAFT,
     "ECAC Doc 29 NPD interpolation",
     "Log-linear NPD level at the log-midpoint distance (Eq. 4-4), dB",
 )

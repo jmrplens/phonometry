@@ -150,6 +150,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`aircraft.aircraft_noise`](/phonometry/reference/api/aeroacoustics/aircraft-noise/) | Aircraft noise certification: Effective Perceived Noise Level (ICAO Annex 16). |
 | [`aircraft.atmospheric_absorption`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/) | One-third-octave-band atmospheric absorption for aircraft noise (SAE ARP 5534). |
 | [`aircraft.airport_noise`](/phonometry/reference/api/aeroacoustics/airport-noise/) | Noise-Power-Distance (NPD) event-level interpolation (ECAC Doc 29). |
+| [`aircraft.anp_fleet`](/phonometry/reference/api/aeroacoustics/anp-fleet/) | EASA ANP fleet database bridge for the ECAC Doc 29 airport-noise chain. |
 | [`aircraft.rotorcraft_noise`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/) | Rotorcraft noise by the hemisphere method (ECAC Doc 32 / NORAH2). |
 | [`environmental.wind_turbine_noise`](/phonometry/reference/api/aeroacoustics/wind-turbine-noise/) | Wind-turbine acoustic noise (IEC 61400-11:2012+A1:2018). |
 

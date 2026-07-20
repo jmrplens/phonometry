@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **364/364 conformance checks pass** across 46 domains and 232 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **365/365 conformance checks pass** across 46 domains and 233 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -577,7 +577,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b>: 100% (14/14)</summary>
+<summary>&#9989; <b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b>: 100% (15/15)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -589,6 +589,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ECAC Doc 29 start-of-roll directivity (turboprop) | ΔSOR behind a takeoff ground-roll segment (turboprop, Eq. 4-24b), dB | 1.0943 dB (+/-0.01 dB) | 1.0944 dB | 0 dB | &#9989; |
 | ECAC Doc 29 workbook event assembly (JETFDS/R03, behind SOR) | Energy sum of the reference per-segment SELs vs the B-1 event total, dB | 74.73 dB (+/-0.01 dB) | 74.733 dB | 0.003 dB | &#9989; |
 | SAE ARP 5534 band-attenuation continuity | SAE-Method δ_B at the 150 dB branch split (Eq. 7 vs Eq. 8), dB | 123.95 dB (+/-0.01 dB) | 123.953 dB | 0.003 dB | &#9989; |
+| EASA ANP database round-trip | Interpolated NPD level at a tabulated node vs the published ANP value, dB | 98.8 dB (+/-0 dB) | 98.8 dB | 0 dB | &#9989; |
 | ECAC Doc 29 NPD interpolation | Log-linear NPD level at the log-midpoint distance (Eq. 4-4), dB | 97 dB (+/-0 dB) | 97 dB | 0 dB | &#9989; |
 | SAE ARP 5534 pure-tone coefficient (ISO 9613-1) | Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m | 0.006186 dB/m (+/-0 dB/m) | 0.006186 dB/m | 0 dB/m | &#9989; |
 | ICAO Annex 16 Vol. I App. 2 Table A2-3 | Perceived noisiness at SPL(b), 1 kHz band, in noys | 1 (+/-0) | 1 | 0 | &#9989; |

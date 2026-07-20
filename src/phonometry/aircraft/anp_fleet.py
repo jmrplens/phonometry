@@ -60,6 +60,8 @@ if TYPE_CHECKING:
 _FT_M = 0.3048
 #: Knots-to-metres-per-second conversion (profile true airspeed).
 _KT_MS = 0.514444
+#: Altitude below which a profile point counts as on the ground, in metres.
+_GROUND_ALTITUDE_M = 1.0
 #: Lateral-directivity identifier -> Doc 29 engine mounting.
 _MOUNTING = {"wing": "wing", "fuselage": "fuselage", "prop": "propeller"}
 #: Operation aliases -> ANP operation code (``"A"`` arrival, ``"D"`` departure).
@@ -332,8 +334,11 @@ class AnpDatabase:
                 f"{avail}). Aircraft with only procedural-step profiles are not "
                 f"supported by this bridge.")
         profile_id, path = self._profiles[key]
-        z = path[:, 2]
-        seg_zero = (z[:-1] == 0.0) & (z[1:] == 0.0)
+        # Ground-roll segments run along the runway: both endpoints at field
+        # elevation. Tabulated ground points sit at exactly 0 m and the lowest
+        # airborne point is above 150 m, so a 1 m threshold separates them.
+        on_ground = np.abs(path[:, 2]) <= _GROUND_ALTITUDE_M
+        seg_zero = on_ground[:-1] & on_ground[1:]
         ground_roll = seg_zero & (op == "D")
         landing_roll = seg_zero & (op == "A")
         return AnpProfile(

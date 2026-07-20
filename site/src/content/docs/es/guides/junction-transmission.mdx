@@ -142,16 +142,22 @@ La media angular es el puente hacia los dos descriptores de unión usados en los
 modelos de edificios basados en SEA: el **factor de pérdidas por acoplamiento**
 (Ec. 2.154) `etaij = cg_i L_ij tau_ij / (2 pi**2 f S_i)` y el **índice de
 reducción vibracional** del enfoque ondulatorio (Ec. 5.116)
-`Kij = 10 lg(1 / tau_ij) + 5 lg(fc_j / fc_i)`, que para placas idénticas se
-reduce a `Kij = 10 lg(1 / tau_ij)` -- para la unión en X idéntica,
-`10 lg 12 ~= 10.8 dB`.
+`Kij = 10 lg(1 / tau_ij) + 5 lg(fc_j / f_ref)` con `f_ref = 1000 Hz` y `fc_j`
+la frecuencia crítica de la placa *receptora*. Combinada con la reciprocidad de
+la Ec. 5.7, esta forma es simétrica, `Kij = Kji`, como exige la EN 12354 al
+descriptor de unión. Para la unión en X idéntica de hormigón de 100 mm
+(`fc ~= 203 Hz`), `Kij = 10 lg 12 + 5 lg(203 / 1000) ~= 7,3 dB`.
 
 ```python
-from phonometry import coupling_loss_factor, wave_vibration_reduction_index
+from phonometry import (coupling_loss_factor, junction_transmission,
+                        wave_vibration_reduction_index)
 
 eta = coupling_loss_factor(1.0 / 12.0, group_velocity=200.0,
                            junction_length=4.0, frequency=500.0, plate_area=10.0)
-kij = wave_vibration_reduction_index(1.0 / 12.0)  # 10.79 dB
+res = junction_transmission("X", 0.1, 3200.0, 240.0, 0.1, 3200.0, 240.0)
+kij = wave_vibration_reduction_index(res.corner_average,
+                                     res.critical_frequency2)  # 7.33 dB
+kij = res.corner_reduction_index  # lo mismo, precalculado en el resultado
 ```
 
 La contraparte medida de la EN 12354 de `Kij` (a partir de la diferencia de

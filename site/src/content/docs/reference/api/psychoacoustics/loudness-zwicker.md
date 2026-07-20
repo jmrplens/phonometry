@@ -137,3 +137,42 @@ Plot the specific loudness N'(z) over Bark (see `._plotting`).
 Adds a loudness-vs-time panel when the time-varying trace is
 present.  Requires matplotlib (`pip install phonometry[plot]`);
 returns the `Axes` (or array thereof).
+
+### ZwickerLoudness.report()
+
+```python
+ZwickerLoudness.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+) -> str
+```
+
+Render an ISO 532-1 Zwicker loudness fiche to a PDF.
+
+Writes a one-page accredited loudness report: the standard-basis line,
+an optional metadata header block, a compact metrics table (total
+loudness N, loudness level LN, and N5/N10 for a time-varying result)
+beside the specific-loudness pattern (the result's own `plot`),
+the boxed `N = X sone (LN = Y phon)` result, an optional verdict row
+and a footer with the fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a prediction fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum permitted loudness in sone. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for a uniform signature; it has no effect on the single-layout loudness fiche. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |

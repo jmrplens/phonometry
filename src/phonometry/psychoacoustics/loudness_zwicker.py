@@ -28,6 +28,8 @@ import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+
+    from .._report.metadata import ReportMetadata
 from scipy import signal
 
 from ._zwicker_data import (
@@ -120,6 +122,46 @@ class ZwickerLoudness:
         from .._plot.psychoacoustics import plot_zwicker_loudness
 
         return plot_zwicker_loudness(self, ax=ax, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+    ) -> str:
+        """Render an ISO 532-1 Zwicker loudness fiche to a PDF.
+
+        Writes a one-page accredited loudness report: the standard-basis line,
+        an optional metadata header block, a compact metrics table (total
+        loudness N, loudness level LN, and N5/N10 for a time-varying result)
+        beside the specific-loudness pattern (the result's own :meth:`plot`),
+        the boxed ``N = X sone (LN = Y phon)`` result, an optional verdict row
+        and a footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a
+            prediction fiche (body, result and disclaimer only). A supplied
+            ``requirement`` is read as the maximum permitted loudness in sone.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for a uniform signature; it has no effect on
+            the single-layout loudness fiche.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso532 import render_iso532_report
+
+        return render_iso532_report(
+            self, path, metadata=metadata, verbose=verbose
+        )
 
 
 # ---------------------------------------------------------------------------

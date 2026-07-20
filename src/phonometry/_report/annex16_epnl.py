@@ -85,7 +85,6 @@ def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
         ("Applicant", metadata.client),
         ("Measurement point", metadata.test_room),
         ("Date of test", metadata.test_date),
-        ("Notes", metadata.notes),
     ]
     return [
         (label, html.escape(str(value)))

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **367/367 conformance checks pass** across 46 domains and 234 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **371/371 conformance checks pass** across 46 domains and 235 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -477,7 +477,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Electroacoustics: distortion &amp; frequency response</b>: 100% (16/16)</summary>
+<summary>&#9989; <b>Electroacoustics: distortion &amp; frequency response</b>: 100% (20/20)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -486,6 +486,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60268-5:2003 (20.3/20.4) | Characteristic sensitivity level, 1 W into 8 ohm at 1 m (flat 90 dB) | 90 dB (+/-0.000001 dB) | 90 dB | 0 dB | &#9989; |
 | IEC 60268-5:2003 (21.2) | Effective frequency range = -10 dB crossings (50 Hz / 18 kHz) | 50 Hz / 18000 Hz (ref -10 dB crossings) | 50.000 Hz / 18000.0 Hz | -0.000 / -0.000 Hz | &#9989; |
 | IEC 60268-3:2013 (14.12.5) | 2nd-order harmonic distortion d2 (rel. total) | 0.099361 (+/-0.0001) | 0.099361 | 0 | &#9989; |
+| IEC 60268-4:2014 (11.1/11.3) | Microphone sensitivity level, 12.5 mV/Pa -> 20 lg 0.0125 dB re 1 V/Pa | -38.0618 dB (+/-0.00001 dB) | -38.0618 dB | 0 dB | &#9989; |
+| IEC 60268-4:2014 (12.2) | Effective frequency range = +/-3 dB tolerance crossings (40 Hz / 18 kHz) | 40 Hz / 18000 Hz (+/-3 dB tolerance crossings) | 40.000 Hz / 18000.0 Hz | 0.000 / -0.000 Hz | &#9989; |
+| IEC 60268-4:2014 (13.2.2) | Directivity index of the ideal cardioid, 10 lg 3 dB (11.2.2 a integral) | 4.771213 dB (+/-0.005 dB) | 4.771214 dB | 0 dB | &#9989; |
+| IEC 60268-4:2014 (17.2) | Equivalent noise level, 2.5 uV over 12.5 mV/Pa -> 200 uPa = 20 dB SPL | 20 dB SPL (+/-0 dB SPL) | 20 dB SPL | 0 dB SPL | &#9989; |
 | IEC 60268-3:2013 (14.12.7.2 g) | Modulation distortion d_m,2 (arithmetic sideband sum over U_2,f2) | 0.16 (+/-0.0001) | 0.16 | 0 | &#9989; |
 | IEC 60268-3:2013 (14.12.7.2 h) | Modulation distortion d_m,3 (arithmetic sideband sum over U_2,f2) | 0.08 (+/-0.0001) | 0.08 | 0 | &#9989; |
 | IEC 60268-3:2013 (14.12.8.1 a) | Difference-frequency distortion d_d,2 (over U_2,ref = 2 U_2,f2) | 0.03 (+/-0.0001) | 0.03 | 0 | &#9989; |

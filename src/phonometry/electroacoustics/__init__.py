@@ -22,6 +22,7 @@ from .distortion import (
 )
 from .frequency_response import FrequencyResponseResult, coherence, transfer_function
 from .loudspeaker import LoudspeakerCharacteristics, loudspeaker_characteristics
+from .microphone import MicrophoneCharacteristics, microphone_characteristics
 from .piston import (
     RadiatingPistonResult,
     piston_directivity,
@@ -39,6 +40,7 @@ __all__ = [
     "FrequencyResponseResult",
     "HarmonicDistortionResult",
     "LoudspeakerCharacteristics",
+    "MicrophoneCharacteristics",
     "ModulationDistortionResult",
     "RadiatingPistonResult",
     "SweptSineDistortionResult",
@@ -51,6 +53,7 @@ __all__ = [
     "idle_channel_noise",
     "itu_r_468_weighting",
     "loudspeaker_characteristics",
+    "microphone_characteristics",
     "modulation_distortion",
     "piston_directivity",
     "piston_reactance",

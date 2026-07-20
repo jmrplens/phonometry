@@ -390,6 +390,73 @@ def _loudspeaker_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iec60268_5_loudspeaker_example.pdf"
 
 
+def _microphone_example() -> Tuple[object, ReportMetadata, str]:
+    """IEC 60268-4 fiche: the rated characteristics of a cardioid condenser mic.
+
+    A synthetic free-field response of a phantom-powered studio condenser
+    microphone: flat around the 1 kHz reference with a gentle +2 dB presence
+    region near 9 kHz, a low-frequency roll-off crossing -3 dB near 30 Hz and a
+    high-frequency roll-off crossing -3 dB near 19 kHz, so the effective
+    frequency range (IEC 60268-4 12.2) sits inside the measured band. The rated
+    free-field sensitivity of 12,5 mV/Pa gives a sensitivity level of
+    20 lg 0,0125 = -38,1 dB re 1 V/Pa (11.1); the A-weighted inherent-noise
+    voltage yields the equivalent noise level (17.2); the ideal-cardioid
+    directional pattern at 1 kHz yields a directivity index of 10 lg 3 = 4,8 dB
+    (13.2.2); and the distortion-against-level curve places the overload sound
+    pressure level at the 0,5 % THD limit (15.2). The requirement is a maximum
+    equivalent noise level the example clears.
+    """
+    freqs = np.geomspace(20.0, 20000.0, 400)
+    response = (
+        -10.0 * np.log10(1.0 + (30.0 / freqs) ** 4)      # LF roll-off
+        - 10.0 * np.log10(1.0 + (freqs / 19000.0) ** 8)  # HF roll-off
+        + 2.0 * np.exp(-((np.log2(freqs / 9000.0)) ** 2) / 0.3)  # presence
+    )
+
+    angles = np.linspace(0.0, 179.0, 359)
+    cardioid_db = 20.0 * np.log10((1.0 + np.cos(np.radians(angles))) / 2.0)
+
+    thd_spl = np.linspace(100.0, 140.0, 81)
+    thd_percent = 0.5 * 10.0 ** ((thd_spl - 130.0) * 0.08)
+
+    noise_freqs = np.geomspace(20.0, 20000.0, 31)
+    noise_levels = 18.0 - 5.4 * np.log2(noise_freqs / 20.0) + 1.5 * np.sin(
+        np.log2(noise_freqs)
+    )
+
+    result = ph.microphone_characteristics(
+        freqs, response, 12.5,
+        tolerance_db=3.0,
+        rated_impedance=150.0,
+        minimum_load_impedance=1000.0,
+        noise_voltage=1.25e-6,
+        max_spl_thd_percent=0.5,
+        distortion=(thd_spl, thd_percent),
+        noise_spectrum=(noise_freqs, noise_levels),
+        polar=(angles, cardioid_db),
+        polar_frequency=1000.0,
+        powering="Phantom P48 (IEC 61938)",
+        supply_current_ma=3.1,
+    )
+    metadata = ReportMetadata(
+        specimen="Cardioid condenser microphone, 25 mm capsule",
+        client="Example client",
+        manufacturer="Example audio",
+        test_room="Anechoic chamber (example)",
+        mounting="Free field, reference axis towards the source at 1 m",
+        measurement_standard="IEC 60268-4",
+        temperature=21.0,
+        relative_humidity=45.0,
+        pressure=101.3,
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-60268-4",
+        requirement=16.0,
+    )
+    return result, metadata, "iec60268_4_microphone_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -403,6 +470,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _filter_class_1995_example,
     _iso4871_declaration_example,
     _loudspeaker_example,
+    _microphone_example,
 ]
 
 

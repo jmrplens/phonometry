@@ -334,6 +334,10 @@ from .electroacoustics.loudspeaker import (
     LoudspeakerCharacteristics,
     loudspeaker_characteristics,
 )
+from .electroacoustics.microphone import (
+    MicrophoneCharacteristics,
+    microphone_characteristics,
+)
 from .electroacoustics.piston import (
     RadiatingPistonResult,
     piston_directivity,
@@ -1061,6 +1065,8 @@ __all__ = [
     "RadiatingPistonResult",
     "loudspeaker_characteristics",
     "LoudspeakerCharacteristics",
+    "microphone_characteristics",
+    "MicrophoneCharacteristics",
     "program_loudness",
     "integrated_loudness",
     "loudness_range",

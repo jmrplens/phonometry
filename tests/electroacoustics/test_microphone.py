@@ -1,0 +1,345 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Tests for the IEC 60268-4 microphone rated characteristics and their
+``.report()`` fiche (characteristics model + PDF rendering).
+
+The four computed characteristics are checked against IEC 60268-4's own
+definitions as clean-room oracles:
+
+* **Sensitivity level** (11.1): ``L_M = 20 lg(M / 1 V/Pa)``, so 12,5 mV/Pa
+  returns ``20 lg 0,0125 = -38,06`` dB re 1 V/Pa (hand-computed) and
+  1 000 mV/Pa returns 0 dB exactly.
+* **Effective frequency range** (12.2): a response crossing the
+  ``+/- tolerance`` limits at chosen frequencies returns exactly those
+  frequencies, on either the lower or the upper limit.
+* **Directivity index** (13.2.2 via the 11.2.2 a) integral): the ideal
+  cardioid ``(1 + cos theta) / 2`` returns ``10 lg 3 = 4,77`` dB.
+* **Equivalent noise level** (17.2 d/e): ``20 lg((U_N / M) / 20 uPa)``, so
+  2,5 uV over 12,5 mV/Pa is 200 uPa, i.e. 20,0 dB exactly, and the overload
+  sound pressure level (15.2.2) is read from a distortion curve that reaches
+  the stated limit at a chosen level.
+
+The rendering itself is a feature, so those tests assert only structural facts:
+a valid one-page PDF, the rated table content, translated Spanish output and
+rejected engines/languages.
+"""
+
+from __future__ import annotations
+
+import math
+import os
+
+import numpy as np
+import pytest
+
+from phonometry import ReportMetadata, microphone_characteristics
+
+_PDF_MAGIC = b"%PDF"
+_M_MV = 12.5
+_TOL = 3.0
+
+
+def _flat_response() -> tuple[np.ndarray, np.ndarray]:
+    """A response flat at 0 dB with ramps crossing -3 dB at 40 and 18 000 Hz."""
+    f = np.geomspace(20.0, 20000.0, 400)
+    rel = np.zeros_like(f)
+    f_lo, f_hi = 40.0, 18000.0
+    f_a, f_b = 63.0, 15000.0
+    below = f < f_a
+    rel[below] = -_TOL * (np.log2(f_a / f[below]) / np.log2(f_a / f_lo))
+    above = f > f_b
+    rel[above] = -_TOL * (np.log2(f[above] / f_b) / np.log2(f_hi / f_b))
+    return f, rel
+
+
+def _assert_one_page(path: str) -> None:
+    from pypdf import PdfReader
+
+    with open(path, "rb") as handle:
+        assert handle.read(4) == _PDF_MAGIC
+    assert os.path.getsize(path) > 0
+    assert len(PdfReader(path).pages) == 1
+
+
+def _extract_text(path: str) -> str:
+    from pypdf import PdfReader
+
+    return "\n".join(page.extract_text() for page in PdfReader(path).pages)
+
+
+# --- IEC 60268-4 11.1/11.3 sensitivity level ---------------------------------
+
+
+def test_sensitivity_level_is_20lg_m_over_1v_pa() -> None:
+    """12,5 mV/Pa gives 20 lg 0,0125 = -38,06 dB re 1 V/Pa (11.1)."""
+    f, rel = _flat_response()
+    result = microphone_characteristics(f, rel, _M_MV, tolerance_db=_TOL)
+    assert result.sensitivity_level_db == pytest.approx(
+        20.0 * math.log10(0.0125), abs=1e-12
+    )
+    assert result.sensitivity_level_db == pytest.approx(-38.0618, abs=5e-5)
+    assert result.sensitivity_v_per_pa == pytest.approx(0.0125, rel=1e-12)
+
+
+def test_reference_sensitivity_gives_zero_level() -> None:
+    """M = 1 V/Pa (1 000 mV/Pa) is the reference: L_M = 0 dB exactly (11.1)."""
+    f, rel = _flat_response()
+    result = microphone_characteristics(f, rel, 1000.0, tolerance_db=_TOL)
+    assert result.sensitivity_level_db == pytest.approx(0.0, abs=1e-12)
+
+
+# --- IEC 60268-4 12.2 effective frequency range -------------------------------
+
+
+def test_effective_range_crosses_lower_limit_at_known_points() -> None:
+    """The band edges are the frequencies where the response crosses -tol (12.2)."""
+    f, rel = _flat_response()
+    result = microphone_characteristics(f, rel, _M_MV, tolerance_db=_TOL)
+    lo, hi = result.effective_range
+    assert lo == pytest.approx(40.0, rel=1e-6)
+    assert hi == pytest.approx(18000.0, rel=1e-6)
+
+
+def test_effective_range_crosses_upper_limit() -> None:
+    """A rising response bounds the range where it crosses +tol (12.2)."""
+    f, rel = _flat_response()
+    rel = rel.copy()
+    # A linear-in-log rise above 8 kHz crossing +3 dB at exactly 12 kHz.
+    above = f > 8000.0
+    rel[above] += _TOL * (np.log2(f[above] / 8000.0) / np.log2(12000.0 / 8000.0))
+    result = microphone_characteristics(f, rel, _M_MV, tolerance_db=_TOL)
+    lo, hi = result.effective_range
+    assert lo == pytest.approx(40.0, rel=1e-6)
+    assert hi == pytest.approx(12000.0, rel=1e-4)
+
+
+def test_response_is_normalized_at_reference_frequency() -> None:
+    """A constant offset is removed: the response is 0 dB at 1 kHz (12.1.1)."""
+    f, rel = _flat_response()
+    result = microphone_characteristics(f, rel + 7.0, _M_MV, tolerance_db=_TOL)
+    idx = int(np.argmin(np.abs(f - 1000.0)))
+    assert result.response_db[idx] == pytest.approx(0.0, abs=1e-9)
+    assert result.effective_range[0] == pytest.approx(40.0, rel=1e-6)
+
+
+# --- IEC 60268-4 13.2.2 directivity index -------------------------------------
+
+
+def test_cardioid_directivity_index_is_10lg3() -> None:
+    """The ideal cardioid returns D = 10 lg 3 = 4,77 dB (13.2.2 / 11.2.2 a)."""
+    f, rel = _flat_response()
+    angles = np.linspace(0.0, 179.9, 1800)
+    pattern = 20.0 * np.log10((1.0 + np.cos(np.radians(angles))) / 2.0)
+    result = microphone_characteristics(
+        f, rel, _M_MV, tolerance_db=_TOL, polar=(angles, pattern),
+        polar_frequency=1000.0,
+    )
+    assert result.directivity_index_db == pytest.approx(
+        10.0 * math.log10(3.0), abs=5e-3
+    )
+    # 11.2.2.1: diffuse-field level = free-field level - directivity index.
+    assert result.diffuse_field_sensitivity_level_db == pytest.approx(
+        result.sensitivity_level_db - result.directivity_index_db, abs=1e-12
+    )
+
+
+def test_omnidirectional_directivity_index_is_zero() -> None:
+    """A uniform pattern returns D = 0 dB (13.2.2)."""
+    f, rel = _flat_response()
+    angles = np.linspace(0.0, 180.0, 721)
+    result = microphone_characteristics(
+        f, rel, _M_MV, tolerance_db=_TOL, polar=(angles, np.zeros_like(angles))
+    )
+    # Trapezoidal quadrature of the 11.2.2 a) integral over 0,25 degree steps.
+    assert result.directivity_index_db == pytest.approx(0.0, abs=1e-4)
+
+
+def test_stated_directivity_index_is_kept() -> None:
+    """A stated directivity index overrides the computed one (13.2.1)."""
+    f, rel = _flat_response()
+    angles = np.linspace(0.0, 180.0, 721)
+    result = microphone_characteristics(
+        f, rel, _M_MV, tolerance_db=_TOL,
+        polar=(angles, np.zeros_like(angles)), directivity_index_db=4.5,
+    )
+    assert result.directivity_index_db == pytest.approx(4.5)
+
+
+def test_front_only_pattern_gives_no_directivity_index() -> None:
+    """A pattern that stops at 90 degrees cannot feed the 11.2.2 a) integral."""
+    f, rel = _flat_response()
+    angles = np.linspace(0.0, 90.0, 91)
+    result = microphone_characteristics(
+        f, rel, _M_MV, tolerance_db=_TOL, polar=(angles, np.zeros_like(angles))
+    )
+    assert result.directivity_index_db is None
+
+
+# --- IEC 60268-4 17.2 equivalent noise level and 15.2 overload SPL ------------
+
+
+def test_equivalent_noise_level_from_noise_voltage() -> None:
+    """2,5 uV over 12,5 mV/Pa is 200 uPa = 20,0 dB SPL exactly (17.2 d/e)."""
+    f, rel = _flat_response()
+    result = microphone_characteristics(
+        f, rel, _M_MV, tolerance_db=_TOL, noise_voltage=2.5e-6
+    )
+    assert result.equivalent_noise_level_db == pytest.approx(20.0, abs=1e-12)
+    # SNR re 1 Pa: 20 lg(1 Pa / 20 uPa) - L_N = 93,98 - 20,0.
+    assert result.signal_to_noise_ratio_db == pytest.approx(
+        20.0 * math.log10(1.0 / 20e-6) - 20.0, abs=1e-12
+    )
+
+
+def test_overload_spl_read_from_distortion_curve() -> None:
+    """The overload SPL is where the THD reaches the stated limit (15.2.2)."""
+    f, rel = _flat_response()
+    spl = np.linspace(100.0, 140.0, 81)  # includes 130,0 dB exactly
+    thd = 0.5 * 10.0 ** ((spl - 130.0) * 0.08)
+    result = microphone_characteristics(
+        f, rel, _M_MV, tolerance_db=_TOL,
+        max_spl_thd_percent=0.5, distortion=(spl, thd),
+    )
+    assert result.max_spl_db == pytest.approx(130.0, abs=1e-9)
+
+
+def test_stated_max_spl_is_kept() -> None:
+    """A stated overload SPL overrides the distortion-curve reading (15.2.1)."""
+    f, rel = _flat_response()
+    spl = np.linspace(100.0, 140.0, 81)
+    thd = 0.5 * 10.0 ** ((spl - 130.0) * 0.08)
+    result = microphone_characteristics(
+        f, rel, _M_MV, tolerance_db=_TOL, max_spl_db=132.0,
+        max_spl_thd_percent=0.5, distortion=(spl, thd),
+    )
+    assert result.max_spl_db == pytest.approx(132.0)
+
+
+def test_distortion_below_limit_gives_no_max_spl() -> None:
+    """A distortion curve that never reaches the limit yields no overload SPL."""
+    f, rel = _flat_response()
+    spl = np.linspace(100.0, 120.0, 41)
+    thd = np.full_like(spl, 0.05)
+    result = microphone_characteristics(
+        f, rel, _M_MV, tolerance_db=_TOL, distortion=(spl, thd)
+    )
+    assert result.max_spl_db is None
+
+
+# --- model validation ----------------------------------------------------------
+
+
+def test_sensitivity_must_be_positive() -> None:
+    f, rel = _flat_response()
+    with pytest.raises(ValueError, match="sensitivity_mv_per_pa"):
+        microphone_characteristics(f, rel, 0.0)
+
+
+def test_mismatched_response_lengths_rejected() -> None:
+    with pytest.raises(ValueError, match="equal length"):
+        microphone_characteristics([100.0, 200.0, 400.0], [0.0, 0.0], _M_MV)
+
+
+def test_reference_frequency_outside_band_rejected() -> None:
+    f, rel = _flat_response()
+    with pytest.raises(ValueError, match="reference_frequency"):
+        microphone_characteristics(f, rel, _M_MV, reference_frequency=30000.0)
+
+
+def test_noise_voltage_and_stated_level_conflict() -> None:
+    f, rel = _flat_response()
+    with pytest.raises(ValueError, match="not both"):
+        microphone_characteristics(
+            f, rel, _M_MV, noise_voltage=1e-6, equivalent_noise_level_db=14.0
+        )
+
+
+def test_no_noise_input_gives_no_noise_rows() -> None:
+    f, rel = _flat_response()
+    result = microphone_characteristics(f, rel, _M_MV, tolerance_db=_TOL)
+    assert result.equivalent_noise_level_db is None
+    assert result.signal_to_noise_ratio_db is None
+
+
+# --- rendering -------------------------------------------------------------------
+
+
+def _example_result():
+    f, rel = _flat_response()
+    angles = np.linspace(0.0, 179.0, 359)
+    pattern = 20.0 * np.log10((1.0 + np.cos(np.radians(angles))) / 2.0)
+    spl = np.linspace(100.0, 140.0, 81)
+    thd = 0.5 * 10.0 ** ((spl - 130.0) * 0.08)
+    nf = np.geomspace(20.0, 20000.0, 31)
+    nl = 18.0 - 5.4 * np.log2(nf / 20.0)
+    return microphone_characteristics(
+        f, rel, _M_MV, tolerance_db=_TOL, rated_impedance=150.0,
+        minimum_load_impedance=1000.0, noise_voltage=1.25e-6,
+        max_spl_thd_percent=0.5, distortion=(spl, thd), noise_spectrum=(nf, nl),
+        polar=(angles, pattern), polar_frequency=1000.0,
+        powering="Phantom P48 (IEC 61938)", supply_current_ma=3.1,
+    )
+
+
+def test_report_renders_one_page_with_rated_table(tmp_path) -> None:
+    """The fiche renders a valid one-page PDF listing the rated characteristics."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    result = _example_result()
+    md = ReportMetadata(
+        manufacturer="Example audio", specimen="Cardioid condenser microphone",
+        measurement_standard="IEC 60268-4", report_id="PHN-60268-4",
+        requirement=16.0,
+    )
+    out = tmp_path / "microphone.pdf"
+    returned = result.report(str(out), metadata=md)
+    assert returned == str(out)
+    _assert_one_page(str(out))
+    # The table cell labels can wrap across lines in the PDF text layer, so the
+    # assertions use single-line fragments.
+    text = _extract_text(str(out))
+    assert "Microphone characteristics" in text
+    assert "Free-field sensitivity" in text
+    assert "Rated impedance" in text
+    assert "Signal-to-noise ratio" in text
+    assert "PASS" in text
+
+
+def test_report_without_optional_panels(tmp_path) -> None:
+    """A response-only result (no polar/noise/distortion) still renders."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    f, rel = _flat_response()
+    result = microphone_characteristics(f, rel, _M_MV, tolerance_db=_TOL)
+    out = tmp_path / "microphone_min.pdf"
+    result.report(str(out))
+    _assert_one_page(str(out))
+
+
+def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
+    """language="es" renders a one-page Spanish fiche."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    result = _example_result()
+    out = tmp_path / "microphone_es.pdf"
+    result.report(str(out), language="es")
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "Características del micrófono" in text
+    assert "Sensibilidad en campo libre" in text
+
+
+def test_unknown_engine_rejected(tmp_path) -> None:
+    """An unknown rendering engine raises ValueError."""
+    result = _example_result()
+    out = str(tmp_path / "x.pdf")
+    with pytest.raises(ValueError, match="engine"):
+        result.report(out, engine="weasyprint")
+
+
+def test_unknown_language_rejected(tmp_path) -> None:
+    """An unknown fiche language raises ValueError."""
+    result = _example_result()
+    out = str(tmp_path / "bad.pdf")
+    with pytest.raises(ValueError, match="language"):
+        result.report(out, language="xx")

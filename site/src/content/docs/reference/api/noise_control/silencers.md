@@ -31,22 +31,31 @@ and a **side branch** of acoustic impedance `Z_b` is the shunt element
     [[ 1,       0 ],
      [ 1 / Z_b, 1 ]].
 
-**Transmission loss** from the compound matrix `T` (Bies Eq. (8.141), no
-flow; reduces to Eq. (8.148) for equal inlet/outlet areas):
+**Transmission loss** from the compound matrix `T` (Munjal, *Acoustics of
+Ducts and Mufflers* 2nd ed., Eq. (3.27), no flow; reduces to Bies Eq. (8.148)
+for equal inlet/outlet areas):
 
-    TL = 10 log10[ (Z1 / Zn) (1/4) | T11 + T12 / Zn + Z1 T21 + (Z1 / Zn) T22 |^2 ]
+    TL = 10 log10[ (Zn / Z1) (1/4) | T11 + T12 / Zn + Z1 T21 + (Z1 / Zn) T22 |^2 ]
 
-with `Z1 = rho c / S_in` and `Zn = rho c / S_out`. `TL` is the intrinsic
-attenuation for an anechoic termination. The **insertion loss** for a source of
-internal impedance `Z_s` radiating into a termination impedance `Z_r` is
-the extra attenuation of inserting the silencer in place of a direct
-connection,
+with `Z1 = rho c / S_in` and `Zn = rho c / S_out`. A zero-length element
+between unequal areas then reproduces the classic sudden-expansion result
+`TL = 10 log10[(1 + m)^2 / (4 m)]` with `m = S_out / S_in`, and the TL is
+the same from either side, as reciprocity of a passive two-port requires.
+Bies Eq. (8.141) prints this formula with impedance ratios on `T11` and
+`T22` (`Z_A1/Z_An` and `Z_An/Z_A1`) instead of the overall `Zn/Z1`
+prefactor; as printed it fails the sudden-expansion limit (see
+`docs/ERRATA.md`). `TL` is the intrinsic attenuation for an anechoic
+termination. The **insertion loss** for a source of internal impedance
+`Z_s` radiating into a termination impedance `Z_r` is the extra
+attenuation of inserting the silencer in place of a direct connection,
 
     IL = 20 log10 | (T11 Z_r + T12 + Z_s Z_r T21 + Z_s T22) / (Z_s + Z_r) |,
 
 which is `0` when the silencer reduces to a through connection (`T = I`)
-and equals the transmission loss for the anechoic reference
-`Z_s = rho c / S_in`, `Z_r = rho c / S_out`.
+and, for equal inlet/outlet areas, equals the transmission loss for the
+anechoic reference `Z_s = Z_r = rho c / S` (with unequal areas the direct
+connection contains the same area jump, so its mismatch loss cancels from
+the insertion loss but not from the transmission loss).
 
 **Simple expansion chamber.** A chamber of area `S_exp` and length `L`
 between pipes of area `S_duct` has the closed-form transmission loss (Bies

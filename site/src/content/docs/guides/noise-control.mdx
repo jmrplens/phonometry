@@ -17,7 +17,7 @@ references:
     edition: "2nd ed."
     publisher: "Wiley"
     doi: "10.1002/9781118443767"
-    note: "The transfer-matrix formulation and the element matrices behind §1."
+    note: "The transfer-matrix formulation, the element matrices and the transmission loss from the compound matrix (Eq. (3.27)) behind §1."
   - type: book
     authors: ["Vér, I. L.", "Beranek, L. L."]
     year: 2006
@@ -57,8 +57,18 @@ $$
 
 and a side branch of impedance $Z_b$ is the shunt
 $\left[\begin{smallmatrix} 1 & 0 \\ 1/Z_b & 1 \end{smallmatrix}\right]$. The
-**transmission loss** follows from the compound matrix $T$ (Bies Eq. (8.141);
-for equal inlet/outlet areas $S$, Eq. (8.148))
+**transmission loss** follows from the compound matrix $T$ with the port
+impedances $Z_1 = \rho c/S_\text{in}$ and $Z_n = \rho c/S_\text{out}$
+(Munjal Eq. (3.27); Bies Eq. (8.141) prints the $T_{11}$/$T_{22}$ impedance
+weights of this formula inverted and fails the sudden-expansion limit, see the
+[errata registry](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md))
+
+$$
+\mathrm{TL} = 10\log_{10}\!\left[\frac{Z_n}{Z_1}\,\tfrac{1}{4}\left|\,T_{11}
++ \tfrac{T_{12}}{Z_n} + Z_1\,T_{21} + \tfrac{Z_1}{Z_n}\,T_{22}\right|^2\right],
+$$
+
+which for equal inlet/outlet areas $S$ reduces to (Bies Eq. (8.148))
 
 $$
 \mathrm{TL} = 20\log_{10}\!\left(\tfrac{1}{2}\left|\,T_{11}

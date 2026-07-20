@@ -571,6 +571,38 @@ to the issuing body, with date and reference).
   ``test_high_frequency_density_asymptote``.
 - **Status:** unreported (textbook rather than a standard).
 
+## Bies, Hansen & Howard, Engineering Noise Control 5e (2017), Eq. (8.141)
+
+- **Location:** Section 8.9.1, Eq. (8.141) (printed p. 461), the transmission
+  loss of a muffler from the elements of its total four-pole matrix.
+- **The print:** TL = 10 lg[ ((1+Mₙ)/(1+M₁))² · ¼ · |(Z_A1/Z_An)·T11 +
+  T12/Z_An + Z_A1·T21 + (Z_An/Z_A1)·T22|² ], i.e. with the impedance ratio
+  Z_A1/Z_An weighting T11 and its inverse weighting T22.
+- **The problem:** the source the equation itself cites (Munjal, *Acoustics
+  of Ducts and Mufflers* 2e, Eq. (3.27), p. 105) carries the overall
+  prefactor Z_An/Z_A1 (equivalently √(S₁/Sₙ) inside a 20 lg form) with T11
+  unweighted and Z_A1/Z_An on T22. As printed, Eq. (8.141) fails the
+  sudden-expansion limit: a zero-length element (T = I) between S₁ = 0,01 m²
+  and Sₙ = 0,02 m² is a sudden area expansion with the classic
+  TL = 10 lg[(1+m)²/(4m)] = 0,512 dB (m = Sₙ/S₁ = 2), but the printed
+  equation gives ¼·(Z_A1/Z_An + Z_An/Z_A1)² = 1,938 dB. Reading the ratios
+  as an overall Z_A1/Z_An prefactor instead is also wrong: it gives 6,532 dB
+  on the same oracle and violates reciprocity (11,34 vs −0,70 dB for an
+  expansion chamber between unequal pipes; a negative TL for a passive
+  element). The misprint is invisible whenever the inlet and outlet areas
+  are equal, where every variant reduces to Eq. (8.148).
+- **Evidence:** numeric evaluation of the zero-length identity element and
+  of an unequal-port expansion chamber under the printed form, the inverted
+  prefactor and Munjal Eq. (3.27); only Munjal's form reproduces the
+  sudden-expansion classic (0,512 dB, both directions) and is reciprocal.
+- **Library behaviour:** `transmission_loss` in
+  [`silencers.py`](../src/phonometry/noise_control/silencers.py) implements
+  Munjal Eq. (3.27), with the sudden-expansion limit and TL reciprocity
+  pinned by regression tests
+  ([`tests/noise_control/test_silencers.py`](../tests/noise_control/test_silencers.py))
+  and a defensive note at the formula.
+- **Status:** unreported (textbook rather than a standard).
+
 ---
 
 ## Related source properties that are not errata

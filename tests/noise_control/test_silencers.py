@@ -6,7 +6,9 @@ Oracles: the simple-expansion-chamber closed form ``TL = 10 log10[1 + (1/4)
 (m = 2 -> 1.94, 4 -> 6.55, 8 -> 12.18, 16 -> 18.10 dB), the four-pole TL
 reducing to the side-branch closed form (Bies Eq. (8.73)), the quarter-wave
 tube tuning ``f = c/(4 l_e)`` (Example 8.1: 56.6 Hz), the Helmholtz resonance
-``f_0 = (c/2 pi) sqrt(S/(l_e V))``, matrix reciprocity, and limiting cases.
+``f_0 = (c/2 pi) sqrt(S/(l_e V))``, matrix reciprocity, the sudden-expansion
+limit ``TL = 10 log10[(1 + m)^2/(4 m)]`` of a zero-length element between
+unequal port areas (Munjal Eq. (3.27)), and limiting cases.
 """
 
 from __future__ import annotations
@@ -103,6 +105,44 @@ def test_insertion_loss_equals_tl_for_anechoic_reference() -> None:
     il = sl.insertion_loss(t, source_impedance=z, radiation_impedance=z)
     assert np.allclose(il, tl, atol=1e-9)
     assert il.max() > 3.0  # a real silencer gives a positive insertion loss
+
+
+def test_identity_element_is_sudden_expansion() -> None:
+    # A zero-length element (T = I) between unequal port areas is a sudden
+    # area change, with the classic TL = 10 log10[(1 + m)^2 / (4 m)],
+    # m = S_out / S_in: 0.512 dB for m = 2, and identical in both directions
+    # (the formula is invariant under m -> 1/m). Pins the Munjal Eq. (3.27)
+    # prefactor Zn/Z1; the misprinted Bies Eq. (8.141) gives 1.938 dB here
+    # and an inverted Z1/Zn prefactor gives 6.532 dB (see docs/ERRATA.md).
+    f = np.linspace(50.0, 500.0, 20)
+    ident = sl.duct_matrix(f, 0.0, 0.01)  # zero-length duct = identity
+    m = 2.0
+    oracle = 10.0 * np.log10((1.0 + m) ** 2 / (4.0 * m))
+    assert oracle == pytest.approx(0.512, abs=5e-4)
+    expansion = sl.transmission_loss(ident, inlet_area=0.01, outlet_area=0.02)
+    contraction = sl.transmission_loss(ident, inlet_area=0.02, outlet_area=0.01)
+    assert np.allclose(expansion, oracle, atol=1e-12)
+    assert np.allclose(contraction, oracle, atol=1e-12)
+
+
+def test_transmission_loss_reciprocity_unequal_ports() -> None:
+    # A lossless reciprocal two-port must show the same TL from either side.
+    # Reversing a two-port with det T = 1 exchanges T11 and T22; the port
+    # areas swap with it. Checks a chamber and an asymmetric two-duct cascade
+    # between unequal pipes, and that the TL of a passive element never goes
+    # negative.
+    f = np.linspace(50.0, 1500.0, 300)
+    chamber = sl.duct_matrix(f, 0.3, 0.04)
+    cascaded = sl.cascade(
+        sl.duct_matrix(f, 0.2, 0.03), sl.duct_matrix(f, 0.15, 0.05)
+    )
+    for t in (chamber, cascaded):
+        t_rev = t.copy()
+        t_rev[:, 0, 0], t_rev[:, 1, 1] = t[:, 1, 1].copy(), t[:, 0, 0].copy()
+        forward = sl.transmission_loss(t, inlet_area=0.01, outlet_area=0.02)
+        reverse = sl.transmission_loss(t_rev, inlet_area=0.02, outlet_area=0.01)
+        assert np.allclose(forward, reverse, atol=1e-9)
+        assert forward.min() > -1e-9
 
 
 def test_transfer_matrix_reciprocity() -> None:

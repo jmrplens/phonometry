@@ -49,6 +49,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   direction) and `φ = β − ε` for observers to port. The sign was inverted, so
   the lateral-directivity (engine-installation) correction of every banked
   segment was mirrored between the inside and outside of a turn.
+- `noise_control.silencers.transmission_loss` had the four-pole prefactor
+  inverted (`Z1/Zn` instead of `Zn/Z1`), overstating the transmission loss by
+  `20 lg(S_out/S_in)` whenever the inlet and outlet port areas differed: a
+  zero-length element between 0.01 and 0.02 m2 (a sudden expansion, classic
+  `TL = 10 lg[(1+m)^2/(4m)] = 0.512 dB`) came out as 6.532 dB, and the TL of
+  an unequal-port chamber was not reciprocal (11.34 vs -0.70 dB, a negative
+  loss for a passive element). The formula now follows Munjal, *Acoustics of
+  Ducts and Mufflers* 2e, Eq. (3.27), reproduces the sudden-expansion limit
+  exactly in both directions and is reciprocal; regression tests pin both.
+  The four shipped silencer builders call it with equal port areas, so their
+  results are unchanged. Bies 5e Eq. (8.141) as printed also fails the
+  sudden-expansion limit (1.938 dB) and is now registered in
+  `docs/ERRATA.md`.
 
 ### Changed
 

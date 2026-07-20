@@ -117,11 +117,14 @@ The ground impedance is either derived from an effective `flow_resistivity`
 (via the `delany_bazley` or `miki` model of
 [`phonometry.materials`](/phonometry/guides/porous-absorbers/), which model a
 semi-infinite porous ground) or supplied directly as a normalized complex
-`impedance` (a scalar, per-band array, or a `PorousMediumResult`), so a measured
-surface impedance in the `e^{-iωt}` convention (a passive ground has
-`Im(Z) < 0`, as the porous models return) can be used unchanged.
+`impedance` (a scalar, per-band array, or a `PorousMediumResult`). A plain
+`impedance` value is taken in the `e^{-iωt}` convention of Salomons, in which a
+passive ground has `Im(Z) > 0`; the porous models of `phonometry.materials`
+work in the opposite `e^{+jωt}` convention (`Im(Z) < 0`), so anything obtained
+from them (a `flow_resistivity` or a `PorousMediumResult`) is conjugated
+internally before it enters the Weyl-Van der Pol formulas.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_effect_spherical.svg" alt="Excess attenuation (level re free field) against frequency on a log axis for four ground types. Fresh snow (10 kPa) dips deepest and lowest in frequency, near minus 9 dB around 180 Hz; forest floor (50 kPa) and grassland (200 kPa) have progressively shallower, higher-frequency dips; asphalt (20000 kPa) hugs the plus 6 dB hard-ground enhancement limit until a deep dip near 3 kHz. A dotted line marks the plus 6 dB hard-ground limit and a solid line the 0 dB free field" width="90%" loading="eager" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_effect_spherical.svg" alt="Excess attenuation (level re free field) against frequency on a log axis for four ground types. Fresh snow (10 kPa) dips deepest and lowest in frequency, near minus 18 dB around 150 Hz; forest floor (50 kPa) reaches about minus 15 dB near 290 Hz and grassland (200 kPa) about minus 12 dB near 540 Hz; asphalt (20000 kPa) hugs the plus 6 dB hard-ground enhancement limit until a deep dip near 2.4 kHz. A dotted line marks the plus 6 dB hard-ground limit and a solid line the 0 dB free field" width="90%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>

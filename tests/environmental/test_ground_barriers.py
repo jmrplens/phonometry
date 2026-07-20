@@ -13,6 +13,8 @@ Clean-room anchors:
 
 Primary oracles (analytic limits + published statements):
 - hard ground |Z| -> inf: |Q| = 1 exactly, dL -> +6 dB in phase (Salomons 3.4);
+- Salomons Fig. D.3 (grassland sigma = 200 kPa s/m2, hs = hr = 2 m, r = 100 m):
+  the ground-effect dip reaches about -12.7 dB near 395 Hz;
 - sigma -> inf tends to the hard ground; grazing hs, hr -> 0 gives Rp -> -1;
 - reciprocity (swap source/receiver heights);
 - Kurze-Anderson N -> 0 -> 5 dB (Bies 5.138) and monotone growth in N;
@@ -62,11 +64,16 @@ def test_hard_ground_low_frequency_enhancement_is_6_db() -> None:
 
 
 @pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
-def test_excess_attenuation_never_exceeds_6_db_for_absorbing_ground() -> None:
-    # |Q| <= 1 (no surface wave for this geometry) bounds dL by +6 dB.
+def test_excess_attenuation_stays_near_the_6_db_bound() -> None:
+    # Physical anchor: the spherical-wave Q = Rp + (1 - Rp) F(w) is not an
+    # energy coefficient; its ground-wave term lets |Q| slightly exceed 1 at
+    # low frequency near grazing (the surface-wave contribution, Salomons
+    # Sec. 3.4, Attenborough Ch. 2), so dL may top +6 dB by a fraction of a
+    # dB. The pre-fix convention (conjugated impedance) suppressed this and
+    # pinned |Q| <= 1, which is not the physical behaviour.
     res = ground_effect(_BANDS, 1.0, 2.0, 100.0, flow_resistivity=2e5)
-    assert np.all(res.excess_attenuation <= 6.0 + 1e-6)
-    assert np.all(np.abs(res.reflection_coefficient) <= 1.0 + 1e-9)
+    assert np.all(res.excess_attenuation <= 6.5)
+    assert np.all(np.abs(res.reflection_coefficient) <= 1.15)
 
 
 def test_sigma_to_infinity_tends_to_hard_ground() -> None:
@@ -79,8 +86,9 @@ def test_sigma_to_infinity_tends_to_hard_ground() -> None:
 
 def test_grazing_incidence_plane_coefficient_tends_to_minus_one() -> None:
     # hs, hr -> 0 => cos(theta) -> 0 => Rp -> -1 (Salomons Eq. (D.59)).
-    q = spherical_reflection_coefficient(_BANDS, 12.0 - 6.0j, 1e-4, 1e-4, 100.0)
-    res = ground_effect(_BANDS, 1e-4, 1e-4, 100.0, impedance=12.0 - 6.0j)
+    # Im(Z) > 0: a passive ground in the e^{-i omega t} convention.
+    q = spherical_reflection_coefficient(_BANDS, 12.0 + 6.0j, 1e-4, 1e-4, 100.0)
+    res = ground_effect(_BANDS, 1e-4, 1e-4, 100.0, impedance=12.0 + 6.0j)
     assert np.all(np.real(res.plane_reflection_coefficient) < -0.9)
     assert q.shape == _BANDS.shape
 
@@ -100,6 +108,21 @@ def test_grassland_shows_a_ground_dip() -> None:
     assert res.excess_attenuation.min() < -2.0  # a genuine interference dip
 
 
+def test_salomons_fig_d3_grassland_dip() -> None:
+    # Physical anchor: Salomons, Computational Atmospheric Acoustics, Fig. D.3
+    # (grassland sigma = 200 kPa s/m2, hs = hr = 2 m, r = 100 m). The two-ray
+    # interference dip reaches about -12.7 dB near 395 Hz. Before the impedance
+    # time-convention fix (materials e^{+j omega t} fed unconjugated into the
+    # Salomons e^{-i omega t} formulas) the dip almost vanished (-0.55 dB).
+    freqs = np.linspace(50.0, 1000.0, 1901)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        res = ground_effect(freqs, 2.0, 2.0, 100.0, flow_resistivity=2e5)
+    i = int(np.argmin(res.excess_attenuation))
+    assert res.excess_attenuation[i] == pytest.approx(-12.7, abs=0.3)
+    assert 380.0 <= freqs[i] <= 410.0
+
+
 def test_impedance_from_porous_medium_result_matches_flow_resistivity() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -109,8 +132,21 @@ def test_impedance_from_porous_medium_result_matches_flow_resistivity() -> None:
     assert np.allclose(by_result.excess_attenuation, by_sigma.excess_attenuation)
 
 
+def test_user_impedance_convention_matches_flow_resistivity_path() -> None:
+    # A user-supplied array is e^{-i omega t} (Im(Z) > 0 for a passive ground):
+    # conjugating the materials' e^{+j omega t} impedance by hand must equal
+    # the internal flow_resistivity path exactly.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        z = np.conj(delany_bazley(_BANDS, 2e5).normalized_impedance)
+        by_array = ground_effect(_BANDS, 1.0, 1.5, 40.0, impedance=z)
+        by_sigma = ground_effect(_BANDS, 1.0, 1.5, 40.0, flow_resistivity=2e5)
+    assert np.all(np.imag(z) > 0.0)  # passive ground in e^{-i omega t}
+    assert np.allclose(by_array.excess_attenuation, by_sigma.excess_attenuation)
+
+
 def test_ground_effect_result_is_frozen_and_has_plot() -> None:
-    res = ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=10.0 - 5.0j)
+    res = ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=10.0 + 5.0j)
     assert isinstance(res, SphericalGroundResult)
     assert res.r_reflected > res.r_direct
     with pytest.raises(dataclasses.FrozenInstanceError):

@@ -101,8 +101,10 @@ split-step Fourier family as the ocean
 2. applies the free-space propagator `exp(i Δr (√(ka² − kz²) − ka))` together
    with the finite-impedance ground reflection
    `R(kz) = (kz Z − k0)/(kz Z + k0)` (Salomons Eq. H.28);
-3. transforms back and applies the refraction phase screen
-   `exp(i Δr (k(z) − ka))` (Eq. H.58).
+3. transforms back and adds the surface-wave residue of the reflection pole
+   at `kz = −k0/Z` (the third term of Eq. H.49, present for a passive ground,
+   `Im(Z) > 0`);
+4. applies the refraction phase screen `exp(i Δr (k(z) − ka))` (Eq. H.58).
 
 The source is a **Gaussian starter** with its ground image (Eqs. G.64, G.76)
 and an **absorbing layer** at the top of the grid (Sec. G.9) suppresses
@@ -122,9 +124,11 @@ pe.plot()                 # the range-height relative-level field
 ```
 
 The ground impedance is supplied directly (`impedance=`, a normalized complex
-value in the `e^{-iωt}` convention with `Im(Z) < 0` for a passive ground), as a
-`PorousMediumResult`, or from an effective `flow_resistivity` via the
-[porous models](porous-absorbers.md) of the materials domain.
+value in the `e^{-iωt}` convention of Salomons, with `Im(Z) > 0` for a passive
+ground), as a `PorousMediumResult`, or from an effective `flow_resistivity` via
+the [porous models](porous-absorbers.md) of the materials domain; the porous
+models work in the opposite `e^{+jωt}` convention, so their impedance is
+conjugated internally.
 
 ## 4. Validation
 
@@ -132,9 +136,10 @@ The models are anchored by independent oracles:
 
 - **Homogeneous limit → spherical ground effect.** With a zero gradient the
   GFPE field must reproduce the exact Weyl-Van der Pol
-  [`ground_effect`](ground-barriers.md) at every range. It does so to about
-  **0.1 dB** over grassland (source and receiver near the ground, 50 m to
-  1 km), and to the coherent **+6 dB** two-ray enhancement over a rigid ground.
+  [`ground_effect`](ground-barriers.md) at every range. It does so to a few
+  tenths of a dB over grassland on the default grid (source and receiver near
+  the ground, 50 m to 1 km), and to the coherent **+6 dB** two-ray enhancement
+  over a rigid ground.
 - **Exact ray geometry.** For a linear profile the traced ray is a circular arc
   whose fitted radius matches the closed-form `ray_curvature_radius` to machine
   precision, and the turning height matches `Rc(1 - cos θ0)`.

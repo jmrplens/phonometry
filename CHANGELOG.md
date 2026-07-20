@@ -62,6 +62,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   results are unchanged. Bies 5e Eq. (8.141) as printed also fails the
   sudden-expansion limit (1.938 dB) and is now registered in
   `docs/ERRATA.md`.
+- `environmental.ground_effect`, `environmental.spherical_reflection_coefficient`,
+  the ground-reflected paths of `environmental.barrier_insertion_loss` and the
+  ground condition of `environmental.atmospheric_parabolic_equation` now
+  conjugate the impedance obtained from the porous models of
+  `phonometry.materials` (the `flow_resistivity=` path and any
+  `PorousMediumResult`). The materials domain works in the `e^{+jωt}` time
+  convention (`Im(Z) < 0` for a passive medium) while the Salomons formulas
+  behind these functions require `e^{-iωt}` (`Im(Z) > 0`); the impedance used
+  to cross that boundary unconjugated, so the phase of the spherical-wave
+  reflection coefficient `Q` was wrong and the soft-ground interference dip
+  almost vanished (Salomons Fig. D.3 geometry, grassland
+  `σ = 200 kPa·s/m²`, `hs = hr = 2 m`, `r = 100 m`: the library gave a
+  `-0.55 dB` minimum where the correct dip is `-12.7 dB` near `395 Hz`, now
+  pinned by test and conformance oracle). User-supplied `impedance=` values are
+  now documented as `e^{-iωt}` with `Im(Z) > 0` for a passive ground (the
+  docstrings previously asserted the opposite sign), matching the convention of
+  `aircraft.rotorcraft_noise.ground_effect_adjustment`.
+- `environmental.atmospheric_parabolic_equation` adds the surface-wave term of
+  the GFPE range step (the residue of the ground-reflection pole at
+  `kz = -k0/Z`, third term of Salomons Eq. (H.49)), which is active for a
+  passive finite-impedance ground; without it the homogeneous-atmosphere field
+  drifted by up to about 1 dB from the Weyl-Van der Pol oracle once the
+  impedance convention was corrected.
 
 ### Changed
 

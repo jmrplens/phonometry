@@ -118,11 +118,16 @@ eta_ij = cg_i L_ij tau_ij / (2 pi**2 f S_i)                        (2.154)
 ```
 
 **Vibration reduction index (Hopkins Eq. 5.116).** The wave-approach value of
-the EN 12354 junction descriptor:
+the EN 12354 junction descriptor, with `fc_j` the critical frequency of the
+**receiving** plate and the reference frequency `f_ref = 1000 Hz`:
 
 ```text
-K_ij = 10 lg(1 / tau_ij) + 5 lg(fc_j / fc_i)                       (5.116)
+K_ij = 10 lg(1 / tau_ij) + 5 lg(fc_j / f_ref)                      (5.116)
 ```
+
+Combined with the reciprocity relationship below (`tau_bar_12 = chi
+tau_bar_21` with `chi = sqrt(fc_2 / fc_1)`) this form is symmetric,
+`K_ij = K_ji`, as EN 12354 and ISO 10848 require of the junction descriptor.
 
 **Reciprocity (Hopkins Eq. 5.7, the SEA consistency relationship).** The angular
 averages of the two directions are linked by
@@ -279,8 +284,10 @@ Bending-wave transmission of a rigid perpendicular plate junction.
 
 Builds the angle-resolved corner (and, for X / T-junction (1), straight)
 transmission coefficients of Hopkins Eqs 5.12/5.13 and their diffuse-field
-angular averages (Eq. 5.6) from the two plates' properties. For the in-line
-junction (normal incidence only) use
+angular averages (Eq. 5.6) from the two plates' properties, together with
+the thin-plate critical frequencies `fc = sqrt(12) c0**2 / (2 pi h cL)`
+(`c0 = 343 m/s`) used by the Eq. 5.116 vibration reduction index. For the
+in-line junction (normal incidence only) use
 [`inline_transmission_coefficient`](/phonometry/reference/api/vibration/junction-transmission/#inline_transmission_coefficient).
 
 **Parameters**
@@ -349,6 +356,8 @@ JunctionTransmissionResult(
     junction: str,
     chi: float,
     psi: float,
+    critical_frequency1: float,
+    critical_frequency2: float,
     angles_deg: np.ndarray,
     corner: np.ndarray,
     straight: np.ndarray | None,
@@ -366,6 +375,8 @@ Bending-wave transmission across a rigid plate junction (Hopkins 5.2.1.3).
 | `junction` | Junction type (`"X"`, `"T1"`, `"T2"` or `"L"`). |
 | `chi` | Wave parameter `chi` (Eq. 5.10). |
 | `psi` | Wave parameter `psi` (Eq. 5.11). |
+| `critical_frequency1` | Critical frequency `fc_1` of the source plate, in hertz (thin plate, `c0 = 343 m/s`). |
+| `critical_frequency2` | Critical frequency `fc_2` of the receiving plate, in hertz (thin plate, `c0 = 343 m/s`). |
 | `angles_deg` | Incidence-angle grid, in degrees. |
 | `corner` | Corner transmission coefficient `tau12(theta)` on the grid. |
 | `straight` | Straight-section coefficient `tau13(theta)` on the grid, or `None` when the junction has no straight section. |
@@ -376,10 +387,12 @@ Bending-wave transmission across a rigid plate junction (Hopkins 5.2.1.3).
 
 *property*
 
-Wave-approach `K_ij` of the corner path, in dB (Hopkins Eq. 5.116).
+Wave-approach `K_12` of the corner path, in dB (Hopkins Eq. 5.116).
 
-Uses `fc_j / fc_i = chi**2` (Eq. 5.10) so
-`K_12 = 10 lg(1 / tau_bar_12) + 10 lg(chi)`.
+`K_12 = 10 lg(1 / tau_bar_12) + 5 lg(fc_2 / 1000)` with the receiving
+plate's critical frequency `fc_2`. The value is symmetric: building
+the reverse junction (plates swapped, and for a T-junction the matching
+constants `T1` \<-> `T2`) gives the same `K_21 = K_12`.
 
 ### JunctionTransmissionResult.plot()
 
@@ -435,25 +448,24 @@ Defined only for the X-junction and T-junction (1); both incidence regimes
 ```python
 wave_vibration_reduction_index(
     transmission_coefficient: ArrayLike,
-    critical_frequency_source: float | None = None,
-    critical_frequency_receiver: float | None = None,
+    critical_frequency_receiver: float,
 ) -> NDArray[np.float64]
 ```
 
 Vibration reduction index from a transmission coefficient (Hopkins 5.116).
 
-`K_ij = 10 lg(1 / tau_ij) + 5 lg(fc_j / fc_i)` with `i` the source and
-`j` the receiving plate. When the critical frequencies are omitted the
-second term is dropped (it vanishes for identical plates, where
-`fc_j = fc_i`).
+`K_ij = 10 lg(1 / tau_ij) + 5 lg(fc_j / f_ref)` with `fc_j` the
+critical frequency of the **receiving** plate and the reference frequency
+`f_ref = 1000 Hz`. Because the angular-average transmission coefficients
+satisfy the reciprocity relationship `tau_bar_ij = tau_bar_ji
+sqrt(fc_j / fc_i)` (Eq. 5.7), this form is symmetric: `K_ij = K_ji`.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `transmission_coefficient` | `tau_ij` (scalar or array, > 0). |
-| `critical_frequency_source` | Critical frequency `fc_i` of the source plate, in hertz (> 0), or `None`. |
-| `critical_frequency_receiver` | Critical frequency `fc_j` of the receiving plate, in hertz (> 0), or `None`. |
+| `critical_frequency_receiver` | Critical frequency `fc_j` of the receiving plate, in hertz (> 0). |
 
 **Returns:** The vibration reduction index `K_ij`, in dB.
 
@@ -461,4 +473,4 @@ second term is dropped (it vanishes for identical plates, where
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive `tau`, or exactly one critical frequency supplied. |
+| ValueError | for a non-positive `tau` or `fc_j`. |

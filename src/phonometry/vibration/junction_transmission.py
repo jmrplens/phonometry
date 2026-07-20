@@ -97,9 +97,14 @@ of incidence is equally probable and the incident intensity carries a
     eta_ij = cg_i L_ij tau_ij / (2 pi**2 f S_i)                        (2.154)
 
 **Vibration reduction index (Hopkins Eq. 5.116).** The wave-approach value of
-the EN 12354 junction descriptor::
+the EN 12354 junction descriptor, with ``fc_j`` the critical frequency of the
+**receiving** plate and the reference frequency ``f_ref = 1000 Hz``::
 
-    K_ij = 10 lg(1 / tau_ij) + 5 lg(fc_j / fc_i)                       (5.116)
+    K_ij = 10 lg(1 / tau_ij) + 5 lg(fc_j / f_ref)                      (5.116)
+
+Combined with the reciprocity relationship below (``tau_bar_12 = chi
+tau_bar_21`` with ``chi = sqrt(fc_2 / fc_1)``) this form is symmetric,
+``K_ij = K_ji``, as EN 12354 and ISO 10848 require of the junction descriptor.
 
 **Reciprocity (Hopkins Eq. 5.7, the SEA consistency relationship).** The angular
 averages of the two directions are linked by
@@ -121,6 +126,12 @@ from .._internal.validation import require_choice, require_positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+
+#: Reference frequency ``f_ref`` of Hopkins Eq. 5.116, in Hz.
+_REFERENCE_FREQUENCY: float = 1000.0
+
+#: Speed of sound in air ``c0`` used for the plate critical frequencies, m/s.
+_SPEED_OF_SOUND: float = 343.0
 
 #: Junction constants ``(J1, J2, J3)`` for the perpendicular junctions
 #: (Hopkins Eq. 5.12/5.13). ``J3 is None`` where no straight section exists.
@@ -182,6 +193,18 @@ def junction_wave_parameters(
     chi = math.sqrt(hc1 / hc2)
     psi = (hc2 * r2) / (hc1 * r1)
     return chi, psi
+
+
+def _critical_frequency(thickness: float, wave_speed: float) -> float:
+    """Thin-plate critical frequency ``fc = sqrt(12) c0**2 / (2 pi h cL)``.
+
+    Hopkins Eq. 2.201 (``fc = (c0**2 / 2 pi) sqrt(m'' / B')``) written for a
+    homogeneous isotropic plate, where ``B' = m'' cL**2 h**2 / 12``, with the
+    speed of sound in air fixed at ``c0 = 343 m/s``.
+    """
+    return math.sqrt(12.0) * _SPEED_OF_SOUND**2 / (
+        2.0 * math.pi * thickness * wave_speed
+    )
 
 
 def _junction(junction: str) -> tuple[float, float, float | None]:
@@ -382,40 +405,28 @@ def coupling_loss_factor(
 
 def wave_vibration_reduction_index(
     transmission_coefficient: ArrayLike,
-    critical_frequency_source: float | None = None,
-    critical_frequency_receiver: float | None = None,
+    critical_frequency_receiver: float,
 ) -> NDArray[np.float64]:
     """Vibration reduction index from a transmission coefficient (Hopkins 5.116).
 
-    ``K_ij = 10 lg(1 / tau_ij) + 5 lg(fc_j / fc_i)`` with ``i`` the source and
-    ``j`` the receiving plate. When the critical frequencies are omitted the
-    second term is dropped (it vanishes for identical plates, where
-    ``fc_j = fc_i``).
+    ``K_ij = 10 lg(1 / tau_ij) + 5 lg(fc_j / f_ref)`` with ``fc_j`` the
+    critical frequency of the **receiving** plate and the reference frequency
+    ``f_ref = 1000 Hz``. Because the angular-average transmission coefficients
+    satisfy the reciprocity relationship ``tau_bar_ij = tau_bar_ji
+    sqrt(fc_j / fc_i)`` (Eq. 5.7), this form is symmetric: ``K_ij = K_ji``.
 
     :param transmission_coefficient: ``tau_ij`` (scalar or array, > 0).
-    :param critical_frequency_source: Critical frequency ``fc_i`` of the source
-        plate, in hertz (> 0), or ``None``.
     :param critical_frequency_receiver: Critical frequency ``fc_j`` of the
-        receiving plate, in hertz (> 0), or ``None``.
+        receiving plate, in hertz (> 0).
     :return: The vibration reduction index ``K_ij``, in dB.
-    :raises ValueError: for a non-positive ``tau``, or exactly one critical
-        frequency supplied.
+    :raises ValueError: for a non-positive ``tau`` or ``fc_j``.
     """
     tau = np.asarray(transmission_coefficient, dtype=np.float64)
     if np.any(tau <= 0.0):
         raise ValueError("'transmission_coefficient' must be positive.")
-    term = 10.0 * np.log10(1.0 / tau)
-    if (critical_frequency_source is None) != (critical_frequency_receiver is None):
-        raise ValueError(
-            "supply both critical frequencies or neither."
-        )
-    if critical_frequency_source is not None and critical_frequency_receiver is not None:
-        fci = require_positive(critical_frequency_source, "critical_frequency_source")
-        fcj = require_positive(
-            critical_frequency_receiver, "critical_frequency_receiver"
-        )
-        term = term + 5.0 * math.log10(fcj / fci)
-    return np.asarray(term, dtype=np.float64)
+    fcj = require_positive(critical_frequency_receiver, "critical_frequency_receiver")
+    kij = 10.0 * np.log10(1.0 / tau) + 5.0 * math.log10(fcj / _REFERENCE_FREQUENCY)
+    return np.asarray(kij, dtype=np.float64)
 
 
 @dataclass(frozen=True)
@@ -425,6 +436,10 @@ class JunctionTransmissionResult:
     :ivar junction: Junction type (``"X"``, ``"T1"``, ``"T2"`` or ``"L"``).
     :ivar chi: Wave parameter ``chi`` (Eq. 5.10).
     :ivar psi: Wave parameter ``psi`` (Eq. 5.11).
+    :ivar critical_frequency1: Critical frequency ``fc_1`` of the source
+        plate, in hertz (thin plate, ``c0 = 343 m/s``).
+    :ivar critical_frequency2: Critical frequency ``fc_2`` of the receiving
+        plate, in hertz (thin plate, ``c0 = 343 m/s``).
     :ivar angles_deg: Incidence-angle grid, in degrees.
     :ivar corner: Corner transmission coefficient ``tau12(theta)`` on the grid.
     :ivar straight: Straight-section coefficient ``tau13(theta)`` on the grid,
@@ -436,6 +451,8 @@ class JunctionTransmissionResult:
     junction: str
     chi: float
     psi: float
+    critical_frequency1: float
+    critical_frequency2: float
     angles_deg: np.ndarray
     corner: np.ndarray
     straight: np.ndarray | None
@@ -444,13 +461,15 @@ class JunctionTransmissionResult:
 
     @property
     def corner_reduction_index(self) -> float:
-        """Wave-approach ``K_ij`` of the corner path, in dB (Hopkins Eq. 5.116).
+        """Wave-approach ``K_12`` of the corner path, in dB (Hopkins Eq. 5.116).
 
-        Uses ``fc_j / fc_i = chi**2`` (Eq. 5.10) so
-        ``K_12 = 10 lg(1 / tau_bar_12) + 10 lg(chi)``.
+        ``K_12 = 10 lg(1 / tau_bar_12) + 5 lg(fc_2 / 1000)`` with the receiving
+        plate's critical frequency ``fc_2``. The value is symmetric: building
+        the reverse junction (plates swapped, and for a T-junction the matching
+        constants ``T1`` <-> ``T2``) gives the same ``K_21 = K_12``.
         """
-        kij = wave_vibration_reduction_index(self.corner_average) + 10.0 * math.log10(
-            self.chi
+        kij = wave_vibration_reduction_index(
+            self.corner_average, self.critical_frequency2
         )
         return float(kij)
 
@@ -483,8 +502,10 @@ def junction_transmission(
 
     Builds the angle-resolved corner (and, for X / T-junction (1), straight)
     transmission coefficients of Hopkins Eqs 5.12/5.13 and their diffuse-field
-    angular averages (Eq. 5.6) from the two plates' properties. For the in-line
-    junction (normal incidence only) use
+    angular averages (Eq. 5.6) from the two plates' properties, together with
+    the thin-plate critical frequencies ``fc = sqrt(12) c0**2 / (2 pi h cL)``
+    (``c0 = 343 m/s``) used by the Eq. 5.116 vibration reduction index. For the
+    in-line junction (normal incidence only) use
     :func:`inline_transmission_coefficient`.
 
     :param junction: ``"X"``, ``"T1"``, ``"T2"`` or ``"L"``.
@@ -534,6 +555,8 @@ def junction_transmission(
         junction=name,
         chi=chi,
         psi=psi,
+        critical_frequency1=_critical_frequency(thickness1, wave_speed1),
+        critical_frequency2=_critical_frequency(thickness2, wave_speed2),
         angles_deg=grid,
         corner=corner,
         straight=straight,

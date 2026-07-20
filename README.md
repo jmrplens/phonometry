@@ -15,7 +15,7 @@
 
 > *phonometry* — the measurement of sound. Formerly published as **PyOctaveBand**.
 
-Acoustic measurement toolkit for Python: fractional octave-band filter banks, frequency and time weighting, and sound level metrology — conformance-tested against **IEC 61260-1:2014 / ANSI S1.11-2004** (filters) and **IEC 61672-1:2013** (weighting and levels) class 1 tolerance limits.
+Acoustic measurement toolkit for Python, from fractional octave-band filters, weighting and sound level metrology to psychoacoustics, rooms and buildings, vibration, environmental and aircraft noise, underwater acoustics, electroacoustics and wave simulation. Every metric is conformance-tested against its governing standard (371 checks across 46 domains and 235 standards), with class 1 filters per **IEC 61260-1:2014 / ANSI S1.11-2004** and class 1 weightings and levels per **IEC 61672-1:2013**.
 
 <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison.svg" alt="Magnitude response comparison of the five filter architectures for the 1 kHz octave band, with a zoom at the -3 dB crossover" width="80%">
 
@@ -23,7 +23,7 @@ Acoustic measurement toolkit for Python: fractional octave-band filter banks, fr
 
 - 🎛️ 1/1, 1/3 and arbitrary fractional octave filter banks (stable SOS + multirate decimation)
 - 🏗️ Five architectures: Butterworth, Chebyshev I/II, Elliptic, Bessel — all with −3 dB points on the ANSI band edges
-- 🔊 A/C/Z frequency weighting within IEC 61672-1 class 1 tolerances
+- 🔊 A/C/Z frequency weighting within IEC 61672-1 class 1 tolerances, plus G weighting for infrasound (ISO 7196)
 - ⏱️ Fast/Slow/Impulse time ballistics, `Leq`, `LAeq` and `L10/L50/L90` statistical levels
 - 🗺️ Octave spectrogram (band levels over time) and zero-phase offline filtering
 - 🧠 Loudness in sones three ways: Zwicker (ISO 532-1 Annex B validated), Moore-Glasberg stationary & time-varying (ISO 532-2/3) and Sottek Hearing Model (ECMA-418-2); DIN 45692 sharpness, ISO 226:2023 contours
@@ -33,7 +33,16 @@ Acoustic measurement toolkit for Python: fractional octave-band filter banks, fr
 - ↗️ Two-microphone sound intensity (IEC 61043) with ISO 9614-1 field indicators
 - 🏛️ Room & building acoustics: swept-sine/MLS impulse responses (ISO 18233), EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), open-plan speech metrics (ISO 3382-3), field airborne + impact + façade insulation with R′w/DnT,w/L′nT,w/D2m,nT,w and C/Ctr/CI (ISO 16283-1/2/3, ISO 717-1/2), laboratory R/Ln (ISO 10140), flanking-transmission prediction of R′w/L′n,w (EN 12354-1/2), measurement uncertainty (ISO 12999-1), sound absorption (ISO 354)
 - 🌬️ Outdoor propagation & occupational exposure: atmospheric absorption α(f) (ISO 9613-1), the ISO 9613-2 general method (divergence + atmospheric + ground + barrier terms) with a per-term octave-band breakdown, and daily noise exposure LEX,8h with task/job/full-day strategies and Annex C uncertainty (ISO 9612)
-- 🔊 Sound power LW three ways: enveloping-surface pressure (ISO 3744/3746), reverberation-room precision with Waterhouse/C1/C2 (ISO 3741), intensity scanning with field indicators and grade (ISO 9614-2)
+- 🔊 Sound power LW five ways: enveloping-surface pressure (ISO 3744/3746), reverberation-room precision with Waterhouse/C1/C2 (ISO 3741), intensity scanning with field indicators and grade (ISO 9614-2), precision anechoic rooms (ISO 3745) and precision intensity scanning (ISO 9614-3), plus ISO 4871 noise-emission declarations
+- 🦻 Hearing: age-related threshold distributions (ISO 7029) and noise-induced permanent threshold shift with HTLAN (ISO 1999)
+- 🧱 Materials: absorption ratings αw (ISO 11654), impedance-tube absorption (ISO 10534-2), porous-absorber models, airflow resistance, scattering and diffusion (ISO 17497), dynamic stiffness
+- 🔩 Vibration & structure-borne sound: mobility and FRFs (ISO 7626), isolator transfer stiffness (ISO 10846), sound power from surface vibration (ISO/TS 7849), reception-plate power (EN 15657), installed-source prediction (EN 12354-5) and human vibration (ISO 2631-1/-5, ISO 5349)
+- ✈️ Aircraft noise: EPNL certification chain (ICAO Annex 16) with IEC 61265 verification and SAE ARP 5534 absorption, ECAC Doc 29 airport contours with the EASA ANP fleet database, and the ECAC Doc 32 rotorcraft hemisphere method
+- 🌊 Underwater acoustics: ISO 18405 levels re 1 µPa, ship radiated noise (ISO 17208-1/2), pile driving (ISO 18406), sonar equation, Wenz/JOMOPANS-ECHO ambient noise, and transmission loss from spreading laws to normal-mode, ray and parabolic-equation solvers
+- 🔈 Electroacoustics: distortion per IEC 60268-3 (THD, THD+N, SMPTE/CCIF intermodulation, DIM), frequency response and coherence, rigid-piston radiation, and loudspeaker/microphone rated characteristics (IEC 60268-5/-4)
+- 🔇 Noise control: silencer insertion loss, enclosures and HVAC spectra
+- 🌐 Deterministic 2D FDTD wave simulation with sources, probes, rasterised obstacles and rigid/impedance/absorbing boundaries
+- 📄 Typed, frozen result dataclasses with `.plot(language="en"|"es")` figures and normative `.report()` PDF fiches (ISO 717, ISO 11654, ISO 532-1, EBU R 128, ICAO EPNL, IEC 61260-1, ISO 4871, IEC 60268-5/-4); documentation fully in English and Spanish
 - 📏 Physical SPL calibration with IEC 60942:2017 stability validation, and dBFS modes
 - 📉 Calibrated spectral analysis (Bendat & Piersol): PSD/CSD with chi-square confidence intervals and random errors, coherent output spectrum & spectral SNR, 1/n-octave smoothing, exact-slope colored-noise generators
 - ⏱️ Correlation & time-delay estimation (Bendat & Piersol, Knapp & Carter): biased/unbiased/coefficient correlation with random errors, GCC with Roth/SCOT/PHAT/ML weightings, sub-sample IR delay & alignment, Hilbert envelope with instantaneous frequency
@@ -46,7 +55,7 @@ Acoustic measurement toolkit for Python: fractional octave-band filter banks, fr
 pip install phonometry
 ```
 
-Optional extras: `phonometry[plot]` (matplotlib for response plots and result `.plot()` methods), `phonometry[perf]` (numba for faster impulse ballistics), `phonometry[full]` (both).
+Optional extras: `phonometry[plot]` (matplotlib for response plots and result `.plot()` methods), `phonometry[perf]` (numba for faster impulse ballistics), `phonometry[report]` (reportlab and svglib, so result `.report()` methods can render normative PDF fiches), `phonometry[full]` (all of the above).
 
 ## 📚 Documentation
 
@@ -110,7 +119,7 @@ print(f"Bands: {freq}")
 print(f"SPL [dB]: {spl}")
 ```
 
-The library is organized into twelve domain namespaces; every public name is
+The library is organized into fifteen domain namespaces; every public name is
 also re-exported at the top level, so `from phonometry import octave_filter`
 keeps working:
 

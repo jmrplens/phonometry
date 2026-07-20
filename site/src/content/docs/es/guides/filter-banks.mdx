@@ -15,7 +15,7 @@ references:
     title: "Electroacoustics — Octave-band and fractional-octave-band filters"
     designation: "IEC 61260:1995"
     url: "https://webstore.iec.ch/en/publication/5065"
-    note: "La primera edición retirada cuya Tabla 1 aporta la máscara de clase 0 más estricta que ofrece edition=\"1995\", y el convenio de bordes de banda sobre el que cada banco sitúa sus puntos de −3 dB."
+    note: "La primera edición retirada cuya Tabla 1 aporta la máscara de clase 0 más estricta que ofrece edition='1995', y el convenio de bordes de banda sobre el que cada banco sitúa sus puntos de −3 dB."
   - type: standard
     organization: "American National Standards Institute"
     year: 2004
@@ -691,6 +691,25 @@ el repositorio; haz clic en la vista previa para abrir el PDF.
 	title="Informe de ejemplo de conformidad de clase de filtro IEC 61260-1 (PDF)"
 	description="Ficha de conformidad de clase de filtro de una página: una cabecera de metadatos, una tabla de clasificación por bandas con la clase alcanzada y el margen vinculante de cada banda de octava, la atenuación relativa medida de la banda de peor margen superpuesta sobre el corredor de aceptación verde de clase 1, el resultado encuadrado Class 1 - COMPLIES (margin +0.40 dB) y un veredicto PASS frente a la clase 1 exigida."
 	caption="Ficha de conformidad de clase de filtro (FilterComplianceResult.report), clase alcanzada con el margen vinculante en dB y la atenuación relativa medida sobre el corredor de la Tabla 1."
+/>
+
+Pasar `edition="1995"` verifica contra la máscara más antigua de IEC 61260:1995 /
+ANSI S1.11-2004, que conserva la **clase 0** más estricta que la edición de 2014
+eliminó, de modo que un banco de orden más alto puede certificarse a clase 0:
+
+```python
+bank = OctaveFilterBank(fs=48000, fraction=1, order=8, limits=[250, 4000])
+result = filter_class_compliance(bank, edition="1995")   # overall_class == 0
+result.report("iec61260_1995.pdf",
+              metadata=ReportMetadata(measurement_standard="IEC 61260:1995",
+                                      required_class=0))   # -> Class 0 - COMPLIES
+```
+
+<ReportPreview
+	name="iec61260_filter_1995_example"
+	title="Informe de ejemplo de conformidad de clase 0 IEC 61260:1995 (PDF)"
+	description="Ficha de conformidad de clase de filtro de una página bajo la edición de 1995: una tabla de clasificación por bandas con cada banda de octava alcanzando la clase 0, la atenuación relativa medida superpuesta sobre el corredor de aceptación verde de clase 0, el resultado encuadrado Class 0 - COMPLIES (margin +0.15 dB) y un veredicto PASS frente a la clase 0 exigida."
+	caption="La clase 0 la conserva la edición IEC 61260:1995 / ANSI S1.11-2004 (edition='1995'); la edición de 2014 solo mantiene las clases 1 y 2."
 />
 
 ## 7. Descomposición de la señal y estabilidad

@@ -77,6 +77,19 @@ def test_class1_bank_reports_complies(tmp_path) -> None:
     _assert_one_page(str(out))
 
 
+def test_1995_edition_reports_class0(tmp_path) -> None:
+    """The 1995 edition keeps class 0; a high-order bank renders a Class 0 fiche."""
+    bank = OctaveFilterBank(fs=48000, fraction=1, order=8, limits=[250, 4000])
+    result = filter_class_compliance(bank, edition="1995")
+    assert result.edition == "1995"
+    assert result.overall_class == 0
+    assert 0 in result.available_classes()  # class 0 only exists in the 1995 mask
+    out = tmp_path / "iec1995.pdf"
+    result.report(str(out), metadata=ReportMetadata(
+        measurement_standard="IEC 61260:1995", required_class=0))
+    _assert_one_page(str(out))
+
+
 def test_full_metadata_renders_one_page(tmp_path) -> None:
     """A populated ReportMetadata renders a one-page filter-compliance fiche."""
     result = filter_class_compliance(_class1_bank())

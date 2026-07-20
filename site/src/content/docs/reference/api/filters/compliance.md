@@ -138,6 +138,18 @@ holding a reference to the (possibly stateful) bank.
 | `fs` | The bank's full sampling rate in Hz. |
 | `num_points` | Frequency grid points per band used by the verification, retained so the redrawn curve matches the analysed grid. |
 
+### FilterComplianceResult.available_classes()
+
+```python
+FilterComplianceResult.available_classes() -> List[int]
+```
+
+The performance classes carried by the per-band verdict dictionaries.
+
+Reads the `margin_class<n>_db` keys of a band verdict, so it reflects
+the edition (the 1995 edition adds class 0; the 2014 edition keeps only
+classes 1 and 2).
+
 ### FilterComplianceResult.plot()
 
 ```python
@@ -151,6 +163,17 @@ acceptance corridor of the achieved (or, when non-compliant, the
 loosest) class; see `phonometry._plot.metrology.plot_filter_class`.
 Requires matplotlib (`pip install phonometry[plot]`) and returns the
 `Axes`.
+
+### FilterComplianceResult.reference_class()
+
+```python
+FilterComplianceResult.reference_class() -> int
+```
+
+The class whose corridor the fiche/plot overlays.
+
+The achieved overall class when the bank complies, else the loosest
+class of the edition (the one it comes closest to meeting).
 
 ### FilterComplianceResult.report()
 

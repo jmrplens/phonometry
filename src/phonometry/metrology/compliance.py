@@ -353,6 +353,30 @@ class FilterComplianceResult:
     fs: float
     num_points: int
 
+    def available_classes(self) -> List[int]:
+        """The performance classes carried by the per-band verdict dictionaries.
+
+        Reads the ``margin_class<n>_db`` keys of a band verdict, so it reflects
+        the edition (the 1995 edition adds class 0; the 2014 edition keeps only
+        classes 1 and 2).
+        """
+        prefix, suffix = "margin_class", "_db"
+        return sorted(
+            int(key[len(prefix):-len(suffix)])
+            for key in self.bands[0]
+            if key.startswith(prefix) and key.endswith(suffix)
+        )
+
+    def reference_class(self) -> int:
+        """The class whose corridor the fiche/plot overlays.
+
+        The achieved overall class when the bank complies, else the loosest
+        class of the edition (the one it comes closest to meeting).
+        """
+        if self.overall_class is not None:
+            return self.overall_class
+        return max(self.available_classes())
+
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
         """Plot the worst-margin band against its class-limit corridor.
 

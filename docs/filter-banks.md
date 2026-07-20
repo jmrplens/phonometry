@@ -611,9 +611,27 @@ result.report(
 )                                        # -> Class 1 - COMPLIES, PASS
 ```
 
-The rendered example fiche lives at
-[`.github/reports/iec61260_filter_example.pdf`](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61260_filter_example.pdf)
-(regenerated with `make reports`).
+Passing `edition="1995"` verifies against the older IEC 61260:1995 /
+ANSI S1.11-2004 mask, which keeps the stricter **class 0** that the 2014 edition
+dropped; a higher-order bank can then be certified to class 0:
+
+```python
+bank = OctaveFilterBank(fs=48000, fraction=1, order=8, limits=[250, 4000])
+result = filter_class_compliance(bank, edition="1995")   # overall_class == 0
+result.report(
+    "iec61260_1995.pdf",
+    metadata=ReportMetadata(
+        measurement_standard="IEC 61260:1995",
+        required_class=0,                # class 0 (1995 edition) required
+    ),
+)                                        # -> Class 0 - COMPLIES, PASS
+```
+
+Both rendered example fiches live under `.github/reports/` (regenerated with
+`make reports`): the 2014-edition class-1
+[`iec61260_filter_example.pdf`](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61260_filter_example.pdf)
+and the 1995-edition class-0
+[`iec61260_filter_1995_example.pdf`](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61260_filter_1995_example.pdf).
 
 ## 7. Signal Decomposition and Stability
 

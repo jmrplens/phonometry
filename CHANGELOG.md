@@ -27,8 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   gains an optional `required_class` field (0, 1 or 2); when supplied, the fiche
   adds a PASS/FAIL verdict row that passes when the achieved overall class is at
   least as strict as the required one. `verify_filter_class` keeps its existing
-  dictionary return unchanged. A rendered example fiche is kept under
-  `.github/reports/`, regenerated with `make reports`
+  dictionary return unchanged. Selecting `edition="1995"` verifies against the
+  IEC 61260:1995 / ANSI S1.11-2004 mask, which keeps the stricter class 0 that
+  the 2014 edition dropped, so a high-order bank can be certified to class 0.
+  Two rendered example fiches (2014-edition class 1 and 1995-edition class 0)
+  are kept under `.github/reports/`, regenerated with `make reports`
   (`scripts/generate_reports.py`), and linked from the filter-banks guide.
 - ISO 717 sound-insulation ratings can now be exported as a one-page PDF fiche
   through a `report(path)` method, laid out like an accredited-laboratory test

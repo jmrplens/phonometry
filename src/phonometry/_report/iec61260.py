@@ -51,24 +51,6 @@ if TYPE_CHECKING:
     from ..metrology.compliance import FilterComplianceResult
 
 
-def _available_classes(result: "FilterComplianceResult") -> List[int]:
-    """The performance classes carried by the per-band verdict dictionaries."""
-    band = result.bands[0]
-    prefix, suffix = "margin_class", "_db"
-    return sorted(
-        int(key[len(prefix):-len(suffix)])
-        for key in band
-        if key.startswith(prefix) and key.endswith(suffix)
-    )
-
-
-def _reference_class(result: "FilterComplianceResult") -> int:
-    """The class the binding margin is measured against (achieved, else loosest)."""
-    if result.overall_class is not None:
-        return result.overall_class
-    return max(_available_classes(result))
-
-
 def _binding_margin(result: "FilterComplianceResult", cls: int) -> float:
     """Smallest per-band margin to class ``cls`` (the binding margin)."""
     key = f"margin_class{cls}_db"
@@ -121,7 +103,7 @@ def _fraction_label(fraction: int) -> str:
 
 def _metric_rows(result: "FilterComplianceResult") -> List[Tuple[str, str]]:
     """Per-band rows: mid-band frequency vs achieved class and binding margin."""
-    cls = _reference_class(result)
+    cls = result.reference_class()
     key = f"margin_class{cls}_db"
     rows: List[Tuple[str, str]] = []
     for band in result.bands:
@@ -142,8 +124,8 @@ def _statement(result: "FilterComplianceResult") -> str:
             f"Class <b>{result.overall_class}</b> - COMPLIES &nbsp; "
             f"(margin {margin:+.2f} dB)"
         )
-    classes = "/".join(str(c) for c in _available_classes(result))
-    margin = _binding_margin(result, _reference_class(result))
+    classes = "/".join(str(c) for c in result.available_classes())
+    margin = _binding_margin(result, result.reference_class())
     return (
         f"<b>Does not comply</b> with class {classes} &nbsp; "
         f"(closest margin {margin:+.2f} dB)"

@@ -47,31 +47,9 @@ _FREQ_LABEL = "Frequency [Hz]"
 # ---------------------------------------------------------------------------
 
 
-def _filter_available_classes(result: "FilterComplianceResult") -> list[int]:
-    """The performance classes carried by the per-band verdict dictionaries."""
-    band = result.bands[0]
-    prefix, suffix = "margin_class", "_db"
-    return sorted(
-        int(key[len(prefix):-len(suffix)])
-        for key in band
-        if key.startswith(prefix) and key.endswith(suffix)
-    )
-
-
-def _filter_reference_class(result: "FilterComplianceResult") -> int:
-    """The class whose corridor the fiche overlays.
-
-    The achieved overall class when the bank complies, else the loosest class
-    of the edition (the one it comes closest to meeting).
-    """
-    if result.overall_class is not None:
-        return result.overall_class
-    return max(_filter_available_classes(result))
-
-
 def _worst_band_index(result: "FilterComplianceResult") -> int:
     """Index of the band with the smallest margin to the reference class."""
-    key = f"margin_class{_filter_reference_class(result)}_db"
+    key = f"margin_class{result.reference_class()}_db"
     margins = [float(band[key]) for band in result.bands]
     return int(np.argmin(margins))
 
@@ -101,7 +79,7 @@ def plot_filter_class(
     from ..metrology.compliance import class_limits
 
     ax = ax if ax is not None else _new_axes()
-    cls = _filter_reference_class(result)
+    cls = result.reference_class()
     idx = _worst_band_index(result)
     fm = float(result.band_frequencies[idx])
     fsd = result.fs / float(result.factors[idx])

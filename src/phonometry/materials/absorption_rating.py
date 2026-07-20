@@ -59,6 +59,8 @@ from .._internal.warnings import _warn_renamed
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 __all__ = [
     "OCTAVE_BANDS",
     "THIRD_OCTAVE_BANDS",
@@ -230,6 +232,46 @@ class AbsorptionRatingResult:
         from .._plot.materials import plot_weighted_absorption
 
         return plot_weighted_absorption(self, ax=ax, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+    ) -> str:
+        """Render an ISO 11654 sound-absorption rating fiche to a PDF.
+
+        Writes a one-page accredited absorption report: the standard-basis
+        line, an optional metadata header block, the octave-band ``alpha_p``
+        table beside the practical-versus-shifted-reference plot (the result's
+        own :meth:`plot`), the boxed ``alpha_w`` result with its absorption
+        class, an optional verdict row and a footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a
+            prediction fiche (body, result and disclaimer only). A supplied
+            ``requirement`` is read as the minimum ``alpha_w``.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table adds the ISO 11654 evaluation
+            columns (practical coefficient, shifted reference, unfavourable
+            deviation) instead of the two-column ``f | alpha_p`` table.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso11654 import render_iso11654_report
+
+        return render_iso11654_report(
+            self, path, metadata=metadata, verbose=verbose
+        )
 
 
 # --- public functions ----------------------------------------------------

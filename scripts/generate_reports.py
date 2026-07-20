@@ -110,11 +110,38 @@ def _impact_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso717_impact_example.pdf"
 
 
+def _absorption_example() -> Tuple[object, ReportMetadata, str]:
+    """Absorption fiche: an ISO 11654 weighted sound absorption rating."""
+    # Octave practical coefficients giving alpha_w = 0.60 with an M shape
+    # indicator (ISO 11654 Annex A.2 shape); a broadband porous absorber.
+    alpha_p = (0.35, 1.00, 0.65, 0.60, 0.55)
+    result = ph.materials.weighted_absorption(alpha_p)
+    metadata = ReportMetadata(
+        specimen="50 mm porous absorber over a 100 mm air gap",
+        client="Example client",
+        manufacturer="Example acoustics",
+        area=10.8,
+        mounting="Type A (mounted directly against a rigid wall)",
+        test_room="Reverberation room (example)",
+        measurement_standard="ISO 354",
+        test_date="2026-07-20",
+        temperature=21.4,
+        relative_humidity=54.0,
+        pressure=101.0,
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-11654",
+        requirement=0.55,
+    )
+    return result, metadata, "iso11654_absorption_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _airborne_example,
     _impact_example,
+    _absorption_example,
 ]
 
 

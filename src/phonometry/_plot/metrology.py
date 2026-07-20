@@ -106,6 +106,13 @@ def plot_filter_class(
     omega_max = float(omega[-1])
     lo_x, hi_x = 1.0 / omega_max, omega_max
     win = (omega >= lo_x) & (omega <= hi_x)
+    if not np.any(win):
+        # Degenerate band (mid-band at or above the decimated Nyquist), so the
+        # symmetric window is empty; fail clearly instead of a cryptic reduction.
+        raise ValueError(
+            "Cannot plot the filter class corridor: the mid-band frequency is at "
+            "or above the analysis Nyquist, so the f/f_m window is empty."
+        )
     finite_upper = np.isfinite(upper)
 
     # Scale the axis to the mask, not to the measured curve: a steep bank

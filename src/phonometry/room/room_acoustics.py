@@ -136,7 +136,7 @@ class RoomAcousticsResult:
     t30_valid: np.ndarray
     curvature: np.ndarray
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes | np.ndarray:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes | np.ndarray:
         """Plot per-band decay times (EDT/T20/T30) and clarity (C50/C80).
 
         Invalid bands are hatched and greyed. With ``ax`` given, only the
@@ -144,9 +144,11 @@ class RoomAcousticsResult:
         (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` (or array thereof).
         """
+        from .._i18n import check_language
         from .._plot.room import plot_room_acoustics
 
-        return plot_room_acoustics(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_room_acoustics(self, ax=ax, language=language, **kwargs)
 
 
 def _onset_index(p2: np.ndarray) -> int:
@@ -352,16 +354,18 @@ class DecayCurve:
         yield self.time
         yield self.level
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the decay curve with optional straight T-fit overlays.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`. Pass ``fits=False`` to omit the
         EDT/T20/T30 fit lines.
         """
+        from .._i18n import check_language
         from .._plot.room import plot_decay_curve
 
-        return plot_decay_curve(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_decay_curve(self, ax=ax, language=language, **kwargs)
 
 
 def decay_curve(

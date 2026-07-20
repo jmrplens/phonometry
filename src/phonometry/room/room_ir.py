@@ -144,7 +144,7 @@ class ImpulseResponseResult:
     def dtype(self) -> np.dtype[Any]:
         return self.ir.dtype
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> "Axes | np.ndarray":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> "Axes | np.ndarray":
         """Plot the impulse response: waveform and log-magnitude decay.
 
         Draws the (normalised) time-domain waveform and, below it, the
@@ -153,9 +153,11 @@ class ImpulseResponseResult:
         matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` (or an array of two axes).
         """
+        from .._i18n import check_language
         from .._plot.room import plot_impulse_response
 
-        return plot_impulse_response(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_impulse_response(self, ax=ax, language=language, **kwargs)
 
 
 def sweep_signal(

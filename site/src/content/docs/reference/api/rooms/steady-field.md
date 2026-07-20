@@ -225,7 +225,12 @@ Steady-state SPL versus distance in a room, split direct / reverberant.
 ### SteadyFieldResult.plot()
 
 ```python
-SteadyFieldResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SteadyFieldResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot direct, reverberant and total SPL against distance.

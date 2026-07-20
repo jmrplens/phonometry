@@ -186,15 +186,17 @@ class PorousMediumResult:
         k0 = 2.0 * np.pi * self.frequency / self.speed_of_sound
         return np.asarray(self.wavenumber / k0, dtype=np.complex128)
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the normalised ``Zc`` and ``k`` components against frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.materials import plot_porous_medium
 
-        return plot_porous_medium(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_porous_medium(self, ax=ax, language=language, **kwargs)
 
 
 def _medium_from_zc_k(
@@ -749,15 +751,17 @@ class LayeredAbsorberResult:
     absorption: Real
     transfer_matrix: Complex
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the absorption spectrum ``alpha(f)`` with ``|R|`` overlaid.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.materials import plot_layered_absorber
 
-        return plot_layered_absorber(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_layered_absorber(self, ax=ax, language=language, **kwargs)
 
 
 @dataclass(frozen=True)
@@ -773,15 +777,17 @@ class DiffuseFieldAbsorptionResult:
     absorption: Real
     angle_limit: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the random-incidence absorption spectrum ``alpha_dif(f)``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
+        from .._i18n import check_language
         from .._plot.materials import plot_diffuse_field_absorption
 
-        return plot_diffuse_field_absorption(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_diffuse_field_absorption(self, ax=ax, language=language, **kwargs)
 
 
 def _sheet_impedance(

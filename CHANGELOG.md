@@ -30,6 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `"es"`). Spanish renders localised axis labels, titles and legends and uses a
   comma decimal separator; English is unchanged. An unsupported language raises
   a clear `ValueError`.
+- The room and materials `.plot()` renderers accept a `language` keyword
+  (`"en"` default, `"es"` for Spanish). Passing `language="es"` renders the
+  axis labels, titles and legends in Spanish and switches linear-axis tick
+  decimals to a comma; the English output is unchanged. An unsupported code
+  raises a clear `ValueError`.
 - IEC 61260-1 filter class compliance can now be exported as a one-page PDF
   fiche. A new `filter_class_compliance(bank, *, num_points=..., edition=...)`
   runs the same verification as `verify_filter_class` and returns a frozen

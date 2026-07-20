@@ -116,6 +116,8 @@ and the `size`/`ndim`/`shape`/`dtype` attributes forward to `ir`.
 ```python
 ImpulseResponseResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```
@@ -254,6 +256,7 @@ plot_excitation(
     *,
     kind: str = 'sweep',
     ax: Axes | None = None,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes | np.ndarray
 ```

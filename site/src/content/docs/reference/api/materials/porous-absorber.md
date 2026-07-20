@@ -183,6 +183,8 @@ normalised by `sin^2(theta_limit)`.
 ```python
 DiffuseFieldAbsorptionResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -361,7 +363,12 @@ reciprocal).
 ### LayeredAbsorberResult.plot()
 
 ```python
-LayeredAbsorberResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+LayeredAbsorberResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the absorption spectrum `alpha(f)` with `|R|` overlaid.
@@ -673,7 +680,12 @@ Wavenumber normalised by the free-air wavenumber `k0 = w / c`.
 ### PorousMediumResult.plot()
 
 ```python
-PorousMediumResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+PorousMediumResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the normalised `Zc` and `k` components against frequency.

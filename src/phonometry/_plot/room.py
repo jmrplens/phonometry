@@ -40,8 +40,82 @@ if TYPE_CHECKING:
     from ..room.image_source import ImageSourceResult
     from ..room.steady_field import SteadyFieldResult
 
+#: Spanish translations of the fixed strings rendered by the room ``.plot()``
+#: renderers, keyed by their verbatim English text.  ``_t`` returns the English
+#: key unchanged for any language other than ``"es"``, so the English output is
+#: byte-for-byte identical to the pre-i18n renderers.
+_STRINGS: dict[str, str] = {
+    "Reverberation time [s]": "Tiempo de reverberación [s]",
+    "ISO 3382 decay times and clarity": "Tiempos de caída y claridad ISO 3382",
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Band": "Banda",
+    "Broadband": "Banda ancha",
+    "Clarity [dB]": "Claridad [dB]",
+    "Time [s]": "Tiempo [s]",
+    "Level re steady state [dB]": "Nivel re estado estacionario [dB]",
+    "ISO 3382 Schroeder decay curve": "Curva de caída de Schroeder ISO 3382",
+    "Schroeder decay": "Decaimiento de Schroeder",
+    "Log-magnitude envelope": "Envolvente de magnitud logarítmica",
+    "Level re peak [dB]": "Nivel re pico [dB]",
+    "Amplitude (norm.)": "Amplitud (norm.)",
+    "ISO 18233 impulse response": "Respuesta al impulso ISO 18233",
+    "Measured": "Medido",
+    "Governing band": "Banda dominante",
+    "Octave-band SPL [dB]": "NPS por bandas de octava [dB]",
+    "Reference RC-": "Referencia RC-",
+    "Rumble tolerance (+5 dB)": "Tolerancia de retumbe (+5 dB)",
+    "Hiss tolerance (+3 dB)": "Tolerancia de siseo (+3 dB)",
+    "Reverberation time $T$ [s]": "Tiempo de reverberación $T$ [s]",
+    "EN 12354-6 reverberation time": "Tiempo de reverberación EN 12354-6",
+    "Reverberation-time models — ": "Modelos de tiempo de reverberación — ",
+    " dB per doubling": " dB por duplicación",
+    " m (STI 0.50)": " m (STI 0,50)",
+    " m (STI 0.20)": " m (STI 0,20)",
+    "Distance from the sound source [m]": "Distancia a la fuente sonora [m]",
+    "A-weighted SPL of speech [dB]": "NPS del habla ponderado A [dB]",
+    "ISO 3382-3 spatial decay of speech": "Decaimiento espacial del habla ISO 3382-3",
+    "Sample": "Muestra",
+    "Amplitude": "Amplitud",
+    "Magnitude [dB]": "Magnitud [dB]",
+    "Magnitude spectrum (flat)": "Espectro de magnitud (plano)",
+    "ISO 18233 exponential sine sweep": "Barrido sinusoidal exponencial ISO 18233",
+    "Spectrogram (exponential frequency rise)":
+        "Espectrograma (subida exponencial de frecuencia)",
+    r"$1/r$ spreading envelope": r"envolvente de propagación $1/r$",
+    "Reflections": "Reflexiones",
+    "Reflection order": "Orden de reflexión",
+    "Direct sound": "Sonido directo",
+    "Arrival time [ms]": "Tiempo de llegada [ms]",
+    "Reflection level re direct [dB]": "Nivel de reflexión re directo [dB]",
+    "Direct field": "Campo directo",
+    "Reverberant field": "Campo reverberante",
+    "Total": "Total",
+    "Distance from source [m]": "Distancia a la fuente [m]",
+    "Sound pressure level [dB]": "Nivel de presión sonora [dB]",
+}
+
+
+def _t(text: str, language: str = "en") -> str:
+    """Localise a fixed string; English is returned verbatim (byte-identical)."""
+    return _STRINGS.get(text, text) if language == "es" else text
+
+
+def _localize_band_axes(ax: Any, language: str) -> None:
+    """Comma-localise the numeric y-axis of a categorical band plot.
+
+    :func:`~phonometry._i18n.localize_axes` reformats only the automatic numeric
+    axis and leaves the categorical band tick labels (a ``FuncFormatter`` on the
+    linear position axis) untouched, so no label restore is needed. English is a
+    no-op.
+    """
+    from .._i18n import localize_axes
+
+    localize_axes(ax, language)
+
+
 def plot_room_acoustics(
-    result: RoomAcousticsResult, ax: Axes | None = None, **kwargs: Any
+    result: RoomAcousticsResult, ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes | np.ndarray:
     """Per-band decay times (EDT/T20/T30) and clarity (C50/C80).
 
@@ -60,7 +134,7 @@ def plot_room_acoustics(
     n = np.asarray(result.t30, dtype=np.float64).size
     if freq is None:
         centers = np.arange(n, dtype=np.float64)
-        labels = ["Broadband"] * n
+        labels = [_t("Broadband", language)] * n
         use_freq_axis = False
     else:
         centers = np.asarray(freq, dtype=np.float64)
@@ -76,15 +150,16 @@ def plot_room_acoustics(
         ax_times = cast("Axes", axes[0])
 
     _draw_decay_times(ax_times, positions, result, **kwargs)
-    ax_times.set_ylabel("Reverberation time [s]")
-    ax_times.set_title("ISO 3382 decay times and clarity")
+    ax_times.set_ylabel(_t("Reverberation time [s]", language))
+    ax_times.set_title(_t("ISO 3382 decay times and clarity", language))
     _band_axis(ax_times, labels, xlabel=None)
     ax_times.grid(True, axis="y", alpha=0.3)
     ax_times.legend(loc="best", fontsize="small")
 
     if single:
         if use_freq_axis:
-            ax_times.set_xlabel("Frequency [Hz]")
+            ax_times.set_xlabel(_t("Frequency [Hz]", language))
+        _localize_band_axes(ax_times, language)
         return ax_times
 
     ax_clarity = cast("Axes", axes[1])
@@ -102,16 +177,21 @@ def plot_room_acoustics(
         color=_C_QUATERNARY,
         label="C80",
     )
-    ax_clarity.set_ylabel("Clarity [dB]")
+    ax_clarity.set_ylabel(_t("Clarity [dB]", language))
     _band_axis(
-        ax_clarity, labels, xlabel="Frequency [Hz]" if use_freq_axis else "Band"
+        ax_clarity,
+        labels,
+        xlabel=_t("Frequency [Hz]" if use_freq_axis else "Band", language),
     )
     ax_clarity.grid(True, alpha=0.3)
     ax_clarity.legend(loc="best", fontsize="small")
+    _localize_band_axes(ax_times, language)
+    _localize_band_axes(ax_clarity, language)
     return axes
 
 def plot_decay_curve(
-    result: DecayCurve, ax: Axes | None = None, fits: bool = True, **kwargs: Any
+    result: DecayCurve, ax: Axes | None = None, fits: bool = True,
+    language: str = "en", **kwargs: Any
 ) -> Axes:
     """Schroeder decay curve with optional straight T-fit overlays.
 
@@ -122,11 +202,13 @@ def plot_decay_curve(
     :param kwargs: Forwarded to the decay-curve ``plot`` call.
     :return: The axes.
     """
+    from .._i18n import localize_axes
+
     ax = ax if ax is not None else _new_axes()
     time = np.asarray(result.time, dtype=np.float64)
     level = np.asarray(result.level, dtype=np.float64)
     kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("label", "Schroeder decay")
+    kwargs.setdefault("label", _t("Schroeder decay", language))
     ax.plot(time, level, **kwargs)
 
     if fits:
@@ -137,23 +219,27 @@ def plot_decay_curve(
         ):
             fit = _fit_segment(time, level, lo, hi)
             if fit is not None:
-                ax.plot(time, fit, style, lw=1, alpha=0.8, label=f"{label} fit")
+                fit_label = f"ajuste {label}" if language == "es" else f"{label} fit"
+                ax.plot(time, fit, style, lw=1, alpha=0.8, label=fit_label)
 
-    ax.set_xlabel("Time [s]")
-    ax.set_ylabel("Level re steady state [dB]")
+    ax.set_xlabel(_t("Time [s]", language))
+    ax.set_ylabel(_t("Level re steady state [dB]", language))
     ax.set_ylim(top=3.0)
     ax.set_xlim(left=0.0, right=float(time[-1]) if time.size else None)
     band = result.band
-    title = "ISO 3382 Schroeder decay curve"
+    title = _t("ISO 3382 Schroeder decay curve", language)
     if band is not None:
-        title += f"  ({_format_freq(float(band))} Hz band)"
+        fb = _format_freq(float(band))
+        title += f"  (banda {fb} Hz)" if language == "es" else f"  ({fb} Hz band)"
     ax.set_title(title)
     ax.grid(True, alpha=0.3)
     ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
     return ax
 
 def plot_impulse_response(
-    result: "ImpulseResponseResult", ax: Axes | None = None, **kwargs: Any
+    result: "ImpulseResponseResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes | np.ndarray:
     """Impulse-response waveform and its log-magnitude / Schroeder decay.
 
@@ -184,33 +270,40 @@ def plot_impulse_response(
 
     color = kwargs.pop("color", _C_PRIMARY)
 
+    from .._i18n import localize_axes
+
+    title = f"{_t('ISO 18233 impulse response', language)} ({result.method})"
+
     def _decay(axd: Axes) -> None:
         axd.plot(time, env_db, color=_C_PRIMARY_LIGHT, lw=0.8,
-                 label="Log-magnitude envelope")
-        axd.plot(time, edc_db, color=_C_REFERENCE, lw=1.8, label="Schroeder decay")
-        axd.set_xlabel(xlabel)
-        axd.set_ylabel("Level re peak [dB]")
+                 label=_t("Log-magnitude envelope", language))
+        axd.plot(time, edc_db, color=_C_REFERENCE, lw=1.8,
+                 label=_t("Schroeder decay", language))
+        axd.set_xlabel(_t(xlabel, language))
+        axd.set_ylabel(_t("Level re peak [dB]", language))
         axd.set_ylim(bottom=-80.0, top=5.0)
         axd.set_xlim(left=float(time[0]) if n else 0.0,
                      right=float(time[-1]) if n else None)
         axd.grid(True, alpha=0.3)
         axd.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+        localize_axes(axd, language)
 
     if ax is not None:
         _decay(ax)
-        ax.set_title(f"ISO 18233 impulse response ({result.method})")
+        ax.set_title(title)
         return ax
 
     axes = _new_axes_column(2, sharex=True, figsize=(8.0, 6.0))
     axes[0].plot(time, h / norm, color=color, lw=0.8, **kwargs)
-    axes[0].set_ylabel("Amplitude (norm.)")
-    axes[0].set_title(f"ISO 18233 impulse response ({result.method})")
+    axes[0].set_ylabel(_t("Amplitude (norm.)", language))
+    axes[0].set_title(title)
     axes[0].grid(True, alpha=0.3)
+    localize_axes(axes[0], language)
     _decay(axes[1])
     return axes
 
 def plot_noise_criterion(
-    result: "NCResult", ax: Axes | None = None, **kwargs: Any
+    result: "NCResult", ax: Axes | None = None, language: str = "en", **kwargs: Any
 ) -> Axes:
     """Measured spectrum against the NC curve family (ANSI/ASA S12.2-2019).
 
@@ -219,6 +312,7 @@ def plot_noise_criterion(
     :param kwargs: Forwarded to the measured-spectrum :meth:`plot`.
     :return: The axes.
     """
+    from .._i18n import localize_axes
     from ..room.room_noise import NC_CURVES, NC_INDICES, OCTAVE_BANDS
 
     ax = ax if ax is not None else _new_axes()
@@ -232,7 +326,7 @@ def plot_noise_criterion(
         )
     valid = ~np.isnan(levels)
     kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("label", "Measured")
+    kwargs.setdefault("label", _t("Measured", language))
     ax.plot(freqs[valid], levels[valid], "o-", zorder=3, **kwargs)
     # Nearest *valid* band rather than float equality against the stored
     # value; the marker sits on that band so its x and y stay paired.
@@ -247,20 +341,24 @@ def plot_noise_criterion(
             [freqs[governing]],
             [levels[governing]],
             "D", color=_C_REFERENCE, zorder=4,
-            label=f"Governing band ({_format_freq(result.governing_frequency)})",
+            label=(f"{_t('Governing band', language)} "
+                   f"({_format_freq(result.governing_frequency)})"),
         )
     _freq_axis(ax, OCTAVE_BANDS)
-    ax.set_ylabel("Octave-band SPL [dB]")
+    if language == "es":
+        ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Octave-band SPL [dB]", language))
     ax.set_title(
         f"ANSI/ASA S12.2 NC-{result.rating:g} "
         f"({_format_freq(result.governing_frequency)})"
     )
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
 def plot_room_criterion(
-    result: "RCResult", ax: Axes | None = None, **kwargs: Any
+    result: "RCResult", ax: Axes | None = None, language: str = "en", **kwargs: Any
 ) -> Axes:
     """Measured spectrum against the reference RC Mark II curve (Annex D).
 
@@ -272,6 +370,8 @@ def plot_room_criterion(
     :param kwargs: Forwarded to the measured-spectrum :meth:`plot`.
     :return: The axes.
     """
+    from .._i18n import localize_axes
+
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     levels = np.asarray(result.levels, dtype=np.float64)
@@ -279,27 +379,31 @@ def plot_room_criterion(
     valid = ~np.isnan(levels)
 
     ax.plot(freqs, reference, "s--", color=_C_MUTED,
-            label=f"Reference RC-{result.rating}")
+            label=f"{_t('Reference RC-', language)}{result.rating}")
     low = freqs <= 500.0
     high = freqs >= 1000.0
     ax.fill_between(freqs[low], reference[low], reference[low] + 5.0,
                     color=_C_SECONDARY_LIGHT, alpha=0.35,
-                    label="Rumble tolerance (+5 dB)")
+                    label=_t("Rumble tolerance (+5 dB)", language))
     ax.fill_between(freqs[high], reference[high], reference[high] + 3.0,
                     color=_C_PRIMARY_LIGHT, alpha=0.45,
-                    label="Hiss tolerance (+3 dB)")
+                    label=_t("Hiss tolerance (+3 dB)", language))
     kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("label", "Measured")
+    kwargs.setdefault("label", _t("Measured", language))
     ax.plot(freqs[valid], levels[valid], "o-", zorder=3, **kwargs)
     _freq_axis(ax, freqs)
-    ax.set_ylabel("Octave-band SPL [dB]")
+    if language == "es":
+        ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Octave-band SPL [dB]", language))
     ax.set_title(f"ANSI/ASA S12.2 {result.label}")
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
 def plot_enclosed_space_absorption(
-    result: "ReverberationResult", ax: Axes | None = None, **kwargs: Any
+    result: "ReverberationResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Reverberation time over the octave bands (EN 12354-6).
 
@@ -308,6 +412,8 @@ def plot_enclosed_space_absorption(
     :param kwargs: Forwarded to the reverberation-time ``plot``.
     :return: The axes.
     """
+    from .._i18n import localize_axes
+
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     rt = np.asarray(result.reverberation_time, dtype=np.float64)
@@ -315,14 +421,18 @@ def plot_enclosed_space_absorption(
     kwargs.setdefault("marker", "o")
     ax.plot(freq, rt, **kwargs)
     _freq_axis(ax, freq)
-    ax.set_ylabel("Reverberation time $T$ [s]")
-    ax.set_title("EN 12354-6 reverberation time")
+    if language == "es":
+        ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Reverberation time $T$ [s]", language))
+    ax.set_title(_t("EN 12354-6 reverberation time", language))
     ax.set_ylim(bottom=0.0)
     ax.grid(True, which="both", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
 def plot_reverberation_models(
-    result: "ReverberationModelResult", ax: Axes | None = None, **kwargs: Any
+    result: "ReverberationModelResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Reverberation time by five statistical models over the bands.
 
@@ -336,6 +446,8 @@ def plot_reverberation_models(
     :param kwargs: Forwarded to every curve ``plot``.
     :return: The axes.
     """
+    from .._i18n import format_number, localize_axes
+
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     styles = (
@@ -356,18 +468,23 @@ def plot_reverberation_models(
             **kwargs,
         )
     _freq_axis(ax, freq)
-    ax.set_ylabel("Reverberation time $T$ [s]")
+    if language == "es":
+        ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Reverberation time $T$ [s]", language))
     ax.set_title(
-        f"Reverberation-time models — $V$ = {result.volume:.0f} m³, "
-        f"$S$ = {result.surface_area:.0f} m²"
+        f"{_t('Reverberation-time models — ', language)}"
+        f"$V$ = {format_number(result.volume, language, decimals=0)} m³, "
+        f"$S$ = {format_number(result.surface_area, language, decimals=0)} m²"
     )
     ax.set_ylim(bottom=0.0)
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
 def plot_open_plan(
-    result: "OpenPlanResult", ax: Axes | None = None, **kwargs: Any
+    result: "OpenPlanResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Spatial decay of speech with the distraction/privacy distances marked.
 
@@ -392,6 +509,8 @@ def plot_open_plan(
     ax = ax if ax is not None else _new_axes()
     import matplotlib.ticker as mticker
 
+    from .._i18n import format_number, localize_axes
+
     r_max = 16.0
     for marker in (result.rd, result.rp):
         if np.isfinite(marker):
@@ -401,28 +520,34 @@ def plot_open_plan(
 
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault(
-        "label", rf"$D_{{2,S}}$ = {result.d2s:.1f} dB per doubling"
+        "label",
+        rf"$D_{{2,S}}$ = {format_number(result.d2s, language, decimals=1)}"
+        f"{_t(' dB per doubling', language)}",
     )
     ax.plot(r, level, **kwargs)
     ax.plot([4.0], [result.lp_as_4m], "o", color=_C_PRIMARY, ms=7,
-            label=rf"$L_{{p,A,S,4m}}$ = {result.lp_as_4m:.1f} dB")
+            label=rf"$L_{{p,A,S,4m}}$ = "
+                  f"{format_number(result.lp_as_4m, language, decimals=1)} dB")
     if np.isfinite(result.rd):
         ax.axvline(result.rd, color=_C_SECONDARY, ls="--",
-                   label=rf"$r_D$ = {result.rd:.1f} m (STI 0.50)")
+                   label=rf"$r_D$ = {format_number(result.rd, language, decimals=1)}"
+                         f"{_t(' m (STI 0.50)', language)}")
     if np.isfinite(result.rp):
         ax.axvline(result.rp, color=_C_REFERENCE, ls=":",
-                   label=rf"$r_P$ = {result.rp:.1f} m (STI 0.20)")
+                   label=rf"$r_P$ = {format_number(result.rp, language, decimals=1)}"
+                         f"{_t(' m (STI 0.20)', language)}")
 
     ax.set_xscale("log", base=2)
     ticks = [float(2**k) for k in range(1, int(np.ceil(np.log2(r_max))) + 1)]
     ax.set_xticks(ticks)
     ax.set_xticklabels([f"{t:g}" for t in ticks])
     ax.xaxis.set_minor_formatter(mticker.NullFormatter())
-    ax.set_xlabel("Distance from the sound source [m]")
-    ax.set_ylabel("A-weighted SPL of speech [dB]")
-    ax.set_title("ISO 3382-3 spatial decay of speech")
+    ax.set_xlabel(_t("Distance from the sound source [m]", language))
+    ax.set_ylabel(_t("A-weighted SPL of speech [dB]", language))
+    ax.set_title(_t("ISO 3382-3 spatial decay of speech", language))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    localize_axes(ax, language)
     return ax
 
 
@@ -432,6 +557,7 @@ def plot_excitation(
     *,
     kind: str = "sweep",
     ax: Axes | None = None,
+    language: str = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Plot an ISO 18233 excitation signal (sweep or MLS).
@@ -450,6 +576,9 @@ def plot_excitation(
     :param kwargs: Forwarded to the time-domain ``plot`` call.
     :return: The time-domain axes (``ax`` given) or the array of two axes.
     """
+    from .._i18n import check_language, localize_axes
+
+    check_language(language)
     x = np.asarray(signal, dtype=np.float64)
     n = x.shape[-1]
     if n == 0:
@@ -467,13 +596,19 @@ def plot_excitation(
     if kind == "mls":
         show = min(n, 120)
         ax_time.step(np.arange(show), x[:show], where="mid", color=color, **kwargs)
-        ax_time.set_xlabel("Sample")
-        ax_time.set_ylabel("Amplitude")
+        ax_time.set_xlabel(_t("Sample", language))
+        ax_time.set_ylabel(_t("Amplitude", language))
         ax_time.set_ylim(-1.4, 1.4)
-        ax_time.set_title(
-            f"ISO 18233 MLS excitation (first {show} of {n} samples)"
-        )
+        if language == "es":
+            ax_time.set_title(
+                f"Excitación MLS ISO 18233 (primeras {show} de {n} muestras)"
+            )
+        else:
+            ax_time.set_title(
+                f"ISO 18233 MLS excitation (first {show} of {n} samples)"
+            )
         ax_time.grid(True, alpha=0.3)
+        localize_axes(ax_time, language)
         if not two_panel:
             return ax_time
         spec = np.abs(np.fft.rfft(x))
@@ -484,32 +619,36 @@ def plot_excitation(
         ax_f.semilogx(freqs[1:], 20.0 * np.log10(
                       np.maximum(ac, 1e-10) / (denom if denom > 0.0 else 1.0)),
                       color=_C_REFERENCE, lw=0.8)
-        ax_f.set_xlabel("Frequency [Hz]")
-        ax_f.set_ylabel("Magnitude [dB]")
-        ax_f.set_title("Magnitude spectrum (flat)")
+        ax_f.set_xlabel(_t("Frequency [Hz]", language))
+        ax_f.set_ylabel(_t("Magnitude [dB]", language))
+        ax_f.set_title(_t("Magnitude spectrum (flat)", language))
         ax_f.grid(True, which="both", alpha=0.3)
         format_frequency_axis(ax_f, float(freqs[1]), float(freqs[-1]))
+        localize_axes(ax_f, language)
         return axes
 
     # Swept sine.
     ax_time.plot(t, x, color=color, lw=0.6, **kwargs)
-    ax_time.set_xlabel("Time [s]")
-    ax_time.set_ylabel("Amplitude")
-    ax_time.set_title("ISO 18233 exponential sine sweep")
+    ax_time.set_xlabel(_t("Time [s]", language))
+    ax_time.set_ylabel(_t("Amplitude", language))
+    ax_time.set_title(_t("ISO 18233 exponential sine sweep", language))
     ax_time.grid(True, alpha=0.3)
+    localize_axes(ax_time, language)
     if not two_panel:
         return ax_time
     ax_s = axes[1]
     nperseg = min(n, max(256, min(2048, n // 16)))
     ax_s.specgram(x, NFFT=nperseg, Fs=fs, noverlap=nperseg // 2, cmap="magma")
-    ax_s.set_xlabel("Time [s]")
-    ax_s.set_ylabel("Frequency [Hz]")
-    ax_s.set_title("Spectrogram (exponential frequency rise)")
+    ax_s.set_xlabel(_t("Time [s]", language))
+    ax_s.set_ylabel(_t("Frequency [Hz]", language))
+    ax_s.set_title(_t("Spectrogram (exponential frequency rise)", language))
+    localize_axes(ax_s, language)
     return axes
 
 
 def plot_image_source_reflectogram(
-    result: "ImageSourceResult", ax: Axes | None = None, **kwargs: Any
+    result: "ImageSourceResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Reflectogram of a synthetic image-source room impulse response.
 
@@ -523,6 +662,8 @@ def plot_image_source_reflectogram(
     :param kwargs: Forwarded to the stem ``markerline`` styling.
     :return: The axes.
     """
+    from .._i18n import localize_axes
+
     ax = ax if ax is not None else _new_axes()
     times = np.asarray(result.times, dtype=np.float64)
     amp = np.asarray(result.amplitudes, dtype=np.float64)
@@ -541,7 +682,7 @@ def plot_image_source_reflectogram(
     envelope = 20.0 * np.log10(np.maximum(d0 / dist, tiny))
     order_sort = np.argsort(ms)
     ax.plot(ms[order_sort], envelope[order_sort], color=_C_MUTED, lw=1.0, ls="--",
-            label=r"$1/r$ spreading envelope", zorder=1)
+            label=_t(r"$1/r$ spreading envelope", language), zorder=1)
 
     # Reflections coloured by order (higher orders fade toward grey). A
     # max_order=0 result has no reflections, so guard the scatter/colorbar
@@ -549,34 +690,43 @@ def plot_image_source_reflectogram(
     ref_mask = ~order0
     if np.any(ref_mask):
         sc = ax.scatter(ms[ref_mask], level[ref_mask], c=orders[ref_mask],
-                        cmap="viridis", s=14, zorder=3, label="Reflections")
+                        cmap="viridis", s=14, zorder=3,
+                        label=_t("Reflections", language))
         ax.vlines(ms[ref_mask], -120.0, level[ref_mask], color=_C_EDGE,
                   lw=0.4, alpha=0.4, zorder=2)
         cbar = ax.figure.colorbar(sc, ax=ax, pad=0.02)
-        cbar.set_label("Reflection order")
+        cbar.set_label(_t("Reflection order", language))
     ax.vlines(ms[order0], -120.0, level[order0], color=_C_PRIMARY, lw=1.6,
               zorder=4)
     ax.plot(ms[order0], level[order0], "o", color=_C_PRIMARY, ms=7, zorder=5,
-            label="Direct sound", **kwargs)
+            label=_t("Direct sound", language), **kwargs)
 
     lx, ly, lz = result.dimensions
     finite = level[np.isfinite(level)]
     ax.set_ylim(bottom=max(-80.0, float(finite.min()) - 3.0) if finite.size else -80.0,
                 top=5.0)
     ax.set_xlim(left=0.0, right=float(ms.max()) if ms.size else None)
-    ax.set_xlabel("Arrival time [ms]")
-    ax.set_ylabel("Reflection level re direct [dB]")
-    ax.set_title(
-        f"Image-source reflectogram — {lx:g}×{ly:g}×{lz:g} m room, "
-        f"order ≤ {result.max_order}"
-    )
+    ax.set_xlabel(_t("Arrival time [ms]", language))
+    ax.set_ylabel(_t("Reflection level re direct [dB]", language))
+    if language == "es":
+        ax.set_title(
+            f"Reflectograma de fuentes imagen — sala de "
+            f"{lx:g}×{ly:g}×{lz:g} m, orden ≤ {result.max_order}"
+        )
+    else:
+        ax.set_title(
+            f"Image-source reflectogram — {lx:g}×{ly:g}×{lz:g} m room, "
+            f"order ≤ {result.max_order}"
+        )
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
     return ax
 
 
 def plot_steady_field(
-    result: "SteadyFieldResult", ax: Axes | None = None, **kwargs: Any
+    result: "SteadyFieldResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
 ) -> Axes:
     """Steady-state SPL against distance: direct, reverberant and total fields.
 
@@ -591,28 +741,40 @@ def plot_steady_field(
     """
     import matplotlib.ticker as mticker
 
+    from .._i18n import format_number, localize_axes
+
     ax = ax if ax is not None else _new_axes()
     r = np.asarray(result.distances, dtype=np.float64)
     ax.plot(r, np.asarray(result.direct, dtype=np.float64), color=_C_SECONDARY,
-            ls="--", lw=1.4, label="Direct field")
+            ls="--", lw=1.4, label=_t("Direct field", language))
     ax.plot(r, np.asarray(result.reverberant, dtype=np.float64),
-            color=_C_TERTIARY, ls=":", lw=1.4, label="Reverberant field")
+            color=_C_TERTIARY, ls=":", lw=1.4, label=_t("Reverberant field", language))
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("lw", 2.4)
     ax.plot(r, np.asarray(result.total, dtype=np.float64),
-            label="Total", **kwargs)
+            label=_t("Total", language), **kwargs)
     ax.axvline(result.critical_distance, color=_C_REFERENCE, ls="-.", lw=1.2,
-               label=rf"$r_c$ = {result.critical_distance:.2f} m")
+               label=rf"$r_c$ = "
+                     f"{format_number(result.critical_distance, language, decimals=2)} m")
 
     ax.set_xscale("log")
     ax.xaxis.set_major_formatter(mticker.ScalarFormatter())
     ax.xaxis.set_minor_formatter(mticker.NullFormatter())
-    ax.set_xlabel("Distance from source [m]")
-    ax.set_ylabel("Sound pressure level [dB]")
-    ax.set_title(
-        f"Steady-state room field — $L_W$ = {result.sound_power_level:g} dB, "
-        f"$R$ = {result.room_constant:.0f} m², $Q$ = {result.directivity:g}"
-    )
+    ax.set_xlabel(_t("Distance from source [m]", language))
+    ax.set_ylabel(_t("Sound pressure level [dB]", language))
+    if language == "es":
+        ax.set_title(
+            f"Campo estacionario de la sala — "
+            f"$L_W$ = {result.sound_power_level:g} dB, "
+            f"$R$ = {format_number(result.room_constant, language, decimals=0)} m², "
+            f"$Q$ = {result.directivity:g}"
+        )
+    else:
+        ax.set_title(
+            f"Steady-state room field — $L_W$ = {result.sound_power_level:g} dB, "
+            f"$R$ = {result.room_constant:.0f} m², $Q$ = {result.directivity:g}"
+        )
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
     return ax

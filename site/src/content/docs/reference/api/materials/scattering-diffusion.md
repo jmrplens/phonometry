@@ -264,7 +264,12 @@ A measured polar response and its diffusion coefficient (ISO 17497-2).
 ### DiffusionResult.plot()
 
 ```python
-DiffusionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+DiffusionResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the polar response with the diffusion coefficient annotated.
@@ -626,7 +631,12 @@ A random-incidence scattering-coefficient spectrum (ISO 17497-1).
 ### ScatteringResult.plot()
 
 ```python
-ScatteringResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ScatteringResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the scattering coefficient `s` versus frequency.

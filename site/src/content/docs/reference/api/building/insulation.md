@@ -587,8 +587,11 @@ Descriptive metadata for the accredited ISO 717 report fiche.
 
 All fields are optional (default `None`); the report renders only the
 fields that are supplied, so a partially populated instance is valid. The
-numeric fields are validated on construction: when given they must be
-finite and strictly positive, otherwise `ValueError` is raised.
+numeric fields are validated on construction by physical range: the
+dimension, mass, volume, pressure and requirement fields must be finite and
+strictly positive; the temperature fields need only be finite (0 degrees
+Celsius or below is a valid test condition); and the relative-humidity
+fields must lie within 0..100 %. A violation raises `ValueError`.
 
 **Attributes**
 

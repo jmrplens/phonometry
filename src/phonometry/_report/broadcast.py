@@ -81,6 +81,30 @@ def _metadata_pairs(metadata: ReportMetadata) -> List[Tuple[str, str]]:
     ]
 
 
+def _status(
+    result: "ProgramLoudnessResult", target: float
+) -> Tuple[str, str, bool]:
+    """The integrated-loudness and true-peak pass states, and their conjunction.
+
+    Both the compliance-table rows and the combined verdict compare against the
+    same two thresholds (integrated loudness within ``target`` &#177;
+    :data:`_TOLERANCE_LU`; true peak at or below :data:`_MAX_TRUE_PEAK_DBTP`),
+    so the comparison is derived once here and reused, keeping the two views in
+    lockstep.
+
+    :return: ``(i_status, tp_status, passed)`` where each status is ``"pass"``
+        or ``"fail"`` and ``passed`` is the conjunction (a programme complies
+        only when both pass).
+    """
+    i_pass = abs(float(result.integrated) - target) <= _TOLERANCE_LU
+    tp_pass = float(result.true_peak) <= _MAX_TRUE_PEAK_DBTP
+    return (
+        "pass" if i_pass else "fail",
+        "pass" if tp_pass else "fail",
+        i_pass and tp_pass,
+    )
+
+
 def _compliance_rows(
     result: "ProgramLoudnessResult", target: float
 ) -> List[Tuple[str, str, str, str]]:
@@ -93,8 +117,7 @@ def _compliance_rows(
     integrated = float(result.integrated)
     true_peak = float(result.true_peak)
     delta = integrated - target
-    i_status = "pass" if abs(delta) <= _TOLERANCE_LU else "fail"
-    tp_status = "pass" if true_peak <= _MAX_TRUE_PEAK_DBTP else "fail"
+    i_status, tp_status, _ = _status(result, target)
     return [
         (
             "Integrated (Programme) Loudness",
@@ -145,10 +168,7 @@ def _verdict(result: "ProgramLoudnessResult", target: float) -> Tuple[str, bool]
     A programme complies when the integrated loudness is within the target
     tolerance and the true peak is at or below the permitted ceiling.
     """
-    passed = (
-        abs(float(result.integrated) - target) <= _TOLERANCE_LU
-        and float(result.true_peak) <= _MAX_TRUE_PEAK_DBTP
-    )
+    _i_status, _tp_status, passed = _status(result, target)
     text = (
         f"Compliant when I is within {target:.1f} &#177;{_TOLERANCE_LU:g} LU "
         f"and true peak &#8804; {_MAX_TRUE_PEAK_DBTP:.1f} dBTP"

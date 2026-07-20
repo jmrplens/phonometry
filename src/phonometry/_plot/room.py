@@ -152,7 +152,7 @@ def plot_room_acoustics(
     _draw_decay_times(ax_times, positions, result, **kwargs)
     ax_times.set_ylabel(_t("Reverberation time [s]", language))
     ax_times.set_title(_t("ISO 3382 decay times and clarity", language))
-    _band_axis(ax_times, labels, xlabel=None)
+    _band_axis(ax_times, labels, xlabel=None, language=language)
     ax_times.grid(True, axis="y", alpha=0.3)
     ax_times.legend(loc="best", fontsize="small")
 
@@ -182,6 +182,7 @@ def plot_room_acoustics(
         ax_clarity,
         labels,
         xlabel=_t("Frequency [Hz]" if use_freq_axis else "Band", language),
+        language=language,
     )
     ax_clarity.grid(True, alpha=0.3)
     ax_clarity.legend(loc="best", fontsize="small")
@@ -258,7 +259,7 @@ def plot_impulse_response(
     n = h.shape[-1]
     if n == 0:
         raise ValueError("impulse response is empty; nothing to plot.")
-    time, xlabel = _time_axis(n, result.fs)
+    time, xlabel = _time_axis(n, result.fs, language=language)
     peak = float(np.max(np.abs(h)))
     tiny = np.finfo(np.float64).tiny
     norm = peak if peak > 0.0 else 1.0
@@ -344,9 +345,7 @@ def plot_noise_criterion(
             label=(f"{_t('Governing band', language)} "
                    f"({_format_freq(result.governing_frequency)})"),
         )
-    _freq_axis(ax, OCTAVE_BANDS)
-    if language == "es":
-        ax.set_xlabel(_t("Frequency [Hz]", language))
+    _freq_axis(ax, OCTAVE_BANDS, language=language)
     ax.set_ylabel(_t("Octave-band SPL [dB]", language))
     ax.set_title(
         f"ANSI/ASA S12.2 NC-{result.rating:g} "
@@ -391,9 +390,7 @@ def plot_room_criterion(
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Measured", language))
     ax.plot(freqs[valid], levels[valid], "o-", zorder=3, **kwargs)
-    _freq_axis(ax, freqs)
-    if language == "es":
-        ax.set_xlabel(_t("Frequency [Hz]", language))
+    _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t("Octave-band SPL [dB]", language))
     ax.set_title(f"ANSI/ASA S12.2 {result.label}")
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
@@ -420,9 +417,7 @@ def plot_enclosed_space_absorption(
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     ax.plot(freq, rt, **kwargs)
-    _freq_axis(ax, freq)
-    if language == "es":
-        ax.set_xlabel(_t("Frequency [Hz]", language))
+    _freq_axis(ax, freq, language=language)
     ax.set_ylabel(_t("Reverberation time $T$ [s]", language))
     ax.set_title(_t("EN 12354-6 reverberation time", language))
     ax.set_ylim(bottom=0.0)
@@ -467,9 +462,7 @@ def plot_reverberation_models(
             label=label,
             **kwargs,
         )
-    _freq_axis(ax, freq)
-    if language == "es":
-        ax.set_xlabel(_t("Frequency [Hz]", language))
+    _freq_axis(ax, freq, language=language)
     ax.set_ylabel(_t("Reverberation time $T$ [s]", language))
     ax.set_title(
         f"{_t('Reverberation-time models — ', language)}"

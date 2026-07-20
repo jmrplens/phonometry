@@ -280,7 +280,12 @@ airflow resistance (Pa\*s/m). `pressure_drop` is the fitted `dp` at
 ### StaticAirflowResult.plot()
 
 ```python
-StaticAirflowResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+StaticAirflowResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the fitted `dp(u)` curve with the evaluation point.

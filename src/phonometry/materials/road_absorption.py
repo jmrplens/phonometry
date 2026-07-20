@@ -587,15 +587,17 @@ class InsituAbsorptionResult:
     frequencies: Real
     absorption: Real
 
-    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the in-situ absorption spectrum ``alpha(f)``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
+        from .._i18n import check_language
         from .._plot.materials import plot_insitu_absorption
 
-        return plot_insitu_absorption(self, ax=ax, **kwargs)
+        check_language(language)
+        return plot_insitu_absorption(self, ax=ax, language=language, **kwargs)
 
 
 def insitu_absorption_spectrum(

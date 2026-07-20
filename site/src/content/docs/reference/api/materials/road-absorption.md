@@ -425,7 +425,12 @@ An in-situ one-third-octave absorption spectrum (ISO 13472-1).
 ### InsituAbsorptionResult.plot()
 
 ```python
-InsituAbsorptionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+InsituAbsorptionResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the in-situ absorption spectrum `alpha(f)`.

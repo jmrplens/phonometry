@@ -196,7 +196,12 @@ Arrival time of the direct sound (order 0), s.
 ### ImageSourceResult.plot()
 
 ```python
-ImageSourceResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ImageSourceResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the reflectogram: reflection level in dB against arrival time.

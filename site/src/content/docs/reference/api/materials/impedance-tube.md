@@ -232,7 +232,12 @@ and `absorption` the normal-incidence coefficient `alpha = 1 - |r|^2`
 ### ImpedanceTubeResult.plot()
 
 ```python
-ImpedanceTubeResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ImpedanceTubeResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the absorption spectrum `alpha(f)` with `|r|` overlaid.

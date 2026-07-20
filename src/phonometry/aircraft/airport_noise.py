@@ -276,11 +276,12 @@ class NpdLevelResult:
     table_distances: "NDArray[np.float64]"
     table_levels: "NDArray[np.float64]"
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the interpolated level versus slant distance (log axis)."""
+        from .._i18n import check_language
         from .._plot.aircraft import plot_npd_level
 
-        return plot_npd_level(self, ax=ax, **kwargs)
+        return plot_npd_level(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def npd_level(
@@ -463,11 +464,12 @@ class FlyoverResult:
     segment_levels: "NDArray[np.float64]"
     observer: "NDArray[np.float64]"
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-segment contributions to the event level."""
+        from .._i18n import check_language
         from .._plot.aircraft import plot_flyover
 
-        return plot_flyover(self, ax=ax, **kwargs)
+        return plot_flyover(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def _validate_path(path: "NDArray[np.float64] | list[list[float]]") -> "NDArray[np.float64]":
@@ -986,11 +988,12 @@ class NoiseContourResult:
     level: "NDArray[np.float64]"
     metric: str
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot filled noise contours over the ground plane."""
+        from .._i18n import check_language
         from .._plot.aircraft import plot_noise_contour
 
-        return plot_noise_contour(self, ax=ax, **kwargs)
+        return plot_noise_contour(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def noise_contour(

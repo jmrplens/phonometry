@@ -139,7 +139,12 @@ Effective Perceived Noise Level of an aircraft flyover (ICAO Annex 16).
 ### EPNLResult.plot()
 
 ```python
-EPNLResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+EPNLResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the PNL and PNLT time histories with PNLTM and the 10 dB-down band.

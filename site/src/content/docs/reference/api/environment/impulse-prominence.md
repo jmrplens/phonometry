@@ -114,7 +114,12 @@ Prominence of a set of candidate impulses (NT ACOU 112:2002).
 ### ImpulseProminenceResult.plot()
 
 ```python
-ImpulseProminenceResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+ImpulseProminenceResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the adjustment curve `KI(P)` with the impulses marked.

@@ -137,7 +137,12 @@ Sonar-equation solution.
 ### SonarEquationResult.plot()
 
 ```python
-SonarEquationResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SonarEquationResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot signal excess versus transmission loss with the detection limit.

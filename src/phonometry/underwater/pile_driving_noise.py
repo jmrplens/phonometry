@@ -121,11 +121,12 @@ class PileStrikeResult:
     pressure: "NDArray[np.float64]"
     fs: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes | NDArray[Any]":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes | NDArray[Any]":
         """Plot the strike waveform and its cumulative energy."""
+        from .._i18n import check_language
         from .._plot.underwater import plot_pile_strike
 
-        return plot_pile_strike(self, ax=ax, **kwargs)
+        return plot_pile_strike(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def pile_strike_metrics(

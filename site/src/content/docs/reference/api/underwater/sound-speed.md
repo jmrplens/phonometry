@@ -155,7 +155,12 @@ Sound-speed profile `c(z)` over a column of water.
 ### SoundSpeedProfile.plot()
 
 ```python
-SoundSpeedProfile.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SoundSpeedProfile.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the sound-speed profile (speed vs depth, depth increasing down).

@@ -84,7 +84,12 @@ Bottom reflection loss versus grazing angle (fluid-fluid Rayleigh model).
 ### BottomLossResult.plot()
 
 ```python
-BottomLossResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+BottomLossResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the bottom loss versus grazing angle with the critical angle.

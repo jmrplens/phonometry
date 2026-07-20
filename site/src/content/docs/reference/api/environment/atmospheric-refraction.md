@@ -195,7 +195,12 @@ Relative sound level versus range at the grid height nearest `height`.
 ### AtmosphericPEResult.plot()
 
 ```python
-AtmosphericPEResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+AtmosphericPEResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the relative-level field over the range-height plane.
@@ -231,7 +236,12 @@ Ray-tracing solution through an effective sound-speed profile.
 ### AtmosphericRayResult.plot()
 
 ```python
-AtmosphericRayResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+AtmosphericRayResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the curved ray paths (height on the vertical axis).
@@ -265,6 +275,8 @@ two-point profile represents an exact linear gradient.
 ```python
 EffectiveSoundSpeedProfile.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

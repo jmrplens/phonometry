@@ -308,11 +308,12 @@ class RotorcraftHemisphere:
     levels: "NDArray[np.float64]"
     distance: float = _RH
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the hemisphere directivity for one band (polar section)."""
+        from .._i18n import check_language
         from .._plot.aircraft import plot_rotorcraft_hemisphere
 
-        return plot_rotorcraft_hemisphere(self, ax=ax, **kwargs)
+        return plot_rotorcraft_hemisphere(self, ax=ax, language=check_language(language), **kwargs)
 
     def mirrored(self) -> "RotorcraftHemisphere":
         """The hemisphere with the azimuth axis reversed (``φ → −φ``).
@@ -504,11 +505,12 @@ class MeanGroundPlaneResult:
         return float((height - self.slope * distance - self.intercept)
                      / math.hypot(1.0, self.slope))
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the terrain section and the fitted mean ground plane."""
+        from .._i18n import check_language
         from .._plot.aircraft import plot_mean_ground_plane
 
-        return plot_mean_ground_plane(self, ax=ax, **kwargs)
+        return plot_mean_ground_plane(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def mean_ground_plane(
@@ -676,11 +678,12 @@ class TerrainScreeningResult:
     distances: "NDArray[np.float64]"
     heights: "NDArray[np.float64]"
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the section geometry: terrain, line of sight and sound path."""
+        from .._i18n import check_language
         from .._plot.aircraft import plot_terrain_screening
 
-        return plot_terrain_screening(self, ax=ax, **kwargs)
+        return plot_terrain_screening(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def terrain_screening_adjustment(
@@ -1156,11 +1159,12 @@ class FlightPathKinematics:
     bank_angle: "NDArray[np.float64]"
     path_angle: "NDArray[np.float64]"
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the speed and angle profiles along the track."""
+        from .._i18n import check_language
         from .._plot.aircraft import plot_flight_path_kinematics
 
-        return plot_flight_path_kinematics(self, ax=ax, **kwargs)
+        return plot_flight_path_kinematics(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def flight_path_kinematics(
@@ -1317,11 +1321,12 @@ class RotorcraftEventResult:
     pnltm: float
     epnl: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the A-weighted level time history with its event metrics."""
+        from .._i18n import check_language
         from .._plot.aircraft import plot_rotorcraft_event
 
-        return plot_rotorcraft_event(self, ax=ax, **kwargs)
+        return plot_rotorcraft_event(self, ax=ax, language=check_language(language), **kwargs)
 
 
 @dataclass(frozen=True)
@@ -1339,11 +1344,12 @@ class RotorcraftNoiseContourResult:
     level: "NDArray[np.float64]"
     metric: str
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot filled noise contours over the ground plane."""
+        from .._i18n import check_language
         from .._plot.aircraft import plot_rotorcraft_noise_contour
 
-        return plot_rotorcraft_noise_contour(self, ax=ax, **kwargs)
+        return plot_rotorcraft_noise_contour(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def _per_point(

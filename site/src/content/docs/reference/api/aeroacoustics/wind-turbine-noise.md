@@ -190,6 +190,8 @@ Tonal audibility of a narrowband spectrum (IEC 61400-11).
 ```python
 WindTurbineTonalityResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

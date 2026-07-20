@@ -152,11 +152,12 @@ class ShipTrafficSpectrum:
     speed_knots: "float | None"
     length_m: "float | None"
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the predicted source spectral-density level versus frequency."""
+        from .._i18n import check_language
         from .._plot.underwater import plot_ship_traffic_spectrum
 
-        return plot_ship_traffic_spectrum(self, ax=ax, **kwargs)
+        return plot_ship_traffic_spectrum(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def ship_source_spectrum(

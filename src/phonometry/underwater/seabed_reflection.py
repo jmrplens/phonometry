@@ -113,11 +113,12 @@ class BottomLossResult:
     reflection_coefficient: "NDArray[np.complex128]"
     critical_angle: "float | None"
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the bottom loss versus grazing angle with the critical angle."""
+        from .._i18n import check_language
         from .._plot.underwater import plot_bottom_loss
 
-        return plot_bottom_loss(self, ax=ax, **kwargs)
+        return plot_bottom_loss(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def bottom_reflection_loss(

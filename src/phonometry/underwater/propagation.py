@@ -196,11 +196,12 @@ class TransmissionLossResult:
     law: str
     model: str
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the transmission loss versus range with its two contributions."""
+        from .._i18n import check_language
         from .._plot.underwater import plot_transmission_loss
 
-        return plot_transmission_loss(self, ax=ax, **kwargs)
+        return plot_transmission_loss(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def transmission_loss(

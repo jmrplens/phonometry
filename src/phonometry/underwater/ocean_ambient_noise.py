@@ -128,11 +128,12 @@ class AmbientNoiseResult:
     shipping: "NDArray[np.float64] | None"
     wind_speed_knots: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the composite spectrum and its components versus frequency."""
+        from .._i18n import check_language
         from .._plot.underwater import plot_ambient_noise
 
-        return plot_ambient_noise(self, ax=ax, **kwargs)
+        return plot_ambient_noise(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def ocean_ambient_noise(

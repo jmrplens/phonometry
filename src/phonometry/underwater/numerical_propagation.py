@@ -94,11 +94,12 @@ class NormalModeResult:
     receiver_depth: float
     source_depth: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the transmission loss versus range (loss increasing downward)."""
+        from .._i18n import check_language
         from .._plot.underwater import plot_normal_modes
 
-        return plot_normal_modes(self, ax=ax, **kwargs)
+        return plot_normal_modes(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def _propagating_band(
@@ -301,11 +302,12 @@ class RayTraceResult:
     source_depth: float
     water_depth: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the ray paths (depth increasing downward)."""
+        from .._i18n import check_language
         from .._plot.underwater import plot_ray_trace
 
-        return plot_ray_trace(self, ax=ax, **kwargs)
+        return plot_ray_trace(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def ray_trace(
@@ -425,11 +427,12 @@ class ParabolicEquationResult:
     transmission_loss: "NDArray[np.float64]"
     source_depth: float
 
-    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the transmission-loss field (depth increasing downward)."""
+        from .._i18n import check_language
         from .._plot.underwater import plot_parabolic_equation
 
-        return plot_parabolic_equation(self, ax=ax, **kwargs)
+        return plot_parabolic_equation(self, ax=ax, language=check_language(language), **kwargs)
 
 
 def parabolic_equation(

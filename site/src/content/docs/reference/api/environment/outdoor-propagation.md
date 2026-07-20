@@ -447,7 +447,12 @@ contributions separately.
 ### OutdoorAttenuation.plot()
 
 ```python
-OutdoorAttenuation.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+OutdoorAttenuation.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the stacked per-band attenuation terms with the total.

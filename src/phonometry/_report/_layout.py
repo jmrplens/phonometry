@@ -68,7 +68,7 @@ def render_figure_drawing(
     plot_fn: Callable[..., Any],
     target_width: float,
     *,
-    y_top: float,
+    y_top: float | None,
     expand_step: float | None = None,
 ) -> Any:
     """Draw a result's plot as a scaled, vector reportlab ``Drawing``.
@@ -80,10 +80,13 @@ def render_figure_drawing(
 
     :param target_width: Target width in points.
     :param y_top: Fixed top of the 0-based y-axis (accredited reports keep a
-        fixed axis so fiches are visually comparable).
+        fixed axis so band fiches are visually comparable); pass ``None`` to
+        leave the plot's own axis untouched (for non-band plots such as a
+        specific-loudness pattern or a level-vs-time trace that self-scale).
     :param expand_step: When given, the top is raised to the next multiple of
         this step if the data exceeds ``y_top`` (used for dB axes); ``None``
-        keeps ``y_top`` exactly (used for a 0..1 coefficient axis).
+        keeps ``y_top`` exactly (used for a 0..1 coefficient axis). Ignored
+        when ``y_top`` is ``None``.
     """
     try:
         import matplotlib
@@ -106,11 +109,14 @@ def render_figure_drawing(
         # The fiche states the rating in the boxed result, so the plot's own
         # title would only duplicate it at a large size.
         ax.set_title("")
-        top = y_top
-        if expand_step is not None:
-            _, data_top = ax.get_ylim()
-            top = max(top, float(np.ceil(data_top / expand_step) * expand_step))
-        ax.set_ylim(0.0, top)
+        # A fixed 0-based axis keeps band fiches comparable; y_top=None leaves
+        # a self-scaling plot (specific loudness, level-vs-time) as its own.
+        if y_top is not None:
+            top = y_top
+            if expand_step is not None:
+                _, data_top = ax.get_ylim()
+                top = max(top, float(np.ceil(data_top / expand_step) * expand_step))
+            ax.set_ylim(0.0, top)
         # Move the legend above the axes, as the reference reports do.
         handles, labels = ax.get_legend_handles_labels()
         existing = ax.get_legend()
@@ -185,6 +191,105 @@ def grid_table(pairs: List[Tuple[str, str]]) -> Any:
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 1.2),
                 ("LINEABOVE", (0, 0), (-1, 0), 0.5, accent),
                 ("LINEBELOW", (0, -1), (-1, -1), 0.5, accent),
+            ]
+        )
+    )
+    return table
+
+
+def document_styles(accent: Any) -> Tuple[Any, Any, Any, Any]:
+    """Return ``(stylesheet, title_style, basis_style, caption_style)``.
+
+    The title (accent, 16 pt), the standard-basis line (muted, 9.5 pt) and the
+    left-panel caption (accent, 8 pt) are identical across every fiche, so they
+    are built once here. The base stylesheet is returned too, as the result box
+    and verdict helpers take it. Called only after the renderer has imported
+    reportlab.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        "fiche_title", parent=styles["Title"], fontSize=16, textColor=accent,
+        spaceAfter=1, alignment=0,
+    )
+    basis_style = ParagraphStyle(
+        "fiche_basis", parent=styles["Normal"], fontSize=9.5,
+        textColor=colors.HexColor(_MUTED_HEX), spaceAfter=2,
+    )
+    caption_style = ParagraphStyle(
+        "fiche_caption", parent=styles["Normal"], fontSize=8,
+        textColor=accent, spaceAfter=3,
+    )
+    return styles, title_style, basis_style, caption_style
+
+
+def two_panel_body(left_cell: Any, plot_drawing: Any) -> Any:
+    """Assemble the two-panel body: a left cell (~56 mm) beside the plot.
+
+    Every fiche puts a table or metrics list on the left and the result's own
+    vector plot on the right; the column widths and cell alignment are shared.
+    Called only after the renderer has imported reportlab.
+    """
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Table, TableStyle
+
+    body = Table([[left_cell, plot_drawing]], colWidths=[56 * mm, 118 * mm])
+    body.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (0, 0), 0),
+                ("RIGHTPADDING", (-1, 0), (-1, 0), 0),
+            ]
+        )
+    )
+    return body
+
+
+def metrics_table(rows: List[Tuple[str, str]], *, col_widths: Any = None) -> Any:
+    """A compact two-column ``metric | value`` table for a non-band fiche.
+
+    The band fiches put a frequency table on the left; the single-metric fiches
+    (loudness, EPNL, programme loudness ...) put a short list of scalar results
+    there instead. Same accredited styling (accent header rule, zebra rows).
+    Called only after the renderer has imported reportlab.
+
+    :param rows: Ordered ``(label, value)`` pairs; labels may carry markup.
+    :param col_widths: Optional explicit column widths; defaults to 34/22 mm.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Paragraph, Table, TableStyle
+
+    styles = getSampleStyleSheet()
+    accent = colors.HexColor(_ACCENT_HEX)
+    light = colors.HexColor(_LIGHT_HEX)
+    label_style = ParagraphStyle(
+        "fiche_metric_label", parent=styles["Normal"], fontSize=8.5, leading=11,
+    )
+    value_style = ParagraphStyle(
+        "fiche_metric_value", parent=styles["Normal"], fontSize=8.5, leading=11,
+        alignment=2,
+    )
+    data = [
+        [Paragraph(label, label_style), Paragraph(value, value_style)]
+        for label, value in rows
+    ]
+    table = Table(data, colWidths=col_widths or [34 * mm, 22 * mm])
+    table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("ROWBACKGROUNDS", (0, 0), (-1, -1), [colors.white, light]),
+                ("LINEABOVE", (0, 0), (-1, 0), 0.6, accent),
+                ("LINEBELOW", (0, -1), (-1, -1), 0.6, accent),
+                ("TOPPADDING", (0, 0), (-1, -1), 3.0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 3.0),
+                ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
             ]
         )
     )

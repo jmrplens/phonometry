@@ -136,12 +136,38 @@ def _absorption_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso11654_absorption_example.pdf"
 
 
+def _loudness_example() -> Tuple[object, ReportMetadata, str]:
+    """Loudness fiche: an ISO 532-1 Zwicker stationary loudness rating."""
+    # A shaped 28-band one-third-octave spectrum (25 Hz..12.5 kHz) of a steady
+    # appliance noise, descending with frequency.
+    levels = np.array(
+        [55, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43,
+         42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29],
+        dtype=float,
+    )
+    result = ph.loudness_zwicker_from_spectrum(levels, field="free")
+    metadata = ReportMetadata(
+        specimen="Household appliance, steady operating noise",
+        client="Example client",
+        manufacturer="Example appliances",
+        test_room="Hemi-anechoic room (example)",
+        measurement_standard="ISO 532-1 method 1",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-532",
+        requirement=12.0,
+    )
+    return result, metadata, "iso532_loudness_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _airborne_example,
     _impact_example,
     _absorption_example,
+    _loudness_example,
 ]
 
 

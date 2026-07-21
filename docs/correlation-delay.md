@@ -231,6 +231,12 @@ and a cross-spectrum computed with the same segment length agree bin by bin;
 the `'phase'` estimator is literally the slope of the
 `CrossSpectralDensityResult` phase, weighted as Eq. 5.101b prescribes.
 
+The Hilbert envelope here is the time-domain companion of the
+[envelope spectrum](cepstrum-echoes.md), which reads the same modulations off
+as discrete lines in frequency; and the sub-sample alignment shares its
+band-limited kernel with the public
+[fractional-delay and resampling tools](test-signals.md).
+
 ## References
 
 - Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and

@@ -1,38 +1,73 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-Deterministic colored-noise test signals.
+Test signals and sample-rate utilities.
 
-Gaussian noise with an exact power-law spectral slope, for exercising and
-validating spectral estimators: white (0 dB/octave), pink (-3.01), red
-(-6.02, also called Brownian), blue (+3.01) and violet (+6.02). The
-autospectral density follows ``Gxx(f) ∝ f^α`` with ``α`` = 0, -1, -2, +1
-and +2 respectively, so the level changes by exactly ``3.01·α`` dB per
-octave (``10·lg 2 = 3.0103`` dB).
+The signal toolbox of the metrology domain: deterministic test signals and
+the two sample-rate operations every measurement chain eventually needs,
+with their accuracy stated instead of implied.
 
-The colors are synthesized by filtering seeded white Gaussian noise in the
-frequency domain: the DFT of the white record is multiplied by the exact
-magnitude response ``|H(f)| = (f/f_ref)^(α/2)`` bin by bin (a zero-phase
-FIR filter applied circularly), so the *expected* spectrum follows the
-power law exactly at every synthesis bin above DC and a measured slope
-deviates only by the random error of the spectral estimate (thousandths of
-a dB per octave over a three-decade regression) - not the piecewise or
-few-pole approximations whose pink slope ripples by fractions of a dB. The
-DC bin is zeroed for the colored variants (a power law has no finite DC
-value) and the record is rescaled to the requested RMS exactly.
+* :func:`noise_signal` - Gaussian noise with an exact power-law spectral
+  slope: white (0 dB/octave), pink (-3.01), red (-6.02, also called
+  Brownian), blue (+3.01) and violet (+6.02). The autospectral density
+  follows ``Gxx(f) ∝ f^α`` with ``α`` = 0, -1, -2, +1 and +2 respectively,
+  so the level changes by exactly ``3.01·α`` dB per octave
+  (``10·lg 2 = 3.0103`` dB). The colors are synthesized by filtering seeded
+  white Gaussian noise in the frequency domain: the DFT of the white record
+  is multiplied by the exact magnitude response ``|H(f)| = (f/f_ref)^(α/2)``
+  bin by bin (a zero-phase FIR filter applied circularly), so the *expected*
+  spectrum follows the power law exactly at every synthesis bin above DC and
+  a measured slope deviates only by the random error of the spectral
+  estimate - not the piecewise or few-pole approximations whose pink slope
+  ripples by fractions of a dB. The DC bin is zeroed for the colored
+  variants (a power law has no finite DC value) and the record is rescaled
+  to the requested RMS exactly. With the same ``seed`` the generator is
+  fully deterministic across runs.
 
-With the same ``seed`` the generator is fully deterministic across runs.
+* :func:`tone_burst` - the gated sine burst of IEC 60268-1:1985 (Annex A,
+  Clause A2): the tone starts at a zero crossing and lasts an integral
+  number of full periods, either as a single burst or as a repetitive train
+  with a stated repetition rate. The result records the rectangular gating
+  envelope and the exact on/off sample bookkeeping, so meter ballistics and
+  dynamic-response tests can state their stimulus instead of hand-rolling
+  it.
+
+* :func:`resample_signal` - polyphase resampling behind an explicit
+  anti-alias specification. The lowpass FIR is designed here (Kaiser
+  window method) from two numbers the caller controls - the stopband
+  attenuation in dB and the transition-band fraction of the target
+  Nyquist - and the designed filter is returned with the result, so the
+  alias rejection of a resampled record is a documented property, not a
+  library default.
+
+* :func:`fractional_delay` - band-limited delay by an arbitrary
+  (sub-sample) number of samples via a frequency-domain phase ramp,
+  ``linear`` (zero-padded, for transients and impulse responses; the same
+  kernel :func:`~phonometry.metrology.correlation.align_impulse_responses`
+  uses) or ``circular`` (for periodic records, exact to machine precision
+  on bin-centered tones).
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .spectra import _positive
+
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
-__all__ = ["noise_signal"]
+__all__ = [
+    "ResampledSignalResult",
+    "ToneBurstResult",
+    "fractional_delay",
+    "noise_signal",
+    "resample_signal",
+    "tone_burst",
+]
 
 #: Power-law exponent α of ``Gxx(f) ∝ f^α`` per color.
 _COLOR_EXPONENTS: dict[str, float] = {
@@ -105,3 +140,442 @@ def noise_signal(
     if scale <= 0.0:  # pragma: no cover - white Gaussian is never all-zero
         raise ValueError("Degenerate all-zero record; use another seed.")
     return np.asarray(x * (rms_v / scale), dtype=np.float64)
+
+
+# ---------------------------------------------------------------------------
+# Shared validation (same conventions as the spectral estimators)
+# ---------------------------------------------------------------------------
+
+
+def _validate_1d_finite(
+    x: "NDArray[np.float64] | list[float]", name: str
+) -> "NDArray[np.float64]":
+    xa = np.asarray(x, dtype=np.float64)
+    if xa.ndim != 1:
+        raise ValueError(f"'{name}' must be one-dimensional.")
+    if xa.size < 2:
+        raise ValueError(f"'{name}' must have at least 2 samples.")
+    if not np.all(np.isfinite(xa)):
+        raise ValueError(f"'{name}' must be finite.")
+    return xa
+
+
+# ---------------------------------------------------------------------------
+# IEC 60268-1 tone bursts (Annex A, Clause A2)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ToneBurstResult:
+    """Gated sine burst per IEC 60268-1:1985 (Annex A, Clause A2).
+
+    The tone starts at a zero crossing (positive-going) and the gate stays
+    open for an integral number of full periods, as Clause A2.1 requires
+    of the dynamic-response stimulus. With a repetition rate the record is
+    a train of identical bursts, one per repetition period (Clause A2.2).
+
+    :ivar signal: The burst record (silence, bursts and gaps included).
+    :ivar envelope: Rectangular gating envelope of :attr:`signal`
+        (``amplitude`` while the gate is open, ``0`` elsewhere).
+    :ivar fs: Sample rate, in Hz.
+    :ivar frequency: Tone frequency, in Hz.
+    :ivar cycles: Full tone periods per burst.
+    :ivar amplitude: Peak amplitude of the tone.
+    :ivar burst_seconds: Burst duration ``cycles/frequency``, in seconds.
+    :ivar burst_samples: Samples per burst, ``round(fs·cycles/frequency)``.
+    :ivar onset_sample: Index of the first sample of the first burst.
+    :ivar repetitions: Number of bursts in the record.
+    :ivar repetition_rate: Bursts per second, or ``None`` (single burst).
+    :ivar period_samples: Samples per repetition period
+        (``round(fs/repetition_rate)``), or ``None`` (single burst).
+    :ivar duty_cycle: On fraction ``burst_samples/period_samples``, or
+        ``None`` (single burst).
+    """
+
+    signal: "NDArray[np.float64]"
+    envelope: "NDArray[np.float64]"
+    fs: float
+    frequency: float
+    cycles: int
+    amplitude: float
+    burst_seconds: float
+    burst_samples: int
+    onset_sample: int
+    repetitions: int
+    repetition_rate: float | None
+    period_samples: int | None
+    duty_cycle: float | None
+
+    def plot(
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
+    ) -> "Axes":
+        """Plot the burst waveform with its gating envelope.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        """
+        from .._i18n import check_language
+        from .._plot.metrology import plot_tone_burst
+
+        check_language(language)
+        return plot_tone_burst(self, ax=ax, language=language, **kwargs)
+
+
+def tone_burst(
+    fs: float,
+    frequency: float,
+    cycles: int,
+    *,
+    amplitude: float = 1.0,
+    repetitions: int = 1,
+    repetition_rate: float | None = None,
+    pre_silence: float = 0.0,
+    post_silence: float = 0.0,
+) -> ToneBurstResult:
+    """Generate an IEC 60268-1 tone burst (single or repetitive).
+
+    IEC 60268-1:1985, Clause A2.1: "The burst should start at the
+    zero-crossing of the [...] tone and should consist of an integral
+    number of full periods." The burst is a sine of ``cycles`` full
+    periods gated by a rectangular envelope; with ``repetition_rate`` a
+    train of ``repetitions`` identical bursts is produced, one per
+    repetition period, as in the repetitive-burst test of Clause A2.2
+    (there: 5 ms bursts of 5 kHz tone at 2, 10 or 100 bursts per second).
+
+    :param fs: Sample rate, in Hz.
+    :param frequency: Tone frequency, in Hz (below the Nyquist rate).
+    :param cycles: Full tone periods per burst (positive integer).
+    :param amplitude: Peak amplitude of the tone.
+    :param repetitions: Number of bursts (requires ``repetition_rate``
+        when greater than 1).
+    :param repetition_rate: Bursts per second; each burst then occupies
+        one full repetition period (burst plus silence). ``None`` (the
+        default) produces a single burst with no trailing period.
+    :param pre_silence: Silence before the first burst, in seconds.
+    :param post_silence: Silence after the last burst (or after the last
+        repetition period), in seconds.
+    :return: A :class:`ToneBurstResult`.
+    :raises ValueError: If the inputs or parameters are invalid.
+    """
+    fs_v = _positive(fs, "fs")
+    f_v = _positive(frequency, "frequency")
+    if f_v >= fs_v / 2.0:
+        raise ValueError("'frequency' must be below the Nyquist rate fs/2.")
+    cycles_v = int(cycles)
+    if cycles_v != cycles or cycles_v < 1:
+        raise ValueError("'cycles' must be a positive integer.")
+    amplitude_v = _positive(amplitude, "amplitude")
+    repetitions_v = int(repetitions)
+    if repetitions_v != repetitions or repetitions_v < 1:
+        raise ValueError("'repetitions' must be a positive integer.")
+    for name, value in (("pre_silence", pre_silence),
+                        ("post_silence", post_silence)):
+        if not np.isfinite(float(value)) or float(value) < 0.0:
+            raise ValueError(f"'{name}' must be a non-negative, finite number.")
+
+    burst_seconds = cycles_v / f_v
+    n_on = int(round(fs_v * burst_seconds))
+    if n_on < 2:
+        raise ValueError(
+            "The burst is shorter than 2 samples; increase 'cycles' or 'fs'."
+        )
+
+    period: int | None = None
+    rate_v: float | None = None
+    duty: float | None = None
+    if repetition_rate is not None:
+        rate_v = _positive(repetition_rate, "repetition_rate")
+        period = int(round(fs_v / rate_v))
+        if period < n_on:
+            raise ValueError(
+                "The burst does not fit in one repetition period: "
+                f"{n_on} samples per burst, {period} per period."
+            )
+        duty = n_on / period
+    elif repetitions_v > 1:
+        raise ValueError(
+            "'repetition_rate' is required when 'repetitions' > 1."
+        )
+
+    n_pre = int(round(float(pre_silence) * fs_v))
+    n_post = int(round(float(post_silence) * fs_v))
+    block = period if period is not None else n_on
+    n_total = n_pre + repetitions_v * block + n_post
+
+    # Clause A2.1: start at the zero crossing, integral number of full
+    # periods. sin(2πf·m/fs) starts at 0, positive-going, and the underlying
+    # continuous tone returns to a zero crossing exactly at t = cycles/f.
+    m = np.arange(n_on, dtype=np.float64)
+    burst = amplitude_v * np.sin(2.0 * np.pi * f_v * m / fs_v)
+
+    signal = np.zeros(n_total, dtype=np.float64)
+    envelope = np.zeros(n_total, dtype=np.float64)
+    for k in range(repetitions_v):
+        start = n_pre + k * block
+        signal[start:start + n_on] = burst
+        envelope[start:start + n_on] = amplitude_v
+
+    return ToneBurstResult(
+        signal=signal,
+        envelope=envelope,
+        fs=fs_v,
+        frequency=f_v,
+        cycles=cycles_v,
+        amplitude=amplitude_v,
+        burst_seconds=burst_seconds,
+        burst_samples=n_on,
+        onset_sample=n_pre,
+        repetitions=repetitions_v,
+        repetition_rate=rate_v,
+        period_samples=period,
+        duty_cycle=duty,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Polyphase resampling with an explicit anti-alias specification
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ResampledSignalResult:
+    """Resampled record with the designed anti-alias filter and its spec.
+
+    The polyphase resampler filters at the intermediate rate
+    ``fs_original·up`` with a linear-phase Kaiser-window lowpass designed
+    from the two numbers below; the filter taps are returned so the spec
+    can be verified against the filter itself.
+
+    :ivar signal: The resampled record.
+    :ivar fs: Sample rate of :attr:`signal`, in Hz.
+    :ivar original_fs: Sample rate of the input, in Hz.
+    :ivar up: Interpolation factor of the rational ratio ``up/down``.
+    :ivar down: Decimation factor of the rational ratio ``up/down``.
+    :ivar filter_taps: Anti-alias FIR taps (unit passband gain; the
+        polyphase engine applies the ``up`` interpolation gain), designed
+        at the intermediate rate ``original_fs·up``. A single ``1.0`` tap
+        when the ratio is 1 (no filtering).
+    :ivar passband_edge_hz: Passband edge of the design, in Hz.
+    :ivar stopband_edge_hz: Stopband edge of the design (the smaller of
+        the two Nyquist frequencies), in Hz.
+    :ivar stopband_attenuation_db: Designed stopband attenuation, in dB
+        (also the passband ripple bound: the Kaiser method is
+        equiripple-bounded by the same ``δ = 10^(-A/20)`` in both bands).
+    :ivar transition_width: Transition-band width as a fraction of the
+        smaller Nyquist frequency.
+    """
+
+    signal: "NDArray[np.float64]"
+    fs: float
+    original_fs: float
+    up: int
+    down: int
+    filter_taps: "NDArray[np.float64]"
+    passband_edge_hz: float
+    stopband_edge_hz: float
+    stopband_attenuation_db: float
+    transition_width: float
+
+    @property
+    def n_taps(self) -> int:
+        """Length of the designed anti-alias FIR."""
+        return int(self.filter_taps.size)
+
+
+def resample_signal(
+    x: "NDArray[np.float64] | list[float]",
+    fs: float,
+    fs_new: float,
+    *,
+    stopband_attenuation_db: float = 120.0,
+    transition_width: float = 0.05,
+    max_denominator: int = 1000,
+) -> ResampledSignalResult:
+    """Resample a record with a stated anti-alias specification.
+
+    Polyphase rational resampling (:func:`scipy.signal.resample_poly`)
+    behind a lowpass FIR designed *here* by the Kaiser window method: the
+    stopband starts at the smaller of the two Nyquist frequencies and
+    provides ``stopband_attenuation_db`` of alias rejection, the passband
+    ends ``transition_width`` below it and is flat within the same ripple
+    bound ``δ = 10^(-A/20)``. The designed taps travel with the result, so
+    the spec is a property of the returned filter, not of a library
+    default.
+
+    :param x: Input record, 1-D.
+    :param fs: Sample rate of ``x``, in Hz.
+    :param fs_new: Target sample rate, in Hz. The ratio ``fs_new/fs``
+        must be a rational number with denominator at most
+        ``max_denominator`` (e.g. 48000/44100 = 160/147).
+    :param stopband_attenuation_db: Anti-alias stopband attenuation, in
+        dB (at least 30).
+    :param transition_width: Transition-band width as a fraction of the
+        smaller Nyquist frequency, in (0, 0.5].
+    :param max_denominator: Largest denominator accepted for the rational
+        rate ratio.
+    :return: A :class:`ResampledSignalResult`.
+    :raises ValueError: If the inputs or parameters are invalid, or if
+        the rate ratio is not rational within ``max_denominator``.
+    """
+    from fractions import Fraction
+
+    xa = _validate_1d_finite(x, "x")
+    fs_v = _positive(fs, "fs")
+    fs_new_v = _positive(fs_new, "fs_new")
+    atten = float(stopband_attenuation_db)
+    if not np.isfinite(atten) or atten < 30.0:
+        raise ValueError("'stopband_attenuation_db' must be at least 30 dB.")
+    tw = float(transition_width)
+    if not np.isfinite(tw) or not 0.0 < tw <= 0.5:
+        raise ValueError("'transition_width' must be in (0, 0.5].")
+    max_den = int(max_denominator)
+    if max_den < 1:
+        raise ValueError("'max_denominator' must be a positive integer.")
+
+    ratio = Fraction(fs_new_v / fs_v).limit_denominator(max_den)
+    up, down = ratio.numerator, ratio.denominator
+    if up == 0 or abs(up / down - fs_new_v / fs_v) > 1e-9 * (fs_new_v / fs_v):
+        raise ValueError(
+            f"'fs_new'/'fs' = {fs_new_v / fs_v!r} is not a rational ratio "
+            f"with denominator <= {max_den}."
+        )
+
+    if up == down:  # Same rate: nothing to do, and nothing to filter.
+        return ResampledSignalResult(
+            signal=xa.copy(),
+            fs=fs_new_v,
+            original_fs=fs_v,
+            up=1,
+            down=1,
+            filter_taps=np.ones(1, dtype=np.float64),
+            passband_edge_hz=(1.0 - tw) * fs_v / 2.0,
+            stopband_edge_hz=fs_v / 2.0,
+            stopband_attenuation_db=atten,
+            transition_width=tw,
+        )
+
+    from scipy import signal as sp_signal
+
+    # Kaiser design at the intermediate rate fs·up: stopband from the
+    # smaller Nyquist frequency (where aliases fold), passband up to
+    # (1 - transition_width) of it, ripple bound 10^(-A/20) in both bands.
+    # Kaiser's attenuation estimate is accurate to a few tenths of a dB,
+    # so the design targets 1 dB past the request: the delivered filter
+    # meets the stated spec, not an approximation of it.
+    fs_up = fs_v * up
+    f_nyq = min(fs_v, fs_new_v) / 2.0
+    f_stop = f_nyq
+    f_pass = (1.0 - tw) * f_nyq
+    n_taps, beta = sp_signal.kaiserord(
+        atten + 1.0, (f_stop - f_pass) / (fs_up / 2.0)
+    )
+    n_taps += (n_taps + 1) % 2  # Odd length: type I linear phase.
+    taps = np.asarray(
+        sp_signal.firwin(
+            n_taps, (f_pass + f_stop) / 2.0, window=("kaiser", beta), fs=fs_up
+        ),
+        dtype=np.float64,
+    )
+    resampled = np.asarray(
+        sp_signal.resample_poly(xa, up, down, window=taps), dtype=np.float64
+    )
+    return ResampledSignalResult(
+        signal=resampled,
+        fs=fs_new_v,
+        original_fs=fs_v,
+        up=up,
+        down=down,
+        filter_taps=taps,
+        passband_edge_hz=f_pass,
+        stopband_edge_hz=f_stop,
+        stopband_attenuation_db=atten,
+        transition_width=tw,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Band-limited fractional delay (frequency-domain phase ramp)
+# ---------------------------------------------------------------------------
+
+
+def _fractional_advance(
+    x: "NDArray[np.float64]", shift: float
+) -> "NDArray[np.float64]":
+    """Advance ``x`` by ``shift`` samples (band-limited, non-circular).
+
+    Frequency-domain phase ramp ``e^{+j2πk·shift/nfft}`` over a record
+    zero-padded past the shift, so the advanced samples leaving one end
+    land in the padding instead of wrapping around. This is the alignment
+    kernel of :func:`~phonometry.metrology.correlation.align_impulse_responses`.
+    """
+    from scipy import fft as sp_fft
+
+    n = x.size
+    pad = int(np.ceil(abs(shift))) + 1
+    nfft = int(sp_fft.next_fast_len(n + pad))
+    spectrum = np.fft.rfft(x, n=nfft)
+    freqs = np.fft.rfftfreq(nfft)
+    shifted = np.fft.irfft(
+        spectrum * np.exp(2j * np.pi * freqs * shift), n=nfft
+    )
+    return np.asarray(shifted[:n], dtype=np.float64)
+
+
+def fractional_delay(
+    x: "NDArray[np.float64] | list[float]",
+    delay: float,
+    *,
+    mode: Literal["linear", "circular"] = "linear",
+) -> "NDArray[np.float64]":
+    """Delay a record by an arbitrary (sub-sample) number of samples.
+
+    Band-limited delay via a frequency-domain phase ramp
+    ``e^{-j2πk·delay/N}``: every spectral component is delayed by exactly
+    ``delay`` samples, i.e. its phase changes by ``-2π·f·delay/fs``
+    radians. Two boundary conventions:
+
+    * ``'linear'`` (default): the record is zero-padded past the shift
+      before the ramp, so samples leaving one end land in the padding
+      instead of wrapping around - use it for transients and impulse
+      responses. Content shifted beyond the record length is discarded
+      (the output keeps the input length).
+    * ``'circular'``: the ramp is applied over the record itself and the
+      shift wraps around - use it for periodic records. For a tone
+      centered on a DFT bin the delayed record equals the analytically
+      delayed tone to machine precision.
+
+    An integer ``delay`` in ``'linear'`` mode reduces to an exact sample
+    shift with zero fill. Negative delays advance the record.
+
+    A real record of even length cannot carry a fractionally delayed
+    Nyquist-bin component (the inverse real FFT keeps its real part), so
+    keep the signal band-limited below Nyquist - as any properly sampled
+    signal is - or use odd lengths, and the operation is exact.
+
+    :param x: Input record, 1-D.
+    :param delay: Delay in samples (fractional and negative allowed);
+        magnitude less than the record length.
+    :param mode: Boundary convention, ``'linear'`` or ``'circular'``.
+    :return: The delayed record, same length as ``x``.
+    :raises ValueError: If the inputs or parameters are invalid.
+    """
+    xa = _validate_1d_finite(x, "x")
+    delay_v = float(delay)
+    if not np.isfinite(delay_v):
+        raise ValueError("'delay' must be a finite number.")
+    if abs(delay_v) >= xa.size:
+        raise ValueError(
+            "'delay' magnitude must be smaller than the record length "
+            f"({xa.size} samples)."
+        )
+    if mode not in ("linear", "circular"):
+        raise ValueError("'mode' must be 'linear' or 'circular'.")
+    if mode == "linear":
+        # A delay is a negative advance; float negation is exact, so the
+        # phase ramp is bit-identical to the alignment kernel's.
+        return _fractional_advance(xa, -delay_v)
+    n = xa.size
+    freqs = np.fft.rfftfreq(n)
+    delayed = np.fft.irfft(
+        np.fft.rfft(xa) * np.exp(-2j * np.pi * freqs * delay_v), n=n
+    )
+    return np.asarray(delayed, dtype=np.float64)

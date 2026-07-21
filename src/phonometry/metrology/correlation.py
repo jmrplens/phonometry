@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .signals import _fractional_advance
 from .spectra import (
     _coherence_from_spectra,
     _noverlap_samples,
@@ -842,28 +843,6 @@ class AlignedImpulseResponseResult:
         check_language(language)
         return plot_aligned_impulse_response(self, ax=ax, language=language,
                                              **kwargs)
-
-
-def _fractional_advance(
-    x: "NDArray[np.float64]", shift: float
-) -> "NDArray[np.float64]":
-    """Advance ``x`` by ``shift`` samples (band-limited, non-circular).
-
-    Frequency-domain phase ramp ``e^{+j2πk·shift/nfft}`` over a record
-    zero-padded past the shift, so the advanced samples leaving one end
-    land in the padding instead of wrapping around.
-    """
-    from scipy import fft as sp_fft
-
-    n = x.size
-    pad = int(np.ceil(abs(shift))) + 1
-    nfft = int(sp_fft.next_fast_len(n + pad))
-    spectrum = np.fft.rfft(x, n=nfft)
-    freqs = np.fft.rfftfreq(nfft)
-    shifted = np.fft.irfft(
-        spectrum * np.exp(2j * np.pi * freqs * shift), n=nfft
-    )
-    return np.asarray(shifted[:n], dtype=np.float64)
 
 
 def align_impulse_responses(

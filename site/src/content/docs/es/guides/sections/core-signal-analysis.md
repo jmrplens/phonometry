@@ -79,6 +79,10 @@ calibrada y acompañada de su calidad estadística.
   PSD y densidad espectral cruzada con intervalos de confianza chi-cuadrado,
   el espectro de salida coherente con la SNR espectral, suavizado en 1/n de
   octava y generadores de ruido de colores con pendiente exacta.
+- [Análisis tiempo-frecuencia](/phonometry/es/guides/time-frequency/): el
+  espectrograma STFT calibrado en unidades absolutas (dB SPL para pascales)
+  y la FFT con zoom que resuelve tonos más próximos que un bin práctico de
+  FFT.
 - [Correlación, retardo y envolvente](/phonometry/es/guides/correlation-delay/):
   estimaciones de correlación con los errores aleatorios de Bendat y
   Piersol, estimación del retardo por correlación directa, pendiente de fase

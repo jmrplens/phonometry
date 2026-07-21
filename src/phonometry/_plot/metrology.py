@@ -23,6 +23,7 @@ if TYPE_CHECKING:
         CrossSpectralDensityResult,
         SpectralDensityResult,
     )
+    from ..metrology.time_frequency import SpectrogramResult, ZoomFFTResult
     from ..metrology.uncertainty import MonteCarloResult, UncertaintyResult
 
 from .common import (
@@ -76,6 +77,10 @@ _STRINGS: dict[str, str] = {
     r"$\hat{G}_{nn}$ (noise)": r"$\hat{G}_{nn}$ (ruido)",
     "Coherent output spectrum (Bendat & Piersol 9.2.2)": "Espectro de salida coherente (Bendat y Piersol 9.2.2)",
     "Spectral SNR [dB]": "SNR espectral [dB]",
+    "Calibrated spectrogram (Bendat & Piersol 12.6.4.2)":
+        "Espectrograma calibrado (Bendat y Piersol 12.6.4.2)",
+    "Zoom FFT (Bendat & Piersol 11.5.4)":
+        "FFT con zoom (Bendat y Piersol 11.5.4)",
     "Correlation coefficient": "Coeficiente de correlación",
     "Correlation ({norm})": "Correlación ({norm})",
     "{kind} estimate (Bendat & Piersol)": "Estimación de {kind} (Bendat y Piersol)",
@@ -528,6 +533,96 @@ def plot_coherent_output_spectrum(
         format_frequency_axis(axf, fmin, fmax)
         localize_axes(axf, language)
     return axes
+
+
+def plot_spectrogram(
+    result: "SpectrogramResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Spectrogram in dB over the time-frequency plane.
+
+    The display is drawn as a single raster image (``imshow``): per-cell
+    vector quads are avoided so the figure stays light and free of moire
+    (the repo's pcolormesh-in-SVG policy). The default color range spans
+    the 80 dB below the strongest cell; pass ``vmin``/``vmax`` to change
+    it.
+
+    :param result: A
+        :class:`~phonometry.metrology.time_frequency.SpectrogramResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to ``imshow``.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    times = np.asarray(result.times, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    level = _db10(np.asarray(result.power, dtype=np.float64))
+    vmax = float(np.max(level[np.isfinite(level)]))
+    fs = result.nperseg / result.time_resolution
+    half_hop = 0.5 * result.hop / fs
+    df = float(freqs[1] - freqs[0])
+    img = ax.imshow(
+        level,
+        **{
+            "cmap": "magma",
+            "vmin": vmax - 80.0,
+            "vmax": vmax,
+            "aspect": "auto",
+            "origin": "lower",
+            "interpolation": "nearest",
+            "extent": (
+                float(times[0]) - half_hop,
+                float(times[-1]) + half_hop,
+                max(float(freqs[0]) - 0.5 * df, 0.0),
+                float(freqs[-1]) + 0.5 * df,
+            ),
+            **kwargs,
+        },
+    )
+    ax.figure.colorbar(img, ax=ax, label=_psd_ylabel(result.scaling, language))
+    ax.set_xlabel(_t("Time [s]", language))
+    ax.set_ylabel(_t("Frequency [Hz]", language))
+    ax.set_title(_t("Calibrated spectrogram (Bendat & Piersol 12.6.4.2)", language))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_zoom_fft(
+    result: "ZoomFFTResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Zoom power spectrum in dB over the zoom band (linear axis).
+
+    :param result: A
+        :class:`~phonometry.metrology.time_frequency.ZoomFFTResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    color = kwargs.pop("color", _C_PRIMARY)
+    be = format_number(result.resolution_bandwidth, language, decimals=2)
+    df = format_number(result.bin_spacing, language, decimals=3)
+    kwargs.setdefault(
+        "label", f"$B_e$ = {be} Hz, $\\Delta f$ = {df} Hz"
+    )
+    ax.plot(freqs, _db10(np.asarray(result.power, dtype=np.float64)),
+            color=color, **kwargs)
+    ax.set_xlim(float(freqs[0]), float(freqs[-1]))
+    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_psd_ylabel("spectrum", language))
+    ax.set_title(_t("Zoom FFT (Bendat & Piersol 11.5.4)", language))
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax
 
 
 _LAG_LABEL = "Lag [s]"

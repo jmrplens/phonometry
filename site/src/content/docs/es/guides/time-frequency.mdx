@@ -1,0 +1,210 @@
+---
+title: "Análisis tiempo-frecuencia"
+description: "El espectrograma STFT calibrado y la FFT con zoom de Bendat y Piersol: dB SPL absolutos por celda con el escalado exacto del módulo de Welch, el compromiso entre resolución temporal y frecuencial, y espectros de banda estrecha en una malla arbitrariamente fina que resuelven tonos más próximos que un bin práctico de FFT."
+references:
+  - type: book
+    authors: ["Bendat, J. S.", "Piersol, A. G."]
+    year: 2010
+    title: "Random data: Analysis and measurement procedures"
+    edition: "4.ª ed."
+    publisher: "Wiley"
+    doi: "10.1002/9781118032428"
+    note: "Sección 12.6.4.2 (espectrogramas y sus errores aleatorios), sección 11.5.4 (procedimientos de transformada con zoom, ecs. 11.122-11.130) y secciones 8.5.1/8.5.4 (ancho de banda de resolución y errores estadísticos de estimaciones sin promediar). ISBN 978-0-470-24877-5."
+---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
+Un espectro estacionario esconde todo lo que ocurre *en el tiempo*: una
+sirena que pasa, un impacto, una máquina arrancando. Esta página cubre los
+dos estimadores tiempo-frecuencia de `phonometry.metrology`, ambos con la
+disciplina de calibración de la
+[página de análisis espectral](/phonometry/es/guides/spectral-analysis/):
+el **espectrograma calibrado** (la vista de transformada de Fourier de
+tiempo corto de Bendat y Piersol, sección 12.6.4.2, en unidades absolutas:
+dB SPL para una señal en pascales) y la **FFT con zoom** (sección 11.5.4),
+que calcula el espectro de una banda estrecha en una malla arbitrariamente
+fina para separar tonos más próximos que un bin práctico de FFT de banda
+completa. Donde la [página de niveles](/phonometry/es/guides/levels/)
+ofrece el espectrograma en bandas fraccionales de octava de un sonómetro,
+esta es su equivalente de banda fina y ancho de banda constante.
+
+## 1. El espectrograma calibrado
+
+`spectrogram` divide el registro en segmentos con ventana (Hann por
+defecto) y solapados - exactamente la segmentación de
+`power_spectral_density` - y conserva el periodograma unilateral de cada
+segmento como una columna de la representación tiempo-frecuencia, en lugar
+de promediarlos. Como la calibración es el escalado exacto del módulo de
+Welch sin eliminación de tendencia, se cumplen tres identidades:
+
+* una señal en pascales da Pa²/Hz (`'density'`) o Pa² (`'spectrum'`) por
+  celda, así que `10·lg(power/p₀²)` con escalado `'spectrum'` lee
+  directamente el **nivel de presión sonora** de un tono en cualquier
+  columna que abarque;
+* la **media de las columnas en el tiempo reproduce
+  `power_spectral_density`** bin a bin, con la misma ventana, solape y
+  escalado;
+* con una ventana cuyo cuadrado suma una constante al solaparse (Hann al
+  75 % de solape), la potencia `'density'` integrada en el tiempo es
+  exactamente la **energía** del registro en el dominio temporal (Parseval
+  más la identidad COLA, una de las comprobaciones de conformidad).
+
+```python
+from phonometry import spectrogram
+
+res = spectrogram(x, fs, nperseg=1024, overlap=0.75, scaling="spectrum")
+print(res.power.shape)             # (frecuencias, tiempos)
+print(res.time_resolution)         # T_B = nperseg/fs, en s
+print(res.resolution_bandwidth)    # Be del segmento con ventana, en Hz
+res.plot(language="es")            # imagen en dB en el plano tiempo-frecuencia
+```
+
+La longitud del segmento es toda la decisión de diseño: `T_B = nperseg/fs`
+de resolución temporal contra `Bₑ ≈ 1/T_B` de resolución frecuencial, un
+producto igual a uno (sección 12.6.4.2). Los segmentos largos fijan las
+frecuencias y emborronan los transitorios; los cortos, lo contrario. Y como
+cada celda es una única estimación *sin promediar*, los datos aleatorios
+llevan un error aleatorio normalizado de 1 por celda (ec. 8.158 con
+`nd = 1`; Bendat y Piersol citan `√2/1,25 ≈ 1,13` para la representación en
+magnitud): el espectrograma es una herramienta para la estructura
+determinista (tonos, barridos, transitorios), mientras que la
+[estimación de Welch](/phonometry/es/guides/spectral-analysis/) promediada
+es la herramienta de baja varianza para el fondo estacionario.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrated_spectrogram_es.png" alt="Espectrograma calibrado en dB SPL de una escena exterior sintética de cuatro segundos: una sirena que barre sinusoidalmente entre 600 y 1200 hercios traza una cresta oscilante brillante a 70 decibelios, un impacto de banda ancha a los dos segundos y medio dibuja una franja vertical y un fondo de ruido rosa a 45 decibelios rellena el fondo, con la barra de color leyendo el nivel de presión sonora absoluto" width="82%" loading="eager" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import noise_signal, spectrogram
+
+fs = 16000.0
+t = np.arange(int(4.0 * fs)) / fs
+p_ref = 2e-5
+
+siren_rms = p_ref * 10.0 ** (70.0 / 20.0)          # sirena a 70 dB SPL
+x = siren_rms * np.sqrt(2.0) * np.cos(
+    2.0 * np.pi * 900.0 * t - 600.0 * np.cos(np.pi * t)
+)
+rng = np.random.default_rng(9)
+n_imp = int(0.06 * fs)                              # impacto en t = 2,5 s
+x[int(2.5 * fs):int(2.5 * fs) + n_imp] += 0.4 * (
+    rng.standard_normal(n_imp) * np.exp(-np.arange(n_imp) / (0.012 * fs))
+)
+x += noise_signal(fs, 4.0, color="pink",            # fondo a 45 dB SPL
+                  rms=p_ref * 10.0 ** (45.0 / 20.0), seed=10)
+
+res = spectrogram(x, fs, nperseg=1024, overlap=0.75, scaling="spectrum")
+level = 10.0 * np.log10(res.power / p_ref**2)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+img = ax.imshow(level, cmap="magma", vmin=level.max() - 55.0,
+                vmax=level.max(), aspect="auto", origin="lower",
+                extent=(res.times[0], res.times[-1], 0.0,
+                        res.frequencies[-1]))
+fig.colorbar(img, ax=ax, label="Nivel de presión sonora [dB SPL]")
+ax.set_ylim(0.0, 3000.0)
+ax.set_xlabel("Tiempo [s]")
+ax.set_ylabel("Frecuencia [Hz]")
+plt.show()
+```
+
+</details>
+
+`res.plot()` dibuja la misma representación directamente desde el
+resultado (una única imagen ráster, 80 dB por debajo de la celda más
+fuerte por defecto; pase `vmin`/`vmax` para cambiar el rango, o `ax` para
+dibujar en un panel existente).
+
+## 2. FFT con zoom
+
+Dos tonos separados 3 Hz - bandas laterales de engranajes, máquinas
+gemelas, zumbido de red contra un armónico de rotor - son invisibles para
+una FFT de 1024 puntos a 8192 Hz: sus bins miden 8 Hz. La solución clásica
+de los analizadores es la **transformada con zoom** de Bendat y Piersol,
+sección 11.5.4: filtrar la banda, bajarla a frecuencia cero por
+demodulación compleja con `exp(-j2πf₁t)` (ecs. 11.123-11.126), decimar por
+la razón de anchos de banda y transformar el registro decimado
+(ecs. 11.128-11.130), obteniendo un espaciado fino de bins sobre la banda
+sin un bloque de FFT gigante (ec. 11.127).
+
+`zoom_fft` calcula el equivalente digital exacto en una sola pasada - la
+evaluación chirp-Z de la DFT del registro con ventana sobre la malla del
+zoom - que da las mismas muestras de la DFT que la cadena
+demodular-decimar; la batería de tests fija ambas entre sí a precisión de
+máquina. Las amplitudes se calibran con la ganancia coherente de la
+ventana, así que un seno de amplitud de pico `A` sobre una frecuencia de
+análisis lee `amplitude = A` y `power = A²/2` exactamente:
+
+```python
+from phonometry import zoom_fft
+
+res = zoom_fft(x, fs, 980.0, 1016.0)     # malla a la resolución del registro
+print(res.bin_spacing)                   # fs/N por defecto
+print(res.resolution_bandwidth)          # Be del registro con ventana
+peak = res.amplitude.argmax()
+print(res.frequencies[peak], res.amplitude[peak])
+res.plot(language="es")                  # espectro de potencia en dB
+```
+
+Una distinción importa y el resultado la declara: la **malla** puede
+hacerse arbitrariamente fina (`n_points`), pero la **resolución** - la
+capacidad de separar dos tonos - la fijan la longitud del registro y la
+ventana, informada como `resolution_bandwidth`
+(`Bₑ = fs·Σw²/(Σw)²`, es decir, `1/T` sin ventana, `1,5/T` con Hann). El
+zoom refina el muestreo del mismo espectro subyacente; solo un registro
+más largo separa tonos más próximos.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/zoom_fft_resolution_es.svg" alt="FFT con zoom de un registro de un segundo con tonos a 997 y 1000 hercios: la FFT gruesa de 1024 puntos con bins de 8 hercios muestra un único bulto ancho, mientras que la FFT con zoom entre 980 y 1016 hercios dibuja dos lóbulos principales separados cuyos picos caen exactamente sobre las frecuencias verdaderas punteadas" width="82%" loading="lazy" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import signal
+from phonometry import zoom_fft
+
+fs = 8192.0
+t = np.arange(8192) / fs                 # registro de 1 s: resolución de 1 Hz
+x = (0.8 * np.cos(2.0 * np.pi * 997.0 * t)
+     + 0.5 * np.cos(2.0 * np.pi * 1000.0 * t))
+
+w = signal.get_window("hann", 1024)      # la vista gruesa: bins de 8 Hz
+coarse = 2.0 * np.abs(np.fft.rfft(x[:1024] * w)) / np.sum(w)
+coarse_f = np.fft.rfftfreq(1024, 1.0 / fs)
+band = (coarse_f >= 950.0) & (coarse_f <= 1050.0)
+
+res = zoom_fft(x, fs, 980.0, 1016.0, n_points=145)   # malla de 0,25 Hz
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(coarse_f[band], 20.0 * np.log10(coarse[band]), "o--",
+        label="FFT de 1024 puntos (bins de 8 Hz)")
+ax.plot(res.frequencies, 20.0 * np.log10(res.amplitude),
+        label="FFT con zoom del mismo registro")
+for f0 in (997.0, 1000.0):
+    ax.axvline(f0, color="k", ls=":", lw=1.0, alpha=0.6)
+ax.set_ylim(-70.0, 5.0)
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("Amplitud [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+## Relación con el resto de la librería
+
+El espectrograma comparte ventana, segmentación y escalado con
+[`power_spectral_density`](/phonometry/es/guides/spectral-analysis/), así
+que ambos son mutuamente consistentes bin a bin; el
+[espectrograma en bandas de octava](/phonometry/es/guides/levels/) de
+`OctaveFilterBank.spectrogram` es el equivalente de ancho de banda
+porcentual constante con balística de sonómetro; y para seguir en el
+tiempo la frecuencia de una sola componente, la
+[frecuencia instantánea de Hilbert](/phonometry/es/guides/correlation-delay/)
+de `envelope` complementa la cresta de la STFT.

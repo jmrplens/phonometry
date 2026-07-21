@@ -24,6 +24,14 @@ de vuelta al mundo de bandas; y los generadores de ruido de colores
 sintetizan señales de prueba blancas, rosas, rojas, azules y violetas con
 pendiente exacta en ley de potencias.
 
+[Análisis tiempo-frecuencia](/phonometry/es/guides/time-frequency/) es la
+vista intermedia: el espectrograma STFT calibrado muestra qué ocurre
+*cuándo* - una sirena que pasa, un impacto, un arranque - con cada celda
+leyendo un nivel absoluto en el mismo escalado que los estimadores de
+Welch, y la FFT con zoom calcula el espectro de una banda estrecha en una
+malla arbitrariamente fina para separar tonos más próximos que un bin
+práctico de FFT.
+
 [Correlación, retardo y envolvente](/phonometry/es/guides/correlation-delay/)
 es la mitad del dominio del tiempo. La autocorrelación y la correlación
 cruzada vienen con las normalizaciones y los errores aleatorios de Bendat y
@@ -48,6 +56,10 @@ estimaciones.
   PSD/CSD de Welch con intervalos de confianza chi-cuadrado, el espectro de
   salida coherente y la SNR espectral, suavizado en 1/n de octava y
   generadores de ruido de colores con pendiente exacta.
+- [Análisis tiempo-frecuencia](/phonometry/es/guides/time-frequency/): el
+  espectrograma STFT calibrado en unidades absolutas (dB SPL para pascales)
+  con el compromiso de resolución tiempo-frecuencia, y la FFT con zoom que
+  resuelve tonos más próximos que un bin práctico de FFT.
 - [Correlación, retardo y envolvente](/phonometry/es/guides/correlation-delay/):
   estimaciones de correlación con sus errores aleatorios, estimación del
   retardo por correlación directa, pendiente de fase y ponderaciones GCC,

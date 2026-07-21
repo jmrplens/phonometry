@@ -76,6 +76,27 @@ def test_coherent_output_spectrum_es() -> None:
     plt.close("all")
 
 
+def test_spectrogram_es() -> None:
+    res = ph.spectrogram(_white(8192), FS, nperseg=1024)
+    ax = res.plot(language="es")
+    assert "Espectrograma calibrado (Bendat y Piersol 12.6.4.2)" in ax.get_title()
+    assert ax.get_xlabel() == "Tiempo [s]"
+    assert ax.get_ylabel() == "Frecuencia [Hz]"
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
+def test_zoom_fft_es() -> None:
+    res = ph.zoom_fft(_white(8192), FS, 1000.0, 2000.0)
+    ax = res.plot(language="es")
+    assert ax.get_title() == "FFT con zoom (Bendat y Piersol 11.5.4)"
+    assert ax.get_ylabel() == "Espectro de potencia [dB]"
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
 def test_correlation_es() -> None:
     res = ph.correlation(_white(), fs=FS, max_lag=0.01)
     ax = res.plot(language="es")

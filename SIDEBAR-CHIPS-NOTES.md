@@ -206,3 +206,85 @@ Guides: edit the `...chips(S(...), T(...))` list on the entry in
 `astro.config.mjs`. API: edit `_API_CHIPS` in `scripts/generate_api_docs.py`
 and run `PYTHONPATH=src python3 scripts/generate_api_docs.py` (`make api-docs`)
 to regenerate `api-sidebar.mjs`; the chips survive regeneration.
+
+## Iteration 4: reduce visual noise (UX)
+
+The inline saturated pills were the right idea but too loud across the whole
+tree. This iteration keeps the standard/reference attribution but makes it
+calm and scannable, and only touches `site/src/styles/sidebar-chips.css` (the
+`.astro` component and the chip data are unchanged, so the layout is pure CSS
+and hot-reloads without a dev-server restart).
+
+### Research: how real doc sites keep nav metadata quiet
+
+Four reusable noise-reduction concepts, with who uses each:
+
+1. Own line below the label, indented under the label text (not inline).
+   Used by GitBook (muted secondary line under items) and most API references
+   (Redocly, Stripe) where the type/version sits below or right of the label
+   rather than competing with it inline.
+2. De-emphasised styling instead of a saturated fill. Tailwind UI documents
+   an explicit emphasis ladder - solid fill (high) -> soft tint (medium) ->
+   outline/ghost (low); Starlight's own badge variants (note/tip) are soft
+   tints, never saturated. Lowest-noise is ghost text with a small colour
+   accent (a dot), the Tailwind "dot + label" badge.
+3. Progressive disclosure - show the tag only for the active / hovered item.
+   Common in dense trees (VS Code explorer, VitePress, many API explorers)
+   where resting state stays clean and detail appears on demand.
+4. A single muted "source" line, monochrome with at most a tiny accent.
+   Reads like a citation (Stripe / Redocly metadata rows); the category colour
+   is dropped entirely in favour of one calm grey line.
+
+### Live default (variant A: chips-below, dot + muted text)
+
+Chosen default. Chips drop onto their own line directly below the label,
+aligned under the label text (they share the anchor's inline padding box), as
+ghost tags: no fill, no border, `0.72em` muted text in `--sl-color-gray-2`,
+each preceded by a small `0.42em` category dot (teal = standard, amber =
+theory). Tight vertical rhythm (`margin-block-start: 0.15em`), wraps cleanly
+for multi/mixed chips. On the active accent pill the chip text inverts to
+`--sl-color-text-invert` (dots keep their colour). Muted-text contrast: 8.57:1
+dark, 11.71:1 light - both clear WCAG AA. EN/ES identical (no per-item text in
+this variant). This is the cleanest option that still keeps the
+standard-vs-reference distinction visible at rest, matching the maintainer's
+lean (own line + de-emphasised + subtle colour accent).
+
+### Switchable variants (for comparison)
+
+All alternatives live behind a `data-chip-style` attribute on the root
+element; the default (variant A) is active when the attribute is absent. To
+preview live, in DevTools console:
+`document.documentElement.dataset.chipStyle = 'boxed'` (or `reveal`, `source`,
+`pills`); remove it (`delete document.documentElement.dataset.chipStyle`) to
+return to the default.
+
+- (A) default / no attribute - chips-below, dot + muted text. LIVE default.
+- (B) `boxed` - each item with chips becomes a bordered card row; chips are
+  soft-tinted rounded tags (medium emphasis). Caveat: the card background
+  currently overrides the active-item accent pill, so the current page's label
+  loses its highlight (invisible in light mode). Would need active-state work
+  before shipping; kept as a comparison only.
+- (C) `reveal` - chips hidden at rest, shown only for the hovered / focused /
+  current item. Calmest resting tree; the screenshot shows the active item
+  (Room acoustics) revealed, hover behaves identically.
+- (D) `source` - one muted italic line `source: ISO 3382 - ISO 18233 -
+  Schroeder 1965` (`fuente:` in ES via `:root[lang='es']`), monochrome, no
+  dots. Reads like a citation.
+- `pills` - the previous saturated inline pills, kept as the "before"
+  reference.
+
+### Screenshots (`ux-variants/`, chromium, Rooms and buildings section)
+
+- `variantA-chips-below-dark.png`, `variantA-chips-below-light.png`,
+  `variantA-chips-below-es-dark.png` (default, EN + ES)
+- `variantB-boxed-dark.png`, `variantB-boxed-light.png`
+- `variantC-reveal-dark.png`, `variantC-reveal-light.png`
+- `variantD-source-dark.png`, `variantD-source-light.png`,
+  `variantD-source-es-dark.png`
+- `reference-pills-dark.png`, `reference-pills-light.png` (the loud "before")
+
+### Colour tokens (iteration 4, theme-aware)
+
+Dots/accents added alongside the existing fills. Dark: standard accent
+`#6fdcc8`, theory accent `#e6b84e`; soft tints are 10% alpha washes of the
+text colour. Light: standard accent `#128273`, theory accent `#a8760a`.

@@ -1,55 +1,90 @@
 /* Sidebar reference chips.
 
-   Each sidebar item can carry a small Starlight badge that tells the reader,
-   at a glance, what governs the page:
+   Each sidebar item can carry one or more small tags that tell the reader, at
+   a glance, what governs the page:
 
-   - `.chip-standard` (colour A, teal): the page implements one or more
-     published standards; the chip shows the standard number(s), kept short
-     (e.g. "IEC 61672", "ISO 2631 / 5349").
-   - `.chip-theory` (colour B, amber): the page is theoretical or
-     experimental with no governing standard; the chip shows the single most
-     notable reference, very short (e.g. "Welch 1967", "Bendat & Piersol").
+   - `.chip-standard` (teal accent): the page implements one or more published
+     standards; the chip shows the standard number(s), kept short (e.g.
+     "IEC 61672", "ISO 3382").
+   - `.chip-theory` (amber accent): a notable reference / investigator the
+     method is attributed to (e.g. "Welch 1967", "Bendat & Piersol").
+   - an item may carry BOTH (mixed).
 
-   The badges are attached in astro.config.mjs via each sidebar entry's
-   `badge: { text, class }` slot and rendered by the Badge component in
-   SidebarSublist.astro. These rules are unlayered, so they override
-   Starlight's layered `.sl-badge.default` colours without a specificity
-   fight. Both themes are covered: the palette is defined for dark mode (the
-   default the maintainer browses in) and re-stated for light mode via the
-   `data-theme` attribute Starlight stamps on the root element. Both colours
-   clear WCAG AA text contrast against their own fill. */
+   Iteration 4 - reduce visual noise. The earlier design put every chip inline
+   after the label as a saturated, filled pill. Across the whole tree that
+   generated too much colour and clutter. The LIVE DEFAULT now moves the chips
+   onto their OWN line directly below the label, aligned under the label text,
+   rendered as quiet de-emphasised tags: no fill, no border, smaller muted
+   text, with a small teal / amber dot carrying the category. The standard vs
+   reference distinction survives but reads as a calm, scannable sub-line.
+
+   Alternative treatments are kept behind a `data-chip-style` attribute on the
+   root element so the maintainer can compare them live and in screenshots
+   (see SIDEBAR-CHIPS-NOTES.md):
+     (default / "below")  quiet chips on their own line, dot + muted text
+     data-chip-style="boxed"    each chip is a soft-tinted rounded tag in a
+                                bordered card row
+     data-chip-style="reveal"   chips hidden at rest, revealed for the
+                                hovered / focused / current item only
+     data-chip-style="source"   a single muted "source: A - B - C" line
+     data-chip-style="pills"    the previous saturated inline pills (reference)
+
+   The rules are unlayered so they override Starlight's layered
+   `.sl-badge.default` colours without a specificity fight. Both themes are
+   covered: the palette is defined for dark mode (the default the maintainer
+   browses in) and re-stated for light mode via the `data-theme` attribute
+   Starlight stamps on the root element. Muted text uses Starlight's own
+   `--sl-color-gray-2`, which clears WCAG AA against the sidebar background in
+   both themes; the dot / accent colours clear the 3:1 non-text contrast. */
 
 :root {
-  /* Colour A: standard-backed (teal). */
+  /* Category accents (dots, soft tints, saturated fills). Dark mode. */
+  --chip-standard-accent: #6fdcc8;
   --chip-standard-bg: #0e3b35;
   --chip-standard-text: #7ee8d5;
   --chip-standard-border: #1e6459;
-  /* Colour B: theoretical / experimental (amber). */
+  --chip-standard-soft-bg: rgba(126, 232, 213, 0.1);
+  --chip-standard-soft-border: rgba(126, 232, 213, 0.28);
+
+  --chip-theory-accent: #e6b84e;
   --chip-theory-bg: #3c2e0c;
   --chip-theory-text: #f4c04e;
   --chip-theory-border: #6a4f14;
+  --chip-theory-soft-bg: rgba(244, 192, 78, 0.1);
+  --chip-theory-soft-border: rgba(244, 192, 78, 0.3);
 }
 
 :root[data-theme='light'] {
+  --chip-standard-accent: #128273;
   --chip-standard-bg: #d3f4ec;
   --chip-standard-text: #0c5c52;
   --chip-standard-border: #9adcce;
+  --chip-standard-soft-bg: rgba(12, 92, 82, 0.08);
+  --chip-standard-soft-border: rgba(12, 92, 82, 0.28);
+
+  --chip-theory-accent: #a8760a;
   --chip-theory-bg: #fbeecd;
   --chip-theory-text: #855107;
   --chip-theory-border: #e4c581;
+  --chip-theory-soft-bg: rgba(133, 81, 7, 0.08);
+  --chip-theory-soft-border: rgba(133, 81, 7, 0.3);
 }
 
-/* Container for one or more chips on a sidebar item. It sits after the label
-   and wraps its chips onto a new line (below the label) when they do not fit,
-   with a small gap between them and no horizontal overflow on narrow screens.
-   `inline-flex` keeps the whole group flowing after the label text yet lets
-   the chips wrap among themselves. */
+/* ---------------------------------------------------------------------------
+   LIVE DEFAULT: quiet chips on their own line below the label.
+   --------------------------------------------------------------------------- */
+
+/* Container drops onto its own line below the inline label (it is a flex
+   block following an inline label span), aligned under the label text (it
+   shares the anchor's inline padding box, so start = label start), and wraps
+   several chips cleanly with a tight vertical rhythm. */
 .sidebar-chips {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
-  gap: 0.25em;
-  margin-inline-start: 0.35em;
-  vertical-align: middle;
+  align-items: center;
+  gap: 0.1em 0.7em;
+  margin-block-start: 0.15em;
+  line-height: 1.25;
   max-width: 100%;
 }
 
@@ -58,34 +93,177 @@
   overflow-wrap: anywhere;
 }
 
-/* Shared chip shape. `.sl-badge` is Starlight's badge root; pairing it with
-   the chip class keeps specificity above the preset `.sl-badge.default`. */
-.sl-badge.chip-standard,
-.sl-badge.chip-theory {
-  border-style: solid;
-  border-width: 1px;
-  font-weight: 600;
-  /* Slightly tighter than a full-size row label so the chip reads as a tag. */
-  font-size: 0.7em;
+/* Quiet tag: strip Starlight's badge fill / border / padding down to muted
+   text preceded by a small category dot. */
+.sidebar-chips .sl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sl-color-gray-2);
+  font-size: 0.72em;
+  font-weight: 500;
   letter-spacing: 0.01em;
+  line-height: 1.25;
   white-space: nowrap;
 }
 
-.sl-badge.chip-standard {
+.sidebar-chips .sl-badge::before {
+  content: '';
+  flex: none;
+  inline-size: 0.42em;
+  block-size: 0.42em;
+  border-radius: 50%;
+  background: var(--dot, currentColor);
+}
+
+.sidebar-chips .chip-standard {
+  --dot: var(--chip-standard-accent);
+}
+
+.sidebar-chips .chip-theory {
+  --dot: var(--chip-theory-accent);
+}
+
+/* On the active (accent pill) row the label text is inverted; keep the muted
+   chip text legible by inverting it too. The dots keep their own colour. */
+[aria-current='page'] .sidebar-chips .sl-badge {
+  color: var(--sl-color-text-invert);
+  opacity: 0.85;
+}
+
+/* ---------------------------------------------------------------------------
+   VARIANT: boxed - soft-tinted rounded tags inside a bordered card row.
+   --------------------------------------------------------------------------- */
+
+:root[data-chip-style='boxed'] a:has(.sidebar-chips),
+:root[data-chip-style='boxed'] .group-label:has(.sidebar-chips) {
+  border: 1px solid var(--sl-color-hairline-light);
+  border-radius: 0.4rem;
+  background: var(--sl-color-black);
+}
+
+:root[data-chip-style='boxed'] .sidebar-chips .sl-badge {
+  padding: 0.05em 0.5em;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.7em;
+  color: var(--chip-tint-text);
+  background: var(--chip-tint-bg);
+  border-color: var(--chip-tint-border);
+}
+
+:root[data-chip-style='boxed'] .sidebar-chips .sl-badge::before {
+  display: none;
+}
+
+:root[data-chip-style='boxed'] .sidebar-chips .chip-standard {
+  --chip-tint-text: var(--chip-standard-text);
+  --chip-tint-bg: var(--chip-standard-soft-bg);
+  --chip-tint-border: var(--chip-standard-soft-border);
+}
+
+:root[data-chip-style='boxed'] .sidebar-chips .chip-theory {
+  --chip-tint-text: var(--chip-theory-text);
+  --chip-tint-bg: var(--chip-theory-soft-bg);
+  --chip-tint-border: var(--chip-theory-soft-border);
+}
+
+:root[data-chip-style='boxed'] [aria-current='page'] .sidebar-chips .sl-badge {
+  color: var(--chip-tint-text);
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   VARIANT: reveal - chips hidden at rest, shown for the active / hovered item.
+   --------------------------------------------------------------------------- */
+
+:root[data-chip-style='reveal'] .sidebar-chips {
+  display: none;
+}
+
+:root[data-chip-style='reveal'] a:hover .sidebar-chips,
+:root[data-chip-style='reveal'] a:focus-visible .sidebar-chips,
+:root[data-chip-style='reveal'] .group-label:hover .sidebar-chips,
+:root[data-chip-style='reveal'] [aria-current='page'] .sidebar-chips {
+  display: flex;
+}
+
+/* ---------------------------------------------------------------------------
+   VARIANT: source - one muted line "source: A - B - C", monochrome.
+   --------------------------------------------------------------------------- */
+
+:root[data-chip-style='source'] .sidebar-chips {
+  gap: 0;
+  column-gap: 0;
+}
+
+:root[data-chip-style='source'] .sidebar-chips::before {
+  content: 'source:';
+  margin-inline-end: 0.4em;
+  color: var(--sl-color-gray-3);
+  font-size: 0.72em;
+  font-style: italic;
+}
+
+:root[lang='es'][data-chip-style='source'] .sidebar-chips::before {
+  content: 'fuente:';
+}
+
+:root[data-chip-style='source'] .sidebar-chips .sl-badge {
+  color: var(--sl-color-gray-3);
+}
+
+:root[data-chip-style='source'] .sidebar-chips .sl-badge::before {
+  display: none;
+}
+
+:root[data-chip-style='source'] .sidebar-chips .sl-badge:not(:last-child)::after {
+  content: '\00b7';
+  margin-inline: 0.4em;
+  color: var(--sl-color-gray-4);
+}
+
+/* ---------------------------------------------------------------------------
+   VARIANT: pills - the previous saturated inline pills (kept for reference).
+   --------------------------------------------------------------------------- */
+
+:root[data-chip-style='pills'] .sidebar-chips {
+  display: inline-flex;
+  gap: 0.25em;
+  margin-block-start: 0;
+  margin-inline-start: 0.35em;
+  vertical-align: middle;
+}
+
+:root[data-chip-style='pills'] .sidebar-chips .sl-badge {
+  padding: 0.05em 0.45em;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 0.35rem;
+  font-size: 0.7em;
+  font-weight: 600;
+  opacity: 1;
+}
+
+:root[data-chip-style='pills'] .sidebar-chips .sl-badge::before {
+  display: none;
+}
+
+:root[data-chip-style='pills'] .sidebar-chips .chip-standard {
   background-color: var(--chip-standard-bg);
   color: var(--chip-standard-text);
   border-color: var(--chip-standard-border);
 }
 
-.sl-badge.chip-theory {
+:root[data-chip-style='pills'] .sidebar-chips .chip-theory {
   background-color: var(--chip-theory-bg);
   color: var(--chip-theory-text);
   border-color: var(--chip-theory-border);
 }
 
-/* On the active (accent pill) row the label text is inverted; keep the chip
-   legible by letting it keep its own fill rather than inheriting the pill. */
-[aria-current='page'] .sl-badge.chip-standard,
-[aria-current='page'] .sl-badge.chip-theory {
+:root[data-chip-style='pills'] [aria-current='page'] .sidebar-chips .sl-badge {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
 }

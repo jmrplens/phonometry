@@ -1,6 +1,6 @@
 ---
 title: "Ruido de aeronaves: nivel efectivo de ruido percibido"
-description: "El nivel efectivo de ruido percibido (EPNL) de la ICAO Anexo 16 Vol. I Apéndice 2: la molestia percibida y el PNL, la corrección tonal por el método de pendientes, la corrección por duración de 10 dB por debajo, y el verificador de sistema de medida IEC 61265."
+description: "El nivel efectivo de ruido percibido (EPNL) del Anexo 16 de la ICAO, Vol. I, Apéndice 2: la molestia percibida y el PNL, la corrección tonal por el método de pendientes, la corrección por duración de 10 dB por debajo, y el verificador de sistema de medida IEC 61265."
 references:
   - type: standard
     organization: "International Civil Aviation Organization"
@@ -150,7 +150,7 @@ aircraft.effective_perceived_noise_level(spectra, dt).plot()
 
 `EPNLResult.report(path)` renderiza una ficha PDF de una página con el formato de
 una hoja de datos de certificación de ruido de aeronaves: la línea de base
-normativa (ICAO Annex 16 Vol. I Apéndice 2), un bloque opcional de metadatos de
+normativa (Anexo 16 de la ICAO, Vol. I, Apéndice 2), un bloque opcional de metadatos de
 cabecera al estilo TCDSN (aeronave, fabricante / titular del certificado de tipo,
 solicitante, punto de medida), una tabla de métricas de las magnitudes
 intermedias informativas (el máximo `PNLTM`, la corrección por duración `D`, la
@@ -194,9 +194,9 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 
 <ReportPreview
 	name="icao_epnl_example"
-	title="Informe de ejemplo EPNL de ICAO Annex 16 (PDF)"
+	title="Informe de ejemplo EPNL del Anexo 16 de la ICAO (PDF)"
 	description="Ficha de certificación de ruido de aeronaves de una página: una cabecera de metadatos, una franja de condiciones de referencia, una tabla de métricas con el máximo PNLTM y la corrección por duración D y la ventana de registros de 10 dB por debajo, la gráfica temporal PNL/PNLT a todo el ancho con el PNLTM marcado y la ventana de integración sombreada, el resultado de un solo número EPNL = 98.3 EPNdB en caja y una fila de veredicto CUMPLE frente a un límite de certificación de 101 EPNdB."
-	caption="Ficha de certificación EPNL de ICAO Annex 16 (EPNLResult.report), EPNL en EPNdB con PNLTM y la corrección por duración D."
+	caption="Ficha de certificación EPNL del Anexo 16 de la ICAO (EPNLResult.report), EPNL en EPNdB con PNLTM y la corrección por duración D."
 />
 
 ## Verificación del sistema de medida (IEC 61265)

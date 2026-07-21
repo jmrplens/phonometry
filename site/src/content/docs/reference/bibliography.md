@@ -51,6 +51,15 @@ list grows as guides gain their References sections.
   Free companion treatment of digital-filter design and analysis, a good next
   step after the filter-bank guides.
   Cited by [Filter Banks](/phonometry/guides/filter-banks/).
+- Bendat, J. S., & Piersol, A. G. (2010). *Random data: Analysis and
+  measurement procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
+  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
+  The reference for the Welch spectral estimators and their statistical
+  quality, and for the multiple-input/output coherence functions of
+  Chapter 7 (multiple and partial coherence, conditioned spectra) with the
+  Section 9.3 error formulas implemented by `miso_coherence`.
+  Cited by [Calibrated spectral analysis](/phonometry/guides/spectral-analysis/)
+  and [Multiple and partial coherence](/phonometry/guides/miso-coherence/).
 - Thomson, D. J. (1982). Spectrum estimation and harmonic analysis.
   *Proceedings of the IEEE*, 70(9), 1055-1096.
   [doi:10.1109/PROC.1982.12433](https://doi.org/10.1109/PROC.1982.12433).

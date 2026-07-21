@@ -47,6 +47,7 @@ from .frequencies import (
 )
 from .inversion import InverseFilterResult, regularized_inverse_filter
 from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
+from .miso import MISOCoherenceResult, miso_coherence
 from .parametric_filters import (
     TimeWeighting,
     WeightingFilter,
@@ -125,6 +126,7 @@ __all__ = [
     "FilterComplianceResult",
     "LevelCrossingResult",
     "LifterResult",
+    "MISOCoherenceResult",
     "MonteCarloResult",
     "MultitaperSpectralDensityResult",
     "OctaveFilterBank",
@@ -172,6 +174,7 @@ __all__ = [
     "linkwitz_riley",
     "ln_levels",
     "minimum_phase",
+    "miso_coherence",
     "monte_carlo",
     "multitaper_psd",
     "noise_signal",

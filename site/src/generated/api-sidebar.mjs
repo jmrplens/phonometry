@@ -218,6 +218,7 @@ export const apiSidebar = {
       translations: { es: 'Análisis espectral' },
       items: [
         'reference/api/spectra/spectra',
+        'reference/api/spectra/miso',
         'reference/api/spectra/time-frequency',
         'reference/api/spectra/signals',
         'reference/api/spectra/phase',

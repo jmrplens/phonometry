@@ -57,6 +57,12 @@ from .spectra import (
     power_spectral_density,
     resolution_bias_error,
 )
+from .time_frequency import (
+    SpectrogramResult,
+    ZoomFFTResult,
+    spectrogram,
+    zoom_fft,
+)
 from .uncertainty import (
     MonteCarloResult,
     Quantity,
@@ -83,11 +89,13 @@ __all__ = [
     "PhaseDecompositionResult",
     "Quantity",
     "SpectralDensityResult",
+    "SpectrogramResult",
     "TimeDelayResult",
     "TimeWeighting",
     "UncertaintyResult",
     "UncertaintyWarning",
     "WeightingFilter",
+    "ZoomFFTResult",
     "align_impulse_responses",
     "calculate_sensitivity",
     "class_limits",
@@ -124,6 +132,7 @@ __all__ = [
     "sel",
     "sensitivity",
     "sound_exposure",
+    "spectrogram",
     "time_delay",
     "time_weighting",
     "triangular",
@@ -133,4 +142,5 @@ __all__ = [
     "verify_weighting_class",
     "weighting_class_limits",
     "weighting_filter",
+    "zoom_fft",
 ]

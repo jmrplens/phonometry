@@ -646,6 +646,24 @@ _ES_EXACT = {
     "1/3-octave smoothed": "Suavizado en 1/3 de octava",
     "Exact -3.01 dB/octave power law":
         "Ley de potencias exacta de -3,01 dB/octava",
+    # Time-frequency analysis (Bendat & Piersol spectrogram + zoom FFT)
+    "Calibrated Spectrogram in dB SPL (Bendat & Piersol)":
+        "Espectrograma calibrado en dB SPL (Bendat y Piersol)",
+    "a siren, an impact and a pink-noise floor:\n"
+    "every cell reads an absolute level":
+        "una sirena, un impacto y un fondo de ruido rosa:\n"
+        "cada celda lee un nivel absoluto",
+    "Zoom FFT Resolves Tones One Coarse Bin Apart (Bendat & Piersol)":
+        "La FFT con zoom resuelve tonos a menos de un bin grueso "
+        "(Bendat y Piersol)",
+    "1024-point FFT (8 Hz bins)": "FFT de 1024 puntos (bins de 8 Hz)",
+    "Zoom FFT of the same record": "FFT con zoom del mismo registro",
+    "997 and 1000 Hz, 3 Hz apart:\n"
+    "one lump on the 8 Hz grid,\n"
+    "two exact lines on the zoom grid":
+        "997 y 1000 Hz, separados 3 Hz:\n"
+        "un solo bulto en la malla de 8 Hz,\n"
+        "dos líneas exactas en la malla del zoom",
     # Correlation and time-delay estimation (B&P / Knapp & Carter GCC)
     "Time-Delay Estimation: GCC-PHAT vs Direct Correlation (Knapp & Carter)":
         "Estimación del retardo: GCC-PHAT frente a correlación directa "
@@ -1315,6 +1333,9 @@ def set_theme(dark: bool) -> None:
 _PNG_FIGURES = frozenset(
     {
         "spectrogram_example",
+        # imshow raster: the STFT cells would bloat an SVG (and the repo's
+        # figure policy keeps rasters out of SVG files).
+        "calibrated_spectrogram",
         "excitation_signals",
         "schroeder_decay",
         "calibration_stability",
@@ -3891,6 +3912,113 @@ def generate_psd_confidence_smoothing(output_dir: str) -> None:
             color=COLOR_FG)
     plt.tight_layout()
     save_figure(output_dir, "psd_confidence_smoothing.svg")
+def generate_calibrated_spectrogram(output_dir: str) -> None:
+    """Calibrated STFT spectrogram of a nonstationary signal, in dB SPL."""
+    print("Generating calibrated_spectrogram...")
+    from phonometry import noise_signal, spectrogram
+
+    fs = 16000.0
+    duration = 4.0
+    t = np.arange(int(fs * duration)) / fs
+    p_ref = 2e-5
+
+    # A siren sweeping 600-1200 Hz at 70 dB SPL, an impact at t = 2.5 s
+    # and a pink-noise floor at 45 dB SPL, all in pascals.
+    siren_rms = p_ref * 10.0 ** (70.0 / 20.0)
+    phase = 2.0 * np.pi * 900.0 * t - 600.0 * np.cos(np.pi * t)
+    x = siren_rms * np.sqrt(2.0) * np.cos(phase)
+    rng = np.random.default_rng(9)
+    n_imp = int(0.06 * fs)
+    impact = rng.standard_normal(n_imp) * np.exp(
+        -np.arange(n_imp) / (0.012 * fs)
+    )
+    x[int(2.5 * fs):int(2.5 * fs) + n_imp] += 0.4 * impact
+    x += noise_signal(fs, duration, color="pink",
+                      rms=p_ref * 10.0 ** (45.0 / 20.0), seed=10)
+
+    res = spectrogram(x, fs, nperseg=1024, overlap=0.75, scaling="spectrum")
+    level = 10.0 * np.log10(res.power / p_ref**2)
+    vmax = float(np.ceil(level.max()))
+
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    half_hop = 0.5 * res.hop / fs
+    df = float(res.frequencies[1] - res.frequencies[0])
+    img = ax.imshow(
+        level, cmap="magma", vmin=vmax - 55.0, vmax=vmax, aspect="auto",
+        origin="lower", interpolation="nearest",
+        extent=(float(res.times[0]) - half_hop,
+                float(res.times[-1]) + half_hop,
+                0.0, float(res.frequencies[-1]) + 0.5 * df),
+    )
+    fig.colorbar(img, ax=ax, label="Sound pressure level [dB SPL]")
+    ax.set_ylim(0.0, 3000.0)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel(LABEL_FREQ_HZ)
+    ax.set_title("Calibrated Spectrogram in dB SPL (Bendat & Piersol)",
+                 fontweight="bold", pad=12)
+    ax.text(0.02, 0.965,
+            "a siren, an impact and a pink-noise floor:\n"
+            "every cell reads an absolute level",
+            transform=ax.transAxes, va="top", ha="left", fontsize=8.5,
+            color="white")
+    plt.tight_layout()
+    save_figure(output_dir, "calibrated_spectrogram.png")
+    plt.close()
+
+
+def generate_zoom_fft_resolution(output_dir: str) -> None:
+    """Zoom FFT resolving two tones closer than a coarse FFT bin."""
+    print("Generating zoom_fft_resolution...")
+    from scipy import signal as sp_signal
+
+    from phonometry import zoom_fft
+
+    fs = 8192.0
+    t = np.arange(8192) / fs  # 1 s record: 1 Hz true resolution
+    x = 0.8 * np.cos(2.0 * np.pi * 997.0 * t) + 0.5 * np.cos(
+        2.0 * np.pi * 1000.0 * t
+    )
+
+    # Coarse view: a 1024-point FFT of the same record (8 Hz bins).
+    w = sp_signal.get_window("hann", 1024)
+    coarse = 2.0 * np.abs(np.fft.rfft(x[:1024] * w)) / np.sum(w)
+    coarse_f = np.fft.rfftfreq(1024, 1.0 / fs)
+    band = (coarse_f >= 950.0) & (coarse_f <= 1050.0)
+
+    # 0.25 Hz grid: four points per record-length resolution, so the two
+    # mainlobes are drawn as smooth curves with their exact peaks.
+    res = zoom_fft(x, fs, 980.0, 1016.0, n_points=145)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(coarse_f[band], 20.0 * np.log10(np.maximum(coarse[band], 1e-12)),
+            color=COLOR_SECONDARY, marker="o",
+            ms=4.0, lw=1.2, ls="--", label="1024-point FFT (8 Hz bins)")
+    ax.plot(res.frequencies,
+            20.0 * np.log10(np.maximum(res.amplitude, 1e-12)),
+            color=COLOR_PRIMARY, lw=1.6,
+            label="Zoom FFT of the same record")
+    for f0 in (997.0, 1000.0):
+        ax.axvline(f0, color=COLOR_FG, ls=":", lw=1.0, alpha=0.6)
+    ax.set_xlim(950.0, 1050.0)
+    ax.set_ylim(-70.0, 5.0)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Amplitude [dB]")
+    ax.set_title("Zoom FFT Resolves Tones One Coarse Bin Apart "
+                 "(Bendat & Piersol)", fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    ax.text(0.015, 0.965,
+            "997 and 1000 Hz, 3 Hz apart:\n"
+            "one lump on the 8 Hz grid,\n"
+            "two exact lines on the zoom grid",
+            transform=ax.transAxes, va="top", ha="left", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "zoom_fft_resolution.svg")
+    plt.close()
+
+
 def generate_program_loudness(output_dir: str) -> None:
     """EBU R 128 metering of a synthetic programme: M, S, I and LRA."""
     print("Generating program_loudness...")
@@ -7679,6 +7807,10 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Calibrated spectral analysis: PSD with chi-square confidence interval
     # and 1/3-octave smoothing on exact-slope pink noise (Bendat & Piersol).
     generate_psd_confidence_smoothing,
+    # Time-frequency analysis: calibrated STFT spectrogram in dB SPL and
+    # the zoom FFT resolving sub-bin tone pairs (Bendat & Piersol).
+    generate_calibrated_spectrogram,
+    generate_zoom_fft_resolution,
     # Broadcast: programme loudness and true peak (ITU-R BS.1770-5 /
     # EBU R 128 with Tech 3341/3342).
     generate_program_loudness,

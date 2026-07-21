@@ -271,6 +271,12 @@ from .metrology.spectra import (
     power_spectral_density,
     resolution_bias_error,
 )
+from .metrology.time_frequency import (
+    SpectrogramResult,
+    ZoomFFTResult,
+    spectrogram,
+    zoom_fft,
+)
 from .room.room_noise import (
     NCResult,
     RCResult,
@@ -1323,6 +1329,10 @@ __all__ = [
     "SpectralDensityResult",
     "CrossSpectralDensityResult",
     "CoherentOutputSpectrumResult",
+    "spectrogram",
+    "zoom_fft",
+    "SpectrogramResult",
+    "ZoomFFTResult",
     "correlation",
     "correlation_random_error",
     "time_delay",

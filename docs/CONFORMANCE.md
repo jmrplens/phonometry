@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **372/372 conformance checks pass** across 46 domains and 236 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **375/375 conformance checks pass** across 47 domains and 239 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -515,6 +515,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bendat & Piersol, Random Data 4e Eqs. (9.55)/(6.39) | Coherent output spectrum of a known-SNR path: gamma^2 = SNR/(1+SNR) | 0.7191 (+/-0.03) | 0.7255 | 0.006 | &#9989; |
 | Closed-form power-law slope (10*lg(2) dB/octave per unit exponent) | Pink-noise PSD slope over 20 Hz - 20 kHz, dB/octave | -3.0103 dB/oct (+/-0.05 dB/oct) | -3.0116 dB/oct | -0.001 dB/oct | &#9989; |
 | Constant-power 1/n-octave kernel (closed form) | 1/3-octave smoothed line level = P*df/(f0*(2^(1/6)-2^(-1/6))) | 0.021592 (+/-1e-07%) | 0.021592 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Time-frequency analysis (Bendat &amp; Piersol)</b>: 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Bendat & Piersol, Random Data 4e Eq. (12.173) | Spectrogram of an on-bin tone reads its mean square A^2/2 in every column | 2 (+/-1e-07%) | 2 | 0 | &#9989; |
+| Parseval + COLA identity (Hann taper, 75% overlap) | Time-integrated STFT power = time-domain energy of an interior burst | 0.236151 (+/-1e-10%) | 0.236151 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Eqs. (11.128)-(11.130) | Zoom FFT tone amplitude = demodulate-decimate-DFT chain, machine precision | 0.7 (+/-1e-10%) | 0.7 | 0 | &#9989; |
 
 </details>
 

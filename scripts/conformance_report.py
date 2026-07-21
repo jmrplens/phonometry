@@ -4298,6 +4298,71 @@ def _chk_smoothing_line_level() -> Outcome:
 
 
 # ===========================================================================
+# Time-frequency analysis (Bendat & Piersol, Random Data 4e)
+# ===========================================================================
+_TIME_FREQ = "Time-frequency analysis (Bendat & Piersol)"
+
+
+@register(
+    _TIME_FREQ,
+    "Bendat & Piersol, Random Data 4e Eq. (12.173)",
+    "Spectrogram of an on-bin tone reads its mean square A^2/2 in every column",
+)
+def _chk_spectrogram_tone_mean_square() -> Outcome:
+    fs = _spectra_fs()
+    t = np.arange(int(4 * fs)) / fs
+    x = 2.0 * np.cos(2.0 * np.pi * 1024.0 * t)  # bin 128 of a 1024-segment
+    res = ph.spectrogram(x, fs, nperseg=1024, scaling="spectrum")
+    b = int(np.argmin(np.abs(res.frequencies - 1024.0)))
+    worst = res.power[b][int(np.argmax(np.abs(res.power[b] - 2.0)))]
+    return numeric(2.0, float(worst), 1e-9, rel=True, places=6)
+
+
+@register(
+    _TIME_FREQ,
+    "Parseval + COLA identity (Hann taper, 75% overlap)",
+    "Time-integrated STFT power = time-domain energy of an interior burst",
+)
+def _chk_spectrogram_parseval_cola() -> Outcome:
+    fs = _spectra_fs()
+    x = np.zeros(8192)
+    x[2048:4096] = np.asarray(_spectra_white(21))[:2048]
+    res = ph.spectrogram(x, fs, nperseg=256, overlap=0.75)
+    df = float(res.frequencies[1] - res.frequencies[0])
+    stft_energy = (res.hop / fs) * float(np.sum(res.power)) * df
+    return numeric(
+        float(np.sum(x**2)) / fs,
+        stft_energy,
+        1e-12,
+        rel=True,
+        places=6,
+    )
+
+
+@register(
+    _TIME_FREQ,
+    "Bendat & Piersol, Random Data 4e Eqs. (11.128)-(11.130)",
+    "Zoom FFT tone amplitude = demodulate-decimate-DFT chain, machine precision",
+)
+def _chk_zoom_fft_demodulation_chain() -> Outcome:
+    fs = _spectra_fs()
+    n = 4096
+    t = np.arange(n) / fs
+    x = 0.7 * np.cos(2.0 * np.pi * 1100.0 * t + 0.3)
+    res = ph.zoom_fft(x, fs, 1000.0, 1256.0, n_points=257, window="boxcar")
+    peak = int(np.argmax(res.amplitude))
+    # Eqs. (11.128)-(11.130): demodulate by exp(-j*2*pi*1000*t), decimate
+    # by d = fs/(2B) = 16 and read bin 50 ((1100-1000) Hz / 2 Hz) of the
+    # decimated record's DFT.
+    idx = np.arange(n)
+    v = (x * np.exp(-2j * np.pi * 1000.0 * idx / fs))[::16]
+    m = np.arange(v.size)
+    bin50 = np.sum(v * np.exp(-2j * np.pi * 50.0 * m / v.size))
+    amp_bp = 2.0 * abs(bin50) / v.size
+    return numeric(amp_bp, float(res.amplitude[peak]), 1e-12, rel=True, places=6)
+
+
+# ===========================================================================
 # Correlation, time delay and envelope (Bendat & Piersol / Knapp & Carter)
 # ===========================================================================
 _CORRELATION = "Correlation, time delay and envelope (B&P / Knapp & Carter)"

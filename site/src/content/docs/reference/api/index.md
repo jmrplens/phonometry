@@ -216,6 +216,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | Module | Summary |
 | :--- | :--- |
 | [`metrology.spectra`](/phonometry/reference/api/spectra/spectra/) | Calibrated spectral-density estimation with statistical error analysis. |
+| [`metrology.time_frequency`](/phonometry/reference/api/spectra/time-frequency/) | Calibrated time-frequency analysis: STFT spectrogram and zoom FFT. |
 | [`metrology.signals`](/phonometry/reference/api/spectra/signals/) | Deterministic colored-noise test signals. |
 | [`metrology.phase`](/phonometry/reference/api/spectra/phase/) | Phase utilities: minimum phase, group delay and excess phase. |
 

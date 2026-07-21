@@ -124,6 +124,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   quantity); to support it, `airborne_insulation()` and `impact_insulation()`
   now retain their energy-averaged inputs on the results (`l1`, `l2`/`li`,
   `t2`, `t0`, all defaulting to `None` for backward-compatible construction).
+- `metrology.spectrogram` and `metrology.SpectrogramResult`: a calibrated
+  STFT power spectrogram (Bendat & Piersol, Random Data 4e, Section
+  12.6.4.2) built on the exact segmentation and scaling of
+  `power_spectral_density`, so a signal in pascals reads Pa²/Hz or Pa² per
+  cell (a tone shows its mean square A²/2, i.e. its dB SPL, in every
+  'spectrum' column), the column mean over time reproduces the Welch
+  estimate bin by bin, and with a squared-COLA taper (Hann at 75 % overlap)
+  the time-integrated 'density' power equals the record energy exactly. The
+  result reports the time resolution T_B, the effective noise bandwidth Be,
+  the hop, and the per-cell random error of the unaveraged estimate, and
+  renders through `.plot()` (single-raster dB image, English and Spanish).
+- `metrology.zoom_fft` and `metrology.ZoomFFTResult`: the zoom transform of
+  Bendat & Piersol Section 11.5.4 (Eqs. 11.122-11.130) computed as its exact
+  single-pass digital equivalent, the chirp-Z evaluation of the tapered
+  record's DFT on the zoom grid, verified at machine precision against the
+  book's demodulate-decimate-DFT chain. Amplitudes are calibrated per taper
+  coherent gain (a sine of peak amplitude A on an analysis frequency reads
+  amplitude A and power A²/2 exactly), and the result distinguishes the
+  freely chosen `bin_spacing` from the record-and-taper-set
+  `resolution_bandwidth`, with a `.plot()` renderer over the zoom band.
+  Three conformance rows pin the tone calibration, the Parseval/COLA energy
+  identity and the zoom demodulation chain; a new "Time-frequency analysis"
+  guide (English and Spanish) documents both estimators.
 - `electroacoustics.loudspeaker_characteristics` and
   `electroacoustics.LoudspeakerCharacteristics` gather the rated loudspeaker
   characteristics of IEC 60268-5:2003+A1:2007 around a measured on-axis

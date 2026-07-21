@@ -1108,6 +1108,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Clause 9 print defects (the Formula (127) kernel phase, the Formula (144)
   bin offset, the unit-less Newton constants of Clause 9.1.7 and a broken
   cross-reference).
+- `SoundAbsorptionMeasurement` and `measure_sound_absorption`: a public
+  reverberation-room sound absorption measurement result type (BS EN
+  ISO 354:2003). It carries the one-third-octave reverberation times of the
+  empty room and of the room with the specimen, the room volume, the specimen
+  area and the climate, and derives the equivalent sound absorption areas `A1`
+  (Eq. (5)) and `A2` (Eq. (7)) and the sound absorption coefficient `alpha_s`
+  (Eq. (8)/(9)) by reusing the existing `absorption_area`/`absorption_coefficient`
+  functions; `alpha_s` may exceed 1,0 (Clause 3.7 NOTE 2) and is never clamped.
+  The result exposes `.plot()` (`alpha_s` versus one-third-octave frequency) and
+  `.report()`, which renders a one-page accredited reverberation-room test-report
+  PDF (metadata header, the `alpha_s` table beside the curve, `verbose=True`
+  adding the `T1`/`T2` and `A1`/`A2` detail columns). ISO 354 is a
+  characterisation, so the fiche has no single-number rating and no pass/fail
+  verdict; the weighted `alpha_w` remains the separate ISO 11654 rating.
 
 ### Changed
 - Raised the `scipy` floor in `pyproject.toml` to `scipy>=1.18.0`, the minimum

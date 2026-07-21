@@ -798,9 +798,11 @@ from .room.steady_field import (
 )
 from .materials.sound_absorption import (
     AbsorptionWarning,
+    SoundAbsorptionMeasurement,
     absorption_area,
     absorption_coefficient,
     attenuation_from_alpha,
+    measure_sound_absorption,
 )
 from .environmental.air_absorption import (
     AtmosphericAbsorptionWarning,
@@ -1470,6 +1472,8 @@ __all__ = [
     "absorption_area",
     "absorption_coefficient",
     "attenuation_from_alpha",
+    "measure_sound_absorption",
+    "SoundAbsorptionMeasurement",
     "AbsorptionWarning",
     "air_attenuation",
     "air_attenuation_m",

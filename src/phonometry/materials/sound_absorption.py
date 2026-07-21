@@ -44,12 +44,19 @@ from __future__ import annotations
 
 import math
 import warnings
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from numpy.typing import ArrayLike, NDArray
 
 from .._internal.warnings import PhonometryWarning
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from matplotlib.axes import Axes
+
+    from .._report.metadata import ReportMetadata
 
 #: Sabine constant of ISO 354:2003, Eq. (5)/(7) (55,3 exactly as printed).
 _SABINE = 55.3
@@ -309,3 +316,244 @@ def absorption_coefficient(
             stacklevel=2,
         )
     return alpha_s
+
+
+# --- one-third-octave measurement result (ISO 354:2003, Clause 8) --------
+
+
+@dataclass(frozen=True)
+class SoundAbsorptionMeasurement:
+    """A reverberation-room sound absorption measurement (ISO 354:2003).
+
+    The one-third-octave outcome of a plane-absorber test: the mean
+    reverberation time measured empty (``T1``) and with the specimen (``T2``),
+    the equivalent sound absorption areas ``A1`` (Eq. (5)) and ``A2`` (Eq. (7))
+    they give through Sabine's equation, and the sound absorption coefficient
+    ``alpha_s`` (Eq. (8)/(9)) of the specimen. Build it with
+    :func:`measure_sound_absorption`; the frozen instance then exposes
+    :meth:`plot` (``alpha_s`` versus frequency) and :meth:`report` (an
+    accredited ISO 354 test-report PDF).
+
+    A single-number rating (the practical coefficient ``alpha_p`` and the
+    weighted coefficient ``alpha_w``) is defined by ISO 11654, not ISO 354, and
+    is therefore not produced here; pass ``alpha_s`` to
+    :func:`~phonometry.materials.weighted_absorption_from_third_octave` for it.
+
+    :ivar frequencies: One-third-octave band centre frequencies, in Hz
+        (the ISO 354 range is 100 Hz to 5000 Hz).
+    :ivar t_empty: Mean reverberation time of the empty room ``T1``, per band,
+        in seconds.
+    :ivar t_specimen: Mean reverberation time of the room with the specimen
+        ``T2``, per band, in seconds.
+    :ivar volume: Reverberation-room volume ``V``, in cubic metres.
+    :ivar area: Area ``S`` covered by the test specimen, in square metres.
+    :ivar temperature: Air temperature during the test, in degrees Celsius.
+    :ivar humidity: Relative humidity during the test, in %, or ``None`` when
+        not recorded. It is informational: humidity enters ISO 354 only through
+        the air attenuation coefficient ``m`` (via ISO 9613-1), never directly.
+    :ivar speed_of_sound: Propagation speed of sound ``c`` used in the Sabine
+        inversion, in m/s (from Eq. (6) unless it was given explicitly).
+    :ivar air_attenuation: Power attenuation coefficient of air ``m``, per band,
+        in 1/m (``0`` when no air correction was applied).
+    :ivar absorption_area_empty: Equivalent sound absorption area of the empty
+        room ``A1`` (Eq. (5)), per band, in square metres.
+    :ivar absorption_area_with_specimen: Equivalent sound absorption area of the
+        room containing the specimen ``A2`` (Eq. (7)), per band, in square
+        metres.
+    :ivar alpha_s: Sound absorption coefficient ``alpha_s`` (Eq. (8)/(9)), per
+        band. It may exceed 1,0 (Clause 3.7 NOTE 2) and is never clamped.
+    """
+
+    frequencies: NDArray[np.float64]
+    t_empty: NDArray[np.float64]
+    t_specimen: NDArray[np.float64]
+    volume: float
+    area: float
+    temperature: float
+    humidity: float | None
+    speed_of_sound: float
+    air_attenuation: NDArray[np.float64]
+    absorption_area_empty: NDArray[np.float64]
+    absorption_area_with_specimen: NDArray[np.float64]
+    alpha_s: NDArray[np.float64]
+
+    @property
+    def equivalent_absorption_area(self) -> NDArray[np.float64]:
+        """Equivalent sound absorption area of the specimen ``AT = A2 - A1``.
+
+        The ISO 354:2003 Eq. (8) quantity, per band, in square metres; dividing
+        it by the specimen area ``S`` gives :attr:`alpha_s` (Eq. (9)).
+        """
+        return self.absorption_area_with_specimen - self.absorption_area_empty
+
+    def plot(
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
+    ) -> "Axes":
+        """Plot the sound absorption coefficient ``alpha_s`` versus frequency.
+
+        Draws ``alpha_s`` over the one-third-octave band axis (ISO 354). Values
+        above 1,0 are kept (Clause 3.7 NOTE 2), so the axis grows to show them.
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the ``alpha_s`` curve ``plot`` call.
+        :return: The axes.
+        """
+        from .._i18n import check_language
+        from .._plot.materials import plot_sound_absorption
+
+        check_language(language)
+        return plot_sound_absorption(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 354 sound-absorption test-report fiche to a PDF.
+
+        Writes a one-page accredited reverberation-room report: the
+        standard-basis line, an optional metadata header block (client,
+        specimen, area ``S``, room volume ``V``, mounting, climate ...), a
+        two-panel body with the one-third-octave ``alpha_s`` table beside the
+        ``alpha_s`` curve, and a footer with the fixed disclaimer. ISO 354 is a
+        characterisation, so there is no pass/fail verdict and no single-number
+        rating (the weighted ``alpha_w`` is an ISO 11654 quantity, out of scope
+        here).
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a body-and-disclaimer fiche without a metadata header. The
+            ``requirement`` field is ignored (ISO 354 has no verdict).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table adds the reverberation times
+            ``T1``/``T2`` and the equivalent absorption areas ``A1``/``A2``.
+        :param language: Fiche language: ``"en"`` (default, English, decimal
+            point) or ``"es"`` (Spanish, decimal comma).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso354 import render_iso354_report
+
+        return render_iso354_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
+
+
+def measure_sound_absorption(
+    frequencies: ArrayLike,
+    t_empty: ArrayLike,
+    t_specimen: ArrayLike,
+    *,
+    volume: float,
+    area: float,
+    temperature: float = 20.0,
+    humidity: float | None = None,
+    speed_of_sound: float | None = None,
+    m: ArrayLike = 0.0,
+) -> SoundAbsorptionMeasurement:
+    """Measure the sound absorption of a plane absorber (ISO 354:2003).
+
+    Assembles a :class:`SoundAbsorptionMeasurement` from the one-third-octave
+    reverberation times of the empty room (``T1``) and of the room with the
+    specimen installed (``T2``). The equivalent sound absorption areas ``A1``
+    and ``A2`` follow from Sabine's equation (Eq. (5)/(7), delegated to
+    :func:`absorption_area`) and the sound absorption coefficient
+    ``alpha_s = (A2 - A1) / S`` from Eq. (8)/(9) (delegated to
+    :func:`absorption_coefficient`); no formula is re-derived here.
+
+    Both measurements are taken at the same air temperature and, for the air
+    attenuation term, the same climatic conditions (ISO 354:2003, 6.3), so a
+    single ``temperature`` and ``m`` apply to both. Use the lower-level
+    :func:`absorption_coefficient` directly when the empty-room and
+    with-specimen climates differ.
+
+    :param frequencies: One-third-octave band centre frequencies, in Hz (the
+        ISO 354 range is 100 Hz to 5000 Hz); a 1-D array matching ``t_empty``
+        and ``t_specimen``.
+    :param t_empty: Empty-room reverberation time ``T1``, per band, in seconds.
+    :param t_specimen: With-specimen reverberation time ``T2``, per band, in
+        seconds.
+    :param volume: Reverberation-room volume ``V``, in cubic metres. A volume
+        below the 150 m3 minimum of clause 6.1.1 emits an advisory
+        :class:`AbsorptionWarning`.
+    :param area: Area ``S`` covered by the test specimen, in square metres. An
+        area outside the clause 6.2.1.1 range (10 m2 to 12 m2, upper limit
+        scaled by ``(V/200)^(2/3)`` for ``V > 200 m3``) emits an advisory
+        :class:`AbsorptionWarning`.
+    :param temperature: Air temperature during the test, in degrees Celsius
+        (default 20). Used for the speed of sound via Eq. (6) unless
+        ``speed_of_sound`` is given; a temperature outside 15..30 degC emits an
+        :class:`AbsorptionWarning`.
+    :param humidity: Relative humidity during the test, in % (informational;
+        recorded on the result but not used in the computation, which sees the
+        climate only through ``m``). ``None`` leaves it unrecorded.
+    :param speed_of_sound: Explicit speed of sound ``c``, in m/s; overrides
+        ``temperature`` and Eq. (6) when supplied.
+    :param m: Power attenuation coefficient of air ``m``, in 1/m (a scalar or a
+        per-band array matching ``frequencies``; default 0, i.e. no air
+        correction). Obtain it from an ISO 9613-1 attenuation coefficient with
+        :func:`attenuation_from_alpha`.
+    :return: A frozen :class:`SoundAbsorptionMeasurement`.
+    :raises ValueError: If the frequency and reverberation-time arrays do not
+        share one shape, or an input is non-physical (see
+        :func:`absorption_coefficient`).
+    """
+    freqs = np.asarray(frequencies, dtype=np.float64)
+    t1 = np.asarray(t_empty, dtype=np.float64)
+    t2 = np.asarray(t_specimen, dtype=np.float64)
+    if not (freqs.shape == t1.shape == t2.shape):
+        raise ValueError(
+            "'frequencies', 't_empty' and 't_specimen' must share one shape; "
+            f"got {freqs.shape}, {t1.shape} and {t2.shape}."
+        )
+    m_arr = np.broadcast_to(np.asarray(m, dtype=np.float64), freqs.shape).astype(
+        np.float64, copy=True
+    )
+    # Resolve the speed once (Eq. (6)); this emits the single temperature
+    # advisory. Passing the resolved speed to the reused helpers below keeps
+    # every advisory to exactly one, since both measurements share the climate.
+    c = _resolve_speed(temperature, speed_of_sound)
+    # A1/A2 reuse the Eq. (5)/(7) evaluation.
+    a1 = _absorption_area(
+        t1, volume, temperature=temperature, speed_of_sound=c, m=m_arr
+    )
+    a2 = _absorption_area(
+        t2, volume, temperature=temperature, speed_of_sound=c, m=m_arr
+    )
+    # alpha_s reuses the validated Eq. (8)/(9) path (it also emits the volume,
+    # sample-area and non-physical advisories exactly once).
+    alpha_s = absorption_coefficient(
+        t1, t2, volume, area,
+        temperature1=temperature, speed_of_sound1=c,
+        m1=m_arr, m2=m_arr,
+    )
+    return SoundAbsorptionMeasurement(
+        frequencies=freqs,
+        t_empty=t1,
+        t_specimen=t2,
+        volume=float(volume),
+        area=float(area),
+        temperature=float(temperature),
+        humidity=None if humidity is None else float(humidity),
+        speed_of_sound=c,
+        air_attenuation=m_arr,
+        absorption_area_empty=a1,
+        absorption_area_with_specimen=a2,
+        alpha_s=alpha_s,
+    )

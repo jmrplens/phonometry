@@ -15,7 +15,13 @@ import numpy as np
 import pytest
 from reference_data import ISO226_2023_TABLE_B1_ANCHOR
 
-from phonometry import equal_loudness_contour, hearing_threshold, loudness_level
+from phonometry import (
+    EqualLoudnessContours,
+    equal_loudness_contour,
+    equal_loudness_contours,
+    hearing_threshold,
+    loudness_level,
+)
 
 # (phon, frequency Hz, expected SPL dB) - ISO 226:2023 Table B.1. The
 # (60 phon, 100 Hz) anchor is imported from tests/reference_data.py (shared
@@ -93,3 +99,87 @@ def test_hearing_threshold_is_table1_tf() -> None:
 def test_multichannel_shapes() -> None:
     freqs, spl = equal_loudness_contour(40.0)
     assert freqs.shape == spl.shape == (29,)
+
+
+def test_contours_result_matches_underlying_functions() -> None:
+    """The result wrapper only reshapes the existing functions' output."""
+    res = equal_loudness_contours()
+    assert isinstance(res, EqualLoudnessContours)
+    assert res.phons == (20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0)
+    assert res.frequencies.shape == (29,)
+    assert res.contours.shape == (8, 29)
+    # Every row equals equal_loudness_contour() at the frequencies it defines.
+    for i, phon in enumerate(res.phons):
+        freqs_p, spl_p = equal_loudness_contour(phon)
+        for f, s in zip(freqs_p, spl_p, strict=True):
+            j = int(np.flatnonzero(np.isclose(res.frequencies, f))[0])
+            assert res.contours[i, j] == pytest.approx(s)
+    # Threshold row is the Table 1 hearing threshold.
+    _, tf = hearing_threshold()
+    np.testing.assert_allclose(res.threshold, tf)
+
+
+def test_contours_iso226_table_points() -> None:
+    """ISO 226:2023 anchor points via the result (Table B.1 / clause 3.3)."""
+    res = equal_loudness_contours()
+    i1k = int(np.flatnonzero(np.isclose(res.frequencies, 1000.0))[0])
+    i63 = int(np.flatnonzero(np.isclose(res.frequencies, 63.0))[0])
+    p40 = res.phons.index(40.0)
+    # By definition the contour passes through 1 kHz at its phon value.
+    assert res.contours[p40, i1k] == pytest.approx(40.0, abs=1e-9)
+    # Table B.1: 40 phon at 63 Hz -> 73.0 dB.
+    assert res.contours[p40, i63] == pytest.approx(73.0, abs=0.05)
+    # Threshold of hearing at 1 kHz is 2.4 dB (Table 1).
+    assert res.threshold[i1k] == pytest.approx(2.4)
+
+
+def test_contours_high_phon_stops_at_4khz() -> None:
+    """Formula (1) is valid only up to 4 kHz above 80 phon: the rest is nan."""
+    res = equal_loudness_contours(phons=(90.0,))
+    above = res.frequencies > 4000.0
+    assert np.all(np.isnan(res.contours[0, above]))
+    assert np.all(np.isfinite(res.contours[0, ~above]))
+
+
+def test_contours_frequency_subset() -> None:
+    res = equal_loudness_contours(phons=(40.0,), frequencies=(63.0, 1000.0))
+    assert res.frequencies.tolist() == [63.0, 1000.0]
+    assert res.contours[0, 1] == pytest.approx(40.0, abs=1e-9)
+
+
+def test_contours_rejects_untabulated_frequency() -> None:
+    with pytest.raises(ValueError, match="frequency"):
+        equal_loudness_contours(frequencies=(440.0,))
+
+
+def test_contours_rejects_out_of_range_phon() -> None:
+    with pytest.raises(ValueError, match="phon"):
+        equal_loudness_contours(phons=(10.0,))
+
+
+def test_contours_plot_returns_axes() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib
+
+    matplotlib.use("Agg")
+    from matplotlib.axes import Axes
+
+    res = equal_loudness_contours()
+    ax_en = res.plot()
+    assert isinstance(ax_en, Axes)
+    assert ax_en.get_xlabel() == "Frequency [Hz]"
+    assert "ISO 226:2023" in ax_en.get_title()
+
+    ax_es = res.plot(language="es")
+    assert ax_es.get_xlabel() == "Frecuencia [Hz]"
+    assert "isofónicas" in ax_es.get_title()
+
+
+def test_contours_plot_rejects_unknown_language() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib
+
+    matplotlib.use("Agg")
+    res = equal_loudness_contours()
+    with pytest.raises(ValueError, match="Unknown language"):
+        res.plot(language="xx")

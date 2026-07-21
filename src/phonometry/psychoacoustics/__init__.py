@@ -13,7 +13,9 @@ from .fluctuation_strength_ecma import (
     fluctuation_strength_ecma,
 )
 from .loudness_contours import (
+    EqualLoudnessContours,
     equal_loudness_contour,
+    equal_loudness_contours,
     hearing_threshold,
     loudness_level,
 )
@@ -75,6 +77,7 @@ __all__ = [
     "EcmaLoudness",
     "EcmaRoughness",
     "EcmaTonality",
+    "EqualLoudnessContours",
     "FluctuationStrengthResult",
     "HANNING_BANDWIDTH_FACTOR",
     "MooreGlasbergLoudness",
@@ -95,6 +98,7 @@ __all__ = [
     "critical_bandwidth_engineering",
     "energy_sum_level",
     "equal_loudness_contour",
+    "equal_loudness_contours",
     "fluctuation_strength",
     "fluctuation_strength_am_noise",
     "fluctuation_strength_ecma",

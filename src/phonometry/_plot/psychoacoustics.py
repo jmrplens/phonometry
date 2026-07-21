@@ -18,11 +18,13 @@ from .common import (
     _C_TERTIARY,
     _new_axes,
     _new_axes_column,
+    format_frequency_axis,
 )
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from ..psychoacoustics.tone_audibility import ToneAudibilityResult
+    from ..psychoacoustics.loudness_contours import EqualLoudnessContours
     from ..psychoacoustics.loudness_zwicker import ZwickerLoudness
     from ..psychoacoustics.loudness_ecma import EcmaLoudness
     from ..psychoacoustics.loudness_moore_glasberg import MooreGlasbergLoudness
@@ -71,6 +73,11 @@ _STRINGS: dict[str, str] = {
     "Fluctuation strength F = {f} vacil": "Intensidad de fluctuación F = {f} vacil",
     "Psychoacoustic annoyance PA = {pa} (N5 = {n5} sone)": "Molestia psicoacústica PA = {pa} (N5 = {n5} sonios)",
     r"decisive $\Delta L$ = {da} dB @ {df} Hz": r"decisiva $\Delta L$ = {da} dB @ {df} Hz",
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Sound pressure level [dB re 20 µPa]": "Nivel de presión sonora [dB re 20 µPa]",
+    r"Hearing threshold $T_f$": r"Umbral de audición $T_f$",
+    "ISO 226:2023 equal-loudness contours": "Curvas isofónicas ISO 226:2023",
+    "{p} phon": "{p} fonios",
 }
 
 
@@ -641,5 +648,56 @@ def plot_tone_audibility(
     ax.set_axisbelow(True)
     # localize_axes leaves the categorical x-axis (a FuncFormatter) alone, so the
     # comma-localized tick labels set above survive.
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_equal_loudness_contours(
+    result: EqualLoudnessContours, ax: Axes | None = None, *, language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Normal equal-loudness-level contour family (ISO 226:2023).
+
+    Draws sound pressure level in dB against a logarithmic frequency axis: one
+    line per loudness level in ``result.phons`` (each annotated near 1 kHz) and
+    the threshold of hearing T_f. This is the iconic ISO 226 chart.
+
+    :param result: An
+        :class:`~phonometry.loudness_contours.EqualLoudnessContours`.
+    :param ax: Existing axes to draw on, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the contour line ``plot`` calls.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    contours = np.asarray(result.contours, dtype=np.float64)
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("linewidth", 1.5)
+
+    for phon, spl in zip(result.phons, contours, strict=True):
+        ax.plot(freqs, spl, **kwargs)
+        # Annotate the contour where it crosses 1 kHz (SPL = phon by definition).
+        ax.annotate(
+            _t("{p} phon", language).format(p=format_number(phon, language, decimals=0, trim=True)),
+            xy=(1000.0, phon), xytext=(1180.0, phon + 1.0),
+            fontsize=9, color=kwargs["color"],
+        )
+    ax.plot(
+        freqs, np.asarray(result.threshold, dtype=np.float64),
+        color=_C_SECONDARY, linestyle="--",
+        label=_t(r"Hearing threshold $T_f$", language),
+    )
+
+    fmin, fmax = float(freqs.min()), float(freqs.max())
+    ax.set_xlim(fmin, fmax)
+    format_frequency_axis(ax, fmin, fmax)
+    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Sound pressure level [dB re 20 µPa]", language))
+    ax.set_title(_t("ISO 226:2023 equal-loudness contours", language))
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="upper right", fontsize="small")
     localize_axes(ax, language)
     return ax

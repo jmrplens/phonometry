@@ -6,7 +6,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from phonometry import sdof_mobility_result
+from phonometry import rigid_mass_calibration_check, sdof_mobility_result
 
 
 def _result():
@@ -27,6 +27,26 @@ def test_spanish_labels() -> None:
     ax_es = res.plot(language="es")
     assert ax_es.get_xlabel() == "Frecuencia [Hz]"
     assert ax_es.get_title() == "ISO 7626-1 movilidad mecánica"
+
+
+def test_rigid_mass_spanish_labels() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib
+
+    matplotlib.use("Agg")
+    f = np.array([20.0, 100.0, 500.0])
+    res = rigid_mass_calibration_check([0.100, 0.102, 0.097], f, mass=10.0)
+
+    axes_en = res.plot(language="en")
+    assert axes_en[0].get_title() == "ISO 7626-2 rigid-mass calibration check (PASS)"
+    assert axes_en[1].get_ylabel() == "Deviation [%]"
+
+    axes_es = res.plot(language="es")
+    assert axes_es[0].get_title() == (
+        "ISO 7626-2 verificación de calibración con masa rígida (CORRECTO)"
+    )
+    assert axes_es[1].get_ylabel() == "Desviación [%]"
+    assert axes_es[1].get_xlabel() == "Frecuencia [Hz]"
 
 
 def test_unknown_language_raises() -> None:

@@ -18,6 +18,7 @@ from .common import (
     _C_TERTIARY,
     _band_axis,
     _new_axes,
+    _new_axes_column,
     format_frequency_axis,
 )
 
@@ -36,7 +37,10 @@ if TYPE_CHECKING:
         WeightingResponse,
     )
     from matplotlib.axes import Axes
-    from ..vibration.mechanical_mobility import MobilityResult
+    from ..vibration.mechanical_mobility import (
+        MobilityResult,
+        RigidMassCalibrationResult,
+    )
     from ..vibration.transfer_stiffness import TransferStiffnessResult
     from ..vibration.multiple_shock_vibration import MultipleShockResult
     from ..vibration.radiation_efficiency import RadiationEfficiencyResult
@@ -60,6 +64,14 @@ _STRINGS: dict[str, str] = {
     "Stress variable $R$": "Variable de tensión $R$",
     "Probability of lumbar injury [%]": "Probabilidad de lesión lumbar [%]",
     "ISO 7626-1 mechanical mobility": "ISO 7626-1 movilidad mecánica",
+    "ISO 7626-2 rigid-mass calibration check": "ISO 7626-2 verificación de calibración con masa rígida",
+    "Accelerance $|A|$ [1/kg]": "Accelerancia $|A|$ [1/kg]",
+    "Deviation [%]": "Desviación [%]",
+    r"expected $|A| = 1/m$": r"esperado $|A| = 1/m$",
+    r"expected $|Y| = 1/(2\pi f m)$": r"esperado $|Y| = 1/(2\pi f m)$",
+    "measured (within tolerance)": "medido (dentro de tolerancia)",
+    "measured (out of tolerance)": "medido (fuera de tolerancia)",
+    r"$\pm${p} % tolerance": r"tolerancia $\pm${p} %",
     "ISO 10846 dynamic transfer stiffness": "ISO 10846 rigidez dinámica de transferencia",
     "Plate radiation efficiency (Leppington / Maidanik)": "Eficiencia de radiación de placa (Leppington / Maidanik)",
     "Frequency weighting {name} (ISO 8041-1)": "Ponderación en frecuencia {name} (ISO 8041-1)",
@@ -271,6 +283,103 @@ def plot_mobility(
     ax.grid(True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
+
+
+def plot_rigid_mass_calibration(
+    result: "RigidMassCalibrationResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any,
+) -> "Axes | np.ndarray":
+    """Rigid-mass operational calibration check (ISO 7626-2, 7.5.2).
+
+    The single-concept calibration-check figure: the measured driving-point
+    FRF magnitude against the known rigid-mass line with its +/- tolerance
+    band (upper panel), and the relative deviation against the same tolerance
+    band (lower panel, where the few-percent band is actually readable). A
+    point outside the band is a failed frequency and is drawn in the
+    out-of-tolerance colour; the title carries the overall verdict.
+
+    With ``ax`` supplied, only the deviation diagnostic is drawn on it and that
+    axes is returned; otherwise a fresh two-panel column is created and the
+    two-axes array is returned.
+
+    :param result: A
+        :class:`~phonometry.vibration.mechanical_mobility.RigidMassCalibrationResult`.
+    :param ax: Existing axes for the deviation panel, or ``None`` for a fresh
+        two-panel figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured-magnitude ``plot`` (primary artist).
+    :return: The deviation axes (``ax`` given) or the two-axes array.
+    """
+    from .._i18n import format_number, localize_axes
+
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    measured = np.asarray(result.measured, dtype=np.float64)
+    expected = np.asarray(result.expected, dtype=np.float64)
+    deviation = np.asarray(result.deviation, dtype=np.float64)
+    within = np.asarray(result.within_tolerance, dtype=bool)
+    tol = float(result.tolerance)
+    tol_pct = 100.0 * tol
+    fmin, fmax = float(freq.min()), float(freq.max())
+    p = format_number(tol_pct, language, decimals=1, trim=True)
+    band_label = _t(r"$\pm${p} % tolerance", language).format(p=p)
+    exp_label = (_t(r"expected $|A| = 1/m$", language)
+                 if result.quantity == "accelerance"
+                 else _t(r"expected $|Y| = 1/(2\pi f m)$", language))
+    mag_ylabel = (_t("Accelerance $|A|$ [1/kg]", language)
+                  if result.quantity == "accelerance"
+                  else _t("Mobility $|Y|$ [m/(N·s)]", language))
+    within_label = _t("measured (within tolerance)", language)
+    outside_label = _t("measured (out of tolerance)", language)
+
+    def _deviation_panel(axd: Axes) -> None:
+        axd.axhspan(-tol_pct, tol_pct, color=_C_REFERENCE, alpha=0.15,
+                    label=band_label)
+        axd.axhline(0.0, color=_C_MUTED, ls=":", lw=0.9)
+        axd.semilogx(freq, 100.0 * deviation, "-", color=_C_PRIMARY, lw=1.4,
+                     zorder=2)
+        axd.plot(freq[within], 100.0 * deviation[within], "o", color=_C_PRIMARY,
+                 zorder=3, label=within_label)
+        if not np.all(within):
+            axd.plot(freq[~within], 100.0 * deviation[~within], "o",
+                     color=_C_SECONDARY, zorder=4, label=outside_label)
+        axd.set_xlabel(_t("Frequency [Hz]", language))
+        axd.set_ylabel(_t("Deviation [%]", language))
+        axd.grid(True, which="both", alpha=0.3)
+        axd.legend(loc="best", fontsize="small")
+
+    if ax is not None:
+        _deviation_panel(ax)
+        format_frequency_axis(ax, fmin, fmax)
+        localize_axes(ax, language)
+        return ax
+
+    axes = _new_axes_column(2, sharex=True, figsize=(8.0, 6.6))
+    axm, axd = axes[0], axes[1]
+    kwargs.setdefault("color", _C_PRIMARY)
+    axm.fill_between(freq, expected * (1.0 - tol), expected * (1.0 + tol),
+                     color=_C_REFERENCE, alpha=0.15, label=band_label)
+    axm.loglog(freq, expected, ls="--", color=_C_REFERENCE, lw=1.4,
+               label=exp_label)
+    axm.loglog(freq, measured, "o-", lw=1.4, label=within_label, **kwargs)
+    if not np.all(within):
+        axm.plot(freq[~within], measured[~within], "o", color=_C_SECONDARY,
+                 zorder=4, label=outside_label)
+    axm.set_ylabel(mag_ylabel)
+    axm.grid(True, which="both", alpha=0.3)
+    axm.legend(loc="best", fontsize="small")
+    if result.passed:
+        verdict = "CORRECTO" if language == "es" else "PASS"
+    else:
+        verdict = "INCORRECTO" if language == "es" else "FAIL"
+    axm.set_title(
+        _t("ISO 7626-2 rigid-mass calibration check", language)
+        + f" ({verdict})"
+    )
+    _deviation_panel(axd)
+    for axf in axes:
+        format_frequency_axis(axf, fmin, fmax)
+        localize_axes(axf, language)
+    return axes
 
 
 def plot_transfer_stiffness(

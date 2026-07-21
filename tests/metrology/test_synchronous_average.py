@@ -252,10 +252,11 @@ def test_record_shorter_than_one_period_raises() -> None:
 
 
 def test_comb_filter_response_validation() -> None:
+    one = np.array([1.0])
     with pytest.raises(ValueError, match="positive integer"):
-        comb_filter_response(np.array([1.0]), PERIOD, 0)
+        comb_filter_response(one, PERIOD, 0)
     with pytest.raises(ValueError, match="positive"):
-        comb_filter_response(np.array([1.0]), -1.0, 2)
+        comb_filter_response(one, -1.0, 2)
 
 
 def test_plot_returns_axes() -> None:

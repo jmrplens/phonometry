@@ -76,7 +76,7 @@ values = [5.2, 6.2, 3.7, 6.4, 3.9, 4.0, 3.9, 5.3, 4.0, 4.6,
 res = trend_test(values)                  # B&P Ejemplo 4.4
 print(res.statistic, res.bounds)          # 86, (64, 125)
 print(res.trend_free, round(res.p_value, 3))   # True, 0.586
-res.plot()
+res.plot(language="es")
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/trend_test_es.svg" alt="Dos secuencias de veinte observaciones dibujadas frente al índice de muestra: el Ejemplo 4.4 de Bendat y Piersol, que fluctúa en torno a cinco con ochenta y seis inversiones de orden y se acepta como sin tendencia, y las mismas fluctuaciones con una deriva ascendente añadida que sube de unos cinco a nueve, cuyas treinta y ocho inversiones de orden caen por debajo del límite inferior de aceptación de sesenta y cuatro y se rechazan como con tendencia al nivel del cinco por ciento" width="82%" loading="eager" />

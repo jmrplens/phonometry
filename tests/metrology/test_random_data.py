@@ -417,6 +417,25 @@ def test_trend_test_plot_renders_and_returns_axes() -> None:
     plt.close("all")
 
 
+def test_runs_plot_draws_original_classification_median() -> None:
+    # Tied data: the median of the original sequence (10) is discarded from
+    # the runs test, and the median of what remains (100) is different. The
+    # reference line must be the classification median the test used, not a
+    # median recomputed on the filtered TrendTestResult.values.
+    values = np.array([0.0] * 5 + [10.0] * 21 + [100.0] * 15)
+    np.random.default_rng(0).shuffle(values)
+    res = ph.trend_test(values, method="runs")
+    assert res.median == 10.0
+    assert float(np.median(res.values)) == 100.0  # filtered median differs
+    ax = res.plot()
+    median_lines = [
+        ln for ln in ax.get_lines() if ln.get_label() == "Sequence median"
+    ]
+    assert len(median_lines) == 1
+    assert np.allclose(median_lines[0].get_ydata(), 10.0)
+    plt.close("all")
+
+
 def test_plots_render_and_return_axes() -> None:
     rng = np.random.default_rng(10)
     n = 1 << 14

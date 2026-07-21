@@ -1560,9 +1560,13 @@ def plot_trend_test(
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("ms", 4.5)
     ax.plot(index, result.values, label=label, **kwargs)
-    if result.method == "runs":
+    if result.method == "runs" and result.median is not None:
+        # The runs test classifies each value against the median of the
+        # *original* sequence (before values equal to it were discarded),
+        # so draw that persisted classification median, not a median
+        # recomputed on the filtered result.values.
         ax.axhline(
-            float(np.median(result.values)), color=_C_REFERENCE,
+            result.median, color=_C_REFERENCE,
             linestyle="--", lw=1.2, label=_t("Sequence median", language),
         )
     ax.set_xlabel(_t("Sample index", language))

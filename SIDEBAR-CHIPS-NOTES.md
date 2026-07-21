@@ -234,82 +234,102 @@ Four reusable noise-reduction concepts, with who uses each:
 4. A single muted "source" line, monochrome with at most a tiny accent.
    Reads like a citation (Stripe / Redocly metadata rows); the category colour
    is dropped entirely in favour of one calm grey line.
+   is dropped entirely in favour of one calm grey line.
 
-### Live default (variant A: chips-below, dot + muted text)
+The iteration-4 "variant A" default (own line + per-chip dot + muted text) is
+SUPERSEDED by iteration 5 below. Its screenshots were removed.
 
-Chosen default. Chips drop onto their own line directly below the label,
-aligned under the label text (they share the anchor's inline padding box), as
-ghost tags: no fill, no border, `0.72em` muted text in `--sl-color-gray-2`,
-each preceded by a small `0.42em` category dot (teal = standard, amber =
-theory). Tight vertical rhythm (`margin-block-start: 0.15em`), wraps cleanly
-for multi/mixed chips. On the active accent pill the chip text inverts to
-`--sl-color-text-invert` (dots keep their colour). Muted-text contrast: 8.57:1
-dark, 11.71:1 light - both clear WCAG AA. EN/ES identical (no per-item text in
-this variant). This is the cleanest option that still keeps the
-standard-vs-reference distinction visible at rest, matching the maintainer's
-lean (own line + de-emphasised + subtle colour accent).
+## Iteration 5: legibility pass (mono font + per-chip dots were the noise)
 
-Refinement (maintainer request): the leaf item label
-(`.sidebar-item-label`) is now semibold (`font-weight: 600`) so the item name
-reads as clearly distinct from its lighter (500) muted chips, and the chip
-line is indented `margin-inline-start: 1em` so it reads as nested UNDER its
-item rather than as a separate sibling row. Hierarchy still holds - section
-header (white, larger) > item label (gray-2, 600, 13px) > chips (gray-2, 500,
-smaller, dotted, indented). The active accent pill is untouched, so the
-current page stays clearly indicated. Screenshots: `variantA-refined-dark.png`
-and `variantA-refined-light.png`.
+Reviewing on mobile, the maintainer said the tree was "still missing
+something" - too visually noisy, wanted it calmer and more legible without
+dropping any chip. Diagnosing the live view (`ux-variants/noise2-*` reproduce
+the exact region, "Build a sound level meter" -> "Signals and spectra") found
+three concrete noise sources, not one:
 
-Refinement 2 (mobile review): (a) the item label was the same gray as the
-chips, so they did not separate; it is now `--sl-color-gray-1` (bright/near-
-white on dark, near-black on light) while the chips stay `--sl-color-gray-2`,
-giving item = bright + bold, chips = dim + small. The active pill keeps
-`--sl-color-text-invert` on the label. Contrast: label 13.04:1 dark / 15.11:1
-light, chips 8.57:1 / 11.71:1 - all AA. (b) The chip text size, dot size and
-gaps were in `em`, so chips looked bigger under higher-level (larger-font)
-items - most visible on mobile, where leaf labels grow to 16px. They are now
-in absolute `rem`: chip text `0.6875rem` (11px), dot `0.3rem`, badge gap
-`0.3rem`, container gap `0.15rem 0.6rem`, chip-line offset `0.15rem` /
-`0.9rem`. Every chip is now identically 11px regardless of item or nesting
-level (verified: a single unique computed font-size across the whole tree, and
-11px chips under 16px mobile labels). Screenshots: `variantA-refined2-dark.png`,
-`variantA-refined2-light.png`, `variantA-refined2-mobile-dark.png` (390px).
+1. Chip text inherited Starlight's badge font, which is `--sl-font-system-mono`
+   (see `@astrojs/starlight/user-components/Badge.astro`: `.sl-badge { font-
+   family: var(--sl-font-system-mono) }`). Monospaced chips read as "code" and
+   clashed with the sans-serif labels - the single biggest contributor.
+2. A colour dot before EVERY chip: a line of three standards carried three
+   marks, competing with the label above it.
+3. Mono texture + many marks together gave the whole tree a restless feel.
 
-### Switchable variants (for comparison)
+### Research: how good docs keep many small nav tags quiet
 
-All alternatives live behind a `data-chip-style` attribute on the root
-element; the default (variant A) is active when the attribute is absent. To
-preview live, in DevTools console:
-`document.documentElement.dataset.chipStyle = 'boxed'` (or `reveal`, `source`,
-`pills`); remove it (`delete document.documentElement.dataset.chipStyle`) to
-return to the default.
+- Metadata uses the UI SANS font, never mono. Stripe / Redocly metadata rows
+  and Linear labels render type/version/tags in the interface sans so they
+  recede as quiet text; mono is reserved for code tokens. Putting mono on nav
+  metadata is what makes it shout.
+- One marker, not one-per-item. Instead of a bullet per tag, group the tags and
+  carry the category once (a single leading dot, or a short heading), then let
+  whitespace / a thin separator do the rest. Fewer marks = calmer list.
+- Tint the text, don't add a shape. Tailwind UI's emphasis ladder and Linear
+  put category colour ON the label text (low-saturation) rather than adding a
+  filled pill or a second glyph - colour without extra marks.
+- Restrained separators + whitespace. A generous gap, or at most a thin middot
+  in a low-contrast grey, reads as a list without the density of per-item
+  bullets (GitBook / Starlight's own soft sub-lines).
 
-- (A) default / no attribute - chips-below, dot + muted text. LIVE default.
-- (B) `boxed` - each item with chips becomes a bordered card row; chips are
-  soft-tinted rounded tags (medium emphasis). Caveat: the card background
-  currently overrides the active-item accent pill, so the current page's label
-  loses its highlight (invisible in light mode). Would need active-state work
-  before shipping; kept as a comparison only.
-- (C) `reveal` - chips hidden at rest, shown only for the hovered / focused /
-  current item. Calmest resting tree; the screenshot shows the active item
-  (Room acoustics) revealed, hover behaves identically.
-- (D) `source` - one muted italic line `source: ISO 3382 - ISO 18233 -
-  Schroeder 1965` (`fuente:` in ES via `:root[lang='es']`), monochrome, no
-  dots. Reads like a citation.
-- `pills` - the previous saturated inline pills, kept as the "before"
-  reference.
+### Live default ("grouped") - LIVE
 
-### Screenshots (`ux-variants/`, chromium, Rooms and buildings section)
+Chosen default (active when no `data-chip-style` attribute is set). Same
+own-line-below-the-label placement as before, but:
 
-- `variantA-chips-below-dark.png`, `variantA-chips-below-light.png`,
-  `variantA-chips-below-es-dark.png` (default, EN + ES)
-- `variantB-boxed-dark.png`, `variantB-boxed-light.png`
-- `variantC-reveal-dark.png`, `variantC-reveal-light.png`
-- `variantD-source-dark.png`, `variantD-source-light.png`,
-  `variantD-source-es-dark.png`
-- `reference-pills-dark.png`, `reference-pills-light.png` (the loud "before")
+- chip text is the site SANS-SERIF (`font-family: inherit` from the anchor),
+  ~11px (`0.6875rem`, absolute so it never scales with the item's font),
+  `--sl-color-gray-2`, weight 500 - quiet secondary metadata;
+- NO per-chip dot. One small colour dot leads each CATEGORY RUN (teal for the
+  standards run, amber for the references run), so a whole category reads as one
+  calm phrase and the standard-vs-reference distinction is still obvious;
+- chips inside a run are separated by whitespace only (a `0.55rem` flex
+  column-gap), no glyph - so a run that wraps to a second line never leaves a
+  separator dangling at a line edge (the wart the middot version had in the
+  narrow 288px desktop sidebar);
+- the leading dots are pure CSS: `.chip-standard:first-child`, `.chip-theory +
+  .chip-standard` (teal) and `.chip-theory:first-child`, `.chip-standard +
+  .chip-theory` (amber). No per-item text, so EN/ES are identical.
 
-### Colour tokens (iteration 4, theme-aware)
+Marks per line drop from one-per-chip (up to 3) to one-per-category (1, or 2 on
+a mixed item). The label (gray-1, 600) clearly dominates the gray-2 chip line.
+Contrast (WCAG AA): chip text gray-2 >= 8.5:1 dark / >= 10:1 light; leading dots
+are non-text and clear 3:1 (`#128273` ~4.7:1, `#a8760a` ~3.3:1 on white). The
+active accent pill keeps its highlight; label + chip text invert, dots keep
+their colour. `pnpm build` passes (437 pages, links valid).
 
-Dots/accents added alongside the existing fills. Dark: standard accent
-`#6fdcc8`, theory accent `#e6b84e`; soft tints are 10% alpha washes of the
-text colour. Light: standard accent `#128273`, theory accent `#a8760a`.
+### Switchable comparison variants
+
+All alternatives live behind a `data-chip-style` attribute on the root element;
+the default ("grouped") is active when the attribute is ABSENT. To preview live
+in the DevTools console:
+`document.documentElement.dataset.chipStyle = 'tinted'` (or `'twoline'`,
+`'pills'`); `delete document.documentElement.dataset.chipStyle` returns to the
+default.
+
+- (default / no attribute) "grouped" - sans text, whitespace separators, one
+  leading colour dot per category run. LIVE.
+- `tinted` - no dots anywhere; the chip TEXT is tinted teal (standard) / amber
+  (reference); a thin gray middot separates adjacent chips. Category = hue.
+  Fewest marks, but more colour across the whole tree.
+- `twoline` - standards on one line, references on the line below, each a
+  tinted middot-joined phrase, no dots. Clearest categorisation, but taller.
+- `pills` - the previous saturated inline pills, kept only as the loud
+  "before" reference.
+
+### Screenshots (`ux-variants/`, chromium, "Build a sound level meter" ->
+"Signals and spectra")
+
+Desktop shots are the 288px sidebar at a 1400px viewport; mobile shots are the
+opened nav at a 390px viewport (the maintainer's review context).
+
+- `noise2-grouped-dark.png`, `noise2-grouped-light.png`,
+  `noise2-grouped-mobile-dark.png`, `noise2-grouped-es-mobile-dark.png` (LIVE)
+- `noise2-tinted-dark.png`, `noise2-tinted-light.png`,
+  `noise2-tinted-mobile-dark.png`
+- `noise2-twoline-dark.png`, `noise2-twoline-light.png`,
+  `noise2-twoline-mobile-dark.png`
+
+The headless capture harness is `scratchpad/shoot.mjs` (playwright-core driving
+the cached chromium). Note: `astro dev` in this workspace returns 404 to a real
+browser navigation (`Accept: text/html`); the harness rewrites the request
+`Accept` header to `*/*` via a route interceptor to get 200s.

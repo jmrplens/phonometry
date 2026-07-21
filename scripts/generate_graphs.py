@@ -661,6 +661,13 @@ _ES_EXACT = {
     "1/3-octave smoothed": "Suavizado en 1/3 de octava",
     "Exact -3.01 dB/octave power law":
         "Ley de potencias exacta de -3,01 dB/octava",
+    # Thomson multitaper spectral density (Percival & Walden 1993)
+    "Thomson Multitaper Density of a Short Record (Percival & Walden)":
+        "Densidad multitaper de Thomson de un registro corto (Percival y Walden)",
+    "Single Slepian taper ($K$ = 1, $\\nu$ = 2)":
+        "Un solo taper de Slepian ($K$ = 1, $\\nu$ = 2)",
+    "Multitaper estimate ($K$ = 7, adaptive)":
+        "Estimación multitaper ($K$ = 7, adaptativa)",
     # Time-frequency analysis (Bendat & Piersol spectrogram + zoom FFT)
     "Calibrated Spectrogram in dB SPL (Bendat & Piersol)":
         "Espectrograma calibrado en dB SPL (Bendat y Piersol)",
@@ -1079,6 +1086,9 @@ _ES_PATTERNS = [
     # psd_confidence_smoothing annotation (mathtext + baked-in numbers).
     (r"^\$n_d\$ = (\d+) averages, \$\\varepsilon_r\$ = (\d+)\.(\d+) %$",
      r"$n_d$ = \1 promedios, $\\varepsilon_r$ = \2,\3 %"),
+    # multitaper_psd_confidence annotation (baked-in dof value).
+    (r"^171 ms record, \$NW\$ = 4, \$\\bar\\nu\$ = (\d+)\.(\d+) equivalent dof$",
+     r"registro de 171 ms, $NW$ = 4, $\\bar\\nu$ = \1,\2 g.d.l. equivalentes"),
     # window_functions_tradeoff legend entries (name + baked-in metrics).
     (r"^([a-z]+): ENBW (.+) bins, sidelobe (.+) dB$",
      r"\1: ENBW \2 bins, lóbulo lateral \3 dB"),
@@ -3937,6 +3947,57 @@ def generate_psd_confidence_smoothing(output_dir: str) -> None:
             color=COLOR_FG)
     plt.tight_layout()
     save_figure(output_dir, "psd_confidence_smoothing.svg")
+
+
+def generate_multitaper_psd_confidence(output_dir: str) -> None:
+    """Thomson multitaper PSD of a short record vs a single-taper estimate."""
+    print("Generating multitaper_psd_confidence...")
+    from phonometry import multitaper_psd, noise_signal
+
+    fs = 48000.0
+    n = 8192  # a genuinely short record: 171 ms
+    x = noise_signal(fs, n / fs, color="pink", seed=11)
+    single = multitaper_psd(x, fs, n_tapers=1, adaptive=False)
+    res = multitaper_psd(x, fs)
+    band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
+    freqs = res.frequencies[band]
+    # The exact -3.01 dB/oct power law through the mean level around 1 kHz.
+    anchor = (freqs >= 800.0) & (freqs <= 1250.0)
+    level_1k = float(np.mean(10.0 * np.log10(res.psd[band][anchor])))
+    ref_db = level_1k - 10.0 * np.log10(freqs / 1000.0)
+
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.semilogx(freqs, 10.0 * np.log10(single.psd[band]), color="gray",
+                alpha=0.45, linewidth=0.7,
+                label="Single Slepian taper ($K$ = 1, $\\nu$ = 2)")
+    ax.fill_between(
+        freqs,
+        10.0 * np.log10(res.ci_lower[band]),
+        10.0 * np.log10(res.ci_upper[band]),
+        color=COLOR_PRIMARY, alpha=0.28, lw=0.0,
+        label="95 % chi-square confidence interval")
+    ax.semilogx(freqs, 10.0 * np.log10(res.psd[band]), color=COLOR_PRIMARY,
+                linewidth=1.2, label="Multitaper estimate ($K$ = 7, adaptive)")
+    ax.semilogx(freqs, ref_db, color=COLOR_FG, linestyle="--", linewidth=1.4,
+                alpha=0.7, label="Exact -3.01 dB/octave power law")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("PSD [dB re 1/Hz]")
+    ax.set_title(
+        "Thomson Multitaper Density of a Short Record (Percival & Walden)",
+        fontweight="bold", pad=12)
+    ax.set_xlim(20.0, 20000.0)
+    format_frequency_axis(ax, 20.0, 20000.0)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower left", fontsize=9)
+    nu = float(np.mean(res.degrees_of_freedom[1:-1]))
+    ax.text(0.985, 0.965,
+            f"171 ms record, $NW$ = 4, "
+            f"$\\bar\\nu$ = {nu:.1f} equivalent dof",
+            transform=ax.transAxes, va="top", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "multitaper_psd_confidence.svg")
 def generate_calibrated_spectrogram(output_dir: str) -> None:
     """Calibrated STFT spectrogram of a nonstationary signal, in dB SPL."""
     print("Generating calibrated_spectrogram...")
@@ -8004,6 +8065,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Calibrated spectral analysis: PSD with chi-square confidence interval
     # and 1/3-octave smoothing on exact-slope pink noise (Bendat & Piersol).
     generate_psd_confidence_smoothing,
+    # Thomson multitaper density of a short record with its chi-square
+    # band against the single-taper estimate (Percival & Walden 1993).
+    generate_multitaper_psd_confidence,
     # Time-frequency analysis: calibrated STFT spectrogram in dB SPL and
     # the zoom FFT resolving sub-bin tone pairs (Bendat & Piersol).
     generate_calibrated_spectrogram,

@@ -53,6 +53,19 @@ que las guías incorporan sus secciones de Referencias.
   Tratamiento gratuito y complementario del diseño y análisis de filtros
   digitales, el paso natural tras las guías de bancos de filtros.
   Citado por [Bancos de filtros](/phonometry/es/guides/filter-banks/).
+- Thomson, D. J. (1982). Spectrum estimation and harmonic analysis.
+  *Proceedings of the IEEE*, 70(9), 1055-1096.
+  [doi:10.1109/PROC.1982.12433](https://doi.org/10.1109/PROC.1982.12433).
+  El método multitaper: ventanas de Slepian, autoespectros propios y los
+  pesos adaptativos que implementa `multitaper_psd`.
+  Citado por [Análisis espectral calibrado](/phonometry/es/guides/spectral-analysis/).
+- Percival, D. B., & Walden, A. T. (1993). *Spectral analysis for physical
+  applications: Multitaper and conventional univariate techniques*.
+  Cambridge University Press. ISBN 978-0-521-43541-3.
+  [doi:10.1017/CBO9780511622762](https://doi.org/10.1017/CBO9780511622762).
+  El desarrollo multitaper (capítulo 7) tras `multitaper_psd` y las tablas
+  de autovalores de las secuencias de Slepian que anclan su oráculo de test.
+  Citado por [Análisis espectral calibrado](/phonometry/es/guides/spectral-analysis/).
 
 ## Instrumentación de medida
 

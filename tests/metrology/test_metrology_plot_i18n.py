@@ -58,6 +58,17 @@ def test_spectral_density_es_and_bad_language() -> None:
         res.plot(language="xx")
 
 
+def test_multitaper_psd_es_and_bad_language() -> None:
+    res = ph.multitaper_psd(_white(), FS)
+    ax = res.plot(language="es")
+    assert "Densidad multitaper de Thomson" in ax.get_title()
+    assert ax.get_xlabel() == "Frecuencia [Hz]"
+    assert "de confianza" in _labels(ax)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
 def test_cross_spectral_density_es() -> None:
     x = _white()
     y = np.roll(x, 17) + 0.1 * _white()

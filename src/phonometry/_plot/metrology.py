@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from ..metrology.spectra import (
         CoherentOutputSpectrumResult,
         CrossSpectralDensityResult,
+        MultitaperSpectralDensityResult,
         SpectralDensityResult,
         WindowMetricsResult,
     )
@@ -148,6 +149,10 @@ _STRINGS: dict[str, str] = {
     "Scalloping loss {sl} dB": "Pérdida de festoneado {sl} dB",
     "Window metrics (Harris 1978): {window}":
         "Métricas de la ventana (Harris 1978): {window}",
+    r"{pct} % confidence ($\chi^2$, $\bar\nu$ = {nu})":
+        r"{pct} % de confianza ($\chi^2$, $\bar\nu$ = {nu})",
+    r"Thomson multitaper density — $K$ = {k} tapers, $NW$ = {nw}":
+        r"Densidad multitaper de Thomson — $K$ = {k} tapers, $NW$ = {nw}",
 }
 
 
@@ -390,6 +395,46 @@ def _psd_ylabel(scaling: str, language: str = "en") -> str:
     )
 
 
+def _plot_density_with_band(
+    result: "SpectralDensityResult | MultitaperSpectralDensityResult",
+    ax: Axes | None,
+    language: str,
+    kwargs: dict[str, Any],
+    *,
+    band_color: Any,
+    band_alpha: float | None,
+    band_label: str,
+    line_label: str,
+    title: str,
+) -> Axes:
+    """Shared renderer: density line in dB over its confidence band."""
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    pos = freqs > 0.0
+    color = kwargs.pop("color", _C_PRIMARY)
+    ax.fill_between(
+        freqs[pos],
+        _db10(np.asarray(result.ci_lower, dtype=np.float64)[pos]),
+        _db10(np.asarray(result.ci_upper, dtype=np.float64)[pos]),
+        color=band_color if band_color is not None else color,
+        alpha=band_alpha,
+        lw=0.0,
+        label=band_label,
+    )
+    kwargs.setdefault("label", line_label)
+    ax.semilogx(freqs[pos], _db10(np.asarray(result.psd)[pos]), color=color, **kwargs)
+    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_psd_ylabel(result.scaling, language))
+    ax.set_title(title)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    format_frequency_axis(ax, float(freqs[pos].min()), float(freqs[pos].max()))
+    localize_axes(ax, language)
+    return ax
+
+
 def plot_spectral_density(
     result: "SpectralDensityResult", ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any
@@ -402,34 +447,61 @@ def plot_spectral_density(
     :param kwargs: Forwarded to the density ``plot`` call.
     :return: The axes.
     """
-    from .._i18n import decimal_comma, format_number, localize_axes
+    from .._i18n import decimal_comma, format_number
 
-    ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies, dtype=np.float64)
-    pos = freqs > 0.0
-    color = kwargs.pop("color", _C_PRIMARY)
     pct = decimal_comma(f"{100.0 * result.confidence:g}", language)
     nd = format_number(result.n_averages, language, decimals=1)
-    ax.fill_between(
-        freqs[pos],
-        _db10(np.asarray(result.ci_lower, dtype=np.float64)[pos]),
-        _db10(np.asarray(result.ci_upper, dtype=np.float64)[pos]),
-        color=color,
-        alpha=0.25,
-        lw=0.0,
-        label=_t(r"{pct} % confidence ($\chi^2$, $n_d$ = {nd})", language, pct=pct, nd=nd),
-    )
-    kwargs.setdefault("label", "$\\hat{G}_{xx}(f)$")
-    ax.semilogx(freqs[pos], _db10(np.asarray(result.psd)[pos]), color=color, **kwargs)
-    ax.set_xlabel(_t("Frequency [Hz]", language))
-    ax.set_ylabel(_psd_ylabel(result.scaling, language))
     er = format_number(100.0 * result.random_error, language, decimals=1)
-    ax.set_title(_t(r"Welch spectral density — $\varepsilon_r$ = {er} %", language, er=er))
-    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
-    format_frequency_axis(ax, float(freqs[pos].min()), float(freqs[pos].max()))
-    localize_axes(ax, language)
-    return ax
+    return _plot_density_with_band(
+        result,
+        ax,
+        language,
+        kwargs,
+        band_color=None,  # the band shares the line color, translucent
+        band_alpha=0.25,
+        band_label=_t(r"{pct} % confidence ($\chi^2$, $n_d$ = {nd})", language, pct=pct, nd=nd),
+        line_label="$\\hat{G}_{xx}(f)$",
+        title=_t(r"Welch spectral density — $\varepsilon_r$ = {er} %", language, er=er),
+    )
+
+
+def plot_multitaper_spectral_density(
+    result: "MultitaperSpectralDensityResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Multitaper spectral density in dB with its chi-square band.
+
+    The confidence band uses the per-frequency degrees of freedom of the
+    (possibly adaptive) estimator and is drawn as a pale opaque fill.
+
+    :param result: A
+        :class:`~phonometry.metrology.spectra.MultitaperSpectralDensityResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the density ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import decimal_comma, format_number
+
+    pct = decimal_comma(f"{100.0 * result.confidence:g}", language)
+    nu_mean = float(np.mean(result.degrees_of_freedom[1:-1]))
+    nu = format_number(nu_mean, language, decimals=1)
+    nw = decimal_comma(f"{result.time_half_bandwidth:g}", language)
+    return _plot_density_with_band(
+        result,
+        ax,
+        language,
+        kwargs,
+        band_color=_C_PRIMARY_LIGHT,
+        band_alpha=None,  # pale opaque fill
+        band_label=_t(r"{pct} % confidence ($\chi^2$, $\bar\nu$ = {nu})",
+                      language, pct=pct, nu=nu),
+        line_label="$\\hat{S}^{(mt)}(f)$",
+        title=_t(
+            r"Thomson multitaper density — $K$ = {k} tapers, $NW$ = {nw}",
+            language, k=result.n_tapers, nw=nw,
+        ),
+    )
 
 
 def plot_cross_spectral_density(

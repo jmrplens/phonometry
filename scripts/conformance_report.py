@@ -4407,6 +4407,66 @@ def _chk_smoothing_line_level() -> Outcome:
     return numeric(5.0 / width, float(out[i0]), 1e-9, rel=True, places=6)
 
 
+@register(
+    _SPECTRA,
+    "Percival & Walden 1993, Table 382",
+    "Slepian taper concentration lambda_14(31, 8/31), quadruple-precision table",
+)
+def _chk_multitaper_dpss_eigenvalue() -> Outcome:
+    from scipy.signal.windows import dpss
+
+    _, ratios = dpss(31, 8.0, Kmax=15, return_ratios=True)
+    return numeric(
+        0.929438220819848052, float(ratios[14]), 1e-12, places=12
+    )
+
+
+@register(
+    _SPECTRA,
+    "Percival & Walden 1993, Section 7.2 / Eq. (333)",
+    "Multitaper white-noise density = sigma^2/(fs/2), NW=4, K=7 tapers",
+)
+def _chk_multitaper_white_level() -> Outcome:
+    fs = _spectra_fs()
+    res = ph.multitaper_psd(np.asarray(_spectra_white(41, rms=2.0))[:8192], fs)
+    expected = 4.0 / (fs / 2.0)
+    return numeric(
+        expected, float(np.mean(res.psd[1:-1])), 0.03, rel=True, places=6
+    )
+
+
+@register(
+    _SPECTRA,
+    "Percival & Walden 1993, Eq. (369a) tone calibration",
+    "Multitaper 'spectrum' scaling reads a sinusoid peak at A^2/2",
+)
+def _chk_multitaper_tone_peak() -> Outcome:
+    fs = _spectra_fs()
+    t = np.arange(4096) / fs
+    x = 3.0 * np.sin(2.0 * np.pi * 1024.0 * t)
+    res = ph.multitaper_psd(x, fs, scaling="spectrum", adaptive=False)
+    return numeric(
+        4.5, float(res.psd[int(np.argmax(res.psd))]), 1e-4, rel=True, places=6
+    )
+
+
+@register(
+    _SPECTRA,
+    "Percival & Walden 1993, Eq. (370b)",
+    "Adaptive multitaper dof -> 2K on white noise (weights -> uniform)",
+)
+def _chk_multitaper_adaptive_dof() -> Outcome:
+    fs = _spectra_fs()
+    res = ph.multitaper_psd(np.asarray(_spectra_white(42))[:4096], fs)
+    return numeric(
+        2.0 * res.n_tapers,
+        float(np.mean(res.degrees_of_freedom[1:-1])),
+        0.02,
+        rel=True,
+        places=4,
+    )
+
+
 # ===========================================================================
 # Time-frequency analysis (Bendat & Piersol, Random Data 4e)
 # ===========================================================================

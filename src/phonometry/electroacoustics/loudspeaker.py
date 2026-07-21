@@ -44,13 +44,14 @@ the report never merely repeats a manufacturer number:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from .._internal.validation import require_positive
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._report.metadata import ReportMetadata
@@ -368,6 +369,31 @@ class LoudspeakerCharacteristics:
         return render_iec60268_5_report(
             self, path, metadata=metadata, language=language
         )
+
+    def plot(
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
+    ) -> "Axes | NDArray[Any]":
+        """Plot the IEC 60268-5 loudspeaker rated-characteristics data sheet.
+
+        A multi-panel figure sharing its panel drawing with the ``.report()``
+        fiche: the on-axis SPL response with its tolerance band and
+        effective-range markers, plus the impedance modulus ``|Z|``, the total
+        harmonic distortion against frequency and the polar directivity for the
+        data supplied. With ``ax`` given only the on-axis response is drawn.
+
+        :param ax: Existing axes for the on-axis response, or ``None`` for a
+            fresh multi-panel data sheet.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :return: The response-panel axes (``ax`` given) or the array of panel
+            axes.
+        :raises ImportError: If matplotlib is not installed
+            (``pip install phonometry[plot]``).
+        """
+        from .._i18n import check_language
+        from .._plot.electroacoustics import plot_loudspeaker_characteristics
+
+        check_language(language)
+        return plot_loudspeaker_characteristics(self, ax=ax, language=language, **kwargs)
 
 
 def _polar_from_directivity(

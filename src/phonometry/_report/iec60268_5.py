@@ -36,6 +36,7 @@ from typing import TYPE_CHECKING, Any, List, Tuple
 
 import numpy as np
 
+from .._plot.electroacoustics import _RESPONSE_SPAN_LSP
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -57,17 +58,11 @@ from .metadata import ReportMetadata
 if TYPE_CHECKING:
     from ..electroacoustics.loudspeaker import LoudspeakerCharacteristics
 
-#: Ordinate span of the on-axis response plot, in dB. A multiple of 25 keeps the
-#: IEC 60263 25 dB-per-decade grid on whole gridlines.
-_RESPONSE_SPAN_DB = 50.0
 #: IEC 60263 clause 2 scale proportion: one frequency decade equals this many
 #: decibels on the ordinate (the "square" 25 dB-per-decade grid).
 _DB_PER_DECADE = 25.0
-#: IEC 60263 clause 3 polar reference-circle span, in dB (radius = 25 dB).
-_POLAR_SPAN_DB = 25.0
 
 _OHM = "&#937;"  # reportlab entity for the ohm sign
-_OHM_TEXT = "Ω"  # unicode ohm for matplotlib labels
 
 
 def _basis(metadata: ReportMetadata | None, language: str = "en") -> str:
@@ -232,73 +227,44 @@ def _response_drawing(
 ) -> Any:
     """On-axis response with the tolerance band and effective-range markers.
 
-    Plotted to the IEC 60263 clause 2 proportion: one frequency decade equals
-    25 dB on the ordinate (:data:`_DB_PER_DECADE`).
+    Drawn by the shared :func:`phonometry._plot.electroacoustics` panel renderer
+    (the single source of truth also used by ``.plot()``), then stretched to the
+    IEC 60263 clause 2 proportion: one frequency decade equals 25 dB on the
+    ordinate (:data:`_DB_PER_DECADE`).
     """
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
 
-    f = result.frequencies
-    spl = result.spl_db
-    ref = result.reference_level_db
-    tol = result.tolerance_db
+    from .._plot.electroacoustics import _draw_loudspeaker_response
 
+    f = result.frequencies
     fig = Figure(figsize=(5.6, 4.2))
     FigureCanvasAgg(fig)
     ax = fig.subplots()
-
-    top = float(np.ceil((max(float(np.max(spl)), ref + tol) + 2.0) / 5.0) * 5.0)
-    bottom = top - _RESPONSE_SPAN_DB
-    # The PDF vector backend (svglib) does not preserve alpha, so a translucent
-    # fill would render as a solid block that hides the response curve. Draw a
-    # pale opaque tolerance band below the curves (zorder=0) instead.
-    ax.axhspan(ref - tol, ref + tol, facecolor="#d3e2f2", edgecolor="none",
-               zorder=0, label=t("Tolerance ±{tol} dB", language).format(
-                   tol=fmt_num(tol, language)))
-    ax.axhline(ref, color="#1f4e79", lw=0.8, ls="--")
-    ax.axhline(ref - 10.0, color="#a11a1a", lw=0.8, ls=":",
-               label=t("−10 dB reference", language))
-    ax.semilogx(f, spl, color="#1f4e79", lw=1.4,
-                label=t("On-axis response", language))
-    lo, hi = result.effective_range
-    for edge in (lo, hi):
-        ax.axvline(edge, color="#1b6e2f", lw=0.9, ls="-.")
-    ax.plot([], [], color="#1b6e2f", lw=0.9, ls="-.",
-            label=t("Effective range", language))
-
-    ax.set_xlim(float(np.min(f)), float(np.max(f)))
-    ax.set_ylim(bottom, top)
-    ax.set_xlabel(t("Frequency [Hz]", language))
-    ax.set_ylabel(t("Sound pressure level [dB]", language))
-    ax.grid(True, which="both", ls=":", lw=0.4, alpha=0.6)
-    _format_freq_axis(ax)
+    _draw_loudspeaker_response(result, ax, language=language)
     decades = np.log10(float(np.max(f)) / float(np.min(f)))
-    ax.set_box_aspect(_RESPONSE_SPAN_DB / (_DB_PER_DECADE * decades))
-    ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.01), ncol=2,
-              frameon=False, fontsize=7.5)
+    ax.set_box_aspect(_RESPONSE_SPAN_LSP / (_DB_PER_DECADE * decades))
     fig.tight_layout()
     return _drawing_from_figure(fig, target_width, language)
-
-
-def _format_freq_axis(ax: Any) -> None:
-    """Label the log-frequency axis with plain hertz/kilohertz ticks."""
-    from matplotlib.ticker import FuncFormatter
-
-    def _fmt(x: float, _pos: int) -> str:
-        if x >= 1000.0:
-            return f"{x / 1000.0:g}k"
-        return f"{x:g}"
-
-    ax.xaxis.set_major_formatter(FuncFormatter(_fmt))
-    ax.xaxis.set_minor_formatter(FuncFormatter(lambda x, p: ""))
 
 
 def _secondary_drawing(
     result: "LoudspeakerCharacteristics", target_width: float, language: str = "en"
 ) -> Any | None:
-    """Impedance, THD and polar-directivity panels for the data supplied."""
+    """Impedance, THD and polar-directivity panels for the data supplied.
+
+    The panels are drawn by the shared
+    :func:`phonometry._plot.electroacoustics` renderers, so the fiche and the
+    ``.plot()`` data sheet never diverge.
+    """
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
+
+    from .._plot.electroacoustics import (
+        _draw_datasheet_polar,
+        _draw_impedance,
+        _draw_loudspeaker_thd,
+    )
 
     has_imp = result.impedance_frequencies is not None
     has_thd = result.thd_frequencies is not None
@@ -310,72 +276,44 @@ def _secondary_drawing(
     fig = Figure(figsize=(5.6 * panels / 2.4 + 0.8, 2.6))
     FigureCanvasAgg(fig)
     idx = 1
-
     if has_imp:
         ax = fig.add_subplot(1, panels, idx)
-        ax.semilogx(result.impedance_frequencies, result.impedance_modulus,
-                    color="#1f4e79", lw=1.3)
-        ax.axhline(result.rated_impedance, color="#555555", lw=0.8, ls="--",
-                   label=t("Rated impedance", language))
-        ax.axhline(0.8 * result.rated_impedance, color="#a11a1a", lw=0.8, ls=":",
-                   label=t("80 % of rated", language))
-        ax.set_xlabel(t("Frequency [Hz]", language))
-        ax.set_ylabel(t("Impedance |Z| [{ohm}]", language).format(ohm=_OHM_TEXT))
-        ax.set_ylim(bottom=0.0)
-        ax.grid(True, which="both", ls=":", lw=0.4, alpha=0.6)
-        ax.set_title(t("Impedance", language), fontsize=8.5)
-        ax.legend(loc="upper right", fontsize=6.5, frameon=False)
-        _format_freq_axis(ax)
+        _draw_impedance(result, ax, language=language)
+        _thin_freq_ticklabels(ax)
         idx += 1
-
     if has_thd:
         ax = fig.add_subplot(1, panels, idx)
-        ax.semilogx(result.thd_frequencies, result.thd_percent,
-                    color="#1f4e79", lw=1.3)
-        ax.set_xlabel(t("Frequency [Hz]", language))
-        ax.set_ylabel(t("THD [%]", language))
-        ax.set_ylim(bottom=0.0)
-        ax.grid(True, which="both", ls=":", lw=0.4, alpha=0.6)
-        ax.set_title(t("Total harmonic distortion", language), fontsize=8.5)
-        _format_freq_axis(ax)
+        _draw_loudspeaker_thd(result, ax, language=language)
+        _thin_freq_ticklabels(ax)
         idx += 1
-
     if has_polar:
-        ax = fig.add_subplot(1, panels, idx, projection="polar")
-        _draw_polar(ax, result, language)
+        _draw_datasheet_polar(
+            result, fig.add_subplot(1, panels, idx, projection="polar"),
+            language=language,
+        )
         idx += 1
-
     fig.tight_layout()
     return _drawing_from_figure(fig, target_width, language)
 
 
-def _draw_polar(
-    ax: Any, result: "LoudspeakerCharacteristics", language: str = "en"
-) -> None:
-    """Polar directivity to the IEC 60263 clause 3 25 dB reference-circle scale."""
-    angles = np.asarray(result.polar_angles_deg, dtype=np.float64)
-    levels = np.clip(np.asarray(result.polar_db, dtype=np.float64), -_POLAR_SPAN_DB, 0.0)
-    # Mirror a one-sided pattern about the reference axis for a full rose.
-    if float(np.min(angles)) >= 0.0:
-        angles = np.concatenate([-angles[::-1], angles])
-        levels = np.concatenate([levels[::-1], levels])
-    theta = np.radians(angles)
-    ax.set_theta_zero_location("N")
-    ax.set_theta_direction(-1)
-    ax.plot(theta, levels, color="#1f4e79", lw=1.3)
-    ax.set_ylim(-_POLAR_SPAN_DB, 0.0)
-    # Reference circle at 0 dB (relative level, IEC 60263 3.3); radial ticks
-    # every 5 dB (multiple of 5 for a 25 dB radius, IEC 60263 3.2).
-    ax.set_yticks([-20.0, -15.0, -10.0, -5.0, 0.0])
-    ax.set_yticklabels(["-20", "", "-10", "", "0 dB"], fontsize=6.5)
-    ax.tick_params(axis="x", labelsize=6.5)
-    ax.grid(True, ls=":", lw=0.4, alpha=0.7)
-    title = t("Directional response", language)
-    if result.polar_frequency is not None:
-        title = t("Directional response at {freq} Hz", language).format(
-            freq=_freq(result.polar_frequency, language)
-        )
-    ax.set_title(title, fontsize=8.5)
+def _thin_freq_ticklabels(ax: Any, keep_every: int = 2) -> None:
+    """Blank alternate labelled frequency ticks on a narrow report panel.
+
+    The shared ``.plot()`` panel drawers label every nominal octave centre
+    (``format_frequency_axis``), which reads well on a full-size ``.plot()``
+    panel but crowds the compressed multi-panel row of the PDF fiche. This keeps
+    every ``keep_every``-th label (and the tick positions untouched) so the
+    narrow panels stay legible without re-implementing any drawing.
+    """
+    from matplotlib.ticker import FixedFormatter
+
+    formatter = ax.xaxis.get_major_formatter()
+    labels = list(getattr(formatter, "seq", []))
+    if len(labels) <= 6:
+        return
+    ax.xaxis.set_major_formatter(
+        FixedFormatter([lab if i % keep_every == 0 else "" for i, lab in enumerate(labels)])
+    )
 
 
 def _statement(result: "LoudspeakerCharacteristics", language: str = "en") -> str:

@@ -57,7 +57,7 @@ so the report never merely repeats a manufacturer number:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -65,6 +65,7 @@ from .._internal.validation import require_positive
 from .loudspeaker import _as_curve, _threshold_crossing
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._report.metadata import ReportMetadata
@@ -371,6 +372,32 @@ class MicrophoneCharacteristics:
         return render_iec60268_4_report(
             self, path, metadata=metadata, language=language
         )
+
+    def plot(
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
+    ) -> "Axes | NDArray[Any]":
+        """Plot the IEC 60268-4 microphone rated-characteristics data sheet.
+
+        A multi-panel figure sharing its panel drawing with the ``.report()``
+        fiche: the free-field response with its tolerance band and
+        effective-range markers, plus the polar directional pattern, the
+        inherent-noise band spectrum and the total harmonic distortion against
+        sound pressure level for the data supplied. With ``ax`` given only the
+        free-field response is drawn.
+
+        :param ax: Existing axes for the free-field response, or ``None`` for a
+            fresh multi-panel data sheet.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :return: The response-panel axes (``ax`` given) or the array of panel
+            axes.
+        :raises ImportError: If matplotlib is not installed
+            (``pip install phonometry[plot]``).
+        """
+        from .._i18n import check_language
+        from .._plot.electroacoustics import plot_microphone_characteristics
+
+        check_language(language)
+        return plot_microphone_characteristics(self, ax=ax, language=language, **kwargs)
 
 
 def _optional_positive(value: float | None, name: str) -> float | None:

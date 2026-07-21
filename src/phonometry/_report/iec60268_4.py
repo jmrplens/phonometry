@@ -34,10 +34,11 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Tuple, cast
+from typing import TYPE_CHECKING, Any, List, Tuple
 
 import numpy as np
 
+from .._plot.electroacoustics import _RESPONSE_SPAN_MIC
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -55,22 +56,16 @@ from ._layout import (
 from .iec60268_5 import (
     _DB_PER_DECADE,
     _OHM,
-    _draw_polar,
     _drawing_from_figure,
-    _format_freq_axis,
     _freq,
     _metadata_pairs,
     _range_text,
+    _thin_freq_ticklabels,
 )
 from .metadata import ReportMetadata
 
 if TYPE_CHECKING:
     from ..electroacoustics.microphone import MicrophoneCharacteristics
-
-#: Ordinate span of the free-field response plot, in dB. One 25 dB span keeps
-#: the IEC 60263 25 dB-per-decade grid on whole gridlines and suits the small
-#: deviations of a microphone response around its 0 dB reference.
-_RESPONSE_SPAN_DB = 25.0
 
 
 def _basis(metadata: ReportMetadata | None, language: str = "en") -> str:
@@ -191,49 +186,23 @@ def _response_drawing(
 ) -> Any:
     """Free-field response with the tolerance band and effective-range markers.
 
-    Plotted to the IEC 60263 clause 2 proportion: one frequency decade equals
-    25 dB on the ordinate (:data:`.iec60268_5._DB_PER_DECADE`).
+    Drawn by the shared :func:`phonometry._plot.electroacoustics` panel renderer
+    (the single source of truth also used by ``.plot()``), then stretched to the
+    IEC 60263 clause 2 proportion: one frequency decade equals 25 dB on the
+    ordinate (:data:`.iec60268_5._DB_PER_DECADE`).
     """
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
 
-    f = result.frequencies
-    rel = result.response_db
-    tol = result.tolerance_db
+    from .._plot.electroacoustics import _draw_microphone_response
 
+    f = result.frequencies
     fig = Figure(figsize=(5.6, 4.2))
     FigureCanvasAgg(fig)
     ax = fig.subplots()
-
-    top = float(np.ceil((max(float(np.max(rel)), tol) + 2.0) / 5.0) * 5.0)
-    bottom = top - _RESPONSE_SPAN_DB
-    # The PDF vector backend (svglib) does not preserve alpha, so a translucent
-    # fill would render as a solid block that hides the response curve. Draw a
-    # pale opaque tolerance band below the curves (zorder=0) instead.
-    ax.axhspan(-tol, tol, facecolor="#d3e2f2", edgecolor="none", zorder=0,
-               label=t("Tolerance ±{tol} dB", language).format(
-                   tol=fmt_num(tol, language)))
-    ax.axhline(0.0, color="#1f4e79", lw=0.8, ls="--")
-    ax.axvline(result.reference_frequency, color="#555555", lw=0.8, ls=":",
-               label=t("Reference frequency", language))
-    ax.semilogx(f, rel, color="#1f4e79", lw=1.4,
-                label=t("Free-field response", language))
-    lo, hi = result.effective_range
-    for edge in (lo, hi):
-        ax.axvline(edge, color="#1b6e2f", lw=0.9, ls="-.")
-    ax.plot([], [], color="#1b6e2f", lw=0.9, ls="-.",
-            label=t("Effective range", language))
-
-    ax.set_xlim(float(np.min(f)), float(np.max(f)))
-    ax.set_ylim(bottom, top)
-    ax.set_xlabel(t("Frequency [Hz]", language))
-    ax.set_ylabel(t("Relative response [dB]", language))
-    ax.grid(True, which="both", ls=":", lw=0.4, alpha=0.6)
-    _format_freq_axis(ax)
+    _draw_microphone_response(result, ax, language=language)
     decades = np.log10(float(np.max(f)) / float(np.min(f)))
-    ax.set_box_aspect(_RESPONSE_SPAN_DB / (_DB_PER_DECADE * decades))
-    ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.01), ncol=2,
-              frameon=False, fontsize=7.5)
+    ax.set_box_aspect(_RESPONSE_SPAN_MIC / (_DB_PER_DECADE * decades))
     fig.tight_layout()
     return _drawing_from_figure(fig, target_width, language)
 
@@ -241,17 +210,30 @@ def _response_drawing(
 def _secondary_drawing(
     result: "MicrophoneCharacteristics", target_width: float, language: str = "en"
 ) -> Any | None:
-    """Directional-pattern, noise-spectrum and distortion panels for the data."""
+    """Directional-pattern, noise-spectrum and distortion panels for the data.
+
+    The panels are drawn by the shared
+    :func:`phonometry._plot.electroacoustics` renderers, so the fiche and the
+    ``.plot()`` data sheet never diverge.
+    """
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
 
-    noise_f = result.noise_frequencies
-    noise_db = result.noise_band_levels_db
-    thd_spl = result.distortion_spl_db
-    thd_pct = result.distortion_thd_percent
+    from .._plot.electroacoustics import (
+        _draw_datasheet_polar,
+        _draw_microphone_distortion,
+        _draw_noise_spectrum,
+    )
+
     has_polar = result.polar_angles_deg is not None
-    has_noise = noise_f is not None and noise_db is not None
-    has_thd = thd_spl is not None and thd_pct is not None
+    has_noise = (
+        result.noise_frequencies is not None
+        and result.noise_band_levels_db is not None
+    )
+    has_thd = (
+        result.distortion_spl_db is not None
+        and result.distortion_thd_percent is not None
+    )
     panels = int(has_polar) + int(has_noise) + int(has_thd)
     if panels == 0:
         return None
@@ -259,41 +241,22 @@ def _secondary_drawing(
     fig = Figure(figsize=(5.6 * panels / 2.4 + 0.8, 2.35))
     FigureCanvasAgg(fig)
     idx = 1
-
     if has_polar:
-        ax = fig.add_subplot(1, panels, idx, projection="polar")
-        # _draw_polar only reads the polar_* attributes, which the microphone
-        # result shares field-for-field with the loudspeaker one.
-        _draw_polar(ax, cast("Any", result), language)
+        _draw_datasheet_polar(
+            result, fig.add_subplot(1, panels, idx, projection="polar"),
+            language=language,
+        )
         idx += 1
-
-    if noise_f is not None and noise_db is not None:
+    if has_noise:
         ax = fig.add_subplot(1, panels, idx)
-        ax.semilogx(noise_f, noise_db, color="#1f4e79", lw=1.3)
-        ax.set_xlabel(t("Frequency [Hz]", language))
-        ax.set_ylabel(t("Band level [dB]", language))
-        ax.grid(True, which="both", ls=":", lw=0.4, alpha=0.6)
-        ax.set_title(t("Inherent noise spectrum", language), fontsize=8.5)
-        _format_freq_axis(ax)
+        _draw_noise_spectrum(result, ax, language=language)
+        _thin_freq_ticklabels(ax)
         idx += 1
-
-    if thd_spl is not None and thd_pct is not None:
-        ax = fig.add_subplot(1, panels, idx)
-        ax.plot(thd_spl, thd_pct, color="#1f4e79", lw=1.3)
-        ax.axhline(result.max_spl_thd_percent, color="#a11a1a", lw=0.8, ls=":",
-                   label=t("{thd} % limit", language).format(
-                       thd=fmt_num(result.max_spl_thd_percent, language)))
-        if result.max_spl_db is not None:
-            ax.axvline(result.max_spl_db, color="#555555", lw=0.8, ls="--",
-                       label=t("Max. SPL", language))
-        ax.set_xlabel(t("Sound pressure level [dB]", language))
-        ax.set_ylabel(t("THD [%]", language))
-        ax.set_ylim(bottom=0.0)
-        ax.grid(True, which="both", ls=":", lw=0.4, alpha=0.6)
-        ax.set_title(t("Total harmonic distortion", language), fontsize=8.5)
-        ax.legend(loc="upper left", fontsize=6.5, frameon=False)
+    if has_thd:
+        _draw_microphone_distortion(
+            result, fig.add_subplot(1, panels, idx), language=language
+        )
         idx += 1
-
     fig.tight_layout()
     return _drawing_from_figure(fig, target_width, language)
 

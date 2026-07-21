@@ -747,8 +747,9 @@ def test_multitaper_defaults_and_result_fields() -> None:
 
 def test_multitaper_rejects_invalid_inputs() -> None:
     x = _white(37, n=1024)
+    two_dimensional = np.zeros((4, 256))
     with pytest.raises(ValueError, match="one-dimensional"):
-        ph.multitaper_psd(np.zeros((4, 256)), FS)
+        ph.multitaper_psd(two_dimensional, FS)
     with pytest.raises(ValueError, match="too short"):
         ph.multitaper_psd(x[:16], FS)
     with pytest.raises(ValueError, match="positive, finite"):
@@ -759,8 +760,9 @@ def test_multitaper_rejects_invalid_inputs() -> None:
         ph.multitaper_psd(x, FS, n_tapers=9)
     with pytest.raises(ValueError, match="Shannon number"):
         ph.multitaper_psd(x, FS, n_tapers=0)
+    silence = np.zeros(1024)
     with pytest.raises(ValueError, match="identically zero"):
-        ph.multitaper_psd(np.zeros(1024), FS)
+        ph.multitaper_psd(silence, FS)
     with pytest.raises(ValueError, match="scaling"):
         ph.multitaper_psd(x, FS, scaling="bogus")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="confidence"):

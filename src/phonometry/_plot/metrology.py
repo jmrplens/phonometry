@@ -484,7 +484,12 @@ def plot_multitaper_spectral_density(
     from .._i18n import decimal_comma, format_number
 
     pct = decimal_comma(f"{100.0 * result.confidence:g}", language)
-    nu_mean = float(np.mean(result.degrees_of_freedom[1:-1]))
+    # Average the per-bin dof over the interior bins; for a very short signal
+    # the array can have <=2 bins, where trimming the DC/Nyquist edges would
+    # leave an empty slice, so fall back to the full array there.
+    dof = result.degrees_of_freedom
+    interior = dof[1:-1] if dof.size > 2 else dof
+    nu_mean = float(np.mean(interior))
     nu = format_number(nu_mean, language, decimals=1)
     nw = decimal_comma(f"{result.time_half_bandwidth:g}", language)
     return _plot_density_with_band(

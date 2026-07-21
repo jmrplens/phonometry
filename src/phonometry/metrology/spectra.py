@@ -1234,9 +1234,13 @@ def _adaptive_multitaper_weights(
         s_new = np.divide(
             np.sum(d * sk, axis=0), dsum, out=s.copy(), where=dsum > 0.0
         )
-        delta = float(
-            np.max(np.abs(s_new - s) / np.maximum(s_new, np.finfo(float).tiny))
+        # Relative change per bin; a bin whose new estimate is exactly zero is
+        # trivially converged, so it contributes 0 to the maximum rather than
+        # dividing by a clamped subnormal.
+        rel = np.divide(
+            np.abs(s_new - s), s_new, out=np.zeros_like(s_new), where=s_new > 0.0
         )
+        delta = float(np.max(rel))
         s = s_new
         if delta < _ADAPTIVE_RTOL:
             break

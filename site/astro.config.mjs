@@ -371,6 +371,7 @@ export default defineConfig({
                 { slug: 'guides/sections/calibration-uncertainty', attrs: { 'data-group-link': true } },
                 'guides/calibration',
                 'guides/gum-uncertainty',
+                'guides/data-qualification',
               ],
             },
           ],

@@ -4709,6 +4709,133 @@ def _chk_envelope_spectrum_am_line() -> Outcome:
 
 
 # ===========================================================================
+# Data qualification and Rice statistics (Bendat & Piersol Chs. 4, 5, 10)
+# ===========================================================================
+_RANDOM_DATA = "Data qualification and Rice statistics (Bendat & Piersol)"
+
+#: B&P Example 4.4: twenty observations with A = 86 reverse arrangements,
+#: accepted as trend-free at the 5 % level of significance.
+_BP_EXAMPLE_4_4 = [
+    5.2, 6.2, 3.7, 6.4, 3.9, 4.0, 3.9, 5.3, 4.0, 4.6,
+    5.9, 6.5, 4.3, 5.7, 3.1, 5.6, 5.2, 3.9, 6.2, 5.0,
+]
+
+
+@register(
+    _RANDOM_DATA,
+    "Bendat & Piersol, Random Data 4e Example 4.4",
+    "Reverse arrangements of the 20-observation sequence",
+)
+def _chk_reverse_arrangements_example_4_4() -> Outcome:
+    res = ph.trend_test(_BP_EXAMPLE_4_4)
+    if not res.trend_free:  # the book accepts the hypothesis at 5 %
+        return numeric(1.0, 0.0, 0.0, places=0)
+    return numeric(86.0, float(res.statistic), 0.0, places=0)
+
+
+@register(
+    _RANDOM_DATA,
+    "Bendat & Piersol, Random Data 4e Table A.6",
+    "Lower percentage point A(20; 0.975) at alpha = 0.05",
+)
+def _chk_table_a6_lower() -> Outcome:
+    res = ph.trend_test(_BP_EXAMPLE_4_4)
+    return numeric(64.0, float(res.bounds[0]), 0.0, places=0)
+
+
+@register(
+    _RANDOM_DATA,
+    "Bendat & Piersol, Random Data 4e Table A.6",
+    "Upper percentage point A(20; 0.025) at alpha = 0.05",
+)
+def _chk_table_a6_upper() -> Outcome:
+    res = ph.trend_test(_BP_EXAMPLE_4_4)
+    return numeric(125.0, float(res.bounds[1]), 0.0, places=0)
+
+
+def _runs_reference_result() -> "ph.TrendTestResult":
+    rng = np.random.default_rng(20)
+    return ph.trend_test(rng.standard_normal(20), method="runs")
+
+
+@register(
+    _RANDOM_DATA,
+    "Wald & Wolfowitz 1940 exact run distribution",
+    "Runs acceptance region for n1 = n2 = 10, alpha = 0.05: lower point",
+)
+def _chk_runs_bounds_lower() -> Outcome:
+    return numeric(
+        6.0, float(_runs_reference_result().bounds[0]), 0.0, places=0
+    )
+
+
+@register(
+    _RANDOM_DATA,
+    "Wald & Wolfowitz 1940 exact run distribution",
+    "Runs acceptance region for n1 = n2 = 10, alpha = 0.05: upper point",
+)
+def _chk_runs_bounds_upper() -> Outcome:
+    return numeric(
+        15.0, float(_runs_reference_result().bounds[1]), 0.0, places=0
+    )
+
+
+def _bandlimited_gaussian_record(
+    seed: int, fs: float, n: int, f1: float, f2: float
+) -> np.ndarray:
+    """Exactly bandlimited unit-variance Gaussian noise (FFT synthesis)."""
+    rng = np.random.default_rng(seed)
+    freqs = np.fft.rfftfreq(n, 1.0 / fs)
+    spec = rng.standard_normal(freqs.size) + 1j * rng.standard_normal(
+        freqs.size
+    )
+    spec[(freqs < f1) | (freqs > f2)] = 0.0
+    x = np.fft.irfft(spec, n)
+    return np.asarray(x / np.std(x))
+
+
+@register(
+    _RANDOM_DATA,
+    "Bendat & Piersol, Random Data 4e Example 5.13 / Eq. (5.195)",
+    "Zero-crossing rate of bandlimited noise (fc = 1 kHz, B = 400 Hz)",
+)
+def _chk_rice_zero_crossings_bandpass() -> Outcome:
+    x = _bandlimited_gaussian_record(0, 20480.0, 1 << 19, 800.0, 1200.0)
+    res = ph.level_crossing_rate(x, 20480.0, levels=[0.0])
+    expected = 2.0 * float(np.sqrt(1000.0**2 + 400.0**2 / 12.0))
+    return numeric(expected, res.zero_crossing_rate, 0.01, rel=True, places=0)
+
+
+@register(
+    _RANDOM_DATA,
+    "Bendat & Piersol, Random Data 4e Example 5.12",
+    "Apparent frequency of low-pass noise (B = 2 kHz) = 0.577 B",
+)
+def _chk_rice_apparent_frequency_lowpass() -> Outcome:
+    x = _bandlimited_gaussian_record(1, 20480.0, 1 << 19, 0.0, 2000.0)
+    res = ph.level_crossing_rate(x, 20480.0, levels=[0.0])
+    expected = 2000.0 / float(np.sqrt(3.0))
+    return numeric(expected, res.apparent_frequency, 0.01, rel=True, places=0)
+
+
+@register(
+    _RANDOM_DATA,
+    "Bendat & Piersol, Random Data 4e Example 5.14 / Eq. (5.206)",
+    "Prob[positive peak > 4 sigma] of a narrow bandwidth record",
+)
+def _chk_rice_narrowband_peak_exceedance() -> Outcome:
+    fs = 8192.0
+    t = np.arange(1 << 16) / fs
+    res = ph.peak_statistics(np.sin(2.0 * np.pi * 60.0 * t), fs)
+    return numeric(
+        float(np.exp(-8.0)),
+        float(res.peak_exceedance(4.0)[0]),
+        1e-5,
+        places=6,
+    )
+
+
+# ===========================================================================
 # Underwater acoustics (ISO 18405 / 17208 / 18406)
 # ===========================================================================
 _UNDERWATER = "Underwater acoustics (ISO 18405/17208/18406)"

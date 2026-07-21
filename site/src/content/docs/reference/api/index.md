@@ -205,11 +205,12 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | :--- | :--- |
 | [`broadcast.program_loudness`](/phonometry/reference/api/broadcast/program-loudness/) | Programme loudness and true-peak level (ITU-R BS.1770-5, EBU R 128). |
 
-## Uncertainty
+## Uncertainty and data quality
 
 | Module | Summary |
 | :--- | :--- |
 | [`metrology.uncertainty`](/phonometry/reference/api/metrology/uncertainty/) | Measurement uncertainty by the GUM and its Monte Carlo supplement. |
+| [`metrology.random_data`](/phonometry/reference/api/metrology/random-data/) | Random-data qualification: stationarity tests and Rice crossing statistics. |
 
 ## Spectral analysis
 

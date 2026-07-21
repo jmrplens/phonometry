@@ -4603,7 +4603,7 @@ def _miso_problem_7_2() -> tuple[float, float, float]:
 @register(
     _MISO,
     "Bendat & Piersol, Random Data 4e Problem 7.2 / Eqs. (7.86)/(7.94)",
-    "Conditioned coherent output of the 2nd input |G2y.1|^2/G22.1 = 4/3 exactly",
+    "Conditioned coherent output of the 2nd input abs(G2y.1)^2/G22.1 = 4/3 exactly",
 )
 def _chk_miso_problem_7_2_conditioned() -> Outcome:
     _gv1, gv2, _p2 = _miso_problem_7_2()

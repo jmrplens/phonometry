@@ -174,19 +174,37 @@ def _ordinary_coherences(
     return np.asarray(np.clip(coh, 0.0, 1.0), dtype=np.float64)
 
 
-def _schur_eliminate(mat: "NDArray[np.complex128]", r: int) -> None:
+def _pivot_safe(piv: "NDArray[np.float64]") -> "NDArray[np.bool_]":
+    """Frequency bins whose pivot autospectrum is above the power floor.
+
+    The floor is relative to the largest pivot on the axis
+    (``_PIVOT_FLOOR_REL``), so a bin with negligible conditioned power (an
+    empty or perfectly collinear input) is flagged out. The *same* mask
+    gates both the coherent-output accumulation and the Schur update, so a
+    near-singular pivot cannot credit output power that is never removed
+    from the residual.
+    """
+    floor = _PIVOT_FLOOR_REL * float(np.max(piv)) if piv.size else 0.0
+    return np.asarray(piv > floor, dtype=np.bool_)
+
+
+def _schur_eliminate(
+    mat: "NDArray[np.complex128]", r: int, safe: "NDArray[np.bool_]"
+) -> None:
     """Remove the linear effect of pivot record ``r`` in place (Eq. 7.94).
 
     Updates the trailing block (records ``> r``) with the Schur complement
-    ``Gij·r! = Gij·(r-1)! - Gir·(r-1)!·Grj·(r-1)!/Grr·(r-1)!``. Frequency bins
-    whose pivot autospectrum is below the relative power floor are left
-    unchanged (their conditioning contribution is null).
+    ``Gij·r! = Gij·(r-1)! - Gir·(r-1)!·Grj·(r-1)!/Grr·(r-1)!``. Only the
+    frequency bins flagged by ``safe`` (pivot autospectrum above the power
+    floor, see :func:`_pivot_safe`) are updated; the rest are left unchanged
+    so their conditioning contribution is exactly null. ``safe`` is computed
+    once by the caller and shared with the coherent-output accumulation, so
+    the power-decomposition invariant holds bin by bin even for a
+    near-singular pivot.
     """
-    piv = mat[:, r, r].real
-    floor = _PIVOT_FLOOR_REL * float(np.max(piv)) if piv.size else 0.0
-    safe = piv > floor
     if not np.any(safe):
         return
+    piv = mat[:, r, r].real
     col = mat[:, r + 1:, r]          # Gir·(r-1)!  (i > r)
     row = mat[:, r, r + 1:]          # Grj·(r-1)!  (j > r)
     update = col[:, :, None] * row[:, None, :]
@@ -224,16 +242,17 @@ def _condition(
     for pos in range(q):
         gpp = work[:, pos, pos].real          # Gii·(i-1)!
         gpy = work[:, pos, q]                 # Giy·(i-1)!
+        safe = _pivot_safe(gpp)
         num = np.abs(gpy) ** 2
         contrib = np.divide(
-            num, gpp, out=np.zeros_like(gpp), where=gpp > 0.0
+            num, gpp, out=np.zeros_like(gpp), where=safe
         )  # |Liy|²·Gii·(i-1)! = Gvᵢ (Eq. 7.86)
         orig = order[pos]
         coherent[orig] = contrib
         partial[orig] = np.divide(
             contrib, gyy, out=np.zeros_like(gyy), where=gyy > 0.0
         )
-        _schur_eliminate(work, pos)
+        _schur_eliminate(work, pos, safe)
     noise = work[:, q, q].real
     clipped = np.asarray(np.clip(partial, 0.0, 1.0), dtype=np.float64)
     return clipped, coherent, noise

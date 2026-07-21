@@ -245,6 +245,45 @@ def test_multiple_coherence_equals_sum_of_partials() -> None:
     )
 
 
+def test_singular_pivot_conditioned_matrix_keeps_decomposition() -> None:
+    # Two perfectly collinear inputs (x2 = x1): after conditioning input 0 the
+    # conditioned autospectrum G22.1 is exactly zero, a singular pivot. The
+    # power decomposition must still close (sum of contributions + residual =
+    # Gyy) with no NaN or inf. G11 = G22 = G12 = 4, G1y = G2y = 4, Gyy = 6
+    # (i.e. y = x1 + noise of power 2), so Gv1 = 4, Gv2 = 0, noise = 2.
+    mat = np.zeros((1, 3, 3), dtype=np.complex128)
+    mat[0, 0, 0] = 4.0
+    mat[0, 1, 1] = 4.0
+    mat[0, 2, 2] = 6.0
+    mat[0, 0, 1] = mat[0, 1, 0] = 4.0
+    mat[0, 0, 2] = mat[0, 2, 0] = 4.0
+    mat[0, 1, 2] = mat[0, 2, 1] = 4.0
+    partial, coherent, noise = _condition(mat, (0, 1))
+    assert np.all(np.isfinite(coherent))
+    assert np.all(np.isfinite(partial))
+    assert float(coherent[0, 0]) == pytest.approx(4.0, abs=1e-12)
+    assert float(coherent[1, 0]) == pytest.approx(0.0, abs=1e-12)
+    assert float(noise[0]) == pytest.approx(2.0, abs=1e-12)
+    reconstructed = coherent.sum(axis=0)[0] + noise[0]
+    assert float(reconstructed) == pytest.approx(6.0, abs=1e-12)
+
+
+def test_near_collinear_inputs_preserve_decomposition() -> None:
+    # x2 is x1 filtered plus a tiny independent component, so its conditioned
+    # autospectrum is negligible in many bands and dips below the relative
+    # pivot floor. The coherent-output accumulation and the Schur update must
+    # share that floor, or the decomposition would leak power. This pins the
+    # invariant (and finiteness) for a near-singular input matrix.
+    x1 = _white(200)
+    x2 = _fir(x1, [1.0, 0.2]) + _white(201, rms=1e-4)
+    y = _fir(x1, [0.8, -0.3]) + _fir(x2, [0.1, 0.05]) + _white(202, rms=0.2)
+    res = ph.miso_coherence([x1, x2], y, FS, nperseg=2048)
+    reconstructed = res.coherent_output_spectra.sum(axis=0) + res.noise_psd
+    assert np.all(np.isfinite(res.coherent_output_spectra))
+    assert np.all(np.isfinite(res.partial_coherence))
+    np.testing.assert_allclose(reconstructed, res.output_psd, rtol=1e-9)
+
+
 def test_ordinary_and_multiple_coherence_are_order_invariant() -> None:
     x1 = _white(90)
     x2 = 0.5 * x1 + _white(91)

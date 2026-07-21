@@ -444,6 +444,18 @@ def _db10(values: np.ndarray) -> np.ndarray:
     return out
 
 
+def _finite_db_floor(curves: list[np.ndarray], *, margin: float = 5.0) -> float:
+    """A fixed lower dB bound from the finite values of several curves.
+
+    Returns the smallest finite level across ``curves`` minus ``margin`` (or
+    a fallback when every value is non-finite), giving fills and y-limits a
+    baseline that does not depend on autoscale or per-iteration axis state.
+    """
+    stacked = np.concatenate([np.asarray(c, dtype=np.float64) for c in curves])
+    finite = stacked[np.isfinite(stacked)]
+    return float(finite.min()) - margin if finite.size else -100.0
+
+
 def _psd_ylabel(scaling: str, language: str = "en") -> str:
     return (
         _t("Spectral density [dB re 1/Hz]", language)
@@ -719,22 +731,32 @@ def _miso_spectra_panel(
     pos: np.ndarray, language: str,
 ) -> None:
     """Draw the per-input coherent output spectra with pale opaque fills."""
-    axs.semilogx(
-        freqs[pos], _db10(result.output_psd[pos]), color=_C_MUTED, lw=1.4,
-        label=_t(r"$\hat{G}_{yy}$ (measured output)", language),
-    )
+    output_db = _db10(result.output_psd[pos])
+    noise_db = _db10(result.noise_psd[pos])
+    coherent_db = [
+        _db10(result.coherent_output_spectra[i][pos])
+        for i in range(result.n_inputs)
+    ]
+    # A single fixed baseline for every fill, derived once from the finite
+    # dynamic range of the panel. A coherent output that dips to zero gives
+    # -inf in dB; clipping to this floor keeps the fills and the y-limits
+    # deterministic instead of letting one empty bin drag the axis.
+    floor = _finite_db_floor([output_db, noise_db, *coherent_db], margin=5.0)
+    axs.semilogx(freqs[pos], output_db, color=_C_MUTED, lw=1.4,
+                 label=_t(r"$\hat{G}_{yy}$ (measured output)", language))
     for i in range(result.n_inputs):
         color = _MISO_COLORS[i % len(_MISO_COLORS)]
-        level = _db10(result.coherent_output_spectra[i][pos])
-        axs.fill_between(freqs[pos], axs.get_ylim()[0], level, color=color,
-                         alpha=0.12, lw=0.0)
+        level = np.clip(coherent_db[i], floor, None)
+        axs.fill_between(freqs[pos], floor, level, color=color, alpha=0.12,
+                         lw=0.0)
         axs.semilogx(freqs[pos], level, color=color, lw=1.2,
                      label=_t("Input {i}", language, i=i + 1))
-    axs.semilogx(
-        freqs[pos], _db10(result.noise_psd[pos]), color=_C_REFERENCE,
-        ls="--", lw=1.0,
-        label=_t(r"$\hat{G}_{nn}$ (residual noise)", language),
-    )
+    axs.semilogx(freqs[pos], np.clip(noise_db, floor, None),
+                 color=_C_REFERENCE, ls="--", lw=1.0,
+                 label=_t(r"$\hat{G}_{nn}$ (residual noise)", language))
+    finite_top = output_db[np.isfinite(output_db)]
+    top = float(np.max(finite_top)) if finite_top.size else floor + 1.0
+    axs.set_ylim(floor, top + 3.0)
     axs.set_ylabel(_psd_ylabel(result.scaling, language))
     axs.grid(True, which="both", alpha=0.3)
     axs.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small", ncol=2)

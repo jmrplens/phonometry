@@ -545,7 +545,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
-| Bendat & Piersol, Random Data 4e Problem 7.2 / Eqs. (7.86)/(7.94) | Conditioned coherent output of the 2nd input |G2y.1|^2/G22.1 = 4/3 exactly | 1.333333333 (+/-0) | 1.333333333 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Problem 7.2 / Eqs. (7.86)/(7.94) | Conditioned coherent output of the 2nd input abs(G2y.1)^2/G22.1 = 4/3 exactly | 1.333333333 (+/-0) | 1.333333333 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e Problem 7.2 / Eqs. (7.87)/(7.116) | Partial coherence gamma^2_2y.1 = 2/15 and multiple coherence = 0.7 | 0.7 (+/-0) | 0.7 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e Eq. (7.35) with Eqs. (6.40)/(6.41) | Multiple coherence of a known-SNR system: gamma^2_{y:x} = SNR/(1+SNR) | 0.8889 (+/-0.03) | 0.8913 | 0.002 | &#9989; |
 | Bendat & Piersol, Random Data 4e Eq. (7.117) | Uncorrelated inputs: multiple coherence = sum of ordinary coherences | 0 (+/-0.02) | -0.0098 | -0.01 | &#9989; |

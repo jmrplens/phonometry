@@ -445,11 +445,18 @@ class EPNLResult:
         )
 
 
+#: Tone-correction start band per certification procedure (App. 2 §4.3.1
+#: Step 1): aeroplanes start the slope analysis at band 3 (80 Hz, 0-based
+#: index 2); helicopters and tilt-rotors at band 1 (50 Hz, index 0).
+_PROCEDURE_START_BAND: "dict[str, int]" = {"aeroplane": _TONE_START, "helicopter": 0}
+
+
 def effective_perceived_noise_level(
     spectra: "NDArray[np.float64] | list[list[float]]",
     dt: "float | NDArray[np.float64] | list[float]" = 0.5,
     *,
     reference_time: float = _EPNL_REFERENCE_TIME,
+    procedure: str = "aeroplane",
 ) -> EPNLResult:
     """Effective Perceived Noise Level from a spectral time history (ICAO Annex 16).
 
@@ -461,17 +468,29 @@ def effective_perceived_noise_level(
     :param spectra: Spectral time history, shape ``(K, 24)``, in dB.
     :param dt: Per-record duration, in s (scalar or per record, default 0.5).
     :param reference_time: Normalising time ``T0``, in s (default 10).
+    :param procedure: Tone-correction procedure of App. 2 §4.3.1 Step 1:
+        ``"aeroplane"`` (default) starts the slope analysis at the 80 Hz band
+        (band 3), ``"helicopter"`` (helicopters and tilt-rotors) at the 50 Hz
+        band (band 1), so rotor tones in the 50-80 Hz bands are not missed.
     :return: An :class:`EPNLResult`.
-    :raises ValueError: If the input is not a ``(K, 24)`` finite array.
+    :raises ValueError: If the input is not a ``(K, 24)`` finite array, or
+        ``procedure`` is not ``"aeroplane"`` or ``"helicopter"``.
     """
     arr = np.asarray(spectra, dtype=np.float64)
     if arr.ndim != 2 or arr.shape[1] != 24 or arr.shape[0] < 1:
         raise ValueError("'spectra' must have shape (K, 24).")
     if not np.all(np.isfinite(arr)):
         raise ValueError("'spectra' must be finite.")
+    start_band = _PROCEDURE_START_BAND.get(procedure)
+    if start_band is None:
+        raise ValueError(
+            f"Unknown procedure {procedure!r}; use 'aeroplane' (tone "
+            "correction from 80 Hz) or 'helicopter' (from 50 Hz, ICAO "
+            "Annex 16 Vol I App. 2 4.3.1 Step 1)."
+        )
 
     pnl = np.array([perceived_noise_level(row) for row in arr])
-    corr = np.array([tone_correction(row) for row in arr])
+    corr = np.array([tone_correction(row, start_band=start_band) for row in arr])
     pnlt = pnl + corr
 
     epnl, pnltm, kf, kl = epnl_from_pnlt(

@@ -130,7 +130,11 @@ def test_shift_is_the_smallest_qualifying_one() -> None:
         (0.98, 1.00),  # up into the cap band
         (0.90, 0.90),  # already on grid
         (0.31, 0.30),  # nearest 0,05 below
-        (0.325, 0.35),  # half rounds up
+        (0.325, 0.35),  # 0.325 * 100 sits just above 32.5 in binary, so it
+        # rounds up here; exact hundredth-halves are not representable in
+        # float and cannot arise from 2-decimal ISO 354 inputs (mean * 100 of
+        # three 2-decimal alphas is never x.5), so the rounding direction at
+        # a true half is unexercised rather than guaranteed "up".
         (0.00, 0.00),
     ],
 )

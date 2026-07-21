@@ -108,6 +108,7 @@ ZwickerLoudness(
     n10: float | None = None,
     time: np.ndarray | None = None,
     loudness_vs_time: np.ndarray | None = None,
+    field: str | None = None,
 )
 ```
 
@@ -122,6 +123,10 @@ the time-varying method it is the pattern at the instant of maximum
 loudness).  `n5`/`n10` are the percentile loudness values N5/N10
 and `time`/`loudness_vs_time` the 500 Hz loudness-vs-time trace
 (clause 6.5); these four are `None` for stationary results.
+`field` records the sound field the calculation assumed (`"free"`
+or `"diffuse"`), one of the items clause 7 requires a loudness report
+to state; it defaults to `None` only for backward-compatible manual
+construction (the library constructors always set it).
 
 ### ZwickerLoudness.plot()
 
@@ -155,12 +160,17 @@ ZwickerLoudness.report(
 
 Render an ISO 532-1 Zwicker loudness fiche to a PDF.
 
-Writes a one-page accredited loudness report: the standard-basis line,
-an optional metadata header block, a compact metrics table (total
-loudness N, loudness level LN, and N5/N10 for a time-varying result)
-beside the specific-loudness pattern (the result's own `plot`),
-the boxed `N = X sone (LN = Y phon)` result, an optional verdict row
-and a footer with the fixed disclaimer.
+Writes a one-page accredited loudness report with the items clause 7
+makes mandatory: the standard-basis line stating the method used
+(stationary, clause 5, or time-varying, clause 6) and the sound field
+(free or diffuse, when the result carries it), an optional metadata
+header block, a compact metrics table (total loudness N, or maximum
+loudness Nmax with the N5/N10 percentiles for a time-varying result,
+and the loudness level LN) beside the specific-loudness pattern (the
+result's own `plot`), for a time-varying result the loudness-
+versus-time function N(t) in sones (clause 7 f)), the boxed
+`N = X sone (LN = Y phon)` result, an optional verdict row and a
+footer with the fixed disclaimer.
 
 **Parameters**
 

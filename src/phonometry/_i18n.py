@@ -48,9 +48,16 @@ def format_number(
     :param decimals: Digits after the decimal separator.
     :param trim: Drop a trailing ``.0`` / ``,0`` (and the separator) for a
         whole number, e.g. ``90.0 -> "90"``.
-    :return: The formatted string.
+    :return: The formatted string. A value that rounds to zero at the
+        requested precision never keeps a minus sign: a tiny negative number
+        (or a signed ``-0.0``) formats as ``"0.0"``, not the contradictory
+        ``"-0.0"``.
     """
     text = f"{float(value):.{decimals}f}"
+    # A formatted value whose digits are all zeros is a signed zero; strip the
+    # sign by inspecting the text itself (no float equality involved).
+    if text.startswith("-") and not text.strip("-0."):
+        text = text[1:]
     if trim and decimals > 0:
         text = text.rstrip("0").rstrip(".")
     if language == "es":

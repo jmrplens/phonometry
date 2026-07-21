@@ -120,6 +120,28 @@ def test_third_octave_fiche_with_metadata(tmp_path) -> None:
     _assert_one_page(str(out))
 
 
+def test_statement_writes_shape_indicator_without_space(tmp_path) -> None:
+    """The boxed rating is written ``0.60(M)``, the ISO 11654 5.3 style.
+
+    The clause 5.3 example prints the shape indicator immediately after the
+    value ("0,70(MH)"), matching ``rating_label``; where an indicator
+    applies, the 5.3 NOTE recommendation (use alpha_w together with the
+    complete curve) is printed as a footnote.
+    """
+    from pypdf import PdfReader
+
+    result = weighted_absorption_from_third_octave(_THIRD_OCTAVE_ALPHA_S)
+    assert result.rating_label == "0.60(M)"
+    out = tmp_path / "statement.pdf"
+    result.report(str(out))
+    text = "\n".join(
+        page.extract_text() for page in PdfReader(str(out)).pages
+    ).replace("\n", " ")
+    assert "0.60(M)" in text
+    assert "0.60 (M)" not in text
+    assert "5.3 NOTE" in text  # shape-indicator recommendation footnote
+
+
 def test_plain_rating_without_alpha_s_still_renders(tmp_path) -> None:
     """A plain weighted_absorption result (alpha_s None) falls back and renders."""
     result = weighted_absorption(_A2_ALPHA_P)

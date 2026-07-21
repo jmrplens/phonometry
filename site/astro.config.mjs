@@ -359,6 +359,7 @@ export default defineConfig({
                 { slug: 'guides/sections/signals-spectra', attrs: { 'data-group-link': true } },
                 'guides/spectral-analysis',
                 'guides/time-frequency',
+                'guides/cepstrum-echoes',
                 'guides/correlation-delay',
                 'guides/test-signals',
               ],

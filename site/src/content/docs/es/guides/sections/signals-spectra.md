@@ -1,6 +1,6 @@
 ---
 title: "Señales y espectros"
-description: "Análisis de señal en frecuencia y en tiempo en phonometry: estimaciones espectrales de Welch calibradas con su calidad estadística, y correlación, estimación de retardo y la envolvente de Hilbert."
+description: "Análisis de señal en frecuencia y en tiempo en phonometry: estimaciones espectrales de Welch calibradas con su calidad estadística, análisis cepstral con detección de ecos y liftering, el espectro de la envolvente, y correlación, estimación de retardo y la envolvente de Hilbert."
 ---
 
 Los niveles de banda responden a *cuánto*; esta sección responde a *qué hay
@@ -31,6 +31,13 @@ leyendo un nivel absoluto en el mismo escalado que los estimadores de
 Welch, y la FFT con zoom calcula el espectro de una banda estrecha en una
 malla arbitrariamente fina para separar tonos más próximos que un bin
 práctico de FFT.
+[Cepstro, ecos y espectro de la envolvente](/phonometry/es/guides/cepstrum-echoes/)
+trabaja sobre la *forma* del espectro. El cepstro de potencia, real y
+complejo colapsa el rizado espectral periódico en picos de quefrencia, la
+detección de ecos lee el retardo y el coeficiente de una reflexión en el
+pico cepstral, el liftering separa un espectro logarítmico en envolvente
+suave y estructura fina, y el espectro de la envolvente convierte las
+modulaciones de amplitud en líneas discretas en la frecuencia de modulación.
 
 [Correlación, retardo y envolvente](/phonometry/es/guides/correlation-delay/)
 es la mitad del dominio del tiempo. La autocorrelación y la correlación
@@ -72,6 +79,11 @@ estimaciones.
   salida coherente y la SNR espectral, suavizado en 1/n de octava,
   generadores de ruido de colores con pendiente exacta y las figuras de
   mérito de Harris para las ventanas.
+- [Cepstro, ecos y espectro de la envolvente](/phonometry/es/guides/cepstrum-echoes/):
+  el cepstro de potencia/real/complejo con análisis de quefrencia, detección
+  de ecos con el coeficiente de reflexión leído en el pico, liftering paso
+  bajo/paso alto, la ida y vuelta homomórfica y el espectro de la envolvente
+  de las modulaciones de amplitud.
 - [Correlación, retardo y envolvente](/phonometry/es/guides/correlation-delay/):
   estimaciones de correlación con sus errores aleatorios, estimación del
   retardo por correlación directa, pendiente de fase y ponderaciones GCC,

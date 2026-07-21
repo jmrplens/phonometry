@@ -547,6 +547,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
+<summary>&#9989; <b>Cepstrum, liftering and envelope spectrum (Havelock / B&amp;P)</b>: 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Havelock 2008 Ch. 27 Fig. 21 + Mercator series of ln(1+a*e^{-j*theta}) | Power-cepstrum height at the echo delay = reflection coefficient a | 0.4 (+/-0) | 0.4 | 0 | &#9989; |
+| Havelock 2008 Ch. 87 Eq. (14): complex cepstrum, series term n = 2 | Second rahmonic of a reflection a = 0.4 equals -a^2/2 | -0.08 (+/-0) | -0.08 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Sec. 13.3 (Fig. 13.11) | Envelope-spectrum line of an AM tone (A0 = 2, m = 0.35) at fm | 0.7 (+/-0.002) | 0.7 | 0 | &#9989; |
+
+</details>
+
+<details>
 <summary>&#9989; <b>Underwater acoustics (ISO 18405/17208/18406)</b>: 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |

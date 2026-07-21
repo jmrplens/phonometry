@@ -16,7 +16,12 @@ if TYPE_CHECKING:
         CorrelationResult,
         TimeDelayResult,
     )
-    from ..metrology.envelope import EnvelopeResult
+    from ..metrology.cepstrum import (
+        CepstrumResult,
+        EchoDetectionResult,
+        LifterResult,
+    )
+    from ..metrology.envelope import EnvelopeResult, EnvelopeSpectrumResult
     from ..metrology.phase import PhaseDecompositionResult
     from ..metrology.signals import ToneBurstResult
     from ..metrology.spectra import (
@@ -99,6 +104,26 @@ _STRINGS: dict[str, str] = {
     "Envelope $A(t)$ (Eq. 13.17)": "Envolvente $A(t)$ (Ec. 13.17)",
     "Hilbert envelope (Bendat & Piersol Ch. 13)": "Envolvente de Hilbert (Bendat y Piersol Cap. 13)",
     "Instantaneous frequency [Hz]": "Frecuencia instantánea [Hz]",
+    "Quefrency [ms]": "Quefrencia [ms]",
+    "Cepstrum": "Cepstro",
+    "Power cepstrum": "Cepstro de potencia",
+    "Real cepstrum": "Cepstro real",
+    "Complex cepstrum": "Cepstro complejo",
+    "Lifter cutoff ({q} ms)": "Corte del lifter ({q} ms)",
+    "Log spectrum": "Espectro logarítmico",
+    "Liftered ({mode})": "Lifterado ({mode})",
+    "lowpass": "paso bajo",
+    "highpass": "paso alto",
+    "Liftering at {q} ms ({mode})": "Liftering a {q} ms ({mode})",
+    "Searched band": "Banda de búsqueda",
+    "Echo: {delay} ms, a = {a}": "Eco: {delay} ms, a = {a}",
+    "Echo detection on the power cepstrum": "Detección de ecos en el cepstro de potencia",
+    "Envelope ({kind})": "Envolvente ({kind})",
+    "magnitude": "magnitud",
+    "squared": "cuadrática",
+    "Mean level": "Nivel medio",
+    "Modulation amplitude": "Amplitud de modulación",
+    "Envelope spectrum (Bendat & Piersol 13.3)": "Espectro de la envolvente (Bendat y Piersol 13.3)",
     "Measured phase": "Fase medida",
     "Minimum phase (from |H|)": "Fase mínima (de |H|)",
     "Excess phase (all-pass)": "Fase de exceso (pasa-todo)",
@@ -940,6 +965,39 @@ def plot_tone_burst(
     ax.set_xlabel(_t("Time [s]", language))
     ax.set_ylabel(_t("Amplitude", language))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+# ---------------------------------------------------------------------------
+# Cepstral analysis (Havelock Chs. 27/87) and envelope spectrum (B&P 13.3)
+# ---------------------------------------------------------------------------
+_CEPSTRUM_TITLES = {
+    "power": "Power cepstrum",
+    "real": "Real cepstrum",
+    "complex": "Complex cepstrum",
+}
+
+
+def plot_cepstrum(
+    result: "CepstrumResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Cepstrum against quefrency, over the unambiguous first half-axis.
+
+    :param result: A :class:`~phonometry.metrology.cepstrum.CepstrumResult`.
+    :param ax: Existing axes, or ``None`` for a fresh figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the cepstrum line.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    if ax is None:
+        ax = _new_axes()
+        ax.set_title(_t(_CEPSTRUM_TITLES[result.kind], language))
+    half = result.nfft // 2 + 1
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("lw", 1.0)
+    ax.plot(1e3 * result.quefrencies[:half], result.cepstrum[:half], **kwargs)
+    ax.set_xlabel(_t("Quefrency [ms]", language))
+    ax.set_ylabel(_t("Cepstrum", language))
     ax.grid(True, alpha=0.3)
     localize_axes(ax, language)
     return ax
@@ -1010,4 +1068,165 @@ def plot_window_metrics(
     for axf in axes:
         localize_axes(axf, language)
     axes[0].figure.tight_layout()
+def plot_lifter(
+    result: "LifterResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes | np.ndarray:
+    """Real cepstrum with the lifter cutoff, plus the split log spectrum.
+
+    With ``ax`` given, only the spectrum panel is drawn on it.
+
+    :param result: A :class:`~phonometry.metrology.cepstrum.LifterResult`.
+    :param ax: Existing axes for the spectrum panel, or ``None`` for a
+        fresh two-panel figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the liftered-spectrum line.
+    :return: The spectrum axes (``ax`` given) or the array of two axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    cutoff_ms = format_number(1e3 * result.cutoff, language, decimals=2,
+                              trim=True)
+
+    def _spectrum_panel(axe: Axes) -> None:
+        axe.plot(
+            result.frequencies, result.spectrum_db, color=_C_MUTED, lw=0.8,
+            label=_t("Log spectrum", language),
+        )
+        kwargs.setdefault("color", _C_PRIMARY)
+        kwargs.setdefault(
+            "label",
+            _t("Liftered ({mode})", language,
+               mode=_t(result.mode, language)),
+        )
+        axe.plot(result.frequencies, result.liftered_db, lw=1.6, **kwargs)
+        axe.set_xlabel(_t("Frequency [Hz]", language))
+        axe.set_ylabel(_t("Magnitude [dB]", language))
+        axe.grid(True, alpha=0.3)
+        axe.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+
+    if ax is not None:
+        _spectrum_panel(ax)
+        localize_axes(ax, language)
+        return ax
+
+    axes = _new_axes_column(2, figsize=(8.0, 6.4))
+    half = result.nfft // 2 + 1
+    axes[0].plot(
+        1e3 * result.quefrencies[:half], result.cepstrum[:half],
+        color=_C_SECONDARY, lw=1.0,
+    )
+    axes[0].axvline(
+        1e3 * result.cutoff, color=_C_REFERENCE, linestyle="--", lw=1.2,
+        label=_t("Lifter cutoff ({q} ms)", language, q=cutoff_ms),
+    )
+    axes[0].set_xlabel(_t("Quefrency [ms]", language))
+    axes[0].set_ylabel(_t("Cepstrum", language))
+    axes[0].grid(True, alpha=0.3)
+    axes[0].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    axes[0].set_title(
+        _t("Liftering at {q} ms ({mode})", language, q=cutoff_ms,
+           mode=_t(result.mode, language))
+    )
+    _spectrum_panel(axes[1])
+    for axf in axes:
+        localize_axes(axf, language)
+    return axes
+
+
+def plot_echo_detection(
+    result: "EchoDetectionResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Power cepstrum with the searched band and the detected echo marked.
+
+    :param result: An
+        :class:`~phonometry.metrology.cepstrum.EchoDetectionResult`.
+    :param ax: Existing axes, or ``None`` for a fresh figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the cepstrum line.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    if ax is None:
+        ax = _new_axes()
+        ax.set_title(_t("Echo detection on the power cepstrum", language))
+    half = result.nfft // 2 + 1
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("lw", 1.0)
+    ax.plot(1e3 * result.quefrencies[:half], result.cepstrum[:half], **kwargs)
+    ax.axvspan(
+        1e3 * result.search_range[0], 1e3 * result.search_range[1],
+        color=_C_PRIMARY_LIGHT, alpha=0.25,
+        label=_t("Searched band", language),
+    )
+    ax.plot(
+        [1e3 * result.delay], [result.reflection_coefficient], "v",
+        color=_C_SECONDARY, markersize=9,
+        label=_t(
+            "Echo: {delay} ms, a = {a}", language,
+            delay=format_number(1e3 * result.delay, language, decimals=2,
+                                trim=True),
+            a=format_number(result.reflection_coefficient, language,
+                            decimals=3, trim=True),
+        ),
+    )
+    ax.set_xlabel(_t("Quefrency [ms]", language))
+    ax.set_ylabel(_t("Cepstrum", language))
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_envelope_spectrum(
+    result: "EnvelopeSpectrumResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes | np.ndarray:
+    """Detected envelope over time and its amplitude spectrum.
+
+    With ``ax`` given, only the spectrum panel is drawn on it.
+
+    :param result: An
+        :class:`~phonometry.metrology.envelope.EnvelopeSpectrumResult`.
+    :param ax: Existing axes for the spectrum panel, or ``None`` for a
+        fresh two-panel figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the spectrum line.
+    :return: The spectrum axes (``ax`` given) or the array of two axes.
+    """
+    from .._i18n import localize_axes
+
+    def _spectrum_panel(axe: Axes) -> None:
+        kwargs.setdefault("color", _C_PRIMARY)
+        kwargs.setdefault("lw", 1.2)
+        axe.plot(result.frequencies, result.amplitude, **kwargs)
+        axe.set_xlabel(_t("Frequency [Hz]", language))
+        axe.set_ylabel(_t("Modulation amplitude", language))
+        axe.grid(True, alpha=0.3)
+
+    if ax is not None:
+        _spectrum_panel(ax)
+        localize_axes(ax, language)
+        return ax
+
+    axes = _new_axes_column(2, figsize=(8.0, 6.4))
+    axes[0].plot(
+        result.times, result.envelope, color=_C_SECONDARY, lw=1.0,
+        label=_t("Envelope ({kind})", language,
+                 kind=_t(result.kind, language)),
+    )
+    axes[0].axhline(
+        result.mean_level, color=_C_REFERENCE, linestyle="--", lw=1.2,
+        label=_t("Mean level", language),
+    )
+    axes[0].set_xlabel(_t("Time [s]", language))
+    axes[0].set_ylabel(_t("Amplitude", language))
+    axes[0].grid(True, alpha=0.3)
+    axes[0].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    axes[0].set_title(_t("Envelope spectrum (Bendat & Piersol 13.3)", language))
+    _spectrum_panel(axes[1])
+    for axf in axes:
+        localize_axes(axf, language)
     return axes

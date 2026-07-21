@@ -43,6 +43,7 @@ PAGES = [
     ("ground-barriers.md", "guides/ground-barriers"),
     ("sound-power.md", "guides/sound-power"),
     ("calibration.md", "guides/calibration"),
+    ("data-qualification.md", "guides/data-qualification"),
     ("spectral-analysis.md", "guides/spectral-analysis"),
     ("correlation-delay.md", "guides/correlation-delay"),
     ("test-signals.md", "guides/test-signals"),

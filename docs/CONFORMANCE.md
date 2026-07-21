@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **387/387 conformance checks pass** across 48 domains and 251 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **395/395 conformance checks pass** across 49 domains and 257 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -561,6 +561,22 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Havelock 2008 Ch. 27 Fig. 21 + Mercator series of ln(1+a*e^{-j*theta}) | Power-cepstrum height at the echo delay = reflection coefficient a | 0.4 (+/-0) | 0.4 | 0 | &#9989; |
 | Havelock 2008 Ch. 87 Eq. (14): complex cepstrum, series term n = 2 | Second rahmonic of a reflection a = 0.4 equals -a^2/2 | -0.08 (+/-0) | -0.08 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e Sec. 13.3 (Fig. 13.11) | Envelope-spectrum line of an AM tone (A0 = 2, m = 0.35) at fm | 0.7 (+/-0.002) | 0.7 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Data qualification and Rice statistics (Bendat &amp; Piersol)</b>: 100% (8/8)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Bendat & Piersol, Random Data 4e Example 4.4 | Reverse arrangements of the 20-observation sequence | 86 (+/-0) | 86 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Table A.6 | Lower percentage point A(20; 0.975) at alpha = 0.05 | 64 (+/-0) | 64 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Table A.6 | Upper percentage point A(20; 0.025) at alpha = 0.05 | 125 (+/-0) | 125 | 0 | &#9989; |
+| Wald & Wolfowitz 1940 exact run distribution | Runs acceptance region for n1 = n2 = 10, alpha = 0.05: lower point | 6 (+/-0) | 6 | 0 | &#9989; |
+| Wald & Wolfowitz 1940 exact run distribution | Runs acceptance region for n1 = n2 = 10, alpha = 0.05: upper point | 15 (+/-0) | 15 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Example 5.13 / Eq. (5.195) | Zero-crossing rate of bandlimited noise (fc = 1 kHz, B = 400 Hz) | 2013 (+/-1%) | 2013 | -0.551 | &#9989; |
+| Bendat & Piersol, Random Data 4e Example 5.12 | Apparent frequency of low-pass noise (B = 2 kHz) = 0.577 B | 1155 (+/-1%) | 1159 | 3.911 | &#9989; |
+| Bendat & Piersol, Random Data 4e Example 5.14 / Eq. (5.206) | Prob[positive peak > 4 sigma] of a narrow bandwidth record | 0.000335 (+/-0.00001) | 0.000334 | 0 | &#9989; |
 
 </details>
 

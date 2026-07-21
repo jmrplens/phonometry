@@ -23,6 +23,11 @@ if TYPE_CHECKING:
     )
     from ..metrology.envelope import EnvelopeResult, EnvelopeSpectrumResult
     from ..metrology.phase import PhaseDecompositionResult
+    from ..metrology.random_data import (
+        LevelCrossingResult,
+        PeakStatisticsResult,
+        StationarityTestResult,
+    )
     from ..metrology.signals import ToneBurstResult
     from ..metrology.spectra import (
         CoherentOutputSpectrumResult,
@@ -153,6 +158,35 @@ _STRINGS: dict[str, str] = {
         r"{pct} % de confianza ($\chi^2$, $\bar\nu$ = {nu})",
     r"Thomson multitaper density — $K$ = {k} tapers, $NW$ = {nw}":
         r"Densidad multitaper de Thomson — $K$ = {k} tapers, $NW$ = {nw}",
+    "Segment mean square": "Media cuadrática por segmento",
+    "Segment RMS": "RMS por segmento",
+    "Segment mean": "Media por segmento",
+    "Segment variance": "Varianza por segmento",
+    "Sequence median": "Mediana de la secuencia",
+    "Segment index": "Índice de segmento",
+    "Stationarity test (Bendat & Piersol 10.3.1.1)":
+        "Test de estacionariedad (Bendat y Piersol 10.3.1.1)",
+    "stationary": "estacionario",
+    "nonstationary": "no estacionario",
+    "Reverse arrangements A = {a}, accept ({lo}, {hi}]: {verdict}":
+        "Inversiones de orden A = {a}, aceptación ({lo}, {hi}]: {verdict}",
+    "Runs r = {r}, accept ({lo}, {hi}]: {verdict}":
+        "Rachas r = {r}, aceptación ({lo}, {hi}]: {verdict}",
+    "Measured rate": "Tasa medida",
+    "Rice expectation (Eq. 5.196)": "Expectativa de Rice (Ec. 5.196)",
+    "Level a [signal units]": "Nivel a [unidades de la señal]",
+    "Crossings per second [1/s]": "Cruces por segundo [1/s]",
+    "Level-crossing rate (Bendat & Piersol 5.5.1)":
+        "Tasa de cruces por nivel (Bendat y Piersol 5.5.1)",
+    "Empirical peak exceedance": "Excedencia empírica de picos",
+    "Rice (r = {r})": "Rice (r = {r})",
+    "Rayleigh limit (r = 1)": "Límite de Rayleigh (r = 1)",
+    "Gaussian limit (r = 0)": "Límite gaussiano (r = 0)",
+    r"Standardized peak height $z = a/\sigma_x$":
+        r"Altura de pico estandarizada $z = a/\sigma_x$",
+    "Prob[peak > z]": "Prob[pico > z]",
+    "Peak-height distribution (Bendat & Piersol 5.5.4)":
+        "Distribución de alturas de pico (Bendat y Piersol 5.5.4)",
 }
 
 
@@ -1315,3 +1349,162 @@ def plot_envelope_spectrum(
     for axf in axes:
         localize_axes(axf, language)
     return axes
+
+
+#: Y-axis labels of the stationarity plot, keyed by the segment statistic.
+_SEGMENT_LABELS = {
+    "mean_square": "Segment mean square",
+    "rms": "Segment RMS",
+    "mean": "Segment mean",
+    "variance": "Segment variance",
+}
+
+
+def plot_stationarity_test(
+    result: "StationarityTestResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Segment-statistic sequence with the trend-test verdict.
+
+    :param result: A
+        :class:`~phonometry.metrology.random_data.StationarityTestResult`.
+    :param ax: Existing axes, or ``None`` for a fresh figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the segment-value line.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    if ax is None:
+        ax = _new_axes()
+        ax.set_title(
+            _t("Stationarity test (Bendat & Piersol 10.3.1.1)", language)
+        )
+    verdict = _t(
+        "stationary" if result.stationary else "nonstationary", language
+    )
+    template = (
+        "Reverse arrangements A = {a}, accept ({lo}, {hi}]: {verdict}"
+        if result.method == "reverse_arrangements"
+        else "Runs r = {r}, accept ({lo}, {hi}]: {verdict}"
+    )
+    label = _t(
+        template, language, a=result.count, r=result.count,
+        lo=result.bounds[0], hi=result.bounds[1], verdict=verdict,
+    )
+    index = np.arange(1, result.n_segments + 1)
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("lw", 1.2)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("ms", 4.5)
+    ax.plot(index, result.segment_values, label=label, **kwargs)
+    if result.method == "runs":
+        ax.axhline(
+            float(np.median(result.segment_values)), color=_C_REFERENCE,
+            linestyle="--", lw=1.2, label=_t("Sequence median", language),
+        )
+    ax.set_xlabel(_t("Segment index", language))
+    ax.set_ylabel(_t(_SEGMENT_LABELS[result.statistic], language))
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_level_crossing_rate(
+    result: "LevelCrossingResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Measured level-crossing rates against the Rice curve.
+
+    :param result: A
+        :class:`~phonometry.metrology.random_data.LevelCrossingResult`.
+    :param ax: Existing axes, or ``None`` for a fresh figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured-rate markers.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    if ax is None:
+        ax = _new_axes()
+        ax.set_title(
+            _t("Level-crossing rate (Bendat & Piersol 5.5.1)", language)
+        )
+    order = np.argsort(result.levels)
+    ax.plot(
+        result.levels[order], result.rice_rates[order], color=_C_REFERENCE,
+        lw=1.4, label=_t("Rice expectation (Eq. 5.196)", language),
+    )
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("ms", 6.0)
+    ax.plot(
+        result.levels, result.rates, "o",
+        label=_t("Measured rate", language), **kwargs,
+    )
+    ax.set_yscale("log")
+    ax.set_xlabel(_t("Level a [signal units]", language))
+    ax.set_ylabel(_t("Crossings per second [1/s]", language))
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_peak_statistics(
+    result: "PeakStatisticsResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Empirical peak exceedance against the Rice closed forms.
+
+    :param result: A
+        :class:`~phonometry.metrology.random_data.PeakStatisticsResult`.
+    :param ax: Existing axes, or ``None`` for a fresh figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the empirical exceedance line.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+    from ..metrology.random_data import _rice_peak_exceedance
+
+    if ax is None:
+        ax = _new_axes()
+        ax.set_title(
+            _t("Peak-height distribution (Bendat & Piersol 5.5.4)", language)
+        )
+    peaks = result.peak_values
+    if peaks.size == 0:
+        raise ValueError("The record has no local maxima to plot.")
+    exceedance = 1.0 - np.arange(1, peaks.size + 1) / peaks.size
+    z = np.linspace(float(peaks[0]), float(peaks[-1]), 400)
+    ax.plot(
+        z, _rice_peak_exceedance(z, 1.0), color=_C_MUTED, lw=1.0,
+        linestyle="--", label=_t("Rayleigh limit (r = 1)", language),
+    )
+    ax.plot(
+        z, _rice_peak_exceedance(z, 0.0), color=_C_MUTED, lw=1.0,
+        linestyle=":", label=_t("Gaussian limit (r = 0)", language),
+    )
+    ax.plot(
+        z, result.peak_exceedance(z), color=_C_REFERENCE, lw=1.5,
+        label=_t(
+            "Rice (r = {r})", language,
+            r=format_number(result.irregularity_factor, language, decimals=3,
+                            trim=True),
+        ),
+    )
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("lw", 1.2)
+    ax.plot(
+        peaks, exceedance, drawstyle="steps-post",
+        label=_t("Empirical peak exceedance", language), **kwargs,
+    )
+    floor = max(1.0 / peaks.size, 1e-6)
+    ax.set_yscale("log")
+    ax.set_ylim(bottom=floor)
+    ax.set_xlabel(_t(r"Standardized peak height $z = a/\sigma_x$", language))
+    ax.set_ylabel(_t("Prob[peak > z]", language))
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
+    return ax

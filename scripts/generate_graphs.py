@@ -711,6 +711,49 @@ _ES_EXACT = {
     "appears as one line at exactly $f_m$":
         "la portadora está en 1 kHz; su modulación de amplitud\n"
         "aparece como una línea exactamente en $f_m$",
+    # Data qualification: stationarity test and Rice crossing statistics
+    "Stationarity Test by Reverse Arrangements (B&P 10.3.1.1)":
+        "Test de estacionariedad por inversiones de orden (B&P 10.3.1.1)",
+    "Steady noise: A = 91, accepted (stationary)":
+        "Ruido estable: A = 91, aceptado (estacionario)",
+    "+20 % gain ramp: A = 7, rejected (nonstationary)":
+        "Rampa de ganancia del +20 %: A = 7, rechazado (no estacionario)",
+    "Segment index": "Índice de segmento",
+    "Segment mean square": "Media cuadrática por segmento",
+    "20 segment mean squares; the count A of pairs i < j with\n"
+    "x[i] > x[j] must fall in (64, 125] at the 5 % level (Table A.6)":
+        "20 medias cuadráticas por segmento; el conteo A de pares i < j con\n"
+        "x[i] > x[j] debe caer en (64, 125] al nivel del 5 % (Tabla A.6)",
+    "Level-Crossing Rates of Bandlimited Gaussian Noise (Rice)":
+        "Tasas de cruce por nivel de ruido gaussiano de banda limitada "
+        "(Rice)",
+    r"Rice: $N_0\,\exp(-a^2/2\sigma_x^2)$ (Eq. 5.196)":
+        r"Rice: $N_0\,\exp(-a^2/2\sigma_x^2)$ (Ec. 5.196)",
+    "Measured crossing rate": "Tasa de cruces medida",
+    "Level a [signal units]": "Nivel a [unidades de la señal]",
+    "Crossings per second [1/s]": "Cruces por segundo [1/s]",
+    "800-1200 Hz Gaussian band: 2014 zero crossings/s, an\n"
+    r"apparent frequency $N_0/2 \approx$ 1007 Hz (B&P Example 5.13)":
+        "banda gaussiana de 800-1200 Hz: 2014 cruces por cero/s, una\n"
+        r"frecuencia aparente $N_0/2 \approx$ 1007 Hz (B&P Ejemplo 5.13)",
+    "Peak-Height Distribution and the Irregularity Factor (Rice)":
+        "Distribución de alturas de pico y factor de irregularidad (Rice)",
+    "Rayleigh limit (r = 1, narrowband)":
+        "Límite de Rayleigh (r = 1, banda estrecha)",
+    "Gaussian limit (r = 0, wideband)":
+        "Límite gaussiano (r = 0, banda ancha)",
+    "Rice mixture at r = 0.746 (Eq. 5.223)":
+        "Mezcla de Rice con r = 0,746 (Ec. 5.223)",
+    "Empirical peak exceedance (0-2 kHz noise)":
+        "Excedencia empírica de picos (ruido de 0-2 kHz)",
+    r"Standardized peak height $z = a/\sigma_x$":
+        r"Altura de pico estandarizada $z = a/\sigma_x$",
+    "Prob[peak > z]": "Prob[pico > z]",
+    r"low-pass noise: $r = N_0/2M = \sqrt{5}/3$; negative maxima exist,"
+    "\nso the peak law sits between Gaussian and Rayleigh (B&P 5.5.4)":
+        r"ruido paso bajo: $r = N_0/2M = \sqrt{5}/3$; existen máximos"
+        " negativos,\nasí que la ley de picos queda entre la gaussiana y la"
+        " de Rayleigh (B&P 5.5.4)",
     # Correlation and time-delay estimation (B&P / Knapp & Carter GCC)
     "Time-Delay Estimation: GCC-PHAT vs Direct Correlation (Knapp & Carter)":
         "Estimación del retardo: GCC-PHAT frente a correlación directa "
@@ -4407,6 +4450,140 @@ def generate_envelope_spectrum(output_dir: str) -> None:
     plt.close()
 
 
+def generate_stationarity_test(output_dir: str) -> None:
+    """Reverse arrangement stationarity test: steady noise vs a gain ramp."""
+    print("Generating stationarity_test...")
+    from phonometry import stationarity_test
+
+    fs = 8192.0
+    n = 1 << 16
+    steady = np.random.default_rng(42).standard_normal(n)
+    # The B&P Example 10.3 scenario: the same noise with a slow +20 % gain
+    # increase over the record.
+    ramp = np.random.default_rng(42).standard_normal(n) * np.linspace(
+        1.0, 1.2, n
+    )
+    res_steady = stationarity_test(steady, fs)
+    res_ramp = stationarity_test(ramp, fs)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    index = np.arange(1, res_steady.n_segments + 1)
+    ax.plot(index, res_steady.segment_values, "o-", color=COLOR_PRIMARY,
+            linewidth=1.2, markersize=5,
+            label="Steady noise: A = 91, accepted (stationary)")
+    ax.plot(index, res_ramp.segment_values, "s-", color=COLOR_SECONDARY,
+            linewidth=1.2, markersize=5,
+            label="+20 % gain ramp: A = 7, rejected (nonstationary)")
+    ax.set_xticks(index[1::2])
+    ax.set_xlabel("Segment index")
+    ax.set_ylabel("Segment mean square")
+    ax.set_title("Stationarity Test by Reverse Arrangements (B&P 10.3.1.1)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+    ax.text(0.02, 0.80,
+            "20 segment mean squares; the count A of pairs i < j with\n"
+            "x[i] > x[j] must fall in (64, 125] at the 5 % level (Table A.6)",
+            transform=ax.transAxes, va="top", ha="left", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "stationarity_test.svg")
+    plt.close()
+
+
+def _bandlimited_gaussian_figure_record(
+    seed: int, fs: float, n: int, f1: float, f2: float
+) -> np.ndarray:
+    """Exactly bandlimited unit-variance Gaussian noise (FFT synthesis)."""
+    rng = np.random.default_rng(seed)
+    freqs = np.fft.rfftfreq(n, 1.0 / fs)
+    spec = rng.standard_normal(freqs.size) + 1j * rng.standard_normal(
+        freqs.size
+    )
+    spec[(freqs < f1) | (freqs > f2)] = 0.0
+    x = np.fft.irfft(spec, n)
+    return np.asarray(x / np.std(x))
+
+
+def generate_rice_level_crossings(output_dir: str) -> None:
+    """Measured level-crossing rates against the Rice curve."""
+    print("Generating rice_level_crossings...")
+    from phonometry import level_crossing_rate
+
+    fs = 20480.0
+    x = _bandlimited_gaussian_figure_record(0, fs, 1 << 19, 800.0, 1200.0)
+    res = level_crossing_rate(x, fs, levels=np.linspace(-3.5, 3.5, 29))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    order = np.argsort(res.levels)
+    ax.plot(res.levels[order], res.rice_rates[order], color=COLOR_SECONDARY,
+            linewidth=1.6,
+            label=r"Rice: $N_0\,\exp(-a^2/2\sigma_x^2)$ (Eq. 5.196)")
+    ax.plot(res.levels, res.rates, "o", color=COLOR_PRIMARY, markersize=6,
+            label="Measured crossing rate")
+    ax.set_yscale("log")
+    ax.set_xlabel("Level a [signal units]")
+    ax.set_ylabel("Crossings per second [1/s]")
+    ax.set_title("Level-Crossing Rates of Bandlimited Gaussian Noise (Rice)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower center", fontsize=9)
+    ax.text(0.975, 0.965,
+            "800-1200 Hz Gaussian band: 2014 zero crossings/s, an\n"
+            r"apparent frequency $N_0/2 \approx$ 1007 Hz"
+            " (B&P Example 5.13)",
+            transform=ax.transAxes, va="top", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "rice_level_crossings.svg")
+    plt.close()
+
+
+def generate_rice_peak_distribution(output_dir: str) -> None:
+    """Peak-height exceedance between the Gaussian and Rayleigh limits."""
+    print("Generating rice_peak_distribution...")
+    from phonometry import peak_statistics
+    from phonometry.metrology.random_data import _rice_peak_exceedance
+
+    fs = 20480.0
+    x = _bandlimited_gaussian_figure_record(3, fs, 1 << 19, 0.0, 2000.0)
+    res = peak_statistics(x, fs)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    peaks = res.peak_values
+    exceedance = 1.0 - np.arange(1, peaks.size + 1) / peaks.size
+    z = np.linspace(-2.5, 4.5, 400)
+    ax.plot(z, _rice_peak_exceedance(z, 1.0), color=COLOR_FG, linewidth=1.0,
+            linestyle="--", alpha=0.6, label="Rayleigh limit (r = 1, narrowband)")
+    ax.plot(z, _rice_peak_exceedance(z, 0.0), color=COLOR_FG, linewidth=1.0,
+            linestyle=":", alpha=0.6, label="Gaussian limit (r = 0, wideband)")
+    ax.plot(z, res.peak_exceedance(z), color=COLOR_SECONDARY, linewidth=1.7,
+            label="Rice mixture at r = 0.746 (Eq. 5.223)")
+    ax.plot(peaks, exceedance, drawstyle="steps-post", color=COLOR_PRIMARY,
+            linewidth=1.2, label="Empirical peak exceedance (0-2 kHz noise)")
+    ax.set_yscale("log")
+    ax.set_xlim(-2.5, 4.5)
+    ax.set_ylim(1e-5, 1.5)
+    ax.set_xlabel(r"Standardized peak height $z = a/\sigma_x$")
+    ax.set_ylabel("Prob[peak > z]")
+    ax.set_title("Peak-Height Distribution and the Irregularity Factor (Rice)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower left", fontsize=9)
+    ax.text(0.975, 0.965,
+            r"low-pass noise: $r = N_0/2M = \sqrt{5}/3$;"
+            " negative maxima exist,\nso the peak law sits between"
+            " Gaussian and Rayleigh (B&P 5.5.4)",
+            transform=ax.transAxes, va="top", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "rice_peak_distribution.svg")
+    plt.close()
+
+
 def generate_stoi_intelligibility(output_dir: str) -> None:
     """STOI vs ESTOI over SNR for stationary and modulated maskers."""
     print("Generating stoi_intelligibility...")
@@ -8086,6 +8263,11 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Chs. 27/87) and the envelope spectrum of an AM tone (B&P 13.3).
     generate_cepstrum_echo,
     generate_envelope_spectrum,
+    # Data qualification: reverse arrangement stationarity test and the Rice
+    # level-crossing / peak statistics (Bendat & Piersol 10.3 / 5.5).
+    generate_stationarity_test,
+    generate_rice_level_crossings,
+    generate_rice_peak_distribution,
     # Objective intelligibility: STOI vs ESTOI over SNR for stationary and
     # modulated maskers (Taal et al. 2011 / Jensen & Taal 2016).
     generate_stoi_intelligibility,

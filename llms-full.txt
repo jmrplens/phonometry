@@ -52,6 +52,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Spherical ground effect and advanced barriers (Attenborough / Salomons / Bies)](https://jmrplens.github.io/phonometry/guides/ground-barriers/)
 - [Sound Power](https://jmrplens.github.io/phonometry/guides/sound-power/)
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/)
+- [Data qualification: stationarity, level crossings and peaks (Bendat & Piersol)](https://jmrplens.github.io/phonometry/guides/data-qualification/)
 - [Calibrated spectral analysis (Bendat & Piersol)](https://jmrplens.github.io/phonometry/guides/spectral-analysis/)
 - [Correlation, time delay and envelope (Bendat & Piersol / Knapp & Carter)](https://jmrplens.github.io/phonometry/guides/correlation-delay/)
 - [Test signals and sample-rate tools (IEC 60268-1)](https://jmrplens.github.io/phonometry/guides/test-signals/)
@@ -9169,6 +9170,355 @@ class 1 limits per nominal frequency).
 ---
 
 
+<!-- source: docs/data-qualification.md | canonical: https://jmrplens.github.io/phonometry/guides/data-qualification/ -->
+
+# Data qualification: stationarity, level crossings and peaks (Bendat & Piersol)
+
+Every average in this documentation - a [PSD](https://jmrplens.github.io/phonometry/guides/spectral-analysis/), a
+[Leq](https://jmrplens.github.io/phonometry/guides/levels/), a
+[GUM budget](gum-uncertainty.md) - assumes the record is
+**stationary**: that the process generating it did not drift while it was
+being measured. Bendat & Piersol devote Section 10.3 of *Random Data* to
+qualifying records before analysis, and `phonometry.metrology` implements its
+quantitative core: distribution-free **trend and stationarity tests** with
+the book's own acceptance regions, and the **Rice statistics** - level
+crossings, apparent frequency, peak rates and heights - that summarize what
+a qualified Gaussian record looks like and flag one that is not.
+
+## 1. The reverse arrangement test
+
+Given a sequence of $N$ observations $x_1, \dots, x_N$ - parameter estimates,
+segment levels, anything - count the pairs $i < j$ with $x_i > x_j$. Each
+such pair is a **reverse arrangement**, and for independent observations of
+one random variable their total $A$ has (B&P Eqs. (4.54)-(4.55))
+
+$$
+\mu_A = \frac{N(N-1)}{4}, \qquad
+\sigma_A^2 = \frac{N(2N+5)(N-1)}{72},
+$$
+
+with no assumption about the distribution of the $x_i$. A monotonic trend
+pushes $A$ to an extreme (0 for a rising sequence, $N(N-1)/2$ for a falling
+one), so the hypothesis of *no trend* is accepted at significance $\alpha$
+when $A$ falls inside a two-sided region - B&P Table A.6, whose
+$\alpha = 0.05$ rows `trend_test` reproduces exactly and the conformance
+suite pins. The book's Example 4.4 (twenty observations, $A = 86$, accepted
+between 64 and 125) runs verbatim:
+
+```python
+from phonometry import trend_test
+
+values = [5.2, 6.2, 3.7, 6.4, 3.9, 4.0, 3.9, 5.3, 4.0, 4.6,
+          5.9, 6.5, 4.3, 5.7, 3.1, 5.6, 5.2, 3.9, 6.2, 5.0]
+
+res = trend_test(values)                  # B&P Example 4.4
+print(res.statistic, res.bounds)          # 86, (64, 125)
+print(res.trend_free, round(res.p_value, 3))   # True, 0.586
+```
+
+The p-value comes from the exact null distribution of $A$ (the inversion
+counts of a random permutation), computed up to $N = 100$ - the range of
+Table A.6 - and from the book's normal approximation beyond; the verdict
+follows the book's tabulated region.
+
+## 2. Stationarity of a record
+
+The B&P Sec. 10.3.1.1 procedure turns the trend test into a stationarity
+test for a single time history: divide the record into $N$ equal intervals
+long enough to be independent, compute a **mean square value per interval**,
+and test that sequence. Nothing needs to be known about the record's
+bandwidth, averaging distribution or units, and the test works on mean
+values, rms values or variances just as well (`statistic=`). A running
+20 % gain drift - the book's Example 10.3 scenario - is caught immediately,
+while the same noise without the drift passes:
+
+```python
+import numpy as np
+from phonometry import stationarity_test
+
+fs = 8192.0
+n = 1 << 16
+noise = np.random.default_rng(42).standard_normal(n)
+
+res = stationarity_test(noise, fs)        # 20 segments, mean squares
+print(res.stationary, res.count, res.bounds)   # True, 91, (64, 125)
+
+drifting = noise * np.linspace(1.0, 1.2, n)    # +20 % gain ramp
+res = stationarity_test(drifting, fs)
+print(res.stationary, res.count)          # False, 7  (upward trend -> low A)
+res.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stationarity_test_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stationarity_test.svg" alt="Twenty segment mean square values for two noise records: a steady record whose values fluctuate around one with a reverse arrangement count of ninety-one, accepted as stationary, and the same noise with a twenty percent gain ramp whose segment mean squares climb steadily to one point five, giving only seven reverse arrangements, rejected as nonstationary at the five percent level" width="82%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import stationarity_test
+
+fs = 8192.0
+n = 1 << 16
+steady = np.random.default_rng(42).standard_normal(n)
+ramp = np.random.default_rng(42).standard_normal(n) * np.linspace(1.0, 1.2, n)
+
+res_steady = stationarity_test(steady, fs)
+res_ramp = stationarity_test(ramp, fs)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+index = np.arange(1, res_steady.n_segments + 1)
+ax.plot(index, res_steady.segment_values, "o-",
+        label=f"Steady noise: A = {res_steady.count}, accepted")
+ax.plot(index, res_ramp.segment_values, "s-",
+        label=f"+20 % gain ramp: A = {res_ramp.count}, rejected")
+ax.set_xlabel("Segment index")
+ax.set_ylabel("Segment mean square")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+The result records the per-segment sequence (`segment_values`,
+`segment_times`), the count, the Table A.6 `bounds`, the exact `p_value`
+and the `stationary` verdict; `.plot()` draws the sequence with the verdict
+in the legend. The default of 20 segments matches the book's worked
+examples - more segments resolve faster drifts but each interval must stay
+long against the record's lowest frequencies for the values to be
+independent.
+
+Two caveats from the book are worth repeating. A record can be
+nonstationary with a stationary mean square (a frequency glide, for
+instance), so pass `statistic="mean"` or test band-filtered versions when
+that matters; and the test needs the *trend* to be slow against the segment
+length, or it dissolves into the random fluctuation of the segment values.
+
+## 3. The runs test
+
+The classical companion (tabulated in the third edition of *Random Data*;
+the exact distribution is Wald & Wolfowitz 1940) classifies each value as
+above or below the sequence median and counts **runs** of like
+classification. A trend or slow drift produces few long runs; rapid
+alternation produces too many. `method="runs"` applies it with the exact
+conditional distribution at any $N$ - for twenty values split 10/10 the
+acceptance region at $\alpha = 0.05$ is the classical $(6, 15]$:
+
+```python
+import numpy as np
+from phonometry import trend_test
+
+rng = np.random.default_rng(3)
+res = trend_test(rng.standard_normal(40), method="runs")
+print(res.statistic, res.bounds, res.trend_free)
+
+alternating = np.tile([1.0, -1.0], 10)   # 20 runs: rejected the other way
+print(trend_test(alternating, method="runs").trend_free)   # False
+```
+
+The reverse arrangement test is the more powerful of the two against the
+monotonic trends that dominate practice (B&P Sec. 4.5.2), which is why it
+is the default everywhere; the runs test adds sensitivity to non-monotonic
+clustering.
+
+## 4. Level crossings and the apparent frequency
+
+For a zero-mean Gaussian record with one-sided autospectrum $G(f)$, Rice's
+classical results give the expected rate of zero crossings (both slopes,
+B&P Eq. (5.195)) from the plain frequency moments
+$m_k = \int f^k\,G(f)\,\mathrm{d}f$:
+
+$$
+N_0 = \frac{1}{\pi}\frac{\sigma_v}{\sigma_x} = 2\sqrt{\frac{m_2}{m_0}},
+\qquad
+N_a = N_0\, e^{-a^2/2\sigma_x^2},
+$$
+
+where $N_a$ is the crossing rate of level $a$ (Eq. (5.196)). $N_0/2$ is the
+record's **apparent frequency**: a 60 Hz sine crosses zero 120 times per
+second, low-pass noise of bandwidth $B$ gives $N_0 = 2B/\sqrt{3}$ (an
+apparent frequency of $0.58B$, Example 5.12) and a band centred on $f_c$
+gives $N_0 = 2\sqrt{f_c^2 + B^2/12}$ (Example 5.13).
+`level_crossing_rate` counts the actual crossings of each level and puts
+the Rice curve next to them, taking the moments from the record's own
+[Welch autospectrum](https://jmrplens.github.io/phonometry/guides/spectral-analysis/):
+
+```python
+import numpy as np
+from phonometry import level_crossing_rate
+
+fs = 8192.0
+t = np.arange(1 << 16) / fs
+x = np.sin(2 * np.pi * 60.0 * t)          # a 60 Hz sine ...
+
+res = level_crossing_rate(x, fs)
+print(round(res.zero_crossing_rate, 1))   # ... has 120 zeros per second
+print(round(res.apparent_frequency, 1))   # 60.0
+res.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rice_level_crossings_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rice_level_crossings.svg" alt="Measured level-crossing rates of a bandlimited Gaussian noise record between eight hundred and twelve hundred hertz, plotted as dots against the crossing level from minus three point five to plus three point five signal units on a logarithmic rate axis, falling from about two thousand crossings per second at level zero to a few per second at three sigma, with the Rice exponential curve passing through every measured point" width="82%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import level_crossing_rate
+
+fs = 20480.0
+n = 1 << 19
+rng = np.random.default_rng(0)
+freqs = np.fft.rfftfreq(n, 1 / fs)        # bandlimited Gaussian noise:
+spec = rng.standard_normal(freqs.size) + 1j * rng.standard_normal(freqs.size)
+spec[(freqs < 800.0) | (freqs > 1200.0)] = 0.0
+x = np.fft.irfft(spec, n)
+
+res = level_crossing_rate(x, fs, levels=np.linspace(-3.5, 3.5, 29) * np.std(x))
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(res.levels, res.rice_rates, label="Rice (Eq. 5.196)")
+ax.plot(res.levels, res.rates, "o", label="Measured")
+ax.set_yscale("log")
+ax.set_xlabel("Level a [signal units]")
+ax.set_ylabel("Crossings per second [1/s]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+The Rice curve holds for Gaussian records, and that is precisely its second
+use: measured rates that fall systematically off the curve are a quick
+non-Gaussianity screen (B&P Sec. 5.5.1.1) - clipping shows up as missing
+high-level crossings, impulsive contamination as an excess. Count-based
+rates need the record comfortably oversampled: a crossing between two
+samples of the same sign goes uncounted.
+
+## 5. Peaks: rates, the irregularity factor and heights
+
+The same moments fix the expected rate of local maxima
+$M = (1/2\pi)(\sigma_a/\sigma_v) = \sqrt{m_4/m_2}$ (Eq. (5.211)) and with
+it the dimensionless **irregularity factor**
+
+$$
+r = \frac{N_0}{2M} = \frac{m_2}{\sqrt{m_0\, m_4}} \in (0, 1],
+$$
+
+the single number that fixes the distribution of peak heights
+(B&P Sec. 5.5.4). At $r = 1$ - narrow bandwidth data, one maximum per
+zero-crossing cycle - peaks are **Rayleigh** distributed:
+$\mathrm{Prob}[\text{peak} > a] = e^{-a^2/2\sigma_x^2}$ (Eq. (5.206)), which
+is the one-in-3000 chance of a peak beyond $4\sigma$ of B&P Example 5.14.
+As $r \to 0$ ever more ripples ride on each cycle, negative maxima appear,
+and the peak heights approach the plain **Gaussian** amplitude distribution.
+In between, Rice's mixture (Eqs. (5.217)/(5.223)) interpolates the two,
+available as `peak_exceedance()` / `peak_density()` on the result:
+
+```python
+import numpy as np
+from phonometry import peak_statistics
+
+fs = 8192.0
+t = np.arange(1 << 16) / fs
+x = np.sin(2 * np.pi * 60.0 * t)          # narrowband: r is essentially 1
+
+res = peak_statistics(x, fs)
+print(round(res.irregularity_factor, 3))       # 0.997
+print(res.peak_exceedance(4.0))                # exp(-8): about 1 in 3000
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rice_peak_distribution_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rice_peak_distribution.svg" alt="Peak-height exceedance probability of low-pass Gaussian noise on a logarithmic axis against the standardized peak height from minus two point five to four point five: the empirical staircase from half a million samples follows the Rice mixture curve for irregularity factor zero point seven four six, clearly below the dashed Rayleigh limit and above the dotted Gaussian limit, with a visible fraction of negative maxima" width="82%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import peak_statistics
+from phonometry.metrology.random_data import _rice_peak_exceedance
+
+fs = 20480.0
+n = 1 << 19
+rng = np.random.default_rng(3)
+freqs = np.fft.rfftfreq(n, 1 / fs)        # low-pass noise: r = sqrt(5)/3
+spec = rng.standard_normal(freqs.size) + 1j * rng.standard_normal(freqs.size)
+spec[freqs > 2000.0] = 0.0
+x = np.fft.irfft(spec, n)
+
+res = peak_statistics(x, fs)
+peaks = res.peak_values
+empirical = 1.0 - np.arange(1, peaks.size + 1) / peaks.size
+z = np.linspace(-2.5, 4.5, 400)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(z, _rice_peak_exceedance(z, 1.0), "--", label="Rayleigh (r = 1)")
+ax.plot(z, _rice_peak_exceedance(z, 0.0), ":", label="Gaussian (r = 0)")
+ax.plot(z, res.peak_exceedance(z),
+        label=f"Rice (r = {res.irregularity_factor:.3f})")
+ax.plot(peaks, empirical, drawstyle="steps-post", label="Empirical")
+ax.set_yscale("log")
+ax.set_ylim(1e-5, 1.5)
+ax.set_xlabel(r"Standardized peak height $z = a/\sigma_x$")
+ax.set_ylabel("Prob[peak > z]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+For an ideal low-pass band the closed forms give $r = \sqrt{5}/3 = 0.745$,
+and the measured value lands on it. The irregularity factor is the standard
+bridge to fatigue and vibro-acoustic damage estimation, where it selects
+the cycle-counting correction between the narrow-band Rayleigh assumption
+and broad-band rainflow corrections. One practical warning: $m_4$ weights
+the spectrum by $f^4$, so wideband instrumentation noise far above the
+physical band silently inflates $M$ and deflates $r$ - band-limit the
+record to the physically meaningful range first.
+
+## Where this fits
+
+Qualification comes *before* the statistics this section's other pages
+compute: the chi-square confidence interval of a
+[Welch PSD](https://jmrplens.github.io/phonometry/guides/spectral-analysis/) and the random-error
+formulas of the [correlation estimators](https://jmrplens.github.io/phonometry/guides/correlation-delay/)
+all assume the record is stationary, as does the very idea of *the* Leq of
+a measurement in [Levels](https://jmrplens.github.io/phonometry/guides/levels/). When a record fails
+the test, split it at the change (the `segment_values` sequence shows
+where), analyse the pieces, or move to the short-time views - the
+[calibrated spectrogram](https://jmrplens.github.io/phonometry/guides/time-frequency/) - that do not
+assume stationarity. And when it passes, the
+[GUM machinery](gum-uncertainty.md) can propagate the
+*remaining* random error of every averaged estimate with a clean
+conscience.
+
+## References
+
+- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
+  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
+  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
+  Section 4.5.2 with Table A.6 (the nonparametric reverse arrangement trend
+  test, its mean and variance, the tabulated percentage points and
+  Example 4.4), Section 10.3 (data qualification; the segment mean-square
+  stationarity procedure of 10.3.1.1 and Example 10.3) and Section 5.5
+  (level crossings and peak values, Examples 5.12-5.15). The runs companion
+  appeared in the third edition's percentage points of the run distribution.
+- Wald, A., & Wolfowitz, J. (1940). On a test whether two samples are from
+  the same population. *The Annals of Mathematical Statistics*, 11(2),
+  147-162. [doi:10.1214/aoms/1177731909](https://doi.org/10.1214/aoms/1177731909).
+  The exact conditional distribution of the number of runs.
+- Rice, S. O. (1945). Mathematical analysis of random noise. *The Bell
+  System Technical Journal*, 24(1), 46-156.
+  [doi:10.1002/j.1538-7305.1945.tb00453.x](https://doi.org/10.1002/j.1538-7305.1945.tb00453.x).
+  The original level-crossing and peak derivations (Parts I-II are in
+  volume 23, 1944).
+
+---
+
+
 <!-- source: docs/spectral-analysis.md | canonical: https://jmrplens.github.io/phonometry/guides/spectral-analysis/ -->
 
 # Calibrated spectral analysis (Bendat & Piersol)
@@ -11522,6 +11872,14 @@ cycle and warn on use; they are removed in 4.0.
 | `UncertaintyResult` | `dataclass` | **GUM propagation result.**<br>• `value`: y = f(x1…xN)<br>• `combined_uncertainty`: uc(y)<br>• `sensitivities`: ci = ∂f/∂xi<br>• `contributions`: \|ci\|·u(xi)<br>• `effective_dof`: Welch–Satterthwaite<br>• `names`<br>• `.plot()`: uncertainty budget | `u.combined_uncertainty, u.contributions` |
 | `MonteCarloResult` | `dataclass` | **Monte Carlo result.**<br>• `value`: sample mean<br>• `standard_uncertainty`: sample std<br>• `interval`: (low, high) coverage interval (§7.7)<br>• `coverage`, `trials` | `mc.value, mc.interval` |
 | `UncertaintyWarning` | `warning class` | **GUM propagation advisory.**<br>Emitted when a propagation falls back outside its nominal assumptions | `warnings.simplefilter('error', UncertaintyWarning)` |
+| `trend_test` | `function` | **Nonparametric trend test on a sequence (Bendat & Piersol 4.5.2).**<br>• `values`: ≥ 10 observations or estimates<br>• `method`: 'reverse_arrangements' (Default; Table A.6 acceptance regions, exact Mahonian p-value to N = 100) / 'runs' (about the median, exact Wald–Wolfowitz distribution; median ties discarded)<br>• `alpha`: two-sided significance (Default: 0.05) | `res = trend_test(values)`<br><br>• `TrendTestResult`; B&P Example 4.4: A = 86, accepted in (64, 125] |
+| `TrendTestResult` | `dataclass` | **Trend-test verdict.**<br>• `statistic`: reverse arrangements A or runs r<br>• `bounds`: acceptance region (lower, upper], `p_value`, `trend_free`<br>• `mean`, `std`: null moments (Eqs. 4.54–4.55)<br>• `values`, `method`, `n`, `alpha` | `res.statistic, res.bounds, res.trend_free` |
+| `stationarity_test` | `function` | **Stationarity test on segment statistics (Bendat & Piersol 10.3.1.1).**<br>• `x`, `fs`<br>• `n_segments` (Default: 20, as B&P Example 10.3), `statistic`: 'mean_square' (Default) / 'rms' / 'mean' / 'variance'<br>• `method`, `alpha` as `trend_test`<br>Trailing samples beyond equal segments are discarded | `res = stationarity_test(x, fs)`<br><br>• `StationarityTestResult` |
+| `StationarityTestResult` | `dataclass` | **Stationarity verdict on a record.**<br>• `segment_values`, `segment_times` [s], `segment_duration` [s]<br>• `count`, `bounds`, `p_value`, `stationary`, `mean`, `std`<br>• `statistic`, `method`, `alpha`, `n_segments`, `fs`<br>• `.plot()`: segment sequence with the verdict | `res.stationary, res.segment_values` |
+| `level_crossing_rate` | `function` | **Level-crossing rates vs the Rice expectation (Bendat & Piersol 5.5.1).**<br>• `x`, `fs` (mean removed first; oversample the band)<br>• `levels` [signal units] (Default: 13 levels over ±3 RMS)<br>• `nperseg`: Welch length for the spectral moments<br>Gaussian: N0 = 2√(m2/m0), Na = N0·exp(−a²/2σ²) | `res = level_crossing_rate(x, fs)`<br><br>• `LevelCrossingResult` |
+| `LevelCrossingResult` | `dataclass` | **Crossing rates (both slopes).**<br>• `levels`, `rates` [1/s], `rice_rates` [1/s]<br>• `zero_crossing_rate`, `zero_crossing_rate_rice`, `apparent_frequency` [Hz] = N0/2<br>• `sigma`, `duration` [s], `fs`<br>• `.plot()`: measured dots vs the Rice curve | `res.zero_crossing_rate, res.apparent_frequency` |
+| `peak_statistics` | `function` | **Peak rate, irregularity factor and peak heights (Bendat & Piersol 5.5.2–5.5.4).**<br>• `x`, `fs` (mean removed; band-limit before: m4 weights G(f) by f⁴)<br>• `nperseg`: Welch length for the moments<br>M = √(m4/m2), r = N0/2M ∈ (0, 1] | `res = peak_statistics(x, fs)`<br><br>• `PeakStatisticsResult` |
+| `PeakStatisticsResult` | `dataclass` | **Peak (maxima) statistics.**<br>• `peak_rate`, `peak_rate_rice` [1/s], `zero_crossing_rate_rice`, `irregularity_factor`<br>• `peak_values`: sorted standardized heights z = a/σ<br>• `.peak_exceedance(z)` / `.peak_density(z)`: Rice mixture (Eqs. 5.217/5.223; Rayleigh at r = 1, Gaussian at r → 0)<br>• `.plot()`: empirical exceedance vs the Rice curves | `res.irregularity_factor, res.peak_exceedance(4.0)` |
 | `power_spectral_density` | `function` | **Welch PSD with statistical error analysis (Bendat & Piersol Ch. 8).**<br>• `x`, `fs`<br>• `window` (Default: 'hann'), `nperseg` (Default: bin spacing of at most 4 Hz; the resolution bandwidth Be also depends on the taper ENBW), `overlap` (Default: 0.5)<br>• `scaling`: 'density' [units²/Hz] / 'spectrum' [units²]<br>• `confidence`: chi-square CI level (Default: 0.95) | `res = power_spectral_density(x, fs)`<br><br>• `SpectralDensityResult` (psd, CI, nd, ε) |
 | `cross_spectral_density` | `function` | **Welch cross-spectral density with magnitude/phase errors (Eqs. 9.33/9.52).**<br>• `x`, `y`, `fs`<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = cross_spectral_density(x, y, fs)`<br><br>• `CrossSpectralDensityResult` |
 | `coherent_output_spectrum` | `function` | **Gvv = γ²·Gyy, noise remainder and spectral SNR (Eqs. 9.55–9.56, 9.73).**<br>• `x` (input), `y` (output), `fs`<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = coherent_output_spectrum(x, y, fs)`<br><br>• `CoherentOutputSpectrumResult` |

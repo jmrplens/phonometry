@@ -179,6 +179,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Random-data qualification module `phonometry.metrology.random_data`
+  (Bendat & Piersol, Random Data 4e, Secs. 4.5.2, 10.3 and 5.5).
+  `trend_test()` runs the nonparametric reverse arrangement test with the
+  Table A.6 acceptance regions (reproduced exactly at alpha = 0.05 for
+  N = 10 to 100, pinned in the conformance suite together with the book's
+  Example 4.4) and an exact Mahonian p-value up to N = 100, or the classical
+  runs test about the median with the exact Wald-Wolfowitz conditional
+  distribution at any N. `stationarity_test()` applies either test to
+  per-segment mean squares (or rms/mean/variance) of a single record, the
+  Sec. 10.3.1.1 procedure, with a `.plot()` of the segment sequence and the
+  verdict. `level_crossing_rate()` counts level crossings (both slopes) and
+  compares them with the Rice expectations N0 = 2 sqrt(m2/m0) and
+  Na = N0 exp(-a^2/2 sigma^2) from the record's own Welch autospectrum
+  moments (Examples 5.12-5.14 verified as conformance rows), and
+  `peak_statistics()` measures the rate of local maxima against
+  M = sqrt(m4/m2), derives the irregularity factor r = N0/2M and exposes
+  the Rice peak-height distribution (`peak_exceedance()`/`peak_density()`)
+  that interpolates Rayleigh (r = 1) and Gaussian (r -> 0); both with
+  EN/ES `.plot()` renderers. New "Data qualification" guide (EN/ES) under
+  Calibration and uncertainty, linked from the GUM and levels guides, with
+  three SVG figures; the API section "Uncertainty" is now "Uncertainty and
+  data quality".
 - B, D and AU frequency weightings in `WeightingFilter` / `weighting_filter`
   (`curve="B"|"D"|"AU"`), joining A/C/G/Z with the same 1 kHz normalization,
   `high_accuracy` oversampling, multichannel and stateful block processing.

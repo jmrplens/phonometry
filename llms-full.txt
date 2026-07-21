@@ -2662,6 +2662,55 @@ result's `.plot()` draws the per-task contribution bars with the $L_{EX,8h}$
 and upper-limit lines (task-based results only, since the other strategies
 carry no per-task breakdown).
 
+## 3. The measurement report (`.report()`)
+
+ISO 9612 Clause 15 lists what the measurement report shall state, down to the
+requirement that the noise exposure level and the measurement uncertainty be
+reported as *separate values*, each rounded to one decimal place.
+`ExposureResult.report(path)` writes that report as a one-page PDF fiche laid
+out like a prevention-service measurement sheet: the standard-basis line naming
+the applied strategy, a header grid (company via `client`, worker(s)/job via
+`specimen`, workplace via `test_room`, and the Clause 15 c `instrumentation`
+and `calibration` free-text fields of `ReportMetadata`), the work analysis
+(the per-task table with the contribution chart for a task-based result, or
+the sampling summary with the Formula C.9 budget for job-based/full-day), the
+boxed $L_{EX,8h}$ with $U$, $k = 1.65$ and the one-sided 95 % upper limit, an
+assessment table against the exposure action values (80/85 dB(A)) and the
+exposure limit value (87 dB(A)) of Directive 2003/10/EC with a PASS/FAIL
+verdict against the limit value, and a footer identity block. A printed note
+records that the limit value applies to the effective exposure with the worn
+hearing protectors' attenuation taken into account, which the measured
+$L_{EX,8h}$ does not include. `verbose=True` adds the per-task Annex C
+uncertainty columns ($u_{1a}$, $u_{1b}$, $u_2$); `language="es"` renders the
+Spanish fiche (nivel de exposición diario equivalente, comma decimals).
+Rendering needs the optional `phonometry[report]` extra (reportlab), plus
+matplotlib for the task-based chart.
+
+```python
+from phonometry import hearing, ReportMetadata
+
+res = hearing.task_based_exposure(tasks, warn=False)  # the Annex D day above
+res.report(
+    "lex8h.pdf",
+    metadata=ReportMetadata(
+        client="Example fabrication works",
+        specimen="Welders (homogeneous exposure group, 4 workers)",
+        test_room="Steel assembly hall, line 2",
+        instrumentation="Personal sound exposure meter (IEC 61252), s/n 0042",
+        calibration="Calibrator IEC 60942 class 1; field checks within 0.3 dB",
+        report_id="EXAMPLE-9612",
+    ),
+)   # LEX,8h = 84.3 dB, U = 3.2 dB -> lower action value exceeded, limit PASS
+```
+
+The rendered example fiche, regenerated with `make reports`, is kept in the
+repository. Click the preview to open the PDF:
+
+[![ISO 9612 occupational noise-exposure example report: a header with the company, exposure group, workplace and instrumentation/calibration, the task-based work-analysis table with durations, sample counts, task levels and LEX,8h contributions, the per-task contribution chart, the boxed LEX,8h = 84.3 dB with U = 3.2 dB, and the Directive 2003/10/EC assessment where the 80 dB(A) lower action value is exceeded and the 85/87 dB(A) values are not, ending in a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9612_exposure_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9612_exposure_example.pdf)
+
+*Occupational noise-exposure fiche (`ExposureResult.report`), the ISO 9612
+Annex D task-based day with the Directive 2003/10/EC assessment.*
+
 ## See also
 
 - [Levels](https://jmrplens.github.io/phonometry/guides/levels/): the `lex_8h` / `sound_exposure` dose primitives
@@ -11540,7 +11589,7 @@ cycle and warn on use; they are removed in 4.0.
 | `FloorCoveringImprovementResult` | `dataclass` | **Floor-covering improvement (ISO 16251-1).**<br>• `improvement` ΔL [dB], `delta_lw`, `ci_delta` (or None)<br>• `limited`: > ΔL mask; `.octave_bands()`, `.plot()` | `res.delta_lw, res.ci_delta` |
 | `ImpactInsulationResult` | `dataclass` | **Impact insulation per band.**<br>• `l_n_t`: Standardized L'nT [dB]<br>• `l_n`: Normalized L'n [dB] or None<br>• `li`, `t2`, `t0`: retained measurement chain (or None)<br>• `.report(path, quantity='l_n_t'/'l_n', ...)`: ISO 16283-2 field test report (Annex C form) with the ISO 717-2 rating → PDF | `imp.report("LnTw.pdf", metadata=ReportMetadata(requirement=58.0))` |
 | `ImpactRatingResult` | `dataclass` | **Weighted impact rating.**<br>• `rating`: Ln,w/L'n,w/L'nT,w [dB], int<br>• `ci`: Spectrum term CI, int<br>• `unfavourable_sum`: [dB]<br>• `band_centers`: Measured-curve centres [Hz] or None<br>• `measured`: Measured impact levels [dB] or None<br>• `shifted_reference`: Shifted impact reference [dB] or None | `r.rating, r.ci` |
-| `ReportMetadata` | `dataclass` | **Metadata for the accredited ISO 717 `.report()` PDF fiche.**<br>• All fields optional; only the supplied ones render<br>• `specimen`, `client`, `manufacturer`, `test_room`, `mounting`, `measurement_standard`, `test_date`<br>• numeric (finite, positive): `area`, `mass_per_area`, `source_volume`, `receiving_volume`, `temperature`, `relative_humidity`, `pressure`, `requirement`<br>• `laboratory`, `operator`, `report_id`, `notes` | `w.report("f.pdf", metadata=ReportMetadata(area=10.0, requirement=52.0))` |
+| `ReportMetadata` | `dataclass` | **Metadata for the accredited ISO 717 `.report()` PDF fiche.**<br>• All fields optional; only the supplied ones render<br>• `specimen`, `client`, `manufacturer`, `test_room`, `instrumentation`, `calibration`, `mounting`, `measurement_standard`, `test_date`<br>• numeric (finite, positive): `area`, `mass_per_area`, `source_volume`, `receiving_volume`, `temperature`, `relative_humidity`, `pressure`, `requirement`<br>• `laboratory`, `operator`, `report_id`, `notes` | `w.report("f.pdf", metadata=ReportMetadata(area=10.0, requirement=52.0))` |
 | `facade_insulation` | `function` | **Field façade insulation (ISO 16283-3).**<br>• `l1_2m`/`l2`: Level 2 m in front / receiving levels [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `area`: Element S [m²], `volume`: Receiving V [m³], `surface_level`: L1,s [dB] (all three for R')<br>• `method`: 'loudspeaker' (−1.5 dB) / 'road_traffic' (−3 dB)<br>• `t0`: Reference T0 [s] (Default: 0.5)<br>• `frequencies` [Hz] | `fac = facade_insulation(l1_2m, l2, t2, volume=50, area=11.5, surface_level=ls)`<br><br>• `FacadeInsulationResult` |
 | `FacadeInsulationResult` | `dataclass` | **Façade insulation per band.**<br>• `d_2m`: Level difference D2m [dB]<br>• `d_2m_nt`: Standardized D2m,nT [dB]<br>• `d_2m_n`: Normalized D2m,n [dB] or None<br>• `r_prime`: Apparent R'45°/R'tr,s [dB] or None<br>• `frequencies` [Hz] or None<br>• `.plot()` | `fac.d_2m_nt, fac.r_prime` |
 | `lab_airborne_insulation` | `function` | **Laboratory airborne insulation (ISO 10140-2).**<br>• `l1`/`l2`: Source/receiving levels [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `area`: Free test-opening S [m²]<br>• `volume`: Receiving V [m³] | `lab = lab_airborne_insulation(l1, l2, t2, area=10, volume=50)`<br><br>• `LabAirborneInsulationResult` |
@@ -11678,7 +11727,7 @@ cycle and warn on use; they are removed in 4.0.
 | `job_based_exposure` | `function` | **Job-based daily exposure LEX,8h + U (ISO 9612 Clause 10).**<br>• `samples` Lp,A,eqT [dB]<br>• `effective_duration_hours` Te [h]<br>• `instrument`, `u3`<br>• `n_workers`/`sample_duration_hours`: Table 1 check | `res = job_based_exposure(samples, 7.5)`<br><br>• `ExposureResult` (Eq C.9 / Table C.4 budget) |
 | `full_day_exposure` | `function` | **Full-day daily exposure LEX,8h + U (ISO 9612 Clause 11).**<br>• `samples` whole-day Lp,A,eqT [dB]<br>• `effective_duration_hours` Te [h]<br>• `instrument`, `u3`, `warn` | `res = full_day_exposure(samples, 9.25)`<br><br>• `ExposureResult`; 3 samples spanning ≥3 dB advise |
 | `Task` | `dataclass` | **One task of a task-based measurement (ISO 9612 Clause 9).**<br>• `samples` [dB], `duration_hours` [h]<br>• `duration_samples`/`duration_range` (for u1b)<br>• `label`, `instrument` | `Task(samples=(80.1, 82.2), duration_hours=5.0)` |
-| `ExposureResult` | `dataclass` | **Daily exposure and uncertainty (ISO 9612).**<br>• `lex_8h` [dB]<br>• `combined_standard_uncertainty` u [dB]<br>• `expanded_uncertainty` U = 1.65 u [dB]<br>• `upper_limit` = LEX,8h + U [dB]<br>• `strategy`, `sampling_advisory`, `tasks` | `res.lex_8h, res.upper_limit` |
+| `ExposureResult` | `dataclass` | **Daily exposure and uncertainty (ISO 9612).**<br>• `lex_8h` [dB]<br>• `combined_standard_uncertainty` u [dB]<br>• `expanded_uncertainty` U = 1.65 u [dB]<br>• `upper_limit` = LEX,8h + U [dB]<br>• `strategy`, `sampling_advisory`, `instrument`, `tasks`<br>• `.report(path, ...)`: ISO 9612 Clause 15 measurement report with the Directive 2003/10/EC assessment → PDF | `res.report("lex.pdf", metadata=ReportMetadata(client="..."))` |
 | `TaskContribution` | `dataclass` | **Per-task breakdown inside `ExposureResult.tasks` (ISO 9612 Clause 9).**<br>• `label`, `lp_aeqt` (Eq. 7), `duration_hours`<br>• `lex_8h_contribution` (Eq. 8) [dB]<br>• uncertainty terms `u1a`, `u1b`, `c1a`, `c1b`, `u2`, `u3` | `res.tasks[0].lex_8h_contribution` |
 | `table_c4_contribution` | `function` | **Sampling contribution c₁u₁ [dB] from Table C.4 (ISO 9612 job/full-day).**<br>• `n_samples`: N (clamped to [3, 30])<br>• `u1`: sampling standard uncertainty [dB]<br>• bilinear interpolation, anchored at u₁ = 0 | `table_c4_contribution(6, 2.0)  # 1.4` |
 | `minimum_cumulative_duration_hours` | `function` | **Minimum cumulative measurement duration [h] (ISO 9612 Table 1).**<br>• `n_workers`: group size n_G (> 40 → 17 h; the standard advises splitting the group) | `minimum_cumulative_duration_hours(18)  # 10.75` |

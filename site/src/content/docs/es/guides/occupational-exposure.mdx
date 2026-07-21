@@ -8,7 +8,7 @@ references:
     title: "Acoustics — Determination of occupational noise exposure — Engineering method"
     designation: "ISO 9612:2009"
     url: "https://www.iso.org/standard/41718.html"
-    note: "El método implementado: las estrategias basadas en tareas (apartado 9), basadas en la función (apartado 10) y de jornada completa (apartado 11), la colocación del micrófono del apartado 12.3, el presupuesto de incertidumbre del anexo C (Ecuaciones C.6, C.9 y C.12, Tablas C.4/C.5) y el factor de cobertura unilateral k = 1,65 (apartado 14), validado frente a los ejemplos resueltos de los anexos D, E y F."
+    note: "El método implementado: las estrategias basadas en tareas (apartado 9), basadas en la función (apartado 10) y de jornada completa (apartado 11), la colocación del micrófono del apartado 12.3, el presupuesto de incertidumbre del anexo C (Ecuaciones C.6, C.9 y C.12, Tablas C.4/C.5) y el factor de cobertura unilateral k = 1,65 (apartado 14), validado frente a los ejemplos resueltos de los anexos D, E y F; el informe de medición del apartado 15 lo escribe ExposureResult.report()."
   - type: report
     organization: "European Parliament and Council"
     year: 2003
@@ -28,6 +28,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Una jornada laboral rara vez se mide de una sola toma: el nivel de exposición
 diario sobre el que actúa la normativa hay que componerlo a partir de
@@ -221,6 +222,70 @@ $u$, `expanded_uncertainty` $U = 1{,}65\ u$, `upper_limit` = $L_{EX,8h} + U$,
 `.plot()` del resultado dibuja las barras de contribución por tarea con las
 líneas de $L_{EX,8h}$ y del límite superior (solo resultados por tareas: las
 otras estrategias no llevan desglose por tarea).
+
+## 3. El informe de medición (apartado 15)
+
+Una determinación de la exposición termina en un *documento*: el apartado 15
+de la ISO 9612 enumera lo que debe declarar el informe de medición, desde la
+estrategia aplicada y el análisis del trabajo hasta el requisito de que el
+nivel de exposición al ruido y la incertidumbre de medición se declaren *como
+valores separados*, cada uno redondeado a un decimal.
+`ExposureResult.report()` escribe ese informe como una ficha PDF de una página
+con el formato de un servicio de prevención: la línea de base normativa con la
+estrategia aplicada, una cabecera (empresa, trabajador(es)/puesto, lugar de
+trabajo, y la instrumentación y la trazabilidad de calibración del
+apartado 15 c), el análisis del trabajo (la tabla por tareas con duraciones,
+niveles $L_{p,A,eqT,m}$ y contribuciones $L_{EX,8h,m}$ para un resultado por
+tareas (con su gráfica de contribuciones), o el resumen del muestreo con el
+presupuesto de la fórmula C.9 para los resultados por puesto o de jornada
+completa) y el $L_{EX,8h}$ en caja con $U$, $k$ y el límite superior
+unilateral al 95 %.
+
+Como el número existe para compararse con la ley, la ficha evalúa después el
+resultado frente a la **Directiva 2003/10/CE** (artículo 3; en España,
+RD 286/2006): los valores inferior y superior de exposición que dan lugar a
+una acción (80 y 85 dB(A)) y el valor límite de exposición (87 dB(A)), cada
+uno marcado superado / no superado sobre el valor tal como se muestra, con un
+veredicto CUMPLE/NO CUMPLE frente al valor límite. Una nota impresa recuerda
+que el valor límite se aplica a la exposición *efectiva*, teniendo en cuenta
+la atenuación de los protectores auditivos utilizados, que el $L_{EX,8h}$
+medido no incluye. `verbose=True` añade las columnas de incertidumbre por
+tarea del anexo C ($u_{1a}$, $u_{1b}$, $u_2$), y `language="es"` produce la
+ficha en español (*nivel de exposición diario equivalente*, *valor límite de
+exposición*, con coma decimal).
+
+```python
+from phonometry import hearing, ReportMetadata
+
+# La jornada de los soldadores del anexo D de la sección 1, con
+# incertidumbre de duración.
+res = hearing.task_based_exposure(tasks, warn=False)
+
+res.report(
+    "lex8h.pdf",
+    language="es",
+    metadata=ReportMetadata(
+        client="Taller de calderería de ejemplo",
+        specimen="Soldadores (grupo homogéneo de exposición, 4 trabajadores)",
+        test_room="Nave de montaje de acero, línea 2",
+        instrumentation="Dosímetro personal (IEC 61252), n/s 0042",
+        calibration="Calibrador IEC 60942 clase 1; verificaciones de campo dentro de 0,3 dB",
+        test_date="2026-07-20",
+        laboratory="Ejemplo de referencia de phonometry",
+        report_id="EXAMPLE-9612",
+    ),
+)   # LEX,8h = 84,3 dB, U = 3,2 dB -> valor inferior de acción superado, límite CUMPLE
+```
+
+La ficha de ejemplo se regenera con `make reports` y se conserva renderizada en
+el repositorio; pulsa en la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso9612_exposure_example"
+	title="Informe de ejemplo de exposición al ruido en el trabajo ISO 9612 (PDF)"
+	description="Ficha de exposición al ruido en el trabajo ISO 9612 de una página: una cabecera con la empresa, el grupo de exposición de soldadores, el lugar de trabajo y la instrumentación con su trazabilidad de calibración, la tabla de análisis del trabajo por tareas (planificación/descansos, soldadura, corte/amolado con duraciones, número de muestras, niveles de tarea y contribuciones LEX,8h cerrada por la fila de totales de la jornada nominal), la gráfica de contribuciones por tarea, el LEX,8h = 84,3 dB en caja con U = 3,2 dB, k = 1,65 y el límite superior de 87,5 dB, y la tabla de evaluación de la Directiva 2003/10/CE donde el valor inferior de acción de 80 dB(A) se supera, el valor superior de 85 dB(A) y el valor límite de 87 dB(A) no, terminando en un veredicto CUMPLE."
+	caption="Ficha de exposición al ruido en el trabajo (ExposureResult.report), la jornada por tareas del anexo D de ISO 9612 con el análisis del trabajo del apartado 15 y la evaluación de la Directiva 2003/10/CE."
+/>
 
 ## Véase también
 

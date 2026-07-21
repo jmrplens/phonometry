@@ -173,6 +173,55 @@ result's `.plot()` draws the per-task contribution bars with the $L_{EX,8h}$
 and upper-limit lines (task-based results only, since the other strategies
 carry no per-task breakdown).
 
+## 3. The measurement report (`.report()`)
+
+ISO 9612 Clause 15 lists what the measurement report shall state, down to the
+requirement that the noise exposure level and the measurement uncertainty be
+reported as *separate values*, each rounded to one decimal place.
+`ExposureResult.report(path)` writes that report as a one-page PDF fiche laid
+out like a prevention-service measurement sheet: the standard-basis line naming
+the applied strategy, a header grid (company via `client`, worker(s)/job via
+`specimen`, workplace via `test_room`, and the Clause 15 c `instrumentation`
+and `calibration` free-text fields of `ReportMetadata`), the work analysis
+(the per-task table with the contribution chart for a task-based result, or
+the sampling summary with the Formula C.9 budget for job-based/full-day), the
+boxed $L_{EX,8h}$ with $U$, $k = 1.65$ and the one-sided 95 % upper limit, an
+assessment table against the exposure action values (80/85 dB(A)) and the
+exposure limit value (87 dB(A)) of Directive 2003/10/EC with a PASS/FAIL
+verdict against the limit value, and a footer identity block. A printed note
+records that the limit value applies to the effective exposure with the worn
+hearing protectors' attenuation taken into account, which the measured
+$L_{EX,8h}$ does not include. `verbose=True` adds the per-task Annex C
+uncertainty columns ($u_{1a}$, $u_{1b}$, $u_2$); `language="es"` renders the
+Spanish fiche (nivel de exposición diario equivalente, comma decimals).
+Rendering needs the optional `phonometry[report]` extra (reportlab), plus
+matplotlib for the task-based chart.
+
+```python
+from phonometry import hearing, ReportMetadata
+
+res = hearing.task_based_exposure(tasks, warn=False)  # the Annex D day above
+res.report(
+    "lex8h.pdf",
+    metadata=ReportMetadata(
+        client="Example fabrication works",
+        specimen="Welders (homogeneous exposure group, 4 workers)",
+        test_room="Steel assembly hall, line 2",
+        instrumentation="Personal sound exposure meter (IEC 61252), s/n 0042",
+        calibration="Calibrator IEC 60942 class 1; field checks within 0.3 dB",
+        report_id="EXAMPLE-9612",
+    ),
+)   # LEX,8h = 84.3 dB, U = 3.2 dB -> lower action value exceeded, limit PASS
+```
+
+The rendered example fiche, regenerated with `make reports`, is kept in the
+repository. Click the preview to open the PDF:
+
+[![ISO 9612 occupational noise-exposure example report: a header with the company, exposure group, workplace and instrumentation/calibration, the task-based work-analysis table with durations, sample counts, task levels and LEX,8h contributions, the per-task contribution chart, the boxed LEX,8h = 84.3 dB with U = 3.2 dB, and the Directive 2003/10/EC assessment where the 80 dB(A) lower action value is exceeded and the 85/87 dB(A) values are not, ending in a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9612_exposure_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso9612_exposure_example.pdf)
+
+*Occupational noise-exposure fiche (`ExposureResult.report`), the ISO 9612
+Annex D task-based day with the Directive 2003/10/EC assessment.*
+
 ## See also
 
 - [Levels](levels.md): the `lex_8h` / `sound_exposure` dose primitives

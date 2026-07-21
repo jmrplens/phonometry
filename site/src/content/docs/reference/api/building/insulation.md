@@ -703,6 +703,8 @@ ReportMetadata(
     receiving_relative_humidity: float | None = None,
     pressure: float | None = None,
     test_room: str | None = None,
+    instrumentation: str | None = None,
+    calibration: str | None = None,
     mounting: str | None = None,
     measurement_standard: str | None = None,
     test_date: str | None = None,
@@ -746,6 +748,8 @@ within 0..100 %. A violation raises `ValueError`.
 | `receiving_relative_humidity` | Receiving-room relative humidity, in %. |
 | `pressure` | Ambient (static) air pressure during the test, in kPa. |
 | `test_room` | Test-room / facility identification. |
+| `instrumentation` | Identification and class of the instrumentation used (manufacturer, model, serial number), as free text. The occupational noise-exposure fiche prints it for ISO 9612:2009 Clause 15 c; when it is not supplied that fiche falls back to the result's own instrument class. |
+| `calibration` | Calibration traceability, as free text (calibrator, date and result of the most recent verification, the before/after field checks). Printed by the occupational noise-exposure fiche (ISO 9612:2009 Clause 15 c). |
 | `mounting` | Mounting condition of the specimen (e.g. the ISO 10140-1 mounting code or a short description). |
 | `measurement_standard` | Measurement standard the spectrum was obtained under (e.g. `"ISO 10140-2"` or `"ISO 16283-1"`); it forms the report's standard-basis line together with the ISO 717 rating part. |
 | `test_date` | Date of the test, as a free-form string. |

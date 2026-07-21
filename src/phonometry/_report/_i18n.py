@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """Translated fixed strings for the accredited ``.report()`` fiches.
 
-Every fixed English string the six report renderers emit (titles, standard-basis
+Every fixed English string the report renderers emit (titles, standard-basis
 line templates, table headers, metadata-grid labels, metric-row labels, verdict
 prose and the footer identity/disclaimer block) is keyed here by its own
 verbatim English text and mapped to its Spanish form. English is the default
@@ -235,6 +235,50 @@ _STRINGS: dict[str, str] = {
     "{thd} % limit": "Límite del {thd} %",
     "Free-field sensitivity <b>{mv} mV/Pa</b> ({level} dB re 1 V/Pa at {freq} Hz); effective frequency range <b>{range}</b> (±{tol} dB)": "Sensibilidad en campo libre <b>{mv} mV/Pa</b> ({level} dB re 1 V/Pa a {freq} Hz); rango de frecuencias efectivo <b>{range}</b> (±{tol} dB)",
     "Equivalent noise level {level} dB({w}), required &#8804; {req} dB({w})": "Nivel de ruido equivalente {level} dB({w}), exigido &#8804; {req} dB({w})",
+    # --- iso9612 occupational noise exposure -------------------------------
+    "Occupational noise exposure determination": "Determinación de la exposición al ruido en el trabajo",
+    "Determination of occupational noise exposure per ISO 9612:2009 (engineering method); {strategy}.": "Determinación de la exposición al ruido en el trabajo según ISO 9612:2009 (método de ingeniería); {strategy}.",
+    "task-based measurement (Clause 9)": "medición basada en la tarea (apartado 9)",
+    "job-based measurement (Clause 10)": "medición basada en el puesto de trabajo (apartado 10)",
+    "full-day measurement (Clause 11)": "medición de jornada completa (apartado 11)",
+    "Company": "Empresa",
+    "Worker(s) / job": "Trabajador(es) / puesto",
+    "Workplace": "Lugar de trabajo",
+    "Instrumentation": "Instrumentación",
+    "Calibration": "Calibración",
+    "Sound level meter IEC 61672-1 class 1": "Sonómetro IEC 61672-1 clase 1",
+    "Sound level meter IEC 61672-1 class 2": "Sonómetro IEC 61672-1 clase 2",
+    "Personal sound exposure meter (IEC 61252)": "Dosímetro personal de exposición sonora (IEC 61252)",
+    "Work analysis": "Análisis del trabajo",
+    "Sampling summary": "Resumen del muestreo",
+    "Task": "Tarea",
+    "Samples I": "Muestras I",
+    "Contribution L<sub>EX,8h,m</sub> [dB]": "Contribución L<sub>EX,8h,m</sub> [dB]",
+    "Nominal day": "Jornada nominal",
+    "Number of samples N": "Número de muestras N",
+    "Energy-average level L<sub>p,A,eqTe</sub> [dB]": "Nivel promedio energético L<sub>p,A,eqTe</sub> [dB]",
+    "Effective day duration T<sub>e</sub> [h]": "Duración efectiva de la jornada T<sub>e</sub> [h]",
+    "Sampling standard uncertainty u<sub>1</sub> [dB]": "Incertidumbre típica de muestreo u<sub>1</sub> [dB]",
+    "Sampling contribution c<sub>1</sub>u<sub>1</sub> (Table C.4) [dB]": "Contribución del muestreo c<sub>1</sub>u<sub>1</sub> (Tabla C.4) [dB]",
+    "Instrument u<sub>2</sub> (Table C.5) [dB]": "Instrumento u<sub>2</sub> (Tabla C.5) [dB]",
+    "Microphone position u<sub>3</sub> [dB]": "Posición del micrófono u<sub>3</sub> [dB]",
+    "Assessment against Directive 2003/10/EC exposure values": "Evaluación frente a los valores de exposición de la Directiva 2003/10/CE",
+    "Directive 2003/10/EC value": "Valor de la Directiva 2003/10/CE",
+    "Threshold": "Umbral",
+    "Lower exposure action value": "Valor inferior de exposición que da lugar a una acción",
+    "Upper exposure action value": "Valor superior de exposición que da lugar a una acción",
+    "Exposure limit value": "Valor límite de exposición",
+    "Exceeded": "Superado",
+    "Not exceeded": "No superado",
+    "One-sided 95 % upper limit L<sub>EX,8h</sub> + U": "Límite superior unilateral al 95 % L<sub>EX,8h</sub> + U",
+    "Daily noise exposure level L<sub>EX,8h</sub> = <b>{lex} dB</b> &nbsp; U&nbsp;=&nbsp;{u}&nbsp;dB": "Nivel de exposición diario equivalente L<sub>EX,8h</sub> = <b>{lex} dB</b> &nbsp; U&nbsp;=&nbsp;{u}&nbsp;dB",
+    "Coverage factor k = {k} (one-sided 95 %)": "Factor de cobertura k = {k} (unilateral al 95 %)",
+    "Combined standard uncertainty u = {value} dB": "Incertidumbre típica combinada u = {value} dB",
+    "Upper limit L<sub>EX,8h</sub> + U = {value} dB": "Límite superior L<sub>EX,8h</sub> + U = {value} dB",
+    "L<sub>EX,8h</sub> = {lex} dB, exposure limit value &#8804; {limit} dB(A)": "L<sub>EX,8h</sub> = {lex} dB, valor límite de exposición &#8804; {limit} dB(A)",
+    "The ISO 9612 sampling rules recommend additional measurements (3 dB spread rule of Clauses 9.3/11.3, Table C.4 threshold of Clause 10.4, or the Table 1 minimum cumulative duration).": "Las reglas de muestreo de la ISO 9612 recomiendan mediciones adicionales (regla de dispersión de 3 dB de los apartados 9.3/11.3, umbral de la Tabla C.4 del apartado 10.4, o la duración acumulada mínima de la Tabla 1).",
+    "Noise exposure level and measurement uncertainty are stated as separate values (ISO 9612:2009 Clause 15); U = k&#183;u with k = 1.65 gives the one-sided 95 % confidence interval (Clause 14, Annex C).": "El nivel de exposición al ruido y la incertidumbre de medición se declaran como valores separados (ISO 9612:2009, apartado 15); U = k&#183;u con k = 1,65 da el intervalo de confianza unilateral al 95 % (apartado 14, anexo C).",
+    "When applying the exposure limit value, Directive 2003/10/EC (Article 3) takes account of the attenuation of the individual hearing protectors worn; the measured L<sub>EX,8h</sub> stated above does not include it.": "Al aplicar el valor límite de exposición, la Directiva 2003/10/CE (artículo 3) tiene en cuenta la atenuación de los protectores auditivos individuales utilizados; el L<sub>EX,8h</sub> medido indicado arriba no la incluye.",
     # --- footer -----------------------------------------------------------
     "Laboratory": "Laboratorio",
     "Report no.": "Informe n.º",

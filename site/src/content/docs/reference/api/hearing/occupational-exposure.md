@@ -70,6 +70,7 @@ ExposureResult(
     u3: float | None = None,
     n_samples: int | None = None,
     sampling_advisory: bool = False,
+    instrument: InstrumentClass | None = None,
     tasks: Tuple[TaskContribution, ...] = ...,
 )
 ```
@@ -84,6 +85,7 @@ Daily noise exposure level and its expanded uncertainty (ISO 9612:2009).
 | `combined_standard_uncertainty` | Combined standard uncertainty `u` (Eq C.1), dB. |
 | `expanded_uncertainty` | Expanded uncertainty `U = 1.65*u` for a one-sided 95 % confidence interval, dB. |
 | `strategy` | `"task"`, `"job"` or `"full_day"`. |
+| `instrument` | Instrument class the measurement was made with (the call default; individual tasks may override it): `"class1"`, `"class2"` or `"personal_exposimeter"`. Printed on the `.report()` fiche (ISO 9612:2009 Clause 15 c). |
 | `upper_limit` | `LEX,8h + U`, the value 95 % of readings fall below. |
 
 ### ExposureResult.plot()
@@ -103,6 +105,53 @@ Only task-based results carry per-task contributions (the job and
 full-day strategies raise `ValueError`). Requires matplotlib
 (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### ExposureResult.report()
+
+```python
+ExposureResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ISO 9612 occupational noise-exposure fiche to a PDF.
+
+Writes a one-page measurement report with the information ISO 9612:2009
+Clause 15 asks for: the standard-basis line naming the applied strategy,
+a metadata header (company, worker/job, workplace, instrumentation,
+calibration), the work analysis (the per-task table of durations,
+`Lp,A,eqT,m` levels and `LEX,8h,m` contributions for the task-based
+strategy, or the sampling summary for the job-based/full-day
+strategies), the per-task contribution chart for a task-based result,
+the boxed `LEX,8h` with its expanded uncertainty `U` stated
+separately (Clause 15 e), an assessment table against the exposure
+action values (80/85 dB(A)) and the exposure limit value (87 dB(A)) of
+Directive 2003/10/EC, a PASS/FAIL verdict against the limit value, and
+a footer identity/disclaimer block.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the worker(s)/job, `test_room` the workplace) plus the `instrumentation` and `calibration` free-text fields and the footer identity. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When True, the task-based work-analysis table adds the Annex C per-task uncertainty columns (`u1a`, `u1b`, `u2`). The job-based/full-day sampling summary always shows its budget. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab (or, for a task-based result's chart, matplotlib) is not installed (`pip install phonometry[report]`). |
 
 ### ExposureResult.upper_limit
 

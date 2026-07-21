@@ -54,6 +54,8 @@ from .._internal.warnings import PhonometryWarning, _warn_renamed
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 #: Reference duration T0 = 8 h (Clause 4).
 _T0: float = 8.0
 
@@ -258,6 +260,10 @@ class ExposureResult:
     :ivar expanded_uncertainty: Expanded uncertainty ``U = 1.65*u`` for a
         one-sided 95 % confidence interval, dB.
     :ivar strategy: ``"task"``, ``"job"`` or ``"full_day"``.
+    :ivar instrument: Instrument class the measurement was made with (the call
+        default; individual tasks may override it): ``"class1"``, ``"class2"``
+        or ``"personal_exposimeter"``. Printed on the ``.report()`` fiche
+        (ISO 9612:2009 Clause 15 c).
     :ivar upper_limit: ``LEX,8h + U``, the value 95 % of readings fall below.
     """
 
@@ -274,6 +280,7 @@ class ExposureResult:
     u3: float | None = None
     n_samples: int | None = None
     sampling_advisory: bool = False  # c1*u1 > 3.5 dB, or 3 dB spread on 3 samples
+    instrument: InstrumentClass | None = None
     tasks: Tuple[TaskContribution, ...] = field(default_factory=tuple)
 
     @property
@@ -293,6 +300,61 @@ class ExposureResult:
         from .._plot.hearing import plot_occupational_exposure
 
         return plot_occupational_exposure(self, ax=ax, language=check_language(language), **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 9612 occupational noise-exposure fiche to a PDF.
+
+        Writes a one-page measurement report with the information ISO 9612:2009
+        Clause 15 asks for: the standard-basis line naming the applied strategy,
+        a metadata header (company, worker/job, workplace, instrumentation,
+        calibration), the work analysis (the per-task table of durations,
+        ``Lp,A,eqT,m`` levels and ``LEX,8h,m`` contributions for the task-based
+        strategy, or the sampling summary for the job-based/full-day
+        strategies), the per-task contribution chart for a task-based result,
+        the boxed ``LEX,8h`` with its expanded uncertainty ``U`` stated
+        separately (Clause 15 e), an assessment table against the exposure
+        action values (80/85 dB(A)) and the exposure limit value (87 dB(A)) of
+        Directive 2003/10/EC, a PASS/FAIL verdict against the limit value, and
+        a footer identity/disclaimer block.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header identity (``client`` is the company, ``specimen`` the
+            worker(s)/job, ``test_room`` the workplace) plus the
+            ``instrumentation`` and ``calibration`` free-text fields and the
+            footer identity.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When True, the task-based work-analysis table adds the
+            Annex C per-task uncertainty columns (``u1a``, ``u1b``, ``u2``).
+            The job-based/full-day sampling summary always shows its budget.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab (or, for a task-based result's chart,
+            matplotlib) is not installed (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso9612 import render_iso9612_report
+
+        return render_iso9612_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 # --------------------------------------------------------------------------- #
@@ -408,6 +470,7 @@ def task_based_exposure(
         strategy="task",
         u3=u3,
         sampling_advisory=any(c.spread_advisory for c in contributions),
+        instrument=instrument,
         tasks=tuple(contributions),
     )
 
@@ -465,6 +528,7 @@ def _sampled_exposure(
         u3=u3,
         n_samples=n,
         sampling_advisory=advisory,
+        instrument=instrument,
     )
 
 

@@ -54,11 +54,11 @@ from ._layout import (
     _MUTED_HEX,
     _REPORTLAB_HINT,
     _VERDICT_BAD_HEX,
-    _VERDICT_OK_HEX,
     analysis_cell_styles,
     build_document,
     display_round,
     document_styles,
+    exceedance_markup,
     footer_flow,
     grid_table,
     render_figure_drawing,
@@ -319,19 +319,6 @@ def _assessment_table(result: "ExposureResult", language: str = "en") -> Any:
 
     header_style, label_style, value_style = analysis_cell_styles("iso9612")
 
-    def _status_markup(exceeded: bool | None) -> str:
-        if exceeded is None:
-            return f"<font color='{_MUTED_HEX}'>&#8211;</font>"
-        if exceeded:
-            return (
-                f"<font color='{_VERDICT_BAD_HEX}'>&#9679; "
-                f"{t('Exceeded', language)}</font>"
-            )
-        return (
-            f"<font color='{_VERDICT_OK_HEX}'>&#9679; "
-            f"{t('Not exceeded', language)}</font>"
-        )
-
     data: List[List[Any]] = [
         [
             Paragraph(t("Directive 2003/10/EC value", language), header_style),
@@ -346,7 +333,7 @@ def _assessment_table(result: "ExposureResult", language: str = "en") -> Any:
                 Paragraph(label, label_style),
                 Paragraph(threshold, value_style),
                 Paragraph(measured, value_style),
-                Paragraph(_status_markup(exceeded), label_style),
+                Paragraph(exceedance_markup(exceeded, language), label_style),
             ]
         )
     return stacked_table(data, [74 * mm, 24 * mm, 42 * mm, 34 * mm])

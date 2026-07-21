@@ -529,6 +529,28 @@ def analysis_cell_styles(prefix: str) -> Tuple[Any, Any, Any]:
     return header_style, label_style, value_style
 
 
+def exceedance_markup(exceeded: bool | None, language: str = "en") -> str:
+    """Inline status markup for an exceeded / not-exceeded assessment row.
+
+    Shared by the exposure fiches (occupational noise, human vibration): a red
+    filled dot and ``Exceeded`` when the value reaches or exceeds the threshold,
+    a green dot and ``Not exceeded`` when it does not, and a muted en dash for
+    an informational row (``exceeded=None``). Returns reportlab paragraph markup
+    (a string), so it needs no reportlab import of its own.
+    """
+    if exceeded is None:
+        return f"<font color='{_MUTED_HEX}'>&#8211;</font>"
+    if exceeded:
+        return (
+            f"<font color='{_VERDICT_BAD_HEX}'>&#9679; "
+            f"{t('Exceeded', language)}</font>"
+        )
+    return (
+        f"<font color='{_VERDICT_OK_HEX}'>&#9679; "
+        f"{t('Not exceeded', language)}</font>"
+    )
+
+
 def stacked_table(data: List[List[Any]], col_widths: List[Any]) -> Any:
     """A full-width table with the accredited styling (accent header, zebra rows).
 

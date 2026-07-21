@@ -255,8 +255,15 @@ four columns and the loudness-vs-time trace is landscape. It uses the same
 [ISO 717 insulation fiche](insulation-field.md#report-metadata-reportmetadata);
 a supplied `requirement` is read as the target programme loudness in LUFS
 (defaulting to the EBU R 128 −23.0 LUFS), and the fiche passes when the
-integrated loudness is within ±0.5 LU of it and the true peak is at or below
-−1.0 dBTP. Rendering needs reportlab (`pip install phonometry[report]`); only
+integrated loudness is within the selected R 128 tolerance of it and the true
+peak is at or below −1.0 dBTP. The tolerance follows the `tolerance` keyword:
+the default `"qc"` applies the ±0.2 LU measurement-error allowance of R 128
+item i) (loudness workflows such as Quality Control), and `"live"` applies the
+±1.0 LU tolerance of item h), permitted only where the Target Level is not
+achievable practically (live programmes, for example); the applied rule and
+its R 128 item are printed on the fiche. The verdict is evaluated on the
+loudness rounded to the displayed 0.1 LU, so the printed numbers can never
+contradict it. Rendering needs reportlab (`pip install phonometry[report]`); only
 `engine="reportlab"` is supported. The fiche renders in English by default;
 pass `language="es"` for a Spanish fiche (translated fixed strings and a comma
 decimal separator), e.g. `res.report("loudness_fiche_es.pdf", language="es")`.
@@ -279,7 +286,7 @@ res.report(
 The example fiche, regenerated with `make reports`, is kept rendered in the
 repository. Click the preview to open the PDF:
 
-[![EBU R 128 programme-loudness example report: metadata header, a four-column compliance table with the integrated loudness and maximum true peak carrying the verdict and the loudness range and momentary/short-term maxima as informational rows, the full-width loudness-vs-time plot, the boxed I = -22.6 LUFS (LRA = 10.0 LU, max TP = -20.0 dBTP) single number and a PASS verdict against the -23.0 LUFS target](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.pdf)
+[![EBU R 128 programme-loudness example report: metadata header, a four-column compliance table with the integrated loudness and maximum true peak carrying the verdict and the loudness range and momentary/short-term maxima as informational rows, the full-width loudness-vs-time plot, the boxed I = -23.0 LUFS (LRA = 10.0 LU, max TP = -20.4 dBTP) single number and a PASS verdict against the -23.0 LUFS target under the default ±0.2 LU QC tolerance of EBU R 128 item i)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.pdf)
 
 *Programme-loudness compliance fiche (`ProgramLoudnessResult.report`), I in
 LUFS with LRA in LU and true peak in dBTP.*

@@ -249,6 +249,74 @@ def _extract_text(path: str) -> str:
     return "\n".join(page.extract_text() for page in PdfReader(path).pages)
 
 
+def test_airborne_fiche_pins_displayed_rating(tmp_path) -> None:
+    """The fiche prints exactly the Annex C Table C.1 numbers.
+
+    Independent oracle: ISO 717-1:2020 Annex C states Rw (C; Ctr) =
+    30 (-2; -3) dB with an unfavourable-deviation sum of 31,8 dB. The
+    adaptation terms carry a sign only when negative, as the standard's own
+    examples write them (e.g. "41 (0; -5) dB" in clause 5.2).
+    """
+    result = weighted_rating(_AIRBORNE_R)
+    out = tmp_path / "pins.pdf"
+    result.report(str(out), verbose=True)
+    text = _extract_text(str(out))
+    assert "Rw (C; Ctr) = 30 (-2; -3) dB" in text
+    assert "One-third-octave R [dB]" in text
+    assert "31.8" in text  # Annex C unfavourable-deviation sum
+
+
+def test_octave_band_fiche_declares_octave_bands(tmp_path) -> None:
+    """A 5-band octave rating is captioned as octave bands (ISO 717-2 4.4).
+
+    Clause 4.4 requires stating whether the rating came from one-third-octave
+    or octave measurements; a 5-row octave fiche must not claim
+    "One-third-octave".
+    """
+    result = weighted_impact_rating([65.0, 68.0, 67.0, 63.0, 58.0])
+    assert result.band_centers is not None and len(result.band_centers) == 5
+    out = tmp_path / "octave.pdf"
+    result.report(str(out))
+    text = _extract_text(str(out))
+    assert "Octave-band Ln [dB]" in text
+    assert "One-third-octave" not in text
+
+
+def test_symbol_labels_field_quantity(tmp_path) -> None:
+    """``symbol="DnT,w"`` relabels the boxed result, table and verdict.
+
+    A field measurement rated to a standardized level difference must not be
+    reported as the laboratory ``Rw`` (ISO 717-1 Tables 1-2 distinguish the
+    quantities).
+    """
+    result = weighted_rating(_AIRBORNE_R)
+    out = tmp_path / "symbol.pdf"
+    result.report(
+        str(out), metadata=ReportMetadata(requirement=25.0), symbol="DnT,w"
+    )
+    text = _extract_text(str(out))
+    assert "DnT,w (C; Ctr) = 30 (-2; -3) dB" in text
+    assert "DnT,w = 30 dB" in text  # verdict row
+    assert "Rw" not in text
+
+
+def test_invalid_symbol_rejected(tmp_path) -> None:
+    """A malformed quantity symbol raises ``ValueError``."""
+    result = weighted_rating(_AIRBORNE_R)
+    with pytest.raises(ValueError, match="symbol"):
+        result.report(str(tmp_path / "bad.pdf"), symbol="not a symbol")
+
+
+def test_metadata_area_is_not_display_rounded(tmp_path) -> None:
+    """A supplied area of 1.23 m^2 is reprinted verbatim, not reduced to 1.2."""
+    result = weighted_rating(_AIRBORNE_R)
+    out = tmp_path / "area.pdf"
+    result.report(str(out), metadata=ReportMetadata(area=1.23))
+    text = _extract_text(str(out))
+    assert "1.23" in text
+    assert "1.2 " not in text
+
+
 def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
     import re

@@ -119,15 +119,69 @@ def test_unknown_engine_rejected(tmp_path) -> None:
 
 
 def test_required_class_pass_and_fail_both_render(tmp_path) -> None:
-    """A PASS (class 1 meets required 1) and FAIL (misses strict 0) both render."""
+    """A PASS (class 1 meets required 1) and a FAIL (meets no class) both render."""
     result = filter_class_compliance(_class1_bank())
     assert result.overall_class == 1
     passing = tmp_path / "pass.pdf"
-    failing = tmp_path / "fail.pdf"
     result.report(str(passing), metadata=ReportMetadata(required_class=1))
-    result.report(str(failing), metadata=ReportMetadata(required_class=0))
     _assert_one_page(str(passing))
+    # FAIL case: a low-order bank meets no class of the edition.
+    failing_result = filter_class_compliance(
+        OctaveFilterBank(fs=48000, fraction=1, order=1, limits=[500, 2000])
+    )
+    assert failing_result.overall_class is None
+    failing = tmp_path / "fail.pdf"
+    failing_result.report(str(failing), metadata=ReportMetadata(required_class=1))
     _assert_one_page(str(failing))
+
+
+def test_required_class_missing_from_edition_rejected(tmp_path) -> None:
+    """Class 0 against a 2014-edition result raises: the class does not exist.
+
+    IEC 61260-1:2014 defines only classes 1 and 2; a required class 0 verdict
+    against a 2014 verification would silently render a meaningless FAIL, so
+    it is rejected with a pointer to the 1995 edition.
+    """
+    result = filter_class_compliance(_class1_bank())
+    with pytest.raises(ValueError, match="edition"):
+        result.report(
+            str(tmp_path / "class0.pdf"), metadata=ReportMetadata(required_class=0)
+        )
+
+
+def test_fiche_labels_bands_with_nominal_frequencies(tmp_path) -> None:
+    """The per-band table uses the nominal mid-band frequencies.
+
+    Both editions identify the filters by their nominal frequencies
+    (2014 5.5 / 1995 4.2): the fiche must print 125 Hz and 4 kHz, never the
+    exact base-ten 125.89.. / 3981.. Hz behind them.
+    """
+    result = filter_class_compliance(_class1_bank())
+    out = tmp_path / "nominal.pdf"
+    result.report(str(out))
+    text = _extract_text(str(out))
+    assert "125 Hz" in text
+    assert "4 kHz" in text
+    assert "126 Hz" not in text and "3981" not in text
+
+
+def test_range_limited_verdict_prints_qualifying_note(tmp_path) -> None:
+    """A range-limited COMPLIES is qualified on the fiche.
+
+    The multirate verification cannot exercise the stop-band mask beyond each
+    band's processing Nyquist, so the result carries ``range_limited`` and
+    the fiche prints the qualification next to the stated class.
+    """
+    result = filter_class_compliance(_class1_bank())
+    assert result.range_limited is True
+    for band in result.bands:
+        assert band["checked_to_omega"] > 0.0
+    out = tmp_path / "qualified.pdf"
+    result.report(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "COMPLIES" in text
+    assert "processing Nyquist frequency" in text
+    assert "not demonstrated" in text
 
 
 def test_non_compliant_bank_renders(tmp_path) -> None:

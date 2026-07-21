@@ -316,8 +316,16 @@ renderizado que la
 [ficha de aislamiento de ISO 717](/phonometry/es/guides/insulation-field/#informe-de-iso-717-report);
 un `requirement` proporcionado se interpreta como la sonoridad de programa
 objetivo en LUFS (por defecto los −23,0 LUFS de EBU R 128), y la ficha cumple
-cuando la sonoridad integrada está dentro de ±0,5 LU de él y el pico verdadero
-es igual o inferior a −1,0 dBTP. El renderizado necesita reportlab
+cuando la sonoridad integrada está dentro de la tolerancia de R 128
+seleccionada y el pico verdadero es igual o inferior a −1,0 dBTP. La
+tolerancia sigue el argumento `tolerance`: el valor por defecto `"qc"` aplica
+el margen de ±0,2 LU por errores de medida del punto i) de R 128 (flujos de
+trabajo de sonoridad como el control de calidad), y `"live"` aplica la
+tolerancia de ±1,0 LU del punto h), permitida solo cuando el nivel objetivo no
+es alcanzable en la práctica (por ejemplo, programas en directo); la regla
+aplicada y su punto de R 128 se imprimen en la ficha. El veredicto se evalúa
+sobre la sonoridad redondeada a los 0,1 LU mostrados, de modo que los números
+impresos nunca pueden contradecirlo. El renderizado necesita reportlab
 (`pip install phonometry[report]`); solo se admite `engine="reportlab"`. La
 ficha se genera en inglés por defecto; pasa `language="es"` para una ficha en
 español (cadenas fijas traducidas y coma como separador decimal), p. ej.
@@ -344,7 +352,7 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 <ReportPreview
 	name="ebu_r128_loudness_example"
 	title="Informe de ejemplo de sonoridad de programa EBU R 128 (PDF)"
-	description="Ficha de conformidad de sonoridad de programa de una página: un bloque de metadatos, una tabla de conformidad de cuatro columnas con la sonoridad integrada y el pico verdadero máximo como veredicto y el rango de sonoridad y los máximos momentáneo/corto plazo como filas informativas, la gráfica de sonoridad frente al tiempo a todo lo ancho, el número único enmarcado I = -22.6 LUFS (LRA = 10.0 LU, TP máx = -20.0 dBTP) y un veredicto CUMPLE frente al objetivo de -23.0 LUFS."
+	description="Ficha de conformidad de sonoridad de programa de una página: un bloque de metadatos, una tabla de conformidad de cuatro columnas con la sonoridad integrada y el pico verdadero máximo como veredicto y el rango de sonoridad y los máximos momentáneo/corto plazo como filas informativas, la gráfica de sonoridad frente al tiempo a todo lo ancho, el número único enmarcado I = -23.0 LUFS (LRA = 10.0 LU, TP máx = -20.4 dBTP) y un veredicto CUMPLE frente al objetivo de -23.0 LUFS con la tolerancia de control de calidad por defecto de ±0,2 LU del punto i) de EBU R 128."
 	caption="Ficha de conformidad de sonoridad de programa (ProgramLoudnessResult.report), I en LUFS con LRA en LU y pico verdadero en dBTP."
 />
 

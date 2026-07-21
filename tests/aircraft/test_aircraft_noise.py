@@ -152,6 +152,32 @@ def test_effective_perceived_noise_level_rejects_bad_shape() -> None:
         effective_perceived_noise_level(np.zeros((5, 10)))
 
 
+def test_helicopter_procedure_catches_low_frequency_rotor_tone() -> None:
+    """App. 2 4.3.1 Step 1: helicopters start the tone correction at 50 Hz.
+
+    A rotor tone in the 63 Hz band sits below the aeroplane procedure's
+    80 Hz start band, so the aeroplane chain must apply no tone correction
+    for it while the helicopter chain must (C > 0), raising the EPNL.
+    """
+    spectrum = np.full(24, 70.0)
+    spectrum[1] += 12.0  # 63 Hz rotor tone, below the aeroplane start band
+    spectra = np.tile(spectrum, (10, 1))
+
+    assert tone_correction(spectrum) == 0.0  # aeroplane start (80 Hz)
+    assert tone_correction(spectrum, start_band=0) > 0.0  # helicopter start
+
+    aeroplane = effective_perceived_noise_level(spectra)
+    helicopter = effective_perceived_noise_level(spectra, procedure="helicopter")
+    assert np.all(aeroplane.tone_correction == 0.0)
+    assert np.all(helicopter.tone_correction > 0.0)
+    assert helicopter.epnl > aeroplane.epnl
+
+
+def test_effective_perceived_noise_level_rejects_bad_procedure() -> None:
+    with pytest.raises(ValueError, match="procedure"):
+        effective_perceived_noise_level(np.zeros((5, 24)), procedure="rocket")
+
+
 def test_epnl_result_plot_smoke() -> None:
     rng = np.random.default_rng(0)
     peak = 20.0 * np.exp(-((np.arange(20) - 10.0) ** 2) / 8.0)

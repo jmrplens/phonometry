@@ -227,7 +227,10 @@ def verify_filter_class(
     constraints are checked even if the grid were coarse. Frequencies beyond
     the processing Nyquist cannot carry signal energy at the band's decimated
     rate (the multirate anti-aliasing filter removes them), so they are
-    treated as compliant.
+    treated as compliant; because the Table 1 limits there are nevertheless
+    not demonstrated, the returned ``range_limited`` flag is set whenever a
+    band's stop-band mask extends beyond its processing Nyquist, and the
+    per-band ``checked_to_omega`` records how far the check reached.
 
     :param bank: The filter bank to verify (its designed SOS are analyzed;
         works for stateful and stateless banks alike).
@@ -235,9 +238,15 @@ def verify_filter_class(
     :param edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
         (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0).
     :return: Dict with ``overall_class`` (the strictest class every band meets,
-        or ``None``) and ``bands``: a list of ``{"freq", "class",
-        "margin_class<c>_db"}`` for each class ``c`` of the edition, where a
-        positive margin means the limits are met with that much room.
+        or ``None``), ``range_limited`` (``True`` when at least one band's
+        stop-band mask extends beyond its processing Nyquist, so the returned
+        class attests the verified frequency range rather than the full
+        Table 1 mask; see above) and ``bands``: a list of ``{"freq", "class",
+        "checked_to_omega", "margin_class<c>_db"}`` for each class ``c`` of
+        the edition, where a positive margin means the limits are met with
+        that much room and ``checked_to_omega`` is the highest normalized
+        frequency the band's verification could reach (its processing Nyquist
+        over ``f_m``).
     """
     if num_points < 16:
         raise ValueError("'num_points' must be at least 16.")
@@ -252,6 +261,14 @@ def verify_filter_class(
     rows = list(spec["passband_max"]) + list(spec["stopband_min"])
     breakpoint_omegas = np.array([_map_breakpoint(row[0], bank.fraction) for row in rows])
     breakpoint_omegas = np.concatenate([1.0 / breakpoint_omegas, breakpoint_omegas])
+
+    # The outermost stop-band breakpoint (G**4 mapped to the bandwidth
+    # designator): a band whose processing Nyquist lies below it cannot have
+    # its full high-side stop-band mask demonstrated, so the verdict is then
+    # range-limited (the multirate anti-aliasing justifies treating the
+    # unreachable region as compliant, but it is not verified).
+    mask_top_omega = _map_breakpoint(spec["stopband_min"][-1][0], bank.fraction)
+    range_limited = False
 
     for idx in range(bank.num_bands):
         fm = float(bank.freq[idx])
@@ -295,21 +312,27 @@ def verify_filter_class(
         band_class: int | None = next(
             (cls for cls in classes_ordered if margins[cls] >= 0), None
         )
-        band_entry: Dict[str, Any] = {"freq": fm, "class": band_class}
+        if omega_nyq < mask_top_omega:
+            range_limited = True
+        band_entry: Dict[str, Any] = {
+            "freq": fm,
+            "class": band_class,
+            "checked_to_omega": float(omega_nyq),
+        }
         for cls in classes_ordered:
             band_entry[f"margin_class{cls}_db"] = margins[cls]
         bands.append(band_entry)
 
     if not bands:
         # No bands to verify: never report compliance vacuously.
-        return {"overall_class": None, "bands": []}
+        return {"overall_class": None, "range_limited": False, "bands": []}
 
     classes = [band["class"] for band in bands]
     # The strictest class every band meets is the worst (largest) per-band class;
     # None if any band meets no class.
     overall: int | None = None if None in classes else max(classes)
 
-    return {"overall_class": overall, "bands": bands}
+    return {"overall_class": overall, "range_limited": range_limited, "bands": bands}
 
 
 @dataclass(frozen=True)
@@ -341,6 +364,12 @@ class FilterComplianceResult:
     :ivar fs: The bank's full sampling rate in Hz.
     :ivar num_points: Frequency grid points per band used by the verification,
         retained so the redrawn curve matches the analysed grid.
+    :ivar range_limited: ``True`` when at least one band's stop-band mask
+        extends beyond its processing Nyquist frequency, so the verification
+        could not exercise the full Table 1 mask there (the multirate
+        anti-aliasing removes signal energy beyond it, but the limits are not
+        demonstrated); the stated class then attests the verified frequency
+        range and the ``.report()`` fiche prints a qualifying note.
     """
 
     overall_class: int | None
@@ -352,6 +381,7 @@ class FilterComplianceResult:
     factors: Tuple[int, ...]
     fs: float
     num_points: int
+    range_limited: bool = False
 
     def available_classes(self) -> List[int]:
         """The performance classes carried by the per-band verdict dictionaries.
@@ -481,6 +511,7 @@ def filter_class_compliance(
         factors=tuple(int(f) for f in bank.factor),
         fs=float(bank.fs),
         num_points=int(num_points),
+        range_limited=bool(verdict["range_limited"]),
     )
 
 

@@ -18,6 +18,7 @@ extra, matplotlib in ``phonometry[plot]``); each raises an actionable
 from __future__ import annotations
 
 import html
+import math
 import os
 import tempfile
 from typing import Any, Callable, List, Tuple
@@ -61,6 +62,37 @@ def fmt_num(value: float, language: str = "en") -> str:
     return format_number(value, language, decimals=1, trim=True)
 
 
+def fmt_meta(value: float, language: str = "en") -> str:
+    """Format a user-supplied metadata number without losing precision.
+
+    The header grid prints values the client supplied (a sample area of
+    ``1.23`` m^2, a pressure of ``101.32`` kPa); a laboratory fiche must not
+    silently alter them, so this round-trips the value (``repr``-shortest via
+    ``%g``) instead of forcing the one-decimal display rounding of
+    :func:`fmt_num`, and only localises the decimal separator.
+    """
+    from ._i18n import decimal_comma
+
+    return decimal_comma(f"{float(value):g}", language)
+
+
+def display_round(value: float, decimals: int = 1) -> float:
+    """Round half away from zero to ``decimals``, for display-driven verdicts.
+
+    The fiches print quantities at a fixed display precision, so their
+    pass/fail comparisons are evaluated on the value rounded exactly as it is
+    displayed (halves away from zero, the reading of the deterministic-rounding
+    convention used across the fiche layer); otherwise a result could print
+    numbers that contradict its own verdict at the tolerance boundary. A
+    result that rounds to zero returns an unsigned ``0.0`` (never ``-0.0``).
+    """
+    scale = 10.0 ** int(decimals)
+    magnitude = math.floor(abs(float(value)) * scale + 0.5) / scale
+    if magnitude == 0.0:
+        return 0.0
+    return -magnitude if value < 0.0 else magnitude
+
+
 def render_figure_drawing(
     plot_fn: Callable[..., Any],
     target_width: float,
@@ -90,6 +122,9 @@ def render_figure_drawing(
         ``None`` keeps the default portrait ``(5.8, 6.4)``. A landscape size
         (e.g. a wide, short time plot) is passed for a stacked full-width
         figure.
+    :param language: Fiche language, forwarded to ``plot_fn`` so the embedded
+        chart's axis labels and legends are localised, and to the tick-label
+        decimal separator.
     """
     try:
         import matplotlib
@@ -108,7 +143,10 @@ def render_figure_drawing(
         fig = Figure(figsize=figsize if figsize is not None else (5.8, 6.4))
         FigureCanvasAgg(fig)
         ax = fig.subplots()
-        plot_fn(ax=ax)
+        # Forward the fiche language so the embedded chart is localised too
+        # (every result ``plot`` accepts ``language``); without it a Spanish
+        # fiche would embed English axis labels and legends.
+        plot_fn(ax=ax, language=language)
         # The fiche states the rating in the boxed result, so the plot's own
         # title would only duplicate it at a large size.
         ax.set_title("")
@@ -253,10 +291,12 @@ def band_table(
         ("BOTTOMPADDING", (0, 0), (-1, -1), 2.6),
         ("BOX", (0, 0), (-1, -1), 0.5, accent),
     ]
-    for triplet_end in range(3, n_data, 3):
-        style_cmds.append(
-            ("LINEBELOW", (0, triplet_end), (-1, triplet_end), 0.4, thin)
-        )
+    # Octave-band tables (5 rows, one per octave) have no triplets to group.
+    if n_data != 5:
+        for triplet_end in range(3, n_data, 3):
+            style_cmds.append(
+                ("LINEBELOW", (0, triplet_end), (-1, triplet_end), 0.4, thin)
+            )
     if extra_styles:
         style_cmds += extra_styles
     table = Table(rows, colWidths=col_widths, repeatRows=1)

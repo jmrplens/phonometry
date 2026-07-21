@@ -41,6 +41,7 @@ from ._layout import (
     _REPORTLAB_HINT,
     build_document,
     compliance_table,
+    display_round,
     document_styles,
     footer_flow,
     grid_table,
@@ -53,11 +54,22 @@ from .metadata import ReportMetadata
 if TYPE_CHECKING:
     from ..broadcast.program_loudness import ProgramLoudnessResult
 
-#: EBU R 128 target programme loudness, LUFS, and its permitted tolerance, LU.
+#: EBU R 128 target programme loudness, LUFS.
 _DEFAULT_TARGET_LUFS = -23.0
-_TOLERANCE_LU = 0.5
 
-#: EBU R 128 maximum permitted true-peak level, dBTP.
+#: Programme-loudness tolerance about the target, in LU, per compliance rule
+#: (EBU R 128 v4/2020, unchanged in the 2023 revision): ``"qc"`` is the
+#: +-0.2 LU allowance of item i) for measurement errors in loudness workflows
+#: such as Quality Control; ``"live"`` is the +-1.0 LU tolerance of item h),
+#: permitted only where attaining the Target Level is not achievable
+#: practically (for example, live programmes). The pre-2020 blanket +-0.5 LU
+#: (the June 2014 V3 rule) no longer exists in R 128.
+_TOLERANCES_LU: dict[str, float] = {"qc": 0.2, "live": 1.0}
+
+#: The R 128 recommendation item each tolerance rule cites on the fiche.
+_TOLERANCE_CLAUSES: dict[str, str] = {"qc": "item i", "live": "item h"}
+
+#: EBU R 128 maximum permitted true-peak level, dBTP (item m).
 _MAX_TRUE_PEAK_DBTP = -1.0
 
 
@@ -85,21 +97,27 @@ def _metadata_pairs(
 
 
 def _status(
-    result: "ProgramLoudnessResult", target: float
+    result: "ProgramLoudnessResult", target: float, tolerance_lu: float
 ) -> Tuple[str, str, bool]:
     """The integrated-loudness and true-peak pass states, and their conjunction.
 
     Both the compliance-table rows and the combined verdict compare against the
     same two thresholds (integrated loudness within ``target`` &#177;
-    :data:`_TOLERANCE_LU`; true peak at or below :data:`_MAX_TRUE_PEAK_DBTP`),
-    so the comparison is derived once here and reused, keeping the two views in
-    lockstep.
+    ``tolerance_lu``; true peak at or below :data:`_MAX_TRUE_PEAK_DBTP`), so
+    the comparison is derived once here and reused, keeping the two views in
+    lockstep. The loudness comparison is evaluated on the value rounded to
+    0.1 LU exactly as the fiche displays it (EBU Tech 3341 section 2 requires
+    a display precision of at most one decimal place), so the printed numbers
+    can never contradict the verdict at the tolerance boundary. The true peak
+    is compared unrounded: item m) is an absolute production ceiling and the
+    strict reading is the conservative one.
 
     :return: ``(i_status, tp_status, passed)`` where each status is ``"pass"``
         or ``"fail"`` and ``passed`` is the conjunction (a programme complies
         only when both pass).
     """
-    i_pass = abs(float(result.integrated) - target) <= _TOLERANCE_LU
+    delta = display_round(float(result.integrated)) - display_round(target)
+    i_pass = abs(delta) <= tolerance_lu + 1e-9
     tp_pass = float(result.true_peak) <= _MAX_TRUE_PEAK_DBTP
     return (
         "pass" if i_pass else "fail",
@@ -109,19 +127,24 @@ def _status(
 
 
 def _compliance_rows(
-    result: "ProgramLoudnessResult", target: float, language: str = "en"
+    result: "ProgramLoudnessResult",
+    target: float,
+    tolerance_lu: float,
+    language: str = "en",
 ) -> List[Tuple[str, str, str, str]]:
     """Build the compliance-table rows for the EBU R 128 fiche.
 
     The verdict is carried only by the integrated loudness and the maximum
     true peak; the loudness range and the momentary/short-term maxima are
-    informational (status ``"info"``, no pass/fail).
+    informational (status ``"info"``, no pass/fail). The integrated loudness
+    and its delta are displayed from the same 0.1 LU rounding that
+    :func:`_status` evaluates, so the printed numbers and the verdict agree.
     """
-    integrated = float(result.integrated)
+    integrated = display_round(float(result.integrated))
     true_peak = float(result.true_peak)
-    delta = integrated - target
-    i_status, tp_status, _ = _status(result, target)
-    tol = decimal_comma(f"{_TOLERANCE_LU:g}", language)
+    delta = integrated - display_round(target)
+    i_status, tp_status, _ = _status(result, target, tolerance_lu)
+    tol = decimal_comma(f"{tolerance_lu:g}", language)
     informational = t("informational", language)
     return [
         (
@@ -176,17 +199,24 @@ def _statement(result: "ProgramLoudnessResult", language: str = "en") -> str:
 
 
 def _verdict(
-    result: "ProgramLoudnessResult", target: float, language: str = "en"
+    result: "ProgramLoudnessResult",
+    target: float,
+    tolerance: str = "qc",
+    language: str = "en",
 ) -> Tuple[str, bool]:
     """Combined verdict text and PASS flag (integrated loudness and true peak).
 
-    A programme complies when the integrated loudness is within the target
-    tolerance and the true peak is at or below the permitted ceiling.
+    A programme complies when the integrated loudness is within the selected
+    R 128 tolerance about the target (``"qc"``: +-0.2 LU per item i;
+    ``"live"``: +-1.0 LU per item h) and the true peak is at or below the
+    permitted ceiling. The verdict sentence cites the applied R 128 item.
     """
-    _i_status, _tp_status, passed = _status(result, target)
-    text = t("Compliant when I is within {target} &#177;{tol} LU and true peak &#8804; {tp} dBTP", language).format(
+    tolerance_lu = _TOLERANCES_LU[tolerance]
+    _i_status, _tp_status, passed = _status(result, target, tolerance_lu)
+    text = t("Compliant when I is within {target} LUFS &#177;{tol} LU (EBU R 128 {clause}) and true peak &#8804; {tp} dBTP", language).format(
         target=format_number(target, language, decimals=1),
-        tol=decimal_comma(f"{_TOLERANCE_LU:g}", language),
+        tol=decimal_comma(f"{tolerance_lu:g}", language),
+        clause=_TOLERANCE_CLAUSES[tolerance],
         tp=format_number(_MAX_TRUE_PEAK_DBTP, language, decimals=1),
     )
     return text, passed
@@ -199,6 +229,7 @@ def render_program_loudness_report(
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
     language: str = "en",
+    tolerance: str = "qc",
 ) -> str:
     """Render an EBU R 128 programme-loudness fiche to a PDF at ``path``.
 
@@ -213,11 +244,25 @@ def render_program_loudness_report(
         LUFS (defaulting to the EBU R 128 -23.0 LUFS).
     :param verbose: Accepted for a uniform ``.report()`` signature; the
         programme-loudness fiche has a single body layout, so it has no effect.
+    :param tolerance: Programme-loudness tolerance rule of EBU R 128:
+        ``"qc"`` (default) applies the +-0.2 LU measurement-error allowance of
+        item i) (loudness workflows such as Quality Control); ``"live"``
+        applies the +-1.0 LU tolerance of item h), permitted only where the
+        Target Level is not achievable practically (for example, live
+        programmes). The applied rule and its R 128 item are printed on the
+        fiche.
     :return: The written ``path`` as a :class:`str`.
+    :raises ValueError: If ``tolerance`` is not ``"qc"`` or ``"live"``.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
     """
     del verbose  # uniform signature; the fiche has one stacked body layout
+    if tolerance not in _TOLERANCES_LU:
+        raise ValueError(
+            f"Unknown tolerance rule {tolerance!r}; use 'qc' (+-0.2 LU, EBU "
+            "R 128 item i) or 'live' (+-1.0 LU, item h)."
+        )
+    tolerance_lu = _TOLERANCES_LU[tolerance]
     try:
         from reportlab.lib import colors
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -260,7 +305,10 @@ def render_program_loudness_report(
 
     flow.append(Paragraph(t("Compliance summary", language), caption_style))
     flow.append(
-        compliance_table(_compliance_rows(result, target, language), language=language)
+        compliance_table(
+            _compliance_rows(result, target, tolerance_lu, language),
+            language=language,
+        )
     )
     flow.append(Spacer(1, 8))
 
@@ -272,7 +320,7 @@ def render_program_loudness_report(
     flow.append(Spacer(1, 8))
 
     flow.append(result_box(_statement(result, language), styles, accent))
-    text, passed = _verdict(result, target, language)
+    text, passed = _verdict(result, target, tolerance, language)
     flow.extend(verdict_flow(text, passed, styles, language))
 
     basis_strip_style = ParagraphStyle(
@@ -280,6 +328,12 @@ def render_program_loudness_report(
         fontSize=7.5, leading=10, textColor=colors.HexColor(_MUTED_HEX),
         spaceBefore=6,
     )
+    tolerance_note = (
+        t("Loudness tolerance &#177;0.2 LU for measurement errors in loudness workflows, e.g. Quality Control (EBU R 128 item i).", language)
+        if tolerance == "qc"
+        else t("Loudness tolerance &#177;1.0 LU, permitted where the Target Level is not achievable practically, e.g. live programmes (EBU R 128 item h).", language)
+    )
+    flow.append(Paragraph(tolerance_note, basis_strip_style))
     flow.append(Paragraph(t("Gating -70 LUFS absolute / -10 LU relative (ITU-R BS.1770); 1 LU = 1 dB; true peak per EBU Tech 3341; LRA per EBU Tech 3342 (not recommended for programmes under 60 s).", language), basis_strip_style))
     flow.extend(footer_flow(metadata, language))
 

@@ -23,6 +23,11 @@ señal-ruido espectral; el suavizado en fracciones de octava tiende el puente
 de vuelta al mundo de bandas; y los generadores de ruido de colores
 sintetizan señales de prueba blancas, rosas, rojas, azules y violetas con
 pendiente exacta en ley de potencias.
+[La coherencia múltiple y parcial](/phonometry/es/guides/miso-coherence/) lleva
+esa misma maquinaria del espectro cruzado a varias fuentes correladas a la vez:
+a partir de dos o tres entradas y una salida separa la coherencia que una
+fuente aporta de verdad de la parte que solo comparte con otra, y sus espectros
+de salida coherente parciales indican qué fuente domina cada banda.
 
 [Análisis tiempo-frecuencia](/phonometry/es/guides/time-frequency/) es la
 vista intermedia: el espectrograma STFT calibrado muestra qué ocurre

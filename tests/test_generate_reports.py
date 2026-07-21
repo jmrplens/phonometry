@@ -1,10 +1,10 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """The example-report generator keeps producing valid one-page fiches.
 
-The rendered PDFs (and their PNG previews) under ``.github/reports/`` are not
+The rendered PDFs (and their WebP previews) under ``.github/reports/`` are not
 byte-checked (their vector plot differs by ~1 ULP across CPUs, and the raster
 inherits it); this test only guards that ``scripts/generate_reports.py`` still
-runs and writes a valid single-page PDF plus a valid PNG preview for every
+runs and writes a valid single-page PDF plus a valid WebP preview for every
 registered example.
 """
 
@@ -19,6 +19,7 @@ pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 pytest.importorskip("pypdf")
 pytest.importorskip("pypdfium2")
+pytest.importorskip("PIL")
 
 _SCRIPT = (
     pathlib.Path(__file__).resolve().parents[1] / "scripts" / "generate_reports.py"
@@ -31,9 +32,6 @@ def _load_generator():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
-
-
-_PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 
 
 def test_generate_reports_writes_one_page_pdfs(tmp_path) -> None:
@@ -50,12 +48,15 @@ def test_generate_reports_writes_one_page_pdfs(tmp_path) -> None:
         assert len(PdfReader(str(p)).pages) == 1
 
 
-def test_generate_reports_writes_png_previews(tmp_path) -> None:
+def test_generate_reports_writes_webp_previews(tmp_path) -> None:
+    from PIL import Image
+
     module = _load_generator()
     written = module.generate_reports(str(tmp_path))
     for path in written:
         preview = pathlib.Path(module.preview_path_for(path))
-        assert preview.suffix == ".png"
+        assert preview.suffix == ".webp"
         assert preview.is_file() and preview.stat().st_size > 0
-        with open(preview, "rb") as handle:
-            assert handle.read(8) == _PNG_MAGIC
+        with Image.open(preview) as image:
+            assert image.format == "WEBP"
+            assert image.width == module._PREVIEW_WIDTH_PX

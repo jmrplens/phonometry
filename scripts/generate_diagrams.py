@@ -3,7 +3,7 @@
 Deterministic SVG generator for the experimental-setup diagrams used in the
 documentation. Every diagram is emitted in a light and a dark variant
 (``*_dark.svg``) with the same palette as the matplotlib figures, so the
-docs can theme-switch them exactly like the PNG plots.
+docs can theme-switch them exactly like the raster WebP plots.
 
 Run directly or via ``make graphs``.
 """

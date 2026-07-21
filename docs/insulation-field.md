@@ -384,11 +384,11 @@ building.weighted_impact_rating(l_nt).report("Lnw_fiche.pdf")  # Ln,w (CI)
 Rendered examples of both fiches, regenerated with `make reports`, are kept in
 the repository. Click either preview to open the PDF:
 
-[![Airborne ISO 717-1 example report: metadata header, one-third-octave R table beside the measured-versus-shifted-reference plot, boxed Rw (C; Ctr) and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.pdf)
+[![Airborne ISO 717-1 example report: metadata header, one-third-octave R table beside the measured-versus-shifted-reference plot, boxed Rw (C; Ctr) and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.pdf)
 
 *Airborne rating fiche (`WeightedRatingResult.report`), Rw (C; Ctr).*
 
-[![Impact ISO 717-2 example report: the same accredited layout for the normalized impact level Ln, boxed Ln,w (CI) and a FAIL verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.pdf)
+[![Impact ISO 717-2 example report: the same accredited layout for the normalized impact level Ln, boxed Ln,w (CI) and a FAIL verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.pdf)
 
 *Impact rating fiche (`ImpactRatingResult.report`), Ln,w (CI).*
 
@@ -475,11 +475,11 @@ imp.report("LnTw_field.pdf",
 Rendered examples of both field fiches, regenerated with `make reports`, are
 kept in the repository. Click either preview to open the PDF:
 
-[![Field airborne ISO 16283-1 example report: metadata header, one-third-octave DnT table beside the measured-versus-shifted-reference curve, boxed DnT,w (C; Ctr), the engineering-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_airborne_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_airborne_example.pdf)
+[![Field airborne ISO 16283-1 example report: metadata header, one-third-octave DnT table beside the measured-versus-shifted-reference curve, boxed DnT,w (C; Ctr), the engineering-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_airborne_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_airborne_example.pdf)
 
 *Field airborne fiche (`AirborneInsulationResult.report`), DnT,w (C; Ctr).*
 
-[![Field impact ISO 16283-2 example report: the same field layout for the standardized impact level L'nT with the 500 Hz read-off, boxed L'nT,w (CI), the engineering-method statement and a FAIL verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_impact_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_impact_example.pdf)
+[![Field impact ISO 16283-2 example report: the same field layout for the standardized impact level L'nT with the 500 Hz read-off, boxed L'nT,w (CI), the engineering-method statement and a FAIL verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_impact_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_impact_example.pdf)
 
 *Field impact fiche (`ImpactInsulationResult.report`), L'nT,w (CI).*
 

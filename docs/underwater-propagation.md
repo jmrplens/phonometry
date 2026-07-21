@@ -369,8 +369,8 @@ computed numerically. Three solvers are provided (Jensen et al.,
   with the normal-mode transmission loss in trend.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_dark.png">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation.png" alt="Three numerical solvers: a Munk sound-speed profile, ray paths forming convergence zones, and transmission loss versus range from the normal-mode and parabolic-equation solvers agreeing in trend" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_dark.webp">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation.webp" alt="Three numerical solvers: a Munk sound-speed profile, ray paths forming convergence zones, and transmission loss versus range from the normal-mode and parabolic-equation solvers agreeing in trend" width="100%">
 </picture>
 
 <details>

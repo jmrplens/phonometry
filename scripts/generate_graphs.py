@@ -1364,16 +1364,18 @@ def set_theme(dark: bool) -> None:
     )
 
 
-# Figures kept as PNG because SVG would be strictly heavier, for two reasons:
+# Figures kept as raster (lossless WebP) because SVG would be strictly heavier,
+# for two reasons:
 #   * raster-backed (pcolormesh / specgram): the SVG would only wrap a base64
-#     bitmap ~4.5x larger than the PNG;
+#     bitmap several times larger than the raster;
 #   * dense time series (thousands of vertices): every sample becomes a path
-#     coordinate, so the SVG runs 5.5-7.75x the PNG (schroeder_decay 105->820 KB,
-#     calibration_stability 99->759 KB, impulse_response 134->747 KB).
+#     coordinate, so the SVG runs 5.5-7.75x the raster (schroeder_decay
+#     105->820 KB, calibration_stability 99->759 KB, impulse_response
+#     134->747 KB, measured against the earlier PNG encoding).
 # Both clear the ~4.5x "SVG no longer wins" bar; everything else is a vector plot
 # written as deterministic SVG (moderate 2.4x cases like sel_concept /
 # ln_levels_example stay SVG -- below the bar, and vector crispness is worth it).
-_PNG_FIGURES = frozenset(
+_RASTER_FIGURES = frozenset(
     {
         "spectrogram_example",
         # imshow raster: the STFT cells would bloat an SVG (and the repo's
@@ -1394,46 +1396,6 @@ _PNG_FIGURES = frozenset(
 )
 
 
-def _optimize_png(path: str) -> None:
-    """Losslessly shrink a rendered PNG in place, deterministically.
-
-    ``oxipng`` (via the pinned ``pyoxipng`` wheel) recompresses the pixels
-    without changing a single one, so the optimized file decodes to the exact
-    same image the raster figures are rendered as. The result is a pure
-    function of the input bytes and the fixed options below -- the same input
-    always yields the same output -- so an unchanged figure produces no diff
-    and ``make graphs`` is byte-reproducible across runs and machines.
-
-    Because the transform is lossless, an optimized committed PNG and a freshly
-    regenerated one (optimized or not) decode to identical pixels, so the
-    tolerance compare in ``scripts/check_figures.py`` passes either way: CI does
-    not have to run the optimizer for the staleness check to succeed (it does,
-    via ``requirements-figures.txt``, which makes the bytes identical too).
-    """
-    try:
-        import oxipng
-    except ImportError:
-        # The tolerance compare passes against unoptimized output (lossless),
-        # so a missing optimizer degrades to larger-but-identical pixels
-        # rather than a crash; regenerating for a COMMIT does need the pinned
-        # tool or the byte diff will churn.
-        print(f"[save_figure] pyoxipng not installed; {os.path.basename(path)} "
-              "saved unoptimized")
-        return
-
-    oxipng.optimize(
-        path,
-        level=6,
-        # Deterministic output regardless of how many worker threads oxipng
-        # uses: the filter/deflate search is exhaustive at this level, so the
-        # chosen encoding is fixed by the input, not by scheduling. No
-        # ``optimize_alpha``: it may rewrite the RGB of fully-transparent
-        # pixels, which would break the pixel-identity guarantee above if a
-        # figure ever gained a transparent region.
-        strip=oxipng.StripChunks.safe(),
-    )
-
-
 def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
     """Translate, theme-suffix and save the current figure.
 
@@ -1442,33 +1404,47 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
     (text kept as ``<text>`` rather than freetype glyph outlines, so the
     output does not depend on the font build) and no date metadata -- so
     ``make graphs`` is stable and CI can diff it. The figures in
-    :data:`_PNG_FIGURES` stay PNG (SVG would be heavier); their metadata is
-    stripped too (matplotlib otherwise stamps a version-dependent ``Software``
-    chunk), so the PNG bytes are reproducible across matplotlib builds. In both
-    cases ``filename`` may carry any extension; the real one is chosen here.
+    :data:`_RASTER_FIGURES` stay raster (SVG would be heavier), written as
+    lossless WebP: matplotlib renders the canvas to an in-memory PNG with the
+    version-stamped ``Software`` chunk (and any date) stripped, and Pillow
+    re-encodes those exact pixels with the exhaustive ``method=6`` search,
+    whose output is fixed by the input, so the WebP bytes are reproducible
+    across matplotlib builds and runs. In both cases ``filename`` may carry
+    any extension; the real one is chosen here.
     """
     _translate_figure(plt.gcf())
     stem = os.path.splitext(filename)[0]
-    ext = "png" if stem in _PNG_FIGURES else "svg"
+    ext = "webp" if stem in _RASTER_FIGURES else "svg"
     path = os.path.join(output_dir, f"{stem}{_LANG_SUFFIX}{_FILENAME_SUFFIX}.{ext}")
     if ext == "svg":
         plt.rcParams["svg.hashsalt"] = "phonometry"
         plt.rcParams["svg.fonttype"] = "none"
         kwargs.setdefault("metadata", {"Date": None})
-    else:
-        # Render the raster figures at 300 dpi so they stay crisp on
-        # high-density displays and when zoomed in the docs. Individual call
-        # sites may still override this.
-        kwargs.setdefault("dpi", 300)
-        # Drop matplotlib's version-stamped Software chunk (and any date) so the
-        # committed PNGs match a fresh render on any matplotlib build in CI.
-        # Merge instead of setdefault: a caller-supplied metadata dict must not
-        # silently reintroduce the version-dependent chunks.
-        kwargs["metadata"] = {"Software": None, "Date": None,
-                              **kwargs.get("metadata", {})}
-    plt.savefig(path, **kwargs)
-    if ext == "png":
-        _optimize_png(path)
+        plt.savefig(path, **kwargs)
+        return
+    import io
+
+    from PIL import Image
+
+    # Render the raster figures at 300 dpi so they stay crisp on
+    # high-density displays and when zoomed in the docs. Individual call
+    # sites may still override this.
+    kwargs.setdefault("dpi", 300)
+    # Drop matplotlib's version-stamped Software chunk (and any date). Merge
+    # instead of setdefault: a caller-supplied metadata dict must not silently
+    # reintroduce the version-dependent chunks.
+    kwargs["metadata"] = {"Software": None, "Date": None,
+                          **kwargs.get("metadata", {})}
+    with io.BytesIO() as buffer:
+        plt.savefig(buffer, format="png", **kwargs)
+        buffer.seek(0)
+        with Image.open(buffer) as image:
+            # Lossless WebP: identical pixels to the rendered canvas at roughly
+            # half the optimized-PNG size (flat-color plot areas compress better
+            # lossless than lossy). method=6 is the slowest, most exhaustive
+            # encoder search; its output is a pure function of the input pixels,
+            # so the committed bytes are byte-stable across runs.
+            image.save(path, "WEBP", lossless=True, quality=100, method=6)
 
 
 
@@ -4888,7 +4864,7 @@ def generate_numerical_propagation(output_dir: str) -> None:
     axes[0].legend(loc="upper right", fontsize=9)
 
     # (b) Parabolic-equation transmission-loss field for the same environment;
-    # imshow renders a single raster image (the figure is a PNG).
+    # imshow renders a single raster image (the figure is a raster WebP).
     pe_field = parabolic_equation(50.0, zprof, cprof, source_depth=1000.0,
                                   max_range=100_000.0, range_step=25.0,
                                   n_depth_points=1024)
@@ -8104,10 +8080,10 @@ def generate_all(img_dir: str) -> None:
 # verdict state near the end of the clip) so the site can embed the video
 # with ``preload="none"`` and still show a meaningful still while nothing is
 # fetched. Posters are ``.jpg`` on purpose: `make graphs` clears only
-# ``*.svg``/``*.png`` and scripts/check_figures.py regenerates/compares only
-# those, so the posters ride with the WebM/GIF outside the figure pipeline.
-# Kept out of generate_all()/`make graphs` so ordinary PNG regeneration stays
-# fast; produced by `make animations` (or `make posters` to re-extract the
+# ``*.svg``/``*.png``/``*.webp`` and scripts/check_figures.py
+# regenerates/compares only those, so the posters ride with the WebM/GIF
+# outside the figure pipeline. Kept out of generate_all()/`make graphs` so
+# ordinary figure regeneration stays fast; produced by `make animations` (or `make posters` to re-extract the
 # stills from the committed WebMs without re-rendering).
 # ====================================================================
 _ANIM_FPS = 20
@@ -8138,7 +8114,7 @@ _GIF_COLORS = 64
 # quality are essentially flat from 2 through 4, so the run uses the faster
 # setting. ``-threads`` is capped so eight parallel Python workers do not
 # oversubscribe the box. Animations are not byte-compared (unlike the
-# SVG/PNG figures), so the mild run-to-run variance these knobs introduce is
+# SVG/WebP figures), so the mild run-to-run variance these knobs introduce is
 # harmless.
 _ANIM_CPU_USED = 4
 _ANIM_ENCODE_THREADS = 3
@@ -8461,7 +8437,7 @@ def _extract_poster(webm: str) -> str:
     The frame is grabbed half a second before the end of the clip, i.e.
     inside the closing hold, so the poster shows the settled verdict state.
     The output sits next to the WebM as ``<stem>_poster.jpg``; JPEG keeps it
-    outside the SVG/PNG figure pipeline (`make graphs` deletion glob and the
+    outside the SVG/WebP figure pipeline (`make graphs` deletion glob and the
     scripts/check_figures.py regeneration compare).
     """
     import subprocess

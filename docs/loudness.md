@@ -154,7 +154,7 @@ res.report(
 The example fiche, regenerated with `make reports`, is kept rendered in the
 repository. Click the preview to open the PDF:
 
-[![ISO 532-1 loudness example report: metadata header, a metrics table with total loudness N and loudness level LN, the specific-loudness pattern over Bark, the boxed N = 8.2 sone (LN = 70.4 phon) single number and a PASS verdict against a 12 sone limit](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso532_loudness_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso532_loudness_example.pdf)
+[![ISO 532-1 loudness example report: metadata header, a metrics table with total loudness N and loudness level LN, the specific-loudness pattern over Bark, the boxed N = 8.2 sone (LN = 70.4 phon) single number and a PASS verdict against a 12 sone limit](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso532_loudness_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso532_loudness_example.pdf)
 
 *Zwicker loudness fiche (`ZwickerLoudness.report`), N in sone with LN in phon.*
 

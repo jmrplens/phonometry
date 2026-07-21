@@ -100,7 +100,7 @@ Without `fs` the check is skipped. Override the limit with
 The check catches exactly what ruins field calibrations (a loose coupler,
 wind, handling noise):
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability.png" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability.webp" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>

@@ -14,7 +14,7 @@ refracting-atmosphere counterpart of the ocean solvers in
 Salomons, *Computational Atmospheric Acoustics* (2001) and Attenborough & Van
 Renterghem, *Predicting Outdoor Sound* 2e (2021, Ch. 11).
 
-![Atmospheric refraction: ray bending and the acoustic shadow](../.github/images/atmospheric_refraction.png)
+![Atmospheric refraction: ray bending and the acoustic shadow](../.github/images/atmospheric_refraction.webp)
 
 ## 1. Effective sound-speed profile
 

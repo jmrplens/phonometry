@@ -2,7 +2,7 @@
 # (the "Documentation figures up to date" job in python-app.yml).
 #
 # This pins the figure *structure*, not the last bit of every coordinate:
-# matplotlib/fonttools/pillow fix SVG text layout and PNG encoding, while
+# matplotlib/fonttools/pillow fix SVG text layout and WebP encoding, while
 # numpy/scipy/contourpy fix the computed data. Pinning only matplotlib is not
 # enough -- a new numpy or fonttools release changes element ordering, labels
 # or dimensions, which the structural comparison in scripts/check_figures.py
@@ -23,8 +23,3 @@ kiwisolver==1.5.0
 pyparsing==3.3.2
 cycler==0.12.1
 python-dateutil==2.9.0.post0
-# Lossless, deterministic PNG optimizer applied to the raster figures at save
-# time (scripts/generate_graphs.py:_optimize_png). The recompression is a pure
-# function of the input pixels, so `make graphs` stays byte-reproducible and CI
-# regenerates the exact committed bytes.
-pyoxipng==9.1.1

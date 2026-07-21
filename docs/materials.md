@@ -157,7 +157,7 @@ result.report(
 The example fiche, regenerated with `make reports`, is kept rendered in the
 repository. Click the preview to open the PDF:
 
-[![ISO 11654 absorption example report: metadata header, the full one-third-octave alpha_s table with the octave alpha_p on the matching rows beside the practical-versus-shifted-reference plot, boxed alpha_w = 0.60 (M) with absorption class C and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso11654_absorption_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso11654_absorption_example.pdf)
+[![ISO 11654 absorption example report: metadata header, the full one-third-octave alpha_s table with the octave alpha_p on the matching rows beside the practical-versus-shifted-reference plot, boxed alpha_w = 0.60 (M) with absorption class C and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso11654_absorption_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso11654_absorption_example.pdf)
 
 *Weighted absorption fiche (`AbsorptionRatingResult.report`), $\alpha_w$ with its class.*
 

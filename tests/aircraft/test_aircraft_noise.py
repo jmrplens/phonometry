@@ -174,8 +174,9 @@ def test_helicopter_procedure_catches_low_frequency_rotor_tone() -> None:
 
 
 def test_effective_perceived_noise_level_rejects_bad_procedure() -> None:
+    spectra = np.zeros((5, 24))
     with pytest.raises(ValueError, match="procedure"):
-        effective_perceived_noise_level(np.zeros((5, 24)), procedure="rocket")
+        effective_perceived_noise_level(spectra, procedure="rocket")
 
 
 def test_epnl_result_plot_smoke() -> None:

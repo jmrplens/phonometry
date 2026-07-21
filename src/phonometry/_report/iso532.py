@@ -113,7 +113,7 @@ def _metric_rows(
         else t("Total loudness N [sone]", language)
     )
     rows = [
-        (loudness_label, d1(result.loudness)),
+        (loudness_label, d1(display_round(float(result.loudness)))),
         (
             t("Loudness level L<sub>N</sub> [phon]", language),
             d1(result.loudness_level),
@@ -157,6 +157,41 @@ def _verdict(
     return text, passed
 
 
+def _basis_line(
+    result: "ZwickerLoudness",
+    metadata: ReportMetadata | None,
+    language: str,
+) -> str:
+    """The standard-basis line, with the clause 7 c)/d) mandatory items.
+
+    States the method used (stationary sounds, clause 5, or time-varying
+    sounds, clause 6) and the sound field the calculation assumed (free F or
+    diffuse D, when the result carries it).
+    """
+    method = (
+        t("method for time-varying sounds (clause 6)", language)
+        if _is_time_varying(result)
+        else t("method for stationary sounds (clause 5)", language)
+    )
+    measurement_standard = (
+        metadata.measurement_standard if metadata is not None else None
+    )
+    if measurement_standard:
+        basis = t("{standard} loudness. Rating per ISO 532-1:2017 (Zwicker method), {method}.", language).format(
+            standard=html.escape(measurement_standard), method=method
+        )
+    else:
+        basis = t("Loudness rating per ISO 532-1:2017 (Zwicker method), {method}.", language).format(method=method)
+    if result.field in ("free", "diffuse"):
+        field_text = (
+            t("free (F)", language)
+            if result.field == "free"
+            else t("diffuse (D)", language)
+        )
+        basis += " " + t("Sound field: {field}.", language).format(field=field_text)
+    return basis
+
+
 def render_iso532_report(
     result: "ZwickerLoudness",
     path: str,
@@ -193,31 +228,7 @@ def render_iso532_report(
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Loudness rating", language)
-
-    # Clause 7 c)/d): the report states the method used (stationary sounds,
-    # clause 5, or time-varying sounds, clause 6) and the sound field the
-    # calculation assumed (free F or diffuse D, when the result carries it).
-    method = (
-        t("method for time-varying sounds (clause 6)", language)
-        if _is_time_varying(result)
-        else t("method for stationary sounds (clause 5)", language)
-    )
-    measurement_standard = (
-        metadata.measurement_standard if metadata is not None else None
-    )
-    if measurement_standard:
-        basis = t("{standard} loudness. Rating per ISO 532-1:2017 (Zwicker method), {method}.", language).format(
-            standard=html.escape(measurement_standard), method=method
-        )
-    else:
-        basis = t("Loudness rating per ISO 532-1:2017 (Zwicker method), {method}.", language).format(method=method)
-    if result.field in ("free", "diffuse"):
-        field_text = (
-            t("free (F)", language)
-            if result.field == "free"
-            else t("diffuse (D)", language)
-        )
-        basis += " " + t("Sound field: {field}.", language).format(field=field_text)
+    basis = _basis_line(result, metadata, language)
 
     flow: List[Any] = [
         Paragraph(title, title_style),

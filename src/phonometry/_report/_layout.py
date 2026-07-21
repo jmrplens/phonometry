@@ -88,7 +88,7 @@ def display_round(value: float, decimals: int = 1) -> float:
     """
     scale = 10.0 ** int(decimals)
     magnitude = math.floor(abs(float(value)) * scale + 0.5) / scale
-    if magnitude == 0.0:
+    if magnitude <= 0.0:  # magnitude is non-negative; <= avoids float equality
         return 0.0
     return -magnitude if value < 0.0 else magnitude
 

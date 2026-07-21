@@ -54,8 +54,10 @@ def format_number(
         ``"-0.0"``.
     """
     text = f"{float(value):.{decimals}f}"
-    if float(text) == 0.0:
-        text = text.lstrip("-")
+    # A formatted value whose digits are all zeros is a signed zero; strip the
+    # sign by inspecting the text itself (no float equality involved).
+    if text.startswith("-") and not text.strip("-0."):
+        text = text[1:]
     if trim and decimals > 0:
         text = text.rstrip("0").rstrip(".")
     if language == "es":

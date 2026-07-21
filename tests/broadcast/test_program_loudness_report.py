@@ -190,8 +190,9 @@ def test_live_tolerance_applies_item_h_1_lu(tmp_path) -> None:
 def test_unknown_tolerance_rejected(tmp_path) -> None:
     """An unknown tolerance rule raises ``ValueError``."""
     result = _case1_result()
+    out = str(tmp_path / "bad.pdf")
     with pytest.raises(ValueError, match="tolerance"):
-        result.report(str(tmp_path / "bad.pdf"), tolerance="broadcast")
+        result.report(out, tolerance="broadcast")
 
 
 def test_verdict_follows_displayed_rounding_at_boundary() -> None:

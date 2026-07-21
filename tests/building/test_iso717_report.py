@@ -303,8 +303,9 @@ def test_symbol_labels_field_quantity(tmp_path) -> None:
 def test_invalid_symbol_rejected(tmp_path) -> None:
     """A malformed quantity symbol raises ``ValueError``."""
     result = weighted_rating(_AIRBORNE_R)
+    out = str(tmp_path / "bad.pdf")
     with pytest.raises(ValueError, match="symbol"):
-        result.report(str(tmp_path / "bad.pdf"), symbol="not a symbol")
+        result.report(out, symbol="not a symbol")
 
 
 def test_metadata_area_is_not_display_rounded(tmp_path) -> None:

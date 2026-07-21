@@ -215,7 +215,7 @@ def _verdict(
     _i_status, _tp_status, passed = _status(result, target, tolerance_lu)
     text = t("Compliant when I is within {target} LUFS &#177;{tol} LU (EBU R 128 {clause}) and true peak &#8804; {tp} dBTP", language).format(
         target=format_number(target, language, decimals=1),
-        tol=decimal_comma(f"{tolerance_lu:g}", language),
+        tol=format_number(tolerance_lu, language, decimals=1),
         clause=_TOLERANCE_CLAUSES[tolerance],
         tp=format_number(_MAX_TRUE_PEAK_DBTP, language, decimals=1),
     )

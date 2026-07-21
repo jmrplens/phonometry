@@ -143,10 +143,10 @@ def test_required_class_missing_from_edition_rejected(tmp_path) -> None:
     it is rejected with a pointer to the 1995 edition.
     """
     result = filter_class_compliance(_class1_bank())
+    out = str(tmp_path / "class0.pdf")
+    meta = ReportMetadata(required_class=0)
     with pytest.raises(ValueError, match="edition"):
-        result.report(
-            str(tmp_path / "class0.pdf"), metadata=ReportMetadata(required_class=0)
-        )
+        result.report(out, metadata=meta)
 
 
 def test_fiche_labels_bands_with_nominal_frequencies(tmp_path) -> None:

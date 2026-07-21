@@ -213,6 +213,67 @@ def class_limits(
     return minimum, maximum
 
 
+def _verify_band(
+    bank: OctaveFilterBank,
+    idx: int,
+    spec: Dict[str, Any],
+    classes_ordered: Tuple[int, ...],
+    breakpoint_omegas: np.ndarray,
+    edition: str,
+    num_points: int,
+) -> Tuple[Dict[str, Any], float]:
+    """Evaluate one band against every class; return its entry and Nyquist."""
+    fm = float(bank.freq[idx])
+    fsd = bank.fs / float(bank.factor[idx])
+    w, h = signal.sosfreqz(bank.sos[idx], worN=num_points, fs=fsd)
+
+    # Attenuation relative to the mid-band attenuation (Formulas 7-8),
+    # with the reference evaluated exactly at the mid-band frequency.
+    attenuation = -20.0 * np.log10(np.abs(h) + np.finfo(float).eps)
+    _, h_ref = signal.sosfreqz(bank.sos[idx], worN=np.array([fm]), fs=fsd)
+    a_ref = float(-20.0 * np.log10(np.abs(h_ref[0]) + np.finfo(float).eps))
+    delta_all = attenuation - a_ref
+
+    omega = w / fm
+    valid = omega > 0
+    omega, delta_a = omega[valid], delta_all[valid]
+
+    # Guarantee the Table 1 breakpoints (pass-band included) are evaluated,
+    # exactly (sosfreqz at the breakpoint frequencies, not interpolated
+    # off the grid, so a coarse grid cannot smooth a dip across them).
+    # Cut at the processing Nyquist, not omega.max(): the sosfreqz grid
+    # stops short of Nyquist and must not exclude checkable breakpoints.
+    omega_nyq = fsd / 2.0 / fm
+    extra = breakpoint_omegas[(breakpoint_omegas > 0) & (breakpoint_omegas <= omega_nyq)]
+    if extra.size:
+        _, h_extra = signal.sosfreqz(bank.sos[idx], worN=extra * fm, fs=fsd)
+        att_extra = -20.0 * np.log10(np.abs(h_extra) + np.finfo(float).eps)
+        omega = np.concatenate([omega, extra])
+        delta_a = np.concatenate([delta_a, att_extra - a_ref])
+
+    margins: Dict[int, float] = {}
+    for cls in classes_ordered:
+        minimum, maximum = class_limits(bank.fraction, cls, omega, edition=edition)
+        low_margin = float(np.min(delta_a - minimum))
+        finite = np.isfinite(maximum)
+        high_margin = (
+            float(np.min(maximum[finite] - delta_a[finite])) if np.any(finite) else np.inf
+        )
+        margins[cls] = min(low_margin, high_margin)
+
+    band_class: int | None = next(
+        (cls for cls in classes_ordered if margins[cls] >= 0), None
+    )
+    band_entry: Dict[str, Any] = {
+        "freq": fm,
+        "class": band_class,
+        "checked_to_omega": float(omega_nyq),
+    }
+    for cls in classes_ordered:
+        band_entry[f"margin_class{cls}_db"] = margins[cls]
+    return band_entry, omega_nyq
+
+
 def verify_filter_class(
     bank: OctaveFilterBank, num_points: int = 2 ** 15, *, edition: str = "2014"
 ) -> Dict[str, Any]:
@@ -271,56 +332,11 @@ def verify_filter_class(
     range_limited = False
 
     for idx in range(bank.num_bands):
-        fm = float(bank.freq[idx])
-        fsd = bank.fs / float(bank.factor[idx])
-        w, h = signal.sosfreqz(bank.sos[idx], worN=num_points, fs=fsd)
-
-        # Attenuation relative to the mid-band attenuation (Formulas 7-8),
-        # with the reference evaluated exactly at the mid-band frequency.
-        attenuation = -20.0 * np.log10(np.abs(h) + np.finfo(float).eps)
-        _, h_ref = signal.sosfreqz(bank.sos[idx], worN=np.array([fm]), fs=fsd)
-        a_ref = float(-20.0 * np.log10(np.abs(h_ref[0]) + np.finfo(float).eps))
-        delta_all = attenuation - a_ref
-
-        omega = w / fm
-        valid = omega > 0
-        omega, delta_a = omega[valid], delta_all[valid]
-
-        # Guarantee the Table 1 breakpoints (pass-band included) are evaluated,
-        # exactly (sosfreqz at the breakpoint frequencies, not interpolated
-        # off the grid, so a coarse grid cannot smooth a dip across them).
-        # Cut at the processing Nyquist, not omega.max(): the sosfreqz grid
-        # stops short of Nyquist and must not exclude checkable breakpoints.
-        omega_nyq = fsd / 2.0 / fm
-        extra = breakpoint_omegas[(breakpoint_omegas > 0) & (breakpoint_omegas <= omega_nyq)]
-        if extra.size:
-            _, h_extra = signal.sosfreqz(bank.sos[idx], worN=extra * fm, fs=fsd)
-            att_extra = -20.0 * np.log10(np.abs(h_extra) + np.finfo(float).eps)
-            omega = np.concatenate([omega, extra])
-            delta_a = np.concatenate([delta_a, att_extra - a_ref])
-
-        margins: Dict[int, float] = {}
-        for cls in classes_ordered:
-            minimum, maximum = class_limits(bank.fraction, cls, omega, edition=edition)
-            low_margin = float(np.min(delta_a - minimum))
-            finite = np.isfinite(maximum)
-            high_margin = (
-                float(np.min(maximum[finite] - delta_a[finite])) if np.any(finite) else np.inf
-            )
-            margins[cls] = min(low_margin, high_margin)
-
-        band_class: int | None = next(
-            (cls for cls in classes_ordered if margins[cls] >= 0), None
+        band_entry, omega_nyq = _verify_band(
+            bank, idx, spec, classes_ordered, breakpoint_omegas, edition, num_points
         )
         if omega_nyq < mask_top_omega:
             range_limited = True
-        band_entry: Dict[str, Any] = {
-            "freq": fm,
-            "class": band_class,
-            "checked_to_omega": float(omega_nyq),
-        }
-        for cls in classes_ordered:
-            band_entry[f"margin_class{cls}_db"] = margins[cls]
         bands.append(band_entry)
 
     if not bands:

@@ -220,6 +220,60 @@ class ToneBurstResult:
         return plot_tone_burst(self, ax=ax, language=language, **kwargs)
 
 
+def _tone_burst_scalars(
+    fs: float,
+    frequency: float,
+    cycles: int,
+    amplitude: float,
+    repetitions: int,
+    pre_silence: float,
+    post_silence: float,
+) -> tuple[float, float, int, float, int]:
+    """Validate the scalar arguments of :func:`tone_burst`."""
+    fs_v = _positive(fs, "fs")
+    f_v = _positive(frequency, "frequency")
+    if f_v >= fs_v / 2.0:
+        raise ValueError("'frequency' must be below the Nyquist rate fs/2.")
+    cycles_v = int(cycles)
+    if cycles_v != cycles or cycles_v < 1:
+        raise ValueError("'cycles' must be a positive integer.")
+    amplitude_v = _positive(amplitude, "amplitude")
+    repetitions_v = int(repetitions)
+    if repetitions_v != repetitions or repetitions_v < 1:
+        raise ValueError("'repetitions' must be a positive integer.")
+    for name, value in (("pre_silence", pre_silence),
+                        ("post_silence", post_silence)):
+        if not np.isfinite(float(value)) or float(value) < 0.0:
+            raise ValueError(f"'{name}' must be a non-negative, finite number.")
+    return fs_v, f_v, cycles_v, amplitude_v, repetitions_v
+
+
+def _tone_burst_period(
+    fs_v: float,
+    n_on: int,
+    repetitions_v: int,
+    repetition_rate: float | None,
+) -> tuple[float | None, int | None, float | None]:
+    """Repetition ``(rate, period_samples, duty_cycle)`` of the burst train.
+
+    ``(None, None, None)`` for a single burst without a repetition rate.
+    """
+    if repetition_rate is None:
+        if repetitions_v > 1:
+            raise ValueError(
+                "'repetition_rate' is required when 'repetitions' > 1."
+            )
+        return None, None, None
+    rate_v = _positive(repetition_rate, "repetition_rate")
+    period = int(round(fs_v / rate_v))
+    if period < n_on:
+        raise ValueError(
+            "The burst does not fit in one repetition period: "
+            f"{n_on} samples per burst, {period} per period."
+        )
+    return rate_v, period, n_on / period
+
+
 def tone_burst(
     fs: float,
     frequency: float,
@@ -256,21 +310,10 @@ def tone_burst(
     :return: A :class:`ToneBurstResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     """
-    fs_v = _positive(fs, "fs")
-    f_v = _positive(frequency, "frequency")
-    if f_v >= fs_v / 2.0:
-        raise ValueError("'frequency' must be below the Nyquist rate fs/2.")
-    cycles_v = int(cycles)
-    if cycles_v != cycles or cycles_v < 1:
-        raise ValueError("'cycles' must be a positive integer.")
-    amplitude_v = _positive(amplitude, "amplitude")
-    repetitions_v = int(repetitions)
-    if repetitions_v != repetitions or repetitions_v < 1:
-        raise ValueError("'repetitions' must be a positive integer.")
-    for name, value in (("pre_silence", pre_silence),
-                        ("post_silence", post_silence)):
-        if not np.isfinite(float(value)) or float(value) < 0.0:
-            raise ValueError(f"'{name}' must be a non-negative, finite number.")
+    fs_v, f_v, cycles_v, amplitude_v, repetitions_v = _tone_burst_scalars(
+        fs, frequency, cycles, amplitude, repetitions, pre_silence,
+        post_silence,
+    )
 
     burst_seconds = cycles_v / f_v
     n_on = int(round(fs_v * burst_seconds))
@@ -279,22 +322,9 @@ def tone_burst(
             "The burst is shorter than 2 samples; increase 'cycles' or 'fs'."
         )
 
-    period: int | None = None
-    rate_v: float | None = None
-    duty: float | None = None
-    if repetition_rate is not None:
-        rate_v = _positive(repetition_rate, "repetition_rate")
-        period = int(round(fs_v / rate_v))
-        if period < n_on:
-            raise ValueError(
-                "The burst does not fit in one repetition period: "
-                f"{n_on} samples per burst, {period} per period."
-            )
-        duty = n_on / period
-    elif repetitions_v > 1:
-        raise ValueError(
-            "'repetition_rate' is required when 'repetitions' > 1."
-        )
+    rate_v, period, duty = _tone_burst_period(
+        fs_v, n_on, repetitions_v, repetition_rate
+    )
 
     n_pre = int(round(float(pre_silence) * fs_v))
     n_post = int(round(float(post_silence) * fs_v))

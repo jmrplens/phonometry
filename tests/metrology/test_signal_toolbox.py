@@ -219,18 +219,20 @@ def test_identity_ratio_returns_copy_without_filtering() -> None:
 
 def test_irrational_ratio_raises() -> None:
     x = ph.noise_signal(FS, 0.05, seed=4)
+    fs_irrational = FS * np.sqrt(2.0)
     with pytest.raises(ValueError, match="rational"):
-        ph.resample_signal(x, FS, FS * np.sqrt(2.0))
+        ph.resample_signal(x, FS, fs_irrational)
 
 
 def test_resample_invalid_parameters() -> None:
     x = ph.noise_signal(FS, 0.05, seed=4)
+    two_dimensional = np.zeros((4, 4))
     with pytest.raises(ValueError, match="at least 30"):
         ph.resample_signal(x, FS, 32000.0, stopband_attenuation_db=10.0)
     with pytest.raises(ValueError, match="transition_width"):
         ph.resample_signal(x, FS, 32000.0, transition_width=0.9)
     with pytest.raises(ValueError, match="one-dimensional"):
-        ph.resample_signal(np.zeros((4, 4)), FS, 32000.0)
+        ph.resample_signal(two_dimensional, FS, 32000.0)
 
 
 # ---------------------------------------------------------------------------
@@ -307,11 +309,13 @@ def test_circular_roundtrip_recovers_record() -> None:
 
 def test_fractional_delay_invalid_inputs() -> None:
     x = ph.noise_signal(FS, 0.05, seed=11)
+    full_length = float(x.size)
+    two_dimensional = np.zeros((2, 8))
     with pytest.raises(ValueError, match="mode"):
         ph.fractional_delay(x, 1.0, mode="wrap")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="magnitude"):
-        ph.fractional_delay(x, float(x.size))
+        ph.fractional_delay(x, full_length)
     with pytest.raises(ValueError, match="finite"):
         ph.fractional_delay(x, np.nan)
     with pytest.raises(ValueError, match="one-dimensional"):
-        ph.fractional_delay(np.zeros((2, 8)), 1.0)
+        ph.fractional_delay(two_dimensional, 1.0)

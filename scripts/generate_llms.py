@@ -49,6 +49,7 @@ PAGES = [
     ("correlation-delay.md", "guides/correlation-delay"),
     ("test-signals.md", "guides/test-signals"),
     ("cepstrum-echoes.md", "guides/cepstrum-echoes"),
+    ("synchronous-averaging.md", "guides/synchronous-averaging"),
     ("swept-sine-distortion.md", "guides/swept-sine-distortion"),
     ("block-processing.md", "guides/block-processing"),
     ("multichannel.md", "guides/multichannel"),

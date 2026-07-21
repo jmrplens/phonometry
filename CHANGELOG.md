@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `time_synchronous_average`: extraction of a periodic waveform of known
+  period from asynchronous noise by time domain averaging (P. D. McFadden,
+  "A revised model for the extraction of periodic waveforms by time domain
+  averaging", Mechanical Systems and Signal Processing 1(1), 1987, 83-95).
+  Ensemble-averaging N successive periods (Eq. 5) reinforces every component
+  synchronous with the period and suppresses the rest, with the residual
+  asynchronous-noise standard deviation falling as 1/sqrt(N). The frozen
+  `SynchronousAverageResult` carries the averaged one-period waveform, the
+  residual and its RMS, the noise reduction in dB (10*log10(N)) with the
+  sqrt(N) amplitude gain, the comb-filter response over the first harmonics,
+  and a `.plot()` (EN/ES). When the sample rate does not divide the period
+  the blocks are aligned to a common integer grid by the band-limited
+  fractional delay of `fractional_delay`; an integer number of samples per
+  period is recovered to machine precision. `comb_filter_response` evaluates
+  the closed-form comb magnitude (Eq. 8/9), a Dirichlet kernel with unit
+  teeth at the harmonics k/T and nodes at j/(N*T), so an interfering order is
+  best rejected by choosing N to place a node on it (McFadden's 32.05-order
+  example: N = 20 beats the power-of-two N = 32).
 - `miso_coherence`: multiple and partial coherence of a multiple-input,
   single-output system (Bendat & Piersol, Random Data 4e, Chapter 7). From the
   Welch cross-spectral matrix of two or three partially correlated inputs and
@@ -1092,8 +1110,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   cross-reference).
 
 ### Changed
-- Raised the `scipy` floor in `pyproject.toml` to the current release
-  (`scipy>=1.18.0`), matching the pin `requirements.txt` already carried. The
+- Raised the `scipy` floor in `pyproject.toml` to `scipy>=1.18.0`, the minimum
+  supported scipy version, matching the floor `requirements.txt` already
+  carried. The
   `numpy` floor stays at `>=2.4.4` because the optional `perf` extra pulls
   numba, which still requires NumPy 2.4 or older; the pure-Python matrix and the
   figure stack already run on the latest NumPy through their own pins.

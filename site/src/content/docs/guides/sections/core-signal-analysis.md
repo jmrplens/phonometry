@@ -73,7 +73,7 @@ and carrying its statistical quality.
   output spectrum with the spectral SNR, 1/n-octave smoothing and
   exact-slope colored-noise generators.
 - [Multiple and partial coherence](/phonometry/guides/miso-coherence/): the
-  multiple-input/output coherence functions for two or three correlated
+  multiple-input/output coherence functions for multiple correlated
   sources and one output, with the conditioning that tells a genuine cause
   from a source that merely correlates with it, and the partial coherent
   output spectra that say which source dominates each band.
@@ -85,6 +85,11 @@ and carrying its statistical quality.
   detection with the reflection coefficient read off the cepstral peak,
   lowpass/highpass liftering of a log spectrum, and the envelope spectrum
   that turns amplitude modulations into discrete lines.
+- [Time synchronous averaging](/phonometry/guides/synchronous-averaging/):
+  extraction of a periodic waveform of known period by time domain averaging,
+  the comb filter that describes it in the frequency domain, the square-root
+  noise-reduction law, and the choice of the number of averages that places a
+  comb node on an interfering order (McFadden 1987).
 - [Correlation, time delay and envelope](/phonometry/guides/correlation-delay/):
   correlation estimates with the Bendat & Piersol random errors, time-delay
   estimation by direct correlation, cross-spectrum phase slope and the

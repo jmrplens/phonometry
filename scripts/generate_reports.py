@@ -110,6 +110,66 @@ def _impact_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso717_impact_example.pdf"
 
 
+def _field_airborne_example() -> Tuple[object, ReportMetadata, str]:
+    """Field airborne fiche: a DnT measurement between dwellings (ISO 16283-1)."""
+    l1 = np.array(
+        [92.3, 93.1, 94.0, 94.4, 94.8, 95.0, 95.2, 95.4,
+         95.3, 95.1, 94.8, 94.4, 93.9, 93.3, 92.5, 91.6]
+    )
+    d = np.array(
+        [38.2, 40.1, 42.6, 45.2, 47.8, 50.1, 52.3, 54.0,
+         55.6, 57.1, 58.2, 59.0, 59.6, 60.1, 60.3, 59.8]
+    )
+    t2 = np.array(
+        [0.62, 0.58, 0.55, 0.53, 0.52, 0.50, 0.49, 0.48,
+         0.47, 0.46, 0.45, 0.45, 0.44, 0.43, 0.43, 0.42]
+    )
+    result = ph.airborne_insulation(l1, l1 - d, t2, area=12.5, volume=30.4)
+    metadata = ReportMetadata(
+        specimen="Separating wall, 240 mm brick with independent lining",
+        client="Example client",
+        area=12.5,
+        source_volume=32.1,
+        receiving_volume=30.4,
+        temperature=20.4,
+        relative_humidity=52.0,
+        test_room="Dwelling A living room to dwelling B living room",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-16283-1",
+        requirement=50.0,
+    )
+    return result, metadata, "iso16283_airborne_example.pdf"
+
+
+def _field_impact_example() -> Tuple[object, ReportMetadata, str]:
+    """Field impact fiche: a tapping-machine L'nT measurement (ISO 16283-2)."""
+    li = np.array(
+        [58.0, 60.5, 62.0, 63.5, 65.0, 66.0, 66.5, 66.0,
+         65.5, 65.0, 64.0, 62.0, 59.0, 56.0, 53.0, 50.0]
+    )
+    t2 = np.array(
+        [0.60, 0.57, 0.55, 0.53, 0.52, 0.50, 0.49, 0.48,
+         0.47, 0.46, 0.45, 0.45, 0.44, 0.43, 0.43, 0.42]
+    )
+    result = ph.impact_insulation(li, t2, volume=30.4)
+    metadata = ReportMetadata(
+        specimen="Timber-joist floor with a floating chipboard deck",
+        client="Example client",
+        receiving_volume=30.4,
+        temperature=20.1,
+        relative_humidity=54.0,
+        test_room="Dwelling A bedroom below dwelling B bedroom",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-16283-2",
+        requirement=58.0,
+    )
+    return result, metadata, "iso16283_impact_example.pdf"
+
+
 def _absorption_example() -> Tuple[object, ReportMetadata, str]:
     """Absorption fiche: an ISO 11654 weighted sound absorption rating."""
     # The fifteen one-third-octave alpha_s (200 Hz to 5000 Hz) an accredited
@@ -462,6 +522,8 @@ def _microphone_example() -> Tuple[object, ReportMetadata, str]:
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _airborne_example,
     _impact_example,
+    _field_airborne_example,
+    _field_impact_example,
     _absorption_example,
     _loudness_example,
     _program_loudness_example,

@@ -106,6 +106,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `building.AirborneInsulationResult.report()` and
+  `building.ImpactInsulationResult.report()` render the ISO 16283 field
+  sound-insulation test report to a one-page PDF: the airborne fiche states
+  the standardized level difference DnT (or, with `quantity="r_prime"`, the
+  apparent sound reduction index R') per ISO 16283-1:2014 Clause 14 in the
+  layout of the recommended Annex B results form, and the impact fiche the
+  standardized L'nT (or normalized L'n) per ISO 16283-2:2020 Clause 14 /
+  Annex C, each with the quantity tabulated to one decimal place beside the
+  curve against the shifted reference (Clause 12), the boxed ISO 717-1 /
+  ISO 717-2 field rating evaluated over the 16 core one-third-octave bands,
+  the mandatory statement that the evaluation is based on field measurement
+  results obtained by an engineering method, an optional requirement verdict
+  and the shared metadata header/footer, localised in English and Spanish.
+  `verbose=True` swaps the table for the per-band measurement chain (the
+  energy-average room levels and the reverberation time beside the reported
+  quantity); to support it, `airborne_insulation()` and `impact_insulation()`
+  now retain their energy-averaged inputs on the results (`l1`, `l2`/`li`,
+  `t2`, `t0`, all defaulting to `None` for backward-compatible construction).
 - `electroacoustics.loudspeaker_characteristics` and
   `electroacoustics.LoudspeakerCharacteristics` gather the rated loudspeaker
   characteristics of IEC 60268-5:2003+A1:2007 around a measured on-axis

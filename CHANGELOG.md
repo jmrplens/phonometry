@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `DailyVibrationExposure.report()`: a one-page PDF daily vibration exposure
+  assessment fiche for hand-arm (ISO 5349-1/-2:2001) and whole-body
+  (ISO 2631-1:1997) exposure, laid out like the hand-arm and whole-body
+  exposure calculators of occupational-hygiene practice. The sheet carries the
+  standard-basis line naming the applied ISO method and the assessment
+  directive, an optional metadata header (company, operator/worker, workplace,
+  instrumentation, calibration), the per-operation exposure analysis (each
+  operation's vibration total value, its daily exposure time `T_i` and the
+  partial exposure `A_i(8)` of ISO 5349-1/-2 Eq. (2), closed by the daily total
+  and the combined `A(8)` of Eq. (3)) with the contribution chart, the boxed
+  `A(8)` with its exposure zone, and an assessment table against the exposure
+  action value (EAV) and exposure limit value (ELV) of Directive 2002/44/EC
+  (Article 3): hand-arm 2.5 / 5 m/s², whole-body 0.5 / 1.15 m/s², each marked
+  exceeded / not exceeded on the value rounded exactly as displayed, with a
+  PASS/FAIL verdict against the limit value and a footer note that the ISO
+  standards define no safe exposure limit. `verbose=True` adds each operation's
+  share of the daily vibration energy, and `language="es"` renders the Spanish
+  fiche (comma decimals). The committed example reproduces the ISO 5349-2:2001
+  Annex E.3 forestry worker's day (A(8) = 3.6 m/s², action zone). Rendering
+  needs the optional `phonometry[report]` extra (reportlab), plus matplotlib
+  for the contribution chart.
 - `time_synchronous_average`: extraction of a periodic waveform of known
   period from asynchronous noise by time domain averaging (P. D. McFadden,
   "A revised model for the extraction of periodic waveforms by time domain

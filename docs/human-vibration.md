@@ -314,6 +314,65 @@ action and limit values are the basis for any exposure criterion. For whole-body
 exposure, `energy_equivalent_acceleration` gives the ISO 2631-1 Eq. (B.3)
 energy-equivalent magnitude across periods of different magnitude and duration.
 
+## 5. The exposure assessment report (`.report()`)
+
+A daily exposure exists to be written down and compared with the law.
+`DailyVibrationExposure.report(path)` writes a one-page PDF assessment sheet
+laid out like the hand-arm and whole-body exposure calculators of
+occupational-hygiene practice (the HSE calculators, the EU Good Practice
+Guides): the standard-basis line naming the applied ISO method (ISO 5349-1/-2
+for hand-transmitted vibration, ISO 2631-1 for whole-body vibration) and the
+directive it is assessed against, a header grid (company via `client`,
+operator/worker via `specimen`, workplace via `test_room`, and the
+`instrumentation` and `calibration` free-text fields of `ReportMetadata`), the
+per-operation exposure analysis (each operation's vibration total value
+$a_{hv}$ or $a_v$, its daily exposure time $T_i$ and the partial exposure
+$A_i(8)$, closed by the daily total and the combined $A(8)$) with the
+contribution chart, and the boxed $A(8)$ with its exposure zone. The fiche then
+assesses $A(8)$ against Directive 2002/44/EC (Article 3): the exposure action
+value (EAV) and exposure limit value (ELV) for the vibration kind (hand-arm
+$2.5$ / $5$ m/s²; whole-body $0.5$ / $1.15$ m/s²), each marked exceeded / not
+exceeded on the value exactly as displayed, with a PASS/FAIL verdict against the
+limit value, and a footer note that the ISO standards define no safe exposure
+limit. `verbose=True` adds each operation's share of the daily vibration energy;
+`language="es"` renders the Spanish fiche (comma decimals). Rendering needs the
+optional `phonometry[report]` extra (reportlab), plus matplotlib for the chart.
+
+The relevant `ReportMetadata` fields for a vibration exposure report are
+`client` (the company), `specimen` (the operator/worker), `test_room` (the
+workplace), `test_date`, `instrumentation`, `calibration`, and the footer
+identity `laboratory`, `operator`, `report_id` and `notes`.
+
+```python
+from phonometry import vibration, ReportMetadata
+
+# The ISO 5349-2 Annex E.3 forestry worker's hand-arm day.
+res = vibration.daily_vibration_exposure(
+    [4.6, 6.0, 3.6],
+    [2 * 3600, 1 * 3600, 2 * 3600],
+    kind="hav",
+    labels=["Brush-saw clearance", "Chain-saw felling", "Chain-saw branch stripping"],
+)
+res.report(
+    "a8.pdf",
+    metadata=ReportMetadata(
+        client="Example forestry contractor",
+        specimen="Forestry worker (right hand)",
+        test_room="Managed woodland, plot 12",
+        instrumentation="Hand-arm vibration meter (ISO 8041-1), s/n 0042",
+        report_id="EXAMPLE-5349",
+    ),
+)   # A(8) = 3.61 m/s² -> action zone (EAV exceeded, ELV not), verdict PASS
+```
+
+The rendered example fiche, regenerated with `make reports`, is kept in the
+repository. Click the preview to open the PDF:
+
+[![Daily hand-arm vibration exposure example report: a header with the forestry contractor, the worker, the woodland workplace and the instrumentation, the per-operation exposure-analysis table (brush-saw clearance, chain-saw felling and branch stripping with the vibration total values, daily exposure times and partial exposures), the per-operation contribution chart, the boxed daily exposure A(8) = 3.61 m/s2 in the action zone, and the Directive 2002/44/EC assessment where the 2.5 m/s2 exposure action value is exceeded and the 5 m/s2 exposure limit value is not, ending in a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/human_vibration_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/human_vibration_example.pdf)
+
+*Daily vibration exposure fiche (`DailyVibrationExposure.report`), the
+ISO 5349-2 Annex E.3 hand-arm day with the Directive 2002/44/EC assessment.*
+
 ## References
 
 - Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.

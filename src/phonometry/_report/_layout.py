@@ -501,6 +501,89 @@ def compliance_table(
     return table
 
 
+def analysis_cell_styles(prefix: str) -> Tuple[Any, Any, Any]:
+    """Return ``(header, label, value)`` paragraph styles for a stacked table.
+
+    Shared by the exposure fiches (occupational noise, human vibration), whose
+    full-width analysis tables use the same cell typography: a white, centred
+    accent-header cell, a left-aligned label cell and a centred value cell, all
+    at 8.5 pt / 11 pt leading. ``prefix`` namespaces the reportlab style names
+    so two fiches rendered in the same process do not collide. Called only after
+    the renderer has imported reportlab.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+
+    styles = getSampleStyleSheet()
+    header_style = ParagraphStyle(
+        f"{prefix}_thead", parent=styles["Normal"], fontSize=8.5, leading=11,
+        textColor=colors.white, alignment=1,
+    )
+    label_style = ParagraphStyle(
+        f"{prefix}_label", parent=styles["Normal"], fontSize=8.5, leading=11,
+    )
+    value_style = ParagraphStyle(
+        f"{prefix}_value", parent=styles["Normal"], fontSize=8.5, leading=11,
+        alignment=1,
+    )
+    return header_style, label_style, value_style
+
+
+def exceedance_markup(exceeded: bool | None, language: str = "en") -> str:
+    """Inline status markup for an exceeded / not-exceeded assessment row.
+
+    Shared by the exposure fiches (occupational noise, human vibration): a red
+    filled dot and ``Exceeded`` when the value reaches or exceeds the threshold,
+    a green dot and ``Not exceeded`` when it does not, and a muted en dash for
+    an informational row (``exceeded=None``). Returns reportlab paragraph markup
+    (a string), so it needs no reportlab import of its own.
+    """
+    if exceeded is None:
+        return f"<font color='{_MUTED_HEX}'>&#8211;</font>"
+    if exceeded:
+        return (
+            f"<font color='{_VERDICT_BAD_HEX}'>&#9679; "
+            f"{t('Exceeded', language)}</font>"
+        )
+    return (
+        f"<font color='{_VERDICT_OK_HEX}'>&#9679; "
+        f"{t('Not exceeded', language)}</font>"
+    )
+
+
+def stacked_table(data: List[List[Any]], col_widths: List[Any]) -> Any:
+    """A full-width table with the accredited styling (accent header, zebra rows).
+
+    Shared by the exposure fiches: the accent header row, zebra body rows and a
+    thin box rule of the ISO 9612 and human-vibration analysis/assessment
+    tables. The returned table accepts further ``setStyle`` calls (for a totals
+    row's fill/rule). Called only after the renderer has imported reportlab.
+    """
+    from reportlab.lib import colors
+    from reportlab.platypus import Table, TableStyle
+
+    accent = colors.HexColor(_ACCENT_HEX)
+    light = colors.HexColor(_LIGHT_HEX)
+    table = Table(data, colWidths=col_widths, repeatRows=1)
+    table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("BACKGROUND", (0, 0), (-1, 0), accent),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, light]),
+                ("LINEABOVE", (0, 0), (-1, 0), 0.6, accent),
+                ("LINEBELOW", (0, -1), (-1, -1), 0.6, accent),
+                ("TOPPADDING", (0, 0), (-1, -1), 3.0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 3.0),
+                ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                ("BOX", (0, 0), (-1, -1), 0.5, accent),
+            ]
+        )
+    )
+    return table
+
+
 def result_box(
     statement: str,
     styles: Any,

@@ -92,6 +92,13 @@ _STRINGS: dict[str, str] = {
     "Total": "Total",
     "Distance from source [m]": "Distancia a la fuente [m]",
     "Sound pressure level [dB]": "Nivel de presión sonora [dB]",
+    "Shaped sweep (group-delay synthesis)":
+        "Barrido conformado (síntesis del retardo de grupo)",
+    "Welch spectrum of the sweep": "Espectro de Welch del barrido",
+    "Synthesis target": "Objetivo de síntesis",
+    "Sweep band": "Banda del barrido",
+    "Level re in-band max [dB]": "Nivel re máximo en banda [dB]",
+    "Crest factor": "Factor de cresta",
 }
 
 
@@ -771,3 +778,89 @@ def plot_steady_field(
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
+
+
+def plot_shaped_sweep(
+    result: "Any", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
+) -> Axes | np.ndarray:
+    """Shaped-sweep waveform and its Welch spectrum against the target.
+
+    Two stacked panels: the time-domain waveform on top and, below it, the
+    sweep's Welch magnitude spectrum overlaid on the synthesis target (both
+    in dB re their in-band maximum, so the match is read directly). With
+    ``ax`` given, only the spectrum panel is drawn on it.
+
+    :param result: A :class:`~phonometry.room.room_ir.ShapedSweepResult`.
+    :param ax: Existing axes for the spectrum panel, or ``None`` for a
+        fresh two-panel figure.
+    :param kwargs: Forwarded to the waveform ``plot`` call.
+    :return: The spectrum axes (``ax`` given) or the array of two axes.
+    """
+    from scipy import signal as sp_signal
+
+    from .._i18n import format_number, localize_axes
+
+    x = np.asarray(result.signal, dtype=np.float64)
+    fs = float(result.fs)
+    f1, f2 = result.f_range
+    time, xlabel = _time_axis(x.size, int(fs), language=language)
+    color = kwargs.pop("color", _C_PRIMARY)
+
+    # Welch magnitude of the sweep and the synthesis target, both in dB
+    # re their in-band maximum (power dB and magnitude dB share the shape).
+    # 75 % overlap: at the default 50 % the squared Hann windows do not sum
+    # to a constant, and a sweep maps that temporal power ripple onto a
+    # ~2 dB frequency ripple.
+    nperseg = min(4096, x.size)
+    freqs_w, psd = sp_signal.welch(
+        x, fs=fs, nperseg=nperseg, noverlap=3 * nperseg // 4
+    )
+    tiny = np.finfo(np.float64).tiny
+    band_w = (freqs_w >= f1) & (freqs_w <= f2)
+    welch_db = 10.0 * np.log10(np.maximum(psd, tiny))
+    welch_db -= float(np.max(welch_db[band_w]))
+    mag = np.asarray(result.magnitude, dtype=np.float64)
+    grid = np.asarray(result.frequencies, dtype=np.float64)
+    band_g = (grid >= f1) & (grid <= f2)
+    target_db = 20.0 * np.log10(np.maximum(mag, tiny))
+    target_db -= float(np.max(target_db[band_g]))
+
+    title = _t("Shaped sweep (group-delay synthesis)", language)
+    crest = format_number(result.crest_factor_db, language, decimals=1)
+
+    def _spectrum(axs: Axes) -> None:
+        pos = freqs_w > 0.0
+        axs.semilogx(freqs_w[pos], welch_db[pos], color=color, lw=1.2,
+                     label=_t("Welch spectrum of the sweep", language))
+        posg = grid > 0.0
+        axs.semilogx(grid[posg], target_db[posg], color=_C_REFERENCE,
+                     lw=1.4, ls="--", label=_t("Synthesis target", language))
+        axs.axvspan(f1, f2, color=color, alpha=0.08,
+                    label=_t("Sweep band", language))
+        axs.set_xlabel(_t("Frequency [Hz]", language))
+        axs.set_ylabel(_t("Level re in-band max [dB]", language))
+        axs.set_ylim(bottom=-60.0, top=8.0)
+        axs.grid(True, which="both", alpha=0.3)
+        axs.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+        format_frequency_axis(axs, max(f1 / 4.0, float(freqs_w[1])),
+                              min(2.0 * f2, fs / 2.0))
+        axs.set_xlim(max(f1 / 4.0, float(freqs_w[1])),
+                     min(2.0 * f2, fs / 2.0))
+        localize_axes(axs, language)
+
+    if ax is not None:
+        _spectrum(ax)
+        ax.set_title(title)
+        return ax
+
+    axes = _new_axes_column(2, figsize=(8.0, 6.0))
+    axes[0].plot(time, x, color=color, lw=0.6, **kwargs)
+    axes[0].set_xlabel(xlabel)
+    axes[0].set_ylabel(_t("Amplitude", language))
+    axes[0].set_title(f"{title} — {_t('Crest factor', language)} {crest} dB")
+    axes[0].grid(True, alpha=0.3)
+    axes[0].set_xlim(float(time[0]), float(time[-1]))
+    localize_axes(axes[0], language)
+    _spectrum(axes[1])
+    return axes

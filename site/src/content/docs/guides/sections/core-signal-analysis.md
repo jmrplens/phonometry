@@ -85,6 +85,10 @@ and carrying its statistical quality.
   estimation by direct correlation, cross-spectrum phase slope and the
   Knapp & Carter GCC weightings, sub-sample impulse-response delay and
   alignment, and the Hilbert envelope.
+- [System measurement](/phonometry/guides/system-measurement/):
+  complementary Golay pairs, sweeps with an arbitrary target magnitude
+  spectrum by group-delay shaping, and the Kirkeby-regularized inversion of
+  a measured response.
 
 ## [Calibration and uncertainty](/phonometry/guides/sections/calibration-uncertainty/)
 

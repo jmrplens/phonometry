@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- System-measurement front ends for the transfer-function toolbox:
 
 - `multitaper_psd`: Thomson multitaper spectral density (Thomson 1982;
   Percival & Walden 1993, Chapter 7) as the whole-record alternative to the

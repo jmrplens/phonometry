@@ -50,6 +50,13 @@ it; the list grows as guides gain their References sections.
   Free companion treatment of digital-filter design and analysis, a good next
   step after the filter-bank guides.
   Cited by [Filter Banks](filter-banks.md).
+- Bristow-Johnson, R. *Audio EQ Cookbook*. Republished as a W3C Working Group
+  Note (ed. R. Toy), 8 June 2021.
+  [w3.org/TR/audio-eq-cookbook](https://www.w3.org/TR/audio-eq-cookbook/).
+  The biquad coefficient recipes (peaking, shelves, low/high-pass, band-pass,
+  notch, all-pass) and their Q / bandwidth / shelf-slope parameterization,
+  implemented verbatim by `ParametricEQ`.
+  Cited by [Filter Banks](filter-banks.md).
 - Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
   Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
   [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).

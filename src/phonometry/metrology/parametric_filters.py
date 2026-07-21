@@ -44,7 +44,7 @@ from typing import List, Tuple, cast
 import numpy as np
 from scipy import signal
 
-from .._internal.utils import _typesignal
+from .._internal.utils import _sos_initial_state, _sos_state_mismatch, _typesignal
 
 try:
     from numba import jit as _numba_jit
@@ -274,27 +274,11 @@ class WeightingFilter:
 
     def _init_filter_state(self, x_proc: np.ndarray) -> None:
         """Allocate or reallocate ``zi`` to match the input shape."""
-        n_sections = self.sos.shape[0]
-        if x_proc.ndim == 1:
-            if self._steady_ic:
-                self.zi = signal.sosfilt_zi(self.sos)
-            else:
-                self.zi = np.zeros((n_sections, 2))
-        else:
-            n_channels = x_proc.shape[0]
-            if self._steady_ic:
-                zi_base = signal.sosfilt_zi(self.sos)
-                self.zi = np.tile(zi_base[:, np.newaxis, :], (1, n_channels, 1))
-            else:
-                self.zi = np.zeros((n_sections, n_channels, 2))
+        self.zi = _sos_initial_state(self.sos, x_proc, self._steady_ic)
 
     def _needs_zi_reinit(self, x_proc: np.ndarray) -> bool:
         """Check whether ``zi`` must be (re)allocated for *x_proc*."""
-        if self.zi.size == 0:
-            return True
-        if x_proc.ndim == 1:
-            return self.zi.ndim != 2
-        return self.zi.ndim != 3 or self.zi.shape[1] != x_proc.shape[0]
+        return _sos_state_mismatch(self.zi, x_proc)
 
     def filter(self, x: List[float] | np.ndarray) -> np.ndarray:
         """

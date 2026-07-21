@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Parametric-EQ biquads per the RBJ Audio EQ Cookbook (W3C Working Group
 - System-measurement front ends for the transfer-function toolbox:
 
 - `multitaper_psd`: Thomson multitaper spectral density (Thomson 1982;

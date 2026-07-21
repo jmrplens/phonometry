@@ -52,6 +52,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry",
             "phonometry.metrology.core",
             "phonometry.metrology.parametric_filters",
+            "phonometry.metrology.equalizer",
             "phonometry.metrology.frequencies",
             "phonometry.metrology.compliance",
         ),

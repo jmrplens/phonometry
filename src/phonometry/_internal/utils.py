@@ -72,3 +72,28 @@ def _downsamplingfactor(freq: List[float], fs: int, headroom: float = 1.25) -> n
     """
     factor = (np.floor((fs / 2) / (headroom * np.array(freq)))).astype("int")
     return cast(np.ndarray, np.clip(factor, 1, 500))
+
+
+def _sos_initial_state(
+    sos: np.ndarray, x_proc: np.ndarray, steady_ic: bool
+) -> np.ndarray:
+    """Initial ``zi`` for an SOS cascade, sized to match the input shape."""
+    n_sections = sos.shape[0]
+    if x_proc.ndim == 1:
+        if steady_ic:
+            return cast(np.ndarray, signal.sosfilt_zi(sos))
+        return np.zeros((n_sections, 2))
+    n_channels = x_proc.shape[0]
+    if steady_ic:
+        zi_base = signal.sosfilt_zi(sos)
+        return np.tile(zi_base[:, np.newaxis, :], (1, n_channels, 1))
+    return np.zeros((n_sections, n_channels, 2))
+
+
+def _sos_state_mismatch(zi: np.ndarray, x_proc: np.ndarray) -> bool:
+    """Whether ``zi`` must be (re)allocated for *x_proc*."""
+    if zi.size == 0:
+        return True
+    if x_proc.ndim == 1:
+        return zi.ndim != 2
+    return zi.ndim != 3 or zi.shape[1] != x_proc.shape[0]

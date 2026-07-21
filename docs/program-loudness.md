@@ -286,7 +286,7 @@ res.report(
 The example fiche, regenerated with `make reports`, is kept rendered in the
 repository. Click the preview to open the PDF:
 
-[![EBU R 128 programme-loudness example report: metadata header, a four-column compliance table with the integrated loudness and maximum true peak carrying the verdict and the loudness range and momentary/short-term maxima as informational rows, the full-width loudness-vs-time plot, the boxed I = -23.0 LUFS (LRA = 10.0 LU, max TP = -20.4 dBTP) single number and a PASS verdict against the -23.0 LUFS target under the default ±0.2 LU QC tolerance of EBU R 128 item i)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.pdf)
+[![EBU R 128 programme-loudness example report: metadata header, a four-column compliance table with the integrated loudness and maximum true peak carrying the verdict and the loudness range and momentary/short-term maxima as informational rows, the full-width loudness-vs-time plot, the boxed I = -23.0 LUFS (LRA = 10.0 LU, max TP = -20.4 dBTP) single number and a PASS verdict against the -23.0 LUFS target under the default ±0.2 LU QC tolerance of EBU R 128 item i)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ebu_r128_loudness_example.pdf)
 
 *Programme-loudness compliance fiche (`ProgramLoudnessResult.report`), I in
 LUFS with LRA in LU and true peak in dBTP.*

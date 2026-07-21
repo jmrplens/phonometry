@@ -462,7 +462,7 @@ levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5
 # levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example.png" alt="One-third-octave spectrogram of a logarithmic sweep with two tone bursts" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example.webp" alt="One-third-octave spectrogram of a logarithmic sweep with two tone bursts" width="80%"></picture>
 
 *A logarithmic sweep plus two tone bursts, resolved in time and in standardized
 1/3-octave bands.*

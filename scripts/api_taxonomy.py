@@ -259,9 +259,12 @@ _SECTION_LIST: tuple[Section, ...] = (
     ),
     Section(
         key="metrology",
-        label_en="Uncertainty",
-        label_es="Incertidumbre",
-        modules=("phonometry.metrology.uncertainty",),
+        label_en="Uncertainty and data quality",
+        label_es="Incertidumbre y calidad de datos",
+        modules=(
+            "phonometry.metrology.uncertainty",
+            "phonometry.metrology.random_data",
+        ),
     ),
     Section(
         key="spectra",

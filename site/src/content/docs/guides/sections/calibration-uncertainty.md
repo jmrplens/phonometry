@@ -27,6 +27,15 @@ intervals that stay honest when the model is non-linear or the inputs are far
 from Gaussian. The page shows both on the same models, including where they
 diverge and why.
 
+[Data qualification](/phonometry/guides/data-qualification/) guards the gate
+in front of both: every average - a Leq, a Welch PSD, an uncertainty budget -
+assumes the record is stationary, and the Bendat & Piersol reverse
+arrangement and runs tests decide that objectively from segment mean squares,
+with the book's own acceptance regions. The same page carries the Rice
+statistics of level crossings and peaks - apparent frequency, peak rates,
+the irregularity factor - that characterize a qualified Gaussian record and
+screen for one that is not.
+
 The same discipline extends into the frequency domain: the
 [Signals and spectra](/phonometry/guides/sections/signals-spectra/) pages
 apply the Bendat & Piersol error analysis to Welch spectral estimates, so
@@ -46,3 +55,6 @@ budgets that are specialisations of the GUM machinery described here.
 - [Measurement uncertainty (GUM and Monte Carlo)](/phonometry/guides/gum-uncertainty/):
   the law of propagation of uncertainty and the Monte Carlo method, expanded
   uncertainty and coverage intervals.
+- [Data qualification](/phonometry/guides/data-qualification/): the reverse
+  arrangement and runs stationarity tests on segment statistics, and the
+  Rice level-crossing and peak statistics with the irregularity factor.

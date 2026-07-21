@@ -273,6 +273,16 @@ from .metrology.phase import (
     minimum_phase,
     phase_decomposition,
 )
+from .metrology.random_data import (
+    LevelCrossingResult,
+    PeakStatisticsResult,
+    StationarityTestResult,
+    TrendTestResult,
+    level_crossing_rate,
+    peak_statistics,
+    stationarity_test,
+    trend_test,
+)
 from .metrology.signals import (
     ResampledSignalResult,
     ToneBurstResult,
@@ -1389,6 +1399,14 @@ __all__ = [
     "excess_phase",
     "phase_decomposition",
     "PhaseDecompositionResult",
+    "trend_test",
+    "stationarity_test",
+    "level_crossing_rate",
+    "peak_statistics",
+    "TrendTestResult",
+    "StationarityTestResult",
+    "LevelCrossingResult",
+    "PeakStatisticsResult",
     "sweep_signal",
     "inverse_filter",
     "impulse_response",

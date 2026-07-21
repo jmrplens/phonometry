@@ -205,10 +205,11 @@ export const apiSidebar = {
       ],
     },
     {
-      label: 'Uncertainty',
-      translations: { es: 'Incertidumbre' },
+      label: 'Uncertainty and data quality',
+      translations: { es: 'Incertidumbre y calidad de datos' },
       items: [
         'reference/api/metrology/uncertainty',
+        'reference/api/metrology/random-data',
       ],
     },
     {

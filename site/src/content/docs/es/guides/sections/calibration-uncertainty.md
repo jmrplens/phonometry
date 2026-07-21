@@ -30,6 +30,16 @@ que siguen siendo honestos cuando el modelo es no lineal o las entradas
 distan de ser gaussianas. La página muestra ambas sobre los mismos modelos,
 incluyendo dónde divergen y por qué.
 
+[Calificación de datos](/phonometry/es/guides/data-qualification/) guarda la
+puerta delante de ambas: todo promedio - un Leq, una PSD de Welch, un
+presupuesto de incertidumbre - supone que el registro es estacionario, y los
+tests de inversiones de orden y de rachas de Bendat y Piersol lo deciden
+objetivamente a partir de medias cuadráticas por segmento, con las regiones
+de aceptación del propio libro. La misma página trae las estadísticas de
+Rice de cruces por nivel y de picos - frecuencia aparente, tasas de picos,
+el factor de irregularidad - que caracterizan un registro gaussiano
+calificado y criban el que no lo es.
+
 La misma disciplina se extiende al dominio de la frecuencia: las páginas de
 [Señales y espectros](/phonometry/es/guides/sections/signals-spectra/)
 aplican el análisis de error de Bendat y Piersol a las estimaciones
@@ -51,3 +61,7 @@ la maquinaria GUM descrita aquí.
 - [Incertidumbre de medida (GUM y Monte Carlo)](/phonometry/es/guides/gum-uncertainty/):
   la ley de propagación de la incertidumbre y el método de Monte Carlo,
   incertidumbre expandida e intervalos de cobertura.
+- [Calificación de datos](/phonometry/es/guides/data-qualification/): los
+  tests de estacionariedad por inversiones de orden y por rachas sobre
+  estadísticas de segmento, y las estadísticas de Rice de cruces por nivel y
+  de picos con el factor de irregularidad.

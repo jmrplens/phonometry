@@ -243,3 +243,43 @@ def test_window_metrics_es_and_bad_language() -> None:
     plt.close("all")
     with pytest.raises(ValueError):
         res.plot(language="xx")
+
+
+def test_stationarity_test_es_and_bad_language() -> None:
+    n = 1 << 14
+    x = _white(n) * np.linspace(1.0, 1.3, n)
+    res = ph.stationarity_test(x, FS)
+    ax = res.plot(language="es")
+    assert "Test de estacionariedad" in ax.get_title()
+    assert ax.get_xlabel() == "Índice de segmento"
+    assert "Inversiones de orden" in _labels(ax)
+    plt.close("all")
+    runs = ph.stationarity_test(x, FS, method="runs")
+    ax = runs.plot(language="es")
+    assert "Rachas r =" in _labels(ax)
+    assert "Mediana de la secuencia" in _labels(ax)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
+def test_level_crossing_rate_es_and_bad_language() -> None:
+    res = ph.level_crossing_rate(_white(1 << 14), FS)
+    ax = res.plot(language="es")
+    assert "Tasa de cruces por nivel" in ax.get_title()
+    assert ax.get_ylabel() == "Cruces por segundo [1/s]"
+    assert "Expectativa de Rice" in _labels(ax)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
+def test_peak_statistics_es_and_bad_language() -> None:
+    res = ph.peak_statistics(_white(1 << 14), FS)
+    ax = res.plot(language="es")
+    assert "Distribución de alturas de pico" in ax.get_title()
+    assert "Límite de Rayleigh" in _labels(ax)
+    assert "Excedencia empírica de picos" in _labels(ax)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")

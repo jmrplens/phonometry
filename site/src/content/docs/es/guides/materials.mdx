@@ -246,6 +246,95 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 	caption="Ficha de absorción ponderada (AbsorptionRatingResult.report), alpha_w con su clase."
 />
 
+### Medición ISO 354 (`measure_sound_absorption`)
+
+La medición en cámara reverberante propiamente dicha es
+`measure_sound_absorption`. Toma el tiempo de reverberación en tercios de
+octava de la sala vacía ($T_1$) y de la sala con la probeta instalada ($T_2$),
+el volumen de la sala $V$ y el área de la probeta $S$, y devuelve un
+`SoundAbsorptionMeasurement` inmutable. Las áreas de absorción equivalente
+salen de la ecuación de Sabine (ISO 354:2003 Ec. (5)/(7)),
+$A = 55.3\,V/(c\,T) - 4\,V\,m$, con la velocidad del sonido de la Ec. (6),
+$c = 331 + 0.6\,t$; el coeficiente de absorción acústica es
+$\alpha_s = (A_2 - A_1)/S$ (Ec. (8)/(9)). El coeficiente puede superar 1,0 por
+efectos de borde y difracción (apartado 3.7 NOTA 2) y nunca se recorta. La
+atenuación del aire entra solo por el coeficiente por banda $m$ (por defecto 0,
+la referencia sin atenuación); pasa `attenuation_from_alpha` de un valor de
+ISO 9613-1 cuando haga falta.
+
+La ISO 354 es una caracterización: produce el espectro de $\alpha_s$, no un
+número único. El coeficiente ponderado $\alpha_w$ es una magnitud de la
+ISO 11654; pasa el $\alpha_s$ medido a `weighted_absorption_from_third_octave`
+(arriba) para obtenerlo.
+
+```python
+import numpy as np
+from phonometry import materials
+
+freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                  1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000], float)
+t_empty = np.array([9.0, 9.0, 8.8, 8.6, 8.4, 8.2, 8.0, 7.8, 7.5, 7.2,
+                    6.9, 6.6, 6.2, 5.8, 5.4, 5.0, 4.6, 4.2])
+t_specimen = np.array([8.4, 8.2, 7.7, 7.2, 6.5, 5.7, 4.9, 4.2, 3.6, 3.15,
+                       2.85, 2.65, 2.55, 2.5, 2.55, 2.6, 2.7, 2.85])
+
+m = materials.measure_sound_absorption(
+    freqs, t_empty, t_specimen, volume=200.0, area=10.8, temperature=20.0
+)
+print(m.alpha_s[7])   # alpha_s a 500 Hz: 0,328...
+m.plot()              # alpha_s frente a la frecuencia en tercios de octava
+```
+
+### Informe ISO 354 (`.report()`)
+
+`SoundAbsorptionMeasurement.report(path)` genera una ficha PDF de una página con
+el formato de un informe de ensayo de absorción acreditado en cámara
+reverberante (ISO 354:2003): la línea de base normativa, una cabecera de
+metadatos, la tabla de $\alpha_s$ en tercios de octava junto a la curva de
+$\alpha_s$ (el propio `.plot()` del resultado), un titular de caracterización en
+caja y un pie con el descargo fijo. La ISO 354 no tiene veredicto de
+cumplimiento ni número único, así que la ficha no incluye ninguno. Con
+`verbose=True` la tabla añade los tiempos de reverberación $T_1$/$T_2$ y las
+áreas de absorción equivalente $A_1$/$A_2$.
+
+Usa el mismo contenedor `ReportMetadata` y el mismo motor que las demás fichas.
+El área de la probeta $S$, el volumen de la sala $V$, la velocidad del sonido
+$c$, la temperatura y la humedad se toman del resultado de la medición (guiaron
+la inversión de Sabine); los campos descriptivos de `ReportMetadata` que
+aplican aquí son `client`, `manufacturer`, `specimen`, `mounting`, `test_room`,
+`test_date`, `pressure`, `measurement_standard`, `laboratory`, `operator`,
+`report_id` y `notes`. El campo `requirement` se ignora (la ISO 354 no tiene
+veredicto). La generación necesita reportlab (`pip install phonometry[report]`);
+solo se admite `engine="reportlab"`. La ficha se genera en inglés por defecto;
+pasa `language="es"` para una ficha en español (cadenas fijas traducidas y coma
+decimal).
+
+```python
+from phonometry import materials, ReportMetadata
+
+m = materials.measure_sound_absorption(
+    freqs, t_empty, t_specimen, volume=200.0, area=10.8,
+    temperature=20.0, humidity=54.0,
+)
+m.report(
+    "alpha_s_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="50 mm porous absorber over a 100 mm air gap",
+        mounting="Type A (against a rigid wall)",
+        measurement_standard="ISO 354",
+        test_room="Reverberation room R1",
+        laboratory="Phonometry Reference Laboratory",
+    ),
+)                                  # alpha_s en tercios de octava, 100 Hz a 5000 Hz
+```
+
+<ReportPreview
+	name="iso354_absorption_example"
+	title="Informe de ejemplo de absorción ISO 354 (PDF)"
+	description="Ficha de absorción acústica en cámara reverberante de una página: una cabecera de metadatos (cliente, muestra, superficie S, volumen de la sala V, velocidad del sonido c, montaje, temperatura, humedad y presión de la cámara reverberante), la tabla de alpha_s en tercios de octava agrupada por octavas junto a la curva de alpha_s, y el titular de caracterización en caja sobre el rango de tercios de octava ensayado."
+	caption="Ficha de absorción en cámara reverberante (SoundAbsorptionMeasurement.report), el espectro de alpha_s."
+/>
+
 ## 2. Resistencia al flujo de aire (ISO 9053-1/-2)
 
 La resistencia al flujo de aire cuantifica con qué fuerza un material poroso se

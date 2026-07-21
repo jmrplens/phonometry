@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **400/400 conformance checks pass** across 50 domains and 262 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **405/405 conformance checks pass** across 51 domains and 267 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -537,6 +537,19 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Percival & Walden 1993, Section 7.2 / Eq. (333) | Multitaper white-noise density = sigma^2/(fs/2), NW=4, K=7 tapers | 0.000977 (+/-3%) | 0.000963 | 0 | &#9989; |
 | Percival & Walden 1993, Eq. (369a) tone calibration | Multitaper 'spectrum' scaling reads a sinusoid peak at A^2/2 | 4.5 (+/-0.01%) | 4.500003 | 0 | &#9989; |
 | Percival & Walden 1993, Eq. (370b) | Adaptive multitaper dof -> 2K on white noise (weights -> uniform) | 14 (+/-2%) | 13.9847 | -0.015 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Multiple-input coherence (Bendat &amp; Piersol)</b>: 100% (5/5)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Bendat & Piersol, Random Data 4e Problem 7.2 / Eqs. (7.86)/(7.94) | Conditioned coherent output of the 2nd input |G2y.1|^2/G22.1 = 4/3 exactly | 1.333333333 (+/-0) | 1.333333333 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Problem 7.2 / Eqs. (7.87)/(7.116) | Partial coherence gamma^2_2y.1 = 2/15 and multiple coherence = 0.7 | 0.7 (+/-0) | 0.7 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Eq. (7.35) with Eqs. (6.40)/(6.41) | Multiple coherence of a known-SNR system: gamma^2_{y:x} = SNR/(1+SNR) | 0.8889 (+/-0.03) | 0.8913 | 0.002 | &#9989; |
+| Bendat & Piersol, Random Data 4e Eq. (7.117) | Uncorrelated inputs: multiple coherence = sum of ordinary coherences | 0 (+/-0.02) | -0.0098 | -0.01 | &#9989; |
+| Bendat & Piersol, Random Data 4e Eqs. (7.88)/(7.121) | Output-power decomposition Gyy = sum of Gvi + Gnn (exact) | 0 (+/-0.000000000001) | 0 | 0 | &#9989; |
 
 </details>
 

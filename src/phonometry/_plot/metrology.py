@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     )
     from ..metrology.equalizer import EQResponseResult
     from ..metrology.envelope import EnvelopeResult, EnvelopeSpectrumResult
+    from ..metrology.miso import MISOCoherenceResult
     from ..metrology.phase import PhaseDecompositionResult
     from ..metrology.random_data import (
         LevelCrossingResult,
@@ -41,6 +42,7 @@ if TYPE_CHECKING:
     from ..metrology.uncertainty import MonteCarloResult, UncertaintyResult
 
 from .common import (
+    _C_EDGE,
     _C_MUTED,
     _C_PRIMARY,
     _C_PRIMARY_LIGHT,
@@ -91,6 +93,15 @@ _STRINGS: dict[str, str] = {
     r"$\hat{G}_{nn}$ (noise)": r"$\hat{G}_{nn}$ (ruido)",
     "Coherent output spectrum (Bendat & Piersol 9.2.2)": "Espectro de salida coherente (Bendat y Piersol 9.2.2)",
     "Spectral SNR [dB]": "SNR espectral [dB]",
+    r"$\hat{G}_{yy}$ (measured output)": r"$\hat{G}_{yy}$ (salida medida)",
+    r"$\hat{G}_{nn}$ (residual noise)": r"$\hat{G}_{nn}$ (ruido residual)",
+    "Input {i}": "Entrada {i}",
+    "Partial coherent output spectra (Bendat & Piersol 7.3)":
+        "Espectros de salida coherente parciales (Bendat y Piersol 7.3)",
+    "Coherence": "Coherencia",
+    r"$\gamma^2_{y:x}$ (multiple)": r"$\gamma^2_{y:x}$ (múltiple)",
+    "Input {i} (partial)": "Entrada {i} (parcial)",
+    "Multiple and partial coherence": "Coherencia múltiple y parcial",
     "Calibrated spectrogram (Bendat & Piersol 12.6.4.2)":
         "Espectrograma calibrado (Bendat y Piersol 12.6.4.2)",
     "Zoom FFT (Bendat & Piersol 11.5.4)":
@@ -693,6 +704,102 @@ def plot_coherent_output_spectrum(
     axes[1].set_ylabel(_t("Spectral SNR [dB]", language))
     axes[1].set_xlabel(_t("Frequency [Hz]", language))
     axes[1].grid(True, which="both", alpha=0.3)
+    for axf in axes:
+        format_frequency_axis(axf, fmin, fmax)
+        localize_axes(axf, language)
+    return axes
+
+
+#: Per-input artist colors for the MISO coherence figure (up to three inputs).
+_MISO_COLORS = (_C_PRIMARY, _C_SECONDARY, _C_TERTIARY)
+
+
+def _miso_spectra_panel(
+    axs: Axes, result: "MISOCoherenceResult", freqs: np.ndarray,
+    pos: np.ndarray, language: str,
+) -> None:
+    """Draw the per-input coherent output spectra with pale opaque fills."""
+    axs.semilogx(
+        freqs[pos], _db10(result.output_psd[pos]), color=_C_MUTED, lw=1.4,
+        label=_t(r"$\hat{G}_{yy}$ (measured output)", language),
+    )
+    for i in range(result.n_inputs):
+        color = _MISO_COLORS[i % len(_MISO_COLORS)]
+        level = _db10(result.coherent_output_spectra[i][pos])
+        axs.fill_between(freqs[pos], axs.get_ylim()[0], level, color=color,
+                         alpha=0.12, lw=0.0)
+        axs.semilogx(freqs[pos], level, color=color, lw=1.2,
+                     label=_t("Input {i}", language, i=i + 1))
+    axs.semilogx(
+        freqs[pos], _db10(result.noise_psd[pos]), color=_C_REFERENCE,
+        ls="--", lw=1.0,
+        label=_t(r"$\hat{G}_{nn}$ (residual noise)", language),
+    )
+    axs.set_ylabel(_psd_ylabel(result.scaling, language))
+    axs.grid(True, which="both", alpha=0.3)
+    axs.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small", ncol=2)
+
+
+def _miso_coherence_panel(
+    axc: Axes, result: "MISOCoherenceResult", freqs: np.ndarray,
+    pos: np.ndarray, language: str,
+) -> None:
+    """Draw the multiple coherence over the per-input partial coherences."""
+    for i in range(result.n_inputs):
+        color = _MISO_COLORS[i % len(_MISO_COLORS)]
+        axc.semilogx(freqs[pos], result.partial_coherence[i][pos], color=color,
+                     lw=1.0, alpha=0.85,
+                     label=_t("Input {i} (partial)", language, i=i + 1))
+    axc.semilogx(freqs[pos], result.multiple_coherence[pos], color=_C_EDGE,
+                 lw=1.8, label=_t(r"$\gamma^2_{y:x}$ (multiple)", language))
+    axc.set_ylabel(_t("Coherence", language))
+    axc.set_ylim(0.0, 1.05)
+    axc.grid(True, which="both", alpha=0.3)
+    axc.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small", ncol=2)
+
+
+def plot_miso_coherence(
+    result: "MISOCoherenceResult",
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> "Axes | np.ndarray":
+    """Per-input coherent output spectra and the multiple/partial coherences.
+
+    The upper panel decomposes the measured output autospectrum into the
+    part each input contributes (a pale opaque fill under each line), the
+    lower panel shows the multiple coherence over the per-input partial
+    coherences. With ``ax`` given, only the spectra panel is drawn on it.
+
+    :param result: A :class:`~phonometry.metrology.miso.MISOCoherenceResult`.
+    :param ax: Existing axes for the spectra panel, or ``None`` for a fresh
+        two-panel figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Ignored (kept for signature parity with the other
+        renderers).
+    :return: The spectra axes (``ax`` given) or the array of two axes.
+    """
+    from .._i18n import localize_axes
+
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    pos = freqs > 0.0
+    fmin, fmax = float(freqs[pos].min()), float(freqs[pos].max())
+
+    if ax is not None:
+        _miso_spectra_panel(ax, result, freqs, pos, language)
+        ax.set_xlabel(_t("Frequency [Hz]", language))
+        format_frequency_axis(ax, fmin, fmax)
+        localize_axes(ax, language)
+        return ax
+
+    axes = _new_axes_column(2, sharex=True, figsize=(8.0, 6.4))
+    _miso_spectra_panel(axes[0], result, freqs, pos, language)
+    axes[0].set_title(
+        _t("Partial coherent output spectra (Bendat & Piersol 7.3)", language)
+    )
+    _miso_coherence_panel(axes[1], result, freqs, pos, language)
+    axes[1].set_xlabel(_t("Frequency [Hz]", language))
     for axf in axes:
         format_frequency_axis(axf, fmin, fmax)
         localize_axes(axf, language)

@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `miso_coherence`: multiple and partial coherence of a multiple-input,
+  single-output system (Bendat & Piersol, Random Data 4e, Chapter 7). From the
+  Welch cross-spectral matrix of two or three partially correlated inputs and
+  one output it reports the ordinary coherence of each input (Eq. 7.109), the
+  multiple coherence explained by all inputs jointly (Eq. 7.35), and the
+  partial coherences (Eq. 7.87) obtained by the Gaussian-elimination
+  conditioning of Section 7.3, so a source that only correlates with the true
+  cause is no longer credited for it. The frozen `MISOCoherenceResult` also
+  carries the partial coherent output spectra that decompose the output power
+  source by source (Eq. 7.86, with `sum(Gvi) + noise = Gyy`), the Section 9.3
+  random errors, a `.dominant_input()` helper for the strongest source per
+  band, and a `.plot()` (EN/ES). The conditioning is pinned to the exact
+  rational values of Problem 7.2 and to the multiple-coherence SNR relation.
 - ISO 9612:2009 occupational noise-exposure measurement report via
 - Parametric-EQ biquads per the RBJ Audio EQ Cookbook (W3C Working Group
 - System-measurement front ends for the transfer-function toolbox:

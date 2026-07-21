@@ -72,12 +72,16 @@ supply the error-analysis vocabulary the estimates are stated in.
   Welch PSD/CSD with chi-square confidence intervals, the coherent output
   spectrum and spectral SNR, 1/n-octave smoothing and exact-slope
   colored-noise generators.
+- [Multiple and partial coherence](/phonometry/guides/miso-coherence/):
+  the Bendat & Piersol multiple-input/output coherence functions for two or
+  three correlated sources and one output, with the Gaussian-elimination
+  conditioning that tells a genuine cause from a source that merely
+  correlates with it, and the partial coherent output spectra that say which
+  source dominates each band.
 - [Time-frequency analysis](/phonometry/guides/time-frequency/): the
   calibrated STFT spectrogram in absolute units (dB SPL for pascals) with
   the time-versus-frequency resolution trade-off, and the zoom FFT that
   resolves tones closer than a practical FFT bin.
-  spectrum and spectral SNR, 1/n-octave smoothing, exact-slope
-  colored-noise generators and the Harris window figures of merit.
 - [Cepstrum, echoes and the envelope spectrum](/phonometry/guides/cepstrum-echoes/):
   the power/real/complex cepstrum with quefrency analysis, echo detection
   with the reflection coefficient read off the peak, lowpass/highpass

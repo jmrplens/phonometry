@@ -721,6 +721,26 @@ _ES_EXACT = {
     "appears as one line at exactly $f_m$":
         "la portadora está en 1 kHz; su modulación de amplitud\n"
         "aparece como una línea exactamente en $f_m$",
+    # Multiple-input coherence (Bendat & Piersol Ch. 7)
+    "Multiple-Input Coherence: Which Source Dominates Each Band "
+    "(Bendat & Piersol Ch. 7)":
+        "Coherencia de múltiples entradas: qué fuente domina cada banda "
+        "(Bendat y Piersol cap. 7)",
+    "Measured output": "Salida medida",
+    "Input 1 contribution": "Contribución de la entrada 1",
+    "Input 2 contribution": "Contribución de la entrada 2",
+    "Residual noise": "Ruido residual",
+    "Coherent output [dB re 1/Hz]": "Salida coherente [dB re 1/Hz]",
+    r"Input 2 ordinary $\gamma^2_{2y}$ (inflated by x1)":
+        r"Entrada 2 ordinaria $\gamma^2_{2y}$ (inflada por x1)",
+    r"Input 2 partial $\gamma^2_{2y\cdot 1}$ (x1 removed)":
+        r"Entrada 2 parcial $\gamma^2_{2y\cdot 1}$ (x1 eliminada)",
+    r"Multiple $\gamma^2_{y:x}$": r"Múltiple $\gamma^2_{y:x}$",
+    "Coherence": "Coherencia",
+    "conditioning removes the shared x1 component:\n"
+    "the low-band ordinary coherence of x2 collapses":
+        "el condicionamiento elimina la componente x1 compartida:\n"
+        "la coherencia ordinaria de x2 en la banda baja se desploma",
     # Data qualification: stationarity test and Rice crossing statistics
     "Stationarity Test by Reverse Arrangements (B&P 10.3.1.1)":
         "Test de estacionariedad por inversiones de orden (B&P 10.3.1.1)",
@@ -4507,6 +4527,84 @@ def generate_envelope_spectrum(output_dir: str) -> None:
             color=COLOR_FG)
     plt.tight_layout()
     save_figure(output_dir, "envelope_spectrum.svg")
+    plt.close()
+
+
+def generate_miso_coherence(output_dir: str) -> None:
+    """MISO coherence: which correlated source dominates each band."""
+    print("Generating miso_coherence...")
+    from scipy import signal as sp_signal
+
+    from phonometry import miso_coherence, noise_signal
+
+    fs = 8192.0
+    seconds = 32.0
+    # x1 drives a low-frequency path; x2 = 0.7*x1 + independent noise drives a
+    # high-frequency path. x2 is correlated with x1, so its ORDINARY coherence
+    # with the output is inflated in the low band (borrowed through x1), while
+    # its PARTIAL coherence is clean once x1 is conditioned out.
+    x1 = noise_signal(fs, seconds, color="white", seed=1)
+    x2 = 0.7 * x1 + noise_signal(fs, seconds, color="white", seed=2)
+    low = sp_signal.butter(4, 400.0, fs=fs, output="sos")
+    high = sp_signal.butter(4, 1500.0, btype="high", fs=fs, output="sos")
+    noise = noise_signal(fs, seconds, color="white", rms=0.05, seed=3)
+    y = sp_signal.sosfilt(low, x1) + sp_signal.sosfilt(high, x2) + noise
+    res = miso_coherence([x1, x2], y, fs, nperseg=2048)
+
+    f = res.frequencies
+    band = (f >= 20.0) & (f <= 4000.0)
+    fb = f[band]
+
+    fig, (ax_top, ax_bot) = plt.subplots(2, 1, figsize=(10, 7.4), sharex=True)
+
+    def db(v: np.ndarray) -> np.ndarray:
+        with np.errstate(divide="ignore"):
+            return 10.0 * np.log10(v)
+
+    ax_top.semilogx(fb, db(res.output_psd[band]), color="gray", linewidth=1.4,
+                    label="Measured output")
+    floor = db(res.output_psd[band]).min() - 5.0
+    for i, color in ((0, COLOR_PRIMARY), (1, COLOR_TERTIARY)):
+        level = db(res.coherent_output_spectra[i][band])
+        ax_top.fill_between(fb, floor, level, color=color, alpha=0.12, lw=0.0)
+        ax_top.semilogx(fb, level, color=color, linewidth=1.4,
+                        label=f"Input {i + 1} contribution")
+    ax_top.semilogx(fb, db(res.noise_psd[band]), color=COLOR_SECONDARY,
+                    linestyle="--", linewidth=1.1, label="Residual noise")
+    ax_top.set_ylim(floor, db(res.output_psd[band]).max() + 3.0)
+    ax_top.set_ylabel("Coherent output [dB re 1/Hz]")
+    ax_top.set_title(
+        "Multiple-Input Coherence: Which Source Dominates Each Band "
+        "(Bendat & Piersol Ch. 7)", fontweight="bold", pad=12)
+    ax_top.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_top.set_axisbelow(True)
+    ax_top.legend(loc="lower center", fontsize=8.5, ncol=2)
+
+    ax_bot.semilogx(fb, res.ordinary_coherence[1][band], color=COLOR_TERTIARY,
+                    linestyle=":", linewidth=1.6,
+                    label=r"Input 2 ordinary $\gamma^2_{2y}$ (inflated by x1)")
+    ax_bot.semilogx(fb, res.partial_coherence[1][band], color=COLOR_TERTIARY,
+                    linewidth=1.8,
+                    label=r"Input 2 partial $\gamma^2_{2y\cdot 1}$ (x1 removed)")
+    ax_bot.semilogx(fb, res.multiple_coherence[band], color=COLOR_FG,
+                    linewidth=1.4, alpha=0.8,
+                    label=r"Multiple $\gamma^2_{y:x}$")
+    ax_bot.set_ylim(0.0, 1.05)
+    ax_bot.set_xlim(20.0, 4000.0)
+    ax_bot.set_xlabel("Frequency [Hz]")
+    ax_bot.set_ylabel("Coherence")
+    ax_bot.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_bot.set_axisbelow(True)
+    ax_bot.legend(loc="center right", fontsize=8.5)
+    ax_bot.text(0.015, 0.05,
+                "conditioning removes the shared x1 component:\n"
+                "the low-band ordinary coherence of x2 collapses",
+                transform=ax_bot.transAxes, va="bottom", ha="left",
+                fontsize=8.5, color=COLOR_FG)
+    for ax in (ax_top, ax_bot):
+        format_frequency_axis(ax, 20.0, 4000.0)
+    plt.tight_layout()
+    save_figure(output_dir, "miso_coherence.svg")
     plt.close()
 
 
@@ -8445,6 +8543,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Chs. 27/87) and the envelope spectrum of an AM tone (B&P 13.3).
     generate_cepstrum_echo,
     generate_envelope_spectrum,
+    # Multiple-input/output coherence (Bendat & Piersol Ch. 7).
+    generate_miso_coherence,
     # Data qualification: reverse arrangement stationarity test and the Rice
     # level-crossing / peak statistics (Bendat & Piersol 10.3 / 5.5).
     generate_stationarity_test,

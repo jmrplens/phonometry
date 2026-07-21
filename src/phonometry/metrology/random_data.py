@@ -309,6 +309,19 @@ class TrendTestResult:
     trend_free: bool
     alpha: float
 
+    def plot(
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
+    ) -> "Axes":
+        """Plot the tested sequence with the trend-test verdict.
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        """
+        from .._i18n import check_language
+        from .._plot.metrology import plot_trend_test
+
+        check_language(language)
+        return plot_trend_test(self, ax=ax, language=language, **kwargs)
+
 
 def _trend_test_reverse(
     values: "NDArray[np.float64]", alpha: float

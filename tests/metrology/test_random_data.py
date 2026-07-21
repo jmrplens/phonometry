@@ -396,6 +396,27 @@ def test_peak_statistics_validation_and_fields() -> None:
 # ---------------------------------------------------------------------------
 
 
+def test_trend_test_plot_renders_and_returns_axes() -> None:
+    res = ph.trend_test(EXAMPLE_4_4)
+    ax = res.plot()
+    assert "Trend test" in ax.get_title()
+    assert ax.get_xlabel() == "Sample index"
+    legend = ax.get_legend().get_texts()[0].get_text()
+    assert "Reverse arrangements A = 86" in legend
+    assert "no trend" in legend
+    plt.close("all")
+    rng = np.random.default_rng(3)
+    runs = ph.trend_test(rng.standard_normal(40), method="runs")
+    ax = runs.plot()
+    legend_texts = [t.get_text() for t in ax.get_legend().get_texts()]
+    assert any("Runs r =" in t for t in legend_texts)
+    assert any("Sequence median" in t for t in legend_texts)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+    plt.close("all")
+
+
 def test_plots_render_and_return_axes() -> None:
     rng = np.random.default_rng(10)
     n = 1 << 14

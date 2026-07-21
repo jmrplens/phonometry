@@ -523,3 +523,22 @@ two-sided tail probability of the observed count.
 | `p_value` | Two-sided p-value from the exact null distribution (normal approximation above `n = 100` for reverse arrangements). |
 | `trend_free` | `True` when the statistic falls inside the acceptance region. |
 | `alpha` | Significance level of the region (default 0.05). |
+
+### TrendTestResult.plot()
+
+```python
+TrendTestResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the tested sequence with the trend-test verdict.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |

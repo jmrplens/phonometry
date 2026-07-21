@@ -739,6 +739,67 @@ def _open_plan_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso3382_3_open_plan_example.pdf"
 
 
+def _multiple_shock_example() -> Tuple[object, ReportMetadata, str]:
+    """Multiple-shock fiche: the ISO 2631-5:2018 Annex C worked example.
+
+    Reproduces the Annex C worked example, whose spinal response is five
+    40 m/s2 shocks in the measured day for an 82 kg male exposed from age 20 for
+    20 years at 120 days/year. From those response peaks the standard gives the
+    daily acceleration dose Dzd = 1.07*(5*40**6)**(1/6) = 55.97 m/s2 (Formula 3;
+    the measurement and daily periods coincide, so Dz = Dzd), the daily
+    compressive stress Sd = mz*Dzd = 0.029*55.97 = 1.623 MPa (Formula C.1), the
+    cumulative stress variable R = 1.22 (Formula C.3) and the probability of
+    lumbar injury Pi = 0.37 (Formula C.5). Against the Table C.2 stress
+    variables for men (R = 0.72 / 1.42 / 2.17 at 10 / 50 / 90 % risk of injury),
+    R = 1.22 falls in the moderate band, matching the standard's own conclusion
+    ("a moderate adverse health effect, 10 % < risk of injury < 50 %"). The
+    result is built directly from the worked-example response peaks (which the
+    standard states as the spinal response), so the fiche's numbers are the
+    published Annex C values.
+    """
+    from phonometry.vibration.multiple_shock_vibration import (
+        MZ_MALE,
+        RISK_THRESHOLDS_MALE,
+        MultipleShockResult,
+        compression_dose,
+        dose_from_peaks,
+        injury_probability,
+        injury_risk,
+    )
+
+    peaks = np.array([40.0] * 5)
+    dz = dose_from_peaks(peaks)
+    sd = compression_dose(dz, mz=MZ_MALE)
+    r = injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
+    result = MultipleShockResult(
+        sex="male",
+        acceleration_dose=dz,
+        daily_dose=dz,
+        compression_dose=sd,
+        risk=r,
+        probability=float(injury_probability(r, sex="male")),
+        start_age=20.0,
+        years=20,
+        days_per_year=120.0,
+        peaks=peaks,
+        risk_thresholds=RISK_THRESHOLDS_MALE,
+    )
+    metadata = ReportMetadata(
+        client="Example transport operator",
+        specimen="82 kg male operator (seated)",
+        test_room="Off-road vehicle, driver's seat",
+        instrumentation="Seat-pad accelerometer (ISO 8041-1), s/n 0117",
+        calibration="Reference calibrator (ISO 8041-1) verified before/after the "
+                    "series within tolerance",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-2631-5",
+        notes="Reproduces the ISO 2631-5:2018 Annex C worked example.",
+    )
+    return result, metadata, "iso2631_5_multiple_shock_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -760,6 +821,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _human_vibration_example,
     _room_acoustics_example,
     _open_plan_example,
+    _multiple_shock_example,
 ]
 
 

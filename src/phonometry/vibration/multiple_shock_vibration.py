@@ -51,6 +51,8 @@ from ..hearing.threshold import SEXES as _SEXES
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike
 
 # ---------------------------------------------------------------------------
@@ -390,6 +392,70 @@ class MultipleShockResult:
         from .._plot.vibration import plot_multiple_shock
 
         return plot_multiple_shock(self, ax=ax, language=check_language(language), **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a whole-body multiple-shock health-risk fiche to a PDF.
+
+        Writes a one-page health-risk assessment sheet for whole-body vibration
+        containing multiple shocks (ISO 2631-5:2018): the standard-basis line
+        (Clause 5 spinal response and Annex C risk model), an optional metadata
+        header (client, subject, workplace/vehicle, instrumentation,
+        calibration), the exposure-scenario grid (subject sex, the age ``b`` at
+        which the exposure started, the number of exposure years ``n``, the
+        number of exposure days per year ``N`` and the number of counted
+        response shocks), the dose-and-stress analysis table (the acceleration
+        dose ``Dz`` of Formula 3, the daily dose ``Dzd`` of Formula 4, the daily
+        compressive stress ``Sd`` of Formula C.1, the cumulative stress variable
+        ``R`` of Formula C.3 and the probability of lumbar injury ``P`` of
+        Formula C.5), the injury-probability chart, the boxed ``R`` and ``P``
+        with the Annex C risk classification, a classification table against the
+        Table C.2 risk levels with a zone row, and a footer identity/disclaimer
+        block.
+
+        The Annex C classification is informative (ISO 2631-5:2018 defines no
+        exposure limit), so the fiche carries a risk-band zone row rather than a
+        PASS/FAIL verdict: ``R`` is placed among the Table C.2 stress variables
+        for 10 / 50 / 90 % risk of injury (low / moderate / high / very high
+        probability of an adverse health effect), the moderate band matching the
+        Annex C worked example.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header identity (``client``, ``specimen`` the subject,
+            ``test_room`` the workplace or vehicle) plus the ``instrumentation``
+            and ``calibration`` free-text fields and the footer identity.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for a uniform ``.report()`` signature; the
+            fiche has one stacked body layout, so it has no effect.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab or matplotlib is not installed. The
+            fiche always embeds the injury-probability chart, so both are
+            required (``pip install "phonometry[report,plot]"``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso2631_5 import render_iso2631_5_report
+
+        return render_iso2631_5_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def multiple_shock_assessment(

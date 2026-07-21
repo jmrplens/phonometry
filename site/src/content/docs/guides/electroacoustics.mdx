@@ -446,6 +446,46 @@ curve and the directivity feed the secondary panels, reusing the
 directivity of section 6 and a [swept-sine THD](/phonometry/guides/swept-sine-distortion/)
 result for the distortion curve.
 
+The same panels are available interactively through `.plot()`, which draws the
+IEC 60268-5 data sheet (the wide on-axis response above the impedance, THD and
+polar panels) sharing its drawing code with the report, so the two never
+diverge. Passing an axes draws only the on-axis response on it.
+
+```python
+result.plot()   # multi-panel IEC 60268-5 data sheet (needs matplotlib)
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudspeaker_characteristics.svg" alt="IEC 60268-5 loudspeaker data sheet: a wide on-axis sound-pressure-level response with its shaded tolerance band and effective-range markers on a nominal-frequency axis, above the impedance modulus with its rated and 80 %-of-rated lines, the total harmonic distortion against frequency, and the polar directivity on the 25 dB reference circle" width="92%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import loudspeaker_characteristics, radiating_piston
+
+freqs = np.geomspace(30, 24000, 320)
+spl = 87.0 + 1.2 * np.sin(2 * np.log2(freqs / 900.0))
+spl -= 10 * np.log10(1 + (50.0 / freqs) ** 6)       # low-frequency roll-off
+spl -= 10 * np.log10(1 + (freqs / 16000.0) ** 7)    # high-frequency roll-off
+fz = np.geomspace(20, 20000, 260)
+thd_f = np.geomspace(50, 5000, 140)
+
+result = loudspeaker_characteristics(
+    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    impedance=(fz, 6.6 + 24 * np.exp(-(np.log2(fz / 52.0) ** 2) / 0.12)),
+    distortion=(thd_f, 0.3 + 2.6 * np.exp(-(np.log2(thd_f / 70.0) ** 2) / 0.45)),
+    directivity=radiating_piston(0.075, np.array([1000.0, 2000.0, 4000.0]),
+                                 angles=np.radians(np.linspace(0, 90, 46))),
+    polar_frequency=2000.0,
+)
+result.plot()
+plt.show()
+```
+
+</details>
+
 The example fiche is regenerated with `make reports` and kept rendered in the
 repository; click the preview to open the PDF.
 
@@ -521,6 +561,49 @@ on the IEC 60263 25 dB reference circle; the inherent-noise spectrum and the
 distortion-against-level curve (with the THD limit and the overload level
 marked) feed the secondary panels. A `requirement` in the metadata is checked
 as a maximum permitted equivalent noise level.
+
+The same panels are available interactively through `.plot()`, which draws the
+IEC 60268-4 data sheet (the wide free-field response above the polar, noise and
+distortion panels) sharing its drawing code with the report. Passing an axes
+draws only the free-field response on it.
+
+```python
+result.plot()   # multi-panel IEC 60268-4 data sheet (needs matplotlib)
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_characteristics.svg" alt="IEC 60268-4 microphone data sheet: a wide free-field relative-response with its shaded tolerance band, reference-frequency marker and effective-range markers on a nominal-frequency axis, above the cardioid polar directional pattern on the 25 dB reference circle, the inherent-noise band-level spectrum, and the total harmonic distortion against sound pressure level with its limit and overload lines" width="92%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import microphone_characteristics
+
+freqs = np.geomspace(20, 20000, 400)
+response = -10 * np.log10(1 + (30.0 / freqs) ** 4)      # low-frequency roll-off
+response -= 10 * np.log10(1 + (freqs / 19000.0) ** 8)   # high-frequency roll-off
+response += 2.0 * np.exp(-(np.log2(freqs / 9000.0) ** 2) / 0.3)  # presence region
+angles = np.linspace(0, 179, 359)
+cardioid = 20 * np.log10((1 + np.cos(np.radians(angles))) / 2)
+noise_f = np.geomspace(20, 20000, 31)
+spl_axis = np.linspace(100, 140, 81)
+
+result = microphone_characteristics(
+    freqs, response, 12.5, tolerance_db=3.0,          # 12.5 mV/Pa at 1 kHz
+    rated_impedance=150.0, minimum_load_impedance=1000.0,
+    noise_voltage=1.25e-6, max_spl_thd_percent=0.5,
+    noise_spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
+    distortion=(spl_axis, 0.5 * 10 ** ((spl_axis - 130.0) * 0.08)),
+    polar=(angles, cardioid), polar_frequency=1000.0,
+    powering="Phantom P48 (IEC 61938)", supply_current_ma=3.1,
+)
+result.plot()
+plt.show()
+```
+
+</details>
 
 The example fiche is regenerated with `make reports` and kept rendered in the
 repository; click the preview to open the PDF.

@@ -203,6 +203,41 @@ Diffuse-field sensitivity level, in dB re 1 V/Pa, or `None`.
 Per 11.2.2.1 the diffuse-field sensitivity level equals the free-field
 plane-wave sensitivity level minus the directivity index (13.2).
 
+### MicrophoneCharacteristics.plot()
+
+```python
+MicrophoneCharacteristics.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes | NDArray[Any]
+```
+
+Plot the IEC 60268-4 microphone rated-characteristics data sheet.
+
+A multi-panel figure sharing its panel drawing with the `.report()`
+fiche: the free-field response with its tolerance band and
+effective-range markers, plus the polar directional pattern, the
+inherent-noise band spectrum and the total harmonic distortion against
+sound pressure level for the data supplied. With `ax` given only the
+free-field response is drawn.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes for the free-field response, or `None` for a fresh multi-panel data sheet. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+
+**Returns:** The response-panel axes (`ax` given) or the array of panel axes.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ImportError | If matplotlib is not installed (`pip install phonometry[plot]`). |
+
 ### MicrophoneCharacteristics.report()
 
 ```python

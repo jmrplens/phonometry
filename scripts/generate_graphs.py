@@ -4062,6 +4062,59 @@ def generate_swept_sine_thd(output_dir: str) -> None:
     plt.close()
 
 
+def generate_loudspeaker_characteristics(output_dir: str) -> None:
+    """IEC 60268-5 loudspeaker rated-characteristics data sheet (LoudspeakerCharacteristics.plot)."""
+    print("Generating loudspeaker_characteristics...")
+    from phonometry import loudspeaker_characteristics, radiating_piston
+
+    freqs = np.geomspace(30, 24000, 320)
+    spl = 87.0 + 1.2 * np.sin(2 * np.log2(freqs / 900.0))
+    spl -= 10 * np.log10(1 + (50.0 / freqs) ** 6)       # low-frequency roll-off
+    spl -= 10 * np.log10(1 + (freqs / 16000.0) ** 7)    # high-frequency roll-off
+    fz = np.geomspace(20, 20000, 260)
+    thd_f = np.geomspace(50, 5000, 140)
+
+    result = loudspeaker_characteristics(
+        freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+        impedance=(fz, 6.6 + 24 * np.exp(-(np.log2(fz / 52.0) ** 2) / 0.12)),
+        distortion=(thd_f, 0.3 + 2.6 * np.exp(-(np.log2(thd_f / 70.0) ** 2) / 0.45)),
+        directivity=radiating_piston(0.075, np.array([1000.0, 2000.0, 4000.0]),
+                                     angles=np.radians(np.linspace(0, 90, 46))),
+        polar_frequency=2000.0,
+    )
+    result.plot(language=_LANG)
+    save_figure(output_dir, "loudspeaker_characteristics.svg")
+    plt.close()
+
+
+def generate_microphone_characteristics(output_dir: str) -> None:
+    """IEC 60268-4 microphone rated-characteristics data sheet (MicrophoneCharacteristics.plot)."""
+    print("Generating microphone_characteristics...")
+    from phonometry import microphone_characteristics
+
+    freqs = np.geomspace(20, 20000, 400)
+    response = -10 * np.log10(1 + (30.0 / freqs) ** 4)      # low-frequency roll-off
+    response -= 10 * np.log10(1 + (freqs / 19000.0) ** 8)   # high-frequency roll-off
+    response += 2.0 * np.exp(-(np.log2(freqs / 9000.0) ** 2) / 0.3)  # presence region
+    angles = np.linspace(0, 179, 359)
+    cardioid = 20 * np.log10((1 + np.cos(np.radians(angles))) / 2)
+    noise_f = np.geomspace(20, 20000, 31)
+    spl_axis = np.linspace(100, 140, 81)
+
+    result = microphone_characteristics(
+        freqs, response, 12.5, tolerance_db=3.0,          # 12.5 mV/Pa at 1 kHz
+        rated_impedance=150.0, minimum_load_impedance=1000.0,
+        noise_voltage=1.25e-6, max_spl_thd_percent=0.5,
+        noise_spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
+        distortion=(spl_axis, 0.5 * 10 ** ((spl_axis - 130.0) * 0.08)),
+        polar=(angles, cardioid), polar_frequency=1000.0,
+        powering="Phantom P48 (IEC 61938)", supply_current_ma=3.1,
+    )
+    result.plot(language=_LANG)
+    save_figure(output_dir, "microphone_characteristics.svg")
+    plt.close()
+
+
 def generate_psd_confidence_smoothing(output_dir: str) -> None:
     """Calibrated PSD of pink noise: chi-square CI plus 1/3-oct smoothing."""
     print("Generating psd_confidence_smoothing...")
@@ -8754,6 +8807,10 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Swept-sine harmonic separation: THD(f) by order from one synchronized
     # sweep (Farina 2000 / Novak et al. 2015).
     generate_swept_sine_thd,
+    # Rated-characteristics data sheets shared with the .report() fiches
+    # (IEC 60268-5 loudspeaker, IEC 60268-4 microphone).
+    generate_loudspeaker_characteristics,
+    generate_microphone_characteristics,
     # Calibrated spectral analysis: PSD with chi-square confidence interval
     # and 1/3-octave smoothing on exact-slope pink noise (Bendat & Piersol).
     generate_psd_confidence_smoothing,

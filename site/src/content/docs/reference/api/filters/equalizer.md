@@ -94,6 +94,7 @@ EQResponseResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
+    show_sections: bool = True,
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```
@@ -108,6 +109,7 @@ With `ax` given, only the magnitude panel is drawn on it.
 | :--- | :--- |
 | `ax` | Existing axes for the magnitude panel, or `None` for a fresh two-panel (magnitude + phase) figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
+| `show_sections` | Overlay each section's individual response under the cascade curve (default `True`). |
 
 **Returns:** The magnitude axes (`ax` given) or the array of two axes.
 

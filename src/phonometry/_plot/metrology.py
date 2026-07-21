@@ -21,6 +21,7 @@ if TYPE_CHECKING:
         EchoDetectionResult,
         LifterResult,
     )
+    from ..metrology.equalizer import EQResponseResult
     from ..metrology.envelope import EnvelopeResult, EnvelopeSpectrumResult
     from ..metrology.phase import PhaseDecompositionResult
     from ..metrology.random_data import (

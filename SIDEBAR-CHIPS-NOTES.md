@@ -1,189 +1,208 @@
 # Sidebar reference chips: classification and decisions
 
 Experimental branch `exp/sidebar-standard-chips`. Every content item in the
-sidebar carries a Starlight badge that states, at a glance, what governs the
-page:
+sidebar carries one or more small colour-coded chips (Starlight badges) that
+state, at a glance, what governs the page:
 
-- `chip-standard` (colour A, teal): the page implements one or more published
-  standards; the chip shows the short designation(s).
-- `chip-theory` (colour B, amber): no governing standard; the chip shows the
-  single most notable reference (author-year or short book/method tag).
-- no chip: only navigational or overview items (see the list at the end).
+- teal `chip-standard`: a published standard the page implements (short
+  designation).
+- amber `chip-theory`: a notable reference / investigator the method is
+  attributed to (author-year or short book/method tag).
+- an item may carry BOTH (mixed): the governing standard(s) plus the
+  author(s) the method is named after.
+- no chip: only navigation / overview items (list at the end).
 
-Mechanism: guide items set `badge: { text, class }` on their sidebar entry in
-`site/astro.config.mjs`; API-reference items get the same badge emitted by the
-generator (`scripts/generate_api_docs.py`, dict `_API_CHIPS`) into
-`site/src/generated/api-sidebar.mjs`. Styling is in
-`site/src/styles/sidebar-chips.css` (unlayered, theme-aware, WCAG AA).
+## Multi-chip mechanism
 
-Attribution is sourced from each page's own material: guides from their
-frontmatter `references` block (`type: standard` -> `designation`, or the
-leading bibliography entry for theory); API modules from their docstring
-(cited standard, or named author). Standard designations are truncated to the
-family (no year/part suffix) for compactness; combined chips like
-`ISO 16283 / 717` or `ISO 2631 / 5349` are used where two families jointly
-govern a page and both read fine on mobile.
+Starlight's native `badge` slot is a single badge. To carry a LIST of
+independent chips per item, the list is threaded through Starlight's
+sanctioned `attrs` passthrough as a JSON string under `data-chips`.
 
-## Task 1: sidebar labels with the standard stripped
+- In `site/astro.config.mjs`: helpers `S(text)` (teal), `T(text)` (amber) and
+  `chips(...)` build the entry, e.g.
+  `{ slug: 'guides/room-acoustics', ...chips(S('ISO 3382'), S('ISO 18233'), T('Schroeder 1965')) }`.
+  `chips(...)` returns `{ attrs: { 'data-chips': JSON.stringify(items) } }`.
+- In the API generator `scripts/generate_api_docs.py`: `_API_CHIPS` maps each
+  module to a tuple of `(text, kind)` pairs; `render_sidebar` emits the same
+  `attrs.data-chips` JSON into `site/src/generated/api-sidebar.mjs`.
+- `site/src/components/SidebarSublist.astro` parses `attrs['data-chips']`
+  (`parseChips`), renders one `<Badge>` per chip inside a `.sidebar-chips`
+  container, and drops the raw attribute from the `<a>` (`withoutChips`) so it
+  is not echoed into the DOM.
+- `site/src/styles/sidebar-chips.css`: `.sidebar-chips` is an
+  `inline-flex; flex-wrap: wrap; gap: 0.25em` container, so several chips sit
+  after the label and wrap onto a new line beneath it on narrow columns with
+  no horizontal overflow. Chip colours are unlayered and theme-aware (dark
+  values on `:root`, light on `:root[data-theme='light']`), both text-on-fill
+  pairs clear WCAG AA.
 
-Set an explicit `label` (+ `translations.es`) on the sidebar entry so the chip
-carries the designation and the label stays a clean topic name. The page H1 /
-frontmatter title is untouched (reversible: delete the label to restore).
+Attribution stays sourced from each page's own material: guides from their
+frontmatter `references` block (all relevant `type: standard` designations,
+and the `type: article`/named-method entries for the author chips); API
+modules from their docstrings. Standard designations are shortened to the
+family; parts of one standard collapse to one chip (ISO 3382-1/-2/-3 ->
+`ISO 3382`), distinct standards get separate chips.
 
-| Slug | Before (EN) | After (EN) | After (ES) |
-|---|---|---|---|
-| dynamic-stiffness | Dynamic stiffness of resilient materials (EN 29052-1) | Dynamic stiffness of resilient materials | Rigidez dinámica de materiales resilientes |
-| enclosed-space-absorption | Sound absorption in enclosed spaces (EN 12354-6) | Sound absorption in enclosed spaces | Absorción sonora en recintos |
-| impulse-prominence | Impulsive-sound prominence (NT ACOU 112) | Impulsive-sound prominence | Prominencia de sonidos impulsivos |
-| installed-structure-borne | Installed structure-borne sound (EN 12354-5) | Installed structure-borne sound | Ruido estructural instalado |
-| insulation-prediction | Predicting Sound Insulation (EN 12354) | Predicting Sound Insulation | Predicción del aislamiento acústico |
-| mechanical-mobility | Mechanical mobility and the FRF family (ISO 7626-1) | Mechanical mobility and the FRF family | Movilidad mecánica y la familia de FRF |
-| multiple-shock-vibration | Multiple-shock whole-body vibration (ISO 2631-5) | Multiple-shock whole-body vibration | Vibración con choques múltiples |
-| noise-induced-hearing-loss | Noise-induced hearing loss (ISO 1999) | Noise-induced hearing loss | Pérdida auditiva inducida por ruido |
-| occupational-exposure | Occupational Noise Exposure (ISO 9612) | Occupational Noise Exposure | Exposición al ruido en el trabajo |
-| structure-borne-power | Structure-borne sound power of equipment (EN 15657) | Structure-borne sound power of equipment | Potencia sonora estructural de equipos |
-| tone-audibility | Objective audibility of tones in noise (ISO/PAS 20065) | Objective audibility of tones in noise | Audibilidad objetiva de tonos en ruido |
-| tone-prominence | Prominent Discrete Tones (ECMA-418-1) | Prominent Discrete Tones | Tonos discretos prominentes |
-| transfer-stiffness | Transfer stiffness of resilient elements (ISO 10846) | Transfer stiffness of resilient elements | Rigidez dinámica de transferencia |
-| vibration-sound-power | Sound power from surface vibration (ISO/TS 7849) | Sound power from surface vibration | Potencia acústica desde vibración |
-| program-loudness | Programme loudness and true peak (BS.1770 / EBU R 128) | Programme loudness and true peak | Sonoridad de programa y pico verdadero |
+## Stripped sidebar labels (chip carries the designation / author list)
 
-## Task 2: full guide classification
+Set via `label` + `translations.es` on the sidebar entry; page H1/frontmatter
+titles are untouched (reversible). New this pass: `reverberation-prediction`
+(the `(Sabine, Eyring, Arau)` author list moved into chips). The other 15 were
+stripped in the earlier pass and are kept:
 
-Standard chips (teal), attribution = leading `type: standard` designation in
-that guide's frontmatter:
-
-| Guide | Chip | Guide | Chip |
-|---|---|---|---|
-| sound-level-meter | IEC 61672 | filter-banks | IEC 61260 |
-| block-processing | IEC 61260 | multichannel | IEC 61260 |
-| weighting | IEC 61672 | time-weighting | IEC 61672 |
-| levels | IEC 61672 | calibration | IEC 60942 |
-| gum-uncertainty | JCGM 100 | test-signals | IEC 60268-1 |
-| loudness | ISO 532-1 | sound-quality | DIN 45692 |
-| tone-prominence | ECMA-418-1 | tone-audibility | ISO/PAS 20065 |
-| speech-transmission | IEC 60268-16 | speech-intelligibility | ANSI S3.5 |
-| hearing-threshold | ISO 7029 | noise-induced-hearing-loss | ISO 1999 |
-| occupational-exposure | ISO 9612 | room-acoustics | ISO 3382 |
-| room-noise | ANSI S12.2 | enclosed-space-absorption | EN 12354-6 |
-| insulation-field | ISO 16283 / 717 | insulation-lab | ISO 10140 |
-| insulation-prediction | EN 12354 | dynamic-stiffness | EN 29052-1 |
-| materials | ISO 11654 | surface-scattering | ISO 17497 |
-| mechanical-mobility | ISO 7626 | transfer-stiffness | ISO 10846 |
-| vibration-sound-power | ISO/TS 7849 | structure-borne-power | EN 15657 |
-| installed-structure-borne | EN 12354-5 | human-vibration | ISO 2631 / 5349 |
-| multiple-shock-vibration | ISO 2631-5 | outdoor-propagation | ISO 9613 |
-| impulse-prominence | NT ACOU 112 | aircraft-noise | ICAO Annex 16 |
-| wind-turbine-noise | IEC 61400-11 | underwater-acoustics | ISO 18405 |
-| intensity | ISO 9614 | sound-power | ISO 3744 |
-| electroacoustics | IEC 60268 | program-loudness | EBU R 128 |
-
-Theory chips (amber), attribution = leading bibliography entry / named method
-in that guide's frontmatter:
-
-| Guide | Chip | Source |
+| Slug | After (EN) | After (ES) |
 |---|---|---|
-| spectral-analysis | Welch 1967 | Welch overlapped-segment PSD |
-| miso-coherence | Bendat & Piersol | Random Data, ch. 7 |
-| time-frequency | Bendat & Piersol | Random Data, section 12.6 |
-| cepstrum-echoes | Havelock et al. | Handbook of Signal Processing in Acoustics |
-| synchronous-averaging | McFadden 1987 | revised TSA model |
-| correlation-delay | Knapp & Carter | generalized correlation (GCC) |
-| data-qualification | Bendat & Piersol | Random Data (stationarity, Rice) |
-| system-measurement | Havelock et al. | Handbook of Signal Processing in Acoustics |
-| psychoacoustic-annoyance | Fastl & Zwicker | Psychoacoustics: Facts and Models |
-| objective-intelligibility | Taal et al. 2011 | STOI |
-| room-image-sources | Kuttruff | Room Acoustics |
-| reverberation-prediction | Sabine / Eyring | classical RT formulae |
-| panel-sound-insulation | Bies & Hansen | Engineering Noise Control |
-| porous-absorbers | Mechel | Formulas of Acoustics (ed.) |
-| junction-transmission | Cremer & Heckl | Structure-Borne Sound |
-| ground-barriers | Attenborough | Predicting Outdoor Sound |
-| atmospheric-refraction | Salomons | Computational Atmospheric Acoustics |
-| rotorcraft-noise | Olsen et al. | hemisphere method |
-| underwater-propagation | Francois & Garrison | absorption / TL |
-| swept-sine-distortion | Farina 2000 | exponential sweep |
-| noise-control | Bies & Hansen | Engineering Noise Control |
-| fdtd-simulation | Botteldooren 1995 | added: canonical 2D acoustic FDTD (page bibliography leads with a general outdoor-sound text) |
+| reverberation-prediction | Reverberation-time prediction | Predicción del tiempo de reverberación |
+| dynamic-stiffness | Dynamic stiffness of resilient materials | Rigidez dinámica de materiales resilientes |
+| enclosed-space-absorption | Sound absorption in enclosed spaces | Absorción sonora en recintos |
+| impulse-prominence | Impulsive-sound prominence | Prominencia de sonidos impulsivos |
+| installed-structure-borne | Installed structure-borne sound | Ruido estructural instalado |
+| insulation-prediction | Predicting Sound Insulation | Predicción del aislamiento acústico |
+| mechanical-mobility | Mechanical mobility and the FRF family | Movilidad mecánica y la familia de FRF |
+| multiple-shock-vibration | Multiple-shock whole-body vibration | Vibración con choques múltiples |
+| noise-induced-hearing-loss | Noise-induced hearing loss | Pérdida auditiva inducida por ruido |
+| occupational-exposure | Occupational Noise Exposure | Exposición al ruido en el trabajo |
+| structure-borne-power | Structure-borne sound power of equipment | Potencia sonora estructural de equipos |
+| tone-audibility | Objective audibility of tones in noise | Audibilidad objetiva de tonos en ruido |
+| tone-prominence | Prominent Discrete Tones | Tonos discretos prominentes |
+| transfer-stiffness | Transfer stiffness of resilient elements | Rigidez dinámica de transferencia |
+| vibration-sound-power | Sound power from surface vibration | Potencia acústica desde vibración |
+| program-loudness | Programme loudness and true peak | Sonoridad de programa y pico verdadero |
 
-## Task 2: full API-reference classification (`_API_CHIPS`)
+Not stripped by choice: `weighting` keeps `(A, B, C, D, G, AU, Z)` and
+`room-noise` keeps `(NC / RC Mark II)` because those are metric/curve names
+that describe the topic, not standard designations or investigator names.
 
-Standard chips (teal): core `IEC 61260`, parametric-filters `IEC 61672`,
-frequencies `ISO 266`, compliance `IEC 61260`; levels `IEC 61672`, calibration
-`IEC 60942`; loudness-zwicker `ISO 532-1`, loudness-moore-glasberg `ISO 532-2`,
-loudness-moore-glasberg-time `ISO 532-3`, loudness-ecma `ECMA-418-2`,
-loudness-contours `ISO 226`, sharpness `DIN 45692`, roughness-ecma
-`ECMA-418-2`, tonality `ECMA-418-1`, tonality-ecma `ECMA-418-2`, tone-audibility
-`ISO/PAS 20065`, fluctuation-strength-ecma `ECMA-418-2`; sti `IEC 60268-16`,
-sii `ANSI S3.5`; threshold `ISO 7029`, noise-induced-hearing-loss `ISO 1999`,
-occupational-exposure `ISO 9612`; room-acoustics `ISO 3382`, room-ir
-`ISO 18233`, room-noise `ANSI S12.2`, open-plan `ISO 3382-3`,
-enclosed-space-absorption `EN 12354-6`; insulation `ISO 16283 / 717`,
-panel-transmission `EN 12354-1`, lab-insulation `ISO 10140`, survey-insulation
-`ISO 10052`, intensity-insulation `ISO 15186`, flanking-transmission
-`ISO 10848`, facade-prediction `EN 12354-3`, building-prediction `EN 12354`,
-building-uncertainty `ISO 12999-1`, floor-covering-improvement `ISO 16251-1`,
-structure-borne-power `EN 15657`, installed-structure-borne `EN 12354-5`;
-sound-absorption `ISO 354`, absorption-rating `ISO 11654`, absorption-uncertainty
-`ISO 12999-2`, airflow-resistance `ISO 9053`, dynamic-stiffness `EN 29052-1`,
-impedance-tube `ISO 10534`, scattering-diffusion `ISO 17497`, road-absorption
-`ISO 13472`; mechanical-mobility `ISO 7626`, point-mobility `ISO 7626`,
-radiation-efficiency `ISO/TS 7849`, transfer-stiffness `ISO 10846`,
-human-vibration `ISO 2631 / 5349`, multiple-shock-vibration `ISO 2631-5`;
-outdoor-propagation `ISO 9613`, ground-barriers `ISO 9613-2`, air-absorption
-`ISO 9613-1`, impulse-prominence `NT ACOU 112`, impulsive-sound `ISO/PAS 1996-3`,
-rating `ISO 1996-1`, measurement `ISO 1996-2`; aircraft-noise `ICAO Annex 16`,
-atmospheric-absorption `SAE ARP 5534`, airport-noise `ECAC Doc 29`, anp-fleet
-`ECAC Doc 29`, wind-turbine-noise `IEC 61400-11`; acoustics `ISO 18405`,
-ship-radiated-noise `ISO 17208`, pile-driving-noise `ISO 18406`; sound-power
-`ISO 3744`, sound-power-intensity `ISO 9614`, sound-power-reverberation
-`ISO 3741`, intensity `ISO 9614`, vibration-sound-power `ISO/TS 7849`,
-declaration `ISO 4871`; distortion `IEC 60268-3`, loudspeaker `IEC 60268-5`,
-microphone `IEC 60268-4`; program-loudness `EBU R 128`; uncertainty `JCGM 100`.
+## Full guide chip sets
 
-Theory chips (amber): equalizer `RBJ Cookbook`; fluctuation-strength
-`Fastl & Zwicker`, psychoacoustic-annoyance `Fastl & Zwicker`;
-objective-intelligibility `Taal et al. 2011`; reverberation-prediction
-`Sabine / Eyring`, image-source `Kuttruff`, steady-field `Kuttruff`;
-aperture-transmission `Hopkins 2007`; porous-absorber `Mechel`;
-junction-transmission `Cremer & Heckl`; atmospheric-refraction `Salomons`,
-rotorcraft-noise `Olsen et al.`; propagation `Francois & Garrison`, sound-speed
-`Mackenzie 1981` (+), sonar-equation `Urick`, ocean-ambient-noise `Wenz 1962`,
-seabed-reflection `Jensen et al.` (+), ship-traffic-noise `JOMOPANS-ECHO`,
-numerical-propagation `Jensen et al.` (+); frequency-response `Bendat & Piersol`,
-swept-sine `Farina 2000`, piston `Beranek & Mellow`; silencers/hvac/enclosures
-`Bies & Hansen`; random-data `Bendat & Piersol`; spectra `Welch 1967`, miso
-`Bendat & Piersol`, time-frequency `Bendat & Piersol`, signals `Bendat & Piersol`,
-phase `Farina 2000`, cepstrum `Havelock et al.`, synchronous-average
-`McFadden 1987`, inversion `Farina 2000`; fdtd `Botteldooren 1995` (+);
-correlation `Bendat & Piersol`, envelope `Bendat & Piersol`.
+Format: item -> [teal standards] + [amber refs]. `S` = teal, `T` = amber.
 
-`(+)` marks a minimal canonical attribution added where the module docstring
-names no source (underwater sound-speed / seabed / numerical solvers, and the
-2D FDTD simulation). Everything else is quoted from the docstring's own cited
-standard or named author.
+- sound-level-meter: IEC 61672, IEC 61260, IEC 60942
+- filter-banks: IEC 61260, ISO 266
+- block-processing: IEC 61260, IEC 61672
+- multichannel: IEC 61260, IEC 61672
+- weighting: IEC 61672, ISO 7196, ISO 226 + Fletcher & Munson
+- time-weighting: IEC 61672
+- levels: IEC 61672, ISO 1996-1
+- spectral-analysis: Welch 1967 + Harris 1978 + Thomson 1982
+- miso-coherence: Bendat & Piersol
+- time-frequency: Bendat & Piersol
+- cepstrum-echoes: Havelock et al. + Bendat & Piersol
+- synchronous-averaging: McFadden 1987
+- correlation-delay: Knapp & Carter
+- test-signals: IEC 60268-1 + Bendat & Piersol
+- system-measurement: Golay 1961 + Kirkeby & Nelson + Müller & Massarani
+- calibration: IEC 60942, IEC 61672-3
+- gum-uncertainty: JCGM 100, JCGM 101
+- data-qualification: Rice 1945 + Wald & Wolfowitz + Bendat & Piersol
+- loudness: ISO 532, ISO 226, ECMA-418-2 + Fletcher & Munson
+- sound-quality: DIN 45692, ECMA-418-2 + Fastl & Zwicker
+- tone-prominence: ECMA-418-1, ECMA-74
+- tone-audibility: ISO/PAS 20065, ISO 1996-2, DIN 45681
+- psychoacoustic-annoyance: Fastl & Zwicker + Osses et al. 2016
+- speech-transmission: IEC 60268-16 + Houtgast & Steeneken
+- speech-intelligibility: ANSI S3.5 + French & Steinberg
+- objective-intelligibility: Taal et al. 2011 + Jensen et al. 2016
+- hearing-threshold: ISO 7029, ISO 389-7
+- noise-induced-hearing-loss: ISO 1999 + Passchier-Vermeer
+- occupational-exposure: ISO 9612
+- room-acoustics: ISO 3382, ISO 18233 + Schroeder 1965
+- room-image-sources: Allen & Berkley + Kuttruff
+- room-noise: ANSI S12.2 + Beranek 1957 + Blazier 1997
+- reverberation-prediction: EN 12354-6 + Sabine + Eyring + Arau
+- enclosed-space-absorption: EN 12354-6, ISO 354
+- insulation-field: ISO 16283, ISO 717, ISO 12999-1
+- insulation-lab: ISO 10140, ISO 15186, ISO 10848, ISO 717
+- insulation-prediction: EN 12354 + Hopkins
+- panel-sound-insulation: Bies & Hansen + Cremer & Heckl
+- dynamic-stiffness: EN 29052-1
+- materials: ISO 11654, ISO 354, ISO 10534, ISO 9053
+- porous-absorbers: Delany & Bazley + Miki + Johnson et al. + Maa
+- surface-scattering: ISO 17497, ISO 13472 + Cox & D'Antonio
+- mechanical-mobility: ISO 7626 + Cremer & Heckl
+- junction-transmission: Cremer & Heckl + Craik
+- transfer-stiffness: ISO 10846
+- vibration-sound-power: ISO/TS 7849
+- structure-borne-power: EN 15657, ISO 9611
+- installed-structure-borne: EN 12354-5
+- human-vibration: ISO 8041, ISO 2631, ISO 5349
+- multiple-shock-vibration: ISO 2631-5
+- outdoor-propagation: ISO 9613 + Maekawa 1968
+- ground-barriers: Kurze & Anderson + Hadden & Pierce
+- atmospheric-refraction: Salomons
+- impulse-prominence: NT ACOU 112, ISO 1996-1
+- aircraft-noise: ICAO Annex 16, IEC 61265, SAE ARP 5534
+- rotorcraft-noise: Olsen et al. 2024 + Chien & Soroka
+- wind-turbine-noise: IEC 61400-11, ISO 1996-2
+- underwater-acoustics: ISO 18405, ISO 17208, ISO 18406
+- underwater-propagation: Francois & Garrison + Wenz 1962 + Mackenzie 1981
+- intensity: IEC 61043, ISO 9614
+- sound-power: ISO 3744, ISO 3741, ISO 9614, ISO 4871
+- electroacoustics: IEC 60268, AES17
+- swept-sine-distortion: Farina 2000 + Novak et al. 2015
+- noise-control: Bies & Hansen + Munjal
+- program-loudness: ITU-R BS.1770, EBU R 128
+- fdtd-simulation: Botteldooren 1995
 
-## No chip (navigational / overview only)
+## Full API chip sets (`_API_CHIPS`, module -> chips)
+
+Single-standard modules keep their one teal chip; the mixed / multiple ones:
+- compliance: IEC 61260, IEC 61672
+- loudness_zwicker: ISO 532-1 + Zwicker
+- loudness_moore_glasberg: ISO 532-2 + Moore & Glasberg
+- loudness_moore_glasberg_time: ISO 532-3 + Moore & Glasberg
+- sti: IEC 60268-16 + Houtgast & Steeneken
+- sii: ANSI S3.5 + French & Steinberg
+- objective_intelligibility: Taal et al. 2011 + Jensen et al. 2016
+- threshold: ISO 7029, ISO 389-7
+- room_acoustics: ISO 3382, ISO 18233 + Schroeder 1965
+- room_noise: ANSI S12.2 + Beranek 1957 + Blazier 1997
+- reverberation_prediction: Sabine + Eyring + Arau
+- insulation: ISO 16283, ISO 717 (split)
+- impedance_tube: ISO 10534, ASTM E2611
+- porous_absorber: Delany & Bazley + Miki + Johnson et al.
+- scattering_diffusion: ISO 17497 + Cox & D'Antonio
+- radiation_efficiency: ISO/TS 7849 + Cremer & Heckl
+- human_vibration: ISO 2631, ISO 5349, ISO 8041 (split)
+- outdoor_propagation: ISO 9613 + Maekawa 1968
+- ground_barriers: ISO 9613-2 + Kurze & Anderson
+- aircraft_noise: ICAO Annex 16, IEC 61265
+- wind_turbine_noise: IEC 61400-11, ISO 1996-2
+- sound_power: ISO 3744, ISO 3741
+- intensity: IEC 61043, ISO 9614
+- distortion: IEC 60268-3, AES17
+- swept_sine: Farina 2000 + Novak et al. 2015
+- silencers: Munjal + Bies & Hansen
+- program_loudness: ITU-R BS.1770, EBU R 128
+- random_data: Rice 1945 + Bendat & Piersol
+- spectra: Welch 1967 + Thomson 1982
+- cepstrum: Havelock et al. + Bendat & Piersol
+- correlation: Knapp & Carter + Bendat & Piersol
+- inversion: Kirkeby & Nelson
+
+The remaining API modules keep a single chip (their governing standard, or a
+single notable reference for the theory ones), matching the earlier pass. Only
+`filters/phonometry` (package metadata) stays bare. Six theory chips are
+minimal canonical attributions added where the docstring names no source
+(underwater sound-speed / seabed / numerical solvers, 2D FDTD, image source,
+steady field).
+
+## No chip (navigation / overview only)
 
 - getting-started, reference/why-phonometry
-- every group landing page `guides/sections/*` (Overview-first group links)
-- API index `reference/api`, and `reference/api/filters/phonometry` (the package
-  top level: only `__version__` and `PhonometryWarning`, no standard/reference)
-- reference/theory landing and the six `reference/theory/*` cross-cutting
-  overviews, reference/conformance, reference/bibliography
+- every group landing page `guides/sections/*`
+- API index `reference/api`, and `reference/api/filters/phonometry`
+- reference/theory landing and the six `reference/theory/*` overviews,
+  reference/conformance, reference/bibliography
 
 ## Colours (theme-aware, WCAG AA)
-
-Defined as CSS custom properties, dark values on `:root` (the default the
-maintainer browses in) and light values on `:root[data-theme='light']`.
 
 - Standard (teal): dark bg `#0e3b35` / text `#7ee8d5`; light bg `#d3f4ec` / text `#0c5c52`.
 - Theory (amber): dark bg `#3c2e0c` / text `#f4c04e`; light bg `#fbeecd` / text `#855107`.
 
 ## Extending / regenerating
 
-Guides: each entry in `astro.config.mjs` is `{ slug, badge: { text, class } }`
-(plus `label`/`translations` where the title was stripped). API: edit
-`_API_CHIPS` in `scripts/generate_api_docs.py` and run `make api-docs`
-(`PYTHONPATH=src python3 scripts/generate_api_docs.py`) to regenerate
-`api-sidebar.mjs`; the chip survives regeneration.
+Guides: edit the `...chips(S(...), T(...))` list on the entry in
+`astro.config.mjs`. API: edit `_API_CHIPS` in `scripts/generate_api_docs.py`
+and run `PYTHONPATH=src python3 scripts/generate_api_docs.py` (`make api-docs`)
+to regenerate `api-sidebar.mjs`; the chips survive regeneration.

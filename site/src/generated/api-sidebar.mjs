@@ -223,6 +223,7 @@ export const apiSidebar = {
         'reference/api/spectra/signals',
         'reference/api/spectra/phase',
         'reference/api/spectra/cepstrum',
+        'reference/api/spectra/synchronous-average',
         'reference/api/spectra/inversion',
       ],
     },

@@ -280,6 +280,11 @@ from .metrology.equalizer import (
     ParametricEQ,
     parametric_eq,
 )
+from .metrology.synchronous_average import (
+    SynchronousAverageResult,
+    comb_filter_response,
+    time_synchronous_average,
+)
 from .metrology.phase import (
     PhaseDecompositionResult,
     excess_phase,
@@ -1405,6 +1410,9 @@ __all__ = [
     "align_impulse_responses",
     "envelope",
     "envelope_spectrum",
+    "time_synchronous_average",
+    "comb_filter_response",
+    "SynchronousAverageResult",
     "cepstrum",
     "lifter",
     "echo_detection",

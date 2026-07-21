@@ -164,9 +164,13 @@ def render_figure_drawing(
         if existing is not None:
             existing.remove()
         if handles:
+            # Cap the legend at three columns: a single row of four entries
+            # (the impact fiches add the 500 Hz read marker) is wider than the
+            # axes, and tight_layout would shrink the plot to fit it, leaving
+            # the impact chart narrower than its airborne sibling.
             ax.legend(
                 handles, labels, loc="lower left",
-                bbox_to_anchor=(0.0, 1.005), ncol=len(handles),
+                bbox_to_anchor=(0.0, 1.005), ncol=min(len(handles), 3),
                 frameon=False, fontsize=8, handlelength=1.6, columnspacing=1.2,
             )
         # Localise the tick-label decimal separator for Spanish (a no-op for

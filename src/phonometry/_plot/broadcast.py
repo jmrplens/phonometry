@@ -12,7 +12,6 @@ from .common import (
     _C_MUTED,
     _C_PRIMARY,
     _C_REFERENCE,
-    _C_SECONDARY,
     _LEGEND_UPPER_RIGHT,
     _new_axes,
 )

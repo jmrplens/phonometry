@@ -87,7 +87,7 @@ _SPECS: dict[str, dict[str, str]] = {
         ),
         "symbol": "D<sub>nT</sub>",
         "rating_symbol": "D<sub>nT,w</sub>",
-        "ylabel": "Standardized level difference $D_{nT}$ [dB]",
+        "ylabel": "$D_{nT}$ [dB]",
         "statement": (
             "Evaluation based on field measurement using results obtained "
             "by an engineering method."
@@ -102,7 +102,7 @@ _SPECS: dict[str, dict[str, str]] = {
         ),
         "symbol": "R&#8242;",
         "rating_symbol": "R&#8242;<sub>w</sub>",
-        "ylabel": "Apparent sound reduction index $R'$ [dB]",
+        "ylabel": "$R'$ [dB]",
         "statement": (
             "Evaluation based on field measurement using results obtained "
             "by an engineering method."
@@ -117,7 +117,7 @@ _SPECS: dict[str, dict[str, str]] = {
         ),
         "symbol": "L&#8242;<sub>nT</sub>",
         "rating_symbol": "L&#8242;<sub>nT,w</sub>",
-        "ylabel": "Standardized impact sound pressure level $L'_{nT}$ [dB]",
+        "ylabel": "$L'_{nT}$ [dB]",
         "statement": (
             "Evaluation based on field measurement results obtained by an "
             "engineering method."
@@ -132,7 +132,7 @@ _SPECS: dict[str, dict[str, str]] = {
         ),
         "symbol": "L&#8242;<sub>n</sub>",
         "rating_symbol": "L&#8242;<sub>n,w</sub>",
-        "ylabel": "Normalized impact sound pressure level $L'_{n}$ [dB]",
+        "ylabel": "$L'_{n}$ [dB]",
         "statement": (
             "Evaluation based on field measurement results obtained by an "
             "engineering method."

@@ -136,10 +136,6 @@ _STRINGS: dict[str, str] = {
     "Evaluation based on field measurement results obtained by an engineering method.": "Evaluación basada en resultados de medidas in situ obtenidos mediante un método de ingeniería.",
     "{sym} = {rating} dB, required &#8805; {req} dB": "{sym} = {rating} dB, exigido &#8805; {req} dB",
     "{sym} = {rating} dB, required &#8804; {req} dB": "{sym} = {rating} dB, exigido &#8804; {req} dB",
-    "Standardized level difference $D_{nT}$ [dB]": "Diferencia de niveles estandarizada $D_{nT}$ [dB]",
-    "Apparent sound reduction index $R'$ [dB]": "Índice de reducción acústica aparente $R'$ [dB]",
-    "Standardized impact sound pressure level $L'_{nT}$ [dB]": "Nivel de presión acústica de impactos estandarizado $L'_{nT}$ [dB]",
-    "Normalized impact sound pressure level $L'_{n}$ [dB]": "Nivel de presión acústica de impactos normalizado $L'_{n}$ [dB]",
     # --- iso11654 statement / verdict ------------------------------------
     "Absorption class: {value}": "Clase de absorción: {value}",
     "Shape indicator: {value}": "Indicador de forma: {value}",

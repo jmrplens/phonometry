@@ -21,6 +21,7 @@ if TYPE_CHECKING:
         EchoDetectionResult,
         LifterResult,
     )
+    from ..metrology.equalizer import EQResponseResult
     from ..metrology.envelope import EnvelopeResult, EnvelopeSpectrumResult
     from ..metrology.phase import PhaseDecompositionResult
     from ..metrology.random_data import (
@@ -195,6 +196,9 @@ _STRINGS: dict[str, str] = {
     "Equalized band": "Banda ecualizada",
     "Regularized inversion (Kirkeby) — flatness {flat} dB":
         "Inversión regularizada (Kirkeby) — planitud {flat} dB",
+    "Cascade": "Cascada",
+    "Parametric EQ response (Audio EQ Cookbook)":
+        "Respuesta del EQ paramétrico (Audio EQ Cookbook)",
 }
 
 
@@ -1578,3 +1582,69 @@ def plot_inverse_filter(
     format_frequency_axis(ax, float(freqs[pos].min()), float(freqs[pos].max()))
     localize_axes(ax, language)
     return ax
+
+
+
+def plot_parametric_eq(
+    result: "EQResponseResult", ax: Axes | None = None, *,
+    language: str = "en", show_sections: bool = True, **kwargs: Any
+) -> Axes | np.ndarray:
+    """Magnitude and phase response of a parametric-EQ cascade.
+
+    With ``ax`` given, only the magnitude panel is drawn on it.
+
+    :param result: An
+        :class:`~phonometry.metrology.equalizer.EQResponseResult`.
+    :param ax: Existing axes for the magnitude panel, or ``None`` for a
+        fresh two-panel (magnitude + phase) figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param show_sections: Also draw each section's magnitude (light lines)
+        when the cascade has more than one section.
+    :param kwargs: Forwarded to the cascade magnitude line.
+    :return: The magnitude axes (``ax`` given) or the array of two axes.
+    """
+    from .._i18n import decimal_comma, localize_axes
+
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    fmin, fmax = float(freqs[0]), float(freqs[-1])
+    color = kwargs.pop("color", _C_PRIMARY)
+
+    def _magnitude(axm: Axes) -> None:
+        if show_sections and result.section_magnitude_db.shape[0] > 1:
+            for idx, section in enumerate(result.sections):
+                label = decimal_comma(
+                    f"{section.filter_type} {section.f0:g} Hz", language
+                )
+                axm.semilogx(
+                    freqs, result.section_magnitude_db[idx],
+                    color=_C_MUTED, lw=0.9, alpha=0.7,
+                    label=label if idx < 8 else None,
+                )
+        kwargs.setdefault("lw", 1.8)
+        kwargs.setdefault("label", _t("Cascade", language))
+        axm.semilogx(freqs, result.magnitude_db, color=color, **kwargs)
+        axm.axhline(0.0, color=_C_REFERENCE, linestyle=":", lw=0.8, alpha=0.5)
+        axm.set_ylabel(_t("Magnitude [dB]", language))
+        axm.grid(True, which="both", alpha=0.3)
+        axm.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+
+    if ax is not None:
+        _magnitude(ax)
+        ax.set_xlabel(_t("Frequency [Hz]", language))
+        format_frequency_axis(ax, fmin, fmax)
+        localize_axes(ax, language)
+        return ax
+
+    axes = _new_axes_column(2, sharex=True, figsize=(8.0, 6.4))
+    _magnitude(axes[0])
+    axes[0].set_title(
+        _t("Parametric EQ response (Audio EQ Cookbook)", language)
+    )
+    axes[1].semilogx(freqs, np.degrees(result.phase_rad), color=color, lw=1.4)
+    axes[1].set_ylabel(_t("Phase [deg]", language))
+    axes[1].set_xlabel(_t("Frequency [Hz]", language))
+    axes[1].grid(True, which="both", alpha=0.3)
+    for axf in axes:
+        format_frequency_axis(axf, fmin, fmax)
+        localize_axes(axf, language)
+    return axes

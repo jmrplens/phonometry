@@ -49,6 +49,15 @@ _ES_EXACT = {
     "Gating envelope": "Envolvente de conmutación",
     "Window Functions: The Spectral Trade-off (Harris 1978)":
         "Ventanas de análisis: el compromiso espectral (Harris 1978)",
+    "Parametric EQ Biquads (RBJ Audio EQ Cookbook)":
+        "Biquads de EQ paramétrico (RBJ Audio EQ Cookbook)",
+    "Peaking +6 dB (Q = 1.4)": "Campana +6 dB (Q = 1.4)",
+    "Low shelf +6 dB": "Shelving grave +6 dB",
+    "High shelf -6 dB": "Shelving agudo -6 dB",
+    "Low-pass (Q = 0.707)": "Paso bajo (Q = 0.707)",
+    "High-pass (Q = 0.707)": "Paso alto (Q = 0.707)",
+    "Band-pass (Q = 2)": "Paso banda (Q = 2)",
+    "Notch (Q = 6)": "Rechazo de banda (Q = 6)",
     "Frequency offset [DFT bins]": "Desplazamiento en frecuencia [bins de la DFT]",
     "Level re main lobe [dB]": "Nivel re lóbulo principal [dB]",
     "GFPE relative sound level": "Nivel sonoro relativo GFPE",
@@ -2061,6 +2070,46 @@ def generate_crossover_plot(output_dir: str) -> None:
     apply_axis_styling(ax, "Linkwitz-Riley Crossover (4th Order @ 1kHz)", xlim=(20, 20000), ylim=(-60, 5))
     ax.legend(loc="lower right")
     save_figure(output_dir, "crossover_lr4.png")
+    plt.close()
+
+
+def generate_parametric_eq_family(output_dir: str) -> None:
+    """Magnitude responses of the RBJ Audio EQ Cookbook biquad family."""
+    print("Generating parametric_eq_family.png...")
+    fs = 48000
+
+    from phonometry import EQSection, ParametricEQ
+
+    family = [
+        (EQSection("peaking", 1000.0, gain_db=6.0, q=1.4),
+         "Peaking +6 dB (Q = 1.4)", COLOR_PRIMARY, "-"),
+        (EQSection("lowshelf", 125.0, gain_db=6.0),
+         "Low shelf +6 dB", COLOR_TERTIARY, "-"),
+        (EQSection("highshelf", 4000.0, gain_db=-6.0),
+         "High shelf -6 dB", "#9467bd", "-"),
+        (EQSection("lowpass", 10000.0),
+         "Low-pass (Q = 0.707)", COLOR_SECONDARY, "--"),
+        (EQSection("highpass", 50.0),
+         "High-pass (Q = 0.707)", "#8c564b", "--"),
+        (EQSection("bandpass", 500.0, q=2.0),
+         "Band-pass (Q = 2)", "#ff7f0e", "-."),
+        (EQSection("notch", 2000.0, q=6.0),
+         "Notch (Q = 6)", "#17becf", "-."),
+    ]
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    for section, label, color, style in family:
+        res = ParametricEQ(fs, section).response(f_min=20.0, f_max=20000.0)
+        ax.semilogx(res.frequencies, res.magnitude_db,
+                    label=label, color=color, linestyle=style)
+
+    ax.axhline(0, color=COLOR_FG, linestyle=":", alpha=0.3, linewidth=1)
+    apply_axis_styling(ax, "Parametric EQ Biquads (RBJ Audio EQ Cookbook)",
+                       xlim=(20, 20000), ylim=(-27, 9))
+    format_frequency_axis(ax, 20.0, 20000.0)
+    ax.set_ylabel("Magnitude [dB]")
+    ax.legend(loc="lower center", fontsize=9, ncols=2)
+    save_figure(output_dir, "parametric_eq_family.png")
     plt.close()
 
 
@@ -8243,6 +8292,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_equal_loudness_contours,
     generate_time_weighting_plot,
     generate_crossover_plot,
+    generate_parametric_eq_family,
     # Feature documentation plots (levels, spectrogram, zero-phase, weighting accuracy)
     generate_spectrogram_example,
     generate_ln_levels_example,

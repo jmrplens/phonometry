@@ -12,6 +12,7 @@ export const apiSidebar = {
         'reference/api/filters/phonometry',
         'reference/api/filters/core',
         'reference/api/filters/parametric-filters',
+        'reference/api/filters/equalizer',
         'reference/api/filters/frequencies',
         'reference/api/filters/compliance',
       ],

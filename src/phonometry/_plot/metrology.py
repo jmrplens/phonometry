@@ -29,6 +29,7 @@ if TYPE_CHECKING:
         LevelCrossingResult,
         PeakStatisticsResult,
         StationarityTestResult,
+        TrendTestResult,
     )
     from ..metrology.signals import ToneBurstResult
     from ..metrology.synchronous_average import SynchronousAverageResult
@@ -177,6 +178,12 @@ _STRINGS: dict[str, str] = {
     "Segment variance": "Varianza por segmento",
     "Sequence median": "Mediana de la secuencia",
     "Segment index": "Índice de segmento",
+    "Sample index": "Índice de muestra",
+    "Sequence value": "Valor de la secuencia",
+    "Trend test (Bendat & Piersol 4.5.2)":
+        "Test de tendencia (Bendat y Piersol 4.5.2)",
+    "no trend": "sin tendencia",
+    "trend": "tendencia",
     "Stationarity test (Bendat & Piersol 10.3.1.1)":
         "Test de estacionariedad (Bendat y Piersol 10.3.1.1)",
     "stationary": "estacionario",
@@ -1508,6 +1515,66 @@ _SEGMENT_LABELS = {
     "mean": "Segment mean",
     "variance": "Segment variance",
 }
+
+
+def plot_trend_test(
+    result: "TrendTestResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Tested sequence against its sample index with the trend-test verdict.
+
+    Draws the sequence of observations ``result.values`` against a plain
+    sample index (1 to ``n``) and states the test outcome in the legend:
+    the reverse-arrangement count ``A`` (or the run count ``r``), the B&P
+    Table A.6 acceptance region and whether the no-trend hypothesis is
+    accepted. For the runs test the sequence median is drawn as the
+    reference line that classifies each value.
+
+    :param result: A
+        :class:`~phonometry.metrology.random_data.TrendTestResult`.
+    :param ax: Existing axes, or ``None`` for a fresh figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the sequence line.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    if ax is None:
+        ax = _new_axes()
+        ax.set_title(
+            _t("Trend test (Bendat & Piersol 4.5.2)", language)
+        )
+    verdict = _t("no trend" if result.trend_free else "trend", language)
+    template = (
+        "Reverse arrangements A = {a}, accept ({lo}, {hi}]: {verdict}"
+        if result.method == "reverse_arrangements"
+        else "Runs r = {r}, accept ({lo}, {hi}]: {verdict}"
+    )
+    label = _t(
+        template, language, a=result.statistic, r=result.statistic,
+        lo=result.bounds[0], hi=result.bounds[1], verdict=verdict,
+    )
+    index = np.arange(1, result.n + 1)
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("lw", 1.2)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("ms", 4.5)
+    ax.plot(index, result.values, label=label, **kwargs)
+    if result.method == "runs" and result.median is not None:
+        # The runs test classifies each value against the median of the
+        # *original* sequence (before values equal to it were discarded),
+        # so draw that persisted classification median, not a median
+        # recomputed on the filtered result.values.
+        ax.axhline(
+            result.median, color=_C_REFERENCE,
+            linestyle="--", lw=1.2, label=_t("Sequence median", language),
+        )
+    ax.set_xlabel(_t("Sample index", language))
+    ax.set_ylabel(_t("Sequence value", language))
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
+    return ax
 
 
 def plot_stationarity_test(

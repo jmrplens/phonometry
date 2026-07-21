@@ -245,6 +245,26 @@ def test_window_metrics_es_and_bad_language() -> None:
         res.plot(language="xx")
 
 
+def test_trend_test_es_and_bad_language() -> None:
+    values = [5.2, 6.2, 3.7, 6.4, 3.9, 4.0, 3.9, 5.3, 4.0, 4.6,
+              5.9, 6.5, 4.3, 5.7, 3.1, 5.6, 5.2, 3.9, 6.2, 5.0]
+    res = ph.trend_test(values)
+    ax = res.plot(language="es")
+    assert "Test de tendencia" in ax.get_title()
+    assert ax.get_xlabel() == "Índice de muestra"
+    assert ax.get_ylabel() == "Valor de la secuencia"
+    assert "Inversiones de orden" in _labels(ax)
+    assert "sin tendencia" in _labels(ax)
+    plt.close("all")
+    runs = ph.trend_test(RNG.standard_normal(40), method="runs")
+    ax = runs.plot(language="es")
+    assert "Rachas r =" in _labels(ax)
+    assert "Mediana de la secuencia" in _labels(ax)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
 def test_stationarity_test_es_and_bad_language() -> None:
     n = 1 << 14
     x = _white(n) * np.linspace(1.0, 1.3, n)

@@ -54,7 +54,7 @@ L 0 3.5
       </g>
      </g>
      <g id="text_1">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="112.812263" y="401.031094" transform="rotate(-0 112.812263 401.031094)">31,5</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="112.812263" y="401.031094" transform="rotate(-0 112.812263 401.031094)">31,5</text>
      </g>
     </g>
     <g id="xtick_2">
@@ -69,7 +69,7 @@ L 169.60981 28.318125
       </g>
      </g>
      <g id="text_2">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="169.60981" y="401.031094" transform="rotate(-0 169.60981 401.031094)">63</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="169.60981" y="401.031094" transform="rotate(-0 169.60981 401.031094)">63</text>
      </g>
     </g>
     <g id="xtick_3">
@@ -84,7 +84,7 @@ L 225.754433 28.318125
       </g>
      </g>
      <g id="text_3">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="225.754433" y="401.031094" transform="rotate(-0 225.754433 401.031094)">125</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="225.754433" y="401.031094" transform="rotate(-0 225.754433 401.031094)">125</text>
      </g>
     </g>
     <g id="xtick_4">
@@ -99,7 +99,7 @@ L 282.55198 28.318125
       </g>
      </g>
      <g id="text_4">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="282.55198" y="401.031094" transform="rotate(-0 282.55198 401.031094)">250</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="282.55198" y="401.031094" transform="rotate(-0 282.55198 401.031094)">250</text>
      </g>
     </g>
     <g id="xtick_5">
@@ -114,7 +114,7 @@ L 339.349527 28.318125
       </g>
      </g>
      <g id="text_5">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="339.349527" y="401.031094" transform="rotate(-0 339.349527 401.031094)">500</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="339.349527" y="401.031094" transform="rotate(-0 339.349527 401.031094)">500</text>
      </g>
     </g>
     <g id="xtick_6">
@@ -129,7 +129,7 @@ L 396.147074 28.318125
       </g>
      </g>
      <g id="text_6">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="396.147074" y="401.031875" transform="rotate(-0 396.147074 401.031875)">1k</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="396.147074" y="401.031875" transform="rotate(-0 396.147074 401.031875)">1k</text>
      </g>
     </g>
     <g id="xtick_7">
@@ -144,7 +144,7 @@ L 452.944621 28.318125
       </g>
      </g>
      <g id="text_7">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="452.944621" y="401.031875" transform="rotate(-0 452.944621 401.031875)">2k</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="452.944621" y="401.031875" transform="rotate(-0 452.944621 401.031875)">2k</text>
      </g>
     </g>
     <g id="xtick_8">
@@ -159,7 +159,7 @@ L 509.742168 28.318125
       </g>
      </g>
      <g id="text_8">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="509.742168" y="401.031875" transform="rotate(-0 509.742168 401.031875)">4k</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="509.742168" y="401.031875" transform="rotate(-0 509.742168 401.031875)">4k</text>
      </g>
     </g>
     <g id="xtick_9">
@@ -174,7 +174,7 @@ L 566.539715 28.318125
       </g>
      </g>
      <g id="text_9">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="566.539715" y="401.031875" transform="rotate(-0 566.539715 401.031875)">8k</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="566.539715" y="401.031875" transform="rotate(-0 566.539715 401.031875)">8k</text>
      </g>
     </g>
     <g id="xtick_10">
@@ -189,7 +189,7 @@ L 623.337263 28.318125
       </g>
      </g>
      <g id="text_10">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="623.337263" y="401.031875" transform="rotate(-0 623.337263 401.031875)">16k</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="623.337263" y="401.031875" transform="rotate(-0 623.337263 401.031875)">16k</text>
      </g>
     </g>
     <g id="xtick_11">
@@ -450,7 +450,7 @@ L 641.621989 28.318125
      </g>
     </g>
     <g id="text_11">
-     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="358.605938" y="415.032656" transform="rotate(-0 358.605938 415.032656)">Frecuencia [Hz]</text>
+     <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="358.605938" y="415.032656" transform="rotate(-0 358.605938 415.032656)">Frecuencia [Hz]</text>
     </g>
    </g>
    <g id="matplotlib.axis_2">
@@ -471,7 +471,7 @@ L -3.5 0
       </g>
      </g>
      <g id="text_12">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="40.288281" y="346.802957" transform="rotate(-0 40.288281 346.802957)">140</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: end" x="40.288281" y="346.802957" transform="rotate(-0 40.288281 346.802957)">140</text>
      </g>
     </g>
     <g id="ytick_2">
@@ -486,7 +486,7 @@ L 669.923594 275.303077
       </g>
      </g>
      <g id="text_13">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="40.288281" y="279.101906" transform="rotate(-0 40.288281 279.101906)">150</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: end" x="40.288281" y="279.101906" transform="rotate(-0 40.288281 279.101906)">150</text>
      </g>
     </g>
     <g id="ytick_3">
@@ -501,7 +501,7 @@ L 669.923594 207.602026
       </g>
      </g>
      <g id="text_14">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="40.288281" y="211.400854" transform="rotate(-0 40.288281 211.400854)">160</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: end" x="40.288281" y="211.400854" transform="rotate(-0 40.288281 211.400854)">160</text>
      </g>
     </g>
     <g id="ytick_4">
@@ -516,7 +516,7 @@ L 669.923594 139.900974
       </g>
      </g>
      <g id="text_15">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="40.288281" y="143.699802" transform="rotate(-0 40.288281 143.699802)">170</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: end" x="40.288281" y="143.699802" transform="rotate(-0 40.288281 143.699802)">170</text>
      </g>
     </g>
     <g id="ytick_5">
@@ -531,11 +531,11 @@ L 669.923594 72.199923
       </g>
      </g>
      <g id="text_16">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="40.288281" y="75.998751" transform="rotate(-0 40.288281 75.998751)">180</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: end" x="40.288281" y="75.998751" transform="rotate(-0 40.288281 75.998751)">180</text>
      </g>
     </g>
     <g id="text_17">
-     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="14.798438" y="207.375781" transform="rotate(-90 14.798438 207.375781)">Nivel [dB re 1 µPa·m]</text>
+     <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="14.798438" y="207.375781" transform="rotate(-90 14.798438 207.375781)">Nivel [dB re 1 µPa·m]</text>
     </g>
    </g>
    <g id="line2d_73">
@@ -727,12 +727,12 @@ Q 456.760705 379.939978 461.010705 379.939978
 z
 " style="fill: #f0f2f5; stroke: #e0e0e0; stroke-linejoin: miter"/>
     </g>
-    <text style="font-size: 8.5px; font-family: 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Computer Modern Typewriter', 'Andale Mono', 'Nimbus Mono L', 'Courier New', 'Courier', 'Fixed', 'Terminal', monospace" transform="translate(594.059611 352.347351)">Ls = LRN + ΔL</text>
-    <text style="font-size: 8.5px; font-family: 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Computer Modern Typewriter', 'Andale Mono', 'Nimbus Mono L', 'Courier New', 'Courier', 'Fixed', 'Terminal', monospace" transform="translate(461.010705 362.594832)">ΔL = -10 lg[(2u^4+14u^2)/(14+2u^2+u^4)]</text>
-    <text style="font-size: 8.5px; font-family: 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Computer Modern Typewriter', 'Andale Mono', 'Nimbus Mono L', 'Courier New', 'Courier', 'Fixed', 'Terminal', monospace" transform="translate(501.94883 372.797156)">u = k d_s,  d_s = 0,7 D = 4,2 m</text>
+    <text style="font-size: 8.5px; font-family: sans-serif" transform="translate(594.059611 352.347351)">Ls = LRN + ΔL</text>
+    <text style="font-size: 8.5px; font-family: sans-serif" transform="translate(461.010705 362.594832)">ΔL = -10 lg[(2u^4+14u^2)/(14+2u^2+u^4)]</text>
+    <text style="font-size: 8.5px; font-family: sans-serif" transform="translate(501.94883 372.797156)">u = k d_s,  d_s = 0,7 D = 4,2 m</text>
    </g>
    <g id="text_19">
-    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="358.605938" y="16.318125" transform="rotate(-0 358.605938 16.318125)">Nivel de fuente monopolar equivalente de buque (ISO 17208-2)</text>
+    <text style="font-weight: 700; font-size: 12px; font-family: sans-serif; text-anchor: middle" x="358.605938" y="16.318125" transform="rotate(-0 358.605938 16.318125)">Nivel de fuente monopolar equivalente de buque (ISO 17208-2)</text>
    </g>
    <g id="legend_1">
     <g id="patch_8">
@@ -758,7 +758,7 @@ L 73.388281 345.659922
      </g>
     </g>
     <g id="text_20">
-     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="80.588281" y="348.809922" transform="rotate(-0 80.588281 348.809922)">Nivel de fuente Ls</text>
+     <text style="font-size: 9px; font-family: sans-serif; text-anchor: start" x="80.588281" y="348.809922" transform="rotate(-0 80.588281 348.809922)">Nivel de fuente Ls</text>
     </g>
     <g id="line2d_76">
      <path d="M 55.388281 359.160625 
@@ -770,7 +770,7 @@ L 73.388281 359.160625
      </g>
     </g>
     <g id="text_21">
-     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="80.588281" y="362.310625" transform="rotate(-0 80.588281 362.310625)">Nivel de ruido radiado</text>
+     <text style="font-size: 9px; font-family: sans-serif; text-anchor: start" x="80.588281" y="362.310625" transform="rotate(-0 80.588281 362.310625)">Nivel de ruido radiado</text>
     </g>
     <g id="line2d_77">
      <path d="M 55.388281 373.021328 
@@ -779,7 +779,7 @@ L 73.388281 373.021328
 " style="fill: none; stroke-dasharray: 2,3.3; stroke-dashoffset: 0; stroke: #2ca02c; stroke-width: 2"/>
     </g>
     <g id="text_22">
-     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="80.588281" y="376.171328" transform="rotate(-0 80.588281 376.171328)">Corrección de superficie ΔL</text>
+     <text style="font-size: 9px; font-family: sans-serif; text-anchor: start" x="80.588281" y="376.171328" transform="rotate(-0 80.588281 376.171328)">Corrección de superficie ΔL</text>
     </g>
    </g>
   </g>
@@ -802,7 +802,7 @@ L 3.5 0
       </g>
      </g>
      <g id="text_23">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="676.923594" y="372.203327" transform="rotate(-0 676.923594 372.203327)">-4</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: start" x="676.923594" y="372.203327" transform="rotate(-0 676.923594 372.203327)">-4</text>
      </g>
     </g>
     <g id="ytick_7">
@@ -817,7 +817,7 @@ L 669.923594 318.882332
       </g>
      </g>
      <g id="text_24">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="676.923594" y="322.68116" transform="rotate(-0 676.923594 322.68116)">-2</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: start" x="676.923594" y="322.68116" transform="rotate(-0 676.923594 322.68116)">-2</text>
      </g>
     </g>
     <g id="ytick_8">
@@ -832,7 +832,7 @@ L 669.923594 269.360165
       </g>
      </g>
      <g id="text_25">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="676.923594" y="273.158993" transform="rotate(-0 676.923594 273.158993)">0</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: start" x="676.923594" y="273.158993" transform="rotate(-0 676.923594 273.158993)">0</text>
      </g>
     </g>
     <g id="ytick_9">
@@ -847,7 +847,7 @@ L 669.923594 219.837999
       </g>
      </g>
      <g id="text_26">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="676.923594" y="223.636827" transform="rotate(-0 676.923594 223.636827)">2</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: start" x="676.923594" y="223.636827" transform="rotate(-0 676.923594 223.636827)">2</text>
      </g>
     </g>
     <g id="ytick_10">
@@ -862,7 +862,7 @@ L 669.923594 170.315832
       </g>
      </g>
      <g id="text_27">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="676.923594" y="174.11466" transform="rotate(-0 676.923594 174.11466)">4</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: start" x="676.923594" y="174.11466" transform="rotate(-0 676.923594 174.11466)">4</text>
      </g>
     </g>
     <g id="ytick_11">
@@ -877,7 +877,7 @@ L 669.923594 120.793665
       </g>
      </g>
      <g id="text_28">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="676.923594" y="124.592493" transform="rotate(-0 676.923594 124.592493)">6</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: start" x="676.923594" y="124.592493" transform="rotate(-0 676.923594 124.592493)">6</text>
      </g>
     </g>
     <g id="ytick_12">
@@ -892,11 +892,11 @@ L 669.923594 71.271499
       </g>
      </g>
      <g id="text_29">
-      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="676.923594" y="75.070327" transform="rotate(-0 676.923594 75.070327)">8</text>
+      <text style="font-size: 10px; font-family: sans-serif; text-anchor: start" x="676.923594" y="75.070327" transform="rotate(-0 676.923594 75.070327)">8</text>
      </g>
     </g>
     <g id="text_30">
-     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="698.892344" y="207.375781" transform="rotate(-90 698.892344 207.375781)">Corrección de superficie ΔL [dB]</text>
+     <text style="font-size: 10px; font-family: sans-serif; text-anchor: middle" x="698.892344" y="207.375781" transform="rotate(-90 698.892344 207.375781)">Corrección de superficie ΔL [dB]</text>
     </g>
    </g>
    <g id="line2d_92">

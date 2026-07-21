@@ -1,0 +1,72 @@
+/* Sidebar reference chips.
+
+   Each sidebar item can carry a small Starlight badge that tells the reader,
+   at a glance, what governs the page:
+
+   - `.chip-standard` (colour A, teal): the page implements one or more
+     published standards; the chip shows the standard number(s), kept short
+     (e.g. "IEC 61672", "ISO 2631 / 5349").
+   - `.chip-theory` (colour B, amber): the page is theoretical or
+     experimental with no governing standard; the chip shows the single most
+     notable reference, very short (e.g. "Welch 1967", "Bendat & Piersol").
+
+   The badges are attached in astro.config.mjs via each sidebar entry's
+   `badge: { text, class }` slot and rendered by the Badge component in
+   SidebarSublist.astro. These rules are unlayered, so they override
+   Starlight's layered `.sl-badge.default` colours without a specificity
+   fight. Both themes are covered: the palette is defined for dark mode (the
+   default the maintainer browses in) and re-stated for light mode via the
+   `data-theme` attribute Starlight stamps on the root element. Both colours
+   clear WCAG AA text contrast against their own fill. */
+
+:root {
+  /* Colour A: standard-backed (teal). */
+  --chip-standard-bg: #0e3b35;
+  --chip-standard-text: #7ee8d5;
+  --chip-standard-border: #1e6459;
+  /* Colour B: theoretical / experimental (amber). */
+  --chip-theory-bg: #3c2e0c;
+  --chip-theory-text: #f4c04e;
+  --chip-theory-border: #6a4f14;
+}
+
+:root[data-theme='light'] {
+  --chip-standard-bg: #d3f4ec;
+  --chip-standard-text: #0c5c52;
+  --chip-standard-border: #9adcce;
+  --chip-theory-bg: #fbeecd;
+  --chip-theory-text: #855107;
+  --chip-theory-border: #e4c581;
+}
+
+/* Shared chip shape. `.sl-badge` is Starlight's badge root; pairing it with
+   the chip class keeps specificity above the preset `.sl-badge.default`. */
+.sl-badge.chip-standard,
+.sl-badge.chip-theory {
+  border-style: solid;
+  border-width: 1px;
+  font-weight: 600;
+  /* Slightly tighter than a full-size row label so the chip reads as a tag. */
+  font-size: 0.7em;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.sl-badge.chip-standard {
+  background-color: var(--chip-standard-bg);
+  color: var(--chip-standard-text);
+  border-color: var(--chip-standard-border);
+}
+
+.sl-badge.chip-theory {
+  background-color: var(--chip-theory-bg);
+  color: var(--chip-theory-text);
+  border-color: var(--chip-theory-border);
+}
+
+/* On the active (accent pill) row the label text is inverted; keep the chip
+   legible by letting it keep its own fill rather than inheriting the pill. */
+[aria-current='page'] .sl-badge.chip-standard,
+[aria-current='page'] .sl-badge.chip-theory {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}

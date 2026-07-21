@@ -260,6 +260,7 @@ export default defineConfig({
         './src/styles/theme-tables.css',
         './src/styles/splash-menu.css',
         './src/styles/sidebar.css',
+        './src/styles/sidebar-chips.css',
       ],
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/jmrplens/phonometry' },
@@ -331,13 +332,13 @@ export default defineConfig({
           translations: { es: 'Análisis de señal' },
           items: [
             { slug: 'guides/sections/core-signal-analysis', attrs: { 'data-group-link': true } },
-            'guides/sound-level-meter',
+            { slug: 'guides/sound-level-meter', badge: { text: 'IEC 61672', class: 'chip-standard' } },
             {
               label: 'Octave filtering',
               translations: { es: 'Filtrado en octavas' },
               items: [
                 { slug: 'guides/sections/octave-filtering', attrs: { 'data-group-link': true } },
-                'guides/filter-banks',
+                { slug: 'guides/filter-banks', badge: { text: 'IEC 61260', class: 'chip-standard' } },
                 'guides/block-processing',
                 'guides/multichannel',
               ],
@@ -347,7 +348,7 @@ export default defineConfig({
               translations: { es: 'Niveles y ponderación' },
               items: [
                 { slug: 'guides/sections/levels-weighting', attrs: { 'data-group-link': true } },
-                'guides/weighting',
+                { slug: 'guides/weighting', badge: { text: 'IEC 61672', class: 'chip-standard' } },
                 'guides/time-weighting',
                 'guides/levels',
               ],
@@ -357,12 +358,12 @@ export default defineConfig({
               translations: { es: 'Señales y espectros' },
               items: [
                 { slug: 'guides/sections/signals-spectra', attrs: { 'data-group-link': true } },
-                'guides/spectral-analysis',
-                'guides/miso-coherence',
-                'guides/time-frequency',
-                'guides/cepstrum-echoes',
-                'guides/synchronous-averaging',
-                'guides/correlation-delay',
+                { slug: 'guides/spectral-analysis', badge: { text: 'Welch 1967', class: 'chip-theory' } },
+                { slug: 'guides/miso-coherence', badge: { text: 'Bendat & Piersol', class: 'chip-theory' } },
+                { slug: 'guides/time-frequency', badge: { text: 'Bendat & Piersol', class: 'chip-theory' } },
+                { slug: 'guides/cepstrum-echoes', badge: { text: 'Havelock et al.', class: 'chip-theory' } },
+                { slug: 'guides/synchronous-averaging', badge: { text: 'McFadden 1987', class: 'chip-theory' } },
+                { slug: 'guides/correlation-delay', badge: { text: 'Knapp & Carter', class: 'chip-theory' } },
                 'guides/test-signals',
                 'guides/system-measurement',
               ],
@@ -389,7 +390,7 @@ export default defineConfig({
               translations: { es: 'Psicoacústica' },
               items: [
                 { slug: 'guides/sections/psychoacoustics', attrs: { 'data-group-link': true } },
-                'guides/loudness',
+                { slug: 'guides/loudness', badge: { text: 'ISO 532-1', class: 'chip-standard' } },
                 'guides/sound-quality',
                 'guides/tone-prominence',
                 'guides/tone-audibility',
@@ -413,7 +414,7 @@ export default defineConfig({
                 { slug: 'guides/sections/hearing-exposure', attrs: { 'data-group-link': true } },
                 'guides/hearing-threshold',
                 'guides/noise-induced-hearing-loss',
-                'guides/occupational-exposure',
+                { slug: 'guides/occupational-exposure', badge: { text: 'ISO 9612', class: 'chip-standard' } },
               ],
             },
           ],
@@ -428,11 +429,11 @@ export default defineConfig({
               translations: { es: 'Acústica de salas' },
               items: [
                 { slug: 'guides/sections/room-acoustics', attrs: { 'data-group-link': true } },
-                'guides/room-acoustics',
+                { slug: 'guides/room-acoustics', badge: { text: 'ISO 3382', class: 'chip-standard' } },
                 'guides/room-image-sources',
                 'guides/room-noise',
                 'guides/reverberation-prediction',
-                'guides/enclosed-space-absorption',
+                { slug: 'guides/enclosed-space-absorption', badge: { text: 'EN 12354-6', class: 'chip-standard' } },
               ],
             },
             {
@@ -440,8 +441,8 @@ export default defineConfig({
               translations: { es: 'Aislamiento acústico' },
               items: [
                 { slug: 'guides/sections/sound-insulation', attrs: { 'data-group-link': true } },
-                'guides/insulation-field',
-                'guides/insulation-lab',
+                { slug: 'guides/insulation-field', badge: { text: 'ISO 16283 / 717', class: 'chip-standard' } },
+                { slug: 'guides/insulation-lab', badge: { text: 'ISO 10140', class: 'chip-standard' } },
                 'guides/insulation-prediction',
                 'guides/panel-sound-insulation',
                 'guides/dynamic-stiffness',
@@ -454,7 +455,7 @@ export default defineConfig({
           translations: { es: 'Materiales y superficies' },
           items: [
             { slug: 'guides/sections/materials-surfaces', attrs: { 'data-group-link': true } },
-            'guides/materials',
+            { slug: 'guides/materials', badge: { text: 'ISO 11654', class: 'chip-standard' } },
             'guides/porous-absorbers',
             'guides/surface-scattering',
           ],
@@ -482,7 +483,7 @@ export default defineConfig({
               translations: { es: 'Vibración en humanos' },
               items: [
                 { slug: 'guides/sections/human-vibration', attrs: { 'data-group-link': true } },
-                'guides/human-vibration',
+                { slug: 'guides/human-vibration', badge: { text: 'ISO 2631 / 5349', class: 'chip-standard' } },
                 'guides/multiple-shock-vibration',
               ],
             },
@@ -535,7 +536,7 @@ export default defineConfig({
             'guides/electroacoustics',
             'guides/swept-sine-distortion',
             'guides/noise-control',
-            'guides/program-loudness',
+            { slug: 'guides/program-loudness', badge: { text: 'EBU R 128', class: 'chip-standard' } },
           ],
         },
         {

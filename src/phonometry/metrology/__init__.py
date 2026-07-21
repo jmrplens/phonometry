@@ -38,6 +38,7 @@ from .envelope import (
     envelope,
     envelope_spectrum,
 )
+from .equalizer import EQResponseResult, EQSection, ParametricEQ, parametric_eq
 from .frequencies import (
     getansifrequencies,
     nominal_frequencies,
@@ -205,4 +206,8 @@ __all__ = [
     "window_metrics",
     "InverseFilterResult",
     "regularized_inverse_filter",
+    "EQResponseResult",
+    "EQSection",
+    "ParametricEQ",
+    "parametric_eq",
 ]

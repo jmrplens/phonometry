@@ -270,6 +270,12 @@ from .metrology.envelope import (
     envelope,
     envelope_spectrum,
 )
+from .metrology.equalizer import (
+    EQResponseResult,
+    EQSection,
+    ParametricEQ,
+    parametric_eq,
+)
 from .metrology.phase import (
     PhaseDecompositionResult,
     excess_phase,
@@ -1051,6 +1057,10 @@ __all__ = [
     "time_weighting",
     "TimeWeighting",
     "linkwitz_riley",
+    "parametric_eq",
+    "ParametricEQ",
+    "EQSection",
+    "EQResponseResult",
     "sensitivity",
     "calculate_sensitivity",  # deprecated alias (remove in 4.0)
     "leq",

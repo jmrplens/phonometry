@@ -300,3 +300,18 @@ def test_inverse_filter_es() -> None:
     plt.close("all")
     with pytest.raises(ValueError):
         res.plot(language="xx")
+
+
+def test_parametric_eq_es_and_bad_language() -> None:
+    eq = ph.ParametricEQ(FS, [
+        ph.EQSection("lowshelf", 100.0, gain_db=4.0),
+        ph.EQSection("peaking", 1000.0, gain_db=-6.0, q=1.5),
+    ])
+    res = eq.response(n_points=64)
+    axes = res.plot(language="es")
+    assert "Respuesta del EQ paramétrico (Audio EQ Cookbook)" in _titles(axes)
+    assert "Cascada" in _labels(axes)
+    assert "Fase [grados]" in _labels(axes)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")

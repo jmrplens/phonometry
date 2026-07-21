@@ -33,7 +33,7 @@ just inside the unit circle at the angles
 $\omega = 2\pi f / f_s$ the passband spans. Two intuitions follow. First,
 selectivity is proximity: the closer the poles sit to the unit circle, the
 sharper the band and the longer the filter rings (the group-delay peaks of
-section 7 are that ringing, measured). Second, stability is a margin, not a
+section 8 are that ringing, measured). Second, stability is a margin, not a
 property of the architecture: an IIR filter is stable only while every pole
 stays strictly inside the unit circle, and a narrow band at a high sample
 rate pushes the poles outward (pole radius $\approx 1 - \pi B / f_s$ for
@@ -401,7 +401,73 @@ plt.show()
 
 </details>
 
-## 6. Verifying the IEC 61260-1 class
+## 6. Parametric EQ (`ParametricEQ`)
+
+Biquad equalizer sections per the **RBJ Audio EQ Cookbook**
+(Bristow-Johnson): peaking (bell), low/high shelf, low/high-pass, band-pass
+(constant 0 dB peak or constant skirt gain), notch and all-pass, each
+parameterized by `fs`, `f0`, `gain_db` and one of `q`, `bw` (bandwidth in
+octaves) or `slope` exactly as the cookbook defines them. Sections cascade
+as a numerically robust SOS chain, and the design is closed-form exact: a
+peaking section passes exactly `gain_db` at `f0` and exactly 0 dB at DC and
+Nyquist, shelves land exactly on `gain_db` at their shelved end, and the
+all-pass has unit magnitude everywhere (only the phase turns).
+
+```python
+import numpy as np
+from phonometry import EQSection, ParametricEQ
+
+fs = 48000
+rng = np.random.default_rng(1)
+x = rng.standard_normal(fs)                 # one second of noise
+
+eq = ParametricEQ(fs, [
+    EQSection("lowshelf", 100.0, gain_db=4.0),
+    EQSection("peaking", 1000.0, gain_db=-6.0, bw=1.0),  # one-octave cut
+    EQSection("highshelf", 8000.0, gain_db=3.0),
+])
+y = eq.filter(x)              # apply the cascade
+res = eq.response()           # frozen result carrying the SOS cascade
+axes = res.plot()             # magnitude + phase of the cascade
+```
+
+For block processing pass `stateful=True` (the same convention as
+`WeightingFilter`); the one-shot helper is `parametric_eq(x, fs, sections)`.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/parametric_eq_family_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/parametric_eq_family.svg" alt="Magnitude responses of the RBJ Audio EQ Cookbook biquad family: peaking, shelves, low/high-pass, band-pass and notch" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import EQSection, ParametricEQ
+
+fs = 48000
+family = [
+    EQSection("peaking", 1000.0, gain_db=6.0, q=1.4),
+    EQSection("lowshelf", 125.0, gain_db=6.0),
+    EQSection("highshelf", 4000.0, gain_db=-6.0),
+    EQSection("lowpass", 10000.0),
+    EQSection("highpass", 50.0),
+    EQSection("bandpass", 500.0, q=2.0),
+    EQSection("notch", 2000.0, q=6.0),
+]
+fig, ax = plt.subplots(figsize=(10, 6))
+for section in family:
+    res = ParametricEQ(fs, [section]).response(f_min=20.0, f_max=20000.0)
+    ax.semilogx(res.frequencies, res.magnitude_db,
+                label=f"{section.filter_type} @ {section.f0:g} Hz")
+ax.set(xlim=(20, 20000), ylim=(-27, 9),
+       xlabel="Frequency [Hz]", ylabel="Magnitude [dB]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend(loc="lower center", ncols=2, fontsize=9)
+plt.show()
+```
+
+</details>
+
+## 7. Verifying the IEC 61260-1 class
 
 `verify_filter_class` checks every band of a bank against the acceptance
 limits of **IEC 61260-1:2014** (Table 1, with the fractional-octave breakpoint
@@ -635,7 +701,7 @@ Both rendered example fiches live under `.github/reports/` (regenerated with
 and the 1995-edition class-0
 [`iec61260_filter_1995_example.pdf`](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61260_filter_1995_example.pdf).
 
-## 7. Signal Decomposition and Stability
+## 8. Signal Decomposition and Stability
 
 By setting `sigbands=True`, you can retrieve the time-domain components of each
 band. This allows for advanced analysis or comparing how different architectures
@@ -742,7 +808,7 @@ plt.show()
 
 </details>
 
-## 8. Zero-phase filtering
+## 9. Zero-phase filtering
 
 For offline analysis you can eliminate group delay entirely: `zero_phase=True`
 filters each band forward-backward (`scipy.signal.sosfiltfilt`), keeping band
@@ -813,6 +879,11 @@ plt.show()
   [Open Library record](https://openlibrary.org/isbn/9780131988422).
   The pole-zero, stability and multirate theory condensed in section 1: SOS
   cascades, the bilinear transform and decimation.
+- Bristow-Johnson, R. *Audio EQ Cookbook*. Republished as a W3C Working
+  Group Note (ed. R. Toy), 8 June 2021.
+  [w3.org/TR/audio-eq-cookbook](https://www.w3.org/TR/audio-eq-cookbook/).
+  The biquad coefficient recipes and the Q / bandwidth / shelf-slope
+  parameterization behind `ParametricEQ` (section 6).
 - Smith, J. O. *Introduction to digital filters with audio applications*
   (online book). Center for Computer Research in Music and Acoustics (CCRMA),
   Stanford University.

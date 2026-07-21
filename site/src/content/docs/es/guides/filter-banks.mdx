@@ -40,6 +40,13 @@ references:
     url: "https://openlibrary.org/isbn/9780131988422"
     note: "La teoría de polos y ceros, estabilidad y multitasa condensada en la sección 1: cascadas SOS, transformada bilineal y diezmado (ISBN 978-0-13-198842-2)."
   - type: web
+    authors: ["Bristow-Johnson, R."]
+    year: 2021
+    title: "Audio EQ Cookbook"
+    siteName: "Nota de grupo de trabajo del W3C (ed. R. Toy), 8 de junio de 2021"
+    url: "https://www.w3.org/TR/audio-eq-cookbook/"
+    note: "Las recetas de coeficientes biquad y la parametrización por Q / ancho de banda / pendiente de shelving detrás de ParametricEQ (sección 6)."
+  - type: web
     authors: ["Smith, J. O."]
     title: "Introduction to digital filters with audio applications"
     siteName: "Center for Computer Research in Music and Acoustics (CCRMA), Stanford University"
@@ -84,7 +91,7 @@ los polos se agrupan justo dentro del círculo unidad en los ángulos
 $\omega = 2\pi f / f_s$ que abarca la banda de paso. De ahí salen dos
 intuiciones. Primera, la selectividad es proximidad: cuanto más cerca del
 círculo unidad están los polos, más abrupta es la banda y más tiempo resuena
-el filtro (los picos de retardo de grupo de la sección 7 son esa resonancia,
+el filtro (los picos de retardo de grupo de la sección 8 son esa resonancia,
 medida). Segunda, la estabilidad es un margen, no una propiedad de la
 arquitectura: un filtro IIR es estable solo mientras todos sus polos
 permanecen estrictamente dentro del círculo unidad, y una banda estrecha a
@@ -462,7 +469,75 @@ plt.show()
 
 </details>
 
-## 6. Verificar la clase IEC 61260-1
+## 6. EQ paramétrico (`ParametricEQ`)
+
+Secciones biquad de ecualización según el **RBJ Audio EQ Cookbook**
+(Bristow-Johnson): campana (peaking), shelving grave/agudo, paso bajo/alto,
+paso banda (pico a 0 dB constante o faldas constantes), rechazo de banda
+(notch) y pasa-todo, cada una parametrizada por `fs`, `f0`, `gain_db` y uno
+de `q`, `bw` (ancho de banda en octavas) o `slope`, exactamente como los
+define el cookbook. Las secciones se encadenan en una cascada SOS
+numéricamente robusta, y el diseño es exacto en forma cerrada: una campana
+pasa exactamente `gain_db` en `f0` y exactamente 0 dB en DC y Nyquist, los
+shelving caen exactamente en `gain_db` en su extremo, y el pasa-todo tiene
+magnitud unidad en todas las frecuencias (solo gira la fase).
+
+```python
+import numpy as np
+from phonometry import EQSection, ParametricEQ
+
+fs = 48000
+rng = np.random.default_rng(1)
+x = rng.standard_normal(fs)                 # un segundo de ruido
+
+eq = ParametricEQ(fs, [
+    EQSection("lowshelf", 100.0, gain_db=4.0),
+    EQSection("peaking", 1000.0, gain_db=-6.0, bw=1.0),  # recorte de 1 octava
+    EQSection("highshelf", 8000.0, gain_db=3.0),
+])
+y = eq.filter(x)              # aplicar la cascada
+res = eq.response()           # resultado congelado con la cascada SOS
+axes = res.plot(language="es")  # magnitud + fase de la cascada
+```
+
+Para procesado por bloques pasa `stateful=True` (la misma convención que
+`WeightingFilter`); el atajo de un solo uso es
+`parametric_eq(x, fs, sections)`.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/parametric_eq_family_es.svg" alt="Respuestas en magnitud de la familia de biquads del RBJ Audio EQ Cookbook: campana, shelving, paso bajo/alto, paso banda y rechazo de banda" width="80%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import EQSection, ParametricEQ
+
+fs = 48000
+familia = [
+    EQSection("peaking", 1000.0, gain_db=6.0, q=1.4),
+    EQSection("lowshelf", 125.0, gain_db=6.0),
+    EQSection("highshelf", 4000.0, gain_db=-6.0),
+    EQSection("lowpass", 10000.0),
+    EQSection("highpass", 50.0),
+    EQSection("bandpass", 500.0, q=2.0),
+    EQSection("notch", 2000.0, q=6.0),
+]
+fig, ax = plt.subplots(figsize=(10, 6))
+for section in familia:
+    res = ParametricEQ(fs, [section]).response(f_min=20.0, f_max=20000.0)
+    ax.semilogx(res.frequencies, res.magnitude_db,
+                label=f"{section.filter_type} @ {section.f0:g} Hz")
+ax.set(xlim=(20, 20000), ylim=(-27, 9),
+       xlabel="Frecuencia [Hz]", ylabel="Magnitud [dB]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend(loc="lower center", ncols=2, fontsize=9)
+plt.show()
+```
+
+</details>
+
+## 7. Verificar la clase IEC 61260-1
 
 `verify_filter_class` comprueba cada banda de un banco contra los límites de
 aceptación de **IEC 61260-1:2014** (Tabla 1, con el mapeo de breakpoints a
@@ -715,7 +790,7 @@ result.report("iec61260_1995.pdf",
 	caption="La clase 0 la conserva la edición IEC 61260:1995 / ANSI S1.11-2004 (edition='1995'); la edición de 2014 solo mantiene las clases 1 y 2."
 />
 
-## 7. Descomposición de la señal y estabilidad
+## 8. Descomposición de la señal y estabilidad
 
 Con `sigbands=True` puedes recuperar las componentes en el dominio del tiempo de
 cada banda. Esto permite análisis avanzados o comparar cómo afectan distintas
@@ -825,7 +900,7 @@ plt.show()
 
 </details>
 
-## 8. Filtrado de fase cero
+## 9. Filtrado de fase cero
 
 Para análisis offline puedes eliminar por completo el retardo de grupo:
 `zero_phase=True` filtra cada banda hacia delante y hacia atrás

@@ -56,6 +56,15 @@ noise bandwidth, coherent gain, scalloping loss, worst-case processing
 loss, highest sidelobe level and the -3 dB main-lobe width - the numbers
 that turn "which window should I use?" into a trade-off one can read.
 
+[`multitaper_psd`](/phonometry/reference/api/spectra/spectra/#multitaper_psd) adds Thomson's multitaper estimator (Thomson 1982;
+Percival & Walden, *Spectral Analysis for Physical Applications*, 1993,
+Chapter 7) as the whole-record alternative to Welch segment averaging:
+`K` orthogonal discrete prolate spheroidal (Slepian) tapers of
+time-half-bandwidth `NW` produce `K` nearly uncorrelated eigenspectra
+whose (adaptively weighted) average carries about `2K` chi-square
+degrees of freedom without splitting the record - the estimator of choice
+for short records where Welch would leave too few segments.
+
 ## coherent_output_spectrum
 
 ```python
@@ -325,6 +334,144 @@ are copied unchanged.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+
+## multitaper_psd
+
+```python
+multitaper_psd(
+    x: NDArray[np.float64] | list[float],
+    fs: float,
+    *,
+    time_half_bandwidth: float = 4.0,
+    n_tapers: int | None = None,
+    adaptive: bool = True,
+    scaling: Literal['density', 'spectrum'] = 'density',
+    confidence: float = 0.95,
+) -> MultitaperSpectralDensityResult
+```
+
+Thomson multitaper spectral density with chi-square interval.
+
+Implements the multitaper estimator of Thomson (1982) as developed in
+Percival & Walden (1993, Chapter 7): the record is multiplied by
+`K` orthogonal discrete prolate spheroidal (Slepian) data tapers -
+the sequences that maximize spectral concentration in the design band
+`[-W, W]`, computed by `scipy.signal.windows.dpss` - and the
+`K` resulting eigenspectra (P&W Eq. 333) are averaged. Because the
+tapers are orthogonal the eigenspectra are nearly uncorrelated, so the
+average has about `2K` chi-square degrees of freedom and `1/K` of
+the periodogram's variance *without* segmenting the record: the
+estimator of choice for short records, where Welch's method
+([`power_spectral_density`](/phonometry/reference/api/spectra/spectra/#power_spectral_density)) would leave too few segments.
+
+With `adaptive=True` (default) the eigenspectra are combined with
+Thomson's frequency-dependent weights (P&W Eqs. 368a/370a, iterated to
+convergence): wherever the local spectrum is weak relative to the
+broad-band leakage each taper could carry, the leakier high-order
+tapers are downweighted, trading degrees of freedom (Eq. 370b) for
+leakage protection in high-dynamic-range spectra. For a locally white
+spectrum the weights converge to uniform and nothing is lost. With
+`adaptive=False` the eigenvalue-weighted average of P&W Eq. 369a is
+returned.
+
+Calibration matches the Welch estimators of this module exactly: no
+detrending, `'density'` scaling integrates to the signal power
+(units²/Hz, one-sided) and `'spectrum'` scaling reads `A²/2` at
+the peak of a sinusoid of amplitude `A` (the tone calibration is
+exact for the taper set in use, computed from the taper DC gains
+`(Σₜhₜₖ)²`; a tone's power in `'density'` scaling is spread over
+the resolution bandwidth `2W`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `x` | Signal, 1-D (used whole; no segmentation). |
+| `fs` | Sample rate, in Hz. |
+| `time_half_bandwidth` | Duration x half-bandwidth product `NW` (dimensionless; default 4, P&W's worked choice). The design half-bandwidth is `W = NW·fs/N` Hz; larger `NW` admits more tapers (lower variance) at the cost of resolution `2W`. |
+| `n_tapers` | Number of tapers `K`; `None` picks `2·NW - 1` (all tapers with near-unity concentration, P&W Section 7.1). At most the Shannon number `2·NW`. |
+| `adaptive` | Use Thomson's adaptive weights (default) or the eigenvalue-weighted average. |
+| `scaling` | `'density'` (units²/Hz) or `'spectrum'` (units², sinusoid-peak reading). |
+| `confidence` | Confidence level for the chi-square interval. |
+
+**Returns:** A [`MultitaperSpectralDensityResult`](/phonometry/reference/api/spectra/spectra/#multitaperspectraldensityresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the inputs or parameters are invalid. |
+
+## MultitaperSpectralDensityResult
+
+```python
+MultitaperSpectralDensityResult(
+    frequencies: NDArray[np.float64],
+    psd: NDArray[np.float64],
+    ci_lower: NDArray[np.float64],
+    ci_upper: NDArray[np.float64],
+    confidence: float,
+    degrees_of_freedom: NDArray[np.float64],
+    random_error: NDArray[np.float64],
+    weights: NDArray[np.float64],
+    eigenvalues: NDArray[np.float64],
+    time_half_bandwidth: float,
+    n_tapers: int,
+    resolution_bandwidth: float,
+    adaptive: bool,
+    scaling: str,
+)
+```
+
+Thomson multitaper spectral density (Percival & Walden Ch. 7).
+
+One whole-record estimate from `K` orthogonal Slepian (dpss) tapers:
+the `K` eigenspectra are nearly uncorrelated, so their weighted
+average trades the two chi-square degrees of freedom of a periodogram
+for about `2K` - without segmenting the record as Welch's method
+does. The chi-square machinery mirrors
+[`SpectralDensityResult`](/phonometry/reference/api/spectra/spectra/#spectraldensityresult), but here the degrees of freedom are
+per-frequency: Thomson's adaptive weights (P&W Eq. 368a) downweight
+leakage-prone tapers wherever the spectrum is locally weak, which
+costs degrees of freedom there (P&W Eq. 370b).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | One-sided frequency axis, in Hz. |
+| `psd` | Multitaper spectral density `Ŝ(mt)(f)` (units²/Hz for `'density'` scaling, units² for `'spectrum'`). |
+| `ci_lower` | Lower chi-square confidence bound, `ν·Ŝ/χ²ᵥ;α/2` with the per-frequency `ν` (the same interval form as B&P Eq. 8.163, with `ν` from P&W Eq. 370b). |
+| `ci_upper` | Upper chi-square confidence bound. |
+| `confidence` | Confidence level of the interval (e.g. `0.95`). |
+| `degrees_of_freedom` | Per-frequency equivalent chi-square degrees of freedom `ν(f) = 2·(Σₖdₖ)²/Σₖdₖ²` with `dₖ = b²ₖ(f)·λₖ` (P&W Eq. 370b); `2K·(Σλₖ/K)²·K/Σλ²ₖ ≈ 2K` for unity weights. The DC bin - and the Nyquist bin for an even record length - carries half (a single real Fourier component per eigenspectrum). |
+| `random_error` | Per-frequency normalized random error `ε[Ŝ(mt)] = √(2/ν)` (`≈ 1/√K`), the multitaper counterpart of B&P Eq. 8.158. |
+| `weights` | Normalized combination weights `dₖ(f)/Σⱼdⱼ(f)`, shape `(n_tapers, n_frequencies)`. Adaptive weighting makes them frequency dependent; they converge to `≈ 1/K` where the spectrum is locally white (exactly uniform weights would be `λₖ/Σλⱼ`). |
+| `eigenvalues` | Concentration ratios `λₖ(N, W)` of the tapers - the fraction of each taper's spectral-window energy inside the design band `[-W, W]` (P&W Section 7.1; near unity for `k < 2NW`). |
+| `time_half_bandwidth` | The duration x half-bandwidth product `NW` (dimensionless; `W = NW/(N·Δt)`). |
+| `n_tapers` | Number of tapers `K` averaged. |
+| `resolution_bandwidth` | The resolution bandwidth `2W` of the estimator, in Hz - the multitaper analog of the Welch `Bₑ` (P&W call `2W` *the* natural resolution measure of the method). |
+| `adaptive` | Whether Thomson's adaptive weights were used. |
+| `scaling` | `'density'` or `'spectrum'`. |
+
+### MultitaperSpectralDensityResult.plot()
+
+```python
+MultitaperSpectralDensityResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the multitaper density in dB with its confidence band.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
 
 ## power_spectral_density
 

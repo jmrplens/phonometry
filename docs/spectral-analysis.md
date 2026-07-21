@@ -12,9 +12,11 @@ confidence intervals; the **coherent output spectrum** that splits a measured
 output into the part linearly explained by the input and the noise remainder,
 with the spectral signal-to-noise ratio; a **fractional-octave smoother** with
 a constant-power kernel; **colored-noise generators** with an exact
-power-law slope for exercising all of the above; and the **window figures of
-merit** of Harris (1978) for choosing the taper. Every error formula is a
-closed form from the book, verified by seeded Monte Carlo in the test suite.
+power-law slope for exercising all of the above; the **window figures of
+merit** of Harris (1978) for choosing the taper; and a **Thomson multitaper
+estimator** (Percival & Walden, 1993) for records too short to segment.
+Every error formula is a closed form from the sources, verified by seeded
+Monte Carlo in the test suite.
 
 ## 1. Power spectral density with its statistical error
 
@@ -290,6 +292,113 @@ weak tone must be found next to a strong one, and accept the wider main
 lobe; reach for the rectangular window only for self-windowing records
 (transients that decay inside the segment) or bin-centered synthesis.
 
+## 7. Multitaper estimation for short records
+
+Welch's method buys stability with record length: each independent segment
+adds two degrees of freedom, so a record that only fits a couple of segments
+leaves an estimate barely better than a periodogram. `multitaper_psd`
+implements the alternative of Thomson (1982), as developed by Percival &
+Walden (1993, Chapter 7): the *whole* record is multiplied by `K` orthogonal
+discrete prolate spheroidal (Slepian) tapers - the sequences that concentrate
+the most spectral-window energy inside a chosen design band `[-W, W]` - and
+the `K` resulting *eigenspectra* are averaged:
+
+$$
+\hat{S}^{(mt)}(f) = \frac{1}{K}\sum_{k=0}^{K-1} \hat{S}_k(f), \qquad
+\hat{S}_k(f) = \Delta t\,\Bigl|\sum_{t=1}^{N} h_{t,k}\,x_t\,
+e^{-i 2\pi f t \Delta t}\Bigr|^2 .
+$$
+
+Because the tapers are orthogonal the eigenspectra are nearly uncorrelated,
+so the average carries about `2K` chi-square degrees of freedom from a
+single record - the same statistical machinery as the Welch result (random
+error, chi-square confidence interval), without segmenting. The
+half-bandwidth `W = NW·fs/N` is set through the duration x half-bandwidth
+product `NW` (default 4). `2W` is the resolution of the estimate (reported
+as `resolution_bandwidth`), and only the tapers below the Shannon number
+`2·NW` keep their spectral-window energy inside the design band - their
+concentrations `λk` are reported as `eigenvalues`, and the default taper
+count is `K = 2·NW - 1`, all tapers with near-unity concentration. Larger
+`NW` admits more tapers (lower variance) at the cost of resolution.
+
+```python
+from phonometry import multitaper_psd
+
+res = multitaper_psd(signal, fs)                 # NW = 4, K = 7, adaptive
+print(res.degrees_of_freedom.mean())             # ~2K from one record
+print(res.eigenvalues)                           # taper concentrations
+res.plot()                                       # density with the CI band
+```
+
+By default the eigenspectra are combined with Thomson's **adaptive weights**
+(P&W Eqs. 368a/370a, iterated to convergence). Each taper's weight at each
+frequency balances the local spectrum against the broad-band leakage the
+taper could carry:
+
+$$
+b_k(f) = \frac{S(f)}{\lambda_k S(f) + (1-\lambda_k)\,\sigma^2 \Delta t},
+\qquad
+\hat{S}^{(amt)}(f) =
+\frac{\sum_k b_k^2(f)\,\lambda_k\,\hat{S}_k(f)}
+     {\sum_k b_k^2(f)\,\lambda_k},
+$$
+
+so the leakier high-order tapers are downweighted exactly where the spectrum
+is locally weak, and nothing is lost where it is locally white (for white
+noise the weights are uniform). The price is bookkept honestly: the
+equivalent degrees of freedom become frequency dependent,
+`ν(f) = 2·(Σk dk)²/Σk dk²` with `dk = b²k·λk` (P&W Eq. 370b), and the
+confidence interval widens wherever leakage protection spent them.
+`adaptive=False` selects the plain eigenvalue-weighted average instead.
+
+Calibration matches the Welch estimators exactly: no detrending,
+`'density'` integrates to the signal power, and `'spectrum'` reads `A²/2` at
+the peak of a sinusoid of amplitude `A` (a tone's power in `'density'`
+scaling spreads over the `2W` band). The Slepian tapers themselves come from
+`scipy.signal.windows.dpss`; their concentrations reproduce the
+quadruple-precision table of Percival & Walden (Table 382) to machine
+precision, which is the anchor oracle of the test suite.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multitaper_psd_confidence_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multitaper_psd_confidence.svg" alt="Thomson multitaper spectral density of a 171 millisecond pink noise record in dB per Hz over 20 Hz to 20 kHz, with the 95 percent chi-square confidence band around the seven-taper adaptive estimate, the single-taper estimate as a jagged gray context line and the exact -3.01 dB per octave power law as a dashed reference" width="82%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import multitaper_psd, noise_signal
+
+fs = 48000.0
+x = noise_signal(fs, 8192 / fs, color="pink", seed=11)   # 171 ms record
+single = multitaper_psd(x, fs, n_tapers=1, adaptive=False)
+res = multitaper_psd(x, fs)                              # NW = 4, K = 7
+band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
+freqs = res.frequencies[band]
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.semilogx(freqs, 10 * np.log10(single.psd[band]), color="gray",
+            alpha=0.45, lw=0.7, label="Single Slepian taper (K = 1)")
+ax.fill_between(freqs, 10 * np.log10(res.ci_lower[band]),
+                10 * np.log10(res.ci_upper[band]), alpha=0.3,
+                label="95 % chi-square confidence interval")
+ax.semilogx(freqs, 10 * np.log10(res.psd[band]), lw=1.2,
+            label="Multitaper estimate (K = 7, adaptive)")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("PSD [dB re 1/Hz]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+Reach for `multitaper_psd` when the record is too short to segment (room
+impulse response tails, transient captures, single machine cycles) or when
+a high-dynamic-range spectrum needs leakage protection that a Hann-windowed
+Welch average cannot give; stay with `power_spectral_density` for long
+records, where segment averaging is cheaper than `K` full-length FFTs and
+the two estimators agree.
+
 ## Relation to the H1/H2 estimators
 
 The [frequency-response estimators](electroacoustics.md) `transfer_function`
@@ -316,3 +425,15 @@ same segment length are mutually consistent bin by bin.
   discrete Fourier transform. *Proceedings of the IEEE*, 66(1), 51–83.
   [doi:10.1109/PROC.1978.10837](https://doi.org/10.1109/PROC.1978.10837).
   The window figures of merit (Table 1) computed by `window_metrics`.
+- Thomson, D. J. (1982). Spectrum estimation and harmonic analysis.
+  *Proceedings of the IEEE*, 70(9), 1055–1096.
+  [doi:10.1109/PROC.1982.12433](https://doi.org/10.1109/PROC.1982.12433).
+  The multitaper method: Slepian tapers, eigenspectra and the adaptive
+  weights implemented by `multitaper_psd`.
+- Percival, D. B., & Walden, A. T. (1993). *Spectral Analysis for Physical
+  Applications: Multitaper and Conventional Univariate Techniques*.
+  Cambridge University Press. ISBN 978-0-521-43541-3.
+  [doi:10.1017/CBO9780511622762](https://doi.org/10.1017/CBO9780511622762).
+  Chapter 7 (multitaper estimation: eigenspectra, adaptive weighting,
+  equivalent degrees of freedom) and Chapter 8 (the Slepian sequences);
+  the Table 382 eigenvalues anchor the taper oracle in the test suite.

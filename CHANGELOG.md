@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `TrendTestResult.plot()`: a one-line canonical figure for the nonparametric
+  trend test (Bendat & Piersol, *Random Data* Sec. 4.5.2), mirroring the
+  companion `StationarityTestResult.plot()`. It draws the tested sequence
+  against its sample index and states the outcome in the legend: the
+  reverse-arrangement count `A` (or the run count `r`), the Table A.6
+  acceptance region and whether the no-trend hypothesis is accepted; for
+  `method="runs"` it also marks the sequence median that classifies each
+  value. `language="es"` renders the Spanish labels.
 - `OpenPlanResult.report()`: a one-page PDF open-plan office acoustics fiche
   (ISO 3382-3:2012), laid out like a speech-privacy measurement report. The
   sheet carries the standard-basis line, an optional metadata header (client,

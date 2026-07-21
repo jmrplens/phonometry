@@ -762,7 +762,21 @@ _ES_EXACT = {
     "the low-band ordinary coherence of x2 collapses":
         "el condicionamiento elimina la componente x1 compartida:\n"
         "la coherencia ordinaria de x2 en la banda baja se desploma",
-    # Data qualification: stationarity test and Rice crossing statistics
+    # Data qualification: trend and stationarity tests, Rice crossing statistics
+    "Nonparametric Trend Test by Reverse Arrangements (B&P 4.5.2)":
+        "Test de tendencia no paramétrico por inversiones de orden (B&P 4.5.2)",
+    "B&P Example 4.4: A = 86, accepted (no trend)":
+        "Ejemplo 4.4 de B&P: A = 86, aceptado (sin tendencia)",
+    "Added rising drift: A = 38, rejected (trend)":
+        "Deriva ascendente añadida: A = 38, rechazado (tendencia)",
+    "Sample index": "Índice de muestra",
+    "Sequence value": "Valor de la secuencia",
+    "20 observations; the count A of pairs i < j with x[i] > x[j]\n"
+    "must fall in (64, 125] at the 5 % level (Table A.6). A rising\n"
+    "trend depresses A below the acceptance region":
+        "20 observaciones; el conteo A de pares i < j con x[i] > x[j]\n"
+        "debe caer en (64, 125] al nivel del 5 % (Tabla A.6). Una deriva\n"
+        "ascendente reduce A por debajo de la región de aceptación",
     "Stationarity Test by Reverse Arrangements (B&P 10.3.1.1)":
         "Test de estacionariedad por inversiones de orden (B&P 10.3.1.1)",
     "Steady noise: A = 91, accepted (stationary)":
@@ -4707,6 +4721,49 @@ def generate_miso_coherence(output_dir: str) -> None:
     plt.close()
 
 
+def generate_trend_test(output_dir: str) -> None:
+    """Reverse arrangement trend test: B&P Example 4.4 vs a rising drift."""
+    print("Generating trend_test...")
+    from phonometry import trend_test
+
+    # B&P Example 4.4: twenty observations, A = 86, accepted (no trend).
+    example = np.array([
+        5.2, 6.2, 3.7, 6.4, 3.9, 4.0, 3.9, 5.3, 4.0, 4.6,
+        5.9, 6.5, 4.3, 5.7, 3.1, 5.6, 5.2, 3.9, 6.2, 5.0,
+    ])
+    # The same fluctuations with a slow upward drift: fewer reverse
+    # arrangements (A = 38, below the Table A.6 lower bound of 64), rejected.
+    drifting = example + np.linspace(0.0, 4.0, example.size)
+    res_flat = trend_test(example)
+    res_drift = trend_test(drifting)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    index = np.arange(1, example.size + 1)
+    ax.plot(index, res_flat.values, "o-", color=COLOR_PRIMARY,
+            linewidth=1.2, markersize=5,
+            label="B&P Example 4.4: A = 86, accepted (no trend)")
+    ax.plot(index, res_drift.values, "s-", color=COLOR_SECONDARY,
+            linewidth=1.2, markersize=5,
+            label="Added rising drift: A = 38, rejected (trend)")
+    ax.set_xticks(index[1::2])
+    ax.set_xlabel("Sample index")
+    ax.set_ylabel("Sequence value")
+    ax.set_title("Nonparametric Trend Test by Reverse Arrangements (B&P 4.5.2)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+    ax.text(0.02, 0.80,
+            "20 observations; the count A of pairs i < j with x[i] > x[j]\n"
+            "must fall in (64, 125] at the 5 % level (Table A.6). A rising\n"
+            "trend depresses A below the acceptance region",
+            transform=ax.transAxes, va="top", ha="left", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "trend_test.svg")
+    plt.close()
+
+
 def generate_stationarity_test(output_dir: str) -> None:
     """Reverse arrangement stationarity test: steady noise vs a gain ramp."""
     print("Generating stationarity_test...")
@@ -8646,8 +8703,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_synchronous_average,
     # Multiple-input/output coherence (Bendat & Piersol Ch. 7).
     generate_miso_coherence,
-    # Data qualification: reverse arrangement stationarity test and the Rice
+    # Data qualification: reverse arrangement trend and stationarity tests
     # level-crossing / peak statistics (Bendat & Piersol 10.3 / 5.5).
+    generate_trend_test,
     generate_stationarity_test,
     generate_rice_level_crossings,
     generate_rice_peak_distribution,

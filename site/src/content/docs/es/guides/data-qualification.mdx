@@ -76,12 +76,47 @@ values = [5.2, 6.2, 3.7, 6.4, 3.9, 4.0, 3.9, 5.3, 4.0, 4.6,
 res = trend_test(values)                  # B&P Ejemplo 4.4
 print(res.statistic, res.bounds)          # 86, (64, 125)
 print(res.trend_free, round(res.p_value, 3))   # True, 0.586
+res.plot()
 ```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/trend_test_es.svg" alt="Dos secuencias de veinte observaciones dibujadas frente al índice de muestra: el Ejemplo 4.4 de Bendat y Piersol, que fluctúa en torno a cinco con ochenta y seis inversiones de orden y se acepta como sin tendencia, y las mismas fluctuaciones con una deriva ascendente añadida que sube de unos cinco a nueve, cuyas treinta y ocho inversiones de orden caen por debajo del límite inferior de aceptación de sesenta y cuatro y se rechazan como con tendencia al nivel del cinco por ciento" width="82%" loading="eager" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import trend_test
+
+example = np.array([5.2, 6.2, 3.7, 6.4, 3.9, 4.0, 3.9, 5.3, 4.0, 4.6,
+                    5.9, 6.5, 4.3, 5.7, 3.1, 5.6, 5.2, 3.9, 6.2, 5.0])
+drifting = example + np.linspace(0.0, 4.0, example.size)   # deriva ascendente
+
+res_flat = trend_test(example)
+res_drift = trend_test(drifting)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+index = np.arange(1, example.size + 1)
+ax.plot(index, res_flat.values, "o-",
+        label=f"Ejemplo 4.4: A = {res_flat.statistic}, aceptado")
+ax.plot(index, res_drift.values, "s-",
+        label=f"Deriva ascendente: A = {res_drift.statistic}, rechazado")
+ax.set_xlabel("Índice de muestra")
+ax.set_ylabel("Valor de la secuencia")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 El p-valor sale de la distribución nula exacta de $A$ (los conteos de
 inversiones de una permutación aleatoria), calculada hasta $N = 100$ - el
 alcance de la Tabla A.6 - y de la aproximación normal del libro más allá;
-el veredicto sigue la región tabulada del libro.
+el veredicto sigue la región tabulada del libro. `.plot()` dibuja la
+secuencia analizada frente a su índice de muestra con el conteo, la región
+de aceptación y el veredicto en la leyenda (con `method="runs"` marca
+además la mediana de la secuencia que clasifica cada valor).
 
 ## 2. Estacionariedad de un registro
 

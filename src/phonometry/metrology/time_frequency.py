@@ -340,15 +340,26 @@ def zoom_fft(
         dtype=np.complex128,
     )
     freqs = np.linspace(lo, hi, m)
-    # One-sided doubling, except at exactly DC and Nyquist where the
-    # positive- and negative-frequency components coincide.
+    # One-sided doubling, except at DC and Nyquist where the positive- and
+    # negative-frequency components coincide. The grid is an increasing
+    # linspace over [f_min, f_max] within [0, fs/2], so only its first
+    # point can sit at DC and only its last at Nyquist; both are matched
+    # with a tolerance far below any usable bin spacing.
+    eps = 1e-12 * fs_v
+    dc_first = abs(lo) <= eps
+    nyquist_last = abs(hi - fs_v / 2.0) <= eps
     gain = np.full(m, 2.0 / float(np.sum(w)))
-    single = (freqs == 0.0) | (freqs == fs_v / 2.0)
-    gain[single] *= 0.5
+    if dc_first:
+        gain[0] *= 0.5
+    if nyquist_last:
+        gain[-1] *= 0.5
     spectrum = coeffs * gain
     amplitude = np.abs(spectrum)
     power = 0.5 * amplitude**2
-    power[single] = amplitude[single] ** 2
+    if dc_first:
+        power[0] = amplitude[0] ** 2
+    if nyquist_last:
+        power[-1] = amplitude[-1] ** 2
 
     return ZoomFFTResult(
         frequencies=freqs,

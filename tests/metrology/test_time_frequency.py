@@ -129,20 +129,24 @@ class TestSpectrogramCalibration:
 
 class TestSpectrogramValidation:
     def test_rejects_bad_overlap(self) -> None:
+        x = np.ones(1024)
         with pytest.raises(ValueError, match="overlap"):
-            spectrogram(np.ones(1024), 1000.0, overlap=1.0)
+            spectrogram(x, 1000.0, overlap=1.0)
 
     def test_rejects_bad_scaling(self) -> None:
+        x = np.ones(1024)
         with pytest.raises(ValueError, match="scaling"):
-            spectrogram(np.ones(1024), 1000.0, scaling="amplitude")  # type: ignore[arg-type]
+            spectrogram(x, 1000.0, scaling="amplitude")  # type: ignore[arg-type]
 
     def test_rejects_short_signal(self) -> None:
+        x = np.ones(8)
         with pytest.raises(ValueError, match="too short"):
-            spectrogram(np.ones(8), 1000.0)
+            spectrogram(x, 1000.0)
 
     def test_rejects_bad_nperseg(self) -> None:
+        x = np.ones(1024)
         with pytest.raises(ValueError, match="nperseg"):
-            spectrogram(np.ones(1024), 1000.0, nperseg=2048)
+            spectrogram(x, 1000.0, nperseg=2048)
 
 
 # ---------------------------------------------------------------------------
@@ -262,24 +266,29 @@ class TestZoomFFTExactness:
 
 class TestZoomFFTValidation:
     def test_rejects_inverted_band(self) -> None:
+        x = np.ones(1024)
         with pytest.raises(ValueError, match="zoom band"):
-            zoom_fft(np.ones(1024), 1000.0, 300.0, 200.0)
+            zoom_fft(x, 1000.0, 300.0, 200.0)
 
     def test_rejects_band_above_nyquist(self) -> None:
+        x = np.ones(1024)
         with pytest.raises(ValueError, match="zoom band"):
-            zoom_fft(np.ones(1024), 1000.0, 100.0, 600.0)
+            zoom_fft(x, 1000.0, 100.0, 600.0)
 
     def test_rejects_negative_f_min(self) -> None:
+        x = np.ones(1024)
         with pytest.raises(ValueError, match="zoom band"):
-            zoom_fft(np.ones(1024), 1000.0, -10.0, 200.0)
+            zoom_fft(x, 1000.0, -10.0, 200.0)
 
     def test_rejects_single_point_grid(self) -> None:
+        x = np.ones(1024)
         with pytest.raises(ValueError, match="n_points"):
-            zoom_fft(np.ones(1024), 1000.0, 100.0, 200.0, n_points=1)
+            zoom_fft(x, 1000.0, 100.0, 200.0, n_points=1)
 
     def test_rejects_short_signal(self) -> None:
+        x = np.ones(8)
         with pytest.raises(ValueError, match="too short"):
-            zoom_fft(np.ones(8), 1000.0, 100.0, 200.0)
+            zoom_fft(x, 1000.0, 100.0, 200.0)
 
 
 # ---------------------------------------------------------------------------

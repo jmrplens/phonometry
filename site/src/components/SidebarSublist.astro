@@ -43,21 +43,58 @@ function toModel(entry: SidebarGroup): GroupModel {
 		? { group: entry, landing: first, children: rest }
 		: { group: entry, landing: undefined, children: entry.entries };
 }
+
+/*
+  Multiple reference chips per item. Starlight's native `badge` slot is a
+  single badge, so a list of chips is threaded through the sanctioned `attrs`
+  passthrough as a JSON string under `data-chips` (built by the `chips()`
+  helper in astro.config.mjs and by the API generator). Each chip is
+  `{ text, class }` where the class is `chip-standard` (teal) or `chip-theory`
+  (amber). We parse that here and render one Badge per chip, then drop the
+  raw attribute so it is not echoed onto the <a> element.
+*/
+interface Chip {
+	text: string;
+	class: string;
+}
+function parseChips(attrs: Record<string, unknown> | undefined): Chip[] {
+	const raw = attrs?.['data-chips'];
+	if (typeof raw !== 'string') return [];
+	try {
+		const list = JSON.parse(raw);
+		return Array.isArray(list) ? (list as Chip[]) : [];
+	} catch {
+		return [];
+	}
+}
+function withoutChips(attrs: Record<string, unknown> | undefined): Record<string, unknown> {
+	const { 'data-chips': _drop, ...rest } = attrs ?? {};
+	return rest;
+}
 ---
 
 <ul class:list={{ 'top-level': !nested }}>
 	{
 		sublist.map((entry) => {
 			if (entry.type === 'link') {
+				const linkChips = parseChips(entry.attrs);
+				const linkAttrs = withoutChips(entry.attrs);
 				return (
 					<li>
 						<a
 							href={entry.href}
 							aria-current={entry.isCurrent ? 'page' : undefined}
 							class:list={[{ large: !nested }, entry.attrs.class]}
-							{...entry.attrs}
+							{...linkAttrs}
 						>
-							<span>{entry.label}</span>
+							<span class="sidebar-item-label">{entry.label}</span>
+							{linkChips.length > 0 && (
+								<span class="sidebar-chips">
+									{linkChips.map((chip) => (
+										<Badge class={chip.class} text={chip.text} />
+									))}
+								</span>
+							)}
 							{entry.badge && (
 								<Badge
 									variant={entry.badge.variant}
@@ -74,9 +111,11 @@ function toModel(entry: SidebarGroup): GroupModel {
 			// except the internal `data-group-link` marker itself.
 			const {
 				'data-group-link': _marker,
+				'data-chips': _landingChipsRaw,
 				class: landingClass,
 				...landingAttrs
 			} = landing?.attrs ?? {};
+			const groupChips = parseChips(landing?.attrs);
 			return (
 				<li>
 					{landing ? (
@@ -87,6 +126,13 @@ function toModel(entry: SidebarGroup): GroupModel {
 							{...landingAttrs}
 						>
 							<span class="large">{group.label}</span>
+							{groupChips.length > 0 && (
+								<span class="sidebar-chips">
+									{groupChips.map((chip) => (
+										<Badge class={chip.class} text={chip.text} />
+									))}
+								</span>
+							)}
 							{group.badge && (
 								<Badge
 									variant={group.badge.variant}

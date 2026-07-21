@@ -39,6 +39,25 @@
   --chip-theory-border: #e4c581;
 }
 
+/* Container for one or more chips on a sidebar item. It sits after the label
+   and wraps its chips onto a new line (below the label) when they do not fit,
+   with a small gap between them and no horizontal overflow on narrow screens.
+   `inline-flex` keeps the whole group flowing after the label text yet lets
+   the chips wrap among themselves. */
+.sidebar-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25em;
+  margin-inline-start: 0.35em;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+/* The label may itself be long; let it wrap and keep the chips tidy. */
+.sidebar-item-label {
+  overflow-wrap: anywhere;
+}
+
 /* Shared chip shape. `.sl-badge` is Starlight's badge root; pairing it with
    the chip class keeps specificity above the preset `.sl-badge.default`. */
 .sl-badge.chip-standard,

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **405/405 conformance checks pass** across 51 domains and 267 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **410/410 conformance checks pass** across 52 domains and 272 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -587,6 +587,19 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Havelock 2008 Ch. 27 Fig. 21 + Mercator series of ln(1+a*e^{-j*theta}) | Power-cepstrum height at the echo delay = reflection coefficient a | 0.4 (+/-0) | 0.4 | 0 | &#9989; |
 | Havelock 2008 Ch. 87 Eq. (14): complex cepstrum, series term n = 2 | Second rahmonic of a reflection a = 0.4 equals -a^2/2 | -0.08 (+/-0) | -0.08 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e Sec. 13.3 (Fig. 13.11) | Envelope-spectrum line of an AM tone (A0 = 2, m = 0.35) at fm | 0.7 (+/-0.002) | 0.7 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Time synchronous averaging (McFadden 1987)</b>: 100% (5/5)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| McFadden 1987 Eq. 8 / Eq. 9: comb filter \|C(f)\| at a harmonic k/T | Comb-filter tooth height at a harmonic equals unity (any N) | 1 (+/-0) | 1 | 0 | &#9989; |
+| McFadden 1987 Eq. 8: comb filter one quarter-order from a tooth, N = 2 | Comb-filter magnitude = 1/sqrt(2) at order 0.25 | 0.70710678 (+/-0) | 0.70710678 | 0 | &#9989; |
+| McFadden 1987 Sec. 4 (Fig. 5): node selection, tone at 32.05 orders | N = 20 places a comb node on 32.05 orders (\|C\| = 0), not the power-of-2 N = 32 | 0 (+/-0.0000000001) | 0 | 0 | &#9989; |
+| McFadden 1987 Eq. 5: exact recovery, integer samples per period | Noiseless periodic waveform (M = 256) recovered to machine precision | 0 (+/-0.0000000001) | 0 | 0 | &#9989; |
+| McFadden 1987 Sec. 1: asynchronous-noise variance reduced by 1/N | Residual noise std of the average falls as sigma/sqrt(N), N = 64 | 0.125 (+/-15%) | 0.12414 | -0.001 | &#9989; |
 
 </details>
 

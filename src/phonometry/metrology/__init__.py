@@ -80,6 +80,11 @@ from .signals import (
     resample_signal,
     tone_burst,
 )
+from .synchronous_average import (
+    SynchronousAverageResult,
+    comb_filter_response,
+    time_synchronous_average,
+)
 from .spectra import (
     CoherentOutputSpectrumResult,
     CrossSpectralDensityResult,
@@ -137,6 +142,7 @@ __all__ = [
     "SpectralDensityResult",
     "SpectrogramResult",
     "StationarityTestResult",
+    "SynchronousAverageResult",
     "TrendTestResult",
     "TimeDelayResult",
     "TimeWeighting",
@@ -195,6 +201,8 @@ __all__ = [
     "spectrogram",
     "stationarity_test",
     "time_delay",
+    "time_synchronous_average",
+    "comb_filter_response",
     "time_weighting",
     "tone_burst",
     "trend_test",

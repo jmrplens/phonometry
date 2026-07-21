@@ -80,7 +80,7 @@ calibrada y acompañada de su calidad estadística.
   el espectro de salida coherente con la SNR espectral, suavizado en 1/n de
   octava y generadores de ruido de colores con pendiente exacta.
 - [Coherencia múltiple y parcial](/phonometry/es/guides/miso-coherence/): las
-  funciones de coherencia de entradas múltiples para dos o tres fuentes
+  funciones de coherencia de entradas múltiples para varias fuentes
   correladas y una salida, con el condicionamiento que distingue una causa
   real de una fuente que solo correla con ella, y los espectros de salida
   coherente parciales que indican qué fuente domina cada banda.
@@ -94,6 +94,12 @@ calibrada y acompañada de su calidad estadística.
   cepstral, liftering paso bajo/paso alto de un espectro logarítmico, y el
   espectro de la envolvente que convierte las modulaciones de amplitud en
   líneas discretas.
+- [Promediado síncrono en el tiempo](/phonometry/es/guides/synchronous-averaging/):
+  extracción de una forma de onda periódica de período conocido por promediado
+  en el dominio del tiempo, el filtro peine que lo describe en el dominio de la
+  frecuencia, la ley de reducción de ruido en raíz cuadrada, y la elección del
+  número de promedios que sitúa un nodo del peine sobre un orden interferente
+  (McFadden 1987).
 - [Correlación, retardo y envolvente](/phonometry/es/guides/correlation-delay/):
   estimaciones de correlación con los errores aleatorios de Bendat y
   Piersol, estimación del retardo por correlación directa, pendiente de fase

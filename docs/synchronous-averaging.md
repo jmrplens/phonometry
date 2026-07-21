@@ -1,0 +1,179 @@
+← [Documentation index](README.md)
+
+# Time synchronous averaging (McFadden 1987)
+
+A rotating machine repeats its signature once per revolution. Buried in
+broadband noise and in the tones of every other shaft, that repetitive
+waveform is hard to read directly. **Time synchronous averaging** (TSA)
+recovers it: given the period `T` of one revolution, it slices the record
+into successive length-`T` blocks and averages them. Every component
+synchronous with `T` reinforces; everything asynchronous, noise and the
+harmonics of unrelated shafts, averages down. `time_synchronous_average`
+implements the model of P. D. McFadden, *A revised model for the extraction
+of periodic waveforms by time domain averaging* (Mechanical Systems and
+Signal Processing 1(1), 1987, 83-95).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/synchronous_average_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/synchronous_average.svg" alt="Two-panel figure. Left: one noisy period of a signal in faint grey swings far above and below a smooth curve; the average of forty periods, in blue, lies almost exactly on the dashed red true waveform, so the asynchronous noise has been removed. Right: the comb-filter magnitude across the orders between 31 and 33, with unit-height teeth at the integer orders; for N = 20 a deep node falls exactly on the interfering tone marked at 32.05 orders, whereas the power-of-two N = 32 leaves a side lobe there and lets the tone through" width="92%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import (
+    comb_filter_response,
+    noise_signal,
+    time_synchronous_average,
+)
+
+fs = 8192.0
+period = 1.0 / 32.0        # one revolution: 256 samples at this rate
+m, n_avg = 256, 40
+phase = np.arange((n_avg + 1) * m) / m
+periodic = (
+    np.cos(2.0 * np.pi * phase)
+    + 0.5 * np.cos(2.0 * np.pi * 3.0 * phase + 0.4)
+    - 0.3 * np.cos(2.0 * np.pi * 6.0 * phase)
+)
+signal = periodic + noise_signal(fs, phase.size / fs, rms=0.9, seed=11)
+res = time_synchronous_average(signal, fs, period, n_averages=n_avg)
+
+fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(11, 4.6))
+t_ms = 1e3 * res.times
+ax0.plot(t_ms, signal[:m], color="#cccccc", label="One noisy period")
+ax0.plot(t_ms, res.period_waveform, color="#1f77b4", lw=1.8,
+         label=f"Average of N = {n_avg} periods")
+ax0.plot(t_ms, periodic[:m], "--", color="#d62728", label="True waveform")
+ax0.set_xlabel("Time [ms]"); ax0.set_ylabel("Amplitude"); ax0.legend()
+
+orders = np.linspace(31.0, 33.0, 4000)
+freqs = orders / period
+ax1.plot(orders, comb_filter_response(freqs, period, 32), color="#2ca02c",
+         label="N = 32 (power of two)")
+ax1.plot(orders, comb_filter_response(freqs, period, 20), color="#1f77b4",
+         label="N = 20 (node on 32.05)")
+ax1.axvline(32.05, color="#d62728", ls=":", label="Interfering tone")
+ax1.set_xlabel("Frequency [orders]"); ax1.set_ylabel("Comb filter magnitude")
+ax1.set_ylim(0, 1.05); ax1.legend()
+plt.show()
+```
+
+</details>
+
+The `.plot()` method draws the averaged waveform and the comb filter in one
+call:
+
+```python
+res.plot()          # English labels; res.plot(language="es") for Spanish
+```
+
+## 1. The average is a comb filter
+
+Averaging `N` successive periods (McFadden Eq. 5),
+`a(t) = (1/N) Σ y(t + n·T)`, is, in the frequency domain, the multiplication
+of the signal spectrum by a **comb filter** (Eq. 8). Its magnitude (Eq. 9) is
+the Dirichlet kernel `|C(f)| = |sin(N·π·f·T) / (N·sin(π·f·T))|`.
+
+The comb has a **tooth** of unit height at every harmonic `k/T` (the orders
+`f·T = 1, 2, 3, ...`), *independent of `N`*: components synchronous with the
+period pass untouched. Between the teeth it has **nodes** at `j/(N·T)` for
+every `j` that is not a multiple of `N`, where the response is exactly zero.
+`comb_filter_response` evaluates this closed form directly:
+
+```python
+import numpy as np
+from phonometry import comb_filter_response
+
+period = 1.0 / 32.0
+comb_filter_response(np.array([16.0 / period]), period, 8)   # 1.0 at a tooth
+comb_filter_response(np.array([0.25 / period]), period, 2)   # 1/sqrt(2)
+comb_filter_response(np.array([0.5 / period]), period, 2)    # 0.0 at a node
+```
+
+`SynchronousAverageResult` carries the response over the first few harmonics
+in `comb_frequencies` and `comb_response`, so the shape of the filter that
+the average applied is available alongside the recovered waveform.
+
+## 2. Noise falls as the square root of the number of averages
+
+Asynchronous noise of variance `σ²` averaged over `N` periods has residual
+variance `σ²/N`: the residual standard deviation falls as `1/√N`, and the
+amplitude signal-to-noise ratio improves by `√N`. That is a power reduction
+of `10·log₁₀ N` dB, reported as `noise_reduction_db`, with the amplitude gain
+`√N` as `amplitude_snr_gain`:
+
+```python
+res = time_synchronous_average(signal, fs, period, n_averages=100)
+res.noise_reduction_db      # 20.0 dB = 10*log10(100)
+res.amplitude_snr_gain      # 10.0   = sqrt(100)
+```
+
+This law is the ideal one: it holds when the noise is uncorrelated from one
+period to the next, so colored or synchronous noise that is correlated across
+periods need not follow it. The `residual` (input minus the periodic
+reconstruction over the analysed span) and its `residual_rms` therefore report
+the noise actually left once the synchronous component is removed.
+
+## 3. Choosing N to reject an interfering order
+
+Because a tooth sits on *every* integer order, TSA passes the harmonics of
+the target shaft but also any tone that happens to fall on an integer order.
+A tone at a *non-harmonic* order `q = f·T` is only attenuated by the comb,
+not removed, and how much depends on where the nearest node lands. McFadden's
+revised-model result is that such an interferer is best rejected by choosing
+`N` so that a node falls exactly on it, i.e. the smallest `N` with `N·q` an
+integer, rather than by the habitual power-of-two number of averages. An exact
+node exists only when the order `q` is rational, so some finite `N` makes `N·q`
+an integer; for an irrational or merely estimated order, choose the `N` whose
+node falls nearest the interfering order.
+
+His own example is a tone at 32.05 orders. With `N = 20` the product
+`20 · 32.05 = 641` is an integer, so a comb node lands on the tone and rejects
+it by more than 100 dB. The common choice `N = 32` gives `32 · 32.05 = 1025.6`,
+which sits on a side lobe: the tone is barely touched. The figure above shows
+both combs around order 32; the end-to-end average confirms it:
+
+```python
+# true 8th-order component plus a strong interferer at 32.05 orders
+phase = np.arange(41 * 256) / 256
+signal = np.cos(2 * np.pi * 8.0 * phase) + 0.7 * np.cos(2 * np.pi * 32.05 * phase)
+
+leak_20 = time_synchronous_average(signal, fs, period, n_averages=20)
+leak_32 = time_synchronous_average(signal, fs, period, n_averages=32)
+# leak_20.period_waveform matches the clean 8th-order tone; leak_32 does not
+```
+
+So a power-of-two number of averages, convenient as it is, is not in general
+the optimal choice: the interfering orders present in the machine should set
+`N`.
+
+## 4. Non-integer samples per period
+
+When `fs·T` is an integer, the period boundaries fall on samples, the blocks
+are sliced directly, and a noiseless periodic signal is recovered to machine
+precision (`interpolated` is `False`). When `fs·T` is not an integer the
+boundaries fall between samples; each block is then aligned to a common
+integer grid by the band-limited fractional delay of
+[`fractional_delay`](test-signals.md), and the waveform is recovered within
+that interpolation error (`interpolated` is `True`):
+
+```python
+fs = 8192.0
+period = 1.0 / 31.7                       # fs * period is not an integer
+t = np.arange(int(40 * period * fs)) / fs
+signal = np.cos(2.0 * np.pi * t / period)  # one cycle per revolution
+res = time_synchronous_average(signal, fs, period)
+res.interpolated                          # True: fractional-delay alignment
+res.samples_per_period                    # integer samples of one period
+```
+
+By default the average uses as many whole periods as the record holds; pass
+`n_averages` to fix the count (for the node-selection choice of §3), and
+`n_harmonics` to set how many harmonics of `1/T` the returned comb response
+spans.
+
+The band-limited alignment shares its kernel with the sub-sample
+impulse-response alignment of the [test-signals page](test-signals.md), and
+the recovered waveform, being exactly one period, can be tiled to reconstruct
+the synchronous part of the signal for subtraction or for order analysis.

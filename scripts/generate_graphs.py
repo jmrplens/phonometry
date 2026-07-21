@@ -721,6 +721,27 @@ _ES_EXACT = {
     "appears as one line at exactly $f_m$":
         "la portadora está en 1 kHz; su modulación de amplitud\n"
         "aparece como una línea exactamente en $f_m$",
+    # Time synchronous averaging (McFadden 1987)
+    "Periodic Waveform Extracted from Noise":
+        "Forma de onda periódica extraída del ruido",
+    "One noisy period": "Un período ruidoso",
+    "Average of N = 40 periods": "Promedio de N = 40 períodos",
+    "True periodic waveform": "Forma de onda periódica verdadera",
+    "averaging N periods lowers the asynchronous\n"
+    "noise by $\\sqrt{N}$ in amplitude":
+        "promediar N períodos reduce el ruido asíncrono\n"
+        "en $\\sqrt{N}$ en amplitud",
+    "Rejecting a Tone by Choosing N (McFadden 1987)":
+        "Rechazo de un tono eligiendo N (McFadden 1987)",
+    "N = 32 (power of two)": "N = 32 (potencia de dos)",
+    "N = 20 (node on 32.05)": "N = 20 (nodo en 32,05)",
+    "Interfering tone (32.05)": "Tono interferente (32,05)",
+    "Frequency [orders]": "Frecuencia [órdenes]",
+    "Comb filter magnitude": "Magnitud del filtro peine",
+    "N = 20 puts a node on 32.05 orders and removes\n"
+    "it; the power-of-two N = 32 lets it through":
+        "N = 20 sitúa un nodo en 32,05 órdenes y lo\n"
+        "elimina; la potencia de dos N = 32 lo deja pasar",
     # Multiple-input coherence (Bendat & Piersol Ch. 7)
     "Multiple-Input Coherence: Which Source Dominates Each Band "
     "(Bendat & Piersol Ch. 7)":
@@ -4527,6 +4548,84 @@ def generate_envelope_spectrum(output_dir: str) -> None:
             color=COLOR_FG)
     plt.tight_layout()
     save_figure(output_dir, "envelope_spectrum.svg")
+    plt.close()
+
+
+def generate_synchronous_average(output_dir: str) -> None:
+    """TSA: a periodic waveform pulled from noise, and the comb filter."""
+    print("Generating synchronous_average...")
+    from phonometry import (
+        comb_filter_response,
+        noise_signal,
+        time_synchronous_average,
+    )
+
+    fs = 8192.0
+    period = 1.0 / 32.0  # one revolution: 256 samples at this rate
+    m = 256
+    n_avg = 40
+    phase = np.arange((n_avg + 1) * m) / m
+    periodic = (
+        np.cos(2.0 * np.pi * phase)
+        + 0.5 * np.cos(2.0 * np.pi * 3.0 * phase + 0.4)
+        - 0.3 * np.cos(2.0 * np.pi * 6.0 * phase)
+    )
+    signal = periodic + noise_signal(fs, phase.size / fs, rms=0.9, seed=11)
+    res = time_synchronous_average(signal, fs, period, n_averages=n_avg)
+    true_one = periodic[:m]
+
+    fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(11, 4.6))
+
+    # Panel (a): one noisy period against the recovered average.
+    t_ms = 1e3 * res.times
+    ax0.plot(t_ms, signal[:m], color=COLOR_GRID, linewidth=1.0,
+             label="One noisy period")
+    ax0.plot(t_ms, res.period_waveform, color=COLOR_PRIMARY, linewidth=1.8,
+             label=f"Average of N = {n_avg} periods")
+    ax0.plot(t_ms, true_one, color=COLOR_SECONDARY, linestyle="--",
+             linewidth=1.2, label="True periodic waveform")
+    ax0.set_xlim(0.0, 1e3 * period)
+    ax0.set_xlabel("Time [ms]")
+    ax0.set_ylabel("Amplitude")
+    ax0.set_title("Periodic Waveform Extracted from Noise",
+                  fontweight="bold", pad=10)
+    ax0.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax0.set_axisbelow(True)
+    ax0.legend(loc="upper right", fontsize=8)
+    ax0.text(0.02, 0.03,
+             "averaging N periods lowers the asynchronous\n"
+             "noise by $\\sqrt{N}$ in amplitude",
+             transform=ax0.transAxes, va="bottom", ha="left", fontsize=8.5,
+             color=COLOR_FG)
+
+    # Panel (b): comb filter, node selection at 32.05 orders.
+    orders = np.linspace(31.0, 33.0, 4000)
+    freqs = orders / period
+    c20 = comb_filter_response(freqs, period, 20)
+    c32 = comb_filter_response(freqs, period, 32)
+    ax1.plot(orders, c32, color=COLOR_TERTIARY, linewidth=1.2,
+             label="N = 32 (power of two)")
+    ax1.plot(orders, c20, color=COLOR_PRIMARY, linewidth=1.4,
+             label="N = 20 (node on 32.05)")
+    ax1.axvline(32.05, color=COLOR_SECONDARY, linestyle=":", linewidth=1.3,
+                label="Interfering tone (32.05)")
+    ax1.set_xlim(31.0, 33.0)
+    ax1.set_ylim(0.0, 1.05)
+    ax1.set_xlabel("Frequency [orders]")
+    ax1.set_ylabel("Comb filter magnitude")
+    ax1.set_title("Rejecting a Tone by Choosing N (McFadden 1987)",
+                  fontweight="bold", pad=10)
+    ax1.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax1.set_axisbelow(True)
+    ax1.legend(loc="upper right", fontsize=8)
+    ax1.text(0.02, 0.55,
+             "N = 20 puts a node on 32.05 orders and removes\n"
+             "it; the power-of-two N = 32 lets it through",
+             transform=ax1.transAxes, va="top", ha="left", fontsize=8.5,
+             color=COLOR_FG)
+
+    plt.tight_layout()
+    save_figure(output_dir, "synchronous_average.svg")
     plt.close()
 
 
@@ -8543,6 +8642,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Chs. 27/87) and the envelope spectrum of an AM tone (B&P 13.3).
     generate_cepstrum_echo,
     generate_envelope_spectrum,
+    # Time synchronous averaging of a periodic waveform in noise (McFadden 1987).
+    generate_synchronous_average,
     # Multiple-input/output coherence (Bendat & Piersol Ch. 7).
     generate_miso_coherence,
     # Data qualification: reverse arrangement stationarity test and the Rice

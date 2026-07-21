@@ -1,6 +1,6 @@
 ---
 title: "Multiple and partial coherence"
-description: "The Bendat & Piersol multiple-input/output coherence functions: ordinary, multiple and partial coherence of two or three correlated sources driving one response, the Gaussian-elimination conditioning that separates a genuine cause from a source that merely correlates with it, and the partial coherent output spectra that say which source dominates each band."
+description: "The Bendat & Piersol multiple-input/output coherence functions: ordinary, multiple and partial coherence of several correlated sources driving one response, the Gaussian-elimination conditioning that separates a genuine cause from a source that merely correlates with it, and the partial coherent output spectra that say which source dominates each band."
 references:
   - type: book
     authors: ["Bendat, J. S.", "Piersol, A. G."]
@@ -21,8 +21,8 @@ reading the ordinary coherences alone can credit the wrong source. Bendat &
 Piersol, *Random Data* (4th ed., 2010, Chapter 7), resolve this for a
 multiple-input/single-output (MISO) system with the **multiple** and
 **partial** coherence functions. `miso_coherence` computes them from the same
-Welch cross-spectral core as the rest of `phonometry.metrology`, for two or
-three inputs and one output.
+Welch cross-spectral core as the rest of `phonometry.metrology`, for several
+correlated inputs and one output.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/miso_coherence.svg" alt="Two-panel figure. Top: the measured output autospectrum in dB with the coherent output contribution of two inputs shaded underneath; input 1 fills the low band up to about 400 Hz and input 2 fills the high band above about 1.5 kHz, with the residual noise far below. Bottom: for the correlated second input, its ordinary coherence sits around 0.3 across the low band even though it drives no low-frequency path, while its partial coherence collapses to zero there once the first input is conditioned out; the multiple coherence stays near one except at the crossover null." width="88%" loading="eager" />
 

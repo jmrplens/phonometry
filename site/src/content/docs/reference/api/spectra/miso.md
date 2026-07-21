@@ -91,7 +91,7 @@ ordering the inputs by descending ordinary coherence with the output.
 
 | Name | Description |
 | :--- | :--- |
-| `inputs` | The `q` input records (2 or 3), a sequence of equal-length 1-D arrays or a 2-D `(q, n)` array. |
+| `inputs` | The `q` input records (`q >= 2`), a sequence of equal-length 1-D arrays or a 2-D `(q, n)` array. |
 | `output` | The output record, 1-D, same length as the inputs. |
 | `fs` | Sample rate, in Hz. |
 | `order` | Conditioning order as input indices (default `0..q-1`). |
@@ -146,7 +146,7 @@ conditioning that produced the partial coherences is recorded in
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | One-sided frequency axis, in Hz. |
-| `n_inputs` | Number of inputs `q` (2 or 3). |
+| `n_inputs` | Number of inputs `q` (`q >= 2`). |
 | `order` | Conditioning order actually applied, as original input indices; `partial_coherence[order[k]]` is conditioned on the inputs `order[:k]`. |
 | `ordinary_coherence` | `γ²iy(f) ∈ [0, 1]` per input (Eq. 7.109), shape `(q, F)`: each input against the output on its own. |
 | `multiple_coherence` | `γ²y:x(f) ∈ [0, 1]` (Eq. 7.35): the fraction of output power explained by all inputs jointly. Equals the sum of the partial coherences (Eq. 7.116) and `1 - noise_psd/output_psd`. |

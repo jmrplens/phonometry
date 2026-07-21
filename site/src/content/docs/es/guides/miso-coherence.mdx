@@ -1,6 +1,6 @@
 ---
 title: "Coherencia múltiple y parcial"
-description: "Las funciones de coherencia de sistemas de entradas múltiples y salida única de Bendat y Piersol: coherencia ordinaria, múltiple y parcial de dos o tres fuentes correladas que excitan una respuesta, el condicionamiento por eliminación de Gauss que separa una causa real de una fuente que solo correla con ella, y los espectros de salida coherente parciales que indican qué fuente domina cada banda."
+description: "Las funciones de coherencia de sistemas de entradas múltiples y salida única de Bendat y Piersol: coherencia ordinaria, múltiple y parcial de varias fuentes correladas que excitan una respuesta, el condicionamiento por eliminación de Gauss que separa una causa real de una fuente que solo correla con ella, y los espectros de salida coherente parciales que indican qué fuente domina cada banda."
 references:
   - type: book
     authors: ["Bendat, J. S.", "Piersol, A. G."]
@@ -22,8 +22,8 @@ fuente equivocada. Bendat y Piersol, *Random Data* (4.a ed., 2010,
 capítulo 7), lo resuelven para un sistema de entradas múltiples y salida única
 (MISO) con las funciones de coherencia **múltiple** y **parcial**.
 `miso_coherence` las calcula desde el mismo núcleo de espectros cruzados de
-Welch que el resto de `phonometry.metrology`, para dos o tres entradas y una
-salida.
+Welch que el resto de `phonometry.metrology`, para varias entradas correladas
+y una salida.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/miso_coherence.svg" alt="Figura de dos paneles. Arriba: el autoespectro de salida medido en dB con la contribución de salida coherente de dos entradas sombreada debajo; la entrada 1 llena la banda baja hasta unos 400 Hz y la entrada 2 la banda alta por encima de unos 1,5 kHz, con el ruido residual muy por debajo. Abajo: para la segunda entrada correlada, su coherencia ordinaria ronda 0,3 en toda la banda baja aunque no excita ningún camino de baja frecuencia, mientras que su coherencia parcial se desploma a cero ahí una vez que se condiciona fuera la primera entrada; la coherencia múltiple se mantiene cerca de uno salvo en el nulo del cruce." width="88%" loading="eager" />
 

@@ -407,7 +407,7 @@ these estimators all share one Welch core (same taper, overlap policy and
 detrend-off calibration), so a PSD, a coherence and an H1 computed with the
 same segment length are mutually consistent bin by bin. The same cross-spectral
 matrix underlies [multiple and partial coherence](miso-coherence.md), which
-extends the ordinary coherence to two or three correlated inputs and one
+extends the ordinary coherence to several correlated inputs and one
 output.
 
 ## References

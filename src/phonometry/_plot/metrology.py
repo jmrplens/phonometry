@@ -31,6 +31,7 @@ if TYPE_CHECKING:
         StationarityTestResult,
     )
     from ..metrology.signals import ToneBurstResult
+    from ..metrology.synchronous_average import SynchronousAverageResult
     from ..metrology.spectra import (
         CoherentOutputSpectrumResult,
         CrossSpectralDensityResult,
@@ -210,6 +211,14 @@ _STRINGS: dict[str, str] = {
     "Cascade": "Cascada",
     "Parametric EQ response (Audio EQ Cookbook)":
         "Respuesta del EQ paramétrico (Audio EQ Cookbook)",
+    "Time synchronous average (McFadden 1987)":
+        "Promediado síncrono en el tiempo (McFadden 1987)",
+    "Averaged periodic waveform (N = {n})":
+        "Forma de onda periódica promediada (N = {n})",
+    "Time [ms]": "Tiempo [ms]",
+    "Frequency [orders]": "Frecuencia [órdenes]",
+    r"Comb filter $|C(f)|$ (Eq. 8)": r"Filtro peine $|C(f)|$ (Ec. 8)",
+    "Harmonics of $1/T$": "Armónicos de $1/T$",
 }
 
 
@@ -1775,5 +1784,64 @@ def plot_parametric_eq(
     axes[1].grid(True, which="both", alpha=0.3)
     for axf in axes:
         format_frequency_axis(axf, fmin, fmax)
+        localize_axes(axf, language)
+    return axes
+
+
+def plot_synchronous_average(
+    result: "SynchronousAverageResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes | np.ndarray:
+    """Averaged periodic waveform and the synchronous-averaging comb filter.
+
+    With ``ax`` given, only the averaged-waveform panel is drawn on it.
+
+    :param result: A
+        :class:`~phonometry.metrology.synchronous_average.SynchronousAverageResult`.
+    :param ax: Existing axes for the waveform panel, or ``None`` for a fresh
+        two-panel (waveform + comb filter) figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the averaged-waveform line.
+    :return: The waveform axes (``ax`` given) or the array of two axes.
+    """
+    from .._i18n import localize_axes
+
+    def _waveform(axw: Axes) -> None:
+        kwargs.setdefault("color", _C_PRIMARY)
+        kwargs.setdefault("lw", 1.6)
+        axw.plot(
+            1e3 * result.times, result.period_waveform,
+            label=_t("Averaged periodic waveform (N = {n})", language,
+                     n=result.n_averages),
+            **kwargs,
+        )
+        axw.set_xlabel(_t("Time [ms]", language))
+        axw.set_ylabel(_t("Amplitude", language))
+        axw.grid(True, alpha=0.3)
+        axw.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+
+    if ax is not None:
+        _waveform(ax)
+        localize_axes(ax, language)
+        return ax
+
+    axes = _new_axes_column(2, figsize=(8.0, 6.4))
+    _waveform(axes[0])
+    axes[0].set_title(_t("Time synchronous average (McFadden 1987)", language))
+
+    orders = result.comb_frequencies * result.period
+    axes[1].plot(orders, result.comb_response, color=_C_PRIMARY, lw=1.2)
+    top = int(np.floor(orders[-1] + 1e-9))
+    for k in range(1, top + 1):
+        axes[1].axvline(
+            float(k), color=_C_REFERENCE, linestyle=":", lw=0.8, alpha=0.6,
+            label=_t("Harmonics of $1/T$", language) if k == 1 else None,
+        )
+    axes[1].set_xlabel(_t("Frequency [orders]", language))
+    axes[1].set_ylabel(_t(r"Comb filter $|C(f)|$ (Eq. 8)", language))
+    axes[1].set_ylim(0.0, 1.05)
+    axes[1].grid(True, alpha=0.3)
+    axes[1].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    for axf in axes:
         localize_axes(axf, language)
     return axes

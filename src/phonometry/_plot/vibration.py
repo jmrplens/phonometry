@@ -8,14 +8,26 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .common import (
+    _C_EDGE,
     _C_MUTED,
     _C_PRIMARY,
+    _C_PRIMARY_LIGHT,
+    _C_QUATERNARY,
     _C_REFERENCE,
     _C_SECONDARY,
+    _C_TERTIARY,
     _band_axis,
     _new_axes,
     format_frequency_axis,
 )
+
+#: Bar colours for the per-operation partial exposures, cycled in order. Blue,
+#: green, purple, light blue and grey deliberately avoid the orange EAV and red
+#: ELV threshold-line colours, so a bar is never mistaken for a limit line.
+_OP_COLORS = (_C_PRIMARY, _C_TERTIARY, _C_QUATERNARY, _C_PRIMARY_LIGHT, _C_MUTED)
+#: The combined A(8) bar keeps a distinct neutral-dark colour: it is the
+#: root-sum-of-squares of the operations, not one of them.
+_A8_COLOR = _C_EDGE
 
 if TYPE_CHECKING:
     from ..vibration.human_vibration import (
@@ -54,6 +66,9 @@ _STRINGS: dict[str, str] = {
     "Weighted $W_i a_i$ ({name})": "Ponderada $W_i a_i$ ({name})",
     "{designation} weighted acceleration spectrum  ($a_w$ = {aw} m/s$^2$)": "{designation} espectro de aceleración ponderada  ($a_w$ = {aw} m/s$^2$)",
     "Directive 2002/44/EC daily {kind} exposure  (A(8) = {a8} m/s$^2$, {zone})": "Directiva 2002/44/CE exposición diaria {kind}  (A(8) = {a8} m/s$^2$, {zone})",
+    "below action": "por debajo de la acción",
+    "action": "acción",
+    "limit": "límite",
     "peak at {v} Hz": "máximo en {v} Hz",
     "ISO 2631-5 injury probability — {sex}": "ISO 2631-5 probabilidad de lesión — {sex}",
     r"$R$ = {r},  $\Pi$ = {p} %": r"$R$ = {r},  $\Pi$ = {p} %",
@@ -164,40 +179,60 @@ def plot_daily_exposure(
         ``labels``, ``partials``, ``a8`` and ``assessment``.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
-    :param kwargs: Forwarded to the exposure :meth:`~matplotlib.axes.Axes.bar`.
+    :param kwargs: Forwarded to each exposure :meth:`~matplotlib.axes.Axes.bar`.
     :return: The axes.
     """
     from .._i18n import decimal_comma, format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
     partials = np.asarray(result.partials, dtype=np.float64)
-    labels = [*result.labels, "A(8)"]
+    n_ops = partials.size
     values = [*partials.tolist(), float(result.a8)]
-    positions = np.arange(len(values), dtype=np.float64)
-    colors = [_C_MUTED] * partials.size + [_C_PRIMARY]
-    kwargs.setdefault("color", colors)
-    ax.bar(positions, values, **kwargs)
-    ax.set_xticks(positions)
-    ax.set_xticklabels(labels, rotation=45, ha="right")
+    # A small gap separates the combined A(8) bar from the operation bars.
+    positions = [*range(n_ops), n_ops + 0.5]
+
+    # One bar per operation, each with its own colour and legend label, so the
+    # operation identity lives in the legend rather than in crowded, rotated
+    # x-axis category labels. The combined A(8) bar takes the distinct A(8)
+    # colour. A caller-supplied colour/width would collide with the per-bar
+    # colouring, so those keys are consumed here.
+    kwargs.pop("color", None)
+    width = kwargs.pop("width", 0.7)
+    edgecolor = kwargs.pop("edgecolor", _C_EDGE)
+    for i in range(n_ops):
+        ax.bar(
+            positions[i], partials[i], width=width,
+            color=_OP_COLORS[i % len(_OP_COLORS)], edgecolor=edgecolor,
+            linewidth=0.6, zorder=3, label=str(result.labels[i]), **kwargs,
+        )
+    ax.bar(
+        positions[-1], values[-1], width=width, color=_A8_COLOR,
+        edgecolor=edgecolor, linewidth=0.6, zorder=3, label="A(8)", **kwargs,
+    )
+    # The legend carries the bar identity, so the crowded category ticks go.
+    ax.set_xticks([])
     ax.set_ylabel(_t("Vibration exposure A(8) [m/s$^2$]", language))
 
     assessment = result.assessment
     eav = float(assessment.action_value)
     elv = float(assessment.limit_value)
-    ax.axhline(eav, color=_C_SECONDARY, ls="--",
+    ax.axhline(eav, color=_C_SECONDARY, ls="--", lw=1.4,
                label="EAV = " + decimal_comma(f"{eav:g}", language))
-    ax.axhline(elv, color=_C_REFERENCE, ls="--",
+    ax.axhline(elv, color=_C_REFERENCE, ls="--", lw=1.4,
                label="ELV = " + decimal_comma(f"{elv:g}", language))
-    top = max(elv, float(np.max(values))) * 1.15
+    top = max(elv, float(np.max(values))) * 1.28
     ax.set_ylim(0.0, top)
     kind = str(assessment.kind).upper()
+    zone = _t(str(assessment.zone), language)
     ax.set_title(_t("Directive 2002/44/EC daily {kind} exposure  (A(8) = {a8} m/s$^2$, {zone})", language).format(
         kind=kind, a8=format_number(float(result.a8), language, decimals=2),
-        zone=assessment.zone,
+        zone=zone,
     ))
-    ax.legend(loc="best", fontsize="small")
+    handles, leg_labels = ax.get_legend_handles_labels()
+    ax.legend(handles, leg_labels, loc="upper center", ncol=min(3, len(handles)),
+              fontsize="small", frameon=True, framealpha=0.9)
     ax.grid(True, axis="y", alpha=0.3)
-    # localize_axes leaves the categorical operation-label axis (a FuncFormatter) alone.
+    ax.set_axisbelow(True)
     localize_axes(ax, language)
     return ax
 

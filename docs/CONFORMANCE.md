@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **378/378 conformance checks pass** across 47 domains and 242 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **383/383 conformance checks pass** across 48 domains and 247 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -508,7 +508,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Calibrated spectral analysis (Bendat &amp; Piersol)</b>: 100% (6/6)</summary>
+<summary>&#9989; <b>Calibrated spectral analysis (Bendat &amp; Piersol)</b>: 100% (8/8)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -517,6 +517,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bendat & Piersol, Random Data 4e Eq. (8.163) | 95% chi-square confidence interval coverage (Monte Carlo) | 0.95 (+/-0.025) | 0.94 | -0.01 | &#9989; |
 | Bendat & Piersol, Random Data 4e Eqs. (9.55)/(6.39) | Coherent output spectrum of a known-SNR path: gamma^2 = SNR/(1+SNR) | 0.7191 (+/-0.03) | 0.7255 | 0.006 | &#9989; |
 | Closed-form power-law slope (10*lg(2) dB/octave per unit exponent) | Pink-noise PSD slope over 20 Hz - 20 kHz, dB/octave | -3.0103 dB/oct (+/-0.05 dB/oct) | -3.0116 dB/oct | -0.001 dB/oct | &#9989; |
+| IEC 60268-1:1985 Clause A2.1 / Table AII | 5 ms burst of 5 kHz tone at 48 kHz: gate RMS = A/sqrt(2) (integral periods) | 0.707107 (+/-0) | 0.707107 | 0 | &#9989; |
+| Harris 1978 closed form (DFT-even Hann) | Hann window ENBW = n*sum(w^2)/sum(w)^2 = 3/2 exactly | 1.5 (+/-0) | 1.5 | 0 | &#9989; |
 | Constant-power 1/n-octave kernel (closed form) | 1/3-octave smoothed line level = P*df/(f0*(2^(1/6)-2^(-1/6))) | 0.021592 (+/-1e-07%) | 0.021592 | 0 | &#9989; |
 
 </details>
@@ -544,6 +546,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bendat & Piersol, Random Data 4e Example 8.5 | Random error of the correlation peak: B=100 Hz, T=5 s, M/S=N/S=10 | 0.35 (+/-0.001) | 0.3493 | -0.001 | &#9989; |
 | Bendat & Piersol, Random Data 4e Table 13.1 | Hilbert transform of cos recovers sin: max interior error | 0 (+/-0) | 0 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e Eq. (13.27) | Envelope of an AM waveform recovers 1 + m*cos(2pi*fm*t) exactly | 0 (+/-0) | 0 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Cepstrum, liftering and envelope spectrum (Havelock / B&amp;P)</b>: 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Havelock 2008 Ch. 27 Fig. 21 + Mercator series of ln(1+a*e^{-j*theta}) | Power-cepstrum height at the echo delay = reflection coefficient a | 0.4 (+/-0) | 0.4 | 0 | &#9989; |
+| Havelock 2008 Ch. 87 Eq. (14): complex cepstrum, series term n = 2 | Second rahmonic of a reflection a = 0.4 equals -a^2/2 | -0.08 (+/-0) | -0.08 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Sec. 13.3 (Fig. 13.11) | Envelope-spectrum line of an AM tone (A0 = 2, m = 0.35) at fm | 0.7 (+/-0.002) | 0.7 | 0 | &#9989; |
 
 </details>
 

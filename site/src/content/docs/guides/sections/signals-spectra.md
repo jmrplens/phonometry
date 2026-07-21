@@ -52,6 +52,14 @@ designed filter travels with the result, and band-limited fractional delay
 with a linear or circular boundary, sharing its kernel with the sub-sample
 alignment of impulse responses.
 
+[System measurement](/phonometry/guides/system-measurement/) turns the
+toolbox toward measuring systems themselves: complementary Golay pairs
+deconvolve a time-invariant system with zero correlation noise, the
+Mueller & Massarani shaped sweeps put the excitation energy where a target
+spectrum asks for it while keeping a swept sine's crest factor, and the
+regularized spectral inversion converts a measured response into a safe
+equalizer with an analytic bound on flatness and out-of-band gain.
+
 These estimators feed the rest of the library: transfer functions and
 distortion analysis build on the cross-spectral machinery, room impulse
 response work leans on delay estimation and alignment, and the
@@ -82,3 +90,8 @@ supply the error-analysis vocabulary the estimates are stated in.
 - [Test signals and sample-rate tools](/phonometry/guides/test-signals/):
   IEC 60268-1 tone bursts with exact gating, resampling with a stated
   anti-alias specification, and band-limited fractional delay.
+- [System measurement](/phonometry/guides/system-measurement/):
+  complementary Golay pairs with exactly noise-free deconvolution to an
+  impulse response, sweeps that follow an arbitrary target magnitude
+  spectrum by group-delay shaping, and the Kirkeby-regularized inversion
+  of a measured response.

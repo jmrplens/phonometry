@@ -1186,6 +1186,111 @@ def _chk_sti_edge_carriers() -> Outcome:
 
 
 # ===========================================================================
+# System measurement (Golay pairs / regularized inversion / shaped sweeps)
+# ===========================================================================
+_SYSMEAS = "System measurement (Golay / Kirkeby / Mueller-Massarani)"
+
+
+@register(
+    _SYSMEAS,
+    "Havelock 2008 Part I Ch. 6 (Xiang), Eq. (2)",
+    "Golay pair: sum of periodic autocorrelations = 2L*delta (L = 4096)",
+)
+def _chk_golay_complementary() -> Outcome:
+    a, b = ph.golay_pair(12)
+    length = a.size
+    acorr = np.fft.irfft(
+        np.abs(np.fft.rfft(a)) ** 2 + np.abs(np.fft.rfft(b)) ** 2, length
+    )
+    peak_ok = abs(acorr[0] - 2.0 * length) <= 1e-8
+    sidelobe = float(np.max(np.abs(acorr[1:])))
+    if not peak_ok:
+        return numeric(2.0 * length, float(acorr[0]), 1e-8, places=4)
+    return numeric(0.0, sidelobe, 1e-10, places=6,
+                   expected_label="0 (algebraic identity, +/-1e-10)")
+
+
+@register(
+    _SYSMEAS,
+    "Havelock 2008 Part I Ch. 6 (Xiang), Eq. (4)",
+    "Golay chain recovers a delay+gain system IR (noiseless, exact)",
+)
+def _chk_golay_recovery() -> Outcome:
+    pair = ph.golay_pair(10)
+    gain, delay = 0.75, 37
+    res = ph.golay_impulse_response(
+        gain * np.roll(pair[0], delay), gain * np.roll(pair[1], delay), pair
+    )
+    expected = np.zeros(pair[0].size)
+    expected[delay] = gain
+    err = float(np.max(np.abs(np.asarray(res) - expected)))
+    return numeric(0.0, err, 1e-13, places=6,
+                   expected_label="0 (machine precision, +/-1e-13)")
+
+
+def _sysmeas_inverse() -> Any:
+    b, a = sg.butter(2, [100.0, 8000.0], btype="bandpass", fs=float(_FS))
+    imp = np.zeros(1024)
+    imp[0] = 1.0
+    return ph.regularized_inverse_filter(
+        sg.lfilter(b, a, imp), float(_FS), f_range=(200.0, 4000.0)
+    )
+
+
+@register(
+    _SYSMEAS,
+    "Kirkeby & Nelson 1999 Eq. (17) / Mueller-Massarani 2001 Sec. 3.1",
+    "In-band equalization residue equals eps/(|H|^2 + eps) bin by bin",
+)
+def _chk_kirkeby_in_band() -> Outcome:
+    res = _sysmeas_inverse()
+    band = (res.frequencies >= 200.0) & (res.frequencies <= 4000.0)
+    product = np.abs(res.response_spectrum * res.spectrum)[band]
+    power = np.abs(res.response_spectrum[band]) ** 2
+    residue = res.regularization[band] / (power + res.regularization[band])
+    err = float(np.max(np.abs((1.0 - product) - residue)))
+    return numeric(0.0, err, 1e-12, places=6,
+                   expected_label="0 (closed form, +/-1e-12)")
+
+
+@register(
+    _SYSMEAS,
+    "Kirkeby & Nelson 1999 (max of x/(x^2+eps) = 1/(2*sqrt(eps)))",
+    "Out-of-band inverse-filter gain within the regularization cap",
+)
+def _chk_kirkeby_out_of_band() -> Outcome:
+    res = _sysmeas_inverse()
+    cap_db = -20.0 * math.log10(2.0)  # eps_outside = 1.0 -> -6.021 dB
+    headroom = cap_db - res.max_gain_db
+    return Outcome(
+        expected=f"<= {cap_db:.3f} dB (analytic cap)",
+        computed=f"{res.max_gain_db:.3f} dB",
+        delta=f"headroom {headroom:+.3f} dB",
+        passed=headroom >= 0.0,
+    )
+
+
+@register(
+    _SYSMEAS,
+    "Mueller-Massarani 2001 Secs. 4.2-4.3 (group-delay synthesis)",
+    "Shaped sweep's Welch spectrum follows the pink target, in-band",
+)
+def _chk_shaped_sweep_pink() -> Outcome:
+    res = ph.shaped_sweep_signal(_FS, 50.0, 5000.0, 2.0, target="pink")
+    nperseg = 8192
+    freqs, psd = sg.welch(
+        np.asarray(res), fs=float(_FS), nperseg=nperseg,
+        noverlap=3 * nperseg // 4,
+    )
+    third = 2.0 ** (1.0 / 3.0)
+    band = (freqs >= 50.0 * third) & (freqs <= 5000.0 / third)
+    diff = 10.0 * np.log10(psd[band]) + 10.0 * np.log10(freqs[band] / 50.0)
+    dev = float(np.max(np.abs(diff - np.median(diff))))
+    return numeric(0.0, dev, 0.5, unit="dB", places=4,
+                   expected_label="0 dB in-band deviation (+/-0.5 dB)")
+
+
+# ===========================================================================
 # Domain 5 - Intensity & sound power
 # ===========================================================================
 def _plane_wave_pair(

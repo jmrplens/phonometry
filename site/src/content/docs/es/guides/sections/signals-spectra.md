@@ -58,6 +58,15 @@ el resultado, y retardo fraccionario de banda limitada con frontera lineal o
 circular, que comparte su núcleo con la alineación submuestral de respuestas
 al impulso.
 
+[Medición de sistemas](/phonometry/es/guides/system-measurement/) orienta la
+caja de herramientas hacia la medición de los propios sistemas: los pares
+complementarios de Golay deconvolucionan un sistema invariante en el tiempo
+con ruido de correlación nulo, los barridos conformados de Mueller y
+Massarani ponen la energía de excitación donde la pide un espectro objetivo
+conservando el factor de cresta de un seno barrido, y la inversión espectral
+regularizada convierte una respuesta medida en un ecualizador seguro con una
+cota analítica de planitud y de ganancia fuera de banda.
+
 Estos estimadores alimentan al resto de la biblioteca: las funciones de
 transferencia y el análisis de distorsión se apoyan en la maquinaria
 espectral cruzada, el trabajo con respuestas al impulso de sala descansa en
@@ -93,3 +102,8 @@ estimaciones.
   salvas de tono IEC 60268-1 con conmutación exacta, remuestreo con
   especificación antialias declarada y retardo fraccionario de banda
   limitada.
+- [Medición de sistemas](/phonometry/es/guides/system-measurement/):
+  pares complementarios de Golay con deconvolución exactamente libre de
+  ruido hacia una respuesta al impulso, barridos que siguen un espectro de
+  magnitud objetivo arbitrario conformando el retardo de grupo, y la
+  inversión con regularización de Kirkeby de una respuesta medida.

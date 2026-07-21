@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **395/395 conformance checks pass** across 49 domains and 257 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **400/400 conformance checks pass** across 50 domains and 262 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -131,6 +131,19 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60268-16:2020 C.4.2 | Filter-bank slope: +41 dB unmodulated tone one octave below 125 Hz | m >= 0.5 (C.4.2 pass criterion) | 0.9812 | 0.481 | &#9989; |
 | IEC 60268-16:2020 A.2.2 (audio path) | Weighting factors: modulated 500 Hz + 1 kHz pair through stipa() | 0.398 (+/-0.005) | 0.398 | 0 | &#9989; |
 | IEC 60268-16:2020 A.3.1.2 (audio path) | Filter-bank phase: half-octave edge carriers at TI=0.9 | 0.9 (+/-0.01) | 0.8975 | -0.003 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>System measurement (Golay / Kirkeby / Mueller-Massarani)</b>: 100% (5/5)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Havelock 2008 Part I Ch. 6 (Xiang), Eq. (2) | Golay pair: sum of periodic autocorrelations = 2L*delta (L = 4096) | 0 (algebraic identity, +/-1e-10) | 0 | 0 | &#9989; |
+| Havelock 2008 Part I Ch. 6 (Xiang), Eq. (4) | Golay chain recovers a delay+gain system IR (noiseless, exact) | 0 (machine precision, +/-1e-13) | 0 | 0 | &#9989; |
+| Kirkeby & Nelson 1999 Eq. (17) / Mueller-Massarani 2001 Sec. 3.1 | In-band equalization residue equals eps/(|H|^2 + eps) bin by bin | 0 (closed form, +/-1e-12) | 0 | 0 | &#9989; |
+| Kirkeby & Nelson 1999 (max of x/(x^2+eps) = 1/(2*sqrt(eps))) | Out-of-band inverse-filter gain within the regularization cap | <= -6.021 dB (analytic cap) | -6.034 dB | headroom +0.013 dB | &#9989; |
+| Mueller-Massarani 2001 Secs. 4.2-4.3 (group-delay synthesis) | Shaped sweep's Welch spectrum follows the pink target, in-band | 0 dB in-band deviation (+/-0.5 dB) | 0.0652 dB | 0.065 dB | &#9989; |
 
 </details>
 

@@ -31,6 +31,31 @@ Two excitation families are implemented:
   cross-correlation of the recorded period with the sequence
   (equivalent to the Hadamard-transform recovery of A.1).
 
+Two further excitations from the transfer-function measurement literature
+complete the family:
+
+* **Complementary Golay pair** -- two binary sequences of length
+  ``L = 2**n`` whose periodic autocorrelations sum to an *exact* delta of
+  height ``2L`` (Golay 1961; Havelock, Kuwano & Vorlaender (eds.), Handbook
+  of Signal Processing in Acoustics, Springer 2008, Part I Ch. 6 by
+  N. Xiang, Eq. (2)). Exciting the system with each code in turn and
+  summing the two circular cross-correlations recovers the IR with zero
+  correlation noise: the deterministic residue of each single-code
+  correlation cancels identically, so only uncorrelated background noise
+  remains (Xiang Eq. (4)). See :func:`golay_pair` and
+  :func:`golay_impulse_response`.
+
+* **Sweep with an arbitrary magnitude spectrum** -- a swept sine synthesized
+  in the frequency domain by shaping its group delay so the dwell time at
+  each frequency is proportional to the desired spectral power
+  (Mueller & Massarani, "Transfer-Function Measurement with Sweeps", JAES
+  49(6), 2001, Secs. 4.2-4.3). The sweep keeps the near-ideal crest factor
+  of a swept sine while following any prescribed emphasis (pink,
+  noise-floor-matched, loudspeaker-equalizing, ...). See
+  :func:`shaped_sweep_signal`; the recording is deconvolved with the
+  ordinary spectral method of :func:`impulse_response`, or post-equalized
+  with :func:`phonometry.regularized_inverse_filter`.
+
 The recovered IR is broadband; ISO 18233 6.3.2 requires subsequent
 fractional-octave-band weighting (IEC 61260) before computing levels or
 decay curves -- that step belongs to downstream room-acoustics modules.
@@ -513,21 +538,42 @@ def mls_impulse_response(
     # it folds back into the record (A.1). The symptom is undecayed energy in
     # the last part of the period; warn (do not raise) so short-order misuse is
     # visible instead of silently biasing the result.
-    peak = float(np.max(np.abs(ir)))
-    if peak > 0.0:
-        tail = ir[int(0.9 * period):]
-        tail_rms = float(np.sqrt(np.mean(tail ** 2)))
-        if tail_rms > peak * 10.0 ** (_MLS_ALIAS_TAIL_DB / 20.0):
-            warnings.warn(
-                "Recovered MLS impulse response still has energy near the end "
-                f"of the {period}-sample period ({20 * np.log10(tail_rms / peak):.0f} "
-                f"dB re peak, above {_MLS_ALIAS_TAIL_DB:.0f} dB): the impulse "
-                "response is likely longer than one period and aliases "
-                "circularly. Use a higher MLS order.",
-                ImpulseResponseWarning,
-                stacklevel=2,
-            )
+    _warn_alias_tail(ir, period, "MLS", "Use a higher MLS order.")
+    out = _periodic_output(ir, period, length)
+    return ImpulseResponseResult(ir=out, fs=fs, method="mls")
 
+
+def _warn_alias_tail(
+    ir: np.ndarray, period: int, excitation: str, remedy: str
+) -> None:
+    """Warn when a circularly recovered IR keeps energy at the period end.
+
+    A system IR longer than one excitation period aliases back into the
+    record under any circular (periodic) deconvolution; the symptom is
+    undecayed energy in the last 10 % of the period. Warn (do not raise) so
+    short-period misuse is visible instead of silently biasing the result.
+    """
+    peak = float(np.max(np.abs(ir)))
+    if peak <= 0.0:
+        return
+    tail = ir[int(0.9 * period):]
+    tail_rms = float(np.sqrt(np.mean(tail ** 2)))
+    if tail_rms > peak * 10.0 ** (_MLS_ALIAS_TAIL_DB / 20.0):
+        warnings.warn(
+            f"Recovered {excitation} impulse response still has energy near "
+            f"the end of the {period}-sample period "
+            f"({20 * np.log10(tail_rms / peak):.0f} dB re peak, above "
+            f"{_MLS_ALIAS_TAIL_DB:.0f} dB): the impulse response is likely "
+            f"longer than one period and aliases circularly. {remedy}",
+            ImpulseResponseWarning,
+            stacklevel=3,
+        )
+
+
+def _periodic_output(
+    ir: np.ndarray, period: int, length: int | None
+) -> np.ndarray:
+    """Trim or periodically extend a one-period IR to ``length`` samples."""
     out_len = length if length is not None else period
     if out_len <= period:
         out = ir[:out_len]
@@ -535,4 +581,408 @@ def mls_impulse_response(
         # Periodic extension for requests longer than one period.
         reps = (out_len + period - 1) // period
         out = np.tile(ir, reps)[:out_len]
-    return ImpulseResponseResult(ir=np.asarray(out), fs=fs, method="mls")
+    return np.asarray(out)
+
+
+# Largest supported Golay order: 2**22 samples per code (~87 s at 48 kHz)
+# keeps the pair comfortably in memory while covering any realistic IR.
+_GOLAY_MAX_ORDER = 22
+
+#: Band-edge taper width of the shaped sweep's magnitude, in octaves. The
+#: half-cosine roll-off lives *outside* the requested band, so the target
+#: magnitude is honoured across all of ``[f1, f2]`` (Mueller & Massarani
+#: 2001, Sec. 4.2: band-limiting the synthesis magnitude avoids the ripple
+#: of an abrupt spectral start/stop).
+_SHAPED_EDGE_OCTAVES = 1.0 / 6.0
+
+
+def golay_pair(order: int) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Generate a complementary Golay pair of length ``2**order``.
+
+    Built with the append recursion of Golay (1961): starting from
+    ``a1 = (+1, +1)``, ``b1 = (+1, -1)``, each step appends ``b`` to ``a``
+    and ``-b`` to ``a`` (Havelock, Handbook of Signal Processing in
+    Acoustics, Springer 2008, Part I Ch. 6 (N. Xiang), Eq. (1)). The pair is
+    *complementary*: the sum of the two periodic autocorrelations is exactly
+    ``2L`` at zero lag and exactly zero everywhere else (Xiang Eq. (2)) --
+    an algebraic identity, not an approximation, unlike the near-delta
+    autocorrelation of an MLS.
+
+    :param order: Number of recursion steps ``n`` (1 to 22). Each code has
+        ``L = 2**order`` samples.
+    :return: The pair ``(a, b)`` as bipolar float arrays (values ``+1/-1``).
+    """
+    if not 1 <= order <= _GOLAY_MAX_ORDER:
+        raise ValueError(
+            f"order must be between 1 and {_GOLAY_MAX_ORDER} (got {order})"
+        )
+    a = np.array([1.0, 1.0])
+    b = np.array([1.0, -1.0])
+    for _ in range(order - 1):
+        a, b = np.concatenate((a, b)), np.concatenate((a, -b))
+    return a, b
+
+
+def golay_impulse_response(
+    recorded_a: List[float] | np.ndarray,
+    recorded_b: List[float] | np.ndarray,
+    pair: Tuple[np.ndarray, np.ndarray],
+    *,
+    length: int | None = None,
+    fs: int | None = None,
+) -> ImpulseResponseResult:
+    """
+    Recover an impulse response from a complementary Golay-pair excitation.
+
+    Each code of the pair is emitted periodically (as with an MLS, record in
+    the steady state: at least one settling period before acquisition); the
+    recorded periods of each code are averaged and the IR is the sum of the
+    two circular cross-correlations, normalised by ``2L`` (Havelock 2008,
+    Part I Ch. 6 (N. Xiang), Eq. (4) and the measurement procedure of
+    Fig. 2):
+
+    ``h = IFFT[ conj(A)*FFT(y_a) + conj(B)*FFT(y_b) ] / (2L)``.
+
+    Because the pair's autocorrelations are *exactly* complementary
+    (Xiang Eq. (2)), the recovery has no correlation noise: for a noiseless
+    linear time-invariant system the IR is exact to machine precision,
+    whereas an MLS leaves a small deterministic residue. Uncorrelated
+    background noise is only attenuated by the averaging, and the price is
+    a doubled excitation time and two steady states, which makes the pair
+    more exposed to time variance than a single sweep (Xiang, Sec. 2).
+
+    :param recorded_a: Recorded response to the periodic ``a`` code; its
+        length must be a positive multiple of the code length ``L``.
+    :param recorded_b: Recorded response to the periodic ``b`` code; its
+        length must be a positive multiple of ``L`` (the period counts of
+        the two recordings may differ).
+    :param pair: The complementary pair ``(a, b)`` from :func:`golay_pair`.
+    :param length: Number of IR samples to return. Defaults to ``L``;
+        longer requests are periodic extensions.
+    :param fs: Optional sample rate in Hz, stored on the result so that
+        :meth:`ImpulseResponseResult.plot` can label a time axis in seconds
+        (the recovery itself is sample-rate agnostic). Default ``None``.
+    :return: An :class:`ImpulseResponseResult` (``method="golay"``). It
+        behaves like the raw IR array for every downstream consumer and
+        adds :meth:`ImpulseResponseResult.plot`.
+
+    .. note::
+        As with any periodic (circular) recovery, a system IR longer than
+        one code period aliases back into the record; an
+        :class:`ImpulseResponseWarning` flags undecayed energy at the end
+        of the period (see the note in :func:`mls_impulse_response` about
+        the heuristic's noise-floor false positives).
+    """
+    code_a, code_b = (_typesignal(c) for c in pair)
+    if code_a.ndim != 1 or code_b.ndim != 1:
+        raise ValueError("both Golay codes must be one-dimensional.")
+    period = code_a.size
+    if period < 2 or code_b.size != period:
+        raise ValueError(
+            "'pair' must hold two equal-length codes of at least 2 samples "
+            "(use golay_pair())."
+        )
+    responses = []
+    for name, rec_in, code in (
+        ("recorded_a", recorded_a, code_a),
+        ("recorded_b", recorded_b, code_b),
+    ):
+        rec = _typesignal(rec_in)
+        if rec.ndim != 1:
+            raise ValueError(f"'{name}' must be one-dimensional.")
+        if rec.size == 0 or rec.size % period != 0:
+            raise ValueError(
+                f"'{name}' length must be a positive multiple of the "
+                f"{period}-sample code length"
+            )
+        # Synchronous averaging of the recorded periods (as with the MLS).
+        averaged = rec.reshape(-1, period).mean(axis=0)
+        # Circular cross-correlation: DFT{corr} = conj(CODE) * REC.
+        responses.append(np.conj(np.fft.rfft(code)) * np.fft.rfft(averaged))
+    # Complementary sum, normalised by 2L (Xiang Eq. (4)).
+    ir = np.fft.irfft(responses[0] + responses[1], n=period) / (2.0 * period)
+
+    _warn_alias_tail(ir, period, "Golay", "Use a higher Golay order.")
+    out = _periodic_output(ir, period, length)
+    return ImpulseResponseResult(ir=out, fs=fs, method="golay")
+
+
+@dataclass(frozen=True)
+class ShapedSweepResult:
+    """A sweep synthesized to follow an arbitrary target magnitude spectrum.
+
+    Returned by :func:`shaped_sweep_signal`. The playable samples live in
+    ``signal``; the object implements :meth:`__array__`, so it can be passed
+    straight to a sound-card writer or as the ``reference`` of
+    :func:`impulse_response` (spectral method). The synthesis metadata --
+    the frequency grid, the band-limited magnitude actually imposed on the
+    spectrum and the group delay that encodes the sweep's time-frequency
+    trajectory (Mueller & Massarani 2001, Secs. 4.2-4.3) -- travels with
+    the result, together with the achieved crest factor.
+
+    :ivar signal: The sweep samples (peak ``amplitude``).
+    :ivar fs: Sample rate, in Hz.
+    :ivar frequencies: Frequency grid of the synthesis FFT, in Hz.
+    :ivar magnitude: Band-limited magnitude imposed on the synthesis
+        spectrum, normalised to a peak of 1 (linear).
+    :ivar group_delay: Synthesized group delay ``tau_G(f)`` on
+        :attr:`frequencies`, in seconds: the time at which each frequency
+        is swept through.
+    :ivar f_range: ``(f1, f2)`` band covered by the sweep, in Hz.
+    :ivar crest_factor_db: Peak-to-RMS ratio over the sweep's central
+        (constant-envelope) interval, in dB. A time-domain swept sine has
+        the ideal 3.02 dB; the frequency-domain synthesis stays close to
+        it (Mueller & Massarani 2001, Sec. 4.3: normally below 4 dB).
+    """
+
+    signal: np.ndarray
+    fs: float
+    frequencies: np.ndarray
+    magnitude: np.ndarray
+    group_delay: np.ndarray
+    f_range: Tuple[float, float]
+    crest_factor_db: float
+
+    def __array__(self, dtype: Any = None) -> np.ndarray:
+        """Return the sweep samples as an array (optionally recast)."""
+        return np.asarray(self.signal, dtype=dtype)
+
+    def __len__(self) -> int:
+        return int(self.signal.shape[-1])
+
+    def __getitem__(self, key: Any) -> Any:
+        return self.signal[key]
+
+    @property
+    def size(self) -> int:
+        """Number of samples in the sweep."""
+        return int(self.signal.size)
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> "Axes | np.ndarray":
+        """Plot the sweep waveform and its spectrum against the target.
+
+        Two stacked panels: the time-domain waveform, and the sweep's Welch
+        magnitude spectrum overlaid on the synthesis target (both in dB re
+        their in-band maximum). With ``ax`` given, only the spectrum panel
+        is drawn on it. Requires matplotlib
+        (``pip install phonometry[plot]``).
+
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        """
+        from .._i18n import check_language
+        from .._plot.room import plot_shaped_sweep
+
+        check_language(language)
+        return plot_shaped_sweep(self, ax=ax, language=language, **kwargs)
+
+
+def _shaped_target_db(
+    target: str | Tuple[np.ndarray, np.ndarray],
+    freqs: np.ndarray,
+    f_range: Tuple[float, float],
+) -> np.ndarray:
+    """Evaluate the target magnitude, in dB, on the synthesis grid.
+
+    Named targets: ``"white"`` is flat; ``"pink"`` falls 3 dB per octave in
+    magnitude (``-10*log10(f/f1)``), the spectrum of the classical
+    logarithmic sweep (Mueller & Massarani 2001, Sec. 4). An arbitrary
+    target is a ``(frequencies_hz, magnitude_db)`` pair, interpolated
+    linearly in dB over log-frequency and held constant beyond its ends.
+    """
+    safe = np.maximum(freqs, freqs[1] if freqs.size > 1 else 1.0)
+    if isinstance(target, str):
+        if target == "white":
+            return np.zeros_like(freqs)
+        if target == "pink":
+            return np.asarray(-10.0 * np.log10(safe / f_range[0]))
+        raise ValueError(
+            f"unknown named target {target!r}; use 'white', 'pink' or a "
+            "(frequencies_hz, magnitude_db) pair"
+        )
+    t_freq = np.asarray(target[0], dtype=np.float64)
+    t_db = np.asarray(target[1], dtype=np.float64)
+    if t_freq.ndim != 1 or t_freq.size < 2 or t_db.shape != t_freq.shape:
+        raise ValueError(
+            "an array target must be a (frequencies_hz, magnitude_db) pair "
+            "of equal-length 1-D arrays with at least 2 points"
+        )
+    if np.any(t_freq <= 0.0) or np.any(np.diff(t_freq) <= 0.0):
+        raise ValueError("target frequencies must be positive and increasing")
+    if not np.all(np.isfinite(t_db)):
+        raise ValueError("target magnitudes must be finite")
+    return np.asarray(np.interp(np.log10(safe), np.log10(t_freq), t_db))
+
+
+def _band_edge_taper(
+    freqs: np.ndarray, f_range: Tuple[float, float], fs: float
+) -> np.ndarray:
+    """Half-cosine band-edge weights (1 inside ``f_range``, 0 far outside).
+
+    The tapers roll off over ``_SHAPED_EDGE_OCTAVES`` octaves *outside* the
+    band, so the requested range keeps the full target magnitude; the upper
+    taper is clipped at Nyquist. DC is always zeroed (a real periodic
+    signal cannot carry an arbitrary DC magnitude).
+    """
+    f1, f2 = f_range
+    ratio = 2.0 ** _SHAPED_EDGE_OCTAVES
+    lo_start = f1 / ratio
+    hi_stop = min(f2 * ratio, fs / 2.0)
+    weight = np.zeros_like(freqs)
+    inside = (freqs >= f1) & (freqs <= f2)
+    weight[inside] = 1.0
+    below = (freqs >= lo_start) & (freqs < f1)
+    if np.any(below):
+        x = np.log2(freqs[below] / lo_start) / np.log2(f1 / lo_start)
+        weight[below] = 0.5 - 0.5 * np.cos(np.pi * x)
+    above = (freqs > f2) & (freqs <= hi_stop) if hi_stop > f2 else \
+        np.zeros_like(freqs, dtype=bool)
+    if np.any(above):
+        x = np.log2(freqs[above] / f2) / np.log2(hi_stop / f2)
+        weight[above] = 0.5 + 0.5 * np.cos(np.pi * x)
+    weight[0] = 0.0
+    return weight
+
+
+def shaped_sweep_signal(
+    fs: int,
+    f1: float,
+    f2: float,
+    seconds: float,
+    *,
+    target: str | Tuple[np.ndarray, np.ndarray] = "pink",
+    amplitude: float = 1.0,
+    start_delay: float | None = None,
+    fade: float = 0.01,
+) -> ShapedSweepResult:
+    """
+    Synthesize a sweep with an arbitrary target magnitude spectrum.
+
+    Implements the frequency-domain sweep construction of
+    Mueller & Massarani ("Transfer-Function Measurement with Sweeps", JAES
+    49(6), 2001, Secs. 4.2-4.3): the magnitude of the synthesis spectrum is
+    set to the band-limited target, and the group delay grows in proportion
+    to the target's spectral power,
+
+    ``tau_G(f) = tau_G(f - df) + C * |H(f)|**2`` with
+    ``C = (tau_G(f_end) - tau_G(f_start)) / sum(|H|**2)``  (Eqs. (11)-(12)),
+
+    so the sweep dwells on each frequency for a time proportional to the
+    energy it must radiate there and its temporal envelope stays nearly
+    constant -- the crest factor stays close to a swept sine's ideal
+    3.02 dB regardless of the spectral shape (Sec. 4.3). The phase is the
+    integral of the group delay, corrected to land on a real spectrum at
+    Nyquist (Eq. (10)), and the sweep is obtained by inverse FFT over a
+    block at least double the sweep length so the pre-ringing of the
+    band-limited spectrum cannot fold onto the sweep's tail (Sec. 4.2).
+
+    Deconvolve the recording with :func:`impulse_response`
+    (``method="spectral"``), passing ``np.asarray(result)`` zero-padded as
+    the reference, exactly as with :func:`sweep_signal`; the sweep's
+    coloration divides out, so the target emphasis only re-weights the
+    measurement's noise floor (that is its purpose: SNR shaping).
+
+    :param fs: Sampling frequency in Hz.
+    :param f1: Start frequency of the sweep band in Hz. Must be > 0. The
+        magnitude rolls off over 1/6 octave *below* ``f1`` (clipped at the
+        first FFT bin), so the full target level holds across ``[f1, f2]``.
+    :param f2: Stop frequency in Hz. Must satisfy ``f1 < f2 <= fs/2``; keep
+        some margin below Nyquist so the upper roll-off has room.
+    :param seconds: Sweep duration ``tau_G(f2) - tau_G(f1)`` in seconds.
+        The returned signal is slightly longer (lead-in plus tail margin,
+        see ``start_delay``).
+    :param target: The magnitude shape: ``"pink"`` (default; 3 dB per
+        octave falling, the classical room-measurement emphasis),
+        ``"white"`` (flat), or a ``(frequencies_hz, magnitude_db)`` pair of
+        arrays interpolated in dB over log-frequency (only the shape
+        matters; any overall offset is normalised away).
+    :param amplitude: Peak amplitude of the returned sweep. Default 1.0.
+    :param start_delay: Group delay assigned to ``f1``, in seconds; the
+        same margin is left after ``tau_G(f2)``, so the signal lasts
+        ``seconds + 2*start_delay``. The sweep spreads slightly beyond its
+        nominal start (Sec. 4.2: the group delay of the lowest bin "should
+        not be set to zero"), so the default ``0.05*seconds`` gives the
+        first half-wave room to evolve.
+    :param fade: Half-Hann fade-in/out length as a fraction of the returned
+        signal, applied to pin the ends to zero (Sec. 4.2). Default 0.01;
+        0.0 disables.
+    :return: A :class:`ShapedSweepResult` wrapping the sweep samples and
+        the synthesis metadata (grid, imposed magnitude, group delay,
+        crest factor).
+    """
+    fs_v = float(fs)
+    if fs_v <= 0.0:
+        raise ValueError("fs must be positive")
+    if f1 <= 0.0:
+        raise ValueError("f1 must be positive")
+    if f2 <= f1:
+        raise ValueError("f2 must be greater than f1")
+    if f2 > fs_v / 2.0:
+        raise ValueError("f2 must not exceed the Nyquist frequency fs/2")
+    if seconds <= 0.0:
+        raise ValueError("seconds must be positive")
+    if amplitude <= 0.0:
+        raise ValueError("amplitude must be positive")
+    if not 0.0 <= fade < 0.5:
+        raise ValueError("fade must be in [0, 0.5)")
+    lead = 0.05 * seconds if start_delay is None else float(start_delay)
+    if lead <= 0.0:
+        raise ValueError("start_delay must be positive")
+
+    # FFT block at least double the total signal so low-frequency
+    # pre-ringing folding to "negative times" stays clear of the tail
+    # (Mueller & Massarani 2001, Sec. 4.2).
+    total = seconds + 2.0 * lead
+    n_keep = int(round(total * fs_v))
+    if n_keep < 16:
+        raise ValueError("seconds*fs must yield at least 16 samples")
+    n_fft = int(2 ** np.ceil(np.log2(2 * n_keep)))
+    freqs = np.asarray(np.fft.rfftfreq(n_fft, 1.0 / fs_v), dtype=np.float64)
+    if not np.any((freqs >= f1) & (freqs <= f2)):
+        raise ValueError(
+            "no frequency bin falls within [f1, f2]; lengthen 'seconds' or "
+            "widen the (f1, f2) range."
+        )
+
+    # Band-limited target magnitude (linear, normalised to peak 1).
+    target_db = _shaped_target_db(target, freqs, (float(f1), float(f2)))
+    magnitude = 10.0 ** (target_db / 20.0) * _band_edge_taper(
+        freqs, (float(f1), float(f2)), fs_v
+    )
+    magnitude /= float(np.max(magnitude))
+
+    # Group delay grows with the spectral power (Eqs. (11)-(12)); the
+    # cumulative sum is the discrete form of the bin-by-bin recursion.
+    power = magnitude ** 2
+    tau = lead + seconds * np.cumsum(power) / float(np.sum(power))
+
+    # Phase = -2*pi * integral of the group delay; then force the Nyquist
+    # phase onto a multiple of pi with a linear-in-f correction (Eq. (10)).
+    df = fs_v / n_fft
+    phase = -2.0 * np.pi * df * np.cumsum(tau)
+    phase -= phase[0]
+    residual = phase[-1] - np.pi * np.round(phase[-1] / np.pi)
+    phase -= residual * freqs / (fs_v / 2.0)
+
+    spectrum = magnitude * np.exp(1j * phase)
+    sweep = np.fft.irfft(spectrum, n=n_fft)[:n_keep]
+    if fade > 0.0:
+        sweep = _apply_fade(sweep, fade)
+    sweep *= amplitude / float(np.max(np.abs(sweep)))
+
+    # Crest factor over the constant-envelope interval [lead, lead+seconds].
+    core = sweep[int(round(lead * fs_v)):int(round((lead + seconds) * fs_v))]
+    rms = float(np.sqrt(np.mean(core ** 2)))
+    crest_db = 20.0 * np.log10(float(np.max(np.abs(core))) / rms)
+
+    return ShapedSweepResult(
+        signal=sweep,
+        fs=fs_v,
+        frequencies=freqs,
+        magnitude=magnitude,
+        group_delay=tau,
+        f_range=(float(f1), float(f2)),
+        crest_factor_db=crest_db,
+    )

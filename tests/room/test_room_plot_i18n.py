@@ -97,6 +97,12 @@ def _impulse_response():
     return ImpulseResponseResult(ir=_decaying_ir(), fs=FS, method="spectral")
 
 
+def _shaped_sweep():
+    from phonometry import shaped_sweep_signal
+
+    return shaped_sweep_signal(FS, 100.0, 5000.0, 0.4, target="pink")
+
+
 def _image_source():
     return image_source_rir(
         (5.0, 4.0, 3.0), (1.2, 1.1, 1.3), (3.5, 2.6, 1.7), 0.15, fs=16000, max_order=8
@@ -117,6 +123,7 @@ _CASES = [
     ("reverberation_models", _models, "Modelos de tiempo de reverberación"),
     ("open_plan", _open_plan, "Decaimiento espacial del habla"),
     ("impulse_response", _impulse_response, "Respuesta al impulso ISO 18233"),
+    ("shaped_sweep", _shaped_sweep, "Barrido conformado"),
     ("image_source", _image_source, "Tiempo de llegada [ms]"),
     ("steady_field", _steady_field, "Distancia a la fuente [m]"),
 ]

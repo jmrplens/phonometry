@@ -252,6 +252,10 @@ from .metrology.correlation import (
     impulse_response_delay,
     time_delay,
 )
+from .metrology.inversion import (
+    InverseFilterResult,
+    regularized_inverse_filter,
+)
 from .metrology.cepstrum import (
     CepstrumResult,
     EchoDetectionResult,
@@ -905,10 +909,14 @@ from .environmental.atmospheric_refraction import (
 from .room.room_ir import (
     ImpulseResponseResult,
     ImpulseResponseWarning,
+    ShapedSweepResult,
+    golay_impulse_response,
+    golay_pair,
     impulse_response,
     inverse_filter,
     mls_impulse_response,
     mls_signal,
+    shaped_sweep_signal,
     sweep_signal,
 )
 from ._plot.room import plot_excitation
@@ -1412,6 +1420,12 @@ __all__ = [
     "impulse_response",
     "mls_signal",
     "mls_impulse_response",
+    "golay_pair",
+    "golay_impulse_response",
+    "shaped_sweep_signal",
+    "ShapedSweepResult",
+    "regularized_inverse_filter",
+    "InverseFilterResult",
     "ImpulseResponseResult",
     "ImpulseResponseWarning",
     "plot_excitation",

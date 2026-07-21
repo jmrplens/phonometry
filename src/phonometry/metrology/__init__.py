@@ -44,6 +44,7 @@ from .frequencies import (
     normalized_frequencies,
     normalizedfreq,
 )
+from .inversion import InverseFilterResult, regularized_inverse_filter
 from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
 from .parametric_filters import (
     TimeWeighting,
@@ -202,4 +203,6 @@ __all__ = [
     "weighting_filter",
     "zoom_fft",
     "window_metrics",
+    "InverseFilterResult",
+    "regularized_inverse_filter",
 ]

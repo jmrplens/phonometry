@@ -95,6 +95,10 @@ calibrada y acompañada de su calidad estadística.
   del espectro cruzado y las ponderaciones GCC de Knapp y Carter, retardo
   submuestral y alineación de respuestas al impulso, y la envolvente de
   Hilbert.
+- [Medición de sistemas](/phonometry/es/guides/system-measurement/):
+  pares complementarios de Golay, barridos con un espectro de magnitud
+  objetivo arbitrario conformando el retardo de grupo, y la inversión con
+  regularización de Kirkeby de una respuesta medida.
 
 ## [Calibración e incertidumbre](/phonometry/es/guides/sections/calibration-uncertainty/)
 

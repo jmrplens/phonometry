@@ -860,8 +860,9 @@ class DailyVibrationExposure:
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
-        :raises ImportError: If reportlab (or, for the contribution chart,
-            matplotlib) is not installed (``pip install phonometry[report]``).
+        :raises ImportError: If reportlab or matplotlib is not installed. The
+            fiche always embeds the contribution chart, so both are required
+            (``pip install "phonometry[report,plot]"``).
         """
         from .._i18n import check_language
 

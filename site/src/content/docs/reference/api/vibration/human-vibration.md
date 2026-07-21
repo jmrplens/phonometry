@@ -280,7 +280,7 @@ verdict against the limit value, and a footer identity/disclaimer block.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the contribution chart, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the contribution chart, so both are required (`pip install "phonometry[report,plot]"`). |
 
 ## energy_equivalent_acceleration
 

@@ -373,8 +373,9 @@ def render_human_vibration_report(
         of the daily vibration energy ``A_i(8)^2 / A(8)^2``.
     :param language: ``"en"`` (default) or ``"es"``.
     :return: The written ``path`` as a :class:`str`.
-    :raises ImportError: If reportlab (or, for the contribution chart,
-        matplotlib) is not installed.
+    :raises ImportError: If reportlab or matplotlib is not installed. The
+        fiche always embeds the contribution chart, so both are required
+        (``pip install "phonometry[report,plot]"``).
     """
     try:
         from reportlab.lib import colors

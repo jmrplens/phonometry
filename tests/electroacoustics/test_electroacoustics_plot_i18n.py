@@ -117,35 +117,50 @@ def _microphone() -> ph.electroacoustics.MicrophoneCharacteristics:
 
 def test_loudspeaker_characteristics_es() -> None:
     res = _loudspeaker()
-    axes = res.plot(language="es")
-    assert isinstance(axes, np.ndarray) and axes.size == 4
-    assert axes[0].get_figure()._suptitle.get_text() == "Características del altavoz (IEC 60268-5)"
-    text = _labels(axes)
-    assert "Respuesta en el eje" in text and "Impedancia" in text
-    assert "Rango efectivo" in text and "Respuesta direccional a 2000 Hz" in text
+    # The default quantity is the on-axis response; every quantity is one axes.
+    assert res.plot(language="es").get_title() == "Respuesta en el eje"
     plt.close("all")
-    # A single external axes carries only the on-axis response.
-    ext = res.plot(ax=plt.subplots()[1], language="es")
-    assert not isinstance(ext, np.ndarray)
-    assert ext.get_ylabel() == "Nivel de presión sonora [dB]"
+    titles = {
+        "response": "Respuesta en el eje",
+        "impedance": "Impedancia",
+        "thd": "Distorsión armónica total",
+        "directivity": "Respuesta direccional a 2000 Hz",
+    }
+    for quantity, title in titles.items():
+        ax = res.plot(quantity=quantity, language="es")
+        assert not isinstance(ax, np.ndarray)
+        assert ax.get_title() == title
+        plt.close("all")
+    assert res.plot(quantity="response", language="es").get_ylabel() == (
+        "Nivel de presión sonora [dB]"
+    )
     plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(quantity="bogus")
     with pytest.raises(ValueError):
         res.plot(language="xx")
 
 
 def test_microphone_characteristics_es() -> None:
     res = _microphone()
-    axes = res.plot(language="es")
-    assert isinstance(axes, np.ndarray) and axes.size == 4
-    assert axes[0].get_figure()._suptitle.get_text() == "Características del micrófono (IEC 60268-4)"
-    text = _labels(axes)
-    assert "Respuesta en campo libre" in text
-    assert "Espectro de ruido inherente" in text
-    assert "Frecuencia de referencia" in text
+    assert res.plot(language="es").get_title() == "Respuesta en campo libre"
     plt.close("all")
-    ext = res.plot(ax=plt.subplots()[1], language="es")
-    assert not isinstance(ext, np.ndarray)
-    assert ext.get_ylabel() == "Respuesta relativa [dB]"
+    titles = {
+        "response": "Respuesta en campo libre",
+        "directivity": "Respuesta direccional a 1000 Hz",
+        "noise": "Espectro de ruido inherente",
+        "distortion": "Distorsión armónica total",
+    }
+    for quantity, title in titles.items():
+        ax = res.plot(quantity=quantity, language="es")
+        assert not isinstance(ax, np.ndarray)
+        assert ax.get_title() == title
+        plt.close("all")
+    assert res.plot(quantity="distortion", language="es").get_xlabel() == (
+        "Nivel de presión sonora [dB]"
+    )
     plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(quantity="bogus")
     with pytest.raises(ValueError):
         res.plot(language="xx")

@@ -371,21 +371,25 @@ class LoudspeakerCharacteristics:
         )
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
-        """Plot the IEC 60268-5 loudspeaker rated-characteristics data sheet.
+        self, quantity: str = "response", ax: "Axes | None" = None, *,
+        language: str = "en", **kwargs: Any,
+    ) -> "Axes":
+        """Plot one IEC 60268-5 loudspeaker rated characteristic on one axes.
 
-        A multi-panel figure sharing its panel drawing with the ``.report()``
-        fiche: the on-axis SPL response with its tolerance band and
-        effective-range markers, plus the impedance modulus ``|Z|``, the total
-        harmonic distortion against frequency and the polar directivity for the
-        data supplied. With ``ax`` given only the on-axis response is drawn.
+        One concept per figure, drawn by the same shared renderer the
+        ``.report()`` fiche composes: ``"response"`` (the on-axis SPL response
+        with its tolerance band and effective-range markers, the default),
+        ``"impedance"`` (the modulus ``|Z|`` with the rated and 80 %-of-rated
+        lines), ``"thd"`` (total harmonic distortion against frequency) and
+        ``"directivity"`` (the polar response on the 25 dB reference circle).
 
-        :param ax: Existing axes for the on-axis response, or ``None`` for a
-            fresh multi-panel data sheet.
+        :param quantity: Which characteristic to plot (see above).
+        :param ax: Existing axes to draw on, or ``None`` for a fresh figure (a
+            polar axes is created for ``"directivity"``).
         :param language: Label language, ``"en"`` (default) or ``"es"``.
-        :return: The response-panel axes (``ax`` given) or the array of panel
-            axes.
+        :return: The axes the characteristic was drawn on.
+        :raises ValueError: If ``quantity`` or ``language`` is unknown, or the
+            result carries no data for ``quantity``.
         :raises ImportError: If matplotlib is not installed
             (``pip install phonometry[plot]``).
         """
@@ -393,7 +397,9 @@ class LoudspeakerCharacteristics:
         from .._plot.electroacoustics import plot_loudspeaker_characteristics
 
         check_language(language)
-        return plot_loudspeaker_characteristics(self, ax=ax, language=language, **kwargs)
+        return plot_loudspeaker_characteristics(
+            self, quantity, ax=ax, language=language, **kwargs
+        )
 
 
 def _polar_from_directivity(

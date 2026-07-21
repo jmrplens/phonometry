@@ -23,7 +23,6 @@ from .common import (
 )
 
 if TYPE_CHECKING:
-    import numpy.typing as npt
     from matplotlib.axes import Axes
 
     from ..electroacoustics.distortion import HarmonicDistortionResult
@@ -96,8 +95,6 @@ _STRINGS: dict[str, str] = {
     "Inherent noise spectrum": "Espectro de ruido inherente",
     "{thd} % limit": "Límite del {thd} %",
     "Max. SPL": "SPL máx.",
-    "Loudspeaker characteristics (IEC 60268-5)": "Características del altavoz (IEC 60268-5)",
-    "Microphone characteristics (IEC 60268-4)": "Características del micrófono (IEC 60268-4)",
 }
 
 
@@ -532,119 +529,129 @@ def _draw_microphone_distortion(
     ax.legend(loc="upper left", fontsize="small")
 
 
-def _datasheet(
+def _new_polar_axes() -> Any:
+    """Create a single fresh polar figure + axes and return the axes."""
+    plt = _import_pyplot()
+    _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+    return ax
+
+
+#: The loudspeaker ``.plot()`` quantities: the panel drawer, whether the panel
+#: is polar, and the optional-data attribute that must be present (``None`` for
+#: the always-available on-axis response).
+_LOUDSPEAKER_QUANTITIES: dict[str, tuple[Any, bool, str | None]] = {
+    "response": (_draw_loudspeaker_response, False, None),
+    "impedance": (_draw_impedance, False, "impedance_frequencies"),
+    "thd": (_draw_loudspeaker_thd, False, "thd_frequencies"),
+    "directivity": (_draw_datasheet_polar, True, "polar_angles_deg"),
+}
+
+#: The microphone ``.plot()`` quantities (see :data:`_LOUDSPEAKER_QUANTITIES`).
+_MICROPHONE_QUANTITIES: dict[str, tuple[Any, bool, str | None]] = {
+    "response": (_draw_microphone_response, False, None),
+    "directivity": (_draw_datasheet_polar, True, "polar_angles_deg"),
+    "noise": (_draw_noise_spectrum, False, "noise_frequencies"),
+    "distortion": (_draw_microphone_distortion, False, "distortion_spl_db"),
+}
+
+
+def _plot_one_quantity(
     result: Any,
-    response_drawer: Any,
-    optional: "list[tuple[str, Any]]",
-    title: str,
+    quantity: str,
+    table: "dict[str, tuple[Any, bool, str | None]]",
+    ax: "Axes | None",
     language: str,
-) -> "npt.NDArray[Any]":
-    """Compose a rated-characteristics data sheet from its panel drawers.
+    missing: "dict[str, str]",
+) -> "Axes":
+    """Draw exactly one rated-characteristic panel on a single axes.
 
-    The response panel spans the full width of the top row; the optional panels
-    flow into a two-column body below it, so a four-panel sheet is a wide
-    response over a 2x2-style body with no cramped, overlapping axes. Each
-    ``("polar" | "cart", drawer)`` entry is drawn on an axes created with its
-    own projection. Returns the panel axes as an array (the sibling multi-panel
-    ``.plot()`` return convention).
+    Shared by the loudspeaker and microphone ``.plot()`` methods: it validates
+    ``quantity`` against ``table``, checks the optional data behind it is
+    present, creates a (polar or cartesian) axes when ``ax`` is ``None`` and
+    delegates to the shared panel drawer, so the interactive plot and the
+    ``.report()`` fiche paint each concept with the same code.
     """
-    from matplotlib.gridspec import GridSpec
-
     from .._i18n import localize_axes
 
-    plt = _import_pyplot()
-    body_rows = (len(optional) + 1) // 2
-    fig = plt.figure(figsize=(11.0, 3.6 + 3.0 * body_rows))
-    gs = GridSpec(1 + body_rows, 2, figure=fig, hspace=0.6, wspace=0.28)
-    response_drawer(result, fig.add_subplot(gs[0, :]), language=language)
-    for i, (kind, drawer) in enumerate(optional):
-        cell = fig.add_subplot(
-            gs[1 + i // 2, i % 2],
-            projection="polar" if kind == "polar" else None,
+    if quantity not in table:
+        allowed = ", ".join(repr(q) for q in table)
+        raise ValueError(
+            f"unknown quantity {quantity!r}; choose one of {allowed}."
         )
-        drawer(result, cell, language=language)
-    fig.suptitle(title, fontweight="bold")
-    for ax in fig.axes:
-        localize_axes(ax, language)
-    return np.asarray(fig.axes, dtype=object)
+    drawer, polar, attr = table[quantity]
+    if attr is not None and getattr(result, attr) is None:
+        raise ValueError(missing[quantity])
+    ax = ax if ax is not None else (_new_polar_axes() if polar else _new_axes())
+    drawer(result, ax, language=language)
+    localize_axes(ax, language)
+    return ax
 
 
 def plot_loudspeaker_characteristics(
-    result: "LoudspeakerCharacteristics", ax: Axes | None = None, *,
-    language: str = "en", **kwargs: Any,
-) -> "Axes | npt.NDArray[Any]":
-    """IEC 60268-5 loudspeaker rated-characteristics data sheet.
+    result: "LoudspeakerCharacteristics", quantity: str = "response",
+    ax: Axes | None = None, *, language: str = "en", **kwargs: Any,
+) -> "Axes":
+    """Plot one IEC 60268-5 loudspeaker rated characteristic on a single axes.
 
-    A multi-panel figure: the on-axis SPL response with its tolerance band and
-    effective-range markers, and, for the data supplied, the impedance modulus
-    ``|Z|``, the total harmonic distortion against frequency and the polar
-    directivity. With ``ax`` given only the on-axis response is drawn on it.
+    Each ``quantity`` is a single concept drawn by the same shared renderer the
+    ``.report()`` fiche composes: ``"response"`` (the on-axis SPL response with
+    its tolerance band and effective-range markers, the default),
+    ``"impedance"`` (the modulus ``|Z|`` with the rated and 80 %-of-rated
+    lines), ``"thd"`` (total harmonic distortion against frequency) and
+    ``"directivity"`` (the polar response on the 25 dB reference circle).
 
     :param result: A
         :class:`~phonometry.electroacoustics.loudspeaker.LoudspeakerCharacteristics`.
-    :param ax: Existing axes for the on-axis response, or ``None`` for a fresh
-        multi-panel data sheet.
+    :param quantity: Which characteristic to plot (see above).
+    :param ax: Existing axes to draw on, or ``None`` for a fresh figure (a polar
+        axes is created for ``"directivity"``).
     :param language: Label language, ``"en"`` (default) or ``"es"``.
-    :param kwargs: Ignored placeholder kept for a uniform ``.plot()`` signature.
-    :return: The response-panel axes (``ax`` given) or the array of panel axes.
+    :param kwargs: Reserved for a uniform ``.plot()`` signature; unused.
+    :return: The axes the characteristic was drawn on.
+    :raises ValueError: If ``quantity`` is unknown or the result carries no data
+        for it.
     """
-    from .._i18n import localize_axes
-
-    del kwargs  # the panels are fixed datasheet artists; no primary override
-    if ax is not None:
-        _draw_loudspeaker_response(result, ax, language=language)
-        localize_axes(ax, language)
-        return ax
-
-    optional: list[tuple[str, Any]] = []
-    if result.impedance_frequencies is not None:
-        optional.append(("cart", _draw_impedance))
-    if result.thd_frequencies is not None:
-        optional.append(("cart", _draw_loudspeaker_thd))
-    if result.polar_angles_deg is not None:
-        optional.append(("polar", _draw_datasheet_polar))
-    return _datasheet(
-        result, _draw_loudspeaker_response, optional,
-        _t("Loudspeaker characteristics (IEC 60268-5)", language), language,
+    del kwargs  # each panel is a fixed datasheet artist; no primary override
+    missing = {
+        "impedance": "this result carries no impedance curve to plot.",
+        "thd": "this result carries no total-harmonic-distortion curve to plot.",
+        "directivity": "this result carries no directional response to plot.",
+    }
+    return _plot_one_quantity(
+        result, quantity, _LOUDSPEAKER_QUANTITIES, ax, language, missing
     )
 
 
 def plot_microphone_characteristics(
-    result: "MicrophoneCharacteristics", ax: Axes | None = None, *,
-    language: str = "en", **kwargs: Any,
-) -> "Axes | npt.NDArray[Any]":
-    """IEC 60268-4 microphone rated-characteristics data sheet.
+    result: "MicrophoneCharacteristics", quantity: str = "response",
+    ax: Axes | None = None, *, language: str = "en", **kwargs: Any,
+) -> "Axes":
+    """Plot one IEC 60268-4 microphone rated characteristic on a single axes.
 
-    A multi-panel figure: the free-field response with its tolerance band and
-    effective-range markers, and, for the data supplied, the polar directional
-    pattern, the inherent-noise band spectrum and the total harmonic distortion
-    against sound pressure level. With ``ax`` given only the free-field response
-    is drawn on it.
+    Each ``quantity`` is a single concept drawn by the same shared renderer the
+    ``.report()`` fiche composes: ``"response"`` (the free-field response with
+    its tolerance band, reference-frequency and effective-range markers, the
+    default), ``"directivity"`` (the polar directional pattern on the 25 dB
+    reference circle), ``"noise"`` (the inherent-noise band-level spectrum) and
+    ``"distortion"`` (total harmonic distortion against sound pressure level).
 
     :param result: A
         :class:`~phonometry.electroacoustics.microphone.MicrophoneCharacteristics`.
-    :param ax: Existing axes for the free-field response, or ``None`` for a
-        fresh multi-panel data sheet.
+    :param quantity: Which characteristic to plot (see above).
+    :param ax: Existing axes to draw on, or ``None`` for a fresh figure (a polar
+        axes is created for ``"directivity"``).
     :param language: Label language, ``"en"`` (default) or ``"es"``.
-    :param kwargs: Ignored placeholder kept for a uniform ``.plot()`` signature.
-    :return: The response-panel axes (``ax`` given) or the array of panel axes.
+    :param kwargs: Reserved for a uniform ``.plot()`` signature; unused.
+    :return: The axes the characteristic was drawn on.
+    :raises ValueError: If ``quantity`` is unknown or the result carries no data
+        for it.
     """
-    from .._i18n import localize_axes
-
     del kwargs
-    if ax is not None:
-        _draw_microphone_response(result, ax, language=language)
-        localize_axes(ax, language)
-        return ax
-
-    optional: list[tuple[str, Any]] = []
-    if result.polar_angles_deg is not None:
-        optional.append(("polar", _draw_datasheet_polar))
-    if result.noise_frequencies is not None:
-        optional.append(("cart", _draw_noise_spectrum))
-    if result.distortion_spl_db is not None:
-        optional.append(("cart", _draw_microphone_distortion))
-    return _datasheet(
-        result, _draw_microphone_response, optional,
-        _t("Microphone characteristics (IEC 60268-4)", language), language,
+    missing = {
+        "directivity": "this result carries no directional pattern to plot.",
+        "noise": "this result carries no inherent-noise spectrum to plot.",
+        "distortion": "this result carries no distortion-against-level curve to plot.",
+    }
+    return _plot_one_quantity(
+        result, quantity, _MICROPHONE_QUANTITIES, ax, language, missing
     )

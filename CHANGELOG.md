@@ -53,21 +53,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   pressure level versus a logarithmic frequency axis, one line per loudness
   level plus the threshold) in English or Spanish. The bare-array functions are
   unchanged.
-- `LoudspeakerCharacteristics.plot()`: a multi-panel IEC 60268-5 rated-
-  characteristics data sheet, drawing the on-axis SPL response with its
-  tolerance band and effective-range markers alongside the impedance modulus
-  `|Z|`, the total harmonic distortion against frequency and the polar
-  directivity for the data supplied. Passing an axes draws only the on-axis
-  response on it. The panels share their drawing code with the `.report()`
-  fiche, so the plot and the report never diverge. `language="es"` labels the
-  figure in Spanish.
-- `MicrophoneCharacteristics.plot()`: a multi-panel IEC 60268-4 rated-
-  characteristics data sheet, drawing the free-field response with its
-  tolerance band and effective-range markers alongside the polar directional
-  pattern, the inherent-noise band spectrum and the total harmonic distortion
-  against sound pressure level for the data supplied. Passing an axes draws
-  only the free-field response on it. The panels share their drawing code with
-  the `.report()` fiche. `language="es"` labels the figure in Spanish.
+- `LoudspeakerCharacteristics.plot(quantity=...)`: single-concept IEC 60268-5
+  rated-characteristic figures selected by `quantity`: `"response"` (the on-axis
+  SPL response with its tolerance band and effective-range markers, the
+  default), `"impedance"` (the modulus `|Z|` with the rated and 80 %-of-rated
+  lines), `"thd"` (total harmonic distortion against frequency) and
+  `"directivity"` (the polar response on the 25 dB reference circle). Each call
+  returns a single Axes and shares its panel drawing with the `.report()` fiche,
+  so the plot and the report never diverge. An unknown `quantity` raises
+  `ValueError`; `language="es"` labels the figure in Spanish.
+- `MicrophoneCharacteristics.plot(quantity=...)`: single-concept IEC 60268-4
+  rated-characteristic figures selected by `quantity`: `"response"` (the
+  free-field response with its tolerance band, reference-frequency and
+  effective-range markers, the default), `"directivity"` (the polar directional
+  pattern on the 25 dB reference circle), `"noise"` (the inherent-noise band
+  spectrum) and `"distortion"` (total harmonic distortion against sound pressure
+  level). Each call returns a single Axes and shares its panel drawing with the
+  `.report()` fiche. An unknown `quantity` raises `ValueError`; `language="es"`
+  labels the figure in Spanish.
 - `OpenPlanResult.report()`: a one-page PDF open-plan office acoustics fiche
   (ISO 3382-3:2012), laid out like a speech-privacy measurement report. The
   sheet carries the standard-basis line, an optional metadata header (client,

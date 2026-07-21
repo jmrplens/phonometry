@@ -374,22 +374,26 @@ class MicrophoneCharacteristics:
         )
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
-        """Plot the IEC 60268-4 microphone rated-characteristics data sheet.
+        self, quantity: str = "response", ax: "Axes | None" = None, *,
+        language: str = "en", **kwargs: Any,
+    ) -> "Axes":
+        """Plot one IEC 60268-4 microphone rated characteristic on one axes.
 
-        A multi-panel figure sharing its panel drawing with the ``.report()``
-        fiche: the free-field response with its tolerance band and
-        effective-range markers, plus the polar directional pattern, the
-        inherent-noise band spectrum and the total harmonic distortion against
-        sound pressure level for the data supplied. With ``ax`` given only the
-        free-field response is drawn.
+        One concept per figure, drawn by the same shared renderer the
+        ``.report()`` fiche composes: ``"response"`` (the free-field response
+        with its tolerance band, reference-frequency and effective-range
+        markers, the default), ``"directivity"`` (the polar directional pattern
+        on the 25 dB reference circle), ``"noise"`` (the inherent-noise
+        band-level spectrum) and ``"distortion"`` (total harmonic distortion
+        against sound pressure level).
 
-        :param ax: Existing axes for the free-field response, or ``None`` for a
-            fresh multi-panel data sheet.
+        :param quantity: Which characteristic to plot (see above).
+        :param ax: Existing axes to draw on, or ``None`` for a fresh figure (a
+            polar axes is created for ``"directivity"``).
         :param language: Label language, ``"en"`` (default) or ``"es"``.
-        :return: The response-panel axes (``ax`` given) or the array of panel
-            axes.
+        :return: The axes the characteristic was drawn on.
+        :raises ValueError: If ``quantity`` or ``language`` is unknown, or the
+            result carries no data for ``quantity``.
         :raises ImportError: If matplotlib is not installed
             (``pip install phonometry[plot]``).
         """
@@ -397,7 +401,9 @@ class MicrophoneCharacteristics:
         from .._plot.electroacoustics import plot_microphone_characteristics
 
         check_language(language)
-        return plot_microphone_characteristics(self, ax=ax, language=language, **kwargs)
+        return plot_microphone_characteristics(
+            self, quantity, ax=ax, language=language, **kwargs
+        )
 
 
 def _optional_positive(value: float | None, name: str) -> float | None:

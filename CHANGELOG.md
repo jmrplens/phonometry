@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `OpenPlanResult.report()`: a one-page PDF open-plan office acoustics fiche
+  (ISO 3382-3:2012), laid out like a speech-privacy measurement report. The
+  sheet carries the standard-basis line, an optional metadata header (client,
+  office/zone, description, floor area, source and measurement positions,
+  climate), a metrics table of the four single-number quantities of Clause 4
+  (the spatial decay rate of A-weighted speech `D2,S`, the nominal 4 m speech
+  level `Lp,A,S,4m`, the distraction distance `rD` and the privacy distance
+  `rP`), the result's own spatial-decay plot (the Clause 6.2 regression on the
+  logarithmic distance axis with the 4 m read-off and the `rD` / `rP`
+  crossings), the boxed `D2,S` with the remaining quantities alongside, and a
+  footer with the fixed disclaimer. A verdict row appears only when a target
+  spatial decay rate is supplied through `metadata.requirement` (read as the
+  minimum acceptable `D2,S`, per the informative quality ranges of Annex A; the
+  room passes at or above it). `language="es"` renders the Spanish fiche with a
+  comma decimal separator.
 - `DailyVibrationExposure.report()`: a one-page PDF daily vibration exposure
   assessment fiche for hand-arm (ISO 5349-1/-2:2001) and whole-body
   (ISO 2631-1:1997) exposure, laid out like the hand-arm and whole-body

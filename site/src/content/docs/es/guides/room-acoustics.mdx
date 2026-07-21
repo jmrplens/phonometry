@@ -711,6 +711,74 @@ partir de esos cuatro campos y marca `rd` / `rp`.
 posición puede medirse a su vez con las herramientas STIPA de la
 [guía del índice de transmisión del habla](/phonometry/es/guides/speech-transmission/).
 
+### Informe ISO 3382-3 (`.report()`)
+
+`OpenPlanResult.report(path)` renderiza una ficha PDF de una página con el
+formato de un informe de medición de privacidad acústica en oficinas diáfanas:
+la línea de norma base, un bloque de cabecera de metadatos opcional, una tabla
+compacta de las cuatro magnitudes de número único del apartado 4 ($D_{2,S}$,
+$L_{p,A,S,4m}$, la distancia de distracción $r_D$ y la distancia de privacidad
+$r_P$) apilada sobre la gráfica de decaimiento espacial a todo el ancho del
+resultado (`.plot()`, la regresión del apartado 6.2 en el eje logarítmico de
+distancia con la lectura a 4 m y los cruces $r_D$ / $r_P$ marcados, la curva al
+estilo de la Figura 3), el $D_{2,S}$ enmarcado con las demás magnitudes al lado,
+y un pie
+con el descargo fijo. La ISO 3382-3 **caracteriza** un espacio en lugar de
+definir un apto/no apto intrínseco, por lo que la fila de veredicto aparece solo
+cuando se suministra una tasa de decaimiento espacial objetivo a través del
+campo `requirement` de los metadatos (`ReportMetadata(requirement=...)`,
+interpretada como el $D_{2,S}$ mínimo aceptable en dB, según los intervalos de
+calidad informativos del Anexo A donde un mayor decaimiento espacial es mejor;
+la sala cumple igualando o superando el objetivo). Usa el mismo contenedor
+`ReportMetadata` y el mismo motor de renderizado que la
+[ficha de acústica de salas ISO 3382-1/-2](#informe-iso-3382-report); los
+campos propios de oficinas diáfanas `area` (superficie del suelo),
+`source_positions` y `receiver_positions` (el número de posiciones de medición)
+rellenan la cabecera, junto con `client`, `test_room` (la oficina o zona),
+`specimen` (la descripción y el estado de amueblamiento), `instrumentation`,
+`temperature`, `relative_humidity`, `pressure`, `measurement_standard`,
+`test_date`, `laboratory`, `operator`, `report_id` y `notes`. Al pasar
+`metadata=None` se obtiene una ficha de caracterización simple. La ficha
+incrusta la gráfica de decaimiento espacial, por lo que el renderizado necesita
+tanto reportlab como matplotlib (`pip install "phonometry[report,plot]"`); solo
+se admite `engine="reportlab"`. La ficha se renderiza en inglés por defecto; pasa
+`language="es"` para una ficha en español (cadenas fijas traducidas y separador
+decimal de coma).
+
+```python
+import numpy as np
+from phonometry import room, ReportMetadata
+
+r = np.array([2.0, 3.0, 4.0, 6.0, 8.0, 11.0, 16.0])   # distancias al hablante (m)
+lp = 62.0 - 7.0 * np.log2(r)                           # nivel de habla ponderado A (dB)
+sti = 0.65 - 0.03 * r                                  # STI por posición
+
+result = room.open_plan_metrics(r, lp, sti)
+result.report(
+    "ficha_oficina_diafana.pdf",
+    metadata=ReportMetadata(
+        test_room="Oficina diáfana B",
+        specimen="Amueblada, desocupada, con ruido de fondo",
+        area=420.0, source_positions=2, receiver_positions=7,
+        measurement_standard="ISO 3382-3",
+        temperature=22.0, relative_humidity=45.0,
+        laboratory="Laboratorio de referencia Phonometry",
+        requirement=7.0,          # añade un veredicto frente a un D2,S objetivo
+    ),
+    language="es",
+)                                 # D2,S + Lp,A,S,4m, rD, rP y la curva de decaimiento
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; haz clic en la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso3382_3_open_plan_example"
+	title="Informe de ejemplo de acústica de oficinas diáfanas ISO 3382-3 (PDF)"
+	description="Ficha de oficina diáfana de una página: una cabecera de metadatos (cliente, oficina/zona, descripción, superficie del suelo, posiciones de fuente y de medición, instrumentación, temperatura, humedad y presión), la tabla de las cuatro magnitudes de número único (D2,S = 7,0 dB por duplicación, Lp,A,S,4m = 48,0 dB, rD = 5,0 m, rP = 15,0 m) sobre la gráfica de decaimiento espacial en un eje logarítmico de distancia con la regresión de D2,S, la lectura a 4 m y los cruces rD y rP, el D2,S enmarcado, y un veredicto CUMPLE frente al objetivo de 7,0 dB."
+	caption="Ficha de acústica de oficinas diáfanas (OpenPlanResult.report): D2,S, Lp,A,S,4m, rD, rP y la curva de decaimiento espacial."
+/>
+
 ## 4. Absorción sonora (ISO 354)
 
 El área de absorción sonora equivalente `A` que gobierna `R'`, `L'n`, la

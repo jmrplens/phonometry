@@ -39,6 +39,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 #: Reference distance for the logarithmic distance axis of D2,S
 #: (ISO 3382-3:2012, 6.2, Equation (5)): r0 = 1 m.
 _R0 = 1.0
@@ -97,6 +99,73 @@ class OpenPlanResult:
 
         check_language(language)
         return plot_open_plan(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an open-plan office acoustics fiche to a PDF (ISO 3382-3).
+
+        Writes a one-page report laid out like an open-plan-office
+        speech-privacy measurement report: the standard-basis line, an optional
+        metadata header block (client, office/zone, description, floor area,
+        source and measurement positions, climate ...), a compact metrics table
+        of the four single-number quantities of Clause 4 (the spatial decay
+        rate ``D2,S``, the nominal 4 m A-weighted speech level ``Lp,A,S,4m``,
+        the distraction distance ``rD`` and the privacy distance ``rP``), the
+        result's own spatial-decay plot (:meth:`plot`, the Clause 6.2
+        regression on the logarithmic distance axis with the 4 m read-off and
+        the ``rD`` / ``rP`` crossings), the boxed ``D2,S``, an optional verdict
+        row and a footer with the fixed disclaimer.
+
+        ISO 3382-3 characterises a space rather than defining an intrinsic
+        pass/fail, so the verdict row appears only when a target spatial decay
+        rate is supplied through ``metadata.requirement`` (read as the minimum
+        acceptable ``D2,S`` in dB, reflecting the informative quality ranges of
+        Annex A where a larger spatial decay is better; the room passes at or
+        above it).
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a bare
+            characterisation fiche (metrics, plot and result only). The
+            open-plan-specific fields ``area`` (floor area), ``source_positions``
+            and ``receiver_positions`` (the number of measurement positions)
+            populate the header, alongside ``client``, ``test_room`` (the
+            office or zone), ``specimen`` (the description and furnishing
+            state), ``instrumentation``, ``temperature``, ``relative_humidity``,
+            ``pressure``, ``measurement_standard``, ``test_date``,
+            ``laboratory``, ``operator``, ``report_id`` and ``notes``;
+            ``requirement`` is read as the minimum acceptable ``D2,S``.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for parity with the other fiches; the fiche
+            has a single stacked body layout, so it has no effect.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab or, for the embedded spatial-decay
+            chart, matplotlib is not installed. The fiche embeds the result's
+            own plot whenever the regression is defined, so both are required
+            (``pip install "phonometry[report,plot]"``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso3382_3 import render_iso3382_3_report
+
+        return render_iso3382_3_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def _linear_fit(x: np.ndarray, y: np.ndarray) -> Tuple[float, float]:

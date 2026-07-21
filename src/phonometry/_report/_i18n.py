@@ -369,6 +369,24 @@ _STRINGS: dict[str, str] = {
     "T<sub>30</sub> = {value} s, required &#8804; {req} s": "T<sub>30</sub> = {value} s, exigido &#8804; {req} s",
     "Decay curves by Schroeder backward integration with noise truncation and tail compensation (ISO 3382-1:2009, 5.3.3); T20 over -5 to -25 dB, T30 over -5 to -35 dB, EDT over 0 to -10 dB, each extrapolated to 60 dB (ISO 3382-2:2008, Clause 6; ISO 3382-1:2009, A.2.2).": "Curvas de caída por integración hacia atrás de Schroeder con truncamiento por ruido y compensación de cola (ISO 3382-1:2009, 5.3.3); T20 de -5 a -25 dB, T30 de -5 a -35 dB, EDT de 0 a -10 dB, cada uno extrapolado a 60 dB (ISO 3382-2:2008, apartado 6; ISO 3382-1:2009, A.2.2).",
     "C50/C80, D50 and Ts follow ISO 3382-1:2009 Equations (A.10), (A.11) and (A.13). The just-noticeable differences (Table A.1) are 5 % for EDT/T, 1 dB for C80, 0.05 for D50 and 10 ms for Ts.": "C50/C80, D50 y Ts siguen las Ecuaciones (A.10), (A.11) y (A.13) de la ISO 3382-1:2009. Las diferencias apenas perceptibles (Tabla A.1) son 5 % para EDT/T, 1 dB para C80, 0,05 para D50 y 10 ms para Ts.",
+    # --- iso3382-3 open-plan office acoustics ------------------------------
+    "Open-plan office acoustics": "Acústica de oficinas diáfanas",
+    "{standard} measurement of open-plan office speech-level spatial decay and speech privacy per ISO 3382-3:2012.": "{standard} medición del decaimiento espacial del nivel de habla y de la privacidad acústica en oficinas diáfanas según ISO 3382-3:2012.",
+    "Open-plan office speech-level spatial decay and speech privacy per ISO 3382-3:2012.": "Decaimiento espacial del nivel de habla y privacidad acústica en oficinas diáfanas según ISO 3382-3:2012.",
+    "Office / zone": "Oficina / zona",
+    "Measurement positions": "Posiciones de medición",
+    "Single-number quantities": "Magnitudes de número único",
+    "Spatial decay rate D<sub>2,S</sub> [dB]": "Tasa de decaimiento espacial D<sub>2,S</sub> [dB]",
+    "Speech level L<sub>p,A,S,4m</sub> [dB]": "Nivel de habla L<sub>p,A,S,4m</sub> [dB]",
+    "Distraction distance r<sub>D</sub> [m]": "Distancia de distracción r<sub>D</sub> [m]",
+    "Privacy distance r<sub>P</sub> [m]": "Distancia de privacidad r<sub>P</sub> [m]",
+    "D<sub>2,S</sub> = <b>{value} dB</b> per distance doubling": "D<sub>2,S</sub> = <b>{value} dB</b> por duplicación de distancia",
+    "L<sub>p,A,S,4m</sub> = {value} dB": "L<sub>p,A,S,4m</sub> = {value} dB",
+    "r<sub>D</sub> = {value} m": "r<sub>D</sub> = {value} m",
+    "r<sub>P</sub> = {value} m": "r<sub>P</sub> = {value} m",
+    "D<sub>2,S</sub> = {value} dB, required &#8805; {req} dB": "D<sub>2,S</sub> = {value} dB, exigido &#8805; {req} dB",
+    "Spatial decay rate D<sub>2,S</sub> and the nominal 4 m speech level L<sub>p,A,S,4m</sub> from a least-squares fit of the A-weighted speech level against lg(r/r<sub>0</sub>) (r<sub>0</sub> = 1 m) over the 2 m to 16 m positions (ISO 3382-3:2012, 6.2, Equation (5)); D<sub>2,S</sub> is the per-distance-doubling decay.": "La tasa de decaimiento espacial D<sub>2,S</sub> y el nivel de habla nominal a 4 m L<sub>p,A,S,4m</sub> se obtienen por ajuste por mínimos cuadrados del nivel de habla ponderado A frente a lg(r/r<sub>0</sub>) (r<sub>0</sub> = 1 m) sobre las posiciones de 2 m a 16 m (ISO 3382-3:2012, 6.2, Ecuación (5)); D<sub>2,S</sub> es el decaimiento por duplicación de distancia.",
+    "Distraction distance r<sub>D</sub> (STI = 0,50) and privacy distance r<sub>P</sub> (STI = 0,20) from a linear regression of the speech transmission index against distance (full IEC 60268-16 method, spatially averaged background noise; ISO 3382-3:2012, 6.3, Figure 3 b).": "La distancia de distracción r<sub>D</sub> (STI = 0,50) y la distancia de privacidad r<sub>P</sub> (STI = 0,20) se obtienen por regresión lineal del índice de transmisión del habla frente a la distancia (método completo IEC 60268-16, ruido de fondo promediado espacialmente; ISO 3382-3:2012, 6.3, Figura 3 b).",
 }
 
 

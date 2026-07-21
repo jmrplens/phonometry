@@ -272,6 +272,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.metrology.time_frequency",
             "phonometry.metrology.signals",
             "phonometry.metrology.phase",
+            "phonometry.metrology.cepstrum",
         ),
     ),
     Section(

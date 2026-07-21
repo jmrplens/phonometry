@@ -219,6 +219,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`metrology.time_frequency`](/phonometry/reference/api/spectra/time-frequency/) | Calibrated time-frequency analysis: STFT spectrogram and zoom FFT. |
 | [`metrology.signals`](/phonometry/reference/api/spectra/signals/) | Test signals and sample-rate utilities. |
 | [`metrology.phase`](/phonometry/reference/api/spectra/phase/) | Phase utilities: minimum phase, group delay and excess phase. |
+| [`metrology.cepstrum`](/phonometry/reference/api/spectra/cepstrum/) | Cepstral analysis: real/power/complex cepstrum, liftering and echo detection. |
 
 ## Wave simulation
 

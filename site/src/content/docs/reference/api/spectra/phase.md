@@ -126,10 +126,11 @@ Minimum-phase response with the magnitude of `response`.
 Computes the phase that the Hilbert relation between log-magnitude and
 phase assigns to `|H(f)|` (Bendat & Piersol Sec. 13.1.4) via the real
 cepstrum: the inverse transform of `ln|H|` is folded onto positive
-quefrencies (doubling them, keeping the ends) and transformed back, so
-`exp` of the result is the unique stable, causal, causally invertible
-response with that magnitude. The input phase, if any, is ignored:
-passing a plain magnitude array works.
+quefrencies (doubling them, keeping the ends; the folding core is
+shared with [`phonometry.metrology.cepstrum`](/phonometry/reference/api/spectra/cepstrum/)) and transformed
+back, so `exp` of the result is the unique stable, causal, causally
+invertible response with that magnitude. The input phase, if any, is
+ignored: passing a plain magnitude array works.
 
 **Parameters**
 

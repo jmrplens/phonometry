@@ -13,6 +13,14 @@ from .compliance import (
     verify_weighting_class,
     weighting_class_limits,
 )
+from .cepstrum import (
+    CepstrumResult,
+    EchoDetectionResult,
+    LifterResult,
+    cepstrum,
+    echo_detection,
+    lifter,
+)
 from .core import FilterBankWarning, OctaveFilterBank, octave_filter, octavefilter
 from .correlation import (
     AlignedImpulseResponseResult,
@@ -24,7 +32,12 @@ from .correlation import (
     impulse_response_delay,
     time_delay,
 )
-from .envelope import EnvelopeResult, envelope
+from .envelope import (
+    EnvelopeResult,
+    EnvelopeSpectrumResult,
+    envelope,
+    envelope_spectrum,
+)
 from .frequencies import (
     getansifrequencies,
     nominal_frequencies,
@@ -87,12 +100,16 @@ from .uncertainty import (
 __all__ = [
     "AlignedImpulseResponseResult",
     "CalibrationWarning",
+    "CepstrumResult",
     "CoherentOutputSpectrumResult",
     "CorrelationResult",
     "CrossSpectralDensityResult",
+    "EchoDetectionResult",
     "EnvelopeResult",
+    "EnvelopeSpectrumResult",
     "FilterBankWarning",
     "FilterComplianceResult",
+    "LifterResult",
     "MonteCarloResult",
     "OctaveFilterBank",
     "PhaseDecompositionResult",
@@ -110,13 +127,16 @@ __all__ = [
     "WindowMetricsResult",
     "align_impulse_responses",
     "calculate_sensitivity",
+    "cepstrum",
     "class_limits",
     "coherent_output_spectrum",
     "combine_uncertainty",
     "correlation",
     "correlation_random_error",
     "cross_spectral_density",
+    "echo_detection",
     "envelope",
+    "envelope_spectrum",
     "excess_phase",
     "filter_class_compliance",
     "fractional_delay",
@@ -128,6 +148,7 @@ __all__ = [
     "lc_peak",
     "leq",
     "lex_8h",
+    "lifter",
     "linkwitz_riley",
     "ln_levels",
     "minimum_phase",

@@ -675,6 +675,31 @@ _ES_EXACT = {
         "997 y 1000 Hz, separados 3 Hz:\n"
         "un solo bulto en la malla de 8 Hz,\n"
         "dos líneas exactas en la malla del zoom",
+    # Cepstral analysis (echo detection) and envelope spectrum
+    "Echo Detection on the Power Cepstrum (Quefrency Analysis)":
+        "Detección de ecos en el cepstro de potencia (análisis de quefrencia)",
+    "Power cepstrum": "Cepstro de potencia",
+    "Searched band": "Banda de búsqueda",
+    "True echo delay (8 ms)": "Retardo verdadero del eco (8 ms)",
+    "Detected peak (height = reflection a)":
+        "Pico detectado (altura = reflexión a)",
+    "Quefrency [ms]": "Quefrencia [ms]",
+    "Cepstrum": "Cepstro",
+    "spectral ripple of period 1/(8 ms) collapses to one\n"
+    "spike at 8 ms whose height reads the reflection":
+        "el rizado espectral de período 1/(8 ms) colapsa en un\n"
+        "pico a 8 ms cuya altura mide la reflexión",
+    "Envelope Spectrum of an AM Tone (Bendat & Piersol 13.3)":
+        "Espectro de la envolvente de un tono AM (Bendat y Piersol 13.3)",
+    "Envelope spectrum": "Espectro de la envolvente",
+    "Modulation frequency (25 Hz)": "Frecuencia de modulación (25 Hz)",
+    r"Exact line amplitude $A_0 m$ = 0.4":
+        r"Amplitud exacta de la línea $A_0 m$ = 0,4",
+    "Modulation amplitude": "Amplitud de modulación",
+    "the carrier is at 1 kHz; its amplitude modulation\n"
+    "appears as one line at exactly $f_m$":
+        "la portadora está en 1 kHz; su modulación de amplitud\n"
+        "aparece como una línea exactamente en $f_m$",
     # Correlation and time-delay estimation (B&P / Knapp & Carter GCC)
     "Time-Delay Estimation: GCC-PHAT vs Direct Correlation (Knapp & Carter)":
         "Estimación del retardo: GCC-PHAT frente a correlación directa "
@@ -4238,6 +4263,100 @@ def generate_gcc_phat_delay(output_dir: str) -> None:
             color=COLOR_FG)
     plt.tight_layout()
     save_figure(output_dir, "gcc_phat_delay.svg")
+    plt.close()
+
+
+def generate_cepstrum_echo(output_dir: str) -> None:
+    """Echo detection on the power cepstrum of an IR with one reflection."""
+    print("Generating cepstrum_echo...")
+    from scipy import signal as sp_signal
+
+    from phonometry import echo_detection, noise_signal
+
+    fs = 48000.0
+    delay_s = 0.008  # one floor reflection 8 ms after the direct sound
+    a = 0.5
+    # Broadband direct sound: a band-passed click, plus the scaled echo and
+    # a -80 dB noise floor.
+    n = 12000
+    impulse = np.zeros(n)
+    impulse[0] = 1.0
+    b, bb = sp_signal.butter(2, [0.004, 0.9], btype="bandpass")
+    direct = sp_signal.lfilter(b, bb, impulse)
+    ir = direct + a * np.roll(direct, int(round(delay_s * fs)))
+    ir += noise_signal(fs, n / fs, color="white", rms=1e-4, seed=13)
+
+    res = echo_detection(ir, fs, min_quefrency=0.002)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    half = res.nfft // 2 + 1
+    ax.plot(1e3 * res.quefrencies[:half], res.cepstrum[:half],
+            color=COLOR_PRIMARY, linewidth=1.1, label="Power cepstrum")
+    ax.axvspan(1e3 * res.search_range[0], 1e3 * res.search_range[1],
+               color=COLOR_PRIMARY, alpha=0.08, label="Searched band")
+    ax.axvline(1e3 * delay_s, color=COLOR_FG, linestyle="--", linewidth=1.3,
+               alpha=0.7, label="True echo delay (8 ms)")
+    ax.plot([1e3 * res.delay], [res.reflection_coefficient], "v",
+            color=COLOR_SECONDARY, markersize=10,
+            label="Detected peak (height = reflection a)")
+    ax.set_xlim(0.0, 30.0)
+    ax.set_ylim(-0.3, 0.65)
+    ax.set_xlabel("Quefrency [ms]")
+    ax.set_ylabel("Cepstrum")
+    ax.set_title("Echo Detection on the Power Cepstrum (Quefrency Analysis)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    ax.text(0.985, 0.60,
+            "spectral ripple of period 1/(8 ms) collapses to one\n"
+            "spike at 8 ms whose height reads the reflection",
+            transform=ax.transAxes, va="top", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "cepstrum_echo.svg")
+    plt.close()
+
+
+def generate_envelope_spectrum(output_dir: str) -> None:
+    """Envelope spectrum of an AM tone in noise: the line at fm."""
+    print("Generating envelope_spectrum...")
+    from phonometry import envelope_spectrum, noise_signal
+
+    fs = 8192.0
+    seconds = 4.0
+    t = np.arange(int(seconds * fs)) / fs
+    a0, m, fm = 1.0, 0.4, 25.0
+    x = a0 * (1.0 + m * np.cos(2.0 * np.pi * fm * t)) * np.cos(
+        2.0 * np.pi * 1000.0 * t
+    )
+    x += noise_signal(fs, seconds, color="white", rms=0.03, seed=8)
+
+    res = envelope_spectrum(x, fs)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(res.frequencies, res.amplitude, color=COLOR_PRIMARY,
+            linewidth=1.4, label="Envelope spectrum")
+    ax.axvline(fm, color=COLOR_FG, linestyle="--", linewidth=1.3, alpha=0.7,
+               label="Modulation frequency (25 Hz)")
+    ax.axhline(a0 * m, color=COLOR_SECONDARY, linestyle=":", linewidth=1.4,
+               label=r"Exact line amplitude $A_0 m$ = 0.4")
+    ax.set_xlim(0.0, 100.0)
+    ax.set_ylim(0.0, 0.5)
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Modulation amplitude")
+    ax.set_title("Envelope Spectrum of an AM Tone (Bendat & Piersol 13.3)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    ax.text(0.985, 0.70,
+            "the carrier is at 1 kHz; its amplitude modulation\n"
+            "appears as one line at exactly $f_m$",
+            transform=ax.transAxes, va="top", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "envelope_spectrum.svg")
     plt.close()
 
 
@@ -7913,6 +8032,10 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Correlation / time-delay estimation: GCC-PHAT vs the direct
     # correlator on a colored signal pair (Knapp & Carter 1976).
     generate_gcc_phat_delay,
+    # Cepstral analysis: echo detection on the power cepstrum (Havelock
+    # Chs. 27/87) and the envelope spectrum of an AM tone (B&P 13.3).
+    generate_cepstrum_echo,
+    generate_envelope_spectrum,
     # Objective intelligibility: STOI vs ESTOI over SNR for stationary and
     # modulated maskers (Taal et al. 2011 / Jensen & Taal 2016).
     generate_stoi_intelligibility,

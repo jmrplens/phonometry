@@ -75,6 +75,11 @@ and carrying its statistical quality.
 - [Time-frequency analysis](/phonometry/guides/time-frequency/): the
   calibrated STFT spectrogram in absolute units (dB SPL for pascals) and
   the zoom FFT that resolves tones closer than a practical FFT bin.
+- [Cepstrum, echoes and the envelope spectrum](/phonometry/guides/cepstrum-echoes/):
+  the power, real and complex cepstrum with quefrency analysis, echo
+  detection with the reflection coefficient read off the cepstral peak,
+  lowpass/highpass liftering of a log spectrum, and the envelope spectrum
+  that turns amplitude modulations into discrete lines.
 - [Correlation, time delay and envelope](/phonometry/guides/correlation-delay/):
   correlation estimates with the Bendat & Piersol random errors, time-delay
   estimation by direct correlation, cross-spectrum phase slope and the

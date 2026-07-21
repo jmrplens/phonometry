@@ -69,6 +69,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 La vibración transmitida a una persona se evalúa con la misma cadena de medida
 sea cual sea su origen: la aceleración se **pondera en frecuencia** para reflejar
@@ -388,6 +389,75 @@ de acción y límite de la directiva son la base de cualquier criterio de
 exposición. Para la exposición de cuerpo completo, `energy_equivalent_acceleration`
 da la magnitud energético-equivalente de ISO 2631-1 ec. (B.3) entre periodos de
 distinta magnitud y duración.
+
+## 5. El informe de evaluación de la exposición
+
+Una exposición diaria rara vez es el final del trabajo: existe para ponerla por
+escrito y compararla con la ley. `DailyVibrationExposure.report()` escribe una
+hoja de evaluación en PDF de una página con la disposición de las calculadoras
+de exposición mano-brazo y de cuerpo completo de la práctica de higiene
+ocupacional (las calculadoras del HSE, las Guías de Buenas Prácticas de la UE):
+la línea de base normativa que nombra el método ISO aplicado (ISO 5349-1/-2 para
+la vibración transmitida a la mano, ISO 2631-1 para la de cuerpo completo) y la
+directiva frente a la que se evalúa, una rejilla de cabecera (empresa,
+operador/trabajador, lugar de trabajo, instrumentación y calibración), el
+análisis de la exposición por operación (el valor total de vibración $a_{hv}$ o
+$a_v$ de cada operación, su tiempo de exposición diario $T_i$ y la exposición
+parcial $A_i(8)$, cerrado por el total diario y el $A(8)$ combinado) con el
+gráfico de aportes, y el $A(8)$ recuadrado con su zona de exposición.
+
+Como el número existe para compararse con la ley, la ficha evalúa entonces
+$A(8)$ frente a la **Directiva 2002/44/CE** (artículo 3): el valor de exposición
+que da lugar a una acción (EAV) y el valor límite de exposición (ELV) para el
+tipo de vibración (mano-brazo $2{,}5$ / $5$ m/s²; cuerpo completo $0{,}5$ /
+$1{,}15$ m/s²), cada uno marcado como superado / no superado sobre el valor tal
+como se muestra, con un veredicto CUMPLE/NO CUMPLE frente al valor límite. Una
+nota impresa recoge que las normas ISO no definen ningún límite de exposición
+seguro y que alcanzar el EAV activa las medidas de control del empresario y el
+derecho de los trabajadores a la vigilancia de la salud. `verbose=True` añade el
+aporte de cada operación a la energía diaria de vibración, y `language="es"`
+representa la ficha en español (decimales con coma).
+
+El argumento `metadata` acepta un `ReportMetadata`
+cuyos campos relevantes para un informe de exposición a vibraciones son `client`
+(la empresa), `specimen` (el operador o trabajador cuya exposición se
+determinó), `test_room` (el lugar de trabajo), `test_date`, `instrumentation`,
+`calibration` y la identidad de pie `laboratory`, `operator`, `report_id` y
+`notes`.
+
+```python
+from phonometry import vibration, ReportMetadata
+
+# El trabajador forestal del Anexo E.3 de ISO 5349-2: desbrozadora (2 h,
+# 4,6 m/s²), motosierra en apeo (1 h, 6,0 m/s²) y desramado (2 h, 3,6 m/s²).
+res = vibration.daily_vibration_exposure(
+    [4.6, 6.0, 3.6],
+    [2 * 3600, 1 * 3600, 2 * 3600],
+    kind="hav",
+    labels=["Desbroce con desbrozadora", "Apeo con motosierra", "Desramado con motosierra"],
+)
+
+res.report(
+    "a8.pdf",
+    metadata=ReportMetadata(
+        client="Contratista forestal de ejemplo",
+        specimen="Trabajador forestal (mano derecha)",
+        test_room="Bosque gestionado, parcela 12",
+        instrumentation="Vibrómetro mano-brazo (ISO 8041-1), n/s 0042",
+        report_id="EXAMPLE-5349",
+    ),
+)   # A(8) = 3,61 m/s² -> zona de acción (EAV superado, ELV no), veredicto CUMPLE
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene representada en
+el repositorio; pulsa la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="human_vibration_example"
+	title="Informe de ejemplo de exposición diaria a vibraciones mano-brazo (PDF)"
+	description="Ficha de evaluación de la exposición diaria a vibraciones de una página: una cabecera con el contratista forestal, el trabajador, el bosque como lugar de trabajo y la instrumentación, la tabla de análisis de la exposición por operación (desbroce, apeo y desramado con los valores totales de vibración, los tiempos de exposición diarios y las exposiciones parciales A_i(8) cerradas por la fila de total diario), el gráfico de aportes por operación, el A(8) = 3,61 m/s2 recuadrado en la zona de acción, y la tabla de evaluación de la Directiva 2002/44/CE donde el valor de exposición que da lugar a una acción de 2,5 m/s2 se supera y el valor límite de exposición de 5 m/s2 no, terminando en un veredicto CUMPLE."
+	caption="Ficha de exposición diaria a vibraciones (DailyVibrationExposure.report), la jornada mano-brazo del Anexo E.3 de ISO 5349-2 con el análisis de la exposición y la evaluación de la Directiva 2002/44/CE."
+/>
 
 ## Véase también
 

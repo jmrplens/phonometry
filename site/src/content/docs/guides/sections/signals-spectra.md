@@ -22,7 +22,7 @@ bridges back to the banded world; and the colored-noise generators synthesize
 white, pink, red, blue and violet test signals with an exact power-law slope.
 [Multiple and partial coherence](/phonometry/guides/miso-coherence/) carries
 that same cross-spectral machinery to several correlated sources at once: from
-two or three inputs and one output it separates the coherence a source
+multiple inputs and one output it separates the coherence a source
 genuinely contributes from the part it merely shares with another, and its
 partial coherent output spectra say which source dominates each band.
 
@@ -39,6 +39,11 @@ a reflection's delay and coefficient off the cepstral peak, liftering splits
 a log spectrum into smooth envelope and fine structure, and the envelope
 spectrum turns amplitude modulations into discrete lines at the modulation
 frequency.
+[Time synchronous averaging](/phonometry/guides/synchronous-averaging/)
+extracts a repetitive waveform of known period from asynchronous noise by
+ensemble-averaging successive periods: the residual noise falls as the square
+root of the number of averages, and choosing that number to place a comb node
+on an interfering order rejects it far better than the habitual power of two.
 
 [Correlation, time delay and envelope](/phonometry/guides/correlation-delay/)
 is the time-domain half. Auto- and cross-correlation come with the
@@ -78,8 +83,8 @@ supply the error-analysis vocabulary the estimates are stated in.
   spectrum and spectral SNR, 1/n-octave smoothing and exact-slope
   colored-noise generators.
 - [Multiple and partial coherence](/phonometry/guides/miso-coherence/):
-  the Bendat & Piersol multiple-input/output coherence functions for two or
-  three correlated sources and one output, with the Gaussian-elimination
+  the Bendat & Piersol multiple-input/output coherence functions for
+  multiple correlated sources and one output, with the Gaussian-elimination
   conditioning that tells a genuine cause from a source that merely
   correlates with it, and the partial coherent output spectra that say which
   source dominates each band.
@@ -92,6 +97,11 @@ supply the error-analysis vocabulary the estimates are stated in.
   with the reflection coefficient read off the peak, lowpass/highpass
   liftering, the homomorphic round trip and the envelope spectrum of
   amplitude modulations.
+- [Time synchronous averaging](/phonometry/guides/synchronous-averaging/):
+  extraction of a periodic waveform of known period by time domain averaging,
+  the comb filter that describes the operation in the frequency domain, the
+  square-root noise-reduction law, and the choice of the number of averages
+  that places a comb node on an interfering order (McFadden 1987).
 - [Correlation, time delay and envelope](/phonometry/guides/correlation-delay/):
   correlation estimates with their random errors, time-delay estimation by
   direct correlation, phase slope and GCC weightings, sub-sample

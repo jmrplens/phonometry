@@ -278,6 +278,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.metrology.signals",
             "phonometry.metrology.phase",
             "phonometry.metrology.cepstrum",
+            "phonometry.metrology.synchronous_average",
             "phonometry.metrology.inversion",
         ),
     ),

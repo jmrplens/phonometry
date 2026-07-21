@@ -25,7 +25,7 @@ sintetizan señales de prueba blancas, rosas, rojas, azules y violetas con
 pendiente exacta en ley de potencias.
 [La coherencia múltiple y parcial](/phonometry/es/guides/miso-coherence/) lleva
 esa misma maquinaria del espectro cruzado a varias fuentes correladas a la vez:
-a partir de dos o tres entradas y una salida separa la coherencia que una
+a partir de varias entradas correladas y una salida separa la coherencia que una
 fuente aporta de verdad de la parte que solo comparte con otra, y sus espectros
 de salida coherente parciales indican qué fuente domina cada banda.
 
@@ -43,6 +43,12 @@ detección de ecos lee el retardo y el coeficiente de una reflexión en el
 pico cepstral, el liftering separa un espectro logarítmico en envolvente
 suave y estructura fina, y el espectro de la envolvente convierte las
 modulaciones de amplitud en líneas discretas en la frecuencia de modulación.
+[El promediado síncrono en el tiempo](/phonometry/es/guides/synchronous-averaging/)
+extrae una forma de onda repetitiva de período conocido del ruido asíncrono
+promediando períodos sucesivos: el ruido residual cae como la raíz cuadrada
+del número de promedios, y elegir ese número para situar un nodo del filtro
+peine sobre un orden interferente lo rechaza mucho mejor que la potencia de
+dos habitual.
 
 [Correlación, retardo y envolvente](/phonometry/es/guides/correlation-delay/)
 es la mitad del dominio del tiempo. La autocorrelación y la correlación
@@ -88,7 +94,7 @@ estimaciones.
   generadores de ruido de colores con pendiente exacta.
 - [Coherencia múltiple y parcial](/phonometry/es/guides/miso-coherence/):
   las funciones de coherencia de entradas múltiples de Bendat y Piersol para
-  dos o tres fuentes correladas y una salida, con el condicionamiento por
+  varias fuentes correladas y una salida, con el condicionamiento por
   eliminación de Gauss que distingue una causa real de una fuente que solo
   correla con ella, y los espectros de salida coherente parciales que indican
   qué fuente domina cada banda.
@@ -101,6 +107,12 @@ estimaciones.
   de ecos con el coeficiente de reflexión leído en el pico, liftering paso
   bajo/paso alto, la ida y vuelta homomórfica y el espectro de la envolvente
   de las modulaciones de amplitud.
+- [Promediado síncrono en el tiempo](/phonometry/es/guides/synchronous-averaging/):
+  extracción de una forma de onda periódica de período conocido por promediado
+  en el dominio del tiempo, el filtro peine que describe la operación en el
+  dominio de la frecuencia, la ley de reducción de ruido en raíz cuadrada, y la
+  elección del número de promedios que sitúa un nodo del peine sobre un orden
+  interferente (McFadden 1987).
 - [Correlación, retardo y envolvente](/phonometry/es/guides/correlation-delay/):
   estimaciones de correlación con sus errores aleatorios, estimación del
   retardo por correlación directa, pendiente de fase y ponderaciones GCC,

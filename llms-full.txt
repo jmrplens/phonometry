@@ -58,6 +58,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Correlation, time delay and envelope (Bendat & Piersol / Knapp & Carter)](https://jmrplens.github.io/phonometry/guides/correlation-delay/)
 - [Test signals and sample-rate tools (IEC 60268-1)](https://jmrplens.github.io/phonometry/guides/test-signals/)
 - [Cepstrum, echoes and the envelope spectrum (Havelock / Bendat & Piersol)](https://jmrplens.github.io/phonometry/guides/cepstrum-echoes/)
+- [Time synchronous averaging (McFadden 1987)](https://jmrplens.github.io/phonometry/guides/synchronous-averaging/)
 - [Swept-sine distortion and phase utilities (Farina / Novak)](https://jmrplens.github.io/phonometry/guides/swept-sine-distortion/)
 - [Block Processing](https://jmrplens.github.io/phonometry/guides/block-processing/)
 - [Multichannel and Performance](https://jmrplens.github.io/phonometry/guides/multichannel/)
@@ -10054,7 +10055,7 @@ these estimators all share one Welch core (same taper, overlap policy and
 detrend-off calibration), so a PSD, a coherence and an H1 computed with the
 same segment length are mutually consistent bin by bin. The same cross-spectral
 matrix underlies [multiple and partial coherence](https://jmrplens.github.io/phonometry/guides/miso-coherence/), which
-extends the ordinary coherence to two or three correlated inputs and one
+extends the ordinary coherence to several correlated inputs and one
 output.
 
 ## References
@@ -10102,8 +10103,8 @@ reading the ordinary coherences alone can credit the wrong source. Bendat &
 Piersol, *Random Data* (4th ed., 2010, Chapter 7), resolve this for a
 multiple-input/single-output (MISO) system with the **multiple** and
 **partial** coherence functions. `miso_coherence` computes them from the same
-Welch cross-spectral core as the rest of `phonometry.metrology`, for two or
-three inputs and one output.
+Welch cross-spectral core as the rest of `phonometry.metrology`, for several
+correlated inputs and one output.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/miso_coherence_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/miso_coherence.svg" alt="Two-panel figure. Top: the measured output autospectrum in dB with the coherent output contribution of two inputs shaded underneath; input 1 fills the low band and input 2 the high band, with the residual noise far below. Bottom: for the correlated second input, its ordinary coherence sits around 0.3 across the low band even though it drives no low-frequency path, while its partial coherence collapses to zero there once the first input is conditioned out; the multiple coherence stays near one except at the crossover null" width="82%"></picture>
 
@@ -10967,6 +10968,189 @@ is modulated, the domain metrics quantify it normatively.
   behind the minimum-phase folding) and Section 13.3 with Figure 13.11
   (envelope detection followed by DC removal, the structure of the
   envelope spectrum).
+
+---
+
+
+<!-- source: docs/synchronous-averaging.md | canonical: https://jmrplens.github.io/phonometry/guides/synchronous-averaging/ -->
+
+# Time synchronous averaging (McFadden 1987)
+
+A rotating machine repeats its signature once per revolution. Buried in
+broadband noise and in the tones of every other shaft, that repetitive
+waveform is hard to read directly. **Time synchronous averaging** (TSA)
+recovers it: given the period `T` of one revolution, it slices the record
+into successive length-`T` blocks and averages them. Every component
+synchronous with `T` reinforces; everything asynchronous, noise and the
+harmonics of unrelated shafts, averages down. `time_synchronous_average`
+implements the model of P. D. McFadden, *A revised model for the extraction
+of periodic waveforms by time domain averaging* (Mechanical Systems and
+Signal Processing 1(1), 1987, 83-95).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/synchronous_average_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/synchronous_average.svg" alt="Two-panel figure. Left: one noisy period of a signal in faint grey swings far above and below a smooth curve; the average of forty periods, in blue, lies almost exactly on the dashed red true waveform, so the asynchronous noise has been removed. Right: the comb-filter magnitude across the orders between 31 and 33, with unit-height teeth at the integer orders; for N = 20 a deep node falls exactly on the interfering tone marked at 32.05 orders, whereas the power-of-two N = 32 leaves a side lobe there and lets the tone through" width="92%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import (
+    comb_filter_response,
+    noise_signal,
+    time_synchronous_average,
+)
+
+fs = 8192.0
+period = 1.0 / 32.0        # one revolution: 256 samples at this rate
+m, n_avg = 256, 40
+phase = np.arange((n_avg + 1) * m) / m
+periodic = (
+    np.cos(2.0 * np.pi * phase)
+    + 0.5 * np.cos(2.0 * np.pi * 3.0 * phase + 0.4)
+    - 0.3 * np.cos(2.0 * np.pi * 6.0 * phase)
+)
+signal = periodic + noise_signal(fs, phase.size / fs, rms=0.9, seed=11)
+res = time_synchronous_average(signal, fs, period, n_averages=n_avg)
+
+fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(11, 4.6))
+t_ms = 1e3 * res.times
+ax0.plot(t_ms, signal[:m], color="#cccccc", label="One noisy period")
+ax0.plot(t_ms, res.period_waveform, color="#1f77b4", lw=1.8,
+         label=f"Average of N = {n_avg} periods")
+ax0.plot(t_ms, periodic[:m], "--", color="#d62728", label="True waveform")
+ax0.set_xlabel("Time [ms]"); ax0.set_ylabel("Amplitude"); ax0.legend()
+
+orders = np.linspace(31.0, 33.0, 4000)
+freqs = orders / period
+ax1.plot(orders, comb_filter_response(freqs, period, 32), color="#2ca02c",
+         label="N = 32 (power of two)")
+ax1.plot(orders, comb_filter_response(freqs, period, 20), color="#1f77b4",
+         label="N = 20 (node on 32.05)")
+ax1.axvline(32.05, color="#d62728", ls=":", label="Interfering tone")
+ax1.set_xlabel("Frequency [orders]"); ax1.set_ylabel("Comb filter magnitude")
+ax1.set_ylim(0, 1.05); ax1.legend()
+plt.show()
+```
+
+</details>
+
+The `.plot()` method draws the averaged waveform and the comb filter in one
+call:
+
+```python
+res.plot()          # English labels; res.plot(language="es") for Spanish
+```
+
+## 1. The average is a comb filter
+
+Averaging `N` successive periods (McFadden Eq. 5),
+`a(t) = (1/N) Σ y(t + n·T)`, is, in the frequency domain, the multiplication
+of the signal spectrum by a **comb filter** (Eq. 8). Its magnitude (Eq. 9) is
+the Dirichlet kernel `|C(f)| = |sin(N·π·f·T) / (N·sin(π·f·T))|`.
+
+The comb has a **tooth** of unit height at every harmonic `k/T` (the orders
+`f·T = 1, 2, 3, ...`), *independent of `N`*: components synchronous with the
+period pass untouched. Between the teeth it has **nodes** at `j/(N·T)` for
+every `j` that is not a multiple of `N`, where the response is exactly zero.
+`comb_filter_response` evaluates this closed form directly:
+
+```python
+import numpy as np
+from phonometry import comb_filter_response
+
+period = 1.0 / 32.0
+comb_filter_response(np.array([16.0 / period]), period, 8)   # 1.0 at a tooth
+comb_filter_response(np.array([0.25 / period]), period, 2)   # 1/sqrt(2)
+comb_filter_response(np.array([0.5 / period]), period, 2)    # 0.0 at a node
+```
+
+`SynchronousAverageResult` carries the response over the first few harmonics
+in `comb_frequencies` and `comb_response`, so the shape of the filter that
+the average applied is available alongside the recovered waveform.
+
+## 2. Noise falls as the square root of the number of averages
+
+Asynchronous noise of variance `σ²` averaged over `N` periods has residual
+variance `σ²/N`: the residual standard deviation falls as `1/√N`, and the
+amplitude signal-to-noise ratio improves by `√N`. That is a power reduction
+of `10·log₁₀ N` dB, reported as `noise_reduction_db`, with the amplitude gain
+`√N` as `amplitude_snr_gain`:
+
+```python
+res = time_synchronous_average(signal, fs, period, n_averages=100)
+res.noise_reduction_db      # 20.0 dB = 10*log10(100)
+res.amplitude_snr_gain      # 10.0   = sqrt(100)
+```
+
+This law is the ideal one: it holds when the noise is uncorrelated from one
+period to the next, so colored or synchronous noise that is correlated across
+periods need not follow it. The `residual` (input minus the periodic
+reconstruction over the analysed span) and its `residual_rms` therefore report
+the noise actually left once the synchronous component is removed.
+
+## 3. Choosing N to reject an interfering order
+
+Because a tooth sits on *every* integer order, TSA passes the harmonics of
+the target shaft but also any tone that happens to fall on an integer order.
+A tone at a *non-harmonic* order `q = f·T` is only attenuated by the comb,
+not removed, and how much depends on where the nearest node lands. McFadden's
+revised-model result is that such an interferer is best rejected by choosing
+`N` so that a node falls exactly on it, i.e. the smallest `N` with `N·q` an
+integer, rather than by the habitual power-of-two number of averages. An exact
+node exists only when the order `q` is rational, so some finite `N` makes `N·q`
+an integer; for an irrational or merely estimated order, choose the `N` whose
+node falls nearest the interfering order.
+
+His own example is a tone at 32.05 orders. With `N = 20` the product
+`20 · 32.05 = 641` is an integer, so a comb node lands on the tone and rejects
+it by more than 100 dB. The common choice `N = 32` gives `32 · 32.05 = 1025.6`,
+which sits on a side lobe: the tone is barely touched. The figure above shows
+both combs around order 32; the end-to-end average confirms it:
+
+```python
+# true 8th-order component plus a strong interferer at 32.05 orders
+phase = np.arange(41 * 256) / 256
+signal = np.cos(2 * np.pi * 8.0 * phase) + 0.7 * np.cos(2 * np.pi * 32.05 * phase)
+
+leak_20 = time_synchronous_average(signal, fs, period, n_averages=20)
+leak_32 = time_synchronous_average(signal, fs, period, n_averages=32)
+# leak_20.period_waveform matches the clean 8th-order tone; leak_32 does not
+```
+
+So a power-of-two number of averages, convenient as it is, is not in general
+the optimal choice: the interfering orders present in the machine should set
+`N`.
+
+## 4. Non-integer samples per period
+
+When `fs·T` is an integer, the period boundaries fall on samples, the blocks
+are sliced directly, and a noiseless periodic signal is recovered to machine
+precision (`interpolated` is `False`). When `fs·T` is not an integer the
+boundaries fall between samples; each block is then aligned to a common
+integer grid by the band-limited fractional delay of
+[`fractional_delay`](https://jmrplens.github.io/phonometry/guides/test-signals/), and the waveform is recovered within
+that interpolation error (`interpolated` is `True`):
+
+```python
+fs = 8192.0
+period = 1.0 / 31.7                       # fs * period is not an integer
+t = np.arange(int(40 * period * fs)) / fs
+signal = np.cos(2.0 * np.pi * t / period)  # one cycle per revolution
+res = time_synchronous_average(signal, fs, period)
+res.interpolated                          # True: fractional-delay alignment
+res.samples_per_period                    # integer samples of one period
+```
+
+By default the average uses as many whole periods as the record holds; pass
+`n_averages` to fix the count (for the node-selection choice of §3), and
+`n_harmonics` to set how many harmonics of `1/T` the returned comb response
+spans.
+
+The band-limited alignment shares its kernel with the sub-sample
+impulse-response alignment of the [test-signals page](https://jmrplens.github.io/phonometry/guides/test-signals/), and
+the recovered waveform, being exactly one period, can be tiled to reconstruct
+the synchronous part of the signal for subtraction or for order analysis.
 
 ---
 
@@ -12198,7 +12382,7 @@ cycle and warn on use; they are removed in 4.0.
 | `cross_spectral_density` | `function` | **Welch cross-spectral density with magnitude/phase errors (Eqs. 9.33/9.52).**<br>• `x`, `y`, `fs`<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = cross_spectral_density(x, y, fs)`<br><br>• `CrossSpectralDensityResult` |
 | `coherent_output_spectrum` | `function` | **Gvv = γ²·Gyy, noise remainder and spectral SNR (Eqs. 9.55–9.56, 9.73).**<br>• `x` (input), `y` (output), `fs`<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = coherent_output_spectrum(x, y, fs)`<br><br>• `CoherentOutputSpectrumResult` |
 | `fractional_octave_smoothing` | `function` | **Constant-power 1/n-octave smoothing of a spectrum.**<br>• `frequencies`, `values`<br>• `fraction`: the n of 1/n octave (Default: 3)<br>• `domain`: 'power'/'amplitude'/'db' (Default: 'power') | `s = fractional_octave_smoothing(f, psd, 3.0)`<br><br>• smoothed array, same domain; flat spectra unchanged |
-| `miso_coherence` | `function` | **Multiple & partial coherence of a MISO system (Bendat & Piersol Ch. 7).**<br>• `inputs`: 2 or 3 input records (sequence of 1-D arrays or a (q, n) array), `output`, `fs`<br>• `order`: conditioning order (Default: 0..q−1)<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = miso_coherence([x1, x2], y, fs)`<br><br>• `MISOCoherenceResult` |
+| `miso_coherence` | `function` | **Multiple & partial coherence of a MISO system (Bendat & Piersol Ch. 7).**<br>• `inputs`: q input records, q ≥ 2 (sequence of 1-D arrays or a (q, n) array), `output`, `fs`<br>• `order`: conditioning order (Default: 0..q−1)<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = miso_coherence([x1, x2], y, fs)`<br><br>• `MISOCoherenceResult` |
 | `MISOCoherenceResult` | `dataclass` | **Multiple/partial coherence of q correlated inputs and one output.**<br>• `ordinary_coherence` (q×F), `multiple_coherence` γ²y:x, `partial_coherence` (q×F, conditioned per `order`)<br>• `coherent_output_spectra` Gvi (q×F, Σ Gvi + `noise_psd` = `output_psd`)<br>• `multiple_coherence_random_error` (Eq. 9.98), `coherent_output_random_error` (Eq. 9.100)<br>• `.dominant_input()`: per-band index of the strongest source<br>• `.plot()`: coherent output spectra + coherences | `res.multiple_coherence, res.dominant_input()` |
 | `resolution_bias_error` | `function` | **First-order resolution bias at a resonance peak, εb ≈ −(Be/Br)²/3 (Eq. 8.141).**<br>• `resolution_bandwidth` Be [Hz]<br>• `half_power_bandwidth` Br [Hz] | `resolution_bias_error(1.0, 4.0)  # -1/48` |
 | `noise_signal` | `function` | **Colored Gaussian noise with an exact power-law PSD slope.**<br>• `fs`, `seconds` (Default: 1.0)<br>• `color`: 'white'/'pink'/'red'/'blue'/'violet' (0/−3.01/−6.02/+3.01/+6.02 dB/oct)<br>• `rms` (Default: 1.0)<br>• `seed`: bit-reproducible per seed | `pink = noise_signal(48000, 10.0, color='pink', seed=7)` |
@@ -12230,6 +12414,9 @@ cycle and warn on use; they are removed in 4.0.
 | `EnvelopeResult` | `dataclass` | **Envelope analysis.**<br>• `times` [s], `envelope`, `phase` [rad, unwrapped], `instantaneous_frequency` [Hz]<br>• `fs` (output rate), `signal`, `signal_fs`, `decimation_factor`, `antialias`<br>• `.plot()`: signal + envelope, instantaneous frequency | `res.envelope, res.instantaneous_frequency` |
 | `envelope_spectrum` | `function` | **Amplitude spectrum of the envelope: modulations as lines (B&P 13.3).**<br>• `x`, `fs`<br>• `kind`: 'magnitude' (Default) / 'squared' (square-law detector, Fig. 13.11)<br>• `window` (Default: 'hann', coherent-gain corrected), `nfft`<br>• `remove_dc` (Default: True; mean kept in `mean_level`)<br>AM tone A0, m: line A0·m at fm ('magnitude') | `res = envelope_spectrum(x, fs)`<br><br>• `EnvelopeSpectrumResult` |
 | `EnvelopeSpectrumResult` | `dataclass` | **Envelope spectrum.**<br>• `frequencies` [Hz], `amplitude` (line heights), `mean_level`, `kind`<br>• `times`, `envelope` (detector output), `window`, `remove_dc`, `fs`, `nfft`<br>• `.plot()`: envelope + spectrum | `res.amplitude, res.mean_level` |
+| `time_synchronous_average` | `function` | **Extract a periodic waveform of known period by time domain averaging (McFadden 1987 Eq. 5).**<br>• `x`, `fs`, `period` [s] (one revolution)<br>• `n_averages`: whole periods to average (Default: as many as the record holds; choose N so N·q is integer to place a comb node on an interfering order q)<br>• `n_harmonics`: comb-response span (Default: 8)<br>Non-integer fs·period aligned by band-limited fractional delay | `res = time_synchronous_average(x, fs, 1/32)`<br><br>• `SynchronousAverageResult` |
+| `SynchronousAverageResult` | `dataclass` | **Time synchronous average.**<br>• `period_waveform`, `times` [s], `residual`, `residual_rms`<br>• `n_averages`, `samples_per_period`, `period`, `fs`, `interpolated`<br>• `noise_reduction_db` = 10·log₁₀N, `amplitude_snr_gain` = √N<br>• `comb_frequencies` [Hz], `comb_response` (\|C(f)\|)<br>• `.plot()`: averaged waveform + comb filter | `res.period_waveform, res.noise_reduction_db` |
+| `comb_filter_response` | `function` | **Magnitude of the N-period synchronous-averaging comb filter (McFadden 1987 Eq. 8).**<br>• `frequencies` [Hz], `period` [s], `n_averages`<br>\|C(f)\| = \|sin(N·π·f·T)/(N·sin(π·f·T))\|: unit teeth at harmonics k/T, nodes at j/(N·T) | `c = comb_filter_response(freqs, 1/32, 20)` |
 | `regularized_inverse_filter` | `function` | **Kirkeby frequency-dependent regularized inversion (Kirkeby & Nelson 1999 Eq. (17)).**<br>• `response`: measured IR (array or `ImpulseResponseResult`; its `fs` rides along)<br>• `fs`: Sample rate [Hz]<br>• `f_range`: (f1, f2) equalized to unity (Required)<br>• `regularization_inside` (Default: 1e-6) / `regularization_outside` (Default: 1.0), fractions of max\|H\|²<br>• `transition_octaves` (Default: 1/3), `n_fft`, `delay` (Default: n_fft//2) | `inv = regularized_inverse_filter(ir, f_range=(100, 10000))`<br><br>• `InverseFilterResult` |
 | `InverseFilterResult` | `dataclass` | **Regularized inverse filter.**<br>• `inverse` (time domain), `spectrum` (with modeling delay), `response_spectrum`, `regularization` = ε(f), `frequencies`, `f_range`, `delay`, `fs`<br>• `flatness_db`: worst in-band deviation of \|H·H_inv\| from 0 dB<br>• `max_gain_db`: out-of-band boost (≤ the 1/(2√ε) cap)<br>• `.apply(x)`: equalize, delay removed; `.plot()` | `flat = inv.apply(recording)` |
 | `cepstrum` | `function` | **Power/real/complex cepstrum (Havelock Chs. 27/87).**<br>• `x`, `fs`<br>• `kind`: 'power' (Default, IDFT of ln\|X\|²) / 'real' (ln\|X\|) / 'complex' (invertible, phase unwrapped)<br>• `nfft`: even, ≥ record (Default: record length)<br>Echo a at t0: rahmonics (−1)^(n+1)·aⁿ/n at n·t0 | `res = cepstrum(x, fs, kind='complex')`<br><br>• `CepstrumResult` |

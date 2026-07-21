@@ -4918,6 +4918,90 @@ def _chk_envelope_spectrum_am_line() -> Outcome:
 
 
 # ===========================================================================
+# Time synchronous averaging (McFadden 1987)
+# ===========================================================================
+_TSA = "Time synchronous averaging (McFadden 1987)"
+
+
+@register(
+    _TSA,
+    r"McFadden 1987 Eq. 8 / Eq. 9: comb filter \|C(f)\| at a harmonic k/T",
+    "Comb-filter tooth height at a harmonic equals unity (any N)",
+)
+def _chk_tsa_comb_tooth() -> Outcome:
+    period = 1.0 / 32.0
+    value = float(ph.comb_filter_response(np.array([16.0 / period]), period, 8)[0])
+    return numeric(1.0, value, 1e-10, places=8)
+
+
+@register(
+    _TSA,
+    "McFadden 1987 Eq. 8: comb filter one quarter-order from a tooth, N = 2",
+    "Comb-filter magnitude = 1/sqrt(2) at order 0.25",
+)
+def _chk_tsa_comb_midbin() -> Outcome:
+    period = 1.0 / 32.0
+    value = float(
+        ph.comb_filter_response(np.array([0.25 / period]), period, 2)[0]
+    )
+    return numeric(1.0 / math.sqrt(2.0), value, 1e-10, places=8)
+
+
+@register(
+    _TSA,
+    "McFadden 1987 Sec. 4 (Fig. 5): node selection, tone at 32.05 orders",
+    r"N = 20 places a comb node on 32.05 orders (\|C\| = 0), not the power-of-2 N = 32",
+)
+def _chk_tsa_node_selection() -> Outcome:
+    period = 1.0 / 32.0
+    freq = np.array([32.05 / period])
+    c20 = float(ph.comb_filter_response(freq, period, 20)[0])
+    c32 = float(ph.comb_filter_response(freq, period, 32)[0])
+    if not c32 > 0.15:  # sanity: the power-of-two choice does not reject it
+        return numeric(0.0, c32, 0.0, places=8)
+    return numeric(0.0, c20, 1e-10, places=10)
+
+
+@register(
+    _TSA,
+    "McFadden 1987 Eq. 5: exact recovery, integer samples per period",
+    "Noiseless periodic waveform (M = 256) recovered to machine precision",
+)
+def _chk_tsa_exact_recovery() -> Outcome:
+    fs = 8192.0
+    period = 1.0 / 32.0
+    m = 256
+    phase = np.arange(m) / m
+    one = np.cos(2.0 * np.pi * phase) + 0.5 * np.cos(
+        2.0 * np.pi * 3.0 * phase + 0.4
+    )
+    res = ph.time_synchronous_average(np.tile(one, 24), fs, period)
+    err = float(np.max(np.abs(res.period_waveform - one)))
+    return numeric(0.0, err, 1e-10, places=12)
+
+
+@register(
+    _TSA,
+    "McFadden 1987 Sec. 1: asynchronous-noise variance reduced by 1/N",
+    "Residual noise std of the average falls as sigma/sqrt(N), N = 64",
+)
+def _chk_tsa_sqrt_n_law() -> Outcome:
+    fs = 8192.0
+    period = 1.0 / 32.0
+    m = 256
+    n_avg = 64
+    phase = np.arange(m) / m
+    one = np.cos(2.0 * np.pi * phase)
+    rng = np.random.default_rng(2024)
+    noise = rng.standard_normal(n_avg * m)
+    res = ph.time_synchronous_average(
+        np.tile(one, n_avg) + noise, fs, period, n_averages=n_avg
+    )
+    measured = float(np.std(res.period_waveform - one))
+    return numeric(1.0 / math.sqrt(n_avg), measured, 0.15, rel=True, places=5)
+
+
+# ===========================================================================
 # Data qualification and Rice statistics (Bendat & Piersol Chs. 4, 5, 10)
 # ===========================================================================
 _RANDOM_DATA = "Data qualification and Rice statistics (Bendat & Piersol)"

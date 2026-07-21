@@ -361,6 +361,7 @@ export default defineConfig({
                 'guides/miso-coherence',
                 'guides/time-frequency',
                 'guides/cepstrum-echoes',
+                'guides/synchronous-averaging',
                 'guides/correlation-delay',
                 'guides/test-signals',
                 'guides/system-measurement',

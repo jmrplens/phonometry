@@ -339,8 +339,8 @@ export default defineConfig({
               items: [
                 { slug: 'guides/sections/octave-filtering', attrs: { 'data-group-link': true } },
                 { slug: 'guides/filter-banks', badge: { text: 'IEC 61260', class: 'chip-standard' } },
-                'guides/block-processing',
-                'guides/multichannel',
+                { slug: 'guides/block-processing', badge: { text: 'IEC 61260', class: 'chip-standard' } },
+                { slug: 'guides/multichannel', badge: { text: 'IEC 61260', class: 'chip-standard' } },
               ],
             },
             {
@@ -349,8 +349,8 @@ export default defineConfig({
               items: [
                 { slug: 'guides/sections/levels-weighting', attrs: { 'data-group-link': true } },
                 { slug: 'guides/weighting', badge: { text: 'IEC 61672', class: 'chip-standard' } },
-                'guides/time-weighting',
-                'guides/levels',
+                { slug: 'guides/time-weighting', badge: { text: 'IEC 61672', class: 'chip-standard' } },
+                { slug: 'guides/levels', badge: { text: 'IEC 61672', class: 'chip-standard' } },
               ],
             },
             {
@@ -364,8 +364,8 @@ export default defineConfig({
                 { slug: 'guides/cepstrum-echoes', badge: { text: 'Havelock et al.', class: 'chip-theory' } },
                 { slug: 'guides/synchronous-averaging', badge: { text: 'McFadden 1987', class: 'chip-theory' } },
                 { slug: 'guides/correlation-delay', badge: { text: 'Knapp & Carter', class: 'chip-theory' } },
-                'guides/test-signals',
-                'guides/system-measurement',
+                { slug: 'guides/test-signals', badge: { text: 'IEC 60268-1', class: 'chip-standard' } },
+                { slug: 'guides/system-measurement', badge: { text: 'Havelock et al.', class: 'chip-theory' } },
               ],
             },
             {
@@ -373,9 +373,9 @@ export default defineConfig({
               translations: { es: 'Calibración e incertidumbre' },
               items: [
                 { slug: 'guides/sections/calibration-uncertainty', attrs: { 'data-group-link': true } },
-                'guides/calibration',
-                'guides/gum-uncertainty',
-                'guides/data-qualification',
+                { slug: 'guides/calibration', badge: { text: 'IEC 60942', class: 'chip-standard' } },
+                { slug: 'guides/gum-uncertainty', badge: { text: 'JCGM 100', class: 'chip-standard' } },
+                { slug: 'guides/data-qualification', badge: { text: 'Bendat & Piersol', class: 'chip-theory' } },
               ],
             },
           ],
@@ -391,10 +391,10 @@ export default defineConfig({
               items: [
                 { slug: 'guides/sections/psychoacoustics', attrs: { 'data-group-link': true } },
                 { slug: 'guides/loudness', badge: { text: 'ISO 532-1', class: 'chip-standard' } },
-                'guides/sound-quality',
-                'guides/tone-prominence',
-                'guides/tone-audibility',
-                'guides/psychoacoustic-annoyance',
+                { slug: 'guides/sound-quality', badge: { text: 'DIN 45692', class: 'chip-standard' } },
+                { slug: 'guides/tone-prominence', label: 'Prominent Discrete Tones', translations: { es: 'Tonos discretos prominentes' }, badge: { text: 'ECMA-418-1', class: 'chip-standard' } },
+                { slug: 'guides/tone-audibility', label: 'Objective audibility of tones in noise', translations: { es: 'Audibilidad objetiva de tonos en ruido' }, badge: { text: 'ISO/PAS 20065', class: 'chip-standard' } },
+                { slug: 'guides/psychoacoustic-annoyance', badge: { text: 'Fastl & Zwicker', class: 'chip-theory' } },
               ],
             },
             {
@@ -402,9 +402,9 @@ export default defineConfig({
               translations: { es: 'Habla' },
               items: [
                 { slug: 'guides/sections/speech', attrs: { 'data-group-link': true } },
-                'guides/speech-transmission',
-                'guides/speech-intelligibility',
-                'guides/objective-intelligibility',
+                { slug: 'guides/speech-transmission', badge: { text: 'IEC 60268-16', class: 'chip-standard' } },
+                { slug: 'guides/speech-intelligibility', badge: { text: 'ANSI S3.5', class: 'chip-standard' } },
+                { slug: 'guides/objective-intelligibility', badge: { text: 'Taal et al. 2011', class: 'chip-theory' } },
               ],
             },
             {
@@ -412,9 +412,9 @@ export default defineConfig({
               translations: { es: 'Audición y exposición' },
               items: [
                 { slug: 'guides/sections/hearing-exposure', attrs: { 'data-group-link': true } },
-                'guides/hearing-threshold',
-                'guides/noise-induced-hearing-loss',
-                { slug: 'guides/occupational-exposure', badge: { text: 'ISO 9612', class: 'chip-standard' } },
+                { slug: 'guides/hearing-threshold', badge: { text: 'ISO 7029', class: 'chip-standard' } },
+                { slug: 'guides/noise-induced-hearing-loss', label: 'Noise-induced hearing loss', translations: { es: 'Pérdida auditiva inducida por ruido' }, badge: { text: 'ISO 1999', class: 'chip-standard' } },
+                { slug: 'guides/occupational-exposure', label: 'Occupational Noise Exposure', translations: { es: 'Exposición al ruido en el trabajo' }, badge: { text: 'ISO 9612', class: 'chip-standard' } },
               ],
             },
           ],
@@ -430,10 +430,10 @@ export default defineConfig({
               items: [
                 { slug: 'guides/sections/room-acoustics', attrs: { 'data-group-link': true } },
                 { slug: 'guides/room-acoustics', badge: { text: 'ISO 3382', class: 'chip-standard' } },
-                'guides/room-image-sources',
-                'guides/room-noise',
-                'guides/reverberation-prediction',
-                { slug: 'guides/enclosed-space-absorption', badge: { text: 'EN 12354-6', class: 'chip-standard' } },
+                { slug: 'guides/room-image-sources', badge: { text: 'Kuttruff', class: 'chip-theory' } },
+                { slug: 'guides/room-noise', badge: { text: 'ANSI S12.2', class: 'chip-standard' } },
+                { slug: 'guides/reverberation-prediction', badge: { text: 'Sabine / Eyring', class: 'chip-theory' } },
+                { slug: 'guides/enclosed-space-absorption', label: 'Sound absorption in enclosed spaces', translations: { es: 'Absorción sonora en recintos' }, badge: { text: 'EN 12354-6', class: 'chip-standard' } },
               ],
             },
             {
@@ -443,9 +443,9 @@ export default defineConfig({
                 { slug: 'guides/sections/sound-insulation', attrs: { 'data-group-link': true } },
                 { slug: 'guides/insulation-field', badge: { text: 'ISO 16283 / 717', class: 'chip-standard' } },
                 { slug: 'guides/insulation-lab', badge: { text: 'ISO 10140', class: 'chip-standard' } },
-                'guides/insulation-prediction',
-                'guides/panel-sound-insulation',
-                'guides/dynamic-stiffness',
+                { slug: 'guides/insulation-prediction', label: 'Predicting Sound Insulation', translations: { es: 'Predicción del aislamiento acústico' }, badge: { text: 'EN 12354', class: 'chip-standard' } },
+                { slug: 'guides/panel-sound-insulation', badge: { text: 'Bies & Hansen', class: 'chip-theory' } },
+                { slug: 'guides/dynamic-stiffness', label: 'Dynamic stiffness of resilient materials', translations: { es: 'Rigidez dinámica de materiales resilientes' }, badge: { text: 'EN 29052-1', class: 'chip-standard' } },
               ],
             },
           ],
@@ -456,8 +456,8 @@ export default defineConfig({
           items: [
             { slug: 'guides/sections/materials-surfaces', attrs: { 'data-group-link': true } },
             { slug: 'guides/materials', badge: { text: 'ISO 11654', class: 'chip-standard' } },
-            'guides/porous-absorbers',
-            'guides/surface-scattering',
+            { slug: 'guides/porous-absorbers', badge: { text: 'Mechel', class: 'chip-theory' } },
+            { slug: 'guides/surface-scattering', badge: { text: 'ISO 17497', class: 'chip-standard' } },
           ],
         },
         {
@@ -470,12 +470,12 @@ export default defineConfig({
               translations: { es: 'Fuentes de ruido estructural' },
               items: [
                 { slug: 'guides/sections/structure-borne', attrs: { 'data-group-link': true } },
-                'guides/mechanical-mobility',
-                'guides/junction-transmission',
-                'guides/transfer-stiffness',
-                'guides/vibration-sound-power',
-                'guides/structure-borne-power',
-                'guides/installed-structure-borne',
+                { slug: 'guides/mechanical-mobility', label: 'Mechanical mobility and the FRF family', translations: { es: 'Movilidad mecánica y la familia de FRF' }, badge: { text: 'ISO 7626', class: 'chip-standard' } },
+                { slug: 'guides/junction-transmission', badge: { text: 'Cremer & Heckl', class: 'chip-theory' } },
+                { slug: 'guides/transfer-stiffness', label: 'Transfer stiffness of resilient elements', translations: { es: 'Rigidez dinámica de transferencia' }, badge: { text: 'ISO 10846', class: 'chip-standard' } },
+                { slug: 'guides/vibration-sound-power', label: 'Sound power from surface vibration', translations: { es: 'Potencia acústica desde vibración' }, badge: { text: 'ISO/TS 7849', class: 'chip-standard' } },
+                { slug: 'guides/structure-borne-power', label: 'Structure-borne sound power of equipment', translations: { es: 'Potencia sonora estructural de equipos' }, badge: { text: 'EN 15657', class: 'chip-standard' } },
+                { slug: 'guides/installed-structure-borne', label: 'Installed structure-borne sound', translations: { es: 'Ruido estructural instalado' }, badge: { text: 'EN 12354-5', class: 'chip-standard' } },
               ],
             },
             {
@@ -484,7 +484,7 @@ export default defineConfig({
               items: [
                 { slug: 'guides/sections/human-vibration', attrs: { 'data-group-link': true } },
                 { slug: 'guides/human-vibration', badge: { text: 'ISO 2631 / 5349', class: 'chip-standard' } },
-                'guides/multiple-shock-vibration',
+                { slug: 'guides/multiple-shock-vibration', label: 'Multiple-shock whole-body vibration', translations: { es: 'Vibración con choques múltiples' }, badge: { text: 'ISO 2631-5', class: 'chip-standard' } },
               ],
             },
           ],
@@ -499,10 +499,10 @@ export default defineConfig({
               translations: { es: 'Sonido en exteriores' },
               items: [
                 { slug: 'guides/sections/outdoor-sound', attrs: { 'data-group-link': true } },
-                'guides/outdoor-propagation',
-                'guides/ground-barriers',
-                'guides/atmospheric-refraction',
-                'guides/impulse-prominence',
+                { slug: 'guides/outdoor-propagation', badge: { text: 'ISO 9613', class: 'chip-standard' } },
+                { slug: 'guides/ground-barriers', badge: { text: 'Attenborough', class: 'chip-theory' } },
+                { slug: 'guides/atmospheric-refraction', badge: { text: 'Salomons', class: 'chip-theory' } },
+                { slug: 'guides/impulse-prominence', label: 'Impulsive-sound prominence', translations: { es: 'Prominencia de sonidos impulsivos' }, badge: { text: 'NT ACOU 112', class: 'chip-standard' } },
               ],
             },
             {
@@ -510,9 +510,9 @@ export default defineConfig({
               translations: { es: 'Aeronaves y energía eólica' },
               items: [
                 { slug: 'guides/sections/aircraft-wind', attrs: { 'data-group-link': true } },
-                'guides/aircraft-noise',
-                'guides/rotorcraft-noise',
-                'guides/wind-turbine-noise',
+                { slug: 'guides/aircraft-noise', badge: { text: 'ICAO Annex 16', class: 'chip-standard' } },
+                { slug: 'guides/rotorcraft-noise', badge: { text: 'Olsen et al.', class: 'chip-theory' } },
+                { slug: 'guides/wind-turbine-noise', badge: { text: 'IEC 61400-11', class: 'chip-standard' } },
               ],
             },
           ],
@@ -522,8 +522,8 @@ export default defineConfig({
           translations: { es: 'Acústica submarina' },
           items: [
             { slug: 'guides/sections/underwater', attrs: { 'data-group-link': true } },
-            'guides/underwater-acoustics',
-            'guides/underwater-propagation',
+            { slug: 'guides/underwater-acoustics', badge: { text: 'ISO 18405', class: 'chip-standard' } },
+            { slug: 'guides/underwater-propagation', badge: { text: 'Francois & Garrison', class: 'chip-theory' } },
           ],
         },
         {
@@ -531,12 +531,12 @@ export default defineConfig({
           translations: { es: 'Fuentes y dispositivos' },
           items: [
             { slug: 'guides/sections/sources-devices', attrs: { 'data-group-link': true } },
-            'guides/intensity',
-            'guides/sound-power',
-            'guides/electroacoustics',
-            'guides/swept-sine-distortion',
-            'guides/noise-control',
-            { slug: 'guides/program-loudness', badge: { text: 'EBU R 128', class: 'chip-standard' } },
+            { slug: 'guides/intensity', badge: { text: 'ISO 9614', class: 'chip-standard' } },
+            { slug: 'guides/sound-power', badge: { text: 'ISO 3744', class: 'chip-standard' } },
+            { slug: 'guides/electroacoustics', badge: { text: 'IEC 60268', class: 'chip-standard' } },
+            { slug: 'guides/swept-sine-distortion', badge: { text: 'Farina 2000', class: 'chip-theory' } },
+            { slug: 'guides/noise-control', badge: { text: 'Bies & Hansen', class: 'chip-theory' } },
+            { slug: 'guides/program-loudness', label: 'Programme loudness and true peak', translations: { es: 'Sonoridad de programa y pico verdadero' }, badge: { text: 'EBU R 128', class: 'chip-standard' } },
           ],
         },
         {
@@ -544,7 +544,7 @@ export default defineConfig({
           translations: { es: 'Simulación de ondas' },
           items: [
             { slug: 'guides/sections/simulation', attrs: { 'data-group-link': true } },
-            'guides/fdtd-simulation',
+            { slug: 'guides/fdtd-simulation', badge: { text: 'Botteldooren 1995', class: 'chip-theory' } },
           ],
         },
         {

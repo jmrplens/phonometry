@@ -324,7 +324,7 @@ def render_iso16283_report(
     value_table = _table(centers, columns, language)
     left_cell = [Paragraph(caption, caption_style), value_table]
 
-    def _plot(ax: Any = None) -> Any:
+    def _plot(ax: Any = None, language: str = language) -> Any:
         axes = rating.plot(ax=ax, language=language)
         axes.set_ylabel(t(spec["ylabel"], language))
         return axes

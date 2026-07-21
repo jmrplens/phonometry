@@ -274,8 +274,6 @@ _STRINGS: dict[str, str] = {
     "Stop-band limits verified up to each band's processing Nyquist frequency; the multirate anti-aliasing leaves no signal energy beyond it, but the Table 1 limits there are not demonstrated, so the stated class attests the verified frequency range.": "Límites de banda eliminada verificados hasta la frecuencia de Nyquist de proceso de cada banda; el antisolapamiento multitasa no deja energía de señal más allá, pero los límites de la Tabla 1 en esa zona no se demuestran, por lo que la clase indicada acredita el rango de frecuencias verificado.",
     # --- iso717 octave caption and quantity-symbol verdicts ----------------
     "Octave-band {vh} [dB]": "Banda de octava {vh} [dB]",
-    "{sym} = {rating} dB, required &#8804; {req} dB": "{sym} = {rating} dB, exigido &#8804; {req} dB",
-    "{sym} = {rating} dB, required &#8805; {req} dB": "{sym} = {rating} dB, exigido &#8805; {req} dB",
     # --- iso11654 shape-indicator note (clause 5.3 NOTE) --------------------
     "A shape indicator applies: ISO 11654 (5.3 NOTE) recommends using &#945;<sub>w</sub> in combination with the complete sound absorption coefficient curve, shown above.": "Se aplica un indicador de forma: ISO 11654 (NOTA de 5.3) recomienda usar &#945;<sub>w</sub> junto con la curva completa del coeficiente de absorción acústica, mostrada más arriba.",
 }

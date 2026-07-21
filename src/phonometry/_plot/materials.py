@@ -24,6 +24,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from ..materials.absorption_rating import AbsorptionRatingResult
+    from ..materials.sound_absorption import SoundAbsorptionMeasurement
     from ..materials.absorption_uncertainty import AbsorptionUncertaintyResult
     from ..materials.airflow_resistance import StaticAirflowResult
     from ..materials.dynamic_stiffness import DynamicStiffnessResult
@@ -45,6 +46,10 @@ _FREQ_LABEL = "Frequency [Hz]"
 _STRINGS: dict[str, str] = {
     "Frequency [Hz]": "Frecuencia [Hz]",
     "Sound absorption coefficient": "Coeficiente de absorción acústica",
+    r"Sound absorption coefficient $\alpha_s$":
+        r"Coeficiente de absorción acústica $\alpha_s$",
+    "ISO 354 reverberation-room sound absorption":
+        "Absorción acústica en cámara reverberante ISO 354",
     "Practical alpha_p": "alpha_p práctico",
     "class ": "clase ",
     "Sigma unfav. = ": "Sigma desfav. = ",
@@ -142,6 +147,40 @@ def plot_weighted_absorption(
         **kwargs,
     )
     localize_axes(ax, language)
+    return ax
+
+def plot_sound_absorption(
+    result: "SoundAbsorptionMeasurement", ax: Axes | None = None,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Sound absorption coefficient ``alpha_s`` versus frequency (ISO 354:2003).
+
+    Draws the one-third-octave ``alpha_s`` on a categorical band axis. Values
+    above 1,0 (edge/diffraction effects, Clause 3.7 NOTE 2) are kept, so the
+    axis grows to show them.
+
+    :param result: A
+        :class:`~phonometry.materials.sound_absorption.SoundAbsorptionMeasurement`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``alpha_s`` curve ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    alpha = np.asarray(result.alpha_s, dtype=np.float64)
+    positions = _band_axis(
+        ax, freqs, xlabel=_t("Frequency [Hz]", language), language=language
+    )
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.plot(positions, alpha, **kwargs)
+    ax.set_ylabel(_t(r"Sound absorption coefficient $\alpha_s$", language))
+    # alpha_s can exceed 1,0 (Clause 3.7 NOTE 2); grow the top so it stays shown.
+    top = max(1.05, float(np.nanmax(alpha)) * 1.05) if alpha.size else 1.05
+    ax.set_ylim(0.0, top)
+    ax.set_title(_t("ISO 354 reverberation-room sound absorption", language))
+    ax.grid(True, axis="y", alpha=0.3)
+    _localize_band_axes(ax, language)
     return ax
 
 def plot_scattering_coefficient(

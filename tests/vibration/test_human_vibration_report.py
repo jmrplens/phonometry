@@ -107,6 +107,7 @@ def test_verbose_adds_energy_share_column(tmp_path) -> None:
     flat = "".join(_extract_text(str(out)).split())
     # Shares: 2.30^2/3.61^2 = 41 %, 2.12^2 = 35 %, 1.80^2 = 25 % (rounded).
     assert "41%" in flat
+    assert "35%" in flat
     assert "25%" in flat
 
 
@@ -138,6 +139,25 @@ def test_hav_directive_boundaries_on_displayed_value(
     assert text.count("Exceeded") == n_exceeded
     assert text.count("Not exceeded") == 2 - n_exceeded
     assert verdict in text
+
+
+def test_verdict_sentence_states_the_actual_relation(tmp_path) -> None:
+    """The verdict sentence agrees with its PASS/FAIL banner, both directions."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    passing = daily_vibration_exposure([3.0], [8 * 3600.0], kind="hav", labels=["op"])
+    out = tmp_path / "pass.pdf"
+    passing.report(str(out))
+    text = _extract_text(str(out))
+    assert "below the exposure limit value" in text
+    assert "reaches or exceeds the exposure limit value" not in text
+    failing = daily_vibration_exposure([6.0], [8 * 3600.0], kind="hav", labels=["op"])
+    out = tmp_path / "fail.pdf"
+    failing.report(str(out))
+    text = _extract_text(str(out))
+    assert "reaches or exceeds the exposure limit value" in text
+    assert "below the exposure limit value" not in text
+    assert "FAIL" in text
 
 
 def test_whole_body_thresholds_and_basis(tmp_path) -> None:

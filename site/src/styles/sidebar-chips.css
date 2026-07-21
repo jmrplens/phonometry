@@ -82,39 +82,49 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.1em 0.7em;
+  gap: 0.15rem 0.6rem;
   /* Indent the chip line to the right of where the label text starts, so it
      reads as nested UNDER its item rather than as a separate sibling row.
      Tight top margin keeps it visually bound to the label above it; wrapped
      chips stay inside this same indent. */
-  margin-block-start: 0.1em;
-  margin-inline-start: 1em;
+  /* Absolute (rem) so the offset does not scale with the item's font size. */
+  margin-block-start: 0.15rem;
+  margin-inline-start: 0.9rem;
   line-height: 1.25;
   max-width: 100%;
 }
 
 /* The label may itself be long; let it wrap and keep the chips tidy. It is
-   set bold (semibold) so the item name reads as clearly distinct from its
-   muted, lighter chip sub-line. This matches the section headers' weight, but
-   the label's dimmer colour and the headers' larger size keep the hierarchy
-   section header > item label > chips. The active-item accent pill is
-   untouched, so the current page stays clearly indicated by its background. */
+   set bold (semibold) and BRIGHT (gray-1) so the item name reads as clearly
+   separated from its muted, lighter (gray-2) chip sub-line: item = bright +
+   bold, chips = dim + small. gray-1 flips per theme (near-white on dark, near-
+   black on light) so it clears AA in both, and stays a step below the section
+   headers' pure white, keeping the hierarchy header > item label > chips. */
 .sidebar-item-label {
   font-weight: 600;
+  color: var(--sl-color-gray-1);
   overflow-wrap: anywhere;
 }
 
+/* On the active (accent pill) row the anchor text is inverted for contrast
+   against the accent fill; let the label follow it rather than force gray-1. */
+[aria-current='page'] .sidebar-item-label {
+  color: var(--sl-color-text-invert);
+}
+
 /* Quiet tag: strip Starlight's badge fill / border / padding down to muted
-   text preceded by a small category dot. */
+   text preceded by a small category dot. Text size, dot size and gaps are in
+   ABSOLUTE units (rem) so every chip is identical regardless of which item or
+   nesting level it sits under (em would scale with the item's own size). */
 .sidebar-chips .sl-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
+  gap: 0.3rem;
   padding: 0;
   border: 0;
   background: transparent;
   color: var(--sl-color-gray-2);
-  font-size: 0.72em;
+  font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.25;
@@ -124,8 +134,8 @@
 .sidebar-chips .sl-badge::before {
   content: '';
   flex: none;
-  inline-size: 0.42em;
-  block-size: 0.42em;
+  inline-size: 0.3rem;
+  block-size: 0.3rem;
   border-radius: 50%;
   background: var(--dot, currentColor);
 }

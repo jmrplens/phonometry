@@ -259,6 +259,21 @@ smaller, dotted, indented). The active accent pill is untouched, so the
 current page stays clearly indicated. Screenshots: `variantA-refined-dark.png`
 and `variantA-refined-light.png`.
 
+Refinement 2 (mobile review): (a) the item label was the same gray as the
+chips, so they did not separate; it is now `--sl-color-gray-1` (bright/near-
+white on dark, near-black on light) while the chips stay `--sl-color-gray-2`,
+giving item = bright + bold, chips = dim + small. The active pill keeps
+`--sl-color-text-invert` on the label. Contrast: label 13.04:1 dark / 15.11:1
+light, chips 8.57:1 / 11.71:1 - all AA. (b) The chip text size, dot size and
+gaps were in `em`, so chips looked bigger under higher-level (larger-font)
+items - most visible on mobile, where leaf labels grow to 16px. They are now
+in absolute `rem`: chip text `0.6875rem` (11px), dot `0.3rem`, badge gap
+`0.3rem`, container gap `0.15rem 0.6rem`, chip-line offset `0.15rem` /
+`0.9rem`. Every chip is now identically 11px regardless of item or nesting
+level (verified: a single unique computed font-size across the whole tree, and
+11px chips under 16px mobile labels). Screenshots: `variantA-refined2-dark.png`,
+`variantA-refined2-light.png`, `variantA-refined2-mobile-dark.png` (390px).
+
 ### Switchable variants (for comparison)
 
 All alternatives live behind a `data-chip-style` attribute on the root

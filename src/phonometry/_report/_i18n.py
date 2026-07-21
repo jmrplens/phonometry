@@ -354,6 +354,7 @@ _STRINGS: dict[str, str] = {
     "Room acoustic parameters by the integrated impulse-response method (ISO 3382-1:2009 / ISO 3382-2:2008).": "Parámetros acústicos de salas por el método de la respuesta al impulso integrada (ISO 3382-1:2009 / ISO 3382-2:2008).",
     "Octave-band parameters": "Parámetros por bandas de octava",
     "One-third-octave-band parameters": "Parámetros por bandas de tercio de octava",
+    "Single-band parameters": "Parámetros de banda única",
     "Broadband analysis": "Análisis de banda ancha",
     "Broadband": "Banda ancha",
     "Room": "Sala",

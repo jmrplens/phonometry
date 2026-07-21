@@ -210,6 +210,37 @@ def test_third_octave_report_renders(tmp_path) -> None:
     _assert_one_page(str(out))
 
 
+def test_single_band_is_not_labeled_broadband(tmp_path) -> None:
+    """A narrow single-band selection is a single band, not broadband.
+
+    Selecting a single octave band leaves one frequency entry (not ``None``),
+    so the caption must read "Single-band parameters", never "Broadband".
+    """
+    res = room_parameters(_synthetic_ir(), _FS, limits=(490.0, 510.0), fraction=1)
+    assert res.frequency is not None and len(res.frequency) == 1
+    out = tmp_path / "single_band.pdf"
+    res.report(str(out))
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "Single-band parameters" in text
+    assert "Broadband" not in text
+
+
+def test_octave_report_many_bands_renders(tmp_path) -> None:
+    """A wide octave analysis (>6 bands) renders one page as an octave set.
+
+    The one-third-octave triplet grouping is gated on the band structure, so a
+    wide octave set (11 bands) is still labelled an octave-band set and grouped
+    by octave, not by spurious one-third-octave triplets.
+    """
+    res = room_parameters(_synthetic_ir(), _FS, limits=(16.0, 16000.0), fraction=1)
+    assert res.frequency is not None and len(res.frequency) > 6
+    out = tmp_path / "octave_wide.pdf"
+    res.report(str(out), metadata=_full_metadata())
+    _assert_one_page(str(out))
+    assert "Octave-band parameters" in _extract_text(str(out))
+
+
 def test_broadband_report_renders(tmp_path) -> None:
     """A broadband (single-band) analysis renders a one-page fiche."""
     res = room_parameters(_synthetic_ir(), _FS, limits=None)

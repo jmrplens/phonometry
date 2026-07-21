@@ -9,6 +9,7 @@ import pytest
 from phonometry.metrology.frequencies import (
     _format_nominal_freq,
     _iec_e3_round,
+    _infer_band_fraction,
     _nominal_freq_for_band,
     nominal_frequencies,
 )
@@ -147,3 +148,19 @@ def test_annex_e34_worked_rounding_examples() -> None:
 
     for raw, printed in IEC61260_E34_EXAMPLES:
         assert _iec_e3_round(raw) == printed
+
+
+def test_infer_band_fraction_octave_third_and_single() -> None:
+    """Octave centres classify as fraction 1, one-third-octave as 3.
+
+    A single band cannot be told apart from its neighbours' ratio, so the
+    helper returns the conventional octave default (1).
+    """
+    octave = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+    third = np.array([100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0])
+    assert _infer_band_fraction(octave) == 1
+    assert _infer_band_fraction(third) == 3
+    # A wide octave set (>6 bands) is still octave, not one-third-octave.
+    assert _infer_band_fraction(np.array([16.0, 31.5, 63.0, 125.0, 250.0,
+                                          500.0, 1000.0, 2000.0])) == 1
+    assert _infer_band_fraction(np.array([500.0])) == 1

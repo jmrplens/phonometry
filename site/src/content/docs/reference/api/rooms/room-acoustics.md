@@ -242,7 +242,10 @@ mid-frequency reverberation time T_mid (the mean of the 500 Hz and
 fixed disclaimer. ISO 3382-1/-2 are characterisation standards with no
 intrinsic pass/fail, so the verdict row appears only when a target
 mid-frequency T is supplied through `metadata.requirement` (read as
-the maximum acceptable T_mid).
+the maximum acceptable T_mid). A broadband result (`frequency` is
+`None`) has no 500 Hz and 1000 Hz octave bands to average, so the box
+and the verdict fall back to the plain broadband T30 instead of a
+mid-frequency average, with no "500-1000 Hz" label.
 
 **Parameters**
 

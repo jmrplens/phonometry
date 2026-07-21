@@ -83,24 +83,22 @@ def _cell(value: float, decimals: int, language: str, *, scale: float = 1.0) -> 
     return format_number(v, language, decimals=decimals)
 
 
-def _band_fraction(frequency: np.ndarray | None) -> int:
-    """Infer the bandwidth fraction (1 = octave, 3 = one-third) from centres.
-
-    Distinguishes octave from one-third-octave bands by the ratio of adjacent
-    centres (2 for octaves, 2**(1/3) for thirds); defaults to octave for a
-    single band.
-    """
-    if frequency is None or frequency.size < 2:
-        return 1
-    ratio = float(frequency[1] / frequency[0])
-    return 1 if ratio > 1.5 else 3
-
-
 def _fraction_label(frequency: np.ndarray | None, language: str) -> str:
-    """Return the caption describing the analysis band set."""
-    if frequency is None or frequency.size < 2:
+    """Return the caption describing the analysis band set.
+
+    Only a ``frequency is None`` result is a broadband analysis; a result that
+    carries a single band is a single octave or one-third-octave band (from a
+    narrow ``limits`` selection), so it is labelled as a single band rather than
+    broadband. Two or more bands are classified octave vs one-third-octave by
+    their centre ratios.
+    """
+    if frequency is None:
         return t("Broadband analysis", language)
-    if _band_fraction(frequency) == 1:
+    if frequency.size < 2:
+        return t("Single-band parameters", language)
+    from ..metrology.frequencies import _infer_band_fraction
+
+    if _infer_band_fraction(frequency) == 1:
         return t("Octave-band parameters", language)
     return t("One-third-octave-band parameters", language)
 
@@ -188,10 +186,12 @@ def _parameter_table(
     ts = np.asarray(result.ts, dtype=np.float64)
     n = t30.size
 
+    from ..metrology.frequencies import _infer_band_fraction
+
+    fraction = _infer_band_fraction(freq) if freq is not None else 1
     if freq is None:
         labels = [t("Broadband", language)] * n
     else:
-        fraction = _band_fraction(freq)
         labels = [
             _band_label(f, fraction) for f in np.asarray(freq, dtype=np.float64)
         ]
@@ -243,9 +243,11 @@ def _parameter_table(
         ("BOX", (0, 0), (-1, -1), 0.5, accent),
     ]
     # A one-third-octave set groups by octave (a thin rule after every triplet),
-    # exactly as accredited room-acoustics tables print it; an octave set (or a
-    # broadband single row) has no triplets to group.
-    if freq is not None and n > 6:
+    # exactly as accredited room-acoustics tables print it; an octave set or a
+    # broadband single row has no one-third-octave triplets to group, so the
+    # grouping rule is gated on the band structure actually being one-third
+    # octave rather than merely on the row count.
+    if freq is not None and fraction == 3:
         for triplet_end in range(3, n, 3):
             style_cmds.append(
                 ("LINEBELOW", (0, triplet_end), (-1, triplet_end), 0.4, thin)

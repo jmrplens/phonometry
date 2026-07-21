@@ -231,13 +231,19 @@ perceived *loudness level* in phons (the SPL of an equally loud 1 kHz tone).
 `equal_loudness_contour(phon)` evaluates ISO 226:2023 Formula (1) at the 29
 preferred third-octave frequencies of Table 1, `loudness_level(spl, frequency)`
 is the exact inverse (Formula 2), and `hearing_threshold()` returns the
-threshold-of-hearing column:
+threshold-of-hearing column. `equal_loudness_contours(phons)` bundles a whole
+family of contours with the threshold into a plottable `EqualLoudnessContours`
+result:
 
 ```python
 from phonometry import psychoacoustics
 
 freqs, spl = psychoacoustics.equal_loudness_contour(40.0)   # the classic 40-phon contour
 phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
+
+# The whole family (20-90 phon by default) plus the hearing threshold:
+res = psychoacoustics.equal_loudness_contours()
+res.plot()   # the iconic ISO 226 chart (needs matplotlib)
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" width="80%" />
@@ -249,7 +255,13 @@ phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 4
 import matplotlib.pyplot as plt
 from phonometry import psychoacoustics
 
-# ISO 226:2023 Formula (1) at the 29 preferred frequencies of Table 1
+# One line — the contour family straight from the result:
+res = psychoacoustics.equal_loudness_contours()
+res.plot()
+plt.show()
+
+# Or reproduce the figure by hand — ISO 226:2023 Formula (1) at the 29
+# preferred frequencies of Table 1, one contour per loudness level:
 fig, ax = plt.subplots()
 for phon in [20, 40, 60, 80, 90]:
     freqs, spl = psychoacoustics.equal_loudness_contour(float(phon))

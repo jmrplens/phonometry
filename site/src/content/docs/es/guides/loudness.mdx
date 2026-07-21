@@ -240,13 +240,19 @@ de sonoridad* percibido en fonios (el SPL de un tono de 1 kHz igual de fuerte).
 `equal_loudness_contour(phon)` evalúa la Fórmula (1) de ISO 226:2023 en las 29
 frecuencias preferentes de tercio de octava de la Tabla 1,
 `loudness_level(spl, frequency)` es la inversa exacta (Fórmula 2) y
-`hearing_threshold()` devuelve la columna del umbral de audición:
+`hearing_threshold()` devuelve la columna del umbral de audición.
+`equal_loudness_contours(phons)` agrupa toda una familia de curvas con el
+umbral en un resultado `EqualLoudnessContours` representable:
 
 ```python
 from phonometry import psychoacoustics
 
 freqs, spl = psychoacoustics.equal_loudness_contour(40.0)   # la clásica isofónica de 40 fonios
 phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonios
+
+# Toda la familia (20-90 fonios por defecto) más el umbral de audición:
+res = psychoacoustics.equal_loudness_contours()
+res.plot()   # el clásico gráfico de ISO 226 (necesita matplotlib)
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es.svg" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" width="80%" />
@@ -258,7 +264,13 @@ phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 4
 import matplotlib.pyplot as plt
 from phonometry import psychoacoustics
 
-# Fórmula (1) de ISO 226:2023 en las 29 frecuencias preferentes de la Tabla 1
+# Una línea — la familia de curvas directamente desde el resultado:
+res = psychoacoustics.equal_loudness_contours()
+res.plot()
+plt.show()
+
+# O reproduce la figura a mano — Fórmula (1) de ISO 226:2023 en las 29
+# frecuencias preferentes de la Tabla 1, una curva por nivel de sonoridad:
 fig, ax = plt.subplots()
 for phon in [20, 40, 60, 80, 90]:
     freqs, spl = psychoacoustics.equal_loudness_contour(float(phon))

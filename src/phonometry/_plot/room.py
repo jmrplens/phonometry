@@ -145,7 +145,17 @@ def plot_room_acoustics(
         use_freq_axis = False
     else:
         centers = np.asarray(freq, dtype=np.float64)
-        labels = [_format_freq(f) for f in centers]
+        # Label the categorical band axis with the standard nominal octave /
+        # one-third-octave centres (IEC 61260: 125, 250, 500, 1k, 2k, 4k), not
+        # the exact base-ten filter centres (125.89..., 1.99526k...), so the
+        # chart matches the nominal frequency table an ISO 3382 report prints.
+        from ..metrology.frequencies import _nominal_freq_for_band
+
+        fraction = 1 if centers.size < 2 or centers[1] / centers[0] > 1.5 else 3
+        labels = [
+            _format_freq(_nominal_freq_for_band(float(f), float(fraction)))
+            for f in centers
+        ]
         use_freq_axis = True
 
     positions = np.arange(n, dtype=np.float64)

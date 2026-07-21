@@ -333,3 +333,27 @@ def test_constant_noise_no_decay_is_finite_and_invalid() -> None:
     # Nothing overflowed to +/-inf (energy metrics stay finite).
     for arr in (res.edt, res.t20, res.t30, res.c50, res.c80, res.d50, res.ts):
         assert not np.any(np.isinf(arr))
+
+
+def test_band_plot_uses_nominal_frequency_labels() -> None:
+    """The per-band decay-time plot labels bars with nominal band centres.
+
+    The categorical octave axis must read the IEC 61260 nominal centres
+    (125, 250, 500, 1k, 2k, 4k), matching the nominal frequency table a
+    report prints, not the exact base-ten filter centres (125.89..., 1.99526k).
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    ir = multitone_ir(1.0, 3.0, [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+    res = room_parameters(ir, FS)
+    fig, ax = plt.subplots()
+    try:
+        res.plot(ax=ax)
+        labels = [tick.get_text() for tick in ax.get_xticklabels()]
+    finally:
+        plt.close(fig)
+    assert labels == ["125", "250", "500", "1k", "2k", "4k"]

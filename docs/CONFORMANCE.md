@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **374/374 conformance checks pass** across 46 domains and 238 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **377/377 conformance checks pass** across 47 domains and 241 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -517,6 +517,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60268-1:1985 Clause A2.1 / Table AII | 5 ms burst of 5 kHz tone at 48 kHz: gate RMS = A/sqrt(2) (integral periods) | 0.707107 (+/-0) | 0.707107 | 0 | &#9989; |
 | Harris 1978 closed form (DFT-even Hann) | Hann window ENBW = n*sum(w^2)/sum(w)^2 = 3/2 exactly | 1.5 (+/-0) | 1.5 | 0 | &#9989; |
 | Constant-power 1/n-octave kernel (closed form) | 1/3-octave smoothed line level = P*df/(f0*(2^(1/6)-2^(-1/6))) | 0.021592 (+/-1e-07%) | 0.021592 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Time-frequency analysis (Bendat &amp; Piersol)</b>: 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Bendat & Piersol, Random Data 4e Eq. (12.173) | Spectrogram of an on-bin tone reads its mean square A^2/2 in every column | 2 (+/-1e-07%) | 2 | 0 | &#9989; |
+| Parseval + COLA identity (Hann taper, 75% overlap) | Time-integrated STFT power = time-domain energy of an interior burst | 0.236151 (+/-1e-10%) | 0.236151 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Eqs. (11.128)-(11.130) | Zoom FFT tone amplitude = demodulate-decimate-DFT chain, machine precision | 0.7 (+/-1e-10%) | 0.7 | 0 | &#9989; |
 
 </details>
 

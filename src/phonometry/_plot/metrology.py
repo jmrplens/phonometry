@@ -1517,6 +1517,35 @@ _SEGMENT_LABELS = {
 }
 
 
+def _trend_verdict_label(
+    method: str, count: int, bounds: tuple[int, int], verdict: str,
+    language: str,
+) -> str:
+    """Legend label naming the count, acceptance region and verdict.
+
+    Shared by :func:`plot_trend_test` and :func:`plot_stationarity_test`,
+    which draw the same reverse-arrangement / runs statistic against their
+    own acceptance region.
+    """
+    template = (
+        "Reverse arrangements A = {a}, accept ({lo}, {hi}]: {verdict}"
+        if method == "reverse_arrangements"
+        else "Runs r = {r}, accept ({lo}, {hi}]: {verdict}"
+    )
+    return _t(
+        template, language, a=count, r=count,
+        lo=bounds[0], hi=bounds[1], verdict=verdict,
+    )
+
+
+def _draw_sequence_median(ax: Axes, median: float, language: str) -> None:
+    """Draw the runs-classification median as a dashed reference line."""
+    ax.axhline(
+        median, color=_C_REFERENCE, linestyle="--", lw=1.2,
+        label=_t("Sequence median", language),
+    )
+
+
 def plot_trend_test(
     result: "TrendTestResult", ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any
@@ -1545,14 +1574,8 @@ def plot_trend_test(
             _t("Trend test (Bendat & Piersol 4.5.2)", language)
         )
     verdict = _t("no trend" if result.trend_free else "trend", language)
-    template = (
-        "Reverse arrangements A = {a}, accept ({lo}, {hi}]: {verdict}"
-        if result.method == "reverse_arrangements"
-        else "Runs r = {r}, accept ({lo}, {hi}]: {verdict}"
-    )
-    label = _t(
-        template, language, a=result.statistic, r=result.statistic,
-        lo=result.bounds[0], hi=result.bounds[1], verdict=verdict,
+    label = _trend_verdict_label(
+        result.method, result.statistic, result.bounds, verdict, language
     )
     index = np.arange(1, result.n + 1)
     kwargs.setdefault("color", _C_PRIMARY)
@@ -1565,10 +1588,7 @@ def plot_trend_test(
         # *original* sequence (before values equal to it were discarded),
         # so draw that persisted classification median, not a median
         # recomputed on the filtered result.values.
-        ax.axhline(
-            result.median, color=_C_REFERENCE,
-            linestyle="--", lw=1.2, label=_t("Sequence median", language),
-        )
+        _draw_sequence_median(ax, result.median, language)
     ax.set_xlabel(_t("Sample index", language))
     ax.set_ylabel(_t("Sequence value", language))
     ax.grid(True, alpha=0.3)
@@ -1600,14 +1620,8 @@ def plot_stationarity_test(
     verdict = _t(
         "stationary" if result.stationary else "nonstationary", language
     )
-    template = (
-        "Reverse arrangements A = {a}, accept ({lo}, {hi}]: {verdict}"
-        if result.method == "reverse_arrangements"
-        else "Runs r = {r}, accept ({lo}, {hi}]: {verdict}"
-    )
-    label = _t(
-        template, language, a=result.count, r=result.count,
-        lo=result.bounds[0], hi=result.bounds[1], verdict=verdict,
+    label = _trend_verdict_label(
+        result.method, result.count, result.bounds, verdict, language
     )
     index = np.arange(1, result.n_segments + 1)
     kwargs.setdefault("color", _C_PRIMARY)
@@ -1616,9 +1630,8 @@ def plot_stationarity_test(
     kwargs.setdefault("ms", 4.5)
     ax.plot(index, result.segment_values, label=label, **kwargs)
     if result.method == "runs":
-        ax.axhline(
-            float(np.median(result.segment_values)), color=_C_REFERENCE,
-            linestyle="--", lw=1.2, label=_t("Sequence median", language),
+        _draw_sequence_median(
+            ax, float(np.median(result.segment_values)), language
         )
     ax.set_xlabel(_t("Segment index", language))
     ax.set_ylabel(_t(_SEGMENT_LABELS[result.statistic], language))

@@ -83,13 +83,24 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.1em 0.7em;
-  margin-block-start: 0.15em;
+  /* Indent the chip line to the right of where the label text starts, so it
+     reads as nested UNDER its item rather than as a separate sibling row.
+     Tight top margin keeps it visually bound to the label above it; wrapped
+     chips stay inside this same indent. */
+  margin-block-start: 0.1em;
+  margin-inline-start: 1em;
   line-height: 1.25;
   max-width: 100%;
 }
 
-/* The label may itself be long; let it wrap and keep the chips tidy. */
+/* The label may itself be long; let it wrap and keep the chips tidy. It is
+   set bold (semibold) so the item name reads as clearly distinct from its
+   muted, lighter chip sub-line. This matches the section headers' weight, but
+   the label's dimmer colour and the headers' larger size keep the hierarchy
+   section header > item label > chips. The active-item accent pill is
+   untouched, so the current page stays clearly indicated by its background. */
 .sidebar-item-label {
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 

@@ -249,6 +249,16 @@ this variant). This is the cleanest option that still keeps the
 standard-vs-reference distinction visible at rest, matching the maintainer's
 lean (own line + de-emphasised + subtle colour accent).
 
+Refinement (maintainer request): the leaf item label
+(`.sidebar-item-label`) is now semibold (`font-weight: 600`) so the item name
+reads as clearly distinct from its lighter (500) muted chips, and the chip
+line is indented `margin-inline-start: 1em` so it reads as nested UNDER its
+item rather than as a separate sibling row. Hierarchy still holds - section
+header (white, larger) > item label (gray-2, 600, 13px) > chips (gray-2, 500,
+smaller, dotted, indented). The active accent pill is untouched, so the
+current page stays clearly indicated. Screenshots: `variantA-refined-dark.png`
+and `variantA-refined-light.png`.
+
 ### Switchable variants (for comparison)
 
 All alternatives live behind a `data-chip-style` attribute on the root

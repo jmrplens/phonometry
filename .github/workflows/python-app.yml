@@ -128,7 +128,7 @@ jobs:
   # The committed documentation figures (.github/images) must match a fresh
   # `make graphs` run. The rendering + compute stack is pinned in
   # requirements-figures.txt so SVG *structure* (elements, text, colours) and
-  # PNG dimensions/encoding are stable -- matplotlib/fonttools/pillow fix the
+  # WebP dimensions/encoding are stable -- matplotlib/fonttools/pillow fix the
   # layout, numpy/scipy fix the computed data. The comparison itself
   # (scripts/check_figures.py) is tolerance-aware rather than a byte diff:
   # GitHub's heterogeneous runner CPUs shift a few path coordinates ~1 ULP,
@@ -159,7 +159,7 @@ jobs:
       # hardware-heterogeneous, so the pinned stack computes a few path
       # coordinates ~1 ULP apart depending on the CPU the run lands on. That
       # sub-pixel drift is irrelevant but breaks a byte diff; the script checks
-      # SVG structure + numeric tolerance and PNG RMS instead, so real figure
+      # SVG structure + numeric tolerance and raster RMS instead, so real figure
       # changes still fail while cross-CPU noise passes. See scripts/check_figures.py.
       run: python scripts/check_figures.py
 

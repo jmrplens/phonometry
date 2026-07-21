@@ -5,7 +5,7 @@
 // siblings are intentionally not emitted: every raster the site references
 // today is a social-card or manifest image whose consumers (Open Graph and
 // Twitter crawlers, web-app manifests) expect PNG/JPEG, and the content
-// figures are remote SVG/WebM, so there is no <img> that could take a
+// figures are remote SVG/WebP/WebM, so there is no <img> that could take a
 // <picture> WebP source with fallback.
 import { readdirSync, statSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, extname } from 'node:path';

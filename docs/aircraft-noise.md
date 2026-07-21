@@ -146,7 +146,7 @@ The example fiche is regenerated with `make reports` and kept rendered in the
 repository:
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/icao_epnl_example.pdf"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/icao_epnl_example.png" alt="One-page ICAO Annex 16 EPNL certification fiche: a metadata header, a reference-conditions strip, an intermediate-quantities table (PNLTM, duration correction D, 10 dB-down window), the landscape PNL/PNLT time-history plot, the boxed EPNL = 98.3 EPNdB single-number result and a PASS verdict against a 101 EPNdB limit" width="70%"></a>
+  <a href="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/icao_epnl_example.pdf"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/icao_epnl_example.webp" alt="One-page ICAO Annex 16 EPNL certification fiche: a metadata header, a reference-conditions strip, an intermediate-quantities table (PNLTM, duration correction D, 10 dB-down window), the landscape PNL/PNLT time-history plot, the boxed EPNL = 98.3 EPNdB single-number result and a PASS verdict against a 101 EPNdB limit" width="70%"></a>
 </p>
 
 ## 4. Measurement-system verification (IEC 61265)
@@ -306,8 +306,8 @@ baseline level (§4.3-4.5):
   are applied (Eq. 4-9).
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour_dark.png">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour.png" alt="Single-event SEL contour of a departure: an elongated footprint along the flight track, loudest near the ground roll and decaying as the aircraft climbs away" width="90%">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour_dark.webp">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour.webp" alt="Single-event SEL contour of a departure: an elongated footprint along the flight track, loudest near the ground roll and decaying as the aircraft climbs away" width="90%">
 </picture>
 
 <details>

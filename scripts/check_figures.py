@@ -17,9 +17,10 @@ committed versions (``git HEAD``) within a tolerance instead:
   must be identical, and every numeric token must agree within an absolute or
   relative tolerance. A moved element, changed label or new path fails; a
   last-bit coordinate wobble passes.
-* **PNG** -- identical dimensions, and *both* (a) at most ``PNG_MAX_SIG_PIXELS``
-  pixels whose per-channel difference exceeds ``PNG_LEVEL_TOL`` and (b) a
-  per-pixel root-mean-square difference below ``PNG_RMS_TOL``. The pixel count
+* **Raster (WebP/PNG)** -- identical dimensions, and *both* (a) at most
+  ``RASTER_MAX_SIG_PIXELS`` pixels whose per-channel difference exceeds
+  ``RASTER_LEVEL_TOL`` and (b) a per-pixel root-mean-square difference below
+  ``RASTER_RMS_TOL``. The pixel count
   catches a *localised* change (a moved line, a relabelled axis) that a global
   RMS would dilute in a large image; the RMS catches a *broad* change (a
   recoloured background) that few-but-everywhere pixels would slip past the
@@ -54,18 +55,18 @@ SVG_ABS_TOL = 1e-2
 SVG_REL_TOL = 1e-4
 
 # A pixel counts as "meaningfully changed" if any channel differs by more than
-# PNG_LEVEL_TOL (0..255). Cross-CPU drift perturbs a coordinate by ~1e-6 units,
+# RASTER_LEVEL_TOL (0..255). Cross-CPU drift perturbs a coordinate by ~1e-6 units,
 # i.e. a ~1e-5-pixel geometric shift, whose anti-aliasing effect rounds to at
 # most a level or two on a few edge pixels -- far below this threshold.
-PNG_LEVEL_TOL = 12
+RASTER_LEVEL_TOL = 12
 # Allowed number of meaningfully-changed pixels. A real edit moves a plotted
 # line or glyph, changing hundreds to thousands of edge pixels; noise changes
 # a handful at most.
-PNG_MAX_SIG_PIXELS = 100
+RASTER_MAX_SIG_PIXELS = 100
 # Broad-change guard: maximum root-mean-square per-channel difference. Catches
 # a change spread thinly over the whole image (e.g. a recoloured background)
-# that stays individually under PNG_LEVEL_TOL.
-PNG_RMS_TOL = 2.0
+# that stays individually under RASTER_LEVEL_TOL.
+RASTER_RMS_TOL = 2.0
 
 # Integers and decimals, with optional sign and exponent. ``split``/``findall``
 # with this pattern partition a file into fixed text and numeric values.
@@ -134,19 +135,20 @@ def _svg_within_tolerance(old: bytes, new: bytes) -> bool:
     return True
 
 
-def _png_problem(old: bytes, new: bytes) -> str | None:
-    """Describe how two PNGs differ beyond tolerance, or ``None`` if within it."""
+def _raster_problem(old: bytes, new: bytes) -> str | None:
+    """Describe how two rasters differ beyond tolerance, or ``None`` if within it."""
     a = np.asarray(Image.open(io.BytesIO(old)).convert("RGBA"), dtype=np.float64)
     b = np.asarray(Image.open(io.BytesIO(new)).convert("RGBA"), dtype=np.float64)
     if a.shape != b.shape:
         return f"dimensions changed {a.shape} != {b.shape}"
     diff = np.abs(a - b)
-    sig_pixels = int(np.count_nonzero(diff.max(axis=-1) > PNG_LEVEL_TOL))
-    if sig_pixels > PNG_MAX_SIG_PIXELS:
-        return f"{sig_pixels} pixels changed by >{PNG_LEVEL_TOL} (> {PNG_MAX_SIG_PIXELS})"
+    sig_pixels = int(np.count_nonzero(diff.max(axis=-1) > RASTER_LEVEL_TOL))
+    if sig_pixels > RASTER_MAX_SIG_PIXELS:
+        return (f"{sig_pixels} pixels changed by >{RASTER_LEVEL_TOL} "
+                f"(> {RASTER_MAX_SIG_PIXELS})")
     rms = float(np.sqrt(np.mean(diff**2)))
-    if rms > PNG_RMS_TOL:
-        return f"RMS {rms:.3f} > {PNG_RMS_TOL}"
+    if rms > RASTER_RMS_TOL:
+        return f"RMS {rms:.3f} > {RASTER_RMS_TOL}"
     return None
 
 
@@ -171,10 +173,10 @@ def main() -> int:
         if path.endswith(".svg"):
             if not _svg_within_tolerance(old, new):
                 problems.append(f"SVG changed beyond tolerance: {path}")
-        elif path.endswith(".png"):
-            reason = _png_problem(old, new)
+        elif path.endswith((".webp", ".png")):
+            reason = _raster_problem(old, new)
             if reason is not None:
-                problems.append(f"PNG changed beyond tolerance ({reason}): {path}")
+                problems.append(f"raster changed beyond tolerance ({reason}): {path}")
         else:
             problems.append(f"asset changed: {path}")
 

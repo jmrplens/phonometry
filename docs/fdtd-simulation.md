@@ -139,7 +139,7 @@ frequencies at once** (a pulse excites the whole band; one FFT of a probe
 yields the spectrum), where a frequency-domain method needs one solve per
 frequency.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation.png" alt="Two panels. Left: a snapshot of the pressure field in a 3 by 2 metre domain with a thin vertical rigid barrier, showing the direct wavefront, the reflection travelling back towards the source and the wave diffracted around the barrier edge, with the source marked by a star and two probes by dots. Right: the pressure history at both probes; the line-of-sight probe shows the direct pulse and the barrier reflection, the shadowed probe a weaker, delayed diffracted arrival" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation.webp" alt="Two panels. Left: a snapshot of the pressure field in a 3 by 2 metre domain with a thin vertical rigid barrier, showing the direct wavefront, the reflection travelling back towards the source and the wave diffracted around the barrier edge, with the source marked by a star and two probes by dots. Right: the pressure history at both probes; the line-of-sight probe shows the direct pulse and the barrier reflection, the shadowed probe a weaker, delayed diffracted arrival" width="96%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>

@@ -52,12 +52,12 @@ sonar:
 	@if [ -f .env ]; then export $$(cat .env | xargs) && $(PNPM) exec sonar-scanner; else $(PNPM) exec sonar-scanner; fi
 
 graphs:
-	# Clear the generated SVG/PNG first so a figure that is no longer produced
+	# Clear the generated SVG/WebP first so a figure that is no longer produced
 	# is actually removed (the generators only overwrite, never delete, so a
 	# stale orphan would otherwise survive and slip past the staleness check).
 	# Animations (*.gif/*.webm) come from the separate `animations` target and
 	# are deliberately preserved.
-	find .github/images -maxdepth 1 -type f \( -name '*.svg' -o -name '*.png' \) -delete
+	find .github/images -maxdepth 1 -type f \( -name '*.svg' -o -name '*.png' -o -name '*.webp' \) -delete
 	$(FIGURE_ENV) $(PYTHON) scripts/generate_graphs.py
 	$(FIGURE_ENV) $(PYTHON) scripts/generate_diagrams.py
 

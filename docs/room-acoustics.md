@@ -93,7 +93,7 @@ unchanged) that also carries the sample rate and method and adds an `.plot()`.
 spectrum over the whole signal, while the MLS is a flat-spectrum two-level
 sequence, visible as the near-constant magnitude on the right.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals.png" alt="ISO 18233 excitation signals: the exponential sine sweep waveform and its spectrogram showing the exponential frequency rise, and a maximum-length sequence with its flat magnitude spectrum" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals.webp" alt="ISO 18233 excitation signals: the exponential sine sweep waveform and its spectrogram showing the exponential frequency rise, and a maximum-length sequence with its flat magnitude spectrum" width="96%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -135,7 +135,7 @@ whose slope becomes the reverberation time in §2.
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution.webm)
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response.png" alt="Recovered room impulse response: the normalized waveform with the direct sound and reflections labelled, and below it the log-magnitude envelope in dB with the Schroeder energy-decay curve" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response.webp" alt="Recovered room impulse response: the normalized waveform with the direct sound and reflections labelled, and below it the log-magnitude envelope in dB with the Schroeder energy-decay curve" width="88%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -274,7 +274,7 @@ D50 0.05, Ts 10 ms) that sets how precisely it is worth reporting.
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder.webm)
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay.png" alt="Squared impulse response with its Schroeder backward-integrated decay curve, and the EDT, T20 and T30 regression windows marked" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay.webp" alt="Squared impulse response with its Schroeder backward-integrated decay curve, and the EDT, T20 and T30 regression windows marked" width="80%"></picture>
 
 *The jagged squared IR (grey) integrates to the smooth Schroeder curve
 (blue); the EDT, T20 and T30 windows are fitted on that curve and each

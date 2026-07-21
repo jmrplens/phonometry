@@ -1,0 +1,144 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Tests for the ISO 354 sound-absorption test report (``.report()`` -> PDF).
+
+The report is a rendering feature, so these tests assert only structural
+facts: a valid single-page PDF is written for a reverberation-room measurement,
+the displayed one-third-octave values match the closed-form ISO 354 oracle,
+the verbose detail table stays on one page, unknown engines are rejected, and
+XML specials in metadata do not break reportlab. Pixel or layout content is
+never inspected.
+"""
+
+from __future__ import annotations
+
+import pytest
+
+pytest.importorskip("reportlab")
+
+import numpy as np  # noqa: E402  (import after importorskip)
+
+from phonometry import ReportMetadata  # noqa: E402  (import after importorskip)
+from phonometry.materials import measure_sound_absorption  # noqa: E402
+
+_PDF_MAGIC = b"%PDF"
+
+# The committed clean-room example (V = 200 m3, S = 10.8 m2, 20 degC -> c = 343,
+# m = 0); alpha_s(500 Hz) = 0.33 and alpha_s(1000 Hz) = 0.61 by Eq. (8)/(9).
+_FREQS = np.array(
+    [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+     1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000],
+    dtype=float,
+)
+_T1 = np.array([9.0, 9.0, 8.8, 8.6, 8.4, 8.2, 8.0, 7.8, 7.5, 7.2,
+                6.9, 6.6, 6.2, 5.8, 5.4, 5.0, 4.6, 4.2])
+_T2 = np.array([8.4, 8.2, 7.7, 7.2, 6.5, 5.7, 4.9, 4.2, 3.6, 3.15,
+                2.85, 2.65, 2.55, 2.5, 2.55, 2.6, 2.7, 2.85])
+
+
+def _result():
+    return measure_sound_absorption(
+        _FREQS, _T1, _T2, volume=200.0, area=10.8, temperature=20.0,
+        humidity=54.0,
+    )
+
+
+def _metadata(**overrides) -> ReportMetadata:
+    base = dict(
+        specimen="50 mm porous absorber over a 100 mm air gap",
+        client="Acoustic Test Client Ltd.",
+        manufacturer="Acoustics Works Inc.",
+        mounting="Type A (against a rigid wall)",
+        test_room="Reverberation room R1",
+        measurement_standard="ISO 354",
+        pressure=101.0,
+        test_date="2026-07-21",
+        laboratory="Phonometry Reference Laboratory",
+        operator="J. M. Requena-Plens",
+        report_id="PHN-2026-354",
+    )
+    base.update(overrides)
+    return ReportMetadata(**base)
+
+
+def _assert_one_page(path: str) -> None:
+    from pypdf import PdfReader
+
+    with open(path, "rb") as handle:
+        assert handle.read(4) == _PDF_MAGIC
+    assert len(PdfReader(path).pages) == 1
+
+
+def _text(path: str) -> str:
+    from pypdf import PdfReader
+
+    return "\n".join(
+        page.extract_text() for page in PdfReader(path).pages
+    ).replace("\n", " ")
+
+
+def test_report_writes_one_page_pdf(tmp_path) -> None:
+    out = tmp_path / "iso354.pdf"
+    returned = _result().report(str(out))
+    assert returned == str(out)
+    _assert_one_page(str(out))
+
+
+def test_report_with_metadata_one_page(tmp_path) -> None:
+    out = tmp_path / "iso354_meta.pdf"
+    _result().report(str(out), metadata=_metadata())
+    _assert_one_page(str(out))
+
+
+def test_unknown_engine_rejected(tmp_path) -> None:
+    with pytest.raises(ValueError, match="engine"):
+        _result().report(str(tmp_path / "x.pdf"), engine="weasyprint")
+
+
+def test_unknown_language_rejected(tmp_path) -> None:
+    with pytest.raises(ValueError, match="Unknown language"):
+        _result().report(str(tmp_path / "x.pdf"), language="xx")
+
+
+def test_displayed_alpha_s_matches_oracle(tmp_path) -> None:
+    """The fiche prints the closed-form alpha_s and the band labels."""
+    out = tmp_path / "iso354.pdf"
+    _result().report(str(out), metadata=_metadata())
+    text = _text(str(out))
+    assert "0.33" in text  # alpha_s(500 Hz)
+    assert "0.61" in text  # alpha_s(1000 Hz)
+    assert "500" in text and "1000" in text  # band labels
+    assert "343" in text  # speed of sound c (Eq. (6))
+
+
+def test_verbose_shows_areas_and_times_one_page(tmp_path) -> None:
+    """verbose=True adds the T1/T2/A1/A2 columns and stays one page."""
+    out = tmp_path / "iso354_verbose.pdf"
+    _result().report(str(out), metadata=_metadata(), verbose=True)
+    _assert_one_page(str(out))
+    text = _text(str(out))
+    assert "7.80" in text  # T1(500 Hz)
+    assert "7.7" in text   # A2(500 Hz) = 7.677 m2 rounded to 0.1
+
+
+def test_metadata_xml_specials_do_not_break(tmp_path) -> None:
+    out = tmp_path / "iso354_xml.pdf"
+    _result().report(
+        str(out), metadata=_metadata(specimen="Panel <A> & <B> \"edge\"")
+    )
+    _assert_one_page(str(out))
+
+
+def test_no_metadata_still_renders(tmp_path) -> None:
+    """Without metadata the body still shows the result's physical conditions."""
+    out = tmp_path / "iso354_bare.pdf"
+    _result().report(str(out))
+    _assert_one_page(str(out))
+    assert "343" in _text(str(out))  # speed of sound from the result
+
+
+def test_spanish_fiche_uses_comma_decimal(tmp_path) -> None:
+    out = tmp_path / "iso354_es.pdf"
+    _result().report(str(out), metadata=_metadata(), language="es")
+    _assert_one_page(str(out))
+    assert "0,33" in _text(str(out))  # Spanish decimal comma

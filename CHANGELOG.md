@@ -1143,6 +1143,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   adding the `T1`/`T2` and `A1`/`A2` detail columns). ISO 354 is a
   characterisation, so the fiche has no single-number rating and no pass/fail
   verdict; the weighted `alpha_w` remains the separate ISO 11654 rating.
+- `RoomAcousticsResult.report()`: a one-page PDF room acoustic parameters
+  measurement fiche (ISO 3382-1:2009 performance spaces, ISO 3382-2:2008
+  ordinary rooms, both by the integrated impulse-response method). It renders
+  the standard-basis line, an optional metadata header, the full-width per-band
+  parameter table (T20, T30, EDT, C50, C80, D50 and Ts, one row per octave or
+  one-third-octave band) above the result's own per-band decay-time plot, and
+  the boxed mid-frequency reverberation time T_mid (the mean of the 500 Hz and
+  1000 Hz octave T30). ISO 3382-1/-2 are characterisation standards with no
+  intrinsic pass/fail, so the verdict row appears only when a target T_mid is
+  supplied through `ReportMetadata.requirement` (read as the maximum acceptable
+  T_mid). Uses the same `ReportMetadata` container and reportlab engine as the
+  ISO 717 / ISO 11654 fiches, in English or Spanish (`language="es"`). The
+  committed example fiche renders an auditorium octave-band measurement whose
+  synthetic single-slope decay fixes the reverberation-time columns at their
+  closed-form values (T20 = T30 = EDT = T per band, since a pure exponential
+  energy decay gives the straight Schroeder line L(t) = -60 t / T of
+  ISO 3382-1:2009, 5.3.3).
+- `ReportMetadata`: three room-acoustics fields, `room_volume` (the volume of
+  the single room under test, in m^3; ISO 3382-2:2008 Clause 9), and the
+  `source_positions` / `receiver_positions` counts (ISO 3382-1:2009 Table 1 and
+  ISO 3382-2:2008 Clause 8), populating the room fiche header. `room_volume` is
+  validated as a finite positive number and the position counts as positive
+  integers, matching the existing field-validation style.
 
 ### Changed
 - Raised the `scipy` floor in `pyproject.toml` to `scipy>=1.18.0`, the minimum

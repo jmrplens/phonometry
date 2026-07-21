@@ -695,6 +695,9 @@ ReportMetadata(
     mass_per_area: float | None = None,
     source_volume: float | None = None,
     receiving_volume: float | None = None,
+    room_volume: float | None = None,
+    source_positions: int | None = None,
+    receiver_positions: int | None = None,
     temperature: float | None = None,
     relative_humidity: float | None = None,
     source_temperature: float | None = None,
@@ -740,6 +743,9 @@ within 0..100 %. A violation raises `ValueError`.
 | `mass_per_area` | Measured mass per unit area, in kg/m^2. |
 | `source_volume` | Source-room volume, in m^3. |
 | `receiving_volume` | Receiving-room volume, in m^3. |
+| `room_volume` | Volume of the single room under test, in m^3. Room acoustics (ISO 3382-1/-2) characterises one enclosure rather than a source/receiving pair, and ISO 3382-2:2008 Clause 9 requires the room volume to be reported; the room-acoustics fiche prints it in the header. Distinct from the `source_volume`/`receiving_volume` pair, which describe a sound-transmission measurement. |
+| `source_positions` | Number of source (loudspeaker/omnidirectional) positions used in the measurement, an integer (ISO 3382-1:2009 Table 1 and ISO 3382-2:2008 Clause 8 require reporting the number of source positions). Printed by the room-acoustics fiche. |
+| `receiver_positions` | Number of microphone (receiver) positions used, an integer (ISO 3382-1:2009 Table 1 and ISO 3382-2:2008 Clause 8 require reporting the number of microphone positions). Printed by the room-acoustics fiche. |
 | `temperature` | Air temperature during the test, in degrees Celsius (a single representative value; use the per-room fields below when the source and receiving rooms are reported separately). |
 | `relative_humidity` | Relative humidity during the test, in %. |
 | `source_temperature` | Source-room air temperature, in degrees Celsius. |
@@ -764,7 +770,7 @@ within 0..100 %. A violation raises `ValueError`.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a supplied dimension/mass/volume/pressure is not finite and strictly positive, a temperature or requirement is not finite, a relative humidity is outside 0..100 %, or a required class is not one of 0, 1, 2. |
+| ValueError | If a supplied dimension/mass/volume/pressure is not finite and strictly positive, a temperature or requirement is not finite, a relative humidity is outside 0..100 %, or a required class is not one of 0, 1, 2, or a position count is not a finite, positive integer. |
 
 ### ReportMetadata.is_empty()
 

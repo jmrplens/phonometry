@@ -51,6 +51,43 @@ _VERDICT_OK_HEX = "#1b6e2f"
 _VERDICT_BAD_HEX = "#a11a1a"
 
 
+def escaped_pairs(
+    specs: List[Tuple[str, str | None]],
+) -> List[Tuple[str, str]]:
+    """Drop unset pairs and XML-escape the user-supplied metadata values.
+
+    Every fiche builds its header grid from an ordered list of
+    ``(label, value)`` pairs where a ``None`` value means the field was not
+    supplied. This keeps only the supplied pairs and escapes the value (free
+    client text) so a stray ``&`` or ``<`` cannot break reportlab's
+    ``Paragraph`` parser; the labels are fixed and carry intentional markup, so
+    they are left untouched.
+    """
+    return [
+        (label, html.escape(str(value)))
+        for label, value in specs
+        if value is not None
+    ]
+
+
+def measurement_basis_style() -> Any:
+    """The muted footnote style for the measurement-basis strip under a fiche.
+
+    The stacked-layout fiches (programme loudness, room acoustics ...) close
+    with one or two small grey lines stating the measurement basis; the style
+    is identical, so it is built once here. Called only after the renderer has
+    imported reportlab.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+
+    return ParagraphStyle(
+        "fiche_measurement_basis", parent=getSampleStyleSheet()["Normal"],
+        fontSize=7.5, leading=10, textColor=colors.HexColor(_MUTED_HEX),
+        spaceBefore=6,
+    )
+
+
 def fmt_num(value: float, language: str = "en") -> str:
     """Format a number with up to one decimal, dropping a trailing ``.0``.
 

@@ -45,6 +45,7 @@ PAGES = [
     ("calibration.md", "guides/calibration"),
     ("data-qualification.md", "guides/data-qualification"),
     ("spectral-analysis.md", "guides/spectral-analysis"),
+    ("miso-coherence.md", "guides/miso-coherence"),
     ("correlation-delay.md", "guides/correlation-delay"),
     ("test-signals.md", "guides/test-signals"),
     ("cepstrum-echoes.md", "guides/cepstrum-echoes"),

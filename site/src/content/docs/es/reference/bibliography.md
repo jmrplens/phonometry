@@ -53,6 +53,16 @@ que las guías incorporan sus secciones de Referencias.
   Tratamiento gratuito y complementario del diseño y análisis de filtros
   digitales, el paso natural tras las guías de bancos de filtros.
   Citado por [Bancos de filtros](/phonometry/es/guides/filter-banks/).
+- Bendat, J. S., & Piersol, A. G. (2010). *Random data: Analysis and
+  measurement procedures* (4.a ed.). Wiley. ISBN 978-0-470-24877-5.
+  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
+  La referencia de los estimadores espectrales de Welch y su calidad
+  estadística, y de las funciones de coherencia de sistemas de entradas
+  múltiples del capítulo 7 (coherencia múltiple y parcial, espectros
+  condicionados) con las fórmulas de error de la sección 9.3 que implementa
+  `miso_coherence`.
+  Citado por [Análisis espectral calibrado](/phonometry/es/guides/spectral-analysis/)
+  y [Coherencia múltiple y parcial](/phonometry/es/guides/miso-coherence/).
 - Thomson, D. J. (1982). Spectrum estimation and harmonic analysis.
   *Proceedings of the IEEE*, 70(9), 1055-1096.
   [doi:10.1109/PROC.1982.12433](https://doi.org/10.1109/PROC.1982.12433).

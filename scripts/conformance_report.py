@@ -4573,6 +4573,110 @@ def _chk_multitaper_adaptive_dof() -> Outcome:
 
 
 # ===========================================================================
+# Multiple-input/output coherence (Bendat & Piersol, Random Data 4e, Ch. 7)
+# ===========================================================================
+_MISO = "Multiple-input coherence (Bendat & Piersol)"
+
+
+def _miso_problem_7_2() -> tuple[float, float, float]:
+    """Conditioned spectra of Problem 7.2 via the public conditioning path.
+
+    Returns ``(Gv1, Gv2, gamma2_2y.1)`` computed by the module's
+    Gaussian-elimination conditioning on the hand-set augmented matrix.
+    """
+    from phonometry.metrology.miso import _condition
+
+    mat = np.zeros((1, 3, 3), dtype=np.complex128)
+    mat[0, 0, 0] = 3.0
+    mat[0, 1, 1] = 2.0
+    mat[0, 2, 2] = 10.0
+    mat[0, 0, 1] = 1.0 + 1.0j
+    mat[0, 1, 0] = 1.0 - 1.0j
+    mat[0, 0, 2] = 4.0 + 1.0j
+    mat[0, 2, 0] = 4.0 - 1.0j
+    mat[0, 1, 2] = 3.0 - 1.0j
+    mat[0, 2, 1] = 3.0 + 1.0j
+    partial, coherent, _noise = _condition(mat, (0, 1))
+    return float(coherent[0, 0]), float(coherent[1, 0]), float(partial[1, 0])
+
+
+@register(
+    _MISO,
+    "Bendat & Piersol, Random Data 4e Problem 7.2 / Eqs. (7.86)/(7.94)",
+    "Conditioned coherent output of the 2nd input abs(G2y.1)^2/G22.1 = 4/3 exactly",
+)
+def _chk_miso_problem_7_2_conditioned() -> Outcome:
+    _gv1, gv2, _p2 = _miso_problem_7_2()
+    return numeric(4.0 / 3.0, gv2, 1e-12, places=9)
+
+
+@register(
+    _MISO,
+    "Bendat & Piersol, Random Data 4e Problem 7.2 / Eqs. (7.87)/(7.116)",
+    "Partial coherence gamma^2_2y.1 = 2/15 and multiple coherence = 0.7",
+)
+def _chk_miso_problem_7_2_multiple() -> Outcome:
+    gv1, gv2, _p2 = _miso_problem_7_2()
+    # gamma^2_{y:x} = (Gv1 + Gv2)/Gyy = (17/3 + 4/3)/10 = 0.7 (Eq. 7.116).
+    return numeric(0.7, (gv1 + gv2) / 10.0, 1e-12, places=9)
+
+
+@register(
+    _MISO,
+    "Bendat & Piersol, Random Data 4e Eq. (7.35) with Eqs. (6.40)/(6.41)",
+    "Multiple coherence of a known-SNR system: gamma^2_{y:x} = SNR/(1+SNR)",
+)
+def _chk_miso_multiple_snr() -> Outcome:
+    fs = _spectra_fs()
+    x1 = _spectra_white(201)
+    x2 = _spectra_white(202)
+    noise = ph.noise_signal(fs, 4.0, color="white", rms=0.5, seed=203)
+    res = ph.miso_coherence([x1, x2], x1 + x2 + noise, fs, nperseg=1024)
+    band = (res.frequencies > 200.0) & (res.frequencies < 3800.0)
+    snr = 2.0 / 0.25  # Gvv = 2*sigma^2, Gnn = 0.5^2, both flat
+    return numeric(
+        snr / (1.0 + snr),
+        float(np.median(res.multiple_coherence[band])),
+        0.03,
+        places=4,
+    )
+
+
+@register(
+    _MISO,
+    "Bendat & Piersol, Random Data 4e Eq. (7.117)",
+    "Uncorrelated inputs: multiple coherence = sum of ordinary coherences",
+)
+def _chk_miso_independent_sum() -> Outcome:
+    fs = _spectra_fs()
+    x1 = _spectra_white(211)
+    x2 = _spectra_white(212)
+    noise = ph.noise_signal(fs, 4.0, color="white", rms=0.4, seed=213)
+    res = ph.miso_coherence([x1, x2], x1 + 0.7 * x2 + noise, fs, nperseg=1024)
+    band = (res.frequencies > 200.0) & (res.frequencies < 3800.0)
+    diff = (res.multiple_coherence
+            - res.ordinary_coherence.sum(axis=0))[band]
+    # O(q/nd) coherence bias (Section 9.3); nd is a few hundred here.
+    return numeric(0.0, float(np.median(diff)), 0.02, places=4)
+
+
+@register(
+    _MISO,
+    "Bendat & Piersol, Random Data 4e Eqs. (7.88)/(7.121)",
+    "Output-power decomposition Gyy = sum of Gvi + Gnn (exact)",
+)
+def _chk_miso_output_decomposition() -> Outcome:
+    fs = _spectra_fs()
+    x1 = _spectra_white(221)
+    x2 = 0.5 * x1 + _spectra_white(222)
+    noise = ph.noise_signal(fs, 4.0, color="white", rms=0.3, seed=223)
+    res = ph.miso_coherence([x1, x2], x1 + x2 + noise, fs, nperseg=1024)
+    reconstructed = res.coherent_output_spectra.sum(axis=0) + res.noise_psd
+    resid = float(np.max(np.abs(reconstructed - res.output_psd)))
+    return numeric(0.0, resid, 1e-12, places=12)
+
+
+# ===========================================================================
 # Time-frequency analysis (Bendat & Piersol, Random Data 4e)
 # ===========================================================================
 _TIME_FREQ = "Time-frequency analysis (Bendat & Piersol)"

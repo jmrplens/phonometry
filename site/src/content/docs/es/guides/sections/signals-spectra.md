@@ -81,13 +81,16 @@ estimaciones.
   PSD/CSD de Welch con intervalos de confianza chi-cuadrado, el espectro de
   salida coherente y la SNR espectral, suavizado en 1/n de octava y
   generadores de ruido de colores con pendiente exacta.
+- [Coherencia múltiple y parcial](/phonometry/es/guides/miso-coherence/):
+  las funciones de coherencia de entradas múltiples de Bendat y Piersol para
+  dos o tres fuentes correladas y una salida, con el condicionamiento por
+  eliminación de Gauss que distingue una causa real de una fuente que solo
+  correla con ella, y los espectros de salida coherente parciales que indican
+  qué fuente domina cada banda.
 - [Análisis tiempo-frecuencia](/phonometry/es/guides/time-frequency/): el
   espectrograma STFT calibrado en unidades absolutas (dB SPL para pascales)
   con el compromiso de resolución tiempo-frecuencia, y la FFT con zoom que
   resuelve tonos más próximos que un bin práctico de FFT.
-  salida coherente y la SNR espectral, suavizado en 1/n de octava,
-  generadores de ruido de colores con pendiente exacta y las figuras de
-  mérito de Harris para las ventanas.
 - [Cepstro, ecos y espectro de la envolvente](/phonometry/es/guides/cepstrum-echoes/):
   el cepstro de potencia/real/complejo con análisis de quefrencia, detección
   de ecos con el coeficiente de reflexión leído en el pico, liftering paso

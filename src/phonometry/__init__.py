@@ -256,6 +256,10 @@ from .metrology.inversion import (
     InverseFilterResult,
     regularized_inverse_filter,
 )
+from .metrology.miso import (
+    MISOCoherenceResult,
+    miso_coherence,
+)
 from .metrology.cepstrum import (
     CepstrumResult,
     EchoDetectionResult,
@@ -1411,8 +1415,10 @@ __all__ = [
     "EnvelopeSpectrumResult",
     "CepstrumResult",
     "LifterResult",
+    "MISOCoherenceResult",
     "EchoDetectionResult",
     "minimum_phase",
+    "miso_coherence",
     "group_delay",
     "excess_phase",
     "phase_decomposition",

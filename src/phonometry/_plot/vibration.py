@@ -65,7 +65,7 @@ _STRINGS: dict[str, str] = {
     "Probability of lumbar injury [%]": "Probabilidad de lesión lumbar [%]",
     "ISO 7626-1 mechanical mobility": "ISO 7626-1 movilidad mecánica",
     "ISO 7626-2 rigid-mass calibration check": "ISO 7626-2 verificación de calibración con masa rígida",
-    "Accelerance $|A|$ [1/kg]": "Accelerancia $|A|$ [1/kg]",
+    "Accelerance $|A|$ [1/kg]": "Acelerancia $|A|$ [1/kg]",
     "Deviation [%]": "Desviación [%]",
     r"expected $|A| = 1/m$": r"esperado $|A| = 1/m$",
     r"expected $|Y| = 1/(2\pi f m)$": r"esperado $|Y| = 1/(2\pi f m)$",
@@ -307,7 +307,9 @@ def plot_rigid_mass_calibration(
     :param ax: Existing axes for the deviation panel, or ``None`` for a fresh
         two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
-    :param kwargs: Forwarded to the measured-magnitude ``plot`` (primary artist).
+    :param kwargs: Forwarded to the primary artist: the measured-magnitude
+        curve for the full two-panel figure, or the deviation curve when ``ax``
+        is supplied.
     :return: The deviation axes (``ax`` given) or the two-axes array.
     """
     from .._i18n import format_number, localize_axes
@@ -331,12 +333,13 @@ def plot_rigid_mass_calibration(
     within_label = _t("measured (within tolerance)", language)
     outside_label = _t("measured (out of tolerance)", language)
 
-    def _deviation_panel(axd: Axes) -> None:
+    def _deviation_panel(axd: Axes, **line_kwargs: Any) -> None:
         axd.axhspan(-tol_pct, tol_pct, color=_C_REFERENCE, alpha=0.15,
                     label=band_label)
         axd.axhline(0.0, color=_C_MUTED, ls=":", lw=0.9)
-        axd.semilogx(freq, 100.0 * deviation, "-", color=_C_PRIMARY, lw=1.4,
-                     zorder=2)
+        line_kwargs.setdefault("color", _C_PRIMARY)
+        axd.semilogx(freq, 100.0 * deviation, "-", lw=1.4, zorder=2,
+                     **line_kwargs)
         axd.plot(freq[within], 100.0 * deviation[within], "o", color=_C_PRIMARY,
                  zorder=3, label=within_label)
         if not np.all(within):
@@ -348,7 +351,7 @@ def plot_rigid_mass_calibration(
         axd.legend(loc="best", fontsize="small")
 
     if ax is not None:
-        _deviation_panel(ax)
+        _deviation_panel(ax, **kwargs)
         format_frequency_axis(ax, fmin, fmax)
         localize_axes(ax, language)
         return ax

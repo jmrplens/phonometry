@@ -333,7 +333,7 @@ _ES_EXACT = {
     "Receptance $|H|$ (× k)": "Receptancia $|H|$ (× k)",
     r"Mobility $|Y|$ (× k/$\omega_0$)": r"Movilidad $|Y|$ (× k/$\omega_0$)",
     r"Accelerance $|A|$ (× k/$\omega_0^2$)":
-        r"Accelerancia $|A|$ (× k/$\omega_0^2$)",
+        r"Acelerancia $|A|$ (× k/$\omega_0^2$)",
     "resonance $f_0$": "resonancia $f_0$",
     # transfer_stiffness figure (ISO 10846)
     "ISO 10846 Dynamic Transfer Stiffness":
@@ -347,7 +347,7 @@ _ES_EXACT = {
     # rigid_mass_calibration figure (ISO 7626-2, 7.5.2)
     "ISO 7626-2 Rigid-Mass Calibration Check":
         "Verificación de calibración con masa rígida ISO 7626-2",
-    "Accelerance $|A|$ [1/kg]": "Accelerancia $|A|$ [1/kg]",
+    "Accelerance $|A|$ [1/kg]": "Acelerancia $|A|$ [1/kg]",
     "Deviation [%]": "Desviación [%]",
     r"expected $|A| = 1/m$": r"esperado $|A| = 1/m$",
     r"$\pm$5 % tolerance band": r"banda de tolerancia $\pm$5 %",

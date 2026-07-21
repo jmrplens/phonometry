@@ -498,6 +498,7 @@ TrendTestResult(
     p_value: float,
     trend_free: bool,
     alpha: float,
+    median: float | None = None,
 )
 ```
 
@@ -523,3 +524,33 @@ two-sided tail probability of the observed count.
 | `p_value` | Two-sided p-value from the exact null distribution (normal approximation above `n = 100` for reverse arrangements). |
 | `trend_free` | `True` when the statistic falls inside the acceptance region. |
 | `alpha` | Significance level of the region (default 0.05). |
+| `median` | For `"runs"`, the median of the *original* sequence against which each value was classified (before values equal to it were discarded); `None` for `"reverse_arrangements"`. |
+
+### TrendTestResult.plot()
+
+```python
+TrendTestResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the tested sequence against its sample index with the verdict.
+
+Draws the sequence of observations against a plain sample index and
+states the outcome in the legend: the reverse-arrangement count
+`A` (or the run count `r`), the acceptance region and whether
+the no-trend hypothesis is accepted. For the runs test the
+classification median is drawn as a reference line.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing `Axes` to draw on, or `None` (default) to create a fresh figure and axes. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Extra keyword arguments forwarded to the sequence `plot` call (e.g. `color`, `lw`, `marker`). |
+
+**Returns:** The `Axes` the sequence was drawn on, so the figure can be composed further.

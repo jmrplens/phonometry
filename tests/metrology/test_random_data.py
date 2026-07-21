@@ -396,6 +396,46 @@ def test_peak_statistics_validation_and_fields() -> None:
 # ---------------------------------------------------------------------------
 
 
+def test_trend_test_plot_renders_and_returns_axes() -> None:
+    res = ph.trend_test(EXAMPLE_4_4)
+    ax = res.plot()
+    assert "Trend test" in ax.get_title()
+    assert ax.get_xlabel() == "Sample index"
+    legend = ax.get_legend().get_texts()[0].get_text()
+    assert "Reverse arrangements A = 86" in legend
+    assert "no trend" in legend
+    plt.close("all")
+    rng = np.random.default_rng(3)
+    runs = ph.trend_test(rng.standard_normal(40), method="runs")
+    ax = runs.plot()
+    legend_texts = [t.get_text() for t in ax.get_legend().get_texts()]
+    assert any("Runs r =" in t for t in legend_texts)
+    assert any("Sequence median" in t for t in legend_texts)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+    plt.close("all")
+
+
+def test_runs_plot_draws_original_classification_median() -> None:
+    # Tied data: the median of the original sequence (10) is discarded from
+    # the runs test, and the median of what remains (100) is different. The
+    # reference line must be the classification median the test used, not a
+    # median recomputed on the filtered TrendTestResult.values.
+    values = np.array([0.0] * 5 + [10.0] * 21 + [100.0] * 15)
+    np.random.default_rng(0).shuffle(values)
+    res = ph.trend_test(values, method="runs")
+    assert res.median == 10.0
+    assert float(np.median(res.values)) == 100.0  # filtered median differs
+    ax = res.plot()
+    median_lines = [
+        ln for ln in ax.get_lines() if ln.get_label() == "Sequence median"
+    ]
+    assert len(median_lines) == 1
+    assert np.allclose(median_lines[0].get_ydata(), 10.0)
+    plt.close("all")
+
+
 def test_plots_render_and_return_axes() -> None:
     rng = np.random.default_rng(10)
     n = 1 << 14

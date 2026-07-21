@@ -296,6 +296,9 @@ class TrendTestResult:
     :ivar trend_free: ``True`` when the statistic falls inside the
         acceptance region.
     :ivar alpha: Significance level of the region (default 0.05).
+    :ivar median: For ``"runs"``, the median of the *original* sequence
+        against which each value was classified (before values equal to it
+        were discarded); ``None`` for ``"reverse_arrangements"``.
     """
 
     values: "NDArray[np.float64]"
@@ -308,6 +311,32 @@ class TrendTestResult:
     p_value: float
     trend_free: bool
     alpha: float
+    median: float | None = None
+
+    def plot(
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
+    ) -> "Axes":
+        """Plot the tested sequence against its sample index with the verdict.
+
+        Draws the sequence of observations against a plain sample index and
+        states the outcome in the legend: the reverse-arrangement count
+        ``A`` (or the run count ``r``), the acceptance region and whether
+        the no-trend hypothesis is accepted. For the runs test the
+        classification median is drawn as a reference line.
+
+        :param ax: Existing :class:`~matplotlib.axes.Axes` to draw on, or
+            ``None`` (default) to create a fresh figure and axes.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Extra keyword arguments forwarded to the sequence
+            ``plot`` call (e.g. ``color``, ``lw``, ``marker``).
+        :return: The :class:`~matplotlib.axes.Axes` the sequence was drawn
+            on, so the figure can be composed further.
+        """
+        from .._i18n import check_language
+        from .._plot.metrology import plot_trend_test
+
+        check_language(language)
+        return plot_trend_test(self, ax=ax, language=language, **kwargs)
 
 
 def _trend_test_reverse(
@@ -364,6 +393,7 @@ def _trend_test_runs(
         p_value=_runs_p_value(n1, n2, statistic),
         trend_free=bounds[0] < statistic <= bounds[1],
         alpha=alpha,
+        median=median,
     )
 
 

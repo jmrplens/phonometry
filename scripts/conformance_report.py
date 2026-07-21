@@ -4925,7 +4925,7 @@ _TSA = "Time synchronous averaging (McFadden 1987)"
 
 @register(
     _TSA,
-    "McFadden 1987 Eq. 8 / Eq. 9: comb filter |C(f)| at a harmonic k/T",
+    r"McFadden 1987 Eq. 8 / Eq. 9: comb filter \|C(f)\| at a harmonic k/T",
     "Comb-filter tooth height at a harmonic equals unity (any N)",
 )
 def _chk_tsa_comb_tooth() -> Outcome:
@@ -4950,7 +4950,7 @@ def _chk_tsa_comb_midbin() -> Outcome:
 @register(
     _TSA,
     "McFadden 1987 Sec. 4 (Fig. 5): node selection, tone at 32.05 orders",
-    "N = 20 places a comb node on 32.05 orders (|C| = 0), not the power-of-2 N = 32",
+    r"N = 20 places a comb node on 32.05 orders (\|C\| = 0), not the power-of-2 N = 32",
 )
 def _chk_tsa_node_selection() -> Outcome:
     period = 1.0 / 32.0

@@ -129,9 +129,11 @@ res.noise_reduction_db      # 20.0 dB = 10*log10(100)
 res.amplitude_snr_gain      # 10.0   = sqrt(100)
 ```
 
-El `residual` (entrada menos la reconstrucción periódica sobre el tramo
-analizado) y su `residual_rms` cuantifican lo que queda una vez eliminada la
-componente síncrona, que es el ruido que el promediado aún no ha suprimido.
+Esta ley es la ideal: se cumple cuando el ruido no está correlado de un período
+al siguiente, de modo que el ruido de color o síncrono correlado entre períodos
+no tiene por qué seguirla. El `residual` (entrada menos la reconstrucción
+periódica sobre el tramo analizado) y su `residual_rms` reportan, por tanto, el
+ruido realmente restante una vez eliminada la componente síncrona.
 
 ## 3. Elegir N para rechazar un orden interferente
 
@@ -142,7 +144,9 @@ peine, no eliminado, y cuánto depende de dónde caiga el nodo más cercano. El
 resultado del modelo revisado de McFadden es que tal interferente se rechaza
 mejor eligiendo `N` de modo que un nodo caiga exactamente sobre él, es decir,
 el menor `N` con `N·q` entero, en vez de con el número de promedios potencia
-de dos habitual.
+de dos habitual. Un nodo exacto solo existe cuando el orden `q` es racional, de
+modo que algún `N` finito hace `N·q` entero; para un orden irracional o solo
+estimado, elige el `N` cuyo nodo caiga más cerca del orden interferente.
 
 Su propio ejemplo es un tono en 32,05 órdenes. Con `N = 20` el producto
 `20 · 32,05 = 641` es entero, así que un nodo del peine cae sobre el tono y lo
@@ -176,7 +180,10 @@ malla entera común mediante el retardo fraccionario de banda limitada de
 se recupera dentro de ese error de interpolación (`interpolated` es `True`):
 
 ```python
-period = 1.0 / 31.7                      # fs * period no es entero
+fs = 8192.0
+period = 1.0 / 31.7                       # fs * period no es entero
+t = np.arange(int(40 * period * fs)) / fs
+signal = np.cos(2.0 * np.pi * t / period)  # un ciclo por revolución
 res = time_synchronous_average(signal, fs, period)
 res.interpolated                          # True: alineación por retardo fraccionario
 res.samples_per_period                    # muestras enteras de un período

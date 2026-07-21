@@ -595,9 +595,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
-| McFadden 1987 Eq. 8 / Eq. 9: comb filter |C(f)| at a harmonic k/T | Comb-filter tooth height at a harmonic equals unity (any N) | 1 (+/-0) | 1 | 0 | &#9989; |
+| McFadden 1987 Eq. 8 / Eq. 9: comb filter \|C(f)\| at a harmonic k/T | Comb-filter tooth height at a harmonic equals unity (any N) | 1 (+/-0) | 1 | 0 | &#9989; |
 | McFadden 1987 Eq. 8: comb filter one quarter-order from a tooth, N = 2 | Comb-filter magnitude = 1/sqrt(2) at order 0.25 | 0.70710678 (+/-0) | 0.70710678 | 0 | &#9989; |
-| McFadden 1987 Sec. 4 (Fig. 5): node selection, tone at 32.05 orders | N = 20 places a comb node on 32.05 orders (|C| = 0), not the power-of-2 N = 32 | 0 (+/-0.0000000001) | 0 | 0 | &#9989; |
+| McFadden 1987 Sec. 4 (Fig. 5): node selection, tone at 32.05 orders | N = 20 places a comb node on 32.05 orders (\|C\| = 0), not the power-of-2 N = 32 | 0 (+/-0.0000000001) | 0 | 0 | &#9989; |
 | McFadden 1987 Eq. 5: exact recovery, integer samples per period | Noiseless periodic waveform (M = 256) recovered to machine precision | 0 (+/-0.0000000001) | 0 | 0 | &#9989; |
 | McFadden 1987 Sec. 1: asynchronous-noise variance reduced by 1/N | Residual noise std of the average falls as sigma/sqrt(N), N = 64 | 0.125 (+/-15%) | 0.12414 | -0.001 | &#9989; |
 

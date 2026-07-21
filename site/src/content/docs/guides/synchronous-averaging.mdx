@@ -128,9 +128,11 @@ res.noise_reduction_db      # 20.0 dB = 10*log10(100)
 res.amplitude_snr_gain      # 10.0   = sqrt(100)
 ```
 
-The `residual` (input minus the periodic reconstruction over the analysed
-span) and its `residual_rms` quantify what is left once the synchronous
-component is removed, which is the noise the averaging has yet to suppress.
+This law is the ideal one: it holds when the noise is uncorrelated from one
+period to the next, so colored or synchronous noise that is correlated across
+periods need not follow it. The `residual` (input minus the periodic
+reconstruction over the analysed span) and its `residual_rms` therefore report
+the noise actually left once the synchronous component is removed.
 
 ## 3. Choosing N to reject an interfering order
 
@@ -140,7 +142,10 @@ A tone at a *non-harmonic* order `q = f·T` is only attenuated by the comb,
 not removed, and how much depends on where the nearest node lands. McFadden's
 revised-model result is that such an interferer is best rejected by choosing
 `N` so that a node falls exactly on it, i.e. the smallest `N` with `N·q` an
-integer, rather than by the habitual power-of-two number of averages.
+integer, rather than by the habitual power-of-two number of averages. An exact
+node exists only when the order `q` is rational, so some finite `N` makes `N·q`
+an integer; for an irrational or merely estimated order, choose the `N` whose
+node falls nearest the interfering order.
 
 His own example is a tone at 32.05 orders. With `N = 20` the product
 `20 · 32.05 = 641` is an integer, so a comb node lands on the tone and rejects
@@ -173,7 +178,10 @@ integer grid by the band-limited fractional delay of
 recovered within that interpolation error (`interpolated` is `True`):
 
 ```python
-period = 1.0 / 31.7                      # fs * period is not an integer
+fs = 8192.0
+period = 1.0 / 31.7                       # fs * period is not an integer
+t = np.arange(int(40 * period * fs)) / fs
+signal = np.cos(2.0 * np.pi * t / period)  # one cycle per revolution
 res = time_synchronous_average(signal, fs, period)
 res.interpolated                          # True: fractional-delay alignment
 res.samples_per_period                    # integer samples of one period

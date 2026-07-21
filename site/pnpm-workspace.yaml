@@ -2,3 +2,9 @@ allowBuilds:
   esbuild: true
   sharp: true
   puppeteer: true
+
+# Disable pnpm 11's minimum-release-age supply-chain gate: the committed
+# lockfile is the trust root here, and the 24 h default kept blocking docs
+# deploys whenever a transitive dependency (e.g. the lightningcss platform
+# binaries) published shortly before a scheduled run.
+minimumReleaseAge: 0

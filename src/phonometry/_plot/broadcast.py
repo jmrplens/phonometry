@@ -63,11 +63,15 @@ def plot_program_loudness(
     ax = ax if ax is not None else _new_axes()
     if math.isfinite(result.lra_low) and math.isfinite(result.lra_high):
         lra = format_number(result.loudness_range, language, decimals=1)
+        # Pale opaque tint of _C_SECONDARY (the 15 % composite over white):
+        # the report pipeline renders through svglib, which drops alpha, so a
+        # translucent fill would come out saturated and hide the curves.
         ax.axhspan(
             result.lra_low,
             result.lra_high,
-            color=_C_SECONDARY,
-            alpha=0.15,
+            facecolor="#ffecdb",
+            edgecolor="none",
+            zorder=0,
             label=f"LRA {lra} LU",
         )
     if result.momentary.size:

@@ -82,14 +82,14 @@ distortion and directivity data feed the corresponding report panels.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | On-axis response frequency axis, in Hz (1-D, > 0). |
+| `frequencies` | On-axis response frequency axis, in Hz (1-D, > 0). Logarithmically spaced samples are strongly recommended: the band averages behind the sensitivity level and the effective-range reference weight each sample equally, so a linearly spaced grid over-weights the high-frequency end of every band. |
 | `spl_db` | On-axis sound pressure level, in dB re 20 uPa. |
 | `rated_impedance` | Rated impedance `R`, in ohm (16.1). |
 | `input_voltage` | Constant drive voltage of the response, in V; defaults to `sqrt(R)` (1 W into `R`, the 2,83 V @ 8 ohm convention). |
 | `distance` | Measuring distance of the response, in m (default 1). |
 | `sensitivity_band` | Stated band `(lo, hi)` for the characteristic sensitivity, in Hz; defaults to the one-octave band in the region of maximum sensitivity. |
 | `tolerance_db` | Half-width of the plotted response tolerance band, in dB (default 3). |
-| `rated_frequency_range` | Manufacturer-stated rated frequency range `(lo, hi)` in Hz (19.1). |
+| `rated_frequency_range` | Manufacturer-stated rated frequency range `(lo, hi)` in Hz (19.1). When supplied it is also the range over which the 16.1 minimum impedance modulus is evaluated. |
 | `rated_noise_power` | Rated noise power, in W (18.1). |
 | `rated_sinusoidal_power` | Rated sinusoidal power, in W (18.4). |
 | `resonance_frequency` | Resonance frequency, in Hz (19.2). |
@@ -185,10 +185,16 @@ The sound pressure at 1 m for 1 W into the rated impedance:
 
 *property*
 
-Lowest impedance modulus over the effective range, ohm (16.1), or `None`.
+Lowest impedance modulus over the rated range, ohm (16.1), or `None`.
 
-IEC 60268-5 16.1 requires it to be at least 80 % of the rated impedance
-within the rated frequency range.
+IEC 60268-5 16.1 requires the lowest value of the impedance modulus
+*in the rated frequency range* to be not less than 80 % of the rated
+impedance, so the scan uses `rated_frequency_range` when it is
+supplied. When no rated range is stated, the computed
+`effective_range` stands in for it; note that the two ranges may
+differ (19.1 NOTE 2), particularly for tweeters or woofers, so an
+impedance dip outside the effective range is only caught when the
+rated range is given.
 
 ### LoudspeakerCharacteristics.report()
 

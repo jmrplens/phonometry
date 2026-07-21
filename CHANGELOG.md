@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- `LoudspeakerCharacteristics.minimum_impedance` now evaluates the lowest
+  impedance modulus over the rated frequency range when
+  `rated_frequency_range` is supplied, as IEC 60268-5 clause 16.1 requires
+  ("the lowest value of the modulus of the impedance in the rated frequency
+  range shall be not less than 80 % of the rated impedance"), falling back to
+  the computed effective frequency range only when no rated range is stated.
+  The property previously always scanned the effective range, which clause
+  19.1 NOTE 2 warns may differ from the rated range (particularly for woofers
+  and tweeters), so an impedance dip below 80 % of the rated impedance inside
+  the rated range but outside the effective range went undetected.
 - `vibration.wave_vibration_reduction_index` now implements Hopkins (2007)
   Eq. 5.116 exactly: `Kij = 10 lg(1/tau_ij) + 5 lg(fc_j/f_ref)` with the
   reference frequency `f_ref = 1000 Hz`, instead of the previous

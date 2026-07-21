@@ -131,7 +131,7 @@ def test_narrow_trough_is_neglected() -> None:
 
 
 def test_minimum_impedance_over_effective_range() -> None:
-    """The minimum impedance is taken over the effective range (16.1)."""
+    """Without a rated range the minimum impedance falls back to the effective range."""
     f, spl = _flat_response()
     fz = np.geomspace(20.0, 20000.0, 200)
     z = 7.0 + 20.0 * np.exp(-((np.log2(fz / 40.0)) ** 2) / 0.1)  # peak below the range
@@ -139,6 +139,42 @@ def test_minimum_impedance_over_effective_range() -> None:
         f, spl, _R, sensitivity_band=(200.0, 4000.0), impedance=(fz, z)
     )
     # Within [50, 18000] Hz the modulus floor is ~7 ohm (>= 80 % of 8 = 6.4).
+    assert result.minimum_impedance == pytest.approx(7.0, abs=0.2)
+    assert result.minimum_impedance >= 0.8 * _R
+
+
+def _dip_below_effective_range() -> tuple[np.ndarray, np.ndarray]:
+    """An impedance curve whose modulus dips to 4 ohm at 40 Hz, 7 ohm elsewhere.
+
+    40 Hz is below the ~50 Hz lower edge of the effective range computed from
+    ``_flat_response`` but inside a woofer-style rated range starting at 30 Hz.
+    """
+    fz = np.unique(np.append(np.geomspace(20.0, 20000.0, 200), 40.0))
+    z = 7.0 - 3.0 * np.exp(-((np.log2(fz / 40.0)) ** 2) / 0.02)
+    return fz, z
+
+
+def test_minimum_impedance_uses_rated_range_when_supplied() -> None:
+    """16.1 scans the rated frequency range: a dip outside the effective range counts."""
+    f, spl = _flat_response()
+    fz, z = _dip_below_effective_range()
+    result = loudspeaker_characteristics(
+        f, spl, _R, sensitivity_band=(200.0, 4000.0),
+        rated_frequency_range=(30.0, 20000.0), impedance=(fz, z),
+    )
+    lo_eff, _ = result.effective_range
+    assert lo_eff > 40.0  # the dip sits outside the computed effective range
+    assert result.minimum_impedance == pytest.approx(4.0, abs=1e-9)
+    assert result.minimum_impedance < 0.8 * _R  # the 16.1 check must fail here
+
+
+def test_minimum_impedance_without_rated_range_misses_out_of_band_dip() -> None:
+    """The effective-range fallback ignores a dip below its lower edge (19.1 NOTE 2)."""
+    f, spl = _flat_response()
+    fz, z = _dip_below_effective_range()
+    result = loudspeaker_characteristics(
+        f, spl, _R, sensitivity_band=(200.0, 4000.0), impedance=(fz, z)
+    )
     assert result.minimum_impedance == pytest.approx(7.0, abs=0.2)
     assert result.minimum_impedance >= 0.8 * _R
 

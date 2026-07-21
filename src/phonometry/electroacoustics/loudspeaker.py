@@ -88,7 +88,13 @@ def _as_curve(
 
 
 def _energetic_mean_db(levels: "NDArray[np.float64]") -> float:
-    """Energetic (r.m.s.-pressure) mean of a set of levels, in dB (20.1.2.4)."""
+    """Energetic (r.m.s.-pressure) mean of a set of levels, in dB (20.1.2.4).
+
+    The mean is unweighted over the samples handed in, so the response grid
+    itself is the frequency weighting: a logarithmically spaced grid weights
+    every octave equally, while a linearly spaced grid concentrates its
+    samples in, and therefore over-weights, the top octaves of a band.
+    """
     return float(10.0 * np.log10(np.mean(10.0 ** (levels / 10.0))))
 
 
@@ -100,9 +106,13 @@ def _reference_level(
     The reference is the largest energetic (r.m.s.-pressure) mean over any
     one-octave band ``[f / sqrt(2), f * sqrt(2)]`` centred on a response sample
     (IEC 60268-5 21.2: "averaged over a bandwidth of one octave in the region
-    of maximum sensitivity"). Sliding the octave to the band that maximises the
-    average makes the reference independent of where a flat plateau's argmax
-    happens to fall.
+    of maximum sensitivity"). The clause does not pin down how the "region of
+    maximum sensitivity" is located; this implementation reads it as the
+    one-octave band that maximises the average. That is a conservative
+    interpretation: it can only raise the reference, hence the -10 dB
+    threshold, hence never widens the effective range beyond what any other
+    placement of the octave would give. It also makes the reference
+    independent of where a flat plateau's argmax happens to fall.
     """
     best = -np.inf
     for f_c in frequencies:
@@ -288,14 +298,24 @@ class LoudspeakerCharacteristics:
 
     @property
     def minimum_impedance(self) -> float | None:
-        """Lowest impedance modulus over the effective range, ohm (16.1), or ``None``.
+        """Lowest impedance modulus over the rated range, ohm (16.1), or ``None``.
 
-        IEC 60268-5 16.1 requires it to be at least 80 % of the rated impedance
-        within the rated frequency range.
+        IEC 60268-5 16.1 requires the lowest value of the impedance modulus
+        *in the rated frequency range* to be not less than 80 % of the rated
+        impedance, so the scan uses :attr:`rated_frequency_range` when it is
+        supplied. When no rated range is stated, the computed
+        :attr:`effective_range` stands in for it; note that the two ranges may
+        differ (19.1 NOTE 2), particularly for tweeters or woofers, so an
+        impedance dip outside the effective range is only caught when the
+        rated range is given.
         """
         if self.impedance_frequencies is None or self.impedance_modulus is None:
             return None
-        lo, hi = self.effective_range
+        lo, hi = (
+            self.rated_frequency_range
+            if self.rated_frequency_range is not None
+            else self.effective_range
+        )
         in_range = (self.impedance_frequencies >= lo) & (self.impedance_frequencies <= hi)
         band = self.impedance_modulus[in_range]
         if band.size == 0:
@@ -487,6 +507,10 @@ def loudspeaker_characteristics(
     distortion and directivity data feed the corresponding report panels.
 
     :param frequencies: On-axis response frequency axis, in Hz (1-D, > 0).
+        Logarithmically spaced samples are strongly recommended: the band
+        averages behind the sensitivity level and the effective-range
+        reference weight each sample equally, so a linearly spaced grid
+        over-weights the high-frequency end of every band.
     :param spl_db: On-axis sound pressure level, in dB re 20 uPa.
     :param rated_impedance: Rated impedance ``R``, in ohm (16.1).
     :param input_voltage: Constant drive voltage of the response, in V; defaults
@@ -498,7 +522,8 @@ def loudspeaker_characteristics(
     :param tolerance_db: Half-width of the plotted response tolerance band, in
         dB (default 3).
     :param rated_frequency_range: Manufacturer-stated rated frequency range
-        ``(lo, hi)`` in Hz (19.1).
+        ``(lo, hi)`` in Hz (19.1). When supplied it is also the range over
+        which the 16.1 minimum impedance modulus is evaluated.
     :param rated_noise_power: Rated noise power, in W (18.1).
     :param rated_sinusoidal_power: Rated sinusoidal power, in W (18.4).
     :param resonance_frequency: Resonance frequency, in Hz (19.2).

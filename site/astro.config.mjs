@@ -331,6 +331,7 @@ export default defineConfig({
           translations: { es: 'Análisis de señal' },
           items: [
             { slug: 'guides/sections/core-signal-analysis', attrs: { 'data-group-link': true } },
+            'guides/sound-level-meter',
             {
               label: 'Octave filtering',
               translations: { es: 'Filtrado en octavas' },
@@ -352,14 +353,21 @@ export default defineConfig({
               ],
             },
             {
+              label: 'Signals and spectra',
+              translations: { es: 'Señales y espectros' },
+              items: [
+                { slug: 'guides/sections/signals-spectra', attrs: { 'data-group-link': true } },
+                'guides/spectral-analysis',
+                'guides/correlation-delay',
+              ],
+            },
+            {
               label: 'Calibration and uncertainty',
               translations: { es: 'Calibración e incertidumbre' },
               items: [
                 { slug: 'guides/sections/calibration-uncertainty', attrs: { 'data-group-link': true } },
                 'guides/calibration',
                 'guides/gum-uncertainty',
-                'guides/spectral-analysis',
-                'guides/correlation-delay',
               ],
             },
           ],

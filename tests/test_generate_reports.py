@@ -34,9 +34,6 @@ def _load_generator():
     return module
 
 
-_WEBP_WIDTH_PX = 1000
-
-
 def test_generate_reports_writes_one_page_pdfs(tmp_path) -> None:
     from pypdf import PdfReader
 
@@ -62,4 +59,4 @@ def test_generate_reports_writes_webp_previews(tmp_path) -> None:
         assert preview.is_file() and preview.stat().st_size > 0
         with Image.open(preview) as image:
             assert image.format == "WEBP"
-            assert image.width == _WEBP_WIDTH_PX
+            assert image.width == module._PREVIEW_WIDTH_PX

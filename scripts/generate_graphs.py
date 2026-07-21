@@ -1435,16 +1435,16 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
     # reintroduce the version-dependent chunks.
     kwargs["metadata"] = {"Software": None, "Date": None,
                           **kwargs.get("metadata", {})}
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format="png", **kwargs)
-    buffer.seek(0)
-    with Image.open(buffer) as image:
-        # Lossless WebP: identical pixels to the rendered canvas at roughly
-        # half the optimized-PNG size (flat-color plot areas compress better
-        # lossless than lossy). method=6 is the slowest, most exhaustive
-        # encoder search; its output is a pure function of the input pixels,
-        # so the committed bytes are byte-stable across runs.
-        image.save(path, "WEBP", lossless=True, quality=100, method=6)
+    with io.BytesIO() as buffer:
+        plt.savefig(buffer, format="png", **kwargs)
+        buffer.seek(0)
+        with Image.open(buffer) as image:
+            # Lossless WebP: identical pixels to the rendered canvas at roughly
+            # half the optimized-PNG size (flat-color plot areas compress better
+            # lossless than lossy). method=6 is the slowest, most exhaustive
+            # encoder search; its output is a pure function of the input pixels,
+            # so the committed bytes are byte-stable across runs.
+            image.save(path, "WEBP", lossless=True, quality=100, method=6)
 
 
 

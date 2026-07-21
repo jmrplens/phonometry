@@ -158,6 +158,76 @@ so horizontal whole-body exposure is assessed instead with the r.m.s.,
 running-r.m.s./MTVV and VDV metrics of [Human Vibration](human-vibration.md)
 (ISO 2631-1).
 
+## 4. The health-risk report (`.report()`)
+
+The dose chain exists to be written down and read against the Annex C guidance.
+`MultipleShockResult.report(path)` writes a one-page PDF health-risk assessment
+sheet: the standard-basis line (Clause 5 spinal response and the Annex C risk
+model), an optional metadata header (client, subject via `specimen`,
+workplace/vehicle via `test_room`, and the `instrumentation` and `calibration`
+free-text fields of `ReportMetadata`), the exposure-scenario grid (subject sex,
+the age `b` at which the exposure started, the number of exposure years `n`, the
+number of exposure days per year `N` and the number of counted response shocks),
+and the dose-and-stress analysis table with the acceleration dose `Dz`
+(Formula 3), the daily dose `Dzd` (Formula 4), the daily compressive stress `Sd`
+(Formula C.1), the cumulative stress variable `R` (Formula C.3) and the
+probability of lumbar injury `Π` (Formula C.5).
+
+Because ISO 2631-5:2018 defines no exposure limit, the fiche carries a risk-band
+zone row rather than a PASS/FAIL verdict: the boxed `R` and `Π` name the Annex C
+risk classification, and a classification table places `R` among the Table C.2
+stress variables for 10 / 50 / 90 % risk of injury (low / moderate / high / very
+high probability of an adverse health effect), with the injury-probability chart
+above it. `language="es"` renders the Spanish fiche (comma decimals). Rendering
+needs the optional `phonometry[report]` extra (reportlab), plus matplotlib for
+the chart.
+
+The relevant `ReportMetadata` fields for a multiple-shock report are `client`,
+`specimen` (the subject), `test_room` (the workplace or vehicle), `test_date`,
+`instrumentation`, `calibration`, and the footer identity `laboratory`,
+`operator`, `report_id` and `notes`.
+
+```python
+import numpy as np
+from phonometry import vibration, ReportMetadata
+
+# The Annex C worked example, rebuilt from its five 40 m/s2 response peaks.
+peaks = np.array([40.0] * 5)
+dz = vibration.dose_from_peaks(peaks)
+sd = vibration.compression_dose(dz)
+r = vibration.injury_risk(sd, start_age=20, years=20, days_per_year=120)
+result = vibration.MultipleShockResult(
+    sex="male",
+    acceleration_dose=dz,
+    daily_dose=dz,
+    compression_dose=sd,
+    risk=r,
+    probability=float(vibration.injury_probability(r)),
+    start_age=20.0,
+    years=20,
+    days_per_year=120.0,
+    peaks=peaks,
+    risk_thresholds=vibration.RISK_THRESHOLDS_MALE,
+)
+result.report(
+    "multiple_shock.pdf",
+    metadata=ReportMetadata(
+        client="Example transport operator",
+        specimen="82 kg male operator (seated)",
+        test_room="Off-road vehicle, driver's seat",
+        report_id="EXAMPLE-2631-5",
+    ),
+)   # R = 1.22, Pi = 37 % -> moderate probability of an adverse health effect
+```
+
+The rendered example fiche, regenerated with `make reports`, is kept in the
+repository. Click the preview to open the PDF:
+
+[![Whole-body multiple-shock health-risk example report: a header with the transport operator, the subject and the off-road vehicle, the exposure-scenario grid (82 kg male, age 20, 20 years, 120 days per year, five counted shocks), the dose-and-stress analysis table with the acceleration dose Dz = 55.97 m/s2, the daily compressive stress Sd = 1.62 MPa, the cumulative stress variable R = 1.22 and the probability of lumbar injury 37 percent, the injury-probability curve with the Table C.2 risk levels marked, the boxed R = 1.22 and 37 percent classed as a moderate probability of an adverse health effect, and the Annex C classification table with the moderate band as the assessment's band](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso2631_5_multiple_shock_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso2631_5_multiple_shock_example.pdf)
+
+*Whole-body multiple-shock health-risk fiche (`MultipleShockResult.report`), the
+ISO 2631-5:2018 Annex C worked example with the Table C.2 risk classification.*
+
 ## References
 
 - Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.

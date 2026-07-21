@@ -261,6 +261,34 @@ def _weighting_deviation(curve: str, fs: int) -> WeightingDeviation:
         nominal = np.array([r[1] for r in rows])
         upper = np.full(nominal.shape, ref.ISO7196_G_TOLERANCE_DB)
         lower = np.full(nominal.shape, -ref.ISO7196_G_TOLERANCE_DB)
+    elif curve == "B":
+        # ANSI S1.4-1983: Table IV design goals (B column) against the
+        # strictest Table V mask (Type 0, laboratory grade).
+        rows_b = [
+            (t4, t5)
+            for t4, t5 in zip(ref.ANSIS14_TABLE4_B, ref.ANSIS14_TABLE5)
+            if t4[0] < fs / 2
+        ]
+        freqs = np.array(
+            [10 ** (round(10 * math.log10(t4[0])) / 10) for t4, _ in rows_b]
+        )
+        nominal = np.array([t4[1] for t4, _ in rows_b])
+        upper = np.array([t5[1] for _, t5 in rows_b])
+        lower = np.array([t5[2] for _, t5 in rows_b])
+    elif curve == "AU":
+        # IEC 61012:1990: nominal AU = nominal A + nominal U (Table 1), with
+        # the subclause 2.2 explicit values above 20 kHz, against the Table 1
+        # separate-unit tolerances. The 1 kHz reference row carries zero
+        # tolerance and the normalized deviation there is identically zero,
+        # so it is skipped to keep the binding-frequency row informative.
+        a_nom = {r[0]: r[1] for r in ref.IEC61672_TABLE3}
+        rows_u = [r for r in ref.IEC61012_TABLE1 if r[0] < fs / 2 and r[0] != 1000]
+        freqs = np.array([10 ** (round(10 * math.log10(r[0])) / 10) for r in rows_u])
+        nominal = np.array(
+            [ref.IEC61012_AU_HF.get(r[0], a_nom.get(r[0], 0.0) + r[1]) for r in rows_u]
+        )
+        upper = np.array([r[2] for r in rows_u])
+        lower = np.array([r[3] for r in rows_u])
     else:
         col = 1 if curve == "A" else 2
         rows = [r for r in ref.IEC61672_TABLE3 if r[0] < fs / 2]
@@ -393,6 +421,61 @@ def _chk_c_weighting() -> Outcome:
 )
 def _chk_g_weighting() -> Outcome:
     return _weighting_check("G", 48000)
+
+
+@register(
+    "Filters & weightings",
+    "ANSI S1.4-1983 Tables IV/V",
+    "B-weighting (historical) deviation vs Type 0 limits (fs=48 kHz)",
+)
+def _chk_b_weighting() -> Outcome:
+    return _weighting_check("B", 48000)
+
+
+@register(
+    "Filters & weightings",
+    "IEC 61012:1990 Table 1 / 2.2",
+    "AU-weighting deviation vs separate-unit tolerances (fs=96 kHz)",
+)
+def _chk_au_weighting() -> Outcome:
+    # 96 kHz so the 25/31.5/40 kHz rows (exact base-10 frequencies up to
+    # 39 811 Hz) fall below Nyquist and the full Table 1 range is checked.
+    return _weighting_check("AU", 96000)
+
+
+@register(
+    "Filters & weightings",
+    "IEC 537:1976 (withdrawn) via NASA CR-3406 Table SLD-I",
+    "D-weighting response vs the published tabulated curve (fs=48 kHz)",
+)
+def _chk_d_weighting() -> Outcome:
+    # IEC 537 is withdrawn and published no surviving tolerance table, so the
+    # D response is pinned against the tabulated curve republished in the
+    # NASA Handbook of Aircraft Noise Metrics (Table SLD-I, printed at the
+    # integer nominal frequencies to 0.1 dB). The rational transfer function
+    # reproduces every row within 0.1 dB except 1600/2500 Hz, which appear to
+    # round a different source curve; the realized filter adds bilinear
+    # residuals below 0.1 dB, so the acceptance bound is 0.2 dB (0.45 dB at
+    # the two outlier cells).
+    wf = WeightingFilter(48000, "D")
+    design_fs = wf.fs * wf._oversample  # noqa: SLF001 - documented attribute
+    freqs = np.array([r[0] for r in ref.IEC537_NASA_TABLE_SLD1], dtype=float)
+    table = np.array([r[1] for r in ref.IEC537_NASA_TABLE_SLD1], dtype=float)
+    _, h = sg.sosfreqz(wf.sos, worN=np.concatenate([freqs, [1000.0]]), fs=design_fs)
+    gain = 20.0 * np.log10(np.abs(h))
+    dev = (gain[:-1] - gain[-1]) - table
+    bound = np.where(np.isin(freqs, (1600.0, 2500.0)), 0.45, 0.2)
+    worst = int(np.argmax(np.abs(dev) / bound))
+    ok = bool(np.all(np.abs(dev) <= bound))
+    return Outcome(
+        expected="abs(response - table) <= 0.2 dB (0.45 dB at 1600/2500 Hz)",
+        computed=(
+            f"{dev[worst]:+.3f} dB @ {freqs[worst]:.0f} Hz "
+            f"(bound {bound[worst]:.2f} dB)"
+        ),
+        delta=f"headroom {bound[worst] - abs(dev[worst]):+.3f} dB",
+        passed=ok,
+    )
 
 
 # ===========================================================================

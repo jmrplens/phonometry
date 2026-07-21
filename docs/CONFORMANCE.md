@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **380/380 conformance checks pass** across 48 domains and 244 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **383/383 conformance checks pass** across 48 domains and 247 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -46,7 +46,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Filters &amp; weightings</b>: 100% (7/7)</summary>
+<summary>&#9989; <b>Filters &amp; weightings</b>: 100% (10/10)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -57,6 +57,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61672-1:2013 Table 3 | A-weighting deviation vs class-1 limits (fs=48 kHz) | deviation within limits @ 1000 Hz | +0.000 dB in [-0.70, +0.70] dB | headroom +0.700 dB | &#9989; |
 | IEC 61672-1:2013 Table 3 | C-weighting deviation vs class-1 limits (fs=48 kHz) | deviation within limits @ 1000 Hz | +0.000 dB in [-0.70, +0.70] dB | headroom +0.700 dB | &#9989; |
 | ISO 7196:1995 Table 2 / A.3 | G-weighting deviation vs +/-1 dB tolerance (fs=48 kHz) | deviation within limits @ 1 Hz | +0.047 dB in [-1.00, +1.00] dB | headroom +0.953 dB | &#9989; |
+| ANSI S1.4-1983 Tables IV/V | B-weighting (historical) deviation vs Type 0 limits (fs=48 kHz) | deviation within limits @ 200 Hz | -0.049 dB in [-0.70, +0.70] dB | headroom +0.651 dB | &#9989; |
+| IEC 61012:1990 Table 1 / 2.2 | AU-weighting deviation vs separate-unit tolerances (fs=96 kHz) | deviation within limits @ 10000 Hz | -0.072 dB in [-1.00, +1.00] dB | headroom +0.928 dB | &#9989; |
+| IEC 537:1976 (withdrawn) via NASA CR-3406 Table SLD-I | D-weighting response vs the published tabulated curve (fs=48 kHz) | abs(response - table) <= 0.2 dB (0.45 dB at 1600/2500 Hz) | -0.131 dB @ 8000 Hz (bound 0.20 dB) | headroom +0.069 dB | &#9989; |
 
 </details>
 

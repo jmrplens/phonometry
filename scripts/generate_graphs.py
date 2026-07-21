@@ -162,7 +162,12 @@ _ES_EXACT = {
     "4 kHz Toneburst Response vs IEC 61672-1 Table 4 (FAST)":
         "Respuesta a r\u00e1fagas de 4 kHz vs Tabla 4 de IEC 61672-1 (FAST)",
     "A-Weighting": "Ponderaci\u00f3n A",
+    "B-Weighting (historical)": "Ponderaci\u00f3n B (hist\u00f3rica)",
     "C-Weighting": "Ponderaci\u00f3n C",
+    "D-Weighting (aircraft, withdrawn)":
+        "Ponderaci\u00f3n D (aeronaves, retirada)",
+    "AU-Weighting (audible + ultrasound)":
+        "Ponderaci\u00f3n AU (audible + ultrasonido)",
     "Z-Weighting (Flat)": "Ponderaci\u00f3n Z (plana)",
     "G-weighting (ISO 7196)": "Ponderaci\u00f3n G (ISO 7196)",
     "G Frequency Weighting for Infrasound (ISO 7196:1995)":
@@ -198,8 +203,7 @@ _ES_EXACT = {
     "A weighting deviation (48 kHz)": "Desviaci\u00f3n de ponderaci\u00f3n A (48 kHz)",
     "C weighting deviation (48 kHz)": "Desviaci\u00f3n de ponderaci\u00f3n C (48 kHz)",
     "Deviation from design goal [dB]": "Desviaci\u00f3n del objetivo de dise\u00f1o [dB]",
-    "Frequency Weighting Curves (IEC 61672-1)":
-        "Curvas de ponderaci\u00f3n frecuencial (IEC 61672-1)",
+    "Frequency Weighting Curves": "Curvas de ponderaci\u00f3n frecuencial",
     "Group Delay Comparison (1 kHz Octave Band, Order 6)":
         "Comparativa de retardo de grupo (banda de 1 kHz, orden 6)",
     "Hearing threshold $T_f$ (Table 1)": "Umbral de audici\u00f3n $T_f$ (Tabla 1)",
@@ -1817,7 +1821,7 @@ def measure_weighting_response(
     linear phase, which does not affect the magnitude.
 
     :param fs: Sample rate in Hz.
-    :param curve: 'A', 'C' or 'Z'.
+    :param curve: 'A', 'B', 'C', 'D', 'G', 'AU' or 'Z'.
     :param freqs: Optional exact frequencies to evaluate; defaults to a
         dense 8192-point grid for plotting.
     :return: Tuple (frequencies, magnitude in dB).
@@ -1838,32 +1842,38 @@ def measure_weighting_response(
 
 
 def generate_weighting_responses(output_dir: str) -> None:
-    """Plot A, C and Z weighting frequency responses."""
+    """Plot the A/B/C/D/AU/Z weighting frequency responses."""
     print("Generating weighting_responses.png...")
     fs = 48000
 
     _, ax = plt.subplots(figsize=(10, 7))
 
     # Zoom inset: the A curve is POSITIVE (+1.27 dB max at ~2.5 kHz per
-    # IEC 61672-1 Table 2), invisible at the full -50..5 dB scale.
+    # IEC 61672-1 Table 2), invisible at the full -50..15 dB scale. Only the
+    # IEC 61672-1 curves are drawn in it: D peaks at +11.5 dB (out of the
+    # inset range) and B/AU hug C/A there.
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-    axins = inset_axes(ax, width="42%", height="38%", loc="lower center", borderpad=2)
+    axins = inset_axes(ax, width="42%", height="34%", loc="lower center", borderpad=2)
     axins.set_xscale("log")
 
     curves = [
-        ("A", "A-Weighting", COLOR_PRIMARY),
-        ("C", "C-Weighting", COLOR_SECONDARY),
-        ("Z", "Z-Weighting (Flat)", COLOR_FG)
+        ("A", "A-Weighting", COLOR_PRIMARY, "-"),
+        ("B", "B-Weighting (historical)", COLOR_TERTIARY, "--"),
+        ("C", "C-Weighting", COLOR_SECONDARY, "-"),
+        ("D", "D-Weighting (aircraft, withdrawn)", "#9467bd", "-."),
+        ("AU", "AU-Weighting (audible + ultrasound)", "#ff7f0e", "--"),
+        ("Z", "Z-Weighting (Flat)", COLOR_FG, "-"),
     ]
 
-    for code, label, color in curves:
+    for code, label, color, style in curves:
         # measure_weighting_response is covered by tests/test_graph_measurements.py
         w, mag_db = measure_weighting_response(fs, code)
-        ax.semilogx(w, mag_db, label=label, color=color)
-        axins.plot(w, mag_db, color=color)
+        ax.semilogx(w, mag_db, label=label, color=color, linestyle=style)
+        if code in ("A", "C", "Z"):
+            axins.plot(w, mag_db, color=color)
 
     ax.axhline(0, color=COLOR_FG, linestyle=":", alpha=0.3, linewidth=1)
-    apply_axis_styling(ax, "Frequency Weighting Curves (IEC 61672-1)", xlim=(10, 22000), ylim=(-50, 5))
+    apply_axis_styling(ax, "Frequency Weighting Curves", xlim=(10, 22000), ylim=(-50, 15))
 
     axins.axhline(0, color=COLOR_FG, linestyle=":", alpha=0.4, linewidth=1)
     axins.set_xlim(500, 8000)
@@ -1880,7 +1890,7 @@ def generate_weighting_responses(output_dir: str) -> None:
     axins.set_xticks([500, 1000, 2500, 5000, 8000])
     axins.set_xticklabels(["500", "1k", "2.5k", "5k", "8k"], fontsize=8)
 
-    ax.legend(loc="lower right")
+    ax.legend(loc="upper left", fontsize=9)
     save_figure(output_dir, "weighting_responses.png")
     plt.close()
 

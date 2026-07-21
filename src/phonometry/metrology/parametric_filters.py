@@ -1,7 +1,38 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-Weighting filters (A, C, G, Z) and time weighting utilities for audio analysis.
+Weighting filters (A, B, C, D, G, AU, Z) and time weighting utilities.
+
 A/C/Z per IEC 61672-1:2013; G (infrasound) per ISO 7196:1995.
+
+B is the historical weighting of ANSI S1.4-1983 (Appendix C): the C curve
+with one extra zero at the origin and one extra real pole at
+``f5 = 158.48932 Hz``. It was dropped from the sound-level-meter standards
+when IEC 61672-1 replaced IEC 60651 (first edition 2002) and is provided for
+historical data and older national codes only.
+
+AU per IEC 61012:1990: the A weighting cascaded with the U low-pass
+(six poles, Table 2: a double real pole at -12 200 Hz and complex pairs at
+-7 850 +/- j8 800 Hz and -2 900 +/- j12 150 Hz) for measuring audible sound
+in the presence of ultrasound. It is flat relative to A up to 10 kHz and
+cuts steeply above (U alone, Table 1: -2.8 dB at 12.5 kHz; -61.8 dB at
+40 kHz). The Table 2 poles reproduce every Table 1 nominal value within
+0.05 dB.
+
+D per the withdrawn IEC 537:1976 (aircraft-noise weighting): implemented
+from the widely published rational transfer function
+``k s (s^2 + 6532 s + 4.0975e7) / ((s + 1776.3)(s + 7288.5)
+(s^2 + 21514 s + 3.8836e8))``, with ``k`` renormalized to exactly 0 dB at
+1 kHz. The standard itself is withdrawn and unavailable, so the constants
+are corroborated against two independent implementations: SQAT
+(``sound_level_meter/Gen_weighting_filters.m``: identical zeros and poles;
+note its display-only ``freqResp`` line prints 1773.6 where its pole list,
+and every other source, has 1776.3) and librosa (``librosa.D_weighting``,
+an independent frequency-domain closed form; agreement within 0.002 dB
+from 10 Hz to 20 kHz). The response also reproduces the tabulated IEC 537
+curve republished in the NASA Handbook of Aircraft Noise Metrics
+(NASA CR-3406, 1981, Table SLD-I) within 0.1 dB at every one-third-octave
+frequency from 50 Hz to 10 kHz except 1600 Hz (0.15 dB) and 2500 Hz
+(0.28 dB), where that table appears to round a different source curve.
 """
 
 from __future__ import annotations
@@ -25,7 +56,7 @@ except ImportError:  # pragma: no cover - depends on install extras
 
 class WeightingFilter:
     """
-    Class-based frequency weighting filter (A, C, G, Z).
+    Class-based frequency weighting filter (A, B, C, D, G, AU, Z).
     Allows pre-calculating and reusing filter coefficients.
     """
 
@@ -36,7 +67,11 @@ class WeightingFilter:
         Initialize the weighting filter.
 
         :param fs: Sample rate in Hz.
-        :param curve: 'A', 'C', 'G' (ISO 7196 infrasound) or 'Z'.
+        :param curve: 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983,
+            historical: removed from the IEC sound-level-meter standards),
+            'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196
+            infrasound), 'AU' (IEC 61012, audible sound in the presence of
+            ultrasound) or 'Z'.
         :param stateful: If True, the weighting filter is stateful. Useful for block processing.
         :param steady_ic: If True, calculate steady state initial conditions for filter.
         :param high_accuracy: If True, design and run the filter at an internal
@@ -73,11 +108,15 @@ class WeightingFilter:
                 self.zi = np.array([])
             return
 
-        if self.curve not in ["A", "C", "G"]:
-            raise ValueError("Weighting curve must be 'A', 'C', 'G' or 'Z'")
+        if self.curve not in ["A", "B", "C", "D", "G", "AU"]:
+            raise ValueError(
+                "Weighting curve must be 'A', 'B', 'C', 'D', 'G', 'AU' or 'Z'"
+            )
 
-        # Analog ZPK for A and C weighting
-        # f1, f2, f3, f4 constants as per IEC 61672-1
+        # Analog ZPK for the A and C weightings.
+        # f1, f2, f3, f4 constants as per IEC 61672-1. ANSI S1.4-1983
+        # Appendix C prints the same poles to fewer digits (f1 = 20.598997,
+        # f4 = 12194.22), so the B weighting below shares them.
         f1 = 20.598997
         f4 = 12194.217
 
@@ -112,7 +151,7 @@ class WeightingFilter:
             # the warping grows quadratically; oversample the design toward
             # 48 kHz so the response stays within ~0.05 dB regardless of fs.
             self._oversample = min(8, max(1, math.ceil(48000 / fs)))
-        elif self.curve == "A":
+        elif self.curve in ("A", "AU"):
             f2 = 107.65265
             f3 = 737.86223
             # Zeros at 0 Hz
@@ -130,6 +169,73 @@ class WeightingFilter:
             )
             # k chosen to give 0 dB at 1000 Hz
             k = 3.5174303309e13
+            if self.curve == "AU":
+                # IEC 61012:1990 subclause 2.2: the AU weighting is the A
+                # weighting cascaded with the U low-pass filter, whose six
+                # poles are prescribed in Table 2 (in Hz, no zeros):
+                # a double real pole at -12 200 and complex-conjugate pairs
+                # at -7 850 +/- j8 800 and -2 900 +/- j12 150. The gain is
+                # renormalized to 0 dB at the 1 kHz reference frequency
+                # below (Table 1 note: zero tolerance at the reference
+                # frequency of IEC 651 subclause 3.7).
+                p_u = 2 * np.pi * np.array(
+                    [
+                        -12200.0,
+                        -12200.0,
+                        -7850.0 + 8800.0j,
+                        -7850.0 - 8800.0j,
+                        -2900.0 + 12150.0j,
+                        -2900.0 - 12150.0j,
+                    ]
+                )
+                p = np.concatenate([p.astype(complex), p_u])
+                if self.high_accuracy:
+                    # The U poles act up to 40 kHz, twice as high as the A/C
+                    # action (16-20 kHz) the 144 kHz design target was sized
+                    # for, so double the target to keep the same relative
+                    # bilinear-warping accuracy over the U roll-off. At
+                    # fs = 48 kHz this designs at 288 kHz and keeps the
+                    # 16 kHz deviation within about -0.7 dB of the IEC 61012
+                    # Table 1 nominal (+/-3 dB tolerance there).
+                    self._oversample = min(8, max(1, math.ceil(288000 / fs)))
+
+        elif self.curve == "B":
+            # ANSI S1.4-1983 Appendix C (C2): the B weighting is the C
+            # weighting times f^2 / (f^2 + f5^2) in power, i.e. one more
+            # zero at the origin and one extra real pole at f5. Historical:
+            # B was dropped when IEC 61672-1 replaced the older meter
+            # standards; keep it for legacy data only.
+            f5 = 158.48932
+            z = np.array([0, 0, 0])
+            p = np.array(
+                [
+                    -2 * np.pi * f1,
+                    -2 * np.pi * f1,
+                    -2 * np.pi * f4,
+                    -2 * np.pi * f4,
+                    -2 * np.pi * f5,
+                ]
+            )
+            k = 1.0
+
+        elif self.curve == "D":
+            # Withdrawn IEC 537:1976 aircraft-noise weighting, from the
+            # published rational transfer function (module docstring):
+            # zeros at the origin and at the roots of s^2 + 6532 s
+            # + 4.0975e7; poles at -1776.3, -7288.5 and the roots of
+            # s^2 + 21514 s + 3.8836e8 (all in rad/s). The complex pairs
+            # are expanded with the quadratic formula so the design is
+            # exact and deterministic. Corroborated against SQAT and
+            # librosa (independent implementations).
+            zr = -6532.0 / 2.0
+            zi = math.sqrt(4.0975e7 - zr**2)
+            pr = -21514.0 / 2.0
+            pi = math.sqrt(3.8836e8 - pr**2)
+            z = np.array([0.0, complex(zr, zi), complex(zr, -zi)])
+            p = np.array(
+                [-1776.3, -7288.5, complex(pr, pi), complex(pr, -pi)]
+            )
+            k = 1.0
 
         else:  # C weighting
             z = np.array([0, 0])
@@ -137,7 +243,9 @@ class WeightingFilter:
             k = 5.91797e8
 
         if self.curve != "G":
-            # Recalculate k to ensure 0dB at 1kHz (A/C reference frequency)
+            # Recalculate k to ensure 0 dB at 1 kHz, the reference frequency
+            # shared by every audio-band weighting (IEC 61672-1 for A/C,
+            # ANSI S1.4-1983 for B, IEC 537 for D, IEC 61012 for AU).
             w = 2 * np.pi * 1000
             h = k * np.prod(1j * w - z) / np.prod(1j * w - p)
             k = k / np.abs(h)
@@ -223,11 +331,13 @@ def weighting_filter(
     x: List[float] | np.ndarray, fs: int, curve: str = "A", high_accuracy: bool = True
 ) -> np.ndarray:
     """
-    Apply frequency weighting (A or C) to a signal.
+    Apply a frequency weighting to a signal.
 
     :param x: Input signal.
     :param fs: Sample rate.
-    :param curve: 'A', 'C', 'G' (ISO 7196 infrasound) or 'Z' (bypass).
+    :param curve: 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical),
+        'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196
+        infrasound), 'AU' (IEC 61012) or 'Z' (bypass).
     :param high_accuracy: Use internal oversampling for IEC 61672-1 class 1
         accuracy at high frequencies (default True).
     :return: Weighted signal.

@@ -40,6 +40,17 @@ _ES_EXACT = {
     "Atmospheric Refraction: Ray Bending and the Acoustic Shadow":
         "Refracción atmosférica: curvatura de rayos y zona de sombra",
     "Sound rays (upward refraction)": "Rayos sonoros (refracción hacia arriba)",
+    "Tone-Burst Test Signal (IEC 60268-1)":
+        "Señal de prueba de salvas de tono (IEC 60268-1)",
+    "Single 5 ms burst of 5 kHz tone (25 full periods)":
+        "Salva única de 5 ms de tono de 5 kHz (25 períodos completos)",
+    "Repetitive train: 10 bursts per second (duty cycle 5 %)":
+        "Tren repetitivo: 10 salvas por segundo (ciclo de trabajo 5 %)",
+    "Gating envelope": "Envolvente de conmutación",
+    "Window Functions: The Spectral Trade-off (Harris 1978)":
+        "Ventanas de análisis: el compromiso espectral (Harris 1978)",
+    "Frequency offset [DFT bins]": "Desplazamiento en frecuencia [bins de la DFT]",
+    "Level re main lobe [dB]": "Nivel re lóbulo principal [dB]",
     "GFPE relative sound level": "Nivel sonoro relativo GFPE",
     "Shadow-zone boundary": "Límite de la zona de sombra",
     "Effective sound speed [m/s]": "Velocidad efectiva del sonido [m/s]",
@@ -1039,6 +1050,9 @@ _ES_PATTERNS = [
     # psd_confidence_smoothing annotation (mathtext + baked-in numbers).
     (r"^\$n_d\$ = (\d+) averages, \$\\varepsilon_r\$ = (\d+)\.(\d+) %$",
      r"$n_d$ = \1 promedios, $\\varepsilon_r$ = \2,\3 %"),
+    # window_functions_tradeoff legend entries (name + baked-in metrics).
+    (r"^([a-z]+): ENBW (.+) bins, sidelobe (.+) dB$",
+     r"\1: ENBW \2 bins, lóbulo lateral \3 dB"),
     (r"^Integrated I = (.+) LUFS$", "Integrada I = \\1 LUFS"),
     (r"^LRA = (.+) LU \(P10-P95\)$", "LRA = \\1 LU (P10-P95)"),
     (r"^f = 10 kHz, α = (.+) dB/km\npractical spreading \(R₀ = 1000 m\)$",
@@ -4016,6 +4030,84 @@ def generate_zoom_fft_resolution(output_dir: str) -> None:
             color=COLOR_FG)
     plt.tight_layout()
     save_figure(output_dir, "zoom_fft_resolution.svg")
+
+
+def generate_tone_burst_train(output_dir: str) -> None:
+    """IEC 60268-1 tone bursts: one gated burst and the repetitive train."""
+    print("Generating tone_burst_train...")
+    from phonometry import tone_burst
+
+    fs = 48000.0
+    single = tone_burst(fs, 5000.0, 25, pre_silence=0.001, post_silence=0.001)
+    train = tone_burst(fs, 5000.0, 25, repetitions=4, repetition_rate=10.0)
+
+    fig, axes = plt.subplots(2, 1, figsize=(10, 6.4))
+    t_ms = 1e3 * np.arange(single.signal.size) / single.fs
+    axes[0].plot(t_ms, single.signal, color=COLOR_PRIMARY, linewidth=0.9)
+    axes[0].plot(t_ms, single.envelope, color=COLOR_SECONDARY, linewidth=1.6,
+                 linestyle="--", label="Gating envelope")
+    axes[0].plot(t_ms, -single.envelope, color=COLOR_SECONDARY, linewidth=1.6,
+                 linestyle="--")
+    axes[0].set_title("Single 5 ms burst of 5 kHz tone (25 full periods)",
+                      fontweight="bold")
+    axes[0].set_xlabel("Time [ms]")
+    axes[0].legend(loc="upper right", fontsize=9)
+
+    t_s = np.arange(train.signal.size) / train.fs
+    axes[1].plot(t_s, train.signal, color=COLOR_PRIMARY, linewidth=0.5)
+    axes[1].plot(t_s, train.envelope, color=COLOR_SECONDARY, linewidth=1.6,
+                 linestyle="--", label="Gating envelope")
+    axes[1].plot(t_s, -train.envelope, color=COLOR_SECONDARY, linewidth=1.6,
+                 linestyle="--")
+    axes[1].set_title("Repetitive train: 10 bursts per second (duty cycle 5 %)",
+                      fontweight="bold")
+    axes[1].set_xlabel("Time [s]")
+    axes[1].legend(loc="upper right", fontsize=9)
+
+    for ax in axes:
+        ax.set_ylabel("Amplitude")
+        ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+        ax.set_axisbelow(True)
+    fig.suptitle("Tone-Burst Test Signal (IEC 60268-1)", fontweight="bold")
+    plt.tight_layout()
+    save_figure(output_dir, "tone_burst_train.svg")
+    plt.close()
+
+
+def generate_window_functions_tradeoff(output_dir: str) -> None:
+    """Window spectra with their Harris figures of merit in the legend."""
+    print("Generating window_functions_tradeoff...")
+    from phonometry import window_metrics
+
+    n, oversample = 1024, 256
+    cases = [
+        ("boxcar", COLOR_FG, "-"),
+        ("hann", COLOR_PRIMARY, "-"),
+        ("hamming", COLOR_SECONDARY, "-"),
+        ("blackman", COLOR_TERTIARY, "-"),
+    ]
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    for name, color, style in cases:
+        res = window_metrics(name, n)
+        spectrum = np.abs(np.fft.rfft(res.taps, n=n * oversample))
+        level = 20.0 * np.log10(spectrum / spectrum[0])
+        bins = np.arange(level.size) / oversample
+        shown = bins <= 16.0
+        ax.plot(bins[shown], level[shown], color=color, linestyle=style,
+                linewidth=1.4, alpha=0.9,
+                label=(f"{name}: ENBW {res.enbw_bins:.2f} bins, "
+                       f"sidelobe {res.highest_sidelobe_db:.1f} dB"))
+    ax.set_xlim(0.0, 16.0)
+    ax.set_ylim(-100.0, 5.0)
+    ax.set_xlabel("Frequency offset [DFT bins]")
+    ax.set_ylabel("Level re main lobe [dB]")
+    ax.set_title("Window Functions: The Spectral Trade-off (Harris 1978)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "window_functions_tradeoff.svg")
     plt.close()
 
 
@@ -7811,6 +7903,10 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # the zoom FFT resolving sub-bin tone pairs (Bendat & Piersol).
     generate_calibrated_spectrogram,
     generate_zoom_fft_resolution,
+    # Signal toolbox: IEC 60268-1 tone bursts (single and repetitive train)
+    # and the window figures of merit (Harris 1978).
+    generate_tone_burst_train,
+    generate_window_functions_tradeoff,
     # Broadcast: programme loudness and true peak (ITU-R BS.1770-5 /
     # EBU R 128 with Tech 3341/3342).
     generate_program_loudness,
@@ -7866,8 +7962,7 @@ def generate_all(img_dir: str) -> None:
         func(img_dir)
 
 
-# ===========================================================================
-# Animations (Tier 1 pilot)
+# ====================================================================# Animations (Tier 1 pilot)
 # ---------------------------------------------------------------------------
 # Deterministic FuncAnimation clips of the level-vs-time phenomena the library
 # already computes. Each is rendered to WebM (site <video>) in all four
@@ -7881,8 +7976,7 @@ def generate_all(img_dir: str) -> None:
 # Kept out of generate_all()/`make graphs` so ordinary PNG regeneration stays
 # fast; produced by `make animations` (or `make posters` to re-extract the
 # stills from the committed WebMs without re-rendering).
-# ===========================================================================
-
+# ====================================================================
 _ANIM_FPS = 20
 _ANIM_SECONDS = 12
 _ANIM_FRAMES = _ANIM_FPS * _ANIM_SECONDS
@@ -10937,8 +11031,7 @@ def generate_animations(output_dir: str,
         func(output_dir)
 
 
-# ===========================================================================
-# Command line / parallel figure generation
+# ====================================================================# Command line / parallel figure generation
 # ---------------------------------------------------------------------------
 # Every asset is produced four times: light/dark theme x English/Spanish
 # ("_dark" / "_es" / "_es_dark" suffixes) so both site languages follow the
@@ -10947,8 +11040,7 @@ def generate_animations(output_dir: str,
 # tasks are distributed over a process pool. Language and theme are applied
 # inside the worker before each figure runs, exactly as the sequential loop
 # did, so the output bytes are identical either way.
-# ===========================================================================
-
+# ====================================================================
 _VARIANTS: tuple[tuple[str, bool], ...] = (
     ("en", False),
     ("en", True),

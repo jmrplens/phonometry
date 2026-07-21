@@ -42,6 +42,15 @@ respuestas al impulso pueden retardarse y alinearse con precisión
 submuestral; y la transformada de Hilbert produce la envolvente con fase y
 frecuencia instantáneas.
 
+[Señales de prueba y herramientas de muestreo](/phonometry/es/guides/test-signals/)
+es la caja de herramientas en la que se apoyan las otras dos: salvas de tono
+con la conmutación exacta de IEC 60268-1 (inicio en el paso por cero, número
+entero de períodos completos, trenes repetitivos), remuestreo polifásico
+tras una especificación antialias explícita cuyo filtro diseñado viaja con
+el resultado, y retardo fraccionario de banda limitada con frontera lineal o
+circular, que comparte su núcleo con la alineación submuestral de respuestas
+al impulso.
+
 Estos estimadores alimentan al resto de la biblioteca: las funciones de
 transferencia y el análisis de distorsión se apoyan en la maquinaria
 espectral cruzada, el trabajo con respuestas al impulso de sala descansa en
@@ -60,8 +69,15 @@ estimaciones.
   espectrograma STFT calibrado en unidades absolutas (dB SPL para pascales)
   con el compromiso de resolución tiempo-frecuencia, y la FFT con zoom que
   resuelve tonos más próximos que un bin práctico de FFT.
+  salida coherente y la SNR espectral, suavizado en 1/n de octava,
+  generadores de ruido de colores con pendiente exacta y las figuras de
+  mérito de Harris para las ventanas.
 - [Correlación, retardo y envolvente](/phonometry/es/guides/correlation-delay/):
   estimaciones de correlación con sus errores aleatorios, estimación del
   retardo por correlación directa, pendiente de fase y ponderaciones GCC,
   alineación submuestral de respuestas al impulso, y la envolvente de
   Hilbert.
+- [Señales de prueba y herramientas de muestreo](/phonometry/es/guides/test-signals/):
+  salvas de tono IEC 60268-1 con conmutación exacta, remuestreo con
+  especificación antialias declarada y retardo fraccionario de banda
+  limitada.

@@ -54,6 +54,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/)
 - [Calibrated spectral analysis (Bendat & Piersol)](https://jmrplens.github.io/phonometry/guides/spectral-analysis/)
 - [Correlation, time delay and envelope (Bendat & Piersol / Knapp & Carter)](https://jmrplens.github.io/phonometry/guides/correlation-delay/)
+- [Test signals and sample-rate tools (IEC 60268-1)](https://jmrplens.github.io/phonometry/guides/test-signals/)
 - [Swept-sine distortion and phase utilities (Farina / Novak)](https://jmrplens.github.io/phonometry/guides/swept-sine-distortion/)
 - [Block Processing](https://jmrplens.github.io/phonometry/guides/block-processing/)
 - [Multichannel and Performance](https://jmrplens.github.io/phonometry/guides/multichannel/)

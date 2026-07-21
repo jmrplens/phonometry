@@ -11,8 +11,9 @@ effective number of averages, the normalized random error and chi-square
 confidence intervals; the **coherent output spectrum** that splits a measured
 output into the part linearly explained by the input and the noise remainder,
 with the spectral signal-to-noise ratio; a **fractional-octave smoother** with
-a constant-power kernel; and **colored-noise generators** with an exact
-power-law slope for exercising all of the above. Every error formula is a
+a constant-power kernel; **colored-noise generators** with an exact
+power-law slope for exercising all of the above; and the **window figures of
+merit** of Harris (1978) for choosing the taper. Every error formula is a
 closed form from the book, verified by seeded Monte Carlo in the test suite.
 
 ## 1. Power spectral density with its statistical error
@@ -242,6 +243,53 @@ the regression slope of each color lands within a few thousandths of a
 dB/octave of the exact value; the conformance suite pins the pink slope at
 -3.0116 against the exact -3.0103.
 
+## 6. Choosing the window
+
+Every estimator on this page accepts any window `scipy.signal.get_window`
+knows, but the choice is a quantified trade-off, not a preference.
+`window_metrics` computes the figures of merit Harris (1978) tabulated, for
+any taper and length, sampled DFT-even exactly as the Welch estimators apply
+it:
+
+- **ENBW** (equivalent noise bandwidth, in bins): how much wider than one
+  bin the effective analysis bandwidth is. This is the same number the PSD
+  result reports as `resolution_bandwidth` (`ENBW·fs/nperseg` in Hz), and
+  it enters directly in the tone/noise trade: a broadband noise floor read
+  from a windowed spectrum sits `10·lg(ENBW)` dB above the true density.
+- **Coherent gain**: the DC gain `Σw/N` a bin-centered tone is scaled by.
+- **Scalloping loss**: the worst-case attenuation of a tone that falls
+  midway between two bins (3.92 dB for rectangular, 1.42 dB for Hann).
+- **Worst-case processing loss**: scalloping plus `10·lg(ENBW)`, the
+  worst-case reduction in output SNR for tone detection in white noise.
+- **Highest sidelobe** and **main-lobe -3 dB width**: leakage floor versus
+  resolution.
+
+```python
+from phonometry import window_metrics
+
+m = window_metrics("hann", 2048)
+print(m.enbw_bins)              # 1.5, exactly
+print(m.scalloping_loss_db)     # 1.42 dB
+print(m.highest_sidelobe_db)    # -31.5 dB
+m.plot()                        # window + spectrum with metrics marked
+```
+
+The closed forms anchor the tests: ENBW is exactly 1 for rectangular, 3/2
+for Hann, 1987/1458 for Hamming and 1523/882 for Blackman (DFT-even
+sampling), and the rectangular scalloping loss is `20·lg(N·sin(π/2N))`,
+the Dirichlet kernel evaluated half a bin off center.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/window_functions_tradeoff_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/window_functions_tradeoff.svg" alt="Spectra of the rectangular, Hann, Hamming and Blackman windows over 16 DFT bins, showing the trade-off between main-lobe width and sidelobe level, with each window's equivalent noise bandwidth and highest sidelobe level in the legend" width="82%"></picture>
+
+The Hann default of this module is the balanced choice: fast sidelobe
+falloff (-18 dB/octave) protects noise spectra from leakage, ENBW 1.5 costs
+only 1.76 dB against the rectangular window, and its overlap correlation at
+50 % keeps nearly all segment information in the effective average count.
+Reach for a lower-sidelobe taper (Blackman, Kaiser with a high beta) when a
+weak tone must be found next to a strong one, and accept the wider main
+lobe; reach for the rectangular window only for self-windowing records
+(transients that decay inside the segment) or bin-centered synthesis.
+
 ## Relation to the H1/H2 estimators
 
 The [frequency-response estimators](electroacoustics.md) `transfer_function`
@@ -264,3 +312,7 @@ same segment length are mutually consistent bin by bin.
   70–73. [doi:10.1109/TAU.1967.1161901](https://doi.org/10.1109/TAU.1967.1161901).
   The overlapped-segment variance formula behind the effective number of
   averages (Bendat & Piersol Section 11.5.2.2, Ref. 11).
+- Harris, F. J. (1978). On the use of windows for harmonic analysis with the
+  discrete Fourier transform. *Proceedings of the IEEE*, 66(1), 51–83.
+  [doi:10.1109/PROC.1978.10837](https://doi.org/10.1109/PROC.1978.10837).
+  The window figures of merit (Table 1) computed by `window_metrics`.

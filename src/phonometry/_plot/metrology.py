@@ -18,10 +18,12 @@ if TYPE_CHECKING:
     )
     from ..metrology.envelope import EnvelopeResult
     from ..metrology.phase import PhaseDecompositionResult
+    from ..metrology.signals import ToneBurstResult
     from ..metrology.spectra import (
         CoherentOutputSpectrumResult,
         CrossSpectralDensityResult,
         SpectralDensityResult,
+        WindowMetricsResult,
     )
     from ..metrology.time_frequency import SpectrogramResult, ZoomFFTResult
     from ..metrology.uncertainty import MonteCarloResult, UncertaintyResult
@@ -107,6 +109,20 @@ _STRINGS: dict[str, str] = {
     "Group delay [ms]": "Retardo de grupo [ms]",
     "biased": "sesgada",
     "unbiased": "insesgada",
+    "Gating envelope": "Envolvente de conmutación",
+    "Tone burst (IEC 60268-1): {f} Hz, {cycles} cycles":
+        "Salva de tono (IEC 60268-1): {f} Hz, {cycles} ciclos",
+    "Tone burst (IEC 60268-1): {f} Hz, {cycles} cycles, {rate}/s":
+        "Salva de tono (IEC 60268-1): {f} Hz, {cycles} ciclos, {rate}/s",
+    "Window w[m]": "Ventana w[m]",
+    "Sample": "Muestra",
+    "Frequency offset [DFT bins]": "Desplazamiento en frecuencia [bins de la DFT]",
+    "Level re main lobe [dB]": "Nivel re lóbulo principal [dB]",
+    "ENBW {enbw} bins": "ENBW {enbw} bins",
+    "Highest sidelobe {sll} dB": "Lóbulo lateral máximo {sll} dB",
+    "Scalloping loss {sl} dB": "Pérdida de festoneado {sl} dB",
+    "Window metrics (Harris 1978): {window}":
+        "Métricas de la ventana (Harris 1978): {window}",
 }
 
 
@@ -883,4 +899,115 @@ def plot_phase_decomposition(
     for axf in axes:
         format_frequency_axis(axf, fmin, fmax)
         localize_axes(axf, language)
+    return axes
+
+
+def plot_tone_burst(
+    result: "ToneBurstResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Burst waveform with its rectangular gating envelope.
+
+    :param result: A :class:`~phonometry.metrology.signals.ToneBurstResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the waveform ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import decimal_comma, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    t = np.arange(result.signal.size) / result.fs
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.plot(t, result.signal, **kwargs)
+    for sign in (1.0, -1.0):
+        ax.plot(
+            t, sign * result.envelope, color=_C_SECONDARY, lw=1.4,
+            linestyle="--",
+            label=_t("Gating envelope", language) if sign > 0 else None,
+        )
+    f = decimal_comma(f"{result.frequency:g}", language)
+    if result.repetition_rate is None:
+        title = _t("Tone burst (IEC 60268-1): {f} Hz, {cycles} cycles",
+                   language, f=f, cycles=result.cycles)
+    else:
+        rate = decimal_comma(f"{result.repetition_rate:g}", language)
+        title = _t(
+            "Tone burst (IEC 60268-1): {f} Hz, {cycles} cycles, {rate}/s",
+            language, f=f, cycles=result.cycles, rate=rate,
+        )
+    ax.set_title(title)
+    ax.set_xlabel(_t("Time [s]", language))
+    ax.set_ylabel(_t("Amplitude", language))
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_window_metrics(
+    result: "WindowMetricsResult", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes | np.ndarray:
+    """Window shape and spectrum with the Harris figures of merit marked.
+
+    With ``ax`` given, only the spectrum panel is drawn on it.
+
+    :param result: A
+        :class:`~phonometry.metrology.spectra.WindowMetricsResult`.
+    :param ax: Existing axes for the spectrum panel, or ``None`` for a
+        fresh two-panel figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the spectrum ``plot`` call.
+    :return: The spectrum axes (``ax`` given) or the array of two axes.
+    """
+    from .._i18n import decimal_comma, localize_axes
+    from ..metrology.spectra import _WINDOW_OVERSAMPLE, _window_spectrum_db
+
+    max_bins = 24.0
+
+    def _spectrum_panel(axs: Axes) -> None:
+        level = _window_spectrum_db(result.taps, _WINDOW_OVERSAMPLE)
+        bins = np.arange(level.size) / _WINDOW_OVERSAMPLE
+        shown = bins <= max_bins
+        kwargs.setdefault("color", _C_PRIMARY)
+        enbw = decimal_comma(f"{result.enbw_bins:.3f}", language)
+        kwargs.setdefault("label", _t("ENBW {enbw} bins", language, enbw=enbw))
+        axs.plot(bins[shown], level[shown], **kwargs)
+        sll = decimal_comma(f"{result.highest_sidelobe_db:.1f}", language)
+        axs.axhline(
+            result.highest_sidelobe_db, color=_C_REFERENCE, lw=1.0,
+            linestyle="--",
+            label=_t("Highest sidelobe {sll} dB", language, sll=sll),
+        )
+        sl = decimal_comma(f"{result.scalloping_loss_db:.2f}", language)
+        axs.plot(
+            [0.5], [-result.scalloping_loss_db], "o", color=_C_SECONDARY,
+            ms=5.0, label=_t("Scalloping loss {sl} dB", language, sl=sl),
+        )
+        axs.set_xlim(0.0, max_bins)
+        axs.set_ylim(bottom=max(-140.0, float(np.min(level[shown])) - 5.0))
+        axs.set_xlabel(_t("Frequency offset [DFT bins]", language))
+        axs.set_ylabel(_t("Level re main lobe [dB]", language))
+        axs.grid(True, alpha=0.3)
+        axs.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+
+    title = _t("Window metrics (Harris 1978): {window}", language,
+               window=result.window)
+    if ax is not None:
+        _spectrum_panel(ax)
+        ax.set_title(title)
+        localize_axes(ax, language)
+        return ax
+
+    axes = _new_axes_column(2, figsize=(8.0, 6.5))
+    axes[0].plot(np.arange(result.n), result.taps, color=_C_PRIMARY, lw=1.2)
+    axes[0].set_xlabel(_t("Sample", language))
+    axes[0].set_ylabel(_t("Window w[m]", language))
+    axes[0].set_title(title)
+    axes[0].grid(True, alpha=0.3)
+    _spectrum_panel(axes[1])
+    for axf in axes:
+        localize_axes(axf, language)
+    axes[0].figure.tight_layout()
     return axes

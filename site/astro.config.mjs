@@ -360,6 +360,7 @@ export default defineConfig({
                 'guides/spectral-analysis',
                 'guides/time-frequency',
                 'guides/correlation-delay',
+                'guides/test-signals',
               ],
             },
             {

@@ -1,6 +1,6 @@
 ---
 title: "Calibrated spectral analysis"
-description: "The Bendat & Piersol Welch estimators with their statistical quality: power and cross-spectral density with the effective number of averages, normalized random errors and chi-square confidence intervals, the coherent output spectrum with the spectral signal-to-noise ratio, constant-power fractional-octave smoothing, and colored-noise generators with an exact power-law slope."
+description: "The Bendat & Piersol Welch estimators with their statistical quality: power and cross-spectral density with the effective number of averages, normalized random errors and chi-square confidence intervals, the coherent output spectrum with the spectral signal-to-noise ratio, constant-power fractional-octave smoothing, colored-noise generators with an exact power-law slope, and the Harris window figures of merit for choosing the taper."
 references:
   - type: book
     authors: ["Bendat, J. S.", "Piersol, A. G."]
@@ -20,6 +20,16 @@ references:
     pages: "70-73"
     doi: "10.1109/TAU.1967.1161901"
     note: "The overlapped-segment variance formula behind the effective number of averages (Bendat & Piersol Section 11.5.2.2, Ref. 11)."
+  - type: article
+    authors: ["Harris, F. J."]
+    year: 1978
+    title: "On the use of windows for harmonic analysis with the discrete Fourier transform"
+    journal: "Proceedings of the IEEE"
+    volume: 66
+    issue: 1
+    pages: "51-83"
+    doi: "10.1109/PROC.1978.10837"
+    note: "The window figures of merit (Table 1): equivalent noise bandwidth, coherent gain, scalloping loss, worst-case processing loss, highest sidelobe level and main-lobe width, computed by window_metrics for any scipy taper."
 ---
 
 import ThemeImage from '../../../components/ThemeImage.astro';
@@ -263,6 +273,83 @@ Measured over three decades (20 Hz – 20 kHz) with the estimator of section 1,
 the regression slope of each color lands within a few thousandths of a
 dB/octave of the exact value; the conformance suite pins the pink slope at
 -3.0116 against the exact -3.0103.
+
+## 6. Choosing the window
+
+Every estimator on this page accepts any window
+`scipy.signal.get_window` knows, but the choice is a quantified
+trade-off, not a preference. `window_metrics` computes the figures of merit
+Harris (1978) tabulated, for any taper and length, sampled DFT-even exactly
+as the Welch estimators apply it:
+
+- **ENBW** (equivalent noise bandwidth, in bins): how much wider than one
+  bin the effective analysis bandwidth is. This is the same number the PSD
+  result reports as `resolution_bandwidth` (`ENBW·fs/nperseg` in Hz), and
+  it enters directly in the tone/noise trade: a broadband noise floor read
+  from a windowed spectrum sits `10·lg(ENBW)` dB above the true density.
+- **Coherent gain**: the DC gain `Σw/N` a bin-centered tone is scaled by.
+- **Scalloping loss**: the worst-case attenuation of a tone that falls
+  midway between two bins (3.92 dB for rectangular, 1.42 dB for Hann).
+- **Worst-case processing loss**: scalloping plus `10·lg(ENBW)`, the
+  worst-case reduction in output SNR for tone detection in white noise.
+- **Highest sidelobe** and **main-lobe -3 dB width**: leakage floor versus
+  resolution.
+
+```python
+from phonometry import window_metrics
+
+m = window_metrics("hann", 2048)
+print(m.enbw_bins)              # 1.5, exactly
+print(m.scalloping_loss_db)     # 1.42 dB
+print(m.highest_sidelobe_db)    # -31.5 dB
+m.plot()                        # window + spectrum with metrics marked
+```
+
+The closed forms anchor the tests: ENBW is exactly 1 for rectangular, 3/2
+for Hann, 1987/1458 for Hamming and 1523/882 for Blackman (DFT-even
+sampling), and the rectangular scalloping loss is `20·lg(N·sin(π/2N))`,
+the Dirichlet kernel evaluated half a bin off center.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/window_functions_tradeoff.svg" alt="Spectra of the rectangular, Hann, Hamming and Blackman windows over 16 DFT bins, showing the trade-off between main-lobe width and sidelobe level, with each window's equivalent noise bandwidth and highest sidelobe level in the legend" width="82%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import window_metrics
+
+n, oversample = 1024, 256
+fig, ax = plt.subplots(figsize=(10, 6.2))
+for name in ("boxcar", "hann", "hamming", "blackman"):
+    res = window_metrics(name, n)
+    spectrum = np.abs(np.fft.rfft(res.taps, n=n * oversample))
+    level = 20.0 * np.log10(spectrum / spectrum[0])
+    bins = np.arange(level.size) / oversample
+    shown = bins <= 16.0
+    ax.plot(bins[shown], level[shown],
+            label=(f"{name}: ENBW {res.enbw_bins:.2f} bins, "
+                   f"sidelobe {res.highest_sidelobe_db:.1f} dB"))
+ax.set_xlim(0.0, 16.0)
+ax.set_ylim(-100.0, 5.0)
+ax.set_xlabel("Frequency offset [DFT bins]")
+ax.set_ylabel("Level re main lobe [dB]")
+ax.legend(loc="upper right")
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
+The Hann default of this module is the balanced choice: fast sidelobe
+falloff (-18 dB/octave) protects noise spectra from leakage, ENBW 1.5 costs
+only 1.76 dB against the rectangular window, and its overlap correlation at
+50 % keeps nearly all segment information in the effective average count.
+Reach for a lower-sidelobe taper (Blackman, Kaiser with a high beta) when a
+weak tone must be found next to a strong one, and accept the wider main
+lobe; reach for the rectangular window only for self-windowing records
+(transients that decay inside the segment) or bin-centered synthesis.
 
 ## Relation to the H1/H2 estimators
 

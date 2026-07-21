@@ -1,4 +1,4 @@
-# System measurement: Golay codes, shaped sweeps and inversion
+# System measurement: Golay, shaped sweeps, inversion
 
 The [room-acoustics guide](room-acoustics.md) recovers
 impulse responses with the two ISO 18233 work-horses - the exponential sweep

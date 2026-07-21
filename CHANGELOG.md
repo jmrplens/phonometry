@@ -21,10 +21,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   random errors, a `.dominant_input()` helper for the strongest source per
   band, and a `.plot()` (EN/ES). The conditioning is pinned to the exact
   rational values of Problem 7.2 and to the multiple-coherence SNR relation.
-- ISO 9612:2009 occupational noise-exposure measurement report via
-- Parametric-EQ biquads per the RBJ Audio EQ Cookbook (W3C Working Group
-- System-measurement front ends for the transfer-function toolbox:
-
+- `ExposureResult.report(path)` renders the ISO 9612:2009 Clause 15
+  occupational noise-exposure measurement report as a one-page PDF fiche laid
+  out like a prevention-service measurement sheet: the standard-basis line
+  naming the applied strategy (task-based, job-based or full-day, Clauses
+  9-11), a header grid with the new `ReportMetadata.instrumentation` and
+  `ReportMetadata.calibration` free-text fields, the work-analysis table (per
+  task the mean duration, sample count, task level of Formula 7 and
+  contribution of Formula 8, or the Annex C sampling budget for the job-based
+  and full-day strategies, with `verbose=True` adding the per-task uncertainty
+  columns), the boxed LEX,8h with its expanded uncertainty U at the coverage
+  factor k = 1.65, and the assessment against Directive 2003/10/EC (the 80/85
+  dB(A) action values and the 87 dB(A) limit value, each marked on the value
+  rounded exactly as displayed). English and Spanish. `ReportMetadata` gains
+  the optional `instrumentation` and `calibration` fields.
+- `metrology.equalizer`: parametric-equalizer biquads implementing the
+  closed-form recipes of the RBJ Audio EQ Cookbook (republished as a W3C
+  Working Group Note). `EQSection` specifies one biquad with the cookbook's
+  exact parameterization (`peaking`, `lowshelf`, `highshelf`, `lowpass`,
+  `highpass`, `bandpass`, `bandpass_skirt`, `notch`, `allpass`; `f0`,
+  `gain_db`, and exactly one of `q`, `bw` in octaves or shelf `slope`), and
+  `ParametricEQ` designs the sections and runs them as a normalized SOS cascade
+  in the `WeightingFilter` house style (reusable `.sos`, 1D/2D multichannel
+  `filter()`, optional stateful block processing). `ParametricEQ.response()`
+  returns a frozen `EQResponseResult` with the per-section and cascade
+  magnitude and phase and an i18n `.plot()`, and `parametric_eq(x, fs, sections)`
+  is the one-shot helper. Verified against the cookbook's own closed forms (a
+  hand-worked coefficient set pinned to 1e-15 and the exact type anchors at
+  f0, DC and Nyquist).
+- Three system-measurement front ends for the transfer-function toolbox, each
+  returning a rich result with a `.plot()` and reusing the existing
+  acquisition and deconvolution machinery. `golay_pair(order)` builds a
+  complementary binary code pair of length `2**order` whose periodic
+  autocorrelations sum to an exact `2L`-delta (Golay 1961; Xiang in Havelock,
+  Handbook of Signal Processing in Acoustics, Part I Ch. 6), and
+  `golay_impulse_response()` recovers the `ImpulseResponseResult`
+  (`method="golay"`) exactly for a noiseless linear time-invariant system.
+  `shaped_sweep_signal(...)` synthesizes a swept sine whose group delay grows
+  in proportion to a target spectral power (`"pink"`, `"white"` or a
+  `(frequencies_hz, magnitude_db)` pair) while keeping a swept sine's crest
+  factor (Mueller & Massarani, JAES 49(6), 2001). `regularized_inverse_filter()`
+  computes the frequency-dependent Tikhonov inverse of Kirkeby & Nelson
+  (JAES 47(7/8), 1999), `H_inv = conj(H) / (|H|^2 + eps(f))`, small in-band and
+  large outside, with the out-of-band gain capped at `1 / (2*sqrt(eps))` and a
+  modeling delay that makes the mixed-phase inverse causal; `.apply()`
+  equalizes a recording with the delay removed.
 - `multitaper_psd`: Thomson multitaper spectral density (Thomson 1982;
   Percival & Walden 1993, Chapter 7) as the whole-record alternative to the
   Welch estimator for records too short to segment. K orthogonal Slepian
@@ -39,170 +80,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   concentrations, with `.plot()` (EN/ES) drawing the density and its
   confidence band; calibration (density/spectrum scaling, no detrending)
   matches the Welch estimators exactly.
-
-### Fixed
-- `shaped_sweep_signal()` no longer returns a NaN or infinite crest factor when
-- The shaped-sweep spectrum plot no longer crashes when the Welch grid, resolved
-- The `regularized_inverse_filter()` result documents `max_gain_db` as the
-
-- The documentation figures now render every text run in the viewer's native
-  sans-serif font: I normalise all `font-family` declarations in the generated
-  SVGs to the generic `sans-serif`, so viewers without DejaVu Sans no longer
-  fall back to a serif for the mathtext labels while the surrounding prose
-  stays sans. Text remains selectable.
-- The EBU R 128 programme-loudness fiche no longer passes the verdict on the
-  obsolete blanket ±0.5 LU tolerance (the June 2014 V3 rule, superseded in
-  the August 2020 V4 revision and absent from R 128-2023).
-  `ProgramLoudnessResult.report()` now selects the tolerance explicitly via a
-  `tolerance` keyword: the default `"qc"` applies the ±0.2 LU
-  measurement-error allowance of R 128 item i) (loudness workflows such as
-  Quality Control) and `"live"` applies the ±1.0 LU tolerance of item h),
-  permitted only where the Target Level is not achievable practically; the
-  fiche prints the applied rule and its R 128 item. A non-live programme at
-  −23.5 LUFS, previously rendered PASS, now correctly fails the default rule.
-- Fiche verdicts are now evaluated on the value rounded exactly as displayed,
-  so the printed numbers can no longer contradict the pass/fail at a
-  tolerance boundary: the programme-loudness delta is compared at the 0.1 LU
-  display precision of EBU Tech 3341, the EPNL is determined once to one
-  decimal place (as Annex 16 states it) before the level, margin and status
-  are derived, and the ISO 532-1 loudness verdict compares the one-decimal
-  displayed value. Tiny negative values no longer print as "-0.0".
-- `effective_perceived_noise_level()` gains a `procedure` keyword
-  (`"aeroplane"` default, `"helicopter"`) that plumbs the tone-correction
-  start band of ICAO Annex 16 Vol I App. 2, 4.3.1 Step 1 through the public
-  EPNL chain: helicopters and tilt-rotors start the slope analysis at the
-  50 Hz band, so rotor tones in the 50-80 Hz bands are no longer silently
-  outside the analysis when the spectrum is processed with the default
-  aeroplane procedure.
-- The ISO 717 fiche now declares the band set actually rated (an octave-band
-  rating was captioned "One-third-octave", contradicting the clause 4.4
-  statement requirement) and can name the reported single-number quantity via
-  a `symbol` keyword on `report()` (e.g. `"DnT,w"`, `"L'nT,w"`), so a field
-  measurement is no longer mislabelled with the laboratory `Rw` / `Ln,w`
-  descriptor; spectrum-adaptation terms print a sign only when negative,
-  matching the standard's own examples.
-- The ISO 532-1 fiche now reports the items clause 7 makes mandatory: the
-  method used (stationary, clause 5, or time-varying, clause 6), the sound
-  field (`ZwickerLoudness` gains a `field` attribute set by the
-  constructors), the loudness-versus-time function N(t) for time-varying
-  sounds and the "maximum loudness Nmax" labelling of the reported maximum.
-- `verify_filter_class()` / `filter_class_compliance()` now report when the
-  verification is range-limited: the stop-band mask beyond each band's
-  processing Nyquist cannot be exercised at the decimated rate (the
-  `range_limited` flag and per-band `checked_to_omega` record it), and the
-  IEC 61260-1 fiche qualifies its COMPLIES statement accordingly instead of
-  asserting unqualified full-mask conformance. The fiche also labels bands
-  with the nominal mid-band frequencies both editions identify filters by
-  (125 Hz, not the exact 125.89.. Hz), cites the 1995 edition's own
-  relative-attenuation definition instead of a 2014-only formula number, and
-  rejects a `required_class` that does not exist in the verified edition
-  (class 0 against a 2014 result previously rendered a meaningless FAIL).
-- Spanish fiches (`language="es"`) now localise the embedded chart too: the
-  fiche language is forwarded to the result's own `plot()`, so axis labels
-  and legends render in Spanish instead of English.
-- Fiche header grids reprint client-supplied metadata verbatim instead of
-  display-rounding it (an area of 1.23 m² was printed as "1.2"), and the
-  ISO 11654 fiche writes the shape indicator in the clause 5.3 style
-  (`0.60(M)`, no space) with the 5.3 NOTE recommendation printed when an
-  indicator applies.
-
-- `LoudspeakerCharacteristics.minimum_impedance` now evaluates the lowest
-  impedance modulus over the rated frequency range when
-  `rated_frequency_range` is supplied, as IEC 60268-5 clause 16.1 requires
-  ("the lowest value of the modulus of the impedance in the rated frequency
-  range shall be not less than 80 % of the rated impedance"), falling back to
-  the computed effective frequency range only when no rated range is stated.
-  The property previously always scanned the effective range, which clause
-  19.1 NOTE 2 warns may differ from the rated range (particularly for woofers
-  and tweeters), so an impedance dip below 80 % of the rated impedance inside
-  the rated range but outside the effective range went undetected.
-- `vibration.wave_vibration_reduction_index` now implements Hopkins (2007)
-  Eq. 5.116 exactly: `Kij = 10 lg(1/tau_ij) + 5 lg(fc_j/f_ref)` with the
-  reference frequency `f_ref = 1000 Hz`, instead of the previous
-  `5 lg(fc_j/fc_i)` correction term. The old form broke the required symmetry
-  of the junction descriptor (`Kij = Kji`, guaranteed by the Eq. 5.7
-  reciprocity of the angular-average transmission coefficients): an L-junction
-  of 100 mm and 215 mm concrete plates returned 6.81 dB in one direction and
-  8.09 dB in the other where the correct symmetric value is 2.97 dB. The
-  function signature changed accordingly (it now takes the receiving plate's
-  `critical_frequency_receiver` instead of the optional source/receiver pair),
-  `junction_transmission` computes both plates' thin-plate critical frequencies
-  (`fc = sqrt(12) c0^2 / (2 pi h cL)`, `c0 = 343 m/s`) and stores them on
-  `JunctionTransmissionResult.critical_frequency1`/`critical_frequency2`, and
-  `corner_reduction_index` uses the receiving plate's value.
-- The ISO 4871 declared single-number values
-  (`OperatingModeDeclaration.declared_sound_power_level` and
-  `.declared_emission_pressure_level`) now round the sum `L + K` once to the
-  nearest decibel, as clause 3.15 defines (`L_d = L + K`, the sum of the
-  unrounded quantities rounded to the nearest decibel), instead of adding the
-  separately rounded `L` and `K` of the dual-number form (clause 3.16). The
-  previous behaviour could understate the declared value by 1 dB (for example
-  `L_WA = 91.4`, `K_WA = 2.4` gave 93 dB instead of 94 dB) and thereby flip
-  the clause 6.2 verification verdict at the boundary.
-- `aircraft.load_anp_database` no longer interleaves distinct fixed-point
-  profiles: the parser now keys each trajectory on the full ANP identity
-  (aircraft, operation, profile identifier, stage length) instead of dropping
-  `Profile_ID`, so aircraft shipping several profiles for the same operation
-  and stage length (e.g. `CNA206`/`CNA20T` departures with `DEFAULT` and
-  `3000LB` weight variants) load each profile whole instead of a physically
-  impossible 18-point merge. `AnpDatabase.profile` and `AnpAircraft.profile`
-  gained an optional `profile_id=` keyword; without it the `DEFAULT` profile is
-  selected when present, a single available profile is used, and an ambiguous
-  request raises listing the identifiers. Duplicate or non-consecutive point
-  numbers within a profile now raise instead of silently corrupting the path.
-- `aircraft.event_level` and `aircraft.noise_contour` apply the ECAC Doc 29
-  Vol 2 §4.5.2 bank-angle sign to the correct observer side: the depression
-  angle is now `φ = β + ε` for observers to starboard (right of the flight
-  direction) and `φ = β − ε` for observers to port. The sign was inverted, so
-  the lateral-directivity (engine-installation) correction of every banked
-  segment was mirrored between the inside and outside of a turn.
-- `noise_control.silencers.transmission_loss` had the four-pole prefactor
-  inverted (`Z1/Zn` instead of `Zn/Z1`), overstating the transmission loss by
-  `20 lg(S_out/S_in)` whenever the inlet and outlet port areas differed: a
-  zero-length element between 0.01 and 0.02 m2 (a sudden expansion, classic
-  `TL = 10 lg[(1+m)^2/(4m)] = 0.512 dB`) came out as 6.532 dB, and the TL of
-  an unequal-port chamber was not reciprocal (11.34 vs -0.70 dB, a negative
-  loss for a passive element). The formula now follows Munjal, *Acoustics of
-  Ducts and Mufflers* 2e, Eq. (3.27), reproduces the sudden-expansion limit
-  exactly in both directions and is reciprocal; regression tests pin both.
-  The four shipped silencer builders call it with equal port areas, so their
-  results are unchanged. Bies 5e Eq. (8.141) as printed also fails the
-  sudden-expansion limit (1.938 dB) and is now registered in
-  `docs/ERRATA.md`.
-- `environmental.ground_effect`, `environmental.spherical_reflection_coefficient`,
-  the ground-reflected paths of `environmental.barrier_insertion_loss` and the
-  ground condition of `environmental.atmospheric_parabolic_equation` now
-  conjugate the impedance obtained from the porous models of
-  `phonometry.materials` (the `flow_resistivity=` path and any
-  `PorousMediumResult`). The materials domain works in the `e^{+jωt}` time
-  convention (`Im(Z) < 0` for a passive medium) while the Salomons formulas
-  behind these functions require `e^{-iωt}` (`Im(Z) > 0`); the impedance used
-  to cross that boundary unconjugated, so the phase of the spherical-wave
-  reflection coefficient `Q` was wrong and the soft-ground interference dip
-  almost vanished (Salomons Fig. D.3 geometry, grassland
-  `σ = 200 kPa·s/m²`, `hs = hr = 2 m`, `r = 100 m`: the library gave a
-  `-0.55 dB` minimum where the correct dip is `-12.7 dB` near `395 Hz`, now
-  pinned by test and conformance oracle). User-supplied `impedance=` values are
-  now documented as `e^{-iωt}` with `Im(Z) > 0` for a passive ground (the
-  docstrings previously asserted the opposite sign), matching the convention of
-  `aircraft.rotorcraft_noise.ground_effect_adjustment`.
-- `environmental.atmospheric_parabolic_equation` adds the surface-wave term of
-  the GFPE range step (the residue of the ground-reflection pole at
-  `kz = -k0/Z`, third term of Salomons Eq. (H.49)), which is active for a
-  passive finite-impedance ground; without it the homogeneous-atmosphere field
-  drifted by up to about 1 dB from the Weyl-Van der Pol oracle once the
-  impedance convention was corrected.
-
-### Changed
-
-- Raised the `scipy` floor in `pyproject.toml` to the current release
-  (`scipy>=1.18.0`), matching the pin `requirements.txt` already carried. The
-  `numpy` floor stays at `>=2.4.4` because the optional `perf` extra pulls
-  numba, which still requires NumPy 2.4 or older; the pure-Python matrix and the
-  figure stack already run on the latest NumPy through their own pins.
-
-### Added
-
 - Random-data qualification module `phonometry.metrology.random_data`
   (Bendat & Piersol, Random Data 4e, Secs. 4.5.2, 10.3 and 5.5).
   `trend_test()` runs the nonparametric reverse arrangement test with the
@@ -629,7 +506,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   mobilities of infinite structures and the injected power
   `W = 0.5 |F|^2 Re{Y}` (Cremer, Heckl & Petersson 2005, *Structure-Borne Sound*
   3e, Table 5.1), the theoretical companions of the measured ISO 7626 mobilities.
-
 - Industrial noise control: silencers, HVAC and machine enclosures, a new
   `phonometry.noise_control` domain (Bies, Hansen & Howard, *Engineering Noise
   Control* 5th ed.; Munjal, *Acoustics of Ducts and Mufflers*). `expansion_chamber`,
@@ -760,7 +636,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   underwater-propagation layout and a leftover duplicated code block in the
   levels guide), applied in lockstep to the GitHub docs and both site
   languages, with new introductory sentences where a clip had none.
-
 - Correlation, time-delay estimation and Hilbert envelope (Bendat & Piersol,
   Random Data 4e; Knapp & Carter 1976): `correlation` (auto/cross via
   zero-padded FFT with the biased, unbiased and coefficient normalizations,
@@ -858,7 +733,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   ASTM E2611 `TransferMatrix` machinery; ten new conformance checks. Three
   source misprints recorded in the errata registry (Maa 1998 Eq. 5b;
   Attenborough & Van Renterghem 2021 Table 5.1 and Eq. 5.13).
-
 - Programme loudness and true peak (ITU-R BS.1770-5, EBU R 128 with Tech
   3341/3342), a new `phonometry.broadcast` domain: `program_loudness` (the
   full EBU Mode measurement set as a frozen `ProgramLoudnessResult` with
@@ -876,7 +750,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   1-4) at their official tolerances, the 997 Hz / -3.01 LKFS anchor and the
   Annex 2 under-read bound; eight new conformance checks and a new
   programme-loudness guide (EN/ES) with a metering figure.
-
 - Calibrated spectral analysis (Bendat & Piersol, Random Data 4e):
   `power_spectral_density` and `cross_spectral_density` (Welch estimators
   that report the effective number of independent averages under overlap,
@@ -890,13 +763,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a frozen result with `.plot()`. The random errors and interval coverage
   are pinned by seeded Monte Carlo against the closed forms, and the
   slopes/levels by exact oracles; six new conformance checks.
-
 - The `transfer_function`/`coherence` estimators, the p-p `sound_intensity`
   probe and the ECMA-418-1 tonality spectrum now compute their spectra
   through the shared Welch core in `phonometry.metrology.spectra`
   (bit-identical outputs, verified array-for-array against the previous
   implementations).
-
 - Rotorcraft terrain and screening (NORAH2 guidance §A.4.4-A.4.5, completing
   the ECAC Doc 32 domain): `mean_ground_plane` (the closed-form continuous
   least-squares plane of a terrain section, Eq. 36-40, with orthogonal
@@ -915,7 +786,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   0.05 dB) and the mixed-ground Case 2 grid in a single call; four new
   conformance checks. Two further guidance defects recorded in the errata
   registry (the Eq. 46 subscript and the §A.4.5 cross-references).
-
 - Rotorcraft single-event method (ECAC Doc 32 §4.3/§5-6, NORAH2 guidance
   §A.3-A.5) completing the hemisphere chain:
   `flight_condition_weights`/`interpolated_source_level` (the distance-scaled
@@ -936,7 +806,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   hand-checked interpolation, kinematics and Lorentzian-flyover closed forms;
   four new conformance checks. Two guidance defects recorded in the errata
   registry (Eq. 21 path angle; §A.3.1 triangulation plane).
-
 - Four new physics-based 2D FDTD documentation animations (WebM + poster
   for the site, GIF for the GitHub docs, EN + ES, light + dark), each
   simulated with `scripts/fdtd2d.py` and annotated on canvas:
@@ -1091,7 +960,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   ECMA-418-2 clause 5.1.5.2 last-block formula, the ISO/PAS 20065 clause
   5.3.4 edge-steepness print that contradicts the executable DIN 45681
   Annex J program, and the Osses 2016 Eq. (3) Bark-constant exponent typo.
-
 - Underwater printed-source oracles promoted to tests and the conformance
   report: the Wong & Zhu (1995) ITS-90 check tables pin the UNESCO and
   Del Grosso sound-speed refits at 17 printed grid points each (agreement
@@ -1172,7 +1040,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   end-to-end, the printed ISO 15186-1 Table B.1 Kc rows, and the EN 12354-5
   Annex I whirlpool (Table I.6a) and flushing cistern (Tables I.8/I.9)
   worked examples replacing the former formula-restatement checks.
-
 - Underwater validation: independent image-source absolute TL anchors for the
   normal-mode and parabolic-equation solvers, the published UNESCO EOS-80
   canonical sound-speed check value (Fofonoff & Millard 1983), six additional
@@ -1225,7 +1092,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   cross-reference).
 
 ### Changed
-
+- Raised the `scipy` floor in `pyproject.toml` to the current release
+  (`scipy>=1.18.0`), matching the pin `requirements.txt` already carried. The
+  `numpy` floor stays at `>=2.4.4` because the optional `perf` extra pulls
+  numba, which still requires NumPy 2.4 or older; the pure-Python matrix and the
+  figure stack already run on the latest NumPy through their own pins.
 - Spanish acoustics terminology in the figure generators now matches the
   official UNE-EN wording used by the `.plot()` string tables: "reducción
   sonora" becomes "reducción acústica" (sound reduction index R, UNE-EN
@@ -1365,7 +1236,166 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   assertion is untouched.
 
 ### Fixed
-
+- `shaped_sweep_signal()` no longer returns a NaN or infinite crest factor
+  when a very small `seconds` next to a dominant `start_delay` rounds the two
+  edges of the constant-envelope window onto the same sample and leaves an
+  empty core slice: it now falls back to the whole retained sweep in that
+  degenerate case.
+- The shaped-sweep spectrum plot no longer crashes when the Welch grid,
+  resolved independently of the synthesis grid, leaves no bin inside a narrow
+  `(f1, f2)` band on a short signal: the Welch magnitude now falls back to its
+  overall positive-frequency maximum as the normalization reference so the plot
+  still renders.
+- The `regularized_inverse_filter()` result documents `max_gain_db` as the
+  achieved peak-normalized out-of-band gain the code actually returns (the
+  computation is unchanged and stays conformance-pinned), and its `plot()`
+  return type is narrowed to a single `Axes`.
+- The documentation figures now render every text run in the viewer's native
+  sans-serif font: I normalise all `font-family` declarations in the generated
+  SVGs to the generic `sans-serif`, so viewers without DejaVu Sans no longer
+  fall back to a serif for the mathtext labels while the surrounding prose
+  stays sans. Text remains selectable.
+- The EBU R 128 programme-loudness fiche no longer passes the verdict on the
+  obsolete blanket ±0.5 LU tolerance (the June 2014 V3 rule, superseded in
+  the August 2020 V4 revision and absent from R 128-2023).
+  `ProgramLoudnessResult.report()` now selects the tolerance explicitly via a
+  `tolerance` keyword: the default `"qc"` applies the ±0.2 LU
+  measurement-error allowance of R 128 item i) (loudness workflows such as
+  Quality Control) and `"live"` applies the ±1.0 LU tolerance of item h),
+  permitted only where the Target Level is not achievable practically; the
+  fiche prints the applied rule and its R 128 item. A non-live programme at
+  −23.5 LUFS, previously rendered PASS, now correctly fails the default rule.
+- Fiche verdicts are now evaluated on the value rounded exactly as displayed,
+  so the printed numbers can no longer contradict the pass/fail at a
+  tolerance boundary: the programme-loudness delta is compared at the 0.1 LU
+  display precision of EBU Tech 3341, the EPNL is determined once to one
+  decimal place (as Annex 16 states it) before the level, margin and status
+  are derived, and the ISO 532-1 loudness verdict compares the one-decimal
+  displayed value. Tiny negative values no longer print as "-0.0".
+- `effective_perceived_noise_level()` gains a `procedure` keyword
+  (`"aeroplane"` default, `"helicopter"`) that plumbs the tone-correction
+  start band of ICAO Annex 16 Vol I App. 2, 4.3.1 Step 1 through the public
+  EPNL chain: helicopters and tilt-rotors start the slope analysis at the
+  50 Hz band, so rotor tones in the 50-80 Hz bands are no longer silently
+  outside the analysis when the spectrum is processed with the default
+  aeroplane procedure.
+- The ISO 717 fiche now declares the band set actually rated (an octave-band
+  rating was captioned "One-third-octave", contradicting the clause 4.4
+  statement requirement) and can name the reported single-number quantity via
+  a `symbol` keyword on `report()` (e.g. `"DnT,w"`, `"L'nT,w"`), so a field
+  measurement is no longer mislabelled with the laboratory `Rw` / `Ln,w`
+  descriptor; spectrum-adaptation terms print a sign only when negative,
+  matching the standard's own examples.
+- The ISO 532-1 fiche now reports the items clause 7 makes mandatory: the
+  method used (stationary, clause 5, or time-varying, clause 6), the sound
+  field (`ZwickerLoudness` gains a `field` attribute set by the
+  constructors), the loudness-versus-time function N(t) for time-varying
+  sounds and the "maximum loudness Nmax" labelling of the reported maximum.
+- `verify_filter_class()` / `filter_class_compliance()` now report when the
+  verification is range-limited: the stop-band mask beyond each band's
+  processing Nyquist cannot be exercised at the decimated rate (the
+  `range_limited` flag and per-band `checked_to_omega` record it), and the
+  IEC 61260-1 fiche qualifies its COMPLIES statement accordingly instead of
+  asserting unqualified full-mask conformance. The fiche also labels bands
+  with the nominal mid-band frequencies both editions identify filters by
+  (125 Hz, not the exact 125.89.. Hz), cites the 1995 edition's own
+  relative-attenuation definition instead of a 2014-only formula number, and
+  rejects a `required_class` that does not exist in the verified edition
+  (class 0 against a 2014 result previously rendered a meaningless FAIL).
+- Spanish fiches (`language="es"`) now localise the embedded chart too: the
+  fiche language is forwarded to the result's own `plot()`, so axis labels
+  and legends render in Spanish instead of English.
+- Fiche header grids reprint client-supplied metadata verbatim instead of
+  display-rounding it (an area of 1.23 m² was printed as "1.2"), and the
+  ISO 11654 fiche writes the shape indicator in the clause 5.3 style
+  (`0.60(M)`, no space) with the 5.3 NOTE recommendation printed when an
+  indicator applies.
+- `LoudspeakerCharacteristics.minimum_impedance` now evaluates the lowest
+  impedance modulus over the rated frequency range when
+  `rated_frequency_range` is supplied, as IEC 60268-5 clause 16.1 requires
+  ("the lowest value of the modulus of the impedance in the rated frequency
+  range shall be not less than 80 % of the rated impedance"), falling back to
+  the computed effective frequency range only when no rated range is stated.
+  The property previously always scanned the effective range, which clause
+  19.1 NOTE 2 warns may differ from the rated range (particularly for woofers
+  and tweeters), so an impedance dip below 80 % of the rated impedance inside
+  the rated range but outside the effective range went undetected.
+- `vibration.wave_vibration_reduction_index` now implements Hopkins (2007)
+  Eq. 5.116 exactly: `Kij = 10 lg(1/tau_ij) + 5 lg(fc_j/f_ref)` with the
+  reference frequency `f_ref = 1000 Hz`, instead of the previous
+  `5 lg(fc_j/fc_i)` correction term. The old form broke the required symmetry
+  of the junction descriptor (`Kij = Kji`, guaranteed by the Eq. 5.7
+  reciprocity of the angular-average transmission coefficients): an L-junction
+  of 100 mm and 215 mm concrete plates returned 6.81 dB in one direction and
+  8.09 dB in the other where the correct symmetric value is 2.97 dB. The
+  function signature changed accordingly (it now takes the receiving plate's
+  `critical_frequency_receiver` instead of the optional source/receiver pair),
+  `junction_transmission` computes both plates' thin-plate critical frequencies
+  (`fc = sqrt(12) c0^2 / (2 pi h cL)`, `c0 = 343 m/s`) and stores them on
+  `JunctionTransmissionResult.critical_frequency1`/`critical_frequency2`, and
+  `corner_reduction_index` uses the receiving plate's value.
+- The ISO 4871 declared single-number values
+  (`OperatingModeDeclaration.declared_sound_power_level` and
+  `.declared_emission_pressure_level`) now round the sum `L + K` once to the
+  nearest decibel, as clause 3.15 defines (`L_d = L + K`, the sum of the
+  unrounded quantities rounded to the nearest decibel), instead of adding the
+  separately rounded `L` and `K` of the dual-number form (clause 3.16). The
+  previous behaviour could understate the declared value by 1 dB (for example
+  `L_WA = 91.4`, `K_WA = 2.4` gave 93 dB instead of 94 dB) and thereby flip
+  the clause 6.2 verification verdict at the boundary.
+- `aircraft.load_anp_database` no longer interleaves distinct fixed-point
+  profiles: the parser now keys each trajectory on the full ANP identity
+  (aircraft, operation, profile identifier, stage length) instead of dropping
+  `Profile_ID`, so aircraft shipping several profiles for the same operation
+  and stage length (e.g. `CNA206`/`CNA20T` departures with `DEFAULT` and
+  `3000LB` weight variants) load each profile whole instead of a physically
+  impossible 18-point merge. `AnpDatabase.profile` and `AnpAircraft.profile`
+  gained an optional `profile_id=` keyword; without it the `DEFAULT` profile is
+  selected when present, a single available profile is used, and an ambiguous
+  request raises listing the identifiers. Duplicate or non-consecutive point
+  numbers within a profile now raise instead of silently corrupting the path.
+- `aircraft.event_level` and `aircraft.noise_contour` apply the ECAC Doc 29
+  Vol 2 §4.5.2 bank-angle sign to the correct observer side: the depression
+  angle is now `φ = β + ε` for observers to starboard (right of the flight
+  direction) and `φ = β − ε` for observers to port. The sign was inverted, so
+  the lateral-directivity (engine-installation) correction of every banked
+  segment was mirrored between the inside and outside of a turn.
+- `noise_control.silencers.transmission_loss` had the four-pole prefactor
+  inverted (`Z1/Zn` instead of `Zn/Z1`), overstating the transmission loss by
+  `20 lg(S_out/S_in)` whenever the inlet and outlet port areas differed: a
+  zero-length element between 0.01 and 0.02 m2 (a sudden expansion, classic
+  `TL = 10 lg[(1+m)^2/(4m)] = 0.512 dB`) came out as 6.532 dB, and the TL of
+  an unequal-port chamber was not reciprocal (11.34 vs -0.70 dB, a negative
+  loss for a passive element). The formula now follows Munjal, *Acoustics of
+  Ducts and Mufflers* 2e, Eq. (3.27), reproduces the sudden-expansion limit
+  exactly in both directions and is reciprocal; regression tests pin both.
+  The four shipped silencer builders call it with equal port areas, so their
+  results are unchanged. Bies 5e Eq. (8.141) as printed also fails the
+  sudden-expansion limit (1.938 dB) and is now registered in
+  `docs/ERRATA.md`.
+- `environmental.ground_effect`, `environmental.spherical_reflection_coefficient`,
+  the ground-reflected paths of `environmental.barrier_insertion_loss` and the
+  ground condition of `environmental.atmospheric_parabolic_equation` now
+  conjugate the impedance obtained from the porous models of
+  `phonometry.materials` (the `flow_resistivity=` path and any
+  `PorousMediumResult`). The materials domain works in the `e^{+jωt}` time
+  convention (`Im(Z) < 0` for a passive medium) while the Salomons formulas
+  behind these functions require `e^{-iωt}` (`Im(Z) > 0`); the impedance used
+  to cross that boundary unconjugated, so the phase of the spherical-wave
+  reflection coefficient `Q` was wrong and the soft-ground interference dip
+  almost vanished (Salomons Fig. D.3 geometry, grassland
+  `σ = 200 kPa·s/m²`, `hs = hr = 2 m`, `r = 100 m`: the library gave a
+  `-0.55 dB` minimum where the correct dip is `-12.7 dB` near `395 Hz`, now
+  pinned by test and conformance oracle). User-supplied `impedance=` values are
+  now documented as `e^{-iωt}` with `Im(Z) > 0` for a passive ground (the
+  docstrings previously asserted the opposite sign), matching the convention of
+  `aircraft.rotorcraft_noise.ground_effect_adjustment`.
+- `environmental.atmospheric_parabolic_equation` adds the surface-wave term of
+  the GFPE range step (the residue of the ground-reflection pole at
+  `kz = -k0/Z`, third term of Salomons Eq. (H.49)), which is active for a
+  passive finite-impedance ground; without it the homogeneous-atmosphere field
+  drifted by up to about 1 dB from the Weyl-Van der Pol oracle once the
+  impedance convention was corrected.
 - `building.critical_frequency` (flanking, ISO 12354-1:2017 Formula (20)) dropped
   a spurious factor of pi that made the thin-plate critical frequency about 3.14
   times too low (for example roughly 670 Hz instead of about 2100 Hz for 6 mm
@@ -1592,9 +1622,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   longer claims an exclusion the code did not apply, and
   `materials/dynamic_stiffness` no longer points to ISO 16251-1 (whose scope
   excludes floating floors).
-
 #### Previously in Unreleased
-
 - Underwater Wenz wind noise was referenced to the historical 20 µPa
   (0.0002 dyn/cm²) pressure while labelled dB re 1 µPa: every wind spectrum
   level (and the ambient composite) was 26.02 dB low and the wind/thermal

@@ -72,6 +72,11 @@ and carrying its statistical quality.
   cross-spectral density with chi-square confidence intervals, the coherent
   output spectrum with the spectral SNR, 1/n-octave smoothing and
   exact-slope colored-noise generators.
+- [Multiple and partial coherence](/phonometry/guides/miso-coherence/): the
+  multiple-input/output coherence functions for two or three correlated
+  sources and one output, with the conditioning that tells a genuine cause
+  from a source that merely correlates with it, and the partial coherent
+  output spectra that say which source dominates each band.
 - [Time-frequency analysis](/phonometry/guides/time-frequency/): the
   calibrated STFT spectrogram in absolute units (dB SPL for pascals) and
   the zoom FFT that resolves tones closer than a practical FFT bin.
@@ -85,6 +90,9 @@ and carrying its statistical quality.
   estimation by direct correlation, cross-spectrum phase slope and the
   Knapp & Carter GCC weightings, sub-sample impulse-response delay and
   alignment, and the Hilbert envelope.
+- [Test signals and sample-rate tools](/phonometry/guides/test-signals/):
+  IEC 60268-1 tone bursts with exact gating, resampling with a stated
+  anti-alias specification, and band-limited fractional delay.
 - [System measurement](/phonometry/guides/system-measurement/):
   complementary Golay pairs, sweeps with an arbitrary target magnitude
   spectrum by group-delay shaping, and the Kirkeby-regularized inversion of
@@ -100,3 +108,6 @@ What the numbers mean and how much to trust them.
 - [Measurement uncertainty (GUM and Monte Carlo)](/phonometry/guides/gum-uncertainty/):
   the law of propagation of uncertainty and the Monte Carlo method of
   ISO/IEC Guide 98-3, with expanded uncertainty and coverage intervals.
+- [Data qualification](/phonometry/guides/data-qualification/): the reverse
+  arrangement and runs stationarity tests on segment statistics, and the Rice
+  level-crossing and peak statistics with the irregularity factor.

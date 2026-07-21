@@ -20,6 +20,11 @@ measured output into the part explained by an input and the part that is
 noise, with a spectral signal-to-noise ratio; fractional-octave smoothing
 bridges back to the banded world; and the colored-noise generators synthesize
 white, pink, red, blue and violet test signals with an exact power-law slope.
+[Multiple and partial coherence](/phonometry/guides/miso-coherence/) carries
+that same cross-spectral machinery to several correlated sources at once: from
+two or three inputs and one output it separates the coherence a source
+genuinely contributes from the part it merely shares with another, and its
+partial coherent output spectra say which source dominates each band.
 
 [Time-frequency analysis](/phonometry/guides/time-frequency/) is the view in
 between: the calibrated STFT spectrogram shows what happens *when* - a

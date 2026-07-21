@@ -79,6 +79,11 @@ calibrada y acompañada de su calidad estadística.
   PSD y densidad espectral cruzada con intervalos de confianza chi-cuadrado,
   el espectro de salida coherente con la SNR espectral, suavizado en 1/n de
   octava y generadores de ruido de colores con pendiente exacta.
+- [Coherencia múltiple y parcial](/phonometry/es/guides/miso-coherence/): las
+  funciones de coherencia de entradas múltiples para dos o tres fuentes
+  correladas y una salida, con el condicionamiento que distingue una causa
+  real de una fuente que solo correla con ella, y los espectros de salida
+  coherente parciales que indican qué fuente domina cada banda.
 - [Análisis tiempo-frecuencia](/phonometry/es/guides/time-frequency/): el
   espectrograma STFT calibrado en unidades absolutas (dB SPL para pascales)
   y la FFT con zoom que resuelve tonos más próximos que un bin práctico de
@@ -95,6 +100,9 @@ calibrada y acompañada de su calidad estadística.
   del espectro cruzado y las ponderaciones GCC de Knapp y Carter, retardo
   submuestral y alineación de respuestas al impulso, y la envolvente de
   Hilbert.
+- [Señales de prueba y herramientas de muestreo](/phonometry/es/guides/test-signals/):
+  salvas de tono IEC 60268-1 con conmutación exacta, remuestreo con
+  especificación antialias declarada y retardo fraccionario de banda limitada.
 - [Medición de sistemas](/phonometry/es/guides/system-measurement/):
   pares complementarios de Golay, barridos con un espectro de magnitud
   objetivo arbitrario conformando el retardo de grupo, y la inversión con
@@ -110,3 +118,7 @@ Qué significan los números y cuánto fiarse de ellos.
 - [Incertidumbre de medida (GUM y Monte Carlo)](/phonometry/es/guides/gum-uncertainty/):
   la ley de propagación de la incertidumbre y el método de Monte Carlo de
   ISO/IEC Guide 98-3, con incertidumbre expandida e intervalos de cobertura.
+- [Calificación de datos](/phonometry/es/guides/data-qualification/): los tests
+  de estacionariedad por inversiones de orden y por rachas sobre estadísticas
+  de segmento, y las estadísticas de Rice de cruces por nivel y de picos con el
+  factor de irregularidad.

@@ -10052,7 +10052,10 @@ The [frequency-response estimators](electroacoustics.md) `transfer_function`
 and `coherence`, the two-microphone [sound intensity](https://jmrplens.github.io/phonometry/guides/intensity/) probe and
 these estimators all share one Welch core (same taper, overlap policy and
 detrend-off calibration), so a PSD, a coherence and an H1 computed with the
-same segment length are mutually consistent bin by bin.
+same segment length are mutually consistent bin by bin. The same cross-spectral
+matrix underlies [multiple and partial coherence](https://jmrplens.github.io/phonometry/guides/miso-coherence/), which
+extends the ordinary coherence to two or three correlated inputs and one
+output.
 
 ## References
 
@@ -10491,6 +10494,12 @@ overlap policy, detrend-off calibration, segment defaults) as
 and a cross-spectrum computed with the same segment length agree bin by bin;
 the `'phase'` estimator is literally the slope of the
 `CrossSpectralDensityResult` phase, weighted as Eq. 5.101b prescribes.
+
+The Hilbert envelope here is the time-domain companion of the
+[envelope spectrum](https://jmrplens.github.io/phonometry/guides/cepstrum-echoes/), which reads the same modulations off
+as discrete lines in frequency; and the sub-sample alignment shares its
+band-limited kernel with the public
+[fractional-delay and resampling tools](https://jmrplens.github.io/phonometry/guides/test-signals/).
 
 ## References
 

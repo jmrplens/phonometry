@@ -521,6 +521,45 @@ def _microphone_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iec60268_4_microphone_example.pdf"
 
 
+def _occupational_exposure_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 9612 fiche: the Annex D task-based welders' day.
+
+    Reproduces the ISO 9612:2009 Annex D worked example: a welder's nominal day
+    split into planning/breaks (a single conservative 70 dB value, 1.5 h),
+    welding (three samples, 5 h with a 4 h to 6 h duration range) and
+    cutting/grinding (six samples after the 3 dB spread rule asked for more,
+    1.5 h with a 1 h to 2 h range), measured with a personal sound exposure
+    meter. The daily level is LEX,8h = 84.3 dB and, with the duration
+    uncertainty included, U = 3.2 dB; the fiche's Directive 2003/10/EC
+    assessment shows the lower action value (80 dB(A)) exceeded and the upper
+    action value (85 dB(A)) and limit value (87 dB(A)) not exceeded.
+    """
+    tasks = [
+        ph.hearing.Task(samples=(70.0,), duration_hours=1.5,
+                        label="Planning and breaks"),
+        ph.hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
+                        duration_range=(4.0, 6.0), label="Welding"),
+        ph.hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2),
+                        duration_hours=1.5, duration_range=(1.0, 2.0),
+                        label="Cutting and grinding"),
+    ]
+    result = ph.hearing.task_based_exposure(tasks, warn=False)
+    metadata = ReportMetadata(
+        client="Example fabrication works",
+        specimen="Welders (homogeneous exposure group, 4 workers)",
+        test_room="Steel assembly hall, line 2",
+        instrumentation="Personal sound exposure meter (IEC 61252), s/n 0042",
+        calibration="Calibrator IEC 60942 class 1, s/n 0117; field checks "
+                    "before/after each series within 0.3 dB",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-9612",
+        notes="Reproduces the ISO 9612:2009 Annex D task-based worked example.",
+    )
+    return result, metadata, "iso9612_exposure_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -537,6 +576,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _iso4871_declaration_example,
     _loudspeaker_example,
     _microphone_example,
+    _occupational_exposure_example,
 ]
 
 

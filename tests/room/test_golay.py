@@ -152,18 +152,19 @@ def test_alias_warning_when_ir_longer_than_period() -> None:
 
 def test_input_validation() -> None:
     pair = golay_pair(4)
+    valid = np.zeros(16)
+    non_multiple = np.zeros(10)
+    empty = np.zeros(0)
+    truncated_pair = (pair[0], pair[1][:8])
+    two_dim = np.zeros((2, 16))
     with pytest.raises(ValueError, match="multiple"):
-        golay_impulse_response(np.zeros(10), np.zeros(16), pair)
+        golay_impulse_response(non_multiple, valid, pair)
     with pytest.raises(ValueError, match="multiple"):
-        golay_impulse_response(np.zeros(16), np.zeros(0), pair)
+        golay_impulse_response(valid, empty, pair)
     with pytest.raises(ValueError, match="equal-length"):
-        golay_impulse_response(
-            np.zeros(16), np.zeros(16), (pair[0], pair[1][:8])
-        )
+        golay_impulse_response(valid, valid, truncated_pair)
     with pytest.raises(ValueError, match="one-dimensional"):
-        golay_impulse_response(
-            np.zeros((2, 16)), np.zeros(16), pair
-        )
+        golay_impulse_response(two_dim, valid, pair)
 
 
 def test_result_behaves_like_array() -> None:

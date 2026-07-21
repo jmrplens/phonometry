@@ -62,6 +62,8 @@ from scipy import signal as sig
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 Complex = NDArray[np.complex128]
 
 __all__ = [
@@ -817,6 +819,62 @@ class DailyVibrationExposure:
         from .._plot.vibration import plot_daily_exposure
 
         return plot_daily_exposure(self, ax=ax, language=check_language(language), **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a daily vibration exposure assessment fiche to a PDF.
+
+        Writes a one-page assessment sheet laid out like the hand-arm /
+        whole-body vibration exposure calculators of the occupational-hygiene
+        practice: the standard-basis line naming the applied ISO method
+        (ISO 5349-1/-2:2001 for hand-transmitted vibration, ISO 2631-1:1997 for
+        whole-body vibration) and the Directive 2002/44/EC it is assessed
+        against, an optional metadata header (company, operator/worker,
+        workplace, instrumentation, calibration), the per-operation exposure
+        analysis (the vibration total value, the daily exposure time ``T_i`` and
+        the partial exposure ``A_i(8)`` of ISO 5349-1/-2 Eq. (2), closed by the
+        daily total and the combined ``A(8)`` of Eq. (3)), the per-operation
+        contribution chart, the boxed ``A(8)`` with its exposure zone, an
+        assessment table against the exposure action value (EAV) and exposure
+        limit value (ELV) of Directive 2002/44/EC (Article 3), a PASS/FAIL
+        verdict against the limit value, and a footer identity/disclaimer block.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header identity (``client`` is the company, ``specimen`` the
+            operator/worker, ``test_room`` the workplace) plus the
+            ``instrumentation`` and ``calibration`` free-text fields and the
+            footer identity.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When True, the operations table adds each operation's
+            share of the daily vibration energy ``A_i(8)^2 / A(8)^2``.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab (or, for the contribution chart,
+            matplotlib) is not installed (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.human_vibration import render_human_vibration_report
+
+        return render_human_vibration_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def daily_vibration_exposure(

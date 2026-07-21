@@ -651,6 +651,54 @@ def _human_vibration_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "human_vibration_example.pdf"
 
 
+def _room_acoustics_example() -> Tuple[object, ReportMetadata, str]:
+    """Room-acoustics fiche: ISO 3382-1/-2 parameters of a small auditorium.
+
+    The impulse response is a deterministic single-slope synthetic decay: one
+    sine carrier per octave band (125 Hz to 4 kHz), each modulated by its own
+    exponential energy envelope exp(-A60*t/T) with A60 = 6*ln(10), so every
+    octave-band Schroeder curve is an exact straight line. The closed-form
+    decay time of a pure exponential energy decay is therefore T20 = T30 = EDT
+    = T per band (ISO 3382-1:2009, 5.3.3 gives L(t) = -60*t/T dB), which fixes
+    the reverberation-time column exactly at the chosen per-band values
+    (1.40, 1.30, 1.20, 1.10, 1.00, 0.85 s), a plausible mid-size hall profile
+    falling with frequency. The energy parameters C50/C80/D50/Ts sit slightly
+    below the single-slope closed form because the octave band-pass group delay
+    smears a little early energy past the 50/80 ms limits (documented in the
+    room_acoustics module and its tests); the mid-frequency descriptor is
+    T_mid = (T30@500 + T30@1000)/2 = 1.15 s.
+    """
+    fs = 48000
+    a60 = 6.0 * np.log(10.0)
+    bands = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
+    t60 = (1.40, 1.30, 1.20, 1.10, 1.00, 0.85)
+    time = np.arange(int(round(5.0 * fs))) / fs
+    ir = np.zeros_like(time)
+    for freq, decay in zip(bands, t60):
+        ir += np.sin(2.0 * np.pi * freq * time) * np.exp(-0.5 * a60 * time / decay)
+    result = ph.room_parameters(ir, fs)
+    metadata = ReportMetadata(
+        specimen="Small auditorium, unoccupied, fully furnished",
+        client="Example client",
+        test_room="Auditorium A (example)",
+        room_volume=2830.0,
+        area=340.0,
+        source_positions=2,
+        receiver_positions=8,
+        instrumentation="Omnidirectional source + 1/2 in. microphone (example)",
+        measurement_standard="ISO 3382-1",
+        temperature=21.0,
+        relative_humidity=45.0,
+        pressure=101.1,
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-3382",
+        requirement=1.3,
+    )
+    return result, metadata, "iso3382_room_acoustics_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -670,6 +718,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _microphone_example,
     _occupational_exposure_example,
     _human_vibration_example,
+    _room_acoustics_example,
 ]
 
 

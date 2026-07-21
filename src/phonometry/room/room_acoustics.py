@@ -51,6 +51,8 @@ from .._internal.utils import _typesignal
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 #: Default octave-band analysis range (ISO 3382-1:2009, 5.1: engineering
 #: and precision methods cover at least 125 Hz to 4 kHz in octave bands).
 _DEFAULT_BANDS = (125.0, 4000.0)
@@ -149,6 +151,62 @@ class RoomAcousticsResult:
 
         check_language(language)
         return plot_room_acoustics(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a room acoustic parameters fiche to a PDF (ISO 3382-1/-2).
+
+        Writes a one-page report laid out like a room-acoustics measurement
+        report: the standard-basis line, an optional metadata header block
+        (room, volume, source/receiver positions, climate ...), the full-width
+        per-band parameter table (T20/T30/EDT and C50/C80/D50/Ts) above the
+        result's own per-band decay-time plot (:meth:`plot`), the boxed
+        mid-frequency reverberation time T_mid (the mean of the 500 Hz and
+        1000 Hz octave T30), an optional verdict row and a footer with the
+        fixed disclaimer. ISO 3382-1/-2 are characterisation standards with no
+        intrinsic pass/fail, so the verdict row appears only when a target
+        mid-frequency T is supplied through ``metadata.requirement`` (read as
+        the maximum acceptable T_mid). A broadband result (``frequency`` is
+        ``None``) has no 500 Hz and 1000 Hz octave bands to average, so the box
+        and the verdict fall back to the plain broadband T30 instead of a
+        mid-frequency average, with no "500-1000 Hz" label.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a bare
+            characterisation fiche (body, result and disclaimer only). The
+            room-specific fields ``room_volume``, ``source_positions`` and
+            ``receiver_positions`` populate the header; ``requirement`` is read
+            as the maximum mid-frequency reverberation time.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for parity with the other fiches; the room
+            table already shows every computed parameter, so it has no effect.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso3382 import render_iso3382_report
+
+        return render_iso3382_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def _onset_index(p2: np.ndarray) -> int:

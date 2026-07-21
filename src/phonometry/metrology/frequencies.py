@@ -165,6 +165,21 @@ def _nominal_freq_for_band(exact_freq: float, fraction: float) -> float:
     return _iec_e3_round(exact_freq)
 
 
+def _infer_band_fraction(frequency: np.ndarray) -> int:
+    """Octave (1) or one-third-octave (3) from adjacent band-centre ratios.
+
+    Distinguishes the two IEC 61260 band structures by the ratio of adjacent
+    mid-band centres (2 for octaves, 2**(1/3) ~ 1.26 for one-third octaves).
+    Fewer than two bands cannot be told apart, so octave (1) is returned as the
+    conventional default. Shared by the room-acoustics plot renderer and the
+    report fiche so they classify a band set identically.
+    """
+    freq = np.asarray(frequency, dtype=np.float64)
+    if freq.size < 2:
+        return 1
+    return 1 if float(freq[1] / freq[0]) > 1.5 else 3
+
+
 def _format_nominal_freq(f: float) -> str:
     """Format a nominal frequency as a human-readable label string."""
     if f >= 1000:

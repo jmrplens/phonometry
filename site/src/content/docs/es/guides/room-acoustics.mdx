@@ -69,6 +69,7 @@ references:
 
 import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 La acústica de salas parte de una única medición: la **respuesta al impulso**
 (RI) entre una fuente y un receptor. Fíltrala en bandas e intégrala, y da el
@@ -529,6 +530,70 @@ valor marcado como válido quede dentro de la DAP del 5 %) y `curvature`
 $C = 100\ (T_{30}/T_{20} - 1)$ % (valores por encima del 10 % señalan un
 decaimiento no recto). `decay_curve(ir, fs, band=None, fraction=1, zero_phase=False)`
 devuelve solo la curva `(time, level)` para una banda o la respuesta de banda ancha.
+
+### Informe ISO 3382 (`.report()`)
+
+`RoomAcousticsResult.report(path)` genera una ficha PDF de una página con el
+formato de un informe de medición de acústica de salas (un espacio para
+espectáculos según la ISO 3382-1:2009 o una sala ordinaria según la
+ISO 3382-2:2008, ambos evaluados por el método de la respuesta al impulso
+integrada): una línea de norma base, un bloque opcional de metadatos de
+cabecera, la tabla de parámetros por bandas a ancho completo ($T_{20}$,
+$T_{30}$, EDT, $C_{50}$, $C_{80}$, $D_{50}$, $T_s$) sobre la gráfica de tiempos
+de caída por banda del propio resultado (`.plot()`), el resultado enmarcado del
+tiempo de reverberación de frecuencias medias $T_\text{mid}$ (la media de los
+$T_{30}$ de las octavas de 500 Hz y 1000 Hz, el descriptor habitual de la sala)
+con el EDT de medias al lado, y un pie con el descargo de responsabilidad fijo.
+La ISO 3382-1/-2 son normas de **caracterización** sin apto/no apto intrínseco,
+por lo que solo aparece una fila de veredicto cuando se aporta un tiempo de
+reverberación de medias objetivo mediante el campo `requirement` de los
+metadatos (`ReportMetadata(requirement=...)`, leído como el $T_\text{mid}$
+máximo aceptable, la forma habitual de un límite de aula u oficina diáfana). Un
+resultado de banda ancha no tiene octavas de 500 Hz / 1000 Hz que promediar, de
+modo que su recuadro y su veredicto recurren al $T_{30}$ de banda ancha sin
+afirmación de "500-1000 Hz". Usa el mismo contenedor `ReportMetadata` y el mismo motor de
+renderizado que la
+[ficha de absorción ISO 11654](/phonometry/es/guides/materials/#informe-de-iso-11654-report);
+los campos específicos de sala `room_volume`, `source_positions` y
+`receiver_positions` rellenan la cabecera (la ISO 3382 exige indicar el volumen
+de la sala y el número de posiciones de fuente y de micrófono), junto con
+`test_room` (el nombre de la sala), `specimen` (la descripción de la sala y su
+estado de ocupación), `area`, `instrumentation`, `temperature`,
+`relative_humidity`, `pressure`, `measurement_standard`, `test_date`,
+`laboratory`, `operator`, `report_id` y `notes`. Al pasar `metadata=None` se
+obtiene una ficha de caracterización mínima. El renderizado necesita reportlab
+(`pip install phonometry[report]`); solo se admite `engine="reportlab"`. La
+ficha se genera en inglés por defecto; pasa `language="es"` para una ficha en
+español (cadenas fijas traducidas y separador decimal de coma).
+
+```python
+from phonometry import room, ReportMetadata
+
+result = room.room_parameters(ir, fs)   # bandas de octava 125 Hz - 4 kHz
+result.report(
+    "ficha_sala.pdf",
+    metadata=ReportMetadata(
+        specimen="Auditorio pequeño, desocupado, totalmente amueblado",
+        test_room="Auditorio A",
+        room_volume=2830.0, area=340.0,
+        source_positions=2, receiver_positions=8,
+        measurement_standard="ISO 3382-1",
+        temperature=21.0, relative_humidity=45.0,
+        laboratory="Laboratorio de referencia Phonometry",
+        requirement=1.3,           # añade un veredicto frente a un T_mid objetivo
+    ),
+)                                  # T_mid + la tabla de parámetros por banda
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; haz clic en la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso3382_room_acoustics_example"
+	title="Informe de ejemplo de parámetros acústicos de salas ISO 3382 (PDF)"
+	description="Ficha de acústica de salas de una página: una cabecera de metadatos (cliente, sala, descripción, volumen de la sala, superficie del suelo, posiciones de fuente y de micrófono, instrumentación, temperatura, humedad y presión), la tabla de parámetros por bandas de octava (T20, T30, EDT, C50, C80, D50 y Ts de 125 Hz a 4 kHz) sobre la gráfica de barras de tiempos de caída por banda, el tiempo de reverberación de medias enmarcado T_mid = 1,15 s con el EDT de medias al lado, y un veredicto CUMPLE frente al objetivo de 1,3 s."
+	caption="Ficha de parámetros acústicos de salas (RoomAcousticsResult.report), T_mid y la tabla por banda."
+/>
 
 ## 3. Oficinas diáfanas (ISO 3382-3)
 

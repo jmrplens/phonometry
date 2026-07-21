@@ -348,6 +348,27 @@ _STRINGS: dict[str, str] = {
     "Octave-band {vh} [dB]": "Banda de octava {vh} [dB]",
     # --- iso11654 shape-indicator note (clause 5.3 NOTE) --------------------
     "A shape indicator applies: ISO 11654 (5.3 NOTE) recommends using &#945;<sub>w</sub> in combination with the complete sound absorption coefficient curve, shown above.": "Se aplica un indicador de forma: ISO 11654 (NOTA de 5.3) recomienda usar &#945;<sub>w</sub> junto con la curva completa del coeficiente de absorción acústica, mostrada más arriba.",
+    # --- iso3382 room acoustic parameters ----------------------------------
+    "Room acoustic parameters": "Parámetros acústicos de salas",
+    "{standard} measurement of room acoustic parameters by the integrated impulse-response method (ISO 3382-1:2009 / ISO 3382-2:2008).": "{standard} medición de parámetros acústicos de salas por el método de la respuesta al impulso integrada (ISO 3382-1:2009 / ISO 3382-2:2008).",
+    "Room acoustic parameters by the integrated impulse-response method (ISO 3382-1:2009 / ISO 3382-2:2008).": "Parámetros acústicos de salas por el método de la respuesta al impulso integrada (ISO 3382-1:2009 / ISO 3382-2:2008).",
+    "Octave-band parameters": "Parámetros por bandas de octava",
+    "One-third-octave-band parameters": "Parámetros por bandas de tercio de octava",
+    "Single-band parameters": "Parámetros de banda única",
+    "Broadband analysis": "Análisis de banda ancha",
+    "Broadband": "Banda ancha",
+    "Room": "Sala",
+    "Floor area S [m<super>2</super>]": "Superficie del suelo S [m<super>2</super>]",
+    "Source positions": "Posiciones de fuente",
+    "Microphone positions": "Posiciones de micrófono",
+    "T<sub>mid</sub> (500-1000 Hz) = <b>{value} s</b>": "T<sub>mid</sub> (500-1000 Hz) = <b>{value} s</b>",
+    "T<sub>30</sub> = <b>{value} s</b>": "T<sub>30</sub> = <b>{value} s</b>",
+    "EDT<sub>mid</sub> = {value} s": "EDT<sub>mid</sub> = {value} s",
+    "EDT = {value} s": "EDT = {value} s",
+    "T<sub>mid</sub> = {value} s, required &#8804; {req} s": "T<sub>mid</sub> = {value} s, exigido &#8804; {req} s",
+    "T<sub>30</sub> = {value} s, required &#8804; {req} s": "T<sub>30</sub> = {value} s, exigido &#8804; {req} s",
+    "Decay curves by Schroeder backward integration with noise truncation and tail compensation (ISO 3382-1:2009, 5.3.3); T20 over -5 to -25 dB, T30 over -5 to -35 dB, EDT over 0 to -10 dB, each extrapolated to 60 dB (ISO 3382-2:2008, Clause 6; ISO 3382-1:2009, A.2.2).": "Curvas de caída por integración hacia atrás de Schroeder con truncamiento por ruido y compensación de cola (ISO 3382-1:2009, 5.3.3); T20 de -5 a -25 dB, T30 de -5 a -35 dB, EDT de 0 a -10 dB, cada uno extrapolado a 60 dB (ISO 3382-2:2008, apartado 6; ISO 3382-1:2009, A.2.2).",
+    "C50/C80, D50 and Ts follow ISO 3382-1:2009 Equations (A.10), (A.11) and (A.13). The just-noticeable differences (Table A.1) are 5 % for EDT/T, 1 dB for C80, 0.05 for D50 and 10 ms for Ts.": "C50/C80, D50 y Ts siguen las Ecuaciones (A.10), (A.11) y (A.13) de la ISO 3382-1:2009. Las diferencias apenas perceptibles (Tabla A.1) son 5 % para EDT/T, 1 dB para C80, 0,05 para D50 y 10 ms para Ts.",
 }
 
 

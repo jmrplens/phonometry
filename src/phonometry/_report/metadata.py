@@ -39,6 +39,20 @@ class ReportMetadata:
     :ivar mass_per_area: Measured mass per unit area, in kg/m^2.
     :ivar source_volume: Source-room volume, in m^3.
     :ivar receiving_volume: Receiving-room volume, in m^3.
+    :ivar room_volume: Volume of the single room under test, in m^3. Room
+        acoustics (ISO 3382-1/-2) characterises one enclosure rather than a
+        source/receiving pair, and ISO 3382-2:2008 Clause 9 requires the room
+        volume to be reported; the room-acoustics fiche prints it in the
+        header. Distinct from the ``source_volume``/``receiving_volume`` pair,
+        which describe a sound-transmission measurement.
+    :ivar source_positions: Number of source (loudspeaker/omnidirectional)
+        positions used in the measurement, an integer (ISO 3382-1:2009 Table 1
+        and ISO 3382-2:2008 Clause 8 require reporting the number of source
+        positions). Printed by the room-acoustics fiche.
+    :ivar receiver_positions: Number of microphone (receiver) positions used,
+        an integer (ISO 3382-1:2009 Table 1 and ISO 3382-2:2008 Clause 8
+        require reporting the number of microphone positions). Printed by the
+        room-acoustics fiche.
     :ivar temperature: Air temperature during the test, in degrees Celsius (a
         single representative value; use the per-room fields below when the
         source and receiving rooms are reported separately).
@@ -88,7 +102,8 @@ class ReportMetadata:
     :raises ValueError: If a supplied dimension/mass/volume/pressure is not
         finite and strictly positive, a temperature or requirement is not
         finite, a relative humidity is outside 0..100 %, or a required class is
-        not one of 0, 1, 2.
+        not one of 0, 1, 2, or a position count is not a finite, positive
+        integer.
     """
 
     specimen: str | None = None
@@ -99,6 +114,9 @@ class ReportMetadata:
     mass_per_area: float | None = None
     source_volume: float | None = None
     receiving_volume: float | None = None
+    room_volume: float | None = None
+    source_positions: int | None = None
+    receiver_positions: int | None = None
     temperature: float | None = None
     relative_humidity: float | None = None
     source_temperature: float | None = None
@@ -125,7 +143,14 @@ class ReportMetadata:
         "mass_per_area",
         "source_volume",
         "receiving_volume",
+        "room_volume",
         "pressure",
+    )
+    #: Count fields that must be finite, positive integers (numbers of source
+    #: and receiver positions in a room-acoustics measurement).
+    _POSITIVE_INT_FIELDS = (
+        "source_positions",
+        "receiver_positions",
     )
     #: Fields that need only be finite, of any sign: the test temperatures (0 C
     #: or below is a valid condition, e.g. an unheated outdoor facade) and the
@@ -172,6 +197,18 @@ class ReportMetadata:
                 name, lambda x: math.isfinite(x) and 0.0 <= x <= 100.0,
                 "a relative humidity in 0..100 %",
             )
+        for name in self._POSITIVE_INT_FIELDS:
+            value = getattr(self, name)
+            if value is None:
+                continue
+            # A count is a whole number of positions: reject non-integers
+            # (a bool is an int in Python, so it is excluded explicitly) and
+            # anything not strictly positive.
+            if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+                raise ValueError(
+                    f"ReportMetadata.{name} must be a positive integer when "
+                    f"given; got {value!r}."
+                )
         if self.required_class is not None and self.required_class not in (0, 1, 2):
             raise ValueError(
                 "ReportMetadata.required_class must be 0, 1 or 2 when given; "

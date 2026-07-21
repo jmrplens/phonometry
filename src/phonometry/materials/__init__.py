@@ -155,9 +155,11 @@ from .scattering_diffusion import (
 )
 from .sound_absorption import (
     AbsorptionWarning,
+    SoundAbsorptionMeasurement,
     absorption_area,
     absorption_coefficient,
     attenuation_from_alpha,
+    measure_sound_absorption,
 )
 
 __all__ = [
@@ -197,6 +199,7 @@ __all__ = [
     "ScatteringDiffusionWarning",
     "ScatteringResult",
     "ScatteringUncertainty",
+    "SoundAbsorptionMeasurement",
     "StaticAirflowResult",
     "THIRD_OCTAVE_BANDS",
     "TWO_DIMENSIONAL_SOURCE_WEIGHTS",
@@ -245,6 +248,7 @@ __all__ = [
     "layered_absorber",
     "linear_airflow_velocity",
     "max_sampled_area_radius",
+    "measure_sound_absorption",
     "membrane_impedance",
     "membrane_resonance_frequency",
     "mic_calibration_factor",

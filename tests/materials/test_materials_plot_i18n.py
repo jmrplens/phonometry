@@ -22,6 +22,9 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 from phonometry import sound_absorption_coefficient_uncertainty  # noqa: E402
 from phonometry.materials.absorption_rating import weighted_absorption  # noqa: E402
+from phonometry.materials.sound_absorption import (  # noqa: E402
+    measure_sound_absorption,
+)
 from phonometry.materials.airflow_resistance import (  # noqa: E402
     static_airflow_resistance,
 )
@@ -62,6 +65,15 @@ def _texts(ax_or_axes: object) -> str:
 
 def _weighted():
     return weighted_absorption([0.35, 0.50, 0.65, 0.60, 0.55])
+
+
+def _measurement():
+    freqs = np.array([250.0, 500.0, 1000.0, 2000.0, 4000.0])
+    t1 = np.array([7.8, 7.4, 6.9, 5.8, 4.6])
+    t2 = np.array([6.5, 4.2, 2.85, 2.5, 2.7])
+    return measure_sound_absorption(
+        freqs, t1, t2, volume=200.0, area=10.8, temperature=20.0
+    )
 
 
 def _scattering():
@@ -137,6 +149,8 @@ def _diffuse():
 # (id, builder, expected Spanish substring) for every materials result renderer.
 _CASES = [
     ("weighted_absorption", _weighted, "Coeficiente de absorción acústica"),
+    ("sound_absorption", _measurement,
+     "Absorción acústica en cámara reverberante ISO 354"),
     ("scattering", _scattering, "Coeficiente de dispersión"),
     ("diffusion_polar", _diffusion, "Coeficiente de difusión"),
     ("insitu_absorption", _insitu, "Absorción in situ de pavimentos"),

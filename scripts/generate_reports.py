@@ -206,6 +206,60 @@ def _absorption_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso11654_absorption_example.pdf"
 
 
+def _sound_absorption_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 354 fiche: a reverberation-room sound-absorption measurement.
+
+    A documented clean-room example, derived in closed form from ISO 354:2003
+    Eq. (5)/(7)/(8)/(9) with no air-attenuation correction (m = 0, the
+    zero-attenuation reference condition). Room volume V = 200 m3 (the ISO 354
+    reference volume) and specimen area S = 10.8 m2 (clause 6.2.1.1 range); at
+    20 degC the speed of sound is c = 331 + 0.6*20 = 343 m/s (Eq. (6)), so the
+    Sabine constant of the inversion is 55.3*V/c = 55.3*200/343 = 32.24490 m2 s.
+    With the empty-room T1 and with-specimen T2 tables below, the equivalent
+    sound absorption areas A = 55.3*V/(c*T) and the coefficient
+    alpha_s = (A2 - A1)/S follow. Two worked bands:
+
+    * 500 Hz: A1 = 32.24490/7.80 = 4.13396 m2, A2 = 32.24490/4.20 = 7.67736 m2,
+      alpha_s = (7.67736 - 4.13396)/10.8 = 0.328 -> 0.33.
+    * 1000 Hz: A1 = 32.24490/6.90 = 4.67317 m2, A2 = 32.24490/2.85 = 11.31400 m2,
+      alpha_s = (11.31400 - 4.67317)/10.8 = 0.615 -> 0.61.
+
+    The resulting alpha_s rises from 0.02 at 100 Hz to a 0.69 plateau near
+    1600 Hz and falls back to 0.34 at 5000 Hz, a broadband porous absorber.
+    """
+    freqs = np.array(
+        [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000],
+        dtype=float,
+    )
+    t_empty = np.array(
+        [9.0, 9.0, 8.8, 8.6, 8.4, 8.2, 8.0, 7.8, 7.5, 7.2,
+         6.9, 6.6, 6.2, 5.8, 5.4, 5.0, 4.6, 4.2]
+    )
+    t_specimen = np.array(
+        [8.4, 8.2, 7.7, 7.2, 6.5, 5.7, 4.9, 4.2, 3.6, 3.15,
+         2.85, 2.65, 2.55, 2.5, 2.55, 2.6, 2.7, 2.85]
+    )
+    result = ph.measure_sound_absorption(
+        freqs, t_empty, t_specimen,
+        volume=200.0, area=10.8, temperature=20.0, humidity=54.0,
+    )
+    metadata = ReportMetadata(
+        specimen="50 mm porous absorber over a 100 mm air gap",
+        client="Example client",
+        manufacturer="Example acoustics",
+        mounting="Type A (mounted directly against a rigid wall)",
+        test_room="Reverberation room (example)",
+        measurement_standard="ISO 354",
+        pressure=101.0,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-354",
+    )
+    return result, metadata, "iso354_absorption_example.pdf"
+
+
 def _loudness_example() -> Tuple[object, ReportMetadata, str]:
     """Loudness fiche: an ISO 532-1 Zwicker stationary loudness rating."""
     # A shaped 28-band one-third-octave spectrum (25 Hz..12.5 kHz) of a steady
@@ -568,6 +622,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _field_airborne_example,
     _field_impact_example,
     _absorption_example,
+    _sound_absorption_example,
     _loudness_example,
     _program_loudness_example,
     _epnl_example,

@@ -341,3 +341,129 @@ def test_synergy_with_room_parameters() -> None:
     # Finite where T20 is finite and positive.
     finite = np.isfinite(res.t20) & (res.t20 > 0)
     assert np.all(np.isfinite(np.asarray(a)[finite]))
+
+
+# --- SoundAbsorptionMeasurement result type (Clause 8) ----------------------
+
+from phonometry import (  # noqa: E402
+    SoundAbsorptionMeasurement,
+    measure_sound_absorption,
+)
+
+#: One-third-octave bands and a documented empty/with-specimen reverberation
+#: pair (V = 200 m3, S = 10.8 m2, t = 20 degC -> c = 343 m/s, m = 0). The
+#: closed-form Eq. (5)/(7)/(8)/(9) values of two bands are asserted below.
+_FREQS = np.array(
+    [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+     1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000],
+    dtype=float,
+)
+_T1 = np.array([9.0, 9.0, 8.8, 8.6, 8.4, 8.2, 8.0, 7.8, 7.5, 7.2,
+                6.9, 6.6, 6.2, 5.8, 5.4, 5.0, 4.6, 4.2])
+_T2 = np.array([8.4, 8.2, 7.7, 7.2, 6.5, 5.7, 4.9, 4.2, 3.6, 3.15,
+                2.85, 2.65, 2.55, 2.5, 2.55, 2.6, 2.7, 2.85])
+
+
+def _measurement() -> SoundAbsorptionMeasurement:
+    return measure_sound_absorption(
+        _FREQS, _T1, _T2, volume=200.0, area=10.8, temperature=20.0,
+        humidity=54.0,
+    )
+
+
+def test_measurement_speed_of_sound_from_eq6() -> None:
+    # Eq. (6) at 20 degC gives c = 343 m/s.
+    assert _measurement().speed_of_sound == pytest.approx(343.0)
+
+
+def test_measurement_alpha_s_matches_absorption_coefficient() -> None:
+    # The result must reuse the validated Eq. (8)/(9) path, not re-derive it.
+    res = _measurement()
+    ref = absorption_coefficient(_T1, _T2, 200.0, 10.8, temperature1=20.0)
+    np.testing.assert_allclose(res.alpha_s, np.asarray(ref), rtol=0, atol=1e-12)
+
+
+def test_measurement_closed_form_500hz_1000hz() -> None:
+    # Independent closed-form ISO 354 Eq. (5)/(7)/(8)/(9), K = 55.3*200/343.
+    k = 55.3 * 200.0 / 343.0
+    res = _measurement()
+    # 500 Hz (index 7): T1 = 7.80 s, T2 = 4.20 s.
+    a1 = k / 7.80
+    a2 = k / 4.20
+    assert res.absorption_area_empty[7] == pytest.approx(a1)
+    assert res.absorption_area_with_specimen[7] == pytest.approx(a2)
+    assert res.alpha_s[7] == pytest.approx((a2 - a1) / 10.8)
+    assert round(float(res.alpha_s[7]), 2) == 0.33
+    # 1000 Hz (index 10): T1 = 6.90 s, T2 = 2.85 s.
+    assert res.alpha_s[10] == pytest.approx((k / 2.85 - k / 6.90) / 10.8)
+    assert round(float(res.alpha_s[10]), 2) == 0.61
+
+
+def test_measurement_equivalent_absorption_area_is_a2_minus_a1() -> None:
+    res = _measurement()
+    np.testing.assert_allclose(
+        res.equivalent_absorption_area,
+        np.asarray(res.absorption_area_with_specimen)
+        - np.asarray(res.absorption_area_empty),
+    )
+
+
+def test_measurement_carries_conditions() -> None:
+    res = _measurement()
+    assert res.volume == 200.0
+    assert res.area == 10.8
+    assert res.temperature == 20.0
+    assert res.humidity == 54.0
+    np.testing.assert_array_equal(res.frequencies, _FREQS)
+    np.testing.assert_allclose(res.air_attenuation, np.zeros_like(_FREQS))
+
+
+def test_measurement_air_attenuation_reduces_area() -> None:
+    # A non-zero m subtracts the 4 V m term (Eq. (5)/(7)).
+    m = 1e-3
+    res = measure_sound_absorption(
+        _FREQS, _T1, _T2, volume=200.0, area=10.8, temperature=20.0, m=m
+    )
+    expected_a1 = 55.3 * 200.0 / (343.0 * _T1) - 4.0 * 200.0 * m
+    np.testing.assert_allclose(res.absorption_area_empty, expected_a1)
+
+
+def test_measurement_shape_mismatch_raises() -> None:
+    with pytest.raises(ValueError, match="share one shape"):
+        measure_sound_absorption(
+            _FREQS, _T1[:-1], _T2, volume=200.0, area=10.8
+        )
+
+
+def test_measurement_frozen() -> None:
+    import dataclasses
+
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        _measurement().alpha_s = np.zeros(18)  # type: ignore[misc]
+
+
+def test_measurement_small_room_warns_once() -> None:
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        measure_sound_absorption(
+            _FREQS, _T1, _T2, volume=100.0, area=10.8, temperature=20.0
+        )
+    volume_warnings = [
+        w for w in caught
+        if issubclass(w.category, AbsorptionWarning) and "volume" in str(w.message)
+    ]
+    assert len(volume_warnings) == 1
+
+
+def test_measurement_temperature_out_of_range_warns_once() -> None:
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        measure_sound_absorption(
+            _FREQS, _T1, _T2, volume=200.0, area=10.8, temperature=5.0
+        )
+    temp_warnings = [
+        w for w in caught
+        if issubclass(w.category, AbsorptionWarning)
+        and "Eq. (6)" in str(w.message)
+    ]
+    assert len(temp_warnings) == 1

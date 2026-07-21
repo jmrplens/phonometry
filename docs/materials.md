@@ -161,6 +161,91 @@ repository. Click the preview to open the PDF:
 
 *Weighted absorption fiche (`AbsorptionRatingResult.report`), $\alpha_w$ with its class.*
 
+### ISO 354 measurement (`measure_sound_absorption`)
+
+The reverberation-room measurement itself is `measure_sound_absorption`. It
+takes the one-third-octave reverberation time of the empty room ($T_1$) and of
+the room with the specimen installed ($T_2$), the room volume $V$ and the
+specimen area $S$, and returns a frozen `SoundAbsorptionMeasurement`. The
+equivalent sound absorption areas follow from Sabine's equation (ISO 354:2003
+Eq. (5)/(7)), $A = 55.3\,V/(c\,T) - 4\,V\,m$, with the speed of sound from
+Eq. (6), $c = 331 + 0.6\,t$; the sound absorption coefficient is
+$\alpha_s = (A_2 - A_1)/S$ (Eq. (8)/(9)). The coefficient may exceed 1.0 from
+edge and diffraction effects (Clause 3.7 NOTE 2) and is never clamped. Air
+attenuation enters only through the per-band coefficient $m$ (default 0, the
+zero-attenuation reference).
+
+ISO 354 is a characterisation: it produces the $\alpha_s$ spectrum, not a
+single-number rating. The weighted coefficient $\alpha_w$ is an ISO 11654
+quantity; feed the measured $\alpha_s$ to `weighted_absorption_from_third_octave`
+above to obtain it.
+
+```python
+import numpy as np
+from phonometry import materials
+
+freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                  1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000], float)
+t_empty = np.array([9.0, 9.0, 8.8, 8.6, 8.4, 8.2, 8.0, 7.8, 7.5, 7.2,
+                    6.9, 6.6, 6.2, 5.8, 5.4, 5.0, 4.6, 4.2])
+t_specimen = np.array([8.4, 8.2, 7.7, 7.2, 6.5, 5.7, 4.9, 4.2, 3.6, 3.15,
+                       2.85, 2.65, 2.55, 2.5, 2.55, 2.6, 2.7, 2.85])
+
+m = materials.measure_sound_absorption(
+    freqs, t_empty, t_specimen, volume=200.0, area=10.8, temperature=20.0
+)
+print(m.alpha_s[7])   # alpha_s at 500 Hz: 0.328...
+m.plot()              # alpha_s versus one-third-octave frequency
+```
+
+### ISO 354 report (`.report()`)
+
+`SoundAbsorptionMeasurement.report(path)` renders a one-page PDF fiche laid out
+like an accredited reverberation-room absorption test report (ISO 354:2003): a
+standard-basis line, a metadata header block, the one-third-octave $\alpha_s$
+table beside the $\alpha_s$ curve (the result's own `.plot()`), a boxed
+characterisation headline and a footer with the fixed disclaimer. ISO 354 has
+no pass/fail verdict and no single-number rating, so the fiche carries neither.
+Setting `verbose=True` adds the reverberation times $T_1$/$T_2$ and the
+equivalent absorption areas $A_1$/$A_2$ to the table.
+
+It uses the same `ReportMetadata` container and rendering engine as the other
+fiches. The specimen area $S$, room volume $V$, speed of sound $c$, temperature
+and humidity are taken from the measurement result; the descriptive
+`ReportMetadata` fields that apply here are `client`, `manufacturer`,
+`specimen`, `mounting`, `test_room`, `test_date`, `pressure`,
+`measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The
+`requirement` field is ignored (ISO 354 has no verdict). Rendering needs
+reportlab (`pip install phonometry[report]`); only `engine="reportlab"` is
+supported. Pass `language="es"` for a Spanish fiche (translated fixed strings
+and a comma decimal separator).
+
+```python
+from phonometry import materials, ReportMetadata
+
+m = materials.measure_sound_absorption(
+    freqs, t_empty, t_specimen, volume=200.0, area=10.8,
+    temperature=20.0, humidity=54.0,
+)
+m.report(
+    "alpha_s_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="50 mm porous absorber over a 100 mm air gap",
+        mounting="Type A (against a rigid wall)",
+        measurement_standard="ISO 354",
+        test_room="Reverberation room R1",
+        laboratory="Phonometry Reference Laboratory",
+    ),
+)                                  # one-third-octave alpha_s, 100 Hz to 5000 Hz
+```
+
+The example fiche, regenerated with `make reports`, is kept rendered in the
+repository. Click the preview to open the PDF:
+
+[![ISO 354 absorption example report: metadata header with sample area S, room volume V and speed of sound c, the one-third-octave alpha_s table grouped by octave beside the alpha_s curve, and the boxed characterisation headline over the tested one-third-octave range](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso354_absorption_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso354_absorption_example.pdf)
+
+*Reverberation-room absorption fiche (`SoundAbsorptionMeasurement.report`), the $\alpha_s$ spectrum.*
+
 ## 2. Airflow resistance (ISO 9053-1/-2)
 
 The airflow resistance quantifies how strongly a porous material opposes a steady

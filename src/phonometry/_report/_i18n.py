@@ -357,7 +357,6 @@ _STRINGS: dict[str, str] = {
     "Broadband analysis": "Análisis de banda ancha",
     "Broadband": "Banda ancha",
     "Room": "Sala",
-    "Room volume V [m<super>3</super>]": "Volumen de la sala V [m<super>3</super>]",
     "Floor area S [m<super>2</super>]": "Superficie del suelo S [m<super>2</super>]",
     "Source positions": "Posiciones de fuente",
     "Microphone positions": "Posiciones de micrófono",

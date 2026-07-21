@@ -29,6 +29,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- The documentation figures now render every text run in the viewer's native
+  sans-serif font: I normalise all `font-family` declarations in the generated
+  SVGs to the generic `sans-serif`, so viewers without DejaVu Sans no longer
+  fall back to a serif for the mathtext labels while the surrounding prose
+  stays sans. Text remains selectable.
 - The EBU R 128 programme-loudness fiche no longer passes the verdict on the
   obsolete blanket ±0.5 LU tolerance (the June 2014 V3 rule, superseded in
   the August 2020 V4 revision and absent from R 128-2023).

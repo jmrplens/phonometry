@@ -283,3 +283,20 @@ def test_peak_statistics_es_and_bad_language() -> None:
     plt.close("all")
     with pytest.raises(ValueError):
         res.plot(language="xx")
+
+
+def test_inverse_filter_es() -> None:
+    from scipy import signal as sg
+
+    b, a = sg.butter(2, [100.0, 8000.0], btype="bandpass", fs=float(FS))
+    imp = np.zeros(1024)
+    imp[0] = 1.0
+    res = ph.regularized_inverse_filter(
+        sg.lfilter(b, a, imp), float(FS), f_range=(200.0, 4000.0)
+    )
+    ax = res.plot(language="es")
+    assert "Inversión regularizada (Kirkeby)" in ax.get_title()
+    assert "Banda ecualizada" in _labels(ax)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")

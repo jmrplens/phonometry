@@ -187,6 +187,14 @@ _STRINGS: dict[str, str] = {
     "Prob[peak > z]": "Prob[pico > z]",
     "Peak-height distribution (Bendat & Piersol 5.5.4)":
         "Distribución de alturas de pico (Bendat y Piersol 5.5.4)",
+    "Measured response $|H|$": "Respuesta medida $|H|$",
+    r"Inverse filter $|H_{\mathrm{inv}}|$":
+        r"Filtro inverso $|H_{\mathrm{inv}}|$",
+    r"Equalized $|H \cdot H_{\mathrm{inv}}|$":
+        r"Ecualizado $|H \cdot H_{\mathrm{inv}}|$",
+    "Equalized band": "Banda ecualizada",
+    "Regularized inversion (Kirkeby) — flatness {flat} dB":
+        "Inversión regularizada (Kirkeby) — planitud {flat} dB",
 }
 
 
@@ -1506,5 +1514,67 @@ def plot_peak_statistics(
     ax.set_ylabel(_t("Prob[peak > z]", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+
+def plot_inverse_filter(
+    result: Any, ax: Axes | None = None, *, language: str = "en",
+    **kwargs: Any
+) -> Axes:
+    """Measured, inverse and equalized magnitudes of a regularized inversion.
+
+    One panel over log-frequency: the measured response ``|H|``
+    (normalised to its peak), the inverse-filter gain ``|H_inv|`` on the
+    same reference, and the equalized product ``|H*H_inv|`` that reads
+    0 dB across the shaded equalized band and rolls off outside it, where
+    the frequency-dependent regularization caps the gain.
+
+    :param result: An :class:`~phonometry.metrology.inversion.InverseFilterResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured-response ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    pos = freqs > 0.0
+    tiny = np.finfo(np.float64).tiny
+    h_mag = np.abs(np.asarray(result.response_spectrum))
+    peak = float(np.max(h_mag))
+    inv_mag = np.abs(np.asarray(result.spectrum))
+    eq_mag = h_mag * inv_mag
+    color = kwargs.pop("color", _C_PRIMARY)
+    f1, f2 = result.f_range
+
+    ax.semilogx(
+        freqs[pos], 20.0 * np.log10(np.maximum(h_mag[pos], tiny) / peak),
+        color=color, lw=1.2, label=_t("Measured response $|H|$", language),
+        **kwargs,
+    )
+    ax.semilogx(
+        freqs[pos], 20.0 * np.log10(np.maximum(inv_mag[pos] * peak, tiny)),
+        color=_C_SECONDARY, lw=1.2,
+        label=_t(r"Inverse filter $|H_{\mathrm{inv}}|$", language),
+    )
+    ax.semilogx(
+        freqs[pos], 20.0 * np.log10(np.maximum(eq_mag[pos], tiny)),
+        color=_C_TERTIARY, lw=1.6,
+        label=_t(r"Equalized $|H \cdot H_{\mathrm{inv}}|$", language),
+    )
+    ax.axvspan(f1, f2, color=color, alpha=0.08,
+               label=_t("Equalized band", language))
+    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Magnitude [dB]", language))
+    ax.set_ylim(bottom=-60.0, top=20.0)
+    flat = format_number(result.flatness_db, language, decimals=2)
+    ax.set_title(_t("Regularized inversion (Kirkeby) — flatness {flat} dB",
+                    language, flat=flat))
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    format_frequency_axis(ax, float(freqs[pos].min()), float(freqs[pos].max()))
     localize_axes(ax, language)
     return ax

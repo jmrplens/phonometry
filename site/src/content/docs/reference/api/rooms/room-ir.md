@@ -38,9 +38,111 @@ Two excitation families are implemented:
   cross-correlation of the recorded period with the sequence
   (equivalent to the Hadamard-transform recovery of A.1).
 
+Two further excitations from the transfer-function measurement literature
+complete the family:
+
+* **Complementary Golay pair** -- two binary sequences of length
+  `L = 2**n` whose periodic autocorrelations sum to an *exact* delta of
+  height `2L` (Golay 1961; Havelock, Kuwano & Vorlaender (eds.), Handbook
+  of Signal Processing in Acoustics, Springer 2008, Part I Ch. 6 by
+  N. Xiang, Eq. (2)). Exciting the system with each code in turn and
+  summing the two circular cross-correlations recovers the IR with zero
+  correlation noise: the deterministic residue of each single-code
+  correlation cancels identically, so only uncorrelated background noise
+  remains (Xiang Eq. (4)). See [`golay_pair`](/phonometry/reference/api/rooms/room-ir/#golay_pair) and
+  [`golay_impulse_response`](/phonometry/reference/api/rooms/room-ir/#golay_impulse_response).
+
+* **Sweep with an arbitrary magnitude spectrum** -- a swept sine synthesized
+  in the frequency domain by shaping its group delay so the dwell time at
+  each frequency is proportional to the desired spectral power
+  (Mueller & Massarani, "Transfer-Function Measurement with Sweeps", JAES
+  49(6), 2001, Secs. 4.2-4.3). The sweep keeps the near-ideal crest factor
+  of a swept sine while following any prescribed emphasis (pink,
+  noise-floor-matched, loudspeaker-equalizing, ...). See
+  [`shaped_sweep_signal`](/phonometry/reference/api/rooms/room-ir/#shaped_sweep_signal); the recording is deconvolved with the
+  ordinary spectral method of [`impulse_response`](/phonometry/reference/api/rooms/room-ir/#impulse_response), or post-equalized
+  with [`phonometry.regularized_inverse_filter`](/phonometry/reference/api/spectra/inversion/#regularized_inverse_filter).
+
 The recovered IR is broadband; ISO 18233 6.3.2 requires subsequent
 fractional-octave-band weighting (IEC 61260) before computing levels or
 decay curves -- that step belongs to downstream room-acoustics modules.
+
+## golay_impulse_response
+
+```python
+golay_impulse_response(
+    recorded_a: List[float] | np.ndarray,
+    recorded_b: List[float] | np.ndarray,
+    pair: Tuple[np.ndarray, np.ndarray],
+    *,
+    length: int | None = None,
+    fs: int | None = None,
+) -> ImpulseResponseResult
+```
+
+Recover an impulse response from a complementary Golay-pair excitation.
+
+Each code of the pair is emitted periodically (as with an MLS, record in
+the steady state: at least one settling period before acquisition); the
+recorded periods of each code are averaged and the IR is the sum of the
+two circular cross-correlations, normalised by `2L` (Havelock 2008,
+Part I Ch. 6 (N. Xiang), Eq. (4) and the measurement procedure of
+Fig. 2):
+
+`h = IFFT[ conj(A)*FFT(y_a) + conj(B)*FFT(y_b) ] / (2L)`.
+
+Because the pair's autocorrelations are *exactly* complementary
+(Xiang Eq. (2)), the recovery has no correlation noise: for a noiseless
+linear time-invariant system the IR is exact to machine precision,
+whereas an MLS leaves a small deterministic residue. Uncorrelated
+background noise is only attenuated by the averaging, and the price is
+a doubled excitation time and two steady states, which makes the pair
+more exposed to time variance than a single sweep (Xiang, Sec. 2).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `recorded_a` | Recorded response to the periodic `a` code; its length must be a positive multiple of the code length `L`. |
+| `recorded_b` | Recorded response to the periodic `b` code; its length must be a positive multiple of `L` (the period counts of the two recordings may differ). |
+| `pair` | The complementary pair `(a, b)` from [`golay_pair`](/phonometry/reference/api/rooms/room-ir/#golay_pair). |
+| `length` | Number of IR samples to return. Defaults to `L`; longer requests are periodic extensions. |
+| `fs` | Optional sample rate in Hz, stored on the result so that [`ImpulseResponseResult.plot`](/phonometry/reference/api/rooms/room-ir/#impulseresponseresultplot) can label a time axis in seconds (the recovery itself is sample-rate agnostic). Default `None`. |
+
+**Returns:** An [`ImpulseResponseResult`](/phonometry/reference/api/rooms/room-ir/#impulseresponseresult) (`method="golay"`). It behaves like the raw IR array for every downstream consumer and adds [`ImpulseResponseResult.plot`](/phonometry/reference/api/rooms/room-ir/#impulseresponseresultplot).
+
+:::note
+As with any periodic (circular) recovery, a system IR longer than
+one code period aliases back into the record; an
+[`ImpulseResponseWarning`](/phonometry/reference/api/rooms/room-ir/#impulseresponsewarning) flags undecayed energy at the end
+of the period (see the note in [`mls_impulse_response`](/phonometry/reference/api/rooms/room-ir/#mls_impulse_response) about
+the heuristic's noise-floor false positives).
+:::
+
+## golay_pair
+
+```python
+golay_pair(order: int) -> Tuple[np.ndarray, np.ndarray]
+```
+
+Generate a complementary Golay pair of length `2**order`.
+
+Built with the append recursion of Golay (1961): starting from
+`a1 = (+1, +1)`, `b1 = (+1, -1)`, each step appends `b` to `a`
+and `-b` to `a` (Havelock, Handbook of Signal Processing in
+Acoustics, Springer 2008, Part I Ch. 6 (N. Xiang), Eq. (1)). The pair is
+*complementary*: the sum of the two periodic autocorrelations is exactly
+`2L` at zero lag and exactly zero everywhere else (Xiang Eq. (2)) --
+an algebraic identity, not an approximation, unlike the near-delta
+autocorrelation of an MLS.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `order` | Number of recursion steps `n` (1 to 22). Each code has `L = 2**order` samples. |
+
+**Returns:** The pair `(a, b)` as bipolar float arrays (values `+1/-1`).
 
 ## impulse_response
 
@@ -280,6 +382,131 @@ samples of the bipolar sequence and its (flat) magnitude spectrum.
 | `kwargs` | Forwarded to the time-domain `plot` call. |
 
 **Returns:** The time-domain axes (`ax` given) or the array of two axes.
+
+## shaped_sweep_signal
+
+```python
+shaped_sweep_signal(
+    fs: int,
+    f1: float,
+    f2: float,
+    seconds: float,
+    *,
+    target: str | Tuple[np.ndarray, np.ndarray] = 'pink',
+    amplitude: float = 1.0,
+    start_delay: float | None = None,
+    fade: float = 0.01,
+) -> ShapedSweepResult
+```
+
+Synthesize a sweep with an arbitrary target magnitude spectrum.
+
+Implements the frequency-domain sweep construction of
+Mueller & Massarani ("Transfer-Function Measurement with Sweeps", JAES
+49(6), 2001, Secs. 4.2-4.3): the magnitude of the synthesis spectrum is
+set to the band-limited target, and the group delay grows in proportion
+to the target's spectral power,
+
+`tau_G(f) = tau_G(f - df) + C * |H(f)|**2` with
+`C = (tau_G(f_end) - tau_G(f_start)) / sum(|H|**2)`  (Eqs. (11)-(12)),
+
+so the sweep dwells on each frequency for a time proportional to the
+energy it must radiate there and its temporal envelope stays nearly
+constant -- the crest factor stays close to a swept sine's ideal
+3.02 dB regardless of the spectral shape (Sec. 4.3). The phase is the
+integral of the group delay, corrected to land on a real spectrum at
+Nyquist (Eq. (10)), and the sweep is obtained by inverse FFT over a
+block at least double the sweep length so the pre-ringing of the
+band-limited spectrum cannot fold onto the sweep's tail (Sec. 4.2).
+
+Deconvolve the recording with [`impulse_response`](/phonometry/reference/api/rooms/room-ir/#impulse_response)
+(`method="spectral"`), passing `np.asarray(result)` zero-padded as
+the reference, exactly as with [`sweep_signal`](/phonometry/reference/api/rooms/room-ir/#sweep_signal); the sweep's
+coloration divides out, so the target emphasis only re-weights the
+measurement's noise floor (that is its purpose: SNR shaping).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `fs` | Sampling frequency in Hz. |
+| `f1` | Start frequency of the sweep band in Hz. Must be > 0. The magnitude rolls off over 1/6 octave *below* `f1` (clipped at the first FFT bin), so the full target level holds across `[f1, f2]`. |
+| `f2` | Stop frequency in Hz. Must satisfy `f1 < f2 <= fs/2`; keep some margin below Nyquist so the upper roll-off has room. |
+| `seconds` | Sweep duration `tau_G(f2) - tau_G(f1)` in seconds. The returned signal is slightly longer (lead-in plus tail margin, see `start_delay`). |
+| `target` | The magnitude shape: `"pink"` (default; 3 dB per octave falling, the classical room-measurement emphasis), `"white"` (flat), or a `(frequencies_hz, magnitude_db)` pair of arrays interpolated in dB over log-frequency (only the shape matters; any overall offset is normalised away). |
+| `amplitude` | Peak amplitude of the returned sweep. Default 1.0. |
+| `start_delay` | Group delay assigned to `f1`, in seconds; the same margin is left after `tau_G(f2)`, so the signal lasts `seconds + 2*start_delay`. The sweep spreads slightly beyond its nominal start (Sec. 4.2: the group delay of the lowest bin "should not be set to zero"), so the default `0.05*seconds` gives the first half-wave room to evolve. |
+| `fade` | Half-Hann fade-in/out length as a fraction of the returned signal, applied to pin the ends to zero (Sec. 4.2). Default 0.01; 0.0 disables. |
+
+**Returns:** A [`ShapedSweepResult`](/phonometry/reference/api/rooms/room-ir/#shapedsweepresult) wrapping the sweep samples and the synthesis metadata (grid, imposed magnitude, group delay, crest factor).
+
+## ShapedSweepResult
+
+```python
+ShapedSweepResult(
+    signal: np.ndarray,
+    fs: float,
+    frequencies: np.ndarray,
+    magnitude: np.ndarray,
+    group_delay: np.ndarray,
+    f_range: Tuple[float, float],
+    crest_factor_db: float,
+)
+```
+
+A sweep synthesized to follow an arbitrary target magnitude spectrum.
+
+Returned by [`shaped_sweep_signal`](/phonometry/reference/api/rooms/room-ir/#shaped_sweep_signal). The playable samples live in
+`signal`; the object implements `__array__`, so it can be passed
+straight to a sound-card writer or as the `reference` of
+[`impulse_response`](/phonometry/reference/api/rooms/room-ir/#impulse_response) (spectral method). The synthesis metadata --
+the frequency grid, the band-limited magnitude actually imposed on the
+spectrum and the group delay that encodes the sweep's time-frequency
+trajectory (Mueller & Massarani 2001, Secs. 4.2-4.3) -- travels with
+the result, together with the achieved crest factor.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `signal` | The sweep samples (peak `amplitude`). |
+| `fs` | Sample rate, in Hz. |
+| `frequencies` | Frequency grid of the synthesis FFT, in Hz. |
+| `magnitude` | Band-limited magnitude imposed on the synthesis spectrum, normalised to a peak of 1 (linear). |
+| `group_delay` | Synthesized group delay `tau_G(f)` on `frequencies`, in seconds: the time at which each frequency is swept through. |
+| `f_range` | `(f1, f2)` band covered by the sweep, in Hz. |
+| `crest_factor_db` | Peak-to-RMS ratio over the sweep's central (constant-envelope) interval, in dB. A time-domain swept sine has the ideal 3.02 dB; the frequency-domain synthesis stays close to it (Mueller & Massarani 2001, Sec. 4.3: normally below 4 dB). |
+
+### ShapedSweepResult.plot()
+
+```python
+ShapedSweepResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes | np.ndarray
+```
+
+Plot the sweep waveform and its spectrum against the target.
+
+Two stacked panels: the time-domain waveform, and the sweep's Welch
+magnitude spectrum overlaid on the synthesis target (both in dB re
+their in-band maximum). With `ax` given, only the spectrum panel
+is drawn on it. Requires matplotlib
+(`pip install phonometry[plot]`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+
+### ShapedSweepResult.size
+
+*property*
+
+Number of samples in the sweep.
 
 ## sweep_signal
 

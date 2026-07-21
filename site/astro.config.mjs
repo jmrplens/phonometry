@@ -362,6 +362,7 @@ export default defineConfig({
                 'guides/cepstrum-echoes',
                 'guides/correlation-delay',
                 'guides/test-signals',
+                'guides/system-measurement',
               ],
             },
             {

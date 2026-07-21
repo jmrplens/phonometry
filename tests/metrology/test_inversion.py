@@ -1,0 +1,202 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Tests for the regularized spectral inversion (Kirkeby & Nelson 1999,
+Mueller & Massarani 2001).
+
+Validation strategy (closed-form, not self-consistency):
+- In-band the equalized magnitude ``|H*H_inv|`` equals
+  ``|H|**2 / (|H|**2 + eps)``: unity within the analytic residue
+  ``eps / (|H|**2 + eps)``, checked bin by bin against the designed
+  regularization profile.
+- Out-of-band the filter gain is bounded by the analytic maximum of
+  ``x / (x**2 + eps)``, i.e. ``1 / (2*sqrt(eps))`` -- the Kirkeby cap that
+  replaces Mueller & Massarani's explicit band-pass.
+- Applying the filter to the response it was designed from returns a
+  delayed band-limited unit pulse; ``apply`` removes the delay.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+from scipy import signal
+
+from phonometry import (
+    InverseFilterResult,
+    impulse_response,
+    regularized_inverse_filter,
+    sweep_signal,
+)
+
+FS = 48000.0
+
+
+def _biquad_ir(n: int = 512) -> np.ndarray:
+    """A gentle peaking response: unity plus an RBJ-style bell at 2 kHz."""
+    b, a = signal.iirpeak(2000.0, Q=2.0, fs=FS)
+    imp = np.zeros(n)
+    imp[0] = 1.0
+    return imp + 0.5 * signal.lfilter(b, a, imp)  # ~ +3.5 dB bump
+
+
+def _bandpass_ir(n: int = 1024) -> np.ndarray:
+    """A loudspeaker-like band-pass (100 Hz - 8 kHz) IR."""
+    b, a = signal.butter(2, [100.0, 8000.0], btype="bandpass", fs=FS)
+    imp = np.zeros(n)
+    imp[0] = 1.0
+    return signal.lfilter(b, a, imp)
+
+
+# --------------------------------------------------------------------------
+# The Kirkeby closed forms
+# --------------------------------------------------------------------------
+def test_in_band_product_is_unity_within_regularization_bound() -> None:
+    h = _bandpass_ir()
+    reg = 1e-6
+    res = regularized_inverse_filter(
+        h, FS, f_range=(200.0, 4000.0), regularization_inside=reg
+    )
+    product = np.abs(res.response_spectrum * res.spectrum)
+    band = (res.frequencies >= 200.0) & (res.frequencies <= 4000.0)
+    power = np.abs(res.response_spectrum) ** 2
+    # |H*Hinv| = |H|^2/(|H|^2 + eps): the deviation from 1 is exactly
+    # eps/(|H|^2 + eps), bin by bin (machine precision).
+    residue = res.regularization[band] / (power[band] + res.regularization[band])
+    np.testing.assert_allclose(1.0 - product[band], residue, atol=1e-12)
+    # And the global closed-form bound: eps_in = reg * max|H|^2.
+    bound = reg * float(np.max(power)) / float(np.min(power[band]))
+    assert float(np.max(1.0 - product[band])) <= bound
+    assert res.flatness_db <= 20.0 * np.log10(1.0 / (1.0 - bound))
+
+
+def test_out_of_band_gain_is_capped_by_the_analytic_maximum() -> None:
+    h = _bandpass_ir()
+    reg_out = 1.0
+    res = regularized_inverse_filter(
+        h, FS, f_range=(200.0, 4000.0), regularization_outside=reg_out
+    )
+    ratio = 2.0 ** (1.0 / 3.0)
+    outside = (res.frequencies > 0.0) & (
+        (res.frequencies < 200.0 / ratio) | (res.frequencies > 4000.0 * ratio)
+    )
+    gain = np.abs(res.spectrum[outside])
+    peak = float(np.max(np.abs(res.response_spectrum)))
+    # max of x/(x^2 + eps) is 1/(2*sqrt(eps)); eps = reg_out * peak^2.
+    cap = 1.0 / (2.0 * np.sqrt(reg_out) * peak)
+    assert float(np.max(gain)) <= cap + 1e-15
+    assert res.max_gain_db <= 20.0 * np.log10(cap * peak) + 1e-9
+
+
+def test_flatness_reports_the_worst_in_band_deviation() -> None:
+    h = _biquad_ir()
+    res = regularized_inverse_filter(h, FS, f_range=(500.0, 8000.0))
+    product = np.abs(res.response_spectrum * res.spectrum)
+    band = (res.frequencies >= 500.0) & (res.frequencies <= 8000.0)
+    worst = float(np.max(np.abs(20.0 * np.log10(product[band]))))
+    assert res.flatness_db == pytest.approx(worst, abs=1e-12)
+    assert res.flatness_db < 0.01  # a gentle response inverts almost exactly
+
+
+def test_stronger_regularization_trades_flatness_for_smaller_gain() -> None:
+    h = _bandpass_ir()
+    gentle = regularized_inverse_filter(
+        h, FS, f_range=(200.0, 4000.0), regularization_inside=1e-8
+    )
+    strong = regularized_inverse_filter(
+        h, FS, f_range=(200.0, 4000.0), regularization_inside=1e-2
+    )
+    assert gentle.flatness_db < strong.flatness_db
+
+
+# --------------------------------------------------------------------------
+# Time-domain behaviour
+# --------------------------------------------------------------------------
+def test_apply_equalizes_the_designed_response_to_a_pulse() -> None:
+    h = _bandpass_ir()
+    res = regularized_inverse_filter(h, FS, f_range=(200.0, 4000.0))
+    # The raw convolution concentrates into a band-limited pulse at the
+    # modeling delay: > 95 % of the energy within +/- 128 samples.
+    full = signal.fftconvolve(h, res.inverse)
+    assert int(np.argmax(np.abs(full))) == res.delay
+    window = slice(res.delay - 128, res.delay + 128)
+    concentration = float(
+        np.sum(full[window] ** 2) / np.sum(full ** 2)
+    )
+    assert concentration > 0.95
+    # apply() removes the delay: same pulse, aligned at sample 0.
+    pulse = res.apply(h)
+    assert pulse.size == h.size
+    assert int(np.argmax(np.abs(pulse))) == 0
+    assert pulse[0] == pytest.approx(float(full[res.delay]), abs=1e-12)
+
+
+def test_delay_defaults_to_half_the_block_and_is_stored() -> None:
+    h = _biquad_ir(200)
+    res = regularized_inverse_filter(h, FS, f_range=(500.0, 8000.0))
+    assert res.size == 512  # next pow2 of 2*200
+    assert res.delay == 256
+    custom = regularized_inverse_filter(
+        h, FS, f_range=(500.0, 8000.0), n_fft=1024, delay=100
+    )
+    assert custom.size == 1024
+    assert custom.delay == 100
+
+
+def test_fs_is_taken_from_a_result_object() -> None:
+    sweep = sweep_signal(int(FS), 50.0, 20000.0, 0.5)
+    rec = np.concatenate([sweep, np.zeros(2048)])
+    ir = impulse_response(rec, np.concatenate([sweep, np.zeros(2048)]),
+                          int(FS), length=2048)
+    res = regularized_inverse_filter(ir, f_range=(200.0, 10000.0))
+    assert isinstance(res, InverseFilterResult)
+    assert res.fs == FS
+    with pytest.raises(ValueError, match="fs"):
+        regularized_inverse_filter(np.asarray(ir), f_range=(200.0, 10000.0))
+
+
+# --------------------------------------------------------------------------
+# Validation
+# --------------------------------------------------------------------------
+def test_rejects_bad_inputs() -> None:
+    h = _biquad_ir()
+    with pytest.raises(ValueError, match="f_range"):
+        regularized_inverse_filter(h, FS, f_range=(0.0, 4000.0))
+    with pytest.raises(ValueError, match="f_range"):
+        regularized_inverse_filter(h, FS, f_range=(4000.0, 200.0))
+    with pytest.raises(ValueError, match="Nyquist"):
+        regularized_inverse_filter(h, FS, f_range=(200.0, 40000.0))
+    with pytest.raises(ValueError, match="regularization"):
+        regularized_inverse_filter(
+            h, FS, f_range=(200.0, 4000.0), regularization_inside=0.0
+        )
+    with pytest.raises(ValueError, match="transition"):
+        regularized_inverse_filter(
+            h, FS, f_range=(200.0, 4000.0), transition_octaves=-1.0
+        )
+    with pytest.raises(ValueError, match="n_fft"):
+        regularized_inverse_filter(
+            h, FS, f_range=(200.0, 4000.0), n_fft=16
+        )
+    with pytest.raises(ValueError, match="delay"):
+        regularized_inverse_filter(
+            h, FS, f_range=(200.0, 4000.0), delay=-1
+        )
+    with pytest.raises(ValueError, match="one-dimensional"):
+        regularized_inverse_filter(
+            np.zeros((2, 8)), FS, f_range=(200.0, 4000.0)
+        )
+    with pytest.raises(ValueError, match="finite"):
+        regularized_inverse_filter(
+            np.array([1.0, np.nan]), FS, f_range=(200.0, 4000.0)
+        )
+    with pytest.raises(ValueError, match="zero"):
+        regularized_inverse_filter(
+            np.zeros(64), FS, f_range=(200.0, 4000.0)
+        )
+
+
+def test_apply_rejects_non_1d() -> None:
+    h = _biquad_ir()
+    res = regularized_inverse_filter(h, FS, f_range=(500.0, 8000.0))
+    with pytest.raises(ValueError, match="one-dimensional"):
+        res.apply(np.zeros((2, 4)))

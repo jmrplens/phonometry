@@ -156,6 +156,11 @@ and play. `impulse_response`/`mls_impulse_response` return an
 `ImpulseResponseResult`, a drop-in for the raw IR array (`np.asarray(ir)`,
 indexing and `ir.size` all keep working, so `room_parameters(ir, fs)` is
 unchanged) that also carries the sample rate and method and adds an `.plot()`.
+Two more excitations from the transfer-function literature - complementary
+Golay pairs with exactly noise-free deconvolution, and sweeps shaped to an
+arbitrary target spectrum - live in the
+[system-measurement guide](/phonometry/guides/system-measurement/) and
+return the same result types.
 
 **The two excitations.** The exponential sweep sweeps its energy up the
 spectrum over the whole signal, while the MLS is a flat-spectrum two-level

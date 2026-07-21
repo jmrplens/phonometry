@@ -161,6 +161,12 @@ un `ImpulseResponseResult`, un sustituto directo del array de la RI
 (`np.asarray(ir)`, la indexación y `ir.size` siguen funcionando, de modo que
 `room_parameters(ir, fs)` no cambia) que además guarda la frecuencia de
 muestreo y el método y añade un `.plot()`.
+Dos excitaciones más de la literatura de medición de funciones de
+transferencia - los pares complementarios de Golay con deconvolución
+exactamente libre de ruido, y los barridos conformados a un espectro
+objetivo arbitrario - viven en la
+[guía de medición de sistemas](/phonometry/es/guides/system-measurement/) y
+devuelven los mismos tipos de resultado.
 
 **Las dos excitaciones.** El barrido exponencial desplaza su energía hacia
 frecuencias altas a lo largo de toda la señal, mientras que la MLS es una

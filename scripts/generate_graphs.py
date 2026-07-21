@@ -8111,6 +8111,127 @@ def generate_silencer_expansion_chamber(output_dir: str) -> None:
 # produced them. This registry is the single source of truth for both the
 # sequential path (``generate_all``) and the parallel runner (``--jobs``),
 # and for the ``--figure`` name filter.
+
+
+def generate_regularized_inversion(output_dir: str) -> None:
+    """Kirkeby inversion of a loudspeaker-like band-pass response."""
+    print("Generating regularized_inversion...")
+    from scipy import signal as sp_signal
+
+    from phonometry import regularized_inverse_filter
+
+    fs = 48000.0
+    b, bb = sp_signal.butter(2, [100.0, 8000.0], btype="bandpass", fs=fs)
+    imp = np.zeros(2048)
+    imp[0] = 1.0
+    h = sp_signal.lfilter(b, bb, imp)
+
+    res = regularized_inverse_filter(h, fs, f_range=(200.0, 4000.0))
+
+    freqs = res.frequencies
+    pos = freqs > 0.0
+    tiny = np.finfo(np.float64).tiny
+    h_mag = np.abs(res.response_spectrum)
+    peak = float(np.max(h_mag))
+    inv_mag = np.abs(res.spectrum)
+    eq_mag = h_mag * inv_mag
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.semilogx(freqs[pos],
+                20.0 * np.log10(np.maximum(h_mag[pos], tiny) / peak),
+                color=COLOR_PRIMARY, linewidth=1.4,
+                label="Measured response $|H|$")
+    ax.semilogx(freqs[pos],
+                20.0 * np.log10(np.maximum(inv_mag[pos] * peak, tiny)),
+                color=COLOR_SECONDARY, linewidth=1.4,
+                label=r"Inverse filter $|H_{\mathrm{inv}}|$")
+    ax.semilogx(freqs[pos],
+                20.0 * np.log10(np.maximum(eq_mag[pos], tiny)),
+                color=COLOR_TERTIARY, linewidth=1.8,
+                label=r"Equalized $|H \cdot H_{\mathrm{inv}}|$")
+    ax.axvspan(200.0, 4000.0, color=COLOR_PRIMARY, alpha=0.08,
+               label="Equalized band (200 Hz - 4 kHz)")
+    ax.set_xlim(20.0, fs / 2.0)
+    ax.set_ylim(-50.0, 15.0)
+    format_frequency_axis(ax, 20.0, fs / 2.0)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Magnitude [dB]")
+    ax.set_title("Regularized Spectral Inversion (Kirkeby Frequency-"
+                 "Dependent Regularization)", fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower center", fontsize=9)
+    ax.text(0.985, 0.97,
+            "unity in-band; outside, the frequency-dependent\n"
+            "regularization caps the gain instead of boosting noise",
+            transform=ax.transAxes, va="top", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "regularized_inversion.svg")
+    plt.close()
+
+
+def generate_shaped_sweep(output_dir: str) -> None:
+    """A pink shaped sweep: waveform and spectrum against the target."""
+    print("Generating shaped_sweep...")
+    from scipy import signal as sp_signal
+
+    from phonometry import shaped_sweep_signal
+
+    fs = 48000
+    res = shaped_sweep_signal(fs, 50.0, 5000.0, 2.0, target="pink")
+    x = np.asarray(res)
+    t = np.arange(x.size) / fs
+
+    nperseg = 8192
+    freqs_w, psd = sp_signal.welch(x, fs=fs, nperseg=nperseg,
+                                   noverlap=3 * nperseg // 4)
+    tiny = np.finfo(np.float64).tiny
+    band_w = (freqs_w >= 50.0) & (freqs_w <= 5000.0)
+    welch_db = 10.0 * np.log10(np.maximum(psd, tiny))
+    welch_db -= float(np.max(welch_db[band_w]))
+    grid = res.frequencies
+    band_g = (grid >= 50.0) & (grid <= 5000.0)
+    target_db = 20.0 * np.log10(np.maximum(res.magnitude, tiny))
+    target_db -= float(np.max(target_db[band_g]))
+
+    fig, axes = plt.subplots(2, 1, figsize=(10, 7))
+    axes[0].plot(t, x, color=COLOR_PRIMARY, linewidth=0.5)
+    axes[0].set_xlabel("Time [s]")
+    axes[0].set_ylabel("Amplitude")
+    axes[0].set_xlim(0.0, float(t[-1]))
+    axes[0].set_title("Shaped Sweep with an Arbitrary Target Spectrum "
+                      "(Group-Delay Synthesis)", fontweight="bold", pad=12)
+    axes[0].grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    axes[0].set_axisbelow(True)
+    axes[0].text(0.985, 0.95,
+                 "nearly constant envelope: the energy shaping lives\n"
+                 "in the dwell time, not in the amplitude",
+                 transform=axes[0].transAxes, va="top", ha="right",
+                 fontsize=8.5, color=COLOR_FG)
+
+    posw = freqs_w > 0.0
+    axes[1].semilogx(freqs_w[posw], welch_db[posw], color=COLOR_PRIMARY,
+                     linewidth=1.3, label="Welch spectrum of the sweep")
+    posg = grid > 0.0
+    axes[1].semilogx(grid[posg], target_db[posg], color=COLOR_SECONDARY,
+                     linewidth=1.5, linestyle="--",
+                     label="Pink target (-3 dB per octave)")
+    axes[1].axvspan(50.0, 5000.0, color=COLOR_PRIMARY, alpha=0.08,
+                    label="Sweep band (50 Hz - 5 kHz)")
+    axes[1].set_xlim(20.0, 20000.0)
+    axes[1].set_ylim(-60.0, 8.0)
+    format_frequency_axis(axes[1], 20.0, 20000.0)
+    axes[1].set_xlabel(LABEL_FREQ_HZ)
+    axes[1].set_ylabel("Level re in-band max [dB]")
+    axes[1].grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    axes[1].set_axisbelow(True)
+    axes[1].legend(loc="lower left", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "shaped_sweep.svg")
+    plt.close()
+
+
 _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_filter_type_comparison,
     generate_filter_responses,
@@ -8268,6 +8389,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_stationarity_test,
     generate_rice_level_crossings,
     generate_rice_peak_distribution,
+    # Regularized inversion (Kirkeby) and the Mueller-Massarani shaped sweep.
+    generate_regularized_inversion,
+    generate_shaped_sweep,
     # Objective intelligibility: STOI vs ESTOI over SNR for stationary and
     # modulated maskers (Taal et al. 2011 / Jensen & Taal 2016).
     generate_stoi_intelligibility,

@@ -135,6 +135,41 @@ def test_envelope_es() -> None:
     plt.close("all")
 
 
+def test_envelope_spectrum_es() -> None:
+    axes = ph.envelope_spectrum(_white(), FS).plot(language="es")
+    assert "Espectro de la envolvente (Bendat y Piersol 13.3)" in _titles(axes)
+    assert "Amplitud de modulación" in _labels(axes)
+    assert "Nivel medio" in _labels(axes)
+    plt.close("all")
+
+
+def test_cepstrum_es() -> None:
+    res = ph.cepstrum(_white(), FS, kind="power")
+    ax = res.plot(language="es")
+    assert "Cepstro de potencia" in _titles(ax)
+    assert "Quefrencia [ms]" in _labels(ax)
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+    plt.close("all")
+
+
+def test_echo_detection_es() -> None:
+    x = np.zeros(4096)
+    x[0], x[313] = 1.0, 0.4
+    ax = ph.echo_detection(x, FS).plot(language="es")
+    assert "Detección de ecos en el cepstro de potencia" in _titles(ax)
+    assert "Banda de búsqueda" in _labels(ax)
+    assert any("Eco:" in s and "," in s for s in _labels(ax).split(" || "))
+    plt.close("all")
+
+
+def test_lifter_es() -> None:
+    axes = ph.lifter(_white(), FS, 0.002, mode="highpass").plot(language="es")
+    assert "Liftering a 2 ms (paso alto)" in _titles(axes)
+    assert "Lifterado (paso alto)" in _labels(axes)
+    plt.close("all")
+
+
 def test_phase_decomposition_es() -> None:
     resp = np.fft.rfft(np.exp(-np.arange(1024) / 50.0))
     axes = ph.phase_decomposition(resp, fs=FS).plot(language="es")

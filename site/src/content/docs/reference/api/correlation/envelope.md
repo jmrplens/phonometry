@@ -36,6 +36,14 @@ decimator for general records, or plain subsampling (`antialias=False`)
 matching the ECMA-internal convention when the input is already
 narrowband.
 
+The **envelope spectrum** ([`envelope_spectrum`](/phonometry/reference/api/correlation/envelope/#envelope_spectrum)) transforms the
+detected envelope itself: Section 13.3 of the book runs a square-law
+envelope detector into a DC remover before correlating (Figure 13.11),
+because the spectral content of the envelope - not of the signal - is
+where amplitude modulations show as discrete lines. An AM tone with
+modulation frequency `f_m` and depth `m` puts a line of closed-form
+amplitude at exactly `f_m`, the anchor the tests pin.
+
 ## envelope
 
 ```python
@@ -78,6 +86,63 @@ same time axis.
 | `antialias` | Anti-alias filter the decimated envelope (default `True`). |
 
 **Returns:** An [`EnvelopeResult`](/phonometry/reference/api/correlation/envelope/#enveloperesult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the inputs or parameters are invalid. |
+
+## envelope_spectrum
+
+```python
+envelope_spectrum(
+    x: NDArray[np.float64] | list[float],
+    fs: float,
+    *,
+    kind: str = 'magnitude',
+    window: str = 'hann',
+    nfft: int | None = None,
+    remove_dc: bool = True,
+) -> EnvelopeSpectrumResult
+```
+
+Amplitude spectrum of the envelope: where modulations become lines.
+
+Follows the structure of Bendat & Piersol Section 13.3 (Figure 13.11):
+an envelope detector, a DC remover, and a spectral view of what is
+left. The detector is the Hilbert envelope `A(t) = |z(t)|`
+(`kind="magnitude"`, the practical default) or the book's square-law
+detector `A^2(t) = x^2 + x_hat^2` (`kind="squared"`); its mean is
+removed (kept in [`EnvelopeSpectrumResult.mean_level`](/phonometry/reference/api/correlation/envelope/#envelopespectrumresult)) and the
+remainder is tapered and transformed once, scaled so a sinusoidal
+modulation reads out as a line at its exact amplitude.
+
+Closed forms for an AM tone `A0 (1 + m cos(2 pi f_m t)) cos(2 pi f_c t)`
+with `0 <= m < 1`:
+
+* `kind="magnitude"`: a line of amplitude `A0 m` at `f_m`;
+  mean level `A0`.
+* `kind="squared"`: lines `2 A0^2 m` at `f_m` and
+  `A0^2 m^2 / 2` at `2 f_m`; mean level `A0^2 (1 + m^2/2)`.
+
+Amplitude modulation of rotating machinery (bearing and gear defect
+frequencies), mains hum and wind-turbine amplitude modulation appear
+the same way: lines at the modulation frequency and its harmonics,
+separated from the carrier's own spectrum.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `x` | Signal, 1-D. |
+| `fs` | Sample rate, in Hz. |
+| `kind` | `"magnitude"` (default) or `"squared"`. |
+| `window` | Taper (any scipy window name; default Hann). The amplitude is corrected for the taper's coherent gain. |
+| `nfft` | FFT length, at least `x.size` (default: the record length). |
+| `remove_dc` | Remove the envelope mean before the transform (default `True`, the Figure 13.11 DC remover); the mean is reported either way. |
+
+**Returns:** An [`EnvelopeSpectrumResult`](/phonometry/reference/api/correlation/envelope/#envelopespectrumresult).
 
 **Raises**
 
@@ -132,6 +197,61 @@ EnvelopeResult.plot(
 ```
 
 Plot the signal with its envelope and the instantaneous frequency.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+
+## EnvelopeSpectrumResult
+
+```python
+EnvelopeSpectrumResult(
+    frequencies: NDArray[np.float64],
+    amplitude: NDArray[np.float64],
+    mean_level: float,
+    kind: str,
+    times: NDArray[np.float64],
+    envelope: NDArray[np.float64],
+    window: str,
+    remove_dc: bool,
+    fs: float,
+    nfft: int,
+)
+```
+
+Amplitude spectrum of a signal's envelope (B&P Section 13.3).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | Frequency axis of the spectrum, in Hz. |
+| `amplitude` | One-sided amplitude spectrum of the (mean-removed) envelope: the height of a discrete modulation line in the units of the envelope itself. The zero-frequency bin is not doubled. |
+| `mean_level` | Mean of the detected envelope (the DC the remover of Figure 13.11 takes out): the carrier amplitude for `kind="magnitude"`, its mean square for `kind="squared"`. |
+| `kind` | `"magnitude"` (Hilbert envelope `A(t)`) or `"squared"` (the book's square-law detector, `A^2(t)`). |
+| `times` | Time axis of [`envelope`](/phonometry/reference/api/correlation/envelope/#envelope), in seconds. |
+| `envelope` | The detector output that was transformed, at full rate (before mean removal and tapering). |
+| `window` | Taper name applied before the transform. |
+| `remove_dc` | Whether the envelope mean was removed first. |
+| `fs` | Sample rate of the analysed record, in Hz. |
+| `nfft` | FFT length used. |
+
+### EnvelopeSpectrumResult.plot()
+
+```python
+EnvelopeSpectrumResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes | NDArray[Any]
+```
+
+Plot the detected envelope and its amplitude spectrum.
+
+With `ax` given, only the spectrum panel is drawn on it.
 
 **Parameters**
 

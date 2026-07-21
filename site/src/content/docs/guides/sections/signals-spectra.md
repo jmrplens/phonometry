@@ -1,6 +1,6 @@
 ---
 title: "Signals and spectra"
-description: "Frequency- and time-domain signal analysis in phonometry: calibrated Welch spectral estimates with their statistical quality, and correlation, time-delay estimation and the Hilbert envelope."
+description: "Frequency- and time-domain signal analysis in phonometry: calibrated Welch spectral estimates with their statistical quality, cepstral analysis with echo detection and liftering, the envelope spectrum, and correlation, time-delay estimation and the Hilbert envelope."
 ---
 
 Band levels answer *how much*; this section answers *what is in the signal*.
@@ -27,6 +27,13 @@ passing siren, an impact, a run-up - with every cell reading an absolute
 level in the same scaling as the Welch estimators, and the zoom FFT computes
 the spectrum of a narrow band on an arbitrarily fine grid to separate tones
 closer than a practical FFT bin.
+[Cepstrum, echoes and the envelope spectrum](/phonometry/guides/cepstrum-echoes/)
+works on the *shape* of the spectrum. The power, real and complex cepstrum
+collapse periodic spectral ripple onto quefrency spikes, echo detection reads
+a reflection's delay and coefficient off the cepstral peak, liftering splits
+a log spectrum into smooth envelope and fine structure, and the envelope
+spectrum turns amplitude modulations into discrete lines at the modulation
+frequency.
 
 [Correlation, time delay and envelope](/phonometry/guides/correlation-delay/)
 is the time-domain half. Auto- and cross-correlation come with the
@@ -63,6 +70,11 @@ supply the error-analysis vocabulary the estimates are stated in.
   resolves tones closer than a practical FFT bin.
   spectrum and spectral SNR, 1/n-octave smoothing, exact-slope
   colored-noise generators and the Harris window figures of merit.
+- [Cepstrum, echoes and the envelope spectrum](/phonometry/guides/cepstrum-echoes/):
+  the power/real/complex cepstrum with quefrency analysis, echo detection
+  with the reflection coefficient read off the peak, lowpass/highpass
+  liftering, the homomorphic round trip and the envelope spectrum of
+  amplitude modulations.
 - [Correlation, time delay and envelope](/phonometry/guides/correlation-delay/):
   correlation estimates with their random errors, time-delay estimation by
   direct correlation, phase slope and GCC weightings, sub-sample

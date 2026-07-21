@@ -238,6 +238,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   spectra, a "Choosing the window" section in the spectral-analysis guide
   (EN/ES) with the window trade-off figure, and two documentation figures
   (`tone_burst_train`, `window_functions_tradeoff`).
+- `metrology.cepstrum` brings cepstral analysis to the signal toolbox
+  (Havelock, *Handbook of Signal Processing in Acoustics*, Chs. 27/87/75, and
+  Bendat & Piersol Sec. 13.1.4): `cepstrum` computes the power, real or
+  complex cepstrum over the quefrency axis (the complex kind unwraps the
+  phase, removes and stores its linear component, and `CepstrumResult.invert`
+  runs the homomorphic round trip back to the record); `lifter` splits a log
+  spectrum into its smooth envelope and its fine structure with exactly
+  complementary lowpass/highpass quefrency windows; and `echo_detection`
+  reads a reflection's delay and coefficient off the power-cepstrum peak,
+  whose height for an in-record echo is analytically the reflection
+  coefficient itself (the n = 1 term of the ln(1 + a·e^(-j·theta)) series;
+  the rahmonic amplitudes (-1)^(n+1)·a^n/n and the liftered-ripple extrema
+  20·lg(1 ± a) dB are pinned as closed-form oracles in the tests and the
+  conformance report). All three return frozen results with localised
+  `.plot()` renderers. `minimum_phase` now folds its real cepstrum through
+  the module's shared core; the refactor is verified bit-exact against the
+  previous implementation on fixed responses.
+- `metrology.envelope_spectrum` transforms the detected envelope itself,
+  following the envelope-detector -> DC-remover chain of Bendat & Piersol
+  Sec. 13.3 (Fig. 13.11) with either the Hilbert magnitude envelope or the
+  book's square-law detector, scaled (window coherent-gain corrected) so a
+  sinusoidal amplitude modulation reads out as a line at its exact
+  amplitude: an AM tone (A0, m) puts A0·m at fm for the magnitude detector
+  and 2·A0²·m at fm plus A0²·m²/2 at 2·fm for the squared one, the
+  closed forms the tests and the conformance report pin. The frozen
+  `EnvelopeSpectrumResult` keeps the removed mean level and offers a
+  localised `.plot()` with the envelope and its spectrum.
+- New "Cepstrum, echoes and the envelope spectrum" guide (English and
+  Spanish) in the Signals and spectra section, with the echo-detection and
+  envelope-spectrum figures.
 - `electroacoustics.loudspeaker_characteristics` and
   `electroacoustics.LoudspeakerCharacteristics` gather the rated loudspeaker
   characteristics of IEC 60268-5:2003+A1:2007 around a measured on-axis

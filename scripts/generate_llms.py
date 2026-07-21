@@ -46,6 +46,7 @@ PAGES = [
     ("spectral-analysis.md", "guides/spectral-analysis"),
     ("correlation-delay.md", "guides/correlation-delay"),
     ("test-signals.md", "guides/test-signals"),
+    ("cepstrum-echoes.md", "guides/cepstrum-echoes"),
     ("swept-sine-distortion.md", "guides/swept-sine-distortion"),
     ("block-processing.md", "guides/block-processing"),
     ("multichannel.md", "guides/multichannel"),

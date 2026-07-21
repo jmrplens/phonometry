@@ -4513,6 +4513,59 @@ def _chk_am_envelope_exact() -> Outcome:
 
 
 # ===========================================================================
+# Cepstral analysis and envelope spectrum (Havelock 2008 / Bendat & Piersol)
+# ===========================================================================
+_CEPSTRUM = "Cepstrum, liftering and envelope spectrum (Havelock / B&P)"
+
+
+def _cepstrum_echo_signal() -> np.ndarray:
+    """delta[n] + a*delta[n-d]: DFT exactly 1 + a*exp(-j*2pi*k*d/N)."""
+    x = np.zeros(4096)
+    x[0] = 1.0
+    x[313] = 0.4
+    return x
+
+
+@register(
+    _CEPSTRUM,
+    "Havelock 2008 Ch. 27 Fig. 21 + Mercator series of ln(1+a*e^{-j*theta})",
+    "Power-cepstrum height at the echo delay = reflection coefficient a",
+)
+def _chk_power_cepstrum_echo() -> Outcome:
+    res = ph.echo_detection(_cepstrum_echo_signal(), 8192.0)
+    if res.delay_samples != 313:
+        return numeric(313.0, float(res.delay_samples), 0.5, places=0)
+    return numeric(0.4, res.reflection_coefficient, 1e-10, places=6)
+
+
+@register(
+    _CEPSTRUM,
+    "Havelock 2008 Ch. 87 Eq. (14): complex cepstrum, series term n = 2",
+    "Second rahmonic of a reflection a = 0.4 equals -a^2/2",
+)
+def _chk_complex_cepstrum_rahmonic() -> Outcome:
+    res = ph.cepstrum(_cepstrum_echo_signal(), 8192.0, kind="complex")
+    return numeric(-0.08, float(res.cepstrum[2 * 313]), 1e-10, places=6)
+
+
+@register(
+    _CEPSTRUM,
+    "Bendat & Piersol, Random Data 4e Sec. 13.3 (Fig. 13.11)",
+    "Envelope-spectrum line of an AM tone (A0 = 2, m = 0.35) at fm",
+)
+def _chk_envelope_spectrum_am_line() -> Outcome:
+    fs = 8192.0
+    n = 16384
+    t = np.arange(n) / fs
+    x = 2.0 * (1.0 + 0.35 * np.cos(2.0 * np.pi * 16.0 * t)) * np.cos(
+        2.0 * np.pi * 1000.0 * t
+    )
+    res = ph.envelope_spectrum(x, fs)
+    line = float(res.amplitude[int(round(16.0 * n / fs))])
+    return numeric(0.7, line, 2e-3, places=4)
+
+
+# ===========================================================================
 # Underwater acoustics (ISO 18405 / 17208 / 18406)
 # ===========================================================================
 _UNDERWATER = "Underwater acoustics (ISO 18405/17208/18406)"

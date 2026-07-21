@@ -83,6 +83,12 @@ calibrada y acompañada de su calidad estadística.
   espectrograma STFT calibrado en unidades absolutas (dB SPL para pascales)
   y la FFT con zoom que resuelve tonos más próximos que un bin práctico de
   FFT.
+- [Cepstro, ecos y espectro de la envolvente](/phonometry/es/guides/cepstrum-echoes/):
+  el cepstro de potencia, real y complejo con análisis de quefrencia,
+  detección de ecos con el coeficiente de reflexión leído en el pico
+  cepstral, liftering paso bajo/paso alto de un espectro logarítmico, y el
+  espectro de la envolvente que convierte las modulaciones de amplitud en
+  líneas discretas.
 - [Correlación, retardo y envolvente](/phonometry/es/guides/correlation-delay/):
   estimaciones de correlación con los errores aleatorios de Bendat y
   Piersol, estimación del retardo por correlación directa, pendiente de fase

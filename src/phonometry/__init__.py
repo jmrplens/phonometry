@@ -252,7 +252,20 @@ from .metrology.correlation import (
     impulse_response_delay,
     time_delay,
 )
-from .metrology.envelope import EnvelopeResult, envelope
+from .metrology.cepstrum import (
+    CepstrumResult,
+    EchoDetectionResult,
+    LifterResult,
+    cepstrum,
+    echo_detection,
+    lifter,
+)
+from .metrology.envelope import (
+    EnvelopeResult,
+    EnvelopeSpectrumResult,
+    envelope,
+    envelope_spectrum,
+)
 from .metrology.phase import (
     PhaseDecompositionResult,
     excess_phase,
@@ -1355,10 +1368,18 @@ __all__ = [
     "impulse_response_delay",
     "align_impulse_responses",
     "envelope",
+    "envelope_spectrum",
+    "cepstrum",
+    "lifter",
+    "echo_detection",
     "CorrelationResult",
     "TimeDelayResult",
     "AlignedImpulseResponseResult",
     "EnvelopeResult",
+    "EnvelopeSpectrumResult",
+    "CepstrumResult",
+    "LifterResult",
+    "EchoDetectionResult",
     "minimum_phase",
     "group_delay",
     "excess_phase",

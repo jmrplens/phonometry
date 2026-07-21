@@ -203,3 +203,109 @@ def test_envelope_plot_with_decimated_result() -> None:
     axes = res.plot()
     assert len(axes) == 2
     plt.close("all")
+
+
+# ---------------------------------------------------------------------------
+# Envelope spectrum (B&P Section 13.3): AM closed forms
+# ---------------------------------------------------------------------------
+#
+# For x(t) = A0*(1 + m*cos(2*pi*fm*t))*cos(2*pi*fc*t) with 0 <= m < 1 the
+# Hilbert envelope is exactly A0*(1 + m*cos(2*pi*fm*t)) (Eq. 13.27), so:
+#
+# * kind="magnitude": mean level A0, one line of amplitude A0*m at fm.
+# * kind="squared" (the square-law detector of Figure 13.11):
+#   A0^2*(1 + m*cos)^2 = A0^2*[1 + m^2/2 + 2m*cos(2*pi*fm*t)
+#   + (m^2/2)*cos(2*pi*2*fm*t)]: mean level A0^2*(1 + m^2/2) and lines
+#   2*A0^2*m at fm and A0^2*m^2/2 at 2*fm.
+#
+# fm is chosen on an exact FFT bin so the line amplitudes are read without
+# scalloping; the tolerances absorb only the Hilbert edge effects.
+
+ES_A0 = 2.0
+ES_M = 0.35
+ES_FM = 13.0  # 13 cycles in the 2 s record: an exact bin
+ES_N = N
+
+
+def _am_signal() -> np.ndarray:
+    t = np.arange(ES_N) / FS
+    return np.asarray(
+        ES_A0 * (1.0 + ES_M * np.cos(2.0 * np.pi * ES_FM * t))
+        * np.cos(2.0 * np.pi * 1000.0 * t),
+        dtype=np.float64,
+    )
+
+
+def _bin(freq: float, nfft: int = ES_N) -> int:
+    return int(round(freq * nfft / FS))
+
+
+def test_envelope_spectrum_magnitude_line_and_mean() -> None:
+    res = ph.envelope_spectrum(_am_signal(), FS)
+    assert res.kind == "magnitude"
+    assert res.mean_level == pytest.approx(ES_A0, abs=1e-3)
+    assert res.amplitude[_bin(ES_FM)] == pytest.approx(ES_A0 * ES_M, rel=1e-3)
+    assert res.frequencies[_bin(ES_FM)] == pytest.approx(ES_FM)
+
+
+def test_envelope_spectrum_squared_lines_and_mean() -> None:
+    res = ph.envelope_spectrum(_am_signal(), FS, kind="squared")
+    assert res.mean_level == pytest.approx(
+        ES_A0**2 * (1.0 + ES_M**2 / 2.0), abs=1e-2
+    )
+    assert res.amplitude[_bin(ES_FM)] == pytest.approx(
+        2.0 * ES_A0**2 * ES_M, rel=1e-3
+    )
+    assert res.amplitude[_bin(2.0 * ES_FM)] == pytest.approx(
+        ES_A0**2 * ES_M**2 / 2.0, rel=1e-2
+    )
+
+
+def test_envelope_spectrum_dc_removal() -> None:
+    res = ph.envelope_spectrum(_am_signal(), FS)
+    assert res.remove_dc
+    assert res.amplitude[0] == pytest.approx(0.0, abs=1e-6)
+    kept = ph.envelope_spectrum(_am_signal(), FS, remove_dc=False)
+    # Without the DC remover the zero-frequency bin carries the mean level
+    # (not doubled), up to the taper's slight leakage.
+    assert kept.amplitude[0] == pytest.approx(kept.mean_level, rel=5e-3)
+    # ...and the modulation line is unaffected either way.
+    assert kept.amplitude[_bin(ES_FM)] == pytest.approx(
+        ES_A0 * ES_M, rel=1e-3
+    )
+
+
+def test_envelope_spectrum_pure_tone_has_no_lines() -> None:
+    res = ph.envelope_spectrum(_tone(1000.0, amp=1.5), FS)
+    assert res.mean_level == pytest.approx(1.5, abs=1e-3)
+    # No modulation: nothing anywhere above the Hilbert edge-effect floor.
+    assert float(np.max(res.amplitude[1:])) < 1e-2
+
+
+def test_envelope_spectrum_zero_padding() -> None:
+    res = ph.envelope_spectrum(_am_signal(), FS, nfft=2 * ES_N)
+    assert res.nfft == 2 * ES_N
+    assert res.frequencies.size == ES_N + 1
+    assert res.amplitude[_bin(ES_FM, 2 * ES_N)] == pytest.approx(
+        ES_A0 * ES_M, rel=1e-2
+    )
+
+
+def test_envelope_spectrum_validates_inputs() -> None:
+    x = _am_signal()
+    with pytest.raises(ValueError, match="kind"):
+        ph.envelope_spectrum(x, FS, kind="log")
+    with pytest.raises(ValueError, match="nfft"):
+        ph.envelope_spectrum(x, FS, nfft=100)
+    with pytest.raises(ValueError, match="fs"):
+        ph.envelope_spectrum(x, -1.0)
+
+
+def test_envelope_spectrum_plot_two_panels_and_external_ax() -> None:
+    res = ph.envelope_spectrum(_am_signal(), FS)
+    axes = res.plot()
+    assert len(axes) == 2
+    assert len(axes[0].lines) >= 1  # envelope (+ mean-level rule)
+    fig, ext = plt.subplots()
+    assert res.plot(ax=ext) is ext
+    plt.close("all")

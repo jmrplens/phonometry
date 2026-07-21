@@ -10055,7 +10055,7 @@ these estimators all share one Welch core (same taper, overlap policy and
 detrend-off calibration), so a PSD, a coherence and an H1 computed with the
 same segment length are mutually consistent bin by bin. The same cross-spectral
 matrix underlies [multiple and partial coherence](https://jmrplens.github.io/phonometry/guides/miso-coherence/), which
-extends the ordinary coherence to two or three correlated inputs and one
+extends the ordinary coherence to several correlated inputs and one
 output.
 
 ## References
@@ -12374,7 +12374,7 @@ cycle and warn on use; they are removed in 4.0.
 | `cross_spectral_density` | `function` | **Welch cross-spectral density with magnitude/phase errors (Eqs. 9.33/9.52).**<br>• `x`, `y`, `fs`<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = cross_spectral_density(x, y, fs)`<br><br>• `CrossSpectralDensityResult` |
 | `coherent_output_spectrum` | `function` | **Gvv = γ²·Gyy, noise remainder and spectral SNR (Eqs. 9.55–9.56, 9.73).**<br>• `x` (input), `y` (output), `fs`<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = coherent_output_spectrum(x, y, fs)`<br><br>• `CoherentOutputSpectrumResult` |
 | `fractional_octave_smoothing` | `function` | **Constant-power 1/n-octave smoothing of a spectrum.**<br>• `frequencies`, `values`<br>• `fraction`: the n of 1/n octave (Default: 3)<br>• `domain`: 'power'/'amplitude'/'db' (Default: 'power') | `s = fractional_octave_smoothing(f, psd, 3.0)`<br><br>• smoothed array, same domain; flat spectra unchanged |
-| `miso_coherence` | `function` | **Multiple & partial coherence of a MISO system (Bendat & Piersol Ch. 7).**<br>• `inputs`: 2 or 3 input records (sequence of 1-D arrays or a (q, n) array), `output`, `fs`<br>• `order`: conditioning order (Default: 0..q−1)<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = miso_coherence([x1, x2], y, fs)`<br><br>• `MISOCoherenceResult` |
+| `miso_coherence` | `function` | **Multiple & partial coherence of a MISO system (Bendat & Piersol Ch. 7).**<br>• `inputs`: q input records, q ≥ 2 (sequence of 1-D arrays or a (q, n) array), `output`, `fs`<br>• `order`: conditioning order (Default: 0..q−1)<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = miso_coherence([x1, x2], y, fs)`<br><br>• `MISOCoherenceResult` |
 | `MISOCoherenceResult` | `dataclass` | **Multiple/partial coherence of q correlated inputs and one output.**<br>• `ordinary_coherence` (q×F), `multiple_coherence` γ²y:x, `partial_coherence` (q×F, conditioned per `order`)<br>• `coherent_output_spectra` Gvi (q×F, Σ Gvi + `noise_psd` = `output_psd`)<br>• `multiple_coherence_random_error` (Eq. 9.98), `coherent_output_random_error` (Eq. 9.100)<br>• `.dominant_input()`: per-band index of the strongest source<br>• `.plot()`: coherent output spectra + coherences | `res.multiple_coherence, res.dominant_input()` |
 | `resolution_bias_error` | `function` | **First-order resolution bias at a resonance peak, εb ≈ −(Be/Br)²/3 (Eq. 8.141).**<br>• `resolution_bandwidth` Be [Hz]<br>• `half_power_bandwidth` Br [Hz] | `resolution_bias_error(1.0, 4.0)  # -1/48` |
 | `noise_signal` | `function` | **Colored Gaussian noise with an exact power-law PSD slope.**<br>• `fs`, `seconds` (Default: 1.0)<br>• `color`: 'white'/'pink'/'red'/'blue'/'violet' (0/−3.01/−6.02/+3.01/+6.02 dB/oct)<br>• `rms` (Default: 1.0)<br>• `seed`: bit-reproducible per seed | `pink = noise_signal(48000, 10.0, color='pink', seed=7)` |

@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   example: N = 20 beats the power-of-two N = 32).
 - `miso_coherence`: multiple and partial coherence of a multiple-input,
   single-output system (Bendat & Piersol, Random Data 4e, Chapter 7). From the
-  Welch cross-spectral matrix of two or three partially correlated inputs and
+  Welch cross-spectral matrix of several partially correlated inputs and
   one output it reports the ordinary coherence of each input (Eq. 7.109), the
   multiple coherence explained by all inputs jointly (Eq. 7.35), and the
   partial coherences (Eq. 7.87) obtained by the Gaussian-elimination

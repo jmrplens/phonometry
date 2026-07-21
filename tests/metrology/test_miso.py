@@ -184,6 +184,53 @@ def test_independent_inputs_multiple_equals_sum_of_ordinary() -> None:
     assert float(np.median(np.abs(diff))) < 0.02
 
 
+def test_four_uncorrelated_inputs_general_q_identity() -> None:
+    """Four mutually uncorrelated inputs (general q, not the old 2-3 cap).
+
+    Oracle: Bendat & Piersol Eqs. 7.116/7.117. When the ``q`` inputs are
+    mutually uncorrelated the conditioning removes nothing, so the partial
+    coherence of each input equals its ordinary coherence (Eq. 7.117) and the
+    multiple coherence equals the sum of the ordinary coherences (Eq. 7.116),
+    bounded by one. The expected relations come from the standard, not from
+    the code: four independent white records drive four distinct FIR paths
+    into one output with additive measurement noise, so the inputs stay
+    mutually uncorrelated by construction and both identities must hold.
+    """
+    x0 = _white(50)
+    x1 = _white(51)
+    x2 = _white(52)
+    x3 = _white(53)
+    y = (
+        _fir(x0, [1.0, 0.4, -0.2])
+        + _fir(x1, [0.2, -0.6, 0.4])
+        + _fir(x2, [0.5, 0.3])
+        + _fir(x3, [-0.3, 0.5, 0.1])
+        + _white(54, rms=0.6)
+    )
+    res = ph.miso_coherence([x0, x1, x2, x3], y, FS, nperseg=2048)
+
+    # (a) general q >= 2 no longer raises, and (d) every array carries q = 4.
+    assert res.n_inputs == 4
+    assert res.ordinary_coherence.shape[0] == 4
+    assert res.partial_coherence.shape[0] == 4
+    assert res.coherent_output_spectra.shape[0] == 4
+    assert res.multiple_coherence.shape == res.frequencies.shape
+
+    band = _band(res.frequencies)
+    # (b) per-input partial == ordinary (Eq. 7.117). The extra input widens the
+    # Section 9.3 bias slightly over the two-input case, so allow a comfortable
+    # few hundredths.
+    for i in range(4):
+        diff = np.abs(
+            res.partial_coherence[i][band] - res.ordinary_coherence[i][band]
+        )
+        assert float(np.median(diff)) < 0.03
+    # (c) multiple == sum of ordinaries, clipped to one (Eq. 7.116).
+    expected = np.minimum(res.ordinary_coherence[:, band].sum(axis=0), 1.0)
+    diff_multiple = res.multiple_coherence[band] - expected
+    assert float(np.median(np.abs(diff_multiple))) < 0.03
+
+
 # ---------------------------------------------------------------------------
 # Correlated inputs: partial coherence removes the shared path (the point)
 # ---------------------------------------------------------------------------
@@ -377,15 +424,8 @@ def test_plot_on_given_axis_draws_spectra_panel() -> None:
 def test_rejects_single_input() -> None:
     x1 = _white(140, n=1 << 14)
     y = x1.copy()
-    with pytest.raises(ValueError, match="2 or 3"):
+    with pytest.raises(ValueError, match="at least two"):
         ph.miso_coherence([x1], y, FS)
-
-
-def test_rejects_four_inputs() -> None:
-    inputs = [_white(150 + i, n=1 << 14) for i in range(4)]
-    y = _white(160, n=1 << 14)
-    with pytest.raises(ValueError, match="2 or 3"):
-        ph.miso_coherence(inputs, y, FS)
 
 
 def test_rejects_mismatched_length() -> None:

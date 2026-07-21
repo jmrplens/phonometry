@@ -95,8 +95,8 @@ def _validate_inputs(
         rows = [np.ascontiguousarray(row, dtype=np.float64) for row in inputs]
     else:
         rows = [np.asarray(x, dtype=np.float64) for x in inputs]
-    if not 2 <= len(rows) <= 3:
-        raise ValueError("'inputs' must hold 2 or 3 input records.")
+    if len(rows) < 2:
+        raise ValueError("'inputs' must hold at least two input records.")
     xs = [_validate_signal(x, f"inputs[{i}]") for i, x in enumerate(rows)]
     ya = _validate_signal(output, "output")
     for i, x in enumerate(xs):
@@ -324,7 +324,7 @@ class MISOCoherenceResult:
     :attr:`order`.
 
     :ivar frequencies: One-sided frequency axis, in Hz.
-    :ivar n_inputs: Number of inputs ``q`` (2 or 3).
+    :ivar n_inputs: Number of inputs ``q`` (``q >= 2``).
     :ivar order: Conditioning order actually applied, as original input
         indices; ``partial_coherence[order[k]]`` is conditioned on the inputs
         ``order[:k]``.
@@ -437,8 +437,8 @@ def miso_coherence(
     Absent a physical basis, Bendat & Piersol (Section 7.2.4) recommend
     ordering the inputs by descending ordinary coherence with the output.
 
-    :param inputs: The ``q`` input records (2 or 3), a sequence of equal-length
-        1-D arrays or a 2-D ``(q, n)`` array.
+    :param inputs: The ``q`` input records (``q >= 2``), a sequence of
+        equal-length 1-D arrays or a 2-D ``(q, n)`` array.
     :param output: The output record, 1-D, same length as the inputs.
     :param fs: Sample rate, in Hz.
     :param order: Conditioning order as input indices (default ``0..q-1``).

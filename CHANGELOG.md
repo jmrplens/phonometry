@@ -162,6 +162,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- B, D and AU frequency weightings in `WeightingFilter` / `weighting_filter`
+  (`curve="B"|"D"|"AU"`), joining A/C/G/Z with the same 1 kHz normalization,
+  `high_accuracy` oversampling, multichannel and stateful block processing.
+  B follows ANSI S1.4-1983 Appendix C (the historical curve dropped from the
+  IEC sound-level-meter standards); AU follows IEC 61012:1990 (the A
+  weighting cascaded with the Table 2 U low-pass for measuring audible sound
+  in the presence of ultrasound, designed toward an internal 288 kHz rate for
+  the steep roll-off); D implements the withdrawn IEC 537:1976 aircraft-noise
+  weighting from its published rational transfer function, cross-checked
+  against SQAT (identical zeros/poles) and librosa (independent closed form,
+  agreement within 0.002 dB) and pinned against the IEC 537 table republished
+  in NASA CR-3406 (Table SLD-I).
+- `verify_weighting_class` now also verifies `B` against ANSI S1.4-1983
+  (Table IV design goals, Table V Type 1/2 tolerance masks) and `AU` against
+  IEC 61012:1990 Table 1 (nominal A + nominal U with the separate-unit
+  tolerances and the subclause 2.2 explicit AU values at 25/31.5/40 kHz),
+  including the between-nominals sweep against the analytic design goals.
+  The conformance report pins B against the strictest Type 0 mask, AU over
+  the full 10 Hz-40 kHz Table 1 range at 96 kHz, and D against the published
+  tabulated curve.
 - `building.AirborneInsulationResult.report()` and
   `building.ImpactInsulationResult.report()` render the ISO 16283 field
   sound-insulation test report to a one-page PDF: the airborne fiche states

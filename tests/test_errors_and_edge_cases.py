@@ -60,7 +60,7 @@ def test_weighting_filter_invalid() -> None:
     Verify error handling for invalid weighting curves.
 
     **Purpose:**
-    Ensure that only supported IEC curves (A, C, Z) are accepted.
+    Ensure that only the supported curves (A, B, C, D, G, AU, Z) are accepted.
 
     **Verification:**
     - Call `weighting_filter` with an unsupported curve name.
@@ -70,8 +70,8 @@ def test_weighting_filter_invalid() -> None:
     """
     rng = np.random.default_rng(42)
     x = rng.standard_normal(1000)
-    with pytest.raises(ValueError, match="must be 'A', 'C', 'G' or 'Z'"):
-        weighting_filter(x, 48000, curve="B")
+    with pytest.raises(ValueError, match="must be 'A', 'B', 'C', 'D', 'G', 'AU' or 'Z'"):
+        weighting_filter(x, 48000, curve="E")
 
 
 def test_time_weighting_invalid() -> None:

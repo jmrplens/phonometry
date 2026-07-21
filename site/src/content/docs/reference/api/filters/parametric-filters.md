@@ -7,8 +7,39 @@ sidebar:
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-Weighting filters (A, C, G, Z) and time weighting utilities for audio analysis.
+Weighting filters (A, B, C, D, G, AU, Z) and time weighting utilities.
+
 A/C/Z per IEC 61672-1:2013; G (infrasound) per ISO 7196:1995.
+
+B is the historical weighting of ANSI S1.4-1983 (Appendix C): the C curve
+with one extra zero at the origin and one extra real pole at
+`f5 = 158.48932 Hz`. It was dropped from the sound-level-meter standards
+when IEC 61672-1 replaced IEC 60651 (first edition 2002) and is provided for
+historical data and older national codes only.
+
+AU per IEC 61012:1990: the A weighting cascaded with the U low-pass
+(six poles, Table 2: a double real pole at -12 200 Hz and complex pairs at
+-7 850 +/- j8 800 Hz and -2 900 +/- j12 150 Hz) for measuring audible sound
+in the presence of ultrasound. It is flat relative to A up to 10 kHz and
+cuts steeply above (U alone, Table 1: -2.8 dB at 12.5 kHz; -61.8 dB at
+40 kHz). The Table 2 poles reproduce every Table 1 nominal value within
+0.05 dB.
+
+D per the withdrawn IEC 537:1976 (aircraft-noise weighting): implemented
+from the widely published rational transfer function
+`k s (s^2 + 6532 s + 4.0975e7) / ((s + 1776.3)(s + 7288.5)
+(s^2 + 21514 s + 3.8836e8))`, with `k` renormalized to exactly 0 dB at
+1 kHz. The standard itself is withdrawn and unavailable, so the constants
+are corroborated against two independent implementations: SQAT
+(`sound_level_meter/Gen_weighting_filters.m`: identical zeros and poles;
+note its display-only `freqResp` line prints 1773.6 where its pole list,
+and every other source, has 1776.3) and librosa (`librosa.D_weighting`,
+an independent frequency-domain closed form; agreement within 0.002 dB
+from 10 Hz to 20 kHz). The response also reproduces the tabulated IEC 537
+curve republished in the NASA Handbook of Aircraft Noise Metrics
+(NASA CR-3406, 1981, Table SLD-I) within 0.1 dB at every one-third-octave
+frequency from 50 Hz to 10 kHz except 1600 Hz (0.15 dB) and 2500 Hz
+(0.28 dB), where that table appears to round a different source curve.
 
 ## linkwitz_riley
 
@@ -104,7 +135,7 @@ weighting_filter(
 ) -> np.ndarray
 ```
 
-Apply frequency weighting (A or C) to a signal.
+Apply a frequency weighting to a signal.
 
 **Parameters**
 
@@ -112,7 +143,7 @@ Apply frequency weighting (A or C) to a signal.
 | :--- | :--- |
 | `x` | Input signal. |
 | `fs` | Sample rate. |
-| `curve` | 'A', 'C', 'G' (ISO 7196 infrasound) or 'Z' (bypass). |
+| `curve` | 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical), 'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012) or 'Z' (bypass). |
 | `high_accuracy` | Use internal oversampling for IEC 61672-1 class 1 accuracy at high frequencies (default True). |
 
 **Returns:** Weighted signal.
@@ -129,7 +160,7 @@ WeightingFilter(
 )
 ```
 
-Class-based frequency weighting filter (A, C, G, Z).
+Class-based frequency weighting filter (A, B, C, D, G, AU, Z).
 Allows pre-calculating and reusing filter coefficients.
 
 Initialize the weighting filter.
@@ -139,7 +170,7 @@ Initialize the weighting filter.
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate in Hz. |
-| `curve` | 'A', 'C', 'G' (ISO 7196 infrasound) or 'Z'. |
+| `curve` | 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical: removed from the IEC sound-level-meter standards), 'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012, audible sound in the presence of ultrasound) or 'Z'. |
 | `stateful` | If True, the weighting filter is stateful. Useful for block processing. |
 | `steady_ic` | If True, calculate steady state initial conditions for filter. |
 | `high_accuracy` | If True, design and run the filter at an internal oversampled rate (target >= 144 kHz) so the response stays within IEC 61672-1 class 1 tolerances up to 16 kHz. At 48 kHz this oversamples x3, keeping the deviation from the analytic curve to about -0.44 dB @16k / -0.85 dB @20k. The plain bilinear design still holds class 1 at fs = 44.1/48 kHz (about -2.7 dB at 12.5 kHz, inside the +2.0/-5.0 class 1 limits) but degrades to class 2 for fs \<= 32 kHz. Defaults to True except in stateful mode (the internal FIR resampling is incompatible with block processing). |

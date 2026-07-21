@@ -4284,6 +4284,33 @@ def _chk_pink_noise_slope() -> Outcome:
 
 @register(
     _SPECTRA,
+    "IEC 60268-1:1985 Clause A2.1 / Table AII",
+    "5 ms burst of 5 kHz tone at 48 kHz: gate RMS = A/sqrt(2) (integral periods)",
+)
+def _chk_tone_burst_rms() -> Outcome:
+    # Clause A2.1: zero-crossing start, integral number of full periods.
+    # Over exactly 25 full periods (240 samples) the mean square of the
+    # sine is exactly 1/2, so the gate RMS is A/sqrt(2) to machine
+    # precision.
+    res = ph.tone_burst(48000.0, 5000.0, 25, amplitude=1.0)
+    if res.burst_samples != 240:  # 5 ms at 48 kHz, from Table AII
+        return numeric(240.0, float(res.burst_samples), 0.0, places=0)
+    rms = float(np.sqrt(np.mean(res.signal[:240] ** 2)))
+    return numeric(1.0 / math.sqrt(2.0), rms, 1e-12, places=6)
+
+
+@register(
+    _SPECTRA,
+    "Harris 1978 closed form (DFT-even Hann)",
+    "Hann window ENBW = n*sum(w^2)/sum(w)^2 = 3/2 exactly",
+)
+def _chk_hann_enbw() -> Outcome:
+    res = ph.window_metrics("hann", 1024)
+    return numeric(1.5, float(res.enbw_bins), 1e-12, places=6)
+
+
+@register(
+    _SPECTRA,
     "Constant-power 1/n-octave kernel (closed form)",
     "1/3-octave smoothed line level = P*df/(f0*(2^(1/6)-2^(-1/6)))",
 )

@@ -54,6 +54,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/)
 - [Calibrated spectral analysis (Bendat & Piersol)](https://jmrplens.github.io/phonometry/guides/spectral-analysis/)
 - [Correlation, time delay and envelope (Bendat & Piersol / Knapp & Carter)](https://jmrplens.github.io/phonometry/guides/correlation-delay/)
+- [Test signals and sample-rate tools (IEC 60268-1)](https://jmrplens.github.io/phonometry/guides/test-signals/)
 - [Swept-sine distortion and phase utilities (Farina / Novak)](https://jmrplens.github.io/phonometry/guides/swept-sine-distortion/)
 - [Block Processing](https://jmrplens.github.io/phonometry/guides/block-processing/)
 - [Multichannel and Performance](https://jmrplens.github.io/phonometry/guides/multichannel/)
@@ -9049,8 +9050,9 @@ effective number of averages, the normalized random error and chi-square
 confidence intervals; the **coherent output spectrum** that splits a measured
 output into the part linearly explained by the input and the noise remainder,
 with the spectral signal-to-noise ratio; a **fractional-octave smoother** with
-a constant-power kernel; and **colored-noise generators** with an exact
-power-law slope for exercising all of the above. Every error formula is a
+a constant-power kernel; **colored-noise generators** with an exact
+power-law slope for exercising all of the above; and the **window figures of
+merit** of Harris (1978) for choosing the taper. Every error formula is a
 closed form from the book, verified by seeded Monte Carlo in the test suite.
 
 ## 1. Power spectral density with its statistical error
@@ -9280,6 +9282,53 @@ the regression slope of each color lands within a few thousandths of a
 dB/octave of the exact value; the conformance suite pins the pink slope at
 -3.0116 against the exact -3.0103.
 
+## 6. Choosing the window
+
+Every estimator on this page accepts any window `scipy.signal.get_window`
+knows, but the choice is a quantified trade-off, not a preference.
+`window_metrics` computes the figures of merit Harris (1978) tabulated, for
+any taper and length, sampled DFT-even exactly as the Welch estimators apply
+it:
+
+- **ENBW** (equivalent noise bandwidth, in bins): how much wider than one
+  bin the effective analysis bandwidth is. This is the same number the PSD
+  result reports as `resolution_bandwidth` (`ENBW·fs/nperseg` in Hz), and
+  it enters directly in the tone/noise trade: a broadband noise floor read
+  from a windowed spectrum sits `10·lg(ENBW)` dB above the true density.
+- **Coherent gain**: the DC gain `Σw/N` a bin-centered tone is scaled by.
+- **Scalloping loss**: the worst-case attenuation of a tone that falls
+  midway between two bins (3.92 dB for rectangular, 1.42 dB for Hann).
+- **Worst-case processing loss**: scalloping plus `10·lg(ENBW)`, the
+  worst-case reduction in output SNR for tone detection in white noise.
+- **Highest sidelobe** and **main-lobe -3 dB width**: leakage floor versus
+  resolution.
+
+```python
+from phonometry import window_metrics
+
+m = window_metrics("hann", 2048)
+print(m.enbw_bins)              # 1.5, exactly
+print(m.scalloping_loss_db)     # 1.42 dB
+print(m.highest_sidelobe_db)    # -31.5 dB
+m.plot()                        # window + spectrum with metrics marked
+```
+
+The closed forms anchor the tests: ENBW is exactly 1 for rectangular, 3/2
+for Hann, 1987/1458 for Hamming and 1523/882 for Blackman (DFT-even
+sampling), and the rectangular scalloping loss is `20·lg(N·sin(π/2N))`,
+the Dirichlet kernel evaluated half a bin off center.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/window_functions_tradeoff_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/window_functions_tradeoff.svg" alt="Spectra of the rectangular, Hann, Hamming and Blackman windows over 16 DFT bins, showing the trade-off between main-lobe width and sidelobe level, with each window's equivalent noise bandwidth and highest sidelobe level in the legend" width="82%"></picture>
+
+The Hann default of this module is the balanced choice: fast sidelobe
+falloff (-18 dB/octave) protects noise spectra from leakage, ENBW 1.5 costs
+only 1.76 dB against the rectangular window, and its overlap correlation at
+50 % keeps nearly all segment information in the effective average count.
+Reach for a lower-sidelobe taper (Blackman, Kaiser with a high beta) when a
+weak tone must be found next to a strong one, and accept the wider main
+lobe; reach for the rectangular window only for self-windowing records
+(transients that decay inside the segment) or bin-centered synthesis.
+
 ## Relation to the H1/H2 estimators
 
 The [frequency-response estimators](electroacoustics.md) `transfer_function`
@@ -9302,6 +9351,10 @@ same segment length are mutually consistent bin by bin.
   70–73. [doi:10.1109/TAU.1967.1161901](https://doi.org/10.1109/TAU.1967.1161901).
   The overlapped-segment variance formula behind the effective number of
   averages (Bendat & Piersol Section 11.5.2.2, Ref. 11).
+- Harris, F. J. (1978). On the use of windows for harmonic analysis with the
+  discrete Fourier transform. *Proceedings of the IEEE*, 66(1), 51–83.
+  [doi:10.1109/PROC.1978.10837](https://doi.org/10.1109/PROC.1978.10837).
+  The window figures of merit (Table 1) computed by `window_metrics`.
 
 ---
 
@@ -9554,6 +9607,160 @@ the `'phase'` estimator is literally the slope of the
   [doi:10.1109/TASSP.1976.1162830](https://doi.org/10.1109/TASSP.1976.1162830).
   The GCC framework, the Table I weightings and their conditions, and the
   maximum-likelihood (Hannan-Thomson) processor.
+
+---
+
+
+<!-- source: docs/test-signals.md | canonical: https://jmrplens.github.io/phonometry/guides/test-signals/ -->
+
+# Test signals and sample-rate tools (IEC 60268-1)
+
+A measurement is only as trustworthy as its stimulus and its sample-rate
+bookkeeping. This page covers the signal toolbox of `phonometry.metrology`:
+**tone bursts** with the exact gating IEC 60268-1 prescribes, the
+**colored-noise generators** (detailed in the
+[spectral analysis guide](https://jmrplens.github.io/phonometry/guides/spectral-analysis/#5-colored-noise-generators)),
+**resampling** whose anti-alias rejection is a stated, verifiable
+specification rather than a library default, and **fractional delay** that
+shifts a record by any sub-sample amount with band-limited exactness.
+
+## 1. Tone bursts (IEC 60268-1)
+
+The gated sine burst is the standard stimulus for dynamic behaviour:
+sound-level-meter ballistics, quasi-peak meters, loudspeaker power handling.
+IEC 60268-1:1985 (Clause A2.1) pins down what a well-formed burst is: it
+"should start at the zero-crossing of the tone and should consist of an
+integral number of full periods". `tone_burst` generates exactly that, as a
+single burst or as the repetitive train of Clause A2.2 in which each burst
+occupies one full repetition period:
+
+```python
+from phonometry import tone_burst
+
+# One 5 ms burst of 5 kHz tone (25 full periods), as in Table AII.
+single = tone_burst(48000, 5000, 25)
+print(single.burst_samples)         # 240 samples = 5 ms at 48 kHz
+
+# Clause A2.2: 5 ms bursts at 10 bursts per second.
+train = tone_burst(48000, 5000, 25, repetitions=4, repetition_rate=10)
+print(train.period_samples, train.duty_cycle)   # 4800, 0.05
+train.plot()                        # waveform with the gating envelope
+```
+
+The result carries the record, the rectangular gating **envelope** and the
+exact sample bookkeeping (`burst_samples`, `onset_sample`, `period_samples`,
+`duty_cycle`), so a test report can state its stimulus numerically. Because
+the gate spans an integral number of full periods starting at a zero
+crossing, the burst energy has the closed form `A²N/2` exactly, which is how
+the generator is verified.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_train_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_train.svg" alt="IEC 60268-1 tone bursts: a single 5 ms burst of 5 kHz tone starting at a zero crossing with its rectangular gating envelope, and a repetitive train of four bursts at 10 bursts per second with a 5 percent duty cycle" width="82%"></picture>
+
+These are the bursts behind the
+[Fast/Slow/Impulse ballistics](https://jmrplens.github.io/phonometry/guides/time-weighting/) reference responses
+(IEC 61672-1 Table 4 uses 4 kHz tonebursts of 200, 50 and 10 ms) and the
+quasi-peak dynamic tests of IEC 60268-1 itself (5 kHz bursts of 1 to 200 ms,
+Table AII).
+
+## 2. Resampling with a stated anti-alias specification
+
+Sample-rate conversion hides a filter, and that filter decides how much
+aliased energy contaminates the result. `resample_signal` performs rational
+polyphase resampling (44.1 to 48 kHz is the ratio 160/147) with a lowpass
+FIR designed *inside the function* by the Kaiser window method, from two
+numbers the caller controls:
+
+- `stopband_attenuation_db` (default 120): the alias rejection, with the
+  stopband starting exactly at the smaller of the two Nyquist frequencies,
+  where folding happens;
+- `transition_width` (default 0.05): the fraction of that Nyquist frequency
+  given up to the filter's transition band, so the passband ends at
+  `(1 - transition_width)·f_Nyq` and is flat within the same Kaiser ripple
+  bound `δ = 10^(-A/20)`.
+
+```python
+from phonometry import noise_signal, resample_signal
+
+x = noise_signal(44100, 5.0, color="pink", seed=1)
+res = resample_signal(x, 44100, 48000)   # 120 dB alias rejection
+print(res.up, res.down)                  # 160, 147
+print(res.n_taps, res.passband_edge_hz)  # designed FIR, 20947.5 Hz
+```
+
+The designed taps travel with the result (`filter_taps`), so the
+specification is *checkable*: the test suite measures the frequency response
+of the returned filter and asserts the passband deviation and stopband
+leakage against the design's own ripple bound (the design internally targets
+1 dB past the request, so the delivered filter meets the stated numbers
+rather than a Kaiser-formula approximation of them). A passband tone
+resampled through the default specification matches the analytic tone at the
+new rate within `10^(-120/20) = 10^-6`.
+
+Several estimators resample internally at fixed rates (the ECMA-418-2
+psychoacoustics at 48 kHz, STOI at 10 kHz); this function is the public,
+documented counterpart for preparing records outside those chains.
+
+## 3. Fractional delay
+
+`fractional_delay` shifts a record by any number of samples, including
+sub-sample amounts, by multiplying the spectrum with the phase ramp
+`e^(-j2πf·D/fs)`: every component is delayed by exactly `D` samples. Two
+boundary conventions cover the two use cases:
+
+- `mode="linear"` (default) zero-pads the record past the shift, so samples
+  leaving one end land in padding instead of wrapping around. Use it for
+  transients and impulse responses; it is bit-identical to the alignment
+  kernel inside [`align_impulse_responses`](https://jmrplens.github.io/phonometry/guides/correlation-delay/). An
+  integer delay reduces to an exact sample shift.
+- `mode="circular"` applies the ramp over the record itself and wraps. For
+  periodic records it is exact: a tone centered on a DFT bin delayed by
+  `D` samples equals the analytically delayed tone to machine precision,
+  and its phase changes by exactly `-2πf·D/fs` radians.
+
+```python
+import numpy as np
+from phonometry import fractional_delay
+
+y = fractional_delay(x, 0.37)                    # 0.37 samples later
+z = fractional_delay(x, -2.5, mode="circular")   # advance, wrapped
+```
+
+One subtlety worth knowing: a real record of even length cannot carry a
+fractionally delayed Nyquist-bin component (the inverse real FFT keeps only
+its real part). Any properly sampled signal is band-limited below Nyquist,
+so in practice the operation is exact; for synthetic corner cases, odd
+lengths avoid the bin entirely.
+
+## 4. Colored noise
+
+The deterministic colored-noise generators (`noise_signal`: white, pink,
+red, blue, violet with an exact power-law slope and bit-reproducible seeds)
+complete the toolbox; they are documented with their spectral verification
+in the [spectral analysis guide](https://jmrplens.github.io/phonometry/guides/spectral-analysis/#5-colored-noise-generators).
+
+## Where these tools are used
+
+The [window figures of merit](https://jmrplens.github.io/phonometry/guides/spectral-analysis/#6-choosing-the-window)
+quantify the taper every spectral estimate in the library rests on; the
+burst generator feeds ballistics and dynamic-response testing; and the
+resampler and fractional delay are the sample-rate half of
+[correlation and delay work](https://jmrplens.github.io/phonometry/guides/correlation-delay/), where sub-sample
+alignment is the difference between averaging impulse responses and
+smearing them.
+
+## References
+
+- International Electrotechnical Commission. (1985). *Sound system
+  equipment — Part 1: General* (IEC 60268-1:1985).
+  Annex A, Clause A2: tone bursts starting at the zero crossing of the tone
+  with an integral number of full periods (A2.1), repetitive burst trains
+  at a stated repetition rate (A2.2), and the Table AII burst durations the
+  sample counts are hand-checked against.
+- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
+  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
+  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
+  Section 10.2 (data preparation: sampling, aliasing and the anti-alias
+  filtering requirement the resampler states explicitly).
 
 ---
 
@@ -10771,6 +10978,13 @@ cycle and warn on use; they are removed in 4.0.
 | `fractional_octave_smoothing` | `function` | **Constant-power 1/n-octave smoothing of a spectrum.**<br>• `frequencies`, `values`<br>• `fraction`: the n of 1/n octave (Default: 3)<br>• `domain`: 'power'/'amplitude'/'db' (Default: 'power') | `s = fractional_octave_smoothing(f, psd, 3.0)`<br><br>• smoothed array, same domain; flat spectra unchanged |
 | `resolution_bias_error` | `function` | **First-order resolution bias at a resonance peak, εb ≈ −(Be/Br)²/3 (Eq. 8.141).**<br>• `resolution_bandwidth` Be [Hz]<br>• `half_power_bandwidth` Br [Hz] | `resolution_bias_error(1.0, 4.0)  # -1/48` |
 | `noise_signal` | `function` | **Colored Gaussian noise with an exact power-law PSD slope.**<br>• `fs`, `seconds` (Default: 1.0)<br>• `color`: 'white'/'pink'/'red'/'blue'/'violet' (0/−3.01/−6.02/+3.01/+6.02 dB/oct)<br>• `rms` (Default: 1.0)<br>• `seed`: bit-reproducible per seed | `pink = noise_signal(48000, 10.0, color='pink', seed=7)` |
+| `tone_burst` | `function` | **IEC 60268-1 tone burst (Clause A2): zero-crossing start, integral full periods.**<br>• `fs`, `frequency`, `cycles`<br>• `amplitude` (Default: 1.0)<br>• `repetitions` + `repetition_rate` [bursts/s]: repetitive train (Clause A2.2)<br>• `pre_silence`, `post_silence` [s] | `res = tone_burst(48000, 5000, 25, repetition_rate=10, repetitions=4)`<br><br>• `ToneBurstResult` |
+| `resample_signal` | `function` | **Polyphase resampling with an explicit anti-alias spec (Kaiser FIR designed here).**<br>• `x`, `fs`, `fs_new` (rational ratio, e.g. 160/147)<br>• `stopband_attenuation_db` (Default: 120)<br>• `transition_width`: fraction of the smaller Nyquist (Default: 0.05)<br>• `max_denominator` (Default: 1000) | `res = resample_signal(x, 44100, 48000)`<br><br>• `ResampledSignalResult` (signal + designed taps) |
+| `fractional_delay` | `function` | **Band-limited delay by a fractional number of samples (phase ramp).**<br>• `x`, `delay` [samples] (fractional, negative = advance)<br>• `mode`: 'linear' (zero-padded, for transients; Default) / 'circular' (periodic records, machine-exact on bin-centered tones) | `y = fractional_delay(x, 0.37)` |
+| `window_metrics` | `function` | **Figures of merit of any scipy window (Harris 1978).**<br>• `window`: name or (name, param) tuple<br>• `n`: length (Default: 1024), DFT-even sampling as in Welch | `m = window_metrics('hann', 2048)`<br><br>• `WindowMetricsResult` |
+| `ToneBurstResult` | `dataclass` | **Tone-burst record.**<br>• `signal`, `envelope` (rectangular gate), `fs`<br>• `burst_seconds`, `burst_samples`, `onset_sample`<br>• `repetition_rate`, `period_samples`, `duty_cycle`<br>• `.plot()`: waveform + gating envelope | `res.signal, res.duty_cycle` |
+| `ResampledSignalResult` | `dataclass` | **Resampled record with its anti-alias design.**<br>• `signal`, `fs`, `original_fs`, `up`, `down`<br>• `filter_taps`, `n_taps`, `passband_edge_hz`, `stopband_edge_hz`<br>• `stopband_attenuation_db`, `transition_width` | `res.signal, res.stopband_attenuation_db` |
+| `WindowMetricsResult` | `dataclass` | **Window figures of merit.**<br>• `enbw_bins`, `.enbw_hz(fs)`, `coherent_gain`<br>• `scalloping_loss_db`, `worst_case_processing_loss_db` (positive losses)<br>• `highest_sidelobe_db` (negative, re main lobe), `mainlobe_width_3db_bins`<br>• `.plot()`: window + spectrum with metrics marked | `m.enbw_bins  # 1.5 for Hann` |
 | `SpectralDensityResult` | `dataclass` | **Welch PSD with its statistical quality.**<br>• `frequencies`, `psd`, `ci_lower`/`ci_upper`, `confidence`<br>• `random_error` = 1/√nd, `n_segments`, `n_averages` (effective nd), `degrees_of_freedom`<br>• `resolution_bandwidth` Be [Hz]<br>• `.plot()`: PSD in dB with the CI band | `res.psd, res.n_averages, res.random_error` |
 | `CrossSpectralDensityResult` | `dataclass` | **Welch CSD with per-bin errors.**<br>• `csd` (complex), `magnitude`, `phase` (unwrapped), `coherence`<br>• `magnitude_random_error`, `phase_std` [rad]<br>• `.plot()`: magnitude, phase ±σ, coherence | `res.magnitude, res.phase_std` |
 | `CoherentOutputSpectrumResult` | `dataclass` | **SISO output decomposition.**<br>• `output_psd` Gyy, `coherent_psd` Gvv, `noise_psd` Gnn<br>• `snr`, `snr_db`, `random_error` (Eq. 9.73), `snr_random_error`, `coherence_bias`<br>• `.plot()`: spectra + SNR panel | `res.coherent_psd, res.snr_db` |

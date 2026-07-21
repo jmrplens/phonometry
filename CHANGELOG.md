@@ -203,6 +203,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Three conformance rows pin the tone calibration, the Parseval/COLA energy
   identity and the zoom demodulation chain; a new "Time-frequency analysis"
   guide (English and Spanish) documents both estimators.
+- `metrology.tone_burst` and `metrology.ToneBurstResult` generate the gated
+  sine burst of IEC 60268-1:1985 (Annex A, Clause A2): the tone starts at a
+  zero crossing and lasts an integral number of full periods, as a single
+  burst or as the repetitive train of Clause A2.2 with a stated repetition
+  rate. The result carries the rectangular gating envelope and the exact
+  sample bookkeeping (burst samples, onset, repetition period, duty cycle),
+  a `.plot()` of the waveform with its envelope (EN/ES), and the closed-form
+  gate energy `A^2 N/2` anchors the tests and a conformance row.
+- `metrology.resample_signal` and `metrology.ResampledSignalResult` perform
+  rational polyphase resampling behind an explicit anti-alias specification:
+  the lowpass FIR is designed inside the function by the Kaiser window
+  method from the stopband attenuation in dB (default 120) and the
+  transition-band fraction of the smaller Nyquist frequency (default 0.05),
+  and the designed taps travel with the result so the spec is verifiable
+  against the filter itself. The tests measure the returned filter and
+  assert the passband deviation and stopband leakage against the design's
+  own ripple bound `10^(-A/20)`.
+- `metrology.fractional_delay` delays a record by an arbitrary fractional
+  number of samples via a frequency-domain phase ramp, with a `linear`
+  boundary (zero-padded, bit-identical to the alignment kernel of
+  `align_impulse_responses`, now shared) or a `circular` one (exact to
+  machine precision on bin-centered tones: each component's phase changes
+  by exactly `-2*pi*f*D/fs`).
+- `metrology.window_metrics` and `metrology.WindowMetricsResult` compute the
+  Harris (1978) figures of merit of any scipy window sampled DFT-even as the
+  Welch estimators apply it: equivalent noise bandwidth (exactly 1, 3/2,
+  1987/1458 and 1523/882 for rectangular/Hann/Hamming/Blackman), coherent
+  gain, scalloping loss, worst-case processing loss, highest sidelobe level
+  and the -3 dB main-lobe width, with a `.plot()` of the window and its
+  spectrum (EN/ES) and an `enbw_hz()` bridge to the PSD estimator's
+  resolution bandwidth.
+- New "Test signals and sample-rate tools" guide (EN/ES) under Signals and
+  spectra, a "Choosing the window" section in the spectral-analysis guide
+  (EN/ES) with the window trade-off figure, and two documentation figures
+  (`tone_burst_train`, `window_functions_tradeoff`).
 - `electroacoustics.loudspeaker_characteristics` and
   `electroacoustics.LoudspeakerCharacteristics` gather the rated loudspeaker
   characteristics of IEC 60268-5:2003+A1:2007 around a measured on-axis

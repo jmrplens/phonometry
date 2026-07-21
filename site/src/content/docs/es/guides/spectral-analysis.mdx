@@ -1,6 +1,6 @@
 ---
 title: "Análisis espectral calibrado"
-description: "Los estimadores de Welch de Bendat y Piersol con su calidad estadística: densidad espectral de potencia y cruzada con el número efectivo de promedios, errores aleatorios normalizados e intervalos de confianza chi-cuadrado, el espectro de salida coherente con la relación señal-ruido espectral, suavizado en fracciones de octava con núcleo de potencia constante, y generadores de ruido de colores con pendiente exacta en ley de potencias."
+description: "Los estimadores de Welch de Bendat y Piersol con su calidad estadística: densidad espectral de potencia y cruzada con el número efectivo de promedios, errores aleatorios normalizados e intervalos de confianza chi-cuadrado, el espectro de salida coherente con la relación señal-ruido espectral, suavizado en fracciones de octava con núcleo de potencia constante, generadores de ruido de colores con pendiente exacta en ley de potencias, y las figuras de mérito de Harris para elegir la ventana."
 references:
   - type: book
     authors: ["Bendat, J. S.", "Piersol, A. G."]
@@ -20,6 +20,16 @@ references:
     pages: "70-73"
     doi: "10.1109/TAU.1967.1161901"
     note: "La fórmula de varianza con segmentos solapados tras el número efectivo de promedios (Bendat y Piersol, sección 11.5.2.2, ref. 11)."
+  - type: article
+    authors: ["Harris, F. J."]
+    year: 1978
+    title: "On the use of windows for harmonic analysis with the discrete Fourier transform"
+    journal: "Proceedings of the IEEE"
+    volume: 66
+    issue: 1
+    pages: "51-83"
+    doi: "10.1109/PROC.1978.10837"
+    note: "Las figuras de mérito de las ventanas (tabla 1): ancho de banda equivalente de ruido, ganancia coherente, pérdida de festoneado, pérdida de proceso en el peor caso, nivel del lóbulo lateral máximo y anchura del lóbulo principal, calculadas por window_metrics para cualquier ventana de scipy."
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
@@ -272,6 +282,90 @@ Medida sobre tres décadas (20 Hz – 20 kHz) con el estimador de la sección 1,
 la pendiente de regresión de cada color cae a unas milésimas de dB/octava
 del valor exacto: la batería de conformidad fija la pendiente rosa en
 -3,0116 frente al exacto -3,0103.
+
+## 6. Elegir la ventana
+
+Todos los estimadores de esta página aceptan cualquier ventana que conozca
+`scipy.signal.get_window`, pero la elección es un compromiso cuantificado,
+no una preferencia. `window_metrics` calcula las figuras de mérito que
+Harris (1978) tabuló, para cualquier ventana y longitud, muestreadas en modo
+periódico (DFT-even) exactamente como las aplican los estimadores de Welch:
+
+- **ENBW** (ancho de banda equivalente de ruido, en bins): cuánto más ancho
+  que un bin es el ancho de banda de análisis efectivo. Es el mismo número
+  que el resultado de la PSD informa como `resolution_bandwidth`
+  (`ENBW·fs/nperseg` en Hz), y entra directamente en el balance tono/ruido:
+  un suelo de ruido de banda ancha leído de un espectro con ventana queda
+  `10·lg(ENBW)` dB por encima de la densidad verdadera.
+- **Ganancia coherente**: la ganancia en continua `Σw/N` que escala un tono
+  centrado en un bin.
+- **Pérdida de festoneado**: la atenuación en el peor caso de un tono que
+  cae a medio camino entre dos bins (3,92 dB para la rectangular, 1,42 dB
+  para Hann).
+- **Pérdida de proceso en el peor caso**: el festoneado más `10·lg(ENBW)`,
+  la reducción de SNR de salida en el peor caso al detectar un tono en
+  ruido blanco.
+- **Lóbulo lateral máximo** y **anchura a -3 dB del lóbulo principal**:
+  suelo de fuga frente a resolución.
+
+```python
+from phonometry import window_metrics
+
+m = window_metrics("hann", 2048)
+print(m.enbw_bins)              # 1.5, exacto
+print(m.scalloping_loss_db)     # 1.42 dB
+print(m.highest_sidelobe_db)    # -31.5 dB
+m.plot()                        # ventana + espectro con las métricas
+```
+
+Las formas cerradas anclan los tests: el ENBW es exactamente 1 para la
+rectangular, 3/2 para Hann, 1987/1458 para Hamming y 1523/882 para Blackman
+(muestreo DFT-even), y la pérdida de festoneado de la rectangular es
+`20·lg(N·sin(π/2N))`, el núcleo de Dirichlet evaluado medio bin fuera del
+centro.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/window_functions_tradeoff_es.svg" alt="Espectros de las ventanas rectangular, Hann, Hamming y Blackman a lo largo de 16 bins de la DFT, mostrando el compromiso entre anchura del lóbulo principal y nivel de los lóbulos laterales, con el ancho de banda equivalente de ruido y el lóbulo lateral máximo de cada ventana en la leyenda" width="82%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import window_metrics
+
+n, oversample = 1024, 256
+fig, ax = plt.subplots(figsize=(10, 6.2))
+for name in ("boxcar", "hann", "hamming", "blackman"):
+    res = window_metrics(name, n)
+    spectrum = np.abs(np.fft.rfft(res.taps, n=n * oversample))
+    level = 20.0 * np.log10(spectrum / spectrum[0])
+    bins = np.arange(level.size) / oversample
+    shown = bins <= 16.0
+    ax.plot(bins[shown], level[shown],
+            label=(f"{name}: ENBW {res.enbw_bins:.2f} bins, "
+                   f"lóbulo lateral {res.highest_sidelobe_db:.1f} dB"))
+ax.set_xlim(0.0, 16.0)
+ax.set_ylim(-100.0, 5.0)
+ax.set_xlabel("Desplazamiento en frecuencia [bins de la DFT]")
+ax.set_ylabel("Nivel re lóbulo principal [dB]")
+ax.legend(loc="upper right")
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
+La ventana Hann por defecto de este módulo es la elección equilibrada: la
+caída rápida de los lóbulos laterales (-18 dB/octava) protege los espectros
+de ruido frente a la fuga, su ENBW de 1,5 solo cuesta 1,76 dB frente a la
+rectangular, y su correlación de solape al 50 % conserva casi toda la
+información de los segmentos en el número efectivo de promedios. Recurra a
+una ventana de lóbulos más bajos (Blackman, Kaiser con beta alta) cuando
+haya que encontrar un tono débil junto a uno fuerte, aceptando el lóbulo
+principal más ancho; y a la rectangular solo para registros que se
+autoenventanan (transitorios que decaen dentro del segmento) o síntesis
+centrada en bins.
 
 ## Relación con los estimadores H1/H2
 

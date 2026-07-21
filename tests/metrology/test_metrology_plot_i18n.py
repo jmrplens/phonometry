@@ -175,3 +175,25 @@ def test_filter_class_es() -> None:
     plt.close("all")
     with pytest.raises(ValueError):
         res.plot(language="xx")
+
+
+def test_tone_burst_es_and_bad_language() -> None:
+    res = ph.tone_burst(FS, 5000.0, 25, repetitions=2, repetition_rate=10.0)
+    ax = res.plot(language="es")
+    assert "Salva de tono (IEC 60268-1)" in ax.get_title()
+    assert ax.get_xlabel() == "Tiempo [s]"
+    assert "Envolvente de conmutación" in _labels(ax)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
+def test_window_metrics_es_and_bad_language() -> None:
+    res = ph.window_metrics("hann", 1024)
+    axes = res.plot(language="es")
+    assert "Métricas de la ventana (Harris 1978)" in _titles(axes)
+    assert "Pérdida de festoneado" in _labels(axes)
+    assert "bins de la DFT" in _labels(axes)
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")

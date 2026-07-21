@@ -260,16 +260,25 @@ from .metrology.phase import (
     minimum_phase,
     phase_decomposition,
 )
-from .metrology.signals import noise_signal
+from .metrology.signals import (
+    ResampledSignalResult,
+    ToneBurstResult,
+    fractional_delay,
+    noise_signal,
+    resample_signal,
+    tone_burst,
+)
 from .metrology.spectra import (
     CoherentOutputSpectrumResult,
     CrossSpectralDensityResult,
     SpectralDensityResult,
+    WindowMetricsResult,
     coherent_output_spectrum,
     cross_spectral_density,
     fractional_octave_smoothing,
     power_spectral_density,
     resolution_bias_error,
+    window_metrics,
 )
 from .metrology.time_frequency import (
     SpectrogramResult,
@@ -1325,7 +1334,11 @@ __all__ = [
     "coherent_output_spectrum",
     "fractional_octave_smoothing",
     "resolution_bias_error",
+    "window_metrics",
     "noise_signal",
+    "tone_burst",
+    "resample_signal",
+    "fractional_delay",
     "SpectralDensityResult",
     "CrossSpectralDensityResult",
     "CoherentOutputSpectrumResult",
@@ -1333,6 +1346,9 @@ __all__ = [
     "zoom_fft",
     "SpectrogramResult",
     "ZoomFFTResult",
+    "WindowMetricsResult",
+    "ToneBurstResult",
+    "ResampledSignalResult",
     "correlation",
     "correlation_random_error",
     "time_delay",

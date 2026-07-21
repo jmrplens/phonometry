@@ -37,6 +37,14 @@ maximum likelihood); impulse responses can be delayed and aligned with
 sub-sample precision; and the Hilbert transform yields the envelope with
 instantaneous phase and frequency.
 
+[Test signals and sample-rate tools](/phonometry/guides/test-signals/) is
+the toolbox the other two lean on: tone bursts with the exact gating of
+IEC 60268-1 (zero-crossing start, integral full periods, repetitive trains),
+polyphase resampling behind an explicit anti-alias specification whose
+designed filter travels with the result, and band-limited fractional delay
+with a linear or circular boundary, sharing its kernel with the sub-sample
+alignment of impulse responses.
+
 These estimators feed the rest of the library: transfer functions and
 distortion analysis build on the cross-spectral machinery, room impulse
 response work leans on delay estimation and alignment, and the
@@ -53,7 +61,12 @@ supply the error-analysis vocabulary the estimates are stated in.
   calibrated STFT spectrogram in absolute units (dB SPL for pascals) with
   the time-versus-frequency resolution trade-off, and the zoom FFT that
   resolves tones closer than a practical FFT bin.
+  spectrum and spectral SNR, 1/n-octave smoothing, exact-slope
+  colored-noise generators and the Harris window figures of merit.
 - [Correlation, time delay and envelope](/phonometry/guides/correlation-delay/):
   correlation estimates with their random errors, time-delay estimation by
   direct correlation, phase slope and GCC weightings, sub-sample
   impulse-response alignment, and the Hilbert envelope.
+- [Test signals and sample-rate tools](/phonometry/guides/test-signals/):
+  IEC 60268-1 tone bursts with exact gating, resampling with a stated
+  anti-alias specification, and band-limited fractional delay.

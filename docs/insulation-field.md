@@ -409,6 +409,80 @@ numeric fields are validated on construction by physical range.
 | `laboratory`, `operator`, `report_id`, `notes` | `str` | Footer: institute, operator signature line, report number and free-form remarks |
 | `requirement` | `float > 0` | Target single number; adds the verdict row (airborne passes at or above it, impact at or below it) |
 
+### ISO 16283 field test report (`.report()`)
+
+The per-band field results write the test report of ISO 16283-1:2014 /
+ISO 16283-2:2020 Clause 14 directly, laid out like the recommended results
+forms (Annex B / Annex C) and the accredited field reports built on them.
+`AirborneInsulationResult.report()` renders the standardized level difference
+*DnT* fiche (Figure B.1) or, with `quantity="r_prime"`, the apparent sound
+reduction index *R'* fiche (Figure B.2); `ImpactInsulationResult.report()`
+renders the standardized *L'nT* fiche (Figure C.1) or, with `quantity="l_n"`,
+the normalized *L'n* fiche (Figure C.2). Each fiche names the field standard
+in its basis line, evaluates the ISO 717-1 / ISO 717-2 single-number rating
+over the 16 core one-third-octave bands (100-3150 Hz), states the quantity to
+one decimal place both in tabular form and as a curve against the shifted
+reference curve (Clause 12), boxes the field rating (`DnT,w (C; Ctr)`,
+`R'w (C; Ctr)`, `L'nT,w (CI)` or `L'n,w (CI)`) and prints the mandatory
+statement that the evaluation is based on field measurement results obtained
+by an engineering method.
+
+`verbose=True` swaps the two-column table for the per-band measurement chain
+(the energy-average *L1* and *L2*, or *Li*, and the reverberation time *T*
+beside the reported quantity), the content accredited field reports annex; it
+needs a result built by `airborne_insulation()` / `impact_insulation()`, which
+retain those inputs on the result (`l1`, `l2`/`li`, `t2`, `t0`). Metadata, the
+requirement verdict (airborne passes at or above it, impact at or below it),
+`language="es"` and the `phonometry[report]` extra behave exactly as in the
+ISO 717 fiche above.
+
+```python
+import numpy as np
+from phonometry import building, ReportMetadata
+
+# Field airborne: source/receiving levels and T per one-third-octave band
+l1 = np.array([92.3, 93.1, 94.0, 94.4, 94.8, 95.0, 95.2, 95.4,
+               95.3, 95.1, 94.8, 94.4, 93.9, 93.3, 92.5, 91.6])
+l2 = l1 - np.array([38.2, 40.1, 42.6, 45.2, 47.8, 50.1, 52.3, 54.0,
+                    55.6, 57.1, 58.2, 59.0, 59.6, 60.1, 60.3, 59.8])
+t2 = np.array([0.62, 0.58, 0.55, 0.53, 0.52, 0.50, 0.49, 0.48,
+               0.47, 0.46, 0.45, 0.45, 0.44, 0.43, 0.43, 0.42])
+field = building.airborne_insulation(l1, l2, t2, area=12.5, volume=30.4)
+metadata = ReportMetadata(
+    specimen="Separating wall, 240 mm brick with independent lining",
+    client="Example client",
+    area=12.5, source_volume=32.1, receiving_volume=30.4,
+    test_room="Dwelling A living room to dwelling B living room",
+    test_date="2026-07-20",
+    laboratory="Phonometry Reference Laboratory",
+    report_id="PHN-2026-0143",
+    requirement=50.0,               # DnT,w >= 50 dB -> PASS/FAIL row
+)
+field.report("DnTw_field.pdf", metadata=metadata)      # DnT,w (C; Ctr)
+field.report("Rpw_field.pdf", quantity="r_prime",
+             metadata=metadata)                        # R'w (C; Ctr)
+field.report("DnTw_chain.pdf", metadata=metadata,
+             verbose=True)                             # f | L1 | L2 | T | DnT
+
+# Field impact: tapping-machine levels in the receiving room
+li = np.array([58.0, 60.5, 62.0, 63.5, 65.0, 66.0, 66.5, 66.0,
+               65.5, 65.0, 64.0, 62.0, 59.0, 56.0, 53.0, 50.0])
+imp = building.impact_insulation(li, t2, volume=30.4)
+imp.report("LnTw_field.pdf",
+           metadata=ReportMetadata(requirement=58.0))  # L'nT,w (CI)
+```
+
+Rendered examples of both field fiches, regenerated with `make reports`, are
+kept in the repository. Click either preview to open the PDF:
+
+[![Field airborne ISO 16283-1 example report: metadata header, one-third-octave DnT table beside the measured-versus-shifted-reference curve, boxed DnT,w (C; Ctr), the engineering-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_airborne_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_airborne_example.pdf)
+
+*Field airborne fiche (`AirborneInsulationResult.report`), DnT,w (C; Ctr).*
+
+[![Field impact ISO 16283-2 example report: the same field layout for the standardized impact level L'nT with the 500 Hz read-off, boxed L'nT,w (CI), the engineering-method statement and a FAIL verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_impact_example.png)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16283_impact_example.pdf)
+
+*Field impact fiche (`ImpactInsulationResult.report`), L'nT,w (CI).*
+
 ### Field façade insulation (ISO 16283-3)
 
 The same source/receiver logic reaches the building **façade**, but now the

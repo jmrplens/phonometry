@@ -27,12 +27,11 @@ intervals that stay honest when the model is non-linear or the inputs are far
 from Gaussian. The page shows both on the same models, including where they
 diverge and why.
 
-The same discipline extends into the frequency domain.
-[Calibrated spectral analysis](/phonometry/guides/spectral-analysis/) applies
-the Bendat & Piersol error analysis to Welch spectral estimates: every PSD
-carries its effective number of averages, its normalized random error and a
-chi-square confidence interval, and the coherent output spectrum splits a
-measured output into signal and noise with a spectral SNR.
+The same discipline extends into the frequency domain: the
+[Signals and spectra](/phonometry/guides/sections/signals-spectra/) pages
+apply the Bendat & Piersol error analysis to Welch spectral estimates, so
+every PSD carries its effective number of averages, its normalized random
+error and a chi-square confidence interval.
 
 The pages meet in practice: an uncertainty budget for an acoustic
 measurement almost always contains a calibration term, and several standards
@@ -47,7 +46,3 @@ budgets that are specialisations of the GUM machinery described here.
 - [Measurement uncertainty (GUM and Monte Carlo)](/phonometry/guides/gum-uncertainty/):
   the law of propagation of uncertainty and the Monte Carlo method, expanded
   uncertainty and coverage intervals.
-- [Calibrated spectral analysis](/phonometry/guides/spectral-analysis/):
-  Welch PSD/CSD with chi-square confidence intervals, the coherent output
-  spectrum and spectral SNR, 1/n-octave smoothing and exact-slope
-  colored-noise generators.

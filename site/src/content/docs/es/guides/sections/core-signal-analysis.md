@@ -1,6 +1,6 @@
 ---
 title: "Análisis de señal"
-description: "El núcleo de medición de phonometry: bancos de filtros de octava fraccional, ponderación frecuencial y temporal, niveles integrados y estadísticos, calibración física e incertidumbre de medida, y cómo esas piezas se encadenan en un sonómetro en código."
+description: "El núcleo de medición de phonometry: bancos de filtros de octava fraccional, ponderación frecuencial y temporal, niveles integrados y estadísticos, análisis espectral y de correlación calibrado, calibración física e incertidumbre de medida, y cómo esas piezas se encadenan en un sonómetro en código."
 ---
 
 Todo en phonometry empieza aquí. Esta sección cubre la cadena que convierte
@@ -13,11 +13,20 @@ funciones componibles, y todas las demás secciones de la documentación se
 apoyan en él: un modelo de sonoridad consume niveles de banda calibrados, un
 parámetro de sala parte de una respuesta al impulso filtrada, una valoración
 ambiental es un Leq ajustado.
+[Construye un sonómetro](/phonometry/es/guides/sound-level-meter/) monta esa
+cadena de principio a fin en una sola página ejecutable; es el mejor punto de
+partida si quieres ver el área entera en funcionamiento antes de abrir las
+guías de fondo.
 
-Dos preocupaciones transversales completan el núcleo. La **calibración**
-decide qué significan físicamente las muestras digitales: los resultados
-pueden referirse a un tono de calibrador medido o a una sensibilidad conocida
-(dB SPL), o quedarse en escala digital completa (dBFS). Y la **incertidumbre
+Alrededor de la cadena de niveles están las herramientas generales de
+análisis de señal: las **estimaciones espectrales calibradas** (PSD y
+densidad espectral cruzada de Welch con intervalos de confianza), la
+**correlación y la estimación de retardo** y la **envolvente de Hilbert**,
+todas expresadas con el análisis de error de Bendat y Piersol. Y dos
+preocupaciones transversales completan el núcleo. La **calibración** decide
+qué significan físicamente las muestras digitales: los resultados pueden
+referirse a un tono de calibrador medido o a una sensibilidad conocida
+(dB SPL), o quedarse en escala digital completa (dBFS). La **incertidumbre
 de medida** (la GUM y su suplemento de Monte Carlo) cualifica cualquier
 resultado calculado a partir de entradas inciertas, que es lo que hace
 defendible un número en un informe.
@@ -60,16 +69,11 @@ valoración.
   (IEC 61252), Lden y niveles de valoración (ISO 1996-1), y espectrogramas de
   octava.
 
-## [Calibración e incertidumbre](/phonometry/es/guides/sections/calibration-uncertainty/)
+## [Señales y espectros](/phonometry/es/guides/sections/signals-spectra/)
 
-Qué significan los números y cuánto fiarse de ellos.
+Análisis de grano fino en frecuencia y en tiempo, con cada estimación
+calibrada y acompañada de su calidad estadística.
 
-- [Calibración y dBFS](/phonometry/es/guides/calibration/): calibración SPL
-  física a partir de un tono de calibrador (IEC 60942) o de una sensibilidad
-  conocida, y el modo digital dBFS.
-- [Incertidumbre de medida (GUM y Monte Carlo)](/phonometry/es/guides/gum-uncertainty/):
-  la ley de propagación de la incertidumbre y el método de Monte Carlo de
-  ISO/IEC Guide 98-3, con incertidumbre expandida e intervalos de cobertura.
 - [Análisis espectral calibrado](/phonometry/es/guides/spectral-analysis/):
   los estimadores de Welch de Bendat y Piersol con su calidad estadística:
   PSD y densidad espectral cruzada con intervalos de confianza chi-cuadrado,
@@ -81,3 +85,14 @@ Qué significan los números y cuánto fiarse de ellos.
   del espectro cruzado y las ponderaciones GCC de Knapp y Carter, retardo
   submuestral y alineación de respuestas al impulso, y la envolvente de
   Hilbert.
+
+## [Calibración e incertidumbre](/phonometry/es/guides/sections/calibration-uncertainty/)
+
+Qué significan los números y cuánto fiarse de ellos.
+
+- [Calibración y dBFS](/phonometry/es/guides/calibration/): calibración SPL
+  física a partir de un tono de calibrador (IEC 60942) o de una sensibilidad
+  conocida, y el modo digital dBFS.
+- [Incertidumbre de medida (GUM y Monte Carlo)](/phonometry/es/guides/gum-uncertainty/):
+  la ley de propagación de la incertidumbre y el método de Monte Carlo de
+  ISO/IEC Guide 98-3, con incertidumbre expandida e intervalos de cobertura.

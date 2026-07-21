@@ -1,6 +1,6 @@
 ---
 title: "Core signal analysis"
-description: "The measurement core of phonometry: fractional octave filter banks, frequency and time weighting, integrated and statistical levels, physical calibration and measurement uncertainty, and how those pieces chain into a sound level meter in code."
+description: "The measurement core of phonometry: fractional octave filter banks, frequency and time weighting, integrated and statistical levels, calibrated spectral and correlation analysis, physical calibration and measurement uncertainty, and how those pieces chain into a sound level meter in code."
 ---
 
 Everything in phonometry starts here. This section covers the chain that turns
@@ -12,13 +12,20 @@ in effect, a sound level meter decomposed into composable functions, and every
 other section of the documentation builds on it: a loudness model consumes
 calibrated band levels, a room parameter starts from a filtered impulse
 response, an environmental rating is an adjusted Leq.
+[Build a sound level meter](/phonometry/guides/sound-level-meter/) assembles
+that chain end to end on a single runnable page; it is the best starting point
+if you want to see the whole area at work before opening the deep guides.
 
-Two transversal concerns complete the core. **Calibration** decides what the
-digital samples mean physically: results can be referenced to a measured
-calibrator tone or a known sensitivity (dB SPL), or stay in digital full scale
-(dBFS). And **measurement uncertainty** (the GUM and its Monte Carlo
-supplement) qualifies any result computed from uncertain inputs, which is what
-makes a number defensible in a report.
+Around the level chain sit the general signal-analysis tools:
+**calibrated spectral estimates** (Welch PSD and cross-spectral density with
+confidence intervals), **correlation and time-delay estimation** and the
+**Hilbert envelope**, all stated with the Bendat & Piersol error analysis.
+And two transversal concerns complete the core. **Calibration** decides what
+the digital samples mean physically: results can be referenced to a measured
+calibrator tone or a known sensitivity (dB SPL), or stay in digital full
+scale (dBFS). **Measurement uncertainty** (the GUM and its Monte Carlo
+supplement) qualifies any result computed from uncertain inputs, which is
+what makes a number defensible in a report.
 
 If you are new to the library, read
 [Filter Banks](/phonometry/guides/filter-banks/) first: it introduces the band
@@ -55,16 +62,11 @@ ballistics and the integrated, statistical and rating levels.
   LAeq, percentile levels L10/L50/L90, LCpeak and SEL, noise dose (IEC 61252),
   Lden and rating levels (ISO 1996-1), and octave spectrograms.
 
-## [Calibration and uncertainty](/phonometry/guides/sections/calibration-uncertainty/)
+## [Signals and spectra](/phonometry/guides/sections/signals-spectra/)
 
-What the numbers mean and how much to trust them.
+Fine-grained frequency- and time-domain analysis, every estimate calibrated
+and carrying its statistical quality.
 
-- [Calibration and dBFS](/phonometry/guides/calibration/): physical SPL
-  calibration from a calibrator tone (IEC 60942) or a known sensitivity, and
-  the digital dBFS mode.
-- [Measurement uncertainty (GUM and Monte Carlo)](/phonometry/guides/gum-uncertainty/):
-  the law of propagation of uncertainty and the Monte Carlo method of
-  ISO/IEC Guide 98-3, with expanded uncertainty and coverage intervals.
 - [Calibrated spectral analysis](/phonometry/guides/spectral-analysis/): the
   Bendat & Piersol Welch estimators with their statistical quality: PSD and
   cross-spectral density with chi-square confidence intervals, the coherent
@@ -75,3 +77,14 @@ What the numbers mean and how much to trust them.
   estimation by direct correlation, cross-spectrum phase slope and the
   Knapp & Carter GCC weightings, sub-sample impulse-response delay and
   alignment, and the Hilbert envelope.
+
+## [Calibration and uncertainty](/phonometry/guides/sections/calibration-uncertainty/)
+
+What the numbers mean and how much to trust them.
+
+- [Calibration and dBFS](/phonometry/guides/calibration/): physical SPL
+  calibration from a calibrator tone (IEC 60942) or a known sensitivity, and
+  the digital dBFS mode.
+- [Measurement uncertainty (GUM and Monte Carlo)](/phonometry/guides/gum-uncertainty/):
+  the law of propagation of uncertainty and the Monte Carlo method of
+  ISO/IEC Guide 98-3, with expanded uncertainty and coverage intervals.

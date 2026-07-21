@@ -34,9 +34,15 @@ _STRINGS: dict[str, str] = {
     "Programme loudness compliance": "Conformidad de sonoridad de programa",
     "Aircraft noise certification - EPNL result": "Certificación de ruido de aeronaves - resultado EPNL",
     "Filter class compliance": "Conformidad de clase de filtro",
+    "Field airborne sound insulation between rooms": "Aislamiento acústico a ruido aéreo entre recintos in situ",
+    "Field impact sound insulation of floors": "Aislamiento acústico a ruido de impactos de suelos in situ",
     # --- standard-basis line templates -----------------------------------
     "{standard} laboratory measurement of sound insulation. Rating per {part}:2020.": "{standard} medición en laboratorio del aislamiento acústico. Índice según {part}:2020.",
     "Sound insulation rating per {part}:2020.": "Índice de aislamiento acústico según {part}:2020.",
+    "Standardized level difference D<sub>nT</sub> measured in accordance with ISO 16283-1:2014 (field measurement). Rating per ISO 717-1:2020.": "Diferencia de niveles estandarizada D<sub>nT</sub> medida de acuerdo con la Norma ISO 16283-1:2014 (medición in situ). Índice según ISO 717-1:2020.",
+    "Apparent sound reduction index R&#8242; measured in accordance with ISO 16283-1:2014 (field measurement). Rating per ISO 717-1:2020.": "Índice de reducción acústica aparente R&#8242; medido de acuerdo con la Norma ISO 16283-1:2014 (medición in situ). Índice según ISO 717-1:2020.",
+    "Standardized impact sound pressure level L&#8242;<sub>nT</sub> measured in accordance with ISO 16283-2:2020 using the tapping machine. Rating per ISO 717-2:2020.": "Nivel de presión acústica de impactos estandarizado L&#8242;<sub>nT</sub> medido de acuerdo con la Norma ISO 16283-2:2020 con la máquina de impactos. Índice según ISO 717-2:2020.",
+    "Normalized impact sound pressure level L&#8242;<sub>n</sub> measured in accordance with ISO 16283-2:2020 using the tapping machine. Rating per ISO 717-2:2020.": "Nivel de presión acústica de impactos normalizado L&#8242;<sub>n</sub> medido de acuerdo con la Norma ISO 16283-2:2020 con la máquina de impactos. Índice según ISO 717-2:2020.",
     "{standard} laboratory measurement of sound absorption. Rating per ISO 11654:1997.": "{standard} medición en laboratorio de la absorción acústica. Índice según ISO 11654:1997.",
     "Sound absorption rating per ISO 11654:1997.": "Índice de absorción acústica según ISO 11654:1997.",
     "{standard} loudness. Rating per ISO 532-1:2017 (Zwicker method).": "{standard} sonoridad. Índice según ISO 532-1:2017 (método de Zwicker).",
@@ -124,6 +130,16 @@ _STRINGS: dict[str, str] = {
     # --- iso717 verdict ---------------------------------------------------
     "L<sub>n,w</sub> = {rating} dB, required &#8804; {req} dB": "L<sub>n,w</sub> = {rating} dB, exigido &#8804; {req} dB",
     "R<sub>w</sub> = {rating} dB, required &#8805; {req} dB": "R<sub>w</sub> = {rating} dB, exigido &#8805; {req} dB",
+    # --- iso16283 field fiches --------------------------------------------
+    "Per-band measurement chain": "Cadena de medición por bandas",
+    "Evaluation based on field measurement using results obtained by an engineering method.": "Evaluación basada en resultados de medidas in situ obtenidos mediante un método de ingeniería.",
+    "Evaluation based on field measurement results obtained by an engineering method.": "Evaluación basada en resultados de medidas in situ obtenidos mediante un método de ingeniería.",
+    "{sym} = {rating} dB, required &#8805; {req} dB": "{sym} = {rating} dB, exigido &#8805; {req} dB",
+    "{sym} = {rating} dB, required &#8804; {req} dB": "{sym} = {rating} dB, exigido &#8804; {req} dB",
+    "Standardized level difference $D_{nT}$ [dB]": "Diferencia de niveles estandarizada $D_{nT}$ [dB]",
+    "Apparent sound reduction index $R'$ [dB]": "Índice de reducción acústica aparente $R'$ [dB]",
+    "Standardized impact sound pressure level $L'_{nT}$ [dB]": "Nivel de presión acústica de impactos estandarizado $L'_{nT}$ [dB]",
+    "Normalized impact sound pressure level $L'_{n}$ [dB]": "Nivel de presión acústica de impactos normalizado $L'_{n}$ [dB]",
     # --- iso11654 statement / verdict ------------------------------------
     "Absorption class: {value}": "Clase de absorción: {value}",
     "Shape indicator: {value}": "Indicador de forma: {value}",

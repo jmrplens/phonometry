@@ -248,11 +248,24 @@ class AirborneInsulationResult:
     :ivar r_prime: Apparent sound reduction index ``R'`` per band, in dB
         (Clause 3.14, Formula (4)), or ``None`` when the partition area
         and receiving-room volume were not supplied.
+    :ivar l1: Energy-average source-room levels the quantities were formed
+        from, in dB (after any position averaging, Formula (9)). Defaults
+        to ``None`` for backward-compatible construction.
+    :ivar l2: Energy-average receiving-room levels, in dB. Defaults to
+        ``None``.
+    :ivar t2: Receiving-room reverberation time per band, in seconds.
+        Defaults to ``None``.
+    :ivar t0: Reference reverberation time ``T0`` used for ``DnT``, in
+        seconds. Defaults to ``None``.
     """
 
     d: np.ndarray
     dnt: np.ndarray
     r_prime: np.ndarray | None
+    l1: np.ndarray | None = None
+    l2: np.ndarray | None = None
+    t2: np.ndarray | None = None
+    t0: float | None = None
 
     def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-band insulation quantities (``DnT``, ``D``, ``R'``).
@@ -265,6 +278,56 @@ class AirborneInsulationResult:
 
         check_language(language)
         return plot_airborne_insulation(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        quantity: str = "dnt",
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 16283-1 field airborne sound-insulation report to a PDF.
+
+        Writes the one-page field test report of ISO 16283-1:2014 Clause 14
+        in the layout of the recommended Annex B form: the standard-basis
+        line, an optional metadata header block (client, construction, room
+        volumes, partition area ...), the one-third-octave table beside the
+        measured-versus-shifted-reference curve, the boxed field rating
+        ``DnT,w (C; Ctr)`` or ``R'w (C; Ctr)`` (evaluated per ISO 717-1 over
+        the 16 core bands), the mandatory field-method statement, an optional
+        verdict row and a footer with the identity block and disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param quantity: The reported field quantity: ``"dnt"`` (default, the
+            standardized level difference of Annex B Figure B.1) or
+            ``"r_prime"`` (the apparent sound reduction index of Figure B.2;
+            requires the result to carry ``r_prime``).
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`;
+            ``None`` produces a lightweight fiche (body, rating and
+            disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table shows the measurement chain
+            per band (energy-average ``L1`` and ``L2``, reverberation time
+            ``T`` and the quantity) instead of the two-column ``f | value``
+            form; it requires the result to carry ``l1``, ``l2`` and ``t2``
+            (populated by :func:`airborne_insulation`).
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` or ``quantity`` is unknown, the
+            selected quantity is not available, the result does not hold the
+            16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1
+            rating needs, or ``verbose=True`` without the per-band chain.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        return _render_iso16283(
+            self, path, quantity=quantity, metadata=metadata, engine=engine,
+            verbose=verbose, language=language,
+        )
 
 
 @dataclass(frozen=True)
@@ -367,10 +430,21 @@ class ImpactInsulationResult:
         ``L'n = Li + 10 lg(A/A0)`` per band, in dB (Clause 3.14,
         Formula (2)), or ``None`` when the receiving-room volume was not
         supplied.
+    :ivar li: Energy-average impact sound pressure levels the quantities
+        were formed from, in dB (after any position averaging,
+        Formula (10)). Defaults to ``None`` for backward-compatible
+        construction.
+    :ivar t2: Receiving-room reverberation time per band, in seconds.
+        Defaults to ``None``.
+    :ivar t0: Reference reverberation time ``T0`` used for ``L'nT``, in
+        seconds. Defaults to ``None``.
     """
 
     l_n_t: np.ndarray
     l_n: np.ndarray | None
+    li: np.ndarray | None = None
+    t2: np.ndarray | None = None
+    t0: float | None = None
 
     def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the per-band impact levels (``L'nT`` and, if present, ``L'n``).
@@ -383,6 +457,56 @@ class ImpactInsulationResult:
 
         check_language(language)
         return plot_impact_insulation(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        quantity: str = "l_n_t",
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 16283-2 field impact sound-insulation report to a PDF.
+
+        Writes the one-page field test report of ISO 16283-2:2020 Clause 14
+        in the layout of the recommended Annex C form: the standard-basis
+        line, an optional metadata header block, the one-third-octave table
+        beside the measured-versus-shifted-reference curve, the boxed field
+        rating ``L'nT,w (CI)`` or ``L'n,w (CI)`` (evaluated per ISO 717-2
+        over the 16 core bands), the mandatory field-method statement, an
+        optional verdict row and a footer with the identity block and
+        disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param quantity: The reported field quantity: ``"l_n_t"`` (default,
+            the standardized level of Annex C Figure C.1) or ``"l_n"`` (the
+            normalized level of Figure C.2; requires the result to carry
+            ``l_n``).
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`;
+            ``None`` produces a lightweight fiche (body, rating and
+            disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table shows the measurement chain
+            per band (energy-average ``Li``, reverberation time ``T`` and the
+            quantity) instead of the two-column ``f | value`` form; it
+            requires the result to carry ``li`` and ``t2`` (populated by
+            :func:`impact_insulation`).
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` or ``quantity`` is unknown, the
+            selected quantity is not available, the result does not hold the
+            16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-2
+            rating needs, or ``verbose=True`` without the per-band chain.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        return _render_iso16283(
+            self, path, quantity=quantity, metadata=metadata, engine=engine,
+            verbose=verbose, language=language,
+        )
 
 
 @dataclass(frozen=True)
@@ -552,6 +676,86 @@ def _render_iso717(
     )
 
 
+#: The field quantities each result kind can report, mapping the ``quantity``
+#: argument of ``report()`` to the attribute holding the per-band curve and
+#: the per-band chain columns ``verbose=True`` needs.
+_FIELD_QUANTITIES: dict[str, Tuple[Tuple[str, ...], Tuple[str, ...]]] = {
+    "AirborneInsulationResult": (("dnt", "r_prime"), ("l1", "l2", "t2")),
+    "ImpactInsulationResult": (("l_n_t", "l_n"), ("li", "t2")),
+}
+
+
+def _render_iso16283(
+    result: "AirborneInsulationResult | ImpactInsulationResult",
+    path: str,
+    *,
+    quantity: str,
+    metadata: "ReportMetadata | None",
+    engine: str,
+    verbose: bool,
+    language: str,
+) -> str:
+    """Validate the field-report request and delegate to the renderer.
+
+    Shared by :meth:`AirborneInsulationResult.report` and
+    :meth:`ImpactInsulationResult.report`: it rejects unknown engines and
+    quantities, requires the 16 core one-third-octave bands (100 Hz to
+    3150 Hz, ISO 16283-1/-2 Clause 5) so the ISO 717 rating is defined,
+    evaluates that rating, and calls the reportlab renderer (which raises a
+    clear :class:`ImportError` when reportlab is absent).
+    """
+    from .._i18n import check_language
+
+    check_language(language)
+    if engine != "reportlab":
+        raise ValueError(
+            f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+        )
+    kind = type(result).__name__
+    quantities, chain_attrs = _FIELD_QUANTITIES[kind]
+    if quantity not in quantities:
+        expected = " or ".join(repr(q) for q in quantities)
+        raise ValueError(
+            f"Unknown field quantity {quantity!r}; expected {expected}."
+        )
+    curve = getattr(result, quantity)
+    if curve is None:
+        raise ValueError(
+            f"The result carries no {quantity!r} curve; build it with the "
+            "'area'/'volume' arguments so the normalized quantity is "
+            "computed."
+        )
+    curve = np.asarray(curve, dtype=np.float64)
+    if curve.shape != (len(_FREQ_THIRD_OCTAVE),):
+        raise ValueError(
+            "The field report rates the 16 core one-third-octave bands "
+            f"(100 Hz to 3150 Hz, ISO 16283 Clause 5); got {curve.shape} "
+            "band values."
+        )
+    if verbose:
+        missing = [a for a in chain_attrs if getattr(result, a) is None]
+        if missing:
+            raise ValueError(
+                "verbose=True needs the per-band measurement chain "
+                f"({', '.join(chain_attrs)}); {', '.join(missing)} "
+                "missing. Build the result with airborne_insulation() / "
+                "impact_insulation() so they are populated."
+            )
+    if kind == "ImpactInsulationResult":
+        rating: WeightedRatingResult | ImpactRatingResult = (
+            weighted_impact_rating(curve)
+        )
+    else:
+        rating = weighted_rating(curve)
+
+    from .._report.iso16283 import render_iso16283_report
+
+    return render_iso16283_report(
+        result, rating, path, quantity=quantity, metadata=metadata,
+        verbose=verbose, language=language,
+    )
+
+
 def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:
     """Reduce levels to one decimal place (ISO 717-1 Clause 4.4, note 1).
 
@@ -688,7 +892,10 @@ def airborne_insulation(
         absorption = 0.16 * volume / t
         r_prime = d + 10.0 * np.log10(area / absorption)
 
-    return AirborneInsulationResult(d=d, dnt=dnt, r_prime=r_prime)
+    return AirborneInsulationResult(
+        d=d, dnt=dnt, r_prime=r_prime,
+        l1=l1_bands, l2=l2_bands, t2=t, t0=t0,
+    )
 
 
 def _resolve_band_set(
@@ -892,7 +1099,9 @@ def impact_insulation(
         absorption = 0.16 * volume / t
         l_n = li_bands + 10.0 * np.log10(absorption / _A0_IMPACT)
 
-    return ImpactInsulationResult(l_n_t=l_n_t, l_n=l_n)
+    return ImpactInsulationResult(
+        l_n_t=l_n_t, l_n=l_n, li=li_bands, t2=t, t0=t0,
+    )
 
 
 def facade_insulation(

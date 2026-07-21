@@ -41,8 +41,9 @@ import numpy as np
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
-    _LIGHT_HEX,
     _REPORTLAB_HINT,
+    band_table,
+    band_table_header_style,
     build_document,
     document_styles,
     fmt_num,
@@ -192,20 +193,10 @@ def _value_table(
 
     Called only after :func:`render_iso717_report` has imported reportlab.
     """
-    from reportlab.lib import colors
-    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import mm
-    from reportlab.platypus import Paragraph, Table, TableStyle
+    from reportlab.platypus import Paragraph
 
-    styles = getSampleStyleSheet()
-    accent = colors.HexColor(_ACCENT_HEX)
-    light = colors.HexColor(_LIGHT_HEX)
-    thin = colors.HexColor("#c9d4e0")
-
-    head_style = ParagraphStyle(
-        "iso717_thead", parent=styles["Normal"], fontSize=7.2,
-        textColor=colors.white, alignment=1, leading=8.5,
-    )
+    head_style = band_table_header_style()
 
     if verbose:
         header = [
@@ -247,36 +238,20 @@ def _value_table(
             rows.append([f"{int(round(fk))}", d1(m)])
 
     n_data = len(centers)
-    style_cmds: List[Any] = [
-        ("BACKGROUND", (0, 0), (-1, 0), accent),
-        ("FONTSIZE", (0, 1), (-1, -1), 8),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, n_data), [colors.white, light]),
-        ("LINEBELOW", (0, 0), (-1, 0), 0.6, accent),
-        ("TOPPADDING", (0, 0), (-1, -1), 2.6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2.6),
-        ("BOX", (0, 0), (-1, -1), 0.5, accent),
-    ]
-    # Thin rule after every third-octave triplet, grouping the table by octave
-    # exactly as the accredited reference report does.
-    for triplet_end in range(3, n_data, 3):
-        style_cmds.append(
-            ("LINEBELOW", (0, triplet_end), (-1, triplet_end), 0.4, thin)
-        )
+    extra_styles: List[Any] = []
     if verbose:
+        from reportlab.lib import colors
+
         rows.append(
             ["", "", t("sum", language), d1(float(deviations.sum()))]
         )
-        style_cmds += [
-            ("LINEABOVE", (0, -1), (-1, -1), 0.6, accent),
+        extra_styles = [
+            ("LINEABOVE", (0, -1), (-1, -1), 0.6, colors.HexColor(_ACCENT_HEX)),
             ("FONTNAME", (2, -1), (-1, -1), "Helvetica-Bold"),
             ("FONTSIZE", (0, -1), (-1, -1), 7.5),
         ]
 
-    table = Table(rows, colWidths=col_widths, repeatRows=1)
-    table.setStyle(TableStyle(style_cmds))
-    return table
+    return band_table(rows, col_widths, n_data, extra_styles)
 
 
 def _verdict(

@@ -206,6 +206,64 @@ def grid_table(pairs: List[Tuple[str, str]]) -> Any:
     return table
 
 
+def band_table_header_style() -> Any:
+    """The white-on-accent header-cell paragraph style of the band tables.
+
+    Shared by the one-third-octave value tables of the sound-insulation
+    fiches. Called only after the renderer has imported reportlab.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+
+    return ParagraphStyle(
+        "fiche_band_thead", parent=getSampleStyleSheet()["Normal"],
+        fontSize=7.2, textColor=colors.white, alignment=1, leading=8.5,
+    )
+
+
+def band_table(
+    rows: List[List[Any]],
+    col_widths: List[Any],
+    n_data: int,
+    extra_styles: List[Any] | None = None,
+) -> Any:
+    """Assemble a one-third-octave band table with the accredited styling.
+
+    Applies the shared look of the sound-insulation fiches: the accent header
+    row, zebra body rows, a box rule and a thin rule after every
+    third-octave triplet (grouping the table by octave exactly as the
+    accredited reference reports do). ``rows`` holds the header row followed
+    by ``n_data`` band rows (plus any trailing summary rows, styled through
+    ``extra_styles``). Called only after the renderer has imported reportlab.
+    """
+    from reportlab.lib import colors
+    from reportlab.platypus import Table, TableStyle
+
+    accent = colors.HexColor(_ACCENT_HEX)
+    light = colors.HexColor(_LIGHT_HEX)
+    thin = colors.HexColor("#c9d4e0")
+    style_cmds: List[Any] = [
+        ("BACKGROUND", (0, 0), (-1, 0), accent),
+        ("FONTSIZE", (0, 1), (-1, -1), 8),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ROWBACKGROUNDS", (0, 1), (-1, n_data), [colors.white, light]),
+        ("LINEBELOW", (0, 0), (-1, 0), 0.6, accent),
+        ("TOPPADDING", (0, 0), (-1, -1), 2.6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2.6),
+        ("BOX", (0, 0), (-1, -1), 0.5, accent),
+    ]
+    for triplet_end in range(3, n_data, 3):
+        style_cmds.append(
+            ("LINEBELOW", (0, triplet_end), (-1, triplet_end), 0.4, thin)
+        )
+    if extra_styles:
+        style_cmds += extra_styles
+    table = Table(rows, colWidths=col_widths, repeatRows=1)
+    table.setStyle(TableStyle(style_cmds))
+    return table
+
+
 def document_styles(accent: Any) -> Tuple[Any, Any, Any, Any]:
     """Return ``(stylesheet, title_style, basis_style, caption_style)``.
 

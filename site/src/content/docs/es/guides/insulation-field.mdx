@@ -493,6 +493,90 @@ rango físico.
 | `laboratory`, `operator`, `report_id`, `notes` | `str` | Pie: institución, línea de firma del operador, número de informe y observaciones libres |
 | `requirement` | `float > 0` | Valor objetivo de un solo número; añade la fila de veredicto (el aéreo cumple si es mayor o igual, el de impactos si es menor o igual) |
 
+### Informe de ensayo in situ de ISO 16283 (`.report()`)
+
+Los resultados de campo por bandas escriben directamente el informe de ensayo
+del apartado 14 de ISO 16283-1:2014 / ISO 16283-2:2020, con el formato de los
+formularios de resultados recomendados (Anexo B / Anexo C) y de los informes de
+campo acreditados construidos sobre ellos.
+`AirborneInsulationResult.report()` genera la ficha de la diferencia de niveles
+estandarizada $D_{nT}$ (Figura B.1) o, con `quantity="r_prime"`, la ficha del
+índice de reducción acústica aparente $R'$ (Figura B.2);
+`ImpactInsulationResult.report()` genera la ficha del nivel estandarizado
+$L'_{nT}$ (Figura C.1) o, con `quantity="l_n"`, la del nivel normalizado
+$L'_n$ (Figura C.2). Cada ficha nombra la norma de campo en su línea de base,
+evalúa el índice de un solo número de ISO 717-1 / ISO 717-2 sobre las 16 bandas
+de tercio de octava del rango básico (100–3150 Hz), expresa la magnitud con un
+decimal tanto en tabla como en curva frente a la curva de referencia desplazada
+(apartado 12), enmarca el índice de campo (`DnT,w (C; Ctr)`, `R'w (C; Ctr)`,
+`L'nT,w (CI)` o `L'n,w (CI)`) e imprime la declaración obligatoria de que la
+evaluación se basa en resultados de medidas in situ obtenidos mediante un
+método de ingeniería.
+
+`verbose=True` cambia la tabla de dos columnas por la cadena de medición por
+bandas (los niveles medios energéticos $L_1$ y $L_2$, o $L_i$, y el tiempo de
+reverberación $T$ junto a la magnitud informada), el contenido que anexan los
+informes de campo acreditados; necesita un resultado construido con
+`airborne_insulation()` / `impact_insulation()`, que conservan esas entradas en
+el resultado (`l1`, `l2`/`li`, `t2`, `t0`). Los metadatos, el veredicto frente
+al requisito (el aéreo cumple si es mayor o igual, el de impactos si es menor o
+igual), `language="es"` y el extra `phonometry[report]` se comportan
+exactamente igual que en la ficha de ISO 717 de arriba.
+
+```python
+import numpy as np
+from phonometry import building, ReportMetadata
+
+# Aéreo in situ: niveles emisor/receptor y T por banda de tercio de octava
+l1 = np.array([92.3, 93.1, 94.0, 94.4, 94.8, 95.0, 95.2, 95.4,
+               95.3, 95.1, 94.8, 94.4, 93.9, 93.3, 92.5, 91.6])
+l2 = l1 - np.array([38.2, 40.1, 42.6, 45.2, 47.8, 50.1, 52.3, 54.0,
+                    55.6, 57.1, 58.2, 59.0, 59.6, 60.1, 60.3, 59.8])
+t2 = np.array([0.62, 0.58, 0.55, 0.53, 0.52, 0.50, 0.49, 0.48,
+               0.47, 0.46, 0.45, 0.45, 0.44, 0.43, 0.43, 0.42])
+field = building.airborne_insulation(l1, l2, t2, area=12.5, volume=30.4)
+metadata = ReportMetadata(
+    specimen="Pared separadora, ladrillo de 240 mm con trasdosado independiente",
+    client="Cliente de ejemplo",
+    area=12.5, source_volume=32.1, receiving_volume=30.4,
+    test_room="Salón de la vivienda A hacia el salón de la vivienda B",
+    test_date="2026-07-20",
+    laboratory="Laboratorio de Referencia phonometry",
+    report_id="PHN-2026-0143",
+    requirement=50.0,               # DnT,w >= 50 dB -> fila CUMPLE/NO CUMPLE
+)
+field.report("DnTw_insitu.pdf", metadata=metadata,
+             language="es")                            # DnT,w (C; Ctr)
+field.report("Rpw_insitu.pdf", quantity="r_prime",
+             metadata=metadata, language="es")         # R'w (C; Ctr)
+field.report("DnTw_cadena.pdf", metadata=metadata,
+             verbose=True, language="es")              # f | L1 | L2 | T | DnT
+
+# Impactos in situ: niveles de la máquina de impactos en la sala receptora
+li = np.array([58.0, 60.5, 62.0, 63.5, 65.0, 66.0, 66.5, 66.0,
+               65.5, 65.0, 64.0, 62.0, 59.0, 56.0, 53.0, 50.0])
+imp = building.impact_insulation(li, t2, volume=30.4)
+imp.report("LnTw_insitu.pdf", language="es",
+           metadata=ReportMetadata(requirement=58.0))  # L'nT,w (CI)
+```
+
+Ambas fichas de ejemplo se regeneran con `make reports` y se conservan
+renderizadas en el repositorio; pulsa cualquier vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso16283_airborne_example"
+	title="Informe de ejemplo aéreo in situ ISO 16283-1 (PDF)"
+	description="Informe de ensayo de aislamiento a ruido aéreo in situ entre viviendas de una página: la cabecera de metadatos (cliente, descripción de la construcción, superficie del cerramiento, volúmenes de las salas, clima), la tabla de DnT en tercios de octava junto a la curva medida frente a la referencia desplazada, el índice de campo DnT,w (C; Ctr) en caja, la declaración del método de ingeniería y un veredicto CUMPLE frente al requisito de 50 dB."
+	caption="Ficha aérea in situ (AirborneInsulationResult.report), DnT,w (C; Ctr)."
+/>
+
+<ReportPreview
+	name="iso16283_impact_example"
+	title="Informe de ejemplo de impactos in situ ISO 16283-2 (PDF)"
+	description="Informe de ensayo de aislamiento a ruido de impactos in situ de un suelo con la máquina de impactos, de una página: la cabecera de metadatos, la tabla de L'nT en tercios de octava junto a la curva medida frente a la referencia desplazada con la lectura a 500 Hz, el índice de campo L'nT,w (CI) en caja, la declaración del método de ingeniería y un veredicto NO CUMPLE frente al requisito de 58 dB (un nivel de impactos más bajo es mejor)."
+	caption="Ficha de impactos in situ (ImpactInsulationResult.report), L'nT,w (CI)."
+/>
+
 ### Aislamiento a ruido aéreo de fachadas en campo (ISO 16283-3)
 
 La misma lógica fuente/receptor alcanza la **fachada** del edificio, pero ahora

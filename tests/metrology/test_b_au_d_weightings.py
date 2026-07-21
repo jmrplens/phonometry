@@ -308,8 +308,9 @@ def test_d_peak_sits_in_the_perceived_noisiness_region() -> None:
 def test_d_and_g_are_rejected_by_the_class_verifier() -> None:
     """No surviving tolerance tables: the class verifier refuses D (and G)."""
     for curve in ("D", "G"):
+        weighting = WeightingFilter(48000, curve)
         with pytest.raises(ValueError, match="'A', 'B', 'C', 'AU' or 'Z'"):
-            verify_weighting_class(WeightingFilter(48000, curve))
+            verify_weighting_class(weighting)
 
 
 # ---------------------------------------------------------------------------

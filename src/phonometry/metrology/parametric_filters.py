@@ -113,6 +113,26 @@ class WeightingFilter:
                 "Weighting curve must be 'A', 'B', 'C', 'D', 'G', 'AU' or 'Z'"
             )
 
+        z, p, k = self._analog_design()
+
+        design_fs = self.fs * self._oversample
+        zd, pd, kd = signal.bilinear_zpk(z, p, k, design_fs)
+        self.sos = signal.zpk2sos(zd, pd, kd)
+
+        # Initialize filter state for stateful block-wise processing.
+        # Uses lazy allocation: zi is sized on first filter() call so that
+        # the channel dimension matches the actual input shape.
+        if self.stateful:
+            self.zi = np.array([])
+            self._steady_ic = steady_ic
+
+    def _analog_design(self) -> Tuple[np.ndarray, np.ndarray, float]:
+        """Analog ZPK of the selected curve, normalised at its reference.
+
+        Also adjusts ``self._oversample`` for the curves whose action extends
+        beyond the default design target (G toward low sample rates, AU's U
+        roll-off toward 40 kHz).
+        """
         # Analog ZPK for the A and C weightings.
         # f1, f2, f3, f4 constants as per IEC 61672-1. ANSI S1.4-1983
         # Appendix C prints the same poles to fewer digits (f1 = 20.598997,
@@ -150,7 +170,7 @@ class WeightingFilter:
             # infrasound recordings, however, 315 Hz approaches Nyquist and
             # the warping grows quadratically; oversample the design toward
             # 48 kHz so the response stays within ~0.05 dB regardless of fs.
-            self._oversample = min(8, max(1, math.ceil(48000 / fs)))
+            self._oversample = min(8, max(1, math.ceil(48000 / self.fs)))
         elif self.curve in ("A", "AU"):
             f2 = 107.65265
             f3 = 737.86223
@@ -197,7 +217,7 @@ class WeightingFilter:
                     # fs = 48 kHz this designs at 288 kHz and keeps the
                     # 16 kHz deviation within about -0.7 dB of the IEC 61012
                     # Table 1 nominal (+/-3 dB tolerance there).
-                    self._oversample = min(8, max(1, math.ceil(288000 / fs)))
+                    self._oversample = min(8, max(1, math.ceil(288000 / self.fs)))
 
         elif self.curve == "B":
             # ANSI S1.4-1983 Appendix C (C2): the B weighting is the C
@@ -250,16 +270,7 @@ class WeightingFilter:
             h = k * np.prod(1j * w - z) / np.prod(1j * w - p)
             k = k / np.abs(h)
 
-        design_fs = self.fs * self._oversample
-        zd, pd, kd = signal.bilinear_zpk(z, p, k, design_fs)
-        self.sos = signal.zpk2sos(zd, pd, kd)
-
-        # Initialize filter state for stateful block-wise processing.
-        # Uses lazy allocation: zi is sized on first filter() call so that
-        # the channel dimension matches the actual input shape.
-        if self.stateful:
-            self.zi = np.array([])
-            self._steady_ic = steady_ic
+        return z, p, k
 
     def _init_filter_state(self, x_proc: np.ndarray) -> None:
         """Allocate or reallocate ``zi`` to match the input shape."""

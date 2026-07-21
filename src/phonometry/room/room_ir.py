@@ -523,7 +523,7 @@ def mls_impulse_response(
     if rec.size == 0 or seq.size == 0:
         raise ValueError("'recorded' and 'mls' must be non-empty.")
     period = seq.size
-    if rec.size == 0 or rec.size % period != 0:
+    if rec.size % period != 0:
         raise ValueError(
             "recorded length must be a positive multiple of the MLS length"
         )
@@ -973,7 +973,13 @@ def shaped_sweep_signal(
     sweep *= amplitude / float(np.max(np.abs(sweep)))
 
     # Crest factor over the constant-envelope interval [lead, lead+seconds].
+    # A tiny 'seconds' next to a dominant 'start_delay' can round the two
+    # edges onto the same sample, leaving an empty (or single-sample) core
+    # that would make the statistic blow up; fall back to the whole
+    # retained sweep in that degenerate case.
     core = sweep[int(round(lead * fs_v)):int(round((lead + seconds) * fs_v))]
+    if core.size < 2:
+        core = sweep
     rms = float(np.sqrt(np.mean(core ** 2)))
     crest_db = 20.0 * np.log10(float(np.max(np.abs(core))) / rms)
 

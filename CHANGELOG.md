@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   matches the Welch estimators exactly.
 
 ### Fixed
+- `shaped_sweep_signal()` no longer returns a NaN or infinite crest factor when
+- The shaped-sweep spectrum plot no longer crashes when the Welch grid, resolved
+- The `regularized_inverse_filter()` result documents `max_gain_db` as the
 
 - The documentation figures now render every text run in the viewer's native
   sans-serif font: I normalise all `font-family` declarations in the generated

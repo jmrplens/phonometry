@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- ISO 9612:2009 occupational noise-exposure measurement report via
 - Parametric-EQ biquads per the RBJ Audio EQ Cookbook (W3C Working Group
 - System-measurement front ends for the transfer-function toolbox:
 

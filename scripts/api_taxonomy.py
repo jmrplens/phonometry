@@ -269,6 +269,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         label_es="Análisis espectral",
         modules=(
             "phonometry.metrology.spectra",
+            "phonometry.metrology.time_frequency",
             "phonometry.metrology.signals",
             "phonometry.metrology.phase",
         ),

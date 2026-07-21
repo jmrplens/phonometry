@@ -21,6 +21,13 @@ noise, with a spectral signal-to-noise ratio; fractional-octave smoothing
 bridges back to the banded world; and the colored-noise generators synthesize
 white, pink, red, blue and violet test signals with an exact power-law slope.
 
+[Time-frequency analysis](/phonometry/guides/time-frequency/) is the view in
+between: the calibrated STFT spectrogram shows what happens *when* - a
+passing siren, an impact, a run-up - with every cell reading an absolute
+level in the same scaling as the Welch estimators, and the zoom FFT computes
+the spectrum of a narrow band on an arbitrarily fine grid to separate tones
+closer than a practical FFT bin.
+
 [Correlation, time delay and envelope](/phonometry/guides/correlation-delay/)
 is the time-domain half. Auto- and cross-correlation come with the
 Bendat & Piersol normalizations and random errors; time-delay estimation
@@ -42,6 +49,10 @@ supply the error-analysis vocabulary the estimates are stated in.
   Welch PSD/CSD with chi-square confidence intervals, the coherent output
   spectrum and spectral SNR, 1/n-octave smoothing and exact-slope
   colored-noise generators.
+- [Time-frequency analysis](/phonometry/guides/time-frequency/): the
+  calibrated STFT spectrogram in absolute units (dB SPL for pascals) with
+  the time-versus-frequency resolution trade-off, and the zoom FFT that
+  resolves tones closer than a practical FFT bin.
 - [Correlation, time delay and envelope](/phonometry/guides/correlation-delay/):
   correlation estimates with their random errors, time-delay estimation by
   direct correlation, phase slope and GCC weightings, sub-sample

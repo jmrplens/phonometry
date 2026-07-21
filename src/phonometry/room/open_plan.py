@@ -149,8 +149,10 @@ class OpenPlanResult:
             ``"es"`` (Spanish, with a comma decimal separator).
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
-        :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``).
+        :raises ImportError: If reportlab or, for the embedded spatial-decay
+            chart, matplotlib is not installed. The fiche embeds the result's
+            own plot whenever the regression is defined, so both are required
+            (``pip install "phonometry[report,plot]"``).
         """
         from .._i18n import check_language
 

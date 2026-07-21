@@ -718,10 +718,11 @@ formato de un informe de medición de privacidad acústica en oficinas diáfanas
 la línea de norma base, un bloque de cabecera de metadatos opcional, una tabla
 compacta de las cuatro magnitudes de número único del apartado 4 ($D_{2,S}$,
 $L_{p,A,S,4m}$, la distancia de distracción $r_D$ y la distancia de privacidad
-$r_P$) junto a la propia gráfica de decaimiento espacial del resultado
-(`.plot()`, la regresión del apartado 6.2 en el eje logarítmico de distancia
-con la lectura a 4 m y los cruces $r_D$ / $r_P$ marcados, la curva al estilo de
-la Figura 3), el $D_{2,S}$ enmarcado con las demás magnitudes al lado, y un pie
+$r_P$) apilada sobre la gráfica de decaimiento espacial a todo el ancho del
+resultado (`.plot()`, la regresión del apartado 6.2 en el eje logarítmico de
+distancia con la lectura a 4 m y los cruces $r_D$ / $r_P$ marcados, la curva al
+estilo de la Figura 3), el $D_{2,S}$ enmarcado con las demás magnitudes al lado,
+y un pie
 con el descargo fijo. La ISO 3382-3 **caracteriza** un espacio en lugar de
 definir un apto/no apto intrínseco, por lo que la fila de veredicto aparece solo
 cuando se suministra una tasa de decaimiento espacial objetivo a través del
@@ -737,9 +738,10 @@ rellenan la cabecera, junto con `client`, `test_room` (la oficina o zona),
 `specimen` (la descripción y el estado de amueblamiento), `instrumentation`,
 `temperature`, `relative_humidity`, `pressure`, `measurement_standard`,
 `test_date`, `laboratory`, `operator`, `report_id` y `notes`. Al pasar
-`metadata=None` se obtiene una ficha de caracterización simple. El renderizado
-necesita reportlab (`pip install phonometry[report]`); solo se admite
-`engine="reportlab"`. La ficha se renderiza en inglés por defecto; pasa
+`metadata=None` se obtiene una ficha de caracterización simple. La ficha
+incrusta la gráfica de decaimiento espacial, por lo que el renderizado necesita
+tanto reportlab como matplotlib (`pip install "phonometry[report,plot]"`); solo
+se admite `engine="reportlab"`. La ficha se renderiza en inglés por defecto; pasa
 `language="es"` para una ficha en español (cadenas fijas traducidas y separador
 decimal de coma).
 

@@ -133,16 +133,18 @@ def test_report_bare_without_metadata(tmp_path) -> None:
 
 def test_unknown_engine_rejected(tmp_path) -> None:
     """An unknown rendering engine raises ``ValueError``."""
+    res = _result()
     out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match="engine"):
-        _result().report(out, engine="weasyprint")
+        res.report(out, engine="weasyprint")
 
 
 def test_unknown_language_rejected(tmp_path) -> None:
     """An unknown fiche language raises ``ValueError``."""
+    res = _result()
     out = str(tmp_path / "bad.pdf")
     with pytest.raises(ValueError, match="language"):
-        _result().report(out, language="xx")
+        res.report(out, language="xx")
 
 
 # --------------------------------------------------------------------------

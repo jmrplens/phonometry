@@ -157,4 +157,4 @@ above it).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab or, for the embedded spatial-decay chart, matplotlib is not installed. The fiche embeds the result's own plot whenever the regression is defined, so both are required (`pip install "phonometry[report,plot]"`). |

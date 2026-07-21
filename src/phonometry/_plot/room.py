@@ -819,7 +819,13 @@ def plot_shaped_sweep(
     tiny = np.finfo(np.float64).tiny
     band_w = (freqs_w >= f1) & (freqs_w <= f2)
     welch_db = 10.0 * np.log10(np.maximum(psd, tiny))
-    welch_db -= float(np.max(welch_db[band_w]))
+    # The Welch grid is resolved independently of the synthesis grid, so a
+    # narrow band on a short signal can leave no Welch bin inside [f1, f2]
+    # (unlike band_g, which synthesis validates). Fall back to the overall
+    # positive-frequency maximum so the reference stays finite and the plot
+    # still renders.
+    ref_w = welch_db[band_w] if np.any(band_w) else welch_db[freqs_w > 0.0]
+    welch_db -= float(np.max(ref_w))
     mag = np.asarray(result.magnitude, dtype=np.float64)
     grid = np.asarray(result.frequencies, dtype=np.float64)
     band_g = (grid >= f1) & (grid <= f2)

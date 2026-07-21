@@ -150,8 +150,9 @@ def test_fs_is_taken_from_a_result_object() -> None:
     res = regularized_inverse_filter(ir, f_range=(200.0, 10000.0))
     assert isinstance(res, InverseFilterResult)
     assert res.fs == FS
+    bare = np.asarray(ir)
     with pytest.raises(ValueError, match="fs"):
-        regularized_inverse_filter(np.asarray(ir), f_range=(200.0, 10000.0))
+        regularized_inverse_filter(bare, f_range=(200.0, 10000.0))
 
 
 # --------------------------------------------------------------------------
@@ -181,22 +182,20 @@ def test_rejects_bad_inputs() -> None:
         regularized_inverse_filter(
             h, FS, f_range=(200.0, 4000.0), delay=-1
         )
+    two_dim = np.zeros((2, 8))
     with pytest.raises(ValueError, match="one-dimensional"):
-        regularized_inverse_filter(
-            np.zeros((2, 8)), FS, f_range=(200.0, 4000.0)
-        )
+        regularized_inverse_filter(two_dim, FS, f_range=(200.0, 4000.0))
+    with_nan = np.array([1.0, np.nan])
     with pytest.raises(ValueError, match="finite"):
-        regularized_inverse_filter(
-            np.array([1.0, np.nan]), FS, f_range=(200.0, 4000.0)
-        )
+        regularized_inverse_filter(with_nan, FS, f_range=(200.0, 4000.0))
+    all_zero = np.zeros(64)
     with pytest.raises(ValueError, match="zero"):
-        regularized_inverse_filter(
-            np.zeros(64), FS, f_range=(200.0, 4000.0)
-        )
+        regularized_inverse_filter(all_zero, FS, f_range=(200.0, 4000.0))
 
 
 def test_apply_rejects_non_1d() -> None:
     h = _biquad_ir()
     res = regularized_inverse_filter(h, FS, f_range=(500.0, 8000.0))
+    two_dim = np.zeros((2, 4))
     with pytest.raises(ValueError, match="one-dimensional"):
-        res.apply(np.zeros((2, 4)))
+        res.apply(two_dim)

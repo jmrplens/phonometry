@@ -130,6 +130,16 @@ def test_crest_factor_stays_near_the_swept_sine_ideal() -> None:
         assert 3.0 < res.crest_factor_db < 4.5
 
 
+def test_crest_factor_is_finite_when_the_core_window_collapses() -> None:
+    # A tiny 'seconds' next to a dominant 'start_delay' rounds the two edges
+    # of the constant-envelope window onto the same sample, leaving an empty
+    # core slice; the crest factor must still come out finite (the statistic
+    # falls back to the whole retained sweep) rather than NaN/inf.
+    res = shaped_sweep_signal(FS, 50.0, 5000.0, 1e-6, start_delay=1.0)
+    assert np.isfinite(res.crest_factor_db)
+    assert res.crest_factor_db > 0.0
+
+
 def test_signal_length_amplitude_and_fades() -> None:
     res = shaped_sweep_signal(
         FS, 100.0, 10000.0, 1.0, amplitude=0.5, start_delay=0.1
@@ -183,21 +193,15 @@ def test_rejects_bad_inputs() -> None:
         shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, start_delay=0.0)
     with pytest.raises(ValueError, match="unknown named target"):
         shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, target="blue")
+    mismatched = (np.array([100.0, 200.0]), np.array([0.0]))
     with pytest.raises(ValueError, match="equal-length"):
-        shaped_sweep_signal(
-            FS, 50.0, 5000.0, 1.0,
-            target=(np.array([100.0, 200.0]), np.array([0.0])),
-        )
+        shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, target=mismatched)
+    decreasing = (np.array([200.0, 100.0]), np.array([0.0, 0.0]))
     with pytest.raises(ValueError, match="increasing"):
-        shaped_sweep_signal(
-            FS, 50.0, 5000.0, 1.0,
-            target=(np.array([200.0, 100.0]), np.array([0.0, 0.0])),
-        )
+        shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, target=decreasing)
+    non_finite = (np.array([100.0, 200.0]), np.array([0.0, np.inf]))
     with pytest.raises(ValueError, match="finite"):
-        shaped_sweep_signal(
-            FS, 50.0, 5000.0, 1.0,
-            target=(np.array([100.0, 200.0]), np.array([0.0, np.inf])),
-        )
+        shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, target=non_finite)
 
 
 def test_result_behaves_like_array() -> None:

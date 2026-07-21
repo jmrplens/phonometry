@@ -437,10 +437,12 @@ def test_rejects_unknown_type_and_bad_frequencies() -> None:
         ph.EQSection("bell", 1000.0)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="positive"):
         ph.EQSection("peaking", 0.0)
+    at_nyquist = ph.EQSection("peaking", FS / 2, gain_db=3.0)
     with pytest.raises(ValueError, match="Nyquist"):
-        ph.ParametricEQ(FS, ph.EQSection("peaking", FS / 2, gain_db=3.0))
+        ph.ParametricEQ(FS, at_nyquist)
+    section = ph.EQSection("peaking", 1000.0, gain_db=3.0)
     with pytest.raises(ValueError, match="positive"):
-        ph.ParametricEQ(0, ph.EQSection("peaking", 1000.0, gain_db=3.0))
+        ph.ParametricEQ(0, section)
 
 
 def test_rejects_conflicting_or_misplaced_parameters() -> None:

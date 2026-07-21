@@ -76,10 +76,10 @@ class InverseFilterResult:
     :ivar fs: Sample rate, in Hz.
     :ivar flatness_db: Largest deviation of the equalized magnitude
         ``20*log10|H*H_inv|`` from 0 dB inside ``[f1, f2]``.
-    :ivar max_gain_db: Largest filter gain ``20*log10|H_inv|`` *outside*
-        the transition-padded band -- the boost the regularization allowed
-        where the measurement carries no signal. Analytically at most
-        ``-20*log10(2*sqrt(epsilon_outside))``.
+    :ivar max_gain_db: Largest filter gain *outside* the transition-padded
+        band, peak-normalized as ``20*log10(max|H_inv| * peak_h)`` where
+        ``peak_h`` is the peak of ``|H|`` -- the achieved out-of-band boost
+        the regularization allowed where the measurement carries no signal.
     """
 
     inverse: np.ndarray
@@ -127,7 +127,7 @@ class InverseFilterResult:
 
     def plot(
         self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | np.ndarray":
+    ) -> "Axes":
         """Plot the measured, inverse and equalized magnitudes.
 
         One panel: ``|H|``, ``|H_inv|`` and the equalized product

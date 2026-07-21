@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **391/391 conformance checks pass** across 49 domains and 253 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **395/395 conformance checks pass** across 49 domains and 257 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -508,7 +508,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Calibrated spectral analysis (Bendat &amp; Piersol)</b>: 100% (8/8)</summary>
+<summary>&#9989; <b>Calibrated spectral analysis (Bendat &amp; Piersol)</b>: 100% (12/12)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -520,6 +520,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60268-1:1985 Clause A2.1 / Table AII | 5 ms burst of 5 kHz tone at 48 kHz: gate RMS = A/sqrt(2) (integral periods) | 0.707107 (+/-0) | 0.707107 | 0 | &#9989; |
 | Harris 1978 closed form (DFT-even Hann) | Hann window ENBW = n*sum(w^2)/sum(w)^2 = 3/2 exactly | 1.5 (+/-0) | 1.5 | 0 | &#9989; |
 | Constant-power 1/n-octave kernel (closed form) | 1/3-octave smoothed line level = P*df/(f0*(2^(1/6)-2^(-1/6))) | 0.021592 (+/-1e-07%) | 0.021592 | 0 | &#9989; |
+| Percival & Walden 1993, Table 382 | Slepian taper concentration lambda_14(31, 8/31), quadruple-precision table | 0.92943822082 (+/-0.000000000001) | 0.92943822082 | 0 | &#9989; |
+| Percival & Walden 1993, Section 7.2 / Eq. (333) | Multitaper white-noise density = sigma^2/(fs/2), NW=4, K=7 tapers | 0.000977 (+/-3%) | 0.000963 | 0 | &#9989; |
+| Percival & Walden 1993, Eq. (369a) tone calibration | Multitaper 'spectrum' scaling reads a sinusoid peak at A^2/2 | 4.5 (+/-0.01%) | 4.500003 | 0 | &#9989; |
+| Percival & Walden 1993, Eq. (370b) | Adaptive multitaper dof -> 2K on white noise (weights -> uniform) | 14 (+/-2%) | 13.9847 | -0.015 | &#9989; |
 
 </details>
 

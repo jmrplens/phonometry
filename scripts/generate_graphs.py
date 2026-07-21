@@ -344,6 +344,15 @@ _ES_EXACT = {
         r"$L_k$ real de $k_{2,1}=k+j\omega c$",
     r"indirect method $-(2\pi f)^2 m_2 T$":
         r"método indirecto $-(2\pi f)^2 m_2 T$",
+    # rigid_mass_calibration figure (ISO 7626-2, 7.5.2)
+    "ISO 7626-2 Rigid-Mass Calibration Check":
+        "Verificación de calibración con masa rígida ISO 7626-2",
+    "Accelerance $|A|$ [1/kg]": "Accelerancia $|A|$ [1/kg]",
+    "Deviation [%]": "Desviación [%]",
+    r"expected $|A| = 1/m$": r"esperado $|A| = 1/m$",
+    r"$\pm$5 % tolerance band": r"banda de tolerancia $\pm$5 %",
+    "within tolerance": "dentro de tolerancia",
+    "out of tolerance": "fuera de tolerancia",
     # vibration_sound_power figure (ISO/TS 7849)
     "ISO/TS 7849 Sound Power from Surface Vibration":
         "Potencia acústica desde vibración superficial ISO/TS 7849",
@@ -6393,6 +6402,79 @@ def generate_transfer_stiffness(output_dir: str) -> None:
     plt.close()
 
 
+def generate_rigid_mass_calibration(output_dir: str) -> None:
+    """ISO 7626-2 (7.5.2) operational rigid-mass calibration check."""
+    print("Generating rigid_mass_calibration...")
+    from phonometry import rigid_mass_calibration_check
+
+    # A 10 kg calibration block: the accelerance must be a flat |A| = 1/m over
+    # frequency. The measured chain has a mild ripple and drifts above the
+    # +/-5 % band towards a few kHz (a transducer/attachment-compliance error,
+    # exactly what the check is meant to catch).
+    m = 10.0
+    freq = np.logspace(np.log10(20.0), np.log10(5000.0), 400)
+    expected = 1.0 / m
+    ripple = 0.015 * np.sin(2.0 * np.pi * np.log10(freq))
+    drift = 0.05 * (freq / 2500.0) ** 2
+    measured = expected * (1.0 + ripple + drift)
+    res = rigid_mass_calibration_check(measured, freq, mass=m)
+    within = res.within_tolerance
+    tol = res.tolerance
+
+    fig, (ax_top, ax_bot) = plt.subplots(
+        2, 1, sharex=True, figsize=(10, 7.0),
+        gridspec_kw={"height_ratios": [1.5, 1.0]},
+    )
+    # Upper panel: measured accelerance against the rigid-mass line + band.
+    ax_top.fill_between(freq, res.expected * (1.0 - tol), res.expected * (1.0 + tol),
+                        color=COLOR_SECONDARY, alpha=0.15,
+                        label=r"$\pm$5 % tolerance band")
+    ax_top.semilogx(freq, res.expected, color=COLOR_SECONDARY, linestyle="--",
+                    linewidth=1.6, label=r"expected $|A| = 1/m$")
+    ax_top.semilogx(freq, res.measured, color=COLOR_PRIMARY, linewidth=2.0,
+                    label="within tolerance")
+    ax_top.semilogx(freq[~within], res.measured[~within], linestyle="none",
+                    marker="o", markersize=4, color=COLOR_SECONDARY,
+                    label="out of tolerance")
+    ax_top.set_ylabel("Accelerance $|A|$ [1/kg]")
+    ax_top.set_title("ISO 7626-2 Rigid-Mass Calibration Check",
+                     fontweight="bold", pad=12)
+    ax_top.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_top.legend(loc="upper left", fontsize=9)
+
+    # Lower panel: the relative deviation against the same +/-5 % band, where
+    # the few-percent tolerance is actually readable.
+    ax_bot.axhspan(-100.0 * tol, 100.0 * tol, color=COLOR_SECONDARY, alpha=0.15)
+    ax_bot.axhline(0.0, color=COLOR_GRID, linestyle=":", linewidth=1.0)
+    ax_bot.semilogx(freq, 100.0 * res.deviation, color=COLOR_PRIMARY,
+                    linewidth=2.0)
+    ax_bot.semilogx(freq[~within], 100.0 * res.deviation[~within],
+                    linestyle="none", marker="o", markersize=4,
+                    color=COLOR_SECONDARY)
+    ax_bot.set_xlabel(LABEL_FREQ_HZ)
+    ax_bot.set_ylabel("Deviation [%]")
+    ax_bot.set_xlim(freq[0], freq[-1])
+    ax_bot.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+
+    format_frequency_axis(ax_top, float(freq[0]), float(freq[-1]))
+    format_frequency_axis(ax_bot, float(freq[0]), float(freq[-1]))
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "calibration block m = 10 kg",
+        "|A| = 1/m = 0.100 1/kg  (7.5.2)",
+        "criterion: agree within +/- 5 %",
+        "high-f drift -> attachment error",
+    ]
+    ax_top.text(0.985, 0.05, "\n".join(info), transform=ax_top.transAxes,
+                va="bottom", ha="right", fontsize=10, color=COLOR_FG,
+                bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                      "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "rigid_mass_calibration.svg")
+    plt.close()
+
+
 def generate_vibration_sound_power(output_dir: str) -> None:
     """ISO/TS 7849 sound power from surface vibration: upper limit vs engineering."""
     print("Generating vibration_sound_power...")
@@ -8597,6 +8679,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_mechanical_mobility,
     generate_junction_transmission,
     generate_transfer_stiffness,
+    generate_rigid_mass_calibration,
     generate_vibration_sound_power,
     generate_structure_borne_power,
     generate_installed_structure_borne,

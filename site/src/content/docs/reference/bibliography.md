@@ -51,6 +51,19 @@ list grows as guides gain their References sections.
   Free companion treatment of digital-filter design and analysis, a good next
   step after the filter-bank guides.
   Cited by [Filter Banks](/phonometry/guides/filter-banks/).
+- Thomson, D. J. (1982). Spectrum estimation and harmonic analysis.
+  *Proceedings of the IEEE*, 70(9), 1055-1096.
+  [doi:10.1109/PROC.1982.12433](https://doi.org/10.1109/PROC.1982.12433).
+  The multitaper method: Slepian tapers, eigenspectra and the adaptive
+  weights implemented by `multitaper_psd`.
+  Cited by [Calibrated spectral analysis](/phonometry/guides/spectral-analysis/).
+- Percival, D. B., & Walden, A. T. (1993). *Spectral analysis for physical
+  applications: Multitaper and conventional univariate techniques*.
+  Cambridge University Press. ISBN 978-0-521-43541-3.
+  [doi:10.1017/CBO9780511622762](https://doi.org/10.1017/CBO9780511622762).
+  The multitaper development (Chapter 7) behind `multitaper_psd` and the
+  Slepian-sequence eigenvalue tables that anchor its test oracle.
+  Cited by [Calibrated spectral analysis](/phonometry/guides/spectral-analysis/).
 
 ## Measurement instrumentation
 

@@ -59,6 +59,19 @@ it; the list grows as guides gain their References sections.
   Cited by [Calibrated Spectral Analysis](spectral-analysis.md),
   [Correlation, Time Delay and Envelope](correlation-delay.md) and
   [Swept-sine distortion and phase utilities](swept-sine-distortion.md).
+- Thomson, D. J. (1982). Spectrum estimation and harmonic analysis.
+  *Proceedings of the IEEE*, 70(9), 1055-1096.
+  [doi:10.1109/PROC.1982.12433](https://doi.org/10.1109/PROC.1982.12433).
+  The multitaper method: Slepian tapers, eigenspectra and the adaptive
+  weights implemented by `multitaper_psd`.
+  Cited by [Calibrated Spectral Analysis](spectral-analysis.md).
+- Percival, D. B., & Walden, A. T. (1993). *Spectral Analysis for Physical
+  Applications: Multitaper and Conventional Univariate Techniques*.
+  Cambridge University Press. ISBN 978-0-521-43541-3.
+  [doi:10.1017/CBO9780511622762](https://doi.org/10.1017/CBO9780511622762).
+  The multitaper development (Chapter 7) behind `multitaper_psd` and the
+  Slepian-sequence eigenvalue tables that anchor its test oracle.
+  Cited by [Calibrated Spectral Analysis](spectral-analysis.md).
 - Knapp, C. H., & Carter, G. C. (1976). The generalized correlation method
   for estimation of time delay. *IEEE Transactions on Acoustics, Speech,
   and Signal Processing*, 24(4), 320-327.

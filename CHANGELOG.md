@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `multitaper_psd`: Thomson multitaper spectral density (Thomson 1982;
+  Percival & Walden 1993, Chapter 7) as the whole-record alternative to the
+  Welch estimator for records too short to segment. K orthogonal Slepian
+  (dpss) tapers - computed by `scipy.signal.windows.dpss`, their
+  concentrations verified against Percival & Walden's quadruple-precision
+  Table 382 - yield K nearly uncorrelated eigenspectra whose adaptively
+  weighted average (P&W Eqs. 368a/370a, iterated to convergence) carries
+  about 2K chi-square degrees of freedom from a single record. The frozen
+  `MultitaperSpectralDensityResult` reports the per-frequency equivalent
+  degrees of freedom (Eq. 370b), the chi-square confidence interval, the
+  normalized random error, the combination weights and the taper
+  concentrations, with `.plot()` (EN/ES) drawing the density and its
+  confidence band; calibration (density/spectrum scaling, no detrending)
+  matches the Welch estimators exactly.
+
 ### Fixed
 
 - The EBU R 128 programme-loudness fiche no longer passes the verdict on the

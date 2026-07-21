@@ -1,6 +1,6 @@
 ---
 title: "Análisis espectral calibrado"
-description: "Los estimadores de Welch de Bendat y Piersol con su calidad estadística: densidad espectral de potencia y cruzada con el número efectivo de promedios, errores aleatorios normalizados e intervalos de confianza chi-cuadrado, el espectro de salida coherente con la relación señal-ruido espectral, suavizado en fracciones de octava con núcleo de potencia constante, generadores de ruido de colores con pendiente exacta en ley de potencias, y las figuras de mérito de Harris para elegir la ventana."
+description: "Los estimadores de Welch de Bendat y Piersol con su calidad estadística: densidad espectral de potencia y cruzada con el número efectivo de promedios, errores aleatorios normalizados e intervalos de confianza chi-cuadrado, el espectro de salida coherente con la relación señal-ruido espectral, suavizado en fracciones de octava con núcleo de potencia constante, generadores de ruido de colores con pendiente exacta en ley de potencias, las figuras de mérito de Harris para elegir la ventana, y el estimador multitaper de Thomson para registros cortos."
 references:
   - type: book
     authors: ["Bendat, J. S.", "Piersol, A. G."]
@@ -30,6 +30,23 @@ references:
     pages: "51-83"
     doi: "10.1109/PROC.1978.10837"
     note: "Las figuras de mérito de las ventanas (tabla 1): ancho de banda equivalente de ruido, ganancia coherente, pérdida de festoneado, pérdida de proceso en el peor caso, nivel del lóbulo lateral máximo y anchura del lóbulo principal, calculadas por window_metrics para cualquier ventana de scipy."
+  - type: article
+    authors: ["Thomson, D. J."]
+    year: 1982
+    title: "Spectrum estimation and harmonic analysis"
+    journal: "Proceedings of the IEEE"
+    volume: 70
+    issue: 9
+    pages: "1055-1096"
+    doi: "10.1109/PROC.1982.12433"
+    note: "El método multitaper: ventanas de Slepian, autoespectros propios y los pesos adaptativos que implementa multitaper_psd."
+  - type: book
+    authors: ["Percival, D. B.", "Walden, A. T."]
+    year: 1993
+    title: "Spectral analysis for physical applications: Multitaper and conventional univariate techniques"
+    publisher: "Cambridge University Press"
+    doi: "10.1017/CBO9780511622762"
+    note: "Capítulo 7 (estimación multitaper: autoespectros propios, ponderación adaptativa, grados de libertad equivalentes) y capítulo 8 (cálculo de las secuencias de Slepian); los autovalores de la tabla 382 anclan el oráculo de las ventanas en la batería de tests. ISBN 978-0-521-43541-3."
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
@@ -45,9 +62,11 @@ aleatorio normalizado y los intervalos de confianza chi-cuadrado; el
 explicada linealmente por la entrada y el resto de ruido, con la relación
 señal-ruido espectral; un **suavizador en fracciones de octava** con núcleo
 de potencia constante; y **generadores de ruido de colores** con pendiente
-exacta en ley de potencias para ejercitar todo lo anterior. Cada fórmula de
-error es una forma cerrada del libro, verificada por Monte Carlo con semilla
-en la batería de tests.
+exacta en ley de potencias para ejercitar todo lo anterior. Un **estimador
+multitaper de Thomson** (Percival y Walden, 1993) completa la familia para
+registros demasiado cortos para segmentar. Cada fórmula de error es una
+forma cerrada de las fuentes, verificada por Monte Carlo con semilla en la
+batería de tests.
 
 ## 1. Densidad espectral de potencia con su error estadístico
 
@@ -366,6 +385,118 @@ haya que encontrar un tono débil junto a uno fuerte, aceptando el lóbulo
 principal más ancho; y a la rectangular solo para registros que se
 autoenventanan (transitorios que decaen dentro del segmento) o síntesis
 centrada en bins.
+
+## 7. Estimación multitaper para registros cortos
+
+El método de Welch compra estabilidad con longitud de registro: cada
+segmento independiente añade dos grados de libertad, así que un registro en
+el que solo caben un par de segmentos deja una estimación apenas mejor que
+un periodograma. `multitaper_psd` implementa la alternativa de Thomson
+(1982), tal y como la desarrollan Percival y Walden (1993, capítulo 7): el
+registro *entero* se multiplica por `K` ventanas ortogonales esferoidales
+prolatas discretas (de Slepian) - las secuencias que concentran la mayor
+energía de su ventana espectral dentro de una banda de diseño `[-W, W]`
+elegida - y se promedian los `K` *autoespectros propios* resultantes:
+
+$$
+\hat{S}^{(mt)}(f) = \frac{1}{K}\sum_{k=0}^{K-1} \hat{S}_k(f), \qquad
+\hat{S}_k(f) = \Delta t\,\Bigl|\sum_{t=1}^{N} h_{t,k}\,x_t\,
+e^{-i 2\pi f t \Delta t}\Bigr|^2 .
+$$
+
+Como las ventanas son ortogonales, los autoespectros están casi
+incorrelados, así que el promedio acarrea unos `2K` grados de libertad
+chi-cuadrado de un único registro - la misma maquinaria estadística que el
+resultado de Welch (error aleatorio, intervalo de confianza chi-cuadrado),
+sin segmentar. El semiancho `W = NW·fs/N` se fija mediante el producto
+duración x semiancho de banda `NW` (4 por defecto). `2W` es la resolución de
+la estimación (informada como `resolution_bandwidth`), y solo las ventanas
+por debajo del número de Shannon `2·NW` mantienen la energía de su ventana
+espectral dentro de la banda de diseño - sus concentraciones `λk` se
+informan como `eigenvalues`, y el número de ventanas por defecto es
+`K = 2·NW - 1`, todas las de concentración casi unidad. Un `NW` mayor
+admite más ventanas (menos varianza) a costa de resolución.
+
+```python
+from phonometry import multitaper_psd
+
+res = multitaper_psd(signal, fs)                 # NW = 4, K = 7, adaptativo
+print(res.degrees_of_freedom.mean())             # ~2K de un solo registro
+print(res.eigenvalues)                           # concentraciones
+res.plot(language="es")                          # densidad con la banda de IC
+```
+
+Por defecto los autoespectros se combinan con los **pesos adaptativos** de
+Thomson (P&W Ecs. 368a/370a, iterados hasta converger). El peso de cada
+ventana en cada frecuencia equilibra el espectro local frente a la fuga de
+banda ancha que esa ventana podría acarrear:
+
+$$
+b_k(f) = \frac{S(f)}{\lambda_k S(f) + (1-\lambda_k)\,\sigma^2 \Delta t},
+\qquad
+\hat{S}^{(amt)}(f) =
+\frac{\sum_k b_k^2(f)\,\lambda_k\,\hat{S}_k(f)}
+     {\sum_k b_k^2(f)\,\lambda_k},
+$$
+
+de modo que las ventanas de orden alto, con más fuga, pierden peso
+exactamente donde el espectro es localmente débil, y no se pierde nada donde
+es localmente blanco (para ruido blanco los pesos son uniformes). El precio
+queda contabilizado con honestidad: los grados de libertad equivalentes
+pasan a depender de la frecuencia, `ν(f) = 2·(Σk dk)²/Σk dk²` con
+`dk = b²k·λk` (P&W Ec. 370b), y el intervalo de confianza se ensancha allí
+donde la protección contra la fuga los gastó. `adaptive=False` selecciona en
+su lugar el promedio ponderado por autovalores.
+
+La calibración coincide exactamente con los estimadores de Welch: sin
+eliminación de tendencia, `'density'` integra a la potencia de la señal y
+`'spectrum'` lee `A²/2` en el pico de una sinusoide de amplitud `A` (la
+potencia de un tono en escalado `'density'` se reparte sobre la banda `2W`).
+Las propias ventanas de Slepian proceden de `scipy.signal.windows.dpss`;
+sus concentraciones reproducen la tabla en cuádruple precisión de Percival y
+Walden (tabla 382) hasta la precisión de máquina, que es el oráculo ancla de
+la batería de tests.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multitaper_psd_confidence_es.svg" alt="Densidad espectral multitaper de Thomson de un registro de ruido rosa de 171 milisegundos en dB por Hz entre 20 Hz y 20 kHz, con la banda de confianza chi-cuadrado del 95 por ciento alrededor de la estimación adaptativa de siete ventanas, la estimación de una sola ventana como línea gris dentada de contexto y la ley de potencias exacta de -3,01 dB por octava como referencia discontinua" width="82%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import multitaper_psd, noise_signal
+
+fs = 48000.0
+x = noise_signal(fs, 8192 / fs, color="pink", seed=11)   # registro de 171 ms
+single = multitaper_psd(x, fs, n_tapers=1, adaptive=False)
+res = multitaper_psd(x, fs)                              # NW = 4, K = 7
+band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
+freqs = res.frequencies[band]
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.semilogx(freqs, 10 * np.log10(single.psd[band]), color="gray",
+            alpha=0.45, lw=0.7, label="Una sola ventana de Slepian (K = 1)")
+ax.fill_between(freqs, 10 * np.log10(res.ci_lower[band]),
+                10 * np.log10(res.ci_upper[band]), alpha=0.3,
+                label="Intervalo de confianza chi-cuadrado del 95 %")
+ax.semilogx(freqs, 10 * np.log10(res.psd[band]), lw=1.2,
+            label="Estimación multitaper (K = 7, adaptativa)")
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("PSD [dB re 1/Hz]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+Recurre a `multitaper_psd` cuando el registro sea demasiado corto para
+segmentar (colas de respuestas al impulso de salas, capturas de transitorios,
+ciclos sueltos de máquina) o cuando un espectro de gran rango dinámico
+necesite una protección contra la fuga que un promedio de Welch con ventana
+Hann no puede dar; quédate con `power_spectral_density` para registros
+largos, donde promediar segmentos es más barato que `K` FFT de longitud
+completa y ambos estimadores coinciden.
 
 ## Relación con los estimadores H1/H2
 

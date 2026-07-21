@@ -69,6 +69,7 @@ references:
 
 import Video from '../../../components/Video.astro';
 import ThemeImage from '../../../components/ThemeImage.astro';
+import ReportPreview from '../../../components/ReportPreview.astro';
 
 Room acoustics starts from one measurement: the **impulse response** (IR)
 between a source and a receiver. Filter it into bands and integrate it, and
@@ -509,6 +510,64 @@ stays within the 5 % JND) and `curvature`
 $C = 100\ (T_{30}/T_{20} - 1)$ % (values above 10 % flag a non-straight
 decay). `decay_curve(ir, fs, band=None, fraction=1, zero_phase=False)` returns
 just the `(time, level)` curve for one band or the broadband response.
+
+### ISO 3382 report (`.report()`)
+
+`RoomAcousticsResult.report(path)` renders a one-page PDF fiche laid out like a
+room-acoustics measurement report (a performance space per ISO 3382-1:2009 or
+an ordinary room per ISO 3382-2:2008, both evaluated by the integrated
+impulse-response method): a standard-basis line, an optional metadata header
+block, the full-width per-band parameter table ($T_{20}$, $T_{30}$, EDT,
+$C_{50}$, $C_{80}$, $D_{50}$, $T_s$) above the result's own per-band
+decay-time plot (`.plot()`), the boxed mid-frequency reverberation time
+$T_\text{mid}$ (the mean of the 500 Hz and 1000 Hz octave $T_{30}$, the
+customary room descriptor) with the mid-frequency EDT alongside, and a footer
+with the fixed disclaimer. ISO 3382-1/-2 are **characterisation** standards
+with no intrinsic pass/fail, so a verdict row appears only when a target
+mid-frequency reverberation time is supplied through `requirement` (read as the
+maximum acceptable $T_\text{mid}$, the usual form of a classroom or open-plan
+limit). It uses the same `ReportMetadata` container and rendering engine as the
+[ISO 11654 absorption fiche](/phonometry/guides/materials/#iso-11654-report-report);
+the room-specific fields `room_volume`, `source_positions` and
+`receiver_positions` populate the header (ISO 3382 requires the room volume and
+the number of source and microphone positions to be reported), alongside
+`test_room` (the room name), `specimen` (the room description and occupancy
+state), `area`, `instrumentation`, `temperature`, `relative_humidity`,
+`pressure`, `measurement_standard`, `test_date`, `laboratory`, `operator`,
+`report_id` and `notes`. Passing `metadata=None` produces a bare
+characterisation fiche. Rendering needs reportlab
+(`pip install phonometry[report]`); only `engine="reportlab"` is supported. The
+fiche renders in English by default; pass `language="es"` for a Spanish fiche
+(translated fixed strings and a comma decimal separator).
+
+```python
+from phonometry import room, ReportMetadata
+
+result = room.room_parameters(ir, fs)   # octave bands 125 Hz - 4 kHz
+result.report(
+    "room_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Small auditorium, unoccupied, fully furnished",
+        test_room="Auditorium A",
+        room_volume=2830.0, area=340.0,
+        source_positions=2, receiver_positions=8,
+        measurement_standard="ISO 3382-1",
+        temperature=21.0, relative_humidity=45.0,
+        laboratory="Phonometry Reference Laboratory",
+        requirement=1.3,           # adds a verdict against a target T_mid
+    ),
+)                                  # T_mid + the per-band parameter table
+```
+
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
+
+<ReportPreview
+	name="iso3382_room_acoustics_example"
+	title="ISO 3382 room acoustic parameters example report (PDF)"
+	description="One-page room-acoustics fiche: a metadata header (client, room, description, room volume, floor area, source and microphone positions, instrumentation, temperature, humidity and pressure), the octave-band parameter table (T20, T30, EDT, C50, C80, D50 and Ts from 125 Hz to 4 kHz) above the per-band decay-time bar plot, the boxed mid-frequency reverberation time T_mid = 1.15 s with the mid-frequency EDT alongside, and a PASS verdict against the 1.3 s target."
+	caption="Room acoustic parameters fiche (RoomAcousticsResult.report), T_mid and the per-band table."
+/>
 
 ## 3. Open-plan offices (ISO 3382-3)
 

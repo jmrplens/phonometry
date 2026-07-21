@@ -216,3 +216,49 @@ Invalid bands are hatched and greyed. With `ax` given, only the
 decay-times panel is drawn on it. Requires matplotlib
 (`pip install phonometry[plot]`); returns the
 `Axes` (or array thereof).
+
+### RoomAcousticsResult.report()
+
+```python
+RoomAcousticsResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a room acoustic parameters fiche to a PDF (ISO 3382-1/-2).
+
+Writes a one-page report laid out like a room-acoustics measurement
+report: the standard-basis line, an optional metadata header block
+(room, volume, source/receiver positions, climate ...), the full-width
+per-band parameter table (T20/T30/EDT and C50/C80/D50/Ts) above the
+result's own per-band decay-time plot (`plot`), the boxed
+mid-frequency reverberation time T_mid (the mean of the 500 Hz and
+1000 Hz octave T30), an optional verdict row and a footer with the
+fixed disclaimer. ISO 3382-1/-2 are characterisation standards with no
+intrinsic pass/fail, so the verdict row appears only when a target
+mid-frequency T is supplied through `metadata.requirement` (read as
+the maximum acceptable T_mid).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare characterisation fiche (body, result and disclaimer only). The room-specific fields `room_volume`, `source_positions` and `receiver_positions` populate the header; `requirement` is read as the maximum mid-frequency reverberation time. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for parity with the other fiches; the room table already shows every computed parameter, so it has no effect. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |

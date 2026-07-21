@@ -54,14 +54,16 @@ from ._layout import (
     _MUTED_HEX,
     _REPORTLAB_HINT,
     _VERDICT_BAD_HEX,
-    _VERDICT_OK_HEX,
+    analysis_cell_styles,
     build_document,
     display_round,
     document_styles,
+    exceedance_markup,
     footer_flow,
     grid_table,
     render_figure_drawing,
     result_box,
+    stacked_table,
     verdict_flow,
 )
 from .metadata import ReportMetadata
@@ -156,53 +158,6 @@ def _esc(value: str | None) -> str | None:
     return html.escape(value) if value else None
 
 
-def _analysis_cell_styles() -> Tuple[Any, Any, Any]:
-    """(header, label-cell, value-cell) paragraph styles of the body tables."""
-    from reportlab.lib import colors
-    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-
-    styles = getSampleStyleSheet()
-    header_style = ParagraphStyle(
-        "iso9612_thead", parent=styles["Normal"], fontSize=8.5, leading=11,
-        textColor=colors.white, alignment=1,
-    )
-    label_style = ParagraphStyle(
-        "iso9612_label", parent=styles["Normal"], fontSize=8.5, leading=11,
-    )
-    value_style = ParagraphStyle(
-        "iso9612_value", parent=styles["Normal"], fontSize=8.5, leading=11,
-        alignment=1,
-    )
-    return header_style, label_style, value_style
-
-
-def _stacked_table(data: List[List[Any]], col_widths: List[Any]) -> Any:
-    """A full-width table with the accredited styling (accent header, zebra)."""
-    from reportlab.lib import colors
-    from reportlab.platypus import Table, TableStyle
-
-    accent = colors.HexColor(_ACCENT_HEX)
-    light = colors.HexColor(_LIGHT_HEX)
-    table = Table(data, colWidths=col_widths, repeatRows=1)
-    table.setStyle(
-        TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("BACKGROUND", (0, 0), (-1, 0), accent),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, light]),
-                ("LINEABOVE", (0, 0), (-1, 0), 0.6, accent),
-                ("LINEBELOW", (0, -1), (-1, -1), 0.6, accent),
-                ("TOPPADDING", (0, 0), (-1, -1), 3.0),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 3.0),
-                ("LEFTPADDING", (0, 0), (-1, -1), 4),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
-                ("BOX", (0, 0), (-1, -1), 0.5, accent),
-            ]
-        )
-    )
-    return table
-
-
 def _task_table(
     result: "ExposureResult", verbose: bool = False, language: str = "en"
 ) -> Any:
@@ -217,7 +172,7 @@ def _task_table(
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
 
-    header_style, label_style, value_style = _analysis_cell_styles()
+    header_style, label_style, value_style = analysis_cell_styles("iso9612")
 
     headers = [
         t("Task", language),
@@ -261,7 +216,7 @@ def _task_table(
         total_row += [Paragraph("", value_style)] * 3
     data.append(total_row)
 
-    table = _stacked_table(data, [w * mm for w in widths])
+    table = stacked_table(data, [w * mm for w in widths])
     # The totals row keeps the light fill regardless of the zebra parity.
     table.setStyle([("BACKGROUND", (0, len(data) - 1), (-1, len(data) - 1),
                      colors.HexColor(_LIGHT_HEX)),
@@ -275,7 +230,7 @@ def _sampling_table(result: "ExposureResult", language: str = "en") -> Any:
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
 
-    header_style, label_style, value_style = _analysis_cell_styles()
+    header_style, label_style, value_style = analysis_cell_styles("iso9612")
 
     rows: List[Tuple[str, str]] = [
         (t("Number of samples N", language), str(result.n_samples)),
@@ -312,7 +267,7 @@ def _sampling_table(result: "ExposureResult", language: str = "en") -> Any:
     ]
     for label, value in rows:
         data.append([Paragraph(label, label_style), Paragraph(value, value_style)])
-    return _stacked_table(data, [120 * mm, 54 * mm])
+    return stacked_table(data, [120 * mm, 54 * mm])
 
 
 def _assessment_rows(
@@ -362,20 +317,7 @@ def _assessment_table(result: "ExposureResult", language: str = "en") -> Any:
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
 
-    header_style, label_style, value_style = _analysis_cell_styles()
-
-    def _status_markup(exceeded: bool | None) -> str:
-        if exceeded is None:
-            return f"<font color='{_MUTED_HEX}'>&#8211;</font>"
-        if exceeded:
-            return (
-                f"<font color='{_VERDICT_BAD_HEX}'>&#9679; "
-                f"{t('Exceeded', language)}</font>"
-            )
-        return (
-            f"<font color='{_VERDICT_OK_HEX}'>&#9679; "
-            f"{t('Not exceeded', language)}</font>"
-        )
+    header_style, label_style, value_style = analysis_cell_styles("iso9612")
 
     data: List[List[Any]] = [
         [
@@ -391,10 +333,10 @@ def _assessment_table(result: "ExposureResult", language: str = "en") -> Any:
                 Paragraph(label, label_style),
                 Paragraph(threshold, value_style),
                 Paragraph(measured, value_style),
-                Paragraph(_status_markup(exceeded), label_style),
+                Paragraph(exceedance_markup(exceeded, language), label_style),
             ]
         )
-    return _stacked_table(data, [74 * mm, 24 * mm, 42 * mm, 34 * mm])
+    return stacked_table(data, [74 * mm, 24 * mm, 42 * mm, 34 * mm])
 
 
 def _statement(result: "ExposureResult", language: str = "en") -> Tuple[str, List[str]]:

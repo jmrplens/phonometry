@@ -614,6 +614,43 @@ def _occupational_exposure_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso9612_exposure_example.pdf"
 
 
+def _human_vibration_example() -> Tuple[object, ReportMetadata, str]:
+    """Human-vibration fiche: the ISO 5349-2 Annex E.3 forestry worker's day.
+
+    Reproduces the ISO 5349-2:2001 Annex E.3 worked example (a forestry
+    worker): brush-saw clearance for 2 h at a_hv = 4.6 m/s2, chain-saw felling
+    for 1 h at 6.0 m/s2 and chain-saw branch stripping for 2 h at 3.6 m/s2. The
+    standard gives the partial exposures A_i(8) = 2.3, 2.1 and 1.8 m/s2 and the
+    combined daily exposure A(8) = 3.6 m/s2 (Eqs. (E.6)-(E.9)); the fiche shows
+    the value to two decimals (3.61 m/s2), so the Directive 2002/44/EC hand-arm
+    assessment places it in the action zone (>= 2.5 m/s2 EAV, < 5 m/s2 ELV).
+    """
+    result = ph.vibration.daily_vibration_exposure(
+        [4.6, 6.0, 3.6],
+        [2 * 3600.0, 1 * 3600.0, 2 * 3600.0],
+        kind="hav",
+        labels=[
+            "Brush-saw clearance",
+            "Chain-saw felling",
+            "Chain-saw branch stripping",
+        ],
+    )
+    metadata = ReportMetadata(
+        client="Example forestry contractor",
+        specimen="Forestry worker (right hand)",
+        test_room="Managed woodland, plot 12",
+        instrumentation="Hand-arm vibration meter (ISO 8041-1), s/n 0042",
+        calibration="Field calibrator (ISO 8041-1) verified before/after the "
+                    "series within tolerance",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-5349",
+        notes="Reproduces the ISO 5349-2:2001 Annex E.3 worked example.",
+    )
+    return result, metadata, "human_vibration_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -632,6 +669,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _loudspeaker_example,
     _microphone_example,
     _occupational_exposure_example,
+    _human_vibration_example,
 ]
 
 

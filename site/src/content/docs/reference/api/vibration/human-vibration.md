@@ -233,6 +233,55 @@ Plot the partial exposures against the EAV / ELV thresholds.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes` and never calls `plt.show`.
 
+### DailyVibrationExposure.report()
+
+```python
+DailyVibrationExposure.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a daily vibration exposure assessment fiche to a PDF.
+
+Writes a one-page assessment sheet laid out like the hand-arm /
+whole-body vibration exposure calculators of the occupational-hygiene
+practice: the standard-basis line naming the applied ISO method
+(ISO 5349-1/-2:2001 for hand-transmitted vibration, ISO 2631-1:1997 for
+whole-body vibration) and the Directive 2002/44/EC it is assessed
+against, an optional metadata header (company, operator/worker,
+workplace, instrumentation, calibration), the per-operation exposure
+analysis (the vibration total value, the daily exposure time `T_i` and
+the partial exposure `A_i(8)` of ISO 5349-1/-2 Eq. (2), closed by the
+daily total and the combined `A(8)` of Eq. (3)), the per-operation
+contribution chart, the boxed `A(8)` with its exposure zone, an
+assessment table against the exposure action value (EAV) and exposure
+limit value (ELV) of Directive 2002/44/EC (Article 3), a PASS/FAIL
+verdict against the limit value, and a footer identity/disclaimer block.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the operator/worker, `test_room` the workplace) plus the `instrumentation` and `calibration` free-text fields and the footer identity. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When True, the operations table adds each operation's share of the daily vibration energy `A_i(8)^2 / A(8)^2`. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the contribution chart, so both are required (`pip install "phonometry[report,plot]"`). |
+
 ## energy_equivalent_acceleration
 
 ```python

@@ -144,11 +144,12 @@ def test_envelope_spectrum_es() -> None:
 
 
 def test_cepstrum_es() -> None:
-    ax = ph.cepstrum(_white(), FS, kind="power").plot(language="es")
+    res = ph.cepstrum(_white(), FS, kind="power")
+    ax = res.plot(language="es")
     assert "Cepstro de potencia" in _titles(ax)
     assert "Quefrencia [ms]" in _labels(ax)
     with pytest.raises(ValueError):
-        ph.cepstrum(_white(), FS).plot(language="xx")
+        res.plot(language="xx")
     plt.close("all")
 
 

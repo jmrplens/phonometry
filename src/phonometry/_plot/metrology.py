@@ -965,6 +965,11 @@ def plot_tone_burst(
     ax.set_xlabel(_t("Time [s]", language))
     ax.set_ylabel(_t("Amplitude", language))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
 # ---------------------------------------------------------------------------
 # Cepstral analysis (Havelock Chs. 27/87) and envelope spectrum (B&P 13.3)
 # ---------------------------------------------------------------------------
@@ -1068,6 +1073,9 @@ def plot_window_metrics(
     for axf in axes:
         localize_axes(axf, language)
     axes[0].figure.tight_layout()
+    return axes
+
+
 def plot_lifter(
     result: "LifterResult", ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any

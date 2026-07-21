@@ -126,7 +126,7 @@ def _log_magnitude(
     """One-sided ``ln|X|`` of the zero-padded record, floored like phase.py."""
     magnitude = np.abs(np.fft.rfft(x, nfft))
     peak = float(np.max(magnitude))
-    if peak == 0.0:
+    if peak <= 0.0:  # max of |X| is non-negative: <= 0 means all-zero
         raise ValueError("'x' must not be identically zero.")
     return np.asarray(
         np.log(np.maximum(magnitude, peak * _MAGNITUDE_FLOOR)),
@@ -148,7 +148,7 @@ def _complex_cepstrum(
     spectrum = np.fft.fft(x, nfft)
     magnitude = np.abs(spectrum)
     peak = float(np.max(magnitude))
-    if peak == 0.0:
+    if peak <= 0.0:  # max of |X| is non-negative: <= 0 means all-zero
         raise ValueError("'x' must not be identically zero.")
     log_mag = np.log(np.maximum(magnitude, peak * _MAGNITUDE_FLOOR))
     phase = np.unwrap(np.angle(spectrum))

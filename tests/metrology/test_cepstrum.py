@@ -185,12 +185,11 @@ def test_echo_detection_search_band_is_respected() -> None:
 
 
 def test_echo_detection_rejects_bad_band() -> None:
+    x = _impulse_echo()
     with pytest.raises(ValueError, match="search band"):
-        ph.echo_detection(
-            _impulse_echo(), FS, min_quefrency=0.1, max_quefrency=0.05
-        )
+        ph.echo_detection(x, FS, min_quefrency=0.1, max_quefrency=0.05)
     with pytest.raises(ValueError, match="search band"):
-        ph.echo_detection(_impulse_echo(), FS, max_quefrency=1.0)
+        ph.echo_detection(x, FS, max_quefrency=1.0)
 
 
 # ---------------------------------------------------------------------------
@@ -249,8 +248,9 @@ def test_cepstrum_validates_inputs() -> None:
         ph.cepstrum(x, FS, nfft=N + 1)
     with pytest.raises(ValueError, match="fs"):
         ph.cepstrum(x, 0.0)
+    silence = np.zeros(N)
     with pytest.raises(ValueError, match="identically zero"):
-        ph.cepstrum(np.zeros(N), FS)
+        ph.cepstrum(silence, FS)
 
 
 def test_results_are_frozen() -> None:

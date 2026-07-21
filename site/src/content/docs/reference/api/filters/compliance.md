@@ -114,6 +114,7 @@ FilterComplianceResult(
     factors: Tuple[int, ...],
     fs: float,
     num_points: int,
+    range_limited: bool = False,
 )
 ```
 
@@ -137,6 +138,7 @@ holding a reference to the (possibly stateful) bank.
 | `factors` | Per-band decimation factor; the band's processing sample rate is `fs / factor` (the multirate rate the SOS were designed at). Stored because the response must be evaluated at that decimated rate, which the verifier's public return does not expose. |
 | `fs` | The bank's full sampling rate in Hz. |
 | `num_points` | Frequency grid points per band used by the verification, retained so the redrawn curve matches the analysed grid. |
+| `range_limited` | `True` when at least one band's stop-band mask extends beyond its processing Nyquist frequency, so the verification could not exercise the full Table 1 mask there (the multirate anti-aliasing removes signal energy beyond it, but the limits are not demonstrated); the stated class then attests the verified frequency range and the `.report()` fiche prints a qualifying note. |
 
 ### FilterComplianceResult.available_classes()
 
@@ -289,7 +291,10 @@ that range are always included in the evaluation, so the pass-band
 constraints are checked even if the grid were coarse. Frequencies beyond
 the processing Nyquist cannot carry signal energy at the band's decimated
 rate (the multirate anti-aliasing filter removes them), so they are
-treated as compliant.
+treated as compliant; because the Table 1 limits there are nevertheless
+not demonstrated, the returned `range_limited` flag is set whenever a
+band's stop-band mask extends beyond its processing Nyquist, and the
+per-band `checked_to_omega` records how far the check reached.
 
 **Parameters**
 
@@ -299,7 +304,7 @@ treated as compliant.
 | `num_points` | Number of frequency grid points per band (>= 16). |
 | `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0). |
 
-**Returns:** Dict with `overall_class` (the strictest class every band meets, or `None`) and `bands`: a list of `{"freq", "class", "margin_class<c>_db"}` for each class `c` of the edition, where a positive margin means the limits are met with that much room.
+**Returns:** Dict with `overall_class` (the strictest class every band meets, or `None`), `range_limited` (`True` when at least one band's stop-band mask extends beyond its processing Nyquist, so the returned class attests the verified frequency range rather than the full Table 1 mask; see above) and `bands`: a list of `{"freq", "class", "checked_to_omega", "margin_class<c>_db"}` for each class `c` of the edition, where a positive margin means the limits are met with that much room and `checked_to_omega` is the highest normalized frequency the band's verification could reach (its processing Nyquist over `f_m`).
 
 ## verify_weighting_class
 

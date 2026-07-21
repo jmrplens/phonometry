@@ -232,20 +232,22 @@ def _loudness_example() -> Tuple[object, ReportMetadata, str]:
 def _program_loudness_example() -> Tuple[object, ReportMetadata, str]:
     """Programme-loudness fiche: an EBU R 128 compliance measurement.
 
-    The signal is the EBU Tech 3342 Case 1 loudness-range reference: two 20 s
-    stereo 1 kHz tone segments at -20 and -30 dBFS, giving an integrated
-    loudness near -23 LUFS and a loudness range near 10 LU.
+    The signal is the EBU Tech 3342 Case 1 loudness-range shape (two 20 s
+    stereo 1 kHz tone segments 10 dB apart) trimmed 0.4 dB to -20.4 and
+    -30.4 dBFS, giving a loudness range near 10 LU with the integrated
+    loudness on the -23.0 LUFS target, inside the default +-0.2 LU QC
+    tolerance of EBU R 128 item i).
     """
     fs = 48000
     t = np.arange(int(round(20.0 * fs))) / fs
     tone = np.sin(2.0 * np.pi * 1000.0 * t)
-    seg_hi = 10.0 ** (-20.0 / 20.0) * tone
-    seg_lo = 10.0 ** (-30.0 / 20.0) * tone
+    seg_hi = 10.0 ** (-20.4 / 20.0) * tone
+    seg_lo = 10.0 ** (-30.4 / 20.0) * tone
     mono = np.concatenate([seg_hi, seg_lo])
     signal = np.vstack([mono, mono])
     result = ph.broadcast.program_loudness(signal, fs)
     metadata = ReportMetadata(
-        specimen="Reference tone sequence (-20 / -30 dBFS steps)",
+        specimen="Reference tone sequence (-20.4 / -30.4 dBFS steps)",
         client="Example broadcaster",
         manufacturer="Example post-production",
         test_room="Reference monitoring room (example)",

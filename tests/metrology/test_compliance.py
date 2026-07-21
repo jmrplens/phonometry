@@ -170,7 +170,8 @@ def test_butter_meets_class0_1995() -> None:
     assert result["overall_class"] == 0, result
     band = result["bands"][0]
     assert set(band) == {
-        "freq", "class", "margin_class0_db", "margin_class1_db", "margin_class2_db"
+        "freq", "class", "checked_to_omega",
+        "margin_class0_db", "margin_class1_db", "margin_class2_db",
     }
     # A class-0 band must clear class 1 and class 2 by at least as much.
     for b in result["bands"]:
@@ -184,8 +185,24 @@ def test_2014_default_unaffected_by_edition_support() -> None:
     result = verify_filter_class(bank)
     assert result["overall_class"] == 1
     assert set(result["bands"][0]) == {
-        "freq", "class", "margin_class1_db", "margin_class2_db"
+        "freq", "class", "checked_to_omega", "margin_class1_db", "margin_class2_db"
     }
+
+
+def test_range_limited_flag_reports_unverifiable_stopband() -> None:
+    """The verdict flags that the mask beyond the processing Nyquist is unchecked.
+
+    Each band's multirate processing Nyquist sits around 1.8-2.0 f_m while
+    the octave-band stop-band mask runs to G^4 = 15.85 f_m, so the G^2..G^4
+    rows cannot be demonstrated and the verdict must say so instead of
+    claiming full Table 1 conformance.
+    """
+    bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+    result = verify_filter_class(bank)
+    assert result["range_limited"] is True
+    for band in result["bands"]:
+        # The checked range covers the band edge but not the G^4 mask end.
+        assert 10 ** 0.15 < band["checked_to_omega"] < 15.0
 
 
 def test_1995_rejects_out_of_range_class_and_bad_edition() -> None:

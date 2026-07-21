@@ -386,12 +386,13 @@ class WeightedRatingResult:
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
+        symbol: "str | None" = None,
     ) -> str:
         """Render an ISO 717-1 airborne sound-insulation fiche to a PDF.
 
         Writes a one-page accredited-laboratory report: the standard-basis
-        line, an optional metadata header block, the one-third-octave table
-        beside the measured-versus-shifted-reference plot (the result's own
+        line, an optional metadata header block, the band table beside the
+        measured-versus-shifted-reference plot (the result's own
         :meth:`plot`), the boxed ``Rw (C; Ctr)`` result, an optional verdict
         row and a footer with the fixed disclaimer.
 
@@ -406,16 +407,22 @@ class WeightedRatingResult:
             table.
         :param language: Fiche language: ``"en"`` (default, English) or
             ``"es"`` (Spanish, with a comma decimal separator).
+        :param symbol: The reported single-number quantity, as plain text:
+            ``"Rw"`` (the default when ``None``), ``"R'w"``, ``"Dn,w"``,
+            ``"DnT,w"`` ... per ISO 717-1 Tables 1-2, so a field measurement
+            (e.g. a standardized level difference rated to ``DnT,w``) is not
+            mislabelled with the laboratory descriptor.
         :return: The written ``path`` as a :class:`str`.
-        :raises ValueError: If ``engine`` is not ``"reportlab"`` or the result
-            was built without the per-band data (``band_centers``,
-            ``measured``, ``shifted_reference``).
+        :raises ValueError: If ``engine`` is not ``"reportlab"``, ``symbol``
+            is not a valid quantity-symbol shape, or the result was built
+            without the per-band data (``band_centers``, ``measured``,
+            ``shifted_reference``).
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``).
         """
         return _render_iso717(
             self, path, metadata=metadata, engine=engine, verbose=verbose,
-            language=language,
+            language=language, symbol=symbol,
         )
 
 
@@ -563,14 +570,15 @@ class ImpactRatingResult:
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
+        symbol: "str | None" = None,
     ) -> str:
         """Render an ISO 717-2 impact-insulation fiche to a PDF.
 
         Writes a one-page accredited-laboratory report for impact sound: the
-        standard-basis line, an optional metadata header block, the
-        one-third-octave table beside the measured-versus-shifted-reference
-        plot (the result's own :meth:`plot`), the boxed ``Ln,w (CI)`` result,
-        an optional verdict row and a footer with the fixed disclaimer.
+        standard-basis line, an optional metadata header block, the band
+        table beside the measured-versus-shifted-reference plot (the
+        result's own :meth:`plot`), the boxed ``Ln,w (CI)`` result, an
+        optional verdict row and a footer with the fixed disclaimer.
 
         :param path: Destination path of the PDF file.
         :param metadata: Optional
@@ -583,16 +591,21 @@ class ImpactRatingResult:
             table.
         :param language: Fiche language: ``"en"`` (default, English) or
             ``"es"`` (Spanish, with a comma decimal separator).
+        :param symbol: The reported single-number quantity, as plain text:
+            ``"Ln,w"`` (the default when ``None``), ``"L'n,w"`` or
+            ``"L'nT,w"`` per ISO 717-2 Table 1, so a field measurement is not
+            mislabelled with the laboratory descriptor.
         :return: The written ``path`` as a :class:`str`.
-        :raises ValueError: If ``engine`` is not ``"reportlab"`` or the result
-            was built without the per-band data (``band_centers``,
-            ``measured``, ``shifted_reference``).
+        :raises ValueError: If ``engine`` is not ``"reportlab"``, ``symbol``
+            is not a valid quantity-symbol shape, or the result was built
+            without the per-band data (``band_centers``, ``measured``,
+            ``shifted_reference``).
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``).
         """
         return _render_iso717(
             self, path, metadata=metadata, engine=engine, verbose=verbose,
-            language=language,
+            language=language, symbol=symbol,
         )
 
 
@@ -644,6 +657,7 @@ def _render_iso717(
     engine: str,
     verbose: bool,
     language: str,
+    symbol: "str | None" = None,
 ) -> str:
     """Validate the report request and delegate to the reportlab renderer.
 
@@ -672,7 +686,8 @@ def _render_iso717(
     from .._report.iso717 import render_iso717_report
 
     return render_iso717_report(
-        result, path, metadata=metadata, verbose=verbose, language=language
+        result, path, metadata=metadata, verbose=verbose, language=language,
+        symbol=symbol,
     )
 
 

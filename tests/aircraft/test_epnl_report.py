@@ -119,6 +119,43 @@ def _extract_text(path: str) -> str:
     return "\n".join(page.extract_text() for page in PdfReader(path).pages)
 
 
+def test_verdict_follows_one_decimal_epnl_at_the_limit(tmp_path) -> None:
+    """The verdict compares the EPNL determined to one decimal place.
+
+    Annex 16 determines the EPNL "to one decimal place": an unrounded
+    101.04 EPNdB against a 101 EPNdB limit is 101.0 EPNdB and PASSes with a
+    zero margin (previously the unrounded comparison printed "101.0",
+    "margin -0.0" and FAIL, contradicting its own displayed numbers).
+    """
+    import dataclasses
+
+    result = dataclasses.replace(_flyover(), epnl=101.04)
+    out = tmp_path / "boundary.pdf"
+    result.report(str(out), metadata=ReportMetadata(requirement=101.0))
+    _assert_one_page(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "EPNL = 101.0 EPNdB" in text
+    assert "margin +0.0" in text
+    assert "PASS" in text and "FAIL" not in text
+    # Just past the tenth boundary the same limit fails.
+    failing = dataclasses.replace(_flyover(), epnl=101.06)
+    out2 = tmp_path / "boundary_fail.pdf"
+    failing.report(str(out2), metadata=ReportMetadata(requirement=101.0))
+    text2 = _extract_text(str(out2)).replace("\n", " ")
+    assert "EPNL = 101.1 EPNdB" in text2
+    assert "FAIL" in text2
+
+
+def test_reference_conditions_cite_part_ii(tmp_path) -> None:
+    """The reference-conditions strip states the Part II 3.6.1.5 conditions."""
+    out = tmp_path / "refcond.pdf"
+    _flyover().report(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "25 °C (ISA + 10 °C)" in text
+    assert "1013.25 hPa" in text
+    assert "Part II, 3.6.1.5" in text
+
+
 def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
     import re

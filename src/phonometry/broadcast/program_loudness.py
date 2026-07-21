@@ -562,6 +562,7 @@ class ProgramLoudnessResult:
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
+        tolerance: str = "qc",
     ) -> str:
         """Render an EBU R 128 programme-loudness compliance fiche to a PDF.
 
@@ -584,8 +585,16 @@ class ProgramLoudnessResult:
             the single-layout programme-loudness fiche.
         :param language: Fiche language: ``"en"`` (default, English) or
             ``"es"`` (Spanish, with a comma decimal separator).
+        :param tolerance: Programme-loudness tolerance rule of EBU R 128:
+            ``"qc"`` (default) applies the +-0.2 LU allowance of item i) for
+            measurement errors in loudness workflows such as Quality Control;
+            ``"live"`` applies the +-1.0 LU tolerance of item h), permitted
+            only where attaining the Target Level is not achievable
+            practically (for example, live programmes). The fiche prints the
+            applied rule and its R 128 item.
         :return: The written ``path`` as a :class:`str`.
-        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or
+            ``tolerance`` is not ``"qc"``/``"live"``.
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``).
         """
@@ -599,7 +608,8 @@ class ProgramLoudnessResult:
         from .._report.broadcast import render_program_loudness_report
 
         return render_program_loudness_report(
-            self, path, metadata=metadata, verbose=verbose, language=language
+            self, path, metadata=metadata, verbose=verbose, language=language,
+            tolerance=tolerance,
         )
 
 

@@ -120,6 +120,50 @@ def _extract_text(path: str) -> str:
     return "\n".join(page.extract_text() for page in PdfReader(path).pages)
 
 
+def test_stationary_fiche_states_method_and_field(tmp_path) -> None:
+    """The fiche states the method and sound field (ISO 532-1 clause 7 c/d).
+
+    Clause 7 requires a loudness report to state the method used (stationary,
+    clause 5, or time-varying, clause 6) and the sound field (free F or
+    diffuse D); the boxed value is the total loudness N to one decimal.
+    """
+    result = _result()
+    out = tmp_path / "clause7.pdf"
+    result.report(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "method for stationary sounds (clause 5)" in text
+    assert "Sound field: free (F)" in text
+    expected = f"N = {result.loudness:.1f} sone"
+    assert expected in text
+
+
+def test_time_varying_fiche_reports_nmax_percentiles_and_nt(tmp_path) -> None:
+    """A time-varying fiche renders Nmax, N5/N10 and the N(t) trace.
+
+    Clause 7 f) makes the loudness time function in sones mandatory for
+    time-varying sounds and names the reported maximum "loudness (Nmax)";
+    the fiche must not label it as the stationary total loudness N.
+    """
+    from phonometry import loudness_zwicker
+
+    fs = 48000
+    t = np.arange(fs) / fs
+    x = 0.2 * np.sin(2.0 * np.pi * 1000.0 * t) * (1.0 + 0.5 * np.sin(2.0 * np.pi * 3.0 * t))
+    result = loudness_zwicker(x, fs, field="diffuse")
+    assert result.n5 is not None and result.time is not None
+    assert result.field == "diffuse"
+    out = tmp_path / "tv.pdf"
+    result.report(str(out), metadata=ReportMetadata(requirement=result.loudness + 1.0))
+    _assert_one_page(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "method for time-varying sounds (clause 6)" in text
+    assert "Sound field: diffuse (D)" in text
+    assert "Maximum loudness Nmax [sone]" in text
+    assert "N5 [sone]" in text and "N10 [sone]" in text
+    assert "Loudness versus time N(t) (clause 6.5)" in text
+    assert "Total loudness N [sone]" not in text
+
+
 def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
     import re

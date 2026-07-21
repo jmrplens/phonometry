@@ -44,10 +44,11 @@ from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
     _LIGHT_HEX,
+    _MUTED_HEX,
     _REPORTLAB_HINT,
     build_document,
     document_styles,
-    fmt_num,
+    fmt_meta,
     footer_flow,
     grid_table,
     render_figure_drawing,
@@ -114,7 +115,9 @@ def _metadata_pairs(
     """
 
     def num(value: float | None) -> str | None:
-        return fmt_num(value, language) if value is not None else None
+        # Round-trip formatting: the header grid reprints client-supplied
+        # values and must not silently reduce them (10.8 m^2, 101.32 kPa).
+        return fmt_meta(value, language) if value is not None else None
 
     specs: List[Tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
@@ -245,10 +248,16 @@ def _third_octave_table(
 
 
 def _statement(result: "AbsorptionRatingResult", language: str = "en") -> str:
-    """The boxed single-number statement ``alpha_w = X (shape)``."""
+    """The boxed single-number statement ``alpha_w = X(shape)``.
+
+    The shape indicator follows the value without a space, exactly as the
+    ISO 11654 clause 5.3 example (``0,70(MH)``) and
+    :attr:`~phonometry.materials.absorption_rating.AbsorptionRatingResult.rating_label`
+    write it.
+    """
     value = format_number(result.alpha_w, language, decimals=2)
     if result.shape_indicator:
-        value = f"{value} ({result.shape_indicator})"
+        value = f"{value}({result.shape_indicator})"
     return f"&#945;<sub>w</sub> = <b>{value}</b>"
 
 
@@ -391,6 +400,23 @@ def render_iso11654_report(
             _extended_terms(result, language),
         )
     )
+    if result.shape_indicator:
+        # ISO 11654 clause 5.3 NOTE: where a shape indicator applies, the
+        # weighted coefficient should be used together with the complete
+        # absorption-coefficient curve, which this fiche shows above.
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+
+        note_style = ParagraphStyle(
+            "fiche_iso11654_note", parent=getSampleStyleSheet()["Normal"],
+            fontSize=7.5, leading=10, textColor=colors.HexColor(_MUTED_HEX),
+            spaceBefore=4,
+        )
+        flow.append(
+            Paragraph(
+                t("A shape indicator applies: ISO 11654 (5.3 NOTE) recommends using &#945;<sub>w</sub> in combination with the complete sound absorption coefficient curve, shown above.", language),
+                note_style,
+            )
+        )
     if metadata is not None and metadata.requirement is not None:
         text, passed = _verdict(result, metadata.requirement, language)
         flow.extend(verdict_flow(text, passed, styles, language))

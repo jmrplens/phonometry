@@ -651,16 +651,17 @@ ImpactRatingResult.report(
     engine: str = 'reportlab',
     verbose: bool = False,
     language: str = 'en',
+    symbol: str | None = None,
 ) -> str
 ```
 
 Render an ISO 717-2 impact-insulation fiche to a PDF.
 
 Writes a one-page accredited-laboratory report for impact sound: the
-standard-basis line, an optional metadata header block, the
-one-third-octave table beside the measured-versus-shifted-reference
-plot (the result's own `plot`), the boxed `Ln,w (CI)` result,
-an optional verdict row and a footer with the fixed disclaimer.
+standard-basis line, an optional metadata header block, the band
+table beside the measured-versus-shifted-reference plot (the
+result's own `plot`), the boxed `Ln,w (CI)` result, an
+optional verdict row and a footer with the fixed disclaimer.
 
 **Parameters**
 
@@ -671,6 +672,7 @@ an optional verdict row and a footer with the fixed disclaimer.
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table uses the ISO 717 Annex C columns (frequency, measured value, shifted reference, unfavourable deviation) instead of the two-column `f \| value` table. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+| `symbol` | The reported single-number quantity, as plain text: `"Ln,w"` (the default when `None`), `"L'n,w"` or `"L'nT,w"` per ISO 717-2 Table 1, so a field measurement is not mislabelled with the laboratory descriptor. |
 
 **Returns:** The written `path` as a `str`.
 
@@ -678,7 +680,7 @@ an optional verdict row and a footer with the fixed disclaimer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` is not `"reportlab"` or the result was built without the per-band data (`band_centers`, `measured`, `shifted_reference`). |
+| ValueError | If `engine` is not `"reportlab"`, `symbol` is not a valid quantity-symbol shape, or the result was built without the per-band data (`band_centers`, `measured`, `shifted_reference`). |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
 
 ## ReportMetadata
@@ -1014,14 +1016,15 @@ WeightedRatingResult.report(
     engine: str = 'reportlab',
     verbose: bool = False,
     language: str = 'en',
+    symbol: str | None = None,
 ) -> str
 ```
 
 Render an ISO 717-1 airborne sound-insulation fiche to a PDF.
 
 Writes a one-page accredited-laboratory report: the standard-basis
-line, an optional metadata header block, the one-third-octave table
-beside the measured-versus-shifted-reference plot (the result's own
+line, an optional metadata header block, the band table beside the
+measured-versus-shifted-reference plot (the result's own
 `plot`), the boxed `Rw (C; Ctr)` result, an optional verdict
 row and a footer with the fixed disclaimer.
 
@@ -1034,6 +1037,7 @@ row and a footer with the fixed disclaimer.
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the table uses the ISO 717 Annex C columns (frequency, measured value, shifted reference, unfavourable deviation) instead of the two-column `f \| value` table. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+| `symbol` | The reported single-number quantity, as plain text: `"Rw"` (the default when `None`), `"R'w"`, `"Dn,w"`, `"DnT,w"` ... per ISO 717-1 Tables 1-2, so a field measurement (e.g. a standardized level difference rated to `DnT,w`) is not mislabelled with the laboratory descriptor. |
 
 **Returns:** The written `path` as a `str`.
 
@@ -1041,5 +1045,5 @@ row and a footer with the fixed disclaimer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` is not `"reportlab"` or the result was built without the per-band data (`band_centers`, `measured`, `shifted_reference`). |
+| ValueError | If `engine` is not `"reportlab"`, `symbol` is not a valid quantity-symbol shape, or the result was built without the per-band data (`band_centers`, `measured`, `shifted_reference`). |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`). |

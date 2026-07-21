@@ -18,8 +18,9 @@ one-page PDF laid out like an aircraft-noise-certification data sheet:
 * a boxed single-number result ``EPNL = X EPNdB``;
 * a Level | Limit | Margin verdict row when a certification limit is supplied
   (``metadata.requirement``); the EPNL passes at or below it;
-* a static reference-conditions strip (25 C, 70 % RH, sea level, zero wind,
-  ISA); and
+* a static reference-conditions strip (25 C i.e. ISA + 10 C, 70 % RH,
+  1013.25 hPa sea-level pressure, zero wind; Annex 16 Vol I Part II,
+  3.6.1.5); and
 * a footer identity/disclaimer block, plus a line stating the fiche is a
   computational result and not an official State noise certificate.
 
@@ -44,6 +45,7 @@ from ._layout import (
     _REPORTLAB_HINT,
     build_document,
     compliance_table,
+    display_round,
     document_styles,
     fmt_num,
     footer_flow,
@@ -114,8 +116,13 @@ def _metric_rows(
 
 
 def _statement(result: "EPNLResult", language: str = "en") -> str:
-    """The boxed single-number statement ``EPNL = X EPNdB``."""
-    epnl = format_number(result.epnl, language, decimals=1)
+    """The boxed single-number statement ``EPNL = X EPNdB``.
+
+    Annex 16 determines the EPNL to one decimal place, so the displayed value
+    is the model-rounded tenth (halves away from zero), the same value the
+    verdict compares.
+    """
+    epnl = format_number(display_round(result.epnl), language, decimals=1)
     return f"EPNL = <b>{epnl} EPNdB</b>"
 
 
@@ -126,13 +133,18 @@ def _verdict_rows(
 
     The EPNL passes at or below the certification limit; the limit cell also
     carries the signed margin ``limit - EPNL`` (positive when compliant).
+    Annex 16 determines the EPNL "to one decimal place", so the level is
+    rounded to a tenth once (halves away from zero) and that same value
+    drives the displayed level, the margin and the pass/fail status; the
+    printed numbers can then never contradict the verdict at the limit.
     """
-    margin = limit - float(result.epnl)
-    status = "pass" if float(result.epnl) <= limit else "fail"
+    epnl = display_round(result.epnl)
+    margin = limit - epnl
+    status = "pass" if epnl <= limit + 1e-9 else "fail"
     return [
         (
             t("EPNL [EPNdB]", language),
-            format_number(result.epnl, language, decimals=1),
+            format_number(epnl, language, decimals=1),
             t("&#8804; {limit} (margin {margin})", language).format(
                 limit=fmt_num(limit, language),
                 margin=decimal_comma(f"{margin:+.1f}", language),
@@ -207,7 +219,7 @@ def render_annex16_epnl_report(
             flow.append(Spacer(1, 3))
             flow.append(grid_table(header_pairs))
     flow.append(
-        Paragraph(t("Reference conditions: 25 &#176;C, 70% relative humidity, sea level, zero wind, ISA (ICAO Annex 16 Vol I App. 2).", language), muted_strip_style)
+        Paragraph(t("Reference conditions: 25 &#176;C (ISA + 10 &#176;C), 70% relative humidity, 1013.25 hPa sea-level pressure, zero wind (ICAO Annex 16 Vol I Part II, 3.6.1.5).", language), muted_strip_style)
     )
     flow.append(Spacer(1, 8))
 

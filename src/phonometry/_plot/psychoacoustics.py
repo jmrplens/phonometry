@@ -129,9 +129,43 @@ def plot_zwicker_loudness(
         return ax_specific
 
     ax_time = cast("Axes", axes[1])
+    plot_zwicker_loudness_time(result, ax=ax_time, language=language)
+    localize_axes(ax_specific, language)
+    return axes
+
+
+def plot_zwicker_loudness_time(
+    result: ZwickerLoudness, ax: Axes | None = None, *, language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Loudness-versus-time function N(t) of a time-varying result (ISO 532-1).
+
+    Draws the 500 Hz total-loudness trace (clause 6.5) with the N5/N10
+    percentile levels marked; this is the "loudness time function in sones"
+    clause 7 requires a time-varying loudness report to state. Also used as
+    the second panel of :func:`plot_zwicker_loudness`.
+
+    :param result: A time-varying
+        :class:`~phonometry.loudness_zwicker.ZwickerLoudness` (with
+        ``time`` / ``loudness_vs_time``).
+    :param ax: Existing axes to draw on, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the loudness-trace ``plot`` call.
+    :return: The axes.
+    :raises ValueError: If the result carries no loudness-vs-time trace.
+    """
+    from .._i18n import format_number, localize_axes
+
+    if result.time is None or result.loudness_vs_time is None:
+        raise ValueError(
+            "plot_zwicker_loudness_time() needs a time-varying result with "
+            "'time' and 'loudness_vs_time'."
+        )
+    ax_time = ax if ax is not None else _new_axes()
     time = np.asarray(result.time, dtype=np.float64)
     lvt = np.asarray(result.loudness_vs_time, dtype=np.float64)
-    ax_time.plot(time, lvt, color=_C_TERTIARY, label="N(t)")
+    kwargs.setdefault("color", _C_TERTIARY)
+    ax_time.plot(time, lvt, label="N(t)", **kwargs)
     if result.n5 is not None:
         ax_time.axhline(
             result.n5, color=_C_REFERENCE, ls="--", lw=1,
@@ -147,9 +181,8 @@ def plot_zwicker_loudness(
     ax_time.set_ylim(bottom=0.0)
     ax_time.grid(True, alpha=0.3)
     ax_time.legend(loc="best", fontsize="small")
-    localize_axes(ax_specific, language)
     localize_axes(ax_time, language)
-    return axes
+    return ax_time
 
 
 def plot_ecma_loudness(

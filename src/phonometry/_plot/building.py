@@ -196,7 +196,8 @@ def plot_weighted_rating(
         np.asarray(result.shifted_reference, dtype=np.float64),
         impact=False,
         title=(
-            f"ISO 717-1 Rw (C={result.c:+d}; Ctr={result.ctr:+d}) = "
+            # Sign only when negative, the style of ISO 717-1's own examples.
+            f"ISO 717-1 Rw (C={result.c:d}; Ctr={result.ctr:d}) = "
             f"{result.rating} dB  ({_t('Sigma unfav.', language)} = "
             f"{format_number(result.unfavourable_sum, language, decimals=1)} dB)"
         ),
@@ -241,7 +242,8 @@ def plot_impact_rating(
         # the dataclass does not carry which, so the figure uses the neutral
         # "impact rating" label rather than hard-coding one specific symbol.
         title=(
-            f"ISO 717-2 {_t('impact rating', language)} (CI={result.ci:+d}) = "
+            # Sign only when negative, the style of ISO 717-2's own examples.
+            f"ISO 717-2 {_t('impact rating', language)} (CI={result.ci:d}) = "
             f"{result.rating} dB  ({_t('Sigma unfav.', language)} = "
             f"{format_number(result.unfavourable_sum, language, decimals=1)} dB)"
         ),

@@ -61,9 +61,9 @@ def _binding_margin(result: "FilterComplianceResult", cls: int) -> float:
 def _basis(metadata: ReportMetadata | None, edition: str, language: str = "en") -> str:
     """The standard-basis line for the fiche."""
     table = (
-        "IEC 61260-1:2014, Table 1"
+        t("IEC 61260-1:2014, Table 1", language)
         if edition == "2014"
-        else "IEC 61260:1995 / ANSI S1.11-2004, Table 1"
+        else t("IEC 61260:1995 / ANSI S1.11-2004, Table 1", language)
     )
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
@@ -98,15 +98,33 @@ def _metadata_pairs(
     ]
 
 
-def _fraction_label(fraction: int) -> str:
+def _fraction_label(fraction: int, language: str = "en") -> str:
     """Human bandwidth-designator label (``1/1-octave``, ``1/3-octave``, ...)."""
-    return "1/1-octave" if fraction == 1 else f"1/{fraction}-octave"
+    if fraction == 1:
+        return t("1/1-octave", language)
+    return t("1/{fraction}-octave", language).format(fraction=fraction)
+
+
+def _band_label(exact_freq: float, fraction: int) -> str:
+    """The nominal band label of an exact mid-band frequency (e.g. ``125 Hz``).
+
+    Both editions identify the filters of a bank by their nominal mid-band
+    frequencies (IEC 61260-1:2014 5.5; IEC 61260:1995 4.2), not by the exact
+    base-ten values behind them, so the per-band table is labelled with the
+    nominal frequency (125 Hz, not the exact 125.89... Hz).
+    """
+    from ..metrology.frequencies import _nominal_freq_for_band
+
+    nominal = _nominal_freq_for_band(exact_freq, float(fraction))
+    if nominal >= 1000.0:
+        return f"{nominal / 1000.0:g} kHz"
+    return f"{nominal:g} Hz"
 
 
 def _metric_rows(
     result: "FilterComplianceResult", language: str = "en"
 ) -> List[Tuple[str, str]]:
-    """Per-band rows: mid-band frequency vs achieved class and binding margin."""
+    """Per-band rows: nominal mid-band frequency vs achieved class and margin."""
     cls = result.reference_class()
     key = f"margin_class{cls}_db"
     rows: List[Tuple[str, str]] = []
@@ -118,9 +136,11 @@ def _metric_rows(
             else t("Class {n}", language).format(n=band_class)
         )
         margin = float(band[key])
-        freq = format_number(float(band["freq"]), language, decimals=0)
+        freq = decimal_comma(
+            _band_label(float(band["freq"]), result.fraction), language
+        )
         margin_text = decimal_comma(f"{margin:+.2f}", language)
-        rows.append((f"{freq} Hz", f"{class_text} ({margin_text} dB)"))
+        rows.append((freq, f"{class_text} ({margin_text} dB)"))
     return rows
 
 
@@ -184,6 +204,9 @@ def render_iec61260_report(
     :param verbose: Accepted for a uniform ``.report()`` signature; the
         filter-compliance fiche has a single body layout, so it has no effect.
     :return: The written ``path`` as a :class:`str`.
+    :raises ValueError: If ``metadata.required_class`` does not exist in the
+        edition the result was verified against (class 0 exists only in the
+        1995 edition).
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
     """
@@ -218,10 +241,15 @@ def render_iec61260_report(
         fontSize=7.5, leading=10, textColor=colors.HexColor(_MUTED_HEX),
         spaceBefore=6,
     )
+    basis_strip_key = (
+        "{fraction} bank, sampling rate f<sub>s</sub> = {fs} Hz; relative attenuation referenced to the mid-band level (IEC 61260-1 Formula 8)."
+        if result.edition == "2014"
+        else "{fraction} bank, sampling rate f<sub>s</sub> = {fs} Hz; relative attenuation referenced to the mid-band level (IEC 61260:1995, 3.13 Note)."
+    )
     flow.append(
         Paragraph(
-            t("{fraction} bank, sampling rate f<sub>s</sub> = {fs} Hz; relative attenuation referenced to the mid-band level (IEC 61260-1 Formula 8).", language).format(
-                fraction=_fraction_label(result.fraction),
+            t(basis_strip_key, language).format(
+                fraction=_fraction_label(result.fraction, language),
                 fs=format_number(result.fs, language, decimals=0),
             ),
             basis_strip_style,
@@ -242,7 +270,24 @@ def render_iec61260_report(
     flow.append(Spacer(1, 8))
 
     flow.append(result_box(_statement(result, language), styles, accent))
+    if getattr(result, "range_limited", False):
+        # The multirate verifier cannot exercise the stop-band mask beyond a
+        # band's processing Nyquist (no decimated signal energy exists there),
+        # so the stated class attests the verified range and says so.
+        flow.append(
+            Paragraph(
+                t("Stop-band limits verified up to each band's processing Nyquist frequency; the multirate anti-aliasing leaves no signal energy beyond it, but the Table 1 limits there are not demonstrated, so the stated class attests the verified frequency range.", language),
+                basis_strip_style,
+            )
+        )
     if metadata is not None and metadata.required_class is not None:
+        if metadata.required_class not in result.available_classes():
+            raise ValueError(
+                f"required_class={metadata.required_class} does not exist in "
+                f"the {result.edition} edition this result was verified "
+                f"against (available classes: {result.available_classes()}); "
+                "class 0 requires edition='1995'."
+            )
         text, passed = _verdict(result, metadata.required_class, language)
         flow.extend(verdict_flow(text, passed, styles, language))
     flow.extend(footer_flow(metadata, language))

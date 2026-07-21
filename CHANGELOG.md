@@ -9,6 +9,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- The EBU R 128 programme-loudness fiche no longer passes the verdict on the
+  obsolete blanket ±0.5 LU tolerance (the June 2014 V3 rule, superseded in
+  the August 2020 V4 revision and absent from R 128-2023).
+  `ProgramLoudnessResult.report()` now selects the tolerance explicitly via a
+  `tolerance` keyword: the default `"qc"` applies the ±0.2 LU
+  measurement-error allowance of R 128 item i) (loudness workflows such as
+  Quality Control) and `"live"` applies the ±1.0 LU tolerance of item h),
+  permitted only where the Target Level is not achievable practically; the
+  fiche prints the applied rule and its R 128 item. A non-live programme at
+  −23.5 LUFS, previously rendered PASS, now correctly fails the default rule.
+- Fiche verdicts are now evaluated on the value rounded exactly as displayed,
+  so the printed numbers can no longer contradict the pass/fail at a
+  tolerance boundary: the programme-loudness delta is compared at the 0.1 LU
+  display precision of EBU Tech 3341, the EPNL is determined once to one
+  decimal place (as Annex 16 states it) before the level, margin and status
+  are derived, and the ISO 532-1 loudness verdict compares the one-decimal
+  displayed value. Tiny negative values no longer print as "-0.0".
+- `effective_perceived_noise_level()` gains a `procedure` keyword
+  (`"aeroplane"` default, `"helicopter"`) that plumbs the tone-correction
+  start band of ICAO Annex 16 Vol I App. 2, 4.3.1 Step 1 through the public
+  EPNL chain: helicopters and tilt-rotors start the slope analysis at the
+  50 Hz band, so rotor tones in the 50-80 Hz bands are no longer silently
+  outside the analysis when the spectrum is processed with the default
+  aeroplane procedure.
+- The ISO 717 fiche now declares the band set actually rated (an octave-band
+  rating was captioned "One-third-octave", contradicting the clause 4.4
+  statement requirement) and can name the reported single-number quantity via
+  a `symbol` keyword on `report()` (e.g. `"DnT,w"`, `"L'nT,w"`), so a field
+  measurement is no longer mislabelled with the laboratory `Rw` / `Ln,w`
+  descriptor; spectrum-adaptation terms print a sign only when negative,
+  matching the standard's own examples.
+- The ISO 532-1 fiche now reports the items clause 7 makes mandatory: the
+  method used (stationary, clause 5, or time-varying, clause 6), the sound
+  field (`ZwickerLoudness` gains a `field` attribute set by the
+  constructors), the loudness-versus-time function N(t) for time-varying
+  sounds and the "maximum loudness Nmax" labelling of the reported maximum.
+- `verify_filter_class()` / `filter_class_compliance()` now report when the
+  verification is range-limited: the stop-band mask beyond each band's
+  processing Nyquist cannot be exercised at the decimated rate (the
+  `range_limited` flag and per-band `checked_to_omega` record it), and the
+  IEC 61260-1 fiche qualifies its COMPLIES statement accordingly instead of
+  asserting unqualified full-mask conformance. The fiche also labels bands
+  with the nominal mid-band frequencies both editions identify filters by
+  (125 Hz, not the exact 125.89.. Hz), cites the 1995 edition's own
+  relative-attenuation definition instead of a 2014-only formula number, and
+  rejects a `required_class` that does not exist in the verified edition
+  (class 0 against a 2014 result previously rendered a meaningless FAIL).
+- Spanish fiches (`language="es"`) now localise the embedded chart too: the
+  fiche language is forwarded to the result's own `plot()`, so axis labels
+  and legends render in Spanish instead of English.
+- Fiche header grids reprint client-supplied metadata verbatim instead of
+  display-rounding it (an area of 1.23 m² was printed as "1.2"), and the
+  ISO 11654 fiche writes the shape indicator in the clause 5.3 style
+  (`0.60(M)`, no space) with the 5.3 NOTE recommendation printed when an
+  indicator applies.
+
 - `LoudspeakerCharacteristics.minimum_impedance` now evaluates the lowest
   impedance modulus over the rated frequency range when
   `rated_frequency_range` is supplied, as IEC 60268-5 clause 16.1 requires

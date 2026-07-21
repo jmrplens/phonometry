@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import html
 import math
+import re
 from typing import TYPE_CHECKING, Any, List, Tuple, cast
 
 import numpy as np
@@ -46,6 +47,7 @@ from ._layout import (
     band_table_header_style,
     build_document,
     document_styles,
+    fmt_meta,
     fmt_num,
     footer_flow,
     grid_table,
@@ -68,29 +70,81 @@ _Y_TOP_AIRBORNE = 60.0
 _Y_TOP_IMPACT = 80.0
 
 
+#: Plain-text form of a valid ISO 717 single-number-quantity symbol: a leading
+#: capital (optionally primed, e.g. ``R'``) followed by the subscripted rest
+#: (letters, digits, commas), e.g. ``Rw``, ``R'w``, ``Dn,w``, ``DnT,w``,
+#: ``Ln,w``, ``L'nT,w``.
+_SYMBOL_RE = re.compile(r"^([A-Z]'?)([A-Za-z0-9,]+)$")
+
+
+def _symbol_markup(symbol: str) -> str:
+    """Reportlab markup of a plain-text quantity symbol (``DnT,w`` -> ``D<sub>nT,w</sub>``).
+
+    :raises ValueError: If ``symbol`` is not a leading (optionally primed)
+        capital followed by its subscript, the shape of every ISO 717-1
+        Tables 1-2 / ISO 717-2 Table 1 single-number quantity.
+    """
+    match = _SYMBOL_RE.match(symbol)
+    if match is None:
+        raise ValueError(
+            f"Invalid ISO 717 quantity symbol {symbol!r}; expected a leading "
+            "capital letter (optionally primed) followed by its subscript, "
+            "e.g. 'Rw', 'R'w', 'DnT,w', 'L'nT,w'."
+        )
+    stem, subscript = match.groups()
+    return f"{stem}<sub>{subscript}</sub>"
+
+
+def _band_symbol_markup(symbol: str) -> str:
+    """Markup of the per-band quantity behind a weighted symbol.
+
+    Strips the trailing weighted-``w`` marker (and its comma) so the value
+    table is headed by the band quantity the curve actually holds
+    (``DnT,w`` -> ``D<sub>nT</sub>``, ``Rw`` -> ``R``).
+    """
+    band = symbol
+    if band.endswith(",w"):
+        band = band[:-2]
+    elif band.endswith("w"):
+        band = band[:-1]
+    if _SYMBOL_RE.match(band):
+        return _symbol_markup(band)
+    return band
+
+
 def _labels(
     result: "WeightedRatingResult | ImpactRatingResult",
     language: str = "en",
+    symbol: str | None = None,
 ) -> Tuple[str, str, str, str]:
-    """Return ``(title, rating_part, statement, value_header)`` for the quantity."""
+    """Return ``(title, rating_part, statement, value_header)`` for the quantity.
+
+    ``symbol`` selects the reported single-number quantity (``Rw``, ``R'w``,
+    ``Dn,w``, ``DnT,w`` per ISO 717-1 Tables 1-2; ``Ln,w``, ``L'n,w``,
+    ``L'nT,w`` per ISO 717-2 Table 1); ``None`` keeps the laboratory defaults
+    ``Rw`` / ``Ln,w``. The adaptation terms print a sign only when negative,
+    the style of the standard's own examples (e.g. ``41 (0; -5) dB``).
+    """
     if result.quantity == "impact":
         impact = cast("ImpactRatingResult", result)
         title = t("Impact sound insulation rating", language)
         rating_part = "ISO 717-2"
+        sym = _symbol_markup(symbol if symbol is not None else "Ln,w")
         statement = (
-            f"L<sub>n,w</sub> (C<sub>I</sub>) = "
-            f"<b>{impact.rating} ({impact.ci:+d}) dB</b>"
+            f"{sym} (C<sub>I</sub>) = "
+            f"<b>{impact.rating} ({impact.ci:d}) dB</b>"
         )
-        value_header = "L<sub>n</sub>"
+        value_header = _band_symbol_markup(symbol) if symbol else "L<sub>n</sub>"
     else:
         airborne = cast("WeightedRatingResult", result)
         title = t("Airborne sound insulation rating", language)
         rating_part = "ISO 717-1"
+        sym = _symbol_markup(symbol if symbol is not None else "Rw")
         statement = (
-            f"R<sub>w</sub> (C; C<sub>tr</sub>) = "
-            f"<b>{airborne.rating} ({airborne.c:+d}; {airborne.ctr:+d}) dB</b>"
+            f"{sym} (C; C<sub>tr</sub>) = "
+            f"<b>{airborne.rating} ({airborne.c:d}; {airborne.ctr:d}) dB</b>"
         )
-        value_header = "R"
+        value_header = _band_symbol_markup(symbol) if symbol else "R"
     return title, rating_part, statement, value_header
 
 
@@ -119,7 +173,7 @@ def _metadata_pairs(
             (t("Mounted by", language), metadata.mounted_by),
             (
                 t("Sample area S [m<super>2</super>]", language),
-                fmt_num(metadata.area, language)
+                fmt_meta(metadata.area, language)
                 if metadata.area is not None else None,
             ),
             (t("Manufacturer", language), metadata.manufacturer),
@@ -130,7 +184,9 @@ def _metadata_pairs(
     )
 
     def num(value: float | None) -> str | None:
-        return fmt_num(value, language) if value is not None else None
+        # Round-trip formatting: the header grid reprints client-supplied
+        # values and must not silently reduce them (1.23 m^2 stays "1.23").
+        return fmt_meta(value, language) if value is not None else None
 
     # Per-room temperature/humidity when supplied; otherwise a single value.
     per_room_t = (
@@ -258,23 +314,28 @@ def _verdict(
     result: "WeightedRatingResult | ImpactRatingResult",
     requirement: float,
     language: str = "en",
+    symbol: str | None = None,
 ) -> Tuple[str, bool]:
     """Return the verdict text and a PASS flag for a supplied requirement.
 
     Airborne ratings pass when the rating meets or exceeds the requirement;
     impact ratings pass when the rating is at or below it (lower is better).
+    The verdict names the reported quantity (``symbol``, defaulting to the
+    laboratory ``Rw`` / ``Ln,w``).
     """
     rating = float(result.rating)
     req_text = fmt_num(requirement, language)
     if result.quantity == "impact":
         passed = rating <= requirement
-        text = t("L<sub>n,w</sub> = {rating} dB, required &#8804; {req} dB", language).format(
-            rating=result.rating, req=req_text
+        sym = _symbol_markup(symbol if symbol is not None else "Ln,w")
+        text = t("{sym} = {rating} dB, required &#8804; {req} dB", language).format(
+            sym=sym, rating=result.rating, req=req_text
         )
     else:
         passed = rating >= requirement
-        text = t("R<sub>w</sub> = {rating} dB, required &#8805; {req} dB", language).format(
-            rating=result.rating, req=req_text
+        sym = _symbol_markup(symbol if symbol is not None else "Rw")
+        text = t("{sym} = {rating} dB, required &#8805; {req} dB", language).format(
+            sym=sym, rating=result.rating, req=req_text
         )
     return text, passed
 
@@ -309,7 +370,9 @@ def _extended_terms(
             continue
         if not math.isfinite(number):  # pragma: no cover - defensive
             continue
-        terms.append(f"{label} = {number:+.0f} dB")
+        # Sign only when negative, the style of the standard's own examples
+        # (format_number also normalises a signed zero away).
+        terms.append(f"{label} = {format_number(number, decimals=0)} dB")
     return terms
 
 
@@ -320,6 +383,7 @@ def render_iso717_report(
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
     language: str = "en",
+    symbol: str | None = None,
 ) -> str:
     """Render an ISO 717 accredited-laboratory rating fiche to a PDF at ``path``.
 
@@ -335,7 +399,14 @@ def render_iso717_report(
     :param verbose: When ``True``, the left table uses the ISO 717 Annex C
         columns (f, measured, shifted reference, unfavourable deviation);
         otherwise the accredited two-column ``f | value`` table.
+    :param symbol: The reported single-number quantity, as plain text (e.g.
+        ``"R'w"``, ``"Dn,w"``, ``"DnT,w"`` per ISO 717-1 Tables 1-2;
+        ``"L'n,w"``, ``"L'nT,w"`` per ISO 717-2 Table 1). ``None`` keeps the
+        laboratory defaults ``Rw`` / ``Ln,w``. The symbol heads the boxed
+        result, the value-table column and the verdict row, so a field
+        measurement is not mislabelled as the laboratory quantity.
     :return: The written ``path`` as a :class:`str`.
+    :raises ValueError: If ``symbol`` is not a valid quantity-symbol shape.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
     """
@@ -371,7 +442,7 @@ def render_iso717_report(
     else:
         deviations = np.maximum(shifted - measured, 0.0)
 
-    title, rating_part, statement, value_header = _labels(result, language)
+    title, rating_part, statement, value_header = _labels(result, language, symbol)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
 
@@ -404,9 +475,16 @@ def render_iso717_report(
     value_table = _value_table(
         centers, measured, shifted, deviations, value_header, verbose, language
     )
+    # ISO 717-1/-2 clause 4.4 requires stating whether the rating came from
+    # one-third-octave or octave bands; the caption declares the actual set.
+    caption_key = (
+        "Octave-band {vh} [dB]"
+        if centers.size == 5
+        else "One-third-octave {vh} [dB]"
+    )
     left_cell = [
         Paragraph(
-            t("One-third-octave {vh} [dB]", language).format(vh=value_header),
+            t(caption_key, language).format(vh=value_header),
             caption_style,
         ),
         value_table,
@@ -421,7 +499,7 @@ def render_iso717_report(
     # Boxed single-number result, optional verdict row, footer.
     flow.append(result_box(statement, styles, accent, _extended_terms(result)))
     if metadata is not None and metadata.requirement is not None:
-        text, passed = _verdict(result, metadata.requirement, language)
+        text, passed = _verdict(result, metadata.requirement, language, symbol)
         flow.extend(verdict_flow(text, passed, styles, language))
     flow.extend(footer_flow(metadata, language))
 

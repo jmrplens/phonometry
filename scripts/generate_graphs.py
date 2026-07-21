@@ -1,4 +1,5 @@
 import os
+import pathlib
 import sys
 
 # Deterministic figure output: pin every numerical thread pool to a single
@@ -1483,6 +1484,16 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
         plt.rcParams["svg.fonttype"] = "none"
         kwargs.setdefault("metadata", {"Date": None})
         plt.savefig(path, **kwargs)
+        # svg.fonttype='none' keeps text selectable, but matplotlib writes
+        # mathtext runs ('$...$') with a bare font-family ('DejaVu Sans', no
+        # generic), so viewers lacking that font fall back to a serif while
+        # plain <text> (full chain ending in sans-serif) stays sans. Normalise
+        # every declaration to the generic 'sans-serif' so all text renders in
+        # the viewer's native sans font, consistently and viewer-independently.
+        import re as _re
+        svg_text = pathlib.Path(path).read_text(encoding="utf-8")
+        svg_text = _re.sub(r"font-family:\s*[^;\"]+", "font-family: sans-serif", svg_text)
+        pathlib.Path(path).write_text(svg_text, encoding="utf-8")
         return
     import io
 

@@ -216,6 +216,24 @@ def test_broadband_report_renders(tmp_path) -> None:
     assert "Broadband" in _extract_text(str(out))
 
 
+def test_broadband_makes_no_mid_frequency_claim(tmp_path) -> None:
+    """A broadband result must NOT box a false "500-1000 Hz" T_mid.
+
+    With no frequency bands there is no 500/1000 Hz averaging, so the boxed
+    descriptor is the plain broadband T30 and the verdict is broadband-aware;
+    neither the result box nor the verdict may claim "500-1000 Hz".
+    """
+    res = room_parameters(_synthetic_ir(), _FS, limits=None)
+    assert res.frequency is None
+    out = tmp_path / "broadband_claim.pdf"
+    res.report(str(out), metadata=_full_metadata(requirement=1.30))
+    text = _extract_text(str(out))
+    assert "500-1000" not in text
+    assert "T_mid" not in text and "Tmid" not in text
+    # A verdict is still emitted against the broadband reverberation time.
+    assert ("PASS" in text) or ("FAIL" in text)
+
+
 # --------------------------------------------------------------------------
 # Robustness and localisation
 # --------------------------------------------------------------------------

@@ -45,13 +45,14 @@ from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
     _LIGHT_HEX,
-    _MUTED_HEX,
     _REPORTLAB_HINT,
     build_document,
     document_styles,
+    escaped_pairs,
     fmt_meta,
     footer_flow,
     grid_table,
+    measurement_basis_style,
     render_figure_drawing,
     result_box,
     verdict_flow,
@@ -149,13 +150,7 @@ def _metadata_pairs(
         (t("Ambient pressure [kPa]", language), num(metadata.pressure)),
         (t("Date of test", language), metadata.test_date),
     ]
-    # Values are user-supplied free text; escape XML specials so a '&' or '<'
-    # cannot break reportlab's Paragraph parser. Labels carry intentional markup.
-    return [
-        (label, html.escape(str(value)))
-        for label, value in specs
-        if value is not None
-    ]
+    return escaped_pairs(specs)
 
 
 def _parameter_table(
@@ -277,49 +272,60 @@ def _band_value(
     return float(values[idx])
 
 
-def _mid_frequency(
+def _reverberation_descriptor(
     result: "RoomAcousticsResult", values: np.ndarray
-) -> float:
-    """Mean of the 500 Hz and 1000 Hz octave values (the mid-frequency average).
+) -> Tuple[float, bool]:
+    """Return ``(value, is_mid)`` for the boxed reverberation-time descriptor.
 
-    The room descriptor T_mid / EDT_mid is the arithmetic mean of the 500 Hz and
-    1000 Hz octave values (ISO 3382 reporting practice). Returns NaN unless both
-    bands are present and finite; for a broadband result the single value is
-    returned.
+    When the result carries frequency bands and both the 500 Hz and 1000 Hz
+    octaves are present and finite, the descriptor is the mid-frequency mean of
+    those two bands (T_mid / EDT_mid, the customary ISO 3382 room descriptor)
+    and ``is_mid`` is True. For a broadband result (``frequency is None``) or a
+    band range that does not span both mid octaves, the descriptor is the first
+    finite value with ``is_mid`` False, so the fiche never makes a false
+    "500-1000 Hz" claim about a value that was not averaged over those bands.
     """
     freq = result.frequency
     arr = np.asarray(values, dtype=np.float64)
-    if freq is None:
-        return float(arr[0]) if arr.size and math.isfinite(arr[0]) else float("nan")
-    low = _band_value(freq, arr, _TMID_BANDS[0])
-    high = _band_value(freq, arr, _TMID_BANDS[1])
-    if not (math.isfinite(low) and math.isfinite(high)):
-        return float("nan")
-    return 0.5 * (low + high)
+    if freq is not None:
+        low = _band_value(freq, arr, _TMID_BANDS[0])
+        high = _band_value(freq, arr, _TMID_BANDS[1])
+        if math.isfinite(low) and math.isfinite(high):
+            return 0.5 * (low + high), True
+    finite = arr[np.isfinite(arr)]
+    value = float(finite[0]) if finite.size else float("nan")
+    return value, False
 
 
 def _statement(result: "RoomAcousticsResult", language: str = "en") -> Tuple[str, List[str]]:
-    """The boxed mid-frequency reverberation time and its extended terms."""
-    t_mid = _mid_frequency(result, np.asarray(result.t30, dtype=np.float64))
-    edt_mid = _mid_frequency(result, np.asarray(result.edt, dtype=np.float64))
-    if math.isfinite(t_mid):
+    """The boxed reverberation-time descriptor and its extended EDT term.
+
+    A band result spanning the 500 Hz and 1000 Hz octaves boxes the
+    mid-frequency T_mid; a broadband result (or a range without both mid
+    octaves) boxes the plain reverberation time T30 without a "500-1000 Hz"
+    label, since no such averaging happened.
+    """
+    t_value, is_mid = _reverberation_descriptor(
+        result, np.asarray(result.t30, dtype=np.float64)
+    )
+    edt_value, _ = _reverberation_descriptor(
+        result, np.asarray(result.edt, dtype=np.float64)
+    )
+    if is_mid:
         statement = t(
             "T<sub>mid</sub> (500-1000 Hz) = <b>{value} s</b>", language
-        ).format(value=format_number(t_mid, language, decimals=2))
+        ).format(value=_cell(t_value, 2, language))
+        edt_key = "EDT<sub>mid</sub> = {value} s"
     else:
-        # No 500/1000 Hz octave pair (e.g. a survey range or broadband): box
-        # the reverberation time that is available instead of an empty result.
-        t30 = np.asarray(result.t30, dtype=np.float64)
-        finite = t30[np.isfinite(t30)]
-        value = float(finite[0]) if finite.size else float("nan")
         statement = t("T<sub>30</sub> = <b>{value} s</b>", language).format(
-            value=(_cell(value, 2, language))
+            value=_cell(t_value, 2, language)
         )
+        edt_key = "EDT = {value} s"
     extended: List[str] = []
-    if math.isfinite(edt_mid):
+    if math.isfinite(edt_value):
         extended.append(
-            t("EDT<sub>mid</sub> = {value} s", language).format(
-                value=format_number(edt_mid, language, decimals=2)
+            t(edt_key, language).format(
+                value=format_number(edt_value, language, decimals=2)
             )
         )
     return statement, extended
@@ -328,19 +334,26 @@ def _statement(result: "RoomAcousticsResult", language: str = "en") -> Tuple[str
 def _verdict(
     result: "RoomAcousticsResult", requirement: float, language: str = "en"
 ) -> Tuple[str, bool]:
-    """Verdict text and PASS flag for a supplied target mid-frequency T.
+    """Verdict text and PASS flag for a supplied target reverberation time.
 
-    The requirement is read as the maximum acceptable mid-frequency
-    reverberation time T_mid (the common form of a room-acoustics target, e.g.
-    a classroom or open-plan upper limit): the room passes when its measured
-    T_mid is at or below it.
+    The requirement is read as the maximum acceptable reverberation time (the
+    common form of a room-acoustics target, e.g. a classroom or open-plan upper
+    limit): the room passes when its measured descriptor is at or below it. The
+    verdict names T_mid only when the descriptor is the mid-frequency mean; a
+    broadband result is checked against its plain T30, with no "500-1000 Hz"
+    claim.
     """
-    t_mid = _mid_frequency(result, np.asarray(result.t30, dtype=np.float64))
-    passed = math.isfinite(t_mid) and t_mid <= requirement
-    text = t(
-        "T<sub>mid</sub> = {value} s, required &#8804; {req} s", language
-    ).format(
-        value=_cell(t_mid, 2, language),
+    t_value, is_mid = _reverberation_descriptor(
+        result, np.asarray(result.t30, dtype=np.float64)
+    )
+    passed = math.isfinite(t_value) and t_value <= requirement
+    key = (
+        "T<sub>mid</sub> = {value} s, required &#8804; {req} s"
+        if is_mid
+        else "T<sub>30</sub> = {value} s, required &#8804; {req} s"
+    )
+    text = t(key, language).format(
+        value=_cell(t_value, 2, language),
         req=format_number(requirement, language, decimals=2),
     )
     return text, passed
@@ -373,7 +386,6 @@ def render_iso3382_report(
     del verbose  # every parameter is always shown; kept for signature parity
     try:
         from reportlab.lib import colors
-        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.lib.units import mm
         from reportlab.platypus import Paragraph, Spacer
     except ImportError as exc:
@@ -440,11 +452,7 @@ def render_iso3382_report(
         text, passed = _verdict(result, metadata.requirement, language)
         flow.extend(verdict_flow(text, passed, styles, language))
 
-    basis_strip_style = ParagraphStyle(
-        "fiche_measurement_basis", parent=getSampleStyleSheet()["Normal"],
-        fontSize=7.5, leading=10, textColor=colors.HexColor(_MUTED_HEX),
-        spaceBefore=6,
-    )
+    basis_strip_style = measurement_basis_style()
     flow.append(
         Paragraph(
             t(

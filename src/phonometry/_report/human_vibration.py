@@ -55,6 +55,7 @@ from ._layout import (
     _REPORTLAB_HINT,
     _VERDICT_BAD_HEX,
     _VERDICT_OK_HEX,
+    analysis_cell_styles,
     build_document,
     display_round,
     document_styles,
@@ -62,6 +63,7 @@ from ._layout import (
     grid_table,
     render_figure_drawing,
     result_box,
+    stacked_table,
     verdict_flow,
 )
 from .metadata import ReportMetadata
@@ -151,53 +153,6 @@ def _metadata_pairs(
     return [(label, value) for label, value in specs if value]
 
 
-def _analysis_cell_styles() -> Tuple[Any, Any, Any]:
-    """(header, label-cell, value-cell) paragraph styles of the body tables."""
-    from reportlab.lib import colors
-    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-
-    styles = getSampleStyleSheet()
-    header_style = ParagraphStyle(
-        "humanvib_thead", parent=styles["Normal"], fontSize=8.5, leading=11,
-        textColor=colors.white, alignment=1,
-    )
-    label_style = ParagraphStyle(
-        "humanvib_label", parent=styles["Normal"], fontSize=8.5, leading=11,
-    )
-    value_style = ParagraphStyle(
-        "humanvib_value", parent=styles["Normal"], fontSize=8.5, leading=11,
-        alignment=1,
-    )
-    return header_style, label_style, value_style
-
-
-def _stacked_table(data: List[List[Any]], col_widths: List[Any]) -> Any:
-    """A full-width table with the accredited styling (accent header, zebra)."""
-    from reportlab.lib import colors
-    from reportlab.platypus import Table, TableStyle
-
-    accent = colors.HexColor(_ACCENT_HEX)
-    light = colors.HexColor(_LIGHT_HEX)
-    table = Table(data, colWidths=col_widths, repeatRows=1)
-    table.setStyle(
-        TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("BACKGROUND", (0, 0), (-1, 0), accent),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, light]),
-                ("LINEABOVE", (0, 0), (-1, 0), 0.6, accent),
-                ("LINEBELOW", (0, -1), (-1, -1), 0.6, accent),
-                ("TOPPADDING", (0, 0), (-1, -1), 3.0),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 3.0),
-                ("LEFTPADDING", (0, 0), (-1, -1), 4),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
-                ("BOX", (0, 0), (-1, -1), 0.5, accent),
-            ]
-        )
-    )
-    return table
-
-
 def _operations_table(
     result: "DailyVibrationExposure", verbose: bool = False, language: str = "en"
 ) -> Any:
@@ -212,7 +167,7 @@ def _operations_table(
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
 
-    header_style, label_style, value_style = _analysis_cell_styles()
+    header_style, label_style, value_style = analysis_cell_styles("humanvib")
     kind = str(result.assessment.kind)
     unit = _unit("a8", language)
     total_symbol = _KIND_TOTAL_SYMBOL.get(kind, "a<sub>v</sub>")
@@ -261,7 +216,7 @@ def _operations_table(
         total_row.append(Paragraph("", value_style))
     data.append(total_row)
 
-    table = _stacked_table(data, [w * mm for w in widths])
+    table = stacked_table(data, [w * mm for w in widths])
     # The totals row keeps the light fill regardless of the zebra parity.
     table.setStyle(
         [
@@ -311,7 +266,7 @@ def _assessment_table(result: "DailyVibrationExposure", language: str = "en") ->
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
 
-    header_style, label_style, value_style = _analysis_cell_styles()
+    header_style, label_style, value_style = analysis_cell_styles("humanvib")
 
     def _status_markup(exceeded: bool) -> str:
         if exceeded:
@@ -341,7 +296,7 @@ def _assessment_table(result: "DailyVibrationExposure", language: str = "en") ->
                 Paragraph(_status_markup(exceeded), label_style),
             ]
         )
-    return _stacked_table(data, [66 * mm, 32 * mm, 42 * mm, 34 * mm])
+    return stacked_table(data, [66 * mm, 32 * mm, 42 * mm, 34 * mm])
 
 
 #: The exposure-zone phrase for the boxed result, keyed by the assessment zone.
@@ -379,10 +334,16 @@ def _verdict(result: "DailyVibrationExposure", language: str = "en") -> Tuple[st
     displayed = display_round(float(assessment.value), _ACC_DECIMALS)
     limit = display_round(float(assessment.limit_value), _ACC_DECIMALS)
     passed = displayed < limit
-    text = t(
-        "A(8) = {a8} {unit} below the exposure limit value {elv} {unit}",
-        language,
-    ).format(
+    # The sentence states the actual relation, so a FAIL never reads as "below
+    # the exposure limit value" while its banner says FAIL.
+    if passed:
+        template = "A(8) = {a8} {unit} below the exposure limit value {elv} {unit}"
+    else:
+        template = (
+            "A(8) = {a8} {unit} reaches or exceeds the exposure limit value "
+            "{elv} {unit}"
+        )
+    text = t(template, language).format(
         a8=_fmt_acc(float(result.a8), language),
         elv=_fmt_acc(float(assessment.limit_value), language),
         unit=unit,
@@ -444,7 +405,7 @@ def render_human_vibration_report(
     # Full-width, landscape per-operation contribution chart (self-scaling).
     flow.append(
         render_figure_drawing(
-            result.plot, 174 * mm, y_top=None, figsize=(9.2, 2.55),
+            result.plot, 174 * mm, y_top=None, figsize=(9.2, 3.3),
             language=language,
         )
     )

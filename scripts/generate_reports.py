@@ -699,6 +699,46 @@ def _room_acoustics_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso3382_room_acoustics_example.pdf"
 
 
+def _open_plan_example() -> Tuple[object, ReportMetadata, str]:
+    """Open-plan-office fiche: ISO 3382-3 spatial decay of a good open office.
+
+    The measurement line is built from a closed-form model so the four
+    single-number quantities are exact and independently verifiable. The
+    A-weighted speech level is collinear in the logarithmic distance axis,
+    Lp,A,S(r) = 62.0 - 7.0*log2(r) dB, so the ISO 3382-3:2012 Clause 6.2
+    least-squares fit recovers D2,S = 7.0 dB per distance doubling and
+    Lp,A,S,4m = 62 - 7*log2(4) = 48.0 dB exactly. The STI is linear in
+    distance, STI(r) = 0.65 - 0.03*r, so the Clause 6.3 STI-vs-distance
+    regression crosses 0.50 at rD = (0.50 - 0.65)/(-0.03) = 5.0 m and 0.20 at
+    rP = (0.20 - 0.65)/(-0.03) = 15.0 m. Seven positions span the 2 m to 16 m
+    range (in the 6 to 10 preferred by Clause 5.2.2); this is a "good" office
+    (Annex A: D2,S >= 7 dB, Lp,A,S,4m <= 48 dB, rD <= 5 m).
+    """
+    positions = np.array([2.0, 3.0, 4.0, 6.0, 8.0, 11.0, 16.0])
+    spl_a_speech = 62.0 - 7.0 * np.log2(positions)
+    sti = 0.65 - 0.03 * positions
+    result = ph.room.open_plan_metrics(positions, spl_a_speech, sti)
+    metadata = ReportMetadata(
+        specimen="Furnished, unoccupied, background noise present",
+        client="Example client",
+        test_room="Open-plan office B (example)",
+        area=420.0,
+        source_positions=2,
+        receiver_positions=7,
+        instrumentation="Omnidirectional source + class 1 SLM (example)",
+        measurement_standard="ISO 3382-3",
+        temperature=22.0,
+        relative_humidity=45.0,
+        pressure=101.1,
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-3382-3",
+        requirement=7.0,
+    )
+    return result, metadata, "iso3382_3_open_plan_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -719,6 +759,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _occupational_exposure_example,
     _human_vibration_example,
     _room_acoustics_example,
+    _open_plan_example,
 ]
 
 

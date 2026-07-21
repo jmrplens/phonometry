@@ -298,6 +298,7 @@ ProgramLoudnessResult.report(
     engine: str = 'reportlab',
     verbose: bool = False,
     language: str = 'en',
+    tolerance: str = 'qc',
 ) -> str
 ```
 
@@ -320,6 +321,7 @@ PASS/FAIL verdict row and a footer with the fixed disclaimer.
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform signature; it has no effect on the single-layout programme-loudness fiche. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+| `tolerance` | Programme-loudness tolerance rule of EBU R 128: `"qc"` (default) applies the +-0.2 LU allowance of item i) for measurement errors in loudness workflows such as Quality Control; `"live"` applies the +-1.0 LU tolerance of item h), permitted only where attaining the Target Level is not achievable practically (for example, live programmes). The fiche prints the applied rule and its R 128 item. |
 
 **Returns:** The written `path` as a `str`.
 
@@ -327,7 +329,7 @@ PASS/FAIL verdict row and a footer with the fixed disclaimer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` is not `"reportlab"`. |
+| ValueError | If `engine` is not `"reportlab"` or `tolerance` is not `"qc"`/`"live"`. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
 
 ## true_peak_level

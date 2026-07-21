@@ -685,6 +685,68 @@ fields and marks `rd` / `rp`.
 STI can itself be measured with the STIPA tools in the
 [Speech Transmission Index guide](/phonometry/guides/speech-transmission/).
 
+### ISO 3382-3 report (`.report()`)
+
+`OpenPlanResult.report(path)` renders a one-page PDF fiche laid out like an
+open-plan-office speech-privacy measurement report: a standard-basis line, an
+optional metadata header block, a compact metrics table of the four
+single-number quantities of Clause 4 ($D_{2,S}$, $L_{p,A,S,4m}$, the
+distraction distance $r_D$ and the privacy distance $r_P$) beside the result's
+own spatial-decay plot (`.plot()`, the Clause 6.2 regression on the logarithmic
+distance axis with the 4 m read-off and the $r_D$ / $r_P$ crossings marked, the
+Figure 3 style curve), the boxed $D_{2,S}$ with the other quantities alongside,
+and a footer with the fixed disclaimer. ISO 3382-3 **characterises** a space
+rather than defining an intrinsic pass/fail, so a verdict row appears only when
+a target spatial decay rate is supplied through the metadata's `requirement`
+field (`ReportMetadata(requirement=...)`, read as the minimum acceptable
+$D_{2,S}$ in dB, reflecting the informative quality ranges of Annex A where a
+larger spatial decay is better; the room passes at or above it). It uses the
+same `ReportMetadata` container and rendering engine as the
+[ISO 3382-1/-2 room-acoustics fiche](#iso-3382-report-report); the
+open-plan-specific fields `area` (floor area), `source_positions` and
+`receiver_positions` (the number of measurement positions) populate the header,
+alongside `client`, `test_room` (the office or zone), `specimen` (the
+description and furnishing state), `instrumentation`, `temperature`,
+`relative_humidity`, `pressure`, `measurement_standard`, `test_date`,
+`laboratory`, `operator`, `report_id` and `notes`. Passing `metadata=None`
+produces a bare characterisation fiche. Rendering needs reportlab
+(`pip install phonometry[report]`); only `engine="reportlab"` is supported. The
+fiche renders in English by default; pass `language="es"` for a Spanish fiche
+(translated fixed strings and a comma decimal separator).
+
+```python
+import numpy as np
+from phonometry import room, ReportMetadata
+
+r = np.array([2.0, 3.0, 4.0, 6.0, 8.0, 11.0, 16.0])   # distances from the talker (m)
+lp = 62.0 - 7.0 * np.log2(r)                           # A-weighted speech level (dB)
+sti = 0.65 - 0.03 * r                                  # STI per position
+
+result = room.open_plan_metrics(r, lp, sti)
+result.report(
+    "open_plan_fiche.pdf",
+    metadata=ReportMetadata(
+        test_room="Open-plan office B",
+        specimen="Furnished, unoccupied, background noise present",
+        area=420.0, source_positions=2, receiver_positions=7,
+        measurement_standard="ISO 3382-3",
+        temperature=22.0, relative_humidity=45.0,
+        laboratory="Phonometry Reference Laboratory",
+        requirement=7.0,          # adds a verdict against a target D2,S
+    ),
+)                                 # D2,S + Lp,A,S,4m, rD, rP and the decay curve
+```
+
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
+
+<ReportPreview
+	name="iso3382_3_open_plan_example"
+	title="ISO 3382-3 open-plan office acoustics example report (PDF)"
+	description="One-page open-plan-office fiche: a metadata header (client, office/zone, description, floor area, source and measurement positions, instrumentation, temperature, humidity and pressure), the metrics table of the four single-number quantities (D2,S = 7.0 dB per doubling, Lp,A,S,4m = 48.0 dB, rD = 5.0 m, rP = 15.0 m) above the spatial-decay plot on a logarithmic distance axis with the D2,S regression, the 4 m read-off and the rD and rP crossings, the boxed D2,S, and a PASS verdict against the 7.0 dB target."
+	caption="Open-plan office acoustics fiche (OpenPlanResult.report): D2,S, Lp,A,S,4m, rD, rP and the spatial-decay curve."
+/>
+
 ## 4. Sound absorption (ISO 354)
 
 The equivalent absorption area `A` that drives `R'`, `L'n`, the ISO 3744 `K2`

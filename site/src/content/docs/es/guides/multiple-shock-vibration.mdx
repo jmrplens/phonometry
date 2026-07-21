@@ -19,6 +19,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 La vibración que contiene **choques mecánicos** repetidos (vehículos todoterreno,
 embarcaciones rápidas, maquinaria de movimiento de tierras) carga la columna
@@ -180,6 +181,85 @@ a la compresión espinal, y el modelo espinal horizontal de la edición de 2004,
 retirada, no se restablece, de modo que la exposición horizontal de cuerpo
 completo se evalúa con las métricas eficaz, eficaz móvil/MTVV y VDV de
 [Vibración en humanos](/phonometry/es/guides/human-vibration/) (ISO 2631-1).
+
+## 4. El informe de riesgo para la salud
+
+La cadena de dosis existe para ponerla por escrito y leerla frente a la
+orientación del anexo C. `MultipleShockResult.report()` escribe una hoja de
+evaluación del riesgo para la salud en PDF de una página: la línea de base
+normativa (respuesta espinal de la cláusula 5 y modelo de riesgo del anexo C),
+una cabecera de metadatos opcional (cliente, sujeto, puesto de trabajo/vehículo,
+instrumentación, calibración), la rejilla del escenario de exposición (sexo del
+sujeto, la edad $b$ al inicio de la exposición, el número de años de exposición
+$n$, el número de días de exposición por año $N$ y el número de choques de
+respuesta contabilizados) y la tabla de análisis de dosis y tensión con la dosis
+de aceleración $D_z$ (Fórmula 3), la dosis diaria $D_{zd}$ (Fórmula 4), la
+tensión compresiva diaria $S_d$ (Fórmula C.1), la variable de tensión acumulada
+$R$ (Fórmula C.3) y la probabilidad de lesión lumbar $\Pi$ (Fórmula C.5).
+
+Como la ISO 2631-5:2018 no define ningún límite de exposición, la ficha lleva
+una **fila de zona** de banda de riesgo en lugar de un veredicto CUMPLE/NO
+CUMPLE: el $R$ y el $\Pi$ recuadrados nombran la clasificación del riesgo del
+anexo C, y una tabla de clasificación sitúa $R$ entre las variables de tensión
+de la Tabla C.2 para un riesgo de lesión del $10$ / $50$ / $90$ %
+(probabilidad baja / moderada / alta / muy alta de un efecto adverso para la
+salud), con la curva de probabilidad de lesión encima. `language="es"`
+representa la ficha en español (decimales con coma).
+
+El argumento `metadata` acepta un `ReportMetadata` cuyos campos relevantes para
+un informe de choques múltiples son `client`, `specimen` (el sujeto),
+`test_room` (el puesto de trabajo o vehículo), `test_date`, `instrumentation`,
+`calibration` y la identidad de pie `laboratory`, `operator`, `report_id` y
+`notes`.
+
+```python
+import numpy as np
+from phonometry import vibration, ReportMetadata
+
+# El ejemplo resuelto del anexo C: cinco choques de respuesta espinal de
+# 40 m/s2 al día, hombre de 82 kg, expuesto desde los 20 años durante 20 años a
+# 120 días/año. El registro se reconstruye a partir de esos picos de respuesta
+# (la norma plantea el ejemplo en términos de los picos), de modo que la ficha
+# imprime los valores publicados del anexo C.
+peaks = np.array([40.0] * 5)
+dz = vibration.dose_from_peaks(peaks)
+sd = vibration.compression_dose(dz)
+r = vibration.injury_risk(sd, start_age=20, years=20, days_per_year=120)
+result = vibration.MultipleShockResult(
+    sex="male",
+    acceleration_dose=dz,
+    daily_dose=dz,
+    compression_dose=sd,
+    risk=r,
+    probability=float(vibration.injury_probability(r)),
+    start_age=20.0,
+    years=20,
+    days_per_year=120.0,
+    peaks=peaks,
+    risk_thresholds=vibration.RISK_THRESHOLDS_MALE,
+)
+
+result.report(
+    "multiple_shock.pdf",
+    metadata=ReportMetadata(
+        client="Operador de transporte de ejemplo",
+        specimen="Operador varón de 82 kg (sentado)",
+        test_room="Vehículo todoterreno, asiento del conductor",
+        report_id="EXAMPLE-2631-5",
+    ),
+    language="es",
+)   # R = 1,22, Pi = 37 % -> probabilidad moderada de un efecto adverso para la salud
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene representada en
+el repositorio; pulsa la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso2631_5_multiple_shock_example"
+	title="Informe de ejemplo de riesgo para la salud por choques múltiples de cuerpo completo (PDF)"
+	description="Ficha de evaluación del riesgo para la salud por choques múltiples de cuerpo completo de una página: una cabecera con el operador de transporte, el sujeto y el vehículo todoterreno, la rejilla del escenario de exposición (hombre de 82 kg, edad 20, 20 años, 120 días por año, cinco choques contabilizados), la tabla de análisis de dosis y tensión con la dosis de aceleración Dz = 55,97 m/s2, la tensión compresiva diaria Sd = 1,62 MPa, la variable de tensión acumulada R = 1,22 y la probabilidad de lesión lumbar 37 por ciento, la curva de probabilidad de lesión con los niveles de riesgo de la Tabla C.2 y esta evaluación marcada, el R = 1,22 y el 37 por ciento recuadrados clasificados como probabilidad moderada de un efecto adverso para la salud, y la tabla de clasificación del anexo C donde la banda moderada (riesgo de lesión del 10 al 50 por ciento) es la banda de la evaluación."
+	caption="Ficha de riesgo para la salud por choques múltiples (MultipleShockResult.report), el ejemplo resuelto del anexo C de la ISO 2631-5:2018 con el análisis de dosis y tensión y la clasificación del riesgo de la Tabla C.2."
+/>
 
 ## Véase también
 

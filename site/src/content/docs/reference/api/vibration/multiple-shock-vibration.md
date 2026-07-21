@@ -298,6 +298,63 @@ Plot the injury-probability curve with this assessment's `R`.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### MultipleShockResult.report()
+
+```python
+MultipleShockResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a whole-body multiple-shock health-risk fiche to a PDF.
+
+Writes a one-page health-risk assessment sheet for whole-body vibration
+containing multiple shocks (ISO 2631-5:2018): the standard-basis line
+(Clause 5 spinal response and Annex C risk model), an optional metadata
+header (client, subject, workplace/vehicle, instrumentation,
+calibration), the exposure-scenario grid (subject sex, the age `b` at
+which the exposure started, the number of exposure years `n`, the
+number of exposure days per year `N` and the number of counted
+response shocks), the dose-and-stress analysis table (the acceleration
+dose `Dz` of Formula 3, the daily dose `Dzd` of Formula 4, the daily
+compressive stress `Sd` of Formula C.1, the cumulative stress variable
+`R` of Formula C.3 and the probability of lumbar injury `P` of
+Formula C.5), the injury-probability chart, the boxed `R` and `P`
+with the Annex C risk classification, a classification table against the
+Table C.2 risk levels with a zone row, and a footer identity/disclaimer
+block.
+
+The Annex C classification is informative (ISO 2631-5:2018 defines no
+exposure limit), so the fiche carries a risk-band zone row rather than a
+PASS/FAIL verdict: `R` is placed among the Table C.2 stress variables
+for 10 / 50 / 90 % risk of injury (low / moderate / high / very high
+probability of an adverse health effect), the moderate band matching the
+Annex C worked example.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client`, `specimen` the subject, `test_room` the workplace or vehicle) plus the `instrumentation` and `calibration` free-text fields and the footer identity. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for a uniform `.report()` signature; the fiche has one stacked body layout, so it has no effect. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the injury-probability chart, so both are required (`pip install "phonometry[report,plot]"`). |
+
 ## response_peaks
 
 ```python

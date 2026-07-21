@@ -16,6 +16,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   acceptance region and whether the no-trend hypothesis is accepted; for
   `method="runs"` it also marks the sequence median that classifies each
   value. `language="es"` renders the Spanish labels.
+- `MultipleShockResult.report()`: a one-page PDF whole-body multiple-shock
+  health-risk assessment fiche (ISO 2631-5:2018), laid out like a health-risk
+  assessment sheet. The sheet carries the standard-basis line (Clause 5 spinal
+  response and the Annex C risk model), an optional metadata header (client,
+  subject, workplace/vehicle, instrumentation, calibration), the
+  exposure-scenario grid (subject sex, the age `b` at which the exposure
+  started, the number of exposure years `n`, the number of exposure days per
+  year `N` and the number of counted response shocks), the dose-and-stress
+  analysis table (the acceleration dose `Dz` of Formula 3, the daily dose `Dzd`
+  of Formula 4, the daily compressive stress `Sd` of Formula C.1, the
+  cumulative stress variable `R` of Formula C.3 and the probability of lumbar
+  injury `P` of Formula C.5), the result's own injury-probability chart, the
+  boxed `R` and `P` with the Annex C risk classification, and a classification
+  table against the Table C.2 stress variables for 10 / 50 / 90 % risk of
+  injury (low / moderate / high / very high probability of an adverse health
+  effect) with a risk-band zone row. Because ISO 2631-5:2018 defines no
+  exposure limit, the fiche carries the informative risk-band classification
+  rather than a PASS/FAIL verdict. `language="es"` renders the Spanish fiche
+  with a comma decimal separator.
 - `OpenPlanResult.report()`: a one-page PDF open-plan office acoustics fiche
   (ISO 3382-3:2012), laid out like a speech-privacy measurement report. The
   sheet carries the standard-basis line, an optional metadata header (client,

@@ -41,6 +41,7 @@ references:
 
 import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Un índice de laboratorio describe un elemento aislado; un edificio también
 transmite el sonido por cada camino de flancos. Esta página cubre la predicción
@@ -268,6 +269,82 @@ ausente, una fuga alrededor del elemento separador.
 `predicted_impact_insulation()` un `ImpactPredictionResult` (`l_prime_n_w`,
 `ln_w_eq`, `delta_l_w`, `k_correction`). El modelo simplificado lleva una
 desviación típica declarada de unos 2 dB (Cláusula 5).
+
+### Informe de predicción EN 12354 (`.report()`)
+
+Ambos resultados de predicción generan un informe de **predicción** de una
+página mediante el método `report(path)`. A diferencia de las fichas de
+medición, el resultado informado es una *estimación* del comportamiento in situ
+a partir de los datos de laboratorio de los elementos más la transmisión por
+flancos de las uniones; la hoja lo indica de forma explícita y se rotula como
+predicción, nunca como medición. `AirbornePredictionResult.report()` genera la
+ficha del índice de reducción acústica aparente previsto (la tabla de vías de
+transmisión junto al gráfico de fracción de energía por vía, con `R'w` en un
+recuadro); `ImpactPredictionResult.report()` genera la ficha del nivel de
+impactos aparente previsto (la tabla de términos de la fórmula (21) junto al
+gráfico de términos, con `L'n,w` en un recuadro). Cada una nombra la
+EN/ISO 12354-1/-2 y la parte de índice ISO 717 en su línea de base, imprime la
+desviación típica del modelo (~2 dB) y, cuando se da un `requirement`, añade un
+veredicto CUMPLE/NO CUMPLE (el índice aéreo cumple igualando o superándolo, y el
+de impactos igualándolo o quedando por debajo).
+
+`verbose=True` añade a la tabla aérea la fracción de energía transmitida de cada
+vía. Los metadatos, `language="es"` y el extra `phonometry[report]` se comportan
+igual que en las fichas de medición; los campos aplicables de `ReportMetadata`
+son el elemento separador (`specimen`), la superficie del separador o el suelo
+(`area`), la geometría de los recintos (`source_volume`, `receiving_volume`), la
+masa del suelo desnudo (`mass_per_area`, impactos), la identidad del calculista/
+laboratorio (`client`, `laboratory`, `operator`, `report_id`, `test_date`) y un
+resumen en texto libre de la construcción de flancos y las hipótesis del modelo
+(`notes`).
+
+```python
+from phonometry import building, ReportMetadata
+
+# Predicción aérea (EN 12354-1 Anexo H.3): un tabique separador Rs,w = 57 dB
+# flanqueado por cuatro elementos -> R'w = 52 dB.
+paths = []
+for label, rw, kff, kfd, lf in [
+    ("floor", 49.0, 12.4, 8.9, 4.5), ("ceiling", 46.0, 14.4, 9.2, 4.5),
+    ("facade", 42.0, 12.6, 6.7, 2.55), ("intwall", 33.0, 33.5, 15.7, 2.55),
+]:
+    ff, df, fd = building.flanking_element(
+        label=label, r_flanking=rw, r_separating=57.0,
+        k_ff=kff, k_fd=kfd, k_df=kfd, separating_area=11.5, coupling_length=lf)
+    paths += [ff, df, fd]
+air = building.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
+air.report("Rpw_prediccion.pdf", language="es", metadata=ReportMetadata(
+    specimen="Tabique separador, Rs,w = 57 dB", area=11.5,
+    source_volume=53.0, receiving_volume=50.0, requirement=50.0,
+    notes="Flancos: suelo/techo/fachada/tabique interior."))   # R'w = 52 dB
+air.report("Rpw_prediccion_vias.pdf", verbose=True, language="es")
+
+# Predicción de impactos (EN 12354-2 Anexo E.3): un forjado de hormigón
+# (m' = 322 kg/m²) con suelo flotante (ΔLw = 33 dB) -> L'n,w = 45 dB.
+ln_eq = building.equivalent_impact_level(322.0)
+k = building.impact_flanking_correction(322.0, 145.0)
+imp = building.predicted_impact_insulation(ln_w_eq=ln_eq, delta_l_w=33.0, k_correction=k)
+imp.report("Lnw_prediccion.pdf", language="es",
+           metadata=ReportMetadata(mass_per_area=322.0, requirement=53.0))  # L'n,w = 45 dB
+```
+
+Ambas fichas de ejemplo se regeneran con `make reports` y se mantienen
+renderizadas en el repositorio; haz clic en cualquier vista previa para abrir el
+PDF.
+
+<ReportPreview
+	name="iso12354_airborne_prediction_example"
+	title="Informe de ejemplo de predicción aérea EN 12354-1 (PDF)"
+	description="Informe de predicción de aislamiento acústico a ruido aéreo entre recintos de una página (EN 12354-1 Anexo H.3): la cabecera de metadatos (elemento separador, superficie, volúmenes de los recintos), la tabla de vías de transmisión (la vía directa y el índice ponderado Rij,w de cada vía de flanco) junto al gráfico de barras de fracción de energía por vía, el R'w previsto = 52 dB en un recuadro, el enunciado de predicción con la desviación típica del modelo (~2 dB) y un veredicto CUMPLE frente al requisito de 50 dB."
+	caption="Ficha aérea prevista (AirbornePredictionResult.report), R'w."
+/>
+
+<ReportPreview
+	name="iso12354_impact_prediction_example"
+	title="Informe de ejemplo de predicción de impactos EN 12354-2 (PDF)"
+	description="Informe de predicción de aislamiento acústico a ruido de impactos de un suelo de una página (EN 12354-2 Anexo E.3): la cabecera de metadatos, la tabla de términos de la fórmula (21) (el nivel equivalente del suelo desnudo Ln,w,eq, la mejora del revestimiento ΔLw y la corrección por flancos K) junto al gráfico de barras de términos, el L'n,w previsto = 45 dB en un recuadro, el enunciado de predicción y un veredicto CUMPLE frente al requisito de 53 dB (un nivel de impactos menor es mejor)."
+	caption="Ficha de impactos prevista (ImpactPredictionResult.report), L'n,w."
+/>
 
 ### Aislamiento de fachada y potencia radiada (EN 12354-3 / -4)
 

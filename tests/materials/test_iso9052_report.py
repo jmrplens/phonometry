@@ -1,0 +1,183 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Tests for the EN 29052-1 / ISO 9052-1 dynamic-stiffness report (``.report()``).
+
+The report is a rendering feature, so these tests assert only structural facts:
+a valid single-page PDF is written, the displayed key quantities match the
+clean-room oracle derived from the standard's own formulae (Formula 4 for the
+apparent dynamic stiffness, Clause 8.2 NOTE for the enclosed-gas term, Formula 6
+for the installed stiffness and Formula 2 for the natural frequency), the metric
+labels and metadata appear, unknown engines/languages are rejected, XML specials
+in metadata do not break reportlab, and the Spanish fiche uses a decimal comma.
+Pixel or layout content is never inspected.
+"""
+
+from __future__ import annotations
+
+import math
+
+import pytest
+
+pytest.importorskip("reportlab")
+
+from phonometry import ReportMetadata  # noqa: E402  (import after importorskip)
+from phonometry import materials  # noqa: E402
+
+_PDF_MAGIC = b"%PDF"
+
+# The committed clean-room example: the standard 8 kg load plate over the
+# 0.04 m2 specimen (m't = 200 kg/m2, Clauses 5-6), a measured resonance of
+# fr = 45.0 Hz, a 20 mm layer of porosity 0.9 at an intermediate airflow
+# resistivity r = 50 kPa.s/m2, installed under a 110 kg/m2 floating screed.
+# See scripts/generate_reports.py.
+_FR = 45.0
+_MT = 200.0
+_MFLOOR = 110.0
+_THICKNESS = 0.020
+_POROSITY = 0.9
+_RESISTIVITY = 50.0
+
+
+def _result():
+    return materials.floating_floor_resonance(
+        resonant_frequency=_FR,
+        total_mass_per_area=_MT,
+        floor_mass_per_area=_MFLOOR,
+        airflow_resistivity=_RESISTIVITY,
+        thickness=_THICKNESS,
+        porosity=_POROSITY,
+    )
+
+
+def _metadata(**overrides) -> ReportMetadata:
+    base = dict(
+        specimen="20 mm mineral-wool resilient layer",
+        client="Acoustic Test Client Ltd.",
+        manufacturer="Acoustics Works Inc.",
+        mass_per_area=200.0,
+        thickness=0.020,
+        test_room="Dynamic-stiffness rig, 8 kg load plate",
+        measurement_standard="EN 29052-1",
+        temperature=21.0,
+        relative_humidity=50.0,
+        test_date="2026-07-21",
+        laboratory="Phonometry Reference Laboratory",
+        operator="J. M. Requena-Plens",
+        report_id="PHN-2026-29052",
+    )
+    base.update(overrides)
+    return ReportMetadata(**base)
+
+
+def _assert_one_page(path: str) -> None:
+    from pypdf import PdfReader
+
+    with open(path, "rb") as handle:
+        assert handle.read(4) == _PDF_MAGIC
+    assert len(PdfReader(path).pages) == 1
+
+
+def _text(path: str) -> str:
+    from pypdf import PdfReader
+
+    return "\n".join(
+        page.extract_text() for page in PdfReader(path).pages
+    ).replace("\n", " ")
+
+
+def test_writes_one_page_pdf(tmp_path) -> None:
+    out = tmp_path / "dyn.pdf"
+    returned = _result().report(str(out))
+    assert returned == str(out)
+    _assert_one_page(str(out))
+
+
+def test_displayed_values_match_oracle(tmp_path) -> None:
+    """The fiche prints s't (Formula 4), s'a, s', fr and f0, and the metadata.
+
+    The oracle is derived from the standard's formulae, independent of the
+    library: s't = 4*pi^2 * m't * fr^2, s'a = p0/(d*eps), s' = s't + s'a
+    (Formula 6, intermediate airflow resistivity), f0 = (1/2pi) sqrt(s'/m').
+    Clause 9 rounds the stiffnesses to the nearest MN/m3.
+    """
+    s_t = 4.0 * math.pi**2 * _MT * _FR**2 / 1e6
+    s_a = 1.0e5 / (_THICKNESS * _POROSITY) / 1e6
+    s_installed = s_t + s_a
+    f0 = math.sqrt(s_installed * 1e6 / _MFLOOR) / (2.0 * math.pi)
+    assert round(s_t) == 16
+    assert round(s_a) == 6
+    assert round(s_installed) == 22
+    assert round(f0, 1) == 70.4
+
+    out = tmp_path / "dyn.pdf"
+    _result().report(str(out), metadata=_metadata())
+    text = _text(str(out))
+    assert "16" in text  # apparent dynamic stiffness s't = 15.99 -> 16 MN/m3
+    assert "6" in text  # enclosed-gas stiffness s'a = 5.56 -> 6 MN/m3
+    assert "22" in text  # installed dynamic stiffness s' = 21.54 -> 22 MN/m3
+    assert "45.0" in text  # resonant frequency fr
+    assert "70.4" in text  # supported-floor natural frequency f0
+    assert "Acoustic Test Client Ltd." in text  # metadata
+    assert "Apparent dynamic stiffness" in text  # boxed headline label
+
+
+def test_metadata_fields_appear(tmp_path) -> None:
+    """The mass per area m't and the loaded thickness d appear in the header."""
+    out = tmp_path / "dyn.pdf"
+    _result().report(str(out), metadata=_metadata())
+    text = _text(str(out))
+    assert "200" in text  # total mass per area m't [kg/m2]
+    assert "20" in text  # thickness under load d = 0.020 m -> 20 mm
+    assert "110" in text  # supported-floor mass m'
+
+
+def test_no_metadata_still_renders(tmp_path) -> None:
+    out = tmp_path / "dyn_bare.pdf"
+    _result().report(str(out))
+    _assert_one_page(str(out))
+    assert "EN 29052-1" in _text(str(out))  # standard-basis line
+
+
+def test_high_resistivity_omits_gas_term(tmp_path) -> None:
+    """For r >= 100 kPa.s/m2 the installed s' equals s't and no s'a row shows."""
+    out = tmp_path / "dyn_hi.pdf"
+    result = materials.floating_floor_resonance(
+        resonant_frequency=_FR,
+        total_mass_per_area=_MT,
+        floor_mass_per_area=_MFLOOR,
+    )
+    result.report(str(out), metadata=_metadata())
+    _assert_one_page(str(out))
+    assert "Enclosed-gas stiffness" not in _text(str(out))
+
+
+def test_unknown_engine_rejected(tmp_path) -> None:
+    result = _result()
+    out = str(tmp_path / "x.pdf")
+    with pytest.raises(ValueError, match="engine"):
+        result.report(out, engine="weasyprint")
+
+
+def test_unknown_language_rejected(tmp_path) -> None:
+    result = _result()
+    out = str(tmp_path / "x.pdf")
+    with pytest.raises(ValueError, match="Unknown language"):
+        result.report(out, language="xx")
+
+
+def test_metadata_xml_specials_do_not_break(tmp_path) -> None:
+    out = tmp_path / "dyn_xml.pdf"
+    _result().report(
+        str(out), metadata=_metadata(specimen='Layer <A> & <B> "edge"')
+    )
+    _assert_one_page(str(out))
+
+
+def test_spanish_uses_comma_decimal(tmp_path) -> None:
+    out = tmp_path / "dyn_es.pdf"
+    _result().report(str(out), metadata=_metadata(), language="es")
+    _assert_one_page(str(out))
+    text = _text(str(out))
+    assert "45,0" in text  # Spanish decimal comma (resonant frequency)
+    assert "70,4" in text  # Spanish decimal comma (natural frequency)
+    assert "Rigidez dinámica" in text  # Spanish title

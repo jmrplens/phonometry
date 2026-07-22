@@ -12,14 +12,19 @@ from .common import (
     _C_MUTED,
     _C_PRIMARY,
     _C_REFERENCE,
+    _C_SECONDARY,
     _LEGEND_UPPER_RIGHT,
     _new_axes,
+    format_frequency_axis,
 )
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-    from ..broadcast.program_loudness import ProgramLoudnessResult
+    from ..broadcast.program_loudness import (
+        KWeightingResponse,
+        ProgramLoudnessResult,
+    )
 
 #: Spanish translations of the fixed strings rendered by the broadcast
 #: ``.plot()`` renderer, keyed by their verbatim English text. ``_t``
@@ -33,6 +38,13 @@ _STRINGS: dict[str, str] = {
     "Loudness [LUFS]": "Sonoridad [LUFS]",
     "Programme loudness (EBU R 128)": "Sonoridad de programa (EBU R 128)",
     "Integrated": "Integrada",
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Magnitude [dB]": "Magnitud [dB]",
+    "K-weighting (combined)": "Ponderación K (combinada)",
+    "Stage 1: spherical-head shelf": "Etapa 1: realce de cabeza esférica",
+    "Stage 2: RLB high-pass": "Etapa 2: paso alto RLB",
+    "K-weighting frequency response (ITU-R BS.1770)":
+        "Respuesta en frecuencia de la ponderación K (UIT-R BS.1770)",
 }
 
 
@@ -114,5 +126,51 @@ def plot_program_loudness(
     ax.set_title(_t("Programme loudness (EBU R 128)", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize=9)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_k_weighting_response(
+    result: "KWeightingResponse", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """K-weighting magnitude frequency response (ITU-R BS.1770-5 Annex 1).
+
+    Draws the combined K-weighting magnitude (dB) on a logarithmic frequency
+    axis, with the two stages (the +4 dB spherical-head shelf and the RLB
+    high-pass) as light companion curves.
+
+    :param result: A :class:`~phonometry.broadcast.KWeightingResponse`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the combined-curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    ax.plot(
+        freqs, np.asarray(result.shelf_db, dtype=np.float64),
+        color=_C_MUTED, linewidth=1.0, linestyle="--",
+        label=_t("Stage 1: spherical-head shelf", language),
+    )
+    ax.plot(
+        freqs, np.asarray(result.highpass_db, dtype=np.float64),
+        color=_C_SECONDARY, linewidth=1.0, linestyle=":",
+        label=_t("Stage 2: RLB high-pass", language),
+    )
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("linewidth", 2.0)
+    kwargs.setdefault("label", _t("K-weighting (combined)", language))
+    ax.plot(freqs, np.asarray(result.magnitude_db, dtype=np.float64), **kwargs)
+    # The +4 dB shelf plateau is the reference the whole response is read against.
+    ax.axhline(4.0, color=_C_REFERENCE, linestyle="-", linewidth=0.8, alpha=0.6)
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Magnitude [dB]", language))
+    ax.set_title(_t("K-weighting frequency response (ITU-R BS.1770)", language))
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="lower right", fontsize=9)
     localize_axes(ax, language)
     return ax

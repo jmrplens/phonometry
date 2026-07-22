@@ -157,6 +157,112 @@ rejected.
 
 **Returns:** `(stage1, stage2)`, each a `(b, a)` coefficient pair: the spherical-head shelving filter and the RLB high-pass filter.
 
+## k_weighting_response
+
+```python
+k_weighting_response(
+    fs: float = 48000.0,
+    *,
+    frequencies: ArrayLike | None = None,
+    n: int = 512,
+) -> KWeightingResponse
+```
+
+K-weighting magnitude frequency response (BS.1770-5 Annex 1, Tables 1-2).
+
+Evaluates the two-stage K-weighting pre-filter as a transfer function and
+returns its magnitude in dB. The biquad coefficients come from
+[`k_weighting_coefficients`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting_coefficients) (the verbatim 48 kHz tables, or the
+analog-prototype redesign at other rates), so the response is the exact
+frequency-domain counterpart of the filter [`k_weighting`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting) applies; no
+coefficients are re-derived here. Each stage is evaluated with
+`scipy.signal.freqz` and their magnitudes summed in dB.
+
+The combined response tends to the +4 dB shelf plateau of the spherical-head
+stage at high frequency and rolls off below a few hundred hertz through the
+RLB high-pass; near 1 kHz it passes through the ~0.69 dB gain that the
+`-0.691` constant of Formula 2 cancels.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `fs` | Sample rate the response is evaluated at, Hz (16 kHz or higher, as [`k_weighting_coefficients`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting_coefficients) requires; default 48 kHz). |
+| `frequencies` | Explicit frequency grid, in Hz (each in the half-open interval `(0, fs/2]`); `None` (the default) uses `n` log-spaced points from 10 Hz to the Nyquist rate. |
+| `n` | Number of log-spaced points when `frequencies` is `None` (default 512); ignored otherwise. |
+
+**Returns:** A frozen [`KWeightingResponse`](/phonometry/reference/api/broadcast/program-loudness/#kweightingresponse).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `fs` is below 16 kHz, `n` is not positive, or a supplied frequency is outside `(0, fs/2]`. |
+
+## KWeightingResponse
+
+```python
+KWeightingResponse(
+    frequencies: np.ndarray,
+    magnitude_db: np.ndarray,
+    shelf_db: np.ndarray,
+    highpass_db: np.ndarray,
+    fs: float,
+)
+```
+
+Magnitude frequency response of the K-weighting pre-filter (BS.1770-5).
+
+The two-stage K-weighting of Annex 1 evaluated as a transfer function: the
+spherical-head high-frequency shelf (stage 1, about +4 dB above 2 kHz), the
+RLB high-pass (stage 2) and their combination, each as a magnitude in dB
+over a shared logarithmic frequency grid. It is the frequency-domain view of
+the same biquads that [`k_weighting`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting) applies in the time domain, built
+from the tabulated (or redesigned) coefficients of [`k_weighting_coefficients`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting_coefficients).
+
+Build it with [`k_weighting_response`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting_response); the frozen instance then exposes
+`plot` (the magnitude response versus frequency).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | Frequency grid, in Hz (log-spaced up to the Nyquist rate by default). |
+| `magnitude_db` | Combined K-weighting magnitude response, in dB (the product of the two stages). It tends to the +4 dB shelf plateau at high frequency and rolls off below a few hundred hertz. |
+| `shelf_db` | Stage 1 (spherical-head shelf) magnitude response, in dB. |
+| `highpass_db` | Stage 2 (RLB high-pass) magnitude response, in dB. |
+| `fs` | Sample rate the response was evaluated at, in Hz. |
+
+### KWeightingResponse.plot()
+
+```python
+KWeightingResponse.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the K-weighting magnitude response versus frequency.
+
+Draws the combined K-weighting magnitude (dB) on a logarithmic
+frequency axis, with the two stages (the +4 dB shelf and the RLB
+high-pass) as light companion curves.
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes` and never calls `plt.show`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the combined-curve `plot` call. |
+
+**Returns:** The axes.
+
 ## loudness_range
 
 ```python

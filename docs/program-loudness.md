@@ -55,6 +55,27 @@ y = broadcast.k_weighting(np.random.default_rng(0).standard_normal(48000),
                           48000)              # the filtered signal itself
 ```
 
+`k_weighting_response` evaluates those same biquads as a transfer function
+and returns a frozen `KWeightingResponse` carrying the combined magnitude
+(`magnitude_db`) and the two stages (`shelf_db`, `highpass_db`) over a
+logarithmic frequency grid; its `.plot()` draws the response, with the +4 dB
+spherical-head shelf and the RLB high-pass roll-off:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/k_weighting_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/k_weighting_response.svg" alt="K-weighting magnitude frequency response on a logarithmic frequency axis: the combined blue curve rolls off below a few hundred hertz through the RLB high-pass and rises to a +4 dB plateau above 2 kHz set by the spherical-head shelf, with the two stages drawn as light companion curves" width="96%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import broadcast
+
+broadcast.k_weighting_response(48000).plot()
+plt.show()
+```
+
+</details>
+
 ## 2. Gating and the programme loudness
 
 The **integrated** (programme) loudness divides the measurement into gating

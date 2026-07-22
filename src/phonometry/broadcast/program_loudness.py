@@ -216,6 +216,117 @@ def k_weighting(x: List[float] | np.ndarray, fs: float) -> np.ndarray:
     )
 
 
+@dataclass(frozen=True)
+class KWeightingResponse:
+    """Magnitude frequency response of the K-weighting pre-filter (BS.1770-5).
+
+    The two-stage K-weighting of Annex 1 evaluated as a transfer function: the
+    spherical-head high-frequency shelf (stage 1, about +4 dB above 2 kHz), the
+    RLB high-pass (stage 2) and their combination, each as a magnitude in dB
+    over a shared logarithmic frequency grid. It is the frequency-domain view of
+    the same biquads that :func:`k_weighting` applies in the time domain, built
+    from the tabulated (or redesigned) coefficients of :func:`k_weighting_coefficients`.
+
+    Build it with :func:`k_weighting_response`; the frozen instance then exposes
+    :meth:`plot` (the magnitude response versus frequency).
+
+    :ivar frequencies: Frequency grid, in Hz (log-spaced up to the Nyquist rate
+        by default).
+    :ivar magnitude_db: Combined K-weighting magnitude response, in dB (the
+        product of the two stages). It tends to the +4 dB shelf plateau at high
+        frequency and rolls off below a few hundred hertz.
+    :ivar shelf_db: Stage 1 (spherical-head shelf) magnitude response, in dB.
+    :ivar highpass_db: Stage 2 (RLB high-pass) magnitude response, in dB.
+    :ivar fs: Sample rate the response was evaluated at, in Hz.
+    """
+
+    frequencies: np.ndarray
+    magnitude_db: np.ndarray
+    shelf_db: np.ndarray
+    highpass_db: np.ndarray
+    fs: float
+
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
+        """Plot the K-weighting magnitude response versus frequency.
+
+        Draws the combined K-weighting magnitude (dB) on a logarithmic
+        frequency axis, with the two stages (the +4 dB shelf and the RLB
+        high-pass) as light companion curves.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the combined-curve ``plot`` call.
+        :return: The axes.
+        """
+        from .._i18n import check_language
+        from .._plot.broadcast import plot_k_weighting_response
+
+        check_language(language)
+        return plot_k_weighting_response(self, ax=ax, language=language, **kwargs)
+
+
+def k_weighting_response(
+    fs: float = _TABLE_RATE,
+    *,
+    frequencies: ArrayLike | None = None,
+    n: int = 512,
+) -> KWeightingResponse:
+    """K-weighting magnitude frequency response (BS.1770-5 Annex 1, Tables 1-2).
+
+    Evaluates the two-stage K-weighting pre-filter as a transfer function and
+    returns its magnitude in dB. The biquad coefficients come from
+    :func:`k_weighting_coefficients` (the verbatim 48 kHz tables, or the
+    analog-prototype redesign at other rates), so the response is the exact
+    frequency-domain counterpart of the filter :func:`k_weighting` applies; no
+    coefficients are re-derived here. Each stage is evaluated with
+    :func:`scipy.signal.freqz` and their magnitudes summed in dB.
+
+    The combined response tends to the +4 dB shelf plateau of the spherical-head
+    stage at high frequency and rolls off below a few hundred hertz through the
+    RLB high-pass; near 1 kHz it passes through the ~0.69 dB gain that the
+    ``-0.691`` constant of Formula 2 cancels.
+
+    :param fs: Sample rate the response is evaluated at, Hz (16 kHz or higher,
+        as :func:`k_weighting_coefficients` requires; default 48 kHz).
+    :param frequencies: Explicit frequency grid, in Hz (each in the half-open
+        interval ``(0, fs/2]``); ``None`` (the default) uses ``n``
+        log-spaced points from 10 Hz to the Nyquist rate.
+    :param n: Number of log-spaced points when ``frequencies`` is ``None``
+        (default 512); ignored otherwise.
+    :return: A frozen :class:`KWeightingResponse`.
+    :raises ValueError: If ``fs`` is below 16 kHz, ``n`` is not positive, or a
+        supplied frequency is outside ``(0, fs/2]``.
+    """
+    fs = require_positive(float(fs), "fs")
+    (b1, a1), (b2, a2) = k_weighting_coefficients(fs)
+    nyquist = fs / 2.0
+    if frequencies is None:
+        if n < 1:
+            raise ValueError(f"n must be a positive integer; got {n}.")
+        freqs = np.logspace(np.log10(10.0), np.log10(nyquist), int(n))
+    else:
+        freqs = np.asarray(frequencies, dtype=np.float64).ravel()
+        if freqs.size == 0:
+            raise ValueError("'frequencies' cannot be empty.")
+        if np.any(freqs <= 0.0) or np.any(freqs > nyquist):
+            raise ValueError(
+                f"every frequency must lie in (0, fs/2] = (0, {nyquist:g}] Hz."
+            )
+    shelf_db = 20.0 * np.log10(np.abs(signal.freqz(b1, a1, worN=freqs, fs=fs)[1]))
+    highpass_db = 20.0 * np.log10(np.abs(signal.freqz(b2, a2, worN=freqs, fs=fs)[1]))
+    return KWeightingResponse(
+        frequencies=freqs,
+        magnitude_db=shelf_db + highpass_db,
+        shelf_db=shelf_db,
+        highpass_db=highpass_db,
+        fs=fs,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Channel weights (Annex 1 Table 3, Annex 3 Table 4).
 # ---------------------------------------------------------------------------

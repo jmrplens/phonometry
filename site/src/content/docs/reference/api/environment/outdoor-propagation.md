@@ -512,7 +512,7 @@ composed with a source power, i.e. when
 | `path` | Destination path of the PDF file. |
 | `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position), the `temperature` / `relative_humidity` / `pressure` conditions and the footer identity. A supplied `requirement` is read as the maximum acceptable A-weighted downwind level in dB. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
-| `verbose` | When True, the per-band table adds the divergence and the exact-midband atmospheric coefficient behind `Aatm`. |
+| `verbose` | When True, the per-band table adds the A-weighted band level (`LfT(DW)` plus the band A-weighting), whose energy sum is the boxed `LAT(DW)`. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
 
 **Returns:** The written `path` as a `str`.

@@ -356,6 +356,7 @@ def plot_seabed_reflection(
         ax.axvline(result.critical_angle, color=_C_REFERENCE, ls="--", lw=1.0,
                    label=f"{_t('Critical angle', language)} = {format_number(result.critical_angle, language)}°")
     ax.set_xlabel(_t("Grazing angle [°]", language))
+    ax.set_xlim(0.0, 90.0)
     ax.set_ylabel(f"{_t('Reflection coefficient magnitude', language)} $|R|$")
     ax.set_title(_t("Seabed reflection coefficient", language))
     ax.grid(True, alpha=0.3)

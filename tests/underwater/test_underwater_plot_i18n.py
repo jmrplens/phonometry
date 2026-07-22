@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 from phonometry.underwater.ocean_ambient_noise import ocean_ambient_noise
-from phonometry.underwater.seabed_reflection import seabed_reflection
+from phonometry.underwater import seabed_reflection
 from phonometry.underwater.sonar_equation import passive_sonar_equation
 
 
@@ -50,9 +50,14 @@ def test_seabed_reflection_plot_labels() -> None:
     assert ax.get_title() == "Seabed reflection coefficient"
     assert ax.get_xlabel() == "Grazing angle [°]"
     assert "$|R|$" in ax.get_ylabel()
+    assert ax.get_xlim() == (0.0, 90.0)
     ax_es = res.plot(language="es")
     assert ax_es.get_title() == "Coeficiente de reflexión del fondo marino"
     assert ax_es.get_xlabel() == "Ángulo rasante [°]"
+    assert any(
+        "Ángulo crítico" in txt.get_text()
+        for txt in ax_es.get_legend().get_texts()
+    )
     with pytest.raises(ValueError, match="Unknown language"):
         res.plot(language="xx")
     plt.close("all")

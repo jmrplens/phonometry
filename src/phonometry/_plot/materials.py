@@ -340,12 +340,16 @@ def plot_impedance_tube(
     ax.plot(freqs, alpha, **kwargs)
     ax.plot(freqs, np.abs(np.asarray(result.reflection, dtype=np.complex128)),
             ls="--", color=_C_MUTED, label=_t("Reflection factor $|r|$", language))
+    # A continuous logarithmic frequency axis with band-centre labels (1k, 2k)
+    # matches the working plane-wave range of the tube and the rest of the
+    # library's spectrum plots (never a power-of-ten log formatter).
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Coefficient", language))
     ax.set_ylim(0.0, 1.05)
     ax.set_title(_t("ISO 10534-2 normal-incidence absorption", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 

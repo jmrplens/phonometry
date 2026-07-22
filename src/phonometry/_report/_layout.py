@@ -396,6 +396,42 @@ def two_panel_body(left_cell: Any, plot_drawing: Any) -> Any:
     return body
 
 
+def wide_two_panel_body(
+    left_cell: Any,
+    plot_drawing: Any,
+    *,
+    left_width_mm: float = 102.0,
+    plot_width_mm: float = 72.0,
+) -> Any:
+    """Assemble a two-panel body with an explicitly widened left cell.
+
+    Some fiches carry a multi-column detail table (reverberation times and
+    absorption areas, or the reflection factor and the real/imaginary parts of
+    the normalised surface impedance) that needs more width than the compact
+    :func:`two_panel_body` left cell, so the columns are rebalanced to
+    ``left_width_mm`` for the table and ``plot_width_mm`` for the plot (they
+    sum to the 174 mm content width). Called only after the renderer has
+    imported reportlab.
+    """
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Table, TableStyle
+
+    body = Table(
+        [[left_cell, plot_drawing]],
+        colWidths=[left_width_mm * mm, plot_width_mm * mm],
+    )
+    body.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (0, 0), 0),
+                ("RIGHTPADDING", (-1, 0), (-1, 0), 0),
+            ]
+        )
+    )
+    return body
+
+
 def metrics_table(rows: List[Tuple[str, str]], *, col_widths: Any = None) -> Any:
     """A compact two-column ``metric | value`` table for a non-band fiche.
 

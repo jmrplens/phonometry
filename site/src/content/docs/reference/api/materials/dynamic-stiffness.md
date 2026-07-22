@@ -166,7 +166,7 @@ frequencies are shown to 0,1 Hz.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mass_per_area` (the total mass per unit area `m't`), `thickness` (the loaded specimen thickness `d`), `test_room`, `test_date`, `temperature`, `relative_humidity`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (EN 29052-1 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mass_per_area` (the total mass per unit area `m't`), `thickness` (the loaded specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature`, `relative_humidity`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (EN 29052-1 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the dynamic-stiffness fiche has a single body layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
@@ -178,7 +178,7 @@ frequencies are shown to 0,1 Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the `f0(s')` design curve, so both are required (`pip install "phonometry[report,plot]"`). |
 
 ## DynamicStiffnessWarning
 

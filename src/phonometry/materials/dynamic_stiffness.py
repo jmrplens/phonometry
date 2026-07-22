@@ -295,7 +295,8 @@ class DynamicStiffnessResult:
             produces a body-and-disclaimer fiche. The applicable descriptive
             fields are ``client``, ``manufacturer``, ``specimen``,
             ``mass_per_area`` (the total mass per unit area ``m't``),
-            ``thickness`` (the loaded specimen thickness ``d``), ``test_room``,
+            ``thickness`` (the loaded specimen thickness ``d``, in metres, shown
+            in millimetres), ``test_room``,
             ``test_date``, ``temperature``, ``relative_humidity``,
             ``measurement_standard``, ``laboratory``, ``operator``,
             ``report_id`` and ``notes``. The ``requirement`` field is ignored
@@ -308,8 +309,9 @@ class DynamicStiffnessResult:
             point) or ``"es"`` (Spanish, decimal comma).
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
-        :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``).
+        :raises ImportError: If reportlab or matplotlib is not installed. The
+            fiche always embeds the ``f0(s')`` design curve, so both are
+            required (``pip install "phonometry[report,plot]"``).
         """
         from .._i18n import check_language
 

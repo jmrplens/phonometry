@@ -15,6 +15,7 @@ Pixel or layout content is never inspected.
 from __future__ import annotations
 
 import math
+import re
 
 import pytest
 
@@ -77,12 +78,20 @@ def _assert_one_page(path: str) -> None:
     assert len(PdfReader(path).pages) == 1
 
 
-def _text(path: str) -> str:
+def _raw_text(path: str) -> str:
+    """The extracted PDF text with its line breaks kept (for row anchoring)."""
     from pypdf import PdfReader
 
-    return "\n".join(
-        page.extract_text() for page in PdfReader(path).pages
-    ).replace("\n", " ")
+    return "\n".join(page.extract_text() for page in PdfReader(path).pages)
+
+
+def _text(path: str) -> str:
+    """The extracted PDF text flattened onto one line (for single-line boxes)."""
+    return _raw_text(path).replace("\n", " ")
+
+
+# The prime (U+2032) reportlab renders for the ``s'`` symbols, as it extracts.
+_PRIME = "′"
 
 
 def test_writes_one_page_pdf(tmp_path) -> None:
@@ -112,23 +121,27 @@ def test_displayed_values_match_oracle(tmp_path) -> None:
     out = tmp_path / "dyn.pdf"
     _result().report(str(out), metadata=_metadata())
     text = _text(str(out))
-    assert "16" in text  # apparent dynamic stiffness s't = 15.99 -> 16 MN/m3
-    assert "6" in text  # enclosed-gas stiffness s'a = 5.56 -> 6 MN/m3
-    assert "22" in text  # installed dynamic stiffness s' = 21.54 -> 22 MN/m3
-    assert "45.0" in text  # resonant frequency fr
-    assert "70.4" in text  # supported-floor natural frequency f0
+    raw = _raw_text(str(out))
+    # Each value is bound to its own row/box statement so it cannot pass on a
+    # coincidental chart tick or another number.
+    assert f"Apparent dynamic stiffness s{_PRIME}t = 16 MN/m" in text
+    assert f"Dynamic stiffness s{_PRIME} = 22 MN/m" in text
+    assert "Resonant frequency fr = 45.0 Hz" in text
+    assert "Natural frequency f0 = 70.4 Hz" in text
+    # The enclosed-gas term is a table row (label above, value below).
+    assert re.search(rf"s{_PRIME}a \[MN/m3\]\s+6\b", raw)
     assert "Acoustic Test Client Ltd." in text  # metadata
-    assert "Apparent dynamic stiffness" in text  # boxed headline label
 
 
 def test_metadata_fields_appear(tmp_path) -> None:
     """The mass per area m't and the loaded thickness d appear in the header."""
     out = tmp_path / "dyn.pdf"
     _result().report(str(out), metadata=_metadata())
-    text = _text(str(out))
-    assert "200" in text  # total mass per area m't [kg/m2]
-    assert "20" in text  # thickness under load d = 0.020 m -> 20 mm
-    assert "110" in text  # supported-floor mass m'
+    raw = _raw_text(str(out))
+    assert re.search(rf"Total mass per area m{_PRIME}t\s*\[kg/m2\]:\s*200\b", raw)
+    # Thickness d = 0.020 m is shown in millimetres.
+    assert re.search(r"Thickness under load d\s*\[mm\]:\s*20\b", raw)
+    assert re.search(rf"m{_PRIME} \[kg/m2\]\s+110\b", raw)  # supported-floor mass
 
 
 def test_no_metadata_still_renders(tmp_path) -> None:
@@ -178,6 +191,7 @@ def test_spanish_uses_comma_decimal(tmp_path) -> None:
     _result().report(str(out), metadata=_metadata(), language="es")
     _assert_one_page(str(out))
     text = _text(str(out))
-    assert "45,0" in text  # Spanish decimal comma (resonant frequency)
-    assert "70,4" in text  # Spanish decimal comma (natural frequency)
-    assert "Rigidez dinámica" in text  # Spanish title
+    # Each Spanish decimal comma is anchored to its labelled box statement.
+    assert "Frecuencia de resonancia fr = 45,0 Hz" in text
+    assert "Frecuencia natural f0 = 70,4 Hz" in text
+    assert f"Rigidez dinámica aparente s{_PRIME}t = 16 MN/m" in text

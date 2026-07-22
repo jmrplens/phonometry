@@ -229,8 +229,9 @@ def render_dynamic_stiffness_report(
         dynamic-stiffness fiche has a single body layout, so it has no effect.
     :param language: ``"en"`` (default) or ``"es"``.
     :return: The written ``path`` as a :class:`str`.
-    :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
-        installed.
+    :raises ImportError: If reportlab or matplotlib is not installed. The fiche
+        always embeds the ``f0(s')`` design curve, so both are required
+        (``pip install "phonometry[report,plot]"``).
     """
     del verbose  # uniform signature; the dynamic-stiffness fiche has one layout
     try:

@@ -514,6 +514,24 @@ _STRINGS: dict[str, str] = {
     "Reduction of impact sound pressure level <b>&#916;L</b>, {lo} Hz to {hi} Hz": "Reducción del nivel de presión acústica de impactos <b>&#916;L</b>, {lo} Hz a {hi} Hz",
     "Weighted reduction of impact sound pressure level &#916;L<sub>w</sub> rated on the 100 Hz to 3150 Hz one-third-octave bands using the ISO 717-2:2020 heavyweight reference floor (Table 4); the statement of results carries the spectrum adaptation term C<sub>I,&#916;</sub> (ISO 717-2:2020 Formula (A.4)).": "Reducción ponderada del nivel de presión acústica de impactos &#916;L<sub>w</sub> calificada sobre las bandas de tercio de octava de 100 Hz a 3150 Hz con el suelo de referencia pesado de la Norma ISO 717-2:2020 (Tabla 4); la expresión de resultados incluye el término de adaptación espectral C<sub>I,&#916;</sub> (ISO 717-2:2020 Fórmula (A.4)).",
     "&#916;L<sub>w</sub> = {value} dB, required &#8805; {req} dB": "&#916;L<sub>w</sub> = {value} dB, exigido &#8805; {req} dB",
+    # --- ISO 17497-1/-2 surface scattering and diffusion -----------------
+    "Surface scattering measurement": "Medición de la dispersión superficial",
+    "Surface diffusion measurement": "Medición de la difusión superficial",
+    "{standard} reverberation-room measurement of the random-incidence scattering coefficient per ISO 17497-1:2004+A1:2014.": "{standard} medición en cámara reverberante del coeficiente de dispersión de incidencia aleatoria según ISO 17497-1:2004+A1:2014.",
+    "Reverberation-room measurement of the random-incidence scattering coefficient per ISO 17497-1:2004+A1:2014.": "Medición en cámara reverberante del coeficiente de dispersión de incidencia aleatoria según ISO 17497-1:2004+A1:2014.",
+    "{standard} free-field measurement of the directional diffusion coefficient per ISO 17497-2:2012.": "{standard} medición en campo libre del coeficiente de difusión direccional según ISO 17497-2:2012.",
+    "Free-field measurement of the directional diffusion coefficient per ISO 17497-2:2012.": "Medición en campo libre del coeficiente de difusión direccional según ISO 17497-2:2012.",
+    "{standard} free-field polar-response measurement of the directional diffusion coefficient per ISO 17497-2:2012.": "{standard} medición de la respuesta polar en campo libre del coeficiente de difusión direccional según ISO 17497-2:2012.",
+    "Free-field polar-response measurement of the directional diffusion coefficient per ISO 17497-2:2012.": "Medición de la respuesta polar en campo libre del coeficiente de difusión direccional según ISO 17497-2:2012.",
+    "One-third-octave &#945;<sub>s</sub> and scattering coefficient s": "&#945;<sub>s</sub> y coeficiente de dispersión s en tercios de octava",
+    "One-third-octave &#945;<sub>s</sub>, &#945;<sub>spec</sub> and scattering coefficient s": "&#945;<sub>s</sub>, &#945;<sub>spec</sub> y coeficiente de dispersión s en tercios de octava",
+    "One-third-octave diffusion coefficient d": "Coeficiente de difusión d en tercios de octava",
+    "One-third-octave diffusion coefficient d and normalised d<sub>n</sub>": "Coeficiente de difusión d y normalizado d<sub>n</sub> en tercios de octava",
+    "Corrected polar response L per receiver angle": "Respuesta polar corregida L por ángulo de recepción",
+    "Angle &#952; [&#176;]": "Ángulo &#952; [&#176;]",
+    "Random-incidence scattering coefficient <b>s</b>, {lo} Hz to {hi} Hz": "Coeficiente de dispersión de incidencia aleatoria <b>s</b>, {lo} Hz a {hi} Hz",
+    "Diffusion coefficient <b>d</b>, {lo} Hz to {hi} Hz": "Coeficiente de difusión <b>d</b>, {lo} Hz a {hi} Hz",
+    "Directional diffusion coefficient <b>d</b> = {value}": "Coeficiente de difusión direccional <b>d</b> = {value}",
 }
 
 

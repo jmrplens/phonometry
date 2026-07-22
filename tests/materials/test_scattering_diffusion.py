@@ -35,6 +35,7 @@ from phonometry.materials.scattering_diffusion import (
     BASE_PLATE_MAX_SCATTERING,
     TWO_DIMENSIONAL_SOURCE_WEIGHTS,
     DiffusionResult,
+    DiffusionSpectrum,
     ScatteringDiffusionWarning,
     ScatteringResult,
     ScatteringUncertainty,
@@ -44,6 +45,7 @@ from phonometry.materials.scattering_diffusion import (
     base_plate_scattering,
     check_base_plate_scattering,
     directional_diffusion,
+    diffusion_spectrum,
     directional_diffusion_coefficient,
     normalized_diffusion_coefficient,
     random_incidence_absorption,
@@ -538,6 +540,48 @@ def test_directional_diffusion_plot_returns_axes() -> None:
     result = directional_diffusion([-30.0, 0.0, 30.0], [70.0, 72.0, 69.0])
     ax = result.plot()
     assert ax.name == "polar"
+    plt.close("all")
+
+
+def test_diffusion_spectrum_builds_and_carries_fields() -> None:
+    freqs = [250.0, 500.0, 1000.0]
+    d = [0.3, 0.5, 0.7]
+    d_n = [0.2, 0.4, 0.6]
+    result = diffusion_spectrum(freqs, d, normalized=d_n)
+    assert isinstance(result, DiffusionSpectrum)
+    np.testing.assert_allclose(result.frequencies, freqs)
+    np.testing.assert_allclose(result.diffusion, d)
+    np.testing.assert_allclose(result.normalized, d_n)
+
+
+def test_diffusion_spectrum_optional_fields_default_none() -> None:
+    result = diffusion_spectrum([250.0, 500.0], [0.3, 0.5])
+    assert result.normalized is None
+
+
+def test_diffusion_spectrum_length_mismatch_raises() -> None:
+    with pytest.raises(ValueError, match="non-empty, 1-D and equal-length"):
+        diffusion_spectrum([250.0, 500.0], [0.3])
+
+
+def test_diffusion_spectrum_normalized_mismatch_raises() -> None:
+    with pytest.raises(ValueError, match="'normalized' must match"):
+        diffusion_spectrum(
+            [250.0, 500.0], [0.3, 0.5], normalized=[0.2]
+        )
+
+
+def test_diffusion_spectrum_plot_returns_axes() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    result = diffusion_spectrum(
+        [250.0, 500.0, 1000.0], [0.3, 0.5, 0.7], normalized=[0.2, 0.4, 0.6]
+    )
+    ax = result.plot()
+    assert isinstance(ax, plt.Axes)
     plt.close("all")
 
 

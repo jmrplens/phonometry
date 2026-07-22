@@ -169,7 +169,7 @@ note, and a footer with the fixed disclaimer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` is not `"reportlab"`. |
+| ValueError | If `language` is not one of the supported languages, or if `engine` is not `"reportlab"`. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
 
 ## ImpulseProminenceWarning

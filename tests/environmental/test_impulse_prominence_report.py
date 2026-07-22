@@ -149,7 +149,12 @@ def test_requirement_pass_and_fail_both_render(tmp_path) -> None:
 
 
 def test_report_escapes_xml_specials_in_metadata(tmp_path) -> None:
-    """Metadata with XML specials (& < >) renders without crashing reportlab."""
+    """Metadata with XML specials (& < >) is escaped, rendered and not dropped.
+
+    The specials must survive reportlab's XML parser (which would otherwise
+    reject a bare ``&`` or ``<``) *and* appear intact in the rendered PDF text,
+    so the fiche cannot silently omit or mangle the client's metadata.
+    """
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
         specimen="hammer <A> & pile",
@@ -162,6 +167,12 @@ def test_report_escapes_xml_specials_in_metadata(tmp_path) -> None:
     out = tmp_path / "xml.pdf"
     _result().report(str(out), metadata=md)
     _assert_one_page(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    # The escaped values render back to their literal glyphs in the PDF text.
+    assert "hammer <A> & pile" in text  # source/situation (specimen)
+    assert "Ac & Co <Ltd>" in text  # client
+    assert "pos <1> & <2>" in text  # measurement position
+    assert "R&D-112" in text  # footer report number
 
 
 def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
@@ -230,10 +241,47 @@ def test_oversized_impulse_set_stays_one_page(tmp_path) -> None:
     _assert_one_page(str(out))
     text = _extract_text(str(out)).replace("\n", " ")
     assert "more impulses of lower prominence" in text
-    # The governing impulse (its 1-based input index) is always shown.
-    governing = int(np.argmax(result.per_impulse[result.qualifies]))
-    governing = int(np.where(result.qualifies)[0][governing])
     assert f"{result.prominence:.2f}" in text  # boxed governing P still present
+
+    # The whole point of the cap is that the governing impulse is never dropped:
+    # its row must survive the truncation to the highest-prominence impulses.
+    from phonometry._report.iso1996_impulse import (
+        _MAX_TABLE_ROWS,
+        _governing_index,
+        _select_rows,
+    )
+
+    per = np.asarray(result.per_impulse, dtype=np.float64)
+    qualifies = np.asarray(result.qualifies, dtype=bool)
+    governing = _governing_index(per, qualifies)
+    shown, dropped = _select_rows(per, governing)
+    assert len(shown) == _MAX_TABLE_ROWS  # the table is actually capped
+    assert dropped == per.size - _MAX_TABLE_ROWS
+    assert governing in shown  # the governing impulse's row is retained
+    # Its 1-based input index and its prominence appear in the rendered table.
+    assert f"{per[governing]:.2f}" in text
+
+
+def test_row_cap_force_includes_a_low_prominence_governing_impulse() -> None:
+    """The cap keeps the governing impulse even when it is not a top-P row.
+
+    A non-qualifying event can carry a higher raw prominence than the governing
+    (highest *qualifying*) impulse; a plain top-N-by-prominence cut would drop
+    the governing row. ``_select_rows`` must force it in and drop a top row.
+    """
+    import numpy as np
+
+    from phonometry._report.iso1996_impulse import _MAX_TABLE_ROWS, _select_rows
+
+    # The governing impulse is the lowest-prominence entry, so a naive top-N cut
+    # would exclude it; every other entry outranks it.
+    n = _MAX_TABLE_ROWS + 3
+    per = np.arange(n, dtype=np.float64) + 10.0  # strictly increasing
+    governing = 0  # the smallest prominence
+    shown, dropped = _select_rows(per, governing)
+    assert len(shown) == _MAX_TABLE_ROWS
+    assert dropped == n - _MAX_TABLE_ROWS
+    assert governing in shown  # forced in despite its low prominence
 
 
 def test_non_prominent_impulse_reports_zero_adjustment(tmp_path) -> None:

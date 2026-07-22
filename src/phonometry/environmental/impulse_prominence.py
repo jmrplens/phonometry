@@ -129,7 +129,8 @@ class ImpulseProminenceResult:
         :param language: Fiche language: ``"en"`` (default, English) or
             ``"es"`` (Spanish, with a comma decimal separator).
         :return: The written ``path`` as a :class:`str`.
-        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ValueError: If ``language`` is not one of the supported
+            languages, or if ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``).
         """

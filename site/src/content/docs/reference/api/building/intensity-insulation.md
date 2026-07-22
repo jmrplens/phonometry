@@ -308,6 +308,63 @@ automatic rating to be available (16 or 5 bands) and matplotlib
 (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### IntensityReductionResult.report()
+
+```python
+IntensityReductionResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ISO 15186-1 intensity sound-insulation report to a PDF.
+
+Writes the one-page laboratory test report of ISO 15186-1:2000 for
+sound insulation measured with sound intensity: the standard-basis
+line, an optional metadata header block, the band table (16
+one-third-octave or 5 octave bands) beside the
+measured-versus-shifted-reference curve, the boxed rating `RI,w
+(C; Ctr)` (the intensity sound reduction index `RI` rated per
+ISO 717-1), the intensity-method statement, an optional verdict row and
+a footer with the identity block and disclaimer. The report requires
+the single-number `rating` to be present on the result; it is formed
+automatically only for exactly 16 one-third-octave (100 Hz to 3150 Hz)
+or 5 octave (125 Hz to 2000 Hz) bands, and a result carrying no rating
+(any other band count) is rejected.
+
+The applicable [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) fields describe the
+intensity measurement: `specimen` (the tested element), `area`
+(specimen area `S`), `client`, `manufacturer`, `test_room` (the
+laboratory / facility), `laboratory`, `operator`, `report_id` and
+`test_date`, plus the room/climate fields shared with the other
+insulation fiches. The measurement-surface geometry and the
+scanning-versus-discrete-point acquisition method are not dedicated
+metadata fields; record them in `notes` (free text) and name the
+measurement standard in `measurement_standard` (`"ISO 15186-1"`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True` and the Kc-modified index `RI,M` is available, the table annexes `RI,M` beside the reported `RI`. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is unknown, `language` is not one of the supported values, or the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-1 rating the fiche needs was not formed). |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded rating figure (`pip install phonometry[plot]`). |
+
 ## surface_pressure_intensity_indicator
 
 ```python

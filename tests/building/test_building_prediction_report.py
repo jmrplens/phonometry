@@ -85,7 +85,8 @@ def _extract_text(path: str) -> str:
 def test_airborne_prediction_rating_pinned_to_annex_h3(tmp_path) -> None:
     """The airborne fiche boxes the Annex H.3 predicted R'w = 52 dB."""
     out = tmp_path / "air.pdf"
-    _annex_h3_airborne().report(str(out))
+    # report() returns the written path (part of the public contract).
+    assert _annex_h3_airborne().report(str(out)) == str(out)
     _assert_one_page(str(out))
     text = _extract_text(str(out))
     assert f"{ref.EN12354_1_ANNEX_H3_RPRIME_W} dB" in text  # boxed R'w = 52 dB
@@ -103,7 +104,7 @@ def test_airborne_prediction_rating_pinned_to_annex_h3(tmp_path) -> None:
 def test_impact_prediction_rating_pinned_to_annex_e3(tmp_path) -> None:
     """The impact fiche boxes the Annex E.3 predicted L'n,w = 45 dB."""
     out = tmp_path / "imp.pdf"
-    _annex_e3_impact().report(str(out))
+    assert _annex_e3_impact().report(str(out)) == str(out)
     _assert_one_page(str(out))
     text = _extract_text(str(out))
     assert f"{ref.EN12354_2_ANNEX_E3_LPRIME_N_W} dB" in text  # boxed L'n,w = 45

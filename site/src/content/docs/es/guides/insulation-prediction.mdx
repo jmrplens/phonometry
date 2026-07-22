@@ -293,10 +293,11 @@ vía. Los metadatos, `language="es"` y el extra `phonometry[report]` se comporta
 igual que en las fichas de medición; los campos aplicables de `ReportMetadata`
 son el elemento separador (`specimen`), la superficie del separador o el suelo
 (`area`), la geometría de los recintos (`source_volume`, `receiving_volume`), la
-masa del suelo desnudo (`mass_per_area`, impactos), la identidad del calculista/
-laboratorio (`client`, `laboratory`, `operator`, `report_id`, `test_date`) y un
-resumen en texto libre de la construcción de flancos y las hipótesis del modelo
-(`notes`).
+masa del suelo desnudo (`mass_per_area`, impactos), el fabricante
+(`manufacturer`), el recinto o la instalación de ensayo (`test_room`), la
+identidad del calculista/laboratorio (`client`, `laboratory`, `operator`,
+`report_id`, `test_date`) y un resumen en texto libre de la construcción de
+flancos y las hipótesis del modelo (`notes`).
 
 ```python
 from phonometry import building, ReportMetadata
@@ -305,8 +306,8 @@ from phonometry import building, ReportMetadata
 # flanqueado por cuatro elementos -> R'w = 52 dB.
 paths = []
 for label, rw, kff, kfd, lf in [
-    ("floor", 49.0, 12.4, 8.9, 4.5), ("ceiling", 46.0, 14.4, 9.2, 4.5),
-    ("facade", 42.0, 12.6, 6.7, 2.55), ("intwall", 33.0, 33.5, 15.7, 2.55),
+    ("suelo", 49.0, 12.4, 8.9, 4.5), ("techo", 46.0, 14.4, 9.2, 4.5),
+    ("fachada", 42.0, 12.6, 6.7, 2.55), ("tabique interior", 33.0, 33.5, 15.7, 2.55),
 ]:
     ff, df, fd = building.flanking_element(
         label=label, r_flanking=rw, r_separating=57.0,

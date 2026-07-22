@@ -151,7 +151,8 @@ class STIResult:
         :param language: Fiche language: ``"en"`` (default, English) or
             ``"es"`` (Spanish, with a comma decimal separator).
         :return: The written ``path`` as a :class:`str`.
-        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or
+            ``language`` is not a supported language.
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``).
         """

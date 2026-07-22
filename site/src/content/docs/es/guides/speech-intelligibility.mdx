@@ -330,20 +330,20 @@ para el lado del STI.
 
 ## 6. Informe ANSI S3.5-1997 (`.report()`)
 
-`SIIResult.report(path)` genera una ficha PDF de una pagina dispuesta como un
-informe de audibilidad del habla: una linea de norma base, un bloque de
+`SIIResult.report(path)` genera una ficha PDF de una página dispuesta como un
+informe de audibilidad del habla: una línea de norma base, un bloque de
 metadatos opcional, una tabla por bandas de tercio de octava del espectro del
-habla equivalente $E_i'$, la funcion de importancia de banda $I_i$ de la Tabla 3
-y la funcion de audibilidad de banda $A_i$ junto a las barras de audibilidad y
-de aportacion ponderada por importancia (el `.plot()` del propio resultado), el
-numero unico enmarcado `SII = X`, una fila de veredicto opcional y un pie con el
+habla equivalente $E_i'$, la función de importancia de banda $I_i$ de la Tabla 3
+y la función de audibilidad de banda $A_i$ junto a las barras de audibilidad y
+de aportación ponderada por importancia (el `.plot()` del propio resultado), el
+número único enmarcado `SII = X`, una fila de veredicto opcional y un pie con el
 descargo fijo. Usa el mismo contenedor `ReportMetadata` y el mismo motor que la
 [ficha de aislamiento de ISO 717](/phonometry/es/guides/insulation-field/#informe-de-iso-717-report);
-un `requirement` indicado se interpreta como el SII minimo exigido (un SII mayor
-cumple). `verbose=True` anade la columna del nivel de espectro de perturbacion
-equivalente $D_i$. La generacion necesita reportlab
+un `requirement` indicado se interpreta como el SII mínimo exigido (un SII mayor
+cumple). `verbose=True` añade la columna del nivel de espectro de perturbación
+equivalente $D_i$. La generación necesita reportlab
 (`pip install phonometry[report]`); solo se admite `engine="reportlab"`. Pasa
-`language="es"` para la ficha en espanol.
+`language="es"` para la ficha en español.
 
 ```python
 from phonometry import hearing, ReportMetadata
@@ -355,7 +355,7 @@ res.report(
         specimen="Habla conversacional en ruido ambiente de baja frecuencia",
         measurement_standard="ANSI S3.5-1997",
         laboratory="Laboratorio de referencia Phonometry",
-        requirement=0.75,            # SII minimo exigido (un SII mayor cumple)
+        requirement=0.75,            # SII mínimo exigido (un SII mayor cumple)
     ),
     language="es",
 )
@@ -367,8 +367,8 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 <ReportPreview
 	name="ansi_s3_5_sii_example"
 	title="Informe de ejemplo SII ANSI S3.5-1997 (PDF)"
-	description="Ficha de indice de inteligibilidad del habla de una pagina: cabecera de metadatos, tabla por bandas de tercio de octava del espectro del habla equivalente, la importancia de banda y la audibilidad de banda, las barras de audibilidad, el numero unico enmarcado SII = 0,851 y un veredicto CUMPLE frente a un minimo de 0,75."
-	caption="Ficha de indice de inteligibilidad del habla (SIIResult.report), el SII con su audibilidad por banda."
+	description="Ficha de índice de inteligibilidad del habla de una página: cabecera de metadatos, tabla por bandas de tercio de octava del espectro del habla equivalente, la importancia de banda y la audibilidad de banda, las barras de audibilidad, el número único enmarcado SII = 0,851 y un veredicto CUMPLE frente a un mínimo de 0,75."
+	caption="Ficha de índice de inteligibilidad del habla (SIIResult.report), el SII con su audibilidad por banda."
 />
 
 ## Véase también

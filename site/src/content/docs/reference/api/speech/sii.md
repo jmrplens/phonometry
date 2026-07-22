@@ -106,7 +106,7 @@ row and a footer with the fixed disclaimer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` is not `"reportlab"`. |
+| ValueError | If `engine` is not `"reportlab"` or `language` is not a supported language. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
 
 ## speech_intelligibility_index

@@ -390,7 +390,7 @@ elements = [
 ]
 fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
                              frequencies=[125, 250, 500, 1000, 2000], bands="octave")
-print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (Rtr,s,w / Ctr / D2m,nT,w)
+print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (R'tr,s,w / Ctr / D2m,nT,w)
 ```
 
 <details>
@@ -427,6 +427,53 @@ fig.tight_layout(); plt.show()
 ```
 
 </details>
+
+La predicción de fachada también escribe un informe de **predicción** de una
+página mediante un método `report(path)`, con la misma maquetación que las
+fichas de predicción a ruido aéreo y de impactos. `FacadePredictionResult.report()`
+representa la tabla de elementos de la fachada (el índice parcial ponderado
+`Rp,w` de cada elemento) junto a la gráfica por elemento / `R'` / `D2m,nT`, el
+número único previsto `D2m,nT,w` en un recuadro (con `R'tr,s,w` y `Ctr`), la
+declaración de predicción y, cuando se aporta un `requirement`, un veredicto
+APTO/NO APTO (la diferencia de niveles cumple si es igual o mayor). `verbose=True`
+añade la fracción de energía sonora transmitida por cada elemento, que señala el
+elemento limitante (aquí la entrada de aire, no la pared). El informe necesita
+los índices de número único de ISO 717-1, así que construye el resultado sobre
+las 5 bandas de octava o las 16 de tercio de octava. Los campos aplicables de
+`ReportMetadata` describen la situación prevista: `specimen` (el conjunto de
+elementos de la fachada), `area` (la superficie expuesta de la fachada), el
+volumen del recinto receptor `receiving_volume`, la situación exterior/de tráfico
+en `test_room`, además de los campos de identidad del calculista / laboratorio
+(`client`, `manufacturer`, `measurement_standard`, `laboratory`, `operator`,
+`report_id`, `test_date`), un resumen libre de la forma de la fachada y del
+modelo en `notes` y el objetivo `D2m,nT,w` en `requirement`. Los metadatos,
+`language="es"` y el extra `phonometry[report]` se comportan como en las fichas
+de medición.
+
+```python
+from phonometry import building, ReportMetadata
+
+# EN 12354-3 Anexo F, fachada -> D2m,nT,w = 33 dB (R'tr,s,w = 31, Ctr = -3).
+elements = [
+    building.FacadeElement("Masonry wall", area=6.0, r=[41, 46, 52, 58, 64]),
+    building.FacadeElement("Glazing",      area=4.5, r=[23, 22, 30, 36, 37]),
+    building.FacadeElement("Roof light",   area=0.5, r=[24, 27, 30, 33, 30]),
+    building.FacadeElement("Air inlet", dn_e=[28, 23, 25, 38, 44]),
+]
+fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
+                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+fac.report("D2mnT_prediction.pdf", metadata=ReportMetadata(
+    specimen="Masonry wall + window + roof light + air inlet", area=11.3,
+    receiving_volume=50.0, requirement=30.0,
+    notes="Fachada plana, ΔLfs = 0 dB (Anexo C)."))         # D2m,nT,w = 33 dB
+```
+
+<ReportPreview
+	name="iso12354_facade_prediction_example"
+	title="Informe de ejemplo de fachada prevista EN 12354-3 (PDF)"
+	description="Informe de una página de aislamiento acústico de fachada previsto (EN 12354-3 Anexo F): la cabecera de metadatos (conjunto de elementos de la fachada, superficie expuesta, volumen del recinto receptor, situación de tráfico), la tabla de elementos de la fachada (el índice parcial ponderado Rp,w de cada elemento) junto a la gráfica por elemento y R' / D2m,nT, el número único previsto D2m,nT,w = 33 dB en un recuadro (con R'tr,s,w = 31 y Ctr = -3), la declaración de predicción indicando la desviación típica del modelo de unos 2 dB y un veredicto APTO frente al requisito de 30 dB."
+	caption="Ficha de fachada prevista (FacadePredictionResult.report), D2m,nT,w."
+/>
 
 **Parte 4: interior → exterior.** El nivel de potencia acústica radiada por un
 segmento (Fórmula 2) es $L_W = L_{p,in} + C_d - R' + 10 \log_{10}(S/S_0)$ con

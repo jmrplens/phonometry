@@ -18,7 +18,13 @@ from .occupational_exposure import (
     task_based_exposure,
 )
 from .objective_intelligibility import STOIResult, stoi
-from .sii import SIIResult, speech_intelligibility_index, standard_speech_spectrum
+from .sii import (
+    SIIResult,
+    StandardSpeechSpectrum,
+    speech_intelligibility_index,
+    standard_speech_spectra,
+    standard_speech_spectrum,
+)
 from .sti import STIResult, STIWarning, sti_from_impulse_response, stipa, stipa_signal
 
 from .threshold import (
@@ -48,6 +54,7 @@ __all__ = [
     "STIResult",
     "STIWarning",
     "STOIResult",
+    "StandardSpeechSpectrum",
     "Task",
     "TaskContribution",
     "full_day_exposure",
@@ -56,6 +63,7 @@ __all__ = [
     "minimum_cumulative_duration_hours",
     "nipts",
     "speech_intelligibility_index",
+    "standard_speech_spectra",
     "standard_speech_spectrum",
     "sti_from_impulse_response",
     "stipa",

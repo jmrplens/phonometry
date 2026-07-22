@@ -347,7 +347,9 @@ from .room.room_noise import (
 from .hearing.objective_intelligibility import STOIResult, stoi
 from .hearing.sii import (
     SIIResult,
+    StandardSpeechSpectrum,
     speech_intelligibility_index,
+    standard_speech_spectra,
     standard_speech_spectrum,
 )
 from .hearing.sti import (
@@ -1278,6 +1280,8 @@ __all__ = [
     "STIWarning",
     "speech_intelligibility_index",
     "standard_speech_spectrum",
+    "standard_speech_spectra",
+    "StandardSpeechSpectrum",
     "SIIResult",
     "stoi",
     "STOIResult",

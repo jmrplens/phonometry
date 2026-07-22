@@ -183,7 +183,7 @@ def _indicator_strip(result: Any, language: str = "en") -> str:
     )
 
 
-def _criteria_strip(result: Any, language: str = "en") -> str:
+def _criteria_strip(language: str = "en") -> str:
     """The Annex B qualification / A-weighting line for the basis strip."""
     return t(
         "A band reaches engineering grade when L<sub>d</sub> &gt; F<sub>pI</sub>"
@@ -241,7 +241,7 @@ def render_intensity_power_report(
         extended=extended,
         basis_strips=[
             _indicator_strip(result, language),
-            _criteria_strip(result, language),
+            _criteria_strip(language),
         ],
         metadata=metadata,
         language=language,

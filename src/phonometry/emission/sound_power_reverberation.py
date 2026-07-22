@@ -47,6 +47,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from .._internal.levels_math import energy_mean, energy_sum
 from .sound_power import (
     SoundPowerWarning,
@@ -101,6 +103,64 @@ class ReverberationSoundPowerResult:
 
         check_language(language)
         return plot_sound_power(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 3741 reverberation-room sound-power determination fiche.
+
+        Writes a one-page sound-power test sheet: the standard-basis line naming
+        the reverberation-room method (the direct method using the room
+        equivalent absorption area, or the comparison method using a reference
+        sound source) and the precision accuracy grade (ISO 3741:2010, grade 1),
+        an optional metadata header (client, noise source, test environment,
+        instrumentation, climate, date), a per-band table (nominal octave/
+        one-third-octave frequency, the mean room sound-pressure level ``Lp``
+        and the band sound-power level ``LW``), the sound-power spectrum
+        ``LW(f)`` with a nominal band axis, the boxed A-weighted sound power
+        level ``LWA`` (dB re 1 pW) with the total ``LW`` and the determination
+        method, an optional verdict row against a declared limit, and a
+        measurement-basis strip stating the correction model (Eq. 20 direct or
+        Eq. 21 comparison), the applied meteorological corrections ``C1``/``C2``
+        and the speed of sound.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header (``client``, ``specimen`` the noise source, ``test_room``
+            the reverberation test room, ``instrumentation``, ``temperature``,
+            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
+            and, via ``requirement``, a declared A-weighted sound-power limit
+            the fiche checks the result against (lower is better).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True`` the per-band table adds the background
+            correction ``K1`` and, for the direct method, the equivalent
+            absorption area ``A`` and the Waterhouse boundary correction ``Cw``.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab (or, for the figure, matplotlib) is
+            not installed (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso3741 import render_reverberation_power_report
+
+        return render_reverberation_power_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def _validate_meteorology(temperature: float, static_pressure: float) -> None:

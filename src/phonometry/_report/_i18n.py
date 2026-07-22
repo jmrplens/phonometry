@@ -160,6 +160,16 @@ _STRINGS: dict[str, str] = {
     "Shape indicator: {value}": "Indicador de forma: {value}",
     "Applied shift: {value}": "Desplazamiento aplicado: {value}",
     "&#945;<sub>w</sub> = {value}, required &#8805; {req}": "&#945;<sub>w</sub> = {value}, exigido &#8805; {req}",
+    # --- iso10534-2 impedance-tube absorption/impedance -------------------
+    "Impedance-tube sound absorption and impedance": "Absorción acústica e impedancia en tubo de impedancia",
+    "{standard} normal-incidence measurement of sound absorption and surface impedance in an impedance tube by the two-microphone transfer-function method per ISO 10534-2:2001.": "{standard} medición a incidencia normal de la absorción acústica y la impedancia superficial en tubo de impedancia por el método de la función de transferencia con dos micrófonos según ISO 10534-2:2001.",
+    "Normal-incidence measurement of sound absorption and surface impedance in an impedance tube by the two-microphone transfer-function method per ISO 10534-2:2001.": "Medición a incidencia normal de la absorción acústica y la impedancia superficial en tubo de impedancia por el método de la función de transferencia con dos micrófonos según ISO 10534-2:2001.",
+    "Tube diameter d [mm]": "Diámetro del tubo d [mm]",
+    "Microphone spacing s [mm]": "Separación de micrófonos s [mm]",
+    "Frequency range [Hz]": "Rango de frecuencias [Hz]",
+    "Normal-incidence &#945; and normalised surface impedance z": "&#945; a incidencia normal e impedancia superficial normalizada z",
+    "Normal-incidence &#945;, |r| and normalised surface impedance z": "&#945; a incidencia normal, |r| e impedancia superficial normalizada z",
+    "Normal-incidence sound absorption coefficient <b>&#945;</b>, {lo} Hz to {hi} Hz": "Coeficiente de absorción acústica a incidencia normal <b>&#945;</b>, {lo} Hz a {hi} Hz",
     # --- iso532 verdict ---------------------------------------------------
     "N = {value} sone, required &#8804; {req} sone": "N = {value} sone, exigido &#8804; {req} sone",
     # --- broadcast --------------------------------------------------------

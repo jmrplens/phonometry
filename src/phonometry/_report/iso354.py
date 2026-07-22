@@ -178,29 +178,6 @@ def _detail_table(
     return band_table(rows, col_widths, len(freqs))
 
 
-def _verbose_body(detail_table: Any, plot_drawing: Any) -> Any:
-    """Two-panel body for the verbose fiche: the ~102 mm detail table beside the plot.
-
-    The detail table needs more width than the default :func:`two_panel_body`
-    left cell, so the columns are rebalanced (102 mm table, 72 mm plot). Called
-    only after the renderer has imported reportlab.
-    """
-    from reportlab.lib.units import mm
-    from reportlab.platypus import Table, TableStyle
-
-    body = Table([[detail_table, plot_drawing]], colWidths=[102 * mm, 72 * mm])
-    body.setStyle(
-        TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (0, 0), 0),
-                ("RIGHTPADDING", (-1, 0), (-1, 0), 0),
-            ]
-        )
-    )
-    return body
-
-
 def _statement(result: "SoundAbsorptionMeasurement", language: str = "en") -> str:
     """The boxed characterisation headline (ISO 354 has no single number)."""
     freqs = np.asarray(result.frequencies, dtype=np.float64)
@@ -300,7 +277,11 @@ def render_iso354_report(
         plot_drawing = render_figure_drawing(
             result.plot, 70 * mm, y_top=None, language=language
         )
-        flow.append(_verbose_body(left_cell, plot_drawing))
+        flow.append(
+            two_panel_body(
+                left_cell, plot_drawing, left_width_mm=102.0, plot_width_mm=72.0
+            )
+        )
     else:
         caption = t("One-third-octave &#945;<sub>s</sub>", language)
         left_cell = [Paragraph(caption, caption_style), _alpha_table(

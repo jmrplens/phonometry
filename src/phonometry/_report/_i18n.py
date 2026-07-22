@@ -540,6 +540,23 @@ _STRINGS: dict[str, str] = {
     "Random-incidence scattering coefficient <b>s</b>, {lo} Hz to {hi} Hz": "Coeficiente de dispersión de incidencia aleatoria <b>s</b>, {lo} Hz a {hi} Hz",
     "Diffusion coefficient <b>d</b>, {lo} Hz to {hi} Hz": "Coeficiente de difusión <b>d</b>, {lo} Hz a {hi} Hz",
     "Directional diffusion coefficient <b>d</b> = {value}": "Coeficiente de difusión direccional <b>d</b> = {value}",
+    # --- EN 29052-1 / ISO 9052-1 dynamic stiffness -----------------------
+    "Dynamic stiffness of resilient materials": "Rigidez dinámica de materiales resilientes",
+    "{standard} resonance measurement of the apparent dynamic stiffness per unit area of a resilient layer used under a floating floor per EN 29052-1:1992 (ISO 9052-1:1989).": "{standard} medición por resonancia de la rigidez dinámica aparente por unidad de superficie de una capa resiliente empleada bajo un suelo flotante según EN 29052-1:1992 (ISO 9052-1:1989).",
+    "Resonance measurement of the apparent dynamic stiffness per unit area of a resilient layer used under a floating floor per EN 29052-1:1992 (ISO 9052-1:1989).": "Medición por resonancia de la rigidez dinámica aparente por unidad de superficie de una capa resiliente empleada bajo un suelo flotante según EN 29052-1:1992 (ISO 9052-1:1989).",
+    "Dynamic-stiffness results": "Resultados de rigidez dinámica",
+    "Total mass per area m&#8242;<sub>t</sub> [kg/m<super>2</super>]": "Masa total por superficie m&#8242;<sub>t</sub> [kg/m<super>2</super>]",
+    "Thickness under load d [mm]": "Espesor bajo carga d [mm]",
+    "Resonant frequency f<sub>r</sub> [Hz]": "Frecuencia de resonancia f<sub>r</sub> [Hz]",
+    "Apparent dynamic stiffness s&#8242;<sub>t</sub> [MN/m<super>3</super>]": "Rigidez dinámica aparente s&#8242;<sub>t</sub> [MN/m<super>3</super>]",
+    "Enclosed-gas stiffness s&#8242;<sub>a</sub> [MN/m<super>3</super>]": "Rigidez del gas encerrado s&#8242;<sub>a</sub> [MN/m<super>3</super>]",
+    "Dynamic stiffness s&#8242; [MN/m<super>3</super>]": "Rigidez dinámica s&#8242; [MN/m<super>3</super>]",
+    "Supported-floor mass m&#8242; [kg/m<super>2</super>]": "Masa del suelo soportado m&#8242; [kg/m<super>2</super>]",
+    "Natural frequency f<sub>0</sub> [Hz]": "Frecuencia natural f<sub>0</sub> [Hz]",
+    "Apparent dynamic stiffness s&#8242;<sub>t</sub> = <b>{value} MN/m<super>3</super></b>": "Rigidez dinámica aparente s&#8242;<sub>t</sub> = <b>{value} MN/m<super>3</super></b>",
+    "Dynamic stiffness s&#8242; = {value}": "Rigidez dinámica s&#8242; = {value}",
+    "Resonant frequency f<sub>r</sub> = {value} Hz": "Frecuencia de resonancia f<sub>r</sub> = {value} Hz",
+    "Natural frequency f<sub>0</sub> = {value} Hz": "Frecuencia natural f<sub>0</sub> = {value} Hz",
 }
 
 

@@ -137,6 +137,7 @@ def render_figure_drawing(
     y_top: float | None,
     expand_step: float | None = None,
     figsize: Tuple[float, float] | None = None,
+    subplot_kw: dict[str, Any] | None = None,
     language: str = "en",
 ) -> Any:
     """Draw a result's plot as a scaled, vector reportlab ``Drawing``.
@@ -159,6 +160,11 @@ def render_figure_drawing(
         ``None`` keeps the default portrait ``(5.8, 6.4)``. A landscape size
         (e.g. a wide, short time plot) is passed for a stacked full-width
         figure.
+    :param subplot_kw: Keyword arguments forwarded to ``Figure.subplots`` when
+        the plot needs a non-rectangular axes (e.g. ``{"projection": "polar"}``
+        for a polar reflected-level response); ``None`` uses the default
+        rectangular axes. A ``y_top`` of ``None`` is expected alongside a polar
+        axes, since the radial limits are the plot's own.
     :param language: Fiche language, forwarded to ``plot_fn`` so the embedded
         chart's axis labels and legends are localised, and to the tick-label
         decimal separator.
@@ -179,7 +185,7 @@ def render_figure_drawing(
     try:
         fig = Figure(figsize=figsize if figsize is not None else (5.8, 6.4))
         FigureCanvasAgg(fig)
-        ax = fig.subplots()
+        ax = fig.subplots(subplot_kw=subplot_kw) if subplot_kw else fig.subplots()
         # Forward the fiche language so the embedded chart is localised too
         # (every result ``plot`` accepts ``language``); without it a Spanish
         # fiche would embed English axis labels and legends.

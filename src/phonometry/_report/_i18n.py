@@ -519,6 +519,7 @@ _STRINGS: dict[str, str] = {
     "Candidate impulses": "Impulsos candidatos",
     "Impulse": "Impulso",
     "Onset &gt; 10 dB/s": "Inicio &gt; 10 dB/s",
+    "&#8230; plus {n} more impulses of lower prominence": "&#8230; y {n} impulsos más de menor prominencia",
     "Yes": "Sí",
     "Governing prominence P = <b>{p}</b> &nbsp; L<sub>Aeq</sub> adjustment K<sub>I</sub> = <b>{ki} dB</b>": "Prominencia rectora P = <b>{p}</b> &nbsp; ajuste de L<sub>Aeq</sub> K<sub>I</sub> = <b>{ki} dB</b>",
     "Governing impulse: OR = {orate} dB/s, LD = {ld} dB": "Impulso rector: OR = {orate} dB/s, LD = {ld} dB",

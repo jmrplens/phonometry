@@ -72,6 +72,13 @@ if TYPE_CHECKING:
 #: the domain module at module level (the render-leaf import rule).
 _ONSET_RATE_LIMIT = 10.0
 
+#: Maximum number of impulse rows the per-impulse table shows. A large valid
+#: impulse set is capped to the highest-prominence impulses (the governing one
+#: always included) so the table cannot push the plot, result and footer off the
+#: single A4 page; the dropped rows are reported in an explicit note row rather
+#: than silently omitted.
+_MAX_TABLE_ROWS = 12
+
 
 def _fmt(value: float, language: str, decimals: int = 1) -> str:
     """A quantity rounded to ``decimals`` decimals, localised separator."""
@@ -95,6 +102,27 @@ def _governing_index(per_impulse: np.ndarray, qualifies: np.ndarray) -> int:
         idx = np.where(qualifies)[0]
         return int(idx[int(np.argmax(per_impulse[idx]))])
     return int(np.argmax(per_impulse))
+
+
+def _select_rows(
+    per_impulse: np.ndarray, governing: int
+) -> Tuple[List[int], int]:
+    """Choose the impulse rows to show and how many are dropped.
+
+    Every impulse is shown (in input order) when the set fits :data:`_MAX_TABLE_ROWS`;
+    otherwise the highest-prominence impulses are kept, always including the
+    governing impulse (which a non-qualifying event of higher raw prominence
+    could otherwise displace), and the remaining count is returned so the fiche
+    can state ``... plus N more`` rather than silently dropping rows.
+    """
+    n = per_impulse.size
+    if n <= _MAX_TABLE_ROWS:
+        return list(range(n)), 0
+    order = np.argsort(per_impulse, kind="stable")[::-1]  # descending prominence
+    top = [int(i) for i in order[:_MAX_TABLE_ROWS]]
+    if governing not in top:
+        top = top[: _MAX_TABLE_ROWS - 1] + [governing]
+    return sorted(top), n - len(top)
 
 
 def _qualifies_markup(qualifies: bool, language: str = "en") -> str:
@@ -144,8 +172,11 @@ def _per_impulse_table(
     One row per candidate impulse: the onset rate (dB/s), the level difference
     (dB), the predicted prominence ``P`` (Formula 1) and whether the onset
     qualifies as an impulse (onset rate above 10 dB/s). The governing impulse's
-    row is emphasised. Called only after :func:`render_impulse_prominence_report`
-    has imported reportlab.
+    row is emphasised. A set larger than :data:`_MAX_TABLE_ROWS` is capped to the
+    highest-prominence impulses (the governing one always kept) with a trailing
+    ``... plus N more`` note row, so the fiche stays one page for any input.
+    Called only after :func:`render_impulse_prominence_report` has imported
+    reportlab.
     """
     from reportlab.lib import colors
     from reportlab.lib.units import mm
@@ -158,6 +189,7 @@ def _per_impulse_table(
     per = np.asarray(result.per_impulse, dtype=np.float64)
     qualifies = np.asarray(result.qualifies, dtype=bool)
     governing = _governing_index(per, qualifies)
+    shown, dropped = _select_rows(per, governing)
 
     headers = [
         t("Impulse", language),
@@ -169,7 +201,7 @@ def _per_impulse_table(
     widths = [22.0, 34.0, 34.0, 34.0, 50.0]
 
     data: List[List[Any]] = [[Paragraph(h, header_style) for h in headers]]
-    for i in range(per.size):
+    for i in shown:
         emph = "<b>{}</b>".format if i == governing else str
         data.append(
             [
@@ -180,16 +212,26 @@ def _per_impulse_table(
                 Paragraph(_qualifies_markup(bool(qualifies[i]), language), value_style),
             ]
         )
+    if dropped:
+        note = t(
+            "&#8230; plus {n} more impulses of lower prominence", language
+        ).format(n=dropped)
+        data.append([Paragraph(note, label_style), "", "", "", ""])
 
     table = stacked_table(data, [w * mm for w in widths])
-    dec_row = governing + 1
+    dec_row = shown.index(governing) + 1  # +1 for the header row
     accent = colors.HexColor(_ACCENT_HEX)
-    table.setStyle(
-        [
-            ("LINEBELOW", (0, dec_row), (-1, dec_row), 0.5, accent),
-            ("LINEABOVE", (0, dec_row), (-1, dec_row), 0.5, accent),
+    extra_style: List[Any] = [
+        ("LINEBELOW", (0, dec_row), (-1, dec_row), 0.5, accent),
+        ("LINEABOVE", (0, dec_row), (-1, dec_row), 0.5, accent),
+    ]
+    if dropped:
+        note_row = len(data) - 1
+        extra_style += [
+            ("SPAN", (0, note_row), (-1, note_row)),
+            ("ALIGN", (0, note_row), (-1, note_row), "LEFT"),
         ]
-    )
+    table.setStyle(extra_style)
     return table
 
 
@@ -231,13 +273,15 @@ def _verdict(
 
     The ``requirement`` is read as the maximum acceptable governing prominence
     ``P`` (a lower prominence is better, as a more prominent impulse is more
-    intrusive); the assessment passes when the governing prominence, rounded as
-    displayed, is at or below it.
+    intrusive); the assessment passes when the governing prominence is at or
+    below it. The comparison is on the unrounded prominence so a value just
+    above the limit (P = 10.004 against a 10.00 maximum) cannot pass on the
+    display rounding; only the printed P is rounded for display.
     """
-    p = display_round(result.prominence, 2)
-    passed = p <= requirement + 1e-9
+    passed = result.prominence <= requirement
     text = t("P = {p}, required &#8804; {req}", language).format(
-        p=_fmt(p, language, decimals=2), req=_fmt(requirement, language, decimals=2)
+        p=_fmt(display_round(result.prominence, 2), language, decimals=2),
+        req=_fmt(requirement, language, decimals=2),
     )
     return text, passed
 

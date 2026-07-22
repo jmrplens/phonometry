@@ -181,6 +181,61 @@ def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
     assert re.search(r"\d,\d", text) is not None  # comma decimal separator
 
 
+def test_verdict_compares_unrounded_prominence(tmp_path) -> None:
+    """A prominence just above the requirement FAILs, not rounded to a PASS.
+
+    The governing prominence 12.2478 rounds to 12.25 for display; a requirement
+    of 12.247 is just below it, so the assessment must FAIL even though the
+    displayed P would round to the same two decimals as a passing value would.
+    """
+    result = _result()
+    out = tmp_path / "boundary.pdf"
+    requirement = result.prominence - 1e-3  # just below the unrounded P
+    result.report(str(out), metadata=ReportMetadata(requirement=requirement))
+    _assert_one_page(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert result.prominence > requirement
+    assert "FAIL" in text
+    assert "PASS" not in text
+
+
+def test_verdict_passes_at_the_requirement(tmp_path) -> None:
+    """A governing prominence at the requirement passes (``<=``)."""
+    result = _result()
+    out = tmp_path / "atlimit.pdf"
+    result.report(str(out), metadata=ReportMetadata(requirement=result.prominence))
+    _assert_one_page(str(out))
+    assert "PASS" in _extract_text(str(out)).replace("\n", " ")
+
+
+def test_oversized_impulse_set_stays_one_page(tmp_path) -> None:
+    """A large valid impulse set caps the table and stays exactly one page.
+
+    Forty qualifying impulses exceed the table row cap; the fiche must keep the
+    highest-prominence rows (including the governing impulse), add an explicit
+    ``... plus N more`` note and still render as a single A4 page.
+    """
+    import warnings
+
+    import numpy as np
+
+    rng = np.random.default_rng(0)
+    onset_rates = rng.uniform(20.0, 2000.0, 40)
+    level_differences = rng.uniform(5.0, 40.0, 40)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        result = nt.impulse_prominence(onset_rates, level_differences)
+    out = tmp_path / "big.pdf"
+    result.report(str(out))
+    _assert_one_page(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "more impulses of lower prominence" in text
+    # The governing impulse (its 1-based input index) is always shown.
+    governing = int(np.argmax(result.per_impulse[result.qualifies]))
+    governing = int(np.where(result.qualifies)[0][governing])
+    assert f"{result.prominence:.2f}" in text  # boxed governing P still present
+
+
 def test_non_prominent_impulse_reports_zero_adjustment(tmp_path) -> None:
     """A qualifying but weak impulse (P <= 5) renders with a zero adjustment.
 

@@ -131,7 +131,6 @@ def _level_cell(level: float, language: str, decimals: int = 1) -> str:
 def _value_table(
     columns: List[Tuple[str, List[str]]],
     col_widths: List[Any],
-    language: str = "en",
 ) -> Any:
     """Assemble the left-hand octave-band table with the accredited styling.
 
@@ -221,7 +220,7 @@ def _assemble_left(
     caption = t("Octave-band sound pressure levels", language)
     left_cell = [
         Paragraph(caption, caption_style),
-        _value_table(columns, col_widths, language),
+        _value_table(columns, col_widths),
     ]
     return left_cell, [widths[0], widths[1]]
 

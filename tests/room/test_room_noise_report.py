@@ -155,16 +155,18 @@ def test_verbose_reports_one_page(tmp_path) -> None:
 def test_unknown_engine_rejected(tmp_path, factory) -> None:
     """An unknown rendering engine raises ``ValueError``."""
     out = str(tmp_path / "x.pdf")
+    result = factory()
     with pytest.raises(ValueError, match="engine"):
-        factory().report(out, engine="weasyprint")
+        result.report(out, engine="weasyprint")
 
 
 @pytest.mark.parametrize("factory", [_nc_result, _rc_result])
 def test_unknown_language_rejected(tmp_path, factory) -> None:
     """An unknown fiche language raises ``ValueError``."""
     out = str(tmp_path / "bad.pdf")
+    result = factory()
     with pytest.raises(ValueError, match="language"):
-        factory().report(out, language="xx")
+        result.report(out, language="xx")
 
 
 # --------------------------------------------------------------------------

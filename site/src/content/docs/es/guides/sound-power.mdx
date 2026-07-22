@@ -1076,6 +1076,62 @@ el repositorio; haz clic en la vista previa para abrir el PDF.
 	caption="Ficha de potencia acústica por intensidad (SoundPowerIntensityResult.report), un barrido ISO 9614-2 de grado de ingeniería con los indicadores de campo y el LWA en recuadro."
 />
 
+### La determinación en sala reverberante (ISO 3741)
+
+El resultado en sala reverberante (`ReverberationSoundPowerResult`, ISO 3741)
+escribe la misma ficha de una página mediante su propio `.report()`. La línea
+de base normativa nombra la ISO 3741:2010 y el grado de precisión (grado 1) e
+indica qué método se empleó, el método directo usando el área de absorción
+equivalente de la sala (Ec. 20) o el método de comparación usando una fuente
+sonora de referencia (Ec. 21). La tabla por bandas lista el nivel de presión
+acústica medio en la sala $L_p$ y el nivel de potencia acústica de banda $L_W$,
+y el recuadro del $L_{WA}$ recoge el $L_W$ total y el método de determinación
+(el resultado en sala reverberante no tiene incertidumbre expandida $U$).
+`verbose=True` añade la corrección por ruido de fondo $K_1$ y, para el método
+directo, el área de absorción equivalente $A$ y la corrección de contorno de
+Waterhouse $C_w$; la tira de base indica el modelo de corrección (Ec. 20 o
+Ec. 21), las correcciones meteorológicas aplicadas $C_1$/$C_2$ y la velocidad
+del sonido, y cita la ponderación A del Anexo F.
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, emission
+
+freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], float)
+# Niveles de presión acústica medios en la sala en bandas de octava
+# en una sala reverberante cualificada de V = 200 m3, S = 240 m2, con un
+# tiempo de reverberación uniforme T60 = 2,0 s.
+lp = np.array([80.0, 83.0, 85.0, 84.0, 80.0, 75.0, 68.0])
+res = emission.sound_power_reverberation(
+    lp, 2.0, volume=200.0, surface_area=240.0, frequencies=freqs,
+    temperature=20.0, static_pressure=101.325,
+)
+
+res.report(
+    "sound_power_reverberation.pdf",
+    metadata=ReportMetadata(
+        client="Planta de fabricación de ejemplo",
+        specimen="Grupo hidráulico (de suelo)",
+        test_room="Sala reverberante cualificada, V = 200 m3, T60 = 2,0 s",
+        instrumentation="Sonómetro clase 1 (IEC 61672-1), n/s 0042",
+        laboratory="Ejemplo de referencia de phonometry",
+        report_id="EXAMPLE-3741",
+        requirement=96.0,
+    ),
+    language="es",
+)   # LWA = 94,3 dB(A) re 1 pW -> límite declarado 96 dB(A): CUMPLE
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; haz clic en la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso3741_reverberation_power_example"
+	title="Informe de ejemplo de potencia acústica en sala reverberante ISO 3741 (PDF)"
+	description="Ficha de una página de determinación de potencia acústica en sala reverberante ISO 3741: un encabezado con el cliente, la fuente de ruido, la sala de ensayo reverberante cualificada y la instrumentación y el clima, la tabla en bandas de octava (125 Hz a 8 kHz) de niveles de presión acústica medios en la sala Lp y niveles de potencia acústica de banda LW, el espectro de potencia acústica LW(f) con eje de bandas nominal, el recuadro con el nivel de potencia acústica ponderado A LWA = 94,3 dB(A) re 1 pW con el LW total = 96,7 dB y el método de determinación directo, y un veredicto CUMPLE frente al límite declarado de 96 dB(A), cerrada por una tira de base que indica el modelo de corrección de la Ec. 20 con el área de absorción de Sabine, el término de contorno de Waterhouse y las correcciones meteorológicas C1 y C2, y la ponderación A del Anexo F."
+	caption="Ficha de potencia acústica en sala reverberante (ReverberationSoundPowerResult.report), una determinación ISO 3741 de grado de precisión por el método directo con las correcciones de Waterhouse y C1/C2 y el LWA en recuadro."
+/>
+
 ## 7. Declarar la emisión sonora (ISO 4871)
 
 Un nivel de potencia acústica medido todavía no es una *declaración*. La norma

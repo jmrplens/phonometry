@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `ReverberationSoundPowerResult.report()`: a one-page PDF reverberation-room
+  sound-power determination fiche for the precision method in a qualified
+  hard-walled reverberation test room (ISO 3741:2010, accuracy grade 1),
+  rendered through the shared sound-power report engine. The sheet carries the
+  standard-basis line naming the reverberation-room method (the direct method
+  using the room equivalent absorption area, Eq. 20, or the comparison method
+  using a reference sound source, Eq. 21) and the precision accuracy grade, an
+  optional metadata header (client, noise source, reverberation test room,
+  instrumentation, climate, date), a per-band table of the mean room
+  sound-pressure level `Lp` and the band sound-power level `LW`, the
+  sound-power spectrum `LW(f)` with a nominal band axis, and a boxed A-weighted
+  sound power level `LWA` (dB re 1 pW) with the total `LW` and the
+  determination method. A declared A-weighted sound-power limit supplied via
+  the metadata `requirement` adds a PASS/FAIL verdict (lower is better).
+  `verbose=True` adds the background correction `K1` and, for the direct
+  method, the equivalent absorption area `A` and the Waterhouse boundary
+  correction `Cw`; the basis strip states the correction model (Eq. 20 or
+  Eq. 21), the applied meteorological corrections `C1`/`C2` and the speed of
+  sound, and cites the Annex F A-weighting. `language="es"` renders the Spanish
+  fiche. The fiche reuses the shared sound-power body (per-band table, `LW(f)`
+  spectrum, boxed `LWA` and flow assembly) already used by the ISO 3744/3745
+  pressure fiche and the ISO 9614-2 intensity fiche.
 - `SoundPowerIntensityResult.report()`: a one-page PDF sound-power-by-intensity
   determination fiche for the sound-intensity scanning method
   (ISO 9614-2:1996, engineering grade 2 or survey grade 3), rendered through

@@ -276,6 +276,45 @@ spectrum clears the noise. When both mechanisms are in play, compute both; the
 inputs are cheap once the room and the noise have been measured. See the
 [Speech Transmission Index guide](speech-transmission.md) for the STI side.
 
+## 6. ANSI S3.5-1997 report (`.report()`)
+
+`SIIResult.report(path)` renders a one-page PDF fiche laid out like a
+speech-audibility report: a standard-basis line, an optional metadata header
+block, a per-one-third-octave-band table of the equivalent speech spectrum
+*E*′<sub>i</sub>, the Table 3 band-importance function *I*<sub>i</sub> and the
+band-audibility function *A*<sub>i</sub> beside the audibility and
+importance-weighted contribution bars (the result's own `.plot()`), the boxed
+`SII = X` single number, an optional verdict row and a footer with the fixed
+disclaimer. It uses the same `ReportMetadata` container (documented under
+[Field insulation](insulation-field.md#report-metadata-reportmetadata)) and
+rendering engine as the ISO 717 insulation fiche; a supplied `requirement` is
+read as the minimum required SII (a higher SII passes). `verbose=True` adds the
+equivalent disturbance spectrum level *D*<sub>i</sub> column. Rendering needs
+reportlab (`pip install phonometry[report]`); only `engine="reportlab"` is
+supported. Pass `language="es"` for a Spanish fiche.
+
+```python
+from phonometry import hearing, ReportMetadata
+
+res = hearing.speech_intelligibility_index(speech, noise, threshold=threshold)
+res.report(
+    "sii_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Conversational speech in low-frequency ambient noise",
+        measurement_standard="ANSI S3.5-1997",
+        laboratory="Phonometry Reference Laboratory",
+        requirement=0.75,            # minimum required SII (a higher SII passes)
+    ),
+)
+```
+
+The example fiche, regenerated with `make reports`, is kept rendered in the
+repository. Click the preview to open the PDF:
+
+[![ANSI S3.5-1997 SII example report: a metadata header, a one-third-octave-band table of the equivalent speech spectrum, band importance and band audibility, the audibility bars, the boxed SII = 0.851 single number and a PASS verdict against a 0.75 minimum](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ansi_s3_5_sii_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ansi_s3_5_sii_example.pdf)
+
+*Speech intelligibility index fiche (`SIIResult.report`), the SII with its per-band audibility.*
+
 ## References
 
 - French, N. R., & Steinberg, J. C. (1947). Factors governing the

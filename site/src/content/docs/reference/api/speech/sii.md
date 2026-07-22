@@ -67,6 +67,48 @@ Plot the per-band audibility weighted by importance, with the SII.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### SIIResult.report()
+
+```python
+SIIResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ANSI S3.5-1997 speech-intelligibility-index fiche to a PDF.
+
+Writes a one-page speech-audibility report: a standard-basis line, an
+optional metadata header block, a per-one-third-octave-band table (the
+equivalent speech spectrum `Ei'`, the band-importance function `Ii`
+of Table 3 and the band-audibility function `Ai`) beside the
+audibility and importance-weighted contribution bars (the result's own
+`plot`), the boxed `SII = X` single number, an optional verdict
+row and a footer with the fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare fiche (body, result and disclaimer only). A supplied `requirement` is read as the minimum required SII (a higher SII passes). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the left table adds the equivalent disturbance spectrum level `Di` column (clause 5.6). |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is not a supported language. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
 ## speech_intelligibility_index
 
 ```python

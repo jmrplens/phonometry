@@ -176,6 +176,45 @@ Each route has failure modes the standard is explicit about:
 Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
 `band_levels`, `rating` (Annex F letter `A+`…`U`).
 
+### IEC 60268-16 report (`.report()`)
+
+`STIResult.report(path)` renders a one-page PDF fiche laid out like a
+voice-alarm / public-address intelligibility verification report: a
+standard-basis line stating the measurement method (the full STI indirect
+method from an impulse response, or the direct STIPA method on a recorded
+signal), an optional metadata header block, a per-octave-band modulation
+transfer index table beside the per-band MTI bars (the result's own `.plot()`),
+the boxed `STI = X` single number with the Annex F qualification band, an
+optional verdict row and a footer with the fixed disclaimer. It uses the same
+`ReportMetadata` container (documented under
+[Field insulation](insulation-field.md#report-metadata-reportmetadata)) and
+rendering engine as the ISO 717 insulation fiche; a supplied `requirement` is
+read as the minimum required STI (a higher STI passes). Rendering needs
+reportlab (`pip install phonometry[report]`); only `engine="reportlab"` is
+supported. Pass `language="es"` for a Spanish fiche.
+
+```python
+from phonometry import hearing, ReportMetadata
+
+res = hearing.sti_from_impulse_response(ir, fs)
+res.report(
+    "sti_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Concourse voice-alarm loudspeaker line",
+        measurement_standard="IEC 60268-16",
+        laboratory="Phonometry Reference Laboratory",
+        requirement=0.5,             # minimum required STI (a higher STI passes)
+    ),
+)
+```
+
+The example fiche, regenerated with `make reports`, is kept rendered in the
+repository. Click the preview to open the PDF:
+
+[![IEC 60268-16 STI example report: a metadata header, an octave-band modulation transfer index table, the per-band MTI bars, the boxed STI = 0.64 single number with the Annex F qualification band and a PASS verdict against a 0.5 minimum](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec60268_16_sti_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec60268_16_sti_example.pdf)
+
+*Speech transmission index fiche (`STIResult.report`), STI with the Annex F band.*
+
 ## See also
 
 - [Room Acoustics](room-acoustics.md): the measured impulse response the

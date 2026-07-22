@@ -2350,6 +2350,72 @@ def _flanking_impact_level_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10848_lnf_example.pdf"
 
 
+def _sti_example() -> Tuple[object, ReportMetadata, str]:
+    """STI fiche: a voice-alarm intelligibility verification (IEC 60268-16).
+
+    A deterministic full-STI indirect measurement: the octave-band modulation
+    transfer function is taken from a noise-carrier impulse response with an
+    exponential energy decay p(t) ~ exp(-13.8 t / T60) at T60 = 0.8 s (the
+    fixed-seed carrier makes the run reproducible). The closed-form Schroeder
+    MTF of that decay, m(F) = 1 / sqrt(1 + (2 pi F T / 13.8)^2), is uniform
+    across the seven bands and rates to STI = 0.639 (Annex F band D); the
+    finite noise carrier adds the documented small positive bias, so the
+    fiche prints STI = 0.64. The requirement is the STI >= 0.5 that
+    IEC 60268-16 associates with a usable public-address / voice-alarm system,
+    which the example clears.
+    """
+    fs = 48000
+    t60 = 0.8
+    rng = np.random.default_rng(0)
+    n = int(2.0 * t60 * fs)
+    t = np.arange(n) / fs
+    ir = rng.standard_normal(n) * np.exp(-3.0 * np.log(10.0) * t / t60)
+    result = ph.hearing.sti_from_impulse_response(ir, fs)
+    metadata = ReportMetadata(
+        specimen="Concourse voice-alarm loudspeaker line",
+        client="Example client",
+        manufacturer="Example audio systems",
+        test_room="Transport terminal concourse (example)",
+        measurement_standard="IEC 60268-16",
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-STI",
+        requirement=0.5,  # STI = 0.64 >= 0.50 -> PASS (usable intelligibility)
+    )
+    return result, metadata, "iec60268_16_sti_example.pdf"
+
+
+def _sii_example() -> Tuple[object, ReportMetadata, str]:
+    """SII fiche: a speech-audibility assessment (ANSI S3.5-1997).
+
+    The R CRAN package "SII" worked Example C.2 (an independent implementation
+    of the one-third-octave-band method): an equivalent speech spectrum of
+    54 dB SPL in every band, a low-frequency ambient noise of 40, 30 and 20 dB
+    in the first three bands and normal hearing. The procedure rates to
+    SII = 0.851, so the fiche prints 0.851. The requirement is a minimum SII of
+    0.75 (an audibility target for good intelligibility), which the example
+    clears.
+    """
+    result = ph.hearing.speech_intelligibility_index(
+        np.full(18, 54.0),
+        np.array([40.0, 30.0, 20.0] + [0.0] * 15),
+        threshold=np.zeros(18),
+    )
+    metadata = ReportMetadata(
+        specimen="Conversational speech in low-frequency ambient noise",
+        client="Example client",
+        test_room="Open-plan office listening position (example)",
+        measurement_standard="ANSI S3.5-1997",
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-SII",
+        requirement=0.75,  # SII = 0.851 >= 0.75 -> PASS (good audibility)
+    )
+    return result, metadata, "ansi_s3_5_sii_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -2397,6 +2463,8 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _vibration_reduction_example,
     _flanking_level_difference_example,
     _flanking_impact_level_example,
+    _sti_example,
+    _sii_example,
 ]
 
 

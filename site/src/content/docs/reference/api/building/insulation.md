@@ -707,6 +707,7 @@ ReportMetadata(
     pressure: float | None = None,
     tube_diameter: float | None = None,
     mic_spacing: float | None = None,
+    thickness: float | None = None,
     test_room: str | None = None,
     instrumentation: str | None = None,
     calibration: str | None = None,
@@ -760,6 +761,7 @@ within 0..100 %. A violation raises `ValueError`.
 | `calibration` | Calibration traceability, as free text (calibrator, date and result of the most recent verification, the before/after field checks). Printed by the occupational noise-exposure fiche (ISO 9612:2009 Clause 15 c). |
 | `tube_diameter` | Impedance-tube inner diameter `d` (circular tube) or maximum lateral dimension (rectangular tube), in metres. Printed by the impedance-tube fiche (ISO 10534-2), where it fixes the upper plane-wave cut-on frequency. |
 | `mic_spacing` | Microphone spacing `s` between the two measurement positions of the impedance tube, in metres. Printed by the impedance-tube fiche (ISO 10534-2), where it bounds the working frequency range. |
+| `thickness` | Specimen thickness under the applied static load, in metres. Printed by the dynamic-stiffness fiche (EN 29052-1 / ISO 9052-1), where EN 29052-1:1992 Clause 9 b) requires reporting the thickness of the resilient layer under load; it is shown in millimetres. |
 | `mounting` | Mounting condition of the specimen (e.g. the ISO 10140-1 mounting code or a short description). |
 | `measurement_standard` | Measurement standard the spectrum was obtained under (e.g. `"ISO 10140-2"` or `"ISO 16283-1"`); it forms the report's standard-basis line together with the ISO 717 rating part. |
 | `test_date` | Date of the test, as a free-form string. |

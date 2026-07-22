@@ -80,16 +80,19 @@ def _metadata_pairs(
     millimetres. Only fields that are set are returned, so empty rows never
     appear.
     """
-    client = metadata.client if metadata is not None else None
-    manufacturer = metadata.manufacturer if metadata is not None else None
-    specimen = metadata.specimen if metadata is not None else None
-    tube_diameter = metadata.tube_diameter if metadata is not None else None
-    mic_spacing = metadata.mic_spacing if metadata is not None else None
-    mounting = metadata.mounting if metadata is not None else None
-    test_room = metadata.test_room if metadata is not None else None
-    test_date = metadata.test_date if metadata is not None else None
-    temperature = metadata.temperature if metadata is not None else None
-    pressure = metadata.pressure if metadata is not None else None
+    def _md(name: str) -> Any:
+        return getattr(metadata, name) if metadata is not None else None
+
+    client = _md("client")
+    manufacturer = _md("manufacturer")
+    specimen = _md("specimen")
+    tube_diameter = _md("tube_diameter")
+    mic_spacing = _md("mic_spacing")
+    mounting = _md("mounting")
+    test_room = _md("test_room")
+    test_date = _md("test_date")
+    temperature = _md("temperature")
+    pressure = _md("pressure")
 
     freqs = np.asarray(result.frequency, dtype=np.float64)
     freq_range = None

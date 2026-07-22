@@ -41,6 +41,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Both fiches reuse the shared sound-power report body (per-band table,
   spectrum, boxed result and flow assembly) already used by the
   ISO 3744/3745/3741/9614/7849 fiches.
+- `.report()` on the three ISO 10848 laboratory flanking-transmission results,
+  each writing a one-page PDF fiche:
+  - `VibrationReductionResult.report()`: a junction-characterization report of
+    the vibration reduction index `Kij` (ISO 10848-1:2006). The sheet carries
+    the standard-basis line, an optional metadata header, the per-band `Kij`
+    table beside the `Kij(f)` curve, and a boxed single-number mean `Kij` over
+    the Annex A band range (200 Hz to 1250 Hz for one-third-octave bands,
+    125 Hz to 1000 Hz for octave bands) with the count of averaged and
+    bracketed bands. Bands bracketed for poor modal overlap (`M < 0,25`,
+    ISO 10848-4:2010 Clause 9) are printed in brackets and excluded from the
+    mean. `verbose=True` adds a column stating whether each band enters the
+    mean.
+  - `FlankingLevelDifferenceResult.report()`: an airborne measurement report of
+    the normalized flanking level difference `Dn,f` (ISO 10848-2:2006), with
+    the per-band `Dn,f` table beside the measured-versus-shifted-reference curve
+    and the boxed single number `Dn,f,w (C; Ctr)` rated per ISO 717-1.
+  - `FlankingImpactLevelResult.report()`: an impact measurement report of the
+    normalized flanking impact level `Ln,f` (ISO 10848-2:2006, tapping
+    machine), with the per-band `Ln,f` table beside the reference curve and the
+    boxed single number `Ln,f,w (CI)` rated per ISO 717-2.
+
+  The two overall descriptors reuse the shared two-panel insulation report
+  skeleton; `verbose=True` shows the ISO 717 evaluation per band (the value,
+  the shifted reference and the unfavourable deviation). A `requirement`
+  supplied via the metadata adds a PASS/FAIL verdict (higher is better for
+  `Dn,f,w`, lower for `Ln,f,w`). `language="es"` renders every fiche in Spanish.
 - `VibrationSoundPowerResult.report()`: a one-page PDF
   sound-power-from-vibration determination fiche for the airborne sound power a
   machine radiates through its surface vibration (ISO/TS 7849-1/-2:2009),

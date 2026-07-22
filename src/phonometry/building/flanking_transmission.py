@@ -76,6 +76,24 @@ from .insulation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
+
+def _validate_report_request(engine: str, language: str) -> None:
+    """Reject an unknown engine or language before a fiche is rendered.
+
+    Shared by the three flanking result ``report`` methods: only the
+    ``"reportlab"`` engine is supported, and the language must be one the
+    renderers translate.
+    """
+    from .._i18n import check_language
+
+    check_language(language)
+    if engine != "reportlab":
+        raise ValueError(
+            f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+        )
+
 #: Reference equivalent sound absorption area ``A0`` for the normalized
 #: flanking descriptors (ISO 10848-1:2006, Clauses 3.2/3.3): 10 m².
 _REFERENCE_ABSORPTION_AREA = 10.0
@@ -332,6 +350,46 @@ class VibrationReductionResult:
         check_language(language)
         return plot_vibration_reduction(self, ax=ax, language=language, **kwargs)
 
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a vibration reduction index ``Kij`` junction fiche to a PDF.
+
+        Writes the one-page ISO 10848-1:2006 junction-characterization report:
+        the standard-basis line, an optional metadata header, the per-band
+        ``Kij`` table beside the ``Kij(f)`` curve, the boxed single-number mean
+        ``Kij`` (Annex A band range) with the count of averaged and bracketed
+        bands, the measurement statement and a footer. Bands bracketed for poor
+        modal overlap (ISO 10848-4:2010 Clause 9) are printed in brackets and
+        excluded from the single number.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a lightweight fiche (body, result and disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the per-band table adds a column stating
+            whether each band enters the single-number mean.
+        :param language: Fiche language: ``"en"`` (default, English) or ``"es"``
+            (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is unknown or the result carries no
+            band centre frequencies.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        _validate_report_request(engine, language)
+        from .._report.iso10848 import render_vibration_reduction_report
+
+        return render_vibration_reduction_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
+
 
 def _validate_octave_triples(freq_groups: np.ndarray) -> None:
     """Require each frequency triple to be the thirds of one octave band.
@@ -569,6 +627,50 @@ class FlankingLevelDifferenceResult:
             )
         return self.rating.plot(ax=ax, language=language, **kwargs)
 
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a normalized flanking level difference ``Dn,f`` fiche to a PDF.
+
+        Writes the one-page ISO 10848-2:2006 airborne flanking-transmission
+        report: the standard-basis line, an optional metadata header, the
+        per-band ``Dn,f`` table beside the measured-versus-shifted-ISO 717-1
+        reference curve, the boxed single-number ``Dn,f,w (C; Ctr)``, the
+        measurement statement, an optional requirement verdict and a footer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a lightweight fiche (body, rating and disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the left table shows the ISO 717
+            evaluation per band (the ``Dn,f`` value, the shifted reference and
+            the unfavourable deviation) instead of the two-column form.
+        :param language: Fiche language: ``"en"`` (default, English) or ``"es"``
+            (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is unknown or the result has no
+            single-number rating (the band count is neither 16 nor 5).
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        _validate_report_request(engine, language)
+        if self.rating is None:
+            raise ValueError(
+                "The Dn,f report needs the ISO 717-1 single-number rating; "
+                "supply 16 one-third-octave or 5 octave bands."
+            )
+        from .._report.iso10848 import render_flanking_level_difference_report
+
+        return render_flanking_level_difference_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
+
 
 @dataclass(frozen=True)
 class FlankingImpactLevelResult:
@@ -590,6 +692,50 @@ class FlankingImpactLevelResult:
                 "one-third-octave or 5 octave bands)."
             )
         return self.rating.plot(ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a normalized flanking impact level ``Ln,f`` fiche to a PDF.
+
+        Writes the one-page ISO 10848-2:2006 impact flanking-transmission
+        report: the standard-basis line, an optional metadata header, the
+        per-band ``Ln,f`` table beside the measured-versus-shifted-ISO 717-2
+        reference curve, the boxed single-number ``Ln,f,w (CI)``, the
+        measurement statement, an optional requirement verdict and a footer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a lightweight fiche (body, rating and disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the left table shows the ISO 717
+            evaluation per band (the ``Ln,f`` value, the shifted reference and
+            the unfavourable deviation) instead of the two-column form.
+        :param language: Fiche language: ``"en"`` (default, English) or ``"es"``
+            (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is unknown or the result has no
+            single-number rating (the band count is neither 16 nor 5).
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        _validate_report_request(engine, language)
+        if self.rating is None:
+            raise ValueError(
+                "The Ln,f report needs the ISO 717-2 single-number rating; "
+                "supply 16 one-third-octave or 5 octave bands."
+            )
+        from .._report.iso10848 import render_flanking_impact_level_report
+
+        return render_flanking_impact_level_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def normalized_flanking_level_difference(

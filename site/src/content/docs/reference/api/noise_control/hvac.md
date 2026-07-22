@@ -191,6 +191,52 @@ Plot the quantity against a continuous log-frequency axis.
 
 Requires matplotlib (`pip install phonometry[plot]`).
 
+### HvacSpectrumResult.report()
+
+```python
+HvacSpectrumResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an HVAC duct-noise-spectrum fiche to `path`.
+
+Writes a one-page HVAC-noise sheet: the method-basis line naming the
+reported quantity and the Bies, Hansen & Howard chapter (Engineering
+Noise Control 5th ed., Chapter 8), an optional metadata header (client,
+duct element, test environment, instrumentation, climate, date), a
+per-band table (nominal frequency and the reported quantity) beside the
+spectrum, the boxed single-number result (for a regenerated-noise
+spectrum the A-weighted sound power level `L_WA` re 1 pW with the
+overall unweighted total; for an attenuation spectrum the mean
+attenuation with its band range), an optional verdict row against a
+declared limit, and a method-basis strip stating the reported quantity's
+relation.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the duct element, `test_room` the test environment, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared maximum A-weighted sound power level for a regenerated-noise spectrum (lower is better) or a declared minimum mean attenuation for an attenuation spectrum (more is better). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True` a regenerated-noise table adds the A-weighting correction and the A-weighted band level columns. |
+| `language` | Fiche language: `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+
 ## plenum_attenuation
 
 ```python

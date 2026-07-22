@@ -225,6 +225,53 @@ automatic rating to be available (16 or 5 bands) and matplotlib
 (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### LabAirborneInsulationResult.report()
+
+```python
+LabAirborneInsulationResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ISO 10140-2 laboratory airborne-insulation report to a PDF.
+
+Writes the one-page laboratory test report of ISO 10140-2:2010: the
+standard-basis line, an optional metadata header block (client,
+specimen, mounting, room volumes, climatic conditions ...), the band
+table (16 one-third-octave or 5 octave bands) beside the
+measured-versus-shifted-reference curve, the boxed laboratory rating
+`Rw (C; Ctr)` (evaluated per ISO 717-1), the laboratory-method
+statement, an optional verdict row and a footer with the identity
+block and disclaimer. The report requires the single-number `rating`
+to be present on the result; it is formed automatically only for
+exactly 16 one-third-octave (100 Hz to 3150 Hz) or 5 octave (125 Hz to
+2000 Hz) bands, and a result carrying no rating (any other band count)
+is rejected.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the table annexes the per-band equivalent sound absorption area `A` beside the reported `R`. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is unknown, `language` is not one of the supported values, or the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-1 rating the fiche needs was not formed). |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded rating figure (`pip install phonometry[plot]`). |
+
 ## LabImpactInsulationResult
 
 ```python
@@ -260,6 +307,52 @@ Delegates to the weighted impact-rating plot. Requires the automatic
 rating to be available (16 or 5 bands) and matplotlib
 (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### LabImpactInsulationResult.report()
+
+```python
+LabImpactInsulationResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ISO 10140-3 laboratory impact-insulation report to a PDF.
+
+Writes the one-page laboratory test report of ISO 10140-3:2010: the
+standard-basis line, an optional metadata header block, the band table
+(16 one-third-octave or 5 octave bands) beside the
+measured-versus-shifted-reference curve, the boxed laboratory rating
+`Ln,w (CI)` (evaluated per ISO 717-2), the laboratory-method
+statement, an optional verdict row and a footer with the identity
+block and disclaimer. The report requires the single-number `rating`
+to be present on the result; it is formed automatically only for
+exactly 16 one-third-octave (100 Hz to 3150 Hz) or 5 octave (125 Hz to
+2000 Hz) bands, and a result carrying no rating (any other band count)
+is rejected.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the table annexes the per-band equivalent sound absorption area `A` beside the reported `Ln`. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is unknown, `language` is not one of the supported values, or the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-2 rating the fiche needs was not formed). |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded rating figure (`pip install phonometry[plot]`). |
 
 ## LabInsulationWarning
 

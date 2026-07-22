@@ -352,6 +352,45 @@ fig.tight_layout(); plt.show()
 
 </details>
 
+The façade prediction also writes a one-page **prediction** report through a
+`report(path)` method, the same layout as the airborne and impact prediction
+fiches. `FacadePredictionResult.report()` renders the façade-element table (each
+element's weighted partial index `Rp,w`) beside the per-element / `R'` /
+`D2m,nT` plot, the boxed predicted `D2m,nT,w` (with `R'tr,s,w` and `Ctr`), the
+prediction statement and, when a `requirement` is supplied, a PASS/FAIL verdict
+(the level difference passes at or above it). `verbose=True` annexes each
+element's share of the transmitted sound energy, which singles out the limiting
+element (the air inlet here, not the wall). The report needs the ISO 717-1
+single-number ratings, so build the result on the 5 octave or 16 one-third-octave
+bands. The applicable `ReportMetadata` fields describe the predicted situation:
+`specimen` (the façade element set), `area` (the exposed façade area), the
+receiving-room `receiving_volume`, the outdoor/traffic situation in `test_room`,
+plus the calculator / laboratory identity fields (`client`, `manufacturer`,
+`measurement_standard`, `laboratory`, `operator`, `report_id`, `test_date`), a
+free-text façade-shape and model summary in `notes` and the target `D2m,nT,w` in
+`requirement`. Metadata, `language="es"` and the `phonometry[report]` extra
+behave as in the measurement fiches.
+
+```python
+from phonometry import building, ReportMetadata
+
+# EN 12354-3 Annex F facade -> D2m,nT,w = 33 dB (Rtr,s,w = 31, Ctr = -3).
+elements = [
+    building.FacadeElement("Masonry wall", area=6.0, r=[41, 46, 52, 58, 64]),
+    building.FacadeElement("Glazing",      area=4.5, r=[23, 22, 30, 36, 37]),
+    building.FacadeElement("Roof light",   area=0.5, r=[24, 27, 30, 33, 30]),
+    building.FacadeElement("Air inlet", dn_e=[28, 23, 25, 38, 44]),
+]
+fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
+                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+fac.report("D2mnT_prediction.pdf", metadata=ReportMetadata(
+    specimen="Masonry wall + window + roof light + air inlet", area=11.3,
+    receiving_volume=50.0, requirement=30.0,
+    notes="Flat facade, ΔLfs = 0 dB (Annex C)."))          # D2m,nT,w = 33 dB
+```
+
+[![Predicted facade EN 12354-3 example report: metadata header, the facade-element table beside the per-element partial-index and R' / D2m,nT chart, boxed predicted D2m,nT,w = 33 dB, the prediction statement and a PASS verdict against the 30 dB requirement](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso12354_facade_prediction_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso12354_facade_prediction_example.pdf)
+
 **Part 4: indoor → outdoor.** The sound power level radiated by a segment
 (Formula 2) is $L_W = L_{p,in} + C_d - R' + 10 \log_{10}(S/S_0)$ with $S_0 = 1$ m²
 and the inside-field diffusivity term $C_d$ (Annex B; −6 dB ideal diffuse, −5 dB

@@ -1087,6 +1087,173 @@ def _sound_power_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso3744_sound_power_example.pdf"
 
 
+#: One-third-octave centre frequencies of ISO 17497 Table 1 / Clause 5, in Hz
+#: (100 Hz to 5000 Hz, full scale).
+_SCATTER_FREQS = np.array(
+    [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+     1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000],
+    dtype=float,
+)
+
+
+def _scattering_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 17497-1 fiche: a random-incidence scattering-coefficient measurement.
+
+    A documented clean-room example (ISO 17497-1 has no numeric worked example,
+    so an end-to-end synthetic case is built from Eqs. (1)/(4)/(5)/(6), as the
+    standard itself directs). A reverberation room of volume V = 200 m3 holds a
+    circular test sample of area S = 10 m2 on a turntable; at 20 degC the speed
+    of sound is c = 343.2 m/s (Eq. (2)) and the air attenuation is neglected
+    (m = 0, the zero-attenuation reference). The four reverberation times of
+    Table 2 are chosen with a perfectly symmetrical base plate (T1 = T3, so the
+    base-plate scattering of Eq. (6) is exactly 0 and passes the Table 1 limits)
+    and a rotating turntable whose apparent (specular) absorption grows with
+    frequency as the surface relief scatters more energy out of the specular
+    direction. The random-incidence absorption alpha_s (Eq. (1)) stays below the
+    0.50 ceiling of Clause 6.3.4. Two worked bands, from
+    s = (alpha_spec - alpha_s) / (1 - alpha_s) (Eq. (5)):
+
+    * 500 Hz: alpha_s = 0.053, alpha_spec = 0.131, s = 0.082 -> 0.08.
+    * 4000 Hz: alpha_s = 0.112, alpha_spec = 0.515, s = 0.454 -> 0.45.
+
+    The scattering coefficient rises from 0.01 at 100 Hz to 0.55 at 5000 Hz, a
+    broadband diffusing surface.
+    """
+    volume, area, c = 200.0, 10.0, 343.2
+    t1 = np.array(
+        [8.0, 7.9, 7.8, 7.6, 7.4, 7.2, 7.0, 6.7, 6.4, 6.0,
+         5.6, 5.2, 4.8, 4.4, 4.0, 3.6, 3.2, 2.9]
+    )
+    t3 = t1.copy()                       # symmetrical base plate: T1 = T3
+    t2 = t1 * 0.90                       # sample, static turntable
+    t4 = t2 * (1.0 - np.linspace(0.02, 0.28, _SCATTER_FREQS.size))
+    alpha_s = ph.materials.random_incidence_absorption(
+        volume, area, c1=c, T1=t1, c2=c, T2=t2
+    )
+    alpha_spec = ph.materials.specular_absorption_coefficient(
+        volume, area, c3=c, T3=t3, c4=c, T4=t4
+    )
+    result = ph.materials.scattering_coefficient_spectrum(
+        _SCATTER_FREQS, alpha_spec, alpha_s
+    )
+    metadata = ReportMetadata(
+        specimen="1:1 quadratic-residue diffuser (N = 7)",
+        client="Example client",
+        manufacturer="Example acoustics",
+        area=area,
+        room_volume=volume,
+        mounting="Circular sample on the rotating turntable, centre displaced d/8",
+        test_room="Reverberation room (example)",
+        measurement_standard="ISO 17497-1",
+        temperature=20.0,
+        relative_humidity=54.0,
+        pressure=101.0,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-17497-1",
+    )
+    return result, metadata, "iso17497_scattering_example.pdf"
+
+
+def _diffuser_polar_energy(
+    angles: np.ndarray, width: float, peak: float
+) -> np.ndarray:
+    """A synthetic reflected-level polar response (a specular lobe over a floor).
+
+    The band energy is a diffuse floor of unity plus a specular lobe of linear
+    amplitude ``peak`` and Gaussian half-width ``width`` (degrees) about the
+    reference normal; the level is ``10 lg(energy) + 60`` dB.
+    """
+    energy = 1.0 + peak * np.exp(-((angles / width) ** 2))
+    return 10.0 * np.log10(energy) + 60.0
+
+
+def _diffusion_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 17497-2 fiche: a directional diffusion-coefficient spectrum d(f).
+
+    A documented clean-room example (ISO 17497-2 has no numeric worked example
+    or reference polar dataset, so the polar responses are synthesised and the
+    coefficient computed from Formula (5), as the standard directs). A
+    single-plane goniometer sweeps 19 equal-area receivers from -90 to 90 deg
+    (10 deg spacing) about the reference normal. As frequency rises the diffuser
+    spreads the reflected energy ever more evenly (the specular lobe broadens
+    and flattens), so the autocorrelation diffusion coefficient d (Formula (5))
+    climbs from 0.23 at 100 Hz to 0.92 at 5000 Hz. A rigid reference flat
+    surface of the same footprint keeps a narrow specular spike, and normalising
+    to it (Formula (7)) removes the finite-panel diffusion, giving the
+    normalised d_n. The random-incidence value d = 0.59 is the mean over source
+    positions (Clause 8.4). Two worked bands: at 500 Hz d = 0.54 (d_n = 0.39);
+    at 4000 Hz d = 0.88 (d_n = 0.79).
+    """
+    angles = np.arange(-90.0, 90.5, 10.0)
+    n = _SCATTER_FREQS.size
+    widths = np.linspace(15.0, 70.0, n)
+    peaks = np.linspace(30.0, 3.0, n)
+    d = np.empty(n)
+    d_ref = np.empty(n)
+    for k in range(n):
+        d[k] = ph.materials.directional_diffusion_coefficient(
+            _diffuser_polar_energy(angles, widths[k], peaks[k])
+        )
+        d_ref[k] = ph.materials.directional_diffusion_coefficient(
+            _diffuser_polar_energy(angles, 0.5 * widths[k], 60.0)
+        )
+    d_n = ph.materials.normalized_diffusion_coefficient(d, d_ref)
+    d_random = ph.materials.random_incidence_diffusion(d)
+    result = ph.materials.directional_diffusion_spectrum(
+        _SCATTER_FREQS, d, normalized=d_n, random_incidence=d_random
+    )
+    metadata = ReportMetadata(
+        specimen="1:1 single-plane Schroeder diffuser (N = 7)",
+        client="Example client",
+        manufacturer="Example acoustics",
+        mounting="Single-plane diffuser, plane of maximum diffusion",
+        test_room="Anechoic goniometer (example), source at 10 m, arc at 5 m",
+        measurement_standard="ISO 17497-2",
+        temperature=20.0,
+        relative_humidity=50.0,
+        pressure=101.0,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-17497-2",
+    )
+    return result, metadata, "iso17497_diffusion_example.pdf"
+
+
+def _diffusion_polar_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 17497-2 fiche: the single-source polar response of one band.
+
+    The corrected 1000 Hz polar response behind the ``_diffusion_example``
+    spectrum (Clause 8.5): 19 equal-area receivers from -90 to 90 deg, whose
+    autocorrelation diffusion coefficient d = 0.67 (Formula (5)) for the
+    normal-incidence source position.
+    """
+    angles = np.arange(-90.0, 90.5, 10.0)
+    widths = np.linspace(15.0, 70.0, _SCATTER_FREQS.size)
+    peaks = np.linspace(30.0, 3.0, _SCATTER_FREQS.size)
+    band = int(np.argmin(np.abs(_SCATTER_FREQS - 1000.0)))
+    levels = _diffuser_polar_energy(angles, widths[band], peaks[band])
+    result = ph.materials.directional_diffusion(angles, levels)
+    metadata = ReportMetadata(
+        specimen="1:1 single-plane Schroeder diffuser (N = 7)",
+        client="Example client",
+        manufacturer="Example acoustics",
+        mounting="Single-plane diffuser, normal-incidence source (0 deg)",
+        test_room="Anechoic goniometer (example), source at 10 m, arc at 5 m",
+        measurement_standard="ISO 17497-2",
+        temperature=20.0,
+        relative_humidity=50.0,
+        pressure=101.0,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-17497-2P",
+    )
+    return result, metadata, "iso17497_diffusion_polar_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -1115,6 +1282,9 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _open_plan_example,
     _multiple_shock_example,
     _sound_power_example,
+    _scattering_example,
+    _diffusion_example,
+    _diffusion_polar_example,
 ]
 
 

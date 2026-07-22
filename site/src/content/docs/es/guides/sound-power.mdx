@@ -1019,6 +1019,63 @@ el repositorio; haz clic en la vista previa para abrir el PDF.
 	caption="Ficha de determinación de potencia acústica (SoundPowerResult.report), una medición ISO 3744 en hemisferio de grado de ingeniería con las correcciones K1/K2 y el LWA en recuadro."
 />
 
+### La determinación por intensidad (ISO 9614-2)
+
+El resultado de barrido por intensidad (`SoundPowerIntensityResult`,
+ISO 9614-2) escribe la misma ficha de una página mediante su propio
+`.report()`. La línea de base normativa nombra la ISO 9614-2:1996 y el grado de
+medición, la tabla por bandas lista el nivel de potencia acústica de banda
+$L_W$ derivado de la intensidad, y el recuadro del $L_{WA}$ recoge el $L_W$
+total, la superficie de medición $S$ y el grado de determinación (el resultado
+por intensidad no tiene incertidumbre expandida $U$). `verbose=True` añade los
+indicadores de campo $F_{pI}$ (superficial de presión-intensidad) y $F_{+/-}$
+(potencia parcial negativa) y el grado alcanzado por banda; la tira de base
+indica el modelo de potencia parcial (las potencias parciales de segmento
+$P_i = I_{n,i} S_i$ que suman $P$) y los criterios de calificación del Anexo B.
+Una banda cuya potencia neta no es positiva no es determinable (apartado 9.2) y
+se imprime una raya.
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, emission
+
+freqs = np.array([125, 250, 500, 1000, 2000, 4000], float)
+# Seis segmentos iguales de 0,5 m^2 (S = 3,0 m^2); un espectro de intensidad
+# normal uniforme barrido dos veces, con el SPL de superficie y el índice
+# residual del instrumento que califican cada banda en grado de ingeniería.
+intensity = np.array([0.6e-4, 1.0e-4, 1.5e-4, 1.4e-4, 0.9e-4, 0.5e-4])
+scan = np.tile(intensity, (6, 1))
+res = emission.sound_power_intensity(
+    scan, np.full(6, 0.5), normal_intensity_2=scan.copy(),
+    pressure_levels=np.full((6, 6), 80.0), pressure_residual_index=15.0,
+    frequencies=freqs, band_type="octave", grade="engineering",
+)
+
+res.report(
+    "sound_power_intensity.pdf",
+    metadata=ReportMetadata(
+        client="Planta de fabricación de ejemplo",
+        specimen="Grupo hidráulico (de suelo)",
+        test_room="Nave con ruido de fondo estacionario",
+        instrumentation="Sonda de intensidad p-p clase 1 (IEC 61043), n/s 0042",
+        laboratory="Ejemplo de referencia de phonometry",
+        report_id="EXAMPLE-9614",
+        requirement=93.0,
+    ),
+    language="es",
+)   # LWA = 90,9 dB(A) re 1 pW -> límite declarado 93 dB(A): CUMPLE
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; haz clic en la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso9614_sound_power_intensity_example"
+	title="Informe de ejemplo de potencia acústica por intensidad ISO 9614-2 (PDF)"
+	description="Ficha de una página de determinación de potencia acústica por intensidad ISO 9614-2: un encabezado con el cliente, la fuente de ruido, el entorno de ensayo en nave y la sonda de intensidad y el clima, la tabla en bandas de octava (125 Hz a 4 kHz) de niveles de potencia acústica de banda LW derivados de la intensidad, el espectro de potencia acústica LW(f) con eje de bandas nominal, el recuadro con el nivel de potencia acústica ponderado A LWA = 90,9 dB(A) re 1 pW con el LW total = 92,5 dB, la superficie de medición S = 3,00 m2 y el grado de ingeniería, y un veredicto CUMPLE frente al límite declarado de 93 dB(A), cerrada por una tira de base que indica el modelo de potencia parcial, los indicadores de campo FpI y F+/- y los criterios de calificación del Anexo B."
+	caption="Ficha de potencia acústica por intensidad (SoundPowerIntensityResult.report), un barrido ISO 9614-2 de grado de ingeniería con los indicadores de campo y el LWA en recuadro."
+/>
+
 ## 7. Declarar la emisión sonora (ISO 4871)
 
 Un nivel de potencia acústica medido todavía no es una *declaración*. La norma

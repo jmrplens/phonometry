@@ -53,6 +53,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from .._internal.levels_math import weighted_energy_mean
 from .intensity import dynamic_capability_index
 from .sound_power import SoundPowerWarning, _a_weighting_corrections, _check_grade
@@ -151,6 +153,61 @@ class SoundPowerIntensityResult:
 
         check_language(language)
         return plot_sound_power(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 9614-2 sound-power-by-intensity determination fiche.
+
+        Writes a one-page sound-power test sheet: the standard-basis line naming
+        the intensity-scanning method and its measurement grade (ISO 9614-2:1996
+        engineering grade 2 or survey grade 3), an optional metadata header
+        (client, noise source, test environment, instrumentation, climate,
+        date), a per-band table (nominal octave/one-third-octave frequency and
+        the intensity-derived band sound-power level ``LW``), the sound-power
+        spectrum ``LW(f)`` with net-negative bands hatched as unusable, the
+        boxed A-weighted sound power level ``LWA`` (dB re 1 pW) with the total
+        ``LW``, the measurement surface area ``S`` and the determination grade,
+        an optional verdict row against a declared limit, and a
+        measurement-basis strip stating the partial-power model, the field
+        indicators (``FpI``, ``F+/-``) and the Annex B qualification criteria.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header (``client``, ``specimen`` the noise source, ``test_room``
+            the test environment, ``instrumentation``, ``temperature``,
+            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
+            and, via ``requirement``, a declared A-weighted sound-power limit
+            the fiche checks the result against (lower is better).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True`` the per-band table adds the field
+            indicators ``FpI`` and ``F+/-`` and the per-band achieved grade.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab (or, for the figure, matplotlib) is
+            not installed (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso9614 import render_intensity_power_report
+
+        return render_intensity_power_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def _level_magnitude(values: np.ndarray) -> np.ndarray:

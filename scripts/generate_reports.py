@@ -1087,6 +1087,59 @@ def _sound_power_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso3744_sound_power_example.pdf"
 
 
+def _intensity_sound_power_example() -> Tuple[object, ReportMetadata, str]:
+    """Sound-power-by-intensity fiche: an ISO 9614-2 engineering-grade scan.
+
+    A machine enclosed by a hypothetical box divided into six equal segments of
+    area Si = 0.5 m2 (measurement surface S = 3.0 m2). The probe is swept twice
+    over each segment; the field is uniform, so every segment reports the same
+    signed normal intensity per octave band (125 Hz to 4 kHz),
+    In = [0.6, 1.0, 1.5, 1.4, 0.9, 0.5] x 1e-4 W/m2. The partial powers
+    Pi = <In,i>*Si sum to the band power P = In*S (Eq. 12/6), so the band
+    sound-power level is LW = 10*lg(In*S/P0), P0 = 1 pW (Eq. 13): 82.5, 84.8,
+    86.5, 86.2, 84.3 and 81.8 dB. With the octave A-weighting corrections
+    (-16.1, -8.6, -3.2, 0.0, 1.2, 1.0 dB) this gives LWA = 90.9 dB(A) re 1 pW.
+    The two sweeps are identical (perfect repeatability), the surface SPL is a
+    uniform 80 dB and the instrument pressure-residual index is delta_pI0 =
+    15 dB, so the dynamic capability Ld = 15 - 10 = 5 dB clears FpI in every
+    band and all six bands qualify at engineering grade. The declared limit of
+    93 dB(A) is met, so the verdict passes.
+    """
+    freqs = np.array([125, 250, 500, 1000, 2000, 4000], dtype=float)
+    intensity = np.array([0.6e-4, 1.0e-4, 1.5e-4, 1.4e-4, 0.9e-4, 0.5e-4])
+    areas = np.full(6, 0.5)
+    # A uniform field: the six segments share one intensity spectrum, and the
+    # two sweeps coincide, so P = In*S and the repeatability is exact.
+    scan = np.tile(intensity, (6, 1))
+    result = ph.emission.sound_power_intensity(
+        scan,
+        areas,
+        normal_intensity_2=scan.copy(),
+        pressure_levels=np.full((6, 6), 80.0),
+        pressure_residual_index=15.0,
+        frequencies=freqs,
+        band_type="octave",
+        grade="engineering",
+    )
+    metadata = ReportMetadata(
+        client="Example manufacturing plant",
+        specimen="Hydraulic power pack (floor-standing)",
+        test_room="Machine hall with steady background noise",
+        instrumentation="Class 1 p-p intensity probe (IEC 61043), s/n 0042",
+        temperature=21.0,
+        relative_humidity=45.0,
+        pressure=101.1,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-9614",
+        requirement=93.0,
+        notes="Intensity-scanning method over a box surface "
+              "(ISO 9614-2:1996, engineering grade 2).",
+    )
+    return result, metadata, "iso9614_sound_power_intensity_example.pdf"
+
+
 #: One-third-octave centre frequencies of ISO 17497 Table 1 / Clause 5, in Hz
 #: (100 Hz to 5000 Hz, full scale).
 _SCATTER_FREQS = np.array(
@@ -1304,6 +1357,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _open_plan_example,
     _multiple_shock_example,
     _sound_power_example,
+    _intensity_sound_power_example,
     _scattering_example,
     _diffusion_example,
     _diffusion_polar_example,

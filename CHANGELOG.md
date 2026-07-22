@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `SoundPowerIntensityResult.report()`: a one-page PDF sound-power-by-intensity
+  determination fiche for the sound-intensity scanning method
+  (ISO 9614-2:1996, engineering grade 2 or survey grade 3), rendered through
+  the shared sound-power report engine. The sheet carries the standard-basis
+  line naming the scanning method and its measurement grade, an optional
+  metadata header (client, noise source, test environment, instrumentation,
+  climate, date), a per-band table of the intensity-derived band sound-power
+  level `LW` (net-negative, non-determinable bands shown as an em dash), the
+  sound-power spectrum `LW(f)` with a nominal band axis, and a boxed A-weighted
+  sound power level `LWA` (dB re 1 pW) with the total `LW`, the measurement
+  surface area `S` and the determination grade. A declared A-weighted
+  sound-power limit supplied via the metadata `requirement` adds a PASS/FAIL
+  verdict (lower is better). `verbose=True` adds the field indicators `FpI`
+  (surface pressure-intensity) and `F+/-` (negative partial power) and the
+  per-band achieved grade; the basis strip states the partial-power model and
+  the Annex B qualification criteria. `language="es"` renders the Spanish
+  fiche. The shared sound-power body (per-band table, `LW(f)` spectrum, boxed
+  `LWA` and flow assembly) is now factored into a common renderer used by both
+  the ISO 3744/3745 pressure fiche and this ISO 9614-2 intensity fiche.
 - `FloorCoveringImprovementResult.report()`: a one-page PDF floor-covering
   impact-improvement test-report fiche rendered through the shared
   accredited-report engine (BS EN ISO 16251-1:2014, the small-mock-up

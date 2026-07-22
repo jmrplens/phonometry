@@ -19,6 +19,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Un **suelo flotante** es una losa pesada que descansa sobre una capa resiliente;
 ambos forman un sistema masa-resorte cuya **frecuencia natural** determina cuánto
@@ -128,6 +129,49 @@ print(round(res.dynamic_stiffness / 1e6, 2), round(res.natural_frequency, 1))
 El `DynamicStiffnessResult` contiene las rigideces aparente, del gas encerrado e
 instalada, la resonancia del ensayo y la frecuencia natural del suelo instalado,
 y su `.plot()` dibuja la curva de diseño `f₀(s')`.
+
+### Ficha de informe de ensayo
+
+`DynamicStiffnessResult.report(path)` genera un informe de ensayo de rigidez
+dinámica acreditado de una página (EN 29052-1:1992 = ISO 9052-1:1989): una
+cabecera de metadatos (probeta, la masa total por unidad de superficie $m'_t$
+empleada durante el ensayo, el espesor bajo carga $d$ (en metros, mostrado en mm), instalación de ensayo,
+clima), una tabla compacta de resultados (la frecuencia de resonancia $f_r$, la
+rigidez aparente $s'_t$ de la Fórmula 4, el término del gas encerrado $s'_a$
+cuando procede, la rigidez instalada $s'$ de la cláusula 8.2 y la frecuencia
+natural $f_0$ de la Fórmula 2) junto a la curva de diseño $f_0(s')$, y una
+rigidez dinámica aparente $s'_t$ enmarcada con la instalada $s'$ y la resonancia
+$f_r$ al lado. La cláusula 9 redondea cada rigidez al MN/m³ más próximo. Es una
+caracterización, por lo que no hay veredicto de apto/no apto; `language="es"`
+genera la ficha en español. La ficha siempre incrusta la curva de diseño
+$f_0(s')$, por lo que requiere los extras de informes y de gráficos
+(`pip install "phonometry[report,plot]"`).
+
+```python
+from phonometry import ReportMetadata, materials
+
+res = materials.floating_floor_resonance(
+    resonant_frequency=45.0, total_mass_per_area=200.0,
+    floor_mass_per_area=110.0,
+    airflow_resistivity=50.0, thickness=0.020, porosity=0.9,
+)
+res.report(
+    "dynamic_stiffness.pdf",
+    metadata=ReportMetadata(
+        specimen="Capa resiliente de lana mineral de 20 mm",
+        mass_per_area=200.0, thickness=0.020,   # espesor d en metros (20 mm)
+        measurement_standard="EN 29052-1",
+    ),
+    language="es",
+)   # ficha de una página (requiere phonometry[report,plot])
+```
+
+<ReportPreview
+	name="en29052_dynamic_stiffness_example"
+	title="Informe de ejemplo de rigidez dinámica EN 29052-1 (PDF)"
+	description="Ficha de rigidez dinámica de una página: una cabecera de metadatos con la masa total por unidad de superficie y el espesor bajo carga, una tabla de resultados con la frecuencia de resonancia, las rigideces dinámicas aparente, del gas encerrado e instalada y la frecuencia natural junto a la curva de diseño f0(s'), y la rigidez dinámica aparente s't enmarcada."
+	caption="Ficha de rigidez dinámica (DynamicStiffnessResult.report): las métricas de resonancia y la curva de diseño f0(s')."
+/>
 
 ## 3. Qué asume el método de resonancia, y dónde muerde
 

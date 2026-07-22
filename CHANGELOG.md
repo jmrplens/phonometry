@@ -27,6 +27,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   fiche. The shared sound-power body (per-band table, `LW(f)` spectrum, boxed
   `LWA` and flow assembly) is now factored into a common renderer used by both
   the ISO 3744/3745 pressure fiche and this ISO 9614-2 intensity fiche.
+- `DynamicStiffnessResult.report()`: a one-page PDF dynamic-stiffness
+  test-report fiche rendered through the shared accredited-report engine
+  (EN 29052-1:1992, identical to ISO 9052-1:1989, the load-plate resonance
+  method for the dynamic stiffness of resilient materials under floating
+  floors). The sheet carries the standard-basis line, an optional metadata
+  header (client, specimen, the total mass per unit area `m't` used during the
+  test, the loaded specimen thickness `d`, test facility, climate), a metrics
+  table (the resonant frequency `fr`, the apparent dynamic stiffness `s't` of
+  Formula 4, the enclosed-gas term `s'a` of Formula 7 when it applies, the
+  installed dynamic stiffness `s'` of Clause 8.2 and the supported-floor natural
+  frequency `f0` of Formula 2) beside the `f0(s')` design curve, and a boxed
+  apparent dynamic stiffness `s't` with the installed `s'` and the resonance
+  `fr` alongside. Clause 9 rounds every dynamic stiffness to the nearest MN/m³;
+  it is a characterisation, so there is no pass/fail verdict. `language="es"`
+  renders the Spanish fiche. `ReportMetadata` gains a `thickness` field (the
+  loaded specimen thickness, EN 29052-1:1992 Clause 9 b).
 - `FloorCoveringImprovementResult.report()`: a one-page PDF floor-covering
   impact-improvement test-report fiche rendered through the shared
   accredited-report engine (BS EN ISO 16251-1:2014, the small-mock-up

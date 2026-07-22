@@ -81,6 +81,10 @@ class ReportMetadata:
         positions of the impedance tube, in metres. Printed by the
         impedance-tube fiche (ISO 10534-2), where it bounds the working
         frequency range.
+    :ivar thickness: Specimen thickness under the applied static load, in
+        metres. Printed by the dynamic-stiffness fiche (EN 29052-1 /
+        ISO 9052-1), where EN 29052-1:1992 Clause 9 b) requires reporting the
+        thickness of the resilient layer under load; it is shown in millimetres.
     :ivar mounting: Mounting condition of the specimen (e.g. the ISO 10140-1
         mounting code or a short description).
     :ivar measurement_standard: Measurement standard the spectrum was obtained
@@ -134,6 +138,7 @@ class ReportMetadata:
     pressure: float | None = None
     tube_diameter: float | None = None
     mic_spacing: float | None = None
+    thickness: float | None = None
     test_room: str | None = None
     instrumentation: str | None = None
     calibration: str | None = None
@@ -157,6 +162,7 @@ class ReportMetadata:
         "pressure",
         "tube_diameter",
         "mic_spacing",
+        "thickness",
     )
     #: Count fields that must be finite, positive integers (numbers of source
     #: and receiver positions in a room-acoustics measurement).

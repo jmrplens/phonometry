@@ -1329,6 +1329,47 @@ def _diffusion_polar_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso17497_diffusion_polar_example.pdf"
 
 
+def _dynamic_stiffness_example() -> Tuple[object, ReportMetadata, str]:
+    """EN 29052-1 fiche: the dynamic stiffness of a resilient floating-floor layer.
+
+    A 20 mm mineral-wool resilient layer under the standard 8 kg load plate on
+    the 0.04 m2 specimen (total mass per unit area m't = 8 kg / 0.04 m2 =
+    200 kg/m2, EN 29052-1:1992 Clauses 5 and 6), whose fundamental resonance is
+    measured at fr = 45.0 Hz. Formula 4 gives the apparent dynamic stiffness
+    s't = 4*pi^2 * m't * fr^2 = 15.99 MN/m3 -> 16 MN/m3 (Clause 9 rounds to the
+    nearest MN/m3). At the intermediate lateral airflow resistivity of
+    r = 50 kPa.s/m2 the enclosed-gas term applies (Clause 8.2 b): s'a = 111/d =
+    5.56 MN/m3 -> 6 MN/m3 (Clause 8.2 NOTE, d = 20 mm), so the installed
+    stiffness is s' = s't + s'a = 21.54 MN/m3 -> 22 MN/m3 (Formula 6). Installed
+    under a 110 kg/m2 floating screed the natural frequency is
+    f0 = (1/2pi) sqrt(s'/m') = 70.4 Hz (Formula 2).
+    """
+    result = ph.materials.floating_floor_resonance(
+        resonant_frequency=45.0,
+        total_mass_per_area=200.0,
+        floor_mass_per_area=110.0,
+        airflow_resistivity=50.0,
+        thickness=0.020,
+        porosity=0.9,
+    )
+    metadata = ReportMetadata(
+        specimen="20 mm mineral-wool resilient layer",
+        client="Example client",
+        manufacturer="Example insulation works",
+        mass_per_area=200.0,
+        thickness=0.020,
+        test_room="Dynamic-stiffness rig (example), 8 kg load plate",
+        measurement_standard="EN 29052-1",
+        temperature=21.0,
+        relative_humidity=50.0,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-29052-1",
+    )
+    return result, metadata, "en29052_dynamic_stiffness_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -1361,6 +1402,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _scattering_example,
     _diffusion_example,
     _diffusion_polar_example,
+    _dynamic_stiffness_example,
 ]
 
 

@@ -57,6 +57,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike
 
 from .._internal.types import as_float_or_array
@@ -257,6 +259,72 @@ class DynamicStiffnessResult:
 
         check_language(language)
         return plot_dynamic_stiffness(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an EN 29052-1 dynamic-stiffness test-report fiche to a PDF.
+
+        Writes a one-page accredited dynamic-stiffness report (EN 29052-1:1992,
+        identical to ISO 9052-1:1989): the standard-basis line, an optional
+        metadata header block (client, specimen, the total mass per unit area
+        ``m't`` used during the test, the loaded specimen thickness ``d``, test
+        facility, date, climate ...), a two-panel body with a compact metrics
+        table (the resonant frequency ``fr``, the apparent dynamic stiffness
+        ``s't`` of Formula 4, the enclosed-gas term ``s'a`` of Formula 7 when it
+        applies, the installed dynamic stiffness ``s'`` of Clause 8.2 and the
+        supported-floor natural frequency ``f0`` of Formula 2) beside the
+        ``f0(s')`` design curve, a boxed apparent dynamic stiffness ``s't`` with
+        the installed ``s'`` and the resonance ``fr`` alongside, and a footer
+        with the fixed disclaimer. EN 29052-1 is a characterisation, so there is
+        no pass/fail verdict.
+
+        Clause 9 requires every dynamic stiffness per unit area to be stated in
+        meganewtons per cubic metre to the nearest meganewton per cubic metre,
+        so the stiffness values are rounded to the nearest MN/m3; the
+        frequencies are shown to 0,1 Hz.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a body-and-disclaimer fiche. The applicable descriptive
+            fields are ``client``, ``manufacturer``, ``specimen``,
+            ``mass_per_area`` (the total mass per unit area ``m't``),
+            ``thickness`` (the loaded specimen thickness ``d``, in metres, shown
+            in millimetres), ``test_room``,
+            ``test_date``, ``temperature``, ``relative_humidity``,
+            ``measurement_standard``, ``laboratory``, ``operator``,
+            ``report_id`` and ``notes``. The ``requirement`` field is ignored
+            (EN 29052-1 has no verdict).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for a uniform ``.report()`` signature; the
+            dynamic-stiffness fiche has a single body layout, so it has no
+            effect.
+        :param language: Fiche language: ``"en"`` (default, English, decimal
+            point) or ``"es"`` (Spanish, decimal comma).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab or matplotlib is not installed. The
+            fiche always embeds the ``f0(s')`` design curve, so both are
+            required (``pip install "phonometry[report,plot]"``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso9052 import render_dynamic_stiffness_report
+
+        return render_dynamic_stiffness_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def floating_floor_resonance(

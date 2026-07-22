@@ -69,6 +69,8 @@ from .insulation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 #: Reference equivalent absorption area for the element-normalized level
 #: difference (ISO 15186-1:2000, Clause 3.9): 10 m².
 _A0 = 10.0
@@ -122,6 +124,91 @@ class IntensityReductionResult:
                 "one-third-octave or 5 octave bands)."
             )
         return self.rating.plot(ax=ax, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 15186-1 intensity sound-insulation report to a PDF.
+
+        Writes the one-page laboratory test report of ISO 15186-1:2000 for
+        sound insulation measured with sound intensity: the standard-basis
+        line, an optional metadata header block, the band table (16
+        one-third-octave or 5 octave bands) beside the
+        measured-versus-shifted-reference curve, the boxed rating ``RI,w
+        (C; Ctr)`` (the intensity sound reduction index ``RI`` rated per
+        ISO 717-1), the intensity-method statement, an optional verdict row and
+        a footer with the identity block and disclaimer. The report requires
+        the single-number ``rating`` to be present on the result; it is formed
+        automatically only for exactly 16 one-third-octave (100 Hz to 3150 Hz)
+        or 5 octave (125 Hz to 2000 Hz) bands, and a result carrying no rating
+        (any other band count) is rejected.
+
+        The applicable :class:`~phonometry.ReportMetadata` fields describe the
+        intensity measurement: ``specimen`` (the tested element), ``area``
+        (specimen area ``S``), ``client``, ``manufacturer``, ``test_room`` (the
+        laboratory / facility), ``laboratory``, ``operator``, ``report_id`` and
+        ``test_date``, plus the room/climate fields shared with the other
+        insulation fiches. The measurement-surface geometry and the
+        scanning-versus-discrete-point acquisition method are not dedicated
+        metadata fields; record them in ``notes`` (free text) and name the
+        measurement standard in ``measurement_standard`` (``"ISO 15186-1"``).
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`;
+            ``None`` produces a lightweight fiche (body, rating, statement and
+            disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True`` and the Kc-modified index ``RI,M`` is
+            available, the table annexes ``RI,M`` beside the reported ``RI``.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is unknown, ``language`` is not one
+            of the supported values, or the result carries no single-number
+            rating (its band count is neither 16 one-third-octave nor 5
+            octave, so the ISO 717-1 rating the fiche needs was not formed).
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``), or matplotlib is missing for
+            the embedded rating figure (``pip install phonometry[plot]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is "
+                "supported."
+            )
+        if self.rating is None:
+            raise ValueError(
+                "The intensity report needs the ISO 717-1 single-number "
+                "rating; it is formed only for exactly 16 one-third-octave "
+                "(100 Hz to 3150 Hz) or 5 octave (125 Hz to 2000 Hz) bands. "
+                "Build the result with that band count."
+            )
+        # Guard a manually built result whose 'rating' arrays were hand-crafted
+        # to a non-ISO band count: the fiche is defined only for the 16
+        # one-third-octave or 5 octave bands ISO 717-1 rates.
+        n_bands = int(np.asarray(self.r_i).size)
+        if n_bands not in (16, 5):
+            raise ValueError(
+                "The intensity report supports only 16 one-third-octave "
+                "(100 Hz to 3150 Hz) or 5 octave (125 Hz to 2000 Hz) bands; "
+                f"the result carries {n_bands}."
+            )
+
+        from .._report.iso15186 import render_iso15186_report
+
+        return render_iso15186_report(
+            self, self.rating, path, metadata=metadata,
+            verbose=verbose, language=language,
+        )
 
 
 @dataclass(frozen=True)

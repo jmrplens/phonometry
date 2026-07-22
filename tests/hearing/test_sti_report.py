@@ -125,11 +125,14 @@ def test_decay_measurement_renders_its_own_value(tmp_path) -> None:
 
     res = _decay_result(0.8)
     out = tmp_path / "decay.pdf"
-    res.report(str(out), metadata=ReportMetadata(
-        specimen="Voice-alarm loudspeaker line",
-        measurement_standard="IEC 60268-16",
-        requirement=0.5,
-    ))
+    res.report(
+        str(out),
+        metadata=ReportMetadata(
+            specimen="Voice-alarm loudspeaker line",
+            measurement_standard="IEC 60268-16",
+            requirement=0.5,
+        ),
+    )
     _assert_one_page(str(out))
     text = _extract_text(str(out))
     assert f"STI = {format_number(res.sti, 'en', decimals=2)}" in text
@@ -147,12 +150,15 @@ def test_metadata_header_renders(tmp_path) -> None:
     pytest.importorskip("matplotlib")
     res = _uniform_result(0.5)
     out = tmp_path / "meta.pdf"
-    res.report(str(out), metadata=ReportMetadata(
-        client="Example works",
-        specimen="Public-address system",
-        laboratory="Reference lab",
-        report_id="STI-1",
-    ))
+    res.report(
+        str(out),
+        metadata=ReportMetadata(
+            client="Example works",
+            specimen="Public-address system",
+            laboratory="Reference lab",
+            report_id="STI-1",
+        ),
+    )
     _assert_one_page(str(out))
     text = _extract_text(str(out))
     assert "Example works" in text
@@ -184,12 +190,14 @@ def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
 def test_unknown_engine_rejected(tmp_path) -> None:
     """An unknown rendering engine raises ValueError."""
     res = _uniform_result(0.5)
+    out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match="engine"):
-        res.report(str(tmp_path / "x.pdf"), engine="weasyprint")
+        res.report(out, engine="weasyprint")
 
 
 def test_unknown_language_rejected(tmp_path) -> None:
     """An unknown fiche language raises ValueError."""
     res = _uniform_result(0.5)
+    out = str(tmp_path / "bad.pdf")
     with pytest.raises(ValueError, match="language"):
-        res.report(str(tmp_path / "bad.pdf"), language="xx")
+        res.report(out, language="xx")

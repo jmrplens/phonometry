@@ -121,12 +121,15 @@ def test_metadata_header_renders(tmp_path) -> None:
     pytest.importorskip("matplotlib")
     res = _example_c2()
     out = tmp_path / "meta.pdf"
-    res.report(str(out), metadata=ReportMetadata(
-        client="Example works",
-        specimen="Speech in office noise",
-        laboratory="Reference lab",
-        report_id="SII-1",
-    ))
+    res.report(
+        str(out),
+        metadata=ReportMetadata(
+            client="Example works",
+            specimen="Speech in office noise",
+            laboratory="Reference lab",
+            report_id="SII-1",
+        ),
+    )
     _assert_one_page(str(out))
     text = _extract_text(str(out))
     assert "Example works" in text
@@ -157,12 +160,14 @@ def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
 def test_unknown_engine_rejected(tmp_path) -> None:
     """An unknown rendering engine raises ValueError."""
     res = _example_c2()
+    out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match="engine"):
-        res.report(str(tmp_path / "x.pdf"), engine="weasyprint")
+        res.report(out, engine="weasyprint")
 
 
 def test_unknown_language_rejected(tmp_path) -> None:
     """An unknown fiche language raises ValueError."""
     res = _example_c2()
+    out = str(tmp_path / "bad.pdf")
     with pytest.raises(ValueError, match="language"):
-        res.report(str(tmp_path / "bad.pdf"), language="xx")
+        res.report(out, language="xx")

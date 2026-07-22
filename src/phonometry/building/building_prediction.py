@@ -55,6 +55,8 @@ from typing import TYPE_CHECKING, Any, Literal, Sequence
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 #: Reference coupling length ``l0`` in Formula (28a), in metres (Clause 4.4.1).
 _L0 = 1.0
 
@@ -187,6 +189,66 @@ class AirbornePredictionResult:
         check_language(language)
         return plot_airborne_prediction(self, ax=ax, language=language, **kwargs)
 
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a predicted airborne insulation report to a PDF (EN 12354-1).
+
+        Writes a one-page **prediction** report for the predicted apparent
+        sound reduction index ``R'`` between rooms estimated by the EN/ISO
+        12354-1:2000 simplified single-number model (Clause 4.4): a
+        standard-basis line that states the sheet is a prediction from element
+        data and not a measurement, an optional metadata header block, a
+        two-panel body with the transmission-path table (the direct path and
+        each flanking path's weighted index ``Rij,w``) beside the per-path
+        share-of-energy plot, the boxed predicted rating ``R'w``, the
+        prediction statement (with the model's ~2 dB standard deviation) and,
+        when a requirement is supplied, a PASS/FAIL verdict (the apparent index
+        passes at or above the requirement), followed by a footer.
+
+        The applicable :class:`~phonometry.ReportMetadata` fields describe the
+        predicted situation: ``specimen`` (the separating element),
+        ``area`` (the separating-element area ``Ss``), ``source_volume`` /
+        ``receiving_volume`` (the room geometry), ``client``, ``manufacturer``,
+        ``test_room``, ``laboratory`` (the calculator / laboratory),
+        ``operator``, ``report_id`` and ``test_date``. A summary of the
+        flanking construction and the model assumptions is recorded in
+        ``notes`` (free text), and ``requirement`` supplies the target ``R'w``.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a lightweight fiche (body, rating, statement, disclaimer).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the path table also shows each path's
+            share of the transmitted sound energy.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is unknown or ``language`` is not
+            supported.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``), or matplotlib is missing for
+            the embedded figure (``pip install phonometry[plot]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is "
+                "supported."
+            )
+        from .._report.iso12354 import render_iso12354_airborne_report
+
+        return render_iso12354_airborne_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
+
 
 @dataclass(frozen=True)
 class ImpactPredictionResult:
@@ -215,6 +277,68 @@ class ImpactPredictionResult:
 
         check_language(language)
         return plot_impact_prediction(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a predicted impact insulation report to a PDF (EN 12354-2).
+
+        Writes a one-page **prediction** report for the predicted apparent
+        normalized impact sound pressure level ``L'n`` estimated by the EN/ISO
+        12354-2:2000 simplified single-number model (Clause 4.3): a
+        standard-basis line that states the sheet is a prediction from element
+        data and not a measurement, an optional metadata header block, a
+        two-panel body with the Formula (21) term table (the bare-floor
+        equivalent level ``Ln,w,eq``, the covering improvement ``ΔLw`` and the
+        flanking correction ``K``) beside the term plot, the boxed predicted
+        rating ``L'n,w``, the prediction statement (with the model's ~2 dB
+        standard deviation) and, when a requirement is supplied, a PASS/FAIL
+        verdict (the apparent level passes at or below the requirement, a lower
+        impact level being better), followed by a footer.
+
+        The applicable :class:`~phonometry.ReportMetadata` fields describe the
+        predicted situation: ``specimen`` (the separating floor), ``area`` (the
+        floor area), ``mass_per_area`` (the bare floor's mass per unit area),
+        ``receiving_volume`` (the receiving-room geometry), ``client``,
+        ``manufacturer``, ``test_room``, ``laboratory`` (the calculator /
+        laboratory), ``operator``, ``report_id`` and ``test_date``. A summary
+        of the flanking construction and the model assumptions is recorded in
+        ``notes`` (free text), and ``requirement`` supplies the target
+        ``L'n,w``.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a lightweight fiche (body, rating, statement, disclaimer).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for a uniform ``.report()`` signature; the
+            impact fiche has a single body layout, so it has no effect.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is unknown or ``language`` is not
+            supported.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``), or matplotlib is missing for
+            the embedded figure (``pip install phonometry[plot]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is "
+                "supported."
+            )
+        from .._report.iso12354 import render_iso12354_impact_report
+
+        return render_iso12354_impact_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def _check_finite(value: float, name: str) -> float:

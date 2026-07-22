@@ -7647,6 +7647,58 @@ atmospheric conditions straight into `absorption_area` /
 `air_attenuation` returns $\alpha$ in dB/m; `air_attenuation_m` returns
 $m = \alpha/(10 \lg e)$ in 1/m for ISO 354.
 
+### A plottable result: `atmospheric_attenuation()`
+
+For a figure or a quick look, `atmospheric_attenuation()` wraps the same
+coefficient in a small `AtmosphericAttenuation` result. It carries the frequency
+grid, the coefficient $\alpha$ and the atmospheric conditions, and exposes
+`.plot()` for the classic $\alpha$-versus-frequency curve (drawn in dB/km, the
+Table 1 unit, on a linear ordinate over a logarithmic frequency axis). Passing a
+`distance` also records the total attenuation $A = \alpha\,d$, in decibels, over
+that path as `total_attenuation`, the ISO 9613-2 $A_{atm}$ of Eq. (8).
+
+```python
+from phonometry import environmental
+
+res = environmental.atmospheric_attenuation(
+    [63, 125, 250, 500, 1000, 2000, 4000, 8000],
+    temperature=20.0, relative_humidity=50.0,
+)
+res.plot()   # alpha in dB/km against frequency (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation.svg" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency, on a linear decibel ordinate over a logarithmic frequency axis, for the reference 20 degrees Celsius and 50 percent relative humidity atmosphere, produced by the AtmosphericAttenuation result plot method" width="80%"></picture>
+
+*On a linear decibel ordinate the coefficient stays near zero up to about
+1 kHz and then climbs steeply, passing 20 dB/km near 3 kHz and reaching over
+150 dB/km by 10 kHz at the reference 20 °C / 50 % RH atmosphere.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import environmental
+
+# One line: the coefficient curve straight from the result.
+res = environmental.atmospheric_attenuation(
+    np.geomspace(50.0, 10000.0, 400), temperature=20.0, relative_humidity=50.0,
+)
+res.plot()
+plt.show()
+
+# Or by hand from air_attenuation (dB/m, so scale by 1000 for dB/km):
+freqs = np.geomspace(50.0, 10000.0, 400)
+fig, ax = plt.subplots()
+ax.semilogx(freqs, environmental.air_attenuation(freqs, 20.0, 50.0) * 1000.0)
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Attenuation coefficient alpha [dB/km]")
+plt.show()
+```
+
+</details>
+
 ## 2. General method of calculation (ISO 9613-2)
 
 ISO 9613-2:1996 predicts the octave-band level at a receiver **downwind** of a
@@ -12226,6 +12278,8 @@ cycle and warn on use; they are removed in 4.0.
 | `air_attenuation` | `function` | **Atmospheric attenuation coefficient α (ISO 9613-1 Eq. 5).**<br>• `frequencies` [Hz]<br>• `temperature` [°C] (Default: 20)<br>• `relative_humidity` [%] (Default: 50)<br>• `pressure` [kPa] (Default: 101.325)<br>• `exact_midband`: snap to Table 1 midbands (Default: False) | `a = air_attenuation([1000, 4000], 20, 50)`<br><br>• α [dB/m] (×1000 = dB/km); out-of-range warns |
 | `air_attenuation_m` | `function` | **ISO 354 power attenuation m from conditions (ISO 9613-1 + ISO 354).**<br>• Same parameters as `air_attenuation` | `m = air_attenuation_m([1000, 4000], 20, 50)`<br><br>• m = α/(10 lg e) [1/m] |
 | `AtmosphericAbsorptionWarning` | `warning class` | **ISO 9613-1 out-of-range advisory.**<br>Emitted by `air_attenuation` when temperature/humidity/frequency leave the tabulated ranges or pressure exceeds 200 kPa; the result still returns | `warnings.simplefilter('error', AtmosphericAbsorptionWarning)` |
+| `atmospheric_attenuation` | `function` | **Plottable ISO 9613-1 attenuation-coefficient curve.**<br>• Same parameters as `air_attenuation`<br>• `distance` d [m] (optional; enables total attenuation) | `res = atmospheric_attenuation([1000, 4000], 20, 50)`<br><br>• `AtmosphericAttenuation`; `res.plot()` |
+| `AtmosphericAttenuation` | `dataclass` | **Atmospheric attenuation result (ISO 9613-1).**<br>• `frequencies` [Hz]<br>• `attenuation_coefficient` α [dB/m]<br>• `temperature`, `relative_humidity`, `pressure`<br>• `distance` [m] or `None`<br>• `.total_attenuation` A = α·d [dB] (ISO 9613-2 Aatm) or `None`<br>• `.plot()`: α (dB/km) vs frequency | `res.attenuation_coefficient, res.total_attenuation` |
 | `geometric_divergence` | `function` | **Geometrical divergence Adiv (ISO 9613-2 Eq. 7).**<br>• `distance` d [m] | `a = geometric_divergence(100.0)`<br><br>• 20 lg(d/d₀) + 11 = 51 dB at 100 m |
 | `atmospheric_absorption` | `function` | **Atmospheric absorption term Aatm (ISO 9613-2 Eq. 8)**, α at the exact base-10 midbands (the Table 2 convention).<br>• `distance` d [m]<br>• `frequencies` [Hz] (snapped to exact midbands)<br>• `temperature`/`humidity`/`pressure` | `aatm = atmospheric_absorption(200, bands)`<br><br>• α·d per band [dB] |
 | `ground_attenuation` | `function` | **Ground effect Agr, general method (ISO 9613-2 7.3.1, Eq. 9).**<br>• `distance` d, `source_height` hs, `receiver_height` hr [m]<br>• `frequencies` [Hz]<br>• `ground_source`/`ground_middle`/`ground_receiver` G ∈ [0,1]<br>• `projected_distance` dp [m] | `agr = ground_attenuation(200, 2, 2, bands, 1, 1, 1)`<br><br>• As+Ar+Am per band [dB] (negative = gain) |

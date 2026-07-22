@@ -5,8 +5,10 @@ from __future__ import annotations
 
 from .air_absorption import (
     AtmosphericAbsorptionWarning,
+    AtmosphericAttenuation,
     air_attenuation,
     air_attenuation_m,
+    atmospheric_attenuation,
 )
 from .impulse_prominence import (
     ImpulseProminenceResult,
@@ -114,6 +116,8 @@ __all__ = [
     "ldn",
 
     "AtmosphericAbsorptionWarning",
+    "AtmosphericAttenuation",
+    "atmospheric_attenuation",
     "Barrier",
     "BarrierInsertionLoss",
     "SphericalGroundResult",

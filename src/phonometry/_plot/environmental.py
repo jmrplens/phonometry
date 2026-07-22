@@ -19,10 +19,12 @@ from .common import (
     _band_axis,
     _freq_axis,
     _new_axes,
+    format_frequency_axis,
 )
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from ..environmental.air_absorption import AtmosphericAttenuation
     from ..environmental.outdoor_propagation import OutdoorAttenuation
     from ..environmental.ground_barriers import (
         BarrierInsertionLoss,
@@ -84,12 +86,58 @@ _STRINGS: dict[str, str] = {
     "Source": "Fuente",
     "Atmospheric ray paths": "Trayectorias de rayos atmosféricos",
     "GFPE relative sound level": "Nivel sonoro relativo GFPE",
+    r"Attenuation coefficient $\alpha$ [dB/km]":
+        r"Coeficiente de atenuación $\alpha$ [dB/km]",
+    "ISO 9613-1 atmospheric attenuation": "Atenuación atmosférica ISO 9613-1",
 }
 
 
 def _t(text: str, language: str = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
+
+
+def plot_atmospheric_attenuation(
+    result: "AtmosphericAttenuation", ax: Axes | None = None, *, language: str = "en",
+    **kwargs: Any
+) -> Axes:
+    """Pure-tone atmospheric attenuation coefficient vs frequency (ISO 9613-1).
+
+    Draws ``alpha`` in dB/km (the Table 1 unit, i.e. the stored dB/m ``x 1000``)
+    on a logarithmic frequency axis for the result's atmospheric conditions, the
+    classic ISO 9613-1:1993 curve: the ``f^2`` low-frequency rise and the
+    humidity-dependent relaxation roll-off.
+
+    :param result: An
+        :class:`~phonometry.environmental.air_absorption.AtmosphericAttenuation`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the ``alpha`` curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import decimal_comma, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    alpha_km = np.asarray(result.attenuation_coefficient, dtype=np.float64) * 1000.0
+    t_str = decimal_comma(f"{result.temperature:g}", language)
+    rh_str = decimal_comma(f"{result.relative_humidity:g}", language)
+    rh_unit = "% HR" if language == "es" else "% RH"
+    label = f"{t_str} °C, {rh_str} {rh_unit}"
+    # dB/km is already a logarithmic quantity, so the ordinate stays linear;
+    # only the frequency axis is logarithmic (semilogx + format_frequency_axis).
+    ax.semilogx(freqs, alpha_km, **{"color": _C_PRIMARY, "lw": 1.8,
+                                    "label": label, **kwargs})
+    fmin, fmax = float(freqs.min()), float(freqs.max())
+    ax.set_xlim(fmin, fmax)
+    format_frequency_axis(ax, fmin, fmax)
+    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t(r"Attenuation coefficient $\alpha$ [dB/km]", language))
+    ax.set_title(_t("ISO 9613-1 atmospheric attenuation", language))
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="upper left", fontsize="small")
+    localize_axes(ax, language)
+    return ax
 
 
 def plot_wind_turbine_tonality(

@@ -122,6 +122,65 @@ The `InstalledSourceResult` carries the per-path levels, the total per band, the
 installed power level and `.overall_level`, and its `.plot()` draws the whole
 cascade.
 
+## 3. The prediction report (`.report()`)
+
+A prediction ends as a *document*. `InstalledSourceResult.report(path)` writes a
+one-page PDF fiche, clearly labelled a prediction and not a measurement: a
+prediction-basis line naming EN 12354-5:2009, an optional metadata header
+(client, source equipment, receiving room, instrumentation, climate, date), a
+per-band table (nominal octave/one-third-octave frequency, the installed
+structure-borne power level `L_Ws,inst`, each transmission path's normalised SPL
+`L_n,s,ij` and the combined total `L_n,s`), the per-path and total `L_n,s(f)`
+spectra, and a boxed band-summed total `L_n,s` (dB) with the installed power
+total and the path count.
+
+The relevant `ReportMetadata` fields are `client`, `specimen` (the source
+equipment), `test_room` (the receiving room), `instrumentation` and the footer
+identity `laboratory`, `operator`, `report_id` and `notes`. Supplying
+`requirement` adds a PASS/FAIL verdict against a declared upper limit on the
+overall `L_n,s` (lower is better). `verbose=True` adds one column per
+transmission path (up to five); otherwise only the installed power and the
+combined total are shown. `language="es"` renders the Spanish fiche. The basis
+strip states Formulae 18a/17 and the prediction disclaimer. Rendering needs the
+optional `phonometry[report]` extra (reportlab), plus matplotlib for the plot.
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, installed_source_prediction
+
+bands = np.array([63, 125, 250, 500, 1000, 2000], float)
+lwc = np.array([84.4, 82.5, 69.9, 67.6, 61.6, 49.9])   # characteristic power [dB]
+dsa = np.array([-13.6, -17.3, -17.4, -20.0, -26.9, -32.9])
+paths = [
+    {"adjustment_term": dsa,
+     "flanking_reduction_index": np.array([43.0, 46, 50.2, 54.7, 64.6, 73]),
+     "element_area": 12.8},
+    {"adjustment_term": dsa,
+     "flanking_reduction_index": np.array([37.0, 41.2, 35.9, 37.7, 49, 57.8]),
+     "element_area": 12.8},
+]
+res = installed_source_prediction(lwc, 16.2, paths, frequencies=bands)
+res.report(
+    "installed_structure_borne.pdf",
+    metadata=ReportMetadata(
+        client="Example dwelling refurbishment",
+        specimen="WC flushing cistern (wall-fixed)",
+        test_room="Receiving room: adjacent bedroom",
+        report_id="EXAMPLE-12354-5",
+        requirement=45.0,
+    ),
+)   # overall L_n,s ~ 43 dB -> declared limit 45 dB: PASS
+```
+
+The rendered example fiche, regenerated with `make reports`, is kept in the
+repository. Click the preview to open the PDF:
+
+[![EN 12354-5 installed structure-borne prediction example report, clearly labelled a prediction and not a measurement: a header with the client, the source equipment, the receiving room and the identity, the octave-band table (63 Hz to 2 kHz) of the installed structure-borne power level L_Ws,inst, the two flanking paths normalised SPL L_n,s,ij and the combined total L_n,s, the per-path and total L_n,s(f) spectra, and the boxed band-summed total L_n,s with the installed power total and the path count, closed by a basis strip stating Formulae 18a/17 and the prediction disclaimer, with a PASS verdict against the declared 45 dB limit](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/en12354_5_installed_structure_borne_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/en12354_5_installed_structure_borne_example.pdf)
+
+*Installed structure-borne prediction fiche (`InstalledSourceResult.report`), an
+EN 12354-5 estimate of the normalised structure-borne SPL in the receiving
+room.*
+
 ## References
 
 - Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne

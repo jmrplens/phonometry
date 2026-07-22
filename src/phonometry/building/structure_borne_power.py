@@ -68,6 +68,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike
 
 from .._internal.validation import require_positive
@@ -214,6 +216,62 @@ class StructureBornePowerResult:
 
         check_language(language)
         return plot_structure_borne_power(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an EN 15657 structure-borne sound power fiche to ``path``.
+
+        Writes a one-page reception-plate characterization sheet: the
+        standard-basis line naming the EN 15657:2018 reception-plate method
+        (Formula 14), an optional metadata header (client, source equipment,
+        test environment, instrumentation, climate, date), a per-band table
+        (nominal octave/one-third-octave frequency, the spatial mean plate
+        velocity level ``Lv`` and the injected structure-borne sound power
+        level ``L_Ws``), the ``L_Ws(f)`` spectrum with a nominal band axis, the
+        boxed band-summed total ``L_Ws`` (dB re 1 pW) with the plate mass per
+        area ``m`` and area ``S``, an optional verdict row against a declared
+        limit, and a basis strip stating Formula 14 and the conversion to the
+        plate-independent source quantities (Formulae 15/17) required before
+        EN 12354-5.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header (``client``, ``specimen`` the source equipment,
+            ``test_room`` the test environment, ``instrumentation``,
+            ``temperature``, ``relative_humidity``, ``pressure``,
+            ``test_date``), the footer identity (``laboratory``, ``operator``,
+            ``report_id``, ``notes``) and, via ``requirement``, a declared
+            upper limit on the total ``L_Ws`` (lower is better). The plate mass
+            and area come from the result itself.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True`` the per-band table adds the plate loss
+            factor ``eta`` column.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab (or, for the figure, matplotlib) is
+            not installed (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.en15657 import render_structure_borne_power_report
+
+        return render_structure_borne_power_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def reception_plate_power(

@@ -1440,6 +1440,98 @@ def _vibration_sound_power_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso7849_vibration_power_example.pdf"
 
 
+def _structure_borne_power_example() -> Tuple[object, ReportMetadata, str]:
+    """Structure-borne source power fiche: an EN 15657 reception-plate test.
+
+    A pump fixed to a reception plate of mass per area m = 25 kg/m2 and area
+    S = 1,2 m2 whose structural reverberation time Ts = 0,3 s gives the plate
+    loss factor eta = 2,2/(f*Ts) (Formula 13). The spatial-average plate
+    velocity level (Formula 12) per octave band (125 Hz to 4 kHz) is
+    Lv = [88, 90, 86, 82, 78, 73] dB re 1e-9 m/s, and the structure-borne sound
+    power injected into the plate is
+    L_Ws = 10*lg(2*pi*f*eta*m*S) + Lv - 60 dB re 1 pW (Formula 14). The band
+    levels are dominated by the 250 Hz band and sum to a total L_Ws near 65 dB
+    re 1 pW. The level is specific to this reception plate; the conversion to
+    the plate-independent source quantities (Formulae 15/17) precedes any
+    EN 12354-5 use, as the basis strip states.
+    """
+    freqs = np.array([125, 250, 500, 1000, 2000, 4000], dtype=float)
+    lv = np.array([88.0, 90.0, 86.0, 82.0, 78.0, 73.0])
+    result = ph.reception_plate_power(
+        lv, freqs, mass_per_area=25.0, area=1.2, reverberation_time=0.3
+    )
+    metadata = ReportMetadata(
+        client="Example building services contractor",
+        specimen="Circulation pump (wall-mounted)",
+        test_room="Reception-plate test rig (heavy concrete plate)",
+        instrumentation="Piezoelectric accelerometer array (ISO 16063-21), s/n 0042",
+        temperature=21.0,
+        relative_humidity=45.0,
+        pressure=101.1,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-15657",
+        notes="Structure-borne sound power injected into the reception plate "
+              "(EN 15657:2018 reception-plate method, Formula 14).",
+    )
+    return result, metadata, "en15657_structure_borne_power_example.pdf"
+
+
+def _installed_structure_borne_example() -> Tuple[object, ReportMetadata, str]:
+    """Installed structure-borne prediction fiche: an EN 12354-5 estimate.
+
+    A WC flushing cistern fixed to a separating wall, predicting the normalised
+    structure-borne sound pressure level L_n,s in the adjacent bedroom over the
+    63 Hz to 2 kHz octaves (the standard's Annex I.3 worked example, wall source
+    element). The characteristic source power L_Ws,c = [84,4, 82,5, 69,9, 67,6,
+    61,6, 49,9] dB and the force-source coupling term D_C = 16,2 dB give the
+    installed power L_Ws,inst = L_Ws,c - D_C (Formula 18b). Two flanking paths
+    leave the wall (wall to floor, wall to wall), each with the wall
+    structure-to-airborne adjustment D_sa and its flanking reduction index
+    R_ij,ref over the element area S = 12,8 m2 (Formula 18a); the paths combine
+    energetically (Formula 17) to a total L_n,s near 41 dB and an overall
+    band-summed level near 43 dB. The sheet is a prediction from the source
+    characterization and the element data, not a measurement; the declared
+    limit of 45 dB is met.
+    """
+    bands = np.array([63, 125, 250, 500, 1000, 2000], dtype=float)
+    characteristic_power = np.array([84.4, 82.5, 69.9, 67.6, 61.6, 49.9])
+    coupling = 16.2  # dB, force-source limit for the wall (Formula 19c)
+    dsa_wall = np.array([-13.6, -17.3, -17.4, -20.0, -26.9, -32.9])
+    paths = [
+        {
+            "adjustment_term": dsa_wall,
+            "flanking_reduction_index":
+                np.array([43.0, 46.0, 50.2, 54.7, 64.6, 73.0]),
+            "element_area": 12.8,
+        },
+        {
+            "adjustment_term": dsa_wall,
+            "flanking_reduction_index":
+                np.array([37.0, 41.2, 35.9, 37.7, 49.0, 57.8]),
+            "element_area": 12.8,
+        },
+    ]
+    result = ph.installed_source_prediction(
+        characteristic_power, coupling, paths, frequencies=bands
+    )
+    metadata = ReportMetadata(
+        client="Example dwelling refurbishment",
+        specimen="WC flushing cistern (wall-fixed)",
+        test_room="Receiving room: adjacent bedroom",
+        instrumentation="Predicted from EN 15657 source data and element mobilities",
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-12354-5",
+        requirement=45.0,
+        notes="Predicted installed structure-borne sound "
+              "(EN 12354-5:2009, Formulae 17/18); prediction, not a measurement.",
+    )
+    return result, metadata, "en12354_5_installed_structure_borne_example.pdf"
+
+
 #: One-third-octave centre frequencies of ISO 17497 Table 1 / Clause 5, in Hz
 #: (100 Hz to 5000 Hz, full scale).
 _SCATTER_FREQS = np.array(
@@ -1706,6 +1798,8 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _intensity_sound_power_example,
     _reverberation_sound_power_example,
     _vibration_sound_power_example,
+    _structure_borne_power_example,
+    _installed_structure_borne_example,
     _scattering_example,
     _diffusion_example,
     _diffusion_polar_example,

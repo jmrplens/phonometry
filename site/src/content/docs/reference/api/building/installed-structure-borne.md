@@ -270,6 +270,52 @@ Plot the per-path and total normalised sound pressure levels.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### InstalledSourceResult.report()
+
+```python
+InstalledSourceResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an EN 12354-5 installed structure-borne prediction fiche.
+
+Writes a one-page **prediction** sheet (an estimate, not a
+measurement): a prediction-basis line naming EN 12354-5:2009, an
+optional metadata header (client, source equipment, receiving room,
+instrumentation, climate, date), a per-band table (nominal
+octave/one-third-octave frequency, the installed structure-borne power
+level `L_Ws,inst`, each transmission path's normalised SPL
+`L_n,s,ij` and the combined total `L_n,s`), the per-path and total
+`L_n,s(f)` spectra, the boxed band-summed total `L_n,s` (dB) with
+the installed power total and the path count, an optional verdict row
+against a declared limit, and a basis strip stating Formulae 18a/17 and
+the prediction disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the source equipment, `test_room` the receiving room, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared upper limit on the overall `L_n,s` (lower is better). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True` the per-band table adds one column per transmission path (up to five); otherwise only the installed power and the combined total are shown. |
+| `language` | Fiche language: `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+
 ## REFERENCE_AREA
 
 *Constant* (`float`).

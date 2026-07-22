@@ -20,6 +20,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 La **EN 12354-5:2009** predice el nivel de presión sonora en un recinto receptor
 causado por equipos de servicio del edificio (bombas, ventiladores, ascensores,
@@ -143,6 +144,70 @@ print(round(res.overall_level, 1))       # nivel sumado en bandas [dB]
 El `InstalledSourceResult` transporta los niveles por camino, el total por banda,
 el nivel de potencia instalada y `.overall_level`, y su `.plot()` dibuja toda la
 cascada.
+
+## 3. El informe de predicción (`.report()`)
+
+Una predicción termina como un *documento*. El `InstalledSourceResult` expone
+un método `.report()` que escribe una ficha PDF de una página, **claramente
+etiquetada como predicción, no como medición**: una línea de base de predicción
+que nombra la EN 12354-5:2009, una cabecera de metadatos opcional (cliente,
+equipo fuente, recinto receptor, instrumentación, clima, fecha), una tabla por
+bandas (frecuencia nominal de octava/tercio de octava, el nivel de potencia
+acústica estructural instalada $L_{Ws,inst}$, el NPS normalizado de cada camino
+de transmisión $L_{n,s,ij}$ y el total combinado $L_{n,s}$), los espectros
+$L_{n,s}(f)$ por camino y total, y el total sumado en bandas $L_{n,s}$ (dB)
+recuadrado, con la potencia instalada total y el número de caminos.
+
+Los metadatos se aportan mediante un `ReportMetadata`, cuyos campos aplicables
+aquí son el **equipo fuente** (`specimen`), el **recinto receptor**
+(`test_room`), el **cliente**, la **instrumentación** y la identidad del pie
+(`laboratory`, `operator`, `report_id`, `notes`). Aportar `requirement` añade un
+veredicto PASS/FAIL frente a un límite superior declarado sobre el $L_{n,s}$
+global (menos es mejor). `verbose=True` añade una columna por camino de
+transmisión (hasta cinco); en otro caso solo se muestran la potencia instalada
+y el total combinado. `language="es"` genera la ficha en español con comas
+decimales. La franja de base indica las Fórmulas 18a/17 y el aviso de
+predicción.
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, installed_source_prediction
+
+bands = np.array([63, 125, 250, 500, 1000, 2000], float)
+lwc = np.array([84.4, 82.5, 69.9, 67.6, 61.6, 49.9])   # potencia característica [dB]
+dsa = np.array([-13.6, -17.3, -17.4, -20.0, -26.9, -32.9])
+paths = [
+    {"adjustment_term": dsa,
+     "flanking_reduction_index": np.array([43.0, 46, 50.2, 54.7, 64.6, 73]),
+     "element_area": 12.8},
+    {"adjustment_term": dsa,
+     "flanking_reduction_index": np.array([37.0, 41.2, 35.9, 37.7, 49, 57.8]),
+     "element_area": 12.8},
+]
+res = installed_source_prediction(lwc, 16.2, paths, frequencies=bands)
+
+res.report(
+    "installed_structure_borne.pdf",
+    metadata=ReportMetadata(
+        client="Example dwelling refurbishment",
+        specimen="WC flushing cistern (wall-fixed)",
+        test_room="Receiving room: adjacent bedroom",
+        report_id="EXAMPLE-12354-5",
+        requirement=45.0,
+    ),
+    language="es",
+)   # L_n,s global ~ 43 dB -> límite declarado 45 dB: PASS
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; pulsa la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="en12354_5_installed_structure_borne_example"
+	title="Informe de ejemplo de predicción estructural instalada EN 12354-5 (PDF)"
+	description="Ficha de una página de predicción de sonido estructural instalado de la EN 12354-5:2009, claramente etiquetada como predicción y no como medición: una cabecera con el cliente, el equipo fuente, el recinto receptor y la identidad, la tabla en bandas de octava (63 Hz a 2 kHz) del nivel de potencia acústica estructural instalada L_Ws,inst, el NPS normalizado L_n,s,ij de los dos caminos por flancos y el total combinado L_n,s, los espectros L_n,s(f) por camino y total, y el total sumado en bandas L_n,s recuadrado con la potencia instalada total y el número de caminos, cerrada por una franja de base con las Fórmulas 18a/17 y el aviso de predicción, con un veredicto PASS frente al límite declarado de 45 dB."
+	caption="Ficha de predicción estructural instalada (InstalledSourceResult.report), una estimación EN 12354-5 del NPS estructural normalizado en el recinto receptor."
+/>
 
 ## Véase también
 

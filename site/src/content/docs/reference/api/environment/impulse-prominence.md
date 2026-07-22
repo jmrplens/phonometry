@@ -127,6 +127,51 @@ Plot the adjustment curve `KI(P)` with the impulses marked.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### ImpulseProminenceResult.report()
+
+```python
+ImpulseProminenceResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an impulsive-sound prominence assessment fiche to a PDF.
+
+Writes a one-page assessment report following NT ACOU 112:2002 (carried
+into ISO/PAS 1996-3:2022): the standard-basis line, an optional metadata
+header (source/situation, client, measurement position, instrumentation
+and date, with the 30-minute assessment period always shown), a
+full-width per-impulse table (onset rate, level difference, predicted
+prominence `P` and whether the onset qualifies as an impulse) above the
+adjustment-curve plot `KI(P)` with the candidate impulses marked, the
+boxed governing prominence `P` and the derived `LAeq` adjustment
+`KI` (Formula 2), an optional verdict row and a prominence-category
+note, and a footer with the fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable governing prominence `P` (a lower prominence passes). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for signature parity with the other fiches; the per-impulse table already shows every candidate, so it has no effect. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `language` is not one of the supported languages, or if `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
 ## ImpulseProminenceWarning
 
 A supplied level rise does not qualify as an impulse (clause 4.5).

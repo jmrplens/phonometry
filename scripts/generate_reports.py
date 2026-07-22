@@ -1354,6 +1354,50 @@ def _reverberation_sound_power_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso3741_reverberation_power_example.pdf"
 
 
+def _vibration_sound_power_example() -> Tuple[object, ReportMetadata, str]:
+    """Sound-power-from-vibration fiche: an ISO/TS 7849-2 engineering example.
+
+    A documented clean-room example (ISO/TS 7849 gives no numeric worked case
+    beyond the calibration example, so the band spectrum is built from the
+    closed-form Eq. 12/15, as the standard directs). A machine casing of
+    radiating area S = 1.6 m2 (so 10*lg(S/S0) = 2.04 dB) is surveyed over six
+    octave bands (125 Hz to 4 kHz); the surface-averaged vibratory velocity
+    level (Eq. 3) is Lv = [78, 82, 85, 83, 79, 74] dB re 5e-8 m/s and the
+    band-wise radiation factor determined from an independent power measurement
+    (Eq. 8, ISO 9614) is epsilon = [0.20, 0.45, 0.75, 0.95, 1.00, 1.00]. The
+    radiated band sound-power level is
+    LW = Lv + 10*lg(S/S0) + 10*lg(epsilon) + 10*lg(411/400) with the fixed
+    impedance term 10*lg(411/400) = 0.12 dB, giving LW = [73.2, 80.7, 85.9,
+    84.9, 81.2, 76.2] dB re 1 pW, a total LW = 90.0 dB and, with the octave
+    A-weighting corrections (-16.1, -8.6, -3.2, 0.0, 1.2, 1.0 dB), an A-weighted
+    sound power level LWA = 88.7 dB(A) re 1 pW. The declared limit of 90 dB(A)
+    is met, so the verdict passes.
+    """
+    freqs = np.array([125, 250, 500, 1000, 2000, 4000], dtype=float)
+    lv = np.array([78.0, 82.0, 85.0, 83.0, 79.0, 74.0])
+    eps = np.array([0.20, 0.45, 0.75, 0.95, 1.00, 1.00])
+    result = ph.emission.sound_power_from_vibration(
+        lv, area=1.6, radiation_factor=eps, frequencies=freqs
+    )
+    metadata = ReportMetadata(
+        client="Example manufacturing plant",
+        specimen="Gearbox casing (steel panel)",
+        test_room="Machine hall (source vibration survey)",
+        instrumentation="Class 1 accelerometer (IEC 60651), s/n 0042",
+        temperature=21.0,
+        relative_humidity=45.0,
+        pressure=101.1,
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-7849",
+        requirement=90.0,
+        notes="Sound power from surface vibration, engineering method "
+              "(ISO/TS 7849-2:2009).",
+    )
+    return result, metadata, "iso7849_vibration_power_example.pdf"
+
+
 #: One-third-octave centre frequencies of ISO 17497 Table 1 / Clause 5, in Hz
 #: (100 Hz to 5000 Hz, full scale).
 _SCATTER_FREQS = np.array(
@@ -1618,6 +1662,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _sound_power_example,
     _intensity_sound_power_example,
     _reverberation_sound_power_example,
+    _vibration_sound_power_example,
     _scattering_example,
     _diffusion_example,
     _diffusion_polar_example,

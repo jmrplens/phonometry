@@ -118,7 +118,7 @@ def _value_table(result: Any, verbose: bool, language: str = "en") -> Any:
     header: List[str] = [t("f [Hz]", language), "L<sub>Ws,inst</sub> [dB]"]
     show_paths = verbose and paths.shape[0] <= _MAX_PATH_COLUMNS
     if show_paths:
-        header.extend(f"L<sub>n,s,{k + 1}</sub>" for k in range(paths.shape[0]))
+        header.extend(f"L<sub>n,s,{k + 1}</sub> [dB]" for k in range(paths.shape[0]))
     header.append("L<sub>n,s</sub> [dB]")
 
     rows_data: List[List[str]] = []

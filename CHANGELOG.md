@@ -56,6 +56,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   acceptable governing prominence supplied via the metadata `requirement` adds a
   PASS/FAIL verdict (a less prominent impulse passes); `language="es"` renders
   the Spanish fiche.
+- `IntensityReductionResult.report()`: a one-page PDF intensity
+  sound-insulation test-report fiche rendered through the shared
+  accredited-report engine (ISO 15186-1:2000, laboratory measurement of sound
+  insulation using sound intensity). The sheet carries the standard-basis line,
+  an optional metadata header (client, specimen, sample area `S`, room volumes,
+  test room, climate), the one-third-octave table of the intensity sound
+  reduction index `RI` beside the measured-versus-shifted-reference curve, and
+  the boxed single-number rating `RI,w (C; Ctr)` (evaluated per ISO 717-1:2020),
+  followed by the statement that the transmitted sound power was measured
+  directly over the measurement surface. A minimum rating supplied via the
+  metadata `requirement` adds a PASS/FAIL verdict (a higher rating passes).
+  `verbose=True` annexes the `Kc`-modified index `RI,M` beside `RI` when an
+  Annex B adaptation term is present; `language="es"` renders the Spanish fiche.
 - `FloorCoveringImprovementResult.report()`: a one-page PDF floor-covering
   impact-improvement test-report fiche rendered through the shared
   accredited-report engine (BS EN ISO 16251-1:2014, the small-mock-up

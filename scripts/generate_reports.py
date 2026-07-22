@@ -250,6 +250,52 @@ def _lab_impact_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10140_impact_example.pdf"
 
 
+def _intensity_example() -> Tuple[object, ReportMetadata, str]:
+    """Intensity fiche: an intensity sound reduction index RI (ISO 15186-1).
+
+    The reported spectrum is the ISO 717-1:2020 Annex C worked-example sound
+    reduction index (Rw = 30 (-2; -3) dB), reused as a documented intensity
+    sound reduction index RI(f): RI is an ordinary sound reduction index rated
+    by the same ISO 717-1 machinery, so feeding the receiving-side intensity
+    levels LIn that make Formula (7) return that curve (with Lp1 = 85 dB, a
+    measurement surface Sm = 12 m2 and a specimen S = 10 m2) pins the fiche to
+    the published RI,w = 30 (-2; -3) dB. The Annex B adaptation term
+    Kc = 10 lg(1 + 61,4/f) (Formula (B.2)) is annexed so the verbose table
+    shows the Kc-modified index RI,M beside RI.
+    """
+    ri = np.array(
+        [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+         28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
+    )
+    lp1, sm, s = 85.0, 12.0, 10.0
+    l_in = lp1 - 6.0 - 10.0 * np.log10(sm / s) - ri
+    kc = ph.building.adaptation_term_kc(_RATING_FREQS)
+    result = ph.building.intensity_sound_reduction(
+        np.full(16, lp1), l_in, measurement_area=sm, area=s, kc=kc
+    )
+    metadata = ReportMetadata(
+        specimen="100 mm autoclaved aerated concrete block wall",
+        client="Example client",
+        manufacturer="Example blockworks",
+        area=10.0,
+        mass_per_area=75.0,
+        receiving_volume=50.0,
+        source_volume=53.0,
+        receiving_temperature=20.8,
+        receiving_relative_humidity=46.0,
+        pressure=101.3,
+        test_room="Transmission suite (example)",
+        mounting="Type A mounting, mortar-bedded perimeter (ISO 10140-1)",
+        measurement_standard="ISO 15186-1",
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-15186-1",
+        requirement=30.0,
+    )
+    return result, metadata, "iso15186_intensity_example.pdf"
+
+
 def _floor_covering_example() -> Tuple[object, ReportMetadata, str]:
     """Floor-covering fiche: an ISO 16251-1 impact-improvement measurement.
 
@@ -1410,6 +1456,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _field_impact_example,
     _lab_airborne_example,
     _lab_impact_example,
+    _intensity_example,
     _floor_covering_example,
     _absorption_example,
     _sound_absorption_example,

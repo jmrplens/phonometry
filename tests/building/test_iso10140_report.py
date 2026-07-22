@@ -262,3 +262,22 @@ def test_manual_impact_result_renders(tmp_path) -> None:
     out = tmp_path / "bare.pdf"
     bare.report(str(out))
     _assert_one_page(str(out))
+
+
+def test_report_rejects_band_count_mismatch(tmp_path) -> None:
+    """A rating whose per-band arrays are shorter than the curve raises a clear
+    ValueError (not an uncaught IndexError)."""
+    import dataclasses
+
+    res = _airborne_result()
+    assert res.rating is not None
+    short = dataclasses.replace(
+        res.rating,
+        band_centers=res.rating.band_centers[:-1],
+        measured=res.rating.measured[:-1],
+        shifted_reference=res.rating.shifted_reference[:-1],
+    )
+    bad = dataclasses.replace(res, rating=short)
+    out = str(tmp_path / "x.pdf")
+    with pytest.raises(ValueError):
+        bad.report(out)

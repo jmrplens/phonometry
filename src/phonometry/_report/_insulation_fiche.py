@@ -220,6 +220,14 @@ def render_insulation_fiche(
     rating_symbol = spec["rating_symbol"]
     curve = np.asarray(getattr(result, curve_attr), dtype=np.float64)
     centers = np.asarray(rating.band_centers, dtype=np.float64)
+    measured = np.asarray(rating.measured, dtype=np.float64)
+    shifted = np.asarray(rating.shifted_reference, dtype=np.float64)
+    if not (curve.shape == centers.shape == measured.shape == shifted.shape):
+        raise ValueError(
+            "The report needs matching per-band lengths: the rating's "
+            "'band_centers', 'measured' and 'shifted_reference' and the "
+            "result's per-band curve must all have the same length."
+        )
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title_text = t(spec["title"], language)

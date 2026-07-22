@@ -928,7 +928,73 @@ plt.show()
 
 </details>
 
-## 6. Declaring the noise emission (ISO 4871)
+## 6. The measurement report (`.report()`)
+
+A sound power determination ends as a *document*. Both the enveloping-surface
+result (`SoundPowerResult`, ISO 3744/3746) and the precision result
+(`PrecisionSoundPowerResult`, ISO 3745) expose a `.report()` method that writes
+a one-page PDF fiche laid out like a sound-power test sheet: the standard-basis
+line naming the applied method and accuracy grade, an optional metadata header
+(client, noise source, test environment, instrumentation, climate, date), a
+per-band table (nominal octave/one-third-octave frequency, the surface
+sound-pressure level $L_p$ and the band sound-power level $L_W$), the
+sound-power spectrum $L_W(f)$ with a nominal band axis, and a boxed A-weighted
+sound power level $L_{WA}$ (dB re 1 pW) with the total $L_W$, the expanded
+uncertainty $U$ and the measurement surface area $S$ alongside.
+
+The metadata is supplied through a `ReportMetadata`, whose applicable fields
+here are the **source description** (`specimen`), the **test environment**
+(`test_room`), the **client**, the **instrumentation**, the **temperature**,
+**relative humidity** and **ambient pressure**, the **date of test**
+(`test_date`) and the footer identity (`laboratory`, `operator`, `report_id`,
+`notes`); the measurement surface area $S$ and the $K_1$/$K_2$ corrections come
+from the result itself and are printed in the result box and the basis strip.
+Supplying `requirement` adds a PASS/FAIL verdict against a declared A-weighted
+sound-power limit (a sound-power emission is a quantity where less is better, so
+the source passes at or below the limit). `verbose=True` adds the
+energy-averaged level $L_p'$ and the $K_1$/$K_2$ correction columns to the
+table, and `language="es"` renders the Spanish fiche with comma decimals.
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, emission
+
+freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], float)
+# Ten identical position spectra over a hemisphere of radius 4 m; background a
+# uniform 10 dB below and an equivalent absorption area A = 1500 m^2 (so K1, K2
+# are meaningful and within the engineering validity limit).
+surface = np.array([72.0, 76, 80, 82, 81, 78, 73, 66])
+res = emission.sound_power_pressure(
+    np.tile(surface, (10, 1)), "hemisphere", radius=4.0,
+    background_levels=np.tile(surface - 10.0, (10, 1)),
+    frequencies=freqs, absorption_area=1500.0, grade="engineering",
+)
+
+res.report(
+    "sound_power.pdf",
+    metadata=ReportMetadata(
+        client="Example manufacturing plant",
+        specimen="Hydraulic power pack (floor-standing)",
+        test_room="Hemi-anechoic room over a reflecting floor",
+        instrumentation="Class 1 sound level meter (IEC 61672-1), s/n 0042",
+        laboratory="Phonometry reference example",
+        report_id="EXAMPLE-3744",
+        requirement=105.0,
+    ),
+)   # LWA = 103.7 dB(A) re 1 pW -> declared limit 105 dB(A): PASS
+```
+
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
+
+<ReportPreview
+	name="iso3744_sound_power_example"
+	title="ISO 3744 sound power determination example report (PDF)"
+	description="One-page ISO 3744 sound-power determination fiche: a header with the client, the noise source, the hemi-anechoic test environment and the instrumentation and climate, the octave-band table (63 Hz to 8 kHz) of surface sound-pressure levels Lp and band sound-power levels LW, the sound-power spectrum LW(f) with a nominal band axis, the boxed A-weighted sound power level LWA = 103.7 dB(A) re 1 pW with the total LW = 105.8 dB, the expanded uncertainty U = 3.0 dB and the measurement surface S = 100.53 m2, and a PASS verdict against the declared 105 dB(A) limit, closed by a basis strip stating the applied K1 = 0.5 dB and K2 = 1.0 dB corrections."
+	caption="Sound power determination fiche (SoundPowerResult.report), an ISO 3744 engineering-grade hemisphere measurement with the K1/K2 corrections and the boxed LWA."
+/>
+
+## 7. Declaring the noise emission (ISO 4871)
 
 A measured sound power level is not yet a *declaration*. ISO 4871:1996 is the
 standard for the noise-emission declaration a manufacturer prints in technical

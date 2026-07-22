@@ -395,6 +395,48 @@ def _program_loudness_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "ebu_r128_loudness_example.pdf"
 
 
+def _tone_audibility_example() -> Tuple[object, ReportMetadata, str]:
+    """Tonal audibility fiche: an ISO 1996-2:2017 Annex J tone assessment.
+
+    The narrow-band spectrum is the ISO/PAS 20065:2016 Annex E combustion-engine
+    worked example (Table E.1, the 38 lines of Delta f = 2.7 Hz about the
+    137.3 Hz tone). analyze_spectrum detects the three tones at 118.4 / 137.3 /
+    158.8 Hz and their combined FG group; the decisive tonal audibility is the
+    FG entry (Delta L_ta ~ 9.1 dB), which maps to the tonal adjustment K = 5 dB
+    by ISO 1996-2:2017 Table J.1 (9 < Delta L <= 12). The complete-spectrum
+    printed value is 9.18 dB (K = 5 either way); the small difference is the
+    documented edge-tone masking-level underestimate on the truncated band.
+    """
+    frequencies = np.array(
+        [96.9, 99.6, 102.3, 105.0, 107.7, 110.4, 113.0, 115.7, 118.4, 121.1,
+         123.8, 126.5, 129.2, 131.9, 134.6, 137.3, 140.0, 142.7, 145.3, 148.0,
+         150.7, 153.4, 156.1, 158.8, 161.5, 164.2, 166.9, 169.6, 172.3, 175.0,
+         177.6, 180.3, 183.0, 185.7, 188.4, 191.1, 193.8, 196.5],
+        dtype=float,
+    )
+    levels = np.array(
+        [49.40, 50.68, 50.09, 53.37, 44.47, 50.91, 51.41, 59.40, 64.54, 57.57,
+         51.02, 50.76, 59.93, 62.94, 58.49, 65.87, 62.66, 50.25, 51.32, 52.30,
+         52.58, 53.15, 67.04, 67.27, 57.40, 57.17, 52.56, 51.39, 52.49, 47.68,
+         51.26, 49.03, 61.42, 59.52, 48.43, 50.84, 48.20, 55.95],
+        dtype=float,
+    )
+    result = ph.analyze_spectrum(levels, frequencies, 2.7)
+    metadata = ReportMetadata(
+        specimen="Combustion engine, steady operation",
+        client="Example client",
+        test_room="Free field, 3 m from source (example)",
+        instrumentation="Class 1 analyser, FFT with 2.7 Hz lines (Hann window)",
+        measurement_standard="ISO 1996-2",
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-1996-TONE",
+        requirement=6.0,
+    )
+    return result, metadata, "iso1996_tone_audibility_example.pdf"
+
+
 def _epnl_example() -> Tuple[object, ReportMetadata, str]:
     """EPNL fiche: an ICAO Annex 16 aircraft-noise-certification result.
 
@@ -943,6 +985,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _sound_absorption_example,
     _loudness_example,
     _program_loudness_example,
+    _tone_audibility_example,
     _epnl_example,
     _filter_class_example,
     _filter_class_1995_example,

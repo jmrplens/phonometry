@@ -153,14 +153,9 @@ def render_insulation_fiche(
     rating: "WeightedRatingResult | ImpactRatingResult",
     path: str,
     *,
+    spec: dict[str, str],
     is_impact: bool,
     curve_attr: str,
-    title: str,
-    basis: str,
-    symbol: str,
-    rating_symbol: str,
-    ylabel: str,
-    method_statement: str,
     build_columns: ColumnsBuilder,
     metadata: ReportMetadata | None,
     verbose: bool,
@@ -175,18 +170,14 @@ def render_insulation_fiche(
         draws the fiche curve and it must carry the per-band ``band_centers``,
         ``measured`` and ``shifted_reference`` arrays.
     :param path: Destination path of the PDF file.
+    :param spec: Fixed English labels for the reported quantity, with keys
+        ``title``, ``basis``, ``symbol``, ``rating_symbol``, ``ylabel`` and
+        ``statement`` (the natural-language ones are translated here).
     :param is_impact: ``True`` for an impact quantity (ISO 717-2), ``False``
         for an airborne one (ISO 717-1); it selects the plot's y-axis top and
         is checked against ``rating.quantity``.
     :param curve_attr: Attribute name of the reported per-band curve on
         ``result`` (e.g. ``"dnt"``, ``"r"``, ``"l_n"``).
-    :param title: Fixed English title (translated here).
-    :param basis: Fixed English standard-basis line (translated here).
-    :param symbol: The reported quantity's markup symbol for the table header.
-    :param rating_symbol: The single-number rating symbol for the boxed result
-        and the verdict row.
-    :param ylabel: The plot y-axis label (mathtext, translated here).
-    :param method_statement: Fixed English method statement (translated here).
     :param build_columns: Callback that builds the left-hand table content.
     :param metadata: Optional :class:`ReportMetadata`; ``None`` produces a
         lightweight fiche (body, rating, statement and disclaimer).
@@ -226,14 +217,15 @@ def render_insulation_fiche(
             "'measured' and 'shifted_reference') on the rating."
         )
 
+    rating_symbol = spec["rating_symbol"]
     curve = np.asarray(getattr(result, curve_attr), dtype=np.float64)
     centers = np.asarray(rating.band_centers, dtype=np.float64)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    title_text = t(title, language)
+    title_text = t(spec["title"], language)
     flow: List[Any] = [
         Paragraph(title_text, title_style),
-        Paragraph(t(basis, language), basis_style),
+        Paragraph(t(spec["basis"], language), basis_style),
     ]
 
     # Metadata header block (only the supplied fields; the same grid the two
@@ -248,7 +240,7 @@ def render_insulation_fiche(
 
     # Left panel: the report-specific table content; right panel: the rating's
     # own measured-versus-shifted-reference curve.
-    value_header = t("{vh} [dB]", language).format(vh=symbol)
+    value_header = t("{vh} [dB]", language).format(vh=spec["symbol"])
     columns, caption, col_widths = build_columns(
         value_header, curve, verbose, language
     )
@@ -257,7 +249,7 @@ def render_insulation_fiche(
 
     def _plot(ax: Any = None, language: str = language) -> Any:
         axes = rating.plot(ax=ax, language=language)
-        axes.set_ylabel(t(ylabel, language))
+        axes.set_ylabel(t(spec["ylabel"], language))
         return axes
 
     y_top = _Y_TOP_IMPACT if is_impact else _Y_TOP_AIRBORNE
@@ -276,7 +268,7 @@ def render_insulation_fiche(
         "insulation_statement", parent=styles["Normal"], fontSize=8.5,
         textColor=colors.HexColor(_MUTED_HEX), spaceBefore=4,
     )
-    flow.append(Paragraph(t(method_statement, language), statement_style))
+    flow.append(Paragraph(t(spec["statement"], language), statement_style))
     if metadata is not None and metadata.requirement is not None:
         text, passed = requirement_verdict(
             rating, rating_symbol, metadata.requirement, language

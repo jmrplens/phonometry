@@ -136,14 +136,9 @@ def render_iso10140_report(
 
     return render_insulation_fiche(
         result, rating, path,
+        spec=spec,
         is_impact=is_impact,
         curve_attr=quantity,
-        title=spec["title"],
-        basis=spec["basis"],
-        symbol=spec["symbol"],
-        rating_symbol=spec["rating_symbol"],
-        ylabel=spec["ylabel"],
-        method_statement=spec["statement"],
         build_columns=build_columns,
         metadata=metadata,
         verbose=verbose,

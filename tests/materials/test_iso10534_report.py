@@ -22,6 +22,8 @@ alpha = 1 - 1/5 = 0.80 with |r| = 1/sqrt(5) = 0.45.
 
 from __future__ import annotations
 
+import re
+
 import pytest
 
 pytest.importorskip("reportlab")
@@ -114,13 +116,17 @@ def test_report_with_metadata_one_page(tmp_path) -> None:
 
 
 def test_unknown_engine_rejected(tmp_path) -> None:
+    result = _result()
+    out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match="engine"):
-        _result().report(str(tmp_path / "x.pdf"), engine="weasyprint")
+        result.report(out, engine="weasyprint")
 
 
 def test_unknown_language_rejected(tmp_path) -> None:
+    result = _result()
+    out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match="Unknown language"):
-        _result().report(str(tmp_path / "x.pdf"), language="xx")
+        result.report(out, language="xx")
 
 
 def test_displayed_absorption_matches_oracle(tmp_path) -> None:
@@ -132,7 +138,10 @@ def test_displayed_absorption_matches_oracle(tmp_path) -> None:
     assert "1.00" in text  # alpha(1000 Hz) = 1 (quarter-wave resonance)
     assert "500" in text and "1000" in text  # band labels
     assert "400 to 1600" in text  # measured frequency range
-    assert "100" in text and "50" in text  # tube diameter d, spacing s [mm]
+    # Anchor the geometry to its label so a bare "100"/"50" cannot match a band
+    # centre (1000) or another frequency (500): the value follows its label.
+    assert re.search(r"Tube diameter d \[mm\]:\s*100\b", text)  # d = 100 mm
+    assert re.search(r"Microphone spacing s\s*\[mm\]:\s*50\b", text)  # s = 50 mm
 
 
 def test_verbose_shows_reflection_column_one_page(tmp_path) -> None:
@@ -168,7 +177,14 @@ def test_spanish_fiche_uses_comma_decimal(tmp_path) -> None:
 
 
 @pytest.mark.parametrize("field", ["tube_diameter", "mic_spacing"])
-def test_metadata_rejects_non_positive_geometry(field: str) -> None:
-    """The impedance-tube geometry fields must be finite and strictly positive."""
+@pytest.mark.parametrize(
+    "value", [-0.05, 0.0, float("nan"), float("inf"), -float("inf")]
+)
+def test_metadata_rejects_invalid_geometry(field: str, value: float) -> None:
+    """The impedance-tube geometry fields must be finite and strictly positive.
+
+    A negative, zero or non-finite (NaN / +-inf) ``tube_diameter`` or
+    ``mic_spacing`` violates the finite-positive contract and raises.
+    """
     with pytest.raises(ValueError, match=field):
-        ReportMetadata(**{field: -0.05})
+        ReportMetadata(**{field: value})

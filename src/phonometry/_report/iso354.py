@@ -53,7 +53,6 @@ from ._layout import (
     render_figure_drawing,
     result_box,
     two_panel_body,
-    wide_two_panel_body,
 )
 from .metadata import ReportMetadata
 
@@ -278,7 +277,11 @@ def render_iso354_report(
         plot_drawing = render_figure_drawing(
             result.plot, 70 * mm, y_top=None, language=language
         )
-        flow.append(wide_two_panel_body(left_cell, plot_drawing))
+        flow.append(
+            two_panel_body(
+                left_cell, plot_drawing, left_width_mm=102.0, plot_width_mm=72.0
+            )
+        )
     else:
         caption = t("One-third-octave &#945;<sub>s</sub>", language)
         left_cell = [Paragraph(caption, caption_style), _alpha_table(

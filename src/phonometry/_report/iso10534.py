@@ -52,7 +52,7 @@ from ._layout import (
     grid_table,
     render_figure_drawing,
     result_box,
-    wide_two_panel_body,
+    two_panel_body,
 )
 from .metadata import ReportMetadata
 
@@ -196,6 +196,63 @@ def _statement(result: "ImpedanceTubeResult", language: str = "en") -> str:
     ).format(lo=lo, hi=hi)
 
 
+def _basis_line(metadata: ReportMetadata | None, language: str = "en") -> str:
+    """The standard-basis line, naming the measurement standard when supplied."""
+    measurement_standard = (
+        metadata.measurement_standard if metadata is not None else None
+    )
+    if measurement_standard:
+        return t(
+            "{standard} normal-incidence measurement of sound absorption and "
+            "surface impedance in an impedance tube by the two-microphone "
+            "transfer-function method per ISO 10534-2:2001.",
+            language,
+        ).format(standard=html.escape(measurement_standard))
+    return t(
+        "Normal-incidence measurement of sound absorption and surface "
+        "impedance in an impedance tube by the two-microphone "
+        "transfer-function method per ISO 10534-2:2001.",
+        language,
+    )
+
+
+def _caption(verbose: bool, language: str = "en") -> str:
+    """The left-panel caption, listing the columns present for this fiche."""
+    if verbose:
+        return t(
+            "Normal-incidence &#945;, |r| and normalised surface impedance z",
+            language,
+        )
+    return t(
+        "Normal-incidence &#945; and normalised surface impedance z", language
+    )
+
+
+def _body(
+    result: "ImpedanceTubeResult",
+    verbose: bool,
+    caption_style: Any,
+    language: str = "en",
+) -> Any:
+    """The two-panel body: the per-frequency table beside the ``alpha(f)`` curve.
+
+    Called only after the renderer has imported reportlab.
+    """
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Paragraph
+
+    left_cell = [
+        Paragraph(_caption(verbose, language), caption_style),
+        _value_table(result, verbose, language),
+    ]
+    plot_drawing = render_figure_drawing(
+        result.plot, 82 * mm, y_top=None, language=language
+    )
+    return two_panel_body(
+        left_cell, plot_drawing, left_width_mm=90.0, plot_width_mm=84.0
+    )
+
+
 def render_iso10534_report(
     result: "ImpedanceTubeResult",
     path: str,
@@ -241,27 +298,9 @@ def render_iso10534_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Impedance-tube sound absorption and impedance", language)
 
-    measurement_standard = (
-        metadata.measurement_standard if metadata is not None else None
-    )
-    if measurement_standard:
-        basis = t(
-            "{standard} normal-incidence measurement of sound absorption and "
-            "surface impedance in an impedance tube by the two-microphone "
-            "transfer-function method per ISO 10534-2:2001.",
-            language,
-        ).format(standard=html.escape(measurement_standard))
-    else:
-        basis = t(
-            "Normal-incidence measurement of sound absorption and surface "
-            "impedance in an impedance tube by the two-microphone "
-            "transfer-function method per ISO 10534-2:2001.",
-            language,
-        )
-
     flow: List[Any] = [
         Paragraph(title, title_style),
-        Paragraph(basis, basis_style),
+        Paragraph(_basis_line(metadata, language), basis_style),
     ]
 
     header_pairs = _metadata_pairs(result, metadata, language)
@@ -270,30 +309,7 @@ def render_iso10534_report(
         flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
-    from reportlab.lib.units import mm
-
-    if verbose:
-        caption = t(
-            "Normal-incidence &#945;, |r| and normalised surface impedance z",
-            language,
-        )
-    else:
-        caption = t(
-            "Normal-incidence &#945; and normalised surface impedance z",
-            language,
-        )
-    left_cell = [
-        Paragraph(caption, caption_style),
-        _value_table(result, verbose, language),
-    ]
-    plot_drawing = render_figure_drawing(
-        result.plot, 82 * mm, y_top=None, language=language
-    )
-    flow.append(
-        wide_two_panel_body(
-            left_cell, plot_drawing, left_width_mm=90.0, plot_width_mm=84.0
-        )
-    )
+    flow.append(_body(result, verbose, caption_style, language))
     flow.append(Spacer(1, 8))
 
     # ISO 10534-2 is a characterisation: a headline label, no single-number

@@ -373,45 +373,23 @@ def document_styles(accent: Any) -> Tuple[Any, Any, Any, Any]:
     return styles, title_style, basis_style, caption_style
 
 
-def two_panel_body(left_cell: Any, plot_drawing: Any) -> Any:
-    """Assemble the two-panel body: a left cell (~56 mm) beside the plot.
-
-    Every fiche puts a table or metrics list on the left and the result's own
-    vector plot on the right; the column widths and cell alignment are shared.
-    Called only after the renderer has imported reportlab.
-    """
-    from reportlab.lib.units import mm
-    from reportlab.platypus import Table, TableStyle
-
-    body = Table([[left_cell, plot_drawing]], colWidths=[56 * mm, 118 * mm])
-    body.setStyle(
-        TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (0, 0), 0),
-                ("RIGHTPADDING", (-1, 0), (-1, 0), 0),
-            ]
-        )
-    )
-    return body
-
-
-def wide_two_panel_body(
+def two_panel_body(
     left_cell: Any,
     plot_drawing: Any,
     *,
-    left_width_mm: float = 102.0,
-    plot_width_mm: float = 72.0,
+    left_width_mm: float = 56.0,
+    plot_width_mm: float = 118.0,
 ) -> Any:
-    """Assemble a two-panel body with an explicitly widened left cell.
+    """Assemble the two-panel body: a left cell beside the result's plot.
 
-    Some fiches carry a multi-column detail table (reverberation times and
+    Every fiche puts a table or metrics list on the left and the result's own
+    vector plot on the right; the cell alignment is shared and the column
+    widths default to the compact ~56 mm left cell used across the fiches. A
+    fiche that carries a multi-column detail table (the reverberation times and
     absorption areas, or the reflection factor and the real/imaginary parts of
-    the normalised surface impedance) that needs more width than the compact
-    :func:`two_panel_body` left cell, so the columns are rebalanced to
-    ``left_width_mm`` for the table and ``plot_width_mm`` for the plot (they
-    sum to the 174 mm content width). Called only after the renderer has
-    imported reportlab.
+    the normalised surface impedance) rebalances the split through
+    ``left_width_mm`` / ``plot_width_mm`` (they sum to the 174 mm content
+    width). Called only after the renderer has imported reportlab.
     """
     from reportlab.lib.units import mm
     from reportlab.platypus import Table, TableStyle

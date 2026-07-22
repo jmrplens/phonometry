@@ -19,9 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `LW(f)` with a nominal band axis, and a boxed A-weighted sound power level
   `LWA` (dB re 1 pW) with the total `LW`, the expanded uncertainty `U` and the
   measurement surface area `S`. A declared limit supplied via the metadata
-  `requirement` adds a PASS/FAIL verdict (lower is better); `verbose=True` adds
-  the energy-averaged level `Lp'` and the `K1`/`K2` correction columns, and
-  `language="es"` renders the Spanish fiche.
+  `requirement` adds a PASS/FAIL verdict (lower is better). `verbose=True` adds
+  the energy-averaged level `Lp'`, and for the ISO 3744/3746 surface result it
+  also adds the background (`K1`) and environmental (`K2`) correction columns;
+  the ISO 3745 precision result carries no `K1`/`K2`, so its basis strip states
+  the meteorological corrections (`C1`/`C2`/`C3`) instead. `language="es"`
+  renders the Spanish fiche.
 - `standard_speech_spectra()` and the `StandardSpeechSpectrum` result: a thin,
   plottable wrapper around `standard_speech_spectrum()` (ANSI S3.5-1997 Table 3)
   that carries the 18 one-third-octave band centre frequencies and the standard

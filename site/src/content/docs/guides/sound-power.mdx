@@ -947,13 +947,17 @@ here are the **source description** (`specimen`), the **test environment**
 (`test_room`), the **client**, the **instrumentation**, the **temperature**,
 **relative humidity** and **ambient pressure**, the **date of test**
 (`test_date`) and the footer identity (`laboratory`, `operator`, `report_id`,
-`notes`); the measurement surface area $S$ and the $K_1$/$K_2$ corrections come
-from the result itself and are printed in the result box and the basis strip.
-Supplying `requirement` adds a PASS/FAIL verdict against a declared A-weighted
-sound-power limit (a sound-power emission is a quantity where less is better, so
-the source passes at or below the limit). `verbose=True` adds the
-energy-averaged level $L_p'$ and the $K_1$/$K_2$ correction columns to the
-table, and `language="es"` renders the Spanish fiche with comma decimals.
+`notes`); the measurement surface area $S$ comes from the result itself and is
+printed in the result box and the basis strip, together with the applied
+corrections (the background $K_1$ and environmental $K_2$ for the ISO 3744/3746
+surface method, or the meteorological $C_1$/$C_2$/$C_3$ for the ISO 3745
+precision method). Supplying `requirement` adds a PASS/FAIL verdict against a
+declared A-weighted sound-power limit (a sound-power emission is a quantity where
+less is better, so the source passes at or below the limit). `verbose=True`
+adds the energy-averaged level $L_p'$ to the table, and for the ISO 3744/3746
+surface result it also adds the $K_1$/$K_2$ correction columns (the ISO 3745
+precision result carries no $K_1$/$K_2$; its $C_1$/$C_2$/$C_3$ appear in the
+basis strip). `language="es"` renders the Spanish fiche with comma decimals.
 
 ```python
 import numpy as np

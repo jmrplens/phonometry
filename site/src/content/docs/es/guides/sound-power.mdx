@@ -965,14 +965,18 @@ aplicables aquí son la **descripción de la fuente** (`specimen`), el **entorno
 de ensayo** (`test_room`), el **cliente**, la **instrumentación**, la
 **temperatura**, la **humedad relativa** y la **presión ambiente**, la **fecha
 del ensayo** (`test_date`) y la identidad del pie (`laboratory`, `operator`,
-`report_id`, `notes`); el área de la superficie de medición $S$ y las
-correcciones $K_1$/$K_2$ proceden del propio resultado y se imprimen en el
-recuadro y en la tira de base. Indicar `requirement` añade un veredicto
+`report_id`, `notes`); el área de la superficie de medición $S$ procede del
+propio resultado y se imprime en el recuadro y en la tira de base, junto con las
+correcciones aplicadas (el ruido de fondo $K_1$ y el entorno $K_2$ para el
+método de superficie ISO 3744/3746, o las meteorológicas $C_1$/$C_2$/$C_3$ para
+el método de precisión ISO 3745). Indicar `requirement` añade un veredicto
 CUMPLE/NO CUMPLE frente a un límite declarado de potencia acústica ponderada A
 (la emisión de potencia acústica es una magnitud en la que menos es mejor, así
 que la fuente cumple igual o por debajo del límite). `verbose=True` añade el
-nivel promedio energético $L_p'$ y las columnas de corrección $K_1$/$K_2$ a la
-tabla, y `language="es"` genera la ficha en español con decimales de coma.
+nivel promedio energético $L_p'$ a la tabla, y para el resultado de superficie
+ISO 3744/3746 añade además las columnas de corrección $K_1$/$K_2$ (el resultado
+de precisión ISO 3745 no lleva $K_1$/$K_2$; sus $C_1$/$C_2$/$C_3$ aparecen en la
+tira de base). `language="es"` genera la ficha en español con decimales de coma.
 
 ```python
 import numpy as np
@@ -1001,6 +1005,7 @@ res.report(
         report_id="EXAMPLE-3744",
         requirement=105.0,
     ),
+    language="es",
 )   # LWA = 103,7 dB(A) re 1 pW -> límite declarado 105 dB(A): CUMPLE
 ```
 

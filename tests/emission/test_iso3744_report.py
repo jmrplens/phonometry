@@ -230,6 +230,12 @@ def test_precision_report_names_iso3745(tmp_path) -> None:
     assert "C1 =" in text and "C3 =" in text
     # The A-weighted total is boxed re 1 pW.
     assert "re 1 pW" in text
+    # The A-weighting is combined per ISO 3745:2012 Annex C (Eq. C.1), not the
+    # ISO 3744:2010 Annex E of the surface method: the precision fiche cites
+    # neither ISO 3744 nor its Annex E anywhere.
+    assert "Eq. C.1" in text
+    assert "Annex E" not in text
+    assert "ISO 3744" not in text
 
 
 # --- Spanish fiche ------------------------------------------------------------
@@ -258,12 +264,14 @@ def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
 def test_unknown_engine_rejected(tmp_path) -> None:
     """An unknown rendering engine raises ValueError."""
     res = _uniform_result()
+    out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match="engine"):
-        res.report(str(tmp_path / "x.pdf"), engine="weasyprint")
+        res.report(out, engine="weasyprint")
 
 
 def test_unknown_language_rejected(tmp_path) -> None:
     """An unknown fiche language raises ValueError."""
     res = _uniform_result()
+    out = str(tmp_path / "bad.pdf")
     with pytest.raises(ValueError, match="language"):
-        res.report(str(tmp_path / "bad.pdf"), language="xx")
+        res.report(out, language="xx")

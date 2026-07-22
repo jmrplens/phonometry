@@ -407,6 +407,31 @@ def _corrections_strip(result: Any, language: str = "en") -> str:
     )
 
 
+def _a_weighting_strip(result: Any, language: str = "en") -> str:
+    """The A-weighting citation line, keyed to the method that combined LWA.
+
+    The surface-pressure result combines the band levels with the ISO 3744:2010
+    Annex E corrections (Eq. E.1); the precision result combines them with the
+    ISO 3745:2012 Annex C corrections (Eq. C.1). Citing the method that actually
+    produced ``sound_power_level_a`` keeps the fiche truthful for both.
+    """
+    if _is_precision(result):
+        return t(
+            "The A-weighted sound power level L<sub>WA</sub> combines the band "
+            "levels with the A-weighting band corrections of ISO 3745:2012 "
+            "Annex C (Eq. C.1). Levels are referenced to the reference sound "
+            "power 1 pW.",
+            language,
+        )
+    return t(
+        "The A-weighted sound power level L<sub>WA</sub> combines the band "
+        "levels with the A-weighting band corrections of ISO 3744:2010 Annex E "
+        "(Tables E.1/E.2, Eq. E.1). Levels are referenced to the reference "
+        "sound power 1 pW.",
+        language,
+    )
+
+
 def _fraction_caption(result: Any, language: str = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
@@ -494,16 +519,7 @@ def render_sound_power_report(
         Paragraph(_corrections_strip(result, language), measurement_basis_style())
     )
     flow.append(
-        Paragraph(
-            t(
-                "The A-weighted sound power level L<sub>WA</sub> combines the "
-                "band levels with the A-weighting band corrections of "
-                "ISO 3744:2010 Annex E (Tables E.1/E.2, Eq. E.1). Levels are "
-                "referenced to the reference sound power 1 pW.",
-                language,
-            ),
-            measurement_basis_style(),
-        )
+        Paragraph(_a_weighting_strip(result, language), measurement_basis_style())
     )
     flow.extend(footer_flow(metadata, language))
 

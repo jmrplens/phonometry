@@ -99,6 +99,55 @@ Plot the LW spectrum with the A-weighted total annotated.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### ReverberationSoundPowerResult.report()
+
+```python
+ReverberationSoundPowerResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ISO 3741 reverberation-room sound-power determination fiche.
+
+Writes a one-page sound-power test sheet: the standard-basis line naming
+the reverberation-room method (the direct method using the room
+equivalent absorption area, or the comparison method using a reference
+sound source) and the precision accuracy grade (ISO 3741:2010, grade 1),
+an optional metadata header (client, noise source, test environment,
+instrumentation, climate, date), a per-band table (nominal octave/
+one-third-octave frequency, the mean room sound-pressure level `Lp`
+and the band sound-power level `LW`), the sound-power spectrum
+`LW(f)` with a nominal band axis, the boxed A-weighted sound power
+level `LWA` (dB re 1 pW) with the total `LW` and the determination
+method, an optional verdict row against a declared limit, and a
+measurement-basis strip stating the correction model (Eq. 20 direct or
+Eq. 21 comparison), the applied meteorological corrections `C1`/`C2`
+and the speed of sound.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the reverberation test room, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True` the per-band table adds the background correction `K1` and, for the direct method, the equivalent absorption area `A` and the Waterhouse boundary correction `Cw`. |
+| `language` | Fiche language: `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+
 ## sound_power_comparison
 
 ```python

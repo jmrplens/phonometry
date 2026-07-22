@@ -1052,6 +1052,59 @@ repository; click the preview to open the PDF.
 	caption="Sound power by intensity fiche (SoundPowerIntensityResult.report), an ISO 9614-2 engineering-grade scan with the field indicators and the boxed LWA."
 />
 
+### The reverberation-room determination (ISO 3741)
+
+The reverberation-room result (`ReverberationSoundPowerResult`, ISO 3741) writes
+the same one-page fiche through its own `.report()`. The standard-basis line
+names ISO 3741:2010 and the precision accuracy grade (grade 1) and states which
+method was used, the direct method using the room equivalent absorption area
+(Eq. 20) or the comparison method using a reference sound source (Eq. 21). The
+per-band table lists the mean room sound-pressure level $L_p$ and the band
+sound-power level $L_W$, and the boxed $L_{WA}$ carries the total $L_W$ and the
+determination method (the reverberation result has no expanded uncertainty $U$).
+`verbose=True` adds the background correction $K_1$ and, for the direct method,
+the equivalent absorption area $A$ and the Waterhouse boundary correction $C_w$;
+the basis strip states the correction model (Eq. 20 or Eq. 21), the applied
+meteorological corrections $C_1$/$C_2$ and the speed of sound, and cites the
+Annex F A-weighting.
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, emission
+
+freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], float)
+# Octave-band mean room sound-pressure levels in a qualified
+# reverberation room of V = 200 m3, S = 240 m2, with a uniform T60 = 2.0 s.
+lp = np.array([80.0, 83.0, 85.0, 84.0, 80.0, 75.0, 68.0])
+res = emission.sound_power_reverberation(
+    lp, 2.0, volume=200.0, surface_area=240.0, frequencies=freqs,
+    temperature=20.0, static_pressure=101.325,
+)
+
+res.report(
+    "sound_power_reverberation.pdf",
+    metadata=ReportMetadata(
+        client="Example manufacturing plant",
+        specimen="Hydraulic power pack (floor-standing)",
+        test_room="Qualified reverberation room, V = 200 m3, T60 = 2.0 s",
+        instrumentation="Class 1 sound level meter (IEC 61672-1), s/n 0042",
+        laboratory="Phonometry reference example",
+        report_id="EXAMPLE-3741",
+        requirement=96.0,
+    ),
+)   # LWA = 94.3 dB(A) re 1 pW -> declared limit 96 dB(A): PASS
+```
+
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
+
+<ReportPreview
+	name="iso3741_reverberation_power_example"
+	title="ISO 3741 reverberation-room sound power example report (PDF)"
+	description="One-page ISO 3741 reverberation-room sound-power determination fiche: a header with the client, the noise source, the qualified reverberation test room and the instrumentation and climate, the octave-band table (125 Hz to 8 kHz) of mean room sound-pressure levels Lp and band sound-power levels LW, the sound-power spectrum LW(f) with a nominal band axis, the boxed A-weighted sound power level LWA = 94.3 dB(A) re 1 pW with the total LW = 96.7 dB and the direct determination method, and a PASS verdict against the declared 96 dB(A) limit, closed by a basis strip stating the Eq. 20 correction model with the Sabine absorption area, the Waterhouse boundary term and the meteorological corrections C1 and C2, and the Annex F A-weighting."
+	caption="Reverberation-room sound power fiche (ReverberationSoundPowerResult.report), an ISO 3741 precision-grade direct-method determination with the Waterhouse and C1/C2 corrections and the boxed LWA."
+/>
+
 ## 7. Declaring the noise emission (ISO 4871)
 
 A measured sound power level is not yet a *declaration*. ISO 4871:1996 is the

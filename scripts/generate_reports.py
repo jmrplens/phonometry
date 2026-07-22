@@ -1217,6 +1217,58 @@ def _intensity_sound_power_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso9614_sound_power_intensity_example.pdf"
 
 
+def _reverberation_sound_power_example() -> Tuple[object, ReportMetadata, str]:
+    """Reverberation-room fiche: an ISO 3741 precision-grade determination.
+
+    A steady, broadband source measured by the direct method in a qualified
+    hard-walled reverberation room of volume V = 200 m3 and total surface
+    S = 240 m2 (ISO 3741:2010 clause 9.1.4). The octave-band mean room
+    sound-pressure levels Lp (125 Hz to 8 kHz octave bands) peak near 500 Hz. At
+    the test temperature theta = 20 degC the speed of sound is
+    c = 20.05*sqrt(293) = 343.2 m/s and, with a uniform reverberation time
+    T60 = 2.0 s, the Sabine equivalent absorption area
+    A = (55.26/c)*(V/T60) = 16.10 m2 is constant across bands, so
+    10*lg(A/A0) = 12.07 dB and 4.34*(A/S) = 0.29 dB are fixed; the Waterhouse
+    boundary correction 10*lg(1 + S*c/(8*V*f)) falls from 1.50 dB at 125 Hz to
+    0.03 dB at 8 kHz. At 101.325 kPa the meteorological corrections are
+    C1 = 5*lg(293.15/314) = -0.15 dB and C2 = 15*lg(293.15/296) = -0.06 dB.
+    Eq. (20) then gives the band levels, e.g. LW = 90.0 dB at 250 Hz, 91.6 dB
+    at 500 Hz and 90.4 dB at 1 kHz, a total LW = 96.7 dB and, with the Annex F
+    (Annex E) A-weighting corrections, an A-weighted sound power level
+    LWA = 94.3 dB(A) re 1 pW. The declared limit of 96 dB(A) is met, so the
+    verdict passes.
+    """
+    freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+    # Documented mean corrected room level Lp(ST) per band (Eq. 16), in dB.
+    lp = np.array([80.0, 83.0, 85.0, 84.0, 80.0, 75.0, 68.0])
+    result = ph.emission.sound_power_reverberation(
+        lp,
+        2.0,
+        volume=200.0,
+        surface_area=240.0,
+        frequencies=freqs,
+        temperature=20.0,
+        static_pressure=101.325,
+    )
+    metadata = ReportMetadata(
+        client="Example manufacturing plant",
+        specimen="Hydraulic power pack (floor-standing)",
+        test_room="Qualified reverberation room, V = 200 m3, T60 = 2.0 s",
+        instrumentation="Class 1 sound level meter (IEC 61672-1), s/n 0042",
+        temperature=20.0,
+        relative_humidity=50.0,
+        pressure=101.325,
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-3741",
+        requirement=96.0,
+        notes="Reverberation-room direct method "
+              "(ISO 3741:2010, precision grade 1).",
+    )
+    return result, metadata, "iso3741_reverberation_power_example.pdf"
+
+
 #: One-third-octave centre frequencies of ISO 17497 Table 1 / Clause 5, in Hz
 #: (100 Hz to 5000 Hz, full scale).
 _SCATTER_FREQS = np.array(
@@ -1478,6 +1530,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _multiple_shock_example,
     _sound_power_example,
     _intensity_sound_power_example,
+    _reverberation_sound_power_example,
     _scattering_example,
     _diffusion_example,
     _diffusion_polar_example,

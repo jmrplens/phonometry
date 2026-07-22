@@ -7368,6 +7368,58 @@ element.
 `ln_w_eq`, `delta_l_w`, `k_correction`). The simplified model carries a reported
 standard deviation of about 2 dB (Clause 5).
 
+### EN 12354 prediction report (`.report()`)
+
+Both prediction results write a one-page **prediction** report through a
+`report(path)` method. Unlike the measurement fiches, the reported result is an
+*estimate* of the in-situ performance from the elements' laboratory data plus
+the flanking transmission across the junctions; the sheet states this
+explicitly and is labelled a prediction, never a measurement.
+`AirbornePredictionResult.report()` renders the predicted apparent sound
+reduction index fiche (the transmission-path table beside the per-path
+share-of-energy plot, the boxed `R'w`); `ImpactPredictionResult.report()`
+renders the predicted apparent impact-level fiche (the Formula (21) term table
+beside the term plot, the boxed `L'n,w`). Each names EN/ISO 12354-1/-2 and the
+ISO 717 rating part in its basis line, prints the model's ~2 dB standard
+deviation and, when a `requirement` is supplied, adds a PASS/FAIL verdict
+(airborne passes at or above it, impact at or below it). `verbose=True` annexes
+each transmission path's share of the transmitted energy to the airborne table;
+metadata, `language="es"` and the `phonometry[report]` extra behave as in the
+measurement fiches.
+
+```python
+from phonometry import building, ReportMetadata
+
+# Airborne prediction (EN 12354-1 Annex H.3): a separating wall Rs,w = 57 dB
+# flanked by four elements -> R'w = 52 dB.
+paths = []
+for label, rw, kff, kfd, lf in [
+    ("floor", 49.0, 12.4, 8.9, 4.5), ("ceiling", 46.0, 14.4, 9.2, 4.5),
+    ("facade", 42.0, 12.6, 6.7, 2.55), ("intwall", 33.0, 33.5, 15.7, 2.55),
+]:
+    ff, df, fd = building.flanking_element(
+        label=label, r_flanking=rw, r_separating=57.0,
+        k_ff=kff, k_fd=kfd, k_df=kfd, separating_area=11.5, coupling_length=lf)
+    paths += [ff, df, fd]
+air = building.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
+air.report("Rpw_prediction.pdf", metadata=ReportMetadata(
+    specimen="Separating wall, Rs,w = 57 dB", area=11.5,
+    source_volume=53.0, receiving_volume=50.0, requirement=50.0,
+    notes="Flanking: floor/ceiling/facade/internal wall."))   # R'w = 52 dB
+
+# Impact prediction (EN 12354-2 Annex E.3): a concrete floor (m' = 322 kg/m2)
+# with a floating floor (DLw = 33 dB) -> L'n,w = 45 dB.
+ln_eq = building.equivalent_impact_level(322.0)
+k = building.impact_flanking_correction(322.0, 145.0)
+imp = building.predicted_impact_insulation(ln_w_eq=ln_eq, delta_l_w=33.0, k_correction=k)
+imp.report("Lnw_prediction.pdf",
+           metadata=ReportMetadata(mass_per_area=322.0, requirement=53.0))  # L'n,w = 45 dB
+```
+
+[![Predicted airborne EN 12354-1 example report: metadata header, the transmission-path table beside the per-path share-of-energy chart, boxed predicted R'w = 52 dB, the prediction statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso12354_airborne_prediction_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso12354_airborne_prediction_example.pdf)
+
+[![Predicted impact EN 12354-2 example report: metadata header, the Formula (21) term table beside the term chart, boxed predicted L'n,w = 45 dB, the prediction statement and a PASS verdict against the 53 dB requirement](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso12354_impact_prediction_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso12354_impact_prediction_example.pdf)
+
 ### Façade insulation & radiated power (EN 12354-3 / -4)
 
 Parts 3 and 4 predict the two directions across the building envelope, both from

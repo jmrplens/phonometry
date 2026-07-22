@@ -34,6 +34,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike
 
 # ---------------------------------------------------------------------------
@@ -96,7 +98,9 @@ class NCResult:
     frequencies: np.ndarray
     levels: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
+    ) -> "Axes":
         """Plot the measured spectrum against the NC curves.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -107,6 +111,53 @@ class NCResult:
 
         check_language(language)
         return plot_noise_criterion(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a Noise Criteria (NC) assessment fiche to a PDF.
+
+        Writes a one-page room-noise assessment report (ANSI/ASA S12.2-2019):
+        the standard-basis line, an optional metadata header block, the
+        measured octave-band levels beside the measured spectrum plotted
+        against the NC curve family (the result's own :meth:`plot`), the boxed
+        ``NC-nn`` rating with its governing band, an optional verdict row and a
+        footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a bare
+            assessment fiche (body, result and disclaimer only). A supplied
+            ``requirement`` is read as the maximum acceptable NC rating (a lower
+            rating is quieter, so the room passes at or below it).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table adds the per-band NC contour
+            value read by the tangency method.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.ansi_s12_2 import render_nc_report
+
+        return render_nc_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 @dataclass(frozen=True)
@@ -134,7 +185,9 @@ class RCResult:
         """The room-criterion label in the ``RC-NN(A)`` form (clause D.3.5)."""
         return f"RC-{self.rating}({self.classification})"
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
+    ) -> "Axes":
         """Plot the measured spectrum against the reference RC Mark II curve.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -145,6 +198,54 @@ class RCResult:
 
         check_language(language)
         return plot_room_criterion(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a Room Criteria Mark II (RC) assessment fiche to a PDF.
+
+        Writes a one-page room-noise assessment report (ANSI/ASA S12.2-2019,
+        Annex D): the standard-basis line, an optional metadata header block,
+        the measured octave-band levels beside the measured spectrum plotted
+        against the reference RC Mark II curve (the result's own :meth:`plot`),
+        the boxed ``RC-nn(tag)`` rating with its mid-frequency average and
+        spectral-quality tag, an optional verdict row and a footer with the
+        fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a bare
+            assessment fiche (body, result and disclaimer only). A supplied
+            ``requirement`` is read as the maximum acceptable RC rating (a lower
+            rating is quieter, so the room passes at or below it).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table adds the reference RC Mark II
+            curve and the measured deviation from it.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.ansi_s12_2 import render_rc_report
+
+        return render_rc_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def nc_curve(index: float) -> np.ndarray:
@@ -235,8 +336,11 @@ def noise_criterion(
     for k in range(_N_BANDS):
         if valid[k]:
             per_band[k] = np.interp(
-                aligned[k], NC_CURVES[:, k], NC_INDICES,
-                left=NC_INDICES[0] - 1.0, right=NC_INDICES[-1] + 1.0,
+                aligned[k],
+                NC_CURVES[:, k],
+                NC_INDICES,
+                left=NC_INDICES[0] - 1.0,
+                right=NC_INDICES[-1] + 1.0,
             )
     governing = int(np.argmax(per_band))
     return NCResult(
@@ -247,9 +351,7 @@ def noise_criterion(
     )
 
 
-def room_criterion(
-    levels: ArrayLike, frequencies: ArrayLike | None = None
-) -> RCResult:
+def room_criterion(levels: ArrayLike, frequencies: ArrayLike | None = None) -> RCResult:
     """Room Criteria Mark II rating (ANSI/ASA S12.2-2019, Annex D).
 
     The numerical rating is the mid-frequency average ``LMF`` of the 500,
@@ -279,7 +381,7 @@ def room_criterion(
     reference = rc_curve(float(rating))
     deviation = aligned - reference
 
-    low = slice(0, 6)   # 16 - 500 Hz (at and below 500 Hz).
+    low = slice(0, 6)  # 16 - 500 Hz (at and below 500 Hz).
     high = slice(6, _N_BANDS)  # 1000 - 8000 Hz (at and above 1000 Hz).
     low_dev = deviation[low][~np.isnan(deviation[low])]
     high_dev = deviation[high][~np.isnan(deviation[high])]

@@ -70,7 +70,13 @@ from .psychoacoustics.loudness_moore_glasberg_time import (
     MooreGlasbergTimeVaryingLoudness,
     loudness_moore_glasberg_time,
 )
-from .psychoacoustics.loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
+from .psychoacoustics.loudness_contours import (
+    EqualLoudnessContours,
+    equal_loudness_contour,
+    equal_loudness_contours,
+    hearing_threshold,
+    loudness_level,
+)
 from .psychoacoustics.sharpness import sharpness_din, sharpness_din_from_specific
 from .hearing.threshold import (
     AgeThresholdResult,
@@ -1242,6 +1248,8 @@ __all__ = [
     "WindTurbineNoiseWarning",
     "WindTurbineTonalityResult",
     "equal_loudness_contour",
+    "equal_loudness_contours",
+    "EqualLoudnessContours",
     "loudness_level",
     "hearing_threshold",
     "tone_to_noise_ratio",

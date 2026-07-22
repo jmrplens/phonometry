@@ -44,6 +44,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   exposure limit, the fiche carries the informative risk-band classification
   rather than a PASS/FAIL verdict. `language="es"` renders the Spanish fiche
   with a comma decimal separator.
+- `equal_loudness_contours()` and the `EqualLoudnessContours` result type for
+  the ISO 226:2023 normal equal-loudness-level contours. The function bundles a
+  family of contours (20 phon to 90 phon in 10 phon steps by default) with the
+  threshold of hearing over a shared frequency grid, reusing the existing
+  `equal_loudness_contour()` and `hearing_threshold()` for all maths. The
+  result exposes `.plot()`, which draws the iconic ISO 226 chart (sound
+  pressure level versus a logarithmic frequency axis, one line per loudness
+  level plus the threshold) in English or Spanish. The bare-array functions are
+  unchanged.
 - `OpenPlanResult.report()`: a one-page PDF open-plan office acoustics fiche
   (ISO 3382-3:2012), laid out like a speech-privacy measurement report. The
   sheet carries the standard-basis line, an optional metadata header (client,

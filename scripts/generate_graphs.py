@@ -217,6 +217,7 @@ _ES_EXACT = {
     "Group Delay Comparison (1 kHz Octave Band, Order 6)":
         "Comparativa de retardo de grupo (banda de 1 kHz, orden 6)",
     "Hearing threshold $T_f$ (Table 1)": "Umbral de audici\u00f3n $T_f$ (Tabla 1)",
+    "Hearing threshold $T_f$": "Umbral de audici\u00f3n $T_f$",
     "High Pass (LR4)": "Paso alto (LR4)",
     "IEC 61672-1 analytic curve": "Curva anal\u00edtica IEC 61672-1",
     "ISO 7196 Table 2 nominals": "Nominales de la Tabla 2 de ISO 7196",
@@ -233,6 +234,8 @@ _ES_EXACT = {
         "Sin estado: cada bloque reinicia el transitorio del filtro",
     "Normal Equal-Loudness-Level Contours (ISO 226:2023)":
         "L\u00edneas isof\u00f3nicas normales (ISO 226:2023)",
+    "ISO 226:2023 defines 20 to 90 phon; above 80 phon the contour is defined only up to 4 kHz.":
+        "ISO 226:2023 define de 20 a 90 fonios; por encima de 80 fonios la curva solo se define hasta 4 kHz.",
     "Original Signal (250 Hz + 1000 Hz Sum) @ 48 kHz":
         "Se\u00f1al original (suma de 250 Hz + 1000 Hz) @ 48 kHz",
     "Oversampled (high_accuracy=True)": "Sobremuestreado (high_accuracy=True)",
@@ -1229,6 +1232,8 @@ _ES_PATTERNS = [
     (r"^Diffracted path \(δ = (\d+),(\d+) m\)$",
      r"Camino difractado (δ = \1,\2 m)"),
     (r"^(\d+) yr$", r"\1 años"),
+    # equal_loudness_contours per-contour annotations ("20 phon" ... "90 phon").
+    (r"^(\d+) phon$", r"\1 fonios"),
     (r"^total \(limit\) (.+) dB$", r"total (límite) \1 dB"),
     (r"^total \(eng\.\) (.+) dB$", r"total (ing.) \1 dB"),
     # tone_audibility decisive legend (mathtext skips the decimal-comma pass).
@@ -2055,24 +2060,15 @@ def generate_g_weighting_response(output_dir: str) -> None:
 def generate_equal_loudness_contours(output_dir: str) -> None:
     """Plot the ISO 226:2023 normal equal-loudness-level contours."""
     print("Generating equal_loudness_contours.png...")
-    from phonometry import equal_loudness_contour, hearing_threshold
+    from phonometry import equal_loudness_contours
 
     _, ax = plt.subplots(figsize=(10, 7))
-    for phon in [20, 40, 60, 80, 90]:
-        freqs, spl = equal_loudness_contour(float(phon))
-        ax.semilogx(freqs, spl, color=COLOR_PRIMARY, linewidth=1.5)
-        ax.annotate(f"{phon} phon", xy=(1000, phon), xytext=(1150, phon + 1),
-                    fontsize=9, color=COLOR_PRIMARY)
-    ft, tf = hearing_threshold()
-    ax.semilogx(ft, tf, color=COLOR_SECONDARY, linestyle="--",
-                label="Hearing threshold $T_f$ (Table 1)")
-    ax.plot(1000, 0, alpha=0)  # keep 0 dB in view
-    apply_axis_styling(
-        ax, "Normal Equal-Loudness-Level Contours (ISO 226:2023)",
-        xlim=(20, 12500), ylim=(-10, 130),
-    )
-    ax.set_ylabel("Sound pressure level [dB re 20 \u00b5Pa]")
-    ax.legend(loc="upper right")
+    # The result's own .plot() draws the contour family plus the hearing
+    # threshold on a 1k/2k-labelled log frequency axis (ISO 226:2023 Formula 1).
+    equal_loudness_contours().plot(ax=ax)
+    ax.set_ylim(-10, 130)
+    ax.set_title("Normal Equal-Loudness-Level Contours (ISO 226:2023)",
+                 fontweight="bold", pad=12)
     save_figure(output_dir, "equal_loudness_contours.png")
     plt.close()
 

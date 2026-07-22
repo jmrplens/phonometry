@@ -3084,16 +3084,24 @@ perceived *loudness level* in phons (the SPL of an equally loud 1 kHz tone).
 `equal_loudness_contour(phon)` evaluates ISO 226:2023 Formula (1) at the 29
 preferred third-octave frequencies of Table 1, `loudness_level(spl, frequency)`
 is the exact inverse (Formula 2), and `hearing_threshold()` returns the
-threshold-of-hearing column:
+threshold-of-hearing column. `equal_loudness_contours(phons)` bundles a whole
+family of contours with the threshold into a plottable `EqualLoudnessContours`
+result:
 
 ```python
 from phonometry import psychoacoustics
 
 freqs, spl = psychoacoustics.equal_loudness_contour(40.0)   # the classic 40-phon contour
 phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
+
+# The whole family (20-90 phon by default) plus the hearing threshold:
+res = psychoacoustics.equal_loudness_contours()
+res.plot()   # the iconic ISO 226 chart (needs matplotlib)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" width="80%"></picture>
+
+ISO 226:2023 defines the contours from 20 to 90 phon; above 80 phon the formula is valid only up to 4 kHz, so the 90 phon contour stops there and no higher contours are defined.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -3102,7 +3110,13 @@ phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 4
 import matplotlib.pyplot as plt
 from phonometry import psychoacoustics
 
-# ISO 226:2023 Formula (1) at the 29 preferred frequencies of Table 1
+# One line — the contour family straight from the result:
+res = psychoacoustics.equal_loudness_contours()
+res.plot()
+plt.show()
+
+# Or reproduce the figure by hand — ISO 226:2023 Formula (1) at the 29
+# preferred frequencies of Table 1, one contour per loudness level:
 fig, ax = plt.subplots()
 for phon in [20, 40, 60, 80, 90]:
     freqs, spl = psychoacoustics.equal_loudness_contour(float(phon))
@@ -11992,6 +12006,8 @@ cycle and warn on use; they are removed in 4.0.
 | `fluctuation_strength` | `function` | **Fluctuation strength F (Osses 2016 signal model), no numeric standard, free-field.**<br>• `signal_in`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz] | `res = fluctuation_strength(x, fs)`<br><br>• `FluctuationStrengthResult`; 1 kHz/60 dB/m=1/4 Hz AM ≈ 1 vacil |
 | `FluctuationStrengthResult` | `dataclass` | **Fluctuation strength result.**<br>• `fluctuation_strength`: F [vacil]<br>• `specific`: F′(z), 47 values<br>• `bark_axis`: z [Bark], 47 values<br>• `time_dependent`: F(t) per frame<br>• `.plot()`: specific F′(z) over the Bark axis | `res.fluctuation_strength, res.specific` |
 | `equal_loudness_contour` | `function` | **ISO 226:2023 equal-loudness contour.**<br>• `phon`: Loudness level, 20-90 phon | `freqs, spl = equal_loudness_contour(40.0)`<br><br>• SPL at the 29 preferred frequencies |
+| `equal_loudness_contours` | `function` | **ISO 226:2023 equal-loudness contour family (plottable).**<br>• `phons`: Loudness levels [phon] (Default: 20-90 in 10-phon steps)<br>• `frequencies`: Grid [Hz] (Default: the 29 preferred) | `res = equal_loudness_contours()`<br><br>• `EqualLoudnessContours`; `res.plot()` |
+| `EqualLoudnessContours` | `dataclass` | **Equal-loudness contour family result.**<br>• `frequencies`: grid [Hz]<br>• `phons`: contour levels [phon]<br>• `contours`: SPL, `(len(phons), len(frequencies))` [dB] (`nan` where undefined)<br>• `threshold`: hearing threshold $T_f$ [dB]<br>• `.plot()`: the iconic ISO 226 chart | `res.contours, res.threshold` |
 | `loudness_level` | `function` | **Loudness level of a pure tone (phon).**<br>• `spl`: Tone SPL [dB]<br>• `frequency`: One of the 29 Table 1 frequencies [Hz] | `phon = loudness_level(73.0, 63.0)` |
 | `hearing_threshold` | `function` | **Threshold of hearing (ISO 226 Table 1).**<br>• (no parameters) | `freqs, tf = hearing_threshold()` |
 | `tone_to_noise_ratio` | `function` | **Tone-to-noise ratio (ECMA-418-1 §11).**<br>• `x`: Signal (1D)<br>• `fs`: Sample rate [Hz]<br>• `tone_freq`: Tone to assess [Hz] (Default: highest peak)<br>• `resolution_hz`: FFT bin spacing (Default: 1.0) | `r = tone_to_noise_ratio(x, fs)`<br><br>• `ToneAssessment(frequency, ratio_db, criterion_db, prominent)` |

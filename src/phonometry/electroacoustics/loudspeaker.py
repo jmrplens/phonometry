@@ -44,13 +44,14 @@ the report never merely repeats a manufacturer number:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from .._internal.validation import require_positive
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._report.metadata import ReportMetadata
@@ -367,6 +368,37 @@ class LoudspeakerCharacteristics:
 
         return render_iec60268_5_report(
             self, path, metadata=metadata, language=language
+        )
+
+    def plot(
+        self, quantity: str = "response", ax: "Axes | None" = None, *,
+        language: str = "en", **kwargs: Any,
+    ) -> "Axes":
+        """Plot one IEC 60268-5 loudspeaker rated characteristic on one axes.
+
+        One concept per figure, drawn by the same shared renderer the
+        ``.report()`` fiche composes: ``"response"`` (the on-axis SPL response
+        with its tolerance band and effective-range markers, the default),
+        ``"impedance"`` (the modulus ``|Z|`` with the rated and 80 %-of-rated
+        lines), ``"thd"`` (total harmonic distortion against frequency) and
+        ``"directivity"`` (the polar response on the 25 dB reference circle).
+
+        :param quantity: Which characteristic to plot (see above).
+        :param ax: Existing axes to draw on, or ``None`` for a fresh figure (a
+            polar axes is created for ``"directivity"``).
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :return: The axes the characteristic was drawn on.
+        :raises ValueError: If ``quantity`` or ``language`` is unknown, or the
+            result carries no data for ``quantity``.
+        :raises ImportError: If matplotlib is not installed
+            (``pip install phonometry[plot]``).
+        """
+        from .._i18n import check_language
+        from .._plot.electroacoustics import plot_loudspeaker_characteristics
+
+        check_language(language)
+        return plot_loudspeaker_characteristics(
+            self, quantity, ax=ax, language=language, **kwargs
         )
 
 

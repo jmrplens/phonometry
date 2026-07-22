@@ -84,3 +84,83 @@ def test_piston_impedance_es() -> None:
     plt.close("all")
     with pytest.raises(ValueError):
         res.plot(language="xx")
+
+
+def _loudspeaker() -> ph.electroacoustics.LoudspeakerCharacteristics:
+    f = np.geomspace(30.0, 24000.0, 200)
+    spl = 87.0 - 10 * np.log10(1 + (50.0 / f) ** 6) - 10 * np.log10(1 + (f / 16000.0) ** 7)
+    fz = np.geomspace(20.0, 20000.0, 120)
+    return ph.loudspeaker_characteristics(
+        f, spl, 8.0, sensitivity_band=(200.0, 4000.0),
+        impedance=(fz, 6.6 + 20 * np.exp(-(np.log2(fz / 52.0) ** 2) / 0.12)),
+        distortion=(np.geomspace(50.0, 5000.0, 90),
+                    0.4 + 2.0 * np.ones(90)),
+        polar=(np.linspace(0.0, 90.0, 46), -np.linspace(0.0, 12.0, 46)),
+        polar_frequency=2000.0,
+    )
+
+
+def _microphone() -> ph.electroacoustics.MicrophoneCharacteristics:
+    f = np.geomspace(20.0, 20000.0, 200)
+    resp = -10 * np.log10(1 + (30.0 / f) ** 4) - 10 * np.log10(1 + (f / 19000.0) ** 8)
+    ang = np.linspace(0.0, 179.0, 180)
+    spl = np.linspace(100.0, 140.0, 41)
+    return ph.microphone_characteristics(
+        f, resp, 12.5, tolerance_db=3.0, noise_voltage=1.25e-6,
+        max_spl_thd_percent=0.5,
+        noise_spectrum=(np.geomspace(20.0, 20000.0, 31), np.full(31, 10.0)),
+        distortion=(spl, 0.5 * 10 ** ((spl - 130.0) * 0.08)),
+        polar=(ang, 20 * np.log10((1 + np.cos(np.radians(ang))) / 2)),
+        polar_frequency=1000.0,
+    )
+
+
+def test_loudspeaker_characteristics_es() -> None:
+    res = _loudspeaker()
+    # The default quantity is the on-axis response; every quantity is one axes.
+    assert res.plot(language="es").get_title() == "Respuesta en el eje"
+    plt.close("all")
+    titles = {
+        "response": "Respuesta en el eje",
+        "impedance": "Impedancia",
+        "thd": "Distorsión armónica total",
+        "directivity": "Respuesta direccional a 2000 Hz",
+    }
+    for quantity, title in titles.items():
+        ax = res.plot(quantity=quantity, language="es")
+        assert not isinstance(ax, np.ndarray)
+        assert ax.get_title() == title
+        plt.close("all")
+    assert res.plot(quantity="response", language="es").get_ylabel() == (
+        "Nivel de presión sonora [dB]"
+    )
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(quantity="bogus")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
+def test_microphone_characteristics_es() -> None:
+    res = _microphone()
+    assert res.plot(language="es").get_title() == "Respuesta en campo libre"
+    plt.close("all")
+    titles = {
+        "response": "Respuesta en campo libre",
+        "directivity": "Respuesta direccional a 1000 Hz",
+        "noise": "Espectro de ruido inherente",
+        "distortion": "Distorsión armónica total",
+    }
+    for quantity, title in titles.items():
+        ax = res.plot(quantity=quantity, language="es")
+        assert not isinstance(ax, np.ndarray)
+        assert ax.get_title() == title
+        plt.close("all")
+    assert res.plot(quantity="distortion", language="es").get_xlabel() == (
+        "Nivel de presión sonora [dB]"
+    )
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(quantity="bogus")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")

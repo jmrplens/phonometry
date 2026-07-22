@@ -446,6 +446,113 @@ curve and the directivity feed the secondary panels, reusing the
 directivity of section 6 and a [swept-sine THD](/phonometry/guides/swept-sine-distortion/)
 result for the distortion curve.
 
+The rated characteristics are also available interactively through `.plot()`,
+which draws **one concept per figure** with the same panel code the report
+composes, selected by `quantity`. Passing an axes draws on it:
+
+```python
+result.plot()                        # on-axis response (default)
+result.plot(quantity="impedance")    # |Z| modulus with the rated / 80 % lines
+result.plot(quantity="thd")          # total harmonic distortion vs frequency
+result.plot(quantity="directivity")  # polar response on the 25 dB circle
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudspeaker_response.svg" alt="On-axis sound-pressure-level response with its shaded tolerance band, the -10 dB reference line and the effective-range markers on a nominal-frequency axis" width="82%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import loudspeaker_characteristics
+
+freqs = np.geomspace(30, 24000, 320)
+spl = 87.0 + 1.2 * np.sin(2 * np.log2(freqs / 900.0))
+spl -= 10 * np.log10(1 + (50.0 / freqs) ** 6)       # low-frequency roll-off
+spl -= 10 * np.log10(1 + (freqs / 16000.0) ** 7)    # high-frequency roll-off
+
+result = loudspeaker_characteristics(freqs, spl, rated_impedance=8.0,
+                                     sensitivity_band=(200.0, 4000.0))
+result.plot()   # quantity="response" (the default)
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudspeaker_impedance.svg" alt="Loudspeaker impedance modulus against frequency with the rated-impedance line and the 80 %-of-rated minimum line" width="82%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import loudspeaker_characteristics
+
+freqs = np.geomspace(30, 24000, 320)
+spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
+fz = np.geomspace(20, 20000, 260)
+
+result = loudspeaker_characteristics(
+    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    impedance=(fz, 6.6 + 24 * np.exp(-(np.log2(fz / 52.0) ** 2) / 0.12)),
+)
+result.plot(quantity="impedance")
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudspeaker_thd.svg" alt="Loudspeaker total harmonic distortion in percent against frequency" width="82%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import loudspeaker_characteristics
+
+freqs = np.geomspace(30, 24000, 320)
+spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
+thd_f = np.geomspace(50, 5000, 140)
+
+result = loudspeaker_characteristics(
+    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    distortion=(thd_f, 0.3 + 2.6 * np.exp(-(np.log2(thd_f / 70.0) ** 2) / 0.45)),
+)
+result.plot(quantity="thd")
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudspeaker_directivity.svg" alt="Loudspeaker polar directional response at 2000 Hz on the IEC 60263 25 dB reference circle" width="72%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import loudspeaker_characteristics, radiating_piston
+
+freqs = np.geomspace(30, 24000, 320)
+spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
+
+result = loudspeaker_characteristics(
+    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    directivity=radiating_piston(0.075, np.array([1000.0, 2000.0, 4000.0]),
+                                 angles=np.radians(np.linspace(0, 90, 46))),
+    polar_frequency=2000.0,
+)
+result.plot(quantity="directivity")
+plt.show()
+```
+
+</details>
+
 The example fiche is regenerated with `make reports` and kept rendered in the
 repository; click the preview to open the PDF.
 
@@ -521,6 +628,112 @@ on the IEC 60263 25 dB reference circle; the inherent-noise spectrum and the
 distortion-against-level curve (with the THD limit and the overload level
 marked) feed the secondary panels. A `requirement` in the metadata is checked
 as a maximum permitted equivalent noise level.
+
+The rated characteristics are also available interactively through `.plot()`,
+which draws **one concept per figure** with the same panel code the report
+composes, selected by `quantity`. Passing an axes draws on it:
+
+```python
+result.plot()                        # free-field response (default)
+result.plot(quantity="directivity")  # polar pattern on the 25 dB circle
+result.plot(quantity="noise")        # inherent-noise band spectrum
+result.plot(quantity="distortion")   # THD vs sound pressure level
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_response.svg" alt="Microphone free-field relative response with its shaded tolerance band, the reference-frequency marker and the effective-range markers on a nominal-frequency axis" width="82%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import microphone_characteristics
+
+freqs = np.geomspace(20, 20000, 400)
+response = -10 * np.log10(1 + (30.0 / freqs) ** 4)      # low-frequency roll-off
+response -= 10 * np.log10(1 + (freqs / 19000.0) ** 8)   # high-frequency roll-off
+response += 2.0 * np.exp(-(np.log2(freqs / 9000.0) ** 2) / 0.3)  # presence region
+
+result = microphone_characteristics(freqs, response, 12.5, tolerance_db=3.0)
+result.plot()   # quantity="response" (the default)
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_directivity.svg" alt="Microphone cardioid directional pattern at 1000 Hz on the IEC 60263 25 dB reference circle" width="72%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import microphone_characteristics
+
+freqs = np.geomspace(20, 20000, 400)
+response = -10 * np.log10(1 + (30.0 / freqs) ** 4)
+angles = np.linspace(0, 179, 359)
+cardioid = 20 * np.log10((1 + np.cos(np.radians(angles))) / 2)
+
+result = microphone_characteristics(
+    freqs, response, 12.5, tolerance_db=3.0,
+    polar=(angles, cardioid), polar_frequency=1000.0,
+)
+result.plot(quantity="directivity")
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_noise.svg" alt="Microphone inherent-noise equivalent band-level spectrum against frequency" width="82%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import microphone_characteristics
+
+freqs = np.geomspace(20, 20000, 400)
+response = -10 * np.log10(1 + (30.0 / freqs) ** 4)
+noise_f = np.geomspace(20, 20000, 31)
+
+result = microphone_characteristics(
+    freqs, response, 12.5, tolerance_db=3.0, noise_voltage=1.25e-6,
+    noise_spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
+)
+result.plot(quantity="noise")
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_distortion.svg" alt="Microphone total harmonic distortion in percent against sound pressure level, with the THD limit and the overload sound pressure level marked" width="82%" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import microphone_characteristics
+
+freqs = np.geomspace(20, 20000, 400)
+response = -10 * np.log10(1 + (30.0 / freqs) ** 4)
+spl_axis = np.linspace(100, 140, 81)
+
+result = microphone_characteristics(
+    freqs, response, 12.5, tolerance_db=3.0, max_spl_thd_percent=0.5,
+    distortion=(spl_axis, 0.5 * 10 ** ((spl_axis - 130.0) * 0.08)),
+)
+result.plot(quantity="distortion")
+plt.show()
+```
+
+</details>
 
 The example fiche is regenerated with `make reports` and kept rendered in the
 repository; click the preview to open the PDF.

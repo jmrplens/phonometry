@@ -389,6 +389,50 @@ def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
     assert "Sensibilidad en campo libre" in text
 
 
+def test_plot_each_quantity_returns_single_axes() -> None:
+    """Every quantity plots one concept on one axes; directivity is polar."""
+    matplotlib = pytest.importorskip("matplotlib")
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    result = _example_result()
+    assert result.plot().get_title() == "Free-field response"
+    plt.close("all")
+    for quantity in ("response", "directivity", "noise", "distortion"):
+        ax = result.plot(quantity=quantity)
+        assert not isinstance(ax, np.ndarray)
+        expected = "polar" if quantity == "directivity" else "rectilinear"
+        assert ax.name == expected
+        plt.close("all")
+
+
+def test_plot_on_external_axes_returns_it() -> None:
+    """Passing an axes draws on it and returns that same axes."""
+    matplotlib = pytest.importorskip("matplotlib")
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    _fig, ax = plt.subplots()
+    out = _example_result().plot(quantity="noise", ax=ax)
+    assert out is ax
+    assert ax.get_title() == "Inherent noise spectrum"
+    plt.close("all")
+
+
+def test_plot_rejects_unknown_quantity_and_missing_data() -> None:
+    """An unknown quantity, and a quantity with no data, raise ValueError."""
+    matplotlib = pytest.importorskip("matplotlib")
+    matplotlib.use("Agg")
+
+    result = _example_result()
+    with pytest.raises(ValueError, match="unknown quantity"):
+        result.plot(quantity="bogus")
+    f, rel = _flat_response()
+    bare = microphone_characteristics(f, rel, _M_MV, tolerance_db=_TOL)
+    with pytest.raises(ValueError, match="no directional pattern"):
+        bare.plot(quantity="directivity")
+
+
 def test_unknown_engine_rejected(tmp_path) -> None:
     """An unknown rendering engine raises ValueError."""
     result = _example_result()

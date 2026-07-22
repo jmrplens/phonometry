@@ -196,6 +196,44 @@ differ (19.1 NOTE 2), particularly for tweeters or woofers, so an
 impedance dip outside the effective range is only caught when the
 rated range is given.
 
+### LoudspeakerCharacteristics.plot()
+
+```python
+LoudspeakerCharacteristics.plot(
+    quantity: str = 'response',
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot one IEC 60268-5 loudspeaker rated characteristic on one axes.
+
+One concept per figure, drawn by the same shared renderer the
+`.report()` fiche composes: `"response"` (the on-axis SPL response
+with its tolerance band and effective-range markers, the default),
+`"impedance"` (the modulus `|Z|` with the rated and 80 %-of-rated
+lines), `"thd"` (total harmonic distortion against frequency) and
+`"directivity"` (the polar response on the 25 dB reference circle).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `quantity` | Which characteristic to plot (see above). |
+| `ax` | Existing axes to draw on, or `None` for a fresh figure (a polar axes is created for `"directivity"`). |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+
+**Returns:** The axes the characteristic was drawn on.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `quantity` or `language` is unknown, or the result carries no data for `quantity`. |
+| ImportError | If matplotlib is not installed (`pip install phonometry[plot]`). |
+
 ### LoudspeakerCharacteristics.report()
 
 ```python

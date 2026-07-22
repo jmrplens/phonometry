@@ -49,6 +49,7 @@ references:
 
 import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Cómo devuelve una superficie el sonido incidente (cuánto dispersa fuera de la
 dirección especular, con qué uniformidad reparte lo que dispersa y cuánto
@@ -199,6 +200,25 @@ print(materials.BASE_PLATE_BANDS[0], materials.BASE_PLATE_MAX_SCATTERING[100])  
 materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS))
 ```
 
+### Ficha de informe de ensayo de dispersión
+
+`ScatteringResult.report(path)` genera un informe de ensayo de dispersión
+acreditado de una página (ISO 17497-1): una cabecera de metadatos (probeta, área
+de muestra $S$, volumen de sala $V$, sala de ensayo, clima), la tabla por tercio
+de octava de la absorción de incidencia aleatoria $\alpha_s$ y el coeficiente de
+dispersión $s$ junto a la curva $s(f)$ sobre un eje de bandas categórico, y un
+titular de caracterización enmarcado. Es una caracterización, por lo que no hay
+veredicto de apto/no apto. `verbose=True` añade la columna de absorción especular
+$\alpha_{spec}$ y `language="es"` genera la ficha en español. Requiere el extra de
+informes (`pip install phonometry[report]`).
+
+<ReportPreview
+	name="iso17497_scattering_example"
+	title="Informe de ejemplo del coeficiente de dispersión ISO 17497-1 (PDF)"
+	description="Ficha de dispersión de incidencia aleatoria de una página: una cabecera de metadatos, la tabla por tercio de octava de la absorción de incidencia aleatoria y el coeficiente de dispersión junto a la curva s(f) con eje de bandas, y el titular de caracterización enmarcado sobre el rango de frecuencias ensayado."
+	caption="Ficha de dispersión de incidencia aleatoria (ScatteringResult.report), los espectros alpha_s y s."
+/>
+
 ## 2. Coeficiente de difusión (ISO 17497-2)
 
 El coeficiente de difusión $d$ mide la **uniformidad espacial** del sonido
@@ -318,6 +338,53 @@ plt.show()
 ```
 
 </details>
+
+### Ficha de informe de ensayo de difusión
+
+Reunido a lo largo de las bandas de tercio de octava, el coeficiente de difusión
+$d(f)$ forma un `DiffusionSpectrum`, cuyo `report(path)` genera un informe de
+ensayo de difusión de una página (ISO 17497-2, Cláusula 8.5): la tabla por banda
+de $d$ junto a la curva $d(f)$ con eje de bandas, con un titular de
+caracterización enmarcado. Según la Cláusula 8.4, el coeficiente de incidencia
+aleatoria es a su vez una magnitud por banda, la media de los coeficientes
+direccionales sobre las posiciones de fuente banda a banda (**no** una media a
+través de las frecuencias), de modo que aquí $d$ es un coeficiente por banda.
+`verbose=True` añade la columna del coeficiente normalizado $d_n$ a la tabla (la
+curva siempre dibuja $d_n$ como acompañante cuando está presente).
+
+```python
+import numpy as np
+from phonometry import materials
+
+# Un coeficiente de difusión por banda (aquí un ejemplo en forma cerrada). En la
+# práctica, la d de incidencia aleatoria de cada banda es la media, sobre las
+# posiciones de fuente, de los coeficientes direccionales: para la banda k, se
+# promedia directional_diffusion_coefficient sobre las fuentes con
+# random_incidence_diffusion (Cláusula 8.4).
+freqs = np.array([250, 500, 1000, 2000, 4000], float)
+d = np.array([0.30, 0.45, 0.60, 0.75, 0.88])
+spectrum = materials.diffusion_spectrum(freqs, d)
+spectrum.report("difusion.pdf")   # ficha de una página (requiere phonometry[report])
+```
+
+<ReportPreview
+	name="iso17497_diffusion_example"
+	title="Informe de ejemplo del coeficiente de difusión ISO 17497-2 (PDF)"
+	description="Ficha de difusión de una página: una cabecera de metadatos, la tabla por tercio de octava del coeficiente de difusión d junto a la curva d(f) con eje de bandas (con el normalizado d_n dibujado como curva acompañante), y el titular de caracterización enmarcado sobre el rango de frecuencias ensayado."
+	caption="Ficha de difusión (DiffusionSpectrum.report), la d(f) de incidencia aleatoria por banda con la curva acompañante normalizada d_n."
+/>
+
+La respuesta polar de una sola banda también es informable: `DiffusionResult.report(path)`
+genera la tabla de ángulo de recepción / nivel reflejado corregido junto al
+diagrama polar semicircular, enmarcando el coeficiente de difusión direccional de
+esa banda.
+
+<ReportPreview
+	name="iso17497_diffusion_polar_example"
+	title="Informe de ejemplo de respuesta polar ISO 17497-2 (PDF)"
+	description="Ficha de respuesta polar de fuente única de una página: una cabecera de metadatos, el nivel reflejado corregido por ángulo de recepción junto al diagrama polar semicircular, y el coeficiente de difusión direccional enmarcado."
+	caption="Ficha de respuesta polar de fuente única (DiffusionResult.report), el nivel reflejado sobre el arco de receptores."
+/>
 
 ## ¿Dispersión o difusión? Dos coeficientes, dos trabajos
 

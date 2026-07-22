@@ -24,6 +24,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   PASS/FAIL verdict (a higher weighted improvement passes). `verbose=True` adds
   the reference-floor-with-covering column `Ln,r = Ln,r,0 - ΔL` (the ISO 717-2
   derivation basis of `ΔLw`); `language="es"` renders the Spanish fiche.
+- `ScatteringResult.report()`, `DiffusionSpectrum.report()` and
+  `DiffusionResult.report()`: one-page PDF surface-scattering and diffusion
+  test-report fiches rendered through the shared accredited-report engine
+  (ISO 17497-1:2004+A1:2014 and ISO 17497-2:2012). The scattering fiche carries
+  the standard-basis line, an optional metadata header (client, specimen,
+  sample area `S`, room volume `V`, test room, climate), a per-one-third-octave
+  table of the random-incidence absorption `alpha_s` and the scattering
+  coefficient `s` beside the `s(f)` curve on a categorical band axis, and a
+  boxed characterisation headline; `verbose=True` adds the specular absorption
+  `alpha_spec` column. The diffusion-spectrum fiche tabulates the diffusion
+  coefficient `d` per band beside the `d(f)` band-axis curve (the per-band
+  random-incidence coefficient being the average of the directional coefficients
+  over the source positions, Clause 8.4); `verbose=True` adds the normalised
+  `d_n` column. The polar-response fiche tabulates the corrected reflected level
+  `L` per receiver angle beside the semicircular polar plot, boxing the
+  directional diffusion coefficient. ISO 17497 is a characterisation, so there
+  is no pass/fail verdict. `language="es"` renders the Spanish fiche. A new
+  `DiffusionSpectrum` result (and its `diffusion_spectrum` constructor) carries
+  the diffusion coefficient across the measured bands, with `.plot()` and
+  `.report()`.
 - `ToneAudibilityResult.report()`: a one-page PDF tonal audibility assessment
   fiche rendered through the shared accredited-report engine, following the
   ISO 1996-2:2017 Annex J engineering method (ISO/PAS 20065:2016). The sheet

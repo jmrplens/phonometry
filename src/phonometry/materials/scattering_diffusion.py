@@ -50,12 +50,15 @@ from .._internal.warnings import PhonometryWarning, _warn_renamed
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 
 __all__ = [
     "BASE_PLATE_BANDS",
     "BASE_PLATE_MAX_SCATTERING",
     "TWO_DIMENSIONAL_SOURCE_WEIGHTS",
     "DiffusionResult",
+    "DiffusionSpectrum",
     "ScatteringDiffusionWarning",
     "ScatteringResult",
     "ScatteringUncertainty",
@@ -64,6 +67,7 @@ __all__ = [
     "area_factors",
     "base_plate_scattering",
     "check_base_plate_scattering",
+    "diffusion_spectrum",
     "directional_diffusion",
     "directional_diffusion_coefficient",
     "normalized_diffusion_coefficient",
@@ -361,6 +365,59 @@ class ScatteringResult:
         check_language(language)
         return plot_scattering_coefficient(self, ax=ax, language=language, **kwargs)
 
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 17497-1 scattering-coefficient test-report fiche to a PDF.
+
+        Writes a one-page accredited random-incidence scattering report
+        (ISO 17497-1:2004+A1:2014): the standard-basis line, an optional
+        metadata header block (client, specimen, test room, sample area ``S``,
+        temperature, humidity ...), a two-panel body with the per-band table
+        (frequency, the random-incidence absorption ``alpha_s`` and the
+        scattering coefficient ``s``) beside the ``s(f)`` curve on a categorical
+        band axis, and a footer with the fixed disclaimer. ISO 17497-1 is a
+        characterisation, so there is no pass/fail verdict and no single-number
+        rating.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a body-and-disclaimer fiche whose header shows only the
+            measured frequency range. The applicable descriptive fields are
+            ``client``, ``manufacturer``, ``specimen``, ``area``, ``room_volume``,
+            ``mounting``, ``test_room``, ``test_date``, ``temperature``,
+            ``relative_humidity``, ``pressure``, ``measurement_standard``,
+            ``laboratory``, ``operator``, ``report_id`` and ``notes``. The
+            ``requirement`` field is ignored (ISO 17497-1 has no verdict).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the value table inserts the specular
+            absorption ``alpha_spec`` column beside ``alpha_s`` and ``s``.
+        :param language: Fiche language: ``"en"`` (default, English, decimal
+            point) or ``"es"`` (Spanish, decimal comma).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso17497 import render_scattering_report
+
+        return render_scattering_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
+
 
 def scattering_coefficient_spectrum(
     frequencies: ArrayLike,
@@ -430,6 +487,193 @@ class DiffusionResult:
 
         check_language(language)
         return plot_diffusion_polar(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 17497-2 polar-response test-report fiche to a PDF.
+
+        Writes a one-page accredited free-field diffusion report for a single
+        source position (ISO 17497-2:2012, Clause 8.5): the standard-basis line,
+        an optional metadata header block, a two-panel body with the corrected
+        polar-response table (receiver angle and reflected sound-pressure level
+        ``L``, rounded to 0,1 dB) beside the semicircular polar plot, a boxed
+        directional diffusion coefficient ``d_theta`` (Formula (5)/(6)) and a
+        footer with the fixed disclaimer. ISO 17497-2 is a characterisation, so
+        there is no pass/fail verdict.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a body-and-disclaimer fiche. The applicable descriptive
+            fields are ``client``, ``manufacturer``, ``specimen``, ``mounting``,
+            ``test_room``, ``test_date``, ``temperature``, ``relative_humidity``,
+            ``pressure``, ``measurement_standard``, ``laboratory``, ``operator``,
+            ``report_id`` and ``notes``. The ``requirement`` field is ignored
+            (ISO 17497-2 has no verdict).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for signature parity; the polar-response fiche
+            has no extended table, so it renders the same body.
+        :param language: Fiche language: ``"en"`` (default, English, decimal
+            point) or ``"es"`` (Spanish, decimal comma).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso17497 import render_diffusion_polar_report
+
+        return render_diffusion_polar_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
+
+
+@dataclass(frozen=True)
+class DiffusionSpectrum:
+    """A diffusion-coefficient spectrum ``d(f)`` (ISO 17497-2, Clause 8.5).
+
+    Where :class:`DiffusionResult` holds the polar response of a single
+    one-third-octave band, this holds the diffusion coefficient across the
+    measured bands, so it can be tabulated and plotted against frequency as
+    Clause 8.5 requires. The per-band coefficient is a *directional* diffusion
+    coefficient ``d_theta`` (Formula (5)/(6)) when it comes from one source
+    position, or a *random-incidence* diffusion coefficient ``d`` when it is the
+    per-band average of the directional coefficients over the source positions
+    (Clause 8.4); the standard defines both as frequency-dependent quantities,
+    so this carries a spectrum rather than a single number.
+
+    :ivar frequencies: One-third-octave band centre frequencies, in hertz.
+    :ivar diffusion: Diffusion coefficient ``d`` per band (directional per
+        source, or random-incidence when averaged over source positions).
+    :ivar normalized: Optional normalised diffusion coefficient ``d_n`` per band
+        (Formula (7)), or ``None`` when the reference flat surface was not
+        measured.
+    """
+
+    frequencies: Real
+    diffusion: Real
+    normalized: Real | None = None
+
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
+        """Plot the diffusion coefficient ``d`` versus frequency.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+        """
+        from .._i18n import check_language
+        from .._plot.materials import plot_diffusion_report
+
+        check_language(language)
+        return plot_diffusion_report(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 17497-2 diffusion-coefficient test-report fiche to a PDF.
+
+        Writes a one-page accredited free-field diffusion report
+        (ISO 17497-2:2012, Clause 8.5): the standard-basis line, an optional
+        metadata header block, a two-panel body with the per-band table
+        (frequency, the diffusion coefficient ``d`` and, when present, the
+        normalised ``d_n``) beside the ``d(f)`` curve on a categorical band
+        axis, a boxed characterisation headline over the tested frequency range,
+        and a footer with the fixed disclaimer. ISO 17497-2 is a
+        characterisation, so there is no pass/fail verdict.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a body-and-disclaimer fiche whose header shows only the
+            measured frequency range. The applicable descriptive fields are
+            ``client``, ``manufacturer``, ``specimen``, ``mounting``,
+            ``test_room``, ``test_date``, ``temperature``, ``relative_humidity``,
+            ``pressure``, ``measurement_standard``, ``laboratory``, ``operator``,
+            ``report_id`` and ``notes``. The ``requirement`` field is ignored
+            (ISO 17497-2 has no verdict).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True`` and a normalised spectrum is present, the
+            value table adds the normalised ``d_n`` column.
+        :param language: Fiche language: ``"en"`` (default, English, decimal
+            point) or ``"es"`` (Spanish, decimal comma).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso17497 import render_diffusion_spectrum_report
+
+        return render_diffusion_spectrum_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
+
+
+def diffusion_spectrum(
+    frequencies: ArrayLike,
+    diffusion: ArrayLike,
+    *,
+    normalized: ArrayLike | None = None,
+) -> DiffusionSpectrum:
+    """Diffusion-coefficient spectrum ``d(f)`` (ISO 17497-2, Clause 8.5).
+
+    Pairs the per-band diffusion coefficients ``d`` with their band centres and
+    returns a plottable, reportable :class:`DiffusionSpectrum`. The coefficient
+    is the *directional* coefficient ``d_theta`` (Formula (5)/(6)) when it comes
+    from a single source position, or the *random-incidence* coefficient ``d``
+    when it is the per-band average of the directional coefficients over the
+    source positions (Clause 8.4, e.g. via :func:`random_incidence_diffusion`
+    band by band). The optional normalised coefficients ``d_n`` (Formula (7))
+    are carried through when supplied.
+
+    :param frequencies: One-third-octave band centres, in hertz (1-D).
+    :param diffusion: Diffusion coefficient ``d`` per band.
+    :param normalized: Optional normalised diffusion coefficient ``d_n`` per
+        band; ``None`` when the reference flat surface was not measured.
+    :return: A :class:`DiffusionSpectrum` with ``.plot()`` and ``.report()``.
+    :raises ValueError: if the inputs differ in length, are empty or not 1-D.
+    """
+    freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    d = np.atleast_1d(np.asarray(diffusion, dtype=np.float64))
+    if freq.ndim != 1 or freq.size == 0 or freq.shape != d.shape:
+        raise ValueError(
+            "'frequencies' and 'diffusion' must be non-empty, 1-D and "
+            "equal-length."
+        )
+    d_n: Real | None = None
+    if normalized is not None:
+        d_n = np.atleast_1d(np.asarray(normalized, dtype=np.float64))
+        if d_n.shape != freq.shape:
+            raise ValueError(
+                "'normalized' must match 'frequencies' in length."
+            )
+    return DiffusionSpectrum(
+        frequencies=freq,
+        diffusion=d,
+        normalized=d_n,
+    )
 
 
 def directional_diffusion(

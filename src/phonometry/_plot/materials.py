@@ -35,7 +35,11 @@ if TYPE_CHECKING:
         DiffuseFieldAbsorptionResult,
     )
     from ..materials.road_absorption import InsituAbsorptionResult
-    from ..materials.scattering_diffusion import DiffusionResult, ScatteringResult
+    from ..materials.scattering_diffusion import (
+        DiffusionResult,
+        DiffusionSpectrum,
+        ScatteringResult,
+    )
 
 _FREQ_LABEL = "Frequency [Hz]"
 
@@ -57,6 +61,10 @@ _STRINGS: dict[str, str] = {
     "Random-incidence scattering coefficient (ISO 17497-1)":
         "Coeficiente de dispersión de incidencia aleatoria (ISO 17497-1)",
     "Diffusion coefficient d = ": "Coeficiente de difusión d = ",
+    "Directional diffusion coefficient (ISO 17497-2)":
+        "Coeficiente de difusión direccional (ISO 17497-2)",
+    "Reflected sound-pressure level L [dB]":
+        "Nivel de presión acústica reflejado L [dB]",
     "Absorption coefficient": "Coeficiente de absorción",
     "In-situ road-surface absorption (ISO 13472-1)":
         "Absorción in situ de pavimentos (ISO 13472-1)",
@@ -242,6 +250,139 @@ def plot_diffusion_polar(
         f"{format_number(float(result.coefficient), language, decimals=2)} "
         "(ISO 17497-2)"
     )
+    return cast("Axes", ax)
+
+def plot_scattering_report(
+    result: "ScatteringResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
+) -> Axes:
+    """Scattering coefficient ``s`` and ``alpha_s`` on a categorical band axis.
+
+    The report-fiche variant of :func:`plot_scattering_coefficient`: the bands
+    sit on evenly spaced positions with nominal labels (``_band_axis``) instead
+    of a base-10 log axis, so the embedded fiche figure lines up band-for-band
+    with the value table beside it. The area under ``s`` is a pale, fully opaque
+    fill drawn below the curves (svglib drops alpha when it vectorises the SVG,
+    so a translucent fill would print as a flat block).
+
+    :param result: A :class:`~phonometry.scattering_diffusion.ScatteringResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the scattering-curve ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    s = np.asarray(result.scattering, dtype=np.float64)
+    a_s = np.asarray(result.random_incidence, dtype=np.float64)
+    positions = _band_axis(
+        ax, freqs, xlabel=_t("Frequency [Hz]", language), language=language
+    )
+    ax.fill_between(
+        positions, 0.0, np.clip(s, 0.0, None),
+        color=_C_PRIMARY_LIGHT, edgecolor="none", zorder=1,
+    )
+    ax.plot(
+        positions, a_s, marker="s", ms=4, color=_C_MUTED, zorder=3,
+        label=r"$\alpha_s$",
+    )
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.plot(positions, s, ms=4, zorder=3, label=r"$s$", **kwargs)
+    ax.set_ylabel(_t("Coefficient", language))
+    top = max(1.05, float(np.nanmax(s)) * 1.05) if s.size else 1.05
+    ax.set_ylim(0.0, top)
+    ax.set_title(
+        _t("Random-incidence scattering coefficient (ISO 17497-1)", language)
+    )
+    ax.grid(True, axis="y", alpha=0.3)
+    _localize_band_axes(ax, language)
+    return ax
+
+def plot_diffusion_report(
+    result: "DiffusionSpectrum", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
+) -> Axes:
+    """Directional diffusion coefficient ``d(f)`` on a categorical band axis.
+
+    The report-fiche figure of a :class:`DiffusionSpectrum`: the per-band
+    directional (and, when present, normalised) diffusion coefficient over the
+    one-third-octave bands, drawn on evenly spaced band positions with nominal
+    labels (``_band_axis``, not a base-10 log axis) so the curve lines up with
+    the value table. The area under ``d`` is a pale, fully opaque fill below the
+    curves (svglib drops alpha on vectorisation).
+
+    :param result: A
+        :class:`~phonometry.scattering_diffusion.DiffusionSpectrum`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``d(f)`` curve ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    d = np.asarray(result.diffusion, dtype=np.float64)
+    positions = _band_axis(
+        ax, freqs, xlabel=_t("Frequency [Hz]", language), language=language
+    )
+    ax.fill_between(
+        positions, 0.0, np.clip(d, 0.0, None),
+        color=_C_PRIMARY_LIGHT, edgecolor="none", zorder=1,
+    )
+    if result.normalized is not None:
+        d_n = np.asarray(result.normalized, dtype=np.float64)
+        ax.plot(
+            positions, d_n, marker="s", ms=4, color=_C_MUTED, zorder=3,
+            label=r"$d_n$",
+        )
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.plot(positions, d, ms=4, zorder=3, label=r"$d$", **kwargs)
+    ax.set_ylabel(_t("Coefficient", language))
+    ax.set_ylim(0.0, 1.05)
+    ax.set_title(
+        _t("Directional diffusion coefficient (ISO 17497-2)", language)
+    )
+    ax.grid(True, axis="y", alpha=0.3)
+    _localize_band_axes(ax, language)
+    return ax
+
+def plot_diffusion_polar_report(
+    result: "DiffusionResult", ax: Axes | None = None, language: str = "en",
+    **kwargs: Any
+) -> Axes:
+    """Polar reflected-level response for the diffusion fiche (opaque fill).
+
+    The report-fiche variant of :func:`plot_diffusion_polar`: identical polar
+    geometry, but the enclosed area is a pale, fully opaque fill below the curve
+    (svglib drops alpha when it vectorises the SVG). The axes must be polar; the
+    fiche renderer creates one for it.
+
+    :param result: A :class:`~phonometry.scattering_diffusion.DiffusionResult`.
+    :param ax: Existing polar axes, or ``None`` to create one.
+    :param kwargs: Forwarded to the reflected-level curve ``plot`` call.
+    :return: The polar axes.
+    """
+    if ax is None:
+        plt = _import_pyplot()
+        _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+    angles_deg = np.asarray(result.angles, dtype=np.float64)
+    angles = np.radians(angles_deg)
+    levels = np.asarray(result.levels, dtype=np.float64)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.fill(angles, levels, color=_C_PRIMARY_LIGHT, edgecolor="none", zorder=1)
+    ax.plot(angles, levels, ms=4, zorder=3, **kwargs)
+    # The theta-orientation setters live on the polar axes, not the base Axes.
+    polar_ax: Any = ax
+    polar_ax.set_theta_zero_location("N")
+    polar_ax.set_theta_direction(-1)
+    if angles_deg.size and float(np.nanmin(angles_deg)) >= -90.0 and \
+            float(np.nanmax(angles_deg)) <= 90.0:
+        polar_ax.set_thetamin(-90)
+        polar_ax.set_thetamax(90)
+    ax.set_title(_t("Directional diffusion coefficient (ISO 17497-2)", language))
+    from .._i18n import localize_axes
+
+    localize_axes(ax, language)
     return cast("Axes", ax)
 
 def plot_insitu_absorption(

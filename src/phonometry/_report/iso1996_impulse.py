@@ -99,7 +99,7 @@ def _governing_index(per_impulse: np.ndarray, qualifies: np.ndarray) -> int:
     result's own governing value).
     """
     if np.any(qualifies):
-        idx = np.where(qualifies)[0]
+        idx = np.nonzero(qualifies)[0]
         return int(idx[int(np.argmax(per_impulse[idx]))])
     return int(np.argmax(per_impulse))
 

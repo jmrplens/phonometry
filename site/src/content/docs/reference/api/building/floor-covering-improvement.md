@@ -151,6 +151,51 @@ Plot the improvement spectrum `ΔL` (with `ΔLw` when available).
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### FloorCoveringImprovementResult.report()
+
+```python
+FloorCoveringImprovementResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ISO 16251-1 impact-improvement test-report fiche to a PDF.
+
+Writes a one-page accredited report (BS EN ISO 16251-1:2014, the
+small-mock-up laboratory method for the reduction of transmitted impact
+sound by soft floor coverings): the standard-basis line, an optional
+metadata header block, a two-panel body with the per-band table
+(frequency and the reduction of impact sound pressure level `ΔL`,
+bands at the 1,3 dB limit of measurement prefixed `>`) beside the
+`ΔL(f)` improvement curve, a boxed single-number weighted improvement
+`ΔLw (CI,Δ)` (ISO 717-2, the Clause 8 e) statement of results; a
+characterisation headline replaces it when the spectrum lacks the 16
+rating bands 100-3150 Hz), an optional verdict row and a footer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche whose header shows only the measured frequency range. The applicable descriptive fields are `client`, `manufacturer`, `specimen` (the floor covering under test), `mounting`, `mass_per_area`, `test_room`, `test_date`, `temperature`, `pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The bare reference floor is the standardised heavyweight floor of ISO 717-2:2020 Table 4, fixed by the standard. When `requirement` is set the fiche adds a verdict row (a higher weighted improvement is better, so the result passes at or above the requirement). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the per-band table gains the reference-floor-with-covering column `Ln,r = Ln,r,0 - ΔL` (ISO 717-2:2020 Formula (1)), the derivation basis of `ΔLw`, when the spectrum is exactly the 16 rating bands 100-3150 Hz. |
+| `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
 ## impact_improvement
 
 ```python

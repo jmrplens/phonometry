@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `FloorCoveringImprovementResult.report()`: a one-page PDF floor-covering
+  impact-improvement test-report fiche rendered through the shared
+  accredited-report engine (BS EN ISO 16251-1:2014, the small-mock-up
+  laboratory method for the reduction of transmitted impact sound by soft floor
+  coverings). The sheet carries the standard-basis line, an optional metadata
+  header (client, floor-covering description, mounting, mass per unit area, the
+  measured frequency range, climate), the one-third-octave table of the
+  reduction of impact sound pressure level `ΔL` (bands at the 1,3 dB limit of
+  measurement prefixed `>`) beside the `ΔL(f)` improvement curve, and the boxed
+  single-number weighted improvement `ΔLw (CI,Δ)` (the ISO 16251-1 Clause 8 e)
+  statement of results, rated per ISO 717-2:2020; a characterisation headline
+  replaces it when the spectrum lacks the 16 rating bands 100 Hz to 3150 Hz). A
+  minimum weighted improvement supplied via the metadata `requirement` adds a
+  PASS/FAIL verdict (a higher weighted improvement passes). `verbose=True` adds
+  the reference-floor-with-covering column `Ln,r = Ln,r,0 - ΔL` (the ISO 717-2
+  derivation basis of `ΔLw`); `language="es"` renders the Spanish fiche.
 - `ToneAudibilityResult.report()`: a one-page PDF tonal audibility assessment
   fiche rendered through the shared accredited-report engine, following the
   ISO 1996-2:2017 Annex J engineering method (ISO/PAS 20065:2016). The sheet

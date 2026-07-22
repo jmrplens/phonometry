@@ -105,6 +105,32 @@ y = broadcast.k_weighting(np.random.default_rng(0).standard_normal(48000),
                           48000)              # la propia señal filtrada
 ```
 
+`k_weighting_response` evalúa esos mismos biquads como función de
+transferencia y devuelve un `KWeightingResponse` inmutable que lleva la
+magnitud combinada (`magnitude_db`) y las dos etapas (`shelf_db`,
+`highpass_db`) sobre una rejilla de frecuencia logarítmica; su `.plot()`
+dibuja la respuesta, con el realce de cabeza esférica de +4 dB y la caída
+del paso alto RLB:
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/k_weighting_response_es.svg"
+  alt="Respuesta en frecuencia de magnitud de la ponderación K en un eje de frecuencia logarítmico: la curva azul combinada cae por debajo de unos pocos cientos de hercios a través del paso alto RLB y sube hasta una meseta de +4 dB por encima de 2 kHz fijada por el realce de cabeza esférica, con las dos etapas dibujadas como curvas acompañantes tenues"
+  width="96%"
+/>
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import broadcast
+
+broadcast.k_weighting_response(48000).plot(language="es")
+plt.show()
+```
+
+</details>
+
 ## 2. Las puertas y la sonoridad de programa
 
 La sonoridad **integrada** (de programa) divide la medición en bloques de

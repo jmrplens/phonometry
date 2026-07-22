@@ -86,6 +86,16 @@ def test_piston_impedance_es() -> None:
         res.plot(language="xx")
 
 
+def test_piston_directivity_es() -> None:
+    res = ph.piston_directivity_pattern([3.0, 8.0, 16.0])
+    ax = res.plot(language="es")
+    assert ax.name == "polar"
+    assert ax.get_title() == "Directividad de un pistón circular con pantalla"
+    plt.close("all")
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
 def _loudspeaker() -> ph.electroacoustics.LoudspeakerCharacteristics:
     f = np.geomspace(30.0, 24000.0, 200)
     spl = 87.0 - 10 * np.log10(1 + (50.0 / f) ** 6) - 10 * np.log10(1 + (f / 16000.0) ** 7)

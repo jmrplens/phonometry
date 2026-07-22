@@ -82,6 +82,32 @@ value (Beranek & Mellow Eq. (4.42)), normalized so `D(0) = 1`.
 
 **Returns:** `D` (float for scalar inputs, else an array).
 
+## piston_directivity_pattern
+
+```python
+piston_directivity_pattern(
+    ka: ArrayLike,
+    angles: ArrayLike | None = None,
+) -> PistonDirectivity
+```
+
+Far-field directivity pattern of one or more baffled circular pistons.
+
+Samples the directivity `D(theta) = 2 J1(ka sin theta) / (ka sin theta)`
+(Beranek & Mellow Eq. (4.42)) at every `ka` over a polar-angle grid and
+bundles it into a [`PistonDirectivity`](/phonometry/reference/api/electroacoustics/piston/#pistondirectivity) that exposes `.plot()`. The
+main lobe narrows as `ka` grows; its first null appears once `ka` passes
+the first zero of `J1` (`ka sin theta = 3.8317`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ka` | Wavenumber-radius product(s) `ka` (scalar or 1-D array), each non-negative. |
+| `angles` | Polar angles `theta` from the axis, rad (1-D). `None` (default) uses 361 points spanning the front hemisphere `-90 deg` to `+90 deg`, 0.5 deg apart. |
+
+**Returns:** A [`PistonDirectivity`](/phonometry/reference/api/electroacoustics/piston/#pistondirectivity).
+
 ## piston_reactance
 
 ```python
@@ -122,6 +148,63 @@ rises as `x^2 / 8 = (ka)^2 / 2` at low `x` and tends to 1 at high `x`.
 | `x` | Argument `x = 2ka` (scalar or array), dimensionless. |
 
 **Returns:** `R1(x)` (float for scalar input, else an array).
+
+## PistonDirectivity
+
+```python
+PistonDirectivity(
+    angles: np.ndarray,
+    ka: np.ndarray,
+    directivity: np.ndarray,
+    directivity_db: np.ndarray,
+)
+```
+
+Far-field directivity pattern of a baffled circular piston.
+
+Bundles the far-field directivity
+`D(theta) = 2 J1(ka sin theta) / (ka sin theta)` (Beranek & Mellow
+Eq. (4.42)) of one or more baffled circular pistons over a shared
+polar-angle grid, so the classic beam pattern can be drawn with
+`plot`. The maths is [`piston_directivity`](/phonometry/reference/api/electroacoustics/piston/#piston_directivity); this is a thin,
+plottable bundle around it.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `angles` | Polar angles `theta` from the axis, rad. |
+| `ka` | Wavenumber-radius products `ka`, one per pattern (a 1-D array). |
+| `directivity` | Linear directivity `D(theta)`, normalized so `D(0) = 1`, as a `(len(ka), len(angles))` array; row `i` is the pattern for `ka[i]`. |
+| `directivity_db` | Directivity in dB, `20 log10 \|D\|`, same shape as `directivity` (the side-lobe nulls floor at a large negative value rather than `-inf`). |
+
+### PistonDirectivity.plot()
+
+```python
+PistonDirectivity.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the far-field directivity (beam) pattern on a polar axes.
+
+Draws the directivity in dB against the polar angle: one curve per
+`ka` value as a single family (still one concept, the directivity
+pattern). A polar axes is created when `ax` is `None`. Requires
+matplotlib (`pip install phonometry[plot]`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing (polar) axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the per-`ka` `Axes.plot` calls. |
+
+**Returns:** The axes.
 
 ## radiating_piston
 

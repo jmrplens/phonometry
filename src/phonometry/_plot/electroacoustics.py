@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from ..electroacoustics.frequency_response import FrequencyResponseResult
     from ..electroacoustics.loudspeaker import LoudspeakerCharacteristics
     from ..electroacoustics.microphone import MicrophoneCharacteristics
-    from ..electroacoustics.piston import RadiatingPistonResult
+    from ..electroacoustics.piston import PistonDirectivity, RadiatingPistonResult
     from ..electroacoustics.swept_sine import SweptSineDistortionResult
 
 #: Shared frequency-axis label of the electroacoustics renderers.
@@ -45,6 +45,9 @@ _C_TOL_BAND = _C_PRIMARY_LIGHT
 _OHM_TEXT = "Ω"
 #: IEC 60263 clause 3 polar reference-circle span, in dB (radius = 25 dB).
 _POLAR_SPAN_DB = 25.0
+#: Radial span of the baffled-piston beam pattern, in dB (40 dB keeps the first
+#: side lobes of a narrow high-``ka`` main lobe on scale below the 0 dB axis).
+_POLAR_SPAN_PISTON_DB = 40.0
 #: Ordinate span of the loudspeaker on-axis response panel, in dB (a multiple of
 #: 25 keeps the IEC 60263 25 dB-per-decade grid on whole gridlines).
 _RESPONSE_SPAN_LSP = 50.0
@@ -75,6 +78,7 @@ _STRINGS: dict[str, str] = {
     "$X_1$ (reactance)": "$X_1$ (reactancia)",
     r"Normalized radiation impedance $Z_r / \rho c S$": r"Impedancia de radiación normalizada $Z_r / \rho c S$",
     "Baffled circular piston radiation impedance": "Impedancia de radiación de un pistón circular con pantalla",
+    "Baffled circular piston directivity": "Directividad de un pistón circular con pantalla",
     # --- IEC 60268-4/-5 datasheet panels (shared by .report() and .plot()) ---
     "Sound pressure level [dB]": "Nivel de presión sonora [dB]",
     "On-axis response": "Respuesta en el eje",
@@ -338,6 +342,61 @@ def plot_piston_impedance(
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
+
+
+def plot_piston_directivity(
+    result: "PistonDirectivity", ax: Any | None = None, *,
+    language: str = "en", **kwargs: Any
+) -> "Axes":
+    """Far-field directivity (beam) pattern of a baffled circular piston.
+
+    Draws the directivity in dB against the polar angle on a polar axes: one
+    curve per ``ka`` in the result, shown as a single family (the directivity
+    pattern). The on-axis level is the 0 dB reference at the top; the main lobe
+    narrows and the first side lobes appear as ``ka`` grows.
+
+    :param result: A
+        :class:`~phonometry.electroacoustics.piston.PistonDirectivity`.
+    :param ax: Existing polar axes, or ``None`` to create a polar figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the per-``ka`` ``Axes.plot`` calls.
+    :return: The (polar) axes.
+    """
+    from .._i18n import decimal_comma, localize_axes
+
+    ax = ax if ax is not None else _new_polar_axes()
+    theta = np.asarray(result.angles, dtype=np.float64)
+    ka = np.asarray(result.ka, dtype=np.float64)
+    levels = np.clip(
+        np.asarray(result.directivity_db, dtype=np.float64),
+        -_POLAR_SPAN_PISTON_DB, 0.0,
+    )
+    colors = (_C_PRIMARY, _C_SECONDARY, _C_TERTIARY, _C_REFERENCE, _C_EDGE)
+    # Axis (theta = 0) points up; positive angles swing clockwise so the front
+    # hemisphere (the baffle blocks the rear) fills the upper half-disk.
+    ax.set_theta_zero_location("N")
+    ax.set_theta_direction(-1)
+    ax.set_thetamin(-90.0)
+    ax.set_thetamax(90.0)
+    for i, ka_value in enumerate(ka):
+        label = f"$ka$ = {decimal_comma(f'{ka_value:.3g}', language)}"
+        line_kwargs: dict[str, Any] = {
+            "color": colors[i % len(colors)], "lw": 1.6, "label": label,
+        }
+        line_kwargs.update(kwargs)
+        ax.plot(theta, levels[i], **line_kwargs)
+    ax.set_ylim(-_POLAR_SPAN_PISTON_DB, 0.0)
+    ax.set_yticks([-40.0, -30.0, -20.0, -10.0, 0.0])
+    ax.set_yticklabels(["-40", "-30", "-20", "-10", "0 dB"], fontsize="x-small")
+    ax.tick_params(axis="x", labelsize="x-small")
+    ax.grid(True, ls=":", lw=0.4, alpha=0.7)
+    ax.set_title(_t("Baffled circular piston directivity", language))
+    if ka.size > 1:
+        ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.12),
+                  ncol=min(ka.size, 3), fontsize="small")
+    localize_axes(ax, language)
+    axes: Axes = ax
+    return axes
 
 
 # ---------------------------------------------------------------------------

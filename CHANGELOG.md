@@ -17,6 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   grid. Its `.plot()` draws the response on a logarithmic frequency axis, the
   combined curve with the two stages as light companions; `language="es"`
   renders the Spanish labels.
+- `piston_directivity_pattern()` and the `PistonDirectivity` result: the
+  far-field directivity of a rigid baffled circular piston
+  (`D(theta) = 2 J1(ka sin theta)/(ka sin theta)`, Beranek & Mellow Eq. (4.42))
+  is now a plottable result carrying the polar-angle grid, the linear
+  directivity and its dB form and the `ka` value(s). Its `.plot()` draws the
+  classic polar beam pattern in dB over the front hemisphere; passing several
+  `ka` shows them as one family, so the main lobe narrowing and the emergence
+  of the side lobes read at a glance. `language="es"` renders the Spanish
+  labels. The underlying `piston_directivity()` maths is unchanged.
 - `TrendTestResult.plot()`: a one-line canonical figure for the nonparametric
   trend test (Bendat & Piersol, *Random Data* Sec. 4.5.2), mirroring the
   companion `StationarityTestResult.plot()`. It draws the tested sequence

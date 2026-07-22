@@ -404,8 +404,10 @@ from .electroacoustics.microphone import (
     microphone_characteristics,
 )
 from .electroacoustics.piston import (
+    PistonDirectivity,
     RadiatingPistonResult,
     piston_directivity,
+    piston_directivity_pattern,
     piston_reactance,
     piston_resistance,
     radiating_piston,
@@ -1139,7 +1141,9 @@ __all__ = [
     "piston_resistance",
     "piston_reactance",
     "piston_directivity",
+    "piston_directivity_pattern",
     "RadiatingPistonResult",
+    "PistonDirectivity",
     "loudspeaker_characteristics",
     "LoudspeakerCharacteristics",
     "microphone_characteristics",

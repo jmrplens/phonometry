@@ -403,6 +403,37 @@ mecánicas, la `radiation_mass`, el `directivity_index`, el patrón de campo lej
 invocables directamente. El pistón es el modelo de radiador complementario de los
 [silenciadores de control de ruido industrial](/phonometry/es/guides/noise-control/).
 
+El **patrón de directividad** es, por sí mismo, un resultado representable:
+`piston_directivity_pattern(ka)` muestrea $D(\theta)$ para uno o varios valores
+de $ka$ y devuelve un `PistonDirectivity` (la malla de ángulos polares, la
+`directivity` lineal y su forma en dB `directivity_db`, y los valores de `ka`),
+cuyo `.plot()` dibuja el diagrama de haz clásico. Varios $ka$ se muestran como
+una familia sobre los mismos ejes polares, de modo que el estrechamiento del
+lóbulo principal y la aparición de los lóbulos secundarios se leen de un vistazo:
+
+```python
+from phonometry import piston_directivity_pattern
+
+pattern = piston_directivity_pattern([3.0, 8.0, 16.0])
+print(pattern.directivity_db.shape)  # (3, 361): una fila por ka
+pattern.plot()                       # diagrama de haz polar en dB (necesita matplotlib)
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/piston_directivity_es.svg" alt="Directividad de campo lejano en polar de un pistón circular con pantalla para ka de 3, 8 y 16 sobre el hemisferio frontal, con el nivel en el eje arriba como referencia de 0 dB, que muestra el estrechamiento del lóbulo principal y la aparición de los lóbulos secundarios al crecer ka" width="72%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import piston_directivity_pattern
+
+piston_directivity_pattern([3.0, 8.0, 16.0]).plot()
+plt.show()
+```
+
+</details>
+
 ## 7. Informe de características del altavoz (IEC 60268-5)
 
 Las características nominales que IEC 60268-5 define en torno a una respuesta en

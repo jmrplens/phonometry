@@ -4062,6 +4062,16 @@ def generate_swept_sine_thd(output_dir: str) -> None:
     plt.close()
 
 
+def generate_piston_directivity(output_dir: str) -> None:
+    """Far-field beam pattern of a baffled circular piston at three ka values."""
+    print("Generating piston_directivity...")
+    from phonometry import piston_directivity_pattern
+
+    piston_directivity_pattern([3.0, 8.0, 16.0]).plot(language=_LANG)
+    save_figure(output_dir, "piston_directivity.svg")
+    plt.close()
+
+
 def _loudspeaker_datasheet_example() -> Any:
     """The IEC 60268-5 loudspeaker result shared by the section-7 .plot() figures."""
     from phonometry import loudspeaker_characteristics, radiating_piston
@@ -8873,6 +8883,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Swept-sine harmonic separation: THD(f) by order from one synchronized
     # sweep (Farina 2000 / Novak et al. 2015).
     generate_swept_sine_thd,
+    # Far-field directivity (beam) pattern of a baffled circular piston.
+    generate_piston_directivity,
     # Single-concept rated-characteristic .plot() figures, sharing their panel
     # drawing with the .report() fiches (IEC 60268-5 loudspeaker, IEC 60268-4
     # microphone).

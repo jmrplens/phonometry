@@ -327,6 +327,36 @@ pattern (when `angles` are given) and `.plot()`. The building blocks
 callable directly. The piston is the companion radiator of the
 [industrial noise-control silencers](noise-control.md).
 
+The far-field **directivity pattern** is a plottable result in its own right:
+`piston_directivity_pattern(ka)` samples `D(theta)` at one or more `ka` values
+and returns a `PistonDirectivity` (the polar angle grid, the linear `directivity`
+and its dB form `directivity_db`, and the `ka` values) whose `.plot()` draws the
+classic polar beam pattern. Several `ka` are shown as one family, so the main
+lobe narrowing and the side lobes appearing read at a glance:
+
+```python
+from phonometry import piston_directivity_pattern
+
+pattern = piston_directivity_pattern([3.0, 8.0, 16.0])
+print(pattern.directivity_db.shape)  # (3, 361): one row per ka
+pattern.plot()                       # polar beam pattern in dB (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/piston_directivity_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/piston_directivity.svg" alt="Polar far-field directivity of a baffled circular piston at ka of 3, 8 and 16 over the front hemisphere, the on-axis level at the top as the 0 dB reference, showing the main lobe narrowing and the side lobes appearing as ka grows" width="72%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import piston_directivity_pattern
+
+piston_directivity_pattern([3.0, 8.0, 16.0]).plot()
+plt.show()
+```
+
+</details>
+
 ## References
 
 - Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and

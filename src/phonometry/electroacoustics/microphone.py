@@ -57,7 +57,7 @@ so the report never merely repeats a manufacturer number:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -65,6 +65,7 @@ from .._internal.validation import require_positive
 from .loudspeaker import _as_curve, _threshold_crossing
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._report.metadata import ReportMetadata
@@ -370,6 +371,38 @@ class MicrophoneCharacteristics:
 
         return render_iec60268_4_report(
             self, path, metadata=metadata, language=language
+        )
+
+    def plot(
+        self, quantity: str = "response", ax: "Axes | None" = None, *,
+        language: str = "en", **kwargs: Any,
+    ) -> "Axes":
+        """Plot one IEC 60268-4 microphone rated characteristic on one axes.
+
+        One concept per figure, drawn by the same shared renderer the
+        ``.report()`` fiche composes: ``"response"`` (the free-field response
+        with its tolerance band, reference-frequency and effective-range
+        markers, the default), ``"directivity"`` (the polar directional pattern
+        on the 25 dB reference circle), ``"noise"`` (the inherent-noise
+        band-level spectrum) and ``"distortion"`` (total harmonic distortion
+        against sound pressure level).
+
+        :param quantity: Which characteristic to plot (see above).
+        :param ax: Existing axes to draw on, or ``None`` for a fresh figure (a
+            polar axes is created for ``"directivity"``).
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :return: The axes the characteristic was drawn on.
+        :raises ValueError: If ``quantity`` or ``language`` is unknown, or the
+            result carries no data for ``quantity``.
+        :raises ImportError: If matplotlib is not installed
+            (``pip install phonometry[plot]``).
+        """
+        from .._i18n import check_language
+        from .._plot.electroacoustics import plot_microphone_characteristics
+
+        check_language(language)
+        return plot_microphone_characteristics(
+            self, quantity, ax=ax, language=language, **kwargs
         )
 
 

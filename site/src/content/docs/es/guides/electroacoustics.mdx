@@ -461,6 +461,114 @@ de la sección 6 y un resultado de
 [distorsión con barrido sinusoidal](/phonometry/es/guides/swept-sine-distortion/)
 para la curva de distorsión.
 
+Las características nominales también están disponibles de forma interactiva
+mediante `.plot()`, que dibuja **un concepto por figura** con el mismo código de
+paneles que compone el informe, seleccionado con `quantity`. Al pasar unos ejes
+se dibuja sobre ellos:
+
+```python
+result.plot()                        # respuesta en el eje (por defecto)
+result.plot(quantity="impedance")    # módulo |Z| con las líneas nominal / 80 %
+result.plot(quantity="thd")          # distorsión armónica total vs frecuencia
+result.plot(quantity="directivity")  # respuesta polar sobre el círculo de 25 dB
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudspeaker_response_es.svg" alt="Respuesta del nivel de presión sonora en el eje con su banda de tolerancia sombreada, la línea de referencia de -10 dB y los marcadores del rango efectivo sobre un eje de frecuencias nominales" width="82%" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import loudspeaker_characteristics
+
+freqs = np.geomspace(30, 24000, 320)
+spl = 87.0 + 1.2 * np.sin(2 * np.log2(freqs / 900.0))
+spl -= 10 * np.log10(1 + (50.0 / freqs) ** 6)       # caída en baja frecuencia
+spl -= 10 * np.log10(1 + (freqs / 16000.0) ** 7)    # caída en alta frecuencia
+
+result = loudspeaker_characteristics(freqs, spl, rated_impedance=8.0,
+                                     sensitivity_band=(200.0, 4000.0))
+result.plot()   # quantity="response" (por defecto)
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudspeaker_impedance_es.svg" alt="Módulo de impedancia del altavoz frente a la frecuencia con la línea de impedancia nominal y la línea del 80 % de la nominal" width="82%" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import loudspeaker_characteristics
+
+freqs = np.geomspace(30, 24000, 320)
+spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
+fz = np.geomspace(20, 20000, 260)
+
+result = loudspeaker_characteristics(
+    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    impedance=(fz, 6.6 + 24 * np.exp(-(np.log2(fz / 52.0) ** 2) / 0.12)),
+)
+result.plot(quantity="impedance")
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudspeaker_thd_es.svg" alt="Distorsión armónica total del altavoz en porcentaje frente a la frecuencia" width="82%" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import loudspeaker_characteristics
+
+freqs = np.geomspace(30, 24000, 320)
+spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
+thd_f = np.geomspace(50, 5000, 140)
+
+result = loudspeaker_characteristics(
+    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    distortion=(thd_f, 0.3 + 2.6 * np.exp(-(np.log2(thd_f / 70.0) ** 2) / 0.45)),
+)
+result.plot(quantity="thd")
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudspeaker_directivity_es.svg" alt="Respuesta direccional polar del altavoz a 2000 Hz sobre el círculo de referencia de 25 dB de IEC 60263" width="72%" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import loudspeaker_characteristics, radiating_piston
+
+freqs = np.geomspace(30, 24000, 320)
+spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
+
+result = loudspeaker_characteristics(
+    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    directivity=radiating_piston(0.075, np.array([1000.0, 2000.0, 4000.0]),
+                                 angles=np.radians(np.linspace(0, 90, 46))),
+    polar_frequency=2000.0,
+)
+result.plot(quantity="directivity")
+plt.show()
+```
+
+</details>
+
 La ficha de ejemplo se regenera con `make reports` y se conserva renderizada en
 el repositorio; pulsa la vista previa para abrir el PDF.
 
@@ -540,6 +648,113 @@ IEC 60263; el espectro de ruido inherente y la curva de distorsión frente a
 nivel (con el límite de THD y el nivel de sobrecarga marcados) alimentan los
 paneles secundarios. Un `requirement` en los metadatos se comprueba como nivel
 de ruido equivalente máximo permitido.
+
+Las características nominales también están disponibles de forma interactiva
+mediante `.plot()`, que dibuja **un concepto por figura** con el mismo código de
+paneles que compone el informe, seleccionado con `quantity`. Al pasar unos ejes
+se dibuja sobre ellos:
+
+```python
+result.plot()                        # respuesta de campo libre (por defecto)
+result.plot(quantity="directivity")  # diagrama polar sobre el círculo de 25 dB
+result.plot(quantity="noise")        # espectro de banda del ruido inherente
+result.plot(quantity="distortion")   # THD frente al nivel de presión sonora
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_response_es.svg" alt="Respuesta relativa de campo libre del micrófono con su banda de tolerancia sombreada, el marcador de la frecuencia de referencia y los marcadores del rango efectivo sobre un eje de frecuencias nominales" width="82%" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import microphone_characteristics
+
+freqs = np.geomspace(20, 20000, 400)
+response = -10 * np.log10(1 + (30.0 / freqs) ** 4)      # caída en baja frecuencia
+response -= 10 * np.log10(1 + (freqs / 19000.0) ** 8)   # caída en alta frecuencia
+response += 2.0 * np.exp(-(np.log2(freqs / 9000.0) ** 2) / 0.3)  # región de presencia
+
+result = microphone_characteristics(freqs, response, 12.5, tolerance_db=3.0)
+result.plot()   # quantity="response" (por defecto)
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_directivity_es.svg" alt="Diagrama direccional cardioide del micrófono a 1000 Hz sobre el círculo de referencia de 25 dB de IEC 60263" width="72%" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import microphone_characteristics
+
+freqs = np.geomspace(20, 20000, 400)
+response = -10 * np.log10(1 + (30.0 / freqs) ** 4)
+angles = np.linspace(0, 179, 359)
+cardioid = 20 * np.log10((1 + np.cos(np.radians(angles))) / 2)
+
+result = microphone_characteristics(
+    freqs, response, 12.5, tolerance_db=3.0,
+    polar=(angles, cardioid), polar_frequency=1000.0,
+)
+result.plot(quantity="directivity")
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_noise_es.svg" alt="Espectro de nivel de banda del ruido inherente del micrófono frente a la frecuencia" width="82%" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import microphone_characteristics
+
+freqs = np.geomspace(20, 20000, 400)
+response = -10 * np.log10(1 + (30.0 / freqs) ** 4)
+noise_f = np.geomspace(20, 20000, 31)
+
+result = microphone_characteristics(
+    freqs, response, 12.5, tolerance_db=3.0, noise_voltage=1.25e-6,
+    noise_spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
+)
+result.plot(quantity="noise")
+plt.show()
+```
+
+</details>
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/microphone_distortion_es.svg" alt="Distorsión armónica total del micrófono en porcentaje frente al nivel de presión sonora, con el límite de THD y el nivel de presión sonora de sobrecarga marcados" width="82%" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import microphone_characteristics
+
+freqs = np.geomspace(20, 20000, 400)
+response = -10 * np.log10(1 + (30.0 / freqs) ** 4)
+spl_axis = np.linspace(100, 140, 81)
+
+result = microphone_characteristics(
+    freqs, response, 12.5, tolerance_db=3.0, max_spl_thd_percent=0.5,
+    distortion=(spl_axis, 0.5 * 10 ** ((spl_axis - 130.0) * 0.08)),
+)
+result.plot(quantity="distortion")
+plt.show()
+```
+
+</details>
 
 La ficha de ejemplo se regenera con `make reports` y se conserva renderizada en
 el repositorio; pulsa la vista previa para abrir el PDF.

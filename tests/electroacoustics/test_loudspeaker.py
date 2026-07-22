@@ -282,6 +282,51 @@ def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
     assert "Impedancia nominal" in text
 
 
+def test_plot_each_quantity_returns_single_axes() -> None:
+    """Every quantity plots one concept on one axes; directivity is polar."""
+    matplotlib = pytest.importorskip("matplotlib")
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    result = _example_result()
+    # The default is the on-axis response.
+    assert result.plot().get_title() == "On-axis response"
+    plt.close("all")
+    for quantity in ("response", "impedance", "thd", "directivity"):
+        ax = result.plot(quantity=quantity)
+        assert not isinstance(ax, np.ndarray)
+        expected = "polar" if quantity == "directivity" else "rectilinear"
+        assert ax.name == expected
+        plt.close("all")
+
+
+def test_plot_on_external_axes_returns_it() -> None:
+    """Passing an axes draws on it and returns that same axes."""
+    matplotlib = pytest.importorskip("matplotlib")
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    _fig, ax = plt.subplots()
+    out = _example_result().plot(quantity="impedance", ax=ax)
+    assert out is ax
+    assert ax.get_title() == "Impedance"
+    plt.close("all")
+
+
+def test_plot_rejects_unknown_quantity_and_missing_data() -> None:
+    """An unknown quantity, and a quantity with no data, raise ValueError."""
+    matplotlib = pytest.importorskip("matplotlib")
+    matplotlib.use("Agg")
+
+    result = _example_result()
+    with pytest.raises(ValueError, match="unknown quantity"):
+        result.plot(quantity="bogus")
+    f, spl = _flat_response()
+    bare = loudspeaker_characteristics(f, spl, _R, sensitivity_band=(200.0, 4000.0))
+    with pytest.raises(ValueError, match="no impedance"):
+        bare.plot(quantity="impedance")
+
+
 def test_unknown_engine_rejected(tmp_path) -> None:
     """An unknown rendering engine raises ValueError."""
     result = _example_result()

@@ -148,9 +148,10 @@ def piston_directivity(ka: ArrayLike, theta: ArrayLike) -> np.ndarray | float:
     return out[()] if out.ndim == 0 else out
 
 
-#: Default polar-angle grid of the directivity pattern: the front hemisphere
-#: ``-90 deg`` to ``+90 deg`` (the baffle blocks the rear), 1 deg apart, so the
-#: mirrored beam pattern is smooth even for a narrow high-``ka`` main lobe.
+#: Default polar-angle grid of the directivity pattern: 361 points spanning the
+#: front hemisphere ``-90 deg`` to ``+90 deg`` (the baffle blocks the rear),
+#: 0.5 deg apart, so the beam pattern is smooth even for a narrow high-``ka``
+#: main lobe.
 _DEFAULT_DIRECTIVITY_ANGLES = np.radians(np.linspace(-90.0, 90.0, 361))
 
 
@@ -216,8 +217,8 @@ def piston_directivity_pattern(
     :param ka: Wavenumber-radius product(s) ``ka`` (scalar or 1-D array), each
         non-negative.
     :param angles: Polar angles ``theta`` from the axis, rad (1-D). ``None``
-        (default) uses the front hemisphere ``-90 deg`` to ``+90 deg``, 1 deg
-        apart.
+        (default) uses 361 points spanning the front hemisphere ``-90 deg`` to
+        ``+90 deg``, 0.5 deg apart.
     :return: A :class:`PistonDirectivity`.
     """
     ka_arr = np.atleast_1d(np.asarray(ka, dtype=np.float64))

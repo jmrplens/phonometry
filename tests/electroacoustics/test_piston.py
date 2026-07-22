@@ -121,8 +121,9 @@ def test_result_shapes_and_plot() -> None:
 
 
 def test_directivity_pattern_result_and_properties() -> None:
-    # Default grid is the front hemisphere -90 deg .. +90 deg, one per degree.
+    # Default grid is 361 points over the front hemisphere -90 deg .. +90 deg.
     res = piston_directivity_pattern([3.0, 8.0])
+    assert res.angles.size == 361
     assert isinstance(res, PistonDirectivity)
     assert res.ka.shape == (2,)
     assert res.directivity.shape == (2, res.angles.size)
@@ -165,12 +166,16 @@ def test_directivity_pattern_plot() -> None:
 
 
 def test_directivity_pattern_validation() -> None:
+    # Build the arguments up front so only the throwing call sits in each block.
+    ka_one = [1.0]
+    infinite_angles = [np.inf]
+    empty_ka = np.empty(0)
     with pytest.raises(ValueError):
         piston_directivity_pattern(-1.0)
     with pytest.raises(ValueError):
-        piston_directivity_pattern([1.0], angles=[np.inf])
+        piston_directivity_pattern(ka_one, angles=infinite_angles)
     with pytest.raises(ValueError):
-        piston_directivity_pattern(np.empty(0))
+        piston_directivity_pattern(empty_ka)
 
 
 def test_validation() -> None:

@@ -104,7 +104,7 @@ the first zero of `J1` (`ka sin theta = 3.8317`).
 | Name | Description |
 | :--- | :--- |
 | `ka` | Wavenumber-radius product(s) `ka` (scalar or 1-D array), each non-negative. |
-| `angles` | Polar angles `theta` from the axis, rad (1-D). `None` (default) uses the front hemisphere `-90 deg` to `+90 deg`, 1 deg apart. |
+| `angles` | Polar angles `theta` from the axis, rad (1-D). `None` (default) uses 361 points spanning the front hemisphere `-90 deg` to `+90 deg`, 0.5 deg apart. |
 
 **Returns:** A [`PistonDirectivity`](/phonometry/reference/api/electroacoustics/piston/#pistondirectivity).
 

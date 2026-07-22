@@ -57,6 +57,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 #: Reference absorption area ``A₀`` (Formulas 8, 14), in m².
 _A0 = 10.0
 #: Reference area ``S₀`` (Formula 2), in m².
@@ -176,6 +178,67 @@ class FacadePredictionResult:
 
         check_language(language)
         return plot_facade_prediction(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a predicted façade sound insulation report to a PDF (EN 12354-3).
+
+        Writes a one-page **prediction** report for the predicted standardized
+        level difference of a façade ``D2m,nT`` estimated by the EN/ISO
+        12354-3:2000 model (Formula 13): a standard-basis line that states the
+        sheet is a prediction from element data and not a measurement, an
+        optional metadata header block, a two-panel body with the façade-element
+        table (each element's weighted partial index ``Rp,w``) beside the
+        per-element partial-index and ``R'`` / ``D2m,nT`` plot, the boxed
+        predicted rating ``D2m,nT,w``, the prediction statement and, when a
+        requirement is supplied, a PASS/FAIL verdict (the level difference
+        passes at or above the requirement), followed by a footer.
+
+        The applicable :class:`~phonometry.ReportMetadata` fields describe the
+        predicted situation: ``specimen`` (the façade element set), ``area``
+        (the exposed façade area ``S``), ``receiving_volume`` (the receiving
+        room volume ``V``), ``test_room`` (the traffic / outdoor situation),
+        ``client``, ``manufacturer``, ``measurement_standard``, ``laboratory``
+        (the calculator / laboratory), ``operator``, ``report_id`` and
+        ``test_date``. A summary of the façade shape (``ΔLfs``) and the model
+        assumptions is recorded in ``notes`` (free text), and ``requirement``
+        supplies the target ``D2m,nT,w``.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a lightweight fiche (body, rating, statement, disclaimer).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the element table also shows each
+            element's share of the transmitted sound energy.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is unknown, ``language`` is not
+            supported, or the result lacks the ISO 717-1 single-number ratings
+            (build it on the 5 octave or 16 one-third-octave bands).
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``), or matplotlib is missing for
+            the embedded figure (``pip install phonometry[plot]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is "
+                "supported."
+            )
+        from .._report.iso12354 import render_iso12354_facade_report
+
+        return render_iso12354_facade_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 @dataclass(frozen=True)

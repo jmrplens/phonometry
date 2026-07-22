@@ -29,6 +29,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   A-weighted total). The fiche reuses the shared sound-power body (per-band
   table, `LW(f)` spectrum, boxed `LWA` and flow assembly) already used by the
   ISO 3744/3745/3741/9614 fiches.
+- `FacadePredictionResult.report()`: a one-page PDF **prediction** report for
+  the predicted façade sound insulation (EN/ISO 12354-3 standardized level
+  difference of a façade `D2m,nT`), computed by energetically combining the
+  envelope elements' transmission factors and the room geometry (Formula 13).
+  The sheet is clearly labelled a prediction, never a measurement: a
+  standard-basis line naming EN/ISO 12354-3 and the ISO 717-1 rating, an
+  optional metadata header (façade element set, exposed area, receiving-room
+  volume, traffic/outdoor situation, calculator/laboratory, date), a two-panel
+  body with the façade-element table on the left (each element's weighted
+  partial index `Rp,w`) beside the result's own per-element / `R'` / `D2m,nT`
+  plot, the boxed predicted single number `D2m,nT,w` (with `R'tr,s,w` and
+  `Ctr`) and a statement reporting the model's ~2 dB standard deviation. A
+  supplied requirement adds a PASS/FAIL verdict (the level difference passes at
+  or above it); `verbose=True` annexes each element's share of the transmitted
+  sound energy, which singles out the limiting element; `language="es"` renders
+  the Spanish fiche. The fiche reuses the shared EN/ISO 12354 prediction report
+  layout (`phonometry[report]` extra).
 - `ReverberationSoundPowerResult.report()`: a one-page PDF reverberation-room
   sound-power determination fiche for the precision method in a qualified
   hard-walled reverberation test room (ISO 3741:2010, accuracy grade 1),

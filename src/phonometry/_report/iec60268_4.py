@@ -38,7 +38,6 @@ from typing import TYPE_CHECKING, Any, List, Tuple
 
 import numpy as np
 
-from .._plot.electroacoustics import _RESPONSE_SPAN_MIC
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -202,6 +201,7 @@ def _response_drawing(
     ax = fig.subplots()
     _draw_microphone_response(result, ax, language=language)
     decades = np.log10(float(np.max(f)) / float(np.min(f)))
+    from .._plot.electroacoustics import _RESPONSE_SPAN_MIC
     ax.set_box_aspect(_RESPONSE_SPAN_MIC / (_DB_PER_DECADE * decades))
     fig.tight_layout()
     return _drawing_from_figure(fig, target_width, language)

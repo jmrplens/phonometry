@@ -4143,6 +4143,44 @@ for effort in hearing.sii.VOCAL_EFFORTS:
 print(hearing.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 ```
 
+The four spectra are also available as one plottable result:
+`standard_speech_spectra()` returns a `StandardSpeechSpectrum` carrying the band
+centre frequencies and the per-effort band levels, and its `.plot()` draws them
+as one labelled family on the one-third-octave band axis.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum.svg" alt="The four ANSI S3.5-1997 standard speech spectra (normal, raised, loud and shout) as one labelled family: the standard speech spectrum level in dB SPL over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum" width="90%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import hearing
+
+# One line: the whole ANSI S3.5-1997 Table 3 family.
+hearing.standard_speech_spectra().plot()
+plt.show()
+
+# By hand, mirroring what StandardSpeechSpectrum.plot() draws:
+res = hearing.standard_speech_spectra()
+pos = np.arange(res.frequencies.size)
+fig, ax = plt.subplots()
+for effort, levels in zip(res.vocal_efforts, res.levels):
+    ax.plot(pos, levels, "o-", label=effort.capitalize())
+ax.set_xticks(pos)
+ax.set_xticklabels([f"{f:g}" for f in res.frequencies], rotation=45, ha="right")
+ax.set_xlabel("One-third-octave band [Hz]")
+ax.set_ylabel("Speech spectrum level [dB SPL]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+The same four spectra feed the index: in a fixed broadband noise, each higher
+vocal effort lifts the speech spectrum and raises the SII.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.svg" alt="Two panels. Left: the four ANSI S3.5-1997 standard speech spectra (normal, raised, loud and shout) over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum. Right: the resulting Speech Intelligibility Index in a fixed broadband noise, rising from 0.12 (normal) through 0.36 and 0.59 to 0.79 (shout)" width="96%"></picture>
 
 <details>
@@ -12323,6 +12361,8 @@ cycle and warn on use; they are removed in 4.0.
 | `AbsorptionWarning` | `warning class` | **ISO 354 advisory.**<br>Emitted for a room below 150 m³, a sample area outside 10-12 m², an out-of-range temperature, or a non-physical α_s ≤ 0; the result still returns | `warnings.simplefilter('error', AbsorptionWarning)` |
 | `speech_intelligibility_index` | `function` | **Speech Intelligibility Index (ANSI S3.5-1997, one-third-octave method).**<br>• `speech_spectrum`: 18 equivalent speech spectrum levels, 160 Hz–8 kHz [dB SPL], or a vocal-effort name 'normal'/'raised'/'loud'/'shout' (Table 3)<br>• `noise_spectrum`: equivalent noise spectrum levels [dB SPL] (Default: None → quiet, −80 dB)<br>• `threshold`: equivalent hearing threshold [dB HL] (Default: None → 0) | `res = speech_intelligibility_index("normal", noise_spectrum=[40.0]*18)`<br><br>• `SIIResult`; `res.sii` = 0.066 |
 | `standard_speech_spectrum` | `function` | **Standard speech spectrum level by vocal effort (ANSI S3.5-1997 Table 3).**<br>• `vocal_effort`: 'normal', 'raised', 'loud' or 'shout' (Default: 'normal') | `u = standard_speech_spectrum('raised')`<br><br>• 18 band levels [dB SPL] |
+| `standard_speech_spectra` | `function` | **Plottable standard speech spectra by vocal effort (ANSI S3.5-1997 Table 3).**<br>• `vocal_efforts`: a name or sequence of 'normal'/'raised'/'loud'/'shout' (Default: the full family) | `res = standard_speech_spectra()`<br><br>• `StandardSpeechSpectrum`; `res.plot()` |
+| `StandardSpeechSpectrum` | `dataclass` | **Standard speech spectrum result.**<br>• `frequencies`: the 18 band centres [Hz]<br>• `vocal_efforts`: the efforts carried<br>• `levels`: `Ui` per effort, `(len(vocal_efforts), 18)` [dB SPL]<br>• `.plot()`: the speech spectrum level vs one-third-octave band, one line per effort | `res.levels, res.vocal_efforts` |
 | `SIIResult` | `dataclass` | **SII result.**<br>• `sii`: index in [0, 1]<br>• `band_audibility`: Ai per band (§5.8)<br>• `band_importance`: Ii (Table 3)<br>• `frequencies` [Hz]<br>• `speech_spectrum` / `disturbance` / `masking`: Ei′ / Di / Zi per band [dB]<br>• `.plot()` | `res.sii, res.band_audibility` |
 | `stoi` | `function` | **Short-time objective intelligibility STOI / ESTOI (Taal et al. 2011; Jensen & Taal 2016).**<br>• `clean`: clean reference (1D)<br>• `degraded`: degraded/processed signal (1D, same length)<br>• `fs` [Hz] (resampled to 10 kHz internally)<br>• `extended`: use ESTOI (Default: False) | `d = stoi(clean, degraded, fs)`<br><br>• `STOIResult`; `d.value` in ~[0, 1] (1 if identical) |
 | `STOIResult` | `dataclass` | **STOI / ESTOI result.**<br>• `value`: the intelligibility index<br>• `extended`: True for ESTOI<br>• `segment_scores`: per-segment intermediate<br>• `band_scores`: per-band mean correlation (STOI; None for ESTOI)<br>• `band_frequencies` [Hz]<br>• `sample_rate` (10 kHz)<br>• `.plot()` | `res.value, res.band_scores` |
@@ -12831,7 +12871,7 @@ cycle and warn on use; they are removed in 4.0.
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `octavefilter` / `getansifrequencies` / `normalizedfreq` / `calculate_sensitivity` / `coverage_factor` / `expanded_uncertainty` | `function` | **Deprecated aliases (warn on use; removal in 4.0).**<br>New names: `octave_filter`, `nominal_frequencies`, `normalized_frequencies`, `sensitivity`, `insulation_coverage_factor`, `insulation_expanded_uncertainty` | `octave_filter(x, fs)  # not octavefilter` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '3.2.0'` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `ReverberationSoundPowerResult`, `SoundPowerIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `ReverberationSoundPowerResult`, `SoundPowerIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 

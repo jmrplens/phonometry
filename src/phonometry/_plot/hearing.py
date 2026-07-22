@@ -14,6 +14,7 @@ from .common import (
     _C_REFERENCE,
     _C_SECONDARY,
     _C_SECONDARY_LIGHT,
+    _C_TERTIARY,
     _LEGEND_UPPER_RIGHT,
     _STI_BAND_CENTERS,
     _band_axis,
@@ -27,7 +28,7 @@ if TYPE_CHECKING:
     from ..hearing.occupational_exposure import ExposureResult
     from ..hearing.threshold import AgeThresholdResult
     from ..hearing.noise_induced_hearing_loss import HtlanResult, NiptsResult
-    from ..hearing.sii import SIIResult
+    from ..hearing.sii import SIIResult, StandardSpeechSpectrum
     from ..hearing.sti import STIResult
     from ..hearing.objective_intelligibility import STOIResult
 
@@ -59,6 +60,12 @@ _STRINGS: dict[str, str] = {
     "IEC 60268-16 STI = {sti}  (rating {rating})": "IEC 60268-16 STI = {sti}  (calificación {rating})",
     "{name} = {v}": "{name} = {v}",
     "ANSI S3.5 SII = {sii}": "ANSI S3.5 SII = {sii}",
+    "Speech spectrum level [dB SPL]": "Nivel del espectro de voz [dB SPL]",
+    "ANSI S3.5-1997 standard speech spectrum": "ANSI S3.5-1997 espectro de voz estándar",
+    "Normal": "Normal",
+    "Raised": "Elevada",
+    "Loud": "Fuerte",
+    "Shout": "Grito",
     "Fractile {v}": "Fractil {v}",
     "ISO 7029 hearing threshold — {sex}, age {age}": "ISO 7029 umbral de audición — {sex}, edad {age}",
     "ISO 1999 NIPTS — $L_{{EX,8h}}$ = {lex} dB, {years} yr": "ISO 1999 NIPTS — $L_{{EX,8h}}$ = {lex} dB, {years} años",
@@ -198,6 +205,53 @@ def plot_sii(
     ))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
+    # localize_axes leaves the categorical band axis (a FuncFormatter) alone.
+    localize_axes(ax, language)
+    return ax
+
+
+#: Distinct hues for the ordered vocal efforts (normal to shout); cycled when
+#: fewer or more efforts are drawn.
+_EFFORT_COLORS = (_C_PRIMARY, _C_TERTIARY, _C_SECONDARY, _C_REFERENCE)
+
+
+def plot_standard_speech_spectrum(
+    result: "StandardSpeechSpectrum", ax: Axes | None = None, *,
+    language: str = "en", **kwargs: Any,
+) -> Axes:
+    """Standard speech spectrum level by vocal effort (ANSI S3.5-1997 Table 3).
+
+    Draws the standard speech spectrum level (dB SPL) over the 18
+    one-third-octave bands (160 Hz to 8000 Hz) on a categorical band axis, one
+    labelled line per vocal effort, so the whole spectrum lifting with vocal
+    effort reads at a glance.
+
+    :param result: A :class:`~phonometry.hearing.sii.StandardSpeechSpectrum`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the per-effort ``plot`` calls.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
+    positions = _band_axis(ax, freqs, xlabel=None, language=language)
+    ax.set_xlabel(_t("One-third-octave band [Hz]", language))
+    for i, effort in enumerate(result.vocal_efforts):
+        # Explicit per-effort colour and label, but let any user kwargs win so
+        # a supplied color=/label= overrides rather than collides.
+        line_kwargs: dict[str, Any] = {
+            "color": _EFFORT_COLORS[i % len(_EFFORT_COLORS)],
+            "label": _t(effort.capitalize(), language),
+        }
+        line_kwargs.update(kwargs)
+        ax.plot(positions, levels[i], "o-", **line_kwargs)
+    ax.set_ylabel(_t("Speech spectrum level [dB SPL]", language))
+    ax.set_title(_t("ANSI S3.5-1997 standard speech spectrum", language))
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(True, alpha=0.3)
     # localize_axes leaves the categorical band axis (a FuncFormatter) alone.
     localize_axes(ax, language)
     return ax

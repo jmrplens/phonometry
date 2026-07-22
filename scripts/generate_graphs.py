@@ -8026,6 +8026,21 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     plt.close()
 
 
+def generate_standard_speech_spectrum(output_dir: str) -> None:
+    """ANSI S3.5-1997 Table 3 standard speech spectra via StandardSpeechSpectrum.plot()."""
+    print("Generating standard_speech_spectrum...")
+    from phonometry import standard_speech_spectra
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    # The result's own .plot() draws one line per vocal effort on the categorical
+    # one-third-octave band axis (160 Hz to 8000 Hz), each higher effort lifting
+    # the whole speech spectrum (ANSI S3.5-1997 Table 3).
+    standard_speech_spectra().plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "standard_speech_spectrum.svg")
+    plt.close()
+
+
 def generate_impulse_prominence(output_dir: str) -> None:
     """NT ACOU 112: predicted prominence and the LAeq adjustment."""
     print("Generating impulse_prominence.png...")
@@ -8865,6 +8880,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Speech intelligibility (ANSI S3.5-1997): band audibility and the SII.
     generate_speech_intelligibility,
     generate_sii_vocal_efforts,
+    generate_standard_speech_spectrum,
     generate_impulse_prominence,
     # Room-noise criteria (ANSI S12.2-2019): NC tangency and RC Mark II.
     generate_room_noise_criteria,

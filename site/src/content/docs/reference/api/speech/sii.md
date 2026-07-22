@@ -99,6 +99,36 @@ the 18 one-third-octave band centres from 160 Hz to 8000 Hz.
 | :--- | :--- |
 | ValueError | if a spectrum has the wrong length or effort name. |
 
+## standard_speech_spectra
+
+```python
+standard_speech_spectra(
+    vocal_efforts: str | Sequence[str] = ('normal', 'raised', 'loud', 'shout'),
+) -> StandardSpeechSpectrum
+```
+
+Build the plottable ANSI S3.5-1997 standard speech spectra (Table 3).
+
+Collects the standard speech spectrum level `Ui` of the requested vocal
+efforts (via [`standard_speech_spectrum`](/phonometry/reference/api/speech/sii/#standard_speech_spectrum)) into a
+[`StandardSpeechSpectrum`](/phonometry/reference/api/speech/sii/#standardspeechspectrum) that exposes `.plot()`. The band levels
+are unchanged; this is a thin, plottable wrapper around the existing
+function, which still returns the bare per-band array.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `vocal_efforts` | A single vocal-effort name or a sequence of names, each one of `"normal"`, `"raised"`, `"loud"` or `"shout"`. Defaults to the full family in the Table 3 order. |
+
+**Returns:** A frozen [`StandardSpeechSpectrum`](/phonometry/reference/api/speech/sii/#standardspeechspectrum).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for an unknown vocal effort, or an empty selection. |
+
 ## standard_speech_spectrum
 
 ```python
@@ -120,3 +150,61 @@ Standard speech spectrum level by vocal effort (ANSI S3.5-1997 Table 3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown vocal effort. |
+
+## StandardSpeechSpectrum
+
+```python
+StandardSpeechSpectrum(
+    frequencies: np.ndarray,
+    vocal_efforts: tuple[str, ...],
+    levels: np.ndarray,
+)
+```
+
+The ANSI S3.5-1997 standard speech spectra by vocal effort (Table 3).
+
+Bundles the standard speech spectrum level `Ui` of one or more vocal
+efforts (ANSI S3.5-1997 Table 3) over the 18 one-third-octave bands, so the
+spectra can be drawn with `plot`. Build it with
+[`standard_speech_spectra`](/phonometry/reference/api/speech/sii/#standard_speech_spectra); the frozen instance is a thin, plottable
+wrapper and re-runs none of the maths (the band levels are the tabulated
+constants that [`standard_speech_spectrum`](/phonometry/reference/api/speech/sii/#standard_speech_spectrum) returns).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The 18 one-third-octave band centre frequencies, in hertz (160 Hz to 8000 Hz). |
+| `vocal_efforts` | The vocal efforts carried, in order; each one of `"normal"`, `"raised"`, `"loud"` or `"shout"`. |
+| `levels` | The standard speech spectrum level `Ui`, in dB SPL, as a `(len(vocal_efforts), 18)` array; row `i` is the spectrum for `vocal_efforts[i]`. |
+
+### StandardSpeechSpectrum.plot()
+
+```python
+StandardSpeechSpectrum.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the standard speech spectrum level versus frequency band.
+
+Draws the standard speech spectrum level (dB SPL) over the 18
+one-third-octave bands (160 Hz to 8000 Hz) on a categorical band axis;
+each vocal effort in `vocal_efforts` is one labelled line, so the
+whole spectrum lifting with vocal effort reads at a glance.
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes` and never calls `plt.show`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the per-effort `plot` calls. |
+
+**Returns:** The axes.

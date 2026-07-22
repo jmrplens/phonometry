@@ -169,6 +169,44 @@ for effort in hearing.sii.VOCAL_EFFORTS:
 print(hearing.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 ```
 
+The four spectra are also available as one plottable result:
+`standard_speech_spectra()` returns a `StandardSpeechSpectrum` carrying the band
+centre frequencies and the per-effort band levels, and its `.plot()` draws them
+as one labelled family on the one-third-octave band axis.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum.svg" alt="The four ANSI S3.5-1997 standard speech spectra (normal, raised, loud and shout) as one labelled family: the standard speech spectrum level in dB SPL over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum" width="90%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import hearing
+
+# One line: the whole ANSI S3.5-1997 Table 3 family.
+hearing.standard_speech_spectra().plot()
+plt.show()
+
+# By hand, mirroring what StandardSpeechSpectrum.plot() draws:
+res = hearing.standard_speech_spectra()
+pos = np.arange(res.frequencies.size)
+fig, ax = plt.subplots()
+for effort, levels in zip(res.vocal_efforts, res.levels):
+    ax.plot(pos, levels, "o-", label=effort.capitalize())
+ax.set_xticks(pos)
+ax.set_xticklabels([f"{f:g}" for f in res.frequencies], rotation=45, ha="right")
+ax.set_xlabel("One-third-octave band [Hz]")
+ax.set_ylabel("Speech spectrum level [dB SPL]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+The same four spectra feed the index: in a fixed broadband noise, each higher
+vocal effort lifts the speech spectrum and raises the SII.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.svg" alt="Two panels. Left: the four ANSI S3.5-1997 standard speech spectra (normal, raised, loud and shout) over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum. Right: the resulting Speech Intelligibility Index in a fixed broadband noise, rising from 0.12 (normal) through 0.36 and 0.59 to 0.79 (shout)" width="96%"></picture>
 
 <details>

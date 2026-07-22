@@ -5,11 +5,13 @@ from __future__ import annotations
 
 from .program_loudness import (
     DEFAULT_CHANNEL_WEIGHTS,
+    KWeightingResponse,
     ProgramLoudnessResult,
     channel_weight,
     integrated_loudness,
     k_weighting,
     k_weighting_coefficients,
+    k_weighting_response,
     loudness_range,
     program_loudness,
     true_peak_level,
@@ -17,11 +19,13 @@ from .program_loudness import (
 
 __all__ = [
     "DEFAULT_CHANNEL_WEIGHTS",
+    "KWeightingResponse",
     "ProgramLoudnessResult",
     "channel_weight",
     "integrated_loudness",
     "k_weighting",
     "k_weighting_coefficients",
+    "k_weighting_response",
     "loudness_range",
     "program_loudness",
     "true_peak_level",

@@ -4534,6 +4534,18 @@ def generate_program_loudness(output_dir: str) -> None:
     plt.close()
 
 
+def generate_k_weighting_response(output_dir: str) -> None:
+    """K-weighting magnitude frequency response (ITU-R BS.1770-5 Annex 1)."""
+    print("Generating k_weighting_response...")
+    from phonometry import k_weighting_response
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    k_weighting_response().plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "k_weighting_response.svg")
+    plt.close()
+
+
 def generate_gcc_phat_delay(output_dir: str) -> None:
     """GCC-PHAT vs direct correlation for TDE on a colored signal pair."""
     print("Generating gcc_phat_delay...")
@@ -8889,6 +8901,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Broadcast: programme loudness and true peak (ITU-R BS.1770-5 /
     # EBU R 128 with Tech 3341/3342).
     generate_program_loudness,
+    generate_k_weighting_response,
     # Correlation / time-delay estimation: GCC-PHAT vs the direct
     # correlator on a colored signal pair (Knapp & Carter 1976).
     generate_gcc_phat_delay,

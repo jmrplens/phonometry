@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `k_weighting_response()` and `KWeightingResponse`: the K-weighting pre-filter
+  of ITU-R BS.1770-5 (Annex 1) evaluated as a magnitude frequency response. The
+  constructor evaluates the same Table 1-2 biquads that `k_weighting` applies
+  (from `k_weighting_coefficients`, so nothing is re-derived) and returns a
+  frozen result carrying the combined magnitude in dB, each of the two stages
+  (the +4 dB spherical-head shelf and the RLB high-pass) and the frequency
+  grid. Its `.plot()` draws the response on a logarithmic frequency axis, the
+  combined curve with the two stages as light companions; `language="es"`
+  renders the Spanish labels.
 - `TrendTestResult.plot()`: a one-line canonical figure for the nonparametric
   trend test (Bendat & Piersol, *Random Data* Sec. 4.5.2), mirroring the
   companion `StationarityTestResult.plot()`. It draws the tested sequence

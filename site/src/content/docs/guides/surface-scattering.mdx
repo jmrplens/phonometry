@@ -49,6 +49,7 @@ references:
 
 import Video from '../../../components/Video.astro';
 import ThemeImage from '../../../components/ThemeImage.astro';
+import ReportPreview from '../../../components/ReportPreview.astro';
 
 How a surface returns incident sound (how much it scatters away from the
 specular direction, how uniformly it spreads what it scatters, and how much it
@@ -195,6 +196,24 @@ print(materials.BASE_PLATE_BANDS[0], materials.BASE_PLATE_MAX_SCATTERING[100])  
 materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS))
 ```
 
+### Scattering test-report fiche
+
+`ScatteringResult.report(path)` renders a one-page accredited scattering test
+report (ISO 17497-1): a metadata header (specimen, sample area $S$, room volume
+$V$, test room, climate), the per-one-third-octave table of the random-incidence
+absorption $\alpha_s$ and the scattering coefficient $s$ beside the $s(f)$ curve
+on a categorical band axis, and a boxed characterisation headline. It is a
+characterisation, so there is no pass/fail verdict. `verbose=True` adds the
+specular absorption $\alpha_{spec}$ column, and `language="es"` renders the
+Spanish fiche. It needs the report extra (`pip install phonometry[report]`).
+
+<ReportPreview
+	name="iso17497_scattering_example"
+	title="ISO 17497-1 scattering-coefficient example report (PDF)"
+	description="One-page random-incidence scattering fiche: a metadata header, the per-one-third-octave table of the random-incidence absorption and the scattering coefficient beside the s(f) band-axis curve, and the boxed characterisation headline over the tested frequency range."
+	caption="Random-incidence scattering fiche (ScatteringResult.report), the alpha_s and s spectra."
+/>
+
 ## 2. Diffusion coefficient (ISO 17497-2)
 
 The diffusion coefficient $d$ measures the **spatial uniformity** of the
@@ -311,6 +330,46 @@ plt.show()
 ```
 
 </details>
+
+### Diffusion test-report fiche
+
+Collected across the one-third-octave bands, the directional diffusion
+coefficient $d(f)$ forms a `DiffusionSpectrum`, whose `report(path)` renders a
+one-page diffusion test report (ISO 17497-2, Clause 8.5): the per-band table of
+$d$ beside the $d(f)$ band-axis curve, with the random-incidence value $d$
+(Clause 8.4) boxed. `verbose=True` adds the normalised $d_n$ column.
+
+```python
+import numpy as np
+from phonometry import materials
+
+# Per-band directional coefficients d(f) collected into a spectrum (here from a
+# closed-form example; in practice each d comes from directional_diffusion_coefficient
+# on that band's polar response).
+freqs = np.array([250, 500, 1000, 2000, 4000], float)
+d = np.array([0.30, 0.45, 0.60, 0.75, 0.88])
+spectrum = materials.directional_diffusion_spectrum(
+    freqs, d, random_incidence=float(np.mean(d)))
+spectrum.report("diffusion.pdf")   # one-page fiche (needs phonometry[report])
+```
+
+<ReportPreview
+	name="iso17497_diffusion_example"
+	title="ISO 17497-2 diffusion-coefficient example report (PDF)"
+	description="One-page directional diffusion fiche: a metadata header, the per-one-third-octave table of the diffusion coefficient beside the d(f) band-axis curve with the normalised d_n companion, and the boxed random-incidence diffusion coefficient over the tested frequency range."
+	caption="Directional diffusion fiche (DiffusionSpectrum.report), the d(f) spectrum with the normalised d_n."
+/>
+
+A single band's polar response is itself reportable: `DiffusionResult.report(path)`
+renders the corrected receiver-angle / reflected-level table beside the
+semicircular polar plot, boxing that band's directional diffusion coefficient.
+
+<ReportPreview
+	name="iso17497_diffusion_polar_example"
+	title="ISO 17497-2 polar-response example report (PDF)"
+	description="One-page single-source polar-response fiche: a metadata header, the corrected reflected level per receiver angle beside the semicircular polar plot, and the boxed directional diffusion coefficient."
+	caption="Single-source polar-response fiche (DiffusionResult.report), the reflected level over the receiver arc."
+/>
 
 ## Scattering or diffusion? Two coefficients, two jobs
 

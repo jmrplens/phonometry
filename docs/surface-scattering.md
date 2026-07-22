@@ -147,6 +147,16 @@ print(materials.BASE_PLATE_BANDS[0], materials.BASE_PLATE_MAX_SCATTERING[100])  
 materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS))
 ```
 
+**Test-report fiche.** `ScatteringResult.report(path)` renders a one-page
+accredited scattering test report (ISO 17497-1): a metadata header, the
+per-one-third-octave table of the random-incidence absorption $\alpha_s$ and the
+scattering coefficient $s$ beside the $s(f)$ curve on a categorical band axis,
+and a boxed characterisation headline (no pass/fail). `verbose=True` adds the
+specular absorption $\alpha_{spec}$ column and `language="es"` renders the
+Spanish fiche; it needs the report extra (`pip install phonometry[report]`).
+
+[![ISO 17497-1 scattering example report: a metadata header, the per-one-third-octave table of the random-incidence absorption and the scattering coefficient beside the s(f) band-axis curve, and the boxed characterisation headline over the tested frequency range](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_scattering_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_scattering_example.pdf)
+
 ## 2. Diffusion coefficient (ISO 17497-2)
 
 The diffusion coefficient $d$ measures the **spatial uniformity** of the
@@ -259,6 +269,17 @@ plt.show()
 ```
 
 </details>
+
+**Test-report fiche.** Collected across the one-third-octave bands, the
+directional diffusion coefficient $d(f)$ forms a `DiffusionSpectrum`
+(`materials.directional_diffusion_spectrum(freqs, d, ...)`), whose
+`report(path)` renders a one-page diffusion test report (ISO 17497-2,
+Clause 8.5): the per-band table of $d$ beside the $d(f)$ band-axis curve, with
+the random-incidence value $d$ (Clause 8.4) boxed. `verbose=True` adds the
+normalised $d_n$ column. A single band's polar response is itself reportable
+through `DiffusionResult.report(path)`.
+
+[![ISO 17497-2 diffusion example report: a metadata header, the per-one-third-octave table of the diffusion coefficient beside the d(f) band-axis curve with the normalised d_n companion, and the boxed random-incidence diffusion coefficient over the tested frequency range](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_example.pdf)
 
 ## Scattering or diffusion? Two coefficients, two jobs
 

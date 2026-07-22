@@ -27,6 +27,7 @@ references:
 
 import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 El ruido con impulsos prominentes (martilleo, remachado, hinca de pilotes) es
 más molesto que un sonido estacionario del mismo nivel equivalente. **NT ACOU
@@ -232,6 +233,56 @@ intervalos gruesos); de lo contrario, la tasa de crecimiento, y con ella $P$,
 se subestima. Y
 el método evalúa la *prominencia* de los impulsos, no su energía: $K_I$ se
 añade sobre el `LAeq` medido en el nivel de evaluación, nunca lo sustituye.
+
+## 5. Informe de evaluación (`.report()`)
+
+`ImpulseProminenceResult.report(path)` genera una ficha PDF de una página con el
+formato de un informe de evaluación de sonidos impulsivos de un laboratorio de
+ruido ambiental, siguiendo la **NT ACOU 112:2002** (recogida en la
+ISO/PAS 1996-3:2022): la línea de base normativa, un bloque de metadatos
+opcional (fuente/situación, cliente, posición de medición, instrumentación y
+fecha, con el periodo de evaluación de 30 minutos siempre visible), una tabla a
+todo ancho por impulso (tasa de inicio, diferencia de nivel, prominencia
+prevista `P` y si el inicio se califica como impulso) sobre el gráfico de la
+curva de ajuste `K`<sub>I</sub>`(P)` con los impulsos candidatos marcados, la
+prominencia rectora `P` enmarcada junto con el ajuste de `L`<sub>Aeq</sub>
+derivado `K`<sub>I</sub> (Fórmula 2), una fila de veredicto APTO/NO APTO opcional
+y una nota de categoría de prominencia, y un pie con el descargo fijo.
+
+Usa el mismo contenedor `ReportMetadata` y el mismo motor de renderizado que la
+[ficha de sonoridad ISO 532-1](/phonometry/es/guides/loudness/#informe-de-iso-532-1-report);
+un `requirement` indicado se interpreta como la prominencia rectora `P` máxima
+admisible (un impulso menos destacado es apto). El renderizado necesita reportlab
+(`pip install phonometry[report]`); solo se admite `engine="reportlab"`. La ficha
+se genera en inglés por defecto; pase `language="es"` para una ficha en español
+(cadenas fijas traducidas y separador decimal de coma), p. ej.
+`res.report("impulse_fiche_es.pdf", language="es")`.
+
+```python
+from phonometry import environmental, ReportMetadata
+
+# El conjunto de tres impulsos de hincado del §1 (tasa de inicio dB/s, LD dB).
+res = environmental.impulse_prominence([1200.0, 300.0, 60.0], [32.0, 18.0, 11.0])
+res.report(
+    "impulse_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Obra de hincado de pilotes, martilleo intermitente",
+        measurement_standard="ISO 1996-2",
+        laboratory="Laboratorio de referencia Phonometry",
+        requirement=10.0,           # prominencia rectora P máxima admisible
+    ),
+)                                   # P rectora y el ajuste de LAeq KI (dB)
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; pulse la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="ntacou112_impulse_prominence_example"
+	title="Informe de ejemplo de prominencia de sonidos impulsivos NT ACOU 112 (PDF)"
+	description="Ficha de evaluación de sonidos impulsivos de una página: un encabezado de metadatos, una tabla por impulso con la tasa de inicio, la diferencia de nivel y la prominencia prevista P, el gráfico de la curva de ajuste KI(P) con los impulsos candidatos marcados, la prominencia rectora P = 12,25 enmarcada con el ajuste de LAeq KI = 13,0 dB (NT ACOU 112:2002 Fórmula 2) y un veredicto NO APTO frente a una prominencia rectora máxima de 10."
+	caption="Ficha de prominencia de sonidos impulsivos (ImpulseProminenceResult.report), prominencia rectora P con el ajuste de LAeq KI."
+/>
 
 ## Véase también
 

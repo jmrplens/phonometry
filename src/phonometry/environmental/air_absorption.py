@@ -380,7 +380,7 @@ def atmospheric_attenuation(
     :param temperature: Ambient air temperature, in degrees Celsius (default 20).
     :param relative_humidity: Relative humidity, in percent (default 50).
     :param pressure: Ambient atmospheric pressure, in kilopascals
-        (default 101,325).
+        (default 101.325 kPa, one standard atmosphere).
     :param exact_midband: Snap the frequencies to the exact one-third-octave
         midbands ``fm = 1000*10^(k/10)`` (Eq. (6)) before evaluation; see
         :func:`air_attenuation`. When ``True`` the stored :attr:`frequencies`

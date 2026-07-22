@@ -167,7 +167,7 @@ unchanged; this is a thin, plottable wrapper around the existing function
 | `frequencies` | Frequency or frequencies `f`, in hertz (array-like). |
 | `temperature` | Ambient air temperature, in degrees Celsius (default 20). |
 | `relative_humidity` | Relative humidity, in percent (default 50). |
-| `pressure` | Ambient atmospheric pressure, in kilopascals (default 101,325). |
+| `pressure` | Ambient atmospheric pressure, in kilopascals (default 101.325 kPa, one standard atmosphere). |
 | `exact_midband` | Snap the frequencies to the exact one-third-octave midbands `fm = 1000*10^(k/10)` (Eq. (6)) before evaluation; see [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation). When `True` the stored `frequencies` are the snapped midbands the coefficient was computed at. |
 | `distance` | Optional propagation distance `d`, in metres. When given, the result's [`total_attenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuationtotal_attenuation) returns the total attenuation `A = alpha * d` over that distance (ISO 9613-2 Eq. (8)). Must be finite and non-negative. |
 

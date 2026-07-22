@@ -223,7 +223,7 @@ plt.show()
 # O a mano desde air_attenuation (dB/m, escala por 1000 para dB/km):
 freqs = np.geomspace(50.0, 10000.0, 400)
 fig, ax = plt.subplots()
-ax.loglog(freqs, environmental.air_attenuation(freqs, 20.0, 50.0) * 1000.0)
+ax.semilogx(freqs, environmental.air_attenuation(freqs, 20.0, 50.0) * 1000.0)
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("Coeficiente de atenuación alpha [dB/km]")
 plt.show()

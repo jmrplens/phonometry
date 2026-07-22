@@ -257,21 +257,21 @@ class VibrationSoundPowerResult:
 
         Combines the band levels with the A-weighting band corrections of
         ISO 3744:2010 Annex E (the standard tabulation reused by the vibration
-        method) when band centre frequencies are known; a directly measured
-        single broadband level is returned unchanged, and an unlabelled
-        multi-band result yields ``nan`` (no band centres to weight).
+        method) when band centre frequencies are known. Without band
+        frequencies the result is an unweighted broadband level that cannot be
+        A-weighted, so ``L_WA`` is undefined and ``nan`` is returned (the
+        report then boxes the unweighted total ``L_W`` instead of an ``L_WA``
+        claim, and no A-weighted verdict is drawn).
         """
-        lw = np.asarray(self.sound_power_level, dtype=np.float64)
-        if self.frequencies is not None:
-            from .sound_power import _a_weighting_corrections
+        if self.frequencies is None:
+            return float("nan")
+        from .sound_power import _a_weighting_corrections
 
-            ck = _a_weighting_corrections(
-                np.asarray(self.frequencies, dtype=np.float64)
-            )
-            return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (lw + ck)))))
-        if lw.size == 1:
-            return float(lw[0])
-        return float("nan")
+        lw = np.asarray(self.sound_power_level, dtype=np.float64)
+        ck = _a_weighting_corrections(
+            np.asarray(self.frequencies, dtype=np.float64)
+        )
+        return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (lw + ck)))))
 
     def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the radiated sound power level per band.

@@ -146,6 +146,27 @@ def test_survey_part1_basis_and_method(tmp_path) -> None:
     assert f"{lw[2]:.1f}" in text
 
 
+def test_broadband_result_has_no_a_weighted_claim(tmp_path) -> None:
+    """A broadband result (no frequencies) cannot be A-weighted, so no LWA."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("svglib")
+    pytest.importorskip("matplotlib")
+    # A single directly measured broadband level, without band centres.
+    res = sound_power_from_vibration(85.0, area=_AREA)
+    assert np.isnan(res.sound_power_level_a)
+    out = tmp_path / "broadband.pdf"
+    res.report(str(out), metadata=ReportMetadata(requirement=80.0))
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    # The unweighted total LW is boxed; nothing is labelled A-weighted.
+    lw = float(85.0 + _S_TERM + _IMP_TERM)
+    assert f"{lw:.1f}" in text
+    assert "dB(A)" not in text
+    assert "L WA" not in text and "LWA" not in text.replace(" ", "")
+    # The verdict compares the unweighted LW, not an invented A-weighted value.
+    assert "declared limit" in text
+
+
 def test_third_octave_labels_and_grouping(tmp_path) -> None:
     """A one-third-octave set is labelled by nominal centres and captioned."""
     pytest.importorskip("reportlab")
@@ -156,6 +177,7 @@ def test_third_octave_labels_and_grouping(tmp_path) -> None:
     res = sound_power_from_vibration(lv, area=_AREA, frequencies=freqs)
     out = tmp_path / "third.pdf"
     res.report(str(out))
+    _assert_one_page(str(out))
     text = _extract_text(str(out))
     assert "One-third-octave-band sound power levels" in text
     for label in ("100", "125", "160", "800"):

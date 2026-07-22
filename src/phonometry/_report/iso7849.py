@@ -43,6 +43,7 @@ matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, Any, List, Tuple
 
 import numpy as np
@@ -163,8 +164,11 @@ def _statement(result: Any, language: str = "en") -> Tuple[str, List[str]]:
     return statement, extended
 
 
-def _relation_strip(result: Any, language: str = "en") -> str:
+def _relation_strip(language: str = "en") -> str:
     """The sound-power-relation line for the basis strip (Eq. 12/15)."""
+    imp = format_number(
+        10.0 * math.log10(411.0 / 400.0), language, decimals=2
+    )
     return t(
         "L<sub>W</sub> = L<sub>v</sub> + 10 lg(S/S<sub>0</sub>) + 10 lg(&#949;) "
         "+ 10 lg(Z<sub>c,n</sub>/Z<sub>c,0</sub>), S<sub>0</sub> = 1 m"
@@ -172,9 +176,9 @@ def _relation_strip(result: Any, language: str = "en") -> str:
         "surface velocity level L<sub>v</sub> = 20 lg(v/v<sub>0</sub>), "
         "v<sub>0</sub> = 5&#183;10<super>&#8722;8</super> m/s (Eq. 3) and the "
         "fixed impedance term 10 lg(Z<sub>c,n</sub>/Z<sub>c,0</sub>) = "
-        "10 lg(411/400) = 0,12 dB.",
+        "10 lg(411/400) = {imp} dB.",
         language,
-    )
+    ).format(imp=imp)
 
 
 def _factor_strip(result: Any, language: str = "en") -> str:
@@ -195,6 +199,12 @@ def _factor_strip(result: Any, language: str = "en") -> str:
             "ISO 9614).",
             language,
         )
+    if getattr(result, "frequencies", None) is None:
+        # A broadband level cannot be A-weighted, so make no L_WA claim.
+        return t(
+            "{factor} Levels are referenced to the reference sound power 1 pW.",
+            language,
+        ).format(factor=factor)
     return t(
         "{factor} The A-weighted sound power level L<sub>WA</sub> combines the "
         "band levels with the A-weighting band corrections of ISO 3744:2010 "
@@ -239,7 +249,7 @@ def render_vibration_power_report(
         statement=statement,
         extended=extended,
         basis_strips=[
-            _relation_strip(result, language),
+            _relation_strip(language),
             _factor_strip(result, language),
         ],
         metadata=metadata,

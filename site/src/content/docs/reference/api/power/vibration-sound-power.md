@@ -364,9 +364,11 @@ A-weighted sound power level `L_WA`, in dB re 1 pW.
 
 Combines the band levels with the A-weighting band corrections of
 ISO 3744:2010 Annex E (the standard tabulation reused by the vibration
-method) when band centre frequencies are known; a directly measured
-single broadband level is returned unchanged, and an unlabelled
-multi-band result yields `nan` (no band centres to weight).
+method) when band centre frequencies are known. Without band
+frequencies the result is an unweighted broadband level that cannot be
+A-weighted, so `L_WA` is undefined and `nan` is returned (the
+report then boxes the unweighted total `L_W` instead of an `L_WA`
+claim, and no A-weighted verdict is drawn).
 
 ### VibrationSoundPowerResult.total_level
 

@@ -1383,7 +1383,7 @@ def _vibration_sound_power_example() -> Tuple[object, ReportMetadata, str]:
         client="Example manufacturing plant",
         specimen="Gearbox casing (steel panel)",
         test_room="Machine hall (source vibration survey)",
-        instrumentation="Class 1 accelerometer (IEC 60651), s/n 0042",
+        instrumentation="Piezoelectric accelerometer (ISO 16063-21 calibration), s/n 0042",
         temperature=21.0,
         relative_humidity=45.0,
         pressure=101.1,

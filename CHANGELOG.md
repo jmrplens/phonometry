@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `VibrationSoundPowerResult.report()`: a one-page PDF
+  sound-power-from-vibration determination fiche for the airborne sound power a
+  machine radiates through its surface vibration (ISO/TS 7849-1/-2:2009),
+  rendered through the shared sound-power report engine. The sheet carries the
+  standard-basis line naming the applied method (the ISO/TS 7849-1 survey
+  method with a fixed radiation factor `ε = 1`, or the ISO/TS 7849-2
+  engineering method with a determined radiation factor), an optional metadata
+  header (client, machine/source, test environment, instrumentation, climate,
+  date), a per-band table of the surface vibratory velocity level `Lv` and the
+  radiated band sound-power level `LW`, the sound-power spectrum `LW(f)` with a
+  nominal band axis, and a boxed A-weighted sound power level `LWA` (dB re
+  1 pW) with the total `LW`, the radiating area `S` and the applied method. A
+  declared A-weighted sound-power limit supplied via the metadata `requirement`
+  adds a PASS/FAIL verdict (lower is better). `verbose=True` adds the radiation
+  factor `ε` column; the basis strip states the sound-power relation
+  `LW = Lv + 10 lg(S/S0) + 10 lg(ε) + 10 lg(411/400)` with its fixed impedance
+  term and the radiation-factor model. `language="es"` renders the Spanish
+  fiche. `VibrationSoundPowerResult` gains a `sound_power_level_a` property (the
+  A-weighted total). The fiche reuses the shared sound-power body (per-band
+  table, `LW(f)` spectrum, boxed `LWA` and flow assembly) already used by the
+  ISO 3744/3745/3741/9614 fiches.
 - `ReverberationSoundPowerResult.report()`: a one-page PDF reverberation-room
   sound-power determination fiche for the precision method in a qualified
   hard-walled reverberation test room (ISO 3741:2010, accuracy grade 1),

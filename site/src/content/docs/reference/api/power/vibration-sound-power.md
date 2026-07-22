@@ -308,6 +308,68 @@ Plot the radiated sound power level per band.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### VibrationSoundPowerResult.report()
+
+```python
+VibrationSoundPowerResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ISO/TS 7849 sound-power-from-vibration determination fiche.
+
+Writes a one-page sound-power test sheet: the standard-basis line naming
+the vibration method (the ISO/TS 7849-1 survey method with a fixed
+radiation factor when every band uses `epsilon = 1`, otherwise the
+ISO/TS 7849-2 engineering method with a determined radiation factor), an
+optional metadata header (client, machine/source, test environment,
+instrumentation, climate, date), a per-band table (nominal
+octave/one-third-octave frequency, the surface vibratory velocity level
+`Lv` and the radiated band sound-power level `LW`), the sound-power
+spectrum `LW(f)` with a nominal band axis, the boxed A-weighted sound
+power level `LWA` (dB re 1 pW) with the total `LW`, the radiating
+area `S` and the applied method, an optional verdict row against a
+declared limit, and a measurement-basis strip stating the sound-power
+relation `LW = Lv + 10 lg(S/S0) + 10 lg(epsilon) + 10 lg(Zc,n/Zc,0)`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the machine/source, `test_room` the test environment, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). The radiating area `S` comes from the result itself. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True` the per-band table adds the radiation factor `epsilon` column. |
+| `language` | Fiche language: `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+
+### VibrationSoundPowerResult.sound_power_level_a
+
+*property*
+
+A-weighted sound power level `L_WA`, in dB re 1 pW.
+
+Combines the band levels with the A-weighting band corrections of
+ISO 3744:2010 Annex E (the standard tabulation reused by the vibration
+method) when band centre frequencies are known. Without band
+frequencies the result is an unweighted broadband level that cannot be
+A-weighted, so `L_WA` is undefined and `nan` is returned (the
+report then boxes the unweighted total `L_W` instead of an `L_WA`
+claim, and no A-weighted verdict is drawn).
+
 ### VibrationSoundPowerResult.total_level
 
 *property*

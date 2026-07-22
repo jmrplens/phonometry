@@ -46,6 +46,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike
 
 from .._internal.validation import require_positive
@@ -249,6 +251,28 @@ class VibrationSoundPowerResult:
         lw = np.asarray(self.sound_power_level, dtype=np.float64)
         return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * lw))))
 
+    @property
+    def sound_power_level_a(self) -> float:
+        """A-weighted sound power level ``L_WA``, in dB re 1 pW.
+
+        Combines the band levels with the A-weighting band corrections of
+        ISO 3744:2010 Annex E (the standard tabulation reused by the vibration
+        method) when band centre frequencies are known. Without band
+        frequencies the result is an unweighted broadband level that cannot be
+        A-weighted, so ``L_WA`` is undefined and ``nan`` is returned (the
+        report then boxes the unweighted total ``L_W`` instead of an ``L_WA``
+        claim, and no A-weighted verdict is drawn).
+        """
+        if self.frequencies is None:
+            return float("nan")
+        from .sound_power import _a_weighting_corrections
+
+        lw = np.asarray(self.sound_power_level, dtype=np.float64)
+        ck = _a_weighting_corrections(
+            np.asarray(self.frequencies, dtype=np.float64)
+        )
+        return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (lw + ck)))))
+
     def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the radiated sound power level per band.
 
@@ -260,6 +284,63 @@ class VibrationSoundPowerResult:
 
         check_language(language)
         return plot_vibration_sound_power(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO/TS 7849 sound-power-from-vibration determination fiche.
+
+        Writes a one-page sound-power test sheet: the standard-basis line naming
+        the vibration method (the ISO/TS 7849-1 survey method with a fixed
+        radiation factor when every band uses ``epsilon = 1``, otherwise the
+        ISO/TS 7849-2 engineering method with a determined radiation factor), an
+        optional metadata header (client, machine/source, test environment,
+        instrumentation, climate, date), a per-band table (nominal
+        octave/one-third-octave frequency, the surface vibratory velocity level
+        ``Lv`` and the radiated band sound-power level ``LW``), the sound-power
+        spectrum ``LW(f)`` with a nominal band axis, the boxed A-weighted sound
+        power level ``LWA`` (dB re 1 pW) with the total ``LW``, the radiating
+        area ``S`` and the applied method, an optional verdict row against a
+        declared limit, and a measurement-basis strip stating the sound-power
+        relation ``LW = Lv + 10 lg(S/S0) + 10 lg(epsilon) + 10 lg(Zc,n/Zc,0)``.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header (``client``, ``specimen`` the machine/source, ``test_room``
+            the test environment, ``instrumentation``, ``temperature``,
+            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
+            and, via ``requirement``, a declared A-weighted sound-power limit
+            the fiche checks the result against (lower is better). The radiating
+            area ``S`` comes from the result itself.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True`` the per-band table adds the radiation
+            factor ``epsilon`` column.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab (or, for the figure, matplotlib) is
+            not installed (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso7849 import render_vibration_power_report
+
+        return render_vibration_power_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def sound_power_from_vibration(

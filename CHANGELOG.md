@@ -43,6 +43,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   it is a characterisation, so there is no pass/fail verdict. `language="es"`
   renders the Spanish fiche. `ReportMetadata` gains a `thickness` field (the
   loaded specimen thickness, EN 29052-1:1992 Clause 9 b).
+- `ImpulseProminenceResult.report()`: a one-page PDF impulsive-sound prominence
+  assessment fiche rendered through the shared accredited-report engine
+  (NT ACOU 112:2002, carried into ISO/PAS 1996-3:2022). The sheet carries the
+  standard-basis line, an optional metadata header (source/situation, client,
+  measurement position, instrumentation, date, with the 30-minute assessment
+  period always shown), a per-impulse table of the onset rate, level difference,
+  predicted prominence `P` and the onset-rate qualification beside the `KI(P)`
+  adjustment-curve plot with the candidate impulses marked, and the boxed
+  governing prominence `P` together with the derived `LAeq` adjustment `KI`
+  (Formula 2), with a prominence-category note (prominent / not). A maximum
+  acceptable governing prominence supplied via the metadata `requirement` adds a
+  PASS/FAIL verdict (a less prominent impulse passes); `language="es"` renders
+  the Spanish fiche.
 - `FloorCoveringImprovementResult.report()`: a one-page PDF floor-covering
   impact-improvement test-report fiche rendered through the shared
   accredited-report engine (BS EN ISO 16251-1:2014, the small-mock-up

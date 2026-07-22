@@ -552,6 +552,37 @@ def _tone_audibility_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso1996_tone_audibility_example.pdf"
 
 
+def _impulse_prominence_example() -> Tuple[object, ReportMetadata, str]:
+    """Impulse-prominence fiche: an NT ACOU 112:2002 impulsive-sound assessment.
+
+    Three candidate impulses of a pile-driving site, each ``(onset rate dB/s,
+    level difference dB)``: (1200, 32), (300, 18) and (60, 11). All three qualify
+    (onset rate above 10 dB/s), and the predicted prominence follows Formula 1
+    P = 3 lg(OR) + 2 lg(LD): P1 = 3 lg 1200 + 2 lg 32 = 9.2375 + 3.0103 = 12.25,
+    P2 = 3 lg 300 + 2 lg 18 = 9.94 and P3 = 3 lg 60 + 2 lg 11 = 7.42. The highest,
+    the first impulse, governs (P = 12.25), and its LAeq adjustment is
+    KI = 1.8 (12.2478 - 5) = 13.05 dB (Formula 2), rounding to 13.0 dB. The
+    requirement is a plausible maximum governing prominence the example exceeds,
+    so the optional verdict FAILs.
+    """
+    result = ph.environmental.impulse_prominence(
+        [1200.0, 300.0, 60.0], [32.0, 18.0, 11.0]
+    )
+    metadata = ReportMetadata(
+        specimen="Pile-driving site, intermittent hammering",
+        client="Example client",
+        test_room="Free field, 25 m from source (example)",
+        instrumentation="Class 1 SLM (IEC 61672-1), L_pAF logged at 100 ms",
+        measurement_standard="ISO 1996-2",
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-NTACOU112",
+        requirement=10.0,
+    )
+    return result, metadata, "ntacou112_impulse_prominence_example.pdf"
+
+
 def _epnl_example() -> Tuple[object, ReportMetadata, str]:
     """EPNL fiche: an ICAO Annex 16 aircraft-noise-certification result.
 
@@ -1386,6 +1417,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _loudness_example,
     _program_loudness_example,
     _tone_audibility_example,
+    _impulse_prominence_example,
     _epnl_example,
     _filter_class_example,
     _filter_class_1995_example,

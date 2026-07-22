@@ -190,6 +190,53 @@ and with it $P$, is underestimated. And the method rates the *prominence* of the
 impulses, not their energy: $K_I$ rides on top of the measured `LAeq` in the
 rating level, it never replaces it.
 
+## 5. Assessment report (`.report()`)
+
+`ImpulseProminenceResult.report(path)` renders a one-page PDF fiche laid out
+like an impulsive-sound assessment report of an environmental-noise laboratory,
+following NT ACOU 112:2002 (carried into ISO/PAS 1996-3:2022): a standard-basis
+line, an optional metadata header block (source/situation, client, measurement
+position, instrumentation and date, with the 30-minute assessment period always
+shown), a full-width per-impulse table (onset rate, level difference, predicted
+prominence `P` and whether the onset qualifies as an impulse) above the
+adjustment-curve plot `KI(P)` with the candidate impulses marked, the boxed
+governing prominence `P` together with the derived `LAeq` adjustment `KI`
+(Formula 2), an optional PASS/FAIL verdict row and a prominence-category note,
+and a footer with the fixed disclaimer.
+
+It uses the same `ReportMetadata` container
+(documented under [Field insulation](insulation-field.md#report-metadata-reportmetadata))
+and rendering engine as the [ISO 532-1 loudness fiche](loudness.md#iso-532-1-report-report);
+a supplied `requirement` is read as the maximum acceptable governing prominence
+`P` (a less prominent impulse passes). Rendering needs reportlab
+(`pip install phonometry[report]`); only `engine="reportlab"` is supported. The
+fiche renders in English by default; pass `language="es"` for a Spanish fiche
+(translated fixed strings and a comma decimal separator), e.g.
+`res.report("impulse_fiche_es.pdf", language="es")`.
+
+```python
+from phonometry import environmental, ReportMetadata
+
+# The three-impulse pile-driving set (onset rate dB/s, level difference dB).
+res = environmental.impulse_prominence([1200.0, 300.0, 60.0], [32.0, 18.0, 11.0])
+res.report(
+    "impulse_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Pile-driving site, intermittent hammering",
+        measurement_standard="ISO 1996-2",
+        laboratory="Phonometry Reference Laboratory",
+        requirement=10.0,           # maximum acceptable governing prominence P
+    ),
+)                                   # governing P and the LAeq adjustment KI (dB)
+```
+
+The example fiche, regenerated with `make reports`, is kept rendered in the
+repository; click the preview to open the PDF.
+
+[![NT ACOU 112 impulsive-sound prominence example report: metadata header, a per-impulse table of the onset rate, level difference and predicted prominence P, the KI(P) adjustment-curve plot with the candidate impulses marked, the boxed governing prominence P = 12.25 with the LAeq adjustment KI = 13.0 dB (NT ACOU 112:2002 Formula 2) and a FAIL verdict against a maximum governing prominence of 10](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ntacou112_impulse_prominence_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ntacou112_impulse_prominence_example.pdf)
+
+*Impulsive-sound prominence fiche (`ImpulseProminenceResult.report`), governing prominence P with the LAeq adjustment KI.*
+
 ## References
 
 - Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for

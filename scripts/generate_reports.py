@@ -800,6 +800,58 @@ def _multiple_shock_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso2631_5_multiple_shock_example.pdf"
 
 
+def _sound_power_example() -> Tuple[object, ReportMetadata, str]:
+    """Sound-power fiche: an ISO 3744 engineering-grade determination.
+
+    A floor-standing machine on one reflecting plane, measured on a hemisphere
+    of radius r = 4 m (surface area S = 2*pi*r^2 = 100.53 m^2, ISO 3744:2010
+    clause 7.2.3) at the ten key microphone positions (clause 8.1.1). The
+    energy-averaged surface pressure levels (Eq. 12) per octave band (63 Hz to
+    8 kHz) are 72, 76, 80, 82, 81, 78, 73 and 66 dB, each with the background
+    noise a uniform 10 dB below, so the background correction is a uniform
+    K1 = -10*lg(1 - 10^(-1,0)) = 0.46 dB (Eq. 16), and an equivalent absorption
+    area A = 1500 m^2 gives K2 = 10*lg(1 + 4*S/A) = 1.03 dB (Eq. A.2), inside
+    the 4 dB engineering validity limit. The surface level (Eq. 17) is then
+    LW = Lp + 10*lg(S/S0) with 10*lg(S/S0) = 20.02 dB (Eq. 18), giving the band
+    levels 90.5, 94.5, 98.5, 100.5, 99.5, 96.5, 91.5 and 84.5 dB and, with the
+    Annex E octave A-weighting corrections (Table E.2, Eq. E.1), an A-weighted
+    sound power level LWA = 103.7 dB(A) re 1 pW. The declared limit of
+    105 dB(A) is met, so the verdict passes.
+    """
+    freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+    surface_pressure = np.array([72.0, 76, 80, 82, 81, 78, 73, 66])
+    # A uniform, well-behaved field: ten identical position spectra, so the
+    # energy average (Eq. 12) equals the documented surface-pressure spectrum.
+    positions = np.tile(surface_pressure, (10, 1))
+    result = ph.emission.sound_power_pressure(
+        positions,
+        "hemisphere",
+        radius=4.0,
+        reflecting_planes=1,
+        background_levels=np.tile(surface_pressure - 10.0, (10, 1)),
+        frequencies=freqs,
+        absorption_area=1500.0,
+        grade="engineering",
+    )
+    metadata = ReportMetadata(
+        client="Example manufacturing plant",
+        specimen="Hydraulic power pack (floor-standing)",
+        test_room="Hemi-anechoic room over a reflecting floor",
+        instrumentation="Class 1 sound level meter (IEC 61672-1), s/n 0042",
+        temperature=21.0,
+        relative_humidity=45.0,
+        pressure=101.1,
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-3744",
+        requirement=105.0,
+        notes="Enveloping-surface pressure method over a hemisphere "
+              "(ISO 3744:2010, engineering grade 2).",
+    )
+    return result, metadata, "iso3744_sound_power_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -822,6 +874,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _room_acoustics_example,
     _open_plan_example,
     _multiple_shock_example,
+    _sound_power_example,
 ]
 
 

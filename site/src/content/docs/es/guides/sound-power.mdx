@@ -944,7 +944,82 @@ plt.show()
 
 </details>
 
-## 6. Declarar la emisión sonora (ISO 4871)
+## 6. El informe de medición (`.report()`)
+
+Una determinación de potencia acústica termina en un *documento*. Tanto el
+resultado de superficie envolvente (`SoundPowerResult`, ISO 3744/3746) como el
+resultado de precisión (`PrecisionSoundPowerResult`, ISO 3745) exponen un método
+`.report()` que escribe una ficha PDF de una página con el formato de una hoja
+de ensayo de potencia acústica: la línea de base normativa que nombra el método
+aplicado y el grado de exactitud, un encabezado opcional de metadatos (cliente,
+fuente de ruido, entorno de ensayo, instrumentación, clima, fecha), una tabla
+por bandas (frecuencia nominal de octava/tercio de octava, el nivel de presión
+acústica de superficie $L_p$ y el nivel de potencia acústica de banda $L_W$), el
+espectro de potencia acústica $L_W(f)$ con eje de bandas nominal, y un recuadro
+con el nivel de potencia acústica ponderado A $L_{WA}$ (dB re 1 pW) acompañado
+del $L_W$ total, la incertidumbre expandida $U$ y el área de la superficie de
+medición $S$.
+
+Los metadatos se proporcionan mediante un `ReportMetadata`, cuyos campos
+aplicables aquí son la **descripción de la fuente** (`specimen`), el **entorno
+de ensayo** (`test_room`), el **cliente**, la **instrumentación**, la
+**temperatura**, la **humedad relativa** y la **presión ambiente**, la **fecha
+del ensayo** (`test_date`) y la identidad del pie (`laboratory`, `operator`,
+`report_id`, `notes`); el área de la superficie de medición $S$ procede del
+propio resultado y se imprime en el recuadro y en la tira de base, junto con las
+correcciones aplicadas (el ruido de fondo $K_1$ y el entorno $K_2$ para el
+método de superficie ISO 3744/3746, o las meteorológicas $C_1$/$C_2$/$C_3$ para
+el método de precisión ISO 3745). Indicar `requirement` añade un veredicto
+CUMPLE/NO CUMPLE frente a un límite declarado de potencia acústica ponderada A
+(la emisión de potencia acústica es una magnitud en la que menos es mejor, así
+que la fuente cumple igual o por debajo del límite). `verbose=True` añade el
+nivel promedio energético $L_p'$ a la tabla, y para el resultado de superficie
+ISO 3744/3746 añade además las columnas de corrección $K_1$/$K_2$ (el resultado
+de precisión ISO 3745 no lleva $K_1$/$K_2$; sus $C_1$/$C_2$/$C_3$ aparecen en la
+tira de base). `language="es"` genera la ficha en español con decimales de coma.
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, emission
+
+freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], float)
+# Diez espectros de posición idénticos sobre un hemisferio de radio 4 m; ruido
+# de fondo uniforme 10 dB por debajo y área de absorción equivalente
+# A = 1500 m^2 (para que K1, K2 sean significativos y dentro del límite de
+# validez del grado de ingeniería).
+surface = np.array([72.0, 76, 80, 82, 81, 78, 73, 66])
+res = emission.sound_power_pressure(
+    np.tile(surface, (10, 1)), "hemisphere", radius=4.0,
+    background_levels=np.tile(surface - 10.0, (10, 1)),
+    frequencies=freqs, absorption_area=1500.0, grade="engineering",
+)
+
+res.report(
+    "sound_power.pdf",
+    metadata=ReportMetadata(
+        client="Planta de fabricación de ejemplo",
+        specimen="Grupo hidráulico (de suelo)",
+        test_room="Sala semianecoica sobre suelo reflectante",
+        instrumentation="Sonómetro clase 1 (IEC 61672-1), s/n 0042",
+        laboratory="Ejemplo de referencia de phonometry",
+        report_id="EXAMPLE-3744",
+        requirement=105.0,
+    ),
+    language="es",
+)   # LWA = 103,7 dB(A) re 1 pW -> límite declarado 105 dB(A): CUMPLE
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; haz clic en la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso3744_sound_power_example"
+	title="Informe de ejemplo de determinación de potencia acústica ISO 3744 (PDF)"
+	description="Ficha de una página de determinación de potencia acústica ISO 3744: un encabezado con el cliente, la fuente de ruido, el entorno de ensayo semianecoico y la instrumentación y el clima, la tabla en bandas de octava (63 Hz a 8 kHz) de niveles de presión acústica de superficie Lp y niveles de potencia acústica de banda LW, el espectro de potencia acústica LW(f) con eje de bandas nominal, el recuadro con el nivel de potencia acústica ponderado A LWA = 103,7 dB(A) re 1 pW con el LW total = 105,8 dB, la incertidumbre expandida U = 3,0 dB y la superficie de medición S = 100,53 m2, y un veredicto CUMPLE frente al límite declarado de 105 dB(A), cerrada por una tira de base que indica las correcciones aplicadas K1 = 0,5 dB y K2 = 1,0 dB."
+	caption="Ficha de determinación de potencia acústica (SoundPowerResult.report), una medición ISO 3744 en hemisferio de grado de ingeniería con las correcciones K1/K2 y el LWA en recuadro."
+/>
+
+## 7. Declarar la emisión sonora (ISO 4871)
 
 Un nivel de potencia acústica medido todavía no es una *declaración*. La norma
 ISO 4871:1996 rige la declaración de emisión sonora que un fabricante imprime en

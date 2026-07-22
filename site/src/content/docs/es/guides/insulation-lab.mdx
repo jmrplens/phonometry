@@ -472,6 +472,49 @@ res.limited           # bandas en el límite de medida de 1,3 dB (> delta-L)
 res.octave_bands()    # (frec. de octava, delta-L_oct) vía Fórmula (5)
 ```
 
+### Informe de mejora a impacto de ISO 16251-1 (`.report()`)
+
+`FloorCoveringImprovementResult.report(path)` escribe una ficha acreditada de
+mejora a impacto de una página: la línea de base normativa, una cabecera de
+metadatos, la tabla por bandas (frecuencia y $\Delta L$, con las bandas en el
+límite de 1,3 dB precedidas por `>`) junto a la curva de mejora $\Delta L(f)$,
+el número único encuadrado $\Delta L_w\ (C_{I,\Delta})$ (la expresión de
+resultados de la Cláusula 8 e) de ISO 16251-1) y un pie. Pasa un
+`ReportMetadata` para la cabecera; los campos aplicables son `specimen` (el
+revestimiento de suelo ensayado), `client`, `manufacturer`, `mounting`,
+`mass_per_area`, `test_room`, `test_date`, `temperature`, `pressure`,
+`measurement_standard`, `laboratory`, `operator`, `report_id`, `notes` y
+`requirement` (una mejora ponderada mayor es mejor, así que el veredicto es apto
+en cuanto la iguala o la supera). El suelo de referencia desnudo es el suelo
+pesado normalizado de la Tabla 4 de ISO 717-2:2020, fijado por la norma.
+`verbose=True` añade la columna del suelo de referencia con revestimiento
+$L_{n,r} = L_{n,r,0} - \Delta L$, la base de la derivación de $\Delta L_w$.
+
+```python
+from phonometry import building, ReportMetadata
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500,
+         630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
+delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
+bare = [78.0] * 16
+res = building.impact_improvement(bare, [b - d for b, d in zip(bare, delta_l)], freqs)
+res.report("dLw.pdf",
+           metadata=ReportMetadata(
+               specimen="Revestimiento textil (moqueta), pelo de 6 mm",
+               measurement_standard="ISO 16251-1",
+               requirement=17.0))  # delta-Lw (CI,delta) = 19 (-11) dB
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene en el
+repositorio. Pulsa la vista previa para abrir el PDF:
+
+<ReportPreview
+	name="iso16251_floor_covering_example"
+	title="Informe de ejemplo de mejora a impacto de revestimientos de suelo ISO 16251-1 (PDF)"
+	description="Informe de ensayo de mejora a impacto de una página para una moqueta blanda medida en una maqueta pequeña: la cabecera de metadatos (cliente, descripción del revestimiento, montaje, masa por superficie, clima), la tabla de delta-L en tercios de octava junto a la curva de mejora delta-L(f) creciendo con la frecuencia, el número único encuadrado delta-Lw (CI,delta) = 19 (-11) dB de mejora ponderada (ISO 717-2) y un veredicto APTO frente al requisito de 17 dB (una mejora ponderada mayor es mejor)."
+	caption="Ficha de mejora a impacto de revestimientos de suelo (FloorCoveringImprovementResult.report), delta-Lw (CI,delta)."
+/>
+
 ## Transmisión por flancos en laboratorio (ISO 10848)
 
 ISO 10848:2006/2010 es el método de laboratorio que **mide** el **índice de

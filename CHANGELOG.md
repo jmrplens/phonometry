@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `standard_speech_spectra()` and the `StandardSpeechSpectrum` result: a thin,
+  plottable wrapper around `standard_speech_spectrum()` (ANSI S3.5-1997 Table 3)
+  that carries the 18 one-third-octave band centre frequencies and the standard
+  speech spectrum level of one or more vocal efforts (`normal`, `raised`,
+  `loud`, `shout`). Its `.plot()` draws the standard speech spectrum level (dB
+  SPL) over the categorical one-third-octave band axis, one labelled line per
+  vocal effort, so the whole spectrum lifting with vocal effort reads at a
+  glance. The band levels are unchanged; `standard_speech_spectrum()` still
+  returns the bare per-band array. `language="es"` renders the Spanish labels.
 - `k_weighting_response()` and `KWeightingResponse`: the K-weighting pre-filter
   of ITU-R BS.1770-5 (Annex 1) evaluated as a magnitude frequency response. The
   constructor evaluates the same Table 1-2 biquads that `k_weighting` applies

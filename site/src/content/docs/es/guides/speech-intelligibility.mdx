@@ -206,6 +206,49 @@ for effort in hearing.sii.VOCAL_EFFORTS:
 print(hearing.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL a 1 kHz
 ```
 
+Los cuatro espectros también están disponibles como un único resultado
+representable: `standard_speech_spectra()` devuelve un `StandardSpeechSpectrum`
+que lleva las frecuencias centrales de banda y los niveles de banda por
+esfuerzo, y su `.plot()` los dibuja como una familia etiquetada sobre el eje de
+bandas de tercio de octava.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum_es.svg"
+  alt="Los cuatro espectros de voz estándar de ANSI S3.5-1997 (normal, elevada, fuerte, grito) como una familia etiquetada: el nivel espectral de voz en dB SPL sobre las 18 bandas de tercio de octava de 160 Hz a 8000 Hz, cada esfuerzo mayor sube todo el espectro"
+  width="90%"
+/>
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import hearing
+
+# Una línea: toda la familia de la Tabla 3 de ANSI S3.5-1997.
+hearing.standard_speech_spectra().plot()
+plt.show()
+
+# A mano, reproduciendo lo que dibuja StandardSpeechSpectrum.plot():
+res = hearing.standard_speech_spectra()
+pos = np.arange(res.frequencies.size)
+fig, ax = plt.subplots()
+for effort, levels in zip(res.vocal_efforts, res.levels):
+    ax.plot(pos, levels, "o-", label=effort.capitalize())
+ax.set_xticks(pos)
+ax.set_xticklabels([f"{f:g}" for f in res.frequencies], rotation=45, ha="right")
+ax.set_xlabel("Banda de tercio de octava [Hz]")
+ax.set_ylabel("Nivel espectral del habla [dB SPL]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+Los mismos cuatro espectros alimentan el índice: en un ruido de banda ancha
+fijo, cada esfuerzo vocal mayor sube el espectro de voz y aumenta el SII.
+
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_es.svg"
   alt="Izquierda: los cuatro espectros de voz estándar de ANSI S3.5-1997 (normal, elevada, fuerte, grito) de 160 Hz a 8000 Hz, cada esfuerzo mayor sube todo el espectro. Derecha: el SII resultante en un ruido de banda ancha fijo, subiendo de 0,12 (normal) a 0,79 (grito)"

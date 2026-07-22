@@ -242,12 +242,16 @@ Render an ISO 10140-2 laboratory airborne-insulation report to a PDF.
 
 Writes the one-page laboratory test report of ISO 10140-2:2010: the
 standard-basis line, an optional metadata header block (client,
-specimen, mounting, room volumes, climatic conditions ...), the
-one-third-octave table beside the measured-versus-shifted-reference
-curve, the boxed laboratory rating `Rw (C; Ctr)` (evaluated per
-ISO 717-1 over the 16 core bands), the laboratory-method statement, an
-optional verdict row and a footer with the identity block and
-disclaimer.
+specimen, mounting, room volumes, climatic conditions ...), the band
+table (16 one-third-octave or 5 octave bands) beside the
+measured-versus-shifted-reference curve, the boxed laboratory rating
+`Rw (C; Ctr)` (evaluated per ISO 717-1), the laboratory-method
+statement, an optional verdict row and a footer with the identity
+block and disclaimer. The report requires the single-number `rating`
+to be present on the result; it is formed automatically only for
+exactly 16 one-third-octave (100 Hz to 3150 Hz) or 5 octave (125 Hz to
+2000 Hz) bands, and a result carrying no rating (any other band count)
+is rejected.
 
 **Parameters**
 
@@ -265,7 +269,7 @@ disclaimer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` is unknown or the result does not hold the 16 one-third-octave (100 Hz to 3150 Hz) or 5 octave bands the ISO 717-1 rating needs. |
+| ValueError | If `engine` is unknown, `language` is not one of the supported values, or the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-1 rating the fiche needs was not formed). |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
 
 ## LabImpactInsulationResult
@@ -320,12 +324,16 @@ LabImpactInsulationResult.report(
 Render an ISO 10140-3 laboratory impact-insulation report to a PDF.
 
 Writes the one-page laboratory test report of ISO 10140-3:2010: the
-standard-basis line, an optional metadata header block, the
-one-third-octave table beside the measured-versus-shifted-reference
-curve, the boxed laboratory rating `Ln,w (CI)` (evaluated per
-ISO 717-2 over the 16 core bands), the laboratory-method statement, an
-optional verdict row and a footer with the identity block and
-disclaimer.
+standard-basis line, an optional metadata header block, the band table
+(16 one-third-octave or 5 octave bands) beside the
+measured-versus-shifted-reference curve, the boxed laboratory rating
+`Ln,w (CI)` (evaluated per ISO 717-2), the laboratory-method
+statement, an optional verdict row and a footer with the identity
+block and disclaimer. The report requires the single-number `rating`
+to be present on the result; it is formed automatically only for
+exactly 16 one-third-octave (100 Hz to 3150 Hz) or 5 octave (125 Hz to
+2000 Hz) bands, and a result carrying no rating (any other band count)
+is rejected.
 
 **Parameters**
 
@@ -343,7 +351,7 @@ disclaimer.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` is unknown or the result does not hold the 16 one-third-octave (100 Hz to 3150 Hz) or 5 octave bands the ISO 717-2 rating needs. |
+| ValueError | If `engine` is unknown, `language` is not one of the supported values, or the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-2 rating the fiche needs was not formed). |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
 
 ## LabInsulationWarning

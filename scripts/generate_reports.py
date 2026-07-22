@@ -178,7 +178,7 @@ def _lab_airborne_example() -> Tuple[object, ReportMetadata, str]:
     The reported spectrum is the ISO 717-1:2020 Annex C worked-example sound
     reduction index (Rw = 30 (-2; -3) dB): with the free test opening area
     S = 10 m2 equal to the receiving-room absorption area A = 0,16 V / T (here
-    V = 31,25 m3, T = 0,5 s give A = 10 m2), the term 10 lg(S/A) vanishes and
+    V = 50 m3, T = 0,8 s give A = 10 m2), the term 10 lg(S/A) vanishes and
     R = L1 - L2 reproduces that published curve exactly.
     """
     r = np.array(
@@ -187,7 +187,7 @@ def _lab_airborne_example() -> Tuple[object, ReportMetadata, str]:
     )
     l1 = np.full(16, 90.0)
     result = ph.lab_airborne_insulation(
-        l1, l1 - r, np.full(16, 0.5), area=10.0, volume=31.25
+        l1, l1 - r, np.full(16, 0.8), area=10.0, volume=50.0
     )
     metadata = ReportMetadata(
         specimen="100 mm autoclaved aerated concrete block wall",
@@ -195,7 +195,7 @@ def _lab_airborne_example() -> Tuple[object, ReportMetadata, str]:
         manufacturer="Example blockworks",
         area=10.0,
         mass_per_area=75.0,
-        receiving_volume=51.0,
+        receiving_volume=50.0,
         source_volume=53.0,
         receiving_temperature=20.8,
         receiving_relative_humidity=46.0,
@@ -218,14 +218,14 @@ def _lab_impact_example() -> Tuple[object, ReportMetadata, str]:
     The reported spectrum is the ISO 717-2:2020 Annex C worked-example
     normalized impact sound pressure level (Ln,w = 79 (-11) dB): with the
     receiving-room absorption area A = 0,16 V / T equal to the reference
-    A0 = 10 m2 (here V = 31,25 m3, T = 0,5 s give A = 10 m2), the term
+    A0 = 10 m2 (here V = 50 m3, T = 0,8 s give A = 10 m2), the term
     10 lg(A/A0) vanishes and Ln = Li reproduces that published curve exactly.
     """
     li = np.array(
         [62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
          73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2]
     )
-    result = ph.lab_impact_insulation(li, np.full(16, 0.5), volume=31.25)
+    result = ph.lab_impact_insulation(li, np.full(16, 0.8), volume=50.0)
     metadata = ReportMetadata(
         specimen="140 mm concrete slab, bare (reference floor)",
         client="Example client",
@@ -233,8 +233,7 @@ def _lab_impact_example() -> Tuple[object, ReportMetadata, str]:
         mounted_by="Example laboratory",
         area=10.0,
         mass_per_area=336.0,
-        receiving_volume=51.0,
-        source_volume=53.0,
+        receiving_volume=50.0,
         receiving_temperature=20.6,
         receiving_relative_humidity=45.0,
         pressure=101.1,

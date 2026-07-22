@@ -235,13 +235,13 @@ l1 = np.full(16, 90.0)
 r = np.array([20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
               28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5])
 lab = building.lab_airborne_insulation(
-    l1, l1 - r, np.full(16, 0.5), area=10.0, volume=31.25
+    l1, l1 - r, np.full(16, 0.8), area=10.0, volume=50.0
 )
 metadata = ReportMetadata(
     specimen="100 mm autoclaved aerated concrete block wall",
     client="Example client",
     area=10.0, mass_per_area=75.0,
-    source_volume=53.0, receiving_volume=51.0,
+    source_volume=53.0, receiving_volume=50.0,
     test_room="Transmission suite (example)",
     mounting="Type A mounting, mortar-bedded perimeter (ISO 10140-1)",
     measurement_standard="ISO 10140-2",
@@ -256,7 +256,7 @@ lab.report("Rw_lab_chain.pdf", metadata=metadata,
 # Laboratory impact: tapping-machine levels in the receiving room
 li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
-imp = building.lab_impact_insulation(li, np.full(16, 0.5), volume=31.25)
+imp = building.lab_impact_insulation(li, np.full(16, 0.8), volume=50.0)
 imp.report("Lnw_lab.pdf",
            metadata=ReportMetadata(requirement=80.0))  # Ln,w (CI)
 ```

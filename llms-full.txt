@@ -6699,13 +6699,13 @@ l1 = np.full(16, 90.0)
 r = np.array([20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
               28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5])
 lab = building.lab_airborne_insulation(
-    l1, l1 - r, np.full(16, 0.5), area=10.0, volume=31.25
+    l1, l1 - r, np.full(16, 0.8), area=10.0, volume=50.0
 )
 metadata = ReportMetadata(
     specimen="100 mm autoclaved aerated concrete block wall",
     client="Example client",
     area=10.0, mass_per_area=75.0,
-    source_volume=53.0, receiving_volume=51.0,
+    source_volume=53.0, receiving_volume=50.0,
     test_room="Transmission suite (example)",
     mounting="Type A mounting, mortar-bedded perimeter (ISO 10140-1)",
     measurement_standard="ISO 10140-2",
@@ -6720,7 +6720,7 @@ lab.report("Rw_lab_chain.pdf", metadata=metadata,
 # Laboratory impact: tapping-machine levels in the receiving room
 li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
-imp = building.lab_impact_insulation(li, np.full(16, 0.5), volume=31.25)
+imp = building.lab_impact_insulation(li, np.full(16, 0.8), volume=50.0)
 imp.report("Lnw_lab.pdf",
            metadata=ReportMetadata(requirement=80.0))  # Ln,w (CI)
 ```
@@ -12295,8 +12295,8 @@ cycle and warn on use; they are removed in 4.0.
 | `survey_service_equipment_level` | `function` | **Service-equipment noise LXY (ISO 10052:2021 Clauses 3.16-3.18).**<br>• `measurements`: three A/C-weighted positions [dB]<br>• `reverberation_index`: k (scalar or per band)<br>• `volume` (for LXY,n) | `se = survey_service_equipment_level([35, 30, 32], 3.0, volume=50)`<br><br>• `SurveyServiceEquipmentResult` (`l_xy`, `l_xy_nt`, `l_xy_n`) |
 | `SurveyAirborneResult` / `SurveyImpactResult` / `SurveyFacadeResult` / `SurveyServiceEquipmentResult` | `dataclass` | **ISO 10052 survey-method results.**<br>• per-band quantities (`d`, `d_nt`, `d_n`, `r_prime`; `l_i`, `l_nt`, `l_n`; `d_2m`...; `l_xy`...)<br>• weighted `rating` where the method defines one | `res = survey_airborne_insulation(...)` |
 | `background_correction` | `function` | **Background-noise correction (ISO 10140-4 §4.3).**<br>• `signal_and_background`: Combined Lsb per band [dB]<br>• `background`: Lb per band [dB]<br>• 6–15 dB margin corrected, ≤6 dB capped at 1.3 dB, ≥15 dB unchanged | `L = background_correction(lsb, lb)`<br><br>• Corrected levels [dB] (`LabInsulationWarning` at the limit of measurement) |
-| `LabAirborneInsulationResult` | `dataclass` | **Laboratory airborne result.**<br>• `r`: Sound reduction index R [dB]<br>• `absorption`: A = 0.16 V/T [m²]<br>• `rating`: `WeightedRatingResult` or None<br>• `.plot()` (needs the rating)<br>• `.report(path, ...)`: ISO 10140-2 laboratory test report with the ISO 717-1 rating → PDF | `lab.r, lab.rating.rating` |
-| `LabImpactInsulationResult` | `dataclass` | **Laboratory impact result.**<br>• `l_n`: Normalized impact level Ln [dB]<br>• `absorption`: A [m²]<br>• `rating`: `ImpactRatingResult` or None<br>• `.plot()` (needs the rating)<br>• `.report(path, ...)`: ISO 10140-3 laboratory test report with the ISO 717-2 rating → PDF | `imp.l_n, imp.rating.rating` |
+| `LabAirborneInsulationResult` | `dataclass` | **Laboratory airborne result.**<br>• `r`: Sound reduction index R [dB]<br>• `absorption`: A = 0.16 V/T [m²]<br>• `rating`: `WeightedRatingResult` or None<br>• `.plot()` (needs the rating)<br>• `.report(path, ...)`: ISO 10140-2 laboratory test report with the ISO 717-1 rating → PDF (also needs the rating; 16 one-third-octave or 5 octave bands) | `lab.r, lab.rating.rating` |
+| `LabImpactInsulationResult` | `dataclass` | **Laboratory impact result.**<br>• `l_n`: Normalized impact level Ln [dB]<br>• `absorption`: A [m²]<br>• `rating`: `ImpactRatingResult` or None<br>• `.plot()` (needs the rating)<br>• `.report(path, ...)`: ISO 10140-3 laboratory test report with the ISO 717-2 rating → PDF (also needs the rating; 16 one-third-octave or 5 octave bands) | `imp.l_n, imp.rating.rating` |
 | `LabInsulationWarning` | `warning class` | **Limit-of-measurement condition (ISO 10140-4).**<br>Emitted by `background_correction` when a band's signal-to-background margin is ≤ 6 dB (fixed 1.3 dB cap applied) | `warnings.simplefilter('error', LabInsulationWarning)` |
 | `predicted_airborne_insulation` | `function` | **Predicted apparent airborne R'w (EN 12354-1 Formula 26).**<br>• `r_direct`: Separating-element Rs,w [dB]<br>• `flanking_paths`: sequence of `FlankingPath` (Default: ())<br>• `delta_r_direct`: Lining ΔRDd,w [dB] (Default: 0) | `res = predicted_airborne_insulation(r_direct=57, flanking_paths=paths)`<br><br>• `AirbornePredictionResult` |
 | `predicted_impact_insulation` | `function` | **Predicted apparent impact L'n,w (EN 12354-2 Formula 21).**<br>• `ln_w_eq`: Bare-floor equivalent Ln,w,eq [dB]<br>• `delta_l_w`: Covering improvement ΔLw [dB] (Default: 0)<br>• `k_correction`: Flanking K [dB] (Default: 0) | `imp = predicted_impact_insulation(ln_w_eq=76.2, delta_l_w=33, k_correction=2)`<br><br>• `ImpactPredictionResult` |

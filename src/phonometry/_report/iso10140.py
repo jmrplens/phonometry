@@ -258,7 +258,7 @@ def render_iso10140_report(
     if verbose:
         absorption = np.asarray(result.absorption, dtype=np.float64)
         columns: List[Tuple[str, np.ndarray, int]] = [
-            ("A [m<super>2</super>]", absorption, 1),
+            (t("A [m<super>2</super>]", language), absorption, 1),
             (value_header, curve, 1),
         ]
         caption = t("Per-band quantity and absorption area", language)

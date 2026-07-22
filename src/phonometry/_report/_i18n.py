@@ -145,6 +145,10 @@ _STRINGS: dict[str, str] = {
     # --- iso16283 field fiches --------------------------------------------
     "Per-band measurement chain": "Cadena de medición por bandas",
     "Per-band quantity and absorption area": "Magnitud y área de absorción por bandas",
+    # Symbol-plus-unit column header: the quantity symbol A and the unit m^2
+    # are language-neutral, but the header is registered so it is routed
+    # through ``t`` consistently with the other table headers.
+    "A [m<super>2</super>]": "A [m<super>2</super>]",
     "Evaluation based on field measurement using results obtained by an engineering method.": "Evaluación basada en resultados de medidas in situ obtenidos mediante un método de ingeniería.",
     "Evaluation based on field measurement results obtained by an engineering method.": "Evaluación basada en resultados de medidas in situ obtenidos mediante un método de ingeniería.",
     "Evaluation based on laboratory measurement results obtained by a precision method (flanking transmission suppressed).": "Evaluación basada en resultados de medidas en laboratorio obtenidos mediante un método de precisión (transmisión por flancos suprimida).",

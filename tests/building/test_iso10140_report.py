@@ -211,6 +211,15 @@ def test_unknown_engine_rejected(tmp_path) -> None:
         _impact_result().report(out, engine="weasyprint")
 
 
+def test_unknown_language_rejected(tmp_path) -> None:
+    """An unsupported language raises ``ValueError`` (shared validation path)."""
+    out = str(tmp_path / "x.pdf")
+    with pytest.raises(ValueError, match="language"):
+        _airborne_result().report(out, language="fr")
+    with pytest.raises(ValueError, match="language"):
+        _impact_result().report(out, language="fr")
+
+
 def test_missing_rating_rejected(tmp_path) -> None:
     """A result without the ISO 717 rating (non-core band count) is rejected."""
     l1 = np.full(8, 90.0)

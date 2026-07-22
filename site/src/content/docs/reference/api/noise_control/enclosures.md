@@ -111,3 +111,49 @@ Plot the panel `R`, correction `C` and net insertion loss.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### EnclosureResult.report()
+
+```python
+EnclosureResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a machine-enclosure insertion-loss fiche to `path`.
+
+Writes a one-page enclosure-performance sheet: the method-basis line
+naming the Bies, Hansen & Howard insertion-loss model
+(Engineering Noise Control 5th ed., section 7.4.2), an optional metadata
+header (client, enclosed machine, test environment, instrumentation,
+climate, date), a per-band table (nominal frequency, the supplied panel
+transmission loss `R`, the interior build-up correction `C` and the
+net insertion loss `IL = R - C`) beside the `R`, `C` and `IL`
+curves, the boxed mean insertion loss over the analysis bands with the
+external and internal surface areas, an optional verdict row against a
+declared minimum, and a method-basis strip stating
+`IL = R - C` with `C = 10 lg(0.3 + S_E / R_i)`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the enclosed machine, `test_room` the test environment, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared minimum mean insertion loss (more insertion loss is better). The surface areas come from the result itself. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True` the per-band table adds the interior room constant `R_i` column. |
+| `language` | Fiche language: `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |

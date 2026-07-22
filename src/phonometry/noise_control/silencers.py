@@ -75,6 +75,8 @@ from .._internal.validation import require_non_negative, require_positive
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 #: Reference air properties at 20 degC, 101.325 kPa.
 _C_AIR = 343.0
 _RHO_AIR = 1.206
@@ -353,6 +355,62 @@ class ReactiveSilencerResult:
 
         check_language(language)
         return plot_reactive_silencer(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a reactive-silencer transmission-loss fiche to ``path``.
+
+        Writes a one-page silencer-performance sheet: the method-basis line
+        naming the plane-wave four-pole (transfer-matrix) method (Munjal,
+        Acoustics of Ducts and Mufflers 2nd ed., Eq. (3.27); Bies, Hansen &
+        Howard, Engineering Noise Control 5th ed., sections 8.8-8.9), an
+        optional metadata header (client, device, test environment,
+        instrumentation, climate, date), a per-band table (nominal frequency,
+        the transmission loss ``TL`` and, when computed, the insertion loss
+        ``IL``) beside the ``TL`` (and ``IL``) curves, the boxed mean
+        transmission loss over the analysis bands with the peak transmission
+        loss and the device kind, an optional verdict row against a declared
+        minimum, and a method-basis strip stating the four-pole
+        transmission-loss relation.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header (``client``, ``specimen`` the device, ``test_room`` the
+            test environment, ``instrumentation``, ``temperature``,
+            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
+            and, via ``requirement``, a declared minimum mean transmission loss
+            (more transmission loss is better).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for signature symmetry with the other fiches;
+            the silencer table already shows the insertion loss when it was
+            computed.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab (or, for the figure, matplotlib) is
+            not installed (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.silencer import render_reactive_silencer_report
+
+        return render_reactive_silencer_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def _result(

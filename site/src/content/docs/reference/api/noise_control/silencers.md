@@ -256,3 +256,50 @@ Plot the transmission (and insertion) loss against frequency.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### ReactiveSilencerResult.report()
+
+```python
+ReactiveSilencerResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a reactive-silencer transmission-loss fiche to `path`.
+
+Writes a one-page silencer-performance sheet: the method-basis line
+naming the plane-wave four-pole (transfer-matrix) method (Munjal,
+Acoustics of Ducts and Mufflers 2nd ed., Eq. (3.27); Bies, Hansen &
+Howard, Engineering Noise Control 5th ed., sections 8.8-8.9), an
+optional metadata header (client, device, test environment,
+instrumentation, climate, date), a per-band table (nominal frequency,
+the transmission loss `TL` and, when computed, the insertion loss
+`IL`) beside the `TL` (and `IL`) curves, the boxed mean
+transmission loss over the analysis bands with the peak transmission
+loss and the device kind, an optional verdict row against a declared
+minimum, and a method-basis strip stating the four-pole
+transmission-loss relation.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the device, `test_room` the test environment, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared minimum mean transmission loss (more transmission loss is better). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for signature symmetry with the other fiches; the silencer table already shows the insertion loss when it was computed. |
+| `language` | Fiche language: `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |

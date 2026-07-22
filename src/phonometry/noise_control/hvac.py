@@ -36,6 +36,8 @@ from ..room.steady_field import room_constant
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 _C_AIR = 343.0
 
 # ---------------------------------------------------------------------------
@@ -143,6 +145,62 @@ class HvacSpectrumResult:
 
         check_language(language)
         return plot_hvac_spectrum(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an HVAC duct-noise-spectrum fiche to ``path``.
+
+        Writes a one-page HVAC-noise sheet: the method-basis line naming the
+        reported quantity and the Bies, Hansen & Howard chapter (Engineering
+        Noise Control 5th ed., Chapter 8), an optional metadata header (client,
+        duct element, test environment, instrumentation, climate, date), a
+        per-band table (nominal frequency and the reported quantity) beside the
+        spectrum, the boxed single-number result (for a regenerated-noise
+        spectrum the A-weighted sound power level ``L_WA`` re 1 pW with the
+        overall unweighted total; for an attenuation spectrum the mean
+        attenuation with its band range), an optional verdict row against a
+        declared limit, and a method-basis strip stating the reported quantity's
+        relation.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header (``client``, ``specimen`` the duct element, ``test_room``
+            the test environment, ``instrumentation``, ``temperature``,
+            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
+            and, via ``requirement``, a declared maximum A-weighted sound power
+            level for a regenerated-noise spectrum (lower is better) or a
+            declared minimum mean attenuation for an attenuation spectrum (more
+            is better).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True`` a regenerated-noise table adds the
+            A-weighting correction and the A-weighted band level columns.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab (or, for the figure, matplotlib) is
+            not installed (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.hvac import render_hvac_report
+
+        return render_hvac_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def end_reflection_loss(

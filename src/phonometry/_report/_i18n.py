@@ -640,6 +640,27 @@ _STRINGS: dict[str, str] = {
     "Predicted standardized level difference of a facade D<sub>2m,nT</sub> (the envelope elements' apparent sound reduction index R&#8242; combined energetically with the room geometry) estimated in accordance with EN/ISO 12354-3:2000 (simplified model, Formula 13). This is a prediction from element data, not a measurement. D<sub>2m,nT,w</sub> (with apparent index R&#8242;<sub>tr,s,w</sub> = {rtrs} dB and C<sub>tr</sub> = {ctr} dB) per ISO 717-1.": "Diferencia de niveles estandarizada de una fachada D<sub>2m,nT</sub> prevista (el índice de reducción acústica aparente R&#8242; de los elementos de la envolvente combinado energéticamente con la geometría del recinto) estimada de acuerdo con la Norma EN/ISO 12354-3:2000 (modelo simplificado, fórmula 13). Es una predicción a partir de los datos de los elementos, no una medición. D<sub>2m,nT,w</sub> (con índice aparente R&#8242;<sub>tr,s,w</sub> = {rtrs} dB y C<sub>tr</sub> = {ctr} dB) según ISO 717-1.",
     "Facade elements R<sub>p,w</sub> [dB]": "Elementos de la fachada R<sub>p,w</sub> [dB]",
     "Facade element R<sub>p,w</sub> [dB] and energy share": "R<sub>p,w</sub> [dB] por elemento de la fachada y fracción de energía",
+    # --- ISO 10848 laboratory flanking transmission ----------------------
+    "Flanking sound insulation between rooms": "Aislamiento acústico por flancos entre recintos",
+    "Flanking impact sound insulation of floors": "Aislamiento acústico por flancos a ruido de impactos de suelos",
+    "Junction vibration reduction index": "Índice de reducción vibracional de la unión",
+    "Normalized flanking level difference D<sub>n,f</sub> measured in accordance with ISO 10848-2:2006 (airborne excitation of the source-room element). Rating per ISO 717-1:2020.": "Diferencia de niveles por flancos normalizada D<sub>n,f</sub> medida de acuerdo con la Norma ISO 10848-2:2006 (excitación aérea del elemento del recinto emisor). Índice según ISO 717-1:2020.",
+    "Normalized flanking impact sound pressure level L<sub>n,f</sub> measured in accordance with ISO 10848-2:2006 using the tapping machine on the source-room floor. Rating per ISO 717-2:2020.": "Nivel de presión acústica de impactos por flancos normalizado L<sub>n,f</sub> medido de acuerdo con la Norma ISO 10848-2:2006 con la máquina de impactos sobre el suelo del recinto emisor. Índice según ISO 717-2:2020.",
+    "Vibration reduction index K<sub>ij</sub> measured in accordance with ISO 10848-1:2006. Junction characterization for the EN 12354 flanking-transmission prediction.": "Índice de reducción vibracional K<sub>ij</sub> medido de acuerdo con la Norma ISO 10848-1:2006. Caracterización de la unión para la predicción de la transmisión por flancos de la Norma EN 12354.",
+    "Evaluation based on laboratory measurement of the normalized flanking level difference (ISO 10848-2:2006, airborne excitation).": "Evaluación basada en la medición en laboratorio de la diferencia de niveles por flancos normalizada (ISO 10848-2:2006, excitación aérea).",
+    "Evaluation based on laboratory measurement of the normalized flanking impact level (ISO 10848-2:2006, tapping machine on the source-room floor).": "Evaluación basada en la medición en laboratorio del nivel de impactos por flancos normalizado (ISO 10848-2:2006, máquina de impactos sobre el suelo del recinto emisor).",
+    "The single-number K<sub>ij</sub> is the arithmetic mean over the Annex A band range (200 Hz to 1250 Hz for one-third-octave bands, 125 Hz to 1000 Hz for octave bands). Bracketed bands, where the modal overlap factor is below 0,25 (ISO 10848-4:2010 Clause 9), are excluded from the mean. The reported index relates only to the tested junction.": "El número único K<sub>ij</sub> es la media aritmética sobre el intervalo de bandas del anexo A (200 Hz a 1250 Hz para bandas de tercio de octava, 125 Hz a 1000 Hz para bandas de octava). Las bandas entre corchetes, donde el factor de solapamiento modal es inferior a 0,25 (ISO 10848-4:2010 apartado 9), se excluyen de la media. El índice declarado se refiere únicamente a la unión ensayada.",
+    "ISO 717 evaluation per band": "Evaluación ISO 717 por banda",
+    "In mean": "En la media",
+    "yes": "sí",
+    "no": "no",
+    "Vibration reduction index per band": "Índice de reducción vibracional por banda",
+    "Annex A band range: {low} Hz to {high} Hz": "Intervalo de bandas del anexo A: {low} Hz a {high} Hz",
+    "Bands averaged: {n}": "Bandas promediadas: {n}",
+    "Bracketed (M &lt; 0,25): {n}": "Entre corchetes (M &lt; 0,25): {n}",
+    "No single-number K<sub>ij</sub> (no bands in the Annex A range)": "Sin número único K<sub>ij</sub> (no hay bandas en el intervalo del anexo A)",
+    "Single-number K<sub>ij</sub> = <b>{value} dB</b>": "Número único K<sub>ij</sub> = <b>{value} dB</b>",
+    "Values in brackets are bracketed bands, excluded from the single number.": "Los valores entre corchetes son bandas excluidas del número único.",
 }
 
 

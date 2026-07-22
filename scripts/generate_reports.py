@@ -1762,6 +1762,118 @@ def _dynamic_stiffness_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "en29052_dynamic_stiffness_example.pdf"
 
 
+#: One-third-octave centre frequencies of the ISO 10848 mandatory range,
+#: 100 Hz to 5000 Hz (18 bands, Part 1 Clause 7.5), in Hz.
+_FLANKING_FREQS = np.array(
+    [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+     1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000],
+    dtype=float,
+)
+
+
+def _vibration_reduction_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 10848 fiche: the vibration reduction index Kij of a rigid junction.
+
+    ISO 10848 carries no worked numeric example, so this is an illustrative
+    clean-room case built from Formula (13). A rigid T-junction of two heavy
+    walls (element areas Si = 12 m2, Sj = 10 m2, common edge lij = 4 m) has a
+    direction-averaged velocity level difference Dv,ij rising from 4.5 dB at
+    100 Hz to 12.7 dB at 5 kHz; with the structural reverberation times
+    Ts,i = 0.35 s and Ts,j = 0.40 s the equivalent absorption lengths follow
+    Formula (12), giving Kij from about 3 dB at low frequency to 20 dB at
+    5 kHz and a single-number mean Kij = 9.5 dB over the Annex A 200-1250 Hz
+    range. The modal overlap factor brackets the three lowest bands
+    (M < 0.25, ISO 10848-4:2010 Clause 9), which are excluded from the mean.
+    """
+    dv = np.array(
+        [4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
+         9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7]
+    )
+    modal_overlap = np.full(_FLANKING_FREQS.size, 1.0)
+    modal_overlap[:3] = 0.1  # bracket the three lowest bands (poor overlap)
+    result = ph.building.vibration_reduction_index(
+        dv, junction_length=4.0, area_i=12.0, area_j=10.0,
+        frequency=_FLANKING_FREQS,
+        structural_reverberation_time_i=0.35,
+        structural_reverberation_time_j=0.40,
+        modal_overlap=modal_overlap,
+    )
+    metadata = ReportMetadata(
+        specimen="Rigid T-junction of two 200 mm concrete walls",
+        client="Example client",
+        test_room="Flanking-transmission suite (example)",
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-10848-KIJ",
+        notes="Junction vibration reduction index Kij (ISO 10848-1:2006).",
+    )
+    return result, metadata, "iso10848_kij_example.pdf"
+
+
+def _flanking_level_difference_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 10848 fiche: the normalized flanking level difference Dn,f (airborne).
+
+    An illustrative clean-room case (ISO 10848 has no worked numeric example):
+    with the source-room level L1 = 80 dB and the receiving-room equivalent
+    absorption area equal to the reference A0 = 10 m2 in every band (so the
+    10 lg(A/A0) term vanishes, Formula (4)), a receiving-room level rising from
+    32 dB at 100 Hz gives a Dn,f rising from 48 dB to 65 dB and, per ISO 717-1,
+    the single number Dn,f,w = 60 (-1; -3) dB.
+    """
+    dn_f = np.array(
+        [48, 49, 50, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 64, 65],
+        dtype=float,
+    )
+    source_level = np.full(16, 80.0)
+    result = ph.building.normalized_flanking_level_difference(
+        source_level, source_level - dn_f, absorption_area=np.full(16, 10.0)
+    )
+    metadata = ReportMetadata(
+        specimen="Flanking wall over a rigid T-junction",
+        client="Example client",
+        test_room="Flanking-transmission suite (example)",
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-10848-DNF",
+        requirement=55.0,  # Dn,f,w = 60 dB >= 55 dB -> PASS
+        notes="Normalized flanking level difference Dn,f (ISO 10848-2:2006).",
+    )
+    return result, metadata, "iso10848_dnf_example.pdf"
+
+
+def _flanking_impact_level_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 10848 fiche: the normalized flanking impact level Ln,f (tapping machine).
+
+    An illustrative clean-room case (ISO 10848 has no worked numeric example):
+    with the receiving-room equivalent absorption area equal to the reference
+    A0 = 10 m2 in every band (so the 10 lg(A/A0) term vanishes, Formula (5)),
+    a receiving-room impact level falling from 58 dB at 100 Hz to 32 dB at
+    3150 Hz gives an Ln,f equal to it and, per ISO 717-2, the single number
+    Ln,f,w = 49 (0) dB.
+    """
+    receive_level = np.array(
+        [58, 57, 56, 55, 54, 52, 50, 48, 46, 44, 42, 40, 38, 36, 34, 32],
+        dtype=float,
+    )
+    result = ph.building.normalized_flanking_impact_level(
+        receive_level, absorption_area=np.full(16, 10.0)
+    )
+    metadata = ReportMetadata(
+        specimen="Flanking floor over a rigid T-junction",
+        client="Example client",
+        test_room="Flanking-transmission suite (example)",
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-10848-LNF",
+        requirement=55.0,  # Ln,f,w = 49 dB <= 55 dB -> PASS
+        notes="Normalized flanking impact level Ln,f (ISO 10848-2:2006).",
+    )
+    return result, metadata, "iso10848_lnf_example.pdf"
+
+
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
 _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
@@ -1804,6 +1916,9 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _diffusion_example,
     _diffusion_polar_example,
     _dynamic_stiffness_example,
+    _vibration_reduction_example,
+    _flanking_level_difference_example,
+    _flanking_impact_level_example,
 ]
 
 

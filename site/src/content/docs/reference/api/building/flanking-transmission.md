@@ -230,6 +230,46 @@ FlankingImpactLevelResult.plot(
 
 Plot `Ln,f` against the shifted ISO 717-2 reference curve.
 
+### FlankingImpactLevelResult.report()
+
+```python
+FlankingImpactLevelResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a normalized flanking impact level `Ln,f` fiche to a PDF.
+
+Writes the one-page ISO 10848-2:2006 impact flanking-transmission
+report: the standard-basis line, an optional metadata header, the
+per-band `Ln,f` table beside the measured-versus-shifted-ISO 717-2
+reference curve, the boxed single-number `Ln,f,w (CI)`, the
+measurement statement, an optional requirement verdict and a footer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the left table shows the ISO 717 evaluation per band (the `Ln,f` value, the shifted reference and the unfavourable deviation) instead of the two-column form. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is unknown or the result has no single-number rating (the band count is neither 16 nor 5). |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
 ## FlankingLevelDifferenceResult
 
 ```python
@@ -260,6 +300,46 @@ FlankingLevelDifferenceResult.plot(
 ```
 
 Plot `Dn,f` against the shifted ISO 717-1 reference curve.
+
+### FlankingLevelDifferenceResult.report()
+
+```python
+FlankingLevelDifferenceResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a normalized flanking level difference `Dn,f` fiche to a PDF.
+
+Writes the one-page ISO 10848-2:2006 airborne flanking-transmission
+report: the standard-basis line, an optional metadata header, the
+per-band `Dn,f` table beside the measured-versus-shifted-ISO 717-1
+reference curve, the boxed single-number `Dn,f,w (C; Ctr)`, the
+measurement statement, an optional requirement verdict and a footer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating and disclaimer only). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the left table shows the ISO 717 evaluation per band (the `Dn,f` value, the shifted reference and the unfavourable deviation) instead of the two-column form. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is unknown or the result has no single-number rating (the band count is neither 16 nor 5). |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
 
 ## modal_density
 
@@ -646,3 +726,45 @@ Plot `Kij` against frequency.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### VibrationReductionResult.report()
+
+```python
+VibrationReductionResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a vibration reduction index `Kij` junction fiche to a PDF.
+
+Writes the one-page ISO 10848-1:2006 junction-characterization report:
+the standard-basis line, an optional metadata header, the per-band
+`Kij` table beside the `Kij(f)` curve, the boxed single-number mean
+`Kij` (Annex A band range) with the count of averaged and bracketed
+bands, the measurement statement and a footer. Bands bracketed for poor
+modal overlap (ISO 10848-4:2010 Clause 9) are printed in brackets and
+excluded from the single number.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, result and disclaimer only). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the per-band table adds a column stating whether each band enters the single-number mean. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is unknown or the result carries no band centre frequencies. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |

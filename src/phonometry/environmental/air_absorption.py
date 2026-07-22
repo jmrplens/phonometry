@@ -308,6 +308,20 @@ class AtmosphericAttenuation:
     pressure: float
     distance: float | None = None
 
+    def __post_init__(self) -> None:
+        """Validate the ``distance`` invariant on any construction path.
+
+        A propagation distance must be finite and non-negative; enforcing it
+        here (rather than only in :func:`atmospheric_attenuation`) keeps direct
+        construction of the frozen result and the factory consistent.
+        """
+        if self.distance is not None and (
+            not np.isfinite(self.distance) or self.distance < 0.0
+        ):
+            raise ValueError(
+                "'distance' must be a finite, non-negative number of metres."
+            )
+
     @property
     def total_attenuation(self) -> NDArray[np.float64] | None:
         """Total atmospheric attenuation ``A = alpha * d`` over :attr:`distance`.
@@ -376,12 +390,10 @@ def atmospheric_attenuation(
         the total attenuation ``A = alpha * d`` over that distance (ISO 9613-2
         Eq. (8)). Must be finite and non-negative.
     :return: A frozen :class:`AtmosphericAttenuation`.
-    :raises ValueError: If ``distance`` is negative or non-finite (NaN/inf).
+    :raises ValueError: If ``distance`` is negative or non-finite (NaN/inf); the
+        check lives on :class:`AtmosphericAttenuation` so it also guards direct
+        construction.
     """
-    if distance is not None and (
-        not np.isfinite(distance) or distance < 0.0
-    ):
-        raise ValueError("'distance' must be a finite, non-negative number of metres.")
     freqs = np.asarray(frequencies, dtype=np.float64)
     alpha = air_attenuation(
         frequencies,

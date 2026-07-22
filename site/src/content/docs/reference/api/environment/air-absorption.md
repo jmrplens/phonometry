@@ -177,7 +177,7 @@ unchanged; this is a thin, plottable wrapper around the existing function
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `distance` is negative or non-finite (NaN/inf). |
+| ValueError | If `distance` is negative or non-finite (NaN/inf); the check lives on [`AtmosphericAttenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuation) so it also guards direct construction. |
 
 ## AtmosphericAbsorptionWarning
 

@@ -39,6 +39,7 @@ _STRINGS: dict[str, str] = {
     "Field impact sound insulation of floors": "Aislamiento acústico a ruido de impactos de suelos in situ",
     "Laboratory airborne sound insulation of a building element": "Aislamiento acústico a ruido aéreo de un elemento constructivo en laboratorio",
     "Laboratory impact sound insulation of floors": "Aislamiento acústico a ruido de impactos de suelos en laboratorio",
+    "Laboratory sound insulation by sound intensity": "Aislamiento acústico en laboratorio por intensidad sonora",
     # --- standard-basis line templates -----------------------------------
     "{standard} laboratory measurement of sound insulation. Rating per {part}:2020.": "{standard} medición en laboratorio del aislamiento acústico. Índice según {part}:2020.",
     "Sound insulation rating per {part}:2020.": "Índice de aislamiento acústico según {part}:2020.",
@@ -48,6 +49,7 @@ _STRINGS: dict[str, str] = {
     "Normalized impact sound pressure level L&#8242;<sub>n</sub> measured in accordance with ISO 16283-2:2020 using the tapping machine. Rating per ISO 717-2:2020.": "Nivel de presión acústica de impactos normalizado L&#8242;<sub>n</sub> medido de acuerdo con la Norma ISO 16283-2:2020 con la máquina de impactos. Índice según ISO 717-2:2020.",
     "Sound reduction index R measured in accordance with ISO 10140-2:2010 in a laboratory suppressing flanking transmission. Rating per ISO 717-1:2020.": "Índice de reducción acústica R medido de acuerdo con la Norma ISO 10140-2:2010 en un laboratorio con la transmisión por flancos suprimida. Índice según ISO 717-1:2020.",
     "Normalized impact sound pressure level L<sub>n</sub> measured in accordance with ISO 10140-3:2010 using the tapping machine. Rating per ISO 717-2:2020.": "Nivel de presión acústica de impactos normalizado L<sub>n</sub> medido de acuerdo con la Norma ISO 10140-3:2010 con la máquina de impactos. Índice según ISO 717-2:2020.",
+    "Intensity sound reduction index R<sub>I</sub> measured in accordance with ISO 15186-1:2000 (transmitted sound power measured directly with an intensity probe). Rating per ISO 717-1:2020.": "Índice de reducción acústica por intensidad R<sub>I</sub> medido de acuerdo con la Norma ISO 15186-1:2000 (potencia acústica transmitida medida directamente con una sonda de intensidad). Índice según ISO 717-1:2020.",
     "{standard} laboratory measurement of sound absorption. Rating per ISO 11654:1997.": "{standard} medición en laboratorio de la absorción acústica. Índice según ISO 11654:1997.",
     "Sound absorption rating per ISO 11654:1997.": "Índice de absorción acústica según ISO 11654:1997.",
     "{standard} reverberation-room measurement of sound absorption per ISO 354:2003.": "{standard} medición en cámara reverberante de la absorción acústica según ISO 354:2003.",
@@ -102,6 +104,7 @@ _STRINGS: dict[str, str] = {
     "sum": "suma",
     # --- captions ---------------------------------------------------------
     "One-third-octave {vh} [dB]": "Tercio de octava {vh} [dB]",
+    "Per-band index and Kc-modified index": "Índice por banda e índice modificado por Kc",
     "One-third-octave &#945;<sub>s</sub>, octave &#945;<sub>p</sub>": "&#945;<sub>s</sub> en tercio de octava, &#945;<sub>p</sub> en octava",
     "Octave-band &#945;<sub>p</sub>": "&#945;<sub>p</sub> en banda de octava",
     "One-third-octave &#945;<sub>s</sub>": "&#945;<sub>s</sub> en tercio de octava",
@@ -153,6 +156,7 @@ _STRINGS: dict[str, str] = {
     "Evaluation based on field measurement results obtained by an engineering method.": "Evaluación basada en resultados de medidas in situ obtenidos mediante un método de ingeniería.",
     "Evaluation based on laboratory measurement results obtained by a precision method (flanking transmission suppressed).": "Evaluación basada en resultados de medidas en laboratorio obtenidos mediante un método de precisión (transmisión por flancos suprimida).",
     "Evaluation based on laboratory measurement results obtained by a precision method with the standard tapping machine.": "Evaluación basada en resultados de medidas en laboratorio obtenidos mediante un método de precisión con la máquina de impactos normalizada.",
+    "Evaluation based on laboratory measurement results obtained by the sound-intensity method (transmitted sound power measured directly over the measurement surface).": "Evaluación basada en resultados de medidas en laboratorio obtenidos mediante el método de intensidad sonora (potencia acústica transmitida medida directamente sobre la superficie de medición).",
     "{sym} = {rating} dB, required &#8805; {req} dB": "{sym} = {rating} dB, exigido &#8805; {req} dB",
     "{sym} = {rating} dB, required &#8804; {req} dB": "{sym} = {rating} dB, exigido &#8804; {req} dB",
     # --- iso11654 statement / verdict ------------------------------------

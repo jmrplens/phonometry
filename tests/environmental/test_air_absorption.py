@@ -268,10 +268,12 @@ def test_atmospheric_attenuation_rejects_bad_distance(bad: float) -> None:
 def test_atmospheric_attenuation_direct_construction_guards_distance(bad: float) -> None:
     # The invariant lives in __post_init__, so building the result directly with
     # a bad distance raises just as the factory does.
+    freqs = np.array([1000.0])
+    alpha = np.array([0.005])
     with pytest.raises(ValueError, match="'distance' must be a finite"):
         AtmosphericAttenuation(
-            frequencies=np.array([1000.0]),
-            attenuation_coefficient=np.array([0.005]),
+            frequencies=freqs,
+            attenuation_coefficient=alpha,
             temperature=20.0,
             relative_humidity=50.0,
             pressure=101.325,

@@ -1,19 +1,24 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
-"""EN/ISO 12354-1/-2 predicted building sound-insulation fiche (reportlab).
+"""EN/ISO 12354-1/-2/-3 predicted building sound-insulation fiche (reportlab).
 
 Renders a
 :class:`~phonometry.building.building_prediction.AirbornePredictionResult`
-(predicted apparent sound reduction index ``R'`` between rooms, EN/ISO 12354-1)
-or an
+(predicted apparent sound reduction index ``R'`` between rooms, EN/ISO 12354-1),
+an
 :class:`~phonometry.building.building_prediction.ImpactPredictionResult`
 (predicted apparent normalized impact sound pressure level ``L'n``, EN/ISO
-12354-2) to a one-page **prediction** report. Unlike the measurement fiches
+12354-2) or a
+:class:`~phonometry.building.facade_prediction.FacadePredictionResult`
+(predicted standardized level difference of a facade ``D2m,nT``, EN/ISO
+12354-3) to a one-page **prediction** report. Unlike the measurement fiches
 (:mod:`.iso10140`, :mod:`.iso16283`, :mod:`.iso15186`), the reported result is
 an *estimate* of the in-situ performance computed from the laboratory
 performance of the building elements plus the flanking transmission across the
 junctions (the simplified single-number model, EN 12354-1 Clause 4.4 airborne /
-EN 12354-2 Clause 4.3 impact); the sheet states this explicitly and is clearly
-labelled a prediction, never a measurement.
+EN 12354-2 Clause 4.3 impact) or, for the facade, from the energy summation of
+the envelope elements' transmission factors and the room geometry (EN 12354-3
+Formula 13); the sheet states this explicitly and is clearly labelled a
+prediction, never a measurement.
 
 The simplified model works directly on the elements' single-number ratings and
 returns the apparent weighted rating (``R'w`` / ``L'n,w``) without an
@@ -60,6 +65,7 @@ if TYPE_CHECKING:
         AirbornePredictionResult,
         ImpactPredictionResult,
     )
+    from ..building.facade_prediction import FacadePredictionResult
 
 #: Model standard deviation of the simplified single-number prediction, stated
 #: for reference in the method statement (EN 12354-1:2000 Clause 5, EN 12354-2
@@ -309,6 +315,98 @@ def render_iso12354_impact_report(
         left_caption_key="Impact level prediction - Formula (21) terms [dB]",
         metric_rows=metric_rows,
         is_impact=True,
+        metadata=metadata,
+        language=language,
+    )
+
+
+def _facade_energy_shares(result: "FacadePredictionResult") -> dict[str, float]:
+    """Each element's share (%) of the facade's transmitted acoustic energy.
+
+    The transmission factor of an element is ``&#964; = 10^(-Rp/10)`` from its
+    partial index ``Rp`` (already area-weighted); summed over the bands and
+    normalised to the whole envelope, the shares add up to 100 % and single out
+    the limiting element (an air inlet or a light window rather than the wall).
+    """
+    import numpy as np
+
+    taus = {
+        name: 10.0 ** (-partial / 10.0)
+        for name, partial in result.element_r.items()
+    }
+    total = float(np.sum([t.sum() for t in taus.values()]))
+    return {name: 100.0 * float(t.sum()) / total for name, t in taus.items()}
+
+
+def render_iso12354_facade_report(
+    result: "FacadePredictionResult",
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    verbose: bool = False,
+    language: str = "en",
+) -> str:
+    """Render a predicted facade sound insulation fiche (EN/ISO 12354-3).
+
+    :param result: The
+        :class:`~phonometry.building.facade_prediction.FacadePredictionResult`
+        carrying the predicted standardized level difference ``D2m,nT``, its
+        single number ``D2m,nT,w`` (with ``R'tr,s,w`` and ``Ctr``) and the
+        per-element partial indices ``Rp``.
+    :param path: Destination path of the PDF file.
+    :param metadata: Optional :class:`ReportMetadata`; ``None`` produces a
+        lightweight fiche (body, rating, statement and disclaimer).
+    :param verbose: When ``True``, the left table annexes each façade element's
+        share of the transmitted sound energy; when ``False`` it lists only
+        each element's weighted partial index ``Rp,w``.
+    :param language: ``"en"`` (default) or ``"es"``.
+    :return: The written ``path`` as a :class:`str`.
+    :raises ValueError: If the result lacks the ISO 717-1 single-number ratings
+        (it must be built on the 5 octave or 16 one-third-octave bands).
+    :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
+        installed.
+    """
+    if result.d_2m_nt_w is None:
+        raise ValueError(
+            "A facade prediction report needs the ISO 717-1 single-number "
+            "ratings: build the result on the 5 octave or 16 one-third-octave "
+            "bands (pass matching per-band element data and 'bands' to "
+            "facade_sound_reduction)."
+        )
+    from ..building.insulation import weighted_rating
+
+    shares = _facade_energy_shares(result) if verbose else {}
+    metric_rows: List[Tuple[str, str]] = []
+    for name, partial in result.element_r.items():
+        value = fmt_num(weighted_rating(partial).rating, language)
+        if verbose:
+            share = format_number(shares[name], language, decimals=1)
+            value = f"{value} &#183; {share}%"
+        metric_rows.append((name, value))
+
+    caption_key = (
+        "Facade element R<sub>p,w</sub> [dB] and energy share"
+        if verbose
+        else "Facade elements R<sub>p,w</sub> [dB]"
+    )
+    return _render_prediction_fiche(
+        result=result,
+        path=path,
+        title_key="Predicted facade sound insulation",
+        basis_key=(
+            "Predicted standardized level difference of a facade "
+            "D<sub>2m,nT</sub> (the envelope elements' apparent sound reduction "
+            "index R&#8242; combined energetically with the room geometry) "
+            "estimated in accordance with EN/ISO 12354-3:2000 (simplified "
+            "model, Formula 13). This is a prediction from element data, not a "
+            "measurement. D<sub>2m,nT,w</sub> (with R&#8242;<sub>tr,s,w</sub> "
+            "and C<sub>tr</sub>) per ISO 717-1."
+        ),
+        rating_value=float(result.d_2m_nt_w),
+        rating_symbol="D<sub>2m,nT,w</sub>",
+        left_caption_key=caption_key,
+        metric_rows=metric_rows,
+        is_impact=False,
         metadata=metadata,
         language=language,
     )

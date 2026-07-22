@@ -611,6 +611,11 @@ _STRINGS: dict[str, str] = {
     "Covering improvement &#916;L<sub>w</sub>": "Mejora del revestimiento &#916;L<sub>w</sub>",
     "Flanking correction K": "Corrección por flancos K",
     "Predicted (estimated) result computed from the building elements' performance by the EN/ISO 12354 simplified single-number model; it is not a measurement. The reported standard deviation of the model is about {sd} dB.": "Resultado previsto (estimado) calculado a partir del comportamiento de los elementos constructivos con el modelo simplificado de número único de la Norma EN/ISO 12354; no es una medición. La desviación típica declarada del modelo es de unos {sd} dB.",
+    # --- EN/ISO 12354-3 predicted facade insulation ----------------------
+    "Predicted facade sound insulation": "Aislamiento acústico de fachada previsto",
+    "Predicted standardized level difference of a facade D<sub>2m,nT</sub> (the envelope elements' apparent sound reduction index R&#8242; combined energetically with the room geometry) estimated in accordance with EN/ISO 12354-3:2000 (simplified model, Formula 13). This is a prediction from element data, not a measurement. D<sub>2m,nT,w</sub> (with R&#8242;<sub>tr,s,w</sub> and C<sub>tr</sub>) per ISO 717-1.": "Diferencia de niveles estandarizada de una fachada D<sub>2m,nT</sub> prevista (el índice de reducción acústica aparente R&#8242; de los elementos de la envolvente combinado energéticamente con la geometría del recinto) estimada de acuerdo con la Norma EN/ISO 12354-3:2000 (modelo simplificado, fórmula 13). Es una predicción a partir de los datos de los elementos, no una medición. D<sub>2m,nT,w</sub> (con R&#8242;<sub>tr,s,w</sub> y C<sub>tr</sub>) según ISO 717-1.",
+    "Facade elements R<sub>p,w</sub> [dB]": "Elementos de la fachada R<sub>p,w</sub> [dB]",
+    "Facade element R<sub>p,w</sub> [dB] and energy share": "R<sub>p,w</sub> [dB] por elemento de la fachada y fracción de energía",
 }
 
 

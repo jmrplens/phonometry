@@ -319,15 +319,15 @@ z
    </g>
    <g id="legend_1">
     <g id="patch_8">
-     <path d="M 541.887969 63.359531 
-L 699.740938 63.359531 
-Q 701.540938 63.359531 701.540938 61.559531 
+     <path d="M 541.887969 64.867031 
+L 699.740938 64.867031 
+Q 701.540938 64.867031 701.540938 63.067031 
 L 701.540938 35.098125 
 Q 701.540938 33.298125 699.740938 33.298125 
 L 541.887969 33.298125 
 Q 540.087969 33.298125 540.087969 35.098125 
-L 540.087969 61.559531 
-Q 540.087969 63.359531 541.887969 63.359531 
+L 540.087969 63.067031 
+Q 540.087969 64.867031 541.887969 64.867031 
 z
 " style="opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
@@ -341,13 +341,13 @@ L 561.687969 40.946719
      <text style="font-size: 9px; font-family: sans-serif; text-anchor: start; fill: #ffffff" x="568.887969" y="44.096719" transform="rotate(-0 568.887969 44.096719)">Pérdida por reflexión (arena)</text>
     </g>
     <g id="line2d_24">
-     <path d="M 543.687969 54.447422 
-L 552.687969 54.447422 
-L 561.687969 54.447422 
+     <path d="M 543.687969 55.954922 
+L 552.687969 55.954922 
+L 561.687969 55.954922 
 " style="fill: none; stroke-dasharray: 5.18,2.24; stroke-dashoffset: 0; stroke: #d62728; stroke-width: 1.4"/>
     </g>
     <g id="text_16">
-     <text style="font-size: 9px; font-family: sans-serif; text-anchor: start; fill: #ffffff" x="568.887969" y="57.597422" transform="rotate(-0 568.887969 57.597422)">Critical angle (24,6°)</text>
+     <text style="font-size: 9px; font-family: sans-serif; text-anchor: start; fill: #ffffff" x="568.887969" y="59.104922" transform="rotate(-0 568.887969 59.104922)">Ángulo crítico (24,6°)</text>
     </g>
    </g>
   </g>

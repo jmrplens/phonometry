@@ -162,7 +162,8 @@ class LabAirborneInsulationResult:
             rating (its band count is neither 16 one-third-octave nor 5
             octave, so the ISO 717-1 rating the fiche needs was not formed).
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``).
+            (``pip install phonometry[report]``), or matplotlib is missing for
+            the embedded rating figure (``pip install phonometry[plot]``).
         """
         return _render_iso10140(
             self, path, quantity="r", metadata=metadata, engine=engine,
@@ -240,7 +241,8 @@ class LabImpactInsulationResult:
             rating (its band count is neither 16 one-third-octave nor 5
             octave, so the ISO 717-2 rating the fiche needs was not formed).
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``).
+            (``pip install phonometry[report]``), or matplotlib is missing for
+            the embedded rating figure (``pip install phonometry[plot]``).
         """
         return _render_iso10140(
             self, path, quantity="l_n", metadata=metadata, engine=engine,

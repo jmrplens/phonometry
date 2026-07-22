@@ -30,13 +30,13 @@ built on it:
 With ``verbose=True`` the table shows the measurement chain instead: the
 energy-average source/receiving (or impact) levels and the receiving-room
 reverberation time beside the reported quantity, the per-band content the
-accredited field reports annex. The quantity-independent skeleton lives in
-:mod:`._layout` and the header grid is shared with :mod:`.iso717` (the two
-sound-insulation fiches describe the same rooms); this module only holds
-the ISO 16283 specifics. reportlab, matplotlib and svglib are soft
-dependencies imported lazily (reportlab and svglib ship in the
-``phonometry[report]`` extra, matplotlib in ``phonometry[plot]``); each is
-guarded with an actionable :class:`ImportError`.
+accredited field reports annex. The shared two-panel skeleton lives in
+:mod:`._insulation_fiche` (used by both this field fiche and the laboratory
+ISO 10140 fiche); this module only holds the ISO 16283 specifics. reportlab,
+matplotlib and svglib are soft dependencies imported lazily by the shared
+renderer (reportlab and svglib ship in the ``phonometry[report]`` extra,
+matplotlib in ``phonometry[plot]``); each is guarded with an actionable
+:class:`ImportError`.
 """
 
 from __future__ import annotations
@@ -45,24 +45,8 @@ from typing import TYPE_CHECKING, Any, List, Sequence, Tuple, cast
 
 import numpy as np
 
-from ._i18n import format_number, t
-from ._layout import (
-    _ACCENT_HEX,
-    _MUTED_HEX,
-    _REPORTLAB_HINT,
-    band_table,
-    band_table_header_style,
-    build_document,
-    document_styles,
-    fmt_num,
-    footer_flow,
-    grid_table,
-    render_figure_drawing,
-    result_box,
-    two_panel_body,
-    verdict_flow,
-)
-from .iso717 import _Y_TOP_AIRBORNE, _Y_TOP_IMPACT, _metadata_pairs
+from ._i18n import t
+from ._insulation_fiche import Column, render_insulation_fiche
 from .metadata import ReportMetadata
 
 if TYPE_CHECKING:
@@ -140,92 +124,8 @@ _SPECS: dict[str, dict[str, str]] = {
     },
 }
 
-
-def _statement(
-    rating: "WeightedRatingResult | ImpactRatingResult", rating_symbol: str
-) -> str:
-    """The boxed field single-number statement with its adaptation terms."""
-    if rating.quantity == "impact":
-        impact = cast("ImpactRatingResult", rating)
-        return (
-            f"{rating_symbol} (C<sub>I</sub>) = "
-            f"<b>{impact.rating} ({impact.ci:+d}) dB</b>"
-        )
-    airborne = cast("WeightedRatingResult", rating)
-    return (
-        f"{rating_symbol} (C; C<sub>tr</sub>) = "
-        f"<b>{airborne.rating} ({airborne.c:+d}; {airborne.ctr:+d}) dB</b>"
-    )
-
-
-def _table(
-    centers: np.ndarray,
-    columns: Sequence[Tuple[str, np.ndarray, int]],
-    language: str,
-) -> Any:
-    """Build the left-hand one-third-octave table.
-
-    ``columns`` are ordered ``(header markup, values, decimals)`` triples
-    following the frequency column; two columns for the recommended-form
-    table (``f | value``), more for the verbose measurement-chain table.
-    Called only after :func:`render_iso16283_report` has imported reportlab.
-    """
-    from reportlab.lib.units import mm
-    from reportlab.platypus import Paragraph
-
-    head_style = band_table_header_style()
-
-    if len(columns) == 1:
-        header = [
-            Paragraph(t("Frequency f [Hz]", language), head_style),
-            Paragraph(columns[0][0], head_style),
-        ]
-        col_widths = [28 * mm, 28 * mm]
-    else:
-        header = [Paragraph(t("f [Hz]", language), head_style)] + [
-            Paragraph(markup, head_style) for markup, _, _ in columns
-        ]
-        col_widths = [10 * mm] + [
-            (10 if decimals == 2 else 12) * mm for _, _, decimals in columns
-        ]
-        # The reported quantity (last column) carries the longest header
-        # (symbol plus unit), so give it room to render on one line; the
-        # total stays within the left panel plus the figure's own margin.
-        col_widths[-1] = 15 * mm
-
-    rows: List[List[Any]] = [header]
-    for k, fk in enumerate(centers):
-        row: List[Any] = [f"{int(round(fk))}"]
-        for _, values, decimals in columns:
-            row.append(format_number(float(values[k]), language, decimals=decimals))
-        rows.append(row)
-
-    return band_table(rows, col_widths, len(centers))
-
-
-def _verdict(
-    rating: "WeightedRatingResult | ImpactRatingResult",
-    rating_symbol: str,
-    requirement: float,
-    language: str,
-) -> Tuple[str, bool]:
-    """Return the verdict text and PASS flag for a supplied requirement.
-
-    Airborne field ratings pass at or above the requirement; impact ratings
-    pass at or below it (a lower impact level is better).
-    """
-    value = float(rating.rating)
-    req_text = fmt_num(requirement, language)
-    if rating.quantity == "impact":
-        passed = value <= requirement
-        text = t("{sym} = {rating} dB, required &#8804; {req} dB", language)
-    else:
-        passed = value >= requirement
-        text = t("{sym} = {rating} dB, required &#8805; {req} dB", language)
-    return (
-        text.format(sym=rating_symbol, rating=rating.rating, req=req_text),
-        passed,
-    )
+#: The reported quantities carried by an impact field result (ISO 717-2).
+_IMPACT_QUANTITIES = ("l_n_t", "l_n")
 
 
 def render_iso16283_report(
@@ -262,45 +162,24 @@ def render_iso16283_report(
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is
         not installed.
     """
-    try:
-        from reportlab.lib import colors
-        from reportlab.lib.styles import ParagraphStyle
-        from reportlab.lib.units import mm
-        from reportlab.platypus import Paragraph, Spacer
-    except ImportError as exc:
-        raise ImportError(_REPORTLAB_HINT) from exc
-    accent = colors.HexColor(_ACCENT_HEX)
-
     spec = _SPECS[quantity]
-    impact = rating.quantity == "impact"
-    curve = np.asarray(getattr(result, quantity), dtype=np.float64)
-    centers = np.asarray(rating.band_centers, dtype=np.float64)
+    is_impact = quantity in _IMPACT_QUANTITIES
 
-    styles, title_style, basis_style, caption_style = document_styles(accent)
-    title = t(spec["title"], language)
-    flow: List[Any] = [
-        Paragraph(title, title_style),
-        Paragraph(t(spec["basis"], language), basis_style),
-    ]
+    def build_columns(
+        value_header: str, curve: np.ndarray, verbose: bool, language: str
+    ) -> Tuple[Sequence[Column], str, Any]:
+        """The field table: ``f | value`` or, verbose, the measurement chain."""
+        from reportlab.lib.units import mm
 
-    # Metadata header block (only the supplied fields; same grid as the
-    # laboratory ISO 717 fiche, both describe rooms and a separating element).
-    if metadata is not None and not metadata.is_empty():
-        identity, conditions = _metadata_pairs(metadata, language)
-        header_pairs = identity + conditions
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+        if not verbose:
+            caption = t("One-third-octave {vh} [dB]", language).format(
+                vh=spec["symbol"]
+            )
+            return [(value_header, curve, 1)], caption, None
 
-    # Left panel: the recommended-form table (f | value, Clause 12 one
-    # decimal) or the verbose measurement-chain columns; right panel: the
-    # rating's own measured-versus-shifted-reference curve.
-    value_header = t("{vh} [dB]", language).format(vh=spec["symbol"])
-    if verbose:
-        if impact:
+        if is_impact:
             impact_result = cast("ImpactInsulationResult", result)
-            chain: List[Tuple[str, np.ndarray, int]] = [
+            chain: List[Column] = [
                 ("L<sub>i</sub> [dB]",
                  np.asarray(impact_result.li, dtype=np.float64), 1),
                 ("T [s]", np.asarray(impact_result.t2, dtype=np.float64), 2),
@@ -315,44 +194,27 @@ def render_iso16283_report(
                 ("T [s]", np.asarray(airborne_result.t2, dtype=np.float64), 2),
             ]
         columns = chain + [(value_header, curve, 1)]
+        # Compact widths for the chain; the reported quantity (last column)
+        # carries the longest header, so give it room to render on one line.
+        col_widths = [10 * mm] + [
+            (10 if decimals == 2 else 12) * mm for _, _, decimals in columns
+        ]
+        col_widths[-1] = 15 * mm
         caption = t("Per-band measurement chain", language)
-    else:
-        columns = [(value_header, curve, 1)]
-        caption = t("One-third-octave {vh} [dB]", language).format(
-            vh=spec["symbol"]
-        )
-    value_table = _table(centers, columns, language)
-    left_cell = [Paragraph(caption, caption_style), value_table]
+        return columns, caption, col_widths
 
-    def _plot(ax: Any = None, language: str = language) -> Any:
-        axes = rating.plot(ax=ax, language=language)
-        axes.set_ylabel(t(spec["ylabel"], language))
-        return axes
-
-    y_top = _Y_TOP_IMPACT if impact else _Y_TOP_AIRBORNE
-    plot_drawing = render_figure_drawing(
-        _plot, 116 * mm, y_top=y_top, expand_step=10.0, language=language
+    return render_insulation_fiche(
+        result, rating, path,
+        is_impact=is_impact,
+        curve_attr=quantity,
+        title=spec["title"],
+        basis=spec["basis"],
+        symbol=spec["symbol"],
+        rating_symbol=spec["rating_symbol"],
+        ylabel=spec["ylabel"],
+        method_statement=spec["statement"],
+        build_columns=build_columns,
+        metadata=metadata,
+        verbose=verbose,
+        language=language,
     )
-    flow.append(two_panel_body(left_cell, plot_drawing))
-    flow.append(Spacer(1, 8))
-
-    # Boxed field rating, the mandatory field-method statement, optional
-    # verdict row and the footer.
-    flow.append(
-        result_box(
-            _statement(rating, spec["rating_symbol"]), styles, accent
-        )
-    )
-    statement_style = ParagraphStyle(
-        "iso16283_statement", parent=styles["Normal"], fontSize=8.5,
-        textColor=colors.HexColor(_MUTED_HEX), spaceBefore=4,
-    )
-    flow.append(Paragraph(t(spec["statement"], language), statement_style))
-    if metadata is not None and metadata.requirement is not None:
-        text, passed = _verdict(
-            rating, spec["rating_symbol"], metadata.requirement, language
-        )
-        flow.extend(verdict_flow(text, passed, styles, language))
-    flow.extend(footer_flow(metadata, language))
-
-    return build_document(path, flow, title)

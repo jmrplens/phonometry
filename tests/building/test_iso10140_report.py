@@ -205,19 +205,23 @@ def test_spanish_fiche_renders_translated(tmp_path) -> None:
 def test_unknown_engine_rejected(tmp_path) -> None:
     """An unknown rendering engine raises ``ValueError``."""
     out = str(tmp_path / "x.pdf")
+    airborne = _airborne_result()
+    impact = _impact_result()
     with pytest.raises(ValueError, match="engine"):
-        _airborne_result().report(out, engine="weasyprint")
+        airborne.report(out, engine="weasyprint")
     with pytest.raises(ValueError, match="engine"):
-        _impact_result().report(out, engine="weasyprint")
+        impact.report(out, engine="weasyprint")
 
 
 def test_unknown_language_rejected(tmp_path) -> None:
     """An unsupported language raises ``ValueError`` (shared validation path)."""
     out = str(tmp_path / "x.pdf")
+    airborne = _airborne_result()
+    impact = _impact_result()
     with pytest.raises(ValueError, match="language"):
-        _airborne_result().report(out, language="fr")
+        airborne.report(out, language="fr")
     with pytest.raises(ValueError, match="language"):
-        _impact_result().report(out, language="fr")
+        impact.report(out, language="fr")
 
 
 def test_missing_rating_rejected(tmp_path) -> None:
@@ -229,6 +233,23 @@ def test_missing_rating_rejected(tmp_path) -> None:
     assert result.rating is None
     out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match="rating"):
+        result.report(out)
+
+
+def test_rating_without_per_band_data_rejected(tmp_path) -> None:
+    """A manually built rating lacking the per-band arrays is rejected."""
+    from phonometry import WeightedRatingResult
+
+    # A backward-compatibly constructed rating (band_centers / measured /
+    # shifted_reference default to None) would otherwise crash the table.
+    bare_rating = WeightedRatingResult(rating=30, c=-2, ctr=-3, unfavourable_sum=0.0)
+    result = LabAirborneInsulationResult(
+        r=np.asarray(_AIRBORNE_R, dtype=np.float64),
+        absorption=np.full(16, 10.0),
+        rating=bare_rating,
+    )
+    out = str(tmp_path / "x.pdf")
+    with pytest.raises(ValueError, match="per-band"):
         result.report(out)
 
 

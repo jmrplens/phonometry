@@ -619,24 +619,30 @@ página de **predicción**. Se etiquetan claramente como predicciones, no como
 mediciones: la hoja indica las hipótesis meteorológicas y de suelo y, para la
 barrera, nombra el modelo de difracción real que hay detrás del número.
 
-`OutdoorAttenuation.report(path)` necesita el nivel a favor del viento
-compuesto, así que pasa un `sound_power_level` a
-`outdoor_propagation_attenuation`. Su número destacado es el nivel a favor del
-viento con ponderación A $L_{AT}(\text{DW})$ en el receptor; un nivel límite
-indicado mediante el `requirement` de los metadatos añade un veredicto
+`OutdoorAttenuation.report(path)` destaca por sí solo el intervalo de la
+atenuación total por bandas de octava; pasa un `SourceEmission` (la potencia
+acústica de la fuente y su directividad) para añadir la potencia de la fuente y
+el nivel a favor del viento a la tabla y destacar en su lugar el nivel a favor
+del viento con ponderación A $L_{AT}(\text{DW})$ en el receptor. Un nivel límite
+indicado mediante el `requirement` de los metadatos añade entonces un veredicto
 CUMPLE/NO CUMPLE (un nivel más bajo es mejor). Usa `language="es"` para la ficha
 en español.
 
 ```python
 import numpy as np
-from phonometry import ReportMetadata, Barrier, outdoor_propagation_attenuation
+from phonometry import (
+    Barrier,
+    ReportMetadata,
+    SourceEmission,
+    outdoor_propagation_attenuation,
+)
 
 freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
 lw = np.array([95, 100, 103, 105, 104, 101, 95, 88], dtype=float)
 result = outdoor_propagation_attenuation(
     200.0, 4.0, 2.0, freqs, 1.0, 1.0, 1.0,
     barrier=Barrier(source_to_edge=105.0, edge_to_receiver=105.0),
-    temperature=10.0, relative_humidity=70.0, sound_power_level=lw,
+    temperature=10.0, relative_humidity=70.0,
 )
 result.report(
     "outdoor_attenuation.pdf",
@@ -645,6 +651,7 @@ result.report(
         test_room="Fachada de la vivienda más próxima",
         requirement=50.0,  # nivel maximo aceptable a favor del viento
     ),
+    source_emission=SourceEmission(sound_power_level=lw),
     language="es",
 )
 ```

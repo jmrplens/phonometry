@@ -372,10 +372,6 @@ outdoor_propagation_attenuation(
     pressure: float = 101.325,
     projected_distance: float | None = None,
     *,
-    sound_power_level: ArrayLike | None = None,
-    directivity_index: float = 0.0,
-    d_omega: float = 0.0,
-    c0: float | None = None,
     humidity: float | str = 'deprecated',
 ) -> OutdoorAttenuation
 ```
@@ -405,13 +401,9 @@ into `Dz` (note 13); for a lateral (vertical-edge) barrier `Abar = Dz`
 | `relative_humidity` | Relative humidity, in percent (default 70). |
 | `pressure` | Atmospheric pressure, in kilopascals. |
 | `projected_distance` | Ground-plane projected distance `dp`, in metres; defaults to `sqrt(d^2 - (hs - hr)^2)`. |
-| `sound_power_level` | Optional octave-band source sound power level `Lw` (dB re 1 pW), one value per frequency. When given, the downwind octave-band receiver level `LfT(DW) = Lw + Dc - A` (Eq. (3)) is composed and stored on the result ([`OutdoorAttenuation.sound_power_level`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuation) and [`OutdoorAttenuation.receiver_level`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuation)), which the `.report()` prediction fiche needs; `None` leaves both fields unset. |
-| `directivity_index` | Source directivity index `Di`, in decibels (used only when `sound_power_level` is given). |
-| `d_omega` | Solid-angle index `DOmega`, in decibels (used only when `sound_power_level` is given; see [`directivity_omega`](/phonometry/reference/api/environment/outdoor-propagation/#directivity_omega)). |
-| `c0` | Meteorological factor `C0`, in decibels; when given (and `sound_power_level` is supplied) the meteorological correction `Cmet` (Eq. (21)/(22)) is subtracted for the long-term average level (Eq. (6)). `None` returns the downwind level `LfT(DW)`. |
 | `humidity` | Deprecated alias of `relative_humidity` (remove in 4.0). |
 
-**Returns:** [`OutdoorAttenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuation) with the per-band term breakdown (and, when `sound_power_level` is given, the composed receiver level).
+**Returns:** [`OutdoorAttenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuation) with the per-band term breakdown.
 
 **Raises**
 
@@ -430,8 +422,6 @@ OutdoorAttenuation(
     a_bar: NDArray[np.float64],
     a_total: NDArray[np.float64],
     d_omega: NDArray[np.float64],
-    sound_power_level: NDArray[np.float64] | None = None,
-    receiver_level: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -453,8 +443,6 @@ contributions separately.
 | `a_bar` | Screening `Abar` (Eq. (12)/(13)), in dB, per band (>= 0). |
 | `a_total` | Total attenuation `A` (Eq. (4)), in dB, per band. |
 | `d_omega` | Solid-angle directivity index `DOmega` (Eq. (11)), in dB; non-zero only for the alternative ground method of 7.3.2. |
-| `sound_power_level` | Octave-band source sound power level `Lw` (dB re 1 pW) the result was composed with, or `None` when only the attenuation was requested. Present when [`outdoor_propagation_attenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoor_propagation_attenuation) is called with `sound_power_level`. |
-| `receiver_level` | Predicted downwind octave-band sound pressure level `LfT(DW)` at the receiver (ISO 9613-2:1996, Eq. (3)/(6)), in dB, or `None` when no source power was supplied. Populated together with `sound_power_level`. |
 
 ### OutdoorAttenuation.plot()
 
@@ -482,6 +470,7 @@ OutdoorAttenuation.report(
     engine: str = 'reportlab',
     verbose: bool = False,
     language: str = 'en',
+    source_emission: SourceEmission | None = None,
 ) -> str
 ```
 
@@ -493,27 +482,27 @@ calculation: the standard-basis line naming ISO 9613-2:1996 (general
 method, conditions favourable to propagation), an optional metadata
 header (source/situation, client, receiver position, meteorological
 conditions, date), a per-band table of the attenuation terms
-(`Adiv`, `Aatm`, `Agr`, `Abar` and the total `A`) with, when
-the result carries a source power, the source power level `Lw` and the
-downwind level `LfT(DW)`, the attenuation-breakdown plot, a boxed
-A-weighted downwind level `LAT(DW)` at the receiver, an optional
-PASS/FAIL verdict against a declared limit level (a lower level is
-better) and a footer identity/disclaimer block.
+(`Adiv`, `Aatm`, `Agr`, `Abar` and the total `A`) and the
+attenuation-breakdown plot, closed by a boxed single result and a footer
+identity/disclaimer block.
 
-The A-weighted receiver level is available only when the result was
-composed with a source power, i.e. when
-[`outdoor_propagation_attenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoor_propagation_attenuation) was called with
-`sound_power_level`; otherwise this raises `ValueError`.
+When a `source_emission` is supplied, the fiche also lists the source
+power level `Lw` and the composed downwind level `LfT(DW)` per band
+and boxes the A-weighted downwind level `LAT(DW)` at the receiver, with
+an optional PASS/FAIL verdict against a declared limit level (a lower
+level is better). Without it the fiche boxes the octave-band range of
+the total attenuation `A`.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position), the `temperature` / `relative_humidity` / `pressure` conditions and the footer identity. A supplied `requirement` is read as the maximum acceptable A-weighted downwind level in dB. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position), the `temperature` / `relative_humidity` / `pressure` conditions and the footer identity. A supplied `requirement` is read as the maximum acceptable A-weighted downwind level in dB (used only when a `source_emission` is given). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
-| `verbose` | When True, the per-band table adds the A-weighted band level (`LfT(DW)` plus the band A-weighting), whose energy sum is the boxed `LAT(DW)`. |
+| `verbose` | When True and a `source_emission` is supplied, the per-band table adds the A-weighted band level (`LfT(DW)` plus the band A-weighting), whose energy sum is the boxed `LAT(DW)`. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
+| `source_emission` | Optional [`SourceEmission`](/phonometry/reference/api/environment/outdoor-propagation/#sourceemission) (the source sound power `Lw` and directivity, plus an optional meteorological correction) that turns the attenuation breakdown into the boxed A-weighted downwind level at the receiver. |
 
 **Returns:** The written `path` as a `str`.
 
@@ -521,7 +510,7 @@ composed with a source power, i.e. when
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` is not `"reportlab"`, `language` is unknown, or the result carries no source power (so no receiver level can be reported). |
+| ValueError | If `engine` is not `"reportlab"`, `language` is unknown, or a supplied `source_emission` sound power does not match the number of frequency bands. |
 | ImportError | If reportlab or matplotlib is not installed (`pip install "phonometry[report,plot]"`). |
 
 ## predicted_receiver_level
@@ -586,3 +575,36 @@ convenience.
 | `humidity` | Deprecated alias of `relative_humidity` (remove in 4.0). |
 
 **Returns:** Predicted octave-band level per frequency, in decibels.
+
+## SourceEmission
+
+```python
+SourceEmission(
+    sound_power_level: ArrayLike,
+    directivity_index: float = 0.0,
+    d_omega: float = 0.0,
+    cmet: float | None = None,
+)
+```
+
+Source emission terms for the ISO 9613-2 downwind receiver level (Eq. (3)).
+
+Passed to [`OutdoorAttenuation.report`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuationreport) so the prediction fiche can box
+the A-weighted downwind level at the receiver from an octave-band
+attenuation breakdown. The level is composed as `LfT(DW) = Lw + Dc - A`
+with the directivity correction `Dc = directivity_index + d_omega`
+(ISO 9613-2:1996, Eq. (3)); an optional meteorological correction `cmet`
+is subtracted for the long-term average level (Eq. (6)).
+
+This report-time object keeps the emission out of
+[`outdoor_propagation_attenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoor_propagation_attenuation) (which stays purely an attenuation
+calculation), so the receiver level is a presentation concern of the fiche.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `sound_power_level` | Octave-band source sound power level `Lw` (dB re 1 pW), one value per band of the attenuation result. |
+| `directivity_index` | Source directivity index `Di`, in decibels. |
+| `d_omega` | Solid-angle index `DOmega`, in decibels (see [`directivity_omega`](/phonometry/reference/api/environment/outdoor-propagation/#directivity_omega) for the alternative ground method). |
+| `cmet` | Optional meteorological correction `Cmet` (dB), obtained from [`meteorological_correction`](/phonometry/reference/api/environment/outdoor-propagation/#meteorological_correction); `None` reports the downwind level `LfT(DW)` directly (`Cmet = 0`). |

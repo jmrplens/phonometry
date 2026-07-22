@@ -126,6 +126,37 @@ class Barrier:
 
 
 @dataclass(frozen=True)
+class SourceEmission:
+    """Source emission terms for the ISO 9613-2 downwind receiver level (Eq. (3)).
+
+    Passed to :meth:`OutdoorAttenuation.report` so the prediction fiche can box
+    the A-weighted downwind level at the receiver from an octave-band
+    attenuation breakdown. The level is composed as ``LfT(DW) = Lw + Dc - A``
+    with the directivity correction ``Dc = directivity_index + d_omega``
+    (ISO 9613-2:1996, Eq. (3)); an optional meteorological correction ``cmet``
+    is subtracted for the long-term average level (Eq. (6)).
+
+    This report-time object keeps the emission out of
+    :func:`outdoor_propagation_attenuation` (which stays purely an attenuation
+    calculation), so the receiver level is a presentation concern of the fiche.
+
+    :param sound_power_level: Octave-band source sound power level ``Lw`` (dB re
+        1 pW), one value per band of the attenuation result.
+    :param directivity_index: Source directivity index ``Di``, in decibels.
+    :param d_omega: Solid-angle index ``DOmega``, in decibels (see
+        :func:`directivity_omega` for the alternative ground method).
+    :param cmet: Optional meteorological correction ``Cmet`` (dB), obtained from
+        :func:`meteorological_correction`; ``None`` reports the downwind level
+        ``LfT(DW)`` directly (``Cmet = 0``).
+    """
+
+    sound_power_level: ArrayLike
+    directivity_index: float = 0.0
+    d_omega: float = 0.0
+    cmet: float | None = None
+
+
+@dataclass(frozen=True)
 class OutdoorAttenuation:
     """Per-octave-band ISO 9613-2 attenuation breakdown (clause 7).
 
@@ -144,14 +175,6 @@ class OutdoorAttenuation:
     :ivar a_total: Total attenuation ``A`` (Eq. (4)), in dB, per band.
     :ivar d_omega: Solid-angle directivity index ``DOmega`` (Eq. (11)), in dB;
         non-zero only for the alternative ground method of 7.3.2.
-    :ivar sound_power_level: Octave-band source sound power level ``Lw`` (dB re
-        1 pW) the result was composed with, or ``None`` when only the attenuation
-        was requested. Present when :func:`outdoor_propagation_attenuation` is
-        called with ``sound_power_level``.
-    :ivar receiver_level: Predicted downwind octave-band sound pressure level
-        ``LfT(DW)`` at the receiver (ISO 9613-2:1996, Eq. (3)/(6)), in dB, or
-        ``None`` when no source power was supplied. Populated together with
-        :attr:`sound_power_level`.
     """
 
     frequencies: NDArray[np.float64]
@@ -161,8 +184,6 @@ class OutdoorAttenuation:
     a_bar: NDArray[np.float64]
     a_total: NDArray[np.float64]
     d_omega: NDArray[np.float64]
-    sound_power_level: NDArray[np.float64] | None = None
-    receiver_level: NDArray[np.float64] | None = None
 
     def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
         """Plot the stacked per-band attenuation terms with the total.
@@ -183,6 +204,7 @@ class OutdoorAttenuation:
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
+        source_emission: "SourceEmission | None" = None,
     ) -> str:
         """Render a one-page ISO 9613-2 outdoor-propagation prediction fiche.
 
@@ -192,17 +214,16 @@ class OutdoorAttenuation:
         method, conditions favourable to propagation), an optional metadata
         header (source/situation, client, receiver position, meteorological
         conditions, date), a per-band table of the attenuation terms
-        (``Adiv``, ``Aatm``, ``Agr``, ``Abar`` and the total ``A``) with, when
-        the result carries a source power, the source power level ``Lw`` and the
-        downwind level ``LfT(DW)``, the attenuation-breakdown plot, a boxed
-        A-weighted downwind level ``LAT(DW)`` at the receiver, an optional
-        PASS/FAIL verdict against a declared limit level (a lower level is
-        better) and a footer identity/disclaimer block.
+        (``Adiv``, ``Aatm``, ``Agr``, ``Abar`` and the total ``A``) and the
+        attenuation-breakdown plot, closed by a boxed single result and a footer
+        identity/disclaimer block.
 
-        The A-weighted receiver level is available only when the result was
-        composed with a source power, i.e. when
-        :func:`outdoor_propagation_attenuation` was called with
-        ``sound_power_level``; otherwise this raises :class:`ValueError`.
+        When a ``source_emission`` is supplied, the fiche also lists the source
+        power level ``Lw`` and the composed downwind level ``LfT(DW)`` per band
+        and boxes the A-weighted downwind level ``LAT(DW)`` at the receiver, with
+        an optional PASS/FAIL verdict against a declared limit level (a lower
+        level is better). Without it the fiche boxes the octave-band range of
+        the total attenuation ``A``.
 
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
@@ -210,16 +231,21 @@ class OutdoorAttenuation:
             ``test_room`` the receiver position), the ``temperature`` /
             ``relative_humidity`` / ``pressure`` conditions and the footer
             identity. A supplied ``requirement`` is read as the maximum
-            acceptable A-weighted downwind level in dB.
+            acceptable A-weighted downwind level in dB (used only when a
+            ``source_emission`` is given).
         :param engine: Rendering back end; only ``"reportlab"`` is supported.
-        :param verbose: When True, the per-band table adds the A-weighted band
-            level (``LfT(DW)`` plus the band A-weighting), whose energy sum is
-            the boxed ``LAT(DW)``.
+        :param verbose: When True and a ``source_emission`` is supplied, the
+            per-band table adds the A-weighted band level (``LfT(DW)`` plus the
+            band A-weighting), whose energy sum is the boxed ``LAT(DW)``.
         :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :param source_emission: Optional :class:`SourceEmission` (the source
+            sound power ``Lw`` and directivity, plus an optional meteorological
+            correction) that turns the attenuation breakdown into the boxed
+            A-weighted downwind level at the receiver.
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``, ``language``
-            is unknown, or the result carries no source power (so no receiver
-            level can be reported).
+            is unknown, or a supplied ``source_emission`` sound power does not
+            match the number of frequency bands.
         :raises ImportError: If reportlab or matplotlib is not installed
             (``pip install "phonometry[report,plot]"``).
         """
@@ -233,7 +259,8 @@ class OutdoorAttenuation:
         from .._report.iso9613 import render_outdoor_attenuation_report
 
         return render_outdoor_attenuation_report(
-            self, path, metadata=metadata, verbose=verbose, language=language
+            self, path, metadata=metadata, verbose=verbose, language=language,
+            source_emission=source_emission,
         )
 
 
@@ -648,10 +675,6 @@ def outdoor_propagation_attenuation(
     pressure: float = 101.325,
     projected_distance: float | None = None,
     *,
-    sound_power_level: ArrayLike | None = None,
-    directivity_index: float = 0.0,
-    d_omega: float = 0.0,
-    c0: float | None = None,
     humidity: float | str = "deprecated",
 ) -> OutdoorAttenuation:
     """Total octave-band outdoor attenuation (ISO 9613-2:1996, Eq. (4)).
@@ -680,23 +703,8 @@ def outdoor_propagation_attenuation(
     :param pressure: Atmospheric pressure, in kilopascals.
     :param projected_distance: Ground-plane projected distance ``dp``, in metres;
         defaults to ``sqrt(d^2 - (hs - hr)^2)``.
-    :param sound_power_level: Optional octave-band source sound power level
-        ``Lw`` (dB re 1 pW), one value per frequency. When given, the downwind
-        octave-band receiver level ``LfT(DW) = Lw + Dc - A`` (Eq. (3)) is
-        composed and stored on the result (:attr:`OutdoorAttenuation.sound_power_level`
-        and :attr:`OutdoorAttenuation.receiver_level`), which the ``.report()``
-        prediction fiche needs; ``None`` leaves both fields unset.
-    :param directivity_index: Source directivity index ``Di``, in decibels
-        (used only when ``sound_power_level`` is given).
-    :param d_omega: Solid-angle index ``DOmega``, in decibels (used only when
-        ``sound_power_level`` is given; see :func:`directivity_omega`).
-    :param c0: Meteorological factor ``C0``, in decibels; when given (and
-        ``sound_power_level`` is supplied) the meteorological correction
-        ``Cmet`` (Eq. (21)/(22)) is subtracted for the long-term average level
-        (Eq. (6)). ``None`` returns the downwind level ``LfT(DW)``.
     :param humidity: Deprecated alias of ``relative_humidity`` (remove in 4.0).
-    :return: :class:`OutdoorAttenuation` with the per-band term breakdown (and,
-        when ``sound_power_level`` is given, the composed receiver level).
+    :return: :class:`OutdoorAttenuation` with the per-band term breakdown.
     :raises ValueError: If ``distance`` is not positive.
     """
     relative_humidity = _resolve_humidity(
@@ -723,19 +731,6 @@ def outdoor_propagation_attenuation(
             a_bar = np.maximum(dz - a_gr, 0.0)
 
     a_total = a_div + a_atm + a_gr + a_bar
-
-    lw: NDArray[np.float64] | None = None
-    receiver: NDArray[np.float64] | None = None
-    if sound_power_level is not None:
-        lw = np.atleast_1d(np.asarray(sound_power_level, dtype=np.float64))
-        cmet: float | None = None
-        if c0 is not None:
-            dp = _projected_distance(distance, source_height, receiver_height,
-                                     projected_distance)
-            cmet = meteorological_correction(dp, source_height, receiver_height, c0)
-        receiver = _compose_receiver_level(lw, directivity_index, d_omega,
-                                           a_total, cmet)
-
     return OutdoorAttenuation(
         frequencies=freqs,
         a_div=a_div,
@@ -744,8 +739,6 @@ def outdoor_propagation_attenuation(
         a_bar=a_bar,
         a_total=a_total,
         d_omega=np.zeros_like(freqs),
-        sound_power_level=lw,
-        receiver_level=receiver,
     )
 
 

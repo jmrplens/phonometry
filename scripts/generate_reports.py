@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import argparse
 import os
-from typing import Callable, List, Tuple
+from typing import Any, Callable, List, Tuple
 
 import numpy as np
 
@@ -1874,23 +1874,46 @@ def _flanking_impact_level_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10848_lnf_example.pdf"
 
 
+class _WithSourceEmission:
+    """Adapter binding a source emission to an ``OutdoorAttenuation.report`` call.
+
+    The uniform generator drives every fiche with ``result.report(path,
+    metadata=...)``; the ISO 9613-2 attenuation fiche needs the source emission
+    too (a report-time, display-only object), so this adapter carries it while
+    keeping the generator loop unchanged.
+    """
+
+    def __init__(self, result: Any, emission: "ph.SourceEmission") -> None:
+        self._result = result
+        self._emission = emission
+
+    def report(self, path: str, *, metadata: "ReportMetadata | None" = None) -> str:
+        return str(
+            self._result.report(
+                path, metadata=metadata, source_emission=self._emission
+            )
+        )
+
+
 def _outdoor_attenuation_example() -> Tuple[object, ReportMetadata, str]:
     """ISO 9613-2 fiche: predicted outdoor propagation attenuation with a barrier.
 
     An industrial point source (octave-band Lw from 95 dB at 63 Hz to 88 dB at
-    8 kHz) 200 m upwind of a dwelling over porous ground (Gs = Gm = Gr = 1),
-    screened by a noise barrier (source-edge = edge-receiver = 105 m, so the
-    diffracted path exceeds the direct one). The divergence, atmospheric, ground
-    and barrier terms and the composed downwind level LfT(DW) come from the
-    tested clause-7 functions (see tests/environmental/test_outdoor_propagation.py).
+    8 kHz, supplied at report time via SourceEmission) 200 m upwind of a dwelling
+    over porous ground (Gs = Gm = Gr = 1), screened by a noise barrier
+    (source-edge = edge-receiver = 105 m, so the diffracted path exceeds the
+    direct one). The divergence, atmospheric, ground and barrier terms come from
+    the tested clause-7 functions (see
+    tests/environmental/test_outdoor_propagation.py).
     """
     freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
     lw = np.array([95, 100, 103, 105, 104, 101, 95, 88], dtype=float)
     barrier = ph.Barrier(source_to_edge=105.0, edge_to_receiver=105.0)
     result = ph.outdoor_propagation_attenuation(
         200.0, 4.0, 2.0, freqs, 1.0, 1.0, 1.0, barrier=barrier,
-        temperature=10.0, relative_humidity=70.0, sound_power_level=lw,
+        temperature=10.0, relative_humidity=70.0,
     )
+    emission = ph.SourceEmission(sound_power_level=lw)
     metadata = ReportMetadata(
         specimen="Industrial fan plant (point source)",
         client="Example client",
@@ -1905,7 +1928,11 @@ def _outdoor_attenuation_example() -> Tuple[object, ReportMetadata, str]:
         requirement=50.0,  # maximum acceptable A-weighted downwind level
         notes="Point source over porous ground with a noise barrier (ISO 9613-2).",
     )
-    return result, metadata, "iso9613_outdoor_attenuation_example.pdf"
+    return (
+        _WithSourceEmission(result, emission),
+        metadata,
+        "iso9613_outdoor_attenuation_example.pdf",
+    )
 
 
 def _barrier_insertion_loss_example() -> Tuple[object, ReportMetadata, str]:

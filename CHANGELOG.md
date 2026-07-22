@@ -14,15 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   prediction-basis line naming ISO 9613-2:1996 and the conditions favourable to
   propagation, an optional metadata header (source/situation, client, receiver
   position, meteorological conditions, date, with the propagation distance
-  recovered from the divergence term), a per-band table of the source power
-  level `Lw`, the divergence, atmospheric, ground and barrier attenuation terms,
-  the total attenuation `A` and the downwind level `LfT(DW)`, the
-  attenuation-breakdown plot, and a boxed A-weighted downwind level `LAT(DW)` at
-  the receiver. A declared limit level supplied via the metadata `requirement`
-  adds a PASS/FAIL verdict (a lower level is better). `verbose=True` adds the
-  A-weighted band-level column. `outdoor_propagation_attenuation` now accepts an
-  optional `sound_power_level` (with `directivity_index`, `d_omega` and `c0`) so
-  the result carries the composed downwind level the fiche reports.
+  recovered from the divergence term), a per-band table of the divergence,
+  atmospheric, ground and barrier attenuation terms with the total attenuation
+  `A`, the attenuation-breakdown plot, and a boxed octave-band range of the
+  total attenuation. Passing a new `SourceEmission` (the source sound power
+  level `Lw` and directivity, plus an optional meteorological correction) to
+  `report(..., source_emission=...)` adds the source power and the downwind
+  level `LfT(DW)` to the table and boxes the A-weighted downwind level
+  `LAT(DW)` at the receiver instead; a declared limit level supplied via the
+  metadata `requirement` then adds a PASS/FAIL verdict (a lower level is
+  better), and `verbose=True` adds the A-weighted band-level column.
   `language="es"` renders the Spanish fiche.
 - `BarrierInsertionLoss.report()`: a one-page PDF barrier insertion-loss
   **prediction** fiche. The sheet is clearly labelled a prediction, not a

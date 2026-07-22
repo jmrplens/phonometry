@@ -589,22 +589,28 @@ They are clearly labelled predictions, not measurements: the sheet states the
 meteorological and ground assumptions and, for the barrier, names the actual
 diffraction model behind the number.
 
-`OutdoorAttenuation.report(path)` needs the composed downwind level, so pass a
-`sound_power_level` to `outdoor_propagation_attenuation` first. Its boxed number
-is the A-weighted downwind level $L_{AT}(\text{DW})$ at the receiver; a limit
-level supplied through the metadata `requirement` adds a PASS/FAIL verdict (a
-lower level is better). Pass `language="es"` for the Spanish fiche.
+`OutdoorAttenuation.report(path)` boxes the octave-band range of the total
+attenuation on its own; pass a `SourceEmission` (the source sound power and
+directivity) to add the source power and downwind level to the table and box the
+A-weighted downwind level $L_{AT}(\text{DW})$ at the receiver instead. A limit
+level supplied through the metadata `requirement` then adds a PASS/FAIL verdict
+(a lower level is better). Pass `language="es"` for the Spanish fiche.
 
 ```python
 import numpy as np
-from phonometry import ReportMetadata, Barrier, outdoor_propagation_attenuation
+from phonometry import (
+    Barrier,
+    ReportMetadata,
+    SourceEmission,
+    outdoor_propagation_attenuation,
+)
 
 freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
 lw = np.array([95, 100, 103, 105, 104, 101, 95, 88], dtype=float)
 result = outdoor_propagation_attenuation(
     200.0, 4.0, 2.0, freqs, 1.0, 1.0, 1.0,
     barrier=Barrier(source_to_edge=105.0, edge_to_receiver=105.0),
-    temperature=10.0, relative_humidity=70.0, sound_power_level=lw,
+    temperature=10.0, relative_humidity=70.0,
 )
 result.report(
     "outdoor_attenuation.pdf",
@@ -613,6 +619,7 @@ result.report(
         test_room="Nearest dwelling facade",
         requirement=50.0,  # maximum acceptable A-weighted downwind level
     ),
+    source_emission=SourceEmission(sound_power_level=lw),
 )
 ```
 

@@ -33,7 +33,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any, List, NamedTuple, Tuple
 
 import numpy as np
 
@@ -60,7 +60,10 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..environmental.ground_barriers import BarrierInsertionLoss
-    from ..environmental.outdoor_propagation import OutdoorAttenuation
+    from ..environmental.outdoor_propagation import (
+        OutdoorAttenuation,
+        SourceEmission,
+    )
 
     NDArrayF = NDArray[np.float64]
 else:  # pragma: no cover - runtime alias only
@@ -68,6 +71,19 @@ else:  # pragma: no cover - runtime alias only
 
 #: Reference distance ``d0`` in the divergence term (ISO 9613-2:1996, Eq. (7)).
 _D0 = 1.0
+
+
+class _AttenuationLevels(NamedTuple):
+    """The per-band source power ``Lw``, downwind level ``LfT`` and A-weighting.
+
+    Bundles the display quantities the attenuation fiche derives from a
+    :class:`~phonometry.environmental.outdoor_propagation.SourceEmission`, so
+    the table and the boxed A-weighted level share one computation.
+    """
+
+    sound_power_level: NDArrayF
+    receiver_level: NDArrayF
+    ck: NDArrayF
 
 
 def _fmt(value: float, language: str, decimals: int = 1) -> str:
@@ -156,15 +172,16 @@ def _attenuation_metadata_pairs(
 
 def _attenuation_table(
     result: "OutdoorAttenuation",
-    ck: NDArrayF,
+    levels: "_AttenuationLevels | None",
     verbose: bool,
     language: str,
 ) -> Any:
     """The full-width per-band attenuation table (ISO 9613-2:1996, clause 7).
 
-    One row per octave band: the source power level ``Lw``, the divergence,
-    atmospheric, ground and barrier terms, the total attenuation ``A`` and the
-    downwind level ``LfT(DW)``. ``verbose`` appends the A-weighted band level
+    One row per octave band: the divergence, atmospheric, ground and barrier
+    terms and the total attenuation ``A``. When ``levels`` is supplied (a source
+    emission was given) the source power level ``Lw`` and the downwind level
+    ``LfT(DW)`` are added, and ``verbose`` appends the A-weighted band level
     ``L_A``, whose energy sum is the boxed ``LAT(DW)``.
     """
     from reportlab.lib.units import mm
@@ -172,38 +189,43 @@ def _attenuation_table(
 
     header_style, _, value_style = analysis_cell_styles("iso9613atten")
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    lw = np.asarray(result.sound_power_level, dtype=np.float64)
-    lft = np.asarray(result.receiver_level, dtype=np.float64)
 
-    headers = [
-        t("f [Hz]", language),
-        "L<sub>w</sub> [dB]",
-        "A<sub>div</sub>",
-        "A<sub>atm</sub>",
-        "A<sub>gr</sub>",
-        "A<sub>bar</sub>",
-        "A [dB]",
-        "L<sub>fT</sub> [dB]",
+    term_headers = [
+        "A<sub>div</sub>", "A<sub>atm</sub>", "A<sub>gr</sub>",
+        "A<sub>bar</sub>", "A [dB]",
     ]
-    widths = [22.0, 20.0, 20.0, 20.0, 20.0, 20.0, 22.0, 24.0]
-    if verbose:
-        headers.append("L<sub>A</sub> [dB(A)]")
-        widths = [20.0, 18.0, 17.0, 17.0, 17.0, 17.0, 18.0, 20.0, 22.0]
+    if levels is None:
+        headers = [t("f [Hz]", language), *term_headers]
+        widths = [26.0, 29.0, 29.0, 29.0, 29.0, 30.0]
+    else:
+        headers = [t("f [Hz]", language), "L<sub>w</sub> [dB]", *term_headers,
+                   "L<sub>fT</sub> [dB]"]
+        widths = [22.0, 20.0, 20.0, 20.0, 20.0, 20.0, 22.0, 24.0]
+        if verbose:
+            headers.append("L<sub>A</sub> [dB(A)]")
+            widths = [20.0, 18.0, 17.0, 17.0, 17.0, 17.0, 18.0, 20.0, 22.0]
 
     data: List[List[Any]] = [[Paragraph(h, header_style) for h in headers]]
     for i in range(freqs.size):
-        row = [
-            Paragraph(_fmt(freqs[i], language, 0), value_style),
-            Paragraph(_fmt(lw[i], language), value_style),
+        row = [Paragraph(_fmt(freqs[i], language, 0), value_style)]
+        if levels is not None:
+            row.append(Paragraph(_fmt(levels.sound_power_level[i], language),
+                                 value_style))
+        row += [
             Paragraph(_fmt(result.a_div[i], language), value_style),
             Paragraph(_fmt(result.a_atm[i], language), value_style),
             Paragraph(_fmt(result.a_gr[i], language), value_style),
             Paragraph(_fmt(result.a_bar[i], language), value_style),
             Paragraph(_fmt(result.a_total[i], language), value_style),
-            Paragraph(_fmt(lft[i], language), value_style),
         ]
-        if verbose:
-            row.append(Paragraph(_fmt(lft[i] + ck[i], language), value_style))
+        if levels is not None:
+            row.append(Paragraph(_fmt(levels.receiver_level[i], language),
+                                 value_style))
+            if verbose:
+                row.append(Paragraph(
+                    _fmt(levels.receiver_level[i] + levels.ck[i], language),
+                    value_style,
+                ))
         data.append(row)
     return stacked_table(data, [w * mm for w in widths])
 
@@ -214,6 +236,23 @@ def _attenuation_statement(la_dw: float, language: str) -> str:
         "A-weighted downwind level at the receiver "
         "L<sub>AT</sub>(DW) = <b>{la} dB</b>", language
     ).format(la=_fmt(la_dw, language))
+
+
+def _breakdown_statement(result: "OutdoorAttenuation", language: str) -> str:
+    """The boxed octave-band range of the total attenuation ``A``.
+
+    Reported when no source emission is supplied, so the fiche still closes on
+    the headline result of the breakdown (the span of the total attenuation
+    over the analysis bands) rather than a receiver level it cannot compute.
+    """
+    a_total = np.asarray(result.a_total, dtype=np.float64)
+    return t(
+        "Total attenuation A = <b>{lo} to {hi} dB</b> over the octave bands",
+        language,
+    ).format(
+        lo=_fmt(float(np.min(a_total)), language),
+        hi=_fmt(float(np.max(a_total)), language),
+    )
 
 
 def _attenuation_verdict(
@@ -233,6 +272,36 @@ def _attenuation_verdict(
     return text, passed
 
 
+def _resolve_levels(
+    result: "OutdoorAttenuation", emission: "SourceEmission"
+) -> _AttenuationLevels:
+    """Compose the per-band levels the fiche boxes from a source emission.
+
+    Calls the shared
+    :func:`~phonometry.environmental.outdoor_propagation._compose_receiver_level`
+    so the report reuses the domain's Eq. (3) composition rather than
+    reimplementing it.
+    """
+    from ..environmental.outdoor_propagation import _compose_receiver_level
+
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    lw = np.atleast_1d(np.asarray(emission.sound_power_level, dtype=np.float64))
+    if lw.shape != freqs.shape:
+        raise ValueError(
+            "source_emission.sound_power_level must have one value per frequency "
+            f"band (got {lw.size}, expected {freqs.size})."
+        )
+    receiver = _compose_receiver_level(
+        lw, emission.directivity_index, emission.d_omega,
+        np.asarray(result.a_total, dtype=np.float64), emission.cmet,
+    )
+    return _AttenuationLevels(
+        sound_power_level=lw,
+        receiver_level=receiver,
+        ck=_a_weighting_octave(freqs),
+    )
+
+
 def render_outdoor_attenuation_report(
     result: "OutdoorAttenuation",
     path: str,
@@ -240,33 +309,30 @@ def render_outdoor_attenuation_report(
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
     language: str = "en",
+    source_emission: "SourceEmission | None" = None,
 ) -> str:
     """Render an ISO 9613-2 outdoor-propagation prediction fiche to ``path``.
 
     :param result: An
         :class:`~phonometry.environmental.outdoor_propagation.OutdoorAttenuation`
-        composed with a source power (call
-        :func:`~phonometry.environmental.outdoor_propagation.outdoor_propagation_attenuation`
-        with ``sound_power_level``); its ``receiver_level`` carries the downwind
-        level the fiche boxes.
+        (the per-band attenuation breakdown).
     :param path: Destination path of the PDF file.
     :param metadata: Optional :class:`ReportMetadata`; a ``requirement`` is the
-        maximum acceptable A-weighted downwind level (a lower level is better).
-    :param verbose: When True, the per-band table adds the A-weighted band level.
+        maximum acceptable A-weighted downwind level (a lower level is better,
+        used only when a ``source_emission`` is given).
+    :param verbose: When True and a ``source_emission`` is supplied, the per-band
+        table adds the A-weighted band level.
     :param language: ``"en"`` (default) or ``"es"``.
+    :param source_emission: Optional
+        :class:`~phonometry.environmental.outdoor_propagation.SourceEmission`;
+        when supplied the fiche boxes the A-weighted downwind level at the
+        receiver, otherwise it boxes the range of the total attenuation.
     :return: The written ``path`` as a :class:`str`.
-    :raises ValueError: If the result carries no source power (no receiver level
-        to report).
+    :raises ValueError: If a supplied ``source_emission`` sound power does not
+        match the number of frequency bands.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
     """
-    if result.receiver_level is None or result.sound_power_level is None:
-        raise ValueError(
-            "An outdoor-propagation prediction report needs the downwind "
-            "receiver level: call outdoor_propagation_attenuation with a "
-            "'sound_power_level' so the result carries the source power and the "
-            "composed level LfT(DW)."
-        )
     try:
         from reportlab.lib import colors
         from reportlab.lib.units import mm
@@ -274,6 +340,12 @@ def render_outdoor_attenuation_report(
     except ImportError as exc:
         raise ImportError(_REPORTLAB_HINT) from exc
     accent = colors.HexColor(_ACCENT_HEX)
+
+    levels = (
+        _resolve_levels(result, source_emission)
+        if source_emission is not None
+        else None
+    )
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Predicted outdoor sound propagation", language)
@@ -296,14 +368,8 @@ def render_outdoor_attenuation_report(
         flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
-    freqs = np.asarray(result.frequencies, dtype=np.float64)
-    ck = _a_weighting_octave(freqs)
-    la_dw = _a_weighted_level(
-        np.asarray(result.receiver_level, dtype=np.float64), ck
-    )
-
     flow.append(Paragraph(t("Attenuation breakdown", language), caption_style))
-    flow.append(_attenuation_table(result, ck, verbose, language))
+    flow.append(_attenuation_table(result, levels, verbose, language))
     flow.append(Spacer(1, 8))
     flow.append(
         render_figure_drawing(
@@ -313,13 +379,20 @@ def render_outdoor_attenuation_report(
     )
     flow.append(Spacer(1, 8))
 
-    flow.append(result_box(_attenuation_statement(la_dw, language), styles, accent))
-
-    if metadata is not None and metadata.requirement is not None:
-        text, passed = _attenuation_verdict(
-            la_dw, float(metadata.requirement), language
+    if levels is not None:
+        la_dw = _a_weighted_level(levels.receiver_level, levels.ck)
+        flow.append(
+            result_box(_attenuation_statement(la_dw, language), styles, accent)
         )
-        flow.extend(verdict_flow(text, passed, styles, language))
+        if metadata is not None and metadata.requirement is not None:
+            text, passed = _attenuation_verdict(
+                la_dw, float(metadata.requirement), language
+            )
+            flow.extend(verdict_flow(text, passed, styles, language))
+    else:
+        flow.append(
+            result_box(_breakdown_statement(result, language), styles, accent)
+        )
 
     basis_strip_style = measurement_basis_style()
     flow.append(
@@ -327,23 +400,31 @@ def render_outdoor_attenuation_report(
             t(
                 "The attenuation A = A<sub>div</sub> + A<sub>atm</sub> + "
                 "A<sub>gr</sub> + A<sub>bar</sub> (Eq. (4)); a negative "
-                "A<sub>gr</sub> is a net gain from ground reflection. The "
-                "downwind level L<sub>fT</sub>(DW) = L<sub>w</sub> + D<sub>c</sub> "
-                "&#8722; A (Eq. (3)); L<sub>AT</sub>(DW) is its A-weighted total.",
+                "A<sub>gr</sub> is a net gain from ground reflection.",
                 language,
             ),
             basis_strip_style,
         )
     )
+    if levels is not None:
+        flow.append(
+            Paragraph(
+                t(
+                    "The downwind level L<sub>fT</sub>(DW) = L<sub>w</sub> + "
+                    "D<sub>c</sub> &#8722; A (Eq. (3)); L<sub>AT</sub>(DW) is its "
+                    "A-weighted total.",
+                    language,
+                ),
+                basis_strip_style,
+            )
+        )
     flow.append(
         Paragraph(
             t(
-                "A<sub>misc</sub> (foliage, industrial sites, housing; Annex A), "
-                "reflections from vertical surfaces (clause 7.5) and the "
-                "meteorological correction C<sub>met</sub> for the long-term "
-                "average level (clause 8) are not included. The method is "
-                "accurate to within about 1 dB to 3 dB for broadband noise up "
-                "to 1000 m (Table 5).",
+                "A<sub>misc</sub> (foliage, industrial sites, housing; Annex A) "
+                "and reflections from vertical surfaces (clause 7.5) are not "
+                "included. The method is accurate to within about 1 dB to 3 dB "
+                "for broadband noise up to 1000 m (Table 5).",
                 language,
             ),
             basis_strip_style,

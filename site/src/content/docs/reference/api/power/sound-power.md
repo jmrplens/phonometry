@@ -511,6 +511,49 @@ Plot the precision `LW` spectrum with the A-weighted total.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### PrecisionSoundPowerResult.report()
+
+```python
+PrecisionSoundPowerResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ISO 3745:2012 precision sound-power fiche to a PDF.
+
+Writes the same one-page sound-power test sheet as
+[`SoundPowerResult.report`](/phonometry/reference/api/power/sound-power/#soundpowerresultreport), with the standard-basis line naming the
+precision method in an anechoic or hemi-anechoic room (ISO 3745:2012,
+accuracy grade 1) and the measurement-basis strip stating the applied
+meteorological corrections `C1`/`C2`/`C3` instead of the ISO 3744
+`K1`/`K2`. The per-band table shows the surface time-averaged level
+`Lp` and the band sound-power level `LW`; `verbose` adds the
+energy-averaged level `Lp'`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header and footer identity and, via `requirement`, a declared A-weighted sound-power limit (lower is better). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True` the per-band table adds the energy-averaged level `Lp'`. |
+| `language` | Fiche language: `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+
 ## sound_power_anechoic
 
 ```python
@@ -769,6 +812,52 @@ Plot the LW spectrum with the A-weighted total annotated.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### SoundPowerResult.report()
+
+```python
+SoundPowerResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ISO 3744/3746 sound-power determination fiche to a PDF.
+
+Writes a one-page sound-power test sheet: the standard-basis line naming
+the applied method and accuracy grade (ISO 3744:2010 engineering grade 2
+or ISO 3746:2010 survey grade 3), an optional metadata header (client,
+noise source, test environment, instrumentation, climate, date), a
+per-band table (nominal octave/one-third-octave frequency, the surface
+sound-pressure level `Lp` and the band sound-power level `LW`), the
+sound-power spectrum `LW(f)`, the boxed A-weighted sound power level
+`LWA` (dB re 1 pW) with the total `LW`, the expanded uncertainty
+`U` and the measurement surface area `S`, an optional verdict row
+against a declared limit, and a measurement-basis strip stating the
+applied background (`K1`) and environmental (`K2`) corrections.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True` the per-band table adds the energy-averaged level `Lp'` and the background (`K1`) and environmental (`K2`) corrections. |
+| `language` | Fiche language: `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
 
 ## SoundPowerWarning
 

@@ -192,6 +192,16 @@ class IntensityReductionResult:
                 "(100 Hz to 3150 Hz) or 5 octave (125 Hz to 2000 Hz) bands. "
                 "Build the result with that band count."
             )
+        # Guard a manually built result whose 'rating' arrays were hand-crafted
+        # to a non-ISO band count: the fiche is defined only for the 16
+        # one-third-octave or 5 octave bands ISO 717-1 rates.
+        n_bands = int(np.asarray(self.r_i).size)
+        if n_bands not in (16, 5):
+            raise ValueError(
+                "The intensity report supports only 16 one-third-octave "
+                "(100 Hz to 3150 Hz) or 5 octave (125 Hz to 2000 Hz) bands; "
+                f"the result carries {n_bands}."
+            )
 
         from .._report.iso15186 import render_iso15186_report
 

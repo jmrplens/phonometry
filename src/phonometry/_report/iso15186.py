@@ -92,6 +92,10 @@ def render_iso15186_report(
         """The table: ``f | RI`` or, verbose with Kc, ``f | RI | RI,M``."""
         from reportlab.lib.units import mm
 
+        # ISO 717-1 Clause 4.4 requires stating whether the rating came from
+        # one-third-octave or octave bands; both the plain and the verbose
+        # caption declare the set (the verbose one also names the RI,M column).
+        is_octave = np.asarray(rating.band_centers).size == 5
         if verbose and modified is not None:
             columns: List[Column] = [
                 (value_header, curve, 1),
@@ -101,14 +105,17 @@ def render_iso15186_report(
                     1,
                 ),
             ]
-            caption = t("Per-band index and Kc-modified index", language)
+            caption_key = (
+                "Octave-band {vh} and Kc-modified index"
+                if is_octave
+                else "One-third-octave {vh} and Kc-modified index"
+            )
+            caption = t(caption_key, language).format(vh=_SPEC["symbol"])
             col_widths = [12 * mm] + [22 * mm for _ in columns]
             return columns, caption, col_widths
-        # ISO 717-1 Clause 4.4 requires stating whether the rating came from
-        # one-third-octave or octave bands; the caption declares the set.
         caption_key = (
             "Octave-band {vh} [dB]"
-            if np.asarray(rating.band_centers).size == 5
+            if is_octave
             else "One-third-octave {vh} [dB]"
         )
         caption = t(caption_key, language).format(vh=_SPEC["symbol"])

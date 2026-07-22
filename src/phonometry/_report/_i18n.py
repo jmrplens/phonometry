@@ -104,7 +104,8 @@ _STRINGS: dict[str, str] = {
     "sum": "suma",
     # --- captions ---------------------------------------------------------
     "One-third-octave {vh} [dB]": "Tercio de octava {vh} [dB]",
-    "Per-band index and Kc-modified index": "Índice por banda e índice modificado por Kc",
+    "One-third-octave {vh} and Kc-modified index": "{vh} en tercio de octava e índice modificado por Kc",
+    "Octave-band {vh} and Kc-modified index": "{vh} en banda de octava e índice modificado por Kc",
     "One-third-octave &#945;<sub>s</sub>, octave &#945;<sub>p</sub>": "&#945;<sub>s</sub> en tercio de octava, &#945;<sub>p</sub> en octava",
     "Octave-band &#945;<sub>p</sub>": "&#945;<sub>p</sub> en banda de octava",
     "One-third-octave &#945;<sub>s</sub>": "&#945;<sub>s</sub> en tercio de octava",

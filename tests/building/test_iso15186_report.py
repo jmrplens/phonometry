@@ -145,18 +145,45 @@ def test_requirement_verdicts_pass_and_fail(tmp_path) -> None:
     assert "PASS" in _extract_text(str(passing))
 
 
-def test_octave_band_fiche_renders(tmp_path) -> None:
-    """A five-octave-band intensity result also yields a one-page fiche."""
+def _octave_result(*, with_kc: bool = False) -> IntensityReductionResult:
+    """A five-octave-band intensity result with a valid ISO 717-1 rating."""
     ri = np.array([30.0, 40.0, 48.0, 52.0, 55.0])
     l_in = _levels_for_target_ri(ri, 85.0, 12.0, 10.0)
-    result = intensity_sound_reduction(
-        np.full(5, 85.0), l_in, measurement_area=12.0, area=10.0
+    octave_freqs = np.array([125, 250, 500, 1000, 2000], dtype=float)
+    kc = adaptation_term_kc(octave_freqs) if with_kc else None
+    return intensity_sound_reduction(
+        np.full(5, 85.0), l_in, measurement_area=12.0, area=10.0, kc=kc
     )
+
+
+def test_octave_band_fiche_renders(tmp_path) -> None:
+    """A five-octave-band intensity result also yields a one-page fiche."""
+    result = _octave_result()
     assert result.rating is not None
     out = tmp_path / "octave.pdf"
     result.report(str(out))
     _assert_one_page(str(out))
     assert "Octave-band" in _extract_text(str(out))
+
+
+def test_octave_band_verbose_declares_band_resolution(tmp_path) -> None:
+    """The verbose RI,M caption still declares the octave-band resolution."""
+    out = tmp_path / "octave_verbose.pdf"
+    _octave_result(with_kc=True).report(str(out), verbose=True)
+    _assert_one_page(str(out))
+    text = " ".join(_extract_text(str(out)).split())
+    assert "Octave-band" in text  # band resolution stated (ISO 717-1 Clause 4.4)
+    assert "Kc-modified" in text  # the RI,M column is present
+
+
+def test_one_third_octave_verbose_declares_band_resolution(tmp_path) -> None:
+    """The verbose RI,M caption declares the one-third-octave resolution."""
+    out = tmp_path / "verbose_res.pdf"
+    _intensity_result(with_kc=True).report(str(out), verbose=True)
+    _assert_one_page(str(out))
+    text = " ".join(_extract_text(str(out)).split())
+    assert "One-third-octave" in text
+    assert "Kc-modified" in text
 
 
 def test_spanish_fiche_renders_translated(tmp_path) -> None:
@@ -213,6 +240,29 @@ def test_verbose_without_kc_renders_plain_table(tmp_path) -> None:
     text = " ".join(_extract_text(str(out)).split())
     assert "One-third-octave" in text
     assert "Kc-modified" not in text
+
+
+def test_non_iso_band_count_rejected(tmp_path) -> None:
+    """A manually built 8-band result with matching rating arrays is rejected.
+
+    The public API promises only the 16 one-third-octave or 5 octave bands
+    ISO 717-1 rates; a hand-crafted rating whose per-band arrays all match an
+    8-band curve would otherwise satisfy the shared renderer's shape checks.
+    """
+    from phonometry import WeightedRatingResult
+
+    centers = np.array([100, 125, 160, 200, 250, 315, 400, 500], dtype=float)
+    curve = np.linspace(20.0, 40.0, 8)
+    rating = WeightedRatingResult(
+        rating=30, c=-2, ctr=-3, unfavourable_sum=0.0,
+        band_centers=centers, measured=curve, shifted_reference=curve,
+    )
+    result = IntensityReductionResult(
+        r_i=curve, r_i_modified=None, rating=rating, rating_modified=None
+    )
+    out = str(tmp_path / "x.pdf")
+    with pytest.raises(ValueError, match="16 one-third-octave"):
+        result.report(out)
 
 
 def test_rating_without_per_band_data_rejected(tmp_path) -> None:

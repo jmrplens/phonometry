@@ -16,9 +16,11 @@ import pytest
 
 from phonometry.underwater.seabed_reflection import (
     BottomLossResult,
+    SeabedReflection,
     bottom_reflection_loss,
     critical_angle,
     reflection_coefficient,
+    seabed_reflection,
 )
 
 # Water over a fast sandy bottom.
@@ -91,4 +93,43 @@ def test_grazing_angle_out_of_range_rejected() -> None:
 
 def test_bottom_loss_plot_smoke() -> None:
     res = bottom_reflection_loss(np.linspace(0.0, 90.0, 91), **_WATER, **_SAND)
+    assert res.plot() is not None
+
+
+def test_seabed_reflection_result_bundles_the_maths() -> None:
+    # The plottable wrapper re-runs no maths: R, |R| and bottom loss must match
+    # the bare functions, and it carries the interface parameters.
+    phi = np.linspace(0.0, 90.0, 91)
+    res = seabed_reflection(phi, **_WATER, **_SAND)
+    assert isinstance(res, SeabedReflection)
+    r = reflection_coefficient(phi, **_WATER, **_SAND)
+    assert np.allclose(res.reflection_coefficient, r)
+    assert np.allclose(res.magnitude, np.abs(r))
+    assert np.allclose(res.bottom_loss, -20.0 * np.log10(np.abs(r)))
+    assert (res.rho1, res.c1, res.rho2, res.c2) == (1000.0, 1500.0, 1900.0, 1650.0)
+    assert res.critical_angle == pytest.approx(critical_angle(1500.0, 1650.0))
+
+
+def test_seabed_reflection_total_reflection_below_critical() -> None:
+    # |R| = 1 below the critical grazing angle for a faster sediment.
+    res = seabed_reflection(np.array([5.0, 15.0, 24.0]), **_WATER, **_SAND)
+    assert np.all(np.array([5.0, 15.0, 24.0]) < res.critical_angle)
+    assert np.allclose(res.magnitude, 1.0, atol=1e-9)
+
+
+def test_seabed_reflection_normal_incidence_magnitude() -> None:
+    # At 90 deg grazing (normal incidence) |R| = |Z2 - Z1|/(Z2 + Z1).
+    res = seabed_reflection(90.0, **_WATER, **_SAND)
+    z1, z2 = 1000.0 * 1500.0, 1900.0 * 1650.0
+    assert float(res.magnitude[-1]) == pytest.approx((z2 - z1) / (z2 + z1), abs=1e-6)
+
+
+def test_seabed_reflection_no_critical_angle_for_slow_bottom() -> None:
+    res = seabed_reflection(45.0, rho1=1000.0, c1=1500.0, rho2=1500.0, c2=1450.0)
+    assert res.critical_angle is None
+    assert np.all(res.magnitude < 1.0)
+
+
+def test_seabed_reflection_plot_smoke() -> None:
+    res = seabed_reflection(np.linspace(0.0, 90.0, 91), **_WATER, **_SAND)
     assert res.plot() is not None

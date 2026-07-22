@@ -356,6 +356,44 @@ print(bl.critical_angle)            # 24,6°
 bl.plot()   # pérdida por reflexión frente al ángulo rasante
 ```
 
+El complemento `seabed_reflection` agrupa el `reflection_coefficient` complejo,
+su `magnitude` $|R|$, el `bottom_loss` (dB) y los parámetros de la interfaz en un
+`SeabedReflection` cuyo `.plot()` dibuja directamente el módulo del coeficiente
+de reflexión $|R|$ (unidad por debajo del ángulo crítico y decreciente hasta el
+valor de incidencia normal a $90°$).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_coefficient_es.svg" alt="Módulo del coeficiente de reflexión del fondo frente al ángulo rasante para un fondo arenoso rápido: reflexión total por debajo del ángulo rasante crítico, decreciendo hasta el valor de incidencia normal por encima" width="82%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# Módulo del coeficiente de reflexión de Rayleigh: agua sobre un fondo arenoso rápido.
+phi = np.linspace(0.0, 90.0, 361)
+sr = underwater.seabed_reflection(phi, rho1=1000.0, c1=1500.0,
+                                  rho2=1900.0, c2=1650.0)
+print(f"|R| en incidencia normal = {sr.magnitude[-1]:.3f}")  # 0.353
+sr.plot()   # módulo del coeficiente de reflexión frente al ángulo rasante
+plt.show()
+```
+
+</details>
+
+```python
+import numpy as np
+from phonometry import underwater
+
+phi = np.linspace(0.0, 90.0, 361)   # ángulo rasante desde la interfaz, grados
+sr = underwater.seabed_reflection(phi, rho1=1000.0, c1=1500.0,   # agua
+                          rho2=1900.0, c2=1650.0)          # arena
+print(sr.magnitude[-1])             # 0,353 = |R| en incidencia normal
+sr.plot()   # |R| frente al ángulo rasante (necesita matplotlib)
+```
+
 ## Ruido ambiental oceánico
 
 El nivel espectral de ruido ambiental es la suma energética de las componentes

@@ -235,6 +235,47 @@ slower bottom). `reflection_coefficient(…)` and `critical_angle(c1, c2)` are
 also exposed directly. The model is lossless (real densities and sound speeds);
 sediment attenuation is out of scope.
 
+The companion `seabed_reflection` bundles the complex `reflection_coefficient`,
+its `magnitude` $|R|$, the `bottom_loss` (dB) and the interface parameters into
+a `SeabedReflection` whose `.plot()` draws the reflection-coefficient magnitude
+$|R|$ directly (unity below the critical angle, dropping to the normal-incidence
+value at $90°$).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_coefficient_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_coefficient.svg" alt="Seabed reflection-coefficient magnitude versus grazing angle for a fast sandy seabed: total reflection (|R| = 1) below the critical grazing angle, falling to the normal-incidence value above it" width="82%">
+</picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# Rayleigh reflection-coefficient magnitude: water over a fast sandy bottom.
+phi = np.linspace(0.0, 90.0, 361)
+sr = underwater.seabed_reflection(phi, rho1=1000.0, c1=1500.0,
+                                  rho2=1900.0, c2=1650.0)
+print(f"|R| at normal incidence = {sr.magnitude[-1]:.3f}")  # |R| at normal incidence = 0.353
+sr.plot()   # reflection-coefficient magnitude vs grazing angle
+plt.show()
+```
+
+</details>
+
+```python
+import numpy as np
+from phonometry import underwater
+
+phi = np.linspace(0.0, 90.0, 361)   # grazing angle from the interface, degrees
+sr = underwater.seabed_reflection(phi, rho1=1000.0, c1=1500.0,  # water
+                          rho2=1900.0, c2=1650.0)         # sand
+print(sr.magnitude[-1])             # 0.353 = |R| at normal incidence
+sr.plot()                           # |R| vs grazing angle (needs matplotlib)
+```
+
 ## 5. Ocean ambient noise
 
 The ambient-noise spectrum level (dB re 1 µPa²/Hz) is the energy sum of the two

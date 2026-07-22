@@ -12,6 +12,9 @@ reflection coefficient (Medwin & Clay, Eq. 2.6.11a). Using the grazing angle
 * :func:`critical_angle` -- the critical grazing angle ``φc = arccos(c1/c2)``
   (only when ``c2 > c1``); below it the wave is totally reflected (``|R| = 1``).
 * :func:`reflection_coefficient` -- the complex ``R`` per grazing angle.
+* :func:`seabed_reflection` -- the complex ``R``, its magnitude ``|R|`` and the
+  bottom loss bundled with the interface parameters into a
+  :class:`SeabedReflection` whose ``.plot()`` draws ``|R|`` versus grazing angle.
 * :func:`bottom_reflection_loss` -- the bottom loss ``BL = −20·lg|R|`` (dB),
   returned as a :class:`BottomLossResult` with a ``.plot()``.
 
@@ -148,4 +151,102 @@ def bottom_reflection_loss(
         reflection_loss=np.asarray(loss, dtype=np.float64),
         reflection_coefficient=r,
         critical_angle=phi_c,
+    )
+
+
+@dataclass(frozen=True)
+class SeabedReflection:
+    """Plane-wave seabed reflection coefficient versus grazing angle.
+
+    Bundles the complex Rayleigh reflection coefficient ``R`` over a
+    grazing-angle grid with its magnitude ``|R|``, the bottom loss
+    ``BL = −20·lg|R|`` and the fluid-fluid interface parameters, so the classic
+    ``|R|`` versus grazing-angle curve can be drawn with :meth:`plot`. Build it
+    with :func:`seabed_reflection`; the frozen instance is a thin, plottable
+    wrapper and re-runs none of the maths.
+
+    :ivar grazing_angle: Grazing angles ``φ`` from the interface, in degrees.
+    :ivar reflection_coefficient: Complex pressure reflection coefficient ``R``
+        per grazing angle.
+    :ivar magnitude: Reflection-coefficient magnitude ``|R|`` per grazing angle
+        (``1`` below the critical angle for a faster sediment).
+    :ivar bottom_loss: Bottom loss ``BL = −20·lg|R|`` per grazing angle, in dB.
+    :ivar critical_angle: The critical grazing angle, in degrees, or ``None`` if
+        the sediment is not faster than the water.
+    :ivar rho1: Water density ``ρ1``.
+    :ivar c1: Sound speed in the water ``c1``, in m/s.
+    :ivar rho2: Sediment density ``ρ2``.
+    :ivar c2: Sound speed in the sediment ``c2``, in m/s.
+    """
+
+    grazing_angle: "NDArray[np.float64]"
+    reflection_coefficient: "NDArray[np.complex128]"
+    magnitude: "NDArray[np.float64]"
+    bottom_loss: "NDArray[np.float64]"
+    critical_angle: "float | None"
+    rho1: float
+    c1: float
+    rho2: float
+    c2: float
+
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+        """Plot the reflection-coefficient magnitude ``|R|`` versus grazing angle.
+
+        Draws ``|R|`` on a linear grazing-angle axis (0..90°), marking the
+        critical angle when the sediment is faster than the water. Requires
+        matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the ``|R|`` curve ``plot`` call.
+        :return: The axes.
+        """
+        from .._i18n import check_language
+        from .._plot.underwater import plot_seabed_reflection
+
+        return plot_seabed_reflection(self, ax=ax, language=check_language(language), **kwargs)
+
+
+def seabed_reflection(
+    grazing_angle: "NDArray[np.float64] | list[float] | float",
+    *,
+    rho1: float = 1000.0,
+    c1: float = 1500.0,
+    rho2: float,
+    c2: float,
+) -> SeabedReflection:
+    """Build a plottable seabed reflection-coefficient result (Rayleigh model).
+
+    Evaluates :func:`reflection_coefficient` at ``grazing_angle`` for the given
+    fluid-fluid interface and bundles the complex ``R``, its magnitude ``|R|``,
+    the bottom loss ``BL = −20·lg|R|`` and the interface parameters into a
+    :class:`SeabedReflection` that exposes ``.plot()``. The maths is unchanged;
+    this is a thin, plottable wrapper around the existing function (the same
+    ``ValueError`` cases apply).
+
+    :param grazing_angle: Grazing angle(s) ``φ`` from the interface, in degrees
+        (``0`` grazing to ``90`` normal incidence).
+    :param rho1: Water density ``ρ1`` (default 1000 kg/m³).
+    :param c1: Sound speed in the water ``c1``, in m/s (default 1500).
+    :param rho2: Sediment density ``ρ2``.
+    :param c2: Sound speed in the sediment ``c2``, in m/s.
+    :return: A frozen :class:`SeabedReflection`.
+    :raises ValueError: If the inputs are invalid.
+    """
+    phi = np.atleast_1d(np.asarray(grazing_angle, dtype=np.float64))
+    r = reflection_coefficient(phi, rho1=rho1, c1=c1, rho2=rho2, c2=c2)
+    magnitude = np.abs(r)
+    loss = -20.0 * np.log10(magnitude)
+    phi_c = critical_angle(c1, c2) if float(c2) > float(c1) else None
+    return SeabedReflection(
+        grazing_angle=phi,
+        reflection_coefficient=r,
+        magnitude=np.asarray(magnitude, dtype=np.float64),
+        bottom_loss=np.asarray(loss, dtype=np.float64),
+        critical_angle=phi_c,
+        rho1=float(rho1),
+        c1=float(c1),
+        rho2=float(rho2),
+        c2=float(c2),
     )

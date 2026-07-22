@@ -41,9 +41,11 @@ from .propagation import (
 )
 from .seabed_reflection import (
     BottomLossResult,
+    SeabedReflection,
     bottom_reflection_loss,
     critical_angle,
     reflection_coefficient,
+    seabed_reflection,
 )
 from .ship_radiated_noise import (
     ShipSourceLevelResult,
@@ -76,6 +78,7 @@ __all__ = [
     "ParabolicEquationResult",
     "PileStrikeResult",
     "RayTraceResult",
+    "SeabedReflection",
     "ShipSourceLevelResult",
     "ShipTrafficSpectrum",
     "SonarEquationResult",
@@ -103,6 +106,7 @@ __all__ = [
     "ray_trace",
     "reflection_coefficient",
     "sea_water_sound_speed",
+    "seabed_reflection",
     "seawater_absorption",
     "ship_source_spectrum",
     "single_strike_sel",

@@ -919,6 +919,12 @@ _ES_EXACT = {
     "Grazing angle [°]": "Ángulo rasante [°]",
     "Bottom loss [dB]": "Pérdida por reflexión [dB]",
     "Bottom loss (sand)": "Pérdida por reflexión (arena)",
+    "Seabed Reflection Coefficient (Rayleigh)":
+        "Coeficiente de reflexión del fondo (Rayleigh)",
+    "Reflection coefficient magnitude |R|":
+        "Módulo del coeficiente de reflexión |R|",
+    "Reflection coefficient magnitude |R| (sand)":
+        "Módulo del coeficiente de reflexión |R| (arena)",
     "Water ρ = 1000, c = 1500\nSand ρ = 1900, c = 1650":
         "Agua ρ = 1000, c = 1500\nArena ρ = 1900, c = 1650",
     "Ocean Ambient Noise (Wenz)": "Ruido ambiental oceánico (Wenz)",
@@ -1236,6 +1242,8 @@ _ES_PATTERNS = [
     (r"^Diffracted path \(δ = (\d+),(\d+) m\)$",
      r"Camino difractado (δ = \1,\2 m)"),
     (r"^(\d+) yr$", r"\1 años"),
+    # seabed_reflection / seabed_reflection_coefficient critical-angle legend.
+    (r"^Critical angle \((\d+)\.(\d+)°\)$", r"Ángulo crítico (\1,\2°)"),
     # equal_loudness_contours per-contour annotations ("20 phon" ... "90 phon").
     (r"^(\d+) phon$", r"\1 fonios"),
     (r"^total \(limit\) (.+) dB$", r"total (límite) \1 dB"),
@@ -5462,6 +5470,35 @@ def generate_seabed_reflection(output_dir: str) -> None:
     plt.close()
 
 
+def generate_seabed_reflection_coefficient(output_dir: str) -> None:
+    """Seabed reflection-coefficient magnitude |R| vs grazing angle."""
+    print("Generating seabed_reflection_coefficient...")
+    from phonometry import seabed_reflection
+
+    phi = np.linspace(0.0, 90.0, 361)
+    res = seabed_reflection(phi, rho1=1000.0, c1=1500.0, rho2=1900.0, c2=1650.0)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(res.grazing_angle, res.magnitude, color=COLOR_PRIMARY, linewidth=2.0,
+            label="Reflection coefficient magnitude |R| (sand)")
+    if res.critical_angle is not None:
+        ax.axvline(res.critical_angle, color=COLOR_SECONDARY, linestyle="--", linewidth=1.4,
+                   label=f"Critical angle ({res.critical_angle:.1f}°)")
+    ax.set_xlabel("Grazing angle [°]")
+    ax.set_ylabel("Reflection coefficient magnitude |R|")
+    ax.set_title("Seabed Reflection Coefficient (Rayleigh)", fontweight="bold", pad=12)
+    ax.set_ylim(0.0, 1.05)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower left", fontsize=9)
+    ax.text(0.02, 0.95,
+            "Water ρ = 1000, c = 1500\nSand ρ = 1900, c = 1650",
+            transform=ax.transAxes, va="top", fontsize=10,
+            bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})
+    plt.tight_layout()
+    save_figure(output_dir, "seabed_reflection_coefficient.svg")
+    plt.close()
+
+
 def generate_ocean_ambient_noise(output_dir: str) -> None:
     """Wenz ambient-noise curves: wind + thermal energy sum vs frequency."""
     print("Generating ocean_ambient_noise...")
@@ -8992,6 +9029,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Underwater propagation: seabed reflection, ambient noise (Wenz) and
     # ship-traffic source level (JOMOPANS-ECHO).
     generate_seabed_reflection,
+    generate_seabed_reflection_coefficient,
     generate_ocean_ambient_noise,
     generate_ship_traffic_noise,
     # Underwater propagation: numerical solvers (modes/rays/PE).

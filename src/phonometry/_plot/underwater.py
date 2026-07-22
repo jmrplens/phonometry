@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from ..underwater.sound_speed import SoundSpeedProfile
     from ..underwater.propagation import TransmissionLossResult
     from ..underwater.sonar_equation import SonarEquationResult
-    from ..underwater.seabed_reflection import BottomLossResult
+    from ..underwater.seabed_reflection import BottomLossResult, SeabedReflection
     from ..underwater.ocean_ambient_noise import AmbientNoiseResult
     from ..underwater.ship_traffic_noise import ShipTrafficSpectrum
 
@@ -74,6 +74,8 @@ _STRINGS: dict[str, str] = {
     "Grazing angle [°]": "Ángulo rasante [°]",
     "Bottom loss [dB]": "Pérdida en el fondo [dB]",
     "Seabed reflection loss": "Pérdida por reflexión en el fondo marino",
+    "Reflection coefficient magnitude": "Módulo del coeficiente de reflexión",
+    "Seabed reflection coefficient": "Coeficiente de reflexión del fondo marino",
     "Total": "Total",
     "Wind": "Viento",
     "Thermal": "Térmico",
@@ -324,6 +326,39 @@ def plot_bottom_loss(
     ax.set_xlabel(_t("Grazing angle [°]", language))
     ax.set_ylabel(_t("Bottom loss [dB]", language))
     ax.set_title(_t("Seabed reflection loss", language))
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+def plot_seabed_reflection(
+    result: "SeabedReflection", ax: Axes | None = None, *, language: str = "en",
+    **kwargs: Any
+) -> Axes:
+    """Seabed reflection-coefficient magnitude versus grazing angle.
+
+    Draws ``|R|`` on a linear grazing-angle axis, marking the critical angle
+    when the sediment is faster than the water.
+
+    :param result: A :class:`~phonometry.seabed_reflection.SeabedReflection`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the magnitude ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    phi = np.asarray(result.grazing_angle, dtype=np.float64)
+    magnitude = np.asarray(result.magnitude, dtype=np.float64)
+    ax.plot(phi, magnitude, **{"color": _C_PRIMARY, "lw": 1.6, "label": "$|R|$", **kwargs})
+    if result.critical_angle is not None:
+        ax.axvline(result.critical_angle, color=_C_REFERENCE, ls="--", lw=1.0,
+                   label=f"{_t('Critical angle', language)} = {format_number(result.critical_angle, language)}°")
+    ax.set_xlabel(_t("Grazing angle [°]", language))
+    ax.set_xlim(0.0, 90.0)
+    ax.set_ylabel(f"{_t('Reflection coefficient magnitude', language)} $|R|$")
+    ax.set_title(_t("Seabed reflection coefficient", language))
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)

@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `ToneAudibilityResult.report()`: a one-page PDF tonal audibility assessment
+  fiche rendered through the shared accredited-report engine, following the
+  ISO 1996-2:2017 Annex J engineering method (ISO/PAS 20065:2016). The sheet
+  carries the standard-basis line, an optional metadata header (source/situation,
+  client, measurement position, instrumentation and date, with the analysis line
+  spacing `Δf` read from the result), a full-width table of the key quantities for
+  every detected tone (tone frequency `fT`, entry type, tone level `Lpt`,
+  critical-band masking-noise level `Lpn`, critical bandwidth `Δfc` and the
+  audibility `ΔLta`) above a level-versus-frequency analysis plot with the tones
+  and their critical-band masking noise marked, and a boxed decisive audibility
+  `ΔLta` with the derived tonal adjustment `K` (ISO 1996-2:2017 Table J.1). A
+  maximum-audibility limit supplied via the metadata `requirement` adds a
+  PASS/FAIL verdict (a quieter tone passes), and a prominence note states whether
+  a prominent tone is present. `verbose=True` adds the per-tone extended
+  uncertainty column; `language="es"` renders the Spanish fiche.
 - `SoundPowerResult.report()` and `PrecisionSoundPowerResult.report()`: a
   one-page PDF sound-power determination fiche rendered through the shared
   accredited-report engine. The sheet carries the standard-basis line naming

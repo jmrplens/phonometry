@@ -26,6 +26,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Un tono estacionario inmerso en ruido de banda ancha resalta cuando emerge de
 forma audible por encima del ruido que de otro modo lo enmascararía, la
@@ -296,6 +297,58 @@ y se verifican contra el programa de referencia del Anexo J de
 1.8)`). Como refuerzo, evaluado en los tonos del Anexo E el umbral (`≈ 24 Hz` en
 137,3 Hz) los mantiene combinados, coherente con la agrupación FG de ese ejemplo.
 :::
+
+## 6. Informe de evaluación tonal (`.report()`)
+
+`ToneAudibilityResult.report(path)` genera una ficha PDF de una página con el
+formato de un informe de evaluación tonal de un laboratorio de ruido ambiental,
+siguiendo el método de ingeniería del **Anexo J de la ISO 1996-2:2017**: la
+línea de base normativa, un bloque de metadatos opcional (fuente/situación,
+cliente, posición de medición, instrumentación y fecha, con la resolución del
+análisis `Δf` tomada del resultado), una tabla a todo ancho con las magnitudes
+clave de cada tono detectado (frecuencia `f`<sub>T</sub>, tipo de entrada, nivel
+del tono `L`<sub>pt</sub>, nivel del ruido enmascarante en la banda crítica
+`L`<sub>pn</sub>, ancho de banda crítica `Δf`<sub>c</sub> y la audibilidad
+`ΔL`<sub>ta</sub>) sobre el gráfico de nivel frente a frecuencia con los tonos y
+su ruido enmascarante marcados, la audibilidad decisiva `ΔL`<sub>ta</sub>
+enmarcada junto con el ajuste tonal derivado `K` (Tabla J.1), una fila de
+veredicto APTO/NO APTO opcional y una nota de prominencia, y un pie con el
+descargo fijo.
+
+Usa el mismo contenedor `ReportMetadata` y el mismo motor de renderizado que la
+[ficha de sonoridad ISO 532-1](/phonometry/es/guides/loudness/#informe-de-iso-532-1-report);
+un `requirement` indicado se interpreta como la audibilidad decisiva
+`ΔL`<sub>ta</sub> máxima admisible en dB (un tono más silencioso es apto). El
+renderizado necesita reportlab (`pip install phonometry[report]`); solo se admite
+`engine="reportlab"`. La ficha se genera en inglés por defecto; pase
+`language="es"` para una ficha en español (cadenas fijas traducidas y separador
+decimal de coma), p. ej. `res.report("tone_fiche_es.pdf", language="es")`.
+
+```python
+from phonometry import psychoacoustics, ReportMetadata
+
+# El espectro del motor de combustión del §4/§5 (analyze_spectrum).
+res = psychoacoustics.analyze_spectrum(levels, freqs, 2.7)
+res.report(
+    "tone_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Motor de combustión, funcionamiento estable",
+        measurement_standard="ISO 1996-2",
+        laboratory="Laboratorio de referencia Phonometry",
+        requirement=6.0,            # ΔL_ta máxima admisible (dB)
+    ),
+)                                   # ΔL_ta decisiva (dB) y K (dB, Tabla J.1)
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; pulse la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso1996_tone_audibility_example"
+	title="Informe de ejemplo de audibilidad tonal ISO 1996-2 (PDF)"
+	description="Ficha de evaluación tonal de una página: un encabezado de metadatos, una tabla por tono con el nivel del tono Lpt, el nivel del ruido enmascarante en la banda crítica Lpn, el ancho de banda crítica y la audibilidad, el gráfico de nivel frente a frecuencia con los tonos y su ruido enmascarante marcados, la audibilidad decisiva ΔL_ta = 9,1 dB enmarcada con el ajuste tonal K = 5 dB (Tabla J.1 de la ISO 1996-2:2017) y un veredicto NO APTO frente a un límite de audibilidad de 6 dB."
+	caption="Ficha de audibilidad tonal (ToneAudibilityResult.report), ΔL_ta decisiva en dB con el ajuste tonal K."
+/>
 
 ## Véase también
 

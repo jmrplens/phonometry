@@ -9,9 +9,13 @@ parameters at the 29 preferred third-octave frequencies of ISO 266.
 
 from __future__ import annotations
 
-from typing import Tuple
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Sequence, Tuple
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 # ISO 226:2023 Table 1 (p. 4): frequency Hz -> (alpha_f, L_U dB, T_f dB).
 # alpha_f: exponent for loudness perception; L_U: magnitude of the linear
@@ -128,3 +132,103 @@ def hearing_threshold() -> Tuple[np.ndarray, np.ndarray]:
     """
     tf = np.array([_TABLE1[f][2] for f in _FREQUENCIES])
     return _FREQUENCIES.copy(), tf
+
+
+#: Default loudness levels of the classic ISO 226:2023 contour family: the
+#: 20 phon to 90 phon range of Formula (1) in 10 phon steps.
+_DEFAULT_PHONS: Tuple[float, ...] = (
+    20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0,
+)
+
+
+@dataclass(frozen=True)
+class EqualLoudnessContours:
+    """The ISO 226:2023 normal equal-loudness-level contour family.
+
+    Bundles a set of equal-loudness contours (ISO 226:2023 Formula 1) with
+    the threshold of hearing (Table 1) over a shared frequency grid, so the
+    iconic chart can be drawn with :meth:`plot`.
+
+    ``frequencies`` is the frequency grid in Hz (by default the 29 preferred
+    third-octave frequencies of Table 1). ``phons`` lists the loudness levels
+    of the contours, in phon. ``contours`` holds the sound pressure levels in
+    dB re 20 uPa as a ``(len(phons), len(frequencies))`` array, row ``i`` being
+    the contour for ``phons[i]``; entries the standard does not define are
+    ``nan`` (Formula 1 is valid only up to 4 kHz above 80 phon, so those rows
+    stop at 4 kHz). ``threshold`` is the threshold of hearing T_f in dB re
+    20 uPa on the same grid.
+    """
+
+    frequencies: np.ndarray
+    phons: Tuple[float, ...]
+    contours: np.ndarray
+    threshold: np.ndarray
+
+    def plot(
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
+    ) -> "Axes":
+        """Plot the equal-loudness contour family with the hearing threshold.
+
+        Draws sound pressure level in dB against a logarithmic frequency axis:
+        one line per loudness level in :attr:`phons`, plus the threshold of
+        hearing. Requires matplotlib (``pip install phonometry[plot]``);
+        returns the :class:`~matplotlib.axes.Axes`.
+
+        :param ax: Existing axes to draw on, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the contour ``plot`` calls.
+        :return: The axes.
+        """
+        from .._i18n import check_language
+        from .._plot.psychoacoustics import plot_equal_loudness_contours
+
+        return plot_equal_loudness_contours(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
+def equal_loudness_contours(
+    phons: Sequence[float] = _DEFAULT_PHONS,
+    frequencies: "Sequence[float] | np.ndarray | None" = None,
+) -> EqualLoudnessContours:
+    """
+    Build the ISO 226:2023 equal-loudness-level contour family.
+
+    Evaluates :func:`equal_loudness_contour` at each level in ``phons`` and
+    :func:`hearing_threshold`, and bundles them into an
+    :class:`EqualLoudnessContours` result that exposes ``.plot()``. The maths
+    is unchanged; this is a thin, plottable wrapper around the existing
+    functions.
+
+    :param phons: Loudness levels of the contours, in phon; each must be in
+        the 20 phon to 90 phon validity range of Formula (1). Defaults to the
+        classic family from 20 phon to 90 phon in 10 phon steps.
+    :param frequencies: Frequency grid in Hz; ``None`` (default) uses the 29
+        preferred third-octave frequencies of Table 1. Any value given must be
+        one of those preferred frequencies (the standard specifies no
+        interpolation between them).
+    :return: An :class:`EqualLoudnessContours`.
+    """
+    if frequencies is None:
+        grid = _FREQUENCIES.copy()
+    else:
+        grid = np.asarray(frequencies, dtype=float)
+        for f in grid:
+            _params(float(f))  # reject any non-preferred frequency
+
+    phon_tuple = tuple(float(p) for p in phons)
+    contours = np.full((len(phon_tuple), grid.size), np.nan)
+    for i, phon in enumerate(phon_tuple):
+        freqs_p, spl_p = equal_loudness_contour(phon)
+        for f, s in zip(freqs_p, spl_p, strict=True):
+            j = np.flatnonzero(np.isclose(grid, f, rtol=1e-6))
+            if j.size:
+                contours[i, j[0]] = s
+
+    tf_freqs, tf_vals = hearing_threshold()
+    threshold = np.array(
+        [tf_vals[int(np.flatnonzero(np.isclose(tf_freqs, f, rtol=1e-6))[0])] for f in grid]
+    )
+    return EqualLoudnessContours(
+        frequencies=grid, phons=phon_tuple, contours=contours, threshold=threshold
+    )

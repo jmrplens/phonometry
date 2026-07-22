@@ -37,6 +37,86 @@ contour therefore stops at 4 kHz.
 
 **Returns:** Tuple `(frequencies, spl)` in Hz and dB re 20 uPa.
 
+## equal_loudness_contours
+
+```python
+equal_loudness_contours(
+    phons: Sequence[float] = (20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0),
+    frequencies: Sequence[float] | np.ndarray | None = None,
+) -> EqualLoudnessContours
+```
+
+Build the ISO 226:2023 equal-loudness-level contour family.
+
+Evaluates [`equal_loudness_contour`](/phonometry/reference/api/psychoacoustics/loudness-contours/#equal_loudness_contour) at each level in `phons` and
+[`hearing_threshold`](/phonometry/reference/api/psychoacoustics/loudness-contours/#hearing_threshold), and bundles them into an
+[`EqualLoudnessContours`](/phonometry/reference/api/psychoacoustics/loudness-contours/#equalloudnesscontours) result that exposes `.plot()`. The maths
+is unchanged; this is a thin, plottable wrapper around the existing
+functions.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `phons` | Loudness levels of the contours, in phon; each must be in the 20 phon to 90 phon validity range of Formula (1). Defaults to the classic family from 20 phon to 90 phon in 10 phon steps. |
+| `frequencies` | Frequency grid in Hz; `None` (default) uses the 29 preferred third-octave frequencies of Table 1. Any value given must be one of those preferred frequencies (the standard specifies no interpolation between them). |
+
+**Returns:** An [`EqualLoudnessContours`](/phonometry/reference/api/psychoacoustics/loudness-contours/#equalloudnesscontours).
+
+## EqualLoudnessContours
+
+```python
+EqualLoudnessContours(
+    frequencies: np.ndarray,
+    phons: Tuple[float, ...],
+    contours: np.ndarray,
+    threshold: np.ndarray,
+)
+```
+
+The ISO 226:2023 normal equal-loudness-level contour family.
+
+Bundles a set of equal-loudness contours (ISO 226:2023 Formula 1) with
+the threshold of hearing (Table 1) over a shared frequency grid, so the
+iconic chart can be drawn with `plot`.
+
+`frequencies` is the frequency grid in Hz (by default the 29 preferred
+third-octave frequencies of Table 1). `phons` lists the loudness levels
+of the contours, in phon. `contours` holds the sound pressure levels in
+dB re 20 uPa as a `(len(phons), len(frequencies))` array, row `i` being
+the contour for `phons[i]`; entries the standard does not define are
+`nan` (Formula 1 is valid only up to 4 kHz above 80 phon, so those rows
+stop at 4 kHz). `threshold` is the threshold of hearing T_f in dB re
+20 uPa on the same grid.
+
+### EqualLoudnessContours.plot()
+
+```python
+EqualLoudnessContours.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the equal-loudness contour family with the hearing threshold.
+
+Draws sound pressure level in dB against a logarithmic frequency axis:
+one line per loudness level in `phons`, plus the threshold of
+hearing. Requires matplotlib (`pip install phonometry[plot]`);
+returns the `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes to draw on, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the contour `plot` calls. |
+
+**Returns:** The axes.
+
 ## hearing_threshold
 
 ```python

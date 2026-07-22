@@ -30,11 +30,13 @@ from scipy import signal as sg
 
 from phonometry.broadcast import (
     DEFAULT_CHANNEL_WEIGHTS,
+    KWeightingResponse,
     ProgramLoudnessResult,
     channel_weight,
     integrated_loudness,
     k_weighting,
     k_weighting_coefficients,
+    k_weighting_response,
     loudness_range,
     program_loudness,
     true_peak_level,
@@ -145,6 +147,65 @@ def test_k_weighting_rejects_low_rate_and_empty() -> None:
     empty = np.empty(0)
     with pytest.raises(ValueError, match="empty"):
         k_weighting(empty, FS)
+
+
+def test_k_weighting_response_matches_coefficients() -> None:
+    """The result carries the exact freqz magnitudes of the Table 1-2 biquads.
+
+    Anchors against the same +4 dB shelf plateau and 997 Hz gain the loudness
+    formula assumes: the shelf tends to +4 dB, the combined response passes
+    through ~0.69 dB near 1 kHz (the ``-0.691`` Formula 2 constant) and the RLB
+    high-pass attenuates the lows.
+    """
+    res = k_weighting_response(48000.0, frequencies=[25.0, 997.0, 10000.0, 20000.0])
+    assert isinstance(res, KWeightingResponse)
+    # The stages sum to the combined magnitude, and reproduce the freqz oracle.
+    np.testing.assert_allclose(res.magnitude_db, res.shelf_db + res.highpass_db)
+    np.testing.assert_allclose(
+        res.magnitude_db, _k_response_db(48000.0, res.frequencies), rtol=0, atol=1e-12
+    )
+    assert res.shelf_db[3] == pytest.approx(4.0, abs=0.01)  # HF shelf plateau
+    assert res.magnitude_db[1] == pytest.approx(0.691, abs=0.05)  # Formula 2 gain
+    assert res.magnitude_db[0] < -9.0  # RLB high-pass attenuates the lows
+    assert res.fs == 48000.0
+
+
+def test_k_weighting_response_default_grid() -> None:
+    """The default grid is log-spaced from 10 Hz to the Nyquist rate."""
+    res = k_weighting_response(96000.0, n=256)
+    assert res.frequencies.size == 256
+    assert res.frequencies[0] == pytest.approx(10.0)
+    assert res.frequencies[-1] == pytest.approx(48000.0)
+
+
+def test_k_weighting_response_rejects_bad_input() -> None:
+    with pytest.raises(ValueError, match="fs >= 16000"):
+        k_weighting_response(8000.0)
+    with pytest.raises(ValueError, match="positive integer"):
+        k_weighting_response(48000.0, n=0)
+    with pytest.raises(ValueError, match="cannot be empty"):
+        k_weighting_response(48000.0, frequencies=[])
+    with pytest.raises(ValueError, match=r"\(0, fs/2\]"):
+        k_weighting_response(48000.0, frequencies=[30000.0])
+
+
+def test_k_weighting_response_plot() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    res = k_weighting_response()
+    ax = res.plot()
+    assert ax.get_ylabel() == "Magnitude [dB]"
+    assert "BS.1770" in ax.get_title()
+    labels = [t.get_text() for t in ax.get_legend().get_texts()]
+    assert any("combined" in s for s in labels)
+    # Spanish localises the title; unknown languages are rejected.
+    assert "BS.1770" in res.plot(language="es").get_title()
+    with pytest.raises(ValueError):
+        res.plot(language="fr")
+    plt.close("all")
 
 
 # ---------------------------------------------------------------------------

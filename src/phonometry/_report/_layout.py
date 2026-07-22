@@ -373,17 +373,31 @@ def document_styles(accent: Any) -> Tuple[Any, Any, Any, Any]:
     return styles, title_style, basis_style, caption_style
 
 
-def two_panel_body(left_cell: Any, plot_drawing: Any) -> Any:
-    """Assemble the two-panel body: a left cell (~56 mm) beside the plot.
+def two_panel_body(
+    left_cell: Any,
+    plot_drawing: Any,
+    *,
+    left_width_mm: float = 56.0,
+    plot_width_mm: float = 118.0,
+) -> Any:
+    """Assemble the two-panel body: a left cell beside the result's plot.
 
     Every fiche puts a table or metrics list on the left and the result's own
-    vector plot on the right; the column widths and cell alignment are shared.
-    Called only after the renderer has imported reportlab.
+    vector plot on the right; the cell alignment is shared and the column
+    widths default to the compact ~56 mm left cell used across the fiches. A
+    fiche that carries a multi-column detail table (the reverberation times and
+    absorption areas, or the reflection factor and the real/imaginary parts of
+    the normalised surface impedance) rebalances the split through
+    ``left_width_mm`` / ``plot_width_mm`` (they sum to the 174 mm content
+    width). Called only after the renderer has imported reportlab.
     """
     from reportlab.lib.units import mm
     from reportlab.platypus import Table, TableStyle
 
-    body = Table([[left_cell, plot_drawing]], colWidths=[56 * mm, 118 * mm])
+    body = Table(
+        [[left_cell, plot_drawing]],
+        colWidths=[left_width_mm * mm, plot_width_mm * mm],
+    )
     body.setStyle(
         TableStyle(
             [

@@ -51,6 +51,8 @@ from .._internal.warnings import PhonometryWarning
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 Complex = NDArray[np.complex128]
 
 #: Reference speed of sound of ISO 10534-2 Eq. (5), in m/s (343,2 exactly).
@@ -481,6 +483,63 @@ class ImpedanceTubeResult:
 
         check_language(language)
         return plot_impedance_tube(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 10534-2 impedance-tube test-report fiche to a PDF.
+
+        Writes a one-page accredited normal-incidence report (BS EN ISO
+        10534-2:2001, two-microphone transfer-function method): the
+        standard-basis line, an optional metadata header block (client,
+        specimen, tube diameter ``d``, microphone spacing ``s``, the measured
+        frequency range, mounting, climate ...), a two-panel body with the
+        per-frequency table (frequency, absorption ``alpha`` and the
+        real/imaginary parts of the normalised surface impedance
+        ``z = Z / (rho c0)``) beside the ``alpha(f)`` curve, and a footer with
+        the fixed disclaimer. ISO 10534-2 is a characterisation, so there is no
+        pass/fail verdict and no single-number rating (the random-incidence
+        weighted ``alpha_w`` is an ISO 11654 / ISO 354 quantity, not comparable
+        to the normal-incidence coefficient reported here).
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a body-and-disclaimer fiche whose header shows only the
+            measured frequency range. The applicable descriptive/geometric
+            fields are ``client``, ``manufacturer``, ``specimen``,
+            ``tube_diameter``, ``mic_spacing``, ``mounting``, ``test_room``,
+            ``test_date``, ``temperature``, ``pressure``,
+            ``measurement_standard``, ``laboratory``, ``operator``,
+            ``report_id`` and ``notes``. The ``requirement`` field is ignored
+            (ISO 10534-2 has no verdict).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the value table inserts the
+            reflection-factor magnitude ``|r|`` column.
+        :param language: Fiche language: ``"en"`` (default, English, decimal
+            point) or ``"es"`` (Spanish, decimal comma).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso10534 import render_iso10534_report
+
+        return render_iso10534_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def two_microphone_impedance(

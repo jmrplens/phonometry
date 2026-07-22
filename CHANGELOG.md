@@ -23,6 +23,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   PASS/FAIL verdict (a quieter tone passes), and a prominence note states whether
   a prominent tone is present. `verbose=True` adds the per-tone extended
   uncertainty column; `language="es"` renders the Spanish fiche.
+- `ImpedanceTubeResult.report()`: a one-page PDF impedance-tube test-report
+  fiche rendered through the shared accredited-report engine (BS EN ISO
+  10534-2:2001, two-microphone transfer-function method). The sheet carries the
+  standard-basis line, an optional metadata header (client, specimen, tube
+  diameter `d`, microphone spacing `s`, the measured frequency range, mounting,
+  climate), a per-frequency table of the normal-incidence absorption
+  coefficient `alpha` with the real and imaginary parts of the normalised
+  surface impedance `z = Z/(rho c0)` beside the `alpha(f)` curve on a continuous
+  logarithmic frequency axis, and a boxed characterisation headline (ISO 10534-2
+  is a characterisation, so there is no pass/fail verdict and no single-number
+  rating). `verbose=True` adds the reflection-factor magnitude `|r|` column, and
+  `language="es"` renders the Spanish fiche. `ReportMetadata` gains the
+  `tube_diameter` and `mic_spacing` geometry fields (in metres, printed in
+  millimetres). The `ImpedanceTubeResult.plot()` absorption spectrum now uses a
+  continuous logarithmic frequency axis with band-centre labels.
 - `SoundPowerResult.report()` and `PrecisionSoundPowerResult.report()`: a
   one-page PDF sound-power determination fiche rendered through the shared
   accredited-report engine. The sheet carries the standard-basis line naming

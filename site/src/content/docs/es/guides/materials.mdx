@@ -597,6 +597,59 @@ cualquier desajuste de micrófonos con `apply_mic_calibration`. Su `.plot()`
 dibuja el espectro de absorción $\alpha(f)$ con el módulo del factor de
 reflexión $|r|$ superpuesto.
 
+### Informe ISO 10534-2 (`.report()`)
+
+`ImpedanceTubeResult.report(path)` genera una ficha PDF de una página con el
+formato de un informe de ensayo en tubo de impedancia a incidencia normal
+acreditado (ISO 10534-2:2001): la línea de base normativa, una cabecera de
+metadatos, la tabla por frecuencia (el coeficiente de absorción $\alpha$ y las
+partes real e imaginaria de la impedancia superficial normalizada
+$z = Z/\rho c_0$) junto a la curva de $\alpha(f)$ (el propio `.plot()` del
+resultado, en un eje de frecuencia logarítmico continuo), un titular de
+caracterización en caja y un pie con el descargo fijo. La ISO 10534-2 es una
+caracterización, así que la ficha no incluye veredicto de cumplimiento ni número
+único; el coeficiente a incidencia normal no es comparable con el $\alpha_s$ /
+$\alpha_w$ a incidencia aleatoria de la ISO 354 / ISO 11654. Con `verbose=True`
+se añade la columna del módulo del factor de reflexión $|r|$.
+
+Usa el mismo contenedor `ReportMetadata` y el mismo motor que las demás fichas.
+El rango de frecuencias medido se toma del resultado; los campos descriptivos y
+geométricos de `ReportMetadata` que aplican aquí son `client`, `manufacturer`,
+`specimen`, `tube_diameter`, `mic_spacing`, `mounting`, `test_room`,
+`test_date`, `temperature`, `pressure`, `measurement_standard`, `laboratory`,
+`operator`, `report_id` y `notes` (`tube_diameter` y `mic_spacing` se dan en
+metros y se imprimen en milímetros). El campo `requirement` se ignora (la
+ISO 10534-2 no tiene veredicto). La generación necesita reportlab
+(`pip install phonometry[report]`); solo se admite `engine="reportlab"`. La
+ficha se genera en inglés por defecto; pasa `language="es"` para una ficha en
+español (cadenas fijas traducidas y coma decimal).
+
+```python
+from phonometry import materials, ReportMetadata
+
+result = materials.two_microphone_impedance(
+    h12, frequency=freqs, spacing=0.05, x1=0.10,
+    speed_of_sound=c0, characteristic_impedance=rho_c, diameter=0.10,
+)
+result.report(
+    "alpha_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Capa resistiva sobre cavidad de aire de 86 mm con respaldo rígido",
+        tube_diameter=0.10,            # m (se imprime como 100 mm)
+        mic_spacing=0.05,              # m (se imprime como 50 mm)
+        measurement_standard="ISO 10534-2",
+        laboratory="Phonometry Reference Laboratory",
+    ),
+)                  # alpha e impedancia a incidencia normal en la banda del tubo
+```
+
+<ReportPreview
+	name="iso10534_impedance_tube_example"
+	title="Informe de ejemplo en tubo de impedancia ISO 10534-2 (PDF)"
+	description="Ficha de tubo de impedancia a incidencia normal de una página: una cabecera de metadatos (cliente, muestra, diámetro del tubo d, separación de micrófonos s, el rango de frecuencias medido, montaje, instalación de ensayo, temperatura y presión), la tabla por frecuencia del coeficiente de absorción alpha y las partes real e imaginaria de la impedancia superficial normalizada z junto a la curva de alpha en un eje de frecuencia logarítmico, y el titular de caracterización en caja sobre el rango de frecuencias ensayado."
+	caption="Ficha de tubo de impedancia a incidencia normal (ImpedanceTubeResult.report), el espectro de alpha con la impedancia superficial."
+/>
+
 **Pérdida por transmisión (ASTM E2611).** Con cuatro micrófonos (dos aguas
 arriba, dos aguas abajo de la muestra) una medición de dos cargas (o de una
 carga) recupera la matriz de transferencia de la muestra, cuyos elementos dan la

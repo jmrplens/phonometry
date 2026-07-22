@@ -338,6 +338,76 @@ def _sound_absorption_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso354_absorption_example.pdf"
 
 
+def _impedance_tube_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 10534-2 fiche: a two-microphone impedance-tube measurement.
+
+    A documented clean-room example with a known closed-form absorption curve.
+    The specimen is modelled as a locally-reacting resistive screen of
+    normalised flow resistance theta = 1 backed by a rigidly-terminated air
+    cavity of depth L, whose normalised surface impedance is the textbook
+    z(f) = theta - j*cot(k0*L) (a resistive layer in series with the cavity
+    reactance; Cox & D'Antonio, Acoustic Absorbers and Diffusers). From it the
+    reflection factor r = (z - 1)/(z + 1) (ISO 10534-2 Eq. (19) inverted) and
+    the absorption alpha = 1 - |r|^2 (Eq. (18)) follow exactly. The transfer
+    function H12 that a tube would measure is synthesised from r via the
+    Annex D field model (Eq. (D.7)) and fed back through
+    ``two_microphone_impedance`` (Eq. (17)), so the fiche exercises the real
+    reduction and its printed alpha matches the closed form.
+
+    A 100 mm circular tube with s = 50 mm microphone spacing and the far mic
+    at x1 = 100 mm works from f_l = c0/(20 s) ~ 343 Hz to the cut-on
+    f_u = 0.58 c0/d ~ 1991 Hz at 20 degC (c0 = 343.29 m/s). The cavity depth
+    L = c0/(4*1000 Hz) = 85.8 mm places the quarter-wave resonance at 1000 Hz,
+    where the matched screen (theta = 1) gives z = 1, r = 0 and alpha = 1.00.
+    Two further worked bands: at 500 Hz k0*L = pi/4, so cot = 1, z = 1 - j and
+    alpha = 1 - |(-j)/(2 - j)|^2 = 1 - 1/5 = 0.80; at 1600 Hz the reactance is
+    mass-like and alpha falls back to 0.68.
+    """
+    speed_of_sound_iso = ph.materials.speed_of_sound_iso
+    air_density_iso = ph.materials.air_density_iso
+
+    temperature_k = 293.15  # 20 degC
+    pressure_kpa = 101.0
+    c0 = float(speed_of_sound_iso(temperature_k))
+    rho = float(air_density_iso(temperature_k, pressure_kpa))
+    rc = ph.materials.characteristic_impedance(rho, c0)
+
+    diameter, spacing, x1 = 0.100, 0.050, 0.100
+    theta, cavity = 1.0, c0 / (4.0 * 1000.0)
+    freqs = np.array([400, 500, 630, 800, 1000, 1250, 1600], dtype=float)
+
+    k0 = 2.0 * np.pi * freqs / c0
+    z = theta - 1j / np.tan(k0 * cavity)
+    r = (z - 1.0) / (z + 1.0)
+    # Synthesise H12 from the known r (ISO 10534-2 Annex D, Eq. (D.7)).
+    kk = np.asarray(ph.materials.tube_wavenumber(freqs, c0))
+    x2 = x1 - spacing
+    h12 = (np.exp(1j * kk * x2) + r * np.exp(-1j * kk * x2)) / (
+        np.exp(1j * kk * x1) + r * np.exp(-1j * kk * x1)
+    )
+    result = ph.materials.two_microphone_impedance(
+        h12, frequency=freqs, spacing=spacing, x1=x1, speed_of_sound=c0,
+        characteristic_impedance=rc, diameter=diameter, shape="circular",
+    )
+    metadata = ReportMetadata(
+        specimen="Resistive facing over an 86 mm rigidly-backed air cavity",
+        client="Example client",
+        manufacturer="Example acoustics",
+        tube_diameter=diameter,
+        mic_spacing=spacing,
+        mounting="Deliberate 86 mm backing air cavity, rigid termination",
+        test_room="Impedance tube B&K 4206 (example)",
+        measurement_standard="ISO 10534-2",
+        temperature=20.0,
+        pressure=pressure_kpa,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-10534-2",
+    )
+    return result, metadata, "iso10534_impedance_tube_example.pdf"
+
+
 def _loudness_example() -> Tuple[object, ReportMetadata, str]:
     """Loudness fiche: an ISO 532-1 Zwicker stationary loudness rating."""
     # A shaped 28-band one-third-octave spectrum (25 Hz..12.5 kHz) of a steady
@@ -983,6 +1053,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _lab_impact_example,
     _absorption_example,
     _sound_absorption_example,
+    _impedance_tube_example,
     _loudness_example,
     _program_loudness_example,
     _tone_audibility_example,

@@ -65,6 +65,8 @@ from .insulation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 #: Reference equivalent absorption area A0 for the normalized impact level
 #: (ISO 10140-3:2010, Clause 3.2) and the element-normalized level difference
 #: (ISO 10140-2:2010, Clause 3.3): 10 m² for the laboratory.
@@ -121,6 +123,47 @@ class LabAirborneInsulationResult:
             )
         return self.rating.plot(ax=ax, **kwargs)
 
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 10140-2 laboratory airborne-insulation report to a PDF.
+
+        Writes the one-page laboratory test report of ISO 10140-2:2010: the
+        standard-basis line, an optional metadata header block (client,
+        specimen, mounting, room volumes, climatic conditions ...), the
+        one-third-octave table beside the measured-versus-shifted-reference
+        curve, the boxed laboratory rating ``Rw (C; Ctr)`` (evaluated per
+        ISO 717-1 over the 16 core bands), the laboratory-method statement, an
+        optional verdict row and a footer with the identity block and
+        disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`;
+            ``None`` produces a lightweight fiche (body, rating, statement and
+            disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table annexes the per-band
+            equivalent sound absorption area ``A`` beside the reported ``R``.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is unknown or the result does not
+            hold the 16 one-third-octave (100 Hz to 3150 Hz) or 5 octave bands
+            the ISO 717-1 rating needs.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        return _render_iso10140(
+            self, path, quantity="r", metadata=metadata, engine=engine,
+            verbose=verbose, language=language,
+        )
+
 
 @dataclass(frozen=True)
 class LabImpactInsulationResult:
@@ -153,6 +196,89 @@ class LabImpactInsulationResult:
                 "one-third-octave or 5 octave bands)."
             )
         return self.rating.plot(ax=ax, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 10140-3 laboratory impact-insulation report to a PDF.
+
+        Writes the one-page laboratory test report of ISO 10140-3:2010: the
+        standard-basis line, an optional metadata header block, the
+        one-third-octave table beside the measured-versus-shifted-reference
+        curve, the boxed laboratory rating ``Ln,w (CI)`` (evaluated per
+        ISO 717-2 over the 16 core bands), the laboratory-method statement, an
+        optional verdict row and a footer with the identity block and
+        disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`;
+            ``None`` produces a lightweight fiche (body, rating, statement and
+            disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table annexes the per-band
+            equivalent sound absorption area ``A`` beside the reported ``Ln``.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is unknown or the result does not
+            hold the 16 one-third-octave (100 Hz to 3150 Hz) or 5 octave bands
+            the ISO 717-2 rating needs.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        return _render_iso10140(
+            self, path, quantity="l_n", metadata=metadata, engine=engine,
+            verbose=verbose, language=language,
+        )
+
+
+def _render_iso10140(
+    result: "LabAirborneInsulationResult | LabImpactInsulationResult",
+    path: str,
+    *,
+    quantity: str,
+    metadata: "ReportMetadata | None",
+    engine: str,
+    verbose: bool,
+    language: str,
+) -> str:
+    """Validate the laboratory-report request and delegate to the renderer.
+
+    Shared by :meth:`LabAirborneInsulationResult.report` and
+    :meth:`LabImpactInsulationResult.report`: it rejects unknown engines,
+    requires the single-number rating (16 one-third-octave or 5 octave bands,
+    ISO 717-1/-2) so the fiche curve is defined, and calls the reportlab
+    renderer (which raises a clear :class:`ImportError` when reportlab is
+    absent).
+    """
+    from .._i18n import check_language
+
+    check_language(language)
+    if engine != "reportlab":
+        raise ValueError(
+            f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+        )
+    rating = result.rating
+    if rating is None:
+        raise ValueError(
+            "The laboratory report needs the ISO 717 single-number rating; "
+            "it is formed only for exactly 16 one-third-octave (100 Hz to "
+            "3150 Hz) or 5 octave (125 Hz to 2000 Hz) bands. Build the result "
+            "with that band count."
+        )
+
+    from .._report.iso10140 import render_iso10140_report
+
+    return render_iso10140_report(
+        result, rating, path, quantity=quantity, metadata=metadata,
+        verbose=verbose, language=language,
+    )
 
 
 def _absorption_area(

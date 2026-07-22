@@ -8,6 +8,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `OutdoorAttenuation.report()`: a one-page PDF outdoor sound propagation
+  **prediction** fiche (ISO 9613-2:1996, general method of calculation). The
+  sheet is clearly labelled a prediction, not a measurement. It carries a
+  prediction-basis line naming ISO 9613-2:1996 and the conditions favourable to
+  propagation, an optional metadata header (source/situation, client, receiver
+  position, meteorological conditions, date, with the propagation distance
+  recovered from the divergence term), a per-band table of the source power
+  level `Lw`, the divergence, atmospheric, ground and barrier attenuation terms,
+  the total attenuation `A` and the downwind level `LfT(DW)`, the
+  attenuation-breakdown plot, and a boxed A-weighted downwind level `LAT(DW)` at
+  the receiver. A declared limit level supplied via the metadata `requirement`
+  adds a PASS/FAIL verdict (a lower level is better). `verbose=True` adds the
+  A-weighted band-level column. `outdoor_propagation_attenuation` now accepts an
+  optional `sound_power_level` (with `directivity_index`, `d_omega` and `c0`) so
+  the result carries the composed downwind level the fiche reports.
+  `language="es"` renders the Spanish fiche.
+- `BarrierInsertionLoss.report()`: a one-page PDF barrier insertion-loss
+  **prediction** fiche. The sheet is clearly labelled a prediction, not a
+  measurement, and its basis line names the actual diffraction model used (the
+  wave-theoretic rigid-screen solution or the Kurze-Anderson closed form), a
+  wave-acoustics complement to the tabulated ISO 9613-2 screening term. It
+  carries an optional metadata header (source/situation, client, receiver
+  position, ground model, date), a per-band table of the insertion loss `IL`,
+  the insertion-loss spectrum plot and a boxed mean insertion loss over the
+  octave bands. A declared minimum required insertion loss supplied via the
+  metadata `requirement` adds a PASS/FAIL verdict (a higher insertion loss is
+  better). `verbose=True` adds the Fresnel-number column. `language="es"`
+  renders the Spanish fiche.
 - `StructureBornePowerResult.report()`: a one-page PDF structure-borne sound
   power characterization fiche for the power a piece of building service
   equipment injects into a reception plate (EN 15657:2018 reception-plate

@@ -372,6 +372,10 @@ outdoor_propagation_attenuation(
     pressure: float = 101.325,
     projected_distance: float | None = None,
     *,
+    sound_power_level: ArrayLike | None = None,
+    directivity_index: float = 0.0,
+    d_omega: float = 0.0,
+    c0: float | None = None,
     humidity: float | str = 'deprecated',
 ) -> OutdoorAttenuation
 ```
@@ -401,9 +405,13 @@ into `Dz` (note 13); for a lateral (vertical-edge) barrier `Abar = Dz`
 | `relative_humidity` | Relative humidity, in percent (default 70). |
 | `pressure` | Atmospheric pressure, in kilopascals. |
 | `projected_distance` | Ground-plane projected distance `dp`, in metres; defaults to `sqrt(d^2 - (hs - hr)^2)`. |
+| `sound_power_level` | Optional octave-band source sound power level `Lw` (dB re 1 pW), one value per frequency. When given, the downwind octave-band receiver level `LfT(DW) = Lw + Dc - A` (Eq. (3)) is composed and stored on the result ([`OutdoorAttenuation.sound_power_level`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuation) and [`OutdoorAttenuation.receiver_level`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuation)), which the `.report()` prediction fiche needs; `None` leaves both fields unset. |
+| `directivity_index` | Source directivity index `Di`, in decibels (used only when `sound_power_level` is given). |
+| `d_omega` | Solid-angle index `DOmega`, in decibels (used only when `sound_power_level` is given; see [`directivity_omega`](/phonometry/reference/api/environment/outdoor-propagation/#directivity_omega)). |
+| `c0` | Meteorological factor `C0`, in decibels; when given (and `sound_power_level` is supplied) the meteorological correction `Cmet` (Eq. (21)/(22)) is subtracted for the long-term average level (Eq. (6)). `None` returns the downwind level `LfT(DW)`. |
 | `humidity` | Deprecated alias of `relative_humidity` (remove in 4.0). |
 
-**Returns:** [`OutdoorAttenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuation) with the per-band term breakdown.
+**Returns:** [`OutdoorAttenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuation) with the per-band term breakdown (and, when `sound_power_level` is given, the composed receiver level).
 
 **Raises**
 
@@ -422,6 +430,8 @@ OutdoorAttenuation(
     a_bar: NDArray[np.float64],
     a_total: NDArray[np.float64],
     d_omega: NDArray[np.float64],
+    sound_power_level: NDArray[np.float64] | None = None,
+    receiver_level: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -443,6 +453,8 @@ contributions separately.
 | `a_bar` | Screening `Abar` (Eq. (12)/(13)), in dB, per band (>= 0). |
 | `a_total` | Total attenuation `A` (Eq. (4)), in dB, per band. |
 | `d_omega` | Solid-angle directivity index `DOmega` (Eq. (11)), in dB; non-zero only for the alternative ground method of 7.3.2. |
+| `sound_power_level` | Octave-band source sound power level `Lw` (dB re 1 pW) the result was composed with, or `None` when only the attenuation was requested. Present when [`outdoor_propagation_attenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoor_propagation_attenuation) is called with `sound_power_level`. |
+| `receiver_level` | Predicted downwind octave-band sound pressure level `LfT(DW)` at the receiver (ISO 9613-2:1996, Eq. (3)/(6)), in dB, or `None` when no source power was supplied. Populated together with `sound_power_level`. |
 
 ### OutdoorAttenuation.plot()
 
@@ -459,6 +471,58 @@ Plot the stacked per-band attenuation terms with the total.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### OutdoorAttenuation.report()
+
+```python
+OutdoorAttenuation.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a one-page ISO 9613-2 outdoor-propagation prediction fiche.
+
+Writes a prediction sheet (clearly labelled a prediction, not a
+measurement) laid out like an environmental-noise propagation
+calculation: the standard-basis line naming ISO 9613-2:1996 (general
+method, conditions favourable to propagation), an optional metadata
+header (source/situation, client, receiver position, meteorological
+conditions, date), a per-band table of the attenuation terms
+(`Adiv`, `Aatm`, `Agr`, `Abar` and the total `A`) with, when
+the result carries a source power, the source power level `Lw` and the
+downwind level `LfT(DW)`, the attenuation-breakdown plot, a boxed
+A-weighted downwind level `LAT(DW)` at the receiver, an optional
+PASS/FAIL verdict against a declared limit level (a lower level is
+better) and a footer identity/disclaimer block.
+
+The A-weighted receiver level is available only when the result was
+composed with a source power, i.e. when
+[`outdoor_propagation_attenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoor_propagation_attenuation) was called with
+`sound_power_level`; otherwise this raises `ValueError`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position), the `temperature` / `relative_humidity` / `pressure` conditions and the footer identity. A supplied `requirement` is read as the maximum acceptable A-weighted downwind level in dB. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When True, the per-band table adds the divergence and the exact-midband atmospheric coefficient behind `Aatm`. |
+| `language` | Fiche language: `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`, `language` is unknown, or the result carries no source power (so no receiver level can be reported). |
+| ImportError | If reportlab or matplotlib is not installed (`pip install "phonometry[report,plot]"`). |
 
 ## predicted_receiver_level
 

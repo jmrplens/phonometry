@@ -148,6 +148,107 @@ def piston_directivity(ka: ArrayLike, theta: ArrayLike) -> np.ndarray | float:
     return out[()] if out.ndim == 0 else out
 
 
+#: Default polar-angle grid of the directivity pattern: the front hemisphere
+#: ``-90 deg`` to ``+90 deg`` (the baffle blocks the rear), 1 deg apart, so the
+#: mirrored beam pattern is smooth even for a narrow high-``ka`` main lobe.
+_DEFAULT_DIRECTIVITY_ANGLES = np.radians(np.linspace(-90.0, 90.0, 361))
+
+
+@dataclass(frozen=True)
+class PistonDirectivity:
+    """Far-field directivity pattern of a baffled circular piston.
+
+    Bundles the far-field directivity
+    ``D(theta) = 2 J1(ka sin theta) / (ka sin theta)`` (Beranek & Mellow
+    Eq. (4.42)) of one or more baffled circular pistons over a shared
+    polar-angle grid, so the classic beam pattern can be drawn with
+    :meth:`plot`. The maths is :func:`piston_directivity`; this is a thin,
+    plottable bundle around it.
+
+    :ivar angles: Polar angles ``theta`` from the axis, rad.
+    :ivar ka: Wavenumber-radius products ``ka``, one per pattern (a 1-D array).
+    :ivar directivity: Linear directivity ``D(theta)``, normalized so
+        ``D(0) = 1``, as a ``(len(ka), len(angles))`` array; row ``i`` is the
+        pattern for ``ka[i]``.
+    :ivar directivity_db: Directivity in dB, ``20 log10 |D|``, same shape as
+        :attr:`directivity` (the side-lobe nulls floor at a large negative
+        value rather than ``-inf``).
+    """
+
+    angles: np.ndarray
+    ka: np.ndarray
+    directivity: np.ndarray
+    directivity_db: np.ndarray
+
+    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
+             **kwargs: Any) -> "Axes":
+        """Plot the far-field directivity (beam) pattern on a polar axes.
+
+        Draws the directivity in dB against the polar angle: one curve per
+        ``ka`` value as a single family (still one concept, the directivity
+        pattern). A polar axes is created when ``ax`` is ``None``. Requires
+        matplotlib (``pip install phonometry[plot]``).
+
+        :param ax: Existing (polar) axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the per-``ka`` ``Axes.plot`` calls.
+        :return: The axes.
+        """
+        from .._i18n import check_language
+        from .._plot.electroacoustics import plot_piston_directivity
+
+        check_language(language)
+        return plot_piston_directivity(self, ax=ax, language=language, **kwargs)
+
+
+def piston_directivity_pattern(
+    ka: ArrayLike,
+    angles: ArrayLike | None = None,
+) -> PistonDirectivity:
+    """Far-field directivity pattern of one or more baffled circular pistons.
+
+    Samples the directivity ``D(theta) = 2 J1(ka sin theta) / (ka sin theta)``
+    (Beranek & Mellow Eq. (4.42)) at every ``ka`` over a polar-angle grid and
+    bundles it into a :class:`PistonDirectivity` that exposes ``.plot()``. The
+    main lobe narrows as ``ka`` grows; its first null appears once ``ka`` passes
+    the first zero of ``J1`` (``ka sin theta = 3.8317``).
+
+    :param ka: Wavenumber-radius product(s) ``ka`` (scalar or 1-D array), each
+        non-negative.
+    :param angles: Polar angles ``theta`` from the axis, rad (1-D). ``None``
+        (default) uses the front hemisphere ``-90 deg`` to ``+90 deg``, 1 deg
+        apart.
+    :return: A :class:`PistonDirectivity`.
+    """
+    ka_arr = np.atleast_1d(np.asarray(ka, dtype=np.float64))
+    if ka_arr.ndim != 1 or ka_arr.size == 0:
+        raise ValueError("'ka' must be a non-empty scalar or 1-D array.")
+    if np.any(ka_arr < 0.0) or not np.all(np.isfinite(ka_arr)):
+        raise ValueError("'ka' must be non-negative and finite.")
+
+    if angles is None:
+        angle_arr = _DEFAULT_DIRECTIVITY_ANGLES.copy()
+    else:
+        angle_arr = np.atleast_1d(np.asarray(angles, dtype=np.float64))
+        if angle_arr.ndim != 1 or angle_arr.size == 0:
+            raise ValueError("'angles' must be a non-empty 1-D array.")
+        if not np.all(np.isfinite(angle_arr)):
+            raise ValueError("'angles' must be finite.")
+
+    directivity = np.asarray(
+        piston_directivity(ka_arr[:, None], angle_arr[None, :]),
+        dtype=np.float64,
+    ).reshape(ka_arr.size, angle_arr.size)
+    tiny = np.finfo(np.float64).tiny
+    directivity_db = 20.0 * np.log10(np.maximum(np.abs(directivity), tiny))
+    return PistonDirectivity(
+        angles=angle_arr,
+        ka=ka_arr,
+        directivity=directivity,
+        directivity_db=directivity_db,
+    )
+
+
 def _directivity_index(ka: NDArray[np.float64]) -> NDArray[np.float64]:
     """Directivity index ``DI = 10 log10 Q`` per ``ka`` by hemisphere quadrature.
 

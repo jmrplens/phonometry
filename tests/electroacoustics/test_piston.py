@@ -18,8 +18,10 @@ import pytest
 from scipy import special
 
 from phonometry import (
+    PistonDirectivity,
     RadiatingPistonResult,
     piston_directivity,
+    piston_directivity_pattern,
     piston_reactance,
     piston_resistance,
     radiating_piston,
@@ -116,6 +118,59 @@ def test_result_shapes_and_plot() -> None:
     matplotlib.use("Agg")
     ax = res.plot()
     assert ax.get_ylabel()
+
+
+def test_directivity_pattern_result_and_properties() -> None:
+    # Default grid is the front hemisphere -90 deg .. +90 deg, one per degree.
+    res = piston_directivity_pattern([3.0, 8.0])
+    assert isinstance(res, PistonDirectivity)
+    assert res.ka.shape == (2,)
+    assert res.directivity.shape == (2, res.angles.size)
+    assert res.directivity_db.shape == res.directivity.shape
+    # D = 1 (0 dB) on axis (theta = 0) for every ka.
+    i0 = int(np.argmin(np.abs(res.angles)))
+    assert np.allclose(res.directivity[:, i0], 1.0)
+    assert np.allclose(res.directivity_db[:, i0], 0.0)
+    # dB echoes the linear directivity: 20 log10 |D|.
+    assert np.allclose(
+        res.directivity_db, 20.0 * np.log10(np.abs(res.directivity)), atol=1e-9
+    )
+
+
+def test_directivity_pattern_first_null() -> None:
+    # First null at ka sin(theta) = 3.8317 (the first zero of J1); it exists
+    # only once ka > 3.8317. Sample the exact null angle for ka = 6.
+    ka = 6.0
+    theta_null = math.asin(J1_FIRST_ZERO / ka)
+    res = piston_directivity_pattern([ka], angles=[0.0, theta_null])
+    assert abs(res.directivity[0, 1]) < 1e-9
+    assert res.directivity_db[0, 1] < -120.0
+    # No null for a scalar ka below the first zero of J1.
+    below = piston_directivity_pattern(3.0)
+    assert np.min(np.abs(below.directivity)) > 0.1
+
+
+def test_directivity_pattern_plot() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    res = piston_directivity_pattern([2.0, 5.0, 10.0])
+    ax = res.plot()
+    # A polar axes carrying one curve per ka value.
+    assert ax.name == "polar"
+    assert len(ax.lines) == 3
+    assert "piston directivity" in ax.get_title()
+    with pytest.raises(ValueError):
+        res.plot(language="xx")
+
+
+def test_directivity_pattern_validation() -> None:
+    with pytest.raises(ValueError):
+        piston_directivity_pattern(-1.0)
+    with pytest.raises(ValueError):
+        piston_directivity_pattern([1.0], angles=[np.inf])
+    with pytest.raises(ValueError):
+        piston_directivity_pattern(np.empty(0))
 
 
 def test_validation() -> None:

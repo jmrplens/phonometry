@@ -24,8 +24,10 @@ from .frequency_response import FrequencyResponseResult, coherence, transfer_fun
 from .loudspeaker import LoudspeakerCharacteristics, loudspeaker_characteristics
 from .microphone import MicrophoneCharacteristics, microphone_characteristics
 from .piston import (
+    PistonDirectivity,
     RadiatingPistonResult,
     piston_directivity,
+    piston_directivity_pattern,
     piston_reactance,
     piston_resistance,
     radiating_piston,
@@ -42,6 +44,7 @@ __all__ = [
     "LoudspeakerCharacteristics",
     "MicrophoneCharacteristics",
     "ModulationDistortionResult",
+    "PistonDirectivity",
     "RadiatingPistonResult",
     "SweptSineDistortionResult",
     "coherence",
@@ -56,6 +59,7 @@ __all__ = [
     "microphone_characteristics",
     "modulation_distortion",
     "piston_directivity",
+    "piston_directivity_pattern",
     "piston_reactance",
     "piston_resistance",
     "radiating_piston",

@@ -109,6 +109,20 @@ The `DynamicStiffnessResult` carries the apparent, enclosed-gas and installed
 stiffnesses, the test resonance and the installed-floor natural frequency, and
 its `.plot()` draws the `f₀(s')` design curve.
 
+**Test-report fiche.** `DynamicStiffnessResult.report(path)` renders a one-page
+accredited dynamic-stiffness test report (EN 29052-1:1992 = ISO 9052-1:1989): a
+metadata header (specimen, the total mass per unit area $m'_t$, the loaded
+thickness $d$ in metres shown in mm, test facility, climate), a metrics table (the resonant frequency
+$f_r$, the apparent stiffness $s'_t$ of Formula 4, the enclosed-gas term $s'_a$
+when it applies, the installed $s'$ of clause 8.2 and the natural frequency
+$f_0$ of Formula 2) beside the $f_0(s')$ design curve, and a boxed apparent
+dynamic stiffness $s'_t$ (no pass/fail). Clause 9 rounds every stiffness to the
+nearest MN/m³; `language="es"` renders the Spanish fiche. The fiche always
+embeds the $f_0(s')$ design curve, so it needs both the report and plot extras
+(`pip install "phonometry[report,plot]"`).
+
+[![EN 29052-1 dynamic-stiffness example report: a metadata header with the total mass per unit area and the loaded thickness, a metrics table of the resonant frequency, the apparent, enclosed-gas and installed dynamic stiffnesses and the natural frequency beside the f0(s') design curve, and the boxed apparent dynamic stiffness s't](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/en29052_dynamic_stiffness_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/en29052_dynamic_stiffness_example.pdf)
+
 ## 3. What the resonance method assumes, and where it bites
 
 The evaluation treats the rig as a single-degree-of-freedom system: the load

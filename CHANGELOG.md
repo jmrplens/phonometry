@@ -26,6 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `ka` shows them as one family, so the main lobe narrowing and the emergence
   of the side lobes read at a glance. `language="es"` renders the Spanish
   labels. The underlying `piston_directivity()` maths is unchanged.
+- `atmospheric_attenuation()` and the `AtmosphericAttenuation` result: a thin,
+  plottable wrapper around `air_attenuation()` (ISO 9613-1:1993) that carries the
+  frequency grid, the pure-tone attenuation coefficient `alpha` and the
+  atmospheric conditions (temperature, relative humidity, pressure). Its
+  `.plot()` draws the classic `alpha`-versus-frequency curve in dB/km on a
+  logarithmic frequency axis, and an optional `distance` exposes the total
+  attenuation `A = alpha * d` over the path (`total_attenuation`, the ISO 9613-2
+  `Aatm`). The maths is unchanged; `air_attenuation()` still returns the bare
+  coefficient array. `language="es"` renders the Spanish labels.
 - `TrendTestResult.plot()`: a one-line canonical figure for the nonparametric
   trend test (Bendat & Piersol, *Random Data* Sec. 4.5.2), mirroring the
   companion `StationarityTestResult.plot()`. It draws the tested sequence

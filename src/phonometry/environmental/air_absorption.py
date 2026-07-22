@@ -53,6 +53,8 @@ returns that ``m`` directly.
 from __future__ import annotations
 
 import warnings
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -61,6 +63,9 @@ from numpy.typing import ArrayLike, NDArray
 from .._internal.warnings import PhonometryWarning
 
 from ..materials.sound_absorption import attenuation_from_alpha
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from matplotlib.axes import Axes
 
 #: Reference air temperature ``T0`` (ISO 9613-1:1993, clause 4.2), in kelvins.
 _T0 = 293.15
@@ -268,3 +273,125 @@ def air_attenuation_m(
         exact_midband=exact_midband,
     )
     return attenuation_from_alpha(alpha)
+
+
+# --- plottable atmospheric-attenuation result (ISO 9613-1:1993) -----------
+
+
+@dataclass(frozen=True)
+class AtmosphericAttenuation:
+    """A pure-tone atmospheric attenuation curve (ISO 9613-1:1993).
+
+    Bundles the ISO 9613-1 attenuation coefficient ``alpha`` (Eq. (5)) over a
+    frequency grid with the atmospheric conditions it was evaluated for, so the
+    classic ``alpha`` versus frequency curve can be drawn with :meth:`plot`.
+    Build it with :func:`atmospheric_attenuation`; the frozen instance is a thin,
+    plottable wrapper and re-runs none of the maths.
+
+    :ivar frequencies: Frequencies ``f`` the coefficient is evaluated at, in Hz
+        (the exact one-third-octave midbands when ``exact_midband`` was used).
+    :ivar attenuation_coefficient: Pure-tone attenuation coefficient ``alpha``,
+        per frequency, in decibels per metre (Table 1 prints dB/km, i.e.
+        ``x 1000``).
+    :ivar temperature: Ambient air temperature, in degrees Celsius.
+    :ivar relative_humidity: Relative humidity, in percent.
+    :ivar pressure: Ambient atmospheric pressure ``pa``, in kilopascals.
+    :ivar distance: Propagation distance ``d``, in metres, or ``None`` when the
+        result carries only the coefficient. When given, :attr:`total_attenuation`
+        returns the total attenuation ``A = alpha * d`` over that distance.
+    """
+
+    frequencies: NDArray[np.float64]
+    attenuation_coefficient: NDArray[np.float64]
+    temperature: float
+    relative_humidity: float
+    pressure: float
+    distance: float | None = None
+
+    @property
+    def total_attenuation(self) -> NDArray[np.float64] | None:
+        """Total atmospheric attenuation ``A = alpha * d`` over :attr:`distance`.
+
+        The pure-tone attenuation ``alpha`` (dB/m) accumulated over the
+        propagation distance ``d`` (m), per frequency, in decibels; this is the
+        ISO 9613-2:1996 ``Aatm`` (Eq. (8)) form. ``None`` when no
+        :attr:`distance` was supplied.
+        """
+        if self.distance is None:
+            return None
+        return np.asarray(
+            self.attenuation_coefficient * self.distance, dtype=np.float64
+        )
+
+    def plot(
+        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
+    ) -> "Axes":
+        """Plot the attenuation coefficient ``alpha`` versus frequency.
+
+        Draws ``alpha`` (in dB/km, as Table 1 tabulates it) on a logarithmic
+        frequency axis, the classic ISO 9613-1 curve for the stored atmospheric
+        conditions. Requires matplotlib (``pip install phonometry[plot]``);
+        returns the :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the ``alpha`` curve ``plot`` call.
+        :return: The axes.
+        """
+        from .._i18n import check_language
+        from .._plot.environmental import plot_atmospheric_attenuation
+
+        check_language(language)
+        return plot_atmospheric_attenuation(self, ax=ax, language=language, **kwargs)
+
+
+def atmospheric_attenuation(
+    frequencies: ArrayLike,
+    temperature: float = 20.0,
+    relative_humidity: float = 50.0,
+    pressure: float = 101.325,
+    *,
+    exact_midband: bool = False,
+    distance: float | None = None,
+) -> AtmosphericAttenuation:
+    """Build a plottable ISO 9613-1 atmospheric-attenuation curve.
+
+    Evaluates :func:`air_attenuation` at ``frequencies`` for the given
+    atmospheric conditions and bundles the result into an
+    :class:`AtmosphericAttenuation` that exposes ``.plot()``. The maths is
+    unchanged; this is a thin, plottable wrapper around the existing function
+    (same warnings and ``ValueError``\\ s apply).
+
+    :param frequencies: Frequency or frequencies ``f``, in hertz (array-like).
+    :param temperature: Ambient air temperature, in degrees Celsius (default 20).
+    :param relative_humidity: Relative humidity, in percent (default 50).
+    :param pressure: Ambient atmospheric pressure, in kilopascals
+        (default 101,325).
+    :param exact_midband: Snap the frequencies to the exact one-third-octave
+        midbands ``fm = 1000*10^(k/10)`` (Eq. (6)) before evaluation; see
+        :func:`air_attenuation`. When ``True`` the stored :attr:`frequencies`
+        are the snapped midbands the coefficient was computed at.
+    :param distance: Optional propagation distance ``d``, in metres. When given,
+        the result's :attr:`~AtmosphericAttenuation.total_attenuation` returns
+        the total attenuation ``A = alpha * d`` over that distance (ISO 9613-2
+        Eq. (8)).
+    :return: A frozen :class:`AtmosphericAttenuation`.
+    """
+    freqs = np.asarray(frequencies, dtype=np.float64)
+    alpha = air_attenuation(
+        frequencies,
+        temperature,
+        relative_humidity,
+        pressure,
+        exact_midband=exact_midband,
+    )
+    if exact_midband:
+        freqs = _exact_midband(freqs)
+    return AtmosphericAttenuation(
+        frequencies=np.atleast_1d(freqs),
+        attenuation_coefficient=np.atleast_1d(alpha),
+        temperature=float(temperature),
+        relative_humidity=float(relative_humidity),
+        pressure=float(pressure),
+        distance=None if distance is None else float(distance),
+    )

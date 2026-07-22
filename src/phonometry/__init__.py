@@ -816,8 +816,10 @@ from .materials.sound_absorption import (
 )
 from .environmental.air_absorption import (
     AtmosphericAbsorptionWarning,
+    AtmosphericAttenuation,
     air_attenuation,
     air_attenuation_m,
+    atmospheric_attenuation,
 )
 from .materials.impedance_tube import (
     ImpedanceTubeResult,
@@ -1494,6 +1496,8 @@ __all__ = [
     "air_attenuation",
     "air_attenuation_m",
     "AtmosphericAbsorptionWarning",
+    "AtmosphericAttenuation",
+    "atmospheric_attenuation",
     # Impedance tube (ISO 10534-1/-2, ASTM E2611)
     "ImpedanceTubeResult",
     "ImpedanceTubeWarning",

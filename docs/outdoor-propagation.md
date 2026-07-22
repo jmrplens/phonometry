@@ -112,6 +112,58 @@ atmospheric conditions straight into `absorption_area` /
 `air_attenuation` returns $\alpha$ in dB/m; `air_attenuation_m` returns
 $m = \alpha/(10 \lg e)$ in 1/m for ISO 354.
 
+### A plottable result: `atmospheric_attenuation()`
+
+For a figure or a quick look, `atmospheric_attenuation()` wraps the same
+coefficient in a small `AtmosphericAttenuation` result. It carries the frequency
+grid, the coefficient $\alpha$ and the atmospheric conditions, and exposes
+`.plot()` for the classic $\alpha$-versus-frequency curve (drawn in dB/km, the
+Table 1 unit). Passing a `distance` also records the total attenuation
+$A = \alpha\,d$ over that path as `total_attenuation`, the ISO 9613-2 $A_{atm}$ of
+Eq. (8).
+
+```python
+from phonometry import environmental
+
+res = environmental.atmospheric_attenuation(
+    [63, 125, 250, 500, 1000, 2000, 4000, 8000],
+    temperature=20.0, relative_humidity=50.0,
+)
+res.plot()   # alpha in dB/km against frequency (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation.svg" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency on a log-log axis for the reference 20 degrees Celsius and 50 percent relative humidity atmosphere, produced by the AtmosphericAttenuation result plot method" width="80%"></picture>
+
+*At the reference 20 °C / 50 % RH atmosphere $\alpha$ rises from well under
+0.1 dB/km at 50 Hz to over 100 dB/km at 10 kHz, the $f^2$ growth bending through
+the relaxation region.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import environmental
+
+# One line: the coefficient curve straight from the result.
+res = environmental.atmospheric_attenuation(
+    np.geomspace(50.0, 10000.0, 400), temperature=20.0, relative_humidity=50.0,
+)
+res.plot()
+plt.show()
+
+# Or by hand from air_attenuation (dB/m, so scale by 1000 for dB/km):
+freqs = np.geomspace(50.0, 10000.0, 400)
+fig, ax = plt.subplots()
+ax.loglog(freqs, environmental.air_attenuation(freqs, 20.0, 50.0) * 1000.0)
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Attenuation coefficient alpha [dB/km]")
+plt.show()
+```
+
+</details>
+
 ## 2. General method of calculation (ISO 9613-2)
 
 ISO 9613-2:1996 predicts the octave-band level at a receiver **downwind** of a

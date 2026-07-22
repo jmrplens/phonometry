@@ -138,6 +138,112 @@ hand-entering `m`.
 
 **Returns:** Power attenuation coefficient `m`, in 1/m, with the shape of `frequencies`.
 
+## atmospheric_attenuation
+
+```python
+atmospheric_attenuation(
+    frequencies: ArrayLike,
+    temperature: float = 20.0,
+    relative_humidity: float = 50.0,
+    pressure: float = 101.325,
+    *,
+    exact_midband: bool = False,
+    distance: float | None = None,
+) -> AtmosphericAttenuation
+```
+
+Build a plottable ISO 9613-1 atmospheric-attenuation curve.
+
+Evaluates [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation) at `frequencies` for the given
+atmospheric conditions and bundles the result into an
+[`AtmosphericAttenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuation) that exposes `.plot()`. The maths is
+unchanged; this is a thin, plottable wrapper around the existing function
+(same warnings and `ValueError`\ s apply).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | Frequency or frequencies `f`, in hertz (array-like). |
+| `temperature` | Ambient air temperature, in degrees Celsius (default 20). |
+| `relative_humidity` | Relative humidity, in percent (default 50). |
+| `pressure` | Ambient atmospheric pressure, in kilopascals (default 101,325). |
+| `exact_midband` | Snap the frequencies to the exact one-third-octave midbands `fm = 1000*10^(k/10)` (Eq. (6)) before evaluation; see [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation). When `True` the stored `frequencies` are the snapped midbands the coefficient was computed at. |
+| `distance` | Optional propagation distance `d`, in metres. When given, the result's [`total_attenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuationtotal_attenuation) returns the total attenuation `A = alpha * d` over that distance (ISO 9613-2 Eq. (8)). |
+
+**Returns:** A frozen [`AtmosphericAttenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuation).
+
 ## AtmosphericAbsorptionWarning
 
 Advisory for ISO 9613-1 inputs outside the tabulated/validity ranges.
+
+## AtmosphericAttenuation
+
+```python
+AtmosphericAttenuation(
+    frequencies: NDArray[np.float64],
+    attenuation_coefficient: NDArray[np.float64],
+    temperature: float,
+    relative_humidity: float,
+    pressure: float,
+    distance: float | None = None,
+)
+```
+
+A pure-tone atmospheric attenuation curve (ISO 9613-1:1993).
+
+Bundles the ISO 9613-1 attenuation coefficient `alpha` (Eq. (5)) over a
+frequency grid with the atmospheric conditions it was evaluated for, so the
+classic `alpha` versus frequency curve can be drawn with `plot`.
+Build it with [`atmospheric_attenuation`](/phonometry/reference/api/environment/air-absorption/#atmospheric_attenuation); the frozen instance is a thin,
+plottable wrapper and re-runs none of the maths.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | Frequencies `f` the coefficient is evaluated at, in Hz (the exact one-third-octave midbands when `exact_midband` was used). |
+| `attenuation_coefficient` | Pure-tone attenuation coefficient `alpha`, per frequency, in decibels per metre (Table 1 prints dB/km, i.e. `x 1000`). |
+| `temperature` | Ambient air temperature, in degrees Celsius. |
+| `relative_humidity` | Relative humidity, in percent. |
+| `pressure` | Ambient atmospheric pressure `pa`, in kilopascals. |
+| `distance` | Propagation distance `d`, in metres, or `None` when the result carries only the coefficient. When given, `total_attenuation` returns the total attenuation `A = alpha * d` over that distance. |
+
+### AtmosphericAttenuation.plot()
+
+```python
+AtmosphericAttenuation.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the attenuation coefficient `alpha` versus frequency.
+
+Draws `alpha` (in dB/km, as Table 1 tabulates it) on a logarithmic
+frequency axis, the classic ISO 9613-1 curve for the stored atmospheric
+conditions. Requires matplotlib (`pip install phonometry[plot]`);
+returns the `Axes` and never calls `plt.show`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the `alpha` curve `plot` call. |
+
+**Returns:** The axes.
+
+### AtmosphericAttenuation.total_attenuation
+
+*property*
+
+Total atmospheric attenuation `A = alpha * d` over `distance`.
+
+The pure-tone attenuation `alpha` (dB/m) accumulated over the
+propagation distance `d` (m), per frequency, in decibels; this is the
+ISO 9613-2:1996 `Aatm` (Eq. (8)) form. `None` when no
+`distance` was supplied.

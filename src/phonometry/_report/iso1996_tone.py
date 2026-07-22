@@ -208,9 +208,10 @@ def _key_quantity_table(
         data.append(row)
 
     table = stacked_table(data, [w * mm for w in widths])
-    # Emphasise the decisive tone's row with the light fill (its row index in
-    # the table is its rank in the frequency order, plus the header row).
-    dec_row = int(np.where(order == decisive)[0][0]) + 1
+    # Emphasise the decisive tone's row (its row index in the table is its rank
+    # in the frequency order, plus the header row). ``order`` is a permutation,
+    # so the decisive tone appears exactly once; a plain list lookup finds it.
+    dec_row = order.tolist().index(decisive) + 1
     table.setStyle(
         [
             ("LINEBELOW", (0, dec_row), (-1, dec_row), 0.5, colors.HexColor(_ACCENT_HEX)),

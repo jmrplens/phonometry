@@ -64,14 +64,18 @@ def test_report_writes_one_page_pdf(tmp_path) -> None:
 
 def test_unknown_engine_rejected(tmp_path) -> None:
     """An unknown rendering engine raises ``ValueError``."""
+    result = _result()
+    out = str(tmp_path / "x.pdf")
     with pytest.raises(ValueError, match="engine"):
-        _result().report(str(tmp_path / "x.pdf"), engine="weasyprint")
+        result.report(out, engine="weasyprint")
 
 
 def test_unknown_language_rejected(tmp_path) -> None:
     """An unknown fiche language raises ``ValueError``."""
+    result = _result()
+    out = str(tmp_path / "bad.pdf")
     with pytest.raises(ValueError, match="language"):
-        _result().report(str(tmp_path / "bad.pdf"), language="xx")
+        result.report(out, language="xx")
 
 
 def test_report_states_audibility_adjustment_and_frequency(tmp_path) -> None:
@@ -180,5 +184,9 @@ def test_absent_tone_reports_zero_adjustment(tmp_path) -> None:
     result.report(str(out))
     _assert_one_page(str(out))
     text = _extract_text(str(out)).replace("\n", " ")
+    # The tone sits below the masking threshold, so no adjustment applies.
+    assert result.decisive_audibility < 0.0
     k = tonal_adjustment_from_mean_audibility(result.decisive_audibility)
-    assert f"K = {k} dB" in text
+    assert k == 0
+    assert "K = 0 dB" in text
+    assert "No prominent tone is present" in text

@@ -107,7 +107,7 @@ def _value_table(result: Any, verbose: bool, language: str = "en") -> Any:
         "R<sub>i</sub> [m<super>2</super>]",
         "IL [dB]",
     ]
-    widths = [12.0, 13.0, 13.0, 14.0, 14.0]
+    widths = [12.0, 13.0, 13.0, 13.0, 13.0]
     rows_data = [
         [
             labels[i],

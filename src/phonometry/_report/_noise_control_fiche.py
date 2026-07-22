@@ -79,20 +79,21 @@ def performance_verdict(
 
     ``higher_is_better`` selects the direction: an insertion or transmission
     loss passes at or above the declared minimum, while a radiated noise level
-    passes at or below the declared maximum. The comparison uses the displayed
-    (one-decimal) value so the printed number cannot contradict the verdict at
-    the boundary. ``symbol`` is markup (e.g. ``IL``, ``L<sub>WA</sub>``) and
-    ``unit`` its unit symbol (``dB`` or ``dB(A)``), neither of which is
-    translated.
+    passes at or below the declared maximum. Both the measured value and the
+    requirement are compared at the displayed (one-decimal) precision so the
+    printed numbers cannot contradict the verdict at the boundary. ``symbol`` is
+    markup (e.g. ``IL``, ``L<sub>WA</sub>``) and ``unit`` its unit symbol
+    (``dB`` or ``dB(A)``), neither of which is translated.
     """
     rounded = display_round(value)
+    rounded_requirement = display_round(requirement)
     if higher_is_better:
-        passed = math.isfinite(value) and rounded >= requirement
+        passed = math.isfinite(value) and rounded >= rounded_requirement
         template = t(
             "{sym} = {value} {unit}, required &#8805; {req} {unit}", language
         )
     else:
-        passed = math.isfinite(value) and rounded <= requirement
+        passed = math.isfinite(value) and rounded <= rounded_requirement
         template = t(
             "{sym} = {value} {unit}, required &#8804; {req} {unit}", language
         )

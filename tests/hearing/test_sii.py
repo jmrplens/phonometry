@@ -193,3 +193,78 @@ def test_plot_returns_axes() -> None:
     ax = sii.speech_intelligibility_index("normal").plot()
     assert isinstance(ax, plt.Axes)
     plt.close("all")
+
+
+def test_standard_speech_spectra_family_matches_table3() -> None:
+    """The result wrapper only stacks the bare Table 3 arrays."""
+    res = sii.standard_speech_spectra()
+    assert isinstance(res, sii.StandardSpeechSpectrum)
+    assert res.vocal_efforts == sii.VOCAL_EFFORTS
+    assert res.levels.shape == (4, 18)
+    np.testing.assert_allclose(res.frequencies, sii.BAND_CENTERS)
+    for i, effort in enumerate(res.vocal_efforts):
+        np.testing.assert_allclose(
+            res.levels[i], sii.standard_speech_spectrum(effort)
+        )
+    # ANSI S3.5-1997 Table 3 anchor values, in dB SPL.
+    i1k = int(np.flatnonzero(np.isclose(res.frequencies, 1000.0))[0])
+    i8k = int(np.flatnonzero(np.isclose(res.frequencies, 8000.0))[0])
+    assert res.levels[0, i1k] == pytest.approx(25.01)          # normal, 1 kHz
+    assert res.levels[2, i1k] == pytest.approx(42.16)          # loud, 1 kHz
+    assert res.levels[3, i8k] == pytest.approx(20.72)          # shout, 8 kHz
+
+
+def test_standard_speech_spectra_single_effort() -> None:
+    res = sii.standard_speech_spectra("raised")
+    assert res.vocal_efforts == ("raised",)
+    assert res.levels.shape == (1, 18)
+    assert res.levels[0, 0] == pytest.approx(33.81)            # raised, 160 Hz
+
+
+def test_standard_speech_spectra_rejects_unknown_and_empty() -> None:
+    with pytest.raises(ValueError, match="vocal_effort"):
+        sii.standard_speech_spectra("whisper")
+    with pytest.raises(ValueError, match="empty"):
+        sii.standard_speech_spectra([])
+
+
+def test_standard_speech_spectra_plot_returns_axes() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.axes import Axes
+
+    res = sii.standard_speech_spectra()
+    ax_en = res.plot()
+    assert isinstance(ax_en, Axes)
+    assert ax_en.get_xlabel() == "One-third-octave band [Hz]"
+    assert ax_en.get_ylabel() == "Speech spectrum level [dB SPL]"
+    assert "ANSI S3.5-1997" in ax_en.get_title()
+    # One labelled line per vocal effort; nominal band labels on the x axis.
+    assert len(ax_en.lines) == len(res.vocal_efforts)
+    labels = [t.get_text() for t in ax_en.get_xticklabels()]
+    assert labels[0] == "160" and labels[-1] == "8k"
+    plt.close("all")
+
+    ax_es = res.plot(language="es")
+    assert ax_es.get_xlabel() == "Banda de tercio de octava [Hz]"
+    assert ax_es.get_ylabel() == "Nivel del espectro de voz [dB SPL]"
+    plt.close("all")
+
+
+def test_standard_speech_spectra_plot_forwards_kwargs_and_rejects_language() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    res = sii.standard_speech_spectra("normal")
+    ax = res.plot(linewidth=3)
+    assert any(line.get_linewidth() == 3.0 for line in ax.lines)
+    plt.close("all")
+    with pytest.raises(ValueError, match="Unknown language"):
+        res.plot(language="xx")
+    plt.close("all")

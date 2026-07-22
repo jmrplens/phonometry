@@ -226,17 +226,18 @@ def _lab_impact_example() -> Tuple[object, ReportMetadata, str]:
          73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2]
     )
     result = ph.lab_impact_insulation(li, np.full(16, 0.8), volume=50.0)
+    # The impact fiche's plot legend carries an extra "500 Hz read" entry that
+    # wraps to a second row, making the embedded figure taller than the
+    # airborne one; the header is kept to the essential accredited fields so
+    # the sheet stays comfortably within one page across renderers.
     metadata = ReportMetadata(
         specimen="140 mm concrete slab, bare (reference floor)",
         client="Example client",
-        manufacturer="Example precast",
-        mounted_by="Example laboratory",
         area=10.0,
         mass_per_area=336.0,
         receiving_volume=50.0,
         receiving_temperature=20.6,
         receiving_relative_humidity=45.0,
-        pressure=101.1,
         test_room="Transmission suite (example)",
         mounting="Bare slab, no floor covering (ISO 10140-1)",
         measurement_standard="ISO 10140-3",

@@ -957,6 +957,10 @@ _ES_EXACT = {
         "Absorción atmosférica α(f) (ISO 9613-1)",
     "Attenuation coefficient α [dB/km]":
         "Coeficiente de atenuación α [dB/km]",
+    "ISO 9613-1 atmospheric attenuation":
+        "Atenuación atmosférica ISO 9613-1",
+    r"Attenuation coefficient $\alpha$ [dB/km]":
+        r"Coeficiente de atenuación $\alpha$ [dB/km]",
     "ISO 9613-2 Attenuation Breakdown (with a 4 m barrier)":
         "Desglose de la atenuación (ISO 9613-2, con barrera de 4 m)",
     "Octave-band centre frequency [Hz]":
@@ -6978,6 +6982,21 @@ def generate_air_absorption_alpha(output_dir: str) -> None:
     plt.close()
 
 
+def generate_atmospheric_attenuation(output_dir: str) -> None:
+    """ISO 9613-1 atmospheric attenuation via the AtmosphericAttenuation.plot()."""
+    print("Generating atmospheric_attenuation.png...")
+    from phonometry import atmospheric_attenuation
+
+    freqs = np.logspace(np.log10(50.0), np.log10(10000.0), 400)
+    _, ax = plt.subplots(figsize=(10, 6.2))
+    # The result's own .plot() draws alpha in dB/km on a 1k/2k-labelled log
+    # frequency axis for the reference 20 degC / 50 % RH atmosphere (ISO 9613-1).
+    atmospheric_attenuation(freqs, temperature=20.0, relative_humidity=50.0).plot(ax=ax)
+    plt.tight_layout()
+    save_figure(output_dir, "atmospheric_attenuation.png")
+    plt.close()
+
+
 def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
     """ISO 9613-2 per-term octave-band attenuation breakdown, with a barrier."""
     print("Generating outdoor_attenuation_breakdown.png...")
@@ -8813,6 +8832,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_insulation_uncertainty_demo,
     # Outdoor propagation & occupational exposure (ISO 9613-1/2, ISO 9612)
     generate_air_absorption_alpha,
+    generate_atmospheric_attenuation,
     generate_outdoor_attenuation_breakdown,
     generate_ground_effect_spherical,
     generate_atmospheric_refraction,

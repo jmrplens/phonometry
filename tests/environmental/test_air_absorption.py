@@ -29,8 +29,10 @@ import pytest
 
 from phonometry import (
     AtmosphericAbsorptionWarning,
+    AtmosphericAttenuation,
     air_attenuation,
     air_attenuation_m,
+    atmospheric_attenuation,
     attenuation_from_alpha,
 )
 
@@ -212,3 +214,100 @@ def test_iso9613_2_table2_grid_exact_midbands() -> None:
             if (temp, rh, band) == (15.0, 80.0, 1000.0):
                 tol = 0.06  # print rounding artifact, see reference_data
             assert got == pytest.approx(printed, abs=tol), (temp, rh, band)
+
+
+# --- AtmosphericAttenuation result + .plot() (thin wrapper) -----------------
+
+def test_atmospheric_attenuation_wraps_air_attenuation() -> None:
+    # The result carries exactly air_attenuation's coefficient (no re-derivation)
+    # and echoes the atmospheric conditions.
+    bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
+    res = atmospheric_attenuation(bands, temperature=20.0, relative_humidity=50.0)
+    assert isinstance(res, AtmosphericAttenuation)
+    np.testing.assert_allclose(
+        res.attenuation_coefficient, air_attenuation(bands, 20.0, 50.0)
+    )
+    np.testing.assert_allclose(res.frequencies, bands)
+    assert (res.temperature, res.relative_humidity, res.pressure) == (20.0, 50.0, 101.325)
+    assert res.distance is None and res.total_attenuation is None
+
+
+def test_atmospheric_attenuation_matches_table1_cell() -> None:
+    # 10 degC, 70 % RH, 1 kHz -> 3,66 dB/km (ISO 9613-1 Table 1, exact midband).
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", AtmosphericAbsorptionWarning)
+        res = atmospheric_attenuation(1000.0, 10.0, 70.0, exact_midband=True)
+    assert float(res.attenuation_coefficient[0]) * 1e3 == pytest.approx(3.66, abs=0.01)
+    # exact_midband stores the snapped midband the coefficient was computed at.
+    assert float(res.frequencies[0]) == pytest.approx(1000.0 * 10.0 ** 0.0)
+
+
+def test_atmospheric_attenuation_total_over_distance() -> None:
+    # total_attenuation is alpha (dB/m) times the distance (m): A = alpha * d [dB].
+    res = atmospheric_attenuation([1000.0, 4000.0], 20.0, 50.0, distance=200.0)
+    np.testing.assert_allclose(
+        res.total_attenuation, res.attenuation_coefficient * 200.0
+    )
+    assert res.distance == 200.0
+
+
+def test_atmospheric_attenuation_zero_distance_is_allowed() -> None:
+    # A zero-length path is degenerate but well defined: A = 0 everywhere.
+    res = atmospheric_attenuation([1000.0], 20.0, 50.0, distance=0.0)
+    np.testing.assert_allclose(res.total_attenuation, 0.0)
+
+
+@pytest.mark.parametrize("bad", [-1.0, -0.001, math.inf, -math.inf, math.nan])
+def test_atmospheric_attenuation_rejects_bad_distance(bad: float) -> None:
+    # A negative or non-finite distance is non-physical and raises.
+    with pytest.raises(ValueError, match="'distance' must be a finite"):
+        atmospheric_attenuation([1000.0], 20.0, 50.0, distance=bad)
+
+
+@pytest.mark.parametrize("bad", [-1.0, math.inf, math.nan])
+def test_atmospheric_attenuation_direct_construction_guards_distance(bad: float) -> None:
+    # The invariant lives in __post_init__, so building the result directly with
+    # a bad distance raises just as the factory does.
+    freqs = np.array([1000.0])
+    alpha = np.array([0.005])
+    with pytest.raises(ValueError, match="'distance' must be a finite"):
+        AtmosphericAttenuation(
+            frequencies=freqs,
+            attenuation_coefficient=alpha,
+            temperature=20.0,
+            relative_humidity=50.0,
+            pressure=101.325,
+            distance=bad,
+        )
+
+
+def test_atmospheric_attenuation_plot_returns_axes() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib
+
+    matplotlib.use("Agg")
+    from matplotlib.axes import Axes
+
+    res = atmospheric_attenuation([63.0, 250.0, 1000.0, 4000.0], 20.0, 50.0)
+    ax_en = res.plot()
+    assert isinstance(ax_en, Axes)
+    assert ax_en.get_xlabel() == "Frequency [Hz]"
+    assert "ISO 9613-1" in ax_en.get_title()
+    # Frequency axis is logarithmic; dB/km is already logarithmic, so the
+    # ordinate stays linear (semilogx, not loglog).
+    assert ax_en.get_xscale() == "log"
+    assert ax_en.get_yscale() == "linear"
+
+    ax_es = res.plot(language="es")
+    assert ax_es.get_xlabel() == "Frecuencia [Hz]"
+    assert "Atenuación atmosférica" in ax_es.get_title()
+
+
+def test_atmospheric_attenuation_plot_rejects_unknown_language() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib
+
+    matplotlib.use("Agg")
+    res = atmospheric_attenuation([1000.0], 20.0, 50.0)
+    with pytest.raises(ValueError, match="Unknown language"):
+        res.plot(language="xx")

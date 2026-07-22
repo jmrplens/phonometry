@@ -27,6 +27,7 @@ references:
 ---
 
 import ThemeImage from '../../../components/ThemeImage.astro';
+import ReportPreview from '../../../components/ReportPreview.astro';
 
 The airborne sound power a machine radiates through the structure-borne
 vibration of its outer surface can be estimated from the surface vibratory
@@ -154,6 +155,69 @@ fixed `ε = 1`
 with a band-by-band `εⱼ` determined from one reference measurement of the
 radiated power (ISO 9614 intensity), after which the velocity survey can be
 repeated cheaply on nominally identical machines.
+
+## 4. The measurement report (`.report()`)
+
+A determination ends as a *document*. The `VibrationSoundPowerResult` exposes a
+`.report()` method that writes a one-page PDF fiche laid out like a sound-power
+test sheet: the standard-basis line naming the applied method (the ISO/TS
+7849-1 survey method with a fixed radiation factor `ε = 1`, or the ISO/TS
+7849-2 engineering method with a determined radiation factor), an optional
+metadata header (client, machine/source, test environment, instrumentation,
+climate, date), a per-band table (nominal octave/one-third-octave frequency,
+the surface vibratory velocity level $L_v$ and the band sound-power level
+$L_W$), the sound-power spectrum $L_W(f)$ with a nominal band axis, and a boxed
+A-weighted sound power level $L_{WA}$ (dB re 1 pW) with the total $L_W$, the
+radiating area $S$ and the applied method alongside.
+
+The metadata is supplied through a `ReportMetadata`, whose applicable fields
+here are the **machine/source description** (`specimen`), the **test
+environment** (`test_room`), the **client**, the **instrumentation**, the
+**temperature**, **relative humidity** and **ambient pressure**, the **date of
+test** (`test_date`) and the footer identity (`laboratory`, `operator`,
+`report_id`, `notes`); the radiating area $S$ comes from the result itself and
+is printed in the result box, together with the sound-power relation
+$L_W = L_v + 10\lg(S/S_0) + 10\lg\varepsilon + 10\lg(Z_{c,n}/Z_{c,0})$ in the
+basis strip. Supplying `requirement` adds a PASS/FAIL verdict against a declared
+A-weighted sound-power limit (a sound-power emission is a quantity where less is
+better, so the source passes at or below the limit). `verbose=True` adds the
+radiation factor $\varepsilon$ column to the table. `language="es"` renders the
+Spanish fiche with comma decimals.
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, emission
+
+freqs = np.array([125, 250, 500, 1000, 2000, 4000], float)
+lv = np.array([78.0, 82, 85, 83, 79, 74])          # surface velocity level [dB]
+eps = np.array([0.20, 0.45, 0.75, 0.95, 1.00, 1.00])  # measured radiation factor
+res = emission.sound_power_from_vibration(
+    lv, area=1.6, radiation_factor=eps, frequencies=freqs,
+)
+
+res.report(
+    "vibration_sound_power.pdf",
+    metadata=ReportMetadata(
+        client="Example manufacturing plant",
+        specimen="Gearbox casing (steel panel)",
+        test_room="Machine hall (source vibration survey)",
+        instrumentation="Class 1 accelerometer (IEC 60651), s/n 0042",
+        laboratory="Phonometry reference example",
+        report_id="EXAMPLE-7849",
+        requirement=90.0,
+    ),
+)   # LWA = 88.7 dB(A) re 1 pW -> declared limit 90 dB(A): PASS
+```
+
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
+
+<ReportPreview
+	name="iso7849_vibration_power_example"
+	title="ISO/TS 7849 sound power from vibration example report (PDF)"
+	description="One-page ISO/TS 7849-2 sound-power-from-vibration determination fiche: a header with the client, the machine/source, the machine-hall test environment and the accelerometer and climate, the octave-band table (125 Hz to 4 kHz) of surface vibratory velocity levels Lv and radiated band sound-power levels LW, the sound-power spectrum LW(f) with a nominal band axis, the boxed A-weighted sound power level LWA = 88.7 dB(A) re 1 pW with the total LW = 90.0 dB, the radiating area S = 1.60 m2 and the engineering method, and a PASS verdict against the declared 90 dB(A) limit, closed by a basis strip stating the LW = Lv + 10 lg(S/S0) + 10 lg(epsilon) + 10 lg(411/400) relation with its fixed impedance term and the radiation-factor model."
+	caption="Sound power from vibration fiche (VibrationSoundPowerResult.report), an ISO/TS 7849-2 engineering-method determination with the measured radiation factor and the boxed LWA."
+/>
 
 ## See also
 

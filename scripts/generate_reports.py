@@ -1223,7 +1223,7 @@ def _reverberation_sound_power_example() -> Tuple[object, ReportMetadata, str]:
     A steady, broadband source measured by the direct method in a qualified
     hard-walled reverberation room of volume V = 200 m3 and total surface
     S = 240 m2 (ISO 3741:2010 clause 9.1.4). The octave-band mean room
-    sound-pressure levels Lp (Annex F, 125 Hz to 8 kHz) peak near 500 Hz. At
+    sound-pressure levels Lp (125 Hz to 8 kHz octave bands) peak near 500 Hz. At
     the test temperature theta = 20 degC the speed of sound is
     c = 20.05*sqrt(293) = 343.2 m/s and, with a uniform reverberation time
     T60 = 2.0 s, the Sabine equivalent absorption area

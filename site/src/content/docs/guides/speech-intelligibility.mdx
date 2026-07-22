@@ -201,6 +201,48 @@ for effort in hearing.sii.VOCAL_EFFORTS:
 print(hearing.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 ```
 
+The four spectra are also available as one plottable result:
+`standard_speech_spectra()` returns a `StandardSpeechSpectrum` carrying the band
+centre frequencies and the per-effort band levels, and its `.plot()` draws them
+as one labelled family on the one-third-octave band axis.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum.svg"
+  alt="The four ANSI S3.5-1997 standard speech spectra (normal, raised, loud, shout) as one labelled family: the standard speech spectrum level in dB SPL over 160 Hz to 8000 Hz, each higher effort lifting the whole spectrum"
+  width="90%"
+/>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import hearing
+
+# One line: the whole ANSI S3.5-1997 Table 3 family.
+hearing.standard_speech_spectra().plot()
+plt.show()
+
+# By hand, mirroring what StandardSpeechSpectrum.plot() draws:
+res = hearing.standard_speech_spectra()
+pos = np.arange(res.frequencies.size)
+fig, ax = plt.subplots()
+for effort, levels in zip(res.vocal_efforts, res.levels):
+    ax.plot(pos, levels, "o-", label=effort.capitalize())
+ax.set_xticks(pos)
+ax.set_xticklabels([f"{f:g}" for f in res.frequencies], rotation=45, ha="right")
+ax.set_xlabel("One-third-octave band [Hz]")
+ax.set_ylabel("Speech spectrum level [dB SPL]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+The same four spectra feed the index: in a fixed broadband noise, each higher
+vocal effort lifts the speech spectrum and raises the SII.
+
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.svg"
   alt="Left: the four ANSI S3.5-1997 standard speech spectra (normal, raised, loud, shout) over 160 Hz to 8000 Hz, each higher effort lifting the whole spectrum. Right: the resulting SII in a fixed broadband noise, rising from 0.12 (normal) to 0.79 (shout)"

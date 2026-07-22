@@ -141,11 +141,37 @@ def test_requirement_pass_verdict(tmp_path) -> None:
     assert "PASS" in _text(str(out))
 
 
+def test_requirement_boundary_verdict(tmp_path) -> None:
+    """At equality (requirement == delta_lw) the verdict passes (>= rule)."""
+    out = tmp_path / "iso16251_boundary.pdf"
+    result = _result()
+    assert result.delta_lw == 19
+    result.report(str(out), metadata=_metadata(requirement=19.0))
+    text = _text(str(out))
+    assert "PASS" in text and "FAIL" not in text
+
+
 def test_requirement_fail_verdict(tmp_path) -> None:
     """A weighted improvement below the requirement fails."""
     out = tmp_path / "iso16251_fail.pdf"
     _result().report(str(out), metadata=_metadata(requirement=25.0))
     assert "FAIL" in _text(str(out))
+
+
+def test_limited_band_uses_literal_greater_than(tmp_path) -> None:
+    """A band at the 1,3 dB limit renders a literal '>' marker, not '&gt;'."""
+    bare = np.full(16, 50.0)
+    covering = np.full(16, 49.0)
+    background = np.full(16, 48.0)  # margin 2 dB < 6 dB -> every band limited
+    result = building.impact_improvement(
+        bare, covering, _FREQS, background=background
+    )
+    assert bool(np.any(result.limited))
+    out = tmp_path / "iso16251_limited.pdf"
+    result.report(str(out))
+    text = _text(str(out))
+    assert "&gt;" not in text  # the XML entity must not leak into a plain cell
+    assert ">" in text
 
 
 def test_metadata_xml_specials_do_not_break(tmp_path) -> None:

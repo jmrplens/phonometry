@@ -136,7 +136,14 @@ def _reference_floor_with_covering(
 
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     rating = np.asarray(_RATING_FREQS, dtype=np.float64)
-    if freqs.shape != rating.shape or not np.allclose(freqs, rating, rtol=0.06):
+    # The derivation subtracts the Table 4 reference floor band-by-band, so it
+    # needs the exact 16-band ISO 717-2 rating set (100 Hz to 3150 Hz). Match on
+    # a tight absolute tolerance (no two nominal bands are within 1 Hz) so a
+    # non-standard band set is rejected (the verbose column is then omitted); a
+    # relative tolerance would widen to tens of Hz at 3150 Hz and misclassify.
+    if freqs.shape != rating.shape or not np.allclose(
+        freqs, rating, rtol=0.0, atol=0.5
+    ):
         return None
     reference = np.asarray(_IMPACT_REFERENCE_FLOOR, dtype=np.float64)
     return reference - np.asarray(result.improvement, dtype=np.float64)
@@ -176,8 +183,10 @@ def _value_table(
     rows: List[List[Any]] = [header]
     for k, fk in enumerate(freqs):
         value = format_number(float(delta_l[k]), language, decimals=1)
+        # band_table receives plain strings drawn literally (not Paragraph
+        # markup), so the limit marker is a literal ">", not the XML entity.
         row: List[Any] = [
-            f"{int(round(fk))}", f"&gt; {value}" if limited[k] else value
+            f"{int(round(fk))}", f"> {value}" if limited[k] else value
         ]
         if ln_r is not None:
             row.append(format_number(float(ln_r[k]), language, decimals=1))
@@ -297,8 +306,10 @@ def render_iso16251_report(
     :param path: Destination path of the PDF file.
     :param metadata: Optional :class:`ReportMetadata`; ``None`` renders the body
         with only the result's own frequency range and no descriptive header.
-    :param verbose: When ``True``, an octave-band ``delta-Loct`` summary table
-        (ISO 16251-1 Formula (5)) is added beside the one-third-octave one.
+    :param verbose: When ``True``, the per-band table gains the
+        reference-floor-with-covering column ``Ln,r = Ln,r,0 - delta-L``
+        (ISO 717-2:2020 Formula (1)), the derivation basis of ``delta-Lw``,
+        when the spectrum is exactly the 16 rating bands 100-3150 Hz.
     :param language: ``"en"`` (default) or ``"es"``.
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not

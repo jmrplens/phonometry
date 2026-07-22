@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `NCResult.report()` and `RCResult.report()`: one-page PDF room-noise
+  assessment fiches for the two ANSI/ASA S12.2-2019 ratings. Each sheet carries
+  the standard-basis line, an optional metadata header (client, room,
+  description, room volume, floor area, instrumentation, climate, date), the
+  measured octave-band levels beside the measured spectrum plotted against the
+  NC/RC curve family (the result's own `plot`), and a boxed rating: `NC-nn`
+  with its governing octave band (tangency method, Table 1) or `RC-nn(tag)`
+  with the mid-frequency average `LMF` and the neutral/rumble/hiss spectral
+  quality (Annex D). A target rating on the metadata `requirement` adds a
+  PASS/FAIL verdict, where a lower rating passes. With `verbose=True` the table
+  gains the per-band NC contour value read by the tangency method, or the
+  reference RC Mark II curve and the measured deviation from it. The fiches
+  render in English and Spanish (`language="es"`).
 - `StructureBornePowerResult.report()`: a one-page PDF structure-borne sound
   power characterization fiche for the power a piece of building service
   equipment injects into a reception plate (EN 15657:2018 reception-plate

@@ -166,6 +166,54 @@ throttled damper close to the outlet, and it is the range that masks
 speech. A neutral tag (`N`) means the level can still be wrong, but the
 character is right: reduce the whole spectrum rather than reshape it.
 
+## 4. Room-noise reports (`.report()`)
+
+Both ratings render a one-page PDF room-noise assessment fiche. `NCResult.report(path)`
+and `RCResult.report(path)` share the same layout: a standard-basis line, an
+optional metadata header block, the measured octave-band levels beside the
+measured spectrum plotted against the NC/RC curve family (the result's own
+`.plot()`), the boxed rating, an optional verdict row and a footer with the
+fixed disclaimer. The NC box shows `NC-nn` with its governing band; the RC box
+shows `RC-nn(tag)` with the mid-frequency average $L_\text{MF}$ and the spectral
+quality. A lower rating is quieter, so a `requirement` on the metadata (read as
+the maximum acceptable NC or RC rating) passes at or below the target. Setting
+`verbose=True` adds the per-band NC contour value read by the tangency method
+(NC), or the reference RC Mark II curve and the measured deviation from it (RC).
+Both use the same `ReportMetadata` container as the other fiches; the
+room-specific `room_volume` and `area` populate the header alongside `client`,
+`test_room`, `specimen`, `instrumentation`, the climate fields,
+`measurement_standard`, `test_date`, `laboratory`, `operator` and `report_id`.
+Passing `metadata=None` produces a bare assessment fiche. Rendering needs
+reportlab (`pip install phonometry[report]`); only `engine="reportlab"` is
+supported, and `language="es"` renders a Spanish fiche (translated fixed strings
+and a comma decimal separator).
+
+```python
+import numpy as np
+from phonometry import room, ReportMetadata
+
+spl = np.array([79.0, 69.0, 59.0, 51.0, 50.0, 39.0, 36.0, 34.0, 33.0, 32.0])
+metadata = ReportMetadata(
+    test_room="Office A", room_volume=180.0, area=60.0,
+    measurement_standard="ANSI/ASA S12.2",
+    laboratory="Phonometry Reference Laboratory",
+    requirement=40.0,              # adds a verdict against a target rating
+)
+room.noise_criterion(spl).report("nc_fiche.pdf", metadata=metadata)
+room.room_criterion(spl).report("rc_fiche.pdf", metadata=metadata)
+```
+
+The example fiches, regenerated with `make reports`, are kept rendered in the
+repository. Click a preview to open the PDF:
+
+[![Noise Criteria example report: metadata header, the octave-band level table beside the measured spectrum over the NC curve family, and the boxed NC-40 rating with the 250 Hz governing band and a PASS verdict against a target of 40](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ansi_s12_2_noise_criteria_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ansi_s12_2_noise_criteria_example.pdf)
+
+*Noise Criteria fiche (`NCResult.report`), the NC rating and its governing band.*
+
+[![Room Criteria example report: metadata header, the octave-band level table beside the measured spectrum over the reference RC Mark II curve with the rumble and hiss tolerance bands shaded, and the boxed RC-35(R) rating with the mid-frequency average LMF and a rumble spectral quality](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ansi_s12_2_room_criteria_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/ansi_s12_2_room_criteria_example.pdf)
+
+*Room Criteria fiche (`RCResult.report`), the RC rating and its spectral tag.*
+
 ## References
 
 - Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise

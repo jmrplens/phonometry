@@ -90,6 +90,47 @@ Plot the measured spectrum against the NC curves.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### NCResult.report()
+
+```python
+NCResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a Noise Criteria (NC) assessment fiche to a PDF.
+
+Writes a one-page room-noise assessment report (ANSI/ASA S12.2-2019):
+the standard-basis line, an optional metadata header block, the
+measured octave-band levels beside the measured spectrum plotted
+against the NC curve family (the result's own `plot`), the boxed
+`NC-nn` rating with its governing band, an optional verdict row and a
+footer with the fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable NC rating (a lower rating is quieter, so the room passes at or below it). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the table adds the per-band NC contour value read by the tangency method. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
 ## noise_criterion
 
 ```python
@@ -188,6 +229,48 @@ Plot the measured spectrum against the reference RC Mark II curve.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### RCResult.report()
+
+```python
+RCResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a Room Criteria Mark II (RC) assessment fiche to a PDF.
+
+Writes a one-page room-noise assessment report (ANSI/ASA S12.2-2019,
+Annex D): the standard-basis line, an optional metadata header block,
+the measured octave-band levels beside the measured spectrum plotted
+against the reference RC Mark II curve (the result's own `plot`),
+the boxed `RC-nn(tag)` rating with its mid-frequency average and
+spectral-quality tag, an optional verdict row and a footer with the
+fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable RC rating (a lower rating is quieter, so the room passes at or below it). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the table adds the reference RC Mark II curve and the measured deviation from it. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
 
 ## room_criterion
 

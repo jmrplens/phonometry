@@ -44,8 +44,24 @@ _DEFAULT_DIR = os.path.normpath(
 _PREVIEW_WIDTH_PX = 1000
 
 _RATING_FREQS = np.array(
-    [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
-     1000, 1250, 1600, 2000, 2500, 3150],
+    [
+        100,
+        125,
+        160,
+        200,
+        250,
+        315,
+        400,
+        500,
+        630,
+        800,
+        1000,
+        1250,
+        1600,
+        2000,
+        2500,
+        3150,
+    ],
     dtype=float,
 )
 
@@ -115,16 +131,64 @@ def _impact_example() -> Tuple[object, ReportMetadata, str]:
 def _field_airborne_example() -> Tuple[object, ReportMetadata, str]:
     """Field airborne fiche: a DnT measurement between dwellings (ISO 16283-1)."""
     l1 = np.array(
-        [92.3, 93.1, 94.0, 94.4, 94.8, 95.0, 95.2, 95.4,
-         95.3, 95.1, 94.8, 94.4, 93.9, 93.3, 92.5, 91.6]
+        [
+            92.3,
+            93.1,
+            94.0,
+            94.4,
+            94.8,
+            95.0,
+            95.2,
+            95.4,
+            95.3,
+            95.1,
+            94.8,
+            94.4,
+            93.9,
+            93.3,
+            92.5,
+            91.6,
+        ]
     )
     d = np.array(
-        [38.2, 40.1, 42.6, 45.2, 47.8, 50.1, 52.3, 54.0,
-         55.6, 57.1, 58.2, 59.0, 59.6, 60.1, 60.3, 59.8]
+        [
+            38.2,
+            40.1,
+            42.6,
+            45.2,
+            47.8,
+            50.1,
+            52.3,
+            54.0,
+            55.6,
+            57.1,
+            58.2,
+            59.0,
+            59.6,
+            60.1,
+            60.3,
+            59.8,
+        ]
     )
     t2 = np.array(
-        [0.62, 0.58, 0.55, 0.53, 0.52, 0.50, 0.49, 0.48,
-         0.47, 0.46, 0.45, 0.45, 0.44, 0.43, 0.43, 0.42]
+        [
+            0.62,
+            0.58,
+            0.55,
+            0.53,
+            0.52,
+            0.50,
+            0.49,
+            0.48,
+            0.47,
+            0.46,
+            0.45,
+            0.45,
+            0.44,
+            0.43,
+            0.43,
+            0.42,
+        ]
     )
     result = ph.airborne_insulation(l1, l1 - d, t2, area=12.5, volume=30.4)
     metadata = ReportMetadata(
@@ -148,12 +212,44 @@ def _field_airborne_example() -> Tuple[object, ReportMetadata, str]:
 def _field_impact_example() -> Tuple[object, ReportMetadata, str]:
     """Field impact fiche: a tapping-machine L'nT measurement (ISO 16283-2)."""
     li = np.array(
-        [58.0, 60.5, 62.0, 63.5, 65.0, 66.0, 66.5, 66.0,
-         65.5, 65.0, 64.0, 62.0, 59.0, 56.0, 53.0, 50.0]
+        [
+            58.0,
+            60.5,
+            62.0,
+            63.5,
+            65.0,
+            66.0,
+            66.5,
+            66.0,
+            65.5,
+            65.0,
+            64.0,
+            62.0,
+            59.0,
+            56.0,
+            53.0,
+            50.0,
+        ]
     )
     t2 = np.array(
-        [0.60, 0.57, 0.55, 0.53, 0.52, 0.50, 0.49, 0.48,
-         0.47, 0.46, 0.45, 0.45, 0.44, 0.43, 0.43, 0.42]
+        [
+            0.60,
+            0.57,
+            0.55,
+            0.53,
+            0.52,
+            0.50,
+            0.49,
+            0.48,
+            0.47,
+            0.46,
+            0.45,
+            0.45,
+            0.44,
+            0.43,
+            0.43,
+            0.42,
+        ]
     )
     result = ph.impact_insulation(li, t2, volume=30.4)
     metadata = ReportMetadata(
@@ -182,8 +278,24 @@ def _lab_airborne_example() -> Tuple[object, ReportMetadata, str]:
     R = L1 - L2 reproduces that published curve exactly.
     """
     r = np.array(
-        [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
-         28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
+        [
+            20.4,
+            16.3,
+            17.7,
+            22.6,
+            22.4,
+            22.7,
+            24.8,
+            26.6,
+            28.0,
+            30.5,
+            31.8,
+            32.5,
+            33.4,
+            33.0,
+            31.0,
+            25.5,
+        ]
     )
     l1 = np.full(16, 90.0)
     result = ph.lab_airborne_insulation(
@@ -222,8 +334,24 @@ def _lab_impact_example() -> Tuple[object, ReportMetadata, str]:
     10 lg(A/A0) vanishes and Ln = Li reproduces that published curve exactly.
     """
     li = np.array(
-        [62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
-         73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2]
+        [
+            62.1,
+            63.2,
+            63.5,
+            66.2,
+            68.5,
+            70.0,
+            71.7,
+            73.1,
+            73.8,
+            73.5,
+            73.8,
+            73.3,
+            73.1,
+            73.0,
+            72.4,
+            71.2,
+        ]
     )
     result = ph.lab_impact_insulation(li, np.full(16, 0.8), volume=50.0)
     # The impact fiche's plot legend carries an extra "500 Hz read" entry that
@@ -264,8 +392,24 @@ def _intensity_example() -> Tuple[object, ReportMetadata, str]:
     shows the Kc-modified index RI,M beside RI.
     """
     ri = np.array(
-        [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
-         28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
+        [
+            20.4,
+            16.3,
+            17.7,
+            22.6,
+            22.4,
+            22.7,
+            24.8,
+            26.6,
+            28.0,
+            30.5,
+            31.8,
+            32.5,
+            33.4,
+            33.0,
+            31.0,
+            25.5,
+        ]
     )
     lp1, sm, s = 85.0, 12.0, 10.0
     l_in = lp1 - 6.0 - 10.0 * np.log10(sm / s) - ri
@@ -317,8 +461,14 @@ def _airborne_prediction_example() -> Tuple[object, ReportMetadata, str]:
     ]
     for label, rw, kff, kfd, lf in elements:
         ff, df, fd = ph.flanking_element(
-            label=label, r_flanking=rw, r_separating=57.0,
-            k_ff=kff, k_fd=kfd, k_df=kfd, separating_area=ss, coupling_length=lf,
+            label=label,
+            r_flanking=rw,
+            r_separating=57.0,
+            k_ff=kff,
+            k_fd=kfd,
+            k_df=kfd,
+            separating_area=ss,
+            coupling_length=lf,
         )
         paths += [ff, df, fd]
     result = ph.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
@@ -399,8 +549,11 @@ def _facade_prediction_example() -> Tuple[object, ReportMetadata, str]:
         ph.building.FacadeElement("Air inlet", dn_e=[28, 23, 25, 38, 44]),
     ]
     result = ph.building.facade_sound_reduction(
-        elements, area=11.3, volume=50.0,
-        frequencies=[125, 250, 500, 1000, 2000], bands="octave",
+        elements,
+        area=11.3,
+        volume=50.0,
+        frequencies=[125, 250, 500, 1000, 2000],
+        bands="octave",
     )
     metadata = ReportMetadata(
         specimen="Masonry wall + window + roof light + air inlet (Annex F)",
@@ -475,11 +628,21 @@ def _absorption_example() -> Tuple[object, ReportMetadata, str]:
     # coefficients (0.35, 1.00, 0.65, 0.60, 0.55) giving alpha_w = 0.60 with an
     # M shape indicator (ISO 11654 Annex A.2 shape); a broadband porous absorber.
     alpha_s = (
-        0.30, 0.35, 0.40,   # 250 Hz octave -> alpha_p 0.35
-        1.00, 1.00, 1.00,   # 500 Hz octave -> alpha_p 1.00
-        0.62, 0.66, 0.67,   # 1000 Hz octave -> alpha_p 0.65
-        0.58, 0.60, 0.62,   # 2000 Hz octave -> alpha_p 0.60
-        0.53, 0.55, 0.57,   # 4000 Hz octave -> alpha_p 0.55
+        0.30,
+        0.35,
+        0.40,  # 250 Hz octave -> alpha_p 0.35
+        1.00,
+        1.00,
+        1.00,  # 500 Hz octave -> alpha_p 1.00
+        0.62,
+        0.66,
+        0.67,  # 1000 Hz octave -> alpha_p 0.65
+        0.58,
+        0.60,
+        0.62,  # 2000 Hz octave -> alpha_p 0.60
+        0.53,
+        0.55,
+        0.57,  # 4000 Hz octave -> alpha_p 0.55
     )
     result = ph.materials.weighted_absorption_from_third_octave(alpha_s)
     metadata = ReportMetadata(
@@ -524,21 +687,80 @@ def _sound_absorption_example() -> Tuple[object, ReportMetadata, str]:
     1600 Hz and falls back to 0.34 at 5000 Hz, a broadband porous absorber.
     """
     freqs = np.array(
-        [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
-         1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000],
+        [
+            100,
+            125,
+            160,
+            200,
+            250,
+            315,
+            400,
+            500,
+            630,
+            800,
+            1000,
+            1250,
+            1600,
+            2000,
+            2500,
+            3150,
+            4000,
+            5000,
+        ],
         dtype=float,
     )
     t_empty = np.array(
-        [9.0, 9.0, 8.8, 8.6, 8.4, 8.2, 8.0, 7.8, 7.5, 7.2,
-         6.9, 6.6, 6.2, 5.8, 5.4, 5.0, 4.6, 4.2]
+        [
+            9.0,
+            9.0,
+            8.8,
+            8.6,
+            8.4,
+            8.2,
+            8.0,
+            7.8,
+            7.5,
+            7.2,
+            6.9,
+            6.6,
+            6.2,
+            5.8,
+            5.4,
+            5.0,
+            4.6,
+            4.2,
+        ]
     )
     t_specimen = np.array(
-        [8.4, 8.2, 7.7, 7.2, 6.5, 5.7, 4.9, 4.2, 3.6, 3.15,
-         2.85, 2.65, 2.55, 2.5, 2.55, 2.6, 2.7, 2.85]
+        [
+            8.4,
+            8.2,
+            7.7,
+            7.2,
+            6.5,
+            5.7,
+            4.9,
+            4.2,
+            3.6,
+            3.15,
+            2.85,
+            2.65,
+            2.55,
+            2.5,
+            2.55,
+            2.6,
+            2.7,
+            2.85,
+        ]
     )
     result = ph.measure_sound_absorption(
-        freqs, t_empty, t_specimen,
-        volume=200.0, area=10.8, temperature=20.0, humidity=54.0,
+        freqs,
+        t_empty,
+        t_specimen,
+        volume=200.0,
+        area=10.8,
+        temperature=20.0,
+        humidity=54.0,
     )
     metadata = ReportMetadata(
         specimen="50 mm porous absorber over a 100 mm air gap",
@@ -604,8 +826,14 @@ def _impedance_tube_example() -> Tuple[object, ReportMetadata, str]:
         np.exp(1j * kk * x1) + r * np.exp(-1j * kk * x1)
     )
     result = ph.materials.two_microphone_impedance(
-        h12, frequency=freqs, spacing=spacing, x1=x1, speed_of_sound=c0,
-        characteristic_impedance=rc, diameter=diameter, shape="circular",
+        h12,
+        frequency=freqs,
+        spacing=spacing,
+        x1=x1,
+        speed_of_sound=c0,
+        characteristic_impedance=rc,
+        diameter=diameter,
+        shape="circular",
     )
     metadata = ReportMetadata(
         specimen="Resistive facing over an 86 mm rigidly-backed air cavity",
@@ -631,8 +859,36 @@ def _loudness_example() -> Tuple[object, ReportMetadata, str]:
     # A shaped 28-band one-third-octave spectrum (25 Hz..12.5 kHz) of a steady
     # appliance noise, descending with frequency.
     levels = np.array(
-        [55, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43,
-         42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29],
+        [
+            55,
+            55,
+            54,
+            53,
+            52,
+            51,
+            50,
+            49,
+            48,
+            47,
+            46,
+            45,
+            44,
+            43,
+            42,
+            41,
+            40,
+            39,
+            38,
+            37,
+            36,
+            35,
+            34,
+            33,
+            32,
+            31,
+            30,
+            29,
+        ],
         dtype=float,
     )
     result = ph.loudness_zwicker_from_spectrum(levels, field="free")
@@ -696,17 +952,89 @@ def _tone_audibility_example() -> Tuple[object, ReportMetadata, str]:
     documented edge-tone masking-level underestimate on the truncated band.
     """
     frequencies = np.array(
-        [96.9, 99.6, 102.3, 105.0, 107.7, 110.4, 113.0, 115.7, 118.4, 121.1,
-         123.8, 126.5, 129.2, 131.9, 134.6, 137.3, 140.0, 142.7, 145.3, 148.0,
-         150.7, 153.4, 156.1, 158.8, 161.5, 164.2, 166.9, 169.6, 172.3, 175.0,
-         177.6, 180.3, 183.0, 185.7, 188.4, 191.1, 193.8, 196.5],
+        [
+            96.9,
+            99.6,
+            102.3,
+            105.0,
+            107.7,
+            110.4,
+            113.0,
+            115.7,
+            118.4,
+            121.1,
+            123.8,
+            126.5,
+            129.2,
+            131.9,
+            134.6,
+            137.3,
+            140.0,
+            142.7,
+            145.3,
+            148.0,
+            150.7,
+            153.4,
+            156.1,
+            158.8,
+            161.5,
+            164.2,
+            166.9,
+            169.6,
+            172.3,
+            175.0,
+            177.6,
+            180.3,
+            183.0,
+            185.7,
+            188.4,
+            191.1,
+            193.8,
+            196.5,
+        ],
         dtype=float,
     )
     levels = np.array(
-        [49.40, 50.68, 50.09, 53.37, 44.47, 50.91, 51.41, 59.40, 64.54, 57.57,
-         51.02, 50.76, 59.93, 62.94, 58.49, 65.87, 62.66, 50.25, 51.32, 52.30,
-         52.58, 53.15, 67.04, 67.27, 57.40, 57.17, 52.56, 51.39, 52.49, 47.68,
-         51.26, 49.03, 61.42, 59.52, 48.43, 50.84, 48.20, 55.95],
+        [
+            49.40,
+            50.68,
+            50.09,
+            53.37,
+            44.47,
+            50.91,
+            51.41,
+            59.40,
+            64.54,
+            57.57,
+            51.02,
+            50.76,
+            59.93,
+            62.94,
+            58.49,
+            65.87,
+            62.66,
+            50.25,
+            51.32,
+            52.30,
+            52.58,
+            53.15,
+            67.04,
+            67.27,
+            57.40,
+            57.17,
+            52.56,
+            51.39,
+            52.49,
+            47.68,
+            51.26,
+            49.03,
+            61.42,
+            59.52,
+            48.43,
+            50.84,
+            48.20,
+            55.95,
+        ],
         dtype=float,
     )
     result = ph.analyze_spectrum(levels, frequencies, 2.7)
@@ -768,7 +1096,9 @@ def _epnl_example() -> Tuple[object, ReportMetadata, str]:
     """
     k, dt = 24, 0.5
     idx = np.arange(k)
-    shape = 15.0 * np.exp(-((np.log10(ph.aircraft.NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5)
+    shape = 15.0 * np.exp(
+        -((np.log10(ph.aircraft.NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5
+    )
     gain = 24.0 * np.exp(-((idx - 12.0) ** 2) / (2 * 3.5**2)) - 3.0
     spectra = (46.0 + shape)[None, :] + gain[:, None]
     spectra[:, 17] += 10.0 * np.exp(-((idx - 12.0) ** 2) / (2 * 4.0**2))  # 2500 Hz tone
@@ -897,14 +1227,14 @@ def _loudspeaker_example() -> Tuple[object, ReportMetadata, str]:
     freqs = np.geomspace(30.0, 24000.0, 320)
     reference = 87.0
     spl = reference + 1.2 * np.sin(2.0 * np.log2(freqs / 900.0))
-    spl -= 10.0 * np.log10(1.0 + (50.0 / freqs) ** 6)      # LF roll-off
-    spl -= 10.0 * np.log10(1.0 + (freqs / 16000.0) ** 7)   # HF roll-off
+    spl -= 10.0 * np.log10(1.0 + (50.0 / freqs) ** 6)  # LF roll-off
+    spl -= 10.0 * np.log10(1.0 + (freqs / 16000.0) ** 7)  # HF roll-off
 
     imp_freqs = np.geomspace(20.0, 20000.0, 260)
     impedance = (
         6.6
-        + 24.0 * np.exp(-((np.log2(imp_freqs / 52.0)) ** 2) / 0.12)   # resonance peak
-        + 5.0 * (imp_freqs / 20000.0) ** 1.5                          # voice-coil rise
+        + 24.0 * np.exp(-((np.log2(imp_freqs / 52.0)) ** 2) / 0.12)  # resonance peak
+        + 5.0 * (imp_freqs / 20000.0) ** 1.5  # voice-coil rise
     )
 
     thd_freqs = np.geomspace(50.0, 5000.0, 140)
@@ -916,7 +1246,9 @@ def _loudspeaker_example() -> Tuple[object, ReportMetadata, str]:
     )
 
     result = ph.loudspeaker_characteristics(
-        freqs, spl, 8.0,
+        freqs,
+        spl,
+        8.0,
         sensitivity_band=(200.0, 4000.0),
         tolerance_db=3.0,
         rated_frequency_range=(45.0, 22000.0),
@@ -965,7 +1297,7 @@ def _microphone_example() -> Tuple[object, ReportMetadata, str]:
     """
     freqs = np.geomspace(20.0, 20000.0, 400)
     response = (
-        -10.0 * np.log10(1.0 + (30.0 / freqs) ** 4)      # LF roll-off
+        -10.0 * np.log10(1.0 + (30.0 / freqs) ** 4)  # LF roll-off
         - 10.0 * np.log10(1.0 + (freqs / 19000.0) ** 8)  # HF roll-off
         + 2.0 * np.exp(-((np.log2(freqs / 9000.0)) ** 2) / 0.3)  # presence
     )
@@ -977,12 +1309,14 @@ def _microphone_example() -> Tuple[object, ReportMetadata, str]:
     thd_percent = 0.5 * 10.0 ** ((thd_spl - 130.0) * 0.08)
 
     noise_freqs = np.geomspace(20.0, 20000.0, 31)
-    noise_levels = 18.0 - 5.4 * np.log2(noise_freqs / 20.0) + 1.5 * np.sin(
-        np.log2(noise_freqs)
+    noise_levels = (
+        18.0 - 5.4 * np.log2(noise_freqs / 20.0) + 1.5 * np.sin(np.log2(noise_freqs))
     )
 
     result = ph.microphone_characteristics(
-        freqs, response, 12.5,
+        freqs,
+        response,
+        12.5,
         tolerance_db=3.0,
         rated_impedance=150.0,
         minimum_load_impedance=1000.0,
@@ -1028,13 +1362,21 @@ def _occupational_exposure_example() -> Tuple[object, ReportMetadata, str]:
     action value (85 dB(A)) and limit value (87 dB(A)) not exceeded.
     """
     tasks = [
-        ph.hearing.Task(samples=(70.0,), duration_hours=1.5,
-                        label="Planning and breaks"),
-        ph.hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
-                        duration_range=(4.0, 6.0), label="Welding"),
-        ph.hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2),
-                        duration_hours=1.5, duration_range=(1.0, 2.0),
-                        label="Cutting and grinding"),
+        ph.hearing.Task(
+            samples=(70.0,), duration_hours=1.5, label="Planning and breaks"
+        ),
+        ph.hearing.Task(
+            samples=(80.1, 82.2, 79.6),
+            duration_hours=5.0,
+            duration_range=(4.0, 6.0),
+            label="Welding",
+        ),
+        ph.hearing.Task(
+            samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2),
+            duration_hours=1.5,
+            duration_range=(1.0, 2.0),
+            label="Cutting and grinding",
+        ),
     ]
     result = ph.hearing.task_based_exposure(tasks, warn=False)
     metadata = ReportMetadata(
@@ -1043,7 +1385,7 @@ def _occupational_exposure_example() -> Tuple[object, ReportMetadata, str]:
         test_room="Steel assembly hall, line 2",
         instrumentation="Personal sound exposure meter (IEC 61252), s/n 0042",
         calibration="Calibrator IEC 60942 class 1, s/n 0117; field checks "
-                    "before/after each series within 0.3 dB",
+        "before/after each series within 0.3 dB",
         test_date="2026-07-20",
         laboratory="Phonometry reference example",
         operator="phonometry",
@@ -1080,7 +1422,7 @@ def _human_vibration_example() -> Tuple[object, ReportMetadata, str]:
         test_room="Managed woodland, plot 12",
         instrumentation="Hand-arm vibration meter (ISO 8041-1), s/n 0042",
         calibration="Field calibrator (ISO 8041-1) verified before/after the "
-                    "series within tolerance",
+        "series within tolerance",
         test_date="2026-07-20",
         laboratory="Phonometry reference example",
         operator="phonometry",
@@ -1136,6 +1478,72 @@ def _room_acoustics_example() -> Tuple[object, ReportMetadata, str]:
         requirement=1.3,
     )
     return result, metadata, "iso3382_room_acoustics_example.pdf"
+
+
+def _noise_criteria_example() -> Tuple[object, ReportMetadata, str]:
+    """Noise Criteria fiche: an office spectrum rated NC-40 (ANSI/ASA S12.2).
+
+    The spectrum is built from the ANSI/ASA S12.2-2019 Table 1 NC-40 contour so
+    the tangency rating is exact and independently verifiable. Every band is
+    depressed 5 dB below its NC-40 contour except the 250 Hz octave, which is
+    left on the NC-40 curve (50 dB, the Table 1 value): that band alone touches
+    the highest NC curve, so the tangency method returns NC-40 with the 250 Hz
+    band governing.
+    """
+    contour = ph.nc_curve(40.0)
+    levels = contour - 5.0
+    levels[4] = contour[4]  # 250 Hz sits on the NC-40 curve and governs.
+    result = ph.noise_criterion(levels)
+    metadata = ReportMetadata(
+        specimen="Open-plan office, air handling at nominal flow",
+        client="Example client",
+        test_room="Office A (example)",
+        room_volume=180.0,
+        area=60.0,
+        instrumentation="Class 1 sound level meter + octave filter set (example)",
+        measurement_standard="ANSI/ASA S12.2",
+        temperature=22.0,
+        relative_humidity=42.0,
+        pressure=101.2,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-S122-NC",
+        requirement=40.0,
+    )
+    return result, metadata, "ansi_s12_2_noise_criteria_example.pdf"
+
+
+def _room_criteria_example() -> Tuple[object, ReportMetadata, str]:
+    """Room Criteria fiche: an RC-35(R) rumble spectrum (ANSI/ASA S12.2 Annex D).
+
+    The spectrum is the ANSI/ASA S12.2-2019 Annex D RC-35 Mark II curve with the
+    250 Hz octave raised 8 dB. The 500/1000/2000 Hz mid bands are unchanged, so
+    the mid-frequency average LMF is exactly 35 dB (clause D.4) and the rating
+    is RC-35; the raised low band exceeds the reference by more than 5 dB, so
+    the spectral-quality tag is rumble (clause D.3), giving RC-35(R).
+    """
+    levels = ph.rc_curve(35.0)
+    levels[4] += 8.0  # 250 Hz rumble.
+    result = ph.room_criterion(levels)
+    metadata = ReportMetadata(
+        specimen="Conference room, variable-air-volume terminal",
+        client="Example client",
+        test_room="Room B (example)",
+        room_volume=140.0,
+        area=48.0,
+        instrumentation="Class 1 sound level meter + octave filter set (example)",
+        measurement_standard="ANSI/ASA S12.2",
+        temperature=21.5,
+        relative_humidity=44.0,
+        pressure=101.0,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-S122-RC",
+        requirement=40.0,
+    )
+    return result, metadata, "ansi_s12_2_room_criteria_example.pdf"
 
 
 def _open_plan_example() -> Tuple[object, ReportMetadata, str]:
@@ -1229,7 +1637,7 @@ def _multiple_shock_example() -> Tuple[object, ReportMetadata, str]:
         test_room="Off-road vehicle, driver's seat",
         instrumentation="Seat-pad accelerometer (ISO 8041-1), s/n 0117",
         calibration="Reference calibrator (ISO 8041-1) verified before/after the "
-                    "series within tolerance",
+        "series within tolerance",
         test_date="2026-07-20",
         laboratory="Phonometry reference example",
         operator="phonometry",
@@ -1286,7 +1694,7 @@ def _sound_power_example() -> Tuple[object, ReportMetadata, str]:
         report_id="EXAMPLE-3744",
         requirement=105.0,
         notes="Enveloping-surface pressure method over a hemisphere "
-              "(ISO 3744:2010, engineering grade 2).",
+        "(ISO 3744:2010, engineering grade 2).",
     )
     return result, metadata, "iso3744_sound_power_example.pdf"
 
@@ -1339,7 +1747,7 @@ def _intensity_sound_power_example() -> Tuple[object, ReportMetadata, str]:
         report_id="EXAMPLE-9614",
         requirement=93.0,
         notes="Intensity-scanning method over a box surface "
-              "(ISO 9614-2:1996, engineering grade 2).",
+        "(ISO 9614-2:1996, engineering grade 2).",
     )
     return result, metadata, "iso9614_sound_power_intensity_example.pdf"
 
@@ -1390,8 +1798,7 @@ def _reverberation_sound_power_example() -> Tuple[object, ReportMetadata, str]:
         operator="phonometry",
         report_id="EXAMPLE-3741",
         requirement=96.0,
-        notes="Reverberation-room direct method "
-              "(ISO 3741:2010, precision grade 1).",
+        notes="Reverberation-room direct method (ISO 3741:2010, precision grade 1).",
     )
     return result, metadata, "iso3741_reverberation_power_example.pdf"
 
@@ -1435,7 +1842,7 @@ def _vibration_sound_power_example() -> Tuple[object, ReportMetadata, str]:
         report_id="EXAMPLE-7849",
         requirement=90.0,
         notes="Sound power from surface vibration, engineering method "
-              "(ISO/TS 7849-2:2009).",
+        "(ISO/TS 7849-2:2009).",
     )
     return result, metadata, "iso7849_vibration_power_example.pdf"
 
@@ -1473,7 +1880,7 @@ def _structure_borne_power_example() -> Tuple[object, ReportMetadata, str]:
         operator="phonometry",
         report_id="EXAMPLE-15657",
         notes="Structure-borne sound power injected into the reception plate "
-              "(EN 15657:2018 reception-plate method, Formula 14).",
+        "(EN 15657:2018 reception-plate method, Formula 14).",
     )
     return result, metadata, "en15657_structure_borne_power_example.pdf"
 
@@ -1502,14 +1909,12 @@ def _installed_structure_borne_example() -> Tuple[object, ReportMetadata, str]:
     paths = [
         {
             "adjustment_term": dsa_wall,
-            "flanking_reduction_index":
-                np.array([43.0, 46.0, 50.2, 54.7, 64.6, 73.0]),
+            "flanking_reduction_index": np.array([43.0, 46.0, 50.2, 54.7, 64.6, 73.0]),
             "element_area": 12.8,
         },
         {
             "adjustment_term": dsa_wall,
-            "flanking_reduction_index":
-                np.array([37.0, 41.2, 35.9, 37.7, 49.0, 57.8]),
+            "flanking_reduction_index": np.array([37.0, 41.2, 35.9, 37.7, 49.0, 57.8]),
             "element_area": 12.8,
         },
     ]
@@ -1527,7 +1932,7 @@ def _installed_structure_borne_example() -> Tuple[object, ReportMetadata, str]:
         report_id="EXAMPLE-12354-5",
         requirement=45.0,
         notes="Predicted installed structure-borne sound "
-              "(EN 12354-5:2009, Formulae 17/18); prediction, not a measurement.",
+        "(EN 12354-5:2009, Formulae 17/18); prediction, not a measurement.",
     )
     return result, metadata, "en12354_5_installed_structure_borne_example.pdf"
 
@@ -1535,8 +1940,26 @@ def _installed_structure_borne_example() -> Tuple[object, ReportMetadata, str]:
 #: One-third-octave centre frequencies of ISO 17497 Table 1 / Clause 5, in Hz
 #: (100 Hz to 5000 Hz, full scale).
 _SCATTER_FREQS = np.array(
-    [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
-     1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000],
+    [
+        100,
+        125,
+        160,
+        200,
+        250,
+        315,
+        400,
+        500,
+        630,
+        800,
+        1000,
+        1250,
+        1600,
+        2000,
+        2500,
+        3150,
+        4000,
+        5000,
+    ],
     dtype=float,
 )
 
@@ -1566,11 +1989,29 @@ def _scattering_example() -> Tuple[object, ReportMetadata, str]:
     """
     volume, area, c = 200.0, 10.0, 343.2
     t1 = np.array(
-        [8.0, 7.9, 7.8, 7.6, 7.4, 7.2, 7.0, 6.7, 6.4, 6.0,
-         5.6, 5.2, 4.8, 4.4, 4.0, 3.6, 3.2, 2.9]
+        [
+            8.0,
+            7.9,
+            7.8,
+            7.6,
+            7.4,
+            7.2,
+            7.0,
+            6.7,
+            6.4,
+            6.0,
+            5.6,
+            5.2,
+            4.8,
+            4.4,
+            4.0,
+            3.6,
+            3.2,
+            2.9,
+        ]
     )
-    t3 = t1.copy()                       # symmetrical base plate: T1 = T3
-    t2 = t1 * 0.90                       # sample, static turntable
+    t3 = t1.copy()  # symmetrical base plate: T1 = T3
+    t2 = t1 * 0.90  # sample, static turntable
     t4 = t2 * (1.0 - np.linspace(0.02, 0.28, _SCATTER_FREQS.size))
     alpha_s = ph.materials.random_incidence_absorption(
         volume, area, c1=c, T1=t1, c2=c, T2=t2
@@ -1665,12 +2106,8 @@ def _diffusion_example() -> Tuple[object, ReportMetadata, str]:
         # Clause 8.4: average the directional coefficients over the source
         # positions, band by band, to get the random-incidence coefficient.
         d[k] = ph.materials.random_incidence_diffusion(d_theta, weights=weights)
-        d_n[k] = ph.materials.random_incidence_diffusion(
-            d_theta_n, weights=weights
-        )
-    result = ph.materials.diffusion_spectrum(
-        _SCATTER_FREQS, d, normalized=d_n
-    )
+        d_n[k] = ph.materials.random_incidence_diffusion(d_theta_n, weights=weights)
+    result = ph.materials.diffusion_spectrum(_SCATTER_FREQS, d, normalized=d_n)
     metadata = ReportMetadata(
         specimen="1:1 single-plane Schroeder diffuser (N = 7)",
         client="Example client",
@@ -1765,8 +2202,26 @@ def _dynamic_stiffness_example() -> Tuple[object, ReportMetadata, str]:
 #: One-third-octave centre frequencies of the ISO 10848 mandatory range,
 #: 100 Hz to 5000 Hz (18 bands, Part 1 Clause 7.5), in Hz.
 _FLANKING_FREQS = np.array(
-    [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
-     1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000],
+    [
+        100,
+        125,
+        160,
+        200,
+        250,
+        315,
+        400,
+        500,
+        630,
+        800,
+        1000,
+        1250,
+        1600,
+        2000,
+        2500,
+        3150,
+        4000,
+        5000,
+    ],
     dtype=float,
 )
 
@@ -1786,13 +2241,34 @@ def _vibration_reduction_example() -> Tuple[object, ReportMetadata, str]:
     (M < 0.25, ISO 10848-4:2010 Clause 9), which are excluded from the mean.
     """
     dv = np.array(
-        [4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
-         9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7]
+        [
+            4.5,
+            4.8,
+            5.2,
+            5.6,
+            6.0,
+            6.5,
+            7.0,
+            7.6,
+            8.1,
+            8.7,
+            9.2,
+            9.8,
+            10.3,
+            10.9,
+            11.4,
+            11.9,
+            12.3,
+            12.7,
+        ]
     )
     modal_overlap = np.full(_FLANKING_FREQS.size, 1.0)
     modal_overlap[:3] = 0.1  # bracket the three lowest bands (poor overlap)
     result = ph.building.vibration_reduction_index(
-        dv, junction_length=4.0, area_i=12.0, area_j=10.0,
+        dv,
+        junction_length=4.0,
+        area_i=12.0,
+        area_j=10.0,
         frequency=_FLANKING_FREQS,
         structural_reverberation_time_i=0.35,
         structural_reverberation_time_j=0.40,
@@ -1904,6 +2380,8 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _occupational_exposure_example,
     _human_vibration_example,
     _room_acoustics_example,
+    _noise_criteria_example,
+    _room_criteria_example,
     _open_plan_example,
     _multiple_shock_example,
     _sound_power_example,
@@ -1947,9 +2425,7 @@ def _write_preview(pdf_path: str) -> str:
         image = page.render(scale=scale).to_pil()
         preview = preview_path_for(pdf_path)
         # RGB (no alpha): the fiche is opaque white; a smaller, simpler image.
-        image.convert("RGB").save(
-            preview, "WEBP", lossless=True, quality=100, method=6
-        )
+        image.convert("RGB").save(preview, "WEBP", lossless=True, quality=100, method=6)
     finally:
         pdf.close()
     return preview

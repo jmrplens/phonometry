@@ -296,6 +296,91 @@ def _intensity_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso15186_intensity_example.pdf"
 
 
+def _airborne_prediction_example() -> Tuple[object, ReportMetadata, str]:
+    """Airborne prediction fiche: EN 12354-1 Annex H.3 worked example.
+
+    A separating wall Rs,w = 57 dB, area Ss = 11.5 m2, flanked by four elements
+    (floor, ceiling, facade, internal wall) whose Annex H tabulated junction
+    Kij feed twelve flanking paths; the direct Dd path plus those twelve make
+    thirteen paths whose energy summation (Formula 26) gives R'w = 52.2 -> 52
+    dB. The element set and its R'w are the standard's own worked example, run
+    through the tested prediction code (see tests/reference_data.py).
+    """
+    ss = 11.5
+    paths = []
+    # (label, R_flanking,w, KFf, KFd = KDf, coupling length lf) from Annex H.
+    elements = [
+        ("floor", 49.0, 12.4, 8.9, 4.5),
+        ("ceiling", 46.0, 14.4, 9.2, 4.5),
+        ("facade", 42.0, 12.6, 6.7, 2.55),
+        ("intwall", 33.0, 33.5, 15.7, 2.55),
+    ]
+    for label, rw, kff, kfd, lf in elements:
+        ff, df, fd = ph.flanking_element(
+            label=label, r_flanking=rw, r_separating=57.0,
+            k_ff=kff, k_fd=kfd, k_df=kfd, separating_area=ss, coupling_length=lf,
+        )
+        paths += [ff, df, fd]
+    result = ph.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
+    metadata = ReportMetadata(
+        specimen="Separating wall, Rs,w = 57 dB (EN 12354-1 Annex H.3)",
+        client="Example client",
+        area=11.5,
+        source_volume=53.0,
+        receiving_volume=50.0,
+        test_room="Dwelling A to dwelling B (example)",
+        measurement_standard="EN/ISO 12354-1",
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-12354-1",
+        notes=(
+            "Flanking elements: floor Rw = 49, ceiling 46, facade 42, "
+            "internal wall 33 dB; junctions per Annex E/H. Simplified "
+            "single-number model (Clause 4.4)."
+        ),
+        requirement=50.0,
+    )
+    return result, metadata, "iso12354_airborne_prediction_example.pdf"
+
+
+def _impact_prediction_example() -> Tuple[object, ReportMetadata, str]:
+    """Impact prediction fiche: EN 12354-2 Annex E.3 worked example.
+
+    A 0.14 m concrete floor (m' = 322 kg/m2) has a bare-floor equivalent level
+    Ln,w,eq = 164 - 35 lg(m') = 76.2 dB (Annex B); a floating floor adds
+    DLw = 33 dB and the flanking correction from Table 1 (separating 322 -> row
+    300, mean flanking mass 145 -> col 150) is K = 2 dB, so L'n,w = 76 - 33 + 2
+    = 45 dB (Formula 21). The element set and its L'n,w are the standard's own
+    worked example, run through the tested prediction code.
+    """
+    ln_w_eq = ph.equivalent_impact_level(322.0)
+    k = ph.impact_flanking_correction(322.0, 145.0)
+    result = ph.predicted_impact_insulation(
+        ln_w_eq=ln_w_eq, delta_l_w=33.0, k_correction=k
+    )
+    metadata = ReportMetadata(
+        specimen="0.14 m concrete floor with floating floor (Annex E.3)",
+        client="Example client",
+        area=20.0,
+        mass_per_area=322.0,
+        receiving_volume=50.0,
+        test_room="Dwelling above to dwelling below (example)",
+        measurement_standard="EN/ISO 12354-2",
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-12354-2",
+        notes=(
+            "Floating-floor covering improvement DLw = 33 dB; mean flanking "
+            "mass 145 kg/m2 (Table 1 -> K = 2 dB). Simplified single-number "
+            "model (Clause 4.3)."
+        ),
+        requirement=53.0,
+    )
+    return result, metadata, "iso12354_impact_prediction_example.pdf"
+
+
 def _floor_covering_example() -> Tuple[object, ReportMetadata, str]:
     """Floor-covering fiche: an ISO 16251-1 impact-improvement measurement.
 
@@ -1509,6 +1594,8 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _lab_airborne_example,
     _lab_impact_example,
     _intensity_example,
+    _airborne_prediction_example,
+    _impact_prediction_example,
     _floor_covering_example,
     _absorption_example,
     _sound_absorption_example,

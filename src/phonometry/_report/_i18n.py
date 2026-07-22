@@ -588,6 +588,18 @@ _STRINGS: dict[str, str] = {
     "Dynamic stiffness s&#8242; = {value}": "Rigidez dinámica s&#8242; = {value}",
     "Resonant frequency f<sub>r</sub> = {value} Hz": "Frecuencia de resonancia f<sub>r</sub> = {value} Hz",
     "Natural frequency f<sub>0</sub> = {value} Hz": "Frecuencia natural f<sub>0</sub> = {value} Hz",
+    # --- EN/ISO 12354-1/-2 predicted building insulation -----------------
+    "Predicted airborne sound insulation between rooms": "Aislamiento acústico a ruido aéreo entre recintos previsto",
+    "Predicted impact sound insulation of floors": "Aislamiento acústico a ruido de impactos de suelos previsto",
+    "Predicted apparent sound reduction index R&#8242; (direct and flanking transmission) estimated in accordance with EN/ISO 12354-1:2000 (simplified single-number model, Clause 4.4). This is a prediction from element data, not a measurement. R&#8242;<sub>w</sub> per ISO 717-1.": "Índice de reducción acústica aparente R&#8242; previsto (transmisión directa y por flancos) estimado de acuerdo con la Norma EN/ISO 12354-1:2000 (modelo simplificado de número único, apartado 4.4). Es una predicción a partir de los datos de los elementos, no una medición. R&#8242;<sub>w</sub> según ISO 717-1.",
+    "Predicted apparent normalized impact sound pressure level L&#8242;<sub>n</sub> (bare floor, covering and flanking) estimated in accordance with EN/ISO 12354-2:2000 (simplified single-number model, Clause 4.3). This is a prediction from element data, not a measurement. L&#8242;<sub>n,w</sub> per ISO 717-2.": "Nivel de presión acústica de impactos normalizado aparente L&#8242;<sub>n</sub> previsto (suelo desnudo, revestimiento y flancos) estimado de acuerdo con la Norma EN/ISO 12354-2:2000 (modelo simplificado de número único, apartado 4.3). Es una predicción a partir de los datos de los elementos, no una medición. L&#8242;<sub>n,w</sub> según ISO 717-2.",
+    "Transmission paths R<sub>ij,w</sub> [dB]": "Vías de transmisión R<sub>ij,w</sub> [dB]",
+    "Path R<sub>ij,w</sub> [dB] and energy share": "R<sub>ij,w</sub> [dB] por vía y fracción de energía",
+    "Impact level prediction - Formula (21) terms [dB]": "Predicción del nivel de impactos - términos de la fórmula (21) [dB]",
+    "Bare-floor level L<sub>n,w,eq</sub>": "Nivel del suelo desnudo L<sub>n,w,eq</sub>",
+    "Covering improvement &#916;L<sub>w</sub>": "Mejora del revestimiento &#916;L<sub>w</sub>",
+    "Flanking correction K": "Corrección por flancos K",
+    "Predicted (estimated) result computed from the building elements' performance by the EN/ISO 12354 simplified single-number model; it is not a measurement. The reported standard deviation of the model is about {sd} dB.": "Resultado previsto (estimado) calculado a partir del comportamiento de los elementos constructivos con el modelo simplificado de número único de la Norma EN/ISO 12354; no es una medición. La desviación típica declarada del modelo es de unos {sd} dB.",
 }
 
 

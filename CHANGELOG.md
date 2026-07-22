@@ -30,6 +30,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   fiche. The fiche reuses the shared sound-power body (per-band table, `LW(f)`
   spectrum, boxed `LWA` and flow assembly) already used by the ISO 3744/3745
   pressure fiche and the ISO 9614-2 intensity fiche.
+- `AirbornePredictionResult.report()` and `ImpactPredictionResult.report()`: a
+  one-page PDF **prediction** report for the predicted building sound insulation
+  between rooms (EN/ISO 12354-1 apparent sound reduction index `R'`) and of
+  floors (EN/ISO 12354-2 apparent normalized impact sound pressure level
+  `L'n`), computed by the simplified single-number model (direct plus flanking
+  transmission). Each sheet is clearly labelled a prediction, never a
+  measurement: a standard-basis line naming EN/ISO 12354-1/-2 and the ISO 717
+  rating part, an optional metadata header (separating element, area, room
+  geometry, bare-floor mass, calculator/laboratory, date), a two-panel body with
+  the model-term table on the left (the direct path and each flanking path's
+  weighted index `Rij,w` for airborne, or the Formula (21) terms `Ln,w,eq`,
+  `ΔLw` and `K` for impact) beside the result's own plot, the boxed predicted
+  single number (`R'w` / `L'n,w`) and a statement reporting the model's ~2 dB
+  standard deviation. A supplied requirement adds a PASS/FAIL verdict (airborne
+  passes at or above it, impact at or below it); `verbose=True` annexes each
+  airborne path's share of the transmitted energy; `language="es"` renders the
+  Spanish fiche. The fiche reuses the shared report layout toolkit
+  (`phonometry[report]` extra).
 - `SoundPowerIntensityResult.report()`: a one-page PDF sound-power-by-intensity
   determination fiche for the sound-intensity scanning method
   (ISO 9614-2:1996, engineering grade 2 or survey grade 3), rendered through

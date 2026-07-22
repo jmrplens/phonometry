@@ -85,6 +85,8 @@ def _common_metadata_pairs(
     metadata: ReportMetadata | None,
     freq_range: str | None,
     language: str = "en",
+    *,
+    include_room_fields: bool = True,
 ) -> List[Tuple[str, str]]:
     """Build the ordered (label, value) pairs shared by the ISO 17497 fiches.
 
@@ -94,12 +96,19 @@ def _common_metadata_pairs(
     empty rows never appear. The frequency range is a label-safe formatted
     string; the remaining values are user free text and are XML-escaped so a
     stray ``&`` or ``<`` cannot break reportlab's ``Paragraph`` parser.
+
+    ``include_room_fields`` controls the reverberation-room quantities (sample
+    area ``S`` and room volume ``V``): they are shown for the ISO 17497-1
+    scattering fiche but suppressed for the ISO 17497-2 diffusion fiches, which
+    are free-field methods where those fields do not apply (so a metadata object
+    reused across a Part 1 and a Part 2 campaign never leaks them into the
+    diffusion sheet).
     """
     def _md(name: str) -> Any:
         return getattr(metadata, name) if metadata is not None else None
 
-    area = _md("area")
-    room_volume = _md("room_volume")
+    area = _md("area") if include_room_fields else None
+    room_volume = _md("room_volume") if include_room_fields else None
     temperature = _md("temperature")
     humidity = _md("relative_humidity")
     pressure = _md("pressure")
@@ -411,7 +420,8 @@ def render_diffusion_spectrum_report(
         language,
     )
     header_pairs = _common_metadata_pairs(
-        metadata, _freq_range(freqs, language), language
+        metadata, _freq_range(freqs, language), language,
+        include_room_fields=False,
     )
     flow = _header_flow(title, basis, header_pairs, title_style, basis_style)
 
@@ -438,19 +448,9 @@ def render_diffusion_spectrum_report(
     lo = int(round(float(freqs.min()))) if freqs.size else 0
     hi = int(round(float(freqs.max()))) if freqs.size else 0
     statement = t(
-        "Directional diffusion coefficient <b>d</b>, {lo} Hz to {hi} Hz",
-        language,
+        "Diffusion coefficient <b>d</b>, {lo} Hz to {hi} Hz", language
     ).format(lo=lo, hi=hi)
-    extended = None
-    if result.random_incidence is not None:
-        extended = [
-            t(
-                "Random-incidence diffusion coefficient d = {value} "
-                "(mean over source positions, Clause 8.4).",
-                language,
-            ).format(value=_c2(float(result.random_incidence), language))
-        ]
-    flow.append(result_box(statement, styles, accent, extended=extended))
+    flow.append(result_box(statement, styles, accent))
     flow.extend(footer_flow(metadata, language))
     return build_document(path, flow, title)
 
@@ -526,7 +526,9 @@ def render_diffusion_polar_report(
         "coefficient per ISO 17497-2:2012.",
         language,
     )
-    header_pairs = _common_metadata_pairs(metadata, None, language)
+    header_pairs = _common_metadata_pairs(
+        metadata, None, language, include_room_fields=False
+    )
     flow = _header_flow(title, basis, header_pairs, title_style, basis_style)
 
     from .._plot.materials import plot_diffusion_polar_report

@@ -1156,53 +1156,75 @@ def _scattering_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso17497_scattering_example.pdf"
 
 
+#: The 2-D single-plane source positions of ISO 17497-2 Clause 6.2.2 (0 deg and
+#: +/-30 deg, +/-60 deg about the reference normal); paired with the Clause 8.4
+#: source weights (0 deg -> 1, the four others -> 3).
+_DIFFUSION_SOURCES = np.array([0.0, 30.0, -30.0, 60.0, -60.0])
+
+
 def _diffuser_polar_energy(
-    angles: np.ndarray, width: float, peak: float
+    angles: np.ndarray, width: float, peak: float, specular: float = 0.0
 ) -> np.ndarray:
     """A synthetic reflected-level polar response (a specular lobe over a floor).
 
     The band energy is a diffuse floor of unity plus a specular lobe of linear
-    amplitude ``peak`` and Gaussian half-width ``width`` (degrees) about the
-    reference normal; the level is ``10 lg(energy) + 60`` dB.
+    amplitude ``peak`` and Gaussian half-width ``width`` (degrees) centred on the
+    ``specular`` reflection angle; the level is ``10 lg(energy) + 60`` dB.
     """
-    energy = 1.0 + peak * np.exp(-((angles / width) ** 2))
+    energy = 1.0 + peak * np.exp(-(((angles - specular) / width) ** 2))
     return 10.0 * np.log10(energy) + 60.0
 
 
 def _diffusion_example() -> Tuple[object, ReportMetadata, str]:
-    """ISO 17497-2 fiche: a directional diffusion-coefficient spectrum d(f).
+    """ISO 17497-2 fiche: a random-incidence diffusion-coefficient spectrum d(f).
 
     A documented clean-room example (ISO 17497-2 has no numeric worked example
     or reference polar dataset, so the polar responses are synthesised and the
     coefficient computed from Formula (5), as the standard directs). A
     single-plane goniometer sweeps 19 equal-area receivers from -90 to 90 deg
-    (10 deg spacing) about the reference normal. As frequency rises the diffuser
-    spreads the reflected energy ever more evenly (the specular lobe broadens
-    and flattens), so the autocorrelation diffusion coefficient d (Formula (5))
-    climbs from 0.23 at 100 Hz to 0.92 at 5000 Hz. A rigid reference flat
-    surface of the same footprint keeps a narrow specular spike, and normalising
-    to it (Formula (7)) removes the finite-panel diffusion, giving the
-    normalised d_n. The random-incidence value d = 0.59 is the mean over source
-    positions (Clause 8.4). Two worked bands: at 500 Hz d = 0.54 (d_n = 0.39);
-    at 4000 Hz d = 0.88 (d_n = 0.79).
+    (10 deg spacing) about the reference normal for each of the five 2-D source
+    positions of Clause 6.2.2 (0 deg and +/-30 deg, +/-60 deg), whose specular
+    reflection falls at the mirror angle. As frequency rises the diffuser spreads
+    the reflected energy ever more evenly (the specular lobe broadens and
+    flattens), so the directional coefficient d_theta (Formula (5)) of each
+    source climbs with frequency. The per-band **random-incidence** coefficient
+    d (Clause 8.4) is the weighted average of the five directional coefficients
+    over the source positions (0 deg -> 1, the four others -> 3), computed band
+    by band, and the normalised d_n (Formula (7), against a rigid flat reference
+    of the same footprint) is likewise averaged over the sources. Both climb
+    with frequency: d from 0.23 at 100 Hz to 0.86 at 5000 Hz. Two worked bands:
+    at 500 Hz d = 0.51 (d_n = 0.35); at 4000 Hz d = 0.81 (d_n = 0.68).
     """
     angles = np.arange(-90.0, 90.5, 10.0)
     n = _SCATTER_FREQS.size
     widths = np.linspace(15.0, 70.0, n)
     peaks = np.linspace(30.0, 3.0, n)
+    weights = np.array(ph.materials.TWO_DIMENSIONAL_SOURCE_WEIGHTS, dtype=float)
     d = np.empty(n)
-    d_ref = np.empty(n)
+    d_n = np.empty(n)
     for k in range(n):
-        d[k] = ph.materials.directional_diffusion_coefficient(
-            _diffuser_polar_energy(angles, widths[k], peaks[k])
+        d_theta = []
+        d_theta_n = []
+        for source in _DIFFUSION_SOURCES:
+            specular = -source  # specular reflection about the reference normal
+            d_s = ph.materials.directional_diffusion_coefficient(
+                _diffuser_polar_energy(angles, widths[k], peaks[k], specular)
+            )
+            d_ref = ph.materials.directional_diffusion_coefficient(
+                _diffuser_polar_energy(angles, 0.5 * widths[k], 60.0, specular)
+            )
+            d_theta.append(d_s)
+            d_theta_n.append(
+                float(ph.materials.normalized_diffusion_coefficient(d_s, d_ref))
+            )
+        # Clause 8.4: average the directional coefficients over the source
+        # positions, band by band, to get the random-incidence coefficient.
+        d[k] = ph.materials.random_incidence_diffusion(d_theta, weights=weights)
+        d_n[k] = ph.materials.random_incidence_diffusion(
+            d_theta_n, weights=weights
         )
-        d_ref[k] = ph.materials.directional_diffusion_coefficient(
-            _diffuser_polar_energy(angles, 0.5 * widths[k], 60.0)
-        )
-    d_n = ph.materials.normalized_diffusion_coefficient(d, d_ref)
-    d_random = ph.materials.random_incidence_diffusion(d)
-    result = ph.materials.directional_diffusion_spectrum(
-        _SCATTER_FREQS, d, normalized=d_n, random_incidence=d_random
+    result = ph.materials.diffusion_spectrum(
+        _SCATTER_FREQS, d, normalized=d_n
     )
     metadata = ReportMetadata(
         specimen="1:1 single-plane Schroeder diffuser (N = 7)",

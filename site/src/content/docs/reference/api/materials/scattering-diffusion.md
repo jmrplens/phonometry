@@ -245,6 +245,44 @@ limit.
 | :--- | :--- |
 | ValueError | for a mapping missing a band or a sequence of the wrong length. |
 
+## diffusion_spectrum
+
+```python
+diffusion_spectrum(
+    frequencies: ArrayLike,
+    diffusion: ArrayLike,
+    *,
+    normalized: ArrayLike | None = None,
+) -> DiffusionSpectrum
+```
+
+Diffusion-coefficient spectrum `d(f)` (ISO 17497-2, Clause 8.5).
+
+Pairs the per-band diffusion coefficients `d` with their band centres and
+returns a plottable, reportable [`DiffusionSpectrum`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionspectrum). The coefficient
+is the *directional* coefficient `d_theta` (Formula (5)/(6)) when it comes
+from a single source position, or the *random-incidence* coefficient `d`
+when it is the per-band average of the directional coefficients over the
+source positions (Clause 8.4, e.g. via [`random_incidence_diffusion`](/phonometry/reference/api/materials/scattering-diffusion/#random_incidence_diffusion)
+band by band). The optional normalised coefficients `d_n` (Formula (7))
+are carried through when supplied.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | One-third-octave band centres, in hertz (1-D). |
+| `diffusion` | Diffusion coefficient `d` per band. |
+| `normalized` | Optional normalised diffusion coefficient `d_n` per band; `None` when the reference flat surface was not measured. |
+
+**Returns:** A [`DiffusionSpectrum`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionspectrum) with `.plot()` and `.report()`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if the inputs differ in length, are empty or not 1-D. |
+
 ## DiffusionResult
 
 ```python
@@ -327,25 +365,28 @@ DiffusionSpectrum(
     frequencies: Real,
     diffusion: Real,
     normalized: Real | None = None,
-    random_incidence: float | None = None,
 )
 ```
 
-A directional diffusion-coefficient spectrum `d(f)` (ISO 17497-2).
+A diffusion-coefficient spectrum `d(f)` (ISO 17497-2, Clause 8.5).
 
 Where [`DiffusionResult`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionresult) holds the polar response of a single
 one-third-octave band, this holds the diffusion coefficient across the
 measured bands, so it can be tabulated and plotted against frequency as
-Clause 8.5 requires.
+Clause 8.5 requires. The per-band coefficient is a *directional* diffusion
+coefficient `d_theta` (Formula (5)/(6)) when it comes from one source
+position, or a *random-incidence* diffusion coefficient `d` when it is the
+per-band average of the directional coefficients over the source positions
+(Clause 8.4); the standard defines both as frequency-dependent quantities,
+so this carries a spectrum rather than a single number.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in hertz. |
-| `diffusion` | Directional diffusion coefficient `d_theta` per band (Formula (5)/(6)). |
-| `normalized` | Optional normalised directional diffusion coefficient `d_theta_n` per band (Formula (7)), or `None` when the reference flat surface was not measured. |
-| `random_incidence` | Optional random-incidence diffusion coefficient `d` (a scalar, Clause 8.4) averaged over the source positions, or `None`. |
+| `diffusion` | Diffusion coefficient `d` per band (directional per source, or random-incidence when averaged over source positions). |
+| `normalized` | Optional normalised diffusion coefficient `d_n` per band (Formula (7)), or `None` when the reference flat surface was not measured. |
 
 ### DiffusionSpectrum.plot()
 
@@ -358,7 +399,7 @@ DiffusionSpectrum.plot(
 ) -> Axes
 ```
 
-Plot the directional diffusion coefficient `d` versus frequency.
+Plot the diffusion coefficient `d` versus frequency.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes` and never calls `plt.show`.
@@ -381,10 +422,11 @@ Render an ISO 17497-2 diffusion-coefficient test-report fiche to a PDF.
 Writes a one-page accredited free-field diffusion report
 (ISO 17497-2:2012, Clause 8.5): the standard-basis line, an optional
 metadata header block, a two-panel body with the per-band table
-(frequency, the directional diffusion coefficient `d` and, when
-present, the normalised `d_n`) beside the `d(f)` curve on a
-categorical band axis, and a footer with the fixed disclaimer.
-ISO 17497-2 is a characterisation, so there is no pass/fail verdict.
+(frequency, the diffusion coefficient `d` and, when present, the
+normalised `d_n`) beside the `d(f)` curve on a categorical band
+axis, a boxed characterisation headline over the tested frequency range,
+and a footer with the fixed disclaimer. ISO 17497-2 is a
+characterisation, so there is no pass/fail verdict.
 
 **Parameters**
 
@@ -485,43 +527,6 @@ are equal.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than two receivers, a non-1-D input, a length mismatch, or non-positive total weight. |
-
-## directional_diffusion_spectrum
-
-```python
-directional_diffusion_spectrum(
-    frequencies: ArrayLike,
-    diffusion: ArrayLike,
-    *,
-    normalized: ArrayLike | None = None,
-    random_incidence: float | None = None,
-) -> DiffusionSpectrum
-```
-
-Directional diffusion-coefficient spectrum `d(f)` (ISO 17497-2, Clause 8.5).
-
-Pairs the per-band directional diffusion coefficients `d_theta`
-(Formula (5)/(6)) with their band centres and returns a plottable, reportable
-[`DiffusionSpectrum`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionspectrum). The optional normalised coefficients `d_theta_n`
-(Formula (7)) and the random-incidence scalar `d` (Clause 8.4) are carried
-through when supplied.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `frequencies` | One-third-octave band centres, in hertz (1-D). |
-| `diffusion` | Directional diffusion coefficient `d` per band. |
-| `normalized` | Optional normalised directional diffusion `d_n` per band; `None` when the reference flat surface was not measured. |
-| `random_incidence` | Optional random-incidence diffusion coefficient `d` (a scalar), averaged over the source positions. |
-
-**Returns:** A [`DiffusionSpectrum`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionspectrum) with `.plot()` and `.report()`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | if the inputs differ in length, are empty or not 1-D. |
 
 ## normalized_diffusion_coefficient
 

@@ -530,9 +530,8 @@ _STRINGS: dict[str, str] = {
     "Corrected polar response L per receiver angle": "Respuesta polar corregida L por ángulo de recepción",
     "Angle &#952; [&#176;]": "Ángulo &#952; [&#176;]",
     "Random-incidence scattering coefficient <b>s</b>, {lo} Hz to {hi} Hz": "Coeficiente de dispersión de incidencia aleatoria <b>s</b>, {lo} Hz a {hi} Hz",
-    "Directional diffusion coefficient <b>d</b>, {lo} Hz to {hi} Hz": "Coeficiente de difusión direccional <b>d</b>, {lo} Hz a {hi} Hz",
+    "Diffusion coefficient <b>d</b>, {lo} Hz to {hi} Hz": "Coeficiente de difusión <b>d</b>, {lo} Hz a {hi} Hz",
     "Directional diffusion coefficient <b>d</b> = {value}": "Coeficiente de difusión direccional <b>d</b> = {value}",
-    "Random-incidence diffusion coefficient d = {value} (mean over source positions, Clause 8.4).": "Coeficiente de difusión de incidencia aleatoria d = {value} (media sobre las posiciones de fuente, Cláusula 8.4).",
 }
 
 

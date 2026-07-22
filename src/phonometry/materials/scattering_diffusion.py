@@ -67,9 +67,9 @@ __all__ = [
     "area_factors",
     "base_plate_scattering",
     "check_base_plate_scattering",
+    "diffusion_spectrum",
     "directional_diffusion",
     "directional_diffusion_coefficient",
-    "directional_diffusion_spectrum",
     "normalized_diffusion_coefficient",
     "random_incidence_absorption",
     "random_incidence_diffusion",
@@ -542,31 +542,32 @@ class DiffusionResult:
 
 @dataclass(frozen=True)
 class DiffusionSpectrum:
-    """A directional diffusion-coefficient spectrum ``d(f)`` (ISO 17497-2).
+    """A diffusion-coefficient spectrum ``d(f)`` (ISO 17497-2, Clause 8.5).
 
     Where :class:`DiffusionResult` holds the polar response of a single
     one-third-octave band, this holds the diffusion coefficient across the
     measured bands, so it can be tabulated and plotted against frequency as
-    Clause 8.5 requires.
+    Clause 8.5 requires. The per-band coefficient is a *directional* diffusion
+    coefficient ``d_theta`` (Formula (5)/(6)) when it comes from one source
+    position, or a *random-incidence* diffusion coefficient ``d`` when it is the
+    per-band average of the directional coefficients over the source positions
+    (Clause 8.4); the standard defines both as frequency-dependent quantities,
+    so this carries a spectrum rather than a single number.
 
     :ivar frequencies: One-third-octave band centre frequencies, in hertz.
-    :ivar diffusion: Directional diffusion coefficient ``d_theta`` per band
-        (Formula (5)/(6)).
-    :ivar normalized: Optional normalised directional diffusion coefficient
-        ``d_theta_n`` per band (Formula (7)), or ``None`` when the reference
-        flat surface was not measured.
-    :ivar random_incidence: Optional random-incidence diffusion coefficient
-        ``d`` (a scalar, Clause 8.4) averaged over the source positions, or
-        ``None``.
+    :ivar diffusion: Diffusion coefficient ``d`` per band (directional per
+        source, or random-incidence when averaged over source positions).
+    :ivar normalized: Optional normalised diffusion coefficient ``d_n`` per band
+        (Formula (7)), or ``None`` when the reference flat surface was not
+        measured.
     """
 
     frequencies: Real
     diffusion: Real
     normalized: Real | None = None
-    random_incidence: float | None = None
 
     def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
-        """Plot the directional diffusion coefficient ``d`` versus frequency.
+        """Plot the diffusion coefficient ``d`` versus frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
@@ -591,10 +592,11 @@ class DiffusionSpectrum:
         Writes a one-page accredited free-field diffusion report
         (ISO 17497-2:2012, Clause 8.5): the standard-basis line, an optional
         metadata header block, a two-panel body with the per-band table
-        (frequency, the directional diffusion coefficient ``d`` and, when
-        present, the normalised ``d_n``) beside the ``d(f)`` curve on a
-        categorical band axis, and a footer with the fixed disclaimer.
-        ISO 17497-2 is a characterisation, so there is no pass/fail verdict.
+        (frequency, the diffusion coefficient ``d`` and, when present, the
+        normalised ``d_n``) beside the ``d(f)`` curve on a categorical band
+        axis, a boxed characterisation headline over the tested frequency range,
+        and a footer with the fixed disclaimer. ISO 17497-2 is a
+        characterisation, so there is no pass/fail verdict.
 
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
@@ -629,27 +631,27 @@ class DiffusionSpectrum:
         )
 
 
-def directional_diffusion_spectrum(
+def diffusion_spectrum(
     frequencies: ArrayLike,
     diffusion: ArrayLike,
     *,
     normalized: ArrayLike | None = None,
-    random_incidence: float | None = None,
 ) -> DiffusionSpectrum:
-    """Directional diffusion-coefficient spectrum ``d(f)`` (ISO 17497-2, Clause 8.5).
+    """Diffusion-coefficient spectrum ``d(f)`` (ISO 17497-2, Clause 8.5).
 
-    Pairs the per-band directional diffusion coefficients ``d_theta``
-    (Formula (5)/(6)) with their band centres and returns a plottable, reportable
-    :class:`DiffusionSpectrum`. The optional normalised coefficients ``d_theta_n``
-    (Formula (7)) and the random-incidence scalar ``d`` (Clause 8.4) are carried
-    through when supplied.
+    Pairs the per-band diffusion coefficients ``d`` with their band centres and
+    returns a plottable, reportable :class:`DiffusionSpectrum`. The coefficient
+    is the *directional* coefficient ``d_theta`` (Formula (5)/(6)) when it comes
+    from a single source position, or the *random-incidence* coefficient ``d``
+    when it is the per-band average of the directional coefficients over the
+    source positions (Clause 8.4, e.g. via :func:`random_incidence_diffusion`
+    band by band). The optional normalised coefficients ``d_n`` (Formula (7))
+    are carried through when supplied.
 
     :param frequencies: One-third-octave band centres, in hertz (1-D).
-    :param diffusion: Directional diffusion coefficient ``d`` per band.
-    :param normalized: Optional normalised directional diffusion ``d_n`` per
+    :param diffusion: Diffusion coefficient ``d`` per band.
+    :param normalized: Optional normalised diffusion coefficient ``d_n`` per
         band; ``None`` when the reference flat surface was not measured.
-    :param random_incidence: Optional random-incidence diffusion coefficient
-        ``d`` (a scalar), averaged over the source positions.
     :return: A :class:`DiffusionSpectrum` with ``.plot()`` and ``.report()``.
     :raises ValueError: if the inputs differ in length, are empty or not 1-D.
     """
@@ -671,9 +673,6 @@ def directional_diffusion_spectrum(
         frequencies=freq,
         diffusion=d,
         normalized=d_n,
-        random_incidence=(
-            None if random_incidence is None else float(random_incidence)
-        ),
     )
 
 

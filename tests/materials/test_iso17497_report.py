@@ -49,30 +49,40 @@ def _scattering():
     return materials.scattering_coefficient_spectrum(_FREQS, alpha_spec, alpha_s)
 
 
-def _polar_energy(angles, width, peak):
-    return 10.0 * np.log10(1.0 + peak * np.exp(-((angles / width) ** 2))) + 60.0
+_SOURCES = np.array([0.0, 30.0, -30.0, 60.0, -60.0])
+
+
+def _polar_energy(angles, width, peak, specular=0.0):
+    return (
+        10.0 * np.log10(1.0 + peak * np.exp(-(((angles - specular) / width) ** 2)))
+        + 60.0
+    )
 
 
 def _diffusion_spectrum():
+    """The committed random-incidence spectrum: source-averaged per band (8.4)."""
     widths = np.linspace(15.0, 70.0, _FREQS.size)
     peaks = np.linspace(30.0, 3.0, _FREQS.size)
-    d = np.array([
-        materials.directional_diffusion_coefficient(
-            _polar_energy(_ANGLES, widths[k], peaks[k])
-        )
-        for k in range(_FREQS.size)
-    ])
-    d_ref = np.array([
-        materials.directional_diffusion_coefficient(
-            _polar_energy(_ANGLES, 0.5 * widths[k], 60.0)
-        )
-        for k in range(_FREQS.size)
-    ])
-    d_n = materials.normalized_diffusion_coefficient(d, d_ref)
-    d_random = materials.random_incidence_diffusion(d)
-    return materials.directional_diffusion_spectrum(
-        _FREQS, d, normalized=d_n, random_incidence=d_random
-    )
+    weights = np.array(materials.TWO_DIMENSIONAL_SOURCE_WEIGHTS, dtype=float)
+    d = np.empty(_FREQS.size)
+    d_n = np.empty(_FREQS.size)
+    for k in range(_FREQS.size):
+        d_theta, d_theta_n = [], []
+        for source in _SOURCES:
+            spec = -source
+            d_s = materials.directional_diffusion_coefficient(
+                _polar_energy(_ANGLES, widths[k], peaks[k], spec)
+            )
+            d_ref = materials.directional_diffusion_coefficient(
+                _polar_energy(_ANGLES, 0.5 * widths[k], 60.0, spec)
+            )
+            d_theta.append(d_s)
+            d_theta_n.append(
+                float(materials.normalized_diffusion_coefficient(d_s, d_ref))
+            )
+        d[k] = materials.random_incidence_diffusion(d_theta, weights=weights)
+        d_n[k] = materials.random_incidence_diffusion(d_theta_n, weights=weights)
+    return materials.diffusion_spectrum(_FREQS, d, normalized=d_n)
 
 
 def _polar():
@@ -139,6 +149,8 @@ def test_scattering_displayed_values_match_oracle(tmp_path) -> None:
     assert "0.45" in text  # s(4000 Hz) = 0.454 -> 0.45
     assert "500" in text and "4000" in text  # band labels
     assert "Acoustic Test Client Ltd." in text  # metadata
+    # The reverberation-room fields belong to the ISO 17497-1 scattering fiche.
+    assert "Sample area" in text and "Room volume" in text
 
 
 def test_scattering_verbose_shows_alpha_spec_one_page(tmp_path) -> None:
@@ -192,21 +204,29 @@ def test_diffusion_writes_one_page_pdf(tmp_path) -> None:
 
 
 def test_diffusion_displayed_values_match_oracle(tmp_path) -> None:
-    """The fiche prints the Formula (5) d(f) and the random-incidence note."""
+    """The fiche prints the per-band random-incidence d (Clause 8.4)."""
     out = tmp_path / "diff.pdf"
     _diffusion_spectrum().report(str(out), metadata=_metadata())
     text = _text(str(out))
-    assert "0.54" in text  # d(500 Hz) = 0.542 -> 0.54
-    assert "0.88" in text  # d(4000 Hz) = 0.881 -> 0.88
-    assert "0.59" in text  # random-incidence d (Clause 8.4)
+    assert "0.51" in text  # d(500 Hz) = 0.506 -> 0.51
+    assert "0.81" in text  # d(4000 Hz) = 0.807 -> 0.81
     assert "500" in text and "4000" in text  # band labels
+
+
+def test_diffusion_omits_room_fields(tmp_path) -> None:
+    """The free-field diffusion fiche must not show sample area / room volume."""
+    out = tmp_path / "diff.pdf"
+    _diffusion_spectrum().report(str(out), metadata=_metadata())
+    text = _text(str(out))
+    assert "Sample area" not in text
+    assert "Room volume" not in text
 
 
 def test_diffusion_verbose_shows_normalized_one_page(tmp_path) -> None:
     out = tmp_path / "diff_v.pdf"
     _diffusion_spectrum().report(str(out), metadata=_metadata(), verbose=True)
     _assert_one_page(str(out))
-    assert "0.39" in _text(str(out))  # d_n(500 Hz) = 0.394 -> 0.39
+    assert "0.35" in _text(str(out))  # d_n(500 Hz) = 0.347 -> 0.35
 
 
 def test_diffusion_unknown_engine_rejected(tmp_path) -> None:
@@ -220,7 +240,7 @@ def test_diffusion_spanish_uses_comma_decimal(tmp_path) -> None:
     out = tmp_path / "diff_es.pdf"
     _diffusion_spectrum().report(str(out), metadata=_metadata(), language="es")
     _assert_one_page(str(out))
-    assert "0,88" in _text(str(out))
+    assert "0,81" in _text(str(out))
 
 
 # --- ISO 17497-2 polar response -------------------------------------------

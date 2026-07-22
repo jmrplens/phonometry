@@ -45,8 +45,8 @@ from phonometry.materials.scattering_diffusion import (
     base_plate_scattering,
     check_base_plate_scattering,
     directional_diffusion,
+    diffusion_spectrum,
     directional_diffusion_coefficient,
-    directional_diffusion_spectrum,
     normalized_diffusion_coefficient,
     random_incidence_absorption,
     random_incidence_diffusion,
@@ -543,34 +543,30 @@ def test_directional_diffusion_plot_returns_axes() -> None:
     plt.close("all")
 
 
-def test_directional_diffusion_spectrum_builds_and_carries_fields() -> None:
+def test_diffusion_spectrum_builds_and_carries_fields() -> None:
     freqs = [250.0, 500.0, 1000.0]
     d = [0.3, 0.5, 0.7]
     d_n = [0.2, 0.4, 0.6]
-    result = directional_diffusion_spectrum(
-        freqs, d, normalized=d_n, random_incidence=0.5
-    )
+    result = diffusion_spectrum(freqs, d, normalized=d_n)
     assert isinstance(result, DiffusionSpectrum)
     np.testing.assert_allclose(result.frequencies, freqs)
     np.testing.assert_allclose(result.diffusion, d)
     np.testing.assert_allclose(result.normalized, d_n)
-    assert result.random_incidence == pytest.approx(0.5)
 
 
-def test_directional_diffusion_spectrum_optional_fields_default_none() -> None:
-    result = directional_diffusion_spectrum([250.0, 500.0], [0.3, 0.5])
+def test_diffusion_spectrum_optional_fields_default_none() -> None:
+    result = diffusion_spectrum([250.0, 500.0], [0.3, 0.5])
     assert result.normalized is None
-    assert result.random_incidence is None
 
 
-def test_directional_diffusion_spectrum_length_mismatch_raises() -> None:
+def test_diffusion_spectrum_length_mismatch_raises() -> None:
     with pytest.raises(ValueError, match="non-empty, 1-D and equal-length"):
-        directional_diffusion_spectrum([250.0, 500.0], [0.3])
+        diffusion_spectrum([250.0, 500.0], [0.3])
 
 
-def test_directional_diffusion_spectrum_normalized_mismatch_raises() -> None:
+def test_diffusion_spectrum_normalized_mismatch_raises() -> None:
     with pytest.raises(ValueError, match="'normalized' must match"):
-        directional_diffusion_spectrum(
+        diffusion_spectrum(
             [250.0, 500.0], [0.3, 0.5], normalized=[0.2]
         )
 
@@ -581,7 +577,7 @@ def test_diffusion_spectrum_plot_returns_axes() -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    result = directional_diffusion_spectrum(
+    result = diffusion_spectrum(
         [250.0, 500.0, 1000.0], [0.3, 0.5, 0.7], normalized=[0.2, 0.4, 0.6]
     )
     ax = result.plot()

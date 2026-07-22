@@ -271,15 +271,18 @@ plt.show()
 </details>
 
 **Test-report fiche.** Collected across the one-third-octave bands, the
-directional diffusion coefficient $d(f)$ forms a `DiffusionSpectrum`
-(`materials.directional_diffusion_spectrum(freqs, d, ...)`), whose
-`report(path)` renders a one-page diffusion test report (ISO 17497-2,
-Clause 8.5): the per-band table of $d$ beside the $d(f)$ band-axis curve, with
-the random-incidence value $d$ (Clause 8.4) boxed. `verbose=True` adds the
-normalised $d_n$ column. A single band's polar response is itself reportable
-through `DiffusionResult.report(path)`.
+diffusion coefficient $d(f)$ forms a `DiffusionSpectrum`
+(`materials.diffusion_spectrum(freqs, d, ...)`), whose `report(path)` renders a
+one-page diffusion test report (ISO 17497-2, Clause 8.5): the per-band table of
+$d$ beside the $d(f)$ band-axis curve, with a boxed characterisation headline.
+Per Clause 8.4 the random-incidence coefficient is itself a per-band quantity,
+the average of the directional coefficients over the source positions band by
+band (not a mean across frequency). `verbose=True` adds the normalised $d_n$
+column to the table (the curve always draws $d_n$ as a companion when present).
+A single band's polar response is itself reportable through
+`DiffusionResult.report(path)`.
 
-[![ISO 17497-2 diffusion example report: a metadata header, the per-one-third-octave table of the diffusion coefficient beside the d(f) band-axis curve with the normalised d_n companion, and the boxed random-incidence diffusion coefficient over the tested frequency range](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_example.pdf)
+[![ISO 17497-2 diffusion example report: a metadata header, the per-one-third-octave table of the diffusion coefficient d beside the d(f) band-axis curve (with the normalised d_n drawn as a companion curve), and the boxed characterisation headline over the tested frequency range](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_diffusion_example.pdf)
 
 ## Scattering or diffusion? Two coefficients, two jobs
 

@@ -33,16 +33,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   table of the random-incidence absorption `alpha_s` and the scattering
   coefficient `s` beside the `s(f)` curve on a categorical band axis, and a
   boxed characterisation headline; `verbose=True` adds the specular absorption
-  `alpha_spec` column. The diffusion-spectrum fiche tabulates the directional
-  diffusion coefficient `d` per band beside the `d(f)` band-axis curve, boxing
-  the random-incidence value `d` (Clause 8.4); `verbose=True` adds the
-  normalised `d_n` column. The polar-response fiche tabulates the corrected
-  reflected level `L` per receiver angle beside the semicircular polar plot,
-  boxing the directional diffusion coefficient. ISO 17497 is a characterisation,
-  so there is no pass/fail verdict. `language="es"` renders the Spanish fiche.
-  A new `DiffusionSpectrum` result (and its `directional_diffusion_spectrum`
-  constructor) carries the diffusion coefficient across the measured bands, with
-  `.plot()` and `.report()`.
+  `alpha_spec` column. The diffusion-spectrum fiche tabulates the diffusion
+  coefficient `d` per band beside the `d(f)` band-axis curve (the per-band
+  random-incidence coefficient being the average of the directional coefficients
+  over the source positions, Clause 8.4); `verbose=True` adds the normalised
+  `d_n` column. The polar-response fiche tabulates the corrected reflected level
+  `L` per receiver angle beside the semicircular polar plot, boxing the
+  directional diffusion coefficient. ISO 17497 is a characterisation, so there
+  is no pass/fail verdict. `language="es"` renders the Spanish fiche. A new
+  `DiffusionSpectrum` result (and its `diffusion_spectrum` constructor) carries
+  the diffusion coefficient across the measured bands, with `.plot()` and
+  `.report()`.
 - `ToneAudibilityResult.report()`: a one-page PDF tonal audibility assessment
   fiche rendered through the shared accredited-report engine, following the
   ISO 1996-2:2017 Annex J engineering method (ISO/PAS 20065:2016). The sheet

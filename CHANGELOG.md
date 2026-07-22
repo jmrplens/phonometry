@@ -72,6 +72,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the metadata `requirement` adds a PASS/FAIL verdict (a higher SII passes).
   `verbose=True` adds the equivalent disturbance spectrum level `Di` column;
   `language="es"` renders the Spanish fiche.
+- Noise-control performance reports via `.report()` on the three
+  `noise_control` result types, each a one-page PDF laid out with a per-band
+  table beside the result's own plot, a boxed single-number performance figure
+  and an optional PASS/FAIL verdict:
+  - `EnclosureResult.report()`: a machine-enclosure insertion-loss fiche (Bies,
+    Hansen & Howard, Engineering Noise Control 5th ed., section 7.4.2). The
+    per-band table lists the supplied panel transmission loss `R`, the interior
+    build-up correction `C` and the net insertion loss `IL = R - C`; the boxed
+    figure is the mean insertion loss over the analysis bands with the external
+    and internal surface areas. A declared minimum via the metadata
+    `requirement` passes when the mean insertion loss meets it (more is
+    better); `verbose=True` adds the interior room constant `R_i` column.
+  - `ReactiveSilencerResult.report()`: a reactive-silencer transmission-loss
+    fiche (Munjal, Acoustics of Ducts and Mufflers 2nd ed., Eq. (3.27); Bies,
+    Hansen & Howard, sections 8.8-8.9). The per-band table lists the
+    transmission loss `TL` and, when end impedances were supplied, the
+    insertion loss `IL`; the boxed figure is the mean transmission loss with
+    the peak transmission loss and the device kind. A declared minimum passes
+    when the mean transmission loss meets it (more is better).
+  - `HvacSpectrumResult.report()`: an HVAC duct-noise-spectrum fiche (Bies,
+    Hansen & Howard, Chapter 8; VDI 2081-1). A regenerated-noise spectrum boxes
+    the A-weighted sound power level `L_WA` (dB(A) re 1 pW) with the overall
+    unweighted total, and a declared limit passes at or below it (lower is
+    better); an attenuation spectrum boxes the mean attenuation, and a declared
+    minimum passes at or above it. `verbose=True` adds the A-weighting
+    correction and A-weighted band-level columns for a regenerated-noise
+    spectrum.
+
+  All three accept an optional metadata header (client, equipment, test
+  environment, instrumentation, climate, date), state their method basis, and
+  render in English or Spanish (`language="es"`).
 - `StructureBornePowerResult.report()`: a one-page PDF structure-borne sound
   power characterization fiche for the power a piece of building service
   equipment injects into a reception plate (EN 15657:2018 reception-plate

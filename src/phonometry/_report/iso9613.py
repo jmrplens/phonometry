@@ -72,6 +72,9 @@ else:  # pragma: no cover - runtime alias only
 #: Reference distance ``d0`` in the divergence term (ISO 9613-2:1996, Eq. (7)).
 _D0 = 1.0
 
+#: The frequency-column header (English key), shared by both per-band tables.
+_FREQ_HEADER = "f [Hz]"
+
 
 class _AttenuationLevels(NamedTuple):
     """The per-band source power ``Lw``, downwind level ``LfT`` and A-weighting.
@@ -195,10 +198,10 @@ def _attenuation_table(
         "A<sub>bar</sub>", "A [dB]",
     ]
     if levels is None:
-        headers = [t("f [Hz]", language), *term_headers]
+        headers = [t(_FREQ_HEADER, language), *term_headers]
         widths = [26.0, 29.0, 29.0, 29.0, 29.0, 30.0]
     else:
-        headers = [t("f [Hz]", language), "L<sub>w</sub> [dB]", *term_headers,
+        headers = [t(_FREQ_HEADER, language), "L<sub>w</sub> [dB]", *term_headers,
                    "L<sub>fT</sub> [dB]"]
         widths = [22.0, 20.0, 20.0, 20.0, 20.0, 20.0, 22.0, 24.0]
         if verbose:
@@ -487,7 +490,7 @@ def _barrier_table(
     il = np.asarray(result.insertion_loss, dtype=np.float64)
     n = np.asarray(result.fresnel_number, dtype=np.float64)
 
-    headers = [t("f [Hz]", language), "IL [dB]"]
+    headers = [t(_FREQ_HEADER, language), "IL [dB]"]
     widths = [22.0, 24.0]
     if verbose:
         headers.insert(1, "N")

@@ -381,6 +381,48 @@ def _impact_prediction_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso12354_impact_prediction_example.pdf"
 
 
+def _facade_prediction_example() -> Tuple[object, ReportMetadata, str]:
+    """Facade prediction fiche: EN 12354-3 Annex F worked example.
+
+    An 11.3 m2 facade (receiving-room volume V = 50 m3, flat so ΔLfs = 0) of a
+    masonry wall, a window, a small roof light and an acoustically treated air
+    inlet (a Dn,e small element); energetically combining the elements'
+    transmission factors (Formula 10) and the room geometry (Formula 13) gives
+    D2m,nT,w = 33 dB (with R'tr,s,w = 31, Ctr = -3). The element set and its
+    single-number ratings are the standard's own worked example, run through the
+    tested prediction code (see tests/reference_data.py).
+    """
+    elements = [
+        ph.building.FacadeElement("Masonry wall", area=6.0, r=[41, 46, 52, 58, 64]),
+        ph.building.FacadeElement("Glazing", area=4.5, r=[23, 22, 30, 36, 37]),
+        ph.building.FacadeElement("Roof light", area=0.5, r=[24, 27, 30, 33, 30]),
+        ph.building.FacadeElement("Air inlet", dn_e=[28, 23, 25, 38, 44]),
+    ]
+    result = ph.building.facade_sound_reduction(
+        elements, area=11.3, volume=50.0,
+        frequencies=[125, 250, 500, 1000, 2000], bands="octave",
+    )
+    metadata = ReportMetadata(
+        specimen="Masonry wall + window + roof light + air inlet (Annex F)",
+        client="Example client",
+        area=11.3,
+        receiving_volume=50.0,
+        test_room="Road-traffic facade, flat reflecting (ΔLfs = 0 dB)",
+        measurement_standard="EN/ISO 12354-3",
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-12354-3",
+        notes=(
+            "Envelope: masonry wall Rw = 52, window 30, roof light 30, air "
+            "inlet Dn,e (small element). Flat facade, ΔLfs = 0 dB (Annex C). "
+            "Energy summation of transmission factors (Formula 10 / 13)."
+        ),
+        requirement=30.0,
+    )
+    return result, metadata, "iso12354_facade_prediction_example.pdf"
+
+
 def _floor_covering_example() -> Tuple[object, ReportMetadata, str]:
     """Floor-covering fiche: an ISO 16251-1 impact-improvement measurement.
 
@@ -1640,6 +1682,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _intensity_example,
     _airborne_prediction_example,
     _impact_prediction_example,
+    _facade_prediction_example,
     _floor_covering_example,
     _absorption_example,
     _sound_absorption_example,

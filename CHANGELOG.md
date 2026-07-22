@@ -25,6 +25,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the ISO 3745 precision result carries no `K1`/`K2`, so its basis strip states
   the meteorological corrections (`C1`/`C2`/`C3`) instead. `language="es"`
   renders the Spanish fiche.
+- `LabAirborneInsulationResult.report()` and `LabImpactInsulationResult.report()`:
+  the one-page laboratory sound-insulation test report of ISO 10140-2:2010
+  (airborne sound reduction index `R`) and ISO 10140-3:2010 (normalized impact
+  sound pressure level `Ln`), rendered to PDF and laid out like the accredited
+  laboratory reports rated per ISO 717. The sheet carries the standard-basis
+  line, an optional metadata header (client, specimen, mounting, sample area,
+  room volumes, climatic conditions), the one-third-octave (or octave) table
+  beside the measured-versus-shifted-reference curve, the boxed laboratory
+  rating `Rw (C; Ctr)` (ISO 717-1) or `Ln,w (CI)` (ISO 717-2) evaluated by the
+  existing weighted-rating engine, the statement that the evaluation rests on a
+  laboratory precision method, and a footer with the fixed disclaimer.
+  `verbose=True` annexes the per-band equivalent absorption area `A = 0,16 V/T`
+  (ISO 10140-4:2010) beside the reported quantity. A verdict row appears only
+  when a target is supplied through `metadata.requirement` (airborne passes at
+  or above it, impact at or below it). `language="es"` renders the Spanish
+  fiche with a comma decimal separator.
 - `standard_speech_spectra()` and the `StandardSpeechSpectrum` result: a thin,
   plottable wrapper around `standard_speech_spectrum()` (ANSI S3.5-1997 Table 3)
   that carries the 18 one-third-octave band centre frequencies and the standard

@@ -251,6 +251,9 @@ def test_facade_prediction_rating_pinned_to_annex_f(tmp_path) -> None:
     # Key model terms: the standardized level difference and the elements' R'.
     assert "D2m,nT" in text
     assert "Formula 13" in text
+    # The apparent-index values are stated, not just their labels (Annex F).
+    assert f"{ref.EN12354_3_ANNEX_F_RTRS_W} dB" in text  # R'tr,s,w = 31 dB
+    assert f"{ref.EN12354_3_ANNEX_F_CTR} dB" in text  # Ctr = -3 dB
     # A couple of the per-element weighted partial indices Rp,w from the table.
     assert "wall" in text
     assert "59" in text  # wall Rp,w

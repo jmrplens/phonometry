@@ -390,7 +390,7 @@ elements = [
 ]
 fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
                              frequencies=[125, 250, 500, 1000, 2000], bands="octave")
-print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (Rtr,s,w / Ctr / D2m,nT,w)
+print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (R'tr,s,w / Ctr / D2m,nT,w)
 ```
 
 <details>
@@ -453,7 +453,7 @@ de medición.
 ```python
 from phonometry import building, ReportMetadata
 
-# EN 12354-3 Anexo F, fachada -> D2m,nT,w = 33 dB (Rtr,s,w = 31, Ctr = -3).
+# EN 12354-3 Anexo F, fachada -> D2m,nT,w = 33 dB (R'tr,s,w = 31, Ctr = -3).
 elements = [
     building.FacadeElement("Masonry wall", area=6.0, r=[41, 46, 52, 58, 64]),
     building.FacadeElement("Glazing",      area=4.5, r=[23, 22, 30, 36, 37]),

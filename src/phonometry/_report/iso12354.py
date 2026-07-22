@@ -117,6 +117,7 @@ def _render_prediction_fiche(
     is_impact: bool,
     metadata: ReportMetadata | None,
     language: str,
+    basis_values: dict[str, str] | None = None,
 ) -> str:
     """Render a predicted-insulation fiche to a PDF at ``path``.
 
@@ -124,6 +125,10 @@ def _render_prediction_fiche(
     optional metadata header, a two-panel body (the left-hand model-term metrics
     table beside the result's own plot), the boxed single-number rating, the
     prediction statement, an optional requirement verdict and the footer.
+
+    ``basis_values`` fills ``{}`` placeholders in the (already translated) basis
+    line, so a fiche can state its computed apparent-index values in prose; pass
+    ``None`` when the basis line is a plain sentence.
     """
     try:
         from reportlab.lib import colors
@@ -136,9 +141,12 @@ def _render_prediction_fiche(
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title_text = t(title_key, language)
+    basis_text = t(basis_key, language)
+    if basis_values is not None:
+        basis_text = basis_text.format(**basis_values)
     flow: List[Any] = [
         Paragraph(title_text, title_style),
-        Paragraph(t(basis_key, language), basis_style),
+        Paragraph(basis_text, basis_style),
     ]
 
     # Metadata header grid (the same room/element grid the insulation fiches
@@ -366,7 +374,7 @@ def render_iso12354_facade_report(
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
     """
-    if result.d_2m_nt_w is None:
+    if result.d_2m_nt_w is None or result.r_tr_s_w is None or result.c_tr is None:
         raise ValueError(
             "A facade prediction report needs the ISO 717-1 single-number "
             "ratings: build the result on the 5 octave or 16 one-third-octave "
@@ -399,8 +407,9 @@ def render_iso12354_facade_report(
             "index R&#8242; combined energetically with the room geometry) "
             "estimated in accordance with EN/ISO 12354-3:2000 (simplified "
             "model, Formula 13). This is a prediction from element data, not a "
-            "measurement. D<sub>2m,nT,w</sub> (with R&#8242;<sub>tr,s,w</sub> "
-            "and C<sub>tr</sub>) per ISO 717-1."
+            "measurement. D<sub>2m,nT,w</sub> (with apparent index "
+            "R&#8242;<sub>tr,s,w</sub> = {rtrs} dB and C<sub>tr</sub> = {ctr} "
+            "dB) per ISO 717-1."
         ),
         rating_value=float(result.d_2m_nt_w),
         rating_symbol="D<sub>2m,nT,w</sub>",
@@ -409,4 +418,8 @@ def render_iso12354_facade_report(
         is_impact=False,
         metadata=metadata,
         language=language,
+        basis_values={
+            "rtrs": fmt_num(float(result.r_tr_s_w), language),
+            "ctr": fmt_num(float(result.c_tr), language),
+        },
     )

@@ -119,16 +119,14 @@ def render_noise_control_fiche(
     metadata: ReportMetadata | None,
     language: str,
     verdict: Tuple[str, bool] | None = None,
-    left_width_mm: float = 64.0,
-    plot_width_mm: float = 110.0,
-    figure_width_mm: float = 108.0,
 ) -> str:
     """Assemble the shared noise-control fiche flow and build the PDF at ``path``.
 
     The metadata header grid reuses the sound-power source/environment layout,
     and the requirement verdict is supplied pre-computed by each renderer (its
     quantity symbol and pass direction). The two-panel body puts the per-band
-    ``value_table`` on the left and the result's own ``plot`` on the right.
+    ``value_table`` on the left (a compact ~64 mm cell that fits the widest
+    four-column enclosure/HVAC table) and the result's own ``plot`` on the right.
 
     :param result: The noise-control result; its ``plot`` draws the right panel.
     :param title: The already-translated fiche title.
@@ -142,13 +140,13 @@ def render_noise_control_fiche(
         identity and (via each renderer) the requirement verdict.
     :param language: ``"en"`` (default) or ``"es"``.
     :param verdict: Optional pre-computed ``(text, passed)`` verdict row.
-    :param left_width_mm: Width of the left (table) panel, in mm.
-    :param plot_width_mm: Width of the right (plot) panel, in mm.
-    :param figure_width_mm: Target width of the embedded vector figure, in mm.
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
     """
+    # Fixed two-panel split, summing to the 174 mm content width: a compact
+    # table cell beside the plot, with the embedded figure just inside its cell.
+    left_width_mm, plot_width_mm, figure_width_mm = 64.0, 110.0, 108.0
     try:
         from reportlab.lib import colors
         from reportlab.lib.units import mm

@@ -299,10 +299,14 @@ def render_hvac_report(
     )
     verdict = None
     if metadata is not None and metadata.requirement is not None:
-        symbol = "L<sub>WA</sub>" if _is_power(result) and corrections is not None else (
-            "L<sub>W</sub>" if _is_power(result) else "D"
-        )
-        unit = "dB(A)" if _is_power(result) and corrections is not None else "dB"
+        a_weighted = _is_power(result) and corrections is not None
+        if a_weighted:
+            symbol = "L<sub>WA</sub>"
+        elif _is_power(result):
+            symbol = "L<sub>W</sub>"
+        else:
+            symbol = "D"
+        unit = "dB(A)" if a_weighted else "dB"
         verdict = performance_verdict(
             value, metadata.requirement, symbol,
             higher_is_better=higher_is_better, unit=unit, language=language,

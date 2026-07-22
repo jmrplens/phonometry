@@ -188,7 +188,7 @@ RLB high-pass; near 1 kHz it passes through the ~0.69 dB gain that the
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate the response is evaluated at, Hz (16 kHz or higher, as [`k_weighting_coefficients`](/phonometry/reference/api/broadcast/program-loudness/#k_weighting_coefficients) requires; default 48 kHz). |
-| `frequencies` | Explicit frequency grid, in Hz (each strictly between 0 and the Nyquist rate `fs/2`); `None` (the default) uses `n` log-spaced points from 10 Hz to the Nyquist rate. |
+| `frequencies` | Explicit frequency grid, in Hz (each in the half-open interval `(0, fs/2]`); `None` (the default) uses `n` log-spaced points from 10 Hz to the Nyquist rate. |
 | `n` | Number of log-spaced points when `frequencies` is `None` (default 512); ignored otherwise. |
 
 **Returns:** A frozen [`KWeightingResponse`](/phonometry/reference/api/broadcast/program-loudness/#kweightingresponse).

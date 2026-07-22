@@ -203,6 +203,15 @@ def test_k_weighting_response_plot() -> None:
     assert any("combined" in s for s in labels)
     # Spanish localises the title; unknown languages are rejected.
     assert "BS.1770" in res.plot(language="es").get_title()
+    # Passing an existing axes draws on it and returns that same axes.
+    _fig, ext = plt.subplots()
+    assert res.plot(ax=ext) is ext
+    # kwargs reach the combined-curve line.
+    styled = res.plot(color="magenta", linewidth=3.0)
+    assert any(
+        line.get_color() == "magenta" and line.get_linewidth() == 3.0
+        for line in styled.get_lines()
+    )
     with pytest.raises(ValueError):
         res.plot(language="fr")
     plt.close("all")

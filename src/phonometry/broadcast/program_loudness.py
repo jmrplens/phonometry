@@ -292,8 +292,8 @@ def k_weighting_response(
 
     :param fs: Sample rate the response is evaluated at, Hz (16 kHz or higher,
         as :func:`k_weighting_coefficients` requires; default 48 kHz).
-    :param frequencies: Explicit frequency grid, in Hz (each strictly between 0
-        and the Nyquist rate ``fs/2``); ``None`` (the default) uses ``n``
+    :param frequencies: Explicit frequency grid, in Hz (each in the half-open
+        interval ``(0, fs/2]``); ``None`` (the default) uses ``n``
         log-spaced points from 10 Hz to the Nyquist rate.
     :param n: Number of log-spaced points when ``frequencies`` is ``None``
         (default 512); ignored otherwise.

@@ -360,7 +360,7 @@ def atmospheric_attenuation(
     atmospheric conditions and bundles the result into an
     :class:`AtmosphericAttenuation` that exposes ``.plot()``. The maths is
     unchanged; this is a thin, plottable wrapper around the existing function
-    (same warnings and ``ValueError``\\ s apply).
+    (the same warnings and the same ``ValueError`` cases apply).
 
     :param frequencies: Frequency or frequencies ``f``, in hertz (array-like).
     :param temperature: Ambient air temperature, in degrees Celsius (default 20).
@@ -374,9 +374,14 @@ def atmospheric_attenuation(
     :param distance: Optional propagation distance ``d``, in metres. When given,
         the result's :attr:`~AtmosphericAttenuation.total_attenuation` returns
         the total attenuation ``A = alpha * d`` over that distance (ISO 9613-2
-        Eq. (8)).
+        Eq. (8)). Must be finite and non-negative.
     :return: A frozen :class:`AtmosphericAttenuation`.
+    :raises ValueError: If ``distance`` is negative or non-finite (NaN/inf).
     """
+    if distance is not None and (
+        not np.isfinite(distance) or distance < 0.0
+    ):
+        raise ValueError("'distance' must be a finite, non-negative number of metres.")
     freqs = np.asarray(frequencies, dtype=np.float64)
     alpha = air_attenuation(
         frequencies,

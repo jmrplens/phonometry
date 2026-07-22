@@ -158,7 +158,7 @@ Evaluates [`air_attenuation`](/phonometry/reference/api/environment/air-absorpti
 atmospheric conditions and bundles the result into an
 [`AtmosphericAttenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuation) that exposes `.plot()`. The maths is
 unchanged; this is a thin, plottable wrapper around the existing function
-(same warnings and `ValueError`\ s apply).
+(the same warnings and the same `ValueError` cases apply).
 
 **Parameters**
 
@@ -169,9 +169,15 @@ unchanged; this is a thin, plottable wrapper around the existing function
 | `relative_humidity` | Relative humidity, in percent (default 50). |
 | `pressure` | Ambient atmospheric pressure, in kilopascals (default 101,325). |
 | `exact_midband` | Snap the frequencies to the exact one-third-octave midbands `fm = 1000*10^(k/10)` (Eq. (6)) before evaluation; see [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation). When `True` the stored `frequencies` are the snapped midbands the coefficient was computed at. |
-| `distance` | Optional propagation distance `d`, in metres. When given, the result's [`total_attenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuationtotal_attenuation) returns the total attenuation `A = alpha * d` over that distance (ISO 9613-2 Eq. (8)). |
+| `distance` | Optional propagation distance `d`, in metres. When given, the result's [`total_attenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuationtotal_attenuation) returns the total attenuation `A = alpha * d` over that distance (ISO 9613-2 Eq. (8)). Must be finite and non-negative. |
 
 **Returns:** A frozen [`AtmosphericAttenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuation).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `distance` is negative or non-finite (NaN/inf). |
 
 ## AtmosphericAbsorptionWarning
 

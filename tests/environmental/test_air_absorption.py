@@ -243,12 +243,25 @@ def test_atmospheric_attenuation_matches_table1_cell() -> None:
 
 
 def test_atmospheric_attenuation_total_over_distance() -> None:
-    # total_attenuation is alpha (dB/m) times the distance (m): A = alpha * d.
+    # total_attenuation is alpha (dB/m) times the distance (m): A = alpha * d [dB].
     res = atmospheric_attenuation([1000.0, 4000.0], 20.0, 50.0, distance=200.0)
     np.testing.assert_allclose(
         res.total_attenuation, res.attenuation_coefficient * 200.0
     )
     assert res.distance == 200.0
+
+
+def test_atmospheric_attenuation_zero_distance_is_allowed() -> None:
+    # A zero-length path is degenerate but well defined: A = 0 everywhere.
+    res = atmospheric_attenuation([1000.0], 20.0, 50.0, distance=0.0)
+    np.testing.assert_allclose(res.total_attenuation, 0.0)
+
+
+@pytest.mark.parametrize("bad", [-1.0, -0.001, math.inf, -math.inf, math.nan])
+def test_atmospheric_attenuation_rejects_bad_distance(bad: float) -> None:
+    # A negative or non-finite distance is non-physical and raises.
+    with pytest.raises(ValueError, match="'distance' must be a finite"):
+        atmospheric_attenuation([1000.0], 20.0, 50.0, distance=bad)
 
 
 def test_atmospheric_attenuation_plot_returns_axes() -> None:
@@ -263,6 +276,10 @@ def test_atmospheric_attenuation_plot_returns_axes() -> None:
     assert isinstance(ax_en, Axes)
     assert ax_en.get_xlabel() == "Frequency [Hz]"
     assert "ISO 9613-1" in ax_en.get_title()
+    # Frequency axis is logarithmic; dB/km is already logarithmic, so the
+    # ordinate stays linear (semilogx, not loglog).
+    assert ax_en.get_xscale() == "log"
+    assert ax_en.get_yscale() == "linear"
 
     ax_es = res.plot(language="es")
     assert ax_es.get_xlabel() == "Frecuencia [Hz]"

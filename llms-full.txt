@@ -7653,9 +7653,9 @@ For a figure or a quick look, `atmospheric_attenuation()` wraps the same
 coefficient in a small `AtmosphericAttenuation` result. It carries the frequency
 grid, the coefficient $\alpha$ and the atmospheric conditions, and exposes
 `.plot()` for the classic $\alpha$-versus-frequency curve (drawn in dB/km, the
-Table 1 unit). Passing a `distance` also records the total attenuation
-$A = \alpha\,d$ over that path as `total_attenuation`, the ISO 9613-2 $A_{atm}$ of
-Eq. (8).
+Table 1 unit, on a linear ordinate over a logarithmic frequency axis). Passing a
+`distance` also records the total attenuation $A = \alpha\,d$, in decibels, over
+that path as `total_attenuation`, the ISO 9613-2 $A_{atm}$ of Eq. (8).
 
 ```python
 from phonometry import environmental
@@ -7667,11 +7667,11 @@ res = environmental.atmospheric_attenuation(
 res.plot()   # alpha in dB/km against frequency (needs matplotlib)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation.svg" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency on a log-log axis for the reference 20 degrees Celsius and 50 percent relative humidity atmosphere, produced by the AtmosphericAttenuation result plot method" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation.svg" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency, on a linear decibel ordinate over a logarithmic frequency axis, for the reference 20 degrees Celsius and 50 percent relative humidity atmosphere, produced by the AtmosphericAttenuation result plot method" width="80%"></picture>
 
-*At the reference 20 °C / 50 % RH atmosphere $\alpha$ rises from well under
-0.1 dB/km at 50 Hz to over 100 dB/km at 10 kHz, the $f^2$ growth bending through
-the relaxation region.*
+*On a linear decibel ordinate the coefficient stays near zero up to about
+1 kHz and then climbs steeply, passing 20 dB/km near 3 kHz and reaching over
+150 dB/km by 10 kHz at the reference 20 °C / 50 % RH atmosphere.*
 
 <details>
 <summary>Show the code for this figure</summary>

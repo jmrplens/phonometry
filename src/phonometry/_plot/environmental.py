@@ -124,8 +124,10 @@ def plot_atmospheric_attenuation(
     rh_str = decimal_comma(f"{result.relative_humidity:g}", language)
     rh_unit = "% HR" if language == "es" else "% RH"
     label = f"{t_str} °C, {rh_str} {rh_unit}"
-    ax.loglog(freqs, alpha_km, **{"color": _C_PRIMARY, "lw": 1.8,
-                                  "label": label, **kwargs})
+    # dB/km is already a logarithmic quantity, so the ordinate stays linear;
+    # only the frequency axis is logarithmic (semilogx + format_frequency_axis).
+    ax.semilogx(freqs, alpha_km, **{"color": _C_PRIMARY, "lw": 1.8,
+                                    "label": label, **kwargs})
     fmin, fmax = float(freqs.min()), float(freqs.max())
     ax.set_xlim(fmin, fmax)
     format_frequency_axis(ax, fmin, fmax)

@@ -183,9 +183,10 @@ Para una figura o un vistazo rápido, `atmospheric_attenuation()` envuelve el
 mismo coeficiente en un pequeño resultado `AtmosphericAttenuation`. Lleva la
 rejilla de frecuencias, el coeficiente $\alpha$ y las condiciones atmosféricas, y
 expone `.plot()` para la clásica curva de $\alpha$ frente a la frecuencia
-(dibujada en dB/km, la unidad de la Tabla 1). Pasar una `distance` también
-registra la atenuación total $A = \alpha\,d$ sobre ese trayecto como
-`total_attenuation`, el $A_{atm}$ de la ISO 9613-2 (Ec. (8)).
+(dibujada en dB/km, la unidad de la Tabla 1, con ordenada lineal sobre un eje de
+frecuencia logarítmico). Pasar una `distance` también registra la atenuación
+total $A = \alpha\,d$, en decibelios, sobre ese trayecto como `total_attenuation`,
+el $A_{atm}$ de la ISO 9613-2 (Ec. (8)).
 
 ```python
 from phonometry import environmental
@@ -194,14 +195,15 @@ res = environmental.atmospheric_attenuation(
     [63, 125, 250, 500, 1000, 2000, 4000, 8000],
     temperature=20.0, relative_humidity=50.0,
 )
-res.plot()   # alpha en dB/km frente a la frecuencia (requiere matplotlib)
+res.plot(language="es")   # alpha en dB/km frente a la frecuencia (requiere matplotlib)
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation_es.svg" alt="Coeficiente de atenuación atmosférica de tono puro alfa de la ISO 9613-1 en dB/km frente a la frecuencia en un eje log-log para la atmósfera de referencia de 20 grados Celsius y 50 por ciento de humedad relativa, producido por el método plot del resultado AtmosphericAttenuation" width="80%" loading="lazy" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/atmospheric_attenuation_es.svg" alt="Coeficiente de atenuación atmosférica de tono puro alfa de la ISO 9613-1 en dB/km frente a la frecuencia, con ordenada lineal en decibelios sobre un eje de frecuencia logarítmico, para la atmósfera de referencia de 20 grados Celsius y 50 por ciento de humedad relativa, producido por el método plot del resultado AtmosphericAttenuation" width="80%" loading="lazy" />
 
-*En la atmósfera de referencia de 20 °C / 50 % HR $\alpha$ sube desde bastante
-menos de 0,1 dB/km a 50 Hz hasta más de 100 dB/km a 10 kHz, con el crecimiento
-$f^2$ doblándose a través de la región de relajación.*
+*En una ordenada lineal de decibelios el coeficiente permanece cerca de cero
+hasta alrededor de 1 kHz y luego sube con fuerza, superando 20 dB/km cerca de
+3 kHz y alcanzando más de 150 dB/km a 10 kHz en la atmósfera de referencia de
+20 °C / 50 % HR.*
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -215,7 +217,7 @@ from phonometry import environmental
 res = environmental.atmospheric_attenuation(
     np.geomspace(50.0, 10000.0, 400), temperature=20.0, relative_humidity=50.0,
 )
-res.plot()
+res.plot(language="es")
 plt.show()
 
 # O a mano desde air_attenuation (dB/m, escala por 1000 para dB/km):

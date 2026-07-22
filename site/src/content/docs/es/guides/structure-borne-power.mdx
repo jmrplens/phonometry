@@ -27,6 +27,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Los equipos de servicio del edificio (bombas, ventiladores, calderas, aparatos
 sanitarios) inyectan **potencia sonora estructural** en la estructura del
@@ -182,6 +183,68 @@ El homólogo directo del lado de la fuente es el nivel de velocidad libre de
 ISO 9611 (re `v₀ = 5·10⁻⁸ m/s`) medido en los puntos de contacto de maquinaria
 montada elásticamente; su media por posiciones de la ecuación (9) es
 `mean_free_velocity_level()`.
+
+## 4. El informe de caracterización (`.report()`)
+
+Una caracterización termina como un *documento*. El
+`StructureBornePowerResult` expone un método `.report()` que escribe una ficha
+PDF de una página con el formato de una hoja de potencia acústica: la línea de
+base normativa que nombra el método de la placa de recepción de la
+EN 15657:2018 (Fórmula 14), una cabecera de metadatos opcional (cliente, equipo
+fuente, entorno de ensayo, instrumentación, clima, fecha), una tabla por bandas
+(frecuencia nominal de octava/tercio de octava, el nivel de velocidad medio
+espacial de la placa $L_v$ y el nivel de potencia acústica estructural inyectado
+$L_{Ws}$), el espectro $L_{Ws}(f)$ con un eje de bandas nominal, y el total
+sumado en bandas $L_{Ws}$ (dB re 1 pW) recuadrado, con la masa por unidad de
+área de la placa $m$ y el área $S$.
+
+Los metadatos se aportan mediante un `ReportMetadata`, cuyos campos aplicables
+aquí son el **equipo fuente** (`specimen`), el **entorno de ensayo**
+(`test_room`), el **cliente**, la **instrumentación**, la **temperatura**, la
+**humedad relativa** y la **presión ambiente**, la **fecha del ensayo**
+(`test_date`) y la identidad del pie (`laboratory`, `operator`, `report_id`,
+`notes`); la masa y el área de la placa provienen del propio resultado. Aportar
+`requirement` añade un veredicto PASS/FAIL frente a un límite superior declarado
+sobre el total $L_{Ws}$ (una emisión de potencia es una magnitud donde menos es
+mejor, así que la fuente cumple en el límite o por debajo). `verbose=True` añade
+la columna del factor de pérdidas de la placa $\eta$ a la tabla.
+`language="es"` genera la ficha en español con comas decimales. La franja de
+base recuerda que el nivel inyectado en la placa debe convertirse a las
+magnitudes de fuente independientes de la placa (Fórmulas 15/17) antes de
+alimentar la EN 12354-5.
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, reception_plate_power
+
+freqs = np.array([125, 250, 500, 1000, 2000, 4000], float)
+lv = np.array([88.0, 90, 86, 82, 78, 73])   # nivel de velocidad medio de la placa [dB]
+res = reception_plate_power(
+    lv, freqs, mass_per_area=25.0, area=1.2, reverberation_time=0.3,
+)
+
+res.report(
+    "structure_borne_power.pdf",
+    metadata=ReportMetadata(
+        client="Example building services contractor",
+        specimen="Circulation pump (wall-mounted)",
+        test_room="Reception-plate test rig (heavy concrete plate)",
+        laboratory="Phonometry reference example",
+        report_id="EXAMPLE-15657",
+    ),
+    language="es",
+)   # total L_Ws ~ 65 dB re 1 pW
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; pulsa la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="en15657_structure_borne_power_example"
+	title="Informe de ejemplo de potencia acústica estructural EN 15657 (PDF)"
+	description="Ficha de una página de potencia acústica estructural por el método de la placa de recepción de la EN 15657:2018: una cabecera con el cliente, el equipo fuente, el banco de placa de recepción y el acelerometro y el clima, la tabla en bandas de octava (125 Hz a 4 kHz) de los niveles de velocidad medios de la placa Lv y los niveles de potencia acústica estructural inyectados L_Ws, el espectro L_Ws(f) con un eje de bandas nominal, y el total sumado en bandas L_Ws (dB re 1 pW) recuadrado con la masa por unidad de área de la placa m = 25 kg/m2 y el área S = 1,20 m2, cerrada por una franja de base con la relación de la Fórmula 14 y la conversión a las magnitudes de fuente independientes de la placa requerida antes de la EN 12354-5."
+	caption="Ficha de potencia acústica estructural (StructureBornePowerResult.report), una caracterización por placa de recepción EN 15657 con el total L_Ws recuadrado."
+/>
 
 ## Véase también
 

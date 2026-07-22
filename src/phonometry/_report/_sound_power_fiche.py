@@ -202,6 +202,30 @@ def power_verdict(
     return text, passed
 
 
+def level_limit_verdict(
+    value: float, requirement: float, symbol: str, language: str = "en"
+) -> Tuple[str, bool]:
+    """Verdict text and PASS flag for a level against a declared upper limit.
+
+    A generic lower-is-better comparison (a power or normalised-level emission
+    passes at or below the declared limit), stated for the quantity ``symbol``
+    (already markup, e.g. ``L<sub>Ws</sub>``). The comparison uses the displayed
+    (one-decimal) value so the printed number cannot contradict the verdict at
+    the boundary. Shared by the structure-borne fiches (EN 15657 injected power,
+    EN 12354-5 installed prediction), whose symbols differ from the airborne
+    ``L<sub>WA</sub>``/``L<sub>W</sub>`` handled by :func:`power_verdict`.
+    """
+    passed = math.isfinite(value) and display_round(value) <= requirement
+    text = t(
+        "{sym} = {value} dB, declared limit &#8804; {req} dB", language
+    ).format(
+        sym=symbol,
+        value=d1(value, language),
+        req=format_number(requirement, language, decimals=1),
+    )
+    return text, passed
+
+
 def fraction_caption(result: Any, language: str = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
@@ -284,6 +308,7 @@ def render_sound_power_fiche(
     basis_strips: Sequence[str],
     metadata: ReportMetadata | None,
     language: str,
+    verdict: Tuple[str, bool] | None = None,
 ) -> str:
     """Assemble the shared sound-power fiche flow and build the PDF at ``path``.
 
@@ -306,6 +331,11 @@ def render_sound_power_fiche(
     :param metadata: Optional :class:`ReportMetadata` for the header, the
         requirement verdict and the footer identity.
     :param language: ``"en"`` (default) or ``"es"``.
+    :param verdict: Optional pre-computed ``(text, passed)`` verdict; when
+        given it replaces the default airborne sound-power requirement
+        comparison, so a caller with a different quantity symbol (the
+        structure-borne fiches) can state its own. ``None`` uses the
+        :func:`power_verdict` fallback when a ``requirement`` is supplied.
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
@@ -347,7 +377,13 @@ def render_sound_power_fiche(
     flow.append(Spacer(1, 8))
 
     flow.append(result_box(statement, styles, accent, extended))
-    if metadata is not None and metadata.requirement is not None:
+    # A caller may supply its own verdict (its quantity symbol and sign rule);
+    # otherwise the airborne sound-power fiches fall back to the L_WA/L_W
+    # requirement comparison. The two paths are mutually exclusive.
+    if verdict is not None:
+        text, passed = verdict
+        flow.extend(verdict_flow(text, passed, styles, language))
+    elif metadata is not None and metadata.requirement is not None:
         text, passed = power_verdict(result, metadata.requirement, language)
         flow.extend(verdict_flow(text, passed, styles, language))
 

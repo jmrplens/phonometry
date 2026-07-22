@@ -151,6 +151,59 @@ The direct source-side counterpart is the ISO 9611 free velocity level (re
 `v₀ = 5·10⁻⁸ m/s`) measured at the contact points of resiliently mounted
 machinery; its equation (9) position average is `mean_free_velocity_level()`.
 
+## 4. The characterization report (`.report()`)
+
+A characterization ends as a *document*. `StructureBornePowerResult.report(path)`
+writes a one-page PDF fiche laid out like a sound-power test sheet: the
+standard-basis line naming the EN 15657:2018 reception-plate method (Formula
+14), an optional metadata header (client, source equipment, test environment,
+instrumentation, climate, date), a per-band table (nominal
+octave/one-third-octave frequency, the spatial mean plate velocity level `Lv`
+and the injected structure-borne sound power level `L_Ws`), the `L_Ws(f)`
+spectrum with a nominal band axis, and a boxed band-summed total `L_Ws` (dB re
+1 pW) with the plate mass per area `m` and area `S`.
+
+The relevant `ReportMetadata` fields are `client`, `specimen` (the source
+equipment), `test_room` (the test environment), `instrumentation`,
+`temperature`, `relative_humidity`, `pressure`, `test_date` and the footer
+identity `laboratory`, `operator`, `report_id` and `notes`; the plate mass and
+area come from the result itself. Supplying `requirement` adds a PASS/FAIL
+verdict against a declared upper limit on the total `L_Ws` (lower is better).
+`verbose=True` adds the plate loss factor `eta` column, and `language="es"`
+renders the Spanish fiche. The basis strip states Formula 14 and the conversion
+to the plate-independent source quantities (Formulae 15/17) required before
+EN 12354-5. Rendering needs the optional `phonometry[report]` extra (reportlab),
+plus matplotlib for the spectrum.
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, reception_plate_power
+
+freqs = np.array([125, 250, 500, 1000, 2000, 4000], float)
+lv = np.array([88.0, 90, 86, 82, 78, 73])   # spatial mean plate velocity level [dB]
+res = reception_plate_power(
+    lv, freqs, mass_per_area=25.0, area=1.2, reverberation_time=0.3,
+)
+res.report(
+    "structure_borne_power.pdf",
+    metadata=ReportMetadata(
+        client="Example building services contractor",
+        specimen="Circulation pump (wall-mounted)",
+        test_room="Reception-plate test rig (heavy concrete plate)",
+        laboratory="Phonometry reference example",
+        report_id="EXAMPLE-15657",
+    ),
+)   # total L_Ws ~ 65 dB re 1 pW
+```
+
+The rendered example fiche, regenerated with `make reports`, is kept in the
+repository. Click the preview to open the PDF:
+
+[![EN 15657 structure-borne sound power example report: a header with the client, the source equipment, the reception-plate test rig and the accelerometer and climate, the octave-band table (125 Hz to 4 kHz) of spatial mean plate velocity levels Lv and injected structure-borne sound power levels L_Ws, the L_Ws(f) spectrum with a nominal band axis, and the boxed band-summed total L_Ws (dB re 1 pW) with the plate mass per area m = 25 kg/m2 and area S = 1.20 m2, closed by a basis strip stating the Formula 14 relation and the conversion to the plate-independent source quantities required before EN 12354-5](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/en15657_structure_borne_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/en15657_structure_borne_power_example.pdf)
+
+*Structure-borne sound power fiche (`StructureBornePowerResult.report`), an
+EN 15657 reception-plate characterization with the boxed total L_Ws.*
+
 ## References
 
 - Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne

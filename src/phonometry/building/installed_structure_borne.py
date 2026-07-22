@@ -48,6 +48,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike
 
 from .._internal.validation import require_positive
@@ -295,6 +297,61 @@ class InstalledSourceResult:
 
         check_language(language)
         return plot_installed_structure_borne(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an EN 12354-5 installed structure-borne prediction fiche.
+
+        Writes a one-page **prediction** sheet (an estimate, not a
+        measurement): a prediction-basis line naming EN 12354-5:2009, an
+        optional metadata header (client, source equipment, receiving room,
+        instrumentation, climate, date), a per-band table (nominal
+        octave/one-third-octave frequency, the installed structure-borne power
+        level ``L_Ws,inst``, each transmission path's normalised SPL
+        ``L_n,s,ij`` and the combined total ``L_n,s``), the per-path and total
+        ``L_n,s(f)`` spectra, the boxed band-summed total ``L_n,s`` (dB) with
+        the installed power total and the path count, an optional verdict row
+        against a declared limit, and a basis strip stating Formulae 18a/17 and
+        the prediction disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header (``client``, ``specimen`` the source equipment,
+            ``test_room`` the receiving room, ``instrumentation``,
+            ``temperature``, ``relative_humidity``, ``pressure``,
+            ``test_date``), the footer identity (``laboratory``, ``operator``,
+            ``report_id``, ``notes``) and, via ``requirement``, a declared
+            upper limit on the overall ``L_n,s`` (lower is better).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True`` the per-band table adds one column per
+            transmission path (up to five); otherwise only the installed power
+            and the combined total are shown.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab (or, for the figure, matplotlib) is
+            not installed (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.en12354_5 import render_installed_structure_borne_report
+
+        return render_installed_structure_borne_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def installed_source_prediction(

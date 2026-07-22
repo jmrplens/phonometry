@@ -129,6 +129,63 @@ with a band-by-band `εⱼ` determined from one reference measurement of the
 radiated power (ISO 9614 intensity), after which the velocity survey can be
 repeated cheaply on nominally identical machines.
 
+## 4. The measurement report (`.report()`)
+
+A determination ends as a *document*. `VibrationSoundPowerResult.report(path)`
+writes a one-page PDF fiche laid out like a sound-power test sheet: the
+standard-basis line naming the applied method (the ISO/TS 7849-1 survey method
+with a fixed radiation factor `ε = 1`, or the ISO/TS 7849-2 engineering method
+with a determined radiation factor), an optional metadata header (client,
+machine/source, test environment, instrumentation, climate, date), a per-band
+table (nominal octave/one-third-octave frequency, the surface vibratory
+velocity level `Lv` and the band sound-power level `LW`), the sound-power
+spectrum `LW(f)` with a nominal band axis, and a boxed A-weighted sound power
+level `LWA` (dB re 1 pW) with the total `LW`, the radiating area `S` and the
+applied method alongside.
+
+The relevant `ReportMetadata` fields are `client`, `specimen` (the
+machine/source), `test_room` (the test environment), `instrumentation`,
+`temperature`, `relative_humidity`, `pressure`, `test_date` and the footer
+identity `laboratory`, `operator`, `report_id` and `notes`; the radiating area
+`S` comes from the result itself. Supplying `requirement` adds a PASS/FAIL
+verdict against a declared A-weighted sound-power limit (lower is better).
+`verbose=True` adds the radiation factor `ε` column, and `language="es"`
+renders the Spanish fiche (comma decimals). Rendering needs the optional
+`phonometry[report]` extra (reportlab), plus matplotlib for the spectrum.
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, emission
+
+freqs = np.array([125, 250, 500, 1000, 2000, 4000], float)
+lv = np.array([78.0, 82, 85, 83, 79, 74])          # surface velocity level [dB]
+eps = np.array([0.20, 0.45, 0.75, 0.95, 1.00, 1.00])  # measured radiation factor
+res = emission.sound_power_from_vibration(
+    lv, area=1.6, radiation_factor=eps, frequencies=freqs,
+)
+res.report(
+    "vibration_sound_power.pdf",
+    metadata=ReportMetadata(
+        client="Example manufacturing plant",
+        specimen="Gearbox casing (steel panel)",
+        test_room="Machine hall (source vibration survey)",
+        instrumentation="Piezoelectric accelerometer (ISO 16063-21 calibration), s/n 0042",
+        laboratory="Phonometry reference example",
+        report_id="EXAMPLE-7849",
+        requirement=90.0,
+    ),
+)   # LWA = 88.7 dB(A) re 1 pW -> declared limit 90 dB(A): PASS
+```
+
+The rendered example fiche, regenerated with `make reports`, is kept in the
+repository. Click the preview to open the PDF:
+
+[![ISO/TS 7849 sound-power-from-vibration example report: a header with the client, the machine/source, the machine-hall test environment and the accelerometer and climate, the octave-band table (125 Hz to 4 kHz) of surface vibratory velocity levels Lv and radiated band sound-power levels LW, the sound-power spectrum LW(f) with a nominal band axis, the boxed A-weighted sound power level LWA = 88.7 dB(A) re 1 pW with the total LW = 90.0 dB, the radiating area S = 1.60 m2 and the engineering method, and a PASS verdict against the declared 90 dB(A) limit](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso7849_vibration_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso7849_vibration_power_example.pdf)
+
+*Sound power from vibration fiche (`VibrationSoundPowerResult.report`), an
+ISO/TS 7849-2 engineering-method determination with the measured radiation
+factor and the boxed LWA.*
+
 ## References
 
 - Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne

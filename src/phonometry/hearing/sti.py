@@ -25,6 +25,8 @@ import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+
+    from .._report.metadata import ReportMetadata
 from scipy import signal
 
 from .._internal.warnings import PhonometryWarning
@@ -117,6 +119,55 @@ class STIResult:
         from .._plot.hearing import plot_sti
 
         return plot_sti(self, ax=ax, language=check_language(language), **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an IEC 60268-16 speech-transmission-index fiche to a PDF.
+
+        Writes a one-page voice-alarm / public-address intelligibility
+        verification report: a standard-basis line stating the measurement
+        method (the full STI indirect method from an impulse response, or the
+        direct STIPA method on a recorded signal), an optional metadata header
+        block, a per-octave-band modulation transfer index table beside the
+        per-band MTI bars (the result's own :meth:`plot`), the boxed
+        ``STI = X`` single number with the Annex F qualification band, an
+        optional verdict row and a footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a bare fiche (body, result and disclaimer only). A supplied
+            ``requirement`` is read as the minimum required STI (a higher STI
+            passes).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for a uniform signature; it has no effect on
+            the single-layout STI fiche.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or
+            ``language`` is not a supported language.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.sti import render_sti_report
+
+        return render_sti_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def _rating(sti: float) -> str:

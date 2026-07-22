@@ -192,6 +192,49 @@ Plot the per-band MTI bars with the STI and rating letter.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### STIResult.report()
+
+```python
+STIResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an IEC 60268-16 speech-transmission-index fiche to a PDF.
+
+Writes a one-page voice-alarm / public-address intelligibility
+verification report: a standard-basis line stating the measurement
+method (the full STI indirect method from an impulse response, or the
+direct STIPA method on a recorded signal), an optional metadata header
+block, a per-octave-band modulation transfer index table beside the
+per-band MTI bars (the result's own `plot`), the boxed
+`STI = X` single number with the Annex F qualification band, an
+optional verdict row and a footer with the fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare fiche (body, result and disclaimer only). A supplied `requirement` is read as the minimum required STI (a higher STI passes). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for a uniform signature; it has no effect on the single-layout STI fiche. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is not a supported language. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
 ## STIWarning
 
 Warns about suspect STI/STIPA measurements or inputs.

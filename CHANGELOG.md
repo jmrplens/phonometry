@@ -21,6 +21,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   gains the per-band NC contour value read by the tangency method, or the
   reference RC Mark II curve and the measured deviation from it. The fiches
   render in English and Spanish (`language="es"`).
+- `STIResult.report()`: a one-page PDF speech-transmission-index fiche
+  (IEC 60268-16:2020) for verifying voice-alarm and public-address
+  intelligibility. The sheet carries a standard-basis line stating the
+  measurement method (the full STI indirect method from an impulse response, or
+  the direct STIPA method on a recorded signal), an optional metadata header
+  (client, system, manufacturer, test room, date), a per-octave-band table of
+  the modulation transfer index `MTI` beside the per-band MTI bars (the
+  result's own plot), and a boxed `STI = X` single number with the Annex F
+  qualification band. A minimum STI supplied via the metadata `requirement`
+  adds a PASS/FAIL verdict (a higher STI passes). `language="es"` renders the
+  Spanish fiche.
+- `SIIResult.report()`: a one-page PDF speech-intelligibility-index fiche
+  (ANSI S3.5-1997, one-third-octave-band method) for a speech-audibility
+  assessment. The sheet carries a standard-basis line, an optional metadata
+  header (client, listening condition, test room, date), a
+  per-one-third-octave-band table of the equivalent speech spectrum `Ei'`, the
+  Table 3 band-importance function `Ii` and the band-audibility function `Ai`
+  beside the audibility and importance-weighted contribution bars (the result's
+  own plot), and a boxed `SII = X` single number. A minimum SII supplied via
+  the metadata `requirement` adds a PASS/FAIL verdict (a higher SII passes).
+  `verbose=True` adds the equivalent disturbance spectrum level `Di` column;
+  `language="es"` renders the Spanish fiche.
 - `StructureBornePowerResult.report()`: a one-page PDF structure-borne sound
   power characterization fiche for the power a piece of building service
   equipment injects into a reception plate (EN 15657:2018 reception-plate

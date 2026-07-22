@@ -35,6 +35,8 @@ _STRINGS: dict[str, str] = {
     "Programme loudness compliance": "Conformidad de sonoridad de programa",
     "Aircraft noise certification - EPNL result": "Certificación de ruido de aeronaves - resultado EPNL",
     "Filter class compliance": "Conformidad de clase de filtro",
+    "Speech transmission index": "Índice de transmisión del habla",
+    "Speech intelligibility index": "Índice de inteligibilidad del habla",
     "Field airborne sound insulation between rooms": "Aislamiento acústico a ruido aéreo entre recintos in situ",
     "Field impact sound insulation of floors": "Aislamiento acústico a ruido de impactos de suelos in situ",
     "Laboratory airborne sound insulation of a building element": "Aislamiento acústico a ruido aéreo de un elemento constructivo en laboratorio",
@@ -177,6 +179,22 @@ _STRINGS: dict[str, str] = {
     "Normal-incidence sound absorption coefficient <b>&#945;</b>, {lo} Hz to {hi} Hz": "Coeficiente de absorción acústica a incidencia normal <b>&#945;</b>, {lo} Hz a {hi} Hz",
     # --- iso532 verdict ---------------------------------------------------
     "N = {value} sone, required &#8804; {req} sone": "N = {value} sone, exigido &#8804; {req} sone",
+    # --- sti (IEC 60268-16) speech transmission index --------------------
+    "{standard} speech transmission index. Rating per IEC 60268-16:2020 ({method}).": "{standard} índice de transmisión del habla. Índice según IEC 60268-16:2020 ({method}).",
+    "Speech transmission index per IEC 60268-16:2020 ({method}).": "Índice de transmisión del habla según IEC 60268-16:2020 ({method}).",
+    "full STI, indirect method": "STI completo, método indirecto",
+    "STIPA, direct method": "STIPA, método directo",
+    "System": "Sistema",
+    "Octave-band modulation transfer index MTI": "Índice de transferencia de modulación MTI por bandas de octava",
+    "Qualification band (IEC 60268-16 Annex F): {value}": "Banda de calificación (IEC 60268-16 Anexo F): {value}",
+    "Method: {method}": "Método: {method}",
+    "STI = {value}, required &#8805; {req}": "STI = {value}, exigido &#8805; {req}",
+    # --- sii (ANSI S3.5-1997) speech intelligibility index ---------------
+    "{standard} speech intelligibility index. Rating per ANSI S3.5-1997 (one-third-octave-band method).": "{standard} índice de inteligibilidad del habla. Índice según ANSI S3.5-1997 (método de bandas de tercio de octava).",
+    "Speech intelligibility index per ANSI S3.5-1997 (one-third-octave-band method).": "Índice de inteligibilidad del habla según ANSI S3.5-1997 (método de bandas de tercio de octava).",
+    "Listening condition": "Condición de escucha",
+    "One-third-octave band audibility": "Audibilidad por bandas de tercio de octava",
+    "SII = {value}, required &#8805; {req}": "SII = {value}, exigido &#8805; {req}",
     # --- broadcast --------------------------------------------------------
     "{target} LUFS &#177;{tol} LU (&#916; {delta} LU)": "{target} LUFS &#177;{tol} LU (&#916; {delta} LU)",
     "&#8804; {limit} dBTP": "&#8804; {limit} dBTP",

@@ -22,6 +22,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Un sistema de megafonía, un interfono, un aula reverberante: cada uno es un
 *canal de transmisión* entre la boca de quien habla y el oído de quien escucha,
@@ -214,6 +215,50 @@ Cada vía tiene modos de fallo que la norma hace explícitos:
 
 Ambas devuelven `STIResult`: `sti`, `mti` (7 bandas), `mtf` (7×14 o 7×2),
 `band_levels`, `rating` (letra del Anexo F, `A+`…`U`).
+
+### Informe IEC 60268-16 (`.report()`)
+
+`STIResult.report(path)` genera una ficha PDF de una página dispuesta como un
+informe de verificación de inteligibilidad de un sistema de megafonía o de
+alarma por voz: una línea de norma base que indica el método de medición (el
+método indirecto de STI completo a partir de una respuesta al impulso, o el
+método directo STIPA sobre una señal grabada), un bloque de metadatos
+opcional, una tabla del índice de transferencia de modulación MTI por bandas de
+octava junto a las barras de MTI por banda (el `.plot()` del propio resultado),
+el número único enmarcado `STI = X` con la banda de calificación del Anexo F,
+una fila de veredicto opcional y un pie con el descargo fijo. Usa el mismo
+contenedor `ReportMetadata` y el mismo motor que la
+[ficha de aislamiento de ISO 717](/phonometry/es/guides/insulation-field/#informe-de-iso-717-report);
+un `requirement` indicado se interpreta como el STI mínimo exigido (un STI mayor
+cumple). La generación necesita reportlab (`pip install phonometry[report]`);
+solo se admite `engine="reportlab"`. Pasa `language="es"` para la ficha en
+español.
+
+```python
+from phonometry import hearing, ReportMetadata
+
+res = hearing.sti_from_impulse_response(ir, fs)
+res.report(
+    "sti_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Línea de altavoces de alarma por voz en vestíbulo",
+        measurement_standard="IEC 60268-16",
+        laboratory="Laboratorio de referencia Phonometry",
+        requirement=0.5,             # STI mínimo exigido (un STI mayor cumple)
+    ),
+    language="es",
+)
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; pulsa la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iec60268_16_sti_example"
+	title="Informe de ejemplo STI IEC 60268-16 (PDF)"
+	description="Ficha de índice de transmisión del habla de una página: cabecera de metadatos, tabla del índice de transferencia de modulación por bandas de octava, barras de MTI por banda, el número único enmarcado STI = 0,64 con la banda de calificación del Anexo F y un veredicto CUMPLE frente a un mínimo de 0,5."
+	caption="Ficha de índice de transmisión del habla (STIResult.report), STI con la banda del Anexo F."
+/>
 
 ## Véase también
 

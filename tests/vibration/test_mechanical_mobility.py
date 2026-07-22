@@ -249,3 +249,31 @@ def test_plot_returns_axes() -> None:
     matplotlib.use("Agg")
     res = sdof_mobility_result(np.linspace(1.0, 50.0, 200), M, K, C)
     assert res.plot() is not None
+
+
+def test_rigid_mass_plot_two_panels_and_external_ax() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    f = np.logspace(np.log10(20.0), np.log10(2000.0), 40)
+    # A calibration that drifts out of the +/-5 % band above ~1.2 kHz.
+    meas = (1.0 / 10.0) * (1.0 + 0.02 * np.sin(f / 200.0) + 0.06 * (f > 1200.0))
+    res = rigid_mass_calibration_check(meas, f, mass=10.0)
+    axes = res.plot()
+    assert len(axes) == 2                       # magnitude + deviation panels
+    fig, ext = plt.subplots()
+    assert res.plot(ax=ext) is ext              # single deviation panel on ax
+    plt.close("all")
+
+
+def test_rigid_mass_plot_rejects_unknown_language() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib
+
+    matplotlib.use("Agg")
+    res = rigid_mass_calibration_check([0.1], [100.0], 10.0)
+    with pytest.raises(ValueError, match="Unknown language"):
+        res.plot(language="xx")

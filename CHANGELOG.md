@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   acceptance region and whether the no-trend hypothesis is accepted; for
   `method="runs"` it also marks the sequence median that classifies each
   value. `language="es"` renders the Spanish labels.
+- `RigidMassCalibrationResult.plot()`: the ISO 7626-2 (7.5.2) operational
+  rigid-mass calibration check as a single-concept, two-panel figure. The upper
+  panel draws the measured driving-point FRF magnitude against the known
+  rigid-mass line (`|A| = 1/m` for accelerance, `|Y| = 1/(2πf·m)` for mobility)
+  with its ±5 % tolerance band; the lower panel draws the relative deviation
+  against the same band, where a few-percent tolerance is actually readable.
+  Frequencies outside the band are drawn in the out-of-tolerance colour and the
+  title carries the overall verdict. Passing an existing axes draws only the
+  deviation diagnostic on it; `language="es"` renders Spanish labels.
 - `MultipleShockResult.report()`: a one-page PDF whole-body multiple-shock
   health-risk assessment fiche (ISO 2631-5:2018), laid out like a health-risk
   assessment sheet. The sheet carries the standard-basis line (Clause 5 spinal

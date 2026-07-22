@@ -298,6 +298,26 @@ Operational rigid-mass calibration check (ISO 7626-2:2015, 7.5.2).
 | `quantity` | FRF kind checked (`"accelerance"` or `"mobility"`). |
 | `tolerance` | Relative tolerance applied (the standard's is 0.05). |
 
+### RigidMassCalibrationResult.plot()
+
+```python
+RigidMassCalibrationResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes | np.ndarray
+```
+
+Plot the rigid-mass calibration check (ISO 7626-2, 7.5.2).
+
+The measured FRF magnitude against the known rigid-mass line with its
+tolerance band, and the relative deviation against the same band. With
+no `ax` a two-panel figure is drawn and its axes array returned; with
+`ax` the deviation diagnostic is drawn on it and that axes returned.
+
+Requires matplotlib (`pip install phonometry[plot]`).
+
 ## sdof_accelerance
 
 ```python

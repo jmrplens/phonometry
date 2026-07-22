@@ -96,6 +96,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Para valorar un elemento constructivo por sí solo (un tipo de pared, un suelo
 flotante, una ventana) se lleva a un laboratorio cualificado, donde la
@@ -203,6 +204,84 @@ caso contrario).
 `LabImpactInsulationResult` (`l_n`, `absorption`, `rating`);
 `background_correction(signal_and_background, background)` devuelve los niveles
 corregidos directamente.
+
+### Informe de ensayo en laboratorio de ISO 10140 (`.report()`)
+
+Ambos resultados de laboratorio escriben directamente el informe de ensayo de
+ISO 10140 en una página, con el formato de los informes de laboratorio
+acreditados valorados según ISO 717. `LabAirborneInsulationResult.report()`
+genera la ficha del índice de reducción acústica $R$ (ISO 10140-2:2010) y
+`LabImpactInsulationResult.report()` la del nivel de presión acústica de
+impactos normalizado $L_n$ (ISO 10140-3:2010). Cada ficha nombra la norma de
+laboratorio en su línea de base, evalúa el índice global de ISO 717-1 /
+ISO 717-2 (16 bandas de tercio de octava de 100 Hz a 3150 Hz, o las 5 bandas de
+octava), presenta la magnitud con un decimal tanto en forma de tabla como en
+forma de curva frente a la curva de referencia desplazada, encaja el índice de
+laboratorio (`Rw (C; Ctr)` o `Ln,w (CI)`) e imprime la declaración de que la
+evaluación se basa en resultados de medidas en laboratorio obtenidos mediante un
+método de precisión. Como un laboratorio cualificado suprime la transmisión por
+flancos, la magnitud declarada es la *directa* $R$ / $L_n$, no la in situ
+$R'$ / $L'_n$.
+
+`verbose=True` anexa el área de absorción acústica equivalente por bandas
+$A = 0{,}16\,V/T$ (ISO 10140-4:2010) junto a la magnitud declarada, el dato de
+normalización que recoge el informe de laboratorio. Los metadatos (cliente,
+muestra, montaje, volúmenes de las salas, condiciones climáticas), el veredicto
+frente al requisito (aéreo cumple igual o por encima, impactos igual o por
+debajo), `language="es"` y el extra `phonometry[report]` se comportan igual que
+en las fichas de ISO 717 e ISO 16283.
+
+```python
+import numpy as np
+from phonometry import building, ReportMetadata
+
+# Aéreo en laboratorio: niveles emisor/receptor y T por banda de tercio de octava
+l1 = np.full(16, 90.0)
+r = np.array([20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+              28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5])
+lab = building.lab_airborne_insulation(
+    l1, l1 - r, np.full(16, 0.5), area=10.0, volume=31.25
+)
+metadata = ReportMetadata(
+    specimen="Muro de bloque de hormigón celular curado en autoclave de 100 mm",
+    client="Cliente de ejemplo",
+    area=10.0, mass_per_area=75.0,
+    source_volume=53.0, receiving_volume=51.0,
+    test_room="Suite de transmisión (ejemplo)",
+    mounting="Montaje tipo A, perímetro recibido con mortero (ISO 10140-1)",
+    measurement_standard="ISO 10140-2",
+    laboratory="Laboratorio de referencia Phonometry",
+    report_id="PHN-2026-0143",
+    requirement=30.0,               # Rw >= 30 dB -> fila CUMPLE/NO CUMPLE
+)
+lab.report("Rw_lab.pdf", metadata=metadata)            # Rw (C; Ctr)
+lab.report("Rw_lab_chain.pdf", metadata=metadata,
+           verbose=True)                               # f | A | R
+
+# Impactos en laboratorio: niveles de la máquina de impactos en el receptor
+li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+               73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+imp = building.lab_impact_insulation(li, np.full(16, 0.5), volume=31.25)
+imp.report("Lnw_lab.pdf",
+           metadata=ReportMetadata(requirement=80.0))  # Ln,w (CI)
+```
+
+Ambas fichas de ejemplo se regeneran con `make reports` y se guardan en el
+repositorio. Haz clic en cualquier vista previa para abrir el PDF:
+
+<ReportPreview
+	name="iso10140_airborne_example"
+	title="Informe de ejemplo aéreo en laboratorio ISO 10140-2 (PDF)"
+	description="Informe de ensayo de aislamiento a ruido aéreo en laboratorio de un elemento constructivo de una página: la cabecera de metadatos (cliente, descripción de la muestra, montaje, superficie de la muestra, volúmenes de las salas, clima), la tabla de R en tercios de octava junto a la curva medida frente a la referencia desplazada, el índice de laboratorio Rw (C; Ctr) en caja, la declaración del método de precisión y un veredicto CUMPLE frente al requisito de 30 dB."
+	caption="Ficha aérea de laboratorio (LabAirborneInsulationResult.report), Rw (C; Ctr)."
+/>
+
+<ReportPreview
+	name="iso10140_impact_example"
+	title="Informe de ejemplo de impactos en laboratorio ISO 10140-3 (PDF)"
+	description="Informe de ensayo de aislamiento a ruido de impactos en laboratorio de un suelo bajo excitación con la máquina de impactos: la cabecera de metadatos, la tabla de Ln en tercios de octava junto a la curva medida frente a la referencia desplazada con la lectura a 500 Hz, el índice de laboratorio Ln,w (CI) en caja, la declaración del método de precisión y un veredicto CUMPLE frente al requisito de 80 dB (un nivel de impactos menor es mejor)."
+	caption="Ficha de impactos de laboratorio (LabImpactInsulationResult.report), Ln,w (CI)."
+/>
 
 ## Aislamiento acústico por intensidad (ISO 15186)
 

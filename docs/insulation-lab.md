@@ -104,6 +104,77 @@ one-third-octave or 5 octave values are supplied (`rating` is `None` otherwise).
 `background_correction(signal_and_background, background)` returns the corrected
 levels directly.
 
+### ISO 10140 laboratory test report (`.report()`)
+
+Both laboratory results write the one-page ISO 10140 test report directly, laid
+out like the accredited laboratory reports rated per ISO 717.
+`LabAirborneInsulationResult.report()` renders the sound reduction index *R*
+fiche (ISO 10140-2:2010) and `LabImpactInsulationResult.report()` the
+normalized impact sound pressure level *Ln* fiche (ISO 10140-3:2010). Each
+fiche names the laboratory standard in its basis line, evaluates the
+ISO 717-1 / ISO 717-2 single-number rating (16 one-third-octave bands from
+100 Hz to 3150 Hz, or the 5 octave bands), states the quantity to one decimal
+place both in tabular form and as a curve against the shifted reference curve,
+boxes the laboratory rating (`Rw (C; Ctr)` or `Ln,w (CI)`) and prints the
+statement that the evaluation is based on laboratory measurement results
+obtained by a precision method. Because a qualified suite suppresses flanking
+transmission, the reported quantity is the *direct* *R* / *Ln*, not the field
+*R'* / *L'n*.
+
+`verbose=True` annexes the per-band equivalent sound absorption area
+*A* = 0,16 *V* / *T* (ISO 10140-4:2010) beside the reported quantity, the
+normalization datum the laboratory report carries. Metadata (client, specimen,
+mounting, room volumes, climatic conditions), the requirement verdict (airborne
+passes at or above it, impact at or below it), `language="es"` and the
+`phonometry[report]` extra behave exactly as in the ISO 717 and ISO 16283
+fiches.
+
+```python
+import numpy as np
+from phonometry import building, ReportMetadata
+
+# Laboratory airborne: source/receiving levels and T per one-third-octave band
+l1 = np.full(16, 90.0)
+r = np.array([20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+              28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5])
+lab = building.lab_airborne_insulation(
+    l1, l1 - r, np.full(16, 0.5), area=10.0, volume=31.25
+)
+metadata = ReportMetadata(
+    specimen="100 mm autoclaved aerated concrete block wall",
+    client="Example client",
+    area=10.0, mass_per_area=75.0,
+    source_volume=53.0, receiving_volume=51.0,
+    test_room="Transmission suite (example)",
+    mounting="Type A mounting, mortar-bedded perimeter (ISO 10140-1)",
+    measurement_standard="ISO 10140-2",
+    laboratory="Phonometry Reference Laboratory",
+    report_id="PHN-2026-0143",
+    requirement=30.0,               # Rw >= 30 dB -> PASS/FAIL row
+)
+lab.report("Rw_lab.pdf", metadata=metadata)            # Rw (C; Ctr)
+lab.report("Rw_lab_chain.pdf", metadata=metadata,
+           verbose=True)                               # f | A | R
+
+# Laboratory impact: tapping-machine levels in the receiving room
+li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+               73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+imp = building.lab_impact_insulation(li, np.full(16, 0.5), volume=31.25)
+imp.report("Lnw_lab.pdf",
+           metadata=ReportMetadata(requirement=80.0))  # Ln,w (CI)
+```
+
+Rendered examples of both laboratory fiches, regenerated with `make reports`,
+are kept in the repository. Click either preview to open the PDF:
+
+[![Laboratory airborne ISO 10140-2 example report: metadata header, one-third-octave R table beside the measured-versus-shifted-reference curve, boxed Rw (C; Ctr), the precision-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_airborne_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_airborne_example.pdf)
+
+*Laboratory airborne fiche (`LabAirborneInsulationResult.report`), Rw (C; Ctr).*
+
+[![Laboratory impact ISO 10140-3 example report: the same laboratory layout for the normalized impact level Ln with the 500 Hz read-off, boxed Ln,w (CI), the precision-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_impact_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10140_impact_example.pdf)
+
+*Laboratory impact fiche (`LabImpactInsulationResult.report`), Ln,w (CI).*
+
 ## Sound insulation by intensity (ISO 15186)
 
 The ISO 10140 laboratory method above reads the transmitted power *indirectly*, from the

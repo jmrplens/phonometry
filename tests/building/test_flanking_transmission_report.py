@@ -25,15 +25,49 @@ _PDF_MAGIC = b"%PDF"
 
 #: The ISO 10848 mandatory one-third-octave range (100 Hz to 5000 Hz, 18 bands).
 _FREQS = [
-    100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
-    1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000,
+    100,
+    125,
+    160,
+    200,
+    250,
+    315,
+    400,
+    500,
+    630,
+    800,
+    1000,
+    1250,
+    1600,
+    2000,
+    2500,
+    3150,
+    4000,
+    5000,
 ]
 
 #: A rigid-junction direction-averaged velocity level difference (dB), rising
 #: with frequency (the illustrative case the docs and generator use).
 _DV = np.array(
-    [4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
-     9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7]
+    [
+        4.5,
+        4.8,
+        5.2,
+        5.6,
+        6.0,
+        6.5,
+        7.0,
+        7.6,
+        8.1,
+        8.7,
+        9.2,
+        9.8,
+        10.3,
+        10.9,
+        11.4,
+        11.9,
+        12.3,
+        12.7,
+    ]
 )
 
 
@@ -59,7 +93,11 @@ def _kij_result() -> "building.VibrationReductionResult":
     modal_overlap = np.full(len(_FREQS), 1.0)
     modal_overlap[:3] = 0.1
     return building.vibration_reduction_index(
-        _DV, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=_FREQS,
+        _DV,
+        junction_length=4.0,
+        area_i=12.0,
+        area_j=10.0,
+        frequency=_FREQS,
         structural_reverberation_time_i=0.35,
         structural_reverberation_time_j=0.40,
         modal_overlap=modal_overlap,
@@ -115,6 +153,28 @@ def test_kij_fiche_verbose_adds_membership_column(tmp_path) -> None:
     _assert_one_page(str(out))
     text = _extract_text(str(out))
     assert "In mean" in text
+
+
+def test_kij_mean_membership_excludes_out_of_range_bands() -> None:
+    """Single-number membership needs the Annex A range, not just no bracket.
+
+    The example spans 100 Hz to 5000 Hz, so the bands above 1250 Hz are not
+    bracketed yet must stay out of the mean; only the 200 Hz to 1250 Hz,
+    non-bracketed bands count.
+    """
+    from phonometry._report.iso10848 import _kij_mean_membership
+
+    frequencies = np.asarray(_FREQS, dtype=np.float64)
+    bracketed = np.zeros(frequencies.size, dtype=np.bool_)
+    bracketed[:3] = True  # the three lowest bands (also below 200 Hz)
+    in_mean, low, high = _kij_mean_membership(frequencies, bracketed)
+    assert (low, high) == (200.0, 1250.0)
+    # 200, 250, 315, 400, 500, 630, 800, 1000, 1250 Hz -> nine bands.
+    assert int(in_mean.sum()) == 9
+    # A non-bracketed band above the range (1600 Hz) is excluded.
+    assert not bool(in_mean[list(_FREQS).index(1600)])
+    # A non-bracketed band inside the range (250 Hz) is included.
+    assert bool(in_mean[list(_FREQS).index(250)])
 
 
 def test_kij_fiche_without_frequencies_rejected(tmp_path) -> None:
@@ -210,9 +270,10 @@ def test_lnf_fiche_spanish(tmp_path) -> None:
 def test_unknown_engine_rejected(tmp_path) -> None:
     """An unknown rendering engine raises ``ValueError`` on every fiche."""
     out = str(tmp_path / "x.pdf")
+    kij, dnf, lnf = _kij_result(), _dnf_result(), _lnf_result()
     with pytest.raises(ValueError, match="engine"):
-        _kij_result().report(out, engine="weasyprint")
+        kij.report(out, engine="weasyprint")
     with pytest.raises(ValueError, match="engine"):
-        _dnf_result().report(out, engine="weasyprint")
+        dnf.report(out, engine="weasyprint")
     with pytest.raises(ValueError, match="engine"):
-        _lnf_result().report(out, engine="weasyprint")
+        lnf.report(out, engine="weasyprint")

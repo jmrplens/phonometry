@@ -267,10 +267,30 @@ def _kij_band_type(frequencies: np.ndarray) -> str:
     return "octave" if ratio > 1.6 else "third-octave"
 
 
+def _kij_mean_membership(
+    frequencies: np.ndarray, bracketed: np.ndarray | None
+) -> Tuple[np.ndarray, float, float]:
+    """Per-band single-number membership plus the Annex A band range.
+
+    A band enters the single-number mean when it lies inside the Annex A range
+    (200 Hz to 1250 Hz for one-third-octave bands, 125 Hz to 1000 Hz for
+    octave bands) and is not bracketed for poor modal overlap. Returns the
+    boolean membership per band together with the applicable ``(low, high)``.
+    """
+    if _kij_band_type(frequencies) == "octave":
+        low, high = 125.0, 1000.0
+    else:
+        low, high = 200.0, 1250.0
+    in_range = (frequencies >= low) & (frequencies <= high)
+    in_mean = in_range if bracketed is None else (in_range & ~bracketed)
+    return in_mean, low, high
+
+
 def _kij_value_table(
     frequencies: np.ndarray,
     k_ij: np.ndarray,
     bracketed: np.ndarray | None,
+    in_mean: np.ndarray,
     verbose: bool,
     language: str,
 ) -> Any:
@@ -278,8 +298,9 @@ def _kij_value_table(
 
     Bands bracketed for poor modal overlap are printed with their value in
     brackets. The default table is ``f | Kij``; ``verbose`` adds a column
-    stating whether the band enters the single-number mean. Called only after
-    the renderer has imported reportlab.
+    stating whether the band enters the single-number mean (inside the Annex A
+    range and not bracketed). Called only after the renderer has imported
+    reportlab.
     """
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
@@ -302,7 +323,7 @@ def _kij_value_table(
             value = f"[{value}]"
         row: List[Any] = [f"{int(round(float(fk)))}", value]
         if verbose:
-            row.append(t("no", language) if is_bracketed else t("yes", language))
+            row.append(t("yes", language) if bool(in_mean[k]) else t("no", language))
         rows.append(row)
 
     return band_table(rows, widths, len(frequencies))
@@ -310,23 +331,16 @@ def _kij_value_table(
 
 def _kij_result_box(
     result: "VibrationReductionResult",
-    frequencies: np.ndarray,
     bracketed: np.ndarray | None,
+    in_mean: np.ndarray,
+    band_range: Tuple[float, float],
     styles: Any,
     accent: Any,
     language: str,
 ) -> Any:
     """Build the boxed single-number ``Kij`` result with its extended terms."""
-    band_type = _kij_band_type(frequencies)
-    if band_type == "octave":
-        low, high = 125.0, 1000.0
-    else:
-        low, high = 200.0, 1250.0
-    in_range = (frequencies >= low) & (frequencies <= high)
-    if bracketed is not None:
-        averaged = int(np.count_nonzero(in_range & ~bracketed))
-    else:
-        averaged = int(np.count_nonzero(in_range))
+    low, high = band_range
+    averaged = int(np.count_nonzero(in_mean))
 
     extended: List[str] = [
         t("Annex A band range: {low} Hz to {high} Hz", language).format(
@@ -415,10 +429,11 @@ def render_vibration_reduction_report(
             flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
+    in_mean, low, high = _kij_mean_membership(frequencies, bracketed)
     caption = t("Vibration reduction index per band", language)
     left_cell = [
         Paragraph(caption, caption_style),
-        _kij_value_table(frequencies, k_ij, bracketed, verbose, language),
+        _kij_value_table(frequencies, k_ij, bracketed, in_mean, verbose, language),
     ]
     plot_drawing = render_figure_drawing(
         result.plot, 116 * mm, y_top=None, figsize=(6.4, 5.8), language=language
@@ -429,7 +444,9 @@ def render_vibration_reduction_report(
     flow.append(Spacer(1, 8))
 
     flow.append(
-        _kij_result_box(result, frequencies, bracketed, styles, accent, language)
+        _kij_result_box(
+            result, bracketed, in_mean, (low, high), styles, accent, language
+        )
     )
     statement_style = ParagraphStyle(
         "kij_statement",

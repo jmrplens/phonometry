@@ -460,9 +460,11 @@ from .underwater.sonar_equation import (
 )
 from .underwater.seabed_reflection import (
     BottomLossResult,
+    SeabedReflection,
     bottom_reflection_loss,
     critical_angle,
     reflection_coefficient,
+    seabed_reflection,
 )
 from .underwater.ocean_ambient_noise import (
     AmbientNoiseResult,
@@ -1183,6 +1185,8 @@ __all__ = [
     "SonarEquationResult",
     "critical_angle",
     "reflection_coefficient",
+    "seabed_reflection",
+    "SeabedReflection",
     "bottom_reflection_loss",
     "BottomLossResult",
     "wind_noise_spectrum",

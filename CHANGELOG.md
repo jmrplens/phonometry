@@ -17,6 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   vocal effort, so the whole spectrum lifting with vocal effort reads at a
   glance. The band levels are unchanged; `standard_speech_spectrum()` still
   returns the bare per-band array. `language="es"` renders the Spanish labels.
+- `seabed_reflection()` and the `SeabedReflection` result: a thin, plottable
+  wrapper around `reflection_coefficient()` (fluid-fluid Rayleigh seabed) that
+  carries the grazing-angle grid, the complex reflection coefficient, its
+  magnitude `|R|`, the bottom loss in dB, the critical angle and the interface
+  parameters (`rho1`, `c1`, `rho2`, `c2`). Its `.plot()` draws the
+  reflection-coefficient magnitude `|R|` on a linear grazing-angle axis, marking
+  the critical angle; `language="es"` renders the Spanish labels. The underlying
+  `reflection_coefficient()` maths is unchanged.
 - `k_weighting_response()` and `KWeightingResponse`: the K-weighting pre-filter
   of ITU-R BS.1770-5 (Annex 1) evaluated as a magnitude frequency response. The
   constructor evaluates the same Table 1-2 biquads that `k_weighting` applies

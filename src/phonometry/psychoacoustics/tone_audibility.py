@@ -97,6 +97,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._report.metadata import ReportMetadata
+
 #: Constant term of the critical bandwidth Δfc (Formula (2)), in Hz.
 _DFC_CONSTANT = 25.0
 #: Frequency-dependent scale of the critical bandwidth (Formula (2)), in Hz.
@@ -1036,6 +1038,59 @@ class ToneAudibilityResult:
         from .._plot.psychoacoustics import plot_tone_audibility
 
         return plot_tone_audibility(self, ax=ax, language=check_language(language), **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a tonal audibility assessment fiche to a PDF.
+
+        Writes a one-page tonal-assessment report following ISO 1996-2:2017
+        Annex J (the engineering method of ISO/PAS 20065:2016): the
+        standard-basis line, an optional metadata header (source/situation,
+        client, measurement position, instrumentation, date, with the analysis
+        line spacing ``Δf`` read from the result), a full-width table of the key
+        quantities for every detected tone (frequency ``f_T``, tone level
+        ``Lpt``, critical-band masking-noise level ``Lpn``, critical bandwidth
+        ``Δf_c`` and audibility ``ΔL_ta``) above the level-versus-frequency
+        analysis plot with the tones and their critical-band masking noise
+        marked, the boxed decisive audibility ``ΔL_ta`` and the derived tonal
+        adjustment ``K`` (Table J.1), an optional verdict row and a prominence
+        note, and a footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a bare
+            assessment fiche (body, result and disclaimer only). A supplied
+            ``requirement`` is read as the maximum acceptable decisive
+            audibility ``ΔL_ta`` in dB (a lower audibility passes).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When True, the key-quantity table adds the per-tone
+            extended-uncertainty column (when the result carries it).
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso1996_tone import render_tone_audibility_report
+
+        return render_tone_audibility_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 # Module named ``tone_audibility`` (distinct from the ISO 1996-2 Annex C

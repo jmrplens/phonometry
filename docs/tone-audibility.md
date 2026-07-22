@@ -256,6 +256,54 @@ psychoacoustics.resolve_tones_separately(118.4, 137.3, 4.0, 5.0) # False → com
 > evaluated at the Annex E tones the threshold (`≈ 24 Hz` at 137.3 Hz) keeps
 > them combined, consistent with that example's FG grouping.
 
+## Tonal assessment report (`.report()`)
+
+`ToneAudibilityResult.report(path)` renders a one-page PDF fiche laid out like a
+tonal-assessment report of an environmental-noise laboratory, following the
+ISO 1996-2:2017 Annex J engineering method: a standard-basis line, an optional
+metadata header block (source/situation, client, measurement position,
+instrumentation and date, with the analysis line spacing `Δf` read from the
+result), a full-width table of the key quantities for every detected tone (tone
+frequency `fT`, entry type, tone level `Lpt`, critical-band masking-noise level
+`Lpn`, critical bandwidth `Δfc` and the audibility `ΔLta`) above the
+level-versus-frequency analysis plot with the tones and their critical-band
+masking noise marked, the boxed decisive audibility `ΔLta` together with the
+derived tonal adjustment `K` (Table J.1), an optional PASS/FAIL verdict row and a
+prominence note, and a footer with the fixed disclaimer.
+
+It uses the same `ReportMetadata` container
+(documented under [Field insulation](insulation-field.md#report-metadata-reportmetadata))
+and rendering engine as the [ISO 532-1 loudness fiche](loudness.md#iso-532-1-report-report);
+a supplied `requirement` is read as the maximum acceptable decisive audibility
+`ΔLta` in dB (a quieter tone passes). Rendering needs reportlab
+(`pip install phonometry[report]`); only `engine="reportlab"` is supported. The
+fiche renders in English by default; pass `language="es"` for a Spanish fiche
+(translated fixed strings and a comma decimal separator), e.g.
+`res.report("tone_fiche_es.pdf", language="es")`.
+
+```python
+from phonometry import psychoacoustics, ReportMetadata
+
+# The Annex E combustion-engine spectrum (analyze_spectrum).
+res = psychoacoustics.analyze_spectrum(levels, freqs, 2.7)
+res.report(
+    "tone_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Combustion engine, steady operation",
+        measurement_standard="ISO 1996-2",
+        laboratory="Phonometry Reference Laboratory",
+        requirement=6.0,             # maximum acceptable ΔL_ta (dB)
+    ),
+)                                    # decisive ΔL_ta (dB) and K (dB, Table J.1)
+```
+
+The example fiche, regenerated with `make reports`, is kept rendered in the
+repository; click the preview to open the PDF.
+
+[![ISO 1996-2 tonal audibility example report: metadata header, a per-tone table of the tone level Lpt, the critical-band masking-noise level Lpn, the critical bandwidth and the audibility, the level-versus-frequency analysis plot with the tones and their masking noise marked, the boxed decisive ΔL_ta = 9.1 dB with the tonal adjustment K = 5 dB (ISO 1996-2:2017 Table J.1) and a FAIL verdict against a 6 dB audibility limit](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso1996_tone_audibility_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso1996_tone_audibility_example.pdf)
+
+*Tonal audibility fiche (`ToneAudibilityResult.report`), decisive ΔL_ta in dB with the tonal adjustment K.*
+
 ## References
 
 - International Organization for Standardization. (2016). *Acoustics —

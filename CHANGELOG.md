@@ -8,6 +8,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `StructureBornePowerResult.report()`: a one-page PDF structure-borne sound
+  power characterization fiche for the power a piece of building service
+  equipment injects into a reception plate (EN 15657:2018 reception-plate
+  method, Formula 14), rendered through the shared sound-power report engine.
+  The sheet carries the standard-basis line naming the reception-plate method,
+  an optional metadata header (client, source equipment, test environment,
+  instrumentation, climate, date), a per-band table of the spatial mean plate
+  velocity level `Lv` and the injected structure-borne sound power level
+  `L_Ws`, the `L_Ws(f)` spectrum with a nominal band axis, and a boxed
+  band-summed total `L_Ws` (dB re 1 pW) with the plate mass per area `m` and
+  area `S`. A declared upper limit supplied via the metadata `requirement`
+  adds a PASS/FAIL verdict (lower is better). `verbose=True` adds the plate
+  loss factor `eta` column; the basis strip states Formula 14 and the
+  conversion to the plate-independent source quantities (Formulae 15/17)
+  required before EN 12354-5. `language="es"` renders the Spanish fiche.
+- `InstalledSourceResult.report()`: a one-page PDF installed structure-borne
+  sound **prediction** fiche (EN 12354-5:2009): the normalised structure-borne
+  sound pressure level `L_n,s` estimated in a receiving room from building
+  service equipment. The sheet is clearly labelled a prediction from the
+  characteristic source power and the transmission paths, not a measurement.
+  It carries a prediction-basis line naming EN 12354-5:2009, an optional
+  metadata header (client, source equipment, receiving room, instrumentation,
+  climate, date), a per-band table of the installed structure-borne power
+  level `L_Ws,inst`, each transmission path's normalised SPL `L_n,s,ij` and the
+  combined total `L_n,s`, the per-path and total `L_n,s(f)` spectra, and a
+  boxed band-summed total `L_n,s` (dB) with the installed power total and the
+  path count. A declared upper limit supplied via the metadata `requirement`
+  adds a PASS/FAIL verdict (lower is better). `verbose=True` adds one column
+  per transmission path (up to five); the basis strip states Formulae 18a/17
+  and the prediction disclaimer. `language="es"` renders the Spanish fiche.
+  Both fiches reuse the shared sound-power report body (per-band table,
+  spectrum, boxed result and flow assembly) already used by the
+  ISO 3744/3745/3741/9614/7849 fiches.
 - `VibrationSoundPowerResult.report()`: a one-page PDF
   sound-power-from-vibration determination fiche for the airborne sound power a
   machine radiates through its surface vibration (ISO/TS 7849-1/-2:2009),

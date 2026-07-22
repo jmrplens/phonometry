@@ -50,6 +50,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
     from .declaration import DeclarationForm, NoiseEmissionDeclaration
 
 _S0 = 1.0  #: Reference area, in square metres (ISO 3744, 8.2.5).
@@ -183,6 +184,61 @@ class SoundPowerResult:
 
         check_language(language)
         return plot_sound_power(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 3744/3746 sound-power determination fiche to a PDF.
+
+        Writes a one-page sound-power test sheet: the standard-basis line naming
+        the applied method and accuracy grade (ISO 3744:2010 engineering grade 2
+        or ISO 3746:2010 survey grade 3), an optional metadata header (client,
+        noise source, test environment, instrumentation, climate, date), a
+        per-band table (nominal octave/one-third-octave frequency, the surface
+        sound-pressure level ``Lp`` and the band sound-power level ``LW``), the
+        sound-power spectrum ``LW(f)``, the boxed A-weighted sound power level
+        ``LWA`` (dB re 1 pW) with the total ``LW``, the expanded uncertainty
+        ``U`` and the measurement surface area ``S``, an optional verdict row
+        against a declared limit, and a measurement-basis strip stating the
+        applied background (``K1``) and environmental (``K2``) corrections.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header (``client``, ``specimen`` the noise source, ``test_room``
+            the test environment, ``instrumentation``, ``temperature``,
+            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
+            and, via ``requirement``, a declared A-weighted sound-power limit
+            the fiche checks the result against (lower is better).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True`` the per-band table adds the
+            energy-averaged level ``Lp'`` and the background (``K1``) and
+            environmental (``K2``) corrections.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab (or, for the figure, matplotlib) is
+            not installed (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso3744 import render_sound_power_report
+
+        return render_sound_power_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
     def declare(
         self,
@@ -838,6 +894,53 @@ class PrecisionSoundPowerResult:
 
         check_language(language)
         return plot_sound_power(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 3745:2012 precision sound-power fiche to a PDF.
+
+        Writes the same one-page sound-power test sheet as
+        :meth:`SoundPowerResult.report`, with the standard-basis line naming the
+        precision method in an anechoic or hemi-anechoic room (ISO 3745:2012,
+        accuracy grade 1) and the measurement-basis strip stating the applied
+        meteorological corrections ``C1``/``C2``/``C3`` instead of the ISO 3744
+        ``K1``/``K2``. The per-band table shows the surface time-averaged level
+        ``Lp`` and the band sound-power level ``LW``; ``verbose`` adds the
+        energy-averaged level ``Lp'``.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header and footer identity and, via ``requirement``, a declared
+            A-weighted sound-power limit (lower is better).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True`` the per-band table adds the
+            energy-averaged level ``Lp'``.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab (or, for the figure, matplotlib) is
+            not installed (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso3744 import render_sound_power_report
+
+        return render_sound_power_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def _precision_table(surface: PrecisionSurface, array: PrecisionArray) -> np.ndarray:

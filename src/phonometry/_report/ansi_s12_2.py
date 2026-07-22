@@ -200,35 +200,52 @@ def _nc_contour_column(levels: np.ndarray, language: str) -> List[str]:
     return cells
 
 
-def _nc_left_cell(
-    result: "NCResult", verbose: bool, caption_style: Any, language: str
-) -> Tuple[List[Any], List[Any]]:
-    """The NC fiche left cell (caption + table) and its two-panel column widths."""
-    from reportlab.lib.units import mm
-    from reportlab.platypus import Paragraph
-
-    labels = _band_labels()
-    levels = np.asarray(result.levels, dtype=np.float64)
-    level_cells = [_level_cell(v, language) for v in levels]
-
-    columns: List[Tuple[str, List[str]]] = [
-        (t("Frequency f [Hz]", language), labels),
-        ("L<sub>p</sub> [dB]", level_cells),
+def _base_columns(levels: np.ndarray, language: str) -> List[Tuple[str, List[str]]]:
+    """The two columns every room-noise table opens with (frequency, level)."""
+    return [
+        (t("Frequency f [Hz]", language), _band_labels()),
+        ("L<sub>p</sub> [dB]", [_level_cell(v, language) for v in levels]),
     ]
-    if verbose:
-        columns.append(("NC", _nc_contour_column(levels, language)))
-        col_widths = [17 * mm, 18 * mm, 17 * mm]
-        left_width, plot_width = 56.0, 118.0
-    else:
-        col_widths = [22 * mm, 22 * mm]
-        left_width, plot_width = 50.0, 124.0
+
+
+def _assemble_left(
+    columns: List[Tuple[str, List[str]]],
+    col_widths: List[Any],
+    widths: Tuple[float, float],
+    caption_style: Any,
+    language: str,
+) -> Tuple[List[Any], List[Any]]:
+    """Wrap the caption and value table into a two-panel left cell."""
+    from reportlab.platypus import Paragraph
 
     caption = t("Octave-band sound pressure levels", language)
     left_cell = [
         Paragraph(caption, caption_style),
         _value_table(columns, col_widths, language),
     ]
-    return left_cell, [left_width, plot_width]
+    return left_cell, [widths[0], widths[1]]
+
+
+def _nc_left_cell(
+    result: "NCResult", verbose: bool, caption_style: Any, language: str
+) -> Tuple[List[Any], List[Any]]:
+    """The NC fiche left cell (caption + table) and its two-panel column widths."""
+    from reportlab.lib.units import mm
+
+    levels = np.asarray(result.levels, dtype=np.float64)
+    columns = _base_columns(levels, language)
+    if verbose:
+        columns.append(("NC", _nc_contour_column(levels, language)))
+        return _assemble_left(
+            columns,
+            [17 * mm, 18 * mm, 17 * mm],
+            (56.0, 118.0),
+            caption_style,
+            language,
+        )
+    return _assemble_left(
+        columns, [22 * mm, 22 * mm], (50.0, 124.0), caption_style, language
+    )
 
 
 def _rc_left_cell(
@@ -236,36 +253,36 @@ def _rc_left_cell(
 ) -> Tuple[List[Any], List[Any]]:
     """The RC fiche left cell (caption + table) and its two-panel column widths."""
     from reportlab.lib.units import mm
-    from reportlab.platypus import Paragraph
 
-    labels = _band_labels()
     levels = np.asarray(result.levels, dtype=np.float64)
     reference = np.asarray(result.reference_curve, dtype=np.float64)
-    level_cells = [_level_cell(v, language) for v in levels]
-
-    columns: List[Tuple[str, List[str]]] = [
-        (t("Frequency f [Hz]", language), labels),
-        ("L<sub>p</sub> [dB]", level_cells),
-    ]
+    columns = _base_columns(levels, language)
     if verbose:
-        ref_cells = [_level_cell(v, language, decimals=0) for v in reference]
-        dev_cells = [
-            _level_cell(lvl - ref, language) for lvl, ref in zip(levels, reference)
-        ]
-        columns.append((t("Ref. [dB]", language), ref_cells))
-        columns.append((t("Dev. [dB]", language), dev_cells))
-        col_widths = [13 * mm, 15 * mm, 15 * mm, 15 * mm]
-        left_width, plot_width = 62.0, 112.0
-    else:
-        col_widths = [22 * mm, 22 * mm]
-        left_width, plot_width = 50.0, 124.0
-
-    caption = t("Octave-band sound pressure levels", language)
-    left_cell = [
-        Paragraph(caption, caption_style),
-        _value_table(columns, col_widths, language),
-    ]
-    return left_cell, [left_width, plot_width]
+        columns.append(
+            (
+                t("Ref. [dB]", language),
+                [_level_cell(v, language, decimals=0) for v in reference],
+            )
+        )
+        columns.append(
+            (
+                t("Dev. [dB]", language),
+                [
+                    _level_cell(lvl - ref, language)
+                    for lvl, ref in zip(levels, reference)
+                ],
+            )
+        )
+        return _assemble_left(
+            columns,
+            [13 * mm, 15 * mm, 15 * mm, 15 * mm],
+            (62.0, 112.0),
+            caption_style,
+            language,
+        )
+    return _assemble_left(
+        columns, [22 * mm, 22 * mm], (50.0, 124.0), caption_style, language
+    )
 
 
 def _rating_label(value: float) -> str:

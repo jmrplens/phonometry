@@ -7106,6 +7106,75 @@ res_m = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
 res_m.bracketed    # per-band flags; bracketed bands leave the single number
 ```
 
+### ISO 10848 flanking-transmission reports (`.report()`)
+
+Each of the three results renders a one-page PDF fiche. `VibrationReductionResult.report()`
+writes a **junction characterization** report of *K*<sub>ij</sub>
+(ISO 10848-1:2006): the standard-basis line, an optional metadata header, the
+per-band *K*<sub>ij</sub> table beside the *K*<sub>ij</sub>(*f*) curve and a
+boxed single-number mean *K*<sub>ij</sub> over the Annex A band range, with the
+count of averaged and bracketed bands. Bands bracketed for poor modal overlap
+(*M* < 0.25, ISO 10848-4:2010 Clause 9) print their value in brackets and are
+excluded from the mean; `verbose=True` adds a column stating whether each band
+enters the mean.
+
+`FlankingLevelDifferenceResult.report()` and `FlankingImpactLevelResult.report()`
+write **measurement** reports of the overall descriptors *D*<sub>n,f</sub>
+(airborne) and *L*<sub>n,f</sub> (impact, tapping machine), reusing the same
+two-panel insulation layout: the per-band quantity beside the
+measured-versus-shifted-ISO 717-reference curve and the boxed single number
+`Dn,f,w (C; Ctr)` (ISO 717-1) or `Ln,f,w (CI)` (ISO 717-2). `verbose=True`
+annexes the ISO 717 evaluation per band (the value, the shifted reference and
+the unfavourable deviation). A `requirement` supplied on the `ReportMetadata`
+adds a verdict (`Dn,f,w` passes at or above it, `Ln,f,w` at or below it), and
+`language="es"` renders every fiche in Spanish. reportlab is required
+(`pip install phonometry[report]`).
+
+```python
+import numpy as np
+from phonometry import building, ReportMetadata
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
+         800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
+               9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
+m = np.full(18, 1.0); m[:3] = 0.1                        # bracket the low bands
+kij = building.vibration_reduction_index(
+    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
+    structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
+    modal_overlap=m,
+)
+kij.report("Kij.pdf", metadata=ReportMetadata(specimen="Rigid T-junction"))
+
+l1 = np.full(16, 80.0)
+dnf = np.array([48, 49, 50, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 64, 65],
+               dtype=float)
+dres = building.normalized_flanking_level_difference(
+    l1, l1 - dnf, absorption_area=np.full(16, 10.0)
+)
+dres.report("Dnf.pdf", metadata=ReportMetadata(requirement=55.0))   # Dn,f,w (C; Ctr)
+
+recv = np.array([58, 57, 56, 55, 54, 52, 50, 48, 46, 44, 42, 40, 38, 36, 34, 32],
+                dtype=float)
+lres = building.normalized_flanking_impact_level(recv, absorption_area=np.full(16, 10.0))
+lres.report("Lnf.pdf", metadata=ReportMetadata(requirement=55.0))   # Ln,f,w (CI)
+```
+
+The example fiches are regenerated with `make reports` and kept in the
+repository. Click a preview to open the PDF:
+
+[![ISO 10848-1 junction report: metadata header, per-band Kij table beside the Kij curve, boxed single-number mean Kij with the count of averaged and bracketed bands](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10848_kij_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10848_kij_example.pdf)
+
+*Vibration reduction index fiche (`VibrationReductionResult.report`), mean Kij.*
+
+[![ISO 10848-2 airborne flanking report: per-band Dn,f table beside the measured-versus-shifted-reference curve, boxed Dn,f,w (C; Ctr) and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10848_dnf_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10848_dnf_example.pdf)
+
+*Flanking level difference fiche (`FlankingLevelDifferenceResult.report`), Dn,f,w (C; Ctr).*
+
+[![ISO 10848-2 impact flanking report: per-band Ln,f table beside the measured-versus-shifted-reference curve, boxed Ln,f,w (CI) and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10848_lnf_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10848_lnf_example.pdf)
+
+*Flanking impact level fiche (`FlankingImpactLevelResult.report`), Ln,f,w (CI).*
+
 ## References
 
 - Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.

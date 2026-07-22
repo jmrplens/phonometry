@@ -670,6 +670,86 @@ res_m = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
 res_m.bracketed    # marcas por banda; las bandas acotadas salen del número único
 ```
 
+### Informes de transmisión por flancos ISO 10848 (`.report()`)
+
+Cada uno de los tres resultados genera una ficha PDF de una página.
+`VibrationReductionResult.report()` escribe un informe de **caracterización de
+la unión** del índice de reducción de vibraciones $K_{ij}$ (ISO 10848-1:2006):
+la línea de base normativa, una cabecera de metadatos opcional, la tabla de
+$K_{ij}$ por banda junto a la curva $K_{ij}(f)$ y un recuadro con el número
+único (media de $K_{ij}$) sobre el intervalo de bandas del anexo A, con el
+recuento de bandas promediadas y acotadas. Las bandas acotadas por solapamiento
+modal insuficiente ($M < 0.25$, ISO 10848-4:2010 apartado 9) imprimen su valor
+entre corchetes y se excluyen de la media; `verbose=True` añade una columna que
+indica si cada banda entra en la media.
+
+`FlankingLevelDifferenceResult.report()` y `FlankingImpactLevelResult.report()`
+escriben informes de **medición** de los descriptores globales $D_{n,f}$
+(aéreo) y $L_{n,f}$ (impactos, máquina de impactos), reutilizando la misma
+disposición de dos paneles del aislamiento: la magnitud por banda junto a la
+curva medida frente a la referencia ISO 717 desplazada y el número único
+`Dn,f,w (C; Ctr)` (ISO 717-1) o `Ln,f,w (CI)` (ISO 717-2). `verbose=True` anexa
+la evaluación ISO 717 por banda (el valor, la referencia desplazada y la
+desviación desfavorable). Un `requirement` indicado en `ReportMetadata` añade un
+veredicto ($D_{n,f,w}$ cumple igualando o superándolo, $L_{n,f,w}$ igualándolo o
+por debajo), y `language="es"` genera cada ficha en español. Se necesita
+reportlab (`pip install phonometry[report]`).
+
+```python
+import numpy as np
+from phonometry import building, ReportMetadata
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
+         800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
+               9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
+m = np.full(18, 1.0); m[:3] = 0.1                        # acota las bandas bajas
+kij = building.vibration_reduction_index(
+    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
+    structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
+    modal_overlap=m,
+)
+kij.report("Kij.pdf", metadata=ReportMetadata(specimen="Unión rígida en T"),
+           language="es")
+
+l1 = np.full(16, 80.0)
+dnf = np.array([48, 49, 50, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 64, 65],
+               dtype=float)
+dres = building.normalized_flanking_level_difference(
+    l1, l1 - dnf, absorption_area=np.full(16, 10.0)
+)
+dres.report("Dnf.pdf", metadata=ReportMetadata(requirement=55.0), language="es")
+
+recv = np.array([58, 57, 56, 55, 54, 52, 50, 48, 46, 44, 42, 40, 38, 36, 34, 32],
+                dtype=float)
+lres = building.normalized_flanking_impact_level(recv, absorption_area=np.full(16, 10.0))
+lres.report("Lnf.pdf", metadata=ReportMetadata(requirement=55.0), language="es")
+```
+
+Las fichas de ejemplo se regeneran con `make reports` y se mantienen en el
+repositorio. Pulsa una vista previa para abrir el PDF:
+
+<ReportPreview
+	name="iso10848_kij_example"
+	title="Informe del índice de reducción de vibraciones de unión ISO 10848-1 (PDF)"
+	description="Informe de una página de caracterización de la unión del índice de reducción de vibraciones Kij: la cabecera de metadatos, la tabla de Kij por banda junto a la curva Kij(f) y el recuadro con el número único (media de Kij) sobre el intervalo del anexo A con el recuento de bandas promediadas y acotadas (las tres bandas más bajas acotadas por solapamiento modal insuficiente)."
+	caption="Ficha del índice de reducción de vibraciones (VibrationReductionResult.report), Kij medio."
+/>
+
+<ReportPreview
+	name="iso10848_dnf_example"
+	title="Informe de la diferencia de niveles por flancos aérea ISO 10848-2 (PDF)"
+	description="Informe de una página de transmisión por flancos aérea de la diferencia de niveles por flancos normalizada Dn,f: la cabecera de metadatos, la tabla de Dn,f en tercios de octava junto a la curva medida frente a la referencia desplazada, el recuadro con Dn,f,w (C; Ctr) según ISO 717-1 y un veredicto de CUMPLE frente al requisito de 55 dB."
+	caption="Ficha de la diferencia de niveles por flancos (FlankingLevelDifferenceResult.report), Dn,f,w (C; Ctr)."
+/>
+
+<ReportPreview
+	name="iso10848_lnf_example"
+	title="Informe del nivel de impactos por flancos ISO 10848-2 (PDF)"
+	description="Informe de una página de transmisión por flancos a impactos del nivel de impactos por flancos normalizado Ln,f: la cabecera de metadatos, la tabla de Ln,f en tercios de octava junto a la curva medida frente a la referencia desplazada, el recuadro con Ln,f,w (CI) según ISO 717-2 y un veredicto de CUMPLE frente al requisito de 55 dB."
+	caption="Ficha del nivel de impactos por flancos (FlankingImpactLevelResult.report), Ln,f,w (CI)."
+/>
+
 ## Véase también
 
 - [Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/):

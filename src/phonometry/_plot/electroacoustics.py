@@ -581,7 +581,8 @@ def _plot_one_quantity(
     drawer, polar, attr = table[quantity]
     if attr is not None and getattr(result, attr) is None:
         raise ValueError(missing[quantity])
-    ax = ax if ax is not None else (_new_polar_axes() if polar else _new_axes())
+    if ax is None:
+        ax = _new_polar_axes() if polar else _new_axes()
     drawer(result, ax, language=language)
     localize_axes(ax, language)
     return ax

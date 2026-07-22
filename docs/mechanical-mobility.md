@@ -157,6 +157,62 @@ print(res.passed, res.within_tolerance.tolist())   # True [True, True, True]
 print(round(float(vibration.random_error_percent(0.8, 75)), 2))   # 4.08  %
 ```
 
+The calibration check returns a `RigidMassCalibrationResult` carrying the
+per-frequency deviation and pass flags, and a `.plot()`: the measured FRF
+magnitude against the rigid-mass line with its ±5 % tolerance band (upper
+panel) and the relative deviation against the same band (lower panel, where a
+few-percent tolerance is actually readable). A calibration that drifts out of
+the band towards a few kHz points at a transducer or attachment-compliance
+error, exactly what the check is meant to catch:
+
+```python
+import numpy as np
+from phonometry import vibration
+
+m = 10.0                                                  # calibration block mass
+f = np.logspace(np.log10(20.0), np.log10(5000.0), 400)
+drift = 0.05 * (f / 2500.0) ** 2                          # high-frequency drift
+measured = (1.0 / m) * (1.0 + 0.015 * np.sin(2 * np.pi * np.log10(f)) + drift)
+res = vibration.rigid_mass_calibration_check(measured, f, mass=m)
+print(res.passed)                                         # False (drift exceeds 5 %)
+res.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rigid_mass_calibration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rigid_mass_calibration.svg" alt="Rigid-mass calibration check of a 10 kg block: the measured accelerance magnitude follows the flat rigid-mass line inside the plus-or-minus five percent tolerance band across most of the range, then drifts above the band towards a few kilohertz where the out-of-tolerance points are marked, and the lower panel shows the same deviation in percent crossing the plus five percent limit" width="82%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration
+
+m = 10.0
+f = np.logspace(np.log10(20.0), np.log10(5000.0), 400)
+drift = 0.05 * (f / 2500.0) ** 2
+measured = (1.0 / m) * (1.0 + 0.015 * np.sin(2 * np.pi * np.log10(f)) + drift)
+res = vibration.rigid_mass_calibration_check(measured, f, mass=m)
+bad = ~res.within_tolerance
+
+fig, (top, bot) = plt.subplots(2, 1, sharex=True, figsize=(10, 7),
+                               gridspec_kw={"height_ratios": [1.5, 1.0]})
+top.fill_between(f, res.expected * 0.95, res.expected * 1.05, color="C1",
+                 alpha=0.15, label="±5 % tolerance band")
+top.semilogx(f, res.expected, "--", color="C1", label="expected |A| = 1/m")
+top.semilogx(f, res.measured, color="C0", label="within tolerance")
+top.semilogx(f[bad], res.measured[bad], "o", color="C1", label="out of tolerance")
+top.set_ylabel("Accelerance |A| [1/kg]"); top.legend()
+
+bot.axhspan(-5.0, 5.0, color="C1", alpha=0.15)
+bot.semilogx(f, 100.0 * res.deviation, color="C0")
+bot.semilogx(f[bad], 100.0 * res.deviation[bad], "o", color="C1")
+bot.set_xlabel("Frequency [Hz]"); bot.set_ylabel("Deviation [%]")
+plt.show()
+```
+
+</details>
+
 ## 4. The `MobilityResult` bundle
 
 `sdof_mobility_result` bundles the FRF over frequency into a `MobilityResult`,

@@ -284,8 +284,7 @@ def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
 
 def test_plot_each_quantity_returns_single_axes() -> None:
     """Every quantity plots one concept on one axes; directivity is polar."""
-    import matplotlib
-    pytest.importorskip("matplotlib")
+    matplotlib = pytest.importorskip("matplotlib")
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
@@ -303,8 +302,7 @@ def test_plot_each_quantity_returns_single_axes() -> None:
 
 def test_plot_on_external_axes_returns_it() -> None:
     """Passing an axes draws on it and returns that same axes."""
-    import matplotlib
-    pytest.importorskip("matplotlib")
+    matplotlib = pytest.importorskip("matplotlib")
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
@@ -317,8 +315,7 @@ def test_plot_on_external_axes_returns_it() -> None:
 
 def test_plot_rejects_unknown_quantity_and_missing_data() -> None:
     """An unknown quantity, and a quantity with no data, raise ValueError."""
-    import matplotlib
-    pytest.importorskip("matplotlib")
+    matplotlib = pytest.importorskip("matplotlib")
     matplotlib.use("Agg")
 
     result = _example_result()

@@ -73,6 +73,11 @@ _STRINGS: dict[str, str] = {
     "Fluctuation strength F = {f} vacil": "Intensidad de fluctuación F = {f} vacil",
     "Psychoacoustic annoyance PA = {pa} (N5 = {n5} sone)": "Molestia psicoacústica PA = {pa} (N5 = {n5} sonios)",
     r"decisive $\Delta L$ = {da} dB @ {df} Hz": r"decisiva $\Delta L$ = {da} dB @ {df} Hz",
+    r"tone level $L_\mathrm{pt}$": r"nivel del tono $L_\mathrm{pt}$",
+    r"masking noise $L_\mathrm{pn}$ (critical band)": r"ruido enmascarante $L_\mathrm{pn}$ (banda crítica)",
+    r"decisive $\Delta L_{{\mathrm{{ta}}}}$ = {da} dB @ {df} Hz": r"decisiva $\Delta L_{{\mathrm{{ta}}}}$ = {da} dB @ {df} Hz",
+    "Sound pressure level [dB]": "Nivel de presión sonora [dB]",
+    "ISO 1996-2 tone-audibility analysis": "Análisis de audibilidad tonal ISO 1996-2",
     "Frequency [Hz]": "Frecuencia [Hz]",
     "Sound pressure level [dB re 20 µPa]": "Nivel de presión sonora [dB re 20 µPa]",
     r"Hearing threshold $T_f$": r"Umbral de audición $T_f$",
@@ -650,6 +655,91 @@ def plot_tone_audibility(
     ax.set_axisbelow(True)
     # localize_axes leaves the categorical x-axis (a FuncFormatter) alone, so the
     # comma-localized tick labels set above survive.
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_tone_audibility_levels(
+    result: "ToneAudibilityResult", ax: Axes | None = None, *, language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""Tone level and critical-band masking noise against frequency (ISO 1996-2).
+
+    Draws, for every detected tone, its tone level ``Lpt`` as a stem above the
+    critical-band masking-noise level ``Lpn`` (drawn as a horizontal segment
+    spanning the tone's critical band ``[f1, f2]``); the vertical gap above the
+    masking threshold is the audibility ``ΔL_ta``. The decisive (most audible)
+    tone is emphasised and the frequency axis is continuous and logarithmic.
+
+    :param result: A :class:`~phonometry.tone_audibility.ToneAudibilityResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the tone-level marker ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import decimal_comma, format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.tone_frequencies, dtype=np.float64)
+    lt = np.asarray(result.tone_levels, dtype=np.float64)
+    lg = np.asarray(result.critical_band_levels, dtype=np.float64)
+    f1 = np.asarray(result.lower_corners, dtype=np.float64)
+    f2 = np.asarray(result.upper_corners, dtype=np.float64)
+    delta = np.asarray(result.audibilities, dtype=np.float64)
+    decisive = int(np.argmax(delta))
+
+    ymin = float(min(lg.min(), lt.min())) - 4.0
+    # Shade the decisive tone's critical band below its masking-noise level so
+    # the audible gap reads at a glance. svglib drops alpha, so the fill is a
+    # pale *opaque* colour with no edge and a low zorder (below the curves).
+    ax.fill_between(
+        [f1[decisive], f2[decisive]], ymin, lg[decisive],
+        color="#eaf0f8", edgecolor="none", zorder=0,
+    )
+
+    # Critical-band masking-noise level Lpn: one horizontal segment per tone
+    # spanning its critical band; the decisive band is emphasised.
+    for i in range(freqs.size):
+        is_dec = i == decisive
+        ax.plot(
+            [f1[i], f2[i]], [lg[i], lg[i]],
+            color=_C_MUTED if not is_dec else _C_SECONDARY,
+            lw=2.0 if is_dec else 1.2, solid_capstyle="round", zorder=2,
+            label=_t(r"masking noise $L_\mathrm{pn}$ (critical band)", language)
+            if i == 0 else None,
+        )
+
+    # Tone level Lpt: a stem from the masking-noise level up to the tone level,
+    # with a marker at the top; the decisive tone is drawn in the reference hue.
+    for i in range(freqs.size):
+        is_dec = i == decisive
+        ax.plot(
+            [freqs[i], freqs[i]], [lg[i], lt[i]],
+            color=_C_REFERENCE if is_dec else _C_PRIMARY,
+            lw=1.6 if is_dec else 1.2, zorder=3,
+        )
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("linestyle", "none")
+    ax.plot(
+        freqs, lt, color=_C_PRIMARY, markeredgecolor=_C_EDGE, zorder=4,
+        label=_t(r"tone level $L_\mathrm{pt}$", language), **kwargs,
+    )
+    ax.plot(
+        [freqs[decisive]], [lt[decisive]], marker="o", linestyle="none",
+        color=_C_REFERENCE, markeredgecolor=_C_EDGE, zorder=5,
+        label=_t(r"decisive $\Delta L_{{\mathrm{{ta}}}}$ = {da} dB @ {df} Hz", language).format(
+            da=format_number(result.decisive_audibility, language, decimals=1),
+            df=decimal_comma(f"{result.decisive_frequency:g}", language),
+        ),
+    )
+
+    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_ylabel(_t("Sound pressure level [dB]", language))
+    ax.set_title(_t("ISO 1996-2 tone-audibility analysis", language))
+    format_frequency_axis(ax, float(f1.min()), float(f2.max()))
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, which="major", axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
     localize_axes(ax, language)
     return ax
 

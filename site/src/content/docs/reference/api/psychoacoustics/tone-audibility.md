@@ -755,6 +755,53 @@ ToneAudibilityResult.plot(
 
 Plot the per-tone audibility `ΔL` against tone frequency.
 
+### ToneAudibilityResult.report()
+
+```python
+ToneAudibilityResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a tonal audibility assessment fiche to a PDF.
+
+Writes a one-page tonal-assessment report following ISO 1996-2:2017
+Annex J (the engineering method of ISO/PAS 20065:2016): the
+standard-basis line, an optional metadata header (source/situation,
+client, measurement position, instrumentation, date, with the analysis
+line spacing `Δf` read from the result), a full-width table of the key
+quantities for every detected tone (frequency `f_T`, tone level
+`Lpt`, critical-band masking-noise level `Lpn`, critical bandwidth
+`Δf_c` and audibility `ΔL_ta`) above the level-versus-frequency
+analysis plot with the tones and their critical-band masking noise
+marked, the boxed decisive audibility `ΔL_ta` and the derived tonal
+adjustment `K` (Table J.1), an optional verdict row and a prominence
+note, and a footer with the fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable decisive audibility `ΔL_ta` in dB (a lower audibility passes). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When True, the key-quantity table adds the per-tone extended-uncertainty column (when the result carries it). |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+
 ## two_tone_separation_frequency
 
 ```python

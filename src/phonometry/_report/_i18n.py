@@ -470,6 +470,28 @@ _STRINGS: dict[str, str] = {
     "Health-risk classification": "Clasificación del riesgo para la salud",
     "stress variable R = {r} &#8594; {band}": "variable de tensión R = {r} &#8594; {band}",
     "ISO 2631-5:2018 defines no exposure limit; the stress variable R and the probability of lumbar injury P are the informative Annex C basis for assessing the potential of an adverse health effect. The risk bands follow the Table C.2 stress variables for 10 / 50 / 90 % risk of injury; the moderate band matches the Annex C worked example (a moderate adverse health effect, 10 % to 50 % risk of injury). The Clause 5 model is vertical-axis only (clause 4 of the 2018 edition neglects the horizontal contributions to spinal compression); assess horizontal whole-body exposure with the ISO 2631-1 metrics instead, and the Annex A / Annex E finite-element model is out of scope.": "La ISO 2631-5:2018 no define ningún límite de exposición; la variable de tensión R y la probabilidad de lesión lumbar P son la base informativa del anexo C para evaluar el potencial de un efecto adverso para la salud. Las bandas de riesgo siguen las variables de tensión de la Tabla C.2 para un riesgo de lesión del 10 / 50 / 90 %; la banda moderada coincide con el ejemplo resuelto del anexo C (un efecto adverso para la salud moderado, riesgo de lesión del 10 % al 50 %). El modelo de la cláusula 5 es solo para el eje vertical (la cláusula 4 de la edición de 2018 desprecia las contribuciones horizontales a la compresión espinal); la exposición horizontal de cuerpo completo se evalúa con las métricas de la ISO 2631-1, y el modelo de elementos finitos del anexo A / anexo E queda fuera del alcance.",
+    # --- tonal audibility assessment (ISO 1996-2:2017 Annex J) ------------
+    "Tonal audibility assessment": "Evaluación de la audibilidad tonal",
+    "{standard} tonal audibility by the ISO 1996-2:2017 Annex J engineering method (ISO/PAS 20065:2016); tonal adjustment K per Table J.1.": "{standard} audibilidad tonal por el método de ingeniería del anexo J de la ISO 1996-2:2017 (ISO/PAS 20065:2016); ajuste tonal K según la Tabla J.1.",
+    "Tonal audibility by the ISO 1996-2:2017 Annex J engineering method (ISO/PAS 20065:2016); tonal adjustment K per Table J.1.": "Audibilidad tonal por el método de ingeniería del anexo J de la ISO 1996-2:2017 (ISO/PAS 20065:2016); ajuste tonal K según la Tabla J.1.",
+    "Source / situation": "Fuente / situación",
+    "Measurement position": "Posición de medición",
+    "Analysis line spacing &#916;f [Hz]": "Resolución del análisis &#916;f [Hz]",
+    "Detected tones": "Tonos detectados",
+    "Tone f<sub>T</sub> [Hz]": "Tono f<sub>T</sub> [Hz]",
+    "Type": "Tipo",
+    "Single": "Único",
+    "FG ({n})": "FG ({n})",
+    "Present": "Presente",
+    "Tonal audibility &#916;L<sub>ta</sub> = <b>{dl} dB</b> &nbsp; tonal adjustment K = <b>{k} dB</b>": "Audibilidad tonal &#916;L<sub>ta</sub> = <b>{dl} dB</b> &nbsp; ajuste tonal K = <b>{k} dB</b>",
+    "Decisive tone f<sub>T</sub> = {f} Hz": "Tono decisivo f<sub>T</sub> = {f} Hz",
+    "Analysis line spacing &#916;f = {df} Hz": "Resolución del análisis &#916;f = {df} Hz",
+    "Extended uncertainty U = {u} dB (90 % coverage)": "Incertidumbre extendida U = {u} dB (cobertura del 90 %)",
+    "&#916;L<sub>ta</sub> = {dl} dB, required &#8804; {req} dB": "&#916;L<sub>ta</sub> = {dl} dB, exigido &#8804; {req} dB",
+    "A prominent tone is present (decisive &#916;L<sub>ta</sub> = {dl} dB &gt; 0); the tonal adjustment K = {k} dB (ISO 1996-2:2017 Table J.1) applies.": "Existe un tono destacado (&#916;L<sub>ta</sub> decisiva = {dl} dB &gt; 0); se aplica el ajuste tonal K = {k} dB (Tabla J.1 de la ISO 1996-2:2017).",
+    "No prominent tone is present (decisive &#916;L<sub>ta</sub> = {dl} dB &#8804; 0); no tonal adjustment applies (K = 0 dB).": "No existe ningún tono destacado (&#916;L<sub>ta</sub> decisiva = {dl} dB &#8804; 0); no se aplica ajuste tonal (K = 0 dB).",
+    "The tonal audibility &#916;L<sub>ta</sub> = L<sub>pt</sub> &#8722; L<sub>pn</sub> &#8722; a<sub>v</sub> is the amount by which the tone level rises above the masking threshold of the surrounding noise (ISO/PAS 20065:2016, Formula (14)); the decisive value is the largest over the detected tones (Clause 5.3.8).": "La audibilidad tonal &#916;L<sub>ta</sub> = L<sub>pt</sub> &#8722; L<sub>pn</sub> &#8722; a<sub>v</sub> es la magnitud en que el nivel del tono supera el umbral de enmascaramiento del ruido circundante (ISO/PAS 20065:2016, Fórmula (14)); el valor decisivo es el mayor de los tonos detectados (Cláusula 5.3.8).",
+    "L<sub>pn</sub> is the critical-band masking-noise level (Formula (12)), &#916;f<sub>c</sub> the critical bandwidth about the tone (Formula (2)); an FG entry combines tones sharing a critical band (Formula (17)).": "L<sub>pn</sub> es el nivel del ruido enmascarante en la banda crítica (Fórmula (12)), &#916;f<sub>c</sub> el ancho de la banda crítica en torno al tono (Fórmula (2)); una entrada FG combina tonos que comparten una banda crítica (Fórmula (17)).",
 }
 
 

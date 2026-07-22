@@ -78,6 +78,8 @@ _STRINGS: dict[str, str] = {
     r"Hearing threshold $T_f$": r"Umbral de audición $T_f$",
     "ISO 226:2023 equal-loudness contours": "Curvas isofónicas ISO 226:2023",
     "{p} phon": "{p} fonios",
+    "ISO 226:2023 defines 20 to 90 phon; above 80 phon the contour is defined only up to 4 kHz.":
+        "ISO 226:2023 define de 20 a 90 fonios; por encima de 80 fonios la curva solo se define hasta 4 kHz.",
 }
 
 
@@ -699,5 +701,17 @@ def plot_equal_loudness_contours(
     ax.set_title(_t("ISO 226:2023 equal-loudness contours", language))
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc="upper right", fontsize="small")
+    # Subtle footnote so the standalone figure is self-explanatory: the 90 phon
+    # contour stops at 4 kHz and no higher contours exist by the standard.
+    ax.text(
+        0.015, 0.02,
+        _t(
+            "ISO 226:2023 defines 20 to 90 phon; above 80 phon the contour is "
+            "defined only up to 4 kHz.",
+            language,
+        ),
+        transform=ax.transAxes, fontsize=7, color=_C_MUTED,
+        ha="left", va="bottom",
+    )
     localize_axes(ax, language)
     return ax

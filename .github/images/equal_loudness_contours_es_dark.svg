@@ -869,6 +869,9 @@ L 605.688281 28.798125
     <text style="font-size: 9px; font-family: sans-serif; text-anchor: start; fill: #1f77b4" x="401.113828" y="136.906125" transform="rotate(-0 401.113828 136.906125)">90 fonios</text>
    </g>
    <g id="text_27">
+    <text style="font-size: 7px; font-family: sans-serif; text-anchor: start; fill: #9e9e9e" x="56.058281" y="407.434884" transform="rotate(-0 56.058281 407.434884)">ISO 226:2023 define de 20 a 90 fonios; por encima de 80 fonios la curva solo se define hasta 4 kHz.</text>
+   </g>
+   <g id="text_28">
     <text style="font-weight: 700; font-size: 12px; font-family: sans-serif; text-anchor: middle; fill: #ffffff" x="326.688281" y="16.798125" transform="rotate(-0 326.688281 16.798125)">Líneas isofónicas normales (ISO 226:2023)</text>
    </g>
    <g id="legend_1">
@@ -891,7 +894,7 @@ L 491.817181 40.043625
 L 500.147181 40.043625 
 " style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #ff7f0e; stroke-width: 1.5"/>
     </g>
-    <g id="text_28">
+    <g id="text_29">
      <!-- Umbral de audición $T_f$ -->
      <g style="fill: #ffffff" transform="translate(506.811181 42.959125)">
       <text>

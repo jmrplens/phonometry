@@ -3101,6 +3101,8 @@ res.plot()   # the iconic ISO 226 chart (needs matplotlib)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" width="80%"></picture>
 
+ISO 226:2023 defines the contours from 20 to 90 phon; above 80 phon the formula is valid only up to 4 kHz, so the 90 phon contour stops there and no higher contours are defined.
+
 <details>
 <summary>Show the code for this figure</summary>
 

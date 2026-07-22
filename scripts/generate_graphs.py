@@ -234,6 +234,8 @@ _ES_EXACT = {
         "Sin estado: cada bloque reinicia el transitorio del filtro",
     "Normal Equal-Loudness-Level Contours (ISO 226:2023)":
         "L\u00edneas isof\u00f3nicas normales (ISO 226:2023)",
+    "ISO 226:2023 defines 20 to 90 phon; above 80 phon the contour is defined only up to 4 kHz.":
+        "ISO 226:2023 define de 20 a 90 fonios; por encima de 80 fonios la curva solo se define hasta 4 kHz.",
     "Original Signal (250 Hz + 1000 Hz Sum) @ 48 kHz":
         "Se\u00f1al original (suma de 250 Hz + 1000 Hz) @ 48 kHz",
     "Oversampled (high_accuracy=True)": "Sobremuestreado (high_accuracy=True)",

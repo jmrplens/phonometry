@@ -23,6 +23,7 @@ references:
 ---
 
 import ThemeImage from '../../../components/ThemeImage.astro';
+import ReportPreview from '../../../components/ReportPreview.astro';
 
 The **Speech Intelligibility Index** predicts how much of a speech signal is
 audible, and therefore intelligible, to a listener in a given noise and hearing
@@ -316,6 +317,47 @@ spectrum clears the noise. When both mechanisms are in play, compute both; the
 inputs are cheap once the room and the noise have been measured. See the
 [Speech Transmission Index guide](/phonometry/guides/speech-transmission/) for
 the STI side.
+
+## 6. ANSI S3.5-1997 report (`.report()`)
+
+`SIIResult.report(path)` renders a one-page PDF fiche laid out like a
+speech-audibility report: a standard-basis line, an optional metadata header
+block, a per-one-third-octave-band table of the equivalent speech spectrum
+$E_i'$, the Table 3 band-importance function $I_i$ and the band-audibility
+function $A_i$ beside the audibility and importance-weighted contribution bars
+(the result's own `.plot()`), the boxed `SII = X` single number, an optional
+verdict row and a footer with the fixed disclaimer. It uses the same
+`ReportMetadata` container and rendering engine as the
+[ISO 717 insulation fiche](/phonometry/guides/insulation-field/#iso-717-report-report);
+a supplied `requirement` is read as the minimum required SII (a higher SII
+passes). `verbose=True` adds the equivalent disturbance spectrum level $D_i$
+column. Rendering needs reportlab (`pip install phonometry[report]`); only
+`engine="reportlab"` is supported. Pass `language="es"` for a Spanish fiche.
+
+```python
+from phonometry import hearing, ReportMetadata
+
+res = hearing.speech_intelligibility_index(speech, noise, threshold=threshold)
+res.report(
+    "sii_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Conversational speech in low-frequency ambient noise",
+        measurement_standard="ANSI S3.5-1997",
+        laboratory="Phonometry Reference Laboratory",
+        requirement=0.75,            # minimum required SII (a higher SII passes)
+    ),
+)
+```
+
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
+
+<ReportPreview
+	name="ansi_s3_5_sii_example"
+	title="ANSI S3.5-1997 SII example report (PDF)"
+	description="One-page speech-intelligibility-index fiche: a metadata header, a one-third-octave-band table of the equivalent speech spectrum, band importance and band audibility, the audibility bars, the boxed SII = 0.851 single-number result and a PASS verdict against a 0.75 minimum."
+	caption="Speech intelligibility index fiche (SIIResult.report), the SII with its per-band audibility."
+/>
 
 ## See also
 

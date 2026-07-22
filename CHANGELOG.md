@@ -37,6 +37,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   metadata `requirement` adds a PASS/FAIL verdict (a higher insertion loss is
   better). `verbose=True` adds the Fresnel-number column. `language="es"`
   renders the Spanish fiche.
+- `NCResult.report()` and `RCResult.report()`: one-page PDF room-noise
+  assessment fiches for the two ANSI/ASA S12.2-2019 ratings. Each sheet carries
+  the standard-basis line, an optional metadata header (client, room,
+  description, room volume, floor area, instrumentation, climate, date), the
+  measured octave-band levels beside the measured spectrum plotted against the
+  NC/RC curve family (the result's own `plot`), and a boxed rating: `NC-nn`
+  with its governing octave band (tangency method, Table 1) or `RC-nn(tag)`
+  with the mid-frequency average `LMF` and the neutral/rumble/hiss spectral
+  quality (Annex D). A target rating on the metadata `requirement` adds a
+  PASS/FAIL verdict, where a lower rating passes. With `verbose=True` the table
+  gains the per-band NC contour value read by the tangency method, or the
+  reference RC Mark II curve and the measured deviation from it. The fiches
+  render in English and Spanish (`language="es"`).
+- `STIResult.report()`: a one-page PDF speech-transmission-index fiche
+  (IEC 60268-16:2020) for verifying voice-alarm and public-address
+  intelligibility. The sheet carries a standard-basis line stating the
+  measurement method (the full STI indirect method from an impulse response, or
+  the direct STIPA method on a recorded signal), an optional metadata header
+  (client, system, manufacturer, test room, date), a per-octave-band table of
+  the modulation transfer index `MTI` beside the per-band MTI bars (the
+  result's own plot), and a boxed `STI = X` single number with the Annex F
+  qualification band. A minimum STI supplied via the metadata `requirement`
+  adds a PASS/FAIL verdict (a higher STI passes). `language="es"` renders the
+  Spanish fiche.
+- `SIIResult.report()`: a one-page PDF speech-intelligibility-index fiche
+  (ANSI S3.5-1997, one-third-octave-band method) for a speech-audibility
+  assessment. The sheet carries a standard-basis line, an optional metadata
+  header (client, listening condition, test room, date), a
+  per-one-third-octave-band table of the equivalent speech spectrum `Ei'`, the
+  Table 3 band-importance function `Ii` and the band-audibility function `Ai`
+  beside the audibility and importance-weighted contribution bars (the result's
+  own plot), and a boxed `SII = X` single number. A minimum SII supplied via
+  the metadata `requirement` adds a PASS/FAIL verdict (a higher SII passes).
+  `verbose=True` adds the equivalent disturbance spectrum level `Di` column;
+  `language="es"` renders the Spanish fiche.
 - `StructureBornePowerResult.report()`: a one-page PDF structure-borne sound
   power characterization fiche for the power a piece of building service
   equipment injects into a reception plate (EN 15657:2018 reception-plate

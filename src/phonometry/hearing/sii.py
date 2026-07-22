@@ -27,6 +27,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike
 
 from .._internal.warnings import _warn_renamed
@@ -122,6 +124,54 @@ class SIIResult:
         from .._plot.hearing import plot_sii
 
         return plot_sii(self, ax=ax, language=check_language(language), **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ANSI S3.5-1997 speech-intelligibility-index fiche to a PDF.
+
+        Writes a one-page speech-audibility report: a standard-basis line, an
+        optional metadata header block, a per-one-third-octave-band table (the
+        equivalent speech spectrum ``Ei'``, the band-importance function ``Ii``
+        of Table 3 and the band-audibility function ``Ai``) beside the
+        audibility and importance-weighted contribution bars (the result's own
+        :meth:`plot`), the boxed ``SII = X`` single number, an optional verdict
+        row and a footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a bare fiche (body, result and disclaimer only). A supplied
+            ``requirement`` is read as the minimum required SII (a higher SII
+            passes).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the left table adds the equivalent
+            disturbance spectrum level ``Di`` column (clause 5.6).
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or
+            ``language`` is not a supported language.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.sii import render_sii_report
+
+        return render_sii_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def standard_speech_spectrum(vocal_effort: str = "normal") -> np.ndarray:

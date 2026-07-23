@@ -410,6 +410,55 @@ print(round(r.resistivity))           # 324000  sigma [Pa*s/m^2]
 print(round(r.linear_coefficient))    # 16000   a = R_s cuando u -> 0
 ```
 
+### Informe de ISO 9053-1 (`.report()`)
+
+`StaticAirflowResult.report(path)` genera una ficha PDF de una página con el
+formato de un informe de ensayo de resistencia al flujo de aire acreditado
+(ISO 9053-1:2018, método estático): una línea de norma de base, un bloque de
+cabecera de metadatos opcional, un cuerpo de dos paneles con una tabla de
+resultados (la velocidad de evaluación, la diferencia de presión ajustada, la
+resistencia al flujo de aire $R$, la resistencia específica al flujo de aire
+$R_s$, la resistividad al flujo de aire $\sigma$ cuando hay espesor disponible,
+y los coeficientes del ajuste por el origen $a$ y $b$) junto a la curva ajustada
+$\Delta p(u)$ (el propio `.plot()` del resultado), la resistencia específica al
+flujo de aire $R_s$ en un recuadro con $R$ y $\sigma$ al lado, y un pie con el
+descargo de responsabilidad fijo. La ISO 9053-1 es una caracterización del
+material, por lo que la ficha no lleva veredicto de conformidad.
+
+Usa el mismo contenedor `ReportMetadata` y el mismo motor de renderizado que las
+demás fichas. Los campos descriptivos que aplican aquí son `client`,
+`manufacturer`, `specimen`, `thickness` (el espesor de la probeta $d$, en metros,
+mostrado en milímetros), `test_room`, `test_date`, `temperature`,
+`relative_humidity`, `measurement_standard`, `laboratory`, `operator`,
+`report_id` y `notes`. El campo `requirement` se ignora (la ISO 9053-1 no tiene
+veredicto). La generación necesita reportlab (`pip install phonometry[report]`);
+solo se admite `engine="reportlab"`. La ficha se genera en inglés por defecto;
+pasa `language="es"` para una ficha en español (cadenas fijas traducidas y coma
+como separador decimal).
+
+```python
+from phonometry import materials, ReportMetadata
+
+r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r.report(
+    "airflow_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="50 mm porous absorber (open-cell)",
+        thickness=0.050,
+        measurement_standard="ISO 9053-1",
+        test_room="Static airflow rig, 100 mm cell",
+        laboratory="Phonometry Reference Laboratory",
+    ),
+)                                  # R_s, R y sigma a u = 0.5 mm/s
+```
+
+<ReportPreview
+	name="iso9053_airflow_resistance_example"
+	title="Informe de ejemplo de resistencia al flujo de aire (ISO 9053-1, PDF)"
+	description="Ficha de una página de resistencia al flujo de aire por el método estático: una cabecera de metadatos (cliente, fabricante, probeta, espesor de la probeta, instalación de ensayo, temperatura y humedad), una tabla de resultados con la velocidad de evaluación, la diferencia de presión ajustada, la resistencia al flujo de aire R, la resistencia específica al flujo de aire R_s, la resistividad al flujo de aire sigma y los coeficientes del ajuste por el origen a y b junto a la curva ajustada de caída de presión, y la resistencia específica al flujo de aire R_s en un recuadro con R y sigma al lado, evaluadas a la velocidad de referencia de 0,5 mm/s."
+	caption="Ficha de resistencia al flujo de aire por el método estático (StaticAirflowResult.report), R_s, R y sigma a 0,5 mm/s."
+/>
+
 **Método alterno (ISO 9053-2:2020).** Un pistón que oscila a 1–4 Hz acciona un
 flujo alterno hacia una cavidad terminada por la probeta o por un tapón
 hermético; la resistencia se obtiene de la diferencia de nivel de presión sonora

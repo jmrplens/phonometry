@@ -2327,6 +2327,42 @@ def _dynamic_stiffness_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "en29052_dynamic_stiffness_example.pdf"
 
 
+def _airflow_resistance_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 9053-1 fiche: the static airflow resistance of a porous specimen.
+
+    A 50 mm porous absorber measured in a 100 mm diameter cell (cross-section
+    A = pi*0.05^2 = 7.854e-3 m2, ISO 9053-1:2018 clause 7). The linear airflow
+    velocity is stepped up to 12 mm/s (below the 15 mm/s clause-7.5 limit) and
+    the measured pressure difference fitted through the origin with a
+    second-order regression dp = a*u + b*u^2 (clause 7.5), here a = 16000 Pa*s/m
+    and b = 400000 Pa*s^2/m^2. Read at the reference velocity u = 0.5 mm/s this
+    gives R_s = a + b*u = 16200 Pa*s/m, an airflow resistance
+    R = R_s/A = 2.06e6 Pa*s/m^3 and, for the 50 mm thickness, an airflow
+    resistivity sigma = R_s/d = 324000 Pa*s/m^2.
+    """
+    area = np.pi * 0.05**2
+    u = np.array([0.5, 1.0, 2.0, 4.0, 8.0, 12.0]) * 1e-3
+    dp = 1.6e4 * u + 4.0e5 * u**2
+    result = ph.materials.static_airflow_resistance(
+        u, dp, area=area, thickness=0.05
+    )
+    metadata = ReportMetadata(
+        specimen="50 mm porous absorber (open-cell)",
+        client="Example client",
+        manufacturer="Example insulation works",
+        thickness=0.050,
+        test_room="Static airflow rig (example), 100 mm cell",
+        measurement_standard="ISO 9053-1",
+        temperature=23.0,
+        relative_humidity=50.0,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-9053-1",
+    )
+    return result, metadata, "iso9053_airflow_resistance_example.pdf"
+
+
 def _mechanical_mobility_example() -> Tuple[object, ReportMetadata, str]:
     """ISO 7626 fiche: the driving-point mechanical mobility of a resonator.
 
@@ -3008,6 +3044,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _diffusion_example,
     _diffusion_polar_example,
     _dynamic_stiffness_example,
+    _airflow_resistance_example,
     _vibration_reduction_example,
     _flanking_level_difference_example,
     _flanking_impact_level_example,

@@ -75,6 +75,8 @@ from .._internal.warnings import PhonometryWarning
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 __all__ = [
     "AirflowResistanceWarning",
     "StaticAirflowResult",
@@ -153,6 +155,71 @@ class StaticAirflowResult:
 
         check_language(language)
         return plot_static_airflow(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 9053-1 static airflow-resistance test-report fiche to a PDF.
+
+        Writes a one-page accredited airflow-resistance report
+        (ISO 9053-1:2018, static/direct airflow method): the standard-basis
+        line, an optional metadata header block (client, manufacturer,
+        specimen, the specimen thickness ``d``, test facility, date, climate
+        ...), a two-panel body with a compact metrics table (the evaluation
+        velocity, the fitted pressure difference ``dp``, the airflow resistance
+        ``R``, the specific airflow resistance ``R_s``, the airflow resistivity
+        ``sigma`` when a thickness is available, and the through-origin fit
+        coefficients ``a`` and ``b``) beside the fitted ``dp(u)`` curve, a boxed
+        specific airflow resistance ``R_s`` with the airflow resistance ``R``
+        and the resistivity ``sigma`` alongside, and a footer with the fixed
+        disclaimer. ISO 9053-1 is a material characterisation, so there is no
+        pass/fail verdict.
+
+        The clause 7.5 stepwise procedure fits ``dp = a*u + b*u**2`` through the
+        origin and evaluates the resistances at the reference velocity
+        ``u = 0.5 mm/s``; the linear coefficient ``a`` is the zero-velocity
+        specific airflow resistance. Resistance quantities are printed to the
+        nearest whole Pa*s unit and the evaluation velocity to 0,1 mm/s.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
+            produces a body-and-disclaimer fiche. The applicable descriptive
+            fields are ``client``, ``manufacturer``, ``specimen``, ``thickness``
+            (the specimen thickness ``d``, in metres, shown in millimetres),
+            ``test_room``, ``test_date``, ``temperature``, ``relative_humidity``,
+            ``measurement_standard``, ``laboratory``, ``operator``, ``report_id``
+            and ``notes``. The ``requirement`` field is ignored (ISO 9053-1 has
+            no verdict).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for a uniform ``.report()`` signature; the
+            airflow-resistance fiche has a single body layout, so it has no
+            effect.
+        :param language: Fiche language: ``"en"`` (default, English, decimal
+            point) or ``"es"`` (Spanish, decimal comma).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab or matplotlib is not installed. The
+            fiche always embeds the fitted ``dp(u)`` curve, so both are required
+            (``pip install "phonometry[report,plot]"``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso9053 import render_static_airflow_report
+
+        return render_static_airflow_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def linear_airflow_velocity(volume_flow_rate: float, area: float) -> float:

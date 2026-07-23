@@ -94,6 +94,7 @@ from ..materials.porous_absorber import delany_bazley, miki
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
     from ..materials.porous_absorber import PorousMediumResult
 
 #: Default speed of sound ``c`` in air, in m/s (matches the materials domain).
@@ -535,6 +536,59 @@ class BarrierInsertionLoss:
         from .._plot.environmental import plot_barrier_insertion_loss
 
         return plot_barrier_insertion_loss(self, ax=ax, language=check_language(language), **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a one-page barrier insertion-loss prediction fiche to a PDF.
+
+        Writes a prediction sheet (clearly labelled a prediction, not a
+        measurement) laid out like an outdoor-noise barrier calculation: the
+        standard-basis line naming the diffraction model used (the
+        wave-theoretic rigid-screen model for ``method="exact"`` or the
+        Kurze-Anderson closed form for ``method="kurze_anderson"``, a
+        wave-acoustics complement to the ISO 9613-2 screening term), an optional
+        metadata header (source/situation, client, receiver position, date), a
+        per-band table of the insertion loss ``IL`` (and, in verbose mode, the
+        Fresnel number ``N``), the insertion-loss spectrum plot, a boxed mean
+        insertion loss over the octave bands, an optional PASS/FAIL verdict
+        against a declared minimum required insertion loss (a higher insertion
+        loss is better) and a footer identity/disclaimer block.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header identity (``specimen`` the source/situation, ``client``,
+            ``test_room`` the receiver position) and the footer identity. A
+            supplied ``requirement`` is read as the minimum required mean
+            insertion loss in dB.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When True, the per-band table adds the Fresnel number
+            ``N`` column.
+        :param language: Fiche language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab or matplotlib is not installed
+            (``pip install "phonometry[report,plot]"``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso9613 import render_barrier_insertion_loss_report
+
+        return render_barrier_insertion_loss_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def _validate_barrier_geometry(

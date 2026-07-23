@@ -61,6 +61,7 @@ references:
 
 import Video from '../../../components/Video.astro';
 import ThemeImage from '../../../components/ThemeImage.astro';
+import ReportPreview from '../../../components/ReportPreview.astro';
 
 Predicting the noise a distant source delivers to a receiver outdoors is a
 book-keeping exercise: start from the source **sound power** and subtract, band
@@ -580,6 +581,80 @@ See the [Theory](/phonometry/reference/theory/environment-transport/) page for t
 [Room Acoustics guide](/phonometry/guides/room-acoustics/) for how $\alpha$ feeds
 ISO 354, and the [Occupational Noise Exposure guide](/phonometry/guides/occupational-exposure/) for the ISO 9612 occupational
 exposure that consumes A-weighted levels.
+
+## 4. Prediction reports (`.report()`)
+
+Both outdoor-propagation results render a one-page PDF **prediction** fiche.
+They are clearly labelled predictions, not measurements: the sheet states the
+meteorological and ground assumptions and, for the barrier, names the actual
+diffraction model behind the number.
+
+`OutdoorAttenuation.report(path)` boxes the octave-band range of the total
+attenuation on its own; pass a `SourceEmission` (the source sound power and
+directivity) to add the source power and downwind level to the table and box the
+A-weighted downwind level $L_{AT}(\text{DW})$ at the receiver instead. A limit
+level supplied through the metadata `requirement` then adds a PASS/FAIL verdict
+(a lower level is better). Pass `language="es"` for the Spanish fiche.
+
+```python
+import numpy as np
+from phonometry import (
+    Barrier,
+    ReportMetadata,
+    SourceEmission,
+    outdoor_propagation_attenuation,
+)
+
+freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+lw = np.array([95, 100, 103, 105, 104, 101, 95, 88], dtype=float)
+result = outdoor_propagation_attenuation(
+    200.0, 4.0, 2.0, freqs, 1.0, 1.0, 1.0,
+    barrier=Barrier(source_to_edge=105.0, edge_to_receiver=105.0),
+    temperature=10.0, relative_humidity=70.0,
+)
+result.report(
+    "outdoor_attenuation.pdf",
+    metadata=ReportMetadata(
+        specimen="Industrial fan plant (point source)",
+        test_room="Nearest dwelling facade",
+        requirement=50.0,  # maximum acceptable A-weighted downwind level
+    ),
+    source_emission=SourceEmission(sound_power_level=lw),
+)
+```
+
+<ReportPreview
+	name="iso9613_outdoor_attenuation_example"
+	title="ISO 9613-2 outdoor propagation example report (PDF)"
+	description="One-page ISO 9613-2 prediction fiche: a metadata header with the propagation distance, a per-band table of the source power level Lw and the divergence, atmospheric, ground and barrier attenuation terms with the total A and the downwind level LfT(DW), the attenuation-breakdown plot and the boxed A-weighted downwind level LAT(DW) = 29.9 dB with a PASS verdict against a 50 dB limit."
+	caption="Outdoor propagation fiche (OutdoorAttenuation.report), the A-weighted downwind level at the receiver."
+/>
+
+`BarrierInsertionLoss.report(path)` boxes the mean insertion loss over the
+octave bands; a minimum required insertion loss supplied through `requirement`
+adds a PASS/FAIL verdict (a higher insertion loss is better).
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, barrier_insertion_loss
+
+freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+result = barrier_insertion_loss(freqs, 1.0, 50.0, 4.0, 100.0, 1.5)
+result.report(
+    "barrier_insertion_loss.pdf",
+    metadata=ReportMetadata(
+        specimen="Roadside noise barrier, 4 m high",
+        requirement=8.0,  # minimum required mean insertion loss
+    ),
+)
+```
+
+<ReportPreview
+	name="iso9613_barrier_insertion_loss_example"
+	title="Barrier insertion loss example report (PDF)"
+	description="One-page barrier insertion-loss prediction fiche: a metadata header naming the ground model, a per-band table of the insertion loss, the insertion-loss spectrum plot and the boxed mean insertion loss IL = 12.9 dB with a PASS verdict against an 8 dB minimum. The basis line names the wave-theoretic rigid-screen diffraction model, a complement to the ISO 9613-2 screening term."
+	caption="Barrier insertion loss fiche (BarrierInsertionLoss.report), the mean insertion loss over the octave bands."
+/>
 
 ## See also
 

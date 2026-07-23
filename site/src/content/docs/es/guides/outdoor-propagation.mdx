@@ -61,6 +61,7 @@ references:
 
 import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 Predecir el ruido que una fuente lejana entrega a un receptor en exteriores es
 un ejercicio de contabilidad: se parte de la **potencia acústica** de la fuente y
@@ -610,6 +611,85 @@ para cómo $\alpha$ alimenta la ISO 354, y la
 [guía de exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/)
 para la exposición ocupacional (ISO 9612) que consume niveles
 ponderados A.
+
+## 4. Informes de predicción (`.report()`)
+
+Ambos resultados de propagación al aire libre generan una ficha PDF de una
+página de **predicción**. Se etiquetan claramente como predicciones, no como
+mediciones: la hoja indica las hipótesis meteorológicas y de suelo y, para la
+barrera, nombra el modelo de difracción real que hay detrás del número.
+
+`OutdoorAttenuation.report(path)` destaca por sí solo el intervalo de la
+atenuación total por bandas de octava; pasa un `SourceEmission` (la potencia
+acústica de la fuente y su directividad) para añadir la potencia de la fuente y
+el nivel a favor del viento a la tabla y destacar en su lugar el nivel a favor
+del viento con ponderación A $L_{AT}(\text{DW})$ en el receptor. Un nivel límite
+indicado mediante el `requirement` de los metadatos añade entonces un veredicto
+CUMPLE/NO CUMPLE (un nivel más bajo es mejor). Usa `language="es"` para la ficha
+en español.
+
+```python
+import numpy as np
+from phonometry import (
+    Barrier,
+    ReportMetadata,
+    SourceEmission,
+    outdoor_propagation_attenuation,
+)
+
+freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+lw = np.array([95, 100, 103, 105, 104, 101, 95, 88], dtype=float)
+result = outdoor_propagation_attenuation(
+    200.0, 4.0, 2.0, freqs, 1.0, 1.0, 1.0,
+    barrier=Barrier(source_to_edge=105.0, edge_to_receiver=105.0),
+    temperature=10.0, relative_humidity=70.0,
+)
+result.report(
+    "outdoor_attenuation.pdf",
+    metadata=ReportMetadata(
+        specimen="Ventilador industrial (fuente puntual)",
+        test_room="Fachada de la vivienda más próxima",
+        requirement=50.0,  # nivel máximo aceptable a favor del viento
+    ),
+    source_emission=SourceEmission(sound_power_level=lw),
+    language="es",
+)
+```
+
+<ReportPreview
+	name="iso9613_outdoor_attenuation_example"
+	title="Informe de ejemplo de propagación ISO 9613-2 (PDF)"
+	description="Ficha de predicción ISO 9613-2 de una página: un encabezado de metadatos con la distancia de propagación, una tabla por banda del nivel de potencia acústica Lw y de los términos de atenuación por divergencia, atmósfera, suelo y barrera con el total A y el nivel a favor del viento LfT(DW), el gráfico del desglose de la atenuación y el nivel a favor del viento con ponderación A destacado LAT(DW) = 29.9 dB con veredicto CUMPLE frente a un límite de 50 dB."
+	caption="Ficha de propagación al aire libre (OutdoorAttenuation.report), el nivel a favor del viento con ponderación A en el receptor."
+/>
+
+`BarrierInsertionLoss.report(path)` destaca la pérdida por inserción media sobre
+las bandas de octava; una pérdida por inserción mínima requerida indicada
+mediante `requirement` añade un veredicto CUMPLE/NO CUMPLE (una pérdida por
+inserción más alta es mejor).
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, barrier_insertion_loss
+
+freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+result = barrier_insertion_loss(freqs, 1.0, 50.0, 4.0, 100.0, 1.5)
+result.report(
+    "barrier_insertion_loss.pdf",
+    metadata=ReportMetadata(
+        specimen="Barrera acústica junto a la carretera, 4 m de altura",
+        requirement=8.0,  # pérdida por inserción media mínima requerida
+    ),
+    language="es",
+)
+```
+
+<ReportPreview
+	name="iso9613_barrier_insertion_loss_example"
+	title="Informe de ejemplo de pérdida por inserción de barrera (PDF)"
+	description="Ficha de predicción de pérdida por inserción de barrera de una página: un encabezado de metadatos con el modelo de suelo, una tabla por banda de la pérdida por inserción, el gráfico del espectro de pérdida por inserción y la pérdida por inserción media destacada IL = 12.9 dB con veredicto CUMPLE frente a un mínimo de 8 dB. La línea de base nombra el modelo ondulatorio de difracción en pantalla rígida, un complemento del término de apantallamiento de la ISO 9613-2."
+	caption="Ficha de pérdida por inserción de barrera (BarrierInsertionLoss.report), la pérdida por inserción media sobre las bandas de octava."
+/>
 
 ## Véase también
 

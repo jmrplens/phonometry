@@ -185,7 +185,8 @@ class StaticAirflowResult:
         origin and evaluates the resistances at the reference velocity
         ``u = 0.5 mm/s``; the linear coefficient ``a`` is the zero-velocity
         specific airflow resistance. Resistance quantities are printed to the
-        nearest whole Pa*s unit and the evaluation velocity to 0,1 mm/s.
+        nearest whole Pa*s unit and the evaluation velocity to one decimal
+        place (mm/s).
 
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``

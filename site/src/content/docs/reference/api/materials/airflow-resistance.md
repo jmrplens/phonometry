@@ -326,7 +326,8 @@ The clause 7.5 stepwise procedure fits `dp = a*u + b*u**2` through the
 origin and evaluates the resistances at the reference velocity
 `u = 0.5 mm/s`; the linear coefficient `a` is the zero-velocity
 specific airflow resistance. Resistance quantities are printed to the
-nearest whole Pa\*s unit and the evaluation velocity to 0,1 mm/s.
+nearest whole Pa\*s unit and the evaluation velocity to one decimal
+place (mm/s).
 
 **Parameters**
 

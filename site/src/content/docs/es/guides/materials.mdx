@@ -431,10 +431,11 @@ demás fichas. Los campos descriptivos que aplican aquí son `client`,
 mostrado en milímetros), `test_room`, `test_date`, `temperature`,
 `relative_humidity`, `measurement_standard`, `laboratory`, `operator`,
 `report_id` y `notes`. El campo `requirement` se ignora (la ISO 9053-1 no tiene
-veredicto). La generación necesita reportlab (`pip install phonometry[report]`);
-solo se admite `engine="reportlab"`. La ficha se genera en inglés por defecto;
-pasa `language="es"` para una ficha en español (cadenas fijas traducidas y coma
-como separador decimal).
+veredicto). La ficha incrusta la curva ajustada, por lo que la generación
+necesita tanto reportlab como matplotlib
+(`pip install "phonometry[report,plot]"`); solo se admite `engine="reportlab"`.
+La ficha se genera en inglés por defecto; pasa `language="es"` para una ficha en
+español (cadenas fijas traducidas y coma como separador decimal).
 
 ```python
 from phonometry import materials, ReportMetadata

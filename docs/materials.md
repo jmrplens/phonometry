@@ -339,8 +339,9 @@ fiches. The descriptive fields that apply here are `client`, `manufacturer`,
 `specimen`, `thickness` (the specimen thickness $d$, in metres, shown in
 millimetres), `test_room`, `test_date`, `temperature`, `relative_humidity`,
 `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The
-`requirement` field is ignored (ISO 9053-1 has no verdict). Rendering needs
-reportlab (`pip install phonometry[report]`); only `engine="reportlab"` is
+`requirement` field is ignored (ISO 9053-1 has no verdict). The fiche embeds
+the fitted curve, so rendering needs both reportlab and matplotlib
+(`pip install "phonometry[report,plot]"`); only `engine="reportlab"` is
 supported. Pass `language="es"` for a Spanish fiche (translated fixed strings
 and a comma decimal separator).
 

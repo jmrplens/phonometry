@@ -27,6 +27,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 La **movilidad** mecánica es el cociente complejo entre una respuesta en
 velocidad y la fuerza que la produce, `Y = v/F`. Es un miembro de una familia de
@@ -260,6 +261,43 @@ res = vibration.sdof_mobility_result(f, mass=2.0, stiffness=8000.0, damping=5.0)
 z = res.to("impedance")                        # impedancia = 1/Y por frecuencia
 print(res.frequencies[int(np.argmax(res.magnitude))].round(1))   # ~10.1 Hz
 ```
+
+### Ficha de informe
+
+`MobilityResult.report(path)` genera un informe de medición de movilidad mecánica
+de una página (definiciones de FRF de la ISO 7626-1:2011, medición según la
+ISO 7626-2:2015). La movilidad es una función de respuesta en frecuencia
+continua, no una magnitud por bandas de octava, de modo que la ficha la presenta
+con honestidad como el espectro de magnitud $|Y(f)|$ más una tabla compacta de
+puntos característicos (el tipo de FRF, en punto de excitación o de
+transferencia, el rango de frecuencias, la frecuencia del máximo, la movilidad
+máxima y la fase allí), y una movilidad máxima $|Y|$ enmarcada a la frecuencia en
+que ocurre (para una FRF en punto de excitación, una resonancia donde
+$|Y| = 1/c$ mide el amortiguamiento). Es una caracterización, así que no hay
+veredicto de aprobado/no aprobado; `language="es"` genera la ficha en español. La
+ficha siempre incrusta el espectro $|Y(f)|$, por lo que necesita los extras de
+informe y de gráficos (`pip install "phonometry[report,plot]"`).
+
+```python
+from phonometry import ReportMetadata, vibration
+
+res = vibration.sdof_mobility_result(f, mass=2.0, stiffness=8000.0, damping=5.0)
+res.report(
+    "movilidad.pdf",
+    metadata=ReportMetadata(
+        specimen="Soporte de máquina (punto de excitación)",
+        measurement_standard="ISO 7626-2",
+    ),
+    language="es",
+)   # ficha de una página (necesita phonometry[report,plot])
+```
+
+<ReportPreview
+	name="iso7626_mobility_example"
+	title="Informe de ejemplo de movilidad mecánica ISO 7626 (PDF)"
+	description="Ficha de movilidad mecánica de una página: una cabecera de metadatos, una tabla de los puntos característicos de la FRF (el tipo de FRF, el rango de frecuencias, la frecuencia del máximo, la movilidad máxima y la fase allí) junto al espectro de magnitud de la movilidad, y la movilidad máxima enmarcada."
+	caption="Ficha de movilidad mecánica (MobilityResult.report): los puntos característicos de la FRF y el espectro de magnitud de la movilidad."
+/>
 
 ## Véase también
 

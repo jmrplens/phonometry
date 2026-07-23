@@ -50,6 +50,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   reverberation time supplied via the metadata `requirement` is printed as a
   reference line without a PASS/FAIL verdict. `language="es"` renders the
   Spanish fiche.
+- `MobilityResult.report()`: a one-page PDF mechanical-mobility measurement
+  fiche (ISO 7626-1:2011 frequency-response-function definitions; measurement
+  per ISO 7626-2:2015). Mechanical mobility is a continuous frequency-response
+  function, not an octave-band quantity, so the sheet presents it honestly as
+  the mobility magnitude spectrum `|Y(f)|` plus a compact table of the FRF's
+  characteristic points (the FRF type, driving-point or transfer, the frequency
+  range, the peak frequency, the peak mobility magnitude and the phase there),
+  with a boxed peak mobility `|Y|` at the frequency it occurs at (for a
+  driving-point FRF a resonance, where `|Y| = 1/c` measures the damping). It is
+  a characterisation, so there is no pass/fail verdict. `language="es"` renders
+  the Spanish fiche.
+- `TransferStiffnessResult.report()`: a one-page PDF dynamic-transfer-stiffness
+  characterisation fiche for a resilient element (ISO 10846-1:2008 definition;
+  determined by the direct method, ISO 10846-2:2008, or the indirect
+  blocking-mass method, ISO 10846-3:2002). The dynamic transfer stiffness is a
+  continuous frequency-response function, so the sheet presents it as the
+  transfer-stiffness level spectrum `Lk(f)` plus a compact table of the FRF's
+  characteristic points (the determination method, the blocking mass for the
+  indirect method, the frequency range, and the low-frequency stiffness plateau
+  `|k2,1|`, its level `Lk` and the loss factor there), with a boxed
+  low-frequency `Lk` (the plateau that characterises the element below its
+  internal resonances). It is a characterisation, so there is no pass/fail
+  verdict. `language="es"` renders the Spanish fiche.
 - `OutdoorAttenuation.report()`: a one-page PDF outdoor sound propagation
   **prediction** fiche (ISO 9613-2:1996, general method of calculation). The
   sheet is clearly labelled a prediction, not a measurement. It carries a

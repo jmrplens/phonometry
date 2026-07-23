@@ -34,6 +34,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 La propiedad de transferencia vibroacústica de un elemento resiliente (un
 aislador de vibraciones, montura, fuelle o manguera) es su **rigidez dinámica de
@@ -216,6 +217,50 @@ k = 1e6 + 5e4j                                  # N/m, a 250 Hz
 Z = vibration.convert_frf(k, 250.0, "dynamic_stiffness", "impedance")
 print(abs(complex(vibration.convert_frf(Z, 250.0, "impedance", "dynamic_stiffness"))))  # 1.0012e6
 ```
+
+## 5. Ficha de informe
+
+`TransferStiffnessResult.report(path)` genera un informe de caracterización de
+la rigidez dinámica de transferencia de un elemento resiliente de una página
+(definición de la ISO 10846-1:2008; determinada por el método directo,
+ISO 10846-2:2008, o el método indirecto de masa de bloqueo, ISO 10846-3:2002).
+La rigidez de transferencia es una función de respuesta en frecuencia continua,
+no una magnitud por bandas de octava, de modo que la ficha la presenta con
+honestidad como el espectro de nivel $L_k(f)$ más una tabla compacta de puntos
+característicos (el método de determinación, la masa de bloqueo del método
+indirecto, el rango de frecuencias y la meseta de rigidez a baja frecuencia
+$|k_{2,1}|$, su nivel $L_k$ y el factor de pérdidas allí), y un $L_k$ a baja
+frecuencia enmarcado (la meseta que caracteriza el elemento por debajo de sus
+resonancias internas). Es una caracterización, así que no hay veredicto de
+aprobado/no aprobado; `language="es"` genera la ficha en español. La ficha
+siempre incrusta el espectro $L_k(f)$, por lo que necesita los extras de informe
+y de gráficos (`pip install "phonometry[report,plot]"`).
+
+```python
+import numpy as np
+from phonometry import ReportMetadata, TransferStiffnessResult, transfer_stiffness_direct
+
+freqs = np.array([20, 31.5, 50, 80, 125, 200, 315, 500, 800, 1250, 2000], dtype=float)
+k21 = 1e6 + 1j * (2 * np.pi * freqs) * 80.0     # elemento Kelvin-Voigt k + jwc
+u1 = 1e-6 + 0j
+k = transfer_stiffness_direct(k21 * u1, u1)     # método directo: k2,1 = F2,b/u1
+res = TransferStiffnessResult(frequencies=freqs, transfer_stiffness=k)
+res.report(
+    "rigidez_transferencia.pdf",
+    metadata=ReportMetadata(
+        specimen="Aislador de vibraciones de caucho",
+        measurement_standard="ISO 10846-2",
+    ),
+    language="es",
+)   # ficha de una página (necesita phonometry[report,plot])
+```
+
+<ReportPreview
+	name="iso10846_transfer_stiffness_example"
+	title="Informe de ejemplo de rigidez dinámica de transferencia ISO 10846 (PDF)"
+	description="Ficha de rigidez dinámica de transferencia de una página: una cabecera de metadatos, una tabla de los puntos característicos de la FRF (el método de determinación, el rango de frecuencias y la rigidez, el nivel y el factor de pérdidas a baja frecuencia) junto al espectro de nivel de rigidez de transferencia, y el nivel a baja frecuencia enmarcado."
+	caption="Ficha de rigidez dinámica de transferencia (TransferStiffnessResult.report): los puntos característicos de la FRF y el espectro de nivel de rigidez de transferencia."
+/>
 
 ## Véase también
 

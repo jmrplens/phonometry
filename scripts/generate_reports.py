@@ -2327,6 +2327,104 @@ def _dynamic_stiffness_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "en29052_dynamic_stiffness_example.pdf"
 
 
+def _mechanical_mobility_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 7626 fiche: the driving-point mechanical mobility of a resonator.
+
+    The closed-form single-degree-of-freedom driving-point mobility of
+    ISO 7626-1:2011 (Table 1 / 3.1.2), for a mass m = 2 kg on a stiffness
+    k = 8000 N/m with viscous damping c = 5 N.s/m. The undamped natural
+    frequency is f0 = (1/2pi) sqrt(k/m) = 10.07 Hz, and at that resonance the
+    driving-point mobility is purely real and equal to 1/c = 0.2 m/(N.s) (the
+    mobility peak measures the damping); including f0 in the log-spaced axis
+    lands the peak exactly on it. These are the module test's oracle values.
+    """
+    import math
+
+    mass, stiffness, damping = 2.0, 8000.0, 5.0
+    f0 = math.sqrt(stiffness / mass) / (2.0 * math.pi)
+    freqs = np.unique(np.append(np.logspace(0.0, np.log10(200.0), 300), f0))
+    result = ph.vibration.sdof_mobility_result(freqs, mass, stiffness, damping)
+    metadata = ReportMetadata(
+        specimen="Machine support bracket (driving point)",
+        client="Example client",
+        manufacturer="Example structures",
+        test_room="Modal-analysis rig (example)",
+        instrumentation="Impact hammer + accelerometer, H1 estimator (ISO 7626-2)",
+        measurement_standard="ISO 7626-2",
+        temperature=21.0,
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-7626",
+    )
+    return result, metadata, "iso7626_mobility_example.pdf"
+
+
+def _transfer_stiffness_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 10846 fiche: the dynamic transfer stiffness of a resilient mount.
+
+    A viscously damped resilient element (a Kelvin-Voigt mount, the module's
+    documented element model) with stiffness k = 1 MN/m and damping
+    c = 80 N.s/m has a transfer stiffness k2,1(f) = k + j*omega*c that is a
+    plateau at low frequency (|k2,1| -> k, the static stiffness) rising with
+    frequency as the damping term grows. The direct method (ISO 10846-2:2008)
+    measures it as k2,1 = F2,b/u1; synthesising the blocked output force
+    F2,b = k2,1 * u1 from a 1 um input displacement u1 and feeding it back
+    through ``transfer_stiffness_direct`` recovers the closed form exactly, so
+    the printed values match the module's tested oracle. At the 20 Hz plateau
+    |k2,1| = 1.00 MN/m, L_k = 20 lg(|k2,1|/k0) = 120.0 dB re 1 N/m and the loss
+    factor eta = Im/Re = 0.010 (ISO 10846-1:2008, 3.8).
+    """
+    freqs = np.array(
+        [
+            20,
+            25,
+            31.5,
+            40,
+            50,
+            63,
+            80,
+            100,
+            125,
+            160,
+            200,
+            250,
+            315,
+            400,
+            500,
+            630,
+            800,
+            1000,
+            1250,
+            1600,
+            2000,
+        ],
+        dtype=float,
+    )
+    stiffness, damping = 1.0e6, 80.0
+    omega = 2.0 * np.pi * freqs
+    k21 = stiffness + 1j * omega * damping
+    u1 = 1.0e-6 + 0.0j
+    measured = ph.transfer_stiffness_direct(k21 * u1, u1)
+    result = ph.TransferStiffnessResult(
+        frequencies=freqs, transfer_stiffness=measured, blocking_mass=None
+    )
+    metadata = ReportMetadata(
+        specimen="Rubber vibration isolator (resilient mount)",
+        client="Example client",
+        manufacturer="Example elastomers",
+        test_room="Transfer-stiffness rig (example)",
+        instrumentation="Force transducer + accelerometers (ISO 10846-2)",
+        measurement_standard="ISO 10846-2",
+        temperature=21.0,
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-10846",
+    )
+    return result, metadata, "iso10846_transfer_stiffness_example.pdf"
+
+
 #: One-third-octave centre frequencies of the ISO 10848 mandatory range,
 #: 100 Hz to 5000 Hz (18 bands, Part 1 Clause 7.5), in Hz.
 _FLANKING_FREQS = np.array(
@@ -2771,6 +2869,8 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _room_criteria_example,
     _open_plan_example,
     _multiple_shock_example,
+    _mechanical_mobility_example,
+    _transfer_stiffness_example,
     _sound_power_example,
     _intensity_sound_power_example,
     _reverberation_sound_power_example,

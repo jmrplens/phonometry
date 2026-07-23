@@ -117,6 +117,23 @@ print(round(float(res.level[-1]), 1))      # ~126  dB re 1 N/m (high-f)
 The `TransferStiffnessResult` carries the complex `k₂₁` and exposes `.level`,
 `.loss_factor`, `.magnitude`, `.to("impedance"/"apparent_mass")` and `.plot()`.
 
+**Test-report fiche.** `TransferStiffnessResult.report(path)` renders a one-page
+dynamic-transfer-stiffness characterisation report for a resilient element
+(ISO 10846-1:2008 definition; determined by the direct method, ISO 10846-2:2008,
+or the indirect blocking-mass method, ISO 10846-3:2002). The transfer stiffness
+is a continuous frequency-response function, not an octave-band quantity, so the
+sheet presents it honestly as the `L_k(f)` level spectrum plus a compact table
+of characteristic points (the determination method, the blocking mass for the
+indirect method, the frequency range, and the low-frequency stiffness plateau
+`|k₂₁|`, its level `L_k` and the loss factor there), and a boxed low-frequency
+`L_k` (the plateau that characterises the element below its internal
+resonances). It is a characterisation, so there is no pass/fail verdict;
+`language="es"` renders the Spanish fiche. The fiche always embeds the `L_k(f)`
+spectrum, so it needs both the report and plot extras
+(`pip install "phonometry[report,plot]"`).
+
+[![ISO 10846 dynamic-transfer-stiffness example report: a metadata header, a table of the FRF characteristic points (method, frequency range and low-frequency stiffness, level and loss factor) beside the transfer-stiffness level spectrum, and the boxed low-frequency level](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10846_transfer_stiffness_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10846_transfer_stiffness_example.pdf)
+
 The two methods split the frequency axis between them. The direct method
 works from 1 Hz, the lower bound of the ISO 10846-2 scope (in practice the
 floor is set by the rig and its instrumentation), up to where the test rig's

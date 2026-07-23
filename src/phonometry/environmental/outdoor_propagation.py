@@ -652,8 +652,8 @@ def _compose_receiver_level(
     ``LfT = Lw + Dc - A`` (ISO 9613-2:1996, Eq. (3)) with ``Dc =
     directivity_index + DOmega``; when a meteorological correction ``cmet`` is
     given it is subtracted band by band to approximate the long-term average
-    level (Eq. (6)). Shared by :func:`outdoor_propagation_attenuation` (which
-    stores the level on the result) and :func:`predicted_receiver_level`.
+    level (Eq. (6)). Used by :func:`predicted_receiver_level` and by the
+    :class:`OutdoorAttenuation` report when a :class:`SourceEmission` is given.
     """
     level = sound_power_level + (directivity_index + d_omega) - a_total
     if cmet is not None:

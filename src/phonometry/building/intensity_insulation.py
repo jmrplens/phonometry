@@ -87,6 +87,52 @@ _SPEED_OF_SOUND = 340.0
 _KC_APPROX_COEFF = 61.4
 
 
+def _validate_intensity_report(
+    *,
+    engine: str,
+    language: str,
+    rating: "WeightedRatingResult | None",
+    curve: np.ndarray,
+    label: str,
+) -> "WeightedRatingResult":
+    """Validate a shared ISO 15186-1 intensity-report request, or raise.
+
+    Both intensity fiches accept only the ``"reportlab"`` engine and a
+    translated language, and both need the ISO 717-1 single-number rating that
+    is formed for exactly the 16 one-third-octave or 5 octave bands the fiche
+    is defined over. A manually built result whose hand-crafted rating carries
+    another band count is rejected too (``curve`` is the reported per-band
+    array, ``label`` names the quantity in the messages). Returns the validated
+    (non-``None``) rating so the caller can hand it straight to the renderer.
+
+    :raises ValueError: If ``engine`` is unknown, ``language`` is unsupported,
+        the single-number ``rating`` is absent, or the band count is neither 16
+        nor 5.
+    """
+    from .._i18n import check_language
+
+    check_language(language)
+    if engine != "reportlab":
+        raise ValueError(
+            f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+        )
+    if rating is None:
+        raise ValueError(
+            f"The {label} report needs the ISO 717-1 single-number rating; it "
+            "is formed only for exactly 16 one-third-octave (100 Hz to "
+            "3150 Hz) or 5 octave (125 Hz to 2000 Hz) bands. Build the result "
+            "with that band count."
+        )
+    n_bands = int(np.asarray(curve).size)
+    if n_bands not in (16, 5):
+        raise ValueError(
+            f"The {label} report supports only 16 one-third-octave (100 Hz to "
+            "3150 Hz) or 5 octave (125 Hz to 2000 Hz) bands; the result "
+            f"carries {n_bands}."
+        )
+    return rating
+
+
 @dataclass(frozen=True)
 class IntensityReductionResult:
     """Per-band intensity sound reduction index (ISO 15186-1:2000).
@@ -177,36 +223,18 @@ class IntensityReductionResult:
             (``pip install phonometry[report]``), or matplotlib is missing for
             the embedded rating figure (``pip install phonometry[plot]``).
         """
-        from .._i18n import check_language
-
-        check_language(language)
-        if engine != "reportlab":
-            raise ValueError(
-                f"Unknown report engine {engine!r}; only 'reportlab' is "
-                "supported."
-            )
-        if self.rating is None:
-            raise ValueError(
-                "The intensity report needs the ISO 717-1 single-number "
-                "rating; it is formed only for exactly 16 one-third-octave "
-                "(100 Hz to 3150 Hz) or 5 octave (125 Hz to 2000 Hz) bands. "
-                "Build the result with that band count."
-            )
-        # Guard a manually built result whose 'rating' arrays were hand-crafted
-        # to a non-ISO band count: the fiche is defined only for the 16
-        # one-third-octave or 5 octave bands ISO 717-1 rates.
-        n_bands = int(np.asarray(self.r_i).size)
-        if n_bands not in (16, 5):
-            raise ValueError(
-                "The intensity report supports only 16 one-third-octave "
-                "(100 Hz to 3150 Hz) or 5 octave (125 Hz to 2000 Hz) bands; "
-                f"the result carries {n_bands}."
-            )
+        rating = _validate_intensity_report(
+            engine=engine,
+            language=language,
+            rating=self.rating,
+            curve=self.r_i,
+            label="intensity",
+        )
 
         from .._report.iso15186 import render_iso15186_report
 
         return render_iso15186_report(
-            self, self.rating, path, metadata=metadata,
+            self, rating, path, metadata=metadata,
             verbose=verbose, language=language,
         )
 
@@ -297,36 +325,18 @@ class IntensityElementNormalizedResult:
             (``pip install phonometry[report]``), or matplotlib is missing for
             the embedded rating figure (``pip install phonometry[plot]``).
         """
-        from .._i18n import check_language
-
-        check_language(language)
-        if engine != "reportlab":
-            raise ValueError(
-                f"Unknown report engine {engine!r}; only 'reportlab' is "
-                "supported."
-            )
-        if self.rating is None:
-            raise ValueError(
-                "The element-normalized report needs the ISO 717-1 "
-                "single-number rating; it is formed only for exactly 16 "
-                "one-third-octave (100 Hz to 3150 Hz) or 5 octave (125 Hz to "
-                "2000 Hz) bands. Build the result with that band count."
-            )
-        # Guard a manually built result whose 'rating' arrays were hand-crafted
-        # to a non-ISO band count: the fiche is defined only for the 16
-        # one-third-octave or 5 octave bands ISO 717-1 rates.
-        n_bands = int(np.asarray(self.d_i_n_e).size)
-        if n_bands not in (16, 5):
-            raise ValueError(
-                "The element-normalized report supports only 16 "
-                "one-third-octave (100 Hz to 3150 Hz) or 5 octave (125 Hz to "
-                f"2000 Hz) bands; the result carries {n_bands}."
-            )
+        rating = _validate_intensity_report(
+            engine=engine,
+            language=language,
+            rating=self.rating,
+            curve=self.d_i_n_e,
+            label="element-normalized",
+        )
 
         from .._report.iso15186 import render_iso15186_element_report
 
         return render_iso15186_element_report(
-            self, self.rating, path, metadata=metadata,
+            self, rating, path, metadata=metadata,
             verbose=verbose, language=language,
         )
 

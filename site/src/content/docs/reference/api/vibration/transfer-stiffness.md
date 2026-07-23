@@ -369,6 +369,57 @@ Plot the transfer-stiffness level `L_k(f)`.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### TransferStiffnessResult.report()
+
+```python
+TransferStiffnessResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a dynamic-transfer-stiffness fiche to a PDF (ISO 10846).
+
+Writes a one-page transfer-stiffness characterisation report for a
+resilient element: the standard-basis line naming the determination
+method (direct, ISO 10846-2:2008, or indirect blocking-mass,
+ISO 10846-3:2002; definition per ISO 10846-1:2008), an optional metadata
+header, a two-panel body with a compact table of the FRF's
+characteristic points (the method, the blocking mass for the indirect
+method, the frequency range, and the low-frequency stiffness plateau
+`|k2,1|`, its level `L_k` and the loss factor `eta` there) beside
+the transfer-stiffness level spectrum `L_k(f)`, a boxed low-frequency
+`L_k` with the stiffness magnitude and method alongside, and a footer
+identity/disclaimer block.
+
+Dynamic transfer stiffness is a continuous frequency-response function,
+so the fiche presents it as a spectrum plus a table of characteristic
+points; a transfer-stiffness determination is a characterisation, so
+there is no pass/fail verdict.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` is the tested resilient element) and the footer identity; the `requirement` field is ignored. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for a uniform `.report()` signature; the transfer-stiffness fiche has a single body layout, so it has no effect. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the `L_k(f)` spectrum, so both are required (`pip install "phonometry[report,plot]"`). |
+
 ### TransferStiffnessResult.to()
 
 ```python

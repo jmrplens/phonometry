@@ -148,6 +148,53 @@ def band_value_table(
     return band_table(rows, widths, len(centers))
 
 
+def iso717_columns_builder(
+    rating: "WeightedRatingResult | ImpactRatingResult",
+    is_impact: bool,
+    symbol: str,
+    *,
+    band_set: str = "One-third-octave",
+) -> ColumnsBuilder:
+    """Build the left-table callback shared by the ISO 717-rated fiches.
+
+    The default table is the two-column ``f | value`` form (caption
+    ``{band_set} {symbol} [dB]``, either ``One-third-octave`` or
+    ``Octave-band``); ``verbose`` shows the ISO 717 evaluation per band (the
+    reported quantity, the shifted Table 3 reference and the unfavourable
+    deviation), read from the rating so no extra per-band data is needed on the
+    result. The unfavourable deviation is the reference above the measurement
+    for a level difference or reduction index (more is better) and the
+    measurement above the reference for an impact level (less is better),
+    exactly as the ISO 717 rating forms it.
+    """
+
+    def build(
+        value_header: str, curve: np.ndarray, verbose: bool, language: str
+    ) -> Tuple[Sequence[Column], str, Any]:
+        from reportlab.lib.units import mm
+
+        if not verbose:
+            caption = t(f"{band_set} {{vh}} [dB]", language).format(vh=symbol)
+            return [(value_header, curve, 1)], caption, None
+
+        measured = np.asarray(rating.measured, dtype=np.float64)
+        shifted = np.asarray(rating.shifted_reference, dtype=np.float64)
+        if is_impact:
+            deviation = np.maximum(measured - shifted, 0.0)
+        else:
+            deviation = np.maximum(shifted - measured, 0.0)
+        columns: List[Column] = [
+            (value_header, curve, 1),
+            (t("Shifted ref. [dB]", language), shifted, 1),
+            (t("Unfav. dev. [dB]", language), deviation, 1),
+        ]
+        col_widths = [10 * mm, 16 * mm, 15 * mm, 15 * mm]
+        caption = t("ISO 717 evaluation per band", language)
+        return columns, caption, col_widths
+
+    return build
+
+
 def render_insulation_fiche(
     result: Any,
     rating: "WeightedRatingResult | ImpactRatingResult",

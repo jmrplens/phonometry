@@ -648,6 +648,56 @@ class FacadeInsulationResult:
         check_language(language)
         return plot_facade_insulation(self, ax=ax, language=language, **kwargs)
 
+    def report(
+        self,
+        path: str,
+        *,
+        quantity: str = "d_2m_nt",
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an ISO 16283-3 field facade sound-insulation report to a PDF.
+
+        Writes the one-page field facade test report of ISO 16283-3:2016: the
+        standard-basis line, an optional metadata header block, the
+        one-third-octave table beside the measured-versus-shifted-reference
+        curve, the boxed field rating ``D2m,nT,w (C; Ctr)`` (evaluated per
+        ISO 717-1 over the 16 core bands), the mandatory field-method
+        statement, an optional verdict row and a footer with the identity
+        block and disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param quantity: The reported facade quantity: ``"d_2m_nt"`` (default,
+            the standardized facade level difference ``D2m,nT``), ``"d_2m_n"``
+            (the normalized facade level difference ``D2m,n``; requires the
+            result to carry ``d_2m_n``) or ``"r_prime"`` (the apparent sound
+            reduction index ``R'45``; requires the result to carry
+            ``r_prime``).
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`;
+            ``None`` produces a lightweight fiche (body, rating and
+            disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table shows the ISO 717 evaluation
+            per band (the reported quantity, the shifted reference and the
+            unfavourable deviation) instead of the two-column ``f | value``
+            form.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` or ``quantity`` is unknown, the
+            selected quantity is not available, or the result does not hold
+            the 16 core one-third-octave bands (100 Hz to 3150 Hz) the
+            ISO 717-1 rating needs.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        return _render_iso16283_facade(
+            self, path, quantity=quantity, metadata=metadata, engine=engine,
+            verbose=verbose, language=language,
+        )
+
 
 def _render_iso717(
     result: "WeightedRatingResult | ImpactRatingResult",
@@ -766,6 +816,65 @@ def _render_iso16283(
     from .._report.iso16283 import render_iso16283_report
 
     return render_iso16283_report(
+        result, rating, path, quantity=quantity, metadata=metadata,
+        verbose=verbose, language=language,
+    )
+
+
+#: The reportable ISO 16283-3 facade quantities, mapping the ``quantity``
+#: argument of :meth:`FacadeInsulationResult.report` to the attribute holding
+#: the per-band curve.
+_FACADE_FIELD_QUANTITIES: Tuple[str, ...] = ("d_2m_nt", "d_2m_n", "r_prime")
+
+
+def _render_iso16283_facade(
+    result: "FacadeInsulationResult",
+    path: str,
+    *,
+    quantity: str,
+    metadata: "ReportMetadata | None",
+    engine: str,
+    verbose: bool,
+    language: str,
+) -> str:
+    """Validate the facade-report request and delegate to the renderer.
+
+    Rejects unknown engines and quantities, requires the 16 core
+    one-third-octave bands (100 Hz to 3150 Hz) so the ISO 717-1 rating is
+    defined, evaluates that rating and calls the reportlab renderer (which
+    raises a clear :class:`ImportError` when reportlab is absent).
+    """
+    from .._i18n import check_language
+
+    check_language(language)
+    if engine != "reportlab":
+        raise ValueError(
+            f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+        )
+    if quantity not in _FACADE_FIELD_QUANTITIES:
+        expected = " or ".join(repr(q) for q in _FACADE_FIELD_QUANTITIES)
+        raise ValueError(
+            f"Unknown facade quantity {quantity!r}; expected {expected}."
+        )
+    curve = getattr(result, quantity)
+    if curve is None:
+        raise ValueError(
+            f"The result carries no {quantity!r} curve; build it with the "
+            "'volume' (and, for R', 'surface_level'/'area') arguments so the "
+            "quantity is computed."
+        )
+    curve = np.asarray(curve, dtype=np.float64)
+    if curve.shape != (len(_FREQ_THIRD_OCTAVE),):
+        raise ValueError(
+            "The facade field report rates the 16 core one-third-octave bands "
+            f"(100 Hz to 3150 Hz, ISO 16283-3 Clause 5); got {curve.shape} "
+            "band values."
+        )
+    rating = weighted_rating(curve)
+
+    from .._report.iso16283 import render_iso16283_facade_report
+
+    return render_iso16283_facade_report(
         result, rating, path, quantity=quantity, metadata=metadata,
         verbose=verbose, language=language,
     )

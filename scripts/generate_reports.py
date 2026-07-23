@@ -2576,6 +2576,133 @@ def _flanking_impact_level_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10848_lnf_example.pdf"
 
 
+def _survey_airborne_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 10052 survey fiche: airborne DnT between dwellings (octave bands).
+
+    The survey (control) method works in the five octave bands 125 Hz to
+    2000 Hz. With the source-room level at 80 dB, a level difference D rising
+    from 33 dB to 48 dB and the reverberation index estimated for a furnished
+    receiving room of about 50 m3 (ISO 10052:2021 Table 4), DnT = D + k gives
+    the standardized level difference and, per ISO 717-1, DnT,w = 44 (-1; -4) dB.
+    """
+    l1 = np.full(5, 80.0)
+    d = np.array([33.0, 36.0, 40.0, 44.0, 48.0])
+    k = ph.building.estimate_reverberation_index(50.0, "furnished")
+    result = ph.building.survey_airborne_insulation(
+        l1, l1 - d, k, volume=50.0, area=12.0
+    )
+    metadata = ReportMetadata(
+        specimen="Separating wall between dwellings (survey method)",
+        client="Example client",
+        area=12.0,
+        receiving_volume=50.0,
+        test_room="Dwelling A living room to dwelling B living room",
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-10052-AIRBORNE",
+        requirement=40.0,  # DnT,w >= 40 dB -> PASS
+        notes="Survey-method airborne sound insulation DnT (ISO 10052:2021).",
+    )
+    return result, metadata, "iso10052_airborne_example.pdf"
+
+
+def _survey_impact_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 10052 survey fiche: impact L'nT of a floor (octave bands).
+
+    With the energy-average tapping-machine level Li falling across the five
+    octave bands and the reverberation index estimated for a furnished
+    receiving room of about 50 m3, L'nT = Li - k gives the standardized impact
+    level and, per ISO 717-2, its single number L'nT,w (CI). A lower impact
+    level is better, so the verdict passes at or below the requirement.
+    """
+    li = np.array([62.0, 64.0, 63.0, 60.0, 55.0])
+    k = ph.building.estimate_reverberation_index(50.0, "furnished")
+    result = ph.building.survey_impact_insulation(li, k, volume=50.0)
+    metadata = ReportMetadata(
+        specimen="Separating floor between dwellings (survey method)",
+        client="Example client",
+        receiving_volume=50.0,
+        test_room="Dwelling A bedroom below dwelling B bedroom",
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-10052-IMPACT",
+        requirement=62.0,  # L'nT,w <= 62 dB -> PASS (lower is better)
+        notes="Survey-method impact sound insulation L'nT (ISO 10052:2021).",
+    )
+    return result, metadata, "iso10052_impact_example.pdf"
+
+
+def _survey_facade_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 10052 survey fiche: facade D2m,nT (octave bands).
+
+    From the outdoor level 2 m in front of the facade and the receiving-room
+    level, the facade level difference D2m rises across the five octave bands;
+    with the reverberation index estimated for a furnished receiving room of
+    about 40 m3, D2m,nT = D2m + k gives the standardized facade level
+    difference and, per ISO 717-1, its single number D2m,nT,w (C; Ctr).
+    """
+    l1_2m = np.full(5, 75.0)
+    d2m = np.array([31.0, 34.0, 37.0, 40.0, 43.0])
+    k = ph.building.estimate_reverberation_index(40.0, "furnished")
+    result = ph.building.survey_facade_insulation(
+        l1_2m, l1_2m - d2m, k, volume=40.0
+    )
+    metadata = ReportMetadata(
+        specimen="Dwelling facade with a double-glazed window (survey method)",
+        client="Example client",
+        receiving_volume=40.0,
+        test_room="Dwelling bedroom facing a residential street",
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-10052-FACADE",
+        requirement=33.0,  # D2m,nT,w >= 33 dB -> PASS
+        notes="Survey-method facade sound insulation D2m,nT (ISO 10052:2021).",
+    )
+    return result, metadata, "iso10052_facade_example.pdf"
+
+
+def _field_facade_example() -> Tuple[object, ReportMetadata, str]:
+    """ISO 16283-3 fiche: field facade D2m,nT (one-third-octave bands).
+
+    The reported spectrum is the ISO 717-1:2020 Annex C worked-example curve
+    (rated 30 (-2; -3) dB): with the outdoor level 2 m in front of the facade
+    set to that curve plus 40 dB, a receiving-room level of 40 dB and the
+    reverberation time equal to T0 = 0,5 s in every band (so the
+    standardization term vanishes), D2m,nT reproduces that published curve and
+    the fiche boxes D2m,nT,w = 30 (-2; -3) dB.
+    """
+    annex_c = np.array(
+        [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+         28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
+    )
+    core_freqs = np.array(
+        [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0,
+         630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0]
+    )
+    result = ph.building.facade_insulation(
+        annex_c + 40.0, np.full(16, 40.0), np.full(16, 0.5),
+        volume=62.5, frequencies=core_freqs,
+    )
+    metadata = ReportMetadata(
+        specimen="Dwelling facade, loudspeaker method",
+        client="Example client",
+        receiving_volume=62.5,
+        temperature=19.8,
+        relative_humidity=55.0,
+        test_room="Dwelling living room facing a main road",
+        test_date="2026-07-22",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-16283-3",
+        requirement=30.0,  # D2m,nT,w >= 30 dB -> PASS
+        notes="Field facade sound insulation D2m,nT (ISO 16283-3:2016).",
+    )
+    return result, metadata, "iso16283_facade_example.pdf"
+
+
 class _WithSourceEmission:
     """Adapter binding a source emission to an ``OutdoorAttenuation.report`` call.
 
@@ -2884,6 +3011,10 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _vibration_reduction_example,
     _flanking_level_difference_example,
     _flanking_impact_level_example,
+    _survey_airborne_example,
+    _survey_impact_example,
+    _survey_facade_example,
+    _field_facade_example,
     _outdoor_attenuation_example,
     _barrier_insertion_loss_example,
     _sti_example,

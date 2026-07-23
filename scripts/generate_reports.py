@@ -1084,6 +1084,40 @@ def _impulse_prominence_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "ntacou112_impulse_prominence_example.pdf"
 
 
+def _wind_turbine_tonality_example() -> Tuple[object, ReportMetadata, str]:
+    """Wind-turbine tonality fiche: an IEC 61400-11:2012+A1:2018 assessment.
+
+    A clean 500 Hz tone (a gearbox line) 30 dB above a flat 30 dB narrow-band
+    floor, sampled at Delta f = 2 Hz over 440-560 Hz. The critical band about
+    500 Hz is CBW = 117.256 Hz (Formula 30) and the ENBW is 1.5 * 2 = 3 Hz, so
+    the masking-noise level is L_pn = 30 + 10 lg(117.256 / 3) = 45.92 dB
+    (Formula 31); the single tone line gives L_pt = 60 dB, hence the tonality
+    is Delta L_tn = 14.08 dB (Formula 32). The audibility criterion at 500 Hz
+    is L_a = -2 - lg(1 + (500/502)^2.5) = -2.30 dB (Formula 34), so the tonal
+    audibility is Delta L_a = 14.08 - (-2.30) = 16.38 dB (Formula 33): the tone
+    is audible. The requirement is a plausible maximum acceptable tonal
+    audibility the example exceeds, so the optional verdict FAILs.
+    """
+    df = 2.0
+    frequencies = np.arange(440.0, 560.0 + df, df)
+    levels = np.full(frequencies.size, 30.0)
+    levels[int(np.argmin(np.abs(frequencies - 500.0)))] = 60.0
+    result = ph.wind_turbine_tonality(levels, frequencies)
+    metadata = ReportMetadata(
+        specimen="Horizontal-axis wind turbine, gearbox tone",
+        client="Example client",
+        test_room="Ground board, downwind reference position (example)",
+        instrumentation="Class 1 analyser, FFT with 2 Hz lines (Hann window)",
+        measurement_standard="IEC 61400-11",
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-61400-11",
+        requirement=6.0,
+    )
+    return result, metadata, "iec61400_wind_turbine_tonality_example.pdf"
+
+
 def _epnl_example() -> Tuple[object, ReportMetadata, str]:
     """EPNL fiche: an ICAO Annex 16 aircraft-noise-certification result.
 
@@ -2979,6 +3013,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _program_loudness_example,
     _tone_audibility_example,
     _impulse_prominence_example,
+    _wind_turbine_tonality_example,
     _epnl_example,
     _filter_class_example,
     _filter_class_1995_example,

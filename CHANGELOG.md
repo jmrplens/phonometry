@@ -21,6 +21,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   clause 7.5 reference velocity of 0.5 mm/s. ISO 9053-1 is a material
   characterisation, so the fiche carries no pass/fail verdict. `language="es"`
   renders the Spanish fiche.
+- `WindTurbineTonalityResult.report()`: a one-page PDF wind-turbine
+  tonal audibility assessment fiche (IEC 61400-11:2012+A1:2018, subclauses
+  9.5.2-9.5.5). The sheet carries a standard-basis line, an optional metadata
+  header (source/situation, client, measurement position, instrumentation,
+  date), a two-panel body with the critical-band and masking analysis in a
+  metrics table (tone frequency, critical bandwidth, tone level `L_pt`,
+  masking-noise level `L_pn`, tonality `dL_tn`, audibility criterion `L_a` and
+  tonal audibility `dL_a`) beside the narrowband-spectrum plot with the
+  critical band, masking level and tone marked, and a boxed decisive tonal
+  audibility `dL_a` with the tone frequency and the audibility decision (a
+  tone is audible when `dL_a` exceeds 0 dB). A maximum acceptable tonal
+  audibility supplied via the metadata `requirement` adds a PASS/FAIL verdict
+  (a lower audibility is better). `language="es"` renders the Spanish fiche.
+- `IntensityElementNormalizedResult.report()`: a one-page PDF
+  element-normalized sound-intensity insulation fiche (ISO 15186-1:2000). It
+  reports the element-normalized level difference `DI,n,e` (Clause 3.9,
+  Formula (8)) of a small building element measured with sound intensity: a
+  standard-basis line, an optional metadata header, the per-band table (16
+  one-third-octave or 5 octave bands) beside the measured-versus-shifted-
+  reference curve, and the boxed rating `DI,n,e,w (C; Ctr)` (rated by the
+  ISO 717-1 airborne machinery). `verbose=True` shows the ISO 717 evaluation
+  per band (the reported value, the shifted reference and the unfavourable
+  deviation). A target supplied via the metadata `requirement` adds a
+  PASS/FAIL verdict (the element insulation passes at or above the target).
+  `language="es"` renders the Spanish fiche. The renderer is shared with the
+  sibling intensity sound reduction index `RI` fiche.
 - `NiptsResult.report()` and `HtlanResult.report()`: one-page PDF
   noise-induced hearing-loss **prediction** fiches (ISO 1999:2013). Both sheets
   are clearly labelled statistical predictions for a noise-exposed population,

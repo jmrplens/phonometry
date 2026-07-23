@@ -197,3 +197,49 @@ WindTurbineTonalityResult.plot(
 ```
 
 Plot the narrowband spectrum with the critical band and masking level.
+
+### WindTurbineTonalityResult.report()
+
+```python
+WindTurbineTonalityResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a wind-turbine tonal audibility assessment fiche to a PDF.
+
+Writes a one-page tonality-assessment report following
+IEC 61400-11:2012+A1:2018 (subclauses 9.5.2-9.5.5): the standard-basis
+line, an optional metadata header (source/situation, client, measurement
+position, instrumentation and date), a two-panel body with the
+critical-band / masking analysis in a metrics table (tone frequency,
+critical bandwidth, tone level `L_pt`, masking-noise level `L_pn`,
+tonality `ΔL_tn`, audibility criterion `L_a` and tonal audibility
+`ΔL_a`) beside the narrowband-spectrum plot with the critical band,
+masking level and tone marked, the boxed decisive tonal audibility
+`ΔL_a` and the tone frequency with the audibility decision, an optional
+verdict row and a footer with the fixed disclaimer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare assessment fiche (body, result and disclaimer only). A supplied `requirement` is read as the maximum acceptable tonal audibility `ΔL_a` in dB (a lower audibility passes). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for signature parity with the other fiches; the metrics table already shows the full Formula 30-34 chain, so it has no effect. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `language` is not one of the supported languages, or if `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |

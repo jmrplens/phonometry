@@ -440,6 +440,61 @@ def _intensity_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso15186_intensity_example.pdf"
 
 
+def _intensity_element_example() -> Tuple[object, ReportMetadata, str]:
+    """Element fiche: an intensity element-normalized level difference DI,n,e.
+
+    The reported spectrum reuses the ISO 717-1:2020 Annex C worked-example
+    curve (Rw = 30 (-2; -3) dB), read here as a documented element-normalized
+    level difference DI,n,e(f): DI,n,e is a level difference rated by the same
+    ISO 717-1 machinery, so feeding the receiving-side intensity levels LIn
+    that make Formula (8) return that curve (with Lp1 = 85 dB, a measurement
+    surface Sm = 12 m2 and a single element unit N = 1, referred to the
+    reference absorption area A0 = 10 m2) pins the fiche to the published
+    DI,n,e,w = 30 (-2; -3) dB.
+    """
+    d_i_n_e = np.array(
+        [
+            20.4,
+            16.3,
+            17.7,
+            22.6,
+            22.4,
+            22.7,
+            24.8,
+            26.6,
+            28.0,
+            30.5,
+            31.8,
+            32.5,
+            33.4,
+            33.0,
+            31.0,
+            25.5,
+        ]
+    )
+    lp1, sm, n = 85.0, 12.0, 1
+    l_in = lp1 - 6.0 - 10.0 * np.log10(sm / 10.0) - 10.0 * np.log10(n) - d_i_n_e
+    result = ph.building.intensity_element_normalized_difference(
+        np.full(16, lp1), l_in, measurement_area=sm, n=n
+    )
+    metadata = ReportMetadata(
+        specimen="Trickle ventilator in a 100 mm masonry wall",
+        client="Example client",
+        manufacturer="Example ventilators",
+        area=0.02,
+        test_room="Transmission suite (example)",
+        mounting="Small-element mounting per ISO 10140-1 Annex F",
+        measurement_standard="ISO 15186-1",
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-15186-1-DINE",
+        notes="Measurement surface Sm = 12 m2, N = 1 element unit.",
+        requirement=30.0,
+    )
+    return result, metadata, "iso15186_element_example.pdf"
+
+
 def _airborne_prediction_example() -> Tuple[object, ReportMetadata, str]:
     """Airborne prediction fiche: EN 12354-1 Annex H.3 worked example.
 
@@ -1082,6 +1137,40 @@ def _impulse_prominence_example() -> Tuple[object, ReportMetadata, str]:
         requirement=10.0,
     )
     return result, metadata, "ntacou112_impulse_prominence_example.pdf"
+
+
+def _wind_turbine_tonality_example() -> Tuple[object, ReportMetadata, str]:
+    """Wind-turbine tonality fiche: an IEC 61400-11:2012+A1:2018 assessment.
+
+    A clean 500 Hz tone (a gearbox line) 30 dB above a flat 30 dB narrow-band
+    floor, sampled at Delta f = 2 Hz over 440-560 Hz. The critical band about
+    500 Hz is CBW = 117.256 Hz (Formula 30) and the ENBW is 1.5 * 2 = 3 Hz, so
+    the masking-noise level is L_pn = 30 + 10 lg(117.256 / 3) = 45.92 dB
+    (Formula 31); the single tone line gives L_pt = 60 dB, hence the tonality
+    is Delta L_tn = 14.08 dB (Formula 32). The audibility criterion at 500 Hz
+    is L_a = -2 - lg(1 + (500/502)^2.5) = -2.30 dB (Formula 34), so the tonal
+    audibility is Delta L_a = 14.08 - (-2.30) = 16.38 dB (Formula 33): the tone
+    is audible. The requirement is a plausible maximum acceptable tonal
+    audibility the example exceeds, so the optional verdict FAILs.
+    """
+    df = 2.0
+    frequencies = np.arange(440.0, 560.0 + df, df)
+    levels = np.full(frequencies.size, 30.0)
+    levels[int(np.argmin(np.abs(frequencies - 500.0)))] = 60.0
+    result = ph.wind_turbine_tonality(levels, frequencies)
+    metadata = ReportMetadata(
+        specimen="Horizontal-axis wind turbine, gearbox tone",
+        client="Example client",
+        test_room="Ground board, downwind reference position (example)",
+        instrumentation="Class 1 analyser, FFT with 2 Hz lines (Hann window)",
+        measurement_standard="IEC 61400-11",
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-61400-11",
+        requirement=6.0,
+    )
+    return result, metadata, "iec61400_wind_turbine_tonality_example.pdf"
 
 
 def _epnl_example() -> Tuple[object, ReportMetadata, str]:
@@ -3004,6 +3093,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _lab_airborne_example,
     _lab_impact_example,
     _intensity_example,
+    _intensity_element_example,
     _airborne_prediction_example,
     _impact_prediction_example,
     _facade_prediction_example,
@@ -3015,6 +3105,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _program_loudness_example,
     _tone_audibility_example,
     _impulse_prominence_example,
+    _wind_turbine_tonality_example,
     _epnl_example,
     _filter_class_example,
     _filter_class_1995_example,

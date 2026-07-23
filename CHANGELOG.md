@@ -1802,6 +1802,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   integers, matching the existing field-validation style.
 
 ### Changed
+- Docs theory reference: the Vibration page now lists in its `references`
+  frontmatter the four structure-borne sources cited on the point-mobility and
+  radiation-efficiency section (Cremer, Heckl and Petersson, Structure-borne
+  sound, 3rd ed.; Hopkins, Sound insulation; ISO 7626-1:2011; and
+  ISO/TS 7849-1:2009 and ISO/TS 7849-2:2009), and the theory index gains the
+  two missing table-of-contents anchors for that page (the point-mobility
+  section and the multiple-shock subsection). Both changes are mirrored in the
+  Spanish pages.
 - Raised the `scipy` floor in `pyproject.toml` to `scipy>=1.18.0`, the minimum
   supported scipy version, matching the floor `requirements.txt` already
   carried. The

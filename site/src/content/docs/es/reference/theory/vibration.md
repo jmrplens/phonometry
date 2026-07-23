@@ -16,6 +16,42 @@ references:
     publisher: "CRC Press"
     url: "https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390"
     note: "ISBN 978-0-415-28239-0. Un recorrido moderno y compacto por las cadenas de evaluación de cuerpo completo de ISO 2631-1 y mano-brazo de ISO 5349 resumidas en esta página."
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
+    year: 2005
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "3.ª ed."
+    publisher: "Springer"
+    url: "https://link.springer.com/book/10.1007/b137728"
+    note: "ISBN 978-3-540-22696-3. La potencia en el punto de excitación W = (1/2) |F|^2 Re{Y} (Ec. 5.23) y las movilidades e impedancias en forma cerrada de estructuras infinitas (Tabla 5.1) de la sección de movilidades puntuales."
+  - type: book
+    authors: ["Hopkins, C."]
+    year: 2007
+    title: "Sound insulation"
+    publisher: "Butterworth-Heinemann"
+    url: "https://www.routledge.com/Sound-Insulation/Hopkins/p/book/9780750665261"
+    note: "ISBN 978-0-7506-6526-1. La teoría de la eficiencia de radiación de placas en flexión (Ecs. 2.227-2.230, el límite de alta frecuencia de Leppington/Maidanik) que sustenta la sección de eficiencia de radiación."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2011
+    title: "Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 1: Basic terms and definitions, and transducer specifications"
+    designation: "ISO 7626-1:2011"
+    url: "https://www.iso.org/standard/50426.html"
+    note: "Las movilidades medidas en el punto de excitación de las que los resultados en forma cerrada de estructuras infinitas de la sección de movilidades puntuales son las contrapartes teóricas."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
+    designation: "ISO/TS 7849-1:2009"
+    url: "https://www.iso.org/standard/40537.html"
+    note: "El factor de radiación que coincide con la eficiencia de radiación, cerrando la cadena de potencia acústica a partir de la vibración de la sección de eficiencia de radiación (método de sondeo, factor de radiación fijo)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 2: Engineering method including determination of the adequate radiation factor"
+    designation: "ISO/TS 7849-2:2009"
+    url: "https://www.iso.org/standard/40538.html"
+    note: "El método de ingeniería de la misma cadena de potencia acústica a partir de la vibración, que determina el factor de radiación adecuado a partir de la medida."
 ---
 
 Esta página reúne la teoría de la vibración en humanos: las ponderaciones frecuenciales de ISO 8041-1, las métricas de cuerpo entero y mano-brazo de ISO 2631-1 e ISO 5349, los valores de acción y límite de la Directiva 2002/44/CE, y el modelo espinal de choques múltiples de ISO 2631-5. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/).

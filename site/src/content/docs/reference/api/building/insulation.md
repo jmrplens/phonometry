@@ -454,10 +454,11 @@ Render an ISO 16283-3 field facade sound-insulation report to a PDF.
 Writes the one-page field facade test report of ISO 16283-3:2016: the
 standard-basis line, an optional metadata header block, the
 one-third-octave table beside the measured-versus-shifted-reference
-curve, the boxed field rating `D2m,nT,w (C; Ctr)` (evaluated per
-ISO 717-1 over the 16 core bands), the mandatory field-method
-statement, an optional verdict row and a footer with the identity
-block and disclaimer.
+curve, the boxed ISO 717-1 field rating of the reported `quantity`
+(`D2m,nT,w` for `d_2m_nt`, `D2m,n,w` for `d_2m_n` or
+`R'45,w` for `r_prime`, each with `C; Ctr` and evaluated over the
+16 core bands), the mandatory field-method statement, an optional
+verdict row and a footer with the identity block and disclaimer.
 
 **Parameters**
 

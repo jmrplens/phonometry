@@ -75,13 +75,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   verdict. `language="es"` renders the Spanish fiche.
 - `.report()` for the field and survey building-insulation results: a one-page
   PDF field test report for each. `SurveyAirborneResult`, `SurveyImpactResult`
-  and `SurveyFacadeResult` (ISO 10052:2021 survey/control method, octave bands)
-  render the standardized level difference `DnT` (or the apparent sound
-  reduction index `R'`), the standardized impact level `L'nT` and the
-  standardized facade level difference `D2m,nT`, each with its ISO 717 weighted
-  single number and the survey-method statement; `FacadeInsulationResult`
+  and `SurveyFacadeResult` (ISO 10052:2021 survey/control method, octave or
+  one-third-octave bands) render the standardized level difference `DnT` (or the
+  apparent sound reduction index `R'`), the standardized impact level `L'nT` and
+  the standardized facade level difference `D2m,nT`, each with its ISO 717
+  weighted single number and the survey-method statement; `FacadeInsulationResult`
   (ISO 16283-3:2016 field facade, one-third-octave bands) renders `D2m,nT`
-  (default), `D2m,n` or `R'45` with the `D2m,nT,w (C; Ctr)` rating and the
+  (default), `D2m,n` or `R'45` with the ISO 717 weighted rating of the reported
+  quantity (`D2m,nT,w`, `D2m,n,w` or `R'45,w`, each with `C; Ctr`) and the
   engineering-method statement. Each sheet carries the standard-basis line, an
   optional metadata header, the per-band table beside the measured-versus-
   shifted-ISO 717-reference curve, the boxed single number, an optional

@@ -108,6 +108,25 @@ def test_airborne_r_prime_quantity(tmp_path) -> None:
     assert "Apparent sound reduction index" in text
 
 
+def test_airborne_one_third_octave_caption(tmp_path) -> None:
+    """A 16-band one-third-octave survey report captions its own band set.
+
+    The survey method also accepts the ISO 717 one-third-octave set (16 bands,
+    100 Hz to 3150 Hz); the default table caption must follow the reported band
+    set, not hard-code "Octave-band".
+    """
+    n = 16
+    l1 = np.full(n, 80.0)
+    d = np.linspace(33.0, 52.0, n)
+    result = survey_airborne_insulation(l1, l1 - d, np.zeros(n), volume=50.0, area=12.0)
+    out = tmp_path / "dnt_third.pdf"
+    result.report(str(out))
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "One-third-octave" in text
+    assert "Octave-band" not in text
+
+
 def test_airborne_verbose_and_verdict_pass(tmp_path) -> None:
     """Verbose annexes the ISO 717 evaluation; a level difference passes above."""
     out = tmp_path / "verbose.pdf"

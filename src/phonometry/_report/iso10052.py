@@ -34,6 +34,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+import numpy as np
+
 from ._insulation_fiche import iso717_columns_builder, render_insulation_fiche
 from .metadata import ReportMetadata
 
@@ -125,7 +127,14 @@ def _render_survey(
     verbose: bool,
     language: str,
 ) -> str:
-    """Drive the shared insulation skeleton with the octave-band survey table."""
+    """Drive the shared insulation skeleton with the survey band table.
+
+    The survey method may be run in octave bands (5 values, 125 Hz to 2000 Hz)
+    or one-third-octave bands (16 values, 100 Hz to 3150 Hz); the table caption
+    follows the band set the reported curve actually carries.
+    """
+    curve = np.atleast_1d(np.asarray(getattr(result, curve_attr), dtype=np.float64))
+    band_set = "Octave-band" if curve.size <= 5 else "One-third-octave"
     return render_insulation_fiche(
         result,
         rating,
@@ -134,7 +143,7 @@ def _render_survey(
         is_impact=is_impact,
         curve_attr=curve_attr,
         build_columns=iso717_columns_builder(
-            rating, is_impact, spec["symbol"], band_set="Octave-band"
+            rating, is_impact, spec["symbol"], band_set=band_set
         ),
         metadata=metadata,
         verbose=verbose,

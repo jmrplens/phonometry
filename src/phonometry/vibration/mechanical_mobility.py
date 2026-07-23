@@ -66,6 +66,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike, NDArray
 
 from .._internal.validation import require_non_negative, require_positive
@@ -431,6 +433,60 @@ class MobilityResult:
         from .._plot.vibration import plot_mobility
 
         return plot_mobility(self, ax=ax, language=check_language(language), **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a mechanical-mobility measurement fiche to a PDF (ISO 7626).
+
+        Writes a one-page mobility measurement report: the standard-basis line
+        naming whether the mobility is a driving-point or a transfer FRF
+        (ISO 7626-1:2011 definitions; measurement per ISO 7626-2:2015), an
+        optional metadata header, a two-panel body with a compact table of the
+        FRF's characteristic points (the FRF type, the frequency range, the peak
+        frequency, the peak mobility magnitude and the phase there) beside the
+        mobility magnitude spectrum ``|Y(f)|``, a boxed peak mobility ``|Y|``
+        with the frequency it occurs at, and a footer identity/disclaimer block.
+
+        Mechanical mobility is a continuous frequency-response function, so the
+        fiche presents it as a spectrum plus a table of characteristic points; a
+        mobility measurement is a characterisation, so there is no pass/fail
+        verdict.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header identity (``specimen`` is the tested structure) and the
+            footer identity; the ``requirement`` field is ignored.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for a uniform ``.report()`` signature; the
+            mobility fiche has a single body layout, so it has no effect.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab or matplotlib is not installed. The
+            fiche always embeds the mobility spectrum, so both are required
+            (``pip install "phonometry[report,plot]"``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso7626 import render_mobility_report
+
+        return render_mobility_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def sdof_mobility_result(

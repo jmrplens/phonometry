@@ -229,6 +229,21 @@ z = res.to("impedance")                        # impedance = 1/Y per frequency
 print(res.frequencies[int(np.argmax(res.magnitude))].round(1))   # ~10.1 Hz
 ```
 
+**Test-report fiche.** `MobilityResult.report(path)` renders a one-page
+mechanical-mobility measurement report (ISO 7626-1:2011 FRF definitions,
+measurement per ISO 7626-2:2015). Mobility is a continuous frequency-response
+function, not an octave-band quantity, so the sheet presents it honestly as the
+`|Y(f)|` magnitude spectrum plus a compact table of characteristic points (the
+FRF type, driving-point or transfer, the frequency range, the peak frequency,
+the peak mobility magnitude and the phase there), and a boxed peak mobility
+`|Y|` at the frequency it occurs at (for a driving-point FRF a resonance, where
+`|Y| = 1/c` measures the damping). It is a characterisation, so there is no
+pass/fail verdict; `language="es"` renders the Spanish fiche. The fiche always
+embeds the `|Y(f)|` spectrum, so it needs both the report and plot extras
+(`pip install "phonometry[report,plot]"`).
+
+[![ISO 7626 mechanical-mobility example report: a metadata header, a table of the FRF characteristic points (type, frequency range, peak frequency, peak mobility and phase) beside the mobility magnitude spectrum, and the boxed peak mobility](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso7626_mobility_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso7626_mobility_example.pdf)
+
 ## References
 
 - Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne

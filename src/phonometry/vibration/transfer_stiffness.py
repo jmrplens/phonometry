@@ -57,6 +57,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike, NDArray
 
 from .._internal.validation import require_non_negative, require_positive
@@ -322,6 +324,64 @@ class TransferStiffnessResult:
         from .._plot.vibration import plot_transfer_stiffness
 
         return plot_transfer_stiffness(self, ax=ax, language=check_language(language), **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a dynamic-transfer-stiffness fiche to a PDF (ISO 10846).
+
+        Writes a one-page transfer-stiffness characterisation report for a
+        resilient element: the standard-basis line naming the determination
+        method (direct, ISO 10846-2:2008, or indirect blocking-mass,
+        ISO 10846-3:2002; definition per ISO 10846-1:2008), an optional metadata
+        header, a two-panel body with a compact table of the FRF's
+        characteristic points (the method, the blocking mass for the indirect
+        method, the frequency range, and the low-frequency stiffness plateau
+        ``|k2,1|``, its level ``L_k`` and the loss factor ``eta`` there) beside
+        the transfer-stiffness level spectrum ``L_k(f)``, a boxed low-frequency
+        ``L_k`` with the stiffness magnitude and method alongside, and a footer
+        identity/disclaimer block.
+
+        Dynamic transfer stiffness is a continuous frequency-response function,
+        so the fiche presents it as a spectrum plus a table of characteristic
+        points; a transfer-stiffness determination is a characterisation, so
+        there is no pass/fail verdict.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header identity (``specimen`` is the tested resilient element)
+            and the footer identity; the ``requirement`` field is ignored.
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for a uniform ``.report()`` signature; the
+            transfer-stiffness fiche has a single body layout, so it has no
+            effect.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab or matplotlib is not installed. The
+            fiche always embeds the ``L_k(f)`` spectrum, so both are required
+            (``pip install "phonometry[report,plot]"``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso10846 import render_transfer_stiffness_report
+
+        return render_transfer_stiffness_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def indirect_transfer_stiffness_result(

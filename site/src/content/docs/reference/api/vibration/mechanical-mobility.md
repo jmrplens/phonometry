@@ -164,6 +164,54 @@ Plot the mobility magnitude `|Y(f)|`.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### MobilityResult.report()
+
+```python
+MobilityResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a mechanical-mobility measurement fiche to a PDF (ISO 7626).
+
+Writes a one-page mobility measurement report: the standard-basis line
+naming whether the mobility is a driving-point or a transfer FRF
+(ISO 7626-1:2011 definitions; measurement per ISO 7626-2:2015), an
+optional metadata header, a two-panel body with a compact table of the
+FRF's characteristic points (the FRF type, the frequency range, the peak
+frequency, the peak mobility magnitude and the phase there) beside the
+mobility magnitude spectrum `|Y(f)|`, a boxed peak mobility `|Y|`
+with the frequency it occurs at, and a footer identity/disclaimer block.
+
+Mechanical mobility is a continuous frequency-response function, so the
+fiche presents it as a spectrum plus a table of characteristic points; a
+mobility measurement is a characterisation, so there is no pass/fail
+verdict.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` is the tested structure) and the footer identity; the `requirement` field is ignored. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for a uniform `.report()` signature; the mobility fiche has a single body layout, so it has no effect. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the mobility spectrum, so both are required (`pip install "phonometry[report,plot]"`). |
+
 ### MobilityResult.to()
 
 ```python

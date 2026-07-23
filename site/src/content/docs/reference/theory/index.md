@@ -50,3 +50,5 @@ The theory reference explains the standards, the mathematics and the design deci
 ## [Vibration](/phonometry/reference/theory/vibration/)
 
 - [Human vibration (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directive 2002/44/EC)](/phonometry/reference/theory/vibration/#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec)
+- [Multiple shocks (ISO 2631-5)](/phonometry/reference/theory/vibration/#multiple-shocks-iso-2631-5)
+- [Point mobilities and radiation efficiency (Cremer 5, Hopkins 2.9)](/phonometry/reference/theory/vibration/#point-mobilities-and-radiation-efficiency-cremer-5-hopkins-29)

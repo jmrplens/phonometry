@@ -25,6 +25,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   metadata `requirement` adds a PASS/FAIL verdict (a lower value is better);
   without it neither fiche prints a verdict. `language="es"` renders the
   Spanish fiches.
+- `ReverberationModelResult.report()`: a one-page PDF reverberation-time
+  **prediction** fiche. The sheet is clearly labelled a design-stage
+  prediction, not a measurement: its basis line names the five classical
+  statistical-acoustics models (Sabine, Eyring, Millington-Sette, Fitzroy and
+  Arau-Puchades), it carries an optional metadata header (client, room,
+  description, room volume, total surface area, climate, date), a per-band
+  table with one reverberation-time column per model beside the model
+  comparison plot, and a boxed mid-frequency reverberation time from
+  Arau-Puchades (the recommended model for a non-uniform absorption
+  distribution) with the per-model spread alongside. The five models bracket
+  the reverberation time likely to occur. A target reverberation time supplied
+  via the metadata `requirement` is printed as a reference line without a
+  PASS/FAIL verdict, since a room reverberation time is a target range rather
+  than a strictly higher/lower-is-better quantity. `language="es"` renders the
+  Spanish fiche.
+- `ReverberationResult.report()`: a one-page PDF enclosed-space characterisation
+  fiche (EN 12354-6:2003). It carries a basis line naming EN 12354-6:2003, an
+  optional metadata header (client, room, description, room volume, object
+  fraction, climate, date), a per-band table of the equivalent sound absorption
+  area `A` and the reverberation time `T` beside the reverberation-time plot,
+  and a boxed mid-frequency reverberation time with the mid-frequency absorption
+  area alongside. EN 12354-6 gives a diffuse-field estimate; a target
+  reverberation time supplied via the metadata `requirement` is printed as a
+  reference line without a PASS/FAIL verdict. `language="es"` renders the
+  Spanish fiche.
 - `OutdoorAttenuation.report()`: a one-page PDF outdoor sound propagation
   **prediction** fiche (ISO 9613-2:1996, general method of calculation). The
   sheet is clearly labelled a prediction, not a measurement. It carries a

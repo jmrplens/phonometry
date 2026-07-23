@@ -62,6 +62,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike, NDArray
 
 from .._internal.types import as_float_or_array
@@ -525,6 +527,61 @@ class ReverberationModelResult:
 
         check_language(language)
         return plot_reverberation_models(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a reverberation-time prediction fiche to a PDF.
+
+        Writes a one-page report of the reverberation time predicted by the
+        five statistical-acoustics models (Sabine, Eyring, Millington-Sette,
+        Fitzroy and Arau-Puchades): a standard-basis line marking it a
+        design-stage prediction, an optional metadata header block (client,
+        room, description, room volume, total surface area, climate ...), a
+        per-band table with one reverberation-time column per model beside the
+        result's own model-comparison plot (:meth:`plot`), the boxed
+        mid-frequency reverberation time from Arau-Puchades (the recommended
+        model for a non-uniform absorption distribution) with the per-model
+        spread alongside, and a footer with the fixed disclaimer. This is a
+        prediction, not a measurement: the five models bracket the
+        reverberation time likely to occur. A supplied
+        ``metadata.requirement`` is printed as a target reverberation-time
+        reference line without a PASS/FAIL verdict, since a room reverberation
+        time is a target range rather than a strictly higher/lower-is-better
+        quantity.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a bare
+            prediction fiche (body, result and disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for parity with the other fiches; the model
+            table already shows every computed value, so it has no effect.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.reverberation import render_reverberation_models_report
+
+        return render_reverberation_models_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def reverberation_time_models(

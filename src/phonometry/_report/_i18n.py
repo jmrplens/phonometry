@@ -786,6 +786,25 @@ _STRINGS: dict[str, str] = {
     "representative HTLAN = {value} dB HL, maximum {req} dB HL": "HTLAN representativo = {value} dB HL, máximo {req} dB HL",
     "These values are a statistical prediction for a noise-exposed population (ISO 1999:2013), not a clinical diagnosis or a measured audiogram of any individual.": "Estos valores son una predicción estadística para una población expuesta al ruido (ISO 1999:2013), no un diagnóstico clínico ni un audiograma medido de ninguna persona.",
     "The population fractile Q is the fraction of the noise-exposed population predicted to show a smaller threshold shift, so a higher fractile is a more-susceptible individual (ISO 1999:2013, 6.3.2).": "El fractil poblacional Q es la fracción de la población expuesta al ruido que se predice con un desplazamiento del umbral menor, por lo que un fractil mayor corresponde a un individuo más susceptible (ISO 1999:2013, 6.3.2).",
+    # --- reverberation-time prediction / enclosed-space characterisation --
+    "Reverberation-time prediction": "Predicción del tiempo de reverberación",
+    "Sound absorption in an enclosed space": "Absorción acústica en un recinto",
+    "Design-stage prediction of the reverberation time by five statistical-acoustics models (Sabine, Eyring, Millington-Sette, Fitzroy and Arau-Puchades).": "Predicción en fase de diseño del tiempo de reverberación mediante cinco modelos de acústica estadística (Sabine, Eyring, Millington-Sette, Fitzroy y Arau-Puchades).",
+    "{standard} estimate of the equivalent sound absorption area and reverberation time of an enclosed space per EN 12354-6:2003.": "{standard} estimación del área de absorción acústica equivalente y del tiempo de reverberación de un recinto según EN 12354-6:2003.",
+    "Equivalent sound absorption area and reverberation time of an enclosed space per EN 12354-6:2003.": "Área de absorción acústica equivalente y tiempo de reverberación de un recinto según EN 12354-6:2003.",
+    "Total surface area S [m<super>2</super>]": "Superficie total S [m<super>2</super>]",
+    "Object fraction &#968;": "Fracción de objetos &#968;",
+    "Reverberation time by model [s]": "Tiempo de reverberación por modelo [s]",
+    "Absorption area A and reverberation time T": "Área de absorción A y tiempo de reverberación T",
+    "T [s]": "T [s]",
+    "Predicted T<sub>mid</sub> (Arau-Puchades, 500-1000 Hz) = <b>{value} s</b>": "T<sub>mid</sub> previsto (Arau-Puchades, 500-1000 Hz) = <b>{value} s</b>",
+    "Predicted T (Arau-Puchades) = <b>{value} s</b>": "T previsto (Arau-Puchades) = <b>{value} s</b>",
+    "T = <b>{value} s</b>": "T = <b>{value} s</b>",
+    "A (500-1000 Hz) = {value} m<super>2</super>": "A (500-1000 Hz) = {value} m<super>2</super>",
+    "Target reverberation time T = {req} s": "Tiempo de reverberación objetivo T = {req} s",
+    "Design-stage prediction from the room geometry and surface absorption by the classical statistical-acoustics models; it is not a measurement. The five models bracket the reverberation time likely to occur; Arau-Puchades is recommended for a non-uniform absorption distribution and drives the boxed descriptor.": "Predicción en fase de diseño a partir de la geometría del recinto y la absorción de las superficies mediante los modelos clásicos de acústica estadística; no es una medición. Los cinco modelos acotan el tiempo de reverberación que probablemente se produzca; Arau-Puchades se recomienda para una distribución de absorción no uniforme y determina el valor destacado.",
+    "Sabine T = 24 ln10/c0 * V/(A + 4mV); Eyring replaces A by -S ln(1 - alpha_bar); Millington-Sette sums -S_i ln(1 - alpha_i) per surface; Fitzroy and Arau-Puchades are the area-weighted arithmetic and geometric means of the three axial Eyring times.": "Sabine T = 24 ln10/c0 * V/(A + 4mV); Eyring sustituye A por -S ln(1 - alpha_bar); Millington-Sette suma -S_i ln(1 - alpha_i) por superficie; Fitzroy y Arau-Puchades son las medias aritmética y geométrica, ponderadas por área, de los tres tiempos de Eyring axiales.",
+    "Estimate of the equivalent sound absorption area A and the reverberation time T of an enclosed space from its surface, object and air absorption by the EN 12354-6:2003 Clause 4 model (A by Formula 1, T = 55.3/c0 * V(1 - psi)/A by Formula 5, with the object fraction psi = sum Vobj / V). It is an estimate for a diffuse field, not a measurement.": "Estimación del área de absorción acústica equivalente A y del tiempo de reverberación T de un recinto a partir de la absorción de sus superficies, objetos y aire mediante el modelo del apartado 4 de la EN 12354-6:2003 (A por la fórmula 1, T = 55,3/c0 * V(1 - psi)/A por la fórmula 5, con la fracción de objetos psi = suma Vobj / V). Es una estimación para un campo difuso, no una medición.",
 }
 
 

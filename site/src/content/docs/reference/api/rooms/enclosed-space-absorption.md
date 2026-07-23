@@ -210,3 +210,51 @@ Plot the reverberation time over the octave bands.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### ReverberationResult.report()
+
+```python
+ReverberationResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an enclosed-space absorption/reverberation fiche to a PDF.
+
+Writes a one-page report characterising an enclosed space by the
+EN 12354-6:2003 Clause 4 model: a standard-basis line, an optional
+metadata header block (client, room, description, room volume, object
+fraction, climate ...), a per-band table of the equivalent sound
+absorption area `A` and the reverberation time `T` beside the
+result's own reverberation-time plot (`plot`), the boxed
+mid-frequency reverberation time with the mid-frequency absorption area
+alongside, and a footer with the fixed disclaimer. EN 12354-6 gives a
+diffuse-field estimate rather than a measurement; a supplied
+`metadata.requirement` is printed as a target reverberation-time
+reference line without a PASS/FAIL verdict, since a room reverberation
+time is a target range rather than a strictly higher/lower-is-better
+quantity.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a bare characterisation fiche (body, result and disclaimer only). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for parity with the other fiches; the band table already shows both A and T, so it has no effect. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |

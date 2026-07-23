@@ -27,6 +27,7 @@ references:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 **EN 12354-6:2003** predice el **área de absorción sonora equivalente total** de
 una sala y su **tiempo de reverberación** a partir de la absorción de sus
@@ -191,6 +192,70 @@ tiempos de reverberación medidos de hasta el doble de la predicción en
 salas de baja difusividad. Las alternativas clásicas para esos casos viven
 en
 [Predicción del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/).
+
+## 4. Informe del recinto (`.report()`)
+
+`ReverberationResult.report(path)` genera una ficha PDF de una página que
+caracteriza el recinto: una línea de base que nombra la EN 12354-6:2003, un
+bloque de cabecera de metadatos opcional (cliente, sala, descripción, volumen de
+la sala, fracción de objetos, condiciones climáticas), una tabla por bandas del
+área de absorción acústica equivalente $A$ y el tiempo de reverberación $T$
+junto a la gráfica del tiempo de reverberación (`.plot()`), y el tiempo de
+reverberación de frecuencias medias destacado con el área de absorción de
+frecuencias medias al lado. La EN 12354-6 ofrece una **estimación** para campo
+difuso, no una medición, por lo que no se emite ningún veredicto CUMPLE/NO
+CUMPLE; un tiempo de reverberación objetivo indicado mediante el campo
+`requirement` de los metadatos se imprime solo como línea de referencia, ya que
+el tiempo de reverberación de una sala es un intervalo objetivo y no una
+magnitud en la que simplemente cuanto más alto o más bajo, mejor. Usa el mismo
+contenedor `ReportMetadata` y el mismo motor de renderizado que las demás
+fichas; pasar `metadata=None` produce una ficha de caracterización básica. El
+renderizado necesita reportlab (`pip install phonometry[report]`); solo se
+admite `engine="reportlab"`. La ficha se renderiza en inglés por defecto; pasa
+`language="es"` para una ficha en español (cadenas fijas traducidas y separador
+decimal de coma).
+
+```python
+from phonometry import (
+    enclosed_space_reverberation, hard_object_absorption, object_fraction,
+    ReportMetadata,
+)
+
+surfaces = [                                   # por banda de octava, 125 Hz - 8 kHz
+    (20.0, [0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.55]),  # suelo enmoquetado
+    (20.0, [0.20, 0.40, 0.65, 0.75, 0.80, 0.80, 0.75]),  # techo acústico
+    (45.0, [0.02, 0.02, 0.03, 0.04, 0.05, 0.05, 0.05]),  # paredes de yeso pintado
+]
+volumes = [0.5, 0.8, 0.3]                      # mobiliario, m^3
+result = enclosed_space_reverberation(
+    surfaces, 50.0,
+    objects=hard_object_absorption(volumes),
+    object_fraction=object_fraction(volumes, 50.0),
+    air_condition="20C_50-70",
+)
+result.report(
+    "enclosed_space_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Sala de reuniones, amueblada",
+        test_room="Sala de reuniones M2",
+        measurement_standard="EN 12354-6",
+        temperature=20.0, relative_humidity=55.0,
+        laboratory="Laboratorio de referencia Phonometry",
+        requirement=0.6,          # impreso como línea de referencia, sin veredicto
+    ),
+    language="es",
+)                                 # la tabla A/T por bandas + el T_mid destacado
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; haz clic en la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="enclosed_space_absorption_example"
+	title="Informe de ejemplo de absorción y reverberación de un recinto (PDF)"
+	description="Ficha de recinto EN 12354-6 de una página: una cabecera de metadatos (cliente, sala, descripción, volumen de la sala, fracción de objetos, temperatura, humedad y presión), la tabla por bandas de octava del área de absorción acústica equivalente A y el tiempo de reverberación T de 125 Hz a 8 kHz junto a la gráfica del tiempo de reverberación, y el tiempo de reverberación de frecuencias medias destacado con el área de absorción de frecuencias medias al lado (sin veredicto CUMPLE/NO CUMPLE)."
+	caption="Ficha de recinto (ReverberationResult.report), la tabla A/T por bandas y el T_mid destacado."
+/>
 
 ## Véase también
 

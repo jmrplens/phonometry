@@ -97,6 +97,7 @@ references:
 
 import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import ReportPreview from '../../../../components/ReportPreview.astro';
 
 El **tiempo de reverberación** $T$, el tiempo que tarda el nivel de energía
 sonora en caer 60 dB tras detenerse la fuente, se predice aquí a partir del
@@ -358,6 +359,63 @@ mobiliario. En la práctica, indica una *banda* de predicciones (Sabine y
 Eyring, o Fitzroy y Arau-Puchades en los casos axiales) en lugar de un
 único valor; donde los modelos se separan, la sala está diciendo que su
 campo no es difuso.
+
+## 5. Informe de predicción (`.report()`)
+
+`ReverberationModelResult.report(path)` genera una ficha PDF de una página de la
+predicción: una línea de base que la marca como **predicción en fase de diseño**
+por los cinco modelos de acústica estadística, un bloque de cabecera de
+metadatos opcional (cliente, sala, descripción, volumen de la sala, superficie
+total, condiciones climáticas), una tabla por bandas con una columna de tiempo
+de reverberación por modelo junto a la gráfica de comparación de modelos
+(`.plot()`), y el tiempo de reverberación de frecuencias medias destacado a
+partir de Arau-Puchades (el modelo recomendado para una distribución de
+absorción no uniforme) con la dispersión entre modelos al lado. Es una
+predicción, no una medición: los cinco modelos acotan el tiempo de reverberación
+que probablemente se produzca, por lo que no se emite ningún veredicto
+CUMPLE/NO CUMPLE. Un tiempo de reverberación objetivo indicado mediante el campo
+`requirement` de los metadatos se imprime solo como línea de referencia, ya que
+el tiempo de reverberación de una sala es un intervalo objetivo y no una
+magnitud en la que simplemente cuanto más alto o más bajo, mejor. Usa el mismo
+contenedor `ReportMetadata` y el mismo motor de renderizado que las demás
+fichas; pasar `metadata=None` produce una ficha de predicción básica. El
+renderizado necesita reportlab (`pip install phonometry[report]`); solo se
+admite `engine="reportlab"`. La ficha se renderiza en inglés por defecto; pasa
+`language="es"` para una ficha en español (cadenas fijas traducidas y separador
+decimal de coma).
+
+```python
+from phonometry import reverberation_time_models, ReportMetadata
+
+result = reverberation_time_models(
+    (8.0, 5.0, 3.0),                       # sala tipo caja, un par de paredes tratado
+    ([0.10, 0.15, 0.30, 0.45, 0.55, 0.60], # par de paredes tratado, por banda de octava
+     [0.08, 0.10, 0.12, 0.15, 0.18, 0.20], # paredes laterales
+     [0.05, 0.08, 0.10, 0.12, 0.15, 0.18]),# suelo/techo
+    frequencies=[125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0],
+)
+result.report(
+    "reverberation_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="Aula, una pared revestida con un absorbente de banda ancha",
+        test_room="Aula C1",
+        temperature=20.0, relative_humidity=50.0,
+        laboratory="Laboratorio de referencia Phonometry",
+        requirement=0.8,          # impreso como línea de referencia, sin veredicto
+    ),
+    language="es",
+)                                 # la tabla de los cinco modelos + el T_mid destacado
+```
+
+La ficha de ejemplo se regenera con `make reports` y se mantiene renderizada en
+el repositorio; haz clic en la vista previa para abrir el PDF.
+
+<ReportPreview
+	name="reverberation_prediction_example"
+	title="Informe de ejemplo de predicción del tiempo de reverberación (PDF)"
+	description="Ficha de predicción del tiempo de reverberación de una página: una cabecera de metadatos (cliente, sala, descripción, volumen de la sala, superficie total, temperatura, humedad y presión), la tabla por bandas de octava con una columna de tiempo de reverberación por modelo (Sabine, Eyring, Millington-Sette, Fitzroy y Arau-Puchades de 125 Hz a 4 kHz) junto a la gráfica de comparación de los cinco modelos, el tiempo de reverberación de frecuencias medias destacado a partir de Arau-Puchades con la dispersión entre modelos al lado, y una línea de referencia del tiempo de reverberación objetivo (sin veredicto CUMPLE/NO CUMPLE)."
+	caption="Ficha de predicción del tiempo de reverberación (ReverberationModelResult.report), la tabla de los cinco modelos y el T_mid destacado."
+/>
 
 ## Véase también
 

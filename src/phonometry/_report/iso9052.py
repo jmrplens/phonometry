@@ -36,25 +36,17 @@ guarded with an actionable :class:`ImportError`.
 
 from __future__ import annotations
 
-import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, List, Tuple
 
 import numpy as np
 
 from ._i18n import format_number, t
-from ._layout import (
-    _ACCENT_HEX,
-    _REPORTLAB_HINT,
-    build_document,
-    document_styles,
-    fmt_meta,
-    fmt_num,
-    footer_flow,
-    grid_table,
-    metrics_table,
-    render_figure_drawing,
-    result_box,
-    two_panel_body,
+from ._layout import fmt_meta, fmt_num
+from ._material_fiche import (
+    MaterialFicheContent,
+    material_metadata_pairs,
+    render_material_fiche,
+    standard_basis_line,
 )
 from .metadata import ReportMetadata
 
@@ -84,32 +76,15 @@ def _metadata_pairs(
     and the environmental conditions (Clause 9 d)). The frequency-range/room
     fields of the other fiches do not apply here.
     """
-    specs: List[Tuple[str, str | None]] = [
-        (t("Client", language), metadata.client),
-        (t("Manufacturer", language), metadata.manufacturer),
-        (t("Description", language), metadata.specimen),
+    middle: List[Tuple[str, str | None]] = [
         (t("Total mass per area m&#8242;<sub>t</sub> [kg/m<super>2</super>]", language),
          fmt_meta(metadata.mass_per_area, language)
          if metadata.mass_per_area is not None else None),
         (t("Thickness under load d [mm]", language),
          fmt_meta(metadata.thickness * 1e3, language)
          if metadata.thickness is not None else None),
-        (t("Test facility", language), metadata.test_room),
-        (t("Date of test", language), metadata.test_date),
-        (t("Temperature [&#176;C]", language),
-         fmt_meta(metadata.temperature, language)
-         if metadata.temperature is not None else None),
-        (t("Relative humidity [%]", language),
-         fmt_meta(metadata.relative_humidity, language)
-         if metadata.relative_humidity is not None else None),
     ]
-    # The formatted values are label-safe; the free-text values are XML-escaped
-    # so a stray '&' or '<' cannot break reportlab's Paragraph parser.
-    return [
-        (label, html.escape(str(value)))
-        for label, value in specs
-        if value is not None
-    ]
+    return material_metadata_pairs(metadata, language, middle)
 
 
 def _metric_rows(
@@ -188,20 +163,14 @@ def _extended_terms(
 
 def _basis_line(metadata: ReportMetadata | None, language: str = "en") -> str:
     """The standard-basis line, naming the measurement standard when supplied."""
-    measurement_standard = (
-        metadata.measurement_standard if metadata is not None else None
-    )
-    if measurement_standard:
-        return t(
-            "{standard} resonance measurement of the apparent dynamic stiffness "
-            "per unit area of a resilient layer used under a floating floor per "
-            "EN 29052-1:1992 (ISO 9052-1:1989).",
-            language,
-        ).format(standard=html.escape(measurement_standard))
-    return t(
+    return standard_basis_line(
+        "{standard} resonance measurement of the apparent dynamic stiffness "
+        "per unit area of a resilient layer used under a floating floor per "
+        "EN 29052-1:1992 (ISO 9052-1:1989).",
         "Resonance measurement of the apparent dynamic stiffness per unit area "
         "of a resilient layer used under a floating floor per EN 29052-1:1992 "
         "(ISO 9052-1:1989).",
+        metadata,
         language,
     )
 
@@ -234,48 +203,18 @@ def render_dynamic_stiffness_report(
         (``pip install "phonometry[report,plot]"``).
     """
     del verbose  # uniform signature; the dynamic-stiffness fiche has one layout
-    try:
-        from reportlab.lib import colors
-        from reportlab.lib.units import mm
-        from reportlab.platypus import Paragraph, Spacer
-    except ImportError as exc:
-        raise ImportError(_REPORTLAB_HINT) from exc
-    accent = colors.HexColor(_ACCENT_HEX)
-
-    styles, title_style, basis_style, caption_style = document_styles(accent)
-    title = t("Dynamic stiffness of resilient materials", language)
-
-    flow: List[Any] = [
-        Paragraph(title, title_style),
-        Paragraph(_basis_line(metadata, language), basis_style),
-    ]
-
-    if metadata is not None and not metadata.is_empty():
-        header_pairs = _metadata_pairs(metadata, language)
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
-
-    left_cell = [
-        Paragraph(t("Dynamic-stiffness results", language), caption_style),
-        metrics_table(_metric_rows(result, language)),
-    ]
-    # Non-band plot (the f0(s') design curve): self-scaling axis.
-    plot_drawing = render_figure_drawing(
-        result.plot, 116 * mm, y_top=None, language=language
+    pairs = (
+        _metadata_pairs(metadata, language)
+        if metadata is not None and not metadata.is_empty()
+        else []
     )
-    flow.append(two_panel_body(left_cell, plot_drawing))
-    flow.append(Spacer(1, 8))
-
-    flow.append(
-        result_box(
-            _statement(result, language),
-            styles,
-            accent,
-            extended=_extended_terms(result, language),
-        )
+    content = MaterialFicheContent(
+        title=t("Dynamic stiffness of resilient materials", language),
+        basis_line=_basis_line(metadata, language),
+        caption=t("Dynamic-stiffness results", language),
+        metadata_pairs=pairs,
+        metric_rows=_metric_rows(result, language),
+        statement=_statement(result, language),
+        extended=_extended_terms(result, language),
     )
-    flow.extend(footer_flow(metadata, language))
-
-    return build_document(path, flow, title)
+    return render_material_fiche(result.plot, path, content, metadata, language=language)

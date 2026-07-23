@@ -293,6 +293,61 @@ Plot the fitted `dp(u)` curve with the evaluation point.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### StaticAirflowResult.report()
+
+```python
+StaticAirflowResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ISO 9053-1 static airflow-resistance test-report fiche to a PDF.
+
+Writes a one-page accredited airflow-resistance report
+(ISO 9053-1:2018, static/direct airflow method): the standard-basis
+line, an optional metadata header block (client, manufacturer,
+specimen, the specimen thickness `d`, test facility, date, climate
+...), a two-panel body with a compact metrics table (the evaluation
+velocity, the fitted pressure difference `dp`, the airflow resistance
+`R`, the specific airflow resistance `R_s`, the airflow resistivity
+`sigma` when a thickness is available, and the through-origin fit
+coefficients `a` and `b`) beside the fitted `dp(u)` curve, a boxed
+specific airflow resistance `R_s` with the airflow resistance `R`
+and the resistivity `sigma` alongside, and a footer with the fixed
+disclaimer. ISO 9053-1 is a material characterisation, so there is no
+pass/fail verdict.
+
+The clause 7.5 stepwise procedure fits `dp = a*u + b*u**2` through the
+origin and evaluates the resistances at the reference velocity
+`u = 0.5 mm/s`; the linear coefficient `a` is the zero-velocity
+specific airflow resistance. Resistance quantities are printed to the
+nearest whole Pa\*s unit and the evaluation velocity to one decimal
+place (mm/s).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `thickness` (the specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature`, `relative_humidity`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 9053-1 has no verdict). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | Accepted for a uniform `.report()` signature; the airflow-resistance fiche has a single body layout, so it has no effect. |
+| `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"`. |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the fitted `dp(u)` curve, so both are required (`pip install "phonometry[report,plot]"`). |
+
 ## thermal_boundary_layer_thickness
 
 ```python

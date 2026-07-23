@@ -458,6 +458,43 @@ repositorio. Haga clic en la vista previa para abrir el PDF:
 	caption="Ficha por intensidad (IntensityReductionResult.report), RI,w (C; Ctr)."
 />
 
+Para un **elemento constructivo pequeño** (un aireador, una caja de enchufe, una
+ventana pequeña) el método por intensidad informa en su lugar la diferencia de
+niveles normalizada de elementos $D_{I,n,e}$ (Fórmula (8)), normalizada al área
+de absorción de referencia $A_0 = 10\ \text{m}^2$.
+`IntensityElementNormalizedResult.report()` escribe la misma ficha de una página
+a través del renderizador compartido, con `DI,n,e,w (C; Ctr)` en caja evaluado
+según ISO 717-1; `verbose=True` muestra la evaluación ISO 717 por banda y un
+`requirement` añade un veredicto CUMPLE/NO CUMPLE (el aislamiento del elemento
+cumple igualando o superando el objetivo).
+
+```python
+import numpy as np
+from phonometry import building, ReportMetadata
+
+lp1, sm, n = 85.0, 12.0, 1                              # NPS fuente, superficie, unidades
+l_in = np.array([57.9, 62.0, 60.6, 55.7, 55.9, 55.6, 53.5, 51.7,
+                 50.3, 47.8, 46.5, 45.8, 44.9, 45.3, 47.3, 52.8])
+res = building.intensity_element_normalized_difference(
+    np.full(16, lp1), l_in, measurement_area=sm, n=n
+)
+metadata = ReportMetadata(
+    specimen="Aireador en un muro de fábrica de 100 mm",
+    measurement_standard="ISO 15186-1",
+    laboratory="Phonometry Reference Laboratory",
+    report_id="PHN-2026-0151",
+    requirement=30.0,                                   # DI,n,e,w >= 30 dB -> CUMPLE
+)
+res.report("DIne.pdf", metadata=metadata)               # DI,n,e,w (C; Ctr)
+```
+
+<ReportPreview
+	name="iso15186_element_example"
+	title="Informe de ejemplo de elementos por intensidad ISO 15186-1 (PDF)"
+	description="Informe de ensayo de aislamiento acústico por intensidad normalizado de elementos en laboratorio de un elemento constructivo pequeño de una página: la cabecera de metadatos (cliente, descripción de la muestra, montaje, superficie del elemento), la tabla de DI,n,e en tercios de octava junto a la curva medida frente a la referencia desplazada, el índice DI,n,e,w (C; Ctr) en caja evaluado según ISO 717-1, la declaración del método por intensidad y un veredicto CUMPLE frente al requisito de 30 dB."
+	caption="Ficha de elementos por intensidad (IntensityElementNormalizedResult.report), DI,n,e,w (C; Ctr)."
+/>
+
 ## Mejora a impacto de revestimientos de suelo (ISO 16251-1)
 
 La ISO 16251-1:2014 es un método de laboratorio para la **mejora del aislamiento

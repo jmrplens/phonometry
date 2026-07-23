@@ -272,6 +272,66 @@ to be available (16 or 5 bands) and matplotlib
 (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### IntensityElementNormalizedResult.report()
+
+```python
+IntensityElementNormalizedResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an ISO 15186-1 element-normalized insulation report to a PDF.
+
+Writes the one-page laboratory test report of ISO 15186-1:2000 for the
+element-normalized level difference `DI,n,e` of a small building
+element measured with sound intensity: the standard-basis line, an
+optional metadata header block, the band table (16 one-third-octave or
+5 octave bands) beside the measured-versus-shifted-reference curve, the
+boxed rating `DI,n,e,w (C; Ctr)` (the element-normalized level
+difference `DI,n,e` rated per ISO 717-1), the intensity-method
+statement, an optional verdict row and a footer with the identity block
+and disclaimer. The report requires the single-number `rating` to be
+present on the result; it is formed automatically only for exactly 16
+one-third-octave (100 Hz to 3150 Hz) or 5 octave (125 Hz to 2000 Hz)
+bands, and a result carrying no rating (any other band count) is
+rejected.
+
+The applicable [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) fields describe the
+intensity measurement: `specimen` (the tested element), `area`
+(the element area), `client`, `manufacturer`, `test_room` (the
+laboratory / facility), `laboratory`, `operator`, `report_id` and
+`test_date`, plus the room/climate fields shared with the other
+insulation fiches. The measurement-surface geometry, the number `N`
+of element units and the scanning-versus-discrete-point acquisition
+method are not dedicated metadata fields; record them in `notes`
+(free text) and name the measurement standard in
+`measurement_standard` (`"ISO 15186-1"`). A `requirement` adds a
+PASS/FAIL verdict; the element insulation passes at or above the target.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a lightweight fiche (body, rating, statement and disclaimer only). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When `True`, the left table shows the ISO 717 evaluation per band (the `DI,n,e` value, the shifted reference and the unfavourable deviation) instead of the two-column form. |
+| `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is unknown, `language` is not one of the supported values, or the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-1 rating the fiche needs was not formed). |
+| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded rating figure (`pip install phonometry[plot]`). |
+
 ## IntensityReductionResult
 
 ```python

@@ -1432,6 +1432,56 @@ def _human_vibration_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "human_vibration_example.pdf"
 
 
+def _nipts_example() -> Tuple[object, ReportMetadata, str]:
+    """NIPTS fiche: the ISO 1999 Annex D 90 dB / 20 year prediction.
+
+    Reproduces the ISO 1999:2013 Annex D (Table D.2) worked example of the
+    noise-induced permanent threshold shift for L_EX,8h = 90 dB and 20 years of
+    exposure, at the most-susceptible tenth (population fractile Q = 0.90). The
+    median 4 kHz shift is N50 = 12.9 dB and the fractile value is 17.8 dB; the
+    fiche boxes the shift averaged over the 2/3/4 kHz hearing-handicap set. It
+    is a statistical prediction for the exposed population, not a clinical
+    diagnosis.
+    """
+    result = ph.hearing.nipts(90.0, 20.0, 0.9)
+    metadata = ReportMetadata(
+        client="Example fabrication works",
+        specimen="Welders (homogeneous exposure group, 4 workers)",
+        test_room="Steel assembly hall, line 2",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-1999-NIPTS",
+        notes="Reproduces the ISO 1999:2013 Annex D (Table D.2) worked example.",
+    )
+    return result, metadata, "iso1999_nipts_example.pdf"
+
+
+def _htlan_example() -> Tuple[object, ReportMetadata, str]:
+    """HTLAN fiche: a 60-year-old worker's age-plus-noise threshold prediction.
+
+    Predicts the hearing threshold level associated with age and noise
+    (ISO 1999:2013 clause 6.1) for a 60-year-old man exposed at
+    L_EX,8h = 95 dB for 30 years, at the median (population fractile Q = 0.50).
+    The age component H (HTLA, database A = ISO 7029) and the noise component N
+    (NIPTS) combine by H' = H + N - H*N/120; the fiche boxes the combined
+    threshold averaged over the 2/3/4 kHz hearing-handicap set. It is a
+    statistical prediction, not a clinical audiogram.
+    """
+    result = ph.hearing.htlan(60, "male", 95.0, 30.0, 0.5)
+    metadata = ReportMetadata(
+        client="Example fabrication works",
+        specimen="Machine operator (60 years, 30 years in role)",
+        test_room="Steel assembly hall, line 2",
+        test_date="2026-07-20",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-1999-HTLAN",
+        notes="Predicted age-plus-noise threshold per ISO 1999:2013 clause 6.1.",
+    )
+    return result, metadata, "iso1999_htlan_example.pdf"
+
+
 def _room_acoustics_example() -> Tuple[object, ReportMetadata, str]:
     """Room-acoustics fiche: ISO 3382-1/-2 parameters of a small auditorium.
 
@@ -2634,6 +2684,8 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _microphone_example,
     _occupational_exposure_example,
     _human_vibration_example,
+    _nipts_example,
+    _htlan_example,
     _room_acoustics_example,
     _noise_criteria_example,
     _room_criteria_example,

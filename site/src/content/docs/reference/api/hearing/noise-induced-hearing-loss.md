@@ -115,6 +115,51 @@ Plot the age, noise and combined threshold components over frequency.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### HtlanResult.report()
+
+```python
+HtlanResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render an HTLAN hearing-threshold prediction fiche to a PDF.
+
+Writes a one-page statistical-prediction report of the hearing
+threshold level associated with age and noise (ISO 1999:2013 clause
+6.1): a prediction-basis line, an optional metadata header, a
+per-audiometric-frequency table of the age component `H`, the noise
+component `N` and the combined threshold `H' = H + N - H*N/120`
+beside the result's own plot, the boxed representative threshold
+averaged over the 2/3/4 kHz hearing-handicap set with the
+listener/exposure conditions, and a statistical-prediction note. The
+fiche is a population estimate, not a clinical diagnosis of any
+individual.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the worker(s)/group, `test_room` the workplace) and, via `requirement`, a maximum acceptable representative HTLAN in dB that adds a PASS/FAIL verdict (a lower threshold is better). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When True, the table adds the compression term `H*N/120`. |
+| `language` | `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab, matplotlib or svglib is not installed (`pip install "phonometry[report,plot]"`). |
+
 ## nipts
 
 ```python
@@ -200,3 +245,48 @@ Plot the NIPTS spectrum with the fractile band over frequency.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### NiptsResult.report()
+
+```python
+NiptsResult.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a NIPTS hearing-loss prediction fiche to a PDF.
+
+Writes a one-page statistical-prediction report of the noise-induced
+permanent threshold shift (ISO 1999:2013 clause 6.3): a
+prediction-basis line, an optional metadata header (company,
+worker(s)/group, workplace, date), a per-audiometric-frequency table of
+the median `N50` and the NIPTS at the chosen population fractile
+beside the result's own spectrum plot, the boxed representative shift
+averaged over the 2/3/4 kHz hearing-handicap set with the exposure
+conditions (`L_EX,8h`, exposure years, fractile), and a
+statistical-prediction note. The fiche is a population estimate, not a
+clinical diagnosis of any individual.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`client` is the company, `specimen` the worker(s)/group, `test_room` the workplace) and, via `requirement`, a maximum acceptable representative NIPTS in dB that adds a PASS/FAIL verdict (a lower shift is better). |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When True, the table adds the upper/lower spread columns (`du`/`dl`). |
+| `language` | `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab, matplotlib or svglib is not installed (`pip install "phonometry[report,plot]"`). |

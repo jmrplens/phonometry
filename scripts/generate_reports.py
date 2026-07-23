@@ -1530,6 +1530,84 @@ def _room_acoustics_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso3382_room_acoustics_example.pdf"
 
 
+def _reverberation_prediction_example() -> Tuple[object, ReportMetadata, str]:
+    """Reverberation-time prediction fiche: five models over the octave bands.
+
+    A shoebox classroom 8 x 5 x 3 m (V = 120 m3, S = 158 m2, the geometry of
+    the reverberation_prediction module tests) with an anisotropic absorption
+    distribution: one wall pair treated with a broadband absorber (alpha rising
+    with frequency), the other two pairs lightly absorptive. The anisotropy is
+    what separates the five models, so the fiche compares them meaningfully.
+    The values printed are computed by the classical closed-form models
+    themselves (each anchored by the module tests), so the fiche needs no
+    separate numeric oracle. It is a design-stage prediction, not a
+    measurement: the five models bracket the reverberation time likely to
+    occur.
+    """
+    freqs = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+    treated = [0.10, 0.15, 0.30, 0.45, 0.55, 0.60]  # broadband absorber wall
+    side = [0.08, 0.10, 0.12, 0.15, 0.18, 0.20]      # lightly absorptive walls
+    floor_ceiling = [0.05, 0.08, 0.10, 0.12, 0.15, 0.18]
+    result = ph.reverberation_time_models(
+        (8.0, 5.0, 3.0), (treated, side, floor_ceiling), frequencies=freqs
+    )
+    metadata = ReportMetadata(
+        specimen="Classroom, one wall lined with a broadband absorber",
+        client="Example client",
+        test_room="Classroom C1 (example)",
+        temperature=20.0,
+        relative_humidity=50.0,
+        pressure=101.3,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-REVERB",
+        requirement=0.8,
+    )
+    return result, metadata, "reverberation_prediction_example.pdf"
+
+
+def _enclosed_space_absorption_example() -> Tuple[object, ReportMetadata, str]:
+    """Enclosed-space fiche: absorption area A and reverberation time T (EN 12354-6).
+
+    A small 5 x 4 x 2.5 m meeting room (V = 50 m3) characterised over the
+    standard octave bands by the EN 12354-6:2003 Clause 4 model: a carpeted
+    floor, an acoustic-tile ceiling and painted-plaster walls, a few hard
+    objects (their equivalent area from Formula 4) giving a small object
+    fraction, and the recommended 20 degC / 50-70 % air-attenuation profile.
+    A and T are computed by the tested Formula 1 / Formula 5 primitives, so the
+    fiche needs no separate numeric oracle. EN 12354-6 gives a diffuse-field
+    estimate, not a measurement.
+    """
+    surfaces = [
+        (20.0, [0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.55]),   # carpeted floor
+        (20.0, [0.20, 0.40, 0.65, 0.75, 0.80, 0.80, 0.75]),   # acoustic ceiling
+        (45.0, [0.02, 0.02, 0.03, 0.04, 0.05, 0.05, 0.05]),   # painted-plaster walls
+    ]
+    object_volumes = [0.5, 0.8, 0.3]  # furniture and fittings, m3
+    objects = ph.hard_object_absorption(object_volumes)
+    psi = ph.object_fraction(object_volumes, 50.0)
+    result = ph.enclosed_space_reverberation(
+        surfaces, 50.0, objects=objects, object_fraction=psi,
+        air_condition="20C_50-70",
+    )
+    metadata = ReportMetadata(
+        specimen="Meeting room, furnished",
+        client="Example client",
+        test_room="Meeting room M2 (example)",
+        measurement_standard="EN 12354-6",
+        temperature=20.0,
+        relative_humidity=55.0,
+        pressure=101.3,
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-EN12354-6",
+        requirement=0.6,
+    )
+    return result, metadata, "enclosed_space_absorption_example.pdf"
+
+
 def _noise_criteria_example() -> Tuple[object, ReportMetadata, str]:
     """Noise Criteria fiche: an office spectrum rated NC-40 (ANSI/ASA S12.2).
 
@@ -2687,6 +2765,8 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _nipts_example,
     _htlan_example,
     _room_acoustics_example,
+    _reverberation_prediction_example,
+    _enclosed_space_absorption_example,
     _noise_criteria_example,
     _room_criteria_example,
     _open_plan_example,

@@ -33,6 +33,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike
 
 from .._internal.types import as_float_or_array
@@ -226,6 +228,58 @@ class ReverberationResult:
 
         check_language(language)
         return plot_enclosed_space_absorption(self, ax=ax, language=language, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an enclosed-space absorption/reverberation fiche to a PDF.
+
+        Writes a one-page report characterising an enclosed space by the
+        EN 12354-6:2003 Clause 4 model: a standard-basis line, an optional
+        metadata header block (client, room, description, room volume, object
+        fraction, climate ...), a per-band table of the equivalent sound
+        absorption area ``A`` and the reverberation time ``T`` beside the
+        result's own reverberation-time plot (:meth:`plot`), the boxed
+        mid-frequency reverberation time with the mid-frequency absorption area
+        alongside, and a footer with the fixed disclaimer. EN 12354-6 gives a
+        diffuse-field estimate rather than a measurement; a supplied
+        ``metadata.requirement`` is printed as a target reverberation-time
+        reference line without a PASS/FAIL verdict, since a room reverberation
+        time is a target range rather than a strictly higher/lower-is-better
+        quantity.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a bare
+            characterisation fiche (body, result and disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for parity with the other fiches; the band
+            table already shows both A and T, so it has no effect.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.reverberation import render_enclosed_space_report
+
+        return render_enclosed_space_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def enclosed_space_reverberation(

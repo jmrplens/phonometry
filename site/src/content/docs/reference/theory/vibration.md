@@ -16,6 +16,42 @@ references:
     publisher: "CRC Press"
     url: "https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390"
     note: "ISBN 978-0-415-28239-0. A compact modern walkthrough of the ISO 2631-1 whole-body and ISO 5349 hand-arm evaluation chains summarised on this page."
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
+    year: 2005
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "3rd ed."
+    publisher: "Springer"
+    url: "https://link.springer.com/book/10.1007/b137728"
+    note: "ISBN 978-3-540-22696-3. The driving-point power W = (1/2) |F|^2 Re{Y} (Eq. 5.23) and the closed-form infinite-structure mobilities and impedances (Table 5.1) of the point-mobility section."
+  - type: book
+    authors: ["Hopkins, C."]
+    year: 2007
+    title: "Sound insulation"
+    publisher: "Butterworth-Heinemann"
+    url: "https://www.routledge.com/Sound-Insulation/Hopkins/p/book/9780750665261"
+    note: "ISBN 978-0-7506-6526-1. The bending-plate radiation-efficiency theory (Eqs 2.227-2.230, the Leppington/Maidanik high-frequency limit) behind the radiation-efficiency section."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2011
+    title: "Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 1: Basic terms and definitions, and transducer specifications"
+    designation: "ISO 7626-1:2011"
+    url: "https://www.iso.org/standard/50426.html"
+    note: "The measured driving-point mobilities that the closed-form infinite-structure results of the point-mobility section are the theoretical companions of."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
+    designation: "ISO/TS 7849-1:2009"
+    url: "https://www.iso.org/standard/40537.html"
+    note: "The radiation factor that equals the radiation efficiency, closing the sound-power-from-vibration chain of the radiation-efficiency section (survey method, fixed radiation factor)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 2: Engineering method including determination of the adequate radiation factor"
+    designation: "ISO/TS 7849-2:2009"
+    url: "https://www.iso.org/standard/40538.html"
+    note: "The engineering method of the same sound-power-from-vibration chain, determining the adequate radiation factor from measurement."
 ---
 
 This page collects the theory behind human vibration: the ISO 8041-1 frequency weightings, the whole-body and hand-arm metrics of ISO 2631-1 and ISO 5349, the action and limit values of Directive 2002/44/EC, and the ISO 2631-5 multiple-shock spinal model. It is part of the [theory reference](/phonometry/reference/theory/).

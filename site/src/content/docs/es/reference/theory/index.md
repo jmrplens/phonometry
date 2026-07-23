@@ -50,3 +50,5 @@ La referencia de teoría explica las normas, las matemáticas y las decisiones d
 ## [Vibración](/phonometry/es/reference/theory/vibration/)
 
 - [Vibración en humanos (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directiva 2002/44/CE)](/phonometry/es/reference/theory/vibration/#vibración-en-humanos-iso-8041-1-iso-2631-12-iso-5349-12-directiva-200244ce)
+- [Choques múltiples (ISO 2631-5)](/phonometry/es/reference/theory/vibration/#choques-múltiples-iso-2631-5)
+- [Movilidades puntuales y eficiencia de radiación (Cremer 5, Hopkins 2.9)](/phonometry/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiación-cremer-5-hopkins-29)

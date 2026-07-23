@@ -171,6 +171,27 @@ def test_spanish_report_renders_translated_fiche(tmp_path) -> None:
     assert re.search(r"\d,\d", text) is not None  # comma decimal separator
 
 
+def test_decision_matches_displayed_audibility_at_boundary(tmp_path) -> None:
+    """The audibility decision reads the displayed rounded ΔL_a, not the raw flag.
+
+    A raw tonal audibility of 0.03 dB is audible (> 0), but it rounds to the
+    displayed 0.0 dB; the fiche must state the tone is *not* audible so the
+    decision text cannot contradict the number printed in the box.
+    """
+    import dataclasses
+
+    result = dataclasses.replace(
+        _result(), tonal_audibility=0.03, is_audible=True
+    )
+    assert result.is_audible is True  # raw flag is audible
+    out = tmp_path / "boundary.pdf"
+    result.report(str(out))
+    _assert_one_page(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "The tone is not audible" in text
+    assert "0.0 dB" in text
+
+
 def test_no_identified_tone_reports_exclusion(tmp_path) -> None:
     """A spectrum with no classified tone renders and states the exclusion.
 

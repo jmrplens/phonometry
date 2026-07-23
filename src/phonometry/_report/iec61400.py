@@ -79,6 +79,21 @@ def _esc(value: str | None) -> str | None:
     return html.escape(value) if value else None
 
 
+def _audible_as_displayed(result: "WindTurbineTonalityResult") -> bool:
+    """Whether the fiche's decision reads the tone as audible.
+
+    The box, verdict and decision text all commit to the tonal audibility
+    rounded exactly as displayed, so the audibility decision is taken on that
+    same rounded value rather than on the result's raw ``is_audible`` flag;
+    otherwise a raw ``ΔL_a`` of, say, 0.03 dB (audible) would print "0.0 dB
+    > 0", contradicting its own number at the 0 dB boundary. A tone must still
+    have been identified (subclause 9.5.4) for any audibility decision to apply.
+    """
+    return (
+        result.has_identified_tone and display_round(result.tonal_audibility) > 0.0
+    )
+
+
 def _metadata_pairs(
     metadata: ReportMetadata | None, language: str = "en"
 ) -> List[Tuple[str, str]]:
@@ -191,7 +206,7 @@ def _decision_phrase(
             f"<font color='{_MUTED_HEX}'>"
             f"{t('Decision: no tone identified', language)}</font>"
         )
-    if result.is_audible:
+    if _audible_as_displayed(result):
         return (
             f"<font color='{_VERDICT_BAD_HEX}'>&#9679; "
             f"{t('Decision: tone audible', language)}</font>"
@@ -233,7 +248,7 @@ def _decision_note(
             "subclause 9.5.1).",
             language,
         )
-    if result.is_audible:
+    if _audible_as_displayed(result):
         return t(
             "The tone is audible (decisive &#916;L<sub>a</sub> = {dl} dB "
             "&gt; 0): the tonality rises above the audibility criterion "

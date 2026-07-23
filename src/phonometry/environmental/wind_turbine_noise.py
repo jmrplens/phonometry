@@ -36,6 +36,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._report.metadata import ReportMetadata
+
 
 class WindTurbineNoiseWarning(PhonometryWarning):
     """The tonality inputs leave the standard's stated domain of validity."""
@@ -210,6 +212,60 @@ class WindTurbineTonalityResult:
         from .._plot.environmental import plot_wind_turbine_tonality
 
         return plot_wind_turbine_tonality(self, ax=ax, language=check_language(language), **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a wind-turbine tonal audibility assessment fiche to a PDF.
+
+        Writes a one-page tonality-assessment report following
+        IEC 61400-11:2012+A1:2018 (subclauses 9.5.2-9.5.5): the standard-basis
+        line, an optional metadata header (source/situation, client, measurement
+        position, instrumentation and date), a two-panel body with the
+        critical-band / masking analysis in a metrics table (tone frequency,
+        critical bandwidth, tone level ``L_pt``, masking-noise level ``L_pn``,
+        tonality ``ΔL_tn``, audibility criterion ``L_a`` and tonal audibility
+        ``ΔL_a``) beside the narrowband-spectrum plot with the critical band,
+        masking level and tone marked, the boxed decisive tonal audibility
+        ``ΔL_a`` and the tone frequency with the audibility decision, an optional
+        verdict row and a footer with the fixed disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional
+            :class:`~phonometry.ReportMetadata`; ``None`` produces a bare
+            assessment fiche (body, result and disclaimer only). A supplied
+            ``requirement`` is read as the maximum acceptable tonal audibility
+            ``ΔL_a`` in dB (a lower audibility passes).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: Accepted for signature parity with the other fiches; the
+            metrics table already shows the full Formula 30-34 chain, so it has
+            no effect.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``language`` is not one of the supported
+            languages, or if ``engine`` is not ``"reportlab"``.
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iec61400 import render_wind_turbine_tonality_report
+
+        return render_wind_turbine_tonality_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def _validate_narrowband(

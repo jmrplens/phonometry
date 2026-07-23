@@ -6982,6 +6982,39 @@ repository. Click the preview to open the PDF:
 
 *Intensity fiche (`IntensityReductionResult.report`), RI,w (C; Ctr).*
 
+For a **small building element** (a ventilator, a socket, a small window) the
+intensity method reports the element-normalized level difference
+*D*<sub>I,n,e</sub> (Formula (8)) instead, normalized to the reference
+absorption area *A*<sub>0</sub> = 10 m<sup>2</sup>.
+`IntensityElementNormalizedResult.report()` writes the same one-page fiche
+through the shared renderer, boxing `DI,n,e,w (C; Ctr)` rated per ISO 717-1;
+`verbose=True` shows the ISO 717 evaluation per band and a `requirement` adds a
+PASS/FAIL verdict (the element insulation passes at or above the target).
+
+```python
+import numpy as np
+from phonometry import building, ReportMetadata
+
+lp1, sm, n = 85.0, 12.0, 1                              # source SPL, surface, units
+l_in = np.array([57.9, 62.0, 60.6, 55.7, 55.9, 55.6, 53.5, 51.7,
+                 50.3, 47.8, 46.5, 45.8, 44.9, 45.3, 47.3, 52.8])
+res = building.intensity_element_normalized_difference(
+    np.full(16, lp1), l_in, measurement_area=sm, n=n
+)
+metadata = ReportMetadata(
+    specimen="Trickle ventilator in a 100 mm masonry wall",
+    measurement_standard="ISO 15186-1",
+    laboratory="Phonometry Reference Laboratory",
+    report_id="PHN-2026-0151",
+    requirement=30.0,                                   # DI,n,e,w >= 30 dB -> PASS
+)
+res.report("DIne.pdf", metadata=metadata)               # DI,n,e,w (C; Ctr)
+```
+
+[![Intensity ISO 15186-1 element example report: metadata header, one-third-octave DI,n,e table beside the measured-versus-shifted-reference curve, boxed DI,n,e,w (C; Ctr), the intensity-method statement and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_element_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso15186_element_example.pdf)
+
+*Element intensity fiche (`IntensityElementNormalizedResult.report`), DI,n,e,w (C; Ctr).*
+
 ## Floor-covering impact improvement (ISO 16251-1)
 
 ISO 16251-1:2014 is a laboratory method for the **improvement of impact sound

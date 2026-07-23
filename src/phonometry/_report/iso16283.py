@@ -2,9 +2,11 @@
 """ISO 16283 field sound-insulation test report (reportlab renderer).
 
 Renders a :class:`~phonometry.building.insulation.AirborneInsulationResult`
-(field airborne, ISO 16283-1:2014) or
+(field airborne, ISO 16283-1:2014),
 :class:`~phonometry.building.insulation.ImpactInsulationResult` (field
-impact, ISO 16283-2:2020) to the one-page field test report of each
+impact, ISO 16283-2:2020) or
+:class:`~phonometry.building.insulation.FacadeInsulationResult` (field
+facade, ISO 16283-3:2016) to the one-page field test report of each
 standard's Clause 14, laid out like the recommended results form (ISO
 16283-1 Annex B / ISO 16283-2 Annex C) and the accredited field reports
 built on it:
@@ -46,16 +48,28 @@ from typing import TYPE_CHECKING, Any, List, Sequence, Tuple, cast
 import numpy as np
 
 from ._i18n import t
-from ._insulation_fiche import Column, render_insulation_fiche
+from ._insulation_fiche import (
+    Column,
+    iso717_columns_builder,
+    render_insulation_fiche,
+)
 from .metadata import ReportMetadata
 
 if TYPE_CHECKING:
     from ..building.insulation import (
         AirborneInsulationResult,
+        FacadeInsulationResult,
         ImpactInsulationResult,
         ImpactRatingResult,
         WeightedRatingResult,
     )
+
+#: The field engineering-method statement the airborne (ISO 16283-1) and facade
+#: (ISO 16283-3) reports print verbatim.
+_FIELD_STATEMENT = (
+    "Evaluation based on field measurement using results obtained "
+    "by an engineering method."
+)
 
 #: Per-quantity fixed labels: title, basis line, the quantity symbol used in
 #: the table header, the rating symbol of the boxed result, the plot y-axis
@@ -72,10 +86,7 @@ _SPECS: dict[str, dict[str, str]] = {
         "symbol": "D<sub>nT</sub>",
         "rating_symbol": "D<sub>nT,w</sub>",
         "ylabel": "$D_{nT}$ [dB]",
-        "statement": (
-            "Evaluation based on field measurement using results obtained "
-            "by an engineering method."
-        ),
+        "statement": _FIELD_STATEMENT,
     },
     "r_prime": {
         "title": "Field airborne sound insulation between rooms",
@@ -87,10 +98,7 @@ _SPECS: dict[str, dict[str, str]] = {
         "symbol": "R&#8242;",
         "rating_symbol": "R&#8242;<sub>w</sub>",
         "ylabel": "$R'$ [dB]",
-        "statement": (
-            "Evaluation based on field measurement using results obtained "
-            "by an engineering method."
-        ),
+        "statement": _FIELD_STATEMENT,
     },
     "l_n_t": {
         "title": "Field impact sound insulation of floors",
@@ -209,6 +217,95 @@ def render_iso16283_report(
         is_impact=is_impact,
         curve_attr=quantity,
         build_columns=build_columns,
+        metadata=metadata,
+        verbose=verbose,
+        language=language,
+    )
+
+
+#: Per-quantity fixed labels of the ISO 16283-3 field facade report: title,
+#: standard-basis line, the quantity symbol used in the table header, the rating
+#: symbol of the boxed result and the plot y-axis label (mathtext). The facade
+#: quantities reference the outdoor level 2 m in front of the facade (``D2m``),
+#: so the notation is kept distinct from the ISO 16283-1 between-rooms ``DnT``.
+_FACADE_TITLE = "Field facade sound insulation"
+_FACADE_SPECS: dict[str, dict[str, str]] = {
+    "d_2m_nt": {
+        "title": _FACADE_TITLE,
+        "basis": (
+            "Standardized facade level difference D<sub>2m,nT</sub> measured "
+            "in accordance with ISO 16283-3:2016 (field measurement). Rating "
+            "per ISO 717-1:2020."
+        ),
+        "symbol": "D<sub>2m,nT</sub>",
+        "rating_symbol": "D<sub>2m,nT,w</sub>",
+        "ylabel": "$D_{2m,nT}$ [dB]",
+        "statement": _FIELD_STATEMENT,
+    },
+    "d_2m_n": {
+        "title": _FACADE_TITLE,
+        "basis": (
+            "Normalized facade level difference D<sub>2m,n</sub> measured in "
+            "accordance with ISO 16283-3:2016 (field measurement). Rating per "
+            "ISO 717-1:2020."
+        ),
+        "symbol": "D<sub>2m,n</sub>",
+        "rating_symbol": "D<sub>2m,n,w</sub>",
+        "ylabel": "$D_{2m,n}$ [dB]",
+        "statement": _FIELD_STATEMENT,
+    },
+    "r_prime": {
+        "title": _FACADE_TITLE,
+        "basis": (
+            "Apparent sound reduction index R&#8242;<sub>45</sub> measured in "
+            "accordance with ISO 16283-3:2016 (field measurement, loudspeaker "
+            "method). Rating per ISO 717-1:2020."
+        ),
+        "symbol": "R&#8242;<sub>45</sub>",
+        "rating_symbol": "R&#8242;<sub>45,w</sub>",
+        "ylabel": "$R'_{45}$ [dB]",
+        "statement": _FIELD_STATEMENT,
+    },
+}
+
+
+def render_iso16283_facade_report(
+    result: "FacadeInsulationResult",
+    rating: "WeightedRatingResult",
+    path: str,
+    *,
+    quantity: str,
+    metadata: ReportMetadata | None = None,
+    verbose: bool = False,
+    language: str = "en",
+) -> str:
+    """Render an ISO 16283-3 field facade sound-insulation report to a PDF.
+
+    :param result: The field facade result
+        (:class:`~phonometry.building.insulation.FacadeInsulationResult`)
+        carrying the per-band facade quantities.
+    :param rating: The ISO 717-1 rating of the reported facade quantity,
+        already evaluated by the caller; its ``plot`` draws the fiche curve.
+    :param path: Destination path of the PDF file.
+    :param quantity: ``"d_2m_nt"`` (the standardized facade level difference),
+        ``"d_2m_n"`` (the normalized facade level difference) or ``"r_prime"``
+        (the apparent sound reduction index ``R'45``); validated by the caller.
+    :param metadata: Optional :class:`ReportMetadata`; ``None`` produces a
+        lightweight fiche (body, rating, statement and disclaimer).
+    :param verbose: When ``True``, the left table shows the ISO 717 evaluation
+        per band instead of the two-column form.
+    :param language: ``"en"`` (default) or ``"es"``.
+    :return: The written ``path`` as a :class:`str`.
+    :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
+        installed.
+    """
+    spec = _FACADE_SPECS[quantity]
+    return render_insulation_fiche(
+        result, rating, path,
+        spec=spec,
+        is_impact=False,
+        curve_attr=quantity,
+        build_columns=iso717_columns_builder(rating, False, spec["symbol"]),
         metadata=metadata,
         verbose=verbose,
         language=language,

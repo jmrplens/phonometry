@@ -104,7 +104,7 @@ def _metric_rows(
     magnitude ``|k2,1|`` (MN/m), its level ``L_k`` (dB re 1 N/m) and the loss
     factor ``eta`` there.
     """
-    freq, magnitude, level, eta = _low_frequency_values(result)
+    _, magnitude, level, eta = _low_frequency_values(result)
     rows: List[Tuple[str, str]] = [
         (t("Method", language), _method(result, language)),
     ]

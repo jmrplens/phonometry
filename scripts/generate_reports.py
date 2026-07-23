@@ -440,6 +440,61 @@ def _intensity_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso15186_intensity_example.pdf"
 
 
+def _intensity_element_example() -> Tuple[object, ReportMetadata, str]:
+    """Element fiche: an intensity element-normalized level difference DI,n,e.
+
+    The reported spectrum reuses the ISO 717-1:2020 Annex C worked-example
+    curve (Rw = 30 (-2; -3) dB), read here as a documented element-normalized
+    level difference DI,n,e(f): DI,n,e is a level difference rated by the same
+    ISO 717-1 machinery, so feeding the receiving-side intensity levels LIn
+    that make Formula (8) return that curve (with Lp1 = 85 dB, a measurement
+    surface Sm = 12 m2 and a single element unit N = 1, referred to the
+    reference absorption area A0 = 10 m2) pins the fiche to the published
+    DI,n,e,w = 30 (-2; -3) dB.
+    """
+    d_i_n_e = np.array(
+        [
+            20.4,
+            16.3,
+            17.7,
+            22.6,
+            22.4,
+            22.7,
+            24.8,
+            26.6,
+            28.0,
+            30.5,
+            31.8,
+            32.5,
+            33.4,
+            33.0,
+            31.0,
+            25.5,
+        ]
+    )
+    lp1, sm, n = 85.0, 12.0, 1
+    l_in = lp1 - 6.0 - 10.0 * np.log10(sm / 10.0) - 10.0 * np.log10(n) - d_i_n_e
+    result = ph.building.intensity_element_normalized_difference(
+        np.full(16, lp1), l_in, measurement_area=sm, n=n
+    )
+    metadata = ReportMetadata(
+        specimen="Trickle ventilator in a 100 mm masonry wall",
+        client="Example client",
+        manufacturer="Example ventilators",
+        area=0.02,
+        test_room="Transmission suite (example)",
+        mounting="Small-element mounting per ISO 10140-1 Annex F",
+        measurement_standard="ISO 15186-1",
+        test_date="2026-07-21",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-15186-1-DINE",
+        notes="Measurement surface Sm = 12 m2, N = 1 element unit.",
+        requirement=30.0,
+    )
+    return result, metadata, "iso15186_element_example.pdf"
+
+
 def _airborne_prediction_example() -> Tuple[object, ReportMetadata, str]:
     """Airborne prediction fiche: EN 12354-1 Annex H.3 worked example.
 
@@ -3002,6 +3057,7 @@ _EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
     _lab_airborne_example,
     _lab_impact_example,
     _intensity_example,
+    _intensity_element_example,
     _airborne_prediction_example,
     _impact_prediction_example,
     _facade_prediction_example,

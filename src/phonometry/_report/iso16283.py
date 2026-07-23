@@ -64,6 +64,13 @@ if TYPE_CHECKING:
         WeightedRatingResult,
     )
 
+#: The field engineering-method statement the airborne (ISO 16283-1) and facade
+#: (ISO 16283-3) reports print verbatim.
+_FIELD_STATEMENT = (
+    "Evaluation based on field measurement using results obtained "
+    "by an engineering method."
+)
+
 #: Per-quantity fixed labels: title, basis line, the quantity symbol used in
 #: the table header, the rating symbol of the boxed result, the plot y-axis
 #: label (mathtext) and the field-method statement each standard's results
@@ -79,10 +86,7 @@ _SPECS: dict[str, dict[str, str]] = {
         "symbol": "D<sub>nT</sub>",
         "rating_symbol": "D<sub>nT,w</sub>",
         "ylabel": "$D_{nT}$ [dB]",
-        "statement": (
-            "Evaluation based on field measurement using results obtained "
-            "by an engineering method."
-        ),
+        "statement": _FIELD_STATEMENT,
     },
     "r_prime": {
         "title": "Field airborne sound insulation between rooms",
@@ -94,10 +98,7 @@ _SPECS: dict[str, dict[str, str]] = {
         "symbol": "R&#8242;",
         "rating_symbol": "R&#8242;<sub>w</sub>",
         "ylabel": "$R'$ [dB]",
-        "statement": (
-            "Evaluation based on field measurement using results obtained "
-            "by an engineering method."
-        ),
+        "statement": _FIELD_STATEMENT,
     },
     "l_n_t": {
         "title": "Field impact sound insulation of floors",
@@ -222,13 +223,6 @@ def render_iso16283_report(
     )
 
 
-#: The field-method statement the ISO 16283-3 facade report prints verbatim
-#: (shared with the ISO 16283-1 airborne report).
-_FACADE_STATEMENT = (
-    "Evaluation based on field measurement using results obtained "
-    "by an engineering method."
-)
-
 #: Per-quantity fixed labels of the ISO 16283-3 field facade report: title,
 #: standard-basis line, the quantity symbol used in the table header, the rating
 #: symbol of the boxed result and the plot y-axis label (mathtext). The facade
@@ -246,7 +240,7 @@ _FACADE_SPECS: dict[str, dict[str, str]] = {
         "symbol": "D<sub>2m,nT</sub>",
         "rating_symbol": "D<sub>2m,nT,w</sub>",
         "ylabel": "$D_{2m,nT}$ [dB]",
-        "statement": _FACADE_STATEMENT,
+        "statement": _FIELD_STATEMENT,
     },
     "d_2m_n": {
         "title": _FACADE_TITLE,
@@ -258,7 +252,7 @@ _FACADE_SPECS: dict[str, dict[str, str]] = {
         "symbol": "D<sub>2m,n</sub>",
         "rating_symbol": "D<sub>2m,n,w</sub>",
         "ylabel": "$D_{2m,n}$ [dB]",
-        "statement": _FACADE_STATEMENT,
+        "statement": _FIELD_STATEMENT,
     },
     "r_prime": {
         "title": _FACADE_TITLE,
@@ -270,7 +264,7 @@ _FACADE_SPECS: dict[str, dict[str, str]] = {
         "symbol": "R&#8242;<sub>45</sub>",
         "rating_symbol": "R&#8242;<sub>45,w</sub>",
         "ylabel": "$R'_{45}$ [dB]",
-        "statement": _FACADE_STATEMENT,
+        "statement": _FIELD_STATEMENT,
     },
 }
 

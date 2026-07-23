@@ -206,6 +206,53 @@ Plot the insertion loss versus frequency.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+### BarrierInsertionLoss.report()
+
+```python
+BarrierInsertionLoss.report(
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    engine: str = 'reportlab',
+    verbose: bool = False,
+    language: str = 'en',
+) -> str
+```
+
+Render a one-page barrier insertion-loss prediction fiche to a PDF.
+
+Writes a prediction sheet (clearly labelled a prediction, not a
+measurement) laid out like an outdoor-noise barrier calculation: the
+standard-basis line naming the diffraction model used (the
+wave-theoretic rigid-screen model for `method="exact"` or the
+Kurze-Anderson closed form for `method="kurze_anderson"`, a
+wave-acoustics complement to the ISO 9613-2 screening term), an optional
+metadata header (source/situation, client, receiver position, date), a
+per-band table of the insertion loss `IL` (and, in verbose mode, the
+Fresnel number `N`), the insertion-loss spectrum plot, a boxed mean
+insertion loss over the octave bands, an optional PASS/FAIL verdict
+against a declared minimum required insertion loss (a higher insertion
+loss is better) and a footer identity/disclaimer block.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Destination path of the PDF file. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position) and the footer identity. A supplied `requirement` is read as the minimum required mean insertion loss in dB. |
+| `engine` | Rendering back end; only `"reportlab"` is supported. |
+| `verbose` | When True, the per-band table adds the Fresnel number `N` column. |
+| `language` | Fiche language: `"en"` (default) or `"es"`. |
+
+**Returns:** The written `path` as a `str`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ImportError | If reportlab or matplotlib is not installed (`pip install "phonometry[report,plot]"`). |
+
 ## fresnel_number
 
 ```python

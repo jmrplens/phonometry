@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `StaticAirflowResult.report()`: a one-page PDF material airflow-resistance
+  test report (ISO 9053-1:2018, static/direct airflow method). The fiche
+  carries a standard-basis line, an optional metadata header (client,
+  manufacturer, specimen, specimen thickness, test facility, date, climate), a
+  two-panel body with a metrics table (the evaluation velocity, the fitted
+  pressure difference, the airflow resistance `R`, the specific airflow
+  resistance `R_s`, the airflow resistivity `sigma` when a thickness is
+  available, and the through-origin fit coefficients `a` and `b`) beside the
+  fitted `dp(u)` curve, and a boxed specific airflow resistance `R_s` with the
+  airflow resistance `R` and the resistivity `sigma` alongside, all read at the
+  clause 7.5 reference velocity of 0.5 mm/s. ISO 9053-1 is a material
+  characterisation, so the fiche carries no pass/fail verdict. `language="es"`
+  renders the Spanish fiche.
 - `WindTurbineTonalityResult.report()`: a one-page PDF wind-turbine
   tonal audibility assessment fiche (IEC 61400-11:2012+A1:2018, subclauses
   9.5.2-9.5.5). The sheet carries a standard-basis line, an optional metadata

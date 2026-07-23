@@ -402,6 +402,53 @@ print(round(r.resistivity))           # 324000  sigma [Pa*s/m^2]
 print(round(r.linear_coefficient))    # 16000   a = R_s at u -> 0
 ```
 
+### ISO 9053-1 report (`.report()`)
+
+`StaticAirflowResult.report(path)` renders a one-page PDF fiche laid out like an
+accredited airflow-resistance test report (ISO 9053-1:2018, static method): a
+standard-basis line, an optional metadata header block, a two-panel body with a
+metrics table (the evaluation velocity, the fitted pressure difference, the
+airflow resistance $R$, the specific airflow resistance $R_s$, the airflow
+resistivity $\sigma$ when a thickness is available, and the through-origin fit
+coefficients $a$ and $b$) beside the fitted $\Delta p(u)$ curve (the result's
+own `.plot()`), the boxed specific airflow resistance $R_s$ with $R$ and
+$\sigma$ alongside, and a footer with the fixed disclaimer. ISO 9053-1 is a
+material characterisation, so the fiche carries no pass/fail verdict.
+
+It uses the same `ReportMetadata` container and rendering engine as the other
+fiches. The descriptive fields that apply here are `client`, `manufacturer`,
+`specimen`, `thickness` (the specimen thickness $d$, in metres, shown in
+millimetres), `test_room`, `test_date`, `temperature`, `relative_humidity`,
+`measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The
+`requirement` field is ignored (ISO 9053-1 has no verdict). The fiche embeds
+the fitted curve, so rendering needs both reportlab and matplotlib
+(`pip install "phonometry[report,plot]"`); only `engine="reportlab"` is
+supported. The fiche renders in English by default; pass `language="es"` for a
+Spanish fiche (translated fixed strings and a comma decimal separator).
+
+```python
+from phonometry import materials, ReportMetadata
+
+r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r.report(
+    "airflow_fiche.pdf",
+    metadata=ReportMetadata(
+        specimen="50 mm porous absorber (open-cell)",
+        thickness=0.050,
+        measurement_standard="ISO 9053-1",
+        test_room="Static airflow rig, 100 mm cell",
+        laboratory="Phonometry Reference Laboratory",
+    ),
+)                                  # R_s, R and sigma at u = 0.5 mm/s
+```
+
+<ReportPreview
+	name="iso9053_airflow_resistance_example"
+	title="ISO 9053-1 static airflow-resistance example report (PDF)"
+	description="One-page static airflow-resistance fiche: a metadata header (client, manufacturer, specimen, specimen thickness, test facility, temperature and humidity), a metrics table with the evaluation velocity, the fitted pressure difference, the airflow resistance R, the specific airflow resistance R_s, the airflow resistivity sigma and the through-origin fit coefficients a and b beside the fitted pressure-drop curve, and the boxed specific airflow resistance R_s with R and sigma alongside, read at the 0.5 mm/s reference velocity."
+	caption="Static airflow-resistance fiche (StaticAirflowResult.report), R_s, R and sigma at 0.5 mm/s."
+/>
+
 **Alternating method (ISO 9053-2:2020).** A piston oscillating at 1–4 Hz drives
 an alternating flow into a cavity terminated either by the specimen or by an
 airtight plug; the resistance follows from the sound-pressure-level difference

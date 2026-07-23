@@ -1,0 +1,210 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Tests for the ISO 1999:2013 hearing-loss prediction ``.report()`` fiches.
+
+The two occupational-hearing-loss result types render one-page statistical
+prediction fiches: NIPTS (noise-induced permanent threshold shift, clause 6.3)
+and HTLAN (hearing threshold level associated with age and noise, clause 6.1).
+The rendered values are checked against the ISO 1999:2013 Annex D worked
+example (Table D.2, L_EX,8h = 90 dB, 20 years): the median 4 kHz shift is
+N50 = 12.9 dB and the fractile value at Q = 0.90 is 17.8 dB. Values are read
+back from the PDF via pypdf text extraction; structural facts (one page,
+rejected engines/languages) complete the rendering contract, and both the
+English and Spanish fiches are exercised.
+"""
+
+from __future__ import annotations
+
+import os
+
+import pytest
+
+from phonometry import ReportMetadata
+from phonometry.hearing import htlan, nipts
+
+_PDF_MAGIC = b"%PDF"
+
+
+def _assert_one_page(path: str) -> None:
+    from pypdf import PdfReader
+
+    with open(path, "rb") as handle:
+        assert handle.read(4) == _PDF_MAGIC
+    assert os.path.getsize(path) > 0
+    assert len(PdfReader(path).pages) == 1
+
+
+def _extract_text(path: str) -> str:
+    """Whitespace-normalized page text (PDF line wraps fold to single spaces)."""
+    from pypdf import PdfReader
+
+    raw = "\n".join(page.extract_text() for page in PdfReader(path).pages)
+    return " ".join(raw.split())
+
+
+# --- NIPTS fiche --------------------------------------------------------------
+
+
+def test_nipts_report_renders_annex_d_values(tmp_path) -> None:
+    """The NIPTS fiche prints the Annex D N50 and fractile shift and one page."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("svglib")
+    res = nipts(90.0, 20.0, 0.9)
+    out = tmp_path / "nipts.pdf"
+    returned = res.report(str(out))
+    assert returned == str(out)
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "12.9" in text  # median N50 at 4 kHz (Table D.2)
+    assert "17.8" in text  # NIPTS at Q = 0.90, 4 kHz (worst tenth)
+    assert "4000" in text  # an audiometric frequency
+    assert "13.9" in text  # representative shift averaged over 2/3/4 kHz
+    assert "clause 6.3" in text
+    assert "statistical prediction" in text
+    assert "not a clinical diagnosis" in text
+
+
+def test_nipts_verbose_adds_spread_columns(tmp_path) -> None:
+    """verbose=True adds the du/dl spread columns to the NIPTS table."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("svglib")
+    res = nipts(95.0, 20.0, 0.9)
+    out = tmp_path / "nipts_v.pdf"
+    res.report(str(out), verbose=True)
+    _assert_one_page(str(out))
+    flat = "".join(_extract_text(str(out)).split())
+    assert "du[dB]" in flat
+    assert "dl[dB]" in flat
+
+
+def test_nipts_verdict_against_requirement(tmp_path) -> None:
+    """A metadata requirement adds a PASS/FAIL verdict on the representative NIPTS."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("svglib")
+    res = nipts(90.0, 20.0, 0.9)  # representative 2/3/4 kHz shift is 13.9 dB
+    out_pass = tmp_path / "pass.pdf"
+    res.report(str(out_pass), metadata=ReportMetadata(requirement=15.0))
+    text = _extract_text(str(out_pass))
+    assert "PASS" in text and "FAIL" not in text
+    out_fail = tmp_path / "fail.pdf"
+    res.report(str(out_fail), metadata=ReportMetadata(requirement=10.0))
+    assert "FAIL" in _extract_text(str(out_fail))
+
+
+def test_nipts_subset_boxes_peak_shift(tmp_path) -> None:
+    """Without the full 2/3/4 kHz set the fiche boxes the peak shift instead."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("svglib")
+    res = nipts(95.0, 20.0, 0.9, frequencies=[500.0, 6000.0])
+    out = tmp_path / "sub.pdf"
+    res.report(str(out))
+    _assert_one_page(str(out))
+    assert "peak NIPTS" in _extract_text(str(out))
+
+
+# --- HTLAN fiche --------------------------------------------------------------
+
+
+def test_htlan_report_renders_components(tmp_path) -> None:
+    """The HTLAN fiche prints the combined threshold and one page."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("svglib")
+    res = htlan(60, "male", 95.0, 30.0, 0.5)
+    out = tmp_path / "htlan.pdf"
+    res.report(str(out))
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "40.8" in text  # combined H' at 4 kHz
+    assert "4000" in text  # an audiometric frequency
+    assert "33.0" in text  # representative threshold averaged over 2/3/4 kHz
+    assert "clause 6.1" in text
+    assert "age and noise" in text
+
+
+def test_htlan_verbose_adds_compression_term(tmp_path) -> None:
+    """verbose=True adds the H*N/120 compression column to the HTLAN table."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("svglib")
+    res = htlan(60, "male", 95.0, 30.0, 0.5)
+    out = tmp_path / "htlan_v.pdf"
+    res.report(str(out), verbose=True)
+    _assert_one_page(str(out))
+    flat = "".join(_extract_text(str(out)).split())
+    assert "N/120" in flat
+
+
+def test_htlan_metadata_header_renders(tmp_path) -> None:
+    """Supplied metadata renders the header grid identity."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("svglib")
+    res = htlan(60, "male", 95.0, 30.0, 0.5)
+    metadata = ReportMetadata(
+        client="Example works",
+        specimen="Machine operator",
+        test_room="Assembly hall",
+        report_id="H-1",
+    )
+    out = tmp_path / "htlan_meta.pdf"
+    res.report(str(out), metadata=metadata)
+    text = _extract_text(str(out))
+    assert "Example works" in text
+    assert "Machine operator" in text
+
+
+# --- Spanish fiche ------------------------------------------------------------
+
+
+def test_nipts_spanish_report(tmp_path) -> None:
+    """language="es" renders the Spanish NIPTS vocabulary and comma decimals."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("svglib")
+    res = nipts(90.0, 20.0, 0.9)
+    out = tmp_path / "nipts_es.pdf"
+    res.report(str(out), language="es")
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "Predicción de la pérdida auditiva inducida por ruido" in text
+    assert "13,9" in text  # comma decimal separator
+    assert "fractil poblacional" in text
+
+
+def test_htlan_spanish_report(tmp_path) -> None:
+    """language="es" renders the Spanish HTLAN vocabulary and comma decimals."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("svglib")
+    res = htlan(60, "male", 95.0, 30.0, 0.5)
+    out = tmp_path / "htlan_es.pdf"
+    res.report(str(out), language="es")
+    _assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "edad y ruido" in text
+    assert "hombre" in text
+    assert "33,0" in text
+
+
+# --- rendering contract -------------------------------------------------------
+
+
+def test_nipts_unknown_engine_rejected(tmp_path) -> None:
+    """An unknown rendering engine raises ValueError."""
+    res = nipts(90.0, 20.0, 0.9)
+    out = str(tmp_path / "x.pdf")
+    with pytest.raises(ValueError, match="engine"):
+        res.report(out, engine="weasyprint")
+
+
+def test_htlan_unknown_language_rejected(tmp_path) -> None:
+    """An unknown fiche language raises ValueError."""
+    res = htlan(60, "male", 95.0, 30.0, 0.5)
+    out = str(tmp_path / "bad.pdf")
+    with pytest.raises(ValueError, match="language"):
+        res.report(out, language="xx")

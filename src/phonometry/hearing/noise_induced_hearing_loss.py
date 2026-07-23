@@ -32,6 +32,8 @@ from .threshold import age_threshold
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
 from numpy.typing import ArrayLike
 
 # ---------------------------------------------------------------------------
@@ -105,6 +107,57 @@ class NiptsResult:
 
         return plot_nipts(self, ax=ax, language=check_language(language), **kwargs)
 
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a NIPTS hearing-loss prediction fiche to a PDF.
+
+        Writes a one-page statistical-prediction report of the noise-induced
+        permanent threshold shift (ISO 1999:2013 clause 6.3): a
+        prediction-basis line, an optional metadata header (company,
+        worker(s)/group, workplace, date), a per-audiometric-frequency table of
+        the median ``N50`` and the NIPTS at the chosen population fractile
+        beside the result's own spectrum plot, the boxed representative shift
+        averaged over the 2/3/4 kHz hearing-handicap set with the exposure
+        conditions (``L_EX,8h``, exposure years, fractile), and a
+        statistical-prediction note. The fiche is a population estimate, not a
+        clinical diagnosis of any individual.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header identity (``client`` is the company, ``specimen`` the
+            worker(s)/group, ``test_room`` the workplace) and, via
+            ``requirement``, a maximum acceptable representative NIPTS in dB that
+            adds a PASS/FAIL verdict (a lower shift is better).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When True, the table adds the upper/lower spread columns
+            (``du``/``dl``).
+        :param language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab, matplotlib or svglib is not installed
+            (``pip install "phonometry[report,plot]"``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso1999 import render_nipts_report
+
+        return render_nipts_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
+
 
 @dataclass(frozen=True)
 class HtlanResult:
@@ -143,6 +196,57 @@ class HtlanResult:
         from .._plot.hearing import plot_htlan
 
         return plot_htlan(self, ax=ax, language=check_language(language), **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render an HTLAN hearing-threshold prediction fiche to a PDF.
+
+        Writes a one-page statistical-prediction report of the hearing
+        threshold level associated with age and noise (ISO 1999:2013 clause
+        6.1): a prediction-basis line, an optional metadata header, a
+        per-audiometric-frequency table of the age component ``H``, the noise
+        component ``N`` and the combined threshold ``H' = H + N - H*N/120``
+        beside the result's own plot, the boxed representative threshold
+        averaged over the 2/3/4 kHz hearing-handicap set with the
+        listener/exposure conditions, and a statistical-prediction note. The
+        fiche is a population estimate, not a clinical diagnosis of any
+        individual.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
+            the header identity (``client`` is the company, ``specimen`` the
+            worker(s)/group, ``test_room`` the workplace) and, via
+            ``requirement``, a maximum acceptable representative HTLAN in dB that
+            adds a PASS/FAIL verdict (a lower threshold is better).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When True, the table adds the compression term
+            ``H*N/120``.
+        :param language: ``"en"`` (default) or ``"es"``.
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
+            is unknown.
+        :raises ImportError: If reportlab, matplotlib or svglib is not installed
+            (``pip install "phonometry[report,plot]"``).
+        """
+        from .._i18n import check_language
+
+        check_language(language)
+        if engine != "reportlab":
+            raise ValueError(
+                f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+            )
+        from .._report.iso1999 import render_htlan_report
+
+        return render_htlan_report(
+            self, path, metadata=metadata, verbose=verbose, language=language
+        )
 
 
 def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:

@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `NiptsResult.report()` and `HtlanResult.report()`: one-page PDF
+  noise-induced hearing-loss **prediction** fiches (ISO 1999:2013). Both sheets
+  are clearly labelled statistical predictions for a noise-exposed population,
+  not clinical diagnoses. The NIPTS fiche (clause 6.3) carries a
+  prediction-basis line, an optional metadata header (company, worker(s)/group,
+  workplace, date), a per-audiometric-frequency table of the median `N50` and
+  the NIPTS at the chosen population fractile beside the shift spectrum, and a
+  boxed representative shift averaged over the 2/3/4 kHz hearing-handicap set
+  with the exposure conditions (`LEX,8h`, exposure years, fractile);
+  `verbose=True` adds the upper/lower spread columns. The HTLAN fiche
+  (clause 6.1) tables the age component `H`, the noise component `N` and the
+  combined threshold `H' = H + N - H*N/120` beside the plot, boxing the
+  representative combined threshold; `verbose=True` adds the `H*N/120`
+  compression term. A maximum acceptable representative value supplied via the
+  metadata `requirement` adds a PASS/FAIL verdict (a lower value is better);
+  without it neither fiche prints a verdict. `language="es"` renders the
+  Spanish fiches.
 - `OutdoorAttenuation.report()`: a one-page PDF outdoor sound propagation
   **prediction** fiche (ISO 9613-2:1996, general method of calculation). The
   sheet is clearly labelled a prediction, not a measurement. It carries a

@@ -76,6 +76,23 @@ from .insulation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._report.metadata import ReportMetadata
+
+
+def _validate_report_request(engine: str, language: str) -> None:
+    """Reject an unknown engine or language before a survey fiche is rendered.
+
+    Shared by the survey result ``report`` methods: only the ``"reportlab"``
+    engine is supported, and the language must be one the renderers translate.
+    """
+    from .._i18n import check_language
+
+    check_language(language)
+    if engine != "reportlab":
+        raise ValueError(
+            f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+        )
+
 #: Reference reverberation time T0 (ISO 10052:2021, Clause 3.3): 0,5 s.
 _T0 = 0.5
 
@@ -319,6 +336,68 @@ class SurveyAirborneResult:
             )
         return self.rating.plot(ax=ax, **kwargs)
 
+    def report(
+        self,
+        path: str,
+        *,
+        quantity: str = "dnt",
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a survey-method airborne field report to a PDF (ISO 10052).
+
+        Writes the one-page survey (control) method field report: the
+        standard-basis line naming ISO 10052 (octave bands), an optional
+        metadata header block, the octave-band table beside the
+        measured-versus-shifted-ISO 717-1-reference curve, the boxed field
+        rating ``DnT,w (C; Ctr)`` or ``R'w (C; Ctr)``, the survey-method
+        statement, an optional verdict row (airborne passes at or above the
+        requirement) and a footer with the identity block and disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param quantity: The reported quantity: ``"dnt"`` (default, the
+            standardized level difference ``DnT``) or ``"r_prime"`` (the
+            apparent sound reduction index ``R'``; requires the result to
+            carry ``r_prime``, built with the ``area`` and ``volume``
+            arguments).
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`;
+            ``None`` produces a lightweight fiche (body, rating and
+            disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table shows the ISO 717 evaluation
+            per band instead of the two-column ``f | value`` form.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` or ``quantity`` is unknown, or the
+            selected quantity has no single-number rating (the survey needs
+            5 octave or 16 one-third-octave bands, and ``R'`` needs ``area``
+            and ``volume``).
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        _validate_report_request(engine, language)
+        if quantity not in ("dnt", "r_prime"):
+            raise ValueError(
+                f"Unknown survey quantity {quantity!r}; expected 'dnt' or "
+                "'r_prime'."
+            )
+        rating = self.rating if quantity == "dnt" else self.r_prime_rating
+        if rating is None:
+            raise ValueError(
+                "The survey airborne report needs the ISO 717-1 single-number "
+                "rating; supply 5 octave or 16 one-third-octave bands "
+                "(and, for R', the 'area' and 'volume' arguments)."
+            )
+        from .._report.iso10052 import render_survey_airborne_report
+
+        return render_survey_airborne_report(
+            self, rating, path, quantity=quantity, metadata=metadata,
+            verbose=verbose, language=language,
+        )
+
 
 @dataclass(frozen=True)
 class SurveyImpactResult:
@@ -347,6 +426,54 @@ class SurveyImpactResult:
             )
         return self.rating.plot(ax=ax, **kwargs)
 
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a survey-method impact field report to a PDF (ISO 10052).
+
+        Writes the one-page survey (control) method field report: the
+        standard-basis line naming ISO 10052 (octave bands, tapping machine),
+        an optional metadata header block, the octave-band ``L'nT`` table
+        beside the measured-versus-shifted-ISO 717-2-reference curve, the
+        boxed field rating ``L'nT,w (CI)``, the survey-method statement, an
+        optional verdict row (impact passes at or below the requirement) and
+        a footer with the identity block and disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`;
+            ``None`` produces a lightweight fiche (body, rating and
+            disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table shows the ISO 717 evaluation
+            per band instead of the two-column ``f | value`` form.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is unknown or the result has no
+            single-number rating (the survey needs 5 octave or 16
+            one-third-octave bands).
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        _validate_report_request(engine, language)
+        if self.rating is None:
+            raise ValueError(
+                "The survey impact report needs the ISO 717-2 single-number "
+                "rating; supply 5 octave or 16 one-third-octave bands."
+            )
+        from .._report.iso10052 import render_survey_impact_report
+
+        return render_survey_impact_report(
+            self, self.rating, path, metadata=metadata, verbose=verbose,
+            language=language,
+        )
+
 
 @dataclass(frozen=True)
 class SurveyFacadeResult:
@@ -374,6 +501,54 @@ class SurveyFacadeResult:
                 "or 16 one-third-octave bands)."
             )
         return self.rating.plot(ax=ax, **kwargs)
+
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: "ReportMetadata | None" = None,
+        engine: str = "reportlab",
+        verbose: bool = False,
+        language: str = "en",
+    ) -> str:
+        """Render a survey-method facade field report to a PDF (ISO 10052).
+
+        Writes the one-page survey (control) method field facade report: the
+        standard-basis line naming ISO 10052 (octave bands), an optional
+        metadata header block, the octave-band ``D2m,nT`` table beside the
+        measured-versus-shifted-ISO 717-1-reference curve, the boxed field
+        rating ``D2m,nT,w (C; Ctr)``, the survey-method statement, an optional
+        verdict row (a facade level difference passes at or above the
+        requirement) and a footer with the identity block and disclaimer.
+
+        :param path: Destination path of the PDF file.
+        :param metadata: Optional :class:`~phonometry.ReportMetadata`;
+            ``None`` produces a lightweight fiche (body, rating and
+            disclaimer only).
+        :param engine: Rendering back end; only ``"reportlab"`` is supported.
+        :param verbose: When ``True``, the table shows the ISO 717 evaluation
+            per band instead of the two-column ``f | value`` form.
+        :param language: Fiche language: ``"en"`` (default, English) or
+            ``"es"`` (Spanish, with a comma decimal separator).
+        :return: The written ``path`` as a :class:`str`.
+        :raises ValueError: If ``engine`` is unknown or the result has no
+            single-number rating (the survey needs 5 octave or 16
+            one-third-octave bands).
+        :raises ImportError: If reportlab is not installed
+            (``pip install phonometry[report]``).
+        """
+        _validate_report_request(engine, language)
+        if self.rating is None:
+            raise ValueError(
+                "The survey facade report needs the ISO 717-1 single-number "
+                "rating; supply 5 octave or 16 one-third-octave bands."
+            )
+        from .._report.iso10052 import render_survey_facade_report
+
+        return render_survey_facade_report(
+            self, self.rating, path, metadata=metadata, verbose=verbose,
+            language=language,
+        )
 
 
 @dataclass(frozen=True)

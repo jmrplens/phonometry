@@ -645,6 +645,30 @@ assumed already corrected for background noise.
 `d_2m_n` or `None`, `r_prime` or `None`, `frequencies`); feed any 16-band façade
 quantity to `weighted_rating` for its ISO 717-1 single number.
 
+#### ISO 16283-3 field façade report (`.report()`)
+
+`FacadeInsulationResult.report(path)` writes the one-page ISO 16283-3 field
+façade test report: the standard-basis line, an optional metadata header, the
+one-third-octave table beside the measured-versus-shifted-reference curve, the
+boxed field rating `D2m,nT,w (C; Ctr)`, the engineering-method statement, an
+optional requirement verdict (a level difference passes at or above it) and a
+footer. `quantity="d_2m_nt"` (default) reports the standardized level
+difference; `"d_2m_n"` the normalized one; `"r_prime"` the apparent sound
+reduction index `R'45`. `verbose=True`, `metadata`, `language="es"` and the
+`phonometry[report]` extra behave exactly as in the fiches above.
+
+```python
+fac.report("D2mnTw_facade.pdf")                        # D2m,nT,w (C; Ctr)
+fac.report("Rp45_facade.pdf", quantity="r_prime")      # R'45,w (C; Ctr)
+```
+
+<ReportPreview
+	name="iso16283_facade_example"
+	title="Field façade ISO 16283-3 example report (PDF)"
+	description="One-page field façade sound insulation test report: the metadata header, the one-third-octave D2m,nT table beside the measured-versus-shifted-reference curve, the boxed D2m,nT,w (C; Ctr) field rating, the engineering-method statement and a PASS verdict."
+	caption="Field façade fiche (FacadeInsulationResult.report), D2m,nT,w (C; Ctr)."
+/>
+
 ## Measurement uncertainty (ISO 12999-1)
 
 A rating without an uncertainty is only half a result. ISO 12999-1 does not
@@ -839,6 +863,48 @@ plt.show()
 `survey_facade_insulation()` a `SurveyFacadeResult`;
 `survey_service_equipment_level()` a `SurveyServiceEquipmentResult` (`l_xy`,
 `l_xy_nt`, `l_xy_n`).
+
+### ISO 10052 survey reports (`.report()`)
+
+The airborne, impact and façade survey results each carry a `.report(path)` that
+writes the one-page ISO 10052 survey (control) method field report: the
+standard-basis line naming ISO 10052 (octave bands), an optional metadata
+header, the octave-band table beside the measured-versus-shifted-reference
+curve, the boxed field rating (`DnT,w`/`R'w`, `L'nT,w` or `D2m,nT,w`), the
+survey-method statement, an optional requirement verdict (level differences pass
+at or above it, the impact level at or below it) and a footer. The airborne
+result reports `quantity="dnt"` (default) or `"r_prime"`; `verbose=True`,
+`metadata` and `language="es"` behave as in the fiches above.
+
+```python
+res.report("DnTw_survey.pdf",
+           metadata=ReportMetadata(requirement=40.0))   # DnT,w (C; Ctr)
+impact = building.survey_impact_insulation(li, k, volume=50.0)
+impact.report("LnTw_survey.pdf")                         # L'nT,w (CI)
+facade = building.survey_facade_insulation(l1_2m, l2, k, volume=40.0)
+facade.report("D2mnTw_survey.pdf")                       # D2m,nT,w (C; Ctr)
+```
+
+<ReportPreview
+	name="iso10052_airborne_example"
+	title="Survey airborne ISO 10052 example report (PDF)"
+	description="One-page survey-method airborne sound insulation field report between dwellings: the metadata header, the octave-band DnT table beside the measured-versus-shifted-reference curve, the boxed DnT,w (C; Ctr) rating, the survey-method statement and a PASS verdict."
+	caption="Survey airborne fiche (SurveyAirborneResult.report), DnT,w (C; Ctr)."
+/>
+
+<ReportPreview
+	name="iso10052_impact_example"
+	title="Survey impact ISO 10052 example report (PDF)"
+	description="One-page survey-method impact sound insulation field report for a floor under tapping-machine excitation: the metadata header, the octave-band L'nT table beside the measured-versus-shifted-reference curve, the boxed L'nT,w (CI) rating, the survey-method statement and a PASS verdict (a lower impact level is better)."
+	caption="Survey impact fiche (SurveyImpactResult.report), L'nT,w (CI)."
+/>
+
+<ReportPreview
+	name="iso10052_facade_example"
+	title="Survey façade ISO 10052 example report (PDF)"
+	description="One-page survey-method façade sound insulation field report: the metadata header, the octave-band D2m,nT table beside the measured-versus-shifted-reference curve, the boxed D2m,nT,w (C; Ctr) rating, the survey-method statement and a PASS verdict."
+	caption="Survey façade fiche (SurveyFacadeResult.report), D2m,nT,w (C; Ctr)."
+/>
 
 ## See also
 

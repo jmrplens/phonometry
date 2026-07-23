@@ -36,12 +36,12 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, List, Tuple
 
 import numpy as np
 
 from ._i18n import format_number, t
-from ._insulation_fiche import Column, render_insulation_fiche
+from ._insulation_fiche import iso717_columns_builder, render_insulation_fiche
 from ._layout import (
     _ACCENT_HEX,
     _MUTED_HEX,
@@ -104,49 +104,6 @@ _LNF_SPEC: dict[str, str] = {
 }
 
 
-def _flanking_columns_builder(
-    rating: "WeightedRatingResult | ImpactRatingResult",
-    is_impact: bool,
-    symbol: str,
-) -> Any:
-    """Build the left-table content callback for a flanking-descriptor fiche.
-
-    The default table is the two-column ``f | value`` form; ``verbose`` shows
-    the ISO 717 evaluation per band (the reported quantity, the shifted Table 3
-    reference and the unfavourable deviation), read from the rating so no extra
-    per-band data is needed on the result. The unfavourable deviation is the
-    reference above the measurement for the airborne level difference (more is
-    better) and the measurement above the reference for the impact level (less
-    is better), exactly as the ISO 717 rating forms it.
-    """
-
-    def build(
-        value_header: str, curve: np.ndarray, verbose: bool, language: str
-    ) -> Tuple[Sequence[Column], str, Any]:
-        from reportlab.lib.units import mm
-
-        if not verbose:
-            caption = t("One-third-octave {vh} [dB]", language).format(vh=symbol)
-            return [(value_header, curve, 1)], caption, None
-
-        measured = np.asarray(rating.measured, dtype=np.float64)
-        shifted = np.asarray(rating.shifted_reference, dtype=np.float64)
-        if is_impact:
-            deviation = np.maximum(measured - shifted, 0.0)
-        else:
-            deviation = np.maximum(shifted - measured, 0.0)
-        columns: List[Column] = [
-            (value_header, curve, 1),
-            (t("Shifted ref. [dB]", language), shifted, 1),
-            (t("Unfav. dev. [dB]", language), deviation, 1),
-        ]
-        col_widths = [10 * mm, 16 * mm, 15 * mm, 15 * mm]
-        caption = t("ISO 717 evaluation per band", language)
-        return columns, caption, col_widths
-
-    return build
-
-
 def _require_rating(
     rating: "WeightedRatingResult | ImpactRatingResult | None",
 ) -> "WeightedRatingResult | ImpactRatingResult":
@@ -197,7 +154,7 @@ def render_flanking_level_difference_report(
         spec=_DNF_SPEC,
         is_impact=False,
         curve_attr="d_n_f",
-        build_columns=_flanking_columns_builder(rating, False, _DNF_SPEC["symbol"]),
+        build_columns=iso717_columns_builder(rating, False, _DNF_SPEC["symbol"]),
         metadata=metadata,
         verbose=verbose,
         language=language,
@@ -236,7 +193,7 @@ def render_flanking_impact_level_report(
         spec=_LNF_SPEC,
         is_impact=True,
         curve_attr="l_n_f",
-        build_columns=_flanking_columns_builder(rating, True, _LNF_SPEC["symbol"]),
+        build_columns=iso717_columns_builder(rating, True, _LNF_SPEC["symbol"]),
         metadata=metadata,
         verbose=verbose,
         language=language,

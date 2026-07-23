@@ -659,6 +659,31 @@ se asume que los niveles por banda ya están corregidos por ruido de fondo.
 `d_2m_n` o `None`, `r_prime` o `None`, `frequencies`); pasa cualquier magnitud de
 fachada de 16 bandas a `weighted_rating` para su número único de ISO 717-1.
 
+#### Informe de fachada en campo ISO 16283-3 (`.report()`)
+
+`FacadeInsulationResult.report(path)` escribe el informe de ensayo de fachada en
+campo ISO 16283-3 de una página: la línea de base normativa, una cabecera de
+metadatos opcional, la tabla en tercios de octava junto a la curva medida frente
+a la referencia desplazada, el índice de campo `D2m,nT,w (C; Ctr)` en su recuadro,
+la declaración de método de ingeniería, un veredicto opcional (una diferencia de
+niveles cumple si iguala o supera el requisito) y un pie. `quantity="d_2m_nt"`
+(por defecto) informa la diferencia de niveles estandarizada; `"d_2m_n"` la
+normalizada; `"r_prime"` el índice de reducción acústica aparente `R'45`.
+`verbose=True`, `metadata`, `language="es"` y el extra `phonometry[report]` se
+comportan igual que en las fichas anteriores.
+
+```python
+fac.report("D2mnTw_facade.pdf")                        # D2m,nT,w (C; Ctr)
+fac.report("Rp45_facade.pdf", quantity="r_prime")      # R'45,w (C; Ctr)
+```
+
+<ReportPreview
+	name="iso16283_facade_example"
+	title="Informe de ejemplo de fachada en campo ISO 16283-3 (PDF)"
+	description="Informe de ensayo de aislamiento acústico de fachada en campo de una página: la cabecera de metadatos, la tabla D2m,nT en tercios de octava junto a la curva medida frente a la referencia desplazada, el índice de campo D2m,nT,w (C; Ctr) en su recuadro, la declaración de método de ingeniería y un veredicto CUMPLE."
+	caption="Ficha de fachada en campo (FacadeInsulationResult.report), D2m,nT,w (C; Ctr)."
+/>
+
 ## Incertidumbre de medición (ISO 12999-1)
 
 Un índice sin incertidumbre es solo medio resultado. ISO 12999-1 no vuelve a
@@ -854,6 +879,50 @@ plt.show()
 `survey_facade_insulation()` un `SurveyFacadeResult`;
 `survey_service_equipment_level()` un `SurveyServiceEquipmentResult` (`l_xy`,
 `l_xy_nt`, `l_xy_n`).
+
+### Informes del método de control ISO 10052 (`.report()`)
+
+Los resultados de control a ruido aéreo, de impactos y de fachada llevan cada
+uno un `.report(path)` que escribe el informe de campo del método de control
+(survey) ISO 10052 de una página: la línea de base normativa que nombra la
+ISO 10052 (bandas de octava), una cabecera de metadatos opcional, la tabla en
+bandas de octava junto a la curva medida frente a la referencia desplazada, el
+índice de campo en su recuadro (`DnT,w`/`R'w`, `L'nT,w` o `D2m,nT,w`), la
+declaración del método de control, un veredicto opcional (las diferencias de
+niveles cumplen si igualan o superan el requisito, y el nivel de impactos si lo
+iguala o queda por debajo) y un pie. El resultado a ruido aéreo informa
+`quantity="dnt"` (por defecto) o `"r_prime"`; `verbose=True`, `metadata` y
+`language="es"` se comportan igual que en las fichas anteriores.
+
+```python
+res.report("DnTw_survey.pdf",
+           metadata=ReportMetadata(requirement=40.0))   # DnT,w (C; Ctr)
+impact = building.survey_impact_insulation(li, k, volume=50.0)
+impact.report("LnTw_survey.pdf")                         # L'nT,w (CI)
+facade = building.survey_facade_insulation(l1_2m, l2, k, volume=40.0)
+facade.report("D2mnTw_survey.pdf")                       # D2m,nT,w (C; Ctr)
+```
+
+<ReportPreview
+	name="iso10052_airborne_example"
+	title="Informe de ejemplo a ruido aéreo del control ISO 10052 (PDF)"
+	description="Informe de campo de aislamiento a ruido aéreo por el método de control entre viviendas de una página: la cabecera de metadatos, la tabla DnT en bandas de octava junto a la curva medida frente a la referencia desplazada, el índice DnT,w (C; Ctr) en su recuadro, la declaración del método de control y un veredicto CUMPLE."
+	caption="Ficha a ruido aéreo de control (SurveyAirborneResult.report), DnT,w (C; Ctr)."
+/>
+
+<ReportPreview
+	name="iso10052_impact_example"
+	title="Informe de ejemplo a impactos del control ISO 10052 (PDF)"
+	description="Informe de campo de aislamiento a ruido de impactos por el método de control para un suelo bajo la máquina de impactos: la cabecera de metadatos, la tabla L'nT en bandas de octava junto a la curva medida frente a la referencia desplazada, el índice L'nT,w (CI) en su recuadro, la declaración del método de control y un veredicto CUMPLE (un nivel de impactos menor es mejor)."
+	caption="Ficha a impactos de control (SurveyImpactResult.report), L'nT,w (CI)."
+/>
+
+<ReportPreview
+	name="iso10052_facade_example"
+	title="Informe de ejemplo de fachada del control ISO 10052 (PDF)"
+	description="Informe de campo de aislamiento acústico de fachada por el método de control de una página: la cabecera de metadatos, la tabla D2m,nT en bandas de octava junto a la curva medida frente a la referencia desplazada, el índice D2m,nT,w (C; Ctr) en su recuadro, la declaración del método de control y un veredicto CUMPLE."
+	caption="Ficha de fachada de control (SurveyFacadeResult.report), D2m,nT,w (C; Ctr)."
+/>
 
 ## Véase también
 

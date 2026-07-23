@@ -289,7 +289,7 @@ def render_nipts_report(
         text, passed = _nipts_verdict(result, metadata.requirement, language)
         flow.extend(verdict_flow(text, passed, styles, language))
 
-    flow.extend(_prediction_notes(caption_style, language))
+    flow.extend(_prediction_notes(language))
     flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)
@@ -448,13 +448,13 @@ def render_htlan_report(
         text, passed = _htlan_verdict(result, metadata.requirement, language)
         flow.extend(verdict_flow(text, passed, styles, language))
 
-    flow.extend(_prediction_notes(caption_style, language))
+    flow.extend(_prediction_notes(language))
     flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)
 
 
-def _prediction_notes(caption_style: Any, language: str = "en") -> List[Any]:
+def _prediction_notes(language: str = "en") -> List[Any]:
     """The shared statistical-prediction notes of the ISO 1999 fiches."""
     from reportlab.lib import colors
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet

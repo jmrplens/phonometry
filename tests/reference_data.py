@@ -1311,6 +1311,38 @@ ISO717_2_REFERENCE_FLOOR_LN_R0_W = 78
 ISO717_2_REFERENCE_FLOOR_CI = -11
 
 # ---------------------------------------------------------------------------
+# ISO 16251-1 real measured oracle - textile carpet on the heavyweight mock-up.
+# Source: R. Foret, J.-B. Chene, C. Guigou-Carter, "A comparison of the
+# reduction of transmitted impact noise by floor coverings measured using
+# ISO 140-8 and ISO/CD 16251-1", Forum Acusticum 2011, Aalborg (CSTB), Figure
+# 4 (textile floor covering, not bonded). The standard itself carries no
+# numeric worked example, so this is the anchoring real measurement.
+#
+# The improvement of impact sound insulation Delta-L is only PLOTTED, but the
+# chart is a Microsoft Office vector object (the two data series are vector
+# paths, not a raster; only the test-setup photographs in the paper are
+# raster), so the per-band spectrum below was digitized from the vector
+# markers. Axis calibration: the nine major horizontal gridlines span 0 to
+# 80 dB over 1549 px at 600 dpi (0,0517 dB/px); each data point is the colour
+# segmented centroid of the red ISO 16251-1 square markers. Digitization
+# tolerance +/- 0,5 dB per band. The ISO 717-2 single-number rating is
+# invariant to that band error and to rounding the spectrum to integers or to
+# half-decibels. End-check: the paper's published Delta-Lw = 29 dB
+# (ISO 16251-1) is reproduced exactly; the companion ISO 140-8 series, read the
+# same way, reproduces its published Delta-Lw = 30 dB, independently
+# confirming the calibration.
+# ---------------------------------------------------------------------------
+FORET2011_CARPET_FREQ = [
+    100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+    1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000,
+]
+FORET2011_CARPET_ISO16251_DELTA_L: list[float] = [
+    5.0, 8.0, 10.0, 14.0, 18.0, 23.0, 30.0, 31.0, 39.0, 49.0,
+    53.0, 57.0, 60.0, 67.0, 68.0, 71.0, 74.0, 72.0,
+]
+FORET2011_CARPET_ISO16251_DELTA_LW = 29
+
+# ---------------------------------------------------------------------------
 # ISO 10848-1:2006 — flanking transmission (vibration reduction index Kij).
 # The standard contains NO worked numeric example anywhere in Parts 1-4, so
 # these are closed-form identities synthesized to hand-checkable results (the

@@ -38,6 +38,47 @@ def test_zero_improvement_gives_zero_delta_lw() -> None:
     assert weighted_impact_improvement(np.zeros(16)) == 0
 
 
+# ---------------------------------------------------------------------------
+# Real measured oracle: textile carpet (Foret, Chene & Guigou-Carter, Forum
+# Acusticum 2011, Figure 4). The Delta-L spectrum was digitized from the vector
+# chart to +/- 0,5 dB per band; the ISO 717-2 rating must reproduce the paper's
+# published ΔLw = 29 dB. See tests/reference_data.py for the full provenance.
+# ---------------------------------------------------------------------------
+def test_foret2011_carpet_rates_to_29() -> None:
+    """The measured carpet spectrum rates to the paper's ΔLw = 29 dB."""
+    bare = np.full(len(ref.FORET2011_CARPET_FREQ), 100.0)
+    delta_l = np.asarray(ref.FORET2011_CARPET_ISO16251_DELTA_L)
+    res = impact_improvement(bare, bare - delta_l, ref.FORET2011_CARPET_FREQ)
+    assert res.delta_lw == ref.FORET2011_CARPET_ISO16251_DELTA_LW
+
+
+def test_foret2011_carpet_rating_robust_to_half_db() -> None:
+    """The single-number ΔLw is stable to +/- 0,5 dB band perturbations.
+
+    This justifies the figure-digitization tolerance: the published rating does
+    not depend on reading each band better than about half a decibel.
+    """
+    base = np.asarray(ref.FORET2011_CARPET_ISO16251_DELTA_L)
+    # Independent per-band reading error (a uniform shift is excluded on
+    # purpose: it moves the single number one-for-one, unlike independent
+    # errors that cancel over the sixteen bands). Include the closed-interval
+    # endpoints the open random draw never reaches: each band set to exactly
+    # base +/- 0,5 by an alternating sign pattern, then seeded interior draws.
+    signs = np.where(np.arange(base.size) % 2 == 0, 0.5, -0.5)
+    for pattern in (signs, -signs):
+        assert (
+            weighted_impact_improvement((base + pattern)[:16])
+            == ref.FORET2011_CARPET_ISO16251_DELTA_LW
+        )
+    rng = np.random.default_rng(0)
+    for _ in range(64):
+        perturbed = base + rng.uniform(-0.5, 0.5, size=base.shape)
+        assert (
+            weighted_impact_improvement(perturbed[:16])
+            == ref.FORET2011_CARPET_ISO16251_DELTA_LW
+        )
+
+
 def test_flat_improvement_shifts_delta_lw_one_for_one() -> None:
     # A uniform ΔL lowers Ln,r uniformly, so ΔLw equals the flat improvement.
     assert weighted_impact_improvement(np.full(16, 10.0)) == 10

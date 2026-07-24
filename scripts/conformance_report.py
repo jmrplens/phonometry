@@ -6244,7 +6244,11 @@ def _chk_slow_sound_perfect_absorption() -> Outcome:
         lattice_step=3.0e-2, period=5.0e-2,
         air_density=_PA_RHO0, speed_of_sound=_PA_C0,
     )
-    return numeric(1.0, float(out.absorption[0]), 1e-3, places=4)
+    # The check requires the solver to have converged: a non-converged design
+    # fails the check outright rather than silently reporting its (imperfect)
+    # absorption.
+    computed = float(out.absorption[0]) if design.converged else float("nan")
+    return numeric(1.0, computed, 1e-3, places=4)
 
 
 @register(

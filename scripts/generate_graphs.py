@@ -1020,6 +1020,12 @@ _ES_EXACT = {
     "Standing-wave level difference L_max - L_min [dB]":
         "Diferencia de nivel de onda estacionaria L_max - L_min [dB]",
     "Sound absorption coefficient alpha": "Coeficiente de absorción sonora alpha",
+    "Perfect Absorption by Critical Coupling (Slow-Sound Panel)":
+        "Absorción perfecta por acoplo crítico (panel de sonido lento)",
+    "Critically coupled (perfect)": "Acoplo crítico (perfecto)",
+    "Narrow slit (over-damped)": "Ranura estrecha (sobreamortiguada)",
+    "Wide slit (under-damped)": "Ranura ancha (subamortiguada)",
+    "design 300 Hz": "diseño 300 Hz",
     "Reflection factor magnitude |r|": "Módulo del factor de reflexión |r|",
     "ISO 10534-1 Standing-Wave-Ratio Method":
         "Método de la razón de onda estacionaria (ISO 10534-1)",
@@ -1219,6 +1225,9 @@ _ES_EXACT = {
 }
 
 _ES_PATTERNS = [
+    # slow_sound_absorber panel-depth annotation (baked-in wavelength ratio).
+    (r"^Normal incidence, rigid backing, panel depth L = lambda/(\d+)$",
+     r"Incidencia normal, respaldo rígido, profundidad del panel L = lambda/\1"),
     # psd_confidence_smoothing annotation (mathtext + baked-in numbers).
     (r"^\$n_d\$ = (\d+) averages, \$\\varepsilon_r\$ = (\d+)\.(\d+) %$",
      r"$n_d$ = \1 promedios, $\\varepsilon_r$ = \2,\3 %"),

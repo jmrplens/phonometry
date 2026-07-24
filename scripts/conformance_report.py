@@ -1865,6 +1865,30 @@ def _chk_iso16251_zero_improvement() -> Outcome:
 
 @register(
     "Room & building acoustics",
+    "ISO 16251-1 / ISO 717-2 (Foret et al. 2011, carpet)",
+    "Measured textile-carpet improvement rates to ΔLw = 29 dB",
+)
+def _chk_iso16251_carpet_foret2011() -> Outcome:
+    # Real measurement: the Delta-L spectrum digitized from Figure 4 (vector
+    # chart) of Foret, Chene & Guigou-Carter, Forum Acusticum 2011, run through
+    # the full ISO 16251-1 improvement path (a flat bare-plate level minus the
+    # measured Delta-L reconstructs the specimen level), then rated per ISO
+    # 717-2 on the 100-3150 Hz sub-range. See tests/reference_data.py for the
+    # provenance and the +/- 0,5 dB digitization tolerance.
+    bare = np.full(len(ref.FORET2011_CARPET_FREQ), 100.0)
+    delta_l = np.asarray(ref.FORET2011_CARPET_ISO16251_DELTA_L, dtype=float)
+    res = ph.impact_improvement(bare, bare - delta_l, ref.FORET2011_CARPET_FREQ)
+    dlw = res.delta_lw
+    return Outcome(
+        expected=f"ΔLw = {ref.FORET2011_CARPET_ISO16251_DELTA_LW} dB (paper, ISO 16251-1)",
+        computed=f"ΔLw = {dlw} dB",
+        delta=f"{(dlw or 0) - ref.FORET2011_CARPET_ISO16251_DELTA_LW:+d} dB",
+        passed=(dlw == ref.FORET2011_CARPET_ISO16251_DELTA_LW),
+    )
+
+
+@register(
+    "Room & building acoustics",
     "ISO 10848-1:2006 Formula (14)",
     "Flanking Kij (simplified) matches closed form",
 )

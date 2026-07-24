@@ -636,30 +636,33 @@ def _floor_covering_example() -> tuple[object, ReportMetadata, str]:
     """Floor-covering fiche: an ISO 16251-1 impact-improvement measurement.
 
     ISO 16251-1:2014 carries no filled numeric worked example (its Annex B is a
-    blank report form), so the committed spectrum is a documented soft-carpet
-    improvement curve whose weighted improvement is derived by hand from the
-    ISO 717-2:2020 rating machinery the module reuses. The reduction of impact
-    sound pressure level rises smoothly with frequency,
-     delta-L = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30] dB
-    over the 16 one-third-octave bands 100 Hz to 3150 Hz (a locally-reacting
-    textile covering, negligible below 200 Hz and reaching 30 dB by 3150 Hz).
+    blank report form), so the committed spectrum is a real measurement: the
+    improvement of a textile carpet (laid loose on the mock-up plate) digitized
+    from Figure 4 of R. Foret, J.-B. Chene and C. Guigou-Carter, "A comparison
+    of the reduction of transmitted impact noise by floor coverings measured
+    using ISO 140-8 and ISO/CD 16251-1", Forum Acusticum 2011, Aalborg (CSTB).
+    The reduction of impact sound pressure level rises with frequency,
+     delta-L = [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71] dB
+    over the 16 one-third-octave bands 100 Hz to 3150 Hz (values read to
+    +/- 0,5 dB from the figure's vector chart).
 
     The weighted improvement follows ISO 717-2:2020 Clause 5: applied to the
     heavyweight reference floor L_n,r,0 (Table 4, rated L_n,r,0,w = 78 dB and
-    CI,r,0 = -11 dB), L_n,r = L_n,r,0 - delta-L rates to L_n,r,w = 59 dB, so
-    delta-Lw = 78 - 59 = 19 dB (Formula (2)) and the spectrum adaptation term is
-    CI,delta = CI,r,0 - CI,r = -11 - 0 = -11 dB (Formula (A.4)). Both are
-    reproduced exactly by ``weighted_impact_improvement`` and
+    CI,r,0 = -11 dB), L_n,r = L_n,r,0 - delta-L rates to L_n,r,w = 49 dB, so
+    delta-Lw = 78 - 49 = 29 dB (Formula (2)), reproducing the paper's published
+    ISO 16251-1 value exactly; the spectrum adaptation term is CI,delta = -13 dB
+    (Formula (A.4)). Both are reproduced by ``weighted_impact_improvement`` and
     ``impact_improvement_adaptation_term``. The requirement is a plausible
     minimum weighted improvement the example clears (a higher value is better).
     """
     bare = np.full(16, 78.0)  # bare-plate acceleration level (arbitrary datum)
     delta_l = np.array(
-        [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30], dtype=float
+        [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71],
+        dtype=float,
     )
     result = ph.building.impact_improvement(bare, bare - delta_l, _RATING_FREQS)
     metadata = ReportMetadata(
-        specimen="Textile floor covering (carpet), 6 mm pile",
+        specimen="Textile floor covering (carpet), laid loose",
         client="Example client",
         manufacturer="Example floors",
         mass_per_area=2.4,
@@ -672,7 +675,7 @@ def _floor_covering_example() -> tuple[object, ReportMetadata, str]:
         laboratory="Phonometry reference example",
         operator="phonometry",
         report_id="EXAMPLE-16251",
-        requirement=17.0,
+        requirement=20.0,
     )
     return result, metadata, "iso16251_floor_covering_example.pdf"
 

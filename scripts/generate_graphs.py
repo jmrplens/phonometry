@@ -6223,10 +6223,13 @@ def generate_floor_covering_improvement(output_dir: str) -> None:
 
     freqs = [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0,
              630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0]
-    # A soft carpet: acceleration levels on the bare plate and with the covering.
+    # A real textile carpet measured on the CSTB mock-up: the improvement
+    # spectrum digitized from Figure 4 of Foret, Chene & Guigou-Carter, Forum
+    # Acusticum 2011 (ISO 16251-1 series). The published weighted improvement
+    # is delta-Lw = 29 dB.
     bare = np.full(16, 78.0)
-    covering = bare - np.array([0, 0, 1, 2, 4, 7, 11, 15, 18, 21,
-                                23, 25, 27, 28, 29, 30], dtype=float)
+    covering = bare - np.array([5, 8, 10, 14, 18, 23, 30, 31, 39, 49,
+                                53, 57, 60, 67, 68, 71], dtype=float)
     res = impact_improvement(bare, covering, freqs)
     assert res.delta_lw is not None
 

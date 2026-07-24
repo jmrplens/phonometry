@@ -58,6 +58,12 @@ references:
     designation: "ISO 16251-1:2014"
     url: "https://www.iso.org/standard/56017.html"
     note: "El método de laboratorio en maqueta pequeña para la mejora a impactos ΔL de revestimientos de suelo blandos y de reacción local, con ΔL_w vía el suelo de referencia de ISO 717-2 y el término de adaptación CI,delta."
+  - type: article
+    authors: ["Foret, R.", "Chéné, J.-B.", "Guigou-Carter, C."]
+    year: 2011
+    title: "A comparison of the reduction of transmitted impact noise by floor coverings measured using ISO 140-8 and ISO/CD 16251-1"
+    journal: "Forum Acusticum 2011, Aalborg (CSTB)"
+    note: "El espectro de mejora de una moqueta textil real usado como ejemplo de ISO 16251-1 en esta página (ΔL_w = 29 dB); su ΔL por bandas se digitalizó de su Figura 4."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2020
@@ -525,7 +531,14 @@ $C_{I,\Delta} = C_{I,r,0} - C_{I,r}$ (ISO 717-2:2020, Fórmula (A.4)), expuesto
 como `ci_delta` en el resultado y de forma independiente como
 `impact_improvement_adaptation_term()`.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_es.svg" alt="Mejora a impacto de revestimientos de suelo ISO 16251-1: la mejora delta-L de una moqueta blanda creciendo con la frecuencia en bandas de tercio de octava de 100 Hz a 3150 Hz, con el área de mejora sombreada y el número único ponderado delta-Lw anotado" width="80%" />
+El ejemplo siguiente es una medición real: la mejora de una moqueta textil sobre
+la maqueta pesada del CSTB, digitalizada de la Figura 4 de Foret, Chéné y
+Guigou-Carter, "A comparison of the reduction of transmitted impact noise by
+floor coverings measured using ISO 140-8 and ISO/CD 16251-1" (Forum Acusticum
+2011, Aalborg). Su mejora ponderada ISO 16251-1 publicada es
+$\Delta L_w = 29$ dB, reproducida exactamente por el motor de valoración.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_es.svg" alt="Mejora a impacto de revestimientos de suelo ISO 16251-1: la mejora delta-L de una moqueta textil real creciendo con la frecuencia en bandas de tercio de octava de 100 Hz a 3150 Hz, con el área de mejora sombreada y el número único ponderado delta-Lw anotado" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -538,10 +551,11 @@ from phonometry import building
 freqs = [100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
 bare = np.full(16, 78.0)                       # nivel de aceleración de la placa desnuda
-covering = bare - np.array([0, 0, 1, 2, 4, 7, 11, 15,
-                            18, 21, 23, 25, 27, 28, 29, 30])
+# Una moqueta textil real medida en la maqueta del CSTB (Foret et al. 2011, Fig. 4).
+covering = bare - np.array([5, 8, 10, 14, 18, 23, 30, 31,
+                            39, 49, 53, 57, 60, 67, 68, 71])
 res = building.impact_improvement(bare, covering, freqs)
-print(res.delta_lw)   # mejora ponderada delta-Lw (ISO 717-2)
+print(res.delta_lw)   # mejora ponderada delta-Lw = 29 dB (ISO 717-2)
 res.plot()
 plt.show()
 ```
@@ -552,8 +566,8 @@ plt.show()
 from phonometry import building
 
 # delta-Lw directo de un espectro de mejora (16 bandas de tercio de octava):
-delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
-print(building.weighted_impact_improvement(delta_l))    # p. ej. 19 dB
+delta_l = [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71]
+print(building.weighted_impact_improvement(delta_l))    # 29 dB (moqueta)
 
 # A partir de los niveles de aceleración medidos (desnudo/cubierto) y un fondo:
 freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
@@ -592,15 +606,15 @@ from phonometry import building, ReportMetadata
 
 freqs = [100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
-delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
+delta_l = [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71]
 bare = [78.0] * 16
 res = building.impact_improvement(bare, [b - d for b, d in zip(bare, delta_l)], freqs)
 res.report("dLw.pdf",
            metadata=ReportMetadata(
-               specimen="Revestimiento textil (moqueta), pelo de 6 mm",
+               specimen="Revestimiento textil (moqueta), colocada suelta",
                measurement_standard="ISO 16251-1",
-               requirement=17.0),
-           language="es")  # delta-Lw (CI,delta) = 19 (-11) dB
+               requirement=20.0),
+           language="es")  # delta-Lw (CI,delta) = 29 (-13) dB
 ```
 
 La ficha de ejemplo se regenera con `make reports` y se mantiene en el
@@ -609,7 +623,7 @@ repositorio. Pulsa la vista previa para abrir el PDF:
 <ReportPreview
 	name="iso16251_floor_covering_example"
 	title="Informe de ejemplo de mejora a impacto de revestimientos de suelo ISO 16251-1 (PDF)"
-	description="Informe de ensayo de mejora a impacto de una página para una moqueta blanda medida en una maqueta pequeña: la cabecera de metadatos (cliente, descripción del revestimiento, montaje, masa por superficie, clima), la tabla de delta-L en tercios de octava junto a la curva de mejora delta-L(f) creciendo con la frecuencia, el número único encuadrado delta-Lw (CI,delta) = 19 (-11) dB de mejora ponderada (ISO 717-2) y un veredicto APTO frente al requisito de 17 dB (una mejora ponderada mayor es mejor)."
+	description="Informe de ensayo de mejora a impacto de una página para una moqueta textil real medida en una maqueta pequeña: la cabecera de metadatos (cliente, descripción del revestimiento, montaje, masa por superficie, clima), la tabla de delta-L en tercios de octava junto a la curva de mejora delta-L(f) creciendo con la frecuencia, el número único encuadrado delta-Lw (CI,delta) = 29 (-13) dB de mejora ponderada (ISO 717-2) y un veredicto APTO frente al requisito de 20 dB (una mejora ponderada mayor es mejor)."
 	caption="Ficha de mejora a impacto de revestimientos de suelo (FloorCoveringImprovementResult.report), delta-Lw (CI,delta)."
 />
 

@@ -406,7 +406,14 @@ $C_{I,\Delta} = C_{I,r,0} - C_{I,r}$ (ISO 717-2:2020 Formula (A.4)), exposed as
 `ci_delta` on the result and standalone as
 `impact_improvement_adaptation_term()`.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement.svg" alt="ISO 16251-1 floor-covering impact sound improvement: the improvement delta-L of a soft carpet rising with frequency across one-third-octave bands from 100 Hz to 3150 Hz, with the shaded improvement area and the weighted single-number delta-Lw annotated" width="80%"></picture>
+The worked example below is a real measurement: the improvement of a textile
+carpet on the CSTB heavyweight mock-up, digitized from Figure 4 of Foret,
+Chéné and Guigou-Carter, "A comparison of the reduction of transmitted impact
+noise by floor coverings measured using ISO 140-8 and ISO/CD 16251-1" (Forum
+Acusticum 2011, Aalborg). Its published ISO 16251-1 weighted improvement is
+$\Delta L_w = 29$ dB, reproduced exactly by the rating engine.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement.svg" alt="ISO 16251-1 floor-covering impact sound improvement: the improvement delta-L of a real textile carpet rising with frequency across one-third-octave bands from 100 Hz to 3150 Hz, with the shaded improvement area and the weighted single-number delta-Lw annotated" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -419,10 +426,11 @@ from phonometry import building
 freqs = [100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
 bare = np.full(16, 78.0)                       # bare-plate acceleration level
-covering = bare - np.array([0, 0, 1, 2, 4, 7, 11, 15,
-                            18, 21, 23, 25, 27, 28, 29, 30])
+# A real textile carpet measured on the CSTB mock-up (Foret et al. 2011, Fig. 4).
+covering = bare - np.array([5, 8, 10, 14, 18, 23, 30, 31,
+                            39, 49, 53, 57, 60, 67, 68, 71])
 res = building.impact_improvement(bare, covering, freqs)
-print(res.delta_lw)   # weighted improvement delta-Lw (ISO 717-2)
+print(res.delta_lw)   # weighted improvement delta-Lw = 29 dB (ISO 717-2)
 res.plot()
 plt.show()
 ```
@@ -433,8 +441,8 @@ plt.show()
 from phonometry import building
 
 # delta-Lw straight from an improvement spectrum (16 one-third-octave bands):
-delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
-print(building.weighted_impact_improvement(delta_l))    # e.g. 19 dB
+delta_l = [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71]
+print(building.weighted_impact_improvement(delta_l))    # 29 dB (carpet)
 
 # From the measured bare/covered acceleration levels, with a background trace:
 freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
@@ -472,20 +480,20 @@ from phonometry import building, ReportMetadata
 
 freqs = [100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
-delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
+delta_l = [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71]
 bare = [78.0] * 16
 res = building.impact_improvement(bare, [b - d for b, d in zip(bare, delta_l)], freqs)
 res.report("dLw.pdf",
            metadata=ReportMetadata(
-               specimen="Textile floor covering (carpet), 6 mm pile",
+               specimen="Textile floor covering (carpet), laid loose",
                measurement_standard="ISO 16251-1",
-               requirement=17.0))  # delta-Lw (CI,delta) = 19 (-11) dB
+               requirement=20.0))  # delta-Lw (CI,delta) = 29 (-13) dB
 ```
 
 A rendered example fiche, regenerated with `make reports`, is kept in the
 repository. Click the preview to open the PDF:
 
-[![Floor-covering impact improvement ISO 16251-1 example report: metadata header, one-third-octave delta-L table beside the delta-L(f) improvement curve, boxed delta-Lw (CI,delta) = 19 (-11) dB weighted improvement (ISO 717-2) and a PASS verdict against the 17 dB requirement](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16251_floor_covering_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16251_floor_covering_example.pdf)
+[![Floor-covering impact improvement ISO 16251-1 example report: metadata header, one-third-octave delta-L table beside the delta-L(f) improvement curve, boxed delta-Lw (CI,delta) = 29 (-13) dB weighted improvement (ISO 717-2) and a PASS verdict against the 20 dB requirement](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16251_floor_covering_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso16251_floor_covering_example.pdf)
 
 ## Laboratory flanking transmission (ISO 10848)
 

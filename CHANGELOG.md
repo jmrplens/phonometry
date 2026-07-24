@@ -1821,6 +1821,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Periodic Structures, Metamaterials, and Porous Media (Jiménez, Umnova and
   Groby, Eds., 2021, Springer) as a metamaterials companion to Cox & D'Antonio.
   Mirrored in the Spanish pages.
+- ISO 16251-1 floor-covering impact improvement is now anchored on a real
+  measurement. The conformance report and the laboratory-insulation guide use
+  the improvement of a textile carpet on the CSTB heavyweight mock-up, taken
+  from Foret, Chéné and Guigou-Carter (Forum Acusticum 2011): the per-band ΔL
+  was read from the figure's vector chart to +/- 0,5 dB and rates to the
+  paper's published ΔLw = 29 dB (the companion ISO 140-8 series reads back to
+  its published ΔLw = 30 dB, confirming the calibration). A new conformance
+  row and a clean-room test assert the rating, the worked example and its
+  figure and example report now show the measured carpet, and the guide cites
+  the source (mirrored in Spanish).
 - Docs theory reference: the Vibration page now lists in its `references`
   frontmatter the four structure-borne sources cited on the point-mobility and
   radiation-efficiency section (Cremer, Heckl and Petersson, Structure-borne

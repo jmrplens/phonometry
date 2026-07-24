@@ -9,13 +9,11 @@ and the rating level of clause 8, Note 1, evaluated by hand.
 
 from __future__ import annotations
 
-import math
-
 import importlib
+import math
 
 import numpy as np
 import pytest
-
 from reference_data import NTACOU112_ADJUSTMENT_P10, NTACOU112_PROMINENCE
 
 # The module is shadowed in the package namespace by the function of the same

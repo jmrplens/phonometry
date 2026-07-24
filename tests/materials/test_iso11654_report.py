@@ -15,22 +15,33 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-import numpy as np  # noqa: E402  (import after importorskip)
-
-from phonometry import ReportMetadata  # noqa: E402  (import after importorskip)
-from phonometry.materials import (  # noqa: E402
-    weighted_absorption,
-    weighted_absorption_from_third_octave,
+import numpy as np
+from reference_data import (
+    ISO11654_ANNEX_A1_ALPHA_P as _A1_ALPHA_P,
+)
+from reference_data import (
+    ISO11654_ANNEX_A1_ALPHA_W as _A1_ALPHA_W,
+)
+from reference_data import (
+    ISO11654_ANNEX_A1_CLASS as _A1_CLASS,
+)
+from reference_data import (
+    ISO11654_ANNEX_A1_INDICATOR as _A1_INDICATOR,
+)
+from reference_data import (
+    ISO11654_ANNEX_A2_ALPHA_P as _A2_ALPHA_P,
+)
+from reference_data import (
+    ISO11654_ANNEX_A2_ALPHA_W as _A2_ALPHA_W,
+)
+from reference_data import (
+    ISO11654_ANNEX_A2_INDICATOR as _A2_INDICATOR,
 )
 
-from reference_data import (  # noqa: E402
-    ISO11654_ANNEX_A1_ALPHA_P as _A1_ALPHA_P,
-    ISO11654_ANNEX_A1_CLASS as _A1_CLASS,
-    ISO11654_ANNEX_A1_INDICATOR as _A1_INDICATOR,
-    ISO11654_ANNEX_A1_ALPHA_W as _A1_ALPHA_W,
-    ISO11654_ANNEX_A2_ALPHA_P as _A2_ALPHA_P,
-    ISO11654_ANNEX_A2_ALPHA_W as _A2_ALPHA_W,
-    ISO11654_ANNEX_A2_INDICATOR as _A2_INDICATOR,
+from phonometry import ReportMetadata
+from phonometry.materials import (
+    weighted_absorption,
+    weighted_absorption_from_third_octave,
 )
 
 _PDF_MAGIC = b"%PDF"
@@ -160,22 +171,22 @@ def test_verbose_renders_evaluation_table(tmp_path) -> None:
 
 
 def _full_metadata(**overrides) -> ReportMetadata:
-    base = dict(
-        specimen="50 mm porous absorber over a 100 mm air gap",
-        client="Acoustic Test Client Ltd.",
-        manufacturer="Acoustics Works Inc.",
-        area=10.8,
-        mounting="Type A (against a rigid wall)",
-        test_room="Reverberation room R1",
-        measurement_standard="ISO 354",
-        test_date="2026-07-20",
-        temperature=21.4,
-        relative_humidity=54.0,
-        pressure=101.0,
-        laboratory="Phonometry Reference Laboratory",
-        operator="J. M. Requena-Plens",
-        report_id="PHN-2026-11654",
-    )
+    base = {
+        "specimen": "50 mm porous absorber over a 100 mm air gap",
+        "client": "Acoustic Test Client Ltd.",
+        "manufacturer": "Acoustics Works Inc.",
+        "area": 10.8,
+        "mounting": "Type A (against a rigid wall)",
+        "test_room": "Reverberation room R1",
+        "measurement_standard": "ISO 354",
+        "test_date": "2026-07-20",
+        "temperature": 21.4,
+        "relative_humidity": 54.0,
+        "pressure": 101.0,
+        "laboratory": "Phonometry Reference Laboratory",
+        "operator": "J. M. Requena-Plens",
+        "report_id": "PHN-2026-11654",
+    }
     base.update(overrides)
     return ReportMetadata(**base)
 

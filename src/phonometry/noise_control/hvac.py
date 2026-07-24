@@ -135,7 +135,7 @@ class HvacSpectrumResult:
     quantity: str
     label: str
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the quantity against a continuous log-frequency axis.
 
         Requires matplotlib (``pip install phonometry[plot]``).
@@ -150,7 +150,7 @@ class HvacSpectrumResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

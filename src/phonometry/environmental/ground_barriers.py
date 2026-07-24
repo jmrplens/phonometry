@@ -114,7 +114,7 @@ Real = NDArray[np.float64]
 # --------------------------------------------------------------------------- #
 def _normalized_ground_impedance(
     frequency: Real,
-    impedance: ArrayLike | "PorousMediumResult" | None,
+    impedance: ArrayLike | PorousMediumResult | None,
     flow_resistivity: float | None,
     model: str,
     speed_of_sound: float,
@@ -217,7 +217,7 @@ class SphericalGroundResult:
     r_direct: float
     r_reflected: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the excess attenuation ``dL`` versus frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -279,7 +279,7 @@ def ground_effect(
     receiver_height: float,
     distance: float,
     *,
-    impedance: ArrayLike | "PorousMediumResult" | None = None,
+    impedance: ArrayLike | PorousMediumResult | None = None,
     flow_resistivity: float | None = None,
     model: Literal["delany_bazley", "miki"] = "delany_bazley",
     speed_of_sound: float = _C_SOUND,
@@ -526,7 +526,7 @@ class BarrierInsertionLoss:
     method: str
     ground: bool
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the insertion loss versus frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -541,7 +541,7 @@ class BarrierInsertionLoss:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -637,7 +637,7 @@ def barrier_insertion_loss(
     *,
     method: Literal["kurze_anderson", "exact"] = "exact",
     thickness: float | None = None,
-    ground_impedance: ArrayLike | "PorousMediumResult" | None = None,
+    ground_impedance: ArrayLike | PorousMediumResult | None = None,
     ground_flow_resistivity: float | None = None,
     ground_model: Literal["delany_bazley", "miki"] = "delany_bazley",
     speed_of_sound: float = _C_SOUND,
@@ -781,7 +781,7 @@ class _ExactBarrierSetup:
     receiver_distance: float
     speed_of_sound: float
     air_density: float
-    ground_impedance: "ArrayLike | PorousMediumResult | None"
+    ground_impedance: ArrayLike | PorousMediumResult | None
     ground_flow_resistivity: float | None
     ground_model: str
 

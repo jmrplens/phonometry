@@ -47,7 +47,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Literal, Tuple
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy import signal
@@ -55,8 +55,8 @@ from scipy import signal
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-from .._internal.validation import require_1d_signal
 from .._internal.utils import _typesignal
+from .._internal.validation import require_1d_signal
 
 # --------------------------------------------------------------------------
 # Global constants (Clause 5)
@@ -126,7 +126,7 @@ _NR_ALPHA = 20.0
 _NR_BETA = 0.07
 
 
-def _band_frequencies() -> Tuple[np.ndarray, np.ndarray]:
+def _band_frequencies() -> tuple[np.ndarray, np.ndarray]:
     """Centre frequencies F(z) and bandwidths df(z) (Formulae 9, 10)."""
     f_centre = (_DF0 / _C) * np.sinh(_C * _Z)
     df = np.sqrt(_DF0**2 + (_C * f_centre) ** 2)
@@ -136,7 +136,7 @@ def _band_frequencies() -> Tuple[np.ndarray, np.ndarray]:
 _F_CENTRE, _DF = _band_frequencies()
 
 
-def _block_sizes() -> Tuple[np.ndarray, np.ndarray]:
+def _block_sizes() -> tuple[np.ndarray, np.ndarray]:
     """Band-dependent block size s_b(z) and hop size s_h(z) (Table 4)."""
     s_b = np.empty(_CBF, dtype=np.int64)
     for i, df in enumerate(_DF):
@@ -229,7 +229,7 @@ def _ear_filter_sos(field: str) -> np.ndarray:
     return sos
 
 
-def _auditory_coeffs(band: int) -> Tuple[np.ndarray, np.ndarray]:
+def _auditory_coeffs(band: int) -> tuple[np.ndarray, np.ndarray]:
     """Complex band-pass IIR coefficients (b', a') for band ``band``.
 
     Implements the discrete gammatone-like auditory filter of Clause 5.1.4:
@@ -276,7 +276,7 @@ def _fade_in(x: np.ndarray) -> np.ndarray:
     return x
 
 
-def _preprocess(x: np.ndarray) -> Tuple[np.ndarray, int, int]:
+def _preprocess(x: np.ndarray) -> tuple[np.ndarray, int, int]:
     """Fade-in and zero-pad the signal (Clause 5.1.2, Formulae 1-3).
 
     Returns the padded signal p(n), n_samples (original length) and n_new.
@@ -360,11 +360,11 @@ def _band_acf(rect: np.ndarray, s_b: int, energy: np.ndarray | None = None) -> n
 
 
 def _scaled_acf_at(
-    p_bands: List[np.ndarray],
+    p_bands: list[np.ndarray],
     band: int,
     block_size: int,
     n_new: int,
-    cache: dict[Tuple[int, int], np.ndarray],
+    cache: dict[tuple[int, int], np.ndarray],
 ) -> np.ndarray:
     """Scaled ACF phi'_z(m) of ``band`` computed at ``block_size`` (Formulae 22-30).
 
@@ -389,8 +389,8 @@ def _scaled_acf_at(
 
 
 def _average_bands_full(
-    p_bands: List[np.ndarray], n_new: int
-) -> List[np.ndarray]:
+    p_bands: list[np.ndarray], n_new: int
+) -> list[np.ndarray]:
     """Full Clause 6.2.3 band averaging with cross-group recomputation.
 
     For each target band z (block size B = s_b(z), reach = min(N_B, z, 52-z)),
@@ -400,8 +400,8 @@ def _average_bands_full(
     band z's native time grid. Shared by the loudness and tonality metrics
     (Clause 8.1.1 builds loudness on the same Clause 6.2 outputs).
     """
-    cache: dict[Tuple[int, int], np.ndarray] = {}
-    out: List[np.ndarray] = []
+    cache: dict[tuple[int, int], np.ndarray] = {}
+    out: list[np.ndarray] = []
     for band in range(_CBF):
         block_size = int(_S_B[band])
         n_b = _N_B_BY_SB[block_size]
@@ -431,13 +431,13 @@ def _average_bands_full(
     return out
 
 
-def _average_blocks(averaged: List[np.ndarray]) -> List[np.ndarray]:
+def _average_blocks(averaged: list[np.ndarray]) -> list[np.ndarray]:
     """Average ACFs over neighbouring time blocks (Clause 6.2.3).
 
     Applied only to the 8192- and 4096-sample block sizes; the first and last
     blocks are left unchanged.
     """
-    out: List[np.ndarray] = []
+    out: list[np.ndarray] = []
     for band in range(_CBF):
         acf = averaged[band]
         if int(_S_B[band]) in (8192, 4096) and acf.shape[0] >= 3:
@@ -451,7 +451,7 @@ def _average_blocks(averaged: List[np.ndarray]) -> List[np.ndarray]:
 
 def _tonal_estimate(
     acf: np.ndarray, band: int
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Windowed-ACF tonal loudness estimate (Clause 6.2.4-6.2.5).
 
     Returns ``(Nhat'_tonal(l, z), N'_signal(l, z), f_ton(l, z))`` at the band's
@@ -507,7 +507,7 @@ def _lowpass_time(x: np.ndarray) -> np.ndarray:
 
 def _tonal_noise_split(
     x: np.ndarray, field: str
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, int, int]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, int, int]:
     """Clause 5 front-end + Clause 6.2 tonal/noise split on the common grid.
 
     Runs the shared auditory front-end (Clause 5), the full Clause 6.2.3
@@ -560,7 +560,7 @@ def _tonal_noise_split(
 
 def _assemble_loudness(
     n_tonal: np.ndarray, n_noise: np.ndarray, n_samples: int
-) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[float, np.ndarray, np.ndarray, np.ndarray]:
     """Combine tonal/noise loudness into the loudness metric (Clause 8.1).
 
     Returns (N, N'(z), N(l), time).
@@ -624,7 +624,7 @@ def loudness_ecma(
     if fs <= 0.0:
         raise ValueError("fs must be positive")
     if fs != _FS:
-        n_target = int(round(x.size * _FS / fs))
+        n_target = round(x.size * _FS / fs)
         x = signal.resample(x, n_target)
 
     n_tonal, n_noise, _, _, n_samples = _tonal_noise_split(x, field)

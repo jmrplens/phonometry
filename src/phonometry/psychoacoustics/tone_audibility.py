@@ -241,7 +241,7 @@ def audibility_from_levels(
 
 
 def energy_sum_level(
-    line_levels: "ArrayLike",
+    line_levels: ArrayLike,
     *,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> float:
@@ -287,8 +287,8 @@ def energy_sum_level(
 # (Clauses 5.3.2/5.3.3, Annex D)
 # --------------------------------------------------------------------------- #
 def _validate_spectrum(
-    levels: "ArrayLike", frequencies: "ArrayLike"
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+    levels: ArrayLike, frequencies: ArrayLike
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Coerce and validate a narrow-band ``(levels, frequencies)`` spectrum."""
     lev = np.asarray(levels, dtype=np.float64)
     freq = np.asarray(frequencies, dtype=np.float64)
@@ -318,8 +318,8 @@ _TONE_PEAK_DROP = 10.0
 
 
 def mean_narrowband_level(
-    levels: "ArrayLike",
-    frequencies: "ArrayLike",
+    levels: ArrayLike,
+    frequencies: ArrayLike,
     tone_frequency: float,
     *,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
@@ -351,8 +351,8 @@ def mean_narrowband_level(
 
 
 def _mean_narrowband_level_lines(
-    levels: "ArrayLike",
-    frequencies: "ArrayLike",
+    levels: ArrayLike,
+    frequencies: ArrayLike,
     tone_frequency: float,
     *,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
@@ -398,8 +398,8 @@ def _mean_narrowband_level_lines(
 
 
 def tone_level(
-    levels: "ArrayLike",
-    frequencies: "ArrayLike",
+    levels: ArrayLike,
+    frequencies: ArrayLike,
     tone_frequency: float,
     mean_narrowband_level: float,
     *,
@@ -450,7 +450,7 @@ _DISTINCT_BW_SLOPE = 0.001
 _DISTINCT_EDGE_STEEPNESS = 24.0
 
 
-def _tone_line_span(lev: "NDArray[np.float64]", peak: int, ls: float) -> tuple[int, int]:
+def _tone_line_span(lev: NDArray[np.float64], peak: int, ls: float) -> tuple[int, int]:
     """Contiguous run of tonal lines about ``peak`` (levels above LS+6, peak−10)."""
     threshold = max(ls + _TONE_MARGIN, lev[peak] - _TONE_PEAK_DROP)
     low = peak
@@ -463,8 +463,8 @@ def _tone_line_span(lev: "NDArray[np.float64]", peak: int, ls: float) -> tuple[i
 
 
 def _is_distinct(
-    lev: "NDArray[np.float64]",
-    freq: "NDArray[np.float64]",
+    lev: NDArray[np.float64],
+    freq: NDArray[np.float64],
     peak: int,
     low: int,
     high: int,
@@ -503,8 +503,8 @@ def _is_distinct(
 
 
 def _detect_tones(
-    lev: "NDArray[np.float64]",
-    freq: "NDArray[np.float64]",
+    lev: NDArray[np.float64],
+    freq: NDArray[np.float64],
     line_spacing: float,
     factor: float,
 ) -> list[tuple[int, int, int, float]]:
@@ -563,8 +563,8 @@ def _detect_tones(
 
 
 def _step3_groups(
-    tones: "list[tuple[float, float, float, float, float, list[int]]]",
-) -> "list[tuple[int, ...]]":
+    tones: list[tuple[float, float, float, float, float, list[int]]],
+) -> list[tuple[int, ...]]:
     """Clause 5.3.8 Step 3 clusters of tones sharing a critical band.
 
     Each tone's own critical band yields a candidate set; the bandwidth grows
@@ -596,8 +596,8 @@ def _step3_groups(
 
 
 def analyze_spectrum(
-    levels: "ArrayLike",
-    frequencies: "ArrayLike",
+    levels: ArrayLike,
+    frequencies: ArrayLike,
     line_spacing: float,
     *,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
@@ -704,10 +704,10 @@ def analyze_spectrum(
 
 
 def combined_tone_level(
-    levels: "ArrayLike",
-    frequencies: "ArrayLike",
-    tone_frequencies: "ArrayLike",
-    mean_narrowband_levels: "ArrayLike",
+    levels: ArrayLike,
+    frequencies: ArrayLike,
+    tone_frequencies: ArrayLike,
+    mean_narrowband_levels: ArrayLike,
     *,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> float:
@@ -835,7 +835,7 @@ def resolve_tones_separately(
 # --------------------------------------------------------------------------- #
 # Decisive and mean audibility (Clauses 5.3.8/5.3.9)
 # --------------------------------------------------------------------------- #
-def mean_audibility(decisive_audibilities: "ArrayLike") -> float:
+def mean_audibility(decisive_audibilities: ArrayLike) -> float:
     """Mean audibility ``ΔL`` over a number of spectra (Formula (20)).
 
     ``ΔL = 10·lg[(1/J)·Σ 10^(ΔLj/10)]`` dB, the energy mean of the decisive
@@ -866,8 +866,8 @@ COVERAGE_FACTOR_90 = 1.645
 
 
 def audibility_uncertainty(
-    tone_line_levels: "ArrayLike",
-    noise_line_levels: "ArrayLike",
+    tone_line_levels: ArrayLike,
+    noise_line_levels: ArrayLike,
     tone_frequency: float,
     line_spacing: float,
     *,
@@ -935,8 +935,8 @@ def audibility_uncertainty(
 
 
 def mean_audibility_uncertainty(
-    decisive_audibilities: "ArrayLike",
-    extended_uncertainties: "ArrayLike",
+    decisive_audibilities: ArrayLike,
+    extended_uncertainties: ArrayLike,
 ) -> float:
     """Extended uncertainty ``U`` of the mean audibility (Formulae (28)/(29)).
 
@@ -1004,21 +1004,21 @@ class ToneAudibilityResult:
         member's frequency.
     """
 
-    tone_frequencies: "NDArray[np.float64]"
-    tone_levels: "NDArray[np.float64]"
-    mean_narrowband_levels: "NDArray[np.float64]"
+    tone_frequencies: NDArray[np.float64]
+    tone_levels: NDArray[np.float64]
+    mean_narrowband_levels: NDArray[np.float64]
     line_spacing: float
-    critical_bandwidths: "NDArray[np.float64]"
-    lower_corners: "NDArray[np.float64]"
-    upper_corners: "NDArray[np.float64]"
-    critical_band_levels: "NDArray[np.float64]"
-    masking_indices: "NDArray[np.float64]"
-    audibilities: "NDArray[np.float64]"
-    extended_uncertainties: "NDArray[np.float64] | None" = None
-    group_sizes: "NDArray[np.int_] | None" = None
+    critical_bandwidths: NDArray[np.float64]
+    lower_corners: NDArray[np.float64]
+    upper_corners: NDArray[np.float64]
+    critical_band_levels: NDArray[np.float64]
+    masking_indices: NDArray[np.float64]
+    audibilities: NDArray[np.float64]
+    extended_uncertainties: NDArray[np.float64] | None = None
+    group_sizes: NDArray[np.int_] | None = None
 
     @property
-    def audible(self) -> "NDArray[np.bool_]":
+    def audible(self) -> NDArray[np.bool_]:
         """Boolean mask of tones that are present, i.e. ``ΔL > 0`` (Step 2)."""
         return self.audibilities > 0.0
 
@@ -1032,7 +1032,7 @@ class ToneAudibilityResult:
         """Tone frequency of the decisive (most audible) tone, in Hz."""
         return float(self.tone_frequencies[int(np.argmax(self.audibilities))])
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the per-tone audibility ``ΔL`` against tone frequency."""
         from .._i18n import check_language
         from .._plot.psychoacoustics import plot_tone_audibility
@@ -1043,7 +1043,7 @@ class ToneAudibilityResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -1124,12 +1124,12 @@ def tone_audibility(
 
 
 def assess_tones(
-    tone_frequencies: "ArrayLike",
-    tone_levels: "ArrayLike",
-    mean_narrowband_levels: "ArrayLike",
+    tone_frequencies: ArrayLike,
+    tone_levels: ArrayLike,
+    mean_narrowband_levels: ArrayLike,
     line_spacing: float,
     *,
-    extended_uncertainties: "ArrayLike | None" = None,
+    extended_uncertainties: ArrayLike | None = None,
 ) -> ToneAudibilityResult:
     """Assess the audibility of the tones of a narrow-band spectrum.
 
@@ -1173,7 +1173,7 @@ def assess_tones(
             "'tone_levels' and 'mean_narrowband_levels' must be finite."
         )
 
-    uncertainties: "NDArray[np.float64] | None" = None
+    uncertainties: NDArray[np.float64] | None = None
     if extended_uncertainties is not None:
         uncertainties = np.asarray(extended_uncertainties, dtype=np.float64)
         if uncertainties.shape != freqs.shape:

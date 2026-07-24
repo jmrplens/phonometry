@@ -24,19 +24,20 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+
     from ..environmental.air_absorption import AtmosphericAttenuation
-    from ..environmental.outdoor_propagation import OutdoorAttenuation
-    from ..environmental.ground_barriers import (
-        BarrierInsertionLoss,
-        SphericalGroundResult,
-    )
     from ..environmental.atmospheric_refraction import (
         AtmosphericPEResult,
         AtmosphericRayResult,
         EffectiveSoundSpeedProfile,
     )
-    from ..environmental.measurement import TonalAssessmentResult
+    from ..environmental.ground_barriers import (
+        BarrierInsertionLoss,
+        SphericalGroundResult,
+    )
     from ..environmental.impulse_prominence import ImpulseProminenceResult
+    from ..environmental.measurement import TonalAssessmentResult
+    from ..environmental.outdoor_propagation import OutdoorAttenuation
     from ..environmental.wind_turbine_noise import WindTurbineTonalityResult
 
 #: Spanish translations of the fixed strings rendered by the environmental
@@ -98,7 +99,7 @@ def _t(text: str, language: str = "en") -> str:
 
 
 def plot_atmospheric_attenuation(
-    result: "AtmosphericAttenuation", ax: Axes | None = None, *, language: str = "en",
+    result: AtmosphericAttenuation, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Pure-tone atmospheric attenuation coefficient vs frequency (ISO 9613-1).
@@ -141,7 +142,7 @@ def plot_atmospheric_attenuation(
 
 
 def plot_wind_turbine_tonality(
-    result: "WindTurbineTonalityResult", ax: Axes | None = None, *, language: str = "en",
+    result: WindTurbineTonalityResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Narrowband spectrum with the critical band, masking level and the tone.
@@ -175,7 +176,7 @@ def plot_wind_turbine_tonality(
     return ax
 
 def plot_impulse_prominence(
-    result: "ImpulseProminenceResult", ax: Axes | None = None, *, language: str = "en",
+    result: ImpulseProminenceResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Adjustment curve ``KI(P)`` with the candidate impulses marked.
@@ -187,7 +188,10 @@ def plot_impulse_prominence(
     :return: The axes.
     """
     from .._i18n import decimal_comma, format_number, localize_axes
-    from ..environmental.impulse_prominence import ADJUSTMENT_THRESHOLD, impulse_adjustment
+    from ..environmental.impulse_prominence import (
+        ADJUSTMENT_THRESHOLD,
+        impulse_adjustment,
+    )
 
     ax = ax if ax is not None else _new_axes()
     per = np.asarray(result.per_impulse, dtype=np.float64)
@@ -216,7 +220,7 @@ def plot_impulse_prominence(
     return ax
 
 def plot_tonal_adjustment(
-    result: "TonalAssessmentResult", ax: Axes | None = None, *, language: str = "en",
+    result: TonalAssessmentResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Tonal adjustment curve ``Kt(ΔLta)`` with the assessed tone marked.
@@ -256,7 +260,7 @@ def plot_tonal_adjustment(
     return ax
 
 def plot_outdoor_attenuation(
-    result: "OutdoorAttenuation", ax: Axes | None = None, *, language: str = "en",
+    result: OutdoorAttenuation, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Stacked per-band attenuation terms with the total overlaid (ISO 9613-2).
@@ -313,7 +317,7 @@ def plot_outdoor_attenuation(
 
 
 def plot_spherical_ground(
-    result: "SphericalGroundResult", ax: Axes | None = None, *, language: str = "en",
+    result: SphericalGroundResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Excess attenuation (level re free field) of the spherical-wave ground effect.
@@ -350,7 +354,7 @@ def plot_spherical_ground(
 
 
 def plot_barrier_insertion_loss(
-    result: "BarrierInsertionLoss", ax: Axes | None = None, *, language: str = "en",
+    result: BarrierInsertionLoss, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Barrier insertion loss versus frequency.
@@ -384,7 +388,7 @@ def plot_barrier_insertion_loss(
 
 
 def plot_sound_speed_profile(
-    profile: "EffectiveSoundSpeedProfile", ax: Axes | None = None, *, language: str = "en",
+    profile: EffectiveSoundSpeedProfile, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Effective sound-speed profile ``c_eff(z)`` (height on the vertical axis).
@@ -413,7 +417,7 @@ def plot_sound_speed_profile(
 
 
 def plot_atmospheric_rays(
-    result: "AtmosphericRayResult", ax: Axes | None = None, *, language: str = "en",
+    result: AtmosphericRayResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Curved sound-ray paths over the ground (height on the vertical axis).
@@ -445,7 +449,7 @@ def plot_atmospheric_rays(
 
 
 def plot_atmospheric_pe(
-    result: "AtmosphericPEResult", ax: Axes | None = None, *, language: str = "en",
+    result: AtmosphericPEResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Parabolic-equation relative-level field over the range-height plane.

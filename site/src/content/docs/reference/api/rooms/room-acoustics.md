@@ -47,7 +47,7 @@ from a straight line.
 
 ```python
 decay_curve(
-    ir: List[float] | np.ndarray,
+    ir: list[float] | np.ndarray,
     fs: int,
     band: float | None = None,
     fraction: int = 1,
@@ -115,9 +115,9 @@ EDT/T20/T30 fit lines.
 
 ```python
 room_parameters(
-    ir: List[float] | np.ndarray,
+    ir: list[float] | np.ndarray,
     fs: int,
-    limits: Tuple[float, float] | None = (125.0, 4000.0),
+    limits: tuple[float, float] | None = (125.0, 4000.0),
     fraction: int = 1,
     zero_phase: bool = False,
 ) -> RoomAcousticsResult

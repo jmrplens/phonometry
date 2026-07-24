@@ -181,8 +181,8 @@ class PistonDirectivity:
     directivity: np.ndarray
     directivity_db: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the far-field directivity (beam) pattern on a polar axes.
 
         Draws the directivity in dB against the polar angle: one curve per
@@ -308,8 +308,8 @@ class RadiatingPistonResult:
     speed_of_sound: float
     density: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the normalized piston resistance and reactance against ``ka``.
 
         Reproduces the classic Beranek & Mellow figure: ``R1`` rising to 1 and

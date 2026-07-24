@@ -5,14 +5,14 @@ Integrated and statistical sound levels (Leq, LAeq, LN percentiles).
 
 from __future__ import annotations
 
-from typing import Dict, List, Sequence
+from collections.abc import Sequence
 
 import numpy as np
 
 from .._internal.peaks import inter_sample_peak
 from .._internal.types import as_float_or_array
-from .parametric_filters import time_weighting, weighting_filter
 from .._internal.utils import _typesignal
+from .parametric_filters import time_weighting, weighting_filter
 
 _REF_PRESSURE = 2e-5
 
@@ -38,7 +38,7 @@ def _validate_level_input(x_proc: np.ndarray, calibration_factor: float) -> None
 
 
 def leq(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
 ) -> float | np.ndarray:
@@ -58,7 +58,7 @@ def leq(
 
 
 def laeq(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
@@ -76,14 +76,14 @@ def laeq(
 
 
 def ln_levels(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     n: Sequence[int] = (10, 50, 90),
     mode: str = "fast",
     weighting: str | None = None,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
-) -> Dict[int, float | np.ndarray]:
+) -> dict[int, float | np.ndarray]:
     """
     Statistical percentile levels (LN) from the time-weighted level envelope.
 
@@ -119,7 +119,7 @@ def ln_levels(
     skip = min(int(5 * tau * fs), envelope.shape[-1] // 2)
     levels_db = _level_db(envelope[..., skip:], calibration_factor, dbfs)
 
-    result: Dict[int, float | np.ndarray] = {}
+    result: dict[int, float | np.ndarray] = {}
     for value in n:
         p = np.percentile(levels_db, 100 - value, axis=-1)
         result[value] = float(p) if np.ndim(p) == 0 else np.asarray(p)
@@ -127,7 +127,7 @@ def ln_levels(
 
 
 def lc_peak(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
@@ -169,7 +169,7 @@ def lc_peak(
 
 
 def sel(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     weighting: str | None = None,
     calibration_factor: float = 1.0,
@@ -203,7 +203,7 @@ def sel(
 
 
 def sound_exposure(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     duration_hours: float | None = None,
     calibration_factor: float = 1.0,
@@ -236,7 +236,7 @@ def sound_exposure(
 
 
 def lex_8h(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     duration_hours: float | None = None,
     calibration_factor: float = 1.0,

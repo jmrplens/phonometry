@@ -29,13 +29,13 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
-from scipy import signal as sp_signal  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
+from scipy import signal as sp_signal
 
-import phonometry as ph  # noqa: E402
-from phonometry.metrology.miso import _condition, _ordinary_coherences  # noqa: E402
+import phonometry as ph
+from phonometry.metrology.miso import _condition, _ordinary_coherences
 
 FS = 8192.0
 N = 1 << 19
@@ -98,7 +98,7 @@ def test_problem_7_2_ordinary_and_multiple_coherence_exact() -> None:
     ordinary = _ordinary_coherences(mat, 2)
     assert float(ordinary[0, 0]) == pytest.approx(17.0 / 30.0, abs=1e-12)
     assert float(ordinary[1, 0]) == pytest.approx(0.5, abs=1e-12)
-    partial, coherent, noise = _condition(mat, (0, 1))
+    partial, _coherent, noise = _condition(mat, (0, 1))
     gyy = mat[0, 2, 2].real
     multiple = (gyy - noise[0]) / gyy
     # gamma^2_{y:x} = 1 - 3/10 = 0.7 = gamma^2_1y + gamma^2_2y.1 (Eq. 7.116).

@@ -33,7 +33,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, NamedTuple, Tuple
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
 
@@ -135,10 +135,10 @@ def _a_weighted_level(receiver_level: NDArrayF, ck: NDArrayF) -> float:
 # ISO 9613-2 attenuation prediction fiche
 # --------------------------------------------------------------------------- #
 def _attenuation_metadata_pairs(
-    result: "OutdoorAttenuation",
+    result: OutdoorAttenuation,
     metadata: ReportMetadata | None,
     language: str,
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Ordered (label, value) pairs of the attenuation-fiche header grid.
 
     The propagation distance ``d`` is always shown, recovered from ``Adiv``;
@@ -146,7 +146,7 @@ def _attenuation_metadata_pairs(
     conditions are shown only when supplied on the metadata.
     """
     distance = _distance_from_divergence(float(np.asarray(result.a_div)[0]))
-    specs: List[Tuple[str, str | None]] = []
+    specs: list[tuple[str, str | None]] = []
     if metadata is not None:
         specs += [
             (t("Source / situation", language), _esc(metadata.specimen)),
@@ -174,8 +174,8 @@ def _attenuation_metadata_pairs(
 
 
 def _attenuation_table(
-    result: "OutdoorAttenuation",
-    levels: "_AttenuationLevels | None",
+    result: OutdoorAttenuation,
+    levels: _AttenuationLevels | None,
     verbose: bool,
     language: str,
 ) -> Any:
@@ -208,7 +208,7 @@ def _attenuation_table(
             headers.append("L<sub>A</sub> [dB(A)]")
             widths = [20.0, 18.0, 17.0, 17.0, 17.0, 17.0, 18.0, 20.0, 22.0]
 
-    data: List[List[Any]] = [[Paragraph(h, header_style) for h in headers]]
+    data: list[list[Any]] = [[Paragraph(h, header_style) for h in headers]]
     for i in range(freqs.size):
         row = [Paragraph(_fmt(freqs[i], language, 0), value_style)]
         if levels is not None:
@@ -241,7 +241,7 @@ def _attenuation_statement(la_dw: float, language: str) -> str:
     ).format(la=_fmt(la_dw, language))
 
 
-def _breakdown_statement(result: "OutdoorAttenuation", language: str) -> str:
+def _breakdown_statement(result: OutdoorAttenuation, language: str) -> str:
     """The boxed octave-band range of the total attenuation ``A``.
 
     Reported when no source emission is supplied, so the fiche still closes on
@@ -260,7 +260,7 @@ def _breakdown_statement(result: "OutdoorAttenuation", language: str) -> str:
 
 def _attenuation_verdict(
     la_dw: float, requirement: float, language: str
-) -> Tuple[str, bool]:
+) -> tuple[str, bool]:
     """Verdict text and PASS flag against a declared maximum level.
 
     The ``requirement`` is read as the maximum acceptable A-weighted downwind
@@ -276,7 +276,7 @@ def _attenuation_verdict(
 
 
 def _resolve_levels(
-    result: "OutdoorAttenuation", emission: "SourceEmission"
+    result: OutdoorAttenuation, emission: SourceEmission
 ) -> _AttenuationLevels:
     """Compose the per-band levels the fiche boxes from a source emission.
 
@@ -306,13 +306,13 @@ def _resolve_levels(
 
 
 def render_outdoor_attenuation_report(
-    result: "OutdoorAttenuation",
+    result: OutdoorAttenuation,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
     language: str = "en",
-    source_emission: "SourceEmission | None" = None,
+    source_emission: SourceEmission | None = None,
 ) -> str:
     """Render an ISO 9613-2 outdoor-propagation prediction fiche to ``path``.
 
@@ -360,7 +360,7 @@ def render_outdoor_attenuation_report(
         "prediction, not a measurement.",
         language,
     )
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]
@@ -455,17 +455,17 @@ _BARRIER_MODEL: dict[str, str] = {
 
 
 def _barrier_metadata_pairs(
-    result: "BarrierInsertionLoss",
+    result: BarrierInsertionLoss,
     metadata: ReportMetadata | None,
     language: str,
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Ordered (label, value) pairs of the barrier-fiche header grid."""
     ground = (
         t("with coherent ground", language)
         if result.ground
         else t("free field (no ground)", language)
     )
-    specs: List[Tuple[str, str | None]] = []
+    specs: list[tuple[str, str | None]] = []
     if metadata is not None:
         specs += [
             (t("Source / situation", language), _esc(metadata.specimen)),
@@ -479,7 +479,7 @@ def _barrier_metadata_pairs(
 
 
 def _barrier_table(
-    result: "BarrierInsertionLoss", verbose: bool, language: str
+    result: BarrierInsertionLoss, verbose: bool, language: str
 ) -> Any:
     """The per-band barrier insertion-loss table (``IL`` and, verbose, ``N``)."""
     from reportlab.lib.units import mm
@@ -496,7 +496,7 @@ def _barrier_table(
         headers.insert(1, "N")
         widths = [18.0, 16.0, 20.0]
 
-    data: List[List[Any]] = [[Paragraph(h, header_style) for h in headers]]
+    data: list[list[Any]] = [[Paragraph(h, header_style) for h in headers]]
     for i in range(freqs.size):
         row = [
             Paragraph(_fmt(freqs[i], language, 0), value_style),
@@ -517,7 +517,7 @@ def _barrier_statement(mean_il: float, language: str) -> str:
 
 def _barrier_verdict(
     mean_il: float, requirement: float, language: str
-) -> Tuple[str, bool]:
+) -> tuple[str, bool]:
     """Verdict text and PASS flag against a declared minimum insertion loss.
 
     The ``requirement`` is the minimum required mean insertion loss in dB; a
@@ -533,7 +533,7 @@ def _barrier_verdict(
 
 
 def render_barrier_insertion_loss_report(
-    result: "BarrierInsertionLoss",
+    result: BarrierInsertionLoss,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -570,7 +570,7 @@ def render_barrier_insertion_loss_report(
         "prediction, not a measurement.",
         language,
     ).format(model=model)
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

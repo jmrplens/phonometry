@@ -24,7 +24,7 @@ caller's responsibility.
 
 ```python
 prominence_ratio(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     tone_freq: float | None = None,
     resolution_hz: float = 1.0,
@@ -60,7 +60,7 @@ Warns about biased tonality estimates (e.g. coarse FFT resolution).
 
 ```python
 tone_to_noise_ratio(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     tone_freq: float | None = None,
     resolution_hz: float = 1.0,

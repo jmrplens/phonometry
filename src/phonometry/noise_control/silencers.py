@@ -344,7 +344,7 @@ class ReactiveSilencerResult:
     kind: str
     resonances: np.ndarray | None = None
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the transmission (and insertion) loss against frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -360,7 +360,7 @@ class ReactiveSilencerResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

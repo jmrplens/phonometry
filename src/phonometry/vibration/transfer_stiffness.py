@@ -314,7 +314,7 @@ class TransferStiffnessResult:
             self.transfer_stiffness, self.frequencies, "dynamic_stiffness", target
         )
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the transfer-stiffness level ``L_k(f)``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -329,7 +329,7 @@ class TransferStiffnessResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

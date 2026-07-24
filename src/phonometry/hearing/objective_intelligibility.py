@@ -107,7 +107,7 @@ class STOIResult:
     band_frequencies: NDArray[np.float64]
     sample_rate: int
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the intermediate intelligibility that averages to the index.
 
         For STOI this is the mean correlation per one-third-octave band; for

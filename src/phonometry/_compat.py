@@ -124,7 +124,7 @@ def _make_shim(old: str, new: str) -> types.ModuleType:
     shim = types.ModuleType(old)
     shim.__doc__ = f"Deprecated alias of :mod:`{new}` (removed in phonometry 4.0)."
 
-    def __getattr__(name: str) -> Any:  # noqa: N807  (module-level protocol)
+    def __getattr__(name: str) -> Any:
         target = import_module(new)
         try:
             attr = getattr(target, name)
@@ -137,7 +137,7 @@ def _make_shim(old: str, new: str) -> types.ModuleType:
         )
         return attr
 
-    def __dir__() -> list[str]:  # noqa: N807
+    def __dir__() -> list[str]:
         return dir(import_module(new))
 
     shim.__getattr__ = __getattr__  # type: ignore[method-assign]

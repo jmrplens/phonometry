@@ -57,7 +57,7 @@ class_limits(
     omega: np.ndarray,
     *,
     edition: str = '2014',
-) -> Tuple[np.ndarray, np.ndarray]
+) -> tuple[np.ndarray, np.ndarray]
 ```
 
 Acceptance limits on relative attenuation at normalized frequencies.
@@ -118,12 +118,12 @@ keeping a reference to the bank.
 ```python
 FilterComplianceResult(
     overall_class: int | None,
-    bands: Tuple[Dict[str, Any], ...],
+    bands: tuple[dict[str, Any], ...],
     fraction: int,
     edition: str,
-    sos: Tuple[np.ndarray, ...],
+    sos: tuple[np.ndarray, ...],
     band_frequencies: np.ndarray,
-    factors: Tuple[int, ...],
+    factors: tuple[int, ...],
     fs: float,
     num_points: int,
     range_limited: bool = False,
@@ -155,7 +155,7 @@ holding a reference to the (possibly stateful) bank.
 ### FilterComplianceResult.available_classes()
 
 ```python
-FilterComplianceResult.available_classes() -> List[int]
+FilterComplianceResult.available_classes() -> list[int]
 ```
 
 The performance classes carried by the per-band verdict dictionaries.
@@ -252,11 +252,11 @@ class-compliance result, an optional verdict row against a supplied
 ```python
 verify_aircraft_noise_system(
     *,
-    directional: Dict[float, Dict[float, float]] | None = None,
-    frequency_response: Dict[float, float] | None = None,
-    linearity: Dict[str, float] | None = None,
+    directional: dict[float, dict[float, float]] | None = None,
+    frequency_response: dict[float, float] | None = None,
+    linearity: dict[str, float] | None = None,
     resolution: float | None = None,
-) -> Dict[str, Any]
+) -> dict[str, Any]
 ```
 
 Verify measured performance against IEC 61265:1995 tolerances.
@@ -290,7 +290,7 @@ verify_filter_class(
     num_points: int = 32768,
     *,
     edition: str = '2014',
-) -> Dict[str, Any]
+) -> dict[str, Any]
 ```
 
 Verify a filter bank against the IEC 61260 class limits.
@@ -325,7 +325,7 @@ verify_weighting_class(
     wf: WeightingFilter,
     *,
     sweep_points: int = 4096,
-) -> Dict[str, Any]
+) -> dict[str, Any]
 ```
 
 Verify a frequency-weighting filter against its standard's tolerances.
@@ -395,7 +395,7 @@ over the standard's full frequency range.
 ```python
 weighting_class_limits(
     weighting_class: int,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]
 ```
 
 IEC 61672-1:2013 Table 3 acceptance limits for a performance class.

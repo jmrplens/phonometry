@@ -36,7 +36,7 @@ guarded with an actionable :class:`ImportError`.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -66,7 +66,7 @@ def _hz(value: float, language: str = "en") -> str:
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the dynamic-stiffness header grid.
 
     Only fields that are set are returned. The applicable fields are the generic
@@ -76,7 +76,7 @@ def _metadata_pairs(
     and the environmental conditions (Clause 9 d)). The frequency-range/room
     fields of the other fiches do not apply here.
     """
-    middle: List[Tuple[str, str | None]] = [
+    middle: list[tuple[str, str | None]] = [
         (t("Total mass per area m&#8242;<sub>t</sub> [kg/m<super>2</super>]", language),
          fmt_meta(metadata.mass_per_area, language)
          if metadata.mass_per_area is not None else None),
@@ -88,8 +88,8 @@ def _metadata_pairs(
 
 
 def _metric_rows(
-    result: "DynamicStiffnessResult", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: DynamicStiffnessResult, language: str = "en"
+) -> list[tuple[str, str]]:
     """The scalar results shown in the left-hand metrics table.
 
     The resonant frequency and the natural frequency are printed to 0,1 Hz; the
@@ -100,7 +100,7 @@ def _metric_rows(
     ``s'`` (a non-finite result, Clause 8.2 c)).
     """
     resolved = bool(np.isfinite(result.dynamic_stiffness))
-    rows: List[Tuple[str, str]] = [
+    rows: list[tuple[str, str]] = [
         (t("Resonant frequency f<sub>r</sub> [Hz]", language),
          _hz(result.resonant_frequency, language)),
         (t("Apparent dynamic stiffness s&#8242;<sub>t</sub> [MN/m<super>3</super>]",
@@ -129,7 +129,7 @@ def _metric_rows(
     return rows
 
 
-def _statement(result: "DynamicStiffnessResult", language: str = "en") -> str:
+def _statement(result: DynamicStiffnessResult, language: str = "en") -> str:
     """The boxed apparent dynamic stiffness ``s't`` (Formula 4)."""
     return t(
         "Apparent dynamic stiffness s&#8242;<sub>t</sub> = "
@@ -138,8 +138,8 @@ def _statement(result: "DynamicStiffnessResult", language: str = "en") -> str:
 
 
 def _extended_terms(
-    result: "DynamicStiffnessResult", language: str = "en"
-) -> List[str]:
+    result: DynamicStiffnessResult, language: str = "en"
+) -> list[str]:
     """The installed ``s'`` and the test resonance ``fr`` shown beside the box."""
     resolved = bool(np.isfinite(result.dynamic_stiffness))
     s_installed = (
@@ -176,7 +176,7 @@ def _basis_line(metadata: ReportMetadata | None, language: str = "en") -> str:
 
 
 def render_dynamic_stiffness_report(
-    result: "DynamicStiffnessResult",
+    result: DynamicStiffnessResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

@@ -45,11 +45,11 @@ frequency from 50 Hz to 10 kHz except 1600 Hz (0.15 dB) and 2500 Hz
 
 ```python
 linkwitz_riley(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     freq: float,
     order: int = 4,
-) -> Tuple[np.ndarray, np.ndarray]
+) -> tuple[np.ndarray, np.ndarray]
 ```
 
 Linkwitz-Riley crossover filter (Butterworth squared).
@@ -70,7 +70,7 @@ Splits signal into low and high bands with flat sum response.
 
 ```python
 time_weighting(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     mode: str = 'fast',
     initial_state: str | float | np.ndarray | None = None,
@@ -111,7 +111,7 @@ across blocks, so concatenated block outputs equal a single continuous call.
 ### TimeWeighting.process()
 
 ```python
-TimeWeighting.process(x: List[float] | np.ndarray) -> np.ndarray
+TimeWeighting.process(x: list[float] | np.ndarray) -> np.ndarray
 ```
 
 Apply time weighting to a block, continuing from the previous block.
@@ -128,7 +128,7 @@ Forget the carried state (the next block starts from rest).
 
 ```python
 weighting_filter(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     curve: str = 'A',
     high_accuracy: bool = True,
@@ -178,7 +178,7 @@ Initialize the weighting filter.
 ### WeightingFilter.filter()
 
 ```python
-WeightingFilter.filter(x: List[float] | np.ndarray) -> np.ndarray
+WeightingFilter.filter(x: list[float] | np.ndarray) -> np.ndarray
 ```
 
 Apply the weighting filter to a signal.

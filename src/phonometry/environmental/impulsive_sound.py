@@ -154,7 +154,7 @@ class ImpulsiveSoundResult:
             return None
         return max(qualifying, key=lambda o: o.prominence)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot ``LpAF`` versus time with the detected onsets marked.
 
         Draws the level history, the starting/end points of each onset, the
@@ -210,17 +210,17 @@ def sound_pressure_level_history(
     if x.size == 0:
         raise ValueError("signal must not be empty.")
 
-    weighted = np.asarray(weighting_filter(x, int(round(fs)), curve="A"), dtype=np.float64)
+    weighted = np.asarray(weighting_filter(x, round(fs), curve="A"), dtype=np.float64)
     # Warm-start the F integrator at the first window's mean square so a steady
     # interval does not show a spurious onset from the processing start-up.
-    window = min(weighted.size, max(1, int(round(TIME_WEIGHTING_F_TAU * fs))))
+    window = min(weighted.size, max(1, round(TIME_WEIGHTING_F_TAU * fs)))
     warm_start = float(np.mean(weighted[:window] ** 2))
     mean_square = np.asarray(
-        time_weighting(weighted, int(round(fs)), mode="fast", initial_state=warm_start),
+        time_weighting(weighted, round(fs), mode="fast", initial_state=warm_start),
         dtype=np.float64,
     )
 
-    step = max(1, int(round(fs * dt)))
+    step = max(1, round(fs * dt))
     idx = np.arange(0, mean_square.size, step)
     sampled = mean_square[idx]
     floor = np.finfo(np.float64).tiny
@@ -235,7 +235,7 @@ def _equivalent_level(
     """A-weighted equivalent continuous level ``LAeq`` of the interval, in dB."""
     from ..metrology.parametric_filters import weighting_filter
 
-    weighted = np.asarray(weighting_filter(signal, int(round(fs)), curve="A"), dtype=np.float64)
+    weighted = np.asarray(weighting_filter(signal, round(fs), curve="A"), dtype=np.float64)
     mean_square = float(np.mean(weighted**2))
     floor = np.finfo(np.float64).tiny
     return float(10.0 * np.log10(max(mean_square, floor) / reference_pressure**2)) + calibration_offset
@@ -501,10 +501,10 @@ _PLOT_LABELS: dict[str, dict[str, str]] = {
 def _plot_impulsive_sound(
     result: ImpulsiveSoundResult,
     *,
-    ax: "Axes | None" = None,
+    ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
-) -> "Axes":
+) -> Axes:
     from .._i18n import check_language
 
     lang = check_language(language)

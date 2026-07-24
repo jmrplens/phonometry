@@ -65,7 +65,7 @@ def radiated_noise_level(rms_pressure: float, distance: float) -> float:
 
 def hydrophone_depths(
     cpa_distance: float, angles: tuple[float, ...] = _STANDARD_ANGLES
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Hydrophone depths for the ISO 17208-1 deep-water geometry.
 
     At the closest point of approach the three hydrophones sit at depression
@@ -117,8 +117,8 @@ def source_level_uncertainty(frequency: float) -> float:
 
 
 def _surface_correction(
-    frequency: "NDArray[np.float64]", source_depth: float, sound_speed: float
-) -> "NDArray[np.float64]":
+    frequency: NDArray[np.float64], source_depth: float, sound_speed: float
+) -> NDArray[np.float64]:
     """Lloyd's-mirror RNL-to-source-level correction ΔL (ISO 17208-2 Formula 3)."""
     k = 2.0 * np.pi * frequency / sound_speed
     u = k * source_depth
@@ -141,14 +141,14 @@ class ShipSourceLevelResult:
     :ivar sound_speed: Speed of sound used, in m/s.
     """
 
-    frequencies: "NDArray[np.float64]"
-    radiated_noise_level: "NDArray[np.float64]"
-    surface_correction: "NDArray[np.float64]"
-    source_level: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    radiated_noise_level: NDArray[np.float64]
+    surface_correction: NDArray[np.float64]
+    source_level: NDArray[np.float64]
     source_depth: float
     sound_speed: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot RNL, source level and the ΔL surface correction vs frequency."""
         from .._i18n import check_language
         from .._plot.underwater import plot_ship_source_level
@@ -157,8 +157,8 @@ class ShipSourceLevelResult:
 
 
 def monopole_source_level(
-    rnl: "float | NDArray[np.float64] | list[float]",
-    frequency: "float | NDArray[np.float64] | list[float]",
+    rnl: float | NDArray[np.float64] | list[float],
+    frequency: float | NDArray[np.float64] | list[float],
     draught: float,
     *,
     c: float = _DEFAULT_SOUND_SPEED,

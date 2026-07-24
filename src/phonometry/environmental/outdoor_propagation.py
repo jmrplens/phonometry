@@ -44,8 +44,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from .air_absorption import air_attenuation
 from .._internal.warnings import _warn_renamed
+from .air_absorption import air_attenuation
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -185,7 +185,7 @@ class OutdoorAttenuation:
     a_total: NDArray[np.float64]
     d_omega: NDArray[np.float64]
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the stacked per-band attenuation terms with the total.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -200,11 +200,11 @@ class OutdoorAttenuation:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
-        source_emission: "SourceEmission | None" = None,
+        source_emission: SourceEmission | None = None,
     ) -> str:
         """Render a one-page ISO 9613-2 outdoor-propagation prediction fiche.
 

@@ -55,8 +55,8 @@ from .ship_radiated_noise import (
     source_level_uncertainty,
 )
 from .ship_traffic_noise import (
-    ShipTrafficSpectrum,
     VESSEL_CLASSES,
+    ShipTrafficSpectrum,
     ship_source_spectrum,
 )
 from .sonar_equation import (
@@ -72,6 +72,9 @@ from .sound_speed import (
 )
 
 __all__ = [
+    "UNDERWATER_REFERENCE_EXPOSURE",
+    "UNDERWATER_REFERENCE_PRESSURE",
+    "VESSEL_CLASSES",
     "AmbientNoiseResult",
     "BottomLossResult",
     "NormalModeResult",
@@ -84,9 +87,6 @@ __all__ = [
     "SonarEquationResult",
     "SoundSpeedProfile",
     "TransmissionLossResult",
-    "UNDERWATER_REFERENCE_EXPOSURE",
-    "UNDERWATER_REFERENCE_PRESSURE",
-    "VESSEL_CLASSES",
     "active_sonar_equation",
     "bottom_reflection_loss",
     "critical_angle",

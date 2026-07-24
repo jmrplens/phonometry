@@ -19,7 +19,7 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import building, ReportMetadata  # noqa: E402
+from phonometry import ReportMetadata, building
 
 _PDF_MAGIC = b"%PDF"
 
@@ -88,7 +88,7 @@ def _extract_text(path: str) -> str:
     return "\n".join(page.extract_text() for page in PdfReader(path).pages)
 
 
-def _kij_result() -> "building.VibrationReductionResult":
+def _kij_result() -> building.VibrationReductionResult:
     """A rigid-junction Kij with the three lowest bands bracketed."""
     modal_overlap = np.full(len(_FREQS), 1.0)
     modal_overlap[:3] = 0.1
@@ -104,7 +104,7 @@ def _kij_result() -> "building.VibrationReductionResult":
     )
 
 
-def _dnf_result() -> "building.FlankingLevelDifferenceResult":
+def _dnf_result() -> building.FlankingLevelDifferenceResult:
     """A 16-band Dn,f whose ISO 717-1 single number is hand-checkable."""
     dn_f = np.array(
         [48, 49, 50, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 64, 65],
@@ -116,7 +116,7 @@ def _dnf_result() -> "building.FlankingLevelDifferenceResult":
     )
 
 
-def _lnf_result() -> "building.FlankingImpactLevelResult":
+def _lnf_result() -> building.FlankingImpactLevelResult:
     """A 16-band Ln,f whose ISO 717-2 single number is hand-checkable."""
     receive = np.array(
         [58, 57, 56, 55, 54, 52, 50, 48, 46, 44, 42, 40, 38, 36, 34, 32],

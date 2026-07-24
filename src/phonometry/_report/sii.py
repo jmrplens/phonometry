@@ -30,7 +30,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -58,14 +58,14 @@ if TYPE_CHECKING:
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
     Only fields that are set are returned. The index is a listener-side
     audibility metric, so the room-pair/climate fields of the insulation fiche
     do not apply; only the generic identity fields are used.
     """
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Listening condition", language), metadata.specimen),
         (t("Manufacturer", language), metadata.manufacturer),
@@ -79,7 +79,7 @@ def _metadata_pairs(
     ]
 
 
-def _band_table(result: "SIIResult", verbose: bool, language: str = "en") -> Any:
+def _band_table(result: SIIResult, verbose: bool, language: str = "en") -> Any:
     """Build the left-hand per-one-third-octave-band audibility table.
 
     The default table carries the equivalent speech spectrum level ``Ei'``, the
@@ -120,10 +120,10 @@ def _band_table(result: "SIIResult", verbose: bool, language: str = "en") -> Any
     def d1(value: float) -> str:
         return format_number(value, language, decimals=1)
 
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for j, fk in enumerate(freqs):
         row = [
-            f"{int(round(fk))}",
+            f"{round(fk)}",
             d1(float(speech[j])),
             format_number(float(importance[j]), language, decimals=4),
             format_number(float(audibility[j]), language, decimals=2),
@@ -151,15 +151,15 @@ def _band_table(result: "SIIResult", verbose: bool, language: str = "en") -> Any
     return table
 
 
-def _statement(result: "SIIResult", language: str = "en") -> str:
+def _statement(result: SIIResult, language: str = "en") -> str:
     """The boxed single-number statement ``SII = X``."""
     value = format_number(display_round(float(result.sii), 3), language, decimals=3)
     return f"SII = <b>{value}</b>"
 
 
 def _verdict(
-    result: "SIIResult", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: SIIResult, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag: the SII passes at or above the requirement.
 
     Speech intelligibility is a "higher is better" quantity (the opposite of
@@ -177,7 +177,7 @@ def _verdict(
 
 
 def render_sii_report(
-    result: "SIIResult",
+    result: SIIResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -225,7 +225,7 @@ def render_sii_report(
             language,
         )
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

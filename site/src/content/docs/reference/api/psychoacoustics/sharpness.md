@@ -23,7 +23,7 @@ at, 1.00 acum (~0.96 Aures / ~1.02 von Bismarck through this front-end).
 
 ```python
 sharpness_din(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     field: Literal['free', 'diffuse'] = 'free',
     method: Literal['din', 'aures', 'bismarck'] = 'din',

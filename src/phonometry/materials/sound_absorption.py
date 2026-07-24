@@ -48,7 +48,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-
 from numpy.typing import ArrayLike, NDArray
 
 from .._internal.warnings import PhonometryWarning
@@ -387,8 +386,8 @@ class SoundAbsorptionMeasurement:
         return self.absorption_area_with_specimen - self.absorption_area_empty
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the sound absorption coefficient ``alpha_s`` versus frequency.
 
         Draws ``alpha_s`` over the one-third-octave band axis (ISO 354). Values
@@ -411,7 +410,7 @@ class SoundAbsorptionMeasurement:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

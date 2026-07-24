@@ -24,6 +24,7 @@ import math
 
 import numpy as np
 import pytest
+from reference_data import ISO717_2_ANNEX_C1_LN
 
 from phonometry import (
     ImpactInsulationResult,
@@ -31,7 +32,6 @@ from phonometry import (
     impact_insulation,
     weighted_impact_rating,
 )
-from reference_data import ISO717_2_ANNEX_C1_LN
 
 # ISO 717-2 Table 3 reference values.
 _REF_IMPACT_THIRD = [
@@ -86,7 +86,7 @@ def _brute_force_ci(
     meas = _round_half_up_tenths(np.asarray(measured, dtype=np.float64))
     subset = meas[:n_bands]
     l_sum = 10.0 * np.log10(np.sum(10.0 ** (subset / 10.0)))
-    return int(math.floor(l_sum + 0.5)) - 15 - rating
+    return math.floor(l_sum + 0.5) - 15 - rating
 
 
 # --------------------------------------------------------------------------

@@ -17,11 +17,11 @@ Warns about fractional-octave filter-bank processing pitfalls.
 
 ```python
 octave_filter(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     fraction: float = 1,
     order: int = 6,
-    limits: List[float] | None = None,
+    limits: list[float] | None = None,
     show: bool = False,
     sigbands: bool = False,
     plot_file: str | None = None,
@@ -33,7 +33,7 @@ octave_filter(
     dbfs: bool = False,
     mode: str = 'rms',
     nominal: bool = False,
-) -> Tuple[np.ndarray, List[float]] | Tuple[np.ndarray, List[str]] | Tuple[np.ndarray, List[float], List[np.ndarray]] | Tuple[np.ndarray, List[str], List[np.ndarray]]
+) -> tuple[np.ndarray, list[float]] | tuple[np.ndarray, list[str]] | tuple[np.ndarray, list[float], list[np.ndarray]] | tuple[np.ndarray, list[str], list[np.ndarray]]
 ```
 
 Filter a signal with octave or fractional octave filter bank.
@@ -82,7 +82,7 @@ OctaveFilterBank(
     fs: int,
     fraction: float = 1,
     order: int = 6,
-    limits: List[float] | None = None,
+    limits: list[float] | None = None,
     filter_type: str = 'butter',
     ripple: float = 0.1,
     attenuation: float = 72.0,
@@ -124,14 +124,14 @@ Initialize the Octave Filter Bank.
 
 ```python
 OctaveFilterBank.filter(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     sigbands: bool = False,
     mode: str = 'rms',
     detrend: bool = True,
     calculate_level: bool = True,
     nominal: bool = False,
     zero_phase: bool = False,
-) -> Tuple[np.ndarray | None, List[float] | List[str]] | Tuple[np.ndarray | None, List[float] | List[str], List[np.ndarray]]
+) -> tuple[np.ndarray | None, list[float] | list[str]] | tuple[np.ndarray | None, list[float] | list[str], list[np.ndarray]]
 ```
 
 Apply the pre-designed filter bank to a signal.
@@ -154,13 +154,13 @@ Apply the pre-designed filter bank to a signal.
 
 ```python
 OctaveFilterBank.spectrogram(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     window_time: float = 0.125,
     overlap: float = 0.5,
     mode: str = 'rms',
     detrend: bool = True,
     zero_phase: bool = False,
-) -> Tuple[np.ndarray, List[float], np.ndarray]
+) -> tuple[np.ndarray, list[float], np.ndarray]
 ```
 
 Short-time fractional-octave analysis: level per band over time.

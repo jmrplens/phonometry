@@ -55,8 +55,9 @@ one-third-octave (100-3150 Hz) or 5 octave (125-2000 Hz) values are supplied.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -91,10 +92,10 @@ def _validate_intensity_report(
     *,
     engine: str,
     language: str,
-    rating: "WeightedRatingResult | None",
+    rating: WeightedRatingResult | None,
     curve: np.ndarray,
     label: str,
-) -> "WeightedRatingResult":
+) -> WeightedRatingResult:
     """Validate a shared ISO 15186-1 intensity-report request, or raise.
 
     Both intensity fiches accept only the ``"reportlab"`` engine and a
@@ -175,7 +176,7 @@ class IntensityReductionResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -273,7 +274,7 @@ class IntensityElementNormalizedResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

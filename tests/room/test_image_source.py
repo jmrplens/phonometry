@@ -237,7 +237,7 @@ def test_length_six_is_per_band_with_six_frequencies() -> None:
 
 def test_air_attenuation_reduces_late_energy() -> None:
     dims = (8.0, 6.0, 4.0)
-    common = dict(fs=48000, max_order=30)
+    common = {"fs": 48000, "max_order": 30}
     dry = image_source_rir(dims, (2.0, 2.0, 2.0), (6.0, 4.0, 2.0), 0.1,
                            air_attenuation=0.0, **common)
     humid = image_source_rir(dims, (2.0, 2.0, 2.0), (6.0, 4.0, 2.0), 0.1,
@@ -263,7 +263,7 @@ def test_fdtd_rigid_wall_echo_matches_first_image() -> None:
     # the image-source prediction (2 * source-to-wall distance) / c. The 2D
     # FDTD (dimension-independent for a plane geometry) must reproduce it.
     dx = 0.02
-    nx, ny = int(round(3.0 / dx)), int(round(2.0 / dx))
+    nx, ny = round(3.0 / dx), round(2.0 / dx)
     src_x, probe_x = 0.5, 1.0
     width = 0.4e-3
     src = GaussianPulse(ix=int(src_x / dx), iy=ny // 2, width=width)
@@ -294,7 +294,7 @@ def test_fdtd_damping_decay_recovers_t60() -> None:
     # the FDTD probe pressure through the same Schroeder machinery the
     # image-source RIR uses (room.decay_curve) and recover that T60.
     dx = 0.05
-    nx, ny = int(round(4.0 / dx)), int(round(3.0 / dx))
+    nx, ny = round(4.0 / dx), round(3.0 / dx)
     t60_target = 0.6
     damping = 3.0 * math.log(10.0) / t60_target
     src = GaussianPulse(ix=nx // 3, iy=ny // 3, width=1.2e-3)
@@ -304,7 +304,7 @@ def test_fdtd_damping_decay_recovers_t60() -> None:
         boundaries="rigid", damping=damping,
     )
     p = res.pressures[0]
-    fs = int(round(1.0 / res.dt))
+    fs = round(1.0 / res.dt)
     time, level = decay_curve(p, fs)
     mask = (level <= -5.0) & (level >= -35.0)
     slope = np.polyfit(time[mask], level[mask], 1)[0]

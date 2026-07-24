@@ -24,9 +24,9 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import ReportMetadata  # noqa: E402
-from phonometry.broadcast import program_loudness  # noqa: E402
-from phonometry._report.broadcast import _verdict  # noqa: E402
+from phonometry import ReportMetadata
+from phonometry._report.broadcast import _verdict
+from phonometry.broadcast import program_loudness
 
 FS = 48000
 _PDF_MAGIC = b"%PDF"
@@ -34,7 +34,7 @@ _PDF_MAGIC = b"%PDF"
 
 def _sine(level_dbfs: float, duration: float, freq: float = 1000.0) -> np.ndarray:
     """A 1 kHz sine with per-sample peak level ``level_dbfs`` (dB re full scale)."""
-    t = np.arange(int(round(duration * FS))) / FS
+    t = np.arange(round(duration * FS)) / FS
     return 10.0 ** (level_dbfs / 20.0) * np.sin(2.0 * np.pi * freq * t)
 
 

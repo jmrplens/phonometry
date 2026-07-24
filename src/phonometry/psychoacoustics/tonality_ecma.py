@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, Tuple
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy import signal
@@ -37,6 +37,8 @@ from scipy import signal
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+from .._internal.utils import _typesignal
+from .._internal.validation import require_1d_signal
 from .loudness_ecma import (
     _CBF,
     _EPS,
@@ -46,8 +48,6 @@ from .loudness_ecma import (
     _Z,
     _tonal_noise_split,
 )
-from .._internal.validation import require_1d_signal
-from .._internal.utils import _typesignal
 
 # Overall-SNR scaling gate q(l) (Formula 50, Table 9).
 _Q_A = 35.0
@@ -107,7 +107,7 @@ class EcmaTonality:
 # --------------------------------------------------------------------------
 
 
-def _band_range(f_low: float | None, f_high: float | None) -> Tuple[int, int]:
+def _band_range(f_low: float | None, f_high: float | None) -> tuple[int, int]:
     """Critical-band index range [z_L, z_H] for a user band (Formulae 56-60).
 
     ``None`` limits default to the full 0..52 band range.  A band z is included
@@ -147,7 +147,7 @@ def _assemble_tonality(
     n_samples: int,
     z_lo: int,
     z_hi: int,
-) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Assemble the tonality metric (Clause 6.2.8-6.2.11).
 
     Returns ``(T, T'(z), f_ton,z(z), T(l), f_ton(l), time)``.
@@ -223,7 +223,7 @@ def tonality_ecma(
     if fs <= 0.0:
         raise ValueError("fs must be positive")
     if fs != _FS:
-        x = signal.resample(x, int(round(x.size * _FS / fs)))
+        x = signal.resample(x, round(x.size * _FS / fs))
 
     z_lo, z_hi = _band_range(f_low, f_high)
     n_tonal, n_noise, f_ton, _, n_samples = _tonal_noise_split(x, field)

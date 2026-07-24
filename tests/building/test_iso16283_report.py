@@ -20,18 +20,22 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import (  # noqa: E402  (import after importorskip)
+from reference_data import (
+    ISO717_1_ANNEX_C_R as _AIRBORNE_R,
+)
+from reference_data import (
+    ISO717_2_ANNEX_C1_EXPECTED as _IMPACT_EXPECTED,
+)
+from reference_data import (
+    ISO717_2_ANNEX_C1_LN as _IMPACT_LN,
+)
+
+from phonometry import (
     AirborneInsulationResult,
     ImpactInsulationResult,
     ReportMetadata,
     airborne_insulation,
     impact_insulation,
-)
-
-from reference_data import (  # noqa: E402
-    ISO717_1_ANNEX_C_R as _AIRBORNE_R,
-    ISO717_2_ANNEX_C1_EXPECTED as _IMPACT_EXPECTED,
-    ISO717_2_ANNEX_C1_LN as _IMPACT_LN,
 )
 
 _PDF_MAGIC = b"%PDF"

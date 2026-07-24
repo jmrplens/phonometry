@@ -261,7 +261,7 @@ def test_rating_path_reproduces_known_rw() -> None:
 # --------------------------------------------------------------------------
 def test_result_is_frozen() -> None:
     res = facade_insulation(_flat(3, 70.0), _flat(3, 30.0), _flat(3, 0.5))
-    with pytest.raises(Exception):
+    with pytest.raises(AttributeError):
         res.d_2m = np.zeros(3)  # type: ignore[misc]
 
 

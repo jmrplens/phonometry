@@ -70,21 +70,21 @@ _VESSEL_CLASSES: dict[str, tuple[float, bool, float, float]] = {
 VESSEL_CLASSES: tuple[str, ...] = tuple(sorted(_VESSEL_CLASSES))
 
 
-def _default_bands() -> "NDArray[np.float64]":
+def _default_bands() -> NDArray[np.float64]:
     """Decidecade band centres 10 Hz-31.5 kHz (indices -20..15), in Hz."""
     i = np.arange(-20, 16, dtype=np.float64)
     return np.asarray(10.0 ** (i / 10.0) * 1000.0, dtype=np.float64)
 
 
-def _clean_frequency(frequency_hz: "NDArray[np.float64] | list[float] | None") -> "NDArray[np.float64]":
+def _clean_frequency(frequency_hz: NDArray[np.float64] | list[float] | None) -> NDArray[np.float64]:
     if frequency_hz is None:
         return _default_bands()
     return require_positive_array(frequency_hz, "frequency_hz")
 
 
 def _jomopans_echo(
-    f: "NDArray[np.float64]", vessel_class: str, speed_knots: float, length_m: float
-) -> "NDArray[np.float64]":
+    f: NDArray[np.float64], vessel_class: str, speed_knots: float, length_m: float
+) -> NDArray[np.float64]:
     key = vessel_class.strip().lower()
     if key not in _VESSEL_CLASSES:
         raise ValueError(f"'vessel_class' must be one of {VESSEL_CLASSES}, got {vessel_class!r}.")
@@ -107,7 +107,7 @@ def _jomopans_echo(
     return np.asarray(psd, dtype=np.float64)
 
 
-def _randi(f: "NDArray[np.float64]", speed_knots: float, length_m: float) -> "NDArray[np.float64]":
+def _randi(f: NDArray[np.float64], speed_knots: float, length_m: float) -> NDArray[np.float64]:
     v = require_positive(speed_knots, "speed_knots")
     length_ft = require_positive(length_m, "length_m") * 3.28084
     lf = -10.0 * np.log10(
@@ -124,7 +124,7 @@ def _randi(f: "NDArray[np.float64]", speed_knots: float, length_m: float) -> "ND
     return np.asarray(psd, dtype=np.float64)
 
 
-def _wales_heitmeyer(f: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _wales_heitmeyer(f: NDArray[np.float64]) -> NDArray[np.float64]:
     psd = 230.0 - 10.0 * np.log10(f**3.594) + 10.0 * np.log10((1.0 + (f / 340.0) ** 2) ** 0.917)
     return np.asarray(psd, dtype=np.float64)
 
@@ -144,15 +144,15 @@ class ShipTrafficSpectrum:
     :ivar length_m: Length used, in metres (``None`` if the model ignores it).
     """
 
-    frequency: "NDArray[np.float64]"
-    source_psd: "NDArray[np.float64]"
-    band_level: "NDArray[np.float64]"
+    frequency: NDArray[np.float64]
+    source_psd: NDArray[np.float64]
+    band_level: NDArray[np.float64]
     model: str
-    vessel_class: "str | None"
-    speed_knots: "float | None"
-    length_m: "float | None"
+    vessel_class: str | None
+    speed_knots: float | None
+    length_m: float | None
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the predicted source spectral-density level versus frequency."""
         from .._i18n import check_language
         from .._plot.underwater import plot_ship_traffic_spectrum
@@ -166,7 +166,7 @@ def ship_source_spectrum(
     *,
     vessel_class: str = "containership",
     model: str = "jomopans-echo",
-    frequency_hz: "NDArray[np.float64] | list[float] | None" = None,
+    frequency_hz: NDArray[np.float64] | list[float] | None = None,
 ) -> ShipTrafficSpectrum:
     """Predicted underwater source-level spectrum of a ship.
 
@@ -186,9 +186,9 @@ def ship_source_spectrum(
     """
     f = _clean_frequency(frequency_hz)
     key = model.strip().lower()
-    used_class: "str | None" = None
-    used_speed: "float | None" = None
-    used_length: "float | None" = None
+    used_class: str | None = None
+    used_speed: float | None = None
+    used_length: float | None = None
     if key == "jomopans-echo":
         psd = _jomopans_echo(f, vessel_class, speed_knots, length_m)
         used_class = vessel_class.strip().lower()

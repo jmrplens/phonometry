@@ -13,10 +13,10 @@ response at one-third-octave frequencies from 0,25 Hz to 315 Hz. Annex A.3
 
 import numpy as np
 import pytest
+from reference_data import ISO7196_TABLE2 as TABLE2
 from scipy import signal as sp_signal
 
 from phonometry import WeightingFilter, weighting_filter
-from reference_data import ISO7196_TABLE2 as TABLE2
 
 FS = 48000
 

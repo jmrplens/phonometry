@@ -29,11 +29,13 @@ pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 pytest.importorskip("pypdf")
 
-import numpy as np  # noqa: E402  (import after importorskip)
+import numpy as np
 
-from phonometry import ReportMetadata  # noqa: E402
-from phonometry import room  # noqa: E402
-from phonometry.room import OpenPlanResult  # noqa: E402
+from phonometry import (
+    ReportMetadata,
+    room,
+)
+from phonometry.room import OpenPlanResult
 
 _PDF_MAGIC = b"%PDF"
 
@@ -73,23 +75,23 @@ def _extract_text(path: str) -> str:
 
 
 def _full_metadata(**overrides) -> ReportMetadata:
-    base = dict(
-        specimen="Furnished, unoccupied, background noise present",
-        client="Acoustic Test Client Ltd.",
-        test_room="Open-plan office B",
-        area=420.0,
-        source_positions=2,
-        receiver_positions=7,
-        instrumentation="Omnidirectional source + class 1 SLM",
-        measurement_standard="ISO 3382-3",
-        temperature=22.0,
-        relative_humidity=45.0,
-        pressure=101.1,
-        test_date="2026-07-20",
-        laboratory="Phonometry Reference Laboratory",
-        operator="J. M. Requena-Plens",
-        report_id="PHN-2026-3382-3",
-    )
+    base = {
+        "specimen": "Furnished, unoccupied, background noise present",
+        "client": "Acoustic Test Client Ltd.",
+        "test_room": "Open-plan office B",
+        "area": 420.0,
+        "source_positions": 2,
+        "receiver_positions": 7,
+        "instrumentation": "Omnidirectional source + class 1 SLM",
+        "measurement_standard": "ISO 3382-3",
+        "temperature": 22.0,
+        "relative_humidity": 45.0,
+        "pressure": 101.1,
+        "test_date": "2026-07-20",
+        "laboratory": "Phonometry Reference Laboratory",
+        "operator": "J. M. Requena-Plens",
+        "report_id": "PHN-2026-3382-3",
+    }
     base.update(overrides)
     return ReportMetadata(**base)
 

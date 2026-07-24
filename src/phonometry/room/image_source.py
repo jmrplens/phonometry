@@ -208,7 +208,7 @@ class ImageSourceResult:
         """Arrival time of the direct sound (order 0), s."""
         return float(self.times[int(np.argmin(self.distances))])
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the reflectogram: reflection level in dB against arrival time.
 
         Stems the per-image amplitudes (in dB re the direct sound), coloured by

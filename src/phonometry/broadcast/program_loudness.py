@@ -42,7 +42,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import ceil
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -196,7 +196,7 @@ def k_weighting_coefficients(
     )
 
 
-def k_weighting(x: List[float] | np.ndarray, fs: float) -> np.ndarray:
+def k_weighting(x: list[float] | np.ndarray, fs: float) -> np.ndarray:
     """Apply the two-stage K-weighting pre-filter (BS.1770-5 Annex 1).
 
     Stage 1 models the acoustic effect of the head as a rigid sphere (a
@@ -246,8 +246,8 @@ class KWeightingResponse:
     highpass_db: np.ndarray
     fs: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the K-weighting magnitude response versus frequency.
 
         Draws the combined K-weighting magnitude (dB) on a logarithmic
@@ -498,7 +498,7 @@ def loudness_range(short_term_loudness: ArrayLike) -> float:
 
 
 def true_peak_level(
-    x: List[float] | np.ndarray, fs: float, oversample: int | None = None
+    x: list[float] | np.ndarray, fs: float, oversample: int | None = None
 ) -> float | np.ndarray:
     """True-peak level in dBTP (BS.1770-5 Annex 2).
 
@@ -548,7 +548,7 @@ def true_peak_level(
 
 
 def integrated_loudness(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: float,
     weights: ArrayLike | None = None,
 ) -> float:
@@ -579,7 +579,7 @@ def integrated_loudness(
 
 
 def _prepare_signal(
-    x: List[float] | np.ndarray, weights: ArrayLike | None
+    x: list[float] | np.ndarray, weights: ArrayLike | None
 ) -> tuple[np.ndarray, np.ndarray]:
     """Coerce to 2D float64, reject empty/non-finite input, resolve weights.
 
@@ -606,8 +606,8 @@ def _power_cumsum(y: np.ndarray) -> np.ndarray:
 
 def _block_geometry(fs: float) -> tuple[int, int]:
     """Gating-block length and hop in samples (400 ms, 75 % overlap)."""
-    n_block = int(round(BLOCK_DURATION * fs))
-    step = max(1, int(round(n_block * (1.0 - BLOCK_OVERLAP))))
+    n_block = round(BLOCK_DURATION * fs)
+    step = max(1, round(n_block * (1.0 - BLOCK_OVERLAP)))
     return n_block, step
 
 
@@ -649,8 +649,8 @@ class ProgramLoudnessResult:
     channel_weights: np.ndarray
     fs: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot momentary and short-term loudness over time, with the
         integrated loudness and the loudness range annotated.
 
@@ -669,7 +669,7 @@ class ProgramLoudnessResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -734,7 +734,7 @@ def _lra_edges(short_term: np.ndarray) -> tuple[float, float]:
 
 
 def program_loudness(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: float,
     weights: ArrayLike | None = None,
     *,
@@ -789,12 +789,12 @@ def program_loudness(
     integrated, relative_threshold = _integrated_from_blocks(block_loudness)
 
     # Momentary series: same 400 ms window, finer hop for metering fidelity.
-    m_step = max(1, int(round(momentary_step * fs)))
+    m_step = max(1, round(momentary_step * fs))
     momentary, m_ends = _windowed_loudness(csum, w, n_block, m_step)
 
     # Short-term series: 3 s window at >= 10 Hz (the Tech 3342 LRA input).
-    n_short = int(round(SHORT_TERM_DURATION * fs))
-    s_step = max(1, int(round(short_term_step * fs)))
+    n_short = round(SHORT_TERM_DURATION * fs)
+    s_step = max(1, round(short_term_step * fs))
     short_term, s_ends = _windowed_loudness(csum, w, n_short, s_step)
 
     lra = loudness_range(short_term)

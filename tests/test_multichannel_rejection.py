@@ -26,6 +26,6 @@ _STEREO = np.zeros((2, 4800))
     ],
     ids=["loudness_ecma", "tonality_ecma", "roughness_ecma", "moore_glasberg"],
 )
-def test_stereo_input_is_rejected(analyze) -> None:  # noqa: ANN001
+def test_stereo_input_is_rejected(analyze) -> None:
     with pytest.raises(ValueError, match="1-D time series"):
         analyze(_STEREO, 48000.0)

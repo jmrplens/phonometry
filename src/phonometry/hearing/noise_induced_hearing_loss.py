@@ -96,7 +96,7 @@ class NiptsResult:
     spread_upper: np.ndarray
     spread_lower: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the NIPTS spectrum with the fractile band over frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -111,7 +111,7 @@ class NiptsResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -186,7 +186,7 @@ class HtlanResult:
     nipts: np.ndarray
     threshold: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the age, noise and combined threshold components over frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -201,7 +201,7 @@ class HtlanResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

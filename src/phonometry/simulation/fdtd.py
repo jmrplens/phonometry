@@ -76,7 +76,7 @@ def _finite(name: str, value: float) -> float:
 def _integer(name: str, value: int) -> int:
     """Validate that *value* is an integral scalar (bool is rejected)."""
     if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
-        raise ValueError(f"{name} must be an integer")
+        raise ValueError(f"{name} must be an integer")  # noqa: TRY004 - ValueError keeps the module validation errors uniform
     return int(value)
 
 
@@ -298,7 +298,7 @@ class _ImpedanceEdge:
     flux enters the divergence of the adjacent pressure cells.
     """
 
-    __slots__ = ("side", "c1", "c2", "vb")
+    __slots__ = ("c1", "c2", "side", "vb")
 
     def __init__(self, side: str, impedance: Field2D, rho_edge: Field2D,
                  dt: float, dx: float) -> None:
@@ -641,8 +641,8 @@ class FDTDResult:
         ny, nx = self.shape
         return nx * self.dx, ny * self.dx
 
-    def plot(self, ax: "Axes | None" = None, *, kind: str = "probes",
-             frame: int = -1, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, kind: str = "probes",
+             frame: int = -1, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the probe histories or one recorded field snapshot.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -836,7 +836,7 @@ def fdtd_simulation(
     ny, nx = sim.p.shape
     probe_ix = _probe_indices(probes, (ny, nx), sim._obstacle)
 
-    steps = int(round(duration / sim.dt))
+    steps = round(duration / sim.dt)
     if steps < 1:
         raise ValueError("duration must cover at least one time step "
                          f"(dt = {sim.dt:.3e} s)")

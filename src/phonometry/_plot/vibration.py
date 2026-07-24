@@ -31,19 +31,20 @@ _OP_COLORS = (_C_PRIMARY, _C_TERTIARY, _C_QUATERNARY, _C_PRIMARY_LIGHT, _C_MUTED
 _A8_COLOR = _C_EDGE
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
     from ..vibration.human_vibration import (
         DailyVibrationExposure,
         WeightedSpectrum,
         WeightingResponse,
     )
-    from matplotlib.axes import Axes
     from ..vibration.mechanical_mobility import (
         MobilityResult,
         RigidMassCalibrationResult,
     )
-    from ..vibration.transfer_stiffness import TransferStiffnessResult
     from ..vibration.multiple_shock_vibration import MultipleShockResult
     from ..vibration.radiation_efficiency import RadiationEfficiencyResult
+    from ..vibration.transfer_stiffness import TransferStiffnessResult
 
 #: Spanish translations of the fixed strings rendered by the vibration
 #: ``.plot()`` renderers, keyed by their verbatim English text. ``_t``
@@ -93,7 +94,7 @@ def _t(text: str, language: str = "en") -> str:
 
 
 def plot_vibration_weighting(
-    result: "WeightingResponse", ax: Axes | None = None, *, language: str = "en",
+    result: WeightingResponse, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Frequency-weighting factor (dB) versus frequency (ISO 8041-1).
@@ -123,7 +124,7 @@ def plot_vibration_weighting(
 
 
 def plot_weighted_spectrum(
-    result: "WeightedSpectrum", ax: Axes | None = None, *, language: str = "en",
+    result: WeightedSpectrum, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Unweighted vs weighted one-third-octave acceleration spectrum.
@@ -178,7 +179,7 @@ def plot_weighted_spectrum(
 
 
 def plot_daily_exposure(
-    result: "DailyVibrationExposure", ax: Axes | None = None, *, language: str = "en",
+    result: DailyVibrationExposure, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Partial daily exposures against the EAV / ELV (Directive 2002/44/EC).
@@ -250,7 +251,7 @@ def plot_daily_exposure(
 
 
 def plot_mobility(
-    result: "MobilityResult", ax: Axes | None = None, *, language: str = "en",
+    result: MobilityResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Mobility magnitude ``|Y(f)|`` on log-log axes (ISO 7626-1).
@@ -286,9 +287,9 @@ def plot_mobility(
 
 
 def plot_rigid_mass_calibration(
-    result: "RigidMassCalibrationResult", ax: Axes | None = None, *,
+    result: RigidMassCalibrationResult, ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any,
-) -> "Axes | np.ndarray":
+) -> Axes | np.ndarray:
     """Rigid-mass operational calibration check (ISO 7626-2, 7.5.2).
 
     The single-concept calibration-check figure: the measured driving-point
@@ -386,7 +387,7 @@ def plot_rigid_mass_calibration(
 
 
 def plot_transfer_stiffness(
-    result: "TransferStiffnessResult", ax: Axes | None = None, *,
+    result: TransferStiffnessResult, ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any,
 ) -> Axes:
     """Dynamic transfer stiffness level ``L_k(f)`` on a log-frequency axis.
@@ -415,7 +416,7 @@ def plot_transfer_stiffness(
 
 
 def plot_radiation_efficiency(
-    result: "RadiationEfficiencyResult", ax: Axes | None = None, *,
+    result: RadiationEfficiencyResult, ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any,
 ) -> Axes:
     """Radiation efficiency ``sigma(f)`` on log-log axes (Hopkins 2.9.4).
@@ -455,7 +456,7 @@ def plot_radiation_efficiency(
 
 
 def plot_multiple_shock(
-    result: "MultipleShockResult", ax: Axes | None = None, *, language: str = "en",
+    result: MultipleShockResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Injury-probability curve ``P(R)`` with this assessment's ``R`` marked.
@@ -466,8 +467,8 @@ def plot_multiple_shock(
     :param kwargs: Forwarded to the ``R`` marker ``scatter``.
     :return: The axes.
     """
-    from ..vibration.multiple_shock_vibration import injury_probability
     from .._i18n import format_number, localize_axes
+    from ..vibration.multiple_shock_vibration import injury_probability
 
     ax = ax if ax is not None else _new_axes()
     r10, r50, r90 = result.risk_thresholds

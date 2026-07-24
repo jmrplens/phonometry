@@ -70,7 +70,7 @@ __all__ = [
 ]
 
 
-def _taper(window: str, nperseg: int) -> "NDArray[np.float64]":
+def _taper(window: str, nperseg: int) -> NDArray[np.float64]:
     """The (periodic) analysis taper, as the Welch core uses it."""
     from scipy import signal as sp_signal
 
@@ -116,9 +116,9 @@ class SpectrogramResult:
     :ivar scaling: ``'density'`` or ``'spectrum'``.
     """
 
-    times: "NDArray[np.float64]"
-    frequencies: "NDArray[np.float64]"
-    power: "NDArray[np.float64]"
+    times: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+    power: NDArray[np.float64]
     time_resolution: float
     resolution_bandwidth: float
     random_error: float
@@ -130,8 +130,8 @@ class SpectrogramResult:
     scaling: str
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the spectrogram in dB over the time-frequency plane.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -144,7 +144,7 @@ class SpectrogramResult:
 
 
 def spectrogram(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     *,
     window: str = "hann",
@@ -253,18 +253,18 @@ class ZoomFFTResult:
     :ivar n_points: Number of grid points.
     """
 
-    frequencies: "NDArray[np.float64]"
-    spectrum: "NDArray[np.complex128]"
-    amplitude: "NDArray[np.float64]"
-    power: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    spectrum: NDArray[np.complex128]
+    amplitude: NDArray[np.float64]
+    power: NDArray[np.float64]
     bin_spacing: float
     resolution_bandwidth: float
     window: str
     n_points: int
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the zoom power spectrum in dB over the zoom band.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -277,7 +277,7 @@ class ZoomFFTResult:
 
 
 def zoom_fft(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     f_min: float,
     f_max: float,

@@ -134,7 +134,7 @@ class UncertaintyResult:
     names: tuple[str, ...] = field(default=())
 
     def expanded(
-        self, coverage: float = 0.95, *, coverage_factor_override: "float | None" = None
+        self, coverage: float = 0.95, *, coverage_factor_override: float | None = None
     ) -> tuple[float, float]:
         """Coverage factor ``k`` and expanded uncertainty ``U = k*uc``.
 
@@ -159,8 +159,8 @@ class UncertaintyResult:
         k = coverage_factor(coverage, self.effective_dof)
         return k, k * self.combined_uncertainty
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the uncertainty budget (per-input contributions).
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -197,8 +197,8 @@ class MonteCarloResult:
     trials: int
     samples: np.ndarray | None = field(default=None, repr=False)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the output histogram with the coverage interval marked.
 
         Needs the raw output sample, so call ``monte_carlo(...,

@@ -48,9 +48,10 @@ Clause citations refer to EN 12354-1:2000 (airborne) or EN 12354-2:2000 (impact)
 from __future__ import annotations
 
 import warnings
+from collections.abc import Sequence
 from dataclasses import dataclass
 from math import isfinite, log10
-from typing import TYPE_CHECKING, Any, Literal, Sequence
+from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -177,7 +178,7 @@ class AirbornePredictionResult:
     paths: tuple[PathContribution, ...]
     dominant: PathContribution
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the per-path shares of the transmitted energy.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -193,7 +194,7 @@ class AirbornePredictionResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -266,7 +267,7 @@ class ImpactPredictionResult:
     delta_l_w: float
     k_correction: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the Formula 21 terms and the resulting ``L'n,w``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -282,7 +283,7 @@ class ImpactPredictionResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

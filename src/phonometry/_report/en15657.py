@@ -39,7 +39,7 @@ guarded with an actionable :class:`ImportError`.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -129,7 +129,7 @@ def _value_table(result: Any, verbose: bool, language: str = "en") -> Any:
     return power_value_table(header, rows_data, widths, fraction)
 
 
-def _statement(result: Any, language: str = "en") -> Tuple[str, List[str]]:
+def _statement(result: Any, language: str = "en") -> tuple[str, list[str]]:
     """The boxed total ``L_Ws`` and its extended plate terms."""
     total = float(result.total_level)
     statement = t(
@@ -181,7 +181,7 @@ def _conversion_strip(language: str = "en") -> str:
 
 
 def render_structure_borne_power_report(
-    result: "StructureBornePowerResult",
+    result: StructureBornePowerResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

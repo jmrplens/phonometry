@@ -11,6 +11,7 @@ copy shared with the CI conformance report, so a typo in either surfaces.
 import math
 
 import pytest
+from reference_data import IEC61672_TABLE3 as TABLE3
 
 from phonometry import (
     WeightingFilter,
@@ -18,7 +19,6 @@ from phonometry import (
     weighting_class_limits,
 )
 from phonometry.metrology.compliance import _WEIGHTING_TABLE3
-from reference_data import IEC61672_TABLE3 as TABLE3
 
 
 def test_masks_match_reference_data() -> None:

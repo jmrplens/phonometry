@@ -59,8 +59,9 @@ medium has ``Im(k) < 0``):
 from __future__ import annotations
 
 import warnings
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Mapping
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -117,12 +118,12 @@ DELANY_BAZLEY_VALIDITY = (0.01, 1.0)
 MIKI_VALIDITY = (0.01, 1.0)
 
 __all__ = [
-    "AirLayer",
     "DELANY_BAZLEY_COEFFICIENTS",
     "DELANY_BAZLEY_VALIDITY",
+    "MIKI_VALIDITY",
+    "AirLayer",
     "DiffuseFieldAbsorptionResult",
     "LayeredAbsorberResult",
-    "MIKI_VALIDITY",
     "MembraneLayer",
     "MicroperforatedPlateLayer",
     "PerforatedPlateLayer",
@@ -186,7 +187,7 @@ class PorousMediumResult:
         k0 = 2.0 * np.pi * self.frequency / self.speed_of_sound
         return np.asarray(self.wavenumber / k0, dtype=np.complex128)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the normalised ``Zc`` and ``k`` components against frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -751,7 +752,7 @@ class LayeredAbsorberResult:
     absorption: Real
     transfer_matrix: Complex
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the absorption spectrum ``alpha(f)`` with ``|R|`` overlaid.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -777,7 +778,7 @@ class DiffuseFieldAbsorptionResult:
     absorption: Real
     angle_limit: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the random-incidence absorption spectrum ``alpha_dif(f)``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the

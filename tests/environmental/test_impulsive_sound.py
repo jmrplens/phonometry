@@ -33,7 +33,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-
 from reference_data import (
     ISO1996_3_RAMP_ADJUSTMENT,
     ISO1996_3_RAMP_LEVEL_DIFFERENCE,
@@ -197,7 +196,7 @@ FS = 8000
 
 
 def _tone(frequency: float, duration: float, amplitude: float) -> np.ndarray:
-    t = np.arange(int(round(duration * FS))) / FS
+    t = np.arange(round(duration * FS)) / FS
     return amplitude * np.sin(2.0 * np.pi * frequency * t)
 
 
@@ -281,7 +280,7 @@ def test_detect_onsets_rejects_non_positive_dt() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _result() -> "iso.ImpulsiveSoundResult":
+def _result() -> iso.ImpulsiveSoundResult:
     levels = _ramp(40.0, 30.0, 0.30)
     times = np.arange(levels.size) * DT
     onsets = iso.detect_onsets(levels, DT)

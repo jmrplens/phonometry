@@ -27,6 +27,18 @@ from .common import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
+    from ..building.aperture_transmission import ApertureTransmissionResult
+    from ..building.building_prediction import (
+        AirbornePredictionResult,
+        ImpactPredictionResult,
+    )
+    from ..building.building_uncertainty import BandUncertainty
+    from ..building.facade_prediction import FacadePredictionResult, RadiatedPowerResult
+    from ..building.flanking_transmission import VibrationReductionResult
+    from ..building.floor_covering_improvement import FloorCoveringImprovementResult
+    from ..building.installed_structure_borne import InstalledSourceResult
     from ..building.insulation import (
         AirborneInsulationResult,
         FacadeInsulationResult,
@@ -34,16 +46,8 @@ if TYPE_CHECKING:
         ImpactRatingResult,
         WeightedRatingResult,
     )
-    from matplotlib.axes import Axes
-    from ..building.building_prediction import AirbornePredictionResult, ImpactPredictionResult
-    from ..building.building_uncertainty import BandUncertainty
-    from ..building.facade_prediction import FacadePredictionResult, RadiatedPowerResult
-    from ..building.flanking_transmission import VibrationReductionResult
-    from ..building.floor_covering_improvement import FloorCoveringImprovementResult
-    from ..building.installed_structure_borne import InstalledSourceResult
-    from ..building.structure_borne_power import StructureBornePowerResult
     from ..building.panel_transmission import SoundReductionResult
-    from ..building.aperture_transmission import ApertureTransmissionResult
+    from ..building.structure_borne_power import StructureBornePowerResult
 
 #: Shared x-axis label for the frequency-domain building plots.
 _FREQ_LABEL = "Frequency [Hz]"
@@ -103,7 +107,7 @@ def _t(text: str, language: str = "en") -> str:
 
 
 def plot_sound_reduction(
-    result: "SoundReductionResult", ax: Axes | None = None, language: str = "en",
+    result: SoundReductionResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Predicted sound reduction index ``R(f)`` (Bies 7.2).
@@ -145,7 +149,7 @@ def plot_sound_reduction(
 
 
 def plot_aperture_transmission(
-    result: "ApertureTransmissionResult", ax: Axes | None = None,
+    result: ApertureTransmissionResult, ax: Axes | None = None,
     language: str = "en", **kwargs: Any
 ) -> Axes:
     """Aperture sound reduction index ``R(f) = -10 lg(tau)`` (Hopkins 4.3.10).
@@ -176,7 +180,7 @@ def plot_aperture_transmission(
 
 
 def plot_weighted_rating(
-    result: "WeightedRatingResult", ax: Axes | None = None, language: str = "en",
+    result: WeightedRatingResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Airborne rating curve vs shifted reference (ISO 717-1).
@@ -211,7 +215,7 @@ def plot_weighted_rating(
 
 
 def plot_impact_rating(
-    result: "ImpactRatingResult", ax: Axes | None = None, language: str = "en",
+    result: ImpactRatingResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Impact rating curve vs shifted reference (ISO 717-2).
@@ -260,7 +264,7 @@ def plot_impact_rating(
 
 
 def plot_facade_insulation(
-    result: "FacadeInsulationResult", ax: Axes | None = None, language: str = "en",
+    result: FacadeInsulationResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Per-band façade sound-insulation profile (ISO 16283-3).
@@ -311,7 +315,7 @@ def plot_facade_insulation(
 
 
 def plot_facade_prediction(
-    result: "FacadePredictionResult", ax: Axes | None = None, language: str = "en",
+    result: FacadePredictionResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Predicted façade insulation profile (EN 12354-3:2000).
@@ -359,7 +363,7 @@ def plot_facade_prediction(
 
 
 def plot_radiated_power(
-    result: "RadiatedPowerResult", ax: Axes | None = None, language: str = "en",
+    result: RadiatedPowerResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Radiated sound power level ``LW`` per band (EN 12354-4:2000).
@@ -407,7 +411,7 @@ def plot_radiated_power(
 
 
 def plot_vibration_reduction(
-    result: "VibrationReductionResult", ax: Axes | None = None, language: str = "en",
+    result: VibrationReductionResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Vibration reduction index ``Kij`` versus frequency (ISO 10848).
@@ -454,7 +458,7 @@ def plot_vibration_reduction(
 
 
 def plot_structure_borne_power(
-    result: "StructureBornePowerResult", ax: Axes | None = None, language: str = "en",
+    result: StructureBornePowerResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Characteristic structure-borne sound power level per band (EN 15657).
@@ -479,7 +483,7 @@ def plot_structure_borne_power(
 
 
 def plot_installed_structure_borne(
-    result: "InstalledSourceResult", ax: Axes | None = None, language: str = "en",
+    result: InstalledSourceResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Per-path and total normalised structure-borne SPL (EN 12354-5).
@@ -520,7 +524,7 @@ def plot_installed_structure_borne(
 
 
 def plot_airborne_prediction(
-    result: "AirbornePredictionResult", ax: Axes | None = None, language: str = "en",
+    result: AirbornePredictionResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Per-path shares of the transmitted energy (EN 12354-1).
@@ -560,7 +564,7 @@ def plot_airborne_prediction(
 
 
 def plot_impact_prediction(
-    result: "ImpactPredictionResult", ax: Axes | None = None, language: str = "en",
+    result: ImpactPredictionResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Terms of the apparent impact-level prediction (EN 12354-2).
@@ -603,7 +607,7 @@ def plot_impact_prediction(
 
 
 def plot_airborne_insulation(
-    result: "AirborneInsulationResult", ax: Axes | None = None, language: str = "en",
+    result: AirborneInsulationResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Per-band airborne insulation quantities (ISO 16283-1).
@@ -638,7 +642,7 @@ def plot_airborne_insulation(
 
 
 def plot_impact_insulation(
-    result: "ImpactInsulationResult", ax: Axes | None = None, language: str = "en",
+    result: ImpactInsulationResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Per-band impact sound pressure levels (ISO 16283-2).
@@ -669,7 +673,7 @@ def plot_impact_insulation(
 
 
 def plot_band_uncertainty(
-    result: "BandUncertainty", ax: Axes | None = None, language: str = "en",
+    result: BandUncertainty, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Per-band standard uncertainty of an insulation quantity (ISO 12999-1).
@@ -702,7 +706,7 @@ def plot_band_uncertainty(
 
 
 def plot_floor_covering_improvement(
-    result: "FloorCoveringImprovementResult", ax: Axes | None = None,
+    result: FloorCoveringImprovementResult, ax: Axes | None = None,
     language: str = "en", **kwargs: Any
 ) -> Axes:
     """Impact-sound improvement spectrum ΔL of a floor covering (ISO 16251-1).

@@ -19,7 +19,7 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import (  # noqa: E402  (import after importorskip)
+from phonometry import (
     FacadeInsulationResult,
     ReportMetadata,
     facade_insulation,

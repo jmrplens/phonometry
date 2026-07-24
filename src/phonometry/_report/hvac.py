@@ -33,7 +33,7 @@ matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -183,7 +183,7 @@ def _value_table(
 
 def _statement(
     result: Any, corrections: np.ndarray | None, language: str = "en"
-) -> Tuple[float, bool, str, List[str]]:
+) -> tuple[float, bool, str, list[str]]:
     """The boxed headline figure, its pass direction and the extended terms.
 
     Returns ``(value, higher_is_better, statement, extended)``. A
@@ -234,7 +234,7 @@ def _statement(
 
 def _basis_strip(
     result: Any, corrections: np.ndarray | None, language: str = "en"
-) -> List[str]:
+) -> list[str]:
     """The method-basis strip(s) for the reported quantity."""
     if _is_power(result):
         strips = [
@@ -266,7 +266,7 @@ def _basis_strip(
 
 
 def render_hvac_report(
-    result: "HvacSpectrumResult",
+    result: HvacSpectrumResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

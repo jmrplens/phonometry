@@ -20,7 +20,7 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import (  # noqa: E402
+from phonometry import (
     OctaveFilterBank,
     ReportMetadata,
     filter_class_compliance,
@@ -197,6 +197,7 @@ def test_non_compliant_bank_renders(tmp_path) -> None:
 def test_empty_bands_result_is_graceful() -> None:
     """A zero-band result reports no classes and fails clearly, not with IndexError."""
     import numpy as np
+
     from phonometry.metrology.compliance import FilterComplianceResult
 
     empty = FilterComplianceResult(

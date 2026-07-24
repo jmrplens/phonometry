@@ -8,9 +8,9 @@ import pytest
 
 from phonometry import (
     OctaveFilterBank,
-    sensitivity,
     linkwitz_riley,
     octave_filter,
+    sensitivity,
     time_weighting,
     weighting_filter,
 )

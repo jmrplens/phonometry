@@ -19,7 +19,8 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Sequence, Tuple, cast
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -47,7 +48,7 @@ if TYPE_CHECKING:
     from ..building.insulation import ImpactRatingResult, WeightedRatingResult
 
 #: A per-band table column: header markup, values and decimal places.
-Column = Tuple[str, np.ndarray, int]
+Column = tuple[str, np.ndarray, int]
 
 #: Builder of the left-hand table content for one report: given the reported
 #: quantity's value header (already translated), its per-band curve, the
@@ -56,12 +57,12 @@ Column = Tuple[str, np.ndarray, int]
 #: the multi-column verbose table) or ``None`` (the two-column ``f | value``
 #: form, whose widths are fixed here).
 ColumnsBuilder = Callable[
-    [str, np.ndarray, bool, str], Tuple[Sequence[Column], str, Any]
+    [str, np.ndarray, bool, str], tuple[Sequence[Column], str, Any]
 ]
 
 
 def single_number_statement(
-    rating: "WeightedRatingResult | ImpactRatingResult", rating_symbol: str
+    rating: WeightedRatingResult | ImpactRatingResult, rating_symbol: str
 ) -> str:
     """The boxed single-number statement with its adaptation terms.
 
@@ -83,11 +84,11 @@ def single_number_statement(
 
 
 def requirement_verdict(
-    rating: "WeightedRatingResult | ImpactRatingResult",
+    rating: WeightedRatingResult | ImpactRatingResult,
     rating_symbol: str,
     requirement: float,
     language: str,
-) -> Tuple[str, bool]:
+) -> tuple[str, bool]:
     """Return the verdict text and PASS flag for a supplied requirement.
 
     Airborne ratings pass at or above the requirement; impact ratings pass at
@@ -138,9 +139,9 @@ def band_value_table(
         ]
         widths = col_widths
 
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for k, fk in enumerate(centers):
-        row: List[Any] = [f"{int(round(fk))}"]
+        row: list[Any] = [f"{round(fk)}"]
         for _, values, decimals in columns:
             row.append(format_number(float(values[k]), language, decimals=decimals))
         rows.append(row)
@@ -149,7 +150,7 @@ def band_value_table(
 
 
 def iso717_columns_builder(
-    rating: "WeightedRatingResult | ImpactRatingResult",
+    rating: WeightedRatingResult | ImpactRatingResult,
     is_impact: bool,
     symbol: str,
     *,
@@ -170,7 +171,7 @@ def iso717_columns_builder(
 
     def build(
         value_header: str, curve: np.ndarray, verbose: bool, language: str
-    ) -> Tuple[Sequence[Column], str, Any]:
+    ) -> tuple[Sequence[Column], str, Any]:
         from reportlab.lib.units import mm
 
         if not verbose:
@@ -183,7 +184,7 @@ def iso717_columns_builder(
             deviation = np.maximum(measured - shifted, 0.0)
         else:
             deviation = np.maximum(shifted - measured, 0.0)
-        columns: List[Column] = [
+        columns: list[Column] = [
             (value_header, curve, 1),
             (t("Shifted ref. [dB]", language), shifted, 1),
             (t("Unfav. dev. [dB]", language), deviation, 1),
@@ -197,7 +198,7 @@ def iso717_columns_builder(
 
 def render_insulation_fiche(
     result: Any,
-    rating: "WeightedRatingResult | ImpactRatingResult",
+    rating: WeightedRatingResult | ImpactRatingResult,
     path: str,
     *,
     spec: dict[str, str],
@@ -278,7 +279,7 @@ def render_insulation_fiche(
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title_text = t(spec["title"], language)
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title_text, title_style),
         Paragraph(t(spec["basis"], language), basis_style),
     ]

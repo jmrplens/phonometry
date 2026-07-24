@@ -26,6 +26,7 @@ import math
 
 import numpy as np
 import pytest
+from reference_data import ISO717_1_ANNEX_C_R as _ANNEX_C_R
 
 from phonometry import (
     AirborneInsulationResult,
@@ -34,7 +35,6 @@ from phonometry import (
     energy_average_level,
     weighted_rating,
 )
-from reference_data import ISO717_1_ANNEX_C_R as _ANNEX_C_R
 
 # One-third-octave reference values, ISO 717-1 Table 3 (100 Hz to 3150 Hz).
 _REF_THIRD = [33, 36, 39, 42, 45, 48, 51, 52, 53, 54, 55, 56, 56, 56, 56, 56]
@@ -91,7 +91,7 @@ def _brute_force_adaptation(
     meas = _round_half_up_tenths(np.asarray(measured, dtype=np.float64))
     spec = np.asarray(spectrum, dtype=np.float64)
     x_aj = -10.0 * np.log10(np.sum(10.0 ** ((spec - meas) / 10.0)))
-    return int(math.floor(x_aj + 0.5)) - rating
+    return math.floor(x_aj + 0.5) - rating
 
 # ISO 717-1 Annex C, Table C.1 measured sound reduction index R (100-3150)
 # is imported from reference_data (shared with the CI conformance report).
@@ -321,6 +321,7 @@ def test_extended_annex_c2_enlarged_range() -> None:
     """ISO 717-1:2020 Annex C Table C.2: Rw(C;Ctr;C50-5000;Ctr,50-5000)
     = 30 (-2; -3; -2; -4) dB."""
     import reference_data as ref
+
     from phonometry import weighted_rating_extended
 
     freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
@@ -344,6 +345,7 @@ def test_extended_annex_c2_enlarged_range() -> None:
 def test_extended_core_only_input() -> None:
     """A bare 16-band input yields the core terms; extended ones are None."""
     import reference_data as ref
+
     from phonometry import weighted_rating_extended
 
     res = weighted_rating_extended(ref.ISO717_1_ANNEX_C_R)
@@ -359,6 +361,7 @@ def test_extended_core_only_input() -> None:
 def test_extended_18_band_100_5000_range() -> None:
     """An 18-band 100-5000 Hz input yields C100-5000 but not the 50 Hz terms."""
     import reference_data as ref
+
     from phonometry import weighted_rating_extended
 
     freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
@@ -386,6 +389,7 @@ def test_one_decimal_rating_annex_b() -> None:
     """ISO 12999-1:2020 Annex B: the 0,1 dB shift yields Rw = 57,4 dB and the
     one-decimal sums Rw + C50-5000 = 56,4 / Rw + Ctr,50-5000 = 51,1 dB."""
     import reference_data as ref
+
     from phonometry import weighted_rating_extended
 
     res = weighted_rating_extended(
@@ -411,6 +415,7 @@ def test_impact_extended_ci_50_2500() -> None:
     """CI,50-2500 sums 50-2500 Hz (A.2.1 NOTE); flat extensions with low
     energy leave it equal to the core CI."""
     import reference_data as ref
+
     from phonometry import weighted_impact_rating_extended
 
     freqs = [50, 63, 80, *[int(f) for f in np.asarray(
@@ -431,6 +436,7 @@ def test_impact_one_decimal_reference_floor() -> None:
     """The 0,1 dB variant reproduces the printed uncertainty constants of
     ISO 717-2:2020 A.2.2: Ln,r,0,w = 77,6 dB and CI,r,0 = -10,3 dB."""
     import reference_data as ref
+
     from phonometry import weighted_impact_rating_extended
 
     res = weighted_impact_rating_extended(

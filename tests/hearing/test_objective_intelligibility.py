@@ -15,6 +15,8 @@ from __future__ import annotations
 import matplotlib
 
 matplotlib.use("Agg")
+import itertools
+
 import numpy as np
 import pytest
 
@@ -69,7 +71,7 @@ def test_monotonic_with_snr(extended: bool) -> None:
         stoi(x, _add_noise(x, snr, seed=10), FS, extended=extended).value
         for snr in (-15.0, -5.0, 5.0, 15.0, 25.0)
     ]
-    assert all(b >= a - 1e-9 for a, b in zip(values, values[1:]))
+    assert all(b >= a - 1e-9 for a, b in itertools.pairwise(values))
     assert values[-1] > values[0] + 0.2  # a clear spread, not a flat line
 
 

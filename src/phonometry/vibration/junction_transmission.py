@@ -473,7 +473,7 @@ class JunctionTransmissionResult:
         )
         return float(kij)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot ``tau(theta)`` versus incidence angle for this junction.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the

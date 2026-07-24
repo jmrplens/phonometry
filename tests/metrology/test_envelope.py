@@ -15,11 +15,11 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-import phonometry as ph  # noqa: E402
+import phonometry as ph
 
 FS = 8192.0
 N = 16384
@@ -192,7 +192,7 @@ def test_envelope_plot_two_panels_and_external_ax() -> None:
     axes = res.plot()
     assert len(axes) == 2
     assert len(axes[0].lines) == 2  # signal + envelope
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")
 
@@ -237,7 +237,7 @@ def _am_signal() -> np.ndarray:
 
 
 def _bin(freq: float, nfft: int = ES_N) -> int:
-    return int(round(freq * nfft / FS))
+    return round(freq * nfft / FS)
 
 
 def test_envelope_spectrum_magnitude_line_and_mean() -> None:
@@ -306,6 +306,6 @@ def test_envelope_spectrum_plot_two_panels_and_external_ax() -> None:
     axes = res.plot()
     assert len(axes) == 2
     assert len(axes[0].lines) >= 1  # envelope (+ mean-level rule)
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")

@@ -42,7 +42,7 @@ from __future__ import annotations
 
 import functools
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -87,7 +87,7 @@ def _common_metadata_pairs(
     language: str = "en",
     *,
     include_room_fields: bool = True,
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs shared by the ISO 17497 fiches.
 
     The descriptive fields (client, specimen, mounting, room, climate ...) come
@@ -114,7 +114,7 @@ def _common_metadata_pairs(
     pressure = _md("pressure")
 
     freq_label = t("Frequency range [Hz]", language)
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), _md("client")),
         (t("Manufacturer", language), _md("manufacturer")),
         (t("Description", language), _md("specimen")),
@@ -145,7 +145,7 @@ def _freq_range(freqs: np.ndarray, language: str) -> str | None:
     if not freqs.size:
         return None
     return t("{lo} to {hi}", language).format(
-        lo=int(round(float(freqs.min()))), hi=int(round(float(freqs.max())))
+        lo=round(float(freqs.min())), hi=round(float(freqs.max()))
     )
 
 
@@ -169,14 +169,14 @@ def _basis_line(
 def _header_flow(
     title: str,
     basis: str,
-    header_pairs: List[Tuple[str, str]],
+    header_pairs: list[tuple[str, str]],
     title_style: Any,
     basis_style: Any,
-) -> List[Any]:
+) -> list[Any]:
     """The shared title/basis/metadata-grid opening of an ISO 17497 fiche."""
     from reportlab.platypus import Paragraph, Spacer
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]
@@ -191,7 +191,7 @@ def _header_flow(
 # ISO 17497-1: random-incidence scattering coefficient.
 # ---------------------------------------------------------------------------
 def _scattering_table(
-    result: "ScatteringResult", verbose: bool, language: str = "en"
+    result: ScatteringResult, verbose: bool, language: str = "en"
 ) -> Any:
     """Build the per-band ``f | alpha_s | s`` table (``alpha_spec`` if verbose)."""
     from reportlab.lib.units import mm
@@ -209,10 +209,10 @@ def _scattering_table(
             Paragraph("&#945;<sub>spec</sub>", head_style),
             Paragraph("s", head_style),
         ]
-        rows: List[List[Any]] = [header]
+        rows: list[list[Any]] = [header]
         for fk, ak, spk, sk in zip(freqs, a_s, spec, s):
             rows.append([
-                f"{int(round(fk))}",
+                f"{round(fk)}",
                 _c2(ak, language),
                 _c2(spk, language),
                 _c2(sk, language),
@@ -227,7 +227,7 @@ def _scattering_table(
         rows = [header]
         for fk, ak, sk in zip(freqs, a_s, s):
             rows.append([
-                f"{int(round(fk))}",
+                f"{round(fk)}",
                 _c2(ak, language),
                 _c2(sk, language),
             ])
@@ -236,7 +236,7 @@ def _scattering_table(
 
 
 def render_scattering_report(
-    result: "ScatteringResult",
+    result: ScatteringResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -319,8 +319,8 @@ def render_scattering_report(
         flow.append(two_panel_body(left_cell, plot_drawing))
     flow.append(Spacer(1, 8))
 
-    lo = int(round(float(freqs.min()))) if freqs.size else 0
-    hi = int(round(float(freqs.max()))) if freqs.size else 0
+    lo = round(float(freqs.min())) if freqs.size else 0
+    hi = round(float(freqs.max())) if freqs.size else 0
     statement = t(
         "Random-incidence scattering coefficient <b>s</b>, {lo} Hz to {hi} Hz",
         language,
@@ -334,7 +334,7 @@ def render_scattering_report(
 # ISO 17497-2: directional diffusion coefficient spectrum d(f).
 # ---------------------------------------------------------------------------
 def _diffusion_table(
-    result: "DiffusionSpectrum", show_normalized: bool, language: str = "en"
+    result: DiffusionSpectrum, show_normalized: bool, language: str = "en"
 ) -> Any:
     """Build the per-band ``f | d`` table (adds ``d_n`` when requested)."""
     from reportlab.lib.units import mm
@@ -350,10 +350,10 @@ def _diffusion_table(
             Paragraph("d", head_style),
             Paragraph("d<sub>n</sub>", head_style),
         ]
-        rows: List[List[Any]] = [header]
+        rows: list[list[Any]] = [header]
         for fk, dk, dnk in zip(freqs, d, d_n):
             rows.append([
-                f"{int(round(fk))}",
+                f"{round(fk)}",
                 _c2(dk, language),
                 _c2(dnk, language),
             ])
@@ -365,13 +365,13 @@ def _diffusion_table(
         ]
         rows = [header]
         for fk, dk in zip(freqs, d):
-            rows.append([f"{int(round(fk))}", _c2(dk, language)])
+            rows.append([f"{round(fk)}", _c2(dk, language)])
         col_widths = [28 * mm, 28 * mm]
     return band_table(rows, col_widths, len(freqs))
 
 
 def render_diffusion_spectrum_report(
-    result: "DiffusionSpectrum",
+    result: DiffusionSpectrum,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -445,8 +445,8 @@ def render_diffusion_spectrum_report(
     flow.append(two_panel_body(left_cell, plot_drawing))
     flow.append(Spacer(1, 8))
 
-    lo = int(round(float(freqs.min()))) if freqs.size else 0
-    hi = int(round(float(freqs.max()))) if freqs.size else 0
+    lo = round(float(freqs.min())) if freqs.size else 0
+    hi = round(float(freqs.max())) if freqs.size else 0
     statement = t(
         "Diffusion coefficient <b>d</b>, {lo} Hz to {hi} Hz", language
     ).format(lo=lo, hi=hi)
@@ -458,7 +458,7 @@ def render_diffusion_spectrum_report(
 # ---------------------------------------------------------------------------
 # ISO 17497-2: single-source polar response.
 # ---------------------------------------------------------------------------
-def _polar_table(result: "DiffusionResult", language: str = "en") -> Any:
+def _polar_table(result: DiffusionResult, language: str = "en") -> Any:
     """Build the corrected ``angle | reflected level`` polar-response table."""
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
@@ -470,14 +470,14 @@ def _polar_table(result: "DiffusionResult", language: str = "en") -> Any:
         Paragraph(t("Angle &#952; [&#176;]", language), head_style),
         Paragraph("L [dB]", head_style),
     ]
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for ang, lev in zip(angles, levels):
         rows.append([_d1(ang, language), _d1(lev, language)])
     return band_table(rows, [28 * mm, 28 * mm], len(angles))
 
 
 def render_diffusion_polar_report(
-    result: "DiffusionResult",
+    result: DiffusionResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

@@ -106,14 +106,14 @@ def spherical_spreading_adjustment(
 
 
 def atmospheric_adjustment(
-    frequencies: "NDArray[np.float64] | list[float]",
+    frequencies: NDArray[np.float64] | list[float],
     distance: float,
     *,
     temperature: float = 25.0,
     relative_humidity: float = 70.0,
     pressure: float = 101.325,
     reference_distance: float = _RH,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Atmospheric-absorption adjustment ``ΔLa`` of the hemisphere level (Eq. 26/27).
 
     The hemisphere already includes absorption out to the reference distance
@@ -163,7 +163,7 @@ def atmospheric_adjustment(
 
 
 def _delany_bazley_impedance(
-    frequencies: "NDArray[np.float64]", flow_resistivity: float) -> "NDArray[np.complex128]":
+    frequencies: NDArray[np.float64], flow_resistivity: float) -> NDArray[np.complex128]:
     """Delany-Bazley one-parameter normalised surface impedance ``Zs`` (Eq. 35)."""
     ratio = frequencies / flow_resistivity
     real = 1.0 + 0.0511 * ratio ** (-0.754)
@@ -172,13 +172,13 @@ def _delany_bazley_impedance(
 
 
 def ground_effect_adjustment(
-    frequencies: "NDArray[np.float64] | list[float]",
+    frequencies: NDArray[np.float64] | list[float],
     source_height: float,
     receiver_height: float,
     horizontal_distance: float,
     *,
-    flow_resistivity: "float | str" = "G",
-) -> "NDArray[np.float64]":
+    flow_resistivity: float | str = "G",
+) -> NDArray[np.float64]:
     """Ground-effect adjustment ``ΔLg`` over an impedance plane (Eq. 28-35).
 
     A point source over a locally-reacting impedance ground produces interference
@@ -212,7 +212,7 @@ def ground_effect_adjustment(
     return np.asarray(grid[0], dtype=np.float64)
 
 
-def _resolve_flow_resistivity(flow_resistivity: "float | str") -> float:
+def _resolve_flow_resistivity(flow_resistivity: float | str) -> float:
     """The flow resistivity ``σ`` in Pa·s/m² from a value or CNOSSOS class letter."""
     if isinstance(flow_resistivity, str):
         key = flow_resistivity.strip().upper()
@@ -225,12 +225,12 @@ def _resolve_flow_resistivity(flow_resistivity: "float | str") -> float:
 
 
 def _ground_effect(
-    frequencies: "NDArray[np.float64]",
-    source_height: "float | NDArray[np.float64]",
+    frequencies: NDArray[np.float64],
+    source_height: float | NDArray[np.float64],
     receiver_height: float,
-    horizontal_distances: "NDArray[np.float64]",
-    sigma: "float | NDArray[np.float64]",
-) -> "NDArray[np.float64]":
+    horizontal_distances: NDArray[np.float64],
+    sigma: float | NDArray[np.float64],
+) -> NDArray[np.float64]:
     """``ΔLg`` (Eq. 28-35) for one emission over many receivers, shape ``(G, F)``.
 
     The validated core of :func:`ground_effect_adjustment`, broadcast over a
@@ -271,8 +271,8 @@ def _ground_effect(
 
 
 def _delany_bazley_impedance_grid(
-    frequencies: "NDArray[np.float64]", sigma_column: "NDArray[np.float64]",
-) -> "NDArray[np.complex128]":
+    frequencies: NDArray[np.float64], sigma_column: NDArray[np.float64],
+) -> NDArray[np.complex128]:
     """``Zs`` (Eq. 35) broadcast over a ``(G, 1)`` flow-resistivity column."""
     ratio = frequencies[None, :] / sigma_column
     real = 1.0 + 0.0511 * ratio ** (-0.754)
@@ -302,20 +302,20 @@ class RotorcraftHemisphere:
         so the propagation chain honours it.
     """
 
-    frequencies: "NDArray[np.float64]"
-    azimuth: "NDArray[np.float64]"
-    polar: "NDArray[np.float64]"
-    levels: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    azimuth: NDArray[np.float64]
+    polar: NDArray[np.float64]
+    levels: NDArray[np.float64]
     distance: float = _RH
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the hemisphere directivity for one band (polar section)."""
         from .._i18n import check_language
         from .._plot.aircraft import plot_rotorcraft_hemisphere
 
         return plot_rotorcraft_hemisphere(self, ax=ax, language=check_language(language), **kwargs)
 
-    def mirrored(self) -> "RotorcraftHemisphere":
+    def mirrored(self) -> RotorcraftHemisphere:
         """The hemisphere with the azimuth axis reversed (``φ → −φ``).
 
         Doc 32 Eq. 2 substitutes a class member whose main/tail-rotor
@@ -335,7 +335,7 @@ class RotorcraftHemisphere:
             distance=self.distance,
         )
 
-    def _filled(self) -> "NDArray[np.float64]":
+    def _filled(self) -> NDArray[np.float64]:
         """The gap-filled level grid (Eq. 14/15), computed once and cached.
 
         The cache relies on the frozen-dataclass contract: mutating the
@@ -353,7 +353,7 @@ class RotorcraftHemisphere:
 
 def hemisphere_source_level(
     hemisphere: RotorcraftHemisphere, azimuth_deg: float, polar_deg: float,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Interpolated source level ``L(fc, φ, θ)`` from a hemisphere (Eq. 13-15).
 
     The grid is first gap-filled by nearest-bin constant-value extrapolation
@@ -381,8 +381,8 @@ def hemisphere_source_level(
 
 def _source_levels(
     hemisphere: RotorcraftHemisphere,
-    azimuth_deg: "NDArray[np.float64]", polar_deg: "NDArray[np.float64]",
-) -> "NDArray[np.float64]":
+    azimuth_deg: NDArray[np.float64], polar_deg: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Vectorised :func:`hemisphere_source_level` over ``M`` queries, shape ``(M, F)``.
 
     The gap-filled grid has every bin finite except bands with no data at all
@@ -411,8 +411,8 @@ def _source_levels(
 
 
 def _axis_cells(
-    nodes: "NDArray[np.float64]", values: "NDArray[np.float64]",
-) -> "tuple[NDArray[np.intp], NDArray[np.float64]]":
+    nodes: NDArray[np.float64], values: NDArray[np.float64],
+) -> tuple[NDArray[np.intp], NDArray[np.float64]]:
     """Lower cell indices and fractional weights of ``values`` on a node axis.
 
     Size-1 axes (a single measured row or column) are handled explicitly: the
@@ -429,9 +429,9 @@ def _axis_cells(
 
 
 def _fill_grid(
-    azimuth: "NDArray[np.float64]", polar: "NDArray[np.float64]",
-    levels: "NDArray[np.float64]",
-) -> "NDArray[np.float64]":
+    azimuth: NDArray[np.float64], polar: NDArray[np.float64],
+    levels: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Nearest-bin gap fill of a hemisphere grid (Eq. 14/15).
 
     Every empty ``(φ, θ)`` bin of each band takes the level of its angularly
@@ -487,10 +487,10 @@ class MeanGroundPlaneResult:
 
     slope: float
     intercept: float
-    distances: "NDArray[np.float64]"
-    heights: "NDArray[np.float64]"
+    distances: NDArray[np.float64]
+    heights: NDArray[np.float64]
 
-    def height(self, distance: "float | NDArray[np.float64]") -> "NDArray[np.float64]":
+    def height(self, distance: float | NDArray[np.float64]) -> NDArray[np.float64]:
         """The plane height ``a·d + b`` at ``distance``, in metres."""
         return np.asarray(self.slope * np.asarray(distance, dtype=np.float64)
                           + self.intercept, dtype=np.float64)
@@ -505,7 +505,7 @@ class MeanGroundPlaneResult:
         return float((height - self.slope * distance - self.intercept)
                      / math.hypot(1.0, self.slope))
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the terrain section and the fitted mean ground plane."""
         from .._i18n import check_language
         from .._plot.aircraft import plot_mean_ground_plane
@@ -514,8 +514,8 @@ class MeanGroundPlaneResult:
 
 
 def mean_ground_plane(
-    distances: "NDArray[np.float64] | list[float]",
-    heights: "NDArray[np.float64] | list[float]",
+    distances: NDArray[np.float64] | list[float],
+    heights: NDArray[np.float64] | list[float],
 ) -> MeanGroundPlaneResult:
     """The mean ground plane of a terrain section (guidance Eq. 36-40).
 
@@ -536,9 +536,9 @@ def mean_ground_plane(
 
 
 def _validated_section(
-    distances: "NDArray[np.float64] | list[float]",
-    heights: "NDArray[np.float64] | list[float]",
-) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+    distances: NDArray[np.float64] | list[float],
+    heights: NDArray[np.float64] | list[float],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The validated ``(d, z)`` arrays of a terrain section."""
     d = np.atleast_1d(np.asarray(distances, dtype=np.float64))
     z = np.atleast_1d(np.asarray(heights, dtype=np.float64))
@@ -552,8 +552,8 @@ def _validated_section(
 
 
 def _mean_plane_coefficients(
-    d: "NDArray[np.float64]", z: "NDArray[np.float64]",
-) -> "tuple[float, float]":
+    d: NDArray[np.float64], z: NDArray[np.float64],
+) -> tuple[float, float]:
     """The Eq. 37/38 closed-form least-squares line through a polyline."""
     ak = np.diff(z) / np.diff(d)
     bk = z[:-1] - ak * d[:-1]
@@ -567,8 +567,8 @@ def _mean_plane_coefficients(
 
 
 def mean_flow_resistivity(
-    lengths: "NDArray[np.float64] | list[float]",
-    resistivities: "NDArray[np.float64] | list[float]",
+    lengths: NDArray[np.float64] | list[float],
+    resistivities: NDArray[np.float64] | list[float],
 ) -> float:
     """Logarithmic mean flow resistivity along a path (guidance Eq. 41).
 
@@ -590,13 +590,13 @@ def mean_flow_resistivity(
 
 
 def diffraction_attenuation(
-    frequencies: "NDArray[np.float64] | list[float]",
+    frequencies: NDArray[np.float64] | list[float],
     path_difference: float,
     *,
     edge_height: float,
     edge_span: float = 0.0,
     capped: bool = True,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Pure diffraction attenuation ``ΔLd`` per band (guidance Eq. 42-44).
 
     ``ΔLd = 10·Ch·log10(3 + (40/λ)·C″·δ)`` where the argument is at least 1
@@ -668,17 +668,17 @@ class TerrainScreeningResult:
     :ivar heights: The section terrain heights, in metres, shape ``(M,)``.
     """
 
-    frequencies: "NDArray[np.float64]"
-    adjustment: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    adjustment: NDArray[np.float64]
     screened: bool
     path_difference: float
-    diffraction_points: "NDArray[np.float64]"
-    source: "tuple[float, float]"
-    receiver: "tuple[float, float]"
-    distances: "NDArray[np.float64]"
-    heights: "NDArray[np.float64]"
+    diffraction_points: NDArray[np.float64]
+    source: tuple[float, float]
+    receiver: tuple[float, float]
+    distances: NDArray[np.float64]
+    heights: NDArray[np.float64]
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the section geometry: terrain, line of sight and sound path."""
         from .._i18n import check_language
         from .._plot.aircraft import plot_terrain_screening
@@ -687,13 +687,13 @@ class TerrainScreeningResult:
 
 
 def terrain_screening_adjustment(
-    frequencies: "NDArray[np.float64] | list[float]",
-    source: "tuple[float, float]",
-    receiver: "tuple[float, float]",
-    distances: "NDArray[np.float64] | list[float]",
-    heights: "NDArray[np.float64] | list[float]",
+    frequencies: NDArray[np.float64] | list[float],
+    source: tuple[float, float],
+    receiver: tuple[float, float],
+    distances: NDArray[np.float64] | list[float],
+    heights: NDArray[np.float64] | list[float],
     *,
-    flow_resistivity: "float | str | NDArray[np.float64] | list[float]" = "G",
+    flow_resistivity: float | str | NDArray[np.float64] | list[float] = "G",
 ) -> TerrainScreeningResult:
     """Ground effect and terrain screening over a vertical section (§A.4.4-A.4.5).
 
@@ -758,9 +758,9 @@ def terrain_screening_adjustment(
 
 
 def _segment_resistivities(
-    flow_resistivity: "float | str | NDArray[np.float64] | list[float]",
+    flow_resistivity: float | str | NDArray[np.float64] | list[float],
     n_segments: int,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Per-segment ``σ`` from a scalar, class letter or per-segment array."""
     if isinstance(flow_resistivity, str):
         return np.full(n_segments, _resolve_flow_resistivity(flow_resistivity))
@@ -774,9 +774,9 @@ def _segment_resistivities(
 
 
 def _cropped_section(
-    d: "NDArray[np.float64]", z: "NDArray[np.float64]",
-    sigma_seg: "NDArray[np.float64]", d_lo: float, d_hi: float,
-) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
+    d: NDArray[np.float64], z: NDArray[np.float64],
+    sigma_seg: NDArray[np.float64], d_lo: float, d_hi: float,
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """The section restricted to ``[d_lo, d_hi]`` with interpolated ends."""
     keep = (d > d_lo) & (d < d_hi)
     dd = np.concatenate([[d_lo], d[keep], [d_hi]])
@@ -786,7 +786,7 @@ def _cropped_section(
     return dd, zz, sigma_seg[idx]
 
 
-def _upper_hull(points: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _upper_hull(points: NDArray[np.float64]) -> NDArray[np.float64]:
     """The upper convex hull of ``(d, z)`` points sorted by ``d``."""
     hull: list[np.ndarray] = []
     for pt in points:
@@ -801,12 +801,12 @@ def _upper_hull(points: "NDArray[np.float64]") -> "NDArray[np.float64]":
 
 
 def _side_ground(
-    f: "NDArray[np.float64]",
-    d: "NDArray[np.float64]", z: "NDArray[np.float64]",
-    sigma_seg: "NDArray[np.float64]",
-    p_lo: "tuple[float, float]", p_hi: "tuple[float, float]",
+    f: NDArray[np.float64],
+    d: NDArray[np.float64], z: NDArray[np.float64],
+    sigma_seg: NDArray[np.float64],
+    p_lo: tuple[float, float], p_hi: tuple[float, float],
     clamp_lo: bool, clamp_hi: bool,
-) -> "tuple[NDArray[np.float64], float, float, float]":
+) -> tuple[NDArray[np.float64], float, float, float]:
     """Mean-plane ground effect between two points of the section.
 
     Returns the flat-ground adjustment ``ΔLg`` (Eq. 28-35) evaluated with
@@ -837,11 +837,11 @@ def _side_ground(
 
 
 def _screening_core(
-    f: "NDArray[np.float64]",
-    src: "tuple[float, float]", rcv: "tuple[float, float]",
-    d: "NDArray[np.float64]", z: "NDArray[np.float64]",
-    sigma_seg: "NDArray[np.float64]",
-) -> "tuple[NDArray[np.float64], bool, float, NDArray[np.float64]]":
+    f: NDArray[np.float64],
+    src: tuple[float, float], rcv: tuple[float, float],
+    d: NDArray[np.float64], z: NDArray[np.float64],
+    sigma_seg: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], bool, float, NDArray[np.float64]]:
     """The combined ground-and-screening adjustment of a section (Eq. 45-47)."""
     interior = slice(1, -1) if d.size > 2 else slice(0, 0)
     los = src[1] + (rcv[1] - src[1]) * (d - src[0]) / (rcv[0] - src[0])
@@ -898,8 +898,8 @@ def _screening_core(
 
 
 def _mirrored_point(
-    point: "tuple[float, float]", equivalent_height: float, slope: float,
-) -> "tuple[float, float]":
+    point: tuple[float, float], equivalent_height: float, slope: float,
+) -> tuple[float, float]:
     """The orthogonal mirror image of a point across a side mean plane.
 
     The image sits at twice the (orthogonal) equivalent height along the
@@ -913,7 +913,7 @@ def _mirrored_point(
 
 
 def _image_path_difference(
-    hull: "NDArray[np.float64]", image: "tuple[float, float]", side: str,
+    hull: NDArray[np.float64], image: tuple[float, float], side: str,
 ) -> float:
     """The rubber-band path difference from an image point (Eq. 46/47).
 
@@ -936,14 +936,14 @@ def _image_path_difference(
 
 
 def flight_condition_weights(
-    airspeeds: "NDArray[np.float64] | list[float]",
-    path_angles: "NDArray[np.float64] | list[float]",
+    airspeeds: NDArray[np.float64] | list[float],
+    path_angles: NDArray[np.float64] | list[float],
     airspeed: float,
     path_angle: float,
     *,
     scaling_factor: float = 2.0,
-    triangles: "NDArray[np.int_] | list[list[int]] | None" = None,
-) -> "list[tuple[int, float]]":
+    triangles: NDArray[np.int_] | list[list[int]] | None = None,
+) -> list[tuple[int, float]]:
     """Hemisphere blending weights for a flight condition (Eq. 3-10).
 
     The database flight conditions and the query are scaled by the database
@@ -1020,9 +1020,9 @@ def flight_condition_weights(
 
 
 def _enveloping_simplex(
-    pts: "NDArray[np.float64]", q: "NDArray[np.float64]", n: int,
-    triangles: "NDArray[np.int_] | list[list[int]] | None",
-) -> "NDArray[np.intp] | None":
+    pts: NDArray[np.float64], q: NDArray[np.float64], n: int,
+    triangles: NDArray[np.int_] | list[list[int]] | None,
+) -> NDArray[np.intp] | None:
     """The triangle of ``pts`` (given or Delaunay) enveloping ``q``, or ``None``."""
     if triangles is not None:
         return _simplex_from_table(pts, q, n, triangles)
@@ -1039,9 +1039,9 @@ def _enveloping_simplex(
 
 
 def _simplex_from_table(
-    pts: "NDArray[np.float64]", q: "NDArray[np.float64]", n: int,
-    triangles: "NDArray[np.int_] | list[list[int]]",
-) -> "NDArray[np.intp] | None":
+    pts: NDArray[np.float64], q: NDArray[np.float64], n: int,
+    triangles: NDArray[np.int_] | list[list[int]],
+) -> NDArray[np.intp] | None:
     """The first triangle of a lookup table enveloping ``q``, or ``None``."""
     tri = np.asarray(triangles, dtype=np.intp)
     if tri.ndim != 2 or tri.shape[1] != 3 or tri.size == 0:
@@ -1061,17 +1061,17 @@ def _simplex_from_table(
 
 
 def interpolated_source_level(
-    hemispheres: "Sequence[RotorcraftHemisphere]",
-    airspeeds: "NDArray[np.float64] | list[float]",
-    path_angles: "NDArray[np.float64] | list[float]",
+    hemispheres: Sequence[RotorcraftHemisphere],
+    airspeeds: NDArray[np.float64] | list[float],
+    path_angles: NDArray[np.float64] | list[float],
     airspeed: float,
     path_angle: float,
     azimuth_deg: float,
     polar_deg: float,
     *,
     scaling_factor: float = 2.0,
-    triangles: "NDArray[np.int_] | list[list[int]] | None" = None,
-) -> "NDArray[np.float64]":
+    triangles: NDArray[np.int_] | list[list[int]] | None = None,
+) -> NDArray[np.float64]:
     """Source level at a flight condition between hemispheres (Eq. 8/10 over Eq. 13).
 
     Blends :func:`hemisphere_source_level` lookups of the hemispheres selected
@@ -1103,9 +1103,9 @@ def interpolated_source_level(
 
 
 def _common_frequencies(
-    hemispheres: "Sequence[RotorcraftHemisphere]",
-    airspeeds: "NDArray[np.float64] | list[float]",
-) -> "NDArray[np.float64]":
+    hemispheres: Sequence[RotorcraftHemisphere],
+    airspeeds: NDArray[np.float64] | list[float],
+) -> NDArray[np.float64]:
     """The shared band grid of a hemisphere set (validated)."""
     if len(hemispheres) == 0:
         raise ValueError("'hemispheres' must not be empty.")
@@ -1150,16 +1150,16 @@ class FlightPathKinematics:
         ``atan`` form, which this implementation follows.
     """
 
-    times: "NDArray[np.float64]"
-    positions: "NDArray[np.float64]"
-    ground_speed: "NDArray[np.float64]"
-    airspeed: "NDArray[np.float64]"
-    heading: "NDArray[np.float64]"
-    curvature: "NDArray[np.float64]"
-    bank_angle: "NDArray[np.float64]"
-    path_angle: "NDArray[np.float64]"
+    times: NDArray[np.float64]
+    positions: NDArray[np.float64]
+    ground_speed: NDArray[np.float64]
+    airspeed: NDArray[np.float64]
+    heading: NDArray[np.float64]
+    curvature: NDArray[np.float64]
+    bank_angle: NDArray[np.float64]
+    path_angle: NDArray[np.float64]
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the speed and angle profiles along the track."""
         from .._i18n import check_language
         from .._plot.aircraft import plot_flight_path_kinematics
@@ -1168,8 +1168,8 @@ class FlightPathKinematics:
 
 
 def flight_path_kinematics(
-    times: "NDArray[np.float64] | list[float]",
-    positions: "NDArray[np.float64] | list[list[float]]",
+    times: NDArray[np.float64] | list[float],
+    positions: NDArray[np.float64] | list[list[float]],
     *,
     gravity: float = _G0,
 ) -> FlightPathKinematics:
@@ -1220,7 +1220,7 @@ def flight_path_kinematics(
 # --------------------------------------------------------------------------- #
 
 
-def _a_weighting_db(frequencies: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _a_weighting_db(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     """IEC 61672-1 A-weighting at the exact frequencies, in dB (Doc 32 Eq. 25)."""
     f = np.asarray(frequencies, dtype=np.float64)
     f1, f2, f3, f4 = 20.598997, 107.65265, 737.86223, 12194.217
@@ -1235,11 +1235,11 @@ def _a_weighting_db(frequencies: "NDArray[np.float64]") -> "NDArray[np.float64]"
 
 
 def _emission_angles(
-    position: "NDArray[np.float64]",
-    receivers: "NDArray[np.float64]",
+    position: NDArray[np.float64],
+    receivers: NDArray[np.float64],
     heading_deg: float,
     bank_deg: float,
-) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Emission azimuth ``φ``, polar angle ``θ`` and slant distance per receiver.
 
     The hemisphere frame follows Doc 32 Eq. 3 (x forward, y starboard, z down)
@@ -1306,22 +1306,22 @@ class RotorcraftEventResult:
         in EPNdB; ``NaN`` if no step has a defined ``PNLT``.
     """
 
-    frequencies: "NDArray[np.float64]"
-    emission_times: "NDArray[np.float64]"
-    times: "NDArray[np.float64]"
-    distance: "NDArray[np.float64]"
-    azimuth: "NDArray[np.float64]"
-    polar: "NDArray[np.float64]"
-    band_levels: "NDArray[np.float64]"
-    a_levels: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    emission_times: NDArray[np.float64]
+    times: NDArray[np.float64]
+    distance: NDArray[np.float64]
+    azimuth: NDArray[np.float64]
+    polar: NDArray[np.float64]
+    band_levels: NDArray[np.float64]
+    a_levels: NDArray[np.float64]
     la_max: float
     sel: float
     sel_10db: float
-    pnlt: "NDArray[np.float64]"
+    pnlt: NDArray[np.float64]
     pnltm: float
     epnl: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the A-weighted level time history with its event metrics."""
         from .._i18n import check_language
         from .._plot.aircraft import plot_rotorcraft_event
@@ -1339,12 +1339,12 @@ class RotorcraftNoiseContourResult:
     :ivar metric: ``"exposure"`` (SEL) or ``"maximum"`` (LASmax).
     """
 
-    x: "NDArray[np.float64]"
-    y: "NDArray[np.float64]"
-    level: "NDArray[np.float64]"
+    x: NDArray[np.float64]
+    y: NDArray[np.float64]
+    level: NDArray[np.float64]
     metric: str
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot filled noise contours over the ground plane."""
         from .._i18n import check_language
         from .._plot.aircraft import plot_rotorcraft_noise_contour
@@ -1353,8 +1353,8 @@ class RotorcraftNoiseContourResult:
 
 
 def _per_point(
-    value: "float | NDArray[np.float64] | list[float] | None", n: int, name: str,
-) -> "NDArray[np.float64] | None":
+    value: float | NDArray[np.float64] | list[float] | None, n: int, name: str,
+) -> NDArray[np.float64] | None:
     """A per-track-point parameter: scalar broadcast, ``(N,)`` array, or ``None``."""
     if value is None:
         return None
@@ -1369,9 +1369,9 @@ def _per_point(
 
 
 def _validated_track(
-    times: "NDArray[np.float64] | list[float]",
-    positions: "NDArray[np.float64] | list[list[float]]",
-) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+    times: NDArray[np.float64] | list[float],
+    positions: NDArray[np.float64] | list[list[float]],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The validated ``(times, positions)`` track arrays."""
     t = np.asarray(times, dtype=np.float64)
     p = np.asarray(positions, dtype=np.float64)
@@ -1386,7 +1386,7 @@ def _validated_track(
     return t, p
 
 
-def _reference_distance(hemispheres: "Sequence[RotorcraftHemisphere]") -> float:
+def _reference_distance(hemispheres: Sequence[RotorcraftHemisphere]) -> float:
     """The shared hemisphere reference distance (validated)."""
     rref = float(hemispheres[0].distance)
     for h in hemispheres[1:]:
@@ -1396,9 +1396,9 @@ def _reference_distance(hemispheres: "Sequence[RotorcraftHemisphere]") -> float:
 
 
 def _absorption_coefficient(
-    frequencies: "NDArray[np.float64]", temperature: float, relative_humidity: float,
+    frequencies: NDArray[np.float64], temperature: float, relative_humidity: float,
     pressure: float,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """ISO 9613-1 pure-tone ``α`` in dB/m at the exact band centres (Eq. 27).
 
     The single suppression site for the advisory out-of-range warning of the
@@ -1408,7 +1408,10 @@ def _absorption_coefficient(
     """
     import warnings
 
-    from ..environmental.air_absorption import AtmosphericAbsorptionWarning, air_attenuation
+    from ..environmental.air_absorption import (
+        AtmosphericAbsorptionWarning,
+        air_attenuation,
+    )
 
     with warnings.catch_warnings():
         if frequencies.max() <= 10000.0:
@@ -1429,52 +1432,52 @@ class _EventSetup:
     around instead of the Doc 32 parameter list.
     """
 
-    hemispheres: "tuple[RotorcraftHemisphere, ...]"
-    airspeeds: "NDArray[np.float64]"
-    path_angles: "NDArray[np.float64]"
-    frequencies: "NDArray[np.float64]"
-    times: "NDArray[np.float64]"
-    positions: "NDArray[np.float64]"
-    speed: "NDArray[np.float64]"
-    gamma: "NDArray[np.float64]"
-    heading: "NDArray[np.float64]"
-    bank: "NDArray[np.float64]"
-    offsets: "NDArray[np.float64]"
-    ground_elevation: "float | NDArray[np.float64]"
+    hemispheres: tuple[RotorcraftHemisphere, ...]
+    airspeeds: NDArray[np.float64]
+    path_angles: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+    times: NDArray[np.float64]
+    positions: NDArray[np.float64]
+    speed: NDArray[np.float64]
+    gamma: NDArray[np.float64]
+    heading: NDArray[np.float64]
+    bank: NDArray[np.float64]
+    offsets: NDArray[np.float64]
+    ground_elevation: float | NDArray[np.float64]
     receiver_height: float
-    sigma: "float | NDArray[np.float64]"
-    alpha: "NDArray[np.float64]"
+    sigma: float | NDArray[np.float64]
+    alpha: NDArray[np.float64]
     rref: float
     scaling_factor: float
-    triangles: "NDArray[np.int_] | list[list[int]] | None"
+    triangles: NDArray[np.int_] | list[list[int]] | None
     band_integrated: bool
-    terrain: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None"
+    terrain: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None
     terrain_resolution: float
 
 
 def _event_setup(
-    hemispheres: "Sequence[RotorcraftHemisphere]",
-    airspeeds: "NDArray[np.float64] | list[float]",
-    path_angles: "NDArray[np.float64] | list[float]",
-    times: "NDArray[np.float64] | list[float]",
-    positions: "NDArray[np.float64] | list[list[float]]",
+    hemispheres: Sequence[RotorcraftHemisphere],
+    airspeeds: NDArray[np.float64] | list[float],
+    path_angles: NDArray[np.float64] | list[float],
+    times: NDArray[np.float64] | list[float],
+    positions: NDArray[np.float64] | list[list[float]],
     *,
     receiver_height: float,
-    ground_elevation: "float | NDArray[np.float64] | list[float] | list[list[float]]",
-    airspeed: "float | NDArray[np.float64] | list[float] | None",
-    path_angle: "float | NDArray[np.float64] | list[float] | None",
-    heading: "float | NDArray[np.float64] | list[float] | None",
-    bank_angle: "float | NDArray[np.float64] | list[float] | None",
-    flow_resistivity: "float | str | NDArray[np.float64] | list[float] | list[list[float]]",
+    ground_elevation: float | NDArray[np.float64] | list[float] | list[list[float]],
+    airspeed: float | NDArray[np.float64] | list[float] | None,
+    path_angle: float | NDArray[np.float64] | list[float] | None,
+    heading: float | NDArray[np.float64] | list[float] | None,
+    bank_angle: float | NDArray[np.float64] | list[float] | None,
+    flow_resistivity: float | str | NDArray[np.float64] | list[float] | list[list[float]],
     temperature: float,
     relative_humidity: float,
     pressure: float,
-    level_offset: "float | NDArray[np.float64] | list[float]",
+    level_offset: float | NDArray[np.float64] | list[float],
     scaling_factor: float,
-    triangles: "NDArray[np.int_] | list[list[int]] | None",
+    triangles: NDArray[np.int_] | list[list[int]] | None,
     atmospheric_method: str,
-    terrain: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None",
-    terrain_resolution: "float | None",
+    terrain: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None,
+    terrain_resolution: float | None,
 ) -> _EventSetup:
     """Validate the shared event/contour inputs into one :class:`_EventSetup`.
 
@@ -1513,8 +1516,8 @@ def _event_setup(
 
 
 def _section_spacing(
-    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None",
-    terrain_resolution: "float | None",
+    dem: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None,
+    terrain_resolution: float | None,
 ) -> float:
     """The section sampling step: the given resolution or the model's cell size."""
     if dem is None:
@@ -1525,9 +1528,9 @@ def _section_spacing(
 
 
 def _setup_resistivity(
-    flow_resistivity: "float | str | NDArray[np.float64] | list[float] | list[list[float]]",
-    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None",
-) -> "float | NDArray[np.float64]":
+    flow_resistivity: float | str | NDArray[np.float64] | list[float] | list[list[float]],
+    dem: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None,
+) -> float | NDArray[np.float64]:
     """The scalar (or per-receiver) flow resistivity of an event run."""
     if isinstance(flow_resistivity, (str, float, int)):
         return _resolve_flow_resistivity(
@@ -1541,9 +1544,9 @@ def _setup_resistivity(
 
 
 def _setup_ground_elevation(
-    ground_elevation: "float | NDArray[np.float64] | list[float] | list[list[float]]",
-    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None",
-) -> "float | NDArray[np.float64]":
+    ground_elevation: float | NDArray[np.float64] | list[float] | list[list[float]],
+    dem: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None,
+) -> float | NDArray[np.float64]:
     """The scalar (or per-receiver) ground elevation of an event run."""
     if np.isscalar(ground_elevation):
         if not np.isfinite(ground_elevation):
@@ -1559,8 +1562,8 @@ def _setup_ground_elevation(
 
 
 def _require_dem_coverage(
-    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]",
-    x: "NDArray[np.float64]", y: "NDArray[np.float64]", what: str,
+    dem: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]],
+    x: NDArray[np.float64], y: NDArray[np.float64], what: str,
 ) -> None:
     """Reject points outside the elevation model's horizontal extent.
 
@@ -1576,8 +1579,8 @@ def _require_dem_coverage(
 
 
 def _validated_terrain(
-    terrain: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None",
-) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None":
+    terrain: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None,
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None:
     """The validated ``(x, y, z)`` digital elevation model, or ``None``."""
     if terrain is None:
         return None
@@ -1596,9 +1599,9 @@ def _validated_terrain(
 
 
 def _dem_height(
-    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]",
-    x: "NDArray[np.float64]", y: "NDArray[np.float64]",
-) -> "NDArray[np.float64]":
+    dem: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]],
+    x: NDArray[np.float64], y: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Bilinear elevation lookup.
 
     Coverage is validated upstream (:func:`_require_dem_coverage`); the edge
@@ -1617,8 +1620,8 @@ def _dem_height(
 
 def _event_histories(
     setup: _EventSetup,
-    receivers: "NDArray[np.float64]",
-) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
+    receivers: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Received time histories: ``(t_rec, L_A)`` shape ``(K, G)`` and spectra.
 
     One vectorised pass per emission step over all receivers (Eq. 1/22/23).
@@ -1681,11 +1684,11 @@ _MAX_SECTION_SAMPLES = 20001
 
 def _terrain_adjustments(
     setup: _EventSetup,
-    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]",
-    position: "NDArray[np.float64]",
-    receivers: "NDArray[np.float64]",
-    dp: "NDArray[np.float64]",
-) -> "NDArray[np.float64]":
+    dem: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]],
+    position: NDArray[np.float64],
+    receivers: NDArray[np.float64],
+    dp: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Ground-and-screening adjustments over the elevation model, ``(G, F)``.
 
     For every receiver the vertical section from the emission point to the
@@ -1701,7 +1704,7 @@ def _terrain_adjustments(
     sx, sy, sz = float(position[0]), float(position[1]), float(position[2])
     for i in range(receivers.shape[0]):
         span = float(dp[i])
-        n = min(max(2, int(math.ceil(span / setup.terrain_resolution)) + 1),
+        n = min(max(2, math.ceil(span / setup.terrain_resolution) + 1),
                 _MAX_SECTION_SAMPLES)
         t = np.linspace(0.0, 1.0, n)
         px = sx + (receivers[i, 0] - sx) * t
@@ -1721,8 +1724,8 @@ def _terrain_adjustments(
 
 
 def _exposure_level(
-    la: "NDArray[np.float64]", trec: "NDArray[np.float64]",
-) -> "NDArray[np.float64]":
+    la: NDArray[np.float64], trec: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """``SEL`` (Doc 32 Eq. 27, ``t_0 = 1 s``) per receiver from ``(K, G)`` histories.
 
     Trapezoidal integration of the received A-weighted energy over recorded
@@ -1735,11 +1738,11 @@ def _exposure_level(
 
 
 def _event_metrics(
-    freqs: "NDArray[np.float64]",
-    trec: "NDArray[np.float64]",
-    la: "NDArray[np.float64]",
-    spectra: "NDArray[np.float64]",
-) -> "tuple[float, float, float, NDArray[np.float64], float, float]":
+    freqs: NDArray[np.float64],
+    trec: NDArray[np.float64],
+    la: NDArray[np.float64],
+    spectra: NDArray[np.float64],
+) -> tuple[float, float, float, NDArray[np.float64], float, float]:
     """The single-receiver metrics ``(LASmax, SEL, SEL_10dB, PNLT, PNLTM, EPNL)``."""
     from .aircraft_noise import (
         _ten_db_down_limits,
@@ -1781,7 +1784,7 @@ def _event_metrics(
     return la_max, sel, sel_10db, pnlt, pnltm, epnl
 
 
-def _noy_band_indices(frequencies: "NDArray[np.float64]") -> "NDArray[np.intp] | None":
+def _noy_band_indices(frequencies: NDArray[np.float64]) -> NDArray[np.intp] | None:
     """Indices of the 24 noy bands (50 Hz-10 kHz) in a band grid, or ``None``."""
     from .aircraft_noise import NOY_BANDS
 
@@ -1795,13 +1798,13 @@ def _noy_band_indices(frequencies: "NDArray[np.float64]") -> "NDArray[np.intp] |
 
 
 def _resolved_track_state(
-    times: "NDArray[np.float64]",
-    positions: "NDArray[np.float64]",
-    airspeed: "float | NDArray[np.float64] | list[float] | None",
-    path_angle: "float | NDArray[np.float64] | list[float] | None",
-    heading: "float | NDArray[np.float64] | list[float] | None",
-    bank_angle: "float | NDArray[np.float64] | list[float] | None",
-) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
+    times: NDArray[np.float64],
+    positions: NDArray[np.float64],
+    airspeed: float | NDArray[np.float64] | list[float] | None,
+    path_angle: float | NDArray[np.float64] | list[float] | None,
+    heading: float | NDArray[np.float64] | list[float] | None,
+    bank_angle: float | NDArray[np.float64] | list[float] | None,
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Per-point ``(V_A, γ, Θ, Φ)``: explicit overrides, else derived (Eq. 16-21)."""
     n = times.size
     spd = _per_point(airspeed, n, "airspeed")
@@ -1818,29 +1821,29 @@ def _resolved_track_state(
 
 
 def rotorcraft_event_level(
-    hemispheres: "Sequence[RotorcraftHemisphere]",
-    airspeeds: "NDArray[np.float64] | list[float]",
-    path_angles: "NDArray[np.float64] | list[float]",
-    times: "NDArray[np.float64] | list[float]",
-    positions: "NDArray[np.float64] | list[list[float]]",
-    receiver: "tuple[float, float] | NDArray[np.float64] | list[float]",
+    hemispheres: Sequence[RotorcraftHemisphere],
+    airspeeds: NDArray[np.float64] | list[float],
+    path_angles: NDArray[np.float64] | list[float],
+    times: NDArray[np.float64] | list[float],
+    positions: NDArray[np.float64] | list[list[float]],
+    receiver: tuple[float, float] | NDArray[np.float64] | list[float],
     *,
     receiver_height: float = 1.2,
     ground_elevation: float = 0.0,
-    airspeed: "float | NDArray[np.float64] | list[float] | None" = None,
-    path_angle: "float | NDArray[np.float64] | list[float] | None" = None,
-    heading: "float | NDArray[np.float64] | list[float] | None" = None,
-    bank_angle: "float | NDArray[np.float64] | list[float] | None" = None,
-    flow_resistivity: "float | str" = "G",
+    airspeed: float | NDArray[np.float64] | list[float] | None = None,
+    path_angle: float | NDArray[np.float64] | list[float] | None = None,
+    heading: float | NDArray[np.float64] | list[float] | None = None,
+    bank_angle: float | NDArray[np.float64] | list[float] | None = None,
+    flow_resistivity: float | str = "G",
     temperature: float = 25.0,
     relative_humidity: float = 70.0,
     pressure: float = 101.325,
-    level_offset: "float | NDArray[np.float64] | list[float]" = 0.0,
+    level_offset: float | NDArray[np.float64] | list[float] = 0.0,
     scaling_factor: float = 2.0,
-    triangles: "NDArray[np.int_] | list[list[int]] | None" = None,
+    triangles: NDArray[np.int_] | list[list[int]] | None = None,
     atmospheric_method: str = "iso9613",
-    terrain: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None" = None,
-    terrain_resolution: "float | None" = None,
+    terrain: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None = None,
+    terrain_resolution: float | None = None,
 ) -> RotorcraftEventResult:
     """Rotorcraft single-event level at a receiver (Doc 32 §6.1 / guidance §A.5.1).
 
@@ -1944,9 +1947,9 @@ def rotorcraft_event_level(
 
 
 def _track_emission_geometry(
-    positions: "NDArray[np.float64]", receiver: "NDArray[np.float64]",
-    heading: "NDArray[np.float64]", bank: "NDArray[np.float64]",
-) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
+    positions: NDArray[np.float64], receiver: NDArray[np.float64],
+    heading: NDArray[np.float64], bank: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Emission ``(φ, θ, r)`` of every track point towards one receiver."""
     n = positions.shape[0]
     phi = np.empty(n)
@@ -1960,31 +1963,31 @@ def _track_emission_geometry(
 
 
 def rotorcraft_noise_contour(
-    hemispheres: "Sequence[RotorcraftHemisphere]",
-    airspeeds: "NDArray[np.float64] | list[float]",
-    path_angles: "NDArray[np.float64] | list[float]",
-    times: "NDArray[np.float64] | list[float]",
-    positions: "NDArray[np.float64] | list[list[float]]",
+    hemispheres: Sequence[RotorcraftHemisphere],
+    airspeeds: NDArray[np.float64] | list[float],
+    path_angles: NDArray[np.float64] | list[float],
+    times: NDArray[np.float64] | list[float],
+    positions: NDArray[np.float64] | list[list[float]],
     *,
-    x: "NDArray[np.float64] | list[float]",
-    y: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
+    y: NDArray[np.float64] | list[float],
     metric: str = "exposure",
     receiver_height: float = 1.2,
-    ground_elevation: "float | NDArray[np.float64] | list[list[float]]" = 0.0,
-    airspeed: "float | NDArray[np.float64] | list[float] | None" = None,
-    path_angle: "float | NDArray[np.float64] | list[float] | None" = None,
-    heading: "float | NDArray[np.float64] | list[float] | None" = None,
-    bank_angle: "float | NDArray[np.float64] | list[float] | None" = None,
-    flow_resistivity: "float | str | NDArray[np.float64] | list[list[float]]" = "G",
+    ground_elevation: float | NDArray[np.float64] | list[list[float]] = 0.0,
+    airspeed: float | NDArray[np.float64] | list[float] | None = None,
+    path_angle: float | NDArray[np.float64] | list[float] | None = None,
+    heading: float | NDArray[np.float64] | list[float] | None = None,
+    bank_angle: float | NDArray[np.float64] | list[float] | None = None,
+    flow_resistivity: float | str | NDArray[np.float64] | list[list[float]] = "G",
     temperature: float = 25.0,
     relative_humidity: float = 70.0,
     pressure: float = 101.325,
-    level_offset: "float | NDArray[np.float64] | list[float]" = 0.0,
+    level_offset: float | NDArray[np.float64] | list[float] = 0.0,
     scaling_factor: float = 2.0,
-    triangles: "NDArray[np.int_] | list[list[int]] | None" = None,
+    triangles: NDArray[np.int_] | list[list[int]] | None = None,
     atmospheric_method: str = "iso9613",
-    terrain: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None" = None,
-    terrain_resolution: "float | None" = None,
+    terrain: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None = None,
+    terrain_resolution: float | None = None,
 ) -> RotorcraftNoiseContourResult:
     """Rotorcraft single-event level over a ground grid (Doc 32 §6.3).
 

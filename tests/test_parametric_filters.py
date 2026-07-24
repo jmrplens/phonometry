@@ -6,7 +6,14 @@ Tests for parametric filters: Weighting (A, C), Time Weighting and Linkwitz-Rile
 import numpy as np
 import pytest
 
-from phonometry import WeightingFilter, sensitivity, linkwitz_riley, octave_filter, time_weighting, weighting_filter
+from phonometry import (
+    WeightingFilter,
+    linkwitz_riley,
+    octave_filter,
+    sensitivity,
+    time_weighting,
+    weighting_filter,
+)
 
 
 def test_calibration_logic() -> None:

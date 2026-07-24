@@ -39,7 +39,7 @@ from __future__ import annotations
 import html
 import math
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -103,7 +103,7 @@ def _band_value(freqs: np.ndarray, values: np.ndarray, target: float) -> float:
     return float(values[idx])
 
 
-def _mid_or_first(freqs: np.ndarray, values: np.ndarray) -> Tuple[float, bool]:
+def _mid_or_first(freqs: np.ndarray, values: np.ndarray) -> tuple[float, bool]:
     """Return ``(value, is_mid)`` for the mid-frequency descriptor.
 
     When both the 500 Hz and 1000 Hz octaves are present and finite, the
@@ -120,7 +120,7 @@ def _mid_or_first(freqs: np.ndarray, values: np.ndarray) -> Tuple[float, bool]:
 
 
 def _octave_table(
-    header_cells: List[Any], rows: List[List[Any]], col_widths: List[Any]
+    header_cells: list[Any], rows: list[list[Any]], col_widths: list[Any]
 ) -> Any:
     """Assemble an octave-band table with the accredited accent/zebra styling.
 
@@ -164,7 +164,7 @@ def _band_header_style() -> Any:
     )
 
 
-def _target_line(requirement: float, styles: Any, language: str) -> List[Any]:
+def _target_line(requirement: float, styles: Any, language: str) -> list[Any]:
     """A muted reference line for a supplied target reverberation time.
 
     A room reverberation time is a target range, not a strictly
@@ -188,10 +188,10 @@ def _target_line(requirement: float, styles: Any, language: str) -> List[Any]:
 
 def _header_grid(
     volume: float,
-    extra_pairs: Sequence[Tuple[str, str | None]],
+    extra_pairs: Sequence[tuple[str, str | None]],
     metadata: ReportMetadata | None,
     language: str,
-) -> List[Any]:
+) -> list[Any]:
     """Build the metadata header grid (volume plus room-identity fields).
 
     Returns the flowables (a spacer and the grid table) or an empty list when no
@@ -208,7 +208,7 @@ def _header_grid(
     humidity = metadata.relative_humidity if metadata is not None else None
     pressure = metadata.pressure if metadata is not None else None
 
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), client),
         (t("Room", language), test_room),
         (t("Description", language), specimen),
@@ -234,7 +234,7 @@ def _header_grid(
 # ---------------------------------------------------------------------------
 
 
-def _models_table(result: "ReverberationModelResult", language: str) -> Any:
+def _models_table(result: ReverberationModelResult, language: str) -> Any:
     """Build the per-band table with one reverberation-time column per model."""
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
@@ -245,18 +245,18 @@ def _models_table(result: "ReverberationModelResult", language: str) -> Any:
 
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     curves = [np.asarray(result.models[name], dtype=np.float64) for name in _MODEL_NAMES]
-    rows: List[List[Any]] = []
+    rows: list[list[Any]] = []
     for i, fk in enumerate(freqs):
         rows.append(
-            [f"{int(round(float(fk)))}", *[_fmt_t(c[i], language) for c in curves]]
+            [f"{round(float(fk))}", *[_fmt_t(c[i], language) for c in curves]]
         )
     col_widths = [14 * mm, 17.6 * mm, 17.6 * mm, 17.6 * mm, 17.6 * mm, 17.6 * mm]
     return _octave_table(header, rows, col_widths)
 
 
 def _prediction_statement(
-    result: "ReverberationModelResult", language: str
-) -> Tuple[str, List[str]]:
+    result: ReverberationModelResult, language: str
+) -> tuple[str, list[str]]:
     """The boxed prediction descriptor and the per-model spread beside it."""
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     primary = np.asarray(result.models[_PRIMARY_MODEL], dtype=np.float64)
@@ -271,7 +271,7 @@ def _prediction_statement(
         statement = t(
             "Predicted T (Arau-Puchades) = <b>{value} s</b>", language
         ).format(value=_fmt_t(value, language))
-    extended: List[str] = []
+    extended: list[str] = []
     for name in _MODEL_NAMES:
         model_value, _ = _mid_or_first(
             freqs, np.asarray(result.models[name], dtype=np.float64)
@@ -281,7 +281,7 @@ def _prediction_statement(
 
 
 def render_reverberation_models_report(
-    result: "ReverberationModelResult",
+    result: ReverberationModelResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -313,7 +313,7 @@ def render_reverberation_models_report(
     accent = colors.HexColor(_ACCENT_HEX)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(t("Reverberation-time prediction", language), title_style),
         Paragraph(
             t(
@@ -387,7 +387,7 @@ def render_reverberation_models_report(
 # ---------------------------------------------------------------------------
 
 
-def _enclosed_table(result: "ReverberationResult", language: str) -> Any:
+def _enclosed_table(result: ReverberationResult, language: str) -> Any:
     """Build the per-band ``f | A | T`` table of the enclosed-space fiche."""
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
@@ -401,11 +401,11 @@ def _enclosed_table(result: "ReverberationResult", language: str) -> Any:
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     area = np.asarray(result.absorption_area, dtype=np.float64)
     rt = np.asarray(result.reverberation_time, dtype=np.float64)
-    rows: List[List[Any]] = []
+    rows: list[list[Any]] = []
     for i, fk in enumerate(freqs):
         rows.append(
             [
-                f"{int(round(float(fk)))}",
+                f"{round(float(fk))}",
                 format_number(float(area[i]), language, decimals=2),
                 _fmt_t(rt[i], language),
             ]
@@ -414,8 +414,8 @@ def _enclosed_table(result: "ReverberationResult", language: str) -> Any:
 
 
 def _enclosed_statement(
-    result: "ReverberationResult", language: str
-) -> Tuple[str, List[str]]:
+    result: ReverberationResult, language: str
+) -> tuple[str, list[str]]:
     """The boxed reverberation-time descriptor and the mid-frequency area."""
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     rt = np.asarray(result.reverberation_time, dtype=np.float64)
@@ -430,7 +430,7 @@ def _enclosed_statement(
             value=_fmt_t(t_value, language)
         )
     a_value, _ = _mid_or_first(freqs, area)
-    extended: List[str] = []
+    extended: list[str] = []
     if math.isfinite(a_value):
         extended.append(
             t("A (500-1000 Hz) = {value} m<super>2</super>", language).format(
@@ -441,7 +441,7 @@ def _enclosed_statement(
 
 
 def render_enclosed_space_report(
-    result: "ReverberationResult",
+    result: ReverberationResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -487,7 +487,7 @@ def render_enclosed_space_report(
             "enclosed space per EN 12354-6:2003.",
             language,
         )
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(t("Sound absorption in an enclosed space", language), title_style),
         Paragraph(basis, basis_style),
     ]

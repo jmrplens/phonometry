@@ -28,7 +28,7 @@ FS = 48000
 
 def _pulse(amplitude: float, seconds: float) -> np.ndarray:
     # A decaying sinusoidal burst, the shape of an impulsive strike.
-    t = np.arange(int(round(seconds * FS))) / FS
+    t = np.arange(round(seconds * FS)) / FS
     return amplitude * np.exp(-t / (0.3 * seconds)) * np.sin(2 * np.pi * 200.0 * t)
 
 

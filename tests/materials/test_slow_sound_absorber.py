@@ -198,6 +198,27 @@ def test_panel_absorption_bounds_and_shapes() -> None:
     assert np.all(np.abs(out.reflection) <= 1.0 + 1e-9)
 
 
+def test_panel_optional_correction_branches_stay_passive() -> None:
+    """The end_correction=False and slit_radiation=False branches stay passive.
+
+    The default path (both True) is covered above; disabling each correction
+    exercises the alternate branches in slit_helmholtz_absorber and, for the
+    end correction, in helmholtz_resonator_impedance, and must still yield a
+    physical (passive, bounded) absorber.
+    """
+    f = np.linspace(100.0, 900.0, 128)
+    res = _base_resonator()
+    for end_correction, slit_radiation in ((False, True), (True, False), (False, False)):
+        out = slit_helmholtz_absorber(
+            f, res, slit_height=1.0e-3, lattice_step=3.0e-2, period=5.0e-2,
+            end_correction=end_correction, slit_radiation=slit_radiation,
+        )
+        assert out.absorption.shape == f.shape
+        assert np.all(out.absorption >= 0.0)
+        assert np.all(out.absorption <= 1.0 + 1e-9)
+        assert np.all(np.abs(out.reflection) <= 1.0 + 1e-9)
+
+
 def test_panel_passivity_random_geometries() -> None:
     rng = np.random.default_rng(20240724)
     f = np.linspace(80.0, 900.0, 60)

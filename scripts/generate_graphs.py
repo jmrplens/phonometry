@@ -7523,7 +7523,7 @@ def generate_slow_sound_absorber(output_dir: str) -> None:
     visco-thermal losses exactly balance the leakage, giving alpha = 1 at
     300 Hz. Detuning the slit height (more or less loss) breaks the balance
     and lowers the peak. One concept: perfect absorption is a loss-versus-
-    leakage balance in a deep-subwavelength (L = lambda/22) panel.
+    leakage balance in a deep-subwavelength (L = lambda/38) panel.
     """
     print("Generating slow_sound_absorber.svg...")
     from phonometry import (

@@ -44,7 +44,7 @@ phonometry (a passive medium has ``Im(k) < 0``):
   radiation end correction of Eqs. (A24)-(A26).
 
 * **Transfer matrix.** The panel is the chain
-  ``M_dl (M_s M_HR M_s) ... `` of half-lattice slit steps (Appl. Sci. Eq. (2)),
+  ``M_dl (M_s M_HR M_s)...`` of half-lattice slit steps (Appl. Sci. Eq. (2)),
   resonators as point shunt scatterers (Eq. (3)) and the slit-radiation end
   correction (Eq. (3)/(A27)). The rigidly-backed reflection factor is
   ``R = (T11 cos(theta) - Z0 T21) / (T11 cos(theta) + Z0 T21)`` with
@@ -646,8 +646,8 @@ def critical_coupling_design(
     :param heat_capacity_ratio: Ratio of specific heats ``gamma``.
     :param atmospheric_pressure: Static pressure ``P0``, in Pa.
     :return: A :class:`CriticalCouplingResult`. A
-        :class:`SlowSoundAbsorberWarning` is raised if the solver does not
-        reach perfect absorption within tolerance.
+        :class:`SlowSoundAbsorberWarning` is emitted (via :func:`warnings.warn`)
+        if the solver does not reach perfect absorption within tolerance.
     """
     f0 = require_positive(target_frequency, "target_frequency")
     a = require_positive(lattice_step, "lattice_step")

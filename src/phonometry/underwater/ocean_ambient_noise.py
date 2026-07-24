@@ -31,7 +31,11 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import require_non_negative, require_positive, require_positive_array
+from .._internal.validation import (
+    require_non_negative,
+    require_positive,
+    require_positive_array,
+)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -51,8 +55,8 @@ _WIND_ANCHOR_DB = 25.0 + 20.0 * np.log10(20.0)
 
 
 def wind_noise_spectrum(
-    frequency_hz: "NDArray[np.float64] | list[float] | float", wind_speed_knots: float
-) -> "NDArray[np.float64]":
+    frequency_hz: NDArray[np.float64] | list[float] | float, wind_speed_knots: float
+) -> NDArray[np.float64]:
     """Wind / sea-surface noise spectrum level (Wenz rule of fives), dB re 1 µPa²/Hz.
 
     ``NL(f, U) = 51.02 − (5/3)·10·(lg f − lg(U/5))`` with ``f`` in kHz and ``U``
@@ -80,12 +84,12 @@ def wind_noise_spectrum(
 
 
 def thermal_noise_spectrum(
-    frequency_hz: "NDArray[np.float64] | list[float] | float",
+    frequency_hz: NDArray[np.float64] | list[float] | float,
     *,
     temperature: float = 16.85,
     density: float = 1025.0,
     sound_speed: float = 1500.0,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Molecular thermal-noise spectrum level (Mellen 1952), dB re 1 µPa²/Hz.
 
     ``<p²(f)> = 4π·k·T·ρ·f²/c`` (Pa²/Hz); the level is ``10·lg(<p²>/p₀²)``.
@@ -121,14 +125,14 @@ class AmbientNoiseResult:
     :ivar wind_speed_knots: The wind speed used, in knots.
     """
 
-    frequency: "NDArray[np.float64]"
-    spectrum_level: "NDArray[np.float64]"
-    wind: "NDArray[np.float64]"
-    thermal: "NDArray[np.float64]"
-    shipping: "NDArray[np.float64] | None"
+    frequency: NDArray[np.float64]
+    spectrum_level: NDArray[np.float64]
+    wind: NDArray[np.float64]
+    thermal: NDArray[np.float64]
+    shipping: NDArray[np.float64] | None
     wind_speed_knots: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the composite spectrum and its components versus frequency."""
         from .._i18n import check_language
         from .._plot.underwater import plot_ambient_noise
@@ -137,10 +141,10 @@ class AmbientNoiseResult:
 
 
 def ocean_ambient_noise(
-    frequency_hz: "NDArray[np.float64] | list[float]",
+    frequency_hz: NDArray[np.float64] | list[float],
     *,
     wind_speed_knots: float,
-    shipping: "NDArray[np.float64] | list[float] | None" = None,
+    shipping: NDArray[np.float64] | list[float] | None = None,
     temperature: float = 16.85,
     density: float = 1025.0,
     sound_speed: float = 1500.0,
@@ -165,7 +169,7 @@ def ocean_ambient_noise(
     thermal = thermal_noise_spectrum(f, temperature=temperature, density=density,
                                      sound_speed=sound_speed)
     energies = 10.0 ** (wind / 10.0) + 10.0 ** (thermal / 10.0)
-    ship_arr: "NDArray[np.float64] | None" = None
+    ship_arr: NDArray[np.float64] | None = None
     if shipping is not None:
         ship_arr = np.asarray(shipping, dtype=np.float64)
         if ship_arr.shape != f.shape or not np.all(np.isfinite(ship_arr)):

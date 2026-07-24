@@ -516,7 +516,7 @@ class ReverberationModelResult:
             "Arau-Puchades": self.arau_puchades,
         }
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the reverberation-time curves of the five models.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -532,7 +532,7 @@ class ReverberationModelResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

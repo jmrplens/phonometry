@@ -40,7 +40,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -48,8 +48,8 @@ from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
     _MUTED_HEX,
-    _VERDICT_OK_HEX,
     _REPORTLAB_HINT,
+    _VERDICT_OK_HEX,
     analysis_cell_styles,
     build_document,
     display_round,
@@ -106,7 +106,7 @@ def _governing_index(per_impulse: np.ndarray, qualifies: np.ndarray) -> int:
 
 def _select_rows(
     per_impulse: np.ndarray, governing: int
-) -> Tuple[List[int], int]:
+) -> tuple[list[int], int]:
     """Choose the impulse rows to show and how many are dropped.
 
     Every impulse is shown (in input order) when the set fits :data:`_MAX_TABLE_ROWS`;
@@ -142,7 +142,7 @@ def _qualifies_markup(qualifies: bool, language: str = "en") -> str:
 
 def _metadata_pairs(
     metadata: ReportMetadata | None, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the assessment header grid.
 
     An impulsive-sound assessment identifies the source/situation whose noise was
@@ -151,7 +151,7 @@ def _metadata_pairs(
     assessment period (over which the governing prominence is taken, clause 8) is
     always shown, as it is fixed by the standard rather than by the metadata.
     """
-    specs: List[Tuple[str, str | None]] = []
+    specs: list[tuple[str, str | None]] = []
     if metadata is not None:
         specs += [
             (t("Source / situation", language), _esc(metadata.specimen)),
@@ -165,7 +165,7 @@ def _metadata_pairs(
 
 
 def _per_impulse_table(
-    result: "ImpulseProminenceResult", language: str = "en"
+    result: ImpulseProminenceResult, language: str = "en"
 ) -> Any:
     """The full-width per-impulse table (onset rate, level difference, P).
 
@@ -200,7 +200,7 @@ def _per_impulse_table(
     ]
     widths = [22.0, 34.0, 34.0, 34.0, 50.0]
 
-    data: List[List[Any]] = [[Paragraph(h, header_style) for h in headers]]
+    data: list[list[Any]] = [[Paragraph(h, header_style) for h in headers]]
     for i in shown:
         emph = "<b>{}</b>".format if i == governing else str
         data.append(
@@ -221,7 +221,7 @@ def _per_impulse_table(
     table = stacked_table(data, [w * mm for w in widths])
     dec_row = shown.index(governing) + 1  # +1 for the header row
     accent = colors.HexColor(_ACCENT_HEX)
-    extra_style: List[Any] = [
+    extra_style: list[Any] = [
         ("LINEBELOW", (0, dec_row), (-1, dec_row), 0.5, accent),
         ("LINEABOVE", (0, dec_row), (-1, dec_row), 0.5, accent),
     ]
@@ -236,8 +236,8 @@ def _per_impulse_table(
 
 
 def _statement(
-    result: "ImpulseProminenceResult", language: str = "en"
-) -> Tuple[str, List[str]]:
+    result: ImpulseProminenceResult, language: str = "en"
+) -> tuple[str, list[str]]:
     """The boxed governing prominence ``P`` and the derived adjustment ``KI``.
 
     The governing prominence is the highest ``P`` over the qualifying impulses
@@ -267,8 +267,8 @@ def _statement(
 
 
 def _verdict(
-    result: "ImpulseProminenceResult", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: ImpulseProminenceResult, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag against a supplied maximum governing prominence.
 
     The ``requirement`` is read as the maximum acceptable governing prominence
@@ -303,7 +303,7 @@ def _basis_line(measurement_standard: str | None, language: str = "en") -> str:
 
 
 def _prominence_note(
-    result: "ImpulseProminenceResult", language: str = "en"
+    result: ImpulseProminenceResult, language: str = "en"
 ) -> str:
     """The prominence-category note: whether a prominent impulse is present."""
     p = _fmt(result.prominence, language, decimals=2)
@@ -322,7 +322,7 @@ def _prominence_note(
 
 
 def render_impulse_prominence_report(
-    result: "ImpulseProminenceResult",
+    result: ImpulseProminenceResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -362,7 +362,7 @@ def render_impulse_prominence_report(
         metadata.measurement_standard if metadata is not None else None
     )
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(_basis_line(measurement_standard, language), basis_style),
     ]

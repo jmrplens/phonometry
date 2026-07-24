@@ -17,9 +17,9 @@ import numpy as np
 import pytest
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 
-from phonometry.aircraft import (  # noqa: E402
+from phonometry.aircraft import (
     AnpAircraft,
     AnpDatabase,
     AnpNpdCurves,

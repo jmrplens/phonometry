@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 from .fdtd import (
-    CWSource,
     FDTD2D,
+    CWSource,
     FDTDResult,
     GaussianPulse,
     SignalSource,
@@ -13,8 +13,8 @@ from .fdtd import (
 )
 
 __all__ = [
-    "CWSource",
     "FDTD2D",
+    "CWSource",
     "FDTDResult",
     "GaussianPulse",
     "SignalSource",

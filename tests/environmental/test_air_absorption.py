@@ -37,8 +37,7 @@ from phonometry import (
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import reference_data as ref  # noqa: E402
-
+import reference_data as ref
 
 # --- Table 1 oracle ---------------------------------------------------------
 

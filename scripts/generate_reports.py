@@ -26,7 +26,8 @@ from __future__ import annotations
 
 import argparse
 import os
-from typing import Any, Callable, List, Tuple
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 
@@ -66,7 +67,7 @@ _RATING_FREQS = np.array(
 )
 
 
-def _airborne_example() -> Tuple[object, ReportMetadata, str]:
+def _airborne_example() -> tuple[object, ReportMetadata, str]:
     """Airborne fiche: a predicted single-panel sound reduction index."""
     result = ph.single_panel_transmission_loss(
         _RATING_FREQS, 15.0, critical_frequency=2000.0, loss_factor=0.02
@@ -96,7 +97,7 @@ def _airborne_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso717_airborne_example.pdf"
 
 
-def _impact_example() -> Tuple[object, ReportMetadata, str]:
+def _impact_example() -> tuple[object, ReportMetadata, str]:
     """Impact fiche: a normalized impact sound pressure level rating."""
     ln = np.array(
         [45, 47, 48, 49, 51, 52, 53, 54, 55, 56, 57, 58, 55, 52, 49, 46],
@@ -128,7 +129,7 @@ def _impact_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso717_impact_example.pdf"
 
 
-def _field_airborne_example() -> Tuple[object, ReportMetadata, str]:
+def _field_airborne_example() -> tuple[object, ReportMetadata, str]:
     """Field airborne fiche: a DnT measurement between dwellings (ISO 16283-1)."""
     l1 = np.array(
         [
@@ -209,7 +210,7 @@ def _field_airborne_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso16283_airborne_example.pdf"
 
 
-def _field_impact_example() -> Tuple[object, ReportMetadata, str]:
+def _field_impact_example() -> tuple[object, ReportMetadata, str]:
     """Field impact fiche: a tapping-machine L'nT measurement (ISO 16283-2)."""
     li = np.array(
         [
@@ -268,7 +269,7 @@ def _field_impact_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso16283_impact_example.pdf"
 
 
-def _lab_airborne_example() -> Tuple[object, ReportMetadata, str]:
+def _lab_airborne_example() -> tuple[object, ReportMetadata, str]:
     """Laboratory airborne fiche: a sound reduction index R (ISO 10140-2).
 
     The reported spectrum is the ISO 717-1:2020 Annex C worked-example sound
@@ -324,7 +325,7 @@ def _lab_airborne_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10140_airborne_example.pdf"
 
 
-def _lab_impact_example() -> Tuple[object, ReportMetadata, str]:
+def _lab_impact_example() -> tuple[object, ReportMetadata, str]:
     """Laboratory impact fiche: a normalized impact level Ln (ISO 10140-3).
 
     The reported spectrum is the ISO 717-2:2020 Annex C worked-example
@@ -378,7 +379,7 @@ def _lab_impact_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10140_impact_example.pdf"
 
 
-def _intensity_example() -> Tuple[object, ReportMetadata, str]:
+def _intensity_example() -> tuple[object, ReportMetadata, str]:
     """Intensity fiche: an intensity sound reduction index RI (ISO 15186-1).
 
     The reported spectrum is the ISO 717-1:2020 Annex C worked-example sound
@@ -440,7 +441,7 @@ def _intensity_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso15186_intensity_example.pdf"
 
 
-def _intensity_element_example() -> Tuple[object, ReportMetadata, str]:
+def _intensity_element_example() -> tuple[object, ReportMetadata, str]:
     """Element fiche: an intensity element-normalized level difference DI,n,e.
 
     The reported spectrum reuses the ISO 717-1:2020 Annex C worked-example
@@ -495,7 +496,7 @@ def _intensity_element_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso15186_element_example.pdf"
 
 
-def _airborne_prediction_example() -> Tuple[object, ReportMetadata, str]:
+def _airborne_prediction_example() -> tuple[object, ReportMetadata, str]:
     """Airborne prediction fiche: EN 12354-1 Annex H.3 worked example.
 
     A separating wall Rs,w = 57 dB, area Ss = 11.5 m2, flanked by four elements
@@ -549,7 +550,7 @@ def _airborne_prediction_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso12354_airborne_prediction_example.pdf"
 
 
-def _impact_prediction_example() -> Tuple[object, ReportMetadata, str]:
+def _impact_prediction_example() -> tuple[object, ReportMetadata, str]:
     """Impact prediction fiche: EN 12354-2 Annex E.3 worked example.
 
     A 0.14 m concrete floor (m' = 322 kg/m2) has a bare-floor equivalent level
@@ -586,7 +587,7 @@ def _impact_prediction_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso12354_impact_prediction_example.pdf"
 
 
-def _facade_prediction_example() -> Tuple[object, ReportMetadata, str]:
+def _facade_prediction_example() -> tuple[object, ReportMetadata, str]:
     """Facade prediction fiche: EN 12354-3 Annex F worked example.
 
     An 11.3 m2 facade (receiving-room volume V = 50 m3, flat so ΔLfs = 0) of a
@@ -631,7 +632,7 @@ def _facade_prediction_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso12354_facade_prediction_example.pdf"
 
 
-def _floor_covering_example() -> Tuple[object, ReportMetadata, str]:
+def _floor_covering_example() -> tuple[object, ReportMetadata, str]:
     """Floor-covering fiche: an ISO 16251-1 impact-improvement measurement.
 
     ISO 16251-1:2014 carries no filled numeric worked example (its Annex B is a
@@ -676,7 +677,7 @@ def _floor_covering_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso16251_floor_covering_example.pdf"
 
 
-def _absorption_example() -> Tuple[object, ReportMetadata, str]:
+def _absorption_example() -> tuple[object, ReportMetadata, str]:
     """Absorption fiche: an ISO 11654 weighted sound absorption rating."""
     # The fifteen one-third-octave alpha_s (200 Hz to 5000 Hz) an accredited
     # ISO 354 certificate reports, whose octave means are the practical
@@ -720,7 +721,7 @@ def _absorption_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso11654_absorption_example.pdf"
 
 
-def _sound_absorption_example() -> Tuple[object, ReportMetadata, str]:
+def _sound_absorption_example() -> tuple[object, ReportMetadata, str]:
     """ISO 354 fiche: a reverberation-room sound-absorption measurement.
 
     A documented clean-room example, derived in closed form from ISO 354:2003
@@ -833,7 +834,7 @@ def _sound_absorption_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso354_absorption_example.pdf"
 
 
-def _impedance_tube_example() -> Tuple[object, ReportMetadata, str]:
+def _impedance_tube_example() -> tuple[object, ReportMetadata, str]:
     """ISO 10534-2 fiche: a two-microphone impedance-tube measurement.
 
     A documented clean-room example with a known closed-form absorption curve.
@@ -909,7 +910,7 @@ def _impedance_tube_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10534_impedance_tube_example.pdf"
 
 
-def _loudness_example() -> Tuple[object, ReportMetadata, str]:
+def _loudness_example() -> tuple[object, ReportMetadata, str]:
     """Loudness fiche: an ISO 532-1 Zwicker stationary loudness rating."""
     # A shaped 28-band one-third-octave spectrum (25 Hz..12.5 kHz) of a steady
     # appliance noise, descending with frequency.
@@ -962,7 +963,7 @@ def _loudness_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso532_loudness_example.pdf"
 
 
-def _program_loudness_example() -> Tuple[object, ReportMetadata, str]:
+def _program_loudness_example() -> tuple[object, ReportMetadata, str]:
     """Programme-loudness fiche: an EBU R 128 compliance measurement.
 
     The signal is the EBU Tech 3342 Case 1 loudness-range shape (two 20 s
@@ -972,7 +973,7 @@ def _program_loudness_example() -> Tuple[object, ReportMetadata, str]:
     tolerance of EBU R 128 item i).
     """
     fs = 48000
-    t = np.arange(int(round(20.0 * fs))) / fs
+    t = np.arange(round(20.0 * fs)) / fs
     tone = np.sin(2.0 * np.pi * 1000.0 * t)
     seg_hi = 10.0 ** (-20.4 / 20.0) * tone
     seg_lo = 10.0 ** (-30.4 / 20.0) * tone
@@ -994,7 +995,7 @@ def _program_loudness_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "ebu_r128_loudness_example.pdf"
 
 
-def _tone_audibility_example() -> Tuple[object, ReportMetadata, str]:
+def _tone_audibility_example() -> tuple[object, ReportMetadata, str]:
     """Tonal audibility fiche: an ISO 1996-2:2017 Annex J tone assessment.
 
     The narrow-band spectrum is the ISO/PAS 20065:2016 Annex E combustion-engine
@@ -1108,7 +1109,7 @@ def _tone_audibility_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso1996_tone_audibility_example.pdf"
 
 
-def _impulse_prominence_example() -> Tuple[object, ReportMetadata, str]:
+def _impulse_prominence_example() -> tuple[object, ReportMetadata, str]:
     """Impulse-prominence fiche: an NT ACOU 112:2002 impulsive-sound assessment.
 
     Three candidate impulses of a pile-driving site, each ``(onset rate dB/s,
@@ -1139,7 +1140,7 @@ def _impulse_prominence_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "ntacou112_impulse_prominence_example.pdf"
 
 
-def _wind_turbine_tonality_example() -> Tuple[object, ReportMetadata, str]:
+def _wind_turbine_tonality_example() -> tuple[object, ReportMetadata, str]:
     """Wind-turbine tonality fiche: an IEC 61400-11:2012+A1:2018 assessment.
 
     A clean 500 Hz tone (a gearbox line) 30 dB above a flat 30 dB narrow-band
@@ -1173,7 +1174,7 @@ def _wind_turbine_tonality_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iec61400_wind_turbine_tonality_example.pdf"
 
 
-def _epnl_example() -> Tuple[object, ReportMetadata, str]:
+def _epnl_example() -> tuple[object, ReportMetadata, str]:
     """EPNL fiche: an ICAO Annex 16 aircraft-noise-certification result.
 
     A deterministic synthetic half-second flyover: a broadband spectral shape
@@ -1207,7 +1208,7 @@ def _epnl_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "icao_epnl_example.pdf"
 
 
-def _filter_class_example() -> Tuple[object, ReportMetadata, str]:
+def _filter_class_example() -> tuple[object, ReportMetadata, str]:
     """Filter-compliance fiche: an IEC 61260-1 octave-band class verification.
 
     The library default (Butterworth order 6) octave bank from 125 Hz to
@@ -1231,7 +1232,7 @@ def _filter_class_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iec61260_filter_example.pdf"
 
 
-def _filter_class_1995_example() -> Tuple[object, ReportMetadata, str]:
+def _filter_class_1995_example() -> tuple[object, ReportMetadata, str]:
     """Filter-compliance fiche under the 1995 edition, which keeps class 0.
 
     IEC 61260-1:2014 dropped class 0; the older IEC 61260:1995 /
@@ -1256,7 +1257,7 @@ def _filter_class_1995_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iec61260_filter_1995_example.pdf"
 
 
-def _iso4871_declaration_example() -> Tuple[object, ReportMetadata, str]:
+def _iso4871_declaration_example() -> tuple[object, ReportMetadata, str]:
     """ISO 4871 fiche: a dual-number machinery noise-emission declaration.
 
     Reproduces the ISO 4871:1996 Annex B.2 example (Type 990, Model 11-TC): two
@@ -1301,7 +1302,7 @@ def _iso4871_declaration_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso4871_declaration_example.pdf"
 
 
-def _loudspeaker_example() -> Tuple[object, ReportMetadata, str]:
+def _loudspeaker_example() -> tuple[object, ReportMetadata, str]:
     """IEC 60268-5 fiche: the rated characteristics of a two-way loudspeaker.
 
     A synthetic on-axis response of an 8 ohm bookshelf loudspeaker: a flat
@@ -1368,7 +1369,7 @@ def _loudspeaker_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iec60268_5_loudspeaker_example.pdf"
 
 
-def _microphone_example() -> Tuple[object, ReportMetadata, str]:
+def _microphone_example() -> tuple[object, ReportMetadata, str]:
     """IEC 60268-4 fiche: the rated characteristics of a cardioid condenser mic.
 
     A synthetic free-field response of a phantom-powered studio condenser
@@ -1437,7 +1438,7 @@ def _microphone_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iec60268_4_microphone_example.pdf"
 
 
-def _occupational_exposure_example() -> Tuple[object, ReportMetadata, str]:
+def _occupational_exposure_example() -> tuple[object, ReportMetadata, str]:
     """ISO 9612 fiche: the Annex D task-based welders' day.
 
     Reproduces the ISO 9612:2009 Annex D worked example: a welder's nominal day
@@ -1484,7 +1485,7 @@ def _occupational_exposure_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso9612_exposure_example.pdf"
 
 
-def _human_vibration_example() -> Tuple[object, ReportMetadata, str]:
+def _human_vibration_example() -> tuple[object, ReportMetadata, str]:
     """Human-vibration fiche: the ISO 5349-2 Annex E.3 forestry worker's day.
 
     Reproduces the ISO 5349-2:2001 Annex E.3 worked example (a forestry
@@ -1521,7 +1522,7 @@ def _human_vibration_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "human_vibration_example.pdf"
 
 
-def _nipts_example() -> Tuple[object, ReportMetadata, str]:
+def _nipts_example() -> tuple[object, ReportMetadata, str]:
     """NIPTS fiche: the ISO 1999 Annex D 90 dB / 20 year prediction.
 
     Reproduces the ISO 1999:2013 Annex D (Table D.2) worked example of the
@@ -1546,7 +1547,7 @@ def _nipts_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso1999_nipts_example.pdf"
 
 
-def _htlan_example() -> Tuple[object, ReportMetadata, str]:
+def _htlan_example() -> tuple[object, ReportMetadata, str]:
     """HTLAN fiche: a 60-year-old worker's age-plus-noise threshold prediction.
 
     Predicts the hearing threshold level associated with age and noise
@@ -1571,7 +1572,7 @@ def _htlan_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso1999_htlan_example.pdf"
 
 
-def _room_acoustics_example() -> Tuple[object, ReportMetadata, str]:
+def _room_acoustics_example() -> tuple[object, ReportMetadata, str]:
     """Room-acoustics fiche: ISO 3382-1/-2 parameters of a small auditorium.
 
     The impulse response is a deterministic single-slope synthetic decay: one
@@ -1592,7 +1593,7 @@ def _room_acoustics_example() -> Tuple[object, ReportMetadata, str]:
     a60 = 6.0 * np.log(10.0)
     bands = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
     t60 = (1.40, 1.30, 1.20, 1.10, 1.00, 0.85)
-    time = np.arange(int(round(5.0 * fs))) / fs
+    time = np.arange(round(5.0 * fs)) / fs
     ir = np.zeros_like(time)
     for freq, decay in zip(bands, t60):
         ir += np.sin(2.0 * np.pi * freq * time) * np.exp(-0.5 * a60 * time / decay)
@@ -1619,7 +1620,7 @@ def _room_acoustics_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso3382_room_acoustics_example.pdf"
 
 
-def _reverberation_prediction_example() -> Tuple[object, ReportMetadata, str]:
+def _reverberation_prediction_example() -> tuple[object, ReportMetadata, str]:
     """Reverberation-time prediction fiche: five models over the octave bands.
 
     A shoebox classroom 8 x 5 x 3 m (V = 120 m3, S = 158 m2, the geometry of
@@ -1656,7 +1657,7 @@ def _reverberation_prediction_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "reverberation_prediction_example.pdf"
 
 
-def _enclosed_space_absorption_example() -> Tuple[object, ReportMetadata, str]:
+def _enclosed_space_absorption_example() -> tuple[object, ReportMetadata, str]:
     """Enclosed-space fiche: absorption area A and reverberation time T (EN 12354-6).
 
     A small 5 x 4 x 2.5 m meeting room (V = 50 m3) characterised over the
@@ -1697,7 +1698,7 @@ def _enclosed_space_absorption_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "enclosed_space_absorption_example.pdf"
 
 
-def _noise_criteria_example() -> Tuple[object, ReportMetadata, str]:
+def _noise_criteria_example() -> tuple[object, ReportMetadata, str]:
     """Noise Criteria fiche: an office spectrum rated NC-40 (ANSI/ASA S12.2).
 
     The spectrum is built from the ANSI/ASA S12.2-2019 Table 1 NC-40 contour so
@@ -1731,7 +1732,7 @@ def _noise_criteria_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "ansi_s12_2_noise_criteria_example.pdf"
 
 
-def _room_criteria_example() -> Tuple[object, ReportMetadata, str]:
+def _room_criteria_example() -> tuple[object, ReportMetadata, str]:
     """Room Criteria fiche: an RC-35(R) rumble spectrum (ANSI/ASA S12.2 Annex D).
 
     The spectrum is the ANSI/ASA S12.2-2019 Annex D RC-35 Mark II curve with the
@@ -1763,7 +1764,7 @@ def _room_criteria_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "ansi_s12_2_room_criteria_example.pdf"
 
 
-def _open_plan_example() -> Tuple[object, ReportMetadata, str]:
+def _open_plan_example() -> tuple[object, ReportMetadata, str]:
     """Open-plan-office fiche: ISO 3382-3 spatial decay of a good open office.
 
     The measurement line is built from a closed-form model so the four
@@ -1803,7 +1804,7 @@ def _open_plan_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso3382_3_open_plan_example.pdf"
 
 
-def _multiple_shock_example() -> Tuple[object, ReportMetadata, str]:
+def _multiple_shock_example() -> tuple[object, ReportMetadata, str]:
     """Multiple-shock fiche: the ISO 2631-5:2018 Annex C worked example.
 
     Reproduces the Annex C worked example, whose spinal response is five
@@ -1864,7 +1865,7 @@ def _multiple_shock_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso2631_5_multiple_shock_example.pdf"
 
 
-def _sound_power_example() -> Tuple[object, ReportMetadata, str]:
+def _sound_power_example() -> tuple[object, ReportMetadata, str]:
     """Sound-power fiche: an ISO 3744 engineering-grade determination.
 
     A floor-standing machine on one reflecting plane, measured on a hemisphere
@@ -1916,7 +1917,7 @@ def _sound_power_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso3744_sound_power_example.pdf"
 
 
-def _intensity_sound_power_example() -> Tuple[object, ReportMetadata, str]:
+def _intensity_sound_power_example() -> tuple[object, ReportMetadata, str]:
     """Sound-power-by-intensity fiche: an ISO 9614-2 engineering-grade scan.
 
     A machine enclosed by a hypothetical box divided into six equal segments of
@@ -1969,7 +1970,7 @@ def _intensity_sound_power_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso9614_sound_power_intensity_example.pdf"
 
 
-def _reverberation_sound_power_example() -> Tuple[object, ReportMetadata, str]:
+def _reverberation_sound_power_example() -> tuple[object, ReportMetadata, str]:
     """Reverberation-room fiche: an ISO 3741 precision-grade determination.
 
     A steady, broadband source measured by the direct method in a qualified
@@ -2020,7 +2021,7 @@ def _reverberation_sound_power_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso3741_reverberation_power_example.pdf"
 
 
-def _vibration_sound_power_example() -> Tuple[object, ReportMetadata, str]:
+def _vibration_sound_power_example() -> tuple[object, ReportMetadata, str]:
     """Sound-power-from-vibration fiche: an ISO/TS 7849-2 engineering example.
 
     A documented clean-room example (ISO/TS 7849 gives no numeric worked case
@@ -2064,7 +2065,7 @@ def _vibration_sound_power_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso7849_vibration_power_example.pdf"
 
 
-def _structure_borne_power_example() -> Tuple[object, ReportMetadata, str]:
+def _structure_borne_power_example() -> tuple[object, ReportMetadata, str]:
     """Structure-borne source power fiche: an EN 15657 reception-plate test.
 
     A pump fixed to a reception plate of mass per area m = 25 kg/m2 and area
@@ -2102,7 +2103,7 @@ def _structure_borne_power_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "en15657_structure_borne_power_example.pdf"
 
 
-def _installed_structure_borne_example() -> Tuple[object, ReportMetadata, str]:
+def _installed_structure_borne_example() -> tuple[object, ReportMetadata, str]:
     """Installed structure-borne prediction fiche: an EN 12354-5 estimate.
 
     A WC flushing cistern fixed to a separating wall, predicting the normalised
@@ -2181,7 +2182,7 @@ _SCATTER_FREQS = np.array(
 )
 
 
-def _scattering_example() -> Tuple[object, ReportMetadata, str]:
+def _scattering_example() -> tuple[object, ReportMetadata, str]:
     """ISO 17497-1 fiche: a random-incidence scattering-coefficient measurement.
 
     A documented clean-room example (ISO 17497-1 has no numeric worked example,
@@ -2278,7 +2279,7 @@ def _diffuser_polar_energy(
     return 10.0 * np.log10(energy) + 60.0
 
 
-def _diffusion_example() -> Tuple[object, ReportMetadata, str]:
+def _diffusion_example() -> tuple[object, ReportMetadata, str]:
     """ISO 17497-2 fiche: a random-incidence diffusion-coefficient spectrum d(f).
 
     A documented clean-room example (ISO 17497-2 has no numeric worked example
@@ -2343,7 +2344,7 @@ def _diffusion_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso17497_diffusion_example.pdf"
 
 
-def _diffusion_polar_example() -> Tuple[object, ReportMetadata, str]:
+def _diffusion_polar_example() -> tuple[object, ReportMetadata, str]:
     """ISO 17497-2 fiche: the single-source polar response of one band.
 
     The corrected 1000 Hz polar response behind the ``_diffusion_example``
@@ -2375,7 +2376,7 @@ def _diffusion_polar_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso17497_diffusion_polar_example.pdf"
 
 
-def _dynamic_stiffness_example() -> Tuple[object, ReportMetadata, str]:
+def _dynamic_stiffness_example() -> tuple[object, ReportMetadata, str]:
     """EN 29052-1 fiche: the dynamic stiffness of a resilient floating-floor layer.
 
     A 20 mm mineral-wool resilient layer under the standard 8 kg load plate on
@@ -2416,7 +2417,7 @@ def _dynamic_stiffness_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "en29052_dynamic_stiffness_example.pdf"
 
 
-def _airflow_resistance_example() -> Tuple[object, ReportMetadata, str]:
+def _airflow_resistance_example() -> tuple[object, ReportMetadata, str]:
     """ISO 9053-1 fiche: the static airflow resistance of a porous specimen.
 
     A 50 mm porous absorber measured in a 100 mm diameter cell (cross-section
@@ -2452,7 +2453,7 @@ def _airflow_resistance_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso9053_airflow_resistance_example.pdf"
 
 
-def _mechanical_mobility_example() -> Tuple[object, ReportMetadata, str]:
+def _mechanical_mobility_example() -> tuple[object, ReportMetadata, str]:
     """ISO 7626 fiche: the driving-point mechanical mobility of a resonator.
 
     The closed-form single-degree-of-freedom driving-point mobility of
@@ -2485,7 +2486,7 @@ def _mechanical_mobility_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso7626_mobility_example.pdf"
 
 
-def _transfer_stiffness_example() -> Tuple[object, ReportMetadata, str]:
+def _transfer_stiffness_example() -> tuple[object, ReportMetadata, str]:
     """ISO 10846 fiche: the dynamic transfer stiffness of a resilient mount.
 
     A viscously damped resilient element (a Kelvin-Voigt mount, the module's
@@ -2577,7 +2578,7 @@ _FLANKING_FREQS = np.array(
 )
 
 
-def _vibration_reduction_example() -> Tuple[object, ReportMetadata, str]:
+def _vibration_reduction_example() -> tuple[object, ReportMetadata, str]:
     """ISO 10848 fiche: the vibration reduction index Kij of a rigid junction.
 
     ISO 10848 carries no worked numeric example, so this is an illustrative
@@ -2638,7 +2639,7 @@ def _vibration_reduction_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10848_kij_example.pdf"
 
 
-def _flanking_level_difference_example() -> Tuple[object, ReportMetadata, str]:
+def _flanking_level_difference_example() -> tuple[object, ReportMetadata, str]:
     """ISO 10848 fiche: the normalized flanking level difference Dn,f (airborne).
 
     An illustrative clean-room case (ISO 10848 has no worked numeric example):
@@ -2670,7 +2671,7 @@ def _flanking_level_difference_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10848_dnf_example.pdf"
 
 
-def _flanking_impact_level_example() -> Tuple[object, ReportMetadata, str]:
+def _flanking_impact_level_example() -> tuple[object, ReportMetadata, str]:
     """ISO 10848 fiche: the normalized flanking impact level Ln,f (tapping machine).
 
     An illustrative clean-room case (ISO 10848 has no worked numeric example):
@@ -2701,7 +2702,7 @@ def _flanking_impact_level_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10848_lnf_example.pdf"
 
 
-def _survey_airborne_example() -> Tuple[object, ReportMetadata, str]:
+def _survey_airborne_example() -> tuple[object, ReportMetadata, str]:
     """ISO 10052 survey fiche: airborne DnT between dwellings (octave bands).
 
     The survey (control) method works in the five octave bands 125 Hz to
@@ -2732,7 +2733,7 @@ def _survey_airborne_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10052_airborne_example.pdf"
 
 
-def _survey_impact_example() -> Tuple[object, ReportMetadata, str]:
+def _survey_impact_example() -> tuple[object, ReportMetadata, str]:
     """ISO 10052 survey fiche: impact L'nT of a floor (octave bands).
 
     With the energy-average tapping-machine level Li falling across the five
@@ -2759,7 +2760,7 @@ def _survey_impact_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10052_impact_example.pdf"
 
 
-def _survey_facade_example() -> Tuple[object, ReportMetadata, str]:
+def _survey_facade_example() -> tuple[object, ReportMetadata, str]:
     """ISO 10052 survey fiche: facade D2m,nT (octave bands).
 
     From the outdoor level 2 m in front of the facade and the receiving-room
@@ -2789,7 +2790,7 @@ def _survey_facade_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso10052_facade_example.pdf"
 
 
-def _field_facade_example() -> Tuple[object, ReportMetadata, str]:
+def _field_facade_example() -> tuple[object, ReportMetadata, str]:
     """ISO 16283-3 fiche: field facade D2m,nT (one-third-octave bands).
 
     The reported spectrum is the ISO 717-1:2020 Annex C worked-example curve
@@ -2837,11 +2838,11 @@ class _WithSourceEmission:
     keeping the generator loop unchanged.
     """
 
-    def __init__(self, result: Any, emission: "ph.SourceEmission") -> None:
+    def __init__(self, result: Any, emission: ph.SourceEmission) -> None:
         self._result = result
         self._emission = emission
 
-    def report(self, path: str, *, metadata: "ReportMetadata | None" = None) -> str:
+    def report(self, path: str, *, metadata: ReportMetadata | None = None) -> str:
         return str(
             self._result.report(
                 path, metadata=metadata, source_emission=self._emission
@@ -2849,7 +2850,7 @@ class _WithSourceEmission:
         )
 
 
-def _outdoor_attenuation_example() -> Tuple[object, ReportMetadata, str]:
+def _outdoor_attenuation_example() -> tuple[object, ReportMetadata, str]:
     """ISO 9613-2 fiche: predicted outdoor propagation attenuation with a barrier.
 
     An industrial point source (octave-band Lw from 95 dB at 63 Hz to 88 dB at
@@ -2889,7 +2890,7 @@ def _outdoor_attenuation_example() -> Tuple[object, ReportMetadata, str]:
     )
 
 
-def _barrier_insertion_loss_example() -> Tuple[object, ReportMetadata, str]:
+def _barrier_insertion_loss_example() -> tuple[object, ReportMetadata, str]:
     """ISO 9613-2 family fiche: predicted barrier insertion loss (wave-theoretic).
 
     A 4 m thin noise barrier 50 m from a source (1 m high), the receiver 1.5 m
@@ -2913,7 +2914,7 @@ def _barrier_insertion_loss_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iso9613_barrier_insertion_loss_example.pdf"
 
 
-def _sti_example() -> Tuple[object, ReportMetadata, str]:
+def _sti_example() -> tuple[object, ReportMetadata, str]:
     """STI fiche: a voice-alarm intelligibility verification (IEC 60268-16).
 
     A deterministic full-STI indirect measurement: the octave-band modulation
@@ -2949,7 +2950,7 @@ def _sti_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "iec60268_16_sti_example.pdf"
 
 
-def _sii_example() -> Tuple[object, ReportMetadata, str]:
+def _sii_example() -> tuple[object, ReportMetadata, str]:
     """SII fiche: a speech-audibility assessment (ANSI S3.5-1997).
 
     The R CRAN package "SII" worked Example C.2 (an independent implementation
@@ -2977,7 +2978,7 @@ def _sii_example() -> Tuple[object, ReportMetadata, str]:
         requirement=0.75,  # SII = 0.851 >= 0.75 -> PASS (good audibility)
     )
     return result, metadata, "ansi_s3_5_sii_example.pdf"
-def _enclosure_example() -> Tuple[object, ReportMetadata, str]:
+def _enclosure_example() -> tuple[object, ReportMetadata, str]:
     """Enclosure fiche: the insertion loss of a machine enclosure (Bies 7.4.2).
 
     A documented clean-room case combining a supplied octave-band panel
@@ -3015,7 +3016,7 @@ def _enclosure_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "enclosure_insertion_loss_example.pdf"
 
 
-def _silencer_example() -> Tuple[object, ReportMetadata, str]:
+def _silencer_example() -> tuple[object, ReportMetadata, str]:
     """Silencer fiche: the transmission loss of an expansion chamber (four-pole).
 
     A documented clean-room case: a simple expansion chamber of length L = 0.5 m
@@ -3051,7 +3052,7 @@ def _silencer_example() -> Tuple[object, ReportMetadata, str]:
     return result, metadata, "reactive_silencer_example.pdf"
 
 
-def _hvac_example() -> Tuple[object, ReportMetadata, str]:
+def _hvac_example() -> tuple[object, ReportMetadata, str]:
     """HVAC fiche: the flow-generated noise of a straight duct (VDI 2081-1).
 
     A documented clean-room case: the flow-generated octave-band sound power
@@ -3085,7 +3086,7 @@ def _hvac_example() -> Tuple[object, ReportMetadata, str]:
 
 #: Every example fiche the repository keeps rendered. New report kinds append
 #: their factory here so ``make reports`` regenerates the full set.
-_EXAMPLES: List[Callable[[], Tuple[object, ReportMetadata, str]]] = [
+_EXAMPLES: list[Callable[[], tuple[object, ReportMetadata, str]]] = [
     _airborne_example,
     _impact_example,
     _field_airborne_example,
@@ -3184,14 +3185,14 @@ def _write_preview(pdf_path: str) -> str:
     return preview
 
 
-def generate_reports(output_dir: str) -> List[str]:
+def generate_reports(output_dir: str) -> list[str]:
     """Write every example fiche (PDF + WebP preview) into ``output_dir``.
 
     Returns the PDF paths written; each has a paired ``.webp`` preview next to
     it (see :func:`preview_path_for`).
     """
     os.makedirs(output_dir, exist_ok=True)
-    written: List[str] = []
+    written: list[str] = []
     for factory in _EXAMPLES:
         result, metadata, name = factory()
         path = os.path.join(output_dir, name)

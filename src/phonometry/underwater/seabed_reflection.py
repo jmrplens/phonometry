@@ -56,13 +56,13 @@ def critical_angle(c1: float, c2: float) -> float:
 
 
 def reflection_coefficient(
-    grazing_angle: "NDArray[np.float64] | list[float] | float",
+    grazing_angle: NDArray[np.float64] | list[float] | float,
     *,
     rho1: float,
     c1: float,
     rho2: float,
     c2: float,
-) -> "NDArray[np.complex128]":
+) -> NDArray[np.complex128]:
     """Complex plane-wave pressure reflection coefficient at the seabed.
 
     :param grazing_angle: Grazing angle(s) ``φ`` from the interface, in degrees
@@ -86,7 +86,7 @@ def reflection_coefficient(
     phi_rad = np.radians(phi)
     cos_t1 = np.sin(phi_rad)  # θ1 from normal = 90° − φ
     sin_t2 = (cs / cw) * np.cos(phi_rad)
-    cos_t2 = np.sqrt((1.0 - sin_t2.astype(np.complex128) ** 2))
+    cos_t2 = np.sqrt(1.0 - sin_t2.astype(np.complex128) ** 2)
     z1 = r1 * cw
     z2 = r2 * cs
     num = z2 * cos_t1 - z1 * cos_t2
@@ -111,12 +111,12 @@ class BottomLossResult:
         the sediment is not faster than the water.
     """
 
-    grazing_angle: "NDArray[np.float64]"
-    reflection_loss: "NDArray[np.float64]"
-    reflection_coefficient: "NDArray[np.complex128]"
-    critical_angle: "float | None"
+    grazing_angle: NDArray[np.float64]
+    reflection_loss: NDArray[np.float64]
+    reflection_coefficient: NDArray[np.complex128]
+    critical_angle: float | None
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the bottom loss versus grazing angle with the critical angle."""
         from .._i18n import check_language
         from .._plot.underwater import plot_bottom_loss
@@ -125,7 +125,7 @@ class BottomLossResult:
 
 
 def bottom_reflection_loss(
-    grazing_angle: "NDArray[np.float64] | list[float] | float",
+    grazing_angle: NDArray[np.float64] | list[float] | float,
     *,
     rho1: float = 1000.0,
     c1: float = 1500.0,
@@ -179,17 +179,17 @@ class SeabedReflection:
     :ivar c2: Sound speed in the sediment ``c2``, in m/s.
     """
 
-    grazing_angle: "NDArray[np.float64]"
-    reflection_coefficient: "NDArray[np.complex128]"
-    magnitude: "NDArray[np.float64]"
-    bottom_loss: "NDArray[np.float64]"
-    critical_angle: "float | None"
+    grazing_angle: NDArray[np.float64]
+    reflection_coefficient: NDArray[np.complex128]
+    magnitude: NDArray[np.float64]
+    bottom_loss: NDArray[np.float64]
+    critical_angle: float | None
     rho1: float
     c1: float
     rho2: float
     c2: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the reflection-coefficient magnitude ``|R|`` versus grazing angle.
 
         Draws ``|R|`` on a linear grazing-angle axis (0..90°), marking the
@@ -209,7 +209,7 @@ class SeabedReflection:
 
 
 def seabed_reflection(
-    grazing_angle: "NDArray[np.float64] | list[float] | float",
+    grazing_angle: NDArray[np.float64] | list[float] | float,
     *,
     rho1: float = 1000.0,
     c1: float = 1500.0,

@@ -5,13 +5,13 @@ Signal processing utilities for phonometry.
 
 from __future__ import annotations
 
-from typing import List, Tuple, cast
+from typing import cast
 
 import numpy as np
 from scipy import signal
 
 
-def _typesignal(x: List[float] | np.ndarray | Tuple[float, ...]) -> np.ndarray:
+def _typesignal(x: list[float] | np.ndarray | tuple[float, ...]) -> np.ndarray:
     """
     Ensure signal is a float64 numpy array.
 
@@ -51,14 +51,14 @@ def _resample_to_length(y: np.ndarray, factor: int, target_length: int) -> np.nd
         # Pad only the last axis. This works for both 1D and 2D arrays.
         # For 1D, pad_width becomes `[(0, diff)]`.
         # For 2D, pad_width becomes `[(0, 0), (0, diff)]`.
-        pad_width: List[Tuple[int, int]] = [(0, 0)] * (y_resampled.ndim - 1) + [(0, diff)]
+        pad_width: list[tuple[int, int]] = [(0, 0)] * (y_resampled.ndim - 1) + [(0, diff)]
             
         y_resampled = np.pad(y_resampled, pad_width, mode='constant')
         
     return y_resampled
 
 
-def _downsamplingfactor(freq: List[float], fs: int, headroom: float = 1.25) -> np.ndarray:
+def _downsamplingfactor(freq: list[float], fs: int, headroom: float = 1.25) -> np.ndarray:
     """
     Compute optimal downsampling factors for filter stability.
 

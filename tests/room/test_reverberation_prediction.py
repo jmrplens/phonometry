@@ -18,8 +18,8 @@ import math
 
 import numpy as np
 import pytest
-
 import reference_data as ref
+
 from phonometry import (
     ReverberationModelResult,
     arau_puchades_reverberation_time,

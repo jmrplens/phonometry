@@ -67,7 +67,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-
 from numpy.typing import ArrayLike, NDArray
 
 from .._internal.warnings import PhonometryWarning
@@ -81,14 +80,14 @@ __all__ = [
     "AirflowResistanceWarning",
     "StaticAirflowResult",
     "airflow_resistance",
-    "specific_airflow_resistance",
     "airflow_resistivity",
-    "linear_airflow_velocity",
-    "static_airflow_resistance",
-    "piston_volume_flow_rate",
-    "thermal_boundary_layer_thickness",
-    "effective_kappa",
     "alternating_airflow_resistance",
+    "effective_kappa",
+    "linear_airflow_velocity",
+    "piston_volume_flow_rate",
+    "specific_airflow_resistance",
+    "static_airflow_resistance",
+    "thermal_boundary_layer_thickness",
 ]
 
 #: Standard atmospheric (static) pressure ``P_S`` (Pa), ISO 9053-2:2020 Formula (2).
@@ -144,7 +143,7 @@ class StaticAirflowResult:
     linear_coefficient: float
     quadratic_coefficient: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the fitted ``dp(u)`` curve with the evaluation point.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -160,7 +159,7 @@ class StaticAirflowResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

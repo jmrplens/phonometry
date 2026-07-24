@@ -37,7 +37,7 @@ guarded with an actionable :class:`ImportError`.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING
 
 from ._i18n import format_number, t
 from ._layout import fmt_meta
@@ -70,7 +70,7 @@ def _pa(value: float, language: str = "en") -> str:
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the airflow-resistance header grid.
 
     Only fields that are set are returned. The applicable fields are the generic
@@ -78,7 +78,7 @@ def _metadata_pairs(
     (``thickness``, stored in metres and printed in millimetres) and the
     environmental conditions.
     """
-    middle: List[Tuple[str, str | None]] = [
+    middle: list[tuple[str, str | None]] = [
         (t("Thickness d [mm]", language),
          fmt_meta(metadata.thickness * 1e3, language)
          if metadata.thickness is not None else None),
@@ -87,8 +87,8 @@ def _metadata_pairs(
 
 
 def _metric_rows(
-    result: "StaticAirflowResult", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: StaticAirflowResult, language: str = "en"
+) -> list[tuple[str, str]]:
     """The scalar results shown in the left-hand metrics table.
 
     The evaluation velocity is shown in mm/s, the fitted pressure difference in
@@ -97,7 +97,7 @@ def _metric_rows(
     thickness. The through-origin fit coefficients ``a`` (the zero-velocity
     specific airflow resistance) and ``b`` close the table.
     """
-    rows: List[Tuple[str, str]] = [
+    rows: list[tuple[str, str]] = [
         (t("Evaluation velocity u [mm/s]", language),
          _mm_s(result.evaluation_velocity, language)),
         (t("Fitted pressure difference &#916;p [Pa]", language),
@@ -124,7 +124,7 @@ def _metric_rows(
     return rows
 
 
-def _statement(result: "StaticAirflowResult", language: str = "en") -> str:
+def _statement(result: StaticAirflowResult, language: str = "en") -> str:
     """The boxed specific airflow resistance ``R_s`` (clause 7.5)."""
     return t(
         "Specific airflow resistance R<sub>s</sub> = "
@@ -133,8 +133,8 @@ def _statement(result: "StaticAirflowResult", language: str = "en") -> str:
 
 
 def _extended_terms(
-    result: "StaticAirflowResult", language: str = "en"
-) -> List[str]:
+    result: StaticAirflowResult, language: str = "en"
+) -> list[str]:
     """The airflow resistance ``R``, resistivity ``sigma`` and evaluation velocity."""
     terms = [
         t("Airflow resistance R = {value} Pa&#183;s/m<super>3</super>", language).format(
@@ -168,7 +168,7 @@ def _basis_line(metadata: ReportMetadata | None, language: str = "en") -> str:
 
 
 def render_static_airflow_report(
-    result: "StaticAirflowResult",
+    result: StaticAirflowResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

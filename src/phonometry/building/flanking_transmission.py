@@ -61,8 +61,9 @@ are bracketed and excluded from the single-number mean when the per-band
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -300,7 +301,7 @@ class VibrationReductionResult:
     single_number: float | None
     bracketed: np.ndarray | None = None
 
-    def octave_bands(self) -> "VibrationReductionResult":
+    def octave_bands(self) -> VibrationReductionResult:
         """Combine one-third-octave ``Kij`` into octave bands.
 
         ``Kij,oct = −10 lg[ (1/3) Σ 10^(−Kij/10) ]`` over each group of three
@@ -338,7 +339,7 @@ class VibrationReductionResult:
             bracketed=oct_bracketed,
         )
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot ``Kij`` against frequency.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -354,7 +355,7 @@ class VibrationReductionResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -416,7 +417,7 @@ def _validate_octave_triples(freq_groups: np.ndarray) -> None:
             )
 
 
-def _detect_band_type(frequencies: "np.ndarray | None") -> str:
+def _detect_band_type(frequencies: np.ndarray | None) -> str:
     """``"octave"`` when consecutive centres step by ~2, else third-octave."""
     if frequencies is None or frequencies.size < 2:
         return "third-octave"
@@ -618,7 +619,7 @@ class FlankingLevelDifferenceResult:
     d_n_f: np.ndarray
     rating: WeightedRatingResult | None
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot ``Dn,f`` against the shifted ISO 717-1 reference curve."""
         if self.rating is None:
             raise ValueError(
@@ -631,7 +632,7 @@ class FlankingLevelDifferenceResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -684,7 +685,7 @@ class FlankingImpactLevelResult:
     l_n_f: np.ndarray
     rating: ImpactRatingResult | None
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot ``Ln,f`` against the shifted ISO 717-2 reference curve."""
         if self.rating is None:
             raise ValueError(
@@ -697,7 +698,7 @@ class FlankingImpactLevelResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

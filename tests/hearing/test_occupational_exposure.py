@@ -336,14 +336,14 @@ def test_duration_range_order_validated():
 
 def test_result_dataclasses_are_frozen():
     result = job_based_exposure([80.0, 82.0, 81.0, 83.0, 80.0], 8.0)
-    with pytest.raises(Exception):
+    with pytest.raises(AttributeError):
         result.lex_8h = 0.0  # type: ignore[misc]
     tc = TaskContribution(
         label="x", lp_aeqt=85.0, duration_hours=8.0, lex_8h_contribution=85.0,
         n_samples=3, sample_range_db=0.0, spread_advisory=False, u1a=0.0,
         c1a=1.0, u1b=0.0, c1b=0.0, u2=0.7, u3=1.0,
     )
-    with pytest.raises(Exception):
+    with pytest.raises(AttributeError):
         tc.u1a = 1.0  # type: ignore[misc]
     assert isinstance(result, ExposureResult)
 

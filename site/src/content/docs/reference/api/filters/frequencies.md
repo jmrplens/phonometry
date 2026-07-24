@@ -14,8 +14,8 @@ Frequency calculation logic according to ANSI/IEC standards.
 ```python
 getansifrequencies(
     fraction: float,
-    limits: List[float] | None = None,
-) -> Tuple[List[float], List[float], List[float], List[str]]
+    limits: list[float] | None = None,
+) -> tuple[list[float], list[float], list[float], list[str]]
 ```
 
 Deprecated alias of [`nominal_frequencies`](/phonometry/reference/api/filters/frequencies/#nominal_frequencies).
@@ -25,8 +25,8 @@ Deprecated alias of [`nominal_frequencies`](/phonometry/reference/api/filters/fr
 ```python
 nominal_frequencies(
     fraction: float,
-    limits: List[float] | None = None,
-) -> Tuple[List[float], List[float], List[float], List[str]]
+    limits: list[float] | None = None,
+) -> tuple[list[float], list[float], list[float], list[str]]
 ```
 
 Calculate frequencies according to ANSI/IEC standards.
@@ -43,7 +43,7 @@ Calculate frequencies according to ANSI/IEC standards.
 ## normalized_frequencies
 
 ```python
-normalized_frequencies(fraction: int) -> List[float]
+normalized_frequencies(fraction: int) -> list[float]
 ```
 
 Get standardized IEC center frequencies.
@@ -59,7 +59,7 @@ Get standardized IEC center frequencies.
 ## normalizedfreq
 
 ```python
-normalizedfreq(fraction: int) -> List[float]
+normalizedfreq(fraction: int) -> list[float]
 ```
 
 Deprecated alias of [`normalized_frequencies`](/phonometry/reference/api/filters/frequencies/#normalized_frequencies).

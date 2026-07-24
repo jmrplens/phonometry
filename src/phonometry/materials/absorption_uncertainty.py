@@ -40,8 +40,9 @@ exposes the rounded view through :attr:`AbsorptionUncertaintyResult.reported_exp
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -51,11 +52,11 @@ if TYPE_CHECKING:
 __all__ = [
     "AbsorptionUncertaintyResult",
     "absorption_coverage_factor",
-    "sound_absorption_coefficient_uncertainty",
     "equivalent_area_uncertainty",
     "practical_coefficient_uncertainty",
-    "weighted_coefficient_uncertainty",
     "single_number_rating_uncertainty",
+    "sound_absorption_coefficient_uncertainty",
+    "weighted_coefficient_uncertainty",
 ]
 
 #: Reference equivalent absorption area constant ``S`` in Formula (2): 10 m².
@@ -208,7 +209,7 @@ class AbsorptionUncertaintyResult:
         """Upper interval bound ``value + U`` (exact ``U``)."""
         return np.asarray(self.values + self.expanded_uncertainty, dtype=np.float64)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the quantity with its ``±U`` uncertainty ribbon (band quantities).
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the

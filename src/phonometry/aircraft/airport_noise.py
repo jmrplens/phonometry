@@ -226,10 +226,10 @@ def start_of_roll_directivity(
 
 
 def _clean_table(
-    powers: "NDArray[np.float64] | list[float]",
-    distances: "NDArray[np.float64] | list[float]",
-    levels: "NDArray[np.float64] | list[list[float]]",
-) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
+    powers: NDArray[np.float64] | list[float],
+    distances: NDArray[np.float64] | list[float],
+    levels: NDArray[np.float64] | list[list[float]],
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     p = np.asarray(powers, dtype=np.float64).ravel()
     d = np.asarray(distances, dtype=np.float64).ravel()
     lv = np.asarray(levels, dtype=np.float64)
@@ -248,8 +248,8 @@ def _clean_table(
     return p, d, lv
 
 
-def _interp_distance(logd_tab: "NDArray[np.float64]", row: "NDArray[np.float64]",
-                     logd: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _interp_distance(logd_tab: NDArray[np.float64], row: NDArray[np.float64],
+                     logd: NDArray[np.float64]) -> NDArray[np.float64]:
     """Log-linear interpolation/extrapolation of one NPD row over distance (Eq. 4-4)."""
     idx = np.clip(np.searchsorted(logd_tab, logd) - 1, 0, logd_tab.size - 2)
     x0 = logd_tab[idx]
@@ -270,13 +270,13 @@ class NpdLevelResult:
     :ivar table_levels: The tabulated levels at the queried power, in dB.
     """
 
-    distance: "NDArray[np.float64]"
-    level: "NDArray[np.float64]"
+    distance: NDArray[np.float64]
+    level: NDArray[np.float64]
     power: float
-    table_distances: "NDArray[np.float64]"
-    table_levels: "NDArray[np.float64]"
+    table_distances: NDArray[np.float64]
+    table_levels: NDArray[np.float64]
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the interpolated level versus slant distance (log axis)."""
         from .._i18n import check_language
         from .._plot.aircraft import plot_npd_level
@@ -285,12 +285,12 @@ class NpdLevelResult:
 
 
 def npd_level(
-    powers: "NDArray[np.float64] | list[float]",
-    distances: "NDArray[np.float64] | list[float]",
-    levels: "NDArray[np.float64] | list[list[float]]",
+    powers: NDArray[np.float64] | list[float],
+    distances: NDArray[np.float64] | list[float],
+    levels: NDArray[np.float64] | list[list[float]],
     power: float,
-    distance: "NDArray[np.float64] | list[float] | float",
-) -> "NDArray[np.float64]":
+    distance: NDArray[np.float64] | list[float] | float,
+) -> NDArray[np.float64]:
     """Interpolated NPD event level ``L(P, d)`` (ECAC Doc 29 §4.2, Eqs. 4-3/4-4).
 
     Interpolates log-linearly in slant distance (Eq. 4-4) at the two bracketing
@@ -326,11 +326,11 @@ def npd_level(
 
 
 def npd_curve(
-    powers: "NDArray[np.float64] | list[float]",
-    distances: "NDArray[np.float64] | list[float]",
-    levels: "NDArray[np.float64] | list[list[float]]",
+    powers: NDArray[np.float64] | list[float],
+    distances: NDArray[np.float64] | list[float],
+    levels: NDArray[np.float64] | list[list[float]],
     power: float,
-    query_distances: "NDArray[np.float64] | list[float] | None" = None,
+    query_distances: NDArray[np.float64] | list[float] | None = None,
 ) -> NpdLevelResult:
     """NPD event level over a distance sweep at one power setting.
 
@@ -371,7 +371,7 @@ _NPD_FLOOR_M = 30.0
 
 
 def _ground_track_offset(
-    seg: "NDArray[np.float64]", s1: "NDArray[np.float64]", obs: "NDArray[np.float64]",
+    seg: NDArray[np.float64], s1: NDArray[np.float64], obs: NDArray[np.float64],
 ) -> float:
     """Horizontal perpendicular distance to the ground track (projected to z = 0)."""
     seg_g = seg.copy()
@@ -386,10 +386,10 @@ def _ground_track_offset(
 
 
 def _segment_angles(
-    u: "NDArray[np.float64]", s1: "NDArray[np.float64]", obs: "NDArray[np.float64]",
+    u: NDArray[np.float64], s1: NDArray[np.float64], obs: NDArray[np.float64],
     q: float, length: float, dp: float, lateral: float,
     z_foot: float, z_near: float, bank_deg: float,
-) -> "tuple[float, float]":
+) -> tuple[float, float]:
     """Elevation ``beta`` and depression ``phi`` for one segment, in degrees.
 
     §4.5.5 equivalent level path (Fig. 4-6): rotating the observer-segment
@@ -423,9 +423,9 @@ def _segment_angles(
 
 
 def _segment_geometry(
-    s1: "NDArray[np.float64]", s2: "NDArray[np.float64]", obs: "NDArray[np.float64]",
+    s1: NDArray[np.float64], s2: NDArray[np.float64], obs: NDArray[np.float64],
     bank_deg: float = 0.0,
-) -> "tuple[float, float, float, float, float, float, float]":
+) -> tuple[float, float, float, float, float, float, float]:
     """Return ``(length, q, dp, ds, beta_deg, phi_deg, lateral_m)`` for a segment.
 
     ``s1``, ``s2`` and ``obs`` are 3-D points ``(x, y, z)`` (any consistent unit);
@@ -466,10 +466,10 @@ class FlyoverResult:
 
     level: float
     metric: str
-    segment_levels: "NDArray[np.float64]"
-    observer: "NDArray[np.float64]"
+    segment_levels: NDArray[np.float64]
+    observer: NDArray[np.float64]
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the per-segment contributions to the event level."""
         from .._i18n import check_language
         from .._plot.aircraft import plot_flyover
@@ -477,7 +477,7 @@ class FlyoverResult:
         return plot_flyover(self, ax=ax, language=check_language(language), **kwargs)
 
 
-def _validate_path(path: "NDArray[np.float64] | list[list[float]]") -> "NDArray[np.float64]":
+def _validate_path(path: NDArray[np.float64] | list[list[float]]) -> NDArray[np.float64]:
     """Coerce and validate a flight path to a finite ``(N, 5)`` array."""
     pts = np.asarray(path, dtype=np.float64)
     if pts.ndim != 2 or pts.shape[1] != 5 or pts.shape[0] < 2:
@@ -492,8 +492,8 @@ def _validate_path(path: "NDArray[np.float64] | list[list[float]]") -> "NDArray[
 
 
 def _validate_ground_roll(
-    ground_roll: "NDArray[np.bool_] | list[bool] | None", n_points: int,
-) -> "NDArray[np.bool_] | None":
+    ground_roll: NDArray[np.bool_] | list[bool] | None, n_points: int,
+) -> NDArray[np.bool_] | None:
     """Coerce and validate the ground-roll segment mask (length ``N-1``)."""
     if ground_roll is None:
         return None
@@ -504,8 +504,8 @@ def _validate_ground_roll(
 
 
 def _validate_bank(
-    bank: "NDArray[np.float64] | list[float] | None", n_points: int,
-) -> "NDArray[np.float64] | None":
+    bank: NDArray[np.float64] | list[float] | None, n_points: int,
+) -> NDArray[np.float64] | None:
     """Coerce an optional per-segment bank-angle array (length ``N-1``)."""
     if bank is None:
         return None
@@ -516,10 +516,10 @@ def _validate_bank(
 
 
 def _attenuation_geometry(
-    s1: "NDArray[np.float64]", s2: "NDArray[np.float64]", obs: "NDArray[np.float64]",
+    s1: NDArray[np.float64], s2: NDArray[np.float64], obs: NDArray[np.float64],
     q: float, length: float, beta: float, phi: float, lateral: float,
     key: str, roll_behind: bool, roll_ahead: bool,
-) -> "tuple[float, float, float]":
+) -> tuple[float, float, float]:
     """Lateral-attenuation and installation angles for one segment (§4.5.5).
 
     Returns ``(beta_att, ell_att, phi_att)``: the general equivalent-path
@@ -555,14 +555,14 @@ def _segment_noise_fraction(
 
 
 def _event_level_core(
-    pts: "NDArray[np.float64]", obs: "NDArray[np.float64]",
-    p: "NDArray[np.float64]", d: "NDArray[np.float64]",
-    le: "NDArray[np.float64]", lm: "NDArray[np.float64]",
+    pts: NDArray[np.float64], obs: NDArray[np.float64],
+    p: NDArray[np.float64], d: NDArray[np.float64],
+    le: NDArray[np.float64], lm: NDArray[np.float64],
     vref: float, imp: float, mounting: str, key: str,
-    ground_roll: "NDArray[np.bool_] | None" = None,
-    landing_roll: "NDArray[np.bool_] | None" = None,
-    bank: "NDArray[np.float64] | None" = None,
-) -> "tuple[float, NDArray[np.float64]]":
+    ground_roll: NDArray[np.bool_] | None = None,
+    landing_roll: NDArray[np.bool_] | None = None,
+    bank: NDArray[np.float64] | None = None,
+) -> tuple[float, NDArray[np.float64]]:
     """Segment loop and summation shared by :func:`event_level`/:func:`noise_contour`.
 
     ``pts`` must be pre-validated and ``p, d, le, lm`` pre-cleaned; this hot path
@@ -630,10 +630,10 @@ def _event_level_core(
 
 
 def _npd_level_grid(
-    p: "NDArray[np.float64]", lv: "NDArray[np.float64]",
-    logd_tab: "NDArray[np.float64]", pq: "NDArray[np.float64]",
-    dq: "NDArray[np.float64]",
-) -> "NDArray[np.float64]":
+    p: NDArray[np.float64], lv: NDArray[np.float64],
+    logd_tab: NDArray[np.float64], pq: NDArray[np.float64],
+    dq: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Vectorised NPD lookup ``L(P, d)`` for per-observer power and distance.
 
     Same arithmetic as :func:`npd_level` (Eq. 4-3/4-4), expression for
@@ -651,9 +651,9 @@ def _npd_level_grid(
 
 
 def _grid_segment_frame(
-    s1: "NDArray[np.float64]", s2: "NDArray[np.float64]",
-    u: "NDArray[np.float64]", length: float, obs: "NDArray[np.float64]",
-) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.bool_], NDArray[np.bool_], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
+    s1: NDArray[np.float64], s2: NDArray[np.float64],
+    u: NDArray[np.float64], length: float, obs: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.bool_], NDArray[np.bool_], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Per-observer geometry of one segment, the array form of :func:`_segment_geometry`.
 
     Returns ``(q, dp, ds, behind, ahead, lateral, z_foot, z_near)`` with one
@@ -682,11 +682,11 @@ def _grid_segment_frame(
 
 
 def _grid_angles(
-    u: "NDArray[np.float64]", s1: "NDArray[np.float64]", obs: "NDArray[np.float64]",
-    dp_: "NDArray[np.float64]", lateral: "NDArray[np.float64]",
-    z_foot: "NDArray[np.float64]", z_near: "NDArray[np.float64]",
-    behind: "NDArray[np.bool_]", ahead: "NDArray[np.bool_]", eps: float,
-) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+    u: NDArray[np.float64], s1: NDArray[np.float64], obs: NDArray[np.float64],
+    dp_: NDArray[np.float64], lateral: NDArray[np.float64],
+    z_foot: NDArray[np.float64], z_near: NDArray[np.float64],
+    behind: NDArray[np.bool_], ahead: NDArray[np.bool_], eps: float,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """``beta``/``phi`` per observer (§4.5.2/4.5.5), array form of :func:`_segment_angles`."""
     with np.errstate(divide="ignore", invalid="ignore"):
         ratio = np.where(dp_ > 0.0, lateral / np.where(dp_ > 0.0, dp_, 1.0), 0.0)
@@ -707,11 +707,11 @@ def _grid_angles(
 
 
 def _grid_attenuation_geometry(
-    s1: "NDArray[np.float64]", s2: "NDArray[np.float64]", obs: "NDArray[np.float64]",
-    beta: "NDArray[np.float64]", phi: "NDArray[np.float64]",
-    lateral: "NDArray[np.float64]", ahead: "NDArray[np.bool_]",
-    use_end: "NDArray[np.bool_]",
-) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
+    s1: NDArray[np.float64], s2: NDArray[np.float64], obs: NDArray[np.float64],
+    beta: NDArray[np.float64], phi: NDArray[np.float64],
+    lateral: NDArray[np.float64], ahead: NDArray[np.bool_],
+    use_end: NDArray[np.bool_],
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Nearest-end ``beta``/``l``/``phi`` (§4.5.5), array form of :func:`_attenuation_geometry`."""
     end = np.where(ahead[:, None], s2, s1)
     d_end = np.linalg.norm(obs - end, axis=1)
@@ -729,8 +729,8 @@ def _grid_attenuation_geometry(
 
 
 def _grid_lateral_attenuation(
-    beta_att: "NDArray[np.float64]", ell_att: "NDArray[np.float64]",
-) -> "NDArray[np.float64]":
+    beta_att: NDArray[np.float64], ell_att: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """``Λ(β, ℓ)`` (Eq. 4-18/4-19), the array form of :func:`lateral_attenuation`."""
     gamma = np.where(ell_att <= 914.0,
                      1.089 * (1.0 - np.exp(-0.00274 * ell_att)), 1.0)
@@ -742,8 +742,8 @@ def _grid_lateral_attenuation(
 
 
 def _grid_installation(
-    phi_att: "NDArray[np.float64]", mount_key: str,
-) -> "NDArray[np.float64] | float":
+    phi_att: NDArray[np.float64], mount_key: str,
+) -> NDArray[np.float64] | float:
     """``ΔI(φ)`` (Eq. 4-15/4-16), the array form of :func:`engine_installation_correction`."""
     if mount_key in ("propeller", "prop"):
         return 0.0
@@ -755,9 +755,9 @@ def _grid_installation(
 
 
 def _grid_sor(
-    q: "NDArray[np.float64]", ds: "NDArray[np.float64]",
-    roll_behind: "NDArray[np.bool_]", engine_jet: bool,
-) -> "NDArray[np.float64]":
+    q: NDArray[np.float64], ds: NDArray[np.float64],
+    roll_behind: NDArray[np.bool_], engine_jet: bool,
+) -> NDArray[np.float64]:
     """``ΔSOR`` (Eq. 4-22..4-25), the array form of :func:`start_of_roll_directivity`."""
     with np.errstate(divide="ignore", invalid="ignore"):
         psi = np.degrees(np.arccos(np.clip(
@@ -778,9 +778,9 @@ def _grid_sor(
 
 
 def _grid_noise_fraction(
-    q: "NDArray[np.float64]", length: float, d_lambda: "NDArray[np.float64]",
-    roll_behind: "NDArray[np.bool_]", roll_ahead: "NDArray[np.bool_]",
-) -> "NDArray[np.float64]":
+    q: NDArray[np.float64], length: float, d_lambda: NDArray[np.float64],
+    roll_behind: NDArray[np.bool_], roll_ahead: NDArray[np.bool_],
+) -> NDArray[np.float64]:
     """``ΔF`` (Eq. 4-20/4-21a/4-21b), the array form of :func:`_segment_noise_fraction`."""
     qf = np.where(roll_behind, 0.0, np.where(roll_ahead, length, q))
     a1 = -qf / d_lambda
@@ -797,11 +797,11 @@ def _grid_noise_fraction(
 class _GridContext(NamedTuple):
     """Per-call constants of the vectorised contour kernel."""
 
-    obs: "NDArray[np.float64]"
-    p: "NDArray[np.float64]"
-    le: "NDArray[np.float64]"
-    lm: "NDArray[np.float64]"
-    logd_tab: "NDArray[np.float64]"
+    obs: NDArray[np.float64]
+    p: NDArray[np.float64]
+    le: NDArray[np.float64]
+    lm: NDArray[np.float64]
+    logd_tab: NDArray[np.float64]
     vref: float
     imp: float
     mount_key: str
@@ -810,9 +810,9 @@ class _GridContext(NamedTuple):
 
 
 def _grid_segment_level(
-    ctx: _GridContext, seg_pts: "NDArray[np.float64]", eps: float,
+    ctx: _GridContext, seg_pts: NDArray[np.float64], eps: float,
     is_takeoff: bool, is_landing: bool,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Per-observer event level of one non-degenerate segment (Eq. 4-8/4-9).
 
     Assembles the NPD baseline and every correction through the ``_grid_*``
@@ -865,14 +865,14 @@ def _grid_segment_level(
 
 
 def _grid_event_levels(
-    pts: "NDArray[np.float64]", obs: "NDArray[np.float64]",
-    p: "NDArray[np.float64]", d: "NDArray[np.float64]",
-    le: "NDArray[np.float64]", lm: "NDArray[np.float64]",
+    pts: NDArray[np.float64], obs: NDArray[np.float64],
+    p: NDArray[np.float64], d: NDArray[np.float64],
+    le: NDArray[np.float64], lm: NDArray[np.float64],
     vref: float, imp: float, mounting: str, key: str,
-    ground_roll: "NDArray[np.bool_] | None" = None,
-    landing_roll: "NDArray[np.bool_] | None" = None,
-    bank: "NDArray[np.float64] | None" = None,
-) -> "NDArray[np.float64]":
+    ground_roll: NDArray[np.bool_] | None = None,
+    landing_roll: NDArray[np.bool_] | None = None,
+    bank: NDArray[np.float64] | None = None,
+) -> NDArray[np.float64]:
     """Vectorised counterpart of :func:`_event_level_core` over many observers.
 
     ``obs`` has shape ``(G, 3)``; returns the event level per observer, shape
@@ -914,21 +914,21 @@ def _grid_event_levels(
 
 
 def event_level(
-    path: "NDArray[np.float64] | list[list[float]]",
-    observer: "NDArray[np.float64] | list[float]",
-    powers: "NDArray[np.float64] | list[float]",
-    distances: "NDArray[np.float64] | list[float]",
-    exposure_levels: "NDArray[np.float64] | list[list[float]]",
-    maximum_levels: "NDArray[np.float64] | list[list[float]]",
+    path: NDArray[np.float64] | list[list[float]],
+    observer: NDArray[np.float64] | list[float],
+    powers: NDArray[np.float64] | list[float],
+    distances: NDArray[np.float64] | list[float],
+    exposure_levels: NDArray[np.float64] | list[list[float]],
+    maximum_levels: NDArray[np.float64] | list[list[float]],
     *,
     reference_speed: float = _VREF_MS,
     mounting: str = "wing",
     metric: str = "exposure",
     temperature: float = _T0_C,
     pressure: float = _P0_KPA,
-    ground_roll: "NDArray[np.bool_] | list[bool] | None" = None,
-    landing_roll: "NDArray[np.bool_] | list[bool] | None" = None,
-    bank: "NDArray[np.float64] | list[float] | None" = None,
+    ground_roll: NDArray[np.bool_] | list[bool] | None = None,
+    landing_roll: NDArray[np.bool_] | list[bool] | None = None,
+    bank: NDArray[np.float64] | list[float] | None = None,
 ) -> FlyoverResult:
     """Single-event noise level of a flight path at a receiver (ECAC Doc 29).
 
@@ -993,12 +993,12 @@ class NoiseContourResult:
     :ivar metric: ``"exposure"`` (SEL) or ``"maximum"`` (LAmax).
     """
 
-    x: "NDArray[np.float64]"
-    y: "NDArray[np.float64]"
-    level: "NDArray[np.float64]"
+    x: NDArray[np.float64]
+    y: NDArray[np.float64]
+    level: NDArray[np.float64]
     metric: str
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot filled noise contours over the ground plane."""
         from .._i18n import check_language
         from .._plot.aircraft import plot_noise_contour
@@ -1007,22 +1007,22 @@ class NoiseContourResult:
 
 
 def noise_contour(
-    path: "NDArray[np.float64] | list[list[float]]",
-    powers: "NDArray[np.float64] | list[float]",
-    distances: "NDArray[np.float64] | list[float]",
-    exposure_levels: "NDArray[np.float64] | list[list[float]]",
-    maximum_levels: "NDArray[np.float64] | list[list[float]]",
+    path: NDArray[np.float64] | list[list[float]],
+    powers: NDArray[np.float64] | list[float],
+    distances: NDArray[np.float64] | list[float],
+    exposure_levels: NDArray[np.float64] | list[list[float]],
+    maximum_levels: NDArray[np.float64] | list[list[float]],
     *,
-    x: "NDArray[np.float64] | list[float]",
-    y: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
+    y: NDArray[np.float64] | list[float],
     reference_speed: float = _VREF_MS,
     mounting: str = "wing",
     metric: str = "exposure",
     temperature: float = _T0_C,
     pressure: float = _P0_KPA,
-    ground_roll: "NDArray[np.bool_] | list[bool] | None" = None,
-    landing_roll: "NDArray[np.bool_] | list[bool] | None" = None,
-    bank: "NDArray[np.float64] | list[float] | None" = None,
+    ground_roll: NDArray[np.bool_] | list[bool] | None = None,
+    landing_roll: NDArray[np.bool_] | list[bool] | None = None,
+    bank: NDArray[np.float64] | list[float] | None = None,
 ) -> NoiseContourResult:
     """Single-event noise level over a ground grid (ECAC Doc 29 contour).
 

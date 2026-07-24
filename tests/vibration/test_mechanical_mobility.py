@@ -264,7 +264,7 @@ def test_rigid_mass_plot_two_panels_and_external_ax() -> None:
     res = rigid_mass_calibration_check(meas, f, mass=10.0)
     axes = res.plot()
     assert len(axes) == 2                       # magnitude + deviation panels
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext              # single deviation panel on ax
     plt.close("all")
 

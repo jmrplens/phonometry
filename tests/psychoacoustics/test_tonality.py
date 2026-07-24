@@ -13,8 +13,8 @@ Anchors transcribed from the official PDF:
 import numpy as np
 import pytest
 from reference_data import (
-    ECMA418_1_DFC_500HZ,
     ECMA418_1_DFC_1KHZ,
+    ECMA418_1_DFC_500HZ,
     ECMA418_1_F1_1KHZ,
     ECMA418_1_F2_1KHZ,
     ECMA418_1_PROX_150HZ,
@@ -95,7 +95,11 @@ def test_pr_of_synthetic_tone_matches_analytic() -> None:
     # the 8 s default (measured error: 0.12 dB at 8 s, 0.037 dB at 16 s).
     x = _tone_in_noise(1000.0, tone_rms, noise_rms, seconds=16.0)
     n0 = noise_rms**2 / (FS / 2)
-    from phonometry.psychoacoustics.tonality import _LOWER_EDGE_COEFFS, _UPPER_EDGE_COEFFS, _fitted_edge
+    from phonometry.psychoacoustics.tonality import (
+        _LOWER_EDGE_COEFFS,
+        _UPPER_EDGE_COEFFS,
+        _fitted_edge,
+    )
 
     f1_m, f2_m, _ = _critical_band(1000.0)
     df_l = f1_m - _fitted_edge(1000.0, _LOWER_EDGE_COEFFS)

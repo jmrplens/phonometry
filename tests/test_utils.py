@@ -4,7 +4,6 @@ Tests for internal utility helpers.
 """
 
 import numpy as np
-
 from phonometry.utils import _resample_to_length, _typesignal
 
 

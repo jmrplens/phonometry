@@ -48,8 +48,8 @@ def _positive(value: float, name: str) -> float:
 
 
 def _validate_pressure(
-    pressure: "NDArray[np.float64] | list[float]", *, min_samples: int = 1
-) -> "NDArray[np.float64]":
+    pressure: NDArray[np.float64] | list[float], *, min_samples: int = 1
+) -> NDArray[np.float64]:
     sig = np.asarray(pressure, dtype=np.float64)
     if sig.ndim != 1:
         raise ValueError("'pressure' must be one-dimensional.")
@@ -62,7 +62,7 @@ def _validate_pressure(
 
 
 def sound_pressure_level(
-    pressure: "NDArray[np.float64] | list[float]",
+    pressure: NDArray[np.float64] | list[float],
     *,
     reference: float = UNDERWATER_REFERENCE_PRESSURE,
 ) -> float:
@@ -85,7 +85,7 @@ def sound_pressure_level(
 
 
 def sound_exposure_level(
-    pressure: "NDArray[np.float64] | list[float]",
+    pressure: NDArray[np.float64] | list[float],
     fs: float,
     *,
     reference: float = UNDERWATER_REFERENCE_EXPOSURE,
@@ -111,7 +111,7 @@ def sound_exposure_level(
 
 
 def peak_sound_pressure_level(
-    pressure: "NDArray[np.float64] | list[float]",
+    pressure: NDArray[np.float64] | list[float],
     *,
     reference: float = UNDERWATER_REFERENCE_PRESSURE,
 ) -> float:

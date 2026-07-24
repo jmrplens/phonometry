@@ -153,7 +153,7 @@ def test_harmonic_products_appear_at_negative_time() -> None:
     # The 2nd harmonic of an ESS arrives ahead of the linear IR by
     # dt = T*ln(2)/ln(f2/f1) (Farina 2000); in the wrapped deconvolution this
     # negative time sits near index n - dt*fs.
-    advance = int(round(secs * np.log(2.0) / np.log(f2 / f1) * FS))
+    advance = round(secs * np.log(2.0) / np.log(f2 / f1) * FS)
     predicted = n - advance
     window = np.abs(full[predicted - 500:predicted + 500])
     harmonic_peak = window.max()
@@ -201,7 +201,7 @@ def test_mls_length_and_levels() -> None:
         assert a.size == 2**order - 1
         assert set(np.unique(a)).issubset({-1.0, 1.0})
         # bipolar sum of a maximum-length sequence is exactly -1
-        assert int(round(a.sum())) == -1
+        assert round(a.sum()) == -1
 
 
 def test_mls_taps_cover_supported_orders() -> None:

@@ -8,12 +8,12 @@ and composite whole-day rating levels (6.5, Formulae 5-6).
 
 from __future__ import annotations
 
-from typing import Iterable, Tuple
+from collections.abc import Iterable
 
 import numpy as np
 
 
-def composite_rating_level(periods: Iterable[Tuple[float, float, float]]) -> float:
+def composite_rating_level(periods: Iterable[tuple[float, float, float]]) -> float:
     """
     Composite whole-day rating level (ISO 1996-1:2016, 6.5).
 
@@ -48,7 +48,7 @@ def lden(
     lday: float,
     levening: float,
     lnight: float,
-    hours: Tuple[float, float, float] = (12.0, 4.0, 8.0),
+    hours: tuple[float, float, float] = (12.0, 4.0, 8.0),
 ) -> float:
     """
     Day-evening-night sound level Lden (ISO 1996-1:2016, 3.6.4).
@@ -73,7 +73,7 @@ def lden(
 def ldn(
     lday: float,
     lnight: float,
-    hours: Tuple[float, float] = (15.0, 9.0),
+    hours: tuple[float, float] = (15.0, 9.0),
 ) -> float:
     """
     Day-night sound level Ldn (ISO 1996-1:2016, 3.6.5).

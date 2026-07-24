@@ -89,7 +89,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, Tuple
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
@@ -99,6 +99,8 @@ from scipy.interpolate import PchipInterpolator
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+from .._internal.utils import _typesignal
+from .._internal.validation import require_1d_signal, require_positive
 from .loudness_ecma import (
     _CBF,
     _F_CENTRE,
@@ -109,8 +111,6 @@ from .loudness_ecma import (
     _fade_in,
     _specific_basis_loudness,
 )
-from .._internal.validation import require_1d_signal, require_positive
-from .._internal.utils import _typesignal
 
 # --------------------------------------------------------------------------
 # Fluctuation-strength constants (Clause 9.1.1-9.1.2)
@@ -227,7 +227,7 @@ class EcmaFluctuationStrength:
 # --------------------------------------------------------------------------
 
 
-def _front_end(x: np.ndarray, field: str) -> Tuple[np.ndarray, np.ndarray]:
+def _front_end(x: np.ndarray, field: str) -> tuple[np.ndarray, np.ndarray]:
     """Downsampled envelopes and block times for the fluctuation chain.
 
     Applies the fluctuation-strength zero-padding (Clause 5.1.2.2), ear
@@ -287,7 +287,7 @@ def _moving_median(x: np.ndarray, length: int) -> np.ndarray:
     return out
 
 
-def _longest_quiet_run(quiet: np.ndarray) -> Tuple[int, int] | None:
+def _longest_quiet_run(quiet: np.ndarray) -> tuple[int, int] | None:
     """Longest run of ``True`` longer than the 9.1.3.4 minimum, or ``None``.
 
     ``quiet`` covers the updated interval only; runs cannot touch its edges
@@ -305,7 +305,7 @@ def _longest_quiet_run(quiet: np.ndarray) -> Tuple[int, int] | None:
     return int(begins[best]), int(ends[best])
 
 
-def _analysis_window(env: np.ndarray) -> Tuple[int, int] | None:
+def _analysis_window(env: np.ndarray) -> tuple[int, int] | None:
     """Analysis-window zeros ``(n_zb, n_ze)`` for one block/band (9.1.3).
 
     Returns ``None`` when the entire block is a quieter period (the window
@@ -386,7 +386,7 @@ def _window_kernel(fc_hz: float, n_zb: int, n_ze: int, k: np.ndarray) -> np.ndar
 
 def _round_half_away(v: float) -> int:
     """Round to nearest, ties away from zero (footnote 42)."""
-    return int(math.floor(v + 0.5)) if v >= 0.0 else int(math.ceil(v - 0.5))
+    return math.floor(v + 0.5) if v >= 0.0 else math.ceil(v - 0.5)
 
 
 def _k_limit(f_max_hz: float) -> int:
@@ -400,7 +400,7 @@ def _hsa_solve(
     rates: np.ndarray,
     n_zb: int,
     n_ze: int,
-) -> Tuple[np.ndarray, float]:
+) -> tuple[np.ndarray, float]:
     """HSA least-squares fit for the line pairs at ``rates`` (9.1.4).
 
     ``p_spec``/``phi`` are the k = 0..48 spectrum and power spectrum of the
@@ -451,7 +451,7 @@ def _hsa_single(
     n_zb: int,
     n_ze: int,
     w0: np.ndarray,
-) -> Tuple[np.ndarray, float]:
+) -> tuple[np.ndarray, float]:
     """One-line-pair HSA in closed form (Clause 9.1.4.1, Formulae 136-142).
 
     The analytic Cramer solution of the 3x3 system; equivalent to
@@ -587,7 +587,7 @@ def _grid_minimum(
 
 def _select_line_pairs(
     p_spec: np.ndarray, phi: np.ndarray, n_zb: int, n_ze: int, w0: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray] | None:
+) -> tuple[np.ndarray, np.ndarray] | None:
     """Preselected modulation rates and amplitudes A_i (Clause 9.1.5).
 
     Returns ``(rates, amplitudes)`` after the Formula (146) gate, or ``None``
@@ -660,7 +660,7 @@ def _harmonic_complex(
     n_ze: int,
     band: int,
     w0: np.ndarray,
-) -> Tuple[float, float, float]:
+) -> tuple[float, float, float]:
     """Harmonic analysis and weighting (Clauses 9.1.8-9.1.9).
 
     Returns ``(a_hat, harmonic_power, p0)`` where ``a_hat`` is the weighted
@@ -668,7 +668,7 @@ def _harmonic_complex(
     ``p^_0^2 + 2 * sum(A_i)`` over the refined complex (Formulae 159-160).
     """
     best_energy = -1.0
-    best: Tuple[np.ndarray, np.ndarray] = (np.empty(0, dtype=np.intp), np.empty(0))
+    best: tuple[np.ndarray, np.ndarray] = (np.empty(0, dtype=np.intp), np.empty(0))
     best_order = 1
     for order in range(1, _MAX_ORDER_SEED + 1):
         f_base = f_opt / order
@@ -715,7 +715,7 @@ def _harmonic_complex(
     return a_hat, harmonic_power, p0
 
 
-def _band_block(env: np.ndarray, band: int) -> Tuple[float, float]:
+def _band_block(env: np.ndarray, band: int) -> tuple[float, float]:
     """Weighted amplitude and harmonic power for one block/band (9.1.3-9.1.9).
 
     Returns ``(a_hat, harmonic_power)``; both are 0 for blocks without
@@ -795,7 +795,7 @@ def _amplitudes(envelopes: np.ndarray) -> np.ndarray:
 
 def _time_dependent(
     a_lz: np.ndarray, block_times: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Time-dependent specific fluctuation strength F'(l50, z) (9.1.11)."""
     t_end = float(block_times[-1])
     n50 = int(np.floor(t_end * _R_S50)) + 1
@@ -827,7 +827,7 @@ def _time_dependent(
 
 def _aggregate(
     f_time: np.ndarray,
-) -> Tuple[float, np.ndarray, np.ndarray]:
+) -> tuple[float, np.ndarray, np.ndarray]:
     """F'(z), F(l50) and the single value F (Clauses 9.1.12-9.1.14)."""
     kept = f_time[_TRANSIENT:] if f_time.shape[0] > _TRANSIENT else f_time
     f_spec = np.mean(kept, axis=0) if kept.shape[0] else np.zeros(_CBF)
@@ -870,7 +870,7 @@ def fluctuation_strength_ecma(
         raise ValueError("'signal' must be finite.")
     fs = require_positive(float(fs), "fs")
     if fs != _FS:
-        x = signal.resample(x, max(1, int(round(x.size * _FS / fs))))
+        x = signal.resample(x, max(1, round(x.size * _FS / fs)))
 
     envelopes, block_times = _front_end(x, field)
     a_lz = _amplitudes(envelopes)

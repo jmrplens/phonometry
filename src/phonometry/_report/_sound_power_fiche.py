@@ -21,7 +21,8 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 from __future__ import annotations
 
 import math
-from typing import Any, List, Sequence, Tuple
+from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 
@@ -55,7 +56,7 @@ def _num(value: float | None, language: str = "en") -> str | None:
 
 def metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the sound-power header grid.
 
     Only supplied fields are returned; the header is identical for the
@@ -65,7 +66,7 @@ def metadata_pairs(
     is the result's own computed value, shown in the result box and basis strip
     rather than trusted from the metadata.
     """
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Noise source", language), metadata.specimen),
         (t("Test environment", language), metadata.test_room),
@@ -88,7 +89,7 @@ def d1(value: float, language: str = "en") -> str:
     return format_number(float(value), language, decimals=1)
 
 
-def band_labels(frequencies: np.ndarray | None, n: int) -> Tuple[List[str], int]:
+def band_labels(frequencies: np.ndarray | None, n: int) -> tuple[list[str], int]:
     """Return the nominal band labels and the band fraction (1, 3 or 0).
 
     A per-band result is labelled by its nominal octave/one-third-octave
@@ -137,7 +138,7 @@ def headline_level(result: Any) -> float:
     return lwa if math.isfinite(lwa) else total_power_level(result)
 
 
-def power_statement(result: Any, language: str = "en") -> Tuple[str, List[str]]:
+def power_statement(result: Any, language: str = "en") -> tuple[str, list[str]]:
     """The boxed sound-power result and its base extended terms.
 
     Boxes the A-weighted sound power level ``LWA`` when it is defined (band
@@ -149,7 +150,7 @@ def power_statement(result: Any, language: str = "en") -> Tuple[str, List[str]]:
     """
     lwa = float(result.sound_power_level_a)
     total = total_power_level(result)
-    extended: List[str] = []
+    extended: list[str] = []
     if math.isfinite(lwa):
         statement = t(
             "Sound power level L<sub>WA</sub> = <b>{lwa} dB(A)</b> re {ref}",
@@ -171,7 +172,7 @@ def power_statement(result: Any, language: str = "en") -> Tuple[str, List[str]]:
 
 def power_verdict(
     result: Any, requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+) -> tuple[str, bool]:
     """Verdict text and PASS flag against a declared sound-power limit.
 
     A sound-power emission is a quantity where less is better, so the source
@@ -204,7 +205,7 @@ def power_verdict(
 
 def level_limit_verdict(
     value: float, requirement: float, symbol: str, language: str = "en"
-) -> Tuple[str, bool]:
+) -> tuple[str, bool]:
     """Verdict text and PASS flag for a level against a declared upper limit.
 
     A generic lower-is-better comparison (a power or normalised-level emission
@@ -268,10 +269,10 @@ def power_value_table(
     )
 
     n = len(rows_data)
-    rows: List[List[Any]] = [[Paragraph(h, head_style) for h in header]]
+    rows: list[list[Any]] = [[Paragraph(h, head_style) for h in header]]
     rows.extend([list(row) for row in rows_data])
 
-    style_cmds: List[Any] = [
+    style_cmds: list[Any] = [
         ("BACKGROUND", (0, 0), (-1, 0), accent),
         ("FONTSIZE", (0, 1), (-1, -1), 8),
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
@@ -304,11 +305,11 @@ def render_sound_power_fiche(
     caption: str,
     value_table: Any,
     statement: str,
-    extended: List[str],
+    extended: list[str],
     basis_strips: Sequence[str],
     metadata: ReportMetadata | None,
     language: str,
-    verdict: Tuple[str, bool] | None = None,
+    verdict: tuple[str, bool] | None = None,
 ) -> str:
     """Assemble the shared sound-power fiche flow and build the PDF at ``path``.
 
@@ -350,7 +351,7 @@ def render_sound_power_fiche(
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

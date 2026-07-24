@@ -32,7 +32,7 @@ matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -111,7 +111,7 @@ def _resonance_term(result: Any, language: str = "en") -> str | None:
     return t("Resonance frequencies: {values} Hz", language).format(values=listed)
 
 
-def _statement(result: Any, language: str = "en") -> Tuple[float, str, List[str]]:
+def _statement(result: Any, language: str = "en") -> tuple[float, str, list[str]]:
     """The boxed mean transmission loss and its extended silencer terms."""
     tl = np.asarray(result.transmission_loss, dtype=np.float64)
     mean_tl = mean_finite(tl)
@@ -155,7 +155,7 @@ def _basis_strip(language: str = "en") -> str:
 
 
 def render_reactive_silencer_report(
-    result: "ReactiveSilencerResult",
+    result: ReactiveSilencerResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

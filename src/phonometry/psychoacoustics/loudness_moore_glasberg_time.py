@@ -57,8 +57,9 @@ required.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -81,7 +82,7 @@ from .loudness_moore_glasberg import (
 # in-band bin indices, output slice into the concatenation-order level array,
 # FFT length).  The FFT length is >= the segment length so the Hann window is
 # never truncated (at 44.1/48 kHz the 64 ms segment exceeds the nominal 2048).
-_Plan = Tuple[int, np.ndarray, float, np.ndarray, slice, int]
+_Plan = tuple[int, np.ndarray, float, np.ndarray, slice, int]
 
 # ---------------------------------------------------------------------------
 # ERB-number grid (clause 7.4): i from 1.75 to 39 Cam in 0.25 Cam steps
@@ -251,7 +252,7 @@ _EPS = 1e-13  # additive constant of clause 7.7 (avoids division by zero)
 _N_FFT = 2048
 _FRAME_MS = 1.0  # T0 = 1 ms frame interval
 # Segment durations [s] and the frequency range [Hz] each one contributes.
-_WINDOWS: Tuple[Tuple[float, float, float], ...] = (
+_WINDOWS: tuple[tuple[float, float, float], ...] = (
     (0.064, 20.0, 80.0),
     (0.032, 80.0, 500.0),
     (0.016, 500.0, 1250.0),
@@ -365,7 +366,7 @@ class MooreGlasbergTimeVaryingLoudness:
     long_term_loudness_level: np.ndarray
     n_max: float
     loudness_level_max: float
-    percentiles: Dict[float, float]
+    percentiles: dict[float, float]
     field: str
     presentation: str
 
@@ -452,7 +453,7 @@ def _smooth(pattern: np.ndarray) -> np.ndarray:
     return smoothed
 
 
-def _short_term_loudness(stsl_l: np.ndarray, stsl_r: np.ndarray) -> Tuple[float, float]:
+def _short_term_loudness(stsl_l: np.ndarray, stsl_r: np.ndarray) -> tuple[float, float]:
     """Short-term loudness of each ear with binaural inhibition (clauses 7.7/7.8).
 
     ``stsl_*`` are the (temporally smoothed) short-term specific loudness
@@ -488,7 +489,7 @@ def _loudness_level(loudness: np.ndarray | float) -> np.ndarray | float:
 # ---------------------------------------------------------------------------
 
 
-def _spectral_plan(fs: float) -> Tuple[np.ndarray, List[_Plan], np.ndarray]:
+def _spectral_plan(fs: float) -> tuple[np.ndarray, list[_Plan], np.ndarray]:
     """Precompute the six-window analysis for a sampling rate.
 
     Returns the ascending component frequencies, a list of
@@ -508,7 +509,7 @@ def _spectral_plan(fs: float) -> Tuple[np.ndarray, List[_Plan], np.ndarray]:
     freqs_parts = []
     cursor = 0
     for duration, f_lo, f_hi in _WINDOWS:
-        length = max(2, int(round(duration * fs)))
+        length = max(2, round(duration * fs))
         window = np.hanning(length)
         sum_w2 = float(np.sum(window**2))
         n_fft = max(_N_FFT, 1 << (length - 1).bit_length())
@@ -524,7 +525,7 @@ def _spectral_plan(fs: float) -> Tuple[np.ndarray, List[_Plan], np.ndarray]:
 
 
 def _frame_levels(
-    signal: np.ndarray, centre: int, plans: List[_Plan], n_components: int
+    signal: np.ndarray, centre: int, plans: list[_Plan], n_components: int
 ) -> np.ndarray:
     """Component sound pressure levels (dB SPL) for one 1-ms frame (clause 7.3).
 
@@ -554,17 +555,17 @@ def _run_ear(
     signal: np.ndarray,
     fs: float,
     field: str,
-    plans: List[_Plan],
+    plans: list[_Plan],
     comp_f_sorted: np.ndarray,
     perm: np.ndarray,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Instantaneous and short-term specific loudness traces for one ear.
 
     Returns ``(instantaneous, short_term)`` arrays of shape ``(n_frames, K)``
     with ``K`` ERB-number points; the short-term pattern is the attack/release
     running average of the instantaneous one (clause 7.6, Formulae 10-13).
     """
-    step = max(1, int(round(_FRAME_MS * 1e-3 * fs)))
+    step = max(1, round(_FRAME_MS * 1e-3 * fs))
     centres = np.arange(0, signal.size, step)
     n_frames = centres.size
     n_components = perm.size
@@ -598,7 +599,7 @@ def _run_ear(
 
 def _as_two_channels(
     signal: Sequence[float] | np.ndarray, presentation: str
-) -> Tuple[np.ndarray, np.ndarray | None]:
+) -> tuple[np.ndarray, np.ndarray | None]:
     """Split the input into left and (optional) right calibrated pressure signals."""
     array = np.asarray(signal, dtype=np.float64)
     if array.ndim == 2:
@@ -628,7 +629,7 @@ def _as_two_channels(
     return left, right
 
 
-def _percentiles(trace: np.ndarray, fractions: Sequence[float]) -> Dict[float, float]:
+def _percentiles(trace: np.ndarray, fractions: Sequence[float]) -> dict[float, float]:
     """Long-term-loudness value exceeded for each stated fraction of the trace."""
     if trace.size == 0:
         return {float(p): 0.0 for p in fractions}

@@ -23,7 +23,8 @@ extra, matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Sequence, Tuple
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -76,8 +77,8 @@ _SPECS: dict[str, dict[str, str]] = {
 
 
 def render_iso10140_report(
-    result: "LabAirborneInsulationResult | LabImpactInsulationResult",
-    rating: "WeightedRatingResult | ImpactRatingResult",
+    result: LabAirborneInsulationResult | LabImpactInsulationResult,
+    rating: WeightedRatingResult | ImpactRatingResult,
     path: str,
     *,
     quantity: str,
@@ -111,13 +112,13 @@ def render_iso10140_report(
 
     def build_columns(
         value_header: str, curve: np.ndarray, verbose: bool, language: str
-    ) -> Tuple[Sequence[Column], str, Any]:
+    ) -> tuple[Sequence[Column], str, Any]:
         """The laboratory table: ``f | value`` or, verbose, ``f | A | value``."""
         from reportlab.lib.units import mm
 
         if verbose:
             absorption = np.asarray(result.absorption, dtype=np.float64)
-            columns: List[Column] = [
+            columns: list[Column] = [
                 (t("A [m<super>2</super>]", language), absorption, 1),
                 (value_header, curve, 1),
             ]

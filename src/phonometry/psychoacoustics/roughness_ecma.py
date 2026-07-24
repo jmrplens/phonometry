@@ -48,7 +48,7 @@ unmodulated carrier -- a fully modulated signal whose carrier alone sits at
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Literal, Tuple
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy import signal
@@ -57,6 +57,8 @@ from scipy.interpolate import PchipInterpolator
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+from .._internal.utils import _typesignal
+from .._internal.validation import require_1d_signal
 from .loudness_ecma import (
     _CBF,
     _EPS,
@@ -68,8 +70,6 @@ from .loudness_ecma import (
     _fade_in,
     _specific_basis_loudness,
 )
-from .._internal.validation import require_1d_signal
-from .._internal.utils import _typesignal
 
 # --------------------------------------------------------------------------
 # Roughness-specific constants (Clause 7.1.1)
@@ -193,7 +193,7 @@ class EcmaRoughness:
 
 def _front_end(
     x: np.ndarray, field: str
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, int]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, int]:
     """Envelopes, basis loudness and block times for the roughness chain.
 
     Applies the roughness zero-padding (Clause 5.1.2.2), ear filter and
@@ -311,7 +311,7 @@ def _bias_correction(f_tilde: float) -> float:
     )  # Formula 78
 
 
-def _pick_peaks(spec: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def _pick_peaks(spec: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Peak modulation rates f_p,i and amplitudes A_i (Clause 7.1.5.1).
 
     ``spec`` is the noise-reduced spectrum Phi_hat for one (l, z). Returns
@@ -357,17 +357,17 @@ def _pick_peaks(spec: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 
 def _fundamental_set(
     f_p: np.ndarray, a_tilde: np.ndarray
-) -> Tuple[List[int], int]:
+) -> tuple[list[int], int]:
     """Harmonic-complex index set I_max and its argmax i_max (Formulae 88-91)."""
     n = f_p.size
     best_energy = -1.0
     i_max = 0
-    i_set: List[int] = []
+    i_set: list[int] = []
     for i0 in range(n):
         if f_p[i0] <= 0.0:
             continue
         ratios = np.round(f_p / f_p[i0]).astype(int)  # Formula 88
-        cand: dict[int, Tuple[int, float]] = {}
+        cand: dict[int, tuple[int, float]] = {}
         for i in range(n):
             r = int(ratios[i])
             if r <= 0:
@@ -443,7 +443,7 @@ def _amplitudes(spectra: np.ndarray) -> np.ndarray:
 
 def _time_dependent(
     a_lz: np.ndarray, block_times: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Time-dependent specific roughness R'(l50, z) (Formulae 103-110)."""
     t_end = float(block_times[-1])
     n50 = int(np.floor(t_end * _R_S50)) + 1
@@ -478,7 +478,7 @@ def _time_dependent(
 
 def _aggregate(
     r_time: np.ndarray,
-) -> Tuple[float, np.ndarray, np.ndarray]:
+) -> tuple[float, np.ndarray, np.ndarray]:
     """Average specific roughness, R(l50) and single value (Clause 7.1.8-7.1.10)."""
     kept = r_time[_TRANSIENT:] if r_time.shape[0] > _TRANSIENT else r_time
     r_spec = np.mean(kept, axis=0) if kept.shape[0] else np.zeros(_CBF)  # 7.1.8
@@ -519,7 +519,7 @@ def roughness_ecma(
     if fs <= 0.0:
         raise ValueError("fs must be positive")
     if fs != _FS:
-        x = signal.resample(x, int(round(x.size * _FS / fs)))
+        x = signal.resample(x, round(x.size * _FS / fs))
 
     envelopes, basis, block_times, _ = _front_end(x, field)
     spectra = _noise_reduced_spectra(envelopes, basis)

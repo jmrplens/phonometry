@@ -106,11 +106,11 @@ def _positive(value: float, name: str) -> float:
 
 
 def _validate_signal(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     name: str,
     *,
     context: str = "a spectral estimate",
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     xa = np.asarray(x, dtype=np.float64)
     if xa.ndim != 1:
         raise ValueError(f"'{name}' must be one-dimensional.")
@@ -144,17 +144,17 @@ def _default_nperseg(n: int, fs: float) -> int:
 
 def _noverlap_samples(nperseg: int, overlap: float) -> int:
     """Overlap fraction -> samples, capped one short of the segment."""
-    return min(int(round(overlap * nperseg)), nperseg - 1)
+    return min(round(overlap * nperseg), nperseg - 1)
 
 
 def _welch_autospectrum(
-    x: "NDArray[np.float64]",
+    x: NDArray[np.float64],
     fs: float,
     nperseg: int,
     noverlap: int,
     window: str = "hann",
     scaling: str = "density",
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """One-sided Welch autospectrum ``(freqs, Gxx)``, no detrending."""
     from scipy import signal as sp_signal
 
@@ -174,14 +174,14 @@ def _welch_autospectrum(
 
 
 def _welch_cross_spectrum(
-    x: "NDArray[np.float64]",
-    y: "NDArray[np.float64]",
+    x: NDArray[np.float64],
+    y: NDArray[np.float64],
     fs: float,
     nperseg: int,
     noverlap: int,
     window: str = "hann",
     scaling: str = "density",
-) -> tuple["NDArray[np.float64]", "NDArray[np.complex128]"]:
+) -> tuple[NDArray[np.float64], NDArray[np.complex128]]:
     """One-sided Welch cross-spectrum ``(freqs, Gxy)``, no detrending."""
     from scipy import signal as sp_signal
 
@@ -202,18 +202,18 @@ def _welch_cross_spectrum(
 
 
 def _welch_pair(
-    x: "NDArray[np.float64]",
-    y: "NDArray[np.float64]",
+    x: NDArray[np.float64],
+    y: NDArray[np.float64],
     fs: float,
     nperseg: int,
     noverlap: int,
     window: str = "hann",
     scaling: str = "density",
 ) -> tuple[
-    "NDArray[np.float64]",
-    "NDArray[np.complex128]",
-    "NDArray[np.float64]",
-    "NDArray[np.float64]",
+    NDArray[np.float64],
+    NDArray[np.complex128],
+    NDArray[np.float64],
+    NDArray[np.float64],
 ]:
     """One-sided ``(freqs, Gxy, Gxx, Gyy)`` from Welch-averaged segments."""
     freqs, gxy = _welch_cross_spectrum(x, y, fs, nperseg, noverlap, window, scaling)
@@ -279,11 +279,11 @@ def _chi2_bounds(dof: float, confidence: float) -> tuple[float, float]:
 
 
 def _chi2_interval(
-    gxx: "NDArray[np.float64]",
+    gxx: NDArray[np.float64],
     nd: float,
     confidence: float,
     nyquist_bin: bool,
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Chi-square confidence interval for the autospectrum (Eq. 8.163).
 
     Interior bins average two squared Gaussian components per segment
@@ -305,10 +305,10 @@ def _chi2_interval(
 
 
 def _coherence_from_spectra(
-    gxy: "NDArray[np.complex128]",
-    gxx: "NDArray[np.float64]",
-    gyy: "NDArray[np.float64]",
-) -> "NDArray[np.float64]":
+    gxy: NDArray[np.complex128],
+    gxx: NDArray[np.float64],
+    gyy: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Ordinary coherence ``γ² = |Gxy|²/(Gxx·Gyy)`` clipped to [0, 1]."""
     denom = gxx * gyy
     coh = np.divide(
@@ -363,10 +363,10 @@ class SpectralDensityResult:
     :ivar scaling: ``'density'`` or ``'spectrum'``.
     """
 
-    frequencies: "NDArray[np.float64]"
-    psd: "NDArray[np.float64]"
-    ci_lower: "NDArray[np.float64]"
-    ci_upper: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    psd: NDArray[np.float64]
+    ci_lower: NDArray[np.float64]
+    ci_upper: NDArray[np.float64]
     confidence: float
     random_error: float
     n_segments: int
@@ -378,8 +378,8 @@ class SpectralDensityResult:
     overlap: float
     scaling: str
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the spectral density in dB with its confidence band.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -392,7 +392,7 @@ class SpectralDensityResult:
 
 
 def power_spectral_density(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     *,
     window: str = "hann",
@@ -511,13 +511,13 @@ class CrossSpectralDensityResult:
     :ivar scaling: ``'density'`` or ``'spectrum'``.
     """
 
-    frequencies: "NDArray[np.float64]"
-    csd: "NDArray[np.complex128]"
-    magnitude: "NDArray[np.float64]"
-    phase: "NDArray[np.float64]"
-    coherence: "NDArray[np.float64]"
-    magnitude_random_error: "NDArray[np.float64]"
-    phase_std: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    csd: NDArray[np.complex128]
+    magnitude: NDArray[np.float64]
+    phase: NDArray[np.float64]
+    coherence: NDArray[np.float64]
+    magnitude_random_error: NDArray[np.float64]
+    phase_std: NDArray[np.float64]
     n_segments: int
     n_averages: float
     resolution_bandwidth: float
@@ -527,8 +527,8 @@ class CrossSpectralDensityResult:
     scaling: str
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | NDArray[Any]:
         """Plot the magnitude, phase (with ±σ band) and coherence.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -542,8 +542,8 @@ class CrossSpectralDensityResult:
 
 
 def cross_spectral_density(
-    x: "NDArray[np.float64] | list[float]",
-    y: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
+    y: NDArray[np.float64] | list[float],
     fs: float,
     *,
     window: str = "hann",
@@ -649,16 +649,16 @@ class CoherentOutputSpectrumResult:
     :ivar scaling: ``'density'`` or ``'spectrum'``.
     """
 
-    frequencies: "NDArray[np.float64]"
-    output_psd: "NDArray[np.float64]"
-    coherent_psd: "NDArray[np.float64]"
-    noise_psd: "NDArray[np.float64]"
-    coherence: "NDArray[np.float64]"
-    snr: "NDArray[np.float64]"
-    snr_db: "NDArray[np.float64]"
-    random_error: "NDArray[np.float64]"
-    snr_random_error: "NDArray[np.float64]"
-    coherence_bias: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    output_psd: NDArray[np.float64]
+    coherent_psd: NDArray[np.float64]
+    noise_psd: NDArray[np.float64]
+    coherence: NDArray[np.float64]
+    snr: NDArray[np.float64]
+    snr_db: NDArray[np.float64]
+    random_error: NDArray[np.float64]
+    snr_random_error: NDArray[np.float64]
+    coherence_bias: NDArray[np.float64]
     n_segments: int
     n_averages: float
     resolution_bandwidth: float
@@ -668,8 +668,8 @@ class CoherentOutputSpectrumResult:
     scaling: str
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | NDArray[Any]:
         """Plot the output/coherent/noise spectra and the spectral SNR.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -683,8 +683,8 @@ class CoherentOutputSpectrumResult:
 
 
 def coherent_output_spectrum(
-    x: "NDArray[np.float64] | list[float]",
-    y: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
+    y: NDArray[np.float64] | list[float],
     fs: float,
     *,
     window: str = "hann",
@@ -774,7 +774,7 @@ def coherent_output_spectrum(
 
 
 def _smoothing_validate(
-    f: "NDArray[np.float64]", v: "NDArray[np.float64]"
+    f: NDArray[np.float64], v: NDArray[np.float64]
 ) -> None:
     """Validate the frequency axis / spectrum pair of the smoother."""
     if f.ndim != 1 or v.ndim != 1:
@@ -790,8 +790,8 @@ def _smoothing_validate(
 
 
 def _smoothing_to_power(
-    v: "NDArray[np.float64]", domain: str
-) -> "NDArray[np.float64]":
+    v: NDArray[np.float64], domain: str
+) -> NDArray[np.float64]:
     """Map the input spectrum onto power-like values per ``domain``."""
     if domain not in ("power", "amplitude", "db"):
         raise ValueError("'domain' must be 'power', 'amplitude' or 'db'.")
@@ -803,8 +803,8 @@ def _smoothing_to_power(
 
 
 def _smoothing_from_power(
-    power: "NDArray[np.float64]", domain: str
-) -> "NDArray[np.float64]":
+    power: NDArray[np.float64], domain: str
+) -> NDArray[np.float64]:
     """Map smoothed power back to the input ``domain``."""
     if domain == "power":
         return power
@@ -816,8 +816,8 @@ def _smoothing_from_power(
 
 
 def _smoothing_window_average(
-    fp: "NDArray[np.float64]", pp: "NDArray[np.float64]", fraction: float
-) -> "NDArray[np.float64]":
+    fp: NDArray[np.float64], pp: NDArray[np.float64], fraction: float
+) -> NDArray[np.float64]:
     """Average piecewise-constant power over the 1/n-octave windows.
 
     Bins are bounded by arithmetic midpoints; the running integral makes
@@ -843,12 +843,12 @@ def _smoothing_window_average(
 
 
 def fractional_octave_smoothing(
-    frequencies: "NDArray[np.float64] | list[float]",
-    values: "NDArray[np.float64] | list[float]",
+    frequencies: NDArray[np.float64] | list[float],
+    values: NDArray[np.float64] | list[float],
     fraction: float = 3.0,
     *,
     domain: Literal["power", "amplitude", "db"] = "power",
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Smooth a spectrum with a constant-power 1/n-octave kernel.
 
     Each output point is the power average of the input over a rectangular
@@ -928,9 +928,9 @@ class WindowMetricsResult:
         lobe, in bins.
     """
 
-    window: "str | tuple[Any, ...]"
+    window: str | tuple[Any, ...]
     n: int
-    taps: "NDArray[np.float64]"
+    taps: NDArray[np.float64]
     coherent_gain: float
     enbw_bins: float
     scalloping_loss_db: float
@@ -947,8 +947,8 @@ class WindowMetricsResult:
         return self.enbw_bins * _positive(fs, "fs") / self.n
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | NDArray[Any]:
         """Plot the window shape and its spectrum with the metrics marked.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -961,8 +961,8 @@ class WindowMetricsResult:
 
 
 def _window_spectrum_db(
-    w: "NDArray[np.float64]", oversample: int
-) -> "NDArray[np.float64]":
+    w: NDArray[np.float64], oversample: int
+) -> NDArray[np.float64]:
     """Magnitude of the window spectrum re its peak, in dB, oversampled.
 
     Zero-padding the DFT by ``oversample`` samples the underlying
@@ -975,7 +975,7 @@ def _window_spectrum_db(
     return np.asarray(level, dtype=np.float64)
 
 
-def _mainlobe_edge(level_db: "NDArray[np.float64]") -> int:
+def _mainlobe_edge(level_db: NDArray[np.float64]) -> int:
     """Index of the first local minimum (the edge of the main lobe)."""
     falling = np.diff(level_db) < 0.0
     edges = np.flatnonzero(~falling[1:] & falling[:-1]) + 1
@@ -985,7 +985,7 @@ def _mainlobe_edge(level_db: "NDArray[np.float64]") -> int:
 
 
 def _width_3db_bins(
-    level_db: "NDArray[np.float64]", oversample: int
+    level_db: NDArray[np.float64], oversample: int
 ) -> float:
     """Two-sided -3 dB main-lobe width in bins (linear dB interpolation)."""
     below = np.flatnonzero(level_db <= -3.0103)
@@ -996,7 +996,7 @@ def _width_3db_bins(
 
 
 def window_metrics(
-    window: "str | tuple[Any, ...]",
+    window: str | tuple[Any, ...],
     n: int = 1024,
 ) -> WindowMetricsResult:
     """Figures of merit of a spectral-analysis taper (Harris 1978).
@@ -1113,23 +1113,23 @@ class MultitaperSpectralDensityResult:
     :ivar scaling: ``'density'`` or ``'spectrum'``.
     """
 
-    frequencies: "NDArray[np.float64]"
-    psd: "NDArray[np.float64]"
-    ci_lower: "NDArray[np.float64]"
-    ci_upper: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    psd: NDArray[np.float64]
+    ci_lower: NDArray[np.float64]
+    ci_upper: NDArray[np.float64]
     confidence: float
-    degrees_of_freedom: "NDArray[np.float64]"
-    random_error: "NDArray[np.float64]"
-    weights: "NDArray[np.float64]"
-    eigenvalues: "NDArray[np.float64]"
+    degrees_of_freedom: NDArray[np.float64]
+    random_error: NDArray[np.float64]
+    weights: NDArray[np.float64]
+    eigenvalues: NDArray[np.float64]
     time_half_bandwidth: float
     n_tapers: int
     resolution_bandwidth: float
     adaptive: bool
     scaling: str
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the multitaper density in dB with its confidence band.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1169,9 +1169,9 @@ def _validate_multitaper_params(
 
 
 def _dpss_eigenspectra(
-    x: "NDArray[np.float64]", fs: float, nw: float, k: int
+    x: NDArray[np.float64], fs: float, nw: float, k: int
 ) -> tuple[
-    "NDArray[np.float64]", "NDArray[np.float64]", "NDArray[np.float64]"
+    NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]
 ]:
     """Eigenspectra ``Ŝₖ(f)`` on the one-sided rfft grid, two-sided scale.
 
@@ -1201,10 +1201,10 @@ def _dpss_eigenspectra(
 
 
 def _adaptive_multitaper_weights(
-    sk: "NDArray[np.float64]",
-    eigenvalues: "NDArray[np.float64]",
+    sk: NDArray[np.float64],
+    eigenvalues: NDArray[np.float64],
     power_density: float,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Thomson's adaptive weights ``dₖ(f) = b²ₖ(f)·λₖ`` (P&W Section 7.4).
 
     Fixed-point iteration of P&W Eq. 368a,
@@ -1250,8 +1250,8 @@ def _adaptive_multitaper_weights(
 
 
 def _multitaper_dof(
-    d: "NDArray[np.float64]", nyquist_bin: bool
-) -> "NDArray[np.float64]":
+    d: NDArray[np.float64], nyquist_bin: bool
+) -> NDArray[np.float64]:
     """Equivalent degrees of freedom ``ν(f) = 2·(Σₖdₖ)²/Σₖdₖ²``.
 
     P&W Eq. 370b: each eigenspectrum contributes two chi-square degrees
@@ -1268,10 +1268,10 @@ def _multitaper_dof(
 
 
 def _chi2_interval_pointwise(
-    psd: "NDArray[np.float64]",
-    dof: "NDArray[np.float64]",
+    psd: NDArray[np.float64],
+    dof: NDArray[np.float64],
     confidence: float,
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Chi-square interval with per-frequency degrees of freedom.
 
     Same form as B&P Eq. 8.163 (``ν·Ŝ/χ²ᵥ;α/2 ≤ S ≤ ν·Ŝ/χ²ᵥ;1-α/2``)
@@ -1290,7 +1290,7 @@ def _chi2_interval_pointwise(
 
 
 def multitaper_psd(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     *,
     time_half_bandwidth: float = 4.0,

@@ -40,7 +40,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -69,10 +69,10 @@ if TYPE_CHECKING:
 
 
 def _metadata_pairs(
-    result: "FloorCoveringImprovementResult",
+    result: FloorCoveringImprovementResult,
     metadata: ReportMetadata | None,
     language: str = "en",
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
     The measured frequency range is taken from the result; the descriptive
@@ -91,11 +91,11 @@ def _metadata_pairs(
     freq_range = None
     if freqs.size:
         freq_range = t("{lo} to {hi}", language).format(
-            lo=int(round(float(freqs.min()))), hi=int(round(float(freqs.max())))
+            lo=round(float(freqs.min())), hi=round(float(freqs.max()))
         )
 
     range_label = t("Frequency range [Hz]", language)
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), _md("client")),
         (t("Manufacturer", language), _md("manufacturer")),
         (t("Floor covering", language), _md("specimen")),
@@ -121,7 +121,7 @@ def _metadata_pairs(
 
 
 def _reference_floor_with_covering(
-    result: "FloorCoveringImprovementResult",
+    result: FloorCoveringImprovementResult,
 ) -> np.ndarray | None:
     """Return ``Ln,r = Ln,r,0 - delta-L`` on the 16 rating bands, or ``None``.
 
@@ -150,7 +150,7 @@ def _reference_floor_with_covering(
 
 
 def _value_table(
-    result: "FloorCoveringImprovementResult",
+    result: FloorCoveringImprovementResult,
     ln_r: np.ndarray | None,
     language: str = "en",
 ) -> Any:
@@ -180,13 +180,13 @@ def _value_table(
     else:
         widths = [28 * mm, 28 * mm]
 
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for k, fk in enumerate(freqs):
         value = format_number(float(delta_l[k]), language, decimals=1)
         # band_table receives plain strings drawn literally (not Paragraph
         # markup), so the limit marker is a literal ">", not the XML entity.
-        row: List[Any] = [
-            f"{int(round(fk))}", f"> {value}" if limited[k] else value
+        row: list[Any] = [
+            f"{round(fk)}", f"> {value}" if limited[k] else value
         ]
         if ln_r is not None:
             row.append(format_number(float(ln_r[k]), language, decimals=1))
@@ -214,7 +214,7 @@ def _basis_line(metadata: ReportMetadata | None, language: str = "en") -> str:
 
 
 def _box_statement(
-    result: "FloorCoveringImprovementResult", language: str = "en"
+    result: FloorCoveringImprovementResult, language: str = "en"
 ) -> str:
     """The boxed single-number statement, or a characterisation headline.
 
@@ -229,8 +229,8 @@ def _box_statement(
             f"<b>{result.delta_lw} ({ci:+d}) dB</b>"
         )
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    lo = int(round(float(freqs.min()))) if freqs.size else 0
-    hi = int(round(float(freqs.max()))) if freqs.size else 0
+    lo = round(float(freqs.min())) if freqs.size else 0
+    hi = round(float(freqs.max())) if freqs.size else 0
     return t(
         "Reduction of impact sound pressure level <b>&#916;L</b>, "
         "{lo} Hz to {hi} Hz",
@@ -239,7 +239,7 @@ def _box_statement(
 
 
 def _body(
-    result: "FloorCoveringImprovementResult",
+    result: FloorCoveringImprovementResult,
     verbose: bool,
     caption_style: Any,
     language: str = "en",
@@ -256,7 +256,7 @@ def _body(
         "One-third-octave &#916;L with the reference floor L<sub>n,r</sub>",
         language,
     ) if ln_r is not None else t("One-third-octave improvement &#916;L [dB]", language)
-    left_cell: List[Any] = [
+    left_cell: list[Any] = [
         Paragraph(caption, caption_style),
         _value_table(result, ln_r, language),
     ]
@@ -274,11 +274,11 @@ def _body(
 
 
 def _verdict_row(
-    result: "FloorCoveringImprovementResult",
+    result: FloorCoveringImprovementResult,
     requirement: float,
     styles: Any,
     language: str,
-) -> List[Any]:
+) -> list[Any]:
     """The requirement verdict: a higher weighted improvement passes."""
     value = float(result.delta_lw) if result.delta_lw is not None else 0.0
     passed = value >= requirement
@@ -289,7 +289,7 @@ def _verdict_row(
 
 
 def render_iso16251_report(
-    result: "FloorCoveringImprovementResult",
+    result: FloorCoveringImprovementResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -334,7 +334,7 @@ def render_iso16251_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Floor-covering impact sound improvement", language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(_basis_line(metadata, language), basis_style),
     ]

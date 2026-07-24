@@ -16,7 +16,7 @@ parameters at the 29 preferred third-octave frequencies of ISO 266.
 ## equal_loudness_contour
 
 ```python
-equal_loudness_contour(phon: float) -> Tuple[np.ndarray, np.ndarray]
+equal_loudness_contour(phon: float) -> tuple[np.ndarray, np.ndarray]
 ```
 
 Normal equal-loudness-level contour (ISO 226:2023 Formula 1).
@@ -68,7 +68,7 @@ functions.
 ```python
 EqualLoudnessContours(
     frequencies: np.ndarray,
-    phons: Tuple[float, ...],
+    phons: tuple[float, ...],
     contours: np.ndarray,
     threshold: np.ndarray,
 )
@@ -120,7 +120,7 @@ returns the `Axes`.
 ## hearing_threshold
 
 ```python
-hearing_threshold() -> Tuple[np.ndarray, np.ndarray]
+hearing_threshold() -> tuple[np.ndarray, np.ndarray]
 ```
 
 Threshold of hearing T_f (ISO 226:2023 Table 1).

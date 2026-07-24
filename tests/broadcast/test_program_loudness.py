@@ -47,7 +47,7 @@ FS = 48000
 
 def _sine(level_dbfs: float, duration: float, freq: float = 1000.0) -> np.ndarray:
     """A sine with per-sample peak level ``level_dbfs`` (dB re full scale)."""
-    t = np.arange(int(round(duration * FS))) / FS
+    t = np.arange(round(duration * FS)) / FS
     return 10.0 ** (level_dbfs / 20.0) * np.sin(2.0 * np.pi * freq * t)
 
 
@@ -63,7 +63,7 @@ def _steps(segments: tuple[tuple[float, float], ...]) -> np.ndarray:
 
 def _tapered(x: np.ndarray, fs: float, fade: float = 0.01) -> np.ndarray:
     """Apply the 10 ms fade-in/fade-out that Tech 3341 asks for."""
-    n = int(round(fade * fs))
+    n = round(fade * fs)
     out = x.copy()
     out[:n] *= np.linspace(0.0, 1.0, n)
     out[-n:] *= np.linspace(1.0, 0.0, n)
@@ -318,7 +318,7 @@ def test_tech3341_case11_successive_max_short_term() -> None:
                     [
                         np.zeros(int(i * 0.15 * FS)),
                         _sine(-38.0 + i, 3.0),
-                        np.zeros(int(round((3.0 - i * 0.15) * FS))),
+                        np.zeros(round((3.0 - i * 0.15) * FS)),
                     ]
                 )
                 for i in range(20)
@@ -342,7 +342,7 @@ def test_tech3341_case14_successive_max_momentary() -> None:
                     [
                         np.zeros(int(i * 0.02 * FS)),
                         _sine(-38.0 + i, 0.4),
-                        np.zeros(int(round((0.4 - i * 0.02) * FS))),
+                        np.zeros(round((0.4 - i * 0.02) * FS)),
                     ]
                 )
                 for i in range(20)
@@ -387,11 +387,11 @@ def test_tech3341_true_peak_intersample_offsets(offset: int) -> None:
     """Cases 20-23: one fs/4 period inside an fs/6 tone, decimated with a
     0-3 sample offset at the 4 fs synthesis rate; all read 0.0 dBTP."""
     fs4 = 4 * FS
-    n = int(round(1.0 * fs4))
+    n = round(1.0 * fs4)
     frequency = np.full(n, FS / 6.0)
     amplitude = np.full(n, 0.5)
     mid = n // 2
-    period = int(round(fs4 / (FS / 4.0)))
+    period = round(fs4 / (FS / 4.0))
     frequency[mid : mid + period] = FS / 4.0
     amplitude[mid : mid + period] = 1.0
     # Phase-continuous synthesis at 4 fs, tapered as the table asks.

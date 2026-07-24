@@ -29,14 +29,15 @@ Design goals: deterministic, fast (< 1 min), no network, pure library calls.
 
 from __future__ import annotations
 
-import json
 import cmath
+import json
 import math
 import pathlib
 import sys
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Literal, Optional, cast
+from typing import Any, Literal, cast
 
 import numpy as np
 from scipy import signal as sg
@@ -48,13 +49,16 @@ for _p in (str(_TESTS),):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-import reference_data as ref  # noqa: E402
+import reference_data as ref
 
-import phonometry as ph  # noqa: E402
-from phonometry import OctaveFilterBank, WeightingFilter  # noqa: E402
-from phonometry.metrology.compliance import class_limits, verify_filter_class  # noqa: E402
-from phonometry.psychoacoustics.sharpness import reference_sound  # noqa: E402
-from phonometry.hearing.sti import _sti_from_mtf  # noqa: E402
+import phonometry as ph
+from phonometry import OctaveFilterBank, WeightingFilter
+from phonometry.hearing.sti import _sti_from_mtf
+from phonometry.metrology.compliance import (
+    class_limits,
+    verify_filter_class,
+)
+from phonometry.psychoacoustics.sharpness import reference_sound
 
 
 # ===========================================================================
@@ -119,7 +123,7 @@ def numeric(
     unit: str = "",
     rel: bool = False,
     places: int = 4,
-    expected_label: Optional[str] = None,
+    expected_label: str | None = None,
 ) -> Outcome:
     """Build an Outcome for ``|computed - expected| <= tol`` (abs or rel)."""
     delta = computed - expected
@@ -158,7 +162,7 @@ class FilterClass:
     number and the range it must sit in, not just the margin.
     """
 
-    overall_class: Optional[int]
+    overall_class: int | None
     min_margin1: float
     min_margin2: float
     bind_freq: float
@@ -252,7 +256,7 @@ def _weighting_deviation(curve: str, fs: int) -> WeightingDeviation:
     for G it is the ISO 7196 Annex A.3 +/-1 dB instrumentation tolerance.
     """
     wf = WeightingFilter(fs, curve)
-    design_fs = wf.fs * wf._oversample  # noqa: SLF001 - documented attribute
+    design_fs = wf.fs * wf._oversample
     if curve == "G":
         rows = [r for r in ref.ISO7196_TABLE2 if r[0] < fs / 2]
         # Table 2 lists nominal one-third-octave labels; evaluate at the
@@ -458,7 +462,7 @@ def _chk_d_weighting() -> Outcome:
     # residuals below 0.1 dB, so the acceptance bound is 0.2 dB (0.45 dB at
     # the two outlier cells).
     wf = WeightingFilter(48000, "D")
-    design_fs = wf.fs * wf._oversample  # noqa: SLF001 - documented attribute
+    design_fs = wf.fs * wf._oversample
     freqs = np.array([r[0] for r in ref.IEC537_NASA_TABLE_SLD1], dtype=float)
     table = np.array([r[1] for r in ref.IEC537_NASA_TABLE_SLD1], dtype=float)
     _, h = sg.sosfreqz(wf.sos, worN=np.concatenate([freqs, [1000.0]]), fs=design_fs)
@@ -949,7 +953,7 @@ def _chk_mg_loudness() -> Outcome:
 )
 def _chk_mg_time_loudness() -> Outcome:
     fs = 32000.0
-    t = np.arange(int(round(0.8 * fs))) / fs
+    t = np.arange(round(0.8 * fs)) / fs
     x = math.sqrt(2.0) * 2e-5 * 10.0 ** (40.0 / 20.0) * np.sin(2.0 * np.pi * 1000.0 * t)
     computed = float(ph.loudness_moore_glasberg_time(x, fs).n_max)
     return numeric(
@@ -1023,7 +1027,7 @@ _STI_STAIRCASE = {0.0: 0.00, 0.1: 0.18, 0.2: 0.30, 0.3: 0.38, 0.4: 0.44,
 def _stipa_sine_signal(
     m: float,
     seconds: float = 16.0,
-    bands: Optional[tuple[int, ...]] = None,
+    bands: tuple[int, ...] | None = None,
     edge_carriers: bool = False,
     flat_levels: bool = False,
 ) -> np.ndarray:
@@ -1035,7 +1039,7 @@ def _stipa_sine_signal(
     half-octave edge carriers fc 2^(+/-1/4) per band (A.3.1.2);
     ``flat_levels`` uses g_k = 1 as the A.2.2/A.3.1.2 bench does.
     """
-    t = np.arange(int(round(seconds * _FS))) / _FS
+    t = np.arange(round(seconds * _FS)) / _FS
     x = np.zeros(t.size)
     for k, (fc, fa, fb, level) in enumerate(
         zip(_STI_CENTERS, _STI_F1, _STI_F2, _STI_LEVELS)
@@ -1425,7 +1429,7 @@ _A60 = 6.0 * math.log(10.0)
 
 
 def _exponential_ir(t60: float, seconds: float) -> np.ndarray:
-    t = np.arange(int(round(seconds * _FS))) / _FS
+    t = np.arange(round(seconds * _FS)) / _FS
     return np.asarray(np.exp(-0.5 * _A60 * t / t60))
 
 
@@ -2471,7 +2475,7 @@ def _chk_en12354_2_standardized() -> Outcome:
     )
 
 
-def _en12354_3_annex_f() -> "ph.FacadePredictionResult":
+def _en12354_3_annex_f() -> ph.FacadePredictionResult:
     """The EN 12354-3 Annex F facade prediction from the shared input table."""
     elements = [
         ph.FacadeElement(name=name, area=area, r=r)
@@ -2634,7 +2638,7 @@ def _chk_iso12999_annex_b_values() -> Outcome:
     "Single-number uncertainties (uncorrelated 0,6/0,8; correlated u(Rw) 1,9)",
 )
 def _chk_iso12999_annex_b_uncertainties() -> Outcome:
-    from phonometry.building.insulation import (  # noqa: PLC0415
+    from phonometry.building.insulation import (
         _SPECTRUM1_50_5000,
         _SPECTRUM2_50_5000,
     )
@@ -3576,7 +3580,7 @@ def _chk_gum_welch() -> Outcome:
     return numeric(ref.GUM_WELCH_VEFF, result.effective_dof, 1e-6, places=3)
 
 
-def _gum_h1_result() -> "Any":
+def _gum_h1_result() -> Any:
     quantities = [ph.Quantity(v, unc, dof=dof) for v, unc, dof in ref.GUM_H1_INPUTS]
     with warnings.catch_warnings():
         # alphaS and theta are genuinely flat directions at the H.1 estimates.
@@ -4039,7 +4043,7 @@ def _chk_thd_f() -> Outcome:
     return numeric(ref.DISTORTION_THD_F, value, 1e-4, places=6)
 
 
-def _loudspeaker_flat_response() -> "tuple[np.ndarray, np.ndarray]":
+def _loudspeaker_flat_response() -> tuple[np.ndarray, np.ndarray]:
     """Flat 90 dB on-axis response with ramps crossing 80 dB at 50/18000 Hz."""
     f = np.geomspace(20.0, 20000.0, 400)
     spl = np.full_like(f, 90.0)
@@ -4091,7 +4095,7 @@ def _chk_harmonic_d2() -> Outcome:
     return numeric(ref.DISTORTION_D2, value, 1e-4, places=6)
 
 
-def _microphone_flat_response() -> "tuple[np.ndarray, np.ndarray]":
+def _microphone_flat_response() -> tuple[np.ndarray, np.ndarray]:
     """Flat 0 dB relative response with ramps crossing -3 dB at 40/18000 Hz."""
     f = np.geomspace(20.0, 20000.0, 400)
     rel = np.zeros_like(f)
@@ -4913,7 +4917,7 @@ def _chk_envelope_spectrum_am_line() -> Outcome:
         2.0 * np.pi * 1000.0 * t
     )
     res = ph.envelope_spectrum(x, fs)
-    line = float(res.amplitude[int(round(16.0 * n / fs))])
+    line = float(res.amplitude[round(16.0 * n / fs)])
     return numeric(0.7, line, 2e-3, places=4)
 
 
@@ -5046,7 +5050,7 @@ def _chk_table_a6_upper() -> Outcome:
     return numeric(125.0, float(res.bounds[1]), 0.0, places=0)
 
 
-def _runs_reference_result() -> "ph.TrendTestResult":
+def _runs_reference_result() -> ph.TrendTestResult:
     rng = np.random.default_rng(20)
     return ph.trend_test(rng.standard_normal(20), method="runs")
 
@@ -5291,7 +5295,7 @@ def _chk_uwp_thorp() -> Outcome:
     "Absorption agreement at 10 kHz, 10 °C, 35 ‰, 0 m, pH 8, dB/km",
 )
 def _chk_uwp_absorption_agreement() -> Outcome:
-    kw = dict(temperature=10.0, salinity=35.0, depth=0.0, ph=8.0)
+    kw = {"temperature": 10.0, "salinity": 35.0, "depth": 0.0, "ph": 8.0}
     fg = float(ph.seawater_absorption(10_000.0, model="francois-garrison", **kw)[0])
     am = float(ph.seawater_absorption(10_000.0, model="ainslie-mccolm", **kw)[0])
     return numeric(fg, am, 0.1 * fg, unit="dB/km", places=4)
@@ -5306,7 +5310,7 @@ def _chk_uwp_fg_printed_table() -> Outcome:
     # Oracle: the printed absorption table of the source paper (J. Acoust.
     # Soc. Am. 72(6), 1982); tolerance is half a unit of the last printed
     # digit, i.e. the print's own rounding.
-    kw = dict(temperature=10.0, salinity=35.0, depth=0.0, ph=8.0)
+    kw = {"temperature": 10.0, "salinity": 35.0, "depth": 0.0, "ph": 8.0}
     got = float(ph.seawater_absorption(100_000.0, model="francois-garrison", **kw)[0])
     return numeric(33.6, got, 0.05, unit="dB/km", places=3)
 
@@ -5591,7 +5595,7 @@ def _chk_doc29_event_assembly() -> Outcome:
     tests_dir = str(_P(__file__).resolve().parent.parent / "tests" / "aircraft")
     if tests_dir not in _sys.path:
         _sys.path.insert(0, tests_dir)
-    from doc29_workbook_data import B1, SEGMENTS  # noqa: PLC0415
+    from doc29_workbook_data import B1, SEGMENTS
 
     rows = SEGMENTS[("JETFDS", "R03")]
     total = 10.0 * math.log10(sum(10.0 ** (r[-1] / 10.0) for r in rows))
@@ -5699,7 +5703,7 @@ def _chk_doc32_chain() -> Outcome:
                      55.8, 56.4, 53.4, 52.9])
     f1, f2, f3, f4 = 20.598997, 107.65265, 737.86223, 12194.217
 
-    def _ra(x: "np.ndarray") -> "np.ndarray":
+    def _ra(x: np.ndarray) -> np.ndarray:
         return (f4**2 * x**4) / ((x**2 + f1**2)
                                  * np.sqrt((x**2 + f2**2) * (x**2 + f3**2))
                                  * (x**2 + f4**2))
@@ -5713,7 +5717,7 @@ def _chk_doc32_chain() -> Outcome:
     return numeric(55.87, got, 0.1, unit="dB(A)", places=3)
 
 
-def _uniform_hemisphere(level: float, bands: "list[float] | None" = None) -> Any:
+def _uniform_hemisphere(level: float, bands: list[float] | None = None) -> Any:
     """A synthetic hemisphere with one uniform level on the standard 10° grid."""
     freqs = np.asarray(bands if bands is not None else [50.0], dtype=np.float64)
     az = np.arange(-90.0, 91.0, 10.0)
@@ -6153,7 +6157,7 @@ _EBU_FS = 48000
 
 def _ebu_tone(level_dbfs: float, duration_s: float, freq: float = 1000.0) -> np.ndarray:
     """A sine with per-sample peak level ``level_dbfs`` re full scale."""
-    t = np.arange(int(round(duration_s * _EBU_FS))) / _EBU_FS
+    t = np.arange(round(duration_s * _EBU_FS)) / _EBU_FS
     return np.asarray(10.0 ** (level_dbfs / 20.0) * np.sin(2 * np.pi * freq * t))
 
 
@@ -7120,7 +7124,7 @@ _DOC_HEADER = """<!--
 """
 
 
-def main(argv: Optional[list[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     markdown, passed, total = render_markdown()
     # The root artifact feeds the CI PR comment; keep it header-free.

@@ -24,7 +24,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import format_number, t
 from ._layout import (
@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     import numpy as np
 
 
-def frequency_range(frequencies: "np.ndarray", language: str = "en") -> str:
+def frequency_range(frequencies: np.ndarray, language: str = "en") -> str:
     """The ``fmin - fmax`` frequency-range string, in hertz (compact form)."""
     lo = format_number(float(frequencies.min()), language, decimals=1, trim=True)
     hi = format_number(float(frequencies.max()), language, decimals=1, trim=True)
@@ -55,9 +55,9 @@ def frequency_range(frequencies: "np.ndarray", language: str = "en") -> str:
 
 def frf_metadata_pairs(
     metadata: ReportMetadata,
-    extra: List[Tuple[str, str | None]],
+    extra: list[tuple[str, str | None]],
     language: str = "en",
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the FRF fiche header grid.
 
     The generic identity fields an FRF characterisation report carries (client,
@@ -67,7 +67,7 @@ def frf_metadata_pairs(
     supplied fields are returned; the free-text values are XML-escaped so a stray
     ``&`` or ``<`` cannot break reportlab's ``Paragraph`` parser.
     """
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Manufacturer", language), metadata.manufacturer),
         (t("Description", language), metadata.specimen),
@@ -96,10 +96,10 @@ def render_frf_fiche(
     title: str,
     basis: str,
     caption: str,
-    header_pairs: List[Tuple[str, str]],
-    metric_rows: List[Tuple[str, str]],
+    header_pairs: list[tuple[str, str]],
+    metric_rows: list[tuple[str, str]],
     statement: str,
-    extended: List[str],
+    extended: list[str],
     metadata: ReportMetadata | None,
     language: str = "en",
 ) -> str:
@@ -130,7 +130,7 @@ def render_frf_fiche(
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

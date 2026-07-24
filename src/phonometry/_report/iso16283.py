@@ -43,7 +43,8 @@ matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Sequence, Tuple, cast
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -137,8 +138,8 @@ _IMPACT_QUANTITIES = ("l_n_t", "l_n")
 
 
 def render_iso16283_report(
-    result: "AirborneInsulationResult | ImpactInsulationResult",
-    rating: "WeightedRatingResult | ImpactRatingResult",
+    result: AirborneInsulationResult | ImpactInsulationResult,
+    rating: WeightedRatingResult | ImpactRatingResult,
     path: str,
     *,
     quantity: str,
@@ -175,7 +176,7 @@ def render_iso16283_report(
 
     def build_columns(
         value_header: str, curve: np.ndarray, verbose: bool, language: str
-    ) -> Tuple[Sequence[Column], str, Any]:
+    ) -> tuple[Sequence[Column], str, Any]:
         """The field table: ``f | value`` or, verbose, the measurement chain."""
         from reportlab.lib.units import mm
 
@@ -187,7 +188,7 @@ def render_iso16283_report(
 
         if is_impact:
             impact_result = cast("ImpactInsulationResult", result)
-            chain: List[Column] = [
+            chain: list[Column] = [
                 ("L<sub>i</sub> [dB]",
                  np.asarray(impact_result.li, dtype=np.float64), 1),
                 ("T [s]", np.asarray(impact_result.t2, dtype=np.float64), 2),
@@ -270,8 +271,8 @@ _FACADE_SPECS: dict[str, dict[str, str]] = {
 
 
 def render_iso16283_facade_report(
-    result: "FacadeInsulationResult",
-    rating: "WeightedRatingResult",
+    result: FacadeInsulationResult,
+    rating: WeightedRatingResult,
     path: str,
     *,
     quantity: str,

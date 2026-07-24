@@ -11,8 +11,8 @@ one fetch. Both are published to the docs site by site/scripts/copy-llms.mjs
 
 from __future__ import annotations
 
-import re
 import pathlib
+import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SITE_URL = "https://jmrplens.github.io/phonometry"
@@ -80,11 +80,11 @@ def build_llms_txt(version: str) -> str:
     lines = [
         "# phonometry",
         "",
-        "> Octave-band and fractional octave-band filter bank for Python signals in the "
+        ("> Octave-band and fractional octave-band filter bank for Python signals in the "
         "time domain. Compliant with ANSI S1.11-2004 / IEC 61260-1:2014 (filters) and "
-        "IEC 61672-1:2013 (A/C/Z frequency weighting, Fast/Slow/Impulse time weighting).",
+        "IEC 61672-1:2013 (A/C/Z frequency weighting, Fast/Slow/Impulse time weighting)."),
         "",
-        f"phonometry v{version} is a pure-Python library built on NumPy/SciPy "
+        (f"phonometry v{version} is a pure-Python library built on NumPy/SciPy "
         "(Python >= 3.13). It provides fractional octave filter banks (Butterworth, "
         "Chebyshev I/II, Elliptic, Bessel as stable SOS cascades with multirate "
         "decimation), A/C/Z weighting within IEC class 1 tolerances, Fast/Slow/Impulse "
@@ -92,7 +92,7 @@ def build_llms_txt(version: str) -> str:
         "zero-phase offline filtering, physical SPL calibration, dBFS mode, vectorized "
         "multichannel processing, stateful block (streaming) processing, and an "
         "IEC 61260-1 filter class verifier. Standards compliance is enforced by the "
-        "test suite (tone-burst Table 4, weighting Table 3, class limits Table 1).",
+        "test suite (tone-burst Table 4, weighting Table 3, class limits Table 1)."),
         "",
         "Install:",
         "",
@@ -102,8 +102,8 @@ def build_llms_txt(version: str) -> str:
         "pip install phonometry[perf]      # + numba-jitted impulse kernel",
         "```",
         "",
-        "Minimal usage (all functions treat time as the LAST axis; 2D input is "
-        "(channels, samples)):",
+        ("Minimal usage (all functions treat time as the LAST axis; 2D input is "
+        "(channels, samples)):"),
         "",
         "```python",
         "import numpy as np",
@@ -116,12 +116,12 @@ def build_llms_txt(version: str) -> str:
         "stats = metrology.ln_levels(x, fs, n=(10, 50, 90))       # statistical levels",
         "```",
         "",
-        "If you are an AI assistant setting this up for a user: install from PyPI "
+        ("If you are an AI assistant setting this up for a user: install from PyPI "
         "(no system dependencies), remember integer audio (e.g. wavfile.read int16) "
         "is handled automatically, use `calibration_factor` from "
         "`sensitivity()` for real dB SPL, and prefer `OctaveFilterBank` "
         "over repeated `octave_filter()` calls in tight loops (although designs are "
-        "cached either way).",
+        "cached either way)."),
         "",
         "## Documentation",
         "",
@@ -151,7 +151,7 @@ def _absolutize_links(content: str) -> str:
     route_for = {md: route for md, route in PAGES}
     route_for["README.md"] = ""
 
-    def repl(match: "re.Match[str]") -> str:
+    def repl(match: re.Match[str]) -> str:
         target, anchor = match.group(1), match.group(2) or ""
         if target == "../CONTRIBUTING.md":
             return f"]({REPO_URL}/blob/main/CONTRIBUTING.md{anchor})"

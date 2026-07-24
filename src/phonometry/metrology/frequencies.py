@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import warnings
 from functools import lru_cache
-from typing import List, Tuple
 
 import numpy as np
 
@@ -16,8 +15,8 @@ from .._internal.warnings import PhonometryWarning, _warn_renamed
 
 def nominal_frequencies(
     fraction: float,
-    limits: List[float] | None = None,
-) -> Tuple[List[float], List[float], List[float], List[str]]:
+    limits: list[float] | None = None,
+) -> tuple[list[float], list[float], list[float], list[str]]:
     """
     Calculate frequencies according to ANSI/IEC standards.
 
@@ -87,8 +86,8 @@ def _bandedge(g: float, b: float) -> float:
 
 
 def _deleteouters(
-    freq: List[float], freq_d: List[float], freq_u: List[float], fs: int
-) -> Tuple[List[float], List[float], List[float]]:
+    freq: list[float], freq_d: list[float], freq_u: list[float], fs: int
+) -> tuple[list[float], list[float], list[float]]:
     """
     Remove bands exceeding the Nyquist frequency.
 
@@ -117,8 +116,8 @@ def _deleteouters(
 
 
 def _genfreqs(
-    limits: List[float], fraction: float, fs: int
-) -> Tuple[List[float], List[float], List[float], List[str]]:
+    limits: list[float], fraction: float, fs: int
+) -> tuple[list[float], list[float], list[float], list[str]]:
     """
     Determine band frequencies within limits.
 
@@ -145,7 +144,7 @@ def _iec_e3_round(f: float) -> float:
 
 
 @lru_cache(maxsize=4)
-def _extended_preferred(frac: int) -> List[float]:
+def _extended_preferred(frac: int) -> list[float]:
     """Cached expansion of the IEC preferred frequency table across decades."""
     base = normalized_frequencies(frac)
     return [f * (10 ** d) for d in range(-3, 4) for f in base]
@@ -187,7 +186,7 @@ def _format_nominal_freq(f: float) -> str:
     return f"{f:g}"
 
 
-def normalized_frequencies(fraction: int) -> List[float]:
+def normalized_frequencies(fraction: int) -> list[float]:
     """
     Get standardized IEC center frequencies.
 
@@ -212,14 +211,14 @@ def normalized_frequencies(fraction: int) -> List[float]:
 # --------------------------------------------------------------------------- #
 def getansifrequencies(
     fraction: float,
-    limits: List[float] | None = None,
-) -> Tuple[List[float], List[float], List[float], List[str]]:
+    limits: list[float] | None = None,
+) -> tuple[list[float], list[float], list[float], list[str]]:
     """Deprecated alias of :func:`nominal_frequencies`."""
     _warn_renamed("getansifrequencies()", "nominal_frequencies()")
     return nominal_frequencies(fraction, limits)
 
 
-def normalizedfreq(fraction: int) -> List[float]:
+def normalizedfreq(fraction: int) -> list[float]:
     """Deprecated alias of :func:`normalized_frequencies`."""
     _warn_renamed("normalizedfreq()", "normalized_frequencies()")
     return normalized_frequencies(fraction)

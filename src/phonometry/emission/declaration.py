@@ -36,8 +36,9 @@ declaration is most often built from a measured sound power via
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal, Sequence
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
@@ -53,7 +54,7 @@ def _round_db(value: float) -> int:
     already declares rounded integers is unaffected, and a value derived from an
     unrounded measurement is rounded here.
     """
-    return int(math.floor(float(value) + 0.5))
+    return math.floor(float(value) + 0.5)
 
 
 @dataclass(frozen=True)
@@ -235,7 +236,7 @@ class NoiseEmissionDeclaration:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

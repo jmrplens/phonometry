@@ -248,7 +248,7 @@ class DynamicStiffnessResult:
     floor_mass_per_area: float
     natural_frequency: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot ``f0(s')`` with this design point marked.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -264,7 +264,7 @@ class DynamicStiffnessResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

@@ -22,9 +22,9 @@ pytest.importorskip("matplotlib")
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 
-from phonometry._plot.common import (  # noqa: E402
+from phonometry._plot.common import (
     _annotate_impact_500,
     _band_axis,
     _facade_x_axis,

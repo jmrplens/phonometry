@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 import reference_data as ref
+
 from phonometry import (
     adaptation_term_kc,
     combine_subareas,

@@ -1,5 +1,6 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 import os
+
 import pytest
 
 # Select a non-interactive matplotlib backend for the headless test suite.

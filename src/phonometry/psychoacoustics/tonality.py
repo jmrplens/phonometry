@@ -18,12 +18,11 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import List, Tuple
 
 import numpy as np
 
-from .._internal.warnings import PhonometryWarning
 from .._internal.utils import _typesignal
+from .._internal.warnings import PhonometryWarning
 from ..metrology.spectra import _welch_autospectrum
 
 
@@ -111,7 +110,7 @@ class ToneAssessment:
     prominent: bool
 
 
-def _critical_band(f0: float) -> Tuple[float, float, float]:
+def _critical_band(f0: float) -> tuple[float, float, float]:
     """Clause 10: critical bandwidth and band-edge frequencies at ``f0``.
 
     Formula (2): dfc = 25,0 + 75,0*(1,0 + 1,4*(f0/1000)^2)^0,69.
@@ -139,12 +138,12 @@ def _proximity_spacing(fp: float) -> float:
 
 def _averaged_spectrum(
     x: np.ndarray, fs: int, resolution_hz: float
-) -> Tuple[np.ndarray, np.ndarray, float]:
+) -> tuple[np.ndarray, np.ndarray, float]:
     """Hann-windowed, RMS-averaged power spectrum (clauses 11.1 / 12.1).
 
     Returns (frequencies, bin powers in Pa^2-like units, bin spacing).
     """
-    nperseg = int(round(fs / resolution_hz))
+    nperseg = round(fs / resolution_hz)
     if nperseg < 16:
         raise ValueError(
             f"resolution_hz={resolution_hz!r} is too coarse for fs={fs}: it "
@@ -173,7 +172,7 @@ def _find_peak(freqs: np.ndarray, power: np.ndarray, tone_freq: float | None) ->
     return int(np.flatnonzero(near)[np.argmax(power[near])])
 
 
-def _tone_band(power: np.ndarray, peak: int, half_width_bins: int) -> Tuple[int, int]:
+def _tone_band(power: np.ndarray, peak: int, half_width_bins: int) -> tuple[int, int]:
     """Clause 11.2: tone-band edges at the minimal points on both sides of
     the peak within 15 % of the critical band; if the minimum falls on the
     window edge, the nearest local minimum beyond it is used."""
@@ -196,7 +195,7 @@ def _tone_band(power: np.ndarray, peak: int, half_width_bins: int) -> Tuple[int,
     return _edge(-1), _edge(+1)
 
 
-def _band_power(freqs: np.ndarray, power: np.ndarray, f1: float, f2: float) -> Tuple[float, int]:
+def _band_power(freqs: np.ndarray, power: np.ndarray, f1: float, f2: float) -> tuple[float, int]:
     mask = (freqs > f1) & (freqs <= f2)
     n = int(np.count_nonzero(mask))
     if n == 0:
@@ -222,7 +221,7 @@ def _pr_criterion(ft: float) -> float:
 
 
 def tone_to_noise_ratio(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     tone_freq: float | None = None,
     resolution_hz: float = 1.0,
@@ -263,7 +262,7 @@ def tone_to_noise_ratio(
     f1, f2, dfc = _critical_band(ft)
     _warn_coarse_resolution(dfc, df, ft)
 
-    half_width_bins = max(1, int(round(0.075 * dfc / df)))
+    half_width_bins = max(1, round(0.075 * dfc / df))
     lo, hi = _tone_band(power, peak, half_width_bins)
     n_tone = hi - lo + 1
     # Formula (9): subtract the line connecting the band-edge levels.
@@ -322,7 +321,7 @@ _UPPER_EDGE_COEFFS = (
 
 
 def _fitted_edge(
-    ft: float, table: Tuple[Tuple[float, float, Tuple[float, float, float]], ...]
+    ft: float, table: tuple[tuple[float, float, tuple[float, float, float]], ...]
 ) -> float:
     # Peaks marginally outside the range of interest (the verdict already
     # reports them as non-prominent) are clipped to the table span.
@@ -334,7 +333,7 @@ def _fitted_edge(
 
 
 def prominence_ratio(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     tone_freq: float | None = None,
     resolution_hz: float = 1.0,

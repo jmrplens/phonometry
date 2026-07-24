@@ -472,7 +472,7 @@ class ImpedanceTubeResult:
     normalized_impedance: Complex
     absorption: Real
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the absorption spectrum ``alpha(f)`` with ``|r|`` overlaid.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -488,7 +488,7 @@ class ImpedanceTubeResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

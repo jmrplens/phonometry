@@ -6,7 +6,7 @@ Basic test and usage example for phonometry.
 
 import numpy as np
 
-import phonometry as phonometry
+import phonometry
 from phonometry._version import __version__
 
 
@@ -87,7 +87,7 @@ def test_octave_filter_reuses_cached_bank(monkeypatch) -> None:
     calls = {"n": 0}
     original_init = OctaveFilterBank.__init__
 
-    def counting_init(self, *args, **kwargs):  # noqa: ANN001, ANN002, ANN003
+    def counting_init(self, *args, **kwargs):
         calls["n"] += 1
         original_init(self, *args, **kwargs)
 

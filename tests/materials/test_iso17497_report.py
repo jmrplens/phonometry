@@ -17,10 +17,12 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-import numpy as np  # noqa: E402  (import after importorskip)
+import numpy as np
 
-from phonometry import ReportMetadata  # noqa: E402  (import after importorskip)
-from phonometry import materials  # noqa: E402
+from phonometry import (
+    ReportMetadata,
+    materials,
+)
 
 _PDF_MAGIC = b"%PDF"
 
@@ -95,23 +97,23 @@ def _polar():
 
 
 def _metadata(**overrides) -> ReportMetadata:
-    base = dict(
-        specimen="Quadratic-residue diffuser (N = 7)",
-        client="Acoustic Test Client Ltd.",
-        manufacturer="Acoustics Works Inc.",
-        area=10.0,
-        room_volume=200.0,
-        mounting="Circular sample on the rotating turntable",
-        test_room="Reverberation room R1",
-        measurement_standard="ISO 17497-1",
-        temperature=20.0,
-        relative_humidity=54.0,
-        pressure=101.0,
-        test_date="2026-07-21",
-        laboratory="Phonometry Reference Laboratory",
-        operator="J. M. Requena-Plens",
-        report_id="PHN-2026-17497",
-    )
+    base = {
+        "specimen": "Quadratic-residue diffuser (N = 7)",
+        "client": "Acoustic Test Client Ltd.",
+        "manufacturer": "Acoustics Works Inc.",
+        "area": 10.0,
+        "room_volume": 200.0,
+        "mounting": "Circular sample on the rotating turntable",
+        "test_room": "Reverberation room R1",
+        "measurement_standard": "ISO 17497-1",
+        "temperature": 20.0,
+        "relative_humidity": 54.0,
+        "pressure": 101.0,
+        "test_date": "2026-07-21",
+        "laboratory": "Phonometry Reference Laboratory",
+        "operator": "J. M. Requena-Plens",
+        "report_id": "PHN-2026-17497",
+    }
     base.update(overrides)
     return ReportMetadata(**base)
 

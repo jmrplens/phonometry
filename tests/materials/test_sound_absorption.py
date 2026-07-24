@@ -29,7 +29,6 @@ from phonometry import (
 )
 from phonometry.materials.sound_absorption import _speed_of_sound
 
-
 # --- Eq. (6): speed of sound ------------------------------------------------
 
 def test_speed_of_sound_reference_20c() -> None:
@@ -345,7 +344,7 @@ def test_synergy_with_room_parameters() -> None:
 
 # --- SoundAbsorptionMeasurement result type (Clause 8) ----------------------
 
-from phonometry import (  # noqa: E402
+from phonometry import (
     SoundAbsorptionMeasurement,
     measure_sound_absorption,
 )

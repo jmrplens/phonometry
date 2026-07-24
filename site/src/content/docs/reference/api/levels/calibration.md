@@ -13,7 +13,7 @@ Calibration utilities for mapping digital signals to physical SPL levels.
 
 ```python
 calculate_sensitivity(
-    ref_signal: List[float] | np.ndarray,
+    ref_signal: list[float] | np.ndarray,
     target_spl: float = 94.0,
     ref_pressure: float = 2e-05,
     fs: int | None = None,
@@ -34,7 +34,7 @@ The calibration reference recording looks unreliable.
 
 ```python
 sensitivity(
-    ref_signal: List[float] | np.ndarray,
+    ref_signal: list[float] | np.ndarray,
     target_spl: float = 94.0,
     ref_pressure: float = 2e-05,
     fs: int | None = None,

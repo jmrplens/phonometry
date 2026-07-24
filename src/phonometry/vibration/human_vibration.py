@@ -54,10 +54,10 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
+from scipy import signal as sig
 
 from .._internal.types import Real
 from .._internal.warnings import PhonometryWarning
-from scipy import signal as sig
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
@@ -67,8 +67,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 Complex = NDArray[np.complex128]
 
 __all__ = [
-    "HAV_ELV_A8",
     "HAV_EAV_A8",
+    "HAV_ELV_A8",
     "REFERENCE_ACCELERATION",
     "REFERENCE_DURATION_S",
     "WBV_EAV_A8",
@@ -479,7 +479,7 @@ def running_rms(
         raise ValueError("'integration_time' must be positive and finite.")
     power = x**2
     if method == "linear":
-        window = max(1, int(round(tau * fs)))
+        window = max(1, round(tau * fs))
         # Causal sliding mean over the trailing ``tau`` seconds, O(n) via a
         # prefix sum (early samples average over the samples available, i.e.
         # zero-padded at the front, matching the "slow" running r.m.s.).
@@ -824,7 +824,7 @@ class DailyVibrationExposure:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -883,7 +883,7 @@ def daily_vibration_exposure(
     durations_s: ArrayLike,
     *,
     kind: str,
-    labels: "list[str] | tuple[str, ...] | None" = None,
+    labels: list[str] | tuple[str, ...] | None = None,
 ) -> DailyVibrationExposure:
     """Daily exposure from several operations, assessed (ISO 5349 + Directive).
 

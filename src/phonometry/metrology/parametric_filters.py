@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import math
 from functools import lru_cache
-from typing import List, Tuple, cast
+from typing import cast
 
 import numpy as np
 from scipy import signal
@@ -126,7 +126,7 @@ class WeightingFilter:
             self.zi = np.array([])
             self._steady_ic = steady_ic
 
-    def _analog_design(self) -> Tuple[np.ndarray, np.ndarray, float]:
+    def _analog_design(self) -> tuple[np.ndarray, np.ndarray, float]:
         """Analog ZPK of the selected curve, normalised at its reference.
 
         Also adjusts ``self._oversample`` for the curves whose action extends
@@ -280,7 +280,7 @@ class WeightingFilter:
         """Check whether ``zi`` must be (re)allocated for *x_proc*."""
         return _sos_state_mismatch(self.zi, x_proc)
 
-    def filter(self, x: List[float] | np.ndarray) -> np.ndarray:
+    def filter(self, x: list[float] | np.ndarray) -> np.ndarray:
         """
         Apply the weighting filter to a signal.
 
@@ -323,7 +323,7 @@ def _cached_weighting_filter(
 
 
 def weighting_filter(
-    x: List[float] | np.ndarray, fs: int, curve: str = "A", high_accuracy: bool = True
+    x: list[float] | np.ndarray, fs: int, curve: str = "A", high_accuracy: bool = True
 ) -> np.ndarray:
     """
     Apply a frequency weighting to a signal.
@@ -402,7 +402,7 @@ else:  # pragma: no cover - exercised only without numba installed
     _apply_impulse_kernel = _impulse_kernel_py
 
 def time_weighting(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     mode: str = "fast",
     initial_state: str | float | np.ndarray | None = None,
@@ -480,7 +480,7 @@ class TimeWeighting:
         self.mode = mode.lower()
         self._state: np.ndarray | None = None
 
-    def process(self, x: List[float] | np.ndarray) -> np.ndarray:
+    def process(self, x: list[float] | np.ndarray) -> np.ndarray:
         """Apply time weighting to a block, continuing from the previous block."""
         x_proc = _typesignal(x)
         if x_proc.shape[-1] == 0:
@@ -495,11 +495,11 @@ class TimeWeighting:
 
 
 def linkwitz_riley(
-    x: List[float] | np.ndarray, 
+    x: list[float] | np.ndarray, 
     fs: int, 
     freq: float, 
     order: int = 4
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Linkwitz-Riley crossover filter (Butterworth squared).
     Splits signal into low and high bands with flat sum response.

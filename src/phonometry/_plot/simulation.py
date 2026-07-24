@@ -35,7 +35,7 @@ def _t(text: str, language: str = "en", **fmt: Any) -> str:
 
 
 def plot_fdtd_probes(
-    result: "FDTDResult", ax: Axes | None = None, *, language: str = "en",
+    result: FDTDResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Pressure time history at each probe of an FDTD run.
@@ -68,7 +68,7 @@ def plot_fdtd_probes(
 
 
 def plot_fdtd_snapshot(
-    result: "FDTDResult", ax: Axes | None = None, *, frame: int = -1,
+    result: FDTDResult, ax: Axes | None = None, *, frame: int = -1,
     language: str = "en", **kwargs: Any
 ) -> Axes:
     """One recorded pressure-field snapshot with the geometry overlaid.

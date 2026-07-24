@@ -62,7 +62,7 @@ def parse_test_results(test_dir):
                     cov_root = cov_tree.getroot()
                     line_rate = float(cov_root.attrib.get("line-rate", 0))
                     coverage_pct = f"{line_rate * 100:.1f}%"
-                except Exception:
+                except Exception:  # noqa: BLE001 - degrade gracefully if the coverage artifact is malformed
                     coverage_pct = "error"
 
             status = "✅ Passed" if failures == 0 else "❌ Failed"
@@ -72,7 +72,7 @@ def parse_test_results(test_dir):
 
             total_tests += tests
             total_failures += failures
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - degrade gracefully if the coverage artifact is malformed
             summary.append(f"| {f_name} | - | - | - | ⚠️ Error parsing: {e} |")
 
     return "\n".join(summary), total_tests, total_failures

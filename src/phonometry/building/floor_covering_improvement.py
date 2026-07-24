@@ -44,8 +44,9 @@ results (Clause 8 e)) also carries the spectrum adaptation term ``CI,Δ``
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -170,7 +171,7 @@ class FloorCoveringImprovementResult:
         """Return ``(octave_freqs, ΔLoct)`` via Formula (5) (needs 16 1/3-oct bands)."""
         return improvement_octave_bands(self.improvement, self.frequencies)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the improvement spectrum ``ΔL`` (with ``ΔLw`` when available).
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -186,7 +187,7 @@ class FloorCoveringImprovementResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

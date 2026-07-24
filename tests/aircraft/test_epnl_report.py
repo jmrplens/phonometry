@@ -21,7 +21,7 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import ReportMetadata, effective_perceived_noise_level  # noqa: E402
+from phonometry import ReportMetadata, effective_perceived_noise_level
 
 _PDF_MAGIC = b"%PDF"
 

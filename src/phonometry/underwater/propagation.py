@@ -47,7 +47,7 @@ def _positive(value: float, name: str) -> float:
     return scalar
 
 
-def _positive_array(values: "NDArray[np.float64] | list[float] | float", name: str) -> "NDArray[np.float64]":
+def _positive_array(values: NDArray[np.float64] | list[float] | float, name: str) -> NDArray[np.float64]:
     arr = np.atleast_1d(np.asarray(values, dtype=np.float64))
     if arr.size == 0 or not np.all(np.isfinite(arr)):
         raise ValueError(f"'{name}' must be finite and non-empty.")
@@ -57,11 +57,11 @@ def _positive_array(values: "NDArray[np.float64] | list[float] | float", name: s
 
 
 def spreading_loss(
-    range_m: "NDArray[np.float64] | list[float] | float",
+    range_m: NDArray[np.float64] | list[float] | float,
     *,
     law: str = "spherical",
-    transition_range: "float | None" = None,
-) -> "NDArray[np.float64]":
+    transition_range: float | None = None,
+) -> NDArray[np.float64]:
     """Geometrical spreading loss, in dB.
 
     ``"spherical"`` gives ``20·lg(R)`` (free field), ``"cylindrical"`` gives
@@ -91,13 +91,13 @@ def spreading_loss(
     raise ValueError(f"'law' must be one of {_SPREADING_LAWS}, got {law!r}.")
 
 
-def _thorp(f_khz: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _thorp(f_khz: NDArray[np.float64]) -> NDArray[np.float64]:
     return 1.0936 * (0.1 * f_khz**2 / (1.0 + f_khz**2) + 40.0 * f_khz**2 / (4100.0 + f_khz**2))
 
 
 def _francois_garrison(
-    f_khz: "NDArray[np.float64]", t: float, s: float, z_m: float, ph: float
-) -> "NDArray[np.float64]":
+    f_khz: NDArray[np.float64], t: float, s: float, z_m: float, ph: float
+) -> NDArray[np.float64]:
     c = 1412.0 + 3.21 * t + 1.19 * s + 0.0167 * z_m
     # Boric-acid factor A1 = (8.86/c)*10^(0.78 pH - 5) per the original paper
     # (Francois & Garrison 1982 Part II, Eq. (10)/Fig. 7), whose own Table IV
@@ -123,8 +123,8 @@ def _francois_garrison(
 
 
 def _ainslie_mccolm(
-    f_khz: "NDArray[np.float64]", t: float, s: float, z_km: float, ph: float
-) -> "NDArray[np.float64]":
+    f_khz: NDArray[np.float64], t: float, s: float, z_km: float, ph: float
+) -> NDArray[np.float64]:
     f1 = 0.78 * (s / 35.0) ** 0.5 * np.exp(t / 26.0)
     f2 = 42.0 * np.exp(t / 17.0)
     boric = 0.106 * f1 * f_khz**2 / (f_khz**2 + f1**2) * np.exp((ph - 8.0) / 0.56)
@@ -134,14 +134,14 @@ def _ainslie_mccolm(
 
 
 def seawater_absorption(
-    frequency_hz: "NDArray[np.float64] | list[float] | float",
+    frequency_hz: NDArray[np.float64] | list[float] | float,
     *,
     temperature: float = 10.0,
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
     model: str = "francois-garrison",
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Volume absorption coefficient ``α``, in dB/km.
 
     :param frequency_hz: Acoustic frequency, in Hz (scalar or array).
@@ -187,16 +187,16 @@ class TransmissionLossResult:
     :ivar model: The absorption model used.
     """
 
-    range_m: "NDArray[np.float64]"
-    tl: "NDArray[np.float64]"
-    spreading: "NDArray[np.float64]"
-    absorption: "NDArray[np.float64]"
+    range_m: NDArray[np.float64]
+    tl: NDArray[np.float64]
+    spreading: NDArray[np.float64]
+    absorption: NDArray[np.float64]
     frequency: float
     absorption_coefficient: float
     law: str
     model: str
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the transmission loss versus range with its two contributions."""
         from .._i18n import check_language
         from .._plot.underwater import plot_transmission_loss
@@ -205,7 +205,7 @@ class TransmissionLossResult:
 
 
 def transmission_loss(
-    range_m: "NDArray[np.float64] | list[float] | float",
+    range_m: NDArray[np.float64] | list[float] | float,
     frequency_hz: float,
     *,
     law: str = "spherical",
@@ -214,7 +214,7 @@ def transmission_loss(
     depth: float = 0.0,
     ph: float = 8.0,
     model: str = "francois-garrison",
-    transition_range: "float | None" = None,
+    transition_range: float | None = None,
 ) -> TransmissionLossResult:
     """Total transmission loss ``TL = spreading + α·R`` versus range.
 

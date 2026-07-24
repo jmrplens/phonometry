@@ -162,7 +162,7 @@ class SoundReductionResult:
         r = np.asarray(self.transmission_loss, dtype=np.float64)
         return np.asarray(10.0 ** (-r / 10.0), dtype=np.float64)
 
-    def rating(self, bands: str | None = None) -> "WeightedRatingResult":
+    def rating(self, bands: str | None = None) -> WeightedRatingResult:
         """Single-number weighted rating ``Rw`` of the predicted ``R(f)``.
 
         Delegates to :func:`phonometry.weighted_rating` (ISO 717-1); requires
@@ -193,7 +193,7 @@ class SoundReductionResult:
         """
         return self.rating().report(path, **kwargs)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the predicted sound reduction index ``R(f)``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -297,7 +297,7 @@ def mass_spring_mass_resonance(
     mass2: float,
     gap: float,
     *,
-    cavity_medium: "PorousMediumResult | None" = None,
+    cavity_medium: PorousMediumResult | None = None,
     speed_of_sound: float = _SPEED_OF_SOUND,
     air_density: float = _AIR_DENSITY,
 ) -> float:
@@ -345,7 +345,7 @@ def double_wall_transmission_loss(
     gap: float,
     *,
     loss_factor: float = 0.1,
-    cavity_medium: "PorousMediumResult | None" = None,
+    cavity_medium: PorousMediumResult | None = None,
     band: str = "third",
     speed_of_sound: float = _SPEED_OF_SOUND,
     air_density: float = _AIR_DENSITY,

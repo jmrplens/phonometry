@@ -15,12 +15,11 @@ couple of the model values, like the sibling report tests.
 from __future__ import annotations
 
 import pytest
-
 import reference_data as ref
 
 pytest.importorskip("reportlab")
 
-from phonometry import (  # noqa: E402  (import after importorskip)
+from phonometry import (
     FacadeElement,
     ReportMetadata,
     equivalent_impact_level,
@@ -30,11 +29,11 @@ from phonometry import (  # noqa: E402  (import after importorskip)
     predicted_airborne_insulation,
     predicted_impact_insulation,
 )
-from phonometry.building.building_prediction import (  # noqa: E402
+from phonometry.building.building_prediction import (
     AirbornePredictionResult,
     ImpactPredictionResult,
 )
-from phonometry.building.facade_prediction import (  # noqa: E402
+from phonometry.building.facade_prediction import (
     FacadePredictionResult,
 )
 

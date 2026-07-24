@@ -9,8 +9,9 @@ parameters at the 29 preferred third-octave frequencies of ISO 266.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Sequence, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -81,7 +82,7 @@ def _spl_from_phon(frequency: float, phon: float) -> float:
     return float(10 / alpha_f * np.log10(term) - l_u)
 
 
-def equal_loudness_contour(phon: float) -> Tuple[np.ndarray, np.ndarray]:
+def equal_loudness_contour(phon: float) -> tuple[np.ndarray, np.ndarray]:
     """
     Normal equal-loudness-level contour (ISO 226:2023 Formula 1).
 
@@ -124,7 +125,7 @@ def loudness_level(spl: float, frequency: float) -> float:
     return float(100.0 / 3.0 * np.log10(b))
 
 
-def hearing_threshold() -> Tuple[np.ndarray, np.ndarray]:
+def hearing_threshold() -> tuple[np.ndarray, np.ndarray]:
     """
     Threshold of hearing T_f (ISO 226:2023 Table 1).
 
@@ -136,7 +137,7 @@ def hearing_threshold() -> Tuple[np.ndarray, np.ndarray]:
 
 #: Default loudness levels of the classic ISO 226:2023 contour family: the
 #: 20 phon to 90 phon range of Formula (1) in 10 phon steps.
-_DEFAULT_PHONS: Tuple[float, ...] = (
+_DEFAULT_PHONS: tuple[float, ...] = (
     20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0,
 )
 
@@ -160,13 +161,13 @@ class EqualLoudnessContours:
     """
 
     frequencies: np.ndarray
-    phons: Tuple[float, ...]
+    phons: tuple[float, ...]
     contours: np.ndarray
     threshold: np.ndarray
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the equal-loudness contour family with the hearing threshold.
 
         Draws sound pressure level in dB against a logarithmic frequency axis:
@@ -189,7 +190,7 @@ class EqualLoudnessContours:
 
 def equal_loudness_contours(
     phons: Sequence[float] = _DEFAULT_PHONS,
-    frequencies: "Sequence[float] | np.ndarray | None" = None,
+    frequencies: Sequence[float] | np.ndarray | None = None,
 ) -> EqualLoudnessContours:
     """
     Build the ISO 226:2023 equal-loudness-level contour family.

@@ -140,7 +140,7 @@ _LP_ORDER = 3  # H(fmod) low-pass order (steep upper roll-off)
 _C_FS: float | None = None
 
 
-def _hz_to_bark(f: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _hz_to_bark(f: NDArray[np.float64]) -> NDArray[np.float64]:
     """Critical-band rate z(f) in Bark (Zwicker-Terhardt; Osses 2016 Eq. 3).
 
     Osses 2016 Eq. (3) misprints the first coefficient as 0.76e-4; the
@@ -155,7 +155,7 @@ def _hz_to_bark(f: "NDArray[np.float64]") -> "NDArray[np.float64]":
     )
 
 
-def _terhardt_a0_db(f: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _terhardt_a0_db(f: NDArray[np.float64]) -> NDArray[np.float64]:
     """Outer/middle-ear transmission a0(f), in dB (Terhardt free-field model).
 
     The frequency-dependent gain from free field to the oval window used by the
@@ -172,7 +172,7 @@ def _terhardt_a0_db(f: "NDArray[np.float64]") -> "NDArray[np.float64]":
     return a0
 
 
-def _g_weight(z: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _g_weight(z: NDArray[np.float64]) -> NDArray[np.float64]:
     """Frequency weighting g(z) (Osses 2016 §3.1): 1 up to 15 Bark, then a
     linear taper down to 0.5 at 23.5 Bark."""
     g = np.ones_like(z)
@@ -195,11 +195,11 @@ class FluctuationStrengthResult:
     """
 
     fluctuation_strength: float
-    specific: "NDArray[np.float64]"
-    bark_axis: "NDArray[np.float64]"
-    time_dependent: "NDArray[np.float64]"
+    specific: NDArray[np.float64]
+    bark_axis: NDArray[np.float64]
+    time_dependent: NDArray[np.float64]
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the specific fluctuation strength against critical-band rate."""
         from .._i18n import check_language
         from .._plot.psychoacoustics import plot_fluctuation_strength
@@ -221,7 +221,7 @@ def _bandpass_envelope_filter(fs: float) -> Any:
     return np.vstack([lp, hp])
 
 
-def _cross_covariance(x: "NDArray[np.float64]", y: "NDArray[np.float64]") -> float:
+def _cross_covariance(x: NDArray[np.float64], y: NDArray[np.float64]) -> float:
     """Normalised cross covariance k (Osses 2016 Eq. 9)."""
     n = x.size
     sx = float(np.sum(x))
@@ -238,7 +238,7 @@ def _cross_covariance(x: "NDArray[np.float64]", y: "NDArray[np.float64]") -> flo
     return float(num / np.sqrt(product))
 
 
-def _validate_signal(x: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _validate_signal(x: NDArray[np.float64]) -> NDArray[np.float64]:
     sig = np.asarray(x, dtype=np.float64)
     if sig.ndim != 1:
         raise ValueError("'signal' must be one-dimensional.")
@@ -255,7 +255,7 @@ _INV_GRID_HZ = np.linspace(20.0, 20000.0, 20000)
 _INV_GRID_BARK = _hz_to_bark(_INV_GRID_HZ)
 
 
-def _bark_center_hz(z: "NDArray[np.float64] | float") -> Any:
+def _bark_center_hz(z: NDArray[np.float64] | float) -> Any:
     """Approximate inverse of :func:`_hz_to_bark` for a band centre (Hz).
 
     Accepts a scalar or an array of critical-band rates and returns the matching
@@ -264,7 +264,7 @@ def _bark_center_hz(z: "NDArray[np.float64] | float") -> Any:
     return np.interp(z, _INV_GRID_BARK, _INV_GRID_HZ)
 
 
-def _analyze(sig: "NDArray[np.float64]") -> tuple["NDArray[np.float64]", "NDArray[np.float64]", "NDArray[np.float64]"]:
+def _analyze(sig: NDArray[np.float64]) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Un-calibrated Osses 2016 sum (``C_FS = 1``) of a model-rate signal.
 
     Runs the full front-end -- ear transmission, 47-band excitation filter bank,
@@ -286,9 +286,8 @@ def _analyze(sig: "NDArray[np.float64]") -> tuple["NDArray[np.float64]", "NDArra
     fs_v = float(_FS_SAMPLE_RATE)
 
     # 2 s frames, 50 % overlap.
-    frame_len = int(round(2.0 * fs_v))
-    if sig.size < frame_len:
-        frame_len = sig.size
+    frame_len = round(2.0 * fs_v)
+    frame_len = min(frame_len, sig.size)
     hop = max(1, frame_len // 2)
     starts = list(range(0, max(1, sig.size - frame_len + 1), hop))
     if not starts:
@@ -369,14 +368,14 @@ def _analyze(sig: "NDArray[np.float64]") -> tuple["NDArray[np.float64]", "NDArra
     return time_dependent, specific, z_axis
 
 
-def _reference_signal(seconds: float = 2.0) -> "NDArray[np.float64]":
+def _reference_signal(seconds: float = 2.0) -> NDArray[np.float64]:
     """The 1-vacil reference stimulus (Osses 2016 §2.2), at the model rate.
 
     A 1 kHz tone 100 % amplitude-modulated at 4 Hz, calibrated to 60 dB SPL. The
     signal is fully deterministic (a pure AM sinusoid, no stochastic component),
     so it reproduces the calibration constant exactly on every run.
     """
-    t = np.arange(int(round(seconds * _FS_SAMPLE_RATE))) / float(_FS_SAMPLE_RATE)
+    t = np.arange(round(seconds * _FS_SAMPLE_RATE)) / float(_FS_SAMPLE_RATE)
     x = (1.0 + np.sin(2.0 * np.pi * 4.0 * t)) * np.sin(2.0 * np.pi * 1000.0 * t)
     x = x / np.sqrt(np.mean(x**2)) * 2e-5 * 10.0 ** (60.0 / 20.0)
     return np.asarray(x, dtype=np.float64)
@@ -401,7 +400,7 @@ def _c_fs() -> float:
 
 
 def fluctuation_strength(
-    signal_in: "NDArray[np.float64]",
+    signal_in: NDArray[np.float64],
     fs: float,
 ) -> FluctuationStrengthResult:
     """Fluctuation strength of a calibrated signal (Osses 2016 model).
@@ -459,7 +458,7 @@ def fluctuation_strength(
 
     # Resample to the model design rate.
     if fs_v != _FS_SAMPLE_RATE:
-        n_out = int(round(sig.size * _FS_SAMPLE_RATE / fs_v))
+        n_out = round(sig.size * _FS_SAMPLE_RATE / fs_v)
         sig = np.asarray(sp_signal.resample(sig, max(n_out, 1)), dtype=np.float64)
 
     time_dependent_raw, specific_raw, z_axis = _analyze(sig)

@@ -92,8 +92,8 @@ _Interpolation = Literal["parabolic", "none"]
 
 
 def _linear_correlation(
-    x: "NDArray[np.float64]", y: "NDArray[np.float64]"
-) -> "NDArray[np.float64]":
+    x: NDArray[np.float64], y: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """Raw linear correlation sums ``c(r) = Σₖ x[k]·y[k+r]`` via FFT.
 
     Zero-padded FFT computation (B&P Section 11.4.2): the returned array
@@ -107,8 +107,8 @@ def _linear_correlation(
 
 
 def _coefficient_correlation(
-    x: "NDArray[np.float64]", y: "NDArray[np.float64]"
-) -> "NDArray[np.float64]":
+    x: NDArray[np.float64], y: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """Correlation coefficient function ``ρxy(τ)`` (B&P Eq. 5.16).
 
     Biased covariance estimate over the mean-removed records, normalized
@@ -142,16 +142,16 @@ class CorrelationResult:
     :ivar duration: Record length ``T = N/fs``, in seconds.
     """
 
-    lags: "NDArray[np.float64]"
-    values: "NDArray[np.float64]"
-    coefficient: "NDArray[np.float64]"
+    lags: NDArray[np.float64]
+    values: NDArray[np.float64]
+    coefficient: NDArray[np.float64]
     normalization: str
     kind: str
     fs: float
     n_samples: int
     duration: float
 
-    def random_error(self, signal_bandwidth: float) -> "NDArray[np.float64]":
+    def random_error(self, signal_bandwidth: float) -> NDArray[np.float64]:
         """Normalized random error of the estimate at each lag.
 
         For bandwidth-limited Gaussian data of bandwidth ``B`` and record
@@ -183,8 +183,8 @@ class CorrelationResult:
             dtype=np.float64,
         )
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the correlation estimate against the lag in seconds.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -197,8 +197,8 @@ class CorrelationResult:
 
 
 def correlation(
-    x: "NDArray[np.float64] | list[float]",
-    y: "NDArray[np.float64] | list[float] | None" = None,
+    x: NDArray[np.float64] | list[float],
+    y: NDArray[np.float64] | list[float] | None = None,
     fs: float = 1.0,
     *,
     normalization: _Normalization = "unbiased",
@@ -244,7 +244,7 @@ def correlation(
 
     m = n - 1
     if max_lag is not None:
-        m = int(round(_positive(max_lag, "max_lag") * fs_v))
+        m = round(_positive(max_lag, "max_lag") * fs_v)
         if not 1 <= m <= n - 1:
             raise ValueError(
                 "'max_lag' must be at least one sample and shorter than "
@@ -339,8 +339,8 @@ def _parabolic_offset(cm: float, c0: float, cp: float) -> float:
 
 
 def _upsampled_peak(
-    curve: "NDArray[np.float64]", index: int, factor: int
-) -> tuple["NDArray[np.float64]", int, float, float]:
+    curve: NDArray[np.float64], index: int, factor: int
+) -> tuple[NDArray[np.float64], int, float, float]:
     """Band-limited local upsampling of ``curve`` around ``index``.
 
     Extracts a window around the coarse peak (clamped to the curve, so a
@@ -369,7 +369,7 @@ def _upsampled_peak(
 
 
 def _refine_peak(
-    curve: "NDArray[np.float64]",
+    curve: NDArray[np.float64],
     index: int,
     interpolation: str,
     upsample: int,
@@ -385,7 +385,7 @@ def _refine_peak(
     """
     position = float(index)
     step = 1.0
-    grid: "NDArray[np.float64]" = curve
+    grid: NDArray[np.float64] = curve
     j = index
     if upsample > 1:
         grid, j, step, position = _upsampled_peak(curve, index, upsample)
@@ -446,16 +446,16 @@ class TimeDelayResult:
     delay_samples: float
     method: str
     weighting: str | None
-    lags: "NDArray[np.float64]"
-    correlation: "NDArray[np.float64]"
+    lags: NDArray[np.float64]
+    correlation: NDArray[np.float64]
     peak_correlation: float
     delay_std: float | None
     delay_interval: tuple[float, float] | None
     signal_bandwidth: float | None
     fs: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the correlation function with the estimated delay marked.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -469,10 +469,10 @@ class TimeDelayResult:
 
 def _gcc_weight(
     weighting: str,
-    gxy: "NDArray[np.complex128]",
-    gxx: "NDArray[np.float64]",
-    gyy: "NDArray[np.float64]",
-) -> "NDArray[np.float64]":
+    gxy: NDArray[np.complex128],
+    gxx: NDArray[np.float64],
+    gyy: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Knapp & Carter (1976) Table I weighting ``ψ(f)``.
 
     Bins where the required denominator vanishes get zero weight (the
@@ -505,14 +505,14 @@ def _gcc_weight(
 
 
 def _delay_error(
-    xa: "NDArray[np.float64]",
-    ya: "NDArray[np.float64]",
+    xa: NDArray[np.float64],
+    ya: NDArray[np.float64],
     delay_samples: float,
     signal_bandwidth: float | None,
     fs: float,
 ) -> tuple[float, float | None, tuple[float, float] | None]:
     """Peak coefficient and the Eq. 8.129 location error of the delay."""
-    r0 = int(round(delay_samples))
+    r0 = round(delay_samples)
     xc = xa - float(np.mean(xa))
     yc = ya - float(np.mean(ya))
     denom = float(np.std(xc)) * float(np.std(yc)) * xa.size
@@ -535,7 +535,7 @@ def _delay_error(
 
 
 def _phase_slope_delay(
-    freqs: "NDArray[np.float64]", gxy: "NDArray[np.complex128]"
+    freqs: NDArray[np.float64], gxy: NDArray[np.complex128]
 ) -> float:
     """Weighted phase-slope delay from the cross-spectrum (Eq. 5.101b).
 
@@ -561,16 +561,16 @@ def _phase_slope_delay(
 
 
 def _direct_tde_curve(
-    xa: "NDArray[np.float64]",
-    ya: "NDArray[np.float64]",
+    xa: NDArray[np.float64],
+    ya: NDArray[np.float64],
     fs: float,
     max_delay: float | None,
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Coefficient cross-correlation restricted to the search window."""
     n = xa.size
     m = n - 1
     if max_delay is not None:
-        m = int(round(_positive(max_delay, "max_delay") * fs))
+        m = round(_positive(max_delay, "max_delay") * fs)
         if not 1 <= m <= n - 1:
             raise ValueError(
                 "'max_delay' must be at least one sample and shorter than "
@@ -583,15 +583,15 @@ def _direct_tde_curve(
 
 
 def _gcc_curve(
-    xa: "NDArray[np.float64]",
-    ya: "NDArray[np.float64]",
+    xa: NDArray[np.float64],
+    ya: NDArray[np.float64],
     fs: float,
     weighting: str,
     window: str,
     nperseg: int | None,
     overlap: float,
     max_delay: float | None,
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]", int]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64], int]:
     """Weighted GCC over the shared Welch core, fftshifted to ±seg/2."""
     seg, ovl = _validate_welch_params(xa.size, fs, nperseg, overlap)
     nov = _noverlap_samples(seg, ovl)
@@ -609,7 +609,7 @@ def _gcc_curve(
     lag_samples = np.fft.fftshift(np.fft.fftfreq(seg)) * seg
     curve = np.asarray(np.fft.fftshift(r), dtype=np.float64)
     if max_delay is not None:
-        m = int(round(_positive(max_delay, "max_delay") * fs))
+        m = round(_positive(max_delay, "max_delay") * fs)
         if not 1 <= m <= (seg - 1) // 2:
             raise ValueError(
                 "'max_delay' must be at least one sample and shorter than "
@@ -623,8 +623,8 @@ def _gcc_curve(
 
 
 def time_delay(
-    x: "NDArray[np.float64] | list[float]",
-    y: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
+    y: NDArray[np.float64] | list[float],
     fs: float,
     *,
     method: _Method = "gcc",
@@ -762,10 +762,10 @@ def time_delay(
 
 
 def impulse_response_delay(
-    ir: "NDArray[np.float64] | list[float]",
+    ir: NDArray[np.float64] | list[float],
     fs: float,
     *,
-    reference: "NDArray[np.float64] | list[float] | None" = None,
+    reference: NDArray[np.float64] | list[float] | None = None,
     interpolation: _Interpolation = "parabolic",
     upsample: int = 8,
 ) -> float:
@@ -825,14 +825,14 @@ class AlignedImpulseResponseResult:
     :ivar fs: Sample rate, in Hz.
     """
 
-    aligned: "NDArray[np.float64]"
-    reference: "NDArray[np.float64]"
+    aligned: NDArray[np.float64]
+    reference: NDArray[np.float64]
     delay: float
     delay_samples: float
     fs: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the reference and the aligned impulse response.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -846,8 +846,8 @@ class AlignedImpulseResponseResult:
 
 
 def align_impulse_responses(
-    ir: "NDArray[np.float64] | list[float]",
-    reference: "NDArray[np.float64] | list[float]",
+    ir: NDArray[np.float64] | list[float],
+    reference: NDArray[np.float64] | list[float],
     fs: float,
     *,
     interpolation: _Interpolation = "parabolic",

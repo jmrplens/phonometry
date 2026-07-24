@@ -82,13 +82,13 @@ def _operation_code(operation: str) -> str:
     return _OPERATION[key]
 
 
-def _rows(text: str) -> "list[dict[str, str]]":
+def _rows(text: str) -> list[dict[str, str]]:
     """Parse a semicolon-delimited ANP CSV table into a list of row mappings."""
     reader = csv.DictReader(text.splitlines(), delimiter=";")
     return [{(k or "").strip(): (v or "").strip() for k, v in row.items()} for row in reader]
 
 
-def _pick(name: str, tables: "Mapping[str, str]") -> str:
+def _pick(name: str, tables: Mapping[str, str]) -> str:
     """Resolve one logical ANP table by a case-insensitive filename keyword.
 
     Accepts both the archive naming (``ANP2.3_NPD_data.csv``) and the curated
@@ -105,7 +105,7 @@ def _pick(name: str, tables: "Mapping[str, str]") -> str:
     return tables[matches[0]]
 
 
-def _distances_m(header: "Iterable[str]") -> "NDArray[np.float64]":
+def _distances_m(header: Iterable[str]) -> NDArray[np.float64]:
     """Slant distances (metres) parsed from the ``L_<ft>ft`` NPD column headers."""
     dist_ft: list[float] = []
     for col in header:
@@ -143,12 +143,12 @@ class AnpNpdCurves:
     metric: str
     operation: str
     power_parameter: str
-    powers: "NDArray[np.float64]"
-    distances: "NDArray[np.float64]"
-    levels: "NDArray[np.float64]"
+    powers: NDArray[np.float64]
+    distances: NDArray[np.float64]
+    levels: NDArray[np.float64]
 
     def level(self, power: float,
-              distance: "NDArray[np.float64] | list[float] | float") -> "NDArray[np.float64]":
+              distance: NDArray[np.float64] | list[float] | float) -> NDArray[np.float64]:
         """Interpolated NPD level ``L(P, d)`` (Doc 29 Eq. 4-3/4-4).
 
         :param power: Query engine power setting.
@@ -159,7 +159,7 @@ class AnpNpdCurves:
 
         return npd_level(self.powers, self.distances, self.levels, power, distance)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the NPD curve at each tabulated power versus slant distance."""
         from .._i18n import check_language
 
@@ -187,11 +187,11 @@ class AnpProfile:
     operation: str
     profile_id: str
     stage_length: int
-    path: "NDArray[np.float64]"
-    ground_roll: "NDArray[np.bool_]"
-    landing_roll: "NDArray[np.bool_]"
+    path: NDArray[np.float64]
+    ground_roll: NDArray[np.bool_]
+    landing_roll: NDArray[np.bool_]
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the trajectory altitude versus along-track distance."""
         from .._i18n import check_language
 
@@ -220,20 +220,20 @@ class AnpAircraft:
     mounting: str
     npd_id: str
     power_parameter: str
-    _database: "AnpDatabase" = field(repr=False, compare=False)
+    _database: AnpDatabase = field(repr=False, compare=False)
 
     def npd_curves(self, operation: str, metric: str = "SEL") -> AnpNpdCurves:
         """NPD curves for this aircraft (see :meth:`AnpDatabase.npd_curves`)."""
         return self._database.npd_curves(self.aircraft_id, operation, metric)
 
     def profile(self, operation: str, stage_length: int = 1, *,
-                profile_id: "str | None" = None) -> AnpProfile:
+                profile_id: str | None = None) -> AnpProfile:
         """Fixed-point profile (see :meth:`AnpDatabase.profile`)."""
         return self._database.profile(self.aircraft_id, operation, stage_length,
                                       profile_id=profile_id)
 
     def event_level(
-        self, observer: "NDArray[np.float64] | list[float]", operation: str, *,
+        self, observer: NDArray[np.float64] | list[float], operation: str, *,
         stage_length: int = 1, metric: str = "exposure",
         temperature: float = 15.0, pressure: float = 101.325,
     ) -> FlyoverResult:
@@ -244,7 +244,7 @@ class AnpAircraft:
 
     def noise_contour(
         self, operation: str, *,
-        x: "NDArray[np.float64] | list[float]", y: "NDArray[np.float64] | list[float]",
+        x: NDArray[np.float64] | list[float], y: NDArray[np.float64] | list[float],
         stage_length: int = 1, metric: str = "exposure",
         temperature: float = 15.0, pressure: float = 101.325,
     ) -> NoiseContourResult:
@@ -264,10 +264,10 @@ class AnpDatabase:
 
     def __init__(
         self,
-        aircraft: "Mapping[str, dict[str, str]]",
-        npd: "Mapping[tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]]",
-        distances: "NDArray[np.float64]",
-        profiles: "Mapping[tuple[str, str, str, int], NDArray[np.float64]]",
+        aircraft: Mapping[str, dict[str, str]],
+        npd: Mapping[tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]],
+        distances: NDArray[np.float64],
+        profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
     ) -> None:
         self._aircraft = dict(aircraft)
         self._npd = dict(npd)
@@ -275,7 +275,7 @@ class AnpDatabase:
         self._profiles = dict(profiles)
 
     @property
-    def aircraft_ids(self) -> "list[str]":
+    def aircraft_ids(self) -> list[str]:
         """Sorted list of aircraft identifiers in the database."""
         return sorted(self._aircraft)
 
@@ -331,7 +331,7 @@ class AnpDatabase:
             powers=powers, distances=self._distances, levels=levels)
 
     def profile(self, aircraft_id: str, operation: str, stage_length: int = 1, *,
-                profile_id: "str | None" = None) -> AnpProfile:
+                profile_id: str | None = None) -> AnpProfile:
         """Fixed-point trajectory for an aircraft, operation and stage length.
 
         Aircraft may ship several fixed-point profiles for the same operation
@@ -398,7 +398,7 @@ class AnpDatabase:
 
     def _doc29_inputs(
         self, aircraft_id: str, operation: str, stage_length: int,
-    ) -> "tuple[AnpAircraft, AnpProfile, NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
+    ) -> tuple[AnpAircraft, AnpProfile, NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
         """Gather (aircraft, profile, powers, distances, SEL, LAmax) for the chain."""
         acft = self.aircraft(aircraft_id)
         prof = self.profile(aircraft_id, operation, stage_length)
@@ -415,7 +415,7 @@ class AnpDatabase:
         return acft, prof, sel.powers, sel.distances, sel.levels, lmax.levels
 
     def event_level(
-        self, aircraft_id: str, observer: "NDArray[np.float64] | list[float]",
+        self, aircraft_id: str, observer: NDArray[np.float64] | list[float],
         operation: str, *, stage_length: int = 1, metric: str = "exposure",
         temperature: float = 15.0, pressure: float = 101.325,
     ) -> FlyoverResult:
@@ -442,7 +442,7 @@ class AnpDatabase:
 
     def noise_contour(
         self, aircraft_id: str, operation: str, *,
-        x: "NDArray[np.float64] | list[float]", y: "NDArray[np.float64] | list[float]",
+        x: NDArray[np.float64] | list[float], y: NDArray[np.float64] | list[float],
         stage_length: int = 1, metric: str = "exposure",
         temperature: float = 15.0, pressure: float = 101.325,
     ) -> NoiseContourResult:
@@ -469,7 +469,7 @@ class AnpDatabase:
             ground_roll=prof.ground_roll, landing_roll=prof.landing_roll)
 
 
-def _read_tables(path: "Path | str | None") -> "dict[str, str]":
+def _read_tables(path: Path | str | None) -> dict[str, str]:
     """Return ``{filename: text}`` for the bundled subset or a user directory."""
     if path is None:
         from importlib.resources import files
@@ -494,7 +494,7 @@ def _read_tables(path: "Path | str | None") -> "dict[str, str]":
 
 def _parse_npd(
     text: str,
-) -> "tuple[dict[tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]], NDArray[np.float64]]":
+) -> tuple[dict[tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]], NDArray[np.float64]]:
     """Parse the NPD table into ``{(npd_id, metric, op): (powers, levels)}``."""
     rows = _rows(text)
     if not rows:
@@ -523,7 +523,7 @@ def _parse_npd(
 
 def _parse_profiles(
     text: str,
-) -> "dict[tuple[str, str, str, int], NDArray[np.float64]]":
+) -> dict[tuple[str, str, str, int], NDArray[np.float64]]:
     """Parse fixed-point profiles into ``{(acft, op, profile_id, stage): path}``.
 
     The path is the Doc 29 ``(N, 5)`` array ``x, y, z, power, speed`` in SI units,
@@ -562,7 +562,7 @@ def _parse_profiles(
     return profiles
 
 
-def load_anp_database(path: "Path | str | None" = None) -> AnpDatabase:
+def load_anp_database(path: Path | str | None = None) -> AnpDatabase:
     """Load an EASA ANP database (aircraft, NPD curves and default profiles).
 
     :param path: Directory of an ANP CSV export (the ``*Aircraft.csv``,
@@ -606,8 +606,8 @@ _PLOT_LABELS = {
 }
 
 
-def _plot_npd(result: AnpNpdCurves, ax: "Axes | None", *,
-              language: str, **kwargs: Any) -> "Axes":
+def _plot_npd(result: AnpNpdCurves, ax: Axes | None, *,
+              language: str, **kwargs: Any) -> Axes:
     import matplotlib.pyplot as plt
 
     lab = _PLOT_LABELS[language]
@@ -626,8 +626,8 @@ def _plot_npd(result: AnpNpdCurves, ax: "Axes | None", *,
     return ax
 
 
-def _plot_profile(result: AnpProfile, ax: "Axes | None", *,
-                  language: str, **kwargs: Any) -> "Axes":
+def _plot_profile(result: AnpProfile, ax: Axes | None, *,
+                  language: str, **kwargs: Any) -> Axes:
     import matplotlib.pyplot as plt
 
     lab = _PLOT_LABELS[language]

@@ -86,7 +86,7 @@ def noise_signal(
     color: Literal["white", "pink", "red", "blue", "violet"] = "white",
     rms: float = 1.0,
     seed: int | None = None,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Generate Gaussian noise with an exact power-law spectral slope.
 
     ``Gxx(f) ∝ f^α`` with α = 0 (white), -1 (pink, -3.01 dB/octave),
@@ -110,7 +110,7 @@ def noise_signal(
     seconds_v = float(seconds)
     if not np.isfinite(seconds_v) or seconds_v <= 0.0:
         raise ValueError("'seconds' must be a positive, finite number.")
-    n = int(round(fs_v * seconds_v))
+    n = round(fs_v * seconds_v)
     if n < 16:
         raise ValueError(
             f"'fs'*'seconds' must give at least 16 samples, got {n}."
@@ -148,8 +148,8 @@ def noise_signal(
 
 
 def _validate_1d_finite(
-    x: "NDArray[np.float64] | list[float]", name: str
-) -> "NDArray[np.float64]":
+    x: NDArray[np.float64] | list[float], name: str
+) -> NDArray[np.float64]:
     xa = np.asarray(x, dtype=np.float64)
     if xa.ndim != 1:
         raise ValueError(f"'{name}' must be one-dimensional.")
@@ -192,8 +192,8 @@ class ToneBurstResult:
         ``None`` (single burst).
     """
 
-    signal: "NDArray[np.float64]"
-    envelope: "NDArray[np.float64]"
+    signal: NDArray[np.float64]
+    envelope: NDArray[np.float64]
     fs: float
     frequency: float
     cycles: int
@@ -207,8 +207,8 @@ class ToneBurstResult:
     duty_cycle: float | None
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the burst waveform with its gating envelope.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -265,7 +265,7 @@ def _tone_burst_period(
             )
         return None, None, None
     rate_v = _positive(repetition_rate, "repetition_rate")
-    period = int(round(fs_v / rate_v))
+    period = round(fs_v / rate_v)
     if period < n_on:
         raise ValueError(
             "The burst does not fit in one repetition period: "
@@ -316,7 +316,7 @@ def tone_burst(
     )
 
     burst_seconds = cycles_v / f_v
-    n_on = int(round(fs_v * burst_seconds))
+    n_on = round(fs_v * burst_seconds)
     if n_on < 2:
         raise ValueError(
             "The burst is shorter than 2 samples; increase 'cycles' or 'fs'."
@@ -326,8 +326,8 @@ def tone_burst(
         fs_v, n_on, repetitions_v, repetition_rate
     )
 
-    n_pre = int(round(float(pre_silence) * fs_v))
-    n_post = int(round(float(post_silence) * fs_v))
+    n_pre = round(float(pre_silence) * fs_v)
+    n_post = round(float(post_silence) * fs_v)
     block = period if period is not None else n_on
     n_total = n_pre + repetitions_v * block + n_post
 
@@ -394,12 +394,12 @@ class ResampledSignalResult:
         smaller Nyquist frequency.
     """
 
-    signal: "NDArray[np.float64]"
+    signal: NDArray[np.float64]
     fs: float
     original_fs: float
     up: int
     down: int
-    filter_taps: "NDArray[np.float64]"
+    filter_taps: NDArray[np.float64]
     passband_edge_hz: float
     stopband_edge_hz: float
     stopband_attenuation_db: float
@@ -412,7 +412,7 @@ class ResampledSignalResult:
 
 
 def resample_signal(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     fs_new: float,
     *,
@@ -528,8 +528,8 @@ def resample_signal(
 
 
 def _fractional_advance(
-    x: "NDArray[np.float64]", shift: float
-) -> "NDArray[np.float64]":
+    x: NDArray[np.float64], shift: float
+) -> NDArray[np.float64]:
     """Advance ``x`` by ``shift`` samples (band-limited, non-circular).
 
     Frequency-domain phase ramp ``e^{+j2πk·shift/nfft}`` over a record
@@ -551,11 +551,11 @@ def _fractional_advance(
 
 
 def fractional_delay(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     delay: float,
     *,
     mode: Literal["linear", "circular"] = "linear",
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Delay a record by an arbitrary (sub-sample) number of samples.
 
     Band-limited delay via a frequency-domain phase ramp

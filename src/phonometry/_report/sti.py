@@ -28,7 +28,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -55,10 +55,10 @@ if TYPE_CHECKING:
 
 #: Nominal octave-band centre frequencies of the seven STI bands, in hertz
 #: (IEC 60268-16 A.5.1: 125 Hz to 8 kHz).
-_STI_BAND_CENTERS: Tuple[int, ...] = (125, 250, 500, 1000, 2000, 4000, 8000)
+_STI_BAND_CENTERS: tuple[int, ...] = (125, 250, 500, 1000, 2000, 4000, 8000)
 
 
-def _is_stipa(result: "STIResult") -> bool:
+def _is_stipa(result: STIResult) -> bool:
     """Whether the result came from the direct STIPA method (Annex B).
 
     STIPA carries two modulation-transfer values per band (the Table B.1
@@ -69,7 +69,7 @@ def _is_stipa(result: "STIResult") -> bool:
     return mtf.ndim == 2 and mtf.shape[1] == 2
 
 
-def _method_phrase(result: "STIResult", language: str = "en") -> str:
+def _method_phrase(result: STIResult, language: str = "en") -> str:
     """The measurement-method phrase used in the basis line."""
     return (
         t("STIPA, direct method", language)
@@ -80,14 +80,14 @@ def _method_phrase(result: "STIResult", language: str = "en") -> str:
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
     Only fields that are set are returned. Speech intelligibility is a
     transmission-path metric, so the room-pair/climate fields of the insulation
     fiche do not apply; only the generic identity fields are used.
     """
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("System", language), metadata.specimen),
         (t("Manufacturer", language), metadata.manufacturer),
@@ -101,7 +101,7 @@ def _metadata_pairs(
     ]
 
 
-def _band_table(result: "STIResult", language: str = "en") -> Any:
+def _band_table(result: STIResult, language: str = "en") -> Any:
     """Build the left-hand per-octave-band modulation-transfer-index table.
 
     Called only after :func:`render_sti_report` has imported reportlab.
@@ -123,7 +123,7 @@ def _band_table(result: "STIResult", language: str = "en") -> Any:
         Paragraph(t("f [Hz]", language), head_style),
         Paragraph("MTI", head_style),
     ]
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for fk, m in zip(_STI_BAND_CENTERS, mti):
         rows.append([f"{fk}", format_number(float(m), language, decimals=2)])
 
@@ -146,13 +146,13 @@ def _band_table(result: "STIResult", language: str = "en") -> Any:
     return table
 
 
-def _statement(result: "STIResult", language: str = "en") -> str:
+def _statement(result: STIResult, language: str = "en") -> str:
     """The boxed single-number statement ``STI = X``."""
     value = format_number(display_round(float(result.sti), 2), language, decimals=2)
     return f"STI = <b>{value}</b>"
 
 
-def _extended_terms(result: "STIResult", language: str = "en") -> List[str]:
+def _extended_terms(result: STIResult, language: str = "en") -> list[str]:
     """The Annex F qualification band and the method shown beside the box."""
     return [
         t(
@@ -165,8 +165,8 @@ def _extended_terms(result: "STIResult", language: str = "en") -> List[str]:
 
 
 def _verdict(
-    result: "STIResult", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: STIResult, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag: the STI passes at or above the requirement.
 
     Speech intelligibility is a "higher is better" quantity (the opposite of
@@ -184,7 +184,7 @@ def _verdict(
 
 
 def _basis_line(
-    result: "STIResult", metadata: ReportMetadata | None, language: str
+    result: STIResult, metadata: ReportMetadata | None, language: str
 ) -> str:
     """The standard-basis line, stating the measurement method."""
     method = _method_phrase(result, language)
@@ -202,7 +202,7 @@ def _basis_line(
 
 
 def render_sti_report(
-    result: "STIResult",
+    result: STIResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -238,7 +238,7 @@ def render_sti_report(
     title = t("Speech transmission index", language)
     basis = _basis_line(result, metadata, language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

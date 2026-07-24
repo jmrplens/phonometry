@@ -38,8 +38,9 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 import reference_data as ref
+
+from phonometry.materials.impedance_tube import TransferMatrix
 from phonometry.materials.porous_absorber import (
     DELANY_BAZLEY_COEFFICIENTS,
     DELANY_BAZLEY_VALIDITY,
@@ -63,7 +64,6 @@ from phonometry.materials.porous_absorber import (
     perforation_end_correction,
     statistical_absorption,
 )
-from phonometry.materials.impedance_tube import TransferMatrix
 
 RHO0 = 1.205
 C0 = 343.0

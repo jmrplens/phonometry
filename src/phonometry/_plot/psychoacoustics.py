@@ -23,17 +23,20 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from ..psychoacoustics.tone_audibility import ToneAudibilityResult
-    from ..psychoacoustics.loudness_contours import EqualLoudnessContours
-    from ..psychoacoustics.loudness_zwicker import ZwickerLoudness
-    from ..psychoacoustics.loudness_ecma import EcmaLoudness
-    from ..psychoacoustics.loudness_moore_glasberg import MooreGlasbergLoudness
-    from ..psychoacoustics.loudness_moore_glasberg_time import MooreGlasbergTimeVaryingLoudness
-    from ..psychoacoustics.tonality_ecma import EcmaTonality
-    from ..psychoacoustics.roughness_ecma import EcmaRoughness
+
     from ..psychoacoustics.fluctuation_strength import FluctuationStrengthResult
     from ..psychoacoustics.fluctuation_strength_ecma import EcmaFluctuationStrength
+    from ..psychoacoustics.loudness_contours import EqualLoudnessContours
+    from ..psychoacoustics.loudness_ecma import EcmaLoudness
+    from ..psychoacoustics.loudness_moore_glasberg import MooreGlasbergLoudness
+    from ..psychoacoustics.loudness_moore_glasberg_time import (
+        MooreGlasbergTimeVaryingLoudness,
+    )
+    from ..psychoacoustics.loudness_zwicker import ZwickerLoudness
     from ..psychoacoustics.psychoacoustic_annoyance import PsychoacousticAnnoyanceResult
+    from ..psychoacoustics.roughness_ecma import EcmaRoughness
+    from ..psychoacoustics.tonality_ecma import EcmaTonality
+    from ..psychoacoustics.tone_audibility import ToneAudibilityResult
 
 #: Spanish translations of the fixed strings rendered by the
 #: psychoacoustics ``.plot()`` renderers, keyed by their verbatim English
@@ -535,7 +538,7 @@ def plot_ecma_fluctuation_strength(
 
 
 def plot_fluctuation_strength(
-    result: "FluctuationStrengthResult", ax: Axes | None = None, *,
+    result: FluctuationStrengthResult, ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any,
 ) -> Axes:
     """Specific fluctuation strength ``f(z)`` against critical-band rate.
@@ -571,7 +574,7 @@ def plot_fluctuation_strength(
 
 
 def plot_psychoacoustic_annoyance(
-    result: "PsychoacousticAnnoyanceResult", ax: Axes | None = None, *,
+    result: PsychoacousticAnnoyanceResult, ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any,
 ) -> Axes:
     """Psychoacoustic annoyance with its ``wS`` and ``wFR`` term contributions.
@@ -612,7 +615,7 @@ def plot_psychoacoustic_annoyance(
 
 
 def plot_tone_audibility(
-    result: "ToneAudibilityResult", ax: Axes | None = None, *, language: str = "en",
+    result: ToneAudibilityResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-tone audibility ``ΔL`` against tone frequency (ISO/PAS 20065).
@@ -660,7 +663,7 @@ def plot_tone_audibility(
 
 
 def plot_tone_audibility_levels(
-    result: "ToneAudibilityResult", ax: Axes | None = None, *, language: str = "en",
+    result: ToneAudibilityResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""Tone level and critical-band masking noise against frequency (ISO 1996-2).

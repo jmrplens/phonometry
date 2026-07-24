@@ -37,7 +37,7 @@ sensations, so the signal convenience is an engineering estimate, while
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -89,7 +89,7 @@ class PsychoacousticAnnoyanceResult:
     w_s: float
     w_fr: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the PA value and the ``wS`` / ``wFR`` term contributions."""
         from .._i18n import check_language
         from .._plot.psychoacoustics import plot_psychoacoustic_annoyance
@@ -153,7 +153,7 @@ def psychoacoustic_annoyance(
 
 
 def psychoacoustic_annoyance_from_signal(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     *,
     field: Literal["free", "diffuse"] = "free",

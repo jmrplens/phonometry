@@ -92,7 +92,7 @@ def slant_distance(
 
 
 def apparent_sound_power_level(
-    band_levels: "float | NDArray[np.float64] | list[float]", r1: float
+    band_levels: float | NDArray[np.float64] | list[float], r1: float
 ) -> float:
     """A-weighted apparent sound power level ``L_WA`` (IEC 61400-11 Formula 26).
 
@@ -137,7 +137,7 @@ def critical_bandwidth(fc: float) -> float:
     return float(25.0 + 75.0 * (1.0 + 1.4 * (f / 1000.0) ** 2) ** 0.69)
 
 
-def _critical_band_edges(fc: float) -> "tuple[float, float]":
+def _critical_band_edges(fc: float) -> tuple[float, float]:
     """Lower and upper edges of the critical band about a tone (Hz).
 
     For a candidate tone in the 20-70 Hz range the band is the fixed absolute
@@ -151,7 +151,7 @@ def _critical_band_edges(fc: float) -> "tuple[float, float]":
     return f - cbw / 2.0, f + cbw / 2.0
 
 
-def _energy_mean(levels_db: "NDArray[np.float64]") -> float:
+def _energy_mean(levels_db: NDArray[np.float64]) -> float:
     return float(10.0 * np.log10(np.mean(10.0 ** (levels_db / 10.0))))
 
 
@@ -203,10 +203,10 @@ class WindTurbineTonalityResult:
     tonal_audibility: float
     is_audible: bool
     has_identified_tone: bool
-    frequencies: "NDArray[np.float64]"
-    levels: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    levels: NDArray[np.float64]
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the narrowband spectrum with the critical band and masking level."""
         from .._i18n import check_language
         from .._plot.environmental import plot_wind_turbine_tonality
@@ -217,7 +217,7 @@ class WindTurbineTonalityResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -269,9 +269,9 @@ class WindTurbineTonalityResult:
 
 
 def _validate_narrowband(
-    levels: "NDArray[np.float64] | list[float]",
-    frequencies: "NDArray[np.float64] | list[float]",
-) -> "tuple[NDArray[np.float64], NDArray[np.float64], float]":
+    levels: NDArray[np.float64] | list[float],
+    frequencies: NDArray[np.float64] | list[float],
+) -> tuple[NDArray[np.float64], NDArray[np.float64], float]:
     """Coerce and validate a uniformly-spaced narrowband spectrum."""
     lv = np.asarray(levels, dtype=np.float64)
     fr = np.asarray(frequencies, dtype=np.float64)
@@ -289,8 +289,8 @@ def _validate_narrowband(
 
 
 def _candidate_peak(
-    lv: "NDArray[np.float64]", fr: "NDArray[np.float64]",
-    tone_frequency: "float | None",
+    lv: NDArray[np.float64], fr: NDArray[np.float64],
+    tone_frequency: float | None,
 ) -> int:
     """Index of the candidate line: the spectrum maximum, or the validated
     nearest bin to the requested frequency."""
@@ -306,7 +306,7 @@ def _candidate_peak(
 
 
 def _screen_possible_tone(
-    lv: "NDArray[np.float64]", in_band: "NDArray[np.bool_]", peak: int,
+    lv: NDArray[np.float64], in_band: NDArray[np.bool_], peak: int,
 ) -> bool:
     """9.5.2 possible-tone screen: local maximum more than 6 dB above the
     critical-band energy average that excludes the maximum line and its two
@@ -324,10 +324,10 @@ def _screen_possible_tone(
 
 
 def wind_turbine_tonality(
-    levels: "NDArray[np.float64] | list[float]",
-    frequencies: "NDArray[np.float64] | list[float]",
+    levels: NDArray[np.float64] | list[float],
+    frequencies: NDArray[np.float64] | list[float],
     *,
-    tone_frequency: "float | None" = None,
+    tone_frequency: float | None = None,
 ) -> WindTurbineTonalityResult:
     """Tonal audibility of a narrowband spectrum (IEC 61400-11 Formulae 30-34).
 
@@ -386,7 +386,7 @@ def wind_turbine_tonality(
     band = lv[in_band]
 
     # L_70%: energy mean of the 70 % lowest-level lines in the critical band.
-    n_low = max(1, int(round(0.7 * band.size)))
+    n_low = max(1, round(0.7 * band.size))
     l70 = _energy_mean(np.sort(band)[:n_low])
     masking = band[band < l70 + _MASKING_MARGIN]
     l_pn_avg = _energy_mean(masking) if masking.size else l70

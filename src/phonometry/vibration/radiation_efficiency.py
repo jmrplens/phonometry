@@ -126,7 +126,7 @@ class RadiationEfficiencyResult:
         sigma = np.asarray(self.radiation_efficiency, dtype=np.float64)
         return np.asarray(10.0 * np.log10(sigma), dtype=np.float64)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the radiation efficiency ``sigma(f)`` on log-log axes.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the

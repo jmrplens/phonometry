@@ -84,17 +84,17 @@ class EffectiveSoundSpeedProfile:
     :ivar description: Short human-readable label (e.g. ``"linear, +0.1 s^-1"``).
     """
 
-    heights: "NDArray[np.float64]"
-    sound_speeds: "NDArray[np.float64]"
+    heights: NDArray[np.float64]
+    sound_speeds: NDArray[np.float64]
     description: str = ""
 
-    def speed_at(self, height: ArrayLike) -> "NDArray[np.float64]":
+    def speed_at(self, height: ArrayLike) -> NDArray[np.float64]:
         """Piecewise-linear effective sound speed at one or more heights."""
         z = np.asarray(height, dtype=np.float64)
         return np.asarray(np.interp(z, self.heights, self.sound_speeds),
                           dtype=np.float64)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the effective sound-speed profile (height on the vertical axis)."""
         from .._i18n import check_language
         from .._plot.environmental import plot_sound_speed_profile
@@ -193,7 +193,7 @@ def log_linear_sound_speed_profile(
 
 def _clean_profile(
     profile: EffectiveSoundSpeedProfile,
-) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Validate and return the height/speed arrays of a profile."""
     z = np.asarray(profile.heights, dtype=np.float64)
     c = np.asarray(profile.sound_speeds, dtype=np.float64)
@@ -301,15 +301,15 @@ class AtmosphericRayResult:
     :ivar source_height: Source height, in metres.
     """
 
-    launch_angles: "NDArray[np.float64]"
-    ranges: "NDArray[np.float64]"
-    heights: "NDArray[np.float64]"
-    travel_times: "NDArray[np.float64]"
-    turning_points: "NDArray[np.int_]"
-    ground_reflections: "NDArray[np.int_]"
+    launch_angles: NDArray[np.float64]
+    ranges: NDArray[np.float64]
+    heights: NDArray[np.float64]
+    travel_times: NDArray[np.float64]
+    turning_points: NDArray[np.int_]
+    ground_reflections: NDArray[np.int_]
     source_height: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the curved ray paths (height on the vertical axis)."""
         from .._i18n import check_language
         from .._plot.environmental import plot_atmospheric_rays
@@ -367,19 +367,19 @@ def atmospheric_ray_paths(
     # above the profile top the atmosphere is taken as homogeneous (gradient 0).
     seg_grad = np.diff(c_prof) / np.diff(z_prof)
 
-    def _grad_at(zq: "NDArray[np.float64]") -> "NDArray[np.float64]":
+    def _grad_at(zq: NDArray[np.float64]) -> NDArray[np.float64]:
         seg = np.clip(np.searchsorted(z_prof, zq, side="right") - 1,
                       0, seg_grad.size - 1)
         g = seg_grad[seg]
         return np.asarray(np.where(zq > top, 0.0, g), dtype=np.float64)
 
-    def _speed_at(zq: "NDArray[np.float64]") -> "NDArray[np.float64]":
+    def _speed_at(zq: NDArray[np.float64]) -> NDArray[np.float64]:
         return np.asarray(np.interp(zq, z_prof, c_prof), dtype=np.float64)
 
     def deriv(
-        z_arr: "NDArray[np.float64]", zeta_arr: "NDArray[np.float64]",
-        xi_arr: "NDArray[np.float64]",
-    ) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+        z_arr: NDArray[np.float64], zeta_arr: NDArray[np.float64],
+        xi_arr: NDArray[np.float64],
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         cc = _speed_at(z_arr)
         return zeta_arr / xi_arr, -_grad_at(z_arr) / (cc**3 * xi_arr)
 
@@ -447,18 +447,18 @@ class AtmosphericPEResult:
     """
 
     frequency: float
-    ranges: "NDArray[np.float64]"
-    heights: "NDArray[np.float64]"
-    relative_level: "NDArray[np.float64]"
+    ranges: NDArray[np.float64]
+    heights: NDArray[np.float64]
+    relative_level: NDArray[np.float64]
     source_height: float
     normalized_impedance: complex
 
-    def level_at_height(self, height: float) -> "NDArray[np.float64]":
+    def level_at_height(self, height: float) -> NDArray[np.float64]:
         """Relative sound level versus range at the grid height nearest ``height``."""
         i = int(np.argmin(np.abs(self.heights - float(height))))
         return np.asarray(self.relative_level[i], dtype=np.float64)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the relative-level field over the range-height plane."""
         from .._i18n import check_language
         from .._plot.environmental import plot_atmospheric_pe
@@ -468,7 +468,7 @@ class AtmosphericPEResult:
 
 def _resolve_pe_impedance(
     frequency: float,
-    impedance: "ArrayLike | PorousMediumResult | None",
+    impedance: ArrayLike | PorousMediumResult | None,
     flow_resistivity: float | None,
     model: str,
     speed_of_sound: float,
@@ -488,7 +488,7 @@ def atmospheric_parabolic_equation(
     profile: EffectiveSoundSpeedProfile,
     *,
     source_height: float,
-    impedance: "ArrayLike | PorousMediumResult | None" = None,
+    impedance: ArrayLike | PorousMediumResult | None = None,
     flow_resistivity: float | None = None,
     model: Literal["delany_bazley", "miki"] = "delany_bazley",
     max_range: float = 1000.0,

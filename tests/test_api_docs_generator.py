@@ -22,10 +22,9 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-import api_taxonomy  # noqa: E402
-import check_api_reference as car  # noqa: E402
-import generate_api_docs as gad  # noqa: E402
-
+import api_taxonomy
+import check_api_reference as car
+import generate_api_docs as gad
 
 # ---------------------------------------------------------------------------
 # Taxonomy
@@ -171,8 +170,8 @@ def test_generation_is_deterministic(
         if p.is_file()
     }
     assert second.keys() == first.keys(), "generated file sets differ"
-    for relpath in first:
-        assert second[relpath] == first[relpath], f"{relpath} is not deterministic"
+    for relpath, first_content in first.items():
+        assert second[relpath] == first_content, f"{relpath} is not deterministic"
 
 
 def test_every_public_name_on_exactly_one_page(

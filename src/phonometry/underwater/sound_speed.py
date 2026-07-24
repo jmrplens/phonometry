@@ -74,14 +74,14 @@ def depth_to_pressure(depth: float, latitude: float = 45.0) -> float:
 
 
 def _pressure_mpa(
-    z: "float | NDArray[np.float64]", latitude_deg: float,
-) -> "float | NDArray[np.float64]":
+    z: float | NDArray[np.float64], latitude_deg: float,
+) -> float | NDArray[np.float64]:
     """Leroy & Parthiot standard-ocean pressure, array-capable kernel."""
     phi = np.radians(latitude_deg)
     h45 = 1.00818e-2 * z + 2.465e-8 * z**2 - 1.25e-13 * z**3 + 2.8e-19 * z**4
     g = 9.7803 * (1.0 + 5.3e-3 * np.sin(phi) ** 2)
     k = (g - 2e-5 * z) / (9.80612 - 2e-5 * z)
-    result: "float | NDArray[np.float64]" = h45 * k
+    result: float | NDArray[np.float64] = h45 * k
     return result
 
 
@@ -91,9 +91,9 @@ def _pressure_mpa(
 
 
 def _mackenzie(
-    t: "float | NDArray[np.float64]", s: "float | NDArray[np.float64]",
-    depth: "float | NDArray[np.float64]",
-) -> "float | NDArray[np.float64]":
+    t: float | NDArray[np.float64], s: float | NDArray[np.float64],
+    depth: float | NDArray[np.float64],
+) -> float | NDArray[np.float64]:
     return (
         1448.96
         + 4.591 * t
@@ -131,9 +131,9 @@ _A = (
 
 
 def _unesco(
-    t: "float | NDArray[np.float64]", s: "float | NDArray[np.float64]",
-    pressure_bar: "float | NDArray[np.float64]",
-) -> "float | NDArray[np.float64]":
+    t: float | NDArray[np.float64], s: float | NDArray[np.float64],
+    pressure_bar: float | NDArray[np.float64],
+) -> float | NDArray[np.float64]:
     p = pressure_bar
     cw = (
         sum(_C[i][0] * t**i for i in range(6))
@@ -158,9 +158,9 @@ def _unesco(
 
 
 def _del_grosso(
-    t: "float | NDArray[np.float64]", s: "float | NDArray[np.float64]",
-    pressure_kgcm2: "float | NDArray[np.float64]",
-) -> "float | NDArray[np.float64]":
+    t: float | NDArray[np.float64], s: float | NDArray[np.float64],
+    pressure_kgcm2: float | NDArray[np.float64],
+) -> float | NDArray[np.float64]:
     p = pressure_kgcm2
     c000 = 1402.392
     d_ct = 0.5012285e1 * t - 0.551184e-1 * t**2 + 0.221649e-3 * t**3
@@ -236,12 +236,12 @@ class SoundSpeedProfile:
     :ivar model: The equation used.
     """
 
-    depth: "NDArray[np.float64]"
-    sound_speed: "NDArray[np.float64]"
-    gradient: "NDArray[np.float64]"
+    depth: NDArray[np.float64]
+    sound_speed: NDArray[np.float64]
+    gradient: NDArray[np.float64]
     model: str
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the sound-speed profile (speed vs depth, depth increasing down)."""
         from .._i18n import check_language
         from .._plot.underwater import plot_sound_speed_profile
@@ -250,9 +250,9 @@ class SoundSpeedProfile:
 
 
 def sound_speed_profile(
-    depths: "NDArray[np.float64] | list[float]",
-    temperatures: "NDArray[np.float64] | list[float] | float",
-    salinities: "NDArray[np.float64] | list[float] | float",
+    depths: NDArray[np.float64] | list[float],
+    temperatures: NDArray[np.float64] | list[float] | float,
+    salinities: NDArray[np.float64] | list[float] | float,
     *,
     model: str = "unesco",
     latitude: float = 45.0,

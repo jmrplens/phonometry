@@ -44,8 +44,9 @@ the ``q``-input multiple coherence carries ``nd-(q-1)`` (Eqs. 9.98/9.99).
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, Sequence
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -83,9 +84,9 @@ _PIVOT_FLOOR_REL = 1e-12
 
 
 def _validate_inputs(
-    inputs: "Sequence[NDArray[np.float64] | list[float]] | NDArray[np.float64]",
-    output: "NDArray[np.float64] | list[float]",
-) -> tuple["list[NDArray[np.float64]]", "NDArray[np.float64]"]:
+    inputs: Sequence[NDArray[np.float64] | list[float]] | NDArray[np.float64],
+    output: NDArray[np.float64] | list[float],
+) -> tuple[list[NDArray[np.float64]], NDArray[np.float64]]:
     """Validate the input records and the output, all one-dimensional.
 
     Accepts a sequence of 1-D arrays or a 2-D ``(q, n)`` array of inputs.
@@ -107,7 +108,7 @@ def _validate_inputs(
     return xs, ya
 
 
-def _validate_order(order: "Sequence[int] | None", q: int) -> tuple[int, ...]:
+def _validate_order(order: Sequence[int] | None, q: int) -> tuple[int, ...]:
     """Validate the conditioning order, a permutation of ``range(q)``."""
     if order is None:
         return tuple(range(q))
@@ -118,14 +119,14 @@ def _validate_order(order: "Sequence[int] | None", q: int) -> tuple[int, ...]:
 
 
 def _augmented_matrix(
-    xs: "list[NDArray[np.float64]]",
-    ya: "NDArray[np.float64]",
+    xs: list[NDArray[np.float64]],
+    ya: NDArray[np.float64],
     fs: float,
     seg: int,
     nov: int,
     window: str,
     scaling: str,
-) -> tuple["NDArray[np.float64]", "NDArray[np.complex128]"]:
+) -> tuple[NDArray[np.float64], NDArray[np.complex128]]:
     """Assemble the ``(F, q+1, q+1)`` Hermitian spectral matrix.
 
     Records ``0..q-1`` are the inputs and record ``q`` is the output, so
@@ -157,8 +158,8 @@ def _augmented_matrix(
 
 
 def _ordinary_coherences(
-    mat: "NDArray[np.complex128]", q: int
-) -> "NDArray[np.float64]":
+    mat: NDArray[np.complex128], q: int
+) -> NDArray[np.float64]:
     """Ordinary coherence of each input with the output (Eq. 7.109)."""
     gyy = mat[:, q, q].real
     coh = np.zeros((q, mat.shape[0]), dtype=np.float64)
@@ -174,7 +175,7 @@ def _ordinary_coherences(
     return np.asarray(np.clip(coh, 0.0, 1.0), dtype=np.float64)
 
 
-def _pivot_safe(piv: "NDArray[np.float64]") -> "NDArray[np.bool_]":
+def _pivot_safe(piv: NDArray[np.float64]) -> NDArray[np.bool_]:
     """Frequency bins whose pivot autospectrum is above the power floor.
 
     The floor is relative to the largest pivot on the axis
@@ -189,7 +190,7 @@ def _pivot_safe(piv: "NDArray[np.float64]") -> "NDArray[np.bool_]":
 
 
 def _schur_eliminate(
-    mat: "NDArray[np.complex128]", r: int, safe: "NDArray[np.bool_]"
+    mat: NDArray[np.complex128], r: int, safe: NDArray[np.bool_]
 ) -> None:
     """Remove the linear effect of pivot record ``r`` in place (Eq. 7.94).
 
@@ -214,9 +215,9 @@ def _schur_eliminate(
 
 
 def _condition(
-    mat: "NDArray[np.complex128]", order: tuple[int, ...]
+    mat: NDArray[np.complex128], order: tuple[int, ...]
 ) -> tuple[
-    "NDArray[np.float64]", "NDArray[np.float64]", "NDArray[np.float64]"
+    NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]
 ]:
     """Ordered conditioning of the augmented matrix (Bendat & Piersol 7.3).
 
@@ -264,8 +265,8 @@ def _condition(
 
 
 def _coherent_output_errors(
-    partial: "NDArray[np.float64]", order: tuple[int, ...], nd: float
-) -> "NDArray[np.float64]":
+    partial: NDArray[np.float64], order: tuple[int, ...], nd: float
+) -> NDArray[np.float64]:
     """Random error of each partial coherent output spectrum (Eq. 9.100).
 
     ``ε = (2-γ²)^½ / (|γ|·√(nd-(i-1)))`` for the ``i``-th ordered input,
@@ -289,8 +290,8 @@ def _coherent_output_errors(
 
 
 def _multiple_coherence_error(
-    multiple: "NDArray[np.float64]", q: int, nd: float
-) -> "NDArray[np.float64]":
+    multiple: NDArray[np.float64], q: int, nd: float
+) -> NDArray[np.float64]:
     """Random error of the multiple coherence estimate (Eq. 9.98).
 
     ``ε = √2·(1-γ²y:x) / (|γy:x|·√(nd-(q-1)))``.
@@ -357,17 +358,17 @@ class MISOCoherenceResult:
     :ivar scaling: ``'density'`` or ``'spectrum'``.
     """
 
-    frequencies: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
     n_inputs: int
     order: tuple[int, ...]
-    ordinary_coherence: "NDArray[np.float64]"
-    multiple_coherence: "NDArray[np.float64]"
-    partial_coherence: "NDArray[np.float64]"
-    coherent_output_spectra: "NDArray[np.float64]"
-    output_psd: "NDArray[np.float64]"
-    noise_psd: "NDArray[np.float64]"
-    multiple_coherence_random_error: "NDArray[np.float64]"
-    coherent_output_random_error: "NDArray[np.float64]"
+    ordinary_coherence: NDArray[np.float64]
+    multiple_coherence: NDArray[np.float64]
+    partial_coherence: NDArray[np.float64]
+    coherent_output_spectra: NDArray[np.float64]
+    output_psd: NDArray[np.float64]
+    noise_psd: NDArray[np.float64]
+    multiple_coherence_random_error: NDArray[np.float64]
+    coherent_output_random_error: NDArray[np.float64]
     n_segments: int
     n_averages: float
     resolution_bandwidth: float
@@ -376,7 +377,7 @@ class MISOCoherenceResult:
     overlap: float
     scaling: str
 
-    def dominant_input(self) -> "NDArray[np.intp]":
+    def dominant_input(self) -> NDArray[np.intp]:
         """Index of the input contributing the most output power per bin.
 
         Returns, for every frequency, the original input index whose partial
@@ -391,8 +392,8 @@ class MISOCoherenceResult:
         )
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | NDArray[Any]:
         """Plot the per-input coherent output spectra and multiple coherence.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -405,11 +406,11 @@ class MISOCoherenceResult:
 
 
 def miso_coherence(
-    inputs: "Sequence[NDArray[np.float64] | list[float]] | NDArray[np.float64]",
-    output: "NDArray[np.float64] | list[float]",
+    inputs: Sequence[NDArray[np.float64] | list[float]] | NDArray[np.float64],
+    output: NDArray[np.float64] | list[float],
     fs: float,
     *,
-    order: "Sequence[int] | None" = None,
+    order: Sequence[int] | None = None,
     window: str = "hann",
     nperseg: int | None = None,
     overlap: float = _DEFAULT_OVERLAP,

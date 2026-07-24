@@ -16,13 +16,13 @@ from __future__ import annotations
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-from phonometry.simulation.fdtd import (  # noqa: E402
-    CWSource,
+from phonometry.simulation.fdtd import (
     FDTD2D,
+    CWSource,
     FDTDResult,
     GaussianPulse,
     SignalSource,
@@ -149,7 +149,7 @@ def _measure_edge_reflection(z_over_rhoc: float) -> float:
     # before the left-going half returns from the rigid left wall.
     sim.p[:] = np.exp(-(((x - 6.0) / 0.15) ** 2))[None, :]
     probe = 900
-    n_steps = int(round(0.032 / sim.dt))
+    n_steps = round(0.032 / sim.dt)
     trace = np.empty(n_steps)
     for i in range(n_steps):
         sim.step()
@@ -202,7 +202,7 @@ def _measured_mode_frequency(nx: int, length: float = 1.0) -> tuple[float,
     x = (np.arange(nx) + 0.5) * dx
     sim.p[:] = np.cos(k * x)[None, :]
     f_exact = C0 / (2.0 * length)
-    steps = int(round(40.0 / f_exact / sim.dt))
+    steps = round(40.0 / f_exact / sim.dt)
     trace = np.empty(steps)
     for i in range(steps):
         sim.step()
@@ -293,8 +293,8 @@ def test_signal_source_rejects_invalid_parameters(
 
 
 def _slab_run(
-    obstacle: "np.ndarray | None",
-) -> tuple[float, float, "np.ndarray | None"]:
+    obstacle: np.ndarray | None,
+) -> tuple[float, float, np.ndarray | None]:
     """Amplitude behind / beside the slab and the snapshots of one run."""
     res = fdtd_simulation(
         C0, 0.02, 7.0e-3, shape=(100, 150),
@@ -390,8 +390,8 @@ def test_side_cannot_be_absorbing_and_impedance() -> None:
 
 
 def _duct_echo(
-    boundaries: "str | dict[str, float | np.ndarray]",
-) -> tuple[float, "np.ndarray"]:
+    boundaries: str | dict[str, float | np.ndarray],
+) -> tuple[float, np.ndarray]:
     """Right-wall echo/incident peak ratio of a duct probe via the public API.
 
     Source at x = 9 m in a 12 m duct, probe at x = 6 m: the left-going pulse

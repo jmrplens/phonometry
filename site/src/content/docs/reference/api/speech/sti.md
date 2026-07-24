@@ -25,7 +25,7 @@ the male test-signal spectrum (A.6.1).
 
 ```python
 sti_from_impulse_response(
-    ir: List[float] | np.ndarray,
+    ir: list[float] | np.ndarray,
     fs: int,
     snr: float | Sequence[float] | np.ndarray | None = None,
     level: Sequence[float] | np.ndarray | None = None,
@@ -79,9 +79,9 @@ STI itself stays within ~0.001.
 
 ```python
 stipa(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
-    reference: List[float] | np.ndarray | None = None,
+    reference: list[float] | np.ndarray | None = None,
     level: Sequence[float] | np.ndarray | None = None,
     ambient: Sequence[float] | np.ndarray | None = None,
 ) -> STIResult

@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+
 @pytest.mark.parametrize("block_size", [8, 256, 1024])
 def test_block_processing_matches_full_signal(block_size: int):
     from phonometry import OctaveFilterBank
@@ -20,7 +21,7 @@ def test_block_processing_matches_full_signal(block_size: int):
 
     # --- Full signal processing (reference) ---
     full_filter = OctaveFilterBank(fs=fs, resample=False)
-    full_output_spl, _, full_output_signal = full_filter.filter(signal, sigbands=True, detrend=False)
+    _full_output_spl, _, full_output_signal = full_filter.filter(signal, sigbands=True, detrend=False)
 
     # --- Block-wise processing ---
     block_filter = OctaveFilterBank(fs=fs, resample=False, stateful=True, steady_ic=False)
@@ -29,7 +30,7 @@ def test_block_processing_matches_full_signal(block_size: int):
 
     for start in range(0, n_samples, block_size):
         block = signal[start:start + block_size]
-        block_output_spl, _, block_output_signal = block_filter.filter(block, sigbands=True, detrend=False)
+        _block_output_spl, _, block_output_signal = block_filter.filter(block, sigbands=True, detrend=False)
         outputs.append(block_output_signal)
 
     block_output_signal = np.concatenate(outputs, axis=-1)
@@ -96,7 +97,7 @@ def test_stateful_multichannel():
         order=2, fraction=1, resample=False,
     )
     stereo_block = rng.standard_normal((n_channels, block_size))
-    spl, _ = bank.filter(stereo_block, detrend=False)
+    _spl, _ = bank.filter(stereo_block, detrend=False)
 
     # zi must have correct multichannel shape after first call
     for idx, zi in enumerate(bank.zi):

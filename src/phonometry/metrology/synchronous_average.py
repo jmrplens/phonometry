@@ -83,10 +83,10 @@ _ALIGN_TOL = 1e-9
 
 
 def comb_filter_response(
-    frequencies: "NDArray[np.float64] | list[float]",
+    frequencies: NDArray[np.float64] | list[float],
     period: float,
     n_averages: int,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Magnitude of the N-period synchronous-averaging comb filter.
 
     The closed form of McFadden Eq. 8, ``|C(f)| = |sin(N·π·f·T) /
@@ -146,9 +146,9 @@ class SynchronousAverageResult:
         :attr:`comb_frequencies`.
     """
 
-    period_waveform: "NDArray[np.float64]"
-    times: "NDArray[np.float64]"
-    residual: "NDArray[np.float64]"
+    period_waveform: NDArray[np.float64]
+    times: NDArray[np.float64]
+    residual: NDArray[np.float64]
     n_averages: int
     samples_per_period: int
     period: float
@@ -156,8 +156,8 @@ class SynchronousAverageResult:
     interpolated: bool
     noise_reduction_db: float
     residual_rms: float
-    comb_frequencies: "NDArray[np.float64]"
-    comb_response: "NDArray[np.float64]"
+    comb_frequencies: NDArray[np.float64]
+    comb_response: NDArray[np.float64]
 
     @property
     def amplitude_snr_gain(self) -> float:
@@ -165,8 +165,8 @@ class SynchronousAverageResult:
         return float(np.sqrt(self.n_averages))
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | NDArray[Any]:
         """Plot the averaged waveform and the comb-filter magnitude.
 
         With ``ax`` given, only the averaged-waveform panel is drawn on it.
@@ -183,7 +183,7 @@ class SynchronousAverageResult:
 def _samples_per_period(fs: float, period: float) -> tuple[float, int]:
     """Exact and integer samples per period, with an integer-fit check."""
     samples = fs * period
-    rounded = int(round(samples))
+    rounded = round(samples)
     if rounded < 2:
         raise ValueError(
             "'period' is too short for the sample rate: it must span at "
@@ -215,15 +215,15 @@ def _resolve_n_averages(
 
 
 def _extract_period(
-    x: "NDArray[np.float64]", start: float, m_int: int
-) -> "NDArray[np.float64]":
+    x: NDArray[np.float64], start: float, m_int: int
+) -> NDArray[np.float64]:
     """One period of ``m_int`` samples starting at fractional ``start``.
 
     The block is aligned to the integer grid by a band-limited fractional
     delay; an integer ``start`` (within :data:`_ALIGN_TOL`) is sliced
     directly, so an integer-period record stays exact.
     """
-    i0 = int(round(start))
+    i0 = round(start)
     frac = start - i0
     if abs(frac) < _ALIGN_TOL:
         return x[i0 : i0 + m_int]
@@ -235,7 +235,7 @@ def _extract_period(
 
 def _comb_grid(
     period: float, n_averages: int, n_harmonics: int
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Frequency axis (Hz) and comb-filter magnitude over the first teeth."""
     points = max(256, 200 * n_harmonics)
     freqs = np.linspace(0.0, n_harmonics / period, points)
@@ -244,7 +244,7 @@ def _comb_grid(
 
 
 def time_synchronous_average(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     period: float,
     *,

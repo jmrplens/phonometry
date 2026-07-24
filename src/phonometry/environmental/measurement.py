@@ -43,8 +43,9 @@ repeated-measurement standard uncertainty (Formulae (17)–(20)) are provided.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -179,7 +180,7 @@ class TonalAssessmentResult:
     audibility: float
     adjustment: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the ``Kt(ΔLta)`` adjustment curve with this tone marked."""
         from .._i18n import check_language
         from .._plot.environmental import plot_tonal_adjustment

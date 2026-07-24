@@ -19,8 +19,9 @@ actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, List, Tuple
+from typing import Any
 
 from ._i18n import t
 from ._layout import escaped_pairs, fmt_meta
@@ -44,10 +45,10 @@ class MaterialFicheContent:
     title: str
     basis_line: str
     caption: str
-    metadata_pairs: List[Tuple[str, str]]
-    metric_rows: List[Tuple[str, str]]
+    metadata_pairs: list[tuple[str, str]]
+    metric_rows: list[tuple[str, str]]
     statement: str
-    extended: List[str]
+    extended: list[str]
 
 
 def standard_basis_line(
@@ -75,8 +76,8 @@ def standard_basis_line(
 def material_metadata_pairs(
     metadata: ReportMetadata,
     language: str,
-    middle: List[Tuple[str, str | None]],
-) -> List[Tuple[str, str]]:
+    middle: list[tuple[str, str | None]],
+) -> list[tuple[str, str]]:
     """Build the common material identity grid with fiche-specific middle rows.
 
     The identity grid opens with the client, manufacturer and specimen
@@ -85,7 +86,7 @@ def material_metadata_pairs(
     fields are dropped and the free-text values XML-escaped by
     :func:`._layout.escaped_pairs`.
     """
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Manufacturer", language), metadata.manufacturer),
         (t("Description", language), metadata.specimen),
@@ -145,7 +146,7 @@ def render_material_fiche(
     accent = colors.HexColor(_ACCENT_HEX)
     styles, title_style, basis_style, caption_style = document_styles(accent)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(content.title, title_style),
         Paragraph(content.basis_line, basis_style),
     ]

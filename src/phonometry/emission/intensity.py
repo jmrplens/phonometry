@@ -39,7 +39,7 @@ Annex B equation (B.1)).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -47,13 +47,13 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
 from .._internal.levels_math import energy_mean
+from .._internal.utils import _typesignal
 from ..metrology.frequencies import _genfreqs
 from ..metrology.spectra import (
     _default_nperseg,
     _welch_autospectrum,
     _welch_cross_spectrum,
 )
-from .._internal.utils import _typesignal
 
 #: Reference sound intensity, in watts per square metre (ISO 9614-1, A.2.3).
 _I0 = 1.0e-12
@@ -159,14 +159,14 @@ def _level_array(values: np.ndarray, reference: float) -> np.ndarray:
 
 
 def sound_intensity(
-    p1: List[float] | np.ndarray,
-    p2: List[float] | np.ndarray,
+    p1: list[float] | np.ndarray,
+    p2: list[float] | np.ndarray,
     fs: int,
     spacing: float,
     rho: float = 1.204,
     c: float = 343.0,
     fraction: int | None = None,
-    limits: List[float] | None = None,
+    limits: list[float] | None = None,
     bias_correct: bool = False,
 ) -> IntensityResult:
     """
@@ -243,9 +243,10 @@ def sound_intensity(
         raise ValueError("Speed of sound 'c' must be positive.")
     if fraction is not None and fraction not in (1, 3):
         raise ValueError("'fraction' must be None, 1 (octave) or 3 (one-third octave).")
-    if limits is not None:
-        if len(limits) != 2 or limits[0] <= 0 or limits[1] <= limits[0]:
-            raise ValueError("'limits' must be [f_min, f_max] with 0 < f_min < f_max.")
+    if limits is not None and (
+        len(limits) != 2 or limits[0] <= 0 or limits[1] <= limits[0]
+    ):
+        raise ValueError("'limits' must be [f_min, f_max] with 0 < f_min < f_max.")
     if x1.size < 32:
         raise ValueError(f"Signals too short for a spectral estimate: {x1.size} samples.")
 
@@ -292,9 +293,9 @@ def sound_intensity(
     if fraction is not None:
         band_limits = [float(limits[0]), float(limits[1])] if limits else [12.0, 20000.0]
         freq, freq_d, freq_u, _ = _genfreqs(band_limits, fraction, fs)
-        centers: List[float] = []
-        band_i: List[float] = []
-        band_msp: List[float] = []
+        centers: list[float] = []
+        band_i: list[float] = []
+        band_msp: list[float] = []
         for fc, lo, hi in zip(freq, freq_d, freq_u):
             mask = (fpos > lo) & (fpos <= hi)
             if not np.any(mask):
@@ -333,8 +334,8 @@ def sound_intensity(
 
 
 def field_indicators(
-    pressure_levels: List[float] | np.ndarray,
-    normal_intensity: List[float] | np.ndarray,
+    pressure_levels: list[float] | np.ndarray,
+    normal_intensity: list[float] | np.ndarray,
 ) -> FieldIndicators:
     """
     ISO 9614-1:1993 Annex A field indicators F2, F3 and F4.

@@ -36,7 +36,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -82,7 +82,7 @@ def _thead_style() -> Any:
     )
 
 
-def _base_table_style(accent: Any, light: Any, n_data: int) -> List[Any]:
+def _base_table_style(accent: Any, light: Any, n_data: int) -> list[Any]:
     """The accredited-table command list shared by every left-panel table.
 
     Accent header row with a rule below it, zebra striping over the ``n_data``
@@ -105,7 +105,7 @@ def _base_table_style(accent: Any, light: Any, n_data: int) -> List[Any]:
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the absorption header grid.
 
     Only fields that are set are returned, so empty rows never appear. The
@@ -119,7 +119,7 @@ def _metadata_pairs(
         # values and must not silently reduce them (10.8 m^2, 101.32 kPa).
         return fmt_meta(value, language) if value is not None else None
 
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Manufacturer", language), metadata.manufacturer),
         (t("Description", language), metadata.specimen),
@@ -176,19 +176,19 @@ def _value_table(
         ]
         col_widths = [28 * mm, 28 * mm]
 
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for fk, m, r_, d in zip(centers, measured, shifted, deviations):
         if verbose:
             rows.append(
                 [
-                    f"{int(round(fk))}",
+                    f"{round(fk)}",
                     _d2(m, language),
                     _d2(r_, language),
                     _d2(d, language) if d > _DEVIATION_EPS else "—",
                 ]
             )
         else:
-            rows.append([f"{int(round(fk))}", _d2(m, language)])
+            rows.append([f"{round(fk)}", _d2(m, language)])
 
     style_cmds = _base_table_style(accent, light, len(centers))
     if verbose:
@@ -236,18 +236,18 @@ def _third_octave_table(
     ]
     col_widths = [24 * mm, 16 * mm, 16 * mm]
 
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for j, (fk, a_s) in enumerate(zip(bands, alpha_s)):
         # The middle of each triple is the octave centre carrying alpha_p.
         octave_cell = _d2(measured[j // 3], language) if j % 3 == 1 else ""
-        rows.append([f"{int(round(fk))}", _d2(a_s, language), octave_cell])
+        rows.append([f"{round(fk)}", _d2(a_s, language), octave_cell])
 
     table = Table(rows, colWidths=col_widths, repeatRows=1)
     table.setStyle(TableStyle(_base_table_style(accent, light, len(bands))))
     return table
 
 
-def _statement(result: "AbsorptionRatingResult", language: str = "en") -> str:
+def _statement(result: AbsorptionRatingResult, language: str = "en") -> str:
     """The boxed single-number statement ``alpha_w = X(shape)``.
 
     The shape indicator follows the value without a space, exactly as the
@@ -262,8 +262,8 @@ def _statement(result: "AbsorptionRatingResult", language: str = "en") -> str:
 
 
 def _extended_terms(
-    result: "AbsorptionRatingResult", language: str = "en"
-) -> List[str]:
+    result: AbsorptionRatingResult, language: str = "en"
+) -> list[str]:
     """The absorption class, shape indicator and applied shift shown by the box."""
     terms = [
         t("Absorption class: {value}", language).format(
@@ -285,8 +285,8 @@ def _extended_terms(
 
 
 def _verdict(
-    result: "AbsorptionRatingResult", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: AbsorptionRatingResult, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag: absorption passes at or above the requirement."""
     passed = float(result.alpha_w) >= requirement
     text = t("&#945;<sub>w</sub> = {value}, required &#8805; {req}", language).format(
@@ -297,7 +297,7 @@ def _verdict(
 
 
 def render_iso11654_report(
-    result: "AbsorptionRatingResult",
+    result: AbsorptionRatingResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -353,7 +353,7 @@ def render_iso11654_report(
     else:
         basis = t("Sound absorption rating per ISO 11654:1997.", language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

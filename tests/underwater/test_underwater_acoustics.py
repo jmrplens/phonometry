@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 import reference_data as ref
+
 from phonometry import (
     in_air_to_underwater_spl,
     peak_sound_pressure_level,
@@ -24,7 +24,7 @@ FS = 48000
 
 
 def _tone(freq: float, seconds: float, amplitude: float) -> np.ndarray:
-    t = np.arange(int(round(seconds * FS))) / FS
+    t = np.arange(round(seconds * FS)) / FS
     return amplitude * np.sin(2 * np.pi * freq * t)
 
 

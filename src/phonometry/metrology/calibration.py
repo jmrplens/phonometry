@@ -6,7 +6,6 @@ Calibration utilities for mapping digital signals to physical SPL levels.
 from __future__ import annotations
 
 import warnings
-from typing import List
 
 import numpy as np
 
@@ -36,7 +35,7 @@ def _class1_fluctuation_limit(frequency: float) -> float:
 
 
 def sensitivity(
-    ref_signal: List[float] | np.ndarray,
+    ref_signal: list[float] | np.ndarray,
     target_spl: float = 94.0,
     ref_pressure: float = 2e-5,
     fs: int | None = None,
@@ -119,7 +118,7 @@ def sensitivity(
 
 
 def calculate_sensitivity(
-    ref_signal: List[float] | np.ndarray,
+    ref_signal: list[float] | np.ndarray,
     target_spl: float = 94.0,
     ref_pressure: float = 2e-5,
     fs: int | None = None,

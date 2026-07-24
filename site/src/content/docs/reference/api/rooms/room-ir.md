@@ -71,9 +71,9 @@ decay curves -- that step belongs to downstream room-acoustics modules.
 
 ```python
 golay_impulse_response(
-    recorded_a: List[float] | np.ndarray,
-    recorded_b: List[float] | np.ndarray,
-    pair: Tuple[np.ndarray, np.ndarray],
+    recorded_a: list[float] | np.ndarray,
+    recorded_b: list[float] | np.ndarray,
+    pair: tuple[np.ndarray, np.ndarray],
     *,
     length: int | None = None,
     fs: int | None = None,
@@ -122,7 +122,7 @@ the heuristic's noise-floor false positives).
 ## golay_pair
 
 ```python
-golay_pair(order: int) -> Tuple[np.ndarray, np.ndarray]
+golay_pair(order: int) -> tuple[np.ndarray, np.ndarray]
 ```
 
 Generate a complementary Golay pair of length `2**order`.
@@ -148,12 +148,12 @@ autocorrelation of an MLS.
 
 ```python
 impulse_response(
-    recorded: List[float] | np.ndarray,
-    reference: List[float] | np.ndarray,
+    recorded: list[float] | np.ndarray,
+    reference: list[float] | np.ndarray,
     fs: int,
     *,
     method: str = 'spectral',
-    f_range: Tuple[float, float] | None = None,
+    f_range: tuple[float, float] | None = None,
     regularization: float = 1e-06,
     length: int | None = None,
     return_full: bool = False,
@@ -289,8 +289,8 @@ the spectral-division convention (rather than a unit pulse peak).
 
 ```python
 mls_impulse_response(
-    recorded: List[float] | np.ndarray,
-    mls: List[float] | np.ndarray,
+    recorded: list[float] | np.ndarray,
+    mls: list[float] | np.ndarray,
     *,
     length: int | None = None,
     fs: int | None = None,
@@ -392,7 +392,7 @@ shaped_sweep_signal(
     f2: float,
     seconds: float,
     *,
-    target: str | Tuple[np.ndarray, np.ndarray] = 'pink',
+    target: str | tuple[np.ndarray, np.ndarray] = 'pink',
     amplitude: float = 1.0,
     start_delay: float | None = None,
     fade: float = 0.01,
@@ -449,7 +449,7 @@ ShapedSweepResult(
     frequencies: np.ndarray,
     magnitude: np.ndarray,
     group_delay: np.ndarray,
-    f_range: Tuple[float, float],
+    f_range: tuple[float, float],
     crest_factor_db: float,
 )
 ```

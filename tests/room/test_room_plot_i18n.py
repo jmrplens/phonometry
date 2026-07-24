@@ -18,19 +18,19 @@ pytest.importorskip("matplotlib")
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 
-from phonometry import decay_curve, room_parameters  # noqa: E402
-from phonometry._plot.room import plot_excitation  # noqa: E402
-from phonometry.room import enclosed_space_absorption as esa  # noqa: E402
-from phonometry.room import room_noise as rn  # noqa: E402
-from phonometry.room.image_source import image_source_rir  # noqa: E402
-from phonometry.room.open_plan import open_plan_metrics  # noqa: E402
-from phonometry.room.reverberation_prediction import (  # noqa: E402
+from phonometry import decay_curve, room_parameters
+from phonometry._plot.room import plot_excitation
+from phonometry.room import enclosed_space_absorption as esa
+from phonometry.room import room_noise as rn
+from phonometry.room.image_source import image_source_rir
+from phonometry.room.open_plan import open_plan_metrics
+from phonometry.room.reverberation_prediction import (
     reverberation_time_models,
 )
-from phonometry.room.room_ir import ImpulseResponseResult  # noqa: E402
-from phonometry.room.steady_field import steady_state_field  # noqa: E402
+from phonometry.room.room_ir import ImpulseResponseResult
+from phonometry.room.steady_field import steady_state_field
 
 FS = 48000
 

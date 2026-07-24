@@ -42,9 +42,10 @@ refer to ISO 9612:2009(E).
 from __future__ import annotations
 
 import warnings
+from collections.abc import Sequence
 from dataclasses import dataclass, field, replace
 from math import log10, sqrt
-from typing import TYPE_CHECKING, Any, Dict, Literal, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -71,7 +72,7 @@ _C5_FACTOR: float = 10.0 / np.log(10.0)  # = 4.3429...
 InstrumentClass = Literal["class1", "class2", "personal_exposimeter"]
 
 #: Instrument standard uncertainty u2 by class (Table C.5), dB.
-INSTRUMENT_U2: Dict[str, float] = {
+INSTRUMENT_U2: dict[str, float] = {
     "class1": 0.7,  # sound level meter IEC 61672-1:2002 class 1
     "class2": 1.5,  # sound level meter IEC 61672-1:2002 class 2
     "personal_exposimeter": 1.5,  # personal sound exposure meter IEC 61252
@@ -86,9 +87,9 @@ class OccupationalExposureWarning(PhonometryWarning):
 # Table C.4: uncertainty contribution c1*u1 (dB) for job/full-day sampling,
 # as a function of the number of samples N and the standard uncertainty u1.
 # --------------------------------------------------------------------------- #
-_C4_U1_AXIS: Tuple[float, ...] = (0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0)
-_C4_N_AXIS: Tuple[int, ...] = (3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 25, 30)
-_C4_TABLE: Tuple[Tuple[float, ...], ...] = (
+_C4_U1_AXIS: tuple[float, ...] = (0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0)
+_C4_N_AXIS: tuple[int, ...] = (3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 25, 30)
+_C4_TABLE: tuple[tuple[float, ...], ...] = (
     (0.6, 1.6, 3.1, 5.2, 8.0, 11.5, 15.7, 20.6, 26.1, 32.2, 39.0, 46.5),  # N=3
     (0.4, 0.9, 1.6, 2.5, 3.6, 5.0, 6.7, 8.6, 10.9, 13.4, 16.1, 19.2),  # N=4
     (0.3, 0.7, 1.2, 1.7, 2.4, 3.3, 4.4, 5.6, 6.9, 8.5, 10.2, 12.1),  # N=5
@@ -211,10 +212,10 @@ class Task:
         default (selects ``u2`` from Table C.5).
     """
 
-    samples: Tuple[float, ...]
+    samples: tuple[float, ...]
     duration_hours: float
-    duration_samples: Tuple[float, ...] | None = None
-    duration_range: Tuple[float, float] | None = None
+    duration_samples: tuple[float, ...] | None = None
+    duration_range: tuple[float, float] | None = None
     label: str | None = None
     instrument: InstrumentClass | None = None
 
@@ -281,14 +282,14 @@ class ExposureResult:
     n_samples: int | None = None
     sampling_advisory: bool = False  # c1*u1 > 3.5 dB, or 3 dB spread on 3 samples
     instrument: InstrumentClass | None = None
-    tasks: Tuple[TaskContribution, ...] = field(default_factory=tuple)
+    tasks: tuple[TaskContribution, ...] = field(default_factory=tuple)
 
     @property
     def upper_limit(self) -> float:
         """Upper limit ``LEX,8h + U`` of the one-sided 95 % interval, dB."""
         return self.lex_8h + self.expanded_uncertainty
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the per-task contributions with the ``LEX,8h`` line.
 
         Only task-based results carry per-task contributions (the job and
@@ -305,7 +306,7 @@ class ExposureResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

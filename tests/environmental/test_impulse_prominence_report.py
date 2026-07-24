@@ -22,7 +22,7 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import ReportMetadata  # noqa: E402
+from phonometry import ReportMetadata
 
 # The module is shadowed in the package namespace by the function of the same
 # name, so it must be imported through the import system directly.

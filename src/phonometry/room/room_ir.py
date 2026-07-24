@@ -65,13 +65,13 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from scipy import signal
 
-from .._internal.warnings import PhonometryWarning
 from .._internal.utils import _typesignal
+from .._internal.warnings import PhonometryWarning
 
 
 class ImpulseResponseWarning(PhonometryWarning):
@@ -97,7 +97,7 @@ _FARINA_MAX_TRAILING_ZEROS = 8
 # and Long Pseudo-Random Sequence Generators", P. Alfke, 1996; equivalent to
 # the primitive-polynomial tables used by Rife & Vanderkooy, JAES 37 (1989),
 # ISO 18233 Bibliography [16]).
-_MLS_TAPS: Dict[int, Tuple[int, ...]] = {
+_MLS_TAPS: dict[int, tuple[int, ...]] = {
     2: (2, 1),
     3: (3, 2),
     4: (4, 3),
@@ -162,14 +162,14 @@ class ImpulseResponseResult:
         return int(self.ir.ndim)
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> tuple[int, ...]:
         return tuple(self.ir.shape)
 
     @property
     def dtype(self) -> np.dtype[Any]:
         return self.ir.dtype
 
-    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> "Axes | np.ndarray":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes | np.ndarray:
         """Plot the impulse response: waveform and log-magnitude decay.
 
         Draws the (normalised) time-domain waveform and, below it, the
@@ -232,7 +232,7 @@ def sweep_signal(
     if not 0.0 <= fade < 0.5:
         raise ValueError("fade must be in [0, 0.5)")
 
-    n = int(round(seconds * fs))
+    n = round(seconds * fs)
     if n < 2:
         raise ValueError("seconds*fs must yield at least 2 samples")
 
@@ -252,7 +252,7 @@ def sweep_signal(
 def _apply_fade(x: np.ndarray, fade: float) -> np.ndarray:
     """Apply symmetric half-Hann fade windows to both ends of ``x``."""
     n = x.size
-    m = int(round(fade * n))
+    m = round(fade * n)
     if m < 1:
         return x
     ramp = 0.5 * (1.0 - np.cos(np.pi * (np.arange(m) + 0.5) / m))
@@ -328,7 +328,7 @@ def _farina_deconvolve(
     rec: np.ndarray,
     ref: np.ndarray,
     fs: int,
-    f_range: Tuple[float, float] | None,
+    f_range: tuple[float, float] | None,
 ) -> np.ndarray:
     """Farina inverse-filter deconvolution (ISO 18233:2006, Figure B.2).
 
@@ -366,12 +366,12 @@ def _farina_deconvolve(
 
 
 def impulse_response(
-    recorded: List[float] | np.ndarray,
-    reference: List[float] | np.ndarray,
+    recorded: list[float] | np.ndarray,
+    reference: list[float] | np.ndarray,
     fs: int,
     *,
     method: str = "spectral",
-    f_range: Tuple[float, float] | None = None,
+    f_range: tuple[float, float] | None = None,
     regularization: float = 1e-6,
     length: int | None = None,
     return_full: bool = False,
@@ -479,8 +479,8 @@ def mls_signal(order: int) -> np.ndarray:
 
 
 def mls_impulse_response(
-    recorded: List[float] | np.ndarray,
-    mls: List[float] | np.ndarray,
+    recorded: list[float] | np.ndarray,
+    mls: list[float] | np.ndarray,
     *,
     length: int | None = None,
     fs: int | None = None,
@@ -596,7 +596,7 @@ _GOLAY_MAX_ORDER = 22
 _SHAPED_EDGE_OCTAVES = 1.0 / 6.0
 
 
-def golay_pair(order: int) -> Tuple[np.ndarray, np.ndarray]:
+def golay_pair(order: int) -> tuple[np.ndarray, np.ndarray]:
     """
     Generate a complementary Golay pair of length ``2**order``.
 
@@ -625,9 +625,9 @@ def golay_pair(order: int) -> Tuple[np.ndarray, np.ndarray]:
 
 
 def golay_impulse_response(
-    recorded_a: List[float] | np.ndarray,
-    recorded_b: List[float] | np.ndarray,
-    pair: Tuple[np.ndarray, np.ndarray],
+    recorded_a: list[float] | np.ndarray,
+    recorded_b: list[float] | np.ndarray,
+    pair: tuple[np.ndarray, np.ndarray],
     *,
     length: int | None = None,
     fs: int | None = None,
@@ -741,7 +741,7 @@ class ShapedSweepResult:
     frequencies: np.ndarray
     magnitude: np.ndarray
     group_delay: np.ndarray
-    f_range: Tuple[float, float]
+    f_range: tuple[float, float]
     crest_factor_db: float
 
     def __array__(self, dtype: Any = None) -> np.ndarray:
@@ -761,7 +761,7 @@ class ShapedSweepResult:
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | np.ndarray":
+    ) -> Axes | np.ndarray:
         """Plot the sweep waveform and its spectrum against the target.
 
         Two stacked panels: the time-domain waveform, and the sweep's Welch
@@ -780,9 +780,9 @@ class ShapedSweepResult:
 
 
 def _shaped_target_db(
-    target: str | Tuple[np.ndarray, np.ndarray],
+    target: str | tuple[np.ndarray, np.ndarray],
     freqs: np.ndarray,
-    f_range: Tuple[float, float],
+    f_range: tuple[float, float],
 ) -> np.ndarray:
     """Evaluate the target magnitude, in dB, on the synthesis grid.
 
@@ -817,7 +817,7 @@ def _shaped_target_db(
 
 
 def _band_edge_taper(
-    freqs: np.ndarray, f_range: Tuple[float, float], fs: float
+    freqs: np.ndarray, f_range: tuple[float, float], fs: float
 ) -> np.ndarray:
     """Half-cosine band-edge weights (1 inside ``f_range``, 0 far outside).
 
@@ -852,7 +852,7 @@ def shaped_sweep_signal(
     f2: float,
     seconds: float,
     *,
-    target: str | Tuple[np.ndarray, np.ndarray] = "pink",
+    target: str | tuple[np.ndarray, np.ndarray] = "pink",
     amplitude: float = 1.0,
     start_delay: float | None = None,
     fade: float = 0.01,
@@ -935,7 +935,7 @@ def shaped_sweep_signal(
     # pre-ringing folding to "negative times" stays clear of the tail
     # (Mueller & Massarani 2001, Sec. 4.2).
     total = seconds + 2.0 * lead
-    n_keep = int(round(total * fs_v))
+    n_keep = round(total * fs_v)
     if n_keep < 16:
         raise ValueError("seconds*fs must yield at least 16 samples")
     n_fft = int(2 ** np.ceil(np.log2(2 * n_keep)))
@@ -977,7 +977,7 @@ def shaped_sweep_signal(
     # edges onto the same sample, leaving an empty (or single-sample) core
     # that would make the statistic blow up; fall back to the whole
     # retained sweep in that degenerate case.
-    core = sweep[int(round(lead * fs_v)):int(round((lead + seconds) * fs_v))]
+    core = sweep[round(lead * fs_v):round((lead + seconds) * fs_v)]
     if core.size < 2:
         core = sweep
     rms = float(np.sqrt(np.mean(core ** 2)))

@@ -27,9 +27,9 @@ pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 pytest.importorskip("pypdf")
 
-import numpy as np  # noqa: E402  (import after importorskip)
+import numpy as np
 
-from phonometry import (  # noqa: E402
+from phonometry import (
     ReportMetadata,
     RoomAcousticsResult,
     room_parameters,
@@ -49,7 +49,7 @@ _T_MID = 0.5 * (_T60[2] + _T60[3])
 
 def _synthetic_ir(seconds: float = 5.0) -> np.ndarray:
     """One sine carrier per octave band, each with its own exponential decay."""
-    time = np.arange(int(round(seconds * _FS))) / _FS
+    time = np.arange(round(seconds * _FS)) / _FS
     ir = np.zeros_like(time)
     for freq, decay in zip(_BANDS, _T60):
         ir += np.sin(2.0 * np.pi * freq * time) * np.exp(-0.5 * _A60 * time / decay)
@@ -82,24 +82,24 @@ def _extract_text(path: str) -> str:
 
 
 def _full_metadata(**overrides) -> ReportMetadata:
-    base = dict(
-        specimen="Small auditorium, unoccupied, fully furnished",
-        client="Acoustic Test Client Ltd.",
-        test_room="Auditorium A",
-        room_volume=2830.0,
-        area=340.0,
-        source_positions=2,
-        receiver_positions=8,
-        instrumentation="Omnidirectional source + 1/2 in. microphone",
-        measurement_standard="ISO 3382-1",
-        temperature=21.0,
-        relative_humidity=45.0,
-        pressure=101.1,
-        test_date="2026-07-20",
-        laboratory="Phonometry Reference Laboratory",
-        operator="J. M. Requena-Plens",
-        report_id="PHN-2026-3382",
-    )
+    base = {
+        "specimen": "Small auditorium, unoccupied, fully furnished",
+        "client": "Acoustic Test Client Ltd.",
+        "test_room": "Auditorium A",
+        "room_volume": 2830.0,
+        "area": 340.0,
+        "source_positions": 2,
+        "receiver_positions": 8,
+        "instrumentation": "Omnidirectional source + 1/2 in. microphone",
+        "measurement_standard": "ISO 3382-1",
+        "temperature": 21.0,
+        "relative_humidity": 45.0,
+        "pressure": 101.1,
+        "test_date": "2026-07-20",
+        "laboratory": "Phonometry Reference Laboratory",
+        "operator": "J. M. Requena-Plens",
+        "report_id": "PHN-2026-3382",
+    }
     base.update(overrides)
     return ReportMetadata(**base)
 

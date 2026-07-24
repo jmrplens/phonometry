@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import io
 import re
-import subprocess  # noqa: S404  (fixed argv, no shell, trusted git invocation)
+import subprocess
 import sys
 from pathlib import Path
 
@@ -86,17 +86,18 @@ _IDREF = re.compile(rb'(\bid="|url\(#|xlink:href="#|\bhref="#)([A-Za-z_][\w.:\-]
 
 def _committed(path: str) -> bytes | None:
     """Return the bytes of ``path`` as committed at HEAD, or ``None``."""
-    result = subprocess.run(  # noqa: S603
-        ["git", "show", f"HEAD:{path}"],  # noqa: S607
+    result = subprocess.run(
+        ["git", "show", f"HEAD:{path}"],
         capture_output=True,
+        check=False,
     )
     return result.stdout if result.returncode == 0 else None
 
 
 def _tracked_files() -> set[str]:
     """Return the set of ``.github/images`` paths tracked at HEAD."""
-    result = subprocess.run(  # noqa: S603
-        ["git", "ls-tree", "-r", "--name-only", "HEAD", IMG_DIR],  # noqa: S607
+    result = subprocess.run(
+        ["git", "ls-tree", "-r", "--name-only", "HEAD", IMG_DIR],
         capture_output=True,
         text=True,
         check=True,

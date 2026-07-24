@@ -1,4 +1,4 @@
-ruff>=0.15.22
+ruff>=0.16.0
 mypy>=2.3.0
 bandit>=1.9.4
 types-setuptools>=83.0.0.20260716

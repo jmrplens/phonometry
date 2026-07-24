@@ -25,7 +25,7 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 from __future__ import annotations
 
 import math
-from typing import Any, List, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -74,7 +74,7 @@ def performance_verdict(
     higher_is_better: bool,
     unit: str = "dB",
     language: str = "en",
-) -> Tuple[str, bool]:
+) -> tuple[str, bool]:
     """Verdict text and PASS flag for a performance figure against a requirement.
 
     ``higher_is_better`` selects the direction: an insertion or transmission
@@ -115,11 +115,11 @@ def render_noise_control_fiche(
     caption: str,
     value_table: Any,
     statement: str,
-    extended: List[str],
-    basis_strips: List[str],
+    extended: list[str],
+    basis_strips: list[str],
     metadata: ReportMetadata | None,
     language: str,
-    verdict: Tuple[str, bool] | None = None,
+    verdict: tuple[str, bool] | None = None,
 ) -> str:
     """Assemble the shared noise-control fiche flow and build the PDF at ``path``.
 
@@ -158,7 +158,7 @@ def render_noise_control_fiche(
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

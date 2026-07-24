@@ -32,7 +32,7 @@ matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -121,7 +121,7 @@ def _value_table(result: Any, verbose: bool, language: str = "en") -> Any:
     return power_value_table(header, rows_data, widths, fraction)
 
 
-def _statement(result: Any, language: str = "en") -> Tuple[float, str, List[str]]:
+def _statement(result: Any, language: str = "en") -> tuple[float, str, list[str]]:
     """The boxed mean insertion loss and its extended enclosure terms."""
     mean_il = mean_finite(result.insertion_loss)
     mean_r = mean_finite(result.panel_transmission_loss)
@@ -158,7 +158,7 @@ def _basis_strip(language: str = "en") -> str:
 
 
 def render_enclosure_report(
-    result: "EnclosureResult",
+    result: EnclosureResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

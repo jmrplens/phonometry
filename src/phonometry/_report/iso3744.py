@@ -43,7 +43,7 @@ extra, matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -78,7 +78,7 @@ def _is_precision(result: Any) -> bool:
     return hasattr(result, "c1") and hasattr(result, "c2") and hasattr(result, "c3")
 
 
-def _method(result: Any, language: str = "en") -> Tuple[str, str]:
+def _method(result: Any, language: str = "en") -> tuple[str, str]:
     """Return ``(standard, grade_phrase)`` for the applied determination method.
 
     ISO 3744:2010 is the engineering method (accuracy grade 2), ISO 3746:2010
@@ -172,7 +172,7 @@ def _value_table(result: Any, verbose: bool, language: str = "en") -> Any:
     return power_value_table(header, rows_data, widths, fraction)
 
 
-def _statement(result: Any, language: str = "en") -> Tuple[str, List[str]]:
+def _statement(result: Any, language: str = "en") -> tuple[str, list[str]]:
     """The boxed sound-power result and its extended terms.
 
     Delegates the ``LWA``/``LW`` box to the shared
@@ -249,7 +249,7 @@ def _a_weighting_strip(result: Any, language: str = "en") -> str:
 
 
 def render_sound_power_report(
-    result: "SoundPowerResult | PrecisionSoundPowerResult",
+    result: SoundPowerResult | PrecisionSoundPowerResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

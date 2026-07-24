@@ -144,7 +144,7 @@ def test_signal_length_amplitude_and_fades() -> None:
     res = shaped_sweep_signal(
         FS, 100.0, 10000.0, 1.0, amplitude=0.5, start_delay=0.1
     )
-    assert res.size == int(round(1.2 * FS))  # seconds + 2*start_delay
+    assert res.size == round(1.2 * FS)  # seconds + 2*start_delay
     assert np.max(np.abs(np.asarray(res))) == pytest.approx(0.5, abs=1e-9)
     assert abs(res.signal[0]) < 1e-6
     assert abs(res.signal[-1]) < 1e-6

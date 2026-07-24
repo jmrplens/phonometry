@@ -115,20 +115,20 @@ __all__ = [
     "SPOT_NARROW_BAND_RANGE",
     "InsituAbsorptionResult",
     "RoadAbsorptionWarning",
-    "insitu_absorption_coefficient",
-    "insitu_absorption_from_reflection",
-    "insitu_absorption_spectrum",
     "absorption_reference_corrected",
     "adrienne_window",
     "check_spot_frequency_range",
     "geometric_spreading_factor",
     "geometric_spreading_factor_angle",
+    "insitu_absorption_coefficient",
+    "insitu_absorption_from_reflection",
+    "insitu_absorption_spectrum",
+    "insitu_reflection_factor",
     "max_sampled_area_radius",
     "msa_major_axis",
     "one_third_octave_absorption",
     "power_reflection_coefficient",
     "reflected_path_delay",
-    "insitu_reflection_factor",
     "spot_internal_loss_correction",
     "spot_microphone_spacing_bounds",
     "spot_tube_upper_frequency",
@@ -303,9 +303,9 @@ def adrienne_window(
         raise ValueError("Edge durations must be non-negative.")
     if leading_edge not in _EDGE_SHAPES or trailing_edge not in _EDGE_SHAPES:
         raise ValueError(f"Edge shapes must be one of {_EDGE_SHAPES}.")
-    n_lead = int(round(leading_duration * fs))
-    n_flat = int(round(flat_duration * fs))
-    n_trail = int(round(trailing_duration * fs))
+    n_lead = round(leading_duration * fs)
+    n_flat = round(flat_duration * fs)
+    n_trail = round(trailing_duration * fs)
     if n_flat <= 0:
         raise ValueError("'flat_duration' is too short for 'fs'.")
     rising = _edge(n_lead, leading_edge, rising=True)

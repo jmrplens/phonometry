@@ -18,32 +18,32 @@ pytest.importorskip("matplotlib")
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 
-from phonometry import sound_absorption_coefficient_uncertainty  # noqa: E402
-from phonometry.materials.absorption_rating import weighted_absorption  # noqa: E402
-from phonometry.materials.sound_absorption import (  # noqa: E402
-    measure_sound_absorption,
-)
-from phonometry.materials.airflow_resistance import (  # noqa: E402
+from phonometry import sound_absorption_coefficient_uncertainty
+from phonometry.materials.absorption_rating import weighted_absorption
+from phonometry.materials.airflow_resistance import (
     static_airflow_resistance,
 )
-from phonometry.materials.dynamic_stiffness import (  # noqa: E402
+from phonometry.materials.dynamic_stiffness import (
     floating_floor_resonance,
 )
-from phonometry.materials.impedance_tube import ImpedanceTubeResult  # noqa: E402
-from phonometry.materials.porous_absorber import (  # noqa: E402
+from phonometry.materials.impedance_tube import ImpedanceTubeResult
+from phonometry.materials.porous_absorber import (
     PorousLayer,
     delany_bazley,
     diffuse_field_absorption,
     layered_absorber,
 )
-from phonometry.materials.road_absorption import (  # noqa: E402
+from phonometry.materials.road_absorption import (
     InsituAbsorptionResult,
 )
-from phonometry.materials.scattering_diffusion import (  # noqa: E402
+from phonometry.materials.scattering_diffusion import (
     directional_diffusion,
     scattering_coefficient_spectrum,
+)
+from phonometry.materials.sound_absorption import (
+    measure_sound_absorption,
 )
 
 _C0 = 343.0

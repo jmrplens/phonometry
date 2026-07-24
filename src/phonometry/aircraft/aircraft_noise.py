@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
 
 #: The 24 one-third-octave band centre frequencies (Hz) used by PNL/EPNL.
-NOY_BANDS: "NDArray[np.float64]" = np.array(
+NOY_BANDS: NDArray[np.float64] = np.array(
     [
         50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0,
         315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0,
@@ -45,7 +45,7 @@ _INF = np.inf
 _NAN = np.nan
 #: ICAO Annex 16 Vol. I Appendix 2 Table A2-3: analytic noy constants per band.
 #: Columns: SPL(a), SPL(b), SPL(c), SPL(d), SPL(e), M(b), M(c), M(d), M(e).
-_A2_3: "NDArray[np.float64]" = np.array(
+_A2_3: NDArray[np.float64] = np.array(
     [
         [91.0, 64, 52, 49, 55, 0.043478, 0.030103, 0.079520, 0.058098],
         [85.9, 60, 51, 44, 51, 0.040570, 0.030103, 0.068160, 0.058098],
@@ -79,7 +79,7 @@ _A2_3: "NDArray[np.float64]" = np.array(
 _PNL_FACTOR = 10.0 / np.log10(2.0)
 
 
-def _validate_spectrum(spl: "NDArray[np.float64] | list[float]") -> "NDArray[np.float64]":
+def _validate_spectrum(spl: NDArray[np.float64] | list[float]) -> NDArray[np.float64]:
     sig = np.asarray(spl, dtype=np.float64)
     if sig.shape != (24,):
         raise ValueError("'spl' must contain the 24 one-third-octave-band levels.")
@@ -88,7 +88,7 @@ def _validate_spectrum(spl: "NDArray[np.float64] | list[float]") -> "NDArray[np.
     return sig
 
 
-def perceived_noisiness(spl: "NDArray[np.float64] | list[float]") -> "NDArray[np.float64]":
+def perceived_noisiness(spl: NDArray[np.float64] | list[float]) -> NDArray[np.float64]:
     """Per-band perceived noisiness ``n`` in noys (ICAO Annex 16 App. 2 §4.7).
 
     The analytic piecewise noy law, using the Table A2-3 constants:
@@ -127,7 +127,7 @@ def perceived_noisiness(spl: "NDArray[np.float64] | list[float]") -> "NDArray[np
     return np.asarray(np.select(conditions, choices, default=0.0), dtype=np.float64)
 
 
-def perceived_noise_level(spl: "NDArray[np.float64] | list[float]") -> float:
+def perceived_noise_level(spl: NDArray[np.float64] | list[float]) -> float:
     """Perceived noise level ``PNL`` (ICAO Annex 16 App. 2 §4.2), in PNdB.
 
     ``N = 0.85·n_max + 0.15·Σn`` and ``PNL = 40 + (10/lg2)·lg N``. If the total
@@ -149,9 +149,9 @@ _TONE_START = 2
 
 
 def _tone_background(
-    spl: "NDArray[np.float64] | list[float]",
+    spl: NDArray[np.float64] | list[float],
     start: int | None = None,
-) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Tone-correction background level ``SPL''`` and excess ``F`` (App. 2 §4.3).
 
     Implements Steps 1-8 of the slope ("encircling") method: slopes, the
@@ -241,7 +241,7 @@ def _tone_factor(excess: float, frequency: float) -> float:
     return 10.0 / 3.0
 
 
-def tone_correction(spl: "NDArray[np.float64] | list[float]", *,
+def tone_correction(spl: NDArray[np.float64] | list[float], *,
                     start_band: int = _TONE_START) -> float:
     """Tone-correction factor ``C`` for a spectrum (ICAO Annex 16 App. 2 §4.3).
 
@@ -268,7 +268,7 @@ _EPNL_REFERENCE_TIME = 10.0
 _TEN_DB_DOWN = 10.0
 
 
-def _ten_db_down_limits(pnlt: "NDArray[np.float64]", threshold: float) -> "tuple[int, int]":
+def _ten_db_down_limits(pnlt: NDArray[np.float64], threshold: float) -> tuple[int, int]:
     """The 10 dB-down record indices ``(kF, kL)`` of the integration window.
 
     ``kF``/``kL`` are the records whose PNLT is nearest to ``PNLTM − 10``. The
@@ -300,12 +300,12 @@ def _ten_db_down_limits(pnlt: "NDArray[np.float64]", threshold: float) -> "tuple
 
 
 def epnl_from_pnlt(
-    pnlt: "NDArray[np.float64] | list[float]",
-    dt: "float | NDArray[np.float64] | list[float]" = 0.5,
+    pnlt: NDArray[np.float64] | list[float],
+    dt: float | NDArray[np.float64] | list[float] = 0.5,
     *,
     reference_time: float = _EPNL_REFERENCE_TIME,
-    tone_corrections: "NDArray[np.float64] | list[float] | None" = None,
-) -> "tuple[float, float, int, int]":
+    tone_corrections: NDArray[np.float64] | list[float] | None = None,
+) -> tuple[float, float, int, int]:
     """EPNL from a tone-corrected perceived-noise-level time history (App. 2 §4.5-4.6).
 
     ``EPNL = 10·lg( Σ_{kF..kL} 10^{PNLT(k)/10}·Δt(k) ) − 10·lg(T0)`` with the
@@ -375,18 +375,18 @@ class EPNLResult:
     :ivar band_limits: The 0-based 10 dB-down record indices ``(kF, kL)``.
     """
 
-    frequencies: "NDArray[np.float64]"
-    times: "NDArray[np.float64]"
-    pnl: "NDArray[np.float64]"
-    tone_correction: "NDArray[np.float64]"
-    pnlt: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    times: NDArray[np.float64]
+    pnl: NDArray[np.float64]
+    tone_correction: NDArray[np.float64]
+    pnlt: NDArray[np.float64]
     pnltm: float
     bandsharing_adjustment: float
     duration_correction: float
     epnl: float
-    band_limits: "tuple[int, int]"
+    band_limits: tuple[int, int]
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the PNL and PNLT time histories with PNLTM and the 10 dB-down band."""
         from .._i18n import check_language
         from .._plot.aircraft import plot_epnl
@@ -397,7 +397,7 @@ class EPNLResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -448,12 +448,12 @@ class EPNLResult:
 #: Tone-correction start band per certification procedure (App. 2 §4.3.1
 #: Step 1): aeroplanes start the slope analysis at band 3 (80 Hz, 0-based
 #: index 2); helicopters and tilt-rotors at band 1 (50 Hz, index 0).
-_PROCEDURE_START_BAND: "dict[str, int]" = {"aeroplane": _TONE_START, "helicopter": 0}
+_PROCEDURE_START_BAND: dict[str, int] = {"aeroplane": _TONE_START, "helicopter": 0}
 
 
 def effective_perceived_noise_level(
-    spectra: "NDArray[np.float64] | list[list[float]]",
-    dt: "float | NDArray[np.float64] | list[float]" = 0.5,
+    spectra: NDArray[np.float64] | list[list[float]],
+    dt: float | NDArray[np.float64] | list[float] = 0.5,
     *,
     reference_time: float = _EPNL_REFERENCE_TIME,
     procedure: str = "aeroplane",

@@ -17,12 +17,23 @@ import sys
 sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from phonometry.simulation.fdtd import (  # noqa: E402
-    CWSource as CWSource,
-    FDTD2D as FDTD2D,
-    Field2D as Field2D,
-    GaussianPulse as GaussianPulse,
-    SignalSource as SignalSource,
-    Source as Source,
-    fdtd_simulation as fdtd_simulation,
+from phonometry.simulation.fdtd import (
+    FDTD2D,
+    CWSource,
+    Field2D,
+    GaussianPulse,
+    SignalSource,
+    Source,
+    fdtd_simulation,
 )
+
+__all__ = [
+    "FDTD2D",
+    "CWSource",
+    "Field2D",
+    "GaussianPulse",
+    "SignalSource",
+    "Source",
+    "fdtd_simulation",
+]
+

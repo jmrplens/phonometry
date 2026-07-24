@@ -184,6 +184,7 @@ def test_characteristic_reception_plate_power_formula_17() -> None:
 def test_conversion_chain_reproduces_annex_i8_wall() -> None:
     """(15)+(17) then the Annex I mobility correction reproduce Table I.8."""
     import reference_data as ref
+
     from phonometry import (
         characteristic_reception_plate_power,
         equivalent_blocked_force_level,
@@ -267,6 +268,7 @@ def test_source_mobility_formula_19_round_trip() -> None:
 def test_iso9611_mean_free_velocity_level() -> None:
     """ISO 9611:1996 eq. (9): the energy mean over positions."""
     import reference_data as ref
+
     from phonometry import mean_free_velocity_level
     from phonometry.building.structure_borne_power import (
         FREE_VELOCITY_REFERENCE,

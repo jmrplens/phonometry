@@ -18,8 +18,9 @@ the male test-signal spectrum (A.6.1).
 from __future__ import annotations
 
 import warnings
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Sequence
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -29,10 +30,10 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
 from scipy import signal
 
+from .._internal.utils import _typesignal
 from .._internal.warnings import PhonometryWarning
 from ..metrology.core import OctaveFilterBank
 from ..metrology.frequencies import nominal_frequencies
-from .._internal.utils import _typesignal
 
 
 class STIWarning(PhonometryWarning):
@@ -124,7 +125,7 @@ class STIResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -328,7 +329,7 @@ def _sti_from_mtf(
 
 
 def sti_from_impulse_response(
-    ir: List[float] | np.ndarray,
+    ir: list[float] | np.ndarray,
     fs: int,
     snr: float | Sequence[float] | np.ndarray | None = None,
     level: Sequence[float] | np.ndarray | None = None,
@@ -444,7 +445,7 @@ def _stipa_modulation_depths(env: np.ndarray, fs: int) -> np.ndarray:
                     f"full period of the {fm} Hz modulation (>= {1.0 / fm:.2f} s; "
                     "the standard recommends 15 s to 25 s)."
                 )
-            n_use = int(round(periods / fm * fs))
+            n_use = round(periods / fm * fs)
             seg = env[k, :n_use]
             total = float(np.sum(seg))
             if total <= 0.0:
@@ -473,9 +474,9 @@ def _stipa_modulation_depths(env: np.ndarray, fs: int) -> np.ndarray:
 
 
 def stipa(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
-    reference: List[float] | np.ndarray | None = None,
+    reference: list[float] | np.ndarray | None = None,
     level: Sequence[float] | np.ndarray | None = None,
     ambient: Sequence[float] | np.ndarray | None = None,
 ) -> STIResult:
@@ -595,7 +596,7 @@ def stipa_signal(
     if seconds <= 0:
         raise ValueError("'seconds' must be positive.")
 
-    n = int(round(seconds * fs))
+    n = round(seconds * fs)
     rng = np.random.default_rng(seed)
     pink = _pink_noise(n, rng)
     t = np.arange(n) / fs

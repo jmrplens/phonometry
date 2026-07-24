@@ -25,12 +25,13 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from ..hearing.occupational_exposure import ExposureResult
-    from ..hearing.threshold import AgeThresholdResult
+
     from ..hearing.noise_induced_hearing_loss import HtlanResult, NiptsResult
+    from ..hearing.objective_intelligibility import STOIResult
+    from ..hearing.occupational_exposure import ExposureResult
     from ..hearing.sii import SIIResult, StandardSpeechSpectrum
     from ..hearing.sti import STIResult
-    from ..hearing.objective_intelligibility import STOIResult
+    from ..hearing.threshold import AgeThresholdResult
 
 #: Spanish translations of the fixed strings rendered by the hearing
 #: ``.plot()`` renderers, keyed by their verbatim English text. ``_t``
@@ -117,7 +118,7 @@ def plot_sti(
 
 
 def plot_stoi(
-    result: "STOIResult", ax: Axes | None = None, *, language: str = "en",
+    result: STOIResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Intermediate intelligibility that averages to the STOI/ESTOI index.
@@ -170,7 +171,7 @@ def plot_stoi(
 
 
 def plot_sii(
-    result: "SIIResult", ax: Axes | None = None, *, language: str = "en",
+    result: SIIResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band audibility and its importance-weighted contribution to the SII.
@@ -216,7 +217,7 @@ _EFFORT_COLORS = (_C_PRIMARY, _C_TERTIARY, _C_SECONDARY, _C_REFERENCE)
 
 
 def plot_standard_speech_spectrum(
-    result: "StandardSpeechSpectrum", ax: Axes | None = None, *,
+    result: StandardSpeechSpectrum, ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any,
 ) -> Axes:
     """Standard speech spectrum level by vocal effort (ANSI S3.5-1997 Table 3).
@@ -258,7 +259,7 @@ def plot_standard_speech_spectrum(
 
 
 def plot_age_threshold(
-    result: "AgeThresholdResult", ax: Axes | None = None, *, language: str = "en",
+    result: AgeThresholdResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Median age-related hearing threshold with the 10-90 % fractile band.
@@ -297,7 +298,7 @@ def plot_age_threshold(
 
 
 def plot_nipts(
-    result: "NiptsResult", ax: Axes | None = None, *, language: str = "en",
+    result: NiptsResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Median NIPTS spectrum with the 10-90 % fractile band (ISO 1999).
@@ -337,7 +338,7 @@ def plot_nipts(
 
 
 def plot_htlan(
-    result: "HtlanResult", ax: Axes | None = None, *, language: str = "en",
+    result: HtlanResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Age, noise and combined hearing threshold components (ISO 1999, 6.1).
@@ -374,7 +375,7 @@ def plot_htlan(
 
 
 def plot_occupational_exposure(
-    result: "ExposureResult", ax: Axes | None = None, *, language: str = "en",
+    result: ExposureResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-task contributions to the daily exposure level (ISO 9612).

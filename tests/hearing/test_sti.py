@@ -23,13 +23,13 @@ import pytest
 
 from phonometry import STIResult, sti_from_impulse_response, stipa, stipa_signal
 from phonometry.hearing.sti import (
-    STIWarning,
     _ALPHA_MALE,
     _BETA_MALE,
     _MOD_FREQS,
     _NUM_BANDS,
     _RATING_EDGES,
     _RATING_LETTERS,
+    STIWarning,
     _masking_amdb,
     _rating,
     _sti_from_mtf,
@@ -337,13 +337,13 @@ def test_invalid_inputs_raise():
 
     with pytest.raises(ValueError, match="1D"):
         stipa(np.zeros((2, FS)), FS)
-    with pytest.raises(ValueError, match="too short"):
+    with pytest.raises(ValueError, match="too short"):  # noqa: SIM117 - simplefilter must run inside catch_warnings before the call
         # The 0.5 s clip also triggers the (correct) sub-15 s STIPA warning;
         # silence it so the test output stays clean while asserting the error.
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
             stipa(stipa_signal(FS, seconds=18.0, seed=3)[: FS // 2], FS)
-    with pytest.warns(STIWarning) as tone_warnings:
+    with pytest.warns(STIWarning) as tone_warnings:  # noqa: PT031 - the warns block records the whole STIWarning family while running
         # A pure tone leaves other octave bands empty: those bands read
         # m = 0 (TI = 0) with a warning rather than a hard error, so the
         # IEC 60268-16 C.4.2 verification signals (energy in only two
@@ -400,7 +400,7 @@ def _c32_signal(m: float, fs: int, seconds: float) -> np.ndarray:
     f1 = [1.60, 1.00, 0.63, 2.00, 1.25, 0.80, 2.50]
     f2 = [8.00, 5.00, 3.15, 10.00, 6.25, 4.00, 12.50]
     levels_db = [-2.5, 0.5, 0.0, -6.0, -12.0, -18.0, -24.0]
-    t = np.arange(int(round(seconds * fs))) / fs
+    t = np.arange(round(seconds * fs)) / fs
     x = np.zeros(t.size)
     for fc, fa, fb, level in zip(centers, f1, f2, levels_db):
         envelope = 0.5 * (

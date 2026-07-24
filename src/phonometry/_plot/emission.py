@@ -23,11 +23,12 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from ..emission.vibration_sound_power import VibrationSoundPowerResult
+
     from ..emission.intensity import IntensityResult
     from ..emission.sound_power import SoundPowerResult
     from ..emission.sound_power_intensity import SoundPowerIntensityResult
     from ..emission.sound_power_reverberation import ReverberationSoundPowerResult
+    from ..emission.vibration_sound_power import VibrationSoundPowerResult
 
 #: Spanish translations of the fixed labels/titles/legends rendered by the
 #: emission-domain ``.plot()`` renderers, keyed by their verbatim English
@@ -55,8 +56,7 @@ def _t(text: str, language: str = "en") -> str:
 
 def plot_sound_power(
     result: (
-        "SoundPowerResult | ReverberationSoundPowerResult"
-        " | SoundPowerIntensityResult | Any"
+        SoundPowerResult | ReverberationSoundPowerResult | SoundPowerIntensityResult | Any
     ),
     ax: Axes | None = None,
     language: str = "en",
@@ -191,7 +191,7 @@ def plot_intensity(
 
 
 def plot_vibration_sound_power(
-    result: "VibrationSoundPowerResult", ax: Axes | None = None,
+    result: VibrationSoundPowerResult, ax: Axes | None = None,
     language: str = "en", **kwargs: Any
 ) -> Axes:
     """Radiated sound power level per band (ISO/TS 7849).

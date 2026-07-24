@@ -38,7 +38,7 @@ FS = 32000.0  # the Annex B/C sampling rate; keeps reference tones on FFT bins
 
 def _tone(frequency: float, level_db: float, duration: float = 1.3) -> np.ndarray:
     """Calibrated pure tone: sound pressure in pascals at ``level_db`` dB SPL."""
-    t = np.arange(int(round(duration * FS))) / FS
+    t = np.arange(round(duration * FS)) / FS
     p_rms = 2e-5 * 10.0 ** (level_db / 20.0)
     return np.sqrt(2.0) * p_rms * np.sin(2.0 * np.pi * frequency * t)
 
@@ -104,7 +104,7 @@ def test_anchor_holds_at_native_sample_rates(fs: float, expected_n_max: float) -
     pin sensitive to the temporal chain as well; at 1.3 s the same anchor
     reads 1.0000/1.0000/0.9982.
     """
-    t = np.arange(int(round(0.5 * fs))) / fs
+    t = np.arange(round(0.5 * fs)) / fs
     x = np.sqrt(2.0) * 2e-5 * 10.0 ** (40.0 / 20.0) * np.sin(2.0 * np.pi * 1000.0 * t)
     res = loudness_moore_glasberg_time(x, fs)
     assert res.n_max == pytest.approx(expected_n_max, abs=0.003)
@@ -437,7 +437,7 @@ def test_low_freq_band_not_truncated_across_sample_rates() -> None:
 
     def _band_level(fs: float) -> float:
         p_rms = 2e-5 * 10.0 ** (60.0 / 20.0)
-        t = np.arange(int(round(1.0 * fs))) / fs
+        t = np.arange(round(1.0 * fs)) / fs
         sig = np.sqrt(2.0) * p_rms * np.sin(2.0 * np.pi * 50.0 * t)
         comp_f, plans, perm = _mgt_mod._spectral_plan(fs)
         levels = _mgt_mod._frame_levels(sig, sig.size // 2, plans, comp_f.size)[perm]
@@ -482,6 +482,7 @@ def test_three_channel_input_is_rejected() -> None:
     # be silently flattened and must be rejected.
     import numpy as np
     import pytest
+
     from phonometry.psychoacoustics import loudness_moore_glasberg_time
 
     cube = np.zeros((2, 2, 2400))

@@ -25,17 +25,17 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-import phonometry as ph  # noqa: E402
+import phonometry as ph
 from phonometry.metrology.synchronous_average import comb_filter_response
 
 FS = 8192.0
 #: One revolution spanning exactly 256 samples (32 revolutions per second).
 PERIOD = 1.0 / 32.0
-M = int(round(FS * PERIOD))  # 256 samples per period
+M = round(FS * PERIOD)  # 256 samples per period
 
 
 def _periodic(period: float, m: int, orders: tuple[float, ...]) -> np.ndarray:
@@ -163,7 +163,7 @@ def test_times_span_one_period() -> None:
 def test_noninteger_period_recovered_within_bound() -> None:
     """A non-integer M is aligned by band-limited fractional delay."""
     period = 1.0 / 31.7  # FS * period is not an integer
-    m_int = int(round(FS * period))
+    m_int = round(FS * period)
     phase = np.arange(30 * m_int) / FS / period
     signal = np.cos(2.0 * np.pi * phase) + 0.4 * np.cos(
         2.0 * np.pi * 2.0 * phase + 0.3

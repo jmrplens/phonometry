@@ -41,12 +41,12 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..metrology.core import OctaveFilterBank
 from .._internal.utils import _typesignal
+from ..metrology.core import OctaveFilterBank
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -156,7 +156,7 @@ class RoomAcousticsResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -230,13 +230,13 @@ def _onset_index(p2: np.ndarray) -> int:
 
 def _noise_power(p2: np.ndarray) -> float:
     """Background-noise power estimated from the tail of the squared IR."""
-    tail = max(1, int(round(p2.size * _NOISE_TAIL_FRACTION)))
+    tail = max(1, round(p2.size * _NOISE_TAIL_FRACTION))
     return float(np.mean(p2[-tail:]))
 
 
 def _truncation(
     p2: np.ndarray, fs: int, noise_power: float
-) -> Tuple[int, float, float]:
+) -> tuple[int, float, float]:
     """Truncation point and tail compensation (ISO 3382-1, 5.3.3, Eq. (3)).
 
     Fits a sloping line to the smoothed squared IR (in dB) between 5 dB
@@ -258,7 +258,7 @@ def _truncation(
     no_truncation = (n, 0.0, 0.0)
     if noise_power <= 0.0:
         return no_truncation
-    window = min(max(1, int(round(_SMOOTH_SECONDS * fs))), n)
+    window = min(max(1, round(_SMOOTH_SECONDS * fs)), n)
     cumulative = np.concatenate(([0.0], np.cumsum(p2)))
     smoothed = (cumulative[window:] - cumulative[:-window]) / window
     t_smooth = (np.arange(smoothed.size) + 0.5 * window) / fs
@@ -278,7 +278,7 @@ def _truncation(
     if slope >= -1e-7:
         return no_truncation
     t1 = (noise_db - intercept) / slope
-    i1 = min(max(int(round(t1 * fs)), 2), n)
+    i1 = min(max(round(t1 * fs), 2), n)
     # Exponential tail with the fitted rate: p2_fit(t) = 10^((a + b*t)/10),
     # decay constant alpha = -b*ln(10)/10 (1/s).
     alpha = -slope * np.log(10.0) / 10.0
@@ -290,7 +290,7 @@ def _truncation(
 
 def _schroeder(
     p2: np.ndarray, fs: int
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, float, int, float]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float, int, float]:
     """Backward-integrated decay curve (ISO 3382-1, 5.3.3, Eq. (1)-(3)).
 
     :param p2: Squared impulse response, onset-trimmed.
@@ -316,7 +316,7 @@ def _schroeder(
 def _fit_decay_time(
     time: np.ndarray,
     level: np.ndarray,
-    decay_range: Tuple[float, float],
+    decay_range: tuple[float, float],
     trust_floor_db: float,
 ) -> float:
     """Least-squares decay time over an evaluation range (Annex C).
@@ -339,7 +339,7 @@ def _fit_decay_time(
     return -60.0 / slope
 
 
-def _band_parameters(x: np.ndarray, fs: int) -> Tuple[float, ...]:
+def _band_parameters(x: np.ndarray, fs: int) -> tuple[float, ...]:
     """All ISO 3382 parameters for one band signal.
 
     :return: ``(edt, t20, t30, c50, c80, d50, ts, dynamic_range)``.
@@ -360,8 +360,8 @@ def _band_parameters(x: np.ndarray, fs: int) -> Tuple[float, ...]:
     t30 = _fit_decay_time(time, level, _T30_RANGE, trust_floor)
 
     c50 = c80 = d50 = nan
-    i50 = int(round(0.050 * fs))
-    i80 = int(round(0.080 * fs))
+    i50 = round(0.050 * fs)
+    i80 = round(0.080 * fs)
     if 0 < i50 <= i1:
         early = float(cumulative[i50 - 1])
         late = total - early
@@ -378,7 +378,7 @@ def _band_parameters(x: np.ndarray, fs: int) -> Tuple[float, ...]:
     return edt, t20, t30, c50, c80, d50, ts, dyn
 
 
-def _validate_ir(ir: List[float] | np.ndarray, fs: int) -> np.ndarray:
+def _validate_ir(ir: list[float] | np.ndarray, fs: int) -> np.ndarray:
     x = _typesignal(ir)
     if x.ndim != 1:
         raise ValueError("The impulse response must be one-dimensional.")
@@ -407,7 +407,7 @@ class DecayCurve:
     level: np.ndarray
     band: float | None = None
 
-    def __iter__(self) -> "Iterator[np.ndarray]":
+    def __iter__(self) -> Iterator[np.ndarray]:
         """Yield ``time`` then ``level`` so the result unpacks like a tuple."""
         yield self.time
         yield self.level
@@ -427,7 +427,7 @@ class DecayCurve:
 
 
 def decay_curve(
-    ir: List[float] | np.ndarray,
+    ir: list[float] | np.ndarray,
     fs: int,
     band: float | None = None,
     fraction: int = 1,
@@ -490,9 +490,9 @@ def decay_curve(
 
 
 def room_parameters(
-    ir: List[float] | np.ndarray,
+    ir: list[float] | np.ndarray,
     fs: int,
-    limits: Tuple[float, float] | None = _DEFAULT_BANDS,
+    limits: tuple[float, float] | None = _DEFAULT_BANDS,
     fraction: int = 1,
     zero_phase: bool = False,
 ) -> RoomAcousticsResult:
@@ -541,7 +541,7 @@ def room_parameters(
     frequency: np.ndarray | None
     if limits is None:
         frequency = None
-        band_signals: List[np.ndarray] = [x]
+        band_signals: list[np.ndarray] = [x]
     else:
         if len(limits) != 2:
             raise ValueError("'limits' must be a (f_min, f_max) pair or None.")

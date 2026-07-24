@@ -22,8 +22,10 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import ReportMetadata  # noqa: E402  (import after importorskip)
-from phonometry import materials  # noqa: E402
+from phonometry import (
+    ReportMetadata,
+    materials,
+)
 
 _PDF_MAGIC = b"%PDF"
 
@@ -51,20 +53,20 @@ def _result():
 
 
 def _metadata(**overrides) -> ReportMetadata:
-    base = dict(
-        specimen="50 mm porous absorber (open-cell)",
-        client="Acoustic Test Client Ltd.",
-        manufacturer="Acoustics Works Inc.",
-        thickness=0.050,
-        test_room="Static airflow rig, 100 mm cell",
-        measurement_standard="ISO 9053-1",
-        temperature=23.0,
-        relative_humidity=50.0,
-        test_date="2026-07-21",
-        laboratory="Phonometry Reference Laboratory",
-        operator="J. M. Requena-Plens",
-        report_id="PHN-2026-9053",
-    )
+    base = {
+        "specimen": "50 mm porous absorber (open-cell)",
+        "client": "Acoustic Test Client Ltd.",
+        "manufacturer": "Acoustics Works Inc.",
+        "thickness": 0.050,
+        "test_room": "Static airflow rig, 100 mm cell",
+        "measurement_standard": "ISO 9053-1",
+        "temperature": 23.0,
+        "relative_humidity": 50.0,
+        "test_date": "2026-07-21",
+        "laboratory": "Phonometry Reference Laboratory",
+        "operator": "J. M. Requena-Plens",
+        "report_id": "PHN-2026-9053",
+    }
     base.update(overrides)
     return ReportMetadata(**base)
 

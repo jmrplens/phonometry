@@ -29,7 +29,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import decimal_comma, format_number, t
 from ._layout import (
@@ -52,7 +52,7 @@ if TYPE_CHECKING:
     from ..metrology.compliance import FilterComplianceResult
 
 
-def _binding_margin(result: "FilterComplianceResult", cls: int) -> float:
+def _binding_margin(result: FilterComplianceResult, cls: int) -> float:
     """Smallest per-band margin to class ``cls`` (the binding margin)."""
     key = f"margin_class{cls}_db"
     return min(float(band[key]) for band in result.bands)
@@ -77,14 +77,14 @@ def _basis(metadata: ReportMetadata | None, edition: str, language: str = "en") 
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
     Only fields that are set are returned. A filter bank is an instrument, so
     the room/climate fields of the insulation fiche do not apply; the specimen
     field labels the tested filter or analyser.
     """
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Filter / instrument", language), metadata.specimen),
         (t("Manufacturer", language), metadata.manufacturer),
@@ -122,12 +122,12 @@ def _band_label(exact_freq: float, fraction: int) -> str:
 
 
 def _metric_rows(
-    result: "FilterComplianceResult", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: FilterComplianceResult, language: str = "en"
+) -> list[tuple[str, str]]:
     """Per-band rows: nominal mid-band frequency vs achieved class and margin."""
     cls = result.reference_class()
     key = f"margin_class{cls}_db"
-    rows: List[Tuple[str, str]] = []
+    rows: list[tuple[str, str]] = []
     for band in result.bands:
         band_class = band["class"]
         class_text = (
@@ -144,7 +144,7 @@ def _metric_rows(
     return rows
 
 
-def _statement(result: "FilterComplianceResult", language: str = "en") -> str:
+def _statement(result: FilterComplianceResult, language: str = "en") -> str:
     """The boxed class-compliance statement with the binding margin."""
     if result.overall_class is not None:
         margin = _binding_margin(result, result.overall_class)
@@ -161,8 +161,8 @@ def _statement(result: "FilterComplianceResult", language: str = "en") -> str:
 
 
 def _verdict(
-    result: "FilterComplianceResult", required_class: int, language: str = "en"
-) -> Tuple[str, bool]:
+    result: FilterComplianceResult, required_class: int, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag against a required class.
 
     A bank meets a required class ``N`` when it achieves a class at least as
@@ -184,7 +184,7 @@ def _verdict(
 
 
 def render_iec61260_report(
-    result: "FilterComplianceResult",
+    result: FilterComplianceResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -223,7 +223,7 @@ def render_iec61260_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Filter class compliance", language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(_basis(metadata, result.edition, language), basis_style),
     ]

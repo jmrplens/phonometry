@@ -35,7 +35,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -66,10 +66,10 @@ def _a2(value: float, language: str = "en") -> str:
 
 
 def _metadata_pairs(
-    result: "ImpedanceTubeResult",
+    result: ImpedanceTubeResult,
     metadata: ReportMetadata | None,
     language: str = "en",
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the impedance-tube header grid.
 
     The measured frequency range is taken from the result (the frequency vector
@@ -98,10 +98,10 @@ def _metadata_pairs(
     freq_range = None
     if freqs.size:
         freq_range = t("{lo} to {hi}", language).format(
-            lo=int(round(float(freqs.min()))), hi=int(round(float(freqs.max())))
+            lo=round(float(freqs.min())), hi=round(float(freqs.max()))
         )
 
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), client),
         (t("Manufacturer", language), manufacturer),
         (t("Description", language), specimen),
@@ -132,7 +132,7 @@ def _metadata_pairs(
 
 
 def _value_table(
-    result: "ImpedanceTubeResult", verbose: bool, language: str = "en"
+    result: ImpedanceTubeResult, verbose: bool, language: str = "en"
 ) -> Any:
     """Build the per-frequency value table (~102 mm wide).
 
@@ -158,10 +158,10 @@ def _value_table(
             Paragraph("Re z", head_style),
             Paragraph("Im z", head_style),
         ]
-        rows: List[List[Any]] = [header]
+        rows: list[list[Any]] = [header]
         for fk, ak, rk, zk in zip(freqs, alpha, r_mag, z):
             rows.append([
-                f"{int(round(fk))}",
+                f"{round(fk)}",
                 _a2(ak, language),
                 _a2(rk, language),
                 _a2(zk.real, language),
@@ -178,7 +178,7 @@ def _value_table(
         rows = [header]
         for fk, ak, zk in zip(freqs, alpha, z):
             rows.append([
-                f"{int(round(fk))}",
+                f"{round(fk)}",
                 _a2(ak, language),
                 _a2(zk.real, language),
                 _a2(zk.imag, language),
@@ -187,11 +187,11 @@ def _value_table(
     return band_table(rows, col_widths, len(freqs))
 
 
-def _statement(result: "ImpedanceTubeResult", language: str = "en") -> str:
+def _statement(result: ImpedanceTubeResult, language: str = "en") -> str:
     """The boxed characterisation headline (ISO 10534-2 has no single number)."""
     freqs = np.asarray(result.frequency, dtype=np.float64)
-    lo = int(round(float(freqs.min()))) if freqs.size else 0
-    hi = int(round(float(freqs.max()))) if freqs.size else 0
+    lo = round(float(freqs.min())) if freqs.size else 0
+    hi = round(float(freqs.max())) if freqs.size else 0
     return t(
         "Normal-incidence sound absorption coefficient <b>&#945;</b>, "
         "{lo} Hz to {hi} Hz",
@@ -232,7 +232,7 @@ def _caption(verbose: bool, language: str = "en") -> str:
 
 
 def _body(
-    result: "ImpedanceTubeResult",
+    result: ImpedanceTubeResult,
     verbose: bool,
     caption_style: Any,
     language: str = "en",
@@ -257,7 +257,7 @@ def _body(
 
 
 def render_iso10534_report(
-    result: "ImpedanceTubeResult",
+    result: ImpedanceTubeResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -301,7 +301,7 @@ def render_iso10534_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Impedance-tube sound absorption and impedance", language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(_basis_line(metadata, language), basis_style),
     ]

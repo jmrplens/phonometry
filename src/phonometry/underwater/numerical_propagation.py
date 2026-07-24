@@ -43,9 +43,9 @@ _BOTTOM_TYPES = ("pressure-release", "rigid")
 
 
 def _clean_profile(
-    depths: "NDArray[np.float64] | list[float]",
-    sound_speeds: "NDArray[np.float64] | list[float]",
-) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+    depths: NDArray[np.float64] | list[float],
+    sound_speeds: NDArray[np.float64] | list[float],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     z = np.asarray(depths, dtype=np.float64)
     c = np.asarray(sound_speeds, dtype=np.float64)
     if z.ndim != 1 or z.size < 2:
@@ -86,15 +86,15 @@ class NormalModeResult:
     """
 
     frequency: float
-    wavenumbers: "NDArray[np.float64]"
-    mode_depths: "NDArray[np.float64]"
-    mode_functions: "NDArray[np.float64]"
-    ranges: "NDArray[np.float64]"
-    transmission_loss: "NDArray[np.float64]"
+    wavenumbers: NDArray[np.float64]
+    mode_depths: NDArray[np.float64]
+    mode_functions: NDArray[np.float64]
+    ranges: NDArray[np.float64]
+    transmission_loss: NDArray[np.float64]
     receiver_depth: float
     source_depth: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the transmission loss versus range (loss increasing downward)."""
         from .._i18n import check_language
         from .._plot.underwater import plot_normal_modes
@@ -103,9 +103,9 @@ class NormalModeResult:
 
 
 def _propagating_band(
-    eigvals: "NDArray[np.float64]", eigvecs: "NDArray[np.float64]",
+    eigvals: NDArray[np.float64], eigvecs: NDArray[np.float64],
     k2_max: float, dz: float,
-) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Propagating wavenumbers (descending) and mode columns, cutoff-guarded.
 
     Discards eigenvalues inside the O(dz²) discretisation-error band about
@@ -131,15 +131,15 @@ def _propagating_band(
 
 def normal_modes(
     frequency_hz: float,
-    depths: "NDArray[np.float64] | list[float]",
-    sound_speeds: "NDArray[np.float64] | list[float]",
+    depths: NDArray[np.float64] | list[float],
+    sound_speeds: NDArray[np.float64] | list[float],
     *,
     source_depth: float,
     receiver_depth: float,
-    ranges_m: "NDArray[np.float64] | list[float] | None" = None,
+    ranges_m: NDArray[np.float64] | list[float] | None = None,
     density: float = 1000.0,
     bottom: str = "pressure-release",
-    n_depth_points: "int | None" = None,
+    n_depth_points: int | None = None,
 ) -> NormalModeResult:
     """Normal-mode transmission loss for a range-independent waveguide.
 
@@ -251,7 +251,7 @@ def normal_modes(
             psi[m] /= np.sqrt(norm)
 
     # Linear interpolation of every mode at zs/zr in one shot (uniform grid).
-    def _modes_at(zq: float) -> "NDArray[np.float64]":
+    def _modes_at(zq: float) -> NDArray[np.float64]:
         i = int(np.clip(np.searchsorted(z, zq) - 1, 0, z.size - 2))
         w = (zq - z[i]) / (z[i + 1] - z[i])
         return np.asarray(psi[:, i] * (1.0 - w) + psi[:, i + 1] * w)
@@ -296,13 +296,13 @@ class RayTraceResult:
     :ivar water_depth: Water-column depth, in metres.
     """
 
-    launch_angles: "NDArray[np.float64]"
-    ranges: "NDArray[np.float64]"
-    depths: "NDArray[np.float64]"
+    launch_angles: NDArray[np.float64]
+    ranges: NDArray[np.float64]
+    depths: NDArray[np.float64]
     source_depth: float
     water_depth: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the ray paths (depth increasing downward)."""
         from .._i18n import check_language
         from .._plot.underwater import plot_ray_trace
@@ -311,11 +311,11 @@ class RayTraceResult:
 
 
 def ray_trace(
-    depths: "NDArray[np.float64] | list[float]",
-    sound_speeds: "NDArray[np.float64] | list[float]",
+    depths: NDArray[np.float64] | list[float],
+    sound_speeds: NDArray[np.float64] | list[float],
     *,
     source_depth: float,
-    launch_angles_deg: "NDArray[np.float64] | list[float]",
+    launch_angles_deg: NDArray[np.float64] | list[float],
     max_range: float = 10_000.0,
     n_steps: int = 2000,
 ) -> RayTraceResult:
@@ -360,8 +360,8 @@ def ray_trace(
     # invariant for c(z). From dz/ds, dζ/ds and dr/ds = c·ξ:
     #   dz/dr = ζ/ξ,   dζ/dr = −(dc/dz)/(c³·ξ).
     def deriv(
-        z_arr: "NDArray[np.float64]", zeta_arr: "NDArray[np.float64]", xi_arr: "NDArray[np.float64]"
-    ) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+        z_arr: NDArray[np.float64], zeta_arr: NDArray[np.float64], xi_arr: NDArray[np.float64]
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         # Vectorised over all rays at once (data-parallel).
         cc = np.interp(z_arr, z_prof, c_prof)
         seg = np.clip(np.searchsorted(z_prof, z_arr, side="right") - 1,
@@ -422,12 +422,12 @@ class ParabolicEquationResult:
     """
 
     frequency: float
-    ranges: "NDArray[np.float64]"
-    depths: "NDArray[np.float64]"
-    transmission_loss: "NDArray[np.float64]"
+    ranges: NDArray[np.float64]
+    depths: NDArray[np.float64]
+    transmission_loss: NDArray[np.float64]
     source_depth: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the transmission-loss field (depth increasing downward)."""
         from .._i18n import check_language
         from .._plot.underwater import plot_parabolic_equation
@@ -437,8 +437,8 @@ class ParabolicEquationResult:
 
 def parabolic_equation(
     frequency_hz: float,
-    depths: "NDArray[np.float64] | list[float]",
-    sound_speeds: "NDArray[np.float64] | list[float]",
+    depths: NDArray[np.float64] | list[float],
+    sound_speeds: NDArray[np.float64] | list[float],
     *,
     source_depth: float,
     max_range: float = 10_000.0,

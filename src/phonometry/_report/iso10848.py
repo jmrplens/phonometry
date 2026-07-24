@@ -36,7 +36,7 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -105,8 +105,8 @@ _LNF_SPEC: dict[str, str] = {
 
 
 def _require_rating(
-    rating: "WeightedRatingResult | ImpactRatingResult | None",
-) -> "WeightedRatingResult | ImpactRatingResult":
+    rating: WeightedRatingResult | ImpactRatingResult | None,
+) -> WeightedRatingResult | ImpactRatingResult:
     """Return the ISO 717 rating, or raise when it is absent.
 
     The overall flanking descriptors carry a single-number rating only for the
@@ -123,7 +123,7 @@ def _require_rating(
 
 
 def render_flanking_level_difference_report(
-    result: "FlankingLevelDifferenceResult",
+    result: FlankingLevelDifferenceResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -162,7 +162,7 @@ def render_flanking_level_difference_report(
 
 
 def render_flanking_impact_level_report(
-    result: "FlankingImpactLevelResult",
+    result: FlankingImpactLevelResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -226,7 +226,7 @@ def _kij_band_type(frequencies: np.ndarray) -> str:
 
 def _kij_mean_membership(
     frequencies: np.ndarray, bracketed: np.ndarray | None
-) -> Tuple[np.ndarray, float, float]:
+) -> tuple[np.ndarray, float, float]:
     """Per-band single-number membership plus the Annex A band range.
 
     A band enters the single-number mean when it lies inside the Annex A range
@@ -263,7 +263,7 @@ def _kij_value_table(
     from reportlab.platypus import Paragraph
 
     head_style = band_table_header_style()
-    header: List[Any] = [
+    header: list[Any] = [
         Paragraph(t("f [Hz]", language), head_style),
         Paragraph("K<sub>ij</sub> [dB]", head_style),
     ]
@@ -272,13 +272,13 @@ def _kij_value_table(
         header.append(Paragraph(t("In mean", language), head_style))
         widths = [16 * mm, 22 * mm, 18 * mm]
 
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for k, fk in enumerate(frequencies):
         value = format_number(float(k_ij[k]), language, decimals=1)
         is_bracketed = bracketed is not None and bool(bracketed[k])
         if is_bracketed:
             value = f"[{value}]"
-        row: List[Any] = [f"{int(round(float(fk)))}", value]
+        row: list[Any] = [f"{round(float(fk))}", value]
         if verbose:
             row.append(t("yes", language) if bool(in_mean[k]) else t("no", language))
         rows.append(row)
@@ -287,10 +287,10 @@ def _kij_value_table(
 
 
 def _kij_result_box(
-    result: "VibrationReductionResult",
+    result: VibrationReductionResult,
     bracketed: np.ndarray | None,
     in_mean: np.ndarray,
-    band_range: Tuple[float, float],
+    band_range: tuple[float, float],
     styles: Any,
     accent: Any,
     language: str,
@@ -299,7 +299,7 @@ def _kij_result_box(
     low, high = band_range
     averaged = int(np.count_nonzero(in_mean))
 
-    extended: List[str] = [
+    extended: list[str] = [
         t("Annex A band range: {low} Hz to {high} Hz", language).format(
             low=f"{int(low)}", high=f"{int(high)}"
         ),
@@ -325,7 +325,7 @@ def _kij_result_box(
 
 
 def render_vibration_reduction_report(
-    result: "VibrationReductionResult",
+    result: VibrationReductionResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -373,7 +373,7 @@ def render_vibration_reduction_report(
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title_text = t(_KIJ_TITLE, language)
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title_text, title_style),
         Paragraph(t(_KIJ_BASIS, language), basis_style),
     ]

@@ -26,6 +26,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+import phonometry.materials.road_absorption as road
 from phonometry.materials.road_absorption import (
     DEFAULT_MIC_HEIGHT,
     DEFAULT_SOURCE_HEIGHT,
@@ -34,25 +35,24 @@ from phonometry.materials.road_absorption import (
     SPOT_NARROW_BAND_RANGE,
     InsituAbsorptionResult,
     RoadAbsorptionWarning,
-    insitu_absorption_coefficient,
-    insitu_absorption_from_reflection,
-    insitu_absorption_spectrum,
     absorption_reference_corrected,
     adrienne_window,
     check_spot_frequency_range,
     geometric_spreading_factor,
     geometric_spreading_factor_angle,
+    insitu_absorption_coefficient,
+    insitu_absorption_from_reflection,
+    insitu_absorption_spectrum,
+    insitu_reflection_factor,
     max_sampled_area_radius,
     msa_major_axis,
     one_third_octave_absorption,
     power_reflection_coefficient,
     reflected_path_delay,
-    insitu_reflection_factor,
     spot_internal_loss_correction,
     spot_microphone_spacing_bounds,
     spot_tube_upper_frequency,
 )
-import phonometry.materials.road_absorption as road
 
 FS = 48_000.0
 

@@ -38,16 +38,17 @@ the exact sinusoidal-component method.
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Literal, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-from .._internal.validation import require_1d_signal
 from .._internal.utils import _typesignal
+from .._internal.validation import require_1d_signal
 
 # ---------------------------------------------------------------------------
 # Fixed transfer functions (clauses 7.2, 7.3, Table 1)
@@ -671,7 +672,7 @@ def _smooth(pattern: np.ndarray) -> np.ndarray:
     return smoothed
 
 
-def _binaural_loudness(n_left: np.ndarray, n_right: np.ndarray) -> Tuple[float, float]:
+def _binaural_loudness(n_left: np.ndarray, n_right: np.ndarray) -> tuple[float, float]:
     """Total loudness in sone with binaural inhibition (clause 8.1).
 
     Returns (loudness_left, loudness_right); their sum is the binaural
@@ -750,8 +751,8 @@ def _validate_conditions(field: str, presentation: str) -> None:
 
 
 def _as_components(
-    components: Sequence[Tuple[float, float]] | np.ndarray,
-) -> Tuple[np.ndarray, np.ndarray]:
+    components: Sequence[tuple[float, float]] | np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
     """Split a sequence of (frequency, level) pairs into arrays and validate."""
     array = np.asarray(components, dtype=np.float64)
     if array.size == 0:
@@ -771,7 +772,7 @@ def _as_components(
 
 
 def loudness_moore_glasberg_from_spectrum(
-    components: Sequence[Tuple[float, float]] | np.ndarray,
+    components: Sequence[tuple[float, float]] | np.ndarray,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",
     presentation: Literal["binaural", "diotic", "monaural"] = "binaural",
@@ -805,7 +806,7 @@ def loudness_moore_glasberg_from_spectrum(
 
 def _third_octave_components(
     band_levels: np.ndarray,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Sinusoidal-component representation of one-third-octave levels (clause 5.5).
 
     Each band is treated as flat: its spectrum level is ``L_T - 10 lg(W/Hz)``
@@ -813,8 +814,8 @@ def _third_octave_components(
     components spaced 10 Hz apart (1 Hz for centre frequencies <= 125 Hz) with
     a level of ``spectrum level + 10 lg(spacing/Hz)``.
     """
-    freqs: List[float] = []
-    levels: List[float] = []
+    freqs: list[float] = []
+    levels: list[float] = []
     for centre, level in zip(_THIRD_OCTAVE_FREQ, band_levels):
         width = centre * (_THIRD_OCTAVE_RATIO - 1.0 / _THIRD_OCTAVE_RATIO)
         spectrum_level = float(level) - 10.0 * math.log10(width)
@@ -903,7 +904,7 @@ def _signal_components(pressure: np.ndarray, fs: float) -> np.ndarray:
 
 
 def loudness_moore_glasberg(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: float,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",

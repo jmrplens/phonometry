@@ -27,8 +27,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..environmental.air_absorption import air_attenuation
 from .._internal.validation import require_non_negative, require_positive_array
+from ..environmental.air_absorption import air_attenuation
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -46,7 +46,7 @@ _G = 0.765
 _SPLIT_DB = 150.0
 
 
-def _sae_band(delta_t: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _sae_band(delta_t: NDArray[np.float64]) -> NDArray[np.float64]:
     """Map pure-tone mid-band attenuation ``δ_t`` (dB) to band attenuation (dB)."""
     # np.where evaluates both branches; clamp the low branch's input to the split
     # point so its power base stays positive (it turns negative near 1209 dB) and
@@ -73,16 +73,16 @@ class AircraftBandAttenuation:
     :ivar pressure: Ambient atmospheric pressure, in kPa.
     """
 
-    frequency: "NDArray[np.float64]"
-    band_attenuation: "NDArray[np.float64]"
-    midband_attenuation: "NDArray[np.float64]"
-    coefficient: "NDArray[np.float64]"
+    frequency: NDArray[np.float64]
+    band_attenuation: NDArray[np.float64]
+    midband_attenuation: NDArray[np.float64]
+    coefficient: NDArray[np.float64]
     path_length: float
     temperature: float
     relative_humidity: float
     pressure: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the band and pure-tone mid-band attenuation versus frequency."""
         from .._i18n import check_language
         from .._plot.aircraft import plot_aircraft_band_attenuation
@@ -91,7 +91,7 @@ class AircraftBandAttenuation:
 
 
 def sae_band_attenuation(
-    frequencies: "NDArray[np.float64] | list[float]",
+    frequencies: NDArray[np.float64] | list[float],
     path_length: float,
     *,
     temperature: float = 25.0,

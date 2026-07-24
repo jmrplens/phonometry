@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+
 @pytest.mark.parametrize("block_size", [8, 256, 1024])
 @pytest.mark.parametrize("filter_type", ["A", "C", "Z"])
 def test_weighting_filter_block_processing_matches_full_signal(block_size: int, filter_type: str):

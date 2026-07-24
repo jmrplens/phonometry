@@ -36,7 +36,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import decimal_comma, format_number, t
 from ._layout import (
@@ -62,7 +62,7 @@ if TYPE_CHECKING:
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the certification header grid.
 
     Only fields that are set are returned. EPNL is an aircraft-flyover metric,
@@ -70,7 +70,7 @@ def _metadata_pairs(
     generic identity fields are relabelled to the certification vocabulary
     (aircraft, type-certificate holder, applicant, measurement point).
     """
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Aircraft", language), metadata.specimen),
         (t("Manufacturer / TC holder", language), metadata.manufacturer),
         (t("Applicant", language), metadata.client),
@@ -85,8 +85,8 @@ def _metadata_pairs(
 
 
 def _metric_rows(
-    result: "EPNLResult", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: EPNLResult, language: str = "en"
+) -> list[tuple[str, str]]:
     """The intermediate EPNL quantities shown in the left-hand metrics table.
 
     These are informational: PNLTM, the duration correction ``D``, the 10
@@ -115,7 +115,7 @@ def _metric_rows(
     return rows
 
 
-def _statement(result: "EPNLResult", language: str = "en") -> str:
+def _statement(result: EPNLResult, language: str = "en") -> str:
     """The boxed single-number statement ``EPNL = X EPNdB``.
 
     Annex 16 determines the EPNL to one decimal place, so the displayed value
@@ -127,8 +127,8 @@ def _statement(result: "EPNLResult", language: str = "en") -> str:
 
 
 def _verdict_rows(
-    result: "EPNLResult", limit: float, language: str = "en"
-) -> List[Tuple[str, str, str, str]]:
+    result: EPNLResult, limit: float, language: str = "en"
+) -> list[tuple[str, str, str, str]]:
     """The Level | Limit | Margin compliance row for a supplied EPNL limit.
 
     The EPNL passes at or below the certification limit; the limit cell also
@@ -155,7 +155,7 @@ def _verdict_rows(
 
 
 def render_annex16_epnl_report(
-    result: "EPNLResult",
+    result: EPNLResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -208,7 +208,7 @@ def render_annex16_epnl_report(
         spaceBefore=2,
     )
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

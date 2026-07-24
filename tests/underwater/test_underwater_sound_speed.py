@@ -107,7 +107,7 @@ def test_depth_to_pressure_leroy_parthiot() -> None:
 def test_three_models_agree_in_common_domain() -> None:
     # UNESCO, Del Grosso and Mackenzie must agree within ~1 m/s at a mid-ocean
     # point inside all three domains (10 C, 35 ppt, 1000 m).
-    kw = dict(latitude=45.0)
+    kw = {"latitude": 45.0}
     c_u = sea_water_sound_speed(10.0, 35.0, 1000.0, model="unesco", **kw)
     c_d = sea_water_sound_speed(10.0, 35.0, 1000.0, model="del_grosso", **kw)
     c_m = sea_water_sound_speed(10.0, 35.0, 1000.0, model="mackenzie", **kw)

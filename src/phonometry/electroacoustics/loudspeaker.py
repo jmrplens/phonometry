@@ -71,8 +71,8 @@ _EFFECTIVE_DROP_DB = 10.0
 
 
 def _as_curve(
-    frequencies: "ArrayLike", values: "ArrayLike", name: str
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+    frequencies: ArrayLike, values: ArrayLike, name: str
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Validate a paired (frequencies, values) curve and sort it by frequency."""
     f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     v = np.atleast_1d(np.asarray(values, dtype=np.float64))
@@ -88,7 +88,7 @@ def _as_curve(
     return f[order], v[order]
 
 
-def _energetic_mean_db(levels: "NDArray[np.float64]") -> float:
+def _energetic_mean_db(levels: NDArray[np.float64]) -> float:
     """Energetic (r.m.s.-pressure) mean of a set of levels, in dB (20.1.2.4).
 
     The mean is unweighted over the samples handed in, so the response grid
@@ -100,7 +100,7 @@ def _energetic_mean_db(levels: "NDArray[np.float64]") -> float:
 
 
 def _reference_level(
-    frequencies: "NDArray[np.float64]", spl_db: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64], spl_db: NDArray[np.float64]
 ) -> float:
     """Level averaged over a one-octave band in the region of maximum sensitivity.
 
@@ -142,9 +142,9 @@ def _threshold_crossing(
 
 
 def _fill_narrow_troughs(
-    above: "NDArray[np.bool_]",
-    frequencies: "NDArray[np.float64]",
-    spl_db: "NDArray[np.float64]",
+    above: NDArray[np.bool_],
+    frequencies: NDArray[np.float64],
+    spl_db: NDArray[np.float64],
     threshold: float,
 ) -> None:
     """Mark below-threshold runs narrower than 1/9 octave as in-band (21.2).
@@ -175,8 +175,8 @@ def _fill_narrow_troughs(
 
 
 def _band_edge(
-    frequencies: "NDArray[np.float64]",
-    spl_db: "NDArray[np.float64]",
+    frequencies: NDArray[np.float64],
+    spl_db: NDArray[np.float64],
     threshold: float,
     edge: int,
     neighbour: int,
@@ -195,7 +195,7 @@ def _band_edge(
 
 
 def _effective_range(
-    frequencies: "NDArray[np.float64]", spl_db: "NDArray[np.float64]", reference: float
+    frequencies: NDArray[np.float64], spl_db: NDArray[np.float64], reference: float
 ) -> tuple[float, float]:
     """Effective frequency range against the ``reference - 10 dB`` band (21.2).
 
@@ -265,8 +265,8 @@ class LoudspeakerCharacteristics:
         in dB (23.3), or ``None``.
     """
 
-    frequencies: "NDArray[np.float64]"
-    spl_db: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    spl_db: NDArray[np.float64]
     rated_impedance: float
     input_voltage: float
     distance: float
@@ -279,12 +279,12 @@ class LoudspeakerCharacteristics:
     rated_noise_power: float | None
     rated_sinusoidal_power: float | None
     resonance_frequency: float | None
-    impedance_frequencies: "NDArray[np.float64] | None"
-    impedance_modulus: "NDArray[np.float64] | None"
-    thd_frequencies: "NDArray[np.float64] | None"
-    thd_percent: "NDArray[np.float64] | None"
-    polar_angles_deg: "NDArray[np.float64] | None"
-    polar_db: "NDArray[np.float64] | None"
+    impedance_frequencies: NDArray[np.float64] | None
+    impedance_modulus: NDArray[np.float64] | None
+    thd_frequencies: NDArray[np.float64] | None
+    thd_percent: NDArray[np.float64] | None
+    polar_angles_deg: NDArray[np.float64] | None
+    polar_db: NDArray[np.float64] | None
     polar_frequency: float | None
     directivity_index_db: float | None
 
@@ -327,7 +327,7 @@ class LoudspeakerCharacteristics:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -371,9 +371,9 @@ class LoudspeakerCharacteristics:
         )
 
     def plot(
-        self, quantity: str = "response", ax: "Axes | None" = None, *,
+        self, quantity: str = "response", ax: Axes | None = None, *,
         language: str = "en", **kwargs: Any,
-    ) -> "Axes":
+    ) -> Axes:
         """Plot one IEC 60268-5 loudspeaker rated characteristic on one axes.
 
         One concept per figure, drawn by the same shared renderer the
@@ -403,8 +403,8 @@ class LoudspeakerCharacteristics:
 
 
 def _polar_from_directivity(
-    directivity: "RadiatingPistonResult", polar_frequency: float | None
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]", float, float | None]:
+    directivity: RadiatingPistonResult, polar_frequency: float | None
+) -> tuple[NDArray[np.float64], NDArray[np.float64], float, float | None]:
     """Derive (angles_deg, relative_db, frequency, DI) from a piston result."""
     if directivity.angles is None or directivity.directivity is None:
         raise ValueError(
@@ -429,8 +429,8 @@ def _optional_positive(value: float | None, name: str) -> float | None:
 
 
 def _resolve_sensitivity_band(
-    f: "NDArray[np.float64]",
-    spl: "NDArray[np.float64]",
+    f: NDArray[np.float64],
+    spl: NDArray[np.float64],
     sensitivity_band: tuple[float, float] | None,
 ) -> tuple[float, float]:
     """Resolve the characteristic-sensitivity band, defaulting to the peak octave."""
@@ -444,8 +444,8 @@ def _resolve_sensitivity_band(
 
 
 def _characteristic_sensitivity_level(
-    f: "NDArray[np.float64]",
-    spl: "NDArray[np.float64]",
+    f: NDArray[np.float64],
+    spl: NDArray[np.float64],
     band: tuple[float, float],
     r: float,
     u: float,
@@ -463,8 +463,8 @@ def _characteristic_sensitivity_level(
 
 
 def _resolve_impedance(
-    impedance: "tuple[ArrayLike, ArrayLike] | None",
-) -> tuple["NDArray[np.float64] | None", "NDArray[np.float64] | None"]:
+    impedance: tuple[ArrayLike, ArrayLike] | None,
+) -> tuple[NDArray[np.float64] | None, NDArray[np.float64] | None]:
     """Validate the optional impedance-modulus curve (16.2)."""
     if impedance is None:
         return None, None
@@ -475,8 +475,8 @@ def _resolve_impedance(
 
 
 def _resolve_distortion(
-    distortion: "SweptSineDistortionResult | tuple[ArrayLike, ArrayLike] | None",
-) -> tuple["NDArray[np.float64] | None", "NDArray[np.float64] | None"]:
+    distortion: SweptSineDistortionResult | tuple[ArrayLike, ArrayLike] | None,
+) -> tuple[NDArray[np.float64] | None, NDArray[np.float64] | None]:
     """Resolve the optional THD-against-frequency curve, in % (24.1)."""
     if distortion is None:
         return None, None
@@ -491,12 +491,12 @@ def _resolve_distortion(
 
 
 def _resolve_polar(
-    directivity: "RadiatingPistonResult | None",
-    polar: "tuple[ArrayLike, ArrayLike] | None",
+    directivity: RadiatingPistonResult | None,
+    polar: tuple[ArrayLike, ArrayLike] | None,
     polar_frequency: float | None,
     directivity_index_db: float | None,
 ) -> tuple[
-    "NDArray[np.float64] | None", "NDArray[np.float64] | None", float | None, float | None
+    NDArray[np.float64] | None, NDArray[np.float64] | None, float | None, float | None
 ]:
     """Resolve the optional polar response and directivity index (23.1/23.3)."""
     if directivity is not None:
@@ -513,8 +513,8 @@ def _resolve_polar(
 
 
 def loudspeaker_characteristics(
-    frequencies: "ArrayLike",
-    spl_db: "ArrayLike",
+    frequencies: ArrayLike,
+    spl_db: ArrayLike,
     rated_impedance: float,
     *,
     input_voltage: float | None = None,
@@ -525,10 +525,10 @@ def loudspeaker_characteristics(
     rated_noise_power: float | None = None,
     rated_sinusoidal_power: float | None = None,
     resonance_frequency: float | None = None,
-    impedance: "tuple[ArrayLike, ArrayLike] | None" = None,
-    distortion: "SweptSineDistortionResult | tuple[ArrayLike, ArrayLike] | None" = None,
-    directivity: "RadiatingPistonResult | None" = None,
-    polar: "tuple[ArrayLike, ArrayLike] | None" = None,
+    impedance: tuple[ArrayLike, ArrayLike] | None = None,
+    distortion: SweptSineDistortionResult | tuple[ArrayLike, ArrayLike] | None = None,
+    directivity: RadiatingPistonResult | None = None,
+    polar: tuple[ArrayLike, ArrayLike] | None = None,
     polar_frequency: float | None = None,
     directivity_index_db: float | None = None,
 ) -> LoudspeakerCharacteristics:

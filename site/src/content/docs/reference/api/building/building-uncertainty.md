@@ -84,8 +84,8 @@ upper limit for airborne, situation A (Annex D Table D.1).
 BandUncertainty(
     measurand: str,
     situation: str,
-    frequencies: Tuple[float, ...],
-    uncertainties: Tuple[float, ...],
+    frequencies: tuple[float, ...],
+    uncertainties: tuple[float, ...],
     upper_limit: bool = False,
 )
 ```
@@ -121,7 +121,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ### BandUncertainty.to_arrays()
 
 ```python
-BandUncertainty.to_arrays() -> Tuple[np.ndarray, np.ndarray]
+BandUncertainty.to_arrays() -> tuple[np.ndarray, np.ndarray]
 ```
 
 Return `(frequencies, uncertainties)` as float `numpy.ndarray`.

@@ -286,7 +286,7 @@ class InstalledSourceResult:
         lt = np.atleast_1d(np.asarray(self.total_level, dtype=np.float64))
         return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * lt))))
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the per-path and total normalised sound pressure levels.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -302,7 +302,7 @@ class InstalledSourceResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

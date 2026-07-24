@@ -42,7 +42,7 @@ svglib ship in the ``phonometry[report]`` extra, matplotlib in
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import t
 from ._layout import (
@@ -77,7 +77,7 @@ _R_DECIMALS = 2
 #: partition the stress variable R by the Table C.2 risk levels; the moderate
 #: band matches the Annex C worked example wording ("a moderate adverse health
 #: effect (10 % < risk of injury < 50 %)").
-_BAND_LABELS: Tuple[str, ...] = (
+_BAND_LABELS: tuple[str, ...] = (
     "low probability of an adverse health effect",
     "moderate probability of an adverse health effect",
     "high probability of an adverse health effect",
@@ -101,7 +101,7 @@ def _fmt_percent(probability: float, language: str = "en") -> str:
     return format_number(100.0 * float(probability), language, decimals=0) + " %"
 
 
-def _band_index(result: "MultipleShockResult") -> int:
+def _band_index(result: MultipleShockResult) -> int:
     """The Annex C risk band (0..3) the assessment's ``R`` falls in.
 
     The comparison is made on ``R`` and the Table C.2 thresholds rounded exactly
@@ -127,7 +127,7 @@ def _esc(value: str | None) -> str | None:
 
 def _metadata_pairs(
     metadata: ReportMetadata | None, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
     A multiple-shock health-risk sheet identifies the client, the subject whose
@@ -136,7 +136,7 @@ def _metadata_pairs(
     """
     if metadata is None:
         return []
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), _esc(metadata.client)),
         (t("Subject", language), _esc(metadata.specimen)),
         (t("Workplace / vehicle", language), _esc(metadata.test_room)),
@@ -148,8 +148,8 @@ def _metadata_pairs(
 
 
 def _scenario_pairs(
-    result: "MultipleShockResult", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: MultipleShockResult, language: str = "en"
+) -> list[tuple[str, str]]:
     """The exposure-scenario grid pairs (subject sex and exposure period).
 
     These come from the result rather than the metadata, so they are always
@@ -160,7 +160,7 @@ def _scenario_pairs(
     """
     from ._i18n import format_number
 
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Subject sex", language), t(str(result.sex), language)),
         (
             t("Age at start b [years]", language),
@@ -171,7 +171,7 @@ def _scenario_pairs(
             t("Exposure days per year N", language),
             format_number(float(result.days_per_year), language, decimals=0, trim=True),
         ),
-        (t("Counted response shocks", language), str(int(len(result.peaks)))),
+        (t("Counted response shocks", language), str(len(result.peaks))),
     ]
     return escaped_pairs(specs)
 
@@ -181,7 +181,7 @@ def _unit_ms2() -> str:
     return "m/s<sup>2</sup>"
 
 
-def _analysis_table(result: "MultipleShockResult", language: str = "en") -> Any:
+def _analysis_table(result: MultipleShockResult, language: str = "en") -> Any:
     """The dose-and-stress analysis table (Clause 5 dose and Annex C stress).
 
     One row per quantity (quantity, symbol, value with unit, clause reference):
@@ -196,7 +196,7 @@ def _analysis_table(result: "MultipleShockResult", language: str = "en") -> Any:
     header_style, label_style, value_style = analysis_cell_styles("iso26315")
     ms2 = _unit_ms2()
 
-    rows: List[Tuple[str, str, str, str]] = [
+    rows: list[tuple[str, str, str, str]] = [
         (
             t("Acceleration dose", language),
             "D<sub>z</sub>",
@@ -229,7 +229,7 @@ def _analysis_table(result: "MultipleShockResult", language: str = "en") -> Any:
         ),
     ]
 
-    data: List[List[Any]] = [
+    data: list[list[Any]] = [
         [
             Paragraph(t("Quantity", language), header_style),
             Paragraph(t("Symbol", language), header_style),
@@ -255,7 +255,7 @@ def _analysis_table(result: "MultipleShockResult", language: str = "en") -> Any:
 
 
 def _classification_table(
-    result: "MultipleShockResult", language: str = "en"
+    result: MultipleShockResult, language: str = "en"
 ) -> Any:
     """The Annex C risk-classification table against the Table C.2 levels.
 
@@ -273,7 +273,7 @@ def _classification_table(
     )
     active = _band_index(result)
 
-    bands: List[Tuple[str, str, str]] = [
+    bands: list[tuple[str, str, str]] = [
         (t("Low", language), t("&lt; 10 %", language), t("R &lt; {r10}", language).format(r10=r10)),
         (
             t("Moderate", language),
@@ -300,7 +300,7 @@ def _classification_table(
             )
         return f"<font color='{_MUTED_HEX}'>&#8211;</font>"
 
-    data: List[List[Any]] = [
+    data: list[list[Any]] = [
         [
             Paragraph(t("Risk band", language), header_style),
             Paragraph(t("Risk of lumbar injury", language), header_style),
@@ -331,7 +331,7 @@ def _classification_table(
     return table
 
 
-def _statement(result: "MultipleShockResult", language: str = "en") -> str:
+def _statement(result: MultipleShockResult, language: str = "en") -> str:
     """The boxed result statement: R, the injury probability and the risk band."""
     band = t(_BAND_LABELS[_band_index(result)], language)
     return t(
@@ -343,7 +343,7 @@ def _statement(result: "MultipleShockResult", language: str = "en") -> str:
     )
 
 
-def _zone_row(result: "MultipleShockResult", language: str = "en") -> Any:
+def _zone_row(result: MultipleShockResult, language: str = "en") -> Any:
     """The classification zone row stating the Annex C risk band for ``R``."""
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.platypus import Paragraph
@@ -361,7 +361,7 @@ def _zone_row(result: "MultipleShockResult", language: str = "en") -> Any:
 
 
 def render_iso2631_5_report(
-    result: "MultipleShockResult",
+    result: MultipleShockResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -400,7 +400,7 @@ def render_iso2631_5_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Whole-body multiple-shock health risk", language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(
             t(

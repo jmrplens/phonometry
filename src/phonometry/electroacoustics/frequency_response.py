@@ -43,8 +43,8 @@ if TYPE_CHECKING:
 
 
 def _validate_pair(
-    x: "NDArray[np.float64] | list[float]", y: "NDArray[np.float64] | list[float]"
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+    x: NDArray[np.float64] | list[float], y: NDArray[np.float64] | list[float]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     xa = np.asarray(x, dtype=np.float64)
     ya = np.asarray(y, dtype=np.float64)
     if xa.ndim != 1 or ya.ndim != 1:
@@ -61,16 +61,16 @@ def _validate_pair(
 
 
 def _spectra(
-    x: "NDArray[np.float64]",
-    y: "NDArray[np.float64]",
+    x: NDArray[np.float64],
+    y: NDArray[np.float64],
     fs: float,
     nperseg: int,
     overlap: float,
 ) -> tuple[
-    "NDArray[np.float64]",
-    "NDArray[np.complex128]",
-    "NDArray[np.float64]",
-    "NDArray[np.float64]",
+    NDArray[np.float64],
+    NDArray[np.complex128],
+    NDArray[np.float64],
+    NDArray[np.float64],
 ]:
     """Return ``(freqs, Gxy, Gxx, Gyy)`` from Welch-averaged Hann segments.
 
@@ -94,16 +94,16 @@ class FrequencyResponseResult:
     :ivar estimator: Estimator used (``'H1'`` or ``'H2'``).
     """
 
-    frequencies: "NDArray[np.float64]"
-    response: "NDArray[np.complex128]"
-    magnitude_db: "NDArray[np.float64]"
-    phase: "NDArray[np.float64]"
-    coherence: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    response: NDArray[np.complex128]
+    magnitude_db: NDArray[np.float64]
+    phase: NDArray[np.float64]
+    coherence: NDArray[np.float64]
     estimator: str
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | NDArray[Any]:
         """Plot the Bode magnitude/phase and the coherence.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -116,8 +116,8 @@ class FrequencyResponseResult:
 
 
 def transfer_function(
-    x: "NDArray[np.float64] | list[float]",
-    y: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
+    y: NDArray[np.float64] | list[float],
     fs: float,
     *,
     estimator: Literal["H1", "H2"] = "H1",
@@ -187,13 +187,13 @@ def transfer_function(
 
 
 def coherence(
-    x: "NDArray[np.float64] | list[float]",
-    y: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
+    y: NDArray[np.float64] | list[float],
     fs: float,
     *,
     nperseg: int | None = None,
     overlap: float = _DEFAULT_OVERLAP,
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Ordinary coherence ``γ²(f)`` between ``x`` and ``y`` (Bendat & Piersol).
 
     ``γ² = |Gxy|² / (Gxx·Gyy)`` ∈ [0, 1]: unity for a noiseless linear path and

@@ -13,9 +13,9 @@ import matplotlib
 matplotlib.use("Agg")
 import numpy as np
 import pytest
+import reference_data as ref
 from scipy import signal as sp_signal
 
-import reference_data as ref
 from phonometry import FrequencyResponseResult, coherence, transfer_function
 
 FS = 48000

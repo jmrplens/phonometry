@@ -146,7 +146,7 @@ def _parse_int(path: pathlib.Path) -> tuple[list[tuple[int, float, float, str]],
     """Hemisphere table and triangulation of a *_triangulation.int file."""
     txt = path.read_text()
     hems = [(int(m.group(1)), float(m.group(2)), float(m.group(3)), m.group(4))
-            for m in re.finditer(r"^(\d+)\t([\d.+-]+)\t([\d.+-]+)\t(\S+\.hem)", txt, re.M)]
+            for m in re.finditer(r"^(\d+)\t([\d.+-]+)\t([\d.+-]+)\t(\S+\.hem)", txt, re.MULTILINE)]
     tris: list[tuple[int, ...]] = []
     in_tri = False
     for line in txt.splitlines():
@@ -354,11 +354,11 @@ def test_case2_contour_grid(norah_root: pathlib.Path, r22_set: dict) -> None:
     inp = _parse_inp(case.with_suffix(".inp"))
     xs, ys = np.unique(mics[:, 0]), np.unique(mics[:, 1])
     assert xs.size == 11 and ys.size == 17
-    kwargs = dict(
-        x=xs, y=ys, receiver_height=1.2, ground_elevation=float(mics[0, 2]),
-        airspeed=inp["speed"], path_angle=inp["vang"], heading=inp["heading"],
-        bank_angle=inp["roll"], level_offset=inp["ddb"],
-        triangles=r22_set["triangles"], atmospheric_method="sae")
+    kwargs = {
+        "x": xs, "y": ys, "receiver_height": 1.2, "ground_elevation": float(mics[0, 2]),
+        "airspeed": inp["speed"], "path_angle": inp["vang"], "heading": inp["heading"],
+        "bank_angle": inp["roll"], "level_offset": inp["ddb"],
+        "triangles": r22_set["triangles"], "atmospheric_method": "sae"}
     for sigma, tol_sel, tol_max in ((2.0e5, 0.7, 0.7), (8.0e5, 0.15, 0.7)):
         sel = rotorcraft_noise_contour(
             r22_set["hemispheres"], r22_set["airspeeds"], r22_set["path_angles"],
@@ -434,12 +434,12 @@ def test_case3_contour_with_elevation_grid(norah_root: pathlib.Path,
         ref_max[i, j] = mic[8]
     assert np.all(np.isfinite(ground))
     assert np.unique(mics[:, 4]).tolist() == [1.0e5]
-    kwargs = dict(
-        x=xs, y=ys, receiver_height=1.2, ground_elevation=ground,
-        airspeed=inp["speed"], path_angle=inp["vang"], heading=inp["heading"],
-        bank_angle=inp["roll"], level_offset=inp["ddb"],
-        triangles=r22_set["triangles"], atmospheric_method="sae",
-        flow_resistivity=1.0e5)
+    kwargs = {
+        "x": xs, "y": ys, "receiver_height": 1.2, "ground_elevation": ground,
+        "airspeed": inp["speed"], "path_angle": inp["vang"], "heading": inp["heading"],
+        "bank_angle": inp["roll"], "level_offset": inp["ddb"],
+        "triangles": r22_set["triangles"], "atmospheric_method": "sae",
+        "flow_resistivity": 1.0e5}
     sel = rotorcraft_noise_contour(
         r22_set["hemispheres"], r22_set["airspeeds"], r22_set["path_angles"],
         inp["times"], inp["positions"], metric="exposure", **kwargs)
@@ -473,12 +473,12 @@ def test_case2_contour_single_call_with_sigma_map(norah_root: pathlib.Path,
         ref_max[i, j] = mic[8]
     assert np.all(np.isfinite(sigma))
     assert sorted(np.unique(sigma).tolist()) == [2.0e5, 8.0e5]
-    kwargs = dict(
-        x=xs, y=ys, receiver_height=1.2, ground_elevation=float(mics[0, 2]),
-        airspeed=inp["speed"], path_angle=inp["vang"], heading=inp["heading"],
-        bank_angle=inp["roll"], level_offset=inp["ddb"],
-        triangles=r22_set["triangles"], atmospheric_method="sae",
-        flow_resistivity=sigma)
+    kwargs = {
+        "x": xs, "y": ys, "receiver_height": 1.2, "ground_elevation": float(mics[0, 2]),
+        "airspeed": inp["speed"], "path_angle": inp["vang"], "heading": inp["heading"],
+        "bank_angle": inp["roll"], "level_offset": inp["ddb"],
+        "triangles": r22_set["triangles"], "atmospheric_method": "sae",
+        "flow_resistivity": sigma}
     sel = rotorcraft_noise_contour(
         r22_set["hemispheres"], r22_set["airspeeds"], r22_set["path_angles"],
         inp["times"], inp["positions"], metric="exposure", **kwargs)

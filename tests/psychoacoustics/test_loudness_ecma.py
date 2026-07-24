@@ -213,8 +213,8 @@ def test_band_acf_matches_reference_loop_bitwise() -> None:
     # The vectorized lag normalization must be bit-identical to the per-lag
     # reference loop for all four block sizes (8192/4096/2048/1024).
     from phonometry.psychoacoustics.loudness_ecma import (
-        _band_acf,
         _S_B,
+        _band_acf,
         _segment_bs,
     )
 

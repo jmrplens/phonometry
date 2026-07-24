@@ -345,7 +345,7 @@ def test_hard_backed_rigid_from_air_gap() -> None:
 
 
 # Geometry (single origin at the front face x = 0).
-GEOM = dict(l1=0.10, s1=0.03, l2=0.15, s2=0.03)
+GEOM = {"l1": 0.10, "s1": 0.03, "l2": 0.15, "s2": 0.03}
 THICKNESS = 0.05
 
 

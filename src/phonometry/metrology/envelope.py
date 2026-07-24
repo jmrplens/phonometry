@@ -81,19 +81,19 @@ class EnvelopeResult:
     :ivar antialias: Whether the decimation was anti-alias filtered.
     """
 
-    times: "NDArray[np.float64]"
-    envelope: "NDArray[np.float64]"
-    phase: "NDArray[np.float64]"
-    instantaneous_frequency: "NDArray[np.float64]"
+    times: NDArray[np.float64]
+    envelope: NDArray[np.float64]
+    phase: NDArray[np.float64]
+    instantaneous_frequency: NDArray[np.float64]
     fs: float
-    signal: "NDArray[np.float64]"
+    signal: NDArray[np.float64]
     signal_fs: float
     decimation_factor: int
     antialias: bool
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | NDArray[Any]:
         """Plot the signal with its envelope and the instantaneous frequency.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -106,8 +106,8 @@ class EnvelopeResult:
 
 
 def _decimate_envelope(
-    env: "NDArray[np.float64]", factor: int, antialias: bool
-) -> "NDArray[np.float64]":
+    env: NDArray[np.float64], factor: int, antialias: bool
+) -> NDArray[np.float64]:
     """Decimate the envelope, anti-aliased (zero-phase FIR) or plain."""
     if not antialias:
         return env[::factor].copy()
@@ -120,7 +120,7 @@ def _decimate_envelope(
 
 
 def envelope(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     *,
     decimation_factor: int = 1,
@@ -215,20 +215,20 @@ class EnvelopeSpectrumResult:
     :ivar nfft: FFT length used.
     """
 
-    frequencies: "NDArray[np.float64]"
-    amplitude: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    amplitude: NDArray[np.float64]
     mean_level: float
     kind: str
-    times: "NDArray[np.float64]"
-    envelope: "NDArray[np.float64]"
+    times: NDArray[np.float64]
+    envelope: NDArray[np.float64]
     window: str
     remove_dc: bool
     fs: float
     nfft: int
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | NDArray[Any]:
         """Plot the detected envelope and its amplitude spectrum.
 
         With ``ax`` given, only the spectrum panel is drawn on it.
@@ -243,7 +243,7 @@ class EnvelopeSpectrumResult:
 
 
 def envelope_spectrum(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     *,
     kind: str = "magnitude",

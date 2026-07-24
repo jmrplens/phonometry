@@ -19,11 +19,11 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-import phonometry as ph  # noqa: E402
+import phonometry as ph
 
 FS = 8192.0
 N = 32768
@@ -122,7 +122,7 @@ def test_cross_correlation_peaks_at_the_imposed_delay() -> None:
 def test_correlation_max_lag_restricts_the_axis() -> None:
     x = _white(4, n=4096)
     res = ph.correlation(x, fs=FS, max_lag=0.02)
-    m = int(round(0.02 * FS))
+    m = round(0.02 * FS)
     assert res.lags.size == 2 * m + 1
     assert float(np.max(np.abs(res.lags))) == pytest.approx(m / FS)
 
@@ -242,7 +242,7 @@ def test_gcc_phat_sharpens_the_peak_of_a_colored_signal() -> None:
     x = np.asarray(sp_signal.lfilter(b, a, _white(10)), dtype=np.float64)
     y = np.roll(x, delay)
 
-    def half_width(res: "ph.TimeDelayResult") -> int:
+    def half_width(res: ph.TimeDelayResult) -> int:
         curve = np.abs(res.correlation)
         return int(np.sum(curve > 0.5 * np.max(curve)))
 
@@ -555,7 +555,7 @@ def test_correlation_plot_line_and_external_ax() -> None:
     res = ph.correlation(x, fs=FS, max_lag=0.01)
     ax = res.plot()
     assert ax.lines
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")
 
@@ -567,7 +567,7 @@ def test_time_delay_plot_marks_the_delay() -> None:
     ax = res.plot()
     labels = [str(line.get_label()) for line in ax.lines]
     assert any("tau" in lab for lab in labels)
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")
 
@@ -578,6 +578,6 @@ def test_alignment_plot_two_lines() -> None:
     res = ph.align_impulse_responses(ir, reference, FS)
     ax = res.plot()
     assert len(ax.lines) == 2
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")

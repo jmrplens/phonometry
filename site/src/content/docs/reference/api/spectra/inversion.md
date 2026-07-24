@@ -48,7 +48,7 @@ InverseFilterResult(
     spectrum: np.ndarray,
     response_spectrum: np.ndarray,
     regularization: np.ndarray,
-    f_range: Tuple[float, float],
+    f_range: tuple[float, float],
     delay: int,
     fs: float,
     flatness_db: float,
@@ -84,7 +84,7 @@ complex inverse spectrum *including* the modeling delay;
 ### InverseFilterResult.apply()
 
 ```python
-InverseFilterResult.apply(x: List[float] | np.ndarray) -> np.ndarray
+InverseFilterResult.apply(x: list[float] | np.ndarray) -> np.ndarray
 ```
 
 Equalize a signal with the inverse filter.
@@ -135,10 +135,10 @@ Number of samples in the inverse filter.
 
 ```python
 regularized_inverse_filter(
-    response: List[float] | np.ndarray | Any,
+    response: list[float] | np.ndarray | Any,
     fs: float | None = None,
     *,
-    f_range: Tuple[float, float],
+    f_range: tuple[float, float],
     regularization_inside: float = 1e-06,
     regularization_outside: float = 1.0,
     transition_octaves: float = 0.3333333333333333,

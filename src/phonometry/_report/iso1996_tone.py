@@ -42,7 +42,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -87,10 +87,10 @@ def _tonal_adjustment(audibility: float) -> int:
 
 
 def _metadata_pairs(
-    result: "ToneAudibilityResult",
+    result: ToneAudibilityResult,
     metadata: ReportMetadata | None,
     language: str = "en",
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the tonal-assessment header grid.
 
     A tonal assessment identifies the source/situation whose noise was analysed
@@ -99,7 +99,7 @@ def _metadata_pairs(
     spacing ``Δf`` is always shown, read from the result rather than the
     metadata.
     """
-    specs: List[Tuple[str, str | None]] = []
+    specs: list[tuple[str, str | None]] = []
     if metadata is not None:
         specs += [
             (t("Source / situation", language), _esc(metadata.specimen)),
@@ -145,7 +145,7 @@ def _type_label(group_size: int | None, language: str = "en") -> str:
 
 
 def _key_quantity_table(
-    result: "ToneAudibilityResult", verbose: bool = False, language: str = "en"
+    result: ToneAudibilityResult, verbose: bool = False, language: str = "en"
 ) -> Any:
     """The full-width per-tone key-quantity table (ISO/PAS 20065 Table E.2 style).
 
@@ -187,7 +187,7 @@ def _key_quantity_table(
         headers.insert(6, "U [dB]")
         widths = [23.0, 20.0, 22.0, 22.0, 24.0, 25.0, 18.0, 20.0]
 
-    data: List[List[Any]] = [[Paragraph(h, header_style) for h in headers]]
+    data: list[list[Any]] = [[Paragraph(h, header_style) for h in headers]]
     for i in order.tolist():
         emph = "<b>{}</b>".format if i == decisive else str
         present = bool(delta[i] > 0.0)
@@ -221,7 +221,7 @@ def _key_quantity_table(
     return table
 
 
-def _statement(result: "ToneAudibilityResult", language: str = "en") -> Tuple[str, List[str]]:
+def _statement(result: ToneAudibilityResult, language: str = "en") -> tuple[str, list[str]]:
     """The boxed decisive audibility ``ΔL_ta`` and tonal adjustment ``K``.
 
     The decisive audibility is the largest over the detected tones (Clause
@@ -255,8 +255,8 @@ def _statement(result: "ToneAudibilityResult", language: str = "en") -> Tuple[st
 
 
 def _verdict(
-    result: "ToneAudibilityResult", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: ToneAudibilityResult, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag against a supplied maximum audibility.
 
     The ``requirement`` is read as the maximum acceptable decisive audibility
@@ -273,7 +273,7 @@ def _verdict(
 
 
 def render_tone_audibility_report(
-    result: "ToneAudibilityResult",
+    result: ToneAudibilityResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -326,7 +326,7 @@ def render_tone_audibility_report(
             language,
         )
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

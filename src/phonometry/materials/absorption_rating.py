@@ -63,8 +63,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
 __all__ = [
     "OCTAVE_BANDS",
-    "THIRD_OCTAVE_BANDS",
     "REFERENCE_CURVE",
+    "THIRD_OCTAVE_BANDS",
     "AbsorptionRatingResult",
     "absorption_class",
     "practical_absorption_coefficient",
@@ -120,8 +120,8 @@ _NOT_CLASSIFIED = "Not classified"
 def _round_half_up(value: float) -> int:
     """Round to the nearest integer, halves away from zero."""
     if value < 0.0:
-        return -int(math.floor(-value + 0.5))
-    return int(math.floor(value + 0.5))
+        return -math.floor(-value + 0.5)
+    return math.floor(value + 0.5)
 
 
 def _practical_round(mean: float) -> float:
@@ -250,7 +250,7 @@ class AbsorptionRatingResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

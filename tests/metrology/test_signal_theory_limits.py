@@ -121,7 +121,7 @@ def test_multichannel_mismatched_lengths() -> None:
     # Numpy arrays must have rectangular shape, so we test with a list of lists of different lengths
     x = [[1.0, 2.0, 3.0], [1.0, 2.0]]
     # This should probably raise an error or handle it via numpy's default behavior
-    with pytest.raises(Exception):
+    with pytest.raises((ValueError, TypeError)):
         # type ignore because list of lists of floats is technically not what we hint, but what user might pass
         octave_filter(x, fs) # type: ignore
 

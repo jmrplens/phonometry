@@ -45,7 +45,7 @@ svglib ship in the ``phonometry[report]`` extra, matplotlib in
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import decimal_comma, t
 from ._layout import (
@@ -112,7 +112,7 @@ def _fmt_hours(seconds: float, language: str = "en") -> str:
     return format_number(float(seconds) / 3600.0, language, decimals=2, trim=True)
 
 
-def _basis(result: "DailyVibrationExposure", language: str = "en") -> str:
+def _basis(result: DailyVibrationExposure, language: str = "en") -> str:
     """The standard-basis line: the ISO method plus the assessment Directive."""
     kind = str(result.assessment.kind)
     quantity = t(_KIND_QUANTITY.get(kind, kind), language)
@@ -131,7 +131,7 @@ def _esc(value: str | None) -> str | None:
 
 def _metadata_pairs(
     metadata: ReportMetadata | None, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
     A vibration exposure sheet identifies the client company, the operator or
@@ -141,7 +141,7 @@ def _metadata_pairs(
     """
     if metadata is None:
         return []
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Company", language), _esc(metadata.client)),
         (t("Operator / worker", language), _esc(metadata.specimen)),
         (t("Workplace", language), _esc(metadata.test_room)),
@@ -153,7 +153,7 @@ def _metadata_pairs(
 
 
 def _operations_table(
-    result: "DailyVibrationExposure", verbose: bool = False, language: str = "en"
+    result: DailyVibrationExposure, verbose: bool = False, language: str = "en"
 ) -> Any:
     """The per-operation exposure-analysis table (ISO 5349-1/-2 Eqs. (2)/(3)).
 
@@ -183,7 +183,7 @@ def _operations_table(
         widths = [66.0, 30.0, 24.0, 30.0, 24.0]
 
     a8_energy = float(result.a8) ** 2
-    data: List[List[Any]] = [[Paragraph(h, header_style) for h in headers]]
+    data: list[list[Any]] = [[Paragraph(h, header_style) for h in headers]]
     for label, total_value, duration_s, partial in zip(
         result.labels, result.total_values, result.durations_s, result.partials
     ):
@@ -229,8 +229,8 @@ def _operations_table(
 
 
 def _assessment_rows(
-    result: "DailyVibrationExposure", language: str = "en"
-) -> List[Tuple[str, str, str, bool]]:
+    result: DailyVibrationExposure, language: str = "en"
+) -> list[tuple[str, str, str, bool]]:
     """The Directive 2002/44/EC assessment rows.
 
     Each row is ``(label, threshold, measured, exceeded)``. The comparison is
@@ -260,14 +260,14 @@ def _assessment_rows(
     ]
 
 
-def _assessment_table(result: "DailyVibrationExposure", language: str = "en") -> Any:
+def _assessment_table(result: DailyVibrationExposure, language: str = "en") -> Any:
     """The Directive 2002/44/EC assessment table (exceeded / not exceeded)."""
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
 
     header_style, label_style, value_style = analysis_cell_styles("humanvib")
 
-    data: List[List[Any]] = [
+    data: list[list[Any]] = [
         [
             Paragraph(t("Directive 2002/44/EC value", language), header_style),
             Paragraph(t("Threshold", language), header_style),
@@ -295,7 +295,7 @@ _ZONE_LABELS: dict[str, str] = {
 }
 
 
-def _statement(result: "DailyVibrationExposure", language: str = "en") -> str:
+def _statement(result: DailyVibrationExposure, language: str = "en") -> str:
     """The boxed result statement: the daily exposure ``A(8)`` and its zone."""
     assessment = result.assessment
     unit = _unit(str(assessment.metric), language)
@@ -306,7 +306,7 @@ def _statement(result: "DailyVibrationExposure", language: str = "en") -> str:
     ).format(a8=_fmt_acc(float(result.a8), language), unit=unit, zone=zone)
 
 
-def _verdict(result: "DailyVibrationExposure", language: str = "en") -> Tuple[str, bool]:
+def _verdict(result: DailyVibrationExposure, language: str = "en") -> tuple[str, bool]:
     """Verdict text and PASS flag against the Directive 2002/44/EC limit value.
 
     The exposure limit value is the daily exposure a worker may in no
@@ -340,7 +340,7 @@ def _verdict(result: "DailyVibrationExposure", language: str = "en") -> Tuple[st
 
 
 def render_human_vibration_report(
-    result: "DailyVibrationExposure",
+    result: DailyVibrationExposure,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -377,7 +377,7 @@ def render_human_vibration_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Daily vibration exposure assessment", language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(_basis(result, language), basis_style),
     ]

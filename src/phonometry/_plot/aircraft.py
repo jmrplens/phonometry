@@ -20,9 +20,14 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+
     from ..aircraft.aircraft_noise import EPNLResult
+    from ..aircraft.airport_noise import (
+        FlyoverResult,
+        NoiseContourResult,
+        NpdLevelResult,
+    )
     from ..aircraft.atmospheric_absorption import AircraftBandAttenuation
-    from ..aircraft.airport_noise import FlyoverResult, NoiseContourResult, NpdLevelResult
     from ..aircraft.rotorcraft_noise import (
         FlightPathKinematics,
         MeanGroundPlaneResult,
@@ -86,7 +91,7 @@ def _t(text: str, language: str = "en", **fmt: Any) -> str:
     return s.format(**fmt) if fmt else s
 
 
-def plot_epnl(result: "EPNLResult", ax: Axes | None = None, *, language: str = "en",
+def plot_epnl(result: EPNLResult, ax: Axes | None = None, *, language: str = "en",
               **kwargs: Any) -> Axes:
     """PNL and PNLT time histories with PNLTM and the 10 dB-down window.
 
@@ -128,7 +133,7 @@ def plot_epnl(result: "EPNLResult", ax: Axes | None = None, *, language: str = "
     return ax
 
 def plot_aircraft_band_attenuation(
-    result: "AircraftBandAttenuation", ax: Axes | None = None, *, language: str = "en",
+    result: AircraftBandAttenuation, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """One-third-octave-band and pure-tone mid-band attenuation versus frequency.
@@ -159,7 +164,7 @@ def plot_aircraft_band_attenuation(
     localize_axes(ax, language)
     return ax
 
-def plot_npd_level(result: "NpdLevelResult", ax: Axes | None = None, *, language: str = "en",
+def plot_npd_level(result: NpdLevelResult, ax: Axes | None = None, *, language: str = "en",
                    **kwargs: Any) -> Axes:
     """NPD event level versus slant distance (log axis), with the tabulated nodes.
 
@@ -188,7 +193,7 @@ def plot_npd_level(result: "NpdLevelResult", ax: Axes | None = None, *, language
     localize_axes(ax, language)
     return ax
 
-def plot_flyover(result: "FlyoverResult", ax: Axes | None = None, *, language: str = "en",
+def plot_flyover(result: FlyoverResult, ax: Axes | None = None, *, language: str = "en",
                  **kwargs: Any) -> Axes:
     """Per-segment contributions to a single-event level (ECAC Doc 29).
 
@@ -224,7 +229,7 @@ def plot_flyover(result: "FlyoverResult", ax: Axes | None = None, *, language: s
     return ax
 
 def plot_rotorcraft_hemisphere(
-    result: "RotorcraftHemisphere", ax: Axes | None = None, *, band: float | None = None,
+    result: RotorcraftHemisphere, ax: Axes | None = None, *, band: float | None = None,
     language: str = "en", **kwargs: Any) -> Axes:
     """Fore-aft directivity section of a rotorcraft noise hemisphere (ECAC Doc 32).
 
@@ -257,7 +262,7 @@ def plot_rotorcraft_hemisphere(
     localize_axes(ax, language)
     return ax
 
-def plot_noise_contour(result: "NoiseContourResult", ax: Axes | None = None, *,
+def plot_noise_contour(result: NoiseContourResult, ax: Axes | None = None, *,
                        language: str = "en", **kwargs: Any) -> Axes:
     """Filled single-event noise contours over the ground plane (ECAC Doc 29).
 
@@ -290,7 +295,7 @@ def plot_noise_contour(result: "NoiseContourResult", ax: Axes | None = None, *,
 
 
 def plot_flight_path_kinematics(
-    result: "FlightPathKinematics", ax: Axes | None = None, *, language: str = "en",
+    result: FlightPathKinematics, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any) -> Axes:
     """Speed and angle profiles of a rotorcraft track (ECAC Doc 32).
 
@@ -330,7 +335,7 @@ def plot_flight_path_kinematics(
 
 
 def plot_rotorcraft_event(
-    result: "RotorcraftEventResult", ax: Axes | None = None, *, language: str = "en",
+    result: RotorcraftEventResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any) -> Axes:
     """A-weighted level time history of a rotorcraft event (ECAC Doc 32).
 
@@ -372,7 +377,7 @@ def plot_rotorcraft_event(
 
 
 def plot_rotorcraft_noise_contour(
-    result: "RotorcraftNoiseContourResult", ax: Axes | None = None, *, language: str = "en",
+    result: RotorcraftNoiseContourResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any) -> Axes:
     """Filled rotorcraft single-event noise contours over the ground plane.
 
@@ -407,7 +412,7 @@ def plot_rotorcraft_noise_contour(
 
 
 def plot_mean_ground_plane(
-    result: "MeanGroundPlaneResult", ax: Axes | None = None, *, language: str = "en",
+    result: MeanGroundPlaneResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any) -> Axes:
     """Terrain section with its fitted mean ground plane (ECAC Doc 32 guidance).
 
@@ -439,7 +444,7 @@ def plot_mean_ground_plane(
 
 
 def plot_terrain_screening(
-    result: "TerrainScreeningResult", ax: Axes | None = None, *, language: str = "en",
+    result: TerrainScreeningResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any) -> Axes:
     """Terrain screening section: profile, line of sight and diffracted path.
 

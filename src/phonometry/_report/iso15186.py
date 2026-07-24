@@ -31,7 +31,8 @@ extra, matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Sequence, Tuple
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -72,8 +73,8 @@ _SPEC: dict[str, str] = {
 
 
 def render_iso15186_report(
-    result: "IntensityReductionResult",
-    rating: "WeightedRatingResult",
+    result: IntensityReductionResult,
+    rating: WeightedRatingResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -102,7 +103,7 @@ def render_iso15186_report(
 
     def build_columns(
         value_header: str, curve: np.ndarray, verbose: bool, language: str
-    ) -> Tuple[Sequence[Column], str, Any]:
+    ) -> tuple[Sequence[Column], str, Any]:
         """The table: ``f | RI`` or, verbose with Kc, ``f | RI | RI,M``."""
         from reportlab.lib.units import mm
 
@@ -111,7 +112,7 @@ def render_iso15186_report(
         # caption declare the set (the verbose one also names the RI,M column).
         is_octave = np.asarray(rating.band_centers).size == 5
         if verbose and modified is not None:
-            columns: List[Column] = [
+            columns: list[Column] = [
                 (value_header, curve, 1),
                 (
                     t("R<sub>I,M</sub> [dB]", language),
@@ -173,8 +174,8 @@ _DINE_SPEC: dict[str, str] = {
 
 
 def render_iso15186_element_report(
-    result: "IntensityElementNormalizedResult",
-    rating: "WeightedRatingResult",
+    result: IntensityElementNormalizedResult,
+    rating: WeightedRatingResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

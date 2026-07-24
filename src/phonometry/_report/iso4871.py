@@ -33,7 +33,7 @@ and guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import format_number, t
 from ._layout import (
@@ -54,7 +54,7 @@ if TYPE_CHECKING:
 
 
 def _basis(
-    declaration: "NoiseEmissionDeclaration",
+    declaration: NoiseEmissionDeclaration,
     metadata: ReportMetadata | None,
     language: str = "en",
 ) -> str:
@@ -75,7 +75,7 @@ def _basis(
     )
 
 
-def _footnote(declaration: "NoiseEmissionDeclaration", language: str = "en") -> str:
+def _footnote(declaration: NoiseEmissionDeclaration, language: str = "en") -> str:
     """The clause-5 b determination footnote (noise test code + basic standards)."""
     standards = ", ".join(html.escape(s) for s in declaration.basic_standards)
     code = (
@@ -112,11 +112,11 @@ def _fmt_level(value: float, language: str = "en") -> str:
 
 
 def _dual_rows(
-    declaration: "NoiseEmissionDeclaration", language: str = "en"
-) -> List[Tuple[str, List[str]]]:
+    declaration: NoiseEmissionDeclaration, language: str = "en"
+) -> list[tuple[str, list[str]]]:
     """Dual-number value rows: (label, per-mode cells) in ISO 4871 Annex B order."""
     modes = list(declaration.modes)
-    rows: List[Tuple[str, List[str]]] = [
+    rows: list[tuple[str, list[str]]] = [
         (
             t(
                 "Measured A-weighted sound power level, "
@@ -166,11 +166,11 @@ def _dual_rows(
 
 
 def _single_rows(
-    declaration: "NoiseEmissionDeclaration", language: str = "en"
-) -> List[Tuple[str, List[str]]]:
+    declaration: NoiseEmissionDeclaration, language: str = "en"
+) -> list[tuple[str, list[str]]]:
     """Single-number value rows: the declared L_WAd (and L_pAd) per mode (3.15)."""
     modes = list(declaration.modes)
-    rows: List[Tuple[str, List[str]]] = [
+    rows: list[tuple[str, list[str]]] = [
         (
             t(
                 "A-weighted sound power level, "
@@ -214,7 +214,7 @@ def _emission_declared_cell(value: int | None, language: str = "en") -> str:
 
 
 def _declaration_table(
-    declaration: "NoiseEmissionDeclaration", language: str = "en"
+    declaration: NoiseEmissionDeclaration, language: str = "en"
 ) -> Any:
     """Reproduce the ISO 4871 Annex B declaration table (identification + values)."""
     from reportlab.lib import colors
@@ -263,7 +263,7 @@ def _declaration_table(
     )
 
     # Identification header (clause 5 a / 5 c), spanning the whole table.
-    identity_bits: List[str] = []
+    identity_bits: list[str] = []
     if declaration.machine:
         identity_bits.append(html.escape(declaration.machine))
     if declaration.operating_conditions:
@@ -271,7 +271,7 @@ def _declaration_table(
     identity_text = ", ".join(identity_bits) if identity_bits else "&#8211;"
 
     span_cols = 1 + n_modes
-    data: List[List[Any]] = [
+    data: list[list[Any]] = [
         [
             Paragraph(
                 t(
@@ -351,7 +351,7 @@ def _declaration_table(
     return table
 
 
-def _note(declaration: "NoiseEmissionDeclaration", language: str = "en") -> str:
+def _note(declaration: NoiseEmissionDeclaration, language: str = "en") -> str:
     """The ISO 4871 Annex B upper-boundary note (dual- or single-number wording)."""
     if declaration.form == "dual-number":
         return t(
@@ -370,10 +370,10 @@ def _note(declaration: "NoiseEmissionDeclaration", language: str = "en") -> str:
 
 
 def _verification_rows(
-    declaration: "NoiseEmissionDeclaration", language: str = "en"
-) -> List[Tuple[str, str, str, str]]:
+    declaration: NoiseEmissionDeclaration, language: str = "en"
+) -> list[tuple[str, str, str, str]]:
     """Verification rows (clause 6.2): L_1 vs the declared L_WAd, per mode."""
-    rows: List[Tuple[str, str, str, str]] = []
+    rows: list[tuple[str, str, str, str]] = []
     for mode in declaration.modes:
         if mode.verification_level is None:
             continue
@@ -397,7 +397,7 @@ def _verification_rows(
 
 
 def render_iso4871_report(
-    declaration: "NoiseEmissionDeclaration",
+    declaration: NoiseEmissionDeclaration,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -429,10 +429,10 @@ def render_iso4871_report(
         raise ImportError(_REPORTLAB_HINT) from exc
     accent = colors.HexColor(_ACCENT_HEX)
 
-    styles, title_style, basis_style, caption_style = document_styles(accent)
+    _styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Noise emission declaration", language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(_basis(declaration, metadata, language), basis_style),
         Spacer(1, 8),

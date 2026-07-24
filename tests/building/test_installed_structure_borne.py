@@ -200,6 +200,7 @@ def _aw_total(levels: np.ndarray) -> float:
 def test_annex_i2_whirlpool_floor_component() -> None:
     """Tables I.6a/I.7: mobility correction and path 11 within +/-0,15 dB."""
     import reference_data as ref
+
     from phonometry import installed_power_from_reception_plate
 
     tol = ref.EN12354_5_ANNEX_I_TOL
@@ -227,6 +228,7 @@ def test_annex_i2_whirlpool_floor_component() -> None:
 def test_annex_i3_cistern_source_conversion() -> None:
     """Table I.8: measured plate power -> installed and characteristic levels."""
     import reference_data as ref
+
     from phonometry import installed_power_from_reception_plate
 
     tol = ref.EN12354_5_ANNEX_I_TOL

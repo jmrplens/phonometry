@@ -23,7 +23,8 @@ figures) so the plot can be composed into a larger layout.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final, Sequence, cast
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, Final, cast
 
 import numpy as np
 
@@ -214,7 +215,7 @@ def format_frequency_axis(
 
 def _band_axis(
     ax: Axes,
-    labels_or_freqs: "np.ndarray | Sequence[str] | Sequence[float]",
+    labels_or_freqs: np.ndarray | Sequence[str] | Sequence[float],
     *,
     xlabel: str | None = "Frequency [Hz]",
     language: str = "en",
@@ -262,7 +263,7 @@ def _fractile_band(
                     color=color, alpha=0.5, label="10-90 % fractile band")
 
 
-def _hatch_invalid(bars: "BarContainer", mask: np.ndarray) -> None:
+def _hatch_invalid(bars: BarContainer, mask: np.ndarray) -> None:
     """Hatch (and outline) the bars flagged invalid/unusable by ``mask``."""
     for bar, bad in zip(bars, np.asarray(mask, dtype=bool), strict=True):
         if bad:
@@ -490,7 +491,7 @@ def _annotate_impact_500(
 
 
 def _require_rating_curve(
-    result: "WeightedRatingResult | ImpactRatingResult",
+    result: WeightedRatingResult | ImpactRatingResult,
 ) -> None:
     if (
         result.band_centers is None
@@ -506,7 +507,7 @@ def _require_rating_curve(
 
 
 def _facade_x_axis(
-    ax: Axes, freqs: "np.ndarray | None", n: int, *, language: str = "en"
+    ax: Axes, freqs: np.ndarray | None, n: int, *, language: str = "en"
 ) -> np.ndarray:
     """Frequency x-axis when centres are known, else a labelled band index."""
     if freqs is None:
@@ -822,7 +823,7 @@ def _plot_band_level_bars(
 
 
 def _plot_insulation_bands(
-    curves: "Sequence[tuple[str, np.ndarray]]",
+    curves: Sequence[tuple[str, np.ndarray]],
     *,
     ylabel: str,
     title: str,

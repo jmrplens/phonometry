@@ -34,7 +34,7 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -91,10 +91,10 @@ def _db_1(value: float, language: str = "en") -> str:
 
 
 def _noise_rows(
-    result: "MicrophoneCharacteristics", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: MicrophoneCharacteristics, language: str = "en"
+) -> list[tuple[str, str]]:
     """The equivalent-noise and signal-to-noise table rows, when known."""
-    rows: List[Tuple[str, str]] = []
+    rows: list[tuple[str, str]] = []
     noise = result.equivalent_noise_level_db
     snr = result.signal_to_noise_ratio_db
     if noise is not None:
@@ -115,12 +115,12 @@ def _noise_rows(
 
 
 def _rated_rows(
-    result: "MicrophoneCharacteristics", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: MicrophoneCharacteristics, language: str = "en"
+) -> list[tuple[str, str]]:
     """The rated-characteristics table rows (only the quantities that exist)."""
     import html
 
-    rows: List[Tuple[str, str]] = [
+    rows: list[tuple[str, str]] = [
         (
             t("Free-field sensitivity", language),
             f"{_db_1(result.sensitivity_mv_per_pa, language)} mV/Pa",
@@ -181,7 +181,7 @@ def _rated_rows(
 # IEC 60263 characteristic graphs
 # --------------------------------------------------------------------------- #
 def _response_drawing(
-    result: "MicrophoneCharacteristics", target_width: float, language: str = "en"
+    result: MicrophoneCharacteristics, target_width: float, language: str = "en"
 ) -> Any:
     """Free-field response with the tolerance band and effective-range markers.
 
@@ -208,7 +208,7 @@ def _response_drawing(
 
 
 def _secondary_drawing(
-    result: "MicrophoneCharacteristics", target_width: float, language: str = "en"
+    result: MicrophoneCharacteristics, target_width: float, language: str = "en"
 ) -> Any | None:
     """Directional-pattern, noise-spectrum and distortion panels for the data.
 
@@ -261,7 +261,7 @@ def _secondary_drawing(
     return _drawing_from_figure(fig, target_width, language)
 
 
-def _statement(result: "MicrophoneCharacteristics", language: str = "en") -> str:
+def _statement(result: MicrophoneCharacteristics, language: str = "en") -> str:
     """The boxed headline: free-field sensitivity and effective range."""
     return t(
         "Free-field sensitivity <b>{mv} mV/Pa</b> ({level} dB re 1 V/Pa at "
@@ -277,8 +277,8 @@ def _statement(result: "MicrophoneCharacteristics", language: str = "en") -> str
 
 
 def _verdict(
-    result: "MicrophoneCharacteristics", requirement: float, language: str = "en"
-) -> Tuple[str, bool] | None:
+    result: MicrophoneCharacteristics, requirement: float, language: str = "en"
+) -> tuple[str, bool] | None:
     """Noise verdict: the equivalent noise level must not exceed the requirement."""
     level = result.equivalent_noise_level_db
     if level is None:
@@ -296,7 +296,7 @@ def _verdict(
 
 
 def render_iec60268_4_report(
-    result: "MicrophoneCharacteristics",
+    result: MicrophoneCharacteristics,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -326,7 +326,7 @@ def render_iec60268_4_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Microphone characteristics", language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(_basis(metadata, language), basis_style),
     ]

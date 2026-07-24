@@ -13,7 +13,7 @@ Integrated and statistical sound levels (Leq, LAeq, LN percentiles).
 
 ```python
 laeq(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
@@ -37,7 +37,7 @@ A-weighted equivalent continuous sound level (LAeq).
 
 ```python
 lc_peak(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
@@ -76,7 +76,7 @@ maximum is taken, recovering the inter-sample peak to within about
 
 ```python
 leq(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
 ) -> float | np.ndarray
@@ -98,7 +98,7 @@ Equivalent continuous sound level (Leq) over the whole signal.
 
 ```python
 lex_8h(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     duration_hours: float | None = None,
     calibration_factor: float = 1.0,
@@ -127,14 +127,14 @@ and LEX,8h of ISO 1999 (BS EN 61252:1995, 3.3 NOTES 5-6).
 
 ```python
 ln_levels(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     n: Sequence[int] = (10, 50, 90),
     mode: str = 'fast',
     weighting: str | None = None,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
-) -> Dict[int, float | np.ndarray]
+) -> dict[int, float | np.ndarray]
 ```
 
 Statistical percentile levels (LN) from the time-weighted level envelope.
@@ -160,7 +160,7 @@ distribution), L90 the level exceeded 90% of the time, etc.
 
 ```python
 sel(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     weighting: str | None = None,
     calibration_factor: float = 1.0,
@@ -191,7 +191,7 @@ reference responses, Equation 8, in the test suite).
 
 ```python
 sound_exposure(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     duration_hours: float | None = None,
     calibration_factor: float = 1.0,

@@ -24,8 +24,8 @@ from phonometry.underwater.seabed_reflection import (
 )
 
 # Water over a fast sandy bottom.
-_WATER = dict(rho1=1000.0, c1=1500.0)
-_SAND = dict(rho2=1900.0, c2=1650.0)
+_WATER = {"rho1": 1000.0, "c1": 1500.0}
+_SAND = {"rho2": 1900.0, "c2": 1650.0}
 
 
 def test_normal_incidence_matches_impedance_formula() -> None:

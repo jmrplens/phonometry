@@ -13,20 +13,20 @@ for _threads_var in (
 ):
     os.environ.setdefault(_threads_var, "1")
 
-from collections.abc import Callable  # noqa: E402
-from functools import lru_cache  # noqa: E402
-from typing import Any, Literal  # noqa: E402
+from collections.abc import Callable
+from functools import cache, lru_cache
+from typing import Any, Literal
 
-import matplotlib.pyplot as plt  # noqa: E402
-import matplotlib.ticker as mticker  # noqa: E402
-import numpy as np  # noqa: E402
-from scipy import signal as scipy_signal  # noqa: E402
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import numpy as np
+from scipy import signal as scipy_signal
 
 # Add src to path to use the local package
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from phonometry import OctaveFilterBank  # noqa: E402
-from phonometry._plot.common import format_frequency_axis  # noqa: E402
+from phonometry import OctaveFilterBank
+from phonometry._plot.common import format_frequency_axis
 
 # Constants for professional styling
 # ---------------------------------------------------------------------------
@@ -1231,10 +1231,10 @@ _ES_PATTERNS = [
     (r"^SAE band \((\d+) m\)$", r"banda SAE (\1 m)"),
     (r"^source (\d+) m, receiver (.+) m, offset (\d+) m$",
      r"fuente \1 m, receptor \2 m, offset \3 m"),
-    (r"^SEL (\d+)\.(\d+) dB\(A\)  ·  EPNL (\d+)\.(\d+) EPNdB\n"
-     r"level flyover, 60 kt, 150 m, 120 m sideline, grass$",
-     "SEL \\1,\\2 dB(A)  ·  EPNL \\3,\\4 EPNdB\n"
-     "sobrevuelo nivelado, 60 kt, 150 m, 120 m lateral, hierba"),
+    ((r"^SEL (\d+)\.(\d+) dB\(A\)  ·  EPNL (\d+)\.(\d+) EPNdB\n"
+     r"level flyover, 60 kt, 150 m, 120 m sideline, grass$"),
+     ("SEL \\1,\\2 dB(A)  ·  EPNL \\3,\\4 EPNdB\n"
+     "sobrevuelo nivelado, 60 kt, 150 m, 120 m lateral, hierba")),
     (r"^\$L_\{ASmax\}\$ = (\d+)\.(\d+) dB\(A\)$",
      r"$L_{ASmax}$ = \1,\2 dB(A)"),
     (r"^Diffracted path \(δ = (\d+)\.(\d+) m\)$",
@@ -1812,7 +1812,7 @@ def generate_multichannel_response(output_dir: str) -> None:
     bank = OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[20.0, 20000.0])
     spl, freq = bank.filter(x)
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    _fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
     # Calculate PSDs for background
     f_psd1, Pxx1 = scipy_signal.welch(x[0], fs, nperseg=4096)
@@ -1890,7 +1890,7 @@ def generate_decomposition_plot(output_dir: str) -> None:
         raise ValueError("Signal bands should not be None")
 
     num_plots = len(xb_butter) + 2 # +1 for original, +1 for impulse response
-    fig, axes = plt.subplots(num_plots, 1, figsize=(10, 2.2 * num_plots), sharex=False)
+    _fig, axes = plt.subplots(num_plots, 1, figsize=(10, 2.2 * num_plots), sharex=False)
 
 
     # Fixed Y limits for decomposition
@@ -2374,7 +2374,7 @@ def generate_group_delay_comparison(output_dir: str) -> None:
         w = np.logspace(np.log10(500), np.log10(2000), 1024)
         gd = np.zeros_like(w)
         for section in bank.sos[idx]:
-            w_s, gd_s = scipy_signal.group_delay((section[:3], section[3:]), w=w, fs=fsd)
+            _w_s, gd_s = scipy_signal.group_delay((section[:3], section[3:]), w=w, fs=fsd)
             gd += gd_s
         ax.semilogx(w, gd / fsd * 1000, label=label, color=color, linestyle=style)
 
@@ -2458,7 +2458,7 @@ def generate_block_processing_continuity(output_dir: str) -> None:
     y_stateful = band_output(stateful=True)
     y_stateless = band_output(stateful=False)
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6.5), sharex=True)
+    _fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6.5), sharex=True)
     zoom = slice(int(0.9 * block), int(1.4 * block))  # around the first boundary
 
     ax1.plot(t[zoom], continuous[zoom], color=COLOR_FG, linewidth=2.2, alpha=0.35,
@@ -2592,7 +2592,11 @@ def generate_filter_class0_mask(output_dir: str) -> None:
 def generate_weighting_class_mask(output_dir: str) -> None:
     """A/C weighting deviation against the IEC 61672-1:2013 Table 3 mask."""
     print("Generating weighting_class_mask.png...")
-    from phonometry import WeightingFilter, verify_weighting_class, weighting_class_limits
+    from phonometry import (
+        WeightingFilter,
+        verify_weighting_class,
+        weighting_class_limits,
+    )
 
     freqs, lower1, upper1 = weighting_class_limits(1)
     _, lower2, upper2 = weighting_class_limits(2)
@@ -3189,7 +3193,7 @@ def generate_impulse_response(output_dir: str) -> None:
     energy = np.cumsum(h[::-1] ** 2)[::-1]
     edc_db = 10.0 * np.log10(np.maximum(energy, tiny) / energy[0])
 
-    fig, (ax_w, ax_d) = plt.subplots(2, 1, figsize=(10, 7), sharex=True)
+    _fig, (ax_w, ax_d) = plt.subplots(2, 1, figsize=(10, 7), sharex=True)
     ax_w.plot(time, h / peak, color=COLOR_PRIMARY, linewidth=0.7)
     ax_w.set_title("Recovered room impulse response (ISO 18233)",
                    fontweight="bold", pad=10)
@@ -3259,10 +3263,10 @@ def generate_insulation_rating(output_dir: str) -> None:
 
     for dy, text in (
         (0.97, f"Reference curve shifted by {shift} dB"),
-        (0.90, f"Sum of unfavourable deviations = {result.unfavourable_sum:.1f}"
-               f" dB  (limit 32.0 dB)"),
-        (0.83, f"Rw (C ; Ctr) = {result.rating} "
-               f"({result.c:+d} ; {result.ctr:+d}) dB"),
+        (0.90, (f"Sum of unfavourable deviations = {result.unfavourable_sum:.1f}"
+               f" dB  (limit 32.0 dB)")),
+        (0.83, (f"Rw (C ; Ctr) = {result.rating} "
+               f"({result.c:+d} ; {result.ctr:+d}) dB")),
     ):
         ax.text(0.03, dy, text, transform=ax.transAxes, va="top", ha="left",
                 fontsize=9.5, color=COLOR_FG)
@@ -3333,8 +3337,8 @@ def generate_impact_rating(output_dir: str) -> None:
 
     for dy, text in (
         (0.97, f"Reference curve shifted by {shift} dB"),
-        (0.90, f"Sum of unfavourable deviations = {result.unfavourable_sum:.1f}"
-               f" dB  (limit 32.0 dB)"),
+        (0.90, (f"Sum of unfavourable deviations = {result.unfavourable_sum:.1f}"
+               f" dB  (limit 32.0 dB)")),
         (0.83, f"Ln,w = {result.rating} dB ; CI = {result.ci:+d} dB"),
     ):
         ax.text(0.03, dy, text, transform=ax.transAxes, va="top", ha="left",
@@ -3418,7 +3422,7 @@ def generate_open_plan_decay(output_dir: str) -> None:
     a_lp = m.lp_as_4m - b_log * np.log10(4.0)
     d_sti, c_sti = np.polyfit(r, sti, 1)              # STI vs distance
 
-    fig, ax = plt.subplots(figsize=(10, 6.5))
+    _fig, ax = plt.subplots(figsize=(10, 6.5))
     ax.set_xscale("log")
     rr = np.logspace(np.log10(2.0), np.log10(16.0), 100)
     line_spl, = ax.plot(rr, a_lp + b_log * np.log10(rr), color=COLOR_PRIMARY,
@@ -3486,12 +3490,12 @@ _FS_PSY = 48000  # ECMA-418-2 / ISO 532 operate at 48 kHz
 def _pure_tone(freq: float, spl_db: float, dur: float,
                fs: int = _FS_PSY) -> np.ndarray:
     """Calibrated sinusoid: sound pressure in pascals at *spl_db* dB SPL."""
-    t = np.arange(int(round(dur * fs))) / fs
+    t = np.arange(round(dur * fs)) / fs
     amp = _P_REF * 10.0 ** (spl_db / 20.0) * np.sqrt(2.0)
     return np.asarray(amp * np.sin(2.0 * np.pi * freq * t))
 
 
-@lru_cache(maxsize=None)
+@cache
 def _loudness_models_data() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Total loudness (sone) vs level for the three loudness models."""
     from phonometry import (
@@ -3550,7 +3554,7 @@ def generate_loudness_models_comparison(output_dir: str) -> None:
     plt.close()
 
 
-@lru_cache(maxsize=None)
+@cache
 def _sottek_specific_data() -> tuple[np.ndarray, np.ndarray, float]:
     """ECMA-418-2 specific loudness N'(z) of a 1 kHz / 60 dB tone."""
     from phonometry.psychoacoustics import loudness_ecma
@@ -3588,7 +3592,7 @@ def generate_sottek_specific_loudness(output_dir: str) -> None:
     plt.close()
 
 
-@lru_cache(maxsize=None)
+@cache
 def _tonality_data() -> tuple[np.ndarray, np.ndarray, float, np.ndarray, np.ndarray, float]:
     """ECMA-418-2 tonality T(t) for a 1 kHz tone-in-noise vs pure noise."""
     from phonometry.psychoacoustics import tonality_ecma
@@ -3606,7 +3610,7 @@ def _tonality_data() -> tuple[np.ndarray, np.ndarray, float, np.ndarray, np.ndar
             pn.time.copy(), pn.tonality_vs_time.copy(), float(pn.tonality))
 
 
-@lru_cache(maxsize=None)
+@cache
 def _roughness_sweep_data() -> tuple[np.ndarray, np.ndarray]:
     """ECMA-418-2 roughness R vs AM frequency, 1 kHz carrier, 100 % AM, 60 dB."""
     from phonometry.psychoacoustics import roughness_ecma
@@ -3669,7 +3673,7 @@ def generate_tonality_roughness_demo(output_dir: str) -> None:
     plt.close()
 
 
-@lru_cache(maxsize=None)
+@cache
 def _fs_ecma_sweep_data() -> tuple[np.ndarray, np.ndarray]:
     """ECMA-418-2 Clause 9 F of a 1 kHz / 60 dB / 100 %-AM tone vs f_mod.
 
@@ -3706,7 +3710,7 @@ def generate_hms_modulation_bandpass(output_dir: str) -> None:
     fm_fs, f_vals = _fs_ecma_sweep_data()
     fm_r, r_vals = _roughness_sweep_data()
 
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     # Per-metric identity colors (teal = fluctuation strength, brown =
     # roughness), matching the result .plot() renderers; legible on both
     # themes, kept literal on purpose.
@@ -3748,7 +3752,7 @@ def generate_hms_modulation_bandpass(output_dir: str) -> None:
     plt.close()
 
 
-@lru_cache(maxsize=None)
+@cache
 def _fluctuation_am_tone_sweep() -> tuple[np.ndarray, np.ndarray]:
     """Osses 2016 signal-model F of a 1 kHz / 70 dB / 100 %-AM tone vs f_mod.
 
@@ -3785,7 +3789,7 @@ def generate_fluctuation_strength(output_dir: str) -> None:
     fm_tone, f_tone = _fluctuation_am_tone_sweep()
     tone_peak = int(np.argmax(f_tone))
 
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.semilogx(fmod, f_bbn, color=COLOR_PRIMARY, linewidth=2.4,
                 label=(f"AM broadband noise (closed form, 60 dB), "
                        f"peak {f_bbn[bbn_peak]:.1f} vacil"))
@@ -3850,7 +3854,7 @@ def generate_psychoacoustic_annoyance(output_dir: str) -> None:
          COLOR_TERTIARY, "-"),
     ]
 
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     for label, s, f, r, color, ls in profiles:
         pa = np.array([psychoacoustic_annoyance(v, s, f, r).annoyance for v in n5])
         lw = 1.6 if ls == "--" else 2.4
@@ -3924,7 +3928,7 @@ def generate_distortion(output_dir: str) -> None:
     ref = np.max(spectrum)
     spec_db = 20.0 * np.log10(np.maximum(spectrum, 1e-12) / ref)
 
-    fig, ax = plt.subplots(figsize=(10, 6.0))
+    _fig, ax = plt.subplots(figsize=(10, 6.0))
     ax.plot(freqs, spec_db, color=COLOR_PRIMARY, linewidth=1.0, alpha=0.8,
             label="Magnitude spectrum")
     hz = np.asarray(res.harmonic_frequencies)
@@ -3987,7 +3991,7 @@ def generate_frequency_response(output_dir: str) -> None:
     freqs = res.frequencies[pos]
     true_db = 20.0 * np.log10(np.maximum(np.abs(h_true[pos]), 1e-12))
 
-    fig, (ax_mag, ax_coh) = plt.subplots(
+    _fig, (ax_mag, ax_coh) = plt.subplots(
         2, 1, figsize=(10, 7.2), sharex=True,
         gridspec_kw={"height_ratios": [2.0, 1.0]})
     ax_mag.semilogx(freqs, true_db, color=COLOR_FG, linestyle="--",
@@ -4039,7 +4043,7 @@ def generate_swept_sine_thd(output_dir: str) -> None:
     freqs = res.thd_frequencies[sel]
     h1_ref = 1.0 + 3.0 * a3 / 4.0  # Chebyshev fundamental gain
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.loglog(freqs, 100.0 * res.thd[sel], color=COLOR_PRIMARY,
               linewidth=2.0, label="Total THD(f)")
     ax.loglog(freqs, 100.0 * res.distortion_ratios[0][sel],
@@ -4210,7 +4214,7 @@ def generate_psd_confidence_smoothing(output_dir: str) -> None:
     i0 = int(np.argmin(np.abs(freqs - 1000.0)))
     ref_db = 10.0 * np.log10(smooth[i0]) - 10.0 * np.log10(freqs / freqs[i0])
 
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.fill_between(
         freqs,
         10.0 * np.log10(res.ci_lower[band]),
@@ -4258,7 +4262,7 @@ def generate_multitaper_psd_confidence(output_dir: str) -> None:
     level_1k = float(np.mean(10.0 * np.log10(res.psd[band][anchor])))
     ref_db = level_1k - 10.0 * np.log10(freqs / 1000.0)
 
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.semilogx(freqs, 10.0 * np.log10(single.psd[band]), color="gray",
                 alpha=0.45, linewidth=0.7,
                 label="Single Slepian taper ($K$ = 1, $\\nu$ = 2)")
@@ -4367,7 +4371,7 @@ def generate_zoom_fft_resolution(output_dir: str) -> None:
     # mainlobes are drawn as smooth curves with their exact peaks.
     res = zoom_fft(x, fs, 980.0, 1016.0, n_points=145)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(coarse_f[band], 20.0 * np.log10(np.maximum(coarse[band], 1e-12)),
             color=COLOR_SECONDARY, marker="o",
             ms=4.0, lw=1.2, ls="--", label="1024-point FFT (8 Hz bins)")
@@ -4450,7 +4454,7 @@ def generate_window_functions_tradeoff(output_dir: str) -> None:
         ("hamming", COLOR_SECONDARY, "-"),
         ("blackman", COLOR_TERTIARY, "-"),
     ]
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     for name, color, style in cases:
         res = window_metrics(name, n)
         spectrum = np.abs(np.fft.rfft(res.taps, n=n * oversample))
@@ -4509,7 +4513,7 @@ def generate_program_loudness(output_dir: str) -> None:
     x *= 10.0 ** ((-23.0 - raw.integrated) / 20.0)
     res = program_loudness(np.vstack([x, x]), fs)
 
-    fig, ax = plt.subplots(figsize=(11.5, 5.8))
+    _fig, ax = plt.subplots(figsize=(11.5, 5.8))
     ax.axhspan(res.lra_low, res.lra_high, color=COLOR_TERTIARY, alpha=0.12,
                label=f"LRA = {res.loudness_range:.1f} LU (P10-P95)")
     ax.plot(res.momentary_time, res.momentary, color="#9e9e9e",
@@ -4561,7 +4565,7 @@ def generate_k_weighting_response(output_dir: str) -> None:
     print("Generating k_weighting_response...")
     from phonometry import k_weighting_response
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     k_weighting_response().plot(ax=ax, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "k_weighting_response.svg")
@@ -4590,7 +4594,7 @@ def generate_gcc_phat_delay(output_dir: str) -> None:
     phat = time_delay(x, y, fs, method="gcc", weighting="phat",
                       nperseg=2048, max_delay=0.01)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(1e3 * direct.lags,
             direct.correlation / np.max(np.abs(direct.correlation)),
             color=COLOR_PRIMARY, linewidth=1.6,
@@ -4634,12 +4638,12 @@ def generate_cepstrum_echo(output_dir: str) -> None:
     impulse[0] = 1.0
     b, bb = sp_signal.butter(2, [0.004, 0.9], btype="bandpass")
     direct = sp_signal.lfilter(b, bb, impulse)
-    ir = direct + a * np.roll(direct, int(round(delay_s * fs)))
+    ir = direct + a * np.roll(direct, round(delay_s * fs))
     ir += noise_signal(fs, n / fs, color="white", rms=1e-4, seed=13)
 
     res = echo_detection(ir, fs, min_quefrency=0.002)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     half = res.nfft // 2 + 1
     ax.plot(1e3 * res.quefrencies[:half], res.cepstrum[:half],
             color=COLOR_PRIMARY, linewidth=1.1, label="Power cepstrum")
@@ -4685,7 +4689,7 @@ def generate_envelope_spectrum(output_dir: str) -> None:
 
     res = envelope_spectrum(x, fs)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(res.frequencies, res.amplitude, color=COLOR_PRIMARY,
             linewidth=1.4, label="Envelope spectrum")
     ax.axvline(fm, color=COLOR_FG, linestyle="--", linewidth=1.3, alpha=0.7,
@@ -4734,7 +4738,7 @@ def generate_synchronous_average(output_dir: str) -> None:
     res = time_synchronous_average(signal, fs, period, n_averages=n_avg)
     true_one = periodic[:m]
 
-    fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(11, 4.6))
+    _fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(11, 4.6))
 
     # Panel (a): one noisy period against the recovered average.
     t_ms = 1e3 * res.times
@@ -4814,7 +4818,7 @@ def generate_miso_coherence(output_dir: str) -> None:
     band = (f >= 20.0) & (f <= 4000.0)
     fb = f[band]
 
-    fig, (ax_top, ax_bot) = plt.subplots(2, 1, figsize=(10, 7.4), sharex=True)
+    _fig, (ax_top, ax_bot) = plt.subplots(2, 1, figsize=(10, 7.4), sharex=True)
 
     def db(v: np.ndarray) -> np.ndarray:
         with np.errstate(divide="ignore"):
@@ -4883,7 +4887,7 @@ def generate_trend_test(output_dir: str) -> None:
     res_flat = trend_test(example)
     res_drift = trend_test(drifting)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     index = np.arange(1, example.size + 1)
     ax.plot(index, res_flat.values, "o-", color=COLOR_PRIMARY,
             linewidth=1.2, markersize=5,
@@ -4926,7 +4930,7 @@ def generate_stationarity_test(output_dir: str) -> None:
     res_steady = stationarity_test(steady, fs)
     res_ramp = stationarity_test(ramp, fs)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     index = np.arange(1, res_steady.n_segments + 1)
     ax.plot(index, res_steady.segment_values, "o-", color=COLOR_PRIMARY,
             linewidth=1.2, markersize=5,
@@ -4975,7 +4979,7 @@ def generate_rice_level_crossings(output_dir: str) -> None:
     x = _bandlimited_gaussian_figure_record(0, fs, 1 << 19, 800.0, 1200.0)
     res = level_crossing_rate(x, fs, levels=np.linspace(-3.5, 3.5, 29))
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     order = np.argsort(res.levels)
     ax.plot(res.levels[order], res.rice_rates[order], color=COLOR_SECONDARY,
             linewidth=1.6,
@@ -5011,7 +5015,7 @@ def generate_rice_peak_distribution(output_dir: str) -> None:
     x = _bandlimited_gaussian_figure_record(3, fs, 1 << 19, 0.0, 2000.0)
     res = peak_statistics(x, fs)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     peaks = res.peak_values
     exceedance = 1.0 - np.arange(1, peaks.size + 1) / peaks.size
     z = np.linspace(-2.5, 4.5, 400)
@@ -5174,7 +5178,7 @@ def generate_ship_source_level(output_dir: str) -> None:
     rnl = 175.0 - 12.0 * np.log10(freqs / 20.0)
     res = monopole_source_level(rnl, freqs, draught=6.0)
 
-    fig, ax = plt.subplots(figsize=(10, 6.0))
+    _fig, ax = plt.subplots(figsize=(10, 6.0))
     ax.semilogx(freqs, res.source_level, "o-", color=COLOR_PRIMARY, linewidth=2.0,
                 markersize=4, label="Source level Ls")
     ax.semilogx(freqs, res.radiated_noise_level, "s--", color=COLOR_SECONDARY,
@@ -5232,7 +5236,7 @@ def generate_pile_driving(output_dir: str) -> None:
     sel_cum = np.array([cumulative_sel_identical(res.single_strike_sel, int(n))
                         for n in strikes])
 
-    fig, (ax_w, ax_c) = plt.subplots(
+    _fig, (ax_w, ax_c) = plt.subplots(
         2, 1, figsize=(10, 7.2),
         gridspec_kw={"height_ratios": [1.4, 1.0]})
     ax_w.plot(t * 1e3, pressure, color=COLOR_PRIMARY, linewidth=0.8)
@@ -5278,7 +5282,7 @@ def generate_epnl(output_dir: str) -> None:
     res = effective_perceived_noise_level(spectra, dt)
     kf, kl = res.band_limits
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.axvspan(res.times[kf], res.times[kl], color=COLOR_TERTIARY, alpha=0.15,
                label="10 dB-down window")
     ax.plot(res.times, res.pnl, color="#8c8c8c", linestyle="--", linewidth=1.4,
@@ -5320,7 +5324,7 @@ def generate_wind_turbine_tonality(output_dir: str) -> None:
     levels[tone_bin] += 22.0
     res = wind_turbine_tonality(levels, freqs, tone_frequency=200.0)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     band_lo, band_hi = _critical_band_edges(res.tone_frequency)
     ax.axvspan(band_lo, band_hi, color=COLOR_TERTIARY, alpha=0.15,
                label="Critical band")
@@ -5357,7 +5361,7 @@ def generate_underwater_transmission_loss(output_dir: str) -> None:
         ranges, 10_000.0, law="practical", transition_range=1000.0,
         temperature=10.0, salinity=35.0, depth=100.0, model="francois-garrison",
     )
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(res.range_m, res.tl, color=COLOR_PRIMARY, linewidth=2.0,
             label="Total transmission loss")
     ax.plot(res.range_m, res.spreading, color="#8c8c8c", linestyle="--", linewidth=1.4,
@@ -5393,7 +5397,7 @@ def generate_underwater_sound_speed(output_dir: str) -> None:
     temps = 4.0 + 14.0 / (1.0 + (np.maximum(depths - 80.0, 0.0) / 250.0) ** 2)
     prof = sound_speed_profile(depths, temps, 35.0, model="unesco")
     axis_depth = depths[int(np.argmin(prof.sound_speed))]
-    fig, ax = plt.subplots(figsize=(7, 8))
+    _fig, ax = plt.subplots(figsize=(7, 8))
     ax.plot(prof.sound_speed, prof.depth, color=COLOR_PRIMARY, linewidth=2.0,
             label="UNESCO sound speed")
     ax.axhline(axis_depth, color=COLOR_SECONDARY, linestyle="--", linewidth=1.4,
@@ -5419,7 +5423,7 @@ def generate_sonar_equation(output_dir: str) -> None:
     tl = np.linspace(40.0, 120.0, 400)
     res = passive_sonar_equation(140.0, tl, 60.0, directivity_index=15.0,
                                  detection_threshold=8.0)
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(res.transmission_loss, res.signal_excess, color=COLOR_PRIMARY, linewidth=2.0,
             label="Signal excess")
     ax.axhline(0.0, color=COLOR_SECONDARY, linestyle="--", linewidth=1.4,
@@ -5449,7 +5453,7 @@ def generate_seabed_reflection(output_dir: str) -> None:
 
     phi = np.linspace(0.0, 90.0, 361)
     res = bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0, rho2=1900.0, c2=1650.0)
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(res.grazing_angle, res.reflection_loss, color=COLOR_PRIMARY, linewidth=2.0,
             label="Bottom loss (sand)")
     if res.critical_angle is not None:
@@ -5477,7 +5481,7 @@ def generate_seabed_reflection_coefficient(output_dir: str) -> None:
 
     phi = np.linspace(0.0, 90.0, 361)
     res = seabed_reflection(phi, rho1=1000.0, c1=1500.0, rho2=1900.0, c2=1650.0)
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(res.grazing_angle, res.magnitude, color=COLOR_PRIMARY, linewidth=2.0,
             label="Reflection coefficient magnitude |R| (sand)")
     if res.critical_angle is not None:
@@ -5505,7 +5509,7 @@ def generate_ocean_ambient_noise(output_dir: str) -> None:
     from phonometry.underwater import ocean_ambient_noise
 
     freqs = np.logspace(2, 5.5, 300)
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     # Label the wind/thermal components only once to avoid repeated legend rows.
     for i, (u, color) in enumerate(((5.0, COLOR_SECONDARY), (20.0, COLOR_PRIMARY))):
         res = ocean_ambient_noise(freqs, wind_speed_knots=u)
@@ -5539,7 +5543,7 @@ def generate_ship_traffic_noise(output_dir: str) -> None:
     print("Generating ship_traffic_noise...")
     from phonometry import ship_source_spectrum
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     cases = (
         ("containership", 18.0, 300.0, COLOR_PRIMARY),
         ("cruise", 17.1, 250.0, COLOR_SECONDARY),
@@ -5635,7 +5639,7 @@ def generate_aircraft_atmospheric_absorption(output_dir: str) -> None:
     from phonometry import sae_band_attenuation
 
     freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)  # 50 Hz - 10 kHz thirds
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     for s, color in ((1000.0, COLOR_SECONDARY), (7620.0, COLOR_PRIMARY)):
         res = sae_band_attenuation(freqs, s, temperature=25.0, relative_humidity=70.0)
         ax.plot(res.frequency, res.band_attenuation, color=color, linewidth=2.0,
@@ -5671,7 +5675,7 @@ def generate_airport_noise(output_dir: str) -> None:
         [98.5, 92.0, 88.2, 83.6, 76.8, 69.4, 63.9, 56.8],
         [107.2, 100.9, 97.2, 92.7, 86.0, 78.5, 72.9, 65.6],
     ]
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     for p, color in ((20000.0, COLOR_PRIMARY), (12000.0, COLOR_SECONDARY)):
         res = npd_curve(powers, distances, levels, p)
         ax.plot(res.distance, res.level, color=color, linewidth=2.0,
@@ -5742,7 +5746,7 @@ def generate_airport_sor(output_dir: str) -> None:
         t = np.radians(a_deg)                    # azimuth clockwise from nose (up)
         return rr * np.sin(t), rr * np.cos(t)
 
-    fig, ax = plt.subplots(figsize=(9.0, 5.0))
+    _fig, ax = plt.subplots(figsize=(9.0, 5.0))
     for a in (90.0, 120.0, 150.0, 180.0, 210.0, 240.0, 270.0):  # radial spokes
         sx, sy = _xy(a, np.array([2.0, 16.0]))
         ax.plot(sx, sy, color=COLOR_FG, linestyle="--", linewidth=0.9, alpha=0.28, zorder=0)
@@ -5790,7 +5794,7 @@ def generate_rotorcraft_ground_effect(output_dir: str) -> None:
     grass = ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity="D")
     asphalt = ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity="G")
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.axhline(0.0, color=COLOR_FG, lw=1.0, alpha=0.5)
     ax.plot(freqs, asphalt, color=COLOR_PRIMARY, lw=2.0, marker="o", ms=3,
             label="Hard (asphalt/concrete, class G)")
@@ -5838,7 +5842,7 @@ def generate_rotorcraft_flyover_event(output_dir: str) -> None:
         [hemisphere], [speed], [0.0], t, track, (120.0, 0.0),
         flow_resistivity="D")
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(event.times, event.a_levels, color=COLOR_PRIMARY, lw=2.0,
             label="Received level $L_A(t)$")
     k = int(np.argmax(event.a_levels))
@@ -5880,7 +5884,7 @@ def generate_rotorcraft_terrain_screening(output_dir: str) -> None:
     res = terrain_screening_adjustment(freqs, src, rcv, d, z, flow_resistivity="D")
     flat = ground_effect_adjustment(freqs, src[1], 1.2, rcv[0], flow_resistivity="D")
 
-    fig, (ax, ax2) = plt.subplots(2, 1, figsize=(10, 8),
+    _fig, (ax, ax2) = plt.subplots(2, 1, figsize=(10, 8),
                                   gridspec_kw={"height_ratios": [1.1, 1.0]})
     res.plot(ax=ax)   # the user-facing section geometry
     ax.set_title("Rotorcraft Terrain Screening (ECAC Doc 32 / NORAH2)",
@@ -5905,7 +5909,7 @@ def generate_rotorcraft_terrain_screening(output_dir: str) -> None:
     plt.close()
 
 
-@lru_cache(maxsize=None)
+@cache
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
     from phonometry.psychoacoustics import loudness_moore_glasberg_time
@@ -6002,7 +6006,7 @@ def generate_prediction_flanking_demo(output_dir: str) -> None:
     direct_share = next(c.fraction for c in result.paths if c.kind == "Dd") * 100.0
     flank_share = 100.0 - direct_share
 
-    fig, ax = plt.subplots(figsize=(11, 6.4))
+    _fig, ax = plt.subplots(figsize=(11, 6.4))
     bars = ax.bar(range(len(fracs)), fracs, color=colors, edgecolor=COLOR_FG,
                   linewidth=0.7, zorder=3)
     bars[0].set_linewidth(2.2)  # highlight the dominant path
@@ -6068,7 +6072,7 @@ def generate_facade_prediction(output_dir: str) -> None:
     )
 
     x = np.arange(len(bands))
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     # Per-element partial indices Rp: thin, faded; they set the transmission floor.
     el_colors = [COLOR_PRIMARY, COLOR_SECONDARY, "#9467bd", "#ff7f0e"]
     for (name, rp), colour in zip(result.element_r.items(), el_colors):
@@ -6127,7 +6131,7 @@ def generate_intensity_insulation(output_dir: str) -> None:
     assert result.rating is not None and result.rating_modified is not None
 
     x = np.arange(len(freqs))
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     # Shade the Kc adaptation lift between RI and RI,M (largest at low bands).
     ax.fill_between(x, result.r_i, result.r_i_modified, color=COLOR_TERTIARY,
                     alpha=0.18, zorder=0, label="Kc adaptation")
@@ -6179,7 +6183,7 @@ def generate_survey_insulation(output_dir: str) -> None:
     assert res.rating is not None
 
     x = np.arange(len(bands))
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     # Shade the reverberation-index correction k between D and DnT.
     ax.fill_between(x, res.d, res.d_nt, color=COLOR_TERTIARY, alpha=0.18,
                     zorder=0, label="k = 10 lg(T/T0)")
@@ -6227,7 +6231,7 @@ def generate_floor_covering_improvement(output_dir: str) -> None:
     assert res.delta_lw is not None
 
     x = np.arange(len(freqs))
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.fill_between(x, 0.0, res.improvement, color=COLOR_TERTIARY, alpha=0.18,
                     zorder=0)
     ax.plot(x, res.improvement, "-", color=COLOR_PRIMARY, linewidth=2.4,
@@ -6278,7 +6282,7 @@ def generate_flanking_transmission(output_dir: str) -> None:
     assert res.single_number is not None
 
     x = np.arange(len(freqs))
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.plot(x, res.k_ij, "-", color=COLOR_PRIMARY, linewidth=2.4, marker="o",
             markersize=6, zorder=5, label="Kij (ISO 10848)")
     ax.axhline(res.single_number, color=COLOR_SECONDARY, linestyle="--",
@@ -6331,7 +6335,7 @@ def generate_reverberation_models(output_dir: str) -> None:
     )
 
     x = np.arange(len(bands))
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     styles = [
         ("Sabine", res.sabine, COLOR_SECONDARY, "s", 1.8),
         ("Eyring", res.eyring, COLOR_TERTIARY, "^", 1.8),
@@ -6375,7 +6379,7 @@ def generate_dynamic_stiffness(output_dir: str) -> None:
     from phonometry import natural_frequency
 
     s_mn = np.logspace(np.log10(2.0), np.log10(100.0), 300)   # MN/m3
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     # Two typical floating-floor masses per unit area (light vs heavy screed).
     for m, color, label in ((40.0, COLOR_SECONDARY, "m' = 40 kg/m^2"),
                              (120.0, COLOR_PRIMARY, "m' = 120 kg/m^2")):
@@ -6426,7 +6430,7 @@ def generate_junction_transmission(output_dir: str) -> None:
     assert res.straight is not None and res.straight_average is not None
     angles = res.angles_deg
 
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.plot(angles, res.corner, color=COLOR_PRIMARY, linewidth=2.0,
             label=r"corner $\tau_{12}(\theta)$")
     ax.plot(angles, res.straight, color=COLOR_SECONDARY, linewidth=2.0,
@@ -6485,7 +6489,7 @@ def generate_mechanical_mobility(output_dir: str) -> None:
         (np.abs(y) * k / w0, COLOR_SECONDARY, r"Mobility $|Y|$ (× k/$\omega_0$)"),
         (np.abs(a) * k / w0**2, COLOR_TERTIARY, r"Accelerance $|A|$ (× k/$\omega_0^2$)"),
     ]
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     for mag, color, label in curves:
         ax.loglog(freq, mag, color=color, linewidth=2.0, label=label)
     ax.axvline(f0, color=COLOR_GRID, linestyle="--", linewidth=1.2,
@@ -6534,7 +6538,7 @@ def generate_transfer_stiffness(output_dir: str) -> None:
     t = base_transmissibility(freq, m2, k, c)              # mass-loaded transmissibility
     k_indirect = transfer_stiffness_indirect(freq, t, m2)  # ISO 10846-3 Eq. (1)
 
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.semilogx(freq, transfer_stiffness_level(k_true), color=COLOR_PRIMARY,
                 linewidth=2.2, label=r"true $L_k$ of $k_{2,1}=k+j\omega c$")
     ax.semilogx(freq, transfer_stiffness_level(k_indirect), color=COLOR_SECONDARY,
@@ -6587,7 +6591,7 @@ def generate_rigid_mass_calibration(output_dir: str) -> None:
     within = res.within_tolerance
     tol = res.tolerance
 
-    fig, (ax_top, ax_bot) = plt.subplots(
+    _fig, (ax_top, ax_bot) = plt.subplots(
         2, 1, sharex=True, figsize=(10, 7.0),
         gridspec_kw={"height_ratios": [1.5, 1.0]},
     )
@@ -6656,7 +6660,7 @@ def generate_vibration_sound_power(output_dir: str) -> None:
     lw_eng = radiated_sound_power_level(lv, area, radiation_factor=eps)  # Part 2
 
     x = np.arange(bands.size)
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.bar(x - 0.2, lw_max, width=0.4, color=COLOR_SECONDARY, edgecolor=COLOR_FG,
            linewidth=0.6, label="Part 1 upper limit ($\\varepsilon$ = 1)")
     ax.bar(x + 0.2, lw_eng, width=0.4, color=COLOR_PRIMARY, edgecolor=COLOR_FG,
@@ -6709,7 +6713,7 @@ def generate_structure_borne_power(output_dir: str) -> None:
                                      reverberation_time=0.5)
 
     x = np.arange(bands.size)
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.bar(x - 0.2, res_low.power_level, width=0.4, color=COLOR_PRIMARY,
            edgecolor=COLOR_FG, linewidth=0.6, label="low-mobility plate")
     ax.bar(x + 0.2, res_high.power_level, width=0.4, color=COLOR_SECONDARY,
@@ -6766,7 +6770,7 @@ def generate_installed_structure_borne(output_dir: str) -> None:
     res = installed_source_prediction(lws_c, dc, paths, frequencies=bands)
 
     x = np.arange(bands.size)
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.plot(x, lws_c, color=COLOR_SECONDARY, marker="o", lw=2.0,
             label=r"characteristic $L_{Ws,c}$ (EN 15657)")
     ax.plot(x, lws_inst, color=COLOR_TERTIARY, marker="s", lw=2.0,
@@ -6821,7 +6825,7 @@ def generate_tone_audibility(output_dir: str) -> None:
     colors = [COLOR_PRIMARY] * len(freqs)
     colors[decisive] = COLOR_SECONDARY
 
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.bar(x, res.audibilities, width=0.7, color=colors, edgecolor=COLOR_FG,
            linewidth=0.6)
     ax.axhline(0.0, color=COLOR_FG, ls="--", lw=1.0,
@@ -6873,7 +6877,7 @@ def generate_absorption_uncertainty(output_dir: str) -> None:
     u = res.expanded_uncertainty
 
     x = np.arange(len(freqs))
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.fill_between(x, alpha_s - u, alpha_s + u, color=COLOR_TERTIARY, alpha=0.22,
                     zorder=0, label="+/-U (k = 2), reproducibility")
     ax.plot(x, alpha_s, "-", color=COLOR_PRIMARY, linewidth=2.4, marker="o",
@@ -6938,7 +6942,7 @@ def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     u_single = single_number_uncertainty("r_w", "B")
     exp_single = insulation_expanded_uncertainty(u_single, 0.95)
 
-    fig, ax = plt.subplots(figsize=(10, 6.3))
+    _fig, ax = plt.subplots(figsize=(10, 6.3))
     ax.fill_between(freqs, measured - exp_band, measured + exp_band,
                     color=COLOR_PRIMARY, alpha=0.14, zorder=1,
                     label="Expanded uncertainty ±U (95 %)")
@@ -7001,7 +7005,7 @@ def generate_air_absorption_alpha(output_dir: str) -> None:
         (0.0, 70.0, COLOR_TERTIARY),
         (30.0, 80.0, "#ff7f0e"),
     ]
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     for temp, rh, color in conditions:
         alpha_km = air_attenuation(freqs, temp, rh) * 1000.0
         ax.loglog(freqs, alpha_km, color=color, linewidth=2.0,
@@ -7049,7 +7053,7 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
         ground_receiver=1.0, barrier=barrier, temperature=15.0, relative_humidity=70.0,
     )
     x = np.arange(len(bands))
-    fig, ax = plt.subplots(figsize=(11, 6.4))
+    _fig, ax = plt.subplots(figsize=(11, 6.4))
     # Separate positive and negative cumulative baselines so a negative term
     # (Agr is a net gain at 63 Hz here) stacks below zero instead of being
     # drawn on top of the previous bars; the signed heights sum to a_total.
@@ -7102,7 +7106,7 @@ def generate_ground_effect_spherical(output_dir: str) -> None:
         ("Grassland (200 kPa·s·m⁻²)", 200e3, COLOR_PRIMARY),
         ("Asphalt (20 000 kPa·s·m⁻²)", 20000e3, COLOR_SECONDARY),
     ]
-    fig, ax = plt.subplots(figsize=(11, 6.4))
+    _fig, ax = plt.subplots(figsize=(11, 6.4))
     with _warnings.catch_warnings():
         _warnings.simplefilter("ignore")
         for label, sigma, color in grounds:
@@ -7217,7 +7221,7 @@ def generate_exposure_uncertainty(output_dir: str) -> None:
     upper = result.upper_limit  # LEX,8h + U
 
     x = np.arange(len(labels))
-    fig, ax = plt.subplots(figsize=(10, 6.3))
+    _fig, ax = plt.subplots(figsize=(10, 6.3))
     ax.bar(x, contribs, color=COLOR_PRIMARY, edgecolor=COLOR_FG, linewidth=0.7,
            width=0.6, zorder=3, label="Measurement task")
     for xi, c in zip(x, contribs):
@@ -7291,10 +7295,10 @@ def generate_absorption_rating(output_dir: str) -> None:
     # Placed low-left, clear of the practical curve that peaks top-centre.
     for dy, text in (
         (0.30, f"Reference curve shifted by {result.shift:.2f}"),
-        (0.23, f"Sum of unfavourable deviations = {result.unfavourable_sum:.2f}"
-               f"  (limit 0.10)"),
-        (0.16, f"Absorption class {result.absorption_class}  "
-               f"(shape indicator: {result.shape_indicator or 'none'})"),
+        (0.23, (f"Sum of unfavourable deviations = {result.unfavourable_sum:.2f}"
+               f"  (limit 0.10)")),
+        (0.16, (f"Absorption class {result.absorption_class}  "
+               f"(shape indicator: {result.shape_indicator or 'none'})")),
     ):
         ax.text(0.03, dy, text, transform=ax.transAxes, va="top", ha="left",
                 fontsize=9.5, color=COLOR_FG)
@@ -7349,11 +7353,11 @@ def generate_airflow_resistance(output_dir: str) -> None:
                 arrowprops={"arrowstyle": "->", "lw": 1.0})
 
     for dy, text in (
-        (0.97, f"Specific airflow resistance R_s = {result.specific_resistance:.0f}"
-               f" Pa s/m"),
+        (0.97, (f"Specific airflow resistance R_s = {result.specific_resistance:.0f}"
+               f" Pa s/m")),
         (0.90, f"Airflow resistivity sigma = {result.resistivity:.0f} Pa s/m^2"),
-        (0.83, f"Linear term a = {result.linear_coefficient:.0f} Pa s/m"
-               f"  (= R_s at u -> 0)"),
+        (0.83, (f"Linear term a = {result.linear_coefficient:.0f} Pa s/m"
+               f"  (= R_s at u -> 0)")),
     ):
         ax.text(0.03, dy, text, transform=ax.transAxes, va="top", ha="left",
                 fontsize=9.5, color=COLOR_FG)
@@ -7375,8 +7379,8 @@ def generate_impedance_tube(output_dir: str) -> None:
     print("Generating impedance_tube.png...")
     from phonometry import (
         standing_wave_absorption,
-        standing_wave_reflection_magnitude,
         standing_wave_ratio_from_level,
+        standing_wave_reflection_magnitude,
     )
 
     # Level difference between pressure maximum and minimum (Eq. 15): a large dL
@@ -7442,7 +7446,6 @@ def generate_porous_absorber_designs(output_dir: str) -> None:
         membrane_resonance_frequency,
         miki,
     )
-
     from phonometry.materials.porous_absorber import Layer
 
     f = np.logspace(np.log10(50.0), np.log10(5000.0), 500)
@@ -7465,7 +7468,7 @@ def generate_porous_absorber_designs(output_dir: str) -> None:
              [MembraneLayer(2.0), AirLayer(0.01),
               PorousLayer(0.038, med_light)], "#9467bd", "-"),
         ]
-        fig, ax = plt.subplots(figsize=(10, 6.2))
+        _fig, ax = plt.subplots(figsize=(10, 6.2))
         for label, layers, color, ls in cases:
             res = layered_absorber(f, layers)
             ax.semilogx(f, res.absorption, ls, color=color, linewidth=2.2,
@@ -7522,7 +7525,7 @@ def generate_scattering_coefficient(output_dir: str) -> None:
     alpha_spec = 0.11 + 0.75 * (np.log10(freqs / 250.0) / np.log10(4000.0 / 250.0))
     result = scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
 
-    fig, ax = plt.subplots(figsize=(10, 6.3))
+    _fig, ax = plt.subplots(figsize=(10, 6.3))
     ax.semilogx(result.frequencies, result.scattering, color=COLOR_PRIMARY,
                 linewidth=1.9, marker="o", markersize=6, markerfacecolor="white",
                 markeredgewidth=1.4, zorder=3)
@@ -7559,7 +7562,7 @@ def generate_diffusion_polar(output_dir: str) -> None:
     )
     result = directional_diffusion(angles, levels)
 
-    fig, ax = plt.subplots(figsize=(8.0, 7.5),
+    _fig, ax = plt.subplots(figsize=(8.0, 7.5),
                            subplot_kw={"projection": "polar"})
     # The theta-* setters live on PolarAxes, not the base Axes type.
     polar: Any = ax
@@ -7599,13 +7602,13 @@ def generate_insitu_absorption(output_dir: str) -> None:
     r0 = 0.85
     taps = scipy_signal.firwin(41, 1200.0, fs=fs)
     taps = taps / taps.sum()
-    shift = int(round(2.0 * 0.25 / 340.0 * fs))  # reflected-path delay 2 dm / c
+    shift = round(2.0 * 0.25 / 340.0 * fs)  # reflected-path delay 2 dm / c
     hr = kr * r0 * np.roll(scipy_signal.lfilter(taps, 1.0, hi), shift)
     result = insitu_absorption_spectrum(hi, hr, fs)
 
     freqs = result.frequencies
     positions = np.arange(freqs.size, dtype=float)
-    fig, ax = plt.subplots(figsize=(10, 6.3))
+    _fig, ax = plt.subplots(figsize=(10, 6.3))
     ax.bar(positions, np.nan_to_num(result.absorption), width=0.7,
            color=COLOR_PRIMARY, edgecolor=COLOR_FG, linewidth=0.7, zorder=3)
     ax.set_xticks(positions)
@@ -7653,7 +7656,7 @@ def generate_sound_power_pressure_result(output_dir: str) -> None:
     lw = result.sound_power_level
     lwa = result.sound_power_level_a
     positions = np.arange(freqs.size, dtype=float)
-    fig, ax = plt.subplots(figsize=(10, 6.3))
+    _fig, ax = plt.subplots(figsize=(10, 6.3))
     ax.bar(positions, lw, width=0.7, color=COLOR_PRIMARY, edgecolor=COLOR_FG,
            linewidth=0.7, zorder=3)
     ax.set_xticks(positions)
@@ -7693,7 +7696,7 @@ def generate_sound_power_reverberation_result(output_dir: str) -> None:
     lw = result.sound_power_level
     lwa = result.sound_power_level_a
     positions = np.arange(freqs.size, dtype=float)
-    fig, ax = plt.subplots(figsize=(10, 6.3))
+    _fig, ax = plt.subplots(figsize=(10, 6.3))
     ax.bar(positions, lw, width=0.7, color=COLOR_PRIMARY, edgecolor=COLOR_FG,
            linewidth=0.7, zorder=3)
     ax.set_xticks(positions)
@@ -7736,7 +7739,7 @@ def generate_sound_power_intensity_result(output_dir: str) -> None:
     lw = result.sound_power_level
     lwa = result.sound_power_level_a
     positions = np.arange(freqs.size, dtype=float)
-    fig, ax = plt.subplots(figsize=(10, 6.3))
+    _fig, ax = plt.subplots(figsize=(10, 6.3))
     # Plot only the determinable (finite-LW) bands; an undeterminable band
     # (net inflow -> NaN) is left as a gap rather than faked to 0 dB. All six
     # bands are finite with this synthetic data, so this is future-proofing.
@@ -7779,7 +7782,7 @@ def generate_precision_anechoic_power(output_dir: str) -> None:
     lw = result.sound_power_level
     lwa = result.sound_power_level_a
     positions = np.arange(freqs.size, dtype=float)
-    fig, ax = plt.subplots(figsize=(10, 6.3))
+    _fig, ax = plt.subplots(figsize=(10, 6.3))
     ax.bar(positions, lw, width=0.7, color=COLOR_PRIMARY, edgecolor=COLOR_FG,
            linewidth=0.7, zorder=3)
     ax.set_xticks(positions)
@@ -7825,7 +7828,7 @@ def generate_intensity_scan_power(output_dir: str) -> None:
     neg = result.not_applicable_band
     lwa = result.sound_power_level_a
     positions = np.arange(freqs.size, dtype=float)
-    fig, ax = plt.subplots(figsize=(10, 6.3))
+    _fig, ax = plt.subplots(figsize=(10, 6.3))
     # Determinate bands: a solid LW bar. Non-applicable bands carry no LW (NaN),
     # so instead of a zero-height bar they are flagged by a full-height greyed,
     # hatched span - clearly a marker, not a plotted value (ISO 9614-3, 9.2).
@@ -7865,7 +7868,7 @@ def generate_vibration_weighting(output_dir: str) -> None:
     freqs = np.geomspace(0.4, 100.0, 240)
     result = frequency_weighting("Wk", freqs)
 
-    fig, ax = plt.subplots(figsize=(10, 6.3))
+    _fig, ax = plt.subplots(figsize=(10, 6.3))
     ax.semilogx(result.frequencies, result.magnitude_db, color=COLOR_PRIMARY,
                 linewidth=1.9, zorder=3)
     ax.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.4, zorder=1)
@@ -7905,7 +7908,7 @@ def generate_weighted_acceleration(output_dir: str) -> None:
 
     positions = np.arange(freqs.size, dtype=float)
     width = 0.4
-    fig, ax = plt.subplots(figsize=(10.5, 6.3))
+    _fig, ax = plt.subplots(figsize=(10.5, 6.3))
     ax.bar(positions - width / 2, result.band_accelerations, width,
            color="#9e9e9e", edgecolor=COLOR_FG, linewidth=0.5,
            label="Unweighted $a_i$", zorder=2)
@@ -7947,7 +7950,7 @@ def generate_daily_vibration_exposure(output_dir: str) -> None:
     values = [*result.partials.tolist(), result.a8]
     positions = np.arange(len(values), dtype=float)
     colors = ["#9e9e9e"] * result.partials.size + [COLOR_PRIMARY]
-    fig, ax = plt.subplots(figsize=(9.5, 6.3))
+    _fig, ax = plt.subplots(figsize=(9.5, 6.3))
     ax.bar(positions, values, width=0.62, color=colors, edgecolor=COLOR_FG,
            linewidth=0.6, zorder=3)
     eav = result.assessment.action_value
@@ -7989,7 +7992,7 @@ def generate_speech_intelligibility(output_dir: str) -> None:
     positions = np.arange(freqs.size)
     weighted = result.band_audibility * result.band_importance
 
-    fig, ax = plt.subplots(figsize=(10, 6.3))
+    _fig, ax = plt.subplots(figsize=(10, 6.3))
     ax.bar(positions, result.band_audibility, width=0.8, color=COLOR_PRIMARY,
            alpha=0.35, zorder=2, label=r"Band audibility $A_i$")
     ax.bar(positions, weighted / weighted.max(), width=0.45, color=COLOR_PRIMARY,
@@ -8021,7 +8024,7 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     # near-invisible on a light background) for the four ordered efforts.
     colours = {"normal": COLOR_TERTIARY, "raised": "#7f7f7f",
                "loud": COLOR_PRIMARY, "shout": COLOR_SECONDARY}
-    fig, (ax_s, ax_i) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+    _fig, (ax_s, ax_i) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 
     # --- Left: the four standard speech spectra. ---
     for effort in VOCAL_EFFORTS:
@@ -8088,7 +8091,7 @@ def generate_impulse_prominence(output_dir: str) -> None:
     )
     from phonometry.environmental.impulse_prominence import ADJUSTMENT_THRESHOLD
 
-    fig, (ax_p, ax_k) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+    _fig, (ax_p, ax_k) = plt.subplots(1, 2, figsize=(12.5, 5.4))
 
     # --- Left: P vs onset rate for three level differences (Formula 1). ---
     orate = np.logspace(1, 4, 200)  # 10 to 10000 dB/s
@@ -8146,7 +8149,7 @@ def generate_tonal_audibility(output_dir: str) -> None:
     grid = np.linspace(0.0, 15.0, 300)
     curve = np.array([tonal_adjustment(d) for d in grid])
 
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.plot(grid, curve, "-", color=COLOR_PRIMARY, linewidth=2.4, zorder=5,
             label=r"$K_t(\Delta L_{ta})$ (Formulae C.4-C.6)")
     for x in (4.0, 10.0):
@@ -8195,7 +8198,7 @@ def generate_multiple_shock(output_dir: str) -> None:
         RISK_THRESHOLDS_MALE,
     )
 
-    fig, (ax_h, ax_r) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+    _fig, (ax_h, ax_r) = plt.subplots(1, 2, figsize=(12.5, 5.4))
 
     # --- Left: seat-to-spine transmissibility |H(f)| (Formula 1). ---
     freq = np.logspace(np.log10(0.5), np.log10(80.0), 400)
@@ -8260,7 +8263,7 @@ def generate_enclosed_space_absorption(output_dir: str) -> None:
     treated = enclosed_space_reverberation(
         [*walls_floor, (20.0, tile)], volume, air_condition="20C_50-70")
 
-    fig, (ax_a, ax_t) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+    _fig, (ax_a, ax_t) = plt.subplots(1, 2, figsize=(12.5, 5.4))
     freq = OCTAVE_BANDS
     labels = [f"{f:g}" if f < 1000 else f"{f / 1000:g}k" for f in freq]
 
@@ -8301,7 +8304,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     nc = noise_criterion(spectrum)
     rc = room_criterion(spectrum)
 
-    fig, (ax_nc, ax_rc) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+    _fig, (ax_nc, ax_rc) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 
     # --- Left: NC curves + tangency rating. ---
     for row, idx in zip(NC_CURVES, NC_INDICES):
@@ -8359,7 +8362,7 @@ def generate_hearing_threshold(output_dir: str) -> None:
     from phonometry.hearing.threshold import AUDIOMETRIC_FREQUENCIES
 
     freqs = AUDIOMETRIC_FREQUENCIES
-    fig, (ax_age, ax_ref) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+    _fig, (ax_age, ax_ref) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 
     # --- Left: ISO 7029 median threshold by age (male) + 10-90 % band @70. ---
     ages = [(20, "#9e9e9e"), (40, "#7f7f7f"), (60, COLOR_PRIMARY),
@@ -8415,7 +8418,7 @@ def generate_noise_induced_hearing_loss(output_dir: str) -> None:
     from phonometry.hearing.noise_induced_hearing_loss import NIPTS_FREQUENCIES
 
     freqs = NIPTS_FREQUENCIES
-    fig, (ax_n, ax_h) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+    _fig, (ax_n, ax_h) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 
     # --- Left: median NIPTS growth with exposure duration at 95 dB. ---
     durations = [(10, "#9e9e9e"), (20, "#7f7f7f"), (30, COLOR_PRIMARY),
@@ -8480,13 +8483,13 @@ def generate_uncertainty(output_dir: str) -> None:
         ph.rectangular(0.0, 0.30, name="Instrument"),
         ph.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
     ]
-    model = lambda a, b, c, d: a + b + c + d  # noqa: E731
+    model = lambda a, b, c, d: a + b + c + d
 
     result = ph.combine_uncertainty(model, quantities)
     mc = ph.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1)
     k, big = result.expanded(0.95)
 
-    fig, (ax_b, ax_m) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+    _fig, (ax_b, ax_m) = plt.subplots(1, 2, figsize=(12.5, 5.4))
 
     # --- Left: uncertainty budget (contributions). ---
     contrib = result.contributions
@@ -8550,7 +8553,7 @@ def generate_fdtd_simulation(output_dir: str) -> None:
         snapshot_every=75,
     )
 
-    fig, (ax_f, ax_p) = plt.subplots(
+    _fig, (ax_f, ax_p) = plt.subplots(
         1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
     res.plot(kind="snapshot", frame=7, ax=ax_f)
     res.plot(ax=ax_p)
@@ -8679,7 +8682,7 @@ def generate_silencer_expansion_chamber(output_dir: str) -> None:
     ratios = (2.0, 4.0, 8.0, 16.0)
     colors = (COLOR_PRIMARY, COLOR_SECONDARY, COLOR_TERTIARY, "#9467bd")
 
-    fig, ax = plt.subplots(figsize=(9.0, 5.2))
+    _fig, ax = plt.subplots(figsize=(9.0, 5.2))
     for m, color in zip(ratios, colors):
         res = expansion_chamber(freqs, length, m * pipe_area, pipe_area)
         peak = 10.0 * np.log10(1.0 + 0.25 * (m - 1.0 / m) ** 2)
@@ -8728,7 +8731,7 @@ def generate_regularized_inversion(output_dir: str) -> None:
     inv_mag = np.abs(res.spectrum)
     eq_mag = h_mag * inv_mag
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.semilogx(freqs[pos],
                 20.0 * np.log10(np.maximum(h_mag[pos], tiny) / peak),
                 color=COLOR_PRIMARY, linewidth=1.4,
@@ -8787,7 +8790,7 @@ def generate_shaped_sweep(output_dir: str) -> None:
     target_db = 20.0 * np.log10(np.maximum(res.magnitude, tiny))
     target_db -= float(np.max(target_db[band_g]))
 
-    fig, axes = plt.subplots(2, 1, figsize=(10, 7))
+    _fig, axes = plt.subplots(2, 1, figsize=(10, 7))
     axes[0].plot(t, x, color=COLOR_PRIMARY, linewidth=0.5)
     axes[0].set_xlabel("Time [s]")
     axes[0].set_ylabel("Amplitude")
@@ -9356,9 +9359,8 @@ def _set_gauge(gauge: dict[str, Any], frac: float, text: str) -> tuple[Any, Any]
 def _flow_box(ax: Any, cx: float, cy: float, w: float, h: float,
               title: str) -> dict[str, Any]:
     """A processing-pipeline box, dimmed until :func:`_light_box` lights it."""
-    from matplotlib.patches import FancyBboxPatch
-
     from matplotlib.colors import to_rgba
+    from matplotlib.patches import FancyBboxPatch
 
     box = FancyBboxPatch((cx - w / 2, cy - h / 2), w, h,
                          boxstyle="round,pad=0.05,rounding_size=0.12",
@@ -9644,7 +9646,7 @@ def animate_time_weighting_ballistics(output_dir: str) -> None:
 
     def update(k: int) -> tuple[Any, ...]:
         tc = tmin + (tmax - tmin) * min(k, sweep - 1) / (sweep - 1)
-        i = max(0, min(t.size - 1, int(round(tc * fs))))
+        i = max(0, min(t.size - 1, round(tc * fs)))
         xc = 0.6 + 8.8 * tc / 4.0
         strip_cur.set_data([xc, xc], [7.4, 9.0])
         level = 3.24 + 1.42 * min(float(fast[i]), 1.02)
@@ -9759,7 +9761,7 @@ def animate_onset_detection(output_dir: str) -> None:
         # reaches 3.0 s, the xlim). The decision chain below still keys off
         # the true tc, so only the glyph position is clamped.
         tc_view = min(max(tc, 0.55 + rx), 3.0 - rx * 1.9)
-        i = max(0, min(t.size - 1, int(round(tc_view * fs))))
+        i = max(0, min(t.size - 1, round(tc_view * fs)))
         y0, g = float(laf[i]), float(grad[i])
         detecting = g > 10.0
         color = COLOR_SECONDARY if detecting else COLOR_FG
@@ -10093,7 +10095,7 @@ def _room_mode_fields(
 
     lx, ly, c0 = 5.0, 3.5, 343.0
     dx = 0.01                                    # 500 x 350 cells
-    ny, nx = int(round(ly / dx)), int(round(lx / dx))
+    ny, nx = round(ly / dx), round(lx / dx)
     f_mode = 0.5 * c0 * float(np.hypot(2 / lx, 1 / ly))   # (2,1) ~ 84.3 Hz
     f_next = 0.5 * c0 * (2 / ly)                          # (0,2) = 98 Hz
     f_off = 0.5 * (f_mode + f_next)              # between resonances
@@ -10104,7 +10106,7 @@ def _room_mode_fields(
         sim = fdtd2d.FDTD2D(c0, dx, shape=(ny, nx), damping=6.9077 / t60)
         sim.add_source(fdtd2d.CWSource(ix=25, iy=25, frequency=f,
                                        ramp_cycles=2.0))
-        steps = int(round(duration / sim.dt))
+        steps = round(duration / sim.dt)
         every = max(1, steps // n_frames)
         # Running mean square with a two-period time constant: the pattern
         # (the mode map) builds up as the resonance settles.
@@ -10268,8 +10270,8 @@ def _barrier_fields(
     c0, dx = 343.0, 0.02
     ny, nx = 350, 600                      # 7 m x 12 m
     rho = np.full((ny, nx), 1.2)
-    bx = int(round(5.5 / dx))              # thin barrier: 3 cells = 6 cm
-    rho[:int(round(2.5 / dx)), bx:bx + 3] = 1.2e6
+    bx = round(5.5 / dx)              # thin barrier: 3 cells = 6 cm
+    rho[:round(2.5 / dx), bx:bx + 3] = 1.2e6
     # 6 captured steps per frame: 13.5 frames per 500 Hz period, 53.4 ms.
     every = 6
     # Receiver patch: 0.6 m x 0.6 m around the shadow-zone receiver,
@@ -10307,8 +10309,8 @@ def _barrier_fields(
             # insertion loss sits within 0.05 dB of its value 30 ms later
             # -- and measure an exact RMS over the last two full periods,
             # so neither run's transient biases the published number.
-            period = int(round(1.0 / (f * sim.dt)))
-            settle = int(round(0.113 / sim.dt)) - sim.n
+            period = round(1.0 / (f * sim.dt))
+            settle = round(0.113 / sim.dt) - sim.n
             acc = np.zeros_like(sim.p)
             for i in range(settle):
                 sim.step()
@@ -10669,7 +10671,7 @@ def _ducting_fields(
     times = np.zeros(0)
     for depth in _DUCT_SRC_DEPTHS:
         sim = fdtd2d.FDTD2D(c_map, dx, rho=1025.0, sponge_width=30)
-        iy = int(round(depth / dx))
+        iy = round(depth / dx)
         sim.add_source(fdtd2d.GaussianPulse(ix=100, iy=iy, width=width))
         sim.add_source(fdtd2d.GaussianPulse(ix=100, iy=iy, width=width,
                                             t0=4.0 * width + offset,
@@ -10850,13 +10852,13 @@ def _diffusion_fields(
     ny, nx = 440, 600                      # 4.4 m x 6.0 m
     x0, x1, y0, y1 = _QRD_SLAB
     rho_flat = np.full((ny, nx), 1.2)
-    rho_flat[int(round(y0 / dx)):int(round(y1 / dx)),
-             int(round(x0 / dx)):int(round(x1 / dx))] = 1.2e6
+    rho_flat[round(y0 / dx):round(y1 / dx),
+             round(x0 / dx):round(x1 / dx)] = 1.2e6
     rho_qrd = rho_flat.copy()
     for wx0, wx1, d in _qrd_wells():
         if d > 0.0:
-            rho_qrd[int(round((y1 - d) / dx)):int(round(y1 / dx)),
-                    int(round(wx0 / dx)):int(round(wx1 / dx))] = 1.2
+            rho_qrd[round((y1 - d) / dx):round(y1 / dx),
+                    round(wx0 / dx):round(wx1 / dx)] = 1.2
     rho_ref = np.full((ny, nx), 1.2)
 
     # Downgoing packet: carrier at the design wavelength under a Gaussian
@@ -10893,7 +10895,7 @@ def _diffusion_fields(
     # half-life). Below the panel face the difference is just the ghost
     # of the unblocked incident wave, so the trail is masked there.
     decay = float(2.0 ** (-sims[0].dt / 0.006))
-    face_row = int(round(y1 / dx))
+    face_row = round(y1 / dx)
     trails = [np.zeros_like(sims[0].p) for _ in range(2)]
     arc_e = np.zeros((2, theta.size))
     tot_frames: list[list[Any]] = [[], []]
@@ -11532,7 +11534,7 @@ def animate_sweep_deconvolution(output_dir: str) -> None:
                * np.exp(-6.9077 * tail_t / 0.5) * (tail_t > 0.012))
     recorded = fftconvolve(sweep, system)
     rec_dur = recorded.size / fs
-    freqs, times, sxx = spectrogram(recorded, fs, nperseg=512,
+    _freqs, times, sxx = spectrogram(recorded, fs, nperseg=512,
                                     noverlap=384)
     sxx_db = 10.0 * np.log10(np.maximum(sxx, sxx.max() * 1e-8) / sxx.max())
     ir = impulse_response(recorded, sweep, fs, method="spectral",
@@ -11727,7 +11729,7 @@ def animate_specific_loudness(output_dir: str) -> None:
 
     def update(kf: int) -> tuple[Any, ...]:
         tc = min(kf / _ANIM_FPS, sweep_s)
-        lv = int(round(float(np.interp(tc, knots_t, knots_l))))
+        lv = round(float(np.interp(tc, knots_t, knots_l)))
         spec = patterns[lv]
         line.set_data(z, spec)
         if tc <= int_t1:

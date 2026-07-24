@@ -97,7 +97,7 @@ def _sweep_rate(f1: float, f2: float, seconds: float) -> float:
     integer, ends) with exactly zero phase, which is the synchronization
     condition for meaningful harmonic phases (their Eqs. 30-32).
     """
-    k = int(round(f1 * seconds / float(np.log(f2 / f1))))
+    k = round(f1 * seconds / float(np.log(f2 / f1)))
     if k < 1:
         raise ValueError(
             "'seconds' is too short to synchronize the sweep: "
@@ -115,7 +115,7 @@ def synchronized_sweep_signal(
     *,
     amplitude: float = 1.0,
     fade: float = 0.0,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """
     Generate a synchronized exponential sweep (Novak et al. 2015, Eq. 47).
 
@@ -201,13 +201,13 @@ class SweptSineDistortionResult:
     :ivar method: ``"synchronized"`` or ``"farina"``.
     """
 
-    frequencies: "NDArray[np.float64]"
-    harmonic_responses: "NDArray[np.complex128]"
-    harmonic_irs: "NDArray[np.float64]"
-    delays: "NDArray[np.float64]"
-    thd_frequencies: "NDArray[np.float64]"
-    thd: "NDArray[np.float64]"
-    distortion_ratios: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    harmonic_responses: NDArray[np.complex128]
+    harmonic_irs: NDArray[np.float64]
+    delays: NDArray[np.float64]
+    thd_frequencies: NDArray[np.float64]
+    thd: NDArray[np.float64]
+    distortion_ratios: NDArray[np.float64]
     fs: float
     f1: float
     f2: float
@@ -221,8 +221,8 @@ class SweptSineDistortionResult:
         return int(self.harmonic_responses.shape[0])
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | NDArray[Any]:
         """Plot the harmonic responses and the THD(f).
 
         Two stacked panels: the magnitudes of ``H1..HN`` in dB against
@@ -241,8 +241,8 @@ class SweptSineDistortionResult:
 
 
 def _analytic_inverse_spectrum(
-    freqs: "NDArray[np.float64]", rate: float, f1: float
-) -> "NDArray[np.complex128]":
+    freqs: NDArray[np.float64], rate: float, f1: float
+) -> NDArray[np.complex128]:
     """Closed-form inverse-filter spectrum (Novak et al. 2015, Eq. 51).
 
     ``X~(f) = 2*sqrt(f/L) * exp(-j*2*pi*f*L*(1 - ln(f/f1)) + j*pi/4)``,
@@ -260,12 +260,12 @@ def _analytic_inverse_spectrum(
 
 
 def _deconvolve_synchronized(
-    rec: "NDArray[np.float64]",
+    rec: NDArray[np.float64],
     fs: float,
     f1: float,
     rate: float,
     pad: int,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Deconvolve with the analytic inverse spectrum (Novak Eqs. 50-51).
 
     Returns the circular deconvolution buffer: the linear response starts
@@ -283,13 +283,13 @@ def _deconvolve_synchronized(
 
 
 def _deconvolve_farina(
-    rec: "NDArray[np.float64]",
+    rec: NDArray[np.float64],
     fs: float,
     f1: float,
     f2: float,
     seconds: float,
     fade: float,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """Deconvolve with the Farina inverse filter (ISO 18233 Figure B.2).
 
     Linear (non-circular) convolution with the time-reversed,
@@ -307,10 +307,10 @@ def _deconvolve_farina(
 
 
 def _window_harmonics(
-    buffer: "NDArray[np.float64]",
-    delays_samples: "NDArray[np.float64]",
+    buffer: NDArray[np.float64],
+    delays_samples: NDArray[np.float64],
     ir_length: int,
-) -> tuple["NDArray[np.float64]", "NDArray[np.complex128]"]:
+) -> tuple[NDArray[np.float64], NDArray[np.complex128]]:
     """Extract each harmonic IR and its response (Novak Sec. A.2.5).
 
     Each order is cut in a window of ``ir_length`` samples centred on its
@@ -340,14 +340,14 @@ def _window_harmonics(
 
 
 def _thd_curves(
-    frequencies: "NDArray[np.float64]",
-    responses: "NDArray[np.complex128]",
+    frequencies: NDArray[np.float64],
+    responses: NDArray[np.complex128],
     fs: float,
     f1: float,
     f2: float,
     method: str,
 ) -> tuple[
-    "NDArray[np.float64]", "NDArray[np.float64]", "NDArray[np.float64]"
+    NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]
 ]:
     """THD(f) and per-order ratios referenced to the fundamental.
 
@@ -399,8 +399,8 @@ def _default_ir_length(min_spacing: int) -> int:
 
 
 def _validated_recording(
-    recorded: "NDArray[np.float64] | list[float]",
-) -> "NDArray[np.float64]":
+    recorded: NDArray[np.float64] | list[float],
+) -> NDArray[np.float64]:
     rec = np.asarray(recorded, dtype=np.float64)
     if rec.ndim != 1:
         raise ValueError("'recorded' must be one-dimensional.")
@@ -423,14 +423,14 @@ def _sweep_timing(
         rate = _sweep_rate(f1, f2, seconds)
         duration = float(rate * np.log(f2 / f1))
         return rate, duration, int(np.ceil(duration * fs))
-    sweep_samples = int(round(seconds * fs))
+    sweep_samples = round(seconds * fs)
     duration = sweep_samples / fs
     return duration / float(np.log(f2 / f1)), duration, sweep_samples
 
 
 def _harmonic_window(
     ir_length: int | None,
-    delays_samples: "NDArray[np.float64]",
+    delays_samples: NDArray[np.float64],
     n_orders: int,
 ) -> int:
     """Resolve and validate the per-order window length, in samples.
@@ -466,7 +466,7 @@ def _harmonic_window(
 
 
 def _check_farina_span(
-    delays_samples: "NDArray[np.float64]",
+    delays_samples: NDArray[np.float64],
     window: int,
     sweep_samples: int,
     f1: float,
@@ -506,7 +506,7 @@ def _check_farina_span(
 
 
 def swept_sine_distortion(
-    recorded: "NDArray[np.float64] | list[float]",
+    recorded: NDArray[np.float64] | list[float],
     fs: float,
     f1: float,
     f2: float,

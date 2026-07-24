@@ -44,8 +44,8 @@ from phonometry.materials.scattering_diffusion import (
     area_factors,
     base_plate_scattering,
     check_base_plate_scattering,
-    directional_diffusion,
     diffusion_spectrum,
+    directional_diffusion,
     directional_diffusion_coefficient,
     normalized_diffusion_coefficient,
     random_incidence_absorption,
@@ -605,7 +605,6 @@ def test_public_names_in_module_all() -> None:
 
 def test_public_exports() -> None:
     import phonometry
-
     import phonometry.materials.scattering_diffusion as m
 
     for name in m.__all__:

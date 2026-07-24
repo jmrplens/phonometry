@@ -217,7 +217,7 @@ class ReverberationResult:
     volume: float
     object_fraction: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the reverberation time over the octave bands.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -233,7 +233,7 @@ class ReverberationResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

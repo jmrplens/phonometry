@@ -38,7 +38,7 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import format_number, t
 from ._layout import (
@@ -80,7 +80,7 @@ def _prediction_verdict(
     *,
     is_impact: bool,
     language: str,
-) -> Tuple[str, bool]:
+) -> tuple[str, bool]:
     """Verdict text and PASS flag for a predicted rating against a requirement.
 
     Airborne insulation passes at or above the requirement; impact level passes
@@ -113,7 +113,7 @@ def _render_prediction_fiche(
     rating_value: float,
     rating_symbol: str,
     left_caption_key: str,
-    metric_rows: List[Tuple[str, str]],
+    metric_rows: list[tuple[str, str]],
     is_impact: bool,
     metadata: ReportMetadata | None,
     language: str,
@@ -144,7 +144,7 @@ def _render_prediction_fiche(
     basis_text = t(basis_key, language)
     if basis_values is not None:
         basis_text = basis_text.format(**basis_values)
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title_text, title_style),
         Paragraph(basis_text, basis_style),
     ]
@@ -206,7 +206,7 @@ def _render_prediction_fiche(
 
 
 def render_iso12354_airborne_report(
-    result: "AirbornePredictionResult",
+    result: AirbornePredictionResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -231,7 +231,7 @@ def render_iso12354_airborne_report(
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
     """
-    metric_rows: List[Tuple[str, str]] = []
+    metric_rows: list[tuple[str, str]] = []
     for contribution in result.paths:
         value = fmt_num(contribution.r_w, language)
         if verbose:
@@ -268,7 +268,7 @@ def render_iso12354_airborne_report(
 
 
 def render_iso12354_impact_report(
-    result: "ImpactPredictionResult",
+    result: ImpactPredictionResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -293,7 +293,7 @@ def render_iso12354_impact_report(
         installed.
     """
     del verbose  # uniform signature; the impact fiche has one body layout
-    metric_rows: List[Tuple[str, str]] = [
+    metric_rows: list[tuple[str, str]] = [
         (
             t("Bare-floor level L<sub>n,w,eq</sub>", language),
             fmt_num(result.ln_w_eq, language),
@@ -328,7 +328,7 @@ def render_iso12354_impact_report(
     )
 
 
-def _facade_energy_shares(result: "FacadePredictionResult") -> dict[str, float]:
+def _facade_energy_shares(result: FacadePredictionResult) -> dict[str, float]:
     """Each element's share (%) of the facade's transmitted acoustic energy.
 
     The transmission factor of an element is ``&#964; = 10^(-Rp/10)`` from its
@@ -347,7 +347,7 @@ def _facade_energy_shares(result: "FacadePredictionResult") -> dict[str, float]:
 
 
 def render_iso12354_facade_report(
-    result: "FacadePredictionResult",
+    result: FacadePredictionResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -384,7 +384,7 @@ def render_iso12354_facade_report(
     from ..building.insulation import weighted_rating
 
     shares = _facade_energy_shares(result) if verbose else {}
-    metric_rows: List[Tuple[str, str]] = []
+    metric_rows: list[tuple[str, str]] = []
     for name, partial in result.element_r.items():
         value = fmt_num(weighted_rating(partial).rating, language)
         if verbose:

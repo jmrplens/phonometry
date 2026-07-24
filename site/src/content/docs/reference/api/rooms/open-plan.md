@@ -39,9 +39,9 @@ STI > 0,20 in all positions" (Clause 6.3).
 
 ```python
 open_plan_metrics(
-    positions_m: List[float] | np.ndarray,
-    spl_a_speech: List[float] | np.ndarray,
-    sti_values: List[float] | np.ndarray,
+    positions_m: list[float] | np.ndarray,
+    spl_a_speech: list[float] | np.ndarray,
+    sti_values: list[float] | np.ndarray,
 ) -> OpenPlanResult
 ```
 

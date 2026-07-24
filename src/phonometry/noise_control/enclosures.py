@@ -73,7 +73,7 @@ class EnclosureResult:
     internal_area: float
     room_constant: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the panel ``R``, correction ``C`` and net insertion loss.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -89,7 +89,7 @@ class EnclosureResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

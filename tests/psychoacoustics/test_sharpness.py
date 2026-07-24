@@ -13,7 +13,11 @@ import numpy as np
 import pytest
 from scipy import signal as sp_signal
 
-from phonometry.psychoacoustics import loudness_zwicker, sharpness_din, sharpness_din_from_specific
+from phonometry.psychoacoustics import (
+    loudness_zwicker,
+    sharpness_din,
+    sharpness_din_from_specific,
+)
 from phonometry.psychoacoustics.sharpness import reference_sound
 
 FS = 48000

@@ -16,19 +16,23 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import (  # noqa: E402  (import after importorskip)
+import numpy as np
+from reference_data import (
+    ISO717_1_ANNEX_C_R as _AIRBORNE_R,
+)
+from reference_data import (
+    ISO717_2_ANNEX_C1_EXPECTED as _IMPACT_EXPECTED,
+)
+from reference_data import (
+    ISO717_2_ANNEX_C1_LN as _IMPACT_LN,
+)
+
+from phonometry import (
     ReportMetadata,
     WeightedRatingResult,
     single_panel_transmission_loss,
     weighted_impact_rating,
     weighted_rating,
-)
-import numpy as np  # noqa: E402
-
-from reference_data import (  # noqa: E402
-    ISO717_1_ANNEX_C_R as _AIRBORNE_R,
-    ISO717_2_ANNEX_C1_EXPECTED as _IMPACT_EXPECTED,
-    ISO717_2_ANNEX_C1_LN as _IMPACT_LN,
 )
 
 _PDF_MAGIC = b"%PDF"
@@ -141,27 +145,27 @@ def test_impact_fiche_reproduces_iso717_2_annex_c1(tmp_path) -> None:
 
 def _full_metadata(**overrides) -> ReportMetadata:
     """A fully populated :class:`ReportMetadata` for the accredited fiche."""
-    base = dict(
-        specimen="200 mm reinforced-concrete wall",
-        client="Acoustic Test Client Ltd.",
-        mounted_by="Test laboratory staff",
-        manufacturer="Concrete Works Inc.",
-        area=10.0,
-        mass_per_area=460.0,
-        source_volume=53.0,
-        receiving_volume=51.0,
-        temperature=21.5,
-        relative_humidity=45.0,
-        pressure=101.3,
-        test_room="Transmission suite T1",
-        mounting="Rigid, mortar-sealed perimeter",
-        measurement_standard="ISO 10140-2",
-        test_date="2026-07-18",
-        laboratory="Phonometry Reference Laboratory",
-        operator="J. M. Requena-Plens",
-        report_id="PHN-2026-0042",
-        notes="Engineering method, one-third-octave bands.",
-    )
+    base = {
+        "specimen": "200 mm reinforced-concrete wall",
+        "client": "Acoustic Test Client Ltd.",
+        "mounted_by": "Test laboratory staff",
+        "manufacturer": "Concrete Works Inc.",
+        "area": 10.0,
+        "mass_per_area": 460.0,
+        "source_volume": 53.0,
+        "receiving_volume": 51.0,
+        "temperature": 21.5,
+        "relative_humidity": 45.0,
+        "pressure": 101.3,
+        "test_room": "Transmission suite T1",
+        "mounting": "Rigid, mortar-sealed perimeter",
+        "measurement_standard": "ISO 10140-2",
+        "test_date": "2026-07-18",
+        "laboratory": "Phonometry Reference Laboratory",
+        "operator": "J. M. Requena-Plens",
+        "report_id": "PHN-2026-0042",
+        "notes": "Engineering method, one-third-octave bands.",
+    }
     base.update(overrides)
     return ReportMetadata(**base)
 

@@ -32,7 +32,7 @@ STI > 0,20 in all positions" (Clause 6.3).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -86,7 +86,7 @@ class OpenPlanResult:
     rd: float
     rp: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the spatial decay of speech with ``rD``/``rP`` marked.
 
         Redraws the Clause 6.2 regression line from ``d2s`` and
@@ -104,7 +104,7 @@ class OpenPlanResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -168,7 +168,7 @@ class OpenPlanResult:
         )
 
 
-def _linear_fit(x: np.ndarray, y: np.ndarray) -> Tuple[float, float]:
+def _linear_fit(x: np.ndarray, y: np.ndarray) -> tuple[float, float]:
     """Ordinary least-squares fit ``y = slope*x + intercept``.
 
     :param x: Independent variable samples.
@@ -198,9 +198,9 @@ def _sti_crossing(
 
 
 def open_plan_metrics(
-    positions_m: List[float] | np.ndarray,
-    spl_a_speech: List[float] | np.ndarray,
-    sti_values: List[float] | np.ndarray,
+    positions_m: list[float] | np.ndarray,
+    spl_a_speech: list[float] | np.ndarray,
+    sti_values: list[float] | np.ndarray,
 ) -> OpenPlanResult:
     """
     Open-plan-office single-number quantities per ISO 3382-3:2012.

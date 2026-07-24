@@ -189,7 +189,7 @@ class ReportMetadata:
     )
 
     def _require(
-        self, name: str, ok: "Callable[[float], bool]", description: str
+        self, name: str, ok: Callable[[float], bool], description: str
     ) -> None:
         """Raise ``ValueError`` unless a supplied numeric field satisfies ``ok``."""
         value = getattr(self, name)

@@ -33,7 +33,7 @@ guarded with an actionable :class:`ImportError`.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -48,13 +48,13 @@ if TYPE_CHECKING:
 _MOBILITY_UNIT = "m/(N&#183;s)"
 
 
-def _kind(result: "MobilityResult", language: str = "en") -> str:
+def _kind(result: MobilityResult, language: str = "en") -> str:
     """The FRF-type phrase: driving-point (i = j) or transfer."""
     key = "driving-point" if result.driving_point else "transfer"
     return t(key, language)
 
 
-def _basis(result: "MobilityResult", language: str = "en") -> str:
+def _basis(result: MobilityResult, language: str = "en") -> str:
     """The standard-basis line naming the FRF type and the ISO 7626 parts."""
     return t(
         "Measurement of the {kind} mechanical mobility Y = v/F over frequency "
@@ -64,7 +64,7 @@ def _basis(result: "MobilityResult", language: str = "en") -> str:
     ).format(kind=_kind(result, language))
 
 
-def _peak(result: "MobilityResult") -> Tuple[int, float, float]:
+def _peak(result: MobilityResult) -> tuple[int, float, float]:
     """Return the peak index, peak magnitude and peak frequency of ``|Y|``."""
     magnitude = np.asarray(result.magnitude, dtype=np.float64)
     index = int(np.argmax(magnitude))
@@ -84,8 +84,8 @@ def _deg(value_rad: float, language: str = "en") -> str:
 
 
 def _metric_rows(
-    result: "MobilityResult", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: MobilityResult, language: str = "en"
+) -> list[tuple[str, str]]:
     """The characteristic points shown in the left-hand table.
 
     The FRF type, the measured frequency range, the peak (resonance for a
@@ -107,7 +107,7 @@ def _metric_rows(
     ]
 
 
-def _statement(result: "MobilityResult", language: str = "en") -> str:
+def _statement(result: MobilityResult, language: str = "en") -> str:
     """The boxed representative value: the peak mobility and its frequency."""
     _, peak_mag, peak_freq = _peak(result)
     return t(
@@ -120,8 +120,8 @@ def _statement(result: "MobilityResult", language: str = "en") -> str:
 
 
 def _extended_terms(
-    result: "MobilityResult", language: str = "en"
-) -> List[str]:
+    result: MobilityResult, language: str = "en"
+) -> list[str]:
     """The FRF type, the frequency range and the peak phase shown beside the box."""
     index, _, _ = _peak(result)
     phase = float(np.asarray(result.phase, dtype=np.float64)[index])
@@ -139,7 +139,7 @@ def _extended_terms(
 
 
 def render_mobility_report(
-    result: "MobilityResult",
+    result: MobilityResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

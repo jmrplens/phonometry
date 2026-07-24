@@ -13,9 +13,9 @@ real filter path (default ``high_accuracy``), at 48 kHz and 96 kHz.
 
 import numpy as np
 import pytest
+from reference_data import IEC61672_TABLE3 as TABLE3
 
 from phonometry import WeightingFilter
-from reference_data import IEC61672_TABLE3 as TABLE3
 
 # (nominal_freq_Hz, A_dB, C_dB, class1_upper_dB, class1_lower_dB)
 # BS EN 61672-1:2013 Table 3 is imported from reference_data (shared with the

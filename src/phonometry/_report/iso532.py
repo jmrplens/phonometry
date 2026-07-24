@@ -34,7 +34,7 @@ matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import format_number, t
 from ._layout import (
@@ -60,14 +60,14 @@ if TYPE_CHECKING:
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the loudness header grid.
 
     Only fields that are set are returned. Loudness is a signal metric, so the
     room/climate fields of the insulation fiche do not apply; only the generic
     identity fields are used.
     """
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Signal", language), metadata.specimen),
         (t("Manufacturer", language), metadata.manufacturer),
@@ -81,12 +81,12 @@ def _metadata_pairs(
     ]
 
 
-def _is_time_varying(result: "ZwickerLoudness") -> bool:
+def _is_time_varying(result: ZwickerLoudness) -> bool:
     """Whether the result came from the time-varying method (clause 6)."""
     return result.time is not None and result.loudness_vs_time is not None
 
 
-def _loudness_symbol(result: "ZwickerLoudness") -> str:
+def _loudness_symbol(result: ZwickerLoudness) -> str:
     """The reported loudness symbol: ``Nmax`` for time-varying, else ``N``.
 
     Clause 7 f) calls the reported maximum of a time-varying sound the
@@ -96,8 +96,8 @@ def _loudness_symbol(result: "ZwickerLoudness") -> str:
 
 
 def _metric_rows(
-    result: "ZwickerLoudness", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: ZwickerLoudness, language: str = "en"
+) -> list[tuple[str, str]]:
     """The scalar loudness results shown in the left-hand metrics table.
 
     Every value is printed to one decimal (the precision of the standard's
@@ -126,7 +126,7 @@ def _metric_rows(
     return rows
 
 
-def _statement(result: "ZwickerLoudness", language: str = "en") -> str:
+def _statement(result: ZwickerLoudness, language: str = "en") -> str:
     """The boxed single-number statement ``N = X sone (LN = Y phon)``."""
     loudness = format_number(
         display_round(float(result.loudness)), language, decimals=1
@@ -139,8 +139,8 @@ def _statement(result: "ZwickerLoudness", language: str = "en") -> str:
 
 
 def _verdict(
-    result: "ZwickerLoudness", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: ZwickerLoudness, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag: loudness passes at or below the requirement.
 
     The requirement is read as a maximum permitted loudness in sone (a lower
@@ -158,7 +158,7 @@ def _verdict(
 
 
 def _basis_line(
-    result: "ZwickerLoudness",
+    result: ZwickerLoudness,
     metadata: ReportMetadata | None,
     language: str,
 ) -> str:
@@ -193,7 +193,7 @@ def _basis_line(
 
 
 def render_iso532_report(
-    result: "ZwickerLoudness",
+    result: ZwickerLoudness,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -230,7 +230,7 @@ def render_iso532_report(
     title = t("Loudness rating", language)
     basis = _basis_line(result, metadata, language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

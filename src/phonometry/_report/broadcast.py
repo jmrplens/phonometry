@@ -32,7 +32,7 @@ svglib ship in the ``phonometry[report]`` extra, matplotlib in
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import decimal_comma, format_number, t
 from ._layout import (
@@ -75,14 +75,14 @@ _MAX_TRUE_PEAK_DBTP = -1.0
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the loudness header grid.
 
     Only fields that are set are returned. Programme loudness is a signal
     metric, so the room/climate fields of the insulation fiche do not apply;
     the specimen field labels the tested programme.
     """
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Programme", language), metadata.specimen),
         (t("Manufacturer", language), metadata.manufacturer),
@@ -97,8 +97,8 @@ def _metadata_pairs(
 
 
 def _status(
-    result: "ProgramLoudnessResult", target: float, tolerance_lu: float
-) -> Tuple[str, str, bool]:
+    result: ProgramLoudnessResult, target: float, tolerance_lu: float
+) -> tuple[str, str, bool]:
     """The integrated-loudness and true-peak pass states, and their conjunction.
 
     Both the compliance-table rows and the combined verdict compare against the
@@ -127,11 +127,11 @@ def _status(
 
 
 def _compliance_rows(
-    result: "ProgramLoudnessResult",
+    result: ProgramLoudnessResult,
     target: float,
     tolerance_lu: float,
     language: str = "en",
-) -> List[Tuple[str, str, str, str]]:
+) -> list[tuple[str, str, str, str]]:
     """Build the compliance-table rows for the EBU R 128 fiche.
 
     The verdict is carried only by the integrated loudness and the maximum
@@ -186,7 +186,7 @@ def _compliance_rows(
     ]
 
 
-def _statement(result: "ProgramLoudnessResult", language: str = "en") -> str:
+def _statement(result: ProgramLoudnessResult, language: str = "en") -> str:
     """The boxed single-number statement ``I = X LUFS (LRA = Y, max TP = Z)``."""
     integrated = format_number(float(result.integrated), language, decimals=1)
     lra = format_number(float(result.loudness_range), language, decimals=1)
@@ -199,11 +199,11 @@ def _statement(result: "ProgramLoudnessResult", language: str = "en") -> str:
 
 
 def _verdict(
-    result: "ProgramLoudnessResult",
+    result: ProgramLoudnessResult,
     target: float,
     tolerance: str = "qc",
     language: str = "en",
-) -> Tuple[str, bool]:
+) -> tuple[str, bool]:
     """Combined verdict text and PASS flag (integrated loudness and true peak).
 
     A programme complies when the integrated loudness is within the selected
@@ -223,7 +223,7 @@ def _verdict(
 
 
 def render_program_loudness_report(
-    result: "ProgramLoudnessResult",
+    result: ProgramLoudnessResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -291,7 +291,7 @@ def render_program_loudness_report(
         else _DEFAULT_TARGET_LUFS
     )
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

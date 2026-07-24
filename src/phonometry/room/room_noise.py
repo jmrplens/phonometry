@@ -99,8 +99,8 @@ class NCResult:
     levels: np.ndarray
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the measured spectrum against the NC curves.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -116,7 +116,7 @@ class NCResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -186,8 +186,8 @@ class RCResult:
         return f"RC-{self.rating}({self.classification})"
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the measured spectrum against the reference RC Mark II curve.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -203,7 +203,7 @@ class RCResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

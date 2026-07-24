@@ -19,16 +19,15 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 import reference_data as ref
 
 pytest.importorskip("reportlab")
 
-from phonometry import (  # noqa: E402  (import after importorskip)
+from phonometry import (
     ReportMetadata,
     intensity_element_normalized_difference,
 )
-from phonometry.building.intensity_insulation import (  # noqa: E402
+from phonometry.building.intensity_insulation import (
     IntensityElementNormalizedResult,
 )
 

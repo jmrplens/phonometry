@@ -211,7 +211,7 @@ class SteadyFieldResult:
     sound_power_level: float
     directivity: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot direct, reverberant and total SPL against distance.
 
         Marks the critical distance ``rc`` where the direct and reverberant

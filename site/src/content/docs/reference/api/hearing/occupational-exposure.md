@@ -71,7 +71,7 @@ ExposureResult(
     n_samples: int | None = None,
     sampling_advisory: bool = False,
     instrument: InstrumentClass | None = None,
-    tasks: Tuple[TaskContribution, ...] = ...,
+    tasks: tuple[TaskContribution, ...] = ...,
 )
 ```
 
@@ -280,10 +280,10 @@ uncertainty `u1`. The `u1` axis is anchored at the origin (`u1 = 0` gives
 
 ```python
 Task(
-    samples: Tuple[float, ...],
+    samples: tuple[float, ...],
     duration_hours: float,
-    duration_samples: Tuple[float, ...] | None = None,
-    duration_range: Tuple[float, float] | None = None,
+    duration_samples: tuple[float, ...] | None = None,
+    duration_range: tuple[float, float] | None = None,
     label: str | None = None,
     instrument: InstrumentClass | None = None,
 )

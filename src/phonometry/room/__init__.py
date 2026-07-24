@@ -35,14 +35,6 @@ from .room_acoustics import (
     decay_curve,
     room_parameters,
 )
-from .steady_field import (
-    SteadyFieldResult,
-    critical_distance,
-    room_constant,
-    schroeder_frequency,
-    steady_state_field,
-    steady_state_spl,
-)
 from .room_ir import (
     ImpulseResponseResult,
     ImpulseResponseWarning,
@@ -63,6 +55,14 @@ from .room_noise import (
     noise_criterion,
     rc_curve,
     room_criterion,
+)
+from .steady_field import (
+    SteadyFieldResult,
+    critical_distance,
+    room_constant,
+    schroeder_frequency,
+    steady_state_field,
+    steady_state_spl,
 )
 
 __all__ = [

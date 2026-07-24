@@ -44,7 +44,7 @@ matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -135,7 +135,7 @@ def _eps_cell(value: float, language: str = "en") -> str:
     return format_number(float(value), language, decimals=3)
 
 
-def _statement(result: Any, language: str = "en") -> Tuple[str, List[str]]:
+def _statement(result: Any, language: str = "en") -> tuple[str, list[str]]:
     """The boxed sound-power result and its extended terms.
 
     Delegates the ``LWA``/``LW`` box to the shared
@@ -214,7 +214,7 @@ def _factor_strip(result: Any, language: str = "en") -> str:
 
 
 def render_vibration_power_report(
-    result: "VibrationSoundPowerResult",
+    result: VibrationSoundPowerResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

@@ -73,16 +73,16 @@ from .tone_audibility import (
 )
 
 __all__ = [
+    "HANNING_BANDWIDTH_FACTOR",
+    "NO_TONE_AUDIBILITY",
     "EcmaFluctuationStrength",
     "EcmaLoudness",
     "EcmaRoughness",
     "EcmaTonality",
     "EqualLoudnessContours",
     "FluctuationStrengthResult",
-    "HANNING_BANDWIDTH_FACTOR",
     "MooreGlasbergLoudness",
     "MooreGlasbergTimeVaryingLoudness",
-    "NO_TONE_AUDIBILITY",
     "PsychoacousticAnnoyanceResult",
     "TonalityWarning",
     "ToneAssessment",
@@ -90,8 +90,8 @@ __all__ = [
     "ZwickerLoudness",
     "analyze_spectrum",
     "assess_tones",
-    "audibility_uncertainty",
     "audibility_from_levels",
+    "audibility_uncertainty",
     "combined_tone_level",
     "critical_band_corners",
     "critical_band_level",

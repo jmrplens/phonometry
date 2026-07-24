@@ -123,7 +123,7 @@ def test_epnl_table_44() -> None:
 def test_epnl_uniform_dt_matches_energy_sum() -> None:
     # With dt=0.5 and T0=10, EPNL = 10 lg(Σ 0.5·10^(PNLT/10)) − 10 lg(10).
     p = np.array([90.0, 95.0, 90.0])  # all within 10 dB of the peak
-    epnl, pnltm, kf, kl = epnl_from_pnlt(p, 0.5)
+    epnl, _pnltm, kf, kl = epnl_from_pnlt(p, 0.5)
     expected = 10.0 * np.log10(np.sum(0.5 * 10.0 ** (p / 10.0))) - 10.0 * np.log10(10.0)
     assert epnl == pytest.approx(expected, rel=1e-9)
     assert (kf, kl) == (0, 2)

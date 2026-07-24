@@ -20,7 +20,7 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import (  # noqa: E402  (import after importorskip)
+from phonometry import (
     ReportMetadata,
     survey_airborne_insulation,
     survey_facade_insulation,
@@ -58,20 +58,20 @@ def _extract_text(path: str) -> str:
     )
 
 
-def _airborne() -> "survey_airborne_insulation":  # type: ignore[valid-type]
+def _airborne() -> survey_airborne_insulation:  # type: ignore[valid-type]
     """A survey airborne result whose DnT equals a known octave curve."""
     l1 = np.full(_OCTAVE, 80.0)
     d = np.array([33.0, 36.0, 40.0, 44.0, 48.0])
     return survey_airborne_insulation(l1, l1 - d, _K0, volume=50.0, area=12.0)
 
 
-def _impact() -> "survey_impact_insulation":  # type: ignore[valid-type]
+def _impact() -> survey_impact_insulation:  # type: ignore[valid-type]
     """A survey impact result whose L'nT equals a known octave curve."""
     li = np.array([62.0, 64.0, 63.0, 60.0, 55.0])
     return survey_impact_insulation(li, _K0, volume=50.0)
 
 
-def _facade() -> "survey_facade_insulation":  # type: ignore[valid-type]
+def _facade() -> survey_facade_insulation:  # type: ignore[valid-type]
     """A survey facade result whose D2m,nT equals a known octave curve."""
     l1_2m = np.full(_OCTAVE, 75.0)
     d2m = np.array([31.0, 34.0, 37.0, 40.0, 43.0])

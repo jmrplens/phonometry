@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **413/413 conformance checks pass** across 53 domains and 274 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **417/417 conformance checks pass** across 53 domains and 277 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -162,7 +162,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room &amp; building acoustics</b>: 100% (51/51)</summary>
+<summary>&#9989; <b>Room &amp; building acoustics</b>: 100% (52/52)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -186,6 +186,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 10052:2021 Table 4 | Reverberation-index estimate (35 <= V < 60, type g) | k = [4.5, 5.0, 5.5, 5.5, 5.5] dB | k = [4.5, 5.0, 5.5, 5.5, 5.5] dB | exact | &#9989; |
 | ISO 717-2:2020 Table 4 / Clause 5.2 | Reference-floor weighted level Ln,r,0,w and CI (ISO 16251-1 ΔLw anchor) | Ln,r,0,w = 78 dB, CI = -11 dB | Ln,r,0,w = 78 dB, CI = -11 dB | exact | &#9989; |
 | ISO 16251-1:2014 / ISO 717-2 Formula (2) | Floor-covering ΔLw: zero improvement gives ΔLw = 0 | ΔLw = 0 dB (ΔL = 0 -> Ln,r = Ln,r,0) | ΔLw = 0 dB | exact | &#9989; |
+| ISO 16251-1 / ISO 717-2 (Foret et al. 2011, carpet) | Measured textile-carpet improvement rates to ΔLw = 29 dB | ΔLw = 29 dB (paper, ISO 16251-1) | ΔLw = 29 dB | +0 dB | &#9989; |
 | ISO 10848-1:2006 Formula (14) | Flanking Kij (simplified) matches closed form | Kij = 1.9897 dB | Kij = 1.9897 dB | exact | &#9989; |
 | ISO 10848-1:2006 Formula (12) | Flanking equivalent absorption length aj at f_ref | aj = 1.2661 m | aj = 1.2661 m | exact | &#9989; |
 | ISO 10848-1:2006 Clause 7.3.1 | Flanking total loss factor η = 2,2/(f·Ts) | η = 0.0044 | η = 0.0044 | exact | &#9989; |
@@ -276,7 +277,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Scattering &amp; diffusion (ISO 17497)</b>: 100% (5/5)</summary>
+<summary>&#9989; <b>Scattering &amp; diffusion (ISO 17497)</b>: 100% (8/8)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -285,6 +286,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 17497-1:2004 Annex A.5 | Expanded uncertainty of scattering coefficient | 0.02971 (+/-0) | 0.02971 | 0 | &#9989; |
 | ISO 17497-2:2012 Formula (5) | Diffusion coefficient (autocorrelation) | 0.7367 (+/-0) | 0.7367 | 0 | &#9989; |
 | ISO 17497-2:2012 Formula (8) | Zenith area factor (radians convention) | 1.57105 (+/-0) | 1.57105 | 0 | &#9989; |
+| Cox & D'Antonio Eq (10.3) | QRD deepest well depth (N=7, f0=500 Hz) | 0.196 m (+/-0 m) | 0.196 m | 0 m | &#9989; |
+| Cox & D'Antonio Eq (5.8) + ISO 17497-2 Formula (7) | Flat-panel predicted normalised diffusion (self-reference zero) | 0 (+/-0) | 0 | 0 | &#9989; |
+| Cox & D'Antonio Eq (5.8) + ISO 17497-2 Formula (7) | QRD predicted normalised diffusion at 2 kHz (above flat panel) | 0.208 (+/-0) | 0.208 | 0 | &#9989; |
 
 </details>
 

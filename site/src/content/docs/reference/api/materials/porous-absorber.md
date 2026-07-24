@@ -46,7 +46,13 @@ medium has `Im(k) < 0`):
   plate, limp membrane) enter as series transfer impedances
   `[[1, z],[0, 1]]`. The stack is closed by a rigid wall, by free air or
   by an arbitrary termination impedance, giving the surface impedance, the
-  oblique reflection factor and `alpha(theta)`.
+  oblique reflection factor and `alpha(theta)`. This same layer transfer
+  matrix underlies the critically-coupled perfect-absorber designs of Jiménez,
+  Groby, Pagneux & Romero-García (2017, *Applied Sciences* 7(6), 618,
+  doi:10.3390/app7060618) and, for a rigidly-backed high-porosity layer,
+  Jiménez, Romero-García & Groby (2018, *Acta Acustica united with Acustica*
+  104(3), 396-409, doi:10.3813/AAA.919183), where the critical-coupling
+  condition on the surface impedance yields total single-frequency absorption.
 
 * **Resonant sheets and random incidence**: the perforated-plate impedance
   uses the end-corrected air-plug mass and the visco-thermal surface

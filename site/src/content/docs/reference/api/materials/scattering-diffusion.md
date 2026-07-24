@@ -39,6 +39,12 @@ Neither part of ISO 17497 contains a numeric worked example; the two methods
 are distinct measurements and the helpers are named per part so they are
 never mixed.
 
+The Part 2 diffusion coefficient is the design target of subwavelength diffuser
+panels such as the metadiffusers of Jiménez, Cox, Romero-García & Groby
+(2017, *Scientific Reports* 7, 5389, doi:10.1038/s41598-017-05710-5), whose
+slow-sound resonant slots reach the diffusion of a Schroeder or
+quadratic-residue diffuser in a fraction of the depth.
+
 ## absorption_coefficient_uncertainty
 
 ```python

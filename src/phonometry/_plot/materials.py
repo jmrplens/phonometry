@@ -35,13 +35,13 @@ if TYPE_CHECKING:
         LayeredAbsorberResult,
         PorousMediumResult,
     )
-    from ..materials.slow_sound_absorber import SlitResonatorAbsorberResult
     from ..materials.road_absorption import InsituAbsorptionResult
     from ..materials.scattering_diffusion import (
         DiffusionResult,
         DiffusionSpectrum,
         ScatteringResult,
     )
+    from ..materials.slow_sound_absorber import SlitResonatorAbsorberResult
     from ..materials.sound_absorption import SoundAbsorptionMeasurement
 
 _FREQ_LABEL = "Frequency [Hz]"

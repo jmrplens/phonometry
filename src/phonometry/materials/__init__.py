@@ -136,17 +136,6 @@ from .road_absorption import (
     spot_microphone_spacing_bounds,
     spot_tube_upper_frequency,
 )
-from .slow_sound_absorber import (
-    CriticalCouplingResult,
-    HelmholtzResonator,
-    SlitResonatorAbsorberResult,
-    SlowSoundAbsorberWarning,
-    critical_coupling_design,
-    helmholtz_resonator_impedance,
-    rectangular_duct_properties,
-    slit_effective_properties,
-    slit_helmholtz_absorber,
-)
 from .scattering_diffusion import (
     BASE_PLATE_BANDS,
     BASE_PLATE_MAX_SCATTERING,
@@ -174,6 +163,17 @@ from .scattering_diffusion import (
     specular_absorption_coefficient,
     speed_of_sound,
 )
+from .slow_sound_absorber import (
+    CriticalCouplingResult,
+    HelmholtzResonator,
+    SlitResonatorAbsorberResult,
+    SlowSoundAbsorberWarning,
+    critical_coupling_design,
+    helmholtz_resonator_impedance,
+    rectangular_duct_properties,
+    slit_effective_properties,
+    slit_helmholtz_absorber,
+)
 from .sound_absorption import (
     AbsorptionWarning,
     SoundAbsorptionMeasurement,
@@ -186,7 +186,6 @@ from .sound_absorption import (
 __all__ = [
     "BASE_PLATE_BANDS",
     "BASE_PLATE_MAX_SCATTERING",
-    "CriticalCouplingResult",
     "DEFAULT_MIC_HEIGHT",
     "DEFAULT_POLAR_ANGLES",
     "DEFAULT_SOURCE_HEIGHT",
@@ -206,6 +205,7 @@ __all__ = [
     "AbsorptionWarning",
     "AirLayer",
     "AirflowResistanceWarning",
+    "CriticalCouplingResult",
     "DiffuseFieldAbsorptionResult",
     "DiffuserPolarResponse",
     "DiffusionResult",

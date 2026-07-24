@@ -622,7 +622,7 @@ def _absorption_spectrum_axes(
 
 
 def _absorption_reflection_axes(
-    ax: "Axes | None",
+    ax: Axes | None,
     freqs: np.ndarray,
     alpha: np.ndarray,
     reflection: np.ndarray,
@@ -731,7 +731,7 @@ def plot_layered_absorber(
 
 
 def plot_slit_resonator_absorber(
-    result: "SlitResonatorAbsorberResult", ax: Axes | None = None,
+    result: SlitResonatorAbsorberResult, ax: Axes | None = None,
     language: str = "en", **kwargs: Any
 ) -> Axes:
     """Absorption spectrum of a slit panel loaded with Helmholtz resonators.

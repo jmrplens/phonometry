@@ -307,14 +307,14 @@ def helmholtz_resonator_impedance(
     wn = require_positive(resonator.neck_side, "neck_side")
     lc = require_positive(resonator.cavity_length, "cavity_length")
     wc = require_positive(resonator.cavity_side, "cavity_side")
-    props: dict[str, Any] = dict(
-        air_density=air_density,
-        viscosity=viscosity,
-        prandtl_number=prandtl_number,
-        heat_capacity_ratio=heat_capacity_ratio,
-        atmospheric_pressure=atmospheric_pressure,
-        sum_terms=sum_terms,
-    )
+    props: dict[str, Any] = {
+        "air_density": air_density,
+        "viscosity": viscosity,
+        "prandtl_number": prandtl_number,
+        "heat_capacity_ratio": heat_capacity_ratio,
+        "atmospheric_pressure": atmospheric_pressure,
+        "sum_terms": sum_terms,
+    }
     omega = 2.0 * np.pi * f
     rho_n, kap_n = rectangular_duct_properties(f, side=wn, **props)
     rho_c, kap_c = rectangular_duct_properties(f, side=wc, **props)
@@ -372,7 +372,7 @@ class SlitResonatorAbsorberResult:
     effective_impedance: Complex
     transfer_matrix: Complex
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the absorption spectrum ``alpha(f)`` with ``|R|`` overlaid.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -519,12 +519,13 @@ def slit_helmholtz_absorber(
     if not 0.0 <= theta < np.pi / 2.0 - 1e-6:
         raise ValueError("'angle' must satisfy 0 <= angle < pi/2 - 1e-6.")
 
-    props = dict(
-        air_density=rho0, viscosity=require_positive(viscosity, "viscosity"),
-        prandtl_number=require_positive(prandtl_number, "prandtl_number"),
-        heat_capacity_ratio=require_positive(heat_capacity_ratio, "heat_capacity_ratio"),
-        atmospheric_pressure=require_positive(atmospheric_pressure, "atmospheric_pressure"),
-    )
+    props: dict[str, Any] = {
+        "air_density": rho0,
+        "viscosity": require_positive(viscosity, "viscosity"),
+        "prandtl_number": require_positive(prandtl_number, "prandtl_number"),
+        "heat_capacity_ratio": require_positive(heat_capacity_ratio, "heat_capacity_ratio"),
+        "atmospheric_pressure": require_positive(atmospheric_pressure, "atmospheric_pressure"),
+    }
     omega = 2.0 * np.pi * f
     tm = _panel_transfer_matrix(
         omega, res, slit_height=h, lattice_step=a, period=d,
@@ -658,12 +659,13 @@ def critical_coupling_design(
         raise ValueError("'angle' must satisfy 0 <= angle < pi/2 - 1e-6.")
     h_lo, h_hi = slit_height_bounds
     lc_lo, lc_hi = cavity_length_bounds
-    props = dict(
-        air_density=rho0, viscosity=require_positive(viscosity, "viscosity"),
-        prandtl_number=require_positive(prandtl_number, "prandtl_number"),
-        heat_capacity_ratio=require_positive(heat_capacity_ratio, "heat_capacity_ratio"),
-        atmospheric_pressure=require_positive(atmospheric_pressure, "atmospheric_pressure"),
-    )
+    props: dict[str, Any] = {
+        "air_density": rho0,
+        "viscosity": require_positive(viscosity, "viscosity"),
+        "prandtl_number": require_positive(prandtl_number, "prandtl_number"),
+        "heat_capacity_ratio": require_positive(heat_capacity_ratio, "heat_capacity_ratio"),
+        "atmospheric_pressure": require_positive(atmospheric_pressure, "atmospheric_pressure"),
+    }
     cos_t = float(np.cos(theta))
     z0 = rho0 * c0 / (d * a)
 

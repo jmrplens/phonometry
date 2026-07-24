@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **414/414 conformance checks pass** across 52 domains and 275 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **416/416 conformance checks pass** across 52 domains and 275 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -277,14 +277,16 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Scattering &amp; diffusion (ISO 17497)</b>: 100% (8/8)</summary>
+<summary>&#9989; <b>Scattering &amp; diffusion (ISO 17497)</b>: 100% (10/10)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | ISO 17497-1:2004 Eq (2) | Reference speed of sound at 20 C | 343.2 m/s (+/-0 m/s) | 343.2 m/s | 0 m/s | &#9989; |
 | ISO 17497-1:2004 Eqs (1)/(4)/(5) | Scattering coefficient (synthetic chain) | 0.0931 (+/-0) | 0.0931 | 0 | &#9989; |
 | ISO 17497-1:2004 Annex A.5 | Expanded uncertainty of scattering coefficient | 0.02971 (+/-0) | 0.02971 | 0 | &#9989; |
-| ISO 17497-2:2012 Formula (5) | Diffusion coefficient (autocorrelation) | 0.7367 (+/-0) | 0.7367 | 0 | &#9989; |
+| ISO 17497-2:2012 Formula (5) | Directional diffusion coefficient (QRD, COMSOL) | 0.7572 (+/-0) | 0.7572 | 0 | &#9989; |
+| ISO 17497-2:2012 Formula (5) | Directional diffusion coefficient (flat reference) | 0.1391 (+/-0) | 0.1391 | 0 | &#9989; |
+| ISO 17497-2:2012 Formula (7) | Normalised diffusion coefficient (QRD, COMSOL) | 0.718 (+/-0) | 0.718 | 0 | &#9989; |
 | ISO 17497-2:2012 Formula (8) | Zenith area factor (radians convention) | 1.57105 (+/-0) | 1.57105 | 0 | &#9989; |
 | Cox & D'Antonio Eq (10.3) | QRD deepest well depth (N=7, f0=500 Hz) | 0.196 m (+/-0 m) | 0.196 m | 0 m | &#9989; |
 | Cox & D'Antonio Eq (5.8) + ISO 17497-2 Formula (7) | Flat-panel predicted normalised diffusion (self-reference zero) | 0 (+/-0) | 0 | 0 | &#9989; |

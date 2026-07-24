@@ -7560,15 +7560,20 @@ def generate_diffusion_polar(output_dir: str) -> None:
     print("Generating diffusion_polar.png...")
     from phonometry import directional_diffusion
 
-    # Reflected sound-pressure levels L_i(theta) on a 37-point semicircle
-    # (-90 to 90 deg, 5 deg spacing) of a diffusing surface: the energy is
-    # spread almost uniformly over angle, so the ISO 17497-2 Formula (5)
-    # autocorrelation coefficient d is high.
+    # Reflected sound-pressure levels L_i(theta) on the standard 37-point
+    # semicircle (-90 to 90 deg, 5 deg spacing) of a real N = 7 quadratic-
+    # residue diffuser: a COMSOL free-field prediction at 1000 Hz, normal
+    # incidence, in the plane of maximum diffusion (Requena-Plens, UPV MSc
+    # thesis, 2018). The energy spreads into several lobes, so the ISO 17497-2
+    # Formula (5) autocorrelation coefficient d is high.
     angles = np.arange(-90.0, 90.5, 5.0)
-    rng = np.random.default_rng(3)
-    levels = 70.0 + 2.0 * np.sin(np.radians(angles) * 3.0) + rng.normal(
-        0.0, 1.0, angles.size
-    )
+    levels = np.array([
+        61.443, 60.511, 55.791, 51.232, 56.85, 59.48, 59.919, 59.14, 58.339,
+        58.366, 58.985, 59.558, 59.611, 59.294, 58.611, 57.655, 56.798, 56.2,
+        55.546, 55.677, 56.044, 56.575, 57.134, 57.315, 56.918, 55.867,
+        53.531, 50.622, 50.659, 54.334, 57.268, 58.66, 57.916, 52.472, 46.71,
+        58.406, 61.443,
+    ])
     result = directional_diffusion(angles, levels)
 
     _fig, ax = plt.subplots(figsize=(8.0, 7.5),

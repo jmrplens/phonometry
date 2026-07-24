@@ -41,6 +41,7 @@ if TYPE_CHECKING:
         DiffusionSpectrum,
         ScatteringResult,
     )
+    from ..materials.slow_sound_absorber import SlitResonatorAbsorberResult
     from ..materials.sound_absorption import SoundAbsorptionMeasurement
 
 _FREQ_LABEL = "Frequency [Hz]"
@@ -620,6 +621,40 @@ def _absorption_spectrum_axes(
     return ax
 
 
+def _absorption_reflection_axes(
+    ax: Axes | None,
+    freqs: np.ndarray,
+    alpha: np.ndarray,
+    reflection: np.ndarray,
+    *,
+    title: str,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Shared alpha(f) + |R| renderer for the oblique-incidence absorbers.
+
+    Draws the absorption spectrum as the primary curve and overlays the
+    reflection-factor magnitude as a muted dashed companion, then adds the
+    legend. Used by the layered-absorber and slit-resonator predictions.
+    """
+    ax = _absorption_spectrum_axes(
+        ax,
+        freqs,
+        alpha,
+        title=title,
+        label=_t(r"Absorption $\alpha(\theta)$", language),
+        language=language,
+        **kwargs,
+    )
+    ax.semilogx(
+        freqs,
+        np.abs(np.asarray(reflection, dtype=np.complex128)),
+        ls="--", color=_C_MUTED, label=_t("Reflection factor $|R|$", language),
+    )
+    ax.legend(loc="best", fontsize="small")
+    return ax
+
+
 def plot_porous_medium(
     result: PorousMediumResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
@@ -684,22 +719,50 @@ def plot_layered_absorber(
                  f"($\\theta$ = {format_number(float(angle_deg), language, decimals=0)}°)")
     else:
         title = f"Layered absorber prediction ($\\theta$ = {angle_deg:.0f}°)"
-    ax = _absorption_spectrum_axes(
+    return _absorption_reflection_axes(
         ax,
         np.asarray(result.frequency, dtype=np.float64),
         np.asarray(result.absorption, dtype=np.float64),
+        np.asarray(result.reflection, dtype=np.complex128),
         title=title,
-        label=_t(r"Absorption $\alpha(\theta)$", language),
         language=language,
         **kwargs,
     )
-    ax.semilogx(
+
+
+def plot_slit_resonator_absorber(
+    result: SlitResonatorAbsorberResult, ax: Axes | None = None,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Absorption spectrum of a slit panel loaded with Helmholtz resonators.
+
+    Draws the predicted ``alpha(f)`` of the slow-sound panel as the primary
+    curve and the reflection-factor magnitude ``|R|(f)`` as a muted companion.
+
+    :param result: A
+        :class:`~phonometry.materials.slow_sound_absorber.SlitResonatorAbsorberResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the absorption-curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number
+
+    angle_deg = np.degrees(result.angle)
+    if language == "es":
+        title = (f"Panel ranurado con resonadores de Helmholtz "
+                 f"($\\theta$ = {format_number(float(angle_deg), language, decimals=0)}°)")
+    else:
+        title = (f"Slit panel with Helmholtz resonators "
+                 f"($\\theta$ = {angle_deg:.0f}°)")
+    return _absorption_reflection_axes(
+        ax,
         np.asarray(result.frequency, dtype=np.float64),
-        np.abs(np.asarray(result.reflection, dtype=np.complex128)),
-        ls="--", color=_C_MUTED, label=_t("Reflection factor $|R|$", language),
+        np.asarray(result.absorption, dtype=np.float64),
+        np.asarray(result.reflection, dtype=np.complex128),
+        title=title,
+        language=language,
+        **kwargs,
     )
-    ax.legend(loc="best", fontsize="small")
-    return ax
 
 
 def plot_diffuse_field_absorption(

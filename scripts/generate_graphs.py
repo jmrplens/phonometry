@@ -1020,6 +1020,12 @@ _ES_EXACT = {
     "Standing-wave level difference L_max - L_min [dB]":
         "Diferencia de nivel de onda estacionaria L_max - L_min [dB]",
     "Sound absorption coefficient alpha": "Coeficiente de absorción sonora alpha",
+    "Perfect Absorption by Critical Coupling (Slow-Sound Panel)":
+        "Absorción perfecta por acoplo crítico (panel de sonido lento)",
+    "Critically coupled (perfect)": "Acoplo crítico (perfecto)",
+    "Narrow slit (over-damped)": "Ranura estrecha (sobreamortiguada)",
+    "Wide slit (under-damped)": "Ranura ancha (subamortiguada)",
+    "design 300 Hz": "diseño 300 Hz",
     "Reflection factor magnitude |r|": "Módulo del factor de reflexión |r|",
     "ISO 10534-1 Standing-Wave-Ratio Method":
         "Método de la razón de onda estacionaria (ISO 10534-1)",
@@ -1219,6 +1225,9 @@ _ES_EXACT = {
 }
 
 _ES_PATTERNS = [
+    # slow_sound_absorber panel-depth annotation (baked-in wavelength ratio).
+    (r"^Normal incidence, rigid backing, panel depth L = lambda/(\d+)$",
+     r"Incidencia normal, respaldo rígido, profundidad del panel L = lambda/\1"),
     # psd_confidence_smoothing annotation (mathtext + baked-in numbers).
     (r"^\$n_d\$ = (\d+) averages, \$\\varepsilon_r\$ = (\d+)\.(\d+) %$",
      r"$n_d$ = \1 promedios, $\\varepsilon_r$ = \2,\3 %"),
@@ -7515,6 +7524,70 @@ def generate_porous_absorber_designs(output_dir: str) -> None:
     plt.close()
 
 
+def generate_slow_sound_absorber(output_dir: str) -> None:
+    """Perfect absorption by critical coupling in a slow-sound slit panel.
+
+    A single Helmholtz resonator loads a thin closed slit; the critical
+    coupling design tunes the cavity length and slit height so the intrinsic
+    visco-thermal losses exactly balance the leakage, giving alpha = 1 at
+    300 Hz. Detuning the slit height (more or less loss) breaks the balance
+    and lowers the peak. One concept: perfect absorption is a loss-versus-
+    leakage balance in a deep-subwavelength (L = lambda/38) panel.
+    """
+    print("Generating slow_sound_absorber.svg...")
+    from phonometry import (
+        HelmholtzResonator,
+        critical_coupling_design,
+        slit_helmholtz_absorber,
+    )
+
+    lattice_step = 3.0e-2
+    period = 5.0e-2
+    f0 = 300.0
+    base = HelmholtzResonator(
+        neck_length=1.0e-3, neck_side=3.0e-3,
+        cavity_length=30.0e-3, cavity_side=27.0e-3,
+    )
+    design = critical_coupling_design(
+        f0, base, lattice_step=lattice_step, period=period,
+    )
+    h0 = design.slit_height
+    f = np.linspace(150.0, 500.0, 700)
+    cases = [
+        (h0, COLOR_SECONDARY, "-", "Critically coupled (perfect)"),
+        (0.6 * h0, COLOR_PRIMARY, "--", "Narrow slit (over-damped)"),
+        (1.7 * h0, COLOR_TERTIARY, "--", "Wide slit (under-damped)"),
+    ]
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    for height, color, ls, label in cases:
+        res = slit_helmholtz_absorber(
+            f, design.resonator, slit_height=height,
+            lattice_step=lattice_step, period=period,
+        )
+        ax.plot(f, res.absorption, ls, color=color, linewidth=2.2, label=label)
+    ax.axvline(f0, color=COLOR_FG, linestyle=":", linewidth=1.1, alpha=0.7)
+    ax.text(f0 * 1.01, 0.05, "design 300 Hz", rotation=90, va="bottom",
+            ha="left", fontsize=8.5, color=COLOR_FG)
+    panel_depth = lattice_step  # slit depth L = N a with N = 1
+    ratio = (343.0 / f0) / panel_depth
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Sound absorption coefficient alpha")
+    ax.set_ylim(0.0, 1.08)
+    ax.set_xlim(150.0, 500.0)
+    ax.set_title("Perfect Absorption by Critical Coupling (Slow-Sound Panel)",
+                 fontweight="bold", pad=12)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+    ax.text(0.985, 0.03,
+            f"Normal incidence, rigid backing, panel depth L = lambda/{ratio:.0f}",
+            transform=ax.transAxes, va="bottom", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "slow_sound_absorber.svg")
+    plt.close()
+
+
 def generate_scattering_coefficient(output_dir: str) -> None:
     """ISO 17497-1: scattering coefficient s(f) from a per-band measurement."""
     print("Generating scattering_coefficient.png...")
@@ -8952,6 +9025,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_impedance_tube,
     # Porous materials & multilayer absorbers (Mechel / Bies / Cox & D'Antonio)
     generate_porous_absorber_designs,
+    # Slow-sound slit + Helmholtz-resonator perfect absorbers (Jimenez et al.)
+    generate_slow_sound_absorber,
     # Scattering/diffusion, in-situ road absorption, precision sound power
     # (ISO 17497-1/-2, ISO 13472-1, ISO 3745 / ISO 9614-3)
     generate_scattering_coefficient,

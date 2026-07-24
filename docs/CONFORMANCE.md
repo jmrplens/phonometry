@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **416/416 conformance checks pass** across 52 domains and 275 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **419/419 conformance checks pass** across 53 domains and 277 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -743,6 +743,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Cox & D'Antonio 3e Eq. (7.9) | Membrane resonance 60/sqrt(m d), m = 5 kg/m2, d = 5 cm, Hz | 120 Hz (+/-2%) | 119.85 Hz | -0.15 Hz | &#9989; |
 | Maa 1998 Fig. 5 / Cox & D'Antonio 3e Fig. 7.28 | Microperforated panel (d=t=0.2 mm, b=2.5 mm, D=6 cm): peak alpha | 0.95 (+/-0.05) | 0.956 | 0.006 | &#9989; |
 | Maa 1998 Eqs. (5a)/(10) | MPP peak absorption vs 4r/(1+r)^2 with Maa's printed resistance | 4r/(1+r)^2 = 0.949 | 0.956 | 0.007 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Slow-sound perfect absorbers (Jimenez et al. Appl. Sci. 2017)</b>: 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Jimenez et al. Appl. Sci. 2017 Eq. (9) | Critical coupling: alpha at the design frequency (300 Hz, normal) | 1 (+/-0.001) | 1 | 0 | &#9989; |
+| Poiseuille limit (Stinson 1991) | Slit: j w rho_s -> 12 eta / h^2 as w -> 0 (h = 1.2 mm) | 153.3 Pa s/m2 (+/-0.1%) | 153.3 Pa s/m2 | 0 Pa s/m2 | &#9989; |
+| Poiseuille limit (Stinson 1991) | Square duct: j w rho -> 28.454 eta / w^2 as w -> 0 (w = 3 mm) | 58.2 Pa s/m2 (+/-0.2%) | 58.2 Pa s/m2 | 0 Pa s/m2 | &#9989; |
 
 </details>
 

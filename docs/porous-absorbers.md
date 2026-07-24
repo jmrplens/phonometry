@@ -248,6 +248,50 @@ print(np.round(diffuse, 2))   # [0.37 0.68 0.9  0.95]
 print(round(float(materials.statistical_absorption(1.567 + 0j)), 3))  # 0.951
 ```
 
+## 5. Slow-sound slit panels with Helmholtz resonators
+
+A rigid panel of thin closed slits, each loaded on its upper wall by an array
+of Helmholtz resonators, is a locally reacting, deep-subwavelength absorber
+(Jiménez et al. 2017). The resonators slow the sound in the slit, pulling its
+resonance far below the quarter-wavelength frequency, and the visco-thermal
+losses of the sub-millimetre slit and the resonator necks make *perfect*
+absorption possible: when the intrinsic loss balances the leakage, the
+reflection zero lands on the real-frequency axis and $\alpha = 1$ (critical
+coupling). The panel transfer matrix is the chain
+$T = M_{\Delta l}\,\prod_n (M_s\,M_{HR}^{(n)}\,M_s)$; the rigidly-backed
+reflection factor is
+$R = (T_{11}\cos\theta - Z_0 T_{21})/(T_{11}\cos\theta + Z_0 T_{21})$ with
+$Z_0 = \rho_0 c_0 / S_0$. `critical_coupling_design` inverts the model, tuning
+the cavity length and the slit height so both matching conditions
+$\mathrm{Re}(Z)\cos\theta = Z_0$ and $\mathrm{Im}(Z) = 0$ hold.
+
+```python
+import numpy as np
+from phonometry import (
+    HelmholtzResonator, critical_coupling_design, slit_helmholtz_absorber,
+)
+
+base = HelmholtzResonator(
+    neck_length=1.0e-3, neck_side=3.0e-3,
+    cavity_length=30.0e-3, cavity_side=27.0e-3,
+)
+design = critical_coupling_design(300.0, base, lattice_step=3.0e-2, period=5.0e-2)
+print(round(design.absorption, 4))          # ~1.0 (perfect absorption)
+
+f = np.linspace(150.0, 500.0, 700)
+res = slit_helmholtz_absorber(
+    f, design.resonator, slit_height=design.slit_height,
+    lattice_step=3.0e-2, period=5.0e-2,
+)
+res.plot()   # alpha(f) with |R| overlaid; peak = 1 at 300 Hz
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slow_sound_absorber_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slow_sound_absorber.svg" alt="Absorption of a slit panel loaded by one Helmholtz resonator: the critically-coupled design reaches alpha = 1 at 300 Hz, while narrowing or widening the slit breaks the balance and lowers the peak; the panel depth is lambda/38" width="80%"></picture>
+
+*One resonator, one slit, one loss-versus-leakage balance: the critically
+coupled design reaches $\alpha = 1$ at 300 Hz in a panel only $\lambda/38$
+deep; detuning the slit height drops the peak below one.*
+
 ## Practical notes
 
 **Fit ranges.** Delany–Bazley warns (and extrapolates) outside
@@ -314,6 +358,23 @@ found in the sources during this work are recorded in the
   absorbent materials. *Applied Acoustics*, 3(2), 105–116.
   [doi:10.1016/0003-682X(70)90031-9](https://doi.org/10.1016/0003-682X(70)90031-9).
   The original empirical relations and their stated validity.
+- Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017).
+  Iridescent perfect absorption in critically-coupled acoustic metamaterials
+  using the transfer matrix method. *Applied Sciences*, 7(6), 618.
+  [doi:10.3390/app7060618](https://doi.org/10.3390/app7060618). The slit +
+  Helmholtz-resonator transfer-matrix model and the critical-coupling
+  condition implemented in `slit_helmholtz_absorber`.
+- Jiménez, N., Huang, W., Romero-García, V., Pagneux, V., & Groby, J.-P.
+  (2016). Ultra-thin metamaterial for perfect and quasi-omnidirectional sound
+  absorption. *Applied Physics Letters*, 109(12), 121902.
+  [doi:10.1063/1.4962328](https://doi.org/10.1063/1.4962328). The resonator
+  impedance (Eq. A23) and its radiation end corrections (Eqs. A24–A27).
+- Stinson, M. R. (1991). The propagation of plane sound waves in narrow and
+  wide circular tubes, and generalization to uniform tubes of arbitrary
+  cross-sectional shape. *Journal of the Acoustical Society of America*,
+  89(2), 550–558. [doi:10.1121/1.400379](https://doi.org/10.1121/1.400379).
+  The visco-thermal effective parameters of the slit and the square necks
+  and cavities.
 
 ## Standards
 

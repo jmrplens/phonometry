@@ -35,6 +35,14 @@ from .airflow_resistance import (
     static_airflow_resistance,
     thermal_boundary_layer_thickness,
 )
+from .diffuser_design import (
+    DEFAULT_POLAR_ANGLES,
+    DiffuserPolarResponse,
+    predict_diffuser_polar_response,
+    predicted_diffusion_spectrum,
+    qrd_well_depths,
+    quadratic_residue_sequence,
+)
 from .dynamic_stiffness import (
     DynamicStiffnessResult,
     DynamicStiffnessWarning,
@@ -168,6 +176,7 @@ __all__ = [
     "BASE_PLATE_BANDS",
     "BASE_PLATE_MAX_SCATTERING",
     "DEFAULT_MIC_HEIGHT",
+    "DEFAULT_POLAR_ANGLES",
     "DEFAULT_SOURCE_HEIGHT",
     "DEFAULT_SPEED_OF_SOUND",
     "DELANY_BAZLEY_COEFFICIENTS",
@@ -186,6 +195,7 @@ __all__ = [
     "AirLayer",
     "AirflowResistanceWarning",
     "DiffuseFieldAbsorptionResult",
+    "DiffuserPolarResponse",
     "DiffusionResult",
     "DiffusionSpectrum",
     "DynamicStiffnessResult",
@@ -271,6 +281,10 @@ __all__ = [
     "power_reflection_coefficient",
     "practical_absorption_coefficient",
     "practical_coefficient_uncertainty",
+    "predict_diffuser_polar_response",
+    "predicted_diffusion_spectrum",
+    "qrd_well_depths",
+    "quadratic_residue_sequence",
     "random_incidence_absorption",
     "random_incidence_diffusion",
     "reflected_path_delay",

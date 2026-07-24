@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from ..materials.absorption_rating import AbsorptionRatingResult
     from ..materials.absorption_uncertainty import AbsorptionUncertaintyResult
     from ..materials.airflow_resistance import StaticAirflowResult
+    from ..materials.diffuser_design import DiffuserPolarResponse
     from ..materials.dynamic_stiffness import DynamicStiffnessResult
     from ..materials.impedance_tube import ImpedanceTubeResult
     from ..materials.porous_absorber import (
@@ -62,6 +63,8 @@ _STRINGS: dict[str, str] = {
     "Random-incidence scattering coefficient (ISO 17497-1)":
         "Coeficiente de dispersión de incidencia aleatoria (ISO 17497-1)",
     "Diffusion coefficient d = ": "Coeficiente de difusión d = ",
+    "Predicted diffuser polar response":
+        "Respuesta polar predicha del difusor",
     "Directional diffusion coefficient (ISO 17497-2)":
         "Coeficiente de difusión direccional (ISO 17497-2)",
     "Reflected sound-pressure level L [dB]":
@@ -730,3 +733,49 @@ def plot_diffuse_field_absorption(
     )
     ax.legend(loc="best", fontsize="small")
     return ax
+
+
+def plot_diffuser_polar_response(
+    result: DiffuserPolarResponse, ax: Axes | None = None,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Predicted far-field polar response of a diffuser design.
+
+    Semicircular polar plot of the predicted reflected sound-pressure levels
+    (peak referenced to 0 dB) with the predicted directional diffusion
+    coefficient and prediction frequency in the title.
+
+    :param result: A
+        :class:`~phonometry.materials.diffuser_design.DiffuserPolarResponse`.
+    :param ax: Existing polar axes, or ``None`` to create one.
+    :param kwargs: Forwarded to the reflected-level curve ``plot`` call.
+    :return: The polar axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    if ax is None:
+        plt = _import_pyplot()
+        _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+    angles_deg = np.asarray(result.angles, dtype=np.float64)
+    angles = np.radians(angles_deg)
+    levels = np.asarray(result.levels, dtype=np.float64)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.fill(angles, levels, alpha=0.15, color=kwargs["color"])
+    ax.plot(angles, levels, ms=4, **kwargs)
+    polar_ax: Any = ax
+    polar_ax.set_theta_zero_location("N")
+    polar_ax.set_theta_direction(-1)
+    if angles_deg.size and float(np.nanmin(angles_deg)) >= -90.0 and \
+            float(np.nanmax(angles_deg)) <= 90.0:
+        polar_ax.set_thetamin(-90)
+        polar_ax.set_thetamax(90)
+    freq = format_number(float(result.frequency), language, decimals=0)
+    coeff = format_number(float(result.coefficient), language, decimals=2)
+    ax.set_title(
+        f"{_t('Predicted diffuser polar response', language)} "
+        f"({freq} Hz), "
+        f"{_t('Diffusion coefficient d = ', language)}{coeff}"
+    )
+    localize_axes(ax, language)
+    return cast("Axes", ax)

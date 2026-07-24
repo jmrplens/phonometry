@@ -746,6 +746,23 @@ ISO17497_2_DIFFUSION_COEFF = 0.7367371379926486  # d from Formula (5)
 ISO17497_2_AREA_FACTOR_ZENITH = 1.571045588794762  # N0, radians convention
 
 # ---------------------------------------------------------------------------
+# Diffuser-design far-field prediction (Cox & D'Antonio, Fraunhofer model).
+# Analytic anchors for the QRD-vs-flat behaviour of the design predictor.
+#
+# Geometry: an N = 7 quadratic residue diffuser (Eq. (10.2), s_n = n^2 mod N,
+# so s = {0,1,4,2,2,4,1}) with design frequency f0 = 500 Hz and c = 343 m/s
+# has design wavelength lambda0 = 0,686 m. The deepest well (s_max = 4) has,
+# by Eq. (10.3) d_n = s_n*lambda0/(2N), depth 4*0,686/14 = 0,196 m exactly.
+DIFFUSER_QRD7_MAX_DEPTH = 0.196  # m, closed form d_max = s_max*c/(2 N f0)
+# A flat panel (all wells zero depth) normalises against itself, so Formula (7)
+# gives (d - d_ref)/(1 - d_ref) = 0 identically: the exact zero anchor.
+DIFFUSER_FLAT_NORMALIZED_DIFFUSION = 0.0
+# The same N = 7 QRD (10 cm wells, five periods) predicted at 2 kHz: the
+# normalised diffusion is well above the flat-panel zero, as a diffuser must be.
+# The value is the far-field model prediction, committed as a regression guard.
+DIFFUSER_QRD7_NORMALIZED_DIFFUSION_2K = 0.20802829817091092
+
+# ---------------------------------------------------------------------------
 # ISO 13472-1:2002 in-situ road-surface absorption. The mandatory geometry
 # ds = 1,25 m, dm = 0,25 m gives the geometrical-spreading factor Kr = 2/3
 # (Clause 4.2). The Annex A worked example (c = 340 m/s, 5 ms flat window)

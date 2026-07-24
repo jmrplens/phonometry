@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **411/411 conformance checks pass** across 52 domains and 273 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **414/414 conformance checks pass** across 52 domains and 275 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -277,7 +277,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Scattering &amp; diffusion (ISO 17497)</b>: 100% (5/5)</summary>
+<summary>&#9989; <b>Scattering &amp; diffusion (ISO 17497)</b>: 100% (8/8)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -286,6 +286,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 17497-1:2004 Annex A.5 | Expanded uncertainty of scattering coefficient | 0.02971 (+/-0) | 0.02971 | 0 | &#9989; |
 | ISO 17497-2:2012 Formula (5) | Diffusion coefficient (autocorrelation) | 0.7367 (+/-0) | 0.7367 | 0 | &#9989; |
 | ISO 17497-2:2012 Formula (8) | Zenith area factor (radians convention) | 1.57105 (+/-0) | 1.57105 | 0 | &#9989; |
+| Cox & D'Antonio Eq (10.3) | QRD deepest well depth (N=7, f0=500 Hz) | 0.196 m (+/-0 m) | 0.196 m | 0 m | &#9989; |
+| Cox & D'Antonio Eq (5.8) + ISO 17497-2 Formula (7) | Flat-panel predicted normalised diffusion (self-reference zero) | 0 (+/-0) | 0 | 0 | &#9989; |
+| Cox & D'Antonio Eq (5.8) + ISO 17497-2 Formula (7) | QRD predicted normalised diffusion at 2 kHz (above flat panel) | 0.208 (+/-0) | 0.208 | 0 | &#9989; |
 
 </details>
 

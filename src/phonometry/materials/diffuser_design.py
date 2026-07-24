@@ -82,8 +82,8 @@ __all__ = [
     "DiffuserPolarResponse",
     "predict_diffuser_polar_response",
     "predicted_diffusion_spectrum",
-    "quadratic_residue_sequence",
     "qrd_well_depths",
+    "quadratic_residue_sequence",
 ]
 
 #: Reference speed of sound in air used by the design helpers when none is
@@ -113,7 +113,7 @@ def _prime_generator(prime: int) -> int:
         raise ValueError("'prime' must be an integer.")
     if n < 3 or n % 2 == 0:
         raise ValueError("'prime' must be an odd prime >= 3.")
-    for factor in range(3, int(math.isqrt(n)) + 1, 2):
+    for factor in range(3, math.isqrt(n) + 1, 2):
         if n % factor == 0:
             raise ValueError(f"'prime' must be prime; {n} is divisible by {factor}.")
     return n

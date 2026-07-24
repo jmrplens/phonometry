@@ -7613,7 +7613,7 @@ def generate_diffuser_prediction(output_dir: str) -> None:
         0.10, freqs, depths=np.zeros_like(depths), periods=5, normalize=False
     )
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     ax.semilogx(freqs, qrd.diffusion, color=COLOR_PRIMARY, linewidth=1.9,
                 marker="o", markersize=4, label="N = 7 QRD design")
     ax.semilogx(freqs, flat.diffusion, color=COLOR_SECONDARY, linewidth=1.9,

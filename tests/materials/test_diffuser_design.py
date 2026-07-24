@@ -27,8 +27,8 @@ from phonometry.materials.diffuser_design import (
     DiffuserPolarResponse,
     predict_diffuser_polar_response,
     predicted_diffusion_spectrum,
-    quadratic_residue_sequence,
     qrd_well_depths,
+    quadratic_residue_sequence,
 )
 from phonometry.materials.scattering_diffusion import DiffusionSpectrum
 

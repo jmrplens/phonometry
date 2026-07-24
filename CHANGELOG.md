@@ -36,6 +36,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   coefficient and `.plot()` (a semicircular polar diagram, English and Spanish).
   This is a far-field design estimate, not a substitute for an ISO 17497-2
   measurement.
+- Slow-sound slit + Helmholtz-resonator perfect absorbers
+  (`materials.slow_sound_absorber`), a clean-room implementation of the
+  transfer-matrix model of Jimenez, Groby, Pagneux and Romero-Garcia
+  (Appl. Sci. 2017, 7, 618) with the resonator impedance and radiation end
+  corrections of Jimenez et al. (Appl. Phys. Lett. 2016, 109, 121902).
+  `slit_helmholtz_absorber` predicts the oblique-incidence absorption of a
+  periodic slit panel loaded by an array of Helmholtz resonators, including
+  the visco-thermal losses of the slit and of the square resonator necks and
+  cavities (Stinson 1991), returning a `SlitResonatorAbsorberResult` with the
+  surface impedance, reflection factor, absorption, retrieved effective
+  parameters and the full chain matrix, plus a `.plot()` of `alpha(f)` with
+  `|R|` overlaid. `critical_coupling_design` solves the inverse problem: it
+  tunes the cavity length and slit height so the reflection zero sits on the
+  real-frequency axis, giving perfect absorption (`alpha = 1`) at a chosen
+  frequency and angle. The building blocks `slit_effective_properties`,
+  `rectangular_duct_properties` and `helmholtz_resonator_impedance` and the
+  `HelmholtzResonator` geometry are exported too. Pinned to the exact analytic
+  anchors: perfect absorption at the design frequency, the Poiseuille
+  resistivity limits `12 eta / h^2` (slit) and `28.454 eta / w^2` (square
+  duct), and the loss-free effective-parameter limits.
 - `StaticAirflowResult.report()`: a one-page PDF material airflow-resistance
   test report (ISO 9053-1:2018, static/direct airflow method). The fiche
   carries a standard-basis line, an optional metadata header (client,

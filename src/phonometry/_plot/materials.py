@@ -35,6 +35,7 @@ if TYPE_CHECKING:
         LayeredAbsorberResult,
         PorousMediumResult,
     )
+    from ..materials.slow_sound_absorber import SlitResonatorAbsorberResult
     from ..materials.road_absorption import InsituAbsorptionResult
     from ..materials.scattering_diffusion import (
         DiffusionResult,
@@ -684,6 +685,48 @@ def plot_layered_absorber(
                  f"($\\theta$ = {format_number(float(angle_deg), language, decimals=0)}°)")
     else:
         title = f"Layered absorber prediction ($\\theta$ = {angle_deg:.0f}°)"
+    ax = _absorption_spectrum_axes(
+        ax,
+        np.asarray(result.frequency, dtype=np.float64),
+        np.asarray(result.absorption, dtype=np.float64),
+        title=title,
+        label=_t(r"Absorption $\alpha(\theta)$", language),
+        language=language,
+        **kwargs,
+    )
+    ax.semilogx(
+        np.asarray(result.frequency, dtype=np.float64),
+        np.abs(np.asarray(result.reflection, dtype=np.complex128)),
+        ls="--", color=_C_MUTED, label=_t("Reflection factor $|R|$", language),
+    )
+    ax.legend(loc="best", fontsize="small")
+    return ax
+
+
+def plot_slit_resonator_absorber(
+    result: "SlitResonatorAbsorberResult", ax: Axes | None = None,
+    language: str = "en", **kwargs: Any
+) -> Axes:
+    """Absorption spectrum of a slit panel loaded with Helmholtz resonators.
+
+    Draws the predicted ``alpha(f)`` of the slow-sound panel as the primary
+    curve and the reflection-factor magnitude ``|R|(f)`` as a muted companion.
+
+    :param result: A
+        :class:`~phonometry.materials.slow_sound_absorber.SlitResonatorAbsorberResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the absorption-curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number
+
+    angle_deg = np.degrees(result.angle)
+    if language == "es":
+        title = (f"Panel ranurado con resonadores de Helmholtz "
+                 f"($\\theta$ = {format_number(float(angle_deg), language, decimals=0)}°)")
+    else:
+        title = (f"Slit panel with Helmholtz resonators "
+                 f"($\\theta$ = {angle_deg:.0f}°)")
     ax = _absorption_spectrum_axes(
         ax,
         np.asarray(result.frequency, dtype=np.float64),

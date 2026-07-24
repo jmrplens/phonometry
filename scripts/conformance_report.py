@@ -6220,6 +6220,68 @@ def _chk_porous_maa_peak_closed_form() -> Outcome:
 
 
 # ===========================================================================
+# Slow-sound slit + Helmholtz-resonator perfect absorbers (Jimenez et al.)
+# ===========================================================================
+_SLOW_SOUND = "Slow-sound perfect absorbers (Jimenez et al. Appl. Sci. 2017)"
+
+
+@register(
+    _SLOW_SOUND,
+    "Jimenez et al. Appl. Sci. 2017 Eq. (9)",
+    "Critical coupling: alpha at the design frequency (300 Hz, normal)",
+)
+def _chk_slow_sound_perfect_absorption() -> Outcome:
+    res = ph.HelmholtzResonator(
+        neck_length=1.0e-3, neck_side=3.0e-3,
+        cavity_length=30.0e-3, cavity_side=27.0e-3,
+    )
+    design = ph.critical_coupling_design(
+        300.0, res, lattice_step=3.0e-2, period=5.0e-2,
+        air_density=_PA_RHO0, speed_of_sound=_PA_C0,
+    )
+    out = ph.slit_helmholtz_absorber(
+        np.array([300.0]), design.resonator, slit_height=design.slit_height,
+        lattice_step=3.0e-2, period=5.0e-2,
+        air_density=_PA_RHO0, speed_of_sound=_PA_C0,
+    )
+    return numeric(1.0, float(out.absorption[0]), 1e-3, places=4)
+
+
+@register(
+    _SLOW_SOUND,
+    "Poiseuille limit (Stinson 1991)",
+    "Slit: j w rho_s -> 12 eta / h^2 as w -> 0 (h = 1.2 mm)",
+)
+def _chk_slow_sound_slit_resistivity() -> Outcome:
+    eta = 1.84e-5
+    h = 1.2e-3
+    f = np.array([1.0e-2])
+    rho_s, _ = ph.slit_effective_properties(
+        f, slit_height=h, air_density=_PA_RHO0, viscosity=eta,
+    )
+    sigma = float((1j * 2.0 * math.pi * f * rho_s)[0].real)
+    return numeric(12.0 * eta / h**2, sigma, 1e-3, rel=True,
+                   unit="Pa s/m2", places=1)
+
+
+@register(
+    _SLOW_SOUND,
+    "Poiseuille limit (Stinson 1991)",
+    "Square duct: j w rho -> 28.454 eta / w^2 as w -> 0 (w = 3 mm)",
+)
+def _chk_slow_sound_duct_resistivity() -> Outcome:
+    eta = 1.84e-5
+    side = 3.0e-3
+    f = np.array([1.0e-2])
+    rho, _ = ph.rectangular_duct_properties(
+        f, side=side, air_density=_PA_RHO0, viscosity=eta,
+    )
+    sigma = float((1j * 2.0 * math.pi * f * rho)[0].real)
+    return numeric(28.454 * eta / side**2, sigma, 2e-3, rel=True,
+                   unit="Pa s/m2", places=1)
+
+
+# ===========================================================================
 # Program loudness (ITU-R BS.1770-5 / EBU R 128)
 # ===========================================================================
 _PROGRAM_LOUDNESS = "Program loudness (ITU-R BS.1770 / EBU R 128)"

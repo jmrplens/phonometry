@@ -256,15 +256,15 @@ colimado (d = 0,32) en un abanico ancho (d = 0,63).
   description="Simulación FDTD 2D de un frente de onda plano incidiendo sobre un panel rígido plano y un difusor de Schroeder de residuos cuadráticos lado a lado. El panel plano devuelve un haz especular colimado mientras que los pozos del difusor reparten la misma energía en un abanico ancho, y el campo dispersado sobre un arco de receptores da coeficientes de difusión de 0,32 frente a 0,63."
 />
 
-La respuesta de un solo plano de abajo es real: una predicción en campo libre
-por elementos de contorno (COMSOL) de un difusor de residuos cuadráticos
-$N = 7$ y su panel de referencia plano a 1000 Hz, incidencia normal, muestreada
-en el semicírculo estándar de 37 puntos (espaciado de 5°, de $-90°$ a $+90°$) en
-el plano de máxima difusión, de J. M. Requena-Plens, *Estudio y caracterización
-de difusores acústicos mediante el método de los elementos finitos* (trabajo fin
-de máster, Universitat Politècnica de València, 2018). Los niveles polares son
-$L_i = 20\,\lg|p_i|$ de la predicción de campo lejano publicada; los mismos
-valores alimentan el conjunto de conformidad de phonometry.
+La respuesta de un solo plano de abajo es un campo físico real: una simulación
+propia en campo libre por elementos finitos (COMSOL) de un difusor de residuos
+cuadráticos $N = 7$ y su panel de referencia plano a 1000 Hz, incidencia normal,
+muestreada en el semicírculo estándar de 37 puntos (espaciado de 5°, de $-90°$ a
+$+90°$) en el plano de máxima difusión, producida por el mantenedor (J. M.
+Requena-Plens). Los niveles polares son $L_i = 20\,\lg|p_i|$; el coeficiente de
+difusión se valida de forma cruzada frente a una implementación MATLAB
+independiente de la Fórmula (5) de la ISO 17497-2, y los mismos valores
+alimentan el conjunto de conformidad de phonometry.
 
 ```python
 from phonometry import materials

@@ -250,15 +250,14 @@ a collimated specular beam (d = 0.32) into a wide fan (d = 0.63).
   description="A 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side. The flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63."
 />
 
-The single-plane response below is a real one: a boundary-element (COMSOL)
-free-field prediction of an $N = 7$ quadratic-residue diffuser and its flat
-reference panel at 1000 Hz, normal incidence, sampled on the standard 37-point
-semicircle (5° spacing, $-90°$ to $+90°$) in the plane of maximum diffusion,
-from J. M. Requena-Plens, *Estudio y caracterizacion de difusores acusticos
-mediante el metodo de los elementos finitos* (MSc thesis, Universitat
-Politecnica de Valencia, 2018). The polar levels are $L_i = 20\,\lg|p_i|$ from
-the published far-field prediction; the same values drive the phonometry
-conformance suite.
+The single-plane response below is a real physical field: an in-house COMSOL
+finite-element free-field simulation of an $N = 7$ quadratic-residue diffuser
+and its flat reference panel at 1000 Hz, normal incidence, sampled on the
+standard 37-point semicircle (5° spacing, $-90°$ to $+90°$) in the plane of
+maximum diffusion, produced by the maintainer (J. M. Requena-Plens). The polar
+levels are $L_i = 20\,\lg|p_i|$; the diffusion coefficient is cross-validated
+against an independent MATLAB implementation of ISO 17497-2 Formula (5), and
+the same values drive the phonometry conformance suite.
 
 ```python
 from phonometry import materials

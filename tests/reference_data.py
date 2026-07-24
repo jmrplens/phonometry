@@ -737,14 +737,15 @@ ISO17497_1_A5_U_SCATTERING = 0.0297147342419613  # combined u(s)
 
 # ---------------------------------------------------------------------------
 # ISO 17497-2:2012 directional diffusion coefficient d_theta, Formula (5).
-# REAL oracle from a boundary-element (COMSOL) free-field prediction of an
+# Oracle from an in-house COMSOL finite-element free-field simulation of an
 # N = 7 quadratic-residue diffuser (QRD) and its flat reference panel at
-# 1000 Hz, normal incidence, computed by Jose M. Requena-Plens, "Estudio y
-# caracterizacion de difusores acusticos mediante el metodo de los elementos
-# finitos" (MSc thesis, Universitat Politecnica de Valencia, 2018) and
-# cross-checked against that work's own MATLAB implementation.
+# 1000 Hz, normal incidence, produced by the maintainer (Jose M.
+# Requena-Plens) and cross-validated against an independent MATLAB
+# implementation of the ISO 17497-2 Formula (5) coefficient, which it
+# reproduces bit-for-bit. This is in-house simulation data, not a third-party
+# published measurement.
 #
-# The thesis field is a dense far-field hemisphere (400 x 400 samples in
+# The simulated field is a dense far-field hemisphere (400 x 400 samples in
 # azimuth theta and elevation phi). To obtain a compact yet faithful oracle we
 # take the standard ISO 17497-2 single-plane semicircular receiver arc: 37
 # receivers at 5 deg spacing over -90 deg .. +90 deg, in the vertical plane of

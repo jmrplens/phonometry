@@ -189,12 +189,13 @@ a collimated specular beam (d = 0.32) into a wide fan (d = 0.63).
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion.webm)
 
-The single-plane response below is a real one: a boundary-element (COMSOL)
-free-field prediction of an N = 7 quadratic-residue diffuser and its flat
-reference panel at 1000 Hz, normal incidence, sampled on the standard 37-point
-semicircle (5 deg spacing, -90 to +90 deg) in the plane of maximum diffusion
-(Requena-Plens, UPV MSc thesis, 2018; the same values drive the phonometry
-conformance suite).
+The single-plane response below is a real physical field: an in-house COMSOL
+finite-element free-field simulation of an N = 7 quadratic-residue diffuser and
+its flat reference panel at 1000 Hz, normal incidence, sampled on the standard
+37-point semicircle (5 deg spacing, -90 to +90 deg) in the plane of maximum
+diffusion, produced by the maintainer (Requena-Plens) and cross-validated
+against an independent MATLAB implementation of ISO 17497-2 Formula (5); the
+same values drive the phonometry conformance suite.
 
 ```python
 from phonometry import materials

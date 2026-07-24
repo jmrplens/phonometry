@@ -107,6 +107,7 @@ export const apiSidebar = {
         'reference/api/materials/impedance-tube',
         'reference/api/materials/porous-absorber',
         'reference/api/materials/scattering-diffusion',
+        'reference/api/materials/diffuser-design',
         'reference/api/materials/road-absorption',
       ],
     },

@@ -386,6 +386,106 @@ esa banda.
 	caption="Ficha de respuesta polar de fuente única (DiffusionResult.report), el nivel reflejado sobre el arco de receptores."
 />
 
+### Predicción de la difusión a partir del diseño de un difusor
+
+El coeficiente de autocorrelación anterior reduce una respuesta polar *medida*.
+El mismo coeficiente puede *predecirse* a partir del diseño físico de un difusor
+de rejilla de fase de Schroeder, de modo que una secuencia de profundidades de
+pozo pueda evaluarse antes de fabricar una muestra.
+`predict_diffuser_polar_response` evalúa el modelo de Fraunhofer (campo lejano)
+de plano único de Cox y D'Antonio: cada pozo de fondo rígido y profundidad $d_n$
+aporta un coeficiente de reflexión de presión $R_n = e^{-2 j k d_n}$, y la
+presión dispersada al ángulo de reflexión $\theta$ para una fuente con incidencia
+$\psi$ es la suma sobre los pozos de la superficie periódica (Ec. (5.8)),
+
+$$
+p(\theta) = F(\theta) \sum_n R_n \, e^{\,j k x_n (\sin\psi + \sin\theta)},
+$$
+
+con $x_n$ el centro del pozo y $k = 2\pi f / c$. Los niveles polares predichos
+$L_i = 20\lg|p(\theta_i)|$ alimentan el mismo `directional_diffusion_coefficient`
+que una medición. Para un difusor de residuo cuadrático la secuencia de
+profundidades se obtiene del generador primo $N$ y la frecuencia de diseño $f_0$
+(Ecs. (10.2)/(10.3)): $s_n = n^2 \bmod N$ y $d_n = s_n \lambda_0 / (2N)$ con
+$\lambda_0 = c/f_0$.
+
+```python
+import numpy as np
+from phonometry import materials
+
+# Un difusor de residuo cuadratico N = 7, frecuencia de diseno 500 Hz.
+depths = materials.qrd_well_depths(7, 500.0)   # Ecs. (10.2)/(10.3)
+print(np.round(depths * 100, 1))               # profundidades de pozo en cm:
+                                               # [ 0.   4.9 19.6  9.8  9.8 19.6  4.9]
+
+# Respuesta polar de campo lejano predicha a una frecuencia (5 periodos
+# repetidos, pozos de 10 cm), reducida al coeficiente de difusion direccional
+# ISO 17497-2.
+surface = materials.predict_diffuser_polar_response(0.10, 2000.0, depths=depths,
+                                                    periods=5)
+print(round(surface.coefficient, 3))           # 0.210
+surface.plot()   # respuesta polar predicha, d en el titulo (requiere matplotlib)
+
+# La variante de espectro normaliza banda a banda frente a la referencia plana
+# de la misma huella (Formula (7)): el panel plano se aplica a cero exacto y el
+# QRD queda muy por encima.
+freqs = np.array([500, 1000, 2000, 4000], float)
+qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, periods=5)
+print(np.round(qrd.normalized, 3))             # [0.352 0.275 0.208 0.073]
+
+flat = materials.predicted_diffusion_spectrum(0.10, freqs,
+                                        depths=np.zeros_like(depths), periods=5)
+print(np.round(flat.normalized, 3))            # [0. 0. 0. 0.]
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffuser_prediction_es.svg" alt="Coeficiente de difusion predicho sobre las bandas de tercio de octava de 250 a 5000 Hz para un diseno de difusor de residuo cuadratico N = 7 comparado con un panel plano de la misma huella: la curva del QRD queda muy por encima de la curva casi nula del panel plano en toda la banda" width="88%" />
+
+*Predicho solo a partir del diseño: el QRD N = 7 reparte la energía reflejada
+mucho más uniformemente que el panel plano de la misma huella, de modo que su
+coeficiente de difusión predicho queda muy por encima de la referencia plana
+casi especular en toda la banda. Se trata de una estimación de diseño en campo
+lejano, no un sustituto de una medición ISO 17497-2; como todo modelo de Fourier
+de difusores pierde precisión a baja frecuencia, en ángulos rasantes y para
+superficies muy absorbentes. Se puede pasar una secuencia arbitraria de
+coeficientes de reflexión complejos por pozo mediante el argumento `reflection`,
+de modo que una superficie de admitancia o cargada con resonadores calculada en
+otro lugar pueda evaluarse igual.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import materials
+
+# QRD N = 7 (frecuencia de diseno 500 Hz, pozos de 10 cm, cinco periodos) frente
+# al panel plano de la misma huella, sobre las bandas de tercio de octava.
+freqs = np.array([250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
+                  2000, 2500, 3150, 4000, 5000], float)
+depths = materials.qrd_well_depths(7, 500.0)
+qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, periods=5)
+
+# El DiffusionSpectrum dibuja la d(f) predicha directamente. Una linea:
+qrd.plot()
+plt.show()
+
+# A mano: d(f) predicha para el QRD frente a la referencia plana.
+flat = materials.predicted_diffusion_spectrum(0.10, freqs,
+                                depths=np.zeros_like(depths), periods=5,
+                                normalize=False)
+fig, ax = plt.subplots()
+ax.semilogx(freqs, qrd.diffusion, "o-", color="#1f77b4", label="Diseno QRD N = 7")
+ax.semilogx(freqs, flat.diffusion, "s--", color="#d62728", label="Panel plano")
+ax.set_ylim(0.0, 1.0)
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("Coeficiente de difusion predicho d")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## ¿Dispersión o difusión? Dos coeficientes, dos trabajos
 
 Los dos coeficientes anteriores se tratan de forma rutinaria como

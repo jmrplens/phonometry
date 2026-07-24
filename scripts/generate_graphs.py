@@ -38,6 +38,12 @@ _LANG_SUFFIX = ""
 
 _ES_EXACT = {
     "Frequency [Hz]": "Frecuencia [Hz]",
+    "Predicted diffusion from design (Cox & D'Antonio Fraunhofer model)":
+        "Difusión predicha desde el diseño (modelo de Fraunhofer de Cox y D'Antonio)",
+    "Predicted diffusion coefficient d":
+        "Coeficiente de difusión predicho d",
+    "N = 7 QRD design": "Diseño QRD N = 7",
+    "Flat panel": "Panel plano",
     "Atmospheric Refraction: Ray Bending and the Acoustic Shadow":
         "Refracción atmosférica: curvatura de rayos y zona de sombra",
     "Sound rays (upward refraction)": "Rayos sonoros (refracción hacia arriba)",
@@ -7586,6 +7592,45 @@ def generate_diffusion_polar(output_dir: str) -> None:
     plt.close()
 
 
+def generate_diffuser_prediction(output_dir: str) -> None:
+    """Predicted diffusion d(f): an N = 7 QRD design versus a flat panel."""
+    print("Generating diffuser_prediction.png...")
+    from phonometry import (
+        predicted_diffusion_spectrum,
+        qrd_well_depths,
+    )
+
+    # An N = 7 quadratic residue diffuser, design frequency 500 Hz, 10 cm wells,
+    # five periods (Cox & D'Antonio far-field Fraunhofer model). The predicted
+    # diffusion is compared band by band with the flat reference panel of the
+    # same footprint: the QRD spreads the reflected energy far more evenly, so
+    # its diffusion coefficient sits well above the near-specular flat panel.
+    freqs = np.array([250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
+                      2000, 2500, 3150, 4000, 5000], float)
+    depths = qrd_well_depths(7, 500.0)
+    qrd = predicted_diffusion_spectrum(0.10, freqs, depths=depths, periods=5)
+    flat = predicted_diffusion_spectrum(
+        0.10, freqs, depths=np.zeros_like(depths), periods=5, normalize=False
+    )
+
+    _fig, ax = plt.subplots(figsize=(10, 6))
+    ax.semilogx(freqs, qrd.diffusion, color=COLOR_PRIMARY, linewidth=1.9,
+                marker="o", markersize=4, label="N = 7 QRD design")
+    ax.semilogx(freqs, flat.diffusion, color=COLOR_SECONDARY, linewidth=1.9,
+                marker="s", markersize=4, linestyle="--", label="Flat panel")
+    ax.set_ylim(0.0, 1.0)
+    ax.set_ylabel("Predicted diffusion coefficient d")
+    format_frequency_axis(ax, 250.0, 5000.0)
+    ax.set_title(
+        "Predicted diffusion from design (Cox & D'Antonio Fraunhofer model)",
+        fontweight="bold",
+    )
+    ax.legend(loc="best")
+    plt.tight_layout()
+    save_figure(output_dir, "diffuser_prediction.png")
+    plt.close()
+
+
 def generate_insitu_absorption(output_dir: str) -> None:
     """ISO 13472-1: in-situ one-third-octave absorption spectrum alpha(f)."""
     print("Generating insitu_absorption.png...")
@@ -8906,6 +8951,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # (ISO 17497-1/-2, ISO 13472-1, ISO 3745 / ISO 9614-3)
     generate_scattering_coefficient,
     generate_diffusion_polar,
+    generate_diffuser_prediction,
     generate_insitu_absorption,
     generate_precision_anechoic_power,
     generate_intensity_scan_power,

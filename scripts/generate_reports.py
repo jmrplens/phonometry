@@ -676,6 +676,11 @@ def _floor_covering_example() -> tuple[object, ReportMetadata, str]:
         operator="phonometry",
         report_id="EXAMPLE-16251",
         requirement=20.0,
+        notes=(
+            "Illustrative example. The improvement spectrum is digitized from "
+            "Foret, Chene and Guigou-Carter (Forum Acusticum 2011, ISO/CD "
+            "16251-1 draft), not an accredited measurement."
+        ),
     )
     return result, metadata, "iso16251_floor_covering_example.pdf"
 

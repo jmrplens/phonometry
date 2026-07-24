@@ -250,18 +250,44 @@ a collimated specular beam (d = 0.32) into a wide fan (d = 0.63).
   description="A 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side. The flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63."
 />
 
+The single-plane response below is a real physical field: an in-house COMSOL
+finite-element free-field simulation of an $N = 7$ quadratic-residue diffuser
+and its flat reference panel at 1000 Hz, normal incidence, sampled on the
+standard 37-point semicircle (5° spacing, $-90°$ to $+90°$) in the plane of
+maximum diffusion, produced by the maintainer (J. M. Requena-Plens). The polar
+levels are $L_i = 20\,\lg|p_i|$; the diffusion coefficient is cross-validated
+against an independent MATLAB implementation of ISO 17497-2 Formula (5), and
+the same values drive the phonometry conformance suite.
+
 ```python
 from phonometry import materials
 
-# Polar response of a diffuser (levels in dB at equally spaced receivers).
-levels = [70.0, 74.0, 68.0, 72.0]
-d = materials.directional_diffusion_coefficient(levels)   # Formula (5)
-print(round(float(d), 4))            # 0.7367
+# Reflected levels L_i (dB) on the 37-point semicircle of an N = 7 QRD.
+levels_qrd = [
+    61.443, 60.511, 55.791, 51.232, 56.85, 59.48, 59.919, 59.14, 58.339,
+    58.366, 58.985, 59.558, 59.611, 59.294, 58.611, 57.655, 56.798, 56.2,
+    55.546, 55.677, 56.044, 56.575, 57.134, 57.315, 56.918, 55.867, 53.531,
+    50.622, 50.659, 54.334, 57.268, 58.66, 57.916, 52.472, 46.71, 58.406,
+    61.443,
+]
+# The flat reference panel on the same arc: a strong specular pair of lobes.
+levels_flat = [
+    73.804, 72.804, 69.83, 63.815, 50.582, 50.868, 54.513, 52.14, 46.395,
+    34.212, 22.254, 24.862, 18.418, 31.312, 34.995, 36.243, 36.561, 36.589,
+    37.443, 37.472, 37.49, 37.28, 36.3, 33.366, 25.005, 19.73, 19.306,
+    33.885, 46.012, 51.814, 54.227, 50.513, 50.823, 63.842, 69.835, 72.802,
+    73.804,
+]
 
-# Normalise against a flat reference surface to isolate the diffuser's effect
+d = materials.directional_diffusion_coefficient(levels_qrd)    # Formula (5)
+print(round(float(d), 4))            # 0.7572
+d_ref = materials.directional_diffusion_coefficient(levels_flat)
+print(round(float(d_ref), 4))        # 0.1391
+
+# Normalise against the flat reference to isolate the diffuser's own effect
 # (Formula (7)): d_n = (d - d_ref) / (1 - d_ref).
-d_n = materials.normalized_diffusion_coefficient(d, 0.10)
-print(round(float(d_n), 4))          # 0.7075
+d_n = materials.normalized_diffusion_coefficient(d, d_ref)
+print(round(float(d_n), 4))          # 0.718
 
 # Random-incidence value: average the band coefficients over source positions,
 # with the standard's 2-D weighting (0 deg -> 1, +/-30/+/-60 deg -> 3).
@@ -271,30 +297,27 @@ print(round(float(d_random), 4))     # 0.2231
 ```
 
 `directional_diffusion` keeps the receiver angles beside the levels of a full
-goniometer sweep and returns a plottable `DiffusionResult`:
+goniometer sweep and returns a plottable `DiffusionResult`. Reusing the QRD
+polar levels from above:
 
 ```python
 import numpy as np
 from phonometry import materials
 
-# A goniometer sweep of a diffusing surface: reflected levels L_i at 37
-# receivers from -90 to 90 deg (5 deg spacing). The energy is spread almost
-# uniformly over angle, so the Formula (5) coefficient d is high.
+# levels_qrd: the 37 QRD levels defined in the example above.
 angles = np.arange(-90.0, 90.5, 5.0)
-rng = np.random.default_rng(3)
-levels = 70.0 + 2.0 * np.sin(np.radians(angles) * 3.0) + rng.normal(0.0, 1.0, angles.size)
 
-result = materials.directional_diffusion(angles, levels)
-print(round(result.coefficient, 2))   # 0.82
+result = materials.directional_diffusion(angles, levels_qrd)
+print(round(result.coefficient, 2))   # 0.76
 result.plot()   # polar reflected response, d in the title (needs matplotlib)
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar.svg" alt="A polar plot of the reflected sound-pressure level of a diffusing surface over 37 receivers from -90 to 90 degrees, the response spread almost uniformly over angle, giving an autocorrelation diffusion coefficient d of about 0.82" width="72%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar.svg" alt="A polar plot of the reflected sound-pressure level of an N=7 quadratic-residue diffuser over 37 receivers from -90 to 90 degrees, the energy spread across the semicircle in several lobes, giving an autocorrelation diffusion coefficient d of about 0.76" width="72%" />
 
-*The reflected energy fills the whole semicircle rather than concentrating in a
-specular lobe, so the autocorrelation diffusion coefficient is high
-($d \approx 0.82$). A flat surface would collapse the response into a narrow
-spike and drive $d$ towards zero.*
+*The QRD spreads the reflected energy across the semicircle into several lobes
+rather than one specular spike, so the autocorrelation diffusion coefficient is
+high ($d \approx 0.76$). The flat reference panel collapses the response into a
+narrow specular pair and drops to $d \approx 0.14$.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -304,13 +327,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import materials
 
-# A goniometer sweep of a diffusing surface: reflected levels L_i at 37
-# receivers from -90 to 90 deg (5 deg spacing). The energy is spread almost
-# uniformly over angle, so the Formula (5) coefficient d is high.
+# levels_qrd: the 37 reflected levels L_i of the N = 7 QRD from the example
+# above (COMSOL far-field, 1000 Hz, normal incidence), on the -90..90 deg,
+# 5 deg semicircle. The energy spreads into several lobes, so the Formula (5)
+# coefficient d is high.
 angles = np.arange(-90.0, 90.5, 5.0)
-rng = np.random.default_rng(3)
-levels = 70.0 + 2.0 * np.sin(np.radians(angles) * 3.0) + rng.normal(0.0, 1.0, angles.size)
-result = materials.directional_diffusion(angles, levels)
+result = materials.directional_diffusion(angles, levels_qrd)
 
 # result is the DiffusionResult computed above. One line:
 result.plot()

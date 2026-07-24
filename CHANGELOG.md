@@ -1852,6 +1852,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   row and a clean-room test assert the rating, the worked example and its
   figure and example report now show the measured carpet, and the guide cites
   the source (mirrored in Spanish).
+- ISO 17497-2 directional diffusion coefficient: the conformance suite and the
+  Surface Scattering guide now use a real polar response instead of the former
+  hand-made four-level pattern. The oracle is a boundary-element (COMSOL)
+  free-field prediction of an N = 7 quadratic-residue diffuser and its flat
+  reference panel at 1000 Hz, normal incidence, reduced to the standard
+  37-receiver single-plane semicircle (5 deg spacing) in the plane of maximum
+  diffusion. It gives the directional diffusion coefficient d_theta = 0.7572
+  (QRD) and 0.1391 (flat), and the normalised d_theta,n = 0.7180 (Formula (7)),
+  reproduced to 1e-6, with clean-room tests re-deriving Formula (5) from the
+  levels independently.
 - Docs theory reference: the Vibration page now lists in its `references`
   frontmatter the four structure-borne sources cited on the point-mobility and
   radiation-efficiency section (Cremer, Heckl and Petersson, Structure-borne

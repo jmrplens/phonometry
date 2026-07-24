@@ -136,8 +136,10 @@ at the zenith). Normalizing against a flat reference reflector of the same
 size removes edge diffraction (clause 8.2, Formula 7):
 $d_{\theta,n} = (d_\theta - d_{\theta,r})/(1 - d_{\theta,r})$. The
 random-incidence value averages the source angles with weights 1:3:3:3:3 for
-0°, ±30°, ±60° (clause 8.4). Anchors: levels (70, 74, 68, 72) dB →
-$d = 0.7367$; zenith area factor 1.5710.
+0°, ±30°, ±60° (clause 8.4). Anchor: the 37-receiver single-plane arc of a
+COMSOL N = 7 quadratic-residue diffuser at 1000 Hz (Requena-Plens, UPV MSc
+thesis, 2018) gives $d_\theta = 0.7572$, its flat reference $0.1391$, and
+$d_{\theta,n} = 0.7180$; zenith area factor 1.5710.
 
 See the [Surface Scattering guide](/phonometry/guides/surface-scattering/) for usage.
 

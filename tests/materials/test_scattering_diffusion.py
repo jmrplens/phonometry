@@ -28,6 +28,11 @@ from reference_data import (
     ISO17497_1_CHAIN_ALPHA_S,
     ISO17497_1_CHAIN_ALPHA_SPEC,
     ISO17497_1_CHAIN_SCATTERING,
+    ISO17497_2_FLAT_DIFFUSION,
+    ISO17497_2_FLAT_LEVELS,
+    ISO17497_2_NORMALIZED_DIFFUSION,
+    ISO17497_2_QRD_DIFFUSION,
+    ISO17497_2_QRD_LEVELS,
 )
 
 from phonometry.materials.scattering_diffusion import (
@@ -277,6 +282,54 @@ def test_diffusion_matches_formula_5_by_hand() -> None:
     expected = (p.sum() ** 2 - (p**2).sum()) / ((n - 1) * (p**2).sum())
     assert directional_diffusion_coefficient(levels) == pytest.approx(expected)
     assert 0.0 <= directional_diffusion_coefficient(levels) <= 1.0
+
+
+# ---------------------------------------------------------------------------
+# ISO 17497-2 oracle: single-plane semicircular arc (37 receivers, 5 deg) of an
+# in-house COMSOL finite-element free-field simulation of an N = 7
+# quadratic-residue diffuser and its flat reference at 1000 Hz, normal
+# incidence, produced by the maintainer and cross-validated against an
+# independent MATLAB implementation of ISO 17497-2 Formula (5). The expected
+# coefficients below are the values that simulated field yields for the
+# committed levels; the checks confirm phonometry reproduces them from the
+# levels alone (Formula (5)) and normalises them (Formula (7)). This is
+# in-house simulation data, not a third-party published measurement.
+# ---------------------------------------------------------------------------
+def test_diffusion_qrd_arc_matches_simulation_oracle() -> None:
+    d = directional_diffusion_coefficient(list(ISO17497_2_QRD_LEVELS))
+    assert len(ISO17497_2_QRD_LEVELS) == 37
+    assert d == pytest.approx(ISO17497_2_QRD_DIFFUSION, abs=1e-6)
+    assert 0.0 <= d <= 1.0
+
+
+def test_diffusion_flat_arc_matches_simulation_oracle() -> None:
+    d = directional_diffusion_coefficient(list(ISO17497_2_FLAT_LEVELS))
+    assert len(ISO17497_2_FLAT_LEVELS) == 37
+    assert d == pytest.approx(ISO17497_2_FLAT_DIFFUSION, abs=1e-6)
+    # The flat reference disperses far less than the QRD (redirection, not
+    # dispersion), so its directional diffusion coefficient is much lower.
+    assert d < directional_diffusion_coefficient(list(ISO17497_2_QRD_LEVELS))
+
+
+def test_diffusion_qrd_normalized_matches_simulation_oracle() -> None:
+    d_qrd = directional_diffusion_coefficient(list(ISO17497_2_QRD_LEVELS))
+    d_flat = directional_diffusion_coefficient(list(ISO17497_2_FLAT_LEVELS))
+    d_n = float(normalized_diffusion_coefficient(d_qrd, d_flat))
+    assert d_n == pytest.approx(ISO17497_2_NORMALIZED_DIFFUSION, abs=1e-6)
+    # The QRD diffuses more than its flat reference, so removing the reference
+    # baseline leaves a positive, bounded normalised coefficient.
+    assert 0.0 < d_n < 1.0
+    assert d_n > d_flat
+
+
+def test_diffusion_qrd_arc_independent_energy_recompute() -> None:
+    # Independent re-derivation of Formula (5) with plain energy arithmetic,
+    # not calling the library kernel through any shared helper.
+    levels = np.asarray(ISO17497_2_QRD_LEVELS, dtype=float)
+    p = 10.0 ** (levels / 10.0)
+    n = levels.size
+    expected = (p.sum() ** 2 - (p**2).sum()) / ((n - 1) * (p**2).sum())
+    assert expected == pytest.approx(ISO17497_2_QRD_DIFFUSION, abs=1e-6)
 
 
 def test_diffusion_formula_6_reduces_to_5_for_uniform_weights() -> None:

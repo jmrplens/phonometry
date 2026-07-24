@@ -256,18 +256,45 @@ colimado (d = 0,32) en un abanico ancho (d = 0,63).
   description="Simulación FDTD 2D de un frente de onda plano incidiendo sobre un panel rígido plano y un difusor de Schroeder de residuos cuadráticos lado a lado. El panel plano devuelve un haz especular colimado mientras que los pozos del difusor reparten la misma energía en un abanico ancho, y el campo dispersado sobre un arco de receptores da coeficientes de difusión de 0,32 frente a 0,63."
 />
 
+La respuesta de un solo plano de abajo es un campo físico real: una simulación
+propia en campo libre por elementos finitos (COMSOL) de un difusor de residuos
+cuadráticos $N = 7$ y su panel de referencia plano a 1000 Hz, incidencia normal,
+muestreada en el semicírculo estándar de 37 puntos (espaciado de 5°, de $-90°$ a
+$+90°$) en el plano de máxima difusión, producida por el mantenedor (J. M.
+Requena-Plens). Los niveles polares son $L_i = 20\,\lg|p_i|$; el coeficiente de
+difusión se valida de forma cruzada frente a una implementación MATLAB
+independiente de la Fórmula (5) de la ISO 17497-2, y los mismos valores
+alimentan el conjunto de conformidad de phonometry.
+
 ```python
 from phonometry import materials
 
-# Respuesta polar de un difusor (niveles en dB en receptores equiespaciados).
-levels = [70.0, 74.0, 68.0, 72.0]
-d = materials.directional_diffusion_coefficient(levels)   # fórmula (5)
-print(round(float(d), 4))            # 0.7367
+# Niveles reflejados L_i (dB) en el semicírculo de 37 puntos de un QRD N = 7.
+levels_qrd = [
+    61.443, 60.511, 55.791, 51.232, 56.85, 59.48, 59.919, 59.14, 58.339,
+    58.366, 58.985, 59.558, 59.611, 59.294, 58.611, 57.655, 56.798, 56.2,
+    55.546, 55.677, 56.044, 56.575, 57.134, 57.315, 56.918, 55.867, 53.531,
+    50.622, 50.659, 54.334, 57.268, 58.66, 57.916, 52.472, 46.71, 58.406,
+    61.443,
+]
+# El panel de referencia plano en el mismo arco: un par de lóbulos especulares.
+levels_flat = [
+    73.804, 72.804, 69.83, 63.815, 50.582, 50.868, 54.513, 52.14, 46.395,
+    34.212, 22.254, 24.862, 18.418, 31.312, 34.995, 36.243, 36.561, 36.589,
+    37.443, 37.472, 37.49, 37.28, 36.3, 33.366, 25.005, 19.73, 19.306,
+    33.885, 46.012, 51.814, 54.227, 50.513, 50.823, 63.842, 69.835, 72.802,
+    73.804,
+]
 
-# Normaliza frente a una superficie de referencia plana para aislar el efecto del
+d = materials.directional_diffusion_coefficient(levels_qrd)    # fórmula (5)
+print(round(float(d), 4))            # 0.7572
+d_ref = materials.directional_diffusion_coefficient(levels_flat)
+print(round(float(d_ref), 4))        # 0.1391
+
+# Normaliza frente a la referencia plana para aislar el efecto propio del
 # difusor (fórmula (7)): d_n = (d - d_ref) / (1 - d_ref).
-d_n = materials.normalized_diffusion_coefficient(d, 0.10)
-print(round(float(d_n), 4))          # 0.7075
+d_n = materials.normalized_diffusion_coefficient(d, d_ref)
+print(round(float(d_n), 4))          # 0.718
 
 # Valor de incidencia aleatoria: promedia los coeficientes de banda sobre las
 # posiciones de fuente, con la ponderación 2-D de la norma (0 grados -> 1,
@@ -279,30 +306,26 @@ print(round(float(d_random), 4))     # 0.2231
 
 `directional_diffusion` mantiene los ángulos de los receptores junto a los
 niveles de un barrido completo de goniómetro y devuelve un `DiffusionResult`
-representable:
+representable. Reutilizando los niveles polares del QRD de arriba:
 
 ```python
 import numpy as np
 from phonometry import materials
 
-# Un barrido de goniómetro de una superficie difusora: niveles reflejados L_i en
-# 37 receptores de -90 a 90 grados (espaciado de 5 grados). La energía se reparte
-# casi uniformemente en ángulo, así que el coeficiente d de la fórmula (5) es alto.
+# levels_qrd: los 37 niveles del QRD definidos en el ejemplo de arriba.
 angles = np.arange(-90.0, 90.5, 5.0)
-rng = np.random.default_rng(3)
-levels = 70.0 + 2.0 * np.sin(np.radians(angles) * 3.0) + rng.normal(0.0, 1.0, angles.size)
 
-result = materials.directional_diffusion(angles, levels)
-print(round(result.coefficient, 2))   # 0.82
+result = materials.directional_diffusion(angles, levels_qrd)
+print(round(result.coefficient, 2))   # 0.76
 result.plot()   # respuesta polar reflejada, d en el título (requiere matplotlib)
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar_es.svg" alt="Un diagrama polar del nivel de presión sonora reflejado de una superficie difusora sobre 37 receptores de -90 a 90 grados, con la respuesta repartida casi uniformemente en ángulo, dando un coeficiente de difusión por autocorrelación d de aproximadamente 0,82" width="72%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar_es.svg" alt="Un diagrama polar del nivel de presión sonora reflejado de un difusor de residuos cuadráticos N=7 sobre 37 receptores de -90 a 90 grados, con la energía repartida por el semicírculo en varios lóbulos, dando un coeficiente de difusión por autocorrelación d de aproximadamente 0,76" width="72%" />
 
-*La energía reflejada llena todo el semicírculo en lugar de concentrarse en un
-lóbulo especular, de modo que el coeficiente de difusión por autocorrelación es
-alto ($d \approx 0{,}82$). Una superficie plana colapsaría la respuesta en un pico
-estrecho y llevaría $d$ hacia cero.*
+*El QRD reparte la energía reflejada por el semicírculo en varios lóbulos en
+lugar de un único pico especular, de modo que el coeficiente de difusión por
+autocorrelación es alto ($d \approx 0{,}76$). El panel de referencia plano
+colapsa la respuesta en un par especular estrecho y baja a $d \approx 0{,}14$.*
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -312,13 +335,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import materials
 
-# Un barrido de goniómetro de una superficie difusora: niveles reflejados L_i en
-# 37 receptores de -90 a 90 grados (espaciado de 5 grados). La energía se reparte
-# casi uniformemente en ángulo, así que el coeficiente d de la fórmula (5) es alto.
+# levels_qrd: los 37 niveles reflejados L_i del QRD N = 7 del ejemplo de arriba
+# (campo lejano COMSOL, 1000 Hz, incidencia normal), en el semicírculo de -90 a
+# 90 grados con espaciado de 5 grados. La energía se reparte en varios lóbulos,
+# así que el coeficiente d de la fórmula (5) es alto.
 angles = np.arange(-90.0, 90.5, 5.0)
-rng = np.random.default_rng(3)
-levels = 70.0 + 2.0 * np.sin(np.radians(angles) * 3.0) + rng.normal(0.0, 1.0, angles.size)
-result = materials.directional_diffusion(angles, levels)
+result = materials.directional_diffusion(angles, levels_qrd)
 
 # result es el DiffusionResult calculado arriba. En una línea:
 result.plot()

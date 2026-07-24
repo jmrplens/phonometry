@@ -3110,10 +3110,24 @@ def _chk_iso17497_1_uncertainty() -> Outcome:
     return numeric(ref.ISO17497_1_A5_U_SCATTERING, u, 1e-6, places=5)
 
 
-@register(_SCATTERING, "ISO 17497-2:2012 Formula (5)", "Diffusion coefficient (autocorrelation)")
-def _chk_iso17497_2_diffusion() -> Outcome:
-    d = float(ph.directional_diffusion_coefficient(list(ref.ISO17497_2_DIFFUSION_LEVELS)))
-    return numeric(ref.ISO17497_2_DIFFUSION_COEFF, d, 1e-9, places=4)
+@register(_SCATTERING, "ISO 17497-2:2012 Formula (5)", "Directional diffusion coefficient (QRD, COMSOL)")
+def _chk_iso17497_2_diffusion_qrd() -> Outcome:
+    d = float(ph.directional_diffusion_coefficient(list(ref.ISO17497_2_QRD_LEVELS)))
+    return numeric(ref.ISO17497_2_QRD_DIFFUSION, d, 1e-6, places=4)
+
+
+@register(_SCATTERING, "ISO 17497-2:2012 Formula (5)", "Directional diffusion coefficient (flat reference)")
+def _chk_iso17497_2_diffusion_flat() -> Outcome:
+    d = float(ph.directional_diffusion_coefficient(list(ref.ISO17497_2_FLAT_LEVELS)))
+    return numeric(ref.ISO17497_2_FLAT_DIFFUSION, d, 1e-6, places=4)
+
+
+@register(_SCATTERING, "ISO 17497-2:2012 Formula (7)", "Normalised diffusion coefficient (QRD, COMSOL)")
+def _chk_iso17497_2_diffusion_normalized() -> Outcome:
+    d_qrd = ph.directional_diffusion_coefficient(list(ref.ISO17497_2_QRD_LEVELS))
+    d_flat = ph.directional_diffusion_coefficient(list(ref.ISO17497_2_FLAT_LEVELS))
+    d_n = float(ph.normalized_diffusion_coefficient(d_qrd, d_flat))
+    return numeric(ref.ISO17497_2_NORMALIZED_DIFFUSION, d_n, 1e-6, places=4)
 
 
 @register(_SCATTERING, "ISO 17497-2:2012 Formula (8)", "Zenith area factor (radians convention)")

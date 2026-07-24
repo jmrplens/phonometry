@@ -52,7 +52,7 @@ phonometry (a passive medium has `Im(k) < 0`):
   radiation end correction of Eqs. (A24)-(A26).
 
 * **Transfer matrix.** The panel is the chain
-  `M_dl (M_s M_HR M_s) ... ` of half-lattice slit steps (Appl. Sci. Eq. (2)),
+  `M_dl (M_s M_HR M_s)...` of half-lattice slit steps (Appl. Sci. Eq. (2)),
   resonators as point shunt scatterers (Eq. (3)) and the slit-radiation end
   correction (Eq. (3)/(A27)). The rigidly-backed reflection factor is
   `R = (T11 cos(theta) - Z0 T21) / (T11 cos(theta) + Z0 T21)` with
@@ -115,7 +115,7 @@ balance) to meet both conditions, so `alpha ~ 1` at the design point.
 | `heat_capacity_ratio` | Ratio of specific heats `gamma`. |
 | `atmospheric_pressure` | Static pressure `P0`, in Pa. |
 
-**Returns:** A [`CriticalCouplingResult`](/phonometry/reference/api/materials/slow-sound-absorber/#criticalcouplingresult). A [`SlowSoundAbsorberWarning`](/phonometry/reference/api/materials/slow-sound-absorber/#slowsoundabsorberwarning) is raised if the solver does not reach perfect absorption within tolerance.
+**Returns:** A [`CriticalCouplingResult`](/phonometry/reference/api/materials/slow-sound-absorber/#criticalcouplingresult). A [`SlowSoundAbsorberWarning`](/phonometry/reference/api/materials/slow-sound-absorber/#slowsoundabsorberwarning) is emitted (via `warnings.warn`) if the solver does not reach perfect absorption within tolerance.
 
 ## CriticalCouplingResult
 

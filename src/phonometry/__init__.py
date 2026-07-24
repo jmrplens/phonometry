@@ -493,6 +493,14 @@ from .materials.airflow_resistance import (
     static_airflow_resistance,
     thermal_boundary_layer_thickness,
 )
+from .materials.diffuser_design import (
+    DEFAULT_POLAR_ANGLES,
+    DiffuserPolarResponse,
+    predict_diffuser_polar_response,
+    predicted_diffusion_spectrum,
+    qrd_well_depths,
+    quadratic_residue_sequence,
+)
 from .materials.dynamic_stiffness import (
     DynamicStiffnessResult,
     DynamicStiffnessWarning,
@@ -1079,6 +1087,12 @@ from .vibration.transfer_stiffness import (
 
 # Public methods
 __all__ = [
+    "DEFAULT_POLAR_ANGLES",
+    "DiffuserPolarResponse",
+    "predict_diffuser_polar_response",
+    "predicted_diffusion_spectrum",
+    "qrd_well_depths",
+    "quadratic_residue_sequence",
     "BASE_PLATE_BANDS",
     "BASE_PLATE_MAX_SCATTERING",
     "COVERAGE_FACTOR",

@@ -15,6 +15,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and apply the new lint fixes across the tree. No runtime behavior changes.
 
 ### Added
+- `materials.diffuser_design`: far-field polar-response and diffusion-coefficient
+  prediction of a Schroeder phase-grating diffuser from its surface design,
+  complementing the measurement-only `materials.scattering_diffusion`.
+  `predict_diffuser_polar_response()` evaluates the single-plane Fraunhofer
+  (Fourier) far-field model of Cox and D'Antonio (Eqs. (5.8)/(9.32)): each
+  rigid-bottom well of depth `d_n` contributes a pressure reflection
+  coefficient `R_n = exp(-2 j k d_n)` and the scattered pressure at each
+  reflection angle is the sum over the wells of the periodic surface, reduced
+  to the ISO 17497-2 directional diffusion coefficient through the existing
+  `directional_diffusion_coefficient`. `predicted_diffusion_spectrum()` returns
+  a `DiffusionSpectrum` of the predicted diffusion `d(f)`, normalised band by
+  band against the same-footprint flat reference (Formula (7)). Quadratic
+  residue diffuser geometry is provided by `quadratic_residue_sequence()`
+  (Eq. (10.2), `s_n = n^2 mod N`) and `qrd_well_depths()` (Eq. (10.3),
+  `d_n = s_n * lambda_0 / (2 N)`); an arbitrary user depth sequence or an
+  explicit complex per-well `reflection` sequence (for admittance or
+  resonator-loaded surfaces) is accepted directly. The `DiffuserPolarResponse`
+  result exposes the per-angle predicted levels, the directional diffusion
+  coefficient and `.plot()` (a semicircular polar diagram, English and Spanish).
+  This is a far-field design estimate, not a substitute for an ISO 17497-2
+  measurement.
 - `StaticAirflowResult.report()`: a one-page PDF material airflow-resistance
   test report (ISO 9053-1:2018, static/direct airflow method). The fiche
   carries a standard-basis line, an optional metadata header (client,

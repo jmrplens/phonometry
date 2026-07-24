@@ -3122,6 +3122,39 @@ def _chk_iso17497_2_area_factor() -> Outcome:
     return numeric(ref.ISO17497_2_AREA_FACTOR_ZENITH, float(n[0]), 1e-6, places=5)
 
 
+@register(_SCATTERING, "Cox & D'Antonio Eq (10.3)", "QRD deepest well depth (N=7, f0=500 Hz)")
+def _chk_diffuser_qrd_depth() -> Outcome:
+    d = ph.qrd_well_depths(7, 500.0, speed_of_sound=343.0)
+    return numeric(ref.DIFFUSER_QRD7_MAX_DEPTH, float(d.max()), 1e-12, unit="m", places=4)
+
+
+@register(_SCATTERING, "Cox & D'Antonio Eq (5.8) + ISO 17497-2 Formula (7)",
+          "Flat-panel predicted normalised diffusion (self-reference zero)")
+def _chk_diffuser_flat_normalized() -> Outcome:
+    spectrum = ph.predicted_diffusion_spectrum(
+        0.10, [2000.0], depths=[0.0] * 7, periods=5
+    )
+    assert spectrum.normalized is not None
+    return numeric(
+        ref.DIFFUSER_FLAT_NORMALIZED_DIFFUSION,
+        float(spectrum.normalized[0]), 1e-12, places=6,
+    )
+
+
+@register(_SCATTERING, "Cox & D'Antonio Eq (5.8) + ISO 17497-2 Formula (7)",
+          "QRD predicted normalised diffusion at 2 kHz (above flat panel)")
+def _chk_diffuser_qrd_normalized() -> Outcome:
+    depths = ph.qrd_well_depths(7, 500.0, speed_of_sound=343.0)
+    spectrum = ph.predicted_diffusion_spectrum(
+        0.10, [2000.0], depths=depths, periods=5
+    )
+    assert spectrum.normalized is not None
+    return numeric(
+        ref.DIFFUSER_QRD7_NORMALIZED_DIFFUSION_2K,
+        float(spectrum.normalized[0]), 1e-9, places=4,
+    )
+
+
 # ---------------------------------------------------------------------------
 # In-situ road-surface absorption (ISO 13472-1/-2)
 # ---------------------------------------------------------------------------

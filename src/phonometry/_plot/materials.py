@@ -621,6 +621,40 @@ def _absorption_spectrum_axes(
     return ax
 
 
+def _absorption_reflection_axes(
+    ax: "Axes | None",
+    freqs: np.ndarray,
+    alpha: np.ndarray,
+    reflection: np.ndarray,
+    *,
+    title: str,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Shared alpha(f) + |R| renderer for the oblique-incidence absorbers.
+
+    Draws the absorption spectrum as the primary curve and overlays the
+    reflection-factor magnitude as a muted dashed companion, then adds the
+    legend. Used by the layered-absorber and slit-resonator predictions.
+    """
+    ax = _absorption_spectrum_axes(
+        ax,
+        freqs,
+        alpha,
+        title=title,
+        label=_t(r"Absorption $\alpha(\theta)$", language),
+        language=language,
+        **kwargs,
+    )
+    ax.semilogx(
+        freqs,
+        np.abs(np.asarray(reflection, dtype=np.complex128)),
+        ls="--", color=_C_MUTED, label=_t("Reflection factor $|R|$", language),
+    )
+    ax.legend(loc="best", fontsize="small")
+    return ax
+
+
 def plot_porous_medium(
     result: PorousMediumResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
@@ -685,22 +719,15 @@ def plot_layered_absorber(
                  f"($\\theta$ = {format_number(float(angle_deg), language, decimals=0)}°)")
     else:
         title = f"Layered absorber prediction ($\\theta$ = {angle_deg:.0f}°)"
-    ax = _absorption_spectrum_axes(
+    return _absorption_reflection_axes(
         ax,
         np.asarray(result.frequency, dtype=np.float64),
         np.asarray(result.absorption, dtype=np.float64),
+        np.asarray(result.reflection, dtype=np.complex128),
         title=title,
-        label=_t(r"Absorption $\alpha(\theta)$", language),
         language=language,
         **kwargs,
     )
-    ax.semilogx(
-        np.asarray(result.frequency, dtype=np.float64),
-        np.abs(np.asarray(result.reflection, dtype=np.complex128)),
-        ls="--", color=_C_MUTED, label=_t("Reflection factor $|R|$", language),
-    )
-    ax.legend(loc="best", fontsize="small")
-    return ax
 
 
 def plot_slit_resonator_absorber(
@@ -727,22 +754,15 @@ def plot_slit_resonator_absorber(
     else:
         title = (f"Slit panel with Helmholtz resonators "
                  f"($\\theta$ = {angle_deg:.0f}°)")
-    ax = _absorption_spectrum_axes(
+    return _absorption_reflection_axes(
         ax,
         np.asarray(result.frequency, dtype=np.float64),
         np.asarray(result.absorption, dtype=np.float64),
+        np.asarray(result.reflection, dtype=np.complex128),
         title=title,
-        label=_t(r"Absorption $\alpha(\theta)$", language),
         language=language,
         **kwargs,
     )
-    ax.semilogx(
-        np.asarray(result.frequency, dtype=np.float64),
-        np.abs(np.asarray(result.reflection, dtype=np.complex128)),
-        ls="--", color=_C_MUTED, label=_t("Reflection factor $|R|$", language),
-    )
-    ax.legend(loc="best", fontsize="small")
-    return ax
 
 
 def plot_diffuse_field_absorption(

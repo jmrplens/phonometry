@@ -184,9 +184,11 @@ def test_prime_must_be_odd_prime() -> None:
 def test_requires_exactly_one_of_depths_or_reflection() -> None:
     with pytest.raises(ValueError, match="exactly one"):
         predict_diffuser_polar_response(0.10, 1000.0)
+    depths = np.zeros(7)
+    reflection = np.ones(7)
     with pytest.raises(ValueError, match="exactly one"):
         predict_diffuser_polar_response(
-            0.10, 1000.0, depths=np.zeros(7), reflection=np.ones(7)
+            0.10, 1000.0, depths=depths, reflection=reflection
         )
 
 
@@ -216,7 +218,9 @@ def test_spectrum_requires_depths() -> None:
 
 
 def test_spectrum_reserved_reflection_argument() -> None:
+    depths = np.zeros(7)
+    reserved = object()
     with pytest.raises(ValueError, match="reflection_of"):
         predicted_diffusion_spectrum(
-            0.10, [500.0], depths=np.zeros(7), reflection_of=object()
+            0.10, [500.0], depths=depths, reflection_of=reserved
         )

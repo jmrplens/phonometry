@@ -285,22 +285,24 @@ def test_diffusion_matches_formula_5_by_hand() -> None:
 
 
 # ---------------------------------------------------------------------------
-# ISO 17497-2 real oracle: single-plane semicircular arc (37 receivers, 5 deg)
-# of a COMSOL boundary-element prediction of an N = 7 quadratic-residue
-# diffuser and its flat reference at 1000 Hz, normal incidence (Requena-Plens,
-# UPV MSc thesis, 2018). The expected coefficients below are the values the
-# thesis field yields for the committed levels; the checks confirm phonometry
-# reproduces them from the levels alone (Formula (5)) and normalises them
-# (Formula (7)) - a clean-room end-to-end oracle from real measured-like data.
+# ISO 17497-2 oracle: single-plane semicircular arc (37 receivers, 5 deg) of an
+# in-house COMSOL finite-element free-field simulation of an N = 7
+# quadratic-residue diffuser and its flat reference at 1000 Hz, normal
+# incidence, produced by the maintainer and cross-validated against an
+# independent MATLAB implementation of ISO 17497-2 Formula (5). The expected
+# coefficients below are the values that simulated field yields for the
+# committed levels; the checks confirm phonometry reproduces them from the
+# levels alone (Formula (5)) and normalises them (Formula (7)). This is
+# in-house simulation data, not a third-party published measurement.
 # ---------------------------------------------------------------------------
-def test_diffusion_qrd_arc_matches_thesis_oracle() -> None:
+def test_diffusion_qrd_arc_matches_simulation_oracle() -> None:
     d = directional_diffusion_coefficient(list(ISO17497_2_QRD_LEVELS))
     assert len(ISO17497_2_QRD_LEVELS) == 37
     assert d == pytest.approx(ISO17497_2_QRD_DIFFUSION, abs=1e-6)
     assert 0.0 <= d <= 1.0
 
 
-def test_diffusion_flat_arc_matches_thesis_oracle() -> None:
+def test_diffusion_flat_arc_matches_simulation_oracle() -> None:
     d = directional_diffusion_coefficient(list(ISO17497_2_FLAT_LEVELS))
     assert len(ISO17497_2_FLAT_LEVELS) == 37
     assert d == pytest.approx(ISO17497_2_FLAT_DIFFUSION, abs=1e-6)
@@ -309,7 +311,7 @@ def test_diffusion_flat_arc_matches_thesis_oracle() -> None:
     assert d < directional_diffusion_coefficient(list(ISO17497_2_QRD_LEVELS))
 
 
-def test_diffusion_qrd_normalized_matches_thesis_oracle() -> None:
+def test_diffusion_qrd_normalized_matches_simulation_oracle() -> None:
     d_qrd = directional_diffusion_coefficient(list(ISO17497_2_QRD_LEVELS))
     d_flat = directional_diffusion_coefficient(list(ISO17497_2_FLAT_LEVELS))
     d_n = float(normalized_diffusion_coefficient(d_qrd, d_flat))

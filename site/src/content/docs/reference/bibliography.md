@@ -328,6 +328,14 @@ list grows as guides gain their References sections.
   authors behind the ISO 17497-2 diffusion-coefficient method.
   Cited by [Acoustic Materials](/phonometry/guides/materials/) and
   [Surface Scattering, Diffusion and In-situ Absorption](/phonometry/guides/surface-scattering/).
+- Jiménez, N., Umnova, O., & Groby, J.-P. (Eds.). (2021). *Acoustic waves in
+  periodic structures, metamaterials, and porous media* (Topics in Applied
+  Physics, Vol. 143). Springer.
+  [doi:10.1007/978-3-030-84300-7](https://doi.org/10.1007/978-3-030-84300-7).
+  An edited umbrella volume on resonant and periodic sound-absorbing and
+  sound-diffusing structures, from the transfer-matrix and critical-coupling
+  theory of metamaterial absorbers to deep-subwavelength diffusers; the modern
+  metamaterials companion to Cox & D'Antonio.
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [iso.org catalogue](https://www.iso.org/standard/34545.html).

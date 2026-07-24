@@ -18,6 +18,35 @@ references:
     publisher: "Wiley"
     doi: "10.1002/9780470747339"
     note: "ISBN 978-0-470-74661-5. The porous-material theory linking the airflow-resistance and impedance-tube quantities of the characterisation section."
+  - type: article
+    authors: ["Jiménez, N.", "Cox, T. J.", "Romero-García, V.", "Groby, J.-P."]
+    year: 2017
+    title: "Metadiffusers: Deep-subwavelength sound diffusers"
+    journal: "Scientific Reports"
+    volume: 7
+    pages: "5389"
+    doi: "10.1038/s41598-017-05710-5"
+    note: "Open access. Deep-subwavelength panel diffusers whose slow-sound resonant slots reach the diffusion of a Schroeder or quadratic-residue diffuser in a fraction of the depth; co-authored with Cox, behind the ISO 17497-2 diffusion-coefficient method."
+  - type: article
+    authors: ["Jiménez, N.", "Groby, J.-P.", "Pagneux, V.", "Romero-García, V."]
+    year: 2017
+    title: "Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method"
+    journal: "Applied Sciences"
+    volume: 7
+    issue: 6
+    pages: "618"
+    doi: "10.3390/app7060618"
+    note: "Open access. A transfer-matrix-method tutorial for rigidly-backed resonant absorbers with the critical-coupling condition for perfect absorption, using the same layer machinery as the multilayer impedance-tube prediction here."
+  - type: article
+    authors: ["Jiménez, N.", "Romero-García, V.", "Groby, J.-P."]
+    year: 2018
+    title: "Perfect absorption of sound by rigidly-backed high-porous materials"
+    journal: "Acta Acustica united with Acustica"
+    volume: 104
+    issue: 3
+    pages: "396-409"
+    doi: "10.3813/AAA.919183"
+    note: "The critical-coupling condition applied to a rigidly-backed layer of ordinary high-porosity absorber, connecting the porous-material models of the characterisation section to perfect single-frequency absorption."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2004

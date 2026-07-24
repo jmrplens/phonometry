@@ -1809,6 +1809,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   integers, matching the existing field-validation style.
 
 ### Changed
+- Docs materials reference: the Materials and Surfaces theory page now cites
+  three open-access works by Jiménez and co-workers alongside Cox & D'Antonio,
+  the metadiffuser paper (Jiménez, Cox, Romero-García and Groby, 2017,
+  Scientific Reports) on the surface-diffusion section and the two
+  critical-coupling perfect-absorption papers (Jiménez, Groby, Pagneux and
+  Romero-García, 2017, Applied Sciences; Jiménez, Romero-García and Groby,
+  2018, Acta Acustica) on the material-characterisation section, and the
+  `scattering_diffusion` and `porous_absorber` module docstrings reference the
+  same works. The bibliography page gains the edited volume Acoustic Waves in
+  Periodic Structures, Metamaterials, and Porous Media (Jiménez, Umnova and
+  Groby, Eds., 2021, Springer) as a metamaterials companion to Cox & D'Antonio.
+  Mirrored in the Spanish pages.
 - Docs theory reference: the Vibration page now lists in its `references`
   frontmatter the four structure-borne sources cited on the point-mobility and
   radiation-efficiency section (Cremer, Heckl and Petersson, Structure-borne

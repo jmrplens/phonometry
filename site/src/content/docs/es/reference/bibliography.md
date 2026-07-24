@@ -339,6 +339,15 @@ que las guías incorporan sus secciones de Referencias.
   autores del método del coeficiente de difusión de ISO 17497-2.
   Citado por [Materiales acústicos](/phonometry/es/guides/materials/) y
   [Dispersión superficial, difusión y absorción in situ](/phonometry/es/guides/surface-scattering/).
+- Jiménez, N., Umnova, O. y Groby, J.-P. (Eds.). (2021). *Acoustic waves in
+  periodic structures, metamaterials, and porous media* (Topics in Applied
+  Physics, Vol. 143). Springer.
+  [doi:10.1007/978-3-030-84300-7](https://doi.org/10.1007/978-3-030-84300-7).
+  Un volumen editado que abarca las estructuras resonantes y periódicas que
+  absorben y difunden el sonido, desde la teoría de la matriz de transferencia
+  y el acoplamiento crítico de los absorbentes de metamaterial hasta los
+  difusores de sublongitud de onda profunda; el complemento moderno sobre
+  metamateriales de Cox & D'Antonio.
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [Catálogo iso.org](https://www.iso.org/standard/34545.html).

@@ -18,6 +18,35 @@ references:
     publisher: "Wiley"
     doi: "10.1002/9780470747339"
     note: "ISBN 978-0-470-74661-5. La teoría del material poroso que enlaza las magnitudes de resistencia al flujo y de tubo de impedancia de la sección de caracterización."
+  - type: article
+    authors: ["Jiménez, N.", "Cox, T. J.", "Romero-García, V.", "Groby, J.-P."]
+    year: 2017
+    title: "Metadiffusers: Deep-subwavelength sound diffusers"
+    journal: "Scientific Reports"
+    volume: 7
+    pages: "5389"
+    doi: "10.1038/s41598-017-05710-5"
+    note: "Acceso abierto. Difusores de panel de sublongitud de onda profunda cuyas ranuras resonantes de sonido lento alcanzan la difusión de un difusor de Schroeder o de residuo cuadrático en una fracción del espesor; en coautoría con Cox, autor del método del coeficiente de difusión de ISO 17497-2."
+  - type: article
+    authors: ["Jiménez, N.", "Groby, J.-P.", "Pagneux, V.", "Romero-García, V."]
+    year: 2017
+    title: "Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method"
+    journal: "Applied Sciences"
+    volume: 7
+    issue: 6
+    pages: "618"
+    doi: "10.3390/app7060618"
+    note: "Acceso abierto. Un tutorial del método de la matriz de transferencia para absorbentes resonantes con terminación rígida y la condición de acoplamiento crítico para la absorción perfecta, con la misma maquinaria por capas que la predicción multicapa del tubo de impedancia de aquí."
+  - type: article
+    authors: ["Jiménez, N.", "Romero-García, V.", "Groby, J.-P."]
+    year: 2018
+    title: "Perfect absorption of sound by rigidly-backed high-porous materials"
+    journal: "Acta Acustica united with Acustica"
+    volume: 104
+    issue: 3
+    pages: "396-409"
+    doi: "10.3813/AAA.919183"
+    note: "La condición de acoplamiento crítico aplicada a una capa de absorbente de alta porosidad con terminación rígida, que conecta los modelos de material poroso de la sección de caracterización con la absorción perfecta a una sola frecuencia."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2004

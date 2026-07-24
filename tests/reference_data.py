@@ -736,13 +736,52 @@ ISO17497_1_A5_U_ALPHA_S = 0.01
 ISO17497_1_A5_U_SCATTERING = 0.0297147342419613  # combined u(s)
 
 # ---------------------------------------------------------------------------
-# ISO 17497-2:2012 diffusion coefficient. Formula (5)/(6) autocorrelation of a
-# polar response; the four-level pattern below is re-derived by hand. Formula
-# (8) area factors use RADIANS internally, so the zenith weight is
+# ISO 17497-2:2012 directional diffusion coefficient d_theta, Formula (5).
+# REAL oracle from a boundary-element (COMSOL) free-field prediction of an
+# N = 7 quadratic-residue diffuser (QRD) and its flat reference panel at
+# 1000 Hz, normal incidence, computed by Jose M. Requena-Plens, "Estudio y
+# caracterizacion de difusores acusticos mediante el metodo de los elementos
+# finitos" (MSc thesis, Universitat Politecnica de Valencia, 2018) and
+# cross-checked against that work's own MATLAB implementation.
+#
+# The thesis field is a dense far-field hemisphere (400 x 400 samples in
+# azimuth theta and elevation phi). To obtain a compact yet faithful oracle we
+# take the standard ISO 17497-2 single-plane semicircular receiver arc: 37
+# receivers at 5 deg spacing over -90 deg .. +90 deg, in the vertical plane of
+# maximum diffusion (azimuth 65.9 deg about the surface normal; the 37 arc
+# points are coplanar to 3.4e-3 of unit radius). Receiver elevations are the
+# nearest COMSOL grid samples to the 5 deg positions (within 0.13 deg); the
+# equal-area Formula (5) uses only the levels, so this labelling does not enter
+# the coefficient. Levels are L_i = 20 lg |p_i| (energy convention), rounded to
+# 1e-3 dB; the coefficients below are recomputed from the rounded levels, so
+# the conformance/test tolerance is a tight 1e-6 (exact arithmetic on the
+# committed levels). For context, the full dense hemisphere flattened with
+# equal weights gives d = 0.5007 (QRD), 0.1487 (flat), d_n = 0.4135; using the
+# amplitude convention L_i = 10 lg |p_i| it gives d = 0.7638, reproducing the
+# thesis MATLAB value bit-for-bit.
+ISO17497_2_QRD_LEVELS: tuple[float, ...] = (
+    61.443, 60.511, 55.791, 51.232, 56.85, 59.48,
+    59.919, 59.14, 58.339, 58.366, 58.985, 59.558,
+    59.611, 59.294, 58.611, 57.655, 56.798, 56.2,
+    55.546, 55.677, 56.044, 56.575, 57.134, 57.315,
+    56.918, 55.867, 53.531, 50.622, 50.659, 54.334,
+    57.268, 58.66, 57.916, 52.472, 46.71, 58.406,
+    61.443,
+)
+ISO17497_2_FLAT_LEVELS: tuple[float, ...] = (
+    73.804, 72.804, 69.83, 63.815, 50.582, 50.868,
+    54.513, 52.14, 46.395, 34.212, 22.254, 24.862,
+    18.418, 31.312, 34.995, 36.243, 36.561, 36.589,
+    37.443, 37.472, 37.49, 37.28, 36.3, 33.366,
+    25.005, 19.73, 19.306, 33.885, 46.012, 51.814,
+    54.227, 50.513, 50.823, 63.842, 69.835, 72.802,
+    73.804,
+)
+ISO17497_2_QRD_DIFFUSION = 0.7572364428264461  # d_theta of the QRD arc, Formula (5)
+ISO17497_2_FLAT_DIFFUSION = 0.1390624505450797  # d_theta of the flat reference arc
+ISO17497_2_NORMALIZED_DIFFUSION = 0.7180241966130375  # d_theta_n, Formula (7)
+# Formula (8) area factors use RADIANS internally, so the zenith weight is
 # N0 = (4*pi/dphi)*sin^2(dtheta/4) / A_min with dtheta = dphi = 5 deg.
-# ---------------------------------------------------------------------------
-ISO17497_2_DIFFUSION_LEVELS: tuple[float, ...] = (70.0, 74.0, 68.0, 72.0)
-ISO17497_2_DIFFUSION_COEFF = 0.7367371379926486  # d from Formula (5)
 ISO17497_2_AREA_FACTOR_ZENITH = 1.571045588794762  # N0, radians convention
 
 # ---------------------------------------------------------------------------

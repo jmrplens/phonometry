@@ -657,7 +657,7 @@ sound_power_pressure(
     surface: Surface,
     *,
     radius: float | None = None,
-    dimensions: Tuple[float, float, float] | None = None,
+    dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
     reflecting_planes: int = 1,
     background_levels: np.ndarray | None = None,

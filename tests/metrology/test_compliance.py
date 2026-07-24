@@ -6,8 +6,8 @@ Tests for the IEC 61260 filter class verifier (2014 classes 1/2 and the
 
 import numpy as np
 import pytest
-
 import reference_data as ref
+
 from phonometry import OctaveFilterBank, verify_filter_class
 from phonometry.metrology.compliance import (
     _PASSBAND_MAX_1995,
@@ -221,8 +221,9 @@ def test_map_breakpoint_reproduces_table_f1() -> None:
     """IEC 61260-1:2014 Table F.1: the Formula (9) mapping reproduces every
     printed one-third-octave (b = 3) breakpoint and reciprocal to the five
     printed decimals."""
-    from phonometry.metrology.compliance import _map_breakpoint
     from reference_data import IEC61260_TABLE_F1
+
+    from phonometry.metrology.compliance import _map_breakpoint
 
     for exponent, (omega, reciprocal) in IEC61260_TABLE_F1.items():
         got = _map_breakpoint(exponent, 3)

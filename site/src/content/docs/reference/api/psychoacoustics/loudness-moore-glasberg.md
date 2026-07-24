@@ -45,7 +45,7 @@ the exact sinusoidal-component method.
 
 ```python
 loudness_moore_glasberg(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: float,
     *,
     field: Literal['free', 'diffuse', 'eardrum'] = 'free',
@@ -80,7 +80,7 @@ calibrated so that `x` is the instantaneous sound pressure in pascals.
 
 ```python
 loudness_moore_glasberg_from_spectrum(
-    components: Sequence[Tuple[float, float]] | np.ndarray,
+    components: Sequence[tuple[float, float]] | np.ndarray,
     *,
     field: Literal['free', 'diffuse', 'eardrum'] = 'free',
     presentation: Literal['binaural', 'diotic', 'monaural'] = 'binaural',

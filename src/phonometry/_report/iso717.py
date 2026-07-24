@@ -35,7 +35,7 @@ from __future__ import annotations
 import html
 import math
 import re
-from typing import TYPE_CHECKING, Any, List, Tuple, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -113,10 +113,10 @@ def _band_symbol_markup(symbol: str) -> str:
 
 
 def _labels(
-    result: "WeightedRatingResult | ImpactRatingResult",
+    result: WeightedRatingResult | ImpactRatingResult,
     language: str = "en",
     symbol: str | None = None,
-) -> Tuple[str, str, str, str]:
+) -> tuple[str, str, str, str]:
     """Return ``(title, rating_part, statement, value_header)`` for the quantity.
 
     ``symbol`` selects the reported single-number quantity (``Rw``, ``R'w``,
@@ -151,13 +151,13 @@ def _labels(
 def _metadata_pairs(
     metadata: ReportMetadata,
     language: str = "en",
-) -> Tuple[List[Tuple[str, str]], List[Tuple[str, str]]]:
+) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
     """Build the two ordered (label, value) groups of the header grid.
 
     Only fields that are set are returned, so empty rows never appear.
     """
 
-    def group(specs: List[Tuple[str, str | None]]) -> List[Tuple[str, str]]:
+    def group(specs: list[tuple[str, str | None]]) -> list[tuple[str, str]]:
         # Values are user-supplied free text; escape XML specials so a '&' or
         # '<' cannot break reportlab's Paragraph parser. Labels are fixed and
         # carry intentional markup (e.g. <super>), so they are left as-is.
@@ -279,22 +279,22 @@ def _value_table(
         # fmt_num; comma for Spanish).
         return format_number(value, language, decimals=1)
 
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for fk, m, r_, d in zip(centers, measured, shifted, deviations):
         if verbose:
             rows.append(
                 [
-                    f"{int(round(fk))}",
+                    f"{round(fk)}",
                     d1(m),
                     format_number(r_, language, decimals=0),
                     d1(d) if d > _DEVIATION_EPS else "—",
                 ]
             )
         else:
-            rows.append([f"{int(round(fk))}", d1(m)])
+            rows.append([f"{round(fk)}", d1(m)])
 
     n_data = len(centers)
-    extra_styles: List[Any] = []
+    extra_styles: list[Any] = []
     if verbose:
         from reportlab.lib import colors
 
@@ -311,11 +311,11 @@ def _value_table(
 
 
 def _verdict(
-    result: "WeightedRatingResult | ImpactRatingResult",
+    result: WeightedRatingResult | ImpactRatingResult,
     requirement: float,
     language: str = "en",
     symbol: str | None = None,
-) -> Tuple[str, bool]:
+) -> tuple[str, bool]:
     """Return the verdict text and a PASS flag for a supplied requirement.
 
     Airborne ratings pass when the rating meets or exceeds the requirement;
@@ -341,15 +341,15 @@ def _verdict(
 
 
 def _extended_terms(
-    result: "WeightedRatingResult | ImpactRatingResult",
-) -> List[str]:
+    result: WeightedRatingResult | ImpactRatingResult,
+) -> list[str]:
     """Return the extended spectrum-adaptation terms the result carries, if any.
 
     The core rating results do not hold the enlarged-range terms, so this is
     normally empty; it only lists terms that are genuinely present on the
     object (never fabricated).
     """
-    terms: List[str] = []
+    terms: list[str] = []
     airborne_specs = [
         ("c_50_3150", "C<sub>50-3150</sub>"),
         ("c_50_5000", "C<sub>50-5000</sub>"),
@@ -377,7 +377,7 @@ def _extended_terms(
 
 
 def render_iso717_report(
-    result: "WeightedRatingResult | ImpactRatingResult",
+    result: WeightedRatingResult | ImpactRatingResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -456,7 +456,7 @@ def render_iso717_report(
     else:
         basis = t("Sound insulation rating per {part}:2020.", language).format(part=rating_part)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

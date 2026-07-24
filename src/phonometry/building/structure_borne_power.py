@@ -205,7 +205,7 @@ class StructureBornePowerResult:
         lw = np.asarray(self.power_level, dtype=np.float64)
         return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * lw))))
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the characteristic structure-borne power level per band.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -221,7 +221,7 @@ class StructureBornePowerResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

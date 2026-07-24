@@ -27,7 +27,7 @@ REF_PRESSURE = 2e-5
 def _tone(
     fs: float, duration: float, freq: float, amplitude: float
 ) -> np.ndarray:
-    t = np.arange(int(round(fs * duration))) / fs
+    t = np.arange(round(fs * duration)) / fs
     return amplitude * np.cos(2.0 * np.pi * freq * t)
 
 

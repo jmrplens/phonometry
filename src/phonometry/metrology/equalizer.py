@@ -56,14 +56,14 @@ https://www.w3.org/TR/audio-eq-cookbook/
 from __future__ import annotations
 
 import math
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, List, Literal, Sequence, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 from scipy import signal
 
-from .._internal.utils import _typesignal
-from .._internal.utils import _sos_initial_state, _sos_state_mismatch
+from .._internal.utils import _sos_initial_state, _sos_state_mismatch, _typesignal
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -269,7 +269,7 @@ def _section_alpha(section: EQSection, w0: float, big_a: float) -> float:
     return sin_w0 / (2 * q)
 
 
-def _section_sos(fs: float, section: EQSection) -> "NDArray[np.float64]":
+def _section_sos(fs: float, section: EQSection) -> NDArray[np.float64]:
     """One normalized SOS row ``[b0, b1, b2, 1, a1, a2]`` for the section."""
     if section.f0 >= fs / 2:
         raise ValueError(
@@ -307,18 +307,18 @@ class EQResponseResult:
     :ivar sections: The :class:`EQSection` specifications, in cascade order.
     """
 
-    frequencies: "NDArray[np.float64]"
-    magnitude_db: "NDArray[np.float64]"
-    phase_rad: "NDArray[np.float64]"
-    section_magnitude_db: "NDArray[np.float64]"
-    sos: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    magnitude_db: NDArray[np.float64]
+    phase_rad: NDArray[np.float64]
+    section_magnitude_db: NDArray[np.float64]
+    sos: NDArray[np.float64]
     fs: float
     sections: tuple[EQSection, ...]
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en",
+        self, ax: Axes | None = None, *, language: str = "en",
         show_sections: bool = True, **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+    ) -> Axes | NDArray[Any]:
         """Plot the cascade magnitude and phase response.
 
         With ``ax`` given, only the magnitude panel is drawn on it.
@@ -383,7 +383,7 @@ class ParametricEQ:
             self.zi = np.array([])
             self._steady_ic = steady_ic
 
-    def filter(self, x: List[float] | np.ndarray) -> np.ndarray:
+    def filter(self, x: list[float] | np.ndarray) -> np.ndarray:
         """Apply the EQ cascade to a signal.
 
         :param x: Input signal (1D or 2D ``[channels, samples]``).
@@ -446,7 +446,7 @@ class ParametricEQ:
 
 
 def parametric_eq(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: float,
     sections: EQSection | Sequence[EQSection],
 ) -> np.ndarray:

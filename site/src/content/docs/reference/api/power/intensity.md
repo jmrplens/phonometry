@@ -78,8 +78,8 @@ for survey (grade 3). The measurement arrangement is adequate when
 
 ```python
 field_indicators(
-    pressure_levels: List[float] | np.ndarray,
-    normal_intensity: List[float] | np.ndarray,
+    pressure_levels: list[float] | np.ndarray,
+    normal_intensity: list[float] | np.ndarray,
 ) -> FieldIndicators
 ```
 
@@ -182,14 +182,14 @@ and matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 sound_intensity(
-    p1: List[float] | np.ndarray,
-    p2: List[float] | np.ndarray,
+    p1: list[float] | np.ndarray,
+    p2: list[float] | np.ndarray,
     fs: int,
     spacing: float,
     rho: float = 1.204,
     c: float = 343.0,
     fraction: int | None = None,
-    limits: List[float] | None = None,
+    limits: list[float] | None = None,
     bias_correct: bool = False,
 ) -> IntensityResult
 ```

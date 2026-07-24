@@ -8,11 +8,11 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-import phonometry as ph  # noqa: E402
+import phonometry as ph
 
 FS = 48000
 RNG = np.random.default_rng(20260720)
@@ -68,7 +68,7 @@ def test_swept_sine_distortion_es() -> None:
     assert "Frecuencia de excitación [Hz]" in text
     plt.close("all")
     # Single-panel case (ax given) carries the swept-THD title.
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     single = res.plot(ax=ext, language="es")
     assert single.get_title() == "THD de barrido sinusoidal (Farina / Novak)"
     plt.close("all")

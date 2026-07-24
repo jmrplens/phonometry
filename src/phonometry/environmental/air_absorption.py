@@ -57,11 +57,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-
 from numpy.typing import ArrayLike, NDArray
 
 from .._internal.warnings import PhonometryWarning
-
 from ..materials.sound_absorption import attenuation_from_alpha
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -338,8 +336,8 @@ class AtmosphericAttenuation:
         )
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the attenuation coefficient ``alpha`` versus frequency.
 
         Draws ``alpha`` (in dB/km, as Table 1 tabulates it) on a logarithmic

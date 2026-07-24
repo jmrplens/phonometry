@@ -43,12 +43,12 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
-from scipy import signal as sp_signal  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
+from scipy import signal as sp_signal
 
-import phonometry as ph  # noqa: E402
+import phonometry as ph
 
 FS = 8192.0
 N = 4096
@@ -353,7 +353,7 @@ def test_cepstrum_plot_single_axes_and_external_ax() -> None:
     assert len(ax.lines) == 1
     # Only the unambiguous first half of the quefrency axis is drawn.
     assert ax.lines[0].get_xdata().size == N // 2 + 1
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")
 
@@ -371,7 +371,7 @@ def test_lifter_plot_two_panels_and_external_ax() -> None:
     res = ph.lifter(_impulse_echo(), FS, (DELAY - 50) / FS)
     axes = res.plot()
     assert len(axes) == 2
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")
 

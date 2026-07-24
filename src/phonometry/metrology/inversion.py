@@ -36,7 +36,7 @@ exceeds the ``1/(2*sqrt(epsilon))`` bound.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -87,7 +87,7 @@ class InverseFilterResult:
     spectrum: np.ndarray
     response_spectrum: np.ndarray
     regularization: np.ndarray
-    f_range: Tuple[float, float]
+    f_range: tuple[float, float]
     delay: int
     fs: float
     flatness_db: float
@@ -105,7 +105,7 @@ class InverseFilterResult:
         """Number of samples in the inverse filter."""
         return int(self.inverse.size)
 
-    def apply(self, x: "List[float] | np.ndarray") -> np.ndarray:
+    def apply(self, x: list[float] | np.ndarray) -> np.ndarray:
         """Equalize a signal with the inverse filter.
 
         Convolves ``x`` with the filter and removes the modeling delay, so
@@ -126,8 +126,8 @@ class InverseFilterResult:
         return np.asarray(full[self.delay:self.delay + arr.size])
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the measured, inverse and equalized magnitudes.
 
         One panel: ``|H|``, ``|H_inv|`` and the equalized product
@@ -145,7 +145,7 @@ class InverseFilterResult:
 
 def _regularization_profile(
     freqs: np.ndarray,
-    f_range: Tuple[float, float],
+    f_range: tuple[float, float],
     eps_inside: float,
     eps_outside: float,
     transition_octaves: float,
@@ -190,8 +190,8 @@ def _validated_response(response: Any) -> np.ndarray:
 
 
 def _validated_band(
-    f_range: Tuple[float, float], fs: float
-) -> Tuple[float, float]:
+    f_range: tuple[float, float], fs: float
+) -> tuple[float, float]:
     """Validate the equalization band against the sample rate."""
     f1, f2 = float(f_range[0]), float(f_range[1])
     if f1 <= 0.0:
@@ -219,10 +219,10 @@ def _resolve_fs(response: Any, fs: float | None) -> float:
 
 
 def regularized_inverse_filter(
-    response: "List[float] | np.ndarray | Any",
+    response: list[float] | np.ndarray | Any,
     fs: float | None = None,
     *,
-    f_range: Tuple[float, float],
+    f_range: tuple[float, float],
     regularization_inside: float = 1e-6,
     regularization_outside: float = 1.0,
     transition_octaves: float = 1.0 / 3.0,

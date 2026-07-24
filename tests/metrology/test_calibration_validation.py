@@ -11,8 +11,8 @@ limits. Class 1: 0.20 dB in 31,5-63 Hz, 0.10 dB in >63-<160 Hz, 0.07 dB from
 """
 
 import warnings
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Iterator
 
 import numpy as np
 import pytest

@@ -224,7 +224,7 @@ def extraneous_velocity_correction(level_difference: float) -> float:
         return 0.0
     if level_difference < 3.0:
         return 3.0
-    return _K1A_TABLE[int(round(level_difference))]
+    return _K1A_TABLE[round(level_difference)]
 
 
 @dataclass(frozen=True)
@@ -273,7 +273,7 @@ class VibrationSoundPowerResult:
         )
         return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (lw + ck)))))
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the radiated sound power level per band.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -289,7 +289,7 @@ class VibrationSoundPowerResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

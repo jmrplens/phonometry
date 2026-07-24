@@ -16,11 +16,15 @@ import numpy as np
 import pytest
 
 from phonometry.emission.sound_power import (
+    _TABLE_D1,
+    _TABLE_E1,
+    _TABLE_E2,
     MeteorologicalCorrection,
     PrecisionCriteria,
     PrecisionFieldIndicators,
     PrecisionIntensityResult,
     PrecisionSoundPowerResult,
+    SoundPowerWarning,
     meteorological_corrections,
     precision_background_correction,
     precision_field_indicators,
@@ -29,12 +33,6 @@ from phonometry.emission.sound_power import (
     precision_uncertainty,
     sound_power_anechoic,
     sound_power_intensity_precision,
-)
-from phonometry.emission.sound_power import (
-    _TABLE_D1,
-    _TABLE_E1,
-    _TABLE_E2,
-    SoundPowerWarning,
 )
 
 _P0 = 1.0e-12

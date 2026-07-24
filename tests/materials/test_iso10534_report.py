@@ -28,10 +28,10 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-import numpy as np  # noqa: E402  (import after importorskip)
+import numpy as np
 
-from phonometry import ReportMetadata  # noqa: E402  (import after importorskip)
-from phonometry.materials import (  # noqa: E402
+from phonometry import ReportMetadata
+from phonometry.materials import (
     air_density_iso,
     characteristic_impedance,
     speed_of_sound_iso,
@@ -66,22 +66,22 @@ def _result():
 
 
 def _metadata(**overrides) -> ReportMetadata:
-    base = dict(
-        specimen="Resistive facing over an 86 mm rigidly-backed air cavity",
-        client="Acoustic Test Client Ltd.",
-        manufacturer="Acoustics Works Inc.",
-        tube_diameter=_DIAMETER,
-        mic_spacing=_SPACING,
-        mounting="Deliberate 86 mm backing air cavity",
-        test_room="Impedance tube R1",
-        measurement_standard="ISO 10534-2",
-        temperature=20.0,
-        pressure=101.0,
-        test_date="2026-07-21",
-        laboratory="Phonometry Reference Laboratory",
-        operator="J. M. Requena-Plens",
-        report_id="PHN-2026-10534",
-    )
+    base = {
+        "specimen": "Resistive facing over an 86 mm rigidly-backed air cavity",
+        "client": "Acoustic Test Client Ltd.",
+        "manufacturer": "Acoustics Works Inc.",
+        "tube_diameter": _DIAMETER,
+        "mic_spacing": _SPACING,
+        "mounting": "Deliberate 86 mm backing air cavity",
+        "test_room": "Impedance tube R1",
+        "measurement_standard": "ISO 10534-2",
+        "temperature": 20.0,
+        "pressure": 101.0,
+        "test_date": "2026-07-21",
+        "laboratory": "Phonometry Reference Laboratory",
+        "operator": "J. M. Requena-Plens",
+        "report_id": "PHN-2026-10534",
+    }
     base.update(overrides)
     return ReportMetadata(**base)
 

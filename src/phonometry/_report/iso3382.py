@@ -37,7 +37,7 @@ from __future__ import annotations
 
 import html
 import math
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -118,7 +118,7 @@ def _band_label(exact_freq: float, fraction: int) -> str:
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the room-acoustics header grid.
 
     Only fields that are set are returned, so empty rows never appear. A room
@@ -134,7 +134,7 @@ def _metadata_pairs(
     def count(value: int | None) -> str | None:
         return str(int(value)) if value is not None else None
 
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Room", language), metadata.test_room),
         (t("Description", language), metadata.specimen),
@@ -152,7 +152,7 @@ def _metadata_pairs(
 
 
 def _parameter_table(
-    result: "RoomAcousticsResult", language: str = "en"
+    result: RoomAcousticsResult, language: str = "en"
 ) -> Any:
     """Build the full-width per-band parameter table.
 
@@ -213,7 +213,7 @@ def _parameter_table(
         Paragraph("D<sub>50</sub>", head_style),
         Paragraph("T<sub>s</sub> [ms]", head_style),
     ]
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for i in range(n):
         rows.append(
             [
@@ -231,7 +231,7 @@ def _parameter_table(
     col_widths = [
         24 * mm, 20 * mm, 20 * mm, 20 * mm, 22 * mm, 22 * mm, 20 * mm, 26 * mm,
     ]
-    style_cmds: List[Any] = [
+    style_cmds: list[Any] = [
         ("BACKGROUND", (0, 0), (-1, 0), accent),
         ("FONTSIZE", (0, 1), (-1, -1), body_font),
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
@@ -275,8 +275,8 @@ def _band_value(
 
 
 def _reverberation_descriptor(
-    result: "RoomAcousticsResult", values: np.ndarray
-) -> Tuple[float, bool]:
+    result: RoomAcousticsResult, values: np.ndarray
+) -> tuple[float, bool]:
     """Return ``(value, is_mid)`` for the boxed reverberation-time descriptor.
 
     When the result carries frequency bands and both the 500 Hz and 1000 Hz
@@ -299,7 +299,7 @@ def _reverberation_descriptor(
     return value, False
 
 
-def _statement(result: "RoomAcousticsResult", language: str = "en") -> Tuple[str, List[str]]:
+def _statement(result: RoomAcousticsResult, language: str = "en") -> tuple[str, list[str]]:
     """The boxed reverberation-time descriptor and its extended EDT term.
 
     A band result spanning the 500 Hz and 1000 Hz octaves boxes the
@@ -323,7 +323,7 @@ def _statement(result: "RoomAcousticsResult", language: str = "en") -> Tuple[str
             value=_cell(t_value, 2, language)
         )
         edt_key = "EDT = {value} s"
-    extended: List[str] = []
+    extended: list[str] = []
     if math.isfinite(edt_value):
         extended.append(
             t(edt_key, language).format(
@@ -334,8 +334,8 @@ def _statement(result: "RoomAcousticsResult", language: str = "en") -> Tuple[str
 
 
 def _verdict(
-    result: "RoomAcousticsResult", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: RoomAcousticsResult, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag for a supplied target reverberation time.
 
     The requirement is read as the maximum acceptable reverberation time (the
@@ -362,7 +362,7 @@ def _verdict(
 
 
 def render_iso3382_report(
-    result: "RoomAcousticsResult",
+    result: RoomAcousticsResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -414,7 +414,7 @@ def render_iso3382_report(
             language,
         )
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

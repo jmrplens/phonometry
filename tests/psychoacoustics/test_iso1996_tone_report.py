@@ -19,8 +19,9 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-import reference_data as ref  # noqa: E402
-from phonometry import (  # noqa: E402
+import reference_data as ref
+
+from phonometry import (
     ReportMetadata,
     analyze_spectrum,
     tonal_adjustment_from_mean_audibility,

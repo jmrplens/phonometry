@@ -245,7 +245,7 @@ def test_sensitivity_step_stays_local_on_nonlinear_model() -> None:
     uncertainty scale, a sqrt(eps)*|x| step (~15 units at 1e9) would probe
     far outside the uncertainty region and bias the sensitivity."""
     x0, ux = 1.0e9, 1.0e-3
-    model = lambda x: math.sin((x - 1.0e9) / 1.0e-2)  # noqa: E731
+    model = lambda x: math.sin((x - 1.0e9) / 1.0e-2)
     result = u.combine_uncertainty(model, [u.Quantity(x0, ux)])
     # d/dx sin((x-x0)/1e-2) at x0 = 100; sensitivity must be ~100, not the
     # aliased near-zero value a 15-unit step returns.
@@ -331,7 +331,7 @@ def test_gum_h1_expanded_uncertainty_99() -> None:
     from reference_data import GUM_H1_U99
 
     result = _h1_budget()
-    k, big = result.expanded(0.99)
+    _k, big = result.expanded(0.99)
     assert big == pytest.approx(GUM_H1_U99, abs=0.1)
     # The printed route: truncate veff to 16 and use Table G.2's k = 2.92.
     k16 = u.coverage_factor(0.99, 16.0)

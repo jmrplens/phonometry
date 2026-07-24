@@ -27,8 +27,8 @@ pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 pytest.importorskip("pypdf")
 
-from phonometry import ReportMetadata  # noqa: E402
-from phonometry.room import room_noise as rn  # noqa: E402
+from phonometry import ReportMetadata
+from phonometry.room import room_noise as rn
 
 _PDF_MAGIC = b"%PDF"
 
@@ -70,22 +70,22 @@ def _extract_text(path: str) -> str:
 
 
 def _full_metadata(**overrides) -> ReportMetadata:
-    base = dict(
-        specimen="Open-plan office, air handling at nominal flow",
-        client="Acoustic Test Client Ltd.",
-        test_room="Office A",
-        room_volume=180.0,
-        area=60.0,
-        instrumentation="Class 1 sound level meter + octave filter set",
-        measurement_standard="ANSI/ASA S12.2",
-        temperature=22.0,
-        relative_humidity=42.0,
-        pressure=101.2,
-        test_date="2026-07-21",
-        laboratory="Phonometry Reference Laboratory",
-        operator="J. M. Requena-Plens",
-        report_id="PHN-2026-S122",
-    )
+    base = {
+        "specimen": "Open-plan office, air handling at nominal flow",
+        "client": "Acoustic Test Client Ltd.",
+        "test_room": "Office A",
+        "room_volume": 180.0,
+        "area": 60.0,
+        "instrumentation": "Class 1 sound level meter + octave filter set",
+        "measurement_standard": "ANSI/ASA S12.2",
+        "temperature": 22.0,
+        "relative_humidity": 42.0,
+        "pressure": 101.2,
+        "test_date": "2026-07-21",
+        "laboratory": "Phonometry Reference Laboratory",
+        "operator": "J. M. Requena-Plens",
+        "report_id": "PHN-2026-S122",
+    }
     base.update(overrides)
     return ReportMetadata(**base)
 

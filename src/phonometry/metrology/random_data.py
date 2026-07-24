@@ -107,7 +107,7 @@ _MIN_OBSERVATIONS = 10
 # ---------------------------------------------------------------------------
 
 
-def _reverse_arrangements(values: "NDArray[np.float64]") -> int:
+def _reverse_arrangements(values: NDArray[np.float64]) -> int:
     """Count reverse arrangements ``A``: pairs ``i < j`` with ``x_i > x_j``.
 
     B&P Eqs. (4.51)-(4.53). Equal values do not count (the inequality is
@@ -124,7 +124,7 @@ def _reverse_arrangement_moments(n: int) -> tuple[float, float]:
     return mean, float(np.sqrt(variance))
 
 
-def _mahonian_cdf(n: int) -> "NDArray[np.float64]":
+def _mahonian_cdf(n: int) -> NDArray[np.float64]:
     """Exact null CDF of the reverse-arrangement count for ``n`` values.
 
     For independent continuous observations the ranks form a uniformly
@@ -179,7 +179,7 @@ def _reverse_arrangement_p_value(n: int, statistic: int) -> float:
 # ---------------------------------------------------------------------------
 
 
-def _log_comb(n: int, k: "NDArray[np.int64]") -> "NDArray[np.float64]":
+def _log_comb(n: int, k: NDArray[np.int64]) -> NDArray[np.float64]:
     """``ln C(n, k)`` element-wise, ``-inf`` outside ``0 <= k <= n``."""
     kk = np.asarray(k, dtype=np.float64)
     valid = (kk >= 0.0) & (kk <= n)
@@ -192,7 +192,7 @@ def _log_comb(n: int, k: "NDArray[np.int64]") -> "NDArray[np.float64]":
     return np.asarray(np.where(valid, out, -np.inf), dtype=np.float64)
 
 
-def _runs_pmf(n1: int, n2: int) -> "NDArray[np.float64]":
+def _runs_pmf(n1: int, n2: int) -> NDArray[np.float64]:
     """Exact null PMF of the number of runs, indexed ``r = 0 .. n1+n2``.
 
     Wald & Wolfowitz (1940): conditional on ``n1`` values of one kind and
@@ -260,7 +260,7 @@ def _runs_p_value(n1: int, n2: int, statistic: int) -> float:
     return min(1.0, 2.0 * min(below, above))
 
 
-def _count_runs(flags: "NDArray[np.bool_]") -> int:
+def _count_runs(flags: NDArray[np.bool_]) -> int:
     """Number of runs of equal values in a boolean sequence."""
     return int(np.count_nonzero(flags[1:] != flags[:-1])) + 1
 
@@ -301,7 +301,7 @@ class TrendTestResult:
         were discarded); ``None`` for ``"reverse_arrangements"``.
     """
 
-    values: "NDArray[np.float64]"
+    values: NDArray[np.float64]
     method: str
     statistic: int
     n: int
@@ -314,8 +314,8 @@ class TrendTestResult:
     median: float | None = None
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the tested sequence against its sample index with the verdict.
 
         Draws the sequence of observations against a plain sample index and
@@ -340,7 +340,7 @@ class TrendTestResult:
 
 
 def _trend_test_reverse(
-    values: "NDArray[np.float64]", alpha: float
+    values: NDArray[np.float64], alpha: float
 ) -> TrendTestResult:
     n = values.size
     statistic = _reverse_arrangements(values)
@@ -361,7 +361,7 @@ def _trend_test_reverse(
 
 
 def _trend_test_runs(
-    values: "NDArray[np.float64]", alpha: float
+    values: NDArray[np.float64], alpha: float
 ) -> TrendTestResult:
     median = float(np.median(values))
     keep = np.abs(values - median) > 0.0
@@ -398,8 +398,8 @@ def _trend_test_runs(
 
 
 def _validate_trend_inputs(
-    values: "NDArray[np.float64] | list[float]", method: str, alpha: float
-) -> "NDArray[np.float64]":
+    values: NDArray[np.float64] | list[float], method: str, alpha: float
+) -> NDArray[np.float64]:
     seq = np.asarray(values, dtype=np.float64)
     if seq.ndim != 1:
         raise ValueError("'values' must be one-dimensional.")
@@ -418,7 +418,7 @@ def _validate_trend_inputs(
 
 
 def trend_test(
-    values: "NDArray[np.float64] | list[float]",
+    values: NDArray[np.float64] | list[float],
     *,
     method: str = "reverse_arrangements",
     alpha: float = 0.05,
@@ -487,8 +487,8 @@ class StationarityTestResult:
     :ivar fs: Sample rate of the record, in Hz.
     """
 
-    segment_values: "NDArray[np.float64]"
-    segment_times: "NDArray[np.float64]"
+    segment_values: NDArray[np.float64]
+    segment_times: NDArray[np.float64]
     statistic: str
     method: str
     count: int
@@ -503,8 +503,8 @@ class StationarityTestResult:
     fs: float
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the segment-statistic sequence with the test verdict.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -517,8 +517,8 @@ class StationarityTestResult:
 
 
 def _segment_statistic(
-    segments: "NDArray[np.float64]", statistic: str
-) -> "NDArray[np.float64]":
+    segments: NDArray[np.float64], statistic: str
+) -> NDArray[np.float64]:
     """Per-row statistic of the segment matrix (B&P Sec. 10.3.1.1 step 2)."""
     if statistic == "mean_square":
         return np.asarray(np.mean(segments**2, axis=1), dtype=np.float64)
@@ -532,7 +532,7 @@ def _segment_statistic(
 
 
 def stationarity_test(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     *,
     n_segments: int = 20,
@@ -615,7 +615,7 @@ def stationarity_test(
 
 
 def _spectral_moments(
-    x: "NDArray[np.float64]", fs: float, nperseg: int | None
+    x: NDArray[np.float64], fs: float, nperseg: int | None
 ) -> tuple[float, float, float]:
     """Frequency moments ``m0, m2, m4`` of the one-sided Welch autospectrum.
 
@@ -633,8 +633,8 @@ def _spectral_moments(
 
 
 def _count_level_crossings(
-    x: "NDArray[np.float64]", levels: "NDArray[np.float64]"
-) -> "NDArray[np.int64]":
+    x: NDArray[np.float64], levels: NDArray[np.float64]
+) -> NDArray[np.int64]:
     """Crossings of each level with both slopes, counted as sign changes."""
     signs = x[np.newaxis, :] > levels[:, np.newaxis]
     return np.asarray(
@@ -668,9 +668,9 @@ class LevelCrossingResult:
     :ivar fs: Sample rate, in Hz.
     """
 
-    levels: "NDArray[np.float64]"
-    rates: "NDArray[np.float64]"
-    rice_rates: "NDArray[np.float64]"
+    levels: NDArray[np.float64]
+    rates: NDArray[np.float64]
+    rice_rates: NDArray[np.float64]
     zero_crossing_rate: float
     zero_crossing_rate_rice: float
     apparent_frequency: float
@@ -679,8 +679,8 @@ class LevelCrossingResult:
     fs: float
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot measured crossing rates against the Rice curve.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -695,10 +695,10 @@ class LevelCrossingResult:
 
 
 def level_crossing_rate(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     *,
-    levels: "NDArray[np.float64] | list[float] | None" = None,
+    levels: NDArray[np.float64] | list[float] | None = None,
     nperseg: int | None = None,
 ) -> LevelCrossingResult:
     """
@@ -768,8 +768,8 @@ def level_crossing_rate(
 
 
 def _rice_peak_exceedance(
-    z: "NDArray[np.float64]", irregularity: float
-) -> "NDArray[np.float64]":
+    z: NDArray[np.float64], irregularity: float
+) -> NDArray[np.float64]:
     """``P[peak > z]`` for standardized peak height ``z`` (B&P Eq. (5.223)).
 
     ``Q(z/eps) + r exp(-z^2/2) [1 - Q(r z / eps)]`` with
@@ -791,8 +791,8 @@ def _rice_peak_exceedance(
 
 
 def _rice_peak_density(
-    z: "NDArray[np.float64]", irregularity: float
-) -> "NDArray[np.float64]":
+    z: NDArray[np.float64], irregularity: float
+) -> NDArray[np.float64]:
     """Peak probability density ``w(z)`` (B&P Eq. (5.217)).
 
     ``(eps/sqrt(2 pi)) exp(-z^2/(2 eps^2))
@@ -843,14 +843,14 @@ class PeakStatisticsResult:
     peak_rate_rice: float
     zero_crossing_rate_rice: float
     irregularity_factor: float
-    peak_values: "NDArray[np.float64]"
+    peak_values: NDArray[np.float64]
     sigma: float
     duration: float
     fs: float
 
     def peak_exceedance(
-        self, z: "NDArray[np.float64] | list[float] | float"
-    ) -> "NDArray[np.float64]":
+        self, z: NDArray[np.float64] | list[float] | float
+    ) -> NDArray[np.float64]:
         """``P[peak > z]`` at the record's irregularity factor.
 
         B&P Eq. (5.223): the probability that a maximum chosen at random
@@ -866,8 +866,8 @@ class PeakStatisticsResult:
         return _rice_peak_exceedance(za, self.irregularity_factor)
 
     def peak_density(
-        self, z: "NDArray[np.float64] | list[float] | float"
-    ) -> "NDArray[np.float64]":
+        self, z: NDArray[np.float64] | list[float] | float
+    ) -> NDArray[np.float64]:
         """Peak probability density ``w(z)`` (B&P Eq. (5.217)).
 
         :param z: Standardized peak heights (units of the record RMS).
@@ -877,8 +877,8 @@ class PeakStatisticsResult:
         return _rice_peak_density(za, self.irregularity_factor)
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the empirical peak exceedance against the Rice curves.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -891,7 +891,7 @@ class PeakStatisticsResult:
 
 
 def peak_statistics(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     *,
     nperseg: int | None = None,

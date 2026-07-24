@@ -7,15 +7,15 @@ from __future__ import annotations
 
 import warnings
 from functools import lru_cache
-from typing import Any, List, Tuple, cast, overload, Literal
+from typing import Any, Literal, cast, overload
 
 import numpy as np
 from scipy import signal
 
+from .._internal.utils import _downsamplingfactor, _resample_to_length, _typesignal
 from .._internal.warnings import PhonometryWarning, _warn_renamed
 from .filter_design import _cheby2_headroom, _design_sos_filter
 from .frequencies import _genfreqs
-from .._internal.utils import _downsamplingfactor, _resample_to_length, _typesignal
 
 
 class FilterBankWarning(PhonometryWarning):
@@ -33,7 +33,7 @@ class OctaveFilterBank:
         fs: int,
         fraction: float = 1,
         order: int = 6,
-        limits: List[float] | None = None,
+        limits: list[float] | None = None,
         filter_type: str = "butter",
         ripple: float = 0.1,
         attenuation: float = 72.0,
@@ -138,7 +138,7 @@ class OctaveFilterBank:
         Uses lazy initialization: zi arrays are allocated on first use in
         _filter_and_resample() so the channel count matches the actual input.
         """
-        self.zi: List[np.ndarray] = [np.array([]) for _ in range(self.num_bands)]
+        self.zi: list[np.ndarray] = [np.array([]) for _ in range(self.num_bands)]
         self._steady_ic = steady_ic
 
 
@@ -152,109 +152,109 @@ class OctaveFilterBank:
     @overload
     def filter(
         self,
-        x: List[float] | np.ndarray,
+        x: list[float] | np.ndarray,
         sigbands: Literal[False] = False,
         mode: str = "rms",
         detrend: bool = True,
         calculate_level: Literal[True] = True,
         nominal: Literal[False] = False,
         zero_phase: bool = False,
-    ) -> Tuple[np.ndarray, List[float]]: ...
+    ) -> tuple[np.ndarray, list[float]]: ...
 
     @overload
     def filter(
         self,
-        x: List[float] | np.ndarray,
+        x: list[float] | np.ndarray,
         sigbands: Literal[True],
         mode: str = "rms",
         detrend: bool = True,
         calculate_level: Literal[True] = True,
         nominal: Literal[False] = False,
         zero_phase: bool = False,
-    ) -> Tuple[np.ndarray, List[float], List[np.ndarray]]: ...
+    ) -> tuple[np.ndarray, list[float], list[np.ndarray]]: ...
 
     @overload
     def filter(
         self,
-        x: List[float] | np.ndarray,
+        x: list[float] | np.ndarray,
         sigbands: Literal[False] = False,
         mode: str = "rms",
         detrend: bool = True,
         calculate_level: Literal[False] = False,
         nominal: Literal[False] = False,
         zero_phase: bool = False,
-    ) -> Tuple[None, List[float]]: ...
+    ) -> tuple[None, list[float]]: ...
 
     @overload
     def filter(
         self,
-        x: List[float] | np.ndarray,
+        x: list[float] | np.ndarray,
         sigbands: Literal[True],
         mode: str = "rms",
         detrend: bool = True,
         calculate_level: Literal[False] = False,
         nominal: Literal[False] = False,
         zero_phase: bool = False,
-    ) -> Tuple[None, List[float], List[np.ndarray]]: ...
+    ) -> tuple[None, list[float], list[np.ndarray]]: ...
 
     @overload
     def filter(
         self,
-        x: List[float] | np.ndarray,
+        x: list[float] | np.ndarray,
         sigbands: Literal[False] = False,
         mode: str = "rms",
         detrend: bool = True,
         calculate_level: Literal[True] = True,
         nominal: Literal[True] = ...,
         zero_phase: bool = False,
-    ) -> Tuple[np.ndarray, List[str]]: ...
+    ) -> tuple[np.ndarray, list[str]]: ...
 
     @overload
     def filter(
         self,
-        x: List[float] | np.ndarray,
+        x: list[float] | np.ndarray,
         sigbands: Literal[True],
         mode: str = "rms",
         detrend: bool = True,
         calculate_level: Literal[True] = True,
         nominal: Literal[True] = ...,
         zero_phase: bool = False,
-    ) -> Tuple[np.ndarray, List[str], List[np.ndarray]]: ...
+    ) -> tuple[np.ndarray, list[str], list[np.ndarray]]: ...
 
     @overload
     def filter(
         self,
-        x: List[float] | np.ndarray,
+        x: list[float] | np.ndarray,
         sigbands: Literal[False] = False,
         mode: str = "rms",
         detrend: bool = True,
         calculate_level: Literal[False] = False,
         nominal: Literal[True] = ...,
         zero_phase: bool = False,
-    ) -> Tuple[None, List[str]]: ...
+    ) -> tuple[None, list[str]]: ...
 
     @overload
     def filter(
         self,
-        x: List[float] | np.ndarray,
+        x: list[float] | np.ndarray,
         sigbands: Literal[True],
         mode: str = "rms",
         detrend: bool = True,
         calculate_level: Literal[False] = False,
         nominal: Literal[True] = ...,
         zero_phase: bool = False,
-    ) -> Tuple[None, List[str], List[np.ndarray]]: ...
+    ) -> tuple[None, list[str], list[np.ndarray]]: ...
 
     def filter(
         self,
-        x: List[float] | np.ndarray,
+        x: list[float] | np.ndarray,
         sigbands: bool = False,
         mode: str = "rms",
         detrend: bool = True,
         calculate_level: bool = True,
         nominal: bool = False,
         zero_phase: bool = False,
-    ) -> Tuple[np.ndarray | None, List[float] | List[str]] | Tuple[np.ndarray | None, List[float] | List[str], List[np.ndarray]]:
+    ) -> tuple[np.ndarray | None, list[float] | list[str]] | tuple[np.ndarray | None, list[float] | list[str], list[np.ndarray]]:
         """
         Apply the pre-designed filter bank to a signal.
 
@@ -319,7 +319,7 @@ class OctaveFilterBank:
 
         # Return a copy: the bank (possibly shared via the octave_filter()
         # design cache) must not be corrupted by callers mutating the list.
-        freq_out: List[float] | List[str] = list(self.nominal_freq) if nominal else list(self.freq)
+        freq_out: list[float] | list[str] = list(self.nominal_freq) if nominal else list(self.freq)
 
         if sigbands and xb is not None:
             return spl, freq_out, xb
@@ -328,13 +328,13 @@ class OctaveFilterBank:
 
     def spectrogram(
         self,
-        x: List[float] | np.ndarray,
+        x: list[float] | np.ndarray,
         window_time: float = 0.125,
         overlap: float = 0.5,
         mode: str = "rms",
         detrend: bool = True,
         zero_phase: bool = False,
-    ) -> Tuple[np.ndarray, List[float], np.ndarray]:
+    ) -> tuple[np.ndarray, list[float], np.ndarray]:
         """
         Short-time fractional-octave analysis: level per band over time.
 
@@ -358,8 +358,8 @@ class OctaveFilterBank:
         x_proc = _typesignal(x)
         is_multichannel = x_proc.ndim > 1
         n_samples = x_proc.shape[-1]
-        win = int(round(window_time * self.fs))
-        hop = max(1, int(round(win * (1 - overlap))))
+        win = round(window_time * self.fs)
+        hop = max(1, round(win * (1 - overlap)))
         if win <= 0 or win > n_samples:
             raise ValueError("window_time must be positive and shorter than the signal.")
 
@@ -373,7 +373,7 @@ class OctaveFilterBank:
             calculate_level=False, zero_phase=zero_phase,
         )
         # sigbands=True always fills the band list
-        bands = cast(List[np.ndarray], bands_opt)
+        bands = cast(list[np.ndarray], bands_opt)
 
         starts = np.arange(0, n_samples - win + 1, hop)
         times = (starts + win / 2) / self.fs
@@ -401,7 +401,7 @@ class OctaveFilterBank:
         mode: str = "rms",
         calculate_level: bool = True,
         zero_phase: bool = False,
-    ) -> Tuple[np.ndarray | None, List[np.ndarray] | None]:
+    ) -> tuple[np.ndarray | None, list[np.ndarray] | None]:
         """
         Process signal through each frequency band.
 
@@ -417,7 +417,7 @@ class OctaveFilterBank:
             spl = np.zeros([num_channels, self.num_bands])
         else:
             spl = None
-        xb: List[np.ndarray] | None = [np.array([]) for _ in range(self.num_bands)] if sigbands else None
+        xb: list[np.ndarray] | None = [np.array([]) for _ in range(self.num_bands)] if sigbands else None
 
         for idx in range(self.num_bands):
             # Vectorized processing for all channels
@@ -497,7 +497,7 @@ def _cached_filter_bank(
     fs: int,
     fraction: float,
     order: int,
-    limits: Tuple[float, ...] | None,
+    limits: tuple[float, ...] | None,
     filter_type: str,
     ripple: float,
     attenuation: float,
@@ -520,11 +520,11 @@ def _cached_filter_bank(
 
 @overload
 def octave_filter(
-    x: List[float] | np.ndarray,  # NOSONAR - public API
+    x: list[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
     order: int = 6,
-    limits: List[float] | None = None,
+    limits: list[float] | None = None,
     show: bool = False,
     sigbands: Literal[False] = False,
     plot_file: str | None = None,
@@ -536,16 +536,16 @@ def octave_filter(
     dbfs: bool = False,
     mode: str = "rms",
     nominal: Literal[False] = False,
-) -> Tuple[np.ndarray, List[float]]: ...
+) -> tuple[np.ndarray, list[float]]: ...
 
 
 @overload
 def octave_filter(
-    x: List[float] | np.ndarray,  # NOSONAR - public API
+    x: list[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
     order: int = 6,
-    limits: List[float] | None = None,
+    limits: list[float] | None = None,
     show: bool = False,
     sigbands: Literal[True] = True,
     plot_file: str | None = None,
@@ -557,16 +557,16 @@ def octave_filter(
     dbfs: bool = False,
     mode: str = "rms",
     nominal: Literal[False] = False,
-) -> Tuple[np.ndarray, List[float], List[np.ndarray]]: ...
+) -> tuple[np.ndarray, list[float], list[np.ndarray]]: ...
 
 
 @overload
 def octave_filter(
-    x: List[float] | np.ndarray,  # NOSONAR - public API
+    x: list[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
     order: int = 6,
-    limits: List[float] | None = None,
+    limits: list[float] | None = None,
     show: bool = False,
     sigbands: Literal[False] = False,
     plot_file: str | None = None,
@@ -578,16 +578,16 @@ def octave_filter(
     dbfs: bool = False,
     mode: str = "rms",
     nominal: Literal[True] = ...,
-) -> Tuple[np.ndarray, List[str]]: ...
+) -> tuple[np.ndarray, list[str]]: ...
 
 
 @overload
 def octave_filter(
-    x: List[float] | np.ndarray,  # NOSONAR - public API
+    x: list[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
     order: int = 6,
-    limits: List[float] | None = None,
+    limits: list[float] | None = None,
     show: bool = False,
     sigbands: Literal[True] = True,
     plot_file: str | None = None,
@@ -599,15 +599,15 @@ def octave_filter(
     dbfs: bool = False,
     mode: str = "rms",
     nominal: Literal[True] = ...,
-) -> Tuple[np.ndarray, List[str], List[np.ndarray]]: ...
+) -> tuple[np.ndarray, list[str], list[np.ndarray]]: ...
 
 
 def octave_filter(
-    x: List[float] | np.ndarray,  # NOSONAR - public API
+    x: list[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
     order: int = 6,
-    limits: List[float] | None = None,
+    limits: list[float] | None = None,
     show: bool = False,
     sigbands: bool = False,
     plot_file: str | None = None,
@@ -619,7 +619,7 @@ def octave_filter(
     dbfs: bool = False,
     mode: str = "rms",
     nominal: bool = False,
-) -> Tuple[np.ndarray, List[float]] | Tuple[np.ndarray, List[str]] | Tuple[np.ndarray, List[float], List[np.ndarray]] | Tuple[np.ndarray, List[str], List[np.ndarray]]:
+) -> tuple[np.ndarray, list[float]] | tuple[np.ndarray, list[str]] | tuple[np.ndarray, list[float], list[np.ndarray]] | tuple[np.ndarray, list[str], list[np.ndarray]]:
     """
     Filter a signal with octave or fractional octave filter bank.
 

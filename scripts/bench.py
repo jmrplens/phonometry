@@ -25,8 +25,9 @@ import argparse
 import sys
 import time
 import timeit
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 
@@ -272,7 +273,7 @@ def _write_golden() -> None:
 
 def _time_figures() -> None:
     sys.path.insert(0, str(_ROOT / "scripts"))
-    import generate_graphs as gg  # noqa: PLC0415
+    import generate_graphs as gg
 
     gg.set_lang("en")
     gg.set_theme(False)

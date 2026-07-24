@@ -35,7 +35,7 @@ coherence(
     *,
     nperseg: int | None = None,
     overlap: float = 0.5,
-) -> tuple['NDArray[np.float64]', 'NDArray[np.float64]']
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]
 ```
 
 Ordinary coherence `γ²(f)` between `x` and `y` (Bendat & Piersol).

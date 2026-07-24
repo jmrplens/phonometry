@@ -17,11 +17,11 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-import phonometry as ph  # noqa: E402
+import phonometry as ph
 
 FS = 8192.0
 N = 32768
@@ -490,7 +490,7 @@ def test_psd_plot_line_and_confidence_band() -> None:
     assert ax.lines, "expected the density line"
     labels = [str(c.get_label()) for c in ax.collections]
     assert any("confidence" in lab for lab in labels)
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")
 
@@ -501,7 +501,7 @@ def test_csd_plot_three_panels_and_external_ax() -> None:
     axes = res.plot()
     assert len(axes) == 3
     assert axes[2].get_ylim()[1] > 1.0  # coherence panel
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")
 
@@ -512,7 +512,7 @@ def test_coherent_output_plot_two_panels_and_external_ax() -> None:
     axes = res.plot()
     assert len(axes) == 2
     assert len(axes[0].lines) == 3  # Gyy, Gvv, Gnn
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")
 
@@ -775,6 +775,6 @@ def test_multitaper_plot_line_and_confidence_band() -> None:
     assert ax.lines, "expected the density line"
     labels = [str(c.get_label()) for c in ax.collections]
     assert any("confidence" in lab for lab in labels)
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")

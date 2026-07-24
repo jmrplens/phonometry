@@ -18,7 +18,7 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import ReportMetadata, loudness_zwicker_from_spectrum  # noqa: E402
+from phonometry import ReportMetadata, loudness_zwicker_from_spectrum
 
 # A shaped 28-band one-third-octave spectrum (25 Hz..12.5 kHz), descending.
 _LEVELS = np.array(

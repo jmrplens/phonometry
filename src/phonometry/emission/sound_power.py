@@ -37,7 +37,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, Literal, Tuple, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
@@ -106,14 +106,14 @@ _TABLE_B3: np.ndarray = np.array(
 
 # --- ISO 3744:2010 Annex E, A-weighting band corrections Ck (dB) ------------
 #: Table E.1 - one-third-octave mid-band frequencies.
-_CK_THIRD: Dict[int, float] = {
+_CK_THIRD: dict[int, float] = {
     50: -30.2, 63: -26.2, 80: -22.5, 100: -19.1, 125: -16.1, 160: -13.4,
     200: -10.9, 250: -8.6, 315: -6.6, 400: -4.8, 500: -3.2, 630: -1.9,
     800: -0.8, 1000: 0.0, 1250: 0.6, 1600: 1.0, 2000: 1.2, 2500: 1.3,
     3150: 1.2, 4000: 1.0, 5000: 0.5, 6300: -0.1, 8000: -1.1, 10000: -2.5,
 }
 #: Table E.2 - octave mid-band frequencies (subset of E.1 values).
-_CK_OCTAVE: Dict[int, float] = {
+_CK_OCTAVE: dict[int, float] = {
     63: -26.2, 125: -16.1, 250: -8.6, 500: -3.2,
     1000: 0.0, 2000: 1.2, 4000: 1.0, 8000: -1.1,
 }
@@ -121,26 +121,26 @@ _CK_OCTAVE: Dict[int, float] = {
 #: Background-noise criteria (low, high) in dB: below ``low`` the correction is
 #: clamped (upper bound, warn); above ``high`` it is set to zero. ISO 3744
 #: clause 8.2.3 (6, 15); ISO 3746 clause 8.4.1 (3, 10).
-_K1_CRITERIA: Dict[str, Tuple[float, float]] = {
+_K1_CRITERIA: dict[str, tuple[float, float]] = {
     "engineering": (6.0, 15.0),
     "survey": (3.0, 10.0),
 }
 #: Environmental-correction validity limit K2A, in dB. ISO 3744 clause 4.3.2
 #: (4 dB); ISO 3746 clause 4.3 (7 dB).
-_K2_LIMIT: Dict[str, float] = {"engineering": 4.0, "survey": 7.0}
+_K2_LIMIT: dict[str, float] = {"engineering": 4.0, "survey": 7.0}
 #: Minimum microphone positions by grade and number of reflecting planes.
 #: ISO 3744 clause 8.1.1 (10/5/3); ISO 3746 clause 8.2.1 (4/3/3).
-_MIN_HEMI_POSITIONS: Dict[str, Dict[int, int]] = {
+_MIN_HEMI_POSITIONS: dict[str, dict[int, int]] = {
     "engineering": {1: 10, 2: 5, 3: 3},
     "survey": {1: 4, 2: 3, 3: 3},
 }
 #: Minimum microphone positions on a parallelepiped: ISO 3744 clause C.1 (9 key
 #: positions for rectangular partial areas); ISO 3746 clause C.1, Figure C.7 (4
 #: positions for a floor-standing source on one reflecting plane).
-_MIN_BOX_POSITIONS: Dict[str, int] = {"engineering": 9, "survey": 4}
+_MIN_BOX_POSITIONS: dict[str, int] = {"engineering": 9, "survey": 4}
 #: Typical A-weighted reproducibility standard deviation sigma_R0, in dB.
 #: ISO 3744 Table 2 (1,5); ISO 3746 Table 1 (3,0, tone-free).
-_SIGMA_R0: Dict[str, float] = {"engineering": 1.5, "survey": 3.0}
+_SIGMA_R0: dict[str, float] = {"engineering": 1.5, "survey": 3.0}
 
 
 @dataclass(frozen=True)
@@ -189,7 +189,7 @@ class SoundPowerResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -251,9 +251,9 @@ class SoundPowerResult:
         machine: str | None = None,
         operating_conditions: str | None = None,
         noise_test_code: str | None = None,
-        basic_standards: "str | Sequence[str]" = (),
-        form: "DeclarationForm" = "dual-number",
-    ) -> "NoiseEmissionDeclaration":
+        basic_standards: str | Sequence[str] = (),
+        form: DeclarationForm = "dual-number",
+    ) -> NoiseEmissionDeclaration:
         """Build an ISO 4871:1996 noise-emission declaration from this result.
 
         Wraps the A-weighted sound power level ``LWA`` of this measurement as the
@@ -504,7 +504,7 @@ def _hemisphere_area(radius: float, reflecting_planes: int) -> float:
 
 
 def _box_area(
-    dimensions: Tuple[float, float, float], distance: float, reflecting_planes: int
+    dimensions: tuple[float, float, float], distance: float, reflecting_planes: int
 ) -> float:
     """Parallelepiped area (ISO 3744:2010 clause 7.2.4, equations (9)-(11))."""
     l1, l2, l3 = dimensions
@@ -525,7 +525,7 @@ def _a_weighting_corrections(frequencies: np.ndarray) -> np.ndarray:
     frequencies (ISO 3744:2010 Annex E, Tables E.1/E.2). The octave-band
     values (Table E.2) coincide with the one-third-octave values (Table E.1)
     at the shared mid-band frequencies, so a single lookup serves both."""
-    nominal = [int(round(f)) for f in frequencies]
+    nominal = [round(f) for f in frequencies]
     # Use the octave table (E.2) when every band is an octave mid-band centre,
     # otherwise the one-third-octave table (E.1); the two agree where they
     # overlap, so the result is identical either way.
@@ -553,7 +553,7 @@ def sound_power_pressure(
     surface: Surface,
     *,
     radius: float | None = None,
-    dimensions: Tuple[float, float, float] | None = None,
+    dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
     reflecting_planes: int = 1,
     background_levels: np.ndarray | None = None,
@@ -899,7 +899,7 @@ class PrecisionSoundPowerResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -1280,7 +1280,7 @@ def sound_power_anechoic(
     u_a = float(precision_uncertainty(_SIGMA_R0_3745_A, sigma_omc, coverage_factor))
     if freqs is not None:
         sigma_bands = np.array(
-            [_sigma_r0_3745(int(round(float(f))), room) for f in freqs],
+            [_sigma_r0_3745(round(float(f)), room) for f in freqs],
             dtype=np.float64,
         )
         u_bands = np.asarray(
@@ -1538,7 +1538,7 @@ def precision_qualification(
                 np.asarray(repeatability_limit, dtype=np.float64), (n_bands,)
             ).astype(np.float64)
         elif frequencies is not None:
-            nominal = [int(round(float(f))) for f in np.asarray(frequencies)]
+            nominal = [round(float(f)) for f in np.asarray(frequencies)]
             s = np.array([_sigma_r0_9614_3(f) for f in nominal], dtype=np.float64)
         else:
             raise ValueError(

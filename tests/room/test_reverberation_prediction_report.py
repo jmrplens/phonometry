@@ -22,9 +22,9 @@ pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 pytest.importorskip("pypdf")
 
-import numpy as np  # noqa: E402  (import after importorskip)
+import numpy as np
 
-from phonometry import (  # noqa: E402
+from phonometry import (
     ReportMetadata,
     ReverberationModelResult,
     reverberation_time_models,
@@ -47,18 +47,18 @@ def _result() -> ReverberationModelResult:
 
 
 def _metadata(**overrides) -> ReportMetadata:
-    base = dict(
-        specimen="Classroom, one wall lined with a broadband absorber",
-        client="Acoustic Test Client Ltd.",
-        test_room="Classroom C1",
-        temperature=20.0,
-        relative_humidity=50.0,
-        pressure=101.3,
-        test_date="2026-07-21",
-        laboratory="Phonometry Reference Laboratory",
-        operator="J. M. Requena-Plens",
-        report_id="PHN-2026-REVERB",
-    )
+    base = {
+        "specimen": "Classroom, one wall lined with a broadband absorber",
+        "client": "Acoustic Test Client Ltd.",
+        "test_room": "Classroom C1",
+        "temperature": 20.0,
+        "relative_humidity": 50.0,
+        "pressure": 101.3,
+        "test_date": "2026-07-21",
+        "laboratory": "Phonometry Reference Laboratory",
+        "operator": "J. M. Requena-Plens",
+        "report_id": "PHN-2026-REVERB",
+    }
     base.update(overrides)
     return ReportMetadata(**base)
 

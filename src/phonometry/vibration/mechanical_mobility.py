@@ -283,8 +283,8 @@ class RigidMassCalibrationResult:
     tolerance: float
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | np.ndarray":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | np.ndarray:
         """Plot the rigid-mass calibration check (ISO 7626-2, 7.5.2).
 
         The measured FRF magnitude against the known rigid-mass line with its
@@ -423,7 +423,7 @@ class MobilityResult:
         """
         return convert_frf(self.mobility, self.frequencies, "mobility", target)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the mobility magnitude ``|Y(f)|``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -438,7 +438,7 @@ class MobilityResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",

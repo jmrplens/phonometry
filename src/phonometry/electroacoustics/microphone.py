@@ -87,8 +87,8 @@ def _sensitivity_level_db(sensitivity_v_per_pa: float) -> float:
 
 
 def _normalized_response(
-    f: "NDArray[np.float64]", response_db: "NDArray[np.float64]", f_ref: float
-) -> "NDArray[np.float64]":
+    f: NDArray[np.float64], response_db: NDArray[np.float64], f_ref: float
+) -> NDArray[np.float64]:
     """The response relative to its level at the reference frequency (12.1.1).
 
     The reference-frequency level is interpolated linearly in log-frequency, so
@@ -99,8 +99,8 @@ def _normalized_response(
 
 
 def _limit_edge(
-    f: "NDArray[np.float64]",
-    rel_db: "NDArray[np.float64]",
+    f: NDArray[np.float64],
+    rel_db: NDArray[np.float64],
     tolerance: float,
     edge: int,
     neighbour: int,
@@ -122,8 +122,8 @@ def _limit_edge(
 
 
 def _effective_range(
-    f: "NDArray[np.float64]",
-    rel_db: "NDArray[np.float64]",
+    f: NDArray[np.float64],
+    rel_db: NDArray[np.float64],
     tolerance: float,
     f_ref: float,
 ) -> tuple[float, float]:
@@ -151,7 +151,7 @@ def _effective_range(
     return lower, upper
 
 
-def _fold_angles_deg(angles_deg: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _fold_angles_deg(angles_deg: NDArray[np.float64]) -> NDArray[np.float64]:
     """Fold full-circle angles onto the 0..180 half plane (rotational symmetry).
 
     The 11.2.2 a) integral runs over the polar angle 0..pi; for a rotationally
@@ -166,7 +166,7 @@ def _fold_angles_deg(angles_deg: "NDArray[np.float64]") -> "NDArray[np.float64]"
 
 
 def _directivity_index_from_polar(
-    angles_deg: "NDArray[np.float64]", rel_db: "NDArray[np.float64]"
+    angles_deg: NDArray[np.float64], rel_db: NDArray[np.float64]
 ) -> float:
     """Directivity index from a rotationally symmetric pattern (13.2.2).
 
@@ -188,8 +188,8 @@ def _directivity_index_from_polar(
 
 
 def _overload_spl(
-    spl_db: "NDArray[np.float64]",
-    thd_percent: "NDArray[np.float64]",
+    spl_db: NDArray[np.float64],
+    thd_percent: NDArray[np.float64],
     limit_percent: float,
 ) -> float | None:
     """Sound pressure level where the distortion reaches the limit (15.2.2).
@@ -272,8 +272,8 @@ class MicrophoneCharacteristics:
         or ``None``.
     """
 
-    frequencies: "NDArray[np.float64]"
-    response_db: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    response_db: NDArray[np.float64]
     reference_frequency: float
     sensitivity_mv_per_pa: float
     sensitivity_level_db: float
@@ -285,12 +285,12 @@ class MicrophoneCharacteristics:
     noise_weighting: str
     max_spl_db: float | None
     max_spl_thd_percent: float
-    distortion_spl_db: "NDArray[np.float64] | None"
-    distortion_thd_percent: "NDArray[np.float64] | None"
-    noise_frequencies: "NDArray[np.float64] | None"
-    noise_band_levels_db: "NDArray[np.float64] | None"
-    polar_angles_deg: "NDArray[np.float64] | None"
-    polar_db: "NDArray[np.float64] | None"
+    distortion_spl_db: NDArray[np.float64] | None
+    distortion_thd_percent: NDArray[np.float64] | None
+    noise_frequencies: NDArray[np.float64] | None
+    noise_band_levels_db: NDArray[np.float64] | None
+    polar_angles_deg: NDArray[np.float64] | None
+    polar_db: NDArray[np.float64] | None
     polar_frequency: float | None
     directivity_index_db: float | None
     powering: str | None
@@ -329,7 +329,7 @@ class MicrophoneCharacteristics:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -374,9 +374,9 @@ class MicrophoneCharacteristics:
         )
 
     def plot(
-        self, quantity: str = "response", ax: "Axes | None" = None, *,
+        self, quantity: str = "response", ax: Axes | None = None, *,
         language: str = "en", **kwargs: Any,
-    ) -> "Axes":
+    ) -> Axes:
         """Plot one IEC 60268-4 microphone rated characteristic on one axes.
 
         One concept per figure, drawn by the same shared renderer the
@@ -432,8 +432,8 @@ def _resolve_noise_level(
 
 
 def _resolve_distortion(
-    distortion: "tuple[ArrayLike, ArrayLike] | None",
-) -> tuple["NDArray[np.float64] | None", "NDArray[np.float64] | None"]:
+    distortion: tuple[ArrayLike, ArrayLike] | None,
+) -> tuple[NDArray[np.float64] | None, NDArray[np.float64] | None]:
     """Validate the optional THD-against-level curve, in (dB SPL, %) (14.2)."""
     if distortion is None:
         return None, None
@@ -444,9 +444,9 @@ def _resolve_distortion(
 
 
 def _resolve_polar(
-    polar: "tuple[ArrayLike, ArrayLike] | None",
+    polar: tuple[ArrayLike, ArrayLike] | None,
     directivity_index_db: float | None,
-) -> tuple["NDArray[np.float64] | None", "NDArray[np.float64] | None", float | None]:
+) -> tuple[NDArray[np.float64] | None, NDArray[np.float64] | None, float | None]:
     """Resolve the optional directional pattern and directivity index (13.1/13.2).
 
     A stated ``directivity_index_db`` is kept; otherwise it is computed from
@@ -477,8 +477,8 @@ def _resolve_polar(
 
 
 def microphone_characteristics(
-    frequencies: "ArrayLike",
-    response_db: "ArrayLike",
+    frequencies: ArrayLike,
+    response_db: ArrayLike,
     sensitivity_mv_per_pa: float,
     *,
     reference_frequency: float = _REFERENCE_FREQUENCY,
@@ -490,9 +490,9 @@ def microphone_characteristics(
     noise_weighting: str = "A",
     max_spl_db: float | None = None,
     max_spl_thd_percent: float = 1.0,
-    distortion: "tuple[ArrayLike, ArrayLike] | None" = None,
-    noise_spectrum: "tuple[ArrayLike, ArrayLike] | None" = None,
-    polar: "tuple[ArrayLike, ArrayLike] | None" = None,
+    distortion: tuple[ArrayLike, ArrayLike] | None = None,
+    noise_spectrum: tuple[ArrayLike, ArrayLike] | None = None,
+    polar: tuple[ArrayLike, ArrayLike] | None = None,
     polar_frequency: float | None = None,
     directivity_index_db: float | None = None,
     powering: str | None = None,
@@ -568,8 +568,8 @@ def microphone_characteristics(
         max_spl = float(max_spl_db)
     elif d_spl is not None and d_thd is not None:
         max_spl = _overload_spl(d_spl, d_thd, thd_limit)
-    n_f: "NDArray[np.float64] | None" = None
-    n_db: "NDArray[np.float64] | None" = None
+    n_f: NDArray[np.float64] | None = None
+    n_db: NDArray[np.float64] | None = None
     if noise_spectrum is not None:
         n_f, n_db = _as_curve(noise_spectrum[0], noise_spectrum[1], "noise_spectrum")
     p_ang, p_db, di = _resolve_polar(polar, directivity_index_db)

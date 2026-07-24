@@ -22,7 +22,7 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-import fdtd2d  # noqa: E402
+import fdtd2d
 
 
 def _pulse_box(sponge_width: int) -> fdtd2d.FDTD2D:

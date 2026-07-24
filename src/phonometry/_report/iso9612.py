@@ -45,7 +45,7 @@ extra, matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import format_number, t
 from ._layout import (
@@ -101,7 +101,7 @@ def _fmt_hours(value: float, language: str = "en") -> str:
     return format_number(float(value), language, decimals=1)
 
 
-def _basis(result: "ExposureResult", language: str = "en") -> str:
+def _basis(result: ExposureResult, language: str = "en") -> str:
     """The standard-basis line: ISO 9612:2009 plus the applied strategy."""
     strategy = t(_STRATEGY_LABELS[result.strategy], language)
     return t(
@@ -112,7 +112,7 @@ def _basis(result: "ExposureResult", language: str = "en") -> str:
 
 
 def _instrumentation_text(
-    result: "ExposureResult",
+    result: ExposureResult,
     metadata: ReportMetadata | None,
     language: str = "en",
 ) -> str | None:
@@ -125,10 +125,10 @@ def _instrumentation_text(
 
 
 def _metadata_pairs(
-    result: "ExposureResult",
+    result: ExposureResult,
     metadata: ReportMetadata | None,
     language: str = "en",
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
     An exposure fiche identifies the client company, the worker(s) or group
@@ -137,7 +137,7 @@ def _metadata_pairs(
     fields are returned; the instrumentation falls back to the result's own
     instrument class.
     """
-    specs: List[Tuple[str, str | None]] = []
+    specs: list[tuple[str, str | None]] = []
     if metadata is not None:
         specs += [
             (t("Company", language), _esc(metadata.client)),
@@ -159,7 +159,7 @@ def _esc(value: str | None) -> str | None:
 
 
 def _task_table(
-    result: "ExposureResult", verbose: bool = False, language: str = "en"
+    result: ExposureResult, verbose: bool = False, language: str = "en"
 ) -> Any:
     """The Clause 15 b/d work-analysis table of a task-based result.
 
@@ -186,7 +186,7 @@ def _task_table(
         headers += ["u<sub>1a,m</sub> [dB]", "u<sub>1b,m</sub> [h]", "u<sub>2,m</sub> [dB]"]
         widths = [42.0, 16.0, 16.0, 26.0, 28.0, 16.0, 16.0, 14.0]
 
-    data: List[List[Any]] = [[Paragraph(h, header_style) for h in headers]]
+    data: list[list[Any]] = [[Paragraph(h, header_style) for h in headers]]
     total_hours = 0.0
     for task in result.tasks:
         total_hours += task.duration_hours
@@ -225,14 +225,14 @@ def _task_table(
     return table
 
 
-def _sampling_table(result: "ExposureResult", language: str = "en") -> Any:
+def _sampling_table(result: ExposureResult, language: str = "en") -> Any:
     """The sampling summary of a job-based/full-day result (Formula (C.9) budget)."""
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
 
     header_style, label_style, value_style = analysis_cell_styles("iso9612")
 
-    rows: List[Tuple[str, str]] = [
+    rows: list[tuple[str, str]] = [
         (t("Number of samples N", language), str(result.n_samples)),
         (
             t("Energy-average level L<sub>p,A,eqTe</sub> [dB]", language),
@@ -259,7 +259,7 @@ def _sampling_table(result: "ExposureResult", language: str = "en") -> Any:
             _fmt_db(result.u3 or 0.0, language),
         ),
     ]
-    data: List[List[Any]] = [
+    data: list[list[Any]] = [
         [
             Paragraph(t("Metric", language), header_style),
             Paragraph(t("Measured", language), header_style),
@@ -271,8 +271,8 @@ def _sampling_table(result: "ExposureResult", language: str = "en") -> Any:
 
 
 def _assessment_rows(
-    result: "ExposureResult", language: str = "en"
-) -> List[Tuple[str, str, str, bool | None]]:
+    result: ExposureResult, language: str = "en"
+) -> list[tuple[str, str, str, bool | None]]:
     """The Directive 2003/10/EC assessment rows.
 
     Each row is ``(label, threshold, measured, exceeded)``; the informational
@@ -283,7 +283,7 @@ def _assessment_rows(
     """
     displayed = display_round(float(result.lex_8h))
     measured = f"L<sub>EX,8h</sub> = {_fmt_db(result.lex_8h, language)} dB"
-    rows: List[Tuple[str, str, str, bool | None]] = [
+    rows: list[tuple[str, str, str, bool | None]] = [
         (
             t("Lower exposure action value", language),
             f"{format_number(_LOWER_ACTION_DBA, language, decimals=0)} dB(A)",
@@ -312,14 +312,14 @@ def _assessment_rows(
     return rows
 
 
-def _assessment_table(result: "ExposureResult", language: str = "en") -> Any:
+def _assessment_table(result: ExposureResult, language: str = "en") -> Any:
     """The Directive 2003/10/EC assessment table (exceeded / not exceeded)."""
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
 
     header_style, label_style, value_style = analysis_cell_styles("iso9612")
 
-    data: List[List[Any]] = [
+    data: list[list[Any]] = [
         [
             Paragraph(t("Directive 2003/10/EC value", language), header_style),
             Paragraph(t("Threshold", language), header_style),
@@ -339,7 +339,7 @@ def _assessment_table(result: "ExposureResult", language: str = "en") -> Any:
     return stacked_table(data, [74 * mm, 24 * mm, 42 * mm, 34 * mm])
 
 
-def _statement(result: "ExposureResult", language: str = "en") -> Tuple[str, List[str]]:
+def _statement(result: ExposureResult, language: str = "en") -> tuple[str, list[str]]:
     """The boxed result statement and its extended terms (Clause 15 e)."""
     statement = t(
         "Daily noise exposure level L<sub>EX,8h</sub> = <b>{lex} dB</b> "
@@ -363,7 +363,7 @@ def _statement(result: "ExposureResult", language: str = "en") -> Tuple[str, Lis
     return statement, extended
 
 
-def _verdict(result: "ExposureResult", language: str = "en") -> Tuple[str, bool]:
+def _verdict(result: ExposureResult, language: str = "en") -> tuple[str, bool]:
     """Verdict text and PASS flag against the Directive 2003/10/EC limit value.
 
     The exposure limit value of 87 dB(A) (Article 3.1) is the only Directive
@@ -384,7 +384,7 @@ def _verdict(result: "ExposureResult", language: str = "en") -> Tuple[str, bool]
 
 
 def render_iso9612_report(
-    result: "ExposureResult",
+    result: ExposureResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -420,7 +420,7 @@ def render_iso9612_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Occupational noise exposure determination", language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(_basis(result, language), basis_style),
     ]

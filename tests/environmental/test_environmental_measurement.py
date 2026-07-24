@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 import reference_data as ref
+
 from phonometry import (
     RepeatedMeasurementResult,
     assess_tonal_audibility,

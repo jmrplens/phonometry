@@ -397,7 +397,7 @@ def test_impedance_adjustment_rejects_absolute_zero() -> None:
 # --------------------------------------------------------------------------- #
 # Doc 29 Vol 3 Part 1 reference workbook: seven-receptor assembly oracle
 # --------------------------------------------------------------------------- #
-from doc29_workbook_data import B1, SEGMENTS  # noqa: E402
+from doc29_workbook_data import B1, SEGMENTS
 
 
 @pytest.mark.parametrize("case", sorted(B1))
@@ -525,7 +525,7 @@ def test_noise_contour_accepts_bank() -> None:
     # API parity with event_level: bank threads through to the contour grid
     # and produces the same port/starboard asymmetry.
     path = [[0.0, 0.0, 300.0, 10000.0, _VREF], [3000.0, 0.0, 400.0, 10000.0, _VREF]]
-    kw = dict(x=[1400.0, 1600.0], y=[-500.0, 500.0])
+    kw = {"x": [1400.0, 1600.0], "y": [-500.0, 500.0]}
     banked = noise_contour(path, _NP, _ND, _NSEL, _NMAX, bank=[10.0], **kw)
     level = noise_contour(path, _NP, _ND, _NSEL, _NMAX, **kw)
     assert banked.level[0, 0] != pytest.approx(banked.level[1, 0])

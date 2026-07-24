@@ -31,13 +31,14 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from ..room.reverberation_prediction import ReverberationModelResult
+
+    from ..room.enclosed_space_absorption import ReverberationResult
+    from ..room.image_source import ImageSourceResult
     from ..room.open_plan import OpenPlanResult
+    from ..room.reverberation_prediction import ReverberationModelResult
     from ..room.room_acoustics import DecayCurve, RoomAcousticsResult
     from ..room.room_ir import ImpulseResponseResult
-    from ..room.enclosed_space_absorption import ReverberationResult
     from ..room.room_noise import NCResult, RCResult
-    from ..room.image_source import ImageSourceResult
     from ..room.steady_field import SteadyFieldResult
 
 #: Spanish translations of the fixed strings rendered by the room ``.plot()``
@@ -259,7 +260,7 @@ def plot_decay_curve(
     return ax
 
 def plot_impulse_response(
-    result: "ImpulseResponseResult", ax: Axes | None = None, language: str = "en",
+    result: ImpulseResponseResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes | np.ndarray:
     """Impulse-response waveform and its log-magnitude / Schroeder decay.
@@ -324,7 +325,7 @@ def plot_impulse_response(
     return axes
 
 def plot_noise_criterion(
-    result: "NCResult", ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: NCResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
 ) -> Axes:
     """Measured spectrum against the NC curve family (ANSI/ASA S12.2-2019).
 
@@ -377,7 +378,7 @@ def plot_noise_criterion(
     return ax
 
 def plot_room_criterion(
-    result: "RCResult", ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: RCResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
 ) -> Axes:
     """Measured spectrum against the reference RC Mark II curve (Annex D).
 
@@ -419,7 +420,7 @@ def plot_room_criterion(
     return ax
 
 def plot_enclosed_space_absorption(
-    result: "ReverberationResult", ax: Axes | None = None, language: str = "en",
+    result: ReverberationResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Reverberation time over the octave bands (EN 12354-6).
@@ -446,7 +447,7 @@ def plot_enclosed_space_absorption(
     return ax
 
 def plot_reverberation_models(
-    result: "ReverberationModelResult", ax: Axes | None = None, language: str = "en",
+    result: ReverberationModelResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Reverberation time by five statistical models over the bands.
@@ -496,7 +497,7 @@ def plot_reverberation_models(
     return ax
 
 def plot_open_plan(
-    result: "OpenPlanResult", ax: Axes | None = None, language: str = "en",
+    result: OpenPlanResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Spatial decay of speech with the distraction/privacy distances marked.
@@ -565,7 +566,7 @@ def plot_open_plan(
 
 
 def plot_excitation(
-    signal: "np.ndarray | Any",
+    signal: np.ndarray | Any,
     fs: int,
     *,
     kind: str = "sweep",
@@ -660,7 +661,7 @@ def plot_excitation(
 
 
 def plot_image_source_reflectogram(
-    result: "ImageSourceResult", ax: Axes | None = None, language: str = "en",
+    result: ImageSourceResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Reflectogram of a synthetic image-source room impulse response.
@@ -738,7 +739,7 @@ def plot_image_source_reflectogram(
 
 
 def plot_steady_field(
-    result: "SteadyFieldResult", ax: Axes | None = None, language: str = "en",
+    result: SteadyFieldResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Steady-state SPL against distance: direct, reverberant and total fields.
@@ -794,7 +795,7 @@ def plot_steady_field(
 
 
 def plot_shaped_sweep(
-    result: "Any", ax: Axes | None = None, language: str = "en",
+    result: Any, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
 ) -> Axes | np.ndarray:
     """Shaped-sweep waveform and its Welch spectrum against the target.

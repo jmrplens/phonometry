@@ -54,7 +54,7 @@ def _t(text: str, language: str = "en") -> str:
 
 
 def plot_program_loudness(
-    result: "ProgramLoudnessResult", ax: Axes | None = None, *,
+    result: ProgramLoudnessResult, ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any
 ) -> Axes:
     """EBU Mode loudness over time (ITU-R BS.1770-5 / EBU R 128).
@@ -131,7 +131,7 @@ def plot_program_loudness(
 
 
 def plot_k_weighting_response(
-    result: "KWeightingResponse", ax: Axes | None = None, *,
+    result: KWeightingResponse, ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any
 ) -> Axes:
     """K-weighting magnitude frequency response (ITU-R BS.1770-5 Annex 1).

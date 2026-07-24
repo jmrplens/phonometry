@@ -9,8 +9,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pytest
 
-from phonometry.underwater.ocean_ambient_noise import ocean_ambient_noise
 from phonometry.underwater import seabed_reflection
+from phonometry.underwater.ocean_ambient_noise import ocean_ambient_noise
 from phonometry.underwater.sonar_equation import passive_sonar_equation
 
 

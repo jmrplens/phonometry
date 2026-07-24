@@ -41,7 +41,7 @@ from __future__ import annotations
 
 import html
 import math
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -87,7 +87,7 @@ def _thead_style() -> Any:
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the room-noise header grid.
 
     Only fields that are set are returned, so empty rows never appear. A
@@ -99,7 +99,7 @@ def _metadata_pairs(
     def num(value: float | None) -> str | None:
         return fmt_meta(value, language) if value is not None else None
 
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Room", language), metadata.test_room),
         (t("Description", language), metadata.specimen),
@@ -114,7 +114,7 @@ def _metadata_pairs(
     return escaped_pairs(specs)
 
 
-def _band_labels() -> List[str]:
+def _band_labels() -> list[str]:
     """Nominal octave-band labels (16 ... 8000 Hz), aligned with the levels."""
     from ..room.room_noise import OCTAVE_BANDS
 
@@ -129,8 +129,8 @@ def _level_cell(level: float, language: str, decimals: int = 1) -> str:
 
 
 def _value_table(
-    columns: List[Tuple[str, List[str]]],
-    col_widths: List[Any],
+    columns: list[tuple[str, list[str]]],
+    col_widths: list[Any],
 ) -> Any:
     """Assemble the left-hand octave-band table with the accredited styling.
 
@@ -148,7 +148,7 @@ def _value_table(
     head = _thead_style()
 
     n_data = len(columns[0][1])
-    rows: List[List[Any]] = [[Paragraph(header, head) for header, _ in columns]]
+    rows: list[list[Any]] = [[Paragraph(header, head) for header, _ in columns]]
     for i in range(n_data):
         rows.append([cells[i] for _, cells in columns])
 
@@ -171,7 +171,7 @@ def _value_table(
     return table
 
 
-def _nc_contour_column(levels: np.ndarray, language: str) -> List[str]:
+def _nc_contour_column(levels: np.ndarray, language: str) -> list[str]:
     """Per-band NC contour value read by the tangency method (verbose NC).
 
     For each band the NC index whose Table 1 curve passes through the measured
@@ -181,7 +181,7 @@ def _nc_contour_column(levels: np.ndarray, language: str) -> List[str]:
     """
     from ..room.room_noise import NC_CURVES, NC_INDICES
 
-    cells: List[str] = []
+    cells: list[str] = []
     for k, level in enumerate(levels):
         if not math.isfinite(level):
             cells.append("—")
@@ -199,7 +199,7 @@ def _nc_contour_column(levels: np.ndarray, language: str) -> List[str]:
     return cells
 
 
-def _base_columns(levels: np.ndarray, language: str) -> List[Tuple[str, List[str]]]:
+def _base_columns(levels: np.ndarray, language: str) -> list[tuple[str, list[str]]]:
     """The two columns every room-noise table opens with (frequency, level)."""
     return [
         (t("Frequency f [Hz]", language), _band_labels()),
@@ -208,12 +208,12 @@ def _base_columns(levels: np.ndarray, language: str) -> List[Tuple[str, List[str
 
 
 def _assemble_left(
-    columns: List[Tuple[str, List[str]]],
-    col_widths: List[Any],
-    widths: Tuple[float, float],
+    columns: list[tuple[str, list[str]]],
+    col_widths: list[Any],
+    widths: tuple[float, float],
     caption_style: Any,
     language: str,
-) -> Tuple[List[Any], List[Any]]:
+) -> tuple[list[Any], list[Any]]:
     """Wrap the caption and value table into a two-panel left cell."""
     from reportlab.platypus import Paragraph
 
@@ -226,8 +226,8 @@ def _assemble_left(
 
 
 def _nc_left_cell(
-    result: "NCResult", verbose: bool, caption_style: Any, language: str
-) -> Tuple[List[Any], List[Any]]:
+    result: NCResult, verbose: bool, caption_style: Any, language: str
+) -> tuple[list[Any], list[Any]]:
     """The NC fiche left cell (caption + table) and its two-panel column widths."""
     from reportlab.lib.units import mm
 
@@ -248,8 +248,8 @@ def _nc_left_cell(
 
 
 def _rc_left_cell(
-    result: "RCResult", verbose: bool, caption_style: Any, language: str
-) -> Tuple[List[Any], List[Any]]:
+    result: RCResult, verbose: bool, caption_style: Any, language: str
+) -> tuple[list[Any], list[Any]]:
     """The RC fiche left cell (caption + table) and its two-panel column widths."""
     from reportlab.lib.units import mm
 
@@ -290,7 +290,7 @@ def _rating_label(value: float) -> str:
     return f"{int(rounded)}" if float(rounded).is_integer() else f"{rounded:g}"
 
 
-def _nc_statement_terms(result: "NCResult", language: str) -> Tuple[str, List[str]]:
+def _nc_statement_terms(result: NCResult, language: str) -> tuple[str, list[str]]:
     """The boxed ``NC-nn`` statement and the governing-band extended term."""
     value = _rating_label(float(result.rating))
     statement = f"NC-<b>{value}</b>"
@@ -312,7 +312,7 @@ _RC_QUALITY = {
 }
 
 
-def _rc_statement_terms(result: "RCResult", language: str) -> Tuple[str, List[str]]:
+def _rc_statement_terms(result: RCResult, language: str) -> tuple[str, list[str]]:
     """The boxed ``RC-nn(tag)`` statement and its RC extended terms."""
     statement = f"RC-<b>{result.rating}</b>({result.classification})"
     quality = _RC_QUALITY.get(result.classification, "neutral")
@@ -327,7 +327,7 @@ def _rc_statement_terms(result: "RCResult", language: str) -> Tuple[str, List[st
 
 def _verdict(
     symbol: str, rating: float, requirement: float, language: str
-) -> Tuple[str, bool]:
+) -> tuple[str, bool]:
     """Verdict text and PASS flag: a room-noise rating passes at or below target.
 
     A lower NC or RC rating is quieter, so the room complies when its rating is
@@ -343,7 +343,7 @@ def _verdict(
 
 
 def _render_room_noise(
-    result: "NCResult | RCResult",
+    result: NCResult | RCResult,
     path: str,
     *,
     basis_template: str,
@@ -377,7 +377,7 @@ def _render_room_noise(
     else:
         basis = t(basis_template, language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]
@@ -419,7 +419,7 @@ def _render_room_noise(
 
 
 def render_nc_report(
-    result: "NCResult",
+    result: NCResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -456,7 +456,7 @@ def render_nc_report(
 
 
 def render_rc_report(
-    result: "RCResult",
+    result: RCResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

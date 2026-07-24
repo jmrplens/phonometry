@@ -33,7 +33,7 @@ A60 = 6.0 * np.log(10.0)
 
 def exponential_ir(t60: float, seconds: float, fs: int = FS) -> np.ndarray:
     """Pressure IR whose energy envelope is exactly exp(-A60*t/t60)."""
-    t = np.arange(int(round(seconds * fs))) / fs
+    t = np.arange(round(seconds * fs)) / fs
     return np.asarray(np.exp(-0.5 * A60 * t / t60))
 
 
@@ -41,7 +41,7 @@ def multitone_ir(t60: float, seconds: float, freqs: list[float],
                  fs: int = FS) -> np.ndarray:
     """One sine carrier per octave band, all sharing the same exponential
     energy envelope, so every band-filtered envelope is exp(-A60*t/t60)."""
-    t = np.arange(int(round(seconds * fs))) / fs
+    t = np.arange(round(seconds * fs)) / fs
     env = np.exp(-0.5 * A60 * t / t60)
     out = np.zeros_like(t)
     for f in freqs:

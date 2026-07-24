@@ -392,12 +392,12 @@ _CHAIN_ROWS = [
 ]
 
 
-def _a_weighting_db(frequencies: "np.ndarray") -> "np.ndarray":
+def _a_weighting_db(frequencies: np.ndarray) -> np.ndarray:
     # IEC 61672-1 analytic A-weighting at the exact band centres.
     f = np.asarray(frequencies, dtype=np.float64)
     f1, f2, f3, f4 = 20.598997, 107.65265, 737.86223, 12194.217
 
-    def ra(x: "np.ndarray") -> "np.ndarray":
+    def ra(x: np.ndarray) -> np.ndarray:
         return (f4**2 * x**4) / ((x**2 + f1**2)
                                  * np.sqrt((x**2 + f2**2) * (x**2 + f3**2))
                                  * (x**2 + f4**2))
@@ -424,7 +424,7 @@ def test_propagation_chain_reproduces_prototype_la(
 # Flight-condition interpolation (guidance Eq. 3-10)
 # --------------------------------------------------------------------------- #
 
-from phonometry.aircraft.rotorcraft_noise import (  # noqa: E402
+from phonometry.aircraft.rotorcraft_noise import (
     flight_condition_weights,
     flight_path_kinematics,
     interpolated_source_level,
@@ -433,7 +433,7 @@ from phonometry.aircraft.rotorcraft_noise import (  # noqa: E402
 )
 
 
-def _uniform_hemisphere(level: float, bands: "list[float] | None" = None,
+def _uniform_hemisphere(level: float, bands: list[float] | None = None,
                         ) -> RotorcraftHemisphere:
     freqs = np.asarray(bands if bands is not None else [50.0], dtype=np.float64)
     az = np.arange(-90.0, 91.0, 10.0)
@@ -616,9 +616,9 @@ def test_kinematics_plot() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def _flyover(level: float = 100.0, bands: "list[float] | None" = None,
+def _flyover(level: float = 100.0, bands: list[float] | None = None,
              span: float = 6000.0, dt: float = 0.5, height: float = 100.1,
-             **kwargs: "float | str") -> "tuple":
+             **kwargs: float | str) -> tuple:
     """A constant-speed level flyover along y over the origin receiver."""
     speed = 50.0
     t = np.arange(0.0, 2.0 * span / speed + dt / 2.0, dt)
@@ -634,7 +634,7 @@ def _flyover(level: float = 100.0, bands: "list[float] | None" = None,
 
 
 def test_event_geometry_overhead() -> None:
-    t, pos, res = _flyover(bands=[31.5])
+    _t, _pos, res = _flyover(bands=[31.5])
     k = int(np.argmin(res.distance))
     assert res.distance[k] == pytest.approx(100.0, abs=1e-9)
     assert res.polar[k] == pytest.approx(90.0, abs=1e-6)
@@ -758,7 +758,7 @@ def test_event_plot() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def _contour_inputs() -> "tuple":
+def _contour_inputs() -> tuple:
     speed = 50.0
     t = np.arange(0.0, 40.5, 0.5)
     pos = np.column_stack([np.zeros_like(t), speed * t - 1000.0,
@@ -811,7 +811,7 @@ def test_contour_plot() -> None:
 # Topography and screening (guidance §A.4.4-A.4.5)
 # --------------------------------------------------------------------------- #
 
-from phonometry.aircraft.rotorcraft_noise import (  # noqa: E402
+from phonometry.aircraft.rotorcraft_noise import (
     diffraction_attenuation,
     mean_flow_resistivity,
     mean_ground_plane,
@@ -1007,7 +1007,7 @@ def test_screening_validation_and_plot() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def _terrain_case(tz: "np.ndarray") -> "tuple":
+def _terrain_case(tz: np.ndarray) -> tuple:
     freqs = np.array([63.0, 250.0, 1000.0])
     az = np.arange(-90.0, 91.0, 10.0)
     po = np.arange(0.0, 181.0, 10.0)

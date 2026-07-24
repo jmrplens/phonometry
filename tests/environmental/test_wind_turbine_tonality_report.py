@@ -19,8 +19,8 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-from phonometry import ReportMetadata  # noqa: E402
-from phonometry.environmental.wind_turbine_noise import (  # noqa: E402
+from phonometry import ReportMetadata
+from phonometry.environmental.wind_turbine_noise import (
     wind_turbine_tonality,
 )
 

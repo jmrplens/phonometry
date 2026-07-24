@@ -38,7 +38,7 @@ imported lazily; each is guarded with an actionable :class:`ImportError`.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -137,7 +137,7 @@ def _grade_cell(grade: np.ndarray | None, i: int) -> str:
     return _GRADE_CELL.get(str(grade[i]), "—")
 
 
-def _statement(result: Any, language: str = "en") -> Tuple[str, List[str]]:
+def _statement(result: Any, language: str = "en") -> tuple[str, list[str]]:
     """The boxed sound-power result and its extended terms.
 
     Delegates the ``LWA``/``LW`` box to the shared
@@ -205,7 +205,7 @@ def _indicator_range(values: np.ndarray | None, language: str = "en") -> str:
 
 
 def render_intensity_power_report(
-    result: "SoundPowerIntensityResult",
+    result: SoundPowerIntensityResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

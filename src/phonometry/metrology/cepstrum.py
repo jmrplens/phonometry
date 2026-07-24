@@ -85,7 +85,7 @@ _KINDS = ("power", "real", "complex")
 _NEPER_TO_DB = 20.0 / np.log(10.0)
 
 
-def _fold_causal(cepstrum: "NDArray[np.float64]") -> "NDArray[np.float64]":
+def _fold_causal(cepstrum: NDArray[np.float64]) -> NDArray[np.float64]:
     """Fold a real (even) cepstrum onto positive quefrencies.
 
     The minimum-phase reconstruction keeps the quefrency-zero and Nyquist
@@ -121,8 +121,8 @@ def _validate_nfft(n: int, nfft: int | None) -> int:
 
 
 def _log_magnitude(
-    x: "NDArray[np.float64]", nfft: int
-) -> "NDArray[np.float64]":
+    x: NDArray[np.float64], nfft: int
+) -> NDArray[np.float64]:
     """One-sided ``ln|X|`` of the zero-padded record, floored like phase.py."""
     magnitude = np.abs(np.fft.rfft(x, nfft))
     peak = float(np.max(magnitude))
@@ -135,8 +135,8 @@ def _log_magnitude(
 
 
 def _complex_cepstrum(
-    x: "NDArray[np.float64]", nfft: int
-) -> "tuple[NDArray[np.float64], int]":
+    x: NDArray[np.float64], nfft: int
+) -> tuple[NDArray[np.float64], int]:
     """Complex cepstrum and the removed linear-phase component.
 
     The full-grid phase is unwrapped and its linear component removed --
@@ -182,14 +182,14 @@ class CepstrumResult:
         restored by :meth:`invert`.
     """
 
-    quefrencies: "NDArray[np.float64]"
-    cepstrum: "NDArray[np.float64]"
+    quefrencies: NDArray[np.float64]
+    cepstrum: NDArray[np.float64]
     kind: str
     fs: float
     nfft: int
     linear_phase_samples: int
 
-    def invert(self) -> "NDArray[np.float64]":
+    def invert(self) -> NDArray[np.float64]:
         """Reconstruct the record from a complex cepstrum.
 
         Applies the forward chain in reverse -- DFT, restore the removed
@@ -217,8 +217,8 @@ class CepstrumResult:
         return np.asarray(np.fft.ifft(spectrum).real, dtype=np.float64)
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the cepstrum against quefrency (positive quefrencies).
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -231,7 +231,7 @@ class CepstrumResult:
 
 
 def cepstrum(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     *,
     kind: str = "power",
@@ -306,19 +306,19 @@ class LifterResult:
     :ivar nfft: FFT length used.
     """
 
-    frequencies: "NDArray[np.float64]"
-    spectrum_db: "NDArray[np.float64]"
-    liftered_db: "NDArray[np.float64]"
-    quefrencies: "NDArray[np.float64]"
-    cepstrum: "NDArray[np.float64]"
+    frequencies: NDArray[np.float64]
+    spectrum_db: NDArray[np.float64]
+    liftered_db: NDArray[np.float64]
+    quefrencies: NDArray[np.float64]
+    cepstrum: NDArray[np.float64]
     cutoff: float
     mode: str
     fs: float
     nfft: int
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | NDArray[Any]:
         """Plot the cepstrum with the cutoff and the two log spectra.
 
         With ``ax`` given, only the spectrum panel is drawn on it.
@@ -333,7 +333,7 @@ class LifterResult:
 
 
 def lifter(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     cutoff: float,
     *,
@@ -368,7 +368,7 @@ def lifter(
             f"'mode' must be 'lowpass' or 'highpass', got {mode!r}."
         )
     n = _validate_nfft(xa.size, nfft)
-    cut = int(round(_positive(cutoff, "cutoff") * fs_v))
+    cut = round(_positive(cutoff, "cutoff") * fs_v)
     if not 1 <= cut <= n // 2:
         raise ValueError(
             "'cutoff' must resolve to between 1 sample and nfft/2 samples "
@@ -416,8 +416,8 @@ class EchoDetectionResult:
     :ivar nfft: FFT length used.
     """
 
-    quefrencies: "NDArray[np.float64]"
-    cepstrum: "NDArray[np.float64]"
+    quefrencies: NDArray[np.float64]
+    cepstrum: NDArray[np.float64]
     delay: float
     delay_samples: int
     reflection_coefficient: float
@@ -426,8 +426,8 @@ class EchoDetectionResult:
     nfft: int
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Plot the power cepstrum with the detected echo marked.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -440,7 +440,7 @@ class EchoDetectionResult:
 
 
 def echo_detection(
-    x: "NDArray[np.float64] | list[float]",
+    x: NDArray[np.float64] | list[float],
     fs: float,
     *,
     min_quefrency: float | None = None,
@@ -477,8 +477,8 @@ def echo_detection(
     n = result.nfft
     fs_v = result.fs
 
-    lo = 16 if min_quefrency is None else int(round(min_quefrency * fs_v))
-    hi = n // 2 if max_quefrency is None else int(round(max_quefrency * fs_v))
+    lo = 16 if min_quefrency is None else round(min_quefrency * fs_v)
+    hi = n // 2 if max_quefrency is None else round(max_quefrency * fs_v)
     if not 1 <= lo < hi <= n // 2:
         raise ValueError(
             "The quefrency search band must satisfy "

@@ -169,7 +169,7 @@ _RANDI_TABLE2 = [
 
 @pytest.mark.parametrize(("length_ft", "speed_kn", "levels"), _RANDI_TABLE2)
 def test_randi_reproduces_report_table_2(
-    length_ft: float, speed_kn: float, levels: "dict[float, float]",
+    length_ft: float, speed_kn: float, levels: dict[float, float],
 ) -> None:
     from phonometry.underwater.ship_traffic_noise import _randi
 

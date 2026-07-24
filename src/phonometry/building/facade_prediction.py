@@ -48,9 +48,10 @@ Clause/formula citations refer to EN 12354-3:2000 or EN 12354-4:2000.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from math import atan, log10, pi
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -171,7 +172,7 @@ class FacadePredictionResult:
     c_tr: int | None = None
     frequencies: np.ndarray | None = None
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the per-element partial indices and the façade ``R'`` / ``D2m,nT``."""
         from .._i18n import check_language
         from .._plot.building import plot_facade_prediction
@@ -183,7 +184,7 @@ class FacadePredictionResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -260,7 +261,7 @@ class RadiatedPowerResult:
     l_w_dba: float | None = None
     frequencies: np.ndarray | None = None
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the radiated sound power level ``LW`` per band."""
         from .._i18n import check_language
         from .._plot.building import plot_radiated_power

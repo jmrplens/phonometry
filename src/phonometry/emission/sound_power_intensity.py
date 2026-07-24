@@ -46,7 +46,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -66,7 +66,7 @@ Grade = Literal["engineering", "survey"]
 BandType = Literal["octave", "third"]
 
 #: Deviation error factor K, in dB (ISO 9614-2:1996 Table 1).
-_K: Dict[str, float] = {"engineering": 10.0, "survey": 7.0}
+_K: dict[str, float] = {"engineering": 10.0, "survey": 7.0}
 #: Criterion 2 limit on the negative-partial-power indicator (Eq. B.2), in dB.
 _F_PLUS_MINUS_LIMIT = 3.0
 #: Grade-3 (control) per-band repeatability limit s, in dB. Table 2 tabulates
@@ -83,7 +83,7 @@ def _table2_s(nominal: int, band_type: BandType) -> float:
     -> 2; octave 500-4000 Hz / third 400-5000 Hz -> 1,5; third 6300 Hz -> 2,5.
     """
     if band_type == "octave":
-        table: Dict[int, float] = {
+        table: dict[int, float] = {
             63: 3.0, 125: 3.0, 250: 2.0, 500: 1.5, 1000: 1.5, 2000: 1.5, 4000: 1.5,
         }
     else:
@@ -158,7 +158,7 @@ class SoundPowerIntensityResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -454,7 +454,7 @@ def _classify(
                 "The achieved grade needs the criterion-3 limit s: provide "
                 "'frequencies' (Table 2 lookup) or 'repeatability_limit'."
             )
-        nominal = [int(round(float(f))) for f in np.asarray(frequencies)]
+        nominal = [round(float(f)) for f in np.asarray(frequencies)]
         s_eng = np.array([_table2_s(f, band_type) for f in nominal], dtype=np.float64)
         s_sur = np.full(n_bands, _S_SURVEY, dtype=np.float64)
 

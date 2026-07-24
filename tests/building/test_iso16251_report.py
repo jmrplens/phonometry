@@ -24,9 +24,9 @@ import pytest
 
 pytest.importorskip("reportlab")
 
-import numpy as np  # noqa: E402  (import after importorskip)
+import numpy as np
 
-from phonometry import ReportMetadata, building  # noqa: E402
+from phonometry import ReportMetadata, building
 
 _PDF_MAGIC = b"%PDF"
 
@@ -46,22 +46,22 @@ def _result():
 
 
 def _metadata(**overrides) -> ReportMetadata:
-    base = dict(
-        specimen="Textile floor covering (carpet), 6 mm pile",
-        client="Acoustic Test Client Ltd.",
-        manufacturer="Floors Works Inc.",
-        mass_per_area=2.4,
-        mounting="Laid loose on the mock-up plate (ISO 10140-1 category I)",
-        test_room="Small-mock-up impact rig R1",
-        measurement_standard="ISO 16251-1",
-        temperature=21.0,
-        pressure=101.2,
-        test_date="2026-07-21",
-        laboratory="Phonometry Reference Laboratory",
-        operator="J. M. Requena-Plens",
-        report_id="PHN-2026-16251",
-        requirement=17.0,
-    )
+    base = {
+        "specimen": "Textile floor covering (carpet), 6 mm pile",
+        "client": "Acoustic Test Client Ltd.",
+        "manufacturer": "Floors Works Inc.",
+        "mass_per_area": 2.4,
+        "mounting": "Laid loose on the mock-up plate (ISO 10140-1 category I)",
+        "test_room": "Small-mock-up impact rig R1",
+        "measurement_standard": "ISO 16251-1",
+        "temperature": 21.0,
+        "pressure": 101.2,
+        "test_date": "2026-07-21",
+        "laboratory": "Phonometry Reference Laboratory",
+        "operator": "J. M. Requena-Plens",
+        "report_id": "PHN-2026-16251",
+        "requirement": 17.0,
+    }
     base.update(overrides)
     return ReportMetadata(**base)
 

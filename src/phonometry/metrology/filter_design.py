@@ -5,8 +5,6 @@ Filter design and visualization for phonometry.
 
 from __future__ import annotations
 
-from typing import List, Tuple
-
 import numpy as np
 from scipy import signal
 
@@ -22,7 +20,7 @@ def _cheby2_transition_ratio(order: int, attenuation: float) -> float:
 
 def _cheby2_stopband_edges(
     fd: float, fu: float, order: int, attenuation: float, fs: float | None = None
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """
     Map desired -3 dB band edges (fd, fu) to the Chebyshev II stopband
     edges that scipy expects as ``Wn``.
@@ -68,9 +66,9 @@ def _cheby2_headroom(fraction: float, order: int, attenuation: float) -> float:
 
 
 def _design_sos_filter(
-    freq: List[float],
-    freq_d: List[float],
-    freq_u: List[float],
+    freq: list[float],
+    freq_d: list[float],
+    freq_u: list[float],
     fs: int,
     order: int,
     factor: np.ndarray,
@@ -79,7 +77,7 @@ def _design_sos_filter(
     attenuation: float,
     show: bool = False,
     plot_file: str | None = None,
-) -> List[np.ndarray]:
+) -> list[np.ndarray]:
     """
     Generate SOS coefficients for the filter bank.
 
@@ -132,10 +130,10 @@ def _design_sos_filter(
     return sos
 
 def _showfilter(
-    sos: List[np.ndarray],
-    freq: List[float],
-    freq_u: List[float],
-    freq_d: List[float],
+    sos: list[np.ndarray],
+    freq: list[float],
+    freq_u: list[float],
+    freq_d: list[float],
     fs: int,
     factor: np.ndarray,
     show: bool = False,

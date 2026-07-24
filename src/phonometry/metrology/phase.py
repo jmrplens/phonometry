@@ -68,10 +68,10 @@ _MIN_BINS = 8
 
 
 def _validate_response(
-    response: "NDArray[np.complex128] | NDArray[np.float64] | list[float]",
+    response: NDArray[np.complex128] | NDArray[np.float64] | list[float],
     *,
     name: str = "response",
-) -> "NDArray[np.complex128]":
+) -> NDArray[np.complex128]:
     arr = np.asarray(response)
     if arr.ndim != 1:
         raise ValueError(f"'{name}' must be one-dimensional.")
@@ -95,8 +95,8 @@ def _validate_oversample(oversample: int) -> int:
 
 
 def _trig_oversample(
-    magnitude: "NDArray[np.float64]", factor: int
-) -> "NDArray[np.float64]":
+    magnitude: NDArray[np.float64], factor: int
+) -> NDArray[np.float64]:
     """Resample a one-sided magnitude onto a ``factor`` times denser grid.
 
     Exact trigonometric interpolation: the magnitude's inverse transform is
@@ -121,10 +121,10 @@ def _trig_oversample(
 
 
 def minimum_phase(
-    response: "NDArray[np.complex128] | NDArray[np.float64] | list[float]",
+    response: NDArray[np.complex128] | NDArray[np.float64] | list[float],
     *,
     oversample: int = 8,
-) -> "NDArray[np.complex128]":
+) -> NDArray[np.complex128]:
     """
     Minimum-phase response with the magnitude of ``response``.
 
@@ -169,9 +169,9 @@ def minimum_phase(
 
 
 def group_delay(
-    response: "NDArray[np.complex128] | list[float]",
+    response: NDArray[np.complex128] | list[float],
     fs: float,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """
     Group delay ``tau_g(f) = -(1/2pi) * dphi/df`` of a sampled response.
 
@@ -199,10 +199,10 @@ def group_delay(
 
 
 def excess_phase(
-    response: "NDArray[np.complex128] | list[float]",
+    response: NDArray[np.complex128] | list[float],
     *,
     oversample: int = 8,
-) -> "NDArray[np.float64]":
+) -> NDArray[np.float64]:
     """
     Excess phase: measured phase minus the minimum phase of ``|H|``.
 
@@ -247,19 +247,19 @@ class PhaseDecompositionResult:
     :ivar fs: Sample rate of the underlying record, in Hz.
     """
 
-    frequencies: "NDArray[np.float64]"
-    magnitude: "NDArray[np.float64]"
-    phase: "NDArray[np.float64]"
-    minimum_phase: "NDArray[np.float64]"
-    excess_phase: "NDArray[np.float64]"
-    group_delay: "NDArray[np.float64]"
-    excess_group_delay: "NDArray[np.float64]"
-    minimum_phase_response: "NDArray[np.complex128]"
+    frequencies: NDArray[np.float64]
+    magnitude: NDArray[np.float64]
+    phase: NDArray[np.float64]
+    minimum_phase: NDArray[np.float64]
+    excess_phase: NDArray[np.float64]
+    group_delay: NDArray[np.float64]
+    excess_group_delay: NDArray[np.float64]
+    minimum_phase_response: NDArray[np.complex128]
     fs: float
 
     def plot(
-        self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any
-    ) -> "Axes | NDArray[Any]":
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes | NDArray[Any]:
         """Plot the magnitude, the phase decomposition and the group delay.
 
         Three stacked panels: ``|H|`` in dB, the measured / minimum /
@@ -276,7 +276,7 @@ class PhaseDecompositionResult:
 
 
 def phase_decomposition(
-    response: "NDArray[np.complex128] | list[float]",
+    response: NDArray[np.complex128] | list[float],
     fs: float,
     *,
     oversample: int = 8,

@@ -143,7 +143,7 @@ One biquad of the RBJ Audio EQ Cookbook.
 
 ```python
 parametric_eq(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: float,
     sections: EQSection | Sequence[EQSection],
 ) -> np.ndarray
@@ -193,7 +193,7 @@ series as a numerically robust SOS cascade, following the house style of
 ### ParametricEQ.filter()
 
 ```python
-ParametricEQ.filter(x: List[float] | np.ndarray) -> np.ndarray
+ParametricEQ.filter(x: list[float] | np.ndarray) -> np.ndarray
 ```
 
 Apply the EQ cascade to a signal.

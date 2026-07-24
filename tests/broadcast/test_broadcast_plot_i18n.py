@@ -8,17 +8,17 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-from phonometry.broadcast import program_loudness  # noqa: E402
+from phonometry.broadcast import program_loudness
 
 FS = 48000
 
 
 def _sine(level_dbfs: float, duration: float) -> np.ndarray:
-    t = np.arange(int(round(duration * FS))) / FS
+    t = np.arange(round(duration * FS)) / FS
     return 10.0 ** (level_dbfs / 20.0) * np.sin(2.0 * np.pi * 1000.0 * t)
 
 

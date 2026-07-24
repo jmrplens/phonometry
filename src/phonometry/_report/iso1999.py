@@ -35,7 +35,7 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -47,8 +47,8 @@ from ._layout import (
     build_document,
     display_round,
     document_styles,
-    footer_flow,
     fmt_num,
+    footer_flow,
     grid_table,
     render_figure_drawing,
     result_box,
@@ -64,7 +64,7 @@ if TYPE_CHECKING:
 #: The 2/3/4 kHz hearing-handicap audiometric set, in hertz. The mean threshold
 #: shift over these three frequencies is the descriptor most occupational
 #: schemes use as a single hearing-damage index.
-_HANDICAP_SET: Tuple[float, float, float] = (2000.0, 3000.0, 4000.0)
+_HANDICAP_SET: tuple[float, float, float] = (2000.0, 3000.0, 4000.0)
 
 #: The compression-term denominator of the HTLAN Formula (1).
 _HTLAN_DENOM = 120.0
@@ -85,7 +85,7 @@ def _esc(value: str | None) -> str | None:
     return html.escape(value) if value else None
 
 
-def _handicap_indices(frequencies: np.ndarray) -> List[int]:
+def _handicap_indices(frequencies: np.ndarray) -> list[int]:
     """Indices of the 2/3/4 kHz hearing-handicap frequencies present in the set."""
     return [
         i
@@ -96,7 +96,7 @@ def _handicap_indices(frequencies: np.ndarray) -> List[int]:
 
 def _representative(
     frequencies: np.ndarray, values: np.ndarray
-) -> Tuple[bool, float, float]:
+) -> tuple[bool, float, float]:
     """Return the representative shift/level and whether it is the 2/3/4 kHz mean.
 
     When all three hearing-handicap frequencies are present the representative
@@ -125,11 +125,11 @@ def _fractile_phrase(fractile: float, language: str = "en") -> str:
 # --------------------------------------------------------------------------- #
 def _nipts_metadata_pairs(
     metadata: ReportMetadata | None, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """The (label, value) header-grid pairs of a NIPTS/HTLAN fiche."""
     if metadata is None:
         return []
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Company", language), _esc(metadata.client)),
         (t("Worker(s) / group", language), _esc(metadata.specimen)),
         (t("Workplace", language), _esc(metadata.test_room)),
@@ -139,7 +139,7 @@ def _nipts_metadata_pairs(
 
 
 def _nipts_table(
-    result: "NiptsResult", verbose: bool = False, language: str = "en"
+    result: NiptsResult, verbose: bool = False, language: str = "en"
 ) -> Any:
     """The per-audiometric-frequency NIPTS table (median and fractile value)."""
     from reportlab.lib.units import mm
@@ -157,7 +157,7 @@ def _nipts_table(
         headers += ["d<sub>u</sub> [dB]", "d<sub>l</sub> [dB]"]
         widths = [22.0, 18.0, 18.0, 19.0, 19.0]
 
-    data: List[List[Any]] = [[Paragraph(h, header_style) for h in headers]]
+    data: list[list[Any]] = [[Paragraph(h, header_style) for h in headers]]
     for i, freq in enumerate(result.frequencies):
         row = [
             Paragraph(_fmt_freq(float(freq), language), label_style),
@@ -174,7 +174,7 @@ def _nipts_table(
     return stacked_table(data, [w * mm for w in widths])
 
 
-def _nipts_statement(result: "NiptsResult", language: str = "en") -> Tuple[str, List[str]]:
+def _nipts_statement(result: NiptsResult, language: str = "en") -> tuple[str, list[str]]:
     """The boxed representative NIPTS statement and the exposure-condition terms."""
     is_handicap, value, freq = _representative(result.frequencies, result.value)
     if is_handicap:
@@ -200,8 +200,8 @@ def _nipts_statement(result: "NiptsResult", language: str = "en") -> Tuple[str, 
 
 
 def _nipts_verdict(
-    result: "NiptsResult", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: NiptsResult, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag: the representative NIPTS at or below a maximum.
 
     The requirement is read as the maximum acceptable representative NIPTS (a
@@ -218,7 +218,7 @@ def _nipts_verdict(
 
 
 def render_nipts_report(
-    result: "NiptsResult",
+    result: NiptsResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -255,7 +255,7 @@ def render_nipts_report(
         language,
     )
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]
@@ -299,7 +299,7 @@ def render_nipts_report(
 # HTLAN fiche.
 # --------------------------------------------------------------------------- #
 def _htlan_table(
-    result: "HtlanResult", verbose: bool = False, language: str = "en"
+    result: HtlanResult, verbose: bool = False, language: str = "en"
 ) -> Any:
     """The per-audiometric-frequency HTLAN table (age, noise and combined)."""
     from reportlab.lib.units import mm
@@ -318,7 +318,7 @@ def _htlan_table(
         headers.insert(3, "H&#183;N/120 [dB]")
         widths = [20.0, 16.0, 16.0, 20.0, 20.0]
 
-    data: List[List[Any]] = [[Paragraph(h, header_style) for h in headers]]
+    data: list[list[Any]] = [[Paragraph(h, header_style) for h in headers]]
     for i, freq in enumerate(result.frequencies):
         h = float(result.htla[i])
         n = float(result.nipts[i])
@@ -335,7 +335,7 @@ def _htlan_table(
     return stacked_table(data, [w * mm for w in widths])
 
 
-def _htlan_statement(result: "HtlanResult", language: str = "en") -> Tuple[str, List[str]]:
+def _htlan_statement(result: HtlanResult, language: str = "en") -> tuple[str, list[str]]:
     """The boxed representative HTLAN statement and the listener/exposure terms."""
     is_handicap, value, freq = _representative(result.frequencies, result.threshold)
     if is_handicap:
@@ -365,8 +365,8 @@ def _htlan_statement(result: "HtlanResult", language: str = "en") -> Tuple[str, 
 
 
 def _htlan_verdict(
-    result: "HtlanResult", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: HtlanResult, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag: the representative HTLAN at or below a maximum."""
     _, value, _ = _representative(result.frequencies, result.threshold)
     passed = display_round(value) <= requirement + 1e-9
@@ -378,7 +378,7 @@ def _htlan_verdict(
 
 
 def render_htlan_report(
-    result: "HtlanResult",
+    result: HtlanResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -414,7 +414,7 @@ def render_htlan_report(
         language,
     )
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]
@@ -454,7 +454,7 @@ def render_htlan_report(
     return build_document(path, flow, title)
 
 
-def _prediction_notes(language: str = "en") -> List[Any]:
+def _prediction_notes(language: str = "en") -> list[Any]:
     """The shared statistical-prediction notes of the ISO 1999 fiches."""
     from reportlab.lib import colors
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet

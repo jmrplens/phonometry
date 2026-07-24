@@ -97,8 +97,9 @@ rubber-ball heavy/soft impactor, out of scope here).
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Sequence, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -113,19 +114,19 @@ if TYPE_CHECKING:
 # --- ISO 717-1 Table 3 reference values ----------------------------------
 
 #: One-third-octave reference values, 100 Hz to 3150 Hz (Table 3).
-_REF_THIRD_OCTAVE: Tuple[int, ...] = (
+_REF_THIRD_OCTAVE: tuple[int, ...] = (
     33, 36, 39, 42, 45, 48, 51, 52, 53, 54, 55, 56, 56, 56, 56, 56,
 )
 #: Octave reference values, 125 Hz to 2000 Hz (Table 3).
-_REF_OCTAVE: Tuple[int, ...] = (36, 45, 52, 55, 56)
+_REF_OCTAVE: tuple[int, ...] = (36, 45, 52, 55, 56)
 
 #: One-third-octave band centre frequencies, 100 Hz to 3150 Hz (16 bands).
-_FREQ_THIRD_OCTAVE: Tuple[float, ...] = (
+_FREQ_THIRD_OCTAVE: tuple[float, ...] = (
     100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0,
     630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0,
 )
 #: Octave band centre frequencies, 125 Hz to 2000 Hz (5 bands).
-_FREQ_OCTAVE: Tuple[float, ...] = (125.0, 250.0, 500.0, 1000.0, 2000.0)
+_FREQ_OCTAVE: tuple[float, ...] = (125.0, 250.0, 500.0, 1000.0, 2000.0)
 
 #: Index of the 500 Hz band in each band set (the rating is read there).
 _INDEX_500_THIRD = 7
@@ -145,11 +146,11 @@ _SHIFT_TOLERANCE = 1e-6
 # --- ISO 717-2 Table 3 impact reference values ---------------------------
 
 #: One-third-octave impact reference values, 100 Hz to 3150 Hz (Table 3).
-_REF_IMPACT_THIRD_OCTAVE: Tuple[int, ...] = (
+_REF_IMPACT_THIRD_OCTAVE: tuple[int, ...] = (
     62, 62, 62, 62, 62, 62, 61, 60, 59, 58, 57, 54, 51, 48, 45, 42,
 )
 #: Octave impact reference values, 125 Hz to 2000 Hz (Table 3).
-_REF_IMPACT_OCTAVE: Tuple[int, ...] = (67, 67, 65, 62, 49)
+_REF_IMPACT_OCTAVE: tuple[int, ...] = (67, 67, 65, 62, 49)
 
 #: Octave-band single-number reduction applied to L'n,w / L'nT,w
 #: (ISO 717-2 Clause 4.3.2): the shifted reference at 500 Hz minus 5 dB.
@@ -174,17 +175,17 @@ _FACADE_CORRECTION = {"loudspeaker": 1.5, "road_traffic": 3.0}
 # --- ISO 717-1 Table 4 spectra (A-weighted, normalized to 0 dB) ----------
 
 #: Spectrum No. 1 (pink noise, for C), one-third octave 100-3150 Hz.
-_SPECTRUM1_THIRD: Tuple[int, ...] = (
+_SPECTRUM1_THIRD: tuple[int, ...] = (
     -29, -26, -23, -21, -19, -17, -15, -13, -12, -11, -10, -9, -9, -9, -9, -9,
 )
 #: Spectrum No. 2 (urban traffic, for Ctr), one-third octave 100-3150 Hz.
-_SPECTRUM2_THIRD: Tuple[int, ...] = (
+_SPECTRUM2_THIRD: tuple[int, ...] = (
     -20, -20, -18, -16, -15, -14, -13, -12, -11, -9, -8, -9, -10, -11, -13, -15,
 )
 #: Spectrum No. 1 (for C), octave 125-2000 Hz.
-_SPECTRUM1_OCTAVE: Tuple[int, ...] = (-21, -14, -8, -5, -4)
+_SPECTRUM1_OCTAVE: tuple[int, ...] = (-21, -14, -8, -5, -4)
 #: Spectrum No. 2 (for Ctr), octave 125-2000 Hz.
-_SPECTRUM2_OCTAVE: Tuple[int, ...] = (-14, -10, -7, -4, -6)
+_SPECTRUM2_OCTAVE: tuple[int, ...] = (-14, -10, -7, -4, -6)
 
 # --- ISO 717-1:2020 Table B.1 spectra for the enlarged frequency ranges ----
 # One-third-octave sound levels, A-weighted and normalized to 0 dB over each
@@ -193,22 +194,22 @@ _SPECTRUM2_OCTAVE: Tuple[int, ...] = (-14, -10, -7, -4, -6)
 # any enlarged range.
 
 #: One-third-octave band centre frequencies, 50 Hz to 5000 Hz (21 bands).
-_FREQ_50_5000: Tuple[float, ...] = (
+_FREQ_50_5000: tuple[float, ...] = (
     50.0, 63.0, 80.0, *_FREQ_THIRD_OCTAVE, 4000.0, 5000.0,
 )
 #: Spectrum No. 1 column for C50-3150 (19 bands, 50-3150 Hz).
-_SPECTRUM1_50_3150: Tuple[int, ...] = (
+_SPECTRUM1_50_3150: tuple[int, ...] = (
     -40, -36, -33, -29, -26, -23, -21, -19, -17, -15,
     -13, -12, -11, -10, -9, -9, -9, -9, -9,
 )
 #: Spectrum No. 1 column for C50-5000 and C100-5000 (21 bands, 50-5000 Hz;
 #: the 100-5000 Hz range uses the same column restricted to its bands).
-_SPECTRUM1_50_5000: Tuple[int, ...] = (
+_SPECTRUM1_50_5000: tuple[int, ...] = (
     -41, -37, -34, -30, -27, -24, -22, -20, -18, -16, -14,
     -13, -12, -11, -10, -10, -10, -10, -10, -10, -10,
 )
 #: Spectrum No. 2 column for Ctr in any enlarged range (21 bands, 50-5000 Hz).
-_SPECTRUM2_50_5000: Tuple[int, ...] = (
+_SPECTRUM2_50_5000: tuple[int, ...] = (
     -25, -23, -21, -20, -20, -18, -16, -15, -14, -13, -12,
     -11, -9, -8, -9, -10, -11, -13, -15, -16, -18,
 )
@@ -217,7 +218,7 @@ _SPECTRUM2_50_5000: Tuple[int, ...] = (
 #: (airborne): descriptor suffix -> (band frequencies, spectrum No. 1 levels,
 #: spectrum No. 2 levels).
 _EXTENDED_RANGES: dict[str, tuple[
-    Tuple[float, ...], Tuple[int, ...], Tuple[int, ...]
+    tuple[float, ...], tuple[int, ...], tuple[int, ...]
 ]] = {
     "50_3150": (
         _FREQ_50_5000[:19], _SPECTRUM1_50_3150, _SPECTRUM2_50_5000[:19]
@@ -230,7 +231,7 @@ _EXTENDED_RANGES: dict[str, tuple[
 
 #: The enlarged CI summation range of ISO 717-2:2020 A.2.1 NOTE: 50-2500 Hz
 #: (18 one-third-octave bands).
-_CI_50_2500_FREQS: Tuple[float, ...] = _FREQ_50_5000[:18]
+_CI_50_2500_FREQS: tuple[float, ...] = _FREQ_50_5000[:18]
 
 
 _VALUES_1D_MSG = "'values_by_band' must be one-dimensional."
@@ -267,7 +268,7 @@ class AirborneInsulationResult:
     t2: np.ndarray | None = None
     t0: float | None = None
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the per-band insulation quantities (``DnT``, ``D``, ``R'``).
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -284,7 +285,7 @@ class AirborneInsulationResult:
         path: str,
         *,
         quantity: str = "dnt",
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -364,7 +365,7 @@ class WeightedRatingResult:
     shifted_reference: np.ndarray | None = None
     quantity: str = "airborne"
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the measured curve vs the shifted reference (ISO 717-1).
 
         Unfavourable deviations (reference above measurement) are shaded and
@@ -382,11 +383,11 @@ class WeightedRatingResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
-        symbol: "str | None" = None,
+        symbol: str | None = None,
     ) -> str:
         """Render an ISO 717-1 airborne sound-insulation fiche to a PDF.
 
@@ -453,7 +454,7 @@ class ImpactInsulationResult:
     t2: np.ndarray | None = None
     t0: float | None = None
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the per-band impact levels (``L'nT`` and, if present, ``L'n``).
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -470,7 +471,7 @@ class ImpactInsulationResult:
         path: str,
         *,
         quantity: str = "l_n_t",
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -548,7 +549,7 @@ class ImpactRatingResult:
     shifted_reference: np.ndarray | None = None
     quantity: str = "impact"
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the measured curve vs the shifted reference (ISO 717-2).
 
         Unfavourable deviations (measurement above the reference, the sign
@@ -566,11 +567,11 @@ class ImpactRatingResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
-        symbol: "str | None" = None,
+        symbol: str | None = None,
     ) -> str:
         """Render an ISO 717-2 impact-insulation fiche to a PDF.
 
@@ -634,7 +635,7 @@ class FacadeInsulationResult:
     r_prime: np.ndarray | None
     frequencies: np.ndarray | None = None
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the per-band façade insulation profile (ISO 16283-3).
 
         Draws the standardized level difference and any other available
@@ -653,7 +654,7 @@ class FacadeInsulationResult:
         path: str,
         *,
         quantity: str = "d_2m_nt",
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -701,14 +702,14 @@ class FacadeInsulationResult:
 
 
 def _render_iso717(
-    result: "WeightedRatingResult | ImpactRatingResult",
+    result: WeightedRatingResult | ImpactRatingResult,
     path: str,
     *,
-    metadata: "ReportMetadata | None",
+    metadata: ReportMetadata | None,
     engine: str,
     verbose: bool,
     language: str,
-    symbol: "str | None" = None,
+    symbol: str | None = None,
 ) -> str:
     """Validate the report request and delegate to the reportlab renderer.
 
@@ -745,18 +746,18 @@ def _render_iso717(
 #: The field quantities each result kind can report, mapping the ``quantity``
 #: argument of ``report()`` to the attribute holding the per-band curve and
 #: the per-band chain columns ``verbose=True`` needs.
-_FIELD_QUANTITIES: dict[str, Tuple[Tuple[str, ...], Tuple[str, ...]]] = {
+_FIELD_QUANTITIES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "AirborneInsulationResult": (("dnt", "r_prime"), ("l1", "l2", "t2")),
     "ImpactInsulationResult": (("l_n_t", "l_n"), ("li", "t2")),
 }
 
 
 def _render_iso16283(
-    result: "AirborneInsulationResult | ImpactInsulationResult",
+    result: AirborneInsulationResult | ImpactInsulationResult,
     path: str,
     *,
     quantity: str,
-    metadata: "ReportMetadata | None",
+    metadata: ReportMetadata | None,
     engine: str,
     verbose: bool,
     language: str,
@@ -825,15 +826,15 @@ def _render_iso16283(
 #: The reportable ISO 16283-3 facade quantities, mapping the ``quantity``
 #: argument of :meth:`FacadeInsulationResult.report` to the attribute holding
 #: the per-band curve.
-_FACADE_FIELD_QUANTITIES: Tuple[str, ...] = ("d_2m_nt", "d_2m_n", "r_prime")
+_FACADE_FIELD_QUANTITIES: tuple[str, ...] = ("d_2m_nt", "d_2m_n", "r_prime")
 
 
 def _render_iso16283_facade(
-    result: "FacadeInsulationResult",
+    result: FacadeInsulationResult,
     path: str,
     *,
     quantity: str,
-    metadata: "ReportMetadata | None",
+    metadata: ReportMetadata | None,
     engine: str,
     verbose: bool,
     language: str,
@@ -1025,7 +1026,7 @@ def airborne_insulation(
 
 def _resolve_band_set(
     n: int, bands: str | None
-) -> Tuple[Tuple[int, ...], float, int, Tuple[int, ...], Tuple[int, ...]]:
+) -> tuple[tuple[int, ...], float, int, tuple[int, ...], tuple[int, ...]]:
     """Select the reference curve, bound and spectra for the band set.
 
     :return: ``(reference, max_unfavourable, index_500, spectrum1,
@@ -1069,7 +1070,7 @@ def _best_shift(
     reference: np.ndarray,
     limit: float,
     step: float = 1.0,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """Largest ``step``-sized shift with unfavourable-deviation sum in ``limit``.
 
     Shifts the reference by multiples of ``step`` and returns the largest
@@ -1104,11 +1105,11 @@ def _best_shift(
 
 
 def _adaptation_term(
-    measured: np.ndarray, spectrum: Tuple[int, ...], rating: int
+    measured: np.ndarray, spectrum: tuple[int, ...], rating: int
 ) -> int:
     """Spectrum adaptation term ``Xaj - rating`` (Clause 4.5, Formula (2))."""
     x_aj = -energy_sum(np.asarray(spectrum, dtype=np.float64) - measured)
-    return int(math.floor(x_aj + 0.5)) - rating
+    return math.floor(x_aj + 0.5) - rating
 
 
 def weighted_rating(
@@ -1151,7 +1152,7 @@ def weighted_rating(
     ref = np.asarray(reference, dtype=np.float64)
 
     shift, unfavourable = _best_shift(measured, ref, limit)
-    rating = int(reference[index_500]) + int(round(shift))
+    rating = int(reference[index_500]) + round(shift)
     c = _adaptation_term(measured, spectrum1, rating)
     ctr = _adaptation_term(measured, spectrum2, rating)
     centers = _FREQ_THIRD_OCTAVE if data.size == 16 else _FREQ_OCTAVE
@@ -1378,7 +1379,7 @@ def facade_insulation(
 
 def _resolve_impact_band_set(
     n: int, bands: str | None
-) -> Tuple[Tuple[int, ...], float, int, int, int]:
+) -> tuple[tuple[int, ...], float, int, int, int]:
     """Select the impact reference curve, bound, indices for the band set.
 
     :return: ``(reference, max_unfavourable, index_500, octave_offset,
@@ -1427,7 +1428,7 @@ def _impact_ci(measured: np.ndarray, rating: int, n_bands: int) -> int:
     (round half up), Formulae (A.1) to (A.3).
     """
     l_sum = energy_sum(measured[:n_bands])
-    return int(math.floor(l_sum + 0.5)) - 15 - rating
+    return math.floor(l_sum + 0.5) - 15 - rating
 
 
 def weighted_impact_rating(
@@ -1481,7 +1482,7 @@ def weighted_impact_rating(
     # shift is k = -m, so the rating is ref_500 - m. The unfavourable sum
     # is identical under negation.
     shift, unfavourable = _best_shift(-measured, -ref, limit)
-    rating = int(reference[index_500]) - int(round(shift)) + octave_offset
+    rating = int(reference[index_500]) - round(shift) + octave_offset
     ci = _impact_ci(measured, rating, ci_bands)
     centers = _FREQ_THIRD_OCTAVE if data.size == 16 else _FREQ_OCTAVE
     return ImpactRatingResult(
@@ -1637,7 +1638,7 @@ def _reduce(value: float, one_decimal: bool) -> float:
 
 
 def _match_bands(
-    frequencies: np.ndarray, targets: Tuple[float, ...]
+    frequencies: np.ndarray, targets: tuple[float, ...]
 ) -> np.ndarray | None:
     """Indices of ``targets`` within ``frequencies`` (6 % tolerance), or None."""
     indices: list[int] = []
@@ -1652,7 +1653,7 @@ def _match_bands(
 def _validated_extended_input(
     values_by_band: Sequence[float] | np.ndarray,
     frequencies: Sequence[float] | np.ndarray | None,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Validate the extended-range input; return (measured, freqs, core_idx)."""
     data = np.asarray(values_by_band, dtype=np.float64)
     if data.ndim != 1:

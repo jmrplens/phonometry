@@ -35,7 +35,7 @@ and svglib ship in the ``phonometry[report]`` extra, matplotlib in
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -47,19 +47,19 @@ if TYPE_CHECKING:
     from ..vibration.transfer_stiffness import TransferStiffnessResult
 
 
-def _is_indirect(result: "TransferStiffnessResult") -> bool:
+def _is_indirect(result: TransferStiffnessResult) -> bool:
     """Return ``True`` for the indirect (blocking-mass) method (ISO 10846-3)."""
     return result.blocking_mass is not None
 
 
-def _method(result: "TransferStiffnessResult", language: str = "en") -> str:
+def _method(result: TransferStiffnessResult, language: str = "en") -> str:
     """The determination-method phrase naming the ISO 10846 part."""
     if _is_indirect(result):
         return t("indirect blocking-mass method (ISO 10846-3:2002)", language)
     return t("direct method (ISO 10846-2:2008)", language)
 
 
-def _basis(result: "TransferStiffnessResult", language: str = "en") -> str:
+def _basis(result: TransferStiffnessResult, language: str = "en") -> str:
     """The standard-basis line naming the determination method."""
     return t(
         "Determination of the dynamic transfer stiffness k<sub>2,1</sub> of a "
@@ -69,8 +69,8 @@ def _basis(result: "TransferStiffnessResult", language: str = "en") -> str:
 
 
 def _low_frequency_values(
-    result: "TransferStiffnessResult",
-) -> Tuple[float, float, float, float]:
+    result: TransferStiffnessResult,
+) -> tuple[float, float, float, float]:
     """Return the lowest frequency and the ``|k2,1|``, ``L_k`` and ``eta`` there.
 
     The low-frequency point characterises the element below its internal
@@ -95,8 +95,8 @@ def _mn(value: float, language: str = "en") -> str:
 
 
 def _metric_rows(
-    result: "TransferStiffnessResult", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: TransferStiffnessResult, language: str = "en"
+) -> list[tuple[str, str]]:
     """The characteristic points shown in the left-hand table.
 
     The determination method, the blocking mass (indirect method only), the
@@ -105,7 +105,7 @@ def _metric_rows(
     factor ``eta`` there.
     """
     _, magnitude, level, eta = _low_frequency_values(result)
-    rows: List[Tuple[str, str]] = [
+    rows: list[tuple[str, str]] = [
         (t("Method", language), _method(result, language)),
     ]
     blocking_mass = result.blocking_mass
@@ -130,7 +130,7 @@ def _metric_rows(
     return rows
 
 
-def _statement(result: "TransferStiffnessResult", language: str = "en") -> str:
+def _statement(result: TransferStiffnessResult, language: str = "en") -> str:
     """The boxed representative value: the low-frequency transfer-stiffness level."""
     _, _, level, _ = _low_frequency_values(result)
     return t(
@@ -140,8 +140,8 @@ def _statement(result: "TransferStiffnessResult", language: str = "en") -> str:
 
 
 def _extended_terms(
-    result: "TransferStiffnessResult", language: str = "en"
-) -> List[str]:
+    result: TransferStiffnessResult, language: str = "en"
+) -> list[str]:
     """The stiffness magnitude, the method and the loss factor shown beside the box."""
     freq, magnitude, _, eta = _low_frequency_values(result)
     return [
@@ -158,7 +158,7 @@ def _extended_terms(
 
 
 def render_transfer_stiffness_report(
-    result: "TransferStiffnessResult",
+    result: TransferStiffnessResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

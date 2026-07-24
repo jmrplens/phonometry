@@ -32,7 +32,7 @@ from __future__ import annotations
 import html
 import os
 import tempfile
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -83,13 +83,13 @@ def _basis(metadata: ReportMetadata | None, language: str = "en") -> str:
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Ordered (label, value) header pairs for the supplied loudspeaker fields."""
 
     def num(value: float | None) -> str | None:
         return fmt_num(value, language) if value is not None else None
 
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Manufacturer", language), metadata.manufacturer),
         (t("Description", language), metadata.specimen),
@@ -114,10 +114,10 @@ def _range_text(lo: float, hi: float, language: str = "en") -> str:
 
 
 def _rated_rows(
-    result: "LoudspeakerCharacteristics", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: LoudspeakerCharacteristics, language: str = "en"
+) -> list[tuple[str, str]]:
     """The rated-characteristics table rows (only the quantities that exist)."""
-    rows: List[Tuple[str, str]] = [
+    rows: list[tuple[str, str]] = [
         (
             t("Rated impedance", language),
             f"{fmt_num(result.rated_impedance, language)} {_OHM}",
@@ -222,7 +222,7 @@ def _drawing_from_figure(fig: Any, target_width: float, language: str = "en") ->
 
 
 def _response_drawing(
-    result: "LoudspeakerCharacteristics", target_width: float, language: str = "en"
+    result: LoudspeakerCharacteristics, target_width: float, language: str = "en"
 ) -> Any:
     """On-axis response with the tolerance band and effective-range markers.
 
@@ -249,7 +249,7 @@ def _response_drawing(
 
 
 def _secondary_drawing(
-    result: "LoudspeakerCharacteristics", target_width: float, language: str = "en"
+    result: LoudspeakerCharacteristics, target_width: float, language: str = "en"
 ) -> Any | None:
     """Impedance, THD and polar-directivity panels for the data supplied.
 
@@ -316,7 +316,7 @@ def _thin_freq_ticklabels(ax: Any, keep_every: int = 2) -> None:
     )
 
 
-def _statement(result: "LoudspeakerCharacteristics", language: str = "en") -> str:
+def _statement(result: LoudspeakerCharacteristics, language: str = "en") -> str:
     """The boxed headline: characteristic sensitivity and effective range."""
     return t(
         "Characteristic sensitivity <b>{level} dB</b> (1 W / 1 m); "
@@ -329,8 +329,8 @@ def _statement(result: "LoudspeakerCharacteristics", language: str = "en") -> st
 
 
 def _verdict(
-    result: "LoudspeakerCharacteristics", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: LoudspeakerCharacteristics, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Sensitivity verdict: the characteristic sensitivity level must reach it."""
     level = result.sensitivity_level_db
     passed = level >= requirement
@@ -345,7 +345,7 @@ def _verdict(
 
 
 def render_iec60268_5_report(
-    result: "LoudspeakerCharacteristics",
+    result: LoudspeakerCharacteristics,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -375,7 +375,7 @@ def render_iec60268_5_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Loudspeaker characteristics", language)
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(_basis(metadata, language), basis_style),
     ]

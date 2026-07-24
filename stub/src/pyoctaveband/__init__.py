@@ -7,7 +7,7 @@ name so existing code keeps working. New code should ``import phonometry``.
 
 import warnings
 
-from phonometry import *  # noqa: F403
+from phonometry import *
 from phonometry import __all__, __version__  # noqa: F401
 
 # FutureWarning (not DeprecationWarning): visible by default, so users of

@@ -29,8 +29,8 @@ _SCRIPTS = os.path.join(os.path.dirname(__file__), "..", "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-import bench  # noqa: E402
-from golden_data import GOLDEN  # noqa: E402
+import bench
+from golden_data import GOLDEN
 
 #: Per-case relative tolerance; default is 1e-9 (see module docstring).
 _RTOL = {

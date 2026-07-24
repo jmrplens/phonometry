@@ -35,7 +35,7 @@ guarded with an actionable :class:`ImportError`.
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -71,10 +71,10 @@ def _a1(value: float, language: str = "en") -> str:
 
 
 def _metadata_pairs(
-    result: "SoundAbsorptionMeasurement",
+    result: SoundAbsorptionMeasurement,
     metadata: ReportMetadata | None,
     language: str = "en",
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the absorption header grid.
 
     The physical test conditions (specimen area ``S``, room volume ``V``, speed
@@ -92,7 +92,7 @@ def _metadata_pairs(
     test_date = metadata.test_date if metadata is not None else None
     pressure = metadata.pressure if metadata is not None else None
 
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), client),
         (t("Manufacturer", language), manufacturer),
         (t("Description", language), specimen),
@@ -134,14 +134,14 @@ def _alpha_table(
         Paragraph(t("Frequency f [Hz]", language), head_style),
         Paragraph("&#945;<sub>s</sub>", head_style),
     ]
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for fk, a_s in zip(freqs, alpha_s):
-        rows.append([f"{int(round(fk))}", _a2(a_s, language)])
+        rows.append([f"{round(fk)}", _a2(a_s, language)])
     return band_table(rows, [28 * mm, 28 * mm], len(freqs))
 
 
 def _detail_table(
-    result: "SoundAbsorptionMeasurement", language: str = "en"
+    result: SoundAbsorptionMeasurement, language: str = "en"
 ) -> Any:
     """Build the verbose table ``f | T1 | T2 | A1 | A2 | alpha_s`` (~102 mm wide)."""
     from reportlab.lib.units import mm
@@ -162,11 +162,11 @@ def _detail_table(
     a1 = np.asarray(result.absorption_area_empty, dtype=np.float64)
     a2 = np.asarray(result.absorption_area_with_specimen, dtype=np.float64)
     alpha_s = np.asarray(result.alpha_s, dtype=np.float64)
-    rows: List[List[Any]] = [header]
+    rows: list[list[Any]] = [header]
     for fk, t1k, t2k, a1k, a2k, ask in zip(freqs, t1, t2, a1, a2, alpha_s):
         rows.append(
             [
-                f"{int(round(fk))}",
+                f"{round(fk)}",
                 _a2(t1k, language),
                 _a2(t2k, language),
                 _a1(a1k, language),
@@ -178,11 +178,11 @@ def _detail_table(
     return band_table(rows, col_widths, len(freqs))
 
 
-def _statement(result: "SoundAbsorptionMeasurement", language: str = "en") -> str:
+def _statement(result: SoundAbsorptionMeasurement, language: str = "en") -> str:
     """The boxed characterisation headline (ISO 354 has no single number)."""
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    lo = int(round(float(freqs.min()))) if freqs.size else 0
-    hi = int(round(float(freqs.max()))) if freqs.size else 0
+    lo = round(float(freqs.min())) if freqs.size else 0
+    hi = round(float(freqs.max())) if freqs.size else 0
     return t(
         "Sound absorption coefficient <b>&#945;<sub>s</sub></b>, "
         "{lo} Hz to {hi} Hz",
@@ -191,7 +191,7 @@ def _statement(result: "SoundAbsorptionMeasurement", language: str = "en") -> st
 
 
 def render_iso354_report(
-    result: "SoundAbsorptionMeasurement",
+    result: SoundAbsorptionMeasurement,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -250,7 +250,7 @@ def render_iso354_report(
             language,
         )
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

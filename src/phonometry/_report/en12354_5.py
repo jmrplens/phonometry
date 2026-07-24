@@ -41,7 +41,7 @@ guarded with an actionable :class:`ImportError`.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -93,7 +93,7 @@ _MAX_PATH_COLUMNS = 5
 _CONTENT_WIDTH_MM = 174.0
 
 
-def _column_widths(n_columns: int) -> List[float]:
+def _column_widths(n_columns: int) -> list[float]:
     """Even column widths spanning the content width for ``n_columns`` columns."""
     return [_CONTENT_WIDTH_MM / n_columns] * n_columns
 
@@ -115,13 +115,13 @@ def _value_table(result: Any, verbose: bool, language: str = "en") -> Any:
     n = total.size
     labels, fraction = band_labels(getattr(result, "frequencies", None), n)
 
-    header: List[str] = [t("f [Hz]", language), "L<sub>Ws,inst</sub> [dB]"]
+    header: list[str] = [t("f [Hz]", language), "L<sub>Ws,inst</sub> [dB]"]
     show_paths = verbose and paths.shape[0] <= _MAX_PATH_COLUMNS
     if show_paths:
         header.extend(f"L<sub>n,s,{k + 1}</sub> [dB]" for k in range(paths.shape[0]))
     header.append("L<sub>n,s</sub> [dB]")
 
-    rows_data: List[List[str]] = []
+    rows_data: list[list[str]] = []
     for i in range(n):
         row = [labels[i], d1(lws_inst[i], language)]
         if show_paths:
@@ -133,7 +133,7 @@ def _value_table(result: Any, verbose: bool, language: str = "en") -> Any:
     return power_value_table(header, rows_data, widths, fraction)
 
 
-def _statement(result: Any, language: str = "en") -> Tuple[str, List[str]]:
+def _statement(result: Any, language: str = "en") -> tuple[str, list[str]]:
     """The boxed total ``L_n,s`` and its extended terms."""
     overall = float(result.overall_level)
     statement = t(
@@ -185,7 +185,7 @@ def _prediction_strip(language: str = "en") -> str:
 
 
 def render_installed_structure_borne_report(
-    result: "InstalledSourceResult",
+    result: InstalledSourceResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

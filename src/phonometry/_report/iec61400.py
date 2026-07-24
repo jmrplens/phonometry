@@ -42,7 +42,7 @@ matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import format_number, t
 from ._layout import (
@@ -79,7 +79,7 @@ def _esc(value: str | None) -> str | None:
     return html.escape(value) if value else None
 
 
-def _audible_as_displayed(result: "WindTurbineTonalityResult") -> bool:
+def _audible_as_displayed(result: WindTurbineTonalityResult) -> bool:
     """Whether the fiche's decision reads the tone as audible.
 
     The box, verdict and decision text all commit to the tonal audibility
@@ -96,7 +96,7 @@ def _audible_as_displayed(result: "WindTurbineTonalityResult") -> bool:
 
 def _metadata_pairs(
     metadata: ReportMetadata | None, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the tonality header grid.
 
     A wind-turbine tonality assessment identifies the source/situation whose
@@ -105,7 +105,7 @@ def _metadata_pairs(
     """
     if metadata is None:
         return []
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Source / situation", language), _esc(metadata.specimen)),
         (t("Client", language), _esc(metadata.client)),
         (t("Measurement position", language), _esc(metadata.test_room)),
@@ -116,8 +116,8 @@ def _metadata_pairs(
 
 
 def _metric_rows(
-    result: "WindTurbineTonalityResult", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: WindTurbineTonalityResult, language: str = "en"
+) -> list[tuple[str, str]]:
     """The critical-band / masking analysis shown in the left-hand table.
 
     Lists the tone frequency and the chain of Formulae 30-34: the critical
@@ -163,8 +163,8 @@ def _basis_line(measurement_standard: str | None, language: str = "en") -> str:
 
 
 def _statement(
-    result: "WindTurbineTonalityResult", language: str = "en"
-) -> Tuple[str, List[str]]:
+    result: WindTurbineTonalityResult, language: str = "en"
+) -> tuple[str, list[str]]:
     """The boxed decisive tonal audibility ``ΔL_a`` and the tone frequency.
 
     The tonal audibility is rounded exactly as displayed so the box can never
@@ -193,7 +193,7 @@ def _statement(
 
 
 def _decision_phrase(
-    result: "WindTurbineTonalityResult", language: str = "en"
+    result: WindTurbineTonalityResult, language: str = "en"
 ) -> str:
     """A short coloured phrase carrying the audibility decision.
 
@@ -218,8 +218,8 @@ def _decision_phrase(
 
 
 def _verdict(
-    result: "WindTurbineTonalityResult", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: WindTurbineTonalityResult, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag against a supplied maximum tonal audibility.
 
     The ``requirement`` is read as the maximum acceptable tonal audibility
@@ -236,7 +236,7 @@ def _verdict(
 
 
 def _decision_note(
-    result: "WindTurbineTonalityResult", language: str = "en"
+    result: WindTurbineTonalityResult, language: str = "en"
 ) -> str:
     """The measurement-basis note stating the audibility decision."""
     delta = _fmt(display_round(result.tonal_audibility), language)
@@ -264,7 +264,7 @@ def _decision_note(
 
 
 def render_wind_turbine_tonality_report(
-    result: "WindTurbineTonalityResult",
+    result: WindTurbineTonalityResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -306,7 +306,7 @@ def render_wind_turbine_tonality_report(
         metadata.measurement_standard if metadata is not None else None
     )
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(_basis_line(measurement_standard, language), basis_style),
     ]

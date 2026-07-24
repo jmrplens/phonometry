@@ -44,9 +44,9 @@ def _t(text: str, language: str = "en") -> str:
 
 
 def plot_junction_transmission(
-    result: "JunctionTransmissionResult", ax: "Axes | None" = None, *,
+    result: JunctionTransmissionResult, ax: Axes | None = None, *,
     language: str = "en", **kwargs: Any,
-) -> "Axes":
+) -> Axes:
     """Plot ``tau(theta)`` versus incidence angle (Hopkins Eqs 5.12/5.13).
 
     Draws the corner coefficient and, where it exists, the straight-section

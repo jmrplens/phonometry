@@ -39,7 +39,7 @@ _ENERGY_LOW = 0.05
 _ENERGY_HIGH = 0.95
 
 
-def single_strike_sel(pressure: "NDArray[np.float64] | list[float]", fs: float) -> float:
+def single_strike_sel(pressure: NDArray[np.float64] | list[float], fs: float) -> float:
     """Single-strike sound exposure level ``SEL_ss`` (ISO 18406 Formulae 3-4).
 
     The sound exposure level of one hammer-strike pulse, integrated over the
@@ -53,7 +53,7 @@ def single_strike_sel(pressure: "NDArray[np.float64] | list[float]", fs: float) 
     return sound_exposure_level(pressure, fs)
 
 
-def cumulative_sel(single_sels: "NDArray[np.float64] | list[float]") -> float:
+def cumulative_sel(single_sels: NDArray[np.float64] | list[float]) -> float:
     """Cumulative sound exposure level over N strikes (ISO 18406 Formulae 8-9).
 
     ``SEL_cum = 10·lg(Σₙ 10^(SELₙ/10))`` -- the energy sum of the per-strike
@@ -90,7 +90,7 @@ def cumulative_sel_identical(sel_ss: float, n_strikes: int) -> float:
     return float(float(sel_ss) + 10.0 * np.log10(n))
 
 
-def _pulse_duration(pressure: "NDArray[np.float64]", fs: float) -> float:
+def _pulse_duration(pressure: NDArray[np.float64], fs: float) -> float:
     """90 %-energy pulse duration: the time between the 5 % and 95 % energy points."""
     energy = np.cumsum(pressure**2)
     total = float(energy[-1])
@@ -118,10 +118,10 @@ class PileStrikeResult:
     peak_spl: float
     spl: float
     pulse_duration: float
-    pressure: "NDArray[np.float64]"
+    pressure: NDArray[np.float64]
     fs: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes | NDArray[Any]":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes | NDArray[Any]:
         """Plot the strike waveform and its cumulative energy."""
         from .._i18n import check_language
         from .._plot.underwater import plot_pile_strike
@@ -130,7 +130,7 @@ class PileStrikeResult:
 
 
 def pile_strike_metrics(
-    pressure: "NDArray[np.float64] | list[float]", fs: float
+    pressure: NDArray[np.float64] | list[float], fs: float
 ) -> PileStrikeResult:
     """Full per-strike pile-driving metrics (ISO 18406).
 

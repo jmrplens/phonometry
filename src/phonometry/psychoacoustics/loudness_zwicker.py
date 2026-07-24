@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Literal, Tuple
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -32,6 +32,8 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
 from scipy import signal
 
+from .._internal.utils import _typesignal
+from .._internal.validation import require_positive
 from ._zwicker_data import (
     A0_TRANSMISSION,
     DCB_ADAPTATION,
@@ -46,8 +48,6 @@ from ._zwicker_data import (
     USL_SLOPES,
     ZUP_BARK_LIMITS,
 )
-from .._internal.validation import require_positive
-from .._internal.utils import _typesignal
 
 # Reference intensity for band levels: I_REF = (20 uPa)^2, so that
 # L = 10*lg(p^2 / I_REF) equals the SPL re 20 uPa of a pressure signal
@@ -82,9 +82,9 @@ _T_VAR = 0.075
 
 # Python-list copies of the Table A.8/A.9 data for the sequential slope
 # state machine (scalar float access is much faster than numpy indexing).
-_ZUP: List[float] = ZUP_BARK_LIMITS.tolist()
-_RNS: List[float] = RNS_RANGES.tolist()
-_USL: List[List[float]] = USL_SLOPES.tolist()
+_ZUP: list[float] = ZUP_BARK_LIMITS.tolist()
+_RNS: list[float] = RNS_RANGES.tolist()
+_USL: list[list[float]] = USL_SLOPES.tolist()
 _N_RNS = len(_RNS)  # 18 specific-loudness ranges (Table A.9)
 _N_CBR = len(_USL[0])  # 8 critical-band ranges (Table A.9)
 
@@ -133,7 +133,7 @@ class ZwickerLoudness:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -355,7 +355,7 @@ def _correct_lowest_band(core: np.ndarray) -> None:
 
 def _nl_coefficients(
     sample_rate: float,
-) -> Tuple[float, float, float, float, float, float]:
+) -> tuple[float, float, float, float, float, float]:
     """Coefficients of the nonlinear decay network for ``sample_rate``.
 
     Analytical solution of the two-capacitor analog circuit of clause 6.3
@@ -384,8 +384,8 @@ def _nl_lp_step(
     ui: float,
     uo_last: float,
     u2_last: float,
-    b: Tuple[float, float, float, float, float, float],
-) -> Tuple[float, float]:
+    b: tuple[float, float, float, float, float, float],
+) -> tuple[float, float]:
     """One step of the nonlinear decay state machine (clause 6.3).
 
     ``ui`` is the input, ``uo_last``/``u2_last`` the previous output and
@@ -397,14 +397,11 @@ def _nl_lp_step(
         if uo_last > u2_last:
             u2 = uo_last * b[0] - u2_last * b[1]
             uo = uo_last * b[2] - u2_last * b[3]
-            if uo < ui:  # output may not fall below the input
-                uo = ui
-            if u2 > uo:  # inner state may not exceed the output
-                u2 = uo
+            uo = max(uo, ui)
+            u2 = min(u2, uo)
         else:
             uo = uo_last * b[4]
-            if uo < ui:
-                uo = ui
+            uo = max(uo, ui)
             u2 = uo
     elif abs(ui - uo_last) < 1e-5:  # steady input
         uo = ui
@@ -426,7 +423,7 @@ def _nonlinear_decay(core: np.ndarray, sample_rate: float) -> None:
     b = _nl_coefficients(sample_rate * _NL_ITER)
     num_samples = core.shape[1]
     for band in range(_N_CORE):
-        row: List[float] = core[band].tolist()
+        row: list[float] = core[band].tolist()
         uo_last = 0.0
         u2_last = 0.0
         for t in range(num_samples - 1):
@@ -449,7 +446,7 @@ def _nonlinear_decay(core: np.ndarray, sample_rate: float) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _calc_slopes(core: List[float]) -> Tuple[float, List[float]]:
+def _calc_slopes(core: list[float]) -> tuple[float, list[float]]:
     """Specific loudness pattern with upper slopes for one time step.
 
     Attaches the masking slopes towards higher frequencies to the core
@@ -518,18 +515,16 @@ def _calc_slopes(core: List[float]) -> Tuple[float, List[float]]:
             # Advance to the specific-loudness range of the segment end.
             while idx_rns < _N_RNS - 1 and n2 <= _RNS[idx_rns]:
                 idx_rns += 1
-            if idx_rns > _N_RNS - 1:
-                idx_rns = _N_RNS - 1
+            idx_rns = min(idx_rns, _N_RNS - 1)
             z1 = z2
             n1 = n2
             if next_band:
                 break
-        if total < 0.0:
-            total = 0.0
+        total = max(total, 0.0)
     return total, ns
 
 
-def _slopes_over_time(core: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def _slopes_over_time(core: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Apply :func:`_calc_slopes` to every time step.
 
     :param core: Core loudness, shape (21, T).
@@ -538,7 +533,7 @@ def _slopes_over_time(core: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     num_samples = core.shape[1]
     loudness = np.empty(num_samples)
     specific = np.empty((_N_BARK, num_samples))
-    core_list: List[List[float]] = core.T.tolist()
+    core_list: list[list[float]] = core.T.tolist()
     for t in range(num_samples):
         loudness[t], specific[:, t] = _calc_slopes(core_list[t])
     return loudness, specific
@@ -558,7 +553,7 @@ def _lowpass_interpolated(x: np.ndarray, tau: float, sample_rate: float) -> np.n
     """
     a1 = math.exp(-1.0 / (sample_rate * _LP_ITER * tau))
     b0 = 1.0 - a1
-    data: List[float] = x.tolist()
+    data: list[float] = x.tolist()
     out = np.empty(x.size)
     y1 = 0.0
     num_samples = len(data)
@@ -661,7 +656,7 @@ def _core_loudness_from_levels(levels: np.ndarray, diffuse: bool) -> np.ndarray:
 
 
 def loudness_zwicker_from_spectrum(
-    levels: List[float] | np.ndarray,
+    levels: list[float] | np.ndarray,
     field: Literal["free", "diffuse"] = "free",
 ) -> ZwickerLoudness:
     """
@@ -699,7 +694,7 @@ def loudness_zwicker_from_spectrum(
 
 
 def loudness_zwicker(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     field: Literal["free", "diffuse"] = "free",
     stationary: bool = False,
@@ -785,7 +780,7 @@ def loudness_zwicker(
     time_skip = float(time_skip)
     if not math.isfinite(time_skip) or time_skip < 0.0:
         raise ValueError("'time_skip' must be a non-negative, finite time.")
-    skip_samples = int(round(time_skip * _FS_REF))
+    skip_samples = round(time_skip * _FS_REF)
     if skip_samples >= pressure.size:
         raise ValueError(
             "'time_skip' must leave at least one sample of signal "

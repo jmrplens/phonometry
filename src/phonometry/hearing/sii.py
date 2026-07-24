@@ -19,8 +19,9 @@ Spectrum levels are as defined in clauses 3.11 and 3.55.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -114,7 +115,7 @@ class SIIResult:
     disturbance: np.ndarray
     masking: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot the per-band audibility weighted by importance, with the SII.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
@@ -129,7 +130,7 @@ class SIIResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -215,8 +216,8 @@ class StandardSpeechSpectrum:
     vocal_efforts: tuple[str, ...]
     levels: np.ndarray
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the standard speech spectrum level versus frequency band.
 
         Draws the standard speech spectrum level (dB SPL) over the 18
@@ -241,7 +242,7 @@ class StandardSpeechSpectrum:
 
 
 def standard_speech_spectra(
-    vocal_efforts: "str | Sequence[str]" = VOCAL_EFFORTS,
+    vocal_efforts: str | Sequence[str] = VOCAL_EFFORTS,
 ) -> StandardSpeechSpectrum:
     """Build the plottable ANSI S3.5-1997 standard speech spectra (Table 3).
 

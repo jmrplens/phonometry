@@ -17,7 +17,7 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-import conformance_report as cr  # noqa: E402
+import conformance_report as cr
 
 
 def test_registry_is_populated() -> None:
@@ -188,7 +188,7 @@ def test_human_vibration_reference_data_matches_oracles() -> None:
 
 
 @pytest.mark.parametrize("check", cr.CHECKS, ids=lambda c: f"{c.standard} :: {c.quantity}")
-def test_every_check_passes(check: "cr.Check") -> None:
+def test_every_check_passes(check: cr.Check) -> None:
     outcome = check.run()
     assert outcome.passed, (
         f"{check.standard} / {check.quantity}: expected {outcome.expected}, "

@@ -117,7 +117,7 @@ _AIRBORNE_QUANTITIES: dict[str, tuple[str, str, dict[str, str]]] = {
 
 def _render_survey(
     result: Any,
-    rating: "WeightedRatingResult | ImpactRatingResult",
+    rating: WeightedRatingResult | ImpactRatingResult,
     path: str,
     *,
     spec: dict[str, str],
@@ -152,8 +152,8 @@ def _render_survey(
 
 
 def render_survey_airborne_report(
-    result: "SurveyAirborneResult",
-    rating: "WeightedRatingResult",
+    result: SurveyAirborneResult,
+    rating: WeightedRatingResult,
     path: str,
     *,
     quantity: str,
@@ -188,8 +188,8 @@ def render_survey_airborne_report(
 
 
 def render_survey_impact_report(
-    result: "SurveyImpactResult",
-    rating: "ImpactRatingResult",
+    result: SurveyImpactResult,
+    rating: ImpactRatingResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -219,8 +219,8 @@ def render_survey_impact_report(
 
 
 def render_survey_facade_report(
-    result: "SurveyFacadeResult",
-    rating: "WeightedRatingResult",
+    result: SurveyFacadeResult,
+    rating: WeightedRatingResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,

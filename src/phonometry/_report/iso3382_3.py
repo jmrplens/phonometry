@@ -38,7 +38,7 @@ from __future__ import annotations
 
 import html
 import math
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 from ._i18n import format_number, t
 from ._layout import (
@@ -79,7 +79,7 @@ def _num(value: float, language: str, *, decimals: int = 1) -> str:
 
 def _metadata_pairs(
     metadata: ReportMetadata, language: str = "en"
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the open-plan header grid.
 
     Only fields that are set are returned, so empty rows never appear. An
@@ -95,7 +95,7 @@ def _metadata_pairs(
     def count(value: int | None) -> str | None:
         return str(int(value)) if value is not None else None
 
-    specs: List[Tuple[str, str | None]] = [
+    specs: list[tuple[str, str | None]] = [
         (t("Client", language), metadata.client),
         (t("Office / zone", language), metadata.test_room),
         (t("Description", language), metadata.specimen),
@@ -112,8 +112,8 @@ def _metadata_pairs(
 
 
 def _metric_rows(
-    result: "OpenPlanResult", language: str = "en"
-) -> List[Tuple[str, str]]:
+    result: OpenPlanResult, language: str = "en"
+) -> list[tuple[str, str]]:
     """The four single-number quantities shown in the left-hand metrics table.
 
     ``D2,S`` (dB per distance doubling), ``Lp,A,S,4m`` (dB), ``rD`` (m) and
@@ -141,8 +141,8 @@ def _metric_rows(
 
 
 def _statement(
-    result: "OpenPlanResult", language: str = "en"
-) -> Tuple[str, List[str]]:
+    result: OpenPlanResult, language: str = "en"
+) -> tuple[str, list[str]]:
     """The boxed spatial-decay-rate statement and its remaining quantities.
 
     ``D2,S`` is boxed as the headline descriptor of the standard's title
@@ -167,8 +167,8 @@ def _statement(
 
 
 def _verdict(
-    result: "OpenPlanResult", requirement: float, language: str = "en"
-) -> Tuple[str, bool]:
+    result: OpenPlanResult, requirement: float, language: str = "en"
+) -> tuple[str, bool]:
     """Verdict text and PASS flag for a supplied target spatial decay rate.
 
     ISO 3382-3:2012 Annex A (informative) gives quality ranges for the spatial
@@ -190,7 +190,7 @@ def _verdict(
 
 
 def render_iso3382_3_report(
-    result: "OpenPlanResult",
+    result: OpenPlanResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -243,7 +243,7 @@ def render_iso3382_3_report(
             language,
         )
 
-    flow: List[Any] = [
+    flow: list[Any] = [
         Paragraph(title, title_style),
         Paragraph(basis, basis_style),
     ]

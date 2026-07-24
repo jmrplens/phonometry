@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+
+### Changed
+
+- Adopt ruff 0.16 and its broadened default rule set: modernize type
+  annotations (PEP 585 built-in generics, unquoted annotations), sort imports
+  and apply the new lint fixes across the tree. No runtime behavior changes.
+
 ### Added
 - `StaticAirflowResult.report()`: a one-page PDF material airflow-resistance
   test report (ISO 9053-1:2018, static/direct airflow method). The fiche

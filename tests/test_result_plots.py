@@ -21,12 +21,12 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-import phonometry as ph  # noqa: E402
-from phonometry._plot import common as _plotting  # noqa: E402
+import phonometry as ph
+from phonometry._plot import common as _plotting
 
 FS = 48000
 RNG = np.random.default_rng(20260707)
@@ -270,7 +270,7 @@ def test_plot_raises_helpful_error_without_matplotlib(monkeypatch) -> None:
     """Without matplotlib, .plot() fails with an actionable message."""
     real_import = builtins.__import__
 
-    def blocked(name, *args, **kwargs):  # noqa: ANN001, ANN002, ANN003
+    def blocked(name, *args, **kwargs):
         if name.startswith("matplotlib"):
             raise ImportError("No module named 'matplotlib'")
         return real_import(name, *args, **kwargs)
@@ -344,7 +344,7 @@ def test_airborne_rating_carries_curve_fields() -> None:
     assert res.band_centers is not None and res.band_centers.size == 16
     assert res.measured is not None and res.shifted_reference is not None
     # shifted reference read at 500 Hz (index 7) equals the rating.
-    assert int(round(res.shifted_reference[7])) == res.rating
+    assert round(res.shifted_reference[7]) == res.rating
 
 
 def test_airborne_rating_shades_only_unfavourable_bands() -> None:
@@ -429,7 +429,7 @@ def test_third_octave_impact_plot_reads_rating_at_500() -> None:
     # value at 500 Hz equals the rating, so no offset note is drawn.
     res = _impact_rating()
     idx500 = int(np.argmin(np.abs(res.band_centers - 500.0)))
-    assert int(round(float(res.shifted_reference[idx500]))) == res.rating
+    assert round(float(res.shifted_reference[idx500])) == res.rating
     ax = res.plot()
     texts = " ".join(t.get_text() for t in ax.texts).replace("−", "-")
     assert "-5" not in texts.replace(" ", "")
@@ -524,7 +524,7 @@ def test_every_plot_forwards_kwargs_to_primary_artist(name, factory, kind) -> No
     artists = ax.lines if kind == "line" else ax.patches
     red = plt.matplotlib.colors.to_rgba("red")
 
-    def _is_red(artist) -> bool:  # noqa: ANN001
+    def _is_red(artist) -> bool:
         if kind == "line":
             return plt.matplotlib.colors.to_rgba(artist.get_color()) == red
         return tuple(artist.get_facecolor()) == red
@@ -612,7 +612,7 @@ def test_room_acoustics_invalid_bands_are_hatched() -> None:
 
 def test_room_acoustics_single_axes_composition() -> None:
     res = _room(limits=[250, 2000])
-    fig, ax = plt.subplots()
+    _fig, ax = plt.subplots()
     out = res.plot(ax=ax)
     assert out is ax
     plt.close("all")

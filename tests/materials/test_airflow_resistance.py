@@ -47,7 +47,6 @@ from phonometry.materials.airflow_resistance import (
     thermal_boundary_layer_thickness,
 )
 
-
 # --- 3.1-3.4: quantity chain and units --------------------------------------
 
 def test_airflow_resistance_ratio() -> None:

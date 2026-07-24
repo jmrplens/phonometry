@@ -19,11 +19,11 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-import phonometry as ph  # noqa: E402
+import phonometry as ph
 
 FS = 48000
 F1, F2, SECONDS = 20.0, 6000.0, 4.0
@@ -365,6 +365,6 @@ def test_plot_two_panels_and_external_ax() -> None:
     axes = res.plot()
     assert len(axes) == 2
     plt.close("all")
-    fig, ext = plt.subplots()
+    _fig, ext = plt.subplots()
     assert res.plot(ax=ext) is ext
     plt.close("all")

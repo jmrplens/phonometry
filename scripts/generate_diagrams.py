@@ -20,8 +20,9 @@ for _threads_var in (
 ):
     os.environ.setdefault(_threads_var, "1")
 
-from collections.abc import Callable  # noqa: E402
-from dataclasses import dataclass  # noqa: E402
+import itertools
+from collections.abc import Callable
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -1072,7 +1073,7 @@ class SVG:
         return head + "".join(self.parts) + "</svg>"
 
 
-def _write(output_dir: str, name: str, build: Callable[["SVG", "Theme"], None], title: str,
+def _write(output_dir: str, name: str, build: Callable[[SVG, Theme], None], title: str,
            height: int = 560) -> None:
     for lang, lang_suffix in (("en", ""), ("es", "_es")):
         for th in (LIGHT, DARK):
@@ -1922,13 +1923,13 @@ def _d_impedance_tube(s: SVG, th: Theme) -> None:
 
     # Governing relations and range.
     for y, txt, col in (
-        (438, "H₁₂ → reflection factor r (Eq. 17), "
+        (438, ("H₁₂ → reflection factor r (Eq. 17), "
               "absorption α = 1 − |r|² (Eq. 18), "
-              "Z/ρc₀ = (1+r)/(1−r) (Eq. 19)", th.fg),
-        (466, "Working range f_l < f < f_u set by the microphone spacing s "
-              "and the tube diameter (Clause 6.1)", th.muted),
-        (492, "ASTM E2611: two further microphones behind the specimen also "
-              "give the transmission loss", th.muted),
+              "Z/ρc₀ = (1+r)/(1−r) (Eq. 19)"), th.fg),
+        (466, ("Working range f_l < f < f_u set by the microphone spacing s "
+              "and the tube diameter (Clause 6.1)"), th.muted),
+        (492, ("ASTM E2611: two further microphones behind the specimen also "
+              "give the transmission loss"), th.muted),
     ):
         s.text(450, y, txt, 18, col)
 
@@ -1992,12 +1993,12 @@ def _d_astm_tube(s: SVG, th: Theme) -> None:
 
     # Governing relations.
     for y, txt, col in (
-        (452, "Decompose A, B (upstream) and C, D (downstream) → "
-              "transfer matrix T (Eq. 22)", th.fg),
+        (452, ("Decompose A, B (upstream) and C, D (downstream) → "
+              "transfer matrix T (Eq. 22)"), th.fg),
         (480, "TL = 20 log₁₀ |(T₁₁ + T₁₂/ρc + ρc·T₂₁ + T₂₂) / 2|   (Eq. 26)",
          th.muted),
-        (506, "Two-load method: repeat with two terminations; the one-load "
-              "variant uses a single anechoic end", th.muted),
+        (506, ("Two-load method: repeat with two terminations; the one-load "
+              "variant uses a single anechoic end"), th.muted),
     ):
         s.text(450, y, txt, 17, col)
 
@@ -2130,11 +2131,11 @@ def _d_scattering_reverb(s: SVG, th: Theme) -> None:
 
     # --- Governing relations ----------------------------------------------
     for y, txt, col, bold in (
-        (448, "Stationary sample → α_s (Eq. 1)   ·   "
-              "rotating / averaged → α_spec (Eq. 4)", th.fg, True),
+        (448, ("Stationary sample → α_s (Eq. 1)   ·   "
+              "rotating / averaged → α_spec (Eq. 4)"), th.fg, True),
         (478, "s = (α_spec − α_s) / (1 − α_s)   (Eq. 5)", th.accent, True),
-        (508, "α from 55.3·(V/S)·(1/cT) − 4(V/S)m   "
-              "(Sabine, Table 2 rows T1–T4)", th.muted, False),
+        (508, ("α from 55.3·(V/S)·(1/cT) − 4(V/S)m   "
+              "(Sabine, Table 2 rows T1–T4)"), th.muted, False),
         (534, "Base-plate check: s_base ≤ Table 1 limit (Clause 6.2)",
          th.muted, False),
     ):
@@ -2429,7 +2430,7 @@ def _d_intensity_scan(s: SVG, th: Theme) -> None:
     ys = (ft + 40, ft + 120, ft + 200)
     px = [(fl + 30, ys[0]), (fr - 30, ys[0]), (fr - 30, ys[1]),
           (fl + 30, ys[1]), (fl + 30, ys[2]), (fr - 30, ys[2])]
-    for (ax, ay), (bxx, byy) in zip(px[:-1], px[1:]):
+    for (ax, ay), (bxx, byy) in itertools.pairwise(px):
         s.line(ax, ay, bxx, byy, th.accent, 2.0, dash="2,3")
     s.arrow(px[-2][0] + 60, px[-1][1], px[-1][0], px[-1][1], th.accent, 2.0)
     s.text(fr + 8, ys[2] + 6, "serpentine scan", 15, th.accent, anchor="start")

@@ -56,18 +56,18 @@ from .vibration_sound_power import (
 )
 
 __all__ = [
+    "NORMALIZED_IMPEDANCE",
+    "REFERENCE_VELOCITY",
     "DeclarationForm",
     "FieldIndicators",
     "IntensityResult",
     "MeteorologicalCorrection",
-    "NORMALIZED_IMPEDANCE",
     "NoiseEmissionDeclaration",
     "OperatingModeDeclaration",
     "PrecisionCriteria",
     "PrecisionFieldIndicators",
     "PrecisionIntensityResult",
     "PrecisionSoundPowerResult",
-    "REFERENCE_VELOCITY",
     "ReverberationSoundPowerResult",
     "SoundPowerIntensityResult",
     "SoundPowerResult",

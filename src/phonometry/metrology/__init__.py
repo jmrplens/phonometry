@@ -4,6 +4,14 @@
 from __future__ import annotations
 
 from .calibration import CalibrationWarning, calculate_sensitivity, sensitivity
+from .cepstrum import (
+    CepstrumResult,
+    EchoDetectionResult,
+    LifterResult,
+    cepstrum,
+    echo_detection,
+    lifter,
+)
 from .compliance import (
     FilterComplianceResult,
     class_limits,
@@ -12,14 +20,6 @@ from .compliance import (
     verify_filter_class,
     verify_weighting_class,
     weighting_class_limits,
-)
-from .cepstrum import (
-    CepstrumResult,
-    EchoDetectionResult,
-    LifterResult,
-    cepstrum,
-    echo_detection,
-    lifter,
 )
 from .core import FilterBankWarning, OctaveFilterBank, octave_filter, octavefilter
 from .correlation import (
@@ -80,11 +80,6 @@ from .signals import (
     resample_signal,
     tone_burst,
 )
-from .synchronous_average import (
-    SynchronousAverageResult,
-    comb_filter_response,
-    time_synchronous_average,
-)
 from .spectra import (
     CoherentOutputSpectrumResult,
     CrossSpectralDensityResult,
@@ -98,6 +93,11 @@ from .spectra import (
     power_spectral_density,
     resolution_bias_error,
     window_metrics,
+)
+from .synchronous_average import (
+    SynchronousAverageResult,
+    comb_filter_response,
+    time_synchronous_average,
 )
 from .time_frequency import (
     SpectrogramResult,
@@ -124,17 +124,21 @@ __all__ = [
     "CoherentOutputSpectrumResult",
     "CorrelationResult",
     "CrossSpectralDensityResult",
+    "EQResponseResult",
+    "EQSection",
     "EchoDetectionResult",
     "EnvelopeResult",
     "EnvelopeSpectrumResult",
     "FilterBankWarning",
     "FilterComplianceResult",
+    "InverseFilterResult",
     "LevelCrossingResult",
     "LifterResult",
     "MISOCoherenceResult",
     "MonteCarloResult",
     "MultitaperSpectralDensityResult",
     "OctaveFilterBank",
+    "ParametricEQ",
     "PeakStatisticsResult",
     "PhaseDecompositionResult",
     "Quantity",
@@ -143,20 +147,21 @@ __all__ = [
     "SpectrogramResult",
     "StationarityTestResult",
     "SynchronousAverageResult",
-    "TrendTestResult",
     "TimeDelayResult",
     "TimeWeighting",
     "ToneBurstResult",
+    "TrendTestResult",
     "UncertaintyResult",
     "UncertaintyWarning",
     "WeightingFilter",
-    "ZoomFFTResult",
     "WindowMetricsResult",
+    "ZoomFFTResult",
     "align_impulse_responses",
     "calculate_sensitivity",
     "cepstrum",
     "class_limits",
     "coherent_output_spectrum",
+    "comb_filter_response",
     "combine_uncertainty",
     "correlation",
     "correlation_random_error",
@@ -189,10 +194,12 @@ __all__ = [
     "normalizedfreq",
     "octave_filter",
     "octavefilter",
+    "parametric_eq",
     "peak_statistics",
     "phase_decomposition",
     "power_spectral_density",
     "rectangular",
+    "regularized_inverse_filter",
     "resample_signal",
     "resolution_bias_error",
     "sel",
@@ -202,7 +209,6 @@ __all__ = [
     "stationarity_test",
     "time_delay",
     "time_synchronous_average",
-    "comb_filter_response",
     "time_weighting",
     "tone_burst",
     "trend_test",
@@ -213,12 +219,6 @@ __all__ = [
     "verify_weighting_class",
     "weighting_class_limits",
     "weighting_filter",
-    "zoom_fft",
     "window_metrics",
-    "InverseFilterResult",
-    "regularized_inverse_filter",
-    "EQResponseResult",
-    "EQSection",
-    "ParametricEQ",
-    "parametric_eq",
+    "zoom_fft",
 ]

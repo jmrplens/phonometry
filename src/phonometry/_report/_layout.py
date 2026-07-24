@@ -21,7 +21,8 @@ import html
 import math
 import os
 import tempfile
-from typing import Any, Callable, List, Tuple
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 
@@ -52,8 +53,8 @@ _VERDICT_BAD_HEX = "#a11a1a"
 
 
 def escaped_pairs(
-    specs: List[Tuple[str, str | None]],
-) -> List[Tuple[str, str]]:
+    specs: list[tuple[str, str | None]],
+) -> list[tuple[str, str]]:
     """Drop unset pairs and XML-escape the user-supplied metadata values.
 
     Every fiche builds its header grid from an ordered list of
@@ -136,7 +137,7 @@ def render_figure_drawing(
     *,
     y_top: float | None,
     expand_step: float | None = None,
-    figsize: Tuple[float, float] | None = None,
+    figsize: tuple[float, float] | None = None,
     subplot_kw: dict[str, Any] | None = None,
     language: str = "en",
 ) -> Any:
@@ -239,7 +240,7 @@ def render_figure_drawing(
     return drawing
 
 
-def grid_table(pairs: List[Tuple[str, str]]) -> Any:
+def grid_table(pairs: list[tuple[str, str]]) -> Any:
     """Lay an ordered list of (label, value) pairs into a two-column grid.
 
     Each grid row holds up to two label/value pairs (four table cells:
@@ -262,7 +263,7 @@ def grid_table(pairs: List[Tuple[str, str]]) -> Any:
         textColor=colors.black,
     )
 
-    rows: List[List[Any]] = []
+    rows: list[list[Any]] = []
     for i in range(0, len(pairs), 2):
         left = pairs[i]
         right = pairs[i + 1] if i + 1 < len(pairs) else ("", "")
@@ -307,10 +308,10 @@ def band_table_header_style() -> Any:
 
 
 def band_table(
-    rows: List[List[Any]],
-    col_widths: List[Any],
+    rows: list[list[Any]],
+    col_widths: list[Any],
     n_data: int,
-    extra_styles: List[Any] | None = None,
+    extra_styles: list[Any] | None = None,
 ) -> Any:
     """Assemble a one-third-octave band table with the accredited styling.
 
@@ -327,7 +328,7 @@ def band_table(
     accent = colors.HexColor(_ACCENT_HEX)
     light = colors.HexColor(_LIGHT_HEX)
     thin = colors.HexColor("#c9d4e0")
-    style_cmds: List[Any] = [
+    style_cmds: list[Any] = [
         ("BACKGROUND", (0, 0), (-1, 0), accent),
         ("FONTSIZE", (0, 1), (-1, -1), 8),
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
@@ -351,7 +352,7 @@ def band_table(
     return table
 
 
-def document_styles(accent: Any) -> Tuple[Any, Any, Any, Any]:
+def document_styles(accent: Any) -> tuple[Any, Any, Any, Any]:
     """Return ``(stylesheet, title_style, basis_style, caption_style)``.
 
     The title (accent, 16 pt), the standard-basis line (muted, 9.5 pt) and the
@@ -416,7 +417,7 @@ def two_panel_body(
     return body
 
 
-def metrics_table(rows: List[Tuple[str, str]], *, col_widths: Any = None) -> Any:
+def metrics_table(rows: list[tuple[str, str]], *, col_widths: Any = None) -> Any:
     """A compact two-column ``metric | value`` table for a non-band fiche.
 
     The band fiches put a frequency table on the left; the single-metric fiches
@@ -465,7 +466,7 @@ def metrics_table(rows: List[Tuple[str, str]], *, col_widths: Any = None) -> Any
 
 
 def compliance_table(
-    rows: List[Tuple[str, str, str, str]],
+    rows: list[tuple[str, str, str, str]],
     *,
     col_widths: Any = None,
     language: str = "en",
@@ -522,7 +523,7 @@ def compliance_table(
             )
         return f"<font color='{_MUTED_HEX}'>&#8211;</font>"
 
-    data: List[List[Any]] = [
+    data: list[list[Any]] = [
         [
             Paragraph(t("Metric", language), header_style),
             Paragraph(t("Measured", language), header_style),
@@ -558,7 +559,7 @@ def compliance_table(
     return table
 
 
-def analysis_cell_styles(prefix: str) -> Tuple[Any, Any, Any]:
+def analysis_cell_styles(prefix: str) -> tuple[Any, Any, Any]:
     """Return ``(header, label, value)`` paragraph styles for a stacked table.
 
     Shared by the exposure fiches (occupational noise, human vibration), whose
@@ -608,7 +609,7 @@ def exceedance_markup(exceeded: bool | None, language: str = "en") -> str:
     )
 
 
-def stacked_table(data: List[List[Any]], col_widths: List[Any]) -> Any:
+def stacked_table(data: list[list[Any]], col_widths: list[Any]) -> Any:
     """A full-width table with the accredited styling (accent header, zebra rows).
 
     Shared by the exposure fiches: the accent header row, zebra body rows and a
@@ -645,7 +646,7 @@ def result_box(
     statement: str,
     styles: Any,
     accent: Any,
-    extended: List[str] | None = None,
+    extended: list[str] | None = None,
 ) -> Any:
     """The boxed single-number result, with optional extended terms alongside.
 
@@ -660,7 +661,7 @@ def result_box(
         "fiche_result", parent=styles["Normal"], fontSize=13, leading=17,
         textColor=accent,
     )
-    box_cells: List[Any] = [Paragraph(statement, result_style)]
+    box_cells: list[Any] = [Paragraph(statement, result_style)]
     box_widths = [174 * mm]
     if extended:
         ext_style = ParagraphStyle(
@@ -690,7 +691,7 @@ def result_box(
 
 def verdict_flow(
     text: str, passed: bool, styles: Any, language: str = "en"
-) -> List[Any]:
+) -> list[Any]:
     """The PASS/FAIL verdict paragraph for a precomputed comparison.
 
     Each renderer computes ``text`` (the requirement comparison) and ``passed``
@@ -718,7 +719,7 @@ def verdict_flow(
 
 def footer_flow(
     metadata: ReportMetadata | None, language: str = "en"
-) -> List[Any]:
+) -> list[Any]:
     """Build the footer identity block plus the always-present disclaimer.
 
     Called only after the renderer has imported reportlab.
@@ -744,8 +745,8 @@ def footer_flow(
     signature = t("Signature", language)
     sign_blank = f"{signature}: ______________________________"
 
-    flow: List[Any] = [Spacer(1, 8)]
-    lines: List[str] = []
+    flow: list[Any] = [Spacer(1, 8)]
+    lines: list[str] = []
     if metadata is not None:
         if metadata.laboratory:
             lines.append(
@@ -800,7 +801,7 @@ def footer_flow(
     return flow
 
 
-def build_document(path: str, flow: List[Any], title: str) -> str:
+def build_document(path: str, flow: list[Any], title: str) -> str:
     """Build the one-page A4 fiche ``flow`` into a reproducible PDF at ``path``.
 
     Called only after the renderer has imported reportlab.

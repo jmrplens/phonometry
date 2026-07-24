@@ -34,6 +34,7 @@ def test_import_does_not_override_matplotlib_backend() -> None:
         text=True,
         env=env,
         timeout=30,
+        check=False,
     )
     assert result.returncode == 0, result.stderr
 
@@ -76,7 +77,7 @@ def test_showfilter_raises_helpful_error_without_matplotlib(monkeypatch) -> None
 
     real_import = builtins.__import__
 
-    def blocked_import(name, *args, **kwargs):  # noqa: ANN001, ANN002, ANN003
+    def blocked_import(name, *args, **kwargs):
         if name.startswith("matplotlib"):
             raise ImportError("No module named 'matplotlib'")
         return real_import(name, *args, **kwargs)

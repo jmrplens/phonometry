@@ -20,20 +20,21 @@ from .common import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
     from ..underwater.numerical_propagation import (
         NormalModeResult,
         ParabolicEquationResult,
         RayTraceResult,
     )
-    from matplotlib.axes import Axes
-    from ..underwater.ship_radiated_noise import ShipSourceLevelResult
-    from ..underwater.pile_driving_noise import PileStrikeResult
-    from ..underwater.sound_speed import SoundSpeedProfile
-    from ..underwater.propagation import TransmissionLossResult
-    from ..underwater.sonar_equation import SonarEquationResult
-    from ..underwater.seabed_reflection import BottomLossResult, SeabedReflection
     from ..underwater.ocean_ambient_noise import AmbientNoiseResult
+    from ..underwater.pile_driving_noise import PileStrikeResult
+    from ..underwater.propagation import TransmissionLossResult
+    from ..underwater.seabed_reflection import BottomLossResult, SeabedReflection
+    from ..underwater.ship_radiated_noise import ShipSourceLevelResult
     from ..underwater.ship_traffic_noise import ShipTrafficSpectrum
+    from ..underwater.sonar_equation import SonarEquationResult
+    from ..underwater.sound_speed import SoundSpeedProfile
 
 #: Spanish translations of the fixed strings rendered by the underwater
 #: ``.plot()`` renderers, keyed by their verbatim English text.  ``_t``
@@ -99,7 +100,7 @@ def _t(text: str, language: str = "en") -> str:
 
 
 def plot_ship_source_level(
-    result: "ShipSourceLevelResult", ax: Axes | None = None, *, language: str = "en",
+    result: ShipSourceLevelResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Radiated noise level, source level and the ΔL surface correction.
@@ -150,7 +151,7 @@ def plot_ship_source_level(
     return ax
 
 def plot_pile_strike(
-    result: "PileStrikeResult", ax: Axes | None = None, *, language: str = "en",
+    result: PileStrikeResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes | np.ndarray:
     """Pile-strike pressure waveform and its cumulative energy.
@@ -209,7 +210,7 @@ def plot_pile_strike(
     return axes
 
 def plot_sound_speed_profile(
-    result: "SoundSpeedProfile", ax: Axes | None = None, *, language: str = "en",
+    result: SoundSpeedProfile, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Sound-speed profile: speed vs depth, with depth increasing downward.
@@ -238,7 +239,7 @@ def plot_sound_speed_profile(
     return ax
 
 def plot_transmission_loss(
-    result: "TransmissionLossResult", ax: Axes | None = None, *, language: str = "en",
+    result: TransmissionLossResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Transmission loss versus range, with spreading and absorption split out.
@@ -272,7 +273,7 @@ def plot_transmission_loss(
     return ax
 
 def plot_sonar_equation(
-    result: "SonarEquationResult", ax: Axes | None = None, *, language: str = "en",
+    result: SonarEquationResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Signal excess versus transmission loss, with the detection limit (SE = 0).
@@ -303,7 +304,7 @@ def plot_sonar_equation(
     return ax
 
 def plot_bottom_loss(
-    result: "BottomLossResult", ax: Axes | None = None, *, language: str = "en",
+    result: BottomLossResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Bottom reflection loss versus grazing angle, marking the critical angle.
@@ -332,7 +333,7 @@ def plot_bottom_loss(
     return ax
 
 def plot_seabed_reflection(
-    result: "SeabedReflection", ax: Axes | None = None, *, language: str = "en",
+    result: SeabedReflection, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Seabed reflection-coefficient magnitude versus grazing angle.
@@ -365,7 +366,7 @@ def plot_seabed_reflection(
     return ax
 
 def plot_ambient_noise(
-    result: "AmbientNoiseResult", ax: Axes | None = None, *, language: str = "en",
+    result: AmbientNoiseResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Composite ambient-noise spectrum and its components versus frequency.
@@ -399,7 +400,7 @@ def plot_ambient_noise(
     return ax
 
 def plot_ship_traffic_spectrum(
-    result: "ShipTrafficSpectrum", ax: Axes | None = None, *, language: str = "en",
+    result: ShipTrafficSpectrum, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Predicted ship source spectral-density level versus frequency.
@@ -431,7 +432,7 @@ def plot_ship_traffic_spectrum(
     return ax
 
 def plot_normal_modes(
-    result: "NormalModeResult", ax: Axes | None = None, *, language: str = "en",
+    result: NormalModeResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Normal-mode transmission loss versus range (loss increasing downward).
@@ -459,7 +460,7 @@ def plot_normal_modes(
     localize_axes(ax, language)
     return ax
 
-def plot_ray_trace(result: "RayTraceResult", ax: Axes | None = None, *, language: str = "en",
+def plot_ray_trace(result: RayTraceResult, ax: Axes | None = None, *, language: str = "en",
                    **kwargs: Any) -> Axes:
     """Ray paths through the water column (depth increasing downward).
 
@@ -488,7 +489,7 @@ def plot_ray_trace(result: "RayTraceResult", ax: Axes | None = None, *, language
     return ax
 
 def plot_parabolic_equation(
-    result: "ParabolicEquationResult", ax: Axes | None = None, *, language: str = "en",
+    result: ParabolicEquationResult, ax: Axes | None = None, *, language: str = "en",
     **kwargs: Any
 ) -> Axes:
     """Parabolic-equation transmission-loss field (range x depth).

@@ -46,14 +46,14 @@ per-band values are supplied.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Sequence
 import warnings
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from .._internal.warnings import PhonometryWarning
-
 from .insulation import (
     ImpactRatingResult,
     WeightedRatingResult,
@@ -127,7 +127,7 @@ class LabAirborneInsulationResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -207,7 +207,7 @@ class LabImpactInsulationResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -251,11 +251,11 @@ class LabImpactInsulationResult:
 
 
 def _render_iso10140(
-    result: "LabAirborneInsulationResult | LabImpactInsulationResult",
+    result: LabAirborneInsulationResult | LabImpactInsulationResult,
     path: str,
     *,
     quantity: str,
-    metadata: "ReportMetadata | None",
+    metadata: ReportMetadata | None,
     engine: str,
     verbose: bool,
     language: str,

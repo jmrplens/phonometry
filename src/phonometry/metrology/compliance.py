@@ -45,7 +45,7 @@ tolerance set, so both verdict slots carry the same margin for AU.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from scipy import signal
@@ -80,7 +80,7 @@ _G = 10 ** (3 / 10)
 # the min limits.
 #
 # Pass-band max limits (min is constant -0.4 dB class 1 / -0.6 dB class 2):
-_PASSBAND_MAX: List[Tuple[float, float, float]] = [
+_PASSBAND_MAX: list[tuple[float, float, float]] = [
     # (exponent, class 1 max, class 2 max)
     (0.0, 0.4, 0.6),      # Omega = 1
     (1 / 8, 0.5, 0.7),
@@ -91,7 +91,7 @@ _PASSBAND_MAX: List[Tuple[float, float, float]] = [
 _PASSBAND_MIN = {1: -0.4, 2: -0.6}
 
 # Stop-band min limits (max is +inf):
-_STOPBAND_MIN: List[Tuple[float, float, float]] = [
+_STOPBAND_MIN: list[tuple[float, float, float]] = [
     # (exponent, class 1 min, class 2 min)
     (1 / 2, 1.2, 0.8),    # G**(1/2) + epsilon
     (1.0, 16.6, 15.6),
@@ -106,7 +106,7 @@ _STOPBAND_MIN: List[Tuple[float, float, float]] = [
 # fractional-octave breakpoint mapping is the same as the 2014 edition: 1995
 # Annex B equation (10) is identical to 2014 Formula (9), so _map_breakpoint is
 # reused unchanged for both editions.
-_PASSBAND_MAX_1995: List[Tuple[float, float, float, float]] = [
+_PASSBAND_MAX_1995: list[tuple[float, float, float, float]] = [
     # (exponent, class 0 max, class 1 max, class 2 max)
     (0.0, 0.15, 0.3, 0.5),   # Omega = 1
     (1 / 8, 0.2, 0.4, 0.6),
@@ -115,7 +115,7 @@ _PASSBAND_MAX_1995: List[Tuple[float, float, float, float]] = [
     (1 / 2, 4.5, 5.0, 5.5),  # G**(1/2) - epsilon
 ]
 _PASSBAND_MIN_1995 = {0: -0.15, 1: -0.3, 2: -0.5}
-_STOPBAND_MIN_1995: List[Tuple[float, float, float, float]] = [
+_STOPBAND_MIN_1995: list[tuple[float, float, float, float]] = [
     # (exponent, class 0 min, class 1 min, class 2 min)
     (1 / 2, 2.3, 2.0, 1.6),  # G**(1/2) + epsilon
     (1.0, 18.0, 17.5, 16.5),
@@ -126,7 +126,7 @@ _STOPBAND_MIN_1995: List[Tuple[float, float, float, float]] = [
 
 # Per-edition mask spec: ordered classes (best -> worst), the three limit tables
 # and the column index of each class within the (exponent, ...) rows.
-_FILTER_EDITIONS: Dict[str, Dict[str, Any]] = {
+_FILTER_EDITIONS: dict[str, dict[str, Any]] = {
     "2014": {
         "classes": (1, 2),
         "passband_max": _PASSBAND_MAX,
@@ -159,7 +159,7 @@ def _map_breakpoint(exponent: float, fraction: float) -> float:
 
 def class_limits(
     fraction: float, filter_class: int, omega: np.ndarray, *, edition: str = "2014"
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Acceptance limits on relative attenuation at normalized frequencies.
 
@@ -228,12 +228,12 @@ def class_limits(
 def _verify_band(
     bank: OctaveFilterBank,
     idx: int,
-    spec: Dict[str, Any],
-    classes_ordered: Tuple[int, ...],
+    spec: dict[str, Any],
+    classes_ordered: tuple[int, ...],
     breakpoint_omegas: np.ndarray,
     edition: str,
     num_points: int,
-) -> Tuple[Dict[str, Any], float]:
+) -> tuple[dict[str, Any], float]:
     """Evaluate one band against every class; return its entry and Nyquist."""
     fm = float(bank.freq[idx])
     fsd = bank.fs / float(bank.factor[idx])
@@ -263,7 +263,7 @@ def _verify_band(
         omega = np.concatenate([omega, extra])
         delta_a = np.concatenate([delta_a, att_extra - a_ref])
 
-    margins: Dict[int, float] = {}
+    margins: dict[int, float] = {}
     for cls in classes_ordered:
         minimum, maximum = class_limits(bank.fraction, cls, omega, edition=edition)
         low_margin = float(np.min(delta_a - minimum))
@@ -276,7 +276,7 @@ def _verify_band(
     band_class: int | None = next(
         (cls for cls in classes_ordered if margins[cls] >= 0), None
     )
-    band_entry: Dict[str, Any] = {
+    band_entry: dict[str, Any] = {
         "freq": fm,
         "class": band_class,
         "checked_to_omega": float(omega_nyq),
@@ -288,7 +288,7 @@ def _verify_band(
 
 def verify_filter_class(
     bank: OctaveFilterBank, num_points: int = 2 ** 15, *, edition: str = "2014"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Verify a filter bank against the IEC 61260 class limits.
 
@@ -326,9 +326,9 @@ def verify_filter_class(
     spec = _FILTER_EDITIONS.get(edition)
     if spec is None:
         raise ValueError("edition must be '2014' or '1995'.")
-    classes_ordered: Tuple[int, ...] = spec["classes"]  # best -> worst
+    classes_ordered: tuple[int, ...] = spec["classes"]  # best -> worst
 
-    bands: List[Dict[str, Any]] = []
+    bands: list[dict[str, Any]] = []
 
     # Table 1 breakpoints (both sides) that must always be evaluated.
     rows = list(spec["passband_max"]) + list(spec["stopband_min"])
@@ -401,17 +401,17 @@ class FilterComplianceResult:
     """
 
     overall_class: int | None
-    bands: Tuple[Dict[str, Any], ...]
+    bands: tuple[dict[str, Any], ...]
     fraction: int
     edition: str
-    sos: Tuple[np.ndarray, ...]
+    sos: tuple[np.ndarray, ...]
     band_frequencies: np.ndarray
-    factors: Tuple[int, ...]
+    factors: tuple[int, ...]
     fs: float
     num_points: int
     range_limited: bool = False
 
-    def available_classes(self) -> List[int]:
+    def available_classes(self) -> list[int]:
         """The performance classes carried by the per-band verdict dictionaries.
 
         Reads the ``margin_class<n>_db`` keys of a band verdict, so it reflects
@@ -447,8 +447,8 @@ class FilterComplianceResult:
             )
         return max(classes)
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the worst-margin band against its class-limit corridor.
 
         Draws the measured relative attenuation of the binding band over the
@@ -469,7 +469,7 @@ class FilterComplianceResult:
         self,
         path: str,
         *,
-        metadata: "ReportMetadata | None" = None,
+        metadata: ReportMetadata | None = None,
         engine: str = "reportlab",
         verbose: bool = False,
         language: str = "en",
@@ -548,7 +548,7 @@ def filter_class_compliance(
 # frequencies. Columns: (nominal Hz, A dB, C dB, class1 upper, class1 lower,
 # class2 upper, class2 lower); Z is 0.0 dB at every frequency. A lower limit
 # of -inf means only the upper limit applies.
-_WEIGHTING_TABLE3: List[Tuple[float, float, float, float, float, float, float]] = [
+_WEIGHTING_TABLE3: list[tuple[float, float, float, float, float, float, float]] = [
     (10.0, -70.4, -14.3, 3.0, -_INF, 5.0, -_INF),
     (12.5, -63.4, -11.2, 2.5, -_INF, 5.0, -_INF),
     (16.0, -56.7, -8.5, 2.0, -4.0, 5.0, -_INF),
@@ -596,7 +596,7 @@ _WEIGHTING_COL = {"A": 1, "C": 2, "Z": None}
 # response level of the B weighting at the 34 nominal frequencies. The A and
 # C columns of Table IV equal IEC 61672-1:2013 Table 3 digit for digit, so
 # only the B column is transcribed here. Row = (nominal Hz, B dB).
-_ANSI_S14_TABLE4_B: List[Tuple[float, float]] = [
+_ANSI_S14_TABLE4_B: list[tuple[float, float]] = [
     (10.0, -38.2), (12.5, -33.2), (16.0, -28.5), (20.0, -24.2),
     (25.0, -20.4), (31.5, -17.1), (40.0, -14.2), (50.0, -11.6),
     (63.0, -9.3), (80.0, -7.4), (100.0, -5.6), (125.0, -4.2),
@@ -614,7 +614,7 @@ _ANSI_S14_TABLE4_B: List[Tuple[float, float]] = [
 # column lives in tests/reference_data.py and is pinned by the CI
 # conformance report.) Row = (nominal Hz, type1 upper, type1 lower,
 # type2 upper, type2 lower); a -inf lower limit means upper-only.
-_ANSI_S14_TABLE5_12: List[Tuple[float, float, float, float, float]] = [
+_ANSI_S14_TABLE5_12: list[tuple[float, float, float, float, float]] = [
     (10.0, 4.0, -4.0, 5.0, -_INF),
     (12.5, 3.5, -3.5, 5.0, -_INF),
     (16.0, 3.0, -3.0, 5.0, -_INF),
@@ -665,7 +665,7 @@ _F5 = 158.48932
 # reference frequency (Table 1 note; IEC 651 subclause 3.7) and the -inf
 # lower limit at 40 kHz means upper-only. Row = (nominal Hz, U dB, upper
 # tolerance, lower tolerance).
-_IEC61012_TABLE1: List[Tuple[float, float, float, float]] = [
+_IEC61012_TABLE1: list[tuple[float, float, float, float]] = [
     (10.0, 0.0, 3.0, -3.0), (12.5, 0.0, 3.0, -3.0), (16.0, 0.0, 3.0, -3.0),
     (20.0, 0.0, 3.0, -3.0), (25.0, 0.0, 2.0, -2.0), (31.5, 0.0, 1.0, -1.0),
     (40.0, 0.0, 1.0, -1.0), (50.0, 0.0, 1.0, -1.0), (63.0, 0.0, 1.0, -1.0),
@@ -770,7 +770,7 @@ def _analytic_weighting_db(curve: str, frequencies: np.ndarray) -> np.ndarray:
 
 def weighting_class_limits(
     weighting_class: int,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     IEC 61672-1:2013 Table 3 acceptance limits for a performance class.
 
@@ -796,11 +796,11 @@ def weighting_class_limits(
 
 def _curve_design_and_limits(
     curve: str,
-) -> Tuple[
+) -> tuple[
     np.ndarray,
     np.ndarray,
-    Tuple[np.ndarray, np.ndarray],
-    Tuple[np.ndarray, np.ndarray],
+    tuple[np.ndarray, np.ndarray],
+    tuple[np.ndarray, np.ndarray],
 ]:
     """Nominal frequencies, design goals and the two acceptance masks.
 
@@ -858,9 +858,9 @@ def _weighting_response_db(wf: WeightingFilter, frequencies: np.ndarray) -> np.n
 def _weighting_band_verdicts(
     freqs_nom: np.ndarray,
     deviation: np.ndarray,
-    limits1: Tuple[np.ndarray, np.ndarray],
-    limits2: Tuple[np.ndarray, np.ndarray],
-) -> List[Dict[str, Any]]:
+    limits1: tuple[np.ndarray, np.ndarray],
+    limits2: tuple[np.ndarray, np.ndarray],
+) -> list[dict[str, Any]]:
     """Per-band class verdicts against the Table 3 acceptance limits.
 
     Margin = distance to the nearer limit; a -inf lower limit makes that side
@@ -868,7 +868,7 @@ def _weighting_band_verdicts(
     """
     lower1, upper1 = limits1
     lower2, upper2 = limits2
-    bands: List[Dict[str, Any]] = []
+    bands: list[dict[str, Any]] = []
     for i, fm in enumerate(freqs_nom):
         m1 = min(upper1[i] - deviation[i], deviation[i] - lower1[i])
         m2 = min(upper2[i] - deviation[i], deviation[i] - lower2[i])
@@ -888,10 +888,10 @@ def _weighting_band_verdicts(
 def _between_nominals_sweep(
     wf: WeightingFilter,
     freqs_exact: np.ndarray,
-    limits1: Tuple[np.ndarray, np.ndarray],
-    limits2: Tuple[np.ndarray, np.ndarray],
+    limits1: tuple[np.ndarray, np.ndarray],
+    limits2: tuple[np.ndarray, np.ndarray],
     sweep_points: int,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Subclause 5.5.7 sweep between adjacent exact nominal frequencies.
 
     The acceptance limits between two adjacent nominal frequencies are the
@@ -922,7 +922,7 @@ def _between_nominals_sweep(
 
 def verify_weighting_class(
     wf: WeightingFilter, *, sweep_points: int = 4096
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Verify a frequency-weighting filter against its standard's tolerances.
 
@@ -1057,11 +1057,11 @@ def verify_weighting_class(
 # ---------------------------------------------------------------------------
 
 #: Tabulated depression/incidence angles (degrees) of IEC 61265 Table 1.
-_IEC61265_ANGLES: Tuple[float, ...] = (30.0, 60.0, 90.0, 120.0, 150.0)
+_IEC61265_ANGLES: tuple[float, ...] = (30.0, 60.0, 90.0, 120.0, 150.0)
 
 #: IEC 61265:1995 Table 1: maximum permitted |sensitivity(0°) − sensitivity(θ)|
 #: (dB) per one-third-octave band. Rows: (f_low, f_high, limits at the angles).
-_IEC61265_DIRECTIONAL: Tuple[Tuple[float, float, Tuple[float, ...]], ...] = (
+_IEC61265_DIRECTIONAL: tuple[tuple[float, float, tuple[float, ...]], ...] = (
     (50.0, 1600.0, (0.5, 0.5, 1.0, 1.0, 1.0)),
     (2000.0, 2000.0, (0.5, 0.5, 1.0, 1.0, 1.0)),
     (2500.0, 2500.0, (0.5, 0.5, 1.0, 1.5, 1.5)),
@@ -1097,11 +1097,11 @@ def _iec61265_directional_limit(frequency: float, angle: float) -> float:
 
 def verify_aircraft_noise_system(
     *,
-    directional: "Dict[float, Dict[float, float]] | None" = None,
-    frequency_response: "Dict[float, float] | None" = None,
-    linearity: "Dict[str, float] | None" = None,
-    resolution: "float | None" = None,
-) -> Dict[str, Any]:
+    directional: dict[float, dict[float, float]] | None = None,
+    frequency_response: dict[float, float] | None = None,
+    linearity: dict[str, float] | None = None,
+    resolution: float | None = None,
+) -> dict[str, Any]:
     """Verify measured performance against IEC 61265:1995 tolerances.
 
     Each supplied measurement is checked against the standard's limit; the
@@ -1119,7 +1119,7 @@ def verify_aircraft_noise_system(
         ...}]}``; ``passed`` is the conjunction of every check.
     :raises ValueError: If a frequency or angle is out of the tabulated range.
     """
-    checks: List[Dict[str, Any]] = []
+    checks: list[dict[str, Any]] = []
 
     if directional is not None:
         for freq, per_angle in directional.items():

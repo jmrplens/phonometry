@@ -37,7 +37,7 @@ def _finite(value: float, name: str) -> float:
     return scalar
 
 
-def _finite_array(values: "NDArray[np.float64] | list[float] | float", name: str) -> "NDArray[np.float64]":
+def _finite_array(values: NDArray[np.float64] | list[float] | float, name: str) -> NDArray[np.float64]:
     arr = np.atleast_1d(np.asarray(values, dtype=np.float64))
     if arr.size == 0 or not np.all(np.isfinite(arr)):
         raise ValueError(f"'{name}' must be finite and non-empty.")
@@ -67,18 +67,18 @@ class SonarEquationResult:
     """
 
     mode: str
-    signal_excess: "NDArray[np.float64]"
-    snr: "NDArray[np.float64]"
+    signal_excess: NDArray[np.float64]
+    snr: NDArray[np.float64]
     figure_of_merit: float
-    transmission_loss: "NDArray[np.float64]"
+    transmission_loss: NDArray[np.float64]
     source_level: float
     noise_level: float
     directivity_index: float
     detection_threshold: float
-    target_strength: "float | None"
+    target_strength: float | None
     reverberation_limited: bool
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en", **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any) -> Axes:
         """Plot signal excess versus transmission loss with the detection limit."""
         from .._i18n import check_language
         from .._plot.underwater import plot_sonar_equation
@@ -88,7 +88,7 @@ class SonarEquationResult:
 
 def passive_sonar_equation(
     source_level: float,
-    transmission_loss: "NDArray[np.float64] | list[float] | float",
+    transmission_loss: NDArray[np.float64] | list[float] | float,
     noise_level: float,
     *,
     directivity_index: float = 0.0,
@@ -131,13 +131,13 @@ def passive_sonar_equation(
 
 def active_sonar_equation(
     source_level: float,
-    transmission_loss: "NDArray[np.float64] | list[float] | float",
+    transmission_loss: NDArray[np.float64] | list[float] | float,
     target_strength: float,
     noise_level: float,
     *,
     directivity_index: float = 0.0,
     detection_threshold: float = 0.0,
-    reverberation_level: "float | None" = None,
+    reverberation_level: float | None = None,
 ) -> SonarEquationResult:
     """Monostatic active sonar equation with a two-way transmission loss.
 

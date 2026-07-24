@@ -29,6 +29,7 @@ import ast
 import dataclasses
 import importlib
 import inspect
+import itertools
 import json
 import re
 import shutil
@@ -38,14 +39,14 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
-import phonometry
-
 from api_taxonomy import (
     OBJECT_MODULE_OVERRIDES,
     SECTIONS,
     Section,
     module_section,
 )
+
+import phonometry
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT_DIR = ROOT / "site" / "src" / "content" / "docs" / "reference" / "api"
@@ -348,7 +349,7 @@ def _inline_markdown(text: str, xref: dict[str, str], stats: RoleStats) -> str:
         lambda m: stash(rest_roles_to_links(m.group(0), xref, stats)), text
     )
     # 2. reST ``literal`` spans -> Markdown code spans.
-    text = re.sub(r"``(.+?)``", r"`\1`", text, flags=re.S)
+    text = re.sub(r"``(.+?)``", r"`\1`", text, flags=re.DOTALL)
     # 3. Protect code spans from escaping.
     text = re.sub(r"`[^`]+`", lambda m: stash(m.group(0)), text)
     # 4. Escape characters Markdown/HTML would misread in plain prose.
@@ -469,7 +470,7 @@ def attribute_module(name: str, obj: object) -> str:
     if isinstance(module, str) and _is_public_module(module):
         return module
     if isinstance(module, str):
-        raise LookupError(
+        raise LookupError(  # noqa: TRY004 - a private-module lookup is a configuration error, not a type error
             f"public name {name!r} is defined in private module {module!r}; "
             "add it to OBJECT_MODULE_OVERRIDES in scripts/api_taxonomy.py"
         )
@@ -502,7 +503,7 @@ def _attribute_docstrings(module: ModuleType) -> dict[str, str]:
     tree = ast.parse(source)
     docs: dict[str, str] = {}
     body = tree.body
-    for stmt, follower in zip(body, body[1:]):
+    for stmt, follower in itertools.pairwise(body):
         target: ast.expr | None = None
         if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1:
             target = stmt.targets[0]
@@ -1037,14 +1038,14 @@ def render_index(
     out = [
         "---",
         'title: "API Reference"',
-        'description: "Every public function, class and constant in '
-        'phonometry, generated from the source docstrings."',
+        ('description: "Every public function, class and constant in '
+        'phonometry, generated from the source docstrings."'),
         "---",
         "",
         BANNER,
         "",
-        "The complete public API, one page per module. Import the domain "
-        "subpackage and call through it:",
+        ("The complete public API, one page per module. Import the domain "
+        "subpackage and call through it:"),
         "",
         "```python",
         "from phonometry import metrology, underwater",
@@ -1053,16 +1054,16 @@ def render_index(
         "snr = underwater.passive_sonar_equation(185.0, 60.0, 50.0)",
         "```",
         "",
-        "Every documented name can also be imported directly from the "
-        "top-level package (`from phonometry import leq`).",
+        ("Every documented name can also be imported directly from the "
+        "top-level package (`from phonometry import leq`)."),
         "",
         ":::note",
-        "The API reference is generated from the English source docstrings "
-        "and is published in English only.",
+        ("The API reference is generated from the English source docstrings "
+        "and is published in English only."),
         "",
-        "La referencia de la API se genera a partir de los docstrings del "
+        ("La referencia de la API se genera a partir de los docstrings del "
         "código (en inglés) y se publica únicamente en inglés; las rutas en "
-        "español muestran esta versión inglesa como alternativa.",
+        "español muestran esta versión inglesa como alternativa."),
         ":::",
         "",
     ]

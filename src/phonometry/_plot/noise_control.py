@@ -54,9 +54,9 @@ def _t(text: str, language: str = "en") -> str:
 
 
 def plot_reactive_silencer(
-    result: "ReactiveSilencerResult", ax: "Axes | None" = None,
+    result: ReactiveSilencerResult, ax: Axes | None = None,
     language: str = "en", **kwargs: Any
-) -> "Axes":
+) -> Axes:
     """Transmission (and insertion) loss of a reactive silencer over frequency.
 
     :param result: A
@@ -95,9 +95,9 @@ def plot_reactive_silencer(
 
 
 def plot_hvac_spectrum(
-    result: "HvacSpectrumResult", ax: "Axes | None" = None, language: str = "en",
+    result: HvacSpectrumResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
-) -> "Axes":
+) -> Axes:
     """Per-frequency HVAC attenuation or regenerated sound power level.
 
     :param result: A :class:`~phonometry.noise_control.hvac.HvacSpectrumResult`.
@@ -131,9 +131,9 @@ def plot_hvac_spectrum(
 
 
 def plot_enclosure(
-    result: "EnclosureResult", ax: "Axes | None" = None, language: str = "en",
+    result: EnclosureResult, ax: Axes | None = None, language: str = "en",
     **kwargs: Any
-) -> "Axes":
+) -> Axes:
     """Panel R, interior correction C and net insertion loss of an enclosure.
 
     :param result: An

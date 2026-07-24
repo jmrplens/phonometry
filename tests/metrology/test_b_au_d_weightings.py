@@ -22,6 +22,16 @@ import math
 
 import numpy as np
 import pytest
+from reference_data import (
+    ANSIS14_TABLE4_B,
+    ANSIS14_TABLE5,
+    IEC537_NASA_TABLE_SLD1,
+    IEC61012_AU_HF,
+    IEC61012_TABLE1,
+    IEC61012_TABLE2_POLES_HZ,
+    IEC61672_TABLE3,
+    LIBROSA_D_WEIGHTING_CONSTS,
+)
 from scipy import signal as sg
 
 from phonometry import WeightingFilter, verify_weighting_class
@@ -32,16 +42,6 @@ from phonometry.metrology.compliance import (
     _IEC61012_TABLE1,
     _U_POLES_HZ,
     _analytic_weighting_db,
-)
-from reference_data import (
-    ANSIS14_TABLE4_B,
-    ANSIS14_TABLE5,
-    IEC537_NASA_TABLE_SLD1,
-    IEC61012_AU_HF,
-    IEC61012_TABLE1,
-    IEC61012_TABLE2_POLES_HZ,
-    IEC61672_TABLE3,
-    LIBROSA_D_WEIGHTING_CONSTS,
 )
 
 

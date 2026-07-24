@@ -81,7 +81,7 @@ term `wS` (Equation 16.3) and the fluctuation/roughness term `wFR`
 
 ```python
 psychoacoustic_annoyance_from_signal(
-    x: List[float] | np.ndarray,
+    x: list[float] | np.ndarray,
     fs: int,
     *,
     field: Literal['free', 'diffuse'] = 'free',

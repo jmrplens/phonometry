@@ -92,7 +92,7 @@ def _validate_notch_q(notch_q: float) -> float:
 _MIN_SIGNAL_SAMPLES = 64
 
 
-def _validate_signal(signal: "NDArray[np.float64] | list[float]") -> "NDArray[np.float64]":
+def _validate_signal(signal: NDArray[np.float64] | list[float]) -> NDArray[np.float64]:
     sig = np.asarray(signal, dtype=np.float64)
     if sig.ndim != 1:
         raise ValueError("'signal' must be one-dimensional.")
@@ -107,8 +107,8 @@ def _validate_signal(signal: "NDArray[np.float64] | list[float]") -> "NDArray[np
 
 
 def _amplitude_spectrum(
-    signal: "NDArray[np.float64]", fs: float, window: str
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+    signal: NDArray[np.float64], fs: float, window: str
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Coherent-gain-normalised amplitude spectrum (a tone on a bin reads its peak)."""
     from scipy import signal as sp_signal
 
@@ -121,8 +121,8 @@ def _amplitude_spectrum(
 
 
 def _tone_amplitude(
-    freqs: "NDArray[np.float64]",
-    amp: "NDArray[np.float64]",
+    freqs: NDArray[np.float64],
+    amp: NDArray[np.float64],
     frequency: float,
     search_hz: float,
 ) -> float:
@@ -135,7 +135,7 @@ def _tone_amplitude(
 
 
 def _fundamental_frequency(
-    freqs: "NDArray[np.float64]", amp: "NDArray[np.float64]"
+    freqs: NDArray[np.float64], amp: NDArray[np.float64]
 ) -> float:
     """Frequency of the largest non-DC spectral peak."""
     idx = int(np.argmax(amp[1:])) + 1
@@ -143,12 +143,12 @@ def _fundamental_frequency(
 
 
 def _harmonic_amplitudes(
-    signal: "NDArray[np.float64]",
+    signal: NDArray[np.float64],
     fs: float,
     fundamental: float | None,
     n_harmonics: int,
     window: str,
-) -> tuple[float, "NDArray[np.float64]"]:
+) -> tuple[float, NDArray[np.float64]]:
     """Return ``(f0, amplitudes)`` with ``amplitudes[k]`` the (k+1)-th harmonic."""
     freqs, amp = _amplitude_spectrum(signal, fs, window)
     f0 = _fundamental_frequency(freqs, amp) if fundamental is None else float(fundamental)
@@ -169,7 +169,7 @@ def _harmonic_amplitudes(
 # Harmonic distortion (IEC 60268-3 14.12.2-3 / 14.12.5, AES17 6.3)
 # --------------------------------------------------------------------------- #
 def thd(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     fundamental: float | None = None,
     *,
@@ -205,7 +205,7 @@ def thd(
     fs_v = _positive(fs, "fs")
     if kind not in ("F", "R"):
         raise ValueError("'kind' must be 'F' or 'R'.")
-    f0, amps = _harmonic_amplitudes(sig, fs_v, fundamental, n_harmonics, window)
+    _f0, amps = _harmonic_amplitudes(sig, fs_v, fundamental, n_harmonics, window)
     if amps.size == 0 or amps[0] <= 0.0:
         raise ValueError("No fundamental component found in the signal.")
     if amps.size < 2:
@@ -221,7 +221,7 @@ def thd(
 
 
 def harmonic_distortion(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     fundamental: float,
     order: int,
@@ -257,8 +257,8 @@ def harmonic_distortion(
 
 
 def _notched_residual(
-    signal: "NDArray[np.float64]", fs: float, f0: float, notch_q: float
-) -> "NDArray[np.float64]":
+    signal: NDArray[np.float64], fs: float, f0: float, notch_q: float
+) -> NDArray[np.float64]:
     """Signal with the fundamental removed by the AES17 standard notch filter.
 
     ``notch_q`` is the *effective* quality factor of the applied (zero-phase,
@@ -284,12 +284,12 @@ def _steady_slice(n: int, fs: float, f0: float, notch_q: float) -> slice:
     signal from each end so at least the middle half always survives.
     """
     design_q = notch_q * _FILTFILT_NOTCH_Q_FACTOR  # ring time follows the design Q
-    settle = int(round(_NOTCH_SETTLE_CYCLES * design_q * fs / f0))
+    settle = round(_NOTCH_SETTLE_CYCLES * design_q * fs / f0)
     settle = min(settle, n // 4)
     return slice(settle, n - settle) if settle > 0 else slice(None)
 
 
-def _band_rms(x: "NDArray[np.float64]", fs: float, f_lo: float, f_hi: float) -> float:
+def _band_rms(x: NDArray[np.float64], fs: float, f_lo: float, f_hi: float) -> float:
     """RMS of ``x`` restricted to the band ``[f_lo, f_hi]`` (brick-wall).
 
     Computed in the frequency domain via Parseval (AES17 5.2.10 sanctions
@@ -312,8 +312,8 @@ def _band_rms(x: "NDArray[np.float64]", fs: float, f_lo: float, f_hi: float) -> 
 
 
 def _aes17_rms_pair(
-    signal: "NDArray[np.float64]",
-    residual: "NDArray[np.float64]",
+    signal: NDArray[np.float64],
+    residual: NDArray[np.float64],
     fs: float,
     f0: float,
     notch_q: float,
@@ -339,7 +339,7 @@ def _aes17_rms_pair(
 
 
 def thd_plus_noise(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     fundamental: float | None = None,
     *,
@@ -392,7 +392,7 @@ def thd_plus_noise(
 
 
 def sinad(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     fundamental: float | None = None,
     *,
@@ -443,7 +443,7 @@ _ITU_R_468_TABLE: tuple[tuple[float, float], ...] = (
 )
 
 
-def itu_r_468_weighting(frequencies: ArrayLike) -> "NDArray[np.float64]":
+def itu_r_468_weighting(frequencies: ArrayLike) -> NDArray[np.float64]:
     """ITU-R BS.468-4 weighting response, in dB re 1 kHz.
 
     The nominal response of the Recommendation's Table 1 (identical to the
@@ -478,7 +478,7 @@ def itu_r_468_weighting(frequencies: ArrayLike) -> "NDArray[np.float64]":
     return out
 
 
-def _weighted_rms_468(x: "NDArray[np.float64]", fs: float) -> float:
+def _weighted_rms_468(x: NDArray[np.float64], fs: float) -> float:
     """RMS of ``x`` weighted by the ITU-R BS.468-4 response (Parseval)."""
     n = x.size
     spec = np.fft.rfft(x)
@@ -495,7 +495,7 @@ def _weighted_rms_468(x: "NDArray[np.float64]", fs: float) -> float:
 
 
 def weighted_thd(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     fundamental: float | None = None,
     *,
@@ -566,8 +566,8 @@ _IMD_SEARCH_BINS = 5.0
 
 
 def _imd_component(
-    freqs: "NDArray[np.float64]",
-    amp: "NDArray[np.float64]",
+    freqs: NDArray[np.float64],
+    amp: NDArray[np.float64],
     frequency: float,
     half_width: float,
     exclude: tuple[float, ...] = (),
@@ -612,7 +612,7 @@ class ModulationDistortionResult:
 
 
 def modulation_distortion(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     f_low: float,
     f_high: float,
@@ -672,7 +672,7 @@ def modulation_distortion(
 
 
 def difference_frequency_distortion(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     f1: float,
     f2: float,
@@ -727,7 +727,7 @@ def difference_frequency_distortion(
 
 
 def total_difference_frequency_distortion(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     f1: float = 8000.0,
     f2: float = 11950.0,
@@ -801,7 +801,7 @@ def _dim_components(f_sine: float, f_square: float, nyquist: float) -> list[floa
 
 
 def dynamic_intermodulation_distortion(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     *,
     f_sine: float = 15000.0,
@@ -862,15 +862,15 @@ class HarmonicDistortionResult:
     """
 
     fundamental: float
-    harmonic_frequencies: "NDArray[np.float64]"
-    harmonic_amplitudes: "NDArray[np.float64]"
+    harmonic_frequencies: NDArray[np.float64]
+    harmonic_amplitudes: NDArray[np.float64]
     thd_f: float
     thd_r: float
     thd_plus_noise: float
     sinad_db: float
 
-    def plot(self, ax: "Axes | None" = None, *, language: str = "en",
-             **kwargs: Any) -> "Axes":
+    def plot(self, ax: Axes | None = None, *, language: str = "en",
+             **kwargs: Any) -> Axes:
         """Plot the magnitude spectrum with the harmonics marked.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -883,7 +883,7 @@ class HarmonicDistortionResult:
 
 
 def harmonic_analysis(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     fundamental: float | None = None,
     *,
@@ -951,7 +951,7 @@ _AES17_DYNAMIC_RANGE_FREQ_HZ = 997.0
 
 
 def _ccir_rms_weighted_rms(
-    x: "NDArray[np.float64]", fs: float, bandwidth: float | None
+    x: NDArray[np.float64], fs: float, bandwidth: float | None
 ) -> float:
     """RMS of ``x`` through the AES17 CCIR-RMS weighting (5.2.7), band-limited.
 
@@ -990,7 +990,7 @@ def _full_scale_rms(full_scale: float) -> float:
 
 
 def dynamic_range(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     fundamental: float | None = None,
     *,
@@ -1046,7 +1046,7 @@ def dynamic_range(
 
 
 def idle_channel_noise(
-    signal: "NDArray[np.float64] | list[float]",
+    signal: NDArray[np.float64] | list[float],
     fs: float,
     *,
     bandwidth: float | None = _AES17_BANDWIDTH_HZ,

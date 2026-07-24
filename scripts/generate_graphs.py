@@ -7549,7 +7549,7 @@ def generate_slow_sound_absorber(output_dir: str) -> None:
         (0.6 * h0, COLOR_PRIMARY, "--", "Narrow slit (over-damped)"),
         (1.7 * h0, COLOR_TERTIARY, "--", "Wide slit (under-damped)"),
     ]
-    fig, ax = plt.subplots(figsize=(10, 6.2))
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
     for height, color, ls, label in cases:
         res = slit_helmholtz_absorber(
             f, design.resonator, slit_height=height,

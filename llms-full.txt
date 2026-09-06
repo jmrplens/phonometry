@@ -22166,8 +22166,8 @@ occupational limit applies, in [Occupational exposure
   the five flow regimes of a throttling valve and the pipe wall that radiates
   what they make.
 - [Hydrodynamic Valve Noise (IEC 60534-8-4)](https://jmrplens.github.io/phonometry/devices/noise-control/valve-cavitation/):
-  the same valve on a liquid line, where cavitation rather than a jet is what
-  makes the noise.
+  the same valve on a liquid line, where the jet's turbulence is one source
+  and cavitation, past its threshold, is the other.
 - [Room to Room: Partition, Receiving Room, Criterion](https://jmrplens.github.io/phonometry/devices/noise-control/room-to-room/):
   the composed source-room to receiving-room chain and the transmission loss a
   partition or an enclosure needs to meet a noise criterion.
@@ -23513,7 +23513,8 @@ Source: https://jmrplens.github.io/phonometry/devices/noise-control/valve-cavita
 
 # Hydrodynamic valve noise (IEC 60534-8-4)
 
-A liquid does not compress, so a control valve on a water line cannot build
+Water is compressible enough to carry sound at 1 400 m/s and far too stiff to
+choke the way a gas does, so a control valve on a water line cannot build
 the shock cells that [the aerodynamic part](https://jmrplens.github.io/phonometry/devices/noise-control/control-valve-noise/) spends
 five regimes on. It makes noise two ways instead, and the whole of
 IEC 60534-8-4 is the sum of them: **turbulence** in the jet leaving the vena contracta, and

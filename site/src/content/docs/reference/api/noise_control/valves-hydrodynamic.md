@@ -7,9 +7,10 @@ sidebar:
 
 Control valve hydrodynamic noise (IEC 60534-8-4:2005).
 
-A liquid does not compress, so a control valve on a water line cannot make
-the shock cells that IEC 60534-8-3 spends five regimes on. It makes two
-things instead, and the whole of this part is the sum of them:
+Water carries sound at 1 400 m/s and is far too stiff to choke the way a gas
+does, so a control valve on a water line cannot make the shock cells that
+IEC 60534-8-3 spends five regimes on. It makes two things instead, and the
+whole of this part is the sum of them:
 
 * **turbulence** in the jet leaving the vena contracta, whose acoustical
   efficiency is a straight line in the jet velocity, Equation (8);

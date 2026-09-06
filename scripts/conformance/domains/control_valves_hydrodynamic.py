@@ -44,20 +44,24 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 _IEC60534_8_4 = "Control valve noise (IEC 60534-8-4)"
 
 #: A.1's given data, shared by the three columns, in SI units.
-_COMMON: dict[str, Any] = {
+_LIQUID: dict[str, Any] = {
     "inlet_pressure": 1.0e6,
     "vapour_pressure": 2.32e3,
-    "liquid_density": 997.0,
-    "liquid_sound_speed": 1400.0,
+    "density": 997.0,
+    "sound_speed": 1400.0,
+}
+_VALVE: dict[str, Any] = {
     "flow_coefficient": 90.0,
     "style_modifier": 0.42,
     "pressure_recovery": 0.92,
     "power_ratio": 0.25,
     "valve_diameter": 0.1,
     "seat_diameter": 0.1,
+}
+_PIPE: dict[str, Any] = {
     "internal_diameter": 0.1071,
     "wall_thickness": 0.0036,
-    "pipe_density": 7800.0,
+    "density": 7800.0,
 }
 
 #: Equation (3a) for this valve; the annex prints 0,2543.
@@ -77,10 +81,17 @@ _BAND_HZ = 8000.0
 
 def _example(index: int) -> HydrodynamicValveNoise:
     """Column ``index`` of Table A.1, one to three."""
-    case = dict(_EXAMPLES[index])
-    shift = case.pop("shift")
+    case = _EXAMPLES[index]
     return ph.noise_control.valve_hydrodynamic_noise(
-        **_COMMON, **case, incipient_ratio=_INCIPIENT + shift
+        ph.noise_control.LiquidStream(
+            **_LIQUID,
+            mass_flow=case["mass_flow"],
+            outlet_pressure=case["outlet_pressure"],
+        ),
+        ph.noise_control.LiquidTrim(
+            **_VALVE, incipient_ratio=_INCIPIENT + case["shift"]
+        ),
+        ph.noise_control.LiquidPipe(**_PIPE),
     )
 
 

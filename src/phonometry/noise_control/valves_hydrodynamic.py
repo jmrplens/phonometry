@@ -106,6 +106,9 @@ __all__ = [
     "jet_strouhal_number",
     "last_stage_differential",
     "last_stage_seat_diameter_mm",
+    "LiquidPipe",
+    "LiquidStream",
+    "LiquidTrim",
     "mechanical_stream_power",
     "multihole_incipient_cavitation_ratio",
     "pipe_ring_frequency",
@@ -1203,30 +1206,84 @@ def _default_bands() -> NDArray[np.float64]:
     return np.asarray(bands[(bands >= low) & (bands <= high)], dtype=np.float64)
 
 
-def valve_hydrodynamic_noise(  # noqa: PLR0913
+@dataclass(frozen=True)
+class LiquidStream:
+    r"""The liquid and the operating point, which Clause 4.1 reads first.
+
+    :ivar mass_flow: :math:`\dot m`, in kg/s.
+    :ivar inlet_pressure: :math:`p_1`, absolute, in Pa.
+    :ivar outlet_pressure: :math:`p_2`, absolute, in Pa.
+    :ivar vapour_pressure: :math:`p_v` of the liquid at the inlet
+        temperature, absolute, in Pa.
+    :ivar density: :math:`\rho_L`, in kg/m³.
+    :ivar sound_speed: :math:`c_L`, in m/s.
+    """
+
+    mass_flow: float
+    inlet_pressure: float
+    outlet_pressure: float
+    vapour_pressure: float
+    density: float
+    sound_speed: float
+
+
+@dataclass(frozen=True)
+class LiquidTrim:
+    r"""The valve, at the travel being examined.
+
+    :ivar flow_coefficient: :math:`C`.
+    :ivar style_modifier: :math:`F_d`, taken from IEC 60534-8-3, since 4.3
+        prints no table of its own.
+    :ivar pressure_recovery: :math:`F_L`.
+    :ivar incipient_ratio: :math:`x_{Fz}` at 6 × 10⁵ Pa, measured to
+        IEC 60534-8-2 or estimated with
+        :func:`incipient_cavitation_ratio`. Equation (3c) corrects it to the
+        working inlet pressure.
+    :ivar power_ratio: :math:`r_W` from Table 2, the share of the sound power
+        radiated into the pipe. See :data:`ACOUSTIC_POWER_RATIOS`.
+    :ivar valve_diameter: :math:`d`, the valve inlet internal diameter, in m.
+    :ivar seat_diameter: :math:`d_o`, in m.
+    :ivar coefficient: Which flow coefficient :attr:`flow_coefficient` is,
+        ``"Cv"`` or ``"Kv"``.
+    """
+
+    flow_coefficient: float
+    style_modifier: float
+    pressure_recovery: float
+    incipient_ratio: float
+    power_ratio: float
+    valve_diameter: float
+    seat_diameter: float
+    coefficient: str = "Cv"
+
+
+@dataclass(frozen=True)
+class LiquidPipe:
+    r"""The pipe the noise comes out of, and the air around it.
+
+    :ivar internal_diameter: :math:`D_i`, in m.
+    :ivar wall_thickness: :math:`t_p`, in m.
+    :ivar density: :math:`\rho_p` of the pipe material, in kg/m³.
+    :ivar sound_speed: :math:`c_p` in the pipe wall, in m/s.
+    :ivar air_density: :math:`\rho_o` outside the pipe, in kg/m³.
+    :ivar air_sound_speed: :math:`c_o` outside the pipe, in m/s.
+    """
+
+    internal_diameter: float
+    wall_thickness: float
+    density: float
+    sound_speed: float = PIPE_SOUND_SPEED_M_S
+    air_density: float = AIR_DENSITY_KG_M3
+    air_sound_speed: float = AIR_SOUND_SPEED_M_S
+
+
+def valve_hydrodynamic_noise(
+    stream: LiquidStream,
+    valve: LiquidTrim,
+    pipe: LiquidPipe,
     *,
-    mass_flow: float,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    vapour_pressure: float,
-    liquid_density: float,
-    liquid_sound_speed: float,
-    flow_coefficient: float,
-    style_modifier: float,
-    pressure_recovery: float,
-    incipient_ratio: float,
-    power_ratio: float,
-    valve_diameter: float,
-    seat_diameter: float,
-    internal_diameter: float,
-    wall_thickness: float,
-    pipe_density: float,
-    coefficient: str = "Cv",
     strouhal_form: str = "annex",
     frequency: ArrayLike | None = None,
-    pipe_sound_speed: float = PIPE_SOUND_SPEED_M_S,
-    air_density: float = AIR_DENSITY_KG_M3,
-    air_sound_speed: float = AIR_SOUND_SPEED_M_S,
 ) -> HydrodynamicValveNoise:
     r"""The whole of Clauses 4 and 5, from the operating point to 1 m.
 
@@ -1242,40 +1299,42 @@ def valve_hydrodynamic_noise(  # noqa: PLR0913
     (19a) or (19b) together. On the threshold itself Equation (9) returns
     exactly zero, so the two branches meet without a step.
 
-    :param mass_flow: :math:`\dot m`, in kg/s.
-    :param inlet_pressure: :math:`p_1`, absolute, in Pa.
-    :param outlet_pressure: :math:`p_2`, absolute, in Pa.
-    :param vapour_pressure: :math:`p_v` of the liquid, absolute, in Pa.
-    :param liquid_density: :math:`\rho_L`, in kg/m³.
-    :param liquid_sound_speed: :math:`c_L`, in m/s.
-    :param flow_coefficient: :math:`C` at the travel being examined.
-    :param style_modifier: :math:`F_d`, from IEC 60534-8-3.
-    :param pressure_recovery: :math:`F_L`, dimensionless.
-    :param incipient_ratio: :math:`x_{Fz}` at 6 × 10⁵ Pa, measured to
-        IEC 60534-8-2 or estimated with
-        :func:`incipient_cavitation_ratio`. Equation (3c) corrects it here.
-    :param power_ratio: :math:`r_W` from Table 2, the share of the sound
-        power radiated into the pipe. See :data:`ACOUSTIC_POWER_RATIOS`.
-    :param valve_diameter: :math:`d`, the valve inlet internal diameter, in
-        m.
-    :param seat_diameter: :math:`d_o`, in m.
-    :param internal_diameter: :math:`D_i` of the downstream pipe, in m.
-    :param wall_thickness: :math:`t_p`, in m.
-    :param pipe_density: :math:`\rho_p`, in kg/m³.
-    :param coefficient: ``"Cv"`` or ``"Kv"``.
+    :param stream: The liquid and the operating point, a
+        :class:`LiquidStream`.
+    :param valve: The valve at the travel being examined, a
+        :class:`LiquidTrim`.
+    :param pipe: The downstream pipe and the air around it, a
+        :class:`LiquidPipe`.
     :param strouhal_form: Which printing of Equation (12) to follow,
         ``"annex"`` or ``"clause"``; see :data:`STROUHAL_CONSTANTS`.
     :param frequency: The band centres to report, in Hz. The default is the
         one-third-octave set 5.4.1 prints, 50 Hz to 20 kHz.
-    :param pipe_sound_speed: :math:`c_p`, in m/s.
-    :param air_density: :math:`\rho_o`, in kg/m³.
-    :param air_sound_speed: :math:`c_o`, in m/s.
     :return: A :class:`HydrodynamicValveNoise` carrying every printed
         intermediate as well as the level at 1 m.
     :raises ValueError: If a value is outside the range its equation is
         written for, or if the operating point is at or past flashing, where
         Equations (9) and (13) divide by zero.
     """
+    mass_flow = stream.mass_flow
+    inlet_pressure = stream.inlet_pressure
+    outlet_pressure = stream.outlet_pressure
+    vapour_pressure = stream.vapour_pressure
+    liquid_density = stream.density
+    liquid_sound_speed = stream.sound_speed
+    flow_coefficient = valve.flow_coefficient
+    style_modifier = valve.style_modifier
+    pressure_recovery = valve.pressure_recovery
+    incipient_ratio = valve.incipient_ratio
+    power_ratio = valve.power_ratio
+    valve_diameter = valve.valve_diameter
+    seat_diameter = valve.seat_diameter
+    coefficient = valve.coefficient
+    internal_diameter = pipe.internal_diameter
+    wall_thickness = pipe.wall_thickness
+    pipe_density = pipe.density
+    pipe_sound_speed = pipe.sound_speed
+    air_density = pipe.air_density
+    air_sound_speed = pipe.air_sound_speed
     p1 = require_positive(inlet_pressure, "inlet_pressure")
     p2 = require_positive(outlet_pressure, "outlet_pressure")
     pv = require_positive(vapour_pressure, "vapour_pressure")

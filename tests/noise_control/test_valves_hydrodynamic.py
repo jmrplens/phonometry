@@ -28,22 +28,52 @@ from phonometry.noise_control import valves_hydrodynamic as hydro
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
-#: A.1's given data, shared by the three columns, in SI units.
-COMMON: dict[str, Any] = {
+#: A.1's given data, shared by the three columns, in SI units: the water and
+#: the pipe are the same in every one, and so is the valve.
+LIQUID: dict[str, Any] = {
     "inlet_pressure": 1.0e6,
     "vapour_pressure": 2.32e3,
-    "liquid_density": 997.0,
-    "liquid_sound_speed": 1400.0,
+    "density": 997.0,
+    "sound_speed": 1400.0,
+}
+VALVE: dict[str, Any] = {
     "flow_coefficient": 90.0,
     "style_modifier": 0.42,
     "pressure_recovery": 0.92,
     "power_ratio": 0.25,
     "valve_diameter": 0.1,
     "seat_diameter": 0.1,
+}
+PIPE: dict[str, Any] = {
     "internal_diameter": 0.1071,
     "wall_thickness": 0.0036,
-    "pipe_density": 7800.0,
+    "density": 7800.0,
 }
+
+
+def _valve(incipient: float) -> hydro.LiquidTrim:
+    """A.1's valve with the threshold the column being run uses."""
+    return hydro.LiquidTrim(**VALVE, incipient_ratio=incipient)
+
+
+def _pipe() -> hydro.LiquidPipe:
+    """A.1's DN 100 steel pipe."""
+    return hydro.LiquidPipe(**PIPE)
+
+
+def _chain(
+    *, mass_flow: float, outlet_pressure: float, incipient: float, **kwargs: Any
+) -> hydro.HydrodynamicValveNoise:
+    """The whole method on A.1's valve, for one column of the table."""
+    return hydro.valve_hydrodynamic_noise(
+        hydro.LiquidStream(
+            **LIQUID, mass_flow=mass_flow, outlet_pressure=outlet_pressure
+        ),
+        _valve(incipient),
+        _pipe(),
+        **kwargs,
+    )
+
 
 #: Equation (3a) for this valve, which the annex prints as 0,2543.
 INCIPIENT = hydro.incipient_cavitation_ratio(90.0, 0.42, 0.92)
@@ -63,10 +93,10 @@ BAND_HZ = 8000.0
 def _run(index: int) -> hydro.HydrodynamicValveNoise:
     """Column ``index`` of Table A.1, one to three."""
     case = dict(EXAMPLES[index - 1])
-    shift = case.pop("shift")
-    case.pop("example")
-    return hydro.valve_hydrodynamic_noise(
-        **COMMON, **case, incipient_ratio=INCIPIENT + shift
+    return _chain(
+        mass_flow=case["mass_flow"],
+        outlet_pressure=case["outlet_pressure"],
+        incipient=INCIPIENT + case["shift"],
     )
 
 
@@ -114,9 +144,7 @@ class TestPreliminaryCalculations:
         # F_L^2 (p_1 - p_v). Equation (5) then runs on the cap and not on the
         # differential, which is 3 % less velocity than the full drop would
         # give and 8 % less stream power.
-        result = hydro.valve_hydrodynamic_noise(
-            **COMMON, mass_flow=60.0, outlet_pressure=1.0e5, incipient_ratio=INCIPIENT
-        )
+        result = _chain(mass_flow=60.0, outlet_pressure=1.0e5, incipient=INCIPIENT)
         assert result.differential == pytest.approx(9.0e5)
         assert result.cavitation_differential == pytest.approx(844436.35, abs=0.1)
         assert result.velocity == pytest.approx(44.737, abs=5e-3)
@@ -269,9 +297,11 @@ class TestEfficiencies:
     def test_the_power_ratio_scales_the_sound_power(self) -> None:
         # Table 2 is the only place r_W enters, and it enters linearly.
         louder = hydro.valve_hydrodynamic_noise(
-            **{**COMMON, "power_ratio": 0.5},
-            **{k: v for k, v in EXAMPLES[0].items() if k not in ("example", "shift")},
-            incipient_ratio=INCIPIENT,
+            hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure=8.0e5),
+            hydro.LiquidTrim(
+                **{**VALVE, "power_ratio": 0.5}, incipient_ratio=INCIPIENT
+            ),
+            _pipe(),
         )
         assert louder.sound_power == pytest.approx(2.0 * _run(1).sound_power, rel=1e-12)
         assert louder.external_level == pytest.approx(
@@ -560,11 +590,10 @@ class TestBandRoute:
         assert bands[-1] == pytest.approx(20000.0)
 
     def test_a_band_set_can_be_given_instead(self) -> None:
-        result = hydro.valve_hydrodynamic_noise(
-            **COMMON,
+        result = _chain(
             mass_flow=30.0,
             outlet_pressure=8.0e5,
-            incipient_ratio=INCIPIENT,
+            incipient=INCIPIENT,
             frequency=[63.0, 125.0, 250.0],
         )
         assert result.frequency.tolist() == [63.0, 125.0, 250.0]
@@ -705,10 +734,9 @@ class TestWholeChain:
 
     def test_a_thicker_wall_lets_less_out(self) -> None:
         thick = hydro.valve_hydrodynamic_noise(
-            **{**COMMON, "wall_thickness": 0.010},
-            mass_flow=30.0,
-            outlet_pressure=8.0e5,
-            incipient_ratio=INCIPIENT,
+            hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure=8.0e5),
+            _valve(INCIPIENT),
+            hydro.LiquidPipe(**{**PIPE, "wall_thickness": 0.010}),
         )
         assert thick.external_level < _run(1).external_level
 
@@ -719,22 +747,20 @@ class TestWholeChain:
         # corrected one, and so does this chain. See ``docs/ERRATA.md``.
         ratio = 0.5 * (INCIPIENT + hydro.corrected_incipient_ratio(INCIPIENT, 1.0e6))
         outlet = 1.0e6 - ratio * (1.0e6 - 2.32e3)
-        result = hydro.valve_hydrodynamic_noise(
-            **COMMON,
-            mass_flow=35.0,
-            outlet_pressure=outlet,
-            incipient_ratio=INCIPIENT,
-        )
+        result = _chain(mass_flow=35.0, outlet_pressure=outlet, incipient=INCIPIENT)
         assert result.corrected_ratio < result.pressure_ratio < INCIPIENT
         assert result.regime == "cavitating"
 
     def test_the_chain_stops_at_flashing(self) -> None:
         with pytest.raises(ValueError, match="flashes"):
             hydro.valve_hydrodynamic_noise(
-                **{**COMMON, "vapour_pressure": 8.0e5},
-                mass_flow=30.0,
-                outlet_pressure=7.0e5,
-                incipient_ratio=INCIPIENT,
+                hydro.LiquidStream(
+                    **{**LIQUID, "vapour_pressure": 8.0e5},
+                    mass_flow=30.0,
+                    outlet_pressure=7.0e5,
+                ),
+                _valve(INCIPIENT),
+                _pipe(),
             )
 
 
@@ -1004,10 +1030,11 @@ class TestGuards:
         # 20 dB to the answer without a word.
         with pytest.raises(ValueError, match="not percentages"):
             hydro.valve_hydrodynamic_noise(
-                **{**COMMON, "power_ratio": bad},
-                mass_flow=30.0,
-                outlet_pressure=8.0e5,
-                incipient_ratio=INCIPIENT,
+                hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure=8.0e5),
+                hydro.LiquidTrim(
+                    **{**VALVE, "power_ratio": bad}, incipient_ratio=INCIPIENT
+                ),
+                _pipe(),
             )
 
     def test_the_cavitating_loss_refuses_a_ratio_above_one(self) -> None:
@@ -1067,6 +1094,4 @@ class TestGuards:
 
     def test_the_chain_refuses_it_too(self) -> None:
         with pytest.raises(ValueError, match="not a percentage"):
-            hydro.valve_hydrodynamic_noise(
-                **COMMON, mass_flow=30.0, outlet_pressure=8.0e5, incipient_ratio=25.0
-            )
+            _chain(mass_flow=30.0, outlet_pressure=8.0e5, incipient=25.0)

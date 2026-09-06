@@ -132,23 +132,29 @@ butterflies, one for an expander.
 ## 3. The whole chain in one call
 
 ```python
-valve = dict(
-    inlet_pressure=1.0e6,
-    vapour_pressure=2.32e3,
-    liquid_density=997.0,
-    liquid_sound_speed=1400.0,
-    flow_coefficient=90.0,
-    style_modifier=0.42,
-    pressure_recovery=0.92,
-    power_ratio=0.25,
-    valve_diameter=0.1,
-    seat_diameter=0.1,
-    internal_diameter=0.1071,
-    wall_thickness=0.0036,
-    pipe_density=7800.0,
-)
 res = noise_control.valve_hydrodynamic_noise(
-    **valve, mass_flow=40.0, outlet_pressure=6.5e5, incipient_ratio=x_fz
+    noise_control.LiquidStream(
+        mass_flow=40.0,                # kg/s
+        inlet_pressure=1.0e6,          # Pa, absolute
+        outlet_pressure=6.5e5,
+        vapour_pressure=2.32e3,
+        density=997.0,                 # kg/m3
+        sound_speed=1400.0,            # m/s
+    ),
+    noise_control.LiquidTrim(
+        flow_coefficient=90.0,         # C_v
+        style_modifier=0.42,           # F_d, from IEC 60534-8-3
+        pressure_recovery=0.92,        # F_L
+        incipient_ratio=x_fz,          # x_Fz, at 6e5 Pa
+        power_ratio=0.25,              # r_W, Table 2
+        valve_diameter=0.1,            # m
+        seat_diameter=0.1,             # m
+    ),
+    noise_control.LiquidPipe(
+        internal_diameter=0.1071,      # m
+        wall_thickness=0.0036,         # m
+        density=7800.0,                # kg/m3, steel
+    ),
 )
 print(res.regime)                                       # cavitating
 print(round(res.sound_power, 5), "W")                   # 0.01158 W

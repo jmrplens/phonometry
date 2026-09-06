@@ -6349,21 +6349,23 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
     print("Generating valve_cavitation_noise.svg...")
     from phonometry import noise_control
 
-    common: dict[str, Any] = {
+    liquid: dict[str, Any] = {
         "inlet_pressure": 1.0e6,
         "vapour_pressure": 2.32e3,
-        "liquid_density": 997.0,
-        "liquid_sound_speed": 1400.0,
+        "density": 997.0,
+        "sound_speed": 1400.0,
+    }
+    trim: dict[str, Any] = {
         "flow_coefficient": 90.0,
         "style_modifier": 0.42,
         "pressure_recovery": 0.92,
         "power_ratio": 0.25,
         "valve_diameter": 0.1,
         "seat_diameter": 0.1,
-        "internal_diameter": 0.1071,
-        "wall_thickness": 0.0036,
-        "pipe_density": 7800.0,
     }
+    water_pipe = noise_control.LiquidPipe(
+        internal_diameter=0.1071, wall_thickness=0.0036, density=7800.0
+    )
     inlet, vapour = 1.0e6, 2.32e3
     threshold = noise_control.incipient_cavitation_ratio(90.0, 0.42, 0.92)
 
@@ -6384,10 +6386,13 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
             pressure_recovery=0.92,
         )
         return noise_control.valve_hydrodynamic_noise(
-            **common,
-            mass_flow=30.0 * math.sqrt(choked / 2.0e5),
-            outlet_pressure=outlet,
-            incipient_ratio=incipient,
+            noise_control.LiquidStream(
+                **liquid,
+                mass_flow=30.0 * math.sqrt(choked / 2.0e5),
+                outlet_pressure=outlet,
+            ),
+            noise_control.LiquidTrim(**trim, incipient_ratio=incipient),
+            water_pipe,
         )
 
     _fig, axes = plt.subplots(1, 3, figsize=(16.4, 5.4))

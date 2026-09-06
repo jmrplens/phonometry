@@ -767,6 +767,88 @@ metres, so divide by 1 000 before passing it on.
 | :--- | :--- |
 | ValueError | If the coefficient is not positive and finite, or is not one Table 1 prints a constant for. |
 
+## LiquidPipe
+
+```python
+LiquidPipe(
+    internal_diameter: float,
+    wall_thickness: float,
+    density: float,
+    sound_speed: float = 5000.0,
+    air_density: float = 1.293,
+    air_sound_speed: float = 343.0,
+)
+```
+
+The pipe the noise comes out of, and the air around it.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `internal_diameter` | $D_i$, in m. |
+| `wall_thickness` | $t_p$, in m. |
+| `density` | $\rho_p$ of the pipe material, in kg/m³. |
+| `sound_speed` | $c_p$ in the pipe wall, in m/s. |
+| `air_density` | $\rho_o$ outside the pipe, in kg/m³. |
+| `air_sound_speed` | $c_o$ outside the pipe, in m/s. |
+
+## LiquidStream
+
+```python
+LiquidStream(
+    mass_flow: float,
+    inlet_pressure: float,
+    outlet_pressure: float,
+    vapour_pressure: float,
+    density: float,
+    sound_speed: float,
+)
+```
+
+The liquid and the operating point, which Clause 4.1 reads first.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `mass_flow` | $\dot m$, in kg/s. |
+| `inlet_pressure` | $p_1$, absolute, in Pa. |
+| `outlet_pressure` | $p_2$, absolute, in Pa. |
+| `vapour_pressure` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
+| `density` | $\rho_L$, in kg/m³. |
+| `sound_speed` | $c_L$, in m/s. |
+
+## LiquidTrim
+
+```python
+LiquidTrim(
+    flow_coefficient: float,
+    style_modifier: float,
+    pressure_recovery: float,
+    incipient_ratio: float,
+    power_ratio: float,
+    valve_diameter: float,
+    seat_diameter: float,
+    coefficient: str = 'Cv',
+)
+```
+
+The valve, at the travel being examined.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `flow_coefficient` | $C$. |
+| `style_modifier` | $F_d$, taken from IEC 60534-8-3, since 4.3 prints no table of its own. |
+| `pressure_recovery` | $F_L$. |
+| `incipient_ratio` | $x_{Fz}$ at 6 × 10⁵ Pa, measured to IEC 60534-8-2 or estimated with [`incipient_cavitation_ratio`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#incipient_cavitation_ratio). Equation (3c) corrects it to the working inlet pressure. |
+| `power_ratio` | $r_W$ from Table 2, the share of the sound power radiated into the pipe. See [`ACOUSTIC_POWER_RATIOS`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#acoustic_power_ratios). |
+| `valve_diameter` | $d$, the valve inlet internal diameter, in m. |
+| `seat_diameter` | $d_o$, in m. |
+| `coefficient` | Which flow coefficient `flow_coefficient` is, `"Cv"` or `"Kv"`. |
+
 ## mechanical_stream_power
 
 ```python
@@ -1204,29 +1286,12 @@ jet area, and a peak frequency four times higher.
 
 ```python
 valve_hydrodynamic_noise(
+    stream: LiquidStream,
+    valve: LiquidTrim,
+    pipe: LiquidPipe,
     *,
-    mass_flow: float,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    vapour_pressure: float,
-    liquid_density: float,
-    liquid_sound_speed: float,
-    flow_coefficient: float,
-    style_modifier: float,
-    pressure_recovery: float,
-    incipient_ratio: float,
-    power_ratio: float,
-    valve_diameter: float,
-    seat_diameter: float,
-    internal_diameter: float,
-    wall_thickness: float,
-    pipe_density: float,
-    coefficient: str = 'Cv',
     strouhal_form: str = 'annex',
     frequency: ArrayLike | None = None,
-    pipe_sound_speed: float = 5000.0,
-    air_density: float = 1.293,
-    air_sound_speed: float = 343.0,
 ) -> HydrodynamicValveNoise
 ```
 
@@ -1248,28 +1313,11 @@ exactly zero, so the two branches meet without a step.
 
 | Name | Description |
 | :--- | :--- |
-| `mass_flow` | $\dot m$, in kg/s. |
-| `inlet_pressure` | $p_1$, absolute, in Pa. |
-| `outlet_pressure` | $p_2$, absolute, in Pa. |
-| `vapour_pressure` | $p_v$ of the liquid, absolute, in Pa. |
-| `liquid_density` | $\rho_L$, in kg/m³. |
-| `liquid_sound_speed` | $c_L$, in m/s. |
-| `flow_coefficient` | $C$ at the travel being examined. |
-| `style_modifier` | $F_d$, from IEC 60534-8-3. |
-| `pressure_recovery` | $F_L$, dimensionless. |
-| `incipient_ratio` | $x_{Fz}$ at 6 × 10⁵ Pa, measured to IEC 60534-8-2 or estimated with [`incipient_cavitation_ratio`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#incipient_cavitation_ratio). Equation (3c) corrects it here. |
-| `power_ratio` | $r_W$ from Table 2, the share of the sound power radiated into the pipe. See [`ACOUSTIC_POWER_RATIOS`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#acoustic_power_ratios). |
-| `valve_diameter` | $d$, the valve inlet internal diameter, in m. |
-| `seat_diameter` | $d_o$, in m. |
-| `internal_diameter` | $D_i$ of the downstream pipe, in m. |
-| `wall_thickness` | $t_p$, in m. |
-| `pipe_density` | $\rho_p$, in kg/m³. |
-| `coefficient` | `"Cv"` or `"Kv"`. |
+| `stream` | The liquid and the operating point, a [`LiquidStream`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#liquidstream). |
+| `valve` | The valve at the travel being examined, a [`LiquidTrim`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#liquidtrim). |
+| `pipe` | The downstream pipe and the air around it, a [`LiquidPipe`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#liquidpipe). |
 | `strouhal_form` | Which printing of Equation (12) to follow, `"annex"` or `"clause"`; see [`STROUHAL_CONSTANTS`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#strouhal_constants). |
 | `frequency` | The band centres to report, in Hz. The default is the one-third-octave set 5.4.1 prints, 50 Hz to 20 kHz. |
-| `pipe_sound_speed` | $c_p$, in m/s. |
-| `air_density` | $\rho_o$, in kg/m³. |
-| `air_sound_speed` | $c_o$, in m/s. |
 
 **Returns:** A [`HydrodynamicValveNoise`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#hydrodynamicvalvenoise) carrying every printed intermediate as well as the level at 1 m.
 

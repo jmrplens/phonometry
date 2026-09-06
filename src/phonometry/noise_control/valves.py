@@ -71,31 +71,35 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
 __all__ = [
     "AERODYNAMIC_A_WEIGHTING_DB",
+    "AerodynamicValveNoise",
     "AIR_SOUND_SPEED_M_S",
+    "coincidence_frequencies",
+    "DownstreamPipe",
     "FLOW_COEFFICIENT_CONSTANTS",
+    "flow_regime",
+    "GasStream",
+    "internal_spectrum",
+    "jet_diameter",
     "MACH_LIMIT_STANDARD_TRIM",
     "PIPE_SOUND_SPEED_M_S",
+    "pipe_transmission_loss",
     "PIPE_WALL_MACH_LIMIT",
+    "PipeFrequencies",
+    "pressure_ratio_boundaries",
     "REGIME_CHOKED",
     "REGIME_CONSTANT_EFFICIENCY",
     "REGIME_COUNT",
     "REGIME_SHOCK",
     "REGIME_SUBSONIC",
     "REGIME_SUPERSONIC",
+    "RegimeBoundaries",
+    "STANDARD_ATMOSPHERE_PA",
     "STRUCTURAL_LOSS_REFERENCE_HZ",
     "UNIVERSAL_GAS_CONSTANT",
     "VALVE_ACOUSTIC_STYLES",
-    "AerodynamicValveNoise",
-    "PipeFrequencies",
-    "RegimeBoundaries",
-    "coincidence_frequencies",
-    "flow_regime",
-    "internal_spectrum",
-    "jet_diameter",
-    "pressure_ratio_boundaries",
-    "pipe_transmission_loss",
     "valve_aerodynamic_noise",
     "valve_style_modifier",
+    "ValveTrim",
 ]
 
 # --------------------------------------------------------------------------
@@ -152,6 +156,11 @@ PIPE_SOUND_SPEED_M_S = 5000.0
 #: list gives it as 1 Hz and the equation never says so again, which makes
 #: the structural loss factor look dimensionless when it is not.
 STRUCTURAL_LOSS_REFERENCE_HZ = 1.0
+
+#: The atmosphere Equations (20a) and (20c) are printed for, in Pa. It is
+#: :math:`p_a` and :math:`p_s` both, which the standard keeps apart because a
+#: pipe can run at one and be rated at the other.
+STANDARD_ATMOSPHERE_PA = 1.01325e5
 
 #: NOTE 1 to Equation (15): above this Mach number at the valve outlet the
 #: accuracy of Clause 5 cannot be maintained and Clause 7 is used instead.
@@ -779,29 +788,86 @@ def _third_octave_bands() -> NDArray[np.float64]:
     return np.asarray(normalized_frequencies(3), dtype=np.float64)
 
 
-def valve_aerodynamic_noise(  # noqa: PLR0913
-    *,
-    mass_flow: float,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    inlet_density: float,
-    inlet_temperature: float,
-    specific_heat_ratio: float,
-    molecular_mass: float,
-    flow_coefficient: float,
-    style_modifier: float,
-    pressure_recovery: float,
-    valve_outlet_diameter: float,
-    internal_diameter: float,
-    wall_thickness: float,
-    pipe_density: float,
-    efficiency_correction: float,
-    strouhal_number: float,
-    coefficient: str = "Cv",
-    pipe_sound_speed: float = PIPE_SOUND_SPEED_M_S,
-    air_sound_speed: float = AIR_SOUND_SPEED_M_S,
-    atmospheric_pressure: float = 1.01325e5,
-    standard_pressure: float = 1.01325e5,
+@dataclass(frozen=True)
+class GasStream:
+    r"""The gas and the operating point, which Clause 5.1 reads first.
+
+    :ivar mass_flow: :math:`\dot m`, in kg/s.
+    :ivar inlet_pressure: :math:`p_1`, absolute, in Pa.
+    :ivar outlet_pressure: :math:`p_2`, absolute, in Pa.
+    :ivar inlet_density: :math:`\rho_1`, in kg/m³.
+    :ivar inlet_temperature: :math:`T_1`, absolute, in K.
+    :ivar specific_heat_ratio: :math:`\gamma`.
+    :ivar molecular_mass: :math:`M`, in kg/kmol.
+    """
+
+    mass_flow: float
+    inlet_pressure: float
+    outlet_pressure: float
+    inlet_density: float
+    inlet_temperature: float
+    specific_heat_ratio: float
+    molecular_mass: float
+
+
+@dataclass(frozen=True)
+class ValveTrim:
+    r"""The valve, at the travel being examined.
+
+    Every field is a manufacturer's datum except the last two, which Table 4
+    prints as typical values for a valve style and NOTE 1 to that table calls
+    typical only.
+
+    :ivar flow_coefficient: :math:`C`.
+    :ivar style_modifier: :math:`F_d`, from :func:`valve_style_modifier`.
+    :ivar pressure_recovery: :math:`F_L`, or :math:`F_{LP}/F_p` with attached
+        fittings.
+    :ivar outlet_diameter: :math:`D` of the valve outlet, in m.
+    :ivar efficiency_correction: :math:`A_\eta` from Table 4.
+    :ivar strouhal_number: :math:`St_p` from Table 4.
+    :ivar coefficient: Which flow coefficient :attr:`flow_coefficient` is,
+        ``"Cv"`` or ``"Kv"``, which selects :math:`N_{14}` from Table 1.
+    """
+
+    flow_coefficient: float
+    style_modifier: float
+    pressure_recovery: float
+    outlet_diameter: float
+    efficiency_correction: float
+    strouhal_number: float
+    coefficient: str = "Cv"
+
+
+@dataclass(frozen=True)
+class DownstreamPipe:
+    r"""The pipe the noise actually comes out of, and what surrounds it.
+
+    The last four fields are the values the standard prints for a steel pipe
+    in air at atmospheric pressure, and they are defaults for that reason,
+    not settings anyone is expected to change.
+
+    :ivar internal_diameter: :math:`D_i`, in m.
+    :ivar wall_thickness: :math:`t_S`, in m.
+    :ivar density: :math:`\rho_s` of the pipe material, in kg/m³.
+    :ivar sound_speed: :math:`c_s` in the pipe wall, in m/s.
+    :ivar air_sound_speed: :math:`c_a` outside the pipe, in m/s.
+    :ivar atmospheric_pressure: :math:`p_a`, in Pa.
+    :ivar standard_pressure: :math:`p_s`, in Pa.
+    """
+
+    internal_diameter: float
+    wall_thickness: float
+    density: float
+    sound_speed: float = PIPE_SOUND_SPEED_M_S
+    air_sound_speed: float = AIR_SOUND_SPEED_M_S
+    atmospheric_pressure: float = STANDARD_ATMOSPHERE_PA
+    standard_pressure: float = STANDARD_ATMOSPHERE_PA
+
+
+def valve_aerodynamic_noise(
+    stream: GasStream,
+    valve: ValveTrim,
+    pipe: DownstreamPipe,
 ) -> AerodynamicValveNoise:
     r"""The whole of Clause 5, from the operating point to the level at 1 m.
 
@@ -810,33 +876,37 @@ def valve_aerodynamic_noise(  # noqa: PLR0913
     acoustical efficiency of 5.4, then the pipe transmission loss of 5.5 and
     the external level of 5.6, which are common to every regime.
 
-    :param mass_flow: :math:`\dot m`, in kg/s.
-    :param inlet_pressure: :math:`p_1`, absolute, in Pa.
-    :param outlet_pressure: :math:`p_2`, absolute, in Pa.
-    :param inlet_density: :math:`\rho_1`, in kg/m³.
-    :param inlet_temperature: :math:`T_1`, absolute, in K.
-    :param specific_heat_ratio: :math:`\gamma`.
-    :param molecular_mass: :math:`M`, in kg/kmol.
-    :param flow_coefficient: :math:`C` at the travel being examined.
-    :param style_modifier: :math:`F_d`, from :func:`valve_style_modifier`.
-    :param pressure_recovery: :math:`F_L`, or :math:`F_{LP}/F_p` with
-        attached fittings.
-    :param valve_outlet_diameter: :math:`D`, in m.
-    :param internal_diameter: :math:`D_i` of the downstream pipe, in m.
-    :param wall_thickness: :math:`t_S`, in m.
-    :param pipe_density: :math:`\rho_s`, in kg/m³.
-    :param efficiency_correction: :math:`A_\eta` from Table 4.
-    :param strouhal_number: :math:`St_p` from Table 4.
-    :param coefficient: ``"Cv"`` or ``"Kv"``, selecting :math:`N_{14}`.
-    :param pipe_sound_speed: :math:`c_s`, in m/s.
-    :param air_sound_speed: :math:`c_a`, in m/s.
-    :param atmospheric_pressure: :math:`p_a`, in Pa.
-    :param standard_pressure: :math:`p_s`, in Pa.
+    :param stream: The gas and the operating point, a :class:`GasStream`.
+    :param valve: The valve at the travel being examined, a
+        :class:`ValveTrim`.
+    :param pipe: The downstream pipe and what surrounds it, a
+        :class:`DownstreamPipe`.
     :return: An :class:`AerodynamicValveNoise` carrying every printed
         intermediate as well as the level at 1 m.
     :raises ValueError: If a value is outside the range its equation is
         written for.
     """
+    mass_flow = stream.mass_flow
+    inlet_pressure = stream.inlet_pressure
+    outlet_pressure = stream.outlet_pressure
+    inlet_density = stream.inlet_density
+    inlet_temperature = stream.inlet_temperature
+    specific_heat_ratio = stream.specific_heat_ratio
+    molecular_mass = stream.molecular_mass
+    flow_coefficient = valve.flow_coefficient
+    style_modifier = valve.style_modifier
+    pressure_recovery = valve.pressure_recovery
+    valve_outlet_diameter = valve.outlet_diameter
+    efficiency_correction = valve.efficiency_correction
+    strouhal_number = valve.strouhal_number
+    coefficient = valve.coefficient
+    internal_diameter = pipe.internal_diameter
+    wall_thickness = pipe.wall_thickness
+    pipe_density = pipe.density
+    pipe_sound_speed = pipe.sound_speed
+    air_sound_speed = pipe.air_sound_speed
+    atmospheric_pressure = pipe.atmospheric_pressure
+    standard_pressure = pipe.standard_pressure
     p1 = require_positive(inlet_pressure, "inlet_pressure")
     p2 = require_positive(outlet_pressure, "outlet_pressure")
     if p2 >= p1:
@@ -926,7 +996,7 @@ def valve_aerodynamic_noise(  # noqa: PLR0913
     weighted = band_external + np.asarray(AERODYNAMIC_A_WEIGHTING_DB, dtype=np.float64)
     external_level = 10.0 * math.log10(float(np.sum(10.0 ** (weighted / 10.0))))
 
-    pipe = coincidence_frequencies(
+    frequencies = coincidence_frequencies(
         bore,
         wall_thickness,
         c2,
@@ -956,5 +1026,5 @@ def valve_aerodynamic_noise(  # noqa: PLR0913
         band_transmission_loss=band_loss,
         band_external_level=np.asarray(band_external, dtype=np.float64),
         external_level=float(external_level),
-        pipe_frequencies=pipe,
+        pipe_frequencies=frequencies,
     )

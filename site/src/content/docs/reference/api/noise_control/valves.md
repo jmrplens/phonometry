@@ -169,6 +169,38 @@ $$
 | :--- | :--- |
 | ValueError | If any argument is not positive and finite. |
 
+## DownstreamPipe
+
+```python
+DownstreamPipe(
+    internal_diameter: float,
+    wall_thickness: float,
+    density: float,
+    sound_speed: float = 5000.0,
+    air_sound_speed: float = 343.0,
+    atmospheric_pressure: float = 101325.0,
+    standard_pressure: float = 101325.0,
+)
+```
+
+The pipe the noise actually comes out of, and what surrounds it.
+
+The last four fields are the values the standard prints for a steel pipe
+in air at atmospheric pressure, and they are defaults for that reason,
+not settings anyone is expected to change.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `internal_diameter` | $D_i$, in m. |
+| `wall_thickness` | $t_S$, in m. |
+| `density` | $\rho_s$ of the pipe material, in kg/m³. |
+| `sound_speed` | $c_s$ in the pipe wall, in m/s. |
+| `air_sound_speed` | $c_a$ outside the pipe, in m/s. |
+| `atmospheric_pressure` | $p_a$, in Pa. |
+| `standard_pressure` | $p_s$, in Pa. |
+
 ## FLOW_COEFFICIENT_CONSTANTS
 
 *Constant* (`dict`).
@@ -209,6 +241,34 @@ normative text and its list is consistent, so this follows the clause;
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the pressure ratio is not a finite number in (0, 1). |
+
+## GasStream
+
+```python
+GasStream(
+    mass_flow: float,
+    inlet_pressure: float,
+    outlet_pressure: float,
+    inlet_density: float,
+    inlet_temperature: float,
+    specific_heat_ratio: float,
+    molecular_mass: float,
+)
+```
+
+The gas and the operating point, which Clause 5.1 reads first.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `mass_flow` | $\dot m$, in kg/s. |
+| `inlet_pressure` | $p_1$, absolute, in Pa. |
+| `outlet_pressure` | $p_2$, absolute, in Pa. |
+| `inlet_density` | $\rho_1$, in kg/m³. |
+| `inlet_temperature` | $T_1$, absolute, in K. |
+| `specific_heat_ratio` | $\gamma$. |
+| `molecular_mass` | $M$, in kg/kmol. |
 
 ## internal_spectrum
 
@@ -485,6 +545,14 @@ The four pressure ratios that cut Clause 5.2 into five regimes.
 | `constant_efficiency` | $x_{CE}$, where the acoustical efficiency stops rising with pressure ratio, Equation (7). |
 | `recovery` | $\alpha$, the recovery correction factor of Equation (5), which the other two are written in terms of. |
 
+## STANDARD_ATMOSPHERE_PA
+
+*Constant* (`float`).
+
+```python
+STANDARD_ATMOSPHERE_PA = 101325.0
+```
+
 ## STRUCTURAL_LOSS_REFERENCE_HZ
 
 *Constant* (`float`).
@@ -513,28 +581,9 @@ VALVE_ACOUSTIC_STYLES = {'globe parabolic plug': (-4.2, 0.19), 'globe V-port plu
 
 ```python
 valve_aerodynamic_noise(
-    *,
-    mass_flow: float,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    inlet_density: float,
-    inlet_temperature: float,
-    specific_heat_ratio: float,
-    molecular_mass: float,
-    flow_coefficient: float,
-    style_modifier: float,
-    pressure_recovery: float,
-    valve_outlet_diameter: float,
-    internal_diameter: float,
-    wall_thickness: float,
-    pipe_density: float,
-    efficiency_correction: float,
-    strouhal_number: float,
-    coefficient: str = 'Cv',
-    pipe_sound_speed: float = 5000.0,
-    air_sound_speed: float = 343.0,
-    atmospheric_pressure: float = 101325.0,
-    standard_pressure: float = 101325.0,
+    stream: GasStream,
+    valve: ValveTrim,
+    pipe: DownstreamPipe,
 ) -> AerodynamicValveNoise
 ```
 
@@ -549,27 +598,9 @@ the external level of 5.6, which are common to every regime.
 
 | Name | Description |
 | :--- | :--- |
-| `mass_flow` | $\dot m$, in kg/s. |
-| `inlet_pressure` | $p_1$, absolute, in Pa. |
-| `outlet_pressure` | $p_2$, absolute, in Pa. |
-| `inlet_density` | $\rho_1$, in kg/m³. |
-| `inlet_temperature` | $T_1$, absolute, in K. |
-| `specific_heat_ratio` | $\gamma$. |
-| `molecular_mass` | $M$, in kg/kmol. |
-| `flow_coefficient` | $C$ at the travel being examined. |
-| `style_modifier` | $F_d$, from [`valve_style_modifier`](/phonometry/reference/api/noise_control/valves/#valve_style_modifier). |
-| `pressure_recovery` | $F_L$, or $F_{LP}/F_p$ with attached fittings. |
-| `valve_outlet_diameter` | $D$, in m. |
-| `internal_diameter` | $D_i$ of the downstream pipe, in m. |
-| `wall_thickness` | $t_S$, in m. |
-| `pipe_density` | $\rho_s$, in kg/m³. |
-| `efficiency_correction` | $A_\eta$ from Table 4. |
-| `strouhal_number` | $St_p$ from Table 4. |
-| `coefficient` | `"Cv"` or `"Kv"`, selecting $N_{14}$. |
-| `pipe_sound_speed` | $c_s$, in m/s. |
-| `air_sound_speed` | $c_a$, in m/s. |
-| `atmospheric_pressure` | $p_a$, in Pa. |
-| `standard_pressure` | $p_s$, in Pa. |
+| `stream` | The gas and the operating point, a [`GasStream`](/phonometry/reference/api/noise_control/valves/#gasstream). |
+| `valve` | The valve at the travel being examined, a [`ValveTrim`](/phonometry/reference/api/noise_control/valves/#valvetrim). |
+| `pipe` | The downstream pipe and what surrounds it, a [`DownstreamPipe`](/phonometry/reference/api/noise_control/valves/#downstreampipe). |
 
 **Returns:** An [`AerodynamicValveNoise`](/phonometry/reference/api/noise_control/valves/#aerodynamicvalvenoise) carrying every printed intermediate as well as the level at 1 m.
 
@@ -615,3 +646,35 @@ a single large port has $F_d$ near one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an argument is not positive and finite, or if the passage count is not a whole number. |
+
+## ValveTrim
+
+```python
+ValveTrim(
+    flow_coefficient: float,
+    style_modifier: float,
+    pressure_recovery: float,
+    outlet_diameter: float,
+    efficiency_correction: float,
+    strouhal_number: float,
+    coefficient: str = 'Cv',
+)
+```
+
+The valve, at the travel being examined.
+
+Every field is a manufacturer's datum except the last two, which Table 4
+prints as typical values for a valve style and NOTE 1 to that table calls
+typical only.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `flow_coefficient` | $C$. |
+| `style_modifier` | $F_d$, from [`valve_style_modifier`](/phonometry/reference/api/noise_control/valves/#valve_style_modifier). |
+| `pressure_recovery` | $F_L$, or $F_{LP}/F_p$ with attached fittings. |
+| `outlet_diameter` | $D$ of the valve outlet, in m. |
+| `efficiency_correction` | $A_\eta$ from Table 4. |
+| `strouhal_number` | $St_p$ from Table 4. |
+| `coefficient` | Which flow coefficient `flow_coefficient` is, `"Cv"` or `"Kv"`, which selects $N_{14}$ from Table 1. |

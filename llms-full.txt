@@ -20934,22 +20934,28 @@ the level outside of Equations (24) and (25).
 from phonometry import noise_control
 
 result = noise_control.valve_aerodynamic_noise(
-    mass_flow=2.22,                # kg/s
-    inlet_pressure=1.0e6,          # Pa, absolute
-    outlet_pressure=7.2e5,
-    inlet_density=5.3,             # kg/m3
-    inlet_temperature=450.0,       # K
-    specific_heat_ratio=1.22,
-    molecular_mass=19.8,           # kg/kmol
-    flow_coefficient=90.0,         # C_v
-    style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
-    pressure_recovery=0.792 / 0.984,
-    valve_outlet_diameter=0.1,     # m
-    internal_diameter=0.2031,      # m, the pipe
-    wall_thickness=0.008,          # m
-    pipe_density=8000.0,           # kg/m3, steel
-    efficiency_correction=-3.8,    # A_eta, Table 4
-    strouhal_number=0.2,           # St_p, Table 4
+    noise_control.GasStream(
+        mass_flow=2.22,                # kg/s
+        inlet_pressure=1.0e6,          # Pa, absolute
+        outlet_pressure=7.2e5,
+        inlet_density=5.3,             # kg/m3
+        inlet_temperature=450.0,       # K
+        specific_heat_ratio=1.22,
+        molecular_mass=19.8,           # kg/kmol
+    ),
+    noise_control.ValveTrim(
+        flow_coefficient=90.0,         # C_v
+        style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
+        pressure_recovery=0.792 / 0.984,
+        outlet_diameter=0.1,           # m
+        efficiency_correction=-3.8,    # A_eta, Table 4
+        strouhal_number=0.2,           # St_p, Table 4
+    ),
+    noise_control.DownstreamPipe(
+        internal_diameter=0.2031,      # m
+        wall_thickness=0.008,          # m
+        density=8000.0,                # kg/m3, steel
+    ),
 )
 
 print(result.regime)                                # 1
@@ -21056,13 +21062,20 @@ the pipe actually runs.
 from phonometry import noise_control
 
 sixth = noise_control.valve_aerodynamic_noise(
-    mass_flow=0.89, inlet_pressure=1.0e6, outlet_pressure=5.0e4,
-    inlet_density=5.3, inlet_temperature=450.0, specific_heat_ratio=1.22,
-    molecular_mass=19.8, flow_coefficient=30.0,
-    style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
-    pressure_recovery=0.792 / 0.984, valve_outlet_diameter=0.1,
-    internal_diameter=0.15, wall_thickness=0.008, pipe_density=8000.0,
-    efficiency_correction=-3.8, strouhal_number=0.2,
+    noise_control.GasStream(
+        mass_flow=0.89, inlet_pressure=1.0e6, outlet_pressure=5.0e4,
+        inlet_density=5.3, inlet_temperature=450.0, specific_heat_ratio=1.22,
+        molecular_mass=19.8,
+    ),
+    noise_control.ValveTrim(
+        flow_coefficient=30.0,
+        style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
+        pressure_recovery=0.792 / 0.984, outlet_diameter=0.1,
+        efficiency_correction=-3.8, strouhal_number=0.2,
+    ),
+    noise_control.DownstreamPipe(
+        internal_diameter=0.15, wall_thickness=0.008, density=8000.0
+    ),
 )
 print(round(sixth.outlet_mach, 2))   # 0.89, far past the 0.3 of NOTE 1
 print(round(sixth.pipe_mach, 2))     # 0.4, clamped to 0.3 for the correction
@@ -39137,8 +39150,9 @@ documents, one page per module.
 | `plane_wave_limit` / `PlaneWaveWarning` | `function` / `warning class` | **The frequency above which a duct stops carrying plane waves only, and the warning the plane-wave results raise past it.**<br>• `plane_wave_limit(diameter=…)`, or `width`/`height`, or `area`<br>• `flow_velocity`, `speed_of_sound`<br>• Raised by `duct_path(section=…)` and by every `ReactiveSilencerResult` | `plane_wave_limit(width=0.65, height=0.4)  # 264 Hz` |
 | `enclosure_insertion_loss` / `ENCLOSURE_MODELS` | `function` / `mapping` | **Machine-enclosure insertion loss IL = R − C (Bies Eqs. 7.103/7.111); panel R supplied by the caller, never predicted.**<br>• `panel_transmission_loss` (per-band array or callable of f)<br>• `external_area`, `internal_area`, `internal_absorption`<br>• `frequencies` (required for a callable R)<br>• `model`: `ENCLOSURE_MODELS` — `'bies'` keeps the 0.3 floor of Eq. 7.111, `'norton'` the bare `C = 10 lg(S_E/R_i)` of Eq. 4.115 | `enclosure_insertion_loss(R, 6.0, 5.0, 0.3)`<br><br>• `EnclosureResult` |
 | `enclosure_required_transmission_loss` | `function` | **The same equation solved for the panel R: `R = IL + C` (Norton Eq. 4.115 design use).**<br>• `insertion_loss` (required IL per band, e.g. the room level minus an NC curve)<br>• `external_area`, `internal_area`, `internal_absorption`, `frequencies`, `model` | `enclosure_required_transmission_loss(lp1 - nc45, 38.75, 59.5, alpha)`<br><br>• `EnclosureResult` whose `panel_transmission_loss` is the required R |
-| `valve_aerodynamic_noise` | `function` | **Control valve aerodynamic noise, the whole of IEC 60534-8-3 Clause 5.**<br>• operating point: `mass_flow` [kg/s], `inlet_pressure` / `outlet_pressure` [Pa], `inlet_density` [kg/m3], `inlet_temperature` [K], `specific_heat_ratio`, `molecular_mass` [kg/kmol]<br>• valve: `flow_coefficient` C, `style_modifier` F_d, `pressure_recovery` F_L or F_LP/F_p, `valve_outlet_diameter` D [m]<br>• pipe: `internal_diameter` D_i [m], `wall_thickness` t_S [m], `pipe_density` [kg/m3]<br>• trim: `efficiency_correction` A_eta and `strouhal_number` St_p, both from Table 4<br>• `coefficient`: 'Cv' (Default) or 'Kv' | `res = noise_control.valve_aerodynamic_noise(mass_flow=2.22, ...)`<br><br>• `AerodynamicValveNoise` |
+| `valve_aerodynamic_noise` | `function` | **Control valve aerodynamic noise, the whole of IEC 60534-8-3 Clause 5.**<br>• `stream`: a `GasStream`, `valve`: a `ValveTrim`, `pipe`: a `DownstreamPipe`<br>• the three groups are the standard's own reading order: the operating point, the valve at that travel, and the pipe the noise comes out of | `res = noise_control.valve_aerodynamic_noise(stream, valve, pipe)`<br><br>• `AerodynamicValveNoise` |
 | `AerodynamicValveNoise` | `dataclass` | **What Clause 5 says about one operating point.**<br>• `regime` (1 to 5), `boundaries`, `pressure_ratio` x, `vena_contracta_pressure` [Pa]<br>• `jet_diameter` [m], `mach`, `acoustical_efficiency`, `stream_power` / `sound_power` [W], `sound_power_level` [dB]<br>• `peak_frequency` [Hz], `outlet_mach`, `pipe_mach`, `velocity_correction` [dB], `internal_level` [dB]<br>• `frequency` and the three band arrays, plus `external_level` [dB] at 1 m | `res.regime, res.external_level` |
+| `GasStream` / `ValveTrim` / `DownstreamPipe` | `dataclass` | **The three groups of input IEC 60534-8-3 reads.**<br>• `GasStream`: `mass_flow` [kg/s], `inlet_pressure` / `outlet_pressure` [Pa], `inlet_density` [kg/m3], `inlet_temperature` [K], `specific_heat_ratio`, `molecular_mass` [kg/kmol]<br>• `ValveTrim`: `flow_coefficient` C, `style_modifier` F_d, `pressure_recovery` F_L or F_LP/F_p, `outlet_diameter` D [m], `efficiency_correction` A_eta and `strouhal_number` St_p from Table 4, `coefficient` 'Cv' (Default) or 'Kv'<br>• `DownstreamPipe`: `internal_diameter` D_i [m], `wall_thickness` t_S [m], `density` [kg/m3], and the printed defaults `sound_speed`, `air_sound_speed`, `atmospheric_pressure`, `standard_pressure` | `noise_control.ValveTrim(flow_coefficient=90.0, ...)` |
 | `pressure_ratio_boundaries` / `RegimeBoundaries` | `function` / `dataclass` | **The four pressure ratios of Eqs. (3) to (7) that cut Clause 5.2 into five regimes.**<br>• `specific_heat_ratio`, `pressure_recovery`<br>• `vena_contracta` x_vcc, `critical` x_C, `break_point` x_B, `constant_efficiency` x_CE, `recovery` alpha | `noise_control.pressure_ratio_boundaries(1.22, 0.8)` |
 | `flow_regime` | `function` | **Which of the five regimes a pressure ratio falls in (Clause 5.2).**<br>• `pressure_ratio` x, `boundaries`<br>• Each interval closed at the top; regime V starts strictly above x_CE, as the clause prints it and not as Table 3 does | `noise_control.flow_regime(0.52, bounds)  # 3` |
 | `valve_style_modifier` | `function` | **F_d of Eqs. (8a) to (8c): the hydraulic diameter of one passage over the diameter of the equivalent single orifice.**<br>• `passage_area` A [m2], `wetted_perimeter` l_w [m], `passages` N_o | `noise_control.valve_style_modifier(0.00137, 0.181, 6)  # 0.30` |
@@ -39151,6 +39165,7 @@ documents, one page per module.
 | `AERODYNAMIC_A_WEIGHTING_DB` | `constant` | **Table 7**: the A weighting the standard prints for its own 33 bands, which Eq. (25) sums with. | `noise_control.AERODYNAMIC_A_WEIGHTING_DB[19]` → `0.0` |
 | `MACH_LIMIT_STANDARD_TRIM` / `PIPE_WALL_MACH_LIMIT` | `constant` | **0.3** in both cases: the valve outlet Mach number above which Clause 5 gives way to Clause 7 (NOTE 1 to Eq. (15)), and the ceiling NOTE 2 puts on the pipe Mach number before Eq. (16). | `noise_control.MACH_LIMIT_STANDARD_TRIM` |
 | `AIR_SOUND_SPEED_M_S` / `PIPE_SOUND_SPEED_M_S` | `constant` | **343 m/s** and **5000 m/s**, the values NOTES 3 and 4 print for the coincidence frequencies; the second is why Clause 1 restricts the method to steel pipe. | `noise_control.PIPE_SOUND_SPEED_M_S` |
+| `STANDARD_ATMOSPHERE_PA` | `constant` | **101325 Pa**, the atmosphere Eqs. (20a) and (20c) are printed for. It is p_a and p_s both, which the standard keeps apart because a pipe can run at one and be rated at the other. | `noise_control.STANDARD_ATMOSPHERE_PA` |
 | `STRUCTURAL_LOSS_REFERENCE_HZ` / `UNIVERSAL_GAS_CONSTANT` | `constant` | **1.0 Hz**, the f_s of Eq. (20c) that the equation never names again, and **8314 J/(kmol K)**, paired with a molecular mass in kg/kmol as Eqs. (10) and (14) are written for. | `noise_control.UNIVERSAL_GAS_CONSTANT` |
 | `REGIME_SUBSONIC` / `REGIME_CHOKED` / `REGIME_SUPERSONIC` / `REGIME_SHOCK` / `REGIME_CONSTANT_EFFICIENCY` / `REGIME_COUNT` | `constant` | **1 to 5**, the five regimes of Clause 5.2 by the number it prints, and their count. | `res.regime == noise_control.REGIME_SHOCK` |
 | `EnclosureResult` | `dataclass` | **Enclosure insertion-loss result.**<br>• `panel_transmission_loss`, `correction` C, `insertion_loss`, `room_constant`, `external_area`, `internal_area`<br>• `.plot()` | `res.insertion_loss` |

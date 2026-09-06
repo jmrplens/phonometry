@@ -41,18 +41,19 @@ _IEC60534 = "Control valve noise (IEC 60534-8-3)"
 #: A.2's given data, shared by examples 1 to 6. The pressure recovery is
 #: ``F_LP/F_p`` with the 0,984 the annex computed with rather than the 0,98 it
 #: printed.
-_COMMON: dict[str, Any] = {
+_STREAM: dict[str, Any] = {
     "inlet_pressure": 1.0e6,
     "inlet_density": 5.3,
     "inlet_temperature": 450.0,
     "specific_heat_ratio": 1.22,
     "molecular_mass": 19.8,
+}
+_VALVE: dict[str, Any] = {
     "pressure_recovery": 0.792 / 0.984,
-    "wall_thickness": 0.008,
-    "pipe_density": 8000.0,
     "efficiency_correction": -3.8,
     "strouhal_number": 0.2,
 }
+_PIPE: dict[str, Any] = {"wall_thickness": 0.008, "density": 8000.0}
 
 #: The cage of A.2: six passages, each 0,00137 m² with a 0,181 m perimeter.
 _PASSAGE_AREA = 0.00137
@@ -142,13 +143,14 @@ def _example(index: int) -> ph.noise_control.AerodynamicValveNoise:
     """One column of Table A.1, through the whole of Clause 5."""
     flow, outlet, coefficient, diameter, bore = _EXAMPLES[index]
     return ph.noise_control.valve_aerodynamic_noise(
-        **_COMMON,
-        mass_flow=flow,
-        outlet_pressure=outlet,
-        flow_coefficient=coefficient,
-        valve_outlet_diameter=diameter,
-        internal_diameter=bore,
-        style_modifier=_style_modifier(),
+        ph.noise_control.GasStream(**_STREAM, mass_flow=flow, outlet_pressure=outlet),
+        ph.noise_control.ValveTrim(
+            **_VALVE,
+            flow_coefficient=coefficient,
+            style_modifier=_style_modifier(),
+            outlet_diameter=diameter,
+        ),
+        ph.noise_control.DownstreamPipe(**_PIPE, internal_diameter=bore),
     )
 
 

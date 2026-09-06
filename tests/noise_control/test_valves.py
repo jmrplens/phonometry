@@ -30,19 +30,21 @@ PRESSURE_RECOVERY = 0.792 / 0.984
 EFFICIENCY_CORRECTION = -3.8
 STROUHAL = 0.2
 
-#: The shared given data of A.2, in SI units.
-COMMON: dict[str, Any] = {
+#: The shared given data of A.2, in SI units: the gas is the same in every
+#: column, and so is everything about the valve except its capacity.
+STREAM: dict[str, Any] = {
     "inlet_pressure": 1.0e6,
     "inlet_density": 5.3,
     "inlet_temperature": 450.0,
     "specific_heat_ratio": 1.22,
     "molecular_mass": 19.8,
+}
+VALVE: dict[str, Any] = {
     "pressure_recovery": PRESSURE_RECOVERY,
-    "wall_thickness": 0.008,
-    "pipe_density": 8000.0,
     "efficiency_correction": EFFICIENCY_CORRECTION,
     "strouhal_number": STROUHAL,
 }
+PIPE: dict[str, Any] = {"wall_thickness": 0.008, "density": 8000.0}
 
 #: The per-example given data of Table A.1, and the regime each one lands in.
 EXAMPLES = [
@@ -111,10 +113,19 @@ def _style_modifier() -> float:
 def _run(index: int) -> valves.AerodynamicValveNoise:
     """Example ``index`` of Table A.1, one to six."""
     case = dict(EXAMPLES[index - 1])
-    case.pop("example")
-    case.pop("regime")
     return valves.valve_aerodynamic_noise(
-        **COMMON, **case, style_modifier=_style_modifier()
+        valves.GasStream(
+            **STREAM,
+            mass_flow=case["mass_flow"],
+            outlet_pressure=case["outlet_pressure"],
+        ),
+        valves.ValveTrim(
+            **VALVE,
+            flow_coefficient=case["flow_coefficient"],
+            style_modifier=_style_modifier(),
+            outlet_diameter=case["valve_outlet_diameter"],
+        ),
+        valves.DownstreamPipe(**PIPE, internal_diameter=case["internal_diameter"]),
     )
 
 
@@ -352,13 +363,14 @@ class TestPipeTransmission:
     def test_the_transmission_loss_matches_every_printed_band(self) -> None:
         bands = np.asarray(
             valves.valve_aerodynamic_noise(
-                **COMMON,
-                mass_flow=2.22,
-                outlet_pressure=7.2e5,
-                flow_coefficient=90.0,
-                valve_outlet_diameter=0.1,
-                internal_diameter=0.2031,
-                style_modifier=_style_modifier(),
+                valves.GasStream(**STREAM, mass_flow=2.22, outlet_pressure=7.2e5),
+                valves.ValveTrim(
+                    **VALVE,
+                    flow_coefficient=90.0,
+                    style_modifier=_style_modifier(),
+                    outlet_diameter=0.1,
+                ),
+                valves.DownstreamPipe(**PIPE, internal_diameter=0.2031),
             ).frequency
         )
         loss = valves.pipe_transmission_loss(bands, **self.PIPE)
@@ -452,13 +464,16 @@ class TestWholeChain:
 
     def test_the_pipe_wall_is_what_the_level_outside_depends_on(self) -> None:
         thin = valves.valve_aerodynamic_noise(
-            **{**COMMON, "wall_thickness": 0.004},
-            mass_flow=2.22,
-            outlet_pressure=7.2e5,
-            flow_coefficient=90.0,
-            valve_outlet_diameter=0.1,
-            internal_diameter=0.2031,
-            style_modifier=_style_modifier(),
+            valves.GasStream(**STREAM, mass_flow=2.22, outlet_pressure=7.2e5),
+            valves.ValveTrim(
+                **VALVE,
+                flow_coefficient=90.0,
+                style_modifier=_style_modifier(),
+                outlet_diameter=0.1,
+            ),
+            valves.DownstreamPipe(
+                **{**PIPE, "wall_thickness": 0.004}, internal_diameter=0.2031
+            ),
         )
         assert thin.external_level > _run(1).external_level
 
@@ -471,13 +486,14 @@ class TestWholeChain:
     def test_it_refuses_a_valve_that_does_not_drop_pressure(self) -> None:
         with pytest.raises(ValueError, match="drops pressure"):
             valves.valve_aerodynamic_noise(
-                **COMMON,
-                mass_flow=2.22,
-                outlet_pressure=1.2e6,
-                flow_coefficient=90.0,
-                valve_outlet_diameter=0.1,
-                internal_diameter=0.2031,
-                style_modifier=_style_modifier(),
+                valves.GasStream(**STREAM, mass_flow=2.22, outlet_pressure=1.2e6),
+                valves.ValveTrim(
+                    **VALVE,
+                    flow_coefficient=90.0,
+                    style_modifier=_style_modifier(),
+                    outlet_diameter=0.1,
+                ),
+                valves.DownstreamPipe(**PIPE, internal_diameter=0.2031),
             )
 
 

@@ -144,22 +144,28 @@ the level outside of Equations (24) and (25).
 from phonometry import noise_control
 
 result = noise_control.valve_aerodynamic_noise(
-    mass_flow=2.22,                # kg/s
-    inlet_pressure=1.0e6,          # Pa, absolute
-    outlet_pressure=7.2e5,
-    inlet_density=5.3,             # kg/m3
-    inlet_temperature=450.0,       # K
-    specific_heat_ratio=1.22,
-    molecular_mass=19.8,           # kg/kmol
-    flow_coefficient=90.0,         # C_v
-    style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
-    pressure_recovery=0.792 / 0.984,
-    valve_outlet_diameter=0.1,     # m
-    internal_diameter=0.2031,      # m, the pipe
-    wall_thickness=0.008,          # m
-    pipe_density=8000.0,           # kg/m3, steel
-    efficiency_correction=-3.8,    # A_eta, Table 4
-    strouhal_number=0.2,           # St_p, Table 4
+    noise_control.GasStream(
+        mass_flow=2.22,                # kg/s
+        inlet_pressure=1.0e6,          # Pa, absolute
+        outlet_pressure=7.2e5,
+        inlet_density=5.3,             # kg/m3
+        inlet_temperature=450.0,       # K
+        specific_heat_ratio=1.22,
+        molecular_mass=19.8,           # kg/kmol
+    ),
+    noise_control.ValveTrim(
+        flow_coefficient=90.0,         # C_v
+        style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
+        pressure_recovery=0.792 / 0.984,
+        outlet_diameter=0.1,           # m
+        efficiency_correction=-3.8,    # A_eta, Table 4
+        strouhal_number=0.2,           # St_p, Table 4
+    ),
+    noise_control.DownstreamPipe(
+        internal_diameter=0.2031,      # m
+        wall_thickness=0.008,          # m
+        density=8000.0,                # kg/m3, steel
+    ),
 )
 
 print(result.regime)                                # 1
@@ -266,13 +272,20 @@ the pipe actually runs.
 from phonometry import noise_control
 
 sixth = noise_control.valve_aerodynamic_noise(
-    mass_flow=0.89, inlet_pressure=1.0e6, outlet_pressure=5.0e4,
-    inlet_density=5.3, inlet_temperature=450.0, specific_heat_ratio=1.22,
-    molecular_mass=19.8, flow_coefficient=30.0,
-    style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
-    pressure_recovery=0.792 / 0.984, valve_outlet_diameter=0.1,
-    internal_diameter=0.15, wall_thickness=0.008, pipe_density=8000.0,
-    efficiency_correction=-3.8, strouhal_number=0.2,
+    noise_control.GasStream(
+        mass_flow=0.89, inlet_pressure=1.0e6, outlet_pressure=5.0e4,
+        inlet_density=5.3, inlet_temperature=450.0, specific_heat_ratio=1.22,
+        molecular_mass=19.8,
+    ),
+    noise_control.ValveTrim(
+        flow_coefficient=30.0,
+        style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
+        pressure_recovery=0.792 / 0.984, outlet_diameter=0.1,
+        efficiency_correction=-3.8, strouhal_number=0.2,
+    ),
+    noise_control.DownstreamPipe(
+        internal_diameter=0.15, wall_thickness=0.008, density=8000.0
+    ),
 )
 print(round(sixth.outlet_mach, 2))   # 0.89, far past the 0.3 of NOTE 1
 print(round(sixth.pipe_mach, 2))     # 0.4, clamped to 0.3 for the correction

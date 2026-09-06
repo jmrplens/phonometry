@@ -54,7 +54,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   `valve_aerodynamic_noise` runs the whole of Clause 5 and returns every
   printed intermediate beside the answer, so a result can be read against the
-  standard row by row rather than trusted. The 2010 edition made the method
+  standard row by row rather than trusted. It is called with the three groups
+  the standard itself reads in order, `GasStream`, `ValveTrim` and
+  `DownstreamPipe`, rather than with a score of loose keywords. The 2010 edition made the method
   spectral, so the result carries the internal level, the transmission loss
   and the external level in all 33 one-third-octave bands from 12,5 Hz to
   20 kHz, as well as the single A-weighted number.

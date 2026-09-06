@@ -484,17 +484,16 @@ class TestWholeChain:
         )
 
     def test_it_refuses_a_valve_that_does_not_drop_pressure(self) -> None:
+        stream = valves.GasStream(**STREAM, mass_flow=2.22, outlet_pressure=1.2e6)
+        trim = valves.ValveTrim(
+            **VALVE,
+            flow_coefficient=90.0,
+            style_modifier=_style_modifier(),
+            outlet_diameter=0.1,
+        )
+        pipe = valves.DownstreamPipe(**PIPE, internal_diameter=0.2031)
         with pytest.raises(ValueError, match="drops pressure"):
-            valves.valve_aerodynamic_noise(
-                valves.GasStream(**STREAM, mass_flow=2.22, outlet_pressure=1.2e6),
-                valves.ValveTrim(
-                    **VALVE,
-                    flow_coefficient=90.0,
-                    style_modifier=_style_modifier(),
-                    outlet_diameter=0.1,
-                ),
-                valves.DownstreamPipe(**PIPE, internal_diameter=0.2031),
-            )
+            valves.valve_aerodynamic_noise(stream, trim, pipe)
 
 
 class TestPrintedTables:

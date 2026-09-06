@@ -752,16 +752,15 @@ class TestWholeChain:
         assert result.regime == "cavitating"
 
     def test_the_chain_stops_at_flashing(self) -> None:
+        stream = hydro.LiquidStream(
+            **{**LIQUID, "vapour_pressure": 8.0e5},
+            mass_flow=30.0,
+            outlet_pressure=7.0e5,
+        )
+        valve = _valve(INCIPIENT)
+        pipe = _pipe()
         with pytest.raises(ValueError, match="flashes"):
-            hydro.valve_hydrodynamic_noise(
-                hydro.LiquidStream(
-                    **{**LIQUID, "vapour_pressure": 8.0e5},
-                    mass_flow=30.0,
-                    outlet_pressure=7.0e5,
-                ),
-                _valve(INCIPIENT),
-                _pipe(),
-            )
+            hydro.valve_hydrodynamic_noise(stream, valve, pipe)
 
 
 class TestMultistageTrim:
@@ -1028,14 +1027,13 @@ class TestGuards:
     def test_it_refuses_a_power_ratio_read_as_a_percentage(self, bad: float) -> None:
         # Table 2 prints 0,25 and 0,5. Read as percentages they would add
         # 20 dB to the answer without a word.
+        stream = hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure=8.0e5)
+        valve = hydro.LiquidTrim(
+            **{**VALVE, "power_ratio": bad}, incipient_ratio=INCIPIENT
+        )
+        pipe = _pipe()
         with pytest.raises(ValueError, match="not percentages"):
-            hydro.valve_hydrodynamic_noise(
-                hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure=8.0e5),
-                hydro.LiquidTrim(
-                    **{**VALVE, "power_ratio": bad}, incipient_ratio=INCIPIENT
-                ),
-                _pipe(),
-            )
+            hydro.valve_hydrodynamic_noise(stream, valve, pipe)
 
     def test_the_cavitating_loss_refuses_a_ratio_above_one(self) -> None:
         with pytest.raises(ValueError, match="not percentages"):

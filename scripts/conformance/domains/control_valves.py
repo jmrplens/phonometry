@@ -496,12 +496,27 @@ def _chk_multistage_conditions() -> Outcome:
             _EXAMPLE_7["last_stage_area"]
         ),
     )
-    return numeric(
-        _PRINTED_EXAMPLE_7["C_n"],
-        round(conditions.flow_coefficient),
-        0.5,
-        places=0,
-        expected_label="C_n = 315 from Equation (27), then (28a) for p_n",
+    computed = {
+        "C_n": round(conditions.flow_coefficient),
+        "p_n (x1e6 Pa)": round(conditions.stagnation_pressure / 1.0e6, 1),
+        "p_n/p_2": round(
+            conditions.stagnation_pressure / _EXAMPLE_7["outlet_pressure"], 1
+        ),
+        "(28a) rather than (28b)": float(conditions.equation == "28a"),
+    }
+    expected = {
+        "C_n": _PRINTED_EXAMPLE_7["C_n"],
+        "p_n (x1e6 Pa)": 2.1,
+        "p_n/p_2": 1.5,
+        "(28a) rather than (28b)": 1.0,
+    }
+    return record(
+        expected,
+        computed,
+        label=(
+            "C_n = 315 from Equation (27); p_n = 2,1 x 1e6 Pa from (28a), "
+            "which NOTE 3 selects because p_1/p_2 = 5 and p_n/p_2 = 1,5"
+        ),
     )
 
 

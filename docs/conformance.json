@@ -21881,17 +21881,28 @@
         "cite": "IEC 60534-8-3:2010"
       },
       "quantity": "Multistage trim substitution, example 7 (Eqs. (27) to (29))",
-      "kind": "scalar",
+      "kind": "record",
       "expected": {
-        "value": 315.0,
-        "label": "C_n = 315 from Equation (27), then (28a) for p_n"
+        "label": "C_n = 315 from Equation (27); p_n = 2,1 x 1e6 Pa from (28a), which NOTE 3 selects because p_1/p_2 = 5 and p_n/p_2 = 1,5",
+        "record": {
+          "C_n": 315.0,
+          "p_n (x1e6 Pa)": 2.1,
+          "p_n/p_2": 1.5,
+          "(28a) rather than (28b)": 1.0
+        }
       },
       "computed": {
-        "value": 315.0
+        "label": "C_n = 315; p_n (x1e6 Pa) = 2.1; p_n/p_2 = 1.5; (28a) rather than (28b) = 1",
+        "record": {
+          "C_n": 315.0,
+          "p_n (x1e6 Pa)": 2.1,
+          "p_n/p_2": 1.5,
+          "(28a) rather than (28b)": 1.0
+        }
       },
       "tolerance": {
         "mode": "absolute",
-        "value": 0.5
+        "value": 0.0
       },
       "deviation": {
         "value": 0.0

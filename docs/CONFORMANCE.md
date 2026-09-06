@@ -1348,7 +1348,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60534-8-3:2010 | A-weighted level 1 m from the pipe wall, examples 1 to 5 (Eq. (25)) | example 1 = 92 dB; example 2 = 93 dB; example 3 = 98 dB; example 4 = 94 dB; example 5 = 97 dB | example 1 = 92 dB; example 2 = 93 dB; example 3 = 98 dB; example 4 = 94 dB; example 5 = 97 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 60534-8-3:2010 | Expander chain of Clause 7, example 6 (Eqs. (34) to (41)) | U_p = 190; U_R = 460; M_R = 0.96; W_mR = 47854; eta_R = 0.0009; W_aR = 42; f_pR = 920; L_piR = 151 | U_p = 190; U_R = 460; M_R = 0.96; W_mR = 47854; eta_R = 0.0009; W_aR = 42; f_pR = 920; L_piR = 151 | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 60534-8-3:2010 | A-weighted level with the expander, example 6 (Eqs. (43) and (25)) | 94 dB(A), where the trim alone gives 93 | 94 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| IEC 60534-8-3:2010 | Multistage trim substitution, example 7 (Eqs. (27) to (29)) | C_n = 315 from Equation (27), then (28a) for p_n | 315 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60534-8-3:2010 | Multistage trim substitution, example 7 (Eqs. (27) to (29)) | C_n = 315 from Equation (27); p_n = 2,1 x 1e6 Pa from (28a), which NOTE 3 selects because p_1/p_2 = 5 and p_n/p_2 = 1,5 | C_n = 315; p_n (x1e6 Pa) = 2.1; p_n/p_2 = 1.5; (28a) rather than (28b) = 1 | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 60534-8-3:2010 | Multipath multistage trim, example 7 (Table A.2) | x = 0.334; p_vc = 1371038; W_a = 10.3; L_pi = 156.9; f_p = 14381; L_pAe = 89 | x = 0.334; p_vc = 1371038; W_a = 10.3; L_pi = 156.9; f_p = 14381; L_pAe = 89 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>

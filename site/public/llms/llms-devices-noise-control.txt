@@ -2930,7 +2930,7 @@ area = 0.010 * 0.002
 perimeter = 2.0 * 0.010 + 2.0 * 0.002
 print(round(4.0 * area / perimeter, 4))          # 0.0033  m, the hydraulic d
 print(round(noise_control.multiple_passage_jet_diameter(
-    90.0, 0.094, 0.020, 0.010), 5))              # 0.00362 m
+    90.0, 0.094, 0.020, 0.0033), 5))             # 0.00333 m
 ```
 
 **A multistage trim** (6.3) drops most of its pressure before the stage that

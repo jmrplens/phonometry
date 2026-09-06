@@ -2,7 +2,8 @@
 
 # Hydrodynamic valve noise (IEC 60534-8-4)
 
-A liquid does not compress, so a control valve on a water line cannot build
+Water is compressible enough to carry sound at 1 400 m/s and far too stiff to
+choke the way a gas does, so a control valve on a water line cannot build
 the shock cells that [the aerodynamic part](control-valve-noise.md) spends
 five regimes on. It makes noise two ways instead, and the whole of
 IEC 60534-8-4 is the sum of them: **turbulence** in the jet leaving the vena contracta, and

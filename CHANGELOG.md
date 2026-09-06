@@ -42,8 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   different kind of noise: IEC 60534-8-4, in
   `noise_control.valves_hydrodynamic`.
 
-  A liquid does not compress, so there are no shock cells and no five regimes.
-  There are two sources instead. Turbulence in the jet is the quiet one, an
+  Water is far too stiff to choke the way a gas does, so there are no shock
+  cells and no five regimes. There are two sources instead, and both are
+  always in the answer: the second only joins the first past a threshold. Turbulence in the jet is the quiet one, an
   efficiency linear in the jet Mach number and therefore around one part in a
   million for water. Cavitation is the other, and it does not fade in: it
   starts at exactly zero on the valve's characteristic pressure ratio, once

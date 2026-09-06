@@ -124,7 +124,7 @@ What IEC 60534-8-3 Clause 5 says about one operating point.
 | `band_external_level` | $L_{pe,1m}(f_i)$ of Equation (24), in dB. |
 | `external_level` | $L_{pAe,1m}$ of Equation (25), in dB. |
 | `pipe_frequencies` | The ring and coincidence frequencies the transmission loss is shaped by. |
-| `expander` | What Clause 7 says the flow leaving the valve outlet makes, or `None` when no expander was given. When it is present its spectrum is already in `band_external_level` and in `external_level`, combined with the trim by Equation (43). |
+| `expander` | What Clause 7 says the flow leaving the valve outlet makes, or `None` when no expander was given. When it is present its spectrum is already in `band_internal_level`, and so in `band_external_level` and `external_level`, combined with the trim by Equation (43); this field carries the outlet flow on its own, which is the only place it can be read apart. |
 
 ## AIR_SOUND_SPEED_M_S
 
@@ -311,7 +311,7 @@ computed as supersonic is computed at Mach one instead.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a value is not positive and finite, or the throat is wider than the pipe. |
+| ValueError | If a physical quantity is not positive and finite, if the two signed dB corrections are not finite, or if the throat is wider than the pipe. The efficiency correction of Table 4 and the velocity correction of Equation (16) are both signed, and the expander's own row prints $A_\eta = -3{,}0$. |
 
 ## EXPANDER_PIPE_MACH_LIMIT
 
@@ -763,7 +763,7 @@ the external level of 5.6, which are common to every regime.
 | `stream` | The gas and the operating point, a [`GasStream`](/phonometry/reference/api/noise_control/valves/#gasstream). |
 | `valve` | The valve at the travel being examined, a [`ValveTrim`](/phonometry/reference/api/noise_control/valves/#valvetrim). |
 | `pipe` | The downstream pipe and what surrounds it, a [`DownstreamPipe`](/phonometry/reference/api/noise_control/valves/#downstreampipe). |
-| `expander` | The transition piece downstream of the valve. Give one when the valve outlet is narrower than the pipe and the outlet Mach number has passed 0,3, which is when NOTE 1 to Equation (15) sends the calculation to Clause 7; the flow leaving the outlet is then a second source and Equation (43) adds it to the trim. |
+| `expander` | The transition piece downstream of the valve. Give one when the valve outlet is narrower than the pipe and the outlet Mach number has passed 0,3, which is when NOTE 1 to Equation (15) sends the calculation to Clause 7. The flow leaving the outlet is then a second source, and Equation (43) adds it to the trim inside the pipe: the `band_internal_level` of the result is the sum of the two, and the transmission loss and the external level follow from that sum. |
 
 **Returns:** An [`AerodynamicValveNoise`](/phonometry/reference/api/noise_control/valves/#aerodynamicvalvenoise) carrying every printed intermediate as well as the level at 1 m.
 

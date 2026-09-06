@@ -856,8 +856,11 @@ def expander_noise(  # noqa: PLR0913
         Equation (41) adds exactly as Equation (18) does.
     :param expander: The transition piece.
     :return: An :class:`ExpanderNoise`.
-    :raises ValueError: If a value is not positive and finite, or the throat
-            is wider than the pipe.
+    :raises ValueError: If a physical quantity is not positive and finite, if
+        the two signed dB corrections are not finite, or if the throat is
+        wider than the pipe. The efficiency correction of Table 4 and the
+        velocity correction of Equation (16) are both signed, and the
+        expander's own row prints :math:`A_\eta = -3{,}0`.
     """
     bands = np.asarray(frequency, dtype=np.float64)
     flow = require_positive(mass_flow, "mass_flow")
@@ -971,8 +974,10 @@ class AerodynamicValveNoise:
         transmission loss is shaped by.
     :ivar expander: What Clause 7 says the flow leaving the valve outlet
         makes, or ``None`` when no expander was given. When it is present its
-        spectrum is already in ``band_external_level`` and in
-        ``external_level``, combined with the trim by Equation (43).
+        spectrum is already in ``band_internal_level``, and so in
+        ``band_external_level`` and ``external_level``, combined with the
+        trim by Equation (43); this field carries the outlet flow on its own,
+        which is the only place it can be read apart.
     """
 
     regime: int
@@ -1104,8 +1109,10 @@ def valve_aerodynamic_noise(
     :param expander: The transition piece downstream of the valve. Give one
         when the valve outlet is narrower than the pipe and the outlet Mach
         number has passed 0,3, which is when NOTE 1 to Equation (15) sends
-        the calculation to Clause 7; the flow leaving the outlet is then a
-        second source and Equation (43) adds it to the trim.
+        the calculation to Clause 7. The flow leaving the outlet is then a
+        second source, and Equation (43) adds it to the trim inside the pipe:
+        the ``band_internal_level`` of the result is the sum of the two, and
+        the transmission loss and the external level follow from that sum.
     :return: An :class:`AerodynamicValveNoise` carrying every printed
         intermediate as well as the level at 1 m.
     :raises ValueError: If a value is outside the range its equation is

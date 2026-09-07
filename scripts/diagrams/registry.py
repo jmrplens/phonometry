@@ -80,6 +80,7 @@ from .devices import (
     _d_swept_sine,
     _d_vdi2081_sheet,
     _d_vibration_sound_power,
+    _d_workstation_microphone,
 )
 from .environment import (
     _d_atmospheric_refraction,
@@ -908,6 +909,11 @@ DIAGRAMS = {
         _d_duct_path,
         "Long's Table 14.9 installation: every row of the sheet as a place",
         566,
+    ),
+    "diagram_workstation_microphone": (
+        _d_workstation_microphone,
+        "Where the microphone goes at a work station (ISO 11201 Clause 9)",
+        600,
     ),
     "diagram_vdi2081_sheet": (
         _d_vdi2081_sheet,

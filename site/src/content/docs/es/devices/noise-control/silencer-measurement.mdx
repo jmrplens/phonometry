@@ -438,12 +438,12 @@ import numpy as np
 
 heads = np.array([20.0, 40.0, 60.0, 80.0, 100.0])   # Pa, cinco caudales
 with_object = 2.5 * heads
-without = 0.4 * heads
+without = 0.6 * heads
 
 zeta = noise_control.average_pressure_loss_coefficient(
     with_object, heads, without, heads,
 )
-print(round(zeta, 3))             # 2.1
+print(round(zeta, 3))             # 1.9
 ```
 
 Cinco caudales por serie, repartidos por igual sobre el intervalo, y el más
@@ -451,7 +451,8 @@ bajo tiene que producir más de 10 Pa para que el número más pequeño del
 promedio siga siendo una medida y no la resolución del manómetro. La
 biblioteca lo dice por partida doble: `average_pressure_loss_coefficient` avisa
 por debajo de cinco puntos, y `pressure_loss_coefficient` avisa con una pérdida
-por debajo de 10 Pa.
+de 10 Pa o menos, el propio límite incluido, porque la cláusula dice *mayor
+que*.
 
 Lo que tiene que ser el flujo antes de que nada de eso cuente es cuestión de
 geometría. El conducto aguas arriba va recto cinco diámetros equivalentes o

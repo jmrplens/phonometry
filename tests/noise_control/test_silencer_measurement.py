@@ -647,6 +647,18 @@ class TestPressureLossCoefficient:
         with pytest.warns(sm.SilencerMeasurementWarning, match="10 Pa"):
             sm.pressure_loss_coefficient(6.0, 64.0)
 
+    def test_a_point_exactly_on_ten_pascals_warns(self) -> None:
+        # The clause reads "greater than 10 Pa", so the boundary itself is
+        # outside what it allows and cannot be the lowest rate of a series.
+        with pytest.warns(sm.SilencerMeasurementWarning, match="10 Pa"):
+            sm.pressure_loss_coefficient(sm.MINIMUM_PRESSURE_DIFFERENCE_PA, 64.0)
+
+    def test_a_point_just_above_ten_pascals_is_quiet(self) -> None:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            found = sm.pressure_loss_coefficient(10.5, 64.0)
+        assert found == pytest.approx(10.5 / 64.0)
+
     def test_a_point_above_ten_pascals_is_quiet(self) -> None:
         with warnings.catch_warnings():
             warnings.simplefilter("error")

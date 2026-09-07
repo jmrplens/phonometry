@@ -1070,12 +1070,14 @@ def pressure_loss_coefficient(
     :return: :math:`\zeta`, dimensionless.
     :raises ValueError: If the loss is not finite, or if the dynamic pressure
         is not positive and finite.
-    :warns SilencerMeasurementWarning: If the loss is smaller than the 10 Pa
+    :warns SilencerMeasurementWarning: If the loss does not exceed the 10 Pa
         6.5.2.1 asks even the lowest airflow rate of a series to produce.
+        The clause reads *greater than*, so a point sitting exactly on 10 Pa
+        is one the series may not be built from and warns like any below it.
     """
     loss = _require_finite_scalar(total_loss, "total_loss")
     head = require_positive(inlet_dynamic_pressure, "inlet_dynamic_pressure")
-    if abs(loss) < MINIMUM_PRESSURE_DIFFERENCE_PA:
+    if abs(loss) <= MINIMUM_PRESSURE_DIFFERENCE_PA:
         msg = (
             "6.5.2.1 wants the lowest airflow rate of a series to produce a "
             f"pressure difference greater than {MINIMUM_PRESSURE_DIFFERENCE_PA:.0f} "

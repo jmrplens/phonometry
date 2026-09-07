@@ -741,7 +741,7 @@ of the fundamental method, $\Delta p_{tot,n} / p_{dn}$.
 
 | Warning | When |
 | :--- | :--- |
-| SilencerMeasurementWarning | If the loss is smaller than the 10 Pa 6.5.2.1 asks even the lowest airflow rate of a series to produce. |
+| SilencerMeasurementWarning | If the loss does not exceed the 10 Pa 6.5.2.1 asks even the lowest airflow rate of a series to produce. The clause reads *greater than*, so a point sitting exactly on 10 Pa is one the series may not be built from and warns like any below it. |
 
 ## RADIATION_SOLID_ANGLES
 

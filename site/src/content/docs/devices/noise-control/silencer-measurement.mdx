@@ -427,19 +427,20 @@ import numpy as np
 
 heads = np.array([20.0, 40.0, 60.0, 80.0, 100.0])   # Pa, five airflow rates
 with_object = 2.5 * heads
-without = 0.4 * heads
+without = 0.6 * heads
 
 zeta = noise_control.average_pressure_loss_coefficient(
     with_object, heads, without, heads,
 )
-print(round(zeta, 3))             # 2.1
+print(round(zeta, 3))             # 1.9
 ```
 
 Five rates per series, spread evenly over the range, and the lowest has to
 produce more than 10 Pa so that the smallest number in the average is still a
 measurement rather than the resolution of the manometer. The library says so
 on both counts: `average_pressure_loss_coefficient` warns below five points,
-and `pressure_loss_coefficient` warns on a loss under 10 Pa.
+and `pressure_loss_coefficient` warns on a loss of 10 Pa or less, the
+boundary included, because the clause reads *greater than*.
 
 What the flow has to be before any of that counts is a matter of geometry.
 The upstream duct is straight for five equivalent diameters or two metres,

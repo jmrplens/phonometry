@@ -1,11 +1,11 @@
 ---
 title: "vibration.structural.building_response"
-description: "Predicting the fundamental frequency and damping of a building (ISO 4866)."
+description: "Predicting the fundamental frequency of a building (ISO 4866 Annex D)."
 sidebar:
   label: "building_response"
 ---
 
-Predicting the fundamental frequency and damping of a building (ISO 4866).
+Predicting the fundamental frequency of a building (ISO 4866 Annex D).
 
 A vibration measurement on a building is read against the building's own
 response, and that response starts with one number: the lowest natural
@@ -258,7 +258,7 @@ form, since the annex gives a range and no way to choose inside it; state
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the model is not one of the four, if an argument the model needs is missing or not positive, or if a coefficient is given for the storey model. |
+| ValueError | If the model is not one of the four, if an argument the model needs is missing or not positive, or if an argument the model does not use is given. |
 
 ## HEIGHT_FREQUENCY_CONSTANT_HZ_M
 

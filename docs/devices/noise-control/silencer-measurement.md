@@ -517,7 +517,7 @@ be honest about them. The measured points have to sit within 3 dB of the line,
 because past that the levels are not a straight line in this variable and
 reading the line off means nothing. And the line may be extended down to half
 the smallest duty measured and up to twice the largest, and no further, which
-for these five points is 0,025 to 1,6 m³/s. Either one out of range raises a
+for these five points is 0.025 to 1.6 m³/s. Either one out of range raises a
 `SilencerMeasurementWarning`:
 
 ```python

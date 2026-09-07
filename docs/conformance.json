@@ -3,13 +3,13 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 841,
-    "passing": 841,
+    "checks": 864,
+    "passing": 864,
     "failing": 0,
-    "domains": 70,
-    "standards": 400,
-    "citations": 644,
-    "designations": 138,
+    "domains": 71,
+    "standards": 403,
+    "citations": 647,
+    "designations": 141,
     "sources": 83
   },
   "units": [
@@ -68,6 +68,7 @@
     "s",
     "sone",
     "sone_HMS",
+    "sr",
     "tu_HMS",
     "vacil",
     "vacil_HMS",
@@ -482,6 +483,12 @@
       "title": "Control valve noise (IEC 60534-8-4)",
       "checks": 14,
       "passing": 14
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "title": "Ducted silencer measurement (ISO 7235, ISO 11691)",
+      "checks": 23,
+      "passing": 23
     },
     {
       "id": "hvac-noise-vdi-2081",
@@ -22672,6 +22679,832 @@
         }
       },
       "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-11691-1995/insertion-loss-by-substitution-eq-1",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11691",
+        "edition": "1995",
+        "cite": "ISO 11691:1995"
+      },
+      "quantity": "Insertion loss by substitution (Eq. (1))",
+      "kind": "record",
+      "expected": {
+        "label": "50 Hz = 4 dB; 63 Hz = 7 dB; 80 Hz = 12 dB; 100 Hz = 20 dB; 125 Hz = 26 dB; 160 Hz = 28 dB",
+        "record": {
+          "50 Hz": 4.0,
+          "63 Hz": 7.0,
+          "80 Hz": 12.0,
+          "100 Hz": 20.0,
+          "125 Hz": 26.0,
+          "160 Hz": 28.0
+        }
+      },
+      "computed": {
+        "label": "50 Hz = 4 dB; 63 Hz = 7 dB; 80 Hz = 12 dB; 100 Hz = 20 dB; 125 Hz = 26 dB; 160 Hz = 28 dB",
+        "record": {
+          "50 Hz": 4.0,
+          "63 Hz": 7.0,
+          "80 Hz": 12.0,
+          "100 Hz": 20.0,
+          "125 Hz": 26.0,
+          "160 Hz": 28.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/reverberation-time-correction-of-the-insertion-loss-6-3",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Reverberation-time correction of the insertion loss (6.3)",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.010299956639812,
+        "label": "10 lg 2 = 3,010300 dB"
+      },
+      "computed": {
+        "value": 3.0103
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 4.44e-16
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-11691-1995/octave-from-three-one-third-octaves-eq-2",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11691",
+        "edition": "1995",
+        "cite": "ISO 11691:1995"
+      },
+      "quantity": "Octave from three one-third octaves (Eq. (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 9.743831846831036,
+        "label": "-10 lg[(10^-3 + 10^-3 + 10^-0,5)/3] = 9,744 dB"
+      },
+      "computed": {
+        "value": 9.743832
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-11691-1995/bounds-of-the-octave-insertion-loss-eq-2",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11691",
+        "edition": "1995",
+        "cite": "ISO 11691:1995"
+      },
+      "quantity": "Bounds of the octave insertion loss (Eq. (2))",
+      "kind": "mask",
+      "expected": {
+        "label": "between 5.000 dB and 9.771 dB"
+      },
+      "computed": {
+        "label": "9.744 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "mask",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 9.744
+      },
+      "binding": {
+        "lower": 5.0,
+        "upper": 9.771212547196624
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-11691-1995/reproducibility-of-the-survey-method-table-1",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11691",
+        "edition": "1995",
+        "cite": "ISO 11691:1995"
+      },
+      "quantity": "Reproducibility of the survey method (Table 1)",
+      "kind": "record",
+      "expected": {
+        "label": "50 Hz = 2 dB; 1250 Hz = 2 dB; 1600 Hz = 3 dB; 10000 Hz = 3 dB",
+        "record": {
+          "50 Hz": 2.0,
+          "1250 Hz": 2.0,
+          "1600 Hz": 3.0,
+          "10000 Hz": 3.0
+        }
+      },
+      "computed": {
+        "label": "50 Hz = 2 dB; 1250 Hz = 2 dB; 1600 Hz = 3 dB; 10000 Hz = 3 dB",
+        "record": {
+          "50 Hz": 2.0,
+          "1250 Hz": 2.0,
+          "1600 Hz": 3.0,
+          "10000 Hz": 3.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/microphone-position-spread-limits-table-6",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Microphone position spread limits (Table 6)",
+      "kind": "record",
+      "expected": {
+        "label": "50 Hz = 10 dB; 63 Hz = 10 dB; 80 Hz = 8 dB; 100 Hz = 8 dB; 125 Hz = 7 dB; just above 125 Hz = 6 dB; 160 Hz and above = 6 dB",
+        "record": {
+          "50 Hz": 10.0,
+          "63 Hz": 10.0,
+          "80 Hz": 8.0,
+          "100 Hz": 8.0,
+          "125 Hz": 7.0,
+          "just above 125 Hz": 6.0,
+          "160 Hz and above": 6.0
+        }
+      },
+      "computed": {
+        "label": "50 Hz = 10 dB; 63 Hz = 10 dB; 80 Hz = 8 dB; 100 Hz = 8 dB; 125 Hz = 7 dB; just above 125 Hz = 6 dB; 160 Hz and above = 6 dB",
+        "record": {
+          "50 Hz": 10.0,
+          "63 Hz": 10.0,
+          "80 Hz": 8.0,
+          "100 Hz": 8.0,
+          "125 Hz": 7.0,
+          "just above 125 Hz": 6.0,
+          "160 Hz and above": 6.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/three-microphone-positions-or-five-6-2-1",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Three microphone positions, or five (6.2.1)",
+      "kind": "record",
+      "expected": {
+        "label": "at 50 Hz = 3; at 125 Hz = 5; at 1000 Hz = 5",
+        "record": {
+          "at 50 Hz": 3.0,
+          "at 125 Hz": 5.0,
+          "at 1000 Hz": 5.0
+        }
+      },
+      "computed": {
+        "label": "at 50 Hz = 3; at 125 Hz = 5; at 1000 Hz = 5",
+        "record": {
+          "at 50 Hz": 3.0,
+          "at 125 Hz": 5.0,
+          "at 1000 Hz": 5.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/reproducibility-of-the-three-quantities-table-7",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Reproducibility of the three quantities (Table 7)",
+      "kind": "record",
+      "expected": {
+        "label": "insertion_loss 50 Hz = 1.5 dB; insertion_loss 250 Hz = 1 dB; insertion_loss 1000 Hz = 2 dB; insertion_loss 4000 Hz = 3 dB; transmission_loss 50 Hz = 3 dB; transmission_loss 250 Hz = 3 dB; transmission_loss 1000 Hz = 3 dB; transmission_loss 4000 Hz = 3 dB; intensity 50 Hz = 3 dB; intensity 250 Hz = 1.5 dB; intensity 1000 Hz = 1 dB; intensity 4000 Hz = 1 dB",
+        "record": {
+          "insertion_loss 50 Hz": 1.5,
+          "insertion_loss 250 Hz": 1.0,
+          "insertion_loss 1000 Hz": 2.0,
+          "insertion_loss 4000 Hz": 3.0,
+          "transmission_loss 50 Hz": 3.0,
+          "transmission_loss 250 Hz": 3.0,
+          "transmission_loss 1000 Hz": 3.0,
+          "transmission_loss 4000 Hz": 3.0,
+          "intensity 50 Hz": 3.0,
+          "intensity 250 Hz": 1.5,
+          "intensity 1000 Hz": 1.0,
+          "intensity 4000 Hz": 1.0
+        }
+      },
+      "computed": {
+        "label": "insertion_loss 50 Hz = 1.5 dB; insertion_loss 250 Hz = 1 dB; insertion_loss 1000 Hz = 2 dB; insertion_loss 4000 Hz = 3 dB; transmission_loss 50 Hz = 3 dB; transmission_loss 250 Hz = 3 dB; transmission_loss 1000 Hz = 3 dB; transmission_loss 4000 Hz = 3 dB; intensity 50 Hz = 3 dB; intensity 250 Hz = 1.5 dB; intensity 1000 Hz = 1 dB; intensity 4000 Hz = 1 dB",
+        "record": {
+          "insertion_loss 50 Hz": 1.5,
+          "insertion_loss 250 Hz": 1.0,
+          "insertion_loss 1000 Hz": 2.0,
+          "insertion_loss 4000 Hz": 3.0,
+          "transmission_loss 50 Hz": 3.0,
+          "transmission_loss 250 Hz": 3.0,
+          "transmission_loss 1000 Hz": 3.0,
+          "transmission_loss 4000 Hz": 3.0,
+          "intensity 50 Hz": 3.0,
+          "intensity 250 Hz": 1.5,
+          "intensity 1000 Hz": 1.0,
+          "intensity 4000 Hz": 1.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/expanded-measurement-uncertainty-7-9",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Expanded measurement uncertainty (7.9)",
+      "kind": "record",
+      "expected": {
+        "label": "250 Hz = 2 dB; 4000 Hz = 6 dB",
+        "record": {
+          "250 Hz": 2.0,
+          "4000 Hz": 6.0
+        }
+      },
+      "computed": {
+        "label": "250 Hz = 2 dB; 4000 Hz = 6 dB",
+        "record": {
+          "250 Hz": 2.0,
+          "4000 Hz": 6.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-11691-1995/test-duct-against-the-silencer-4-5",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11691",
+        "edition": "1995",
+        "cite": "ISO 11691:1995"
+      },
+      "quantity": "Test duct against the silencer (4.5)",
+      "kind": "record",
+      "expected": {
+        "label": "lower = 0.6; upper = 1.7",
+        "record": {
+          "lower": 0.6,
+          "upper": 1.7
+        }
+      },
+      "computed": {
+        "label": "lower = 0.6; upper = 1.7",
+        "record": {
+          "lower": 0.6,
+          "upper": 1.7
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/open-end-transmission-loss-and-reflection-b-3-b-4",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Open-end transmission loss and reflection (B.3), (B.4)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "D_td = -10 lg(1 - r^2) at all 30 pairs"
+      },
+      "computed": {
+        "value": 1.24e-14,
+        "label": "largest disagreement 1.243e-14 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 1.24e-14
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/solid-angle-of-radiation-at-the-duct-end-table-b-1",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Solid angle of radiation at the duct end (Table B.1)",
+      "kind": "record",
+      "expected": {
+        "label": "A (flush in a wall) = 6.2832 sr; B (wall and floor) = 3.1416 sr; C (free in the room) = 12.5664 sr; D (on the floor) = 6.2832 sr; E (mid-room duct) = 12.5664 sr",
+        "record": {
+          "A (flush in a wall)": 6.283185307179586,
+          "B (wall and floor)": 3.141592653589793,
+          "C (free in the room)": 12.566370614359172,
+          "D (on the floor)": 6.283185307179586,
+          "E (mid-room duct)": 12.566370614359172
+        }
+      },
+      "computed": {
+        "label": "A (flush in a wall) = 6.2832 sr; B (wall and floor) = 3.1416 sr; C (free in the room) = 12.5664 sr; D (on the floor) = 6.2832 sr; E (mid-room duct) = 12.5664 sr",
+        "record": {
+          "A (flush in a wall)": 6.283185307179586,
+          "B (wall and floor)": 3.141592653589793,
+          "C (free in the room)": 12.566370614359172,
+          "D (on the floor)": 6.283185307179586,
+          "E (mid-room duct)": 12.566370614359172
+        }
+      },
+      "unit": "sr",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/rectangular-cut-on-frequency-eq-5",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Rectangular cut-on frequency (Eq. (5))",
+      "kind": "scalar",
+      "expected": {
+        "value": 343.00000000000006,
+        "label": "343,000000 Hz from the (1, 0) eigenvalue"
+      },
+      "computed": {
+        "value": 343.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": -5.68e-14
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/circular-cut-on-frequency-eq-4",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Circular cut-on frequency (Eq. (4))",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.006701969160318,
+        "label": "0,59 / (1,8412 / pi) = 1,006701"
+      },
+      "computed": {
+        "value": 1.006702
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/transmission-loss-of-an-air-terminal-unit-eq-6",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Transmission loss of an air-terminal unit (Eq. (6))",
+      "kind": "record",
+      "expected": {
+        "label": "63 Hz gap = 11.2255 dB; 2000 Hz gap = 0.0525 dB",
+        "record": {
+          "63 Hz gap": 11.225451,
+          "2000 Hz gap": 0.052513
+        }
+      },
+      "computed": {
+        "label": "63 Hz gap = 11.2255 dB; 2000 Hz gap = 0.0525 dB",
+        "record": {
+          "63 Hz gap": 11.225451,
+          "2000 Hz gap": 0.052513
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/normal-air-density-eqs-10-21-22",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Normal air density (Eqs. (10), (21), (22))",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.2073230191102495,
+        "label": "(101 325 + 200) / (287 x 293) = 1,207323 kg/m³"
+      },
+      "computed": {
+        "value": 1.207323
+      },
+      "unit": "kg/m³",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/total-pressure-loss-across-unequal-ducts-eq-12",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Total pressure loss across unequal ducts (Eq. (12))",
+      "kind": "record",
+      "expected": {
+        "label": "S_2 = S_1 = 45 Pa; S_2 = 2 S_1 = 93.6253 Pa; S_2 = S_1 / 2 = -149.5012 Pa",
+        "record": {
+          "S_2 = S_1": 45.0,
+          "S_2 = 2 S_1": 93.62530850056837,
+          "S_2 = S_1 / 2": -149.5012340022735
+        }
+      },
+      "computed": {
+        "label": "S_2 = S_1 = 45 Pa; S_2 = 2 S_1 = 93.6253 Pa; S_2 = S_1 / 2 = -149.5012 Pa",
+        "record": {
+          "S_2 = S_1": 45.0,
+          "S_2 = 2 S_1": 93.62530850056837,
+          "S_2 = S_1 / 2": -149.5012340022735
+        }
+      },
+      "unit": "Pa",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/pressure-loss-coefficient-is-flow-invariant-eq-14",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Pressure loss coefficient is flow invariant (Eq. (14))",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.75,
+        "label": "zeta = 0.750000 at 1 m³/s"
+      },
+      "computed": {
+        "value": 0.75,
+        "label": "0.750000 at 2 m³/s"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/averaged-pressure-loss-coefficient-eq-18",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Averaged pressure loss coefficient (Eq. (18))",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.1,
+        "label": "2,5 - 0,4 = 2,100000"
+      },
+      "computed": {
+        "value": 2.1
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/upstream-straight-length-6-5-2-2-1",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Upstream straight length (6.5.2.2.1)",
+      "kind": "record",
+      "expected": {
+        "label": "S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m",
+        "record": {
+          "S = 0,0962 m² (350 mm)": 2.0,
+          "S = 0,1257 m² (400 mm)": 2.0,
+          "S = 0,5 m²": 3.989422804014327
+        }
+      },
+      "computed": {
+        "label": "S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m",
+        "record": {
+          "S = 0,0962 m² (350 mm)": 2.0,
+          "S = 0,1257 m² (400 mm)": 2.0,
+          "S = 0,5 m²": 3.989422804014327
+        }
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-5135-1999/end-reflection-loss-is-iso-7235-b-3-written-out-eq-2",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 5135",
+        "edition": "1999",
+        "cite": "ISO 5135:1999"
+      },
+      "quantity": "End reflection loss is ISO 7235 (B.3) written out (Eq. (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "ISO 5135 (2) = ISO 7235 (B.3) at all 30 pairs"
+      },
+      "computed": {
+        "value": 3.55e-15,
+        "label": "largest disagreement 3.553e-15 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 3.55e-15
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-5135-1999/sound-power-level-in-the-duct-eq-1",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 5135",
+        "edition": "1999",
+        "cite": "ISO 5135:1999"
+      },
+      "quantity": "Sound power level in the duct (Eq. (1))",
+      "kind": "record",
+      "expected": {
+        "label": "63 Hz = 71.2255 dB; 125 Hz = 66.1429 dB; 250 Hz = 62.5007 dB; 500 Hz = 60.7724 dB; 1000 Hz = 60.2063 dB; 2000 Hz = 60.0525 dB",
+        "record": {
+          "63 Hz": 71.225451,
+          "125 Hz": 66.142905,
+          "250 Hz": 62.50069,
+          "500 Hz": 60.772372,
+          "1000 Hz": 60.206348,
+          "2000 Hz": 60.052513
+        }
+      },
+      "computed": {
+        "label": "63 Hz = 71.2255 dB; 125 Hz = 66.1429 dB; 250 Hz = 62.5007 dB; 500 Hz = 60.7724 dB; 1000 Hz = 60.2063 dB; 2000 Hz = 60.0525 dB",
+        "record": {
+          "63 Hz": 71.225451,
+          "125 Hz": 66.142905,
+          "250 Hz": 62.50069,
+          "500 Hz": 60.772372,
+          "1000 Hz": 60.206348,
+          "2000 Hz": 60.052513
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-5135-1999/least-squares-operating-line-5-5-2",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 5135",
+        "edition": "1999",
+        "cite": "ISO 5135:1999"
+      },
+      "quantity": "Least-squares operating line (5.5.2)",
+      "kind": "record",
+      "expected": {
+        "label": "slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6",
+        "record": {
+          "slope [dB/decade]": 20.0,
+          "level at 0,2 m³/s [dB]": 50.0,
+          "worst deviation [dB]": 0.0,
+          "lowest readable duty [m³/s]": 0.025,
+          "highest readable duty [m³/s]": 1.6
+        }
+      },
+      "computed": {
+        "label": "slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6",
+        "record": {
+          "slope [dB/decade]": 20.0,
+          "level at 0,2 m³/s [dB]": 50.0,
+          "worst deviation [dB]": 0.0,
+          "lowest readable duty [m³/s]": 0.025,
+          "highest readable duty [m³/s]": 1.6
+        }
+      },
       "tolerance": {
         "mode": "absolute",
         "value": 0.0

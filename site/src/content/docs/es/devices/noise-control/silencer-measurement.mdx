@@ -467,6 +467,83 @@ print(round(noise_control.upstream_straight_length(0.0962), 2))   # 2.0 m
 print(round(noise_control.upstream_straight_length(0.5), 2))      # 3.99 m
 ```
 
+## 11. La tercera norma, y la fórmula que comparte
+
+La ISO 5135:1999 mide otra cosa distinta: la potencia sonora que radia un
+dispositivo terminal de aire, una unidad terminal, una compuerta o una
+válvula, determinada en sala reverberante conforme a la ISO 3741. Lo que
+necesita un proyectista no es eso sino lo que el aparato mete en el conducto
+que tiene detrás, y la Ecuación (1) es el paso entre ambas:
+
+$$
+L_{W\mathrm{duct}} = L_W + \Delta L_\mathrm{r}
+$$
+
+La corrección $\Delta L_\mathrm{r}$ es la Ecuación (2) de la ISO 5135, y
+merece la pena escribir las dos impresiones una al lado de la otra:
+
+$$
+\Delta L_\mathrm{r} = 10\lg\left[1 +
+   \left(\frac{c}{4\pi f}\right)^{2}\frac{\Omega}{S}\right]
+\qquad
+D_\mathrm{td} = 10\lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f\sqrt{S}}{c}\right)^{2}}\right]
+$$
+
+Desarrolla cualquiera de las dos y ambas quedan en
+$10\lg[1 + \Omega c^2 / (16\pi^2 f^2 S)]$. Son una sola fórmula, sus dos
+tablas de ángulo sólido coinciden entrada por entrada, y
+`open_end_transmission_loss` es las dos. Por eso aquí no aparece nada nuevo
+para la corrección en sí:
+
+```python
+d_lr = noise_control.open_end_transmission_loss(bands, area)
+lw_room = np.array([58.0, 60.0, 61.0, 59.0, 55.0, 50.0])
+print(noise_control.duct_sound_power_level(lw_room, d_lr).round(2))
+#                                 # [69.23 66.14 63.5  59.77 55.21 50.05] dB
+```
+
+Un aparato medido en sala queda infravalorado en el conducto en once
+decibelios abajo del intervalo y en nada arriba. La NOTA a la Tabla 1 ofrece
+una salida a la corrección en vez de una segunda fórmula para ella: se monta
+un elemento de transmisión conforme a la ISO 7235 y no se aplica corrección
+alguna.
+
+## 12. Leer un nivel a un régimen que nadie midió
+
+Un aparato no se ensaya en el único punto de servicio al que lo va a usar un
+proyectista. El 5.5.2 de la ISO 5135 ajusta por mínimos cuadrados una recta a
+través de los niveles frente a $\lg q_V$ cuando los ensayos se hicieron a
+coeficiente de pérdida de presión constante, o frente a
+$\lg \Delta p_\mathrm{t}$ cuando se hicieron a caudal constante. El mismo
+ajuste sirve para los niveles de banda y para el ponderado A:
+
+```python
+duty = np.array([0.05, 0.1, 0.2, 0.4, 0.8])          # m3/s
+levels = np.array([38.0, 44.5, 50.0, 56.5, 62.0])    # dB(A)
+
+line = noise_control.fit_operating_line(duty, levels)
+print(round(line.slope, 2))               # 19.93 dB por década
+print(round(line.maximum_deviation, 2))   # 0.3 dB
+print(round(line.level_at(0.3), 1))       # 53.7 dB(A)
+```
+
+Dos reglas mantienen eso honesto, y la biblioteca hace cumplir las dos. Los
+puntos medidos tienen que caer a menos de 3 dB de la recta, porque más allá
+de eso los niveles no son una recta en esa variable y leer la recta no
+significa nada. Y la recta se puede prolongar hasta la mitad del régimen más
+pequeño medido y hasta el doble del mayor, y no más, que para estos cinco
+puntos son de 0,025 a 1,6 m³/s. Pedir un nivel fuera de ahí lo dice:
+
+```python
+print(line.valid_range)           # (0.025, 1.6)
+```
+
+El 8 k) cierra el círculo: un informe da los niveles totalmente corregidos al
+medio decibelio más próximo y tiene que declarar cuáles de ellos son
+extrapolados y no medidos directamente. El `.plot()` dibuja esa distinción,
+sombreando los dos extremos del intervalo que son extrapolación.
+
 ## Qué cubre esta guía
 
 <Scope>
@@ -491,7 +568,12 @@ Ecuaciones (4) y (5) en las que escalona la exigencia del filtro modal del
 velocidad de la (13), (16), (19) y (20), la presión total de la (11), la
 corrección por cambio de área de la (12), el coeficiente de pérdida de presión
 de la (14) y la (17), el promedio por sustitución de la (18), y la longitud de
-asentamiento del 6.5.2.2.1.
+asentamiento del 6.5.2.2.1. De la ISO 5135: el nivel de potencia sonora en el
+conducto de la Ecuación (1); la Ecuación (2), que es la (B.3) de la ISO 7235
+escrita otra vez y la sirve la misma función; y la recta de servicio por
+mínimos cuadrados del 5.5.2 mediante `fit_operating_line`, con el límite de
+3 dB del ajuste, el intervalo de la mitad al doble en que se puede leer, y un
+`.plot()` que sombrea la parte de ese intervalo que es extrapolación.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -501,9 +583,13 @@ tolerancia dimensional del conducto de sustitución y la pérdida por inserción
 límite se describen pero no se calculan, y a la Ecuación (7) se le da la
 corrección de sala en vez de deducirla. La medida de caudal en sí no se
 modela: los dispositivos de presión diferencial de la ISO 5167-1, el recorrido
-de velocidades y el anillo piezométrico son procedimiento y no aritmética, y
-la extrapolación de un coeficiente medido fuera del intervalo en que se midió
-se deja al lector. Tampoco está la ISO 11820, que mide un
+de velocidades y el anillo piezométrico son procedimiento y no aritmética.
+Aquí tampoco se construye ni se cualifica ninguna sala reverberante: la
+determinación de la ISO 3741 a la que ambas normas remiten su lado receptor
+es página aparte, y las correcciones por ruido de fondo, la comprobación de
+componentes tonales y la cualificación de la sala le pertenecen. La
+ISO 11820, que mide un silenciador in situ donde el truco de la sustitución
+no suele ser posible, no está implementada en absoluto. Tampoco está la ISO 11820, que mide un
 silenciador in situ, donde el truco de la sustitución no suele ser posible.
 </ScopeClaim>
 </Scope>
@@ -520,5 +606,8 @@ silenciador in situ, donde el truco de la sustitución no suele ser posible.
 - [Ruido de climatización a la alemana (VDI 2081)](/phonometry/es/devices/noise-control/vdi2081-air-systems/):
   la pérdida por inserción de un silenciador de bafles predicha desde la
   geometría, para comparar con lo que mediría un laboratorio.
+- [Control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/):
+  la forma cerrada rival para la reflexión en la boca, y las correcciones de
+  terminal de aire con las que se elige un difusor.
 
 </SeeAlso>

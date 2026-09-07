@@ -428,25 +428,103 @@ print(round(noise_control.upstream_straight_length(0.0962), 2))   # 2.0 m
 print(round(noise_control.upstream_straight_length(0.5), 2))      # 3.99 m
 ```
 
+## 11. The third standard, and the formula it shares
+
+ISO 5135:1999 measures something else again: the sound power an air-terminal
+device, air-terminal unit, damper or valve radiates, determined in a
+reverberation room to ISO 3741. What a designer needs is not that but what
+the device puts into the duct behind it, and Equation (1) is the step between
+them:
+
+$$
+L_{W\mathrm{duct}} = L_W + \Delta L_\mathrm{r}
+$$
+
+The correction $\Delta L_\mathrm{r}$ is Equation (2) of ISO 5135, and it is
+worth writing both printings side by side:
+
+$$
+\Delta L_\mathrm{r} = 10\lg\left[1 +
+   \left(\frac{c}{4\pi f}\right)^{2}\frac{\Omega}{S}\right]
+\qquad
+D_\mathrm{td} = 10\lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f\sqrt{S}}{c}\right)^{2}}\right]
+$$
+
+Expand either and both become $10\lg[1 + \Omega c^2 / (16\pi^2 f^2 S)]$.
+They are one formula, their two solid-angle tables agree entry for entry, and
+`open_end_transmission_loss` is both. That is why nothing new appears here for
+the correction itself:
+
+```python
+d_lr = noise_control.open_end_transmission_loss(bands, area)
+lw_room = np.array([58.0, 60.0, 61.0, 59.0, 55.0, 50.0])
+print(noise_control.duct_sound_power_level(lw_room, d_lr).round(2))
+#                                 # [69.23 66.14 63.5  59.77 55.21 50.05] dB
+```
+
+A device measured in a room is understated in the duct by eleven decibels at
+the bottom of the range and by nothing at the top. The NOTE to Table 1 offers
+a way round the correction rather than a second formula for it: fit a
+transmission element to ISO 7235 and no correction is applied at all.
+
+## 12. Reading a level at a duty nobody measured
+
+A device is not tested at the one operating point a designer will use it at.
+ISO 5135 5.5.2 fits a straight line by least squares through the levels
+against $\lg q_V$ when the tests were made at a constant pressure loss
+coefficient, or against $\lg \Delta p_\mathrm{t}$ when they were made at a
+constant flow rate. The same fit serves the band levels and the A-weighted
+one:
+
+```python
+duty = np.array([0.05, 0.1, 0.2, 0.4, 0.8])          # m3/s
+levels = np.array([38.0, 44.5, 50.0, 56.5, 62.0])    # dB(A)
+
+line = noise_control.fit_operating_line(duty, levels)
+print(round(line.slope, 2))               # 19.93 dB per decade
+print(round(line.maximum_deviation, 2))   # 0.3 dB
+print(round(line.level_at(0.3), 1))       # 53.7 dB(A)
+```
+
+Two rules keep that honest, and the library enforces both. The measured
+points have to sit within 3 dB of the line, because past that the levels are
+not a straight line in this variable and reading the line off means nothing.
+And the line may be extended down to half the smallest duty measured and up
+to twice the largest, and no further, which for these five points is 0,025 to
+1,6 m³/s. Asking for a level outside that says so:
+
+```python
+print(line.valid_range)           # (0.025, 1.6)
+```
+
+Clause 8 k) closes the loop: a report gives the fully corrected levels to the
+nearest half decibel and has to state which of them were extrapolated rather
+than measured directly. `.plot()` draws that distinction, shading the two ends
+of the range that are extrapolation.
+
 ## Standards
 
-ISO 7235:2003 and ISO 11691:1995, read from BS EN ISO 7235:2009 and
-BS EN ISO 11691:2009, which endorse them without modification. Implemented:
-Equation (1) of both standards with the reverberation-time correction of
-ISO 7235 6.3; the octave fold of ISO 11691 Equation (2); ISO 7235 Table 6 and
-the three-or-five rule of 6.2.1; ISO 11691 Table 1 and all three columns of
-ISO 7235 Table 7, with the coverage factor of 7.9; the scope of ISO 11691 1.1
-and 4.5; the open-end transmission loss and reflection coefficient of
-Equations (B.3) and (B.4) with the solid angles of Table B.1; the transmission
-loss of Equation (6) and the flow-noise sound power of Equation (7); the
-cut-on frequencies of Equations (4) and (5); and the flow half of 6.5, from
-the gas law of Equations (10), (21) and (22) to the substitution average of
-Equation (18) and the settling length of 6.5.2.2.1. Checked in the
-[conformance report](../../CONFORMANCE.md); the gap Table 6 leaves at 160 Hz
-and the two printed gas-law constants are in the
-[errata register](../../ERRATA.md). Not implemented: the facility
-requirements themselves, the flow measurement of ISO 5167-1, and ISO 11820,
-which measures a silencer in situ.
+ISO 7235:2003, ISO 11691:1995 and ISO 5135:1999, read from BS EN ISO 7235:2009,
+BS EN ISO 11691:2009 and BS EN ISO 5135:1999, which endorse them without
+modification. Implemented, from ISO 7235 and ISO 11691: Equation (1) of both
+with the reverberation-time correction of ISO 7235 6.3; the octave fold of
+ISO 11691 Equation (2); ISO 7235 Table 6 and the three-or-five rule of 6.2.1;
+ISO 11691 Table 1 and all three columns of ISO 7235 Table 7, with the coverage
+factor of 7.9; the scope of ISO 11691 1.1 and 4.5; the open-end transmission
+loss and reflection coefficient of Equations (B.3) and (B.4) with the solid
+angles of Table B.1; the transmission loss of Equation (6) and the flow-noise
+sound power of Equation (7); the cut-on frequencies of Equations (4) and (5);
+and the flow half of 6.5, from the gas law of Equations (10), (21) and (22) to
+the substitution average of Equation (18) and the settling length of
+6.5.2.2.1. From ISO 5135: the duct sound power level of Equation (1),
+Equation (2), which is ISO 7235 (B.3) written out again, and the least-squares
+operating line of 5.5.2 with its 3 dB fit limit and its half-to-twice reading
+range. Checked in the [conformance report](../../CONFORMANCE.md); the gap
+Table 6 leaves at 160 Hz and the two printed gas-law constants are in the
+[errata register](../../ERRATA.md). Not implemented: the facility requirements
+themselves, the flow measurement of ISO 5167-1, the ISO 3741 determination the
+receiving side is handed to, and ISO 11820, which measures a silencer in situ.
 
 ## See also
 
@@ -461,3 +539,6 @@ which measures a silencer in situ.
 - [Errata in published sources](../../ERRATA.md): the gap Table 6 of ISO 7235
   leaves at 160 Hz, and the two printed gas-law constants.
 - API reference: [`noise_control.silencer_measurement`](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencer-measurement/).
+- [Industrial noise control](noise-control.md):
+  the rival closed form for the end reflection, and the air-terminal
+  corrections a diffuser is selected with.

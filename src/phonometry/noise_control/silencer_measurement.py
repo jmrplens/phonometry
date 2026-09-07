@@ -5,8 +5,9 @@ Everything a silencer model computes comes from geometry. The figure a
 supplier publishes does not: it is an **insertion loss measured by
 substitution**, and this module is the arithmetic of that measurement.
 
-Two standards share the method and differ only in how much rigour they ask
-of the laboratory:
+Three standards describe how a duct element is measured in a laboratory. Two
+of them share the substitution method and differ only in how much rigour they
+ask:
 
 * **ISO 7235:2003** (published in Europe as EN ISO 7235:2009) is the full
   procedure, with a modal filter between the source and the test object, a
@@ -18,6 +19,17 @@ of the laboratory:
   nothing else, without flow and with none in the answer, up to a design
   velocity of 15 m/s. A measurement that needs flow, or an object that is not
   a silencer, is outside it and belongs to ISO 7235.
+
+The third measures a different quantity by a different route.
+**ISO 5135:1999** (EN ISO 5135:1998) determines the sound power an
+air-terminal device, air-terminal unit, damper or valve radiates, in a
+reverberation room to ISO 3741, and hands back the power in the duct behind
+it with the end reflection loss of its Equation (2). That equation is
+Equation (B.3) of ISO 7235 written out again, character for character, and
+its solid-angle table is Table B.1: :func:`open_end_transmission_loss` is
+both. What ISO 5135 adds of its own is :func:`fit_operating_line`, the
+straight line 5.5.2 fits through the test points so that a level can be read
+off at a duty the laboratory did not measure at.
 
 The measurement is the same subtraction in both. Run the rig once with a
 plain **substitution duct** in place of the silencer, run it again with the
@@ -72,7 +84,8 @@ from __future__ import annotations
 
 import math
 import warnings
-from typing import TYPE_CHECKING
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -85,11 +98,14 @@ from .._internal.validation import (
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
     "CIRCULAR_CUT_ON_COEFFICIENT",
     "DENSITY_RATIO_RANGE",
+    "EXTRAPOLATION_MAX_DEVIATION_DB",
+    "EXTRAPOLATION_RANGE_FACTORS",
     "ISO11691_REPRODUCIBILITY",
     "ISO7235_ABSOLUTE_ZERO_OFFSET",
     "ISO7235_COVERAGE_FACTOR",
@@ -99,8 +115,10 @@ __all__ = [
     "MINIMUM_FLOW_RATES",
     "MINIMUM_PRESSURE_DIFFERENCE_PA",
     "MODAL_FILTER_ATTENUATION_DB",
+    "OperatingLine",
     "RADIATION_SOLID_ANGLES",
     "RECTANGULAR_CUT_ON_COEFFICIENT",
+    "REPORTING_RESOLUTION_DB",
     "SURVEY_AREA_RATIO_RANGE",
     "SURVEY_BAND_RANGE_HZ",
     "SURVEY_DIAMETER_RANGE_M",
@@ -110,7 +128,9 @@ __all__ = [
     "UPSTREAM_STRAIGHT_MIN_M",
     "VELOCITY_PROFILE_TOLERANCE_PERCENT",
     "average_pressure_loss_coefficient",
+    "duct_sound_power_level",
     "dynamic_pressure",
+    "fit_operating_line",
     "flow_noise_power_level",
     "measured_transmission_loss",
     "measurement_expanded_uncertainty",
@@ -288,6 +308,21 @@ UPSTREAM_STRAIGHT_MIN_M = 2.0
 #: the upstream connection, as a percentage of the mean over the cross
 #: section, excluding the 15 mm nearest the walls.
 VELOCITY_PROFILE_TOLERANCE_PERCENT = 10.0
+
+#: ISO 5135:1999, 5.5.2. The largest distance, in dB, a measured point may
+#: sit from the least-squares line fitted through the test points before the
+#: fit stops being a straight line in that variable.
+EXTRAPOLATION_MAX_DEVIATION_DB = 3.0
+
+#: ISO 5135:1999, 5.5.2. How far outside the measured duties the fitted line
+#: may be read: down to half the smallest and up to twice the largest.
+EXTRAPOLATION_RANGE_FACTORS: tuple[float, float] = (0.5, 2.0)
+
+#: ISO 5135:1999, 8 k). The resolution the fully corrected sound power levels
+#: are tabulated or plotted to, in dB.
+REPORTING_RESOLUTION_DB = 0.5
+
+_MINIMUM_FIT_POINTS = 2
 
 _THIRDS_PER_OCTAVE = 3
 
@@ -1182,3 +1217,184 @@ def upstream_straight_length(area: float) -> float:
     section = require_positive(area, "area")
     equivalent = math.sqrt(4.0 * section / math.pi)
     return float(max(UPSTREAM_STRAIGHT_DIAMETERS * equivalent, UPSTREAM_STRAIGHT_MIN_M))
+
+
+def duct_sound_power_level(
+    room_sound_power_level: ArrayLike, end_reflection_loss: ArrayLike
+) -> NDArray[np.float64]:
+    r"""ISO 5135 Equation (1): back from the room to the duct.
+
+    .. math::
+
+       L_{W\mathrm{duct}} = L_W + \Delta L_\mathrm{r}
+
+    An air-terminal device is measured by what it radiates into a
+    reverberation room, and what a designer needs is what it puts into the
+    duct behind it. The two differ by the end reflection loss of the open
+    duct, which is Equation (2) of ISO 5135 and, written out, is exactly
+    Equation (B.3) of ISO 7235: the same formula, the same solid-angle table,
+    two names. :func:`open_end_transmission_loss` is both.
+
+    The NOTE to Table 1 offers a way out of the correction rather than a
+    second formula for it: a transmission element to ISO 7235 may be fitted
+    instead, and then no correction is applied at all.
+
+    :param room_sound_power_level: :math:`L_W`, the sound power radiated into
+        the room, in dB, from ISO 3741.
+    :param end_reflection_loss: :math:`\Delta L_\mathrm{r}`, in dB, from
+        :func:`open_end_transmission_loss`.
+    :return: :math:`L_{W\mathrm{duct}}`, in dB, one value per band.
+    :raises ValueError: If a value is not finite, or if the two arrays do not
+        carry the same number of bands.
+    """
+    level = require_finite_array(room_sound_power_level, "room_sound_power_level")
+    reflection = require_finite_array(end_reflection_loss, "end_reflection_loss")
+    _require_matching_bands(
+        {
+            "room_sound_power_level": level.size,
+            "end_reflection_loss": reflection.size,
+        },
+        broadcast_singletons=True,
+    )
+    return np.asarray(level + reflection, dtype=np.float64)
+
+
+@dataclass(frozen=True)
+class OperatingLine:
+    r"""ISO 5135 5.5.2: a level fitted against the logarithm of a duty.
+
+    An air-terminal device is not tested at the one operating point a
+    designer will use it at. It is tested at several, and the standard fits a
+    straight line through the levels against :math:`\lg q_V` or
+    :math:`\lg \Delta p_\mathrm{t}` by least squares. Between the points
+    that is interpolation; outside them 5.5.2 allows the line to be extended
+    down to half the smallest duty measured and up to twice the largest, and
+    no further.
+
+    Two things make the fit reportable. The maximum deviation between the
+    measured points and the line has to be within
+    :data:`EXTRAPOLATION_MAX_DEVIATION_DB`; past that the levels are not a
+    straight line in this variable and the extrapolation means nothing.
+    And clause 8 k) requires the report to say which of the values it gives
+    are extrapolated rather than measured directly.
+
+    :ivar slope: dB per decade of the duty.
+    :ivar intercept: The level, in dB, at a duty of 1 in whatever unit the
+        duty was given in.
+    :ivar maximum_deviation: The largest distance, in dB, between a measured
+        point and the line.
+    :ivar smallest_duty: The lowest duty measured.
+    :ivar largest_duty: The highest duty measured.
+    :ivar duty: The duties the fit was made from, as given.
+    :ivar levels: The levels, in dB, as given.
+    """
+
+    slope: float
+    intercept: float
+    maximum_deviation: float
+    smallest_duty: float
+    largest_duty: float
+    duty: NDArray[np.float64]
+    levels: NDArray[np.float64]
+
+    @property
+    def valid_range(self) -> tuple[float, float]:
+        """The duties 5.5.2 lets the line be read at, half to twice."""
+        low, high = EXTRAPOLATION_RANGE_FACTORS
+        return (low * self.smallest_duty, high * self.largest_duty)
+
+    def level_at(self, duty: float) -> float:
+        """The fitted level at one duty, in dB.
+
+        :param duty: The volume flow rate or total pressure loss to read the
+            line at, in the unit the fit was made in.
+        :return: The level, in dB, rounded to nothing: clause 8 k) asks for
+            half a decibel in the report and
+            :data:`REPORTING_RESOLUTION_DB` carries that, but rounding here
+            would compound through a chain.
+        :raises ValueError: If the duty is not positive and finite.
+        :warns SilencerMeasurementWarning: If the duty is outside the range
+            5.5.2 allows the line to be extended over.
+        """
+        point = require_positive(duty, "duty")
+        low, high = self.valid_range
+        if not low <= point <= high:
+            msg = (
+                "ISO 5135 5.5.2 extends a fitted line down to half the "
+                f"smallest duty measured and up to twice the largest, so to "
+                f"{low:.4g} and {high:.4g}; got {duty!r}, which is an "
+                "extrapolation the standard does not offer."
+            )
+            warnings.warn(msg, SilencerMeasurementWarning, stacklevel=2)
+        return float(self.slope * math.log10(point) + self.intercept)
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the measured points and the line fitted through them.
+
+        Requires matplotlib (``pip install phonometry[plot]``).
+        """
+        from .._i18n import check_language
+        from .._plot.noise_control import plot_operating_line
+
+        check_language(language)
+        return plot_operating_line(self, ax=ax, language=language, **kwargs)
+
+
+def fit_operating_line(duty: ArrayLike, levels: ArrayLike) -> OperatingLine:
+    r"""ISO 5135 5.5.2: the least-squares line through the test points.
+
+    The abscissa is the logarithm of the duty, which is the volume flow rate
+    when the tests were made at a constant pressure loss coefficient and the
+    total pressure loss when they were made at a constant flow rate. The
+    ordinate is the band level or the A-weighted level, and the same fit
+    serves both.
+
+    :param duty: :math:`q_V` in m³/s or :math:`\Delta p_\mathrm{t}` in Pa,
+        one per test point, at least two of them.
+    :param levels: The level at each of those points, in dB.
+    :return: An :class:`OperatingLine`.
+    :raises ValueError: If a duty is not positive and finite, if a level is
+        not finite, if the two arrays are of different lengths, if there are
+        fewer than two points, or if every point is at the same duty.
+    :warns SilencerMeasurementWarning: If a point lies further from the line
+        than the 3 dB of 5.5.2.
+    """
+    duties = require_positive_array(duty, "duty")
+    measured = require_finite_array(levels, "levels")
+    _require_matching_bands({"duty": duties.size, "levels": measured.size})
+    if duties.size < _MINIMUM_FIT_POINTS:
+        msg = (
+            "A straight line needs at least two points to be fitted through; "
+            f"got {duties.size}."
+        )
+        raise ValueError(msg)
+    abscissa = np.log10(duties)
+    if float(np.ptp(abscissa)) <= 0.0:
+        msg = (
+            "5.5.2 fits the levels against the logarithm of the duty, so the "
+            "test points have to be at more than one duty; every one of "
+            f"these is at {float(duties[0])!r}."
+        )
+        raise ValueError(msg)
+    slope, intercept = np.polyfit(abscissa, measured, 1)
+    deviation = float(np.max(np.abs(measured - (slope * abscissa + intercept))))
+    if deviation > EXTRAPOLATION_MAX_DEVIATION_DB:
+        msg = (
+            f"5.5.2 asks for the measured points to sit within "
+            f"{EXTRAPOLATION_MAX_DEVIATION_DB:.0f} dB of the fitted line; the "
+            f"worst of these is {deviation:.2f} dB away, so the levels are "
+            "not a straight line in this variable and reading the line off "
+            "outside the points would not mean anything."
+        )
+        warnings.warn(msg, SilencerMeasurementWarning, stacklevel=2)
+    return OperatingLine(
+        slope=float(slope),
+        intercept=float(intercept),
+        maximum_deviation=deviation,
+        smallest_duty=float(np.min(duties)),
+        largest_duty=float(np.max(duties)),
+        duty=duties,
+        levels=measured,
+    )

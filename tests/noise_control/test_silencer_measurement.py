@@ -692,3 +692,164 @@ class TestUpstreamStraightLength:
     def test_an_area_that_is_not_positive_is_refused(self, bad: float) -> None:
         with pytest.raises(ValueError, match="area"):
             sm.upstream_straight_length(bad)
+
+
+#: Five test points of an air-terminal device, ISO 5135 5.5.2 a): the
+#: A-weighted level against the volume flow rate at a constant pressure loss
+#: coefficient. Twenty decibels per decade is the sixth power of the velocity
+#: a diffuser is usually quoted at.
+DUTY = np.array([0.05, 0.1, 0.2, 0.4, 0.8])
+DUTY_LEVELS = np.array([38.0, 44.5, 50.0, 56.5, 62.0])
+
+
+class TestDuctSoundPowerLevel:
+    """ISO 5135 Equation (1), and the formula it shares with ISO 7235."""
+
+    def test_it_adds_the_end_reflection_back(self) -> None:
+        found = sm.duct_sound_power_level([60.0, 62.0], [4.0, 2.0])
+        assert found == pytest.approx([64.0, 64.0])
+
+    def test_iso_5135_equation_two_is_iso_7235_equation_b_three(self) -> None:
+        # ISO 5135 prints Delta L_r = 10 lg[1 + (c / 4 pi f)^2 (Omega / S)];
+        # ISO 7235 prints D_td = 10 lg[1 + Omega / (4 pi f sqrt(S) / c)^2].
+        # Expand either and they are the same expression, which is why the
+        # library has one function for both.
+        c, area = 343.0, DUCT_AREA
+        for angle in sm.RADIATION_SOLID_ANGLES.values():
+            printed = 10.0 * np.log10(
+                1.0 + (c / (4.0 * math.pi * BANDS)) ** 2 * (angle / area)
+            )
+            found = sm.open_end_transmission_loss(BANDS, area, solid_angle=angle)
+            assert found == pytest.approx(printed)
+
+    def test_the_two_solid_angle_tables_agree_entry_for_entry(self) -> None:
+        # Table 1 of ISO 5135 and Table B.1 of ISO 7235 print the same five
+        # configurations with the same five values.
+        assert list(sm.RADIATION_SOLID_ANGLES.values()) == pytest.approx(
+            [2.0 * math.pi, math.pi, 4.0 * math.pi, 2.0 * math.pi, 4.0 * math.pi]
+        )
+
+    def test_mismatched_band_counts_are_refused(self) -> None:
+        with pytest.raises(ValueError, match="one length"):
+            sm.duct_sound_power_level([60.0, 62.0, 64.0], [4.0, 2.0])
+
+
+class TestOperatingLine:
+    """ISO 5135 5.5.2, the straight line fitted through the test points."""
+
+    def test_a_clean_power_law_comes_back_as_its_slope(self) -> None:
+        duty = np.array([0.05, 0.1, 0.2, 0.4, 0.8])
+        levels = 50.0 + 20.0 * np.log10(duty / 0.2)
+        line = sm.fit_operating_line(duty, levels)
+        assert line.slope == pytest.approx(20.0)
+        assert line.maximum_deviation == pytest.approx(0.0, abs=1e-9)
+        assert line.level_at(0.2) == pytest.approx(50.0)
+
+    def test_it_keeps_the_points_it_was_given(self) -> None:
+        line = sm.fit_operating_line(DUTY, DUTY_LEVELS)
+        assert line.duty == pytest.approx(DUTY)
+        assert line.levels == pytest.approx(DUTY_LEVELS)
+
+    def test_the_extension_range_is_half_to_twice(self) -> None:
+        line = sm.fit_operating_line(DUTY, DUTY_LEVELS)
+        assert line.valid_range == pytest.approx((0.025, 1.6))
+        assert line.smallest_duty == pytest.approx(0.05)
+        assert line.largest_duty == pytest.approx(0.8)
+
+    def test_reading_inside_the_range_is_quiet(self) -> None:
+        line = sm.fit_operating_line(DUTY, DUTY_LEVELS)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            found = line.level_at(0.3)
+        assert found == pytest.approx(53.71, abs=5e-3)
+
+    def test_the_range_ends_are_inside_it(self) -> None:
+        line = sm.fit_operating_line(DUTY, DUTY_LEVELS)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            low = line.level_at(0.025)
+            high = line.level_at(1.6)
+        assert low < high
+
+    def test_reading_beyond_it_warns(self) -> None:
+        line = sm.fit_operating_line(DUTY, DUTY_LEVELS)
+        with pytest.warns(sm.SilencerMeasurementWarning, match="5.5.2"):
+            line.level_at(3.0)
+
+    def test_points_that_are_not_a_straight_line_warn(self) -> None:
+        bent = DUTY_LEVELS.copy()
+        bent[2] += 6.0
+        with pytest.warns(sm.SilencerMeasurementWarning, match="fitted line"):
+            sm.fit_operating_line(DUTY, bent)
+
+    def test_the_three_decibel_limit_and_the_half_decibel_report(self) -> None:
+        assert sm.EXTRAPOLATION_MAX_DEVIATION_DB == pytest.approx(3.0)
+        assert sm.EXTRAPOLATION_RANGE_FACTORS == (0.5, 2.0)
+        assert sm.REPORTING_RESOLUTION_DB == pytest.approx(0.5)
+
+    def test_one_point_cannot_make_a_line(self) -> None:
+        with pytest.raises(ValueError, match="at least two points"):
+            sm.fit_operating_line([0.2], [50.0])
+
+    def test_every_point_at_one_duty_cannot_either(self) -> None:
+        with pytest.raises(ValueError, match="more than one duty"):
+            sm.fit_operating_line([0.2, 0.2, 0.2], [50.0, 51.0, 49.0])
+
+    def test_two_arrays_of_different_lengths_are_refused(self) -> None:
+        with pytest.raises(ValueError, match="one length"):
+            sm.fit_operating_line([0.1, 0.2, 0.4], [50.0, 52.0])
+
+    @pytest.mark.parametrize("bad", [0.0, -0.2])
+    def test_a_duty_that_is_not_positive_is_refused(self, bad: float) -> None:
+        with pytest.raises(ValueError, match="duty"):
+            sm.fit_operating_line([0.1, bad], [50.0, 52.0])
+
+
+class TestOperatingLinePlot:
+    """The renderer, checked on what it draws rather than by looking."""
+
+    @staticmethod
+    def _axes() -> object:
+        matplotlib = pytest.importorskip("matplotlib")
+        matplotlib.use("Agg")
+        line = sm.fit_operating_line(DUTY, DUTY_LEVELS)
+        return line.plot()
+
+    def test_it_draws_the_fit_and_the_points(self) -> None:
+        ax = self._axes()
+        assert len(ax.lines) == 2  # type: ignore[attr-defined]
+        labels = [line.get_label() for line in ax.lines]  # type: ignore[attr-defined]
+        assert any("Least-squares fit" in str(label) for label in labels)
+        assert any("Measured points" in str(label) for label in labels)
+
+    def test_the_measured_points_are_the_ones_given(self) -> None:
+        ax = self._axes()
+        points = next(
+            line
+            for line in ax.lines  # type: ignore[attr-defined]
+            if "Measured" in str(line.get_label())
+        )
+        assert points.get_xdata() == pytest.approx(DUTY)
+        assert points.get_ydata() == pytest.approx(DUTY_LEVELS)
+
+    def test_the_duty_axis_is_logarithmic(self) -> None:
+        # The fit is made in lg of the duty, so a linear axis would draw a
+        # straight line as a curve.
+        assert self._axes().get_xscale() == "log"  # type: ignore[attr-defined]
+
+    def test_the_two_extrapolated_ends_are_shaded(self) -> None:
+        ax = self._axes()
+        assert len(ax.patches) == 2  # type: ignore[attr-defined]
+
+    def test_the_title_carries_the_worst_deviation(self) -> None:
+        ax = self._axes()
+        assert "0.30 dB" in ax.get_title()  # type: ignore[attr-defined]
+
+    def test_the_spanish_labels(self) -> None:
+        matplotlib = pytest.importorskip("matplotlib")
+        matplotlib.use("Agg")
+        line = sm.fit_operating_line(DUTY, DUTY_LEVELS)
+        ax = line.plot(language="es")
+        assert "Recta de servicio" in ax.get_title()
+        labels = [artist.get_label() for artist in ax.lines]
+        assert any("mínimos cuadrados" in str(label) for label in labels)

@@ -16,7 +16,7 @@ from ..theme import (
     FIELD_STROKE,
 )
 from ._core import (
-    _fdtd_cw_capture,
+    _cw_beta,
     _fit_text_x,
     _rms_to_db,
     _settle,
@@ -68,7 +68,7 @@ def _barrier_fields(n_frames: int = _BARRIER_FRAMES) -> tuple[Any, Any, Any, Any
     instantaneous-pressure frames, RMS maps in dB re each run's own
     maximum, the frame times and the per-frequency insertion losses.
     """
-    import fdtd2d
+    import fdtd_dispatch
 
     c0, dx = 343.0, 0.02
     ny, nx = 350, 600  # 7 m x 12 m
@@ -91,39 +91,49 @@ def _barrier_fields(n_frames: int = _BARRIER_FRAMES) -> tuple[Any, Any, Any, Any
         # in the imshow-origin naming of fdtd2d); the ground stays rigid.
         rms_patch = []
         for rho_map in (rho, None):
-            sim = fdtd2d.FDTD2D(
+            scene = fdtd_dispatch.Scene(
                 c0,
                 dx,
                 shape=(ny, nx),
                 rho=1.2 if rho_map is None else rho_map,
                 sponge_width=40,
                 sponge_sides=("left", "right", "bottom"),
+                sources=(
+                    fdtd_dispatch.point(100, 25, fdtd_dispatch.cw(f, ramp_cycles=2.0)),
+                ),
             )
-            sim.add_source(fdtd2d.CWSource(ix=100, iy=25, frequency=f, ramp_cycles=2.0))
-            if rho_map is not None:
-                ps, rs, times, _ = _fdtd_cw_capture(sim, f, every, n_frames)
-                p_all.append(ps)
-                db_all.append(_rms_to_db(rs))
-            else:
-                # Barrier-free reference: same steps, no frames captured.
-                for _ in range(every * n_frames):
-                    sim.step()
             # The clip ends at 44.5 ms, but at 100 Hz the field behind the
             # barrier has not settled by then: after the 20 ms source ramp
             # the diffracted and ground-bounced paths over the edge keep
-            # building the receiver level for several more periods. Step
-            # both runs on, uncaptured, to ~113 ms -- where the measured
+            # building the receiver level for several more periods. Both
+            # runs step on, uncaptured, to ~113 ms -- where the measured
             # insertion loss sits within 0.05 dB of its value 30 ms later
-            # -- and measure an exact RMS over the last two full periods,
-            # so neither run's transient biases the published number.
-            period = round(1.0 / (f * sim.dt))
-            settle = round(0.113 / sim.dt) - sim.n
-            acc = np.zeros_like(sim.p)
-            for i in range(settle):
-                sim.step()
-                if i >= settle - 2 * period:
-                    acc += sim.p**2
-            rms = np.sqrt(acc / (2 * period))
+            # -- and the level is an exact RMS over the last two full
+            # periods, so neither run's transient biases the published
+            # number. That window is a reduction of the run itself
+            # (``mean_squares``), so the reference run ships nothing back
+            # but the map it is measured on.
+            period = round(1.0 / (f * scene.dt))
+            settled = round(0.113 / scene.dt)
+            window = [
+                {"name": "settled", "start": settled - 2 * period, "stop": settled}
+            ]
+            if rho_map is not None:
+                out = fdtd_dispatch.run(
+                    scene,
+                    steps=settled,
+                    sample_steps=[every * (k + 1) for k in range(n_frames)],
+                    sample_stride=2,
+                    rms_beta=_cw_beta(scene, f),
+                    mean_squares=window,
+                )
+                p_all.append(out["frames"])
+                db_all.append(_rms_to_db(out["rms_frames"]))
+                times = out["sample_steps"] * scene.dt
+            else:
+                # Barrier-free reference: the same run, no frames captured.
+                out = fdtd_dispatch.run(scene, steps=settled, mean_squares=window)
+            rms = out["mean_square_settled"]
             rms_patch.append(float(np.sqrt(np.mean(rms[patch] ** 2))))
         ils.append(20.0 * float(np.log10(rms_patch[1] / rms_patch[0])))
     return np.stack(p_all), np.stack(db_all), times, tuple(ils)

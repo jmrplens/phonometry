@@ -18,40 +18,52 @@ import numpy as np
 from ..theme import COLOR_FG
 
 if TYPE_CHECKING:
+    from fdtd_dispatch import Scene
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
     from matplotlib.text import Text
     from matplotlib.transforms import Bbox
     from numpy.typing import NDArray
 
-    from phonometry.simulation.fdtd import FDTD2D
+
+def _cw_beta(scene: Scene, frequency: float) -> float:
+    """The one-pole coefficient of the running mean square of a CW run.
+
+    A two-period time constant: the RMS map (the lobe/shadow pattern) builds
+    up as the field settles, rather than carrying the onset transient into
+    the picture.
+    """
+    return float(np.exp(-scene.dt * frequency / 2.0))
 
 
 def _fdtd_cw_capture(
-    sim: FDTD2D, frequency: float, every: int, n_frames: int, decimate: int = 2
+    scene: Scene, frequency: float, every: int, n_frames: int, decimate: int = 2
 ) -> tuple[
     NDArray[np.float32], NDArray[np.float32], NDArray[np.float64], NDArray[np.float64]
 ]:
-    """Drive a CW simulation and capture instantaneous + running-RMS frames.
+    """Drive a CW scene and capture instantaneous + running-RMS frames.
 
-    The running mean square uses a two-period time constant, so the RMS map
-    (the lobe/shadow pattern) builds up as the field settles. Returns the
-    float32 frame stacks (decimated), the frame times and the final
-    full-resolution RMS map for physics probes.
+    The scene is stepped wherever :mod:`fdtd_dispatch` sends it (the GPU
+    box of ``.env`` when it answers, this machine otherwise) and the two
+    reductions are computed there, so a clip's field never travels a frame
+    per step. Returns the float32 frame stacks (decimated), the frame times
+    and the final full-resolution RMS map for physics probes.
     """
-    beta = float(np.exp(-sim.dt * frequency / 2.0))
-    ms = np.zeros_like(sim.p)
-    ps: list[NDArray[np.float32]] = []
-    rs: list[NDArray[np.float32]] = []
-    ts: list[float] = []
-    for _ in range(every * n_frames):
-        sim.step()
-        ms = beta * ms + (1.0 - beta) * sim.p**2
-        if sim.n % every == 0 and len(ps) < n_frames:
-            ps.append(sim.p[::decimate, ::decimate].astype(np.float32))
-            rs.append(np.sqrt(ms[::decimate, ::decimate]).astype(np.float32))
-            ts.append(sim.time)
-    return np.stack(ps), np.stack(rs), np.asarray(ts), np.sqrt(ms)
+    import fdtd_dispatch
+
+    out = fdtd_dispatch.run(
+        scene,
+        steps=every * n_frames,
+        sample_steps=[every * (k + 1) for k in range(n_frames)],
+        sample_stride=decimate,
+        rms_beta=_cw_beta(scene, frequency),
+    )
+    return (
+        out["frames"],
+        out["rms_frames"],
+        out["sample_steps"] * scene.dt,
+        out["rms_final"],
+    )
 
 
 def _rms_to_db(

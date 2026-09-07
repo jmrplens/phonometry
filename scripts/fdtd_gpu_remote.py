@@ -158,6 +158,164 @@ class RemoteRunError(RuntimeError):
     """A remote stage (ssh, scp or docker) failed or timed out."""
 
 
+def _validate_sources(
+    sources: list[dict[str, Any]], ny: int, nx: int
+) -> list[dict[str, Any]]:
+    """Check the sources and return them in the form the engine takes.
+
+    The checks are the engine's own, run against the grid the job is packed
+    for: a point outside it, a direction that is not one of the four, an
+    offset off the edge or a waveform type nobody implements all fail at
+    packing time, where the traceback is readable and the round trip has
+    not been paid for.
+
+    What comes back is what ``build_job`` serialises, and it is normalised
+    rather than merely approved: the cell indices and the offset are the
+    integers ``GpuFDTD2D`` insists on, the plane amplitude is finite, and
+    the waveform is a copy. JSON carries whatever it is handed, so a
+    ``float("nan")`` amplitude that only the far side rejects, or a mapping
+    the caller edits after packing, would otherwise reach the engine past
+    the check that was supposed to stop it.
+
+    :param sources: The source dicts as ``build_job`` received them.
+    :param ny: Grid rows.
+    :param nx: Grid columns.
+    :returns: One normalised record per source, in the order given.
+    :raises ValueError: On the first source that does not describe one.
+    """
+    records: list[dict[str, Any]] = []
+    for index, spec in enumerate(sources):
+        kind = str(spec.get("kind", ""))
+        waveform = spec.get("waveform")
+        if not isinstance(waveform, dict):
+            msg = f"sources[{index}] needs a 'waveform' dict"
+            raise ValueError(msg)
+        fdtd_gpu.check_waveform(waveform)
+        if kind == "point":
+            ix = fdtd_gpu._integer(f"sources[{index}] ix", spec["ix"])
+            iy = fdtd_gpu._integer(f"sources[{index}] iy", spec["iy"])
+            if not (0 <= ix < nx and 0 <= iy < ny):
+                msg = (
+                    f"sources[{index}] drives cell ({iy}, {ix}), outside the "
+                    f"{ny} x {nx} grid"
+                )
+                raise ValueError(msg)
+            records.append(
+                {"kind": "point", "ix": ix, "iy": iy, "waveform": dict(waveform)}
+            )
+        elif kind == "plane":
+            direction = str(spec["direction"])
+            if direction not in fdtd_gpu._SIDE_TRAVEL:
+                msg = (
+                    f"sources[{index}] travels {direction!r}; expected one of "
+                    f"{fdtd_gpu._SIDE_TRAVEL}"
+                )
+                raise ValueError(msg)
+            span = ny if direction in ("down", "up") else nx
+            offset = fdtd_gpu._integer(
+                f"sources[{index}] offset", spec.get("offset", 0)
+            )
+            if not 0 <= offset < span - 1:
+                msg = f"sources[{index}] offset {offset} is off the grid"
+                raise ValueError(msg)
+            amplitude = fdtd_gpu._finite(
+                f"sources[{index}] amplitude", spec.get("amplitude", 1.0)
+            )
+            records.append(
+                {
+                    "kind": "plane",
+                    "direction": direction,
+                    "offset": offset,
+                    "amplitude": amplitude,
+                    "waveform": dict(waveform),
+                }
+            )
+        else:
+            msg = f"sources[{index}] kind {kind!r}; expected 'point' or 'plane'"
+            raise ValueError(msg)
+    return records
+
+
+def _validate_window(
+    specs: list[dict[str, Any]], kind: str, steps: int
+) -> list[dict[str, Any]]:
+    """Check a reduction and return it with its bounds as integers.
+
+    The half-open window ``(start, stop]`` both reductions accumulate over
+    is checked here, so a job that would silently reduce over nothing fails
+    at packing time. The bounds are also normalised: the runner compares
+    them against a step counter, and a bound that arrives as ``"100"``
+    survives JSON intact and raises a type error mid-run on the far side.
+
+    :param specs: The reduction specs as ``build_job`` received them.
+    :param kind: The parameter name, for the message.
+    :param steps: Total steps of the job, which bounds the windows.
+    :return: The same specs, copied, with integer bounds.
+    :raises ValueError: On the first spec that is not usable.
+    """
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for index, spec in enumerate(specs):
+        name = str(spec.get("name", ""))
+        if not name or name in seen:
+            msg = f"{kind}[{index}] needs a 'name', unique within the job"
+            raise ValueError(msg)
+        seen.add(name)
+        first, last = (
+            _whole(spec["start"], f"{kind}[{index}].start"),
+            _whole(spec["stop"], f"{kind}[{index}].stop"),
+        )
+        if not 0 <= first < last <= steps:
+            msg = (
+                f"{kind}[{index}] accumulates over steps ({first}, {last}], "
+                f"which is not inside (0, {steps}]"
+            )
+            raise ValueError(msg)
+        out.append({**spec, "name": name, "start": first, "stop": last})
+    return out
+
+
+def _whole(value: Any, name: str) -> int:  # noqa: ANN401 - whatever the caller packed
+    """The integer *value* stands for, refusing anything that is not one."""
+    if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
+        msg = f"{name} must be an integer; got {value!r}"
+        raise ValueError(msg)
+    return int(value)
+
+
+def _validate_envelopes(
+    envelopes: list[dict[str, Any]], ny: int, nx: int, steps: int
+) -> list[dict[str, Any]]:
+    """Reject an envelope that names no line, or one off the grid.
+
+    :param envelopes: The envelope specs as ``build_job`` received them.
+    :param ny: Grid rows.
+    :param nx: Grid columns.
+    :param steps: Total steps of the job, which bounds the windows.
+    :return: The same specs, copied, with every index an integer.
+    :raises ValueError: On the first spec that does not describe a line.
+    """
+    checked = _validate_window(envelopes, "envelopes", steps)
+    for index, spec in enumerate(checked):
+        row, column = spec.get("row"), spec.get("column")
+        if (row is None) == (column is None):
+            msg = f"envelopes[{index}] takes exactly one of 'row' and 'column'"
+            raise ValueError(msg)
+        along, limit = (nx, ny) if row is not None else (ny, nx)
+        side = "row" if row is not None else "column"
+        fixed = _whole(row if row is not None else column, f"envelopes[{index}].{side}")
+        if not 0 <= fixed < limit:
+            msg = f"envelopes[{index}] sits at {fixed}, off a grid of {limit}"
+            raise ValueError(msg)
+        start = _whole(spec["from"], f"envelopes[{index}].from")
+        stop = _whole(spec["to"], f"envelopes[{index}].to")
+        if not 0 <= start < stop <= along:
+            msg = f"envelopes[{index}] spans [{start}, {stop}) of {along}"
+            raise ValueError(msg)
+        spec.update({side: fixed, "from": start, "to": stop})
+    return checked
+
+
 def build_job(
     c: float | NDArray[np.float64],
     dx: float,
@@ -174,6 +332,10 @@ def build_job(
     edge_impedance: dict[str, float | NDArray[np.float64]] | None = None,
     obstacle_mask: NDArray[np.bool_] | None = None,
     plane_waves: list[dict[str, Any]] | None = None,
+    sources: list[dict[str, Any]] | None = None,
+    rms_beta: float = 0.0,
+    envelopes: list[dict[str, Any]] | None = None,
+    mean_squares: list[dict[str, Any]] | None = None,
     init_scale_x: NDArray[np.float64] | None = None,
     sample_stride: int = 1,
     sample_dtype: str = "float64",
@@ -194,6 +356,25 @@ def build_job(
     window of length ``nx`` applied after the plane waves are laid down
     (``p *= w`` and ``vy *= w`` column-wise, ``vx`` untouched), giving the
     initial front a lateral taper that leaves the sponges alone.
+    ``sources`` are the *sustained* sources, the ones the library adds with
+    ``add_source``: a list of dicts, each ``{"kind": "point", "ix", "iy",
+    "waveform"}`` or ``{"kind": "plane", "direction", "offset",
+    "amplitude", "waveform"}``, where the waveform is the parameter dict
+    :func:`fdtd_gpu.waveform_value` reads (``"cw"`` or ``"gaussian"``). A
+    job archive cannot carry the callable the library takes, which is why
+    they are described rather than passed. They are validated here against
+    a throwaway engine, so a malformed source fails at packing time.
+
+    ``rms_beta``, ``envelopes`` and ``mean_squares`` are the reductions the
+    runner can compute on the device, for the scenes that accumulate over
+    every step rather than over the captured frames: a one-pole running
+    mean square of the pressure, the running maximum of ``|p|`` along a row
+    or column over a window of steps, and the root mean square of the whole
+    field over a window of steps. They exist because shipping every step
+    back would cost more than the simulation; ``envelopes`` is a list of
+    ``{"name", "row"|"column", "from", "to", "start", "stop"}`` and
+    ``mean_squares`` a list of ``{"name", "start", "stop"}``.
+
     ``sample_stride`` subsamples each
     recorded frame spatially (``frame[::stride, ::stride]``, applied on
     the compute device before the transfer) and ``sample_dtype``
@@ -234,6 +415,12 @@ def build_job(
     )
     mask = fdtd_gpu._resolve_obstacle_mask(obstacle_mask, ny, nx)
     obstacle = np.zeros((ny, nx), dtype=np.bool_) if mask is None else mask
+    source_records = _validate_sources(sources or [], ny, nx)
+    if not np.isfinite(rms_beta) or not 0.0 <= rms_beta < 1.0:
+        msg = f"rms_beta must lie in [0, 1); got {rms_beta!r}"
+        raise ValueError(msg)
+    envelope_specs = _validate_envelopes(envelopes or [], ny, nx, steps)
+    square_specs = _validate_window(mean_squares or [], "mean_squares", steps)
     job: dict[str, Any] = {
         "c": c_map,
         "rho": rho_map,
@@ -246,6 +433,10 @@ def build_job(
         "edge_sides": np.asarray(sorted(edge_profiles), dtype=np.str_),
         "obstacle": obstacle,
         "plane_waves": np.str_(json.dumps(plane_waves or [])),
+        "sources": np.str_(json.dumps(source_records)),
+        "rms_beta": np.float64(rms_beta),
+        "envelopes": np.str_(json.dumps(envelope_specs)),
+        "mean_squares": np.str_(json.dumps(square_specs)),
         "steps": np.int64(steps),
         "sample_steps": sample_arr,
         "sample_stride": np.int64(sample_stride),

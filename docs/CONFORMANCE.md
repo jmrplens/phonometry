@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**857/857 conformance checks pass** across 70 domains and 400 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**864/864 conformance checks pass** across 71 domains and 403 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1232,6 +1232,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bies 5e Eq. (5.138) (Kurze-Anderson, N -> 0) | Barrier attenuation at the shadow boundary N = 0 | 5 dB (+/-0 dB) | 5 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | Bies 5e Eq. (5.138) (Kurze-Anderson, large-N slope) | Delta(N=10) - Delta(N=1) vs the 10 lg(10) = 10 dB decade growth | 10 dB (+/-0.5 dB) | 9.8845 dB | -0.1155 dB | 23 % | ![Pass][cv-pass] Pass |
 | Attenborough 2e Eqs. (9.19)-(9.20) (rigid half-plane, shadow boundary) | Exact thin-screen insertion loss at grazing (field halved, 6 dB) | 6.0206 dB (+/-0.6 dB) | 5.7932 dB | -0.2274 dB | 38 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Road traffic noise reducing devices (EN 1793)</b>: 100% (7/7)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| EN 1793-3:1997 Table 1 (normalised traffic noise spectrum) | the eighteen printed levels, 100 Hz to 5 kHz | 100 Hz = -20 dB; 1 kHz = -8 dB; 5 kHz = -18 dB | 100 Hz = -20 dB; 1 kHz = -8 dB; 5 kHz = -18 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-1:2012 Clause 5 (DLalpha, constant absorption) | a device absorbing 0,50 in every band rates -10 lg(1 - 0,50) | 3.0103 dB (+/-0.0001 dB) | 3.0103 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-1:2012 Clause 5 (DLalpha, the 0,99 ratio limit) | a perfect absorber is capped at -10 lg(1 - 0,99) = 20 dB | 20 dB (+/-0 dB) | 20 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-1:2012 Table A.1 (categories of absorptive performance) | the four boundaries A2/A3/A4/A5 read off the reported integer | 4 dB -> A2, 8 dB -> A3, 12 dB -> A4, 16 dB -> A5 | 4 dB -> A2, 8 dB -> A3, 12 dB -> A4, 16 dB -> A5 | 0 | - | ![Pass][cv-pass] Pass |
+| EN 1793-2:2012 Clause 5.2 (DLR, constant sound reduction index) | a wall with R = 32 dB in every band rates 32 dB | 32 dB (+/-0 dB) | 32 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-2:2012 Clause 5.2 (DLR, spectrum weighting) | one 10 dB band costs more at the 1 kHz peak than at the 100 Hz end | DLR(weak at 1 kHz) < DLR(weak at 100 Hz) | 18.14 dB < 29.73 dB | -11.60 dB | - | ![Pass][cv-pass] Pass |
+| EN 1793-2:2012 Table A.1 (categories of airborne sound insulation) | the three boundaries B2/B3/B4 read off the reported integer | 15 dB -> B2, 25 dB -> B3, 35 dB -> B4 | 15 dB -> B2, 25 dB -> B3, 35 dB -> B4 | 0 | - | ![Pass][cv-pass] Pass |
 
 </details>
 

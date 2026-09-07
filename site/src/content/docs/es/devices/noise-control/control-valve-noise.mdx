@@ -414,8 +414,9 @@ print(round(conditions.stagnation_density, 1))   # 16.6     kg/m3
 print(conditions.equation)                       # 28a
 ```
 
-Esos tres entran luego en `valve_aerodynamic_noise` en lugar de la entrada de
-la válvula. Ese es el ejemplo 7 del anexo A, una jaula de 432 pasos en una
+Esos tres entran luego en el `GasStream` y en el `ValveTrim` en lugar de la
+presión de entrada, la densidad de entrada y el coeficiente de caudal de la
+propia válvula. Ese es el ejemplo 7 del anexo A, una jaula de 432 pasos en una
 línea de vapor a 70 bar, y cierra en los **89 dB(A)** impresos, con un chorro
 de 2,2 mm y un pico a 14,4 kHz.
 

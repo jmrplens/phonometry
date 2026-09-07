@@ -21194,8 +21194,8 @@ print(round(conditions.stagnation_density, 1))   # 16.6     kg/m3
 print(conditions.equation)                       # 28a
 ```
 
-Those three then go into `valve_aerodynamic_noise` in place of the valve's own
-inlet. That is Annex A's example 7, a 432-passage cage on a 70 bar vapour
+Those three then go into the `GasStream` and the `ValveTrim` in place of the
+valve's own inlet pressure, inlet density and flow coefficient. That is Annex A's example 7, a 432-passage cage on a 70 bar vapour
 line, and it closes at the printed **89 dB(A)** with a jet 2,2 mm across and a
 peak at 14,4 kHz.
 

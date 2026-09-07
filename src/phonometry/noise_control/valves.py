@@ -86,11 +86,15 @@ __all__ = [
     "FLOW_COEFFICIENT_CONSTANTS",
     "flow_regime",
     "GasStream",
-    "LAST_STAGE_AREA_CONSTANTS",
     "GLOBE_CONTRACTION_COEFFICIENT",
     "internal_spectrum",
     "jet_diameter",
+    "LAST_STAGE_AREA_CONSTANTS",
+    "last_stage_flow_coefficient",
     "MACH_LIMIT_STANDARD_TRIM",
+    "multiple_passage_jet_diameter",
+    "multistage_trim_conditions",
+    "MultistageConditions",
     "PIPE_SOUND_SPEED_M_S",
     "pipe_transmission_loss",
     "PIPE_WALL_MACH_LIMIT",
@@ -103,29 +107,11 @@ __all__ = [
     "REGIME_SUBSONIC",
     "REGIME_SUPERSONIC",
     "RegimeBoundaries",
+    "stage_level_correction",
     "STANDARD_ATMOSPHERE_PA",
     "STRUCTURAL_LOSS_REFERENCE_HZ",
     "UNIVERSAL_GAS_CONSTANT",
     "VALVE_ACOUSTIC_STYLES",
-    "AerodynamicValveNoise",
-    "coincidence_frequencies",
-    "combine_internal_levels",
-    "Expander",
-    "expander_noise",
-    "ExpanderNoise",
-    "flow_regime",
-    "internal_spectrum",
-    "jet_diameter",
-    "last_stage_flow_coefficient",
-    "multiple_passage_jet_diameter",
-    "multistage_trim_conditions",
-    "MultistageConditions",
-    "pipe_transmission_loss",
-    "PipeFrequencies",
-    "pressure_ratio_boundaries",
-    "RegimeBoundaries",
-    "stage_level_correction",
-    "ValveNoiseWarning",
     "valve_aerodynamic_noise",
     "valve_style_modifier",
     "ValveNoiseWarning",
@@ -883,8 +869,11 @@ def multistage_trim_conditions(
     :param flow_coefficient: :math:`C` of the whole valve.
     :param last_stage_coefficient: :math:`C_n` of the last stage, from
         :func:`last_stage_flow_coefficient` or from the manufacturer.
-    :return: A :class:`MultistageConditions` to pass to
-        :func:`valve_aerodynamic_noise` in place of the valve's own inlet.
+    :return: A :class:`MultistageConditions`, whose three fields stand in for
+        the valve's own inlet when the chain is run: the stagnation pressure
+        and density go into the :class:`GasStream` in place of :math:`p_1`
+        and :math:`\rho_1`, and the flow coefficient into the
+        :class:`ValveTrim` in place of :math:`C`.
     :raises ValueError: If a value is not positive and finite, or the outlet
         pressure is not below the inlet.
     """

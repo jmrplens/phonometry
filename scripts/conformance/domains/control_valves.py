@@ -431,6 +431,19 @@ _PRINTED_EXAMPLE_7 = {
 }
 
 
+def _example_seven_modifier() -> float:
+    """The valve style modifier of example 7, from its 432 passages.
+
+    Equation (8c) is the multipath form: the jet diameter comes from one
+    passage, and the count then spreads the same area over 432 of them.
+    """
+    case = _EXAMPLE_7
+    area = case["last_stage_area"] / case["passages"]
+    return ph.noise_control.valve_style_modifier(
+        area, 4.0 * area / case["hydraulic_diameter"], int(case["passages"])
+    )
+
+
 def _example_seven() -> ph.noise_control.AerodynamicValveNoise:
     """Example 7, through Clause 6's substitution and then Clause 5."""
     case = _EXAMPLE_7
@@ -443,10 +456,7 @@ def _example_seven() -> ph.noise_control.AerodynamicValveNoise:
             case["last_stage_area"]
         ),
     )
-    area = case["last_stage_area"] / case["passages"]
-    modifier = ph.noise_control.valve_style_modifier(
-        area, 4.0 * area / case["hydraulic_diameter"], int(case["passages"])
-    )
+    modifier = _example_seven_modifier()
     return ph.noise_control.valve_aerodynamic_noise(
         ph.noise_control.GasStream(
             mass_flow=case["mass_flow"],
@@ -536,6 +546,7 @@ def _chk_example_seven() -> Outcome:
     computed = {
         "x": round(found.pressure_ratio, 3),
         "p_vc": round(found.vena_contracta_pressure),
+        "F_d": round(_example_seven_modifier(), 3),
         "W_a": round(found.sound_power, 1),
         "L_pi": round(found.internal_level, 1),
         "f_p": round(found.peak_frequency),

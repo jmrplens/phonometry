@@ -21922,10 +21922,11 @@
       "quantity": "Multipath multistage trim, example 7 (Table A.2)",
       "kind": "record",
       "expected": {
-        "label": "x = 0.334; p_vc = 1371038; W_a = 10.3; L_pi = 156.9; f_p = 14381; L_pAe = 89",
+        "label": "x = 0.334; p_vc = 1371038; F_d = 0.028; W_a = 10.3; L_pi = 156.9; f_p = 14381; L_pAe = 89",
         "record": {
           "x": 0.334,
           "p_vc": 1371038.0,
+          "F_d": 0.028,
           "W_a": 10.3,
           "L_pi": 156.9,
           "f_p": 14381.0,
@@ -21933,10 +21934,11 @@
         }
       },
       "computed": {
-        "label": "x = 0.334; p_vc = 1371038; W_a = 10.3; L_pi = 156.9; f_p = 14381; L_pAe = 89",
+        "label": "x = 0.334; p_vc = 1371038; F_d = 0.028; W_a = 10.3; L_pi = 156.9; f_p = 14381; L_pAe = 89",
         "record": {
           "x": 0.334,
           "p_vc": 1371038.0,
+          "F_d": 0.028,
           "W_a": 10.3,
           "L_pi": 156.9,
           "f_p": 14381.0,

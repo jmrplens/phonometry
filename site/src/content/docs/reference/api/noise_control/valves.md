@@ -655,7 +655,7 @@ directly.
 | `flow_coefficient` | $C$ of the whole valve. |
 | `last_stage_coefficient` | $C_n$ of the last stage, from [`last_stage_flow_coefficient`](/phonometry/reference/api/noise_control/valves/#last_stage_flow_coefficient) or from the manufacturer. |
 
-**Returns:** A [`MultistageConditions`](/phonometry/reference/api/noise_control/valves/#multistageconditions) to pass to [`valve_aerodynamic_noise`](/phonometry/reference/api/noise_control/valves/#valve_aerodynamic_noise) in place of the valve's own inlet.
+**Returns:** A [`MultistageConditions`](/phonometry/reference/api/noise_control/valves/#multistageconditions), whose three fields stand in for the valve's own inlet when the chain is run: the stagnation pressure and density go into the [`GasStream`](/phonometry/reference/api/noise_control/valves/#gasstream) in place of $p_1$ and $\rho_1$, and the flow coefficient into the [`ValveTrim`](/phonometry/reference/api/noise_control/valves/#valvetrim) in place of $C$.
 
 **Raises**
 

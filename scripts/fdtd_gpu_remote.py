@@ -158,6 +158,109 @@ class RemoteRunError(RuntimeError):
     """A remote stage (ssh, scp or docker) failed or timed out."""
 
 
+def _validate_sources(sources: list[dict[str, Any]], ny: int, nx: int) -> None:
+    """Reject a malformed source here rather than on the remote machine.
+
+    The checks are the engine's own, run against the grid the job is packed
+    for: a point outside it, a direction that is not one of the four, an
+    offset off the edge or a waveform type nobody implements all fail at
+    packing time, where the traceback is readable and the round trip has
+    not been paid for.
+
+    :param sources: The source dicts as ``build_job`` received them.
+    :param ny: Grid rows.
+    :param nx: Grid columns.
+    :raises ValueError: On the first source that does not describe one.
+    """
+    for index, spec in enumerate(sources):
+        kind = str(spec.get("kind", ""))
+        waveform = spec.get("waveform")
+        if not isinstance(waveform, dict):
+            msg = f"sources[{index}] needs a 'waveform' dict"
+            raise ValueError(msg)
+        fdtd_gpu.waveform_value(waveform, 0.0)
+        if kind == "point":
+            ix, iy = int(spec["ix"]), int(spec["iy"])
+            if not (0 <= ix < nx and 0 <= iy < ny):
+                msg = (
+                    f"sources[{index}] drives cell ({iy}, {ix}), outside the "
+                    f"{ny} x {nx} grid"
+                )
+                raise ValueError(msg)
+        elif kind == "plane":
+            direction = str(spec["direction"])
+            if direction not in fdtd_gpu._SIDE_TRAVEL:
+                msg = (
+                    f"sources[{index}] travels {direction!r}; expected one of "
+                    f"{fdtd_gpu._SIDE_TRAVEL}"
+                )
+                raise ValueError(msg)
+            span = ny if direction in ("down", "up") else nx
+            offset = int(spec.get("offset", 0))
+            if not 0 <= offset < span - 1:
+                msg = f"sources[{index}] offset {offset} is off the grid"
+                raise ValueError(msg)
+        else:
+            msg = f"sources[{index}] kind {kind!r}; expected 'point' or 'plane'"
+            raise ValueError(msg)
+
+
+def _validate_window(specs: list[dict[str, Any]], kind: str, steps: int) -> None:
+    """Reject a reduction with no unique name or an impossible step window.
+
+    The half-open window ``(start, stop]`` both reductions accumulate over
+    is checked here, so a job that would silently reduce over nothing
+    fails at packing time.
+
+    :param specs: The reduction specs as ``build_job`` received them.
+    :param kind: The parameter name, for the message.
+    :param steps: Total steps of the job, which bounds the windows.
+    :raises ValueError: On the first spec that is not usable.
+    """
+    seen: set[str] = set()
+    for index, spec in enumerate(specs):
+        name = str(spec.get("name", ""))
+        if not name or name in seen:
+            msg = f"{kind}[{index}] needs a 'name', unique within the job"
+            raise ValueError(msg)
+        seen.add(name)
+        first, last = int(spec["start"]), int(spec["stop"])
+        if not 0 <= first < last <= steps:
+            msg = (
+                f"{kind}[{index}] accumulates over steps ({first}, {last}], "
+                f"which is not inside (0, {steps}]"
+            )
+            raise ValueError(msg)
+
+
+def _validate_envelopes(
+    envelopes: list[dict[str, Any]], ny: int, nx: int, steps: int
+) -> None:
+    """Reject an envelope that names no line, or one off the grid.
+
+    :param envelopes: The envelope specs as ``build_job`` received them.
+    :param ny: Grid rows.
+    :param nx: Grid columns.
+    :param steps: Total steps of the job, which bounds the windows.
+    :raises ValueError: On the first spec that does not describe a line.
+    """
+    _validate_window(envelopes, "envelopes", steps)
+    for index, spec in enumerate(envelopes):
+        row, column = spec.get("row"), spec.get("column")
+        if (row is None) == (column is None):
+            msg = f"envelopes[{index}] takes exactly one of 'row' and 'column'"
+            raise ValueError(msg)
+        along, limit = (nx, ny) if row is not None else (ny, nx)
+        fixed = int(row) if row is not None else int(column)  # type: ignore[arg-type]  # exactly one is not None, checked above
+        if not 0 <= fixed < limit:
+            msg = f"envelopes[{index}] sits at {fixed}, off a grid of {limit}"
+            raise ValueError(msg)
+        start, stop = int(spec["from"]), int(spec["to"])
+        if not 0 <= start < stop <= along:
+            msg = f"envelopes[{index}] spans [{start}, {stop}) of {along}"
+            raise ValueError(msg)
+
+
 def build_job(
     c: float | NDArray[np.float64],
     dx: float,
@@ -174,6 +277,10 @@ def build_job(
     edge_impedance: dict[str, float | NDArray[np.float64]] | None = None,
     obstacle_mask: NDArray[np.bool_] | None = None,
     plane_waves: list[dict[str, Any]] | None = None,
+    sources: list[dict[str, Any]] | None = None,
+    rms_beta: float = 0.0,
+    envelopes: list[dict[str, Any]] | None = None,
+    mean_squares: list[dict[str, Any]] | None = None,
     init_scale_x: NDArray[np.float64] | None = None,
     sample_stride: int = 1,
     sample_dtype: str = "float64",
@@ -194,6 +301,25 @@ def build_job(
     window of length ``nx`` applied after the plane waves are laid down
     (``p *= w`` and ``vy *= w`` column-wise, ``vx`` untouched), giving the
     initial front a lateral taper that leaves the sponges alone.
+    ``sources`` are the *sustained* sources, the ones the library adds with
+    ``add_source``: a list of dicts, each ``{"kind": "point", "ix", "iy",
+    "waveform"}`` or ``{"kind": "plane", "direction", "offset",
+    "amplitude", "waveform"}``, where the waveform is the parameter dict
+    :func:`fdtd_gpu.waveform_value` reads (``"cw"`` or ``"gaussian"``). A
+    job archive cannot carry the callable the library takes, which is why
+    they are described rather than passed. They are validated here against
+    a throwaway engine, so a malformed source fails at packing time.
+
+    ``rms_beta``, ``envelopes`` and ``mean_squares`` are the reductions the
+    runner can compute on the device, for the scenes that accumulate over
+    every step rather than over the captured frames: a one-pole running
+    mean square of the pressure, the running maximum of ``|p|`` along a row
+    or column over a window of steps, and the root mean square of the whole
+    field over a window of steps. They exist because shipping every step
+    back would cost more than the simulation; ``envelopes`` is a list of
+    ``{"name", "row"|"column", "from", "to", "start", "stop"}`` and
+    ``mean_squares`` a list of ``{"name", "start", "stop"}``.
+
     ``sample_stride`` subsamples each
     recorded frame spatially (``frame[::stride, ::stride]``, applied on
     the compute device before the transfer) and ``sample_dtype``
@@ -234,6 +360,12 @@ def build_job(
     )
     mask = fdtd_gpu._resolve_obstacle_mask(obstacle_mask, ny, nx)
     obstacle = np.zeros((ny, nx), dtype=np.bool_) if mask is None else mask
+    _validate_sources(sources or [], ny, nx)
+    if not np.isfinite(rms_beta) or not 0.0 <= rms_beta < 1.0:
+        msg = f"rms_beta must lie in [0, 1); got {rms_beta!r}"
+        raise ValueError(msg)
+    _validate_envelopes(envelopes or [], ny, nx, steps)
+    _validate_window(mean_squares or [], "mean_squares", steps)
     job: dict[str, Any] = {
         "c": c_map,
         "rho": rho_map,
@@ -246,6 +378,10 @@ def build_job(
         "edge_sides": np.asarray(sorted(edge_profiles), dtype=np.str_),
         "obstacle": obstacle,
         "plane_waves": np.str_(json.dumps(plane_waves or [])),
+        "sources": np.str_(json.dumps(sources or [])),
+        "rms_beta": np.float64(rms_beta),
+        "envelopes": np.str_(json.dumps(envelopes or [])),
+        "mean_squares": np.str_(json.dumps(mean_squares or [])),
         "steps": np.int64(steps),
         "sample_steps": sample_arr,
         "sample_stride": np.int64(sample_stride),

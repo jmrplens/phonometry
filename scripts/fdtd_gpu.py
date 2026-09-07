@@ -36,7 +36,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Mapping
     from types import ModuleType
 
 Field2D = NDArray[np.float64]
@@ -52,6 +52,15 @@ def _positive_finite(name: str, value: float) -> float:
     out = float(value)
     if not np.isfinite(out) or out <= 0.0:
         msg = f"{name} must be positive and finite"
+        raise ValueError(msg)
+    return out
+
+
+def _finite(name: str, value: float) -> float:
+    """Validate that *value* is a finite scalar of either sign."""
+    out = float(value)
+    if not np.isfinite(out):
+        msg = f"{name} must be finite"
         raise ValueError(msg)
     return out
 
@@ -251,6 +260,42 @@ def _resolve_obstacle_mask(
     return mask
 
 
+def waveform_value(spec: Mapping[str, Any], t: float) -> float:
+    """One sample of a serialisable source waveform at time ``t``.
+
+    A transcription of the library's own source classes, term for term, so
+    a job that runs here and the same scene stepped by
+    :class:`phonometry.simulation.fdtd.FDTD2D` agree bit for bit:
+
+    * ``"cw"`` is ``CWSource.value``, a sine with a raised-cosine onset over
+      ``ramp_cycles`` periods;
+    * ``"gaussian"`` is ``GaussianPulse.value``, with ``t0`` defaulting to
+      four widths so the pulse starts from rest.
+
+    :param spec: The waveform parameters, with a ``type`` of ``"cw"`` or
+        ``"gaussian"``.
+    :param t: Time [s].
+    :return: The source value at that time.
+    :raises ValueError: If the type is not one of the two.
+    """
+    kind = str(spec["type"])
+    amplitude = float(spec.get("amplitude", 1.0))
+    if kind == "cw":
+        frequency = float(spec["frequency"])
+        ramp_time = float(spec.get("ramp_cycles", 3.0)) / frequency
+        if t < ramp_time and ramp_time > 0.0:
+            envelope = 0.5 * (1.0 - float(np.cos(np.pi * t / ramp_time)))
+        else:
+            envelope = 1.0
+        return amplitude * envelope * float(np.sin(2.0 * np.pi * frequency * t))
+    if kind == "gaussian":
+        width = float(spec["width"])
+        t0 = 4.0 * width if spec.get("t0") is None else float(spec["t0"])
+        return amplitude * float(np.exp(-(((t - t0) / width) ** 2)))
+    msg = f"unknown waveform type {kind!r}; expected 'cw' or 'gaussian'"
+    raise ValueError(msg)
+
+
 class _ImpedanceEdge:
     """One locally reacting boundary side with a real specific impedance.
 
@@ -371,6 +416,12 @@ class GpuFDTD2D:
         self._rho_y: XPArray = xp.asarray(rho_y)
         self._rho_y_np = rho_y
         self.n = 0  # completed steps
+        # Sustained sources, as the parameter dicts the job archive
+        # carries; the waveform is evaluated on the host once per step
+        # (it is one scalar) and only the += lands on the device, so
+        # the arithmetic is the library's to the last bit.
+        self._point_sources: list[dict[str, Any]] = []
+        self._plane_sources: list[dict[str, Any]] = []
 
         sides = _resolve_sponge_sides(sponge_sides)
         sigma_max = 0.0
@@ -509,13 +560,100 @@ class GpuFDTD2D:
             v_add = sign * v_prof[np.newaxis, :] / (self._rho_x_np * c_ref)
             self.vx += xp.asarray(v_add)
 
+    def add_point_source(self, ix: int, iy: int, waveform: Mapping[str, Any]) -> None:
+        """Add a sustained point source at cell ``(iy, ix)``.
+
+        The library's ``FDTD2D.add_source`` takes an object with a
+        ``value(t)``; a job archive cannot carry a callable, so the waveform
+        arrives as the parameter dict :func:`waveform_value` reads.
+
+        :param ix: Column index of the driven cell.
+        :param iy: Row index of the driven cell.
+        :param waveform: Waveform parameters (see :func:`waveform_value`).
+        :raises ValueError: If the cell is outside the grid.
+        """
+        ny, nx = self.p.shape
+        ix, iy = _integer("ix", ix), _integer("iy", iy)
+        if not (0 <= ix < nx and 0 <= iy < ny):
+            msg = f"source cell ({iy}, {ix}) is outside the {ny} x {nx} grid"
+            raise ValueError(msg)
+        waveform_value(waveform, 0.0)  # fail here rather than mid-run
+        self._point_sources.append({"ix": ix, "iy": iy, "waveform": waveform})
+
+    def add_plane_source(
+        self,
+        direction: str,
+        waveform: Mapping[str, Any],
+        *,
+        offset: int = 0,
+        amplitude: float = 1.0,
+    ) -> None:
+        """Add a sustained plane wave injected along one edge.
+
+        The counterpart of the library's ``PlaneWaveSource``: a one-way
+        injection line that carries the incident wave into the domain
+        without reflecting what comes back out through it.
+
+        :param direction: Travel direction, one of ``"down"``, ``"up"``,
+            ``"left"`` or ``"right"``.
+        :param waveform: Waveform parameters (see :func:`waveform_value`).
+        :param offset: How many cells in from the edge the line sits.
+        :param amplitude: Scale factor on the injected wave.
+        :raises ValueError: If the direction is not one of the four, or the
+            offset does not fall inside the grid.
+        """
+        if direction not in _SIDE_TRAVEL:
+            msg = f"direction must be one of {_SIDE_TRAVEL}; got {direction!r}"
+            raise ValueError(msg)
+        offset = _integer("offset", offset)
+        ny, nx = self.p.shape
+        span = ny if direction in ("down", "up") else nx
+        if not 0 <= offset < span - 1:
+            msg = f"offset must lie in [0, {span - 2}]; got {offset}"
+            raise ValueError(msg)
+        waveform_value(waveform, 0.0)
+        self._plane_sources.append(
+            {
+                "direction": direction,
+                "offset": offset,
+                "amplitude": _finite("amplitude", amplitude),
+                "waveform": waveform,
+            }
+        )
+
+    def _inject_plane(self, plane: Mapping[str, Any], t_next: float) -> None:
+        """Add one plane source's increment, as ``FDTD2D._inject_plane``."""
+        c_ref = self._c_ref
+        gain = float(plane["amplitude"]) * self.dt / (self.dx / c_ref)
+        value_p = waveform_value(plane["waveform"], t_next)
+        value_v = waveform_value(
+            plane["waveform"], t_next - 0.5 * self.dt + 0.5 * self.dx / c_ref
+        )
+        direction = str(plane["direction"])
+        k = int(plane["offset"])
+        if direction == "down":
+            self.p[k, :] += gain * value_p
+            self.vy[k, :] += gain * value_v / (self._rho_y[k, :] * c_ref)
+        elif direction == "up":
+            row = self.p.shape[0] - 1 - k
+            self.p[row, :] += gain * value_p
+            self.vy[row - 1, :] -= gain * value_v / (self._rho_y[row - 1, :] * c_ref)
+        elif direction == "right":
+            self.p[:, k] += gain * value_p
+            self.vx[:, k] += gain * value_v / (self._rho_x[:, k] * c_ref)
+        else:
+            col = self.p.shape[1] - 1 - k
+            self.p[:, col] += gain * value_p
+            self.vx[:, col - 1] -= gain * value_v / (self._rho_x[:, col - 1] * c_ref)
+
     def step(self) -> None:
         """Advance the leapfrog scheme by one time step.
 
         Update order is identical to the library engine: velocity from the
         pressure gradient, obstacle face closure, velocity decay, impedance
         edge update from the pre-step pressure, divergence scatter plus
-        edge flux, pressure update, pressure decay.
+        edge flux, pressure update, the sustained sources at the next
+        instant, pressure decay.
         """
         dt_dx = self.dt / self.dx
         self.vx -= dt_dx / self._rho_x * (self.p[:, 1:] - self.p[:, :-1])
@@ -536,6 +674,11 @@ class GpuFDTD2D:
         for edge in self._edges:
             edge.add_flux(div)
         self.p -= self.kappa * dt_dx * div
+        t_next = (self.n + 1) * self.dt
+        for src in self._point_sources:
+            self.p[src["iy"], src["ix"]] += waveform_value(src["waveform"], t_next)
+        for plane in self._plane_sources:
+            self._inject_plane(plane, t_next)
         self.p *= self._decay_p
         self.n += 1
 

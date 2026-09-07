@@ -55,6 +55,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- The wave fields of the clips are solved where they are encoded. The remote
+  runner could already ship a field to the CUDA machine named in `.env`, and
+  the clips did not use it for anything but the AV1 encode, because the engine
+  it sends had no sustained sources: a scene that drives a loudspeaker or a
+  plane wave could not be described as a job at all, so the hundreds of
+  millions of cell updates behind a clip stayed on this machine while only the
+  video went over the wire.
+
+  `GpuFDTD2D` grows the point and plane drives, described as data rather than
+  as the callable the library takes, since an archive cannot carry a function.
+  The runner grows the three accumulations a scene reads off every step, a
+  running mean square, the envelope of `|p|` along a line, and the root mean
+  square over a window of steps, so a scene that measures a settled level no
+  longer has to ship a frame per step to do it. `scripts/fdtd_dispatch.py` is
+  where a run is described instead of constructed, and it decides where to
+  send it: the GPU when one answers, this machine when none does, and the same
+  numbers either way, which the parity tests hold against the library engine
+  scene by scene. The aperture run steps in 6.8 s there against about 135 s
+  here; what the wall clock then spends is the frames coming back.
+
 - The same two numbers beside a railway: **EN 16272-3-1:2012**, in the
   `spectrum="railway"` of the two rating functions.
 

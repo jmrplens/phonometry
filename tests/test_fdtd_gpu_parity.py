@@ -26,7 +26,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from phonometry.simulation.fdtd import FDTD2D
+from phonometry.simulation.fdtd import (
+    FDTD2D,
+    CWSource,
+    GaussianPulse,
+    PlaneWaveSource,
+)
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -35,6 +40,7 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
+import fdtd_dispatch
 import fdtd_gpu
 import fdtd_gpu_remote
 import job_runner
@@ -559,3 +565,341 @@ def test_scenarios_match_library_on_the_remote_gpu(scenario: str) -> None:
     wave = {"center": 0.15, "width": 0.06, "wavelength": 0.09}
     fields = _reference(kwargs, wave, "down")
     _assert_parity(fields, _remote_frames(kwargs, wave, "down"), _GPU_TOL)
+
+
+# --- Sustained sources and the three reductions of the runner ----------------
+#
+# What the animation scenes need beyond a plane-wave initial condition: a
+# drive that keeps injecting, and the accumulations they take off every
+# step. Both are described in the job (a callable cannot be packed into an
+# archive), so what is under test is that the description reproduces the
+# library object it stands for, and that a reduction computed on the device
+# equals the loop the scene used to run here.
+
+#: Drive frequency of the source cases: fast enough to be several periods
+#: into the run at :data:`_STEPS`, slow enough to be resolved by the mesh.
+_SOURCE_F = 900.0
+
+#: One Gaussian width, in steps of the reference engine's own time step.
+_PULSE_WIDTH_S = 8.0e-5
+
+
+def _source_cases() -> dict[str, tuple[list[dict[str, Any]], list[Any]]]:
+    """Each sustained source, as the job describes it and as the library builds it."""
+    return {
+        "point_cw": (
+            [fdtd_dispatch.point(20, 30, fdtd_dispatch.cw(_SOURCE_F, 0.7, 2.0))],
+            [
+                CWSource(
+                    ix=20, iy=30, frequency=_SOURCE_F, amplitude=0.7, ramp_cycles=2.0
+                )
+            ],
+        ),
+        "point_gaussian": (
+            [fdtd_dispatch.point(44, 18, fdtd_dispatch.gaussian(_PULSE_WIDTH_S))],
+            [GaussianPulse(ix=44, iy=18, width=_PULSE_WIDTH_S)],
+        ),
+        "point_gaussian_shifted": (
+            [
+                fdtd_dispatch.point(
+                    30, 30, fdtd_dispatch.gaussian(_PULSE_WIDTH_S, 5.0e-4, 0.4)
+                )
+            ],
+            [
+                GaussianPulse(
+                    ix=30, iy=30, width=_PULSE_WIDTH_S, t0=5.0e-4, amplitude=0.4
+                )
+            ],
+        ),
+        "plane_cw": (
+            [fdtd_dispatch.plane("right", fdtd_dispatch.cw(_SOURCE_F), offset=2)],
+            [
+                PlaneWaveSource(
+                    "right", CWSource(0, 0, frequency=_SOURCE_F).value, offset=2
+                )
+            ],
+        ),
+        "plane_scaled": (
+            [
+                fdtd_dispatch.plane(
+                    "down", fdtd_dispatch.cw(_SOURCE_F), offset=3, amplitude=0.5
+                )
+            ],
+            [
+                PlaneWaveSource(
+                    "down",
+                    CWSource(0, 0, frequency=_SOURCE_F).value,
+                    offset=3,
+                    amplitude=0.5,
+                )
+            ],
+        ),
+        "two_points": (
+            [
+                fdtd_dispatch.point(20, 20, fdtd_dispatch.cw(_SOURCE_F)),
+                fdtd_dispatch.point(40, 40, fdtd_dispatch.cw(_SOURCE_F, -1.0)),
+            ],
+            [
+                CWSource(ix=20, iy=20, frequency=_SOURCE_F),
+                CWSource(ix=40, iy=40, frequency=_SOURCE_F, amplitude=-1.0),
+            ],
+        ),
+    }
+
+
+def _driven_reference(sources: list[Any], steps: int = _STEPS) -> FDTD2D:
+    """The library engine driven by *sources*, stepped *steps* times."""
+    ref = FDTD2D(343.0, _DX, shape=(_NY, _NX))
+    for source in sources:
+        ref.add_source(source)
+    for _ in range(steps):
+        ref.step()
+    return ref
+
+
+@pytest.mark.parametrize("case", list(_source_cases()))
+def test_described_sources_match_the_library_objects(case: str) -> None:
+    """A source packed as data drives exactly what the library object does."""
+    described, built = _source_cases()[case]
+    ref = _driven_reference(built)
+    job = fdtd_gpu_remote.build_job(
+        343.0,
+        _DX,
+        shape=(_NY, _NX),
+        steps=_STEPS,
+        sample_steps=[_STEPS],
+        sources=described,
+    )
+    result = job_runner.run_job(job)
+    assert float(np.max(np.abs(ref.p))) > 1e-6  # the drive reached the grid
+    assert np.array_equal(np.asarray(result["frames"])[0], ref.p)
+
+
+@_needs_remote
+@pytest.mark.parametrize("case", list(_source_cases()))
+def test_described_sources_match_the_library_on_the_remote_gpu(case: str) -> None:
+    """The same drives, injected on the GPU."""
+    described, built = _source_cases()[case]
+    ref = _driven_reference(built)
+    job = fdtd_gpu_remote.build_job(
+        343.0,
+        _DX,
+        shape=(_NY, _NX),
+        steps=_STEPS,
+        sample_steps=[_STEPS],
+        sources=described,
+    )
+    result = fdtd_gpu_remote.run_remote(job, _REMOTE, timeout=_REMOTE_TIMEOUT_S)
+    assert result["backend"] == "cupy"
+    _assert_parity([ref.p], list(np.asarray(result["frames"])), _GPU_TOL)
+
+
+def test_waveform_value_rejects_an_unknown_type() -> None:
+    """A waveform nobody implements fails where it is described."""
+    with pytest.raises(ValueError, match=r"unknown waveform type 'square'"):
+        fdtd_gpu.waveform_value({"type": "square", "frequency": 1.0}, 0.0)
+
+
+def test_build_job_rejects_a_malformed_source() -> None:
+    """A source off the grid, or with no waveform, fails at packing time."""
+    ok: dict[str, Any] = {"shape": (_NY, _NX), "steps": 100, "sample_steps": [50]}
+    with pytest.raises(ValueError, match=r"sources\[0\] needs a 'waveform' dict"):
+        fdtd_gpu_remote.build_job(
+            343.0, _DX, sources=[{"kind": "point", "ix": 1, "iy": 1}], **ok
+        )
+    off_grid = [fdtd_dispatch.point(_NX, 1, fdtd_dispatch.cw(_SOURCE_F))]
+    with pytest.raises(ValueError, match=r"sources\[0\] drives cell \(1, 80\)"):
+        fdtd_gpu_remote.build_job(343.0, _DX, sources=off_grid, **ok)
+    sideways = [fdtd_dispatch.plane("sideways", fdtd_dispatch.cw(_SOURCE_F))]
+    with pytest.raises(ValueError, match=r"sources\[0\] travels 'sideways'"):
+        fdtd_gpu_remote.build_job(343.0, _DX, sources=sideways, **ok)
+    unknown = [{"kind": "spiral", "waveform": fdtd_dispatch.cw(_SOURCE_F)}]
+    with pytest.raises(ValueError, match=r"sources\[0\] kind 'spiral'"):
+        fdtd_gpu_remote.build_job(343.0, _DX, sources=unknown, **ok)
+
+
+def _reduction_job(**extra: Any) -> dict[str, Any]:
+    """A driven job asking for whatever reduction *extra* names."""
+    described, _ = _source_cases()["point_cw"]
+    return fdtd_gpu_remote.build_job(
+        343.0,
+        _DX,
+        shape=(_NY, _NX),
+        steps=_STEPS,
+        sample_steps=[100, _STEPS],
+        sources=described,
+        **extra,
+    )
+
+
+def _reduction_reference(
+    beta: float, window: tuple[int, int], row: int
+) -> dict[str, Any]:
+    """The three accumulations, run the way a scene used to run them here."""
+    _, built = _source_cases()["point_cw"]
+    ref = FDTD2D(343.0, _DX, shape=(_NY, _NX))
+    for source in built:
+        ref.add_source(source)
+    ms = np.zeros_like(ref.p)
+    acc = np.zeros_like(ref.p)
+    peak = np.zeros(_NX)
+    frames = {}
+    for i in range(_STEPS):
+        ref.step()
+        step = i + 1
+        ms = beta * ms + (1.0 - beta) * ref.p**2
+        if window[0] < step <= window[1]:
+            acc += ref.p**2
+            np.maximum(peak, np.abs(ref.p[row, :]), out=peak)
+        if step in (100, _STEPS):
+            frames[step] = np.sqrt(ms)
+    return {
+        "rms_frames": np.stack([frames[100], frames[_STEPS]]),
+        "rms_final": np.sqrt(ms),
+        "mean_square": np.sqrt(acc / (window[1] - window[0])),
+        "envelope": peak,
+    }
+
+
+def test_running_mean_square_matches_the_scene_loop() -> None:
+    """rms_beta reproduces the one-pole average the capture used to keep."""
+    beta = 0.97
+    expected = _reduction_reference(beta, (0, _STEPS), 0)
+    result = job_runner.run_job(_reduction_job(rms_beta=beta))
+    assert np.array_equal(result["rms_frames"], expected["rms_frames"])
+    assert np.array_equal(result["rms_final"], expected["rms_final"])
+
+
+def test_envelope_and_mean_square_windows_match_the_scene_loop() -> None:
+    """The two windowed reductions equal the loops they replace."""
+    window, row = (120, _STEPS), 30
+    expected = _reduction_reference(0.0, window, row)
+    result = job_runner.run_job(
+        _reduction_job(
+            envelopes=[
+                {
+                    "name": "axis",
+                    "row": row,
+                    "from": 0,
+                    "to": _NX,
+                    "start": window[0],
+                    "stop": window[1],
+                }
+            ],
+            mean_squares=[{"name": "settled", "start": window[0], "stop": window[1]}],
+        )
+    )
+    assert np.array_equal(result["envelope_axis"], expected["envelope"])
+    assert np.array_equal(result["mean_square_settled"], expected["mean_square"])
+
+
+@_needs_remote
+def test_reductions_match_the_scene_loop_on_the_remote_gpu() -> None:
+    """The same three accumulations, computed on the device."""
+    beta, window, row = 0.97, (120, _STEPS), 30
+    expected = _reduction_reference(beta, window, row)
+    job = _reduction_job(
+        rms_beta=beta,
+        envelopes=[
+            {
+                "name": "axis",
+                "row": row,
+                "from": 0,
+                "to": _NX,
+                "start": window[0],
+                "stop": window[1],
+            }
+        ],
+        mean_squares=[{"name": "settled", "start": window[0], "stop": window[1]}],
+    )
+    result = fdtd_gpu_remote.run_remote(job, _REMOTE, timeout=_REMOTE_TIMEOUT_S)
+    assert result["backend"] == "cupy"
+    peak = float(np.max(expected["rms_final"]))
+    for key, ref in (
+        ("rms_final", expected["rms_final"]),
+        ("mean_square_settled", expected["mean_square"]),
+        ("envelope_axis", expected["envelope"]),
+    ):
+        np.testing.assert_allclose(result[key], ref, rtol=0.0, atol=_GPU_TOL * peak)
+
+
+def test_build_job_rejects_a_malformed_reduction() -> None:
+    """An unusable reduction fails at packing time, not on the far side."""
+    ok: dict[str, Any] = {"shape": (_NY, _NX), "steps": 100, "sample_steps": [50]}
+    line = {"name": "axis", "row": 0, "from": 0, "to": _NX, "start": 0, "stop": 100}
+    with pytest.raises(ValueError, match=r"rms_beta must lie in \[0, 1\)"):
+        fdtd_gpu_remote.build_job(343.0, _DX, rms_beta=1.0, **ok)
+    with pytest.raises(ValueError, match=r"envelopes\[1\] needs a 'name'"):
+        fdtd_gpu_remote.build_job(343.0, _DX, envelopes=[line, dict(line)], **ok)
+    with pytest.raises(ValueError, match=r"envelopes\[0\] takes exactly one"):
+        fdtd_gpu_remote.build_job(343.0, _DX, envelopes=[{**line, "column": 3}], **ok)
+    with pytest.raises(ValueError, match=r"envelopes\[0\] sits at 60, off a grid"):
+        fdtd_gpu_remote.build_job(343.0, _DX, envelopes=[{**line, "row": _NY}], **ok)
+    with pytest.raises(ValueError, match=r"envelopes\[0\] spans \[0, 200\)"):
+        fdtd_gpu_remote.build_job(343.0, _DX, envelopes=[{**line, "to": 200}], **ok)
+    with pytest.raises(ValueError, match=r"envelopes\[0\] accumulates over steps"):
+        fdtd_gpu_remote.build_job(343.0, _DX, envelopes=[{**line, "stop": 101}], **ok)
+    with pytest.raises(ValueError, match=r"mean_squares\[0\] accumulates over steps"):
+        fdtd_gpu_remote.build_job(
+            343.0, _DX, mean_squares=[{"name": "s", "start": 50, "stop": 50}], **ok
+        )
+    with pytest.raises(ValueError, match=r"mean_squares\[0\] needs a 'name'"):
+        fdtd_gpu_remote.build_job(
+            343.0, _DX, mean_squares=[{"name": "", "start": 0, "stop": 100}], **ok
+        )
+
+
+# --- The dispatch layer the scenes speak ------------------------------------
+
+
+def test_scene_time_step_is_the_engines_own() -> None:
+    """Scene.dt is known before anything is allocated, and it is exact."""
+    c_map = np.full((_NY, _NX), 343.0)
+    c_map[:10, :] = 1500.0  # the fastest cell sets the step
+    scene = fdtd_dispatch.Scene(c_map, _DX, cfl=0.5)
+    ref = FDTD2D(c_map, _DX, cfl=0.5)
+    assert scene.dt == ref.dt
+
+
+def test_scene_with_sources_keeps_the_geometry() -> None:
+    """with_sources swaps the drive and nothing else."""
+    mask = np.zeros((_NY, _NX), dtype=np.bool_)
+    mask[10:12, 20:60] = True
+    scene = fdtd_dispatch.Scene(
+        343.0,
+        _DX,
+        shape=(_NY, _NX),
+        sponge_width=6,
+        sponge_sides=("left", "right"),
+        obstacle_mask=mask,
+        edge_impedance={"top": 413.0},
+        sources=(fdtd_dispatch.point(10, 10, fdtd_dispatch.cw(_SOURCE_F)),),
+    )
+    other = scene.with_sources(fdtd_dispatch.point(20, 20, fdtd_dispatch.cw(500.0)))
+    assert other.sources[0]["ix"] == 20
+    assert other.sources[0]["waveform"]["frequency"] == 500.0
+    assert other.shape == scene.shape
+    assert other.sponge_sides == scene.sponge_sides
+    assert other.edge_impedance == scene.edge_impedance
+    assert other.obstacle_mask is scene.obstacle_mask
+    assert other.dt == scene.dt
+
+
+def test_dispatch_run_reproduces_the_library_run() -> None:
+    """A scene run through the dispatcher is the library engine, driven."""
+    described, built = _source_cases()["point_cw"]
+    ref = _driven_reference(built)
+    scene = fdtd_dispatch.Scene(343.0, _DX, shape=(_NY, _NX), sources=tuple(described))
+    result = fdtd_dispatch.run(
+        scene,
+        steps=_STEPS,
+        sample_steps=[_STEPS],
+        sample_dtype="float64",
+        timeout=_REMOTE_TIMEOUT_S,
+    )
+    np.testing.assert_allclose(
+        np.asarray(result["frames"])[0],
+        ref.p,
+        rtol=0.0,
+        atol=_GPU_TOL * float(np.max(np.abs(ref.p))),
+    )

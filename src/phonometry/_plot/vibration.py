@@ -176,6 +176,7 @@ _STRINGS: dict[str, str] = {
     "dwellings": "viviendas",
     "especially sensitive": "especialmente sensible",
     "measured {v} mm/s at {f} Hz": "medido {v} mm/s a {f} Hz",
+    "measured {v} mm/s, at every frequency": "medido {v} mm/s, a todas las frecuencias",
     "guideline {v} mm/s": "valor de referencia {v} mm/s",
     "Guideline values at the foundation (DIN 4150-3 Table 1)": "Valores de referencia en el cimiento (DIN 4150-3, tabla 1)",
 }
@@ -781,6 +782,7 @@ def plot_damage_assessment(
             markersize=3,
             label=_t(names[cls], language),
         )
+    reading = format_number(result.velocity_mm_s, language, decimals=1, trim=True)
     if result.frequency_hz is None:
         ax.axhline(
             result.guideline_mm_s,
@@ -791,20 +793,23 @@ def plot_damage_assessment(
                 v=format_number(result.guideline_mm_s, language, decimals=1, trim=True)
             ),
         )
+        # The point needs somewhere to sit and the reading has no frequency:
+        # park it at the right edge and say so, rather than labelling it with
+        # the frequency that happens to be there.
         f_point = float(freqs[-1])
+        point_label = _t("measured {v} mm/s, at every frequency", language).format(
+            v=reading
+        )
     else:
         f_point = float(result.frequency_hz)
+        point_label = _t("measured {v} mm/s at {f} Hz", language).format(
+            v=reading, f=format_number(f_point, language, decimals=0)
+        )
     kwargs.setdefault("color", _C_REFERENCE)
     kwargs.setdefault("marker", "D")
     kwargs.setdefault("markersize", 7)
     kwargs.setdefault("ls", "none")
-    kwargs.setdefault(
-        "label",
-        _t("measured {v} mm/s at {f} Hz", language).format(
-            v=format_number(result.velocity_mm_s, language, decimals=1, trim=True),
-            f=format_number(f_point, language, decimals=0),
-        ),
-    )
+    kwargs.setdefault("label", point_label)
     ax.plot([f_point], [result.velocity_mm_s], **kwargs)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Peak velocity $v_i$ [mm/s]", language))

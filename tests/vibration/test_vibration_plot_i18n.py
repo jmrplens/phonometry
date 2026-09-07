@@ -428,3 +428,31 @@ def test_seat_transmission_forwards_kwargs_to_the_seat_bars() -> None:
     labels = [text.get_text() for text in ax.get_legend().get_texts()]
     assert labels[2] == "cushion"
     assert labels[0] == "platform $a_\\mathrm{wP}$"
+
+
+def test_the_damage_assessment_says_when_it_has_no_frequency() -> None:
+    """A top-floor reading is placed on the plot without pretending to a frequency.
+
+    The point still needs somewhere to sit, so it goes at the right edge of
+    the axis; the label must not then read as a measurement taken at 100 Hz,
+    which is the frequency that happens to be there.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    flat = vibration.assess_building_vibration(
+        12.0, building_class="residential", location="top_floor"
+    )
+    labels = [t.get_text() for t in flat.plot().get_legend().get_texts()]
+    assert "measured 12 mm/s, at every frequency" in labels
+    assert not any("Hz" in label for label in labels)
+
+    at_a_frequency = vibration.assess_building_vibration(
+        4.0, building_class="residential", frequency_hz=30.0
+    )
+    spanish = [
+        t.get_text()
+        for t in at_a_frequency.plot(language="es").get_legend().get_texts()
+    ]
+    assert "medido 4 mm/s a 30 Hz" in spanish

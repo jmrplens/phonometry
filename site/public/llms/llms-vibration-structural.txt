@@ -57,9 +57,13 @@ which is where this section meets the
 
 One page here asks a different question of the same shaking.
 [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/)
-does not care what a building radiates, only whether it cracks: the guideline
-values for the peak particle velocity a foundation, a topmost floor plane or a
-buried pipe may see, by building class and by how often the vibration occurs.
+is not about what a building radiates but about whether it cracks, and it
+answers with a screening comparison rather than a verdict: the guideline values
+for the peak particle velocity, chosen by building class and by how often the
+vibration occurs at a foundation and in the topmost floor plane, and by pipe
+material on a buried pipeline. Keeping under one is where experience says the
+question stops; exceeding one sends the reader to the stress calculation, not
+to a finding of damage.
 
 ## Pages in this section
 

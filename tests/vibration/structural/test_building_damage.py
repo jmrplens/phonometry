@@ -288,12 +288,25 @@ def test_the_guideline_itself_is_within_the_guideline() -> None:
     assert over.ratio > 1.0
 
 
-@pytest.mark.parametrize("bad", [0.0, -2.0, math.nan])
+@pytest.mark.parametrize("bad", [-2.0, math.nan])
 def test_the_assessment_refuses_a_velocity_that_is_not_one(bad: float) -> None:
     with pytest.raises(ValueError, match=r"'velocity_mm_s'"):
         bd.assess_building_vibration(
             bad, building_class="residential", frequency_hz=10.0
         )
+
+
+def test_a_foundation_that_did_not_move_is_a_measurement() -> None:
+    """Zero is the easiest case the standard covers, not an error.
+
+    Nothing in Clause 5 excludes it, and it keeps to every guideline value
+    there is; refusing it would refuse the reading a quiet site produces.
+    """
+    got = bd.assess_building_vibration(
+        0.0, building_class="sensitive", frequency_hz=4.0
+    )
+    assert got.ratio == pytest.approx(0.0)
+    assert got.within_guideline
 
 
 def test_the_curve_helper_returns_the_four_corners() -> None:

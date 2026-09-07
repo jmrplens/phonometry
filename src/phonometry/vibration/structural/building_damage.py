@@ -75,6 +75,7 @@ import numpy as np
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
+    require_non_negative,
     require_positive,
 )
 
@@ -363,7 +364,8 @@ def assess_building_vibration(
     """Compare one measured peak velocity with its guideline value.
 
     :param velocity_mm_s: The measured peak velocity, in millimetres per
-        second; see :class:`DamageAssessment` for which component it is.
+        second; see :class:`DamageAssessment` for which component it is. Zero
+        is accepted and keeps to every guideline value.
     :param building_class: One of :data:`BUILDING_CLASSES`.
     :param frequency_hz: Frequency of the dominant component, in hertz.
         Required for the short-term foundation case.
@@ -371,10 +373,13 @@ def assess_building_vibration(
     :param duration: ``"short_term"`` (default) or ``"long_term"``.
     :param massive_structure: See :func:`guideline_velocity`.
     :return: The comparison, as a :class:`DamageAssessment`.
-    :raises ValueError: If the velocity is not positive and finite, or for
-        any reason :func:`guideline_velocity` raises.
+    :raises ValueError: If the velocity is negative or not finite, or for any
+        reason :func:`guideline_velocity` raises.
     """
-    v = require_positive(velocity_mm_s, "velocity_mm_s")
+    # Non-negative rather than positive: a foundation that did not move is a
+    # measurement like any other, and it keeps to every guideline value there
+    # is. Refusing it would refuse the easiest case the standard covers.
+    v = require_non_negative(velocity_mm_s, "velocity_mm_s")
     guideline = guideline_velocity(
         building_class,
         frequency_hz,

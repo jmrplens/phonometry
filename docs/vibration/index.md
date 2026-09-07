@@ -105,11 +105,15 @@ in trouble: the amplitude criteria that turn a present line into an assessment
 10816 / ISO 20816 — are outside the library, as are rotor balancing (ISO 21940)
 and order tracking.
 
-**Nor is one issued for a building.** The 2003 edition of ISO 2631-2 deleted
-its predecessor's guidance values on purpose, so there are no acceptable
-magnitudes for building vibration to compare against; what the library gives
-is the weighted magnitude, and the judgement stays with the assessor and the
-national code.
+**Nor is one issued for what people feel in a building.** The 2003 edition of
+ISO 2631-2 deleted its predecessor's guidance values on purpose, so for the
+human response to building vibration there are no acceptable magnitudes to
+compare against; what the library gives is the weighted magnitude, and the
+judgement stays with the assessor and the national code. The guideline values
+of [DIN 4150-3](structural/structural-damage.md) are a
+different question and are implemented: they are about damage to the structure,
+and keeping to one is not a certificate any more than exceeding one is a
+finding of damage.
 
 Two structural predictions are idealisations rather than measurements. The
 junction transmission coefficients are a closed-form result for a rigid,

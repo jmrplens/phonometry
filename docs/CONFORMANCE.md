@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**867/867 conformance checks pass** across 72 domains and 404 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**874/874 conformance checks pass** across 73 domains and 405 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -545,6 +545,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 5349-2:2001 Example E.3 | Forestry three-task A(8) | 3.6 m/s² (+/-0.05 m/s²) | 3.61 m/s² | 0.01 m/s² | 20 % | ![Pass][cv-pass] Pass |
 | ISO 5349-1:2001 Eq. (C.1) | VWF 10 % lifetime Dy at A(8)=7 | 4 yr (+/-0.1 yr) | 4.04 yr | 0.042 yr | 42 % | ![Pass][cv-pass] Pass |
 | Directive 2002/44/EC Art. 3 | HAV/WBV action & limit values | HAV 2.5/5.0, WBV 0.5/1.15 m/s^2 | HAV 2.5/5.0, WBV 0.5/1.15 m/s^2 | 0 | - | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Seat vibration transmission (ISO 10326-1)</b>: 100% (7/7)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 10326-1:2016 Formula (2) | SEAT factor of one test | 0.7076 (+/-0.0005) | 0.7076 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10326-1:2016 Clause 10.2.1 | Mean of three agreeing runs at the platform, m/s2 | 1.0033 m/s² (+/-0.0005 m/s²) | 1.0033 m/s² | 0 m/s² | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10326-1:2016 Clause 10.2.1 | Agreement three consecutive runs must keep, % | 5 % (+/-0.0005 %) | 5 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10326-1:2016 Formula (4) | Corrected magnitude on the seat, m/s2 | 0.7784 m/s² (+/-0.0005 m/s²) | 0.7784 m/s² | 0 m/s² | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10326-1:2016 Formula (5) | Transmissibility at resonance of the damping test | 2 (+/-0.0005) | 2 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10326-1:2016 Clause 10.3 | Inert mass the seat carries for the damping test, kg | 75 kg (+/-0.0005 kg) | 75 kg | 0 kg | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10326-1:2016 Clause 9.5.1 | Reduced test mass for an actively damped suspension, kg | 60 kg (+/-0.0005 kg) | 60 kg | 0 kg | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

@@ -2783,3 +2783,153 @@ def generate_iso17534_qa_cases(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "iso17534_qa_cases.svg")
     plt.close()
+
+
+def generate_road_device_ratings(output_dir: str) -> None:
+    """EN 1793: the spectrum that weights a road device, and the two ratings."""
+    print("Generating road_device_ratings.png...")
+    from phonometry import environment
+
+    bands = np.asarray(environment.TRAFFIC_NOISE_BANDS_HZ)
+    spectrum = np.asarray(environment.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB)
+    x = np.arange(len(bands))
+
+    # Two devices of each kind, with the per-band performance a maker of that
+    # kind declares: a cassette with mineral wool behind a perforated face,
+    # and a plain concrete panel that reflects almost everything.
+    absorptive = np.array(
+        [
+            0.15,
+            0.25,
+            0.40,
+            0.60,
+            0.80,
+            0.95,
+            0.98,
+            0.95,
+            0.92,
+            0.90,
+            0.88,
+            0.85,
+            0.82,
+            0.80,
+            0.78,
+            0.75,
+            0.72,
+            0.70,
+        ]
+    )
+    reflective = np.full(len(bands), 0.05)
+    concrete = np.array(
+        [
+            30.0,
+            31.0,
+            33.0,
+            35.0,
+            37.0,
+            39.0,
+            41.0,
+            42.0,
+            44.0,
+            45.0,
+            46.0,
+            47.0,
+            48.0,
+            49.0,
+            50.0,
+            51.0,
+            52.0,
+            53.0,
+        ]
+    )
+    cassette = np.array(
+        [
+            21.0,
+            22.0,
+            23.0,
+            24.0,
+            25.0,
+            26.0,
+            27.0,
+            28.0,
+            29.0,
+            30.0,
+            31.0,
+            31.0,
+            32.0,
+            32.0,
+            33.0,
+            33.0,
+            34.0,
+            34.0,
+        ]
+    )
+
+    _fig, axes = plt.subplots(1, 3, figsize=(15.5, 5.4))
+
+    axes[0].bar(
+        x, spectrum, color=COLOR_PRIMARY, edgecolor=COLOR_FG, linewidth=0.6, zorder=3
+    )
+    axes[0].set_title("The weighting: EN 1793-3 Table 1")
+    axes[0].set_ylabel("$L_i$ [dB]")
+    axes[0].annotate(
+        "the peak carries the rating",
+        xy=(10, spectrum[10]),
+        xytext=(4.6, spectrum[10] + 5.0),
+        fontsize=10,
+        color=COLOR_FG,
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 1.2},
+        bbox={
+            "boxstyle": "round,pad=0.5",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+
+    for values, colour, label in (
+        (absorptive, COLOR_PRIMARY, "absorptive cassette"),
+        (reflective, COLOR_SECONDARY, "concrete panel"),
+    ):
+        rating = environment.sound_absorption_rating(values)
+        axes[1].plot(
+            x,
+            values,
+            marker="o",
+            markersize=4.5,
+            color=colour,
+            linewidth=2.0,
+            label=f"{label}: $DL_\\alpha$ = {rating.reported} dB ({rating.category})",
+        )
+    axes[1].set_title("EN 1793-1: what is not sent back")
+    axes[1].set_ylabel(r"$\alpha_\mathrm{S}$")
+    axes[1].set_ylim(0.0, 1.28)
+
+    for values, colour, label in (
+        (concrete, COLOR_PRIMARY, "concrete panel"),
+        (cassette, COLOR_SECONDARY, "metal cassette"),
+    ):
+        rating = environment.airborne_insulation_rating(values)
+        axes[2].plot(
+            x,
+            values,
+            marker="o",
+            markersize=4.5,
+            color=colour,
+            linewidth=2.0,
+            label=f"{label}: $DL_R$ = {rating.reported} dB ({rating.category})",
+        )
+    axes[2].set_title("EN 1793-2: what is not let through")
+    axes[2].set_ylabel("$R$ [dB]")
+
+    for ax in axes:
+        ax.set_xlabel("1/3-octave band centre frequency [Hz]")
+        ax.set_xticks(x[::3])
+        ax.set_xticklabels([f"{b:g}" for b in bands[::3]])
+        ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+        ax.set_axisbelow(True)
+    axes[1].legend(loc="upper right", fontsize=9)
+    axes[2].legend(loc="upper left", fontsize=9)
+
+    plt.tight_layout()
+    save_figure(output_dir, "road_device_ratings.png")
+    plt.close()

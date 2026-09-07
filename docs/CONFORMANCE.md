@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**857/857 conformance checks pass** across 70 domains and 400 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**841/841 conformance checks pass** across 70 domains and 400 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -37,12 +37,12 @@
 | Long 2e Table 14.9 (worked duct-borne sheet, supply path) | Fan to room, 8 octave bands -> 52/42/30/18/9/-2/-2/-1 dB at the receiver | 1 dB | 1 dB | 100 % |
 | IEC 60268-16 Annex M | Step 2 printed intermediates: the measurement condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.993 | 99 % |
 | VDI 2081 Blatt 2:2005 Table 1, element 14 | Bend flow noise, worst octave deviation, dB | 0.0496 dB | 0.0496 dB | 99 % |
-| ISO 11691:1995 | Bounds of the octave insertion loss (Eq. (2)) | 9.744 dB | headroom 0.027 dB | 99 % |
 | IEC 60268-16 Annex M | Step 3 printed intermediates: the operational condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.987 | 99 % |
 | VDI 2081 Blatt 2:2005 Table 1, element 20 | Sound pressure level in room 102, worst octave deviation, dB | 0.4913 dB | 0.4913 dB | 98 % |
 | ISO 5136:2003 Table D.1 | C3,4 of the sampling tube for d = 0,5 m at U = +/-5, +/-15, +/-30 m/s, 27 bands | max absolute deviation 0.049 dB | 0.049 dB | 98 % |
 | ISO 11200:2014 Table B.2 local environmental correction | K_3A at a work station 1,6 m from the dominating source, dB | 3.749 dB | 0.049 dB | 98 % |
 | ISO 9053-2:2020 Annex A.3 | Thermal boundary-layer thickness b | 0.00183 m | 0 m | 97 % |
+| Long, Architectural Acoustics 2e, Table 8.1 | Room modes of a 7 x 5 x 3 m room: the six printed frequencies, Hz | 42.27 Hz | -0.126 Hz | 97 % |
 
 <details>
 <summary><b>Numerical validation - filters &amp; weightings</b>: class showcase (IEC 61260-1 · IEC 61672-1 · ISO 7196)</summary>
@@ -1236,6 +1236,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
+<summary><b>Road traffic noise reducing devices (EN 1793)</b>: 100% (7/7)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| EN 1793-3:1997 Table 1 (normalised traffic noise spectrum) | the eighteen printed levels, 100 Hz to 5 kHz | 100 Hz = -20 dB; 1 kHz = -8 dB; 5 kHz = -18 dB | 100 Hz = -20 dB; 1 kHz = -8 dB; 5 kHz = -18 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-1:2012 Clause 5 (DLalpha, constant absorption) | a device absorbing 0,50 in every band rates -10 lg(1 - 0,50) | 3.0103 dB (+/-0.0001 dB) | 3.0103 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-1:2012 Clause 5 (DLalpha, the 0,99 ratio limit) | a perfect absorber is capped at -10 lg(1 - 0,99) = 20 dB | 20 dB (+/-0 dB) | 20 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-1:2012 Table A.1 (categories of absorptive performance) | the four boundaries A2/A3/A4/A5 read off the reported integer | 4 dB -> A2, 8 dB -> A3, 12 dB -> A4, 16 dB -> A5 | 4 dB -> A2, 8 dB -> A3, 12 dB -> A4, 16 dB -> A5 | 0 | - | ![Pass][cv-pass] Pass |
+| EN 1793-2:2012 Clause 5.2 (DLR, constant sound reduction index) | a wall with R = 32 dB in every band rates 32 dB | 32 dB (+/-0 dB) | 32 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-2:2012 Clause 5.2 (DLR, spectrum weighting) | one 10 dB band costs more at the 1 kHz peak than at the 100 Hz end | DLR(weak at 1 kHz) < DLR(weak at 100 Hz) | 18.14 dB < 29.73 dB | -11.60 dB | - | ![Pass][cv-pass] Pass |
+| EN 1793-2:2012 Table A.1 (categories of airborne sound insulation) | the three boundaries B2/B3/B4 read off the reported integer | 15 dB -> B2, 25 dB -> B3, 35 dB -> B4 | 15 dB -> B2, 25 dB -> B3, 35 dB -> B4 | 0 | - | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
 <summary><b>Panel &amp; aperture sound insulation (Bies / Hopkins / Cremer)</b>: 100% (17/17)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
@@ -1372,37 +1387,6 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60534-8-4:2005 | Cavitating transmission loss, examples 2 and 3 (Eq. (17)) | example 3, the worse of the two printed rows | -74.922 dB | 0.084 dB | 84 % | ![Pass][cv-pass] Pass |
 | IEC 60534-8-4:2005 | Level 1 m from the pipe wall, examples 1 to 3 (Eqs. (18a), (18b)) | example 1 = 62.7 dB; example 2 = 81 dB; example 3 = 66.9 dB | example 1 = 62.7 dB; example 2 = 81 dB; example 3 = 66.9 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 60534-8-4:2005 | Frequency route at 8 kHz, examples 1 to 3 (Eqs. (19) to (22)) | L_pi(8k) 1 = 116.3 dB; L_pi(8k) 2 = 141.9 dB; L_pi(8k) 3 = 128 dB; TL(8k) = -51.76 dB; L_pe(8k) 1 = 51.8 dB; L_pe(8k) 2 = 77.4 dB; L_pe(8k) 3 = 63.6 dB | L_pi(8k) 1 = 116.3 dB; L_pi(8k) 2 = 141.9 dB; L_pi(8k) 3 = 128 dB; TL(8k) = -51.76 dB; L_pe(8k) 1 = 51.8 dB; L_pe(8k) 2 = 77.4 dB; L_pe(8k) 3 = 63.6 dB | exact | 0 % | ![Pass][cv-pass] Pass |
-
-</details>
-
-<details>
-<summary><b>Ducted silencer measurement (ISO 7235, ISO 11691)</b>: 100% (23/23)</summary>
-
-| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
-|:---|:---|:---|:---|:---|:---:|:---:|
-| ISO 11691:1995 | Insertion loss by substitution (Eq. (1)) | 50 Hz = 4 dB; 63 Hz = 7 dB; 80 Hz = 12 dB; 100 Hz = 20 dB; 125 Hz = 26 dB; 160 Hz = 28 dB | 50 Hz = 4 dB; 63 Hz = 7 dB; 80 Hz = 12 dB; 100 Hz = 20 dB; 125 Hz = 26 dB; 160 Hz = 28 dB | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Reverberation-time correction of the insertion loss (6.3) | 10 lg 2 = 3,010300 dB | 3.0103 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| ISO 11691:1995 | Octave from three one-third octaves (Eq. (2)) | -10 lg[(10^-3 + 10^-3 + 10^-0,5)/3] = 9,744 dB | 9.743832 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| ISO 11691:1995 | Bounds of the octave insertion loss (Eq. (2)) | between 5.000 dB and 9.771 dB | 9.744 dB | headroom 0.027 dB | 99 % | ![Pass][cv-pass] Pass |
-| ISO 11691:1995 | Reproducibility of the survey method (Table 1) | 50 Hz = 2 dB; 1250 Hz = 2 dB; 1600 Hz = 3 dB; 10000 Hz = 3 dB | 50 Hz = 2 dB; 1250 Hz = 2 dB; 1600 Hz = 3 dB; 10000 Hz = 3 dB | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Microphone position spread limits (Table 6) | 50 Hz = 10 dB; 63 Hz = 10 dB; 80 Hz = 8 dB; 100 Hz = 8 dB; 125 Hz = 7 dB; just above 125 Hz = 6 dB; 160 Hz and above = 6 dB | 50 Hz = 10 dB; 63 Hz = 10 dB; 80 Hz = 8 dB; 100 Hz = 8 dB; 125 Hz = 7 dB; just above 125 Hz = 6 dB; 160 Hz and above = 6 dB | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Three microphone positions, or five (6.2.1) | at 50 Hz = 3; at 125 Hz = 5; at 1000 Hz = 5 | at 50 Hz = 3; at 125 Hz = 5; at 1000 Hz = 5 | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Reproducibility of the three quantities (Table 7) | insertion_loss 50 Hz = 1.5 dB; insertion_loss 250 Hz = 1 dB; insertion_loss 1000 Hz = 2 dB; insertion_loss 4000 Hz = 3 dB; transmission_loss 50 Hz = 3 dB; transmission_loss 250 Hz = 3 dB; transmission_loss 1000 Hz = 3 dB; transmission_loss 4000 Hz = 3 dB; intensity 50 Hz = 3 dB; intensity 250 Hz = 1.5 dB; intensity 1000 Hz = 1 dB; intensity 4000 Hz = 1 dB | insertion_loss 50 Hz = 1.5 dB; insertion_loss 250 Hz = 1 dB; insertion_loss 1000 Hz = 2 dB; insertion_loss 4000 Hz = 3 dB; transmission_loss 50 Hz = 3 dB; transmission_loss 250 Hz = 3 dB; transmission_loss 1000 Hz = 3 dB; transmission_loss 4000 Hz = 3 dB; intensity 50 Hz = 3 dB; intensity 250 Hz = 1.5 dB; intensity 1000 Hz = 1 dB; intensity 4000 Hz = 1 dB | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Expanded measurement uncertainty (7.9) | 250 Hz = 2 dB; 4000 Hz = 6 dB | 250 Hz = 2 dB; 4000 Hz = 6 dB | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 11691:1995 | Test duct against the silencer (4.5) | lower = 0.6; upper = 1.7 | lower = 0.6; upper = 1.7 | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Open-end transmission loss and reflection (B.3), (B.4) | D_td = -10 lg(1 - r^2) at all 30 pairs | largest disagreement 1.243e-14 dB | 0 dB | 1 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Solid angle of radiation at the duct end (Table B.1) | A (flush in a wall) = 6.2832 sr; B (wall and floor) = 3.1416 sr; C (free in the room) = 12.5664 sr; D (on the floor) = 6.2832 sr; E (mid-room duct) = 12.5664 sr | A (flush in a wall) = 6.2832 sr; B (wall and floor) = 3.1416 sr; C (free in the room) = 12.5664 sr; D (on the floor) = 6.2832 sr; E (mid-room duct) = 12.5664 sr | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Rectangular cut-on frequency (Eq. (5)) | 343,000000 Hz from the (1, 0) eigenvalue | 343 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Circular cut-on frequency (Eq. (4)) | 0,59 / (1,8412 / pi) = 1,006701 | 1.006702 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Transmission loss of an air-terminal unit (Eq. (6)) | 63 Hz gap = 11.2255 dB; 2000 Hz gap = 0.0525 dB | 63 Hz gap = 11.2255 dB; 2000 Hz gap = 0.0525 dB | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Normal air density (Eqs. (10), (21), (22)) | (101 325 + 200) / (287 x 293) = 1,207323 kg/m³ | 1.207323 kg/m³ | 0 kg/m³ | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Total pressure loss across unequal ducts (Eq. (12)) | S_2 = S_1 = 45 Pa; S_2 = 2 S_1 = 93.6253 Pa; S_2 = S_1 / 2 = -149.5012 Pa | S_2 = S_1 = 45 Pa; S_2 = 2 S_1 = 93.6253 Pa; S_2 = S_1 / 2 = -149.5012 Pa | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Pressure loss coefficient is flow invariant (Eq. (14)) | zeta = 0.750000 at 1 m³/s | 0.750000 at 2 m³/s | 0 | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Averaged pressure loss coefficient (Eq. (18)) | 2,5 - 0,4 = 2,100000 | 2.1 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Upstream straight length (6.5.2.2.1) | S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m | S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 5135:1999 | End reflection loss is ISO 7235 (B.3) written out (Eq. (2)) | ISO 5135 (2) = ISO 7235 (B.3) at all 30 pairs | largest disagreement 3.553e-15 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| ISO 5135:1999 | Sound power level in the duct (Eq. (1)) | 63 Hz = 71.2255 dB; 125 Hz = 66.1429 dB; 250 Hz = 62.5007 dB; 500 Hz = 60.7724 dB; 1000 Hz = 60.2063 dB; 2000 Hz = 60.0525 dB | 63 Hz = 71.2255 dB; 125 Hz = 66.1429 dB; 250 Hz = 62.5007 dB; 500 Hz = 60.7724 dB; 1000 Hz = 60.2063 dB; 2000 Hz = 60.0525 dB | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 5135:1999 | Least-squares operating line (5.5.2) | slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6 | slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

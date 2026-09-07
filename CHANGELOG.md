@@ -55,6 +55,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- The same two numbers beside a railway: **EN 16272-3-1:2012**, in the
+  `spectrum="railway"` of the two rating functions.
+
+  Its Clauses 5 and 6 are the road formulas with the railway table in the
+  weights, over the same eighteen bands. Rolling noise sits higher up: the
+  railway spectrum is flat within a decibel from 1,25 kHz to 2,5 kHz where
+  the road one has already begun to fall away, so an absorber that improves
+  with frequency is worth two decibels more beside a track. The railway parts
+  print no category ladder, and the result says so by carrying nothing where
+  a road device carries its letter. Clause 6 of that standard also says the
+  indices are weighted by "the normalised traffic noise spectrum defined in
+  Table 1", while its Table 1 is the railway spectrum and the symbol list
+  under the formula says railway: the road wording of EN 1793-2, left in
+  place when the clause was copied, and now an errata entry of its own.
+
 - What a road barrier is sold by, which is not what it diffracts: the two
   single-number ratings of EN 1793 and the spectrum they share, in
   `environment.sound_absorption_rating` and

@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""EN 1793-1 and EN 1793-2 single-number ratings, and the spectrum they share.
+"""The single-number ratings of EN 1793 and EN 16272, and the two spectra.
 
 Oracles, all from the printed pages:
 
@@ -8,6 +8,9 @@ Oracles, all from the printed pages:
   folio 3): they peak at 1 kHz and fall to -20 dB and -18 dB at the ends.
 - EN 1793-1:2012 Clause 5, ``DLα``, and its Table A.1 categories A1 to A5.
 - EN 1793-2:2012 Clause 5.2, ``DL_R``, and its Table A.1 categories B1 to B4.
+- EN 16272-3-1:2012 Table 1 (PDF page 8, printed folio 6), the normalised
+  railway noise spectrum, and its Clauses 5 and 6, which are the same two
+  formulas with that table in the weights and no category ladder at all.
 
 Closed-form checks the two formulas have to satisfy whatever the spectrum
 is, which is what makes them oracles rather than regression pins:
@@ -213,3 +216,83 @@ class TestReporting:
             got.weights, prop.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB
         )
         np.testing.assert_allclose(got.bands_hz, prop.TRAFFIC_NOISE_BANDS_HZ)
+
+
+class TestRailwaySpectrum:
+    """EN 16272-3-1:2012, Table 1 and Clauses 5 and 6."""
+
+    def test_the_printed_levels(self) -> None:
+        assert prop.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB == (
+            -27.0,
+            -25.0,
+            -23.0,
+            -21.0,
+            -19.0,
+            -17.0,
+            -15.0,
+            -13.0,
+            -12.0,
+            -11.0,
+            -10.0,
+            -9.0,
+            -9.0,
+            -9.0,
+            -9.0,
+            -10.0,
+            -13.0,
+            -17.0,
+        )
+
+    def test_it_covers_the_same_eighteen_bands(self) -> None:
+        assert len(prop.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB) == _BANDS
+        assert set(prop.SPECTRA) == {"road", "railway"}
+
+    def test_the_railway_plateau_is_where_rolling_noise_is(self) -> None:
+        # Flat within a decibel from 1,25 kHz to 2,5 kHz, where the road
+        # spectrum has already begun to fall away.
+        rail = np.asarray(prop.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB)
+        road = np.asarray(prop.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB)
+        plateau = rail[11:15]
+        assert float(plateau.max() - plateau.min()) == pytest.approx(0.0)
+        assert rail[14] - rail[10] > road[14] - road[10]
+
+    def test_a_constant_device_rates_the_same_on_either_spectrum(self) -> None:
+        # The weighting cancels, so a device that behaves the same in every
+        # band cannot tell the two standards apart.
+        for spectrum in prop.SPECTRA:
+            got = prop.airborne_insulation_rating(
+                np.full(_BANDS, 26.0), spectrum=spectrum
+            )
+            assert got.rating == pytest.approx(26.0)
+            assert got.spectrum == spectrum
+
+    def test_a_rising_absorber_rates_higher_on_the_railway_spectrum(self) -> None:
+        # Rolling noise sits higher up, so an absorber that improves with
+        # frequency is worth more against it.
+        alpha = np.linspace(0.2, 0.9, _BANDS)
+        road = prop.sound_absorption_rating(alpha).rating
+        rail = prop.sound_absorption_rating(alpha, spectrum="railway").rating
+        assert rail > road
+
+    def test_the_railway_parts_print_no_category(self) -> None:
+        # Their annexes are guidance notes: the rating is the number and
+        # nothing more, and inventing an A or B letter for it would be an
+        # invention.
+        alpha = np.full(_BANDS, 0.6)
+        assert prop.sound_absorption_rating(alpha, spectrum="railway").category is None
+        assert (
+            prop.airborne_insulation_rating(
+                np.full(_BANDS, 20.0), spectrum="railway"
+            ).category
+            is None
+        )
+        assert prop.sound_absorption_rating(alpha).category is not None
+
+    def test_the_cap_applies_to_the_railway_rating_too(self) -> None:
+        with pytest.warns(prop.RoadDeviceWarning, match="EN 16272-3-1"):
+            got = prop.sound_absorption_rating(np.ones(_BANDS), spectrum="railway")
+        assert got.rating == pytest.approx(20.0)
+
+    def test_an_unknown_spectrum_is_refused(self) -> None:
+        with pytest.raises(ValueError, match="spectrum must be one of"):
+            prop.sound_absorption_rating(np.zeros(_BANDS), spectrum="aircraft")

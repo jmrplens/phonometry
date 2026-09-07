@@ -1,11 +1,20 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-r"""Single-number ratings of road traffic noise reducing devices (EN 1793).
+r"""Single-number ratings of noise reducing devices (EN 1793, EN 16272).
 
 A barrier beside a road is not judged band by band. It is judged by two
 numbers, and both are the same operation on a spectrum nobody measures on
 site: the normalised traffic noise spectrum of **EN 1793-3:1997**, eighteen
 one-third octave bands from 100 Hz to 5 kHz carrying relative A-weighted
 levels :math:`L_i` that stand for what a road sounds like at the roadside.
+
+A barrier beside a railway is judged the same way and by a different
+spectrum. **EN 16272-3-1:2012** prints the normalised railway noise spectrum
+over the same eighteen bands, and its Clauses 5 and 6 are the two formulas
+below with that table in place of the other one: rolling noise puts its
+weight higher up, so the railway spectrum is flat within one decibel from
+1,25 kHz to 2,5 kHz where the road one has already begun to fall away.
+The railway parts carry no category ladder; their annexes are guidance
+notes, and a rating there is the number and nothing more.
 
 * **EN 1793-1:2012** rates absorption. What matters to the neighbour is the
   energy the device sends back across the road, so the rating is what is
@@ -103,9 +112,40 @@ NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB: tuple[float, ...] = (
     -18.0,
 )
 
-#: EN 1793-1:2012, Clause 5. The ceiling the standard puts on the weighted
-#: absorption ratio, so that a measured coefficient above one cannot leave
-#: the logarithm without an argument.
+#: EN 16272-3-1:2012, Table 1. The normalised railway noise spectrum, over
+#: the same eighteen bands as the road one: relative A-weighted one-third
+#: octave band levels, in dB, flat within a decibel from 1,25 kHz to 2,5 kHz.
+NORMALISED_RAILWAY_NOISE_SPECTRUM_DB: tuple[float, ...] = (
+    -27.0,
+    -25.0,
+    -23.0,
+    -21.0,
+    -19.0,
+    -17.0,
+    -15.0,
+    -13.0,
+    -12.0,
+    -11.0,
+    -10.0,
+    -9.0,
+    -9.0,
+    -9.0,
+    -9.0,
+    -10.0,
+    -13.0,
+    -17.0,
+)
+
+#: The two spectra a device can be rated against, by the standard that
+#: prints each: ``"road"`` is EN 1793-3 and ``"railway"`` is EN 16272-3-1.
+SPECTRA: dict[str, tuple[float, ...]] = {
+    "road": NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB,
+    "railway": NORMALISED_RAILWAY_NOISE_SPECTRUM_DB,
+}
+
+#: EN 1793-1:2012, Clause 5 and EN 16272-3-1:2012, Clause 5. The ceiling both
+#: standards put on the weighted absorption ratio, so that a measured
+#: coefficient above one cannot leave the logarithm without an argument.
 ABSORPTION_RATIO_LIMIT = 0.99
 
 #: EN 1793-1:2012, Table A.1. Categories of absorptive performance, read
@@ -142,8 +182,10 @@ class RoadDeviceRating:
     :ivar reported: The same rating rounded to the nearest integer, which is
         what a test report carries and what the category is read off.
     :ivar category: The Annex A category of the reported value, ``"A1"`` to
-        ``"A5"`` for absorption or ``"B1"`` to ``"B4"`` for insulation.
+        ``"A5"`` for absorption or ``"B1"`` to ``"B4"`` for insulation, or
+        ``None`` for a railway rating, whose standard prints no ladder.
     :ivar quantity: ``"absorption"`` or ``"insulation"``.
+    :ivar spectrum: ``"road"`` (EN 1793-3) or ``"railway"`` (EN 16272-3-1).
     :ivar bands_hz: The eighteen band centre frequencies, in Hz.
     :ivar values: The per-band input the rating was weighted from: the sound
         absorption coefficients, or the sound reduction indices in dB.
@@ -152,8 +194,9 @@ class RoadDeviceRating:
 
     rating: float
     reported: int
-    category: str
+    category: str | None
     quantity: str
+    spectrum: str
     bands_hz: NDArray[np.float64]
     values: NDArray[np.float64]
     weights: NDArray[np.float64]
@@ -185,18 +228,20 @@ def _round_half_up(value: float) -> int:
 
 
 def _weighted(
-    values: ArrayLike, name: str
+    values: ArrayLike, name: str, spectrum: str
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The band values and the spectrum weights, checked against each other."""
+    if spectrum not in SPECTRA:
+        msg = f"spectrum must be one of {tuple(SPECTRA)}; got {spectrum!r}"
+        raise ValueError(msg)
     band_values = require_finite_array(values, name)
     if band_values.size != len(TRAFFIC_NOISE_BANDS_HZ):
         msg = (
             f"{name} must cover the {len(TRAFFIC_NOISE_BANDS_HZ)} one-third "
-            f"octave bands of EN 1793-3 from 100 Hz to 5 kHz; got "
-            f"{band_values.size}"
+            f"octave bands from 100 Hz to 5 kHz; got {band_values.size}"
         )
         raise ValueError(msg)
-    return band_values, np.asarray(NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB, dtype=float)
+    return band_values, np.asarray(SPECTRA[spectrum], dtype=float)
 
 
 def _category(reported: int, ladder: tuple[tuple[str, int, int], ...]) -> str:
@@ -208,24 +253,38 @@ def _category(reported: int, ladder: tuple[tuple[str, int, int], ...]) -> str:
     raise ValueError(msg)
 
 
-def sound_absorption_rating(absorption_coefficients: ArrayLike) -> RoadDeviceRating:
-    r"""``DLα``, the EN 1793-1 single-number rating of sound absorption.
+def sound_absorption_rating(
+    absorption_coefficients: ArrayLike, *, spectrum: str = "road"
+) -> RoadDeviceRating:
+    r"""``DLα``, the single-number rating of sound absorption.
+
+    EN 1793-1:2012 Clause 5 for a road device, EN 16272-3-1:2012 Clause 5
+    for a railway one: the same formula over the same eighteen bands, with
+    the spectrum of the matching part in the weights. Only the road parts
+    print a category ladder, so a railway rating carries none.
 
     :param absorption_coefficients: :math:`\alpha_\mathrm{S}` in the
         eighteen one-third octave bands of :data:`TRAFFIC_NOISE_BANDS_HZ`.
-    :return: The rating, its reported integer and its Annex A category.
-    :raises ValueError: If the input does not cover the eighteen bands, or
-        is not finite.
+    :param spectrum: ``"road"`` (EN 1793-3, the default) or ``"railway"``
+        (EN 16272-3-1).
+    :return: The rating, its reported integer and, for a road device, its
+        Annex A category.
+    :raises ValueError: If the input does not cover the eighteen bands, is
+        not finite, or the spectrum is not one of the two.
     :warns RoadDeviceWarning: If the weighted ratio reaches the 0,99 limit
-        of Clause 5, which means the rating is the limit and not the data.
+        both standards put on it, which means the rating is the limit and
+        not the data.
     """
-    alpha, weights = _weighted(absorption_coefficients, "absorption_coefficients")
+    alpha, weights = _weighted(
+        absorption_coefficients, "absorption_coefficients", spectrum
+    )
     energy = 10.0 ** (0.1 * weights)
     ratio = float(np.sum(alpha * energy) / np.sum(energy))
     if ratio >= ABSORPTION_RATIO_LIMIT:
+        clause = "EN 1793-1" if spectrum == "road" else "EN 16272-3-1"
         msg = (
             "the weighted absorption ratio reached the "
-            f"{ABSORPTION_RATIO_LIMIT} limit of EN 1793-1 Clause 5, so the "
+            f"{ABSORPTION_RATIO_LIMIT} limit of {clause} Clause 5, so the "
             f"rating is that limit rather than the measurement; the ratio "
             f"was {ratio!r}"
         )
@@ -236,24 +295,37 @@ def sound_absorption_rating(absorption_coefficients: ArrayLike) -> RoadDeviceRat
     return RoadDeviceRating(
         rating=rating,
         reported=reported,
-        category=_category(reported, ABSORPTION_CATEGORIES),
+        category=(
+            _category(reported, ABSORPTION_CATEGORIES) if spectrum == "road" else None
+        ),
         quantity="absorption",
+        spectrum=spectrum,
         bands_hz=np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float),
         values=alpha,
         weights=weights,
     )
 
 
-def airborne_insulation_rating(sound_reduction_index_db: ArrayLike) -> RoadDeviceRating:
-    r"""``DL_R``, the EN 1793-2 single-number rating of airborne insulation.
+def airborne_insulation_rating(
+    sound_reduction_index_db: ArrayLike, *, spectrum: str = "road"
+) -> RoadDeviceRating:
+    r"""``DL_R``, the single-number rating of airborne sound insulation.
+
+    EN 1793-2:2012 Clause 5.2 for a road device, EN 16272-3-1:2012 Clause 6
+    for a railway one, on the same weighting as the absorption rating above.
 
     :param sound_reduction_index_db: :math:`R` in decibels, in the eighteen
         one-third octave bands of :data:`TRAFFIC_NOISE_BANDS_HZ`.
-    :return: The rating, its reported integer and its Annex A category.
-    :raises ValueError: If the input does not cover the eighteen bands, or
-        is not finite.
+    :param spectrum: ``"road"`` (EN 1793-3, the default) or ``"railway"``
+        (EN 16272-3-1).
+    :return: The rating, its reported integer and, for a road device, its
+        Annex A category.
+    :raises ValueError: If the input does not cover the eighteen bands, is
+        not finite, or the spectrum is not one of the two.
     """
-    reduction, weights = _weighted(sound_reduction_index_db, "sound_reduction_index_db")
+    reduction, weights = _weighted(
+        sound_reduction_index_db, "sound_reduction_index_db", spectrum
+    )
     energy = 10.0 ** (0.1 * weights)
     transmitted = float(np.sum(energy * 10.0 ** (-0.1 * reduction)) / np.sum(energy))
     rating = -10.0 * float(np.log10(abs(transmitted)))
@@ -261,8 +333,11 @@ def airborne_insulation_rating(sound_reduction_index_db: ArrayLike) -> RoadDevic
     return RoadDeviceRating(
         rating=rating,
         reported=reported,
-        category=_category(reported, INSULATION_CATEGORIES),
+        category=(
+            _category(reported, INSULATION_CATEGORIES) if spectrum == "road" else None
+        ),
         quantity="insulation",
+        spectrum=spectrum,
         bands_hz=np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float),
         values=reduction,
         weights=weights,

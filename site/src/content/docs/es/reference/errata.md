@@ -5221,6 +5221,41 @@ dos ediciones con las mismas entradas y en el mismo orden.
   160 Hz mismos.
 - **Estado:** sin comunicar.
 
+## EN 16272-3-1:2012, capítulo 6 (un índice ferroviario ponderado con «el espectro normalizado de ruido de tráfico»)
+
+- **Localización:** capítulo 6, «Single-number rating of airborne sound
+  insulation $DL_R$», segundo párrafo, en el folio impreso 7 (página 9 del
+  PDF) de la BS EN 16272-3-1:2012.
+- **Lo impreso:** «The individual sound reduction index values shall be
+  weighted according to the normalised **traffic** noise spectrum defined in
+  Table 1».
+- **El problema:** la tabla 1 de esta norma es el *espectro normalizado de
+  ruido ferroviario*, y la definición de $L_i$ tres líneas por debajo de la
+  fórmula lo dice con todas las letras: «the relative A-weighted sound
+  pressure level (dB) of the normalised railway noise spectrum, as defined in
+  Table 1». La palabra «traffic» es la redacción de carretera del capítulo
+  5.2 de la EN 1793-2:2012, de donde este capítulo está copiado por lo demás
+  al pie de la letra, fórmula incluida. El capítulo 5 de la propia norma, una
+  página antes, lo dice bien: «normalised railway noise spectrum defined in
+  Table 1».
+- **Consecuencia:** ninguna aritmética, porque la frase nombra la tabla 1 y la
+  lista de símbolos nombra el espectro ferroviario. Le importa a quien lee,
+  que puede tomar «the normalised traffic noise spectrum» por el término
+  definido que es en la EN 1793-3 e irse a buscar la tabla de carretera: los
+  dos espectros comparten sus dieciocho bandas y difieren hasta en 7 dB banda
+  a banda, así que las dos lecturas no dan el mismo índice.
+- **Evidencia:** el párrafo tal como está impreso, leído sobre la página.
+  Verificado en la página 9 del PDF (p. 7 impresa) de la
+  BS EN 16272-3-1:2012: la palabra «traffic» aparece en el párrafo sobre la
+  fórmula (2), y la palabra «railway» en la definición de $L_i$ bajo ella.
+- **Comportamiento de la biblioteca:**
+  [`airborne_insulation_rating`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/propagation/noise_reducing_devices.py)
+  recibe el espectro por su nombre y pondera un índice ferroviario con la
+  tabla ferroviaria, que es lo que dicen la lista de símbolos y la tabla 1. La
+  fila de conformidad «EN 16272-3-1:2012 Clause 6 (DLR on the railway
+  spectrum)» lo registra.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

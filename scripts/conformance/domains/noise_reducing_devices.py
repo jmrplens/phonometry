@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Road traffic noise reducing devices (EN 1793-1, -2 and -3).
+"""Noise reducing devices beside a road and beside a railway (EN 1793, EN 16272).
 
 Two single-number ratings over one printed spectrum. The spectrum is the
 oracle for itself, band by band from Table 1 of EN 1793-3; the two ratings
@@ -24,10 +24,11 @@ import phonometry as ph
 from ..registry import Outcome, numeric, record, register
 
 _ROAD_DEVICES = "Road traffic noise reducing devices (EN 1793)"
+_RAIL_DEVICES = "Railway noise reducing devices (EN 16272)"
 _BANDS = len(ph.environment.TRAFFIC_NOISE_BANDS_HZ)
 
 
-def _ladder(printed: dict[int, str], computed: dict[int, str]) -> Outcome:
+def _ladder(printed: dict[int, str], computed: dict[int, str | None]) -> Outcome:
     """Compare a category ladder at the decibel values where it changes."""
     as_text = ", ".join(f"{value} dB -> {name}" for value, name in printed.items())
     got_text = ", ".join(f"{value} dB -> {name}" for value, name in computed.items())
@@ -146,3 +147,54 @@ def _chk_insulation_categories() -> Outcome:
         for reported in printed
     }
     return _ladder(printed, computed)
+
+
+@register(
+    _RAIL_DEVICES,
+    "EN 16272-3-1:2012 Table 1 (normalised railway noise spectrum)",
+    "the printed levels at the ends and on the plateau",
+)
+def _chk_railway_spectrum() -> Outcome:
+    levels = dict(
+        zip(
+            ph.environment.TRAFFIC_NOISE_BANDS_HZ,
+            ph.environment.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB,
+            strict=True,
+        )
+    )
+    printed = {"100 Hz": -27.0, "2 kHz": -9.0, "5 kHz": -17.0}
+    computed = {
+        "100 Hz": levels[100.0],
+        "2 kHz": levels[2000.0],
+        "5 kHz": levels[5000.0],
+    }
+    return record(printed, computed, unit="dB")
+
+
+@register(
+    _RAIL_DEVICES,
+    "EN 16272-3-1:2012 Clause 6 (DLR on the railway spectrum)",
+    "a wall with R = 26 dB in every band rates 26 dB",
+)
+def _chk_railway_insulation() -> Outcome:
+    got = ph.environment.airborne_insulation_rating(
+        np.full(_BANDS, 26.0), spectrum="railway"
+    )
+    return numeric(26.0, got.rating, 1e-9, unit="dB")
+
+
+@register(
+    _RAIL_DEVICES,
+    "EN 16272-3-1:2012 Clause 5 (DLalpha on the railway spectrum)",
+    "the same absorber rates higher against rolling noise than against a road",
+)
+def _chk_railway_absorption() -> Outcome:
+    alpha = np.linspace(0.2, 0.9, _BANDS)
+    road = ph.environment.sound_absorption_rating(alpha).rating
+    rail = ph.environment.sound_absorption_rating(alpha, spectrum="railway").rating
+    return Outcome(
+        expected="DLalpha(railway) > DLalpha(road)",
+        computed=f"{rail:.2f} dB > {road:.2f} dB",
+        delta=f"{rail - road:+.2f} dB",
+        passed=rail > road,
+    )

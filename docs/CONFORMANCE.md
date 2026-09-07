@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**864/864 conformance checks pass** across 71 domains and 403 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**867/867 conformance checks pass** across 72 domains and 404 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1247,6 +1247,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | EN 1793-2:2012 Clause 5.2 (DLR, constant sound reduction index) | a wall with R = 32 dB in every band rates 32 dB | 32 dB (+/-0 dB) | 32 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | EN 1793-2:2012 Clause 5.2 (DLR, spectrum weighting) | one 10 dB band costs more at the 1 kHz peak than at the 100 Hz end | DLR(weak at 1 kHz) < DLR(weak at 100 Hz) | 18.14 dB < 29.73 dB | -11.60 dB | - | ![Pass][cv-pass] Pass |
 | EN 1793-2:2012 Table A.1 (categories of airborne sound insulation) | the three boundaries B2/B3/B4 read off the reported integer | 15 dB -> B2, 25 dB -> B3, 35 dB -> B4 | 15 dB -> B2, 25 dB -> B3, 35 dB -> B4 | 0 | - | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Railway noise reducing devices (EN 16272)</b>: 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| EN 16272-3-1:2012 Table 1 (normalised railway noise spectrum) | the printed levels at the ends and on the plateau | 100 Hz = -27 dB; 2 kHz = -9 dB; 5 kHz = -17 dB | 100 Hz = -27 dB; 2 kHz = -9 dB; 5 kHz = -17 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 16272-3-1:2012 Clause 6 (DLR on the railway spectrum) | a wall with R = 26 dB in every band rates 26 dB | 26 dB (+/-0 dB) | 26 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| EN 16272-3-1:2012 Clause 5 (DLalpha on the railway spectrum) | the same absorber rates higher against rolling noise than against a road | DLalpha(railway) > DLalpha(road) | 4.77 dB > 3.95 dB | +0.82 dB | - | ![Pass][cv-pass] Pass |
 
 </details>
 

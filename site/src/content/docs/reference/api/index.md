@@ -197,7 +197,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`environment.propagation.outdoor_propagation`](/phonometry/reference/api/environment/outdoor-propagation/) | Outdoor sound propagation: ISO 9613-2:1996 general method of calculation. |
 | [`environment.sources.cnossos_road`](/phonometry/reference/api/environment/cnossos-road/) | CNOSSOS-EU road traffic source emission (Directive 2002/49/EC Annex II, 2.2). |
 | [`environment.propagation.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/) | Spherical-wave ground effect and advanced barrier diffraction. |
-| [`environment.propagation.road_devices`](/phonometry/reference/api/environment/road-devices/) | Single-number ratings of road traffic noise reducing devices (EN 1793). |
+| [`environment.propagation.noise_reducing_devices`](/phonometry/reference/api/environment/noise-reducing-devices/) | Single-number ratings of noise reducing devices (EN 1793, EN 16272). |
 | [`environment.propagation.refraction`](/phonometry/reference/api/environment/refraction/) | Atmospheric refraction: ray tracing and the parabolic equation (PE). |
 | [`environment.propagation.air_absorption`](/phonometry/reference/api/environment/air-absorption/) | Atmospheric absorption of sound: ISO 9613-1:1993. |
 | [`environment.sources.cnossos_rail`](/phonometry/reference/api/environment/cnossos-rail/) | CNOSSOS-EU railway source emission (Directive 2002/49/EC Annex II, 2.3). |

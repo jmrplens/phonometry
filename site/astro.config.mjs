@@ -416,7 +416,7 @@ export default defineConfig({
   base: basePath,
   // Every address this site has published and no longer serves. The eight
   // entries that used to be written out here covered the four guides that were
-  // split, and nothing else: the reorganisations that followed moved 216 pages
+  // split, and nothing else: the reorganisations that followed moved 217 pages
   // in each language and left every one of their old addresses answering 404,
   // to search results, bookmarks and citations alike. The map is derived from
   // the rename history of the content tree and committed, so it is reviewable

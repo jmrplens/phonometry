@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 864 numerical conformance checks against 403 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 867 numerical conformance checks against 404 standards enforced in CI.
 
-phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 864 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 71 domains.
+phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 867 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 72 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -464,10 +464,10 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [environment/ground-barriers](https://jmrplens.github.io/phonometry/reference/api/environment/ground-barriers/)
 - [environment/impulsive-sound](https://jmrplens.github.io/phonometry/reference/api/environment/impulsive-sound/)
 - [environment/measurement](https://jmrplens.github.io/phonometry/reference/api/environment/measurement/)
+- [environment/noise-reducing-devices](https://jmrplens.github.io/phonometry/reference/api/environment/noise-reducing-devices/)
 - [environment/outdoor-propagation](https://jmrplens.github.io/phonometry/reference/api/environment/outdoor-propagation/)
 - [environment/rating](https://jmrplens.github.io/phonometry/reference/api/environment/rating/)
 - [environment/refraction](https://jmrplens.github.io/phonometry/reference/api/environment/refraction/)
-- [environment/road-devices](https://jmrplens.github.io/phonometry/reference/api/environment/road-devices/)
 - [environment/spain](https://jmrplens.github.io/phonometry/reference/api/environment/spain/)
 - [environment/wind-turbine](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine/)
 - [filters/compliance](https://jmrplens.github.io/phonometry/reference/api/filters/compliance/)
@@ -26572,10 +26572,11 @@ it goes through. Both are weighted by a spectrum nobody measures on site, the
 bands from 100 Hz to 5 kHz, peaking at 1 kHz and twelve decibels down at either
 end.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/road_device_ratings_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/road_device_ratings.svg" alt="Three panels over the eighteen one-third octave bands of EN 1793-3. Left: the normalised traffic noise spectrum as bars, running from minus twenty decibels at 100 Hz up to a minus eight decibel peak at 1 kHz and back down to minus eighteen at 5 kHz, with an annotation saying the peak carries the rating. Middle: the sound absorption coefficient of two devices, an absorptive cassette rising from 0.15 to 0.98 around 400 Hz and easing to 0.70, rating DL alpha 8 decibels in category A3, and a concrete panel flat at 0.05 rating 0 decibels in category A1. Right: the sound reduction index of two devices, a concrete panel rising from 30 to 53 decibels and rating DL R 42 decibels in category B4, and a metal cassette rising from 21 to 34 decibels and rating 29 decibels in category B3." width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/road_device_ratings_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/road_device_ratings.svg" alt="Three panels over the eighteen one-third octave bands of EN 1793-3. Left: the normalised traffic noise spectrum of EN 1793-3 as bars, running from minus twenty decibels at 100 Hz up to a minus eight decibel peak at 1 kHz and back down to minus eighteen at 5 kHz, with an annotation saying the peak carries the rating, and over them the normalised railway noise spectrum of EN 16272-3-1 as a marker line, lower at 100 Hz and flat from 1.25 to 2.5 kHz where the road one is already falling. Middle: the sound absorption coefficient of two devices, an absorptive cassette rising from 0.15 to 0.98 around 400 Hz and easing to 0.70, rating DL alpha 8 decibels in category A3, and a concrete panel flat at 0.05 rating 0 decibels in category A1. Right: the sound reduction index of two devices, a concrete panel rising from 30 to 53 decibels and rating DL R 42 decibels in category B4, and a metal cassette rising from 21 to 34 decibels and rating 29 decibels in category B3." width="100%"></picture>
 
-*The weighting on the left decides everything: a device is judged by what it
-does around 1 kHz, and what it does at 100 Hz or 5 kHz barely counts.*
+*The weighting on the left decides everything, and there are two of them: a road
+device is judged by what it does around 1 kHz, a railway one by what it does
+between 1,25 and 2,5 kHz.*
 
 **EN 1793-1** rates absorption as the energy the device does *not* send back:
 
@@ -26629,6 +26630,39 @@ an absorptive cassette that keeps the reflection down can be the weaker one.
 Which of the two matters is a question about the site, not about the product:
 absorption for a road in a cutting or between parallel barriers, insulation for
 whatever is directly behind.
+
+### The same two numbers beside a railway
+
+A barrier beside a track is rated the same way and against a different noise.
+**EN 16272-3-1:2012** prints the normalised railway noise spectrum over the
+same eighteen bands, and its Clauses 5 and 6 are the two formulas above with
+that table in the weights. Rolling noise sits higher up than a road: the
+railway spectrum is flat within a decibel from 1,25 kHz to 2,5 kHz, where the
+road one has already begun to fall away, so an absorber that improves with
+frequency is worth more beside a track than beside a road.
+
+```python
+from phonometry import environment
+
+# A thick porous absorber, still improving where rolling noise is loudest.
+absorption = [0.10, 0.15, 0.22, 0.32, 0.45, 0.60, 0.72, 0.82, 0.88,
+              0.92, 0.95, 0.96, 0.96, 0.95, 0.94, 0.93, 0.92, 0.90]
+
+road = environment.sound_absorption_rating(absorption)
+rail = environment.sound_absorption_rating(absorption, spectrum="railway")
+print(road.reported, rail.reported)          # 8 10
+print(road.category, rail.category)          # A3 None
+```
+
+The railway parts print no category ladder: their annexes are guidance notes
+on using the rating, so a railway rating is the number and nothing more, and
+the result says so by carrying `None` where a road device carries its letter.
+Clause 6 also carries a slip worth knowing about, since it changes what a
+reader goes looking for: it says the sound reduction indices are weighted by
+"the normalised traffic noise spectrum defined in Table 1", while Table 1 of
+that standard is the railway spectrum and the symbol list under the formula
+says railway. It is the road wording of EN 1793-2, left in place when the
+clause was copied.
 
 ## Relation to ISO 9613-2
 
@@ -40165,9 +40199,9 @@ documents, one page per module.
 | `fresnel_number` | `function` | **Barrier Fresnel number N = (2/λ)(A+B−d) (Bies 5e Eq. 5.134).**<br>• `source_to_edge` A, `edge_to_receiver` B, `direct_distance` d [m]<br>• `frequencies` [Hz] | `n = environment.fresnel_number(101, 101, 200, bands)` |
 | `kurze_anderson_attenuation` | `function` | **Kurze-Anderson barrier attenuation (Bies Eq. 5.138).**<br>• `fresnel_number` N | `kurze_anderson_attenuation(0.0)  # 5 dB` |
 | `barrier_insertion_loss` | `function` | **Barrier insertion loss: Kurze-Anderson / exact half-plane / coherent ground four-path (Attenborough Ch. 9, Bies 5.3.5-5.3.7).**<br>• `frequencies`, `source_height`, `barrier_distance`, `barrier_height`, `receiver_distance`, `receiver_height`<br>• `method` 'exact'/'kurze_anderson'<br>• `thickness` e [m] (thick barrier)<br>• `ground_impedance` or `ground_flow_resistivity` | `il = environment.barrier_insertion_loss(bands, 1, 50, 4, 100, 1.5, ground_flow_resistivity=2e5)`<br><br>• `BarrierInsertionLoss` |
-| `TRAFFIC_NOISE_BANDS_HZ` / `NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB` | `constant` | **EN 1793-3 Table 1: the eighteen one-third octave bands from 100 Hz to 5 kHz and the relative A-weighted levels a road is rated against.** The two single-number ratings below weight everything by this and nothing else. | `environment.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB[10]  # -8.0 dB at 1 kHz` |
-| `sound_absorption_rating` / `airborne_insulation_rating` | `function` | **EN 1793-1 Clause 5 and EN 1793-2 Clause 5.2: what a road device is declared by.**<br>• `sound_absorption_rating(absorption_coefficients)`: `DLα`, the energy the device does not send back, capped by the 0,99 ratio limit of Clause 5<br>• `airborne_insulation_rating(sound_reduction_index_db)`: `DL_R`, the energy it does not pass<br>• both return a `RoadDeviceRating` carrying the unrounded value, the reported integer and its Annex A category | `environment.airborne_insulation_rating([32.0] * 18).category  # 'B3'` |
-| `RoadDeviceRating` | `dataclass` | **One declared rating: `rating`, `reported`, `category`, `quantity`, `bands_hz`, `values`, `weights`.**<br>• `.plot()` draws the per-band input against the spectrum that weights it | `rating.plot()` |
+| `TRAFFIC_NOISE_BANDS_HZ` / `NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB` / `NORMALISED_RAILWAY_NOISE_SPECTRUM_DB` / `SPECTRA` | `constant` | **The eighteen one-third octave bands from 100 Hz to 5 kHz, and the two spectra a device is rated against: EN 1793-3 Table 1 for a road and EN 16272-3-1 Table 1 for a railway.** `SPECTRA` maps `'road'` and `'railway'` to them. | `environment.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB[10]  # -8.0 dB at 1 kHz` |
+| `sound_absorption_rating` / `airborne_insulation_rating` | `function` | **EN 1793-1 Clause 5, EN 1793-2 Clause 5.2 and EN 16272-3-1 Clauses 5 and 6: what a noise reducing device is declared by.**<br>• `sound_absorption_rating(absorption_coefficients, spectrum='road')`: `DLα`, the energy the device does not send back, capped by the 0,99 ratio limit both standards put on it<br>• `airborne_insulation_rating(sound_reduction_index_db, spectrum='road')`: `DL_R`, the energy it does not pass<br>• `spectrum='railway'` swaps in EN 16272-3-1 Clauses 5 and 6, which are the same formulas on the railway table and print no category ladder<br>• both return a `RoadDeviceRating` carrying the unrounded value, the reported integer and, for a road device, its Annex A category | `environment.airborne_insulation_rating([32.0] * 18).category  # 'B3'` |
+| `RoadDeviceRating` | `dataclass` | **One declared rating: `rating`, `reported`, `category` (`None` for a railway device), `quantity`, `spectrum`, `bands_hz`, `values`, `weights`.**<br>• `.plot()` draws the per-band input against the spectrum that weights it | `rating.plot()` |
 | `ABSORPTION_RATIO_LIMIT` / `ABSORPTION_CATEGORIES` / `INSULATION_CATEGORIES` | `constant` | **The 0,99 ceiling of EN 1793-1 Clause 5, and the two Annex A category ladders (A1 to A5, B1 to B4) read off the reported integer.** | `environment.ABSORPTION_RATIO_LIMIT  # 0.99` |
 | `RoadDeviceWarning` | `warning class` | **Raised when the weighted absorption ratio reaches the 0,99 limit, so the rating is the limit rather than the measurement.** | `warnings.catch_warnings()` |
 | `plot_barrier_geometry` | `function` | **Source-barrier-receiver section to scale.**<br>• `source_height`, `barrier_distance`, `barrier_height`, `receiver_distance`, `receiver_height` [m]<br>• `thickness` [m] (Default: None → thin screen)<br>• `language` | `plot_barrier_geometry(source_height=1.5, barrier_distance=5.0, barrier_height=3.0, receiver_distance=20.0, receiver_height=1.5)`<br><br>• Direct + diffracted paths, path difference annotated; also `BarrierInsertionLoss.plot_geometry()` |
@@ -55312,7 +55346,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 864 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 867 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -55681,7 +55715,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-864 numerical conformance checks across 71 domains and 403 standards, covering
+867 numerical conformance checks across 72 domains and 404 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

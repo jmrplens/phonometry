@@ -19,6 +19,19 @@ from .ground_barriers import (
     kurze_anderson_attenuation,
     spherical_reflection_coefficient,
 )
+from .noise_reducing_devices import (
+    ABSORPTION_CATEGORIES,
+    ABSORPTION_RATIO_LIMIT,
+    INSULATION_CATEGORIES,
+    NORMALISED_RAILWAY_NOISE_SPECTRUM_DB,
+    NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB,
+    SPECTRA,
+    TRAFFIC_NOISE_BANDS_HZ,
+    RoadDeviceRating,
+    RoadDeviceWarning,
+    airborne_insulation_rating,
+    sound_absorption_rating,
+)
 from .outdoor_propagation import (
     DEFAULT_FREQUENCIES,
     AtmosphericConditions,
@@ -50,17 +63,6 @@ from .refraction import (
     log_linear_sound_speed_profile,
     ray_curvature_radius,
     shadow_zone_distance,
-)
-from .road_devices import (
-    ABSORPTION_CATEGORIES,
-    ABSORPTION_RATIO_LIMIT,
-    INSULATION_CATEGORIES,
-    NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB,
-    TRAFFIC_NOISE_BANDS_HZ,
-    RoadDeviceRating,
-    RoadDeviceWarning,
-    airborne_insulation_rating,
-    sound_absorption_rating,
 )
 
 __all__ = [
@@ -98,6 +100,7 @@ __all__ = [
     "log_linear_sound_speed_profile",
     "mean_path_height",
     "meteorological_correction",
+    "NORMALISED_RAILWAY_NOISE_SPECTRUM_DB",
     "NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB",
     "outdoor_propagation_attenuation",
     "OutdoorAttenuation",
@@ -110,6 +113,7 @@ __all__ = [
     "shadow_zone_distance",
     "sound_absorption_rating",
     "SourceEmission",
+    "SPECTRA",
     "spherical_reflection_coefficient",
     "SphericalGroundResult",
     "TRAFFIC_NOISE_BANDS_HZ",

@@ -4868,6 +4868,39 @@ in the same order.
   above". A test named for the gap pins the value at 160 Hz itself.
 - **Status:** unreported.
 
+## EN 16272-3-1:2012, Clause 6 (a railway rating weighted by "the normalised traffic noise spectrum")
+
+- **Location:** Clause 6, "Single-number rating of airborne sound insulation
+  $DL_R$", second paragraph, on printed folio 7 (PDF page 9) of
+  BS EN 16272-3-1:2012.
+- **The print:** "The individual sound reduction index values shall be
+  weighted according to the normalised **traffic** noise spectrum defined in
+  Table 1."
+- **The problem:** Table 1 of this standard is the *normalised railway noise
+  spectrum*, and the definition of $L_i$ three lines below the formula says
+  so in as many words: "the relative A-weighted sound pressure level (dB) of
+  the normalised railway noise spectrum, as defined in Table 1". The word
+  "traffic" is the road wording of EN 1793-2:2012 Clause 5.2, from which this
+  clause is otherwise copied verbatim, formula included. Clause 5 of the same
+  standard, one page earlier, gets it right: it says "normalised railway
+  noise spectrum defined in Table 1".
+- **Consequence:** none arithmetically, because the sentence names Table 1 and
+  the symbol list names the railway spectrum. It matters to a reader, who can
+  take "the normalised traffic noise spectrum" as the defined term it is in
+  EN 1793-3 and go looking for the road table: the two spectra share their
+  eighteen bands and differ by up to 7 dB band by band, so the two readings do
+  not give the same rating.
+- **Evidence:** the paragraph as printed, read on the page. Verified on PDF
+  page 9 (printed p. 7) of BS EN 16272-3-1:2012: the word "traffic" appears in
+  the paragraph above Formula (2), and the word "railway" in the definition of
+  $L_i$ under it.
+- **Library behaviour:**
+  [`airborne_insulation_rating`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/propagation/noise_reducing_devices.py)
+  takes the spectrum by name and weights a railway rating by the railway
+  table, which is what the symbol list and Table 1 say. The conformance row
+  "EN 16272-3-1:2012 Clause 6 (DLR on the railway spectrum)" records it.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

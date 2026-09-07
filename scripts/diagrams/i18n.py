@@ -3136,6 +3136,28 @@ _ES: dict[str, str] = {
     "the row-to-position map": "el mapa fila-posición",
     "A swapped pair gives perfectly valid levels attributed to the wrong positions,": "Intercambiar dos canales da niveles válidos atribuidos a posiciones equivocadas,",
     "and no later check can detect it": "y ninguna comprobación posterior lo detecta",
+    # What ISO 3382-1 asks for beyond one omnidirectional microphone
+    # (buildings/rooms/room-impulse-response).
+    "What ISO 3382-1 asks for beyond one omnidirectional microphone": "Lo que la ISO 3382-1 pide además de un micrófono omnidireccional",
+    "Reverberation time takes one omni; these four ask for something else": "El tiempo de reverberación se mide con un omni; estas cuatro piden otra cosa",
+    "Sound strength": "Fuerza sonora",
+    "10 m, in a free field": "10 m, en campo libre",
+    "or at $d$ ≥ 3 m, corrected by 20 lg($d$/10) dB": "o a $d$ ≥ 3 m, corrigiendo con 20 lg($d$/10) dB",
+    "and averaged around the source every 12.5°": "y promediando alrededor de la fuente cada 12,5°",
+    "Lateral energy": "Energía lateral",
+    "direct sound": "sonido directo",
+    "null": "nulo",
+    "a figure of eight beside the omni,": "un ocho junto al omni,",
+    "its null pointed at the source": "con el nulo apuntando a la fuente",
+    "Interaural correlation": "Correlación interaural",
+    "a head, real or dummy, with a microphone": "una cabeza, real o artificial, con un micrófono",
+    "at each ear canal, about 1.2 m up": "en cada canal auditivo, a unos 1,2 m",
+    "Support, on the platform": "Soporte, en el escenario",
+    "> 2 m to anything else": "> 2 m a cualquier otra cosa",
+    "direct sound: 0 to 10 ms, floor included": "sonido directo: de 0 a 10 ms, suelo incluido",
+    "early: 20 to 100 ms, late: from 100 ms on": "temprano: de 20 a 100 ms, tardío: desde 100 ms",
+    "One impulse response gives the reverberation time.": "Una respuesta al impulso da el tiempo de reverberación.",
+    "These four give what the room does to a listener, and each of them needs its own setup.": "Estas cuatro dan lo que la sala le hace a quien escucha, y cada una pide su propio montaje.",
 }
 
 

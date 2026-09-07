@@ -3805,3 +3805,170 @@ def _d_resilient_buildups(s: SVG, th: Theme) -> None:
         13,
         th.accent,
     )
+
+
+# ---------------------------------------------------------------------------
+# The measurements ISO 3382-1 needs more than an omnidirectional microphone for
+# ---------------------------------------------------------------------------
+
+
+def _second_mic_cell(
+    s: SVG, th: Theme, x: float, y: float, w: float, h: float, tag: str, name: str
+) -> None:
+    """One panel of the second-microphone plate: frame, symbol and name."""
+    s.rect(x, y, w, h, th.panel, th.muted, rx=6, sw=1.4)
+    s.text(x + 14, y + 24, tag, 16, th.secondary, anchor="start", bold=True)
+    s.text(x + w / 2 + 26, y + 24, name, 13, th.fg)
+
+
+def _d_room_second_microphone(s: SVG, th: Theme) -> None:
+    """What the four annexed measures of ISO 3382-1 ask for beyond one omni.
+
+    Reverberation time takes one omnidirectional microphone anywhere the
+    plan allows. The four measures of the annexes do not: strength wants a
+    free-field reference at a stated distance, the lateral fractions want a
+    figure of eight aimed a particular way, the correlation wants two ears,
+    and the platform measures want the microphone a metre from the source.
+    """
+    s.text(
+        450,
+        60,
+        "Reverberation time takes one omni; these four ask for something else",
+        16,
+        th.fg,
+    )
+
+    left, gap = 26.0, 13.0
+    w = (900.0 - 2 * left - gap) / 2.0
+    h = 196.0
+    top1, top2 = 84.0, 296.0
+
+    # --- G: the free-field reference at 10 m -------------------------------
+    x0 = left
+    _second_mic_cell(s, th, x0, top1, w, h, "$G$", "Sound strength")
+    sy = top1 + 94.0
+    sx = x0 + 74.0
+    mxg = x0 + w - 74.0
+    for r in (20.0, 32.0):
+        s.ellipse(sx, sy, r, r, "none", th.muted, 0.9, dash="3,4")
+    s.circle(sx, sy, 11.0, th.secondary)
+    s.text(sx, sy + 44, "source", 11, th.muted)
+    s.rect(mxg - 5, sy - 13, 10, 24, th.primary, th.primary, rx=4, sw=1.0)
+    s.dim(sx, sy - 40, mxg, sy - 40, "10 m, in a free field", offset=0, size=12)
+    s.text(
+        x0 + w / 2,
+        top1 + h - 34,
+        "or at $d$ ≥ 3 m, corrected by 20 lg($d$/10) dB",
+        12,
+        th.fg,
+    )
+    s.text(
+        x0 + w / 2,
+        top1 + h - 16,
+        "and averaged around the source every 12.5°",
+        12,
+        th.fg,
+    )
+
+    # --- Lateral fractions: the figure of eight ----------------------------
+    x0 = left + w + gap
+    _second_mic_cell(s, th, x0, top1, w, h, "$J_{LF}$, $L_J$", "Lateral energy")
+    sy = top1 + 104.0
+    sx = x0 + 60.0
+    mxl = x0 + w - 96.0
+    s.circle(sx, sy, 9.0, th.secondary)
+    s.line(sx + 12, sy, mxl - 40, sy, th.muted, 1.2, dash="6,4")
+    s.text((sx + mxl) / 2 - 14, sy - 10, "direct sound", 11, th.muted)
+    s.rect(mxl - 5, sy - 12, 10, 22, th.primary, th.primary, rx=4, sw=1.0)
+    lobe = 34.0
+    for sign in (-1.0, 1.0):
+        s.ellipse(
+            mxl, sy + sign * lobe / 1.6, 16.0, lobe / 2.0, th.panel, th.fg, sw=1.6
+        )
+    s.text(mxl + 30, sy + 4, "null", 11, th.muted, anchor="start")
+    s.line(mxl + 12, sy, mxl + 26, sy, th.fg, 1.4)
+    s.text(
+        x0 + w / 2,
+        top1 + h - 34,
+        "a figure of eight beside the omni,",
+        12,
+        th.fg,
+    )
+    s.text(x0 + w / 2, top1 + h - 16, "its null pointed at the source", 12, th.fg)
+
+    # --- IACC: the dummy head ----------------------------------------------
+    x0 = left
+    _second_mic_cell(s, th, x0, top2, w, h, "IACC", "Interaural correlation")
+    gy = top2 + 128.0
+    hx = x0 + w / 2 - 30.0
+    s.ground(gy, x0 + 20, x0 + w - 20, hatch=22)
+    s.circle(hx, gy - 44, 22.0, th.panel, th.fg, sw=2.0)
+    for sign in (-1.0, 1.0):
+        s.circle(hx + sign * 22.0, gy - 44, 5.0, th.primary)
+    s.path(
+        f"M {hx - 7:.1f} {gy - 62:.1f} L {hx:.1f} {gy - 73:.1f} "
+        f"L {hx + 7:.1f} {gy - 62:.1f} Z",
+        fill=th.fg,
+        stroke=th.fg,
+        sw=1.0,
+    )
+    s.line(hx, gy - 22, hx, gy, th.fg, 2.0)
+    s.dim(hx + 74, gy, hx + 74, gy - 44, "1.2 m", offset=0, size=12, label_side="right")
+    s.line(hx + 22, gy - 44, hx + 74, gy - 44, th.muted, 0.9, dash="3,3")
+    s.text(
+        x0 + w / 2,
+        top2 + h - 34,
+        "a head, real or dummy, with a microphone",
+        12,
+        th.fg,
+    )
+    s.text(
+        x0 + w / 2,
+        top2 + h - 16,
+        "at each ear canal, about 1.2 m up",
+        12,
+        th.fg,
+    )
+
+    # --- Stage support: a metre from the source ----------------------------
+    x0 = left + w + gap
+    _second_mic_cell(s, th, x0, top2, w, h, "ST", "Support, on the platform")
+    py = top2 + 110.0
+    psx = x0 + 96.0
+    pmx = psx + 96.0
+    s.rect(x0 + 40, py + 10, w - 80, 14, th.muted, th.fg, rx=3, sw=1.4)
+    s.circle(psx, py, 11.0, th.secondary)
+    s.rect(pmx - 5, py - 13, 10, 24, th.primary, th.primary, rx=4, sw=1.0)
+    s.dim(psx, py - 34, pmx, py - 34, "1.0 m", offset=0, size=12)
+    s.arrow(pmx + 16, py - 4, x0 + w - 26, py - 4, th.muted, 1.2)
+    s.text(pmx + 20, py - 12, "> 2 m to anything else", 11, th.muted, anchor="start")
+    s.text(
+        x0 + w / 2,
+        top2 + h - 34,
+        "direct sound: 0 to 10 ms, floor included",
+        12,
+        th.fg,
+    )
+    s.text(
+        x0 + w / 2,
+        top2 + h - 16,
+        "early: 20 to 100 ms, late: from 100 ms on",
+        12,
+        th.fg,
+    )
+
+    s.text(
+        450,
+        top2 + h + 32,
+        "One impulse response gives the reverberation time.",
+        13,
+        th.muted,
+    )
+    s.text(
+        450,
+        top2 + h + 54,
+        "These four give what the room does to a listener, and each of them "
+        "needs its own setup.",
+        13,
+        th.muted,
+    )

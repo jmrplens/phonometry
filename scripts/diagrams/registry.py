@@ -50,6 +50,7 @@ from .buildings import (
     _d_room_measurement_section,
     _d_room_noise,
     _d_room_noise_setup,
+    _d_room_second_microphone,
     _d_survey_sweep,
     _d_sweep_budget,
 )
@@ -351,6 +352,11 @@ DIAGRAMS = {
         _d_speech_intelligibility,
         "Speech Intelligibility Index computation flow (ANSI S3.5-1997)",
         600,
+    ),
+    "diagram_room_second_microphone": (
+        _d_room_second_microphone,
+        "What ISO 3382-1 asks for beyond one omnidirectional microphone",
+        574,
     ),
     "diagram_room_measurement": (
         _d_room_measurement,

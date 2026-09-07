@@ -1,0 +1,203 @@
+---
+title: "Lo que un asiento hace con la vibración"
+description: "El método de laboratorio de ISO 10326-1: el factor SEAT como cociente entre la aceleración eficaz ponderada en el asiento y en la plataforma, las tres pasadas que deben coincidir dentro del 5 %, la corrección a la entrada que el ensayo pretendía y la transmisibilidad en resonancia del ensayo de amortiguamiento."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2016
+    title: "Mechanical vibration — Laboratory method for evaluating vehicle seat vibration — Part 1: Basic requirements"
+    designation: "ISO 10326-1:2016"
+    primary: true
+    note: "Apartado 10: el factor SEAT de la fórmula (2), las tres pasadas consecutivas dentro del ± 5 % del 10.2.1, la corrección del 10.2.3 con las fórmulas (3) y (4), y el ensayo de amortiguamiento del 10.3 con la fórmula (5) y su masa inerte de 75 kg. El apartado 11 deja los valores de aceptación a la norma de aplicación. La fórmula (3) impresa es una identidad; ver las erratas."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Quien conduce no va sentado en el suelo de la máquina. En medio está el
+asiento, y que ayude no es evidente: un asiento con suspensión es un muelle y
+un amortiguador, y un muelle tiene resonancia. Dale el espectro equivocado y
+amplifica justo lo que se compró para atenuar.
+
+[Exposición humana a vibración](/phonometry/es/vibration/human/human-vibration/)
+mide lo que le llega a la persona. Esta página es el método de laboratorio que
+mide qué le hizo el asiento, y responde con un único número.
+
+## 1. El factor SEAT
+
+Monta el asiento en un simulador de vibración, excita la plataforma con el
+espectro de entrada que prescriba la norma de aplicación, sienta a una persona
+de ensayo y mide la aceleración eficaz ponderada en dos sitios. El cociente es
+la transmisibilidad efectiva de amplitud del asiento, que todo el mundo llama
+factor SEAT (10.2.2):
+
+$$
+\mathrm{SEAT} = \frac{a_\mathrm{wS}}{a_\mathrm{wP}}
+$$
+
+Por debajo de 1 el asiento hace su trabajo. En 1 es una tabla rígida. Por
+encima de 1 empeora el viaje respecto a no llevar asiento, y no es un supuesto
+teórico: es lo que hace una suspensión cuando la frecuencia dominante de la
+máquina cae sobre su resonancia.
+
+Las dos aceleraciones son la media aritmética de **tres pasadas consecutivas
+cuyos valores estén dentro del ± 5 % de esa media** (10.2.1). La biblioteca lo
+trata como condición y no como nota al pie: `mean_of_test_runs` rechaza un
+conjunto que no cumpla la dispersión, porque la media de unas pasadas que
+discrepan más no es una medida que esta norma reconozca.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seat_vibration_test.svg" alt="Dos paneles. El panel izquierdo da tres pasadas del ensayo como barras emparejadas, la plataforma cerca de 1,00 y el asiento cerca de 0,71 metros por segundo al cuadrado, con la media de cada conjunto como línea discontinua y una flecha doble entre las dos medias rotulada SEAT = 0,71. El panel derecho da cuatro barras para la corrección del apartado 10.2.3: la entrada entregada en 1,00, la pretendida en 1,10, la magnitud medida en el asiento en 0,71 y la magnitud corregida en 0,78, sobre la fórmula a*wS = SEAT por a*wP." width="94%" loading="eager" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import vibration
+
+# Tres pasadas en la plataforma y tres en el asiento, en m/s2.
+test = vibration.seat_transmission(
+    [0.72, 0.70, 0.71], [1.02, 1.00, 0.99]
+)
+print(round(test.seat_factor, 3), test.attenuates)     # 0.708 True
+test.plot(language="es")
+plt.show()
+
+# Unas pasadas que no coinciden dentro del 5 % no son una medida:
+try:
+    vibration.mean_of_test_runs([1.0, 1.2, 1.0])
+except ValueError as error:
+    print(error)
+# The runs differ from their mean by 12.5 %, more than the 5 % this test allows.
+```
+
+</details>
+
+*Un ensayo, y el cociente para el que existe. Las tres pasadas coinciden muy
+por dentro de la tolerancia, así que sus medias son los dos números con los que
+se construye el factor SEAT.*
+
+## 2. Corregir a la entrada que se pretendía
+
+Un simulador no reproduce su espectro objetivo con exactitud. El apartado
+10.2.3 escala la magnitud medida en el asiento por el cociente entre la entrada
+que el ensayo pretendía y la que realmente entregó:
+
+$$
+a^{*}_\mathrm{wS} = \frac{a_\mathrm{wS}\, a^{*}_\mathrm{wP}}{a_\mathrm{wP}}
+= \mathrm{SEAT} \cdot a^{*}_\mathrm{wP}
+$$
+
+```python
+from phonometry import vibration
+
+test = vibration.seat_transmission([0.72, 0.70, 0.71], [1.02, 1.00, 0.99])
+
+# La plataforma entregó 1,003 m/s2 donde se pretendían 1,10.
+print(round(test.corrected_acceleration(1.10), 3))     # 0.778
+
+# La corrección no hace nada cuando el simulador dio en el blanco:
+print(round(test.corrected_acceleration(test.platform_acceleration), 3))
+# 0.71
+```
+
+La norma imprime esa corrección dos veces y solo una de las dos está bien. La
+fórmula (4), la de arriba, es correcta. La (3), a su lado, lleva asterisco en
+sus cuatro símbolos y se reduce a $a^{*}_\mathrm{wS} = a^{*}_\mathrm{wS}$, que
+no corrige nada; la lectura que implementa la biblioteca es la que pide el
+propio texto del apartado. Queda registrada en las
+[erratas](/phonometry/es/reference/errata/).
+
+## 3. El ensayo de amortiguamiento
+
+El otro ensayo del apartado 10 no lleva persona. Carga el asiento con una masa
+inerte de 75 kg ± 1 %, excita la base a la frecuencia de resonancia
+$f_\mathrm{r}$ de la suspensión y toma allí el cociente (10.3):
+
+$$
+T = \frac{a_\mathrm{S}(f_\mathrm{r})}{a_\mathrm{P}(f_\mathrm{r})}
+$$
+
+```python
+from phonometry import vibration
+
+# Una suspensión que duplica lo que recibe, en su propia frecuencia.
+print(vibration.resonance_transmissibility(2.4, 1.2))   # 2.0
+print(vibration.DAMPING_TEST_MASS_KG)                   # 75.0
+```
+
+La aritmética es la del factor SEAT y el significado no. El factor SEAT es un
+veredicto sobre un espectro entero con una persona sentada; $T$ es lo que hace
+el asiento en la única frecuencia donde más hace, con una masa inerte encima.
+El apartado 9.5.1 advierte de que el ensayo puede no convenir a una suspensión
+con amortiguamiento activo, y de que una masa reducida de 60 kg ha resultado
+apropiada.
+
+## 4. Lo que estos números no son
+
+El apartado 11 es corto y conviene leerlo antes de citar cualquier cifra de
+esta página como apto o no apto. Esta norma fija el método y **no da ningún
+valor de aceptación**: los da la norma de aplicación escrita para la máquina, o
+bien como factor SEAT máximo o como magnitud corregida máxima en el asiento, y
+aparte como transmisibilidad máxima en resonancia. Por eso `attenuates` dice
+algo del asiento, no un veredicto sobre la máquina.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim>
+El **factor SEAT** de la fórmula (2), a partir de las pasadas de un ensayo, con
+la coincidencia del ± 5 % que el 10.2.1 exige a tres pasadas consecutivas
+comprobada y no supuesta.
+</ScopeClaim>
+
+<ScopeClaim>
+La **corrección a la entrada pretendida** del 10.2.3, como la fórmula (4) con
+el factor SEAT sustituido, que es lo que pide el texto del apartado y lo que su
+fórmula (3) impresa no llega a decir.
+</ScopeClaim>
+
+<ScopeClaim>
+La **transmisibilidad en resonancia** de la fórmula (5), y las masas de ensayo
+del 10.3 y del 9.5.1.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ningún valor de aceptación**, porque la norma no da ninguno: el apartado 11
+los deja a la norma de aplicación de la máquina, y aquí no se suple ningún
+valor por defecto. Las clases espectrales de entrada que esas normas prescriben,
+como las de maquinaria de movimiento de tierras de ISO 7096, tampoco están.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Aquí no se pondera ninguna señal.** Las aceleraciones que esta página divide
+ya vienen ponderadas en frecuencia; las ponderaciones en sí, y la integración
+eficaz que llevan detrás, están en [exposición humana a
+vibración](/phonometry/es/vibration/human/human-vibration/).
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ningún laboratorio.** Las tolerancias del simulador del apartado 9, el
+montaje de captadores del 5.2, el disco semirrígido, las personas de ensayo y
+la postura del 8.2, los periodos de rodaje del 8.1.2 y el acta del apartado 12
+están descritos en la norma y no se implementa ninguno: esta página es la
+aritmética que sigue a un ensayo, no el ensayo.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Exposición humana a vibración (ISO 2631, ISO 5349)](/phonometry/es/vibration/human/human-vibration/):
+  las ponderaciones y la exposición diaria al servicio de las cuales se mide el
+  asiento.
+- [Vibración con choques repetidos (ISO 2631-5)](/phonometry/es/vibration/human/multiple-shock-vibration/):
+  lo que un asiento que toca fondo le entrega a la columna.
+- [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/vibration/structural/transfer-stiffness/):
+  la misma idea de un cociente de transmisión medido, aplicada al aislador en
+  lugar de al asiento.
+
+</SeeAlso>

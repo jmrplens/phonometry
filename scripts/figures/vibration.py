@@ -2295,6 +2295,125 @@ def generate_mobility_random_error(output_dir: str) -> None:
     plt.close()
 
 
+def generate_seat_vibration_test(output_dir: str) -> None:
+    """ISO 10326-1: the SEAT factor of one test, and the correction of 10.2.3."""
+    print("Generating seat_vibration_test...")
+    from phonometry import vibration
+
+    platform_runs = (1.02, 1.00, 0.99)
+    seat_runs = (0.72, 0.70, 0.71)
+    intended = 1.10
+    test = vibration.seat_transmission(seat_runs, platform_runs)
+
+    fig, (ax_runs, ax_fix) = plt.subplots(1, 2, figsize=(12.2, 5.4))
+
+    runs = np.arange(len(platform_runs)) + 1.0
+    width = 0.36
+    ax_runs.bar(
+        runs - width / 2,
+        platform_runs,
+        width=width,
+        color=COLOR_PRIMARY,
+        label="platform $a_\\mathrm{wP}$",
+    )
+    ax_runs.bar(
+        runs + width / 2,
+        seat_runs,
+        width=width,
+        color=COLOR_TERTIARY,
+        label="seat $a_\\mathrm{wS}$",
+    )
+    for value, colour, name in (
+        (test.platform_acceleration, COLOR_PRIMARY, "mean at the platform"),
+        (test.seat_acceleration, COLOR_TERTIARY, "mean at the seat"),
+    ):
+        ax_runs.axhline(value, color=colour, linestyle="--", linewidth=1.2, label=name)
+    ax_runs.annotate(
+        "",
+        xy=(3.6, test.seat_acceleration),
+        xytext=(3.6, test.platform_acceleration),
+        arrowprops={"arrowstyle": "<->", "color": COLOR_FG, "linewidth": 1.2},
+    )
+    ax_runs.text(
+        3.66,
+        0.5 * (test.seat_acceleration + test.platform_acceleration),
+        f"SEAT = {test.seat_factor:.2f}",
+        va="center",
+        ha="left",
+        fontsize=10,
+        color=COLOR_FG,
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax_runs.set_xticks(runs)
+    ax_runs.set_xlim(0.4, 4.5)
+    ax_runs.set_ylim(0.0, 1.28)
+    ax_runs.set_xlabel("Test run")
+    ax_runs.set_ylabel("Weighted r.m.s. acceleration (m/s²)")
+    ax_runs.set_title("Simulated Input Vibration Test", pad=10)
+    ax_runs.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, axis="y")
+    ax_runs.set_axisbelow(True)
+    ax_runs.legend(loc="upper left", fontsize=8.5)
+
+    # Right: the correction of 10.2.3. The simulator delivered a little more
+    # than it meant to, so the magnitude on the seat is scaled to the input
+    # that was intended rather than to the one that arrived.
+    corrected = test.corrected_acceleration(intended)
+    bars = (
+        ("delivered\n$a_\\mathrm{wP}$", test.platform_acceleration, COLOR_PRIMARY),
+        ("intended\n$a^{*}_\\mathrm{wP}$", intended, COLOR_QUATERNARY),
+        ("measured\n$a_\\mathrm{wS}$", test.seat_acceleration, COLOR_TERTIARY),
+        ("corrected\n$a^{*}_\\mathrm{wS}$", corrected, COLOR_SECONDARY),
+    )
+    positions = np.arange(len(bars))
+    ax_fix.bar(
+        positions,
+        [value for _, value, _ in bars],
+        width=0.6,
+        color=[colour for _, _, colour in bars],
+    )
+    for x, (_, value, _) in zip(positions, bars, strict=True):
+        ax_fix.text(
+            x,
+            value + 0.02,
+            f"{value:.2f}",
+            va="bottom",
+            ha="center",
+            fontsize=9,
+            color=COLOR_FG,
+        )
+    ax_fix.set_xticks(positions)
+    ax_fix.set_xticklabels([label for label, _, _ in bars], fontsize=9)
+    ax_fix.set_ylim(0.0, 1.35)
+    ax_fix.set_ylabel("Weighted r.m.s. acceleration (m/s²)")
+    ax_fix.set_title("Correcting to the Input That Was Intended", pad=10)
+    ax_fix.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, axis="y")
+    ax_fix.set_axisbelow(True)
+    ax_fix.text(
+        0.5,
+        0.94,
+        "$a^{*}_\\mathrm{wS} = \\mathrm{SEAT} \\cdot a^{*}_\\mathrm{wP}$",
+        transform=ax_fix.transAxes,
+        va="top",
+        ha="center",
+        fontsize=11,
+        color=COLOR_FG,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+
+    fig.suptitle("What a Seat Does to the Vibration Under It", fontsize=13)
+    plt.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
+    save_figure(output_dir, "seat_vibration_test.svg")
+    plt.close()
+
+
 def generate_machine_vibration_zones(output_dir: str) -> None:
     """The four evaluation zones as a frequency-shaped velocity criterion."""
     print("Generating machine_vibration_zones...")

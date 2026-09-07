@@ -360,6 +360,21 @@ _ES_EXACT = {
     "Bearing Fault Lines on a Measured Envelope Spectrum": "Líneas de fallo del rodamiento sobre un espectro de envolvente medido",
     "Evaluation Zones as a Frequency-Shaped Velocity Criterion": "Zonas de evaluación como criterio de velocidad conformado en frecuencia",
     "Allowable r.m.s. velocity (mm/s)": "Velocidad eficaz admisible (mm/s)",
+    # seat_vibration_test (ISO 10326-1): the SEAT factor of one test and the
+    # correction to the input the test intended.
+    "What a Seat Does to the Vibration Under It": "Lo que un asiento le hace a la vibración que recibe",
+    "Simulated Input Vibration Test": "Ensayo con vibración de entrada simulada",
+    "Correcting to the Input That Was Intended": "Corrección a la entrada que se pretendía",
+    "Test run": "Pasada del ensayo",
+    "Weighted r.m.s. acceleration (m/s²)": "Aceleración eficaz ponderada (m/s²)",
+    "platform $a_\\mathrm{wP}$": "plataforma $a_\\mathrm{wP}$",
+    "seat $a_\\mathrm{wS}$": "asiento $a_\\mathrm{wS}$",
+    "mean at the platform": "media en la plataforma",
+    "mean at the seat": "media en el asiento",
+    "delivered\n$a_\\mathrm{wP}$": "entregada\n$a_\\mathrm{wP}$",
+    "intended\n$a^{*}_\\mathrm{wP}$": "pretendida\n$a^{*}_\\mathrm{wP}$",
+    "measured\n$a_\\mathrm{wS}$": "medida\n$a_\\mathrm{wS}$",
+    "corrected\n$a^{*}_\\mathrm{wS}$": "corregida\n$a^{*}_\\mathrm{wS}$",
     "limit of zone A ($Z$ = 1)": "límite de la zona A ($Z$ = 1)",
     "limit of zone B ($Z$ = 2.56)": "límite de la zona B ($Z$ = 2,56)",
     "limit of zone C ($Z$ = 6.4)": "límite de la zona C ($Z$ = 6,4)",
@@ -4036,6 +4051,12 @@ _ES_EXACT = {
 
 
 _ES_PATTERNS = [
+    # seat_vibration_test: the SEAT factor written beside the arrow, whose
+    # mathematics keeps it out of the blanket decimal-comma pass.
+    (
+        r"^SEAT = (\d+)\.(\d+)$",
+        r"SEAT = \1,\2",
+    ),
     # road_device_ratings: the legends carry the computed rating and category.
     (
         r"^absorptive cassette: \$DL_\\alpha\$ = (\d+) dB \((A\d)\)$",

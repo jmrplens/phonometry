@@ -2868,9 +2868,26 @@ def generate_road_device_ratings(output_dir: str) -> None:
     _fig, axes = plt.subplots(1, 3, figsize=(15.5, 5.4))
 
     axes[0].bar(
-        x, spectrum, color=COLOR_PRIMARY, edgecolor=COLOR_FG, linewidth=0.6, zorder=3
+        x,
+        spectrum,
+        color=COLOR_PRIMARY,
+        edgecolor=COLOR_FG,
+        linewidth=0.6,
+        zorder=3,
+        label="road, EN 1793-3",
     )
-    axes[0].set_title("The weighting: EN 1793-3 Table 1")
+    axes[0].plot(
+        x,
+        np.asarray(environment.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB),
+        marker="o",
+        markersize=4.5,
+        color=COLOR_SECONDARY,
+        linewidth=2.0,
+        zorder=4,
+        label="railway, EN 16272-3-1",
+    )
+    axes[0].legend(loc="lower center", fontsize=9)
+    axes[0].set_title("The weighting: one grid, two spectra")
     axes[0].set_ylabel("$L_i$ [dB]")
     axes[0].annotate(
         "the peak carries the rating",

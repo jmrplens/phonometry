@@ -3,13 +3,13 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 864,
-    "passing": 864,
+    "checks": 867,
+    "passing": 867,
     "failing": 0,
-    "domains": 71,
-    "standards": 403,
-    "citations": 647,
-    "designations": 141,
+    "domains": 72,
+    "standards": 404,
+    "citations": 650,
+    "designations": 142,
     "sources": 83
   },
   "units": [
@@ -441,6 +441,12 @@
       "title": "Road traffic noise reducing devices (EN 1793)",
       "checks": 7,
       "passing": 7
+    },
+    {
+      "id": "railway-noise-reducing-devices-en-16272",
+      "title": "Railway noise reducing devices (EN 16272)",
+      "checks": 3,
+      "passing": 3
     },
     {
       "id": "panel-aperture-sound-insulation-bies-hopkins-cremer",
@@ -20058,6 +20064,99 @@
       "deviation": {
         "value": 0.0,
         "label": "0"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-noise-reducing-devices-en-16272/en-16272-3-1-2012-table-1-normalised-railway-noise-spectrum/the-printed-levels-at-the-ends-and-on-the-plateau",
+      "domain": "railway-noise-reducing-devices-en-16272",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16272-3-1",
+        "edition": "2012",
+        "clause": "Table 1 (normalised railway noise spectrum)",
+        "cite": "EN 16272-3-1:2012 Table 1 (normalised railway noise spectrum)"
+      },
+      "quantity": "the printed levels at the ends and on the plateau",
+      "kind": "record",
+      "expected": {
+        "label": "100 Hz = -27 dB; 2 kHz = -9 dB; 5 kHz = -17 dB",
+        "record": {
+          "100 Hz": -27.0,
+          "2 kHz": -9.0,
+          "5 kHz": -17.0
+        }
+      },
+      "computed": {
+        "label": "100 Hz = -27 dB; 2 kHz = -9 dB; 5 kHz = -17 dB",
+        "record": {
+          "100 Hz": -27.0,
+          "2 kHz": -9.0,
+          "5 kHz": -17.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-noise-reducing-devices-en-16272/en-16272-3-1-2012-clause-6-dlr-on-the-railway-spectrum/a-wall-with-r-26-db-in-every-band-rates-26-db",
+      "domain": "railway-noise-reducing-devices-en-16272",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16272-3-1",
+        "edition": "2012",
+        "clause": "Clause 6 (DLR on the railway spectrum)",
+        "cite": "EN 16272-3-1:2012 Clause 6 (DLR on the railway spectrum)"
+      },
+      "quantity": "a wall with R = 26 dB in every band rates 26 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 26.0
+      },
+      "computed": {
+        "value": 26.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-noise-reducing-devices-en-16272/en-16272-3-1-2012-clause-5-dlalpha-on-the-railway-spectrum/the-same-absorber-rates-higher-against-rolling-noise-than-against-a-road",
+      "domain": "railway-noise-reducing-devices-en-16272",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16272-3-1",
+        "edition": "2012",
+        "clause": "Clause 5 (DLalpha on the railway spectrum)",
+        "cite": "EN 16272-3-1:2012 Clause 5 (DLalpha on the railway spectrum)"
+      },
+      "quantity": "the same absorber rates higher against rolling noise than against a road",
+      "kind": "scalar",
+      "expected": {
+        "label": "DLalpha(railway) > DLalpha(road)"
+      },
+      "computed": {
+        "label": "4.77 dB > 3.95 dB"
+      },
+      "deviation": {
+        "value": 0.82,
+        "label": "+0.82 dB"
       },
       "precision": 4,
       "verdict": "pass"

@@ -2683,10 +2683,14 @@ def generate_building_frequency_prediction(output_dir: str) -> None:
         ),
     )
     for model, label, _short, colour, style in forms:
+        # The height form is written on the height alone and refuses a width,
+        # so the width goes only to the two forms that use one.
         values = np.array(
             [
                 vibration.fundamental_frequency(
-                    model, height_m=float(h), width_m=float(h) / aspect
+                    model,
+                    height_m=float(h),
+                    **({} if model == "height" else {"width_m": float(h) / aspect}),
                 )
                 for h in heights
             ]
@@ -2710,7 +2714,10 @@ def generate_building_frequency_prediction(output_dir: str) -> None:
         low, high = vibration.PERIOD_COEFFICIENT_RANGES[model]
         span = [
             vibration.fundamental_frequency(
-                model, height_m=tall, width_m=wide, coefficient=k
+                model,
+                height_m=tall,
+                coefficient=k,
+                **({} if model == "height" else {"width_m": wide}),
             )
             for k in (low, high)
         ]

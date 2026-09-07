@@ -2602,7 +2602,7 @@ def generate_structural_damage_guidelines(output_dir: str) -> None:
         short,
         long,
         list(row_labels),
-        ("short-term", "long-term"),
+        ("short-term vibration", "long-term vibration"),
     )
     ax_top.set_xlabel("Peak velocity $v_i$ (mm/s)")
     ax_top.set_title("In the Topmost Floor Plane, Horizontal", pad=10)
@@ -2625,7 +2625,7 @@ def generate_structural_damage_guidelines(output_dir: str) -> None:
         pipe_short,
         pipe_long,
         [label for _, label in materials],
-        ("short-term", "long-term"),
+        ("short-term vibration", "long-term vibration"),
     )
     ax_pipe.set_xlabel("Peak velocity $v_i$ (mm/s)")
     ax_pipe.set_title("On a Buried Pipeline", pad=10)
@@ -2666,7 +2666,9 @@ def _paired_bars(
     ax.set_yticks(y)
     ax.set_yticklabels(labels, fontsize=9)
     ax.invert_yaxis()
-    ax.set_xlim(0.0, max(first) * 1.28)
+    # Room to the right for the value beside the longest bar and for the
+    # legend, which is wider in Spanish than in English.
+    ax.set_xlim(0.0, max(first) * 1.52)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, axis="x")
     ax.set_axisbelow(True)
     ax.legend(loc="lower right", fontsize=8.5)

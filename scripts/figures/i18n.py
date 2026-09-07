@@ -393,8 +393,12 @@ _ES_EXACT = {
     "dwellings": "viviendas",
     "especially sensitive": "especialmente sensible",
     "especially\nsensitive": "especialmente\nsensible",
-    "short-term": "corta duración",
-    "long-term": "larga duración",
+    # Named in full rather than as "short-term" and "long-term": a key that
+    # short is written inside other figures' labels ("short-term loudness"),
+    # and every clip that writes one takes the entry into the fingerprint it
+    # was sealed with, which restamps clips this figure never touched.
+    "short-term vibration": "vibración de corta duración",
+    "long-term vibration": "vibración de larga duración",
     "welded steel": "acero soldado",
     "concrete,\nflanged metal": "hormigón,\nmetal con bridas",
     "masonry,\nplastic": "obra de fábrica,\nplástico",

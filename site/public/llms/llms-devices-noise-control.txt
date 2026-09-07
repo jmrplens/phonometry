@@ -72,6 +72,8 @@ occupational limit applies, in [Occupational exposure
 
 - [Silencers](https://jmrplens.github.io/phonometry/devices/noise-control/silencers/): reactive silencers by the
   four-pole method and the reactive-versus-dissipative choice.
+- [Measuring a Silencer (ISO 7235 and ISO 11691)](https://jmrplens.github.io/phonometry/devices/noise-control/silencer-measurement/):
+  where a catalogue insertion loss comes from, and how repeatable it is.
 - [Duct-Borne Noise: Fan to Room](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/): the
   end-to-end fan-to-room calculation against a room criterion, and the
   higher-order-mode cut-on that limits every plane-wave method.
@@ -1861,10 +1863,10 @@ lookup (Bies Table 8.11) and the plenum is Wells' closed form driven by a
 declared mean absorption — neither is a liner model.
 Mean-flow effects — convection, temperature gradients, the
 flow-dependent impedance of perforates — are outside the no-flow element
-matrices used here. Nothing on this page is a measurement: no part of ISO 7235
-is implemented, shell breakout and the end corrections at the area jumps are
-not modelled, and the branch models are lossless unless a `resistance` is
-supplied.
+matrices used here. Nothing on this page is a measurement: the arithmetic of
+ISO 7235 has [a page of its own](https://jmrplens.github.io/phonometry/devices/noise-control/silencer-measurement/), shell breakout and
+the end corrections at the area jumps are not modelled, and the branch models
+are lossless unless a `resistance` is supplied.
 
 ## See also
 
@@ -2255,6 +2257,581 @@ a machine into its enclosure or its slab is outside every model here.
 ---
 
 
+<!-- source: docs/devices/noise-control/silencer-measurement.md | canonical: https://jmrplens.github.io/phonometry/devices/noise-control/silencer-measurement/ -->
+Source: https://jmrplens.github.io/phonometry/devices/noise-control/silencer-measurement/
+
+# Measuring a silencer (ISO 7235 and ISO 11691)
+
+Everything a silencer model computes comes from geometry. The figure a
+supplier publishes does not. It is an **insertion loss measured by
+substitution**: the same rig run twice, once with a plain duct where the
+silencer will go and once with the silencer in it, and the difference between
+the two receiving-side levels, band by band. Reading a catalogue without
+knowing that is how a computed 8,9 dB and a published "25 dB" end up in the
+same sentence.
+
+Two standards describe the measurement, and they differ in scope as much as
+in what they ask of the laboratory. **ISO 7235:2003** is the full procedure,
+with a modal filter decoupling the source, a qualified receiving side and a
+stated measurement uncertainty, and it covers silencers, air-terminal units
+and other duct elements, with flow and without. **ISO 11691:1995** is six
+printed pages carrying two equations, and it measures silencers and nothing
+else, without flow and with none in the answer, up to a design velocity of
+15 m/s. A measurement that needs flow, or an object that is not a silencer,
+is outside ISO 11691 and belongs to ISO 7235.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/silencer_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/silencer_measurement.svg" alt="Three panels. Left: two groups of bars, one for a silencer that is flat across an octave and one whose worst third leaks, each showing the three one-third-octave insertion losses as pale bars, the octave that Equation (2) gives as a filled bar and the plain mean of the decibels as a dashed line; in the flat group the two agree and in the leaky one the octave sits twelve decibels under the mean. Middle: the open-end transmission loss of a 350 mm duct against frequency on a logarithmic axis, drawn for the three distinct solid angles of Table B.1 and for Long's rival closed form, all falling from about fifteen decibels at 50 Hz to nothing above 2 kHz, with the free-space curve the highest of the three. Right: the reproducibility standard deviations of both standards as step functions of frequency, the insertion-loss column dipping to one decibel in the middle of the range, the transmission-loss column flat at three, the sound-intensity column falling to one and stopping at 5 kHz, and the survey method stepping from two to three" width="100%"></picture>
+
+*The three things a measurement report carries beyond the numbers themselves:
+how its octaves were folded, what its duct mouth was keeping in, and how far
+any of it can be trusted.*
+
+## 1. One subtraction, two numberings
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_iso7235_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_iso7235.svg" alt="Two stacked runs on one duct axis. In the upper run, series one, a sealed and lined loudspeaker box feeds a modal filter, then a transition, then the test object, then a test duct with an anechoic wedge termination carrying three microphone positions on a line inclined to the duct axis. The lower run, series two, is identical except that the test object is replaced by an empty substitution duct. Dashed qualification planes are marked at the test object and at the receiving duct. Below, the insertion loss is given as the difference of the two receiving-side levels, third octave by third octave, with the modal-filter attenuation, the reflection-coefficient limit, the substitution-duct tolerance and the signal-to-background rule listed as the standard's own clause numbers" width="92%"></picture>
+
+*The two series are the whole method: everything else in both standards is
+about making sure nothing but the test object changed between them.*
+
+The measurement is the same in both:
+
+$$
+D_\mathrm{i} = L_{W\mathrm{II}} - L_{W\mathrm{I}}
+$$
+
+with $\mathrm{I}$ the series that had the test object and $\mathrm{II}$ the
+series that had the substitution duct. ISO 11691 writes the identical thing
+as $D = L_{p1} - L_{p2}$, and numbers the two series **the other way round**:
+its 1 is the substitution duct. Two standards for one measurement, with
+opposite subscripts, is exactly the sort of thing that gets entered backwards,
+so the arguments here are named for what was in the duct rather than for
+either numbering.
+
+```python
+from phonometry import noise_control
+
+substitution = [88.0, 90.0, 91.0, 92.0, 92.0, 91.0]   # dB, empty duct
+with_silencer = [84.0, 83.0, 79.0, 72.0, 66.0, 63.0]  # dB, silencer fitted
+
+d_i = noise_control.substitution_insertion_loss(substitution, with_silencer)
+print(d_i)                        # [ 4.  7. 12. 20. 26. 28.] dB
+```
+
+If the receiving room's absorption moved between the two series, that
+difference is not yet the insertion loss. Clause 6.3 puts it right with
+$10\lg(T_2/T_1)$, where $T_2$ is the reverberation time measured with the
+test object installed. A room that got **deader** while the silencer was in it
+was flattering the silencer, and the correction takes that back:
+
+```python
+corrected = noise_control.substitution_insertion_loss(
+    substitution, with_silencer, reverberation_times=(2.1, 1.8),
+)
+print(corrected.round(2))         # [ 3.33  6.33 11.33 19.33 25.33 27.33] dB
+```
+
+Clause 6.3 also allows $T_2 = T_1$ outright when the test object sits outside
+the room, and then the pair can be left out.
+
+## 2. What the number is not
+
+It is not a transmission loss. It is measured against a particular
+substitution duct in a particular rig, and it carries that rig with it in two
+ways worth naming.
+
+The first is the **limiting insertion loss**: sound flanks along the duct
+walls rather than through the silencer, and no arrangement can measure past
+what its own flanking lets round. ISO 7235 has the laboratory measure that
+ceiling with the substitution duct acoustically blocked and record it as a
+function of frequency (7.4). A very large catalogue figure is a claim about
+the test arrangement as much as about the device.
+
+The second is the receiving side, which decides how much of the sound the
+microphones see at all. ISO 7235 allows three (5.2.4): a reverberation room
+to ISO 3741 qualified at least down to the 125 Hz one-third octave, which is
+preferred; a test duct with an anechoic termination whose reflection
+coefficient is no greater than 0,3; or essentially free-field conditions at
+the open end. ISO 11691 keeps only the reverberation room and the free-field
+alternatives, and asks for 3,5 m of duct on each side of the silencer.
+
+None of that is arithmetic, which is why the rest of this page is short. The
+arithmetic that remains is the part a reader can get wrong on paper.
+
+## 3. Octaves are folded on the energy, not on the decibels
+
+A measurement is made in one-third octaves and often reported in octaves.
+ISO 11691 Equation (2) says how, and it is not an average of the three
+numbers:
+
+$$
+D_\mathrm{oct} = -10 \lg\left[\frac{1}{3}\left(
+   10^{-D_1/10} + 10^{-D_2/10} + 10^{-D_3/10}
+\right)\right]\ \text{dB}
+$$
+
+The average is taken on what the silencer **lets through**. That matters
+because a silencer is rarely flat across an octave, and the band that leaks
+decides the answer:
+
+```python
+thirds = [4.0, 7.0, 12.0, 20.0, 26.0, 28.0]
+print(noise_control.octave_insertion_loss(thirds).round(2))
+#                                 # [ 6.57 23.28] dB
+```
+
+The plain arithmetic means of the same two groups are 7,67 and 24,67 dB, so
+reading the decibels rather than the energy would have overstated both
+octaves by about a decibel. On a steeper silencer the gap is larger: three
+thirds of 30, 30 and 5 dB give **9,7 dB** over the octave, not 21,7. Almost
+all the transmitted sound is coming through the one band that does not work,
+and Equation (2) is written out rather than described precisely so that this
+cannot be got wrong.
+
+ISO 11691 states the assumption it rests on: the sound pressure levels of the
+three one-third octaves are taken to be equal in the series run with the
+substitution duct, which is what lets their energies be weighted equally.
+
+## 4. Three microphone positions, or five
+
+In a test duct the spatial average comes from at least three microphone
+positions equally spaced on a line across the duct, spanning at least a
+quarter wavelength of the band, about half way along the duct. Three is
+enough only if the three agree. ISO 7235 Table 6 says how closely, and if the
+highest and lowest differ by more than that, five positions shall be used:
+
+```python
+levels = [70.0, 74.0, 79.0]       # dB at the three key positions
+print(noise_control.microphone_spread_limit(125.0))     # 7.0 dB
+print(noise_control.microphone_positions_required(levels, 50.0))    # 3
+print(noise_control.microphone_positions_required(levels, 125.0))   # 5
+```
+
+The same three levels are acceptable at 50 Hz, where the limit is 10 dB, and
+not at 125 Hz, where it is 7. The limit falls with frequency because a duct
+at low frequency has a standing-wave pattern that three points sample badly,
+and at high frequency does not.
+
+One thing to know about Table 6: its rows read 50, 63, 80, 100, 125 and then
+`> 160` Hz, so the **160 Hz one-third octave belongs to no row** and is given
+no limit at all. Every other row names a single band, and 160 Hz is a
+one-third-octave centre like the rest, so it is read here as belonging to the
+last row. The gap is in the [errata
+register](https://jmrplens.github.io/phonometry/reference/errata/).
+
+## 5. How repeatable any of this is
+
+Both standards answer, and neither answer is flattering.
+
+ISO 11691 says outright that exact information on the precision of its method
+cannot be given, that interlaboratory tests would be needed for a real
+reproducibility standard deviation, and that this is what makes it a survey
+standard. Its Table 1 offers an estimate only: 2 dB up to the 1,25 kHz
+one-third octave and 3 dB above it.
+
+ISO 7235 Table 7 has three columns, and the disagreement between them is the
+useful part:
+
+```python
+for band in (50.0, 250.0, 1000.0, 4000.0):
+    print(band, [
+        noise_control.measurement_reproducibility(band, quantity=q)
+        for q in ("insertion_loss", "transmission_loss", "intensity")
+    ])
+# 50.0   [1.5, 3.0, 3.0]
+# 250.0  [1.0, 3.0, 1.5]
+# 1000.0 [2.0, 3.0, 1.0]
+# 4000.0 [3.0, 3.0, 1.0]
+```
+
+Insertion loss is measured best in the middle of the range and worst at the
+top; the sound-intensity route runs the other way; transmission loss is a
+flat 3 dB everywhere. Clause 7.9 explains why: only the insertion-loss column
+came from tests, on 1 m long parallel-baffle silencers, and the other two rest
+on experience. A column that does not move with frequency is the shape of an
+estimate, not of a measurement.
+
+What goes on the report is twice the table value, for a coverage probability
+of 95 %:
+
+```python
+print(noise_control.measurement_expanded_uncertainty(250.0))    # 2.0 dB
+print(noise_control.measurement_expanded_uncertainty(4000.0))   # 6.0 dB
+```
+
+A silencer quoted at 25 dB in the 4 kHz band is being quoted to within 6 dB.
+
+## 6. The scope ISO 11691 draws round itself
+
+The survey method is deliberately narrow, and its limits are published rather
+than implied. The design velocity may not exceed 15 m/s, because the method
+runs the rig with no flow at all and so includes none of the self-generated
+noise. It is written for circular silencers from 80 mm to 2 m in diameter, or
+rectangular ones of comparable area. And the test ducts have to be close in
+cross section to what they feed, between 0,6 and 1,7 times the area of the
+silencer or the substitution duct (4.5). Outside that, the joints reflect more
+than the method allows for, and the library says so:
+
+```python
+print(noise_control.substitution_area_ratio(0.0962, 0.0962))    # 1.0
+print(noise_control.SURVEY_MAX_VELOCITY_M_S)                    # 15.0
+print(noise_control.SURVEY_AREA_RATIO_RANGE)                    # (0.6, 1.7)
+```
+
+## 7. The open end, and the two quantities that need it
+
+A duct radiating into a room does not hand the room everything that reaches
+its mouth. Well below the frequency at which the mouth is a wavelength across
+it is a poor radiator, and most of the energy turns round and travels back up
+the duct. Annex B.3 puts a number on it:
+
+$$
+D_\mathrm{td} = 10 \lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f \sqrt{S}}{c}\right)^{2}}\right]\ \text{dB}
+$$
+
+The group $4\pi f \sqrt{S} / c$ is the mouth measured in wavelengths, and
+$\Omega$ is the solid angle it radiates into. A 350 mm duct flush with a wall
+holds back 11 dB at 63 Hz and 0,05 dB at 2 kHz, which is nothing:
+
+```python
+import numpy as np
+
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0])
+area = 0.0962                     # m2, a 350 mm circular duct
+
+d_td = noise_control.open_end_transmission_loss(bands, area)
+print(d_td.round(2))              # [11.23  6.14  2.5   0.77  0.21  0.05] dB
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_end_solid_angles_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_end_solid_angles.svg" alt="Five cells in a row, one for each mounting configuration of ISO 7235 Table B.1. In each, a small square terminal sits at the origin of a shaded wedge that is the solid angle read in section: a half circle against a wall for A, a quarter circle in the corner of a wall and a floor for B, a full circle standing free for C, a half circle above a floor for D, and a full circle again for E. Below each, the solid angle: two pi, pi, four pi, two pi and four pi. Under the row, the formula written both as ISO 7235 prints it and as ISO 5135 prints it, a note that the two are one formula with the same five values, and the conclusion that the bigger the solid angle the more the mouth keeps in" width="100%"></picture>
+
+*The solid angle is the only term of Equation (B.3) a laboratory chooses
+rather than measures, and the five choices are the same in both standards.*
+
+The solid angle is Table B.1, and the same five values are Table 1 of
+ISO 5135. It works the way round that surprises people: $\Omega$ sits in the
+numerator, so a duct ending in the middle of the room keeps **more** sound in
+than one flush with a wall, not less. A baffle is what makes an opening a good
+radiator, because it stops the pressure relieving round the rim of the mouth,
+and an unbaffled end of the same size sends more of the sound back up the
+duct:
+
+```python
+free = noise_control.open_end_transmission_loss(
+    bands, area, solid_angle=noise_control.RADIATION_SOLID_ANGLES["C"],
+)
+print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
+```
+
+Three more decibels at 63 Hz, and the reflection coefficient rises with it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end.gif" alt="Animation: a 0.20 m duct flush in a rigid screen, radiating into the half space beyond it, driven at 100 Hz and at 800 Hz one above the other. At 100 Hz the duct fills with a standing wave and only a faint field escapes past the screen; the envelope beside it swings between a maximum and a minimum that give a reflection coefficient of 0.71. At 800 Hz the duct carries a nearly travelling wave and strong circular fronts leave the mouth into the half space, with an envelope that ripples only slightly and gives 0.19" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end.webm)
+
+*Both carriers are below the 857 Hz cut-on of a duct that wide, so the field
+inside it is the plane wave the whole of ISO 7235's duct arithmetic assumes.
+The reflection coefficients read off the standing wave are the simulated
+geometry's own, and not Equation (B.4): that closed form is a piston
+approximation for a circular mouth, where this is a slit in a screen. What
+the two share is the mechanism, and it is the mechanism that decides whether
+a level measured in a room is the level in the duct behind it.*
+
+Equation (B.4) says the same fact the other way round, as a pressure
+reflection coefficient, and the two close exactly on the energy:
+$D_\mathrm{td} = -10\lg(1 - r^2)$ at every frequency, area and solid angle.
+That identity is the conformance anchor for both, because neither is printed
+with a worked value. It also has a use of its own: 5.2.4 qualifies a test
+duct as anechoic only below $r = 0{,}3$, which this bare open end reaches
+somewhere between 500 Hz and 1 kHz.
+
+```python
+r = noise_control.open_end_reflection_coefficient(bands, area)
+print(r.round(3))                 # [0.962 0.87  0.662 0.404 0.215 0.11 ]
+```
+
+The library carries a second closed form for the same physics, Reynolds' as
+given by Long, in
+[`end_reflection_loss_closed_form`](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/).
+It raises the same argument to 1,88 rather than to 2, and for a circular duct
+in free space the two read $10\lg[1 + (c/\pi f d)^2]$ against
+$10\lg[1 + (c/\pi f d)^{1,88}]$. They agree closely where the argument is
+near 1 and part company at the ends of the range.
+
+Two quantities need it. Equation (6) turns the measured insertion loss of an
+air-terminal unit into its transmission loss by putting back what the mouth
+was keeping in anyway, so the two are the same number at the top of the range
+and eleven decibels apart at the bottom:
+
+```python
+d_i = np.array([4.0, 7.0, 12.0, 20.0, 26.0, 28.0])
+print(noise_control.measured_transmission_loss(d_i, d_td).round(2))
+#                                 # [15.23 13.14 14.5  20.77 26.21 28.05] dB
+```
+
+And Equation (7) makes the flow noise a sound power,
+$L_W = \overline{L_p} + D_\mathrm{td} + C$, where $C$ is the ISO 3741 level
+difference between the power radiated into the room and the average pressure
+in it. Clause 6.4 is explicit that $\overline{L_p}$ goes in **without** a
+background correction: the two series are reported separately and the reader
+subtracts them.
+
+## 8. Where higher-order modes start
+
+The modal filter between the source and the test object exists to stop
+higher-order modes reaching the silencer, and its requirement steps at the
+frequency where those modes can propagate in the connected ducts: at least
+3 dB of longitudinal attenuation of the fundamental at the low-frequency end,
+and at least 5 dB above that frequency (5.2.2.3). NOTE 2 prints where it is:
+
+```python
+print(round(noise_control.modal_filter_cut_on(diameter=0.4), 1))          # 505.9 Hz
+print(round(noise_control.modal_filter_cut_on(larger_dimension=0.5), 1))  # 343.0 Hz
+```
+
+The rectangular form, $0{,}5\,c/H$, is exact: the first mode of a rigid
+rectangular duct is a half wavelength across the larger dimension. The
+circular one, $0{,}59\,c/d$, is rounded. The exact coefficient is the first
+zero of $J_1'$ over $\pi$, which is 0,58607, so Equation (4) sits 0,67 %
+high: on the 0,4 m duct of the ISO 11691 sound source that is 505,9 Hz where
+[`circular_duct_cut_on`](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/) gives
+502,6 Hz. Three and a half hertz does not matter for choosing a modal filter,
+and it is worth knowing which of the two numbers is the physics.
+
+## 9. What the object costs to push air through
+
+The third thing ISO 7235 measures has nothing to do with sound. A silencer
+that works and costs a fan half its pressure is not a good silencer, so 6.5
+measures the **total pressure loss coefficient**, and the whole point of the
+coefficient rather than the loss is that a loss means nothing without the flow
+it was measured at.
+
+Start with the air. Equation (10) is the ideal gas law with the standard's own
+constants, and the static pressure it takes is a gauge pressure against the
+ambient, so the two add:
+
+```python
+rho = noise_control.normal_air_density(200.0, 101325.0, 20.0)
+print(round(rho, 4))              # 1.2073 kg/m3
+
+q_v = noise_control.volume_flow_rate(1.2, rho)
+print(round(q_v, 4))              # 0.9939 m3/s
+```
+
+ISO 7235 prints $R = 287$ and writes the absolute temperature as
+$\theta + 273\ ^\circ\text{C}$, neither of which is the accurate figure. The
+offset alone puts the density 0,051 % high at 20 °C, and the gas constant adds
+0,017 % to that, for 0,069 % in all. It does not cancel: the same density is
+in the dynamic pressure of both test series, so the coefficient is **scaled**
+by that one factor rather than shifted, and comes out 0,069 % low. That is far
+under the uncertainty of a pressure-loss test, and using the printed constants
+is what reproduces a result computed to the standard, so the library keeps
+both. It is recorded in the [errata
+register](https://jmrplens.github.io/phonometry/reference/errata/) as
+a property of the source rather than as a defect.
+
+Equation (9) rather than (8) is used when the flow meter and the test object
+are far enough apart in temperature or pressure that their density ratio
+leaves 0,98 to 1,02: outside that window the meter is not measuring the flow
+the test object sees.
+
+The velocity head is Equation (13), and the coefficient is the loss divided by
+it:
+
+```python
+p_d1 = noise_control.dynamic_pressure(q_v, 0.0962, rho)
+print(round(p_d1, 2))             # 64.44 Pa
+
+delta_p_t = noise_control.total_pressure_loss(45.0, p_d1, 0.0962, 0.0962)
+print(round(noise_control.pressure_loss_coefficient(delta_p_t, p_d1), 3))
+#                                 # 0.698
+```
+
+That number belongs to the object rather than to the test point, at least to
+the extent the flow is dynamically similar: a loss grows as the square of the
+velocity and so does the head it is divided by, so the algebra returns the
+same coefficient at twice the flow. Real flow is not exactly similar, because
+doubling the rate doubles the Reynolds number too, and that is the reason
+6.5.2 measures at five rates and averages rather than trusting one. The drift
+over a test range is small, and it is not zero.
+
+Equation (12) is the part worth reading twice. Measuring static pressures on
+both sides is not enough when the two sides are different sizes, because an
+object that widens the duct converts velocity head back into static pressure
+and a static difference alone would credit it with a recovery that is only
+bookkeeping. The bracket $1 - (S_1/S_2)^2$ puts it back, and the NOTE to
+Equation (14) says what usually happens to it: as a rule $S_1 = S_2$, and it
+vanishes. Where it does not, it is not small:
+
+```python
+widening = noise_control.total_pressure_loss(45.0, p_d1, 0.0962, 2 * 0.0962)
+print(round(noise_control.pressure_loss_coefficient(widening, p_d1), 3))
+#                                 # 1.448, from the same 45 Pa of static loss
+```
+
+## 10. The substitution trick, again
+
+The fundamental method of 6.5.2.2 measures the coefficient the way the
+acoustic half measures insertion loss: run the rig with the test object, run
+it again with the substitution duct, and the difference belongs to the object.
+The computational route of 6.5.2.2.3 does the subtraction on the coefficients
+rather than on the pressures, which means the two series need share neither
+their flow rates nor even their number of points:
+
+```python
+import numpy as np
+
+heads = np.array([20.0, 40.0, 60.0, 80.0, 100.0])   # Pa, five airflow rates
+with_object = 2.5 * heads
+without = 0.6 * heads
+
+zeta = noise_control.average_pressure_loss_coefficient(
+    with_object, heads, without, heads,
+)
+print(round(zeta, 3))             # 1.9
+```
+
+Five rates per series, spread evenly over the range, and the lowest has to
+produce more than 10 Pa so that the smallest number in the average is still a
+measurement rather than the resolution of the manometer. The library says so
+on both counts: `average_pressure_loss_coefficient` warns below five points,
+and `pressure_loss_coefficient` warns on a loss of 10 Pa or less, the
+boundary included, because the clause reads *greater than*.
+
+What the flow has to be before any of that counts is a matter of geometry.
+The upstream duct is straight for five equivalent diameters or two metres,
+whichever is greater, so that the velocity profile has settled; it must be
+uniform to ±10 % of the mean over the section, excluding the 15 mm nearest the
+walls, surveyed ten points along each of two perpendicular axes about
+$1{,}5\,d_e$ upstream. The two length rules cross at a 0,4 m equivalent
+diameter:
+
+```python
+print(round(noise_control.upstream_straight_length(0.0962), 2))   # 2.0 m
+print(round(noise_control.upstream_straight_length(0.5), 2))      # 3.99 m
+```
+
+## 11. The third standard, and the formula it shares
+
+ISO 5135:1999 measures something else again: the sound power an air-terminal
+device, air-terminal unit, damper or valve radiates, determined in a
+reverberation room to ISO 3741. What a designer needs is not that but what
+the device puts into the duct behind it, and Equation (1) is the step between
+them:
+
+$$
+L_{W\mathrm{duct}} = L_W + \Delta L_\mathrm{r}
+$$
+
+The correction $\Delta L_\mathrm{r}$ is Equation (2) of ISO 5135, and it is
+worth writing both printings side by side:
+
+$$
+\Delta L_\mathrm{r} = 10\lg\left[1 +
+   \left(\frac{c}{4\pi f}\right)^{2}\frac{\Omega}{S}\right]
+\qquad
+D_\mathrm{td} = 10\lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f\sqrt{S}}{c}\right)^{2}}\right]
+$$
+
+Expand either and both become $10\lg[1 + \Omega c^2 / (16\pi^2 f^2 S)]$.
+They are one formula, their two solid-angle tables agree entry for entry, and
+`open_end_transmission_loss` is both. That is why nothing new appears here for
+the correction itself:
+
+```python
+d_lr = noise_control.open_end_transmission_loss(bands, area)
+lw_room = np.array([58.0, 60.0, 61.0, 59.0, 55.0, 50.0])
+print(noise_control.duct_sound_power_level(lw_room, d_lr).round(2))
+#                                 # [69.23 66.14 63.5  59.77 55.21 50.05] dB
+```
+
+A device measured in a room is understated in the duct by eleven decibels at
+the bottom of the range and by nothing at the top. The NOTE to Table 1 offers
+a way round the correction rather than a second formula for it: fit a
+transmission element to ISO 7235 and no correction is applied at all.
+
+## 12. Reading a level at a duty nobody measured
+
+A device is not tested at the one operating point a designer will use it at.
+ISO 5135 5.5.2 fits a straight line by least squares through the levels
+against $\lg q_V$ when the tests were made at a constant pressure loss
+coefficient, or against $\lg \Delta p_\mathrm{t}$ when they were made at a
+constant flow rate. The same fit serves the band levels and the A-weighted
+one:
+
+```python
+duty = np.array([0.05, 0.1, 0.2, 0.4, 0.8])          # m3/s
+levels = np.array([38.0, 44.5, 50.0, 56.5, 62.0])    # dB(A)
+
+line = noise_control.fit_operating_line(duty, levels)
+print(round(line.slope, 2))               # 19.93 dB per decade
+print(round(line.maximum_deviation, 2))   # 0.3 dB
+print(round(line.level_at(0.3), 1))       # 53.7 dB(A)
+```
+
+Two rules keep that honest, and the library says so on both rather than
+refusing: a fit that is not a straight line is still a fit, and a level read
+past the range is still a number, and what the standard asks is that a report
+be honest about them. The measured points have to sit within 3 dB of the line,
+because past that the levels are not a straight line in this variable and
+reading the line off means nothing. And the line may be extended down to half
+the smallest duty measured and up to twice the largest, and no further, which
+for these five points is 0.025 to 1.6 m³/s. Either one out of range raises a
+`SilencerMeasurementWarning`:
+
+```python
+print(line.valid_range)           # (0.025, 1.6)
+```
+
+Clause 8 k) closes the loop: a report gives the fully corrected levels to the
+nearest half decibel and has to state which of them were extrapolated rather
+than measured directly. `.plot()` draws that distinction, shading the two ends
+of the range that are extrapolation.
+
+## Standards
+
+ISO 7235:2003, ISO 11691:1995 and ISO 5135:1999, read from BS EN ISO 7235:2009,
+BS EN ISO 11691:2009 and BS EN ISO 5135:1999, which endorse them without
+modification. Implemented, from ISO 7235 and ISO 11691: Equation (1) of both
+with the reverberation-time correction of ISO 7235 6.3; the octave fold of
+ISO 11691 Equation (2); ISO 7235 Table 6 and the three-or-five rule of 6.2.1;
+ISO 11691 Table 1 and all three columns of ISO 7235 Table 7, with the coverage
+factor of 7.9; the scope of ISO 11691 1.1 and 4.5; the open-end transmission
+loss and reflection coefficient of Equations (B.3) and (B.4) with the solid
+angles of Table B.1; the transmission loss of Equation (6) and the flow-noise
+sound power of Equation (7); the cut-on frequencies of Equations (4) and (5);
+and the flow half of 6.5, from the gas law of Equations (10), (21) and (22) to
+the substitution average of Equation (18) and the settling length of
+6.5.2.2.1. From ISO 5135: the duct sound power level of Equation (1),
+Equation (2), which is ISO 7235 (B.3) written out again, and the least-squares
+operating line of 5.5.2 with its 3 dB fit limit and its half-to-twice reading
+range. Checked in the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/); the gap
+Table 6 leaves at 160 Hz and the two printed gas-law constants are in the
+[errata register](https://jmrplens.github.io/phonometry/reference/errata/). Not implemented: the facility requirements
+themselves, the flow measurement of ISO 5167-1, the ISO 3741 determination the
+receiving side is handed to, and ISO 11820, which measures a silencer in situ.
+
+## See also
+
+- [Silencers](https://jmrplens.github.io/phonometry/devices/noise-control/silencers/): the reactive
+  four-pole models this measurement is the counterpart of, and the rig it is
+  made on, described in full.
+- [Duct-Borne Noise: Fan to Room](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/):
+  where a measured insertion loss goes once it has been bought.
+- [HVAC Noise the German Way (VDI 2081)](https://jmrplens.github.io/phonometry/devices/noise-control/vdi2081-air-systems/):
+  the splitter-silencer insertion loss predicted from geometry, for comparison
+  with what a laboratory would measure.
+- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the gap Table 6 of ISO 7235
+  leaves at 160 Hz, and the two printed gas-law constants.
+- API reference: [`noise_control.silencer_measurement`](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencer-measurement/).
+- [Industrial noise control](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/):
+  the rival closed form for the end reflection, and the air-terminal
+  corrections a diffuser is selected with.
+
+---
+
+
 <!-- source: docs/devices/noise-control/vdi2081-air-systems.md | canonical: https://jmrplens.github.io/phonometry/devices/noise-control/vdi2081-air-systems/ -->
 Source: https://jmrplens.github.io/phonometry/devices/noise-control/vdi2081-air-systems/
 
@@ -2586,785 +3163,5 @@ Equations (16), (17) and (18), the splitter silencer and its self-noise of Equat
 VDI 2081 Blatt 2:2005-05, *Geräuscherzeugung und Lärmminderung in
 Raumlufttechnischen Anlagen — Beispiele*: the worked supply air network of
 Table 1 and the assessment curve of Section 1.1.
-
----
-
-
-<!-- source: docs/devices/noise-control/control-valve-noise.md | canonical: https://jmrplens.github.io/phonometry/devices/noise-control/control-valve-noise/ -->
-Source: https://jmrplens.github.io/phonometry/devices/noise-control/control-valve-noise/
-
-# Control valve noise (IEC 60534-8-3)
-
-A control valve is usually the loudest thing in a process plant, and it is
-loud for a reason worth stating plainly: throttling turns pressure into
-velocity, and the velocity is then thrown away in a free jet inside the pipe.
-A small and well characterised fraction of that jet's power comes back as
-sound. The valve does not radiate it. **The pipe does**, which is why a
-prediction method that stops at the valve is not a prediction of anything
-anyone hears.
-
-IEC 60534-8-3 is that chain, from an operating point to a level one metre from
-the pipe wall, and this page follows it.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_valve_noise_place_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_valve_noise_place.svg" alt="A section through a control valve on a pipe. The flow enters from the left, the valve body straddles the pipe with its plug closing on a seat, and the stream chokes at the vena contracta just downstream of the plug, marked as the source. From there a wedge-shaped jet spreads downstream inside the pipe. An arrow leaves the pipe wall and goes up to a microphone, labelled as the way out through the wall, and the microphone is dimensioned 1 m downstream of the valve body and 1 m from the outer pipe wall, where the A-weighted level L p A e 1 m is quoted. Further downstream an arrow points at the pipe to say a fast outlet is a second source, added to the first on energy. Underneath, a note that the body is not the path and the valve is not the source: the noise is made where the stream chokes, and the wall decides how much of it is heard." width="100%"></picture>
-
-*The whole of Clause 5 lives between those two points: what the jet makes, and
-what is left of it a metre outside the wall.*
-
-## 1. Five regimes, and why the method has a branch in it
-
-Everything turns on the **differential pressure ratio**, Equation (1):
-
-$$
-x = \frac{p_1 - p_2}{p_1}
-$$
-
-A valve barely throttling and a valve running a shock train are not the same
-noise source, and the standard does not pretend otherwise. Equations (3) to
-(7) cut $x$ into five intervals, and Table 3 gives each interval its own Mach
-number, its own acoustical efficiency and its own peak frequency.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/control_valve_noise_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/control_valve_noise.svg" alt="Three panels. Left: the acoustical efficiency of one valve against the differential pressure ratio on a logarithmic axis, from one part in a million to two parts in a thousand, with the five regimes shaded and labelled with roman numerals and their four boundaries drawn as dotted lines. Middle: the sound pressure level in each one-third-octave band from 12.5 Hz to 20 kHz, once inside the pipe and once one metre outside it, about a hundred decibels lower, with the peak frequency marked. Right: the pipe transmission loss against frequency, rising from ninety decibels at the bottom of the range to a maximum near the internal coincidence frequency and falling again, with the external coincidence, internal coincidence and ring frequencies marked" width="100%"></picture>
-
-*The same valve, from one part in a million of the stream power to two parts
-in a thousand, and the hundred decibels the pipe wall is worth.*
-
-The five are, in the order the clause prints them: **I** subsonic in the vena
-contracta, **II** and **III** choked with a jet that is still growing, and
-**IV** and **V** the shock-cell regimes, where the peak frequency stops
-following the jet velocity and starts following the spacing of the cells.
-
-```python
-from phonometry import noise_control
-
-bounds = noise_control.pressure_ratio_boundaries(1.22, 0.792 / 0.984)
-print(round(bounds.critical, 3))              # 0.285  x_C
-print(round(bounds.vena_contracta, 3))        # 0.439  x_vcc
-print(round(bounds.break_point, 3))           # 0.576  x_B
-print(round(bounds.constant_efficiency, 3))   # 0.942  x_CE
-
-print(noise_control.flow_regime(0.28, bounds))   # 1
-print(noise_control.flow_regime(0.52, bounds))   # 3
-print(noise_control.flow_regime(0.95, bounds))   # 5
-```
-
-The second argument is the pressure recovery factor $F_L$, or
-$F_{LP}/F_p$ when the valve has attached fittings, which is what the note to
-Table 3 asks for and what every example in Annex A uses.
-
-**The boundaries are printed twice and not identically.** Clause 5.2 ends its
-list with "Regime V if $x_{CE} < x$" and Table 3 prints $x_{CE} \le x$ for the
-same row, while its regime IV row ends $x \le x_{CE}$. Read as the table
-prints it, the single point $x = x_{CE}$ belongs to two regimes at once. The
-clause is the normative text and its list is consistent, so `flow_regime`
-follows the clause, and
-[the errata register](https://jmrplens.github.io/phonometry/reference/errata/) records the
-disagreement.
-
-## 2. The jet, which is not the valve
-
-The peak frequency of the noise is set by the size of one jet, not by the size
-of the valve. A cage with sixty small holes and a single-port plug of the same
-capacity make the same power and put it in very different places.
-Equations (8a) to (8c) are how the standard measures that:
-
-$$
-d_H = \frac{4A}{l_w}, \qquad
-d_o = \sqrt{\frac{4 N_o A}{\pi}}, \qquad
-F_d = \frac{d_H}{d_o}
-$$
-
-$d_H$ is the hydraulic diameter of one passage and $d_o$ the diameter of the
-single circular orifice that would pass the same total area, so $F_d$ is near
-one for a single large port and small for a cage.
-
-```python
-from phonometry import noise_control
-
-# The cage of Annex A: six openings, each 0,00137 m2 with a 0,181 m perimeter.
-fd = noise_control.valve_style_modifier(0.00137, 0.181, 6)
-print(round(fd, 3))                                        # 0.296
-
-print(round(noise_control.jet_diameter(90.0, fd, 0.792 / 0.984), 4))
-# 0.0116  m
-```
-
-Equation (9) then turns the flow coefficient into the jet diameter,
-$D_j = N_{14} F_d \sqrt{C\,F_{LP}/F_P}$, with $N_{14}$ from Table 1 by
-whichever coefficient the valve is rated in.
-
-**Annex A prints an orifice diameter ten times too small.** Its Table A.1
-gives $d_o = 0{,}010$ m in all six columns where Equation (8c) with the
-annex's own $N_O = 6$ and $A = 0{,}00137$ m² gives $0{,}102$ m. The row below
-settles it: the printed $F_d = 0{,}30$ is $0{,}030/0{,}102$, and it would be
-3,0 with the printed $d_o$. That one is in the errata register too, along with
-a piping geometry factor the annex prints rounded to 0,98 and computed with
-0,984.
-
-## 3. The whole of Clause 5, in one call
-
-The rest of the chain is the acoustical efficiency of Table 3, the sound power
-of Equation (11), the internal level at the pipe wall of Equation (18), the
-spectrum of Equation (19), the pipe transmission loss of Equation (20a) and
-the level outside of Equations (24) and (25).
-
-```python
-from phonometry import noise_control
-
-result = noise_control.valve_aerodynamic_noise(
-    noise_control.GasStream(
-        mass_flow=2.22,                # kg/s
-        inlet_pressure=1.0e6,          # Pa, absolute
-        outlet_pressure=7.2e5,
-        inlet_density=5.3,             # kg/m3
-        inlet_temperature=450.0,       # K
-        specific_heat_ratio=1.22,
-        molecular_mass=19.8,           # kg/kmol
-    ),
-    noise_control.ValveTrim(
-        flow_coefficient=90.0,         # C_v
-        style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
-        pressure_recovery=0.792 / 0.984,
-        outlet_diameter=0.1,           # m
-        efficiency_correction=-3.8,    # A_eta, Table 4
-        strouhal_number=0.2,           # St_p, Table 4
-    ),
-    noise_control.DownstreamPipe(
-        internal_diameter=0.2031,      # m
-        wall_thickness=0.008,          # m
-        density=8000.0,                # kg/m3, steel
-    ),
-)
-
-print(result.regime)                                # 1
-print(round(result.sound_power, 1))                 # 22.3  W
-print(round(result.internal_level, 1))              # 155.3 dB
-print(round(result.peak_frequency))                 # 7778  Hz
-print(round(result.external_level, 1))              # 91.7  dB
-```
-
-Every one of those is a printed value of Annex A's example 1, including the
-last: the annex prints $L_{pAe,1m} = 92$ dB(A) for it. Five of the six columns
-end in a number Clause 5 alone reaches, and the library reproduces all five;
-the sixth is the one whose valve outlet is narrower than its pipe, so the annex
-adds the expander noise of Clause 7 to it, and Clause 5 by itself lands a
-decibel low. The result also carries the rest of the printed intermediates, so
-a calculation can be read against the standard row by row rather than trusted.
-
-The last two arguments are the only ones a data sheet may not give.
-$A_\eta$ is the exponent of the acoustical efficiency and $St_p$ the Strouhal
-number at the peak; Table 4 prints typical pairs for thirteen valve styles and
-says in its own NOTE 1 that a manufacturer states the real ones.
-
-```python
-from phonometry import noise_control
-
-print(noise_control.VALVE_ACOUSTIC_STYLES["globe ported cage"])
-# (-3.8, 0.2)
-print(noise_control.VALVE_ACOUSTIC_STYLES["segmented ball 90 deg"])
-# (-3.6, 0.3)
-```
-
-$A_\eta$ is $-4$ for a pure dipole, which is what a free jet expanding into a
-large volume is; the printed values run from $-4{,}8$ to $-3{,}0$, so the
-whole table spans a factor of sixty in efficiency, which is 18 dB.
-
-## 4. Where the sound actually comes out
-
-The internal level is around 155 dB in the example above, and nobody standing
-beside the pipe hears anything like that. The pipe wall is what stands between
-them, and Equation (20a) is worth more than a hundred decibels at the bottom
-of the range.
-
-It is not a flat hundred. Three frequencies shape it, and the middle one is
-where the wall gives most away:
-
-$$
-f_r = \frac{c_s}{\pi D_i}, \qquad
-f_o = \frac{f_r}{4}\left(\frac{c_2}{c_a}\right), \qquad
-f_g = \frac{\sqrt{3}}{\pi t_S}\frac{c_a^2}{c_s}
-$$
-
-```python
-from phonometry import noise_control
-
-pipe = noise_control.coincidence_frequencies(0.200, 0.008, 408.0)
-print(round(pipe.ring))                    # 7958  Hz, f_r
-print(round(pipe.internal_coincidence))    # 2366  Hz, f_o
-print(round(pipe.external_coincidence))    # 1622  Hz, f_g
-```
-
-$f_r$ is the ring frequency, where the circumference is one wavelength in the
-steel. $f_o$ is the internal coincidence frequency, where the sound inside the
-pipe and the bending waves in its wall travel at the same speed, so they
-couple: that is the maximum in the right-hand panel of the figure, and it is
-where a valve's noise gets out. $f_g$ is the external one, where the bending
-waves match the air outside.
-
-```python
-import numpy as np
-from phonometry import noise_control
-
-bands = np.array([200.0, 1000.0, 2500.0])
-loss = noise_control.pipe_transmission_loss(
-    bands,
-    internal_diameter=0.200,
-    wall_thickness=0.008,
-    valve_outlet_diameter=0.200,
-    downstream_density=11.1,
-    downstream_sound_speed=408.0,
-    pipe_density=8000.0,
-)
-print(np.round(loss, 1))
-# [-70.4 -56.9 -49.4]
-```
-
-All three are printed values of Annex A's example 7. The loss is
-negative and Equation (24) *adds* it, which is the standard's own sign and not
-a convention chosen here.
-
-**A thinner pipe is a louder pipe, and by a lot.** The wall thickness enters
-Equation (20a) squared, so halving it is worth about 6 dB in every band, which
-is the cheapest and most often forgotten line in a valve noise budget.
-
-## 5. When the outlet runs fast: the second source
-
-Clause 5 has limits, and two of them bite. The pipe Mach number $M_2$ of
-Equation (17) is not really a limit but a clamp: NOTE 2 caps it at 0,3 before
-the velocity correction of Equation (16), however fast the pipe actually runs.
-The valve outlet Mach number $M_o$ of Equation (15) is a limit, and it is the
-one that matters, because past 0,3 the flow leaving the outlet stops being a
-detail and becomes **a second noise source** in its own right. NOTE 1 sends
-the calculation to Clause 7 for it.
-
-```python
-from phonometry import noise_control
-
-case = dict(
-    stream=noise_control.GasStream(
-        mass_flow=0.89, inlet_pressure=1.0e6, outlet_pressure=5.0e4,
-        inlet_density=5.3, inlet_temperature=450.0, specific_heat_ratio=1.22,
-        molecular_mass=19.8,
-    ),
-    valve=noise_control.ValveTrim(
-        flow_coefficient=30.0,
-        style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
-        pressure_recovery=0.792 / 0.984, outlet_diameter=0.1,
-        efficiency_correction=-3.8, strouhal_number=0.2,
-    ),
-    pipe=noise_control.DownstreamPipe(
-        internal_diameter=0.15, wall_thickness=0.008, density=8000.0
-    ),
-)
-both = noise_control.valve_aerodynamic_noise(
-    **case, expander=noise_control.Expander()
-)
-
-print(round(both.outlet_mach, 2))     # 0.89, far past the 0.3 of NOTE 1
-print(round(both.pipe_mach, 2))       # 0.4, clamped to 0.3 for the correction
-print(round(both.external_level))     # 94  dB(A), trim and outlet together
-```
-
-That is Annex A's example 6, and 94 dB(A) is what the annex prints for it.
-Without the `expander` the same call gives 93 and warns that a source is
-missing: the level is the trim alone, which is not what a valve running at
-Mach 0,89 sounds like.
-
-Clause 7 is a small chain of its own. The flow is accelerated through the
-narrower outlet, capped at Mach 0,8 in the pipe and at the speed of sound at
-the outlet, and what it makes is Equations (34) to (41):
-
-$$
-U_R = \frac{U_p D_i^2}{\beta d_i^2}, \qquad
-W_{mR} = \frac{\dot m U_R^2}{2}
-         \left[\left(1 - \frac{d_i^2}{D_i^2}\right)^2 + 0{,}2\right],
-\qquad
-\eta_R = 10^{A_\eta} M_R^3
-$$
-
-```python
-from phonometry import noise_control
-
-outlet = both.expander
-print(round(outlet.inlet_velocity))            # 460  m/s
-print(round(outlet.mach, 2))                   # 0.96
-print(round(outlet.stream_power))              # 47854  W
-print(round(outlet.sound_power, 1))            # 42.0   W
-print(round(outlet.peak_frequency))            # 920    Hz
-print(round(outlet.internal_level))            # 151    dB
-```
-
-Every one of those is printed in the sixth column of Table A.1. Note the
-company the outlet keeps: 42 W of sound against the 218 W the trim makes, but
-at 920 Hz instead of 7,9 kHz, which is why it moves the A-weighted answer at
-all.
-
-**The two sources add in energy, not in level.** Equation (43) sums them
-inside the pipe, and Equation (24) then takes the sum through the wall once,
-because there is only one wall.
-
-$$
-L_{piS}(f_i) = 10 \lg\left(
-  10^{L_{pi}(f_i)/10} + 10^{L_{piR}(f_i)/10}\right)
-$$
-
-Two other things about Clause 7 are worth knowing before using it. Its 7.1
-limits the transition piece to **30 degrees of total included angle**, because
-a steeper cone makes the flow unstable in ways the standard does not model.
-And the contraction coefficient $\beta$ of Equation (35) is a measurement, not
-a constant: NOTE 1 gives 0,93 for straight pattern globe valves, says some
-rotary valves may be as low as 0,7, and admits there are no data for the rest.
-`Expander` defaults to the 0,93 and to Table 4's own *expander* row, which is
-$A_\eta = -3{,}0$ and not the valve's figure.
-## 6. Trims designed to be quiet
-
-Everything above is Clause 5, which is a valve with ordinary trim. A valve
-bought to be quiet is not that, and Clause 6 says how it differs: **not by a
-different method**, but by what is fed into the same one.
-
-There are three families and each substitutes something.
-
-**A drilled cage** (6.2) makes many small jets instead of one large one, and
-Equation (26) replaces the pressure recovery factor of Equation (9) with a
-geometry, $[0{,}9 - 0{,}06\,(l/d)]$, where $l$ and $d$ are the length and
-diameter of one hole. A long hole recovers less than a short one, and NOTE 1
-caps the ratio at 4 because the bracket would otherwise reach zero at 15.
-
-```python
-from phonometry import noise_control
-
-# 6.2's own example: 48 rectangular passages, 10 mm by 2 mm.
-area = 0.010 * 0.002
-perimeter = 2.0 * 0.010 + 2.0 * 0.002
-print(round(4.0 * area / perimeter, 4))          # 0.0033  m, the hydraulic d
-print(round(noise_control.multiple_passage_jet_diameter(
-    90.0, 0.094, 0.020, 0.0033), 5))             # 0.00333 m
-```
-
-**A multistage trim** (6.3) drops most of its pressure before the stage that
-makes the noise, so the method is run on that stage: the stagnation pressure
-$p_n$ at its inlet stands in for $p_1$, the density there for $\rho_1$, and
-the flow coefficient of the last stage for the valve's.
-
-$$
-C_n = N_{16} A_n, \qquad
-p_n = \sqrt{\left(\frac{p_1 C}{1{,}155 C_n}\right)^2 + p_2^2}, \qquad
-\rho_n = \rho_1 \frac{p_n}{p_1}
-$$
-
-Which equation gives $p_n$ is a **two-step reading** and not a formula. NOTE 3
-says that with $p_1/p_2 \ge 2$ you assume $p_n/p_2 < 2$, take Equation (28a),
-and fall through to (28b) if the answer turns out to be $2 p_2$ or more; below
-a valve ratio of two, (28c) applies directly. The result says which branch it
-took, because a report should not have to guess.
-
-```python
-from phonometry import noise_control
-
-conditions = noise_control.multistage_trim_conditions(
-    inlet_pressure=7.0e6, outlet_pressure=1.4e6, inlet_density=55.3,
-    flow_coefficient=81.5,
-    last_stage_coefficient=noise_control.last_stage_flow_coefficient(6.44e-3),
-)
-print(round(conditions.flow_coefficient))        # 315
-print(round(conditions.stagnation_pressure))     # 2102410  Pa
-print(round(conditions.stagnation_density, 1))   # 16.6     kg/m3
-print(conditions.equation)                       # 28a
-```
-
-Those three then go into the `GasStream` and the `ValveTrim` in place of the
-valve's own inlet pressure, inlet density and flow coefficient. That is Annex A's example 7, a 432-passage cage on a 70 bar vapour
-line, and it closes at the printed **89 dB(A)** with a jet 2,2 mm across and a
-peak at 14,4 kHz.
-
-**A multipath, multistage trim** (6.4) is both at once, and it is what example
-7 actually is. It adds nothing new to the substitution: Equations (32) and
-(33) restate the regime I Mach number and peak frequency with the last stage's
-recovery factor, which is what the substitution has already put there.
-
-For 6.3 there is one thing more. Clause 5 has been run on the last stage
-alone, so Equation (31) puts the others back:
-
-$$
-L_{pi} = L_{pi,n} + \frac{1}{(n-1)^{0{,}125}}\,10 \lg\frac{p_1}{p_n}
-$$
-
-```python
-from phonometry import noise_control
-
-print(round(noise_control.stage_level_correction(150.0, 3, 7.0e6, 2.1e6), 1))
-# 154.8  dB
-```
-
-The exponent is 0,125, so the number of stages barely enters: two stages and
-eight differ by a quarter of a term that is itself only a few decibels. What
-the correction really tracks is $p_1/p_n$, the pressure the earlier stages
-took out.
-
-
-## See also
-
-- [Reactive Silencers](https://jmrplens.github.io/phonometry/devices/noise-control/silencers/): the four-pole chain that would be put
-  downstream of a valve this loud.
-- [Duct-Borne Noise](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/): the same question for a ventilation
-  system, where the source is a fan rather than a jet.
-- [HVAC Noise the German Way (VDI 2081)](https://jmrplens.github.io/phonometry/devices/noise-control/vdi2081-air-systems/): another
-  chain that ends in a level rather than in a sound power.
-- [Sound Power in a Duct](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-duct/): the ISO 5136
-  measurement of what a source puts into a pipe, which is the measured
-  counterpart of what this page predicts.
-- API reference: [`noise_control.valves`](https://jmrplens.github.io/phonometry/reference/api/noise_control/valves/).
-
-## Standards
-
-IEC 60534-8-3:2010, Clause 5, for a valve with standard trim: the pressure
-ratios of 5.1 and 5.2, the geometry of 5.3, the regime-dependent quantities of
-Table 3, the internal level and spectrum of 5.4, the pipe transmission loss of
-5.5 and the external level of 5.6, with Tables 1, 4, 5, 6 and 7. Clause 6 for
-the trims built to be quiet: the drilled cage of 6.2, the multistage
-substitution of 6.3 and the multipath multistage case of 6.4. And the
-outlet-flow half of Clause 7, for the flow leaving a valve outlet that has
-passed Mach 0,3. Validated against all seven worked examples of Annex A in the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/); the three defects that annex
-carries are in the [errata register](https://jmrplens.github.io/phonometry/reference/errata/). Clause 8 and Clause 9
-are not implemented yet; the hydrodynamic case of IEC 60534-8-4 has
-[a page of its own](https://jmrplens.github.io/phonometry/devices/noise-control/valve-cavitation/).
-
----
-
-
-<!-- source: docs/devices/noise-control/valve-cavitation.md | canonical: https://jmrplens.github.io/phonometry/devices/noise-control/valve-cavitation/ -->
-Source: https://jmrplens.github.io/phonometry/devices/noise-control/valve-cavitation/
-
-# Hydrodynamic valve noise (IEC 60534-8-4)
-
-Water is compressible enough to carry sound at 1 400 m/s and far too stiff to
-choke the way a gas does, so a control valve on a water line cannot build
-the shock cells that [the aerodynamic part](https://jmrplens.github.io/phonometry/devices/noise-control/control-valve-noise/) spends
-five regimes on. It makes noise two ways instead, and the whole of
-IEC 60534-8-4 is the sum of them: **turbulence** in the jet leaving the vena contracta, and
-**cavitation**, once the pressure there falls low enough for the liquid to
-flash to vapour and the bubbles to collapse again downstream.
-
-The difference between the two is not a matter of degree. Turbulent noise
-follows the jet velocity gently; cavitation arrives at a threshold and then
-climbs as a fifth power. Everything on this page turns on where the operating
-point sits with respect to that threshold.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_valve_noise_place_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_valve_noise_place.svg" alt="A section through a control valve on a pipe. The flow enters from the left, the valve body straddles the pipe with its plug closing on a seat, and the stream chokes at the vena contracta just downstream of the plug, marked as the source. From there a wedge-shaped jet spreads downstream inside the pipe. An arrow leaves the pipe wall and goes up to a microphone, labelled as the way out through the wall, and the microphone is dimensioned 1 m downstream of the valve body and 1 m from the outer pipe wall, where the A-weighted level L p A e 1 m is quoted. Further downstream an arrow points at the pipe to say a fast outlet is a second source, added to the first on energy. Underneath, a note that the body is not the path and the valve is not the source: the noise is made where the stream chokes, and the wall decides how much of it is heard." width="100%"></picture>
-
-*The liquid case changes the source and not the geometry: the bubbles collapse
-where the jet is, and the level is quoted at the same metre.*
-
-## 1. The threshold, and why the standard asks you to measure it
-
-Two ratios decide the regime. The first is the **differential pressure
-ratio**, Equation (1), which says how far towards flashing this operating
-point is:
-
-$$
-x_F = \frac{p_1 - p_2}{p_1 - p_v}
-$$
-
-The second is the **characteristic pressure ratio** $x_{Fz}$: the value of
-$x_F$ at which cavitation first becomes audible on this valve. It is a
-property of the valve, measured to IEC 60534-8-2, and 4.2 offers Equation (3a)
-only as an estimate for when no measurement exists. Equation (3c) then moves
-it from the 6 × 10⁵ Pa the estimate is drawn at to the working inlet pressure.
-
-```python
-from phonometry import noise_control
-
-x_f = noise_control.differential_pressure_ratio(
-    inlet_pressure=1.0e6, outlet_pressure=6.5e5, vapour_pressure=2.32e3
-)
-print(round(x_f, 4))                                    # 0.3508
-
-x_fz = noise_control.incipient_cavitation_ratio(90.0, 0.42, 0.92)
-print(round(x_fz, 4))                                   # 0.2543  at 6e5 Pa
-print(round(noise_control.corrected_incipient_ratio(x_fz, 1.0e6), 4))
-#                                                       # 0.2386  at 10 bar
-```
-
-This valve is past its threshold, so it cavitates. A multihole trim of the
-same capacity would not be: Equation (3b) answers on the hole geometry rather
-than on the capacity, and a hundred and twenty holes of three millimetres push
-the threshold up by half. The comparison has to be made against the **corrected**
-value, which is the half of it a reader is most likely to skip.
-
-```python
-holes = noise_control.multihole_incipient_cavitation_ratio(120, 0.003, 0.92)
-print(round(holes, 4))                                  # 0.3941  at 6e5 Pa
-print(round(noise_control.corrected_incipient_ratio(holes, 1.0e6), 4))
-#                                                       # 0.3698  still above x_F
-```
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/valve_cavitation_noise_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/valve_cavitation_noise.svg" alt="Three panels. Left: the level one metre from the pipe against the differential pressure ratio, drawn twice for the same valve with characteristic pressure ratios 0,1 apart, each curve rising smoothly, stepping up sharply at its own threshold and flattening near 90 decibels, with the three worked examples marked. Middle: the sound pressure level in each one-third-octave band from 50 Hz to 20 kHz, showing the turbulent and cavitating shares of the internal spectrum, their sum, and the level one metre outside sixty to a hundred decibels below, with both peak frequencies marked. Right: the two acoustical efficiencies against the differential pressure ratio on a logarithmic axis, the turbulent one almost flat near one part in a million and the cavitating one rising from zero at the threshold to cross it and keep climbing" width="100%"></picture>
-
-*The left panel is Annex A's own Figure A.1: the same valve at the same flow,
-with a characteristic pressure ratio 0,1 apart, and 14 dB between the two
-markers at $x_F = 0{,}35$.*
-
-That 14 dB is the reason 4.2 warns that a prediction built on the estimate
-"can create uncertainties". The estimate is not a small correction to the
-answer; on a cavitating valve it **is** the answer.
-
-## 2. Two efficiencies, and one stream power to share
-
-The source half of the method is short. The differential of Equation (2) is
-capped at the choking point, Equation (5) turns it into a jet velocity and
-Equation (6) into the stream power the valve dissipates:
-
-```python
-choked = noise_control.cavitation_differential(
-    inlet_pressure=1.0e6,
-    outlet_pressure=6.5e5,
-    vapour_pressure=2.32e3,
-    pressure_recovery=0.92,
-)
-speed = noise_control.vena_contracta_velocity(choked, 997.0, 0.92)
-power = noise_control.mechanical_stream_power(40.0, speed, 0.92)
-print(round(speed, 3), round(power, 1))                 # 28.801 14042.1
-```
-
-Then two efficiencies say what fraction of those fourteen kilowatts leaves as
-sound. Equation (8) makes the turbulent one linear in the jet Mach number,
-reaching $10^{-4}$ only when the jet reaches the speed of sound in the liquid,
-which for water is 1 400 m/s and never happens in a control valve:
-
-$$
-\eta_{turb} = 10^{-4}\left(\frac{U_{vc}}{c_L}\right)
-$$
-
-Equation (9) is the other one, and it is worth reading factor by factor:
-
-$$
-\eta_{cav} = 0{,}32\, \eta_{turb}
-  \sqrt{\frac{p_1 - p_2}{\Delta p_c}\cdot\frac{1}{x_{Fzp1}}}\;
-  e^{5 x_{Fzp1}}
-  \left(\frac{1 - x_{Fzp1}}{1 - x_F}\right)^{0,5}
-  \left(\frac{x_F}{x_{Fzp1}}\right)^{5}
-  \left(x_F - x_{Fzp1}\right)^{1,5}
-$$
-
-Three of those factors do all the work. $(x_F - x_{Fzp1})^{1,5}$ starts the
-term at **exactly zero** on the threshold, so the two regimes meet without a
-step. $(x_F/x_{Fzp1})^5$ then makes it climb almost vertically. And
-$(1 - x_F)^{-0,5}$ sends it towards infinity as the valve approaches flashing,
-which is where the method stops.
-
-```python
-turbulent = noise_control.turbulent_efficiency(speed, 1400.0)
-cavitating = noise_control.cavitation_efficiency(
-    turbulent=turbulent,
-    differential=3.5e5,
-    choked_differential=choked,
-    pressure_ratio=0.3508,
-    corrected_ratio=0.2386,
-)
-print(f"{turbulent:.3e} {cavitating:.3e}")              # 2.057e-06 1.242e-06
-```
-
-Just past the threshold the cavitation term is already comparable with the
-turbulent one, and Equation (7b) adds them before Table 2's acoustic power
-ratio $r_W$ takes the share that is radiated into the pipe rather than lost in
-the body: a quarter for every globe and rotary valve, a half for the
-butterflies, one for an expander.
-
-## 3. The whole chain in one call
-
-```python
-res = noise_control.valve_hydrodynamic_noise(
-    noise_control.LiquidStream(
-        mass_flow=40.0,                # kg/s
-        inlet_pressure=1.0e6,          # Pa, absolute
-        outlet_pressure=6.5e5,
-        vapour_pressure=2.32e3,
-        density=997.0,                 # kg/m3
-        sound_speed=1400.0,            # m/s
-    ),
-    noise_control.LiquidTrim(
-        flow_coefficient=90.0,         # C_v
-        style_modifier=0.42,           # F_d, from IEC 60534-8-3
-        pressure_recovery=0.92,        # F_L
-        incipient_ratio=x_fz,          # x_Fz, at 6e5 Pa
-        power_ratio=0.25,              # r_W, Table 2
-        valve_diameter=0.1,            # m
-        seat_diameter=0.1,             # m
-    ),
-    noise_control.LiquidPipe(
-        internal_diameter=0.1071,      # m
-        wall_thickness=0.0036,         # m
-        density=7800.0,                # kg/m3, steel
-    ),
-)
-print(res.regime)                                       # cavitating
-print(round(res.sound_power, 5), "W")                   # 0.01158 W
-print(round(res.internal_level, 3), "dB")               # 156.543 dB
-print(round(res.turbulent_peak, 2), round(res.cavitation_peak, 2))
-#                                                       # 654.35 1088.94
-print(round(res.external_level, 1), "dB at 1 m")        # 81.0 dB at 1 m
-```
-
-Every one of those is a printed cell of Annex A's Table A.1. The same call on
-the first column, 30 kg/s into 8 bar, stays turbulent and answers 62,7 dB; the
-third column is the second one again with $x_{Fz}$ shifted by 0,1, and answers
-66,9 dB.
-
-The two peak frequencies are Equations (11) and (13), and (13) is the
-surprising one: on the threshold the cavitating peak is **six times** the
-turbulent peak, and it falls from there as the valve is opened further into
-cavitation, because the bubbles grow larger and take longer to collapse. Just
-past onset, cavitation is a hiss; deep into it, a rumble.
-
-## 4. The pipe, and a printed sign that cannot be right
-
-Inside the pipe this valve runs at 156 dB. What makes the outside habitable is
-the wall, and the standard anchors its transmission loss at the **ring
-frequency**, Equation (14), where one wavelength in the wall material wraps
-exactly once around the circumference:
-
-```python
-print(round(res.pipe_ring_frequency, 1), "Hz")          # 14860.4 Hz
-print(round(res.reference_transmission_loss, 2), "dB")  # -44.71 dB
-print(round(res.transmission_loss, 2), "dB")            # -62.86 dB
-```
-
-Both terms of Equation (15) are printed with a minus sign, so the
-transmission loss of this method is a **negative number that is added** all
-the way to the end. Away from the ring frequency Equations (16b) and (22b)
-only make it worse, and the peak frequencies of a control valve are more than
-a decade below the ring frequency of its pipe, which is where the other 18 dB
-of this valve's loss come from: Equation (16b) costs 27 dB at the turbulent
-peak, and Equation (17) hands 9 of them back because the valve cavitates.
-
-Band by band, 5.4 spreads the internal level with Equations (20a) and (20b)
-and gives the wall a frequency-dependent loss with Equation (22a):
-
-```python
-import numpy as np
-
-band = int(np.argmin(np.abs(res.frequency - 8000.0)))
-print(round(float(res.band_internal_level[band]), 1))     # 141.9
-print(round(float(res.band_transmission_loss[band]), 2))  # -51.76
-print(round(float(res.band_external_level[band]), 1))     # 77.4
-```
-
-Those three are printed in Table A.1 as 141,9 dB, **51,76 dB** and 77,4 dB.
-The middle one is printed without its minus sign, and it cannot be: its own
-two inputs, $-44{,}71$ and $-7{,}053$ dB, sum to $-51{,}763$, and the row
-below only reproduces its printed 77,4 dB with the negative value.
-[The errata register](https://jmrplens.github.io/phonometry/reference/errata/) records it, along with three
-intermediates of the same table that its own equations do not reproduce.
-
-## 5. One equation, printed two ways
-
-Equation (12), the Strouhal number that places the turbulent peak, appears
-twice in the document and not identically. Clause 5.1 prints a leading 0,02
-and no valve style modifier; Table A.1 prints 0,036 and a factor
-$F_d^{0,75}$. Both are on the page, and they are not the same function of the
-valve.
-
-```python
-form = dict(
-    flow_coefficient=90.0,
-    style_modifier=0.42,
-    pressure_recovery=0.92,
-    corrected_ratio=0.2386,
-    valve_diameter=0.1,
-    seat_diameter=0.1,
-    inlet_pressure=1.0e6,
-    vapour_pressure=2.32e3,
-)
-print(round(noise_control.jet_strouhal_number(**form, form="annex"), 3))   # 0.399
-print(round(noise_control.jet_strouhal_number(**form, form="clause"), 3))  # 0.425
-```
-
-Only the annex form reproduces the annex's own printed $N_{Str} = 0{,}399$,
-so it is the default here and the clause form is one keyword away. For this
-valve the two differ by 6 %; for a single-port valve with $F_d = 1$ the annex
-form is 80 % above the clause one, which is five sixths of an octave in the
-peak frequency and a few decibels through the transmission loss.
-
-## 6. Stage by stage
-
-Clause 6 is the same method with per-stage inputs. Each stage takes a share of
-the differential in inverse proportion to the square of its own flow
-coefficient, which is the series law $1/C^2 = \sum_i 1/C_i^2$:
-
-```python
-stages = noise_control.stage_conditions(
-    inlet_pressure=1.0e6,
-    outlet_pressure=4.0e5,
-    vapour_pressure=2.32e3,
-    stage_coefficients=[130.0, 160.0, 199.1],
-    flow_coefficient=90.0,
-)
-for stage in stages:
-    print(round(stage.inlet_pressure), round(stage.pressure_ratio, 3))
-# 1000000 0.288
-# 712426 0.267
-# 522582 0.236
-
-print(round(noise_control.combine_stage_levels(78.0, 74.0, 71.0), 1))   # 80.0
-```
-
-Those three coefficients increase along the flow, which is the device of
-Figure 2: most of the pressure is taken in the first stages and the last one
-is left working at a differential small enough not to cavitate. 6.3.2 then
-calculates **only** that last stage, because the sound the earlier ones make
-is absorbed inside the trim before it reaches the pipe, and it caps the
-differential at the last stage's own cavitation threshold rather than at the
-choking point:
-
-```python
-print(noise_control.last_stage_differential(
-    inlet_pressure=6.0e5,
-    outlet_pressure=4.0e5,
-    vapour_pressure=2.32e3,
-    corrected_ratio=0.30,
-))                                                      # 179304.0
-
-print(noise_control.uniform_passage_style_modifier(16))            # 0.25
-print(round(noise_control.last_stage_seat_diameter_mm(45.0), 1))   # 37.7
-```
-
-The last of those carries its unit in its name for a reason. The formula it
-implements is the one display formula in the standard with no equation number,
-$d_o = 5{,}2\sqrt{N_{34} C_n}$, and Clause 3 declares $d_o$ in metres, which
-for any real last stage it cannot be: 37,7 of anything is millimetres. Divide
-by a thousand before handing it to Equation (12).
-
-## See also
-
-- [Control Valve Noise (IEC 60534-8-3)](https://jmrplens.github.io/phonometry/devices/noise-control/control-valve-noise/): the same
-  chain for a compressible fluid, where five flow regimes take the place of
-  one threshold.
-- [Reactive Silencers](https://jmrplens.github.io/phonometry/devices/noise-control/silencers/): the four-pole chain that would be put
-  downstream of a line this loud.
-- [Duct-Borne Noise](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/): the same question for a ventilation
-  system, where the source is a fan rather than a jet.
-- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the six entries this page
-  rests on, from a sign to an equation printed two ways.
-- API reference: [`noise_control.valves_hydrodynamic`](https://jmrplens.github.io/phonometry/reference/api/noise_control/valves-hydrodynamic/).
-
-## Standards
-
-IEC 60534-8-4:2005, Clauses 4, 5 and 6. The preliminary calculations of
-Clause 4: the pressure ratio of Equation (1), the capped differential of (2),
-the characteristic
-pressure ratio of (3a) to (3c), the jet diameter of (4), the vena contracta
-velocity of (5) and the stream power of (6). The prediction of Clause 5: the
-two acoustical efficiencies of (8) and (9), the sound power of (7a) and (7b),
-the internal level of (10), the Strouhal number and both peak frequencies of
-(11) to (13), the transmission loss of (14) to (17) with the floor of the
-NOTE, the external level of (18a) and (18b), and the band route of 5.4. And
-Clause 6 for a multistage trim: the stage pressures and ratios of (23a) to
-(26), the energy sum of (27), and the last stage of 6.3.2. Validated against
-all three worked examples of Annex A in the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/); the six defects that annex and
-its clauses carry are in the [errata register](https://jmrplens.github.io/phonometry/reference/errata/). The
-laboratory measurement of x_Fz (IEC 60534-8-2) and the flashing regime past
-x_F = 1 are not implemented.
 
 ---

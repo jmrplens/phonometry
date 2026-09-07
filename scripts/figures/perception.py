@@ -4111,9 +4111,7 @@ def generate_audiometric_zero_earphones(output_dir: str) -> None:
     coupler = hearing.earphone_reference_level("TDH 39", shared)
     field = hearing.reference_threshold("free-field", shared)
     ax_gap.plot(shared, coupler, "s-", color=COLOR_SECONDARY, label="TDH 39, coupler")
-    ax_gap.plot(
-        shared, field, "o-", color=COLOR_PRIMARY, label="ISO 389-7, free field"
-    )
+    ax_gap.plot(shared, field, "o-", color=COLOR_PRIMARY, label="ISO 389-7, free field")
     ax_gap.fill_between(
         shared,
         field,

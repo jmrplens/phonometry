@@ -18,6 +18,7 @@ engine only through that path.
 
 from __future__ import annotations
 
+import json
 import os
 import pathlib
 import sys
@@ -698,6 +699,76 @@ def test_waveform_value_rejects_an_unknown_type() -> None:
     """A waveform nobody implements fails where it is described."""
     with pytest.raises(ValueError, match=r"unknown waveform type 'square'"):
         fdtd_gpu.waveform_value({"type": "square", "frequency": 1.0}, 0.0)
+
+
+def test_check_waveform_rejects_what_the_engine_cannot_drive() -> None:
+    """The parameters are checked once, at registration, not every step.
+
+    ``waveform_value`` runs inside the stepping loop, so it reads the
+    parameters and does not police them. A NaN amplitude or a negative ramp
+    would otherwise reach the field and poison it from the first step.
+    """
+    with pytest.raises(ValueError, match=r"unknown waveform type 'square'"):
+        fdtd_gpu.check_waveform({"type": "square"})
+    with pytest.raises(ValueError, match=r"amplitude must be finite"):
+        fdtd_gpu.check_waveform({"type": "cw", "frequency": 1.0, "amplitude": np.nan})
+    with pytest.raises(ValueError, match=r"frequency must be finite"):
+        fdtd_gpu.check_waveform({"type": "cw", "frequency": np.inf})
+    with pytest.raises(ValueError, match=r"frequency must be positive"):
+        fdtd_gpu.check_waveform({"type": "cw", "frequency": 0.0})
+    with pytest.raises(ValueError, match=r"ramp_cycles must be non-negative"):
+        fdtd_gpu.check_waveform({"type": "cw", "frequency": 1.0, "ramp_cycles": -1.0})
+    with pytest.raises(ValueError, match=r"width must be positive"):
+        fdtd_gpu.check_waveform({"type": "gaussian", "width": 0.0})
+    with pytest.raises(ValueError, match=r"t0 must be finite"):
+        fdtd_gpu.check_waveform({"type": "gaussian", "width": 1e-4, "t0": np.nan})
+
+
+def test_sources_are_checked_where_they_are_registered() -> None:
+    """Both the engine and the packer refuse the same waveform."""
+    sim = fdtd_gpu.GpuFDTD2D(343.0, _DX, shape=(_NY, _NX))
+    bad = {"type": "cw", "frequency": _SOURCE_F, "ramp_cycles": -2.0}
+    with pytest.raises(ValueError, match=r"ramp_cycles must be non-negative"):
+        sim.add_point_source(10, 10, bad)
+    with pytest.raises(ValueError, match=r"ramp_cycles must be non-negative"):
+        sim.add_plane_source("down", bad)
+    with pytest.raises(ValueError, match=r"ramp_cycles must be non-negative"):
+        fdtd_gpu_remote.build_job(
+            343.0,
+            _DX,
+            shape=(_NY, _NX),
+            steps=100,
+            sample_steps=[50],
+            sources=[fdtd_dispatch.point(10, 10, bad)],
+        )
+
+
+def test_reduction_bounds_must_be_integers() -> None:
+    """A bound that survives JSON as a string would fail mid-run instead.
+
+    The runner compares the window against a step counter, so a spec built
+    from parsed text has to be refused (or normalised) at packing time.
+    """
+    ok: dict[str, Any] = {"shape": (_NY, _NX), "steps": 100, "sample_steps": [50]}
+    with pytest.raises(ValueError, match=r"mean_squares\[0\].start must be an integer"):
+        fdtd_gpu_remote.build_job(
+            343.0, _DX, mean_squares=[{"name": "s", "start": "0", "stop": 100}], **ok
+        )
+    line = {"name": "axis", "row": 0, "from": 0, "to": _NX, "start": 0, "stop": 100}
+    with pytest.raises(ValueError, match=r"envelopes\[0\].row must be an integer"):
+        fdtd_gpu_remote.build_job(343.0, _DX, envelopes=[{**line, "row": 1.5}], **ok)
+    with pytest.raises(ValueError, match=r"envelopes\[0\].to must be an integer"):
+        fdtd_gpu_remote.build_job(343.0, _DX, envelopes=[{**line, "to": "80"}], **ok)
+    packed = fdtd_gpu_remote.build_job(
+        343.0,
+        _DX,
+        envelopes=[{**line, "row": np.int64(3)}],
+        mean_squares=[{"name": "s", "start": np.int64(0), "stop": np.int64(100)}],
+        **ok,
+    )
+    stored = json.loads(str(packed["envelopes"]))[0]
+    assert isinstance(stored["row"], int)
+    assert json.loads(str(packed["mean_squares"]))[0]["stop"] == 100
 
 
 def test_build_job_rejects_a_malformed_source() -> None:

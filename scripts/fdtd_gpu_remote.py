@@ -178,7 +178,7 @@ def _validate_sources(sources: list[dict[str, Any]], ny: int, nx: int) -> None:
         if not isinstance(waveform, dict):
             msg = f"sources[{index}] needs a 'waveform' dict"
             raise ValueError(msg)
-        fdtd_gpu.waveform_value(waveform, 0.0)
+        fdtd_gpu.check_waveform(waveform)
         if kind == "point":
             ix, iy = int(spec["ix"]), int(spec["iy"])
             if not (0 <= ix < nx and 0 <= iy < ny):
@@ -205,60 +205,84 @@ def _validate_sources(sources: list[dict[str, Any]], ny: int, nx: int) -> None:
             raise ValueError(msg)
 
 
-def _validate_window(specs: list[dict[str, Any]], kind: str, steps: int) -> None:
-    """Reject a reduction with no unique name or an impossible step window.
+def _validate_window(
+    specs: list[dict[str, Any]], kind: str, steps: int
+) -> list[dict[str, Any]]:
+    """Check a reduction and return it with its bounds as integers.
 
     The half-open window ``(start, stop]`` both reductions accumulate over
-    is checked here, so a job that would silently reduce over nothing
-    fails at packing time.
+    is checked here, so a job that would silently reduce over nothing fails
+    at packing time. The bounds are also normalised: the runner compares
+    them against a step counter, and a bound that arrives as ``"100"``
+    survives JSON intact and raises a type error mid-run on the far side.
 
     :param specs: The reduction specs as ``build_job`` received them.
     :param kind: The parameter name, for the message.
     :param steps: Total steps of the job, which bounds the windows.
+    :return: The same specs, copied, with integer bounds.
     :raises ValueError: On the first spec that is not usable.
     """
     seen: set[str] = set()
+    out: list[dict[str, Any]] = []
     for index, spec in enumerate(specs):
         name = str(spec.get("name", ""))
         if not name or name in seen:
             msg = f"{kind}[{index}] needs a 'name', unique within the job"
             raise ValueError(msg)
         seen.add(name)
-        first, last = int(spec["start"]), int(spec["stop"])
+        first, last = (
+            _whole(spec["start"], f"{kind}[{index}].start"),
+            _whole(spec["stop"], f"{kind}[{index}].stop"),
+        )
         if not 0 <= first < last <= steps:
             msg = (
                 f"{kind}[{index}] accumulates over steps ({first}, {last}], "
                 f"which is not inside (0, {steps}]"
             )
             raise ValueError(msg)
+        out.append({**spec, "name": name, "start": first, "stop": last})
+    return out
+
+
+def _whole(value: Any, name: str) -> int:  # noqa: ANN401 - whatever the caller packed
+    """The integer *value* stands for, refusing anything that is not one."""
+    if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
+        msg = f"{name} must be an integer; got {value!r}"
+        raise ValueError(msg)
+    return int(value)
 
 
 def _validate_envelopes(
     envelopes: list[dict[str, Any]], ny: int, nx: int, steps: int
-) -> None:
+) -> list[dict[str, Any]]:
     """Reject an envelope that names no line, or one off the grid.
 
     :param envelopes: The envelope specs as ``build_job`` received them.
     :param ny: Grid rows.
     :param nx: Grid columns.
     :param steps: Total steps of the job, which bounds the windows.
+    :return: The same specs, copied, with every index an integer.
     :raises ValueError: On the first spec that does not describe a line.
     """
-    _validate_window(envelopes, "envelopes", steps)
-    for index, spec in enumerate(envelopes):
+    checked = _validate_window(envelopes, "envelopes", steps)
+    for index, spec in enumerate(checked):
         row, column = spec.get("row"), spec.get("column")
         if (row is None) == (column is None):
             msg = f"envelopes[{index}] takes exactly one of 'row' and 'column'"
             raise ValueError(msg)
         along, limit = (nx, ny) if row is not None else (ny, nx)
-        fixed = int(row) if row is not None else int(column)  # type: ignore[arg-type]  # exactly one is not None, checked above
+        side = "row" if row is not None else "column"
+        fixed = _whole(row if row is not None else column, f"envelopes[{index}].{side}")
         if not 0 <= fixed < limit:
             msg = f"envelopes[{index}] sits at {fixed}, off a grid of {limit}"
             raise ValueError(msg)
-        start, stop = int(spec["from"]), int(spec["to"])
+        start = _whole(spec["from"], f"envelopes[{index}].from")
+        stop = _whole(spec["to"], f"envelopes[{index}].to")
         if not 0 <= start < stop <= along:
             msg = f"envelopes[{index}] spans [{start}, {stop}) of {along}"
             raise ValueError(msg)
+        spec.update({side: fixed, "from": start, "to": stop})
+    return checked
 
 
 def build_job(
@@ -364,8 +388,8 @@ def build_job(
     if not np.isfinite(rms_beta) or not 0.0 <= rms_beta < 1.0:
         msg = f"rms_beta must lie in [0, 1); got {rms_beta!r}"
         raise ValueError(msg)
-    _validate_envelopes(envelopes or [], ny, nx, steps)
-    _validate_window(mean_squares or [], "mean_squares", steps)
+    envelope_specs = _validate_envelopes(envelopes or [], ny, nx, steps)
+    square_specs = _validate_window(mean_squares or [], "mean_squares", steps)
     job: dict[str, Any] = {
         "c": c_map,
         "rho": rho_map,
@@ -380,8 +404,8 @@ def build_job(
         "plane_waves": np.str_(json.dumps(plane_waves or [])),
         "sources": np.str_(json.dumps(sources or [])),
         "rms_beta": np.float64(rms_beta),
-        "envelopes": np.str_(json.dumps(envelopes or [])),
-        "mean_squares": np.str_(json.dumps(mean_squares or [])),
+        "envelopes": np.str_(json.dumps(envelope_specs)),
+        "mean_squares": np.str_(json.dumps(square_specs)),
         "steps": np.int64(steps),
         "sample_steps": sample_arr,
         "sample_stride": np.int64(sample_stride),

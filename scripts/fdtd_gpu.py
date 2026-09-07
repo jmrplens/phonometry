@@ -260,6 +260,42 @@ def _resolve_obstacle_mask(
     return mask
 
 
+def check_waveform(spec: Mapping[str, Any]) -> None:
+    """Reject a waveform the engine cannot drive, once, at registration.
+
+    :func:`waveform_value` runs on every step of every source, so it reads
+    the parameters and does not check them; this is where they are checked,
+    with the library's own rules: a positive finite frequency or width, a
+    finite amplitude, a non-negative ramp and a finite centre time. A job
+    carrying ``NaN`` would otherwise poison the whole field on the first
+    step and say nothing about why.
+
+    :param spec: Waveform parameters (see :func:`waveform_value`).
+    :raises ValueError: On the first parameter the engine cannot use.
+    """
+    kind = str(spec["type"])
+    _finite("amplitude", float(spec.get("amplitude", 1.0)))
+    if kind == "cw":
+        frequency = _finite("frequency", float(spec["frequency"]))
+        if frequency <= 0.0:
+            msg = f"frequency must be positive; got {frequency!r}"
+            raise ValueError(msg)
+        ramp = _finite("ramp_cycles", float(spec.get("ramp_cycles", 3.0)))
+        if ramp < 0.0:
+            msg = f"ramp_cycles must be non-negative; got {ramp!r}"
+            raise ValueError(msg)
+    elif kind == "gaussian":
+        width = _finite("width", float(spec["width"]))
+        if width <= 0.0:
+            msg = f"width must be positive; got {width!r}"
+            raise ValueError(msg)
+        if spec.get("t0") is not None:
+            _finite("t0", float(spec["t0"]))
+    else:
+        msg = f"unknown waveform type {kind!r}; expected 'cw' or 'gaussian'"
+        raise ValueError(msg)
+
+
 def waveform_value(spec: Mapping[str, Any], t: float) -> float:
     """One sample of a serialisable source waveform at time ``t``.
 
@@ -577,7 +613,7 @@ class GpuFDTD2D:
         if not (0 <= ix < nx and 0 <= iy < ny):
             msg = f"source cell ({iy}, {ix}) is outside the {ny} x {nx} grid"
             raise ValueError(msg)
-        waveform_value(waveform, 0.0)  # fail here rather than mid-run
+        check_waveform(waveform)  # fail here rather than mid-run
         self._point_sources.append({"ix": ix, "iy": iy, "waveform": waveform})
 
     def add_plane_source(
@@ -611,7 +647,7 @@ class GpuFDTD2D:
         if not 0 <= offset < span - 1:
             msg = f"offset must lie in [0, {span - 2}]; got {offset}"
             raise ValueError(msg)
-        waveform_value(waveform, 0.0)
+        check_waveform(waveform)
         self._plane_sources.append(
             {
                 "direction": direction,

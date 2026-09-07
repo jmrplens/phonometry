@@ -158,8 +158,10 @@ class RemoteRunError(RuntimeError):
     """A remote stage (ssh, scp or docker) failed or timed out."""
 
 
-def _validate_sources(sources: list[dict[str, Any]], ny: int, nx: int) -> None:
-    """Reject a malformed source here rather than on the remote machine.
+def _validate_sources(
+    sources: list[dict[str, Any]], ny: int, nx: int
+) -> list[dict[str, Any]]:
+    """Check the sources and return them in the form the engine takes.
 
     The checks are the engine's own, run against the grid the job is packed
     for: a point outside it, a direction that is not one of the four, an
@@ -167,11 +169,21 @@ def _validate_sources(sources: list[dict[str, Any]], ny: int, nx: int) -> None:
     packing time, where the traceback is readable and the round trip has
     not been paid for.
 
+    What comes back is what ``build_job`` serialises, and it is normalised
+    rather than merely approved: the cell indices and the offset are the
+    integers ``GpuFDTD2D`` insists on, the plane amplitude is finite, and
+    the waveform is a copy. JSON carries whatever it is handed, so a
+    ``float("nan")`` amplitude that only the far side rejects, or a mapping
+    the caller edits after packing, would otherwise reach the engine past
+    the check that was supposed to stop it.
+
     :param sources: The source dicts as ``build_job`` received them.
     :param ny: Grid rows.
     :param nx: Grid columns.
+    :returns: One normalised record per source, in the order given.
     :raises ValueError: On the first source that does not describe one.
     """
+    records: list[dict[str, Any]] = []
     for index, spec in enumerate(sources):
         kind = str(spec.get("kind", ""))
         waveform = spec.get("waveform")
@@ -180,13 +192,17 @@ def _validate_sources(sources: list[dict[str, Any]], ny: int, nx: int) -> None:
             raise ValueError(msg)
         fdtd_gpu.check_waveform(waveform)
         if kind == "point":
-            ix, iy = int(spec["ix"]), int(spec["iy"])
+            ix = fdtd_gpu._integer(f"sources[{index}] ix", spec["ix"])
+            iy = fdtd_gpu._integer(f"sources[{index}] iy", spec["iy"])
             if not (0 <= ix < nx and 0 <= iy < ny):
                 msg = (
                     f"sources[{index}] drives cell ({iy}, {ix}), outside the "
                     f"{ny} x {nx} grid"
                 )
                 raise ValueError(msg)
+            records.append(
+                {"kind": "point", "ix": ix, "iy": iy, "waveform": dict(waveform)}
+            )
         elif kind == "plane":
             direction = str(spec["direction"])
             if direction not in fdtd_gpu._SIDE_TRAVEL:
@@ -196,13 +212,28 @@ def _validate_sources(sources: list[dict[str, Any]], ny: int, nx: int) -> None:
                 )
                 raise ValueError(msg)
             span = ny if direction in ("down", "up") else nx
-            offset = int(spec.get("offset", 0))
+            offset = fdtd_gpu._integer(
+                f"sources[{index}] offset", spec.get("offset", 0)
+            )
             if not 0 <= offset < span - 1:
                 msg = f"sources[{index}] offset {offset} is off the grid"
                 raise ValueError(msg)
+            amplitude = fdtd_gpu._finite(
+                f"sources[{index}] amplitude", spec.get("amplitude", 1.0)
+            )
+            records.append(
+                {
+                    "kind": "plane",
+                    "direction": direction,
+                    "offset": offset,
+                    "amplitude": amplitude,
+                    "waveform": dict(waveform),
+                }
+            )
         else:
             msg = f"sources[{index}] kind {kind!r}; expected 'point' or 'plane'"
             raise ValueError(msg)
+    return records
 
 
 def _validate_window(
@@ -384,7 +415,7 @@ def build_job(
     )
     mask = fdtd_gpu._resolve_obstacle_mask(obstacle_mask, ny, nx)
     obstacle = np.zeros((ny, nx), dtype=np.bool_) if mask is None else mask
-    _validate_sources(sources or [], ny, nx)
+    source_records = _validate_sources(sources or [], ny, nx)
     if not np.isfinite(rms_beta) or not 0.0 <= rms_beta < 1.0:
         msg = f"rms_beta must lie in [0, 1); got {rms_beta!r}"
         raise ValueError(msg)
@@ -402,7 +433,7 @@ def build_job(
         "edge_sides": np.asarray(sorted(edge_profiles), dtype=np.str_),
         "obstacle": obstacle,
         "plane_waves": np.str_(json.dumps(plane_waves or [])),
-        "sources": np.str_(json.dumps(sources or [])),
+        "sources": np.str_(json.dumps(source_records)),
         "rms_beta": np.float64(rms_beta),
         "envelopes": np.str_(json.dumps(envelope_specs)),
         "mean_squares": np.str_(json.dumps(square_specs)),

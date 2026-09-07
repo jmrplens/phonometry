@@ -790,6 +790,76 @@ def test_build_job_rejects_a_malformed_source() -> None:
         fdtd_gpu_remote.build_job(343.0, _DX, sources=unknown, **ok)
 
 
+def test_packed_sources_are_the_records_the_engine_takes() -> None:
+    """What is serialised is normalised, not merely approved.
+
+    JSON carries a NaN amplitude and a float cell index intact, and both
+    would only be refused on the far side, after the transfer. The packer
+    runs the engine's own helpers over each source and stores what they
+    return, so the archive holds integers and finite amplitudes or the
+    packing fails here.
+    """
+    ok: dict[str, Any] = {"shape": (_NY, _NX), "steps": 100, "sample_steps": [50]}
+    wave = fdtd_dispatch.cw(_SOURCE_F)
+    with pytest.raises(ValueError, match=r"sources\[0\] ix must be an integer"):
+        fdtd_gpu_remote.build_job(
+            343.0,
+            _DX,
+            sources=[{"kind": "point", "ix": 1.5, "iy": 1, "waveform": wave}],
+            **ok,
+        )
+    nan_amplitude = [
+        {
+            "kind": "plane",
+            "direction": "down",
+            "offset": 0,
+            "amplitude": float("nan"),
+            "waveform": wave,
+        }
+    ]
+    with pytest.raises(ValueError, match=r"sources\[0\] amplitude must be finite"):
+        fdtd_gpu_remote.build_job(343.0, _DX, sources=nan_amplitude, **ok)
+    packed = fdtd_gpu_remote.build_job(
+        343.0,
+        _DX,
+        sources=[
+            {"kind": "point", "ix": np.int64(10), "iy": np.int64(20), "waveform": wave},
+            {
+                "kind": "plane",
+                "direction": "down",
+                "offset": np.int64(2),
+                "amplitude": np.float64(0.5),
+                "waveform": wave,
+            },
+        ],
+        **ok,
+    )
+    stored = json.loads(str(packed["sources"]))
+    assert isinstance(stored[0]["ix"], int)
+    assert stored[0]["iy"] == 20
+    assert isinstance(stored[1]["offset"], int)
+    assert stored[1]["amplitude"] == 0.5
+
+
+def test_a_registered_waveform_is_a_snapshot() -> None:
+    """Editing the mapping after registration cannot reach the stepping loop.
+
+    ``check_waveform`` runs once, where the source is added; if the engine
+    kept the caller's mapping, a later edit would drive the grid with
+    parameters no check has ever seen.
+    """
+    live: dict[str, Any] = dict(fdtd_dispatch.cw(_SOURCE_F))
+    sim = fdtd_gpu.GpuFDTD2D(343.0, _DX, shape=(_NY, _NX))
+    sim.add_point_source(10, 20, live)
+    sim.add_plane_source("down", live, offset=1)
+    live["amplitude"] = float("nan")
+    live["type"] = "spiral"
+    for _ in range(20):
+        sim.step()
+    assert np.all(np.isfinite(np.asarray(sim.p)))
+    assert float(np.max(np.abs(np.asarray(sim.p)))) > 0.0
+
+
 def _reduction_job(**extra: Any) -> dict[str, Any]:
     """A driven job asking for whatever reduction *extra* names."""
     described, _ = _source_cases()["point_cw"]

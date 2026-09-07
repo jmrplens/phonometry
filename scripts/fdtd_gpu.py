@@ -614,7 +614,9 @@ class GpuFDTD2D:
             msg = f"source cell ({iy}, {ix}) is outside the {ny} x {nx} grid"
             raise ValueError(msg)
         check_waveform(waveform)  # fail here rather than mid-run
-        self._point_sources.append({"ix": ix, "iy": iy, "waveform": waveform})
+        # Snapshot: the check above is the only one there is, so a mapping
+        # the caller keeps editing would step with parameters nobody read.
+        self._point_sources.append({"ix": ix, "iy": iy, "waveform": dict(waveform)})
 
     def add_plane_source(
         self,
@@ -653,7 +655,7 @@ class GpuFDTD2D:
                 "direction": direction,
                 "offset": offset,
                 "amplitude": _finite("amplitude", amplitude),
-                "waveform": waveform,
+                "waveform": dict(waveform),
             }
         )
 

@@ -334,6 +334,11 @@ def _area_members() -> dict[str, list[str]]:
 #: the standard itself keeps apart from the decay analysis of its normative
 #: body. Those four carve out.
 #:
+#: ``devices/noise-control`` has eight, and two of them are throttling-valve
+#: noise: a different source, a different standard family (IEC 60534-8) and a
+#: different reader from the fan-to-room duct chain and the elements it calls.
+#: Those two carve out.
+#:
 #: In both, the leaf names are guide filenames and the label mirrors the
 #: heading. The carved-out shard has no page of its own, so its Overview link
 #: still resolves to the parent folder (see _shard_folders and _shard_label
@@ -348,6 +353,11 @@ MANUAL_SPLITS: dict[str, tuple[str, str, tuple[str, ...]]] = {
         "devices-emission-intensity",
         "Sound intensity and sound power from it",
         ("intensity", "sound-power-intensity"),
+    ),
+    "devices/noise-control": (
+        "devices-noise-control-valves",
+        "Control valve noise (IEC 60534-8)",
+        ("control-valve-noise", "valve-cavitation"),
     ),
     "buildings/rooms": (
         "buildings-rooms-auditorium",

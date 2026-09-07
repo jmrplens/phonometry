@@ -88,11 +88,16 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
+    "CIRCULAR_CUT_ON_COEFFICIENT",
+    "DENSITY_RATIO_RANGE",
     "ISO11691_REPRODUCIBILITY",
+    "ISO7235_ABSOLUTE_ZERO_OFFSET",
     "ISO7235_COVERAGE_FACTOR",
+    "ISO7235_GAS_CONSTANT",
     "ISO7235_REPRODUCIBILITY",
     "ISO7235_SPREAD_LIMITS",
-    "CIRCULAR_CUT_ON_COEFFICIENT",
+    "MINIMUM_FLOW_RATES",
+    "MINIMUM_PRESSURE_DIFFERENCE_PA",
     "MODAL_FILTER_ATTENUATION_DB",
     "RADIATION_SOLID_ANGLES",
     "RECTANGULAR_CUT_ON_COEFFICIENT",
@@ -101,6 +106,11 @@ __all__ = [
     "SURVEY_DIAMETER_RANGE_M",
     "SURVEY_MAX_VELOCITY_M_S",
     "SilencerMeasurementWarning",
+    "UPSTREAM_STRAIGHT_DIAMETERS",
+    "UPSTREAM_STRAIGHT_MIN_M",
+    "VELOCITY_PROFILE_TOLERANCE_PERCENT",
+    "average_pressure_loss_coefficient",
+    "dynamic_pressure",
     "flow_noise_power_level",
     "measured_transmission_loss",
     "measurement_expanded_uncertainty",
@@ -108,12 +118,18 @@ __all__ = [
     "microphone_positions_required",
     "microphone_spread_limit",
     "modal_filter_cut_on",
+    "normal_air_density",
     "octave_insertion_loss",
     "open_end_reflection_coefficient",
     "open_end_transmission_loss",
+    "pressure_loss_coefficient",
     "substitution_area_ratio",
     "substitution_insertion_loss",
     "survey_reproducibility",
+    "total_pressure",
+    "total_pressure_loss",
+    "upstream_straight_length",
+    "volume_flow_rate",
 ]
 
 #: ISO 11691:1995, 4.5. The cross-sectional area of the test duct divided by
@@ -233,6 +249,46 @@ RECTANGULAR_CUT_ON_COEFFICIENT = 0.5
 #: takes a ``sound_speed`` argument.
 _SOUND_SPEED_M_S = 343.0
 
+#: ISO 7235:2003, Equation (10). The specific gas constant of air as the
+#: standard prints it, in N·m/(kg·K). The accurate value for dry air is
+#: 287,05; the printed 287 is 0,017 % low, which with the temperature offset
+#: scales a pressure loss coefficient by 0,069 % rather than shifting it.
+ISO7235_GAS_CONSTANT = 287.0
+
+#: ISO 7235:2003, Equations (10), (21) and (22). The offset the standard adds
+#: to a Celsius temperature to get an absolute one, in degrees. It prints 273
+#: rather than 273,15, which puts a density 0,051 % high at 20 °C; the value
+#: is kept as printed so that a result can be reproduced as the standard
+#: gives it.
+ISO7235_ABSOLUTE_ZERO_OFFSET = 273.0
+
+#: ISO 7235:2003, 6.5.2.1. The window the density ratio between the flow
+#: meter and the test object may sit in before Equation (9) has to replace
+#: Equation (8): outside it the meter is not measuring the flow the test
+#: object sees.
+DENSITY_RATIO_RANGE: tuple[float, float] = (0.98, 1.02)
+
+#: ISO 7235:2003, 6.5.2.1. The pressure difference, in Pa, the lowest of the
+#: airflow rates has to exceed, so that the smallest number in the fit is
+#: still a measurement.
+MINIMUM_PRESSURE_DIFFERENCE_PA = 10.0
+
+#: ISO 7235:2003, 6.5.2.1 and 6.5.2.2.1. How many airflow rates each series
+#: is measured at, spread evenly over the test range.
+MINIMUM_FLOW_RATES = 5
+
+#: ISO 7235:2003, 6.5.2.2.1. The upstream test duct is straight for at least
+#: this many equivalent diameters, or the length below, whichever is greater.
+UPSTREAM_STRAIGHT_DIAMETERS = 5.0
+
+#: ISO 7235:2003, 6.5.2.2.1. The floor on that straight length, in m.
+UPSTREAM_STRAIGHT_MIN_M = 2.0
+
+#: ISO 7235:2003, 6.5.2.2.1. How uniform the velocity profile has to be near
+#: the upstream connection, as a percentage of the mean over the cross
+#: section, excluding the 15 mm nearest the walls.
+VELOCITY_PROFILE_TOLERANCE_PERCENT = 10.0
+
 _THIRDS_PER_OCTAVE = 3
 
 
@@ -245,6 +301,25 @@ class SilencerMeasurementWarning(PhonometryWarning):
     measure over. The arithmetic still runs, because a laboratory may report
     such a value as long as it says so.
     """
+
+
+def _require_finite_scalar(value: float, name: str) -> float:
+    """One finite number, and not the first of several.
+
+    ``require_finite_array`` accepts a scalar and a sequence alike, and
+    taking ``[0]`` of the result reads the first element of a sequence and
+    drops the rest without a word. A static pressure or a temperature is one
+    measurement in one plane, so a sequence is a mistake and is said to be
+    one.
+    """
+    values = require_finite_array(value, name)
+    if values.size != 1:
+        msg = (
+            f"'{name}' is one measurement in one plane, so one number is "
+            f"expected; got {values.size}."
+        )
+        raise ValueError(msg)
+    return float(values[0])
 
 
 def _require_matching_bands(
@@ -791,3 +866,319 @@ def modal_filter_cut_on(
         f"'larger_dimension' is expected; got {given or 'neither'}."
     )
     raise ValueError(msg)
+
+
+def normal_air_density(
+    static_gauge_pressure: float,
+    ambient_pressure: float,
+    temperature_celsius: float,
+) -> float:
+    r"""ISO 7235 Equations (10), (21) and (22): the density where it matters.
+
+    .. math::
+
+       \rho_{1n} = \frac{1}{R}\,
+                   \frac{p_{s1} + p_a}{\theta_1 + 273\ ^\circ\mathrm{C}}
+
+    The ideal gas law with the standard's own numbers. The static pressure in
+    the duct is measured as a **gauge** pressure against the ambient, so the
+    two are added to get the absolute pressure the gas law wants, and the
+    temperature is the one in the plane the pressure was measured in.
+
+    Three equations print this: (10) for the normalised flow rate of (9),
+    and (21) and (22) for the two series of the computational route of
+    6.5.2.2.3. They differ only in which measurement they are given.
+
+    Both printed constants are a little off the accurate figures. The offset
+    273 rather than 273,15 puts the density 0,051 % high at 20 °C, and
+    :math:`R = 287` rather than 287,05 adds 0,017 % to that, for 0,069 % in
+    all. It does not cancel out of the pressure loss coefficient: the same
+    density is in the dynamic pressure of both series, so the whole
+    coefficient is scaled by that one factor rather than shifted, which
+    leaves it 0,069 % low. That is far under the uncertainty of a
+    pressure-loss test, and using the printed constants is what reproduces a
+    result computed to the standard, which is why
+    :data:`ISO7235_ABSOLUTE_ZERO_OFFSET` and :data:`ISO7235_GAS_CONSTANT`
+    carry them as printed.
+
+    :param static_gauge_pressure: :math:`p_{s1}`, the duct static pressure
+        relative to the ambient, in Pa.
+    :param ambient_pressure: :math:`p_a`, the absolute ambient pressure, in
+        Pa.
+    :param temperature_celsius: :math:`\theta_1`, in °C.
+    :return: :math:`\rho_{1n}`, in kg/m³.
+    :raises ValueError: If the ambient pressure is not positive and finite,
+        if the gauge pressure is not finite, if the absolute pressure they
+        make is not positive, or if the temperature is at or below the
+        printed absolute zero.
+    """
+    ambient = require_positive(ambient_pressure, "ambient_pressure")
+    gauge = _require_finite_scalar(static_gauge_pressure, "static_gauge_pressure")
+    celsius = _require_finite_scalar(temperature_celsius, "temperature_celsius")
+    absolute = gauge + ambient
+    if absolute <= 0.0:
+        msg = (
+            "'static_gauge_pressure' is measured against the ambient, so the "
+            "two add to the absolute pressure of the gas law, which has to "
+            f"be positive; got {static_gauge_pressure!r} Pa against "
+            f"{ambient_pressure!r} Pa."
+        )
+        raise ValueError(msg)
+    kelvin = celsius + ISO7235_ABSOLUTE_ZERO_OFFSET
+    if kelvin <= 0.0:
+        msg = (
+            "Equation (10) divides by the absolute temperature, which "
+            f"ISO 7235 writes as theta + {ISO7235_ABSOLUTE_ZERO_OFFSET:.0f} "
+            f"degrees Celsius; got {temperature_celsius!r} °C."
+        )
+        raise ValueError(msg)
+    return float(absolute / (ISO7235_GAS_CONSTANT * kelvin))
+
+
+def volume_flow_rate(mass_flow: float, density: float) -> float:
+    r"""ISO 7235 Equations (8) and (9): mass flow into volume flow.
+
+    .. math::
+
+       q_V = \frac{q_m}{\rho_1}
+       \qquad\text{or}\qquad
+       q_V = \frac{q_m}{\rho_{1n}}
+
+    The two printings are one division and differ only in which density goes
+    in. Equation (8) uses the density upstream of the test object. Equation
+    (9) uses the normalised density of Equation (10), and 6.5.2.1 says when:
+    if the flow meter and the test object are far enough apart in temperature
+    or static pressure that their density ratio leaves 0,98 to 1,02, the
+    meter is no longer measuring the flow the test object sees.
+    :data:`DENSITY_RATIO_RANGE` carries that window.
+
+    :param mass_flow: :math:`q_m`, in kg/s.
+    :param density: :math:`\rho_1` or :math:`\rho_{1n}`, in kg/m³.
+    :return: :math:`q_V`, in m³/s.
+    :raises ValueError: If a value is not positive and finite.
+    """
+    flow = require_positive(mass_flow, "mass_flow")
+    rho = require_positive(density, "density")
+    return float(flow / rho)
+
+
+def dynamic_pressure(volume_flow: float, area: float, density: float) -> float:
+    r"""ISO 7235 Equations (13), (16), (19) and (20): the velocity head.
+
+    .. math::
+
+       p_\mathrm{d} = \frac{\rho}{2}\left(\frac{q_V}{S}\right)^{2}
+
+    One equation printed four times, once for each place the pressure loss
+    coefficient needs it: the inlet of the simplified method (13), the chosen
+    mid-range point of the fundamental method (16), and the two series of the
+    computational route (19) and (20). The group :math:`q_V / S` is the face
+    velocity, so this is :math:`\rho v^2 / 2` with the velocity written the
+    way a flow meter reports it.
+
+    :param volume_flow: :math:`q_V`, in m³/s.
+    :param area: :math:`S`, the cross-sectional area the flow passes, in m².
+    :param density: :math:`\rho`, in kg/m³.
+    :return: :math:`p_\mathrm{d}`, in Pa.
+    :raises ValueError: If a value is not positive and finite.
+    """
+    flow = require_positive(volume_flow, "volume_flow")
+    section = require_positive(area, "area")
+    rho = require_positive(density, "density")
+    return float(0.5 * rho * (flow / section) ** 2)
+
+
+def total_pressure(
+    static_pressure: float, volume_flow: float, area: float, density: float
+) -> float:
+    r"""ISO 7235 Equation (11): static plus dynamic, in one plane.
+
+    .. math::
+
+       p_\mathrm{t} = p_\mathrm{s} + \frac{\rho}{2}
+                      \left(\frac{q_V}{S}\right)^{2}
+
+    :param static_pressure: :math:`p_\mathrm{s}`, in Pa, in the same
+        reference as the answer is wanted in.
+    :param volume_flow: :math:`q_V`, in m³/s.
+    :param area: :math:`S`, in m².
+    :param density: :math:`\rho`, in kg/m³.
+    :return: :math:`p_\mathrm{t}`, in Pa.
+    :raises ValueError: If the static pressure is not finite, or if another
+        value is not positive and finite.
+    """
+    static = _require_finite_scalar(static_pressure, "static_pressure")
+    return static + dynamic_pressure(volume_flow, area, density)
+
+
+def total_pressure_loss(
+    static_pressure_loss: float,
+    inlet_dynamic_pressure: float,
+    inlet_area: float,
+    outlet_area: float,
+) -> float:
+    r"""ISO 7235 Equation (12): the total pressure loss across the object.
+
+    .. math::
+
+       \Delta p_\mathrm{t} = \Delta p_\mathrm{s}
+           + p_\mathrm{d1}\left[1 - \left(\frac{S_1}{S_2}\right)^2\right]
+
+    Measuring static pressures on both sides is not enough when the two sides
+    are different sizes: an object that widens the duct converts velocity
+    head back into static pressure, and a static-pressure difference alone
+    would credit it with a recovery that is only bookkeeping. The bracket is
+    that correction, and the NOTE to Equation (14) says what usually happens
+    to it: as a rule :math:`S_1 = S_2`, and it vanishes.
+
+    :param static_pressure_loss: :math:`\Delta p_\mathrm{s}`, in Pa.
+    :param inlet_dynamic_pressure: :math:`p_\mathrm{d1}` from
+        :func:`dynamic_pressure` at the inlet, in Pa.
+    :param inlet_area: :math:`S_1`, the inlet test duct, in m².
+    :param outlet_area: :math:`S_2`, the outlet test duct, in m².
+    :return: :math:`\Delta p_\mathrm{t}`, in Pa.
+    :raises ValueError: If the static loss is not finite, or if another value
+        is not positive and finite.
+    """
+    static = _require_finite_scalar(static_pressure_loss, "static_pressure_loss")
+    head = require_positive(inlet_dynamic_pressure, "inlet_dynamic_pressure")
+    first = require_positive(inlet_area, "inlet_area")
+    second = require_positive(outlet_area, "outlet_area")
+    return float(static + head * (1.0 - (first / second) ** 2))
+
+
+def pressure_loss_coefficient(
+    total_loss: float, inlet_dynamic_pressure: float
+) -> float:
+    r"""ISO 7235 Equations (14) and (17): the loss in velocity heads.
+
+    .. math::
+
+       \zeta = \frac{\Delta p_\mathrm{t}}{p_\mathrm{d1}}
+
+    A pressure loss on its own says nothing without the flow it was measured
+    at, because it grows as the square of the velocity. Dividing by the
+    velocity head of Equation (13) takes that out and leaves a number that
+    belongs to the object: how many velocity heads it costs to push air
+    through it. Equation (17) is the same division with the mid-range point
+    of the fundamental method, :math:`\Delta p_{tot,n} / p_{dn}`.
+
+    :param total_loss: :math:`\Delta p_\mathrm{t}` or
+        :math:`\Delta p_{tot,n}`, in Pa.
+    :param inlet_dynamic_pressure: :math:`p_\mathrm{d1}` or
+        :math:`p_\mathrm{dn}`, in Pa.
+    :return: :math:`\zeta`, dimensionless.
+    :raises ValueError: If the loss is not finite, or if the dynamic pressure
+        is not positive and finite.
+    :warns SilencerMeasurementWarning: If the loss does not exceed the 10 Pa
+        6.5.2.1 asks even the lowest airflow rate of a series to produce.
+        The clause reads *greater than*, so a point sitting exactly on 10 Pa
+        is one the series may not be built from and warns like any below it.
+    """
+    loss = _require_finite_scalar(total_loss, "total_loss")
+    head = require_positive(inlet_dynamic_pressure, "inlet_dynamic_pressure")
+    if abs(loss) <= MINIMUM_PRESSURE_DIFFERENCE_PA:
+        msg = (
+            "6.5.2.1 wants the lowest airflow rate of a series to produce a "
+            f"pressure difference greater than {MINIMUM_PRESSURE_DIFFERENCE_PA:.0f} "
+            f"Pa, so that the smallest number in the fit is still a "
+            f"measurement; this point is {loss!r} Pa."
+        )
+        warnings.warn(msg, SilencerMeasurementWarning, stacklevel=2)
+    return float(loss / head)
+
+
+def average_pressure_loss_coefficient(
+    object_static_pressure: ArrayLike,
+    object_dynamic_pressure: ArrayLike,
+    substitution_static_pressure: ArrayLike,
+    substitution_dynamic_pressure: ArrayLike,
+) -> float:
+    r"""ISO 7235 Equation (18): the substitution method, averaged.
+
+    .. math::
+
+       \zeta = \frac{1}{N}\sum_{i=1}^{N}
+                 \frac{p_{s1(\mathrm{I})i}}{p_{\mathrm{d}i}}
+             - \frac{1}{M}\sum_{k=1}^{M}
+                 \frac{p_{s1(\mathrm{II})k}}{p_{\mathrm{d}k}}
+
+    The fundamental method of 6.5.2.2 is a substitution measurement like the
+    acoustic one: run the rig with the test object and again with the
+    substitution duct, and the difference belongs to the object. The
+    computational route of 6.5.2.2.3 does it on the coefficients rather than
+    on the pressures, so the two series need not be run at matching flow
+    rates and need not even have the same number of points.
+
+    Each series is at least five airflow rates spread over the test range,
+    and the lowest has to produce more than
+    :data:`MINIMUM_PRESSURE_DIFFERENCE_PA`.
+
+    :param object_static_pressure: :math:`p_{s1(\mathrm{I})i}`, the upstream
+        static pressures of the series with the test object, in Pa.
+    :param object_dynamic_pressure: :math:`p_{\mathrm{d}i}` of that series,
+        in Pa, from :func:`dynamic_pressure`.
+    :param substitution_static_pressure: :math:`p_{s1(\mathrm{II})k}` of the
+        series with the substitution duct, in Pa.
+    :param substitution_dynamic_pressure: :math:`p_{\mathrm{d}k}` of that
+        series, in Pa.
+    :return: :math:`\zeta`, dimensionless.
+    :raises ValueError: If a value is not finite, if a dynamic pressure is
+        not positive, or if a series' two arrays are of different lengths.
+    :warns SilencerMeasurementWarning: If either series has fewer points than
+        the five 6.5.2.2.1 asks for.
+    """
+    first = require_finite_array(object_static_pressure, "object_static_pressure")
+    first_head = require_positive_array(
+        object_dynamic_pressure, "object_dynamic_pressure"
+    )
+    second = require_finite_array(
+        substitution_static_pressure, "substitution_static_pressure"
+    )
+    second_head = require_positive_array(
+        substitution_dynamic_pressure, "substitution_dynamic_pressure"
+    )
+    _require_matching_bands(
+        {
+            "object_static_pressure": first.size,
+            "object_dynamic_pressure": first_head.size,
+        }
+    )
+    _require_matching_bands(
+        {
+            "substitution_static_pressure": second.size,
+            "substitution_dynamic_pressure": second_head.size,
+        }
+    )
+    for name, size in (("test object", first.size), ("substitution duct", second.size)):
+        if size < MINIMUM_FLOW_RATES:
+            msg = (
+                f"6.5.2.2.1 asks for at least {MINIMUM_FLOW_RATES} airflow "
+                f"rates in each series; the {name} series has {size}, so the "
+                "average is over fewer points than the standard allows for."
+            )
+            warnings.warn(msg, SilencerMeasurementWarning, stacklevel=2)
+    return float(np.mean(first / first_head) - np.mean(second / second_head))
+
+
+def upstream_straight_length(area: float) -> float:
+    r"""ISO 7235 6.5.2.2.1: how much straight duct the flow needs first.
+
+    The upstream test duct is straight for at least :math:`5 d_e` or 2 m,
+    whichever is greater, where :math:`d_e = \sqrt{4S/\pi}` is the equivalent
+    diameter. Below about 0,126 m² the 2 m floor is what binds; above it the
+    five diameters are.
+
+    The length is there so the velocity profile has settled by the time it
+    reaches the test object: 6.5.2.2.1 wants it uniform to ±10 % of the mean
+    over the cross section, excluding the 15 mm nearest the walls, surveyed
+    at ten points along each of two perpendicular axes about
+    :math:`1{,}5 d_e` upstream.
+
+    :param area: :math:`S`, the cross-sectional area of the duct, in m².
+    :return: The straight length required, in m.
+    :raises ValueError: If the area is not positive and finite.
+    """
+    section = require_positive(area, "area")
+    equivalent = math.sqrt(4.0 * section / math.pi)
+    return float(max(UPSTREAM_STRAIGHT_DIAMETERS * equivalent, UPSTREAM_STRAIGHT_MIN_M))

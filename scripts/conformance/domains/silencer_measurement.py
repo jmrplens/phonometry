@@ -420,3 +420,141 @@ def _chk_measured_transmission_loss() -> Outcome:
         "2000 Hz gap": round(float(found[-1] - insertion[-1]), 6),
     }
     return record(expected, computed, unit="dB")
+
+
+@register(_ISO7235, "ISO 7235:2003", "Normal air density (Eqs. (10), (21), (22))")
+def _chk_normal_air_density() -> Outcome:
+    """The gas law with the standard's own two constants.
+
+    ISO 7235 prints ``R = 287 N.m/(kg.K)`` and writes the absolute
+    temperature as ``theta + 273 degC``. Neither is the accurate figure
+    (287,05 and 273,15): the offset alone puts a density 0,051 % high at
+    20 °C and the gas constant adds 0,017 % to that. The row pins the printed
+    arithmetic, which is what reproduces a result computed to the standard.
+    The error does not cancel where the density is used, it scales: the same
+    value is in the dynamic pressure of both test series, so the pressure
+    loss coefficient of Equation (18) comes out 0,069 % low rather than
+    displaced, which is far under the uncertainty of the test.
+    """
+    found = ph.noise_control.normal_air_density(200.0, 101325.0, 20.0)
+    printed = (101325.0 + 200.0) / (287.0 * (20.0 + 273.0))
+    return numeric(
+        printed,
+        found,
+        1e-12,
+        unit="kg/m3",
+        places=6,
+        expected_label="(101 325 + 200) / (287 x 293) = 1,207323 kg/m³",
+    )
+
+
+@register(
+    _ISO7235, "ISO 7235:2003", "Total pressure loss across unequal ducts (Eq. (12))"
+)
+def _chk_total_pressure_loss() -> Outcome:
+    """The bracket that keeps an area change out of the answer.
+
+    An object that widens the duct turns velocity head back into static
+    pressure, and a static-pressure difference alone would credit it with a
+    recovery that is only bookkeeping. Equation (12) adds
+    ``p_d1 [1 - (S_1/S_2)^2]`` back. The row checks the three cases the
+    bracket has: equal ducts, where it vanishes as the NOTE to Equation (14)
+    says it usually does; twice the outlet area, where it returns three
+    quarters of the inlet velocity head; and half of it, where it takes three
+    whole heads away.
+    """
+    head = ph.noise_control.dynamic_pressure(1.0, 0.0962, 1.2)
+    expected = {
+        "S_2 = S_1": 45.0,
+        "S_2 = 2 S_1": 45.0 + 0.75 * head,
+        "S_2 = S_1 / 2": 45.0 - 3.0 * head,
+    }
+    computed = {
+        "S_2 = S_1": ph.noise_control.total_pressure_loss(45.0, head, 0.0962, 0.0962),
+        "S_2 = 2 S_1": ph.noise_control.total_pressure_loss(
+            45.0, head, 0.0962, 2.0 * 0.0962
+        ),
+        "S_2 = S_1 / 2": ph.noise_control.total_pressure_loss(
+            45.0, head, 0.0962, 0.5 * 0.0962
+        ),
+    }
+    return record(expected, computed, unit="Pa")
+
+
+@register(
+    _ISO7235, "ISO 7235:2003", "Pressure loss coefficient is flow invariant (Eq. (14))"
+)
+def _chk_pressure_loss_coefficient() -> Outcome:
+    """The coefficient belongs to the object, not to the test point.
+
+    A total pressure loss grows as the square of the velocity, and so does
+    the velocity head Equation (14) divides it by, so the ratio is the same
+    number at every flow rate the loss scales that way at. That is what makes
+    the coefficient reportable at all, and it is the algebra this row pins: a
+    loss four times larger at twice the flow gives one value. Real flow is
+    only approximately similar, because twice the rate is twice the Reynolds
+    number, which is why 6.5.2 measures at five rates and averages rather
+    than trusting one.
+    """
+    slow = ph.noise_control.pressure_loss_coefficient(
+        45.0, ph.noise_control.dynamic_pressure(1.0, 0.1, 1.2)
+    )
+    fast = ph.noise_control.pressure_loss_coefficient(
+        4.0 * 45.0, ph.noise_control.dynamic_pressure(2.0, 0.1, 1.2)
+    )
+    return numeric(
+        slow,
+        fast,
+        1e-12,
+        places=6,
+        expected_label=f"zeta = {slow:.6f} at 1 m³/s",
+        computed_label=f"{fast:.6f} at 2 m³/s",
+    )
+
+
+@register(_ISO7235, "ISO 7235:2003", "Averaged pressure loss coefficient (Eq. (18))")
+def _chk_average_pressure_loss_coefficient() -> Outcome:
+    """The computational route of 6.5.2.2.3, which is a substitution too.
+
+    Equation (18) averages the coefficients rather than the pressures, so the
+    two series need share neither their flow rates nor their point count.
+    The row runs a test object at 2,5 velocity heads against a substitution
+    duct at 0,4, over five points and six points at different flow rates, and
+    the difference has to come back as exactly 2,1.
+    """
+    first = np.array([20.0, 40.0, 60.0, 80.0, 100.0])
+    second = np.array([25.0, 50.0, 75.0, 100.0, 125.0, 150.0])
+    found = ph.noise_control.average_pressure_loss_coefficient(
+        2.5 * first, first, 0.4 * second, second
+    )
+    return numeric(
+        2.1,
+        found,
+        1e-12,
+        places=6,
+        expected_label="2,5 - 0,4 = 2,100000",
+    )
+
+
+@register(_ISO7235, "ISO 7235:2003", "Upstream straight length (6.5.2.2.1)")
+def _chk_upstream_length() -> Outcome:
+    """Five equivalent diameters or two metres, whichever is greater.
+
+    The two rules cross at the duct whose five diameters are exactly two
+    metres, which is an equivalent diameter of 0,4 m and an area of
+    0,1257 m². Below it the floor binds and above it the diameters do, and
+    the row checks a duct on each side of the crossing as well as the
+    crossing itself.
+    """
+    crossing = math.pi * (2.0 / 5.0) ** 2 / 4.0
+    expected = {
+        "S = 0,0962 m² (350 mm)": 2.0,
+        "S = 0,1257 m² (400 mm)": 2.0,
+        "S = 0,5 m²": 5.0 * math.sqrt(4.0 * 0.5 / math.pi),
+    }
+    computed = {
+        "S = 0,0962 m² (350 mm)": ph.noise_control.upstream_straight_length(0.0962),
+        "S = 0,1257 m² (400 mm)": ph.noise_control.upstream_straight_length(crossing),
+        "S = 0,5 m²": ph.noise_control.upstream_straight_length(0.5),
+    }
+    return record(expected, computed, unit="m")

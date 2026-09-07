@@ -500,3 +500,195 @@ class TestModalFilterCutOn:
     def test_a_dimension_that_is_not_positive_is_refused(self, bad: float) -> None:
         with pytest.raises(ValueError, match="diameter"):
             sm.modal_filter_cut_on(diameter=bad)
+
+
+class TestFlowQuantities:
+    """ISO 7235 6.5, Equations (8) to (13) and (16)."""
+
+    def test_the_gas_law_with_the_printed_constants(self) -> None:
+        # (101 325 + 200) / (287 x 293) = 1,2073 kg/m3.
+        found = sm.normal_air_density(200.0, 101325.0, 20.0)
+        assert found == pytest.approx(101525.0 / (287.0 * 293.0))
+
+    def test_the_gauge_pressure_may_be_negative(self) -> None:
+        # A duct on the suction side of a fan sits below the ambient.
+        found = sm.normal_air_density(-300.0, 101325.0, 20.0)
+        assert found == pytest.approx(101025.0 / (287.0 * 293.0))
+
+    def test_the_printed_offset_is_two_hundred_and_seventy_three(self) -> None:
+        # Not 273,15, and the gas constant is 287 and not 287,05. Together
+        # they put the density 0,069 % high at 20 degrees, and both cancel in
+        # the pressure loss coefficient because the same density is in the
+        # dynamic pressure of each series.
+        assert sm.ISO7235_ABSOLUTE_ZERO_OFFSET == pytest.approx(273.0)
+        assert sm.ISO7235_GAS_CONSTANT == pytest.approx(287.0)
+        exact = 101525.0 / (287.05 * 293.15)
+        printed = sm.normal_air_density(200.0, 101325.0, 20.0)
+        assert printed / exact == pytest.approx(1.000686, abs=5e-6)
+
+    def test_an_absolute_pressure_that_is_not_positive_is_refused(self) -> None:
+        with pytest.raises(ValueError, match="absolute pressure"):
+            sm.normal_air_density(-101325.0, 101325.0, 20.0)
+
+    def test_a_temperature_below_the_printed_absolute_zero_is_refused(self) -> None:
+        with pytest.raises(ValueError, match="absolute temperature"):
+            sm.normal_air_density(200.0, 101325.0, -273.0)
+
+    def test_the_volume_flow_is_the_mass_flow_over_the_density(self) -> None:
+        assert sm.volume_flow_rate(1.2, 1.2) == pytest.approx(1.0)
+
+    def test_the_density_window_the_correction_starts_at(self) -> None:
+        assert sm.DENSITY_RATIO_RANGE == (0.98, 1.02)
+
+    def test_the_dynamic_pressure_is_half_rho_v_squared(self) -> None:
+        # 1 m3/s through 0,0962 m2 is 10,395 m/s, and 1,2 kg/m3 makes that
+        # 64,83 Pa.
+        found = sm.dynamic_pressure(1.0, 0.0962, 1.2)
+        assert found == pytest.approx(0.5 * 1.2 * (1.0 / 0.0962) ** 2)
+
+    def test_the_dynamic_pressure_grows_as_the_square_of_the_flow(self) -> None:
+        single = sm.dynamic_pressure(1.0, 0.0962, 1.2)
+        double = sm.dynamic_pressure(2.0, 0.0962, 1.2)
+        assert double / single == pytest.approx(4.0)
+
+    def test_the_total_pressure_is_static_plus_dynamic(self) -> None:
+        head = sm.dynamic_pressure(1.0, 0.0962, 1.2)
+        assert sm.total_pressure(200.0, 1.0, 0.0962, 1.2) == pytest.approx(200.0 + head)
+
+    @pytest.mark.parametrize("bad", [0.0, -0.1])
+    def test_an_area_that_is_not_positive_is_refused_here_too(self, bad: float) -> None:
+        with pytest.raises(ValueError, match="area"):
+            sm.dynamic_pressure(1.0, bad, 1.2)
+
+    def test_a_pressure_measured_in_one_plane_is_one_number(self) -> None:
+        # Taking the first element of a sequence and dropping the rest is
+        # how a run of five test points quietly becomes one.
+        with pytest.raises(ValueError, match="one number"):
+            sm.total_pressure([200.0, 300.0], 1.0, 0.0962, 1.2)
+
+    def test_a_temperature_measured_in_one_plane_is_one_number_too(self) -> None:
+        with pytest.raises(ValueError, match="one number"):
+            sm.normal_air_density(200.0, 101325.0, [20.0, 21.0])
+
+
+class TestPressureLossCoefficient:
+    """ISO 7235 Equations (12), (14), (17) and (18)."""
+
+    def test_equal_ducts_leave_the_static_loss_alone(self) -> None:
+        # The NOTE to Equation (14): as a rule S_1 = S_2, and the bracket of
+        # Equation (12) vanishes.
+        head = sm.dynamic_pressure(1.0, 0.0962, 1.2)
+        found = sm.total_pressure_loss(45.0, head, 0.0962, 0.0962)
+        assert found == pytest.approx(45.0)
+
+    def test_a_widening_object_is_not_credited_with_the_recovery(self) -> None:
+        # Doubling the outlet area turns three quarters of the inlet velocity
+        # head into static pressure, and Equation (12) adds it back so the
+        # object is not paid for bookkeeping.
+        head = sm.dynamic_pressure(1.0, 0.0962, 1.2)
+        found = sm.total_pressure_loss(45.0, head, 0.0962, 2.0 * 0.0962)
+        assert found == pytest.approx(45.0 + 0.75 * head)
+
+    def test_a_narrowing_object_pays_for_the_speed_it_adds(self) -> None:
+        head = sm.dynamic_pressure(1.0, 0.0962, 1.2)
+        found = sm.total_pressure_loss(45.0, head, 0.0962, 0.5 * 0.0962)
+        assert found == pytest.approx(45.0 - 3.0 * head)
+
+    def test_the_coefficient_is_the_loss_in_velocity_heads(self) -> None:
+        head = sm.dynamic_pressure(1.0, 0.0962, 1.2)
+        assert sm.pressure_loss_coefficient(45.0, head) == pytest.approx(45.0 / head)
+
+    def test_the_coefficient_does_not_move_with_the_flow_rate(self) -> None:
+        # A loss that grows as the square of the velocity divided by a head
+        # that does the same is a property of the object.
+        first = sm.pressure_loss_coefficient(45.0, sm.dynamic_pressure(1.0, 0.1, 1.2))
+        second = sm.pressure_loss_coefficient(
+            4.0 * 45.0, sm.dynamic_pressure(2.0, 0.1, 1.2)
+        )
+        assert first == pytest.approx(second)
+
+    def test_the_substitution_average_of_equation_eighteen(self) -> None:
+        heads = np.array([20.0, 40.0, 60.0, 80.0, 100.0])
+        with_object = 2.5 * heads
+        without = 0.4 * heads
+        found = sm.average_pressure_loss_coefficient(with_object, heads, without, heads)
+        assert found == pytest.approx(2.1)
+
+    def test_the_two_series_need_not_be_the_same_length(self) -> None:
+        # 6.5.2.2.3 averages the coefficients, not the pressures, so the two
+        # series need not share their flow rates or their point count.
+        first_head = np.array([20.0, 40.0, 60.0, 80.0, 100.0])
+        second_head = np.array([25.0, 50.0, 75.0, 100.0, 125.0, 150.0])
+        found = sm.average_pressure_loss_coefficient(
+            2.5 * first_head, first_head, 0.4 * second_head, second_head
+        )
+        assert found == pytest.approx(2.1)
+
+    def test_a_series_shorter_than_five_points_warns(self) -> None:
+        heads = np.array([20.0, 40.0, 60.0])
+        with pytest.warns(sm.SilencerMeasurementWarning, match="airflow rates"):
+            sm.average_pressure_loss_coefficient(2.5 * heads, heads, 0.4 * heads, heads)
+
+    def test_a_series_whose_two_arrays_disagree_is_refused(self) -> None:
+        heads = np.array([20.0, 40.0, 60.0, 80.0, 100.0])
+        with pytest.raises(ValueError, match="one length"):
+            sm.average_pressure_loss_coefficient(
+                np.array([1.0, 2.0]), heads, 0.4 * heads, heads
+            )
+
+    def test_the_five_rates_and_the_ten_pascals(self) -> None:
+        assert sm.MINIMUM_FLOW_RATES == 5
+        assert sm.MINIMUM_PRESSURE_DIFFERENCE_PA == pytest.approx(10.0)
+
+    def test_a_point_below_ten_pascals_warns(self) -> None:
+        # 6.5.2.1 wants even the lowest airflow rate of a series to produce
+        # more than 10 Pa, so that the smallest number in the fit is still a
+        # measurement rather than the resolution of the manometer.
+        with pytest.warns(sm.SilencerMeasurementWarning, match="10 Pa"):
+            sm.pressure_loss_coefficient(6.0, 64.0)
+
+    def test_a_point_exactly_on_ten_pascals_warns(self) -> None:
+        # The clause reads "greater than 10 Pa", so the boundary itself is
+        # outside what it allows and cannot be the lowest rate of a series.
+        with pytest.warns(sm.SilencerMeasurementWarning, match="10 Pa"):
+            sm.pressure_loss_coefficient(sm.MINIMUM_PRESSURE_DIFFERENCE_PA, 64.0)
+
+    def test_a_point_just_above_ten_pascals_is_quiet(self) -> None:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            found = sm.pressure_loss_coefficient(10.5, 64.0)
+        assert found == pytest.approx(10.5 / 64.0)
+
+    def test_a_point_above_ten_pascals_is_quiet(self) -> None:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            found = sm.pressure_loss_coefficient(45.0, 64.0)
+        assert found == pytest.approx(45.0 / 64.0)
+
+    def test_a_loss_that_is_a_vector_is_refused(self) -> None:
+        with pytest.raises(ValueError, match="one number"):
+            sm.pressure_loss_coefficient([45.0, 50.0], 64.0)
+
+
+class TestUpstreamStraightLength:
+    """ISO 7235 6.5.2.2.1, the settling length before the test object."""
+
+    def test_a_small_duct_takes_the_two_metre_floor(self) -> None:
+        # A 350 mm duct is 1,75 m of five diameters, so the floor binds.
+        assert sm.upstream_straight_length(0.0962) == pytest.approx(2.0)
+
+    def test_a_large_duct_takes_five_equivalent_diameters(self) -> None:
+        equivalent = math.sqrt(4.0 * 0.5 / math.pi)
+        assert sm.upstream_straight_length(0.5) == pytest.approx(5.0 * equivalent)
+
+    def test_the_two_rules_cross_where_five_diameters_reach_two_metres(self) -> None:
+        area = math.pi * (2.0 / 5.0) ** 2 / 4.0
+        assert sm.upstream_straight_length(area) == pytest.approx(2.0)
+
+    def test_the_published_profile_tolerance(self) -> None:
+        assert sm.VELOCITY_PROFILE_TOLERANCE_PERCENT == pytest.approx(10.0)
+
+    @pytest.mark.parametrize("bad", [0.0, -0.5])
+    def test_an_area_that_is_not_positive_is_refused(self, bad: float) -> None:
+        with pytest.raises(ValueError, match="area"):
+            sm.upstream_straight_length(bad)

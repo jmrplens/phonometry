@@ -530,6 +530,10 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2 e ISO 8041-1.
 - [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/vibration/structural/transfer-stiffness/):
   la rigidez dinámica de transferencia y el factor de pérdidas de un aislador por
   los métodos directo e indirecto.
+- [Daños en estructuras por vibración (DIN 4150-3)](/phonometry/es/vibration/structural/structural-damage/):
+  las velocidades de pico de referencia con las que se juzgan un cimiento, el
+  plano de la última planta y una tubería enterrada, y la tensión de flexión que
+  implica una velocidad.
 - [Potencia acústica a partir de la vibración (ISO/TS 7849)](/phonometry/es/devices/emission/vibration-sound-power/):
   la potencia radiada a partir del nivel de velocidad promediado en la superficie
   y el factor de radiación, con el límite superior de la Parte 1 y el valor de

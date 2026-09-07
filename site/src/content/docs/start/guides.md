@@ -506,6 +506,9 @@ ISO 2631-1/-2/-4/-5, ISO 5349-1/-2 and ISO 8041-1.
 - [Transfer stiffness of resilient elements (ISO 10846)](/phonometry/vibration/structural/transfer-stiffness/):
   the dynamic transfer stiffness and loss factor of an isolator by the direct
   and indirect methods.
+- [Vibration damage to structures (DIN 4150-3)](/phonometry/vibration/structural/structural-damage/):
+  the guideline peak particle velocities a foundation, a topmost floor plane and
+  a buried pipe are judged by, and the bending stress a velocity implies.
 - [Sound power from surface vibration (ISO/TS 7849)](/phonometry/devices/emission/vibration-sound-power/):
   the radiated power from the surface-averaged velocity level and the radiation
   factor, with the Part 1 upper limit and the Part 2 engineering value. It lives

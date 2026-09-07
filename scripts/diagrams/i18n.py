@@ -3158,6 +3158,32 @@ _ES: dict[str, str] = {
     "early: 20 to 100 ms, late: from 100 ms on": "temprano: de 20 a 100 ms, tardío: desde 100 ms",
     "One impulse response gives the reverberation time.": "Una respuesta al impulso da el tiempo de reverberación.",
     "These four give what the room does to a listener, and each of them needs its own setup.": "Estas cuatro dan lo que la sala le hace a quien escucha, y cada una pide su propio montaje.",
+    # Where the microphone goes at a work station (devices/emission/
+    # workstation-emission): the five cases of ISO 11201 Clause 9.
+    "Where the microphone goes at a work station (ISO 11201 Clause 9)": "Dónde va el micrófono en un puesto de trabajo (ISO 11201, capítulo 9)",
+    "The emission level belongs to a position, and this is the position": "El nivel de emisión es de una posición, y esta es la posición",
+    "Operator present": "Con operador presente",
+    "centre plane": "plano central",
+    "line of vision": "línea de visión",
+    "0.20 m ± 0.02 m": "0,20 m ± 0,02 m",
+    "on a line with the eyes,": "a la altura de los ojos,",
+    "on the louder side": "por el lado más ruidoso",
+    "Seat, nobody in it": "Asiento vacío",
+    "0.80 m ± 0.05 m": "0,80 m ± 0,05 m",
+    "above the middle of the seat": "sobre el centro del asiento",
+    "Standing, nobody there": "De pie, sin nadie",
+    "1.55 m ± 0.075 m": "1,55 m ± 0,075 m",
+    "reference point": "punto de referencia",
+    "the floor below the head": "el suelo bajo la cabeza",
+    "Operator on a path": "Operador en recorrido",
+    "≤ 2 m": "≤ 2 m",
+    "same 1.55 m, and the levels are averaged over the path": "los mismos 1,55 m, y los niveles se promedian sobre el recorrido",
+    "No work station": "Sin puesto de trabajo",
+    "around the reference box, from every side": "alrededor del paralelepípedo de referencia, por cada lado",
+    "four or more, 1.55 m above the floor": "cuatro o más, a 1,55 m sobre el suelo",
+    "and the highest one is the answer": "y el más alto es el resultado",
+    "$L_{pA}$ at one of these positions is an emission level, not a sound power level: it says what the machine does to whoever is there.": "$L_{pA}$ en una de estas posiciones es un nivel de emisión, no un nivel de potencia acústica: dice lo que la máquina le hace a quien está ahí.",
+    "The background correction $K_1$ and the environmental correction $K_2$ or $K_3$ come off it, and a peak level takes neither.": "La corrección por ruido de fondo $K_1$ y la corrección ambiental $K_2$ o $K_3$ se le restan, y un nivel de pico no lleva ninguna.",
 }
 
 

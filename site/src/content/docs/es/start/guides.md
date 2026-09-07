@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 122 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 123 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -111,7 +111,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento veintidós guías repartidas en doce temas, y cada
+Esta página es el mapa. Ciento veintitrés guías repartidas en doce temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -752,6 +752,10 @@ IEC 60268-3/-4/-5, ITU-R BS.1770-5 y EBU R 128.
 - [Silenciadores](/phonometry/es/devices/noise-control/silencers/): los silenciadores
   reactivos por el método de matrices de cuatro polos y la elección entre
   reactivo y disipativo.
+- [Medir un silenciador (ISO 7235 e ISO 11691)](/phonometry/es/devices/noise-control/silencer-measurement/):
+  la medida por sustitución de la que sale la pérdida por inserción de un
+  catálogo, su corrección por reverberación y la reproducibilidad que
+  publican ambas normas.
 - [Ruido por conductos: del ventilador a la sala](/phonometry/es/devices/noise-control/duct-path/):
   el cálculo completo del ventilador a la sala frente a un criterio de ruido de
   fondo, y el corte de modos superiores que limita todo método de onda plana.

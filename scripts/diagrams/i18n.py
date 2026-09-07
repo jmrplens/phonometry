@@ -2739,6 +2739,25 @@ _ES: dict[str, str] = {
     "the return wins above 1 kHz: its silencer floors the room near 25 dB, and no amount of supply attenuation moves that": "por encima de 1 kHz manda el retorno: su silenciador deja un suelo de 25 dB que la impulsión no puede bajar",
     # ISO 7235 silencer measurement (devices/noise-control/silencers).
     "How a silencer is measured: the ISO 7235 substitution method": "Cómo se mide un silenciador: el método de sustitución de la ISO 7235",
+    # diagram_open_end_solid_angles
+    "How a duct end is mounted, and what it keeps in (ISO 7235 Table B.1)": "Cómo se monta la boca de un conducto, y lo que retiene (ISO 7235 Tabla B.1)",
+    "The solid angle is the only term of Equation (B.3) a laboratory chooses": "El ángulo sólido es el único término de la Ecuación (B.3) que elige un laboratorio",
+    "Flush in a wall": "Enrasada en una pared",
+    "Wall and floor": "Pared y suelo",
+    "Free in the room": "Libre en la sala",
+    "On the floor": "Sobre el suelo",
+    "Duct in free space": "Conducto exento",
+    "A full circle in section is 4\u03c0: the opening radiates into the whole room. "
+    "Half of one is 2\u03c0, a quarter is \u03c0.": "Un círculo completo en sección es 4\u03c0: la abertura radia a toda la sala. "
+    "La mitad es 2\u03c0, un cuarto es \u03c0.",
+    "D_td = 10 lg[1 + \u03a9 / (4\u03c0f\u221aS / c)\u00b2] dB, "
+    "which ISO 5135 prints as \u0394L_r = 10 lg[1 + (c / 4\u03c0f)\u00b2 (\u03a9 / S)]": "D_td = 10 lg[1 + \u03a9 / (4\u03c0f\u221aS / c)\u00b2] dB, "
+    "que la ISO 5135 imprime como \u0394L_r = 10 lg[1 + (c / 4\u03c0f)\u00b2 (\u03a9 / S)]",
+    "One formula, two names, and the same five values in ISO 7235 Table B.1 "
+    "and ISO 5135 Table 1": "Una fórmula, dos nombres, y los mismos cinco valores en la Tabla B.1 de la "
+    "ISO 7235 y la Tabla 1 de la ISO 5135",
+    "The bigger the solid angle, the more the mouth keeps in": "Cuanto mayor es el ángulo sólido, más retiene la boca",
+    "a baffle is what makes an opening a good radiator": "lo que hace buena radiadora a una abertura es la pantalla",
     "Series I — test object installed": "Serie I: con el objeto de ensayo",
     "Series II — substitution duct": "Serie II: con el conducto de sustitución",
     "test object": "objeto de ensayo",

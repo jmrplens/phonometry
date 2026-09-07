@@ -47,6 +47,12 @@ una velocidad de diseño de 15 m/s. Una medida que necesite flujo, o un objeto
 que no sea un silenciador, queda fuera de la ISO 11691 y pertenece a la
 ISO 7235.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/silencer_measurement.svg" alt="Tres paneles. Izquierda: dos grupos de barras, uno para un silenciador plano a lo largo de una octava y otro cuyo peor tercio fuga, cada uno con las tres pérdidas por inserción de tercio de octava como barras claras, la octava que da la Ecuación (2) como barra rellena y la media simple de los decibelios como línea discontinua; en el grupo plano las dos coinciden y en el que fuga la octava queda doce decibelios por debajo de la media. Centro: la pérdida por transmisión en la boca de un conducto de 350 mm frente a la frecuencia en eje logarítmico, dibujada para los tres ángulos sólidos distintos de la Tabla B.1 y para la forma cerrada rival de Long, todas cayendo desde unos quince decibelios a 50 Hz hasta nada por encima de 2 kHz, con la curva de campo libre la más alta de las tres. Derecha: las desviaciones típicas de reproducibilidad de ambas normas como funciones escalón de la frecuencia, la columna de pérdida por inserción bajando a un decibelio en la mitad del intervalo, la de pérdida por transmisión plana en tres, la de intensidad sonora bajando a uno y parando en 5 kHz, y el método de clase 3 escalonando de dos a tres" width="100%" />
+
+*Las tres cosas que lleva un informe de medida más allá de las cifras mismas:
+cómo se plegaron sus octavas, qué retenía la boca de su conducto, y hasta
+dónde se puede confiar en todo ello.*
+
 ## 1. Una resta, dos numeraciones
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_iso7235.svg" alt="Dos recorridos apilados sobre un mismo eje de conducto. En el de arriba, la serie uno, una caja de altavoz sellada y forrada alimenta un filtro modal, luego una transición, luego el objeto de ensayo, y luego un conducto de ensayo con terminación anecoica de cuñas que lleva tres posiciones de micrófono sobre una línea inclinada respecto al eje del conducto. El de abajo, la serie dos, es idéntico salvo que el objeto de ensayo se sustituye por un conducto de sustitución vacío. Se marcan con trazo discontinuo los planos de cualificación en el objeto de ensayo y en el conducto receptor. Debajo, la pérdida por inserción aparece como la diferencia de los dos niveles del lado receptor, tercio de octava a tercio de octava, con la atenuación del filtro modal, el límite del coeficiente de reflexión, la tolerancia del conducto de sustitución y la regla de señal a ruido de fondo listados con los números de apartado de la propia norma" width="92%" />
@@ -268,6 +274,11 @@ area = 0.0962                     # m2, un conducto circular de 350 mm
 d_td = noise_control.open_end_transmission_loss(bands, area)
 print(d_td.round(2))              # [11.23  6.14  2.5   0.77  0.21  0.05] dB
 ```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_end_solid_angles.svg" alt="Cinco celdas en fila, una por cada configuración de montaje de la Tabla B.1 de la ISO 7235. En cada una, un pequeño terminal cuadrado se sitúa en el origen de un sector sombreado que es el ángulo sólido leído en sección: un semicírculo contra una pared para A, un cuarto de círculo en la esquina de una pared y un suelo para B, un círculo completo exento para C, un semicírculo sobre un suelo para D, y otra vez un círculo completo para E. Debajo de cada una, el ángulo sólido: dos pi, pi, cuatro pi, dos pi y cuatro pi. Bajo la fila, la fórmula escrita tal como la imprime la ISO 7235 y tal como la imprime la ISO 5135, una nota de que las dos son una sola fórmula con los mismos cinco valores, y la conclusión de que cuanto mayor es el ángulo sólido más retiene la boca" width="100%" />
+
+*El ángulo sólido es el único término de la Ecuación (B.3) que un laboratorio
+elige en vez de medir, y las cinco opciones son las mismas en ambas normas.*
 
 El ángulo sólido es la Tabla B.1, y esos mismos cinco valores son la Tabla 1
 de la ISO 5135. Funciona al revés de lo que uno esperaría: $\Omega$ está en el

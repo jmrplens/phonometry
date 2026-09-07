@@ -3210,6 +3210,34 @@ _ES_EXACT = {
     "zero at the threshold, then a fifth power:\nthe cavitation term passes the turbulent\n"
     "one within a tenth of $x_F$ of starting": "cero en el umbral y luego una quinta potencia:\nel término de cavitación pasa al turbulento\n"
     "en menos de una décima de $x_F$",
+    # silencer_measurement: the octave fold, the mouth, and the spread
+    "The octave is the energy, not the average": "La octava es la energía, no el promedio",
+    "Mean of the decibels": "Media de los decibelios",
+    "Flat: the three one-third octaves": "Plano: los tres tercios de octava",
+    "One band leaks: the three one-third octaves": "Una banda fuga: los tres tercios de octava",
+    "Flat\nthree thirds, then the octave": "Plano\ntres tercios y luego la octava",
+    "One band leaks\nthree thirds, then the octave": "Una banda fuga\ntres tercios y luego la octava",
+    "the filled bar is Equation (2): the band that\nleaks carries the transmitted sound, so the\n"
+    "octave sits 12 dB under the mean of the three": "la barra rellena es la Ecuación (2): la banda que\nfuga lleva el sonido transmitido, así que la octava\n"
+    "queda 12 dB por debajo de la media de los tres",
+    "What the mouth keeps in": "Lo que retiene la boca",
+    "Open-end transmission loss [dB]": "Pérdida por transmisión en la boca [dB]",
+    "$\\Omega = \\pi$, wall and floor": "$\\Omega = \\pi$, pared y suelo",
+    "$\\Omega = 2\\pi$, flush in a wall": "$\\Omega = 2\\pi$, enrasada en una pared",
+    "$\\Omega = 4\\pi$, free in the room": "$\\Omega = 4\\pi$, libre en la sala",
+    "Long's closed form, exponent 1,88": "Forma cerrada de Long, exponente 1,88",
+    "the solid angle is in the numerator, so an\nunbaffled mouth keeps more in, not less:\n"
+    "a baffle is what makes an opening radiate": "el ángulo sólido está en el numerador, así que una\nboca sin pantalla retiene más, no menos: lo que\n"
+    "hace radiar a una abertura es la pantalla",
+    "How repeatable the number is": "Cuán repetible es la cifra",
+    "Reproducibility $\\sigma_R$ [dB]": "Reproducibilidad $\\sigma_R$ [dB]",
+    "ISO 7235 Table 7, insertion loss": "ISO 7235 Tabla 7, pérdida por inserción",
+    "ISO 7235 Table 7, transmission loss": "ISO 7235 Tabla 7, pérdida por transmisión",
+    "ISO 7235 Table 7, sound intensity": "ISO 7235 Tabla 7, intensidad sonora",
+    "ISO 11691 Table 1, survey method": "ISO 11691 Tabla 1, método de clase 3",
+    "only the insertion-loss column came from\ntests; a column that does not move with\n"
+    "frequency is the shape of an estimate.\nThe report carries twice these values": "sólo la columna de pérdida por inserción salió\nde ensayos; una columna que no se mueve con la\n"
+    "frecuencia tiene forma de estimación.\nEl informe lleva el doble de estos valores",
     # silencer_selection: reactive against dissipative on one axis
     "Choosing the family: where each one is worth having": "Elegir la familia: dónde compensa cada una",
     "Reactive: 0.3 m expansion chamber, $m = 4$": "Reactivo: cámara de expansión de 0,3 m, $m = 4$",

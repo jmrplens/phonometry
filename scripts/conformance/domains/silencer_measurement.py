@@ -428,11 +428,13 @@ def _chk_normal_air_density() -> Outcome:
 
     ISO 7235 prints ``R = 287 N.m/(kg.K)`` and writes the absolute
     temperature as ``theta + 273 degC``. Neither is the accurate figure
-    (287,05 and 273,15), and together they put a density 0,069 % high at
-    20 °C. The row pins the printed arithmetic and records the size of the
-    gap, because it cancels where the density is used: the same value is in
-    the dynamic pressure of both test series, so the pressure loss
-    coefficient of Equation (18) does not see it at all.
+    (287,05 and 273,15): the offset alone puts a density 0,051 % high at
+    20 °C and the gas constant adds 0,017 % to that. The row pins the printed
+    arithmetic, which is what reproduces a result computed to the standard.
+    The error does not cancel where the density is used, it scales: the same
+    value is in the dynamic pressure of both test series, so the pressure
+    loss coefficient of Equation (18) comes out 0,069 % low rather than
+    displaced, which is far under the uncertainty of the test.
     """
     found = ph.noise_control.normal_air_density(200.0, 101325.0, 20.0)
     printed = (101325.0 + 200.0) / (287.0 * (20.0 + 273.0))
@@ -486,10 +488,13 @@ def _chk_pressure_loss_coefficient() -> Outcome:
     """The coefficient belongs to the object, not to the test point.
 
     A total pressure loss grows as the square of the velocity, and so does
-    the velocity head Equation (14) divides it by, so the ratio has to be the
-    same number at every flow rate. That invariance is what makes the
-    coefficient reportable at all, and it is the closed form this row pins:
-    the same object measured at 1 m³/s and at 2 m³/s gives one value.
+    the velocity head Equation (14) divides it by, so the ratio is the same
+    number at every flow rate the loss scales that way at. That is what makes
+    the coefficient reportable at all, and it is the algebra this row pins: a
+    loss four times larger at twice the flow gives one value. Real flow is
+    only approximately similar, because twice the rate is twice the Reynolds
+    number, which is why 6.5.2 measures at five rates and averages rather
+    than trusting one.
     """
     slow = ph.noise_control.pressure_loss_coefficient(
         45.0, ph.noise_control.dynamic_pressure(1.0, 0.1, 1.2)

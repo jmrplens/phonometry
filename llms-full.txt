@@ -23346,11 +23346,14 @@ print(round(q_v, 4))              # 0.9939 m3/s
 ```
 
 ISO 7235 prints $R = 287$ and writes the absolute temperature as
-$\theta + 273\ ^\circ\text{C}$, neither of which is the accurate figure.
-Together they put the density 0,069 % high at 20 °C, and the library keeps
-both as printed, because the error cancels: the same density appears in the
-dynamic pressure of both test series, so the coefficient never sees it. That
-is recorded in the [errata
+$\theta + 273\ ^\circ\text{C}$, neither of which is the accurate figure. The
+offset alone puts the density 0,051 % high at 20 °C, and the gas constant adds
+0,017 % to that, for 0,069 % in all. It does not cancel: the same density is
+in the dynamic pressure of both test series, so the coefficient is **scaled**
+by that one factor rather than shifted, and comes out 0,069 % low. That is far
+under the uncertainty of a pressure-loss test, and using the printed constants
+is what reproduces a result computed to the standard, so the library keeps
+both. It is recorded in the [errata
 register](https://jmrplens.github.io/phonometry/reference/errata/) as
 a property of the source rather than as a defect.
 
@@ -23371,9 +23374,13 @@ print(round(noise_control.pressure_loss_coefficient(delta_p_t, p_d1), 3))
 #                                 # 0.698
 ```
 
-That number belongs to the object rather than to the test point: a loss grows
-as the square of the velocity and so does the head it is divided by, so
-measuring the same object twice as fast gives the same coefficient.
+That number belongs to the object rather than to the test point, at least to
+the extent the flow is dynamically similar: a loss grows as the square of the
+velocity and so does the head it is divided by, so the algebra returns the
+same coefficient at twice the flow. Real flow is not exactly similar, because
+doubling the rate doubles the Reynolds number too, and that is the reason
+6.5.2 measures at five rates and averages rather than trusting one. The drift
+over a test range is small, and it is not zero.
 
 Equation (12) is the part worth reading twice. Measuring static pressures on
 both sides is not enough when the two sides are different sizes, because an
@@ -23413,7 +23420,9 @@ print(round(zeta, 3))             # 2.1
 
 Five rates per series, spread evenly over the range, and the lowest has to
 produce more than 10 Pa so that the smallest number in the average is still a
-measurement. Fewer than five and the library says so.
+measurement rather than the resolution of the manometer. The library says so
+on both counts: `average_pressure_loss_coefficient` warns below five points,
+and `pressure_loss_coefficient` warns on a loss under 10 Pa.
 
 What the flow has to be before any of that counts is a matter of geometry.
 The upstream duct is straight for five equivalent diameters or two metres,

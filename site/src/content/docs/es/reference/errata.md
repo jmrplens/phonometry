@@ -5230,11 +5230,15 @@ concordancia con las fuentes publicadas:
   ideales viene impresa con
   $R = 287\ \text{N}\cdot\text{m}/(\text{kg}\cdot\text{K})$ y la
   temperatura absoluta escrita como $\theta + 273\ ^\circ\text{C}$. Ninguno
-  de los dos es el valor exacto (287,05 y 273,15), y juntos dejan una densidad
-  un 0,069 % alta a 20 °C. Es una simplificación y no un defecto: la densidad
-  que producen sólo se usa en la presión dinámica de las Ecuaciones (16), (19)
-  y (20), y ambas series del coeficiente de pérdida de presión llevan el mismo
-  factor, de modo que se cancela exactamente en las Ecuaciones (17) y (18). La
+  de los dos es el valor exacto (287,05 y 273,15). El desfase por sí solo deja
+  una densidad un 0,051 % alta a 20 °C y la constante de los gases le añade
+  otro 0,017 %, para un 0,069 % en total. Es una simplificación y no un
+  defecto: la densidad que producen sólo se usa en la presión dinámica de las
+  Ecuaciones (16), (19) y (20), y ambas series del coeficiente de pérdida de
+  presión llevan el mismo factor, de modo que las Ecuaciones (17) y (18) salen
+  **escaladas** por él en vez de desplazadas, un 0,069 % bajas, que queda muy
+  por debajo de la incertidumbre de un ensayo de pérdida de presión y es lo que
+  muestra un resultado calculado según la norma. La
   biblioteca conserva las dos constantes impresas, como
   [`ISO7235_GAS_CONSTANT`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/silencer_measurement.py)
   y `ISO7235_ABSOLUTE_ZERO_OFFSET`, para que un resultado se pueda reproducir

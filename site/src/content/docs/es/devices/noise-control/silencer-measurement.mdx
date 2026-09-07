@@ -371,11 +371,15 @@ print(round(q_v, 4))              # 0.9939 m3/s
 ```
 
 La ISO 7235 imprime $R = 287$ y escribe la temperatura absoluta como
-$\theta + 273\ ^\circ\text{C}$, y ninguna de las dos es la cifra exacta.
-Juntas dejan la densidad un 0,069 % alta a 20 °C, y la biblioteca conserva
-ambas tal como vienen impresas, porque el error se cancela: la misma densidad
-aparece en la presión dinámica de las dos series de ensayo, de modo que el
-coeficiente nunca la ve. Queda registrado en el [registro de
+$\theta + 273\ ^\circ\text{C}$, y ninguna de las dos es la cifra exacta. El
+desfase por sí solo deja la densidad un 0,051 % alta a 20 °C, y la constante
+de los gases le añade otro 0,017 %, para un 0,069 % en total. No se cancela:
+la misma densidad está en la presión dinámica de las dos series de ensayo, así
+que el coeficiente queda **escalado** por ese único factor en vez de
+desplazado, y sale un 0,069 % bajo. Eso queda muy por debajo de la
+incertidumbre de un ensayo de pérdida de presión, y usar las constantes
+impresas es lo que reproduce un resultado calculado según la norma, así que la
+biblioteca conserva ambas. Queda registrado en el [registro de
 erratas](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.es.md)
 como propiedad de la fuente y no como defecto.
 
@@ -396,9 +400,14 @@ print(round(noise_control.pressure_loss_coefficient(delta_p_t, p_d1), 3))
 #                                 # 0.698
 ```
 
-Ese número pertenece al objeto y no al punto de ensayo: una pérdida crece con
-el cuadrado de la velocidad y la altura por la que se divide también, así que
-medir el mismo objeto al doble de velocidad da el mismo coeficiente.
+Ese número pertenece al objeto y no al punto de ensayo, al menos en la medida
+en que el flujo sea dinámicamente semejante: una pérdida crece con el cuadrado
+de la velocidad y la altura por la que se divide también, así que el álgebra
+devuelve el mismo coeficiente al doble de caudal. El flujo real no es
+exactamente semejante, porque doblar el caudal dobla también el número de
+Reynolds, y esa es la razón de que el 6.5.2 mida a cinco caudales y promedie
+en vez de fiarse de uno. La deriva a lo largo de un intervalo de ensayo es
+pequeña, y no es nula.
 
 La Ecuación (12) es la parte que conviene leer dos veces. Medir presiones
 estáticas a los dos lados no basta cuando los dos lados tienen tamaños
@@ -439,7 +448,10 @@ print(round(zeta, 3))             # 2.1
 
 Cinco caudales por serie, repartidos por igual sobre el intervalo, y el más
 bajo tiene que producir más de 10 Pa para que el número más pequeño del
-promedio siga siendo una medida. Con menos de cinco, la biblioteca lo dice.
+promedio siga siendo una medida y no la resolución del manómetro. La
+biblioteca lo dice por partida doble: `average_pressure_loss_coefficient` avisa
+por debajo de cinco puntos, y `pressure_loss_coefficient` avisa con una pérdida
+por debajo de 10 Pa.
 
 Lo que tiene que ser el flujo antes de que nada de eso cuente es cuestión de
 geometría. El conducto aguas arriba va recto cinco diámetros equivalentes o

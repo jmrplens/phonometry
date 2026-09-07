@@ -251,13 +251,13 @@ _SOUND_SPEED_M_S = 343.0
 
 #: ISO 7235:2003, Equation (10). The specific gas constant of air as the
 #: standard prints it, in N·m/(kg·K). The accurate value for dry air is
-#: 287,05; the printed 287 is 0,017 % low, and it cancels in the pressure
-#: loss coefficient because the same density is in both series.
+#: 287,05; the printed 287 is 0,017 % low, which with the temperature offset
+#: scales a pressure loss coefficient by 0,069 % rather than shifting it.
 ISO7235_GAS_CONSTANT = 287.0
 
 #: ISO 7235:2003, Equations (10), (21) and (22). The offset the standard adds
 #: to a Celsius temperature to get an absolute one, in degrees. It prints 273
-#: rather than 273,15, which puts a density 0,055 % high at 20 °C; the value
+#: rather than 273,15, which puts a density 0,051 % high at 20 °C; the value
 #: is kept as printed so that a result can be reproduced as the standard
 #: gives it.
 ISO7235_ABSOLUTE_ZERO_OFFSET = 273.0
@@ -301,6 +301,25 @@ class SilencerMeasurementWarning(PhonometryWarning):
     measure over. The arithmetic still runs, because a laboratory may report
     such a value as long as it says so.
     """
+
+
+def _require_finite_scalar(value: float, name: str) -> float:
+    """One finite number, and not the first of several.
+
+    ``require_finite_array`` accepts a scalar and a sequence alike, and
+    taking ``[0]`` of the result reads the first element of a sequence and
+    drops the rest without a word. A static pressure or a temperature is one
+    measurement in one plane, so a sequence is a mistake and is said to be
+    one.
+    """
+    values = require_finite_array(value, name)
+    if values.size != 1:
+        msg = (
+            f"'{name}' is one measurement in one plane, so one number is "
+            f"expected; got {values.size}."
+        )
+        raise ValueError(msg)
+    return float(values[0])
 
 
 def _require_matching_bands(
@@ -870,11 +889,17 @@ def normal_air_density(
     and (21) and (22) for the two series of the computational route of
     6.5.2.2.3. They differ only in which measurement they are given.
 
-    The printed offset is 273 rather than 273,15, which puts the density
-    0,055 % high at 20 °C. In the pressure loss coefficient it cancels almost
-    exactly, because the same density appears in the dynamic pressure of both
-    series; :data:`ISO7235_ABSOLUTE_ZERO_OFFSET` carries the printed value so
-    that a result can be reproduced as the standard prints it.
+    Both printed constants are a little off the accurate figures. The offset
+    273 rather than 273,15 puts the density 0,051 % high at 20 °C, and
+    :math:`R = 287` rather than 287,05 adds 0,017 % to that, for 0,069 % in
+    all. It does not cancel out of the pressure loss coefficient: the same
+    density is in the dynamic pressure of both series, so the whole
+    coefficient is scaled by that one factor rather than shifted, which
+    leaves it 0,069 % low. That is far under the uncertainty of a
+    pressure-loss test, and using the printed constants is what reproduces a
+    result computed to the standard, which is why
+    :data:`ISO7235_ABSOLUTE_ZERO_OFFSET` and :data:`ISO7235_GAS_CONSTANT`
+    carry them as printed.
 
     :param static_gauge_pressure: :math:`p_{s1}`, the duct static pressure
         relative to the ambient, in Pa.
@@ -888,10 +913,8 @@ def normal_air_density(
         printed absolute zero.
     """
     ambient = require_positive(ambient_pressure, "ambient_pressure")
-    gauge = float(
-        require_finite_array(static_gauge_pressure, "static_gauge_pressure")[0]
-    )
-    celsius = float(require_finite_array(temperature_celsius, "temperature_celsius")[0])
+    gauge = _require_finite_scalar(static_gauge_pressure, "static_gauge_pressure")
+    celsius = _require_finite_scalar(temperature_celsius, "temperature_celsius")
     absolute = gauge + ambient
     if absolute <= 0.0:
         msg = (
@@ -984,7 +1007,7 @@ def total_pressure(
     :raises ValueError: If the static pressure is not finite, or if another
         value is not positive and finite.
     """
-    static = float(require_finite_array(static_pressure, "static_pressure")[0])
+    static = _require_finite_scalar(static_pressure, "static_pressure")
     return static + dynamic_pressure(volume_flow, area, density)
 
 
@@ -1017,9 +1040,7 @@ def total_pressure_loss(
     :raises ValueError: If the static loss is not finite, or if another value
         is not positive and finite.
     """
-    static = float(
-        require_finite_array(static_pressure_loss, "static_pressure_loss")[0]
-    )
+    static = _require_finite_scalar(static_pressure_loss, "static_pressure_loss")
     head = require_positive(inlet_dynamic_pressure, "inlet_dynamic_pressure")
     first = require_positive(inlet_area, "inlet_area")
     second = require_positive(outlet_area, "outlet_area")
@@ -1049,9 +1070,19 @@ def pressure_loss_coefficient(
     :return: :math:`\zeta`, dimensionless.
     :raises ValueError: If the loss is not finite, or if the dynamic pressure
         is not positive and finite.
+    :warns SilencerMeasurementWarning: If the loss is smaller than the 10 Pa
+        6.5.2.1 asks even the lowest airflow rate of a series to produce.
     """
-    loss = float(require_finite_array(total_loss, "total_loss")[0])
+    loss = _require_finite_scalar(total_loss, "total_loss")
     head = require_positive(inlet_dynamic_pressure, "inlet_dynamic_pressure")
+    if abs(loss) < MINIMUM_PRESSURE_DIFFERENCE_PA:
+        msg = (
+            "6.5.2.1 wants the lowest airflow rate of a series to produce a "
+            f"pressure difference greater than {MINIMUM_PRESSURE_DIFFERENCE_PA:.0f} "
+            f"Pa, so that the smallest number in the fit is still a "
+            f"measurement; this point is {loss!r} Pa."
+        )
+        warnings.warn(msg, SilencerMeasurementWarning, stacklevel=2)
     return float(loss / head)
 
 

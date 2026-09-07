@@ -560,6 +560,16 @@ class TestFlowQuantities:
         with pytest.raises(ValueError, match="area"):
             sm.dynamic_pressure(1.0, bad, 1.2)
 
+    def test_a_pressure_measured_in_one_plane_is_one_number(self) -> None:
+        # Taking the first element of a sequence and dropping the rest is
+        # how a run of five test points quietly becomes one.
+        with pytest.raises(ValueError, match="one number"):
+            sm.total_pressure([200.0, 300.0], 1.0, 0.0962, 1.2)
+
+    def test_a_temperature_measured_in_one_plane_is_one_number_too(self) -> None:
+        with pytest.raises(ValueError, match="one number"):
+            sm.normal_air_density(200.0, 101325.0, [20.0, 21.0])
+
 
 class TestPressureLossCoefficient:
     """ISO 7235 Equations (12), (14), (17) and (18)."""
@@ -629,6 +639,23 @@ class TestPressureLossCoefficient:
     def test_the_five_rates_and_the_ten_pascals(self) -> None:
         assert sm.MINIMUM_FLOW_RATES == 5
         assert sm.MINIMUM_PRESSURE_DIFFERENCE_PA == pytest.approx(10.0)
+
+    def test_a_point_below_ten_pascals_warns(self) -> None:
+        # 6.5.2.1 wants even the lowest airflow rate of a series to produce
+        # more than 10 Pa, so that the smallest number in the fit is still a
+        # measurement rather than the resolution of the manometer.
+        with pytest.warns(sm.SilencerMeasurementWarning, match="10 Pa"):
+            sm.pressure_loss_coefficient(6.0, 64.0)
+
+    def test_a_point_above_ten_pascals_is_quiet(self) -> None:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            found = sm.pressure_loss_coefficient(45.0, 64.0)
+        assert found == pytest.approx(45.0 / 64.0)
+
+    def test_a_loss_that_is_a_vector_is_refused(self) -> None:
+        with pytest.raises(ValueError, match="one number"):
+            sm.pressure_loss_coefficient([45.0, 50.0], 64.0)
 
 
 class TestUpstreamStraightLength:

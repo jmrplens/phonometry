@@ -529,11 +529,17 @@ Three equations print this: (10) for the normalised flow rate of (9),
 and (21) and (22) for the two series of the computational route of
 6.5.2.2.3. They differ only in which measurement they are given.
 
-The printed offset is 273 rather than 273,15, which puts the density
-0,055 % high at 20 °C. In the pressure loss coefficient it cancels almost
-exactly, because the same density appears in the dynamic pressure of both
-series; [`ISO7235_ABSOLUTE_ZERO_OFFSET`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_absolute_zero_offset) carries the printed value so
-that a result can be reproduced as the standard prints it.
+Both printed constants are a little off the accurate figures. The offset
+273 rather than 273,15 puts the density 0,051 % high at 20 °C, and
+$R = 287$ rather than 287,05 adds 0,017 % to that, for 0,069 % in
+all. It does not cancel out of the pressure loss coefficient: the same
+density is in the dynamic pressure of both series, so the whole
+coefficient is scaled by that one factor rather than shifted, which
+leaves it 0,069 % low. That is far under the uncertainty of a
+pressure-loss test, and using the printed constants is what reproduces a
+result computed to the standard, which is why
+[`ISO7235_ABSOLUTE_ZERO_OFFSET`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_absolute_zero_offset) and [`ISO7235_GAS_CONSTANT`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_gas_constant)
+carry them as printed.
 
 **Parameters**
 
@@ -730,6 +736,12 @@ of the fundamental method, $\Delta p_{tot,n} / p_{dn}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the loss is not finite, or if the dynamic pressure is not positive and finite. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| SilencerMeasurementWarning | If the loss is smaller than the 10 Pa 6.5.2.1 asks even the lowest airflow rate of a series to produce. |
 
 ## RADIATION_SOLID_ANGLES
 

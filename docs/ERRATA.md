@@ -4850,11 +4850,14 @@ published sources:
 - **ISO 7235:2003, Equations (10), (21) and (22):** the ideal gas law is
   printed with $R = 287\ \text{N}\cdot\text{m}/(\text{kg}\cdot\text{K})$
   and the absolute temperature written as $\theta + 273\ ^\circ\text{C}$.
-  Neither is the accurate value (287,05 and 273,15), and together they put a
-  density 0,069 % high at 20 °C. This is a simplification and not a defect:
-  the density it produces is used only in the dynamic pressure of Equations
-  (16), (19) and (20), and both series of the pressure loss coefficient carry
-  the same factor, so it cancels out of Equations (17) and (18) exactly. The
+  Neither is the accurate value (287,05 and 273,15). The offset alone puts a
+  density 0,051 % high at 20 °C and the gas constant adds 0,017 % to that, for
+  0,069 % in all. This is a simplification and not a defect: the density it
+  produces is used only in the dynamic pressure of Equations (16), (19) and
+  (20), and both series of the pressure loss coefficient carry the same
+  factor, so Equations (17) and (18) come out **scaled** by it rather than
+  shifted, 0,069 % low, which is far under the uncertainty of a
+  pressure-loss test and is what a result computed to the standard shows. The
   library keeps both printed constants, as
   [`ISO7235_GAS_CONSTANT`](../src/phonometry/noise_control/silencer_measurement.py)
   and `ISO7235_ABSOLUTE_ZERO_OFFSET`, so that a worked result can be

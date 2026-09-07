@@ -1,0 +1,293 @@
+---
+title: "Daños en estructuras por vibración"
+description: "Los valores de referencia de DIN 4150-3: velocidad de pico de la partícula en el cimiento y en el plano de la última planta según el tipo de edificio y la frecuencia, la tabla de tuberías enterradas, los valores de vibración de larga duración y la tensión de flexión que implica una velocidad medida."
+references:
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 1999
+    title: "Erschütterungen im Bauwesen — Teil 3: Einwirkungen auf bauliche Anlagen"
+    designation: "DIN 4150-3:1999-02"
+    primary: true
+    note: "La magnitud medida del apartado 5.1, los valores de referencia de corta duración de la tabla 1 con las curvas del Bild 1, la regla de forjados del 5.2, los valores para tuberías enterradas de la tabla 2, los valores de larga duración de la tabla 3 y la reducción al 50 % del 6.3, la tensión de flexión de la fórmula (1) del 6.2 y la estimación por plantas del 6.4."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Todo lo demás de esta sección sigue a la vibración porque acaba siendo
+**sonido**. Esta página la sigue porque acaba siendo una **grieta**. Una
+hincadora de pilotes al lado, un tranvía al final de la calle o una voladura en
+una obra cercana meten vibración en el terreno, el terreno la mete en un
+cimiento, y la pregunta que hacen los vecinos no tiene nada que ver con la
+audibilidad: ¿se va a dañar el edificio?
+
+Responderla como es debido significa calcular las tensiones dinámicas de la
+estructura y compararlas con lo que el material y el diseño admiten. DIN 4150-3
+ofrece primero la respuesta barata, que es la que se usa en la práctica:
+**valores de referencia** (*Anhaltswerte*) para una sola magnitud medida, la
+velocidad de pico de la partícula, obtenidos de un gran conjunto de medidas en
+edificios reales. Por debajo de ellos no se han observado daños del tipo que la
+norma define. Por encima no se sigue nada de forma automática. La norma dice
+expresamente que no tienen por qué producirse daños; lo que se ha agotado es la
+respuesta barata, y hay que hacer el cálculo de tensiones.
+
+## 1. Qué se mide
+
+El apartado 5.1 fija la magnitud antes que ningún número. En el **cimiento** se
+registran por separado las tres componentes $v_x$, $v_y$ y $v_z$ de la
+velocidad de la partícula y se juzga el mayor pico de las tres,
+$|v_i|_\mathrm{max}$; la norma lo escribe luego $v_i$ y esta página también.
+Los captadores van en la planta más baja, en el cimiento o en el muro exterior,
+y en un edificio sin sótano a no más de 0,5 m sobre la rasante,
+preferentemente en la cara orientada hacia la excitación.
+
+En el **plano de la última planta** cambia la magnitud: la mayor de las dos
+componentes horizontales, medida en el muro exterior o junto a él. Esa medida
+no es una segunda excitación. Es la respuesta horizontal del edificio a la que
+recibe en su cimiento, y por eso el valor de referencia allí no depende de la
+frecuencia: la respuesta ya está en las frecuencias propias de la estructura.
+
+## 2. Vibración de corta duración, y por qué el valor sube con la frecuencia
+
+La vibración de corta duración es la que no se repite lo bastante como para que
+la estructura entre en resonancia: obras, voladuras, un tren en una línea poco
+transitada. La tabla 1 da sus valores de referencia para tres tipos de edificio
+y, en el cimiento, dependen de la frecuencia.
+
+Suben, y la razón es que la norma trata en realidad de la deformación. La misma
+velocidad a una frecuencia más baja significa un desplazamiento mayor, y es el
+desplazamiento a través de un muro el que abre una grieta en el revoco. Así que
+un edificio aguanta mejor un temblor rápido que uno lento, y el valor de
+referencia sube de 1 Hz a 100 Hz. Por encima de 100 Hz puede usarse el valor
+de 100 Hz.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structural_damage_guidelines.svg" alt="Tres paneles. El panel grande de la izquierda representa la velocidad de pico de referencia frente a la frecuencia, de 1 a 100 hercios, para los tres tipos de edificio: cada curva es plana hasta 10 hercios y sube después en dos tramos rectos, comercial e industrial de 20 a 50 milímetros por segundo, viviendas de 5 a 20, y edificios especialmente sensibles de 3 a 10, con el área bajo la curva más baja sombreada. El panel superior derecho da los valores del plano de la última planta como barras horizontales emparejadas, corta duración frente a larga duración: 40 frente a 10, 15 frente a 5 y 8 frente a 2,5 milímetros por segundo. El panel inferior derecho da del mismo modo los valores para tuberías enterradas: acero soldado 100 frente a 50, hormigón y metal con bridas 80 frente a 40, obra de fábrica y plástico 50 frente a 25." width="94%" loading="eager" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration
+
+freq = np.linspace(1.0, 100.0, 400)
+
+fig, ax = plt.subplots()
+for name in vibration.BUILDING_CLASSES:
+    ax.plot(freq, vibration.guideline_velocity(name, freq), label=name)
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Velocidad de pico $v_i$ [mm/s]")
+ax.grid(True, alpha=0.3)
+ax.legend()
+plt.show()
+
+# Una medida frente al valor de referencia que la juzga, dibujada sobre las
+# mismas curvas:
+res = vibration.assess_building_vibration(
+    4.2, building_class="residential", frequency_hz=18.0
+)
+print(round(res.guideline_mm_s, 2), res.within_guideline)   # 7.0 True
+res.plot(language="es")
+plt.show()
+```
+
+</details>
+
+*Las tres tablas a la vez. El panel de la izquierda es el Bild 1: el valor de
+referencia en el cimiento, plano hasta 10 Hz y creciente después. Los paneles
+de la derecha son los valores que no llevan frecuencia, cada uno con su valor
+de larga duración al lado.*
+
+La tabla 1 imprime la banda intermedia como un intervalo, «5 bis 15» para una
+vivienda entre 10 Hz y 50 Hz, y un intervalo no dice cuánto vale 30 Hz. Lo dice
+el Bild 1: los valores de las esquinas unidos por rectas sobre un eje de
+frecuencia **lineal**. A una vivienda a 30 Hz le corresponden 10 mm/s, y eso es
+una lectura de la figura, no de la tabla.
+
+```python
+from phonometry import vibration
+
+# Las esquinas que imprime la tabla 1, para una vivienda.
+for f in (1.0, 10.0, 50.0, 100.0):
+    print(f, vibration.guideline_velocity("residential", f))
+# 1.0 5.0 / 10.0 5.0 / 50.0 15.0 / 100.0 20.0
+
+# Dentro de una banda, que solo decide el Bild 1.
+print(vibration.guideline_velocity("residential", 30.0))          # 10.0
+
+# En el plano de la última planta no hay nada que leer frente a la frecuencia.
+print(vibration.guideline_velocity("residential", location="top_floor"))  # 15.0
+```
+
+Los tres tipos son las filas de la tabla 1: `"commercial"` para edificios
+comerciales e industriales y de estructura análoga, `"residential"` para
+viviendas y edificios de construcción o uso análogos, y `"sensitive"` para los
+que no encajan en ninguno de los dos y merecen conservarse, siendo un edificio
+protegido el ejemplo que da la norma. Una estructura de ingeniería maciza, como
+un estribo de hormigón armado o una cimentación en bloque, puede subir los
+valores de la fila 1 hasta el doble, que es lo que permite el 5.1 siempre que
+no surja ningún peligro de los procesos del terreno:
+
+```python
+print(vibration.guideline_velocity("commercial", 50.0, massive_structure=True))
+# 80.0
+```
+
+## 3. Forjados, y el único número que los cubre
+
+Un forjado o un techo recibe una frase propia en lugar de una tabla. Apartado
+5.2: si la velocidad vertical en el punto de mayor vibración, en general el
+centro del vano, se mantiene igual o por debajo de 20 mm/s, no cabe esperar una
+merma del valor de uso del forjado. El valor se publica como
+[`FLOOR_VERTICAL_MM_S`](/phonometry/es/reference/api/vibration/building-damage/),
+y para un edificio de la fila 3 de la tabla 1 la norma advierte de que puede
+hacer falta rebajarlo.
+
+## 4. Tuberías enterradas
+
+Una tubería en el terreno se juzga sobre la propia tubería, no sobre el
+edificio que tenga encima, y por el material del que está hecha. La tabla 2
+tiene tres filas, y el apartado 6.3 permite usar esa misma tabla al 50 % para
+vibración de larga duración sin más justificación:
+
+```python
+from phonometry import vibration
+
+print(vibration.pipeline_guideline_velocity("welded_steel"))                # 100.0
+print(vibration.pipeline_guideline_velocity("masonry_or_plastic"))          #  50.0
+print(vibration.pipeline_guideline_velocity(
+    "masonry_or_plastic", duration="long_term"))                            #  25.0
+```
+
+Las acometidas domiciliarias hasta 2 m del edificio se juzgan con los valores
+del cimiento del propio edificio, y los tubos de drenaje por la fila 3 sea cual
+sea su material.
+
+## 5. Vibración de larga duración
+
+La vibración de larga duración (*Dauererschütterungen*) es el caso contrario:
+se repite lo bastante como para que la estructura responda en sus frecuencias
+propias. La tabla 3 la resuelve con un valor por tipo en el plano de la última
+planta y nada en el cimiento, porque una estructura que vibra en su propia
+frecuencia se juzga donde vibra. Los valores son alrededor de una cuarta parte
+de los de corta duración:
+
+```python
+from phonometry import vibration
+
+for name in vibration.BUILDING_CLASSES:
+    short = vibration.guideline_velocity(name, location="top_floor")
+    long = vibration.guideline_velocity(
+        name, location="top_floor", duration="long_term"
+    )
+    print(name, short, long)
+# commercial 40.0 10.0 / residential 15.0 5.0 / sensitive 8.0 2.5
+```
+
+Pedir un valor de larga duración en el cimiento lanza un error, porque la tabla
+3 no tiene esa columna.
+
+## 6. De una velocidad a una tensión
+
+El apartado 6.2 es el puente de vuelta al cálculo formal. Para una viga o una
+losa unidireccional de sección rectangular llena, rigidez constante y masa
+uniforme, vibrando en un modo, la tensión de flexión de pico se deduce solo de
+la velocidad de pico:
+
+$$
+\hat{\sigma}_\mathrm{max} = 1{,}73 \left(E_\mathrm{dyn}\, \varrho\,
+\frac{G_\mathrm{ges}}{G_\mathrm{balken}}\right)^{0,5} k_n\, \hat{v}_\mathrm{max}
+$$
+
+Ni longitud, ni canto, ni luz: las dimensiones se cancelan, que es justamente
+lo que hace valiosa a la fórmula. Basta con una velocidad medida donde la
+amplitud es mayor. El coeficiente de modo $k_n$ está entre 1 y 1,3 en los casos
+de interés técnico, así que puede mover el resultado menos de un tercio, y
+$G_\mathrm{ges}/G_\mathrm{balken}$ vale 1 para una viga que no carga nada más
+que a sí misma.
+
+```python
+from phonometry import vibration
+
+# Hormigón, módulo dinámico de 30 GPa, 2400 kg/m3, primer modo, 10 mm/s de pico.
+# Ojo a la unidad: las tablas van en mm/s y esta fórmula en m/s.
+sigma = vibration.bending_stress(
+    0.010, dynamic_modulus_pa=3.0e10, density_kg_m3=2400.0
+)
+print(round(sigma / 1e6, 2), "MPa")     # 0.15 MPa
+```
+
+El apartado 6.4 añade la estimación que dice si el plano de la última planta va
+a responder siquiera: para un edificio de unas cinco plantas o más, la
+frecuencia propia horizontal más baja es aproximadamente $f_i \approx 10/n$ con
+$n$ el número de plantas.
+
+```python
+print(vibration.storey_fundamental_frequency(10))    # 1.0 Hz
+```
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim>
+Los **valores de referencia** de DIN 4150-3 tal como se publican: la tabla 1 en
+el cimiento frente a la frecuencia y en el plano de la última planta, la tabla
+2 para tuberías enterradas, la tabla 3 para vibración de larga duración, la
+duplicación de la fila 1 para estructuras de ingeniería macizas (5.1), la
+reducción al 50 % de la tabla 2 para larga duración (6.3) y el valor vertical
+de 20 mm/s para forjados (5.2).
+</ScopeClaim>
+
+<ScopeClaim>
+La lectura del **Bild 1** entre los valores impresos de las esquinas: rectas
+sobre un eje de frecuencia lineal, de modo que un valor dentro de una banda
+queda definido en vez de quedar a criterio de quien lee.
+</ScopeClaim>
+
+<ScopeClaim>
+La **tensión de flexión** de la fórmula (1) del 6.2 y la estimación por plantas
+$f_i \approx 10/n$ del 6.4.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Nada predice la vibración**: los valores de referencia se comparan con una
+medida que aportas tú. La predicción de la vibración transmitida por el terreno
+desde una fuente hasta un edificio, que es DIN 4150-1, no está aquí, y tampoco
+la percepción humana de la vibración en edificios de DIN 4150-2. Para las
+personas en lugar de las estructuras, ve a las páginas de
+[vibración en humanos](/phonometry/es/vibration/human/).
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**La vía de la tensión es una fórmula, no una comprobación de diseño.** Los
+apartados 4.2 a 4.4, que determinan las tensiones dinámicas por medida o por
+cálculo y las comparan con las admisibles, son lo que toca hacer cuando se
+supera un valor de referencia; aquí solo se implementa el puente en forma
+cerrada del 6.2. La fatiga, los asientos de suelos no cohesivos bajo vibración
+repetida (4.6, anexo C) y el desplazamiento de la cimentación están descritos
+en la norma y no modelados aquí.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ninguna cadena de medida.** Los requisitos de instrumentación de DIN 45669-1
+y -2, a los que remite el 5.4, no están implementados, y tampoco el acta de
+medida del anexo A.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Evaluación de la vibración de máquinas (ISO 20816-1)](/phonometry/es/vibration/machinery/machine-vibration-evaluation/):
+  la misma forma de pregunta hecha a una máquina en vez de a un edificio, y
+  respondida con zonas de evaluación en lugar de valores de referencia.
+- [Exposición humana a vibración (ISO 2631, ISO 5349)](/phonometry/es/vibration/human/human-vibration/):
+  qué hace esa misma vibración a una persona, ponderada para el cuerpo y no
+  para la estructura.
+- [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/vibration/structural/transfer-stiffness/):
+  los elementos que se intercalan para que la vibración no llegue.
+
+</SeeAlso>

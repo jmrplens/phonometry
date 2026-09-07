@@ -307,6 +307,7 @@ export const topics = [
           'vibration/structural/mechanical-mobility',
           'vibration/structural/junction-transmission',
           'vibration/structural/transfer-stiffness',
+          'vibration/structural/structural-damage',
         ],
       },
       {

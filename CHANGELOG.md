@@ -98,6 +98,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   printed Formula (3) carries an asterisk on all four of its symbols, which
   makes it the identity `a*wS = a*wS` and corrects nothing; Formula (4) beside
   it, and the clause's own prose, give the reading the library implements.
+- Whether the shaking cracks the building, which is the one vibration question
+  that is not about sound: the guideline values of DIN 4150-3, in
+  `vibration.guideline_velocity` and `vibration.assess_building_vibration`.
+
+  A pile driver, a tram or a blast puts vibration into the ground and the
+  neighbours ask about damage, not audibility. The standard answers with
+  guideline values for one measured quantity, the peak particle velocity, and
+  the numbers depend on where it was measured and how often it happens. At the
+  foundation Table 1 makes them a function of frequency, because the same
+  velocity at a lower frequency is a larger displacement and it is the
+  displacement across a wall that opens a crack; between the printed corners
+  the value is read off Bild 1, straight lines on a linear frequency axis,
+  which is what decides that a dwelling at 30 Hz is allowed 10 mm/s rather
+  than anything between 5 and 15. In the topmost floor plane the frequency
+  drops out, and long-term vibration is judged there and only there (Table 3).
+  Buried pipes have their own table by pipe material, halved for long-term
+  vibration, and floors have the single 20 mm/s of Clause 5.2. Alongside them,
+  `vibration.bending_stress` is Formula (1) of 6.2, which turns a measured
+  velocity into a bending stress without needing any of the beam's
+  dimensions, and `vibration.storey_fundamental_frequency` is the 10/n
+  estimate of 6.4.
 
 - The same two numbers beside a railway: **EN 16272-3-1:2012**, in the
   `spectrum="railway"` of the two rating functions.

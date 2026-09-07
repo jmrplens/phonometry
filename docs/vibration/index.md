@@ -24,6 +24,9 @@ machine injects into a reception plate; and EN 12354-5 assembles all of it into
 the sound pressure level predicted in a receiving room. That final prediction
 is also where this section hands over to the [sound
 insulation](../buildings/insulation/index.md) models of the buildings section.
+The same group holds the one question that is not about sound at all: whether
+the shaking damages the building, which DIN 4150-3 answers with guideline
+values for the peak particle velocity.
 
 The **human vibration** pages share the measurement philosophy of a sound
 level meter, applied to acceleration: frequency weightings that reflect body

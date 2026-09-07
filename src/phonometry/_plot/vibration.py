@@ -54,6 +54,7 @@ if TYPE_CHECKING:
     from ..vibration.human.seat_vibration import SeatTransmissionResult
     from ..vibration.machinery.diagnostics import FaultFrequencyResult
     from ..vibration.machinery.evaluation import VectorChangeResult
+    from ..vibration.structural.building_damage import DamageAssessment
     from ..vibration.structural.experimental_sea import PowerInjectionResult
     from ..vibration.structural.junction_transmission import (
         JunctionTransmissionResult,
@@ -169,6 +170,14 @@ _STRINGS: dict[str, str] = {
     "mean {value}": "media {value}",
     "Weighted r.m.s. acceleration [m/s²]": "Aceleración eficaz ponderada [m/s²]",
     "Seat transmission (ISO 10326-1): SEAT = {value}": "Transmisión del asiento (ISO 10326-1): SEAT = {value}",
+    # Effects of vibration on structures (DIN 4150-3 Table 1, Bild 1).
+    "Peak velocity $v_i$ [mm/s]": "Velocidad de pico $v_i$ [mm/s]",
+    "commercial and industrial": "comercial e industrial",
+    "dwellings": "viviendas",
+    "especially sensitive": "especialmente sensible",
+    "measured {v} mm/s at {f} Hz": "medido {v} mm/s a {f} Hz",
+    "guideline {v} mm/s": "valor de referencia {v} mm/s",
+    "Guideline values at the foundation (DIN 4150-3 Table 1)": "Valores de referencia en el cimiento (DIN 4150-3, tabla 1)",
 }
 
 
@@ -719,6 +728,93 @@ def plot_seat_transmission(
         loc="best",
         fontsize="small",
     )
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_damage_assessment(
+    result: DamageAssessment,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Bild 1 of DIN 4150-3 with one measurement on it.
+
+    The three foundation guideline curves of Table 1 against frequency, and
+    the measured velocity as a point. A measurement taken in the topmost
+    floor plane, or judged against Table 3, has no frequency to be placed at;
+    it is drawn as the horizontal guideline it was compared with, and the
+    point sits on the frequency axis limit its curve is flat over.
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.building_damage.DamageAssessment`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured-point ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+    from ..vibration.structural.building_damage import (
+        BUILDING_CLASSES,
+        FOUNDATION_FREQUENCIES_HZ,
+        SHORT_TERM_FOUNDATION_MM_S,
+    )
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(FOUNDATION_FREQUENCIES_HZ, dtype=np.float64)
+    names = {
+        "commercial": "commercial and industrial",
+        "residential": "dwellings",
+        "sensitive": "especially sensitive",
+    }
+    colors = (_C_PRIMARY, _C_TERTIARY, _C_SECONDARY)
+    for cls, color in zip(BUILDING_CLASSES, colors, strict=True):
+        curve = np.asarray(SHORT_TERM_FOUNDATION_MM_S[cls], dtype=np.float64)
+        ax.plot(
+            freqs,
+            curve,
+            color=color,
+            lw=2.0 if cls == result.building_class else 1.2,
+            alpha=1.0 if cls == result.building_class else 0.45,
+            marker="o",
+            markersize=3,
+            label=_t(names[cls], language),
+        )
+    if result.frequency_hz is None:
+        ax.axhline(
+            result.guideline_mm_s,
+            color=_C_REFERENCE,
+            ls="--",
+            lw=1.2,
+            label=_t("guideline {v} mm/s", language).format(
+                v=format_number(result.guideline_mm_s, language, decimals=1, trim=True)
+            ),
+        )
+        f_point = float(freqs[-1])
+    else:
+        f_point = float(result.frequency_hz)
+    kwargs.setdefault("color", _C_REFERENCE)
+    kwargs.setdefault("marker", "D")
+    kwargs.setdefault("markersize", 7)
+    kwargs.setdefault("ls", "none")
+    kwargs.setdefault(
+        "label",
+        _t("measured {v} mm/s at {f} Hz", language).format(
+            v=format_number(result.velocity_mm_s, language, decimals=1, trim=True),
+            f=format_number(f_point, language, decimals=0),
+        ),
+    )
+    ax.plot([f_point], [result.velocity_mm_s], **kwargs)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Peak velocity $v_i$ [mm/s]", language))
+    ax.set_title(
+        _t("Guideline values at the foundation (DIN 4150-3 Table 1)", language)
+    )
+    ax.set_xlim(0.0, max(float(freqs[-1]), f_point) * 1.02)
+    ax.set_ylim(bottom=0.0)
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 

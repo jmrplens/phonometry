@@ -48,6 +48,12 @@ mobilities, and predicts the sound pressure level in the receiving room,
 which is where this section meets the
 [sound insulation](../../buildings/insulation/index.md) models.
 
+One page here asks a different question of the same shaking.
+[Vibration damage to structures (DIN 4150-3)](structural-damage.md)
+does not care what a building radiates, only whether it cracks: the guideline
+values for the peak particle velocity a foundation, a topmost floor plane or a
+buried pipe may see, by building class and by how often the vibration occurs.
+
 ## Pages in this section
 
 - [Mechanical mobility and the FRF family (ISO 7626-1)](mechanical-mobility.md):
@@ -59,6 +65,9 @@ which is where this section meets the
   by power injection, with the modal densities they need.
 - [Transfer stiffness of resilient elements (ISO 10846)](transfer-stiffness.md):
   dynamic transfer stiffness of isolators by the direct and indirect methods.
+- [Vibration damage to structures (DIN 4150-3)](structural-damage.md):
+  the guideline peak velocities of Tables 1, 2 and 3, the reading of Bild 1
+  between them, and the bending stress a measured velocity implies.
 
 ## See also
 

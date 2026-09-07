@@ -591,6 +591,7 @@ from .vibration import (
     generate_seat_vibration_test,
     generate_shock_dose_measures,
     generate_spinal_response_peaks,
+    generate_structural_damage_guidelines,
     generate_transfer_stiffness,
     generate_vibration_weighting,
     generate_vibration_weighting_family,
@@ -735,6 +736,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_machine_vibration_trend,
     # Gear units (ISO 20816-9): the two rating curves of Annex A.
     generate_gear_unit_rating_curves,
+    # Effects on structures (DIN 4150-3): the guideline values a building,
+    # a topmost floor plane and a buried pipe are judged by.
+    generate_structural_damage_guidelines,
     generate_experimental_sea_clf,
     generate_plateau_transmission_loss,
     generate_orthotropic_transmission_loss,

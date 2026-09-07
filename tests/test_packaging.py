@@ -10,7 +10,11 @@ guides that had since been filed into subdirectories. The generator pins those
 links to the release tag instead, and the tests below hold that pin: no ``main``
 ref may reach the page, every ref must be the tag of the version in ``VERSION``,
 and every path behind one must exist in this checkout, which is the tree the tag
-will be cut from.
+will be cut from, and be tracked, because a tag carries a commit and a commit
+carries only what git has been told about. Existing is the weaker half of that
+pair: a generated artefact that is present and never added passes it and is
+absent from the release all the same, which is the failure reported in #735 for
+the brand images and the conformance badge.
 
 Those three hold the page PyPI serves, not the copy committed here. Between
 releases ``VERSION`` still names the last release, so the committed copy pins
@@ -33,8 +37,11 @@ here can gate, so the prose keeps the mechanism and drops the number.
 
 import pathlib
 import re
+import subprocess
 import sys
 import tomllib
+
+import pytest
 
 import phonometry
 
@@ -152,6 +159,82 @@ def test_pinned_pypi_links_resolve_in_this_checkout() -> None:
     assert not dangling, (
         "README_PYPI.md links to paths that are not in this checkout, so they "
         f"will not be in the release tag either: {dangling}"
+    )
+
+
+def _tracked(paths: list[str], root: pathlib.Path = _ROOT) -> set[str]:
+    """The subset of *paths* git has under version control, inside *root*.
+
+    One call for the whole list: ``git ls-files`` echoes back only what it
+    tracks, so what it leaves out is the answer. It reads the index, which
+    is what the next commit will carry, and the release commit is made and
+    tagged in one step, so the index and that commit are the same thing
+    where this runs. *root* is a parameter so the predicate can be asked
+    about a repository built for the purpose.
+    """
+    listed = subprocess.run(  # noqa: S603 - fixed argv, paths from our own page
+        ["git", "-C", str(root), "ls-files", "-z", "--", *paths],  # noqa: S607
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    return set(listed.split("\0")) - {""}
+
+
+def _git(root: pathlib.Path, *args: str) -> None:
+    """Run one git command in *root*, for building a fixture repository."""
+    subprocess.run(  # noqa: S603 - fixed argv, arguments from this file
+        ["git", "-C", str(root), *args],  # noqa: S607
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+
+def test_tracked_reports_a_file_that_is_there_and_untracked(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The predicate answers both ways, or it proves nothing.
+
+    The failure this guards against is not a missing file, it is a file that
+    is *there* and absent from the commit anyway, so that is what it is
+    asked about: a repository with one committed page and one generated
+    artefact beside it that nobody added. `exists()` cannot tell them apart
+    and this must.
+    """
+    _git(tmp_path, "init", "--quiet")
+    _git(tmp_path, "config", "user.email", "packaging@example.invalid")
+    _git(tmp_path, "config", "user.name", "packaging test")
+    (tmp_path / "README.md").write_text("committed\n", encoding="utf-8")
+    _git(tmp_path, "add", "README.md")
+    _git(tmp_path, "commit", "--quiet", "-m", "initial")
+    (tmp_path / "generated.svg").write_text("<svg/>\n", encoding="utf-8")
+    assert (tmp_path / "generated.svg").exists()
+    assert _tracked(["README.md", "generated.svg"], tmp_path) == {"README.md"}
+    assert _tracked(["never-written.svg"], tmp_path) == set()
+
+
+def test_pinned_pypi_links_are_tracked_by_git() -> None:
+    """Existing in the tree is not enough: the tag carries only what is tracked.
+
+    A tag points at a commit, and a commit holds tracked files. A path that
+    is present but ignored or simply never added satisfies the test above
+    and is still absent from the release, which is the shape of the report
+    in #735: a URL that answers on a working tree and 404s on the tag. Every
+    generated artefact this page names (the conformance badge, the brand
+    images, the animation posters) is committed today, and this is what says
+    so at the release commit rather than after the upload.
+    """
+    if not (_ROOT / ".git").exists():
+        pytest.skip("not a git checkout, so there is nothing to ask git about")
+    paths = sorted(
+        {match["path"] for match in _REPO_URL.finditer(_committed_pypi_readme())}
+    )
+    assert paths, "no repository links found; the pattern stopped matching"
+    untracked = sorted(set(paths) - _tracked(paths))
+    assert not untracked, (
+        "README_PYPI.md links to paths git does not track, so the release tag "
+        f"will not carry them however present they look here: {untracked}"
     )
 
 

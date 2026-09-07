@@ -151,6 +151,12 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.tag }}
+          # The tag has to name the commit these checks ran on. Left out,
+          # the tag is cut from whatever the default branch points at when
+          # this step runs, so a push landing meanwhile would be inside a
+          # release nobody built or tested, and the description uploaded a
+          # few steps earlier would name a tree the tag does not hold.
+          target_commitish: ${{ github.sha }}
           name: Release ${{ steps.version.outputs.tag }}
           body: |
             See the [changelog](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) for the full details of this release.

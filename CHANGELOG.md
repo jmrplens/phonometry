@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- A release tag names the commit its checks ran on. The release step passed
+  the tag name and nothing else, and without a commit to point at the tag is
+  cut from whatever the default branch holds when that step runs, which is
+  not necessarily the commit that was built, tested and uploaded minutes
+  earlier. A push landing in that window would be inside a release nobody
+  ran anything against, and the description already sent to PyPI would name
+  a tree the tag does not carry. The step names the triggering commit now.
+
+  The same distinction reached the page itself. Every repository link on the
+  frozen description is pinned to the release tag, and what held that up was
+  a check that the path exists in the working tree. A tag points at a
+  commit and a commit carries tracked files, so a generated artefact that is
+  present and never added passes that check and is missing from the release
+  all the same: a URL that answers in a checkout and 404s on the tag, which
+  is what #735 reported for the brand images and the conformance badge. The
+  paths are asked of git now rather than of the filesystem.
+
 - The accessibility audit drives the browser this site installs. Every audit
   behind `scripts/with-preview.mjs` needs a headless Chrome and they were not
   all asking the same package for one: the in-house scripts use `puppeteer`,

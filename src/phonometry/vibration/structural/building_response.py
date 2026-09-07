@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-r"""Predicting the fundamental frequency and damping of a building (ISO 4866).
+r"""Predicting the fundamental frequency of a building (ISO 4866 Annex D).
 
 A vibration measurement on a building is read against the building's own
 response, and that response starts with one number: the lowest natural
@@ -105,6 +105,34 @@ def _coefficient(model: str, coefficient: float | None) -> float:
     return 0.5 * (low + high)
 
 
+def _refuse_unused(model: str, **given: object) -> None:
+    """Refuse an argument the chosen predictor has no use for.
+
+    Each of the four forms is written on a different set of dimensions, and a
+    caller who hands over one the form ignores has misread which form they
+    asked for. Taking it silently is worse than saying so: a height given to
+    the storey model would be carried into the result and drawn on Figure D.1
+    as though the prediction had used it.
+
+    :param model: The predictor, one of :data:`PERIOD_MODELS`.
+    :param given: The optional arguments as the caller passed them.
+    :raises ValueError: On the first argument the model does not use.
+    """
+    used = {
+        "storeys": {"storeys"},
+        "height": {"height_m", "coefficient"},
+        "height_width": {"height_m", "width_m", "coefficient"},
+        "slenderness": {"height_m", "width_m", "coefficient"},
+    }[model]
+    for parameter, value in given.items():
+        if value is not None and parameter not in used:
+            msg = (
+                f"The {model!r} model does not use {parameter!r}; it is not "
+                "accepted, so a value given for it cannot be silently ignored."
+            )
+            raise ValueError(msg)
+
+
 def fundamental_period(
     model: PeriodModel | str,
     *,
@@ -136,14 +164,18 @@ def fundamental_period(
         which has no coefficient to choose.
     :return: The fundamental period, in seconds.
     :raises ValueError: If the model is not one of the four, if an argument
-        the model needs is missing or not positive, or if a coefficient is
-        given for the storey model.
+        the model needs is missing or not positive, or if an argument the
+        model does not use is given.
     """
     name = require_choice(str(model), "model", PERIOD_MODELS)
+    _refuse_unused(
+        name,
+        storeys=storeys,
+        height_m=height_m,
+        width_m=width_m,
+        coefficient=coefficient,
+    )
     if name == "storeys":
-        if coefficient is not None:
-            msg = "The storey model has no coefficient; 'coefficient' is not accepted."
-            raise ValueError(msg)
         if storeys is None:
             msg = "The storey model needs 'storeys'."
             raise ValueError(msg)

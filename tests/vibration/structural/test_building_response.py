@@ -47,7 +47,9 @@ def test_formula_d_1_is_linear_in_the_height() -> None:
 def test_the_default_coefficient_is_the_middle_of_the_printed_range() -> None:
     """D.2 gives a range and no way to choose inside it, so take the middle."""
     for model, (low, high) in br.PERIOD_COEFFICIENT_RANGES.items():
-        kwargs = {"height_m": 40.0, "width_m": 25.0}
+        kwargs: dict = {"height_m": 40.0}
+        if model != "height":
+            kwargs["width_m"] = 25.0
         default = br.fundamental_period(model, **kwargs)
         middle = br.fundamental_period(model, coefficient=0.5 * (low + high), **kwargs)
         assert default == pytest.approx(middle)
@@ -136,9 +138,27 @@ def test_a_model_needs_the_arguments_it_is_written_on() -> None:
         br.fundamental_period("slenderness", height_m=40.0)
 
 
-def test_the_storey_model_has_no_coefficient_to_choose() -> None:
-    with pytest.raises(ValueError, match=r"'coefficient' is not accepted"):
+def test_a_model_refuses_an_argument_it_does_not_use() -> None:
+    """Every form is written on its own dimensions, and only on those.
+
+    Taking an argument a form ignores is worse than refusing it: a height
+    handed to the storey model would be carried into the estimate and drawn on
+    Figure D.1 as if the prediction had used it.
+    """
+    with pytest.raises(ValueError, match=r"'storeys' model does not use 'coefficient'"):
         br.fundamental_period("storeys", storeys=10, coefficient=0.022)
+    with pytest.raises(ValueError, match=r"'storeys' model does not use 'height_m'"):
+        br.fundamental_period("storeys", storeys=10, height_m=60.0)
+    with pytest.raises(ValueError, match=r"'height' model does not use 'width_m'"):
+        br.fundamental_period("height", height_m=60.0, width_m=15.0)
+    with pytest.raises(ValueError, match=r"does not use 'storeys'"):
+        br.fundamental_period("height_width", height_m=60.0, width_m=15.0, storeys=18)
+
+
+def test_the_estimate_refuses_the_height_it_would_have_drawn_wrongly() -> None:
+    """The regression behind the rule above, at the entry point that draws."""
+    with pytest.raises(ValueError, match=r"'storeys' model does not use 'height_m'"):
+        br.estimate_fundamental_frequency("storeys", storeys=10, height_m=60.0)
 
 
 def test_a_model_outside_the_four_is_refused() -> None:

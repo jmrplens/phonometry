@@ -47,8 +47,10 @@ $$
 
 with $h$ the height and $b$ the width parallel to the force, both in metres.
 The first knows only how tall the building is. The second adds how wide it is,
-which is what actually resists the sway. The third adds a slenderness factor
-that shortens the period further for a tall narrow building.
+which is what actually resists the sway. The third adds a slenderness factor,
+$\sqrt{h/(h+b)}$, which is always below 1 and so shortens the period relative
+to the second form. It shortens it *least* for a tall narrow building, where
+the factor approaches 1, and most for a squat wide one.
 
 D.2 prints a **range** for each coefficient rather than a value: 0,014 to 0,03
 for $k_1$, 0,087 to 0,109 for $k_2$, 0,06 to 0,08 for $k_3$. The range is the
@@ -56,12 +58,16 @@ spread across the codes it collected them from, and the annex offers no way to
 choose inside it, so `fundamental_period` takes the midpoint unless you name a
 coefficient.
 
+The four predictors take different arguments, so comparing them means
+describing the same building twice: eighteen storeys at a shade over three
+metres each is the sixty metres the other three are given.
+
 ```python
 from phonometry import vibration
 
-# A sixty-metre building, fifteen wide, by each of the four predictors.
+# The same sixty-metre building, fifteen wide, by each of the four predictors.
 for model, kwargs in (
-    ("storeys", {"storeys": 18}),
+    ("storeys", {"storeys": 18}),        # 18 storeys, about 3.3 m each
     ("height", {"height_m": 60.0}),
     ("height_width", {"height_m": 60.0, "width_m": 15.0}),
     ("slenderness", {"height_m": 60.0, "width_m": 15.0}),
@@ -110,6 +116,20 @@ ax.fill_between(
     label=r"$\pm$50 %",
 )
 ax.loglog(heights, fit, label="$f = 46/h$")
+
+# The three code forms over it, for a building four times as tall as it is
+# wide, which is what makes them comparable on one axis.
+for model in ("height", "height_width", "slenderness"):
+    values = [
+        vibration.fundamental_frequency(
+            model,
+            height_m=float(h),
+            **({} if model == "height" else {"width_m": float(h) / 4.0}),
+        )
+        for h in heights
+    ]
+    ax.loglog(heights, values, "--", label=model)
+
 ax.set(xlabel="Building height $h$ [m]", ylabel="Fundamental frequency $f$ [Hz]")
 ax.grid(True, which="both", alpha=0.3)
 ax.legend()

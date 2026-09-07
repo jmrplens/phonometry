@@ -48,7 +48,9 @@ $$
 con $h$ la altura y $b$ la anchura paralela a la fuerza, las dos en metros. La
 primera solo sabe lo alto que es el edificio. La segunda añade lo ancho que es,
 que es lo que de verdad se opone al balanceo. La tercera añade un factor de
-esbeltez que acorta todavía más el periodo de un edificio alto y estrecho.
+esbeltez, $\sqrt{h/(h+b)}$, siempre menor que 1, que acorta el periodo respecto
+a la segunda forma. Lo acorta *menos* en un edificio alto y estrecho, donde el
+factor se acerca a 1, y más en uno bajo y ancho.
 
 El D.2 imprime un **intervalo** para cada coeficiente en vez de un valor: de
 0,014 a 0,03 para $k_1$, de 0,087 a 0,109 para $k_2$, de 0,06 a 0,08 para
@@ -57,12 +59,16 @@ el anexo no da ningún criterio para elegir dentro de él, así que
 `fundamental_period` toma el punto medio salvo que se le indique un
 coeficiente.
 
+Los cuatro predictores toman argumentos distintos, así que compararlos obliga a
+describir el mismo edificio dos veces: dieciocho plantas de poco más de tres
+metros son los sesenta metros que reciben los otros tres.
+
 ```python
 from phonometry import vibration
 
-# Un edificio de sesenta metros, quince de ancho, por cada uno de los cuatro.
+# El mismo edificio de sesenta metros, quince de ancho, por cada uno de los cuatro.
 for model, kwargs in (
-    ("storeys", {"storeys": 18}),
+    ("storeys", {"storeys": 18}),        # 18 plantas, de unos 3,3 m
     ("height", {"height_m": 60.0}),
     ("height_width", {"height_m": 60.0, "width_m": 15.0}),
     ("slenderness", {"height_m": 60.0, "width_m": 15.0}),
@@ -112,6 +118,20 @@ ax.fill_between(
     label=r"$\pm$50 %",
 )
 ax.loglog(heights, fit, label="$f = 46/h$")
+
+# Las tres formas normativas encima, para un edificio cuatro veces más alto
+# que ancho, que es lo que las hace comparables en un mismo eje.
+for model in ("height", "height_width", "slenderness"):
+    values = [
+        vibration.fundamental_frequency(
+            model,
+            height_m=float(h),
+            **({} if model == "height" else {"width_m": float(h) / 4.0}),
+        )
+        for h in heights
+    ]
+    ax.loglog(heights, values, "--", label=model)
+
 ax.set(xlabel="Altura del edificio $h$ [m]",
        ylabel="Frecuencia fundamental $f$ [Hz]")
 ax.grid(True, which="both", alpha=0.3)

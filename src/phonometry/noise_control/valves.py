@@ -876,6 +876,17 @@ def expander_noise(  # noqa: PLR0913
             f"{throat_diameter!r} m against {internal_diameter!r} m."
         )
         raise ValueError(msg)
+    signed = {
+        "expander.efficiency_correction": expander.efficiency_correction,
+        "velocity_correction": velocity_correction,
+    }
+    for name, value in signed.items():
+        if not math.isfinite(value):
+            msg = (
+                f"'{name}' is a signed correction in dB, so it may be "
+                f"negative, but it has to be a number; got {value!r}."
+            )
+            raise ValueError(msg)
 
     pipe_velocity = min(
         4.0 * flow / (math.pi * rho2 * bore**2),

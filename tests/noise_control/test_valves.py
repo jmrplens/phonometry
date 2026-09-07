@@ -588,6 +588,22 @@ class TestExpander:
             warnings.simplefilter("error", valves.ValveNoiseWarning)
             valves.valve_aerodynamic_noise(stream, trim, pipe)
 
+    @pytest.mark.parametrize("bad", [math.nan, math.inf])
+    def test_it_refuses_a_correction_that_is_not_a_number(self, bad: float) -> None:
+        # The two signed corrections may be negative, and Table 4 prints the
+        # expander's own as -3,0, so they are not caught by a positivity
+        # guard; without a finiteness one a NaN reaches every band.
+        with pytest.raises(ValueError, match="signed correction"):
+            valves.expander_noise(
+                np.array([1000.0]),
+                mass_flow=50.0,
+                downstream_density=0.265,
+                downstream_sound_speed=480.0,
+                internal_diameter=0.15,
+                throat_diameter=0.1,
+                velocity_correction=bad,
+            )
+
     def test_the_pipe_velocity_is_capped_at_mach_eight_tenths(self) -> None:
         # Equation (34) is capped, so a pipe that would run supersonic is
         # computed as if it ran at 0,8.

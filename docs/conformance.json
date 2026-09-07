@@ -3,8 +3,8 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 844,
-    "passing": 844,
+    "checks": 849,
+    "passing": 849,
     "failing": 0,
     "domains": 70,
     "standards": 399,
@@ -68,6 +68,7 @@
     "s",
     "sone",
     "sone_HMS",
+    "sr",
     "tu_HMS",
     "vacil",
     "vacil_HMS",
@@ -480,8 +481,8 @@
     {
       "id": "ducted-silencer-measurement-iso-7235-iso-11691",
       "title": "Ducted silencer measurement (ISO 7235, ISO 11691)",
-      "checks": 10,
-      "passing": 10
+      "checks": 15,
+      "passing": 15
     },
     {
       "id": "hvac-noise-vdi-2081",
@@ -22855,6 +22856,171 @@
           "upper": 1.7
         }
       },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/open-end-transmission-loss-and-reflection-b-3-b-4",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Open-end transmission loss and reflection (B.3), (B.4)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "D_td = -10 lg(1 - r^2) at all 30 pairs"
+      },
+      "computed": {
+        "value": 1.24e-14,
+        "label": "largest disagreement 1.243e-14 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 1.24e-14
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/solid-angle-of-radiation-at-the-duct-end-table-b-1",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Solid angle of radiation at the duct end (Table B.1)",
+      "kind": "record",
+      "expected": {
+        "label": "A (flush in a wall) = 6.2832 sr; B (wall and floor) = 3.1416 sr; C (free in the room) = 12.5664 sr; D (on the floor) = 6.2832 sr; E (mid-room duct) = 12.5664 sr",
+        "record": {
+          "A (flush in a wall)": 6.283185307179586,
+          "B (wall and floor)": 3.141592653589793,
+          "C (free in the room)": 12.566370614359172,
+          "D (on the floor)": 6.283185307179586,
+          "E (mid-room duct)": 12.566370614359172
+        }
+      },
+      "computed": {
+        "label": "A (flush in a wall) = 6.2832 sr; B (wall and floor) = 3.1416 sr; C (free in the room) = 12.5664 sr; D (on the floor) = 6.2832 sr; E (mid-room duct) = 12.5664 sr",
+        "record": {
+          "A (flush in a wall)": 6.283185307179586,
+          "B (wall and floor)": 3.141592653589793,
+          "C (free in the room)": 12.566370614359172,
+          "D (on the floor)": 6.283185307179586,
+          "E (mid-room duct)": 12.566370614359172
+        }
+      },
+      "unit": "sr",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/rectangular-cut-on-frequency-eq-5",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Rectangular cut-on frequency (Eq. (5))",
+      "kind": "scalar",
+      "expected": {
+        "value": 343.00000000000006,
+        "label": "343,000000 Hz from the (1, 0) eigenvalue"
+      },
+      "computed": {
+        "value": 343.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": -5.68e-14
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/circular-cut-on-frequency-eq-4",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Circular cut-on frequency (Eq. (4))",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.006701969160318,
+        "label": "0,59 / (1,8412 / pi) = 1,006701"
+      },
+      "computed": {
+        "value": 1.006702
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/transmission-loss-of-an-air-terminal-unit-eq-6",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Transmission loss of an air-terminal unit (Eq. (6))",
+      "kind": "record",
+      "expected": {
+        "label": "63 Hz gap = 11.2255 dB; 2000 Hz gap = 0.0525 dB",
+        "record": {
+          "63 Hz gap": 11.225451,
+          "2000 Hz gap": 0.052513
+        }
+      },
+      "computed": {
+        "label": "63 Hz gap = 11.2255 dB; 2000 Hz gap = 0.0525 dB",
+        "record": {
+          "63 Hz gap": 11.225451,
+          "2000 Hz gap": 0.052513
+        }
+      },
+      "unit": "dB",
       "tolerance": {
         "mode": "absolute",
         "value": 0.0

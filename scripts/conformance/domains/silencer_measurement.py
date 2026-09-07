@@ -23,6 +23,8 @@ from __future__ import annotations
 
 import math
 
+import numpy as np
+
 import phonometry as ph
 
 from ..registry import Outcome, mask, numeric, record, register
@@ -272,3 +274,149 @@ def _chk_area_ratio() -> Outcome:
         "upper": ph.noise_control.substitution_area_ratio(0.1 * high, 0.1),
     }
     return record(expected, computed)
+
+
+#: A 350 mm circular test duct, as its cross-sectional area in m², and the
+#: octave centres a laboratory would report it over.
+_DUCT_AREA = 0.0962
+_BANDS = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0)
+
+
+@register(
+    _ISO7235, "ISO 7235:2003", "Open-end transmission loss and reflection (B.3), (B.4)"
+)
+def _chk_open_end_identity() -> Outcome:
+    """The two Annex B equations are the same physics said twice.
+
+    Neither is printed with a worked value, but they cannot disagree: what
+    the duct mouth does not transmit it reflects, so
+    ``D_td = -10 lg(1 - r^2)`` at every frequency, area and solid angle. The
+    row evaluates both at six octave centres on a 350 mm duct, once for each
+    of the five configurations of Table B.1, and reports the largest
+    disagreement across all thirty pairs.
+    """
+    worst = 0.0
+    for angle in ph.noise_control.RADIATION_SOLID_ANGLES.values():
+        loss = ph.noise_control.open_end_transmission_loss(
+            _BANDS, _DUCT_AREA, solid_angle=angle
+        )
+        reflected = ph.noise_control.open_end_reflection_coefficient(
+            _BANDS, _DUCT_AREA, solid_angle=angle
+        )
+        closed = -10.0 * np.log10(1.0 - reflected**2)
+        worst = max(worst, float(np.max(np.abs(loss - closed))))
+    return numeric(
+        0.0,
+        worst,
+        1e-12,
+        unit="dB",
+        places=12,
+        expected_label="D_td = -10 lg(1 - r^2) at all 30 pairs",
+        computed_label=f"largest disagreement {worst:.3e} dB",
+    )
+
+
+@register(
+    _ISO7235, "ISO 7235:2003", "Solid angle of radiation at the duct end (Table B.1)"
+)
+def _chk_solid_angles() -> Outcome:
+    """Table B.1, all five configurations of Figure B.2.
+
+    The same five values are printed as Table 1 of ISO 5135:1999, entry for
+    entry: a duct flush in a wall radiates into a half space, one at the
+    junction of a wall and the floor into a quarter, and one standing free in
+    the room into the whole of it.
+    """
+    expected = {
+        "A (flush in a wall)": 2.0 * math.pi,
+        "B (wall and floor)": math.pi,
+        "C (free in the room)": 4.0 * math.pi,
+        "D (on the floor)": 2.0 * math.pi,
+        "E (mid-room duct)": 4.0 * math.pi,
+    }
+    computed = dict(
+        zip(
+            expected,
+            ph.noise_control.RADIATION_SOLID_ANGLES.values(),
+            strict=True,
+        )
+    )
+    return record(expected, computed, unit="sr")
+
+
+@register(_ISO7235, "ISO 7235:2003", "Rectangular cut-on frequency (Eq. (5))")
+def _chk_rectangular_cut_on() -> Outcome:
+    """Equation (5) is exact, and the library's own eigenvalues say so.
+
+    The first higher-order mode of a rigid rectangular duct is a half
+    wavelength across the larger dimension, so ``f = c / 2H``, which is the
+    ``0,5 c / H`` NOTE 2 prints. The independent route through Norton &
+    Karczub's eigenvalues has to give the same number to the last bit.
+    """
+    exact = ph.noise_control.rectangular_duct_cut_on(
+        0.5, 0.2, speed_of_sound=343.0, count=1
+    )
+    found = ph.noise_control.modal_filter_cut_on(larger_dimension=0.5)
+    return numeric(
+        float(exact.cut_on_no_flow[0]),
+        found,
+        1e-9,
+        unit="Hz",
+        places=6,
+        expected_label="343,000000 Hz from the (1, 0) eigenvalue",
+    )
+
+
+@register(_ISO7235, "ISO 7235:2003", "Circular cut-on frequency (Eq. (4))")
+def _chk_circular_cut_on() -> Outcome:
+    """Equation (4) is the same mode with a rounded constant.
+
+    The exact coefficient is the first zero of the derivative of the Bessel
+    function of order one divided by pi, 1,8412 / pi = 0,58607. The standard
+    prints 0,59, which is 0,67 % high: on the 0,4 m duct of the sound source
+    of ISO 11691 that is 505,9 Hz against 502,6 Hz, a difference of 3,4 Hz on
+    a frequency the modal filter requirement steps at. The row pins the
+    ratio, which is the part that does not depend on the duct.
+    """
+    exact = ph.noise_control.circular_duct_cut_on(0.4, speed_of_sound=343.0, count=1)
+    found = ph.noise_control.modal_filter_cut_on(diameter=0.4)
+    return numeric(
+        0.59 / (1.8412 / math.pi),
+        found / float(exact.cut_on_no_flow[0]),
+        1e-9,
+        places=6,
+        expected_label="0,59 / (1,8412 / pi) = 1,006701",
+    )
+
+
+@register(
+    _ISO7235, "ISO 7235:2003", "Transmission loss of an air-terminal unit (Eq. (6))"
+)
+def _chk_measured_transmission_loss() -> Outcome:
+    """Equation (6) and the limit that makes it meaningful.
+
+    ``D_t = D_i + D_td`` puts back what the open end of the duct was keeping
+    in anyway, so the gap between the two quantities has to be Equation (B.3)
+    exactly. The expected side here is that equation written out again away
+    from the library: on a 350 mm duct flush with a wall it is 11,2 dB at
+    63 Hz and 0,05 dB at 2 kHz, which is why an air-terminal unit's
+    transmission loss and its insertion loss are the same number at the top
+    of the range and are not at the bottom.
+    """
+    insertion = np.array([4.0, 7.0, 12.0, 20.0, 26.0, 28.0])
+    open_end = ph.noise_control.open_end_transmission_loss(_BANDS, _DUCT_AREA)
+    found = ph.noise_control.measured_transmission_loss(insertion, open_end)
+
+    def printed(band: float) -> float:
+        """Equation (B.3) written out again, away from the library."""
+        mouth = 4.0 * math.pi * band * math.sqrt(_DUCT_AREA) / 343.0
+        return 10.0 * math.log10(1.0 + 2.0 * math.pi / mouth**2)
+
+    expected = {
+        f"{band:.0f} Hz gap": round(printed(band), 6) for band in (63.0, 2000.0)
+    }
+    computed = {
+        "63 Hz gap": round(float(found[0] - insertion[0]), 6),
+        "2000 Hz gap": round(float(found[-1] - insertion[-1]), 6),
+    }
+    return record(expected, computed, unit="dB")

@@ -344,3 +344,159 @@ class TestPublishedScope:
 
     def test_the_band_range(self) -> None:
         assert sm.SURVEY_BAND_RANGE_HZ == (50.0, 10000.0)
+
+
+#: A 350 mm circular test duct, as its cross-sectional area in m².
+DUCT_AREA = 0.0962
+BANDS = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0])
+
+
+class TestOpenEnd:
+    """ISO 7235 Annex B.3, the duct mouth that keeps sound in."""
+
+    def test_the_loss_falls_to_nothing_at_high_frequency(self) -> None:
+        found = sm.open_end_transmission_loss(BANDS, DUCT_AREA)
+        assert found[0] > found[-1]
+        assert found[-1] == pytest.approx(0.0, abs=0.1)
+
+    def test_the_loss_is_large_where_the_mouth_is_small(self) -> None:
+        # At 63 Hz a 350 mm duct is a tenth of a wavelength across, and
+        # nine tenths of the energy turns round.
+        found = sm.open_end_transmission_loss(BANDS, DUCT_AREA)
+        assert float(found[0]) == pytest.approx(11.23, abs=5e-3)
+
+    def test_a_duct_in_free_space_reflects_less_than_a_flush_one(self) -> None:
+        # Twice the solid angle is twice the room to radiate into.
+        flush = sm.open_end_transmission_loss(
+            BANDS, DUCT_AREA, solid_angle=sm.RADIATION_SOLID_ANGLES["A"]
+        )
+        free = sm.open_end_transmission_loss(
+            BANDS, DUCT_AREA, solid_angle=sm.RADIATION_SOLID_ANGLES["C"]
+        )
+        assert np.all(free > flush)
+
+    def test_the_two_annex_b_equations_close_on_the_energy(self) -> None:
+        # (B.3) and (B.4) are the same physics said twice: what is not
+        # transmitted is reflected, so D_td = -10 lg(1 - r^2) exactly.
+        for angle in sm.RADIATION_SOLID_ANGLES.values():
+            loss = sm.open_end_transmission_loss(BANDS, DUCT_AREA, solid_angle=angle)
+            reflected = sm.open_end_reflection_coefficient(
+                BANDS, DUCT_AREA, solid_angle=angle
+            )
+            assert loss == pytest.approx(-10.0 * np.log10(1.0 - reflected**2))
+
+    def test_the_reflection_coefficient_stays_in_range(self) -> None:
+        found = sm.open_end_reflection_coefficient(BANDS, DUCT_AREA)
+        assert np.all(found > 0.0)
+        assert np.all(found < 1.0)
+
+    def test_the_anechoic_termination_limit_of_five_two_four(self) -> None:
+        # A test duct qualifies as anechoic only below r = 0,3, which this
+        # bare open end reaches only above 700 Hz or so.
+        bands = np.array([500.0, 1000.0])
+        found = sm.open_end_reflection_coefficient(bands, DUCT_AREA)
+        assert float(found[0]) > 0.3
+        assert float(found[1]) < 0.3
+
+    def test_the_five_printed_solid_angles(self) -> None:
+        assert sm.RADIATION_SOLID_ANGLES == {
+            "A": 2.0 * math.pi,
+            "B": math.pi,
+            "C": 4.0 * math.pi,
+            "D": 2.0 * math.pi,
+            "E": 4.0 * math.pi,
+        }
+
+    @pytest.mark.parametrize("bad", [0.0, -0.1])
+    def test_an_area_that_is_not_positive_is_refused(self, bad: float) -> None:
+        with pytest.raises(ValueError, match="area"):
+            sm.open_end_transmission_loss(BANDS, bad)
+
+    @pytest.mark.parametrize("bad", [0.0, -1.0])
+    def test_a_solid_angle_that_is_not_positive_is_refused(self, bad: float) -> None:
+        with pytest.raises(ValueError, match="solid_angle"):
+            sm.open_end_reflection_coefficient(BANDS, DUCT_AREA, solid_angle=bad)
+
+
+class TestMeasuredTransmissionLoss:
+    """ISO 7235 Equation (6) and Equation (7)."""
+
+    def test_it_adds_what_the_open_end_was_keeping_in(self) -> None:
+        insertion = np.array([4.0, 7.0, 12.0, 20.0, 26.0, 28.0])
+        open_end = sm.open_end_transmission_loss(BANDS, DUCT_AREA)
+        found = sm.measured_transmission_loss(insertion, open_end)
+        assert found == pytest.approx(insertion + open_end)
+
+    def test_a_transparent_mouth_leaves_the_insertion_loss_alone(self) -> None:
+        insertion = np.array([20.0, 26.0])
+        found = sm.measured_transmission_loss(insertion, [0.0, 0.0])
+        assert found == pytest.approx(insertion)
+
+    def test_the_flow_noise_power_is_the_sum_of_its_three_terms(self) -> None:
+        open_end = sm.open_end_transmission_loss(BANDS, DUCT_AREA)
+        found = sm.flow_noise_power_level(np.full(BANDS.size, 70.0), open_end, 5.0)
+        assert found == pytest.approx(75.0 + open_end)
+
+    def test_the_room_correction_may_vary_band_by_band(self) -> None:
+        correction = np.linspace(4.0, 6.0, BANDS.size)
+        found = sm.flow_noise_power_level(
+            np.full(BANDS.size, 70.0), np.zeros(BANDS.size), correction
+        )
+        assert found == pytest.approx(70.0 + correction)
+
+    def test_only_the_room_correction_may_stand_for_the_whole_run(self) -> None:
+        # The open-end loss is a per-band quantity, so a single value for it
+        # is a mistake, where a single room correction is a measurement made
+        # once.
+        with pytest.raises(ValueError, match="one length"):
+            sm.flow_noise_power_level(np.full(BANDS.size, 70.0), 0.0, 5.0)
+
+    def test_mismatched_band_counts_are_refused(self) -> None:
+        with pytest.raises(ValueError, match="one length"):
+            sm.measured_transmission_loss([4.0, 7.0, 12.0], [1.0, 2.0])
+
+
+class TestModalFilterCutOn:
+    """ISO 7235 Equations (4) and (5), and the requirement they serve."""
+
+    def test_the_circular_form(self) -> None:
+        assert sm.modal_filter_cut_on(diameter=0.4) == pytest.approx(0.59 * 343.0 / 0.4)
+
+    def test_the_rectangular_form_is_a_half_wavelength(self) -> None:
+        assert sm.modal_filter_cut_on(larger_dimension=0.5) == pytest.approx(343.0)
+
+    def test_the_rectangular_form_is_exact(self) -> None:
+        # A rigid rectangular duct's first mode is c / 2H, which is what
+        # Equation (5) prints, so the library's own eigenvalue route agrees
+        # to the last bit.
+        from phonometry.noise_control import rectangular_duct_cut_on
+
+        exact = rectangular_duct_cut_on(0.5, 0.2, speed_of_sound=343.0, count=1)
+        found = sm.modal_filter_cut_on(larger_dimension=0.5, sound_speed=343.0)
+        assert found == pytest.approx(float(exact.cut_on_no_flow[0]))
+
+    def test_the_circular_constant_is_rounded_high(self) -> None:
+        # The exact coefficient is the first zero of J_1', 1,8412 / pi, so
+        # the printed 0,59 sits 0,67 % above it.
+        from phonometry.noise_control import circular_duct_cut_on
+
+        exact = circular_duct_cut_on(0.4, speed_of_sound=343.0, count=1)
+        found = sm.modal_filter_cut_on(diameter=0.4, sound_speed=343.0)
+        ratio = found / float(exact.cut_on_no_flow[0])
+        assert ratio == pytest.approx(1.0067, abs=5e-5)
+
+    def test_the_two_attenuation_minimums(self) -> None:
+        assert sm.MODAL_FILTER_ATTENUATION_DB == (3.0, 5.0)
+
+    def test_neither_dimension_is_refused(self) -> None:
+        with pytest.raises(ValueError, match="exactly one"):
+            sm.modal_filter_cut_on()
+
+    def test_both_dimensions_are_refused(self) -> None:
+        with pytest.raises(ValueError, match="exactly one"):
+            sm.modal_filter_cut_on(diameter=0.4, larger_dimension=0.5)
+
+    @pytest.mark.parametrize("bad", [0.0, -0.4])
+    def test_a_dimension_that_is_not_positive_is_refused(self, bad: float) -> None:
+        with pytest.raises(ValueError, match="diameter"):
+            sm.modal_filter_cut_on(diameter=bad)

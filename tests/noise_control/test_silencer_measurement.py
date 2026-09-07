@@ -837,6 +837,19 @@ class TestOperatingLinePlot:
         # straight line as a curve.
         assert self._axes().get_xscale() == "log"  # type: ignore[attr-defined]
 
+    def test_the_duty_ticks_are_plain_decimals(self) -> None:
+        # A log axis labels 0,1 as 10^-1 by default, which reads as an
+        # exponent rather than as the flow rate a point was taken at.
+        ax = self._axes()
+        ax.figure.canvas.draw()  # type: ignore[attr-defined]
+        labels = [
+            text.get_text()
+            for text in ax.get_xticklabels()  # type: ignore[attr-defined]
+            if text.get_text()
+        ]
+        assert "0.05" in labels
+        assert not any("10" in label and "^" in label for label in labels)
+
     def test_the_two_extrapolated_ends_are_shaded(self) -> None:
         ax = self._axes()
         assert len(ax.patches) == 2  # type: ignore[attr-defined]
@@ -853,3 +866,16 @@ class TestOperatingLinePlot:
         assert "Recta de servicio" in ax.get_title()
         labels = [artist.get_label() for artist in ax.lines]
         assert any("mínimos cuadrados" in str(label) for label in labels)
+        # The slope and the deviation carry a decimal comma in Spanish, and
+        # the unit is translated with them.
+        assert any("19,9 dB/década" in str(label) for label in labels)
+        assert "0,30 dB" in ax.get_title()
+
+    def test_the_spanish_duty_ticks_use_a_decimal_comma(self) -> None:
+        matplotlib = pytest.importorskip("matplotlib")
+        matplotlib.use("Agg")
+        line = sm.fit_operating_line(DUTY, DUTY_LEVELS)
+        ax = line.plot(language="es")
+        ax.figure.canvas.draw()
+        labels = [text.get_text() for text in ax.get_xticklabels()]
+        assert "0,05" in labels

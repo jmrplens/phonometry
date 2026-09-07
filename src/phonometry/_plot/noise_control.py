@@ -48,6 +48,7 @@ _STRINGS: dict[str, str] = {
     "Operating line (ISO 5135 5.5.2)": "Recta de servicio (ISO 5135 5.5.2)",
     "worst point": "peor punto",
     "Extrapolated": "Extrapolado",
+    "dB/decade": "dB/década",
     "Band": "Banda",
     _TL_LABEL: "Pérdida por transmisión",
     "Insertion loss": "Pérdida por inserción",
@@ -528,7 +529,9 @@ def plot_operating_line(
     :param kwargs: Forwarded to ``Axes.plot`` for the fitted line.
     :return: The axes.
     """
-    from .._i18n import localize_axes
+    import matplotlib.ticker as mticker
+
+    from .._i18n import decimal_comma, localize_axes
 
     ax = ax if ax is not None else _new_axes()
     low, high = result.valid_range
@@ -537,7 +540,10 @@ def plot_operating_line(
     kwargs.setdefault("lw", 1.8)
     kwargs.setdefault(
         "label",
-        _t("Least-squares fit", language) + f" ({result.slope:.1f} dB/decade)",
+        _t("Least-squares fit", language)
+        + " ("
+        + decimal_comma(f"{result.slope:.1f}", language)
+        + f" {_t('dB/decade', language)})",
     )
     ax.plot(span, result.slope * np.log10(span) + result.intercept, **kwargs)
     ax.plot(
@@ -561,13 +567,25 @@ def plot_operating_line(
             label=_t("Extrapolated", language) if index == 0 else None,
         )
     ax.set_xscale("log")
+    # The duty spans a decade or two of a flow rate in m3/s or a pressure in
+    # Pa, and the default log axis labels that 10^-1 rather than 0,1, which
+    # reads as an exponent and not as a duty. Ticks at 1, 2 and 5 of each
+    # decade, written plainly, give a reader the numbers the test points were
+    # actually taken at.
+    ax.xaxis.set_major_locator(mticker.LogLocator(base=10.0, subs=(1.0, 2.0, 5.0)))
+    ax.xaxis.set_major_formatter(
+        mticker.FuncFormatter(lambda value, _pos: decimal_comma(f"{value:g}", language))
+    )
+    ax.xaxis.set_minor_formatter(mticker.NullFormatter())
     ax.set_xlabel(_t("Duty (flow rate or total pressure loss)", language))
     ax.set_ylabel(_t(_LEVEL_LABEL, language))
     ax.set_title(
         _t("Operating line (ISO 5135 5.5.2)", language)
-        + f" - {_t('worst point', language)} {result.maximum_deviation:.2f} dB"
+        + f" - {_t('worst point', language)} "
+        + decimal_comma(f"{result.maximum_deviation:.2f}", language)
+        + " dB"
     )
     ax.grid(True, which="both", alpha=0.3)
-    ax.legend(loc="best", fontsize="small")
+    ax.legend(loc="upper left", fontsize="small")
     localize_axes(ax, language)
     return ax

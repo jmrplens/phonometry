@@ -2685,16 +2685,22 @@ def generate_building_frequency_prediction(output_dir: str) -> None:
     for model, label, _short, colour, style in forms:
         # The height form is written on the height alone and refuses a width,
         # so the width goes only to the two forms that use one.
-        values = np.array(
-            [
-                vibration.fundamental_frequency(
-                    model,
-                    height_m=float(h),
-                    **({} if model == "height" else {"width_m": float(h) / aspect}),
-                )
-                for h in heights
-            ]
-        )
+        if model == "height":
+            values = np.array(
+                [
+                    vibration.fundamental_frequency(model, height_m=float(h))
+                    for h in heights
+                ]
+            )
+        else:
+            values = np.array(
+                [
+                    vibration.fundamental_frequency(
+                        model, height_m=float(h), width_m=float(h) / aspect
+                    )
+                    for h in heights
+                ]
+            )
         ax_fit.plot(
             heights, values, color=colour, linewidth=1.6, linestyle=style, label=label
         )
@@ -2712,15 +2718,18 @@ def generate_building_frequency_prediction(output_dir: str) -> None:
     rows = []
     for model, _label, short, colour, _style in forms:
         low, high = vibration.PERIOD_COEFFICIENT_RANGES[model]
-        span = [
-            vibration.fundamental_frequency(
-                model,
-                height_m=tall,
-                coefficient=k,
-                **({} if model == "height" else {"width_m": wide}),
-            )
-            for k in (low, high)
-        ]
+        if model == "height":
+            span = [
+                vibration.fundamental_frequency(model, height_m=tall, coefficient=k)
+                for k in (low, high)
+            ]
+        else:
+            span = [
+                vibration.fundamental_frequency(
+                    model, height_m=tall, width_m=wide, coefficient=k
+                )
+                for k in (low, high)
+            ]
         rows.append((short, min(span), max(span), colour))
     fitted = float(vibration.height_fundamental_frequency(tall))
     for index, (label, low, high, colour) in enumerate(rows):

@@ -1244,8 +1244,9 @@ def duct_sound_power_level(
     :param end_reflection_loss: :math:`\Delta L_\mathrm{r}`, in dB, from
         :func:`open_end_transmission_loss`.
     :return: :math:`L_{W\mathrm{duct}}`, in dB, one value per band.
-    :raises ValueError: If a value is not finite, or if the two arrays do not
-        carry the same number of bands.
+    :raises ValueError: If a value is not finite, or if the two arrays carry
+        different numbers of bands. Both are per-band quantities, so neither
+        stands in for a whole run.
     """
     level = require_finite_array(room_sound_power_level, "room_sound_power_level")
     reflection = require_finite_array(end_reflection_loss, "end_reflection_loss")
@@ -1253,8 +1254,7 @@ def duct_sound_power_level(
         {
             "room_sound_power_level": level.size,
             "end_reflection_loss": reflection.size,
-        },
-        broadcast_singletons=True,
+        }
     )
     return np.asarray(level + reflection, dtype=np.float64)
 

@@ -193,7 +193,7 @@ instead, and then no correction is applied at all.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a value is not finite, or if the two arrays do not carry the same number of bands. |
+| ValueError | If a value is not finite, or if the two arrays carry different numbers of bands. Both are per-band quantities, so neither stands in for a whole run. |
 
 ## dynamic_pressure
 

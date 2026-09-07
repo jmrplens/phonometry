@@ -2747,12 +2747,15 @@ print(round(line.maximum_deviation, 2))   # 0.3 dB
 print(round(line.level_at(0.3), 1))       # 53.7 dB(A)
 ```
 
-Two rules keep that honest, and the library enforces both. The measured
-points have to sit within 3 dB of the line, because past that the levels are
-not a straight line in this variable and reading the line off means nothing.
-And the line may be extended down to half the smallest duty measured and up
-to twice the largest, and no further, which for these five points is 0,025 to
-1,6 m³/s. Asking for a level outside that says so:
+Two rules keep that honest, and the library says so on both rather than
+refusing: a fit that is not a straight line is still a fit, and a level read
+past the range is still a number, and what the standard asks is that a report
+be honest about them. The measured points have to sit within 3 dB of the line,
+because past that the levels are not a straight line in this variable and
+reading the line off means nothing. And the line may be extended down to half
+the smallest duty measured and up to twice the largest, and no further, which
+for these five points is 0,025 to 1,6 m³/s. Either one out of range raises a
+`SilencerMeasurementWarning`:
 
 ```python
 print(line.valid_range)           # (0.025, 1.6)

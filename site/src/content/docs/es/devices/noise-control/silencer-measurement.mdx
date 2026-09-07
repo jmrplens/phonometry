@@ -528,12 +528,16 @@ print(round(line.maximum_deviation, 2))   # 0.3 dB
 print(round(line.level_at(0.3), 1))       # 53.7 dB(A)
 ```
 
-Dos reglas mantienen eso honesto, y la biblioteca hace cumplir las dos. Los
-puntos medidos tienen que caer a menos de 3 dB de la recta, porque más allá
-de eso los niveles no son una recta en esa variable y leer la recta no
-significa nada. Y la recta se puede prolongar hasta la mitad del régimen más
-pequeño medido y hasta el doble del mayor, y no más, que para estos cinco
-puntos son de 0,025 a 1,6 m³/s. Pedir un nivel fuera de ahí lo dice:
+Dos reglas mantienen eso honesto, y la biblioteca avisa de las dos en vez de
+negarse: un ajuste que no sea una recta sigue siendo un ajuste, y un nivel
+leído fuera del intervalo sigue siendo un número, y lo que pide la norma es
+que el informe sea honesto sobre ellos. Los puntos medidos tienen que caer a
+menos de 3 dB de la recta, porque más allá de eso los niveles no son una recta
+en esa variable y leer la recta no significa nada. Y la recta se puede
+prolongar hasta la mitad del régimen más pequeño medido y hasta el doble del
+mayor, y no más, que para estos cinco puntos son de 0,025 a 1,6 m³/s.
+Cualquiera de las dos fuera de rango levanta un
+`SilencerMeasurementWarning`:
 
 ```python
 print(line.valid_range)           # (0.025, 1.6)

@@ -1,0 +1,285 @@
+---
+title: "Medir un silenciador (ISO 7235 e ISO 11691)"
+description: "De dónde sale la pérdida por inserción de un catálogo: la medida por sustitución de la ISO 7235 y su hermana de clase de precisión 3, la ISO 11691, la corrección por tiempo de reverberación, el promedio en octavas que se hace sobre la energía transmitida, la regla que lleva de tres posiciones de micrófono a cinco, y cuán repetible es todo ello."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2003
+    title: "Acoustics — Laboratory measurement procedures for ducted silencers and air-terminal units — Insertion loss, flow noise and total pressure loss"
+    designation: "ISO 7235:2003"
+    primary: true
+    note: "La medida en sí: la Ecuación (1), la corrección por reverberación del 6.3, la Tabla 6 con la regla del 6.2.1, y la Tabla 7 con el factor de cobertura del 7.9. Leída de la BS EN ISO 7235:2009, que la asume sin modificación."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1995
+    title: "Acoustics — Measurement of insertion loss of ducted silencers without flow — Laboratory survey method"
+    designation: "ISO 11691:1995"
+    note: "La hermana de menor exigencia: sus Ecuaciones (1) y (2), la Tabla 1, y el alcance que fija en 1.1 y 4.5. Leída de la BS EN ISO 11691:2009, que la asume sin modificación."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels of noise sources using sound pressure — Precision methods for reverberation test rooms"
+    designation: "ISO 3741:2010"
+    note: "La determinación de potencia sonora a la que ambas normas remiten el lado receptor, y de donde salen los tiempos de reverberación que pide la corrección del 6.3."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Todo lo que calcula un modelo de silenciador sale de la geometría. La cifra
+que publica un fabricante, no. Es una **pérdida por inserción medida por
+sustitución**: el mismo banco recorrido dos veces, una con un conducto liso
+donde irá el silenciador y otra con el silenciador puesto, y la diferencia
+entre los dos niveles del lado receptor, banda a banda. Leer un catálogo sin
+saber eso es como acaban en la misma frase unos 8,9 dB calculados y unos
+«25 dB» publicados.
+
+Dos normas describen la medida y sólo se diferencian en cuánto le exigen al
+laboratorio. La **ISO 7235:2003** es el procedimiento completo, con un filtro
+modal que desacopla la fuente, un lado receptor cualificado y una
+incertidumbre de medida declarada; cubre silenciadores, unidades terminales de
+aire y otros elementos de conducto, con flujo y sin él. La **ISO 11691:1995**
+es el método de laboratorio de clase de precisión 3 sin flujo, seis páginas
+impresas con dos ecuaciones, para silenciadores cuya velocidad de diseño no
+pasa de 15 m/s.
+
+## 1. Una resta, dos numeraciones
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_iso7235.svg" alt="Dos recorridos apilados sobre un mismo eje de conducto. En el de arriba, la serie uno, una caja de altavoz sellada y forrada alimenta un filtro modal, luego una transición, luego el objeto de ensayo, y luego un conducto de ensayo con terminación anecoica de cuñas que lleva tres posiciones de micrófono sobre una línea inclinada respecto al eje del conducto. El de abajo, la serie dos, es idéntico salvo que el objeto de ensayo se sustituye por un conducto de sustitución vacío. Se marcan con trazo discontinuo los planos de cualificación en el objeto de ensayo y en el conducto receptor. Debajo, la pérdida por inserción aparece como la diferencia de los dos niveles del lado receptor, tercio de octava a tercio de octava, con la atenuación del filtro modal, el límite del coeficiente de reflexión, la tolerancia del conducto de sustitución y la regla de señal a ruido de fondo listados con los números de apartado de la propia norma" width="92%" />
+
+*Las dos series son todo el método: cuanto queda en ambas normas va de
+asegurar que entre una y otra no cambió nada más que el objeto de ensayo.*
+
+La medida es la misma en las dos:
+
+$$
+D_\mathrm{i} = L_{W\mathrm{II}} - L_{W\mathrm{I}}
+$$
+
+con $\mathrm{I}$ la serie que llevaba el objeto de ensayo y $\mathrm{II}$ la
+que llevaba el conducto de sustitución. La ISO 11691 escribe exactamente lo
+mismo como $D = L_{p1} - L_{p2}$, y numera las dos series **al revés**: su 1
+es el conducto de sustitución. Dos normas para una medida, con los subíndices
+cambiados, es justo lo que se acaba metiendo del revés, así que aquí los
+argumentos se llaman por lo que había en el conducto y no por ninguna de las
+dos numeraciones.
+
+```python
+from phonometry import noise_control
+
+substitution = [88.0, 90.0, 91.0, 92.0, 92.0, 91.0]   # dB, conducto vacío
+with_silencer = [84.0, 83.0, 79.0, 72.0, 66.0, 63.0]  # dB, con silenciador
+
+d_i = noise_control.substitution_insertion_loss(substitution, with_silencer)
+print(d_i)                        # [ 4.  7. 12. 20. 26. 28.] dB
+```
+
+Si la absorción de la sala receptora cambió entre las dos series, esa
+diferencia todavía no es la pérdida por inserción. El apartado 6.3 lo
+corrige con $10\lg(T_2/T_1)$, donde $T_2$ es el tiempo de reverberación
+medido con el objeto de ensayo instalado. Una sala que se volvió **más
+sorda** mientras el silenciador estaba puesto lo estaba favoreciendo, y la
+corrección se lo quita:
+
+```python
+corrected = noise_control.substitution_insertion_loss(
+    substitution, with_silencer, reverberation_times=(2.1, 1.8),
+)
+print(corrected.round(2))         # [ 3.33  6.33 11.33 19.33 25.33 27.33] dB
+```
+
+El 6.3 admite además $T_2 = T_1$ sin más cuando el objeto de ensayo queda
+fuera de la sala, y entonces el par se puede omitir.
+
+## 2. Lo que esa cifra no es
+
+No es una pérdida por transmisión. Está medida contra un conducto de
+sustitución concreto en un banco concreto, y se lleva ese banco consigo de dos
+maneras que conviene nombrar.
+
+La primera es la **pérdida por inserción límite**: el sonido flanquea por las
+paredes del conducto en vez de atravesar el silenciador, y ningún montaje
+puede medir más allá de lo que su propio flanqueo deja pasar por el lado. La
+ISO 7235 hace que el laboratorio mida ese techo con el conducto de sustitución
+bloqueado acústicamente y lo registre en función de la frecuencia (7.4). Una
+cifra de catálogo muy grande afirma tanto sobre el montaje de ensayo como
+sobre el aparato.
+
+La segunda es el lado receptor, que decide cuánto del sonido llegan a ver los
+micrófonos. La ISO 7235 admite tres (5.2.4): una sala reverberante conforme a
+la ISO 3741 y cualificada al menos hasta el tercio de octava de 125 Hz, que es
+la preferida; un conducto de ensayo con terminación anecoica cuyo coeficiente
+de reflexión no supere 0,3; o condiciones esencialmente de campo libre en la
+boca. La ISO 11691 se queda sólo con la sala reverberante y las alternativas
+de campo libre, y pide 3,5 m de conducto a cada lado del silenciador.
+
+Nada de eso es aritmética, y por eso el resto de esta página es corto. La
+aritmética que queda es la parte que un lector puede equivocar sobre el papel.
+
+## 3. Las octavas se promedian sobre la energía, no sobre los decibelios
+
+La medida se hace en tercios de octava y a menudo se informa en octavas. La
+Ecuación (2) de la ISO 11691 dice cómo, y no es un promedio de los tres
+números:
+
+$$
+D_\mathrm{oct} = -10 \lg\left[\frac{1}{3}\left(
+   10^{-D_1/10} + 10^{-D_2/10} + 10^{-D_3/10}
+\right)\right]\ \text{dB}
+$$
+
+El promedio se hace sobre lo que el silenciador **deja pasar**. Eso importa
+porque un silenciador rara vez es plano a lo largo de una octava, y la banda
+que fuga decide la respuesta:
+
+```python
+thirds = [4.0, 7.0, 12.0, 20.0, 26.0, 28.0]
+print(noise_control.octave_insertion_loss(thirds).round(2))
+#                                 # [ 6.57 23.28] dB
+```
+
+Las medias aritméticas simples de esos dos grupos son 7,67 y 24,67 dB, así que
+leer los decibelios en vez de la energía habría exagerado ambas octavas en
+cerca de un decibelio. Con un silenciador más abrupto la diferencia es mayor:
+tres tercios de 30, 30 y 5 dB dan **9,7 dB** en la octava, no 21,7. Casi todo
+el sonido transmitido está entrando por la única banda que no funciona, y la
+Ecuación (2) va escrita en vez de descrita precisamente para que esto no se
+pueda equivocar.
+
+La ISO 11691 declara el supuesto en el que se apoya: se toman iguales los
+niveles de presión sonora de los tres tercios de octava en la serie recorrida
+con el conducto de sustitución, que es lo que permite pesar sus energías por
+igual.
+
+## 4. Tres posiciones de micrófono, o cinco
+
+En un conducto de ensayo el promedio espacial sale de al menos tres
+posiciones de micrófono repartidas por igual sobre una línea que cruza el
+conducto, abarcando al menos un cuarto de longitud de onda de la banda, hacia
+la mitad del conducto. Tres bastan sólo si las tres concuerdan. La Tabla 6 de
+la ISO 7235 dice cuánto, y si la mayor y la menor difieren más que eso hay
+que usar cinco posiciones:
+
+```python
+levels = [70.0, 74.0, 79.0]       # dB en las tres posiciones clave
+print(noise_control.microphone_spread_limit(125.0))     # 7.0 dB
+print(noise_control.microphone_positions_required(levels, 50.0))    # 3
+print(noise_control.microphone_positions_required(levels, 125.0))   # 5
+```
+
+Los mismos tres niveles valen a 50 Hz, donde el límite es de 10 dB, y no a
+125 Hz, donde es de 7. El límite baja con la frecuencia porque un conducto a
+baja frecuencia tiene un patrón de onda estacionaria que tres puntos muestrean
+mal, y a alta frecuencia no.
+
+Una cosa que hay que saber de la Tabla 6: sus filas dicen 50, 63, 80, 100, 125
+y luego `> 160` Hz, así que el **tercio de octava de 160 Hz no pertenece a
+ninguna fila** y se queda sin límite alguno. Todas las demás filas nombran una
+sola banda, y 160 Hz es un centro de tercio de octava como los demás, así que
+aquí se lee como perteneciente a la última fila. El hueco está en el
+[registro de erratas](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.es.md).
+
+## 5. Cuán repetible es todo esto
+
+Ambas normas responden, y ninguna respuesta es halagüeña.
+
+La ISO 11691 dice sin rodeos que no se puede dar información exacta sobre la
+precisión de su método, que harían falta ensayos interlaboratorio para una
+desviación típica de reproducibilidad de verdad, y que eso es lo que la
+convierte en una norma de clase de precisión 3. Su Tabla 1 ofrece sólo una
+estimación: 2 dB hasta el tercio de octava de 1,25 kHz y 3 dB por encima.
+
+La Tabla 7 de la ISO 7235 tiene tres columnas, y lo útil es que no coincidan:
+
+```python
+for band in (50.0, 250.0, 1000.0, 4000.0):
+    print(band, [
+        noise_control.measurement_reproducibility(band, quantity=q)
+        for q in ("insertion_loss", "transmission_loss", "intensity")
+    ])
+# 50.0   [1.5, 3.0, 3.0]
+# 250.0  [1.0, 3.0, 1.5]
+# 1000.0 [2.0, 3.0, 1.0]
+# 4000.0 [3.0, 3.0, 1.0]
+```
+
+La pérdida por inserción se mide mejor en la mitad del intervalo y peor
+arriba; la vía por intensidad va al revés; la pérdida por transmisión es 3 dB
+planos en todas partes. El 7.9 explica por qué: sólo la columna de pérdida por
+inserción salió de ensayos, sobre silenciadores de bafles de 1 m de longitud,
+y las otras dos se apoyan en la experiencia. Una columna que no se mueve con
+la frecuencia tiene la forma de una estimación, no de una medida.
+
+Lo que va al informe es el doble del valor de tabla, para una probabilidad de
+cobertura del 95 %:
+
+```python
+print(noise_control.measurement_expanded_uncertainty(250.0))    # 2.0 dB
+print(noise_control.measurement_expanded_uncertainty(4000.0))   # 6.0 dB
+```
+
+Un silenciador declarado con 25 dB en la banda de 4 kHz se está declarando con
+un margen de 6 dB.
+
+## 6. El alcance que la ISO 11691 se dibuja
+
+El método de clase de precisión 3 es deliberadamente estrecho, y sus límites
+están publicados en vez de sobreentendidos. La velocidad de diseño no puede
+pasar de 15 m/s, porque el método recorre el banco sin flujo alguno y por
+tanto no incluye nada del ruido autogenerado. Está escrito para silenciadores
+circulares de 80 mm a 2 m de diámetro, o rectangulares de área comparable. Y
+los conductos de ensayo tienen que estar cerca en sección de aquello que
+alimentan, entre 0,6 y 1,7 veces el área del silenciador o del conducto de
+sustitución (4.5). Fuera de ahí las uniones reflejan más de lo que el método
+contempla, y la biblioteca lo dice:
+
+```python
+print(noise_control.substitution_area_ratio(0.0962, 0.0962))    # 1.0
+print(noise_control.SURVEY_MAX_VELOCITY_M_S)                    # 15.0
+print(noise_control.SURVEY_AREA_RATIO_RANGE)                    # (0.6, 1.7)
+```
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+La aritmética de la medida por sustitución: la Ecuación (1) de ambas normas
+mediante `substitution_insertion_loss`, con la corrección por tiempo de
+reverberación del 6.3 de la ISO 7235; el promedio en octavas de la Ecuación
+(2) de la ISO 11691 mediante `octave_insertion_loss`; la Tabla 6 de la
+ISO 7235 y la regla de tres o cinco del 6.2.1 mediante
+`microphone_spread_limit` y `microphone_positions_required`; la
+reproducibilidad de la Tabla 1 de la ISO 11691 y de las tres columnas de la
+Tabla 7 de la ISO 7235, con la incertidumbre expandida del 7.9; y el alcance
+que la ISO 11691 fija en 1.1 y 4.5, incluida la comprobación de cociente de
+áreas que avisa fuera de él.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Aquí no se construye ni se comprueba ningún banco de ensayo: la atenuación
+del filtro modal, el coeficiente de reflexión de la terminación anecoica, la
+tolerancia dimensional del conducto de sustitución y la pérdida por inserción
+límite se describen pero no se calculan. La mitad con flujo de la ISO 7235 no
+está en esta página: el ruido de flujo del 6.4, el caudal volumétrico y el
+coeficiente de pérdida de presión del 6.5, y la pérdida por transmisión en la
+boca del anexo B son trabajo aparte. Tampoco está la ISO 11820, que mide un
+silenciador in situ, donde el truco de la sustitución no suele ser posible.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Silenciadores](/phonometry/es/devices/noise-control/silencers/): los
+  modelos reactivos de cuatro polos de los que esta medida es la contraparte,
+  y el banco sobre el que se hace, descrito por completo.
+- [Ruido en conductos: del ventilador a la sala](/phonometry/es/devices/noise-control/duct-path/):
+  a dónde va una pérdida por inserción medida una vez comprada.
+- [Ruido de climatización a la alemana (VDI 2081)](/phonometry/es/devices/noise-control/vdi2081-air-systems/):
+  la pérdida por inserción de un silenciador de bafles predicha desde la
+  geometría, para comparar con lo que mediría un laboratorio.
+
+</SeeAlso>

@@ -169,7 +169,7 @@ class TestMicrophonePositions:
         assert sm.microphone_spread_limit(frequency) == pytest.approx(limit)
 
     @pytest.mark.parametrize("frequency", [160.0, 200.0, 1000.0, 10000.0])
-    def test_the_last_row_is_read_as_one_hundred_and_sixty_and_above(
+    def test_the_gap_table_6_leaves_at_one_hundred_and_sixty_hertz(
         self, frequency: float
     ) -> None:
         # The printed row says "> 160", which leaves the 160 Hz one-third

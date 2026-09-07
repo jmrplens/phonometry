@@ -4,7 +4,7 @@
 // for a month: /reference/why-phonometry/ was live and indexable from
 // 2026-07-06 to 2026-08-03 and has answered 404 ever since, and
 // /guides/room-acoustics/ has answered 404 since the taxonomy move. They were
-// not special. 432 published addresses were in the same state, against eight
+// not special. 434 published addresses were in the same state, against eight
 // redirect entries in the configuration. Nothing in the build looked: Astro
 // does not know an address used to exist, and starlight-links-validator only
 // reads the links the pages carry today.

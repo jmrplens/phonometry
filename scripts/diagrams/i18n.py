@@ -3181,8 +3181,6 @@ _ES: dict[str, str] = {
     "No work station": "Sin puesto de trabajo",
     "four or more, 1.55 m above the floor": "cuatro o más, a 1,55 m sobre el suelo",
     "and the highest one is the answer": "y el más alto es el resultado",
-    "$L_{pA}$ at one of these positions is an emission level, not a sound power level: it says what the machine does to whoever is there.": "$L_{pA}$ en una de estas posiciones es un nivel de emisión, no un nivel de potencia acústica: dice lo que la máquina le hace a quien está ahí.",
-    "The background correction $K_1$ and the environmental correction $K_2$ or $K_3$ come off it, and a peak level takes neither.": "La corrección por ruido de fondo $K_1$ y la corrección ambiental $K_2$ o $K_3$ se le restan, y un nivel de pico no lleva ninguna.",
 }
 
 

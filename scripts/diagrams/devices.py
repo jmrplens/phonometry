@@ -2928,6 +2928,117 @@ def _d_vdi2081_sheet(s: SVG, th: Theme) -> None:
         s.text(x + 26, yy, source, 11, th.muted, anchor="start")
 
 
+def _d_open_end_solid_angles(s: SVG, th: Theme) -> None:
+    """The five mounting configurations of ISO 7235 Table B.1.
+
+    The same five appear as Table 1 of ISO 5135, entry for entry, and they
+    are the only thing in Equation (B.3) that a laboratory chooses rather
+    than measures. The wedge drawn at each mouth is the solid angle read in
+    section: a full circle for the 4 pi of an opening standing free, a half
+    for the 2 pi of one flush with a surface, a quarter for the pi of one in
+    the corner where two surfaces meet.
+    """
+    import math as _math
+
+    cells = (
+        ("A", "Flush in a wall", "2π", 270.0, 180.0, ("wall",)),
+        ("B", "Wall and floor", "π", 270.0, 90.0, ("wall", "floor")),
+        ("C", "Free in the room", "4π", 0.0, 360.0, ()),
+        ("D", "On the floor", "2π", 180.0, 180.0, ("floor",)),
+        ("E", "Duct in free space", "4π", 0.0, 360.0, ()),
+    )
+    left, cell_w, gap = 26.0, 160.0, 12.0
+    top, box_h = 96.0, 178.0
+
+    s.text(
+        450,
+        62,
+        "The solid angle is the only term of Equation (B.3) a laboratory chooses",
+        16,
+        th.fg,
+    )
+
+    for index, (letter, name, omega, start, sweep, surfaces) in enumerate(cells):
+        x0 = left + index * (cell_w + gap)
+        cx, cy = x0 + cell_w / 2, top + box_h / 2 + 6
+        radius = 46.0
+
+        s.rect(x0, top, cell_w, box_h, th.panel, th.muted, rx=6, sw=1.4)
+
+        # The wedge: the solid angle read in section, drawn before the
+        # surfaces so a wall lies over its own edge rather than under it.
+        if sweep >= 360.0:
+            s.circle(cx, cy, radius, th.primary, th.primary, sw=1.2)
+        else:
+            a0, a1 = _math.radians(start), _math.radians(start + sweep)
+            x1, y1 = cx + radius * _math.cos(a0), cy + radius * _math.sin(a0)
+            x2, y2 = cx + radius * _math.cos(a1), cy + radius * _math.sin(a1)
+            large = 1 if sweep > 180.0 else 0
+            s.path(
+                f"M {cx:.1f} {cy:.1f} L {x1:.1f} {y1:.1f} "
+                f"A {radius:.1f} {radius:.1f} 0 {large} 1 {x2:.1f} {y2:.1f} Z",
+                fill=th.primary,
+                stroke=th.primary,
+                sw=1.2,
+            )
+
+        # A surface stops where the wedge does, so the corner of B reads as a
+        # corner and not as a cross.
+        corner = len(surfaces) == 2
+        if "wall" in surfaces:
+            s.line(cx, top + 16, cx, cy if corner else top + box_h - 34, th.fg, 5.0)
+        if "floor" in surfaces:
+            s.line(cx if corner else x0 + 16, cy, x0 + cell_w - 16, cy, th.fg, 5.0)
+
+        # The terminal itself, at the origin of the wedge.
+        s.rect(cx - 11, cy - 11, 22, 22, th.bg, th.secondary, rx=3, sw=2.4)
+        s.circle(cx, cy, 4.5, th.secondary)
+
+        s.text(x0 + 12, top + 24, letter, 19, th.secondary, anchor="start", bold=True)
+        s.text(cx, top + box_h - 14, name, 13, th.fg)
+        s.text(cx, top + box_h + 24, f"Ω = {omega}", 17, th.primary, bold=True)
+
+    s.text(
+        450,
+        326,
+        "A full circle in section is 4π: the opening radiates into the whole room. "
+        "Half of one is 2π, a quarter is π.",
+        13,
+        th.muted,
+    )
+    s.text(
+        450,
+        372,
+        "D_td = 10 lg[1 + Ω / (4πf√S / c)²] dB, "
+        "which ISO 5135 prints as ΔL_r = 10 lg[1 + (c / 4πf)² (Ω / S)]",
+        16,
+        th.fg,
+    )
+    s.text(
+        450,
+        400,
+        "One formula, two names, and the same five values in ISO 7235 Table B.1 "
+        "and ISO 5135 Table 1",
+        13,
+        th.muted,
+    )
+    s.text(
+        450,
+        434,
+        "The bigger the solid angle, the more the mouth keeps in",
+        15,
+        th.accent,
+        bold=True,
+    )
+    s.text(
+        450,
+        456,
+        "a baffle is what makes an opening a good radiator",
+        13,
+        th.muted,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Where the microphone goes at a work station (ISO 11201:2010, Clause 9)
 # ---------------------------------------------------------------------------

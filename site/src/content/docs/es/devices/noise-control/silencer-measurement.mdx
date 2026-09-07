@@ -257,7 +257,7 @@ $$
 
 El grupo $4\pi f \sqrt{S} / c$ es la boca medida en longitudes de onda, y
 $\Omega$ es el ángulo sólido al que radia. Un conducto de 350 mm enrasado en
-una pared retiene 11 dB a 63 Hz y nada en absoluto a 2 kHz:
+una pared retiene 11 dB a 63 Hz y 0,05 dB a 2 kHz, que es nada:
 
 ```python
 import numpy as np
@@ -270,8 +270,12 @@ print(d_td.round(2))              # [11.23  6.14  2.5   0.77  0.21  0.05] dB
 ```
 
 El ángulo sólido es la Tabla B.1, y esos mismos cinco valores son la Tabla 1
-de la ISO 5135. Un conducto que acaba en mitad de la sala tiene el doble de
-espacio para radiar que uno enrasado, así que refleja la mitad:
+de la ISO 5135. Funciona al revés de lo que uno esperaría: $\Omega$ está en el
+numerador, así que un conducto que acaba en mitad de la sala retiene **más**
+sonido que uno enrasado en la pared, no menos. Lo que hace buena radiadora a
+una abertura es la pantalla, porque impide que la presión se alivie por el
+borde de la boca, y una boca sin pantalla del mismo tamaño devuelve más sonido
+por el conducto:
 
 ```python
 free = noise_control.open_end_transmission_loss(
@@ -279,6 +283,8 @@ free = noise_control.open_end_transmission_loss(
 )
 print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
 ```
+
+Tres decibelios más a 63 Hz, y el coeficiente de reflexión sube con ellos.
 
 La Ecuación (B.4) dice lo mismo del revés, como coeficiente de reflexión de
 presión, y ambas cierran exactamente sobre la energía:

@@ -2485,7 +2485,7 @@ $$
 
 The group $4\pi f \sqrt{S} / c$ is the mouth measured in wavelengths, and
 $\Omega$ is the solid angle it radiates into. A 350 mm duct flush with a wall
-holds back 11 dB at 63 Hz and nothing at all at 2 kHz:
+holds back 11 dB at 63 Hz and 0,05 dB at 2 kHz, which is nothing:
 
 ```python
 import numpy as np
@@ -2498,8 +2498,12 @@ print(d_td.round(2))              # [11.23  6.14  2.5   0.77  0.21  0.05] dB
 ```
 
 The solid angle is Table B.1, and the same five values are Table 1 of
-ISO 5135. A duct that ends in the middle of the room has twice the space to
-radiate into that a flush one has, so it reflects half as much:
+ISO 5135. It works the way round that surprises people: $\Omega$ sits in the
+numerator, so a duct ending in the middle of the room keeps **more** sound in
+than one flush with a wall, not less. A baffle is what makes an opening a good
+radiator, because it stops the pressure relieving round the rim of the mouth,
+and an unbaffled end of the same size sends more of the sound back up the
+duct:
 
 ```python
 free = noise_control.open_end_transmission_loss(
@@ -2507,6 +2511,8 @@ free = noise_control.open_end_transmission_loss(
 )
 print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
 ```
+
+Three more decibels at 63 Hz, and the reflection coefficient rises with it.
 
 Equation (B.4) says the same fact the other way round, as a pressure
 reflection coefficient, and the two close exactly on the energy:

@@ -122,7 +122,7 @@ room's volume and reverberation time.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a value is not finite, or if the arrays do not carry the same number of bands. |
+| ValueError | If a value is not finite, if the level and the open-end loss carry different numbers of bands, or if the room correction is neither a single value nor one per band. |
 
 ## ISO11691_REPRODUCIBILITY
 
@@ -193,7 +193,7 @@ $D_\mathrm{td}$ goes to zero and the two quantities meet.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a value is not finite, or if the two arrays do not carry the same number of bands. |
+| ValueError | If a value is not finite, or if the two arrays carry different numbers of bands. Both are per-band quantities, so neither stands in for a whole run. |
 
 ## measurement_expanded_uncertainty
 
@@ -484,9 +484,12 @@ wavelength across it is a poor radiator, and most of the energy turns
 round and goes back up the duct; well above it the mouth is transparent
 and the loss goes to zero. The group $4\pi f \sqrt{S} / c$ is the
 mouth measured in wavelengths, and the solid angle says how much room
-there is to radiate into: a duct ending in the middle of a room
-($4\pi$) gives the sound twice the space of one flush with a wall
-($2\pi$) and so reflects half as much.
+there is to radiate into. It works the way round that surprises people:
+$\Omega$ is in the numerator, so a duct ending in the middle of a
+room ($4\pi$) keeps **more** sound in than one flush with a wall
+($2\pi$). A baffle is what makes an opening a good radiator,
+because it stops the pressure relieving round the rim, and an unbaffled
+mouth of the same size sends more of the sound back up the duct.
 
 ISO 5135 prints the identical formula as its own Equation (2), where it
 is called the end reflection loss of the open duct and is added to the

@@ -439,8 +439,17 @@ class TestMeasuredTransmissionLoss:
 
     def test_the_room_correction_may_vary_band_by_band(self) -> None:
         correction = np.linspace(4.0, 6.0, BANDS.size)
-        found = sm.flow_noise_power_level(np.full(BANDS.size, 70.0), 0.0, correction)
+        found = sm.flow_noise_power_level(
+            np.full(BANDS.size, 70.0), np.zeros(BANDS.size), correction
+        )
         assert found == pytest.approx(70.0 + correction)
+
+    def test_only_the_room_correction_may_stand_for_the_whole_run(self) -> None:
+        # The open-end loss is a per-band quantity, so a single value for it
+        # is a mistake, where a single room correction is a measurement made
+        # once.
+        with pytest.raises(ValueError, match="one length"):
+            sm.flow_noise_power_level(np.full(BANDS.size, 70.0), 0.0, 5.0)
 
     def test_mismatched_band_counts_are_refused(self) -> None:
         with pytest.raises(ValueError, match="one length"):

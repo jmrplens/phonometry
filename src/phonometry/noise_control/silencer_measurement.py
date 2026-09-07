@@ -578,9 +578,12 @@ def open_end_transmission_loss(
     round and goes back up the duct; well above it the mouth is transparent
     and the loss goes to zero. The group :math:`4\pi f \sqrt{S} / c` is the
     mouth measured in wavelengths, and the solid angle says how much room
-    there is to radiate into: a duct ending in the middle of a room
-    (:math:`4\pi`) gives the sound twice the space of one flush with a wall
-    (:math:`2\pi`) and so reflects half as much.
+    there is to radiate into. It works the way round that surprises people:
+    :math:`\Omega` is in the numerator, so a duct ending in the middle of a
+    room (:math:`4\pi`) keeps **more** sound in than one flush with a wall
+    (:math:`2\pi`). A baffle is what makes an opening a good radiator,
+    because it stops the pressure relieving round the rim, and an unbaffled
+    mouth of the same size sends more of the sound back up the duct.
 
     ISO 5135 prints the identical formula as its own Equation (2), where it
     is called the end reflection loss of the open duct and is added to the
@@ -675,14 +678,14 @@ def measured_transmission_loss(
     :param open_end_loss: :math:`D_\mathrm{td}`, in dB, from
         :func:`open_end_transmission_loss`.
     :return: :math:`D_\mathrm{t}`, in dB, one value per band.
-    :raises ValueError: If a value is not finite, or if the two arrays do not
-        carry the same number of bands.
+    :raises ValueError: If a value is not finite, or if the two arrays carry
+        different numbers of bands. Both are per-band quantities, so neither
+        stands in for a whole run.
     """
     insertion = require_finite_array(insertion_loss, "insertion_loss")
     open_end = require_finite_array(open_end_loss, "open_end_loss")
     _require_matching_bands(
-        {"insertion_loss": insertion.size, "open_end_loss": open_end.size},
-        broadcast_singletons=True,
+        {"insertion_loss": insertion.size, "open_end_loss": open_end.size}
     )
     return np.asarray(insertion + open_end, dtype=np.float64)
 
@@ -712,19 +715,16 @@ def flow_noise_power_level(
         :func:`open_end_transmission_loss`.
     :param room_correction: :math:`C`, in dB, per band or one value for all.
     :return: :math:`L_W`, in dB, one value per band.
-    :raises ValueError: If a value is not finite, or if the arrays do not
-        carry the same number of bands.
+    :raises ValueError: If a value is not finite, if the level and the
+        open-end loss carry different numbers of bands, or if the room
+        correction is neither a single value nor one per band.
     """
     level = require_finite_array(pressure_level, "pressure_level")
     open_end = require_finite_array(open_end_loss, "open_end_loss")
     correction = require_finite_array(room_correction, "room_correction")
     _require_matching_bands(
-        {
-            "pressure_level": level.size,
-            "open_end_loss": open_end.size,
-            "room_correction": correction.size,
-        },
-        broadcast_singletons=True,
+        {"pressure_level": level.size, "open_end_loss": open_end.size},
+        broadcast={"room_correction": correction.size},
     )
     return np.asarray(level + open_end + correction, dtype=np.float64)
 

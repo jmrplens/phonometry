@@ -502,10 +502,17 @@ _RETSPL_OTHER: np.ndarray = np.array(
     dtype=np.float64,
 )
 
+#: The three earphone names, written once. They are keys of two tables and
+#: the default of two entry points, and a name that drifts between them would
+#: be a lookup that fails rather than a typo anyone sees.
+_DT48 = "DT 48"
+_TDH39 = "TDH 39"
+_OTHER = "other supra-aural"
+
 _RETSPL = {
-    "DT 48": _RETSPL_DT48,
-    "TDH 39": _RETSPL_TDH39,
-    "other supra-aural": _RETSPL_OTHER,
+    _DT48: _RETSPL_DT48,
+    _TDH39: _RETSPL_TDH39,
+    _OTHER: _RETSPL_OTHER,
 }
 
 #: The earphones ISO 389-1 prints a reference level for.
@@ -514,9 +521,9 @@ EARPHONES: tuple[str, ...] = tuple(_RETSPL)
 #: What each of them is calibrated on: the two named models on the acoustic
 #: coupler of Clause 4.2, everything else on the artificial ear of 4.3.
 EARPHONE_COUPLERS: dict[str, str] = {
-    "DT 48": "IEC 60303 acoustic coupler",
-    "TDH 39": "IEC 60303 acoustic coupler",
-    "other supra-aural": "IEC 60318 artificial ear",
+    _DT48: "IEC 60303 acoustic coupler",
+    _TDH39: "IEC 60303 acoustic coupler",
+    _OTHER: "IEC 60318 artificial ear",
 }
 
 
@@ -539,7 +546,7 @@ def _select_retspl(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndar
 
 
 def earphone_reference_level(
-    earphone: str = "TDH 39", frequencies: ArrayLike | None = None
+    earphone: str = _TDH39, frequencies: ArrayLike | None = None
 ) -> np.ndarray:
     """Reference equivalent threshold sound pressure level (ISO 389-1:1998).
 
@@ -565,7 +572,7 @@ def earphone_reference_level(
 
 def hearing_level_to_coupler_spl(
     hearing_level: ArrayLike,
-    earphone: str = "TDH 39",
+    earphone: str = _TDH39,
     frequencies: ArrayLike | None = None,
 ) -> np.ndarray:
     """An audiogram in dB HL as the level the coupler has to see, in dB SPL.

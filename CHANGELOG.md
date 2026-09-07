@@ -55,6 +55,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Where a catalogue insertion loss actually comes from: the substitution
+  measurement of ISO 7235 and ISO 11691, in
+  `noise_control.silencer_measurement`.
+
+  A silencer figure is not computed, it is measured: the same rig run twice,
+  once with a plain duct where the silencer will go and once with the silencer
+  in it, and the difference between the two receiving-side levels. Both
+  standards write that subtraction, and they number the two series the
+  opposite way round, so `substitution_insertion_loss` names its arguments for
+  what was in the duct rather than for either numbering, and takes the
+  reverberation-time correction of ISO 7235 6.3 when the receiving room moved
+  between the series.
+
+  `octave_insertion_loss` is ISO 11691 Equation (2), which is worth having
+  written out: the three one-third octaves are averaged on the transmitted
+  energy, not on the decibels, so 30, 30 and 5 dB give 9,7 dB over the octave
+  and not 21,7. The band that leaks decides the answer.
+
+  The rest is the bookkeeping the measurement carries. `microphone_spread_limit`
+  and `microphone_positions_required` are Table 6 and the rule of 6.2.1 that
+  sends a test duct from three microphone positions to five.
+  `measurement_reproducibility` is all three columns of Table 7, whose
+  disagreement is the useful part: only the insertion-loss column came from
+  tests, and the flat 3 dB of the transmission-loss column is the shape of an
+  estimate. `measurement_expanded_uncertainty` doubles it for the 95 %
+  coverage of 7.9, and `survey_reproducibility` is ISO 11691 Table 1.
+  `substitution_area_ratio` holds the test ducts to the 0,6 to 1,7 of 4.5 and
+  warns outside it, beside the design velocity, diameter and band limits
+  ISO 11691 draws round its own method.
+
+  Ten conformance rows against the printed tables and the closed forms, and a
+  new errata entry: Table 6 of ISO 7235 names the bands 50 to 125 Hz and then
+  "> 160", so the 160 Hz one-third octave belongs to no row and is left with
+  no limit at all.
+
 - The same valve on a liquid line, which is a different standard and a
   different kind of noise: IEC 60534-8-4, in
   `noise_control.valves_hydrodynamic`.

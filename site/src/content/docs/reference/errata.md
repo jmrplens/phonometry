@@ -4835,6 +4835,39 @@ in the same order.
   and record what the annex printed.
 - **Status:** unreported.
 
+## ISO 7235:2003, Table 6 (the 160 Hz band belongs to no row)
+
+- **Location:** Clause 6.2.1, Table 6, "Maximum level differences for three
+  microphone positions in the test duct", on printed folio 23 (PDF page 33) of
+  BS EN ISO 7235:2009.
+- **The print:** the frequency column reads 50, 63, 80, 100, 125 and then
+  "$> 160$", with 10, 10, 8, 8, 7 and 6 dB beside them. The header of that
+  column is "Frequency / Hz".
+- **The problem:** the last row is strictly greater than 160, so the 160 Hz
+  one-third octave is covered by no row and the table sets it no limit at all.
+  Every other row names a single band centre, and 160 Hz is a
+  one-third-octave centre of the same series, so the gap is between the rows
+  rather than in the frequencies the clause measures over: 6.1 measures every
+  one-third octave from 50 Hz to 10 kHz, 160 Hz included. The intended
+  reading is "160 and above" or "$\geq 160$", which is also the only reading
+  under which the six rows partition the range.
+- **Consequence:** the rule the table serves is the one that sends a test duct
+  from three microphone positions to five (6.2.1). Read literally, a
+  laboratory measuring the 160 Hz band has no criterion to apply and could
+  keep three positions whatever the spread between them. Read as intended, the
+  limit there is 6 dB.
+- **Evidence:** the six rows as printed, read on the page. Verified on PDF
+  page 33 (printed p. 23) of BS EN ISO 7235:2009, which endorses ISO 7235:2003
+  without modification: the last cell of the frequency column carries the
+  strict inequality sign and no equals bar, and the five rows above it carry
+  bare numbers.
+- **Library behaviour:**
+  [`microphone_spread_limit`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/silencer_measurement.py)
+  returns 6 dB from 160 Hz upwards, and the conformance row "Microphone
+  position spread limits (Table 6)" records the last row as "160 Hz and
+  above". A test named for the gap pins the value at 160 Hz itself.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

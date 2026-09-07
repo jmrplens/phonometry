@@ -65,6 +65,8 @@ occupational limit applies, in [Occupational exposure
 
 - [Silencers](silencers.md): reactive silencers by the
   four-pole method and the reactive-versus-dissipative choice.
+- [Measuring a Silencer (ISO 7235 and ISO 11691)](silencer-measurement.md):
+  where a catalogue insertion loss comes from, and how repeatable it is.
 - [Duct-Borne Noise: Fan to Room](duct-path.md): the
   end-to-end fan-to-room calculation against a room criterion, and the
   higher-order-mode cut-on that limits every plane-wave method.

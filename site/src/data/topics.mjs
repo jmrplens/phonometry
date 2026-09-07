@@ -445,6 +445,7 @@ export const topics = [
         items: [
           { slug: 'devices/noise-control', label: 'Overview', translations: { es: 'Resumen' } },
           'devices/noise-control/silencers',
+          'devices/noise-control/silencer-measurement',
           'devices/noise-control/duct-path',
           'devices/noise-control/vdi2081-air-systems',
           'devices/noise-control/control-valve-noise',

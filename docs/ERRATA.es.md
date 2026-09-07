@@ -5147,6 +5147,41 @@ dos ediciones con las mismas entradas y en el mismo orden.
   que dan las ecuaciones y dejan constancia de lo que imprimió el anexo.
 - **Estado:** sin comunicar.
 
+## ISO 7235:2003, Tabla 6 (la banda de 160 Hz no pertenece a ninguna fila)
+
+- **Ubicación:** apartado 6.2.1, Tabla 6, «Maximum level differences for three
+  microphone positions in the test duct», en la p. impresa 23 (PDF p. 33) de
+  BS EN ISO 7235:2009.
+- **Lo impreso:** la columna de frecuencias dice 50, 63, 80, 100, 125 y luego
+  «$> 160$», con 10, 10, 8, 8, 7 y 6 dB al lado. El encabezado de esa columna
+  es «Frequency / Hz».
+- **El problema:** la última fila es estrictamente mayor que 160, así que el
+  tercio de octava de 160 Hz no lo cubre ninguna fila y la tabla no le fija
+  límite alguno. Todas las demás filas nombran un solo centro de banda, y
+  160 Hz es un centro de tercio de octava de la misma serie, de modo que el
+  hueco está entre las filas y no en las frecuencias que mide el apartado: el
+  6.1 mide todos los tercios de octava de 50 Hz a 10 kHz, incluido el de
+  160 Hz. La lectura pretendida es «160 y superiores» o «$\geq 160$», que es
+  además la única con la que las seis filas se reparten el intervalo.
+- **Consecuencia:** la regla a la que sirve la tabla es la que lleva un
+  conducto de ensayo de tres posiciones de micrófono a cinco (6.2.1). Leída al
+  pie de la letra, un laboratorio que mida la banda de 160 Hz no tiene
+  criterio que aplicar y podría quedarse con tres posiciones fuera cual fuera
+  la dispersión entre ellas. Leída como se pretende, el límite allí es de
+  6 dB.
+- **Evidencia:** las seis filas tal como están impresas, leídas en la página.
+  Verificado en la PDF p. 33 (p. impresa 23) de BS EN ISO 7235:2009, que asume
+  la ISO 7235:2003 sin modificación: la última celda de la columna de
+  frecuencias lleva el signo de desigualdad estricta y ninguna barra de igual,
+  y las cinco filas de encima llevan números escuetos.
+- **Comportamiento de la biblioteca:**
+  [`microphone_spread_limit`](../src/phonometry/noise_control/silencer_measurement.py)
+  devuelve 6 dB desde 160 Hz hacia arriba, y la fila de conformidad
+  «Microphone position spread limits (Table 6)» registra la última fila como
+  «160 Hz and above». Un test con el nombre del hueco fija el valor en los
+  160 Hz mismos.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

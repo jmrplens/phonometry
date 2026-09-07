@@ -82,6 +82,7 @@ from conformance.domains import (
     noise_control,
     control_valves,
     control_valves_hydrodynamic,
+    silencer_measurement,
     vdi2081,
     cnossos_rail,
 )
@@ -219,6 +220,7 @@ __all__ = [
     "register",
     "render_markdown",
     "signal_analysis",
+    "silencer_measurement",
     "sound_quality",
     "speech",
     "swept_sine",

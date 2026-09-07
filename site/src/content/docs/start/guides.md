@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 122 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 123 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -110,7 +110,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and twenty-two guides sit in twelve topics, and each topic has its
+This page is the map. A hundred and twenty-three guides sit in twelve topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -714,6 +714,9 @@ IEC 60268-3/-4/-5, ITU-R BS.1770-5 and EBU R 128.
 - [Silencers](/phonometry/devices/noise-control/silencers/): reactive silencers by the
   four-pole transmission-matrix method and the reactive-versus-dissipative
   choice.
+- [Measuring a Silencer (ISO 7235 and ISO 11691)](/phonometry/devices/noise-control/silencer-measurement/):
+  the substitution measurement a catalogue insertion loss comes from, its
+  reverberation correction, and the reproducibility both standards publish.
 - [Duct-Borne Noise: Fan to Room](/phonometry/devices/noise-control/duct-path/): the
   end-to-end fan-to-room calculation against a room criterion, and the
   higher-order-mode cut-on that limits every plane-wave method.

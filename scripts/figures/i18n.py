@@ -2466,7 +2466,9 @@ _ES_EXACT = {
     "Octave-band centre frequency [Hz]": "Frecuencia central de banda de octava [Hz]",
     "1/3-octave band centre frequency [Hz]": "Frecuencia central de banda de tercio de octava [Hz]",
     # road_device_ratings: EN 1793, the spectrum and the two ratings.
-    "The weighting: EN 1793-3 Table 1": "La ponderación: tabla 1 de la EN 1793-3",
+    "The weighting: one grid, two spectra": "La ponderación: una rejilla, dos espectros",
+    "road, EN 1793-3": "carretera, EN 1793-3",
+    "railway, EN 16272-3-1": "ferrocarril, EN 16272-3-1",
     "EN 1793-1: what is not sent back": "EN 1793-1: lo que no se devuelve",
     "EN 1793-2: what is not let through": "EN 1793-2: lo que no se deja pasar",
     "the peak carries the rating": "el pico manda en el índice",

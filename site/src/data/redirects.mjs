@@ -13,7 +13,7 @@
 // path, which is what Astro emits.
 import { basePath } from './site.mjs';
 
-/** Old address -> where its content is published today. 432 entries. */
+/** Old address -> where its content is published today. 434 entries. */
 const moved = {
 	'/about/': '/start/about/',
 	'/environment/environmental-levels/': '/environment/assessment/environmental-levels/',
@@ -170,6 +170,7 @@ const moved = {
 	'/es/reference/api/correlation/envelope/': '/es/reference/api/signals/envelope/',
 	'/es/reference/api/environment/atmospheric-refraction/': '/es/reference/api/environment/refraction/',
 	'/es/reference/api/environment/impulse-prominence/': '/es/reference/api/environment/impulsive-sound/',
+	'/es/reference/api/environment/road-devices/': '/es/reference/api/environment/noise-reducing-devices/',
 	'/es/reference/api/environment/spanish-regulation/': '/es/reference/api/environment/spain/',
 	'/es/reference/api/filters/parametric-filters/': '/es/reference/api/filters/weighting/',
 	'/es/reference/api/levels/calibration/': '/es/reference/api/metrology/calibration/',
@@ -383,6 +384,7 @@ const moved = {
 	'/reference/api/correlation/envelope/': '/reference/api/signals/envelope/',
 	'/reference/api/environment/atmospheric-refraction/': '/reference/api/environment/refraction/',
 	'/reference/api/environment/impulse-prominence/': '/reference/api/environment/impulsive-sound/',
+	'/reference/api/environment/road-devices/': '/reference/api/environment/noise-reducing-devices/',
 	'/reference/api/environment/spanish-regulation/': '/reference/api/environment/spain/',
 	'/reference/api/filters/parametric-filters/': '/reference/api/filters/weighting/',
 	'/reference/api/levels/calibration/': '/reference/api/metrology/calibration/',

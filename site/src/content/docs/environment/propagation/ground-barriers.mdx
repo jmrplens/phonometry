@@ -560,12 +560,13 @@ end.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/road_device_ratings.svg"
-  alt="Three panels over the eighteen one-third octave bands of EN 1793-3. Left: the normalised traffic noise spectrum as bars, running from minus twenty decibels at 100 Hz up to a minus eight decibel peak at 1 kHz and back down to minus eighteen at 5 kHz, with an annotation saying the peak carries the rating. Middle: the sound absorption coefficient of two devices, an absorptive cassette rising from 0.15 to 0.98 around 400 Hz and easing to 0.70, rating DL alpha 8 decibels in category A3, and a concrete panel flat at 0.05 rating 0 decibels in category A1. Right: the sound reduction index of two devices, a concrete panel rising from 30 to 53 decibels and rating DL R 42 decibels in category B4, and a metal cassette rising from 21 to 34 decibels and rating 29 decibels in category B3."
+  alt="Three panels over the eighteen one-third octave bands of EN 1793-3. Left: the normalised traffic noise spectrum of EN 1793-3 as bars, running from minus twenty decibels at 100 Hz up to a minus eight decibel peak at 1 kHz and back down to minus eighteen at 5 kHz, with an annotation saying the peak carries the rating, and over them the normalised railway noise spectrum of EN 16272-3-1 as a marker line, lower at 100 Hz and flat from 1.25 to 2.5 kHz where the road one is already falling. Middle: the sound absorption coefficient of two devices, an absorptive cassette rising from 0.15 to 0.98 around 400 Hz and easing to 0.70, rating DL alpha 8 decibels in category A3, and a concrete panel flat at 0.05 rating 0 decibels in category A1. Right: the sound reduction index of two devices, a concrete panel rising from 30 to 53 decibels and rating DL R 42 decibels in category B4, and a metal cassette rising from 21 to 34 decibels and rating 29 decibels in category B3."
   width="100%"
 />
 
-*The weighting on the left decides everything: a device is judged by what it
-does around 1 kHz, and what it does at 100 Hz or 5 kHz barely counts.*
+*The weighting on the left decides everything, and there are two of them: a road
+device is judged by what it does around 1 kHz, a railway one by what it does
+between 1,25 and 2,5 kHz.*
 
 **EN 1793-1** rates absorption as the energy the device does *not* send back:
 
@@ -619,6 +620,39 @@ an absorptive cassette that keeps the reflection down can be the weaker one.
 Which of the two matters is a question about the site, not about the product:
 absorption for a road in a cutting or between parallel barriers, insulation for
 whatever is directly behind.
+
+### The same two numbers beside a railway
+
+A barrier beside a track is rated the same way and against a different noise.
+**EN 16272-3-1:2012** prints the normalised railway noise spectrum over the
+same eighteen bands, and its Clauses 5 and 6 are the two formulas above with
+that table in the weights. Rolling noise sits higher up than a road: the
+railway spectrum is flat within a decibel from 1,25 kHz to 2,5 kHz, where the
+road one has already begun to fall away, so an absorber that improves with
+frequency is worth more beside a track than beside a road.
+
+```python
+from phonometry import environment
+
+# A thick porous absorber, still improving where rolling noise is loudest.
+absorption = [0.10, 0.15, 0.22, 0.32, 0.45, 0.60, 0.72, 0.82, 0.88,
+              0.92, 0.95, 0.96, 0.96, 0.95, 0.94, 0.93, 0.92, 0.90]
+
+road = environment.sound_absorption_rating(absorption)
+rail = environment.sound_absorption_rating(absorption, spectrum="railway")
+print(road.reported, rail.reported)          # 8 10
+print(road.category, rail.category)          # A3 None
+```
+
+The railway parts print no category ladder: their annexes are guidance notes
+on using the rating, so a railway rating is the number and nothing more, and
+the result says so by carrying `None` where a road device carries its letter.
+Clause 6 also carries a slip worth knowing about, since it changes what a
+reader goes looking for: it says the sound reduction indices are weighted by
+"the normalised traffic noise spectrum defined in Table 1", while Table 1 of
+that standard is the railway spectrum and the symbol list under the formula
+says railway. It is the road wording of EN 1793-2, left in place when the
+clause was copied.
 
 ## Relation to ISO 9613-2
 

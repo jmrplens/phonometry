@@ -38,13 +38,13 @@ if TYPE_CHECKING:
         BarrierInsertionLoss,
         SphericalGroundResult,
     )
+    from ..environment.propagation.noise_reducing_devices import RoadDeviceRating
     from ..environment.propagation.outdoor_propagation import OutdoorAttenuation
     from ..environment.propagation.refraction import (
         AtmosphericPEResult,
         AtmosphericRayResult,
         EffectiveSoundSpeedProfile,
     )
-    from ..environment.propagation.road_devices import RoadDeviceRating
     from ..environment.sources.cnossos_rail import RailwayEmissionResult
     from ..environment.sources.cnossos_road import RoadEmissionResult
     from ..environment.sources.wind_turbine import WindTurbineTonalityResult
@@ -1037,7 +1037,7 @@ def plot_road_device_rating(
     the two of them come to.
 
     :param result: A
-        :class:`~phonometry.environment.propagation.road_devices.RoadDeviceRating`.
+        :class:`~phonometry.environment.propagation.noise_reducing_devices.RoadDeviceRating`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the per-band ``bar`` call.

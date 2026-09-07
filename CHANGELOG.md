@@ -98,6 +98,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   printed Formula (3) carries an asterisk on all four of its symbols, which
   makes it the identity `a*wS = a*wS` and corrects nothing; Formula (4) beside
   it, and the clause's own prose, give the reading the library implements.
+
+- The frequency a building answers at, when nobody could measure it: the
+  empirical predictors of ISO 4866 Annex D, in
+  `vibration.fundamental_frequency` and `vibration.height_fundamental_frequency`.
+
+  The guideline values of DIN 4150-3 are read at a frequency, and in the
+  topmost floor plane they stop depending on one because the building is
+  answering at its own. Annex D is what to do when that frequency cannot be
+  measured, and it offers four predictors while being candid about all of
+  them. Three are the shapes the period takes in national codes, and D.2
+  prints a *range* for each coefficient rather than a value, because the codes
+  disagree: on one sixty-metre building the choice of code moves the answer by
+  a factor of two, so the default here is the middle of the printed range and
+  the caller can name a coefficient instead. The fourth is a fit to
+  measurement, `f = 46/h` from 163 rectangular-plan buildings, and it carries
+  the error the annex admits: `empirical_frequency_bounds` is the ± 50 % D.3
+  calls not uncommon. One quiet agreement between the two is worth the test
+  that pins it: 0,022 s/m is both the middle of the oldest code range and the
+  coefficient of the measured fit. Damping gets `DAMPING_RATIO_RANGE` and no
+  estimator, which is the shape of D.4: it reports 0,5 % to 2,1 % of critical
+  and says no proven method of predicting it exists.
+
 - Whether the shaking cracks the building, which is the one vibration question
   that is not about sound: the guideline values of DIN 4150-3, in
   `vibration.guideline_velocity` and `vibration.assess_building_vibration`.

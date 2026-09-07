@@ -402,6 +402,14 @@ _ES_EXACT = {
     "welded steel": "acero soldado",
     "concrete,\nflanged metal": "hormigón,\nmetal con bridas",
     "masonry,\nplastic": "obra de fábrica,\nplástico",
+    # building_frequency_prediction (ISO 4866 Annex D): the empirical
+    # predictors of a building's fundamental frequency.
+    "Empirical Fundamental Frequency of a Building (ISO 4866 Annex D)": "Frecuencia fundamental empírica de un edificio (ISO 4866, anexo D)",
+    "Four Predictors of One Frequency": "Cuatro predictores de una frecuencia",
+    "What the Choice of Code Costs, on One Building": "Lo que cuesta elegir norma, en un edificio",
+    "Building height $h$ (m)": "Altura del edificio $h$ (m)",
+    "Fundamental frequency $f$ (Hz)": "Frecuencia fundamental $f$ (Hz)",
+    "$\\pm$50 %, which D.3 calls not uncommon": "$\\pm$50 %, que D.3 llama nada raro",
     "limit of zone A ($Z$ = 1)": "límite de la zona A ($Z$ = 1)",
     "limit of zone B ($Z$ = 2.56)": "límite de la zona B ($Z$ = 2,56)",
     "limit of zone C ($Z$ = 6.4)": "límite de la zona C ($Z$ = 6,4)",
@@ -4078,6 +4086,18 @@ _ES_EXACT = {
 
 
 _ES_PATTERNS = [
+    # building_frequency_prediction: the span each coefficient range allows,
+    # written beside its bar.
+    (
+        r"^(\d+\.\d+) to (\d+\.\d+) Hz$",
+        r"\1 a \2 Hz",
+    ),
+    # The same figure's fit line, whose label carries mathematics and so is
+    # skipped by the blanket decimal-comma pass.
+    (
+        r"^\$f = 46/h\$: (\d+)\.(\d+) Hz$",
+        r"$f = 46/h$: \1,\2 Hz",
+    ),
     # road_device_ratings: the legends carry the computed rating and category.
     (
         r"^absorptive cassette: \$DL_\\alpha\$ = (\d+) dB \((A\d)\)$",

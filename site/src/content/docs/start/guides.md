@@ -509,6 +509,9 @@ ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 and DIN 4150-3.
 - [Vibration damage to structures (DIN 4150-3)](/phonometry/vibration/structural/structural-damage/):
   the guideline peak particle velocities a foundation, a topmost floor plane and
   a buried pipe are judged by, and the bending stress a velocity implies.
+- [Predicting a building's own frequency (ISO 4866)](/phonometry/vibration/structural/building-response/):
+  the empirical predictors of Annex D, the ± 50 % they admit, and the damping
+  range the annex reports without a way to predict it.
 - [Sound power from surface vibration (ISO/TS 7849)](/phonometry/devices/emission/vibration-sound-power/):
   the radiated power from the surface-averaged velocity level and the radiation
   factor, with the Part 1 upper limit and the Part 2 engineering value. It lives

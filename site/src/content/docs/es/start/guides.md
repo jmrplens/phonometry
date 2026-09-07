@@ -534,6 +534,9 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 y DIN 4150-3.
   las velocidades de pico de referencia con las que se juzgan un cimiento, el
   plano de la última planta y una tubería enterrada, y la tensión de flexión que
   implica una velocidad.
+- [Predecir la frecuencia propia de un edificio (ISO 4866)](/phonometry/es/vibration/structural/building-response/):
+  los predictores empíricos del anexo D, el ± 50 % que admiten y el intervalo de
+  amortiguamiento que el anexo aporta sin manera de predecirlo.
 - [Potencia acústica a partir de la vibración (ISO/TS 7849)](/phonometry/es/devices/emission/vibration-sound-power/):
   la potencia radiada a partir del nivel de velocidad promediado en la superficie
   y el factor de radiación, con el límite superior de la Parte 1 y el valor de

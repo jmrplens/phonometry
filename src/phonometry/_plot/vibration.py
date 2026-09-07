@@ -56,6 +56,9 @@ if TYPE_CHECKING:
     from ..vibration.machinery.diagnostics import FaultFrequencyResult
     from ..vibration.machinery.evaluation import VectorChangeResult
     from ..vibration.structural.building_damage import DamageAssessment
+    from ..vibration.structural.building_response import (
+        BuildingFrequencyEstimate,
+    )
     from ..vibration.structural.experimental_sea import PowerInjectionResult
     from ..vibration.structural.junction_transmission import (
         JunctionTransmissionResult,
@@ -181,7 +184,16 @@ _STRINGS: dict[str, str] = {
     "Building class": "Clase de edificio",
     "Guideline values at the foundation (DIN 4150-3 Table 1)": "Valores de referencia en el cimiento (DIN 4150-3, tabla 1)",
     "Guideline values in the topmost floor plane (DIN 4150-3 Table 1)": "Valores de referencia en el plano de la última planta (DIN 4150-3, tabla 1)",
-    "Long-term guideline values in the topmost floor plane (DIN 4150-3 Table 3)": "Valores de referencia de larga duración en el plano de la última planta (DIN 4150-3, tabla 3)",
+    "Long-term guideline values in the topmost floor plane (DIN 4150-3 Table 3)": "Valores de referencia de larga duración en el plano de la última planta (DIN 4150-3, tabla 3)",  # Empirical fundamental frequency of a building (ISO 4866 Figure D.1).
+    "Building height $h$ [m]": "Altura del edificio $h$ [m]",
+    r"$f = 46/h$": r"$f = 46/h$",
+    r"$\pm$50 %, which D.3 calls not uncommon": r"$\pm$50 %, que D.3 llama nada raro",
+    "{model} model: {f} Hz at {h} m": "modelo {model}: {f} Hz a {h} m",
+    "Empirical fundamental frequency of a building (ISO 4866 D.3)": "Frecuencia fundamental empírica de un edificio (ISO 4866, D.3)",
+    "storeys": "plantas",
+    "height": "altura",
+    "height_width": "altura y anchura",
+    "slenderness": "esbeltez",
 }
 
 
@@ -883,6 +895,73 @@ def plot_damage_assessment(
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
     ax.set_axisbelow(True)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_building_frequency(
+    result: BuildingFrequencyEstimate,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Figure D.1 of ISO 4866 with one estimate on it.
+
+    The ``f = 46/h`` fit against building height on logarithmic axes, the
+    ± 50 % band D.3 puts around an empirical prediction, and the estimate as a
+    point. A prediction from another of the annex's forms lands off the line,
+    which is the comparison the figure is for.
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.building_response.BuildingFrequencyEstimate`
+        carrying a height.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the estimate-point ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+    from ..vibration.structural.building_response import (
+        EMPIRICAL_FREQUENCY_TOLERANCE,
+        height_fundamental_frequency,
+    )
+
+    ax = ax if ax is not None else _new_axes()
+    height = float(result.height_m or 0.0)
+    span = np.logspace(np.log10(3.0), np.log10(300.0), 300)
+    fit = np.asarray(height_fundamental_frequency(span), dtype=np.float64)
+    ax.plot(fit, span, color=_C_PRIMARY, lw=2.0, label=_t(r"$f = 46/h$", language))
+    ax.fill_betweenx(
+        span,
+        fit * (1.0 - EMPIRICAL_FREQUENCY_TOLERANCE),
+        fit * (1.0 + EMPIRICAL_FREQUENCY_TOLERANCE),
+        color=_C_PRIMARY,
+        alpha=0.15,
+        label=_t(r"$\pm$50 %, which D.3 calls not uncommon", language),
+    )
+    kwargs.setdefault("color", _C_REFERENCE)
+    kwargs.setdefault("marker", "D")
+    kwargs.setdefault("markersize", 7)
+    kwargs.setdefault("ls", "none")
+    kwargs.setdefault(
+        "label",
+        _t("{model} model: {f} Hz at {h} m", language).format(
+            model=_t(result.model, language),
+            f=format_number(result.frequency_hz, language, decimals=2),
+            h=format_number(height, language, decimals=0),
+        ),
+    )
+    ax.plot([result.frequency_hz], [height], **kwargs)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Building height $h$ [m]", language))
+    ax.set_title(
+        _t("Empirical fundamental frequency of a building (ISO 4866 D.3)", language)
+    )
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
 

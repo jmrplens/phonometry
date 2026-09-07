@@ -14,6 +14,11 @@ the
 energies or a centre time read from one recording alone, and survives any
 gain you put in front of it. $G$ does not.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_second_microphone_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_second_microphone.svg" alt="Four panels, one per measure. G, sound strength: an omnidirectional source with concentric dashed rings around it and a microphone 10 m away in a free field, with the note that a distance d of at least 3 m may be used instead and corrected by twenty times the logarithm of d over ten, and that the free-field measurement is averaged around the source every 12.5 degrees. J LF and L J, lateral energy: the source at the left, the direct sound dashed across to a microphone position, and beside the omnidirectional capsule a figure-of-eight pattern drawn as two lobes with its null pointing back along the direct sound. IACC, interaural correlation: a head seen from above on a stand over hatched floor with a microphone at each ear canal, dimensioned 1.2 m above the floor. ST, support on the platform: a stage platform with an omnidirectional source and a microphone 1.0 m apart, an arrow saying that anything else reflecting must be more than 2 m away, and the two integration windows, the direct sound from 0 to 10 ms with the floor reflection included and the reflected sound from 20 to 100 ms for early support and from 100 ms on for late. Underneath, a note that one impulse response gives the reverberation time while these four give what the room does to a listener, each with its own setup." width="100%"></picture>
+
+*Only the first cell is this page: $G$ is the measure that needs a reference,
+and the reference is the same source at 10 m with no room around it.*
+
 ## 1. What G is
 
 ISO 3382-1:2009, Equation (A.1) defines it as the energy of the measured

@@ -314,6 +314,10 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Industrial noise control: HVAC and enclosures](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/)
 - [Measuring a silencer (ISO 7235 and ISO 11691)](https://jmrplens.github.io/phonometry/devices/noise-control/silencer-measurement/)
 - [HVAC noise the German way (VDI 2081)](https://jmrplens.github.io/phonometry/devices/noise-control/vdi2081-air-systems/)
+
+### Control valve noise (IEC 60534-8)
+
+- [Overview](https://jmrplens.github.io/phonometry/devices/noise-control/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-devices-noise-control-valves.txt)
 - [Control valve noise (IEC 60534-8-3)](https://jmrplens.github.io/phonometry/devices/noise-control/control-valve-noise/)
 - [Hydrodynamic valve noise (IEC 60534-8-4)](https://jmrplens.github.io/phonometry/devices/noise-control/valve-cavitation/)
 
@@ -399,6 +403,7 @@ One file per area, each small enough to fetch whole. `llms-full.txt` is the comp
 - [Electroacoustics](https://jmrplens.github.io/phonometry/llms/llms-devices-electroacoustics.txt)
 - [Broadcast](https://jmrplens.github.io/phonometry/llms/llms-devices-broadcast.txt)
 - [Noise control](https://jmrplens.github.io/phonometry/llms/llms-devices-noise-control.txt)
+- [Control valve noise (IEC 60534-8)](https://jmrplens.github.io/phonometry/llms/llms-devices-noise-control-valves.txt)
 - [Wave simulation](https://jmrplens.github.io/phonometry/llms/llms-simulation.txt)
 - [Reference](https://jmrplens.github.io/phonometry/llms/llms-reference.txt)
 - [Everything](https://jmrplens.github.io/phonometry/llms-full.txt)

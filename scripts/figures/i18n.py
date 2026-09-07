@@ -3210,6 +3210,14 @@ _ES_EXACT = {
     "zero at the threshold, then a fifth power:\nthe cavitation term passes the turbulent\n"
     "one within a tenth of $x_F$ of starting": "cero en el umbral y luego una quinta potencia:\nel término de cavitación pasa al turbulento\n"
     "en menos de una décima de $x_F$",
+    # fdtd_open_end: the mouth as a filter, at two frequencies
+    "The open end of a duct: what comes back (2D FDTD)": "La boca de un conducto: lo que vuelve (FDTD 2D)",
+    "|p| along the duct": "|p| a lo largo del conducto",
+    "Distance from the source [m]": "Distancia desde la fuente [m]",
+    "The mouth is a filter, and Equation (B.3) is how much of one": "La boca es un filtro, y la Ecuación (B.3) dice cuánto",
+    "at 100 Hz it reflects most of what reaches it and the duct rings; "
+    "at 800 Hz it radiates and the duct carries a travelling wave": "a 100 Hz refleja casi todo lo que le llega y el conducto resuena; "
+    "a 800 Hz radia y el conducto lleva una onda viajera",
     # silencer_measurement: the octave fold, the mouth, and the spread
     "The octave is the energy, not the average": "La octava es la energía, no el promedio",
     "Mean of the decibels": "Media de los decibelios",
@@ -4025,6 +4033,11 @@ _ES_PATTERNS = [
     # computed, so only the words around the number can be tabled.
     (r"^critical distance, (\d+)\.(\d+) m$", r"distancia crítica, \1,\2 m"),
     (r"^(\d+)\.(\d+) dB$", r"\1,\2 dB"),
+    # fdtd_open_end: the standing-wave ratio is measured off the field.
+    (
+        r"^standing-wave r = (\d+)\.(\d+)$",
+        r"r de onda estacionaria = \1,\2",
+    ),
     # lateral_energy_measures: the legend carries the computed coefficient.
     (
         r"^one signal in both ears: IACC = (\d+)\.(\d+)$",

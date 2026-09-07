@@ -27,6 +27,7 @@ import Scope from '../../../../../components/Scope.astro';
 import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
+import Video from '../../../../../components/Video.astro';
 
 Todo lo que calcula un modelo de silenciador sale de la geometría. La cifra
 que publica un fabricante, no. Es una **pérdida por inserción medida por
@@ -296,6 +297,23 @@ print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
 ```
 
 Tres decibelios más a 63 Hz, y el coeficiente de reflexión sube con ellos.
+
+<Video
+  name="anim_fdtd_open_end"
+  width={2400}
+  height={1350}
+  title="La boca de un conducto en una simulación FDTD 2D"
+  description="Un conducto de 0,20 m enrasado en una pantalla rígida, radiando al semiespacio que hay más allá, excitado a 100 Hz y a 800 Hz uno sobre otro. A 100 Hz el conducto se llena de onda estacionaria y sólo escapa un campo débil al otro lado de la pantalla; la envolvente que hay al lado oscila entre un máximo y un mínimo que dan un coeficiente de reflexión de 0,71. A 800 Hz el conducto lleva una onda casi viajera y de la boca salen frentes circulares fuertes hacia el semiespacio, con una envolvente que apenas ondula y da 0,19."
+/>
+
+*Ambas portadoras están por debajo de la frecuencia de corte de 857 Hz de un
+conducto de ese ancho, así que el campo dentro de él es la onda plana que
+supone toda la aritmética de conductos de la ISO 7235. Los coeficientes de
+reflexión leídos de la onda estacionaria son los de la geometría simulada, y
+no los de la Ecuación (B.4): esa forma cerrada es una aproximación de pistón
+para una boca circular, y esto es una rendija en una pantalla. Lo que
+comparten es el mecanismo, y es el mecanismo el que decide si un nivel medido
+en una sala es el nivel del conducto que hay detrás.*
 
 La Ecuación (B.4) dice lo mismo del revés, como coeficiente de reflexión de
 presión, y ambas cierran exactamente sobre la energía:

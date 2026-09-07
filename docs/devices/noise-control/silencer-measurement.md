@@ -265,6 +265,18 @@ print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
 
 Three more decibels at 63 Hz, and the reflection coefficient rises with it.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end.gif" alt="Animation: a 0.20 m duct flush in a rigid screen, radiating into the half space beyond it, driven at 100 Hz and at 800 Hz one above the other. At 100 Hz the duct fills with a standing wave and only a faint field escapes past the screen; the envelope beside it swings between a maximum and a minimum that give a reflection coefficient of 0.71. At 800 Hz the duct carries a nearly travelling wave and strong circular fronts leave the mouth into the half space, with an envelope that ripples only slightly and gives 0.19" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end.webm)
+
+*Both carriers are below the 857 Hz cut-on of a duct that wide, so the field
+inside it is the plane wave the whole of ISO 7235's duct arithmetic assumes.
+The reflection coefficients read off the standing wave are the simulated
+geometry's own, and not Equation (B.4): that closed form is a piston
+approximation for a circular mouth, where this is a slit in a screen. What
+the two share is the mechanism, and it is the mechanism that decides whether
+a level measured in a room is the level in the duct behind it.*
+
 Equation (B.4) says the same fact the other way round, as a pressure
 reflection coefficient, and the two close exactly on the energy:
 $D_\mathrm{td} = -10\lg(1 - r^2)$ at every frequency, area and solid angle.

@@ -9,7 +9,7 @@
 # reportlab and svglib than the committed fiches were rendered with, so a
 # developer running `make reports` saw drift in fiches nobody had touched.
 # The versions here are the versions there; bump them together.
-ruff==0.16.5
+ruff==0.16.6
 mypy==2.3.1
 bandit==1.9.4
 types-setuptools==84.0.0.20260812

@@ -130,6 +130,35 @@ def test_the_doubling_is_written_for_row_1_alone() -> None:
         bd.guideline_velocity("residential", 50.0, massive_structure=True)
 
 
+def test_the_doubling_does_not_reach_table_3() -> None:
+    """Row 1 of Table 1 is a row of Table 1, and Table 3 is another table.
+
+    Clause 5.1 is a sentence of Clause 5, which is short-term vibration, and
+    it names Table 1. Clause 6 prints Table 3 and says nothing about raising
+    it for a massive structure, so the allowance stops here rather than being
+    carried over by analogy.
+    """
+    with pytest.raises(ValueError, match=r"Table 3 carries no such allowance"):
+        bd.guideline_velocity(
+            "commercial",
+            location="top_floor",
+            duration="long_term",
+            massive_structure=True,
+        )
+    plain = bd.guideline_velocity(
+        "commercial", location="top_floor", duration="long_term"
+    )
+    assert plain == pytest.approx(10.0)
+
+
+def test_the_doubling_does_reach_the_topmost_floor_plane() -> None:
+    """5.1 names row 1, and the topmost floor plane is a column of that row."""
+    got = bd.guideline_velocity(
+        "commercial", location="top_floor", massive_structure=True
+    )
+    assert got == pytest.approx(80.0)
+
+
 def test_table_3_has_no_foundation_column() -> None:
     with pytest.raises(ValueError, match=r"topmost floor plane only"):
         bd.guideline_velocity("residential", 10.0, duration="long_term")

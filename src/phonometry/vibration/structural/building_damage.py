@@ -140,7 +140,8 @@ FLOOR_VERTICAL_MM_S: float = 20.0
 #: block foundations) may raise the row 1 values of Table 1 by up to this
 #: factor, provided no danger arises from soil-mechanical effects. The clause
 #: says "up to", so this is a ceiling on the allowance rather than a value the
-#: structure is entitled to.
+#: structure is entitled to, and it is a sentence of Clause 5 naming Table 1,
+#: so it does not reach the long-term values of Table 3.
 MASSIVE_STRUCTURE_FACTOR: float = 2.0
 
 #: The pipe materials of Table 2, in the order the rows are printed.
@@ -205,14 +206,15 @@ def guideline_velocity(
         (Table 3).
     :param massive_structure: Raise the row 1 values by
         :data:`MASSIVE_STRUCTURE_FACTOR`, which is the most 5.1 allows a
-        massive engineering structure. Only the commercial row is raised; the
-        allowance is written for that row alone.
+        massive engineering structure. The allowance is written for row 1 of
+        Table 1 alone, so it applies to the commercial class and to short-term
+        vibration, and is refused anywhere else.
     :return: The guideline peak velocity, in millimetres per second; a float
         unless *frequency* was an array.
     :raises ValueError: If a name is not one of its choices, if the
         short-term foundation case is asked for without a frequency, if a
         frequency is not positive and finite, or if *massive_structure* is
-        asked for outside the commercial row.
+        asked for outside row 1 of Table 1.
     """
     cls = require_choice(str(building_class), "building_class", BUILDING_CLASSES)
     where = require_choice(str(location), "location", ("foundation", "top_floor"))
@@ -225,6 +227,16 @@ def guideline_velocity(
                 f"got building_class={cls!r}."
             )
             raise ValueError(msg)
+        if when != "short_term":
+            # The allowance is a sentence of Clause 5, which is short-term
+            # vibration, and it names Table 1. Table 3 belongs to Clause 6 and
+            # the standard says nothing about raising it.
+            msg = (
+                "'massive_structure' is the Clause 5.1 allowance on Table 1; "
+                "Table 3 carries no such allowance, so it cannot be applied "
+                "with duration='long_term'."
+            )
+            raise ValueError(msg)
         factor = MASSIVE_STRUCTURE_FACTOR
     if when == "long_term":
         if where != "top_floor":
@@ -233,7 +245,7 @@ def guideline_velocity(
                 "plane only; got location='foundation'."
             )
             raise ValueError(msg)
-        return factor * LONG_TERM_TOP_FLOOR_MM_S[cls]
+        return LONG_TERM_TOP_FLOOR_MM_S[cls]
     if where == "top_floor":
         return factor * SHORT_TERM_TOP_FLOOR_MM_S[cls]
     if frequency is None:
@@ -392,9 +404,11 @@ def storey_fundamental_frequency(storeys: int) -> float:
     :return: The estimated lowest horizontal natural frequency, in hertz.
     :raises ValueError: If the storey count is not a positive integer.
     """
+    # ValueError rather than TypeError, so every argument this module refuses
+    # raises the same class.
     if isinstance(storeys, bool) or not isinstance(storeys, (int, np.integer)):
         msg = "'storeys' must be an integer."
-        raise ValueError(msg)  # noqa: TRY004 - ValueError keeps the module uniform
+        raise ValueError(msg)  # noqa: TRY004
     n = int(storeys)
     if n < 1:
         msg = f"'storeys' must be at least 1; got {n}."

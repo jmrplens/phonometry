@@ -312,7 +312,7 @@ number for all frequencies, and *frequency* is then not needed.
 | `frequency` | Frequency of the dominant component, in hertz (scalar or array). Required for the short-term foundation case and ignored otherwise. |
 | `location` | `"foundation"` (default) or `"top_floor"`. |
 | `duration` | `"short_term"` (Table 1, default) or `"long_term"` (Table 3). |
-| `massive_structure` | Raise the row 1 values by [`MASSIVE_STRUCTURE_FACTOR`](/phonometry/reference/api/vibration/building-damage/#massive_structure_factor), which is the most 5.1 allows a massive engineering structure. Only the commercial row is raised; the allowance is written for that row alone. |
+| `massive_structure` | Raise the row 1 values by [`MASSIVE_STRUCTURE_FACTOR`](/phonometry/reference/api/vibration/building-damage/#massive_structure_factor), which is the most 5.1 allows a massive engineering structure. The allowance is written for row 1 of Table 1 alone, so it applies to the commercial class and to short-term vibration, and is refused anywhere else. |
 
 **Returns:** The guideline peak velocity, in millimetres per second; a float unless *frequency* was an array.
 
@@ -320,7 +320,7 @@ number for all frequencies, and *frequency* is then not needed.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a name is not one of its choices, if the short-term foundation case is asked for without a frequency, if a frequency is not positive and finite, or if *massive_structure* is asked for outside the commercial row. |
+| ValueError | If a name is not one of its choices, if the short-term foundation case is asked for without a frequency, if a frequency is not positive and finite, or if *massive_structure* is asked for outside row 1 of Table 1. |
 
 ## LONG_TERM_TOP_FLOOR_MM_S
 

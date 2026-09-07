@@ -127,7 +127,9 @@ buildings that fit neither and are worth preserving, a listed building being
 the example the standard gives. A massive engineering structure such as a
 reinforced-concrete abutment or a block foundation may raise the row 1 values
 by up to a factor of two, which is what 5.1 allows provided nothing dangerous
-comes of the soil mechanics:
+comes of the soil mechanics. The allowance is a sentence of Clause 5 naming
+Table 1, so it stops at short-term vibration and the library refuses to carry
+it over to Table 3:
 
 ```python
 print(vibration.guideline_velocity("commercial", 50.0, massive_structure=True))

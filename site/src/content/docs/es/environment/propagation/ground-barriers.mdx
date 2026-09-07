@@ -44,6 +44,24 @@ references:
     pages: "1266-1276"
     doi: "10.1121/1.385809"
     note: "La solución exacta de difracción por cuña cuyo límite de cuña plana (semiplano fino) usa la pérdida por inserción de la barrera."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2012
+    title: "Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 1: Intrinsic characteristics of sound absorption under diffuse sound field conditions"
+    designation: "EN 1793-1:2012"
+    note: "Apartado 5, el índice global DLalpha y su límite de 0,99 en el cociente; apartado 6.1, la declaración al entero más próximo; anexo A, las categorías A1 a A5. Leída de la edición BS EN 1793-1:2012."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2012
+    title: "Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 2: Intrinsic characteristics of airborne sound insulation under diffuse sound field conditions"
+    designation: "EN 1793-2:2012"
+    note: "Apartado 5.2, el índice global DLR; apartado 7.1, la declaración al entero más próximo; anexo A, las categorías B1 a B4. Leída de la edición BS EN 1793-2:2012."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 1997
+    title: "Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 3: Normalized traffic noise spectrum"
+    designation: "EN 1793-3:1997"
+    note: "Tabla 1, los dieciocho niveles relativos ponderados A por tercio de octava con los que se ponderan los dos índices globales. Leída de la edición BS EN 1793-3:1998."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -546,6 +564,81 @@ superficie cerrada y una extensión horizontal normal a la trayectoria mayor que
 la longitud de onda. Esas reglas de cualificación están enunciadas en el
 [apartado de errores habituales con barreras de Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/);
 aquí se aplican sin cambios.
+
+## 3. Lo que dice la declaración del producto (EN 1793)
+
+Todo lo anterior es la barrera como física. Una barrera a la venta es un
+producto, y lo que lleva su declaración son dos enteros, y ninguno de los dos
+es una difracción: cuánto del sonido que le llega vuelve cruzando la carretera,
+y cuánto la atraviesa. Los dos se ponderan con un espectro que nadie mide en
+obra, el **espectro normalizado de ruido de tráfico** de la EN 1793-3:
+dieciocho bandas de tercio de octava de 100 Hz a 5 kHz, con el máximo en 1 kHz
+y doce decibelios menos en cada extremo.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/road_device_ratings.svg"
+  alt="Tres paneles sobre las dieciocho bandas de tercio de octava de la EN 1793-3. A la izquierda, el espectro normalizado de ruido de tráfico en barras, de menos veinte decibelios en 100 Hz hasta un máximo de menos ocho decibelios en 1 kHz y de vuelta a menos dieciocho en 5 kHz, con una anotación que dice que el pico manda en el índice. En el centro, el coeficiente de absorción de dos dispositivos: un casete absorbente que sube de 0,15 a 0,98 alrededor de 400 Hz y baja hasta 0,70, con un DL alfa de 8 decibelios en la categoría A3, y un panel de hormigón plano en 0,05 con 0 decibelios en la categoría A1. A la derecha, el índice de reducción sonora de dos dispositivos: un panel de hormigón que sube de 30 a 53 decibelios con un DL R de 42 decibelios en la categoría B4, y un casete metálico que sube de 21 a 34 decibelios con 29 decibelios en la categoría B3."
+  width="100%"
+/>
+
+*La ponderación de la izquierda lo decide todo: a un dispositivo se le juzga
+por lo que hace alrededor de 1 kHz, y lo que hace en 100 Hz o en 5 kHz apenas
+cuenta.*
+
+La **EN 1793-1** valora la absorción como la energía que el dispositivo *no*
+devuelve:
+
+$$
+DL_\alpha = -10 \lg\left| 1 -
+\frac{\sum_{i=1}^{18} \alpha_{\mathrm{S}i}\, 10^{0,1 L_i}}
+     {\sum_{i=1}^{18} 10^{0,1 L_i}} \right|
+$$
+
+Un $\alpha_\mathrm{S}$ de cámara reverberante puede pasar de uno banda a banda,
+lo que empujaría el cociente ponderado por encima de 1 y dejaría al logaritmo
+sin argumento. El apartado 5 lo dice y lo arregla: el cociente se limita a
+0,99, así que ningún dispositivo puede pasar de 20 dB por absorbente que salga
+medido. `sound_absorption_rating` avisa cuando lo que ha respondido es ese
+límite y no la medida.
+
+La **EN 1793-2** valora el aislamiento acústico al ruido aéreo con la misma
+ponderación, pero sobre la energía transmitida:
+
+$$
+DL_R = -10 \lg\left|
+\frac{\sum_{i=1}^{18} 10^{0,1 L_i}\, 10^{-0,1 R_i}}
+     {\sum_{i=1}^{18} 10^{0,1 L_i}} \right|
+$$
+
+```python
+from phonometry import environment
+
+# Un casete con lana mineral tras una cara perforada, en las dieciocho bandas
+# de tercio de octava de la EN 1793-3, de 100 Hz a 5 kHz.
+absorption = [0.15, 0.25, 0.40, 0.60, 0.80, 0.95, 0.98, 0.95, 0.92,
+              0.90, 0.88, 0.85, 0.82, 0.80, 0.78, 0.75, 0.72, 0.70]
+reduction = [21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0,
+             30.0, 31.0, 31.0, 32.0, 32.0, 33.0, 33.0, 34.0, 34.0]
+
+absorbed = environment.sound_absorption_rating(absorption)
+print(absorbed.reported, absorbed.category)     # 8 A3
+
+through = environment.airborne_insulation_rating(reduction)
+print(through.reported, through.category)       # 29 B3
+```
+
+Los dos se declaran redondeados al entero más próximo (EN 1793-1, apartado 6.1;
+EN 1793-2, apartado 7.1), y cada uno tiene en su anexo A una escala normativa
+que se lee sobre ese entero: de A1 a A5 la absorción, de B1 a B4 el
+aislamiento, con A0 y B0 reservados para «sin determinar». Las escalas no
+tienen huecos entre escalones porque el número que clasifican ya es un entero.
+
+No son comparables y una declaración lleva los dos. Un panel de hormigón
+liso devuelve casi todo al otro lado de la carretera y aun así es la mejor
+pared; un casete absorbente que mantiene baja la reflexión puede ser la peor.
+Cuál de los dos importa es una pregunta sobre el emplazamiento y no sobre el
+producto: la absorción para una carretera en trinchera o entre pantallas
+paralelas, el aislamiento para lo que haya justo detrás.
 
 ## Relación con ISO 9613-2
 

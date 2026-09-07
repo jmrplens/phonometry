@@ -227,6 +227,7 @@ from .environment import (
     generate_rd1367_tonal_correction,
     generate_rd1367_vs_iso_tonal,
     generate_refraction_homogeneous_check,
+    generate_road_device_ratings,
     generate_shadow_zone_map,
     generate_tonal_audibility,
     generate_wind_turbine_apparent_power,
@@ -766,6 +767,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_outdoor_level_cascade,
     # The quality-assurance cases ISO/TR 17534-3 prints for ISO 9613-2.
     generate_iso17534_qa_cases,
+    # What a road device is declared by, over the EN 1793-3 spectrum.
+    generate_road_device_ratings,
     generate_atmospheric_refraction,
     generate_shadow_zone_map,
     generate_refraction_homogeneous_check,

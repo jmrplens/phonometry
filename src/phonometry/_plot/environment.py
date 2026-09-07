@@ -44,6 +44,7 @@ if TYPE_CHECKING:
         AtmosphericRayResult,
         EffectiveSoundSpeedProfile,
     )
+    from ..environment.propagation.road_devices import RoadDeviceRating
     from ..environment.sources.cnossos_rail import RailwayEmissionResult
     from ..environment.sources.cnossos_road import RoadEmissionResult
     from ..environment.sources.wind_turbine import WindTurbineTonalityResult
@@ -1015,6 +1016,73 @@ def plot_cnossos_road_emission(
     ax.set_ylabel(r"$L^{\prime}_{W,\mathrm{eq,line}}$ [dB re 1 pW/m]")
     ax.set_title(_t("CNOSSOS-EU road source line power", language))
     ax.legend(loc="best", fontsize="small")
+    ax.grid(True, axis="y", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_road_device_rating(
+    result: RoadDeviceRating,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The per-band performance of a road device against the spectrum weighting it.
+
+    The eighteen one-third octave bands of EN 1793-3 carry two things at
+    once: what the device does in each of them, drawn as bars on the left
+    axis, and how much each band counts, drawn as the normalised traffic
+    noise spectrum on a right axis. The single number in the title is what
+    the two of them come to.
+
+    :param result: A
+        :class:`~phonometry.environment.propagation.road_devices.RoadDeviceRating`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the per-band ``bar`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.bands_hz, dtype=np.float64)
+    positions = _band_axis(ax, freqs, language=language)
+    absorbing = result.quantity == "absorption"
+
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault(
+        "label",
+        _t(r"$\alpha_\mathrm{S}$ — absorption coefficient", language)
+        if absorbing
+        else _t(r"$R$ — sound reduction index [dB]", language),
+    )
+    ax.bar(positions, np.asarray(result.values, dtype=np.float64), **kwargs)
+    ax.set_ylabel(
+        _t("Sound absorption coefficient", language)
+        if absorbing
+        else _t("Sound reduction index [dB]", language)
+    )
+
+    spectrum = ax.twinx()
+    spectrum.plot(
+        positions,
+        np.asarray(result.weights, dtype=np.float64),
+        color=_C_SECONDARY,
+        marker="o",
+        lw=1.6,
+        label=_t(r"$L_i$ — normalised traffic noise [dB]", language),
+    )
+    spectrum.set_ylabel(_t(r"$L_i$ [dB]", language), color=_C_SECONDARY)
+    spectrum.tick_params(axis="y", labelcolor=_C_SECONDARY)
+
+    symbol = r"$DL_\alpha$" if absorbing else r"$DL_R$"
+    ax.set_title(
+        _t(f"{symbol} = {result.reported} dB, category {result.category}", language)
+    )
+    handles, labels = ax.get_legend_handles_labels()
+    extra = spectrum.get_legend_handles_labels()
+    ax.legend(handles + extra[0], labels + extra[1], loc="best", fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax

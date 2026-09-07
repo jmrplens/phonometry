@@ -55,6 +55,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- What a road barrier is sold by, which is not what it diffracts: the two
+  single-number ratings of EN 1793 and the spectrum they share, in
+  `environment.sound_absorption_rating` and
+  `environment.airborne_insulation_rating`.
+
+  A device on sale carries two integers and neither of them is a diffraction:
+  how much of the sound reaching it comes back across the road, and how much
+  goes through. Both are weighted by the normalised traffic noise spectrum of
+  EN 1793-3, eighteen one-third octave bands from 100 Hz to 5 kHz that peak at
+  1 kHz and fall twelve decibels at either end, so what a device does around
+  1 kHz is nearly all of what it is judged by. `DLα` (EN 1793-1 Clause 5) is
+  the energy not sent back, with the 0,99 ratio limit its own clause puts on
+  it, which the library warns about when the limit is what answered rather
+  than the measurement. `DL_R` (EN 1793-2 Clause 5.2) is the energy not let
+  through. Both come back rounded to the nearest integer with the Annex A
+  category read off it, A1 to A5 and B1 to B4, and both are on the same
+  `RoadDeviceRating`, whose `.plot()` draws the per-band performance against
+  the spectrum weighting it.
+
 - Where a catalogue insertion loss actually comes from: the substitution
   measurement of ISO 7235 and ISO 11691, in
   `noise_control.silencer_measurement`.

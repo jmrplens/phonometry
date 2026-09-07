@@ -42,3 +42,37 @@ def test_outdoor_plot_stacks_terms_to_total() -> None:
     # the total line echoes a_total.
     np.testing.assert_allclose(ax.lines[0].get_ydata(), res.a_total)
     plt.close("all")
+
+
+def test_road_device_plot_draws_the_bands_against_the_spectrum() -> None:
+    """The rating plot carries both halves of the weighting.
+
+    A single number comes out of two spectra, and the figure has to show
+    them both or it explains nothing: the device's own per-band values as
+    bars on the left axis, and the normalised traffic noise spectrum of
+    EN 1793-3 as a line on a right axis. The title carries the reported
+    integer and its category, since that is what a declaration prints.
+    """
+    from phonometry.environment import propagation as prop
+
+    alpha = np.linspace(0.1, 0.9, len(prop.TRAFFIC_NOISE_BANDS_HZ))
+    result = prop.sound_absorption_rating(alpha)
+
+    fig, ax = plt.subplots()
+    try:
+        result.plot(ax=ax)
+        bars = [p for p in ax.patches if p.get_height() != 0.0]
+        assert len(bars) == len(prop.TRAFFIC_NOISE_BANDS_HZ)
+        np.testing.assert_allclose([p.get_height() for p in bars], alpha)
+
+        twin = next(other for other in ax.figure.axes if other is not ax)
+        (line,) = twin.get_lines()
+        np.testing.assert_allclose(
+            line.get_ydata(), prop.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB
+        )
+
+        title = ax.get_title()
+        assert str(result.reported) in title
+        assert result.category in title
+    finally:
+        plt.close(fig)

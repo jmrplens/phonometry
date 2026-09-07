@@ -3,13 +3,13 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 857,
-    "passing": 857,
+    "checks": 864,
+    "passing": 864,
     "failing": 0,
-    "domains": 70,
-    "standards": 400,
-    "citations": 640,
-    "designations": 138,
+    "domains": 71,
+    "standards": 403,
+    "citations": 647,
+    "designations": 141,
     "sources": 83
   },
   "units": [
@@ -433,6 +433,12 @@
     {
       "id": "spherical-ground-barriers-attenborough-salomons-bies",
       "title": "Spherical ground & barriers (Attenborough / Salomons / Bies)",
+      "checks": 7,
+      "passing": 7
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793",
+      "title": "Road traffic noise reducing devices (EN 1793)",
       "checks": 7,
       "passing": 7
     },
@@ -19851,6 +19857,207 @@
       },
       "deviation": {
         "value": -0.2274
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-3-1997-table-1-normalised-traffic-noise-spectrum/the-eighteen-printed-levels-100-hz-to-5-khz",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 1793-3",
+        "edition": "1997",
+        "clause": "Table 1 (normalised traffic noise spectrum)",
+        "cite": "EN 1793-3:1997 Table 1 (normalised traffic noise spectrum)"
+      },
+      "quantity": "the eighteen printed levels, 100 Hz to 5 kHz",
+      "kind": "record",
+      "expected": {
+        "label": "100 Hz = -20 dB; 1 kHz = -8 dB; 5 kHz = -18 dB",
+        "record": {
+          "100 Hz": -20.0,
+          "1 kHz": -8.0,
+          "5 kHz": -18.0
+        }
+      },
+      "computed": {
+        "label": "100 Hz = -20 dB; 1 kHz = -8 dB; 5 kHz = -18 dB",
+        "record": {
+          "100 Hz": -20.0,
+          "1 kHz": -8.0,
+          "5 kHz": -18.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-1-2012-clause-5-dlalpha-constant-absorption/a-device-absorbing-0-50-in-every-band-rates-10-lg-1-0-50",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 1793-1",
+        "edition": "2012",
+        "clause": "Clause 5 (DLalpha, constant absorption)",
+        "cite": "EN 1793-1:2012 Clause 5 (DLalpha, constant absorption)"
+      },
+      "quantity": "a device absorbing 0,50 in every band rates -10 lg(1 - 0,50)",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.0103
+      },
+      "computed": {
+        "value": 3.0103
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": -4.34e-08
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-1-2012-clause-5-dlalpha-the-0-99-ratio-limit/a-perfect-absorber-is-capped-at-10-lg-1-0-99-20-db",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 1793-1",
+        "edition": "2012",
+        "clause": "Clause 5 (DLalpha, the 0,99 ratio limit)",
+        "cite": "EN 1793-1:2012 Clause 5 (DLalpha, the 0,99 ratio limit)"
+      },
+      "quantity": "a perfect absorber is capped at -10 lg(1 - 0,99) = 20 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": -3.55e-15
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-1-2012-table-a-1-categories-of-absorptive-performance/the-four-boundaries-a2-a3-a4-a5-read-off-the-reported-integer",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 1793-1",
+        "edition": "2012",
+        "clause": "Table A.1 (categories of absorptive performance)",
+        "cite": "EN 1793-1:2012 Table A.1 (categories of absorptive performance)"
+      },
+      "quantity": "the four boundaries A2/A3/A4/A5 read off the reported integer",
+      "kind": "scalar",
+      "expected": {
+        "label": "4 dB -> A2, 8 dB -> A3, 12 dB -> A4, 16 dB -> A5"
+      },
+      "computed": {
+        "label": "4 dB -> A2, 8 dB -> A3, 12 dB -> A4, 16 dB -> A5"
+      },
+      "deviation": {
+        "value": 0.0,
+        "label": "0"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-2-2012-clause-5-2-dlr-constant-sound-reduction-index/a-wall-with-r-32-db-in-every-band-rates-32-db",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 1793-2",
+        "edition": "2012",
+        "clause": "Clause 5.2 (DLR, constant sound reduction index)",
+        "cite": "EN 1793-2:2012 Clause 5.2 (DLR, constant sound reduction index)"
+      },
+      "quantity": "a wall with R = 32 dB in every band rates 32 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 32.0
+      },
+      "computed": {
+        "value": 32.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-2-2012-clause-5-2-dlr-spectrum-weighting/one-10-db-band-costs-more-at-the-1-khz-peak-than-at-the-100-hz-end",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 1793-2",
+        "edition": "2012",
+        "clause": "Clause 5.2 (DLR, spectrum weighting)",
+        "cite": "EN 1793-2:2012 Clause 5.2 (DLR, spectrum weighting)"
+      },
+      "quantity": "one 10 dB band costs more at the 1 kHz peak than at the 100 Hz end",
+      "kind": "scalar",
+      "expected": {
+        "label": "DLR(weak at 1 kHz) < DLR(weak at 100 Hz)"
+      },
+      "computed": {
+        "label": "18.14 dB < 29.73 dB"
+      },
+      "deviation": {
+        "value": -11.6,
+        "label": "-11.60 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-2-2012-table-a-1-categories-of-airborne-sound-insulation/the-three-boundaries-b2-b3-b4-read-off-the-reported-integer",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 1793-2",
+        "edition": "2012",
+        "clause": "Table A.1 (categories of airborne sound insulation)",
+        "cite": "EN 1793-2:2012 Table A.1 (categories of airborne sound insulation)"
+      },
+      "quantity": "the three boundaries B2/B3/B4 read off the reported integer",
+      "kind": "scalar",
+      "expected": {
+        "label": "15 dB -> B2, 25 dB -> B3, 35 dB -> B4"
+      },
+      "computed": {
+        "label": "15 dB -> B2, 25 dB -> B3, 35 dB -> B4"
+      },
+      "deviation": {
+        "value": 0.0,
+        "label": "0"
       },
       "precision": 4,
       "verdict": "pass"

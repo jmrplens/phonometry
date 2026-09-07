@@ -274,6 +274,74 @@ plt.show()
 
 </details>
 
+## 3. What the product declaration says (EN 1793)
+
+Everything above is the barrier as physics. A barrier on sale is a product, and
+what its declaration carries is two integers, neither of them a diffraction:
+how much of the sound reaching it comes back across the road, and how much of
+it goes through. Both are weighted by a spectrum nobody measures on site, the
+**normalised traffic noise spectrum** of EN 1793-3: eighteen one-third octave
+bands from 100 Hz to 5 kHz, peaking at 1 kHz and twelve decibels down at either
+end.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/road_device_ratings_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/road_device_ratings.svg" alt="Three panels over the eighteen one-third octave bands of EN 1793-3. Left: the normalised traffic noise spectrum as bars, running from minus twenty decibels at 100 Hz up to a minus eight decibel peak at 1 kHz and back down to minus eighteen at 5 kHz, with an annotation saying the peak carries the rating. Middle: the sound absorption coefficient of two devices, an absorptive cassette rising from 0.15 to 0.98 around 400 Hz and easing to 0.70, rating DL alpha 8 decibels in category A3, and a concrete panel flat at 0.05 rating 0 decibels in category A1. Right: the sound reduction index of two devices, a concrete panel rising from 30 to 53 decibels and rating DL R 42 decibels in category B4, and a metal cassette rising from 21 to 34 decibels and rating 29 decibels in category B3." width="100%"></picture>
+
+*The weighting on the left decides everything: a device is judged by what it
+does around 1 kHz, and what it does at 100 Hz or 5 kHz barely counts.*
+
+**EN 1793-1** rates absorption as the energy the device does *not* send back:
+
+$$
+DL_\alpha = -10 \lg\left| 1 -
+\frac{\sum_{i=1}^{18} \alpha_{\mathrm{S}i}\, 10^{0,1 L_i}}
+     {\sum_{i=1}^{18} 10^{0,1 L_i}} \right|
+$$
+
+A reverberation-room $\alpha_\mathrm{S}$ can pass one band by band, which would
+push the weighted ratio past 1 and leave the logarithm without an argument.
+Clause 5 says so and fixes it: the ratio is limited to 0,99, so no device can
+rate above 20 dB however absorptive it measures. `sound_absorption_rating`
+warns when that limit is what answered instead of the measurement.
+
+**EN 1793-2** rates airborne insulation with the same weighting, on the
+transmitted energy instead:
+
+$$
+DL_R = -10 \lg\left|
+\frac{\sum_{i=1}^{18} 10^{0,1 L_i}\, 10^{-0,1 R_i}}
+     {\sum_{i=1}^{18} 10^{0,1 L_i}} \right|
+$$
+
+```python
+from phonometry import environment
+
+# A cassette with mineral wool behind a perforated face, in the eighteen
+# one-third octave bands of EN 1793-3 from 100 Hz to 5 kHz.
+absorption = [0.15, 0.25, 0.40, 0.60, 0.80, 0.95, 0.98, 0.95, 0.92,
+              0.90, 0.88, 0.85, 0.82, 0.80, 0.78, 0.75, 0.72, 0.70]
+reduction = [21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0,
+             30.0, 31.0, 31.0, 32.0, 32.0, 33.0, 33.0, 34.0, 34.0]
+
+absorbed = environment.sound_absorption_rating(absorption)
+print(absorbed.reported, absorbed.category)     # 8 A3
+
+through = environment.airborne_insulation_rating(reduction)
+print(through.reported, through.category)       # 29 B3
+```
+
+Both are reported rounded to the nearest integer (EN 1793-1 Clause 6.1,
+EN 1793-2 Clause 7.1), and each has a normative ladder in its Annex A read off
+that integer: A1 to A5 for absorption, B1 to B4 for insulation, with A0 and B0
+reserved for "not determined". The ladders have no gaps between their steps
+because the number they classify is already an integer.
+
+The two are not comparable and a declaration carries both. A plain concrete
+panel reflects almost everything across the road and is still the better wall;
+an absorptive cassette that keeps the reflection down can be the weaker one.
+Which of the two matters is a question about the site, not about the product:
+absorption for a road in a cutting or between parallel barriers, insulation for
+whatever is directly behind.
+
 ## Relation to ISO 9613-2
 
 The tabulated $A_\mathrm{gr}$ and $D_z$ of the

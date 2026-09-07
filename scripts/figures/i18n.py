@@ -2465,6 +2465,11 @@ _ES_EXACT = {
     "ISO 9613-2 Attenuation Breakdown (with a 4 m barrier)": "Desglose de la atenuación (ISO 9613-2, con barrera de 4 m)",
     "Octave-band centre frequency [Hz]": "Frecuencia central de banda de octava [Hz]",
     "1/3-octave band centre frequency [Hz]": "Frecuencia central de banda de tercio de octava [Hz]",
+    # road_device_ratings: EN 1793, the spectrum and the two ratings.
+    "The weighting: EN 1793-3 Table 1": "La ponderación: tabla 1 de la EN 1793-3",
+    "EN 1793-1: what is not sent back": "EN 1793-1: lo que no se devuelve",
+    "EN 1793-2: what is not let through": "EN 1793-2: lo que no se deja pasar",
+    "the peak carries the rating": "el pico manda en el índice",
     "CNOSSOS-EU Railway Source Line Power (96 coaches/h at 160 km/h)": "Potencia de la línea fuente ferroviaria CNOSSOS-EU "
     "(96 coches/h a 160 km/h)",
     r"Line power $L^{\prime}_{W,\mathrm{eq,line}}$ [dB re 1 pW/m]": r"Potencia de la línea $L^{\prime}_{W,\mathrm{eq,line}}$ [dB re 1 pW/m]",
@@ -4029,6 +4034,23 @@ _ES_EXACT = {
 
 
 _ES_PATTERNS = [
+    # road_device_ratings: the legends carry the computed rating and category.
+    (
+        r"^absorptive cassette: \$DL_\\alpha\$ = (\d+) dB \((A\d)\)$",
+        r"casete absorbente: $DL_\\alpha$ = \1 dB (\2)",
+    ),
+    (
+        r"^concrete panel: \$DL_\\alpha\$ = (\d+) dB \((A\d)\)$",
+        r"panel de hormigón: $DL_\\alpha$ = \1 dB (\2)",
+    ),
+    (
+        r"^concrete panel: \$DL_R\$ = (\d+) dB \((B\d)\)$",
+        r"panel de hormigón: $DL_R$ = \1 dB (\2)",
+    ),
+    (
+        r"^metal cassette: \$DL_R\$ = (\d+) dB \((B\d)\)$",
+        r"casete metálico: $DL_R$ = \1 dB (\2)",
+    ),
     # sound_strength_routes: the route markers and the critical distance are
     # computed, so only the words around the number can be tabled.
     (r"^critical distance, (\d+)\.(\d+) m$", r"distancia crítica, \1,\2 m"),

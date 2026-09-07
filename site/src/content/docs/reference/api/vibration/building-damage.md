@@ -88,7 +88,7 @@ Compare one measured peak velocity with its guideline value.
 
 | Name | Description |
 | :--- | :--- |
-| `velocity_mm_s` | The measured peak velocity, in millimetres per second; see [`DamageAssessment`](/phonometry/reference/api/vibration/building-damage/#damageassessment) for which component it is. |
+| `velocity_mm_s` | The measured peak velocity, in millimetres per second; see [`DamageAssessment`](/phonometry/reference/api/vibration/building-damage/#damageassessment) for which component it is. Zero is accepted and keeps to every guideline value. |
 | `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). |
 | `frequency_hz` | Frequency of the dominant component, in hertz. Required for the short-term foundation case. |
 | `location` | `"foundation"` (default) or `"top_floor"`. |
@@ -101,7 +101,7 @@ Compare one measured peak velocity with its guideline value.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the velocity is not positive and finite, or for any reason [`guideline_velocity`](/phonometry/reference/api/vibration/building-damage/#guideline_velocity) raises. |
+| ValueError | If the velocity is negative or not finite, or for any reason [`guideline_velocity`](/phonometry/reference/api/vibration/building-damage/#guideline_velocity) raises. |
 
 ## bending_stress
 

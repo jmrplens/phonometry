@@ -211,6 +211,104 @@ print(noise_control.SURVEY_MAX_VELOCITY_M_S)                    # 15.0
 print(noise_control.SURVEY_AREA_RATIO_RANGE)                    # (0.6, 1.7)
 ```
 
+## 7. The open end, and the two quantities that need it
+
+A duct radiating into a room does not hand the room everything that reaches
+its mouth. Well below the frequency at which the mouth is a wavelength across
+it is a poor radiator, and most of the energy turns round and travels back up
+the duct. Annex B.3 puts a number on it:
+
+$$
+D_\mathrm{td} = 10 \lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f \sqrt{S}}{c}\right)^{2}}\right]\ \text{dB}
+$$
+
+The group $4\pi f \sqrt{S} / c$ is the mouth measured in wavelengths, and
+$\Omega$ is the solid angle it radiates into. A 350 mm duct flush with a wall
+holds back 11 dB at 63 Hz and nothing at all at 2 kHz:
+
+```python
+import numpy as np
+
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0])
+area = 0.0962                     # m2, a 350 mm circular duct
+
+d_td = noise_control.open_end_transmission_loss(bands, area)
+print(d_td.round(2))              # [11.23  6.14  2.5   0.77  0.21  0.05] dB
+```
+
+The solid angle is Table B.1, and the same five values are Table 1 of
+ISO 5135. A duct that ends in the middle of the room has twice the space to
+radiate into that a flush one has, so it reflects half as much:
+
+```python
+free = noise_control.open_end_transmission_loss(
+    bands, area, solid_angle=noise_control.RADIATION_SOLID_ANGLES["C"],
+)
+print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
+```
+
+Equation (B.4) says the same fact the other way round, as a pressure
+reflection coefficient, and the two close exactly on the energy:
+$D_\mathrm{td} = -10\lg(1 - r^2)$ at every frequency, area and solid angle.
+That identity is the conformance anchor for both, because neither is printed
+with a worked value. It also has a use of its own: 5.2.4 qualifies a test
+duct as anechoic only below $r = 0{,}3$, which this bare open end reaches
+somewhere between 500 Hz and 1 kHz.
+
+```python
+r = noise_control.open_end_reflection_coefficient(bands, area)
+print(r.round(3))                 # [0.962 0.87  0.662 0.404 0.215 0.11 ]
+```
+
+The library carries a second closed form for the same physics, Reynolds' as
+given by Long, in
+[`end_reflection_loss_closed_form`](noise-control.md).
+It raises the same argument to 1,88 rather than to 2, and for a circular duct
+in free space the two read $10\lg[1 + (c/\pi f d)^2]$ against
+$10\lg[1 + (c/\pi f d)^{1,88}]$. They agree closely where the argument is
+near 1 and part company at the ends of the range.
+
+Two quantities need it. Equation (6) turns the measured insertion loss of an
+air-terminal unit into its transmission loss by putting back what the mouth
+was keeping in anyway, so the two are the same number at the top of the range
+and eleven decibels apart at the bottom:
+
+```python
+d_i = np.array([4.0, 7.0, 12.0, 20.0, 26.0, 28.0])
+print(noise_control.measured_transmission_loss(d_i, d_td).round(2))
+#                                 # [15.23 13.14 14.5  20.77 26.21 28.05] dB
+```
+
+And Equation (7) makes the flow noise a sound power,
+$L_W = \overline{L_p} + D_\mathrm{td} + C$, where $C$ is the ISO 3741 level
+difference between the power radiated into the room and the average pressure
+in it. Clause 6.4 is explicit that $\overline{L_p}$ goes in **without** a
+background correction: the two series are reported separately and the reader
+subtracts them.
+
+## 8. Where higher-order modes start
+
+The modal filter between the source and the test object exists to stop
+higher-order modes reaching the silencer, and its requirement steps at the
+frequency where those modes can propagate in the connected ducts: at least
+3 dB of longitudinal attenuation of the fundamental at the low-frequency end,
+and at least 5 dB above that frequency (5.2.2.3). NOTE 2 prints where it is:
+
+```python
+print(round(noise_control.modal_filter_cut_on(diameter=0.4), 1))          # 505.9 Hz
+print(round(noise_control.modal_filter_cut_on(larger_dimension=0.5), 1))  # 343.0 Hz
+```
+
+The rectangular form, $0{,}5\,c/H$, is exact: the first mode of a rigid
+rectangular duct is a half wavelength across the larger dimension. The
+circular one, $0{,}59\,c/d$, is rounded. The exact coefficient is the first
+zero of $J_1'$ over $\pi$, which is 0,58607, so Equation (4) sits 0,67 %
+high: on the 0,4 m duct of the ISO 11691 sound source that is 505,9 Hz where
+[`circular_duct_cut_on`](duct-path.md) gives
+502,6 Hz. Three and a half hertz does not matter for choosing a modal filter,
+and it is worth knowing which of the two numbers is the physics.
+
 ## Standards
 
 ISO 7235:2003 and ISO 11691:1995, read from BS EN ISO 7235:2009 and
@@ -218,12 +316,15 @@ BS EN ISO 11691:2009, which endorse them without modification. Implemented:
 Equation (1) of both standards with the reverberation-time correction of
 ISO 7235 6.3; the octave fold of ISO 11691 Equation (2); ISO 7235 Table 6 and
 the three-or-five rule of 6.2.1; ISO 11691 Table 1 and all three columns of
-ISO 7235 Table 7, with the coverage factor of 7.9; and the scope of
-ISO 11691 1.1 and 4.5. Checked in the
+ISO 7235 Table 7, with the coverage factor of 7.9; the scope of ISO 11691 1.1
+and 4.5; the open-end transmission loss and reflection coefficient of
+Equations (B.3) and (B.4) with the solid angles of Table B.1; the transmission
+loss of Equation (6) and the flow-noise sound power of Equation (7); and the
+cut-on frequencies of Equations (4) and (5). Checked in the
 [conformance report](../../CONFORMANCE.md); the gap Table 6 leaves at 160 Hz
 is in the [errata register](../../ERRATA.md). Not implemented: the facility
-requirements themselves, the flow half of ISO 7235 (6.4, 6.5 and Annex B),
-and ISO 11820, which measures a silencer in situ.
+requirements themselves, the volume flow rate and pressure loss coefficient of
+6.5, and ISO 11820, which measures a silencer in situ.
 
 ## See also
 

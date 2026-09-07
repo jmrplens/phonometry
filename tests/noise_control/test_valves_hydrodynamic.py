@@ -1102,8 +1102,9 @@ class TestGuards:
             mass_flow=30.0,
             outlet_pressure=0.6e5,
         )
+        valve, pipe = _valve(0.9), _pipe()
         with pytest.raises(ValueError, match="x_Fzp1"):
-            hydro.valve_hydrodynamic_noise(stream, _valve(0.9), _pipe())
+            hydro.valve_hydrodynamic_noise(stream, valve, pipe)
 
     def test_the_cavitating_peak_refuses_one_too(self) -> None:
         with pytest.raises(ValueError, match="not a percentage"):

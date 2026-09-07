@@ -3,13 +3,13 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 854,
-    "passing": 854,
+    "checks": 857,
+    "passing": 857,
     "failing": 0,
     "domains": 70,
-    "standards": 399,
-    "citations": 639,
-    "designations": 137,
+    "standards": 400,
+    "citations": 640,
+    "designations": 138,
     "sources": 83
   },
   "units": [
@@ -481,8 +481,8 @@
     {
       "id": "ducted-silencer-measurement-iso-7235-iso-11691",
       "title": "Ducted silencer measurement (ISO 7235, ISO 11691)",
-      "checks": 20,
-      "passing": 20
+      "checks": 23,
+      "passing": 23
     },
     {
       "id": "hvac-noise-vdi-2081",
@@ -23183,6 +23183,121 @@
         }
       },
       "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-5135-1999/end-reflection-loss-is-iso-7235-b-3-written-out-eq-2",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 5135",
+        "edition": "1999",
+        "cite": "ISO 5135:1999"
+      },
+      "quantity": "End reflection loss is ISO 7235 (B.3) written out (Eq. (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "ISO 5135 (2) = ISO 7235 (B.3) at all 30 pairs"
+      },
+      "computed": {
+        "value": 3.55e-15,
+        "label": "largest disagreement 3.553e-15 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 3.55e-15
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-5135-1999/sound-power-level-in-the-duct-eq-1",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 5135",
+        "edition": "1999",
+        "cite": "ISO 5135:1999"
+      },
+      "quantity": "Sound power level in the duct (Eq. (1))",
+      "kind": "record",
+      "expected": {
+        "label": "63 Hz = 71.2255 dB; 125 Hz = 66.1429 dB; 250 Hz = 62.5007 dB; 500 Hz = 60.7724 dB; 1000 Hz = 60.2063 dB; 2000 Hz = 60.0525 dB",
+        "record": {
+          "63 Hz": 71.225451,
+          "125 Hz": 66.142905,
+          "250 Hz": 62.50069,
+          "500 Hz": 60.772372,
+          "1000 Hz": 60.206348,
+          "2000 Hz": 60.052513
+        }
+      },
+      "computed": {
+        "label": "63 Hz = 71.2255 dB; 125 Hz = 66.1429 dB; 250 Hz = 62.5007 dB; 500 Hz = 60.7724 dB; 1000 Hz = 60.2063 dB; 2000 Hz = 60.0525 dB",
+        "record": {
+          "63 Hz": 71.225451,
+          "125 Hz": 66.142905,
+          "250 Hz": 62.50069,
+          "500 Hz": 60.772372,
+          "1000 Hz": 60.206348,
+          "2000 Hz": 60.052513
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-5135-1999/least-squares-operating-line-5-5-2",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 5135",
+        "edition": "1999",
+        "cite": "ISO 5135:1999"
+      },
+      "quantity": "Least-squares operating line (5.5.2)",
+      "kind": "record",
+      "expected": {
+        "label": "slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6",
+        "record": {
+          "slope [dB/decade]": 20.0,
+          "level at 0,2 m³/s [dB]": 50.0,
+          "worst deviation [dB]": 0.0,
+          "lowest readable duty [m³/s]": 0.025,
+          "highest readable duty [m³/s]": 1.6
+        }
+      },
+      "computed": {
+        "label": "slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6",
+        "record": {
+          "slope [dB/decade]": 20.0,
+          "level at 0,2 m³/s [dB]": 50.0,
+          "worst deviation [dB]": 0.0,
+          "lowest readable duty [m³/s]": 0.025,
+          "highest readable duty [m³/s]": 1.6
+        }
+      },
       "tolerance": {
         "mode": "absolute",
         "value": 0.0

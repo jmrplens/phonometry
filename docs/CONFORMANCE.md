@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**854/854 conformance checks pass** across 70 domains and 399 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**857/857 conformance checks pass** across 70 domains and 400 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1376,7 +1376,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Ducted silencer measurement (ISO 7235, ISO 11691)</b>: 100% (20/20)</summary>
+<summary><b>Ducted silencer measurement (ISO 7235, ISO 11691)</b>: 100% (23/23)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -1400,6 +1400,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 7235:2003 | Pressure loss coefficient is flow invariant (Eq. (14)) | zeta = 0.750000 at 1 m³/s | 0.750000 at 2 m³/s | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ISO 7235:2003 | Averaged pressure loss coefficient (Eq. (18)) | 2,5 - 0,4 = 2,100000 | 2.1 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ISO 7235:2003 | Upstream straight length (6.5.2.2.1) | S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m | S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 5135:1999 | End reflection loss is ISO 7235 (B.3) written out (Eq. (2)) | ISO 5135 (2) = ISO 7235 (B.3) at all 30 pairs | largest disagreement 3.553e-15 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 5135:1999 | Sound power level in the duct (Eq. (1)) | 63 Hz = 71.2255 dB; 125 Hz = 66.1429 dB; 250 Hz = 62.5007 dB; 500 Hz = 60.7724 dB; 1000 Hz = 60.2063 dB; 2000 Hz = 60.0525 dB | 63 Hz = 71.2255 dB; 125 Hz = 66.1429 dB; 250 Hz = 62.5007 dB; 500 Hz = 60.7724 dB; 1000 Hz = 60.2063 dB; 2000 Hz = 60.0525 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 5135:1999 | Least-squares operating line (5.5.2) | slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6 | slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

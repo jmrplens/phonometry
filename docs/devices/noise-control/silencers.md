@@ -466,10 +466,10 @@ lookup (Bies Table 8.11) and the plenum is Wells' closed form driven by a
 declared mean absorption — neither is a liner model.
 Mean-flow effects — convection, temperature gradients, the
 flow-dependent impedance of perforates — are outside the no-flow element
-matrices used here. Nothing on this page is a measurement: no part of ISO 7235
-is implemented, shell breakout and the end corrections at the area jumps are
-not modelled, and the branch models are lossless unless a `resistance` is
-supplied.
+matrices used here. Nothing on this page is a measurement: the arithmetic of
+ISO 7235 has [a page of its own](silencer-measurement.md), shell breakout and
+the end corrections at the area jumps are not modelled, and the branch models
+are lossless unless a `resistance` is supplied.
 
 ## See also
 

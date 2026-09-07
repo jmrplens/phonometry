@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 854 numerical conformance checks against 399 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 857 numerical conformance checks against 400 standards enforced in CI.
 
-phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 854 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 70 domains.
+phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 857 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 70 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -23030,6 +23030,12 @@ else, without flow and with none in the answer, up to a design velocity of
 15 m/s. A measurement that needs flow, or an object that is not a silencer,
 is outside ISO 11691 and belongs to ISO 7235.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/silencer_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/silencer_measurement.svg" alt="Three panels. Left: two groups of bars, one for a silencer that is flat across an octave and one whose worst third leaks, each showing the three one-third-octave insertion losses as pale bars, the octave that Equation (2) gives as a filled bar and the plain mean of the decibels as a dashed line; in the flat group the two agree and in the leaky one the octave sits twelve decibels under the mean. Middle: the open-end transmission loss of a 350 mm duct against frequency on a logarithmic axis, drawn for the three distinct solid angles of Table B.1 and for Long's rival closed form, all falling from about fifteen decibels at 50 Hz to nothing above 2 kHz, with the free-space curve the highest of the three. Right: the reproducibility standard deviations of both standards as step functions of frequency, the insertion-loss column dipping to one decibel in the middle of the range, the transmission-loss column flat at three, the sound-intensity column falling to one and stopping at 5 kHz, and the survey method stepping from two to three" width="100%"></picture>
+
+*The three things a measurement report carries beyond the numbers themselves:
+how its octaves were folded, what its duct mouth was keeping in, and how far
+any of it can be trusted.*
+
 ## 1. One subtraction, two numberings
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_iso7235_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_iso7235.svg" alt="Two stacked runs on one duct axis. In the upper run, series one, a sealed and lined loudspeaker box feeds a modal filter, then a transition, then the test object, then a test duct with an anechoic wedge termination carrying three microphone positions on a line inclined to the duct axis. The lower run, series two, is identical except that the test object is replaced by an empty substitution duct. Dashed qualification planes are marked at the test object and at the receiving duct. Below, the insertion loss is given as the difference of the two receiving-side levels, third octave by third octave, with the modal-filter attenuation, the reflection-coefficient limit, the substitution-duct tolerance and the signal-to-background rule listed as the standard's own clause numbers" width="92%"></picture>
@@ -23247,6 +23253,11 @@ d_td = noise_control.open_end_transmission_loss(bands, area)
 print(d_td.round(2))              # [11.23  6.14  2.5   0.77  0.21  0.05] dB
 ```
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_end_solid_angles_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_end_solid_angles.svg" alt="Five cells in a row, one for each mounting configuration of ISO 7235 Table B.1. In each, a small square terminal sits at the origin of a shaded wedge that is the solid angle read in section: a half circle against a wall for A, a quarter circle in the corner of a wall and a floor for B, a full circle standing free for C, a half circle above a floor for D, and a full circle again for E. Below each, the solid angle: two pi, pi, four pi, two pi and four pi. Under the row, the formula written both as ISO 7235 prints it and as ISO 5135 prints it, a note that the two are one formula with the same five values, and the conclusion that the bigger the solid angle the more the mouth keeps in" width="100%"></picture>
+
+*The solid angle is the only term of Equation (B.3) a laboratory chooses
+rather than measures, and the five choices are the same in both standards.*
+
 The solid angle is Table B.1, and the same five values are Table 1 of
 ISO 5135. It works the way round that surprises people: $\Omega$ sits in the
 numerator, so a duct ending in the middle of the room keeps **more** sound in
@@ -23263,6 +23274,18 @@ print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
 ```
 
 Three more decibels at 63 Hz, and the reflection coefficient rises with it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end.gif" alt="Animation: a 0.20 m duct flush in a rigid screen, radiating into the half space beyond it, driven at 100 Hz and at 800 Hz one above the other. At 100 Hz the duct fills with a standing wave and only a faint field escapes past the screen; the envelope beside it swings between a maximum and a minimum that give a reflection coefficient of 0.71. At 800 Hz the duct carries a nearly travelling wave and strong circular fronts leave the mouth into the half space, with an envelope that ripples only slightly and gives 0.19" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end.webm)
+
+*Both carriers are below the 857 Hz cut-on of a duct that wide, so the field
+inside it is the plane wave the whole of ISO 7235's duct arithmetic assumes.
+The reflection coefficients read off the standing wave are the simulated
+geometry's own, and not Equation (B.4): that closed form is a piston
+approximation for a circular mouth, where this is a slit in a screen. What
+the two share is the mechanism, and it is the mechanism that decides whether
+a level measured in a room is the level in the duct behind it.*
 
 Equation (B.4) says the same fact the other way round, as a pressure
 reflection coefficient, and the two close exactly on the energy:
@@ -23438,25 +23461,106 @@ print(round(noise_control.upstream_straight_length(0.0962), 2))   # 2.0 m
 print(round(noise_control.upstream_straight_length(0.5), 2))      # 3.99 m
 ```
 
+## 11. The third standard, and the formula it shares
+
+ISO 5135:1999 measures something else again: the sound power an air-terminal
+device, air-terminal unit, damper or valve radiates, determined in a
+reverberation room to ISO 3741. What a designer needs is not that but what
+the device puts into the duct behind it, and Equation (1) is the step between
+them:
+
+$$
+L_{W\mathrm{duct}} = L_W + \Delta L_\mathrm{r}
+$$
+
+The correction $\Delta L_\mathrm{r}$ is Equation (2) of ISO 5135, and it is
+worth writing both printings side by side:
+
+$$
+\Delta L_\mathrm{r} = 10\lg\left[1 +
+   \left(\frac{c}{4\pi f}\right)^{2}\frac{\Omega}{S}\right]
+\qquad
+D_\mathrm{td} = 10\lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f\sqrt{S}}{c}\right)^{2}}\right]
+$$
+
+Expand either and both become $10\lg[1 + \Omega c^2 / (16\pi^2 f^2 S)]$.
+They are one formula, their two solid-angle tables agree entry for entry, and
+`open_end_transmission_loss` is both. That is why nothing new appears here for
+the correction itself:
+
+```python
+d_lr = noise_control.open_end_transmission_loss(bands, area)
+lw_room = np.array([58.0, 60.0, 61.0, 59.0, 55.0, 50.0])
+print(noise_control.duct_sound_power_level(lw_room, d_lr).round(2))
+#                                 # [69.23 66.14 63.5  59.77 55.21 50.05] dB
+```
+
+A device measured in a room is understated in the duct by eleven decibels at
+the bottom of the range and by nothing at the top. The NOTE to Table 1 offers
+a way round the correction rather than a second formula for it: fit a
+transmission element to ISO 7235 and no correction is applied at all.
+
+## 12. Reading a level at a duty nobody measured
+
+A device is not tested at the one operating point a designer will use it at.
+ISO 5135 5.5.2 fits a straight line by least squares through the levels
+against $\lg q_V$ when the tests were made at a constant pressure loss
+coefficient, or against $\lg \Delta p_\mathrm{t}$ when they were made at a
+constant flow rate. The same fit serves the band levels and the A-weighted
+one:
+
+```python
+duty = np.array([0.05, 0.1, 0.2, 0.4, 0.8])          # m3/s
+levels = np.array([38.0, 44.5, 50.0, 56.5, 62.0])    # dB(A)
+
+line = noise_control.fit_operating_line(duty, levels)
+print(round(line.slope, 2))               # 19.93 dB per decade
+print(round(line.maximum_deviation, 2))   # 0.3 dB
+print(round(line.level_at(0.3), 1))       # 53.7 dB(A)
+```
+
+Two rules keep that honest, and the library says so on both rather than
+refusing: a fit that is not a straight line is still a fit, and a level read
+past the range is still a number, and what the standard asks is that a report
+be honest about them. The measured points have to sit within 3 dB of the line,
+because past that the levels are not a straight line in this variable and
+reading the line off means nothing. And the line may be extended down to half
+the smallest duty measured and up to twice the largest, and no further, which
+for these five points is 0.025 to 1.6 m³/s. Either one out of range raises a
+`SilencerMeasurementWarning`:
+
+```python
+print(line.valid_range)           # (0.025, 1.6)
+```
+
+Clause 8 k) closes the loop: a report gives the fully corrected levels to the
+nearest half decibel and has to state which of them were extrapolated rather
+than measured directly. `.plot()` draws that distinction, shading the two ends
+of the range that are extrapolation.
+
 ## Standards
 
-ISO 7235:2003 and ISO 11691:1995, read from BS EN ISO 7235:2009 and
-BS EN ISO 11691:2009, which endorse them without modification. Implemented:
-Equation (1) of both standards with the reverberation-time correction of
-ISO 7235 6.3; the octave fold of ISO 11691 Equation (2); ISO 7235 Table 6 and
-the three-or-five rule of 6.2.1; ISO 11691 Table 1 and all three columns of
-ISO 7235 Table 7, with the coverage factor of 7.9; the scope of ISO 11691 1.1
-and 4.5; the open-end transmission loss and reflection coefficient of
-Equations (B.3) and (B.4) with the solid angles of Table B.1; the transmission
-loss of Equation (6) and the flow-noise sound power of Equation (7); the
-cut-on frequencies of Equations (4) and (5); and the flow half of 6.5, from
-the gas law of Equations (10), (21) and (22) to the substitution average of
-Equation (18) and the settling length of 6.5.2.2.1. Checked in the
-[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/); the gap Table 6 leaves at 160 Hz
-and the two printed gas-law constants are in the
-[errata register](https://jmrplens.github.io/phonometry/reference/errata/). Not implemented: the facility
-requirements themselves, the flow measurement of ISO 5167-1, and ISO 11820,
-which measures a silencer in situ.
+ISO 7235:2003, ISO 11691:1995 and ISO 5135:1999, read from BS EN ISO 7235:2009,
+BS EN ISO 11691:2009 and BS EN ISO 5135:1999, which endorse them without
+modification. Implemented, from ISO 7235 and ISO 11691: Equation (1) of both
+with the reverberation-time correction of ISO 7235 6.3; the octave fold of
+ISO 11691 Equation (2); ISO 7235 Table 6 and the three-or-five rule of 6.2.1;
+ISO 11691 Table 1 and all three columns of ISO 7235 Table 7, with the coverage
+factor of 7.9; the scope of ISO 11691 1.1 and 4.5; the open-end transmission
+loss and reflection coefficient of Equations (B.3) and (B.4) with the solid
+angles of Table B.1; the transmission loss of Equation (6) and the flow-noise
+sound power of Equation (7); the cut-on frequencies of Equations (4) and (5);
+and the flow half of 6.5, from the gas law of Equations (10), (21) and (22) to
+the substitution average of Equation (18) and the settling length of
+6.5.2.2.1. From ISO 5135: the duct sound power level of Equation (1),
+Equation (2), which is ISO 7235 (B.3) written out again, and the least-squares
+operating line of 5.5.2 with its 3 dB fit limit and its half-to-twice reading
+range. Checked in the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/); the gap
+Table 6 leaves at 160 Hz and the two printed gas-law constants are in the
+[errata register](https://jmrplens.github.io/phonometry/reference/errata/). Not implemented: the facility requirements
+themselves, the flow measurement of ISO 5167-1, the ISO 3741 determination the
+receiving side is handed to, and ISO 11820, which measures a silencer in situ.
 
 ## See also
 
@@ -23471,6 +23575,9 @@ which measures a silencer in situ.
 - [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the gap Table 6 of ISO 7235
   leaves at 160 Hz, and the two printed gas-law constants.
 - API reference: [`noise_control.silencer_measurement`](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencer-measurement/).
+- [Industrial noise control](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/):
+  the rival closed form for the end reflection, and the air-terminal
+  corrections a diffuser is selected with.
 
 ---
 
@@ -23944,10 +24051,10 @@ lookup (Bies Table 8.11) and the plenum is Wells' closed form driven by a
 declared mean absorption — neither is a liner model.
 Mean-flow effects — convection, temperature gradients, the
 flow-dependent impedance of perforates — are outside the no-flow element
-matrices used here. Nothing on this page is a measurement: no part of ISO 7235
-is implemented, shell breakout and the end corrections at the area jumps are
-not modelled, and the branch models are lossless unless a `resistance` is
-supplied.
+matrices used here. Nothing on this page is a measurement: the arithmetic of
+ISO 7235 has [a page of its own](https://jmrplens.github.io/phonometry/devices/noise-control/silencer-measurement/), shell breakout and
+the end corrections at the area jumps are not modelled, and the branch models
+are lossless unless a `resistance` is supplied.
 
 ## See also
 
@@ -40084,6 +40191,8 @@ documents, one page per module.
 | `volume_flow_rate` / `dynamic_pressure` / `total_pressure` / `DENSITY_RATIO_RANGE` | `function` / `function` / `function` / `constant` | **ISO 7235 Eqs. (8), (9), (11), (13), (16), (19) and (20): the flow quantities the pressure loss coefficient is built from.**<br>• `volume_flow_rate(mass_flow, density)`: q_V = q_m/ρ, with ρ the normalised density of Eq. (10) when the meter and the object leave `DENSITY_RATIO_RANGE` (0.98 to 1.02)<br>• `dynamic_pressure(volume_flow, area, density)`: `(ρ/2)(q_V/S)²`, the velocity head<br>• `total_pressure(static_pressure, volume_flow, area, density)`: static plus dynamic in one plane | `noise_control.dynamic_pressure(1.0, 0.0962, 1.2)  # 64.8 Pa` |
 | `total_pressure_loss` / `pressure_loss_coefficient` / `average_pressure_loss_coefficient` | `function` | **ISO 7235 Eqs. (12), (14), (17) and (18): what an object costs to push air through, in velocity heads.**<br>• `total_pressure_loss(static_pressure_loss, inlet_dynamic_pressure, inlet_area, outlet_area)`: adds `p_d1[1 − (S_1/S_2)²]`, which vanishes when the two ducts match<br>• `pressure_loss_coefficient(total_loss, inlet_dynamic_pressure)`: ζ, the same number at every flow rate the object sees the same flow pattern at, warning at 10 Pa and below<br>• `average_pressure_loss_coefficient(object_static, object_dynamic, substitution_static, substitution_dynamic)`: Eq. (18), a substitution average over each series' own flow rates, warning below five points | `noise_control.pressure_loss_coefficient(45.0, 64.8)  # 0.694` |
 | `upstream_straight_length` / `MINIMUM_FLOW_RATES` / `MINIMUM_PRESSURE_DIFFERENCE_PA` / `UPSTREAM_STRAIGHT_DIAMETERS` / `UPSTREAM_STRAIGHT_MIN_M` / `VELOCITY_PROFILE_TOLERANCE_PERCENT` | `function` / `constant` | **ISO 7235 6.5.2.1 and 6.5.2.2.1: what a flow measurement needs before it counts.**<br>• `upstream_straight_length(area)`: max(5 d_e, 2 m) with `d_e = √(4S/π)`, the two rules crossing at a 0.4 m equivalent diameter<br>• five airflow rates per series, the lowest above 10 Pa, and a velocity profile uniform to ±10 % excluding 15 mm from the walls | `noise_control.upstream_straight_length(0.5)  # 3.99 m` |
+| `duct_sound_power_level` | `function` | **ISO 5135 Eq. (1): from what the room heard back to what the duct carries.**<br>• `room_sound_power_level` L_W [dB] from ISO 3741, `end_reflection_loss` ΔL_r [dB]<br>• ISO 5135 Eq. (2) is ISO 7235 Eq. (B.3) written out, so `open_end_transmission_loss` supplies both, and their two solid-angle tables agree entry for entry<br>• the NOTE to Table 1 offers a transmission element to ISO 7235 as an alternative to correcting at all | `noise_control.duct_sound_power_level(lw, d_td)` |
+| `fit_operating_line` / `OperatingLine` / `EXTRAPOLATION_MAX_DEVIATION_DB` / `EXTRAPOLATION_RANGE_FACTORS` / `REPORTING_RESOLUTION_DB` | `function` / `dataclass` / `constant` | **ISO 5135 5.5.2: the least-squares line a level is read off at a duty the laboratory did not measure at.**<br>• `duty` q_V [m³/s] or Δp_t [Pa], `levels` [dB], at least two points at more than one duty<br>• result: `slope` [dB/decade], `intercept`, `maximum_deviation`, `smallest_duty`, `largest_duty`, `valid_range` (half to twice), `.level_at(duty)`, `.plot()`<br>• warns past the 3 dB of 5.5.2, and again when a duty is read outside the range the clause allows; 8 k) reports to half a decibel | `noise_control.fit_operating_line(q, lwa).level_at(0.3)` |
 | `end_reflection_loss` / `elbow_insertion_loss` | `function` | **HVAC duct end reflection & bend insertion loss (Bies Tables 8.14/8.11, ASHRAE).**<br>• end: `frequencies`, `diameter`, `termination` 'flush'/'free'<br>• elbow: `frequencies`, `width`, `bend_type`, `vanes`, `lined` | `end_reflection_loss(bands, 0.3)`<br><br>• `HvacSpectrumResult` |
 | `plenum_attenuation` | `function` | **Plenum-chamber TL by Wells' method (Bies Eq. 8.275).**<br>• `exit_area`, `line_of_sight`, `wall_area`, `mean_absorption`, `angle` | `plenum_attenuation(0.1, 1.0, 20.0, 0.2)  # dB` |
 | `plot_plenum_geometry` | `function` | **Plenum section honouring r and θ exactly.**<br>• `exit_area` S_out [m²], `line_of_sight` r [m], `wall_area` S_w [m²]<br>• `angle` θ [rad] (Default: 0)<br>• `language` | `plot_plenum_geometry(0.09, 1.2, 6.0, angle=0.35)`<br><br>• Box fixed by r/θ, S_out mouth to scale, S_w annotated |
@@ -55114,7 +55223,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 854 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 857 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -55483,7 +55592,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-854 numerical conformance checks across 70 domains and 399 standards, covering
+857 numerical conformance checks across 70 domains and 400 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

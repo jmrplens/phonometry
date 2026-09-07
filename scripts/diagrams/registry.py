@@ -65,6 +65,7 @@ from .devices import (
     _d_methods,
     _d_microphone_references,
     _d_noise_control,
+    _d_open_end_solid_angles,
     _d_pp_probe,
     _d_precision_anechoic,
     _d_program_loudness,
@@ -891,6 +892,11 @@ DIAGRAMS = {
         _d_silencer_iso7235,
         "How a silencer is measured: the ISO 7235 substitution method",
         710,
+    ),
+    "diagram_open_end_solid_angles": (
+        _d_open_end_solid_angles,
+        "How a duct end is mounted, and what it keeps in (ISO 7235 Table B.1)",
+        470,
     ),
     "diagram_duct_path": (
         _d_duct_path,

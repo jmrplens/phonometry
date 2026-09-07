@@ -170,6 +170,7 @@ from .devices import (
     generate_silencer_expansion_chamber,
     generate_silencer_extended_tube,
     generate_silencer_insertion_loss,
+    generate_silencer_measurement,
     generate_silencer_selection,
     generate_silencer_side_branch,
     generate_sound_energy_burst,
@@ -247,6 +248,7 @@ from .fields import (
     _impedance_tube_fields,
     _metadiffuser_fields,
     _mode_conversion_fields,
+    _open_end_fields,
     _pillar_fields,
     _plate_junction_fields,
     _poster_ss_for,
@@ -274,6 +276,7 @@ from .fields import (
     animate_fdtd_ground_effect,
     animate_fdtd_impedance_tube,
     animate_fdtd_metadiffuser,
+    animate_fdtd_open_end,
     animate_fdtd_pillar_hall,
     animate_fdtd_refraction,
     animate_fdtd_room_modes,
@@ -1188,6 +1191,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_silencer_insertion_loss,
     generate_control_valve_noise,
     generate_valve_cavitation_noise,
+    generate_silencer_measurement,
     generate_silencer_selection,
     generate_silencer_extended_tube,
     generate_extended_tube_geometry,
@@ -1283,6 +1287,7 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_dynamic_stiffness_sweep": animate_dynamic_stiffness_sweep,
     "anim_fdtd_slit_absorber": animate_fdtd_slit_absorber,
     "anim_fdtd_expansion_chamber": animate_fdtd_expansion_chamber,
+    "anim_fdtd_open_end": animate_fdtd_open_end,
     "anim_fdtd_side_branch": animate_fdtd_side_branch,
     "anim_fdtd_absorption_placement": animate_fdtd_absorption_placement,
     "anim_fdtd_aperture_slit": animate_fdtd_aperture_slit,
@@ -1309,6 +1314,7 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
 #: are never written after they are built, so the children share them
 #: copy-on-write instead of paying for the simulation (or the memory) again.
 _ANIM_FIELDS: dict[str, Callable[[], Any]] = {
+    "anim_fdtd_open_end": _open_end_fields,
     "anim_fdtd_room_modes": _room_mode_fields,
     "anim_fdtd_barrier": _barrier_fields,
     "anim_fdtd_critical_angle": _seabed_fields,

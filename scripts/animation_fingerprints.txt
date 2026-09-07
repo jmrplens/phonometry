@@ -31,6 +31,7 @@ anim_fdtd_expansion_chamber 365032d3b23cc653
 anim_fdtd_ground_effect e1ed1fd5930aa92c
 anim_fdtd_impedance_tube 2cc853001a691290
 anim_fdtd_metadiffuser c564f82d9ebcd475
+anim_fdtd_open_end 9d10b17184bd2c80
 anim_fdtd_pillar_hall 93a4765be97d4c76
 anim_fdtd_refraction e8140d09967a2567
 anim_fdtd_room_modes 762de507bcf3305a

@@ -27,6 +27,7 @@ import Scope from '../../../../components/Scope.astro';
 import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import Video from '../../../../components/Video.astro';
 
 Everything a silencer model computes comes from geometry. The figure a
 supplier publishes does not. It is an **insertion loss measured by
@@ -45,6 +46,12 @@ printed pages carrying two equations, and it measures silencers and nothing
 else, without flow and with none in the answer, up to a design velocity of
 15 m/s. A measurement that needs flow, or an object that is not a silencer,
 is outside ISO 11691 and belongs to ISO 7235.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/silencer_measurement.svg" alt="Three panels. Left: two groups of bars, one for a silencer that is flat across an octave and one whose worst third leaks, each showing the three one-third-octave insertion losses as pale bars, the octave that Equation (2) gives as a filled bar and the plain mean of the decibels as a dashed line; in the flat group the two agree and in the leaky one the octave sits twelve decibels under the mean. Middle: the open-end transmission loss of a 350 mm duct against frequency on a logarithmic axis, drawn for the three distinct solid angles of Table B.1 and for Long's rival closed form, all falling from about fifteen decibels at 50 Hz to nothing above 2 kHz, with the free-space curve the highest of the three. Right: the reproducibility standard deviations of both standards as step functions of frequency, the insertion-loss column dipping to one decibel in the middle of the range, the transmission-loss column flat at three, the sound-intensity column falling to one and stopping at 5 kHz, and the survey method stepping from two to three" width="100%" />
+
+*The three things a measurement report carries beyond the numbers themselves:
+how its octaves were folded, what its duct mouth was keeping in, and how far
+any of it can be trusted.*
 
 ## 1. One subtraction, two numberings
 
@@ -264,6 +271,11 @@ d_td = noise_control.open_end_transmission_loss(bands, area)
 print(d_td.round(2))              # [11.23  6.14  2.5   0.77  0.21  0.05] dB
 ```
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_end_solid_angles.svg" alt="Five cells in a row, one for each mounting configuration of ISO 7235 Table B.1. In each, a small square terminal sits at the origin of a shaded wedge that is the solid angle read in section: a half circle against a wall for A, a quarter circle in the corner of a wall and a floor for B, a full circle standing free for C, a half circle above a floor for D, and a full circle again for E. Below each, the solid angle: two pi, pi, four pi, two pi and four pi. Under the row, the formula written both as ISO 7235 prints it and as ISO 5135 prints it, a note that the two are one formula with the same five values, and the conclusion that the bigger the solid angle the more the mouth keeps in" width="100%" />
+
+*The solid angle is the only term of Equation (B.3) a laboratory chooses
+rather than measures, and the five choices are the same in both standards.*
+
 The solid angle is Table B.1, and the same five values are Table 1 of
 ISO 5135. It works the way round that surprises people: $\Omega$ sits in the
 numerator, so a duct ending in the middle of the room keeps **more** sound in
@@ -280,6 +292,22 @@ print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
 ```
 
 Three more decibels at 63 Hz, and the reflection coefficient rises with it.
+
+<Video
+  name="anim_fdtd_open_end"
+  width={2400}
+  height={1350}
+  title="The open end of a duct in a 2D FDTD simulation"
+  description="A 0.20 m duct flush in a rigid screen, radiating into the half space beyond it, driven at 100 Hz and at 800 Hz one above the other. At 100 Hz the duct fills with a standing wave and only a faint field escapes past the screen; the envelope beside it swings between a maximum and a minimum that give a reflection coefficient of 0.71. At 800 Hz the duct carries a nearly travelling wave and strong circular fronts leave the mouth into the half space, with an envelope that ripples only slightly and gives 0.19."
+/>
+
+*Both carriers are below the 857 Hz cut-on of a duct that wide, so the field
+inside it is the plane wave the whole of ISO 7235's duct arithmetic assumes.
+The reflection coefficients read off the standing wave are the simulated
+geometry's own, and not Equation (B.4): that closed form is a piston
+approximation for a circular mouth, where this is a slit in a screen. What
+the two share is the mechanism, and it is the mechanism that decides whether
+a level measured in a room is the level in the duct behind it.*
 
 Equation (B.4) says the same fact the other way round, as a pressure
 reflection coefficient, and the two close exactly on the energy:
@@ -455,6 +483,84 @@ print(round(noise_control.upstream_straight_length(0.0962), 2))   # 2.0 m
 print(round(noise_control.upstream_straight_length(0.5), 2))      # 3.99 m
 ```
 
+## 11. The third standard, and the formula it shares
+
+ISO 5135:1999 measures something else again: the sound power an air-terminal
+device, air-terminal unit, damper or valve radiates, determined in a
+reverberation room to ISO 3741. What a designer needs is not that but what
+the device puts into the duct behind it, and Equation (1) is the step between
+them:
+
+$$
+L_{W\mathrm{duct}} = L_W + \Delta L_\mathrm{r}
+$$
+
+The correction $\Delta L_\mathrm{r}$ is Equation (2) of ISO 5135, and it is
+worth writing both printings side by side:
+
+$$
+\Delta L_\mathrm{r} = 10\lg\left[1 +
+   \left(\frac{c}{4\pi f}\right)^{2}\frac{\Omega}{S}\right]
+\qquad
+D_\mathrm{td} = 10\lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f\sqrt{S}}{c}\right)^{2}}\right]
+$$
+
+Expand either and both become $10\lg[1 + \Omega c^2 / (16\pi^2 f^2 S)]$.
+They are one formula, their two solid-angle tables agree entry for entry, and
+`open_end_transmission_loss` is both. That is why nothing new appears here for
+the correction itself:
+
+```python
+d_lr = noise_control.open_end_transmission_loss(bands, area)
+lw_room = np.array([58.0, 60.0, 61.0, 59.0, 55.0, 50.0])
+print(noise_control.duct_sound_power_level(lw_room, d_lr).round(2))
+#                                 # [69.23 66.14 63.5  59.77 55.21 50.05] dB
+```
+
+A device measured in a room is understated in the duct by eleven decibels at
+the bottom of the range and by nothing at the top. The NOTE to Table 1 offers
+a way round the correction rather than a second formula for it: fit a
+transmission element to ISO 7235 and no correction is applied at all.
+
+## 12. Reading a level at a duty nobody measured
+
+A device is not tested at the one operating point a designer will use it at.
+ISO 5135 5.5.2 fits a straight line by least squares through the levels
+against $\lg q_V$ when the tests were made at a constant pressure loss
+coefficient, or against $\lg \Delta p_\mathrm{t}$ when they were made at a
+constant flow rate. The same fit serves the band levels and the A-weighted
+one:
+
+```python
+duty = np.array([0.05, 0.1, 0.2, 0.4, 0.8])          # m3/s
+levels = np.array([38.0, 44.5, 50.0, 56.5, 62.0])    # dB(A)
+
+line = noise_control.fit_operating_line(duty, levels)
+print(round(line.slope, 2))               # 19.93 dB per decade
+print(round(line.maximum_deviation, 2))   # 0.3 dB
+print(round(line.level_at(0.3), 1))       # 53.7 dB(A)
+```
+
+Two rules keep that honest, and the library says so on both rather than
+refusing: a fit that is not a straight line is still a fit, and a level read
+past the range is still a number, and what the standard asks is that a report
+be honest about them. The measured points have to sit within 3 dB of the line,
+because past that the levels are not a straight line in this variable and
+reading the line off means nothing. And the line may be extended down to half
+the smallest duty measured and up to twice the largest, and no further, which
+for these five points is 0.025 to 1.6 m³/s. Either one out of range raises a
+`SilencerMeasurementWarning`:
+
+```python
+print(line.valid_range)           # (0.025, 1.6)
+```
+
+Clause 8 k) closes the loop: a report gives the fully corrected levels to the
+nearest half decibel and has to state which of them were extrapolated rather
+than measured directly. `.plot()` draws that distinction, shading the two ends
+of the range that are extrapolation.
+
 ## What this guide covers
 
 <Scope>
@@ -476,7 +582,12 @@ And the flow half of 6.5: the gas law of Equations (10), (21) and (22), the
 volume flow rate of (8) and (9), the velocity head of (13), (16), (19) and
 (20), the total pressure of (11), the area-change correction of (12), the
 pressure loss coefficient of (14) and (17), the substitution average of (18),
-and the settling length of 6.5.2.2.1.
+and the settling length of 6.5.2.2.1. From ISO 5135: the duct sound power
+level of Equation (1); Equation (2), which is Equation (B.3) of ISO 7235
+written out again and is served by the same function; and the least-squares
+operating line of 5.5.2 through `fit_operating_line`, with the 3 dB limit on
+the fit, the half-to-twice range it may be read over, and a `.plot()` that
+shades the part of that range which is extrapolation.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
@@ -486,9 +597,12 @@ substitution duct's dimensional tolerance and the limiting insertion loss are
 described but not computed, and Equation (7) is given the room correction
 rather than deriving it. The flow measurement itself is not modelled: the
 differential-pressure devices of ISO 5167-1, the velocity survey and the
-piezometric ring are procedure rather than arithmetic, and the extrapolation
-of a measured coefficient outside the range it was measured over is left to
-the reader.
+piezometric ring are procedure rather than arithmetic. Nothing here builds a
+reverberation room or qualifies one: the ISO 3741 determination both
+standards hand their receiving side to is a separate page, and the background
+corrections, the discrete-tone check and the room qualification belong to it.
+ISO 11820, which measures a silencer in situ where the substitution trick is
+usually impossible, is not implemented at all.
 Neither is ISO 11820, which measures a silencer in situ, where the
 substitution trick is usually impossible.
 </ScopeClaim>
@@ -506,5 +620,8 @@ substitution trick is usually impossible.
 - [HVAC Noise the German Way (VDI 2081)](/phonometry/devices/noise-control/vdi2081-air-systems/):
   the splitter-silencer insertion loss predicted from geometry, for comparison
   with what a laboratory would measure.
+- [Industrial noise control](/phonometry/devices/noise-control/noise-control/):
+  the rival closed form for the end reflection, and the air-terminal
+  corrections a diffuser is selected with.
 
 </SeeAlso>

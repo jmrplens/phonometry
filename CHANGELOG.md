@@ -117,8 +117,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   equivalent diameters or two metres, the two rules crossing at a 0,4 m
   equivalent diameter.
 
-  Twenty conformance rows against the printed tables and the closed forms,
-  and a new errata entry: Table 6 of ISO 7235 names the bands 50 to 125 Hz and
+  A third standard shares the page. ISO 5135:1999 determines what an
+  air-terminal device radiates in a reverberation room and hands back what it
+  puts into the duct behind it, and `duct_sound_power_level` is its
+  Equation (1). Its Equation (2), the end reflection loss, turns out to be
+  Equation (B.3) of ISO 7235 written out again, and its solid-angle table to
+  be Table B.1 entry for entry, so `open_end_transmission_loss` serves both
+  and a conformance row records that the two printings agree everywhere.
+  What ISO 5135 does add is `fit_operating_line`, the least-squares line of
+  5.5.2 that reads a level off at a duty the laboratory did not measure at,
+  with the 3 dB limit on how far a point may sit from it, the half-to-twice
+  range 5.5.2 allows it to be extended over, and a `.plot()` that shades the
+  ends of that range which are extrapolation rather than interpolation, as
+  clause 8 k) requires a report to distinguish.
+
+  Twenty-three conformance rows against the printed tables and the closed
+  forms, and a new errata entry: Table 6 of ISO 7235 names the bands 50 to 125 Hz and
   then "> 160", so the 160 Hz one-third octave belongs to no row and is left
   with no limit at all.
 

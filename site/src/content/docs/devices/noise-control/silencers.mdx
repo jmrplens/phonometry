@@ -879,7 +879,9 @@ uncertainty twice those values.
 
 Two neighbouring standards complete the picture: **ISO 11691** is the survey-
 grade laboratory method without flow, and **ISO 11820** measures a silencer in
-situ, where the substitution trick is usually impossible.
+situ, where the substitution trick is usually impossible. The arithmetic of
+the first two, the subtraction itself and the tables that go with it, is on
+[Measuring a Silencer](/phonometry/devices/noise-control/silencer-measurement/).
 
 ## Cross-check against the FDTD solver
 
@@ -915,7 +917,8 @@ four constructors' results and on a chain, and the expansion chamber
 cross-checked against the independent FDTD solver; the
 `plane_wave_limit` that bounds all of them; and, as prose rather than as code,
 the ISO 7235 substitution measurement that produces the insertion loss a
-supplier publishes.
+supplier publishes, whose arithmetic is on [its own
+page](/phonometry/devices/noise-control/silencer-measurement/).
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
@@ -927,10 +930,11 @@ figure is a table lookup (Bies Table 8.11) and the plenum attenuation is
 Wells' closed form driven by a declared mean absorption — neither is a liner model.
 Mean-flow effects (convection,
 temperature gradients, flow-dependent impedance of perforates) are outside the
-no-flow element matrices used here. Nothing on this page is a measurement: no
-part of ISO 7235 is implemented, the shell breakout and the end corrections at
-the area jumps are not modelled, and the branch models are lossless unless a
-`resistance` is supplied.
+no-flow element matrices used here. Nothing on this page is a measurement: the
+arithmetic of ISO 7235 has [a page of its
+own](/phonometry/devices/noise-control/silencer-measurement/), the shell
+breakout and the end corrections at the area jumps are not modelled, and the
+branch models are lossless unless a `resistance` is supplied.
 </ScopeClaim>
 </Scope>
 

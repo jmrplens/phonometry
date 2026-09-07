@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from ..noise_control.enclosures import EnclosureResult
     from ..noise_control.hvac import HvacSpectrumResult
     from ..noise_control.room_to_room import RoomToRoomResult
+    from ..noise_control.silencer_measurement import OperatingLine
     from ..noise_control.silencers import ReactiveSilencerResult
 
 _FREQ_LABEL = "Frequency [Hz]"
@@ -41,6 +42,13 @@ _TL_LABEL = "Transmission loss"
 #: pre-i18n renderers.
 _STRINGS: dict[str, str] = {
     "Frequency [Hz]": "Frecuencia [Hz]",
+    "Least-squares fit": "Ajuste por mínimos cuadrados",
+    "Measured points": "Puntos medidos",
+    "Duty (flow rate or total pressure loss)": "Régimen (caudal o pérdida de presión total)",
+    "Operating line (ISO 5135 5.5.2)": "Recta de servicio (ISO 5135 5.5.2)",
+    "worst point": "peor punto",
+    "Extrapolated": "Extrapolado",
+    "dB/decade": "dB/década",
     "Band": "Banda",
     _TL_LABEL: "Pérdida por transmisión",
     "Insertion loss": "Pérdida por inserción",
@@ -495,5 +503,89 @@ def plot_enclosure(
         ax.set_xlabel(_t("Band", language))
         ax.set_xticks(x)
     ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_operating_line(
+    result: OperatingLine,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The ISO 5135 5.5.2 fit: the test points and the line through them.
+
+    The duty runs on a logarithmic axis, because that is the variable the
+    least-squares fit is made in. The measured points are drawn as they were
+    given, the fitted line spans the whole range 5.5.2 allows it to be read
+    over, and the part of that range which is extrapolation rather than
+    interpolation is shaded, because clause 8 k) requires a report to say
+    which of its values were not measured directly.
+
+    :param result: An
+        :class:`~phonometry.noise_control.silencer_measurement.OperatingLine`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to ``Axes.plot`` for the fitted line.
+    :return: The axes.
+    """
+    import matplotlib.ticker as mticker
+
+    from .._i18n import decimal_comma, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    low, high = result.valid_range
+    span = np.geomspace(low, high, 128)
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("lw", 1.8)
+    kwargs.setdefault(
+        "label",
+        _t("Least-squares fit", language)
+        + " ("
+        + decimal_comma(f"{result.slope:.1f}", language)
+        + f" {_t('dB/decade', language)})",
+    )
+    ax.plot(span, result.slope * np.log10(span) + result.intercept, **kwargs)
+    ax.plot(
+        np.asarray(result.duty),
+        np.asarray(result.levels),
+        linestyle="none",
+        marker="o",
+        ms=5,
+        color=_C_SECONDARY,
+        label=_t("Measured points", language),
+    )
+    wash = theme_fill(_C_MUTED, ax)
+    for index, (lower, upper) in enumerate(
+        ((low, result.smallest_duty), (result.largest_duty, high))
+    ):
+        ax.axvspan(
+            lower,
+            upper,
+            color=wash,
+            zorder=0,
+            label=_t("Extrapolated", language) if index == 0 else None,
+        )
+    ax.set_xscale("log")
+    # The duty spans a decade or two of a flow rate in m3/s or a pressure in
+    # Pa, and the default log axis labels that 10^-1 rather than 0,1, which
+    # reads as an exponent and not as a duty. Ticks at 1, 2 and 5 of each
+    # decade, written plainly, give a reader the numbers the test points were
+    # actually taken at.
+    ax.xaxis.set_major_locator(mticker.LogLocator(base=10.0, subs=(1.0, 2.0, 5.0)))
+    ax.xaxis.set_major_formatter(
+        mticker.FuncFormatter(lambda value, _pos: decimal_comma(f"{value:g}", language))
+    )
+    ax.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax.set_xlabel(_t("Duty (flow rate or total pressure loss)", language))
+    ax.set_ylabel(_t(_LEVEL_LABEL, language))
+    ax.set_title(
+        _t("Operating line (ISO 5135 5.5.2)", language)
+        + f" - {_t('worst point', language)} "
+        + decimal_comma(f"{result.maximum_deviation:.2f}", language)
+        + " dB"
+    )
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="upper left", fontsize="small")
     localize_axes(ax, language)
     return ax

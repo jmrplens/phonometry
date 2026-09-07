@@ -82,7 +82,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of Equation (7). `modal_filter_cut_on` is Equations (4) and (5), where the
   modal-filter requirement of 5.2.2.3 steps from 3 dB to 5.
 
-  Fifteen conformance rows against the printed tables and the closed forms,
+  The third thing ISO 7235 measures has nothing to do with sound: 6.5 is the
+  total pressure loss coefficient, because a silencer that works and costs a
+  fan half its pressure is not a good silencer. `normal_air_density` is the
+  gas law of Equations (10), (21) and (22) with the standard's own two
+  constants, `volume_flow_rate` and `dynamic_pressure` the quantities the
+  coefficient is built from, and `pressure_loss_coefficient` the division
+  that makes it a property of the object rather than of the test point.
+  `total_pressure_loss` carries the part worth reading twice, the bracket of
+  Equation (12) that keeps an object from being credited with a recovery that
+  is only bookkeeping when it widens the duct.
+  `average_pressure_loss_coefficient` is Equation (18), which is a
+  substitution measurement like the acoustic one and averages the
+  coefficients rather than the pressures, so the two series need share
+  neither their flow rates nor their point count.
+  `upstream_straight_length` is the settling length of 6.5.2.2.1, five
+  equivalent diameters or two metres, the two rules crossing at a 0,4 m
+  equivalent diameter.
+
+  Twenty conformance rows against the printed tables and the closed forms,
   and a new errata entry: Table 6 of ISO 7235 names the bands 50 to 125 Hz and
   then "> 160", so the 160 Hz one-third octave belongs to no row and is left
   with no limit at all.

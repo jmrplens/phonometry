@@ -75,6 +75,57 @@ which a duct stops carrying plane waves alone is in
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
+## average_pressure_loss_coefficient
+
+```python
+average_pressure_loss_coefficient(
+    object_static_pressure: ArrayLike,
+    object_dynamic_pressure: ArrayLike,
+    substitution_static_pressure: ArrayLike,
+    substitution_dynamic_pressure: ArrayLike,
+) -> float
+```
+
+ISO 7235 Equation (18): the substitution method, averaged.
+
+$$
+\zeta = \frac{1}{N}\sum_{i=1}^{N} \frac{p_{s1(\mathrm{I})i}}{p_{\mathrm{d}i}} - \frac{1}{M}\sum_{k=1}^{M} \frac{p_{s1(\mathrm{II})k}}{p_{\mathrm{d}k}}
+$$
+
+The fundamental method of 6.5.2.2 is a substitution measurement like the
+acoustic one: run the rig with the test object and again with the
+substitution duct, and the difference belongs to the object. The
+computational route of 6.5.2.2.3 does it on the coefficients rather than
+on the pressures, so the two series need not be run at matching flow
+rates and need not even have the same number of points.
+
+Each series is at least five airflow rates spread over the test range,
+and the lowest has to produce more than
+[`MINIMUM_PRESSURE_DIFFERENCE_PA`](/phonometry/reference/api/noise_control/silencer-measurement/#minimum_pressure_difference_pa).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `object_static_pressure` | $p_{s1(\mathrm{I})i}$, the upstream static pressures of the series with the test object, in Pa. |
+| `object_dynamic_pressure` | $p_{\mathrm{d}i}$ of that series, in Pa, from [`dynamic_pressure`](/phonometry/reference/api/noise_control/silencer-measurement/#dynamic_pressure). |
+| `substitution_static_pressure` | $p_{s1(\mathrm{II})k}$ of the series with the substitution duct, in Pa. |
+| `substitution_dynamic_pressure` | $p_{\mathrm{d}k}$ of that series, in Pa. |
+
+**Returns:** $\zeta$, dimensionless.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a value is not finite, if a dynamic pressure is not positive, or if a series' two arrays are of different lengths. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| SilencerMeasurementWarning | If either series has fewer points than the five 6.5.2.2.1 asks for. |
+
 ## CIRCULAR_CUT_ON_COEFFICIENT
 
 *Constant* (`float`).
@@ -82,6 +133,49 @@ which a duct stops carrying plane waves alone is in
 ```python
 CIRCULAR_CUT_ON_COEFFICIENT = 0.59
 ```
+
+## DENSITY_RATIO_RANGE
+
+*Constant* (`tuple`).
+
+```python
+DENSITY_RATIO_RANGE = (0.98, 1.02)
+```
+
+## dynamic_pressure
+
+```python
+dynamic_pressure(volume_flow: float, area: float, density: float) -> float
+```
+
+ISO 7235 Equations (13), (16), (19) and (20): the velocity head.
+
+$$
+p_\mathrm{d} = \frac{\rho}{2}\left(\frac{q_V}{S}\right)^{2}
+$$
+
+One equation printed four times, once for each place the pressure loss
+coefficient needs it: the inlet of the simplified method (13), the chosen
+mid-range point of the fundamental method (16), and the two series of the
+computational route (19) and (20). The group $q_V / S$ is the face
+velocity, so this is $\rho v^2 / 2$ with the velocity written the
+way a flow meter reports it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `volume_flow` | $q_V$, in m³/s. |
+| `area` | $S$, the cross-sectional area the flow passes, in m². |
+| `density` | $\rho$, in kg/m³. |
+
+**Returns:** $p_\mathrm{d}$, in Pa.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a value is not positive and finite. |
 
 ## flow_noise_power_level
 
@@ -132,12 +226,28 @@ room's volume and reverberation time.
 ISO11691_REPRODUCIBILITY = ((1250.0, 2.0), (10000.0, 3.0))
 ```
 
+## ISO7235_ABSOLUTE_ZERO_OFFSET
+
+*Constant* (`float`).
+
+```python
+ISO7235_ABSOLUTE_ZERO_OFFSET = 273.0
+```
+
 ## ISO7235_COVERAGE_FACTOR
 
 *Constant* (`float`).
 
 ```python
 ISO7235_COVERAGE_FACTOR = 2.0
+```
+
+## ISO7235_GAS_CONSTANT
+
+*Constant* (`float`).
+
+```python
+ISO7235_GAS_CONSTANT = 287.0
 ```
 
 ## ISO7235_REPRODUCIBILITY
@@ -323,6 +433,22 @@ between 125 and its `> 160` row.
 | :--- | :--- |
 | ValueError | If the frequency is not positive and finite. |
 
+## MINIMUM_FLOW_RATES
+
+*Constant* (`int`).
+
+```python
+MINIMUM_FLOW_RATES = 5
+```
+
+## MINIMUM_PRESSURE_DIFFERENCE_PA
+
+*Constant* (`float`).
+
+```python
+MINIMUM_PRESSURE_DIFFERENCE_PA = 10.0
+```
+
 ## MODAL_FILTER_ATTENUATION_DB
 
 *Constant* (`tuple`).
@@ -377,6 +503,53 @@ the mean-flow correction this equation does not have.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If neither dimension or both are given, or if a value is not positive and finite. |
+
+## normal_air_density
+
+```python
+normal_air_density(
+    static_gauge_pressure: float,
+    ambient_pressure: float,
+    temperature_celsius: float,
+) -> float
+```
+
+ISO 7235 Equations (10), (21) and (22): the density where it matters.
+
+$$
+\rho_{1n} = \frac{1}{R}\, \frac{p_{s1} + p_a}{\theta_1 + 273\ ^\circ\mathrm{C}}
+$$
+
+The ideal gas law with the standard's own numbers. The static pressure in
+the duct is measured as a **gauge** pressure against the ambient, so the
+two are added to get the absolute pressure the gas law wants, and the
+temperature is the one in the plane the pressure was measured in.
+
+Three equations print this: (10) for the normalised flow rate of (9),
+and (21) and (22) for the two series of the computational route of
+6.5.2.2.3. They differ only in which measurement they are given.
+
+The printed offset is 273 rather than 273,15, which puts the density
+0,055 % high at 20 °C. In the pressure loss coefficient it cancels almost
+exactly, because the same density appears in the dynamic pressure of both
+series; [`ISO7235_ABSOLUTE_ZERO_OFFSET`](/phonometry/reference/api/noise_control/silencer-measurement/#iso7235_absolute_zero_offset) carries the printed value so
+that a result can be reproduced as the standard prints it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `static_gauge_pressure` | $p_{s1}$, the duct static pressure relative to the ambient, in Pa. |
+| `ambient_pressure` | $p_a$, the absolute ambient pressure, in Pa. |
+| `temperature_celsius` | $\theta_1$, in °C. |
+
+**Returns:** $\rho_{1n}$, in kg/m³.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the ambient pressure is not positive and finite, if the gauge pressure is not finite, if the absolute pressure they make is not positive, or if the temperature is at or below the printed absolute zero. |
 
 ## octave_insertion_loss
 
@@ -520,6 +693,43 @@ the middle.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+
+## pressure_loss_coefficient
+
+```python
+pressure_loss_coefficient(
+    total_loss: float,
+    inlet_dynamic_pressure: float,
+) -> float
+```
+
+ISO 7235 Equations (14) and (17): the loss in velocity heads.
+
+$$
+\zeta = \frac{\Delta p_\mathrm{t}}{p_\mathrm{d1}}
+$$
+
+A pressure loss on its own says nothing without the flow it was measured
+at, because it grows as the square of the velocity. Dividing by the
+velocity head of Equation (13) takes that out and leaves a number that
+belongs to the object: how many velocity heads it costs to push air
+through it. Equation (17) is the same division with the mid-range point
+of the fundamental method, $\Delta p_{tot,n} / p_{dn}$.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `total_loss` | $\Delta p_\mathrm{t}$ or $\Delta p_{tot,n}$, in Pa. |
+| `inlet_dynamic_pressure` | $p_\mathrm{d1}$ or $p_\mathrm{dn}$, in Pa. |
+
+**Returns:** $\zeta$, dimensionless.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the loss is not finite, or if the dynamic pressure is not positive and finite. |
 
 ## RADIATION_SOLID_ANGLES
 
@@ -691,3 +901,170 @@ what makes it a survey standard.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the frequency is not positive and finite, or above the 10 kHz the table stops at. |
+
+## total_pressure
+
+```python
+total_pressure(
+    static_pressure: float,
+    volume_flow: float,
+    area: float,
+    density: float,
+) -> float
+```
+
+ISO 7235 Equation (11): static plus dynamic, in one plane.
+
+$$
+p_\mathrm{t} = p_\mathrm{s} + \frac{\rho}{2} \left(\frac{q_V}{S}\right)^{2}
+$$
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `static_pressure` | $p_\mathrm{s}$, in Pa, in the same reference as the answer is wanted in. |
+| `volume_flow` | $q_V$, in m³/s. |
+| `area` | $S$, in m². |
+| `density` | $\rho$, in kg/m³. |
+
+**Returns:** $p_\mathrm{t}$, in Pa.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the static pressure is not finite, or if another value is not positive and finite. |
+
+## total_pressure_loss
+
+```python
+total_pressure_loss(
+    static_pressure_loss: float,
+    inlet_dynamic_pressure: float,
+    inlet_area: float,
+    outlet_area: float,
+) -> float
+```
+
+ISO 7235 Equation (12): the total pressure loss across the object.
+
+$$
+\Delta p_\mathrm{t} = \Delta p_\mathrm{s} + p_\mathrm{d1}\left[1 - \left(\frac{S_1}{S_2}\right)^2\right]
+$$
+
+Measuring static pressures on both sides is not enough when the two sides
+are different sizes: an object that widens the duct converts velocity
+head back into static pressure, and a static-pressure difference alone
+would credit it with a recovery that is only bookkeeping. The bracket is
+that correction, and the NOTE to Equation (14) says what usually happens
+to it: as a rule $S_1 = S_2$, and it vanishes.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `static_pressure_loss` | $\Delta p_\mathrm{s}$, in Pa. |
+| `inlet_dynamic_pressure` | $p_\mathrm{d1}$ from [`dynamic_pressure`](/phonometry/reference/api/noise_control/silencer-measurement/#dynamic_pressure) at the inlet, in Pa. |
+| `inlet_area` | $S_1$, the inlet test duct, in m². |
+| `outlet_area` | $S_2$, the outlet test duct, in m². |
+
+**Returns:** $\Delta p_\mathrm{t}$, in Pa.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the static loss is not finite, or if another value is not positive and finite. |
+
+## UPSTREAM_STRAIGHT_DIAMETERS
+
+*Constant* (`float`).
+
+```python
+UPSTREAM_STRAIGHT_DIAMETERS = 5.0
+```
+
+## upstream_straight_length
+
+```python
+upstream_straight_length(area: float) -> float
+```
+
+ISO 7235 6.5.2.2.1: how much straight duct the flow needs first.
+
+The upstream test duct is straight for at least $5 d_e$ or 2 m,
+whichever is greater, where $d_e = \sqrt{4S/\pi}$ is the equivalent
+diameter. Below about 0,126 m² the 2 m floor is what binds; above it the
+five diameters are.
+
+The length is there so the velocity profile has settled by the time it
+reaches the test object: 6.5.2.2.1 wants it uniform to ±10 % of the mean
+over the cross section, excluding the 15 mm nearest the walls, surveyed
+at ten points along each of two perpendicular axes about
+$1{,}5 d_e$ upstream.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `area` | $S$, the cross-sectional area of the duct, in m². |
+
+**Returns:** The straight length required, in m.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the area is not positive and finite. |
+
+## UPSTREAM_STRAIGHT_MIN_M
+
+*Constant* (`float`).
+
+```python
+UPSTREAM_STRAIGHT_MIN_M = 2.0
+```
+
+## VELOCITY_PROFILE_TOLERANCE_PERCENT
+
+*Constant* (`float`).
+
+```python
+VELOCITY_PROFILE_TOLERANCE_PERCENT = 10.0
+```
+
+## volume_flow_rate
+
+```python
+volume_flow_rate(mass_flow: float, density: float) -> float
+```
+
+ISO 7235 Equations (8) and (9): mass flow into volume flow.
+
+$$
+q_V = \frac{q_m}{\rho_1} \qquad\text{or}\qquad q_V = \frac{q_m}{\rho_{1n}}
+$$
+
+The two printings are one division and differ only in which density goes
+in. Equation (8) uses the density upstream of the test object. Equation
+(9) uses the normalised density of Equation (10), and 6.5.2.1 says when:
+if the flow meter and the test object are far enough apart in temperature
+or static pressure that their density ratio leaves 0,98 to 1,02, the
+meter is no longer measuring the flow the test object sees.
+[`DENSITY_RATIO_RANGE`](/phonometry/reference/api/noise_control/silencer-measurement/#density_ratio_range) carries that window.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `mass_flow` | $q_m$, in kg/s. |
+| `density` | $\rho_1$ or $\rho_{1n}$, in kg/m³. |
+
+**Returns:** $q_V$, in m³/s.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a value is not positive and finite. |

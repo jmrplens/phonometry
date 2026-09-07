@@ -2941,7 +2941,7 @@ def _d_open_end_solid_angles(s: SVG, th: Theme) -> None:
     import math as _math
 
     cells = (
-        ("A", "Flush in a wall", "2π", 180.0, 180.0, ("wall",)),
+        ("A", "Flush in a wall", "2π", 270.0, 180.0, ("wall",)),
         ("B", "Wall and floor", "π", 270.0, 90.0, ("wall", "floor")),
         ("C", "Free in the room", "4π", 0.0, 360.0, ()),
         ("D", "On the floor", "2π", 180.0, 180.0, ("floor",)),

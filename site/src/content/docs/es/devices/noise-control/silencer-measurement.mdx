@@ -350,6 +350,123 @@ ISO 11691 eso son 505,9 Hz donde
 502,6 Hz. Tres hertzios y medio no cambian la elección de un filtro modal, y
 merece la pena saber cuál de los dos números es la física.
 
+## 9. Lo que cuesta empujar aire a través del objeto
+
+Lo tercero que mide la ISO 7235 no tiene nada que ver con el sonido. Un
+silenciador que funciona y le cuesta a un ventilador la mitad de su presión no
+es un buen silenciador, así que el 6.5 mide el **coeficiente de pérdida de
+presión total**, y toda la gracia de dar el coeficiente y no la pérdida es que
+una pérdida no significa nada sin el caudal al que se midió.
+
+Se empieza por el aire. La Ecuación (10) es la ley de los gases ideales con
+las constantes de la propia norma, y la presión estática que toma es una
+presión manométrica frente a la ambiente, así que las dos se suman:
+
+```python
+rho = noise_control.normal_air_density(200.0, 101325.0, 20.0)
+print(round(rho, 4))              # 1.2073 kg/m3
+
+q_v = noise_control.volume_flow_rate(1.2, rho)
+print(round(q_v, 4))              # 0.9939 m3/s
+```
+
+La ISO 7235 imprime $R = 287$ y escribe la temperatura absoluta como
+$\theta + 273\ ^\circ\text{C}$, y ninguna de las dos es la cifra exacta. El
+desfase por sí solo deja la densidad un 0,051 % alta a 20 °C, y la constante
+de los gases le añade otro 0,017 %, para un 0,069 % en total. No se cancela:
+la misma densidad está en la presión dinámica de las dos series de ensayo, así
+que el coeficiente queda **escalado** por ese único factor en vez de
+desplazado, y sale un 0,069 % bajo. Eso queda muy por debajo de la
+incertidumbre de un ensayo de pérdida de presión, y usar las constantes
+impresas es lo que reproduce un resultado calculado según la norma, así que la
+biblioteca conserva ambas. Queda registrado en el [registro de
+erratas](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.es.md)
+como propiedad de la fuente y no como defecto.
+
+Se usa la Ecuación (9) en vez de la (8) cuando el caudalímetro y el objeto de
+ensayo están lo bastante separados en temperatura o presión como para que su
+cociente de densidades salga de 0,98 a 1,02: fuera de esa ventana el
+caudalímetro no está midiendo el caudal que ve el objeto de ensayo.
+
+La altura de velocidad es la Ecuación (13), y el coeficiente es la pérdida
+dividida por ella:
+
+```python
+p_d1 = noise_control.dynamic_pressure(q_v, 0.0962, rho)
+print(round(p_d1, 2))             # 64.44 Pa
+
+delta_p_t = noise_control.total_pressure_loss(45.0, p_d1, 0.0962, 0.0962)
+print(round(noise_control.pressure_loss_coefficient(delta_p_t, p_d1), 3))
+#                                 # 0.698
+```
+
+Ese número pertenece al objeto y no al punto de ensayo, al menos en la medida
+en que el flujo sea dinámicamente semejante: una pérdida crece con el cuadrado
+de la velocidad y la altura por la que se divide también, así que el álgebra
+devuelve el mismo coeficiente al doble de caudal. El flujo real no es
+exactamente semejante, porque doblar el caudal dobla también el número de
+Reynolds, y esa es la razón de que el 6.5.2 mida a cinco caudales y promedie
+en vez de fiarse de uno. La deriva a lo largo de un intervalo de ensayo es
+pequeña, y no es nula.
+
+La Ecuación (12) es la parte que conviene leer dos veces. Medir presiones
+estáticas a los dos lados no basta cuando los dos lados tienen tamaños
+distintos, porque un objeto que ensancha el conducto convierte altura de
+velocidad de nuevo en presión estática y una diferencia estática a secas le
+abonaría una recuperación que es sólo contabilidad. El paréntesis
+$1 - (S_1/S_2)^2$ lo devuelve, y la NOTA a la Ecuación (14) dice lo que suele
+pasarle: por regla general $S_1 = S_2$, y desaparece. Cuando no, no es
+pequeño:
+
+```python
+widening = noise_control.total_pressure_loss(45.0, p_d1, 0.0962, 2 * 0.0962)
+print(round(noise_control.pressure_loss_coefficient(widening, p_d1), 3))
+#                                 # 1.448, con los mismos 45 Pa de pérdida estática
+```
+
+## 10. El truco de la sustitución, otra vez
+
+El método fundamental del 6.5.2.2 mide el coeficiente igual que la mitad
+acústica mide la pérdida por inserción: se recorre el banco con el objeto de
+ensayo, se recorre otra vez con el conducto de sustitución, y la diferencia
+pertenece al objeto. La vía computacional del 6.5.2.2.3 hace la resta sobre
+los coeficientes y no sobre las presiones, lo que significa que las dos series
+no tienen que compartir ni sus caudales ni siquiera su número de puntos:
+
+```python
+import numpy as np
+
+heads = np.array([20.0, 40.0, 60.0, 80.0, 100.0])   # Pa, cinco caudales
+with_object = 2.5 * heads
+without = 0.6 * heads
+
+zeta = noise_control.average_pressure_loss_coefficient(
+    with_object, heads, without, heads,
+)
+print(round(zeta, 3))             # 1.9
+```
+
+Cinco caudales por serie, repartidos por igual sobre el intervalo, y el más
+bajo tiene que producir más de 10 Pa para que el número más pequeño del
+promedio siga siendo una medida y no la resolución del manómetro. La
+biblioteca lo dice por partida doble: `average_pressure_loss_coefficient` avisa
+por debajo de cinco puntos, y `pressure_loss_coefficient` avisa con una pérdida
+de 10 Pa o menos, el propio límite incluido, porque la cláusula dice *mayor
+que*.
+
+Lo que tiene que ser el flujo antes de que nada de eso cuente es cuestión de
+geometría. El conducto aguas arriba va recto cinco diámetros equivalentes o
+dos metros, lo que sea mayor, para que el perfil de velocidad se haya
+asentado; tiene que ser uniforme al ±10 % de la media sobre la sección,
+excluidos los 15 mm más cercanos a las paredes, recorrido en diez puntos sobre
+cada uno de dos ejes perpendiculares a unos $1{,}5\,d_e$ aguas arriba. Las dos
+reglas de longitud se cruzan en un diámetro equivalente de 0,4 m:
+
+```python
+print(round(noise_control.upstream_straight_length(0.0962), 2))   # 2.0 m
+print(round(noise_control.upstream_straight_length(0.5), 2))      # 3.99 m
+```
+
 ## Qué cubre esta guía
 
 <Scope>
@@ -369,7 +486,12 @@ que la ISO 11691 fija en 1.1 y 4.5, incluida la comprobación de cociente de
 Tabla B.1; la pérdida por transmisión de la Ecuación (6) y la potencia sonora
 del ruido de flujo de la Ecuación (7); y las frecuencias de corte de las
 Ecuaciones (4) y (5) en las que escalona la exigencia del filtro modal del
-5.2.2.3.
+5.2.2.3. Y la mitad con flujo del 6.5: la ley de los gases de las Ecuaciones
+(10), (21) y (22), el caudal volumétrico de la (8) y la (9), la altura de
+velocidad de la (13), (16), (19) y (20), la presión total de la (11), la
+corrección por cambio de área de la (12), el coeficiente de pérdida de presión
+de la (14) y la (17), el promedio por sustitución de la (18), y la longitud de
+asentamiento del 6.5.2.2.1.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -377,9 +499,11 @@ Aquí no se construye ni se comprueba ningún banco de ensayo: la atenuación
 del filtro modal, el coeficiente de reflexión de la terminación anecoica, la
 tolerancia dimensional del conducto de sustitución y la pérdida por inserción
 límite se describen pero no se calculan, y a la Ecuación (7) se le da la
-corrección de sala en vez de deducirla. La mitad con flujo de la ISO 7235 no
-está aquí: el caudal volumétrico y el coeficiente de pérdida de presión del
-6.5 son trabajo aparte. Tampoco está la ISO 11820, que mide un
+corrección de sala en vez de deducirla. La medida de caudal en sí no se
+modela: los dispositivos de presión diferencial de la ISO 5167-1, el recorrido
+de velocidades y el anillo piezométrico son procedimiento y no aritmética, y
+la extrapolación de un coeficiente medido fuera del intervalo en que se midió
+se deja al lector. Tampoco está la ISO 11820, que mide un
 silenciador in situ, donde el truco de la sustitución no suele ser posible.
 </ScopeClaim>
 </Scope>

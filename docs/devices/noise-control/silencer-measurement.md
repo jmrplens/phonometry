@@ -315,6 +315,119 @@ high: on the 0,4 m duct of the ISO 11691 sound source that is 505,9 Hz where
 502,6 Hz. Three and a half hertz does not matter for choosing a modal filter,
 and it is worth knowing which of the two numbers is the physics.
 
+## 9. What the object costs to push air through
+
+The third thing ISO 7235 measures has nothing to do with sound. A silencer
+that works and costs a fan half its pressure is not a good silencer, so 6.5
+measures the **total pressure loss coefficient**, and the whole point of the
+coefficient rather than the loss is that a loss means nothing without the flow
+it was measured at.
+
+Start with the air. Equation (10) is the ideal gas law with the standard's own
+constants, and the static pressure it takes is a gauge pressure against the
+ambient, so the two add:
+
+```python
+rho = noise_control.normal_air_density(200.0, 101325.0, 20.0)
+print(round(rho, 4))              # 1.2073 kg/m3
+
+q_v = noise_control.volume_flow_rate(1.2, rho)
+print(round(q_v, 4))              # 0.9939 m3/s
+```
+
+ISO 7235 prints $R = 287$ and writes the absolute temperature as
+$\theta + 273\ ^\circ\text{C}$, neither of which is the accurate figure. The
+offset alone puts the density 0,051 % high at 20 °C, and the gas constant adds
+0,017 % to that, for 0,069 % in all. It does not cancel: the same density is
+in the dynamic pressure of both test series, so the coefficient is **scaled**
+by that one factor rather than shifted, and comes out 0,069 % low. That is far
+under the uncertainty of a pressure-loss test, and using the printed constants
+is what reproduces a result computed to the standard, so the library keeps
+both. It is recorded in the [errata
+register](../../ERRATA.md) as
+a property of the source rather than as a defect.
+
+Equation (9) rather than (8) is used when the flow meter and the test object
+are far enough apart in temperature or pressure that their density ratio
+leaves 0,98 to 1,02: outside that window the meter is not measuring the flow
+the test object sees.
+
+The velocity head is Equation (13), and the coefficient is the loss divided by
+it:
+
+```python
+p_d1 = noise_control.dynamic_pressure(q_v, 0.0962, rho)
+print(round(p_d1, 2))             # 64.44 Pa
+
+delta_p_t = noise_control.total_pressure_loss(45.0, p_d1, 0.0962, 0.0962)
+print(round(noise_control.pressure_loss_coefficient(delta_p_t, p_d1), 3))
+#                                 # 0.698
+```
+
+That number belongs to the object rather than to the test point, at least to
+the extent the flow is dynamically similar: a loss grows as the square of the
+velocity and so does the head it is divided by, so the algebra returns the
+same coefficient at twice the flow. Real flow is not exactly similar, because
+doubling the rate doubles the Reynolds number too, and that is the reason
+6.5.2 measures at five rates and averages rather than trusting one. The drift
+over a test range is small, and it is not zero.
+
+Equation (12) is the part worth reading twice. Measuring static pressures on
+both sides is not enough when the two sides are different sizes, because an
+object that widens the duct converts velocity head back into static pressure
+and a static difference alone would credit it with a recovery that is only
+bookkeeping. The bracket $1 - (S_1/S_2)^2$ puts it back, and the NOTE to
+Equation (14) says what usually happens to it: as a rule $S_1 = S_2$, and it
+vanishes. Where it does not, it is not small:
+
+```python
+widening = noise_control.total_pressure_loss(45.0, p_d1, 0.0962, 2 * 0.0962)
+print(round(noise_control.pressure_loss_coefficient(widening, p_d1), 3))
+#                                 # 1.448, from the same 45 Pa of static loss
+```
+
+## 10. The substitution trick, again
+
+The fundamental method of 6.5.2.2 measures the coefficient the way the
+acoustic half measures insertion loss: run the rig with the test object, run
+it again with the substitution duct, and the difference belongs to the object.
+The computational route of 6.5.2.2.3 does the subtraction on the coefficients
+rather than on the pressures, which means the two series need share neither
+their flow rates nor even their number of points:
+
+```python
+import numpy as np
+
+heads = np.array([20.0, 40.0, 60.0, 80.0, 100.0])   # Pa, five airflow rates
+with_object = 2.5 * heads
+without = 0.6 * heads
+
+zeta = noise_control.average_pressure_loss_coefficient(
+    with_object, heads, without, heads,
+)
+print(round(zeta, 3))             # 1.9
+```
+
+Five rates per series, spread evenly over the range, and the lowest has to
+produce more than 10 Pa so that the smallest number in the average is still a
+measurement rather than the resolution of the manometer. The library says so
+on both counts: `average_pressure_loss_coefficient` warns below five points,
+and `pressure_loss_coefficient` warns on a loss of 10 Pa or less, the
+boundary included, because the clause reads *greater than*.
+
+What the flow has to be before any of that counts is a matter of geometry.
+The upstream duct is straight for five equivalent diameters or two metres,
+whichever is greater, so that the velocity profile has settled; it must be
+uniform to ±10 % of the mean over the section, excluding the 15 mm nearest the
+walls, surveyed ten points along each of two perpendicular axes about
+$1{,}5\,d_e$ upstream. The two length rules cross at a 0,4 m equivalent
+diameter:
+
+```python
+print(round(noise_control.upstream_straight_length(0.0962), 2))   # 2.0 m
+print(round(noise_control.upstream_straight_length(0.5), 2))      # 3.99 m
+```
+
 ## Standards
 
 ISO 7235:2003 and ISO 11691:1995, read from BS EN ISO 7235:2009 and
@@ -325,12 +438,15 @@ the three-or-five rule of 6.2.1; ISO 11691 Table 1 and all three columns of
 ISO 7235 Table 7, with the coverage factor of 7.9; the scope of ISO 11691 1.1
 and 4.5; the open-end transmission loss and reflection coefficient of
 Equations (B.3) and (B.4) with the solid angles of Table B.1; the transmission
-loss of Equation (6) and the flow-noise sound power of Equation (7); and the
-cut-on frequencies of Equations (4) and (5). Checked in the
+loss of Equation (6) and the flow-noise sound power of Equation (7); the
+cut-on frequencies of Equations (4) and (5); and the flow half of 6.5, from
+the gas law of Equations (10), (21) and (22) to the substitution average of
+Equation (18) and the settling length of 6.5.2.2.1. Checked in the
 [conformance report](../../CONFORMANCE.md); the gap Table 6 leaves at 160 Hz
-is in the [errata register](../../ERRATA.md). Not implemented: the facility
-requirements themselves, the volume flow rate and pressure loss coefficient of
-6.5, and ISO 11820, which measures a silencer in situ.
+and the two printed gas-law constants are in the
+[errata register](../../ERRATA.md). Not implemented: the facility
+requirements themselves, the flow measurement of ISO 5167-1, and ISO 11820,
+which measures a silencer in situ.
 
 ## See also
 
@@ -343,5 +459,5 @@ requirements themselves, the volume flow rate and pressure loss coefficient of
   the splitter-silencer insertion loss predicted from geometry, for comparison
   with what a laboratory would measure.
 - [Errata in published sources](../../ERRATA.md): the gap Table 6 of ISO 7235
-  leaves at 160 Hz.
+  leaves at 160 Hz, and the two printed gas-law constants.
 - API reference: [`noise_control.silencer_measurement`](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencer-measurement/).

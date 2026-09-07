@@ -5187,6 +5187,25 @@ dos ediciones con las mismas entradas y en el mismo orden.
 Registradas aquí para prevenir futuros «arreglos» que romperían la
 concordancia con las fuentes publicadas:
 
+- **ISO 7235:2003, Ecuaciones (10), (21) y (22):** la ley de los gases
+  ideales viene impresa con
+  $R = 287\ \text{N}\cdot\text{m}/(\text{kg}\cdot\text{K})$ y la
+  temperatura absoluta escrita como $\theta + 273\ ^\circ\text{C}$. Ninguno
+  de los dos es el valor exacto (287,05 y 273,15). El desfase por sí solo deja
+  una densidad un 0,051 % alta a 20 °C y la constante de los gases le añade
+  otro 0,017 %, para un 0,069 % en total. Es una simplificación y no un
+  defecto: la densidad que producen sólo se usa en la presión dinámica de las
+  Ecuaciones (16), (19) y (20), y ambas series del coeficiente de pérdida de
+  presión llevan el mismo factor, de modo que las Ecuaciones (17) y (18) salen
+  **escaladas** por él en vez de desplazadas, un 0,069 % bajas, que queda muy
+  por debajo de la incertidumbre de un ensayo de pérdida de presión y es lo que
+  muestra un resultado calculado según la norma. La
+  biblioteca conserva las dos constantes impresas, como
+  [`ISO7235_GAS_CONSTANT`](../src/phonometry/noise_control/silencer_measurement.py)
+  y `ISO7235_ABSOLUTE_ZERO_OFFSET`, para que un resultado se pueda reproducir
+  tal como lo da la norma, y la fila de conformidad «Normal air density
+  (Eqs. (10), (21), (22))» deja constancia del tamaño de la diferencia.
+
 - **ISO 12354-1:2017 Tabla L.8 / ISO 12354-2:2017 Tabla G.8, primera fila:**
   la fila etiquetada «Int. wall 1/2 – Ext. wall 1/2» imprime
   $m'_i = 219{,}0\ \text{kg/m}^2$ y $m'_{\perp i}$ (Parte 2:

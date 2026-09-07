@@ -3,8 +3,8 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 849,
-    "passing": 849,
+    "checks": 854,
+    "passing": 854,
     "failing": 0,
     "domains": 70,
     "standards": 399,
@@ -481,8 +481,8 @@
     {
       "id": "ducted-silencer-measurement-iso-7235-iso-11691",
       "title": "Ducted silencer measurement (ISO 7235, ISO 11691)",
-      "checks": 15,
-      "passing": 15
+      "checks": 20,
+      "passing": 20
     },
     {
       "id": "hvac-noise-vdi-2081",
@@ -23021,6 +23021,168 @@
         }
       },
       "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/normal-air-density-eqs-10-21-22",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Normal air density (Eqs. (10), (21), (22))",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.2073230191102495,
+        "label": "(101 325 + 200) / (287 x 293) = 1,207323 kg/m³"
+      },
+      "computed": {
+        "value": 1.207323
+      },
+      "unit": "kg/m³",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/total-pressure-loss-across-unequal-ducts-eq-12",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Total pressure loss across unequal ducts (Eq. (12))",
+      "kind": "record",
+      "expected": {
+        "label": "S_2 = S_1 = 45 Pa; S_2 = 2 S_1 = 93.6253 Pa; S_2 = S_1 / 2 = -149.5012 Pa",
+        "record": {
+          "S_2 = S_1": 45.0,
+          "S_2 = 2 S_1": 93.62530850056837,
+          "S_2 = S_1 / 2": -149.5012340022735
+        }
+      },
+      "computed": {
+        "label": "S_2 = S_1 = 45 Pa; S_2 = 2 S_1 = 93.6253 Pa; S_2 = S_1 / 2 = -149.5012 Pa",
+        "record": {
+          "S_2 = S_1": 45.0,
+          "S_2 = 2 S_1": 93.62530850056837,
+          "S_2 = S_1 / 2": -149.5012340022735
+        }
+      },
+      "unit": "Pa",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/pressure-loss-coefficient-is-flow-invariant-eq-14",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Pressure loss coefficient is flow invariant (Eq. (14))",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.75,
+        "label": "zeta = 0.750000 at 1 m³/s"
+      },
+      "computed": {
+        "value": 0.75,
+        "label": "0.750000 at 2 m³/s"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/averaged-pressure-loss-coefficient-eq-18",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Averaged pressure loss coefficient (Eq. (18))",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.1,
+        "label": "2,5 - 0,4 = 2,100000"
+      },
+      "computed": {
+        "value": 2.1
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "ducted-silencer-measurement-iso-7235-iso-11691/iso-7235-2003/upstream-straight-length-6-5-2-2-1",
+      "domain": "ducted-silencer-measurement-iso-7235-iso-11691",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 7235",
+        "edition": "2003",
+        "cite": "ISO 7235:2003"
+      },
+      "quantity": "Upstream straight length (6.5.2.2.1)",
+      "kind": "record",
+      "expected": {
+        "label": "S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m",
+        "record": {
+          "S = 0,0962 m² (350 mm)": 2.0,
+          "S = 0,1257 m² (400 mm)": 2.0,
+          "S = 0,5 m²": 3.989422804014327
+        }
+      },
+      "computed": {
+        "label": "S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m",
+        "record": {
+          "S = 0,0962 m² (350 mm)": 2.0,
+          "S = 0,1257 m² (400 mm)": 2.0,
+          "S = 0,5 m²": 3.989422804014327
+        }
+      },
+      "unit": "m",
       "tolerance": {
         "mode": "absolute",
         "value": 0.0

@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**849/849 conformance checks pass** across 70 domains and 399 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**854/854 conformance checks pass** across 70 domains and 399 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1376,7 +1376,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Ducted silencer measurement (ISO 7235, ISO 11691)</b>: 100% (15/15)</summary>
+<summary><b>Ducted silencer measurement (ISO 7235, ISO 11691)</b>: 100% (20/20)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -1395,6 +1395,11 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 7235:2003 | Rectangular cut-on frequency (Eq. (5)) | 343,000000 Hz from the (1, 0) eigenvalue | 343 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
 | ISO 7235:2003 | Circular cut-on frequency (Eq. (4)) | 0,59 / (1,8412 / pi) = 1,006701 | 1.006702 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ISO 7235:2003 | Transmission loss of an air-terminal unit (Eq. (6)) | 63 Hz gap = 11.2255 dB; 2000 Hz gap = 0.0525 dB | 63 Hz gap = 11.2255 dB; 2000 Hz gap = 0.0525 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7235:2003 | Normal air density (Eqs. (10), (21), (22)) | (101 325 + 200) / (287 x 293) = 1,207323 kg/m³ | 1.207323 kg/m³ | 0 kg/m³ | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7235:2003 | Total pressure loss across unequal ducts (Eq. (12)) | S_2 = S_1 = 45 Pa; S_2 = 2 S_1 = 93.6253 Pa; S_2 = S_1 / 2 = -149.5012 Pa | S_2 = S_1 = 45 Pa; S_2 = 2 S_1 = 93.6253 Pa; S_2 = S_1 / 2 = -149.5012 Pa | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7235:2003 | Pressure loss coefficient is flow invariant (Eq. (14)) | zeta = 0.750000 at 1 m³/s | 0.750000 at 2 m³/s | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7235:2003 | Averaged pressure loss coefficient (Eq. (18)) | 2,5 - 0,4 = 2,100000 | 2.1 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7235:2003 | Upstream straight length (6.5.2.2.1) | S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m | S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

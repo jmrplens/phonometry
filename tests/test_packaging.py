@@ -162,14 +162,18 @@ def test_pinned_pypi_links_resolve_in_this_checkout() -> None:
     )
 
 
-def _tracked(paths: list[str]) -> set[str]:
-    """The subset of *paths* git has under version control.
+def _tracked(paths: list[str], root: pathlib.Path = _ROOT) -> set[str]:
+    """The subset of *paths* git has under version control, inside *root*.
 
     One call for the whole list: ``git ls-files`` echoes back only what it
-    tracks, so what it leaves out is the answer.
+    tracks, so what it leaves out is the answer. It reads the index, which
+    is what the next commit will carry, and the release commit is made and
+    tagged in one step, so the index and that commit are the same thing
+    where this runs. *root* is a parameter so the predicate can be asked
+    about a repository built for the purpose.
     """
     listed = subprocess.run(  # noqa: S603 - fixed argv, paths from our own page
-        ["git", "-C", str(_ROOT), "ls-files", "-z", "--", *paths],  # noqa: S607
+        ["git", "-C", str(root), "ls-files", "-z", "--", *paths],  # noqa: S607
         capture_output=True,
         text=True,
         check=True,
@@ -177,17 +181,37 @@ def _tracked(paths: list[str]) -> set[str]:
     return set(listed.split("\0")) - {""}
 
 
-def test_tracked_reports_what_git_does_not_carry() -> None:
-    """The predicate above answers both ways, or it proves nothing.
+def _git(root: pathlib.Path, *args: str) -> None:
+    """Run one git command in *root*, for building a fixture repository."""
+    subprocess.run(  # noqa: S603 - fixed argv, arguments from this file
+        ["git", "-C", str(root), *args],  # noqa: S607
+        capture_output=True,
+        text=True,
+        check=True,
+    )
 
-    A check that can only say yes would pass on a page full of dead links,
-    so it is asked about a path that is not in the repository and about one
-    that is.
+
+def test_tracked_reports_a_file_that_is_there_and_untracked(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The predicate answers both ways, or it proves nothing.
+
+    The failure this guards against is not a missing file, it is a file that
+    is *there* and absent from the commit anyway, so that is what it is
+    asked about: a repository with one committed page and one generated
+    artefact beside it that nobody added. `exists()` cannot tell them apart
+    and this must.
     """
-    if not (_ROOT / ".git").exists():
-        pytest.skip("not a git checkout, so there is nothing to ask git about")
-    assert _tracked(["docs/a-path-no-release-will-ever-carry.md"]) == set()
-    assert _tracked(["README.md"]) == {"README.md"}
+    _git(tmp_path, "init", "--quiet")
+    _git(tmp_path, "config", "user.email", "packaging@example.invalid")
+    _git(tmp_path, "config", "user.name", "packaging test")
+    (tmp_path / "README.md").write_text("committed\n", encoding="utf-8")
+    _git(tmp_path, "add", "README.md")
+    _git(tmp_path, "commit", "--quiet", "-m", "initial")
+    (tmp_path / "generated.svg").write_text("<svg/>\n", encoding="utf-8")
+    assert (tmp_path / "generated.svg").exists()
+    assert _tracked(["README.md", "generated.svg"], tmp_path) == {"README.md"}
+    assert _tracked(["never-written.svg"], tmp_path) == set()
 
 
 def test_pinned_pypi_links_are_tracked_by_git() -> None:

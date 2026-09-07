@@ -420,6 +420,14 @@ livelier vena contracta, but the eighth-power root makes it a slow
 correction: ten times the inlet pressure moves the threshold by a
 quarter.
 
+Below 6 × 10⁵ Pa the correction works the other way and raises the
+threshold, and with an $x_{Fz}$ near the 0,90 ceiling of Equation
+(3a) it can carry it to or past 1. That pair is outside the method: a
+threshold of 1 is the flashing point, so it is not a ratio at which
+cavitation could be detected, and Equations (9) and (13) divide by
+$1 - x_{Fzp1}$. It is rejected here rather than several steps
+later.
+
 **Parameters**
 
 | Name | Description |
@@ -433,7 +441,7 @@ quarter.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a value is not positive and finite, or the threshold is at or above 1, where the method has already stopped. |
+| ValueError | If a value is not positive and finite, if $x_{Fz}$ is at or above 1, or if the correction to this inlet pressure carries the threshold to or above 1. |
 
 ## differential_pressure_ratio
 

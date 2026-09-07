@@ -1086,6 +1086,25 @@ class TestGuards:
         with pytest.raises(ValueError, match="not a percentage"):
             hydro.corrected_incipient_ratio(bad, 1.0e6)
 
+    def test_a_low_inlet_pressure_can_lift_the_threshold_past_one(self) -> None:
+        # Equation (3c) raises x_Fz below 6 x 10^5 Pa. At 1 x 10^5 Pa the
+        # factor is 6^0,125 = 1,25, so the 0,90 ceiling of Equation (3a) is
+        # carried to 1,13, which is at or past flashing and cannot be a ratio
+        # at which cavitation is detected.
+        with pytest.raises(ValueError, match="past flashing"):
+            hydro.corrected_incipient_ratio(0.9, 1.0e5)
+
+    def test_the_chain_refuses_that_pair_by_name(self) -> None:
+        # Before the guard the pair reached Equation (12) and was rejected
+        # there under the name of an argument the caller never passed.
+        stream = hydro.LiquidStream(
+            **{**LIQUID, "inlet_pressure": 1.0e5},
+            mass_flow=30.0,
+            outlet_pressure=0.6e5,
+        )
+        with pytest.raises(ValueError, match="x_Fzp1"):
+            hydro.valve_hydrodynamic_noise(stream, _valve(0.9), _pipe())
+
     def test_the_cavitating_peak_refuses_one_too(self) -> None:
         with pytest.raises(ValueError, match="not a percentage"):
             hydro.cavitation_peak_frequency(500.0, 0.5, 1.5)

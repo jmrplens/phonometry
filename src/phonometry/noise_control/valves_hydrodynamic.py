@@ -442,18 +442,35 @@ def corrected_incipient_ratio(incipient_ratio: float, inlet_pressure: float) -> 
     correction: ten times the inlet pressure moves the threshold by a
     quarter.
 
+    Below 6 × 10⁵ Pa the correction works the other way and raises the
+    threshold, and with an :math:`x_{Fz}` near the 0,90 ceiling of Equation
+    (3a) it can carry it to or past 1. That pair is outside the method: a
+    threshold of 1 is the flashing point, so it is not a ratio at which
+    cavitation could be detected, and Equations (9) and (13) divide by
+    :math:`1 - x_{Fzp1}`. It is rejected here rather than several steps
+    later.
+
     :param incipient_ratio: :math:`x_{Fz}` at 6 × 10⁵ Pa, measured or from
         :func:`incipient_cavitation_ratio`.
     :param inlet_pressure: :math:`p_1`, absolute, in Pa.
     :return: :math:`x_{Fzp1}`, dimensionless.
-    :raises ValueError: If a value is not positive and finite, or the
-        threshold is at or above 1, where the method has already stopped.
+    :raises ValueError: If a value is not positive and finite, if
+        :math:`x_{Fz}` is at or above 1, or if the correction to this inlet
+        pressure carries the threshold to or above 1.
     """
     ratio = _require_threshold(incipient_ratio, "incipient_ratio")
     p1 = require_positive(inlet_pressure, "inlet_pressure")
-    return float(
-        ratio * (REFERENCE_INLET_PRESSURE_PA / p1) ** _INLET_CORRECTION_EXPONENT
-    )
+    corrected = ratio * (REFERENCE_INLET_PRESSURE_PA / p1) ** _INLET_CORRECTION_EXPONENT
+    if corrected >= _FLASHING_RATIO:
+        msg = (
+            "Equation (3c) raises the threshold below 6 x 10^5 Pa, and here "
+            f"it carries x_Fz = {incipient_ratio!r} to x_Fzp1 = "
+            f"{corrected:.3f} at p_1 = {inlet_pressure!r} Pa, which is at or "
+            "past flashing and so is not a ratio at which cavitation can be "
+            "detected. Check the inlet pressure is absolute and in Pa."
+        )
+        raise ValueError(msg)
+    return float(corrected)
 
 
 def vena_contracta_velocity(

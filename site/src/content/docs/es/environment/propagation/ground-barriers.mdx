@@ -577,13 +577,13 @@ y doce decibelios menos en cada extremo.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/road_device_ratings.svg"
-  alt="Tres paneles sobre las dieciocho bandas de tercio de octava de la EN 1793-3. A la izquierda, el espectro normalizado de ruido de tráfico en barras, de menos veinte decibelios en 100 Hz hasta un máximo de menos ocho decibelios en 1 kHz y de vuelta a menos dieciocho en 5 kHz, con una anotación que dice que el pico manda en el índice. En el centro, el coeficiente de absorción de dos dispositivos: un casete absorbente que sube de 0,15 a 0,98 alrededor de 400 Hz y baja hasta 0,70, con un DL alfa de 8 decibelios en la categoría A3, y un panel de hormigón plano en 0,05 con 0 decibelios en la categoría A1. A la derecha, el índice de reducción sonora de dos dispositivos: un panel de hormigón que sube de 30 a 53 decibelios con un DL R de 42 decibelios en la categoría B4, y un casete metálico que sube de 21 a 34 decibelios con 29 decibelios en la categoría B3."
+  alt="Tres paneles sobre las dieciocho bandas de tercio de octava de la EN 1793-3. A la izquierda, el espectro normalizado de ruido de tráfico de la EN 1793-3 en barras, de menos veinte decibelios en 100 Hz hasta un máximo de menos ocho decibelios en 1 kHz y de vuelta a menos dieciocho en 5 kHz, con una anotación que dice que el pico manda en el índice, y sobre ellas el espectro normalizado de ruido ferroviario de la EN 16272-3-1 como línea con marcadores, más bajo en 100 Hz y plano de 1,25 a 2,5 kHz donde el de carretera ya está cayendo. En el centro, el coeficiente de absorción de dos dispositivos: un casete absorbente que sube de 0,15 a 0,98 alrededor de 400 Hz y baja hasta 0,70, con un DL alfa de 8 decibelios en la categoría A3, y un panel de hormigón plano en 0,05 con 0 decibelios en la categoría A1. A la derecha, el índice de reducción sonora de dos dispositivos: un panel de hormigón que sube de 30 a 53 decibelios con un DL R de 42 decibelios en la categoría B4, y un casete metálico que sube de 21 a 34 decibelios con 29 decibelios en la categoría B3."
   width="100%"
 />
 
-*La ponderación de la izquierda lo decide todo: a un dispositivo se le juzga
-por lo que hace alrededor de 1 kHz, y lo que hace en 100 Hz o en 5 kHz apenas
-cuenta.*
+*La ponderación de la izquierda lo decide todo, y hay dos: a un dispositivo de
+carretera se le juzga por lo que hace alrededor de 1 kHz, y a uno de ferrocarril
+por lo que hace entre 1,25 y 2,5 kHz.*
 
 La **EN 1793-1** valora la absorción como la energía que el dispositivo *no*
 devuelve:
@@ -639,6 +639,40 @@ pared; un casete absorbente que mantiene baja la reflexión puede ser la peor.
 Cuál de los dos importa es una pregunta sobre el emplazamiento y no sobre el
 producto: la absorción para una carretera en trinchera o entre pantallas
 paralelas, el aislamiento para lo que haya justo detrás.
+
+### Los mismos dos números junto a una vía
+
+Una pantalla junto a una vía se valora igual y contra otro ruido. La
+**EN 16272-3-1:2012** imprime el espectro normalizado de ruido ferroviario
+sobre las mismas dieciocho bandas, y sus capítulos 5 y 6 son las dos fórmulas
+de arriba con esa tabla en los pesos. El ruido de rodadura está más arriba que
+el de una carretera: el espectro ferroviario es plano dentro de un decibelio
+de 1,25 kHz a 2,5 kHz, donde el de carretera ya ha empezado a caer, así que un
+absorbente que mejora con la frecuencia vale más junto a una vía que junto a
+una carretera.
+
+```python
+from phonometry import environment
+
+# Un absorbente poroso grueso, que sigue mejorando donde más suena la rodadura.
+absorption = [0.10, 0.15, 0.22, 0.32, 0.45, 0.60, 0.72, 0.82, 0.88,
+              0.92, 0.95, 0.96, 0.96, 0.95, 0.94, 0.93, 0.92, 0.90]
+
+road = environment.sound_absorption_rating(absorption)
+rail = environment.sound_absorption_rating(absorption, spectrum="railway")
+print(road.reported, rail.reported)          # 8 10
+print(road.category, rail.category)          # A3 None
+```
+
+Las partes ferroviarias no imprimen escala de categorías: sus anexos son notas
+de orientación sobre el uso del índice, así que un índice ferroviario es el
+número y nada más, y el resultado lo dice llevando `None` donde un dispositivo
+de carretera lleva su letra. El capítulo 6 trae además un desliz que conviene
+conocer, porque cambia lo que uno se pone a buscar: dice que los índices de
+reducción sonora se ponderan con «the normalised traffic noise spectrum
+defined in Table 1», cuando la tabla 1 de esa norma es el espectro ferroviario
+y la lista de símbolos bajo la fórmula dice «railway». Es la redacción de
+carretera de la EN 1793-2, que se quedó ahí al copiar el capítulo.
 
 ## Relación con ISO 9613-2
 

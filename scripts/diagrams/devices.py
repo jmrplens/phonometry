@@ -3139,7 +3139,9 @@ def _d_workstation_microphone(s: SVG, th: Theme) -> None:
     _cell(s, th, x0, top1, w1, h1, "9.3", "Standing, nobody there")
     gy = top1 + 160.0
     s.ground(gy, x0 + 18, x0 + w1 - 18, hatch=20)
-    gcx = x0 + w1 / 2 + 26.0
+    # Left of centre so the label beside the floor point has the width its
+    # longest translation needs before the cell border cuts it.
+    gcx = x0 + w1 / 2 - 6.0
     s.circle(gcx, gy, 3.6, th.secondary)
     s.text(gcx + 12, gy - 12, "reference point", 11, th.muted, anchor="start")
     s.mic(gcx, top1 + 62.0, gy, scale=0.8)

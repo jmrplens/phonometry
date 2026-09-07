@@ -375,6 +375,11 @@ _ES_EXACT = {
     "intended\n$a^{*}_\\mathrm{wP}$": "pretendida\n$a^{*}_\\mathrm{wP}$",
     "measured\n$a_\\mathrm{wS}$": "medida\n$a_\\mathrm{wS}$",
     "corrected\n$a^{*}_\\mathrm{wS}$": "corregida\n$a^{*}_\\mathrm{wS}$",
+    # The reading beside the arrow. An exact entry rather than a pattern: the
+    # value is fixed, and every _ES_PATTERNS entry is part of the fingerprint
+    # the clips are sealed with, so a short one restamps clips this figure
+    # never touched.
+    "SEAT = 0.71": "SEAT = 0,71",
     "limit of zone A ($Z$ = 1)": "límite de la zona A ($Z$ = 1)",
     "limit of zone B ($Z$ = 2.56)": "límite de la zona B ($Z$ = 2,56)",
     "limit of zone C ($Z$ = 6.4)": "límite de la zona C ($Z$ = 6,4)",
@@ -4051,12 +4056,6 @@ _ES_EXACT = {
 
 
 _ES_PATTERNS = [
-    # seat_vibration_test: the SEAT factor written beside the arrow, whose
-    # mathematics keeps it out of the blanket decimal-comma pass.
-    (
-        r"^SEAT = (\d+)\.(\d+)$",
-        r"SEAT = \1,\2",
-    ),
     # road_device_ratings: the legends carry the computed rating and category.
     (
         r"^absorptive cassette: \$DL_\\alpha\$ = (\d+) dB \((A\d)\)$",

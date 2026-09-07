@@ -333,6 +333,60 @@ threshold shift of ISO 1999, which adds a noise component on top of this age
 component, is the subject of the
 [noise-induced hearing loss](/phonometry/perception/hearing/noise-induced-hearing-loss/) guide.
 
+## 3. The audiometric zero of an earphone (ISO 389-1)
+
+The section above ends by saying what 0 dB HL on a clinical audiometer *is*,
+and not what it is worth. **ISO 389-1:1998** prints that: the reference
+equivalent threshold sound pressure level, the level the earphone has to
+produce **in the coupler** for a hearing level of zero. It is a property of
+the earphone and of the coupler together, which is why one standard carries
+two tables and neither of them is a curve of the ear.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometric_zero_earphones.svg"
+  alt="Two panels. Left: the ISO 389-1 reference levels of three supra-aural earphone cases against frequency on a logarithmic axis from 125 Hz to 8 kHz, the Beyer DT 48 and the Telephonics TDH 39 on an IEC 60303 coupler and any other supra-aural earphone on an IEC 60318 artificial ear. All three start above 45 decibels at 125 Hz, fall to single digits between 800 Hz and 2 kHz and rise again above 4 kHz, with the artificial-ear curve peaking at 21 decibels at 6.3 kHz. Right: the same TDH 39 curve against the ISO 389-7 free-field reference threshold at the eleven frequencies they share, with the area between them shaded and labelled as the two zeros not being the same: they are twenty-three decibels apart at 125 Hz and meet again at 8 kHz."
+  width="100%"
+/>
+
+*The two named models are calibrated on a coupler and everything else on an
+artificial ear, so the three columns are not three measurements of the same
+thing. On the right, the same audiogram against the two zeros a laboratory
+can quote it from: twenty-three decibels apart at 125 Hz.*
+
+Table 1 covers the two earphones the standard names, the Beyer DT 48 with a
+flat cushion and the Telephonics TDH 39 with the MX 41/AR (or model 51)
+cushion, both on an acoustic coupler to IEC 60303. Table 2 covers any other
+supra-aural earphone meeting the four requirements of Clause 4.3, on an
+artificial ear to IEC 60318, and Clause 4.3 excludes the two models of 4.2
+from it explicitly. Both tables are printed at twenty-three frequencies,
+the audiometric ones plus the intermediate steps an audiometer may offer,
+and both round to the nearest half decibel.
+
+```python
+from phonometry import hearing
+
+bands = [500.0, 1000.0, 2000.0, 4000.0]
+print(hearing.earphone_reference_level("TDH 39", bands))
+# [11.5  7.   9.   9.5]
+
+# An audiogram is measured from that zero, so the level in the coupler is
+# the audiogram plus the reference: nothing else is involved.
+audiogram = [15.0, 20.0, 35.0, 55.0]   # dB HL
+print(hearing.hearing_level_to_coupler_spl(audiogram, "TDH 39", bands))
+# [26.5 27.  44.  64.5]
+
+print(hearing.EARPHONE_COUPLERS["TDH 39"])   # IEC 60303 acoustic coupler
+```
+
+Two traps come with this table. The first is the one the previous section
+names: these levels and the free-field levels of ISO 389-7 are different
+numbers for different tests, and the difference is largest exactly where a
+survey is most tempted to convert, twenty-three decibels at 125 Hz. The
+second is the earphone itself. An audiogram is only as good as the model it
+was measured on, and asking for a model the standard does not print raises
+rather than guessing: an HDA 200 or an insert phone belongs to ISO 389-5,
+-8 or -2, not here.
+
 ## What this guide covers
 
 <Scope>

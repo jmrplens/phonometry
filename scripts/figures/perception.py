@@ -4065,3 +4065,74 @@ def generate_hearing_protector_methods(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "hearing_protector_methods.png")
     plt.close()
+
+
+def generate_audiometric_zero_earphones(output_dir: str) -> None:
+    """ISO 389-1 earphone reference levels, against the sound-field zero."""
+    print("Generating audiometric_zero_earphones.png...")
+    from phonometry import hearing
+
+    freqs = hearing.RETSPL_FREQUENCIES_HZ
+    _fig, (ax_ref, ax_gap) = plt.subplots(1, 2, figsize=(12.8, 5.6))
+
+    styles = (
+        ("DT 48", "o-", COLOR_PRIMARY, "Beyer DT 48 (IEC 60303 coupler)"),
+        ("TDH 39", "s-", COLOR_SECONDARY, "Telephonics TDH 39 (same coupler)"),
+        (
+            "other supra-aural",
+            "^--",
+            COLOR_TERTIARY,
+            "any other supra-aural (IEC 60318 ear)",
+        ),
+    )
+    for earphone, marker, colour, label in styles:
+        ax_ref.plot(
+            freqs,
+            hearing.earphone_reference_level(earphone),
+            marker,
+            color=colour,
+            markersize=5,
+            label=label,
+        )
+    ax_ref.set_xscale("log")
+    ax_ref.set_xticks([125, 250, 500, 1000, 2000, 4000, 8000])
+    ax_ref.set_xticklabels(["125", "250", "500", "1000", "2000", "4000", "8000"])
+    ax_ref.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax_ref.set_xlabel("Test frequency [Hz]")
+    ax_ref.set_ylabel("Reference level (RETSPL) [dB]")
+    ax_ref.set_title("ISO 389-1 — what 0 dB HL is in the coupler", pad=10)
+    ax_ref.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_ref.set_axisbelow(True)
+    ax_ref.legend(loc="upper right", fontsize=9)
+
+    # The sound-field zero of ISO 389-7 at the eleven frequencies it shares
+    # with the earphone table: the same audiogram, two different zeros.
+    shared = [f for f in hearing.AUDIOMETRIC_FREQUENCIES if f in set(freqs)]
+    coupler = hearing.earphone_reference_level("TDH 39", shared)
+    field = hearing.reference_threshold("free-field", shared)
+    ax_gap.plot(shared, coupler, "s-", color=COLOR_SECONDARY, label="TDH 39, coupler")
+    ax_gap.plot(
+        shared, field, "o-", color=COLOR_PRIMARY, label="ISO 389-7, free field"
+    )
+    ax_gap.fill_between(
+        shared,
+        field,
+        coupler,
+        color=theme_fill(COLOR_SECONDARY, ax_gap),
+        zorder=0,
+        label="the two zeros are not the same",
+    )
+    ax_gap.set_xscale("log")
+    ax_gap.set_xticks(list(shared))
+    ax_gap.set_xticklabels([f"{f:g}" for f in shared], rotation=45, ha="right")
+    ax_gap.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax_gap.set_xlabel("Audiometric frequency [Hz]")
+    ax_gap.set_ylabel("Reference level [dB]")
+    ax_gap.set_title("A headphone zero is not a loudspeaker zero", pad=10)
+    ax_gap.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_gap.set_axisbelow(True)
+    ax_gap.legend(loc="upper center", fontsize=9)
+
+    plt.tight_layout()
+    save_figure(output_dir, "audiometric_zero_earphones.png")
+    plt.close()

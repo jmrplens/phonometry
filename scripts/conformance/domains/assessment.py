@@ -26,7 +26,7 @@ from scipy import signal as sg
 
 import phonometry as ph
 
-from ..registry import Outcome, numeric, register
+from ..registry import Outcome, numeric, record, register
 
 if TYPE_CHECKING:
     from phonometry.environment import ImpulseOnset
@@ -133,6 +133,54 @@ def _chk_hearing_spread() -> Outcome:
 def _chk_hearing_reference() -> Outcome:
     value = float(ph.hearing.reference_threshold("free-field")[4])
     return numeric(ref.ISO389_7_REF_FREE_1KHZ, value, 1e-9, unit="dB", places=3)
+
+
+@register(
+    _HEAR,
+    "ISO 389-1:1998 Table 1 (coupler, IEC 60303)",
+    "RETSPL of the two named earphones at 1 kHz, and the TDH 39 at 125 Hz",
+)
+def _chk_earphone_coupler() -> Outcome:
+    printed = {
+        "DT 48, 1 kHz": ref.ISO389_1_DT48_1KHZ,
+        "TDH 39, 1 kHz": ref.ISO389_1_TDH39_1KHZ,
+        "TDH 39, 125 Hz": ref.ISO389_1_TDH39_125HZ,
+    }
+    computed = {
+        "DT 48, 1 kHz": float(
+            ph.hearing.earphone_reference_level("DT 48", [1000.0])[0]
+        ),
+        "TDH 39, 1 kHz": float(
+            ph.hearing.earphone_reference_level("TDH 39", [1000.0])[0]
+        ),
+        "TDH 39, 125 Hz": float(
+            ph.hearing.earphone_reference_level("TDH 39", [125.0])[0]
+        ),
+    }
+    return record(printed, computed, unit="dB")
+
+
+@register(
+    _HEAR,
+    "ISO 389-1:1998 Table 2 (artificial ear, IEC 60318)",
+    "RETSPL of any other supra-aural earphone at 6,3 kHz",
+)
+def _chk_earphone_artificial_ear() -> Outcome:
+    value = float(ph.hearing.earphone_reference_level("other supra-aural", [6300.0])[0])
+    return numeric(ref.ISO389_1_OTHER_6300HZ, value, 1e-9, unit="dB", places=3)
+
+
+@register(
+    _HEAR,
+    "ISO 389-1:1998 Clause 3.7 (hearing level against the audiometric zero)",
+    "40 dB HL at 4 kHz on a TDH 39 is the reference level plus 40 dB",
+)
+def _chk_hearing_level_definition() -> Outcome:
+    reference = float(ph.hearing.earphone_reference_level("TDH 39", [4000.0])[0])
+    value = float(
+        ph.hearing.hearing_level_to_coupler_spl([40.0], "TDH 39", [4000.0])[0]
+    )
+    return numeric(reference + 40.0, value, 1e-9, unit="dB", places=3)
 
 
 _GUM = "Measurement uncertainty (GUM / Supplement 1)"

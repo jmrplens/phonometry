@@ -27,6 +27,7 @@ import Scope from '../../../../../components/Scope.astro';
 import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
+import Video from '../../../../../components/Video.astro';
 
 Todo lo que calcula un modelo de silenciador sale de la geometría. La cifra
 que publica un fabricante, no. Es una **pérdida por inserción medida por
@@ -46,6 +47,12 @@ silenciadores y nada más, sin flujo y sin nada de flujo en la respuesta, hasta
 una velocidad de diseño de 15 m/s. Una medida que necesite flujo, o un objeto
 que no sea un silenciador, queda fuera de la ISO 11691 y pertenece a la
 ISO 7235.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/silencer_measurement.svg" alt="Tres paneles. Izquierda: dos grupos de barras, uno para un silenciador plano a lo largo de una octava y otro cuyo peor tercio fuga, cada uno con las tres pérdidas por inserción de tercio de octava como barras claras, la octava que da la Ecuación (2) como barra rellena y la media simple de los decibelios como línea discontinua; en el grupo plano las dos coinciden y en el que fuga la octava queda doce decibelios por debajo de la media. Centro: la pérdida por transmisión en la boca de un conducto de 350 mm frente a la frecuencia en eje logarítmico, dibujada para los tres ángulos sólidos distintos de la Tabla B.1 y para la forma cerrada rival de Long, todas cayendo desde unos quince decibelios a 50 Hz hasta nada por encima de 2 kHz, con la curva de campo libre la más alta de las tres. Derecha: las desviaciones típicas de reproducibilidad de ambas normas como funciones escalón de la frecuencia, la columna de pérdida por inserción bajando a un decibelio en la mitad del intervalo, la de pérdida por transmisión plana en tres, la de intensidad sonora bajando a uno y parando en 5 kHz, y el método de clase 3 escalonando de dos a tres" width="100%" />
+
+*Las tres cosas que lleva un informe de medida más allá de las cifras mismas:
+cómo se plegaron sus octavas, qué retenía la boca de su conducto, y hasta
+dónde se puede confiar en todo ello.*
 
 ## 1. Una resta, dos numeraciones
 
@@ -269,6 +276,11 @@ d_td = noise_control.open_end_transmission_loss(bands, area)
 print(d_td.round(2))              # [11.23  6.14  2.5   0.77  0.21  0.05] dB
 ```
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_end_solid_angles.svg" alt="Cinco celdas en fila, una por cada configuración de montaje de la Tabla B.1 de la ISO 7235. En cada una, un pequeño terminal cuadrado se sitúa en el origen de un sector sombreado que es el ángulo sólido leído en sección: un semicírculo contra una pared para A, un cuarto de círculo en la esquina de una pared y un suelo para B, un círculo completo exento para C, un semicírculo sobre un suelo para D, y otra vez un círculo completo para E. Debajo de cada una, el ángulo sólido: dos pi, pi, cuatro pi, dos pi y cuatro pi. Bajo la fila, la fórmula escrita tal como la imprime la ISO 7235 y tal como la imprime la ISO 5135, una nota de que las dos son una sola fórmula con los mismos cinco valores, y la conclusión de que cuanto mayor es el ángulo sólido más retiene la boca" width="100%" />
+
+*El ángulo sólido es el único término de la Ecuación (B.3) que un laboratorio
+elige en vez de medir, y las cinco opciones son las mismas en ambas normas.*
+
 El ángulo sólido es la Tabla B.1, y esos mismos cinco valores son la Tabla 1
 de la ISO 5135. Funciona al revés de lo que uno esperaría: $\Omega$ está en el
 numerador, así que un conducto que acaba en mitad de la sala retiene **más**
@@ -285,6 +297,23 @@ print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
 ```
 
 Tres decibelios más a 63 Hz, y el coeficiente de reflexión sube con ellos.
+
+<Video
+  name="anim_fdtd_open_end"
+  width={2400}
+  height={1350}
+  title="La boca de un conducto en una simulación FDTD 2D"
+  description="Un conducto de 0,20 m enrasado en una pantalla rígida, radiando al semiespacio que hay más allá, excitado a 100 Hz y a 800 Hz uno sobre otro. A 100 Hz el conducto se llena de onda estacionaria y sólo escapa un campo débil al otro lado de la pantalla; la envolvente que hay al lado oscila entre un máximo y un mínimo que dan un coeficiente de reflexión de 0,71. A 800 Hz el conducto lleva una onda casi viajera y de la boca salen frentes circulares fuertes hacia el semiespacio, con una envolvente que apenas ondula y da 0,19."
+/>
+
+*Ambas portadoras están por debajo de la frecuencia de corte de 857 Hz de un
+conducto de ese ancho, así que el campo dentro de él es la onda plana que
+supone toda la aritmética de conductos de la ISO 7235. Los coeficientes de
+reflexión leídos de la onda estacionaria son los de la geometría simulada, y
+no los de la Ecuación (B.4): esa forma cerrada es una aproximación de pistón
+para una boca circular, y esto es una rendija en una pantalla. Lo que
+comparten es el mecanismo, y es el mecanismo el que decide si un nivel medido
+en una sala es el nivel del conducto que hay detrás.*
 
 La Ecuación (B.4) dice lo mismo del revés, como coeficiente de reflexión de
 presión, y ambas cierran exactamente sobre la energía:
@@ -467,6 +496,87 @@ print(round(noise_control.upstream_straight_length(0.0962), 2))   # 2.0 m
 print(round(noise_control.upstream_straight_length(0.5), 2))      # 3.99 m
 ```
 
+## 11. La tercera norma, y la fórmula que comparte
+
+La ISO 5135:1999 mide otra cosa distinta: la potencia sonora que radia un
+dispositivo terminal de aire, una unidad terminal, una compuerta o una
+válvula, determinada en sala reverberante conforme a la ISO 3741. Lo que
+necesita un proyectista no es eso sino lo que el aparato mete en el conducto
+que tiene detrás, y la Ecuación (1) es el paso entre ambas:
+
+$$
+L_{W\mathrm{duct}} = L_W + \Delta L_\mathrm{r}
+$$
+
+La corrección $\Delta L_\mathrm{r}$ es la Ecuación (2) de la ISO 5135, y
+merece la pena escribir las dos impresiones una al lado de la otra:
+
+$$
+\Delta L_\mathrm{r} = 10\lg\left[1 +
+   \left(\frac{c}{4\pi f}\right)^{2}\frac{\Omega}{S}\right]
+\qquad
+D_\mathrm{td} = 10\lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f\sqrt{S}}{c}\right)^{2}}\right]
+$$
+
+Desarrolla cualquiera de las dos y ambas quedan en
+$10\lg[1 + \Omega c^2 / (16\pi^2 f^2 S)]$. Son una sola fórmula, sus dos
+tablas de ángulo sólido coinciden entrada por entrada, y
+`open_end_transmission_loss` es las dos. Por eso aquí no aparece nada nuevo
+para la corrección en sí:
+
+```python
+d_lr = noise_control.open_end_transmission_loss(bands, area)
+lw_room = np.array([58.0, 60.0, 61.0, 59.0, 55.0, 50.0])
+print(noise_control.duct_sound_power_level(lw_room, d_lr).round(2))
+#                                 # [69.23 66.14 63.5  59.77 55.21 50.05] dB
+```
+
+Un aparato medido en sala queda infravalorado en el conducto en once
+decibelios abajo del intervalo y en nada arriba. La NOTA a la Tabla 1 ofrece
+una salida a la corrección en vez de una segunda fórmula para ella: se monta
+un elemento de transmisión conforme a la ISO 7235 y no se aplica corrección
+alguna.
+
+## 12. Leer un nivel a un régimen que nadie midió
+
+Un aparato no se ensaya en el único punto de servicio al que lo va a usar un
+proyectista. El 5.5.2 de la ISO 5135 ajusta por mínimos cuadrados una recta a
+través de los niveles frente a $\lg q_V$ cuando los ensayos se hicieron a
+coeficiente de pérdida de presión constante, o frente a
+$\lg \Delta p_\mathrm{t}$ cuando se hicieron a caudal constante. El mismo
+ajuste sirve para los niveles de banda y para el ponderado A:
+
+```python
+duty = np.array([0.05, 0.1, 0.2, 0.4, 0.8])          # m3/s
+levels = np.array([38.0, 44.5, 50.0, 56.5, 62.0])    # dB(A)
+
+line = noise_control.fit_operating_line(duty, levels)
+print(round(line.slope, 2))               # 19.93 dB por década
+print(round(line.maximum_deviation, 2))   # 0.3 dB
+print(round(line.level_at(0.3), 1))       # 53.7 dB(A)
+```
+
+Dos reglas mantienen eso honesto, y la biblioteca avisa de las dos en vez de
+negarse: un ajuste que no sea una recta sigue siendo un ajuste, y un nivel
+leído fuera del intervalo sigue siendo un número, y lo que pide la norma es
+que el informe sea honesto sobre ellos. Los puntos medidos tienen que caer a
+menos de 3 dB de la recta, porque más allá de eso los niveles no son una recta
+en esa variable y leer la recta no significa nada. Y la recta se puede
+prolongar hasta la mitad del régimen más pequeño medido y hasta el doble del
+mayor, y no más, que para estos cinco puntos son de 0,025 a 1,6 m³/s.
+Cualquiera de las dos fuera de rango levanta un
+`SilencerMeasurementWarning`:
+
+```python
+print(line.valid_range)           # (0.025, 1.6)
+```
+
+El 8 k) cierra el círculo: un informe da los niveles totalmente corregidos al
+medio decibelio más próximo y tiene que declarar cuáles de ellos son
+extrapolados y no medidos directamente. El `.plot()` dibuja esa distinción,
+sombreando los dos extremos del intervalo que son extrapolación.
+
 ## Qué cubre esta guía
 
 <Scope>
@@ -491,7 +601,12 @@ Ecuaciones (4) y (5) en las que escalona la exigencia del filtro modal del
 velocidad de la (13), (16), (19) y (20), la presión total de la (11), la
 corrección por cambio de área de la (12), el coeficiente de pérdida de presión
 de la (14) y la (17), el promedio por sustitución de la (18), y la longitud de
-asentamiento del 6.5.2.2.1.
+asentamiento del 6.5.2.2.1. De la ISO 5135: el nivel de potencia sonora en el
+conducto de la Ecuación (1); la Ecuación (2), que es la (B.3) de la ISO 7235
+escrita otra vez y la sirve la misma función; y la recta de servicio por
+mínimos cuadrados del 5.5.2 mediante `fit_operating_line`, con el límite de
+3 dB del ajuste, el intervalo de la mitad al doble en que se puede leer, y un
+`.plot()` que sombrea la parte de ese intervalo que es extrapolación.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -501,9 +616,13 @@ tolerancia dimensional del conducto de sustitución y la pérdida por inserción
 límite se describen pero no se calculan, y a la Ecuación (7) se le da la
 corrección de sala en vez de deducirla. La medida de caudal en sí no se
 modela: los dispositivos de presión diferencial de la ISO 5167-1, el recorrido
-de velocidades y el anillo piezométrico son procedimiento y no aritmética, y
-la extrapolación de un coeficiente medido fuera del intervalo en que se midió
-se deja al lector. Tampoco está la ISO 11820, que mide un
+de velocidades y el anillo piezométrico son procedimiento y no aritmética.
+Aquí tampoco se construye ni se cualifica ninguna sala reverberante: la
+determinación de la ISO 3741 a la que ambas normas remiten su lado receptor
+es página aparte, y las correcciones por ruido de fondo, la comprobación de
+componentes tonales y la cualificación de la sala le pertenecen. La
+ISO 11820, que mide un silenciador in situ donde el truco de la sustitución
+no suele ser posible, no está implementada en absoluto. Tampoco está la ISO 11820, que mide un
 silenciador in situ, donde el truco de la sustitución no suele ser posible.
 </ScopeClaim>
 </Scope>
@@ -520,5 +639,8 @@ silenciador in situ, donde el truco de la sustitución no suele ser posible.
 - [Ruido de climatización a la alemana (VDI 2081)](/phonometry/es/devices/noise-control/vdi2081-air-systems/):
   la pérdida por inserción de un silenciador de bafles predicha desde la
   geometría, para comparar con lo que mediría un laboratorio.
+- [Control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/):
+  la forma cerrada rival para la reflexión en la boca, y las correcciones de
+  terminal de aire con las que se elige un difusor.
 
 </SeeAlso>

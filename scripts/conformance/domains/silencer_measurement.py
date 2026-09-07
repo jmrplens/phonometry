@@ -558,3 +558,95 @@ def _chk_upstream_length() -> Outcome:
         "S = 0,5 m²": ph.noise_control.upstream_straight_length(0.5),
     }
     return record(expected, computed, unit="m")
+
+
+@register(
+    _ISO7235,
+    "ISO 5135:1999",
+    "End reflection loss is ISO 7235 (B.3) written out (Eq. (2))",
+)
+def _chk_iso5135_end_reflection() -> Outcome:
+    """Two standards, two printings, one formula.
+
+    ISO 5135 Equation (2) reads
+    ``Delta L_r = 10 lg[1 + (c / 4 pi f)^2 (Omega / S)]`` and ISO 7235
+    Equation (B.3) reads ``D_td = 10 lg[1 + Omega / (4 pi f sqrt(S) / c)^2]``.
+    Expanding either gives ``10 lg[1 + Omega c^2 / (16 pi^2 f^2 S)]``, so the
+    end reflection loss of one and the open-end transmission loss of the
+    other are one quantity under two names. The expected side here is the
+    ISO 5135 printing evaluated on its own, over six octave centres and all
+    five configurations of Table 1.
+    """
+    worst = 0.0
+    for angle in ph.noise_control.RADIATION_SOLID_ANGLES.values():
+        iso5135 = 10.0 * np.log10(
+            1.0
+            + (343.0 / (4.0 * math.pi * np.asarray(_BANDS))) ** 2 * (angle / _DUCT_AREA)
+        )
+        iso7235 = ph.noise_control.open_end_transmission_loss(
+            _BANDS, _DUCT_AREA, solid_angle=angle
+        )
+        worst = max(worst, float(np.max(np.abs(iso5135 - iso7235))))
+    return numeric(
+        0.0,
+        worst,
+        1e-12,
+        unit="dB",
+        places=12,
+        expected_label="ISO 5135 (2) = ISO 7235 (B.3) at all 30 pairs",
+        computed_label=f"largest disagreement {worst:.3e} dB",
+    )
+
+
+@register(_ISO7235, "ISO 5135:1999", "Sound power level in the duct (Eq. (1))")
+def _chk_duct_sound_power() -> Outcome:
+    """What the room measured, plus what the duct mouth kept in.
+
+    ``L_Wduct = L_W + Delta L_r``. On the 350 mm duct of the other rows,
+    flush with a wall, that is 11,2 dB at 63 Hz and 0,05 dB at 2 kHz, so an
+    air-terminal device measured in a reverberation room is understated in
+    the duct by eleven decibels at the bottom of the range and by nothing at
+    the top.
+    """
+    room = np.full(len(_BANDS), 60.0)
+    reflection = ph.noise_control.open_end_transmission_loss(_BANDS, _DUCT_AREA)
+    found = ph.noise_control.duct_sound_power_level(room, reflection)
+    expected = {
+        f"{band:.0f} Hz": round(60.0 + float(value), 6)
+        for band, value in zip(_BANDS, reflection, strict=True)
+    }
+    computed = {
+        f"{band:.0f} Hz": round(float(value), 6)
+        for band, value in zip(_BANDS, found, strict=True)
+    }
+    return record(expected, computed, unit="dB")
+
+
+@register(_ISO7235, "ISO 5135:1999", "Least-squares operating line (5.5.2)")
+def _chk_operating_line() -> Outcome:
+    """The fit, on data whose answer is known before it is fitted.
+
+    A device whose level follows a clean twenty decibels per decade of flow
+    rate has to come back with that slope, no deviation from the line at any
+    point, and the level it was built around at the duty it was built around.
+    The row also pins the range 5.5.2 allows the line to be read over, half
+    the smallest duty measured to twice the largest.
+    """
+    duty = np.array([0.05, 0.1, 0.2, 0.4, 0.8])
+    levels = 50.0 + 20.0 * np.log10(duty / 0.2)
+    line = ph.noise_control.fit_operating_line(duty, levels)
+    expected = {
+        "slope [dB/decade]": 20.0,
+        "level at 0,2 m³/s [dB]": 50.0,
+        "worst deviation [dB]": 0.0,
+        "lowest readable duty [m³/s]": 0.025,
+        "highest readable duty [m³/s]": 1.6,
+    }
+    computed = {
+        "slope [dB/decade]": round(line.slope, 6),
+        "level at 0,2 m³/s [dB]": round(line.level_at(0.2), 6),
+        "worst deviation [dB]": round(line.maximum_deviation, 6),
+        "lowest readable duty [m³/s]": round(line.valid_range[0], 6),
+        "highest readable duty [m³/s]": round(line.valid_range[1], 6),
+    }
+    return record(expected, computed)

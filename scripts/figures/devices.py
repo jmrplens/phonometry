@@ -6787,3 +6787,220 @@ def generate_control_valve_noise(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "control_valve_noise.svg")
     plt.close()
+
+
+def generate_silencer_measurement(output_dir: str) -> None:
+    """ISO 7235 and ISO 11691: the octave fold, the mouth, and the spread."""
+    print("Generating silencer_measurement.svg...")
+    from phonometry import noise_control
+
+    _fig, axes = plt.subplots(1, 3, figsize=(16.4, 5.4))
+
+    # -- Left: what ISO 11691 Equation (2) does that an average of decibels
+    # does not. The two cases share their loudest band and differ only in how
+    # much the worst one leaks.
+    ax = axes[0]
+    cases = (
+        ("Flat", (22.0, 24.0, 23.0), COLOR_PRIMARY),
+        ("One band leaks", (30.0, 30.0, 5.0), COLOR_SECONDARY),
+    )
+    width = 0.18
+    for index, (label, thirds, colour) in enumerate(cases):
+        offset = index * 1.05
+        positions = offset + np.arange(3) * width
+        ax.bar(
+            positions,
+            thirds,
+            width=width * 0.9,
+            color=colour,
+            alpha=0.45,
+            edgecolor=colour,
+            linewidth=1.2,
+            label=f"{label}: the three one-third octaves",
+        )
+        octave = float(noise_control.octave_insertion_loss(thirds)[0])
+        decibels = float(np.mean(thirds))
+        ax.bar(
+            offset + 3.35 * width,
+            octave,
+            width=width * 0.9,
+            color=colour,
+            edgecolor=colour,
+            linewidth=1.2,
+        )
+        ax.plot(
+            [offset - 0.4 * width, offset + 3.9 * width],
+            [decibels, decibels],
+            color=COLOR_MUTED,
+            ls="--",
+            lw=1.6,
+        )
+        ax.annotate(
+            f"{octave:.1f} dB",
+            xy=(offset + 3.35 * width, octave),
+            xytext=(0.0, 4.0),
+            textcoords="offset points",
+            ha="center",
+            fontsize=9,
+            color=colour,
+        )
+        ax.annotate(
+            f"{decibels:.1f} dB",
+            xy=(offset + 3.95 * width, decibels),
+            xytext=(3.0, 0.0),
+            textcoords="offset points",
+            ha="left",
+            va="center",
+            fontsize=8,
+            color=COLOR_MUTED,
+        )
+    ax.set_xticks([1.7 * width, 1.05 + 1.7 * width])
+    ax.set_xticklabels([f"{case[0]}\nthree thirds, then the octave" for case in cases])
+    ax.set_xlim(-0.5 * width, 1.05 + 5.2 * width)
+    ax.set_ylim(0.0, 46.0)
+    ax.set_ylabel("Insertion loss [dB]")
+    ax.set_title("The octave is the energy, not the average")
+    ax.grid(axis="y", color=COLOR_GRID, ls="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.plot([], [], color=COLOR_MUTED, ls="--", lw=1.6, label="Mean of the decibels")
+    ax.legend(loc="upper left", fontsize=8.5)
+    ax.annotate(
+        "the filled bar is Equation (2): the band that\nleaks carries the transmitted sound, so the\n"
+        "octave sits 12 dB under the mean of the three",
+        xy=(1.05 + 3.35 * width, 11.0),
+        xytext=(0.62, 32.0),
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "linewidth": 1.1},
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+
+    # -- Middle: the mouth of a 350 mm duct, for the three distinct solid
+    # angles of Table B.1, against the rival closed form the library already
+    # carried.
+    ax2 = axes[1]
+    bands = np.logspace(np.log10(50.0), np.log10(4000.0), 400)
+    area = 0.0962
+    diameter = math.sqrt(4.0 * area / math.pi)
+    for angle, colour, style, label in (
+        (math.pi, COLOR_TERTIARY, ":", "$\\Omega = \\pi$, wall and floor"),
+        (2.0 * math.pi, COLOR_PRIMARY, "-", "$\\Omega = 2\\pi$, flush in a wall"),
+        (4.0 * math.pi, COLOR_SECONDARY, "--", "$\\Omega = 4\\pi$, free in the room"),
+    ):
+        ax2.plot(
+            bands,
+            noise_control.open_end_transmission_loss(bands, area, solid_angle=angle),
+            color=colour,
+            lw=2.4,
+            ls=style,
+            label=label,
+        )
+    ax2.plot(
+        bands,
+        noise_control.end_reflection_loss_closed_form(
+            bands, diameter, termination="flush"
+        ).values,
+        color=COLOR_QUATERNARY,
+        lw=1.8,
+        ls="-.",
+        label="Long's closed form, exponent 1,88",
+    )
+    ax2.set_xscale("log")
+    ax2.set_xlim(50.0, 4000.0)
+    ax2.set_ylim(0.0, 21.0)
+    ax2.set_xlabel(LABEL_FREQ_HZ)
+    ax2.set_ylabel("Open-end transmission loss [dB]")
+    ax2.set_title("What the mouth keeps in")
+    ax2.grid(color=COLOR_GRID, ls="--", alpha=0.5, which="both")
+    ax2.set_axisbelow(True)
+    format_frequency_axis(ax2)
+    ax2.legend(loc="upper right", fontsize=8.5)
+    ax2.annotate(
+        "the solid angle is in the numerator, so an\nunbaffled mouth keeps more in, not less:\n"
+        "a baffle is what makes an opening radiate",
+        xy=(70.0, 15.6),
+        xytext=(230.0, 11.5),
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "linewidth": 1.1},
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+
+    # -- Right: how repeatable any of it is, read off the two printed tables
+    # as the step functions they are.
+    ax3 = axes[2]
+    steps = np.logspace(np.log10(50.0), np.log10(10000.0), 400)
+    for quantity, colour, style, label in (
+        ("insertion_loss", COLOR_PRIMARY, "-", "ISO 7235 Table 7, insertion loss"),
+        (
+            "transmission_loss",
+            COLOR_TERTIARY,
+            ":",
+            "ISO 7235 Table 7, transmission loss",
+        ),
+        ("intensity", COLOR_QUATERNARY, "-.", "ISO 7235 Table 7, sound intensity"),
+    ):
+        inside = steps[steps <= (5000.0 if quantity == "intensity" else 10000.0)]
+        ax3.step(
+            inside,
+            [
+                noise_control.measurement_reproducibility(f, quantity=quantity)
+                for f in inside
+            ],
+            where="post",
+            color=colour,
+            lw=2.2,
+            ls=style,
+            label=label,
+        )
+    ax3.step(
+        steps,
+        [noise_control.survey_reproducibility(f) for f in steps],
+        where="post",
+        color=COLOR_SECONDARY,
+        lw=2.4,
+        ls="--",
+        label="ISO 11691 Table 1, survey method",
+    )
+    ax3.set_xscale("log")
+    ax3.set_xlim(50.0, 10000.0)
+    ax3.set_ylim(0.0, 4.6)
+    ax3.set_xlabel(LABEL_FREQ_HZ)
+    ax3.set_ylabel("Reproducibility $\\sigma_R$ [dB]")
+    ax3.set_title("How repeatable the number is")
+    ax3.grid(color=COLOR_GRID, ls="--", alpha=0.5, which="both")
+    ax3.set_axisbelow(True)
+    format_frequency_axis(ax3)
+    ax3.legend(loc="upper left", fontsize=8.5)
+    ax3.annotate(
+        "only the insertion-loss column came from\ntests; a column that does not move with\n"
+        "frequency is the shape of an estimate.\nThe report carries twice these values",
+        xy=(3200.0, 3.0),
+        xytext=(70.0, 0.25),
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "linewidth": 1.1},
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+
+    plt.tight_layout()
+    save_figure(output_dir, "silencer_measurement.svg")
+    plt.close()

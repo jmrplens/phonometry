@@ -55,6 +55,7 @@ from .mode_conversion import (
     _mode_conversion_fields,
     animate_elastic_mode_conversion,
 )
+from .open_end import _open_end_fields, animate_fdtd_open_end
 from .pillar_hall import (
     _pillar_fields,
     _poster_ss_for,
@@ -87,6 +88,7 @@ __all__ = [
     "_duct_cut_on_fields",
     "_ducting_fields",
     "_expansion_chamber_fields",
+    "_open_end_fields",
     "_ground_effect_fields",
     "_halfspace_fields",
     "_impedance_tube_fields",
@@ -117,6 +119,7 @@ __all__ = [
     "animate_fdtd_duct_cut_on",
     "animate_fdtd_ducting",
     "animate_fdtd_expansion_chamber",
+    "animate_fdtd_open_end",
     "animate_fdtd_ground_effect",
     "animate_fdtd_impedance_tube",
     "animate_fdtd_metadiffuser",

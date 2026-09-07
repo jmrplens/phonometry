@@ -60,12 +60,69 @@ The rest of the module is the bookkeeping that goes with the subtraction:
   [`measurement_expanded_uncertainty`](/phonometry/reference/api/noise_control/silencer-measurement/#measurement_expanded_uncertainty) are the two standards' own answers to how
   repeatable any of this is.
 
+The open end of the duct is the other half. A duct radiating into a room does
+not hand the room everything that reaches its mouth: at low frequency the
+mouth is a poor radiator and reflects most of the energy back up the duct.
+[`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss) is Equation (B.3), which is what stands
+between the level measured in a reverberation room and the level travelling
+in the duct, and it is needed twice over: by the transmission loss of
+Equation (6) and by the flow-noise sound power of Equation (7).
+
 The plane-wave modelling this measurement is compared against lives in
 [`phonometry.noise_control.silencers`](/phonometry/reference/api/noise_control/silencers/), and the cut-on frequency above
 which a duct stops carrying plane waves alone is in
 [`phonometry.noise_control.duct_modes`](/phonometry/reference/api/noise_control/duct-modes/).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+## CIRCULAR_CUT_ON_COEFFICIENT
+
+*Constant* (`float`).
+
+```python
+CIRCULAR_CUT_ON_COEFFICIENT = 0.59
+```
+
+## flow_noise_power_level
+
+```python
+flow_noise_power_level(
+    pressure_level: ArrayLike,
+    open_end_loss: ArrayLike,
+    room_correction: ArrayLike,
+) -> NDArray[np.float64]
+```
+
+ISO 7235 Equation (7): the sound power of the flow noise.
+
+$$
+L_W = \overline{L_p} + D_\mathrm{td} + C
+$$
+
+Three terms, and each is a different kind of quantity. $L_p$ is the
+spatial energy-average level measured in the reverberation room, and 6.4
+is explicit that it is taken **without** a background correction, because
+the two series are reported separately and the reader subtracts them.
+$D_\mathrm{td}$ puts back what the open end of the duct kept in.
+$C$ is the level difference between the sound power radiated into
+the room and the average pressure in it, which ISO 3741 supplies from the
+room's volume and reverberation time.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `pressure_level` | $\overline{L_p}$, in dB, per band. |
+| `open_end_loss` | $D_\mathrm{td}$, in dB, from [`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss). |
+| `room_correction` | $C$, in dB, per band or one value for all. |
+
+**Returns:** $L_W$, in dB, one value per band.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a value is not finite, if the level and the open-end loss carry different numbers of bands, or if the room correction is neither a single value nor one per band. |
 
 ## ISO11691_REPRODUCIBILITY
 
@@ -98,6 +155,45 @@ ISO7235_REPRODUCIBILITY = {'insertion_loss': ((100.0, 1.5), (500.0, 1.0), (1250.
 ```python
 ISO7235_SPREAD_LIMITS = ((50.0, 10.0), (63.0, 10.0), (80.0, 8.0), (100.0, 8.0), (125.0, 7.0), (160.0, 6.0))
 ```
+
+## measured_transmission_loss
+
+```python
+measured_transmission_loss(
+    insertion_loss: ArrayLike,
+    open_end_loss: ArrayLike,
+) -> NDArray[np.float64]
+```
+
+ISO 7235 Equation (6): the transmission loss of an air-terminal unit.
+
+$$
+D_\mathrm{t} = D_\mathrm{i} + D_\mathrm{td}
+$$
+
+An air-terminal unit is measured in a reverberation room, so what the two
+series give is an insertion loss against the substitution duct. The unit's
+own transmission loss is that plus what the open end of the duct was
+keeping in anyway, which is why Equation (6) needs the theoretical
+$D_\mathrm{td}$ of Annex B rather than a second measurement.
+
+Well above the frequency at which the duct mouth is a wavelength across,
+$D_\mathrm{td}$ goes to zero and the two quantities meet.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `insertion_loss` | $D_\mathrm{i}$, in dB, from [`substitution_insertion_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#substitution_insertion_loss). |
+| `open_end_loss` | $D_\mathrm{td}$, in dB, from [`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss). |
+
+**Returns:** $D_\mathrm{t}$, in dB, one value per band.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a value is not finite, or if the two arrays carry different numbers of bands. Both are per-band quantities, so neither stands in for a whole run. |
 
 ## measurement_expanded_uncertainty
 
@@ -227,6 +323,61 @@ between 125 and its `> 160` row.
 | :--- | :--- |
 | ValueError | If the frequency is not positive and finite. |
 
+## MODAL_FILTER_ATTENUATION_DB
+
+*Constant* (`tuple`).
+
+```python
+MODAL_FILTER_ATTENUATION_DB = (3.0, 5.0)
+```
+
+## modal_filter_cut_on
+
+```python
+modal_filter_cut_on(
+    *,
+    diameter: float | None = None,
+    larger_dimension: float | None = None,
+    sound_speed: float = 343.0,
+) -> float
+```
+
+ISO 7235 Equations (4) and (5): where higher-order modes start.
+
+$$
+f_{Cd} = \frac{0{,}59\,c}{d} \qquad f_{CH} = \frac{0{,}5\,c}{H}
+$$
+
+NOTE 2 to 5.2.2.3 prints these for the duct the modal filter is connected
+to, because the filter's requirement changes there: at least 3 dB of
+longitudinal attenuation of the fundamental mode at the low-frequency end,
+and at least 5 dB above this frequency, where the higher-order modes the
+filter exists to suppress can propagate.
+
+The rectangular form is exact: the first mode of a rigid rectangular duct
+is a half wavelength across the larger dimension, so $c / 2H$. The
+circular constant is rounded: the exact value is the first zero of
+$J_1'$, which puts the coefficient at 0,58607 rather than 0,59, so
+Equation (4) sits 0,67 % high. The exact eigenvalues are in
+[`phonometry.noise_control.circular_duct_cut_on`](/phonometry/reference/api/noise_control/duct-modes/#circular_duct_cut_on), which also carries
+the mean-flow correction this equation does not have.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `diameter` | $d$ of a circular duct, in m. Exactly one of the two dimensions is given. |
+| `larger_dimension` | $H$, the larger cross-sectional dimension of a rectangular duct, in m. |
+| `sound_speed` | $c$, in m/s. |
+
+**Returns:** $f_{Cd}$ or $f_{CH}$, in Hz.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If neither dimension or both are given, or if a value is not positive and finite. |
+
 ## octave_insertion_loss
 
 ```python
@@ -263,6 +414,128 @@ the substitution duct, so their energies can be weighted equally here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not finite, if the array is empty, or if it does not hold a multiple of three bands. |
+
+## open_end_reflection_coefficient
+
+```python
+open_end_reflection_coefficient(
+    frequency: ArrayLike,
+    area: float,
+    *,
+    solid_angle: float = 6.283185307179586,
+    sound_speed: float = 343.0,
+) -> NDArray[np.float64]
+```
+
+ISO 7235 Equation (B.4): the pressure reflection coefficient there.
+
+$$
+r = \left[\frac{1}{\Omega} \left(\frac{4\pi f \sqrt{S}}{c}\right)^{2} + 1\right]^{-1/2}
+$$
+
+The same physics as Equation (B.3) said the other way round, and the two
+close exactly: what is not transmitted is reflected, so
+$D_\mathrm{td} = -10\lg(1 - r^2)$ for every frequency, area and
+solid angle. That identity is the conformance anchor for both, because
+neither standard prints a worked example of either.
+
+Clause 5.2.4 puts this quantity to work as a requirement rather than as a
+result: a test duct with an anechoic termination qualifies only if its
+reflection coefficient is no greater than 0,3.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frequency` | Band centre frequencies $f$, in Hz. |
+| `area` | $S$, the cross-sectional area of the duct, in m². |
+| `solid_angle` | $\Omega$, in sr. |
+| `sound_speed` | $c$, in m/s. |
+
+**Returns:** $r$, dimensionless, one value per frequency.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a value is not positive and finite. |
+
+## open_end_transmission_loss
+
+```python
+open_end_transmission_loss(
+    frequency: ArrayLike,
+    area: float,
+    *,
+    solid_angle: float = 6.283185307179586,
+    sound_speed: float = 343.0,
+) -> NDArray[np.float64]
+```
+
+ISO 7235 Equation (B.3): what the open end of a duct keeps in.
+
+$$
+D_\mathrm{td} = 10 \lg\left[1 + \frac{\Omega}{\left(\dfrac{4\pi f \sqrt{S}}{c}\right)^{2}} \right]\ \text{dB}
+$$
+
+A duct radiating into a room does not hand the room everything that
+reaches its mouth. Well below the frequency at which the mouth is a
+wavelength across it is a poor radiator, and most of the energy turns
+round and goes back up the duct; well above it the mouth is transparent
+and the loss goes to zero. The group $4\pi f \sqrt{S} / c$ is the
+mouth measured in wavelengths, and the solid angle says how much room
+there is to radiate into. It works the way round that surprises people:
+$\Omega$ is in the numerator, so a duct ending in the middle of a
+room ($4\pi$) keeps **more** sound in than one flush with a wall
+($2\pi$). A baffle is what makes an opening a good radiator,
+because it stops the pressure relieving round the rim, and an unbaffled
+mouth of the same size sends more of the sound back up the duct.
+
+ISO 5135 prints the identical formula as its own Equation (2), where it
+is called the end reflection loss of the open duct and is added to the
+sound power radiated into the room. The two names are one quantity.
+
+The library also carries a different closed form for the same physics,
+[`phonometry.noise_control.end_reflection_loss_closed_form`](/phonometry/reference/api/noise_control/hvac/#end_reflection_loss_closed_form), which
+is Reynolds' as given by Long and raises the same argument to 1,88
+rather than to 2. For a circular duct in free space the two are
+$10\lg[1 + (c/\pi f d)^2]$ against
+$10\lg[1 + (c/\pi f d)^{1,88}]$, so they part company where the
+argument is far from 1, which is at the ends of the range rather than in
+the middle.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frequency` | Band centre frequencies $f$, in Hz. |
+| `area` | $S$, the cross-sectional area of the duct, in m². |
+| `solid_angle` | $\Omega$, the solid angle of radiation at the duct end, in sr. The five configurations of Table B.1 are in [`RADIATION_SOLID_ANGLES`](/phonometry/reference/api/noise_control/silencer-measurement/#radiation_solid_angles); the default is a duct flush with one surface. |
+| `sound_speed` | $c$, in m/s. |
+
+**Returns:** $D_\mathrm{td}$, in dB, one value per frequency.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a value is not positive and finite. |
+
+## RADIATION_SOLID_ANGLES
+
+*Constant* (`dict`).
+
+```python
+RADIATION_SOLID_ANGLES = {'A': 6.283185307179586, 'B': 3.141592653589793, 'C': 12.566370614359172, 'D': 6.283185307179586, 'E': 12.566370614359172}
+```
+
+## RECTANGULAR_CUT_ON_COEFFICIENT
+
+*Constant* (`float`).
+
+```python
+RECTANGULAR_CUT_ON_COEFFICIENT = 0.5
+```
 
 ## SilencerMeasurementWarning
 

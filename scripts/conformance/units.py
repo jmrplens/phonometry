@@ -99,6 +99,7 @@ UNITS: frozenset[str] = frozenset(
         "rad/m",
         "s",
         "sone",
+        "sr",
         "sone_HMS",
         "tu_HMS",
         "vacil",

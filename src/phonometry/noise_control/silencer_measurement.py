@@ -54,6 +54,14 @@ The rest of the module is the bookkeeping that goes with the subtraction:
   :func:`measurement_expanded_uncertainty` are the two standards' own answers to how
   repeatable any of this is.
 
+The open end of the duct is the other half. A duct radiating into a room does
+not hand the room everything that reaches its mouth: at low frequency the
+mouth is a poor radiator and reflects most of the energy back up the duct.
+:func:`open_end_transmission_loss` is Equation (B.3), which is what stands
+between the level measured in a reverberation room and the level travelling
+in the duct, and it is needed twice over: by the transmission loss of
+Equation (6) and by the flow-noise sound power of Equation (7).
+
 The plane-wave modelling this measurement is compared against lives in
 :mod:`phonometry.noise_control.silencers`, and the cut-on frequency above
 which a duct stops carrying plane waves alone is in
@@ -62,6 +70,7 @@ which a duct stops carrying plane waves alone is in
 
 from __future__ import annotations
 
+import math
 import warnings
 from typing import TYPE_CHECKING
 
@@ -83,16 +92,25 @@ __all__ = [
     "ISO7235_COVERAGE_FACTOR",
     "ISO7235_REPRODUCIBILITY",
     "ISO7235_SPREAD_LIMITS",
+    "CIRCULAR_CUT_ON_COEFFICIENT",
+    "MODAL_FILTER_ATTENUATION_DB",
+    "RADIATION_SOLID_ANGLES",
+    "RECTANGULAR_CUT_ON_COEFFICIENT",
     "SURVEY_AREA_RATIO_RANGE",
     "SURVEY_BAND_RANGE_HZ",
     "SURVEY_DIAMETER_RANGE_M",
     "SURVEY_MAX_VELOCITY_M_S",
     "SilencerMeasurementWarning",
+    "flow_noise_power_level",
+    "measured_transmission_loss",
     "measurement_expanded_uncertainty",
     "measurement_reproducibility",
     "microphone_positions_required",
     "microphone_spread_limit",
+    "modal_filter_cut_on",
     "octave_insertion_loss",
+    "open_end_reflection_coefficient",
+    "open_end_transmission_loss",
     "substitution_area_ratio",
     "substitution_insertion_loss",
     "survey_reproducibility",
@@ -178,6 +196,42 @@ ISO7235_REPRODUCIBILITY: dict[str, tuple[tuple[float, float], ...]] = {
 #: ISO 7235:2003, 7.9. The expanded uncertainty for a coverage probability of
 #: 95 % is twice the reproducibility standard deviation of Table 7.
 ISO7235_COVERAGE_FACTOR = 2.0
+
+#: ISO 7235:2003, Table B.1, and the identical Table 1 of ISO 5135:1999. The
+#: solid angle of radiation at a duct end, in sr, for the five configurations
+#: of Figure B.2: **A** flush in a wall, **B** at the junction of a wall and
+#: the floor, **C** a duct end projecting into the room, **D** a box standing
+#: on the floor, **E** a duct in the middle of the room.
+RADIATION_SOLID_ANGLES: dict[str, float] = {
+    "A": 2.0 * math.pi,
+    "B": math.pi,
+    "C": 4.0 * math.pi,
+    "D": 2.0 * math.pi,
+    "E": 4.0 * math.pi,
+}
+
+#: ISO 7235:2003, 5.2.2.3. The longitudinal attenuation of the fundamental
+#: mode the modal filter has to provide, in dB: at least the first at the
+#: low-frequency end, and at least the second above the cut-on frequency of
+#: the higher-order modes in the connected ducts.
+MODAL_FILTER_ATTENUATION_DB: tuple[float, float] = (3.0, 5.0)
+
+#: ISO 7235:2003, Equation (4). The coefficient of the cut-on frequency of the
+#: first higher-order mode of a circular duct, ``f = 0,59 c / d``. The exact
+#: value is the first zero of the derivative of the Bessel function of order
+#: one, 1,8412 / pi = 0,58607, so the printed constant sits 0,67 % high.
+CIRCULAR_CUT_ON_COEFFICIENT = 0.59
+
+#: ISO 7235:2003, Equation (5). The same for a rectangular duct of larger
+#: dimension ``H``, ``f = 0,5 c / H``. This one is exact: the first mode is a
+#: half wavelength across the duct.
+RECTANGULAR_CUT_ON_COEFFICIENT = 0.5
+
+#: The speed of sound in air the two standards work at, in m/s. ISO 7235 B.2.3
+#: writes 340 m/s into its two-microphone spacing rule; the value here is the
+#: library's own 20 degree Celsius figure, and every function that uses it
+#: takes a ``sound_speed`` argument.
+_SOUND_SPEED_M_S = 343.0
 
 _THIRDS_PER_OCTAVE = 3
 
@@ -501,3 +555,239 @@ def substitution_area_ratio(duct_area: float, element_area: float) -> float:
         )
         warnings.warn(msg, SilencerMeasurementWarning, stacklevel=2)
     return float(ratio)
+
+
+def open_end_transmission_loss(
+    frequency: ArrayLike,
+    area: float,
+    *,
+    solid_angle: float = 2.0 * math.pi,
+    sound_speed: float = _SOUND_SPEED_M_S,
+) -> NDArray[np.float64]:
+    r"""ISO 7235 Equation (B.3): what the open end of a duct keeps in.
+
+    .. math::
+
+       D_\mathrm{td} = 10 \lg\left[1 +
+           \frac{\Omega}{\left(\dfrac{4\pi f \sqrt{S}}{c}\right)^{2}}
+       \right]\ \text{dB}
+
+    A duct radiating into a room does not hand the room everything that
+    reaches its mouth. Well below the frequency at which the mouth is a
+    wavelength across it is a poor radiator, and most of the energy turns
+    round and goes back up the duct; well above it the mouth is transparent
+    and the loss goes to zero. The group :math:`4\pi f \sqrt{S} / c` is the
+    mouth measured in wavelengths, and the solid angle says how much room
+    there is to radiate into. It works the way round that surprises people:
+    :math:`\Omega` is in the numerator, so a duct ending in the middle of a
+    room (:math:`4\pi`) keeps **more** sound in than one flush with a wall
+    (:math:`2\pi`). A baffle is what makes an opening a good radiator,
+    because it stops the pressure relieving round the rim, and an unbaffled
+    mouth of the same size sends more of the sound back up the duct.
+
+    ISO 5135 prints the identical formula as its own Equation (2), where it
+    is called the end reflection loss of the open duct and is added to the
+    sound power radiated into the room. The two names are one quantity.
+
+    The library also carries a different closed form for the same physics,
+    :func:`phonometry.noise_control.end_reflection_loss_closed_form`, which
+    is Reynolds' as given by Long and raises the same argument to 1,88
+    rather than to 2. For a circular duct in free space the two are
+    :math:`10\lg[1 + (c/\pi f d)^2]` against
+    :math:`10\lg[1 + (c/\pi f d)^{1,88}]`, so they part company where the
+    argument is far from 1, which is at the ends of the range rather than in
+    the middle.
+
+    :param frequency: Band centre frequencies :math:`f`, in Hz.
+    :param area: :math:`S`, the cross-sectional area of the duct, in m².
+    :param solid_angle: :math:`\Omega`, the solid angle of radiation at the
+        duct end, in sr. The five configurations of Table B.1 are in
+        :data:`RADIATION_SOLID_ANGLES`; the default is a duct flush with one
+        surface.
+    :param sound_speed: :math:`c`, in m/s.
+    :return: :math:`D_\mathrm{td}`, in dB, one value per frequency.
+    :raises ValueError: If a value is not positive and finite.
+    """
+    bands = require_positive_array(frequency, "frequency")
+    section = require_positive(area, "area")
+    angle = require_positive(solid_angle, "solid_angle")
+    speed = require_positive(sound_speed, "sound_speed")
+    mouth = 4.0 * math.pi * bands * math.sqrt(section) / speed
+    return np.asarray(10.0 * np.log10(1.0 + angle / mouth**2), dtype=np.float64)
+
+
+def open_end_reflection_coefficient(
+    frequency: ArrayLike,
+    area: float,
+    *,
+    solid_angle: float = 2.0 * math.pi,
+    sound_speed: float = _SOUND_SPEED_M_S,
+) -> NDArray[np.float64]:
+    r"""ISO 7235 Equation (B.4): the pressure reflection coefficient there.
+
+    .. math::
+
+       r = \left[\frac{1}{\Omega}
+           \left(\frac{4\pi f \sqrt{S}}{c}\right)^{2} + 1\right]^{-1/2}
+
+    The same physics as Equation (B.3) said the other way round, and the two
+    close exactly: what is not transmitted is reflected, so
+    :math:`D_\mathrm{td} = -10\lg(1 - r^2)` for every frequency, area and
+    solid angle. That identity is the conformance anchor for both, because
+    neither standard prints a worked example of either.
+
+    Clause 5.2.4 puts this quantity to work as a requirement rather than as a
+    result: a test duct with an anechoic termination qualifies only if its
+    reflection coefficient is no greater than 0,3.
+
+    :param frequency: Band centre frequencies :math:`f`, in Hz.
+    :param area: :math:`S`, the cross-sectional area of the duct, in m².
+    :param solid_angle: :math:`\Omega`, in sr.
+    :param sound_speed: :math:`c`, in m/s.
+    :return: :math:`r`, dimensionless, one value per frequency.
+    :raises ValueError: If a value is not positive and finite.
+    """
+    bands = require_positive_array(frequency, "frequency")
+    section = require_positive(area, "area")
+    angle = require_positive(solid_angle, "solid_angle")
+    speed = require_positive(sound_speed, "sound_speed")
+    mouth = 4.0 * math.pi * bands * math.sqrt(section) / speed
+    return np.asarray((mouth**2 / angle + 1.0) ** -0.5, dtype=np.float64)
+
+
+def measured_transmission_loss(
+    insertion_loss: ArrayLike, open_end_loss: ArrayLike
+) -> NDArray[np.float64]:
+    r"""ISO 7235 Equation (6): the transmission loss of an air-terminal unit.
+
+    .. math::
+
+       D_\mathrm{t} = D_\mathrm{i} + D_\mathrm{td}
+
+    An air-terminal unit is measured in a reverberation room, so what the two
+    series give is an insertion loss against the substitution duct. The unit's
+    own transmission loss is that plus what the open end of the duct was
+    keeping in anyway, which is why Equation (6) needs the theoretical
+    :math:`D_\mathrm{td}` of Annex B rather than a second measurement.
+
+    Well above the frequency at which the duct mouth is a wavelength across,
+    :math:`D_\mathrm{td}` goes to zero and the two quantities meet.
+
+    :param insertion_loss: :math:`D_\mathrm{i}`, in dB, from
+        :func:`substitution_insertion_loss`.
+    :param open_end_loss: :math:`D_\mathrm{td}`, in dB, from
+        :func:`open_end_transmission_loss`.
+    :return: :math:`D_\mathrm{t}`, in dB, one value per band.
+    :raises ValueError: If a value is not finite, or if the two arrays carry
+        different numbers of bands. Both are per-band quantities, so neither
+        stands in for a whole run.
+    """
+    insertion = require_finite_array(insertion_loss, "insertion_loss")
+    open_end = require_finite_array(open_end_loss, "open_end_loss")
+    _require_matching_bands(
+        {"insertion_loss": insertion.size, "open_end_loss": open_end.size}
+    )
+    return np.asarray(insertion + open_end, dtype=np.float64)
+
+
+def flow_noise_power_level(
+    pressure_level: ArrayLike,
+    open_end_loss: ArrayLike,
+    room_correction: ArrayLike,
+) -> NDArray[np.float64]:
+    r"""ISO 7235 Equation (7): the sound power of the flow noise.
+
+    .. math::
+
+       L_W = \overline{L_p} + D_\mathrm{td} + C
+
+    Three terms, and each is a different kind of quantity. :math:`L_p` is the
+    spatial energy-average level measured in the reverberation room, and 6.4
+    is explicit that it is taken **without** a background correction, because
+    the two series are reported separately and the reader subtracts them.
+    :math:`D_\mathrm{td}` puts back what the open end of the duct kept in.
+    :math:`C` is the level difference between the sound power radiated into
+    the room and the average pressure in it, which ISO 3741 supplies from the
+    room's volume and reverberation time.
+
+    :param pressure_level: :math:`\overline{L_p}`, in dB, per band.
+    :param open_end_loss: :math:`D_\mathrm{td}`, in dB, from
+        :func:`open_end_transmission_loss`.
+    :param room_correction: :math:`C`, in dB, per band or one value for all.
+    :return: :math:`L_W`, in dB, one value per band.
+    :raises ValueError: If a value is not finite, if the level and the
+        open-end loss carry different numbers of bands, or if the room
+        correction is neither a single value nor one per band.
+    """
+    level = require_finite_array(pressure_level, "pressure_level")
+    open_end = require_finite_array(open_end_loss, "open_end_loss")
+    correction = require_finite_array(room_correction, "room_correction")
+    _require_matching_bands(
+        {"pressure_level": level.size, "open_end_loss": open_end.size},
+        broadcast={"room_correction": correction.size},
+    )
+    return np.asarray(level + open_end + correction, dtype=np.float64)
+
+
+def modal_filter_cut_on(
+    *,
+    diameter: float | None = None,
+    larger_dimension: float | None = None,
+    sound_speed: float = _SOUND_SPEED_M_S,
+) -> float:
+    r"""ISO 7235 Equations (4) and (5): where higher-order modes start.
+
+    .. math::
+
+       f_{Cd} = \frac{0{,}59\,c}{d}
+       \qquad
+       f_{CH} = \frac{0{,}5\,c}{H}
+
+    NOTE 2 to 5.2.2.3 prints these for the duct the modal filter is connected
+    to, because the filter's requirement changes there: at least 3 dB of
+    longitudinal attenuation of the fundamental mode at the low-frequency end,
+    and at least 5 dB above this frequency, where the higher-order modes the
+    filter exists to suppress can propagate.
+
+    The rectangular form is exact: the first mode of a rigid rectangular duct
+    is a half wavelength across the larger dimension, so :math:`c / 2H`. The
+    circular constant is rounded: the exact value is the first zero of
+    :math:`J_1'`, which puts the coefficient at 0,58607 rather than 0,59, so
+    Equation (4) sits 0,67 % high. The exact eigenvalues are in
+    :func:`phonometry.noise_control.circular_duct_cut_on`, which also carries
+    the mean-flow correction this equation does not have.
+
+    :param diameter: :math:`d` of a circular duct, in m. Exactly one of the
+        two dimensions is given.
+    :param larger_dimension: :math:`H`, the larger cross-sectional dimension
+        of a rectangular duct, in m.
+    :param sound_speed: :math:`c`, in m/s.
+    :return: :math:`f_{Cd}` or :math:`f_{CH}`, in Hz.
+    :raises ValueError: If neither dimension or both are given, or if a value
+        is not positive and finite.
+    """
+    speed = require_positive(sound_speed, "sound_speed")
+    if diameter is not None and larger_dimension is None:
+        return float(
+            CIRCULAR_CUT_ON_COEFFICIENT * speed / require_positive(diameter, "diameter")
+        )
+    if larger_dimension is not None and diameter is None:
+        return float(
+            RECTANGULAR_CUT_ON_COEFFICIENT
+            * speed
+            / require_positive(larger_dimension, "larger_dimension")
+        )
+    given = [
+        name
+        for name, value in (
+            ("diameter", diameter),
+            ("larger_dimension", larger_dimension),
+        )
+        if value is not None
+    ]
+    msg = (
+        "Equation (4) is for a circular duct and Equation (5) for a "
+        "rectangular one, so exactly one of 'diameter' and "
+        f"'larger_dimension' is expected; got {given or 'neither'}."
+    )
+    raise ValueError(msg)

@@ -243,6 +243,113 @@ print(noise_control.SURVEY_MAX_VELOCITY_M_S)                    # 15.0
 print(noise_control.SURVEY_AREA_RATIO_RANGE)                    # (0.6, 1.7)
 ```
 
+## 7. La boca del conducto, y las dos magnitudes que la necesitan
+
+Un conducto que radia a una sala no le entrega a la sala todo lo que llega a
+su boca. Bastante por debajo de la frecuencia a la que la boca mide una
+longitud de onda es un radiador pobre, y casi toda la energía se da la vuelta
+y vuelve por el conducto. El anexo B.3 le pone número:
+
+$$
+D_\mathrm{td} = 10 \lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f \sqrt{S}}{c}\right)^{2}}\right]\ \text{dB}
+$$
+
+El grupo $4\pi f \sqrt{S} / c$ es la boca medida en longitudes de onda, y
+$\Omega$ es el ángulo sólido al que radia. Un conducto de 350 mm enrasado en
+una pared retiene 11 dB a 63 Hz y 0,05 dB a 2 kHz, que es nada:
+
+```python
+import numpy as np
+
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0])
+area = 0.0962                     # m2, un conducto circular de 350 mm
+
+d_td = noise_control.open_end_transmission_loss(bands, area)
+print(d_td.round(2))              # [11.23  6.14  2.5   0.77  0.21  0.05] dB
+```
+
+El ángulo sólido es la Tabla B.1, y esos mismos cinco valores son la Tabla 1
+de la ISO 5135. Funciona al revés de lo que uno esperaría: $\Omega$ está en el
+numerador, así que un conducto que acaba en mitad de la sala retiene **más**
+sonido que uno enrasado en la pared, no menos. Lo que hace buena radiadora a
+una abertura es la pantalla, porque impide que la presión se alivie por el
+borde de la boca, y una boca sin pantalla del mismo tamaño devuelve más sonido
+por el conducto:
+
+```python
+free = noise_control.open_end_transmission_loss(
+    bands, area, solid_angle=noise_control.RADIATION_SOLID_ANGLES["C"],
+)
+print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
+```
+
+Tres decibelios más a 63 Hz, y el coeficiente de reflexión sube con ellos.
+
+La Ecuación (B.4) dice lo mismo del revés, como coeficiente de reflexión de
+presión, y ambas cierran exactamente sobre la energía:
+$D_\mathrm{td} = -10\lg(1 - r^2)$ a cualquier frecuencia, área y ángulo
+sólido. Esa identidad es el anclaje de conformidad de las dos, porque ninguna
+viene impresa con un valor resuelto. Y tiene un uso propio: el 5.2.4 sólo
+cualifica un conducto de ensayo como anecoico por debajo de $r = 0{,}3$, que
+esta boca desnuda alcanza entre 500 Hz y 1 kHz.
+
+```python
+r = noise_control.open_end_reflection_coefficient(bands, area)
+print(r.round(3))                 # [0.962 0.87  0.662 0.404 0.215 0.11 ]
+```
+
+La biblioteca lleva una segunda forma cerrada para la misma física, la de
+Reynolds tal como la da Long, en
+[`end_reflection_loss_closed_form`](/phonometry/es/devices/noise-control/noise-control/).
+Eleva el mismo argumento a 1,88 en vez de a 2, y para un conducto circular en
+campo libre las dos quedan $10\lg[1 + (c/\pi f d)^2]$ frente a
+$10\lg[1 + (c/\pi f d)^{1,88}]$. Concuerdan de cerca donde el argumento anda
+por 1 y se separan en los extremos del intervalo.
+
+Dos magnitudes la necesitan. La Ecuación (6) convierte la pérdida por
+inserción medida de una unidad terminal de aire en su pérdida por
+transmisión devolviéndole lo que la boca retenía de todos modos, así que las
+dos son el mismo número arriba del intervalo y difieren en once decibelios
+abajo:
+
+```python
+d_i = np.array([4.0, 7.0, 12.0, 20.0, 26.0, 28.0])
+print(noise_control.measured_transmission_loss(d_i, d_td).round(2))
+#                                 # [15.23 13.14 14.5  20.77 26.21 28.05] dB
+```
+
+Y la Ecuación (7) convierte el ruido de flujo en potencia sonora,
+$L_W = \overline{L_p} + D_\mathrm{td} + C$, donde $C$ es la diferencia de
+nivel de la ISO 3741 entre la potencia radiada a la sala y la presión media
+en ella. El 6.4 es explícito en que $\overline{L_p}$ entra **sin** corrección
+por ruido de fondo: las dos series se informan por separado y es el lector
+quien las resta.
+
+## 8. Dónde empiezan los modos de orden superior
+
+El filtro modal entre la fuente y el objeto de ensayo existe para que los
+modos de orden superior no lleguen al silenciador, y su exigencia cambia de
+escalón en la frecuencia a la que esos modos pueden propagarse por los
+conductos conectados: al menos 3 dB de atenuación longitudinal del modo
+fundamental en el extremo de baja frecuencia, y al menos 5 dB por encima de
+esa frecuencia (5.2.2.3). La NOTA 2 imprime dónde está:
+
+```python
+print(round(noise_control.modal_filter_cut_on(diameter=0.4), 1))          # 505.9 Hz
+print(round(noise_control.modal_filter_cut_on(larger_dimension=0.5), 1))  # 343.0 Hz
+```
+
+La forma rectangular, $0{,}5\,c/H$, es exacta: el primer modo de un conducto
+rectangular rígido es media longitud de onda a lo ancho de la dimensión
+mayor. La circular, $0{,}59\,c/d$, va redondeada. El coeficiente exacto es el
+primer cero de $J_1'$ entre $\pi$, que vale 0,58607, así que la Ecuación (4)
+queda un 0,67 % alta: en el conducto de 0,4 m de la fuente sonora de la
+ISO 11691 eso son 505,9 Hz donde
+[`circular_duct_cut_on`](/phonometry/es/devices/noise-control/duct-path/) da
+502,6 Hz. Tres hertzios y medio no cambian la elección de un filtro modal, y
+merece la pena saber cuál de los dos números es la física.
+
 ## Qué cubre esta guía
 
 <Scope>
@@ -256,17 +363,23 @@ ISO 7235 y la regla de tres o cinco del 6.2.1 mediante
 reproducibilidad de la Tabla 1 de la ISO 11691 y de las tres columnas de la
 Tabla 7 de la ISO 7235, con la incertidumbre expandida del 7.9; y el alcance
 que la ISO 11691 fija en 1.1 y 4.5, incluida la comprobación de cociente de
-áreas que avisa fuera de él.
+áreas que avisa fuera de él. La boca del conducto: las Ecuaciones (B.3) y
+(B.4) mediante `open_end_transmission_loss` y
+`open_end_reflection_coefficient`, con los cinco ángulos sólidos de la
+Tabla B.1; la pérdida por transmisión de la Ecuación (6) y la potencia sonora
+del ruido de flujo de la Ecuación (7); y las frecuencias de corte de las
+Ecuaciones (4) y (5) en las que escalona la exigencia del filtro modal del
+5.2.2.3.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
 Aquí no se construye ni se comprueba ningún banco de ensayo: la atenuación
 del filtro modal, el coeficiente de reflexión de la terminación anecoica, la
 tolerancia dimensional del conducto de sustitución y la pérdida por inserción
-límite se describen pero no se calculan. La mitad con flujo de la ISO 7235 no
-está en esta página: el ruido de flujo del 6.4, el caudal volumétrico y el
-coeficiente de pérdida de presión del 6.5, y la pérdida por transmisión en la
-boca del anexo B son trabajo aparte. Tampoco está la ISO 11820, que mide un
+límite se describen pero no se calculan, y a la Ecuación (7) se le da la
+corrección de sala en vez de deducirla. La mitad con flujo de la ISO 7235 no
+está aquí: el caudal volumétrico y el coeficiente de pérdida de presión del
+6.5 son trabajo aparte. Tampoco está la ISO 11820, que mide un
 silenciador in situ, donde el truco de la sustitución no suele ser posible.
 </ScopeClaim>
 </Scope>

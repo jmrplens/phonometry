@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**844/844 conformance checks pass** across 70 domains and 399 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**849/849 conformance checks pass** across 70 domains and 399 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1376,7 +1376,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Ducted silencer measurement (ISO 7235, ISO 11691)</b>: 100% (10/10)</summary>
+<summary><b>Ducted silencer measurement (ISO 7235, ISO 11691)</b>: 100% (15/15)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -1390,6 +1390,11 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 7235:2003 | Reproducibility of the three quantities (Table 7) | insertion_loss 50 Hz = 1.5 dB; insertion_loss 250 Hz = 1 dB; insertion_loss 1000 Hz = 2 dB; insertion_loss 4000 Hz = 3 dB; transmission_loss 50 Hz = 3 dB; transmission_loss 250 Hz = 3 dB; transmission_loss 1000 Hz = 3 dB; transmission_loss 4000 Hz = 3 dB; intensity 50 Hz = 3 dB; intensity 250 Hz = 1.5 dB; intensity 1000 Hz = 1 dB; intensity 4000 Hz = 1 dB | insertion_loss 50 Hz = 1.5 dB; insertion_loss 250 Hz = 1 dB; insertion_loss 1000 Hz = 2 dB; insertion_loss 4000 Hz = 3 dB; transmission_loss 50 Hz = 3 dB; transmission_loss 250 Hz = 3 dB; transmission_loss 1000 Hz = 3 dB; transmission_loss 4000 Hz = 3 dB; intensity 50 Hz = 3 dB; intensity 250 Hz = 1.5 dB; intensity 1000 Hz = 1 dB; intensity 4000 Hz = 1 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 7235:2003 | Expanded measurement uncertainty (7.9) | 250 Hz = 2 dB; 4000 Hz = 6 dB | 250 Hz = 2 dB; 4000 Hz = 6 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11691:1995 | Test duct against the silencer (4.5) | lower = 0.6; upper = 1.7 | lower = 0.6; upper = 1.7 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7235:2003 | Open-end transmission loss and reflection (B.3), (B.4) | D_td = -10 lg(1 - r^2) at all 30 pairs | largest disagreement 1.243e-14 dB | 0 dB | 1 % | ![Pass][cv-pass] Pass |
+| ISO 7235:2003 | Solid angle of radiation at the duct end (Table B.1) | A (flush in a wall) = 6.2832 sr; B (wall and floor) = 3.1416 sr; C (free in the room) = 12.5664 sr; D (on the floor) = 6.2832 sr; E (mid-room duct) = 12.5664 sr | A (flush in a wall) = 6.2832 sr; B (wall and floor) = 3.1416 sr; C (free in the room) = 12.5664 sr; D (on the floor) = 6.2832 sr; E (mid-room duct) = 12.5664 sr | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7235:2003 | Rectangular cut-on frequency (Eq. (5)) | 343,000000 Hz from the (1, 0) eigenvalue | 343 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7235:2003 | Circular cut-on frequency (Eq. (4)) | 0,59 / (1,8412 / pi) = 1,006701 | 1.006702 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7235:2003 | Transmission loss of an air-terminal unit (Eq. (6)) | 63 Hz gap = 11.2255 dB; 2000 Hz gap = 0.0525 dB | 63 Hz gap = 11.2255 dB; 2000 Hz gap = 0.0525 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

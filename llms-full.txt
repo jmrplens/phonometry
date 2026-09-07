@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 844 numerical conformance checks against 399 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 849 numerical conformance checks against 399 standards enforced in CI.
 
-phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 844 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 70 domains.
+phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 849 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 70 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -23216,6 +23216,110 @@ print(noise_control.SURVEY_MAX_VELOCITY_M_S)                    # 15.0
 print(noise_control.SURVEY_AREA_RATIO_RANGE)                    # (0.6, 1.7)
 ```
 
+## 7. The open end, and the two quantities that need it
+
+A duct radiating into a room does not hand the room everything that reaches
+its mouth. Well below the frequency at which the mouth is a wavelength across
+it is a poor radiator, and most of the energy turns round and travels back up
+the duct. Annex B.3 puts a number on it:
+
+$$
+D_\mathrm{td} = 10 \lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f \sqrt{S}}{c}\right)^{2}}\right]\ \text{dB}
+$$
+
+The group $4\pi f \sqrt{S} / c$ is the mouth measured in wavelengths, and
+$\Omega$ is the solid angle it radiates into. A 350 mm duct flush with a wall
+holds back 11 dB at 63 Hz and 0,05 dB at 2 kHz, which is nothing:
+
+```python
+import numpy as np
+
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0])
+area = 0.0962                     # m2, a 350 mm circular duct
+
+d_td = noise_control.open_end_transmission_loss(bands, area)
+print(d_td.round(2))              # [11.23  6.14  2.5   0.77  0.21  0.05] dB
+```
+
+The solid angle is Table B.1, and the same five values are Table 1 of
+ISO 5135. It works the way round that surprises people: $\Omega$ sits in the
+numerator, so a duct ending in the middle of the room keeps **more** sound in
+than one flush with a wall, not less. A baffle is what makes an opening a good
+radiator, because it stops the pressure relieving round the rim of the mouth,
+and an unbaffled end of the same size sends more of the sound back up the
+duct:
+
+```python
+free = noise_control.open_end_transmission_loss(
+    bands, area, solid_angle=noise_control.RADIATION_SOLID_ANGLES["C"],
+)
+print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
+```
+
+Three more decibels at 63 Hz, and the reflection coefficient rises with it.
+
+Equation (B.4) says the same fact the other way round, as a pressure
+reflection coefficient, and the two close exactly on the energy:
+$D_\mathrm{td} = -10\lg(1 - r^2)$ at every frequency, area and solid angle.
+That identity is the conformance anchor for both, because neither is printed
+with a worked value. It also has a use of its own: 5.2.4 qualifies a test
+duct as anechoic only below $r = 0{,}3$, which this bare open end reaches
+somewhere between 500 Hz and 1 kHz.
+
+```python
+r = noise_control.open_end_reflection_coefficient(bands, area)
+print(r.round(3))                 # [0.962 0.87  0.662 0.404 0.215 0.11 ]
+```
+
+The library carries a second closed form for the same physics, Reynolds' as
+given by Long, in
+[`end_reflection_loss_closed_form`](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/).
+It raises the same argument to 1,88 rather than to 2, and for a circular duct
+in free space the two read $10\lg[1 + (c/\pi f d)^2]$ against
+$10\lg[1 + (c/\pi f d)^{1,88}]$. They agree closely where the argument is
+near 1 and part company at the ends of the range.
+
+Two quantities need it. Equation (6) turns the measured insertion loss of an
+air-terminal unit into its transmission loss by putting back what the mouth
+was keeping in anyway, so the two are the same number at the top of the range
+and eleven decibels apart at the bottom:
+
+```python
+d_i = np.array([4.0, 7.0, 12.0, 20.0, 26.0, 28.0])
+print(noise_control.measured_transmission_loss(d_i, d_td).round(2))
+#                                 # [15.23 13.14 14.5  20.77 26.21 28.05] dB
+```
+
+And Equation (7) makes the flow noise a sound power,
+$L_W = \overline{L_p} + D_\mathrm{td} + C$, where $C$ is the ISO 3741 level
+difference between the power radiated into the room and the average pressure
+in it. Clause 6.4 is explicit that $\overline{L_p}$ goes in **without** a
+background correction: the two series are reported separately and the reader
+subtracts them.
+
+## 8. Where higher-order modes start
+
+The modal filter between the source and the test object exists to stop
+higher-order modes reaching the silencer, and its requirement steps at the
+frequency where those modes can propagate in the connected ducts: at least
+3 dB of longitudinal attenuation of the fundamental at the low-frequency end,
+and at least 5 dB above that frequency (5.2.2.3). NOTE 2 prints where it is:
+
+```python
+print(round(noise_control.modal_filter_cut_on(diameter=0.4), 1))          # 505.9 Hz
+print(round(noise_control.modal_filter_cut_on(larger_dimension=0.5), 1))  # 343.0 Hz
+```
+
+The rectangular form, $0{,}5\,c/H$, is exact: the first mode of a rigid
+rectangular duct is a half wavelength across the larger dimension. The
+circular one, $0{,}59\,c/d$, is rounded. The exact coefficient is the first
+zero of $J_1'$ over $\pi$, which is 0,58607, so Equation (4) sits 0,67 %
+high: on the 0,4 m duct of the ISO 11691 sound source that is 505,9 Hz where
+[`circular_duct_cut_on`](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/) gives
+502,6 Hz. Three and a half hertz does not matter for choosing a modal filter,
+and it is worth knowing which of the two numbers is the physics.
+
 ## Standards
 
 ISO 7235:2003 and ISO 11691:1995, read from BS EN ISO 7235:2009 and
@@ -23223,12 +23327,15 @@ BS EN ISO 11691:2009, which endorse them without modification. Implemented:
 Equation (1) of both standards with the reverberation-time correction of
 ISO 7235 6.3; the octave fold of ISO 11691 Equation (2); ISO 7235 Table 6 and
 the three-or-five rule of 6.2.1; ISO 11691 Table 1 and all three columns of
-ISO 7235 Table 7, with the coverage factor of 7.9; and the scope of
-ISO 11691 1.1 and 4.5. Checked in the
+ISO 7235 Table 7, with the coverage factor of 7.9; the scope of ISO 11691 1.1
+and 4.5; the open-end transmission loss and reflection coefficient of
+Equations (B.3) and (B.4) with the solid angles of Table B.1; the transmission
+loss of Equation (6) and the flow-noise sound power of Equation (7); and the
+cut-on frequencies of Equations (4) and (5). Checked in the
 [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/); the gap Table 6 leaves at 160 Hz
 is in the [errata register](https://jmrplens.github.io/phonometry/reference/errata/). Not implemented: the facility
-requirements themselves, the flow half of ISO 7235 (6.4, 6.5 and Annex B),
-and ISO 11820, which measures a silencer in situ.
+requirements themselves, the volume flow rate and pressure loss coefficient of
+6.5, and ISO 11820, which measures a silencer in situ.
 
 ## See also
 
@@ -39849,6 +39956,9 @@ documents, one page per module.
 | `measurement_reproducibility` / `measurement_expanded_uncertainty` / `ISO7235_REPRODUCIBILITY` / `ISO7235_COVERAGE_FACTOR` | `function` / `function` / `table` / `constant` | **ISO 7235 Table 7 and 7.9: how repeatable the measurement is, and the uncertainty that goes on the report.**<br>• `frequency` [Hz], `quantity`: `'insertion_loss'` (Default), `'transmission_loss'` or `'intensity'`<br>• insertion loss 1.5/1/2/3 dB by band range, transmission loss a flat 3, intensity 3/1.5/1/1 and stopping at 5 kHz<br>• the expanded uncertainty is `ISO7235_COVERAGE_FACTOR = 2` times the deviation, for 95 % coverage | `noise_control.measurement_expanded_uncertainty(4000.0)  # 6.0 dB` |
 | `survey_reproducibility` / `ISO11691_REPRODUCIBILITY` | `function` / `constant` | **ISO 11691 Table 1: 2 dB up to the 1.25 kHz one-third octave and 3 dB above it.**<br>• `frequency` [Hz]<br>• the standard offers no interlaboratory result of its own and says this estimate is what makes it a survey method | `noise_control.survey_reproducibility(1000.0)  # 2.0 dB` |
 | `substitution_area_ratio` / `SURVEY_AREA_RATIO_RANGE` / `SURVEY_MAX_VELOCITY_M_S` / `SURVEY_DIAMETER_RANGE_M` / `SURVEY_BAND_RANGE_HZ` / `SilencerMeasurementWarning` | `function` / `range` / `constant` / `range` / `range` / `warning class` | **The scope ISO 11691 writes for its own survey method.**<br>• `substitution_area_ratio(duct_area, element_area)` [m²], warning outside the 0.6 to 1.7 of 4.5<br>• design velocity up to 15 m/s (1.1), circular diameters 80 mm to 2 m, one-third octaves from 50 Hz to 10 kHz | `noise_control.substitution_area_ratio(0.09, 0.09)  # 1.0` |
+| `open_end_transmission_loss` / `open_end_reflection_coefficient` / `RADIATION_SOLID_ANGLES` | `function` / `function` / `mapping` | **ISO 7235 Eqs. (B.3) and (B.4): what the open end of a duct keeps in, and the reflection that is the same fact said the other way.**<br>• `frequency` [Hz], `area` S [m²], `solid_angle` Ω [sr] (Default: 2π), `sound_speed` [m/s]<br>• `D_td = 10 lg[1 + Ω/(4πf√S/c)²]`, `r = [(1/Ω)(4πf√S/c)² + 1]^(−1/2)`, and the two close through `D_td = −10 lg(1 − r²)`<br>• `RADIATION_SOLID_ANGLES` is Table B.1, the same five values as ISO 5135 Table 1: A 2π, B π, C 4π, D 2π, E 4π<br>• the same physics as `end_reflection_loss_closed_form`, which raises the same argument to 1.88 rather than to 2 | `noise_control.open_end_transmission_loss(bands, 0.0962)` |
+| `measured_transmission_loss` / `flow_noise_power_level` | `function` | **ISO 7235 Eqs. (6) and (7): the two quantities the open-end loss is needed for.**<br>• `measured_transmission_loss(insertion_loss, open_end_loss)`: `D_t = D_i + D_td`, the transmission loss of an air-terminal unit<br>• `flow_noise_power_level(pressure_level, open_end_loss, room_correction)`: `L_W = L_p + D_td + C`, with `L_p` uncorrected for background as 6.4 requires and `C` from ISO 3741 | `noise_control.measured_transmission_loss(d_i, d_td)` |
+| `modal_filter_cut_on` / `CIRCULAR_CUT_ON_COEFFICIENT` / `RECTANGULAR_CUT_ON_COEFFICIENT` / `MODAL_FILTER_ATTENUATION_DB` | `function` / `constant` / `constant` / `constant` | **ISO 7235 Eqs. (4) and (5): where higher-order modes start in the duct the modal filter is connected to.**<br>• exactly one of `diameter` d or `larger_dimension` H [m], plus `sound_speed`<br>• `0.59 c/d` and `0.5 c/H`; the rectangular constant is exact, the circular one sits 0.67 % above the Bessel eigenvalue that `circular_duct_cut_on` uses<br>• `MODAL_FILTER_ATTENUATION_DB = (3.0, 5.0)`, the minimum longitudinal attenuation of 5.2.2.3 below and above it | `noise_control.modal_filter_cut_on(diameter=0.4)  # 506 Hz` |
 | `end_reflection_loss` / `elbow_insertion_loss` | `function` | **HVAC duct end reflection & bend insertion loss (Bies Tables 8.14/8.11, ASHRAE).**<br>• end: `frequencies`, `diameter`, `termination` 'flush'/'free'<br>• elbow: `frequencies`, `width`, `bend_type`, `vanes`, `lined` | `end_reflection_loss(bands, 0.3)`<br><br>• `HvacSpectrumResult` |
 | `plenum_attenuation` | `function` | **Plenum-chamber TL by Wells' method (Bies Eq. 8.275).**<br>• `exit_area`, `line_of_sight`, `wall_area`, `mean_absorption`, `angle` | `plenum_attenuation(0.1, 1.0, 20.0, 0.2)  # dB` |
 | `plot_plenum_geometry` | `function` | **Plenum section honouring r and θ exactly.**<br>• `exit_area` S_out [m²], `line_of_sight` r [m], `wall_area` S_w [m²]<br>• `angle` θ [rad] (Default: 0)<br>• `language` | `plot_plenum_geometry(0.09, 1.2, 6.0, angle=0.35)`<br><br>• Box fixed by r/θ, S_out mouth to scale, S_w annotated |
@@ -54879,7 +54989,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 844 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 849 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -55248,7 +55358,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-844 numerical conformance checks across 70 domains and 399 standards, covering
+849 numerical conformance checks across 70 domains and 399 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

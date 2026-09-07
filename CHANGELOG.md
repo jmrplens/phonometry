@@ -85,10 +85,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   warns outside it, beside the design velocity, diameter and band limits
   ISO 11691 draws round its own method.
 
-  Ten conformance rows against the printed tables and the closed forms, and a
-  new errata entry: Table 6 of ISO 7235 names the bands 50 to 125 Hz and then
-  "> 160", so the 160 Hz one-third octave belongs to no row and is left with
-  no limit at all.
+  The open end of the duct is the other half of the standard, and it is what
+  stands between a level measured in a reverberation room and the level
+  travelling in the duct. `open_end_transmission_loss` is Equation (B.3), with
+  the five solid angles of Table B.1 in `RADIATION_SOLID_ANGLES`;
+  `open_end_reflection_coefficient` is Equation (B.4), which is the same fact
+  said the other way round and closes with it exactly through
+  `D_td = -10 lg(1 - r^2)`. That identity is the conformance anchor for both,
+  because neither is printed with a worked value. A 350 mm duct flush with a
+  wall keeps 11 dB in at 63 Hz and nothing at 2 kHz, which is the whole
+  difference between the transmission loss of Equation (6) and the insertion
+  loss it is built from, and the same term enters the flow-noise sound power
+  of Equation (7). `modal_filter_cut_on` is Equations (4) and (5), where the
+  modal-filter requirement of 5.2.2.3 steps from 3 dB to 5.
+
+  Fifteen conformance rows against the printed tables and the closed forms,
+  and a new errata entry: Table 6 of ISO 7235 names the bands 50 to 125 Hz and
+  then "> 160", so the 160 Hz one-third octave belongs to no row and is left
+  with no limit at all.
 
 - The same valve on a liquid line, which is a different standard and a
   different kind of noise: IEC 60534-8-4, in

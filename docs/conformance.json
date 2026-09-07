@@ -22667,24 +22667,26 @@
       "quantity": "Microphone position spread limits (Table 6)",
       "kind": "record",
       "expected": {
-        "label": "50 Hz = 10 dB; 63 Hz = 10 dB; 80 Hz = 8 dB; 100 Hz = 8 dB; 125 Hz = 7 dB; 160 Hz and above = 6 dB",
+        "label": "50 Hz = 10 dB; 63 Hz = 10 dB; 80 Hz = 8 dB; 100 Hz = 8 dB; 125 Hz = 7 dB; just above 125 Hz = 6 dB; 160 Hz and above = 6 dB",
         "record": {
           "50 Hz": 10.0,
           "63 Hz": 10.0,
           "80 Hz": 8.0,
           "100 Hz": 8.0,
           "125 Hz": 7.0,
+          "just above 125 Hz": 6.0,
           "160 Hz and above": 6.0
         }
       },
       "computed": {
-        "label": "50 Hz = 10 dB; 63 Hz = 10 dB; 80 Hz = 8 dB; 100 Hz = 8 dB; 125 Hz = 7 dB; 160 Hz and above = 6 dB",
+        "label": "50 Hz = 10 dB; 63 Hz = 10 dB; 80 Hz = 8 dB; 100 Hz = 8 dB; 125 Hz = 7 dB; just above 125 Hz = 6 dB; 160 Hz and above = 6 dB",
         "record": {
           "50 Hz": 10.0,
           "63 Hz": 10.0,
           "80 Hz": 8.0,
           "100 Hz": 8.0,
           "125 Hz": 7.0,
+          "just above 125 Hz": 6.0,
           "160 Hz and above": 6.0
         }
       },

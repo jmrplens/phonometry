@@ -154,7 +154,9 @@ def _chk_spread_limits() -> Outcome:
     The limit falls from 10 dB at 50 and 63 Hz to 6 dB from 160 Hz upwards.
     The printed last row reads ``> 160``, which leaves the 160 Hz one-third
     octave itself with no limit; it is read here as belonging to that row and
-    the gap is registered in ``docs/ERRATA.md``.
+    the gap is registered in ``docs/ERRATA.md``. The row also pins where the
+    step sits, at 130 Hz, so that a boundary moved anywhere into the gap the
+    printed table leaves between 125 and 160 changes an answer here.
     """
     expected = {
         "50 Hz": 10.0,
@@ -162,9 +164,10 @@ def _chk_spread_limits() -> Outcome:
         "80 Hz": 8.0,
         "100 Hz": 8.0,
         "125 Hz": 7.0,
+        "just above 125 Hz": 6.0,
         "160 Hz and above": 6.0,
     }
-    bands = (50.0, 63.0, 80.0, 100.0, 125.0, 200.0)
+    bands = (50.0, 63.0, 80.0, 100.0, 125.0, 130.0, 200.0)
     computed = dict(
         zip(
             expected,

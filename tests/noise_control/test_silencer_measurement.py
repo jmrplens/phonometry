@@ -91,6 +91,15 @@ class TestSubstitutionInsertionLoss:
                 [90.0, 88.0], [65.0, 60.0], reverberation_times=times
             )
 
+    def test_the_reverberation_times_cannot_set_the_band_count(self) -> None:
+        # One measured band and two reverberation times is one measurement,
+        # not two, and letting the singleton level broadcast would have
+        # returned two answers from it.
+        with pytest.raises(ValueError, match="one length"):
+            sm.substitution_insertion_loss(
+                90.0, 65.0, reverberation_times=([1.0, 1.0], [2.0, 2.0])
+            )
+
     def test_one_reverberation_time_stands_for_every_band(self) -> None:
         # A room measured once for the whole run, rather than band by band.
         corrected = sm.substitution_insertion_loss(
@@ -180,6 +189,14 @@ class TestMicrophonePositions:
 
     def test_a_band_below_the_table_takes_the_first_row(self) -> None:
         assert sm.microphone_spread_limit(40.0) == pytest.approx(10.0)
+
+    def test_the_step_sits_immediately_above_the_last_printed_row(self) -> None:
+        # A frequency between two tabulated centres takes the limit of the
+        # next centre at or above it, so 125 Hz is the last band with 7 dB
+        # and everything above it has 6, rather than the step floating
+        # somewhere in the gap the printed table leaves between 125 and 160.
+        assert sm.microphone_spread_limit(125.0) == pytest.approx(7.0)
+        assert sm.microphone_spread_limit(130.0) == pytest.approx(6.0)
 
     def test_the_limit_never_rises_with_frequency(self) -> None:
         bands = [50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 500.0, 5000.0]

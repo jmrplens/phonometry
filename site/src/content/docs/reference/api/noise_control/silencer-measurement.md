@@ -20,8 +20,10 @@ of the laboratory:
   silencers, air-terminal units and other duct elements, with and without
   flow.
 * **ISO 11691:1995** (EN ISO 11691:2009) is the survey-grade laboratory
-  method without flow, for silencers up to a design velocity of 15 m/s. It
-  is six printed pages and carries two equations.
+  method, six printed pages carrying two equations. It measures silencers and
+  nothing else, without flow and with none in the answer, up to a design
+  velocity of 15 m/s. A measurement that needs flow, or an object that is not
+  a silencer, is outside it and belongs to ISO 7235.
 
 The measurement is the same subtraction in both. Run the rig once with a
 plain **substitution duct** in place of the silencer, run it again with the
@@ -204,6 +206,12 @@ positions are not enough to describe the field and five shall be used.
 The limit falls with frequency, from 10 dB at 50 and 63 Hz to 6 dB from
 160 Hz upwards, because a duct at low frequency has a standing-wave
 pattern the three points sample badly and at high frequency does not.
+
+The argument is a one-third-octave band centre, which is where the table
+is defined. A frequency between two of them takes the limit of the next
+centre at or above it, so the step from 7 dB to 6 dB sits immediately
+above 125 Hz rather than anywhere in the gap the printed table leaves
+between 125 and its `> 160` row.
 
 **Parameters**
 

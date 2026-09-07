@@ -14,8 +14,10 @@ of the laboratory:
   silencers, air-terminal units and other duct elements, with and without
   flow.
 * **ISO 11691:1995** (EN ISO 11691:2009) is the survey-grade laboratory
-  method without flow, for silencers up to a design velocity of 15 m/s. It
-  is six printed pages and carries two equations.
+  method, six printed pages carrying two equations. It measures silencers and
+  nothing else, without flow and with none in the answer, up to a design
+  velocity of 15 m/s. A measurement that needs flow, or an object that is not
+  a silencer, is outside it and belongs to ISO 7235.
 
 The measurement is the same subtraction in both. Run the rig once with a
 plain **substitution duct** in place of the silencer, run it again with the
@@ -192,26 +194,39 @@ class SilencerMeasurementWarning(PhonometryWarning):
 
 
 def _require_matching_bands(
-    counts: dict[str, int], *, broadcast_singletons: bool = False
+    counts: dict[str, int], *, broadcast: dict[str, int] | None = None
 ) -> None:
     """Every band-indexed argument of one call describes the same bands.
 
-    A single value may stand for every band when ``broadcast_singletons`` is
-    set: one reverberation time measured for the whole run is a reasonable
-    thing to hand in, where one level for a run of bands is not.
+    ``counts`` holds the arguments that carry one value per band; they have
+    to agree exactly, because a level given for one band and a loss given for
+    six are not a measurement of anything.
+
+    ``broadcast`` holds the arguments a laboratory may reasonably measure
+    once for a whole run rather than band by band, such as a reverberation
+    time or the room correction of Equation (7). Those may be a single value
+    or one per band, and nothing in between. Letting a singleton anywhere
+    silently set the length is what turns one measured level and two
+    reverberation times into two answers.
     """
-    lengths = {
-        name: size
-        for name, size in counts.items()
-        if not (broadcast_singletons and size == 1)
-    }
-    if len(set(lengths.values())) > 1:
-        listed = ", ".join(f"'{name}' has {size}" for name, size in counts.items())
-        msg = (
-            "The arguments of a substitution measurement are the same bands "
-            f"of the same two test series, so they need one length; {listed}."
-        )
-        raise ValueError(msg)
+    listed = dict(counts) | dict(broadcast or {})
+    if len(set(counts.values())) > 1:
+        _raise_band_mismatch(listed)
+    bands = next(iter(counts.values()))
+    for size in (broadcast or {}).values():
+        if size not in (1, bands):
+            _raise_band_mismatch(listed)
+
+
+def _raise_band_mismatch(counts: dict[str, int]) -> None:
+    """Report which argument brought how many bands, and stop."""
+    listed = ", ".join(f"'{name}' has {size}" for name, size in counts.items())
+    msg = (
+        "The arguments of one measurement describe the same bands, so they "
+        f"need one length, and only a value measured once for the whole run "
+        f"may be given on its own; {listed}."
+    )
+    raise ValueError(msg)
 
 
 def substitution_insertion_loss(
@@ -270,12 +285,11 @@ def substitution_insertion_loss(
     t1 = require_positive_array(first, "reverberation_times[0]")
     t2 = require_positive_array(second, "reverberation_times[1]")
     _require_matching_bands(
-        {
-            "substitution_level": without.size,
+        {"substitution_level": without.size, "object_level": with_object.size},
+        broadcast={
             "reverberation_times[0]": t1.size,
             "reverberation_times[1]": t2.size,
         },
-        broadcast_singletons=True,
     )
     return np.asarray(difference + 10.0 * np.log10(t2 / t1), dtype=np.float64)
 
@@ -346,6 +360,12 @@ def microphone_spread_limit(frequency: float) -> float:
     The limit falls with frequency, from 10 dB at 50 and 63 Hz to 6 dB from
     160 Hz upwards, because a duct at low frequency has a standing-wave
     pattern the three points sample badly and at high frequency does not.
+
+    The argument is a one-third-octave band centre, which is where the table
+    is defined. A frequency between two of them takes the limit of the next
+    centre at or above it, so the step from 7 dB to 6 dB sits immediately
+    above 125 Hz rather than anywhere in the gap the printed table leaves
+    between 125 and its ``> 160`` row.
 
     :param frequency: The one-third-octave band centre, in Hz.
     :return: The largest tolerated difference between the three positions, in

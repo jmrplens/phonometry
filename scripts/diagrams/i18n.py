@@ -3179,7 +3179,6 @@ _ES: dict[str, str] = {
     "≤ 2 m": "≤ 2 m",
     "same 1.55 m, and the levels are averaged over the path": "los mismos 1,55 m, y los niveles se promedian sobre el recorrido",
     "No work station": "Sin puesto de trabajo",
-    "around the reference box, from every side": "alrededor del paralelepípedo de referencia, por cada lado",
     "four or more, 1.55 m above the floor": "cuatro o más, a 1,55 m sobre el suelo",
     "and the highest one is the answer": "y el más alto es el resultado",
     "$L_{pA}$ at one of these positions is an emission level, not a sound power level: it says what the machine does to whoever is there.": "$L_{pA}$ en una de estas posiciones es un nivel de emisión, no un nivel de potencia acústica: dice lo que la máquina le hace a quien está ahí.",

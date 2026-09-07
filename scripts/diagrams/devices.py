@@ -3037,7 +3037,7 @@ def _d_workstation_microphone(s: SVG, th: Theme) -> None:
     s.text(x0 + w1 / 2, top1 + h1 - 16, "the floor below the head", 12, th.fg)
 
     # --- 9.4  Operator moving along a path ---------------------------------
-    top2, h2 = 322.0, 196.0
+    top2, h2 = 322.0, 214.0
     w2 = (900.0 - 2 * left - gap) / 2.0
     x0 = left
     _cell(s, th, x0, top2, w2, h2, "9.4", "Operator on a path")
@@ -3059,23 +3059,29 @@ def _d_workstation_microphone(s: SVG, th: Theme) -> None:
     # --- 9.5  Nobody at all: the reference box in plan ----------------------
     x0 = left + w2 + gap
     _cell(s, th, x0, top2, w2, h2, "9.5", "No work station")
-    s.text(
-        x0 + w2 / 2,
-        top2 + 44,
-        "around the reference box, from every side",
-        11,
-        th.muted,
-    )
-    bw, bh = 116.0, 44.0
-    bx, by = x0 + w2 / 2 - bw / 2, top2 + 80.0
+    s.text(x0 + w2 / 2, top2 + 46, "reference box", 11, th.muted)
+    bw, bh = 116.0, 40.0
+    bx, by = x0 + w2 / 2 - bw / 2, top2 + 92.0
     bcx, bcy = bx + bw / 2, by + bh / 2
     s.rect(bx, by, bw, bh, "none", th.fg, rx=3, sw=1.6, dash="6,4")
     s.rect(bx + 26, by + 11, bw - 52, bh - 22, th.muted, th.fg, rx=3, sw=1.2)
+    # One metre is one metre: the four positions stand the same distance off
+    # the face they belong to, which is what the caption claims.
+    out = 22.0
     for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
-        px = bcx + dx * (bw / 2 + 34)
-        py = bcy + dy * (bh / 2 + 18)
+        px = bcx + dx * (bw / 2 + out)
+        py = bcy + dy * (bh / 2 + out)
         s.circle(px, py, 6.0, th.primary)
-    s.dim(bx + bw, bcy, bx + bw + 34, bcy, "1 m", offset=24, size=12)
+    s.dim(
+        bcx,
+        by + bh,
+        bcx,
+        bcy + bh / 2 + out,
+        "1 m",
+        offset=0,
+        size=12,
+        label_side="right",
+    )
     s.text(
         x0 + w2 / 2,
         top2 + h2 - 34,

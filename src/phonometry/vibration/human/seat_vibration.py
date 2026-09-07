@@ -15,8 +15,8 @@ divide:
 
    \mathrm{SEAT} = \frac{a_\mathrm{wS}}{a_\mathrm{wP}} \tag{2}
 
-Below 1 the seat is doing its job; at 1 it is a rigid plank; above 1 it is
-making the ride worse. Both accelerations are the arithmetic mean of **three
+Below 1 the seat is doing its job; at 1 it passes the vibration through
+unchanged; above 1 it is making the ride worse. Both accelerations are the arithmetic mean of **three
 consecutive runs agreeing within ± 5 %** (10.2.1), which is what
 :func:`mean_of_test_runs` enforces, because a mean of runs that disagree by
 more than that is not a measurement this standard recognises.
@@ -90,9 +90,13 @@ DAMPING_TEST_MASS_TOLERANCE: float = 0.01
 #: suit, and a reduced mass has been found appropriate, in kilograms.
 ACTIVE_DAMPING_TEST_MASS_KG: float = 60.0
 
-#: The value of a SEAT factor or a transmissibility at which the seat passes
-#: the vibration through unchanged. It is not an acceptance value: Clause 11
-#: leaves those to the application standard.
+#: The value of a SEAT factor or a transmissibility at which the magnitude
+#: measured on the seat equals the one measured at the platform, so the seat
+#: passed the vibration through unchanged. It says that about the two
+#: measurements and nothing about the seat being rigid: a seat whose
+#: attenuation over part of the spectrum is cancelled by amplification over
+#: the rest lands here too. It is not an acceptance value either, since
+#: Clause 11 leaves those to the application standard.
 UNITY_TRANSMISSION: float = 1.0
 
 
@@ -106,19 +110,28 @@ def mean_of_test_runs(
     meet the spread is not a result to be averaged anyway, so it is refused
     here rather than quietly returned.
 
-    :param values: The r.m.s. accelerations of the runs, in any consistent
-        unit. Three of them, as the standard asks; a different count is
-        accepted, since the run-in and warm-up notes in 10.2.1 leave room for
-        discarding a reading.
+    :param values: The r.m.s. accelerations of the runs, one per reading, in
+        any consistent unit. Three of them, as the standard asks; a different
+        count is accepted rather than enforced, because 10.2.1 asks for three
+        runs that *agree*, and its own warm-up note recommends discarding the
+        first reading of each series, which leaves a laboratory holding a
+        different number of them. Two is the floor: a spread needs two
+        readings to exist.
     :param tolerance: The permitted spread as a fraction of the mean;
         :data:`RUN_AGREEMENT_TOLERANCE` by default.
     :return: The arithmetic mean, in the unit the values were given in.
-    :raises ValueError: If fewer than two values are given, if any is not
-        positive and finite, if the tolerance is not positive, or if any value
-        lies outside the tolerance band around the mean.
+    :raises ValueError: If the values are not one-dimensional, if fewer than
+        two are given, if any is not positive and finite, if the tolerance is
+        not positive, or if any value lies outside the tolerance band around
+        the mean.
     """
     tol = require_positive(tolerance, "tolerance")
     runs = np.atleast_1d(np.asarray(values, dtype=np.float64))
+    if runs.ndim != 1:
+        # A nested shape passes the size check and then fails deep inside the
+        # result, where the message names neither the argument nor the test.
+        msg = f"'values' must be one run per reading, not {runs.ndim}-D."
+        raise ValueError(msg)
     if runs.size < _MINIMUM_RUNS:
         msg = "'values' needs at least two runs to have a spread."
         raise ValueError(msg)

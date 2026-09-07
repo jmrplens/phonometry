@@ -124,6 +124,14 @@ def test_one_run_has_no_spread_to_check() -> None:
         st.mean_of_test_runs([1.0])
 
 
+def test_a_nested_shape_is_refused_where_it_is_readable() -> None:
+    """A nested set passes a size check and dies somewhere unhelpful later."""
+    with pytest.raises(ValueError, match=r"one run per reading, not 2-D"):
+        st.mean_of_test_runs([[1.02, 1.00, 0.99]])
+    with pytest.raises(ValueError, match=r"one run per reading"):
+        st.seat_transmission([[0.72, 0.70, 0.71]], [[1.02, 1.00, 0.99]])
+
+
 @pytest.mark.parametrize("bad", [[0.0, 1.0, 1.0], [1.0, math.inf, 1.0]])
 def test_a_run_that_is_not_an_acceleration_is_refused(bad: list) -> None:
     with pytest.raises(ValueError, match=r"'values' must be positive and finite"):

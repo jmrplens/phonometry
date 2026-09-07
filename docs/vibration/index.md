@@ -76,6 +76,9 @@ risk.
 - [Multiple-shock whole-body vibration (ISO 2631-5)](human/multiple-shock-vibration.md):
   the spinal-response model and the probability of lumbar injury for vibration
   containing multiple shocks.
+- [What a seat does to the vibration (ISO 10326-1)](human/seat-vibration.md):
+  the SEAT factor of a laboratory seat test, the correction to the input the
+  test intended, and the transmissibility at resonance of the damping test.
 
 ## [Machinery](machinery/index.md)
 

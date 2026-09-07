@@ -21,8 +21,8 @@ $$
 \mathrm{SEAT} = \frac{a_\mathrm{wS}}{a_\mathrm{wP}} \tag{2}
 $$
 
-Below 1 the seat is doing its job; at 1 it is a rigid plank; above 1 it is
-making the ride worse. Both accelerations are the arithmetic mean of **three
+Below 1 the seat is doing its job; at 1 it passes the vibration through
+unchanged; above 1 it is making the ride worse. Both accelerations are the arithmetic mean of **three
 consecutive runs agreeing within ± 5 %** (10.2.1), which is what
 [`mean_of_test_runs`](/phonometry/reference/api/vibration/seat-vibration/#mean_of_test_runs) enforces, because a mean of runs that disagree by
 more than that is not a measurement this standard recognises.
@@ -130,7 +130,7 @@ here rather than quietly returned.
 
 | Name | Description |
 | :--- | :--- |
-| `values` | The r.m.s. accelerations of the runs, in any consistent unit. Three of them, as the standard asks; a different count is accepted, since the run-in and warm-up notes in 10.2.1 leave room for discarding a reading. |
+| `values` | The r.m.s. accelerations of the runs, one per reading, in any consistent unit. Three of them, as the standard asks; a different count is accepted rather than enforced, because 10.2.1 asks for three runs that *agree*, and its own warm-up note recommends discarding the first reading of each series, which leaves a laboratory holding a different number of them. Two is the floor: a spread needs two readings to exist. |
 | `tolerance` | The permitted spread as a fraction of the mean; [`RUN_AGREEMENT_TOLERANCE`](/phonometry/reference/api/vibration/seat-vibration/#run_agreement_tolerance) by default. |
 
 **Returns:** The arithmetic mean, in the unit the values were given in.
@@ -139,7 +139,7 @@ here rather than quietly returned.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If fewer than two values are given, if any is not positive and finite, if the tolerance is not positive, or if any value lies outside the tolerance band around the mean. |
+| ValueError | If the values are not one-dimensional, if fewer than two are given, if any is not positive and finite, if the tolerance is not positive, or if any value lies outside the tolerance band around the mean. |
 
 ## resonance_transmissibility
 

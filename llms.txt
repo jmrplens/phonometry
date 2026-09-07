@@ -222,6 +222,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Overview](https://jmrplens.github.io/phonometry/vibration/human/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-vibration-human.txt)
 - [Human Vibration: Whole-Body and Hand-Arm Exposure](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/)
 - [Multiple-shock whole-body vibration (ISO 2631-5)](https://jmrplens.github.io/phonometry/vibration/human/multiple-shock-vibration/)
+- [What a seat does to the vibration (ISO 10326-1)](https://jmrplens.github.io/phonometry/vibration/human/seat-vibration/)
 
 ### Machinery
 
@@ -592,4 +593,5 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [vibration/multiple-shock](https://jmrplens.github.io/phonometry/reference/api/vibration/multiple-shock/)
 - [vibration/point-mobility](https://jmrplens.github.io/phonometry/reference/api/vibration/point-mobility/)
 - [vibration/radiation-efficiency](https://jmrplens.github.io/phonometry/reference/api/vibration/radiation-efficiency/)
+- [vibration/seat-vibration](https://jmrplens.github.io/phonometry/reference/api/vibration/seat-vibration/)
 - [vibration/transfer-stiffness](https://jmrplens.github.io/phonometry/reference/api/vibration/transfer-stiffness/)

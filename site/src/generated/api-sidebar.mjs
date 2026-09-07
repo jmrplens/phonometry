@@ -287,6 +287,7 @@ export const apiSections = {
     collapsed: true,
     items: [
       'reference/api/noise_control/silencers',
+      'reference/api/noise_control/silencer-measurement',
       'reference/api/noise_control/hvac',
       'reference/api/noise_control/duct-path',
       'reference/api/noise_control/duct-modes',

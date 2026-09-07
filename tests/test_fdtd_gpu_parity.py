@@ -728,6 +728,7 @@ def test_sources_are_checked_where_they_are_registered() -> None:
     """Both the engine and the packer refuse the same waveform."""
     sim = fdtd_gpu.GpuFDTD2D(343.0, _DX, shape=(_NY, _NX))
     bad = {"type": "cw", "frequency": _SOURCE_F, "ramp_cycles": -2.0}
+    described = [fdtd_dispatch.point(10, 10, bad)]
     with pytest.raises(ValueError, match=r"ramp_cycles must be non-negative"):
         sim.add_point_source(10, 10, bad)
     with pytest.raises(ValueError, match=r"ramp_cycles must be non-negative"):
@@ -739,7 +740,7 @@ def test_sources_are_checked_where_they_are_registered() -> None:
             shape=(_NY, _NX),
             steps=100,
             sample_steps=[50],
-            sources=[fdtd_dispatch.point(10, 10, bad)],
+            sources=described,
         )
 
 

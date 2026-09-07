@@ -3037,3 +3037,187 @@ def _d_open_end_solid_angles(s: SVG, th: Theme) -> None:
         13,
         th.muted,
     )
+
+
+# ---------------------------------------------------------------------------
+# Where the microphone goes at a work station (ISO 11201:2010, Clause 9)
+# ---------------------------------------------------------------------------
+
+
+def _cell(
+    s: SVG, th: Theme, x: float, y: float, w: float, h: float, tag: str, name: str
+) -> None:
+    """One panel of the work-station plate: frame, clause number and name."""
+    s.rect(x, y, w, h, th.panel, th.muted, rx=6, sw=1.4)
+    s.text(x + 12, y + 22, tag, 15, th.secondary, anchor="start", bold=True)
+    s.text(x + w / 2 + 20, y + 22, name, 13, th.fg)
+
+
+def _height_dim(
+    s: SVG, th: Theme, x: float, y_low: float, y_high: float, offset: float
+) -> None:
+    """A vertical dimension whose number is printed elsewhere.
+
+    ``SVG.dim`` writes the label beside the line, which a three-across cell
+    has no room for once the number carries a tolerance; these cells print
+    it across the top instead and keep only the arrows here.
+    """
+    dx = x + offset
+    s.line(x, y_low, dx, y_low, th.muted, 0.9, dash="3,3")
+    s.line(x, y_high, dx, y_high, th.muted, 0.9, dash="3,3")
+    mid = (y_low + y_high) / 2
+    s.arrow(dx, mid - 4, dx, y_high, th.muted, 1.2)
+    s.arrow(dx, mid + 4, dx, y_low, th.muted, 1.2)
+
+
+def _d_workstation_microphone(s: SVG, th: Theme) -> None:
+    """The five microphone positions of ISO 11201 Clause 9, drawn.
+
+    The emission sound pressure level belongs to a position, and the
+    standard spends a whole clause saying which one. Each cell here is one
+    of its cases, with the distance the clause prints: beside a head, above
+    a seat, above a footprint on the floor, along a path, and around a
+    machine that nobody stands at.
+    """
+    s.text(
+        450,
+        60,
+        "The emission level belongs to a position, and this is the position",
+        16,
+        th.fg,
+    )
+
+    left, gap = 26.0, 13.0
+    top1, h1 = 84.0, 214.0
+    w1 = (900.0 - 2 * left - 2 * gap) / 3.0
+
+    # --- 9.1  Operator present: the head in plan ---------------------------
+    x0 = left
+    _cell(s, th, x0, top1, w1, h1, "9.1", "Operator present")
+    cx, cy = x0 + w1 / 2 - 30.0, top1 + 108.0
+    ydim = cy + 54.0
+    s.text(x0 + w1 / 2, top1 + 46, "0.20 m ± 0.02 m", 12, th.fg)
+    s.line(cx, top1 + 56, cx, ydim, th.muted, 1.1, dash="4,4")
+    s.circle(cx, cy, 20.0, th.panel, th.fg, sw=2.0)
+    s.path(
+        f"M {cx - 7:.1f} {cy - 18:.1f} L {cx:.1f} {cy - 29:.1f} "
+        f"L {cx + 7:.1f} {cy - 18:.1f} Z",
+        fill=th.fg,
+        stroke=th.fg,
+        sw=1.0,
+    )
+    s.text(cx - 30, cy - 2, "centre plane", 11, th.muted, anchor="end")
+    s.arrow(cx, cy - 36, cx, cy - 58, th.muted, 1.4)
+    s.text(cx + 12, cy - 46, "line of vision", 11, th.muted, anchor="start")
+    mx = cx + 64.0
+    s.rect(mx - 5, cy - 15, 10, 24, th.primary, th.primary, rx=4, sw=1.0)
+    s.line(mx, cy + 9, mx, ydim, th.muted, 1.1, dash="4,4")
+    mid = (cx + mx) / 2
+    s.arrow(mid - 4, ydim, cx, ydim, th.muted, 1.2)
+    s.arrow(mid + 4, ydim, mx, ydim, th.muted, 1.2)
+    s.text(x0 + w1 / 2, top1 + h1 - 34, "on a line with the eyes,", 12, th.fg)
+    s.text(x0 + w1 / 2, top1 + h1 - 16, "on the louder side", 12, th.fg)
+
+    # --- 9.2  Seated operator absent ---------------------------------------
+    x0 = left + w1 + gap
+    _cell(s, th, x0, top1, w1, h1, "9.2", "Seat, nobody in it")
+    seat_y = top1 + 146.0
+    scx = x0 + w1 / 2 + 8.0
+    s.rect(scx - 44, seat_y, 88, 11, th.muted, th.fg, rx=3, sw=1.4)
+    s.rect(scx + 33, seat_y - 48, 11, 48, th.muted, th.fg, rx=3, sw=1.4)
+    s.line(scx, seat_y + 11, scx, seat_y + 26, th.fg, 2.0)
+    s.line(scx - 20, seat_y + 26, scx + 20, seat_y + 26, th.fg, 2.0)
+    s.line(scx - 62, seat_y, scx + 58, seat_y, th.primary, 1.1, dash="5,4")
+    cap = top1 + 54.0
+    s.rect(scx - 5, cap, 10, 24, th.primary, th.primary, rx=4, sw=1.0)
+    _height_dim(s, th, scx, seat_y, cap + 24, -56.0)
+    s.text(x0 + w1 / 2, top1 + 46, "0.80 m ± 0.05 m", 12, th.fg)
+    s.text(x0 + w1 / 2, top1 + h1 - 16, "above the middle of the seat", 12, th.fg)
+
+    # --- 9.3  Standing operator absent -------------------------------------
+    x0 = left + 2 * (w1 + gap)
+    _cell(s, th, x0, top1, w1, h1, "9.3", "Standing, nobody there")
+    gy = top1 + 160.0
+    s.ground(gy, x0 + 18, x0 + w1 - 18, hatch=20)
+    # Left of centre so the label beside the floor point has the width its
+    # longest translation needs before the cell border cuts it.
+    gcx = x0 + w1 / 2 - 6.0
+    s.circle(gcx, gy, 3.6, th.secondary)
+    s.text(gcx + 12, gy - 12, "reference point", 11, th.muted, anchor="start")
+    s.mic(gcx, top1 + 62.0, gy, scale=0.8)
+    _height_dim(s, th, gcx, gy, top1 + 62.0, -58.0)
+    s.text(x0 + w1 / 2, top1 + 46, "1.55 m ± 0.075 m", 12, th.fg)
+    s.text(x0 + w1 / 2, top1 + h1 - 16, "the floor below the head", 12, th.fg)
+
+    # --- 9.4  Operator moving along a path ---------------------------------
+    top2, h2 = 322.0, 214.0
+    w2 = (900.0 - 2 * left - gap) / 2.0
+    x0 = left
+    _cell(s, th, x0, top2, w2, h2, "9.4", "Operator on a path")
+    gy = top2 + 148.0
+    s.ground(gy, x0 + 18, x0 + w2 - 18, hatch=20)
+    s.line(x0 + 44, gy - 4, x0 + w2 - 44, gy - 4, th.secondary, 2.0, dash="10,6")
+    xs = [x0 + 78.0 + k * 84.0 for k in range(4)]
+    for x in xs:
+        s.mic(x, top2 + 58.0, gy, scale=0.7)
+    s.dim(xs[1], top2 + 122, xs[2], top2 + 122, "≤ 2 m", offset=0, size=12)
+    s.text(
+        x0 + w2 / 2,
+        top2 + h2 - 16,
+        "same 1.55 m, and the levels are averaged over the path",
+        12,
+        th.fg,
+    )
+
+    # --- 9.5  Nobody at all: the reference box in plan ----------------------
+    x0 = left + w2 + gap
+    _cell(s, th, x0, top2, w2, h2, "9.5", "No work station")
+    s.text(x0 + w2 / 2, top2 + 46, "reference box", 11, th.muted)
+    bw, bh = 116.0, 40.0
+    bx, by = x0 + w2 / 2 - bw / 2, top2 + 92.0
+    bcx, bcy = bx + bw / 2, by + bh / 2
+    s.rect(bx, by, bw, bh, "none", th.fg, rx=3, sw=1.6, dash="6,4")
+    s.rect(bx + 26, by + 11, bw - 52, bh - 22, th.muted, th.fg, rx=3, sw=1.2)
+    # One metre is one metre: the four positions stand the same distance off
+    # the face they belong to, which is what the caption claims.
+    out = 22.0
+    for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+        px = bcx + dx * (bw / 2 + out)
+        py = bcy + dy * (bh / 2 + out)
+        s.circle(px, py, 6.0, th.primary)
+    s.dim(
+        bcx,
+        by + bh,
+        bcx,
+        bcy + bh / 2 + out,
+        "1 m",
+        offset=0,
+        size=12,
+        label_side="right",
+    )
+    s.text(
+        x0 + w2 / 2,
+        top2 + h2 - 34,
+        "four or more, 1.55 m above the floor",
+        12,
+        th.fg,
+    )
+    s.text(x0 + w2 / 2, top2 + h2 - 16, "and the highest one is the answer", 12, th.fg)
+
+    # --- what the number is, and is not ------------------------------------
+    s.text(
+        450,
+        top2 + h2 + 34,
+        "$L_{pA}$ at one of these positions is an emission level, not a sound "
+        "power level: it says what the machine does to whoever is there.",
+        13,
+        th.muted,
+    )
+    s.text(
+        450,
+        top2 + h2 + 56,
+        "The background correction $K_1$ and the environmental correction "
+        "$K_2$ or $K_3$ come off it, and a peak level takes neither.",
+        13,
+        th.muted,
+    )

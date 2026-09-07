@@ -2684,6 +2684,11 @@ corrects for it accurately; ISO 11203 derives the level from the sound power
 level, so nothing is measured at the work station itself; ISO 11205 uses intensity and is not
 implemented here.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_workstation_microphone_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_workstation_microphone.svg" alt="Five panels, one for each case of Clause 9. 9.1, operator present: the head seen from above with its centre plane dashed and the line of vision arrowed forward, and a microphone 0.20 m plus or minus 0.02 m to the side, on a line with the eyes and on the louder side. 9.2, a seat with nobody in it: a microphone 0.80 m plus or minus 0.05 m above the middle of the seat plane. 9.3, a standing position with nobody there: a microphone on a stand 1.55 m plus or minus 0.075 m above a reference point marked on the floor, the point below the centre of the operator's head. 9.4, an operator on a path: four microphones on stands above a dashed path on the floor, no more than 2 m apart, at that same height, with the levels averaged over the path. 9.5, no work station at all: a plan view of the reference box drawn around the machine with four microphone positions 1 m out from each side, at 1.55 m above the floor, of which the highest is the answer. Underneath, a note that the level at one of these positions is an emission level and not a sound power level, that the background correction K1 and the environmental correction K2 or K3 come off it, and that a peak level takes neither." width="100%"></picture>
+
+*The clause is short and those five cases are all of it: what changes is where
+the microphone stands, never what is taken off what it reads.*
+
 ## 1. One law, printed three times
 
 $$

@@ -3191,6 +3191,18 @@ _ES: dict[str, str] = {
     "9.5": "9.5",
     "$L_{pA}$ at one of these positions is an emission level, not a sound power level: it says what the machine does to whoever is there.": "$L_{pA}$ en una de estas posiciones es un nivel de emisión, no un nivel de potencia sonora: dice lo que la máquina le hace a quien está ahí.",
     "The background correction $K_1$ and the environmental correction $K_2$ or $K_3$ come off it, and a peak level takes neither.": "De él se descuentan la corrección de ruido de fondo $K_1$ y la corrección ambiental $K_2$ o $K_3$, y un nivel de pico no lleva ninguna de las dos.",
+    # Where control valve noise is made, and where it is quoted
+    # (devices/noise-control/control-valve-noise, valve-cavitation).
+    "Where control valve noise is made, and where it is quoted": "Dónde se hace el ruido de una válvula de control, y dónde se declara",
+    "Almost nothing comes out of the valve; the pipe wall is the way out": "Por la válvula no sale casi nada; la salida es la pared del tubo",
+    "flow": "flujo",
+    "valve": "válvula",
+    "the vena contracta is the source": "la vena contracta es la fuente",
+    "through the wall": "por la pared del tubo",
+    "a fast outlet is a second source,": "una salida rápida es una segunda fuente,",
+    "added to the first on energy": "que se suma en energía a la primera",
+    "The body is not the path and the valve is not the source:": "El cuerpo no es el camino y la válvula no es la fuente:",
+    "the noise is made where the stream chokes, and the wall decides how much of it is heard.": "el ruido se hace donde la vena se estrangula, y la pared decide cuánto se oye.",
 }
 
 

@@ -13,6 +13,11 @@ anyone hears.
 IEC 60534-8-3 is that chain, from an operating point to a level one metre from
 the pipe wall, and this page follows it.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_valve_noise_place_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_valve_noise_place.svg" alt="A section through a control valve on a pipe. The flow enters from the left, the valve body straddles the pipe with its plug closing on a seat, and the stream chokes at the vena contracta just downstream of the plug, marked as the source. From there a wedge-shaped jet spreads downstream inside the pipe. An arrow leaves the pipe wall and goes up to a microphone, labelled as the way out through the wall, and the microphone is dimensioned 1 m downstream of the valve body and 1 m from the outer pipe wall, where the A-weighted level L p A e 1 m is quoted. Further downstream an arrow points at the pipe to say a fast outlet is a second source, added to the first on energy. Underneath, a note that the body is not the path and the valve is not the source: the noise is made where the stream chokes, and the wall decides how much of it is heard." width="100%"></picture>
+
+*The whole of Clause 5 lives between those two points: what the jet makes, and
+what is left of it a metre outside the wall.*
+
 ## 1. Five regimes, and why the method has a branch in it
 
 Everything turns on the **differential pressure ratio**, Equation (1):

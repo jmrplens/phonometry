@@ -13,8 +13,10 @@ Vibration transmitted to a person is evaluated with a measurement chain
 deliberately parallel to a sound level meter's: the acceleration is
 **frequency-weighted** to reflect how the body responds at each frequency,
 reduced to a **weighted r.m.s.** value or a dose, combined across axes, and
-normalised to a **daily exposure** that regulation can act on. The two pages
-of this section cover the general chain and the special case that breaks it.
+normalised to a **daily exposure** that regulation can act on. Four pages
+cover it: the general chain, the special case that breaks it, what a seat does
+to the vibration it passes on, and whether the instrument doing the measuring
+is entitled to be believed.
 
 [Human Vibration](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/) is the general chain.
 It covers the whole-body and hand-arm frequency weightings of **ISO 8041-1**,
@@ -59,10 +61,14 @@ analysis](https://jmrplens.github.io/phonometry/signals/) section.
 
 ## What this section does not cover
 
-**No meter is type-tested.** ISO 8041-1's own subject — the design and
-type-testing of general-purpose human-vibration meters — is not implemented;
-only its frequency-weighting definitions are taken from it, so nothing here
-assigns a class to an instrument.
+**A meter is graded on its weighting.** The tolerance tables of ISO 8041-1 are
+implemented, so a measured weighting response can be checked against the band
+the standard allows it, which is what [meter
+verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/) is about. The
+design and type-testing clauses of that standard, from indication and
+linearity to the environmental tests, are laboratory measurements on hardware
+and stay outside: a pass on the weighting is a necessary condition for
+conformity, not a certificate of it.
 
 **Building vibration stops at the weighting.** Of ISO 2631-2 the library
 implements the direction-independent `Wm` curve and nothing else, and that is
@@ -104,9 +110,9 @@ The weightings themselves are defined once, in **ISO 8041-1:2017**, as a cascade
 of analog filters; **ISO 2631-1** applies them to whole-body vibration,
 **ISO 2631-2** to vibration in buildings, **ISO 2631-4** to rail ride comfort,
 and **ISO 5349-1/-2** to hand-transmitted vibration. This page covers the whole
-chain. Only the weighting definitions are taken from ISO 8041-1: its own
-subject, the design and type-testing of general purpose vibration meters, is
-not implemented.
+chain. Only the weighting definitions are taken from ISO 8041-1 here; what
+that standard says about the instrument measuring them is
+[meter verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Whole-body vibration measurement chain: a triaxial accelerometer at the seat/body interface of a seated person measures the x, y and z acceleration; each axis is band-limited and frequency-weighted (Wk vertical, Wd horizontal) per ISO 8041-1, reduced to a weighted r.m.s. a_w and VDV per ISO 2631-1, and the highest frequency-weighted axis value max(1.4 a_wx, 1.4 a_wy, a_wz) is normalised to the daily exposure A(8) and assessed against the EAV and ELV of Directive 2002/44/EC" width="94%"></picture>
 

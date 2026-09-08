@@ -90,6 +90,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   laboratory measurements on hardware, so the result says so and the
   documentation says so.
 
+- And the rest of what ISO 8041-1 grades arithmetically, which turned out to
+  be most of clause 5: the phase response, the band-limiting stage on its own,
+  the running r.m.s. decay and the saw-tooth signal burst.
+
+  `vibration.verify_phase_response` closes a printed oracle nobody was using.
+  Annex B tabulates a phase column for all nine weightings, 318 cells of it,
+  and Table 5 prints a tolerance for the characteristic phase deviation, and
+  until now there was nothing in the library to compare against either. The
+  criterion is Formula (6), and it is invariant to the two things a phase
+  measurement legitimately carries: a constant offset, graded at face value,
+  and a constant group delay, graded as zero. It is refused on a grid coarser
+  than the third of an octave 12.11.1 asks for, because the design goal is
+  rebuilt on the grid it is given and a coarser one can land a whole turn away
+  without the verdict noticing. `peak_deviation_percent` is Formula (H.4), the
+  one worked number of the annex: 12 degrees costs about 10 % of a peak
+  reading, and past a quarter turn the formula stops ranking pairs at all and
+  says so instead of returning a negative magnitude.
+
+  `vibration.band_limiting_factors` and `apply_band_limiting` publish the
+  two-pole pair every weighting starts with, which is what the band-limiting
+  row of the burst tables is measured on and what `band_limited_weighting_factor`
+  multiplies the design goal by to give the figure a real meter shows.
+  `verify_running_rms_decay` grades the decay Tables 10 and 11 print, and
+  `mtvv` grows the `method` those tables need to be reachable at all.
+
+  `vibration.verify_signal_burst_response` is clause 5.9: a saw-tooth burst of
+  1, 2, 4, 8 or 16 cycles, or continuous, and the r.m.s., VDV, MTVV and MSDV a
+  conforming meter reads from it. All 228 printed cells of Tables 7, 8 and 9
+  are carried as data and reproduced. Two conventions the printed tables do
+  not state had to be settled by measurement and are documented as decisions:
+  the continuous row starts at t = 0 rather than at the Table 6 start time
+  (0,5649 against the printed 0,565, where the other reading gives 0,5601),
+  and the tables come from a zero-state simulation while this library's
+  weighting filter is circular, a difference worth up to 5,2 % on four of the
+  cells.
+
+  The verdict also learned what a laboratory brings to it. 13.1 and 14.1 say
+  compliance is demonstrated when the deviation, extended by the actual
+  expanded uncertainty of measurement of the testing laboratory, does not
+  exceed the tolerance limits, so `verify_weighting` takes that uncertainty
+  and narrows both limits by it, leaving the tails alone because there is no
+  lower limit there to narrow. The figure draws the narrowed band beside the
+  printed one, since a measurement can now sit inside Table 5 and still fail.
+
 - The wave fields of the clips are solved where they are encoded. The remote
   runner could already ship a field to the CUDA machine named in `.env`, and
   the clips did not use it for anything but the AV1 encode, because the engine

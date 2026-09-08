@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 946 numerical conformance checks against 407 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 992 numerical conformance checks against 407 standards enforced in CI.
 
-phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 946 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 76 domains.
+phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 992 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 77 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -599,6 +599,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [vibration/point-mobility](https://jmrplens.github.io/phonometry/reference/api/vibration/point-mobility/)
 - [vibration/radiation-efficiency](https://jmrplens.github.io/phonometry/reference/api/vibration/radiation-efficiency/)
 - [vibration/seat-vibration](https://jmrplens.github.io/phonometry/reference/api/vibration/seat-vibration/)
+- [vibration/signal-burst](https://jmrplens.github.io/phonometry/reference/api/vibration/signal-burst/)
 - [vibration/transfer-stiffness](https://jmrplens.github.io/phonometry/reference/api/vibration/transfer-stiffness/)
 
 
@@ -41047,11 +41048,22 @@ documents, one page per module.
 | `daily_vibration_exposure` | `function` | **A(8) from several operations, assessed (ISO 5349 + Directive).**<br>• `total_values` [m/s²], `durations_s` [s]<br>• `kind`: 'hav'/'wbv'<br>• `labels` (Default: None → 'op 1', …) | `res = vibration.daily_vibration_exposure([3.0, 5.0], [2*3600, 3600], kind='hav')`<br><br>• `DailyVibrationExposure` (A(8) = 2.32) |
 | `DailyVibrationExposure` | `dataclass` | **Assessed daily exposure.**<br>• `a8` [m/s²]<br>• `labels`, `total_values`, `durations_s`, `partials`<br>• `assessment`: `ExposureAssessment`<br>• `.plot()` | `res.a8, res.assessment.zone` |
 | `HumanVibrationWarning` | `warning class` | **Human-vibration advisory.**<br>Emitted for a crest factor above 9 (ISO 2631-1 6.2.2) or other out-of-range measurement conditions | `warnings.simplefilter('error', HumanVibrationWarning)` |
-| `verify_weighting` / `WeightingVerification` | `function` / `dataclass` | **Does a vibration meter's frequency weighting meet ISO 8041-1 (Tables 4 and 5)?**<br>• `name`, `frequencies` [Hz], `measured_factors` (linear, not dB)<br>• `.passes`, `.deviation_percent`, `.failing_frequencies_hz`, `.worst_deviation_percent`, `.plot()`<br>• the weighting only: indication, linearity, overload and the environmental tests are hardware measurements this does not stand in for | `vibration.verify_weighting('Wk', [16.0], [0.86]).passes  # False` |
+| `verify_weighting` / `WeightingVerification` | `function` / `dataclass` | **Does a vibration meter's frequency weighting meet ISO 8041-1 (Tables 4 and 5)?**<br>• `name`, `frequencies` [Hz], `measured_factors` (linear, not dB)<br>• `expanded_uncertainty_percent`: the testing laboratory's own U, which extends the measured deviation (13.1 and 14.1); Default `None`, the bare deviation<br>• `.passes`, `.deviation_percent`, `.failing_frequencies_hz`, `.worst_deviation_percent`, `.expanded_uncertainty_percent`, `.plot()`<br>• the weighting only: indication, linearity, overload and the environmental tests are hardware measurements this does not stand in for | `vibration.verify_weighting('Wk', [16.0], [0.86]).passes  # False` |
+| `verify_phase_response` / `PhaseVerification` | `function` / `dataclass` | **Does its phase response meet the phase column of ISO 8041-1 Table 5?**<br>• `name`, `frequencies_hz` (ascending), `measured_phase_deg` on the continuous branch Annex B prints<br>• `.characteristic_deviation_deg` (Formula (6), one per adjacent pair, attributed to the lower frequency), `.deviation_deg`, `.tolerance_deg`, `.passes`, `.peak_deviation_percent`, `.plot()`<br>• only for a meter reporting a parameter not based on r.m.s. values (Table 5 footnote a) | `vibration.verify_phase_response('Wk', [8.0, 10.0, 12.5], phases).passes` |
+| `characteristic_phase_deviation` / `peak_deviation_percent` | `function` | **The two formulae the phase criterion is made of.**<br>• Formula (6): `|(f_n Δφ_{n+1} − f_{n+1} Δφ_n) / (f_{n+1} − f_n)|` [degrees], N − 1 values<br>• Formula (H.4): the peak-value deviation that costs, `0,48 sin Δφ0 × 100 %`, an approximation Annex H limits to Δφ0 below 30° | `vibration.peak_deviation_percent(12.0)  # 9.98 %` |
+| `NOMINAL_FREQUENCY_RANGE_HZ` | `constant` | **The nominal frequency range of each weighting (ISO 8041-1 Table 1).**<br>• `Wh` 8 to 1 000, whole-body 0,5 to 80, `Wm` 1 to 80, `Wf` 0,1 to 0,5<br>• the printed round numbers, not the band centres `10**(k/10)` Annex B tabulates at | `vibration.NOMINAL_FREQUENCY_RANGE_HZ['Wm']  # (1.0, 80.0)` |
+| `ISO8041_COVERAGE_FACTOR` / `MAX_EXPANDED_UNCERTAINTY_PERCENT` | `constant` | **What a testing laboratory's uncertainty is expanded with, and how far it may reach.**<br>• `k = 2` (13.1 and 14.1; 12.1 prints "no less than 2"), named for its standard because `hearing.COVERAGE_FACTOR` is a different one (1,65, ISO 9612)<br>• the maximum permitted expanded uncertainty per test clause, e.g. 4,5 % for 12.11.2 and 0,01 % for the timing clauses | `vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT['12.13']  # 3.0 %` |
 | `weighting_tolerance_percent` / `phase_tolerance_degrees` | `function` | **The band ISO 8041-1 Table 5 allows, region by region.**<br>• `+12 %` / `−11 %` in the central region, `+26 %` / `−21 %` in the skirts, no lower limit in the tails<br>• the phase band applies only to a meter reporting a parameter not based on r.m.s. values (Table 5 footnote a), which is why it is a separate call | `vibration.weighting_tolerance_percent('Wk', [16.0])  # (12.0, -11.0)` |
 | `TRANSITION_FREQUENCIES_HZ` / `CENTRAL_TOLERANCE_PERCENT` / `SKIRT_TOLERANCE_PERCENT` / `TAIL_TOLERANCE_PERCENT` / `UNCONSTRAINED_BELOW` | `constant` | **Tables 4 and 5 of ISO 8041-1, as data.**<br>• the four transition frequencies per weighting, built from the printed `10**(k/10)` exponents<br>• the three bands, each `(upper %, lower %, phase °)`<br>• `−100 %`, which is the absence of a lower limit rather than a wide one | `vibration.TRANSITION_FREQUENCIES_HZ['Wk']`<br><br>• (0.251, 0.631, 63.1, 158.5) Hz |
 | `REFERENCE_FREQUENCY_HZ` / `REFERENCE_ACCELERATION_M_S2` / `reference_indication` | `constant` / `function` | **The ISO 8041-1 Table 1 reference conditions.**<br>• the calibration frequency per weighting, from the radians per second the standard prints<br>• the reference r.m.s. acceleration, 1 m/s² whole-body, 10 hand-transmitted, 0,1 low-frequency<br>• `reference_indication(name)` is their product with the weighting factor there, which is what a conforming meter shows | `vibration.reference_indication('Wh')  # 2.02 m/s²` |
 | `indication_tolerance_percent` / `INDICATION_TOLERANCE_PERCENT` / `LOW_FREQUENCY_INDICATION_TOLERANCE_PERCENT` / `LOW_FREQUENCY_WEIGHTING` | `function` / `constant` | **How far the indication itself may sit from the truth (ISO 8041-1 Table 2).**<br>• 4 % at the reference frequency, and 5 % for the low-frequency whole-body case, which is `Wf` | `vibration.indication_tolerance_percent('Wf')  # 5.0` |
+| `band_limiting_response` / `band_limiting_factors` / `apply_band_limiting` | `function` | **The band-limiting stage of a weighting on its own (ISO 8041-1 Formulae (1) and (2)).**<br>• the two-pole Butterworth high-pass and low-pass pair every weighting starts with, without the transition and step stages<br>• `apply_band_limiting(signal, fs=None, *, name)` filters with it, which is what the band-limiting row of the burst tables is measured on | `vibration.band_limiting_factors('Wk', [1.0])`<br><br>• 0.9874 |
+| `band_limited_weighting_factor` / `WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT` | `function` / `constant` | **The weighting factor a band-limited channel actually shows (ISO 8041-1 Table 2, row 2).**<br>• the design goal times the band-limiting response, which is what a meter indicates when both stages are in the path<br>• the 3 % row 2 allows between the two | `vibration.band_limited_weighting_factor('Wk', [16.0])` |
+| `running_rms_decay_time` | `function` | **How long the running r.m.s. takes to fall to 10 % of its steady value (ISO 8041-1 5.13).**<br>• `integration_time_s`, and `method` selecting linear or exponential averaging<br>• the quantity Table 11 prints, timed from the moment the signal is shut off | `vibration.running_rms_decay_time(1.0, method='linear')` |
+| `verify_running_rms_decay` / `RUNNING_RMS_DECAY_RATE_DB_PER_S` / `RUNNING_RMS_DECAY_TIME_S` / `RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT` | `function` / `constant` | **Does the running r.m.s. decay at the printed rate (ISO 8041-1 Tables 10 and 11)?**<br>• the decay in decibels per second and the time to fall, per integration time, for linear and exponential averaging<br>• the 2 % the indication may differ by | `vibration.RUNNING_RMS_DECAY_RATE_DB_PER_S[1]`<br><br>• (1.0, 3.8, 4.9) s, dB, dB |
+| `verify_signal_burst_response` / `SignalBurstVerification` | `function` / `dataclass` | **A meter's response to the saw-tooth burst of ISO 8041-1 5.9 (Tables 7 to 9).**<br>• `application`, `weighting`, the measured indications per burst length<br>• `.passes`, `.deviation_percent`, `.failing_cycle_counts`, `.plot()`<br>• graded on a zero-state simulation, which is what the printed tables come from | `vibration.verify_signal_burst_response('whole-body', 'Wk', measured)` |
+| `sawtooth_burst` / `signal_burst_indications` / `SawtoothBurstTest` / `SAWTOOTH_BURST_TESTS` | `function` / `dataclass` / `constant` | **The burst signal itself and what a conforming meter reads from it (Table 6).**<br>• `sawtooth_burst(...)` builds the waveform: angular frequency, start time, cycle count, repeat and total duration<br>• the three applications, 500 rad/s hand-arm, 100 whole-body and 2,5 low-frequency | `vibration.SAWTOOTH_BURST_TESTS['whole-body'].cycle_counts`<br><br>• (1, 2, 4, 8, 16) |
+| `SIGNAL_BURST_RESPONSE` / `BURST_TOLERANCE_PERCENT` / `BAND_LIMITING` | `constant` | **Tables 7, 8 and 9 as data, and the tolerance each column carries.**<br>• 228 printed cells keyed by `(application, weighting, cycles)`, with `None` for the continuous row<br>• 10 % on the r.m.s. and MTVV columns, 12 % on VDV<br>• `'band-limiting'` names the row measured with the weighting stages out of the path | `vibration.BURST_TOLERANCE_PERCENT['vdv']  # 12.0` |
 | `REFERENCE_ACCELERATION` | `float` | **Vibration reference acceleration [m/s²].**<br>1e-6 (ISO 1683 acceleration level reference) | `REFERENCE_ACCELERATION  # 1e-06` |
 | `REFERENCE_DURATION_S` | `float` | **Daily-exposure reference duration T0 [s].**<br>28800 (8 h) | `REFERENCE_DURATION_S  # 28800.0` |
 | `HAV_EAV_A8` | `float` | **Hand-arm exposure action value [m/s²].**<br>2.5 (Directive 2002/44/EC) | `HAV_EAV_A8  # 2.5` |
@@ -55390,7 +55402,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 946 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 992 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -55759,7 +55771,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-946 numerical conformance checks across 76 domains and 407 standards, covering
+992 numerical conformance checks across 77 domains and 407 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise
@@ -58185,9 +58197,9 @@ The weightings themselves are defined once, in **ISO 8041-1:2017**, as a cascade
 of analog filters; **ISO 2631-1** applies them to whole-body vibration,
 **ISO 2631-2** to vibration in buildings, **ISO 2631-4** to rail ride comfort,
 and **ISO 5349-1/-2** to hand-transmitted vibration. This page covers the whole
-chain. Only the weighting definitions are taken from ISO 8041-1: its own
-subject, the design and type-testing of general purpose vibration meters, is
-not implemented.
+chain. Only the weighting definitions are taken from ISO 8041-1 here; what
+that standard says about the instrument measuring them is
+[meter verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Whole-body vibration measurement chain: a triaxial accelerometer at the seat/body interface of a seated person measures the x, y and z acceleration; each axis is band-limited and frequency-weighted (Wk vertical, Wd horizontal) per ISO 8041-1, reduced to a weighted r.m.s. a_w and VDV per ISO 2631-1, and the highest frequency-weighted axis value max(1.4 a_wx, 1.4 a_wy, a_wz) is normalised to the daily exposure A(8) and assessed against the EAV and ELV of Directive 2002/44/EC" width="94%"></picture>
 
@@ -58609,8 +58621,10 @@ Vibration transmitted to a person is evaluated with a measurement chain
 deliberately parallel to a sound level meter's: the acceleration is
 **frequency-weighted** to reflect how the body responds at each frequency,
 reduced to a **weighted r.m.s.** value or a dose, combined across axes, and
-normalised to a **daily exposure** that regulation can act on. The two pages
-of this section cover the general chain and the special case that breaks it.
+normalised to a **daily exposure** that regulation can act on. Four pages
+cover it: the general chain, the special case that breaks it, what a seat does
+to the vibration it passes on, and whether the instrument doing the measuring
+is entitled to be believed.
 
 [Human Vibration](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/) is the general chain.
 It covers the whole-body and hand-arm frequency weightings of **ISO 8041-1**,
@@ -58655,10 +58669,14 @@ analysis](https://jmrplens.github.io/phonometry/signals/) section.
 
 ## What this section does not cover
 
-**No meter is type-tested.** ISO 8041-1's own subject — the design and
-type-testing of general-purpose human-vibration meters — is not implemented;
-only its frequency-weighting definitions are taken from it, so nothing here
-assigns a class to an instrument.
+**A meter is graded on its weighting.** The tolerance tables of ISO 8041-1 are
+implemented, so a measured weighting response can be checked against the band
+the standard allows it, which is what [meter
+verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/) is about. The
+design and type-testing clauses of that standard, from indication and
+linearity to the environmental tests, are laboratory measurements on hardware
+and stay outside: a pass on the weighting is a necessary condition for
+conformity, not a certificate of it.
 
 **Building vibration stops at the weighting.** Of ISO 2631-2 the library
 implements the direction-independent `Wm` curve and nothing else, and that is
@@ -59243,10 +59261,14 @@ Turning a vibration spectrum into a diagnosis of the machine that made it.
 
 ## What this section does not cover
 
-**No instrument is type-tested.** ISO 8041-1's own subject, the design and
-type-testing of human-vibration meters, is not implemented: only its frequency
-weightings are taken from it, so a class verdict for a hand-held meter is not
-something this library can give.
+**An instrument is graded on its weighting and on nothing else.** The
+tolerance tables of ISO 8041-1 are implemented, so a measured weighting
+response can be checked against the band the standard allows it, on the
+[meter verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/) page.
+The rest of that standard, the indication, linearity, overload, temperature,
+humidity and electromagnetic clauses, is a set of laboratory tests on
+hardware, so a pass here is a necessary condition for conformity and never a
+certificate of it.
 
 **No severity verdict is issued for a machine.** The machinery pages predict
 *where* a line would be, never whether it is present or whether the machine is

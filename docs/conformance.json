@@ -3,12 +3,12 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 961,
-    "passing": 961,
+    "checks": 992,
+    "passing": 992,
     "failing": 0,
-    "domains": 76,
+    "domains": 77,
     "standards": 407,
-    "citations": 677,
+    "citations": 686,
     "designations": 145,
     "sources": 83
   },
@@ -53,6 +53,8 @@
     "m/N",
     "m/s",
     "m/s per °C",
+    "m/s^1.5",
+    "m/s^1.75",
     "m/s²",
     "mm/s",
     "modes/Hz",
@@ -193,14 +195,20 @@
     {
       "id": "human-vibration-meter-verification-iso-8041-1",
       "title": "Human-vibration meter verification (ISO 8041-1)",
-      "checks": 30,
-      "passing": 30
+      "checks": 44,
+      "passing": 44
     },
     {
       "id": "seat-vibration-transmission-iso-10326-1",
       "title": "Seat vibration transmission (ISO 10326-1)",
       "checks": 7,
       "passing": 7
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "title": "Saw-tooth signal burst (ISO 8041-1 5.9)",
+      "checks": 17,
+      "passing": 17
     },
     {
       "id": "machine-vibration-evaluation-iso-20816",
@@ -11206,6 +11214,441 @@
       "verdict": "pass"
     },
     {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-13-1-and-14-1/decision-rule-at-the-upper-tolerance-limit-2-verdicts",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "13.1 and 14.1",
+        "cite": "ISO 8041-1:2017 13.1 and 14.1"
+      },
+      "quantity": "Decision rule at the upper tolerance limit, 2 verdicts",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "11,5 % conforms bare, and not with U = 1 % against +12 %"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 verdicts"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-13-1-and-14-1/decision-rule-at-the-lower-tolerance-limit-2-verdicts",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "13.1 and 14.1",
+        "cite": "ISO 8041-1:2017 13.1 and 14.1"
+      },
+      "quantity": "Decision rule at the lower tolerance limit, 2 verdicts",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "-10,5 % conforms bare, and not with U = 1 % against -11 %"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 verdicts"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-13-1-and-14-1/coverage-factor-of-the-expanded-uncertainty",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "13.1 and 14.1",
+        "cite": "ISO 8041-1:2017 13.1 and 14.1"
+      },
+      "quantity": "Coverage factor of the expanded uncertainty",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.0
+      },
+      "computed": {
+        "value": 2.0
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-12-11-and-12-13/maximum-permitted-expanded-uncertainties-of-measurement",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "12.11 and 12.13",
+        "cite": "ISO 8041-1:2017 12.11 and 12.13"
+      },
+      "quantity": "Maximum permitted expanded uncertainties of measurement, %",
+      "kind": "record",
+      "expected": {
+        "label": "12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 %; 12.13 = 3 %",
+        "record": {
+          "12.11.2": 4.5,
+          "12.11.3": 3.0,
+          "12.11.4": 5.0,
+          "12.13": 3.0
+        }
+      },
+      "computed": {
+        "label": "12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 %; 12.13 = 3 %",
+        "record": {
+          "12.11.2": 4.5,
+          "12.11.3": 3.0,
+          "12.11.4": 5.0,
+          "12.13": 3.0
+        }
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/nominal-frequency-range-9-weightings",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Nominal frequency range, 9 weightings",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18 printed range bounds, 9 weightings"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 printed range bounds"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/nominal-frequency-range-of-the-three-applications-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Nominal frequency range of the three applications, Hz",
+      "kind": "record",
+      "expected": {
+        "label": "Wh lower = 8 Hz; Wh upper = 1000 Hz; Wm lower = 1 Hz; Wf upper = 0.5 Hz",
+        "record": {
+          "Wh lower": 8.0,
+          "Wh upper": 1000.0,
+          "Wm lower": 1.0,
+          "Wf upper": 0.5
+        }
+      },
+      "computed": {
+        "label": "Wh lower = 8 Hz; Wh upper = 1000 Hz; Wm lower = 1 Hz; Wf upper = 0.5 Hz",
+        "record": {
+          "Wh lower": 8.0,
+          "Wh upper": 1000.0,
+          "Wm lower": 1.0,
+          "Wf upper": 0.5
+        }
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-formula-h-4/peak-value-deviation-at-12-degrees-of-characteristic-phase-deviation",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Formula (H.4)",
+        "cite": "ISO 8041-1:2017 Formula (H.4)"
+      },
+      "quantity": "Peak-value deviation at 12 degrees of characteristic phase deviation, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.0
+      },
+      "computed": {
+        "value": 9.9798
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.0202
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-annex-b/wh-design-goal-phase-at-158-5-hz-degrees",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Annex B",
+        "cite": "ISO 8041-1:2017 Annex B"
+      },
+      "quantity": "Wh design-goal phase at 158.5 Hz, degrees",
+      "kind": "scalar",
+      "expected": {
+        "value": -93.75
+      },
+      "computed": {
+        "value": -93.7544
+      },
+      "unit": "deg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.0044
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-annex-b/wb-design-goal-phase-at-1-hz-degrees",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Annex B",
+        "cite": "ISO 8041-1:2017 Annex B"
+      },
+      "quantity": "Wb design-goal phase at 1 Hz, degrees",
+      "kind": "scalar",
+      "expected": {
+        "value": 42.42
+      },
+      "computed": {
+        "value": 42.4193
+      },
+      "unit": "deg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.0007
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-annex-b/wk-design-goal-phase-at-15-85-hz-degrees",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Annex B",
+        "cite": "ISO 8041-1:2017 Annex B"
+      },
+      "quantity": "Wk design-goal phase at 15.85 Hz, degrees",
+      "kind": "scalar",
+      "expected": {
+        "value": -61.84
+      },
+      "computed": {
+        "value": -61.8405
+      },
+      "unit": "deg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.0005
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-annex-b/wf-design-goal-phase-at-0-3981-hz-degrees",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Annex B",
+        "cite": "ISO 8041-1:2017 Annex B"
+      },
+      "quantity": "Wf design-goal phase at 0.3981 Hz, degrees",
+      "kind": "scalar",
+      "expected": {
+        "value": -162.1
+      },
+      "computed": {
+        "value": -162.1181
+      },
+      "unit": "deg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.0181
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-annex-b/design-goal-phase-columns-of-tables-b-1-to-b-9-318-cells",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Annex B",
+        "cite": "ISO 8041-1:2017 Annex B"
+      },
+      "quantity": "Design-goal phase columns of Tables B.1 to B.9, 318 cells",
+      "kind": "count",
+      "expected": {
+        "value": 318.0,
+        "label": "318 printed phase cells, 9 weightings"
+      },
+      "computed": {
+        "value": 318.0,
+        "label": "318/318 printed phase cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-5/printed-phase-columns-judged-by-formula-6-9-weightings",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 5",
+        "cite": "ISO 8041-1:2017 Table 5"
+      },
+      "quantity": "Printed phase columns judged by Formula (6), 9 weightings",
+      "kind": "count",
+      "expected": {
+        "value": 9.0,
+        "label": "9 printed phase columns inside Table 5"
+      },
+      "computed": {
+        "value": 9.0,
+        "label": "9/9 weightings"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-h-2-3-4-n/characteristic-phase-deviation-of-a-constant-group-delay-degrees",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "H.2.3.4 n)",
+        "cite": "ISO 8041-1:2017 H.2.3.4 n)"
+      },
+      "quantity": "Characteristic phase deviation of a constant group delay, degrees",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 deg for any constant delay"
+      },
+      "computed": {
+        "value": 2.83e-13
+      },
+      "unit": "deg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 2.83e-13
+      },
+      "precision": 9,
+      "verdict": "pass"
+    },
+    {
       "id": "seat-vibration-transmission-iso-10326-1/iso-10326-1-2016-formula-2/seat-factor-of-one-test",
       "domain": "seat-vibration-transmission-iso-10326-1",
       "reference": {
@@ -11404,6 +11847,502 @@
         "value": 0.0
       },
       "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-7/signal-burst-response-hand-arm-every-printed-cell",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 7",
+        "cite": "ISO 8041-1:2017 Table 7"
+      },
+      "quantity": "Signal-burst response, hand-arm: every printed cell",
+      "kind": "count",
+      "expected": {
+        "value": 12.0,
+        "label": "12 cells inside the printed tolerance"
+      },
+      "computed": {
+        "value": 12.0,
+        "label": "12/12 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-8/signal-burst-response-whole-body-every-printed-cell",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 8",
+        "cite": "ISO 8041-1:2017 Table 8"
+      },
+      "quantity": "Signal-burst response, whole-body: every printed cell",
+      "kind": "count",
+      "expected": {
+        "value": 192.0,
+        "label": "192 cells inside the printed tolerance"
+      },
+      "computed": {
+        "value": 192.0,
+        "label": "192/192 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-9/signal-burst-response-low-frequency-whole-body-every-printed-cell",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 9",
+        "cite": "ISO 8041-1:2017 Table 9"
+      },
+      "quantity": "Signal-burst response, low-frequency-whole-body: every printed cell",
+      "kind": "count",
+      "expected": {
+        "value": 24.0,
+        "label": "24 cells inside the printed tolerance"
+      },
+      "computed": {
+        "value": 24.0,
+        "label": "24/24 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-7/band-limiting-1-cycle-r-m-s-value-m-s2",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 7",
+        "cite": "ISO 8041-1:2017 Table 7"
+      },
+      "quantity": "band-limiting, 1 cycle, r.m.s. value, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0448
+      },
+      "computed": {
+        "value": 0.04476
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -4e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-7/band-limiting-continuous-r-m-s-value-m-s2",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 7",
+        "cite": "ISO 8041-1:2017 Table 7"
+      },
+      "quantity": "band-limiting, continuous, r.m.s. value, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.565
+      },
+      "computed": {
+        "value": 0.5649
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.0001
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-7/wh-16-cycles-r-m-s-value-m-s2",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 7",
+        "cite": "ISO 8041-1:2017 Table 7"
+      },
+      "quantity": "Wh, 16 cycles, r.m.s. value, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0309
+      },
+      "computed": {
+        "value": 0.03084
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -6e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-8/band-limiting-continuous-r-m-s-value-m-s2",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 8",
+        "cite": "ISO 8041-1:2017 Table 8"
+      },
+      "quantity": "band-limiting, continuous, r.m.s. value, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.546
+      },
+      "computed": {
+        "value": 0.54547
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.00053
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-8/wb-4-cycles-r-m-s-value-m-s2",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 8",
+        "cite": "ISO 8041-1:2017 Table 8"
+      },
+      "quantity": "Wb, 4 cycles, r.m.s. value, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0614
+      },
+      "computed": {
+        "value": 0.06139
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -1e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-8/wk-1-cycle-vdv-m-s-1-75",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 8",
+        "cite": "ISO 8041-1:2017 Table 8"
+      },
+      "quantity": "Wk, 1 cycle, VDV, m/s^1.75",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.323
+      },
+      "computed": {
+        "value": 0.32306
+      },
+      "unit": "m/s^1.75",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 6e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-8/wk-16-cycles-mtvv-exponential-m-s2",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 8",
+        "cite": "ISO 8041-1:2017 Table 8"
+      },
+      "quantity": "Wk, 16 cycles, MTVV exponential, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.289
+      },
+      "computed": {
+        "value": 0.28888
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.00012
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-8/wk-continuous-mtvv-linear-m-s2",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 8",
+        "cite": "ISO 8041-1:2017 Table 8"
+      },
+      "quantity": "Wk, continuous, MTVV linear, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.364
+      },
+      "computed": {
+        "value": 0.36405
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 5e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-9/band-limiting-continuous-msdv-m-s-1-5",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 9",
+        "cite": "ISO 8041-1:2017 Table 9"
+      },
+      "quantity": "band-limiting, continuous, MSDV, m/s^1.5",
+      "kind": "scalar",
+      "expected": {
+        "value": 21.51
+      },
+      "computed": {
+        "value": 21.40289
+      },
+      "unit": "m/s^1.5",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.01
+      },
+      "deviation": {
+        "value": -0.10711
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-9/wf-1-cycle-r-m-s-value-m-s2",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 9",
+        "cite": "ISO 8041-1:2017 Table 9"
+      },
+      "quantity": "Wf, 1 cycle, r.m.s. value, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0197
+      },
+      "computed": {
+        "value": 0.01969
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -1e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-6/saw-tooth-frequency-of-the-whole-body-burst-hz",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 6",
+        "cite": "ISO 8041-1:2017 Table 6"
+      },
+      "quantity": "Saw-tooth frequency of the whole-body burst, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 15.915
+      },
+      "computed": {
+        "value": 15.9155
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": 0.0005
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-6/saw-tooth-frequency-of-the-hand-arm-burst-hz",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 6",
+        "cite": "ISO 8041-1:2017 Table 6"
+      },
+      "quantity": "Saw-tooth frequency of the hand-arm burst, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 79.58
+      },
+      "computed": {
+        "value": 79.5775
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": -0.0025
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-table-6/saw-tooth-frequency-of-the-low-frequency-whole-body-burst-hz",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 6",
+        "cite": "ISO 8041-1:2017 Table 6"
+      },
+      "quantity": "Saw-tooth frequency of the low-frequency whole-body burst, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.3979
+      },
+      "computed": {
+        "value": 0.3979
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": -1.26e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "saw-tooth-signal-burst-iso-8041-1-5-9/iso-8041-1-2017-12-13/largest-fall-time-of-the-whole-body-saw-tooth-generator-s",
+      "domain": "saw-tooth-signal-burst-iso-8041-1-5-9",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "12.13",
+        "cite": "ISO 8041-1:2017 12.13"
+      },
+      "quantity": "Largest fall time of the whole-body saw-tooth generator, s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.002
+      },
+      "computed": {
+        "value": 0.002
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
       "verdict": "pass"
     },
     {

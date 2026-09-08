@@ -193,6 +193,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`vibration.human.multiple_shock`](/phonometry/reference/api/vibration/multiple-shock/) | Whole-body vibration containing multiple shocks (ISO 2631-5:2018). |
 | [`vibration.human.seat_vibration`](/phonometry/reference/api/vibration/seat-vibration/) | What a seat does to the vibration under it (ISO 10326-1:2016). |
 | [`vibration.human.instrumentation`](/phonometry/reference/api/vibration/instrumentation/) | Type-testing a human-vibration meter against ISO 8041-1:2017. |
+| [`vibration.human.signal_burst`](/phonometry/reference/api/vibration/signal-burst/) | The saw-tooth signal burst of ISO 8041-1:2017, 5.9, and what a meter reads. |
 
 ## Environmental acoustics
 

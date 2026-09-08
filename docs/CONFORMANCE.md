@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**946/946 conformance checks pass** across 76 domains and 407 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**992/992 conformance checks pass** across 77 domains and 407 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -526,7 +526,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Human vibration (ISO 8041 / 2631 / 5349)</b>: 100% (15/15)</summary>
+<summary><b>Human vibration (ISO 8041 / 2631 / 5349)</b>: 100% (30/30)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -545,11 +545,26 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 5349-2:2001 Example E.3 | Forestry three-task A(8) | 3.6 m/s² (+/-0.05 m/s²) | 3.61 m/s² | 0.01 m/s² | 20 % | ![Pass][cv-pass] Pass |
 | ISO 5349-1:2001 Eq. (C.1) | VWF 10 % lifetime Dy at A(8)=7 | 4 yr (+/-0.1 yr) | 4.04 yr | 0.042 yr | 42 % | ![Pass][cv-pass] Pass |
 | Directive 2002/44/EC Art. 3 | HAV/WBV action & limit values | HAV 2.5/5.0, WBV 0.5/1.15 m/s^2 | HAV 2.5/5.0, WBV 0.5/1.15 m/s^2 | 0 | - | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 5.6.6 + Annex B | All nine band-limiting responses inside the Table 5 envelope (318 bands) | 0 bands outside the Table 5 tolerances | 0 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Annex B | Wk band-limiting factor at 0,631 Hz | 0.9279 (+/-0.1%) | 0.9279 | 0 | 4 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Annex B | Wf band-limiting factor at 0,3981 Hz | 0.9279 (+/-0.1%) | 0.9279 | 0 | 4 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Annex B | Wh band-limiting factor at 10 Hz | 0.9291 (+/-0.1%) | 0.9291 | 0 | 2 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Annex B | Wm band-limiting factor at 1,259 Hz | 0.9291 (+/-0.1%) | 0.9291 | 0 | 2 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table B.5 | Wf design-goal factor at 0,3981 Hz, the cell Table 2 row 2 turns on | 0.3884 (+/-0.1%) | 0.3884 | 0 | 7 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 10 | Running r.m.s. decay to 10 %, linear averaging, tau = 0.125 s | 0.124 s (+/-0.005 s) | 0.122 s | -0.002 s | 40 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 10 | Running r.m.s. decay to 10 %, linear averaging, tau = 1 s | 0.99 s (+/-0.05 s) | 0.983 s | -0.007 s | 14 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 10 | Running r.m.s. decay to 10 %, linear averaging, tau = 8 s | 7.92 s (+/-0.2 s) | 7.915 s | -0.005 s | 2 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 11 | Running r.m.s. decay to 10 %, exponential averaging, tau = 0.125 s | 0.58 s (+/-0.03 s) | 0.576 s | -0.004 s | 13 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 11 | Running r.m.s. decay to 10 %, exponential averaging, tau = 1 s | 4.61 s (+/-0.25 s) | 4.605 s | -0.005 s | 2 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 11 | Running r.m.s. decay to 10 %, exponential averaging, tau = 8 s | 36.8 s (+/-2 s) | 36.841 s | 0.041 s | 2 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 11 | Equivalent decay rate, exponential averaging, tau = 0.125 s | 31 to 40 dB/s | 34.73 dB/s | -0.766 dB/s | 17 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 11 | Equivalent decay rate, exponential averaging, tau = 1 s | 3.8 to 4.9 dB/s | 4.34 dB/s | -0.007 dB/s | 1 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 11 | Equivalent decay rate, exponential averaging, tau = 8 s | 0.48 to 0.62 dB/s | 0.54 dB/s | -0.007 dB/s | 10 % | ![Pass][cv-pass] Pass |
 
 </details>
 
 <details>
-<summary><b>Human-vibration meter verification (ISO 8041-1)</b>: 100% (30/30)</summary>
+<summary><b>Human-vibration meter verification (ISO 8041-1)</b>: 100% (44/44)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -583,6 +598,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 8041-1:2017 Table 5 | Characteristic phase deviation in the central region, degrees | 6 deg (+/-0.0005 deg) | 6 deg | 0 deg | 0 % | ![Pass][cv-pass] Pass |
 | ISO 8041-1:2017 Table 2 | Indication tolerance at the reference frequency, % | 4 % (+/-0.0005 %) | 4 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
 | ISO 8041-1:2017 Table 2 | Indication tolerance for low-frequency whole-body vibration, % | 5 % (+/-0.0005 %) | 5 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 13.1 and 14.1 | Decision rule at the upper tolerance limit, 2 verdicts | 11,5 % conforms bare, and not with U = 1 % against +12 % | 2/2 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 13.1 and 14.1 | Decision rule at the lower tolerance limit, 2 verdicts | -10,5 % conforms bare, and not with U = 1 % against -11 % | 2/2 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 13.1 and 14.1 | Coverage factor of the expanded uncertainty | 2 (+/-0.0005) | 2 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 12.11 and 12.13 | Maximum permitted expanded uncertainties of measurement, % | 12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 %; 12.13 = 3 % | 12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 %; 12.13 = 3 % | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Nominal frequency range, 9 weightings | 18 printed range bounds, 9 weightings | 18/18 printed range bounds | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Nominal frequency range of the three applications, Hz | Wh lower = 8 Hz; Wh upper = 1000 Hz; Wm lower = 1 Hz; Wf upper = 0.5 Hz | Wh lower = 8 Hz; Wh upper = 1000 Hz; Wm lower = 1 Hz; Wf upper = 0.5 Hz | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Formula (H.4) | Peak-value deviation at 12 degrees of characteristic phase deviation, % | 10 % (+/-0.05 %) | 9.9798 % | -0.0202 % | 40 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Annex B | Wh design-goal phase at 158.5 Hz, degrees | -93.75 deg (+/-0.05 deg) | -93.7544 deg | -0.0044 deg | 9 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Annex B | Wb design-goal phase at 1 Hz, degrees | 42.42 deg (+/-0.05 deg) | 42.4193 deg | -0.0007 deg | 1 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Annex B | Wk design-goal phase at 15.85 Hz, degrees | -61.84 deg (+/-0.05 deg) | -61.8405 deg | -0.0005 deg | 1 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Annex B | Wf design-goal phase at 0.3981 Hz, degrees | -162.1 deg (+/-0.05 deg) | -162.1181 deg | -0.0181 deg | 36 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Annex B | Design-goal phase columns of Tables B.1 to B.9, 318 cells | 318 printed phase cells, 9 weightings | 318/318 printed phase cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 5 | Printed phase columns judged by Formula (6), 9 weightings | 9 printed phase columns inside Table 5 | 9/9 weightings | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 H.2.3.4 n) | Characteristic phase deviation of a constant group delay, degrees | 0 deg for any constant delay | 0 deg | 0 deg | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 
@@ -598,6 +627,31 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 10326-1:2016 Formula (5) | Transmissibility at resonance of the damping test | 2 (+/-0.0005) | 2 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10326-1:2016 Clause 10.3 | Inert mass the seat carries for the damping test, kg | 75 kg (+/-0.0005 kg) | 75 kg | 0 kg | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10326-1:2016 Clause 9.5.1 | Reduced test mass for an actively damped suspension, kg | 60 kg (+/-0.0005 kg) | 60 kg | 0 kg | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Saw-tooth signal burst (ISO 8041-1 5.9)</b>: 100% (17/17)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 8041-1:2017 Table 7 | Signal-burst response, hand-arm: every printed cell | 12 cells inside the printed tolerance | 12/12 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 8 | Signal-burst response, whole-body: every printed cell | 192 cells inside the printed tolerance | 192/192 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 9 | Signal-burst response, low-frequency-whole-body: every printed cell | 24 cells inside the printed tolerance | 24/24 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 7 | band-limiting, 1 cycle, r.m.s. value, m/s2 | 0.0448 m/s² (+/-0.5%) | 0.04476 m/s² | -0.00004 m/s² | 18 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 7 | band-limiting, continuous, r.m.s. value, m/s2 | 0.565 m/s² (+/-0.5%) | 0.5649 m/s² | -0.0001 m/s² | 4 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 7 | Wh, 16 cycles, r.m.s. value, m/s2 | 0.0309 m/s² (+/-0.5%) | 0.03084 m/s² | -0.00006 m/s² | 39 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 8 | band-limiting, continuous, r.m.s. value, m/s2 | 0.546 m/s² (+/-0.5%) | 0.54547 m/s² | -0.00053 m/s² | 19 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 8 | Wb, 4 cycles, r.m.s. value, m/s2 | 0.0614 m/s² (+/-0.5%) | 0.06139 m/s² | -0.00001 m/s² | 3 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 8 | Wk, 1 cycle, VDV, m/s^1.75 | 0.323 m/s^1.75 (+/-0.5%) | 0.32306 m/s^1.75 | 0.00006 m/s^1.75 | 4 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 8 | Wk, 16 cycles, MTVV exponential, m/s2 | 0.289 m/s² (+/-0.5%) | 0.28888 m/s² | -0.00012 m/s² | 8 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 8 | Wk, continuous, MTVV linear, m/s2 | 0.364 m/s² (+/-0.5%) | 0.36405 m/s² | 0.00005 m/s² | 3 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 9 | band-limiting, continuous, MSDV, m/s^1.5 | 21.51 m/s^1.5 (+/-1%) | 21.40289 m/s^1.5 | -0.10711 m/s^1.5 | 50 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 9 | Wf, 1 cycle, r.m.s. value, m/s2 | 0.0197 m/s² (+/-0.5%) | 0.01969 m/s² | -0.00001 m/s² | 10 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 6 | Saw-tooth frequency of the whole-body burst, Hz | 15.915 Hz (+/-0.01%) | 15.9155 Hz | 0.0005 Hz | 31 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 6 | Saw-tooth frequency of the hand-arm burst, Hz | 79.58 Hz (+/-0.01%) | 79.5775 Hz | -0.0025 Hz | 31 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 6 | Saw-tooth frequency of the low-frequency whole-body burst, Hz | 0.3979 Hz (+/-0.01%) | 0.3979 Hz | 0 Hz | 32 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 12.13 | Largest fall time of the whole-body saw-tooth generator, s | 0.002 s (+/-0.000001 s) | 0.002 s | 0 s | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

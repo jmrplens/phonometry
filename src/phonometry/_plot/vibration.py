@@ -61,6 +61,7 @@ if TYPE_CHECKING:
     )
     from ..vibration.human.multiple_shock import MultipleShockResult
     from ..vibration.human.seat_vibration import SeatTransmissionResult
+    from ..vibration.human.signal_burst import SignalBurstVerification
     from ..vibration.machinery.diagnostics import FaultFrequencyResult
     from ..vibration.machinery.evaluation import VectorChangeResult
     from ..vibration.structural.building_damage import DamageAssessment
@@ -215,6 +216,19 @@ _STRINGS: dict[str, str] = {
     "height": "altura",
     "height_width": "altura y anchura",
     "slenderness": "esbeltez",
+    # Saw-tooth signal-burst response (ISO 8041-1 Tables 6 to 9).
+    "Saw-tooth cycles per burst": "Ciclos de diente de sierra por ráfaga",
+    "continuous": "continua",
+    "r.m.s. value": "valor eficaz",
+    "MTVV linear": "MTVV lineal",
+    "MTVV exponential": "MTVV exponencial",
+    r"printed tolerance $\pm${p} %": r"tolerancia impresa $\pm${p} %",
+    r"printed tolerance $\pm${p} % (VDV)": r"tolerancia impresa $\pm${p} % (VDV)",
+    "hand-arm": "mano-brazo",
+    "whole-body": "cuerpo entero",
+    "low-frequency whole-body": "cuerpo entero de baja frecuencia",
+    "band limiting": "limitación de banda",
+    "Signal-burst response (ISO 8041-1)\n{name}, {application}": "Respuesta a ráfaga de señal (ISO 8041-1)\n{name}, {application}",
 }
 
 
@@ -1812,5 +1826,118 @@ def plot_vector_change(
     )
     ax.grid(True, alpha=0.3)
     ax.legend(loc="lower left", fontsize="small", bbox_to_anchor=(-0.15, -0.1))
+    localize_axes(ax, language)
+    return ax
+
+
+#: The printed columns of ISO 8041-1 Tables 7 to 9 and the label each series
+#: carries. The two dose values keep their acronyms, which are identifiers.
+_BURST_QUANTITY_LABELS: dict[str, str] = {
+    "rms": "r.m.s. value",
+    "vdv": "VDV",
+    "mtvv_linear": "MTVV linear",
+    "mtvv_exponential": "MTVV exponential",
+    "msdv": "MSDV",
+}
+#: One colour and one marker per printed column, in printed order.
+_BURST_COLORS = (_C_PRIMARY, _C_SECONDARY, _C_TERTIARY, _C_QUATERNARY, _C_REFERENCE)
+_BURST_MARKERS = ("o", "s", "^", "D", "v")
+#: The row of Tables 7 to 9 that grades the band-limiting response, spelled as
+#: :data:`phonometry.vibration.BAND_LIMITING` spells it.
+_BAND_LIMITING_ROW = "band-limiting"
+#: The application keys of Table 6, as a title spells them.
+_BURST_APPLICATIONS: dict[str, str] = {
+    "hand-arm": "hand-arm",
+    "whole-body": "whole-body",
+    "low-frequency-whole-body": "low-frequency whole-body",
+}
+
+
+def plot_signal_burst_verification(
+    result: SignalBurstVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Signal-burst deviations against the tolerance printed beside them.
+
+    One marker series per printed column of Table 7, 8 or 9, across the burst
+    lengths the table prints, inside the shaded band the same table allows.
+    The vibration dose value is allowed 12 % where every other column is
+    allowed 10 %, so the wider pair is drawn as a dashed edge instead of
+    widening the band under all of them.
+
+    :param result: A
+        :class:`~phonometry.vibration.human.signal_burst.SignalBurstVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to every marker series.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    positions = np.arange(len(result.cycle_counts), dtype=np.float64)
+    inner = float(np.min(result.tolerance_percent))
+    outer = float(np.max(result.tolerance_percent))
+    ax.axhspan(
+        -inner,
+        inner,
+        color=_C_MUTED,
+        alpha=0.18,
+        label=_t(r"printed tolerance $\pm${p} %", language).format(
+            p=format_number(inner, language, decimals=0)
+        ),
+    )
+    if outer > inner:
+        wider = _t(r"printed tolerance $\pm${p} % (VDV)", language).format(
+            p=format_number(outer, language, decimals=0)
+        )
+        # The label goes on the first edge only: the pair is one band, and
+        # matplotlib would otherwise list it twice.
+        for index, edge in enumerate((-outer, outer)):
+            ax.axhline(
+                edge,
+                color=_C_MUTED,
+                ls="--",
+                lw=1.0,
+                label=wider if index == 0 else None,
+            )
+    ax.axhline(0.0, color=_C_EDGE, lw=0.8)
+
+    for index, quantity in enumerate(result.quantities):
+        style = dict(kwargs)
+        style_default(style, "color", _BURST_COLORS[index % len(_BURST_COLORS)])
+        style_default(style, "marker", _BURST_MARKERS[index % len(_BURST_MARKERS)])
+        style_default(style, "linewidth", 1.2)
+        style.setdefault("label", _t(_BURST_QUANTITY_LABELS[quantity], language))
+        ax.plot(positions, result.deviation_percent[:, index], **style)
+
+    ax.set_xticks(list(positions))
+    ax.set_xticklabels(
+        [
+            _t("continuous", language)
+            if cycles is None
+            else format_number(cycles, language, decimals=0)
+            for cycles in result.cycle_counts
+        ]
+    )
+    ax.set_xlabel(_t("Saw-tooth cycles per burst", language))
+    ax.set_ylabel(_t("Deviation [%]", language))
+    row = (
+        _t("band limiting", language)
+        if result.weighting == _BAND_LIMITING_ROW
+        else result.weighting
+    )
+    application = _t(_BURST_APPLICATIONS[result.application], language)
+    ax.set_title(
+        _t(
+            "Signal-burst response (ISO 8041-1)\n{name}, {application}", language
+        ).format(name=row, application=application)
+    )
+    ax.grid(True, axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
+    ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax

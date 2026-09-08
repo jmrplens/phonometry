@@ -195,6 +195,7 @@ export const apiSections = {
       'reference/api/vibration/multiple-shock',
       'reference/api/vibration/seat-vibration',
       'reference/api/vibration/instrumentation',
+      'reference/api/vibration/signal-burst',
     ],
   },
   'environment': {

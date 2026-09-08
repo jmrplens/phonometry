@@ -803,6 +803,32 @@ result.report(
 )                                            # -> Class 1 - COMPLIES, PASS
 ```
 
+**The verifiers that grade a measurement, not a design.** Five more functions
+carry the same `verify_` prefix and answer a different question. The four
+above are handed a filter this library built, and report whether that *design*
+fits an acceptance mask; these are handed numbers somebody measured on a
+bench, and report whether *that instrument, on the day it was measured*, meets
+the standard it is sold against. There are no classes and no decibel margins
+in them: the verdict is a plain pass or fail, in the unit its own standard
+writes its tolerances in.
+
+| What is graded | Verifier | Acceptance limits |
+| :--- | :--- | :--- |
+| Aircraft-noise measurement system | `verify_aircraft_noise_system` | IEC 61265:1995 Table 1, and the scalar limits beside it |
+| Human-vibration frequency weighting | `verify_weighting` | ISO 8041-1:2017 Tables 4 and 5 |
+| Human-vibration phase response | `verify_phase_response` | ISO 8041-1:2017 Table 5 and Formula (6) |
+| Saw-tooth burst indications | `verify_signal_burst_response` | ISO 8041-1:2017 Tables 6 to 9 |
+| Running r.m.s. decay time | `verify_running_rms_decay` | ISO 8041-1:2017 Tables 10 and 11 |
+
+One clause of ISO 8041-1 makes those four different in kind from everything
+else on this page. The deviation a laboratory reports is extended by that
+laboratory's own expanded uncertainty before it is compared with the limit
+(clauses 13.1 and 14.1), so the same instrument passes on one bench and fails
+on another, and `verify_weighting` takes that uncertainty as an argument
+rather than assuming it away. The four are covered by [Verifying a
+human-vibration meter](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/), and the
+aircraft one by [Aircraft noise](https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/).
+
 ## Reading the conformance report
 
 The verifiers grade *your* configuration; the

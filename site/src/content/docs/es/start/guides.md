@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 126 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 127 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -111,7 +111,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento veintiséis guías repartidas en doce temas, y cada
+Esta página es el mapa. Ciento veintisiete guías repartidas en doce temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -564,6 +564,10 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 y DIN 4150-3.
 - [Lo que un asiento hace con la vibración (ISO 10326-1)](/phonometry/es/vibration/human/seat-vibration/):
   el factor SEAT de un ensayo de asiento en laboratorio, la corrección a la
   entrada pretendida y la transmisibilidad en resonancia.
+- [Verificación del vibrómetro (ISO 8041-1)](/phonometry/es/vibration/human/meter-verification/):
+  la banda de tolerancia de cada ponderación frecuencial, la desviación
+  característica de fase, el decaimiento del r.m.s. móvil y las indicaciones
+  de la ráfaga en diente de sierra.
 
 **[Maquinaria](/phonometry/es/vibration/machinery/)**
 

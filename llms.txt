@@ -225,6 +225,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Human Vibration: Whole-Body and Hand-Arm Exposure](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/)
 - [Multiple-shock whole-body vibration (ISO 2631-5)](https://jmrplens.github.io/phonometry/vibration/human/multiple-shock-vibration/)
 - [What a seat does to the vibration (ISO 10326-1)](https://jmrplens.github.io/phonometry/vibration/human/seat-vibration/)
+- [Verifying a vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/)
 
 ### Machinery
 

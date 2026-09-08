@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Two verifier figures painted the verdict backwards. The frequency-weighting
+  and phase-response plots of ISO 8041-1 drew the points **inside** the
+  tolerance in red and the ones outside in orange, which is the only pair in
+  the corpus that reads that way and the wrong way round for a drawing whose
+  whole content is a pass or a fail. They use the green and red that
+  `plot_db_hr_assessment` already grades its rows in.
+
+- The signal-burst figure joined the continuous row to the longest burst. Its
+  abscissa is a list of the rows Tables 7 to 9 print, not a scale, and the
+  continuous row has no burst length at all, so that segment drew a trend
+  across an interval the tables never define. The burst lengths are joined to
+  one another, the continuous row is a detached marker, and a rule marks
+  where the ordered part of the axis ends.
+
 - A release tag names the commit its checks ran on. The release step passed
   the tag name and nothing else, and without a commit to point at the tag is
   cut from whatever the default branch holds when that step runs, which is

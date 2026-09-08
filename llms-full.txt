@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 916 numerical conformance checks against 407 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 919 numerical conformance checks against 408 standards enforced in CI.
 
-phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 916 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 75 domains.
+phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 919 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 75 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -34885,6 +34885,56 @@ threshold shift of ISO 1999, which adds a noise component on top of this age
 component, is the subject of the
 [noise-induced hearing loss](https://jmrplens.github.io/phonometry/perception/hearing/noise-induced-hearing-loss/) guide.
 
+## 3. The audiometric zero of an earphone (ISO 389-1)
+
+The section above ends by saying what 0 dB HL on a clinical audiometer *is*,
+and not what it is worth. **ISO 389-1:1998** prints that: the reference
+equivalent threshold sound pressure level, the level the earphone has to
+produce **in the coupler** for a hearing level of zero. It is a property of
+the earphone and of the coupler together, which is why one standard carries
+two tables and neither of them is a curve of the ear.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometric_zero_earphones_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometric_zero_earphones.svg" alt="Two panels. Left: the ISO 389-1 reference levels of three supra-aural earphone cases against frequency on a logarithmic axis from 125 Hz to 8 kHz, the Beyer DT 48 and the Telephonics TDH 39 on an IEC 60303 coupler and any other supra-aural earphone on an IEC 60318 artificial ear. All three start above 45 decibels at 125 Hz, fall to single digits between 800 Hz and 2 kHz and rise again above 4 kHz, with the artificial-ear curve peaking at 21 decibels at 6.3 kHz. Right: the same TDH 39 curve against the ISO 389-7 free-field reference threshold at the eleven frequencies they share, with the area between them shaded and labelled as the two zeros not being the same: they are twenty-three decibels apart at 125 Hz and meet again at 8 kHz." width="100%"></picture>
+
+*The two named models are calibrated on a coupler and everything else on an
+artificial ear, so the three columns are not three measurements of the same
+thing. On the right, the same audiogram against the two zeros a laboratory
+can quote it from: twenty-three decibels apart at 125 Hz.*
+
+Table 1 covers the two earphones the standard names, the Beyer DT 48 with a
+flat cushion and the Telephonics TDH 39 with the MX 41/AR (or model 51)
+cushion, both on an acoustic coupler to IEC 60303. Table 2 covers any other
+supra-aural earphone meeting the four requirements of Clause 4.3, on an
+artificial ear to IEC 60318, and Clause 4.3 excludes the two models of 4.2
+from it explicitly. Both tables are printed at twenty-three frequencies,
+the audiometric ones plus the intermediate steps an audiometer may offer,
+and both round to the nearest half decibel.
+
+```python
+from phonometry import hearing
+
+bands = [500.0, 1000.0, 2000.0, 4000.0]
+print(hearing.earphone_reference_level("TDH 39", bands))
+# [11.5  7.   9.   9.5]
+
+# An audiogram is measured from that zero, so the level in the coupler is
+# the audiogram plus the reference: nothing else is involved.
+audiogram = [15.0, 20.0, 35.0, 55.0]   # dB HL
+print(hearing.hearing_level_to_coupler_spl(audiogram, "TDH 39", bands))
+# [26.5 27.  44.  64.5]
+
+print(hearing.EARPHONE_COUPLERS["TDH 39"])   # IEC 60303 acoustic coupler
+```
+
+Two traps come with this table. The first is the one the previous section
+names: these levels and the free-field levels of ISO 389-7 are different
+numbers for different tests, and the difference is largest exactly where a
+survey is most tempted to convert, twenty-three decibels at 125 Hz. The
+second is the earphone itself. An audiogram is only as good as the model it
+was measured on, and asking for a model the standard does not print raises
+rather than guessing: an HDA 200 belongs to ISO 389-8 and an insert phone to
+ISO 389-2, not here.
+
 ## See also
 
 - [Noise-induced hearing loss](https://jmrplens.github.io/phonometry/perception/hearing/noise-induced-hearing-loss/): the ISO 1999 model
@@ -40602,6 +40652,8 @@ documents, one page per module.
 | `FIELDS` | `tuple` | **The listening fields `reference_threshold` accepts**: `'free-field'`, `'diffuse-field'`. | `hearing.FIELDS` |
 | `SEXES` | `tuple` | **The populations `age_threshold` accepts** (ISO 7029:2017 tabulates the two separately): `'male'`, `'female'`. | `hearing.SEXES` |
 | `reference_threshold` | `function` | **Reference threshold of hearing, 0 dB HL (ISO 389-7:2005 Table 1).**<br>• `field`: 'free-field' or 'diffuse-field' (Default: 'free-field')<br>• `frequencies`: optional subset [Hz] | `t = hearing.reference_threshold()`<br><br>• dB SPL per audiometric frequency (1 kHz → 2.4) |
+| `RETSPL_FREQUENCIES_HZ` / `EARPHONES` / `EARPHONE_COUPLERS` | `constant` | **ISO 389-1 Tables 1 and 2: the twenty-three test frequencies, the three earphone cases the standard prints a reference level for, and the coupler each of them is calibrated on.** | `hearing.EARPHONE_COUPLERS['TDH 39']  # 'IEC 60303 acoustic coupler'` |
+| `earphone_reference_level` / `hearing_level_to_coupler_spl` | `function` | **ISO 389-1:1998: what 0 dB HL is on a supra-aural earphone, and what an audiogram is worth in the coupler.**<br>• `earphone_reference_level(earphone, frequencies)`: the RETSPL, for `'DT 48'` or `'TDH 39'` (Table 1, IEC 60303 coupler) or `'other supra-aural'` (Table 2, IEC 60318 artificial ear)<br>• `hearing_level_to_coupler_spl(hearing_level, earphone, frequencies)`: the audiogram plus that reference, which is all hearing level means | `hearing.earphone_reference_level('TDH 39', [1000.0])  # 7.0 dB` |
 | `AgeThresholdResult` | `dataclass` | **Age threshold distribution.**<br>• `age`, `sex`, `fractile`<br>• `frequencies` [Hz]<br>• `median`: deviation from age 18 [dB]<br>• `spread_upper` / `spread_lower`: half-Gaussian su/sl [dB]<br>• `threshold`: value at `fractile` [dB]<br>• `.plot()` | `at.median, at.threshold` |
 | `nipts` | `function` | **Noise-induced permanent threshold shift (ISO 1999:2013 §6.3).**<br>• `l_ex`: LEX,8h [dB]<br>• `years`: exposure duration (10–40 established; 1–10 extrapolated by Formula 3)<br>• `fractile`: (0, 1) (Default: 0.5)<br>• `frequencies`: subset [Hz] (Default: None → 500–6000 Hz) | `n = hearing.nipts(95.0, 20.0)`<br><br>• `NiptsResult`; N50 at 4 kHz = 23.0 dB |
 | `htlan` | `function` | **Threshold associated with age and noise, H′ = H + N − HN/120 (ISO 1999 Formula 1).**<br>• `age`: years (≥ 18), `sex`: 'male'/'female'<br>• `l_ex`: LEX,8h [dB], `years`<br>• `fractile`: (0, 1) applied to both components (Default: 0.5)<br>• `frequencies` | `h = hearing.htlan(60, 'male', 95.0, 20.0)`<br><br>• `HtlanResult`; H′ at 4 kHz = 39.3 dB |
@@ -55386,7 +55438,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 916 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 919 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -55755,7 +55807,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-916 numerical conformance checks across 75 domains and 407 standards, covering
+919 numerical conformance checks across 75 domains and 408 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

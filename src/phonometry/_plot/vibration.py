@@ -676,7 +676,7 @@ def plot_seat_transmission(
     ax = ax if ax is not None else _new_axes()
     runs = np.arange(len(result.platform_runs)) + 1.0
     width = 0.36
-    ax.bar(
+    platform_bars = ax.bar(
         runs - width / 2,
         result.platform_runs,
         width=width,
@@ -685,11 +685,8 @@ def plot_seat_transmission(
     )
     kwargs.setdefault("color", _C_TERTIARY)
     kwargs.setdefault("label", _t(r"seat $a_\mathrm{wS}$", language))
-    ax.bar(runs + width / 2, result.seat_runs, width=width, **kwargs)
-    for value, colour in (
-        (result.platform_acceleration, _C_PRIMARY),
-        (result.seat_acceleration, _C_TERTIARY),
-    ):
+    seat_bars = ax.bar(runs + width / 2, result.seat_runs, width=width, **kwargs)
+    means = [
         ax.axhline(
             value,
             color=colour,
@@ -699,6 +696,11 @@ def plot_seat_transmission(
                 value=format_number(value, language, decimals=2)
             ),
         )
+        for value, colour in (
+            (result.platform_acceleration, _C_PRIMARY),
+            (result.seat_acceleration, _C_TERTIARY),
+        )
+    ]
     ax.set_xticks(runs)
     ax.set_xlabel(_t("Test run", language))
     ax.set_ylabel(_t("Weighted r.m.s. acceleration [m/s²]", language))
@@ -709,7 +711,14 @@ def plot_seat_transmission(
     )
     ax.grid(True, axis="y", alpha=0.3)
     ax.set_axisbelow(True)
-    ax.legend(loc="best", fontsize="small")
+    # Each mean beside the set it belongs to: matplotlib would otherwise list
+    # the two dashed lines first, leaving colour as the only clue to which
+    # surface each average came from.
+    ax.legend(
+        handles=[platform_bars, means[0], seat_bars, means[1]],
+        loc="best",
+        fontsize="small",
+    )
     localize_axes(ax, language)
     return ax
 

@@ -4,13 +4,14 @@
 
 A machine fixed to a building radiates sound twice: directly from its own
 vibrating surface, and indirectly by injecting **structure-borne power** into
-the structure, which carries it away and re-radiates it in distant rooms. Six
-pages cover both paths, three of them here and three elsewhere on the site: one
-estimates the direct radiation from the surface vibration itself, and the other
-five characterise
+the structure, which carries it away and re-radiates it in distant rooms. Seven
+pages cover both paths and the question that is not about sound at all, four of
+them here and three elsewhere on the site: one estimates the direct radiation
+from the surface vibration itself, five characterise
 the second, sneakier structure-borne path end to end, from describing the
 vibration and characterising the isolators to quantifying the power and
-predicting the level a listener finally hears.
+predicting the level a listener finally hears, and the seventh asks instead
+whether the shaking damages the building.
 
 The language comes first.
 [Mechanical mobility and the FRF family (ISO 7626-1)](mechanical-mobility.md)
@@ -48,6 +49,16 @@ mobilities, and predicts the sound pressure level in the receiving room,
 which is where this section meets the
 [sound insulation](../../buildings/insulation/index.md) models.
 
+One page here asks a different question of the same shaking.
+[Vibration damage to structures (DIN 4150-3)](structural-damage.md)
+is not about what a building radiates but about whether it cracks, and it
+answers with a screening comparison rather than a verdict: the guideline values
+for the peak particle velocity, chosen by building class and by how often the
+vibration occurs at a foundation and in the topmost floor plane, and by pipe
+material on a buried pipeline. Keeping under one is where experience says the
+question stops; exceeding one sends the reader to the stress calculation, not
+to a finding of damage.
+
 ## Pages in this section
 
 - [Mechanical mobility and the FRF family (ISO 7626-1)](mechanical-mobility.md):
@@ -59,6 +70,9 @@ which is where this section meets the
   by power injection, with the modal densities they need.
 - [Transfer stiffness of resilient elements (ISO 10846)](transfer-stiffness.md):
   dynamic transfer stiffness of isolators by the direct and indirect methods.
+- [Vibration damage to structures (DIN 4150-3)](structural-damage.md):
+  the guideline peak velocities of Tables 1, 2 and 3, the reading of Bild 1
+  between them, and the bending stress a measured velocity implies.
 
 ## See also
 

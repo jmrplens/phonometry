@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 124 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 125 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -110,7 +110,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and twenty-four guides sit in twelve topics, and each topic has its
+This page is the map. A hundred and twenty-five guides sit in twelve topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -492,7 +492,7 @@ junctions and human vibration. The area covers the path a machine takes into a
 structure and out again as airborne sound, and the separate question of what
 vibration does to the person exposed to it. Implements ISO 7626-1/-2,
 ISO 10846-1/-2/-3, ISO 9611, ISO/TS 7849-1/-2, EN 15657, EN 12354-5,
-ISO 2631-1/-2/-4/-5, ISO 5349-1/-2 and ISO 8041-1.
+ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 and DIN 4150-3.
 
 **[Structure-borne sources](/phonometry/vibration/structural/)**
 
@@ -506,6 +506,9 @@ ISO 2631-1/-2/-4/-5, ISO 5349-1/-2 and ISO 8041-1.
 - [Transfer stiffness of resilient elements (ISO 10846)](/phonometry/vibration/structural/transfer-stiffness/):
   the dynamic transfer stiffness and loss factor of an isolator by the direct
   and indirect methods.
+- [Vibration damage to structures (DIN 4150-3)](/phonometry/vibration/structural/structural-damage/):
+  the guideline peak particle velocities a foundation, a topmost floor plane and
+  a buried pipe are judged by, and the bending stress a velocity implies.
 - [Sound power from surface vibration (ISO/TS 7849)](/phonometry/devices/emission/vibration-sound-power/):
   the radiated power from the surface-averaged velocity level and the radiation
   factor, with the Part 1 upper limit and the Part 2 engineering value. It lives

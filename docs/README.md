@@ -184,6 +184,7 @@ the diagnostic signature of a machine.
 - [Mechanical mobility and the FRF family](vibration/structural/mechanical-mobility.md): the ISO 7626-1:2011 family of motion-per-force frequency-response functions (receptance, mobility, accelerance and their reciprocals, Table 1), conversion through the receptance pivot, and the single-degree-of-freedom reference resonator (Annex A)
 - [Dynamic transfer stiffness of resilient elements](vibration/structural/transfer-stiffness.md): the ISO 10846 dynamic transfer stiffness $k_{21}$ of vibration isolators: the level $L_k$ re 1 N/m and loss factor, the direct and indirect (transmissibility) determination methods, and the Annex-A relation to mechanical impedance and effective mass
 - [Bending-wave transmission at plate junctions](vibration/structural/junction-transmission.md): the wave-approach (Cremer/Craik/Hopkins 5.2.1.3) frequency-independent bending-wave transmission coefficients for rigid X, T, L and in-line plate junctions, their diffuse-field angular average, and the derived coupling loss factor and vibration reduction index $K_{ij}$
+- [Vibration damage to structures](vibration/structural/structural-damage.md): the DIN 4150-3:1999-02 guideline values for the peak particle velocity at a foundation, in the topmost floor plane and on a buried pipeline, by building class, frequency and how often the vibration occurs, with the bending stress of Formula (1)
 
 **[Human vibration](vibration/human/index.md)**
 

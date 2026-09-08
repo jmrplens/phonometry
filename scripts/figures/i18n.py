@@ -380,6 +380,28 @@ _ES_EXACT = {
     # the clips are sealed with, so a short one restamps clips this figure
     # never touched.
     "SEAT = 0.71": "SEAT = 0,71",
+    # structural_damage_guidelines (DIN 4150-3): the guideline values a
+    # building, a topmost floor plane and a buried pipe are judged by.
+    "Guideline Values for the Effect of Vibration on Structures": "Valores de referencia para el efecto de la vibración sobre las estructuras",
+    "At the Foundation, Short-Term Vibration": "En el cimiento, vibración de corta duración",
+    "In the Topmost Floor Plane, Horizontal": "En el plano de la última planta, horizontal",
+    "On a Buried Pipeline": "En una tubería enterrada",
+    "Peak velocity $v_i$ (mm/s)": "Velocidad de pico $v_i$ (mm/s)",
+    "below every guideline value": "por debajo de todos los valores de referencia",
+    "commercial and industrial": "comercial e industrial",
+    "commercial\nand industrial": "comercial\ne industrial",
+    "dwellings": "viviendas",
+    "especially sensitive": "especialmente sensible",
+    "especially\nsensitive": "especialmente\nsensible",
+    # Named in full rather than as "short-term" and "long-term": a key that
+    # short is written inside other figures' labels ("short-term loudness"),
+    # and every clip that writes one takes the entry into the fingerprint it
+    # was sealed with, which restamps clips this figure never touched.
+    "short-term vibration": "vibración de corta duración",
+    "long-term vibration": "vibración de larga duración",
+    "welded steel": "acero soldado",
+    "concrete,\nflanged metal": "hormigón,\nmetal con bridas",
+    "masonry,\nplastic": "obra de fábrica,\nplástico",
     "limit of zone A ($Z$ = 1)": "límite de la zona A ($Z$ = 1)",
     "limit of zone B ($Z$ = 2.56)": "límite de la zona B ($Z$ = 2,56)",
     "limit of zone C ($Z$ = 6.4)": "límite de la zona C ($Z$ = 6,4)",

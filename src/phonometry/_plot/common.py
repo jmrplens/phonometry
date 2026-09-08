@@ -612,6 +612,45 @@ def _new_axes_column(n: int, **kwargs: Any) -> np.ndarray:
     return result
 
 
+#: Matplotlib property aliases, long spelling to short. Since matplotlib 3.3 a
+#: call that receives both spellings of one property is a ``TypeError`` ("Got
+#: both 'color' and 'c', which are aliases of one another"), so a renderer that
+#: injects its own default under one spelling breaks every caller who wrote the
+#: other. Only the pairs the renderers actually default are listed.
+_STYLE_ALIASES: dict[str, str] = {
+    "color": "c",
+    "linestyle": "ls",
+    "linewidth": "lw",
+    "markeredgecolor": "mec",
+    "markeredgewidth": "mew",
+    "markerfacecolor": "mfc",
+    "markersize": "ms",
+}
+#: The same table read from the short spelling.
+_STYLE_ALIASES_INVERSE: dict[str, str] = {
+    short: long for long, short in _STYLE_ALIASES.items()
+}
+
+
+def style_default(kwargs: dict[str, Any], name: str, value: object) -> None:
+    """Default a style keyword unless the caller gave it under either spelling.
+
+    ``kwargs.setdefault("color", ...)`` is not enough for the properties that
+    matplotlib aliases: a caller who passed ``c=`` gets both spellings and the
+    artist refuses the call. This defaults ``name`` only when neither it nor
+    its alias is present.
+
+    :param kwargs: The keyword mapping about to be forwarded to an artist,
+        modified in place.
+    :param name: The property to default, in either spelling.
+    :param value: The default to install if the caller expressed no opinion.
+    """
+    alias = _STYLE_ALIASES.get(name) or _STYLE_ALIASES_INVERSE.get(name)
+    if name in kwargs or (alias is not None and alias in kwargs):
+        return
+    kwargs[name] = value
+
+
 def _freq_axis(ax: Axes, freqs: np.ndarray, *, language: str = "en") -> None:
     """Configure a logarithmic frequency x-axis labelled with band centres."""
     import matplotlib.ticker as mticker

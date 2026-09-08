@@ -12,9 +12,11 @@ weightings (:data:`~phonometry.vibration.WEIGHTING_NAMES`) as exact transfer
 functions, and then says how far a real instrument may sit from them. The
 allowance is not one number: it is a band that widens away from the middle of
 the working range, keyed to four transition frequencies per weighting
-(Table 4) and four tolerance regions between them (Table 5). Inside the
-central region the magnitude may differ by ``+12 %`` / ``−11 %``; in the two
-skirts by ``+26 %`` / ``−21 %``; beyond the outermost pair the standard stops
+(Table 4). Table 5 prints five rows across them and they carry three
+distinct limit pairs, because the two skirts share theirs and so do the two
+tails: inside the central region the magnitude may differ by ``+12 %`` /
+``−11 %``; in the two skirts by ``+26 %`` / ``−21 %``; beyond the outermost
+pair the standard stops
 constraining the response from below altogether, which is what ``−100 %``
 means in the printed table.
 

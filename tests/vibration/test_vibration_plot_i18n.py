@@ -744,9 +744,9 @@ def test_the_phase_verification_speaks_spanish() -> None:
 
     ax = res.plot(language="es")
     assert ax.get_title() == (
-        "Desviación de fase característica de Wd frente a ISO 8041-1: CUMPLE"
+        "Desviación característica de fase de Wd frente a ISO 8041-1: CUMPLE"
     )
-    assert ax.get_ylabel() == "Desviación de fase característica [grados]"
+    assert ax.get_ylabel() == "Desviación característica de fase [grados]"
     assert ax.get_xlabel() == "Frecuencia [Hz]"
     labels = [text.get_text() for text in ax.get_legend().get_texts()]
     assert labels == ["tolerancia de ISO 8041-1", "dentro de tolerancia"]

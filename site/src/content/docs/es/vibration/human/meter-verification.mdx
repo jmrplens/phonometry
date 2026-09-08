@@ -62,7 +62,7 @@ falta ni excitador, ni transductor de referencia, ni cámara climática, solo el
 objetivo de diseño y dos tablas. Eso es lo que hace `verify_weighting`, y es
 todo lo que hace.
 
-Así que el alcance de esta página es estrecho, y conviene enunciarlo antes que
+Así que el alcance de esta página es muy acotado, y conviene enunciarlo antes que
 nada. Lo que la biblioteca tiene es la aritmética: el objetivo de diseño (las
 funciones de transferencia exactas del apartado 5.6, ya usadas para ponderar
 señales en otras páginas de esta sección), las frecuencias de transición de la
@@ -71,7 +71,7 @@ referencia de la Tabla 1 y las tolerancias de indicación de la Tabla 2, la
 desviación característica de fase de la Fórmula (6), los tiempos de
 decaimiento del valor eficaz móvil de las Tablas 10 y 11, y las 228 indicaciones de
 la ráfaga de señal de las Tablas 7 a 9. Cada una de esas cosas es o bien un
-número que la norma imprime o bien un número que ella define en forma cerrada,
+número que la norma imprime o bien un número que la norma define en forma cerrada,
 y cada una es un lado de una comparación cuyo otro lado sale de un banco de
 ensayo.
 
@@ -88,11 +88,10 @@ condición necesaria para la conformidad y nunca un certificado de ella.**
 Conviene llevarse una frase del 5.6.6 al resto de la página: los límites de
 tolerancia *incluyen* las incertidumbres expandidas máximas de medida
 aplicables. La banda no es la holgura del instrumento con la incertidumbre
-de la medida en el banco sumada encima; esa incertidumbre tiene que caber
+de la medida en el banco añadida aparte; esa incertidumbre tiene que caber
 también dentro de la banda. Hay una segunda frase sobre incertidumbre, en 13.1
 y 14.1, y dice algo distinto; distinguir las dos es de lo que trata la
 sección 4.
-
 ## 2. Las nueve ponderaciones, y la banda que se ensancha a su alrededor
 
 El objetivo de diseño no es una tabla de números, es una función de
@@ -114,7 +113,7 @@ Alrededor del objetivo de diseño está la **Tabla 5**, y es fácil leerla como 
 sola tolerancia cuando son tres. Las filas van referidas a cuatro frecuencias de
 transición, de $f_\mathrm{t1}$ a $f_\mathrm{t4}$, que la **Tabla 4** da para
 cada ponderación y que cortan el eje en cinco regiones; las cinco filas impresas
-solo llevan tres pares de límites distintos, porque las dos faldas comparten los
+solo llevan tres pares de límites, distintos entre sí, porque las dos faldas comparten los
 suyos y las dos colas también:
 
 | Región de frecuencia | Tolerancia de magnitud | Desviación característica de fase |
@@ -217,7 +216,7 @@ from phonometry import vibration
 # Un barrido de banco del canal Wk de un vibrómetro de cuerpo entero. Los
 # centros se construyen con la Fórmula (B.1) en vez de escribirse como
 # decimales: 63.096 redondea hacia arriba por encima de ft3 y se calificaría
-# contra la falda, como avisa el párrafo de arriba.
+# frente a la falda, como avisa el párrafo de arriba.
 bands = np.array([-3, 0, 3, 6, 9, 12, 15, 18, 19])
 frequencies = 10.0 ** (bands / 10.0)
 measured = np.array([0.4314, 0.4969, 0.5466, 0.9937, 1.068,
@@ -333,7 +332,7 @@ de tolerancia de la Tabla 5 *incluyen* las **máximas** incertidumbres
 expandidas de medida aplicables. Eso es una afirmación sobre cómo se trazó la
 tabla. Es la razón de que `weighting_tolerance_percent` devuelva +12 % y
 −11 % y nunca nada más ancho: la holgura que se le concede a un banco
-cuidadoso ya está dentro de esos números, y sumarle algo sería gastarla dos
+cuidadoso ya está dentro de esos números, y sumarles algo sería gastarla dos
 veces.
 
 La segunda está en el 13.1 y en el 14.1, palabra por palabra en los dos: la
@@ -390,7 +389,7 @@ pregunta si la desviación *ampliada* se mantiene dentro del límite. Leído al
 revés, un laboratorio que carga con un 4,5 % solo puede certificar
 desviaciones de hasta el 7,5 % en la región central, y un banco que mide con
 más cuidado certifica más instrumentos. Ese es todo el sentido del apartado:
-la incertidumbre no es una holgura gratis, es un coste.
+la incertidumbre no es una holgura gratuita, es un coste.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_uncertainty_allowance.svg" alt="Dos paneles que comparten un mismo eje de desviación. A la izquierda, la desviación de un barrido de banco de Wk en tanto por ciento de 0,1 a 400 Hz frente a los límites de la Tabla 5 de la ISO 8041-1, dibujados como una escalera que salta en las cuatro frecuencias de transición 0,2512, 0,631, 63,1 y 158,5 Hz: +26 y -21 por ciento en las dos faldas, +12 y -11 en la región central, y ningún límite inferior en las dos colas, donde el relleno se sale por el borde inferior del panel. Todos los puntos medidos quedan dentro de la banda impresa, y cada uno lleva una barra de más y menos el 4,5 por ciento que permite el apartado 12.11.2, con un solo brazo en las dos colas. Dos puntos van marcados con un aspa roja porque la punta de la barra se sale de la banda aunque el punto en sí no: uno que lee un 9 por ciento de más a 6,31 Hz y otro que lee un 17,5 por ciento de menos a 125,9 Hz. A la derecha, lo que un laboratorio todavía puede certificar a medida que su propia incertidumbre expandida U crece de 0 a 5 por ciento: tres cuñas anidadas que se estrechan hacia la derecha, la central, que va de -11 a +12 por ciento con U = 0 y de -6,5 a +7,5 por ciento con 4,5 por ciento, y la cuña de las colas conservando su suelo abierto." width="96%" />
 
@@ -402,7 +401,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import vibration
 
-# El barrido de banco que califica la figura: centros de tercio de octava de
+# El barrido de banco al que la figura pone nota: centros de tercio de octava de
 # la Fórmula (B.1), y una respuesta que está dentro de la banda impresa en
 # todos y cada uno de ellos.
 sweep_bands = np.arange(-8, 25)
@@ -587,7 +586,7 @@ print(vibration.band_limiting_factors("Wk", centres).round(4))
 print(vibration.weighting_factors("Wk", centres).round(4))
 # [0.4588 1.0544 0.1857 0.0887]
 
-# Wm es una de las tres que no comparte la esquina de 0,4 Hz.
+# Wm es una de las tres que no comparten la esquina de 0,4 Hz.
 print(vibration.band_limiting_factors("Wm", centres).round(4))
 # [0.5336 0.9999 0.9291 0.7071]
 ```
@@ -596,7 +595,7 @@ Ahí se ven dos cosas. La respuesta de limitación de banda es plana en el centr
 y cae a $1/\sqrt{2}$ a 100 Hz, que es lo que hace una esquina Butterworth; y la
 ponderación global tiene una forma completamente distinta, porque las etapas de
 transición y de escalón de la cascada son las que hacen que una `Wk` sea una
-`Wk`. La fila de limitación de banda no es una versión debilitada de la fila de
+`Wk`. La fila de limitación de banda no es una versión más débil de la fila de
 la ponderación, es la otra mitad del mismo producto.
 
 **La fila de la Tabla 2 que califica el par.** La Tabla 2 tiene tres filas, y
@@ -698,7 +697,6 @@ exactitud de medida.
 aplica a cada frecuencia, sin opinión alguna sobre qué se compara con él.
 Calcular un $\Delta\varphi_0$ a partir de una respuesta de fase medida y
 calificarlo frente a la banda es la sección siguiente.
-
 ## 8. Calificar una respuesta de fase: la Fórmula (6) y lo que ignora
 
 La Fórmula (6) convierte dos errores de fase contiguos en un solo número:
@@ -710,15 +708,15 @@ $$
 $$
 
 Es una pendiente escrita como ordenada en el origen. Lee los dos errores de fase
-como dos puntos de una recta frente a la frecuencia: la cantidad que va dentro de
-las barras es donde esa recta cruza $f = 0$. Así que un error de fase que pasa
-recto por el origen se califica con un cero redondo, y un error de fase
-desplazado del origen se califica con el tamaño del desplazamiento. La Fórmula (H.3) del Anexo H
-normativo imprime la misma cantidad con los dos productos intercambiados, que es
-el mismo número dentro de las barras, y zanja dónde va la respuesta: `N`
-frecuencias dan `N − 1` valores, cada uno atribuido a la frecuencia **inferior**
-de su par. Eso es lo que decide qué región de la Tabla 5 califica un par que
-queda a caballo de una frecuencia de transición.
+como dos puntos de una recta frente a la frecuencia: la cantidad que va dentro
+de las barras es donde esa recta cruza $f = 0$. Así que un error de fase que
+pasa recto por el origen se califica con un cero redondo, y un error de fase
+desplazado del origen se califica con el tamaño del desplazamiento. La Fórmula
+(H.3) del Anexo H normativo imprime la misma cantidad con los dos productos
+intercambiados, que es el mismo número dentro de las barras, y zanja dónde va la
+respuesta: `N` frecuencias dan `N − 1` valores, cada uno atribuido a la
+frecuencia **inferior** de su par. Eso es lo que decide qué región de la Tabla 5
+califica un par que queda a caballo de una frecuencia de transición.
 
 Las dos invariancias merecen verse en lugar de leerse, porque son toda la
 justificación de un criterio que parece tan indirecto:
@@ -753,19 +751,19 @@ apartado H.2.1 dice exactamente eso de un retardo de grupo constante:
 pero no influiría ni en los parámetros de vibración que se van a medir ni en los
 valores de la desviación característica de fase». Un vibrómetro que lo retrasa
 todo el mismo tiempo ha cambiado cuándo llega la forma de onda, no qué aspecto
-tiene, y el pico, el MTVV y el VDV de una forma de onda retrasada son el pico, el
-MTVV y el VDV. Unas tolerancias escritas sobre el error de fase en bruto tendrían
-que ser brutalmente estrechas para dejar sitio a un retardo que tiene cualquier
-instrumento real.
+tiene, y el pico, el MTVV y el VDV de una forma de onda retrasada son el pico,
+el MTVV y el VDV. Unas tolerancias escritas sobre el error de fase en bruto
+tendrían que ser brutalmente estrechas para dejar sitio a un retardo que tiene
+cualquier instrumento real.
 
-**El oráculo.** El Anexo B imprime una columna de fase para la ponderación global
-en todas y cada una de las Tablas B.1 a B.9, calculada a partir de la Fórmula
-(H.1), que es el argumento del mismo $H(s)$ del que salen las magnitudes. Esas
-columnas recorren una sola rama continua, desde cerca de +180 grados en la parte
-baja de cada tabla hasta bastante más allá de −180 en la parte alta, y el
-objetivo de diseño se sigue a lo largo de esa rama en lugar de plegarse en la
-media vuelta a cada lado del cero. Cinco filas de la Tabla B.8, calculadas en vez
-de transcritas:
+**El oráculo.** El Anexo B imprime una columna de fase para la ponderación
+global en todas y cada una de las Tablas B.1 a B.9, calculada a partir de la
+Fórmula (H.1), que es el argumento del mismo $H(s)$ del que salen las
+magnitudes. Esas columnas recorren una sola rama continua, desde cerca de
++180 grados en la parte baja de cada tabla hasta bastante más allá de −180 en la
+parte alta, y el objetivo de diseño se sigue a lo largo de esa rama en lugar de
+plegarse en la media vuelta a cada lado del cero. Cinco filas de la Tabla B.8,
+calculadas en vez de transcritas:
 
 ```python
 # frequencies es la malla de tercios de octava del bloque anterior.
@@ -788,16 +786,16 @@ La Tabla B.8 imprime 159,8; 40,06; −6,841; −137,6 y −247,9 en esas filas. 
 último es la clave: −247,9 grados no es una fase que muestre el instrumento de
 nadie, es adonde ha llegado la rama, y es también donde tiene que llegar la
 medición. Plegar cualquiera de los dos lados dentro de $(-180°, +180°]$ destruye
-la invariancia frente al retardo, que es lo único para lo que existe el criterio.
-El apartado H.2.3.4 g) a m) es la receta que da la propia norma para reconstruir
-la curva continua a partir de las lecturas enrolladas de un medidor de fase, y su
-sitio está antes de la llamada, no dentro: en una malla de tercios de octava un
-enrollado y una rampa de retardo son el mismo salto, así que nada aguas abajo
-podría distinguirlos.
+la invariancia frente al retardo, que es lo único para lo que existe el
+criterio. El apartado H.2.3.4 g) a m) es la receta que da la propia norma para
+reconstruir la curva continua a partir de las lecturas enrolladas de un medidor
+de fase, y su sitio está antes de la llamada, no dentro: en una malla de tercios
+de octava un enrollado y una rampa de retardo son el mismo salto, así que nada
+aguas abajo podría distinguirlos.
 
-**Un veredicto.** El instrumento de abajo tiene dos defectos. Uno es un retardo de
-grupo de 2 ms, al que el criterio es ciego. El otro es un polo de más en
-100 Hz, un filtro antisolapamiento colocado donde el objetivo de diseño ya tiene
+**Un veredicto.** El instrumento de abajo tiene dos defectos. Uno es un retardo
+de grupo de 2 ms, al que el criterio es ciego. El otro es un polo de más en
+100 Hz, un filtro antialias colocado donde el objetivo de diseño ya tiene
 su esquina de limitación de banda, y a eso el criterio no es ciego en absoluto.
 La malla es el rango de frecuencias nominal de un vibrómetro de cuerpo entero,
 sobre los centros exactos de la Fórmula (B.1):
@@ -825,8 +823,8 @@ print(round(check.peak_deviation_percent, 1))                        # 6.9
 check.plot()   # la desviación característica en su banda (requiere matplotlib)
 ```
 
-Quita el polo y el retardo por sí solo es un error de fase de hasta 57 grados que
-el criterio califica como cero:
+Quita el polo y el retardo por sí solo es un error de fase de hasta 57 grados
+que el criterio califica como cero:
 
 ```python
 delayed = vibration.verify_phase_response("Wk", frequencies, design + delay)
@@ -837,7 +835,7 @@ print(delayed.passes)   # True
 print(float(delayed.characteristic_deviation_deg.max()) < 1e-10)   # True
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_phase_verification.svg" alt="Tres paneles del error de fase de un mismo instrumento, sobre los centros de tercio de octava de 0,5012 a 79,43 Hz. Arriba a la izquierda, el error de fase frente a un eje de frecuencia logarítmico sin ninguna banda de tolerancia, porque la Tabla 5 no fija ninguna sobre esta magnitud y su nota a al pie aplica la columna de fase solo a los instrumentos cuyo parámetro de medida no se basa en valores eficaces: una constante de más 4 grados, 2 ms de retardo de grupo que cae hasta menos 57,2 grados, y ese mismo retardo con un polo de más en 100 Hz que cae hasta menos 95,7. Abajo a la izquierda, sobre el mismo eje de frecuencia, la desviación característica de fase de la Fórmula (6) dentro de la banda de la Tabla 5, 6 grados en la región central, 12 en las dos faldas y sin límite en las dos colas, con las cuatro frecuencias de transición de la Tabla 4 marcadas: el error constante se califica con 4,00 grados en todos los pares, el retardo de grupo con 0,00 grados en todos los pares, y la respuesta que lleva el polo de más se sube por encima de su límite en el último par, 8,26 grados atribuidos a 63,1 Hz donde la región central permite 6, mientras que el otro extremo de ese mismo par, en 79,4 Hz, habría quedado dentro de los 12 grados de la falda. A la derecha, los mismos tres errores de fase sobre un eje de frecuencia lineal con la recta que pasa por el último par prolongada hasta f = 0, donde las tres rectas se cruzan en más 4, 0 y menos 8,26 grados, cada cruce rotulado con su propio valor en el margen: esa ordenada en el origen, sin su signo, es lo que lee la Fórmula (6)" width="96%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_phase_verification.svg" alt="Tres paneles del error de fase de un mismo instrumento, sobre los centros de tercio de octava de 0,5012 a 79,43 Hz. Arriba a la izquierda, el error de fase frente a un eje de frecuencia logarítmico sin ninguna banda de tolerancia, porque la Tabla 5 no fija ninguna sobre esta magnitud y su nota a al pie aplica la columna de fase solo a los instrumentos cuyo parámetro de medida no se basa en valores eficaces: una constante de más 4 grados, 2 ms de retardo de grupo que cae hasta menos 57,2 grados, y ese mismo retardo con un polo de más en 100 Hz que cae hasta menos 95,7. Abajo a la izquierda, sobre el mismo eje de frecuencia, la desviación característica de fase de la Fórmula (6) dentro de la banda de la Tabla 5, 6 grados en la región central, 12 en las dos faldas y sin límite en las dos colas, con las cuatro frecuencias de transición de la Tabla 4 marcadas: el error constante se califica con 4,00 grados en todos los pares, el retardo de grupo con 0,00 grados en todos los pares, y la respuesta que lleva el polo de más sube por encima de su límite en el último par, 8,26 grados atribuidos a 63,1 Hz donde la región central permite 6, mientras que el otro extremo de ese mismo par, en 79,4 Hz, habría quedado dentro de los 12 grados de la falda. A la derecha, los mismos tres errores de fase sobre un eje de frecuencia lineal con la recta que pasa por el último par prolongada hasta f = 0, donde las tres rectas se cruzan en más 4, 0 y menos 8,26 grados, cada cruce rotulado con su propio valor en el margen: esa ordenada en el origen, sin su signo, es lo que lee la Fórmula (6)" width="96%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -883,13 +881,14 @@ plt.show()
 </details>
 
 **Lo que un error de fase le cuesta a una lectura de pico.** El Anexo H es
-normativo, y la Fórmula (H.4) es el
-único número calculado de todo el razonamiento sobre la fase:
+normativo, y la Fórmula (H.4) es el único número calculado de todo el
+razonamiento sobre la fase:
 $\Delta P_\max \approx \pm\max\{0.48 \sin \Delta\varphi_0\} \times 100\ \%$,
 seguida de la frase de que para las desviaciones características de fase máximas
 de 12 grados la desviación máxima del valor de pico es aproximadamente del 10 %.
-El máximo va dentro de la fórmula impresa, así que el resultado es un solo número
-para toda una respuesta y no uno por frecuencia, y es lo que cuesta el peor par:
+El máximo va dentro de la fórmula impresa, así que el resultado es un solo
+número para toda una respuesta y no uno por frecuencia, y es lo que cuesta el
+peor par:
 
 ```python
 print(round(vibration.peak_deviation_percent([12.0]), 2))   # 9.98
@@ -897,21 +896,21 @@ print(round(vibration.peak_deviation_percent([6.0]), 2))    # 5.02
 ```
 
 De ahí salen los ±6 grados y los ±12 grados de la Tabla 5: una región central
-sujeta al 5 % en una lectura de pico y unas faldas sujetas al 10 %. Es también el
-6,9 % que se le cobró por sus 8,26 grados al vibrómetro que falla más arriba, y
-que `PhaseVerification.peak_deviation_percent` calcula a partir del peor par.
+sujeta al 5 % en una lectura de pico y unas faldas sujetas al 10 %. Es también
+el 6,9 % que se le cobró por sus 8,26 grados al vibrómetro que falla más arriba,
+y que `PhaseVerification.peak_deviation_percent` calcula a partir del peor par.
 La NOTA 2 del apartado H.2.1 acota la aproximación dos veces, y las dos cotas
-conviene conocerlas. Se aplica a valores por debajo de 30 grados, así que uno mayor se
-deja pasar con un aviso; y es un peor caso que combina dos componentes de la
-forma más desfavorable, así que la desviación efectiva del valor de pico de una
-forma de onda real normalmente es menor.
+conviene conocerlas. Se aplica a valores por debajo de 30 grados, así que uno
+mayor se deja pasar con un aviso; y es un peor caso que combina dos componentes
+de la forma más desfavorable, así que la desviación efectiva del valor de pico
+de una forma de onda real normalmente es menor.
 
 **La malla.** `verify_phase_response` rechaza una malla más gruesa que el tercio
 de octava, y cita el apartado 12.11.1, que pide un ensayo de respuesta en
 frecuencia «en pasos no mayores de un tercio de octava». La razón es que la fase
 de diseño se reconstruye sobre la malla que se le da: la rama se sigue de
-frecuencia en frecuencia, y en una malla gruesa un paso de más de media vuelta es
-indistinguible de la rama siguiente. El diseño entero caería a 360 grados de
+frecuencia en frecuencia, y en una malla gruesa un paso de más de media vuelta
+es indistinguible de la rama siguiente. El diseño entero caería a 360 grados de
 distancia, y la Fórmula (6) convertiría ese desplazamiento, en un par muy
 separado, en un puñado de grados, que puede quedarse cómodamente dentro de la
 tolerancia. El fallo es silencioso y puede ir en cualquiera de los dos sentidos,
@@ -930,14 +929,14 @@ except ValueError as error:
 # noticing.
 ```
 
-Conviene conocer un último caso, porque el veredicto es correcto y el diagnóstico
-no. Una medición que está a media vuelta del objetivo de diseño en todas las
-frecuencias es una señal invertida, y la Fórmula (6) califica un desplazamiento
-constante por su valor, así que falla por 180 grados y falla a gritos. El
-apartado H.2.3.4 k) dice que el criterio «no es aplicable a la inversión de
-señal» y que la polaridad tiene su propio procedimiento de ensayo, así que el
-veredicto viene con un aviso que lo dice: el número es real, y el defecto al que
-apunta es un ensayo que esta función no realiza.
+Conviene conocer un último caso, porque el veredicto es correcto y el
+diagnóstico no. Una medición que está a media vuelta del objetivo de diseño en
+todas las frecuencias es una señal invertida, y la Fórmula (6) califica un
+desplazamiento constante por su valor, así que falla por 180 grados y falla a
+gritos. El apartado H.2.3.4 k) dice que el criterio «no es aplicable a la
+inversión de señal» y que la polaridad tiene su propio procedimiento de ensayo,
+así que el veredicto viene con un aviso que lo dice: el número es real, y el
+defecto al que apunta es un ensayo que esta función no realiza.
 ## 9. Cuánto tarda en olvidar el valor eficaz móvil
 
 El apartado 5.13 es la ponderación temporal, y su ensayo es un cronómetro. Una
@@ -1000,8 +999,8 @@ for method in ("linear", "exponential"):
 # exponential 4.605 True
 ```
 
-La lectura lineal sale 0,98 s en vez de los 0,99 s de la forma cerrada, y eso es
-el ensayo comportándose como ensayo y no como aritmética. En el instante del
+La lectura lineal sale a 0,98 s en vez de los 0,99 s de la forma cerrada, y eso es
+el ensayo comportándose como un ensayo y no como aritmética. En el instante del
 cruce, la ventana deslizante solo guarda unas pocas muestras finales de una
 sinusoide, y su valor cuadrático medio depende del punto del ciclo en el que se cortó
 la señal. La banda impresa es 0,99 ± 0,05 s, lo bastante ancha para absorberlo,
@@ -1018,7 +1017,7 @@ import matplotlib.pyplot as plt
 tau = 1.0
 cut = int(cut_s * fs)
 since_cut = np.arange(t.size - cut) / fs
-# El 10 % del apartado, leído de vuelta desde la forma cerrada en lugar de
+# El 10 % del apartado, leído a partir de la forma cerrada en lugar de
 # tecleado: el promediado exponencial cae como exp(-t / 2 tau), así que la
 # fracción es lo que vale esa expresión en el instante que devuelve
 # running_rms_decay_time.
@@ -1029,7 +1028,7 @@ for method, colour in (("linear", "#1f77b4"), ("exponential", "#2ca02c")):
     trace = np.asarray(vibration.running_rms(a, fs, integration_time=tau, method=method))
     relative = trace[cut:] / trace[cut - 1]
     # El promediado lineal se vacía una constante de tiempo después del corte, y
-    # un nivel no está definido donde el valor cuadrático medio de la ventana es
+    # el nivel no está definido donde el valor cuadrático medio de la ventana es
     # exactamente cero.
     level_db = np.full(relative.shape, np.nan)
     level_db[relative > 0.0] = 20.0 * np.log10(relative[relative > 0.0])
@@ -1080,10 +1079,10 @@ print(round(20 * np.log10(np.e) / 2.0, 4))   # 4.3429
 
 La velocidad en forma cerrada de un promediado exponencial es
 $20\lg(e)/(2\tau) = 4{,}3429/\tau$ decibelios por segundo, que para $\tau = 1$ s
-vale 4,3429 y queda en el centro del 3,8 a 4,9 impreso. Pero ese intervalo va de
+vale 4,3429 y queda en el centro del intervalo impreso de 3,8 a 4,9. Pero ese intervalo va de
 0,875 a 1,128 veces la forma cerrada, mientras que el tiempo impreso de la misma
 fila, 4,61 ± 0,25 s, va de 0,947 a 1,055 veces $2\tau\ln 10$: aproximadamente la
-mitad de ancho, y las otras dos filas se reparten igual. Las dos columnas no son
+mitad de ancho, y las otras dos filas se dividen de la misma manera. Las dos columnas no son
 recíprocas la una de la otra: la columna del tiempo es la vinculante y la de la
 velocidad es la afirmación más laxa de la misma caída, así que el veredicto se
 escribe sobre la más estrecha.
@@ -1137,7 +1136,7 @@ Seis ráfagas de dos ciclos cada una, en un minuto de registro por lo demás en
 silencio. La frecuencia de muestreo recomendada es una elección de la propia
 biblioteca, no una cifra normativa: la norma no prescribe ninguna, y es la
 frecuencia a la que las celdas impresas salen con unas pocas décimas de por
-ciento.
+ciento de diferencia.
 
 **Reproducir una fila.** `signal_burst_indications` recorre la cadena que
 describe la norma y devuelve las columnas impresas de la tabla de esa
@@ -1182,7 +1181,7 @@ print(check.passes, round(check.worst_deviation_percent, 2))   # True 0.34
 El valor de dosis de vibración es la única columna a la que se le admite un
 12 % en vez de un 10 %, en las 48 celdas que tiene.
 
-Aquí hay un vibrómetro que no cumple, y no cumple de una forma instructiva.
+Aquí hay un vibrómetro que no cumple, y no cumple de forma instructiva.
 Calcula su MTVV con un promediado exponencial y lo informa en la columna
 lineal:
 
@@ -1302,9 +1301,9 @@ print(round(from_start, 4), round((from_start / printed - 1) * 100, 2))
 ```
 
 Fíjate en que las dos lecturas cumplen, porque la tolerancia es del 10 % y la
-peor de las dos se desvía un 0,86 %. Justo por eso la cuestión hubo que zanjarla
-por cuál de las dos reproduce los dígitos impresos: la tolerancia es, con
-diferencia, demasiado ancha para decidirlo.
+peor de las dos se desvía un 0,86 %. Justo por eso la cuestión hubo que
+zanjarla por cuál de las dos reproduce los dígitos impresos: la tolerancia es,
+con diferencia, demasiado ancha para decidirlo.
 
 *El filtrado parte de estado nulo.* `apply_weighting` multiplica en el dominio
 de la frecuencia sin relleno de ceros, que es una convolución circular, y su
@@ -1336,8 +1335,8 @@ for name in ("Wc", "Wm", "Wd", "We"):
 # We -5.19 -0.52
 ```
 
-Hasta un 5,2 % en cuatro celdas, y todo por una elección sobre lo que el filtro
-tenía dentro antes de que empezara el registro. El comportamiento por defecto
+Hasta un 5,2 % en cuatro celdas, por una elección sobre lo que el filtro tenía
+dentro antes de que empezara el registro. El comportamiento por defecto
 de `apply_weighting` se deja a propósito como está: el relleno de ceros es de
 este ensayo, no de toda señal ponderada, y quien lo necesite en otro sitio
 rellena antes el registro con ceros y quita el relleno después, que es lo que

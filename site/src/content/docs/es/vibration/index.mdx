@@ -111,12 +111,16 @@ Convertir un espectro de vibración en un diagnóstico de la máquina que lo pro
 ## Qué no cubre esta sección
 
 <Scope>
-<ScopeClaim status="not-covered">
-**Aquí no se somete a ensayo de tipo ningún instrumento.** El objeto propio de
-la ISO 8041-1, el diseño y los ensayos de tipo de los vibrómetros para
-vibración en humanos, no está implementado: de ella solo se toman las
-ponderaciones frecuenciales, así que un veredicto de clase para un vibrómetro
-de mano no es algo que esta biblioteca pueda dar.
+<ScopeClaim status="covered" label="solo la ponderación frecuencial">
+**Un instrumento se juzga por su ponderación y por nada más.** Las tablas de
+tolerancia de la ISO 8041-1 están implementadas, así que una respuesta de
+ponderación medida puede contrastarse con la banda que la norma le permite, en
+la página de [verificación del
+vibrómetro](/phonometry/es/vibration/human/meter-verification/). El resto de
+esa norma, los apartados de indicación, linealidad, sobrecarga, temperatura,
+humedad y compatibilidad electromagnética, son ensayos de laboratorio sobre
+soporte físico, así que cumplir aquí es condición necesaria para la conformidad
+y nunca un certificado de ella.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">

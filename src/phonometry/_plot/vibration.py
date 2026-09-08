@@ -31,6 +31,10 @@ _LABEL_INITIAL = "initial $A_1$"
 _LABEL_FINAL = "final $A_2$"
 _LABEL_CHANGE = "change $A_2 - A_1$"
 
+#: The ISO 4866 D.3 height fit, named once for the same reason: it is both the
+#: legend entry of the fitted line and the key its Spanish form is filed under.
+_LABEL_HEIGHT_FIT = r"$f = 46/h$"
+
 #: Bar colours for the per-operation partial exposures, cycled in order. Blue,
 #: green, purple, light blue and grey deliberately avoid the orange EAV and red
 #: ELV threshold-line colours, so a bar is never mistaken for a limit line.
@@ -186,7 +190,7 @@ _STRINGS: dict[str, str] = {
     "Guideline values in the topmost floor plane (DIN 4150-3 Table 1)": "Valores de referencia en el plano de la última planta (DIN 4150-3, tabla 1)",
     "Long-term guideline values in the topmost floor plane (DIN 4150-3 Table 3)": "Valores de referencia de larga duración en el plano de la última planta (DIN 4150-3, tabla 3)",  # Empirical fundamental frequency of a building (ISO 4866 Figure D.1).
     "Building height $h$ [m]": "Altura del edificio $h$ [m]",
-    r"$f = 46/h$": r"$f = 46/h$",
+    _LABEL_HEIGHT_FIT: _LABEL_HEIGHT_FIT,
     r"$\pm$50 %, which D.3 calls not uncommon": r"$\pm$50 %, que D.3 llama nada raro",
     "{model} model: {f} Hz at {h} m": "modelo {model}: {f} Hz a {h} m",
     "Empirical fundamental frequency of a building (ISO 4866 D.3)": "Frecuencia fundamental empírica de un edificio (ISO 4866, D.3)",
@@ -931,7 +935,7 @@ def plot_building_frequency(
     height = float(result.height_m or 0.0)
     span = np.logspace(np.log10(3.0), np.log10(300.0), 300)
     fit = np.asarray(height_fundamental_frequency(span), dtype=np.float64)
-    ax.plot(fit, span, color=_C_PRIMARY, lw=2.0, label=_t(r"$f = 46/h$", language))
+    ax.plot(fit, span, color=_C_PRIMARY, lw=2.0, label=_t(_LABEL_HEIGHT_FIT, language))
     ax.fill_betweenx(
         span,
         fit * (1.0 - EMPIRICAL_FREQUENCY_TOLERANCE),

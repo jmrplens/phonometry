@@ -55,6 +55,7 @@ if TYPE_CHECKING:
         WeightedSpectrum,
         WeightingResponse,
     )
+    from ..vibration.human.instrumentation import WeightingVerification
     from ..vibration.human.multiple_shock import MultipleShockResult
     from ..vibration.human.seat_vibration import SeatTransmissionResult
     from ..vibration.machinery.diagnostics import FaultFrequencyResult
@@ -183,6 +184,15 @@ _STRINGS: dict[str, str] = {
     "commercial and industrial": "comercial e industrial",
     "dwellings": "viviendas",
     "especially sensitive": "especialmente sensible",
+    # Instrument verification (ISO 8041-1 Tables 4 and 5).
+    "design goal": "objetivo de diseño",
+    "ISO 8041-1 tolerance": "tolerancia de ISO 8041-1",
+    "within tolerance": "dentro de tolerancia",
+    "outside tolerance": "fuera de tolerancia",
+    "Weighting factor": "Factor de ponderación",
+    "{w} weighting against ISO 8041-1: {verdict}": "Ponderación {w} frente a ISO 8041-1: {verdict}",
+    "PASS": "CUMPLE",
+    "FAIL": "NO CUMPLE",
     "measured {v} mm/s at {f} Hz": "medido {v} mm/s a {f} Hz",
     "measured {v} mm/s": "medido {v} mm/s",
     "Building class": "Clase de edificio",
@@ -748,6 +758,82 @@ def plot_seat_transmission(
         loc="best",
         fontsize="small",
     )
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_weighting_verification(
+    result: WeightingVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """A measured weighting response inside the band ISO 8041-1 allows it.
+
+    The design goal as a line, the Table 5 tolerance band around it as a
+    shaded region, and the measurement as points, the ones outside the band
+    marked apart. The band is drawn from the tolerances rather than from a
+    fixed number of decibels, so it widens at the transition frequencies of
+    Table 4 exactly where the standard widens it.
+
+    :param result: A
+        :class:`~phonometry.vibration.human.instrumentation.WeightingVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured-point ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+    from ..vibration.human.instrumentation import weighting_tolerance_percent
+
+    ax = ax if ax is not None else _new_axes()
+    order = np.argsort(result.frequencies_hz)
+    freqs = result.frequencies_hz[order]
+    design = result.design[order]
+    measured = result.measured[order]
+    inside = result.within_tolerance[order]
+
+    upper, lower = weighting_tolerance_percent(result.weighting, freqs)
+    ax.fill_between(
+        freqs,
+        design * (1.0 + lower / 100.0),
+        design * (1.0 + upper / 100.0),
+        color=_C_PRIMARY,
+        alpha=0.15,
+        label=_t("ISO 8041-1 tolerance", language),
+    )
+    ax.plot(freqs, design, color=_C_PRIMARY, lw=2.0, label=_t("design goal", language))
+
+    style_default(kwargs, "color", _C_REFERENCE)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "markersize", 5)
+    style_default(kwargs, "ls", "none")
+    kwargs.setdefault("label", _t("within tolerance", language))
+    ax.plot(freqs[inside], measured[inside], **kwargs)
+    if not inside.all():
+        ax.plot(
+            freqs[~inside],
+            measured[~inside],
+            color=_C_SECONDARY,
+            marker="X",
+            markersize=9,
+            ls="none",
+            label=_t("outside tolerance", language),
+        )
+
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Weighting factor", language))
+    verdict = _t("PASS" if result.passes else "FAIL", language)
+    ax.set_title(
+        _t("{w} weighting against ISO 8041-1: {verdict}", language).format(
+            w=result.weighting, verdict=verdict
+        )
+    )
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
 

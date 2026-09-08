@@ -611,3 +611,78 @@ def test_the_frequency_estimate_keeps_the_spelling_the_caller_used(
         assert point.get_linestyle() == "-"
     else:
         assert point.get_markersize() == 12
+
+
+def test_the_meter_verification_draws_the_band_it_was_judged_against() -> None:
+    """The band comes from Table 5, so it widens where the standard widens it."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    from phonometry.vibration.human.instrumentation import TRANSITION_FREQUENCIES_HZ
+
+    f = np.array([0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
+    design = np.asarray(vibration.weighting_factors("Wk", f))
+    res = vibration.verify_weighting("Wk", f, design)
+
+    ax = res.plot()
+    assert ax.get_title() == "Wk weighting against ISO 8041-1: PASS"
+    assert ax.get_ylabel() == "Weighting factor"
+    assert (ax.get_xscale(), ax.get_yscale()) == ("log", "log")
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert labels == ["ISO 8041-1 tolerance", "design goal", "within tolerance"]
+
+    # The band is the Table 5 one, not a fixed number of decibels: at 16 Hz,
+    # inside the central region, it is +12 % / -11 % of the design goal.
+    band = ax.collections[0].get_paths()[0].vertices
+    _, ft2, ft3, _ = TRANSITION_FREQUENCIES_HZ["Wk"]
+    assert ft2 < 16.0 < ft3
+    at_16 = [y for x, y in band if x == pytest.approx(16.0)]
+    design_16 = float(design[list(f).index(16.0)])
+    assert (min(at_16), max(at_16)) == pytest.approx(
+        (design_16 * 0.89, design_16 * 1.12)
+    )
+
+    # And at 0,5 Hz, past ft1 and inside the lower skirt, it opens to
+    # +26 % / -21 %.
+    ft1 = TRANSITION_FREQUENCIES_HZ["Wk"][0]
+    assert ft1 < 0.5 < ft2
+    at_half = [y for x, y in band if x == pytest.approx(0.5)]
+    design_half = float(design[0])
+    assert (min(at_half), max(at_half)) == pytest.approx(
+        (design_half * 0.79, design_half * 1.26)
+    )
+
+    # A failing point is drawn apart from the ones inside.
+    off = design.copy()
+    off[5] *= 1.2
+    failing = vibration.verify_weighting("Wk", f, off).plot()
+    assert "FAIL" in failing.get_title()
+    assert [t.get_text() for t in failing.get_legend().get_texts()][-1] == (
+        "outside tolerance"
+    )
+    assert failing.lines[-1].get_xdata() == pytest.approx([16.0])
+
+
+def test_the_meter_verification_speaks_spanish() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    f = np.array([1.0, 8.0, 80.0])
+    design = np.asarray(vibration.weighting_factors("Wd", f))
+    res = vibration.verify_weighting("Wd", f, design)
+
+    ax = res.plot(language="es")
+    assert ax.get_title() == "Ponderación Wd frente a ISO 8041-1: CUMPLE"
+    assert ax.get_ylabel() == "Factor de ponderación"
+    assert ax.get_xlabel() == "Frecuencia [Hz]"
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert labels == [
+        "tolerancia de ISO 8041-1",
+        "objetivo de diseño",
+        "dentro de tolerancia",
+    ]
+
+    with pytest.raises(ValueError, match="Unknown language"):
+        res.plot(language="xx")

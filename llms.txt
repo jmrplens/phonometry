@@ -592,6 +592,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [vibration/evaluation](https://jmrplens.github.io/phonometry/reference/api/vibration/evaluation/)
 - [vibration/experimental-sea](https://jmrplens.github.io/phonometry/reference/api/vibration/experimental-sea/)
 - [vibration/exposure](https://jmrplens.github.io/phonometry/reference/api/vibration/exposure/)
+- [vibration/instrumentation](https://jmrplens.github.io/phonometry/reference/api/vibration/instrumentation/)
 - [vibration/junction-transmission](https://jmrplens.github.io/phonometry/reference/api/vibration/junction-transmission/)
 - [vibration/mechanical-mobility](https://jmrplens.github.io/phonometry/reference/api/vibration/mechanical-mobility/)
 - [vibration/multiple-shock](https://jmrplens.github.io/phonometry/reference/api/vibration/multiple-shock/)

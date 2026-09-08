@@ -244,6 +244,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.vibration.human.exposure",
             "phonometry.vibration.human.multiple_shock",
             "phonometry.vibration.human.seat_vibration",
+            "phonometry.vibration.human.instrumentation",
         ),
     ),
     Section(
@@ -466,6 +467,19 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "GEAR_DISPLACEMENT_SLOPE_DB_PER_DECADE": "phonometry.vibration.machinery.evaluation",
     "GEAR_VELOCITY_CORNERS_HZ": "phonometry.vibration.machinery.evaluation",
     "GEAR_VELOCITY_SLOPE_DB_PER_DECADE": "phonometry.vibration.machinery.evaluation",
+    # The nine weighting names are owned by the exposure module and imported
+    # by the instrumentation one, which grades a meter against those same
+    # nine, so a plain scan sees them in both.
+    "WEIGHTING_NAMES": "phonometry.vibration.human.exposure",
+    # The ISO 8041-1 tolerance tables are plain containers too, so a scan by
+    # module finds no owner; they belong to the instrumentation module that
+    # publishes them.
+    "TRANSITION_FREQUENCIES_HZ": "phonometry.vibration.human.instrumentation",
+    "CENTRAL_TOLERANCE_PERCENT": "phonometry.vibration.human.instrumentation",
+    "SKIRT_TOLERANCE_PERCENT": "phonometry.vibration.human.instrumentation",
+    "TAIL_TOLERANCE_PERCENT": "phonometry.vibration.human.instrumentation",
+    "REFERENCE_FREQUENCY_HZ": "phonometry.vibration.human.instrumentation",
+    "REFERENCE_ACCELERATION_M_S2": "phonometry.vibration.human.instrumentation",
     # Defined in phonometry._internal.warnings, exported at the top level.
     "PhonometryWarning": "phonometry",
     # The io subpackage keeps its implementation modules private and

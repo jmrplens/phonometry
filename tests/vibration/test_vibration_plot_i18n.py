@@ -686,3 +686,128 @@ def test_the_meter_verification_speaks_spanish() -> None:
 
     with pytest.raises(ValueError, match="Unknown language"):
         res.plot(language="xx")
+
+
+def _phase_verdict(weighting: str, offset_deg: float) -> object:
+    """A phase response sitting ``offset_deg`` from the design goal."""
+    f = np.array([10.0 ** (n / 10.0) for n in range(-10, 27)])
+    response = vibration.frequency_weighting(weighting, f).response
+    design = np.degrees(np.unwrap(np.angle(response)))
+    return vibration.verify_phase_response(weighting, f, design + offset_deg)
+
+
+def test_the_phase_verification_draws_the_band_it_was_judged_against() -> None:
+    """The band is the Table 5 phase column, which is a limit on a modulus.
+
+    So it is drawn from the axis floor up to the limit rather than around a
+    line, and the two tails, where the standard sets no limit at all, are
+    filled to the top of the axes instead of to infinity.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    from phonometry.vibration.human.instrumentation import TRANSITION_FREQUENCIES_HZ
+
+    res = _phase_verdict("Wk", 3.0)
+    ax = res.plot()
+    assert (
+        ax.get_title() == "Wk characteristic phase deviation against ISO 8041-1: PASS"
+    )
+    assert ax.get_ylabel() == "Characteristic phase deviation [deg]"
+    assert ax.get_xscale() == "log"
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert labels == ["ISO 8041-1 tolerance", "within tolerance"]
+
+    band = ax.collections[0].get_paths()[0].vertices
+    _, ft2, ft3, _ = TRANSITION_FREQUENCIES_HZ["Wk"]
+    at_16 = [y for x, y in band if x == pytest.approx(15.848931924611133)]
+    assert ft2 < 15.85 < ft3
+    assert (min(at_16), max(at_16)) == pytest.approx((0.0, 6.0))
+    ceiling = ax.get_ylim()[1]
+    at_tail = [y for x, y in band if x == pytest.approx(0.1)]
+    assert max(at_tail) == pytest.approx(ceiling)
+
+    failing = _phase_verdict("Wk", 8.0).plot()
+    assert "FAIL" in failing.get_title()
+    assert [t.get_text() for t in failing.get_legend().get_texts()][-1] == (
+        "outside tolerance"
+    )
+
+
+def test_the_phase_verification_speaks_spanish() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    res = _phase_verdict("Wd", 3.0)
+
+    ax = res.plot(language="es")
+    assert ax.get_title() == (
+        "Desviación de fase característica de Wd frente a ISO 8041-1: CUMPLE"
+    )
+    assert ax.get_ylabel() == "Desviación de fase característica [grados]"
+    assert ax.get_xlabel() == "Frecuencia [Hz]"
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert labels == ["tolerancia de ISO 8041-1", "dentro de tolerancia"]
+
+    with pytest.raises(ValueError, match="Unknown language"):
+        res.plot(language="xx")
+
+
+def test_the_meter_figure_draws_the_band_the_verdict_actually_uses() -> None:
+    """With a laboratory uncertainty, the accepted band is not the printed one.
+
+    13.1 and 14.1 subtract the laboratory's expanded uncertainty from both
+    limits, so a measurement can sit inside the Table 5 band and still fail.
+    Drawing only the printed band put a red X on a point inside the shaded
+    region with nothing on the axes to explain it.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+
+    design = float(np.asarray(vibration.weighting_factors("Wk", [16.0]))[0])
+    result = vibration.verify_weighting(
+        "Wk", [16.0], [design * 1.115], expanded_uncertainty_percent=1.0
+    )
+    assert not result.passes
+
+    ax = result.plot()
+    bands = [
+        (
+            min(y for _, y in c.get_paths()[0].vertices),
+            max(y for _, y in c.get_paths()[0].vertices),
+        )
+        for c in ax.collections
+    ]
+    assert len(bands) == 2
+    printed, accepted = bands
+    assert printed == pytest.approx((design * 0.89, design * 1.12))
+    assert accepted == pytest.approx((design * 0.90, design * 1.11))
+    # The measurement sits inside the printed band and outside the accepted one.
+    assert printed[0] < design * 1.115 < printed[1]
+    assert design * 1.115 > accepted[1]
+
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert "accepted with U = 1 %" in labels
+    assert "aceptado con U = 1 %" in [
+        t.get_text() for t in result.plot(language="es").get_legend().get_texts()
+    ]
+
+
+def test_the_meter_figure_draws_one_band_when_no_uncertainty_is_given() -> None:
+    """Without one the printed band is the accepted band, so there is one."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+
+    f = np.array([1.0, 8.0, 80.0])
+    design = np.asarray(vibration.weighting_factors("Wk", f))
+    ax = vibration.verify_weighting("Wk", f, design).plot()
+    assert len(ax.collections) == 1
+    assert "accepted with U" not in " ".join(
+        t.get_text() for t in ax.get_legend().get_texts()
+    )

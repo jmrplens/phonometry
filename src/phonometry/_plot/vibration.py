@@ -55,7 +55,10 @@ if TYPE_CHECKING:
         WeightedSpectrum,
         WeightingResponse,
     )
-    from ..vibration.human.instrumentation import WeightingVerification
+    from ..vibration.human.instrumentation import (
+        PhaseVerification,
+        WeightingVerification,
+    )
     from ..vibration.human.multiple_shock import MultipleShockResult
     from ..vibration.human.seat_vibration import SeatTransmissionResult
     from ..vibration.machinery.diagnostics import FaultFrequencyResult
@@ -187,10 +190,13 @@ _STRINGS: dict[str, str] = {
     # Instrument verification (ISO 8041-1 Tables 4 and 5).
     "design goal": "objetivo de diseño",
     "ISO 8041-1 tolerance": "tolerancia de ISO 8041-1",
+    "accepted with U = {u} %": "aceptado con U = {u} %",
     "within tolerance": "dentro de tolerancia",
     "outside tolerance": "fuera de tolerancia",
     "Weighting factor": "Factor de ponderación",
     "{w} weighting against ISO 8041-1: {verdict}": "Ponderación {w} frente a ISO 8041-1: {verdict}",
+    "Characteristic phase deviation [deg]": "Desviación de fase característica [grados]",
+    "{w} characteristic phase deviation against ISO 8041-1: {verdict}": "Desviación de fase característica de {w} frente a ISO 8041-1: {verdict}",
     "PASS": "CUMPLE",
     "FAIL": "NO CUMPLE",
     "measured {v} mm/s at {f} Hz": "medido {v} mm/s a {f} Hz",
@@ -784,8 +790,11 @@ def plot_weighting_verification(
     :param kwargs: Forwarded to the measured-point ``plot`` call.
     :return: The axes.
     """
-    from .._i18n import localize_axes
-    from ..vibration.human.instrumentation import weighting_tolerance_percent
+    from .._i18n import format_number, localize_axes
+    from ..vibration.human.instrumentation import (
+        UNCONSTRAINED_BELOW,
+        weighting_tolerance_percent,
+    )
 
     ax = ax if ax is not None else _new_axes()
     order = np.argsort(result.frequencies_hz)
@@ -803,6 +812,25 @@ def plot_weighting_verification(
         alpha=0.15,
         label=_t("ISO 8041-1 tolerance", language),
     )
+    # 13.1 and 14.1 subtract the laboratory's own expanded uncertainty from
+    # both limits, so with one supplied the band a measurement is actually
+    # accepted in is narrower than the printed one. Drawing only the printed
+    # band would put a failing point inside the shaded region with nothing to
+    # explain it. The tail keeps its lower edge, exactly as the verdict does.
+    uncertainty = result.expanded_uncertainty_percent
+    if uncertainty > 0.0:
+        unconstrained = lower <= UNCONSTRAINED_BELOW
+        effective_lower = np.where(unconstrained, lower, lower + uncertainty)
+        ax.fill_between(
+            freqs,
+            design * (1.0 + effective_lower / 100.0),
+            design * (1.0 + (upper - uncertainty) / 100.0),
+            color=_C_PRIMARY,
+            alpha=0.3,
+            label=_t("accepted with U = {u} %", language).format(
+                u=format_number(uncertainty, language, decimals=2, trim=True)
+            ),
+        )
     ax.plot(freqs, design, color=_C_PRIMARY, lw=2.0, label=_t("design goal", language))
 
     style_default(kwargs, "color", _C_REFERENCE)
@@ -831,6 +859,96 @@ def plot_weighting_verification(
         _t("{w} weighting against ISO 8041-1: {verdict}", language).format(
             w=result.weighting, verdict=verdict
         )
+    )
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_phase_verification(
+    result: PhaseVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The characteristic phase deviation inside the band ISO 8041-1 allows it.
+
+    The quantity drawn is Formula (6), not the phase error: a modulus, one
+    value per adjacent pair of frequencies, attributed to the lower one. So
+    the band is drawn from the axis floor up to the Table 5 limit rather than
+    symmetrically about a line, and the two tails, where the standard sets no
+    limit, are filled to the top of the axes.
+
+    :param result: A
+        :class:`~phonometry.vibration.human.instrumentation.PhaseVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured-point ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+    from ..vibration.human.instrumentation import SKIRT_TOLERANCE_PERCENT
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = result.characteristic_frequencies_hz
+    deviation = result.characteristic_deviation_deg
+    inside = result.within_tolerance
+    limits = result.tolerance_deg
+
+    finite = limits[np.isfinite(limits)]
+    tallest = max(
+        float(finite.max()) if finite.size else 0.0,
+        float(deviation.max()) if deviation.size else 0.0,
+    )
+    ceiling = 1.2 * tallest if tallest > 0.0 else float(SKIRT_TOLERANCE_PERCENT[2])
+    band = np.where(np.isfinite(limits), limits, ceiling)
+    # Table 5 is a piecewise-constant limit that steps at the Table 4
+    # transition frequencies, so the band is held between samples and stepped
+    # at them rather than ramped, which would draw a limit the standard never
+    # sets across the one-third octave either side of a corner.
+    ax.fill_between(
+        freqs,
+        np.zeros_like(band),
+        band,
+        step="post",
+        color=_C_PRIMARY,
+        alpha=0.15,
+        label=_t("ISO 8041-1 tolerance", language),
+    )
+
+    style_default(kwargs, "color", _C_REFERENCE)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "markersize", 5)
+    style_default(kwargs, "ls", "none")
+    kwargs.setdefault("label", _t("within tolerance", language))
+    ax.plot(freqs[inside], deviation[inside], **kwargs)
+    if not inside.all():
+        ax.plot(
+            freqs[~inside],
+            deviation[~inside],
+            color=_C_SECONDARY,
+            marker="X",
+            markersize=9,
+            ls="none",
+            label=_t("outside tolerance", language),
+        )
+
+    # A plain logarithmic axis rather than the octave-centre ticks of
+    # format_frequency_axis, and for the same reason the magnitude verdict
+    # beside this one uses one: the nominal centres that helper labels start
+    # at 1 Hz, and half of the whole-body range is below that.
+    ax.set_xscale("log")
+    ax.set_ylim(0.0, ceiling)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Characteristic phase deviation [deg]", language))
+    verdict = _t("PASS" if result.passes else "FAIL", language)
+    ax.set_title(
+        _t(
+            "{w} characteristic phase deviation against ISO 8041-1: {verdict}",
+            language,
+        ).format(w=result.weighting, verdict=verdict)
     )
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")

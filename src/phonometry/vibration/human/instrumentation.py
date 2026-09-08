@@ -30,18 +30,50 @@ it: the rest are laboratory tests on hardware, not arithmetic.
 limits as percentages of the weighting factor, and this module keeps them
 that way. ``+26 %`` is ``+2,0 dB`` to two decimals, but the percentage is
 what the page prints and what the acceptance test in Annex B is written in.
+
+**The band does not widen; the measurement does.** Two sentences of the
+standard talk about expanded uncertainty and they are not the same sentence.
+5.6.6 (printed folio 14) says the Table 5 limits already "include the
+applicable maximum expanded uncertainties of measurement", which is why
+:func:`weighting_tolerance_percent` returns the printed numbers and never
+adds to them. 13.1 (folio 42) and 14.1 (folio 48) say something else, word
+for word in both: compliance is demonstrated when the measured deviation,
+"extended by the actual expanded uncertainty of measurement of the testing
+laboratory", does not exceed those limits. That second rule is about the
+laboratory's own uncertainty, it moves the deviation rather than the band,
+and it is what ``expanded_uncertainty_percent`` does in
+:func:`verify_weighting`.
+
+**Phase is graded on a slope, not on an angle.** Footnote a of Table 5 limits
+the phase criterion to instruments reporting a parameter not based on r.m.s.
+values, and 5.6.6 explains why the criterion is not the phase error itself:
+a constant group delay is a large phase error that changes no measured
+quantity. Formula (6) (folio 15) turns a pair of adjacent phase errors into
+the characteristic phase deviation the table actually grades, and
+:func:`verify_phase_response` is that comparison.
 """
 
 from __future__ import annotations
 
 import math
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.validation import require_choice, require_equal_shapes
-from .exposure import WEIGHTING_NAMES, weighting_factors
+from ..._internal.validation import (
+    require_choice,
+    require_equal_shapes,
+    require_finite_array,
+    require_positive_array,
+)
+from .exposure import (
+    WEIGHTING_NAMES,
+    HumanVibrationWarning,
+    frequency_weighting,
+    weighting_factors,
+)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -125,6 +157,71 @@ REFERENCE_ACCELERATION_M_S2: dict[str, float] = {
     "Wm": 1.0,
 }
 
+#: Table 1: the nominal frequency range of each weighting, in hertz, as the
+#: ``(lower, upper)`` pair the column prints. These are the nominal values
+#: printed in the table (``8 to 1 000``, ``0,5 to 80``, ``1 to 80``,
+#: ``0,1 to 0,5``), not the exact one-third-octave centres ``10**(k/10)``
+#: that Annex B tabulates the response at, and they are deliberately kept
+#: that way: 5.7, 5.10, 12.11 and the Table 15 test grids all read "for all
+#: frequencies in the appropriate nominal frequency range", so the range is
+#: an interval named by round numbers rather than a band centre. The nominal
+#: 8 Hz that opens the hand-transmitted range is the band centred on
+#: ``10**(9/10) = 7,943`` Hz, which is why the printed lower bound is 8 and
+#: the first Annex B row inside it is not.
+NOMINAL_FREQUENCY_RANGE_HZ: dict[str, tuple[float, float]] = {
+    "Wb": (0.5, 80.0),
+    "Wc": (0.5, 80.0),
+    "Wd": (0.5, 80.0),
+    "We": (0.5, 80.0),
+    "Wf": (0.1, 0.5),
+    "Wh": (8.0, 1000.0),
+    "Wj": (0.5, 80.0),
+    "Wk": (0.5, 80.0),
+    "Wm": (1.0, 80.0),
+}
+
+#: The coverage factor the expanded uncertainty of a conformance measurement
+#: is calculated with. 13.1 (folio 42) and 14.1 (folio 48) both print
+#: ``k = 2``; 12.1 (folio 28) prints "a coverage factor of no less than 2",
+#: so 2 is the floor for pattern evaluation and the exact value for the other
+#: two clauses. It carries the number of its standard because it is not the
+#: only coverage factor the library publishes:
+#: :data:`phonometry.hearing.COVERAGE_FACTOR` is the 1,65 of ISO 9612, and a
+#: bare ``COVERAGE_FACTOR`` in a second domain would read as the same number.
+ISO8041_COVERAGE_FACTOR = 2.0
+
+#: The maximum expanded uncertainty of measurement, in per cent, that each
+#: test clause permits a testing laboratory. 12.1 (folio 28) says what the
+#: table is for: "Testing laboratories shall not perform tests to demonstrate
+#: conformance to the specifications of this document if their actual expanded
+#: uncertainties of measurement exceed the maximum permitted values."
+#:
+#: The keys are clause numbers of ISO 8041-1:2017. Two clauses print two
+#: different figures, one for the reference measurement range and one for the
+#: additional ranges, and carry two keys rather than one number that would be
+#: wrong on one of them. Clauses absent from the table are the ones that print
+#: no figure; 12.20.2 is deliberately absent because the uncertainties it
+#: prints are ``0,5 °C`` and ``10 %`` relative humidity, which are
+#: uncertainties of the environmental conditions rather than of a deviation
+#: from a design goal.
+MAX_EXPANDED_UNCERTAINTY_PERCENT: dict[str, float] = {
+    "12.7": 2.0,  # folio 29, indication at the reference frequency
+    "12.10.1": 2.0,  # folio 31, electrical amplitude linearity
+    "12.10.2": 3.0,  # folio 32, mechanical linearity, reference range
+    "12.10.2 additional ranges": 4.0,  # folio 33, the other ranges
+    "12.11.2": 4.5,  # folio 34, mechanical frequency response
+    "12.11.3": 3.0,  # folio 35, electrical frequency response
+    "12.11.4": 5.0,  # folio 35, the overall response that combines them
+    "12.13": 3.0,  # folio 36, signal-burst response
+    "12.14": 2.0,  # folio 36, overload indication
+    "12.18": 0.01,  # folio 37, timing facilities
+    "13.9": 2.0,  # folio 44, indication, one-off instrument
+    "13.11": 4.0,  # folio 46, linearity and frequency response, one-off
+    "13.14": 2.0,  # folio 47, overload indication, one-off
+    "13.15": 0.01,  # folio 47, timing facilities, one-off
+    "14.9": 5.0,  # folio 51, linearity and frequency response, periodic
+}
+
 #: Table 2: how far the indication itself may sit from the true value at the
 #: reference frequency, in per cent. The low-frequency whole-body case (Wf)
 #: is allowed the wider one.
@@ -205,6 +302,25 @@ def phase_tolerance_degrees(name: str, frequencies: ArrayLike) -> NDArray[np.flo
     return limits
 
 
+def _checked_uncertainty(value: float | None, name: str) -> float:
+    """Validate a laboratory expanded uncertainty and default it to zero.
+
+    :param value: The uncertainty as the caller supplied it, or ``None``.
+    :param name: The parameter name, for the error message.
+    :return: The uncertainty as a float; ``0.0`` for ``None``.
+    :raises ValueError: If it is negative or not finite. An uncertainty that
+        is not a number is refused rather than dropped, because dropping it
+        would hand back the verdict 13.1 says is not enough.
+    """
+    if value is None:
+        return 0.0
+    uncertainty = float(value)
+    if not math.isfinite(uncertainty) or uncertainty < 0.0:
+        msg = f"'{name}' must be non-negative and finite; got {value!r}."
+        raise ValueError(msg)
+    return uncertainty
+
+
 @dataclass(frozen=True)
 class WeightingVerification:
     """One measured weighting response against its ISO 8041-1 tolerances.
@@ -216,7 +332,12 @@ class WeightingVerification:
         frequencies.
     :ivar deviation_percent: ``(measured / design - 1) * 100`` elementwise,
         which is the quantity the standard's acceptance test is written in.
-    :ivar within_tolerance: Whether each frequency is inside its band.
+    :ivar within_tolerance: Whether each frequency is inside its band, with
+        the deviation extended by ``expanded_uncertainty_percent`` as 13.1
+        and 14.1 require.
+    :ivar expanded_uncertainty_percent: The testing laboratory's own expanded
+        uncertainty, in per cent, that the verdict was reached with. ``0,0``
+        when the caller supplied none, which compares the bare deviation.
     """
 
     weighting: str
@@ -225,6 +346,7 @@ class WeightingVerification:
     design: NDArray[np.float64]
     deviation_percent: NDArray[np.float64]
     within_tolerance: NDArray[np.bool_]
+    expanded_uncertainty_percent: float = 0.0
 
     @property
     def passes(self) -> bool:
@@ -270,7 +392,11 @@ class WeightingVerification:
 
 
 def verify_weighting(
-    name: str, frequencies: ArrayLike, measured_factors: ArrayLike
+    name: str,
+    frequencies: ArrayLike,
+    measured_factors: ArrayLike,
+    *,
+    expanded_uncertainty_percent: float | None = None,
 ) -> WeightingVerification:
     """Check a measured weighting response against ISO 8041-1 Tables 4 and 5.
 
@@ -278,17 +404,41 @@ def verify_weighting(
     ``(measured / design - 1) * 100`` at each frequency has to sit between the
     lower and upper limits of the region that frequency falls in.
 
+    **Where the laboratory's uncertainty goes.** 13.1 (folio 42) and 14.1
+    (folio 48) print the same sentence: compliance is demonstrated when the
+    result of a measurement of a deviation from a design goal, "extended by
+    the actual expanded uncertainty of measurement of the testing laboratory",
+    does not exceed the specified tolerance limits, the uncertainty being
+    calculated with the coverage factor ``k = 2``
+    (:data:`ISO8041_COVERAGE_FACTOR`). So the comparison is
+    ``deviation + U <= upper`` and ``deviation - U >= lower``: the band stays
+    where Table 5 prints it and the measurement is what widens. That is not in
+    conflict with 5.6.6 (folio 14), which says the Table 5 limits already
+    include the applicable *maximum permitted* expanded uncertainties: the
+    band is not widened by either sentence, and what 13.1 adds is the
+    laboratory's *actual* uncertainty, which is its own number and is bounded
+    by :data:`MAX_EXPANDED_UNCERTAINTY_PERCENT`.
+
     :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
     :param frequencies: The frequencies the response was measured at, in
         hertz.
     :param measured_factors: The measured weighting factors, linear and not in
         decibels, one per frequency.
+    :param expanded_uncertainty_percent: The testing laboratory's actual
+        expanded uncertainty of the deviation measurement, in per cent and
+        already expanded with ``k = 2``. ``None`` (the default) compares the
+        bare deviation, which is the right reading only for a measurement
+        whose uncertainty has been shown to be negligible.
     :return: The verdict, as a :class:`WeightingVerification`.
     :raises ValueError: If the weighting is not one of the nine, if the two
         arrays do not have the same shape, if a frequency is not positive and
-        finite, or if a measured factor is negative or not finite.
+        finite, if a measured factor is negative or not finite, or if the
+        expanded uncertainty is negative or not finite.
     """
     weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
+    uncertainty = _checked_uncertainty(
+        expanded_uncertainty_percent, "expanded_uncertainty_percent"
+    )
     f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     measured = np.atleast_1d(np.asarray(measured_factors, dtype=np.float64))
     require_equal_shapes(
@@ -306,10 +456,14 @@ def verify_weighting(
     design = np.atleast_1d(np.asarray(weighting_factors(weighting, f), np.float64))
     deviation = (measured / design - 1.0) * 100.0
     upper, lower = weighting_tolerance_percent(weighting, f)
-    # The lower limit of the two tails is -100 %, which admits every
-    # non-negative factor, so the comparison there is satisfied by
-    # construction rather than by a special case.
-    within = (deviation <= upper) & (deviation >= lower)
+    # The -100 % of the two tails is the absence of a lower limit rather than
+    # a wide one, so it is the one place the laboratory's uncertainty must not
+    # be subtracted: a response of exactly zero deviates by -100 % and still
+    # conforms, and -100 - U would reject it for being measured carefully.
+    unconstrained = lower <= UNCONSTRAINED_BELOW
+    within = (deviation + uncertainty <= upper) & (
+        unconstrained | (deviation - uncertainty >= lower)
+    )
     return WeightingVerification(
         weighting=weighting,
         frequencies_hz=f,
@@ -317,6 +471,456 @@ def verify_weighting(
         design=design,
         deviation_percent=deviation,
         within_tolerance=np.asarray(within, dtype=np.bool_),
+        expanded_uncertainty_percent=uncertainty,
+    )
+
+
+#: How many frequencies Formula (6) needs to produce anything: it is written
+#: on the pair ``f(n)``, ``f(n+1)``.
+_FORMULA_6_FREQUENCIES = 2
+
+
+def _require_a_pair_of_ascending_frequencies(
+    frequencies_hz: NDArray[np.float64], owner: str
+) -> None:
+    """Require what Formula (6) needs: two frequencies, and an order.
+
+    :param frequencies_hz: The already validated frequencies, in hertz.
+    :param owner: Name of the entry point, for the error message.
+    :raises ValueError: If there is only one frequency, or if two of them are
+        equal or out of order. The formula divides by ``f(n+1) - f(n)``, so an
+        unordered grid is not a grid it can be evaluated on, and sorting one
+        silently would pair up phase errors the caller never measured together.
+    """
+    if frequencies_hz.size < _FORMULA_6_FREQUENCIES:
+        msg = (
+            f"{owner}: 'frequencies_hz' must hold at least two frequencies; "
+            f"Formula (6) is about a pair of adjacent bands, and got "
+            f"{frequencies_hz.size}."
+        )
+        raise ValueError(msg)
+    if not np.all(np.diff(frequencies_hz) > 0.0):
+        msg = (
+            f"{owner}: 'frequencies_hz' must increase strictly, because "
+            f"Formula (6) divides by the difference between adjacent ones."
+        )
+        raise ValueError(msg)
+
+
+#: The widest step 12.11.1 allows a frequency-response test to be made in, as
+#: a ratio: "in steps of not more than one-third octave across the frequency
+#: ranges specified in Table 15" (folio 33). The one-third octave of Formula
+#: (B.1) is a ratio of ``10 ** (1 / 10)``.
+_WIDEST_STEP_RATIO = 10.0 ** (1.0 / 10.0)
+
+#: Slack on that ratio, so a grid built from the printed decimals rather than
+#: from the exponents is not refused for its last digit.
+_STEP_RATIO_SLACK = 1e-6
+
+
+def _require_a_third_octave_grid(
+    frequencies_hz: NDArray[np.float64], owner: str
+) -> None:
+    """Require the grid 12.11.1 prints, because the design is rebuilt on it.
+
+    The design-goal phase runs off one continuous branch, and it is recovered
+    from the principal value by following it frequency to frequency. That
+    recovery needs the steps the standard already asks for: on a coarser grid
+    a step of more than half a turn is indistinguishable from the next branch,
+    the whole design lands 360 degrees away, and Formula (6) turns that offset
+    on a widely spaced pair into a few degrees, which can sit inside the
+    tolerance. The failure is silent and it can go either way, so it is
+    refused rather than warned about.
+
+    :param frequencies_hz: The already validated ascending frequencies, in
+        hertz.
+    :param owner: Name of the entry point, for the error message.
+    :raises ValueError: If two adjacent frequencies are more than one third of
+        an octave apart.
+    """
+    ratios = frequencies_hz[1:] / frequencies_hz[:-1]
+    worst = float(np.max(ratios))
+    if worst > _WIDEST_STEP_RATIO * (1.0 + _STEP_RATIO_SLACK):
+        msg = (
+            f"{owner}: 'frequencies_hz' steps by a ratio of up to {worst:.4g}, "
+            f"and ISO 8041-1:2017 12.11.1 asks for steps of not more than one "
+            f"third of an octave ({_WIDEST_STEP_RATIO:.4g}). The design-goal "
+            f"phase is rebuilt on the grid it is given, and on a coarser one "
+            f"it can land a whole turn away without the verdict noticing."
+        )
+        raise ValueError(msg)
+
+
+def characteristic_phase_deviation(
+    frequencies_hz: ArrayLike, phase_deviation_deg: ArrayLike
+) -> NDArray[np.float64]:
+    r"""The characteristic phase deviation of ISO 8041-1 Formula (6).
+
+    5.6.6 (printed folio 14) says why the phase error itself is not the
+    criterion: "the errors in measurement due to errors in the phase response
+    are dependent on the rate of change in phase error with frequency, rather
+    than the absolute phase error itself". Formula (6) (folio 15) is that rate,
+    printed inside absolute-value bars:
+
+    .. math::
+
+        \Delta\varphi_0 = \left\lvert
+        \frac{f_n \, \Delta\varphi_{n+1} - f_{n+1} \, \Delta\varphi_n}
+             {f_{n+1} - f_n} \right\rvert
+
+    The normative Annex H closes the two questions the clause leaves open.
+    Formula (H.3) (folio 93) prints the same quantity with the two products
+    exchanged, which is the same number inside the bars both formulae carry,
+    and it says where the number belongs: "This allows the calculation of
+    Δφ0(f_n) at each frequency f_n except for the highest frequency". So ``N``
+    frequencies give ``N - 1`` values, each attributed to the lower frequency
+    of its pair, and that is what decides which Table 5 region grades a pair
+    that straddles a transition frequency: the region of ``f_n``.
+
+    Two closed forms say what the quantity measures. A constant phase error of
+    ``c`` degrees gives ``|c|`` at every pair, so an offset is graded at face
+    value. A phase error proportional to frequency, which is a constant group
+    delay, gives exactly zero, and NOTE 1 of H.2.1 is that reading: a constant
+    group delay "would probably far exceed the tolerances on phase deviation,
+    but would influence neither the vibration parameters to be measured nor
+    the characteristic phase deviation values".
+
+    :param frequencies_hz: The frequencies the phase errors belong to, in
+        hertz, strictly ascending. H.2.1 asks for them "preferably in steps of
+        one-third octaves", which is the grid Annex B tabulates.
+    :param phase_deviation_deg: The phase error at each frequency, in degrees,
+        measured minus design goal.
+    :return: One value per adjacent pair, in degrees, attributed to the lower
+        frequency of the pair, so of length one less than the input.
+    :raises ValueError: If the two arrays do not have the same shape, if a
+        frequency is not positive and finite, if a phase deviation is not
+        finite, or if there are fewer than two frequencies or they do not
+        strictly ascend.
+    """
+    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    deviation = require_finite_array(phase_deviation_deg, "phase_deviation_deg")
+    require_equal_shapes(
+        "characteristic_phase_deviation",
+        {"frequencies_hz": f.shape, "phase_deviation_deg": deviation.shape},
+        quantity="frequency",
+    )
+    _require_a_pair_of_ascending_frequencies(f, "characteristic_phase_deviation")
+    lower, upper = f[:-1], f[1:]
+    characteristic = np.abs(
+        (lower * deviation[1:] - upper * deviation[:-1]) / (upper - lower)
+    )
+    return np.asarray(characteristic, dtype=np.float64)
+
+
+#: Where NOTE 2 of H.2.1 stops vouching for Formula (H.4): it "is an
+#: approximation to numerical results and applies to small Δφ0 values only
+#: (< 30°)".
+_PEAK_APPROXIMATION_LIMIT_DEG = 30.0
+
+#: The coefficient Formula (H.4) prints in front of the sine.
+_PEAK_DEVIATION_COEFFICIENT = 0.48
+
+
+def peak_deviation_percent(characteristic_phase_deviation_deg: ArrayLike) -> float:
+    r"""The peak-value deviation a phase response costs (Formula (H.4)).
+
+    Annex H is normative, and (H.4) (folio 93) is the only worked number in
+    the whole phase argument:
+
+    .. math::
+
+        \Delta P_{\max} \approx \pm \max\{0{,}48 \sin \Delta\varphi_0(f_n)\}
+        \times 100 \, \%
+
+    followed by "For the maximum characteristic phase deviations of 12°, the
+    maximum peak value deviation is approximately 10 %". The maximum is inside
+    the printed formula, so this returns one number for a whole response
+    rather than one per frequency: ``ΔP_max`` is what the worst pair costs.
+
+    NOTE 2 of H.2.1 fences the approximation twice, and both fences matter to
+    a reader of the returned number. It "applies to small Δφ0 values only
+    (< 30°)", which is why a larger value is passed on with a warning rather
+    than silently. And it is a worst case: "Depending on the signal waveform,
+    the actual peak value deviation will normally be smaller than ΔP_max
+    which is a worst-case estimate, combining the amplitudes and zero phase
+    angles of two frequency components in the most unfavourable manner."
+
+    :param characteristic_phase_deviation_deg: One or more characteristic
+        phase deviations, in degrees, as
+        :func:`characteristic_phase_deviation` returns them.
+    :return: The likely maximum peak-value deviation, in per cent. The
+        printed ``±`` is the sign of the deviation, not part of the size, so
+        the number returned is the magnitude.
+    :raises ValueError: If a value is negative or not finite. Formula (6)
+        prints the quantity inside absolute-value bars, so a negative one is
+        not a characteristic phase deviation and is refused rather than
+        folded.
+    :raises UserWarning: :class:`~phonometry.vibration.HumanVibrationWarning`
+        when a value exceeds the 30 degrees NOTE 2 limits the approximation to.
+    """
+    deviations = require_finite_array(
+        characteristic_phase_deviation_deg, "characteristic_phase_deviation_deg"
+    )
+    if np.any(deviations < 0.0):
+        msg = (
+            "'characteristic_phase_deviation_deg' must be non-negative: "
+            "Formula (6) prints the quantity inside absolute-value bars."
+        )
+        raise ValueError(msg)
+    worst = float(np.max(deviations))
+    if worst >= _SINE_ORDERING_LIMIT_DEG:
+        # Past a quarter turn the sine stops ranking pairs, so the maximum
+        # inside the printed formula no longer picks the worst one, and past a
+        # half turn it goes negative and the returned "magnitude" changes sign.
+        # Neither is a peak-value deviation, and NOTE 2 stopped vouching for
+        # the approximation four times further back, so this is refused rather
+        # than handed over with a warning.
+        msg = (
+            f"'characteristic_phase_deviation_deg' reaches {worst:.4g} "
+            f"degrees, and Formula (H.4) only ranks pairs below "
+            f"{_SINE_ORDERING_LIMIT_DEG:g}: its sine is not monotonic past a "
+            f"quarter turn and is negative past a half turn, so the maximum "
+            f"it prints stops meaning the worst pair. ISO 8041-1:2017 H.2.1 "
+            f"NOTE 2 limits it to below "
+            f"{_PEAK_APPROXIMATION_LIMIT_DEG:g} degrees in any case."
+        )
+        raise ValueError(msg)
+    if worst >= _PEAK_APPROXIMATION_LIMIT_DEG:
+        warnings.warn(
+            f"Formula (H.4) is an approximation for characteristic phase "
+            f"deviations below {_PEAK_APPROXIMATION_LIMIT_DEG:g} degrees "
+            f"(ISO 8041-1:2017, H.2.1, NOTE 2); the largest supplied is "
+            f"{worst:.4g} degrees.",
+            HumanVibrationWarning,
+            stacklevel=2,
+        )
+    peak = np.max(np.sin(np.radians(deviations)))
+    return float(_PEAK_DEVIATION_COEFFICIENT * peak * 100.0)
+
+
+def _design_phase_deg(
+    name: str, frequencies_hz: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """The design-goal phase along ascending frequencies, in degrees.
+
+    Formula (H.1) (folio 92) defines the design goal as the argument of
+    ``H(s)`` of Formula (5), and says "Values for the phase angle φ are
+    included in Tables B.1 to B.9". Those tables print one continuous branch,
+    running down from close to ``+180`` degrees at the lowest frequency of
+    each table and past ``-180`` at the highest, so the branch is followed
+    here rather than the principal value: with it, all 318 printed phase cells
+    of Tables B.1 to B.9 are reproduced within their print rounding.
+
+    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
+    :param frequencies_hz: Strictly ascending frequencies, in hertz.
+    :return: The design-goal phase, in degrees, on the printed branch.
+    """
+    response = frequency_weighting(name, frequencies_hz).response
+    return np.degrees(np.unwrap(np.angle(response))).astype(np.float64)
+
+
+#: Where Formula (H.4) stops ordering pairs at all. Its sine rises to a
+#: quarter turn, falls back to zero at a half turn and is negative beyond, so
+#: the maximum the formula prints stops picking the worst pair there and the
+#: number stops being a magnitude. Well outside the 30 degrees NOTE 2 vouches
+#: for, and refused rather than warned about.
+_SINE_ORDERING_LIMIT_DEG = 90.0
+
+#: How close to a half turn every phase error has to sit before the verdict
+#: says the measurement looks inverted rather than wrong, in degrees.
+_INVERSION_TOLERANCE_DEG = 1.0
+
+
+def _warn_if_inverted(deviation_deg: NDArray[np.float64]) -> None:
+    """Say when a phase error is a polarity, not a phase response.
+
+    An inverted measurement sits half a turn from the design goal at every
+    frequency, and Formula (6) grades that constant offset as 180 degrees, so
+    it fails the criterion loudly and for the wrong reason. H.2.3.4 k) says
+    what the reason is, and that this is not the test for it, so the verdict
+    says so rather than letting the number speak for a diagnosis it cannot
+    make. A wrapped measurement is not detected here and cannot be: on a
+    one-third-octave grid a wrap and the delay ramp of H.2.3.4 n), which the
+    criterion is invariant to, are the same jump.
+
+    :param deviation_deg: The phase error at each frequency, in degrees.
+    :raises UserWarning: :class:`~phonometry.vibration.HumanVibrationWarning`
+        when every one of them is half a turn.
+    """
+    if np.allclose(
+        np.abs(deviation_deg), 180.0, atol=_INVERSION_TOLERANCE_DEG, rtol=0.0
+    ):
+        warnings.warn(
+            "Every phase error is half a turn, which is signal inversion: "
+            "ISO 8041-1:2017 H.2.3.4 k) says the characteristic phase "
+            "deviation criterion is not applicable to it and that polarity "
+            "has its own test.",
+            HumanVibrationWarning,
+            stacklevel=3,
+        )
+
+
+@dataclass(frozen=True)
+class PhaseVerification:
+    """One measured phase response against the ISO 8041-1 Table 5 phase band.
+
+    :ivar weighting: The weighting the response was measured for.
+    :ivar frequencies_hz: The frequencies it was measured at.
+    :ivar measured_phase_deg: The measured phase, as supplied.
+    :ivar design_phase_deg: The design-goal phase of Formula (H.1) at the same
+        frequencies, on the branch Tables B.1 to B.9 print.
+    :ivar deviation_deg: The phase error, measured minus design, in degrees.
+    :ivar characteristic_frequencies_hz: The frequencies the characteristic
+        phase deviations are attributed to, which are all but the highest
+        (H.2.1, Formula (H.3)).
+    :ivar characteristic_deviation_deg: The characteristic phase deviation of
+        Formula (6) at each of those, in degrees.
+    :ivar tolerance_deg: The Table 5 limit at each of those, in degrees,
+        infinite in the two tails.
+    :ivar within_tolerance: Whether each characteristic phase deviation is
+        inside its limit.
+    """
+
+    weighting: str
+    frequencies_hz: NDArray[np.float64]
+    measured_phase_deg: NDArray[np.float64]
+    design_phase_deg: NDArray[np.float64]
+    deviation_deg: NDArray[np.float64]
+    characteristic_frequencies_hz: NDArray[np.float64]
+    characteristic_deviation_deg: NDArray[np.float64]
+    tolerance_deg: NDArray[np.float64]
+    within_tolerance: NDArray[np.bool_]
+
+    @property
+    def passes(self) -> bool:
+        """Whether every characteristic phase deviation sits inside Table 5.
+
+        True says the phase response meets the criterion of footnote a of
+        Table 5, which is the one an instrument reporting peak, MTVV or VDV is
+        held to. An r.m.s.-only instrument is not graded on phase at all, and
+        this is not a verdict on its magnitude response.
+        """
+        return bool(np.all(self.within_tolerance))
+
+    @property
+    def failing_frequencies_hz(self) -> NDArray[np.float64]:
+        """The frequencies whose characteristic phase deviation is too large."""
+        return np.asarray(
+            self.characteristic_frequencies_hz[~self.within_tolerance],
+            dtype=np.float64,
+        )
+
+    @property
+    def peak_deviation_percent(self) -> float:
+        """What this phase response costs a peak reading (Formula (H.4)).
+
+        The worst case over the measured range, which is where the maximum in
+        the printed formula is taken.
+        """
+        return peak_deviation_percent(self.characteristic_deviation_deg)
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Draw the characteristic phase deviation inside the Table 5 band.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to
+            :func:`phonometry._plot.vibration.plot_phase_verification`.
+        """
+        from ..._i18n import check_language
+        from ..._plot.vibration import plot_phase_verification
+
+        check_language(language)
+        return plot_phase_verification(self, ax, language=language, **kwargs)
+
+
+def verify_phase_response(
+    name: str, frequencies_hz: ArrayLike, measured_phase_deg: ArrayLike
+) -> PhaseVerification:
+    """Check a measured phase response against the ISO 8041-1 Table 5 band.
+
+    Table 5 (folio 15) prints a characteristic phase deviation limit beside
+    every magnitude limit: ``±6°`` in the central region, ``±12°`` in the two
+    skirts and ``±∞`` in the two tails. The quantity those grade is not the
+    phase error but Formula (6) of it, which is why this is a separate entry
+    point from :func:`verify_weighting` rather than a third array inside it:
+    footnote a of the table applies the phase criterion only to instruments
+    "that provide measurement parameters that are not based on r.m.s. values",
+    so an r.m.s.-only meter is never handed this verdict.
+
+    The design goal comes from Formula (H.1), which is the argument of the
+    same ``H(s)`` :func:`~phonometry.vibration.frequency_weighting` evaluates,
+    and it is put on the branch Tables B.1 to B.9 print, so the measurement
+    has to arrive on a continuous branch too. That is not a convenience: the
+    two invariances the standard prints for this criterion hold on the
+    continuous phase error and on no other. A constant phase error of ``c``
+    degrees is graded as ``c``; a constant group delay, which is a phase error
+    proportional to frequency, is graded as zero, and H.2.3.4 n) is explicit
+    that "any remaining constant delay time (except 180°) does not influence
+    the result at all". Fold the error into a half turn either side of zero
+    and the second one stops being true, which is why nothing is folded here.
+    H.2.3.4 g) to m) is the standard's own reconstruction of that continuous
+    curve from wrapped phase-meter readings, and it belongs before this call:
+    on a one-third-octave grid a wrap and a delay ramp are the same jump, so
+    no check here could tell a measurement still carrying its wraps from the
+    delay the criterion is meant to ignore.
+
+    **What a polarity error looks like here, and why it is not this test.**
+    H.2.3.4 k) (folio 99) says a half-turn shift of every component "leaves
+    the wave form of the signal unchanged, but would create catastrophic
+    results attempting to apply the characteristic phase deviation (CPD)
+    criterion", and that the criterion "is not applicable to signal inversion.
+    Signal inversion is a unique form of signal processing which needs its own
+    test procedure, the polarity test". An inverted measurement therefore
+    fails this check with a 180-degree deviation everywhere, and is warned
+    about, because the verdict is real but the diagnosis is a polarity test
+    this function does not perform.
+
+    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
+    :param frequencies_hz: The frequencies the phase was measured at, in
+        hertz, strictly ascending and at least two of them.
+    :param measured_phase_deg: The measured phase at each frequency, in
+        degrees, on the continuous branch Tables B.1 to B.9 print.
+    :return: The verdict, as a :class:`PhaseVerification`.
+    :raises ValueError: If the weighting is not one of the nine, if the two
+        arrays do not have the same shape, if a frequency is not positive and
+        finite, if a phase is not finite, or if there are fewer than two
+        frequencies or they do not strictly ascend.
+    :raises UserWarning: :class:`~phonometry.vibration.HumanVibrationWarning`
+        when every phase error is a half turn, which is an inverted signal
+        rather than a phase response the criterion can grade.
+    """
+    weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
+    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    measured = require_finite_array(measured_phase_deg, "measured_phase_deg")
+    require_equal_shapes(
+        "verify_phase_response",
+        {"frequencies_hz": f.shape, "measured_phase_deg": measured.shape},
+        quantity="frequency",
+    )
+    _require_a_pair_of_ascending_frequencies(f, "verify_phase_response")
+    _require_a_third_octave_grid(f, "verify_phase_response")
+
+    design = _design_phase_deg(weighting, f)
+    deviation = np.asarray(measured - design, dtype=np.float64)
+    _warn_if_inverted(deviation)
+    characteristic = characteristic_phase_deviation(f, deviation)
+    tolerance = phase_tolerance_degrees(weighting, f[:-1])
+    return PhaseVerification(
+        weighting=weighting,
+        frequencies_hz=f,
+        measured_phase_deg=measured,
+        design_phase_deg=design,
+        deviation_deg=deviation,
+        characteristic_frequencies_hz=np.asarray(f[:-1], dtype=np.float64),
+        characteristic_deviation_deg=characteristic,
+        tolerance_deg=tolerance,
+        within_tolerance=np.asarray(characteristic <= tolerance, dtype=np.bool_),
     )
 
 

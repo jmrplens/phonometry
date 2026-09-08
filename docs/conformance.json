@@ -3,13 +3,13 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 867,
-    "passing": 867,
+    "checks": 874,
+    "passing": 874,
     "failing": 0,
-    "domains": 72,
-    "standards": 404,
-    "citations": 650,
-    "designations": 142,
+    "domains": 73,
+    "standards": 405,
+    "citations": 656,
+    "designations": 143,
     "sources": 83
   },
   "units": [
@@ -189,6 +189,12 @@
       "title": "Human vibration (ISO 8041 / 2631 / 5349)",
       "checks": 15,
       "passing": 15
+    },
+    {
+      "id": "seat-vibration-transmission-iso-10326-1",
+      "title": "Seat vibration transmission (ISO 10326-1)",
+      "checks": 7,
+      "passing": 7
     },
     {
       "id": "machine-vibration-evaluation-iso-20816",
@@ -9874,6 +9880,207 @@
       "deviation": {
         "value": 0.0,
         "label": "0"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "seat-vibration-transmission-iso-10326-1/iso-10326-1-2016-formula-2/seat-factor-of-one-test",
+      "domain": "seat-vibration-transmission-iso-10326-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 10326-1",
+        "edition": "2016",
+        "clause": "Formula (2)",
+        "cite": "ISO 10326-1:2016 Formula (2)"
+      },
+      "quantity": "SEAT factor of one test",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7076411960132891
+      },
+      "computed": {
+        "value": 0.7076
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "seat-vibration-transmission-iso-10326-1/iso-10326-1-2016-clause-10-2-1/mean-of-three-agreeing-runs-at-the-platform-m-s2",
+      "domain": "seat-vibration-transmission-iso-10326-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 10326-1",
+        "edition": "2016",
+        "clause": "Clause 10.2.1",
+        "cite": "ISO 10326-1:2016 Clause 10.2.1"
+      },
+      "quantity": "Mean of three agreeing runs at the platform, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.0033333333333332
+      },
+      "computed": {
+        "value": 1.0033
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "seat-vibration-transmission-iso-10326-1/iso-10326-1-2016-clause-10-2-1/agreement-three-consecutive-runs-must-keep",
+      "domain": "seat-vibration-transmission-iso-10326-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 10326-1",
+        "edition": "2016",
+        "clause": "Clause 10.2.1",
+        "cite": "ISO 10326-1:2016 Clause 10.2.1"
+      },
+      "quantity": "Agreement three consecutive runs must keep, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.0
+      },
+      "computed": {
+        "value": 5.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "seat-vibration-transmission-iso-10326-1/iso-10326-1-2016-formula-4/corrected-magnitude-on-the-seat-m-s2",
+      "domain": "seat-vibration-transmission-iso-10326-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 10326-1",
+        "edition": "2016",
+        "clause": "Formula (4)",
+        "cite": "ISO 10326-1:2016 Formula (4)"
+      },
+      "quantity": "Corrected magnitude on the seat, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7784053156146181
+      },
+      "computed": {
+        "value": 0.7784
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "seat-vibration-transmission-iso-10326-1/iso-10326-1-2016-formula-5/transmissibility-at-resonance-of-the-damping-test",
+      "domain": "seat-vibration-transmission-iso-10326-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 10326-1",
+        "edition": "2016",
+        "clause": "Formula (5)",
+        "cite": "ISO 10326-1:2016 Formula (5)"
+      },
+      "quantity": "Transmissibility at resonance of the damping test",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.0
+      },
+      "computed": {
+        "value": 2.0
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "seat-vibration-transmission-iso-10326-1/iso-10326-1-2016-clause-10-3/inert-mass-the-seat-carries-for-the-damping-test-kg",
+      "domain": "seat-vibration-transmission-iso-10326-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 10326-1",
+        "edition": "2016",
+        "clause": "Clause 10.3",
+        "cite": "ISO 10326-1:2016 Clause 10.3"
+      },
+      "quantity": "Inert mass the seat carries for the damping test, kg",
+      "kind": "scalar",
+      "expected": {
+        "value": 75.0
+      },
+      "computed": {
+        "value": 75.0
+      },
+      "unit": "kg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "seat-vibration-transmission-iso-10326-1/iso-10326-1-2016-clause-9-5-1/reduced-test-mass-for-an-actively-damped-suspension-kg",
+      "domain": "seat-vibration-transmission-iso-10326-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 10326-1",
+        "edition": "2016",
+        "clause": "Clause 9.5.1",
+        "cite": "ISO 10326-1:2016 Clause 9.5.1"
+      },
+      "quantity": "Reduced test mass for an actively damped suspension, kg",
+      "kind": "scalar",
+      "expected": {
+        "value": 60.0
+      },
+      "computed": {
+        "value": 60.0
+      },
+      "unit": "kg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"

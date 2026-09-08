@@ -51,6 +51,7 @@ if TYPE_CHECKING:
         WeightingResponse,
     )
     from ..vibration.human.multiple_shock import MultipleShockResult
+    from ..vibration.human.seat_vibration import SeatTransmissionResult
     from ..vibration.machinery.diagnostics import FaultFrequencyResult
     from ..vibration.machinery.evaluation import VectorChangeResult
     from ..vibration.structural.experimental_sea import PowerInjectionResult
@@ -160,6 +161,14 @@ _STRINGS: dict[str, str] = {
     _LABEL_FINAL: "final $A_2$",
     _LABEL_CHANGE: "cambio $A_2 - A_1$",
     "Change in vibration: magnitude {mag}, vector {vec}": "Cambio de vibración: magnitud {mag}, vector {vec}",
+    # Seat transmission (ISO 10326-1): the runs of one test and the SEAT
+    # factor between their means.
+    "Test run": "Pasada",
+    "platform $a_\\mathrm{wP}$": "plataforma $a_\\mathrm{wP}$",
+    "seat $a_\\mathrm{wS}$": "asiento $a_\\mathrm{wS}$",
+    "mean {value}": "media {value}",
+    "Weighted r.m.s. acceleration [m/s²]": "Aceleración eficaz ponderada [m/s²]",
+    "Seat transmission (ISO 10326-1): SEAT = {value}": "Transmisión del asiento (ISO 10326-1): SEAT = {value}",
 }
 
 
@@ -639,6 +648,77 @@ def plot_radiation_efficiency(
     ax.set_title(_t("Plate radiation efficiency (Leppington / Maidanik)", language))
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_seat_transmission(
+    result: SeatTransmissionResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The runs of one simulated input vibration test, and the SEAT between them.
+
+    Platform and seat side by side for each run, with the mean of each set as
+    a line, which is what the SEAT factor is the ratio of.
+
+    :param result: A
+        :class:`~phonometry.vibration.human.seat_vibration.SeatTransmissionResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the seat bars.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    runs = np.arange(len(result.platform_runs)) + 1.0
+    width = 0.36
+    platform_bars = ax.bar(
+        runs - width / 2,
+        result.platform_runs,
+        width=width,
+        color=_C_PRIMARY,
+        label=_t(r"platform $a_\mathrm{wP}$", language),
+    )
+    kwargs.setdefault("color", _C_TERTIARY)
+    kwargs.setdefault("label", _t(r"seat $a_\mathrm{wS}$", language))
+    seat_bars = ax.bar(runs + width / 2, result.seat_runs, width=width, **kwargs)
+    means = [
+        ax.axhline(
+            value,
+            color=colour,
+            ls="--",
+            lw=1.1,
+            label=_t("mean {value}", language).format(
+                value=format_number(value, language, decimals=2)
+            ),
+        )
+        for value, colour in (
+            (result.platform_acceleration, _C_PRIMARY),
+            (result.seat_acceleration, _C_TERTIARY),
+        )
+    ]
+    ax.set_xticks(runs)
+    ax.set_xlabel(_t("Test run", language))
+    ax.set_ylabel(_t("Weighted r.m.s. acceleration [m/s²]", language))
+    ax.set_title(
+        _t("Seat transmission (ISO 10326-1): SEAT = {value}", language).format(
+            value=format_number(result.seat_factor, language, decimals=2)
+        )
+    )
+    ax.grid(True, axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
+    # Each mean beside the set it belongs to: matplotlib would otherwise list
+    # the two dashed lines first, leaving colour as the only clue to which
+    # surface each average came from.
+    ax.legend(
+        handles=[platform_bars, means[0], seat_bars, means[1]],
+        loc="best",
+        fontsize="small",
+    )
     localize_axes(ax, language)
     return ax
 

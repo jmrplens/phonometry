@@ -317,6 +317,7 @@ export const topics = [
           { slug: 'vibration/human', label: 'Overview', translations: { es: 'Resumen' } },
           'vibration/human/human-vibration',
           'vibration/human/multiple-shock-vibration',
+          'vibration/human/seat-vibration',
         ],
       },
       {

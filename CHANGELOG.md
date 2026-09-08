@@ -75,6 +75,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   scene by scene. The aperture run steps in 6.8 s there against about 135 s
   here; what the wall clock then spends is the frames coming back.
 
+- What a seat does to the vibration under it: the laboratory method of
+  **ISO 10326-1:2016**, in `vibration.seat_transmission` and
+  `vibration.resonance_transmissibility`.
+
+  A suspension seat is a spring and a damper, so whether it helps depends on
+  what it is fed: on its own resonance it amplifies exactly what it was bought
+  to attenuate. The SEAT factor is the ratio of the frequency-weighted r.m.s.
+  acceleration at the seat to the one at the platform, below 1 when the seat
+  is doing its job, and both terms are the mean of three consecutive runs
+  agreeing within 5 % of it. That agreement is a condition rather than a
+  footnote here: `mean_of_test_runs` refuses a set that misses it, because the
+  mean of runs that disagree by more is not a measurement the standard
+  recognises. `corrected_seat_acceleration` scales the seat magnitude to the
+  input the test intended rather than the one the simulator delivered, and
+  `resonance_transmissibility` is the damping test, which is the same
+  arithmetic at the one frequency where the seat does the most, with an inert
+  75 kg in it instead of a person. No acceptance value comes with any of them,
+  because Clause 11 states none and leaves them to the application standard.
+
+  The correction is also an erratum. The standard prints it twice, and the
+  printed Formula (3) carries an asterisk on all four of its symbols, which
+  makes it the identity `a*wS = a*wS` and corrects nothing; Formula (4) beside
+  it, and the clause's own prose, give the reading the library implements.
+
 - The same two numbers beside a railway: **EN 16272-3-1:2012**, in the
   `spectrum="railway"` of the two rating functions.
 

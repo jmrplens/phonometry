@@ -189,6 +189,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`vibration.structural.transfer_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/) | Dynamic transfer stiffness of resilient elements (ISO 10846-1/-2/-3). |
 | [`vibration.human.exposure`](/phonometry/reference/api/vibration/exposure/) | Human exposure to whole-body and hand-transmitted vibration. |
 | [`vibration.human.multiple_shock`](/phonometry/reference/api/vibration/multiple-shock/) | Whole-body vibration containing multiple shocks (ISO 2631-5:2018). |
+| [`vibration.human.seat_vibration`](/phonometry/reference/api/vibration/seat-vibration/) | What a seat does to the vibration under it (ISO 10326-1:2016). |
 
 ## Environmental acoustics
 

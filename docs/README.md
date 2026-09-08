@@ -189,6 +189,7 @@ the diagnostic signature of a machine.
 
 - [Human Vibration](vibration/human/human-vibration.md): whole-body and hand-arm frequency weightings (ISO 8041-1), weighted r.m.s. acceleration, running r.m.s./MTVV/VDV and crest factor (ISO 2631-1), vibration in buildings (ISO 2631-2), vibration total value and daily exposure $A(8)$ (ISO 5349-1/-2), and the exposure action/limit values of Directive 2002/44/EC
 - [Multiple-shock whole-body vibration](vibration/human/multiple-shock-vibration.md): the ISO 2631-5:2018 spinal-response model: the seat-to-spine transfer function, the acceleration and daily dose from the response peaks (Clause 5), and the compressive stress, stress variable $R$ and Weibull probability of lumbar injury (Annex C)
+- [What a seat does to the vibration](vibration/human/seat-vibration.md): the ISO 10326-1:2016 laboratory method, with the SEAT factor of Formula (2), the three runs that must agree within 5 %, the correction to the input the test intended, and the transmissibility at resonance of the damping test
 
 **[Machinery](vibration/machinery/index.md)**
 

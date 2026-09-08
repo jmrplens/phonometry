@@ -46,6 +46,9 @@ analysis](../../signals/index.md) section.
 - [Multiple-shock whole-body vibration (ISO 2631-5)](multiple-shock-vibration.md):
   the spinal-response model, acceleration dose and probability of lumbar
   injury.
+- [What a seat does to the vibration (ISO 10326-1)](seat-vibration.md):
+  the SEAT factor of a laboratory seat test, the correction to the input the
+  test intended, and the transmissibility at resonance of the damping test.
 
 ## What this section does not cover
 

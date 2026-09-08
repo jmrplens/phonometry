@@ -30,6 +30,9 @@ level meter, applied to acceleration: frequency weightings that reflect body
 response, running and integrated averages, and dose quantities compared
 against the action and limit values of Directive 2002/44/EC, plus the
 dedicated spinal-response model for vibration containing repeated shocks.
+They also cover the one piece of hardware between the machine and the person:
+the seat, measured by the laboratory method of ISO 10326-1, which answers with
+a single ratio whether the seat attenuates what it is given or amplifies it.
 
 Start with
 [Mechanical mobility and the FRF family](structural/mechanical-mobility.md)
@@ -73,6 +76,9 @@ risk.
 - [Multiple-shock whole-body vibration (ISO 2631-5)](human/multiple-shock-vibration.md):
   the spinal-response model and the probability of lumbar injury for vibration
   containing multiple shocks.
+- [What a seat does to the vibration (ISO 10326-1)](human/seat-vibration.md):
+  the SEAT factor of a laboratory seat test, the correction to the input the
+  test intended, and the transmissibility at resonance of the damping test.
 
 ## [Machinery](machinery/index.md)
 

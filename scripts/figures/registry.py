@@ -588,6 +588,7 @@ from .vibration import (
     generate_mobility_result_lines,
     generate_multiple_shock,
     generate_rigid_mass_calibration,
+    generate_seat_vibration_test,
     generate_shock_dose_measures,
     generate_spinal_response_peaks,
     generate_transfer_stiffness,
@@ -873,6 +874,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Multiple-shock whole-body vibration (ISO 2631-5 Clause 5 + Annex C).
     generate_tonal_audibility,
     generate_multiple_shock,
+    generate_seat_vibration_test,
     generate_spinal_response_peaks,
     # Sound absorption in enclosed spaces (EN 12354-6 Clause 4).
     generate_enclosed_space_absorption,

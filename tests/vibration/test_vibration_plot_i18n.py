@@ -456,3 +456,40 @@ def test_the_damage_assessment_says_when_it_has_no_frequency() -> None:
         for t in at_a_frequency.plot(language="es").get_legend().get_texts()
     ]
     assert "medido 4 mm/s a 30 Hz" in spanish
+
+
+@pytest.mark.parametrize(
+    ("given", "defaulted"),
+    [
+        ({"c": "#654321"}, "color"),
+        ({"linestyle": "-"}, "ls"),
+        ({"ms": 12}, "markersize"),
+    ],
+)
+def test_the_damage_reading_keeps_the_spelling_the_caller_used(
+    given: dict[str, object], defaulted: str
+) -> None:
+    """A style given under either alias must not meet the renderer's default.
+
+    Matplotlib refuses a call that carries both spellings of one property
+    ("Got both 'color' and 'c', which are aliases of one another"), so
+    injecting a default under the spelling the caller did not use turns a
+    styled plot into a ``TypeError``.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    res = vibration.assess_building_vibration(
+        4.0, building_class="residential", frequency_hz=30.0
+    )
+
+    ax = res.plot(**given)  # type: ignore[arg-type]
+
+    reading = ax.lines[-1]
+    if defaulted == "color":
+        assert reading.get_color() == "#654321"
+    elif defaulted == "ls":
+        assert reading.get_linestyle() == "-"
+    else:
+        assert reading.get_markersize() == 12

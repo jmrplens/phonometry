@@ -21,6 +21,7 @@ from .common import (
     _new_axes,
     _new_axes_column,
     format_frequency_axis,
+    style_default,
 )
 
 #: The three phasors of the ISO 20816-1 Figure D.1 diagram, named once so
@@ -805,10 +806,10 @@ def plot_damage_assessment(
         point_label = _t("measured {v} mm/s at {f} Hz", language).format(
             v=reading, f=format_number(f_point, language, decimals=0)
         )
-    kwargs.setdefault("color", _C_REFERENCE)
+    style_default(kwargs, "color", _C_REFERENCE)
     kwargs.setdefault("marker", "D")
-    kwargs.setdefault("markersize", 7)
-    kwargs.setdefault("ls", "none")
+    style_default(kwargs, "markersize", 7)
+    style_default(kwargs, "ls", "none")
     kwargs.setdefault("label", point_label)
     ax.plot([f_point], [result.velocity_mm_s], **kwargs)
     ax.set_xlabel(_t(_FREQ_LABEL, language))

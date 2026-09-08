@@ -577,9 +577,11 @@ against the band is the next section.
 
 Formula (6) turns two adjacent phase errors into one number:
 
-$$\Delta\varphi_0 = \left\lvert
+$$
+\Delta\varphi_0 = \left\lvert
 \frac{f_n \, \Delta\varphi_{n+1} - f_{n+1} \, \Delta\varphi_n}
-     {f_{n+1} - f_n} \right\rvert$$
+     {f_{n+1} - f_n} \right\rvert
+$$
 
 It is a slope written as an intercept. Read the two phase errors as two points
 on a line against frequency; the quantity inside the bars is where that line

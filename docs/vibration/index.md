@@ -101,7 +101,7 @@ Turning a vibration spectrum into a diagnosis of the machine that made it.
 **An instrument is graded on its weighting and on nothing else.** The
 tolerance tables of ISO 8041-1 are implemented, so a measured weighting
 response can be checked against the band the standard allows it, on the
-[meter verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/) page.
+[meter verification](human/meter-verification.md) page.
 The rest of that standard, the indication, linearity, overload, temperature,
 humidity and electromagnetic clauses, is a set of laboratory tests on
 hardware, so a pass here is a necessary condition for conformity and never a

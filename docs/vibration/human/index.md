@@ -51,13 +51,17 @@ analysis](../../signals/index.md) section.
 - [What a seat does to the vibration (ISO 10326-1)](seat-vibration.md):
   the SEAT factor of a laboratory seat test, the correction to the input the
   test intended, and the transmissibility at resonance of the damping test.
+- [Verifying a vibration meter (ISO 8041-1)](meter-verification.md):
+  the tolerance band around each frequency weighting, the characteristic phase
+  deviation, the running r.m.s. decay and the saw-tooth burst indications a
+  conforming meter has to reproduce.
 
 ## What this section does not cover
 
 **A meter is graded on its weighting.** The tolerance tables of ISO 8041-1 are
 implemented, so a measured weighting response can be checked against the band
 the standard allows it, which is what [meter
-verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/) is about. The
+verification](meter-verification.md) is about. The
 design and type-testing clauses of that standard, from indication and
 linearity to the environmental tests, are laboratory measurements on hardware
 and stay outside: a pass on the weighting is a necessary condition for

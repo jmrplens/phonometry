@@ -3221,3 +3221,137 @@ def _d_workstation_microphone(s: SVG, th: Theme) -> None:
         13,
         th.muted,
     )
+
+
+def _d_valve_noise_place(s: SVG, th: Theme) -> None:
+    """The place the printed level belongs to, and the path that gets it there.
+
+    Almost nothing escapes through the valve body. The noise of interest is
+    made at the vena contracta, travels downstream inside the pipe, and
+    reaches the outside through the pipe wall, which is why the method
+    spends a whole clause on the wall and none on the body. The number
+    everybody quotes is measured a metre downstream of the body and a metre
+    off the outer wall.
+    """
+    s.text(
+        450,
+        58,
+        "Almost nothing comes out of the valve; the pipe wall is the way out",
+        16,
+        th.fg,
+    )
+
+    axis, bore, wall = 272.0, 36.0, 6.0
+    x_in, x_out = 66.0, 706.0
+    body_x0, body_x1 = 168.0, 248.0
+    metre = 118.0
+    top_wall = axis - bore - wall
+
+    # --- The pipe, drawn as two walls with a bore between them --------------
+    for sign in (-1.0, 1.0):
+        y = axis + sign * bore if sign > 0 else axis - bore - wall
+        s.rect(x_in, y, x_out - x_in, wall, th.muted, th.fg, rx=1.5, sw=1.2)
+    s.text(x_in + 4, axis + 6, "flow", 12, th.muted, anchor="start")
+    s.arrow(x_in + 38, axis, x_in + 82, axis, th.muted, 1.6)
+
+    # --- The valve body: a plug closing on a seat, and the throat it leaves -
+    s.rect(
+        body_x0,
+        axis - bore - 58,
+        body_x1 - body_x0,
+        2 * (bore + 58),
+        th.panel,
+        th.fg,
+        rx=8,
+        sw=2.0,
+    )
+    stem = (body_x0 + body_x1) / 2
+    s.rect(stem - 13, axis - bore - 92, 26, 36, th.muted, th.fg, rx=3, sw=1.6)
+    s.line(stem, axis - bore - 56, stem, axis - 14, th.fg, 3.0)
+    s.rect(stem - 21, axis - 14, 42, 28, th.panel, th.fg, rx=3, sw=1.6)
+    for sign in (-1.0, 1.0):
+        y = axis + sign * bore
+        s.path(
+            f"M {body_x0 + 8:.1f} {y:.1f} L {stem + 26:.1f} {y:.1f} "
+            f"L {stem + 26:.1f} {axis + sign * 12:.1f} Z",
+            fill=th.muted,
+            stroke=th.fg,
+            sw=1.2,
+        )
+    s.text(stem, axis - bore - 106, "valve", 12, th.fg)
+
+    # --- The jet, which is the source, and where it starts ------------------
+    jet_x0, jet_x1 = stem + 26.0, stem + 232.0
+    s.path(
+        f"M {jet_x0:.1f} {axis - 12:.1f} L {jet_x1:.1f} {axis - bore + 5:.1f} "
+        f"L {jet_x1:.1f} {axis + bore - 5:.1f} L {jet_x0:.1f} {axis + 12:.1f} Z",
+        fill=th.primary,
+        stroke="none",
+        sw=0.0,
+    )
+    s.circle(jet_x0, axis, 5.0, th.secondary)
+    s.line(jet_x0, axis + 16, jet_x0 + 30, axis + bore + 34, th.secondary, 1.2)
+    s.text(
+        jet_x0 + 34,
+        axis + bore + 40,
+        "the vena contracta is the source",
+        11,
+        th.secondary,
+        anchor="start",
+    )
+
+    # --- Out through the wall, to the point the level is quoted ------------
+    mic_x = body_x1 + metre
+    mic_y = top_wall - metre
+    s.arrow(mic_x, top_wall - 2, mic_x, mic_y + 30, th.secondary, 1.8)
+    s.rect(mic_x - 5, mic_y, 10, 26, th.primary, th.primary, rx=4, sw=1.0)
+    s.text(mic_x, mic_y - 14, "$L_{pAe,1m}$", 15, th.primary, bold=True)
+    s.text(
+        mic_x - 14,
+        top_wall - 24,
+        "through the wall",
+        11,
+        th.secondary,
+        anchor="end",
+    )
+    s.line(body_x1, top_wall - 68, body_x1, top_wall, th.muted, 0.9, dash="3,3")
+    s.dim(body_x1, top_wall - 58, mic_x, top_wall - 58, "1 m", offset=0, size=12)
+    dim_x = mic_x + 64.0
+    s.line(mic_x + 8, mic_y, dim_x, mic_y, th.muted, 0.9, dash="3,3")
+    s.line(mic_x + 8, top_wall, dim_x, top_wall, th.muted, 0.9, dash="3,3")
+    s.dim(dim_x, top_wall, dim_x, mic_y, "1 m", offset=0, size=12, label_side="right")
+
+    # --- The second source, where the outlet lets the gas out fast ---------
+    out_x = x_out - 60.0
+    s.arrow(
+        out_x, axis + bore + wall + 54, out_x, axis + bore + wall + 10, th.muted, 1.4
+    )
+    s.text(
+        out_x,
+        axis + bore + wall + 70,
+        "a fast outlet is a second source,",
+        11,
+        th.muted,
+    )
+    s.text(out_x, axis + bore + wall + 86, "added to the first on energy", 11, th.muted)
+
+    s.text(
+        450,
+        axis + bore + 152,
+        "The body is not the path and the valve is not the source:",
+        13,
+        th.muted,
+    )
+    s.text(
+        450,
+        axis + bore + 172,
+        "the noise is made where the stream chokes, and the wall decides how "
+        "much of it is heard.",
+        13,
+        th.muted,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Where the microphone goes at a work station (ISO 11201:2010, Clause 9)
+# ---------------------------------------------------------------------------

@@ -78,6 +78,7 @@ from .devices import (
     _d_surfaces,
     _d_sweep_bench,
     _d_swept_sine,
+    _d_valve_noise_place,
     _d_vdi2081_sheet,
     _d_vibration_sound_power,
     _d_workstation_microphone,
@@ -914,6 +915,11 @@ DIAGRAMS = {
         _d_workstation_microphone,
         "Where the microphone goes at a work station (ISO 11201 Clause 9)",
         600,
+    ),
+    "diagram_valve_noise_place": (
+        _d_valve_noise_place,
+        "Where control valve noise is made, and where it is quoted",
+        502,
     ),
     "diagram_vdi2081_sheet": (
         _d_vdi2081_sheet,

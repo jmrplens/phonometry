@@ -118,7 +118,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `vibration.bending_stress` is Formula (1) of 6.2, which turns a measured
   velocity into a bending stress without needing any of the beam's
   dimensions, and `vibration.storey_fundamental_frequency` is the 10/n
-  estimate of 6.4.
+  estimate of 6.4, which warns with `vibration.BuildingDamageWarning` below
+  the five storeys the clause offers it from.
+
+  Two things the tables do not have are refused rather than faked. A
+  frequency given for a case no table reads one at, the topmost floor plane
+  or the whole of Table 3, raises instead of being ignored: accepted quietly
+  it would ride into the assessment and be drawn as though the guideline had
+  been read at it. And `DamageAssessment.plot()` draws the table the reading
+  was actually judged against, the Bild 1 curves for a short-term foundation
+  reading and one bar per building class for every other, so a criterion that
+  did not apply never appears on the page as though it had.
 
 - The same two numbers beside a railway: **EN 16272-3-1:2012**, in the
   `spectrum="railway"` of the two rating functions.

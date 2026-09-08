@@ -14,8 +14,10 @@ against what the material and the design allow. DIN 4150-3 offers the cheap
 answer first, and it is the one used in practice: **guideline values**
 (*Anhaltswerte*) for a single measured quantity, the peak particle velocity,
 drawn from a large body of measurements on real buildings. Keep under them and
-damage of the kind the standard defines has not been observed. Exceed them and
-nothing follows automatically. The standard is explicit that damage does not
+damage of the kind the standard defines has not been observed in that body of
+measurements, which is a statement about the evidence rather than a promise
+about this building: meeting a guideline value satisfies the DIN 4150-3
+criterion and certifies nothing. Exceed them and nothing follows automatically. The standard is explicit that damage does not
 have to occur; what has run out is the cheap answer, and the stress
 calculation has to be done instead.
 
@@ -98,7 +100,8 @@ for f in (1.0, 10.0, 50.0, 100.0):
 # Inside a band, which only Bild 1 decides.
 print(vibration.guideline_velocity("residential", 30.0))          # 10.0
 
-# In the topmost floor plane there is nothing to read against frequency.
+# In the topmost floor plane there is nothing to read against frequency,
+# and passing one anyway is refused rather than ignored.
 print(vibration.guideline_velocity("residential", location="top_floor"))  # 15.0
 ```
 
@@ -206,6 +209,11 @@ of storeys.
 ```python
 print(vibration.storey_fundamental_frequency(10))    # 1.0 Hz
 ```
+
+Below that, `BuildingDamageWarning` says so: four storeys still return
+2,5 Hz, because "about five" is not a line the standard drew, but the number
+is an extrapolation of a rule offered for taller buildings rather than the
+rule itself.
 
 ## See also
 

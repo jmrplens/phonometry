@@ -165,6 +165,15 @@ BENDING_STRESS_CONSTANT = 1.73
 BUILDING_CLASSES = ('commercial', 'residential', 'sensitive')
 ```
 
+## BuildingDamageWarning
+
+A DIN 4150-3 rule is used outside the range the standard offers it for.
+
+Raised by [`storey_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#storey_fundamental_frequency) below
+[`STOREY_FREQUENCY_MIN_STOREYS`](/phonometry/reference/api/vibration/building-damage/#storey_frequency_min_storeys). The estimate is still returned: the
+standard offers `10 / n` from about five storeys up, and below that it
+says nothing, so the number is an extrapolation rather than the rule.
+
 ## DamageAssessment
 
 ```python
@@ -309,7 +318,7 @@ number for all frequencies, and *frequency* is then not needed.
 | Name | Description |
 | :--- | :--- |
 | `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). |
-| `frequency` | Frequency of the dominant component, in hertz (scalar or array). Required for the short-term foundation case and ignored otherwise. |
+| `frequency` | Frequency of the dominant component, in hertz (scalar or array). Required for the short-term foundation case, and refused for every other one, where the printed value is the same at every frequency and a frequency would govern nothing. |
 | `location` | `"foundation"` (default) or `"top_floor"`. |
 | `duration` | `"short_term"` (Table 1, default) or `"long_term"` (Table 3). |
 | `massive_structure` | Raise the row 1 values by [`MASSIVE_STRUCTURE_FACTOR`](/phonometry/reference/api/vibration/building-damage/#massive_structure_factor), which is the most 5.1 allows a massive engineering structure. The allowance is written for row 1 of Table 1 alone, so it applies to the commercial class and to short-term vibration, and is refused anywhere else. |
@@ -320,7 +329,7 @@ number for all frequencies, and *frequency* is then not needed.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a name is not one of its choices, if the short-term foundation case is asked for without a frequency, if a frequency is not positive and finite, or if *massive_structure* is asked for outside row 1 of Table 1. |
+| ValueError | If a name is not one of its choices, if the short-term foundation case is asked for without a frequency, if a frequency is given for a case that does not read one, if a frequency is not positive and finite, or if *massive_structure* is asked for outside row 1 of Table 1. |
 
 ## LONG_TERM_TOP_FLOOR_MM_S
 
@@ -451,3 +460,9 @@ plane will answer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the storey count is not a positive integer. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| BuildingDamageWarning | Below [`STOREY_FREQUENCY_MIN_STOREYS`](/phonometry/reference/api/vibration/building-damage/#storey_frequency_min_storeys), where the estimate is an extrapolation of a rule the standard offers for taller buildings. |

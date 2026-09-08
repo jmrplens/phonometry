@@ -17,6 +17,7 @@ from .building_damage import (
     SHORT_TERM_TOP_FLOOR_MM_S,
     STOREY_FREQUENCY_MIN_STOREYS,
     STOREY_FREQUENCY_NUMERATOR_HZ,
+    BuildingDamageWarning,
     DamageAssessment,
     assess_building_vibration,
     bending_stress,
@@ -97,6 +98,7 @@ from .transfer_stiffness import (
 __all__ = [
     "BENDING_STRESS_CONSTANT",
     "BUILDING_CLASSES",
+    "BuildingDamageWarning",
     "DamageAssessment",
     "FLOOR_VERTICAL_MM_S",
     "FOUNDATION_FREQUENCIES_HZ",

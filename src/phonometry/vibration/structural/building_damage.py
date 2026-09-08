@@ -67,6 +67,7 @@ asking.
 from __future__ import annotations
 
 import math
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -78,6 +79,7 @@ from ..._internal.validation import (
     require_non_negative,
     require_positive,
 )
+from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -181,6 +183,37 @@ STOREY_FREQUENCY_NUMERATOR_HZ: float = 10.0
 STOREY_FREQUENCY_MIN_STOREYS: int = 5
 
 
+def _refuse_unread_frequency(
+    frequency: ArrayLike | None, where: str, when: str
+) -> None:
+    """Refuse a frequency for a case whose printed value does not read one.
+
+    Refusing rather than ignoring. Table 3 and the topmost floor plane of
+    Table 1 print one number for every frequency, so a frequency given there
+    governs nothing; accepted silently it would ride into
+    :class:`DamageAssessment` and be drawn as though the guideline had been
+    read at it.
+    """
+    if frequency is None:
+        return
+    msg = (
+        "Only the short-term foundation guideline of Table 1 depends on "
+        f"frequency; got location={where!r}, duration={when!r}, so a "
+        "frequency cannot be taken into account."
+    )
+    raise ValueError(msg)
+
+
+class BuildingDamageWarning(PhonometryWarning):
+    """A DIN 4150-3 rule is used outside the range the standard offers it for.
+
+    Raised by :func:`storey_fundamental_frequency` below
+    :data:`STOREY_FREQUENCY_MIN_STOREYS`. The estimate is still returned: the
+    standard offers ``10 / n`` from about five storeys up, and below that it
+    says nothing, so the number is an extrapolation rather than the rule.
+    """
+
+
 def guideline_velocity(
     building_class: BuildingClass | str,
     frequency: ArrayLike | None = None,
@@ -200,8 +233,9 @@ def guideline_velocity(
 
     :param building_class: One of :data:`BUILDING_CLASSES`.
     :param frequency: Frequency of the dominant component, in hertz (scalar
-        or array). Required for the short-term foundation case and ignored
-        otherwise.
+        or array). Required for the short-term foundation case, and refused
+        for every other one, where the printed value is the same at every
+        frequency and a frequency would govern nothing.
     :param location: ``"foundation"`` (default) or ``"top_floor"``.
     :param duration: ``"short_term"`` (Table 1, default) or ``"long_term"``
         (Table 3).
@@ -214,8 +248,9 @@ def guideline_velocity(
         unless *frequency* was an array.
     :raises ValueError: If a name is not one of its choices, if the
         short-term foundation case is asked for without a frequency, if a
-        frequency is not positive and finite, or if *massive_structure* is
-        asked for outside row 1 of Table 1.
+        frequency is given for a case that does not read one, if a frequency
+        is not positive and finite, or if *massive_structure* is asked for
+        outside row 1 of Table 1.
     """
     cls = require_choice(str(building_class), "building_class", BUILDING_CLASSES)
     where = require_choice(str(location), "location", ("foundation", "top_floor"))
@@ -246,8 +281,10 @@ def guideline_velocity(
                 "plane only; got location='foundation'."
             )
             raise ValueError(msg)
+        _refuse_unread_frequency(frequency, where, when)
         return LONG_TERM_TOP_FLOOR_MM_S[cls]
     if where == "top_floor":
+        _refuse_unread_frequency(frequency, where, when)
         return factor * SHORT_TERM_TOP_FLOOR_MM_S[cls]
     if frequency is None:
         msg = (
@@ -408,6 +445,9 @@ def storey_fundamental_frequency(storeys: int) -> float:
     :param storeys: The number of storeys ``n``.
     :return: The estimated lowest horizontal natural frequency, in hertz.
     :raises ValueError: If the storey count is not a positive integer.
+    :warns BuildingDamageWarning: Below
+        :data:`STOREY_FREQUENCY_MIN_STOREYS`, where the estimate is an
+        extrapolation of a rule the standard offers for taller buildings.
     """
     # ValueError rather than TypeError, so every argument this module refuses
     # raises the same class.
@@ -418,6 +458,18 @@ def storey_fundamental_frequency(storeys: int) -> float:
     if n < 1:
         msg = f"'storeys' must be at least 1; got {n}."
         raise ValueError(msg)
+    if n < STOREY_FREQUENCY_MIN_STOREYS:
+        # A warning and not a refusal: 6.4 says "about five storeys", and a
+        # four-storey building is not on the far side of a line the standard
+        # drew. What it is not is covered, and silence would say it was.
+        warnings.warn(
+            f"DIN 4150-3 6.4 offers f_i ~ 10/n from about "
+            f"{STOREY_FREQUENCY_MIN_STOREYS} storeys up; got {n}, so the "
+            f"{STOREY_FREQUENCY_NUMERATOR_HZ / n:.3g} Hz returned is an "
+            "extrapolation of the rule rather than the rule.",
+            BuildingDamageWarning,
+            stacklevel=2,
+        )
     return STOREY_FREQUENCY_NUMERATOR_HZ / n
 
 

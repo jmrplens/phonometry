@@ -430,32 +430,62 @@ def test_seat_transmission_forwards_kwargs_to_the_seat_bars() -> None:
     assert labels[0] == "platform $a_\\mathrm{wP}$"
 
 
-def test_the_damage_assessment_says_when_it_has_no_frequency() -> None:
-    """A top-floor reading is placed on the plot without pretending to a frequency.
+def test_the_damage_assessment_draws_the_table_it_was_read_against() -> None:
+    """A top-floor reading is not drawn against the foundation curves.
 
-    The point still needs somewhere to sit, so it goes at the right edge of
-    the axis; the label must not then read as a measurement taken at 100 Hz,
-    which is the frequency that happens to be there.
+    Table 1 at the foundation is a function of frequency; in the topmost
+    floor plane, and in the whole of Table 3, it is one number per building
+    class. Showing the frequency curves for a reading judged against those
+    would put a criterion on the page that did not apply to it.
     """
     pytest.importorskip("matplotlib")
     import matplotlib as mpl
 
     mpl.use("Agg")
-    flat = vibration.assess_building_vibration(
-        12.0, building_class="residential", location="top_floor"
-    )
-    labels = [t.get_text() for t in flat.plot().get_legend().get_texts()]
-    assert "measured 12 mm/s, at every frequency" in labels
-    assert not any("Hz" in label for label in labels)
 
     at_a_frequency = vibration.assess_building_vibration(
         4.0, building_class="residential", frequency_hz=30.0
     )
-    spanish = [
-        t.get_text()
-        for t in at_a_frequency.plot(language="es").get_legend().get_texts()
+    ax = at_a_frequency.plot()
+    assert ax.get_title() == "Guideline values at the foundation (DIN 4150-3 Table 1)"
+    assert ax.get_xlabel() == "Frequency [Hz]"
+    # The three Table 1 curves, plus the reading.
+    assert len(ax.lines) == 4
+    assert not ax.patches
+    assert "measured 4 mm/s at 30 Hz" in [
+        t.get_text() for t in ax.get_legend().get_texts()
     ]
-    assert "medido 4 mm/s a 30 Hz" in spanish
+
+    flat = vibration.assess_building_vibration(
+        12.0, building_class="residential", location="top_floor"
+    )
+    ax = flat.plot()
+    assert ax.get_title() == (
+        "Guideline values in the topmost floor plane (DIN 4150-3 Table 1)"
+    )
+    assert ax.get_xlabel() == "Building class"
+    # One bar per class, the assessed one at full opacity, and no curve.
+    assert [patch.get_height() for patch in ax.patches] == pytest.approx(
+        [40.0, 15.0, 8.0]
+    )
+    assert [patch.get_alpha() for patch in ax.patches] == [0.45, 1.0, 0.45]
+    assert [t.get_text() for t in ax.get_legend().get_texts()] == ["measured 12 mm/s"]
+    # The reading sits on its own class, not on a frequency.
+    assert ax.lines[0].get_xdata() == pytest.approx([1.0])
+    assert ax.lines[0].get_ydata() == pytest.approx([12.0])
+
+    long_term = vibration.assess_building_vibration(
+        2.0, building_class="residential", location="top_floor", duration="long_term"
+    )
+    ax = long_term.plot(language="es")
+    assert ax.get_title() == (
+        "Valores de referencia de larga duración en el plano de la última planta "
+        "(DIN 4150-3, tabla 3)"
+    )
+    assert [patch.get_height() for patch in ax.patches] == pytest.approx(
+        [10.0, 5.0, 2.5]
+    )
+    assert [t.get_text() for t in ax.get_legend().get_texts()] == ["medido 2 mm/s"]
 
 
 @pytest.mark.parametrize(

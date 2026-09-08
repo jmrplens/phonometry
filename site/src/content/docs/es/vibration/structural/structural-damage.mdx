@@ -29,7 +29,10 @@ ofrece primero la respuesta barata, que es la que se usa en la práctica:
 **valores de referencia** (*Anhaltswerte*) para una sola magnitud medida, la
 velocidad de pico de la partícula, obtenidos de un gran conjunto de medidas en
 edificios reales. Por debajo de ellos no se han observado daños del tipo que la
-norma define. Por encima no se sigue nada de forma automática. La norma dice
+norma define en ese conjunto de medidas, que es una afirmación sobre la
+evidencia y no una promesa sobre este edificio: cumplir un valor de referencia
+satisface el criterio de DIN 4150-3 y no certifica nada. Por encima no se sigue
+nada de forma automática. La norma dice
 expresamente que no tienen por qué producirse daños; lo que se ha agotado es la
 respuesta barata, y hay que hacer el cálculo de tensiones.
 
@@ -117,7 +120,8 @@ for f in (1.0, 10.0, 50.0, 100.0):
 # Dentro de una banda, que solo decide el Bild 1.
 print(vibration.guideline_velocity("residential", 30.0))          # 10.0
 
-# En el plano de la última planta no hay nada que leer frente a la frecuencia.
+# En el plano de la última planta no hay nada que leer frente a la frecuencia,
+# y pasar una de todos modos se rechaza en vez de ignorarse.
 print(vibration.guideline_velocity("residential", location="top_floor"))  # 15.0
 ```
 
@@ -229,6 +233,11 @@ $n$ el número de plantas.
 ```python
 print(vibration.storey_fundamental_frequency(10))    # 1.0 Hz
 ```
+
+Por debajo de ahí lo dice `BuildingDamageWarning`: cuatro plantas siguen
+devolviendo 2,5 Hz, porque «unas cinco» no es una raya que la norma trace,
+pero el número es una extrapolación de una regla ofrecida para edificios más
+altos, no la regla.
 
 ## Qué cubre esta guía
 

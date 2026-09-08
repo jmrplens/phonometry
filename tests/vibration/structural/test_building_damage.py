@@ -16,6 +16,7 @@ tested here are read from that figure and not from any other source.
 from __future__ import annotations
 
 import math
+import warnings
 
 import numpy as np
 import pytest
@@ -326,3 +327,58 @@ def test_the_names_are_exported_from_the_domain() -> None:
     assert vibration.guideline_velocity("residential", 10.0) == pytest.approx(5.0)
     assert vibration.PIPELINE_MM_S["welded_steel"] == pytest.approx(100.0)
     assert vibration.BUILDING_CLASSES == bd.BUILDING_CLASSES
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        {"location": "top_floor"},
+        {"location": "top_floor", "duration": "long_term"},
+    ],
+)
+def test_a_frequency_is_refused_where_no_table_reads_one(
+    case: dict[str, str],
+) -> None:
+    """Table 3, and Table 1 in the topmost floor plane, print one value.
+
+    Ignoring the frequency instead would let it into the assessment and, from
+    there, onto the figure, where the reading would be drawn at a frequency
+    that had nothing to do with the guideline it was compared against.
+    """
+    with pytest.raises(ValueError, match=r"depends on frequency"):
+        bd.guideline_velocity("residential", 30.0, **case)
+    with pytest.raises(ValueError, match=r"depends on frequency"):
+        bd.assess_building_vibration(
+            4.0, building_class="residential", frequency_hz=30.0, **case
+        )
+
+
+def test_the_long_term_foundation_refusal_comes_before_the_frequency_one() -> None:
+    """Two things are wrong and the caller is told the one that matters."""
+    with pytest.raises(ValueError, match=r"topmost floor plane only"):
+        bd.guideline_velocity("residential", 30.0, duration="long_term")
+
+
+def test_the_storey_estimate_warns_below_the_five_storeys_of_6_4() -> None:
+    """The constant said five storeys and nothing enforced it.
+
+    Clause 6.4 offers ``10 / n`` from about five storeys up. A warning and not
+    a refusal: "about five" is not a line the standard drew, but a four-storey
+    building is outside what it offers, and silence would say otherwise.
+    """
+    with pytest.warns(bd.BuildingDamageWarning, match=r"5 storeys up; got 3"):
+        got = bd.storey_fundamental_frequency(3)
+    assert got == pytest.approx(10.0 / 3.0)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert bd.storey_fundamental_frequency(
+            bd.STOREY_FREQUENCY_MIN_STOREYS
+        ) == pytest.approx(2.0)
+
+
+def test_the_warning_is_a_phonometry_warning() -> None:
+    from phonometry._internal.warnings import PhonometryWarning
+
+    assert issubclass(bd.BuildingDamageWarning, PhonometryWarning)
+    assert vibration.BuildingDamageWarning is bd.BuildingDamageWarning

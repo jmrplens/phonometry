@@ -3,13 +3,13 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 901,
-    "passing": 901,
+    "checks": 916,
+    "passing": 916,
     "failing": 0,
-    "domains": 74,
-    "standards": 406,
-    "citations": 664,
-    "designations": 144,
+    "domains": 75,
+    "standards": 407,
+    "citations": 670,
+    "designations": 145,
     "sources": 83
   },
   "units": [
@@ -207,6 +207,12 @@
       "title": "Vibration effects on structures (DIN 4150-3)",
       "checks": 27,
       "passing": 27
+    },
+    {
+      "id": "building-response-prediction-iso-4866",
+      "title": "Building response prediction (ISO 4866)",
+      "checks": 15,
+      "passing": 15
     },
     {
       "id": "speech-intelligibility-ansi-s3-5-1997",
@@ -12697,6 +12703,441 @@
         "value": 1.0
       },
       "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/fundamental-frequency-of-a-23-m-building-f-46-h-hz",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
+      },
+      "quantity": "Fundamental frequency of a 23 m building, f = 46/h, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.0
+      },
+      "computed": {
+        "value": 2.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/fundamental-frequency-of-a-46-m-building-f-46-h-hz",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
+      },
+      "quantity": "Fundamental frequency of a 46 m building, f = 46/h, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.0
+      },
+      "computed": {
+        "value": 1.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/fundamental-frequency-of-a-92-m-building-f-46-h-hz",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
+      },
+      "quantity": "Fundamental frequency of a 92 m building, f = 46/h, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.5
+      },
+      "computed": {
+        "value": 0.5
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/the-same-fit-as-a-period-t-0-022-h-s",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
+      },
+      "quantity": "The same fit as a period, T = 0,022 h, s",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.1
+      },
+      "computed": {
+        "value": 1.1
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -2.22e-16
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/fundamental-frequency-of-a-ten-storey-building-f-10-n-hz",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "D.2",
+        "cite": "ISO 4866:2010 D.2"
+      },
+      "quantity": "Fundamental frequency of a ten-storey building, f = 10/n, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.0
+      },
+      "computed": {
+        "value": 1.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-formula-d-1/fundamental-period-from-the-height-form-at-k-0-014-s",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "Formula (D.1)",
+        "cite": "ISO 4866:2010 Formula (D.1)"
+      },
+      "quantity": "Fundamental period from the height form at k = 0.014, s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7
+      },
+      "computed": {
+        "value": 0.7
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 1.11e-16
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-formula-d-1/fundamental-period-from-the-height-form-at-k-0-03-s",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "Formula (D.1)",
+        "cite": "ISO 4866:2010 Formula (D.1)"
+      },
+      "quantity": "Fundamental period from the height form at k = 0.03, s",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.5
+      },
+      "computed": {
+        "value": 1.5
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-formula-d-2/fundamental-period-from-the-height-width-form-at-k-0-087-s",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "Formula (D.2)",
+        "cite": "ISO 4866:2010 Formula (D.2)"
+      },
+      "quantity": "Fundamental period from the height_width form at k = 0.087, s",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.1673
+      },
+      "computed": {
+        "value": 1.1672
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-formula-d-2/fundamental-period-from-the-height-width-form-at-k-0-109-s",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "Formula (D.2)",
+        "cite": "ISO 4866:2010 Formula (D.2)"
+      },
+      "quantity": "Fundamental period from the height_width form at k = 0.109, s",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.4625
+      },
+      "computed": {
+        "value": 1.4624
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-formula-d-3/fundamental-period-from-the-slenderness-form-at-k-0-06-s",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "Formula (D.3)",
+        "cite": "ISO 4866:2010 Formula (D.3)"
+      },
+      "quantity": "Fundamental period from the slenderness form at k = 0.06, s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.6971
+      },
+      "computed": {
+        "value": 0.6971
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 3.7e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-formula-d-3/fundamental-period-from-the-slenderness-form-at-k-0-08-s",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "Formula (D.3)",
+        "cite": "ISO 4866:2010 Formula (D.3)"
+      },
+      "quantity": "Fundamental period from the slenderness form at k = 0.08, s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.9295
+      },
+      "computed": {
+        "value": 0.9295
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 1.6e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/upper-end-of-the-error-band-an-empirical-prediction-carries-hz",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
+      },
+      "quantity": "Upper end of the error band an empirical prediction carries, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.0
+      },
+      "computed": {
+        "value": 3.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/lower-end-of-the-error-band-an-empirical-prediction-carries-hz",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
+      },
+      "quantity": "Lower end of the error band an empirical prediction carries, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.0
+      },
+      "computed": {
+        "value": 1.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-4/lowest-damping-ratio-measured-on-a-building-of-critical",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "D.4",
+        "cite": "ISO 4866:2010 D.4"
+      },
+      "quantity": "Lowest damping ratio measured on a building, % of critical",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.5
+      },
+      "computed": {
+        "value": 0.5
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-4/highest-damping-ratio-measured-on-a-building-of-critical",
+      "domain": "building-response-prediction-iso-4866",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 4866",
+        "edition": "2010",
+        "clause": "D.4",
+        "cite": "ISO 4866:2010 D.4"
+      },
+      "quantity": "Highest damping ratio measured on a building, % of critical",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.1
+      },
+      "computed": {
+        "value": 2.1
+      },
+      "unit": "%",
       "tolerance": {
         "mode": "absolute",
         "value": 0.0005

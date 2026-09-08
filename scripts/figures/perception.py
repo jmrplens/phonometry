@@ -4069,7 +4069,7 @@ def generate_hearing_protector_methods(output_dir: str) -> None:
 
 def generate_audiometric_zero_earphones(output_dir: str) -> None:
     """ISO 389-1 earphone reference levels, against the sound-field zero."""
-    print("Generating audiometric_zero_earphones.png...")
+    print("Generating audiometric_zero_earphones...")
     from phonometry import hearing
 
     freqs = hearing.RETSPL_FREQUENCIES_HZ
@@ -4132,5 +4132,5 @@ def generate_audiometric_zero_earphones(output_dir: str) -> None:
     ax_gap.legend(loc="upper center", fontsize=9)
 
     plt.tight_layout()
-    save_figure(output_dir, "audiometric_zero_earphones.png")
+    save_figure(output_dir, "audiometric_zero_earphones.svg")
     plt.close()

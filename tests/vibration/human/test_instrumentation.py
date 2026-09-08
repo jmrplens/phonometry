@@ -615,3 +615,198 @@ def test_the_phase_measurement_is_checked_before_it_is_judged(call) -> None:  # 
         call([0.0, 2.0], [0.0, 0.0])
     with pytest.raises(ValueError, match=r"must contain only finite"):
         call([1.0, 2.0], [0.0, math.nan])
+
+
+# The factor the second row of Table 2 needs, and the Wf reading (12.7).
+# ---------------------------------------------------------------------------
+def test_the_two_consistency_tolerances_are_the_printed_ones() -> None:
+    """Table 2, rows 2 and 3: 3 % and 2 %."""
+    assert ins.WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT == pytest.approx(3.0)
+    assert ins.RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT == pytest.approx(2.0)
+
+
+def test_the_band_limited_factor_is_the_ratio_of_the_two_responses() -> None:
+    """``|H(f_ref)| / |H_BL(f_ref)|``, which is what 12.7 sets up."""
+    for name in vibration.WEIGHTING_NAMES:
+        frequencies = [ins.REFERENCE_FREQUENCY_HZ[name]]
+        overall = float(np.asarray(vibration.weighting_factors(name, frequencies))[0])
+        band = float(np.asarray(vibration.band_limiting_factors(name, frequencies))[0])
+        assert ins.band_limited_weighting_factor(name) == pytest.approx(overall / band)
+
+
+def test_eight_of_the_nine_close_on_the_table_1_factor() -> None:
+    """Their band limiting is 0,999 68 or better at the reference frequency.
+
+    So the printed Table 1 factor and the ratio are the same number to
+    0,03 %, well inside the 3 % of the second row of Table 2.
+    """
+    for name, printed in TABLE_1_PRINTED.items():
+        if name == ins.LOW_FREQUENCY_WEIGHTING:
+            continue
+        deviation = abs(ins.band_limited_weighting_factor(name) / printed[1] - 1.0)
+        assert deviation * 100.0 < 0.05, name
+        assert deviation * 100.0 < ins.WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT, name
+
+
+def test_the_second_row_of_table_2_cannot_close_for_wf_on_table_1() -> None:
+    """The reference frequency of ``Wf`` sits inside its own band-limiting
+    skirt, so the two readings of "the appropriate weighting factor" differ
+    by more than twice the tolerance of the row they have to satisfy.
+
+    The ratio is the quotient of the two cells Table B.5 prints at the
+    neighbouring 0,398 1 Hz band centre, 0,388 4 / 0,927 9.
+    """
+    ratio = ins.band_limited_weighting_factor("Wf")
+    printed_table_1 = TABLE_1_PRINTED["Wf"][1]
+    deviation_percent = (ratio / printed_table_1 - 1.0) * 100.0
+    assert deviation_percent == pytest.approx(7.75, abs=0.05)
+    assert deviation_percent > ins.WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT
+    assert ratio == pytest.approx(0.3884 / 0.9279, rel=2e-3)
+
+
+def test_the_band_limited_factor_refuses_an_unknown_weighting() -> None:
+    with pytest.raises(ValueError, match=r"'name'"):
+        ins.band_limited_weighting_factor("Wz")
+
+
+# ---------------------------------------------------------------------------
+# Tables 10 and 11: how the running r.m.s. decays after the signal stops.
+# ---------------------------------------------------------------------------
+# Table 10 (folio 20) and Table 11 (folio 21): time constant, time to 10 % of
+# the original value, and the printed tolerance on it, in seconds.
+TABLE_10_PRINTED = ((0.125, 0.124, 0.005), (1.0, 0.99, 0.05), (8.0, 7.92, 0.2))
+TABLE_11_PRINTED = ((0.125, 0.58, 0.03), (1.0, 4.61, 0.25), (8.0, 36.8, 2.0))
+# Table 11 only: the equivalent decay rate, in decibels per second.
+TABLE_11_RATE_PRINTED = ((0.125, 31.0, 40.0), (1.0, 3.8, 4.9), (8.0, 0.48, 0.62))
+
+
+def test_the_two_decay_tables_are_transcribed() -> None:
+    assert ins.RUNNING_RMS_DECAY_TIME_S["linear"] == TABLE_10_PRINTED
+    assert ins.RUNNING_RMS_DECAY_TIME_S["exponential"] == TABLE_11_PRINTED
+    assert ins.RUNNING_RMS_DECAY_RATE_DB_PER_S == TABLE_11_RATE_PRINTED
+
+
+@pytest.mark.parametrize(
+    ("method", "table"),
+    [("linear", TABLE_10_PRINTED), ("exponential", TABLE_11_PRINTED)],
+)
+def test_the_closed_form_decay_lands_inside_the_printed_band(
+    method: str, table: tuple[tuple[float, float, float], ...]
+) -> None:
+    """0,99 tau and 2 tau ln 10, against the six printed cells."""
+    for tau, printed, tolerance in table:
+        assert (
+            abs(ins.running_rms_decay_time(tau, method=method) - printed) <= tolerance
+        )
+
+
+@pytest.mark.parametrize(
+    ("method", "table"),
+    [("linear", TABLE_10_PRINTED), ("exponential", TABLE_11_PRINTED)],
+)
+def test_the_running_rms_itself_decays_the_way_the_tables_print(
+    method: str, table: tuple[tuple[float, float, float], ...]
+) -> None:
+    """Measured rather than derived: 5.13 applied to the library's average.
+
+    A steady sinusoid at the whole-body reference frequency is held for the
+    5 time constants (linear) or 20 (exponential) the clause asks for, cut,
+    and the running r.m.s. timed down to 10 % of the value it had at the cut.
+    """
+    fs = 5000.0
+    frequency = ins.REFERENCE_FREQUENCY_HZ["Wk"]
+    for tau, printed, tolerance in table:
+        steady = 5.0 * tau if method == "linear" else 20.0 * tau
+        decay = 1.5 * tau if method == "linear" else 6.0 * tau
+        held = int(round(steady * fs))
+        total = held + int(round(decay * fs))
+        t = np.arange(total) / fs
+        signal = np.where(
+            np.arange(total) < held, np.sin(2.0 * math.pi * frequency * t), 0.0
+        )
+        indicated = vibration.running_rms(
+            signal, fs, integration_time=tau, method=method
+        )
+        after = indicated[held - 1 :]
+        measured = int(np.argmax(after < 0.1 * after[0])) / fs
+        assert abs(measured - printed) <= tolerance, (method, tau)
+        assert ins.verify_running_rms_decay(
+            measured, integration_time_s=tau, method=method
+        )
+
+
+def test_the_decay_rate_column_is_the_looser_statement_of_the_same_decay() -> None:
+    """Table 11 prints a dB/s band that contains 4,3429 / tau every time.
+
+    It is not the reciprocal of the time column: its limits sit at 0,875 to
+    0,892 and 1,128 to 1,151 times the closed-form rate, wider than the
+    printed times map to, which is why the time column is the one the
+    verdict is taken on.
+    """
+    for tau, lower, upper in TABLE_11_RATE_PRINTED:
+        rate = 20.0 * math.log10(math.e) / (2.0 * tau)
+        assert lower <= rate <= upper
+        assert lower / rate == pytest.approx(0.883, abs=0.01)
+        assert upper / rate == pytest.approx(1.14, abs=0.02)
+
+
+def test_the_decay_verdict_is_the_printed_interval_and_nothing_wider() -> None:
+    """0,99 +- 0,05 s for a 1 s linear average, both sides of the edge."""
+    assert ins.verify_running_rms_decay(1.039, integration_time_s=1.0, method="linear")
+    assert not ins.verify_running_rms_decay(
+        1.041, integration_time_s=1.0, method="linear"
+    )
+    assert ins.verify_running_rms_decay(0.941, integration_time_s=1.0, method="linear")
+    assert not ins.verify_running_rms_decay(
+        0.939, integration_time_s=1.0, method="linear"
+    )
+
+
+def test_a_time_constant_the_tables_do_not_print_is_refused() -> None:
+    """Tables 10 and 11 print three rows, and there is no band for a fourth.
+
+    The closed form still answers for any averaging time; it is the verdict
+    that has nothing printed to be taken against.
+    """
+    assert ins.running_rms_decay_time(2.0, method="linear") == pytest.approx(1.98)
+    with pytest.raises(ValueError, match=r"'integration_time_s'"):
+        ins.verify_running_rms_decay(1.98, integration_time_s=2.0, method="linear")
+
+
+@pytest.mark.parametrize(
+    ("call", "match"),
+    [
+        (
+            lambda: ins.running_rms_decay_time(0.0, method="linear"),
+            r"'integration_time_s'",
+        ),
+        (
+            lambda: ins.running_rms_decay_time(math.inf, method="linear"),
+            r"'integration_time_s'",
+        ),
+        (lambda: ins.running_rms_decay_time(1.0, method="rms"), r"'method'"),
+        (
+            lambda: ins.verify_running_rms_decay(
+                0.0, integration_time_s=1.0, method="linear"
+            ),
+            r"'measured_time_s'",
+        ),
+        (
+            lambda: ins.verify_running_rms_decay(
+                math.nan, integration_time_s=1.0, method="linear"
+            ),
+            r"'measured_time_s'",
+        ),
+        (
+            lambda: ins.verify_running_rms_decay(
+                1.0, integration_time_s=1.0, method="Linear"
+            ),
+            r"'method'",
+        ),
+    ],
+)
+def test_the_decay_functions_check_what_they_are_given(
+    call: object, match: str
+) -> None:
+    with pytest.raises(ValueError, match=match):
+        call()  # type: ignore[operator]

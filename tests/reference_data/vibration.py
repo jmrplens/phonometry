@@ -759,6 +759,214 @@ ISO8041_1_TABLE5_TOLERANCES: tuple[tuple[float, float], ...] = (
     (0.26, 0.21),
     (0.26, 1.00),
 )
+# ISO 8041-1:2017 Annex B, Tables B.1-B.9, "Band-limiting Factor" column: the
+# printed design-goal factor of the band-limiting weighting alone (Formulae
+# (1) and (2)) per one-third-octave band. Six weightings share the 0,4 Hz and
+# 100 Hz corners of Table 3 and therefore print the same column, verified
+# cell by cell against the page images of Tables B.1 to B.9, so it is
+# transcribed once here; Wf, Wh and Wm have corners of their own.
+_SHARED_BAND_LIMITING: tuple[tuple[int, float], ...] = (
+    (-10, 0.06238),
+    (-9, 0.09857),
+    (-8, 0.1551),
+    (-7, 0.2415),
+    (-6, 0.3669),
+    (-5, 0.53),
+    (-4, 0.7037),
+    (-3, 0.8434),
+    (-2, 0.9279),
+    (-1, 0.9693),
+    (0, 0.9874),
+    (1, 0.9949),
+    (2, 0.998),
+    (3, 0.9992),
+    (4, 0.9997),
+    (5, 0.9999),
+    (6, 0.9999),
+    (7, 1.0),
+    (8, 1.0),
+    (9, 1.0),
+    (10, 0.9999),
+    (11, 0.9999),
+    (12, 0.9997),
+    (13, 0.9992),
+    (14, 0.998),
+    (15, 0.995),
+    (16, 0.9877),
+    (17, 0.9699),
+    (18, 0.9291),
+    (19, 0.8457),
+    (20, 0.7071),
+    (21, 0.5336),
+    (22, 0.3699),
+    (23, 0.2436),
+    (24, 0.1565),
+    (25, 0.0995),
+    (26, 0.06297),
+)
+ISO8041_1_ANNEX_B_BAND_LIMITING: dict[str, tuple[tuple[int, float], ...]] = {
+    "Wb": _SHARED_BAND_LIMITING,
+    "Wc": _SHARED_BAND_LIMITING,
+    "Wd": _SHARED_BAND_LIMITING,
+    "We": _SHARED_BAND_LIMITING,
+    # Table B.5: 0,08 Hz and 0,63 Hz corners, n = -17 to 3.
+    "Wf": (
+        (-17, 0.06208),
+        (-16, 0.09811),
+        (-15, 0.1544),
+        (-14, 0.2404),
+        (-13, 0.3653),
+        (-12, 0.5282),
+        (-11, 0.702),
+        (-10, 0.842),
+        (-9, 0.9265),
+        (-8, 0.9671),
+        (-7, 0.9824),
+        (-6, 0.9826),
+        (-5, 0.9677),
+        (-4, 0.9279),
+        (-3, 0.8447),
+        (-2, 0.7059),
+        (-1, 0.5324),
+        (0, 0.3689),
+        (1, 0.2429),
+        (2, 0.1561),
+        (3, 0.0992),
+    ),
+    # Table B.6: 10^0,8 Hz and 10^3,1 Hz corners, n = -1 to 36.
+    "Wh": (
+        (-1, 0.01585),
+        (0, 0.02511),
+        (1, 0.03978),
+        (2, 0.06297),
+        (3, 0.0995),
+        (4, 0.1565),
+        (5, 0.2436),
+        (6, 0.3699),
+        (7, 0.5336),
+        (8, 0.7071),
+        (9, 0.8457),
+        (10, 0.9291),
+        (11, 0.9699),
+        (12, 0.9877),
+        (13, 0.995),
+        (14, 0.998),
+        (15, 0.9992),
+        (16, 0.9997),
+        (17, 0.9999),
+        (18, 0.9999),
+        (19, 1.0),
+        (20, 1.0),
+        (21, 0.9999),
+        (22, 0.9999),
+        (23, 0.9997),
+        (24, 0.9992),
+        (25, 0.998),
+        (26, 0.995),
+        (27, 0.9877),
+        (28, 0.9699),
+        (29, 0.9291),
+        (30, 0.8457),
+        (31, 0.7071),
+        (32, 0.5336),
+        (33, 0.3699),
+        (34, 0.2436),
+        (35, 0.1565),
+        (36, 0.0995),
+    ),
+    "Wj": _SHARED_BAND_LIMITING,
+    "Wk": _SHARED_BAND_LIMITING,
+    # Table B.9: 10^-0,1 Hz and 100 Hz corners, n = -10 to 26.
+    "Wm": (
+        (-10, 0.01585),
+        (-9, 0.02511),
+        (-8, 0.03978),
+        (-7, 0.06297),
+        (-6, 0.0995),
+        (-5, 0.1565),
+        (-4, 0.2436),
+        (-3, 0.3699),
+        (-2, 0.5336),
+        (-1, 0.7071),
+        (0, 0.8457),
+        (1, 0.9291),
+        (2, 0.9699),
+        (3, 0.9877),
+        (4, 0.995),
+        (5, 0.998),
+        (6, 0.9992),
+        (7, 0.9997),
+        (8, 0.9999),
+        (9, 0.9999),
+        (10, 0.9999),
+        (11, 0.9999),
+        (12, 0.9997),
+        (13, 0.9992),
+        (14, 0.998),
+        (15, 0.995),
+        (16, 0.9877),
+        (17, 0.9699),
+        (18, 0.9291),
+        (19, 0.8457),
+        (20, 0.7071),
+        (21, 0.5336),
+        (22, 0.3699),
+        (23, 0.2436),
+        (24, 0.1565),
+        (25, 0.0995),
+        (26, 0.06297),
+    ),
+}
+
+# ISO 8041-1:2017 Table 2 (folio 12), rows 2 and 3: the two consistency
+# tolerances of the indication, in per cent. Row 3 is part 1 only, because
+# ISO 8041-2 5.13 declares the running r.m.s. not applicable to a PVEM.
+ISO8041_1_WEIGHTING_CONSISTENCY_PERCENT = 3.0
+ISO8041_1_RUNNING_RMS_CONSISTENCY_PERCENT = 2.0
+
+# ISO 8041-1:2017 Table 6 (folio 17): the whole-body saw-tooth signal burst,
+# 100 rad/s, first burst at 1 s, repeated every 10 s over a 60 s record.
+ISO8041_1_BURST_WBV_ANGULAR_FREQUENCY_RAD_S = 100.0
+ISO8041_1_BURST_WBV_START_S = 1.0
+ISO8041_1_BURST_WBV_REPEAT_S = 10.0
+ISO8041_1_BURST_WBV_DURATION_S = 60.0
+
+# ISO 8041-1:2017 Table 8 (folios 18 and 19), the one-cycle-per-burst row of
+# the band-limiting weighting and of Wk: (r.m.s., VDV, MTVV linear, MTVV
+# exponential) for a 1 m/s2 amplitude burst. The printed tolerances are 10 %
+# on the r.m.s. and the two MTVV columns and 12 % on the VDV column.
+ISO8041_1_TABLE8_ONE_CYCLE: dict[str, tuple[float, float, float, float]] = {
+    "band-limiting": (0.0433, 0.498, 0.137, 0.135),
+    "Wk": (0.0299, 0.323, 0.0944, 0.0922),
+}
+ISO8041_1_TABLE8_TOLERANCE_PERCENT: tuple[float, float, float, float] = (
+    10.0,
+    12.0,
+    10.0,
+    10.0,
+)
+
+# ISO 8041-1:2017 Tables 10 and 11 (folios 20 and 21): the time the running
+# r.m.s. indication takes to fall to 10 % of its initial value after a steady
+# reference sinusoid is shut off, as (time constant s, printed time s,
+# printed tolerance s), and the equivalent decay rate Table 11 prints beside
+# it, as (time constant s, lower dB/s, upper dB/s). Table 10 prints no rate.
+ISO8041_1_TABLE10_DECAY_S: tuple[tuple[float, float, float], ...] = (
+    (0.125, 0.124, 0.005),
+    (1.0, 0.99, 0.05),
+    (8.0, 7.92, 0.2),
+)
+ISO8041_1_TABLE11_DECAY_S: tuple[tuple[float, float, float], ...] = (
+    (0.125, 0.58, 0.03),
+    (1.0, 4.61, 0.25),
+    (8.0, 36.8, 2.0),
+)
+ISO8041_1_TABLE11_DECAY_RATE_DB_PER_S: tuple[tuple[float, float, float], ...] = (
+    (0.125, 31.0, 40.0),
+    (1.0, 3.8, 4.9),
+    (8.0, 0.48, 0.62),
+)
+
 # ISO 5349-2:2001 Annex E worked-example daily exposures A(8), m/s^2.
 ISO5349_2_E21_A8 = 4.1  # E.2.1 single tool: 7,4*sqrt(2,5/8)
 ISO5349_2_E3_A8 = 3.6  # E.3 forestry three-task combination

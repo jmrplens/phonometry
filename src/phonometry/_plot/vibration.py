@@ -131,6 +131,7 @@ _STRINGS: dict[str, str] = {
     "ISO 10846 dynamic transfer stiffness": "ISO 10846 rigidez dinámica de transferencia",
     "Plate radiation efficiency (Leppington / Maidanik)": "Eficiencia de radiación de placa (Leppington / Maidanik)",
     "Frequency weighting {name} (ISO 8041-1)": "Ponderación en frecuencia {name} (ISO 8041-1)",
+    "Band-limiting weighting of {name} (ISO 8041-1)": "Ponderación limitadora de banda de {name} (ISO 8041-1)",
     "Weighted $W_i a_i$ ({name})": "Ponderada $W_i a_i$ ({name})",
     "{designation} weighted acceleration spectrum  ($a_\\mathrm{{w}}$ = {aw} m/s²)": "{designation} espectro de aceleración ponderada  ($a_\\mathrm{{w}}$ = {aw} m/s²)",
     "Directive 2002/44/EC daily {kind} exposure  ($A(8)$ = {a8} m/s², {zone})": "Directiva 2002/44/CE exposición diaria {kind}  ($A(8)$ = {a8} m/s², {zone})",
@@ -248,9 +249,12 @@ def plot_vibration_weighting(
     ax.semilogx(freqs, mag_db, **kwargs)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Weighting factor [dB]", language))
-    ax.set_title(
-        _t("Frequency weighting {name} (ISO 8041-1)", language).format(name=result.name)
+    title = (
+        "Band-limiting weighting of {name} (ISO 8041-1)"
+        if result.band_limiting
+        else "Frequency weighting {name} (ISO 8041-1)"
     )
+    ax.set_title(_t(title, language).format(name=result.name))
     ax.grid(True, which="both", alpha=0.3)
     format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     localize_axes(ax, language)

@@ -3,12 +3,12 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 946,
-    "passing": 946,
+    "checks": 961,
+    "passing": 961,
     "failing": 0,
     "domains": 76,
     "standards": 407,
-    "citations": 673,
+    "citations": 677,
     "designations": 145,
     "sources": 83
   },
@@ -187,8 +187,8 @@
     {
       "id": "human-vibration-iso-8041-2631-5349",
       "title": "Human vibration (ISO 8041 / 2631 / 5349)",
-      "checks": 15,
-      "passing": 15
+      "checks": 30,
+      "passing": 30
     },
     {
       "id": "human-vibration-meter-verification-iso-8041-1",
@@ -9900,6 +9900,439 @@
         "label": "0"
       },
       "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-5-6-6-annex-b/all-nine-band-limiting-responses-inside-the-table-5-envelope-318-bands",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "5.6.6 + Annex B",
+        "cite": "ISO 8041-1:2017 5.6.6 + Annex B"
+      },
+      "quantity": "All nine band-limiting responses inside the Table 5 envelope (318 bands)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 bands outside the Table 5 tolerances"
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-annex-b/wk-band-limiting-factor-at-0-631-hz",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Annex B",
+        "cite": "ISO 8041-1:2017 Annex B"
+      },
+      "quantity": "Wk band-limiting factor at 0,631 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.9279
+      },
+      "computed": {
+        "value": 0.9279
+      },
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -3.31e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-annex-b/wf-band-limiting-factor-at-0-3981-hz",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Annex B",
+        "cite": "ISO 8041-1:2017 Annex B"
+      },
+      "quantity": "Wf band-limiting factor at 0,3981 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.9279
+      },
+      "computed": {
+        "value": 0.9279
+      },
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 3.87e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-annex-b/wh-band-limiting-factor-at-10-hz",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Annex B",
+        "cite": "ISO 8041-1:2017 Annex B"
+      },
+      "quantity": "Wh band-limiting factor at 10 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.9291
+      },
+      "computed": {
+        "value": 0.9291
+      },
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -1.81e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-annex-b/wm-band-limiting-factor-at-1-259-hz",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Annex B",
+        "cite": "ISO 8041-1:2017 Annex B"
+      },
+      "quantity": "Wm band-limiting factor at 1,259 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.9291
+      },
+      "computed": {
+        "value": 0.9291
+      },
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -1.81e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-table-b-5/wf-design-goal-factor-at-0-3981-hz-the-cell-table-2-row-2-turns-on",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table B.5",
+        "cite": "ISO 8041-1:2017 Table B.5"
+      },
+      "quantity": "Wf design-goal factor at 0,3981 Hz, the cell Table 2 row 2 turns on",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.3884
+      },
+      "computed": {
+        "value": 0.3884
+      },
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -2.87e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-table-10/running-r-m-s-decay-to-10-linear-averaging-tau-0-125-s",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 10",
+        "cite": "ISO 8041-1:2017 Table 10"
+      },
+      "quantity": "Running r.m.s. decay to 10 %, linear averaging, tau = 0.125 s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.124
+      },
+      "computed": {
+        "value": 0.122
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.002
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-table-10/running-r-m-s-decay-to-10-linear-averaging-tau-1-s",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 10",
+        "cite": "ISO 8041-1:2017 Table 10"
+      },
+      "quantity": "Running r.m.s. decay to 10 %, linear averaging, tau = 1 s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.99
+      },
+      "computed": {
+        "value": 0.983
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.007
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-table-10/running-r-m-s-decay-to-10-linear-averaging-tau-8-s",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 10",
+        "cite": "ISO 8041-1:2017 Table 10"
+      },
+      "quantity": "Running r.m.s. decay to 10 %, linear averaging, tau = 8 s",
+      "kind": "scalar",
+      "expected": {
+        "value": 7.92
+      },
+      "computed": {
+        "value": 7.915
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.2
+      },
+      "deviation": {
+        "value": -0.005
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-table-11/running-r-m-s-decay-to-10-exponential-averaging-tau-0-125-s",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 11",
+        "cite": "ISO 8041-1:2017 Table 11"
+      },
+      "quantity": "Running r.m.s. decay to 10 %, exponential averaging, tau = 0.125 s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.58
+      },
+      "computed": {
+        "value": 0.576
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.03
+      },
+      "deviation": {
+        "value": -0.004
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-table-11/running-r-m-s-decay-to-10-exponential-averaging-tau-1-s",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 11",
+        "cite": "ISO 8041-1:2017 Table 11"
+      },
+      "quantity": "Running r.m.s. decay to 10 %, exponential averaging, tau = 1 s",
+      "kind": "scalar",
+      "expected": {
+        "value": 4.61
+      },
+      "computed": {
+        "value": 4.605
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.25
+      },
+      "deviation": {
+        "value": -0.005
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-table-11/running-r-m-s-decay-to-10-exponential-averaging-tau-8-s",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 11",
+        "cite": "ISO 8041-1:2017 Table 11"
+      },
+      "quantity": "Running r.m.s. decay to 10 %, exponential averaging, tau = 8 s",
+      "kind": "scalar",
+      "expected": {
+        "value": 36.8
+      },
+      "computed": {
+        "value": 36.841
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 2.0
+      },
+      "deviation": {
+        "value": 0.041
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-table-11/equivalent-decay-rate-exponential-averaging-tau-0-125-s",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 11",
+        "cite": "ISO 8041-1:2017 Table 11"
+      },
+      "quantity": "Equivalent decay rate, exponential averaging, tau = 0.125 s",
+      "kind": "scalar",
+      "expected": {
+        "value": 35.5,
+        "label": "31 to 40 dB/s"
+      },
+      "computed": {
+        "value": 34.73
+      },
+      "unit": "dB/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 4.5
+      },
+      "deviation": {
+        "value": -0.766
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-table-11/equivalent-decay-rate-exponential-averaging-tau-1-s",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 11",
+        "cite": "ISO 8041-1:2017 Table 11"
+      },
+      "quantity": "Equivalent decay rate, exponential averaging, tau = 1 s",
+      "kind": "scalar",
+      "expected": {
+        "value": 4.35,
+        "label": "3.8 to 4.9 dB/s"
+      },
+      "computed": {
+        "value": 4.34
+      },
+      "unit": "dB/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5500000000000003
+      },
+      "deviation": {
+        "value": -0.007
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-iso-8041-2631-5349/iso-8041-1-2017-table-11/equivalent-decay-rate-exponential-averaging-tau-8-s",
+      "domain": "human-vibration-iso-8041-2631-5349",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 11",
+        "cite": "ISO 8041-1:2017 Table 11"
+      },
+      "quantity": "Equivalent decay rate, exponential averaging, tau = 8 s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.55,
+        "label": "0.48 to 0.62 dB/s"
+      },
+      "computed": {
+        "value": 0.54
+      },
+      "unit": "dB/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.07
+      },
+      "deviation": {
+        "value": -0.007
+      },
+      "precision": 2,
       "verdict": "pass"
     },
     {

@@ -9,6 +9,7 @@ quantities of ISO 5349-1/-2, and the daily exposure A(8) that Directive
 
 from __future__ import annotations
 
+import numpy as np
 import reference_data as ref
 
 import phonometry as ph
@@ -205,3 +206,164 @@ def _chk_directive_2002_44() -> Outcome:
         f"WBV {wbv.action_value}/{wbv.limit_value} m/s^2"
     )
     return Outcome(expected=exp, computed=got, delta="0", passed=ok)
+
+
+# ---------------------------------------------------------------------------
+# The band-limiting weighting: Annex B's own three columns (5.6.6).
+# ---------------------------------------------------------------------------
+#: Sampled band-limiting factors, one per printed corner shape: the shared
+#: 0,4 Hz / 100 Hz pair (Table B.8), and the three weightings whose corners
+#: differ (Tables B.5, B.6 and B.9). ``(weighting, band number, printed)``.
+_BAND_LIMITING_SAMPLES = (
+    ("Wk", -2, "0,631", 0.9279),
+    ("Wf", -4, "0,3981", 0.9279),
+    ("Wh", 10, "10", 0.9291),
+    ("Wm", 1, "1,259", 0.9291),
+)
+
+
+@register(
+    _HUMAN_VIB,
+    "ISO 8041-1:2017 5.6.6 + Annex B",
+    "All nine band-limiting responses inside the Table 5 envelope (318 bands)",
+)
+def _chk_iso8041_band_limiting_envelope() -> Outcome:
+    violations = 0
+    for name, rows in ref.ISO8041_1_ANNEX_B_BAND_LIMITING.items():
+        ft1, ft2, ft3, ft4 = ref.ISO8041_1_TABLE4_TRANSITIONS[name]
+        for n, printed in rows:
+            freq = _true_centre(n)
+            if freq <= ft1:
+                region = 0
+            elif freq < ft2:
+                region = 1
+            elif freq <= ft3:
+                region = 2
+            elif freq < ft4:
+                region = 3
+            else:
+                region = 4
+            upper, lower = ref.ISO8041_1_TABLE5_TOLERANCES[region]
+            factor = float(ph.vibration.band_limiting_factors(name, freq)[0])
+            if not -lower <= factor / printed - 1.0 <= upper:
+                violations += 1
+    return numeric(
+        0.0,
+        float(violations),
+        0.0,
+        places=0,
+        expected_label="0 bands outside the Table 5 tolerances",
+    )
+
+
+def _register_band_limiting_samples() -> None:
+    """One row per sampled band-limiting factor of Annex B."""
+    for weighting, band, label, printed in _BAND_LIMITING_SAMPLES:
+
+        def _check(
+            weighting: str = weighting, band: int = band, printed: float = printed
+        ) -> Outcome:
+            factor = float(
+                ph.vibration.band_limiting_factors(weighting, _true_centre(band))[0]
+            )
+            return numeric(printed, factor, 1e-3, rel=True, places=4)
+
+        register(
+            _HUMAN_VIB,
+            "ISO 8041-1:2017 Annex B",
+            f"{weighting} band-limiting factor at {label} Hz",
+        )(_check)
+
+
+_register_band_limiting_samples()
+
+
+@register(
+    _HUMAN_VIB,
+    "ISO 8041-1:2017 Table B.5",
+    "Wf design-goal factor at 0,3981 Hz, the cell Table 2 row 2 turns on",
+)
+def _chk_iso8041_wf_annex_b_reference_band() -> Outcome:
+    factor = float(ph.vibration.weighting_factors("Wf", _true_centre(-4))[0])
+    return numeric(0.3884, factor, 1e-3, rel=True, places=4)
+
+
+# ---------------------------------------------------------------------------
+# Tables 10 and 11: the decay of the running r.m.s. after the signal stops.
+# ---------------------------------------------------------------------------
+def _measured_decay_time_s(integration_time_s: float, method: str) -> float:
+    """5.13 applied to :func:`running_rms`: hold, cut, time down to 10 %."""
+    fs = 5000.0
+    frequency = ph.vibration.REFERENCE_FREQUENCY_HZ["Wk"]
+    steady = (
+        5.0 * integration_time_s if method == "linear" else 20.0 * integration_time_s
+    )
+    decay = 1.5 * integration_time_s if method == "linear" else 6.0 * integration_time_s
+    held = int(round(steady * fs))
+    total = held + int(round(decay * fs))
+    t = np.arange(total) / fs
+    signal = np.where(np.arange(total) < held, np.sin(2.0 * np.pi * frequency * t), 0.0)
+    indicated = ph.vibration.running_rms(
+        signal, fs, integration_time=integration_time_s, method=method
+    )
+    after = indicated[held - 1 :]
+    return float(np.argmax(after < 0.1 * after[0])) / fs
+
+
+def _register_decay_times() -> None:
+    """One row per printed decay time of Tables 10 and 11."""
+    tables = (
+        ("linear", "Table 10", ref.ISO8041_1_TABLE10_DECAY_S),
+        ("exponential", "Table 11", ref.ISO8041_1_TABLE11_DECAY_S),
+    )
+    for method, table, rows in tables:
+        for tau, printed, tolerance in rows:
+
+            def _check(
+                method: str = method,
+                tau: float = tau,
+                printed: float = printed,
+                tolerance: float = tolerance,
+            ) -> Outcome:
+                measured = _measured_decay_time_s(tau, method)
+                return numeric(printed, measured, tolerance, unit="s", places=3)
+
+            register(
+                _HUMAN_VIB,
+                f"ISO 8041-1:2017 {table}",
+                f"Running r.m.s. decay to 10 %, {method} averaging, tau = {tau:g} s",
+            )(_check)
+
+
+_register_decay_times()
+
+
+def _register_decay_rates() -> None:
+    """One row per printed decay rate of Table 11, as its own interval."""
+    for tau, lower, upper in ref.ISO8041_1_TABLE11_DECAY_RATE_DB_PER_S:
+
+        def _check(
+            tau: float = tau, lower: float = lower, upper: float = upper
+        ) -> Outcome:
+            # The decay runs 20 dB down, from the initial value to 10 % of it,
+            # so the rate the table prints is that 20 dB over the time the
+            # library's running r.m.s. actually takes to get there.
+            rate = 20.0 / _measured_decay_time_s(tau, "exponential")
+            centre = (lower + upper) / 2.0
+            return numeric(
+                centre,
+                rate,
+                (upper - lower) / 2.0,
+                unit="dB/s",
+                places=2,
+                expected_label=f"{lower:g} to {upper:g} dB/s",
+            )
+
+        register(
+            _HUMAN_VIB,
+            "ISO 8041-1:2017 Table 11",
+            f"Equivalent decay rate, exponential averaging, tau = {tau:g} s",
+        )(_check)
+
+
+_register_decay_rates()

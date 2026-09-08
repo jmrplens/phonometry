@@ -16,9 +16,15 @@ import math
 import numpy as np
 import pytest
 from reference_data import (
+    ISO8041_1_ANNEX_B_BAND_LIMITING,
     ISO8041_1_ANNEX_B_FACTORS,
+    ISO8041_1_BURST_WBV_ANGULAR_FREQUENCY_RAD_S,
+    ISO8041_1_BURST_WBV_DURATION_S,
+    ISO8041_1_BURST_WBV_REPEAT_S,
+    ISO8041_1_BURST_WBV_START_S,
     ISO8041_1_TABLE4_TRANSITIONS,
     ISO8041_1_TABLE5_TOLERANCES,
+    ISO8041_1_TABLE8_ONE_CYCLE,
 )
 
 from phonometry.vibration.human import exposure as hv
@@ -225,6 +231,200 @@ def test_apply_weighting_validates() -> None:
         hv.apply_weighting(two_dimensional, 1000.0, name="Wk")
     with pytest.raises(ValueError, match=r"'fs' must be a positive, finite"):
         hv.apply_weighting([1.0, 2.0], 0.0, name="Wk")
+
+
+# ---------------------------------------------------------------------------
+# Band-limiting weighting (ISO 8041-1 Formulae (1)/(2); Annex B BL columns).
+# ---------------------------------------------------------------------------
+def test_annex_b_band_limiting_columns_reproduce() -> None:
+    """Every printed band-limiting factor (Tables B.1-B.9, 318 bands).
+
+    Annex B gives the band-limiting weighting three columns of its own in
+    every table, and 5.6.6 grades it against the same Table 5 limits as the
+    overall weighting.
+    """
+    for name, rows in ISO8041_1_ANNEX_B_BAND_LIMITING.items():
+        for n, printed in rows:
+            got = float(hv.band_limiting_factors(name, _fc(n))[0])
+            # The tables print four significant figures (<= 0,05 % rounding).
+            assert got == pytest.approx(printed, rel=1e-3), (name, n)
+
+
+def test_the_band_limiting_column_is_not_the_weighting_column() -> None:
+    """The two Annex B columns are far apart wherever the weighting works.
+
+    At 1 Hz Table B.8 prints 0,987 4 for the band limiting of ``Wk`` and
+    0,482 5 for ``Wk`` itself, so a band-limiting response that returned the
+    overall weighting would fail every band in the middle of the range.
+    """
+    freq = _fc(0)
+    assert float(hv.band_limiting_factors("Wk", freq)[0]) == pytest.approx(
+        0.9874, rel=1e-3
+    )
+    assert float(hv.weighting_factors("Wk", freq)[0]) == pytest.approx(0.4825, rel=1e-3)
+
+
+def test_six_weightings_share_one_band_limiting_pair() -> None:
+    """Table 3 gives six weightings the same 0,4 Hz and 100 Hz corners.
+
+    Which is why Annex B prints one band-limiting column for the six of them,
+    and why ``Wf``, ``Wh`` and ``Wm``, whose corners differ, must not match.
+    """
+    frequencies = [0.1, 1.0, 16.0, 100.0, 398.1]
+    shared = hv.band_limiting_factors("Wk", frequencies)
+    for name in ("Wb", "Wc", "Wd", "We", "Wj"):
+        assert hv.band_limiting_factors(name, frequencies) == pytest.approx(shared)
+    for name in ("Wf", "Wh", "Wm"):
+        assert not np.allclose(hv.band_limiting_factors(name, frequencies), shared)
+
+
+def test_the_band_limiting_response_declares_which_curve_it_is() -> None:
+    """Table B.5, n = -4: the band limiting of ``Wf`` is 0,927 9 (-0,65 dB)."""
+    resp = hv.band_limiting_response("Wf", [_fc(-4)])
+    assert resp.name == "Wf"
+    assert resp.band_limiting
+    assert not hv.frequency_weighting("Wf", [_fc(-4)]).band_limiting
+    assert resp.magnitude[0] == pytest.approx(0.9279, rel=1e-3)
+    assert resp.magnitude_db[0] == pytest.approx(-0.65, abs=0.01)
+
+
+def test_the_band_limiting_phase_is_the_annex_b_phase_column() -> None:
+    """Table B.8 prints 90,06 and -89,68 degrees at the two 3 dB corners."""
+    resp = hv.band_limiting_response("Wk", [_fc(-4), _fc(20)])
+    degrees = np.degrees(np.angle(resp.response))
+    assert degrees == pytest.approx([90.06, -89.68], abs=0.02)
+
+
+def test_band_limiting_refuses_what_the_weighting_refuses() -> None:
+    with pytest.raises(ValueError, match="Unknown weighting"):
+        hv.band_limiting_factors("Wz", [10.0])
+    with pytest.raises(ValueError, match=r"'frequencies' must be a non-empty"):
+        hv.band_limiting_response("Wk", [])
+    with pytest.raises(ValueError, match=r"'fs' must be a positive, finite"):
+        hv.apply_band_limiting([1.0, 2.0], 0.0, name="Wk")
+    with pytest.raises(ValueError, match="Unknown weighting"):
+        hv.apply_band_limiting([1.0, 2.0], 100.0, name="Wz")
+
+
+def test_apply_band_limiting_scales_a_sine_by_the_band_limiting_factor() -> None:
+    """And by that factor rather than by the overall weighting.
+
+    At 80 Hz Table B.8 prints 0,845 7 for the band limiting of ``Wk`` and
+    0,133 9 for ``Wk``, six times smaller.
+    """
+    fs = 2000.0
+    f0 = 80.0
+    t = np.arange(int(4 * fs)) / fs
+    x = np.sqrt(2.0) * np.sin(2.0 * math.pi * f0 * t)  # unit-r.m.s. amplitude
+    y = hv.apply_band_limiting(x, fs, name="Wk")
+    factor = float(hv.band_limiting_factors("Wk", f0)[0])
+    interior = y[int(0.5 * fs) : -int(0.5 * fs)]
+    assert float(np.sqrt(np.mean(interior**2))) == pytest.approx(factor, rel=2e-2)
+    assert factor / float(hv.weighting_factors("Wk", f0)[0]) > 5.0
+
+
+def test_the_band_limiting_plot_says_that_is_what_it_is() -> None:
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    frequencies = [1.0, 10.0, 100.0]
+    title = hv.band_limiting_response("Wk", frequencies).plot().get_title()
+    assert "Band-limiting" in title
+    assert "Wk" in title
+    spanish = hv.band_limiting_response("Wk", frequencies).plot(language="es")
+    assert "limitadora de banda" in spanish.get_title()
+    assert (
+        "Band-limiting"
+        not in hv.frequency_weighting("Wk", frequencies).plot().get_title()
+    )
+    plt.close("all")
+
+
+# ---------------------------------------------------------------------------
+# The saw-tooth burst of ISO 8041-1 Table 6 against the printed Table 8.
+# ---------------------------------------------------------------------------
+_BURST_FS = 5000.0
+
+
+def _sawtooth_burst(cycles: int) -> np.ndarray:
+    """The whole-body saw-tooth signal burst of Table 6 (folio 17).
+
+    100 rad/s, first burst at 1 s, repeated every 10 s over a 60 s record,
+    1 m/s2 zero-to-peak. Each burst is a linear upward ramp with a vertical
+    fall that starts at an upward zero crossing, which is the shape Figure 3
+    draws.
+    """
+    frequency = ISO8041_1_BURST_WBV_ANGULAR_FREQUENCY_RAD_S / (2.0 * math.pi)
+    period = 1.0 / frequency
+    samples = int(round(ISO8041_1_BURST_WBV_DURATION_S * _BURST_FS))
+    t = np.arange(samples) / _BURST_FS
+    signal = np.zeros(samples)
+    onset = ISO8041_1_BURST_WBV_START_S
+    while onset < ISO8041_1_BURST_WBV_DURATION_S:
+        inside = (t >= onset) & (t < onset + cycles * period)
+        local = t[inside] - onset
+        signal[inside] = 2.0 * (((local / period + 0.5) % 1.0) - 0.5)
+        onset += ISO8041_1_BURST_WBV_REPEAT_S
+    return signal
+
+
+def _zero_state(signal: np.ndarray, *, name: str, band_limiting: bool) -> np.ndarray:
+    """Weight the record keeping the switch-on transient (5.9, NOTE 1).
+
+    ``apply_weighting`` multiplies in the frequency domain without padding,
+    which wraps the record around itself; the printed responses come from a
+    digital simulation started from rest, so the record is zero-padded before
+    the multiplication and cut back afterwards.
+    """
+    padded = np.concatenate([signal, np.zeros(signal.size)])
+    apply = hv.apply_band_limiting if band_limiting else hv.apply_weighting
+    return np.asarray(apply(padded, _BURST_FS, name=name))[: signal.size]
+
+
+@pytest.mark.parametrize("row", ["band-limiting", "Wk"])
+def test_the_one_cycle_row_of_table_8(row: str) -> None:
+    """r.m.s., VDV and both MTVV columns of the one-cycle burst.
+
+    Printed with 10 % tolerance (12 % on the VDV); the chain reproduces them
+    to better than 0,5 %, which is what is checked here.
+    """
+    weighted = _zero_state(
+        _sawtooth_burst(1), name="Wk", band_limiting=row == "band-limiting"
+    )
+    got = (
+        float(np.sqrt(np.mean(weighted**2))),
+        hv.vibration_dose_value(weighted, _BURST_FS),
+        hv.mtvv(weighted, _BURST_FS, method="linear"),
+        hv.mtvv(weighted, _BURST_FS, method="exponential"),
+    )
+    for value, printed in zip(got, ISO8041_1_TABLE8_ONE_CYCLE[row], strict=True):
+        assert value == pytest.approx(printed, rel=5e-3)
+
+
+def test_the_two_mtvv_columns_of_table_8_are_different_numbers() -> None:
+    """Forwarding ``method`` is what puts the exponential column in reach.
+
+    Table 8 prints 0,094 4 for the linear MTVV of the one-cycle ``Wk`` burst
+    and 0,092 2 for the exponential one, 2,3 % apart. An ``mtvv`` that
+    averaged linearly whatever it was asked for would land on the first
+    number and miss the second by four times the tolerance used here.
+    """
+    weighted = _zero_state(_sawtooth_burst(1), name="Wk", band_limiting=False)
+    linear, exponential = ISO8041_1_TABLE8_ONE_CYCLE["Wk"][2:]
+    got = hv.mtvv(weighted, _BURST_FS, method="exponential")
+    assert got == pytest.approx(exponential, rel=5e-3)
+    assert got != pytest.approx(linear, rel=5e-3)
+    assert hv.mtvv(weighted, _BURST_FS) == pytest.approx(linear, rel=5e-3)
+
+
+def test_mtvv_takes_the_two_averagings_running_rms_has_and_no_others() -> None:
+    signal = [0.0, 1.0, 2.0, 1.0, 0.0]
+    assert hv.mtvv(signal, 100.0, method="linear") > 0.0
+    assert hv.mtvv(signal, 100.0, method="exponential") > 0.0
+    with pytest.raises(ValueError, match=r"'method' must be 'linear' or 'exponential'"):
+        hv.mtvv(signal, 100.0, method="Linear")
 
 
 # ---------------------------------------------------------------------------

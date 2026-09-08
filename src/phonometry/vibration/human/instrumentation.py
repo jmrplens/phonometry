@@ -71,6 +71,7 @@ from ..._internal.validation import (
 from .exposure import (
     WEIGHTING_NAMES,
     HumanVibrationWarning,
+    band_limiting_factors,
     frequency_weighting,
     weighting_factors,
 )
@@ -231,6 +232,21 @@ LOW_FREQUENCY_INDICATION_TOLERANCE_PERCENT = 5.0
 #: The weighting whose application is low-frequency whole-body vibration, and
 #: which therefore takes the wider indication tolerance of Table 2.
 LOW_FREQUENCY_WEIGHTING = "Wf"
+
+#: Table 2, second row (folio 12): the indicated frequency-weighted value and
+#: the indicated band-limiting value multiplied by the appropriate weighting
+#: factor may differ by 3 %, for a steady sinusoid at the reference frequency
+#: and reference vibration value. 12.7 (folio 30) repeats the identity as the
+#: test procedure. See :func:`band_limited_weighting_factor` for which factor
+#: makes the row satisfiable.
+WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT = 3.0
+
+#: Table 2, third row (folio 12): the running r.m.s. indication and the linear
+#: time-averaged r.m.s. value, both with the band-limiting weighting, may
+#: differ by 2 % over any measurement time. Part 1 only: the Table 2 of
+#: ISO 8041-2 (folio 8) has two rows rather than three, because its 5.13
+#: declares the running r.m.s. "Not applicable for PVEM".
+RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT = 2.0
 
 
 def indication_tolerance_percent(name: str) -> float:
@@ -940,3 +956,173 @@ def reference_indication(name: str) -> float:
         np.asarray(weighting_factors(weighting, [REFERENCE_FREQUENCY_HZ[weighting]]))[0]
     )
     return REFERENCE_ACCELERATION_M_S2[weighting] * factor
+
+
+def band_limited_weighting_factor(name: str) -> float:
+    r"""The factor that makes the second row of Table 2 satisfiable.
+
+    Table 2 (folio 12) allows 3 % between "the indicated value of any
+    frequency-weighted measurement quantity" and "the indicated value of the
+    corresponding band-limiting measurement multiplied by the appropriate
+    weighting factor", and 12.7 (folio 30) turns it into a procedure: with the
+    input adjusted so that the meter indicates the reference vibration value
+    *with band-limiting frequency weighting*, the frequency-weighted
+    indication "shall equal the indicated band-limited weighted vibration
+    value multiplied by the appropriate weighting factor (see Table 1)".
+
+    That test fixes the input at ``a_ref / |H_BL(f_ref)|``, so the weighted
+    indication is ``a_ref |H(f_ref)| / |H_BL(f_ref)|``: the factor that makes
+    the identity true is the **ratio** of the two responses at the reference
+    frequency, which is what this function returns.
+
+    ==========  ==================  ===================
+    Weighting   This ratio          Table 1 prints
+    ==========  ==================  ===================
+    ``Wb``      0,812 819           0,812 6
+    ``Wc``      0,514 617           0,514 5
+    ``Wd``      0,126 120           0,126 1
+    ``We``      0,062 891           0,062 87
+    ``Wf``      0,418 982           0,388 8
+    ``Wh``      0,202 025           0,202 0
+    ``Wj``      1,018 841           1,019
+    ``Wk``      0,772 066           0,771 8
+    ``Wm``      0,336 336           0,336 2
+    ==========  ==================  ===================
+
+    For eight of the nine the distinction is academic: their band-limiting
+    weighting is between 0,999 68 and 0,999 97 at their reference frequency,
+    so the printed Table 1 factor is the same number to 0,03 %, against a
+    tolerance of 3 %. For ``Wf`` it is not. Its reference frequency,
+    2,5 rad/s = 0,397 887 Hz, sits inside its own band-limiting skirt (0,08 Hz
+    and 0,63 Hz corners, Table 3): the band-limiting weighting is 0,928 078
+    there and the overall weighting 0,388 848, values Table B.5 prints as
+    0,927 9 and 0,388 4 at the neighbouring 0,398 1 Hz band centre. Reading
+    "the appropriate weighting factor" as the 0,388 8 of Table 1 makes a
+    *conforming* ``Wf`` meter miss the row by 7,75 %, more than twice the
+    tolerance; reading it as the ratio 0,418 982 makes the row true by
+    construction. The standard does not define the phrase, and the "(see
+    Table 1)" of 12.7 points at the reading that cannot be satisfied; the
+    ambiguity is registered in ``docs/ERRATA.md``.
+
+    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
+    :return: ``|H(f_ref)| / |H_BL(f_ref)|``, dimensionless.
+    :raises ValueError: If the weighting is not one of the nine.
+    """
+    weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
+    frequencies = [REFERENCE_FREQUENCY_HZ[weighting]]
+    overall = float(np.asarray(weighting_factors(weighting, frequencies))[0])
+    band_limited = float(np.asarray(band_limiting_factors(weighting, frequencies))[0])
+    return overall / band_limited
+
+
+# ---------------------------------------------------------------------------
+# Running r.m.s. time weighting: the decay of Tables 10 and 11 (5.13).
+# ---------------------------------------------------------------------------
+#: The fraction of the initial indicated value the decay is timed down to
+#: (5.13, folio 20: "the time at which the indicated value is less than 10 %
+#: of the initial value").
+_DECAY_FRACTION = 0.1
+
+#: Tables 10 and 11 (folios 20 and 21): the time the indicated running r.m.s.
+#: value takes to fall to 10 % of its initial value after a steady reference
+#: sinusoid is suddenly shut off, in seconds. One row per printed time
+#: constant, ``(integration time, printed time, printed tolerance)``.
+RUNNING_RMS_DECAY_TIME_S: dict[str, tuple[tuple[float, float, float], ...]] = {
+    "linear": ((0.125, 0.124, 0.005), (1.0, 0.99, 0.05), (8.0, 7.92, 0.2)),
+    "exponential": ((0.125, 0.58, 0.03), (1.0, 4.61, 0.25), (8.0, 36.8, 2.0)),
+}
+
+#: Table 11 (folio 21): the equivalent decay rate of the exponential average,
+#: in decibels per second, as ``(integration time, lower, upper)``. Table 10
+#: prints no such column, so this is the exponential average alone.
+#:
+#: The rate band is not the reciprocal of the time band. The closed-form rate
+#: is ``20 lg(e) / (2 tau) = 4,3429 / tau`` dB/s, and the printed limits sit
+#: at 0,875 to 0,892 and 1,128 to 1,151 times it, while the printed times map
+#: to narrower intervals around ``2 tau ln 10``. The time column is the one
+#: that binds; the rate column is the looser statement of the same decay.
+RUNNING_RMS_DECAY_RATE_DB_PER_S: tuple[tuple[float, float, float], ...] = (
+    (0.125, 31.0, 40.0),
+    (1.0, 3.8, 4.9),
+    (8.0, 0.48, 0.62),
+)
+
+
+def running_rms_decay_time(integration_time_s: float, *, method: str) -> float:
+    r"""When the running r.m.s. falls to 10 % after the signal is shut off.
+
+    5.13 (folio 20) applies a steady sinusoid at the reference frequency for
+    at least 5 time constants (linear averaging) or 20 (exponential), shuts it
+    off, and times the decay "from the start of the decay to the time at
+    which the indicated value is less than 10 % of the initial value".
+
+    Both averages have a closed form. The linear average of Eq. (2) keeps the
+    last ``tau`` seconds of the record, so a time ``t`` after the cut its
+    window still holds ``(tau - t) / tau`` of the original mean square and the
+    indicated value falls as :math:`\sqrt{(\tau - t)/\tau}`, reaching 10 % at
+    ``t = 0,99 tau``. The exponential average of Eq. (3) decays in power as
+    :math:`e^{-t/\tau}`, so the indication falls as :math:`e^{-t/2\tau}` and
+    reaches 10 % at :math:`t = 2\tau\ln 10 = 4,605\,2\,\tau`.
+
+    Both land inside the printed bands of :data:`RUNNING_RMS_DECAY_TIME_S`
+    for the three time constants the standard tabulates.
+
+    :param integration_time_s: The averaging time ``tau``, in seconds (> 0).
+    :param method: ``"linear"`` (Table 10) or ``"exponential"`` (Table 11),
+        the two averages of :func:`~phonometry.vibration.running_rms`.
+    :return: The time to 10 % of the initial indicated value, in seconds.
+    :raises ValueError: If ``method`` is neither average, or the integration
+        time is not positive and finite.
+    """
+    averaging = require_choice(str(method), "method", ("linear", "exponential"))
+    tau = float(integration_time_s)
+    if not math.isfinite(tau) or tau <= 0.0:
+        msg = "'integration_time_s' must be positive and finite."
+        raise ValueError(msg)
+    if averaging == "linear":
+        return (1.0 - _DECAY_FRACTION**2) * tau
+    return -2.0 * math.log(_DECAY_FRACTION) * tau
+
+
+def verify_running_rms_decay(
+    measured_time_s: float, *, integration_time_s: float, method: str
+) -> bool:
+    """Check a measured decay time against Table 10 or Table 11.
+
+    The verdict is one printed row: the measured time to 10 % of the initial
+    value has to sit inside the printed interval for that time constant and
+    that average. The rate column of Table 11 is deliberately not the
+    criterion, for the reason :data:`RUNNING_RMS_DECAY_RATE_DB_PER_S`
+    explains.
+
+    Only the three time constants the two tables print can be checked, so an
+    instrument averaging over any other time is refused rather than judged
+    against a band the standard does not give.
+
+    :param measured_time_s: The measured time to 10 % of the initial
+        indicated value, in seconds (> 0).
+    :param integration_time_s: The averaging time it was measured at, which
+        has to be one of the printed 0,125 s, 1 s and 8 s. Keyword-only, and
+        so is the method: two times in seconds side by side are the kind of
+        pair a positional call gets the wrong way round in silence.
+    :param method: ``"linear"`` (Table 10) or ``"exponential"`` (Table 11).
+    :return: Whether the measurement is inside the printed interval.
+    :raises ValueError: If ``method`` is neither average, if the measured time
+        is not positive and finite, or if the integration time is not one of
+        the three printed time constants.
+    """
+    averaging = require_choice(str(method), "method", ("linear", "exponential"))
+    measured = float(measured_time_s)
+    if not math.isfinite(measured) or measured <= 0.0:
+        msg = "'measured_time_s' must be positive and finite."
+        raise ValueError(msg)
+    tau = float(integration_time_s)
+    for printed_tau, printed_time, tolerance in RUNNING_RMS_DECAY_TIME_S[averaging]:
+        if math.isclose(tau, printed_tau, rel_tol=1e-9, abs_tol=0.0):
+            return abs(measured - printed_time) <= tolerance
+    printed = ", ".join(f"{row[0]:g}" for row in RUNNING_RMS_DECAY_TIME_S[averaging])
+    msg = (
+        f"'integration_time_s' must be one of the time constants Tables 10 "
+        f"and 11 print ({printed} s); {tau:g} s has no printed decay band."
+    )
+    raise ValueError(msg)

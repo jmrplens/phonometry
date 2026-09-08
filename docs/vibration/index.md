@@ -98,14 +98,15 @@ Turning a vibration spectrum into a diagnosis of the machine that made it.
 
 ## What this section does not cover
 
-**An instrument is graded on its weighting and on nothing else.** The
-tolerance tables of ISO 8041-1 are implemented, so a measured weighting
-response can be checked against the band the standard allows it, on the
-[meter verification](human/meter-verification.md) page.
-The rest of that standard, the indication, linearity, overload, temperature,
-humidity and electromagnetic clauses, is a set of laboratory tests on
-hardware, so a pass here is a necessary condition for conformity and never a
-certificate of it.
+**An instrument is graded on the clauses that can be computed.** Every
+criterion of ISO 8041-1 that is arithmetic is implemented, on the [meter
+verification](human/meter-verification.md) page: the
+tolerance band around each frequency weighting, the characteristic phase
+deviation, the running r.m.s. decay times and the 228 saw-tooth burst
+indications the standard prints. The rest of that standard, the indication,
+linearity, overload, temperature, humidity and electromagnetic clauses, is a
+set of laboratory tests on hardware, so a pass here is a necessary condition
+for conformity and never a certificate of it.
 
 **No severity verdict is issued for a machine.** The machinery pages predict
 *where* a line would be, never whether it is present or whether the machine is

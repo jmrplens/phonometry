@@ -58,13 +58,15 @@ analysis](../../signals/index.md) section.
 
 ## What this section does not cover
 
-**A meter is graded on its weighting.** The tolerance tables of ISO 8041-1 are
-implemented, so a measured weighting response can be checked against the band
-the standard allows it, which is what [meter
+**A meter is graded on the clauses that can be computed.** The tolerance
+tables of ISO 8041-1 are implemented, and so is every other criterion of it
+that is arithmetic: the characteristic phase deviation, the running r.m.s.
+decay times and the 228 saw-tooth burst indications the standard prints, which
+is what [meter
 verification](meter-verification.md) is about. The
 design and type-testing clauses of that standard, from indication and
 linearity to the environmental tests, are laboratory measurements on hardware
-and stay outside: a pass on the weighting is a necessary condition for
+and stay outside: a pass on any of these is a necessary condition for
 conformity, not a certificate of it.
 
 **Building vibration stops at the weighting.** Of ISO 2631-2 the library

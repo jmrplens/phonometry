@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**916/916 conformance checks pass** across 75 domains and 407 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**919/919 conformance checks pass** across 75 domains and 408 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -768,13 +768,16 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Hearing threshold (ISO 7029 / ISO 389-7)</b>: 100% (3/3)</summary>
+<summary><b>Hearing threshold (ISO 7029 / ISO 389-7)</b>: 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
 | ISO 7029:2017 Table 1 | Median threshold, male age 60 at 4 kHz | 20.209 dB (+/-0.001 dB) | 20.208 dB | 0 dB | 3 % | ![Pass][cv-pass] Pass |
 | ISO 7029:2017 Table 2 | Upper spread su, male age 60 at 1 kHz | 10.153 dB (+/-0.001 dB) | 10.153 dB | 0 dB | 3 % | ![Pass][cv-pass] Pass |
 | ISO 389-7:2005 Table 1 | Free-field reference threshold at 1 kHz | 2.4 dB (+/-0 dB) | 2.4 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 389-1:1998 Table 1 (coupler, IEC 60303) | RETSPL of the two named earphones at 1 kHz, and the TDH 39 at 125 Hz | DT 48, 1 kHz = 8 dB; TDH 39, 1 kHz = 7 dB; TDH 39, 125 Hz = 45 dB | DT 48, 1 kHz = 8 dB; TDH 39, 1 kHz = 7 dB; TDH 39, 125 Hz = 45 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 389-1:1998 Table 2 (artificial ear, IEC 60318) | RETSPL of any other supra-aural earphone at 6,3 kHz | 21 dB (+/-0 dB) | 21 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 389-1:1998 Clause 3.7 (hearing level against the audiometric zero) | 40 dB HL at 4 kHz on a TDH 39 is the reference level plus 40 dB | 49.5 dB (+/-0 dB) | 49.5 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

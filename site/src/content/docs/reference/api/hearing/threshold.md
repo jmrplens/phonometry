@@ -117,6 +117,54 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 *Constant* (`numpy.ndarray, shape (11,)`).
 
+## EARPHONE_COUPLERS
+
+*Constant* (`dict`).
+
+```python
+EARPHONE_COUPLERS = {'DT 48': 'IEC 60303 acoustic coupler', 'TDH 39': 'IEC 60303 acoustic coupler', 'other supra-aural': 'IEC 60318 artificial ear'}
+```
+
+## earphone_reference_level
+
+```python
+earphone_reference_level(
+    earphone: str = 'TDH 39',
+    frequencies: ArrayLike | None = None,
+) -> np.ndarray
+```
+
+Reference equivalent threshold sound pressure level (ISO 389-1:1998).
+
+The sound pressure level, in dB re 20 uPa, that an audiometer has to
+produce **in the coupler** for a hearing level of 0 dB HL. It is what
+audiometric zero means for a supra-aural earphone, and it depends on the
+earphone model and on the coupler it is calibrated on, which is why the
+standard prints two tables rather than one.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `earphone` | `"DT 48"` or `"TDH 39"` (Table 1, on the IEC 60303 coupler), or `"other supra-aural"` (Table 2, on the IEC 60318 artificial ear, for an earphone meeting the requirements of 4.3). |
+| `frequencies` | Optional subset of [`RETSPL_FREQUENCIES_HZ`](/phonometry/reference/api/hearing/threshold/#retspl_frequencies_hz), in hertz; `None` uses all twenty-three. |
+
+**Returns:** The reference level, in dB, aligned with the frequencies.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For an unknown earphone or frequency. |
+
+## EARPHONES
+
+*Constant* (`tuple`).
+
+```python
+EARPHONES = ('DT 48', 'TDH 39', 'other supra-aural')
+```
+
 ## FIELDS
 
 *Constant* (`tuple`).
@@ -124,6 +172,39 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ```python
 FIELDS = ('free-field', 'diffuse-field')
 ```
+
+## hearing_level_to_coupler_spl
+
+```python
+hearing_level_to_coupler_spl(
+    hearing_level: ArrayLike,
+    earphone: str = 'TDH 39',
+    frequencies: ArrayLike | None = None,
+) -> np.ndarray
+```
+
+An audiogram in dB HL as the level the coupler has to see, in dB SPL.
+
+Hearing level is defined against the audiometric zero, so the two differ
+by the reference level of the earphone and nothing else: an audiogram of
+0 dB HL is the reference level itself, and every decibel of hearing loss
+is a decibel more in the coupler.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `hearing_level` | The audiogram, in dB HL, one value per frequency. |
+| `earphone` | As in [`earphone_reference_level`](/phonometry/reference/api/hearing/threshold/#earphone_reference_level). |
+| `frequencies` | The frequencies the audiogram was taken at; `None` uses all twenty-three of [`RETSPL_FREQUENCIES_HZ`](/phonometry/reference/api/hearing/threshold/#retspl_frequencies_hz). |
+
+**Returns:** The equivalent sound pressure level in the coupler, in dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the audiogram does not match the frequencies, or for an unknown earphone or frequency. |
 
 ## reference_threshold
 
@@ -154,6 +235,10 @@ frequencies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown field or frequency. |
+
+## RETSPL_FREQUENCIES_HZ
+
+*Constant* (`numpy.ndarray, shape (23,)`).
 
 ## SEXES
 

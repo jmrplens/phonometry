@@ -362,6 +362,7 @@ from .perception import (
     generate_age_threshold_fractiles,
     generate_age_threshold_sex_and_spread,
     generate_annoyance_weightings,
+    generate_audiometric_zero_earphones,
     generate_equal_loudness_contours,
     generate_erb_bandwidth,
     generate_exposure_budget,
@@ -874,6 +875,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Hearing threshold (ISO 7029 age-related, ISO 389-7 reference).
     generate_hearing_threshold,
     generate_age_threshold_sex_and_spread,
+    # What 0 dB HL is on an earphone (ISO 389-1).
+    generate_audiometric_zero_earphones,
     # Noise-induced hearing loss (ISO 1999 NIPTS and HTLAN).
     generate_noise_induced_hearing_loss,
     generate_nipts_level_growth,

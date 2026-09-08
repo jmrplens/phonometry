@@ -369,3 +369,233 @@ def reference_threshold(
         msg = f"field must be one of {FIELDS}; got {field!r}."
         raise ValueError(msg)
     return _select(_REFERENCE[field], frequencies)
+
+
+# ---------------------------------------------------------------------------
+# ISO 389-1:1998, the audiometric zero of a supra-aural earphone.
+# ---------------------------------------------------------------------------
+
+#: ISO 389-1:1998, Tables 1 and 2. The twenty-three frequencies the earphone
+#: reference levels are printed at, in hertz. They are the audiometric
+#: frequencies plus the intermediate ones an audiometer may offer.
+RETSPL_FREQUENCIES_HZ: np.ndarray = np.array(
+    [
+        125.0,
+        160.0,
+        200.0,
+        250.0,
+        315.0,
+        400.0,
+        500.0,
+        630.0,
+        750.0,
+        800.0,
+        1000.0,
+        1250.0,
+        1500.0,
+        1600.0,
+        2000.0,
+        2500.0,
+        3000.0,
+        3150.0,
+        4000.0,
+        5000.0,
+        6000.0,
+        6300.0,
+        8000.0,
+    ],
+    dtype=np.float64,
+)
+
+#: ISO 389-1:1998, Table 1: the Beyer DT 48 with a flat cushion, on an
+#: acoustic coupler to IEC 60303. Values rounded to the nearest half decibel,
+#: as the table's note says.
+_RETSPL_DT48: np.ndarray = np.array(
+    [
+        47.5,
+        40.5,
+        34.0,
+        28.5,
+        23.0,
+        18.5,
+        14.5,
+        11.5,
+        9.5,
+        9.0,
+        8.0,
+        7.5,
+        7.5,
+        7.5,
+        8.0,
+        7.0,
+        6.0,
+        6.0,
+        5.5,
+        7.0,
+        8.0,
+        9.0,
+        14.5,
+    ],
+    dtype=np.float64,
+)
+
+#: ISO 389-1:1998, Table 1: the Telephonics TDH 39 with the MX 41/AR (or
+#: model 51) cushion, on the same coupler.
+_RETSPL_TDH39: np.ndarray = np.array(
+    [
+        45.0,
+        37.5,
+        31.5,
+        25.5,
+        20.0,
+        15.0,
+        11.5,
+        8.5,
+        7.5,
+        7.0,
+        7.0,
+        6.5,
+        6.5,
+        7.0,
+        9.0,
+        9.5,
+        10.0,
+        10.0,
+        9.5,
+        13.0,
+        15.5,
+        15.0,
+        13.0,
+    ],
+    dtype=np.float64,
+)
+
+#: ISO 389-1:1998, Table 2: any other supra-aural earphone meeting the four
+#: requirements of 4.3, on an artificial ear to IEC 60318. The two models of
+#: 4.2 are excluded from it by the clause itself.
+_RETSPL_OTHER: np.ndarray = np.array(
+    [
+        45.0,
+        38.5,
+        32.5,
+        27.0,
+        22.0,
+        17.0,
+        13.5,
+        10.5,
+        9.0,
+        8.5,
+        7.5,
+        7.5,
+        7.5,
+        8.0,
+        9.0,
+        10.5,
+        11.5,
+        11.5,
+        12.0,
+        11.0,
+        16.0,
+        21.0,
+        15.5,
+    ],
+    dtype=np.float64,
+)
+
+#: The three earphone names, written once. They are keys of two tables and
+#: the default of two entry points, and a name that drifts between them would
+#: be a lookup that fails rather than a typo anyone sees.
+_DT48 = "DT 48"
+_TDH39 = "TDH 39"
+_OTHER = "other supra-aural"
+
+_RETSPL = {
+    _DT48: _RETSPL_DT48,
+    _TDH39: _RETSPL_TDH39,
+    _OTHER: _RETSPL_OTHER,
+}
+
+#: The earphones ISO 389-1 prints a reference level for.
+EARPHONES: tuple[str, ...] = tuple(_RETSPL)
+
+#: What each of them is calibrated on: the two named models on the acoustic
+#: coupler of Clause 4.2, everything else on the artificial ear of 4.3.
+EARPHONE_COUPLERS: dict[str, str] = {
+    _DT48: "IEC 60303 acoustic coupler",
+    _TDH39: "IEC 60303 acoustic coupler",
+    _OTHER: "IEC 60318 artificial ear",
+}
+
+
+def _select_retspl(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
+    """``values`` at a requested subset of the ISO 389-1 frequencies."""
+    if frequencies is None:
+        return values.copy()
+    fr = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    idx = []
+    for f in fr:
+        matches = np.isclose(RETSPL_FREQUENCIES_HZ, f, rtol=1e-3)
+        if not matches.any():
+            msg = (
+                f"frequency {f} Hz is not an ISO 389-1 test frequency "
+                f"(125 Hz - 8000 Hz)."
+            )
+            raise ValueError(msg)
+        idx.append(int(np.argmax(matches)))
+    return values[idx]
+
+
+def earphone_reference_level(
+    earphone: str = _TDH39, frequencies: ArrayLike | None = None
+) -> np.ndarray:
+    """Reference equivalent threshold sound pressure level (ISO 389-1:1998).
+
+    The sound pressure level, in dB re 20 uPa, that an audiometer has to
+    produce **in the coupler** for a hearing level of 0 dB HL. It is what
+    audiometric zero means for a supra-aural earphone, and it depends on the
+    earphone model and on the coupler it is calibrated on, which is why the
+    standard prints two tables rather than one.
+
+    :param earphone: ``"DT 48"`` or ``"TDH 39"`` (Table 1, on the IEC 60303
+        coupler), or ``"other supra-aural"`` (Table 2, on the IEC 60318
+        artificial ear, for an earphone meeting the requirements of 4.3).
+    :param frequencies: Optional subset of :data:`RETSPL_FREQUENCIES_HZ`, in
+        hertz; ``None`` uses all twenty-three.
+    :return: The reference level, in dB, aligned with the frequencies.
+    :raises ValueError: For an unknown earphone or frequency.
+    """
+    if earphone not in _RETSPL:
+        msg = f"earphone must be one of {EARPHONES}; got {earphone!r}."
+        raise ValueError(msg)
+    return _select_retspl(_RETSPL[earphone], frequencies)
+
+
+def hearing_level_to_coupler_spl(
+    hearing_level: ArrayLike,
+    earphone: str = _TDH39,
+    frequencies: ArrayLike | None = None,
+) -> np.ndarray:
+    """An audiogram in dB HL as the level the coupler has to see, in dB SPL.
+
+    Hearing level is defined against the audiometric zero, so the two differ
+    by the reference level of the earphone and nothing else: an audiogram of
+    0 dB HL is the reference level itself, and every decibel of hearing loss
+    is a decibel more in the coupler.
+
+    :param hearing_level: The audiogram, in dB HL, one value per frequency.
+    :param earphone: As in :func:`earphone_reference_level`.
+    :param frequencies: The frequencies the audiogram was taken at; ``None``
+        uses all twenty-three of :data:`RETSPL_FREQUENCIES_HZ`.
+    :return: The equivalent sound pressure level in the coupler, in dB.
+    :raises ValueError: If the audiogram does not match the frequencies, or
+        for an unknown earphone or frequency.
+    """
+    reference = earphone_reference_level(earphone, frequencies)
+    levels = np.atleast_1d(np.asarray(hearing_level, dtype=np.float64))
+    if levels.shape != reference.shape:
+        msg = (
+            f"hearing_level carries {levels.size} value(s) but the request "
+            f"covers {reference.size} frequency/frequencies."
+        )
+        raise ValueError(msg)
+    return np.asarray(levels + reference, dtype=np.float64)

@@ -1104,6 +1104,37 @@ has a microphone, a transducer or a serial number.
 is the map of every verifier in the library and of where each one's claim
 ends.
 
+## What this guide covers
+
+The **tolerance band on a frequency weighting**: the four transition
+frequencies of Table 4 built from their printed exponents, the three distinct
+pairs of limits Table 5 carries across them, and the verdict of
+`verify_weighting` on a measured response, with the testing laboratory's
+expanded uncertainty extending the deviation as 13.1 and 14.1 require.
+
+The **characteristic phase deviation** of Formula (6), computed on the grid
+12.11.1 asks for and graded against the phase column of Table 5, with the peak
+cost of Formula (H.4) beside it.
+
+The **band-limiting stage on its own**, the **running r.m.s. decay times** of
+Tables 10 and 11 in closed form, and the **228 saw-tooth burst indications**
+of Tables 7 to 9 reproduced from the signal Table 6 defines.
+
+The **reference conditions** of Table 1 and the **tolerance of indication** of
+Table 2, published as the window an indication has to land in. They are
+published, not checked: reading a display is a bench measurement.
+
+**No bench, anywhere.** Every criterion here is one side of a comparison whose
+other side somebody has to measure on hardware. Accuracy of indication,
+linearity, instrument noise, overload, cross-talk, transducer characteristics,
+mounting and the whole environmental and electromagnetic clause are not
+implemented and are not implementable here.
+
+**No conformity verdict for an instrument.** A pass on any clause of this page
+is a statement about that clause. Pattern evaluation, periodic verification
+and the in situ check are procedures on a physical meter, and nothing here
+carries a serial number.
+
 ## See also
 
 - [Human vibration exposure (ISO 2631, ISO 5349)](human-vibration.md): the

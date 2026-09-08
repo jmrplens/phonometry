@@ -214,8 +214,8 @@ numbers for different tests, and the difference is largest exactly where a
 survey is most tempted to convert, twenty-three decibels at 125 Hz. The
 second is the earphone itself. An audiogram is only as good as the model it
 was measured on, and asking for a model the standard does not print raises
-rather than guessing: an HDA 200 or an insert phone belongs to ISO 389-5,
--8 or -2, not here.
+rather than guessing: an HDA 200 belongs to ISO 389-8 and an insert phone to
+ISO 389-2, not here.
 
 ## See also
 

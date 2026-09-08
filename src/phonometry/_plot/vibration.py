@@ -753,6 +753,17 @@ def _damage_curves(ax: Axes, result: DamageAssessment, language: str) -> float:
         SHORT_TERM_FOUNDATION_MM_S,
     )
 
+    if result.frequency_hz is None:
+        # DamageAssessment is public, so one can be built by hand with the
+        # short-term foundation case and no frequency, which is the one case
+        # Table 1 does not cover. Parking the point at the axis limit and
+        # labelling it "at 100 Hz" would report a frequency nobody measured.
+        msg = (
+            "A short-term foundation assessment is read off Bild 1 at the "
+            "dominant frequency, and this one carries none; there is nowhere "
+            "on the frequency axis to place it."
+        )
+        raise ValueError(msg)
     freqs = np.asarray(FOUNDATION_FREQUENCIES_HZ, dtype=np.float64)
     for cls, color in zip(BUILDING_CLASSES, _DAMAGE_CLASS_COLORS, strict=True):
         assessed = cls == result.building_class
@@ -766,7 +777,7 @@ def _damage_curves(ax: Axes, result: DamageAssessment, language: str) -> float:
             markersize=3,
             label=_t(_DAMAGE_CLASS_LABELS[cls], language),
         )
-    x_point = float(result.frequency_hz or freqs[-1])
+    x_point = float(result.frequency_hz)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_xlim(0.0, max(float(freqs[-1]), x_point) * 1.02)
     return x_point

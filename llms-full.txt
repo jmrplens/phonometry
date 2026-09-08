@@ -40697,7 +40697,7 @@ documents, one page per module.
 | `corrected_seat_acceleration` / `resonance_transmissibility` | `function` | **The corrected seat magnitude and the resonance ratio (ISO 10326-1 Clause 10).**<br>• `corrected_seat_acceleration(a_wS, a_wP, intended)`: the seat magnitude scaled to the input the test intended (10.2.3, Formula (4); the printed Formula (3) is an identity, see the errata)<br>• `resonance_transmissibility(a_S, a_P)`: Formula (5), the damping test at the suspension resonance | `vibration.corrected_seat_acceleration(0.70, 1.00, 1.10)  # 0.77` |
 | `mean_of_test_runs` / `RUN_AGREEMENT_TOLERANCE` / `TEST_RUNS` | `function` / `constant` | **The three runs a seat test is made of (ISO 10326-1 10.2.1, 10.3).**<br>• the arithmetic mean of runs that agree within ± 5 % of it, and a refusal when they do not<br>• `tolerance=` tightens the band for an application standard that asks for less | `vibration.mean_of_test_runs([1.02, 1.00, 0.99])  # 1.003` |
 | `DAMPING_TEST_MASS_KG` / `DAMPING_TEST_MASS_TOLERANCE` / `ACTIVE_DAMPING_TEST_MASS_KG` / `UNITY_TRANSMISSION` | `constant` | **The masses and the neutral value of ISO 10326-1.**<br>• 75 kg ± 1 % of inert mass for the damping test (10.3)<br>• 60 kg where the suspension is actively damped (9.5.1)<br>• 1, the ratio at which the seat passes the vibration through unchanged, which says nothing about it being rigid; Clause 11 leaves acceptance values to the application standard | `vibration.DAMPING_TEST_MASS_KG  # 75.0` |
-| `guideline_velocity` / `BUILDING_CLASSES` | `function` / `constant` | **Guideline peak velocity for damage to a structure (DIN 4150-3 Tables 1 and 3).**<br>• `building_class`: `'commercial'`, `'residential'` or `'sensitive'`<br>• `frequency` [Hz], needed only at the foundation for short-term vibration<br>• `location`: `'foundation'` or `'top_floor'`; `duration`: `'short_term'` or `'long_term'`<br>• `massive_structure=True` doubles the commercial row (5.1) | `vibration.guideline_velocity('residential', 30)  # 10.0 mm/s` |
+| `guideline_velocity` / `BUILDING_CLASSES` | `function` / `constant` | **Guideline peak velocity for a structural-vibration assessment (DIN 4150-3 Tables 1 and 3).**<br>Keeping to a value meets the standard's criterion and certifies nothing; exceeding one is not a finding of damage<br>• `building_class`: `'commercial'`, `'residential'` or `'sensitive'`<br>• `frequency` [Hz], needed only at the foundation for short-term vibration<br>• `location`: `'foundation'` or `'top_floor'`; `duration`: `'short_term'` or `'long_term'`<br>• `massive_structure=True` doubles the commercial row (5.1) | `vibration.guideline_velocity('residential', 30)  # 10.0 mm/s` |
 | `pipeline_guideline_velocity` / `PIPELINE_MATERIALS` | `function` / `constant` | **Guideline peak velocity on a buried pipeline (DIN 4150-3 Table 2).**<br>• `material`: `'welded_steel'` 100, `'concrete_or_flanged_metal'` 80, `'masonry_or_plastic'` 50 mm/s<br>• `duration='long_term'` halves them, which is the reduction 6.3 allows | `vibration.pipeline_guideline_velocity('welded_steel')  # 100.0` |
 | `assess_building_vibration` / `DamageAssessment` | `function` / `dataclass` | **One measured peak velocity against its guideline value.**<br>• `velocity_mm_s` plus the same `building_class`, `frequency_hz`, `location` and `duration`<br>• `.guideline_mm_s`, `.ratio`, `.within_guideline`, `.plot()` drawing Bild 1 with the measurement on it | `vibration.assess_building_vibration(4.2, building_class='residential', frequency_hz=18).ratio  # 0.6` |
 | `bending_stress` / `storey_fundamental_frequency` | `function` | **From a velocity to a stress, and the storey estimate (DIN 4150-3 6.2 and 6.4).**<br>• `bending_stress(peak_velocity_m_s, dynamic_modulus_pa=, density_kg_m3=, load_ratio=, mode_factor=)`, Formula (1); note the m/s<br>• `storey_fundamental_frequency(n)` = 10/n Hz, from about five storeys up | `vibration.bending_stress(0.01, dynamic_modulus_pa=3e10, density_kg_m3=2400)`<br><br>• 1.47e5 Pa |
@@ -61235,7 +61235,9 @@ Long-term vibration (*Dauererschütterungen*) is the opposite case: it occurs
 often enough for the structure to respond at its own frequencies. Table 3
 answers it with one value per class in the topmost floor plane and nothing at
 the foundation, because a structure ringing at its own frequency is judged
-where it rings. The values are about a quarter of the short-term ones:
+where it rings. The values run from a quarter to a third of the short-term ones, and the
+fraction is not the same for the three classes: 10 against 40, 5 against 15 and
+2.5 against 8 mm/s.
 
 ```python
 from phonometry import vibration
@@ -61292,7 +61294,7 @@ print(vibration.storey_fundamental_frequency(10))    # 1.0 Hz
 ```
 
 Below that, `BuildingDamageWarning` says so: four storeys still return
-2,5 Hz, because "about five" is not a line the standard drew, but the number
+2.5 Hz, because "about five" is not a line the standard drew, but the number
 is an extrapolation of a rule offered for taller buildings rather than the
 rule itself.
 

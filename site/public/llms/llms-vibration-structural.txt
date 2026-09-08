@@ -1434,7 +1434,9 @@ Long-term vibration (*Dauererschütterungen*) is the opposite case: it occurs
 often enough for the structure to respond at its own frequencies. Table 3
 answers it with one value per class in the topmost floor plane and nothing at
 the foundation, because a structure ringing at its own frequency is judged
-where it rings. The values are about a quarter of the short-term ones:
+where it rings. The values run from a quarter to a third of the short-term ones, and the
+fraction is not the same for the three classes: 10 against 40, 5 against 15 and
+2.5 against 8 mm/s.
 
 ```python
 from phonometry import vibration
@@ -1491,7 +1493,7 @@ print(vibration.storey_fundamental_frequency(10))    # 1.0 Hz
 ```
 
 Below that, `BuildingDamageWarning` says so: four storeys still return
-2,5 Hz, because "about five" is not a line the standard drew, but the number
+2.5 Hz, because "about five" is not a line the standard drew, but the number
 is an extrapolation of a rule offered for taller buildings rather than the
 rule itself.
 

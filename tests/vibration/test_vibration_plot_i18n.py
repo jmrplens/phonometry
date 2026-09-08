@@ -523,3 +523,29 @@ def test_the_damage_reading_keeps_the_spelling_the_caller_used(
         assert reading.get_linestyle() == "-"
     else:
         assert reading.get_markersize() == 12
+
+
+def test_bild_1_refuses_an_assessment_that_has_no_frequency() -> None:
+    """A hand-built foundation assessment without one is not on the figure.
+
+    ``assess_building_vibration`` cannot produce it, but ``DamageAssessment``
+    is public and can be constructed directly. Parking the point at the axis
+    limit and labelling it "at 100 Hz" would report a frequency nobody
+    measured, which is the defect the other branch already refuses.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    from phonometry.vibration.structural.building_damage import DamageAssessment
+
+    orphan = DamageAssessment(
+        velocity_mm_s=4.0,
+        guideline_mm_s=10.0,
+        building_class="residential",
+        location="foundation",
+        duration="short_term",
+        frequency_hz=None,
+    )
+    with pytest.raises(ValueError, match=r"carries none"):
+        orphan.plot()

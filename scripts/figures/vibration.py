@@ -3719,3 +3719,2100 @@ def generate_meter_tolerance_regions(output_dir: str) -> None:
     fig.subplots_adjust(left=0.068, right=0.985, top=0.875, bottom=0.145)
     save_figure(output_dir, "meter_tolerance_regions.svg")
     plt.close()
+
+
+def _intercept_at_zero(
+    lower_hz: float, upper_hz: float, lower_deg: float, upper_deg: float
+) -> float:
+    """Where the line through one pair of phase errors crosses ``f = 0``.
+
+    ISO 8041-1 Formula (6) is this number inside absolute-value bars: its
+    numerator is written with the two products exchanged, which flips the sign
+    and leaves the modulus alone. Kept signed here because the drawing places
+    a mark at the crossing, and a mark below the axis has to be drawn below
+    the axis; the reading beside it takes the modulus the formula prints.
+    """
+    return (upper_hz * lower_deg - lower_hz * upper_deg) / (upper_hz - lower_hz)
+
+
+def _draw_phase_series(
+    ax: Axes,
+    frequencies_hz: np.ndarray,
+    values_deg: np.ndarray,
+    colour: str,
+    *,
+    dashed: bool = False,
+    hollow: bool = False,
+    label: str = "_nolegend_",
+) -> None:
+    """One of the three phase errors, stroked the same way in every panel.
+
+    Three panels draw the same three responses, so the stroke is written once:
+    a reader who has learnt a colour on one of them has learnt it on all three.
+
+    The delay-only response is the hollow one, and that is not decoration. Its
+    characteristic phase deviation is zero at every pair, which is exactly
+    where the response with the spare pole sits over most of the range; two
+    filled markers there would leave only whichever was drawn last, and the
+    reading the panel exists for is that both are on the axis.
+    """
+    ax.plot(
+        frequencies_hz,
+        values_deg,
+        color=colour,
+        linestyle="--" if dashed else "-",
+        linewidth=1.7,
+        marker="o",
+        markersize=5.5 if hollow else 3.2,
+        markerfacecolor="none" if hollow else colour,
+        label=label,
+        zorder=3,
+    )
+
+
+def generate_meter_phase_verification(output_dir: str) -> None:
+    """ISO 8041-1 Formula (6): the phase criterion that grades an intercept.
+
+    One instrument's phase error, three times over: against frequency, graded
+    against the Table 5 band, and read as the intercept the formula actually
+    takes. A constant error is graded at face value, a constant group delay as
+    zero, and the spare pole is what the criterion catches.
+    """
+    print("Generating meter_phase_verification...")
+    from matplotlib.ticker import NullFormatter
+
+    from phonometry import vibration
+
+    name = "Wk"
+    transitions = vibration.TRANSITION_FREQUENCIES_HZ[name]
+    ft3 = transitions[2]
+    # The nominal frequency range of a whole-body meter, on the exact
+    # one-third-octave centres of Formula (B.1). This is the grid the guide
+    # grades its instrument on, so the drawing and the page report one run.
+    freqs = 10.0 ** (np.arange(-3, 20) / 10.0)
+    # The frame runs a little past ft1 and ft4 so that both tails, where
+    # Table 5 sets no limit at all, are on the panel; the meter's own range
+    # reaches neither of them.
+    fmin, fmax = 0.16, 250.0
+
+    # The guide's instrument and the two error shapes the criterion is built
+    # around. Every reading in the drawing is formatted from these three.
+    constant_deg = 4.0
+    delay_s = 2.0e-3
+    pole_hz = 100.0
+
+    zero = np.zeros_like(freqs)
+    design = vibration.verify_phase_response(name, freqs, zero).design_phase_deg
+    delay_deg = -360.0 * freqs * delay_s
+    pole_deg = -np.degrees(np.arctan(freqs / pole_hz))
+
+    # Colour carries the response and the stroke carries the reading: dashed
+    # for the constant, hollow for the one whose graded value is zero. The
+    # three region colours are reserved for Table 5, so none of these three is
+    # one of them, and red is the failing response, as it is in the library's
+    # own verdict plot.
+    responses = (
+        (
+            COLOR_QUATERNARY,
+            True,
+            False,
+            f"a constant phase error of +{constant_deg:.0f}°",
+            np.full(freqs.shape, constant_deg),
+        ),
+        (
+            COLOR_FG,
+            False,
+            True,
+            f"{delay_s * 1e3:.0f} ms of group delay on its own",
+            delay_deg,
+        ),
+        (
+            COLOR_SECONDARY,
+            False,
+            False,
+            f"the same delay with a spare pole at {pole_hz:.0f} Hz",
+            delay_deg + pole_deg,
+        ),
+    )
+    checks = [
+        vibration.verify_phase_response(name, freqs, design + error)
+        for _colour, _dashed, _hollow, _label, error in responses
+    ]
+    constant_check, delay_check, pole_check = checks
+
+    # Table 5's five rows are three distinct phase limits, in the colours
+    # ``meter_tolerance_regions`` gives the same three rows.
+    central_phase = vibration.CENTRAL_TOLERANCE_PERCENT[2]
+    skirt_phase = vibration.SKIRT_TOLERANCE_PERCENT[2]
+    tail_phase = vibration.TAIL_TOLERANCE_PERCENT[2]
+    # The third row prints a limit that is the absence of one, and the glyph
+    # is read off the constant rather than typed, the way ``_table_5_row``
+    # reads the same cell for the figure beside this one on the page: three
+    # rows, one convention, and no label that can outlive its constant.
+    tail_limit = f"±{tail_phase:.0f}°" if math.isfinite(tail_phase) else "±∞"
+    regions = (
+        (
+            COLOR_PRIMARY,
+            f"the central region, where Table 5 allows ±{central_phase:.0f}°",
+        ),
+        (COLOR_TERTIARY, f"the two skirts, where it allows ±{skirt_phase:.0f}°"),
+        (COLOR_MUTED, f"the two tails, where it allows {tail_limit}"),
+    )
+    # A pair of points either side of every transition frequency: the band
+    # steps there, and a grid carrying no point at the step draws it as a ramp
+    # across whichever cell it falls in. The limit is constant between the
+    # corners, so ten points draw the whole staircase.
+    edges = np.array(
+        [f * scale for f in transitions for scale in (1.0 - 1e-9, 1.0 + 1e-9)]
+    )
+    steps = np.unique(np.concatenate(([fmin, fmax], edges)))
+    step_masks = _table_5_masks(steps, transitions)
+    step_limit = vibration.phase_tolerance_degrees(name, steps)
+    # The two tails have no limit, so their fill runs to the top of the panel
+    # instead of to a value.
+    ceiling_deg = 1.55 * skirt_phase
+    band = np.where(np.isfinite(step_limit), step_limit, ceiling_deg)
+
+    fig = plt.figure(figsize=(13.4, 7.6))
+    grid_spec = fig.add_gridspec(2, 2, width_ratios=[1.32, 1.0])
+    ax_error = fig.add_subplot(grid_spec[0, 0])
+    ax_cpd = fig.add_subplot(grid_spec[1, 0])
+    ax_geom = fig.add_subplot(grid_spec[:, 1])
+    chip = {
+        "boxstyle": "round,pad=0.35",
+        "facecolor": COLOR_PANEL,
+        "edgecolor": COLOR_GRID,
+    }
+
+    # Top left: the quantity nobody grades. No band, because Table 5 sets none.
+    for (colour, dashed, hollow, label, _error), check in zip(
+        responses, checks, strict=True
+    ):
+        _draw_phase_series(
+            ax_error,
+            freqs,
+            check.deviation_deg,
+            colour,
+            dashed=dashed,
+            hollow=hollow,
+            label=label,
+        )
+    ax_error.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.35, zorder=1)
+    # Low and to the left, where the three responses have not yet fallen:
+    # the note is five lines and the two that fall reach its top edge only
+    # past 44 Hz, which is well to the right of where it ends.
+    ax_error.text(
+        2.8,
+        -74.0,
+        "Table 5 sets no limit on this quantity: its phase column\n"
+        "grades the characteristic phase deviation in the panel below,\n"
+        "and footnote a applies that column only to instruments whose\n"
+        "measurement parameter is not based on r.m.s. values. At "
+        f"{freqs[-1]:.1f} Hz\nthe delay alone is "
+        f"{_fmt_minus(delay_check.deviation_deg[-1], '.1f')}°, and with the "
+        f"pole {_fmt_minus(pole_check.deviation_deg[-1], '.1f')}°",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=5,
+        bbox=chip,
+    )
+
+    # Bottom left: the quantity Table 5 does grade, inside its band.
+    for (colour, _label), mask in zip(regions, step_masks, strict=True):
+        ax_cpd.fill_between(
+            steps,
+            np.zeros_like(band),
+            band,
+            where=mask,
+            color=theme_fill(colour, ax_cpd),
+            zorder=0,
+            label=_label,
+        )
+    ax_cpd.plot(
+        steps,
+        np.where(np.isfinite(step_limit), step_limit, np.nan),
+        color=COLOR_FG,
+        linewidth=1.2,
+        alpha=0.75,
+        zorder=2,
+    )
+    for (colour, dashed, hollow, _label, _error), check in zip(
+        responses, checks, strict=True
+    ):
+        _draw_phase_series(
+            ax_cpd,
+            check.characteristic_frequencies_hz,
+            check.characteristic_deviation_deg,
+            colour,
+            dashed=dashed,
+            hollow=hollow,
+        )
+
+    # The failing pair, and the whole of the attribution rule: a cross at the
+    # frequency the value is attributed to, an open circle at the other end of
+    # the same pair, and the step in the band between them.
+    #
+    # One index for the mark, the reading and the limit. They would agree
+    # read from three ends here, because exactly one pair fails and it is the
+    # last one, but nothing in the code says so: two failing pairs and the
+    # cross would carry another pair's number and another pair's limit. A
+    # response with no failing pair raises here instead, which is the right
+    # noise for a drawing whose subject is the pair that fails.
+    fail_index = int(np.flatnonzero(~pole_check.within_tolerance)[0])
+    fail_hz = float(pole_check.characteristic_frequencies_hz[fail_index])
+    fail_deg = float(pole_check.characteristic_deviation_deg[fail_index])
+    fail_limit = float(pole_check.tolerance_deg[fail_index])
+    # The other end of that very same pair, which is the whole of the
+    # attribution rule: Formula (H.3) hands the value to the lower of the two.
+    pair_hz = float(pole_check.frequencies_hz[fail_index + 1])
+    upper_limit = float(vibration.phase_tolerance_degrees(name, [pair_hz])[0])
+    ax_cpd.plot(
+        [fail_hz, pair_hz],
+        [fail_deg, fail_deg],
+        color=COLOR_SECONDARY,
+        linestyle=":",
+        linewidth=1.2,
+        zorder=4,
+    )
+    ax_cpd.plot(
+        [pair_hz],
+        [fail_deg],
+        color=COLOR_SECONDARY,
+        marker="o",
+        markersize=6.5,
+        markerfacecolor="none",
+        linestyle="none",
+        zorder=4,
+    )
+    # The cross lands on ft3 itself, which is where the band steps from one
+    # colour to the next, so it is drawn with a halo of the panel colour:
+    # without it the mark reads as half in the central region and half in the
+    # skirt, and which side of that step it is on is the whole verdict.
+    ax_cpd.plot(
+        [fail_hz],
+        [fail_deg],
+        color=COLOR_SECONDARY,
+        marker="X",
+        markersize=11,
+        markeredgecolor=COLOR_PANEL,
+        markeredgewidth=1.4,
+        linestyle="none",
+        zorder=5,
+    )
+    # Both notes hang over the central region and above the ±12° line, which
+    # is the one part of this panel where nothing is drawn: the staircase is
+    # what the panel grades against, and a chip resting on it would hide the
+    # step at the very frequency the verdict turns on. They share an anchor,
+    # the geometric middle of the central region, so they stack.
+    note_hz = math.sqrt(transitions[1] * ft3)
+    ax_cpd.text(
+        note_hz,
+        15.4,
+        f"{fail_deg:.2f}° against the ±{fail_limit:.0f}° of the central "
+        "region: each value\nis attributed to the lower frequency of its "
+        f"pair, so this one\nis graded at $f_\\mathrm{{t3}}$ = {fail_hz:.1f} Hz,"
+        f" which Table 5 keeps\ninside the region, and not at {pair_hz:.1f} Hz,"
+        f" where it allows ±{upper_limit:.0f}°",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=6,
+        bbox=chip,
+    )
+    ax_cpd.text(
+        note_hz,
+        9.3,
+        f"a constant +{constant_deg:.0f}° error is graded "
+        f"{constant_check.characteristic_deviation_deg.max():.2f}° at every pair;\n"
+        f"{delay_s * 1e3:.0f} ms of group delay is graded "
+        f"{delay_check.characteristic_deviation_deg.max():.2f}° at every pair",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=6,
+        bbox=chip,
+    )
+
+    # The four transition frequencies of Table 4, marked on both panels of the
+    # shared axis and named on the upper one, where the panel is empty.
+    for index, frequency in enumerate(transitions, start=1):
+        for panel in (ax_error, ax_cpd):
+            panel.axvline(
+                frequency,
+                color=COLOR_MUTED,
+                linestyle="--",
+                linewidth=1.0,
+                alpha=0.8,
+                zorder=1,
+            )
+        ax_error.text(
+            frequency,
+            7.0,
+            f"$f_\\mathrm{{t{index}}}$",
+            fontsize=9.5,
+            color=COLOR_FG,
+            ha="center",
+            va="bottom",
+            zorder=4,
+            # Over its own dashed line, so the mark carries a chip: without
+            # one the rule is drawn straight through the subscript.
+            bbox={
+                "boxstyle": "round,pad=0.2",
+                "facecolor": COLOR_PANEL,
+                "edgecolor": COLOR_GRID,
+            },
+        )
+
+    # Right: the same three errors on a linear frequency axis, with the line
+    # through the last pair carried back to where the formula reads it.
+    for (colour, dashed, hollow, _label, _error), check in zip(
+        responses, checks, strict=True
+    ):
+        _draw_phase_series(
+            ax_geom, freqs, check.deviation_deg, colour, dashed=dashed, hollow=hollow
+        )
+        intercept = _intercept_at_zero(
+            float(freqs[-2]),
+            float(freqs[-1]),
+            float(check.deviation_deg[-2]),
+            float(check.deviation_deg[-1]),
+        )
+        # Grey rather than the foreground colour: two of the three lie exactly
+        # on the response they were built from, which is the invariance, and a
+        # construction line the same colour as the curve under it would be
+        # invisible on the one response where that matters most.
+        ax_geom.plot(
+            [0.0, freqs[-1]],
+            [intercept, check.deviation_deg[-1]],
+            color=COLOR_MUTED,
+            linestyle=":",
+            linewidth=1.4,
+            zorder=4,
+        )
+        ax_geom.plot(
+            [0.0],
+            [intercept],
+            color=colour,
+            marker="o",
+            markersize=8,
+            linestyle="none",
+            zorder=5,
+        )
+        # The reading at the crossing, in the margin the axis was widened for.
+        # Formula (6) takes this number without its sign, and the note below
+        # says so; the mark is at a signed height, so the label beside it
+        # carries the sign it is drawn at. Rounding before the sign is what
+        # keeps the delay's crossing, which lands on the negative side of zero
+        # by a fifteenth decimal place, from being written as a negative zero.
+        ax_geom.text(
+            -1.4,
+            intercept,
+            f"{_fmt_minus(round(intercept, 2) + 0.0, '+.2f')}°",
+            fontsize=9,
+            color=colour,
+            ha="right",
+            va="bottom",
+            zorder=5,
+        )
+    ax_geom.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.35, zorder=1)
+    ax_geom.axvline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.35, zorder=1)
+    for frequency in (freqs[-2], freqs[-1]):
+        ax_geom.axvline(
+            frequency,
+            color=COLOR_MUTED,
+            linestyle="--",
+            linewidth=1.0,
+            alpha=0.8,
+            zorder=1,
+        )
+    # Right-aligned short of the left-hand rule of the pair, and two lines
+    # rather than one: the single line of the draft ended on the right spine
+    # in English and crossed it in Spanish, and a line long enough to reach
+    # from the frame to the rules cannot avoid being drawn over them. Anchored
+    # inside the frame, the whole note lives in the band above the constant
+    # response, where nothing else is drawn.
+    ax_geom.text(
+        61.0,
+        9.4,
+        "the two dashed lines mark the pair\nthe dotted lines are drawn through",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="right",
+        va="center",
+        zorder=6,
+        bbox=chip,
+    )
+    # Anchored on its right edge rather than centred: centred, the chip runs
+    # past 63.1 Hz and covers the dashed rule of the failing pair, which is
+    # the one thing the note above it points at.
+    ax_geom.text(
+        61.0,
+        -84.0,
+        "$\\Delta\\varphi_0$ is where the line through a pair of adjacent\n"
+        "points crosses $f = 0$, taken without its sign. A line through\n"
+        "the origin gives zero, and a horizontal one gives its own\n"
+        "height: that is the whole of Formula (6)",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="right",
+        va="center",
+        zorder=6,
+        bbox=chip,
+    )
+
+    error_label = "Phase error, measured minus design (degrees)"
+    ax_error.set_ylabel(error_label)
+    ax_error.set_title("The Phase Error Itself, Which Table 5 Never Grades", pad=8)
+    ax_cpd.set_ylabel("Characteristic phase deviation $\\Delta\\varphi_0$ (degrees)")
+    ax_cpd.set_title("The Characteristic Phase Deviation, Which It Grades", pad=8)
+    ax_geom.set_ylabel(error_label)
+    ax_geom.set_title(
+        "The Same Errors on a Linear Frequency Axis, Read at $f = 0$", pad=8
+    )
+    # One scale for the two panels that draw the same quantity, with enough
+    # headroom over the constant response for the note in the right-hand one
+    # and for the four transition marks in the left-hand one, which are drawn
+    # with a chip and would otherwise cross the frame.
+    for panel in (ax_error, ax_geom):
+        panel.set_ylim(-104.0, 15.0)
+    ax_cpd.set_ylim(-1.0, ceiling_deg)
+    ax_cpd.set_yticks([0.0, central_phase, skirt_phase])
+    ax_cpd.set_yticklabels(
+        [f"{value:.0f}" for value in (0.0, central_phase, skirt_phase)]
+    )
+
+    # One frequency axis for the two panels on the left, ticked at the four
+    # numbers of Table 4 and at the two decades that place them. The labels
+    # are formatted from the same constants that place the ticks.
+    ticks = (transitions[0], transitions[1], 1.0, 10.0, ft3, transitions[3])
+    for panel in (ax_error, ax_cpd):
+        panel.set_xscale("log")
+        panel.set_xlim(fmin, fmax)
+        panel.set_xticks(list(ticks))
+        panel.set_xticklabels([f"{value:.4g}" for value in ticks], fontsize=9)
+        panel.xaxis.set_minor_formatter(NullFormatter())
+    ax_error.tick_params(axis="x", labelbottom=False)
+    # Room to the left of f = 0 for the three intercept readings: they are
+    # the number Formula (6) takes, and the panel exists to show that it is
+    # read off this axis rather than computed somewhere else. The automatic
+    # locator would tick that margin with a negative frequency, so its choice
+    # over the measured range is kept and nothing below zero is.
+    # (``set_xticks`` widens the view to hold every tick it is given, so the
+    # limit is set after it and not before.)
+    ax_geom.set_xticks([tick for tick in ax_geom.get_xticks() if tick >= 0.0])
+    ax_geom.set_xlim(-13.0, 84.0)
+    for panel in (ax_error, ax_cpd, ax_geom):
+        panel.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+        panel.set_axisbelow(True)
+    for panel in (ax_cpd, ax_geom):
+        panel.set_xlabel(LABEL_FREQ_HZ)
+
+    # One key at the foot: the three responses on the upper row, the three
+    # Table 5 rows they are graded against on the lower one. A legend fills
+    # column by column, so the two are interleaved to come out as two rows.
+    response_handles, response_labels = ax_error.get_legend_handles_labels()
+    region_handles, region_labels = ax_cpd.get_legend_handles_labels()
+    handles = [
+        h for pair in zip(response_handles, region_handles, strict=True) for h in pair
+    ]
+    labels = [
+        t for pair in zip(response_labels, region_labels, strict=True) for t in pair
+    ]
+    fig.legend(handles, labels, loc="lower center", ncol=3, fontsize=8.5, frameon=False)
+    fig.suptitle(
+        "Grading a Phase Response: What ISO 8041-1 Formula (6) Ignores, "
+        "and What It Catches",
+        fontsize=13,
+    )
+    # No tight_layout: a gridspec with a panel spanning two rows is one of the
+    # layouts it declines to honour, and it warns and reverts instead.
+    fig.subplots_adjust(
+        left=0.055, right=0.99, top=0.9, bottom=0.135, hspace=0.3, wspace=0.16
+    )
+    save_figure(output_dir, "meter_phase_verification.svg")
+    plt.close()
+
+
+def _verdict_clause(passes: bool) -> str:
+    """The verdict of one sweep, as the clause the legend ends on.
+
+    Taken from ``WeightingVerification.passes`` rather than typed, so a
+    library change that moved either verdict would change the drawn label
+    (and, since the label is an exact key of the Spanish table, would be
+    caught by the language gate rather than shipped as a wrong caption).
+    """
+    return "and it conforms" if passes else "and it does not conform"
+
+
+def generate_meter_weighting_verification(output_dir: str) -> None:
+    """ISO 8041-1: one Wk bench sweep, refused, and the same shortfall accepted.
+
+    The frequency weighting only. A sweep inside these limits has met one
+    clause of the standard, and the indication, linearity, noise, overload,
+    burst and environmental clauses are laboratory measurements no arithmetic
+    can stand in for.
+    """
+    print("Generating meter_weighting_verification...")
+    from matplotlib.ticker import NullFormatter
+
+    from phonometry import vibration
+
+    name = "Wk"
+    ft1, ft2, ft3, ft4 = vibration.TRANSITION_FREQUENCIES_HZ[name]
+
+    # The guide's own bench sweep, on the one-third-octave centres of Formula
+    # (B.1) rather than on the printed decimals: 63.096 Hz rounds up past ft3
+    # and would then be graded against the skirt rather than against the
+    # central region it is the last band of.
+    bands = np.array([-3, 0, 3, 6, 9, 12, 15, 18, 19])
+    swept = 10.0 ** (bands / 10.0)
+    as_read = np.array(
+        [0.4314, 0.4969, 0.5466, 0.9937, 1.068, 0.7897, 0.3427, 0.1894, 0.1366]
+    )
+    moved = np.array(
+        [0.4314, 0.4969, 0.5466, 0.9937, 1.068, 0.7897, 0.4112, 0.1894, 0.1138]
+    )
+    refused = vibration.verify_weighting(name, swept, as_read)
+    accepted = vibration.verify_weighting(name, swept, moved)
+
+    # Where each sweep reads low, read off the verdict rather than off the
+    # index the array was typed at: the first is the frequency the standard
+    # refuses, the second the deepest deviation of the sweep that conforms.
+    outside = ~refused.within_tolerance
+    refused_hz = float(refused.failing_frequencies_hz[0])
+    moved_hz = float(swept[int(np.argmin(accepted.deviation_percent))])
+    shortfall = _fmt_minus(refused.worst_deviation_percent, ".1f")
+
+    central_upper, central_lower, _central_phase = vibration.CENTRAL_TOLERANCE_PERCENT
+    skirt_upper, skirt_lower, _skirt_phase = vibration.SKIRT_TOLERANCE_PERCENT
+
+    # The band, on a grid that opens just inside ft1 and closes just inside
+    # ft4: Table 5 prints its first and last rows closed (f <= ft1, f >= ft4),
+    # so a grid point exactly on a corner would take the tail's rule and drop
+    # the lower edge of the sleeve to zero in one column of pixels. What is
+    # drawn is therefore the open interval, one part in a thousand million
+    # inside each corner, and the two extreme columns carry the skirt limit
+    # that holds everywhere between the corners rather than the tail rule that
+    # holds at the corner itself: that lapse is one frequency wide, and it is
+    # section 3's subject rather than this figure's. A pair of points either
+    # side of ft2 and ft3 makes the two steps vertical rather than a ramp
+    # across whichever cell they fall in.
+    inside_ft1, inside_ft4 = ft1 * (1.0 + 1e-9), ft4 * (1.0 - 1e-9)
+    edges = np.array(
+        [f * scale for f in (ft2, ft3) for scale in (1.0 - 1e-9, 1.0 + 1e-9)]
+    )
+    freqs = np.unique(
+        np.concatenate((np.geomspace(inside_ft1, inside_ft4, 420), edges))
+    )
+    # The upper panel follows a curve, so it is sampled densely; the lower one
+    # draws limits that are constant between the corners, so it is evaluated
+    # on the corners alone, which is the same staircase in six points instead
+    # of four hundred.
+    steps = np.unique(np.concatenate(([inside_ft1, inside_ft4], edges)))
+    design = np.asarray(vibration.weighting_factors(name, freqs))
+    upper, lower = vibration.weighting_tolerance_percent(name, freqs)
+    step_upper, step_lower = vibration.weighting_tolerance_percent(name, steps)
+
+    # How far the refused point sits below the limit of its own region. The
+    # upper panel cannot show a gap this small, so it is the number that panel
+    # says out loud, and it is said in the quantity the lower panel is drawn
+    # in: deviation from the design goal, so that the chip above and the two
+    # lines below are one arithmetic (-15.0 against -11) and not two
+    # percentages of two different denominators.
+    swept_lower = vibration.weighting_tolerance_percent(name, swept)[1]
+    below_limit = swept_lower - refused.deviation_percent
+    failing = int(np.flatnonzero(outside)[np.argmax(below_limit[outside])])
+    gap, failing_limit = float(below_limit[failing]), float(swept_lower[failing])
+
+    fig = plt.figure(figsize=(11.6, 9.0))
+    grid_spec = fig.add_gridspec(2, 1, height_ratios=[1.12, 0.86], hspace=0.24)
+    ax_band = fig.add_subplot(grid_spec[0])
+    ax_deviation = fig.add_subplot(grid_spec[1], sharex=ax_band)
+
+    # Upper panel: the design goal and the sleeve Table 5 allows around it.
+    # One wash rather than one per region: the regions are the previous
+    # figure's subject, and the two saturated colours this drawing has are
+    # spent on telling the two sweeps apart.
+    band_label = (
+        f"the Table 5 band: +{central_upper:.0f} % / "
+        f"{_fmt_minus(central_lower, '.0f')} % centrally, +{skirt_upper:.0f} % / "
+        f"{_fmt_minus(skirt_lower, '.0f')} % in a skirt"
+    )
+    ax_band.fill_between(
+        freqs,
+        design * (1.0 + lower / 100.0),
+        design * (1.0 + upper / 100.0),
+        color=theme_fill(COLOR_PRIMARY, ax_band),
+        zorder=0,
+        label=band_label,
+    )
+    for limit in (upper, lower):
+        ax_band.plot(
+            freqs,
+            design * (1.0 + limit / 100.0),
+            color=COLOR_FG,
+            linewidth=1.0,
+            alpha=0.55,
+            zorder=2,
+        )
+    ax_band.plot(
+        freqs,
+        design,
+        color=COLOR_PRIMARY,
+        linewidth=1.8,
+        zorder=3,
+        label="the design goal the deviation is measured from",
+    )
+
+    # The two sweeps. The accepted one is drawn first and hollow, so that at
+    # the seven bands where the two agree the reader sees one point wearing
+    # both marks rather than one mark hiding the other.
+    accepted_label = (
+        f"the same shortfall moved to {moved_hz:.2f} Hz, "
+        + _verdict_clause(accepted.passes)
+    )
+    refused_label = (
+        f"the sweep as read: {shortfall} % at {refused_hz:.2f} Hz, "
+        + _verdict_clause(refused.passes)
+    )
+    for panel, read_values, moved_values in (
+        (ax_band, refused.measured, accepted.measured),
+        (ax_deviation, refused.deviation_percent, accepted.deviation_percent),
+    ):
+        panel.plot(
+            swept,
+            read_values,
+            marker="o",
+            markersize=5.2,
+            color=COLOR_SECONDARY,
+            linestyle="none",
+            zorder=5,
+            label=refused_label if panel is ax_band else None,
+        )
+        panel.plot(
+            swept,
+            moved_values,
+            marker="o",
+            markersize=9.6,
+            markerfacecolor="none",
+            markeredgewidth=1.4,
+            color=COLOR_TERTIARY,
+            linestyle="none",
+            zorder=4,
+            label=accepted_label if panel is ax_band else None,
+        )
+
+    # What the upper panel cannot show, written on the upper panel. The chip
+    # sits in the empty quarter under the roll-off and points at the marker.
+    ax_band.annotate(
+        f"{refused_hz:.2f} Hz falls in the central region, and the point sits\n"
+        f"{gap:.1f} % of the design goal below the "
+        f"{_fmt_minus(failing_limit, '.0f')} % limit",
+        xy=(refused_hz, float(refused.measured[failing])),
+        xytext=(9.2, 0.058),
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=6,
+        arrowprops={
+            "arrowstyle": "->",
+            "color": COLOR_FG,
+            "linewidth": 1.0,
+            "shrinkB": 7.0,
+        },
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+
+    # The panel is scaled to the drawn band and no wider: the two sweeps part
+    # by a fifth of a factor at the two bands where they differ, and on a taller
+    # axis that difference closes to the width of the ink.
+    ax_band.set_yscale("log")
+    ax_band.set_ylim(0.020, 1.45)
+    ax_band.set_ylabel(f"Weighting factor of the {name} channel")
+    ax_band.set_title("The Bench Sweep Inside a Band That Narrows in the Middle", pad=8)
+
+    # Lower panel: the same nine points as the quantity the acceptance test is
+    # written in, against the limit of the region each one falls in.
+    ax_deviation.fill_between(
+        steps,
+        step_lower,
+        step_upper,
+        color=theme_fill(COLOR_PRIMARY, ax_deviation),
+        zorder=0,
+    )
+    for limit in (step_upper, step_lower):
+        ax_deviation.plot(
+            steps, limit, color=COLOR_FG, linewidth=1.2, alpha=0.75, zorder=2
+        )
+    ax_deviation.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.35, zorder=1)
+
+    # The flip itself: the same shortfall carried across the step the lower
+    # limit takes at ft3, from below the line to above it.
+    ax_deviation.annotate(
+        "",
+        xy=(moved_hz, float(np.min(accepted.deviation_percent))),
+        xytext=(refused_hz, float(refused.worst_deviation_percent)),
+        arrowprops={
+            "arrowstyle": "->",
+            "color": COLOR_FG,
+            "linewidth": 1.4,
+            "shrinkA": 9.0,
+            "shrinkB": 9.0,
+        },
+        zorder=3,
+    )
+    ax_deviation.text(
+        refused_hz,
+        skirt_lower - 6.5,
+        f"the same shortfall, {shortfall} %, twice: outside the "
+        f"{_fmt_minus(central_lower, '.0f')} %\nof the central region, inside the "
+        f"{_fmt_minus(skirt_lower, '.0f')} % of the upper skirt",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=6,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+
+    magnitude_ticks = (skirt_upper, central_upper, 0.0, central_lower, skirt_lower)
+    ax_deviation.set_ylim(skirt_lower - 13.5, skirt_upper + 5.0)
+    ax_deviation.set_yticks(list(magnitude_ticks))
+    ax_deviation.set_yticklabels([_signed_percent(value) for value in magnitude_ticks])
+    ax_deviation.set_ylabel("Deviation from the design goal (%)")
+    ax_deviation.set_title(
+        "The Same Sweep in Per Cent, Where the Two Verdicts Part", pad=8
+    )
+
+    # One frequency axis for both panels, running from the first corner of
+    # Table 4 to the last and ticked at all four of them, each label carrying
+    # the number and the name the table gives it. The labels are formatted
+    # from the same constants that place the ticks, so a corner cannot be
+    # written under a rule it no longer belongs to.
+    ticks = (ft1, ft2, 1.0, 10.0, ft3, ft4)
+    corners = (
+        "$f_\\mathrm{t1}$",
+        "$f_\\mathrm{t2}$",
+        "",
+        "",
+        "$f_\\mathrm{t3}$",
+        "$f_\\mathrm{t4}$",
+    )
+    tick_labels = [
+        f"{value:.4g}\n{corner}".rstrip()
+        for value, corner in zip(ticks, corners, strict=True)
+    ]
+    for panel in (ax_band, ax_deviation):
+        for corner in (ft2, ft3):
+            panel.axvline(
+                corner,
+                color=COLOR_MUTED,
+                linestyle="--",
+                linewidth=1.0,
+                alpha=0.8,
+                zorder=1,
+            )
+        panel.set_xscale("log")
+        panel.set_xlim(ft1, ft4)
+        panel.set_xticks(list(ticks))
+        panel.set_xticklabels(tick_labels, fontsize=9)
+        panel.xaxis.set_minor_formatter(NullFormatter())
+        panel.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+        panel.set_axisbelow(True)
+    ax_deviation.set_xlabel(LABEL_FREQ_HZ)
+    # The two panels share the axis, so it is labelled once, under the lower.
+    ax_band.tick_params(axis="x", labelbottom=False)
+
+    # One key at the foot of the figure, two entries to a row: the band and
+    # the design goal it is drawn around, then the two sweeps and what the
+    # standard says about each. The row clears the frequency labels above it
+    # because ``subplots_adjust`` holds the panels off the foot of the figure.
+    handles, names = ax_band.get_legend_handles_labels()
+    fig.legend(handles, names, loc="lower center", ncol=2, fontsize=8.5, frameon=False)
+    fig.suptitle(
+        "The Same Shortfall, Refused in One Region and Accepted in the Next",
+        fontsize=13,
+    )
+    fig.subplots_adjust(left=0.075, right=0.985, top=0.912, bottom=0.15)
+    save_figure(output_dir, "meter_weighting_verification.svg")
+    plt.close()
+
+
+def generate_meter_uncertainty_allowance(output_dir: str) -> None:
+    """ISO 8041-1: what the laboratory's own expanded uncertainty moves.
+
+    5.6.6 keeps the Table 5 band where it is; 13.1 and 14.1 extend the
+    measured deviation by the testing laboratory's actual expanded
+    uncertainty. So a sweep that is inside the printed band can still be
+    refused, and a bench that measures more carefully certifies more
+    instruments.
+    """
+    print("Generating meter_uncertainty_allowance...")
+    from matplotlib.ticker import NullFormatter
+
+    from phonometry import vibration
+
+    name = "Wk"
+    # 12.11.2 is the mechanical frequency-response test, which is the test
+    # this drawing grades, and 4.5 % is the most it lets a laboratory carry:
+    # the general prohibition is 12.1 (folio 28), and the per-test maxima it
+    # refers to are the table this key reads. The largest figure anywhere in
+    # that table sets the abscissa of the right panel, so the wedges are drawn
+    # over the whole range the standard permits rather than up to one clause's
+    # share of it, and the dashed rule of that panel says whose share the
+    # 4.5 % is so the rest of the axis is not read as available to this test.
+    clause = "12.11.2"
+    uncertainty = vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT[clause]
+    widest = max(vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT.values())
+    transitions = vibration.TRANSITION_FREQUENCIES_HZ[name]
+    ft1, ft2, ft3, ft4 = transitions
+    fmin, fmax = 0.1, 400.0
+    # The same limits the panels are drawn against, unpacked once so no label
+    # can write a number the drawing did not use.
+    central_upper, central_lower = vibration.CENTRAL_TOLERANCE_PERCENT[:2]
+    skirt_upper, skirt_lower = vibration.SKIRT_TOLERANCE_PERCENT[:2]
+
+    # The bench sweep. 12.11.1 asks for steps of not more than one-third
+    # octave, and the centres are built from Formula (B.1) rather than typed
+    # as decimals: 63.096 written as the printed 63.1 rounds up past ft3 and
+    # would be graded against the skirt instead of the central region. The
+    # sweep runs past the nominal 0.5 Hz to 80 Hz of Table 1 at both ends,
+    # because the two tails are where the exemption lives and nothing inside
+    # the nominal range reaches them.
+    bands = np.arange(-8, 25)
+    freqs = 10.0 ** (bands / 10.0)
+    # Table 4 gives Wk's four corners as the same powers of ten, so four of
+    # those centres are a transition frequency and are set to the table's own
+    # value rather than left as a second, arithmetically equal double.
+    # ``pow`` is one of the libm entry points whose last bit is not the same
+    # on every platform, and a centre landing one bit over ft1 would be
+    # graded against the skirt instead of the tail: it would grow a second
+    # arm and change verdict, on a figure that has to draw the same on every
+    # machine. (The row is closed at ft1 and open above it, so it is the bit
+    # above that crosses; the snap protects both directions either way.)
+    for corner in transitions:
+        freqs[np.isclose(freqs, corner, rtol=1e-9, atol=0.0)] = corner
+    # The measurement, as deviations from the design goal in per cent. Every
+    # one of them is inside the printed band of its region, so this is a
+    # sweep that conforms on the bare comparison; the two that sit within
+    # 4.5 % of a limit are the whole subject of the figure. The band at
+    # 10**0.8 Hz reading 9 % high is the section's own worked example.
+    deviations = np.array(
+        [
+            -27.0, -24.0, -21.0, -13.0, -9.0, -6.0, -4.0, -2.0, -0.5, 1.0,
+            2.0, 2.5, 3.0, 3.5, 4.5, 6.5, 9.0, 6.0, 4.0, 2.5,
+            1.5, 0.5, -0.5, -1.5, -3.0, -4.5, -6.0, -9.0, -13.0, -17.5,
+            -22.0, -25.0, -28.0,
+        ]
+    )  # fmt: skip
+    design = np.asarray(vibration.weighting_factors(name, freqs))
+    measured = design * (1.0 + deviations / 100.0)
+    # The verdict, and every reading the panel writes, come from here rather
+    # than from the array above: the deviations are re-derived from the
+    # measured factors exactly as a report would derive them.
+    declared = vibration.verify_weighting(
+        name, freqs, measured, expanded_uncertainty_percent=uncertainty
+    )
+    deviation = declared.deviation_percent
+    kept = declared.within_tolerance
+    refused = ~kept
+    # The band the section's example lives in, found by its band index rather
+    # than by its verdict, so the note keeps pointing at the same point.
+    example = int(np.flatnonzero(bands == 8)[0])
+
+    # The printed band, evaluated on the corners alone: the limits are
+    # constant between the four transition frequencies, so a pair of points
+    # either side of each of them draws the staircase exactly, and a grid
+    # carrying no point at a step would draw it as a ramp.
+    edges = np.array(
+        [f * scale for f in transitions for scale in (1.0 - 1e-9, 1.0 + 1e-9)]
+    )
+    steps = np.unique(np.concatenate(([fmin, fmax], edges)))
+    step_upper, step_lower = vibration.weighting_tolerance_percent(name, steps)
+    step_masks = _table_5_masks(steps, transitions)
+
+    # The three distinct rows of Table 5, in the colours the tolerance-regions
+    # figure of the same guide gives them, so the two drawings name the same
+    # region with the same ink. The pair is the magnitude column; the phase
+    # column is that figure's subject and not this one's.
+    regions = (
+        (
+            COLOR_PRIMARY,
+            "the central region of Table 5",
+            (central_upper, central_lower),
+        ),
+        (COLOR_TERTIARY, "the two skirts of Table 5", (skirt_upper, skirt_lower)),
+        (
+            COLOR_MUTED,
+            "the two tails, with no lower limit",
+            vibration.TAIL_TOLERANCE_PERCENT[:2],
+        ),
+    )
+
+    fig = plt.figure(figsize=(13.2, 6.6))
+    grid_spec = fig.add_gridspec(1, 2, width_ratios=[1.62, 1.0], wspace=0.06)
+    ax_sweep = fig.add_subplot(grid_spec[0, 0])
+    ax_window = fig.add_subplot(grid_spec[0, 1], sharey=ax_sweep)
+
+    # Left: the band, unchanged by anything on this page. The lower edge of a
+    # tail is -100 %, which is the absence of a limit rather than a value, so
+    # the fill runs off the bottom of the panel and the boundary line is
+    # simply not drawn there: an outline along some floor would read as a
+    # limit that is not in the table.
+    for (colour, region, _limits), mask in zip(regions, step_masks, strict=True):
+        ax_sweep.fill_between(
+            steps,
+            step_lower,
+            step_upper,
+            where=mask,
+            color=theme_fill(colour, ax_sweep),
+            zorder=0,
+            label=region,
+        )
+    ax_sweep.plot(
+        steps, step_upper, color=COLOR_FG, linewidth=1.2, alpha=0.75, zorder=2
+    )
+    ax_sweep.plot(
+        steps,
+        np.where(step_lower > vibration.UNCONSTRAINED_BELOW, step_lower, np.nan),
+        color=COLOR_FG,
+        linewidth=1.2,
+        alpha=0.75,
+        zorder=2,
+    )
+    ax_sweep.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.35, zorder=1)
+    for frequency in transitions:
+        ax_sweep.axvline(
+            frequency,
+            color=COLOR_MUTED,
+            linestyle="--",
+            linewidth=1.0,
+            alpha=0.8,
+            zorder=1,
+        )
+
+    # The bar 13.1 adds, and the one place it has only one arm. Where the
+    # lower limit is -100 % the verification subtracts nothing, so drawing a
+    # downward arm there would draw a comparison the library does not make.
+    _point_upper, point_lower = vibration.weighting_tolerance_percent(name, freqs)
+    unconstrained = point_lower <= vibration.UNCONSTRAINED_BELOW
+    arms = np.vstack(
+        (
+            np.where(unconstrained, 0.0, uncertainty),
+            np.full(freqs.shape, uncertainty),
+        )
+    )
+    for mask, colour, marker, size, order, label in (
+        (kept, COLOR_FG, "o", 4.5, 4, "the extended deviation conforms"),
+        (refused, COLOR_SECONDARY, "X", 8.5, 5, "the extended deviation is refused"),
+    ):
+        ax_sweep.errorbar(
+            freqs[mask],
+            deviation[mask],
+            yerr=arms[:, mask],
+            color=colour,
+            marker=marker,
+            markersize=size,
+            linestyle="none",
+            elinewidth=1.2,
+            capsize=2.5,
+            zorder=order,
+            label=label,
+        )
+
+    # The arithmetic of the refusal, over the point it refuses. Every number
+    # in it is read back out of the arrays that placed the point and out of
+    # the constants that drew the band.
+    example_hz = float(freqs[example])
+    example_deviation = float(deviation[example])
+    ax_sweep.text(
+        example_hz,
+        20.5,
+        f"at {example_hz:.3g} Hz the deviation is {example_deviation:.0f} %,\n"
+        f"inside the +{central_upper:.0f} % of the central region;\n"
+        f"{example_deviation:.0f} % + {uncertainty:.4g} % = "
+        f"{example_deviation + uncertainty:.4g} % is not, and\n"
+        "clause 13.1 grades the extended figure",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=6,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    # The exemption, in the empty band between the two tails: below the
+    # central floor and above the deepest point of either tail.
+    ax_sweep.text(
+        math.sqrt(ft2 * ft3),
+        -25.5,
+        "in the two tails the bar has one arm:\n"
+        "there is no lower limit to extend, so a\n"
+        "channel reading nothing at all conforms",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=6,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+
+    ax_sweep.set_xscale("log")
+    ax_sweep.set_xlim(fmin, fmax)
+    # The same six ticks as the tolerance-regions figure of this guide, and
+    # for the same reason: the four numbers of Table 4 are read off the axis
+    # rather than off a chip over the data, and every region edge lands on a
+    # labelled tick. The labels are formatted from the values that place
+    # them, so a number cannot be written under a rule it no longer marks.
+    ticks = (0.1, ft1, ft2, 10.0, ft3, ft4)
+    ax_sweep.set_xticks(list(ticks))
+    ax_sweep.set_xticklabels([f"{value:.4g}" for value in ticks], fontsize=9)
+    ax_sweep.xaxis.set_minor_formatter(NullFormatter())
+    ax_sweep.set_xlabel(LABEL_FREQ_HZ)
+    ax_sweep.set_ylabel("Deviation from the design goal (%)")
+    # The panel is titled by what the bar is rather than by the clause that
+    # adds it: the number belongs to the chip that spells the comparison out,
+    # and the height of the bar comes from a clause of a different level of
+    # testing, so the two numbers are best kept one to a place.
+    ax_sweep.set_title(
+        "What the Laboratory's Own Uncertainty Adds to Each Point", pad=8
+    )
+
+    # Right: the same comparison solved for the deviation instead. A region
+    # whose limits are (upper, lower) certifies from lower + U to upper - U,
+    # so each row of Table 5 is a wedge narrowing as U grows, and the two
+    # limits are straight lines because the extension is a subtraction. Two
+    # abscissae are enough for a straight line, and the wedges are drawn
+    # widest first so the narrower ones sit on top.
+    u_axis = np.array([0.0, widest])
+    for colour, _region, (upper, lower) in reversed(regions):
+        floor = (
+            np.full(u_axis.shape, lower)
+            if lower <= vibration.UNCONSTRAINED_BELOW
+            else lower + u_axis
+        )
+        ax_window.fill_between(
+            u_axis,
+            floor,
+            upper - u_axis,
+            color=theme_fill(colour, ax_window),
+            zorder=0,
+        )
+    for _colour, _region, (upper, lower) in regions:
+        if lower <= vibration.UNCONSTRAINED_BELOW:
+            # The tail shares its ceiling with the skirt and has no floor, so
+            # it contributes no edge of its own.
+            continue
+        for limit in (upper - u_axis, lower + u_axis):
+            ax_window.plot(
+                u_axis, limit, color=COLOR_FG, linewidth=1.2, alpha=0.75, zorder=2
+            )
+    ax_window.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.35, zorder=1)
+
+    # What 12.11.2 costs, marked on the wedge it narrows.
+    window_upper = central_upper - uncertainty
+    window_lower = central_lower + uncertainty
+    ax_window.axvline(
+        uncertainty,
+        color=COLOR_MUTED,
+        linestyle="--",
+        linewidth=1.0,
+        alpha=0.8,
+        zorder=1,
+    )
+    ax_window.plot(
+        [uncertainty, uncertainty],
+        [window_lower, window_upper],
+        color=COLOR_FG,
+        linewidth=1.6,
+        marker="_",
+        markersize=9,
+        zorder=3,
+    )
+    # The rule is labelled with whose ceiling it is, not just with its
+    # height: the abscissa runs to the largest figure the clause table permits
+    # anywhere, and without this the half per cent beyond the rule reads as
+    # available to the test the left panel grades, which may not carry it.
+    # Right-aligned so the chip ends on the rule it names and clears the right
+    # spine, and lifted above the skirt ceiling so it crosses no boundary.
+    ax_window.text(
+        uncertainty,
+        27.0,
+        f"{uncertainty:.4g} %, the most clause {clause} allows",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="right",
+        va="bottom",
+        zorder=6,
+        # Over its own dashed rule, so the reading carries a chip.
+        bbox={
+            "boxstyle": "round,pad=0.2",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax_window.text(
+        0.5 * widest,
+        17.0,
+        f"a bench carrying {uncertainty:.4g} % can certify\n"
+        f"only {_fmt_minus(window_lower, '.4g')} % to "
+        f"+{window_upper:.4g} %, where\n"
+        f"Table 5 prints {_fmt_minus(central_lower, '.0f')} % to "
+        f"+{central_upper:.0f} %",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=6,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+
+    ax_window.set_xlim(0.0, widest)
+    ax_window.set_xticks(np.arange(0.0, widest + 1.0, 1.0))
+    ax_window.set_xlabel(
+        "Expanded uncertainty $U$ of the laboratory (%), "
+        f"$k$ = {vibration.ISO8041_COVERAGE_FACTOR:.0f}"
+    )
+    ax_window.set_title("What a Bench Carrying $U$ Can Certify", pad=8)
+    ax_window.tick_params(axis="y", labelleft=False)
+
+    # One deviation axis for both panels, ticked at the four graded limits of
+    # Table 5 and at zero, and labelled from the same constants that place the
+    # ticks. Sharing it is what lets the reader carry a height across: the
+    # 9 % of the left panel is the height the right panel's central wedge has
+    # already fallen below at 4.5 %.
+    tolerance_ticks = (skirt_upper, central_upper, 0.0, central_lower, skirt_lower)
+    ax_sweep.set_yticks(list(tolerance_ticks))
+    ax_sweep.set_yticklabels([_signed_percent(value) for value in tolerance_ticks])
+    ax_sweep.set_ylim(-33.0, 31.0)
+    for panel in (ax_sweep, ax_window):
+        panel.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+        panel.set_axisbelow(True)
+
+    # One key at the foot of the figure: the three regions carry the same
+    # colour on both panels, so a box per panel would say it twice, and the
+    # two marker classes belong to the left one alone. The row clears the
+    # frequency labels above it because the margins below hold the panels off
+    # the foot of the figure.
+    handles, names = ax_sweep.get_legend_handles_labels()
+    fig.legend(handles, names, loc="lower center", ncol=5, fontsize=8.5, frameon=False)
+    fig.suptitle(
+        "The Band Does Not Move: ISO 8041-1 Extends the Measurement Instead",
+        fontsize=13,
+    )
+    # The margins are set by hand, as the tolerance-regions figure of this
+    # guide sets them and for the same reason: ``tight_layout`` declines a
+    # gridspec whose subplot parameters were set on the gridspec itself, and
+    # it would warn, leave the defaults in place and undo the ``wspace``
+    # above. The foot holds the key clear of the frequency labels, and the
+    # head holds the two panel titles clear of the suptitle.
+    fig.subplots_adjust(left=0.062, right=0.988, top=0.875, bottom=0.155)
+    save_figure(output_dir, "meter_uncertainty_allowance.svg")
+    plt.close()
+
+
+def _decay_criterion_fraction(decay_time_s: float, integration_time_s: float) -> float:
+    """The 10 % of clause 5.13, read back out of the library's closed form.
+
+    The clause times the fall down to a fraction of the initial indicated
+    value, and that fraction is the one number of the test the library keeps
+    private. It is recoverable exactly, because the exponential average's
+    closed form is ``t = -2 tau ln(f)``: the fraction is ``exp(-t / 2 tau)`` of
+    the time :func:`running_rms_decay_time` returns for that same average.
+    Reading it back rather than typing it in is what keeps the rule the
+    crossings are timed at, the per cent its label writes and the printed bands
+    drawn around it from ever disagreeing.
+    """
+    return math.exp(-0.5 * decay_time_s / integration_time_s)
+
+
+def _printed_decay_time(
+    rows: tuple[tuple[float, float, float], ...], integration_time_s: float
+) -> tuple[float, float]:
+    """The printed decay time and its tolerance, for one time constant.
+
+    Tables 10 and 11 are keyed by the averaging time rather than ordered, and
+    ``verify_running_rms_decay`` reads them that way too, so the row is looked
+    up rather than indexed: a row added between the printed three would then
+    move nothing in the drawing.
+    """
+    matched = [
+        (printed, tolerance)
+        for constant, printed, tolerance in rows
+        if math.isclose(constant, integration_time_s, rel_tol=1e-9, abs_tol=0.0)
+    ]
+    if len(matched) != 1:
+        msg = f"{integration_time_s} s is not one printed row of the decay tables."
+        raise ValueError(msg)
+    return matched[0]
+
+
+def _relative_level_db(relative: np.ndarray) -> np.ndarray:
+    """A decay trace as a level below the indication it started from.
+
+    The linear average empties: once its sliding window holds nothing but the
+    zeros after the cut, the mean square in it is exactly zero and a level is
+    not defined there. Those samples are dropped rather than floored, so the
+    curve stops at the last sample that has a level instead of running along a
+    horizontal line at whatever floor the panel happens to use, which is a
+    reading the standard never drew.
+    """
+    level_db = np.full(relative.shape, np.nan)
+    positive = relative > 0.0
+    level_db[positive] = 20.0 * np.log10(relative[positive])
+    return level_db
+
+
+def generate_meter_running_rms_decay(output_dir: str) -> None:
+    """ISO 8041-1 5.13: how long the running r.m.s. takes to forget.
+
+    Both averages falling away from the cut, the printed bands of Tables 10
+    and 11 their crossings have to land in, and the decay-rate column that is
+    deliberately not the criterion. A stopwatch, not a certificate: conformity
+    also takes the indication, linearity, overload, burst and environmental
+    clauses, which are measurements on hardware.
+    """
+    print("Generating meter_running_rms_decay...")
+    from phonometry import vibration
+
+    name = "Wk"
+    tau_s = 1.0
+    fs_hz = 2000.0
+    cut_s = 10.0
+    # The width of the top panel, in seconds after the cut: past the printed
+    # band of the slower average, with room on the right for the reading of
+    # the criterion rule.
+    view_s = 6.2
+
+    # The test signal of 5.13: a steady sinusoid at the reference frequency of
+    # the weighting under test, shut off at ``cut_s``. It is applied already
+    # weighted, because the time weighting sits after the frequency weighting
+    # in the chain. The amplitude is immaterial, since the test times a fall
+    # to a fraction of whatever the indication was; root two puts the steady
+    # indication at 1 m/s2. The fill before the cut is ten time constants,
+    # which is twice the five the clause asks of the linear average; the
+    # exponential average is asked for twenty, and at ten its transient is
+    # 45 parts per million of the mean square, two orders of magnitude under
+    # the ripple that actually sets where the initial value falls.
+    excitation_hz = vibration.REFERENCE_FREQUENCY_HZ[name]
+    sample_times = np.arange(round(2.0 * cut_s * fs_hz)) / fs_hz
+    excitation = math.sqrt(2.0) * np.sin(2.0 * math.pi * excitation_hz * sample_times)
+    excitation[sample_times >= cut_s] = 0.0
+    cut_index = round(cut_s * fs_hz)
+    # Time since the cut, counted in samples rather than by subtracting the
+    # cut from the clock, so the axis starts at exactly zero.
+    since_cut = np.arange(sample_times.size - cut_index) / fs_hz
+
+    closed_form_s = {
+        method: vibration.running_rms_decay_time(tau_s, method=method)
+        for method in ("linear", "exponential")
+    }
+    fraction = _decay_criterion_fraction(closed_form_s["exponential"], tau_s)
+    criterion_db = 20.0 * math.log10(fraction)
+
+    # The two averages, measured. The crossing is timed the way the clause
+    # words it, on the indication itself: the first sample whose value is less
+    # than the fraction of the initial one, not the first sample of a level.
+    measured_db: dict[str, np.ndarray] = {}
+    crossing_s: dict[str, float] = {}
+    for method in ("linear", "exponential"):
+        trace = np.asarray(
+            vibration.running_rms(
+                excitation, fs_hz, integration_time=tau_s, method=method
+            ),
+            dtype=np.float64,
+        )
+        relative = trace[cut_index:] / float(trace[cut_index - 1])
+        measured_db[method] = _relative_level_db(relative)
+        crossing_s[method] = float(since_cut[np.flatnonzero(relative < fraction)[0]])
+
+    # The same two falls in closed form, as 5.13 gives them: the linear
+    # average keeps the last tau seconds of the record, so a time t after the
+    # cut its window still holds (tau - t) / tau of the original mean square;
+    # the exponential average decays in power as exp(-t / tau).
+    closed_db = {
+        "linear": _relative_level_db(
+            np.sqrt(np.clip(1.0 - since_cut / tau_s, 0.0, None))
+        ),
+        "exponential": _relative_level_db(np.exp(-0.5 * since_cut / tau_s)),
+    }
+
+    # One colour per average, on both panels that draw one, and one colour per
+    # printed column, on both panels that draw one.
+    averages = (
+        (
+            "linear",
+            COLOR_PRIMARY,
+            f"the linear average of Table 10 ($\\tau$ = {tau_s:g} s)",
+        ),
+        (
+            "exponential",
+            COLOR_TERTIARY,
+            f"the exponential average of Table 11 ($\\tau$ = {tau_s:g} s)",
+        ),
+    )
+    # The band and the first bar of the third panel are the same printed
+    # column drawn twice, in seconds and as a multiple, so both names carry
+    # which of the two it is. Named only by what they are, they read as two
+    # entries saying the same thing, which is what the first draft of the key
+    # did.
+    band_label = "the printed decay time and its tolerance, in seconds"
+    time_column_label = "the time column of Table 11, as a multiple"
+    rate_label = "the rate column of Table 11, read as a decay time"
+
+    fig = plt.figure(figsize=(13.2, 7.6))
+    grid_spec = fig.add_gridspec(
+        2,
+        2,
+        height_ratios=[1.32, 1.0],
+        width_ratios=[1.2, 1.0],
+        hspace=0.36,
+        wspace=0.16,
+    )
+    ax_decay = fig.add_subplot(grid_spec[0, :])
+    ax_zoom = fig.add_subplot(grid_spec[1, 0])
+    ax_columns = fig.add_subplot(grid_spec[1, 1])
+
+    # --- Top: both falls, the criterion, and the two printed bands ----------
+    #
+    # The linear average lives for one time constant and the last hundredth of
+    # it is the point of the figure, so it is drawn sample by sample and
+    # stopped at its last defined sample. The exponential average is a
+    # straight line on this axis for six seconds, so it is drawn every tenth
+    # sample: 5 ms of drawn resolution, four points across the fastest ripple
+    # the average can pass, and a tenth of the vertices.
+    stride = {"linear": 1, "exponential": round(0.005 * fs_hz)}
+    view_stop = round(view_s * fs_hz) + 1
+    for method, colour, label in averages:
+        defined = np.flatnonzero(np.isfinite(measured_db[method]))
+        shown = slice(0, min(int(defined[-1]) + 1, view_stop), stride[method])
+        ax_decay.plot(
+            since_cut[shown],
+            measured_db[method][shown],
+            color=colour,
+            linewidth=1.9,
+            zorder=3,
+            label=label,
+        )
+    for index, (method, _colour, _label) in enumerate(averages):
+        defined = np.flatnonzero(np.isfinite(closed_db[method]))
+        shown = slice(0, min(int(defined[-1]) + 1, view_stop), stride[method])
+        ax_decay.plot(
+            since_cut[shown],
+            closed_db[method][shown],
+            color=COLOR_MUTED,
+            linewidth=1.1,
+            linestyle="--",
+            zorder=2,
+            label="the closed form of each average" if index == 0 else "_nolegend_",
+        )
+    ax_decay.axhline(criterion_db, color=COLOR_FG, linewidth=1.0, alpha=0.55, zorder=1)
+    # The printed bands, and the chip that reads each one against the trace
+    # that has to land in it. Both chips sit in the empty quarter under the
+    # exponential fall, with an arrow to the crossing they belong to, so
+    # neither of them covers a stroke.
+    chip = {
+        "boxstyle": "round,pad=0.35",
+        "facecolor": COLOR_PANEL,
+        "edgecolor": COLOR_GRID,
+    }
+    chip_at = {"linear": (1.30, -23.5), "exponential": (2.45, -31.0)}
+    printed_row = {
+        method: _printed_decay_time(vibration.RUNNING_RMS_DECAY_TIME_S[method], tau_s)
+        for method, _colour, _label in averages
+    }
+    for index, (method, colour, _label) in enumerate(averages):
+        printed, tolerance = printed_row[method]
+        ax_decay.axvspan(
+            printed - tolerance,
+            printed + tolerance,
+            color=theme_fill(COLOR_SECONDARY, ax_decay),
+            zorder=0,
+            label=band_label if index == 1 else "_nolegend_",
+        )
+        ax_decay.plot(
+            [crossing_s[method]],
+            [criterion_db],
+            marker="o",
+            markersize=5.5,
+            color=colour,
+            zorder=4,
+        )
+        table = "Table 10" if method == "linear" else "Table 11"
+        ax_decay.annotate(
+            f"{table} prints {printed:g} ± {tolerance:g} s;\n"
+            f"the trace crosses at {crossing_s[method]:.2f} s",
+            xy=(crossing_s[method], criterion_db),
+            xytext=chip_at[method],
+            fontsize=9,
+            color=colour,
+            ha="left",
+            va="center",
+            zorder=5,
+            bbox=chip,
+            arrowprops={"arrowstyle": "->", "lw": 0.9, "color": colour},
+        )
+    # Three short lines rather than two long ones, and the clause named as
+    # "clause 5.13" rather than as a bare "5.13". Both are the Spanish twin
+    # talking: the translated sentence is a third longer, and at two lines it
+    # reached back over the exponential fall; and the save-time decimal pass
+    # rewrites a bare "5.13" as "5,13" unless one of the reference words it
+    # knows ("apartado") stands in front of it, which is a clause number
+    # printed as a number and a half.
+    ax_decay.text(
+        view_s - 0.1,
+        criterion_db + 0.9,
+        f"clause 5.13 times the fall to here:\n"
+        f"{fraction * 100.0:.0f} % of the initial indication,\n"
+        f"which is {_fmt_minus(criterion_db, '.0f')} dB",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="right",
+        va="bottom",
+        zorder=5,
+        bbox=chip,
+    )
+
+    decay_ticks = (0.0, -10.0, criterion_db, -30.0)
+    ax_decay.set_ylim(-34.0, 1.6)
+    ax_decay.set_yticks(list(decay_ticks))
+    ax_decay.set_yticklabels([_fmt_minus(value, ".0f") for value in decay_ticks])
+    ax_decay.set_title("The Two Averages Falling Away From the Cut", pad=10)
+
+    # --- Bottom left: the last tenth of a second of the linear fall ---------
+    printed, tolerance = printed_row["linear"]
+    ax_zoom.axvspan(
+        printed - tolerance,
+        printed + tolerance,
+        color=theme_fill(COLOR_SECONDARY, ax_zoom),
+        zorder=0,
+    )
+    ax_zoom.axhline(criterion_db, color=COLOR_FG, linewidth=1.0, alpha=0.55, zorder=1)
+    ax_zoom.plot(
+        since_cut,
+        closed_db["linear"],
+        color=COLOR_MUTED,
+        linewidth=1.2,
+        linestyle="--",
+        zorder=2,
+    )
+    ax_zoom.plot(
+        since_cut, measured_db["linear"], color=COLOR_PRIMARY, linewidth=1.9, zorder=3
+    )
+    # Two readings on one rule: where the closed form reaches the criterion,
+    # which is the number Table 10 rounds and prints, and where the measured
+    # trace does.
+    ax_zoom.plot(
+        [closed_form_s["linear"]],
+        [criterion_db],
+        marker="o",
+        markersize=5.5,
+        color=COLOR_MUTED,
+        zorder=4,
+    )
+    ax_zoom.plot(
+        [crossing_s["linear"]],
+        [criterion_db],
+        marker="o",
+        markersize=5.5,
+        color=COLOR_PRIMARY,
+        zorder=4,
+    )
+    ax_zoom.text(
+        printed + tolerance + 0.016,
+        -6.6,
+        "at the crossing the sliding window holds only\n"
+        f"the last few samples of the {excitation_hz:g} Hz sinusoid,\n"
+        "and their mean square depends on where in\n"
+        "the cycle the signal was cut",
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="right",
+        va="top",
+        zorder=5,
+        bbox=chip,
+    )
+    # Which dot is which, and the two readings the panel exists to compare.
+    # The chip above says why they differ, and said it without naming either
+    # of them: the reader had to carry the colour code down from the top
+    # panel to tell the measurement from the closed form. Each label sits
+    # against its own marker, so proximity names it even where the colour
+    # cannot: the measured one takes the colour of its trace, and the closed
+    # form takes the foreground, because COLOR_MUTED is a neutral for
+    # de-emphasised data and at 8.5 points on the chip it is not a readable
+    # ink on either page.
+    ax_zoom.text(
+        crossing_s["linear"] - 0.005,
+        criterion_db - 1.6,
+        f"the measured crossing, {crossing_s['linear']:.2f} s",
+        fontsize=8.5,
+        color=COLOR_PRIMARY,
+        ha="right",
+        va="top",
+        zorder=5,
+        bbox=chip,
+    )
+    ax_zoom.text(
+        closed_form_s["linear"] + 0.005,
+        criterion_db + 1.2,
+        f"the closed form, {closed_form_s['linear']:.2f} s",
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        va="bottom",
+        zorder=5,
+        bbox=chip,
+    )
+    zoom_ticks = (printed - tolerance, printed, printed + tolerance)
+    ax_zoom.set_xlim(0.90, printed + tolerance + 0.02)
+    ax_zoom.set_xticks(list(zoom_ticks))
+    ax_zoom.set_xticklabels([f"{value:.4g}" for value in zoom_ticks])
+    ax_zoom.set_ylim(-32.0, -6.0)
+    ax_zoom.set_yticks([-10.0, criterion_db, -30.0])
+    ax_zoom.set_yticklabels(
+        [_fmt_minus(value, ".0f") for value in (-10.0, criterion_db, -30.0)]
+    )
+    ax_zoom.set_title("The Linear Crossing, Sample by Sample", pad=8)
+
+    # --- Bottom right: Table 11's two columns, against its own closed form --
+    #
+    # A decay rate is a time only once a distance is fixed, and the clause
+    # fixes it: the criterion is the same 10 %, so a rate R reaches it in
+    # (0 dB - criterion) / R seconds. Both columns then live on one axis, and
+    # the axis is dimensionless because each row is divided by the closed form
+    # of its own time constant.
+    columns = (
+        (COLOR_SECONDARY, time_column_label, 0.19),
+        (COLOR_QUATERNARY, rate_label, -0.19),
+    )
+    constants = []
+    for index, (constant, lower_rate, upper_rate) in enumerate(
+        vibration.RUNNING_RMS_DECAY_RATE_DB_PER_S
+    ):
+        constants.append(constant)
+        closed_s = vibration.running_rms_decay_time(constant, method="exponential")
+        printed, tolerance = _printed_decay_time(
+            vibration.RUNNING_RMS_DECAY_TIME_S["exponential"], constant
+        )
+        intervals = (
+            ((printed - tolerance) / closed_s, (printed + tolerance) / closed_s),
+            (
+                -criterion_db / (upper_rate * closed_s),
+                -criterion_db / (lower_rate * closed_s),
+            ),
+        )
+        for (colour, label, offset), (low, high) in zip(
+            columns, intervals, strict=True
+        ):
+            ax_columns.barh(
+                index + offset,
+                high - low,
+                left=low,
+                height=0.3,
+                color=theme_fill(colour, ax_columns),
+                edgecolor=colour,
+                linewidth=1.3,
+                zorder=2,
+                label=label if index == 0 else "_nolegend_",
+            )
+    ax_columns.axvline(1.0, color=COLOR_FG, linewidth=1.0, alpha=0.55, zorder=1)
+    # Hung off the top of the frame rather than off a row of the data. Placed
+    # at a y in data units it stood a fixed number of points tall in a panel
+    # whose data units are rows, so it ran over the top spine and cut it: the
+    # spine is drawn, the chip is opaque, and the frame came out broken in all
+    # four variants. Anchored in axes coordinates it cannot leave the panel,
+    # and the head room that keeps it off the top bar is made by the ylim
+    # below rather than by the placement.
+    ax_columns.text(
+        0.5,
+        0.96,
+        f"a decay rate of $R$ dB/s reaches the same {fraction * 100.0:.0f} % in "
+        f"{-criterion_db:.0f}/$R$ s;\nin all three printed rows the time column "
+        "is the narrower statement",
+        transform=ax_columns.transAxes,
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="center",
+        va="top",
+        zorder=5,
+        bbox=chip,
+    )
+    column_ticks = np.arange(0.85, 1.16, 0.05)
+    ax_columns.set_xlim(0.84, 1.18)
+    ax_columns.set_xticks(list(column_ticks))
+    ax_columns.set_xticklabels([f"{value:.2f}" for value in column_ticks])
+    ax_columns.set_xlabel("Decay time, as a multiple of $2\\tau\\ln 10$")
+    ax_columns.set_ylim(-0.62, len(constants) + 0.6)
+    ax_columns.set_yticks(list(range(len(constants))))
+    ax_columns.set_yticklabels([f"{value:g}" for value in constants])
+    ax_columns.set_ylabel("Averaging time $\\tau$ [s]")
+    ax_columns.set_title("Table 11's Two Columns, Against Its Own Closed Form", pad=8)
+
+    for panel in (ax_decay, ax_zoom):
+        panel.set_xlabel("Time since the signal was cut [s]")
+        panel.set_ylabel("Indication, relative to its initial value [dB]")
+    decay_x_ticks = np.arange(0.0, view_s, 1.0)
+    ax_decay.set_xlim(0.0, view_s)
+    ax_decay.set_xticks(list(decay_x_ticks))
+    ax_decay.set_xticklabels([f"{value:g}" for value in decay_x_ticks])
+    for panel in (ax_decay, ax_zoom, ax_columns):
+        panel.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+        panel.set_axisbelow(True)
+
+    # One key at the foot of the figure: the two averages and the closed form
+    # are the same colours on the two panels that draw a fall, and the printed
+    # decay time is the same colour on the two panels that draw it, so a box
+    # per panel would say the same five things twice.
+    handles, names = ax_decay.get_legend_handles_labels()
+    extra_handles, extra_names = ax_columns.get_legend_handles_labels()
+    fig.legend(
+        handles + extra_handles,
+        names + extra_names,
+        loc="lower center",
+        ncol=3,
+        fontsize=8.5,
+        frameon=False,
+    )
+    fig.suptitle(
+        "The Running r.m.s. Decay of ISO 8041-1: Tables 10 and 11, Timed From the Cut",
+        fontsize=13,
+    )
+    # The margins are set by hand rather than by ``tight_layout``, which
+    # declines a gridspec with a panel spanning two columns: it would warn,
+    # leave the defaults in place and undo the ``hspace`` and ``wspace`` above.
+    # The foot holds the two-row key clear of the frequency-of-use labels, and
+    # the head holds the three panel titles clear of the suptitle.
+    fig.subplots_adjust(left=0.062, right=0.986, top=0.878, bottom=0.155)
+    save_figure(output_dir, "meter_running_rms_decay.svg")
+    plt.close()
+
+
+def _burst_deviation(value: float) -> str:
+    """One cell's deviation, written as the sentence beside it needs it.
+
+    ``_signed_percent``, which the tolerance-region figure of this guide
+    already carries, rounds to whole per cent for a tick label; a deviation
+    read out inside a sentence keeps its tenth, and it keeps the U+2212 that
+    ``format`` would write as an ASCII hyphen.
+    """
+    if value < 0.0:
+        return f"{_fmt_minus(value, '.1f')} %"
+    return f"+{value:.1f} %"
+
+
+def _record_envelope(
+    record: np.ndarray, fs: float, bins: int
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """The record reduced to ``bins`` (centre, minimum, maximum) columns.
+
+    A minute of record at any honest sampling rate is more vertices than a
+    vector figure can carry, and drawing every n-th sample of a saw-tooth is
+    the one reduction that lies: it reports whichever phase the stride lands
+    on. The extremes of each bin are what the ink of the full trace would
+    cover, so a stepped fill between them is the record at this scale.
+
+    The bin that straddles the edge of a burst holds part signal and part
+    silence, so it is drawn short: a notch of one bin, about a pixel at the
+    size the page delivers, and the true extremes of that window rather than
+    an artefact. No bin count removes it. At 200 samples per cycle a burst is
+    exactly 3200 samples, but the bursts begin 31 831 samples apart and the
+    first begins at sample 3184, whose greatest common divisor with the rest
+    is 1: only a bin of one sample, which is the whole record and the reason
+    this function exists, would start and end all six on a bin boundary.
+    """
+    block = record.size // bins
+    frames = record[: block * bins].reshape(bins, block)
+    return (
+        (np.arange(bins) + 0.5) * block / fs,
+        frames.min(axis=1),
+        frames.max(axis=1),
+    )
+
+
+def generate_meter_signal_burst_response(output_dir: str) -> None:
+    """ISO 8041-1 5.9: the saw-tooth burst, and a meter Table 8 catches.
+
+    The signal of Table 6, and the deviations of one instrument against the
+    printed cells of Table 8. A row inside the band says the time response of
+    that weighting chain matches the printed table, and nothing else.
+    """
+    print("Generating meter_signal_burst_response...")
+    from phonometry import vibration
+
+    application = "whole-body"
+    name = "Wk"
+    test = vibration.SAWTOOTH_BURST_TESTS[application]
+    longest = test.cycle_counts[-1]
+    burst_span_s = longest / test.frequency_hz
+
+    # The record, drawn at 200 samples per saw-tooth cycle. Not the rate the
+    # indications are computed at: those run at the recommended 20 kHz, where
+    # a minute of record is 1.2 million samples, and a vector figure cannot
+    # carry a million vertices. A whole number of samples per cycle keeps
+    # every tooth of the drawn burst identical, and the phase the sampling
+    # lands on costs the peak 0.1 %.
+    draw_fs = 200.0 * test.frequency_hz
+    record = vibration.sawtooth_burst(application, longest, fs=draw_fs)
+    record_times = np.arange(record.size) / draw_fs
+    times, low, high = _record_envelope(record, draw_fs, 750)
+
+    # The first burst, sliced with the inequality the library fills it by, so
+    # the panel holds the samples that are in the burst and no others.
+    inside = (record_times >= test.start_time_s) & (
+        record_times < test.start_time_s + burst_span_s
+    )
+    burst_cycles = (record_times[inside] - test.start_time_s) * test.frequency_hz
+
+    # The indications, once, and then two verdicts off the same numbers: the
+    # chain as the library computes it, and the same chain with the
+    # exponential MTVV reported in the linear column.
+    rows = {
+        cycles: vibration.signal_burst_indications(application, name, cycles)
+        for cycles in (*test.cycle_counts, None)
+    }
+    honest = vibration.verify_signal_burst_response(application, name, rows)
+    swapped = {
+        cycles: {**row, "mtvv_linear": row["mtvv_exponential"]}
+        for cycles, row in rows.items()
+    }
+    verdict = vibration.verify_signal_burst_response(application, name, swapped)
+
+    fig = plt.figure(figsize=(13.4, 8.8))
+    grid_spec = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.45])
+    ax_record = fig.add_subplot(grid_spec[0, 0])
+    ax_burst = fig.add_subplot(grid_spec[0, 1])
+    ax_verdict = fig.add_subplot(grid_spec[1, :])
+
+    # Top left: where the bursts sit. The x axis is ticked at the burst start
+    # times themselves, so the start time and the repeat time of Table 6 are
+    # read off the axis rather than off a chip.
+    ax_record.fill_between(
+        times,
+        low,
+        high,
+        step="mid",
+        color=COLOR_PRIMARY,
+        linewidth=0.0,
+        zorder=2,
+    )
+    starts = test.start_time_s + np.arange(test.burst_count) * test.repeat_time_s
+    record_ticks = (*starts, test.duration_s)
+    ax_record.set_xticks(list(record_ticks))
+    ax_record.set_xticklabels([f"{value:g}" for value in record_ticks], fontsize=9)
+    ax_record.set_xlim(0.0, test.duration_s)
+    ax_record.set_ylim(-1.5, 2.1)
+    ax_record.set_yticks([-1.0, 0.0, 1.0])
+    ax_record.text(
+        0.5 * test.duration_s,
+        1.55,
+        f"the whole-body row of Table 6: {test.burst_count} bursts of {longest}\n"
+        f"cycles in a {test.duration_s:.0f} s record, the first at "
+        f"{test.start_time_s:.0f} s and then one every "
+        f"{test.repeat_time_s:.0f} s",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=5,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax_record.set_xlabel("Time [s]")
+    ax_record.set_ylabel("acceleration [m/s²]")
+    ax_record.set_title("Where the Bursts Sit in the Record", pad=8)
+
+    # Top right: one burst, on an axis of saw-tooth cycles, so the five
+    # printed burst lengths are ticks of the axis instead of marks over the
+    # trace. Every shorter row is this same waveform stopped at one of them.
+    ax_burst.plot(burst_cycles, record[inside], color=COLOR_PRIMARY, linewidth=1.0)
+    crossings = np.array([0.0, *(float(count) for count in test.cycle_counts)])
+    ax_burst.plot(
+        crossings,
+        np.zeros_like(crossings),
+        marker="o",
+        markersize=6,
+        linestyle="none",
+        color=COLOR_QUATERNARY,
+        zorder=4,
+    )
+    ax_burst.set_xticks(list(crossings))
+    ax_burst.set_xticklabels([f"{value:.0f}" for value in crossings], fontsize=9)
+    ax_burst.set_xlim(-0.45, longest + 0.45)
+    ax_burst.set_ylim(-1.5, 2.1)
+    ax_burst.set_yticks([-1.0, 0.0, 1.0])
+    ax_burst.text(
+        0.5 * longest,
+        1.55,
+        "a linear rise and a vertical fall, and every printed length "
+        f"starting\nand ending on an upward zero crossing: "
+        f"{test.frequency_hz:.4f} Hz, {longest} cycles in {burst_span_s:.3f} s",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=5,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax_burst.set_xlabel("Saw-tooth cycles from the start of the burst")
+    ax_burst.set_ylabel("acceleration [m/s²]")
+    ax_burst.set_title("One Burst, and the Five Lengths the Tables Grade", pad=8)
+
+    # Bottom: the verdict. The tolerance is per column, so the wider one is
+    # drawn as a pair of edges over the same band rather than as a second
+    # band under everything.
+    positions = np.arange(len(verdict.cycle_counts), dtype=np.float64)
+    # Bound here rather than at the ``set_xlim`` below, because the two
+    # allowance stubs start at the left edge of the panel.
+    x_left = -0.4
+    x_right = positions[-1] + 0.42
+    inner = float(np.min(verdict.tolerance_percent))
+    outer = float(np.max(verdict.tolerance_percent))
+    vdv_cells = sum(
+        1 for cell in vibration.SIGNAL_BURST_RESPONSE.values() if "vdv" in cell
+    )
+    ax_verdict.axhspan(
+        -inner,
+        inner,
+        color=theme_fill(COLOR_MUTED, ax_verdict),
+        zorder=0,
+        label=f"±{inner:.0f} %, the tolerance on every column but one",
+    )
+    # The wider allowance is one column's, so it is drawn as a pair of stubs
+    # hanging off the axis beside their own ticks. Run across the panel, the
+    # lower edge passes through the ring on the 8-cycle cell, and that cell is
+    # graded on the narrower tolerance: the drawing would show a cell failing
+    # against a limit that is not its own, which is the opposite of what the
+    # legend says. Each stub ends half a step short of the first burst
+    # length, where the panel draws nothing else.
+    for index, edge in enumerate((-outer, outer)):
+        ax_verdict.plot(
+            (x_left, positions[0] + 0.5),
+            (edge, edge),
+            color=COLOR_MUTED,
+            linestyle="--",
+            linewidth=1.1,
+            zorder=1,
+            label=(
+                f"±{outer:.0f} %, the one on the vibration dose value, in all "
+                f"{vdv_cells} of its cells"
+                if index == 0
+                else None
+            ),
+        )
+    ax_verdict.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.4, zorder=1)
+    ax_verdict.axvline(
+        positions[-1] - 0.5,
+        color=COLOR_MUTED,
+        linestyle=":",
+        linewidth=1.0,
+        zorder=1,
+    )
+
+    # The column the defect lands in is drawn over the three that hug zero:
+    # at the continuous row all four markers sit within a third of a per cent
+    # of each other, and the one the panel is about has to be the visible one.
+    styles = {
+        # The panel title says what this meter does with the column, so the
+        # legend row names it and stops there.
+        "mtvv_linear": (COLOR_SECONDARY, "o", 2.0, "the linear MTVV column"),
+        "vdv": (COLOR_TERTIARY, "s", 1.4, "the vibration dose value column"),
+        "rms": (
+            COLOR_PRIMARY,
+            "^",
+            1.2,
+            "the r.m.s. and exponential MTVV columns, which the defect does not reach",
+        ),
+        "mtvv_exponential": (COLOR_PRIMARY, "v", 1.2, None),
+    }
+    for index, quantity in enumerate(verdict.quantities):
+        colour, marker, width, label = styles[quantity]
+        on_top = 3.5 if quantity == "mtvv_linear" else 3.0
+        deviations = verdict.deviation_percent[:, index]
+        # The burst rows carry a line between them because their abscissa is
+        # ordered; the continuous row is not a burst length, so it is drawn
+        # as a point of its own beyond the dotted rule.
+        ax_verdict.plot(
+            positions[:-1],
+            deviations[:-1],
+            color=colour,
+            marker=marker,
+            markersize=6,
+            linewidth=width,
+            zorder=on_top,
+            label=label,
+        )
+        ax_verdict.plot(
+            positions[-1:],
+            deviations[-1:],
+            color=colour,
+            marker=marker,
+            markersize=6,
+            linestyle="none",
+            zorder=on_top,
+        )
+    failed_rows, failed_columns = np.nonzero(~verdict.within_tolerance)
+    ax_verdict.plot(
+        positions[failed_rows],
+        verdict.deviation_percent[failed_rows, failed_columns],
+        marker="o",
+        markersize=14,
+        markerfacecolor="none",
+        markeredgecolor=COLOR_SECONDARY,
+        markeredgewidth=1.6,
+        linestyle="none",
+        zorder=4,
+        label="the cells this meter fails",
+    )
+
+    linear = verdict.quantities.index("mtvv_linear")
+    outside = [
+        (cycles, deviation)
+        for cycles, deviation, ok in zip(
+            verdict.cycle_counts,
+            verdict.deviation_percent[:, linear],
+            verdict.within_tolerance[:, linear],
+            strict=True,
+        )
+        if not ok
+    ]
+    lengths = " and ".join(f"{cycles}" for cycles, _ in outside)
+    readings = " and ".join(_burst_deviation(value) for _, value in outside)
+    ax_verdict.text(
+        1.9,
+        -17.5,
+        f"only the {lengths} cycle rows leave the band, at\n{readings}: a test "
+        "suite that ran only short\nbursts would have signed this meter off",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=6,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax_verdict.text(
+        0.9,
+        6.6,
+        "read in the right column, the same chain reproduces\nall "
+        f"{verdict.deviation_percent.size} of {name}'s printed cells to "
+        f"{abs(honest.worst_deviation_percent):.2f} %",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=6,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax_verdict.text(
+        positions[-1] + 0.28,
+        -9.0,
+        "the continuous row passes too:\non a signal that never stops,\nthe two "
+        "averages agree",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="right",
+        va="center",
+        zorder=6,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+
+    ax_verdict.set_xticks(list(positions))
+    ax_verdict.set_xticklabels(
+        [
+            "continuous (no bursts)" if cycles is None else f"{cycles}"
+            for cycles in verdict.cycle_counts
+        ]
+    )
+    ax_verdict.set_xlim(x_left, x_right)
+    ax_verdict.set_ylim(-24.0, 14.0)
+    # The band edges and the two allowance edges, and one tick below them at
+    # twice the printed tolerance. Without it the whole lower half of the
+    # axis carries no number, and the deepest reading of the panel, which is
+    # the headline of the section, could be read only off its chip.
+    band_ticks = (-2.0 * inner, -outer, -inner, 0.0, inner, outer)
+    ax_verdict.set_yticks(list(band_ticks))
+    ax_verdict.set_yticklabels([_signed_percent(value) for value in band_ticks])
+    ax_verdict.set_xlabel("Saw-tooth cycles per burst")
+    ax_verdict.set_ylabel("Deviation from the printed cell [%]")
+    ax_verdict.set_title(
+        f"{name}: A Meter That Reports Its Exponential Average in the Linear Column",
+        pad=8,
+    )
+
+    for panel in (ax_record, ax_burst):
+        panel.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+        panel.set_axisbelow(True)
+    # Vertical gridlines only on the verdict panel. A horizontal one lands on
+    # a level the panel already draws at every tick but the lowest, and at
+    # that one it would run through the ring on the 16-cycle cell. The first
+    # call is the one that matters: ``axes.grid`` is on in the rcParams, so
+    # the y gridlines have to be taken away rather than left unasked for.
+    ax_verdict.grid(visible=False)
+    ax_verdict.grid(visible=True, axis="x", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_verdict.set_axisbelow(True)
+
+    # One key for the whole drawing, in two rows of three: the column-major
+    # fill puts the two tolerances together, then the two columns the defect
+    # misses, then the column it lands in and the ring on its failing cells.
+    # The labels are kept short enough for the key to stay narrower than the
+    # drawing above it, and that is a constraint rather than taste:
+    # ``savefig.bbox`` is "tight" for the whole corpus, so a key wider than
+    # the panels grows the saved canvas instead of being clipped, and it grows
+    # it by more in Spanish. Measured on this figure, the key is 812 pt in
+    # English and 902 pt in Spanish against 939 pt of drawing, so both
+    # editions save at the same width.
+    handles, names = ax_verdict.get_legend_handles_labels()
+    fig.legend(handles, names, loc="lower center", ncol=3, fontsize=8.5, frameon=False)
+    total_cells = sum(len(cell) for cell in vibration.SIGNAL_BURST_RESPONSE.values())
+    fig.suptitle(
+        "The Saw-Tooth Burst of ISO 8041-1, and the "
+        f"{total_cells} Numbers a Conforming Meter Has to Reproduce",
+        fontsize=13,
+    )
+    fig.subplots_adjust(
+        left=0.055, right=0.985, top=0.905, bottom=0.155, hspace=0.42, wspace=0.14
+    )
+    save_figure(output_dir, "meter_signal_burst_response.svg")
+    plt.close()

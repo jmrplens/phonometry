@@ -100,6 +100,8 @@ the skirts exclude theirs, so a measurement exactly at $f_\mathrm{t2}$ or
 $f_\mathrm{t3}$ takes the tighter limit rather than the wider one on the other
 side of it.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_tolerance_regions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_tolerance_regions.svg" alt="Three panels on one logarithmic frequency axis from 0.1 to 400 Hz, with the four transition frequencies of Table 4 for Wk as its ticks: 0.2512, 0.631, 63.1 and 158.5 Hz. The left panel draws the Wk design goal on log-log with the band Table 5 allows around it, coloured by region, a thin sleeve through the central region, a wider one in the two skirts, and in the two tails a fill that runs off the bottom of the panel because there is no lower limit there at all. The right top panel draws the same band with the design goal divided out, in per cent, where the step from plus 12 and minus 11 in the middle to plus 26 and minus 21 in the skirts is to scale. The right bottom panel draws the limit on the characteristic phase deviation on the same four corners, 6 degrees centrally, 12 in the skirts and plus or minus infinity in the tails, with the footnote that restricts that column to instruments whose measurement parameter is not based on r.m.s. values" width="96%"></picture>
+
 Table 4 prints each corner twice, as a power $10^{k/10}$ and as a rounded
 decimal beside it, and the library builds them from the exponents. So
 $f_\mathrm{t3}$ for `Wk` is 63.0957 Hz and the 63.1 Hz printed beside it is
@@ -210,8 +212,10 @@ moved = np.array([0.4314, 0.4969, 0.5466, 0.9937, 1.068,
 print(vibration.verify_weighting("Wk", frequencies, moved).passes)   # True
 ```
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_weighting_verification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_weighting_verification.svg" alt="Two panels on one logarithmic frequency axis, 0.2512 to 158.5 Hz. Above, the Wk design goal inside its Table 5 band, the sweep as read in filled red circles and the same sweep with its shortfall moved in open green rings: at seven bands one point wears both marks, and at 31.62 Hz the red circle sits alone just under the lower edge, with a note reading 4.0 per cent of the design goal below the minus 11 per cent limit. Below, the same points in per cent against plus 12 and minus 11 centrally and plus 26 and minus 21 in the skirts: the 31.62 Hz point is 15 per cent low, and an arrow carries it past the step at 63.1 Hz to 79.43 Hz, above minus 21 and conforming" width="94%"></picture>
+
 <details>
-<summary>Show the code for the tolerance-band figure</summary>
+<summary>Show the code for the one-sweep tolerance-band view</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -351,6 +355,84 @@ other way round, a laboratory carrying 4.5 % can only certify deviations up to
 7.5 % in the central region, and a bench that measures more carefully certifies
 more instruments. That is the whole point of the clause: uncertainty is not a
 free allowance, it is a cost.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_uncertainty_allowance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_uncertainty_allowance.svg" alt="Two panels sharing one deviation axis. Left, the deviation of a Wk bench sweep in per cent over 0.1 to 400 Hz against the ISO 8041-1 Table 5 limits, drawn as a staircase that steps at the four transition frequencies 0.2512, 0.631, 63.1 and 158.5 Hz: +26 and -21 per cent in the two skirts, +12 and -11 in the central region, and no lower limit at all in the two tails, where the fill runs off the bottom of the panel. Every measured point sits inside the printed band, and each carries a bar of plus and minus the 4.5 per cent that clause 12.11.2 allows, with one arm only in the two tails. Two points are marked with a red cross because the tip of the bar leaves the band while the point itself does not: one reading 9 per cent high at 6.31 Hz and one reading 17.5 per cent low at 125.9 Hz. Right, what a laboratory can still certify as its own expanded uncertainty U grows from 0 to 5 per cent: three nested wedges narrowing to the right, the central one falling from -11 to +12 per cent at U = 0 to -6.5 to +7.5 per cent at 4.5 per cent, and the tail wedge keeping its open floor." width="96%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration
+
+# The bench sweep the figure grades: one-third-octave centres from Formula
+# (B.1), and a response that is inside the printed band at every one of them.
+sweep_bands = np.arange(-8, 25)
+sweep_hz = 10.0 ** (sweep_bands / 10.0)
+
+# Four of those centres ARE transition frequencies of Wk, and both sides of
+# that comparison are a pow whose last bit is a platform's to choose. Snap
+# them to the table's own value: a centre landing one bit off a corner is
+# graded against the neighbouring region, and two of these four would then
+# print a different verdict below.
+corners = np.array(vibration.TRANSITION_FREQUENCIES_HZ["Wk"])
+for corner in corners:
+    sweep_hz[np.isclose(sweep_hz, corner, rtol=1e-9, atol=0.0)] = corner
+
+sweep_deviations = np.array([
+    -27.0, -24.0, -21.0, -13.0, -9.0, -6.0, -4.0, -2.0, -0.5, 1.0, 2.0, 2.5,
+    3.0, 3.5, 4.5, 6.5, 9.0, 6.0, 4.0, 2.5, 1.5, 0.5, -0.5, -1.5, -3.0, -4.5,
+    -6.0, -9.0, -13.0, -17.5, -22.0, -25.0, -28.0,
+])
+sweep_measured = (vibration.weighting_factors("Wk", sweep_hz)
+                  * (1 + sweep_deviations / 100))
+
+u = vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT["12.11.2"]
+print(vibration.verify_weighting("Wk", sweep_hz, sweep_measured).passes)   # True
+graded = vibration.verify_weighting(
+    "Wk", sweep_hz, sweep_measured, expanded_uncertainty_percent=u
+)
+print(graded.passes)                              # False
+print(graded.failing_frequencies_hz.round(2))     # [  6.31 125.89]
+
+# One line: the renderer draws the printed band and, inside it, the narrower
+# band the declared uncertainty leaves.
+graded.plot()
+plt.show()
+
+# By hand, the same verdict read as deviations: the band stays where Table 5
+# prints it and the measurement grows a bar. The limits are constant between
+# the four transition frequencies, so a pair of points either side of each of
+# them draws the staircase exactly.
+edges = np.sort(np.concatenate((corners * (1 - 1e-9), corners * (1 + 1e-9),
+                                [0.1, 400.0])))
+band_upper, band_lower = vibration.weighting_tolerance_percent("Wk", edges)
+
+# In the two tails the lower limit is -100 %, which verify_weighting subtracts
+# nothing from, so the bar there has one arm.
+_ceiling, floor = vibration.weighting_tolerance_percent("Wk", sweep_hz)
+arms = np.vstack((np.where(floor <= vibration.UNCONSTRAINED_BELOW, 0.0, u),
+                  np.full(sweep_hz.shape, u)))
+kept = graded.within_tolerance
+
+fig, ax = plt.subplots()
+ax.fill_between(edges, band_lower, band_upper, color="#1f77b4", alpha=0.15,
+                label="ISO 8041-1 tolerance")
+ax.errorbar(sweep_hz[kept], graded.deviation_percent[kept],
+            yerr=arms[:, kept], color="#2ca02c", marker="o", ls="none",
+            capsize=2.5, label="extended deviation conforms")
+ax.errorbar(sweep_hz[~kept], graded.deviation_percent[~kept],
+            yerr=arms[:, ~kept], color="#d62728", marker="X", markersize=9,
+            ls="none", capsize=2.5, label="extended deviation refused")
+ax.set(xscale="log", xlim=(0.1, 400.0), ylim=(-33.0, 31.0),
+       xlabel="Frequency [Hz]", ylabel="Deviation from the design goal [%]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 The default is `None`, which compares the bare deviation and is the reading
 that is only right when the measurement uncertainty has been shown to be
@@ -706,6 +788,48 @@ print(delayed.passes)   # True
 print(float(delayed.characteristic_deviation_deg.max()) < 1e-10)   # True
 ```
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_phase_verification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_phase_verification.svg" alt="Three panels of one instrument's phase error, on the one-third-octave centres from 0.5012 to 79.43 Hz. Top left, the phase error against a logarithmic frequency axis with no tolerance band at all, because Table 5 sets none on this quantity and its footnote a applies the phase column only to instruments whose measurement parameter is not based on r.m.s. values: a constant plus 4 degrees, 2 ms of group delay falling to minus 57.2 degrees, and the same delay with a spare pole at 100 Hz falling to minus 95.7. Bottom left, on the same frequency axis, the characteristic phase deviation of Formula (6) inside the Table 5 band, 6 degrees in the central region, 12 in the two skirts and no limit in the two tails, with the four transition frequencies of Table 4 marked: the constant error is graded 4.00 degrees at every pair, the group delay 0.00 degrees at every pair, and the response carrying the spare pole climbs over its limit at the last pair, 8.26 degrees attributed to 63.1 Hz where the central region allows 6, while the other end of that same pair at 79.4 Hz would have sat inside the 12 degrees of the skirt. Right, the same three phase errors on a linear frequency axis with the line through the last pair carried back to f = 0, where the three lines cross at plus 4, 0 and minus 8.26 degrees, each crossing labelled with its own value in the margin: that intercept, without its sign, is what Formula (6) reads" width="96%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# frequencies, design, delay, spare_pole and check come from the blocks above.
+
+# One line, for the response the section grades:
+check.plot()
+plt.show()
+
+# The two panels that share a frequency axis, from the results' fields: the
+# phase error Table 5 never grades, and the characteristic deviation it does.
+errors = {
+    "a constant +4 degrees": np.full(frequencies.shape, 4.0),
+    "2 ms of group delay on its own": delay,
+    "the same delay with a spare pole at 100 Hz": delay + spare_pole,
+}
+attributed = frequencies[:-1]
+limit = vibration.phase_tolerance_degrees("Wk", attributed)
+
+fig, (ax_error, ax_graded) = plt.subplots(2, 1, sharex=True, figsize=(9, 7))
+for label, error in errors.items():
+    graded = vibration.verify_phase_response("Wk", frequencies, design + error)
+    ax_error.semilogx(frequencies, graded.deviation_deg, marker="o", label=label)
+    ax_graded.semilogx(attributed, graded.characteristic_deviation_deg, marker="o")
+ax_graded.plot(attributed, limit, color="#1f77b4", ls="--", drawstyle="steps-post",
+               label="the Table 5 limit")
+ax_error.set_ylabel("Phase error [deg]")
+ax_error.legend(fontsize="small")
+ax_graded.set(xlabel="Frequency [Hz]", ylabel="Characteristic deviation [deg]")
+ax_graded.legend(fontsize="small")
+for ax in (ax_error, ax_graded):
+    ax.grid(True, which="both", alpha=0.3)
+plt.show()
+```
+
+</details>
+
 **What a phase error costs a peak reading.** Annex H is normative, and
 Formula (H.4) is the
 only worked number in the whole phase argument:
@@ -828,6 +952,49 @@ sinusoid, and their mean square depends on where in the cycle the signal was
 cut. The printed band is 0.99 ± 0.05 s, wide enough to absorb it, which is why
 the band is what the verdict is written against and not the closed form.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_running_rms_decay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_running_rms_decay.svg" alt="The ISO 8041-1 clause 5.13 decay test drawn in three panels, for a 1 s averaging time. The top panel plots both running r.m.s. indications falling away from the instant a steady sinusoid at the 15.9155 Hz reference frequency is shut off, in decibels below the value each started from: the linear average sags gently and then falls off a cliff at 1 s, the exponential average falls as a straight line, and each crosses the 10 % criterion at minus 20 decibels inside the printed band drawn around it, 0.99 plus or minus 0.05 s for the linear average and 4.61 plus or minus 0.25 s for the exponential one. The lower left panel magnifies the linear crossing, where the measured trace runs below the closed form rather than around it, in 193 of the 199 samples in which the linear average still has a level at all, and therefore crosses early: the two crossings are labelled where they sit on the criterion rule, the measured one at 0.98 s and the closed form at 0.99 s, and both are well inside the printed band. The lower right panel puts the two columns of Table 11 on one dimensionless axis for the three printed time constants of 0.125, 1 and 8 s: the printed decay time spans about 0.94 to 1.06 times the closed form in every row, and the printed decay rate read as a decay time spans about 0.87 to 1.14, so the time column is the narrower statement of the two." width="96%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+tau = 1.0
+cut = int(cut_s * fs)
+since_cut = np.arange(t.size - cut) / fs
+# The 10 % of the clause, read back out of the closed form rather than typed:
+# the exponential average falls as exp(-t / 2 tau), so the fraction is what
+# that expression is worth at the time running_rms_decay_time returns.
+fraction = np.exp(-vibration.running_rms_decay_time(tau, method="exponential") / (2 * tau))
+
+fig, ax = plt.subplots()
+for method, colour in (("linear", "#1f77b4"), ("exponential", "#2ca02c")):
+    trace = np.asarray(vibration.running_rms(a, fs, integration_time=tau, method=method))
+    relative = trace[cut:] / trace[cut - 1]
+    # The linear average empties one time constant after the cut, and a level
+    # is not defined where the mean square in the window is exactly zero.
+    level_db = np.full(relative.shape, np.nan)
+    level_db[relative > 0.0] = 20.0 * np.log10(relative[relative > 0.0])
+    ax.plot(since_cut, level_db, color=colour, lw=1.8, label=f"{method} average")
+
+    # The printed band the crossing has to land in, from Table 10 or Table 11.
+    printed, tolerance = {
+        row[0]: row[1:] for row in vibration.RUNNING_RMS_DECAY_TIME_S[method]
+    }[tau]
+    ax.axvspan(printed - tolerance, printed + tolerance, color=colour, alpha=0.12)
+
+ax.axhline(20.0 * np.log10(fraction), color="0.4", lw=1.0)
+ax.set(xlim=(0.0, 6.2), ylim=(-34.0, 2.0),
+       xlabel="Time since the signal was cut [s]",
+       ylabel="Indication, relative to its initial value [dB]")
+ax.grid(True, alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 `verify_running_rms_decay` grades one printed row, and only the three time
 constants the two tables print. Anything else is refused rather than judged
 against a band the standard does not give:
@@ -855,11 +1022,12 @@ print(round(20 * np.log10(np.e) / 2.0, 4))   # 4.3429
 
 The closed-form rate of an exponential average is $20\lg(e)/(2\tau) =
 4.3429/\tau$ decibels per second, which for $\tau = 1$ s is 4.3429 and sits in
-the middle of the printed 3.8 to 4.9. But that interval is 0.875 to 1.151 times
-the closed form, while the printed times map to a much narrower interval around
-$2\tau\ln 10$. The two columns are not reciprocals of one another: the time
-column binds and the rate column is the looser statement of the same decay, so
-the verdict is written on the tighter one.
+the middle of the printed 3.8 to 4.9. But that interval is 0.875 to 1.128 times
+the closed form, while the printed time for the same row, 4.61 ± 0.25 s, is
+0.947 to 1.055 times $2\tau\ln 10$: about half as wide, and the other two rows
+divide the same way. The two columns are not reciprocals of one another: the
+time column binds and the rate column is the looser statement of the same
+decay, so the verdict is written on the tighter one.
 
 The third row of Table 2 belongs here too. It allows 2 % between the running
 r.m.s. indication and the linear time-averaged r.m.s. value, both band-limited,
@@ -972,6 +1140,62 @@ The 1, 2 and 4 cycle rows pass, the continuous row passes because the two
 averages agree on a signal that never stops, and the 8 and 16 cycle rows are
 where the confusion shows. A test suite that ran only short bursts would have
 signed the instrument off.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_signal_burst_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_signal_burst_response.svg" alt="Three panels of the ISO 8041-1 signal-burst test. Top left, a minute of the whole-body test record: six bursts of 16 saw-tooth cycles, the first starting at 1 s and one every 10 s after it, each about a second of signal in an otherwise silent record. Top right, one burst on an axis of saw-tooth cycles: a linear rise and a vertical fall repeated 16 times between +1 and −1 m/s^2, with the start and the five printed burst lengths of 1, 2, 4, 8 and 16 cycles marked on the upward zero crossings they fall on. Bottom, spanning the width, the deviation of one meter's indications from the printed cells of the Wk row of Table 8, against burst length: the r.m.s., vibration dose value and exponential MTVV columns lie on zero, while the linear MTVV column, which this meter fills with its exponential average, falls from −2.3 % at one cycle to −11.3 % at eight and −20.4 % at sixteen, leaving the shaded 10 % tolerance band on those last two lengths, and comes back to −0.2 % on the continuous row. The 12 % allowed to the vibration dose value is marked by a pair of short dashed edges hanging off the left of the axis, beside their own ticks." width="96%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# One line, from the verdict above:
+verdict.plot()
+plt.show()
+
+# By hand, from the result's fields: one series per printed column of Table 8,
+# inside the band the same table allows, with the wider allowance of the
+# vibration dose value drawn as a pair of edges rather than as a second band
+# under every column. The continuous row sits past a dotted rule with no line
+# drawn into it, as it does in the figure: Table 6 gives it no burst length,
+# so joining it to the 16 cycle point would draw a trend across a gap that
+# does not exist.
+positions = np.arange(len(verdict.cycle_counts))
+inner = float(np.min(verdict.tolerance_percent))
+outer = float(np.max(verdict.tolerance_percent))
+
+fig, ax = plt.subplots(figsize=(9.0, 4.5))
+ax.axhspan(-inner, inner, color="#9e9e9e", alpha=0.25,
+           label=f"±{inner:.0f} % on every column but one")
+# The wider pair belongs to the vibration dose value alone, so it is drawn as
+# a stub at the edge rather than across the panel, where a rule at -12 % would
+# pass through the ringed 8 cycle cell of a column it does not apply to.
+for edge in (-outer, outer):
+    ax.plot([positions[0] - 0.4, positions[0] + 0.4], [edge, edge],
+            color="#9e9e9e", ls="--", lw=1.0)
+ax.axhline(0.0, color="black", lw=0.8, alpha=0.4)
+ax.axvline(positions[-1] - 0.5, color="#9e9e9e", ls=":", lw=1.0)
+for index, quantity in enumerate(verdict.quantities):
+    deviations = verdict.deviation_percent[:, index]
+    burst_rows, = ax.plot(positions[:-1], deviations[:-1], marker="o",
+                          label=quantity)
+    ax.plot(positions[-1:], deviations[-1:], marker="o", ls="none",
+            color=burst_rows.get_color())
+outside = ~verdict.within_tolerance
+ax.plot(positions[np.nonzero(outside)[0]], verdict.deviation_percent[outside],
+        "o", markersize=14, markerfacecolor="none", markeredgecolor="#d62728",
+        ls="none", label="the cells this meter fails")
+ax.set_xticks(positions)
+ax.set_xticklabels(["1", "2", "4", "8", "16", "continuous"])
+ax.set(xlabel="Saw-tooth cycles per burst",
+       ylabel="Deviation from the printed cell [%]")
+ax.grid(True, axis="x", alpha=0.3)
+ax.legend(fontsize="small")
+plt.show()
+```
+
+</details>
 
 **Two conventions the tables do not print.** The printed cells are the output
 of a simulation nobody published, so two readings of the same clause give two

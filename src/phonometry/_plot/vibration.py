@@ -851,7 +851,13 @@ def plot_weighting_verification(
         )
     ax.plot(freqs, design, color=_C_PRIMARY, lw=2.0, label=_t("design goal", language))
 
-    style_default(kwargs, "color", _C_REFERENCE)
+    # Green for the bands that conform and red for the ones that do not, the
+    # pair ``plot_db_hr_assessment`` already uses for a complies/fails
+    # verdict. The measured series cannot take _C_PRIMARY here, which the
+    # design goal and its band already carry, and it must not take
+    # _C_REFERENCE, which would paint a conforming band in the colour of a
+    # refusal.
+    style_default(kwargs, "color", _C_TERTIARY)
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "markersize", 5)
     style_default(kwargs, "ls", "none")
@@ -861,7 +867,7 @@ def plot_weighting_verification(
         ax.plot(
             freqs[~inside],
             measured[~inside],
-            color=_C_SECONDARY,
+            color=_C_REFERENCE,
             marker="X",
             markersize=9,
             ls="none",
@@ -936,7 +942,13 @@ def plot_phase_verification(
         label=_t("ISO 8041-1 tolerance", language),
     )
 
-    style_default(kwargs, "color", _C_REFERENCE)
+    # Green for the bands that conform and red for the ones that do not, the
+    # pair ``plot_db_hr_assessment`` already uses for a complies/fails
+    # verdict. The measured series cannot take _C_PRIMARY here, which the
+    # design goal and its band already carry, and it must not take
+    # _C_REFERENCE, which would paint a conforming band in the colour of a
+    # refusal.
+    style_default(kwargs, "color", _C_TERTIARY)
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "markersize", 5)
     style_default(kwargs, "ls", "none")
@@ -946,7 +958,7 @@ def plot_phase_verification(
         ax.plot(
             freqs[~inside],
             deviation[~inside],
-            color=_C_SECONDARY,
+            color=_C_REFERENCE,
             marker="X",
             markersize=9,
             ls="none",
@@ -1906,13 +1918,40 @@ def plot_signal_burst_verification(
             )
     ax.axhline(0.0, color=_C_EDGE, lw=0.8)
 
+    # The continuous row has no burst length, so the axis is a list of rows
+    # and not a scale: a line drawn from the longest burst to it would read as
+    # a trend across an interval that does not exist. The bursts are joined to
+    # one another, the continuous row is left as a detached marker, and a rule
+    # says where the list stops being ordered by anything.
+    detached_from = next(
+        (k for k, cycles in enumerate(result.cycle_counts) if cycles is None),
+        len(result.cycle_counts),
+    )
+    if 0 < detached_from < len(result.cycle_counts):
+        ax.axvline(
+            float(detached_from) - 0.5,
+            color=_C_MUTED,
+            ls=":",
+            lw=0.9,
+            zorder=0,
+        )
+
     for index, quantity in enumerate(result.quantities):
         style = dict(kwargs)
         style_default(style, "color", _BURST_COLORS[index % len(_BURST_COLORS)])
         style_default(style, "marker", _BURST_MARKERS[index % len(_BURST_MARKERS)])
         style_default(style, "linewidth", 1.2)
         style.setdefault("label", _t(_BURST_QUANTITY_LABELS[quantity], language))
-        ax.plot(positions, result.deviation_percent[:, index], **style)
+        values = result.deviation_percent[:, index]
+        ax.plot(positions[:detached_from], values[:detached_from], **style)
+        if detached_from < len(result.cycle_counts):
+            detached = {
+                key: value
+                for key, value in style.items()
+                if key not in {"label", "linestyle", "ls"}
+            }
+            detached["ls"] = "none"
+            ax.plot(positions[detached_from:], values[detached_from:], **detached)
 
     ax.set_xticks(list(positions))
     ax.set_xticklabels(

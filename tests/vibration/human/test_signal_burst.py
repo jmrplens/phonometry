@@ -564,6 +564,42 @@ def test_the_plot_draws_one_series_per_printed_column() -> None:
     assert sorted(line.get_ydata()[0] for line in dashed) == [-12.0, 12.0]
 
 
+def test_the_continuous_row_is_not_joined_to_the_longest_burst() -> None:
+    """The continuous row has no burst length, so no line may reach it.
+
+    The x axis is a list of printed rows and not a scale, and a segment drawn
+    from the 16 cycle row to the continuous one would read as a trend over an
+    interval the tables never define.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    ax = _verdict().plot()
+    joined = [
+        line
+        for line in ax.get_lines()
+        if line.get_marker() not in ("", "None") and line.get_linestyle() != "None"
+    ]
+    detached = [
+        line
+        for line in ax.get_lines()
+        if line.get_marker() not in ("", "None") and line.get_linestyle() == "None"
+    ]
+    assert len(joined) == 4
+    assert len(detached) == 4
+    # The joined series stop at the last burst length, position 4 of six.
+    assert all(list(line.get_xdata()) == [0.0, 1.0, 2.0, 3.0, 4.0] for line in joined)
+    assert all(list(line.get_xdata()) == [5.0] for line in detached)
+    # And a rule marks where the ordered part of the axis ends.
+    rules = [
+        line
+        for line in ax.get_lines()
+        if line.get_linestyle() == ":" and len(set(line.get_xdata())) == 1
+    ]
+    assert [line.get_xdata()[0] for line in rules] == [4.5]
+
+
 def test_the_plot_speaks_spanish_and_takes_a_kwarg_alias() -> None:
     pytest.importorskip("matplotlib")
     import matplotlib as mpl
@@ -577,7 +613,9 @@ def test_the_plot_speaks_spanish_and_takes_a_kwarg_alias() -> None:
     )
     assert [text.get_text() for text in ax.get_xticklabels()][-1] == "continua"
     series = [line for line in ax.get_lines() if line.get_marker() not in ("", "None")]
-    assert len(series) == 4
+    # Two artists per column: the joined burst lengths and the detached
+    # continuous row.
+    assert len(series) == 8
     assert all(line.get_color() == "k" for line in series)
 
 

@@ -810,3 +810,61 @@ def test_the_decay_functions_check_what_they_are_given(
 ) -> None:
     with pytest.raises(ValueError, match=match):
         call()  # type: ignore[operator]
+
+
+# ---------------------------------------------------------------------------
+# The figures
+# ---------------------------------------------------------------------------
+def _refused_sweep() -> vibration.WeightingVerification:
+    """A Wk sweep with one band 15 % low in the central region."""
+    bands = np.array([-3, 0, 3, 6, 9, 12, 15, 18, 19])
+    frequencies = 10.0 ** (bands / 10.0)
+    measured = vibration.weighting_factors("Wk", frequencies).copy()
+    measured[6] *= 0.85
+    return vibration.verify_weighting("Wk", frequencies, measured)
+
+
+def test_the_weighting_plot_paints_a_refusal_red_and_a_pass_green() -> None:
+    """Colour carries the verdict, and it may not carry it backwards.
+
+    Red is what the corpus paints a refusal in (``plot_db_hr_assessment``
+    grades its rows in the same pair), so the series inside the tolerance
+    cannot be the red one: a reader who reads only the colours would take the
+    conforming bands for the failures.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    ax = _refused_sweep().plot()
+    series = {
+        line.get_label(): line
+        for line in ax.get_lines()
+        if line.get_marker() not in ("", "None")
+    }
+    assert set(series) == {"within tolerance", "outside tolerance"}
+    assert series["within tolerance"].get_color() == "#2ca02c"
+    assert series["outside tolerance"].get_color() == "#d62728"
+    # And the one refused band is the only point on the refusal series.
+    assert len(series["outside tolerance"].get_xdata()) == 1
+
+
+def test_the_phase_plot_uses_the_same_pair_as_the_weighting_plot() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    bands = np.arange(-3, 20)
+    frequencies = 10.0 ** (bands / 10.0)
+    design = vibration.verify_phase_response(
+        "Wk", frequencies, np.zeros_like(frequencies)
+    ).design_phase_deg
+    spare_pole = -np.degrees(np.arctan(frequencies / 100.0))
+    ax = vibration.verify_phase_response("Wk", frequencies, design + spare_pole).plot()
+    series = {
+        line.get_label(): line
+        for line in ax.get_lines()
+        if line.get_marker() not in ("", "None")
+    }
+    assert series["within tolerance"].get_color() == "#2ca02c"
+    assert series["outside tolerance"].get_color() == "#d62728"

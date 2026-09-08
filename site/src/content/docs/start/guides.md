@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 123 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 124 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -110,7 +110,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and twenty-three guides sit in twelve topics, and each topic has its
+This page is the map. A hundred and twenty-four guides sit in twelve topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -529,6 +529,9 @@ ISO 2631-1/-2/-4/-5, ISO 5349-1/-2 and ISO 8041-1.
 - [Multiple-shock whole-body vibration (ISO 2631-5)](/phonometry/vibration/human/multiple-shock-vibration/):
   the seat-to-spine transfer function, the acceleration dose, and the
   cumulative stress variable behind the lumbar injury probability.
+- [What a seat does to the vibration (ISO 10326-1)](/phonometry/vibration/human/seat-vibration/):
+  the SEAT factor of a laboratory seat test, the correction to the intended
+  input and the transmissibility at resonance.
 
 **[Machinery](/phonometry/vibration/machinery/)**
 

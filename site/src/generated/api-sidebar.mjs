@@ -191,6 +191,7 @@ export const apiSections = {
       'reference/api/vibration/transfer-stiffness',
       'reference/api/vibration/exposure',
       'reference/api/vibration/multiple-shock',
+      'reference/api/vibration/seat-vibration',
     ],
   },
   'environment': {

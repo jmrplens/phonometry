@@ -347,3 +347,84 @@ def test_power_injection_labels() -> None:
 
     with pytest.raises(ValueError, match="Unknown language"):
         res.plot(language="xx")
+
+
+def test_seat_transmission_draws_every_run_and_both_means() -> None:
+    """The bars are the runs themselves, and the lines the means the SEAT is of."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+
+    seat_runs = (0.72, 0.70, 0.71)
+    platform_runs = (1.02, 1.00, 0.99)
+    res = vibration.seat_transmission(seat_runs, platform_runs)
+
+    ax = res.plot()
+    bars = [patch.get_height() for patch in ax.patches]
+    assert bars == pytest.approx([*platform_runs, *seat_runs])
+    # Platform and seat sit on either side of the run number, never on top.
+    centres = [patch.get_x() + patch.get_width() / 2 for patch in ax.patches]
+    assert centres[:3] == pytest.approx([0.82, 1.82, 2.82])
+    assert centres[3:] == pytest.approx([1.18, 2.18, 3.18])
+    assert list(ax.get_xticks()) == pytest.approx([1.0, 2.0, 3.0])
+
+    means = sorted(line.get_ydata()[0] for line in ax.lines)
+    assert means == pytest.approx(
+        sorted((res.seat_acceleration, res.platform_acceleration))
+    )
+
+    assert ax.get_xlabel() == "Test run"
+    assert ax.get_ylabel() == "Weighted r.m.s. acceleration [m/s²]"
+    assert ax.get_title() == "Seat transmission (ISO 10326-1): SEAT = 0.71"
+    # Each mean is listed right after the set it averages.
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert labels == [
+        "platform $a_\\mathrm{wP}$",
+        "mean 1.00",
+        "seat $a_\\mathrm{wS}$",
+        "mean 0.71",
+    ]
+
+
+def test_seat_transmission_spanish_labels() -> None:
+    """Every string of the figure, including the two means, crosses over."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+
+    res = vibration.seat_transmission((0.72, 0.70, 0.71), (1.02, 1.00, 0.99))
+
+    ax = res.plot(language="es")
+    assert ax.get_xlabel() == "Pasada"
+    assert ax.get_ylabel() == "Aceleración eficaz ponderada [m/s²]"
+    assert ax.get_title() == "Transmisión del asiento (ISO 10326-1): SEAT = 0,71"
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert labels == [
+        "plataforma $a_\\mathrm{wP}$",
+        "media 1,00",
+        "asiento $a_\\mathrm{wS}$",
+        "media 0,71",
+    ]
+
+    with pytest.raises(ValueError, match="Unknown language"):
+        res.plot(language="xx")
+
+
+def test_seat_transmission_forwards_kwargs_to_the_seat_bars() -> None:
+    """The seat set is the one a caller restyles; the platform stays put."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+
+    res = vibration.seat_transmission((0.72, 0.70, 0.71), (1.02, 1.00, 0.99))
+    ax = res.plot(color="#123456", label="cushion")
+
+    assert [patch.get_facecolor()[:3] for patch in ax.patches[3:]] == [
+        pytest.approx((0x12 / 255, 0x34 / 255, 0x56 / 255))
+    ] * 3
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert labels[2] == "cushion"
+    assert labels[0] == "platform $a_\\mathrm{wP}$"

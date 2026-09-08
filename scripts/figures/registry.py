@@ -568,6 +568,7 @@ from .underwater import (
 )
 from .vibration import (
     generate_bearing_fault_envelope,
+    generate_building_frequency_prediction,
     generate_daily_vibration_exposure,
     generate_envelope_chain_steps,
     generate_experimental_sea_clf,
@@ -739,6 +740,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Effects on structures (DIN 4150-3): the guideline values a building,
     # a topmost floor plane and a buried pipe are judged by.
     generate_structural_damage_guidelines,
+    # Building response (ISO 4866 Annex D): the four empirical predictors of
+    # the frequency those guideline values are read at.
+    generate_building_frequency_prediction,
     generate_experimental_sea_clf,
     generate_plateau_transmission_loss,
     generate_orthotropic_transmission_loss,

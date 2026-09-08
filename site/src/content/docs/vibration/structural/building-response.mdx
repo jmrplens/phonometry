@@ -1,0 +1,229 @@
+---
+title: "Predicting a building's own frequency"
+description: "The empirical predictors of ISO 4866 Annex D: the storey rule, the three code forms for the period with the coefficient ranges they span, the f = 46/h fit to 163 measured buildings with its ± 50 % band, and the damping values nothing predicts."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Mechanical vibration and shock — Vibration of fixed structures — Guidelines for the measurement of vibrations and evaluation of their effects on structures"
+    designation: "ISO 4866:2010"
+    primary: true
+    note: "Annex D: the storey rule and the three code forms of D.2 with their coefficient ranges, the f = 46/h fit and the ± 50 % accuracy of D.3, and the measured damping values of D.4. The building and foundation classification of Annex B and the response ranges of Annex A are described here and not implemented."
+---
+
+import Scope from '../../../../components/Scope.astro';
+import ScopeClaim from '../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
+[Vibration damage to structures](/phonometry/vibration/structural/structural-damage/)
+reads a measured velocity against a guideline value that depends on frequency,
+and in the topmost floor plane it stops depending on frequency because the
+building is answering at its own. Both readings assume you know roughly where
+that own frequency is. This page is what ISO 4866 says to do when you cannot
+measure it.
+
+Measure it if you can: that is the main body of the standard and it comes
+first. Annex D is the fallback, for when the excitation is too weak to bring
+the building out, the damping too high, or the subcomponents too loud to
+separate the fundamental mode from them. It offers four predictors and is
+candid about every one.
+
+## 1. Four predictors, and what they are made of
+
+The simplest counts storeys. $f = 10/n$ hertz, which is the same rule
+DIN 4150-3 prints in its 6.4 and this library already publishes as
+`storey_fundamental_frequency`; here it is the ``"storeys"`` model, so the
+four predictors can be compared through one entry point.
+
+The other three are the shapes the period $T$ takes in national codes, each
+with a coefficient the codes disagree about:
+
+$$
+T = k_1 h \qquad
+T = \frac{k_2 h}{\sqrt{b}} \qquad
+T = \frac{k_3 h}{\sqrt{b}} \sqrt{\frac{h}{h + b}}
+$$
+
+with $h$ the height and $b$ the width parallel to the force, both in metres.
+The first knows only how tall the building is. The second adds how wide it is,
+which is what actually resists the sway. The third adds a slenderness factor,
+$\sqrt{h/(h+b)}$, which is always below 1 and so shortens the period relative
+to the second form. It shortens it *least* for a tall narrow building, where
+the factor approaches 1, and most for a squat wide one.
+
+D.2 prints a **range** for each coefficient rather than a value: 0,014 to 0,03
+for $k_1$, 0,087 to 0,109 for $k_2$, 0,06 to 0,08 for $k_3$. The range is the
+spread across the codes it collected them from, and the annex offers no way to
+choose inside it, so `fundamental_period` takes the midpoint unless you name a
+coefficient.
+
+The four predictors take different arguments, so comparing them means
+describing the same building twice: eighteen storeys at a shade over three
+metres each is the sixty metres the other three are given.
+
+```python
+from phonometry import vibration
+
+# The same sixty-metre building, fifteen wide, by each of the four predictors.
+for model, kwargs in (
+    ("storeys", {"storeys": 18}),        # 18 storeys, about 3.3 m each
+    ("height", {"height_m": 60.0}),
+    ("height_width", {"height_m": 60.0, "width_m": 15.0}),
+    ("slenderness", {"height_m": 60.0, "width_m": 15.0}),
+):
+    f = vibration.fundamental_frequency(model, **kwargs)
+    print(model, round(f, 2), "Hz")
+# storeys 0.56 Hz / height 0.76 Hz / height_width 0.66 Hz / slenderness 1.03 Hz
+```
+
+## 2. The fit to measurement, and the error it admits
+
+D.3 leaves the codes aside and fits one curve to data: 163 rectangular-plan
+buildings give $f = 46/h$ hertz, equivalently $T = 0{,}022\,h$ seconds. Two
+things about that line are worth carrying away.
+
+The first is quiet and this library pins it with a test: **0,022 is also the
+middle of the $k_1$ range** the codes span. The oldest and crudest of the code
+forms, taken at the centre of its spread, is the measured fit.
+
+The second is the annex being honest about accuracy. Around that line, errors
+of **± 50 % are not uncommon**, and D.3 says this is typical of what an
+empirical formula can do. It then says something a reader does not expect: the
+correlation between *computed* frequencies, from a standard structural model,
+and measured ones is **worse** than the correlation with $46/h$, because a
+model is only as good as its idea of what the building is made of.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/building_frequency_prediction.svg" alt="Two panels. The left panel plots fundamental frequency against building height on logarithmic axes from six to two hundred and fifty metres: the f = 46/h fit as a solid line inside a shaded plus-or-minus fifty per cent band, with the three code forms drawn over it, the height form lying on the fit, and the height-and-width and slenderness forms each crossing it from below to above as the building grows taller, the slenderness form crossing at about thirty metres and the height-and-width form at about eighty. The right panel gives, for one sixty-metre building fifteen metres wide, the frequency span each coefficient range allows as a horizontal bar: 0,56 to 1,19 hertz for the height form, 0,59 to 0,74 for the height-and-width form and 0,90 to 1,20 for the slenderness form, against a vertical line at the 0,77 hertz the fit gives." width="94%" loading="eager" />
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration
+
+heights = np.logspace(np.log10(6.0), np.log10(250.0), 300)
+fit = np.asarray(vibration.height_fundamental_frequency(heights))
+
+fig, ax = plt.subplots()
+ax.fill_between(
+    heights,
+    fit * (1.0 - vibration.EMPIRICAL_FREQUENCY_TOLERANCE),
+    fit * (1.0 + vibration.EMPIRICAL_FREQUENCY_TOLERANCE),
+    alpha=0.2,
+    label=r"$\pm$50 %",
+)
+ax.loglog(heights, fit, label="$f = 46/h$")
+
+# The three code forms over it, for a building four times as tall as it is
+# wide, which is what makes them comparable on one axis.
+for model in ("height", "height_width", "slenderness"):
+    values = [
+        vibration.fundamental_frequency(
+            model,
+            height_m=float(h),
+            **({} if model == "height" else {"width_m": float(h) / 4.0}),
+        )
+        for h in heights
+    ]
+    ax.loglog(heights, values, "--", label=model)
+
+ax.set(xlabel="Building height $h$ [m]", ylabel="Fundamental frequency $f$ [Hz]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+
+# One estimate, drawn on the same line with its band:
+res = vibration.estimate_fundamental_frequency(
+    "height_width", height_m=60.0, width_m=15.0
+)
+print(round(res.frequency_hz, 2), tuple(round(b, 2) for b in res.bounds_hz))
+# 0.66 (0.33, 0.99)
+res.plot()
+plt.show()
+```
+
+</details>
+
+*The predictors against each other. The height form sits on the measured fit
+because the middle of its coefficient range is the fit's own coefficient. The
+right panel is the cost of the choice: on one building, picking a code rather
+than a formula moves the answer by a factor of two.*
+
+## 3. Damping, which nothing predicts
+
+D.4 is short and the shortness is the message. No proven method of predicting
+damping exists. What the annex reports is measurement: between **0,5 % and
+2,1 %** of critical on ten buildings where soil-structure interaction was
+negligible, with the two orthogonal translation modes of the same building
+often far apart. Damping is partly a function of construction procedure and
+workmanship, so anticipate large errors.
+
+```python
+from phonometry import vibration
+
+low, high = vibration.DAMPING_RATIO_RANGE
+print(f"{100 * low:g} % to {100 * high:g} % of critical")   # 0.5 % to 2.1 %
+```
+
+The library publishes the range and no estimator, which is the honest shape of
+D.4: a number to sanity-check a measured decay against, not one to assume.
+
+## What this guide covers
+
+<Scope>
+<ScopeClaim status="covered" label="Covered">
+The four **empirical predictors** of Annex D: the storey rule of D.2, the
+three code forms (D.1), (D.2) and (D.3) with the coefficient ranges D.2 prints
+for each, and the $f = 46/h$ fit of D.3, as frequencies or as periods.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+The **error** those predictions carry: the ± 50 % band of D.3, published as a
+constant and as bounds around any prediction.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+The **damping range** measured in D.4, as a range and not as an estimator,
+because the annex offers none.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="Not covered">
+**Nothing here measures a frequency.** The main body of ISO 4866, which is the
+measurement this annex is the fallback for, is not implemented: no transducer
+requirements, no data acquisition, no modal extraction from a measured
+response.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**The classifications are not here.** Annex B classifies buildings, foundations
+and soils into the groups and classes that decide what tolerance a structure
+gets, and Annex A gives ranges of structural response; both are described in
+the standard and neither is implemented. Annex E, the vibrational interaction
+of a foundation with the soil, is likewise out.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**No computer model.** D.3 names the ESDU methods for core, shear and frame
+buildings, and says a method not calibrated against reliable experimental data
+should not be assumed more accurate than the empirical predictors. None of
+them is implemented here, and this page is not a substitute for one.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## See also
+
+- [Vibration damage to structures (DIN 4150-3)](/phonometry/vibration/structural/structural-damage/):
+  the damage question a building frequency is estimated for, and where the
+  storey rule also appears; its guideline values are read at the dominant
+  frequency of the measured vibration, not at the frequency predicted here.
+- [Evaluating machine vibration (ISO 20816-1)](/phonometry/vibration/machinery/machine-vibration-evaluation/):
+  the same idea of a frequency-shaped criterion, applied to a machine.
+- [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/vibration/structural/mechanical-mobility/):
+  the vocabulary a measured response is expressed in, when there is one.
+
+</SeeAlso>

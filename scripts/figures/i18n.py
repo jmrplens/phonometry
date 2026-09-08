@@ -402,6 +402,22 @@ _ES_EXACT = {
     "welded steel": "acero soldado",
     "concrete,\nflanged metal": "hormigón,\nmetal con bridas",
     "masonry,\nplastic": "obra de fábrica,\nplástico",
+    # building_frequency_prediction (ISO 4866 Annex D): the empirical
+    # predictors of a building's fundamental frequency.
+    "Empirical Fundamental Frequency of a Building (ISO 4866 Annex D)": "Frecuencia fundamental empírica de un edificio (ISO 4866, anexo D)",
+    "Four Predictors of One Frequency": "Cuatro predictores de una frecuencia",
+    "What the Choice of Code Costs, on One Building": "Lo que cuesta elegir norma, en un edificio",
+    "Building height $h$ (m)": "Altura del edificio $h$ (m)",
+    "Fundamental frequency $f$ (Hz)": "Frecuencia fundamental $f$ (Hz)",
+    "$\\pm$50 %, which D.3 calls not uncommon": "$\\pm$50 %, que D.3 llama nada raro",
+    # The four readings this figure writes out. Exact entries rather than a
+    # pattern: every _ES_PATTERNS entry is part of the fingerprint each clip
+    # is sealed with, so adding one there restamps forty-three clips that have
+    # nothing to do with this figure.
+    "0.56 to 1.19 Hz": "0,56 a 1,19 Hz",
+    "0.59 to 0.74 Hz": "0,59 a 0,74 Hz",
+    "0.90 to 1.20 Hz": "0,90 a 1,20 Hz",
+    "$f = 46/h$: 0.77 Hz": "$f = 46/h$: 0,77 Hz",
     "limit of zone A ($Z$ = 1)": "límite de la zona A ($Z$ = 1)",
     "limit of zone B ($Z$ = 2.56)": "límite de la zona B ($Z$ = 2,56)",
     "limit of zone C ($Z$ = 6.4)": "límite de la zona C ($Z$ = 6,4)",

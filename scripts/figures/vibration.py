@@ -2638,6 +2638,145 @@ def generate_structural_damage_guidelines(output_dir: str) -> None:
     plt.close()
 
 
+def generate_building_frequency_prediction(output_dir: str) -> None:
+    """ISO 4866 Annex D: four predictors of one frequency, and their spread."""
+    print("Generating building_frequency_prediction...")
+    from phonometry import vibration
+
+    # A building of ordinary proportions: four times as tall as it is wide,
+    # which is what makes the three code forms comparable on one axis.
+    aspect = 4.0
+    heights = np.logspace(np.log10(6.0), np.log10(250.0), 300)
+    fit = np.asarray(vibration.height_fundamental_frequency(heights))
+
+    fig, (ax_fit, ax_spread) = plt.subplots(
+        1, 2, figsize=(12.4, 5.6), gridspec_kw={"width_ratios": [1.25, 1.0]}
+    )
+
+    ax_fit.fill_between(
+        heights,
+        fit * (1.0 - vibration.EMPIRICAL_FREQUENCY_TOLERANCE),
+        fit * (1.0 + vibration.EMPIRICAL_FREQUENCY_TOLERANCE),
+        color=theme_fill(COLOR_PRIMARY, ax_fit),
+        zorder=0,
+        label="$\\pm$50 %, which D.3 calls not uncommon",
+    )
+    ax_fit.plot(
+        heights, fit, color=COLOR_PRIMARY, linewidth=2.0, label="$f = 46/h$ (D.3)"
+    )
+    # (model, curve label, short label for the bar rows, colour, dash)
+    forms = (
+        ("height", "$T = k_1 h$ (D.1)", "$T = k_1 h$", COLOR_TERTIARY, "--"),
+        (
+            "height_width",
+            "$T = k_2 h/\\sqrt{b}$ (D.2)",
+            "$T = k_2 h/\\sqrt{b}$",
+            COLOR_QUATERNARY,
+            "-.",
+        ),
+        (
+            "slenderness",
+            "$T = k_3 (h/\\sqrt{b})\\sqrt{h/(h+b)}$ (D.3)",
+            "$T = k_3 (h/\\sqrt{b})\\sqrt{h/(h+b)}$",
+            COLOR_SECONDARY,
+            ":",
+        ),
+    )
+    for model, label, _short, colour, style in forms:
+        # The height form is written on the height alone and refuses a width,
+        # so the width goes only to the two forms that use one.
+        if model == "height":
+            values = np.array(
+                [
+                    vibration.fundamental_frequency(model, height_m=float(h))
+                    for h in heights
+                ]
+            )
+        else:
+            values = np.array(
+                [
+                    vibration.fundamental_frequency(
+                        model, height_m=float(h), width_m=float(h) / aspect
+                    )
+                    for h in heights
+                ]
+            )
+        ax_fit.plot(
+            heights, values, color=colour, linewidth=1.6, linestyle=style, label=label
+        )
+    ax_fit.set_xscale("log")
+    ax_fit.set_yscale("log")
+    ax_fit.set_xlabel("Building height $h$ (m)")
+    ax_fit.set_ylabel("Fundamental frequency $f$ (Hz)")
+    ax_fit.set_title("Four Predictors of One Frequency", pad=10)
+    ax_fit.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax_fit.set_axisbelow(True)
+    ax_fit.legend(loc="lower left", fontsize=8.5)
+
+    # Right: what the choice of code costs, on one 60 m building 15 m wide.
+    tall, wide = 60.0, 15.0
+    rows = []
+    for model, _label, short, colour, _style in forms:
+        low, high = vibration.PERIOD_COEFFICIENT_RANGES[model]
+        if model == "height":
+            span = [
+                vibration.fundamental_frequency(model, height_m=tall, coefficient=k)
+                for k in (low, high)
+            ]
+        else:
+            span = [
+                vibration.fundamental_frequency(
+                    model, height_m=tall, width_m=wide, coefficient=k
+                )
+                for k in (low, high)
+            ]
+        rows.append((short, min(span), max(span), colour))
+    fitted = float(vibration.height_fundamental_frequency(tall))
+    for index, (label, low, high, colour) in enumerate(rows):
+        ax_spread.barh(
+            index, high - low, left=low, height=0.42, color=colour, label=label
+        )
+        # Over a gridline, so the reading carries a chip of its own.
+        ax_spread.text(
+            high + 0.012,
+            index,
+            f"{low:.2f} to {high:.2f} Hz",
+            va="center",
+            ha="left",
+            fontsize=8.5,
+            color=COLOR_FG,
+            bbox={
+                "boxstyle": "round,pad=0.25",
+                "facecolor": COLOR_PANEL,
+                "edgecolor": COLOR_GRID,
+            },
+        )
+    ax_spread.axvline(
+        fitted,
+        color=COLOR_PRIMARY,
+        linewidth=1.6,
+        label=f"$f = 46/h$: {fitted:.2f} Hz",
+    )
+    ax_spread.set_yticks(range(len(rows)))
+    ax_spread.set_yticklabels([label for label, _, _, _ in rows], fontsize=9)
+    ax_spread.invert_yaxis()
+    ax_spread.set_xlim(0.0, 1.62)
+    ax_spread.set_xlabel("Fundamental frequency $f$ (Hz)")
+    ax_spread.set_title("What the Choice of Code Costs, on One Building", pad=10)
+    ax_spread.grid(False)
+    ax_spread.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, axis="x")
+    ax_spread.set_axisbelow(True)
+    ax_spread.legend(loc="lower left", fontsize=8.5)
+
+    fig.suptitle(
+        "Empirical Fundamental Frequency of a Building (ISO 4866 Annex D)",
+        fontsize=13,
+    )
+    plt.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
+    save_figure(output_dir, "building_frequency_prediction.svg")
+    plt.close()
+
+
 def _paired_bars(
     ax: Axes,
     y: np.ndarray,

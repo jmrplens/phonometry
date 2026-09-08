@@ -1,0 +1,237 @@
+---
+title: "Predecir la frecuencia propia de un edificio"
+description: "Los predictores empíricos del anexo D de ISO 4866: la regla por plantas, las tres formas normativas del periodo con los intervalos de coeficiente que abarcan, el ajuste f = 46/h a 163 edificios medidos con su banda del ± 50 % y los valores de amortiguamiento que nadie predice."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Mechanical vibration and shock — Vibration of fixed structures — Guidelines for the measurement of vibrations and evaluation of their effects on structures"
+    designation: "ISO 4866:2010"
+    primary: true
+    note: "Anexo D: la regla por plantas y las tres formas normativas del D.2 con sus intervalos de coeficiente, el ajuste f = 46/h y la exactitud del ± 50 % del D.3, y los valores de amortiguamiento medidos del D.4. La clasificación de edificios y cimentaciones del anexo B y los rangos de respuesta del anexo A se describen aquí y no se implementan."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+[Daños en estructuras por vibración](/phonometry/es/vibration/structural/structural-damage/)
+lee una velocidad medida frente a un valor de referencia que depende de la
+frecuencia, y en el plano de la última planta deja de depender de ella porque
+el edificio responde en la suya. Las dos lecturas dan por hecho que sabes más o
+menos dónde está esa frecuencia propia. Esta página es lo que dice ISO 4866
+cuando no puedes medirla.
+
+Mídela si puedes: eso es el cuerpo de la norma y va primero. El anexo D es el
+recurso de reserva, para cuando la excitación es demasiado débil para sacar al
+edificio, el amortiguamiento demasiado alto o los subcomponentes demasiado
+ruidosos para separar de ellos el modo fundamental. Ofrece cuatro predictores y
+es franco con todos.
+
+## 1. Cuatro predictores, y de qué están hechos
+
+El más simple cuenta plantas. $f = 10/n$ hercios, que es la misma regla que
+imprime DIN 4150-3 en su 6.4 y que esta biblioteca ya publica como
+`storey_fundamental_frequency`; aquí es el modelo ``"storeys"``, para poder
+comparar los cuatro predictores por la misma puerta.
+
+Los otros tres son las formas que toma el periodo $T$ en las normas nacionales,
+cada una con un coeficiente en el que esas normas no se ponen de acuerdo:
+
+$$
+T = k_1 h \qquad
+T = \frac{k_2 h}{\sqrt{b}} \qquad
+T = \frac{k_3 h}{\sqrt{b}} \sqrt{\frac{h}{h + b}}
+$$
+
+con $h$ la altura y $b$ la anchura paralela a la fuerza, las dos en metros. La
+primera solo sabe lo alto que es el edificio. La segunda añade lo ancho que es,
+que es lo que de verdad se opone al balanceo. La tercera añade un factor de
+esbeltez, $\sqrt{h/(h+b)}$, siempre menor que 1, que acorta el periodo respecto
+a la segunda forma. Lo acorta *menos* en un edificio alto y estrecho, donde el
+factor se acerca a 1, y más en uno bajo y ancho.
+
+El D.2 imprime un **intervalo** para cada coeficiente en vez de un valor: de
+0,014 a 0,03 para $k_1$, de 0,087 a 0,109 para $k_2$, de 0,06 a 0,08 para
+$k_3$. El intervalo es la dispersión entre las normas de las que los recogió, y
+el anexo no da ningún criterio para elegir dentro de él, así que
+`fundamental_period` toma el punto medio salvo que se le indique un
+coeficiente.
+
+Los cuatro predictores toman argumentos distintos, así que compararlos obliga a
+describir el mismo edificio dos veces: dieciocho plantas de poco más de tres
+metros son los sesenta metros que reciben los otros tres.
+
+```python
+from phonometry import vibration
+
+# El mismo edificio de sesenta metros, quince de ancho, por cada uno de los cuatro.
+for model, kwargs in (
+    ("storeys", {"storeys": 18}),        # 18 plantas, de unos 3,3 m
+    ("height", {"height_m": 60.0}),
+    ("height_width", {"height_m": 60.0, "width_m": 15.0}),
+    ("slenderness", {"height_m": 60.0, "width_m": 15.0}),
+):
+    f = vibration.fundamental_frequency(model, **kwargs)
+    print(model, round(f, 2), "Hz")
+# storeys 0.56 Hz / height 0.76 Hz / height_width 0.66 Hz / slenderness 1.03 Hz
+```
+
+## 2. El ajuste a la medida, y el error que admite
+
+El D.3 deja las normas a un lado y ajusta una curva a los datos: 163 edificios
+de planta rectangular dan $f = 46/h$ hercios, o lo que es lo mismo
+$T = 0{,}022\,h$ segundos. De esa recta merece la pena llevarse dos cosas.
+
+La primera es discreta y esta biblioteca la fija con un test: **0,022 es
+también el punto medio del intervalo de $k_1$** que abarcan las normas. La más
+antigua y tosca de las formas normativas, tomada en el centro de su
+dispersión, es el ajuste medido.
+
+La segunda es la franqueza del anexo con la exactitud. Alrededor de esa recta,
+errores del **± 50 % no son raros**, y el D.3 dice que eso es lo típico de lo
+que puede dar una fórmula empírica. Y añade algo que el lector no espera: la
+correlación entre las frecuencias *calculadas* con un modelo estructural al uso
+y las medidas es **peor** que la correlación con $46/h$, porque un modelo vale
+lo que valga su idea de con qué está hecho el edificio.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/building_frequency_prediction.svg" alt="Dos paneles. El panel izquierdo representa la frecuencia fundamental frente a la altura del edificio en ejes logarítmicos, de seis a doscientos cincuenta metros: el ajuste f = 46/h como línea continua dentro de una banda sombreada del más menos cincuenta por ciento, con las tres formas normativas dibujadas encima, la forma en altura sobre el ajuste, y las de altura y anchura y de esbeltez cruzándolo de abajo arriba conforme crece el edificio, la de esbeltez hacia los treinta metros y la de altura y anchura hacia los ochenta. El panel derecho da, para un edificio de sesenta metros y quince de ancho, el intervalo de frecuencia que permite cada rango de coeficiente como una barra horizontal: de 0,56 a 1,19 hercios la forma en altura, de 0,59 a 0,74 la de altura y anchura y de 0,90 a 1,20 la de esbeltez, frente a una línea vertical en los 0,77 hercios que da el ajuste." width="94%" loading="eager" />
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration
+
+heights = np.logspace(np.log10(6.0), np.log10(250.0), 300)
+fit = np.asarray(vibration.height_fundamental_frequency(heights))
+
+fig, ax = plt.subplots()
+ax.fill_between(
+    heights,
+    fit * (1.0 - vibration.EMPIRICAL_FREQUENCY_TOLERANCE),
+    fit * (1.0 + vibration.EMPIRICAL_FREQUENCY_TOLERANCE),
+    alpha=0.2,
+    label=r"$\pm$50 %",
+)
+ax.loglog(heights, fit, label="$f = 46/h$")
+
+# Las tres formas normativas encima, para un edificio cuatro veces más alto
+# que ancho, que es lo que las hace comparables en un mismo eje.
+for model in ("height", "height_width", "slenderness"):
+    values = [
+        vibration.fundamental_frequency(
+            model,
+            height_m=float(h),
+            **({} if model == "height" else {"width_m": float(h) / 4.0}),
+        )
+        for h in heights
+    ]
+    ax.loglog(heights, values, "--", label=model)
+
+ax.set(xlabel="Altura del edificio $h$ [m]",
+       ylabel="Frecuencia fundamental $f$ [Hz]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+
+# Una estimación, dibujada sobre esa misma recta con su banda:
+res = vibration.estimate_fundamental_frequency(
+    "height_width", height_m=60.0, width_m=15.0
+)
+print(round(res.frequency_hz, 2), tuple(round(b, 2) for b in res.bounds_hz))
+# 0.66 (0.33, 0.99)
+res.plot(language="es")
+plt.show()
+```
+
+</details>
+
+*Los predictores unos frente a otros. La forma en altura cae sobre el ajuste
+medido porque el centro de su intervalo de coeficiente es el coeficiente del
+propio ajuste. El panel de la derecha es lo que cuesta la elección: en un
+edificio, elegir norma en lugar de fórmula mueve el resultado un factor de
+dos.*
+
+## 3. Amortiguamiento, que no predice nadie
+
+El D.4 es corto y su brevedad es el mensaje. No existe ningún método probado
+para predecir el amortiguamiento. Lo que el anexo aporta son medidas: entre el
+**0,5 % y el 2,1 %** del crítico en diez edificios donde la interacción
+suelo-estructura era despreciable, y con los dos modos de traslación
+ortogonales de un mismo edificio a menudo muy separados. El amortiguamiento
+depende en parte del procedimiento de construcción y de la ejecución, así que
+cuenta con errores grandes.
+
+```python
+from phonometry import vibration
+
+low, high = vibration.DAMPING_RATIO_RANGE
+print(f"{100 * low:g} % to {100 * high:g} % of critical")   # 0.5 % to 2.1 %
+```
+
+La biblioteca publica el intervalo y ningún estimador, que es la forma honesta
+del D.4: un número con el que contrastar una caída medida, no uno que suponer.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+Los cuatro **predictores empíricos** del anexo D: la regla por plantas del D.2,
+las tres formas normativas (D.1), (D.2) y (D.3) con los intervalos de
+coeficiente que el D.2 imprime para cada una, y el ajuste $f = 46/h$ del D.3,
+como frecuencias o como periodos.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+El **error** que llevan esas predicciones: la banda del ± 50 % del D.3,
+publicada como constante y como cotas alrededor de cualquier predicción.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+El **intervalo de amortiguamiento** medido en el D.4, como intervalo y no como
+estimador, porque el anexo no ofrece ninguno.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+**Aquí no se mide ninguna frecuencia.** El cuerpo de ISO 4866, que es la medida
+para la que este anexo es el recurso de reserva, no está implementado: ni
+requisitos de captadores, ni adquisición de datos, ni extracción modal de una
+respuesta medida.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Las clasificaciones no están.** El anexo B clasifica edificios, cimentaciones
+y suelos en los grupos y clases que deciden qué tolerancia le corresponde a una
+estructura, y el anexo A da rangos de respuesta estructural; los dos se
+describen en la norma y ninguno se implementa. El anexo E, la interacción
+vibratoria entre la cimentación y el terreno, también queda fuera.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ningún modelo de ordenador.** El D.3 cita los métodos ESDU para edificios de
+núcleo, de cortante y de pórtico, y dice que a un método no calibrado contra
+datos experimentales fiables no se le debe suponer más exactitud que a los
+predictores empíricos. Ninguno de ellos está aquí, y esta página no sustituye a
+uno.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Daños en estructuras por vibración (DIN 4150-3)](/phonometry/es/vibration/structural/structural-damage/):
+  la pregunta por el daño para la que se estima una frecuencia de edificio, y
+  donde también aparece la regla por plantas; sus valores de referencia se leen
+  a la frecuencia dominante de la vibración medida, no a la que aquí se
+  predice.
+- [Evaluación de la vibración de máquinas (ISO 20816-1)](/phonometry/es/vibration/machinery/machine-vibration-evaluation/):
+  la misma idea de criterio conformado en frecuencia, aplicada a una máquina.
+- [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/vibration/structural/mechanical-mobility/):
+  el vocabulario en el que se expresa una respuesta medida, cuando la hay.
+
+</SeeAlso>

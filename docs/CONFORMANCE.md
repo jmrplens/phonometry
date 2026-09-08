@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**901/901 conformance checks pass** across 74 domains and 406 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**916/916 conformance checks pass** across 75 domains and 407 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -667,6 +667,29 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | DIN 4150-3:1999 Bild 1 | Guideline vi inside a band, dwellings, 30 Hz | 10 mm/s (+/-0.005 mm/s) | 10 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
 | DIN 4150-3:1999 Bild 1 | Guideline vi inside a band, commercial and industrial buildings, 75 Hz | 45 mm/s (+/-0.005 mm/s) | 45 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
 | DIN 4150-3:1999 Clause 6.4 | Lowest horizontal natural frequency of a ten-storey building, Hz | 1 Hz (+/-0.0005 Hz) | 1 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Building response prediction (ISO 4866)</b>: 100% (15/15)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 4866:2010 D.3 | Fundamental frequency of a 23 m building, f = 46/h, Hz | 2 Hz (+/-0.0005 Hz) | 2 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 D.3 | Fundamental frequency of a 46 m building, f = 46/h, Hz | 1 Hz (+/-0.0005 Hz) | 1 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 D.3 | Fundamental frequency of a 92 m building, f = 46/h, Hz | 0.5 Hz (+/-0.0005 Hz) | 0.5 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 D.3 | The same fit as a period, T = 0,022 h, s | 1.1 s (+/-0.0005 s) | 1.1 s | 0 s | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 D.2 | Fundamental frequency of a ten-storey building, f = 10/n, Hz | 1 Hz (+/-0.0005 Hz) | 1 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 Formula (D.1) | Fundamental period from the height form at k = 0.014, s | 0.7 s (+/-0.0005 s) | 0.7 s | 0 s | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 Formula (D.1) | Fundamental period from the height form at k = 0.03, s | 1.5 s (+/-0.0005 s) | 1.5 s | 0 s | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 Formula (D.2) | Fundamental period from the height_width form at k = 0.087, s | 1.1673 s (+/-0.0005 s) | 1.1672 s | -0.0001 s | 20 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 Formula (D.2) | Fundamental period from the height_width form at k = 0.109, s | 1.4625 s (+/-0.0005 s) | 1.4624 s | -0.0001 s | 20 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 Formula (D.3) | Fundamental period from the slenderness form at k = 0.06, s | 0.6971 s (+/-0.0005 s) | 0.6971 s | 0 s | 7 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 Formula (D.3) | Fundamental period from the slenderness form at k = 0.08, s | 0.9295 s (+/-0.0005 s) | 0.9295 s | 0 s | 3 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 D.3 | Upper end of the error band an empirical prediction carries, Hz | 3 Hz (+/-0.0005 Hz) | 3 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 D.3 | Lower end of the error band an empirical prediction carries, Hz | 1 Hz (+/-0.0005 Hz) | 1 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 D.4 | Lowest damping ratio measured on a building, % of critical | 0.5 % (+/-0.0005 %) | 0.5 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4866:2010 D.4 | Highest damping ratio measured on a building, % of critical | 2.1 % (+/-0.0005 %) | 2.1 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

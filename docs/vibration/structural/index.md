@@ -58,6 +58,10 @@ vibration occurs at a foundation and in the topmost floor plane, and by pipe
 material on a buried pipeline. Keeping under one is where experience says the
 question stops; exceeding one sends the reader to the stress calculation, not
 to a finding of damage.
+[Predicting a building's own frequency (ISO 4866)](building-response.md)
+is what those guideline values are read at when nobody could measure it: the
+empirical predictors of Annex D, the error each one admits, and the damping
+range the annex reports without offering a way to predict it.
 
 ## Pages in this section
 
@@ -73,6 +77,9 @@ to a finding of damage.
 - [Vibration damage to structures (DIN 4150-3)](structural-damage.md):
   the guideline peak velocities of Tables 1, 2 and 3, the reading of Bild 1
   between them, and the bending stress a measured velocity implies.
+- [Predicting a building's own frequency (ISO 4866)](building-response.md):
+  the four empirical predictors of Annex D, the ± 50 % they admit, and the
+  measured damping range.
 
 ## See also
 

@@ -549,3 +549,65 @@ def test_bild_1_refuses_an_assessment_that_has_no_frequency() -> None:
     )
     with pytest.raises(ValueError, match=r"carries none"):
         orphan.plot()
+
+
+def test_the_building_frequency_figure_puts_the_estimate_beside_the_fit() -> None:
+    """Figure D.1 is the fit, its ± 50 % band and the one estimate on it."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    res = vibration.estimate_fundamental_frequency("height", height_m=40.0)
+
+    ax = res.plot()
+    fit, point = ax.lines
+    # The fit is drawn as f against h, so the frequency is the x coordinate.
+    assert fit.get_xdata()[0] * fit.get_ydata()[0] == pytest.approx(46.0)
+    assert point.get_xdata() == pytest.approx([res.frequency_hz])
+    assert point.get_ydata() == pytest.approx([40.0])
+    assert (ax.get_xscale(), ax.get_yscale()) == ("log", "log")
+
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert labels == [
+        "$f = 46/h$",
+        "$\\pm$50 %, which D.3 calls not uncommon",
+        "height model: 1.14 Hz at 40 m",
+    ]
+    assert ax.get_ylabel() == "Building height $h$ [m]"
+
+    labels_es = [
+        text.get_text() for text in res.plot(language="es").get_legend().get_texts()
+    ]
+    assert labels_es[0] == "$f = 46/h$"
+    assert labels_es[2] == "modelo de altura: 1,14 Hz a 40 m"
+
+    with pytest.raises(ValueError, match="Unknown language"):
+        res.plot(language="xx")
+
+
+@pytest.mark.parametrize(
+    ("given", "reads"),
+    [
+        ({"c": "#654321"}, "color"),
+        ({"linestyle": "-"}, "ls"),
+        ({"ms": 12}, "markersize"),
+    ],
+)
+def test_the_frequency_estimate_keeps_the_spelling_the_caller_used(
+    given: dict[str, object], reads: str
+) -> None:
+    """The same alias trap as the damage reading, on the other new figure."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    res = vibration.estimate_fundamental_frequency("height", height_m=40.0)
+
+    point = res.plot(**given).lines[-1]  # type: ignore[arg-type]
+
+    if reads == "color":
+        assert point.get_color() == "#654321"
+    elif reads == "ls":
+        assert point.get_linestyle() == "-"
+    else:
+        assert point.get_markersize() == 12

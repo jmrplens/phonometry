@@ -33,7 +33,12 @@ is also where this section hands over to the [sound
 insulation](https://jmrplens.github.io/phonometry/buildings/insulation/) models of the buildings section.
 The same group holds the one question that is not about sound at all: whether
 the shaking damages the building, which DIN 4150-3 answers with guideline
-values for the peak particle velocity.
+values for the peak particle velocity, read at the dominant frequency of the
+measured vibration. ISO 4866 Annex D estimates a different frequency, the
+building's own, from its height or its number of storeys when no modal
+measurement was made; the two meet only where the response is the building
+answering at that frequency, which is what the topmost floor plane and the
+floor of Clause 5.2 are about.
 
 The **human vibration** pages share the measurement philosophy of a sound
 level meter, applied to acceleration: frequency weightings that reflect body

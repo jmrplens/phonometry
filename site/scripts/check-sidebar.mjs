@@ -271,7 +271,13 @@ async function open(path, { phone = false } = {}) {
 		.addStyleTag({ content: 'astro-dev-toolbar{display:none !important}' })
 		.catch(() => {});
 	if (phone) {
-		await page.evaluate(() => document.querySelector('starlight-menu-button button')?.click());
+		// Starlight 0.42 replaced the <starlight-menu-button> custom element with
+		// a plain button driving the sidebar as a native popover, so clicking the
+		// old selector silently did nothing and every row read as invisible.
+		await page.evaluate(() => {
+			const button = document.querySelector('button.sl-menu-button, starlight-menu-button button');
+			button?.click();
+		});
 		await new Promise((r) => setTimeout(r, 300));
 	}
 	return { context, page };

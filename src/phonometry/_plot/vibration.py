@@ -192,7 +192,7 @@ _STRINGS: dict[str, str] = {
     "Building height $h$ [m]": "Altura del edificio $h$ [m]",
     _LABEL_HEIGHT_FIT: _LABEL_HEIGHT_FIT,
     r"$\pm$50 %, which D.3 calls not uncommon": r"$\pm$50 %, que D.3 llama nada raro",
-    "{model} model: {f} Hz at {h} m": "modelo {model}: {f} Hz a {h} m",
+    "{model} model: {f} Hz at {h} m": "modelo de {model}: {f} Hz a {h} m",
     "Empirical fundamental frequency of a building (ISO 4866 D.3)": "Frecuencia fundamental empírica de un edificio (ISO 4866, D.3)",
     "storeys": "plantas",
     "height": "altura",
@@ -944,10 +944,10 @@ def plot_building_frequency(
         alpha=0.15,
         label=_t(r"$\pm$50 %, which D.3 calls not uncommon", language),
     )
-    kwargs.setdefault("color", _C_REFERENCE)
+    style_default(kwargs, "color", _C_REFERENCE)
     kwargs.setdefault("marker", "D")
-    kwargs.setdefault("markersize", 7)
-    kwargs.setdefault("ls", "none")
+    style_default(kwargs, "markersize", 7)
+    style_default(kwargs, "ls", "none")
     kwargs.setdefault(
         "label",
         _t("{model} model: {f} Hz at {h} m", language).format(

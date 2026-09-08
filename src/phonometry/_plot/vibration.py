@@ -736,6 +736,91 @@ def plot_seat_transmission(
     return ax
 
 
+#: The three rows of Table 1, in the order DIN 4150-3 prints them.
+_DAMAGE_CLASS_LABELS = {
+    "commercial": "commercial and industrial",
+    "residential": "dwellings",
+    "sensitive": "especially sensitive",
+}
+_DAMAGE_CLASS_COLORS = (_C_PRIMARY, _C_TERTIARY, _C_SECONDARY)
+
+
+def _damage_curves(ax: Axes, result: DamageAssessment, language: str) -> float:
+    """Draw Bild 1 and return where the reading sits on the frequency axis."""
+    from ..vibration.structural.building_damage import (
+        BUILDING_CLASSES,
+        FOUNDATION_FREQUENCIES_HZ,
+        SHORT_TERM_FOUNDATION_MM_S,
+    )
+
+    freqs = np.asarray(FOUNDATION_FREQUENCIES_HZ, dtype=np.float64)
+    for cls, color in zip(BUILDING_CLASSES, _DAMAGE_CLASS_COLORS, strict=True):
+        assessed = cls == result.building_class
+        ax.plot(
+            freqs,
+            np.asarray(SHORT_TERM_FOUNDATION_MM_S[cls], dtype=np.float64),
+            color=color,
+            lw=2.0 if assessed else 1.2,
+            alpha=1.0 if assessed else 0.45,
+            marker="o",
+            markersize=3,
+            label=_t(_DAMAGE_CLASS_LABELS[cls], language),
+        )
+    x_point = float(result.frequency_hz or freqs[-1])
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_xlim(0.0, max(float(freqs[-1]), x_point) * 1.02)
+    return x_point
+
+
+def _damage_bars(ax: Axes, result: DamageAssessment, language: str) -> float:
+    """Draw the printed value per class and return where the reading sits."""
+    from ..vibration.structural.building_damage import (
+        BUILDING_CLASSES,
+        LONG_TERM_TOP_FLOOR_MM_S,
+        SHORT_TERM_TOP_FLOOR_MM_S,
+    )
+
+    table = (
+        LONG_TERM_TOP_FLOOR_MM_S
+        if result.duration == "long_term"
+        else SHORT_TERM_TOP_FLOOR_MM_S
+    )
+    positions = np.arange(len(BUILDING_CLASSES), dtype=np.float64)
+    for position, cls, color in zip(
+        positions, BUILDING_CLASSES, _DAMAGE_CLASS_COLORS, strict=True
+    ):
+        # No legend entry: the class of each bar is its own tick label, and the
+        # one being assessed is the bar the marker sits on.
+        ax.bar(
+            position,
+            table[cls],
+            width=0.6,
+            color=color,
+            alpha=1.0 if cls == result.building_class else 0.45,
+        )
+    ax.set_xticks(positions)
+    ax.set_xticklabels(
+        [_t(_DAMAGE_CLASS_LABELS[cls], language) for cls in BUILDING_CLASSES]
+    )
+    ax.set_xlabel(_t("Building class", language))
+    return float(positions[BUILDING_CLASSES.index(result.building_class)])
+
+
+def _damage_title(result: DamageAssessment, language: str) -> str:
+    """Name the table the reading was read against."""
+    if result.location == "foundation":
+        return _t("Guideline values at the foundation (DIN 4150-3 Table 1)", language)
+    if result.duration == "long_term":
+        return _t(
+            "Long-term guideline values in the topmost floor plane "
+            "(DIN 4150-3 Table 3)",
+            language,
+        )
+    return _t(
+        "Guideline values in the topmost floor plane (DIN 4150-3 Table 1)", language
+    )
+
+
 def plot_damage_assessment(
     result: DamageAssessment,
     ax: Axes | None = None,
@@ -761,79 +846,19 @@ def plot_damage_assessment(
     :return: The axes.
     """
     from .._i18n import format_number, localize_axes
-    from ..vibration.structural.building_damage import (
-        BUILDING_CLASSES,
-        FOUNDATION_FREQUENCIES_HZ,
-        LONG_TERM_TOP_FLOOR_MM_S,
-        SHORT_TERM_FOUNDATION_MM_S,
-        SHORT_TERM_TOP_FLOOR_MM_S,
-    )
 
     ax = ax if ax is not None else _new_axes()
-    names = {
-        "commercial": "commercial and industrial",
-        "residential": "dwellings",
-        "sensitive": "especially sensitive",
-    }
-    colors = (_C_PRIMARY, _C_TERTIARY, _C_SECONDARY)
     reading = format_number(result.velocity_mm_s, language, decimals=1, trim=True)
     on_bild_1 = result.location == "foundation" and result.duration == "short_term"
 
     if on_bild_1:
-        freqs = np.asarray(FOUNDATION_FREQUENCIES_HZ, dtype=np.float64)
-        for cls, color in zip(BUILDING_CLASSES, colors, strict=True):
-            curve = np.asarray(SHORT_TERM_FOUNDATION_MM_S[cls], dtype=np.float64)
-            ax.plot(
-                freqs,
-                curve,
-                color=color,
-                lw=2.0 if cls == result.building_class else 1.2,
-                alpha=1.0 if cls == result.building_class else 0.45,
-                marker="o",
-                markersize=3,
-                label=_t(names[cls], language),
-            )
-        x_point = float(result.frequency_hz or freqs[-1])
+        x_point = _damage_curves(ax, result, language)
         point_label = _t("measured {v} mm/s at {f} Hz", language).format(
             v=reading, f=format_number(x_point, language, decimals=0)
         )
-        ax.set_xlabel(_t(_FREQ_LABEL, language))
-        ax.set_xlim(0.0, max(float(freqs[-1]), x_point) * 1.02)
-        title = _t("Guideline values at the foundation (DIN 4150-3 Table 1)", language)
     else:
-        table = (
-            LONG_TERM_TOP_FLOOR_MM_S
-            if result.duration == "long_term"
-            else SHORT_TERM_TOP_FLOOR_MM_S
-        )
-        positions = np.arange(len(BUILDING_CLASSES), dtype=np.float64)
-        for i, (cls, color) in enumerate(zip(BUILDING_CLASSES, colors, strict=True)):
-            # No legend entry: the class of each bar is its own tick label,
-            # and the one being assessed is the bar the marker sits on.
-            ax.bar(
-                positions[i],
-                table[cls],
-                width=0.6,
-                color=color,
-                alpha=1.0 if cls == result.building_class else 0.45,
-            )
-        x_point = float(positions[BUILDING_CLASSES.index(result.building_class)])
+        x_point = _damage_bars(ax, result, language)
         point_label = _t("measured {v} mm/s", language).format(v=reading)
-        ax.set_xticks(positions)
-        ax.set_xticklabels([_t(names[cls], language) for cls in BUILDING_CLASSES])
-        ax.set_xlabel(_t("Building class", language))
-        title = (
-            _t(
-                "Long-term guideline values in the topmost floor plane "
-                "(DIN 4150-3 Table 3)",
-                language,
-            )
-            if result.duration == "long_term"
-            else _t(
-                "Guideline values in the topmost floor plane (DIN 4150-3 Table 1)",
-                language,
-            )
-        )
 
     style_default(kwargs, "color", _C_REFERENCE)
     kwargs.setdefault("marker", "D")
@@ -842,7 +867,7 @@ def plot_damage_assessment(
     kwargs.setdefault("label", point_label)
     ax.plot([x_point], [result.velocity_mm_s], **kwargs)
     ax.set_ylabel(_t("Peak velocity $v_i$ [mm/s]", language))
-    ax.set_title(title)
+    ax.set_title(_damage_title(result, language))
     ax.set_ylim(bottom=0.0)
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)

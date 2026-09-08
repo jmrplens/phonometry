@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 124 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 125 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -111,7 +111,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento veinticuatro guías repartidas en doce temas, y cada
+Esta página es el mapa. Ciento veinticinco guías repartidas en doce temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -516,7 +516,7 @@ uniones y vibración en humanos. El área cubre el camino que sigue una máquina
 al entrar en una estructura y volver a salir como sonido aéreo, y la cuestión
 aparte de qué le hace la vibración a la persona expuesta. Implementa
 ISO 7626-1/-2, ISO 10846-1/-2/-3, ISO 9611, ISO/TS 7849-1/-2, EN 15657,
-EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2 e ISO 8041-1.
+EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 y DIN 4150-3.
 
 **[Fuentes de ruido estructural](/phonometry/es/vibration/structural/)**
 
@@ -530,6 +530,10 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2 e ISO 8041-1.
 - [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/vibration/structural/transfer-stiffness/):
   la rigidez dinámica de transferencia y el factor de pérdidas de un aislador por
   los métodos directo e indirecto.
+- [Daños en estructuras por vibración (DIN 4150-3)](/phonometry/es/vibration/structural/structural-damage/):
+  las velocidades de pico de referencia con las que se juzgan un cimiento, el
+  plano de la última planta y una tubería enterrada, y la tensión de flexión que
+  implica una velocidad.
 - [Potencia acústica a partir de la vibración (ISO/TS 7849)](/phonometry/es/devices/emission/vibration-sound-power/):
   la potencia radiada a partir del nivel de velocidad promediado en la superficie
   y el factor de radiación, con el límite superior de la Parte 1 y el valor de

@@ -2524,6 +2524,156 @@ def generate_machine_vibration_zones(output_dir: str) -> None:
     plt.close()
 
 
+def generate_structural_damage_guidelines(output_dir: str) -> None:
+    """DIN 4150-3: what a building is allowed to be shaken by."""
+    print("Generating structural_damage_guidelines...")
+    from phonometry import vibration
+
+    classes = (
+        ("commercial", "commercial and industrial", COLOR_PRIMARY),
+        ("residential", "dwellings", COLOR_TERTIARY),
+        ("sensitive", "especially sensitive", COLOR_SECONDARY),
+    )
+    # The bar rows carry the same names as the curves, broken over two lines
+    # so the tick labels stay inside the column they belong to.
+    row_labels = ("commercial\nand industrial", "dwellings", "especially\nsensitive")
+    fig = plt.figure(figsize=(12.6, 6.0))
+    grid = fig.add_gridspec(2, 2, width_ratios=[1.35, 1.0], hspace=0.55, wspace=0.3)
+    ax_curve = fig.add_subplot(grid[:, 0])
+    ax_top = fig.add_subplot(grid[0, 1])
+    ax_pipe = fig.add_subplot(grid[1, 1])
+
+    # Left: Bild 1. The guideline at the foundation is constant to 10 Hz and
+    # then rises, so the same building takes more of a fast wiggle than a slow
+    # one. Sampled densely rather than at the four corners, because the point
+    # is that a value inside a band is defined at all.
+    freq = np.linspace(1.0, 100.0, 400)
+    for name, label, colour in classes:
+        values = np.asarray(vibration.guideline_velocity(name, freq))
+        ax_curve.plot(freq, values, color=colour, linewidth=1.9, label=label)
+        corners = np.asarray(vibration.FOUNDATION_FREQUENCIES_HZ)
+        ax_curve.plot(
+            corners,
+            np.asarray(vibration.guideline_velocity(name, corners)),
+            linestyle="none",
+            marker="o",
+            markersize=4.5,
+            color=colour,
+        )
+    for edge in (10.0, 50.0):
+        ax_curve.axvline(
+            edge, color=COLOR_MUTED, linestyle="--", linewidth=1.0, alpha=0.7
+        )
+    ax_curve.fill_between(
+        freq,
+        0.0,
+        np.asarray(vibration.guideline_velocity("sensitive", freq)),
+        color=theme_fill(COLOR_SECONDARY, ax_curve),
+        zorder=0,
+        label="below every guideline value",
+    )
+    ax_curve.set_xlim(0.0, 100.0)
+    ax_curve.set_ylim(0.0, 55.0)
+    ax_curve.set_xlabel(LABEL_FREQ_HZ)
+    ax_curve.set_ylabel("Peak velocity $v_i$ (mm/s)")
+    ax_curve.set_title("At the Foundation, Short-Term Vibration", pad=10)
+    ax_curve.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_curve.set_axisbelow(True)
+    ax_curve.legend(loc="upper left", fontsize=9)
+
+    # Top right: the topmost floor plane, where the guideline stops depending
+    # on frequency and long-term vibration is judged instead.
+    y = np.arange(len(classes))
+    short = [
+        float(vibration.guideline_velocity(name, location="top_floor"))
+        for name, _, _ in classes
+    ]
+    long = [
+        float(
+            vibration.guideline_velocity(
+                name, location="top_floor", duration="long_term"
+            )
+        )
+        for name, _, _ in classes
+    ]
+    _paired_bars(
+        ax_top,
+        y,
+        short,
+        long,
+        list(row_labels),
+        ("short-term vibration", "long-term vibration"),
+    )
+    ax_top.set_xlabel("Peak velocity $v_i$ (mm/s)")
+    ax_top.set_title("In the Topmost Floor Plane, Horizontal", pad=10)
+
+    # Bottom right: buried pipelines, judged on the pipe by its material,
+    # with the long-term half the standard allows without further evidence.
+    materials = (
+        ("welded_steel", "welded steel"),
+        ("concrete_or_flanged_metal", "concrete,\nflanged metal"),
+        ("masonry_or_plastic", "masonry,\nplastic"),
+    )
+    pipe_short = [vibration.pipeline_guideline_velocity(name) for name, _ in materials]
+    pipe_long = [
+        vibration.pipeline_guideline_velocity(name, duration="long_term")
+        for name, _ in materials
+    ]
+    _paired_bars(
+        ax_pipe,
+        np.arange(len(materials)),
+        pipe_short,
+        pipe_long,
+        [label for _, label in materials],
+        ("short-term vibration", "long-term vibration"),
+    )
+    ax_pipe.set_xlabel("Peak velocity $v_i$ (mm/s)")
+    ax_pipe.set_title("On a Buried Pipeline", pad=10)
+
+    fig.suptitle(
+        "Guideline Values for the Effect of Vibration on Structures", fontsize=13
+    )
+    plt.tight_layout(rect=(0.0, 0.0, 1.0, 0.955))
+    save_figure(output_dir, "structural_damage_guidelines.svg")
+    plt.close()
+
+
+def _paired_bars(
+    ax: Axes,
+    y: np.ndarray,
+    first: list[float],
+    second: list[float],
+    labels: list[str],
+    names: tuple[str, str],
+) -> None:
+    """Two horizontal bars per row, with the value written at the tip."""
+    height = 0.36
+    for offset, values, colour, name in (
+        (height / 2, first, COLOR_PRIMARY, names[0]),
+        (-height / 2, second, COLOR_QUATERNARY, names[1]),
+    ):
+        ax.barh(y + offset, values, height=height, color=colour, label=name)
+        for row, value in zip(y + offset, values, strict=True):
+            ax.text(
+                value + 0.02 * max(first),
+                row,
+                f"{value:g}",
+                va="center",
+                ha="left",
+                fontsize=8.5,
+                color=COLOR_FG,
+            )
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels, fontsize=9)
+    ax.invert_yaxis()
+    # Room to the right for the value beside the longest bar and for the
+    # legend, which is wider in Spanish than in English.
+    ax.set_xlim(0.0, max(first) * 1.52)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, axis="x")
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower right", fontsize=8.5)
+
+
 def generate_machine_vector_change(output_dir: str) -> None:
     """The Annex D vector change: a magnitude that falls while the vibration grows."""
     print("Generating machine_vector_change...")

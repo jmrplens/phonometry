@@ -189,6 +189,7 @@ export const apiSections = {
       'reference/api/vibration/diagnostics',
       'reference/api/vibration/evaluation',
       'reference/api/vibration/transfer-stiffness',
+      'reference/api/vibration/building-damage',
       'reference/api/vibration/exposure',
       'reference/api/vibration/multiple-shock',
       'reference/api/vibration/seat-vibration',

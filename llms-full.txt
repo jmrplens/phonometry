@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 874 numerical conformance checks against 405 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 901 numerical conformance checks against 406 standards enforced in CI.
 
-phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 874 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 73 domains.
+phonometry v3.3.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 901 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 74 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -216,6 +216,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Mechanical mobility and the FRF family (ISO 7626-1)](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/)
 - [Bending-wave transmission at plate junctions (Cremer / Craik / Hopkins)](https://jmrplens.github.io/phonometry/vibration/structural/junction-transmission/)
 - [Dynamic transfer stiffness of resilient elements (ISO 10846)](https://jmrplens.github.io/phonometry/vibration/structural/transfer-stiffness/)
+- [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/)
 
 ### Human vibration
 
@@ -584,6 +585,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [underwater/sound-speed](https://jmrplens.github.io/phonometry/reference/api/underwater/sound-speed/)
 - [underwater/weighting](https://jmrplens.github.io/phonometry/reference/api/underwater/weighting/)
 - [underwater/weston-regimes](https://jmrplens.github.io/phonometry/reference/api/underwater/weston-regimes/)
+- [vibration/building-damage](https://jmrplens.github.io/phonometry/reference/api/vibration/building-damage/)
 - [vibration/diagnostics](https://jmrplens.github.io/phonometry/reference/api/vibration/diagnostics/)
 - [vibration/evaluation](https://jmrplens.github.io/phonometry/reference/api/vibration/evaluation/)
 - [vibration/experimental-sea](https://jmrplens.github.io/phonometry/reference/api/vibration/experimental-sea/)
@@ -40695,6 +40697,14 @@ documents, one page per module.
 | `corrected_seat_acceleration` / `resonance_transmissibility` | `function` | **The corrected seat magnitude and the resonance ratio (ISO 10326-1 Clause 10).**<br>• `corrected_seat_acceleration(a_wS, a_wP, intended)`: the seat magnitude scaled to the input the test intended (10.2.3, Formula (4); the printed Formula (3) is an identity, see the errata)<br>• `resonance_transmissibility(a_S, a_P)`: Formula (5), the damping test at the suspension resonance | `vibration.corrected_seat_acceleration(0.70, 1.00, 1.10)  # 0.77` |
 | `mean_of_test_runs` / `RUN_AGREEMENT_TOLERANCE` / `TEST_RUNS` | `function` / `constant` | **The three runs a seat test is made of (ISO 10326-1 10.2.1, 10.3).**<br>• the arithmetic mean of runs that agree within ± 5 % of it, and a refusal when they do not<br>• `tolerance=` tightens the band for an application standard that asks for less | `vibration.mean_of_test_runs([1.02, 1.00, 0.99])  # 1.003` |
 | `DAMPING_TEST_MASS_KG` / `DAMPING_TEST_MASS_TOLERANCE` / `ACTIVE_DAMPING_TEST_MASS_KG` / `UNITY_TRANSMISSION` | `constant` | **The masses and the neutral value of ISO 10326-1.**<br>• 75 kg ± 1 % of inert mass for the damping test (10.3)<br>• 60 kg where the suspension is actively damped (9.5.1)<br>• 1, the ratio at which the seat passes the vibration through unchanged, which says nothing about it being rigid; Clause 11 leaves acceptance values to the application standard | `vibration.DAMPING_TEST_MASS_KG  # 75.0` |
+| `guideline_velocity` / `BUILDING_CLASSES` | `function` / `constant` | **Guideline peak velocity for damage to a structure (DIN 4150-3 Tables 1 and 3).**<br>• `building_class`: `'commercial'`, `'residential'` or `'sensitive'`<br>• `frequency` [Hz], needed only at the foundation for short-term vibration<br>• `location`: `'foundation'` or `'top_floor'`; `duration`: `'short_term'` or `'long_term'`<br>• `massive_structure=True` doubles the commercial row (5.1) | `vibration.guideline_velocity('residential', 30)  # 10.0 mm/s` |
+| `pipeline_guideline_velocity` / `PIPELINE_MATERIALS` | `function` / `constant` | **Guideline peak velocity on a buried pipeline (DIN 4150-3 Table 2).**<br>• `material`: `'welded_steel'` 100, `'concrete_or_flanged_metal'` 80, `'masonry_or_plastic'` 50 mm/s<br>• `duration='long_term'` halves them, which is the reduction 6.3 allows | `vibration.pipeline_guideline_velocity('welded_steel')  # 100.0` |
+| `assess_building_vibration` / `DamageAssessment` | `function` / `dataclass` | **One measured peak velocity against its guideline value.**<br>• `velocity_mm_s` plus the same `building_class`, `frequency_hz`, `location` and `duration`<br>• `.guideline_mm_s`, `.ratio`, `.within_guideline`, `.plot()` drawing Bild 1 with the measurement on it | `vibration.assess_building_vibration(4.2, building_class='residential', frequency_hz=18).ratio  # 0.6` |
+| `bending_stress` / `storey_fundamental_frequency` | `function` | **From a velocity to a stress, and the storey estimate (DIN 4150-3 6.2 and 6.4).**<br>• `bending_stress(peak_velocity_m_s, dynamic_modulus_pa=, density_kg_m3=, load_ratio=, mode_factor=)`, Formula (1); note the m/s<br>• `storey_fundamental_frequency(n)` = 10/n Hz, from about five storeys up | `vibration.bending_stress(0.01, dynamic_modulus_pa=3e10, density_kg_m3=2400)`<br><br>• 1.47e5 Pa |
+| `BuildingDamageWarning` | `warning class` | **A DIN 4150-3 rule used outside the range the standard offers it for.**<br>Emitted by `storey_fundamental_frequency` below `STOREY_FREQUENCY_MIN_STOREYS`, where 10/n is an extrapolation rather than the rule of 6.4 | `warnings.simplefilter("error", vibration.BuildingDamageWarning)` |
+| `foundation_guideline_curve` | `function` | **Bild 1 as two arrays, ready to plot.**<br>• `building_class`, and `frequency` to sample elsewhere than the four printed corners<br>• returns `(frequency_hz, guideline_mm_s)` | `vibration.foundation_guideline_curve('sensitive')`<br><br>• (1, 10, 50, 100) Hz, (3, 3, 8, 10) mm/s |
+| `SHORT_TERM_FOUNDATION_MM_S` / `FOUNDATION_FREQUENCIES_HZ` / `SHORT_TERM_TOP_FLOOR_MM_S` / `LONG_TERM_TOP_FLOOR_MM_S` / `PIPELINE_MM_S` | `constant` | **The three printed tables of DIN 4150-3, as data.**<br>• Table 1 at the foundation, by class, at 1, 10, 50 and 100 Hz<br>• Table 1 in the topmost floor plane: 40 / 15 / 8 mm/s<br>• Table 3, long-term: 10 / 5 / 2.5 mm/s; Table 2, pipelines: 100 / 80 / 50 mm/s | `vibration.SHORT_TERM_FOUNDATION_MM_S['residential']  # (5.0, 5.0, 15.0, 20.0)` |
+| `FLOOR_VERTICAL_MM_S` / `MASSIVE_STRUCTURE_FACTOR` / `PIPELINE_LONG_TERM_FACTOR` / `BENDING_STRESS_CONSTANT` / `STOREY_FREQUENCY_NUMERATOR_HZ` / `STOREY_FREQUENCY_MIN_STOREYS` | `constant` | **The numbers DIN 4150-3 prints in sentences rather than in tables.**<br>• 20 mm/s vertical for a floor (5.2); the factor 2 for massive engineering structures (5.1)<br>• the 50 % of 6.3; the 1,73 of Formula (1)<br>• the 10 Hz and the five storeys of 6.4 | `vibration.FLOOR_VERTICAL_MM_S  # 20.0` |
 | `ZoneBoundaries` / `evaluation_zone` | `class` / `function` | **Evaluation zones of machine vibration (ISO 20816-1 6.3.2.3).**<br>• `ZoneBoundaries(a_b, b_c, c_d)`: the three boundaries, rising, in whichever quantity the applicable part states<br>• `evaluation_zone(magnitude, boundaries)` → `'A'`/`'B'`/`'C'`/`'D'`; a magnitude on a boundary is the top of the zone below | `z = vibration.ZoneBoundaries(2.8, 7.1, 11.2)`<br>`vibration.evaluation_zone(3.4, z)  # 'B'` |
 | `allowable_velocity` | `function` | **Frequency-shaped velocity criterion (ISO 20816-1 Figure 9, Formula C.1).**<br>• `frequency` f [Hz]<br>• `constant_velocity_mm_s` vA [mm/s], `zone_factor` Zbound (see `ZONE_LIMIT_FACTORS`: 1 / 2.56 / 6.4)<br>• `corner_low_hz` fx, `corner_high_hz` fy [Hz]<br>• `exponent_low` k, `exponent_high` m (Default: 1, constant displacement below and constant acceleration above) | `vibration.allowable_velocity(100, constant_velocity_mm_s=1.12, corner_low_hz=10, corner_high_hz=1000)` |
 | `VectorChangeResult` | `dataclass` | **A change in vibration between two steady states (ISO 20816-1 Annex D).**<br>• `magnitude` the change itself, `phase_deg` its direction<br>• `initial` / `final` the two states as (magnitude, phase)<br>• `magnitude_change`: what a magnitude-only comparison would have reported<br>• `.plot(unit='mm/s')`: the polar diagram of Figure D.1 | `vibration.vibration_vector_change(3, 40, 2.5, 180).plot(unit='mm/s')` |
@@ -55367,7 +55377,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 874 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 901 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -55736,7 +55746,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-874 numerical conformance checks across 73 domains and 405 standards, covering
+901 numerical conformance checks across 74 domains and 406 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise
@@ -59146,6 +59156,9 @@ machine injects into a reception plate; and EN 12354-5 assembles all of it into
 the sound pressure level predicted in a receiving room. That final prediction
 is also where this section hands over to the [sound
 insulation](https://jmrplens.github.io/phonometry/buildings/insulation/) models of the buildings section.
+The same group holds the one question that is not about sound at all: whether
+the shaking damages the building, which DIN 4150-3 answers with guideline
+values for the peak particle velocity.
 
 The **human vibration** pages share the measurement philosophy of a sound
 level meter, applied to acceleration: frequency weightings that reflect body
@@ -59224,11 +59237,15 @@ in trouble: the amplitude criteria that turn a present line into an assessment
 10816 / ISO 20816 — are outside the library, as are rotor balancing (ISO 21940)
 and order tracking.
 
-**Nor is one issued for a building.** The 2003 edition of ISO 2631-2 deleted
-its predecessor's guidance values on purpose, so there are no acceptable
-magnitudes for building vibration to compare against; what the library gives
-is the weighted magnitude, and the judgement stays with the assessor and the
-national code.
+**Nor is one issued for what people feel in a building.** The 2003 edition of
+ISO 2631-2 deleted its predecessor's guidance values on purpose, so for the
+human response to building vibration there are no acceptable magnitudes to
+compare against; what the library gives is the weighted magnitude, and the
+judgement stays with the assessor and the national code. The guideline values
+of [DIN 4150-3](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/) are a
+different question and are implemented: they are about damage to the structure,
+and keeping to one is not a certificate any more than exceeding one is a
+finding of damage.
 
 Two structural predictions are idealisations rather than measurements. The
 junction transmission coefficients are a closed-form result for a rigid,
@@ -60106,13 +60123,14 @@ Source: https://jmrplens.github.io/phonometry/vibration/structural/
 
 A machine fixed to a building radiates sound twice: directly from its own
 vibrating surface, and indirectly by injecting **structure-borne power** into
-the structure, which carries it away and re-radiates it in distant rooms. Six
-pages cover both paths, three of them here and three elsewhere on the site: one
-estimates the direct radiation from the surface vibration itself, and the other
-five characterise
+the structure, which carries it away and re-radiates it in distant rooms. Seven
+pages cover both paths and the question that is not about sound at all, four of
+them here and three elsewhere on the site: one estimates the direct radiation
+from the surface vibration itself, five characterise
 the second, sneakier structure-borne path end to end, from describing the
 vibration and characterising the isolators to quantifying the power and
-predicting the level a listener finally hears.
+predicting the level a listener finally hears, and the seventh asks instead
+whether the shaking damages the building.
 
 The language comes first.
 [Mechanical mobility and the FRF family (ISO 7626-1)](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/)
@@ -60150,6 +60168,16 @@ mobilities, and predicts the sound pressure level in the receiving room,
 which is where this section meets the
 [sound insulation](https://jmrplens.github.io/phonometry/buildings/insulation/) models.
 
+One page here asks a different question of the same shaking.
+[Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/)
+is not about what a building radiates but about whether it cracks, and it
+answers with a screening comparison rather than a verdict: the guideline values
+for the peak particle velocity, chosen by building class and by how often the
+vibration occurs at a foundation and in the topmost floor plane, and by pipe
+material on a buried pipeline. Keeping under one is where experience says the
+question stops; exceeding one sends the reader to the stress calculation, not
+to a finding of damage.
+
 ## Pages in this section
 
 - [Mechanical mobility and the FRF family (ISO 7626-1)](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/):
@@ -60161,6 +60189,9 @@ which is where this section meets the
   by power injection, with the modal densities they need.
 - [Transfer stiffness of resilient elements (ISO 10846)](https://jmrplens.github.io/phonometry/vibration/structural/transfer-stiffness/):
   dynamic transfer stiffness of isolators by the direct and indirect methods.
+- [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/):
+  the guideline peak velocities of Tables 1, 2 and 3, the reading of Bild 1
+  between them, and the bending stress a measured velocity implies.
 
 ## See also
 
@@ -61043,6 +61074,259 @@ reciprocity $\text{impedance} \cdot \text{mobility} = 1$, the rigid-mass
 calibration values ($|A| = 0.100$ 1/kg for 10 kg;
 $|Y| = 1.59155 \times 10^{-4}$ m/(N·s) at 100 Hz) and the Annex A example
 ($\gamma^2 = 0.8$, $n = 75$ → $\varepsilon = 4.08$ %).
+
+---
+
+
+<!-- source: docs/vibration/structural/structural-damage.md | canonical: https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/ -->
+Source: https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/
+
+# Vibration damage to structures (DIN 4150-3)
+
+Everything else in this section follows vibration because it ends up as
+**sound**. This page follows it because it ends up as a **crack**. A pile
+driver next door, a tram at the end of the street or a blast on a nearby site
+puts vibration into the ground, the ground puts it into a foundation, and the
+question the neighbours ask has nothing to do with audibility: will the
+building be damaged?
+
+Answering it properly means the dynamic stresses in the structure, compared
+against what the material and the design allow. DIN 4150-3 offers the cheap
+answer first, and it is the one used in practice: **guideline values**
+(*Anhaltswerte*) for a single measured quantity, the peak particle velocity,
+drawn from a large body of measurements on real buildings. Keep under them and
+damage of the kind the standard defines has not been observed in that body of
+measurements, which is a statement about the evidence rather than a promise
+about this building: meeting a guideline value satisfies the DIN 4150-3
+criterion and certifies nothing. Exceed them and nothing follows automatically. The standard is explicit that damage does not
+have to occur; what has run out is the cheap answer, and the stress
+calculation has to be done instead.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structural_damage_guidelines_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structural_damage_guidelines.svg" alt="Guideline peak velocity against frequency for the three building classes of DIN 4150-3 Table 1, flat to 10 Hz and rising after it, with the topmost-floor and buried-pipeline values beside it as paired short-term and long-term bars" width="94%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration
+
+freq = np.linspace(1.0, 100.0, 400)
+
+fig, ax = plt.subplots()
+for name in vibration.BUILDING_CLASSES:
+    ax.plot(freq, vibration.guideline_velocity(name, freq), label=name)
+ax.set(xlabel="Frequency [Hz]", ylabel="Peak velocity $v_i$ [mm/s]")
+ax.grid(True, alpha=0.3)
+ax.legend()
+plt.show()
+
+# One measurement against the guideline it is judged by, drawn on the same
+# curves:
+res = vibration.assess_building_vibration(
+    4.2, building_class="residential", frequency_hz=18.0
+)
+print(round(res.guideline_mm_s, 2), res.within_guideline)   # 7.0 True
+res.plot()
+plt.show()
+```
+
+</details>
+
+## 1. What is measured
+
+Clause 5.1 fixes the quantity before it fixes any number. At the
+**foundation**, the three components $v_x$, $v_y$ and $v_z$ of the particle
+velocity are recorded separately and the largest peak of the three,
+$|v_i|_\mathrm{max}$, is the value judged; the standard then writes it $v_i$
+and so does this page. The transducers go in the lowest storey, on the
+foundation or the outside wall, and on an unbasemented building no more than
+0,5 m above ground level, preferably on the side facing the excitation.
+
+In the **topmost floor plane** the quantity changes: the larger of the two
+horizontal components, measured in or close to the outside wall. That
+measurement is not a second excitation. It is the building's horizontal answer
+to the one at its foundation, which is why the guideline value there does not
+depend on frequency: the response is already at the structure's own
+frequencies.
+
+## 2. Short-term vibration, and why the guideline rises with frequency
+
+Short-term vibration is vibration that does not occur often enough to build up
+resonance in the structure: construction work, blasting, a passing train on a
+line that is not busy. Table 1 gives its guideline values for three building
+classes, and at the foundation they depend on frequency.
+
+They rise, and the reason is that the standard is really about strain. The
+same velocity at a lower frequency means a larger displacement, and it is the
+displacement across a wall that opens a crack in the plaster. So a building
+tolerates a fast wiggle better than a slow one, and the guideline value climbs
+from 1 Hz to 100 Hz. Above 100 Hz the 100 Hz value may be used.
+
+Table 1 prints the middle band as a range, "5 bis 15" for a dwelling between
+10 Hz and 50 Hz, and a range does not say what 30 Hz is worth. Bild 1 says it:
+the corner values joined by straight lines on a **linear** frequency axis. A
+dwelling at 30 Hz is allowed 10 mm/s, and that is a reading of the figure, not
+of the table.
+
+```python
+from phonometry import vibration
+
+# The corners Table 1 prints, for a dwelling.
+for f in (1.0, 10.0, 50.0, 100.0):
+    print(f, vibration.guideline_velocity("residential", f))
+# 1.0 5.0 / 10.0 5.0 / 50.0 15.0 / 100.0 20.0
+
+# Inside a band, which only Bild 1 decides.
+print(vibration.guideline_velocity("residential", 30.0))          # 10.0
+
+# In the topmost floor plane there is nothing to read against frequency,
+# and passing one anyway is refused rather than ignored.
+print(vibration.guideline_velocity("residential", location="top_floor"))  # 15.0
+```
+
+The three classes are the rows of Table 1: `"commercial"` for commercial and
+industrial buildings and buildings of like structure, `"residential"` for
+dwellings and buildings of like construction or use, and `"sensitive"` for
+buildings that fit neither and are worth preserving, a listed building being
+the example the standard gives. A massive engineering structure such as a
+reinforced-concrete abutment or a block foundation may raise the row 1 values
+by up to a factor of two, which is what 5.1 allows provided nothing dangerous
+comes of the soil mechanics. The allowance is a sentence of Clause 5 naming
+Table 1, so it stops at short-term vibration and the library refuses to carry
+it over to Table 3:
+
+```python
+print(vibration.guideline_velocity("commercial", 50.0, massive_structure=True))
+# 80.0
+```
+
+## 3. Floors, and the one number that covers them
+
+A floor or ceiling gets its own sentence rather than a table. Clause 5.2: if
+the vertical velocity at the point of largest vibration, in general mid-span,
+stays at or below 20 mm/s, no reduction in the serviceability of the floor is
+expected. The value is published as `FLOOR_VERTICAL_MM_S`, and for a building
+in row 3 of Table 1 the standard notes that even that may have to be reduced.
+
+## 4. Buried pipelines
+
+A pipe in the ground is judged on the pipe, not on the building above it, and
+by what it is made of. Table 2 has three rows, and Clause 6.3 lets long-term
+vibration use the same table at 50 % without further evidence:
+
+```python
+from phonometry import vibration
+
+print(vibration.pipeline_guideline_velocity("welded_steel"))                # 100.0
+print(vibration.pipeline_guideline_velocity("masonry_or_plastic"))          #  50.0
+print(vibration.pipeline_guideline_velocity(
+    "masonry_or_plastic", duration="long_term"))                            #  25.0
+```
+
+House connections up to 2 m from the building are judged by the building's own
+foundation values instead, and drainage pipes by row 3 whatever they are made
+of.
+
+## 5. Long-term vibration
+
+Long-term vibration (*Dauererschütterungen*) is the opposite case: it occurs
+often enough for the structure to respond at its own frequencies. Table 3
+answers it with one value per class in the topmost floor plane and nothing at
+the foundation, because a structure ringing at its own frequency is judged
+where it rings. The values are about a quarter of the short-term ones:
+
+```python
+from phonometry import vibration
+
+for name in vibration.BUILDING_CLASSES:
+    short = vibration.guideline_velocity(name, location="top_floor")
+    long = vibration.guideline_velocity(
+        name, location="top_floor", duration="long_term"
+    )
+    print(name, short, long)
+# commercial 40.0 10.0 / residential 15.0 5.0 / sensitive 8.0 2.5
+```
+
+Asking for a long-term value at the foundation raises, because Table 3 does
+not have that column.
+
+## 6. From a velocity to a stress
+
+Clause 6.2 is the bridge back to the proper calculation. For a beam or a
+one-way slab of full rectangular section, constant stiffness and uniform mass,
+vibrating in one mode, the peak bending stress follows from the peak velocity
+alone:
+
+$$
+\hat{\sigma}_\mathrm{max} = 1{,}73 \left(E_\mathrm{dyn}\, \varrho\,
+\frac{G_\mathrm{ges}}{G_\mathrm{balken}}\right)^{0,5} k_n\, \hat{v}_\mathrm{max}
+$$
+
+No length, no depth, no span: the dimensions cancel, which is the whole reason
+the formula is worth having. A velocity measured where the amplitude is
+largest is enough. The mode coefficient $k_n$ lies between 1 and 1,3 in the
+technically important cases, so it can move the answer by less than a third,
+and $G_\mathrm{ges}/G_\mathrm{balken}$ is 1 for a beam carrying nothing but
+itself.
+
+```python
+from phonometry import vibration
+
+# Concrete, 30 GPa dynamic modulus, 2400 kg/m3, first mode, 10 mm/s peak.
+# Note the unit: the tables are in mm/s and this formula is in m/s.
+sigma = vibration.bending_stress(
+    0.010, dynamic_modulus_pa=3.0e10, density_kg_m3=2400.0
+)
+print(round(sigma / 1e6, 2), "MPa")     # 0.15 MPa
+```
+
+Clause 6.4 adds the estimate that says whether the topmost floor plane will
+answer at all: for a building of about five storeys or more, the lowest
+horizontal natural frequency is roughly $f_i \approx 10/n$ with $n$ the number
+of storeys.
+
+```python
+print(vibration.storey_fundamental_frequency(10))    # 1.0 Hz
+```
+
+Below that, `BuildingDamageWarning` says so: four storeys still return
+2,5 Hz, because "about five" is not a line the standard drew, but the number
+is an extrapolation of a rule offered for taller buildings rather than the
+rule itself.
+
+## See also
+
+- [Evaluating machine vibration (ISO 20816-1)](https://jmrplens.github.io/phonometry/vibration/machinery/machine-vibration-evaluation/):
+  the same shape of question asked of a machine rather than of a building.
+- [Human vibration exposure (ISO 2631, ISO 5349)](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/):
+  what the same vibration does to a person.
+- [Transfer stiffness of resilient elements (ISO 10846)](https://jmrplens.github.io/phonometry/vibration/structural/transfer-stiffness/):
+  the elements inserted to keep the vibration out in the first place.
+
+## References
+
+- Deutsches Institut für Normung. (1999). *Erschütterungen im Bauwesen — Teil
+  3: Einwirkungen auf bauliche Anlagen* (DIN 4150-3:1999-02).
+  The measured quantity of 5.1, the short-term guideline values of Table 1
+  with the curves of Bild 1, the ceiling rule of 5.2, the buried-pipeline
+  values of Table 2, the long-term values of Table 3 and the 50 % reduction of
+  6.3, the bending stress of Formula (1) in 6.2 and the storey estimate of
+  6.4.
+
+## Standards
+
+DIN 4150-3:1999-02, *Erschütterungen im Bauwesen — Teil 3: Einwirkungen auf
+bauliche Anlagen*: the guideline values for the peak particle velocity by
+building class, measurement location and how often the vibration occurs
+(Tables 1, 2 and 3, with Bild 1 fixing the reading between the printed corner
+values), the vertical value for floors (5.2), the doubling of row 1 for
+massive engineering structures (5.1), the 50 % reduction of the pipeline table
+for long-term vibration (6.3), the bending stress of Formula (1) in 6.2 and
+the storey estimate of 6.4. Prediction (DIN 4150-1), human perception in
+buildings (DIN 4150-2) and the instrument requirements of DIN 45669 are not
+implemented.
 
 ---
 

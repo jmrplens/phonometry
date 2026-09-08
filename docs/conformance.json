@@ -3,13 +3,13 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 874,
-    "passing": 874,
+    "checks": 901,
+    "passing": 901,
     "failing": 0,
-    "domains": 73,
-    "standards": 405,
-    "citations": 656,
-    "designations": 143,
+    "domains": 74,
+    "standards": 406,
+    "citations": 664,
+    "designations": 144,
     "sources": 83
   },
   "units": [
@@ -201,6 +201,12 @@
       "title": "Machine vibration evaluation (ISO 20816)",
       "checks": 64,
       "passing": 64
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3",
+      "title": "Vibration effects on structures (DIN 4150-3)",
+      "checks": 27,
+      "passing": 27
     },
     {
       "id": "speech-intelligibility-ansi-s3-5-1997",
@@ -11918,6 +11924,787 @@
         "value": 2.034
       },
       "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-1-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, commercial and industrial buildings, 1 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-10-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, commercial and industrial buildings, 10 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-50-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, commercial and industrial buildings, 50 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 40.0
+      },
+      "computed": {
+        "value": 40.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-100-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, commercial and industrial buildings, 100 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 50.0
+      },
+      "computed": {
+        "value": 50.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-dwellings-1-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, dwellings, 1 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.0
+      },
+      "computed": {
+        "value": 5.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-dwellings-10-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, dwellings, 10 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.0
+      },
+      "computed": {
+        "value": 5.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-dwellings-50-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, dwellings, 50 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 15.0
+      },
+      "computed": {
+        "value": 15.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-dwellings-100-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, dwellings, 100 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-1-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, especially sensitive buildings, 1 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.0
+      },
+      "computed": {
+        "value": 3.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-10-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, especially sensitive buildings, 10 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.0
+      },
+      "computed": {
+        "value": 3.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-50-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, especially sensitive buildings, 50 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 8.0
+      },
+      "computed": {
+        "value": 8.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-100-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi at the foundation, especially sensitive buildings, 100 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.0
+      },
+      "computed": {
+        "value": 10.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-in-the-topmost-floor-plane-commercial-and-industrial-buildings",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi in the topmost floor plane, commercial and industrial buildings",
+      "kind": "scalar",
+      "expected": {
+        "value": 40.0
+      },
+      "computed": {
+        "value": 40.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-in-the-topmost-floor-plane-dwellings",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi in the topmost floor plane, dwellings",
+      "kind": "scalar",
+      "expected": {
+        "value": 15.0
+      },
+      "computed": {
+        "value": 15.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-in-the-topmost-floor-plane-especially-sensitive-buildings",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 1",
+        "cite": "DIN 4150-3:1999 Table 1"
+      },
+      "quantity": "Short-term guideline vi in the topmost floor plane, especially sensitive buildings",
+      "kind": "scalar",
+      "expected": {
+        "value": 8.0
+      },
+      "computed": {
+        "value": 8.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-3/long-term-guideline-vi-in-the-topmost-floor-plane-commercial-and-industrial-buildings",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 3",
+        "cite": "DIN 4150-3:1999 Table 3"
+      },
+      "quantity": "Long-term guideline vi in the topmost floor plane, commercial and industrial buildings",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.0
+      },
+      "computed": {
+        "value": 10.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-3/long-term-guideline-vi-in-the-topmost-floor-plane-dwellings",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 3",
+        "cite": "DIN 4150-3:1999 Table 3"
+      },
+      "quantity": "Long-term guideline vi in the topmost floor plane, dwellings",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.0
+      },
+      "computed": {
+        "value": 5.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-3/long-term-guideline-vi-in-the-topmost-floor-plane-especially-sensitive-buildings",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 3",
+        "cite": "DIN 4150-3:1999 Table 3"
+      },
+      "quantity": "Long-term guideline vi in the topmost floor plane, especially sensitive buildings",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.5
+      },
+      "computed": {
+        "value": 2.5
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-2/short-term-guideline-vi-on-a-buried-pipeline-welded-steel",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 2",
+        "cite": "DIN 4150-3:1999 Table 2"
+      },
+      "quantity": "Short-term guideline vi on a buried pipeline, welded steel",
+      "kind": "scalar",
+      "expected": {
+        "value": 100.0
+      },
+      "computed": {
+        "value": 100.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-2/short-term-guideline-vi-on-a-buried-pipeline-concrete-and-flanged-metal",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 2",
+        "cite": "DIN 4150-3:1999 Table 2"
+      },
+      "quantity": "Short-term guideline vi on a buried pipeline, concrete and flanged metal",
+      "kind": "scalar",
+      "expected": {
+        "value": 80.0
+      },
+      "computed": {
+        "value": 80.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-2/short-term-guideline-vi-on-a-buried-pipeline-masonry-and-plastic",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Table 2",
+        "cite": "DIN 4150-3:1999 Table 2"
+      },
+      "quantity": "Short-term guideline vi on a buried pipeline, masonry and plastic",
+      "kind": "scalar",
+      "expected": {
+        "value": 50.0
+      },
+      "computed": {
+        "value": 50.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-clause-6-3/long-term-reduction-of-the-pipeline-guideline-values",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Clause 6.3",
+        "cite": "DIN 4150-3:1999 Clause 6.3"
+      },
+      "quantity": "Long-term reduction of the pipeline guideline values",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.5
+      },
+      "computed": {
+        "value": 0.5
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-clause-5-1/massive-engineering-structures-factor-on-the-row-1-values",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Clause 5.1",
+        "cite": "DIN 4150-3:1999 Clause 5.1"
+      },
+      "quantity": "Massive engineering structures, factor on the row 1 values",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.0
+      },
+      "computed": {
+        "value": 2.0
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-clause-5-2/vertical-guideline-vz-for-a-ceiling-or-floor-mm-s",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Clause 5.2",
+        "cite": "DIN 4150-3:1999 Clause 5.2"
+      },
+      "quantity": "Vertical guideline vz for a ceiling or floor, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-bild-1/guideline-vi-inside-a-band-dwellings-30-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Bild 1",
+        "cite": "DIN 4150-3:1999 Bild 1"
+      },
+      "quantity": "Guideline vi inside a band, dwellings, 30 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.0
+      },
+      "computed": {
+        "value": 10.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-bild-1/guideline-vi-inside-a-band-commercial-and-industrial-buildings-75-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Bild 1",
+        "cite": "DIN 4150-3:1999 Bild 1"
+      },
+      "quantity": "Guideline vi inside a band, commercial and industrial buildings, 75 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 45.0
+      },
+      "computed": {
+        "value": 45.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-clause-6-4/lowest-horizontal-natural-frequency-of-a-ten-storey-building-hz",
+      "domain": "vibration-effects-on-structures-din-4150-3",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-3",
+        "edition": "1999",
+        "clause": "Clause 6.4",
+        "cite": "DIN 4150-3:1999 Clause 6.4"
+      },
+      "quantity": "Lowest horizontal natural frequency of a ten-storey building, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.0
+      },
+      "computed": {
+        "value": 1.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
       "verdict": "pass"
     },
     {

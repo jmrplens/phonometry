@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**874/874 conformance checks pass** across 73 domains and 405 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**901/901 conformance checks pass** across 74 domains and 406 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -632,6 +632,41 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 20816-9:2020 Figure A.2 | Fall of the velocity rating curve a decade outside each corner, dB | 14 dB (+/-0.0005 dB) | 14 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 20816-9:2020 Figure A.2 | Velocity rating curve between its corners, worst deviation from VR, mm/s | 0 mm/s (+/-0.0005 mm/s) | 0 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
 | ISO 20816-9:2020 Table 4, note | Velocity rungs carried onto acceleration rungs at 280 Hz, worst error, % | 0 % (+/-3 %) | 2.034 % | 2.034 % | 68 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Vibration effects on structures (DIN 4150-3)</b>: 100% (27/27)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 1 Hz | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 10 Hz | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 50 Hz | 40 mm/s (+/-0.005 mm/s) | 40 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 100 Hz | 50 mm/s (+/-0.005 mm/s) | 50 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, dwellings, 1 Hz | 5 mm/s (+/-0.005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, dwellings, 10 Hz | 5 mm/s (+/-0.005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, dwellings, 50 Hz | 15 mm/s (+/-0.005 mm/s) | 15 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, dwellings, 100 Hz | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 1 Hz | 3 mm/s (+/-0.005 mm/s) | 3 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 10 Hz | 3 mm/s (+/-0.005 mm/s) | 3 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 50 Hz | 8 mm/s (+/-0.005 mm/s) | 8 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 100 Hz | 10 mm/s (+/-0.005 mm/s) | 10 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi in the topmost floor plane, commercial and industrial buildings | 40 mm/s (+/-0.005 mm/s) | 40 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi in the topmost floor plane, dwellings | 15 mm/s (+/-0.005 mm/s) | 15 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 1 | Short-term guideline vi in the topmost floor plane, especially sensitive buildings | 8 mm/s (+/-0.005 mm/s) | 8 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 3 | Long-term guideline vi in the topmost floor plane, commercial and industrial buildings | 10 mm/s (+/-0.005 mm/s) | 10 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 3 | Long-term guideline vi in the topmost floor plane, dwellings | 5 mm/s (+/-0.005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 3 | Long-term guideline vi in the topmost floor plane, especially sensitive buildings | 2.5 mm/s (+/-0.005 mm/s) | 2.5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 2 | Short-term guideline vi on a buried pipeline, welded steel | 100 mm/s (+/-0.005 mm/s) | 100 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 2 | Short-term guideline vi on a buried pipeline, concrete and flanged metal | 80 mm/s (+/-0.005 mm/s) | 80 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Table 2 | Short-term guideline vi on a buried pipeline, masonry and plastic | 50 mm/s (+/-0.005 mm/s) | 50 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Clause 6.3 | Long-term reduction of the pipeline guideline values | 0.5 (+/-0.0005) | 0.5 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Clause 5.1 | Massive engineering structures, factor on the row 1 values | 2 (+/-0.0005) | 2 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Clause 5.2 | Vertical guideline vz for a ceiling or floor, mm/s | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Bild 1 | Guideline vi inside a band, dwellings, 30 Hz | 10 mm/s (+/-0.005 mm/s) | 10 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Bild 1 | Guideline vi inside a band, commercial and industrial buildings, 75 Hz | 45 mm/s (+/-0.005 mm/s) | 45 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999 Clause 6.4 | Lowest horizontal natural frequency of a ten-storey building, Hz | 1 Hz (+/-0.0005 Hz) | 1 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

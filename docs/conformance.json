@@ -3,12 +3,12 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 916,
-    "passing": 916,
+    "checks": 946,
+    "passing": 946,
     "failing": 0,
-    "domains": 75,
+    "domains": 76,
     "standards": 407,
-    "citations": 670,
+    "citations": 673,
     "designations": 145,
     "sources": 83
   },
@@ -189,6 +189,12 @@
       "title": "Human vibration (ISO 8041 / 2631 / 5349)",
       "checks": 15,
       "passing": 15
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1",
+      "title": "Human-vibration meter verification (ISO 8041-1)",
+      "checks": 30,
+      "passing": 30
     },
     {
       "id": "seat-vibration-transmission-iso-10326-1",
@@ -9892,6 +9898,876 @@
       "deviation": {
         "value": 0.0,
         "label": "0"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wk-transition-frequency-ft1-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wk transition frequency ft1, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.2512
+      },
+      "computed": {
+        "value": 0.25119
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": -1e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wk-transition-frequency-ft2-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wk transition frequency ft2, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.631
+      },
+      "computed": {
+        "value": 0.63096
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": -4e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wk-transition-frequency-ft3-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wk transition frequency ft3, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 63.1
+      },
+      "computed": {
+        "value": 63.09573
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": -0.00427
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wk-transition-frequency-ft4-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wk transition frequency ft4, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 158.5
+      },
+      "computed": {
+        "value": 158.48932
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": -0.01068
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wf-transition-frequency-ft1-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wf transition frequency ft1, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.05012
+      },
+      "computed": {
+        "value": 0.05012
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": -1.28e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wf-transition-frequency-ft2-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wf transition frequency ft2, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.1259
+      },
+      "computed": {
+        "value": 0.12589
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": -1e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wf-transition-frequency-ft3-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wf transition frequency ft3, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.3981
+      },
+      "computed": {
+        "value": 0.39811
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": 1e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wf-transition-frequency-ft4-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wf transition frequency ft4, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.0
+      },
+      "computed": {
+        "value": 1.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wh-transition-frequency-ft1-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wh transition frequency ft1, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.981
+      },
+      "computed": {
+        "value": 3.98107
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": 7e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wh-transition-frequency-ft2-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wh transition frequency ft2, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.0
+      },
+      "computed": {
+        "value": 10.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wh-transition-frequency-ft3-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wh transition frequency ft3, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 794.3
+      },
+      "computed": {
+        "value": 794.32823
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": 0.02823
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-4/wh-transition-frequency-ft4-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 4",
+        "cite": "ISO 8041-1:2017 Table 4"
+      },
+      "quantity": "Wh transition frequency ft4, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 1995.0
+      },
+      "computed": {
+        "value": 1995.26231
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": 0.26231
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/wb-reference-frequency-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Wb reference frequency, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 15.915
+      },
+      "computed": {
+        "value": 15.9155
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": 0.0005
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/wb-weighted-indication-at-the-reference-m-s2",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Wb weighted indication at the reference, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.8126
+      },
+      "computed": {
+        "value": 0.81256
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -4e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/wd-reference-frequency-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Wd reference frequency, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 15.915
+      },
+      "computed": {
+        "value": 15.9155
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": 0.0005
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/wd-weighted-indication-at-the-reference-m-s2",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Wd weighted indication at the reference, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.1261
+      },
+      "computed": {
+        "value": 0.12608
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -2e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/wh-reference-frequency-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Wh reference frequency, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 79.58
+      },
+      "computed": {
+        "value": 79.5775
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": -0.0025
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/wh-weighted-indication-at-the-reference-m-s2",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Wh weighted indication at the reference, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.02
+      },
+      "computed": {
+        "value": 2.02019
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 0.00019
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/wk-reference-frequency-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Wk reference frequency, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 15.915
+      },
+      "computed": {
+        "value": 15.9155
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": 0.0005
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/wk-weighted-indication-at-the-reference-m-s2",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Wk weighted indication at the reference, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7718
+      },
+      "computed": {
+        "value": 0.77182
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 2e-05
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/wf-reference-frequency-hz",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Wf reference frequency, Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.3979
+      },
+      "computed": {
+        "value": 0.3979
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": -1.26e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-1/wf-weighted-indication-at-the-reference-m-s2",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 1",
+        "cite": "ISO 8041-1:2017 Table 1"
+      },
+      "quantity": "Wf weighted indication at the reference, m/s2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.03888
+      },
+      "computed": {
+        "value": 0.03888
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 4.78e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-5/upper-magnitude-tolerance-in-the-central-region",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 5",
+        "cite": "ISO 8041-1:2017 Table 5"
+      },
+      "quantity": "Upper magnitude tolerance in the central region, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 12.0
+      },
+      "computed": {
+        "value": 12.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-5/lower-magnitude-tolerance-in-the-central-region",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 5",
+        "cite": "ISO 8041-1:2017 Table 5"
+      },
+      "quantity": "Lower magnitude tolerance in the central region, %",
+      "kind": "scalar",
+      "expected": {
+        "value": -11.0
+      },
+      "computed": {
+        "value": -11.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-5/upper-magnitude-tolerance-in-the-skirts",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 5",
+        "cite": "ISO 8041-1:2017 Table 5"
+      },
+      "quantity": "Upper magnitude tolerance in the skirts, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 26.0
+      },
+      "computed": {
+        "value": 26.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-5/lower-magnitude-tolerance-in-the-skirts",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 5",
+        "cite": "ISO 8041-1:2017 Table 5"
+      },
+      "quantity": "Lower magnitude tolerance in the skirts, %",
+      "kind": "scalar",
+      "expected": {
+        "value": -21.0
+      },
+      "computed": {
+        "value": -21.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-5/lower-magnitude-tolerance-in-the-tails",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 5",
+        "cite": "ISO 8041-1:2017 Table 5"
+      },
+      "quantity": "Lower magnitude tolerance in the tails, %",
+      "kind": "scalar",
+      "expected": {
+        "value": -100.0
+      },
+      "computed": {
+        "value": -100.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-5/characteristic-phase-deviation-in-the-central-region-degrees",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 5",
+        "cite": "ISO 8041-1:2017 Table 5"
+      },
+      "quantity": "Characteristic phase deviation in the central region, degrees",
+      "kind": "scalar",
+      "expected": {
+        "value": 6.0
+      },
+      "computed": {
+        "value": 6.0
+      },
+      "unit": "deg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-2/indication-tolerance-at-the-reference-frequency",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 2",
+        "cite": "ISO 8041-1:2017 Table 2"
+      },
+      "quantity": "Indication tolerance at the reference frequency, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 4.0
+      },
+      "computed": {
+        "value": 4.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "human-vibration-meter-verification-iso-8041-1/iso-8041-1-2017-table-2/indication-tolerance-for-low-frequency-whole-body-vibration",
+      "domain": "human-vibration-meter-verification-iso-8041-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 8041-1",
+        "edition": "2017",
+        "clause": "Table 2",
+        "cite": "ISO 8041-1:2017 Table 2"
+      },
+      "quantity": "Indication tolerance for low-frequency whole-body vibration, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.0
+      },
+      "computed": {
+        "value": 5.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"

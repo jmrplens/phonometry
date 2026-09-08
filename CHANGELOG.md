@@ -55,6 +55,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- A vibration meter can be given the verdict a sound level meter already gets:
+  the frequency-weighting tolerances of **ISO 8041-1:2017**, in
+  `vibration.verify_weighting`.
+
+  The library has checked A, C and Z against IEC 61672-1 for a long time, and
+  said in as many words, on the vibration section's own page, that no
+  instrument was type-tested. That was the odd half of a pair: ISO 8041-1
+  grades a human-vibration meter by the same kind of table, and its nine
+  weightings were already implemented here because ISO 2631 and ISO 5349 are
+  built on them.
+
+  What was missing is the verdict. Table 5 is not one tolerance but a band
+  that widens away from the middle of the working range, keyed to the four
+  transition frequencies Table 4 gives per weighting: `+12 %` / `-11 %` in the
+  central region, `+26 %` / `-21 %` in the two skirts, and beyond the outer
+  pair no lower limit at all, which is what the printed `-100 %` means and is
+  implemented as the absence of a limit rather than a wide one. The band is
+  read off the factor, not off the decibel, because that is how the page
+  writes it. `vibration.weighting_tolerance_percent` returns it, and
+  `vibration.phase_tolerance_degrees` returns the phase band separately,
+  because footnote a applies it only to an instrument that reports a
+  parameter not based on r.m.s. values.
+
+  The Table 1 reference conditions come with it, and they are the check that
+  the nine weightings were right in the first place:
+  `vibration.reference_indication` reproduces the printed 2,020 m/s2 for Wh
+  and 0,7718 for Wk. Thirty conformance rows pin Tables 1, 2, 4 and 5 against
+  the printed page, including each transition frequency built from the
+  `10**(k/10)` exponent and checked against the rounded decimal beside it.
+
+  A pass is about the frequency weighting and nothing else: indication,
+  linearity, overload and the environmental clauses of the same standard are
+  laboratory measurements on hardware, so the result says so and the
+  documentation says so.
+
 - The wave fields of the clips are solved where they are encoded. The remote
   runner could already ship a field to the CUDA machine named in `.env`, and
   the clips did not use it for anything but the AV1 encode, because the engine

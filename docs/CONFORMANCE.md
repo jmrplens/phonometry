@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**916/916 conformance checks pass** across 75 domains and 407 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**946/946 conformance checks pass** across 76 domains and 407 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -545,6 +545,44 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 5349-2:2001 Example E.3 | Forestry three-task A(8) | 3.6 m/s² (+/-0.05 m/s²) | 3.61 m/s² | 0.01 m/s² | 20 % | ![Pass][cv-pass] Pass |
 | ISO 5349-1:2001 Eq. (C.1) | VWF 10 % lifetime Dy at A(8)=7 | 4 yr (+/-0.1 yr) | 4.04 yr | 0.042 yr | 42 % | ![Pass][cv-pass] Pass |
 | Directive 2002/44/EC Art. 3 | HAV/WBV action & limit values | HAV 2.5/5.0, WBV 0.5/1.15 m/s^2 | HAV 2.5/5.0, WBV 0.5/1.15 m/s^2 | 0 | - | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Human-vibration meter verification (ISO 8041-1)</b>: 100% (30/30)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 8041-1:2017 Table 4 | Wk transition frequency ft1, Hz | 0.2512 Hz (+/-0.02%) | 0.25119 Hz | -0.00001 Hz | 20 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 4 | Wk transition frequency ft2, Hz | 0.631 Hz (+/-0.02%) | 0.63096 Hz | -0.00004 Hz | 32 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 4 | Wk transition frequency ft3, Hz | 63.1 Hz (+/-0.02%) | 63.09573 Hz | -0.00427 Hz | 34 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 4 | Wk transition frequency ft4, Hz | 158.5 Hz (+/-0.02%) | 158.48932 Hz | -0.01068 Hz | 34 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 4 | Wf transition frequency ft1, Hz | 0.05012 Hz (+/-0.02%) | 0.05012 Hz | 0 Hz | 13 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 4 | Wf transition frequency ft2, Hz | 0.1259 Hz (+/-0.02%) | 0.12589 Hz | -0.00001 Hz | 40 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 4 | Wf transition frequency ft3, Hz | 0.3981 Hz (+/-0.02%) | 0.39811 Hz | 0.00001 Hz | 13 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 4 | Wf transition frequency ft4, Hz | 1 Hz (+/-0.02%) | 1 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 4 | Wh transition frequency ft1, Hz | 3.981 Hz (+/-0.02%) | 3.98107 Hz | 0.00007 Hz | 9 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 4 | Wh transition frequency ft2, Hz | 10 Hz (+/-0.02%) | 10 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 4 | Wh transition frequency ft3, Hz | 794.3 Hz (+/-0.02%) | 794.32823 Hz | 0.02823 Hz | 18 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 4 | Wh transition frequency ft4, Hz | 1995 Hz (+/-0.02%) | 1995.26231 Hz | 0.26231 Hz | 66 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Wb reference frequency, Hz | 15.915 Hz (+/-0.01%) | 15.9155 Hz | 0.0005 Hz | 31 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Wb weighted indication at the reference, m/s2 | 0.8126 m/s² (+/-0.1%) | 0.81256 m/s² | -0.00004 m/s² | 5 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Wd reference frequency, Hz | 15.915 Hz (+/-0.01%) | 15.9155 Hz | 0.0005 Hz | 31 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Wd weighted indication at the reference, m/s2 | 0.1261 m/s² (+/-0.1%) | 0.12608 m/s² | -0.00002 m/s² | 16 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Wh reference frequency, Hz | 79.58 Hz (+/-0.01%) | 79.5775 Hz | -0.0025 Hz | 31 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Wh weighted indication at the reference, m/s2 | 2.02 m/s² (+/-0.1%) | 2.02019 m/s² | 0.00019 m/s² | 9 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Wk reference frequency, Hz | 15.915 Hz (+/-0.01%) | 15.9155 Hz | 0.0005 Hz | 31 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Wk weighted indication at the reference, m/s2 | 0.7718 m/s² (+/-0.1%) | 0.77182 m/s² | 0.00002 m/s² | 3 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Wf reference frequency, Hz | 0.3979 Hz (+/-0.01%) | 0.3979 Hz | 0 Hz | 32 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 1 | Wf weighted indication at the reference, m/s2 | 0.03888 m/s² (+/-0.1%) | 0.03888 m/s² | 0 m/s² | 12 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 5 | Upper magnitude tolerance in the central region, % | 12 % (+/-0.0005 %) | 12 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 5 | Lower magnitude tolerance in the central region, % | -11 % (+/-0.0005 %) | -11 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 5 | Upper magnitude tolerance in the skirts, % | 26 % (+/-0.0005 %) | 26 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 5 | Lower magnitude tolerance in the skirts, % | -21 % (+/-0.0005 %) | -21 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 5 | Lower magnitude tolerance in the tails, % | -100 % (+/-0.0005 %) | -100 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 5 | Characteristic phase deviation in the central region, degrees | 6 deg (+/-0.0005 deg) | 6 deg | 0 deg | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 2 | Indication tolerance at the reference frequency, % | 4 % (+/-0.0005 %) | 4 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-1:2017 Table 2 | Indication tolerance for low-frequency whole-body vibration, % | 5 % (+/-0.0005 %) | 5 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

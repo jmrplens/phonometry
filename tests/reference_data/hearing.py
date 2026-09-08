@@ -51,6 +51,18 @@ ISO7029_SU_MALE_60_1KHZ = 10.1533  # dB, ISO 7029 Table 2 upper spread
 ISO389_7_REF_FREE_1KHZ = 2.4  # dB, ISO 389-7 Table 1 free-field
 
 # ---------------------------------------------------------------------------
+# ISO 389-1:1998, the audiometric zero of a supra-aural earphone. Read from
+# the rendered printed pages: Table 1 (folio 8) for the two named models on
+# an IEC 60303 coupler, Table 2 (folio 10) for any other supra-aural earphone
+# on an IEC 60318 artificial ear. Both tables round to the nearest half
+# decibel, which their notes say in as many words.
+# ---------------------------------------------------------------------------
+ISO389_1_DT48_1KHZ = 8.0  # dB, Table 1, Beyer DT 48 with a flat cushion
+ISO389_1_TDH39_1KHZ = 7.0  # dB, Table 1, Telephonics TDH 39 with MX 41/AR
+ISO389_1_TDH39_125HZ = 45.0  # dB, Table 1, the low end of the same column
+ISO389_1_OTHER_6300HZ = 21.0  # dB, Table 2, the peak of the artificial ear
+
+# ---------------------------------------------------------------------------
 # Noise-induced hearing loss - ISO 1999:2013, Annex D worked examples (dB).
 # Table D.2 (L_EX,8h = 90 dB, 20 years) at 4 kHz: median NIPTS = 13 dB and the
 # most-susceptible tenth (fractile 0.9) = 18 dB. Table D.4 (100 dB, 40 years)

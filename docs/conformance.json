@@ -3,13 +3,13 @@
   "library": "3.3.0",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 992,
-    "passing": 992,
+    "checks": 995,
+    "passing": 995,
     "failing": 0,
     "domains": 77,
-    "standards": 407,
-    "citations": 686,
-    "designations": 145,
+    "standards": 408,
+    "citations": 689,
+    "designations": 146,
     "sources": 83
   },
   "units": [
@@ -261,8 +261,8 @@
     {
       "id": "hearing-threshold-iso-7029-iso-389-7",
       "title": "Hearing threshold (ISO 7029 / ISO 389-7)",
-      "checks": 3,
-      "passing": 3
+      "checks": 6,
+      "passing": 6
     },
     {
       "id": "measurement-uncertainty-gum-supplement-1",
@@ -16415,6 +16415,103 @@
       },
       "computed": {
         "value": 2.4
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "hearing-threshold-iso-7029-iso-389-7/iso-389-1-1998-table-1-coupler-iec-60303/retspl-of-the-two-named-earphones-at-1-khz-and-the-tdh-39-at-125-hz",
+      "domain": "hearing-threshold-iso-7029-iso-389-7",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 389-1",
+        "edition": "1998",
+        "clause": "Table 1 (coupler, IEC 60303)",
+        "cite": "ISO 389-1:1998 Table 1 (coupler, IEC 60303)"
+      },
+      "quantity": "RETSPL of the two named earphones at 1 kHz, and the TDH 39 at 125 Hz",
+      "kind": "record",
+      "expected": {
+        "label": "DT 48, 1 kHz = 8 dB; TDH 39, 1 kHz = 7 dB; TDH 39, 125 Hz = 45 dB",
+        "record": {
+          "DT 48, 1 kHz": 8.0,
+          "TDH 39, 1 kHz": 7.0,
+          "TDH 39, 125 Hz": 45.0
+        }
+      },
+      "computed": {
+        "label": "DT 48, 1 kHz = 8 dB; TDH 39, 1 kHz = 7 dB; TDH 39, 125 Hz = 45 dB",
+        "record": {
+          "DT 48, 1 kHz": 8.0,
+          "TDH 39, 1 kHz": 7.0,
+          "TDH 39, 125 Hz": 45.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "hearing-threshold-iso-7029-iso-389-7/iso-389-1-1998-table-2-artificial-ear-iec-60318/retspl-of-any-other-supra-aural-earphone-at-6-3-khz",
+      "domain": "hearing-threshold-iso-7029-iso-389-7",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 389-1",
+        "edition": "1998",
+        "clause": "Table 2 (artificial ear, IEC 60318)",
+        "cite": "ISO 389-1:1998 Table 2 (artificial ear, IEC 60318)"
+      },
+      "quantity": "RETSPL of any other supra-aural earphone at 6,3 kHz",
+      "kind": "scalar",
+      "expected": {
+        "value": 21.0
+      },
+      "computed": {
+        "value": 21.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "hearing-threshold-iso-7029-iso-389-7/iso-389-1-1998-clause-3-7-hearing-level-against-the-audiometric-zero/40-db-hl-at-4-khz-on-a-tdh-39-is-the-reference-level-plus-40-db",
+      "domain": "hearing-threshold-iso-7029-iso-389-7",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 389-1",
+        "edition": "1998",
+        "clause": "Clause 3.7 (hearing level against the audiometric zero)",
+        "cite": "ISO 389-1:1998 Clause 3.7 (hearing level against the audiometric zero)"
+      },
+      "quantity": "40 dB HL at 4 kHz on a TDH 39 is the reference level plus 40 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 49.5
+      },
+      "computed": {
+        "value": 49.5
       },
       "unit": "dB",
       "tolerance": {

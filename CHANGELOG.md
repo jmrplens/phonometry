@@ -260,6 +260,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   under the formula says railway: the road wording of EN 1793-2, left in
   place when the clause was copied, and now an errata entry of its own.
 
+- What 0 dB HL is worth on an earphone: the reference levels of
+  **ISO 389-1:1998**, in `hearing.earphone_reference_level` and
+  `hearing.hearing_level_to_coupler_spl`.
+
+  The threshold guide already said that the audiometric zero of a clinical
+  audiometer is an ISO 389-1 quantity and not the free-field zero of
+  ISO 389-7; it did not carry the numbers. It does now, all three columns of
+  the standard: the Beyer DT 48 and the Telephonics TDH 39 on an IEC 60303
+  coupler (Table 1) and any other supra-aural earphone on an IEC 60318
+  artificial ear (Table 2), at the twenty-three frequencies both tables are
+  printed at. Hearing level is defined against that zero and nothing else, so
+  converting an audiogram to the level in the coupler is the audiogram plus
+  the reference, which is what the second function does. The two zeros are
+  twenty-three decibels apart at 125 Hz, which is the figure the new section
+  ends on.
+
 - What a road barrier is sold by, which is not what it diffracts: the two
   single-number ratings of EN 1793 and the spectrum they share, in
   `environment.sound_absorption_rating` and

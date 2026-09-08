@@ -426,7 +426,7 @@ _ES_EXACT = {
     "The Characteristic Phase Deviation, Which It Grades": "La desviación de fase característica, que sí califica",
     "The Same Errors on a Linear Frequency Axis, Read at $f = 0$": "Los mismos errores en un eje de frecuencia lineal, leídos en $f = 0$",
     "Phase error, measured minus design (degrees)": "Error de fase, medido menos objetivo de diseño (grados)",
-    "Characteristic phase deviation $\\Delta\\varphi_0$ (degrees)": "Desviación de fase característica $\\Delta\\varphi_0$ (grados)",
+    "Characteristic phase deviation $\\Delta\\varphi_0$ (degrees)": "Desviación característica de fase $\\Delta\\varphi_0$ (grados)",
     # The three responses, in the order the key at the foot lists them.
     "a constant phase error of +4°": "un error de fase constante de +4°",
     "2 ms of group delay on its own": "2 ms de retardo de grupo, y nada más",

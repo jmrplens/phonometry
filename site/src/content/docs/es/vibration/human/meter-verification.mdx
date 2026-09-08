@@ -1,6 +1,6 @@
 ---
 title: "Verificación del vibrómetro"
-description: "Los apartados de la ISO 8041-1 que son aritmética: la banda de tolerancia de la Tabla 5 alrededor de cada ponderación frecuencial con la incertidumbre expandida del propio laboratorio, la desviación característica de fase de la fórmula (6), los tiempos de decaimiento del r.m.s. móvil de las Tablas 10 y 11, y las 228 indicaciones de la ráfaga en diente de sierra de las Tablas 7 a 9."
+description: "Los apartados de la ISO 8041-1 que son aritmética: la banda de tolerancia de la Tabla 5 alrededor de cada ponderación frecuencial con la incertidumbre expandida del propio laboratorio, la desviación característica de fase de la Fórmula (6), los tiempos de decaimiento del valor eficaz móvil de las Tablas 10 y 11, y las 228 indicaciones de la ráfaga en diente de sierra de las Tablas 7 a 9."
 references:
   - type: standard
     organization: "International Organization for Standardization"
@@ -8,7 +8,7 @@ references:
     title: "Human response to vibration — Measuring instrumentation — Part 1: General purpose vibration meters"
     designation: "ISO 8041-1:2017"
     primary: true
-    note: "Los tres niveles de ensayo de prestaciones (apartado 1), las condiciones ambientales de referencia (apartado 4), los valores y frecuencias de vibración de referencia de la Tabla 1, las tres filas de la Tabla 2, los parámetros de ponderación de la Tabla 3 y las funciones de transferencia de 5.6, las frecuencias de transición de la Tabla 4 y las tolerancias de la Tabla 5 con su nota a, la desviación característica de fase de la fórmula (6), la ráfaga de señal en diente de sierra de 5.9 con su Tabla 6 y las respuestas impresas de las Tablas 7 a 9, el promediado temporal del r.m.s. móvil de 5.13 con las Tablas 10 y 11, las incertidumbres expandidas máximas de 12.1 y la rejilla de ensayo de 12.11.1, la demostración de conformidad de 13.1 y 14.1, las ponderaciones y fases del objetivo de diseño tabuladas del anexo B, y el argumento de fase del anexo H con sus fórmulas (H.1), (H.3) y (H.4). Los apartados de diseño y de ensayo de tipo que necesitan un banco no están implementados: cumplir en cualquier apartado de aquí es una afirmación sobre ese apartado y nunca un certificado de conformidad de un instrumento."
+    note: "Los tres niveles de ensayo de prestaciones (apartado 1), las condiciones ambientales de referencia (apartado 4), los valores y frecuencias de vibración de referencia de la Tabla 1, las tres filas de la Tabla 2, los parámetros de ponderación de la Tabla 3 y las funciones de transferencia de 5.6, las frecuencias de transición de la Tabla 4 y las tolerancias de la Tabla 5 con su nota a, la desviación característica de fase de la Fórmula (6), la ráfaga de señal en diente de sierra de 5.9 con su Tabla 6 y las respuestas impresas de las Tablas 7 a 9, el promediado temporal del valor eficaz móvil de 5.13 con las Tablas 10 y 11, las incertidumbres expandidas máximas de 12.1 y la malla de ensayo de 12.11.1, la demostración de conformidad de 13.1 y 14.1, las ponderaciones y fases del objetivo de diseño tabuladas del anexo B, y el argumento de fase del anexo H con sus fórmulas (H.1), (H.3) y (H.4). Los apartados de diseño y de ensayo de tipo que necesitan un banco no están implementados: cumplir en cualquier apartado de aquí es una afirmación sobre ese apartado y nunca un certificado de conformidad de un instrumento."
   - type: book
     authors: ["Griffin, M. J."]
     year: 1996
@@ -36,10 +36,10 @@ El apartado que viene justo después de ellas es donde empieza esta página:
 cuánto puede apartarse un instrumento real de esas ponderaciones antes de
 dejar de ser conforme. Ese apartado es una tabla de frecuencias y porcentajes,
 y una resta. Resulta que no está solo. La desviación característica de fase,
-el decaimiento del r.m.s. móvil y la ráfaga de señal en diente de sierra están
+el decaimiento del valor eficaz móvil y la ráfaga de señal en diente de sierra están
 especificados los tres como números que un vibrómetro conforme tiene que
 producir, y todos y cada uno de esos números se pueden calcular. Esta página
-trata de las partes de un ensayo de tipo que son aritmética y no trabajo de
+trata de las partes del ensayo de un instrumento que son aritmética y no trabajo de
 laboratorio, y de dejar claro dónde termina cada una.
 
 ## 1. Por qué una norma de instrumentación está en una biblioteca de cálculo
@@ -51,7 +51,7 @@ para un instrumento de ejemplar único; la **verificación periódica**, un
 conjunto intermedio de ensayos que confirma que un instrumento sigue
 funcionando según lo especificado; y las **comprobaciones in situ**, el mínimo
 que indica que probablemente esté funcionando. Los tres son trabajo sobre
-soporte físico, hecho en un laboratorio o en campo. Ninguno de ellos se
+hardware, hecho en un laboratorio o en campo. Ninguno de ellos se
 ejecuta aquí.
 
 Lo que se repite dentro de los tres es un único cálculo. Alguien midió la
@@ -68,8 +68,8 @@ funciones de transferencia exactas del apartado 5.6, ya usadas para ponderar
 señales en otras páginas de esta sección), las frecuencias de transición de la
 Tabla 4 y las bandas de tolerancia de la Tabla 5, las condiciones de
 referencia de la Tabla 1 y las tolerancias de indicación de la Tabla 2, la
-desviación característica de fase de la fórmula (6), los tiempos de
-decaimiento del r.m.s. móvil de las Tablas 10 y 11, y las 228 indicaciones de
+desviación característica de fase de la Fórmula (6), los tiempos de
+decaimiento del valor eficaz móvil de las Tablas 10 y 11, y las 228 indicaciones de
 la ráfaga de señal de las Tablas 7 a 9. Cada una de esas cosas es o bien un
 número que la norma imprime o bien un número que ella define en forma cerrada,
 y cada una es un lado de una comparación cuyo otro lado sale de un banco de
@@ -80,14 +80,14 @@ indicación en condiciones de referencia (5.5), la linealidad de amplitud
 (5.7), el ruido del instrumento (5.8), la indicación de sobrecarga y la de
 señal por debajo del rango (5.10 y 5.11), la diafonía eléctrica (5.16), el
 montaje del apartado 6 y los criterios ambientales y electromagnéticos del
-apartado 7 son medidas sobre soporte físico; y también lo es, en el momento en
+apartado 7 son medidas sobre hardware; y también lo es, en el momento en
 que alguien tiene que hacer vibrar un transductor y leer una pantalla,
 cualquier ensayo de esta página. **Superar la comprobación de ponderación es
 condición necesaria para la conformidad y nunca un certificado de ella.**
 
 Conviene llevarse una frase del 5.6.6 al resto de la página: los límites de
 tolerancia *incluyen* las incertidumbres expandidas máximas de medida
-aplicables. La banda no es la tolerancia del instrumento con la incertidumbre
+aplicables. La banda no es la holgura del instrumento con la incertidumbre
 de la medida en el banco sumada encima; esa incertidumbre tiene que caber
 también dentro de la banda. Hay una segunda frase sobre incertidumbre, en 13.1
 y 14.1, y dice algo distinto; distinguir las dos es de lo que trata la
@@ -117,7 +117,7 @@ cada ponderación y que cortan el eje en cinco regiones; las cinco filas impresa
 solo llevan tres pares de límites distintos, porque las dos faldas comparten los
 suyos y las dos colas también:
 
-| Región de frecuencia | Tolerancia de magnitud | Desviación de fase característica |
+| Región de frecuencia | Tolerancia de magnitud | Desviación característica de fase |
 | :--- | :---: | :---: |
 | $f \le f_\mathrm{t1}$ | +26 %, −100 % | ±∞ |
 | $f_\mathrm{t1} < f < f_\mathrm{t2}$ | +26 %, −21 % | ±12° |
@@ -130,7 +130,7 @@ faldas excluyen los suyos, así que una medida justo en $f_\mathrm{t2}$ o en
 $f_\mathrm{t3}$ toma el límite más estrecho y no el más ancho que hay al otro
 lado.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_tolerance_regions.svg" alt="Tres paneles sobre un mismo eje logarítmico de frecuencia de 0,1 a 400 Hz, con las cuatro frecuencias de transición de la Tabla 4 para Wk como sus marcas: 0,2512, 0,631, 63,1 y 158,5 Hz. El panel izquierdo dibuja el objetivo de diseño de Wk en log-log con la banda que la Tabla 5 permite a su alrededor, coloreada por regiones, una franja estrecha a lo largo de la región central, otra más ancha en las dos faldas y, en las dos colas, un relleno que se sale por la parte inferior del panel porque ahí no hay ningún límite inferior. El panel superior derecho dibuja esa misma banda dividida por el objetivo de diseño, en porcentaje, donde el escalón del más 12 y menos 11 del centro al más 26 y menos 21 de las faldas está a escala. El panel inferior derecho dibuja el límite de la desviación de fase característica sobre los mismos cuatro cortes, 6 grados en el centro, 12 en las faldas y más o menos infinito en las colas, con la nota que restringe esa columna a los instrumentos cuyo parámetro de medida no se basa en valores eficaces" width="96%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_tolerance_regions.svg" alt="Tres paneles sobre un mismo eje logarítmico de frecuencia de 0,1 a 400 Hz, con las cuatro frecuencias de transición de la Tabla 4 para Wk como sus marcas: 0,2512, 0,631, 63,1 y 158,5 Hz. El panel izquierdo dibuja el objetivo de diseño de Wk en log-log con la banda que la Tabla 5 permite a su alrededor, coloreada por regiones, una franja estrecha a lo largo de la región central, otra más ancha en las dos faldas y, en las dos colas, un relleno que se sale por la parte inferior del panel porque ahí no hay ningún límite inferior. El panel superior derecho dibuja esa misma banda dividida por el objetivo de diseño, en porcentaje, donde el escalón del más 12 y menos 11 del centro al más 26 y menos 21 de las faldas está a escala. El panel inferior derecho dibuja el límite de la desviación característica de fase sobre los mismos cuatro cortes, 6 grados en el centro, 12 en las faldas y más o menos infinito en las colas, con la nota que restringe esa columna a los instrumentos cuyo parámetro de medida no se basa en valores eficaces" width="96%" />
 
 La Tabla 4 imprime cada corte dos veces, como potencia $10^{k/10}$ y como
 decimal redondeado al lado, y la biblioteca los construye a partir de los
@@ -271,7 +271,7 @@ fig, ax = plt.subplots()
 ax.fill_between(check.frequencies_hz,
                 check.design * (1.0 + lower / 100.0),
                 check.design * (1.0 + upper / 100.0),
-                color="#1f77b4", alpha=0.15, label="tolerancia ISO 8041-1")
+                color="#1f77b4", alpha=0.15, label="tolerancia de ISO 8041-1")
 ax.plot(check.frequencies_hz, check.design, color="#1f77b4", lw=2.0,
         label="objetivo de diseño")
 ax.plot(check.frequencies_hz[inside], check.measured[inside], "o",
@@ -338,7 +338,7 @@ veces.
 
 La segunda está en el 13.1 y en el 14.1, palabra por palabra en los dos: la
 conformidad queda demostrada cuando la desviación medida respecto de un
-objetivo de diseño, **ampliada con la incertidumbre expandida de medida real
+objetivo de diseño, **extendida con la incertidumbre expandida de medida real
 del laboratorio de ensayo**, no supera los límites de tolerancia
 especificados. Eso es una afirmación sobre un laboratorio en un día concreto.
 Mueve la desviación, no la banda, así que la comparación pasa a ser
@@ -435,7 +435,7 @@ print(graded.failing_frequencies_hz.round(2))     # [  6.31 125.89]
 
 # En una línea: el renderizador dibuja la banda impresa y, dentro de ella, la
 # banda más estrecha que deja la incertidumbre declarada.
-graded.plot()
+graded.plot(language="es")
 plt.show()
 
 # A mano, el mismo veredicto leído como desviaciones: la banda se queda donde
@@ -455,15 +455,15 @@ kept = graded.within_tolerance
 
 fig, ax = plt.subplots()
 ax.fill_between(edges, band_lower, band_upper, color="#1f77b4", alpha=0.15,
-                label="tolerancia ISO 8041-1")
+                label="tolerancia de ISO 8041-1")
 ax.errorbar(sweep_hz[kept], graded.deviation_percent[kept],
             yerr=arms[:, kept], color="#2ca02c", marker="o", ls="none",
-            capsize=2.5, label="desviación ampliada conforme")
+            capsize=2.5, label="desviación extendida conforme")
 ax.errorbar(sweep_hz[~kept], graded.deviation_percent[~kept],
             yerr=arms[:, ~kept], color="#d62728", marker="X", markersize=9,
-            ls="none", capsize=2.5, label="desviación ampliada rechazada")
+            ls="none", capsize=2.5, label="desviación extendida rechazada")
 ax.set(xscale="log", xlim=(0.1, 400.0), ylim=(-33.0, 31.0),
-       xlabel="Frecuencia [Hz]", ylabel="Desviación del objetivo de diseño [%]")
+       xlabel="Frecuencia [Hz]", ylabel="Desviación respecto al objetivo de diseño [%]")
 ax.grid(True, which="both", alpha=0.3)
 ax.legend()
 plt.show()
@@ -471,7 +471,7 @@ plt.show()
 
 </details>
 
-El valor por defecto es `None`, que compara la desviación sin ampliar y es la
+El valor por defecto es `None`, que compara la desviación sin extender y es la
 lectura que solo es correcta cuando se ha demostrado que la incertidumbre de
 medida es despreciable. Una cifra negativa o infinita se rechaza en lugar de
 ignorarse en silencio, porque ignorarla devolvería exactamente el veredicto
@@ -873,7 +873,7 @@ ax_graded.plot(attributed, limit, color="#1f77b4", ls="--", drawstyle="steps-pos
 ax_error.set_ylabel("Error de fase [grados]")
 ax_error.legend(fontsize="small")
 ax_graded.set(xlabel="Frecuencia [Hz]",
-              ylabel="Desviación característica [grados]")
+              ylabel="Desviación característica de fase [grados]")
 ax_graded.legend(fontsize="small")
 for ax in (ax_error, ax_graded):
     ax.grid(True, which="both", alpha=0.3)
@@ -957,11 +957,11 @@ print(vibration.RUNNING_RMS_DECAY_TIME_S["exponential"])
 # ((0.125, 0.58, 0.03), (1.0, 4.61, 0.25), (8.0, 36.8, 2.0))
 ```
 
-Los dos promedios tienen forma cerrada, y ninguno es una constante ajustada. El
-promedio lineal conserva los últimos $\tau$ segundos del registro, así que $t$
+Los dos promediados tienen forma cerrada, y ninguno es una constante ajustada. El
+promediado lineal conserva los últimos $\tau$ segundos del registro, así que $t$
 segundos después del corte su ventana todavía guarda $(\tau - t)/\tau$ de la
-media cuadrática original y la indicación cae como $\sqrt{(\tau - t)/\tau}$,
-hasta llegar a la décima parte en $t = 0{,}99\,\tau$. El promedio exponencial
+valor cuadrático medio original y la indicación cae como $\sqrt{(\tau - t)/\tau}$,
+hasta llegar a la décima parte en $t = 0{,}99\,\tau$. El promediado exponencial
 decae en potencia como $e^{-t/\tau}$, así que la indicación cae como
 $e^{-t/2\tau}$ y llega a la décima parte en $t = 2\tau\ln 10 = 4{,}6052\,\tau$.
 `running_rms_decay_time` son esas dos expresiones, y caen sobre los números
@@ -1003,11 +1003,11 @@ for method in ("linear", "exponential"):
 La lectura lineal sale 0,98 s en vez de los 0,99 s de la forma cerrada, y eso es
 el ensayo comportándose como ensayo y no como aritmética. En el instante del
 cruce, la ventana deslizante solo guarda unas pocas muestras finales de una
-sinusoide, y su media cuadrática depende del punto del ciclo en el que se cortó
+sinusoide, y su valor cuadrático medio depende del punto del ciclo en el que se cortó
 la señal. La banda impresa es 0,99 ± 0,05 s, lo bastante ancha para absorberlo,
 y por eso el veredicto se escribe contra la banda y no contra la forma cerrada.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_running_rms_decay.svg" alt="El ensayo de caída del apartado 5.13 de la ISO 8041-1 dibujado en tres paneles, para un tiempo de promediado de 1 s. El panel superior dibuja las dos indicaciones de valor eficaz móvil cayendo desde el instante en que se corta una sinusoide estable a la frecuencia de referencia de 15,9155 Hz, en decibelios por debajo del valor del que partía cada una: el promedio lineal se hunde suavemente y luego se desploma en 1 s, el promedio exponencial cae como una recta, y cada uno cruza el criterio del 10 % en menos 20 decibelios dentro de la banda impresa dibujada a su alrededor, 0,99 más o menos 0,05 s para el promedio lineal y 4,61 más o menos 0,25 s para el exponencial. El panel inferior izquierdo amplía el cruce del lineal, donde la traza medida discurre por debajo de la forma cerrada en lugar de alrededor de ella, en 193 de las 199 muestras en las que el promedio lineal todavía tiene algún nivel, y por eso cruza antes: los dos cruces están rotulados donde caen sobre la línea del criterio, el medido en 0,98 s y la forma cerrada en 0,99 s, y los dos quedan holgadamente dentro de la banda impresa. El panel inferior derecho pone las dos columnas de la Tabla 11 sobre un mismo eje adimensional para las tres constantes de tiempo impresas de 0,125, 1 y 8 s: el tiempo de caída impreso abarca de unas 0,94 a unas 1,06 veces la forma cerrada en todas las filas, y la velocidad de caída impresa leída como tiempo de caída abarca de unas 0,87 a unas 1,14, así que la columna del tiempo es la afirmación más estrecha de las dos." width="96%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_running_rms_decay.svg" alt="El ensayo de caída del apartado 5.13 de la ISO 8041-1 dibujado en tres paneles, para un tiempo de promediado de 1 s. El panel superior dibuja las dos indicaciones de valor eficaz móvil cayendo desde el instante en que se corta una sinusoide estable a la frecuencia de referencia de 15,9155 Hz, en decibelios por debajo del valor del que partía cada una: el promediado lineal se hunde suavemente y luego se desploma en 1 s, el promediado exponencial cae como una recta, y cada uno cruza el criterio del 10 % en menos 20 decibelios dentro de la banda impresa dibujada a su alrededor, 0,99 más o menos 0,05 s para el promediado lineal y 4,61 más o menos 0,25 s para el exponencial. El panel inferior izquierdo amplía el cruce del lineal, donde la traza medida discurre por debajo de la forma cerrada en lugar de alrededor de ella, en 193 de las 199 muestras en las que el promediado lineal todavía tiene algún nivel, y por eso cruza antes: los dos cruces están rotulados donde caen sobre la línea del criterio, el medido en 0,98 s y la forma cerrada en 0,99 s, y los dos quedan holgadamente dentro de la banda impresa. El panel inferior derecho pone las dos columnas de la Tabla 11 sobre un mismo eje adimensional para las tres constantes de tiempo impresas de 0,125, 1 y 8 s: el tiempo de caída impreso abarca de unas 0,94 a unas 1,06 veces la forma cerrada en todas las filas, y la velocidad de caída impresa leída como tiempo de caída abarca de unas 0,87 a unas 1,14, así que la columna del tiempo es la afirmación más estrecha de las dos." width="96%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -1019,7 +1019,7 @@ tau = 1.0
 cut = int(cut_s * fs)
 since_cut = np.arange(t.size - cut) / fs
 # El 10 % del apartado, leído de vuelta desde la forma cerrada en lugar de
-# tecleado: el promedio exponencial cae como exp(-t / 2 tau), así que la
+# tecleado: el promediado exponencial cae como exp(-t / 2 tau), así que la
 # fracción es lo que vale esa expresión en el instante que devuelve
 # running_rms_decay_time.
 fraction = np.exp(-vibration.running_rms_decay_time(tau, method="exponential") / (2 * tau))
@@ -1028,12 +1028,12 @@ fig, ax = plt.subplots()
 for method, colour in (("linear", "#1f77b4"), ("exponential", "#2ca02c")):
     trace = np.asarray(vibration.running_rms(a, fs, integration_time=tau, method=method))
     relative = trace[cut:] / trace[cut - 1]
-    # El promedio lineal se vacía una constante de tiempo después del corte, y
-    # un nivel no está definido donde la media cuadrática de la ventana es
+    # El promediado lineal se vacía una constante de tiempo después del corte, y
+    # un nivel no está definido donde el valor cuadrático medio de la ventana es
     # exactamente cero.
     level_db = np.full(relative.shape, np.nan)
     level_db[relative > 0.0] = 20.0 * np.log10(relative[relative > 0.0])
-    ax.plot(since_cut, level_db, color=colour, lw=1.8, label=f"promedio {method}")
+    ax.plot(since_cut, level_db, color=colour, lw=1.8, label=f"promediado {method}")
 
     # La banda impresa en la que tiene que caer el cruce, de la Tabla 10 o la
     # Tabla 11.
@@ -1078,7 +1078,7 @@ print(vibration.RUNNING_RMS_DECAY_RATE_DB_PER_S)
 print(round(20 * np.log10(np.e) / 2.0, 4))   # 4.3429
 ```
 
-La velocidad en forma cerrada de un promedio exponencial es
+La velocidad en forma cerrada de un promediado exponencial es
 $20\lg(e)/(2\tau) = 4{,}3429/\tau$ decibelios por segundo, que para $\tau = 1$ s
 vale 4,3429 y queda en el centro del 3,8 a 4,9 impreso. Pero ese intervalo va de
 0,875 a 1,128 veces la forma cerrada, mientras que el tiempo impreso de la misma
@@ -1099,7 +1099,7 @@ rizado de un 0,3 % aproximadamente, holgadamente dentro de ese margen.
 El apartado 5.9 es el único sitio de todo el documento donde la ISO 8041-1
 imprime un oráculo en vez de un requisito. Define una señal de ensayo en la
 Tabla 6 y luego imprime en las Tablas 7, 8 y 9 las indicaciones que un
-instrumento conforme tiene que mostrar cuando se le aplica esa señal, cada una
+vibrómetro conforme tiene que mostrar cuando se le aplica esa señal, cada una
 con la tolerancia contra la que se la juzga: 228 celdas en total. La NOTA 1
 dice de dónde salen, y es la frase sin la cual esta sección no sería posible en
 absoluto: «La respuesta a la ráfaga de señal en diente de sierra se determina
@@ -1162,7 +1162,7 @@ columnas de la Tabla 8 son el mismo MTVV calculado dos veces, y de ahí que
 el promediado exponencial de la ec. (3) dan respuestas distintas, y la norma
 califica los dos.
 
-`verify_signal_burst_response` compara un juego de indicaciones medidas contra
+`verify_signal_burst_response` compara un juego de indicaciones medidas con
 las celdas impresas, fila a fila y columna a columna, cada una contra la
 tolerancia impresa a su lado:
 
@@ -1418,7 +1418,7 @@ Tabla 5, con el coste en valor de pico de la Fórmula (H.4) al lado.
 
 <ScopeClaim status="covered">
 La **etapa de limitación de banda por separado**, los **tiempos de decaimiento
-del r.m.s. móvil** de las Tablas 10 y 11 en forma cerrada, y las **228
+del valor eficaz móvil** de las Tablas 10 y 11 en forma cerrada, y las **228
 indicaciones de la ráfaga en diente de sierra** de las Tablas 7 a 9 reproducidas
 a partir de la señal que define la Tabla 6.
 </ScopeClaim>
@@ -1432,7 +1432,7 @@ de banco.
 
 <ScopeClaim status="not-covered" label="No cubierto">
 **Ningún banco, en ninguna parte.** Todo criterio de aquí es un lado de una
-comparación cuyo otro lado alguien tiene que medir sobre soporte físico. La
+comparación cuyo otro lado alguien tiene que medir sobre hardware. La
 exactitud de indicación, la linealidad, el ruido del instrumento, la sobrecarga,
 la diafonía, las características del transductor, el montaje y el apartado
 ambiental y electromagnético entero no están implementados ni son implementables

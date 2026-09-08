@@ -566,7 +566,7 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 y DIN 4150-3.
   entrada pretendida y la transmisibilidad en resonancia.
 - [Verificación del vibrómetro (ISO 8041-1)](/phonometry/es/vibration/human/meter-verification/):
   la banda de tolerancia de cada ponderación frecuencial, la desviación
-  característica de fase, el decaimiento del r.m.s. móvil y las indicaciones
+  característica de fase, el decaimiento del valor eficaz móvil y las indicaciones
   de la ráfaga en diente de sierra.
 
 **[Maquinaria](/phonometry/es/vibration/machinery/)**

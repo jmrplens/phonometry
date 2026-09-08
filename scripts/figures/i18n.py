@@ -418,6 +418,32 @@ _ES_EXACT = {
     "0.59 to 0.74 Hz": "0,59 a 0,74 Hz",
     "0.90 to 1.20 Hz": "0,90 a 1,20 Hz",
     "$f = 46/h$: 0.77 Hz": "$f = 46/h$: 0,77 Hz",
+    # meter_tolerance_regions (ISO 8041-1 Tables 4 and 5): the band a
+    # human-vibration meter's frequency weighting has to stay inside, the
+    # width of that band in per cent, and the phase limit that hangs off the
+    # same four transition frequencies.
+    "The Shape of the ISO 8041-1 Tolerance: Tables 4 and 5 on One Frequency Axis": "La forma de la tolerancia de la ISO 8041-1: las tablas 4 y 5 sobre un mismo eje de frecuencia",
+    "The Band Around Wk, and Where It Changes Width": "La banda alrededor de Wk, y dónde cambia de anchura",
+    "The Magnitude Tolerance, to Scale": "La tolerancia de magnitud, a escala",
+    "The Phase Tolerance, on the Same Corners": "La tolerancia de fase, sobre los mismos cortes",
+    "Wk weighting factor": "Factor de ponderación Wk",
+    "Magnitude tolerance on the factor (%)": "Tolerancia de magnitud sobre el factor (%)",
+    "Limit on $\\Delta\\varphi_0$ (degrees)": "Límite de $\\Delta\\varphi_0$ (grados)",
+    "Wk, the design goal of Table 3": "Wk, el objetivo de diseño de la tabla 3",
+    # The three distinct rows of Table 5, named and written as the table
+    # prints them, both graded columns included. Exact entries rather than a
+    # pattern: the percentages and the degrees are fixed by the table, and
+    # every _ES_PATTERNS entry is part of the fingerprint each clip is
+    # sealed with.
+    "the central region: +12 %, −11 %, ±6°": "la región central: +12 %, −11 %, ±6°",
+    "the two skirts: +26 %, −21 %, ±12°": "las dos faldas: +26 %, −21 %, ±12°",
+    "the two tails: +26 %, −100 %, ±∞": "las dos colas: +26 %, −100 %, ±∞",
+    "−100 %: below $f_\\mathrm{t1}$ and\nabove $f_\\mathrm{t4}$ the standard sets\nno lower limit at all": "−100 %: por debajo de $f_\\mathrm{t1}$ y\npor encima de $f_\\mathrm{t4}$ la norma no fija\nningún límite inferior",
+    "footnote a: the phase column applies only\nto instruments whose measurement parameter\nis not based on r.m.s. values": "nota a: la columna de fase solo se aplica\na instrumentos cuyo parámetro de medida\nno se basa en valores eficaces",
+    # The Table 4 note on the left panel. The four frequencies are the
+    # printed decimals of the two rows, so the Spanish twin carries the
+    # commas the save-time pass would otherwise have to find.
+    "Table 4 gives every weighting its own four:\nWk's run from 0.2512 Hz to 158.5 Hz,\nand Wh's from 3.981 Hz to 1995 Hz": "La tabla 4 da a cada ponderación sus cuatro:\nlas de Wk van de 0,2512 Hz a 158,5 Hz,\ny las de Wh, de 3,981 Hz a 1995 Hz",
     "limit of zone A ($Z$ = 1)": "límite de la zona A ($Z$ = 1)",
     "limit of zone B ($Z$ = 2.56)": "límite de la zona B ($Z$ = 2,56)",
     "limit of zone C ($Z$ = 6.4)": "límite de la zona C ($Z$ = 6,4)",

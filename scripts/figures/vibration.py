@@ -30,7 +30,7 @@ from matplotlib.axes import Axes
 
 from phonometry._plot.common import format_frequency_axis, theme_fill
 
-from .i18n import _LANG
+from .i18n import _LANG, _fmt_minus
 from .theme import (
     COLOR_FG,
     COLOR_GRID,
@@ -3363,4 +3363,359 @@ def generate_machine_vibration_trend(output_dir: str) -> None:
 
     plt.tight_layout()
     save_figure(output_dir, "machine_vibration_trend.svg")
+    plt.close()
+
+
+def _signed_percent(value: float) -> str:
+    """A Table 5 percentage with the sign the figure is set in.
+
+    ``format`` writes a negative number with an ASCII hyphen, which is a
+    shorter, lower mark than the U+2212 the tick labels beside it carry, so
+    negatives go through ``_fmt_minus``. Zero takes no sign at all.
+    """
+    if value > 0.0:
+        return f"+{value:.0f}"
+    if value < 0.0:
+        return _fmt_minus(value, ".0f")
+    return "0"
+
+
+def _table_5_masks(
+    frequencies: np.ndarray, transitions: tuple[float, float, float, float]
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """The central, skirt and tail masks of ISO 8041-1 Table 5, in that order.
+
+    Written with the inequalities the table itself prints: closed on the
+    central region, open on the two skirts, so a frequency exactly at a corner
+    takes the tighter limit rather than the wider one beside it.
+    """
+    ft1, ft2, ft3, ft4 = transitions
+    central = (frequencies >= ft2) & (frequencies <= ft3)
+    skirts = ((frequencies > ft1) & (frequencies < ft2)) | (
+        (frequencies > ft3) & (frequencies < ft4)
+    )
+    tails = (frequencies <= ft1) | (frequencies >= ft4)
+    return central, skirts, tails
+
+
+def _table_5_row(region: str, limits: tuple[float, float, float]) -> str:
+    """One row of ISO 8041-1 Table 5, named and written as the table prints it.
+
+    Both graded columns, because the point of the legend is that they are one
+    row: the magnitude pair and the characteristic phase deviation beside it.
+    Every number comes from the library constants rather than from the label,
+    so the key and the drawing cannot disagree.
+    """
+    upper, lower, phase = limits
+    degrees = "±∞" if not math.isfinite(phase) else f"±{phase:.0f}°"
+    return f"{region}: +{upper:.0f} %, {_fmt_minus(lower, '.0f')} %, {degrees}"
+
+
+def generate_meter_tolerance_regions(output_dir: str) -> None:
+    """ISO 8041-1: the five regions Tables 4 and 5 grade a meter in.
+
+    The tolerance on the frequency weighting, and nothing else: no measurement
+    and no verdict. Conformity also takes the indication, linearity, overload,
+    burst and environmental clauses, which are hardware tests.
+    """
+    print("Generating meter_tolerance_regions...")
+    from matplotlib.ticker import NullFormatter
+
+    from phonometry import vibration
+
+    # Wk carries the transition frequencies Table 4 gives six of the nine
+    # weightings (Wb, Wc, Wd, We, Wj and Wk share one row), so the picture is
+    # the common case rather than a special one.
+    name = "Wk"
+    transitions = vibration.TRANSITION_FREQUENCIES_HZ[name]
+    ft1, ft2, ft3, ft4 = transitions
+    fmin, fmax = 0.1, 400.0
+    # The floor of the left panel. The two tails have no lower limit, so their
+    # fill is drawn down to the axis instead of down to a value; the floor is
+    # low enough for the upper limit of the right-hand tail, which is the half
+    # of that row that does bind, to stay on the panel.
+    floor = 8.0e-4
+
+    # A pair of points either side of every transition frequency: all three
+    # bands step there, and a grid carrying no point at the step draws it as a
+    # ramp across whichever cell it falls in.
+    edges = np.array(
+        [f * scale for f in transitions for scale in (1.0 - 1e-9, 1.0 + 1e-9)]
+    )
+    # The left panel follows a curve, so it is sampled densely. The two on the
+    # right draw limits that are constant between the corners, so they are
+    # evaluated on the corners alone: the same staircase in ten points instead
+    # of four hundred, which is most of the weight of the finished drawing.
+    freqs = np.unique(np.concatenate((np.geomspace(fmin, fmax, 420), edges)))
+    steps = np.unique(np.concatenate(([fmin, fmax], edges)))
+    design = np.asarray(vibration.weighting_factors(name, freqs))
+    upper, lower = vibration.weighting_tolerance_percent(name, freqs)
+    step_upper, step_lower = vibration.weighting_tolerance_percent(name, steps)
+    step_phase = vibration.phase_tolerance_degrees(name, steps)
+    top = design * (1.0 + upper / 100.0)
+    bottom = design * (1.0 + lower / 100.0)
+
+    # Table 5's five rows are three distinct limit sets, and the colour of each
+    # is the same on all three panels.
+    rows = (
+        (COLOR_PRIMARY, "the central region", vibration.CENTRAL_TOLERANCE_PERCENT),
+        (COLOR_TERTIARY, "the two skirts", vibration.SKIRT_TOLERANCE_PERCENT),
+        (COLOR_MUTED, "the two tails", vibration.TAIL_TOLERANCE_PERCENT),
+    )
+    band_masks = _table_5_masks(freqs, transitions)
+    step_masks = _table_5_masks(steps, transitions)
+
+    # The band on the left is the tall panel because it is the only one with a
+    # curve in it; the two Table 5 columns stack beside it on the same axis.
+    fig = plt.figure(figsize=(13.2, 7.0))
+    grid_spec = fig.add_gridspec(
+        2, 2, width_ratios=[1.18, 1.0], hspace=0.3, wspace=0.22
+    )
+    ax_band = fig.add_subplot(grid_spec[:, 0])
+    ax_magnitude = fig.add_subplot(grid_spec[0, 1])
+    ax_phase = fig.add_subplot(grid_spec[1, 1])
+
+    # Left: the design goal and its sleeve. The lower edge of a tail is zero,
+    # which a logarithmic axis cannot draw, so the fill runs to the floor and
+    # the boundary line is simply not drawn there: an outline along the axis
+    # would read as a limit, and the whole point of the region is that there
+    # is none.
+    fill_bottom = np.where(bottom > 0.0, bottom, floor)
+    for (colour, region, limits), mask in zip(rows, band_masks, strict=True):
+        ax_band.fill_between(
+            freqs,
+            fill_bottom,
+            top,
+            where=mask,
+            color=theme_fill(colour, ax_band),
+            zorder=0,
+            label=_table_5_row(region, limits),
+        )
+    ax_band.plot(freqs, top, color=COLOR_FG, linewidth=1.0, alpha=0.55, zorder=2)
+    ax_band.plot(
+        freqs,
+        np.where(bottom > 0.0, bottom, np.nan),
+        color=COLOR_FG,
+        linewidth=1.0,
+        alpha=0.55,
+        zorder=2,
+    )
+    ax_band.plot(
+        freqs,
+        design,
+        color=COLOR_PRIMARY,
+        linewidth=1.8,
+        zorder=3,
+        label=f"{name}, the design goal of Table 3",
+    )
+
+    # The four transition frequencies, marked on all three panels and named on
+    # the left one, just above the upper edge of the band, which is empty on
+    # both sides of every one of them.
+    edge_design = np.asarray(vibration.weighting_factors(name, np.asarray(transitions)))
+    edge_upper, _edge_lower = vibration.weighting_tolerance_percent(name, transitions)
+    for index, (frequency, ceiling) in enumerate(
+        zip(transitions, edge_design * (1.0 + edge_upper / 100.0), strict=True), start=1
+    ):
+        for panel in (ax_band, ax_magnitude, ax_phase):
+            panel.axvline(
+                frequency,
+                color=COLOR_MUTED,
+                linestyle="--",
+                linewidth=1.0,
+                alpha=0.8,
+                zorder=1,
+            )
+        ax_band.text(
+            frequency,
+            ceiling * 1.9,
+            f"$f_\\mathrm{{t{index}}}$",
+            fontsize=9.5,
+            color=COLOR_FG,
+            ha="center",
+            va="bottom",
+            zorder=4,
+            # Over its own dashed line, so the mark carries a chip: without
+            # one the rule is drawn straight through the subscript.
+            bbox={
+                "boxstyle": "round,pad=0.2",
+                "facecolor": COLOR_PANEL,
+                "edgecolor": COLOR_GRID,
+            },
+        )
+
+    # The other half of Table 4, which one weighting cannot draw: the five
+    # regions are the standard's and the four frequencies are the weighting's.
+    # Wh is the far end of that table, and every number here is printed to the
+    # four significant figures Table 4 gives it.
+    wh_first, _wh_second, _wh_third, wh_last = vibration.TRANSITION_FREQUENCIES_HZ["Wh"]
+    ax_band.text(
+        math.sqrt(ft2 * ft3),
+        2.4e-3,
+        "Table 4 gives every weighting its own four:\n"
+        f"Wk's run from {ft1:.4g} Hz to {ft4:.4g} Hz,\n"
+        f"and Wh's from {wh_first:.4g} Hz to {wh_last:.4g} Hz",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=5,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+
+    ax_band.set_yscale("log")
+    ax_band.set_ylim(floor, 3.0)
+    ax_band.set_ylabel(f"{name} weighting factor")
+    ax_band.set_title("The Band Around Wk, and Where It Changes Width", pad=10)
+
+    # Right top: the same band with the design goal divided out. The two
+    # boundary lines are drawn whole rather than region by region, so the step
+    # at each transition frequency and the plunge off the bottom of the panel
+    # are continuous strokes instead of four disconnected pieces.
+    for (colour, _region, _limits), mask in zip(rows, step_masks, strict=True):
+        ax_magnitude.fill_between(
+            steps,
+            step_lower,
+            step_upper,
+            where=mask,
+            color=theme_fill(colour, ax_magnitude),
+            zorder=0,
+        )
+    for limit in (step_upper, step_lower):
+        ax_magnitude.plot(
+            steps, limit, color=COLOR_FG, linewidth=1.2, alpha=0.75, zorder=2
+        )
+    ax_magnitude.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.35, zorder=1)
+    ax_magnitude.text(
+        math.sqrt(ft2 * ft3),
+        -31.0,
+        f"{_fmt_minus(vibration.UNCONSTRAINED_BELOW, '.0f')} %: below "
+        "$f_\\mathrm{t1}$ and\nabove $f_\\mathrm{t4}$ the standard sets\n"
+        "no lower limit at all",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=5,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+
+    central_upper, central_lower, central_phase = vibration.CENTRAL_TOLERANCE_PERCENT
+    skirt_upper, skirt_lower, skirt_phase = vibration.SKIRT_TOLERANCE_PERCENT
+    magnitude_ticks = (skirt_upper, central_upper, 0.0, central_lower, skirt_lower)
+    # Room under the lower skirt limit for the note about the two tails, and
+    # a little air over the upper one for the boundary line.
+    ax_magnitude.set_ylim(skirt_lower - 20.0, skirt_upper + 8.0)
+    ax_magnitude.set_yticks(list(magnitude_ticks))
+    ax_magnitude.set_yticklabels([_signed_percent(value) for value in magnitude_ticks])
+    ax_magnitude.set_ylabel("Magnitude tolerance on the factor (%)")
+    ax_magnitude.set_title("The Magnitude Tolerance, to Scale", pad=8)
+
+    # Right bottom: the other graded column of the same table. Formula (6) is
+    # printed inside absolute-value bars, so its limit is a ceiling on a
+    # modulus rather than a band about a line, and the fill runs from zero up
+    # to it. In the two tails there is no ceiling, so the fill reaches the top
+    # of the panel and the two cells are marked with what the table prints.
+    ceiling_deg = 1.55 * skirt_phase
+    phase_band = np.where(np.isfinite(step_phase), step_phase, ceiling_deg)
+    for (colour, _region, _limits), mask in zip(rows, step_masks, strict=True):
+        ax_phase.fill_between(
+            steps,
+            np.zeros_like(phase_band),
+            phase_band,
+            where=mask,
+            color=theme_fill(colour, ax_phase),
+            zorder=0,
+        )
+    ax_phase.plot(
+        steps,
+        np.where(np.isfinite(step_phase), step_phase, np.nan),
+        color=COLOR_FG,
+        linewidth=1.2,
+        alpha=0.75,
+        zorder=2,
+    )
+    for tail_centre in (math.sqrt(fmin * ft1), math.sqrt(ft4 * fmax)):
+        # No chip: the mark sits on a flat fill, clear of every gridline.
+        ax_phase.text(
+            tail_centre,
+            0.16 * ceiling_deg,
+            "±∞",
+            fontsize=10,
+            color=COLOR_FG,
+            ha="center",
+            va="center",
+            zorder=4,
+        )
+    ax_phase.text(
+        math.sqrt(ft2 * ft3),
+        0.76 * ceiling_deg,
+        "footnote a: the phase column applies only\n"
+        "to instruments whose measurement parameter\n"
+        "is not based on r.m.s. values",
+        fontsize=9,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+        zorder=5,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+
+    ax_phase.set_ylim(0.0, ceiling_deg)
+    ax_phase.set_yticks([0.0, central_phase, skirt_phase])
+    ax_phase.set_yticklabels(
+        [f"{value:.0f}" for value in (0.0, central_phase, skirt_phase)]
+    )
+    ax_phase.set_ylabel("Limit on $\\Delta\\varphi_0$ (degrees)")
+    ax_phase.set_title("The Phase Tolerance, on the Same Corners", pad=8)
+
+    # One frequency axis for all three panels, ticked at the four numbers of
+    # Table 4 and at the decades that place them. The labels are formatted
+    # from the same constants that place the ticks, so a number cannot be
+    # written under a rule it no longer belongs to.
+    ticks = (0.1, ft1, ft2, 10.0, ft3, ft4)
+    tick_labels = [f"{value:.4g}" for value in ticks]
+    for panel in (ax_band, ax_magnitude, ax_phase):
+        panel.set_xscale("log")
+        panel.set_xlim(fmin, fmax)
+        panel.set_xticks(list(ticks))
+        panel.set_xticklabels(tick_labels, fontsize=9)
+        panel.xaxis.set_minor_formatter(NullFormatter())
+        panel.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+        panel.set_axisbelow(True)
+    for panel in (ax_band, ax_phase):
+        panel.set_xlabel(LABEL_FREQ_HZ)
+    # The two right-hand panels share one axis, so it is labelled once, under
+    # the lower of them.
+    ax_magnitude.tick_params(axis="x", labelbottom=False)
+
+    # One key at the foot of the figure: the three regions are the same three
+    # colours on all three panels, so a box per panel would say it three
+    # times. One row of four, so that the three entries read as the three
+    # distinct rows of Table 5 laid side by side, both graded columns each.
+    handles, names = ax_band.get_legend_handles_labels()
+    fig.legend(handles, names, loc="lower center", ncol=4, fontsize=8.5, frameon=False)
+    fig.suptitle(
+        "The Shape of the ISO 8041-1 Tolerance: Tables 4 and 5 on One Frequency Axis",
+        fontsize=13,
+    )
+    # The margins are set by hand rather than by ``tight_layout``, which
+    # declines a gridspec with a panel spanning two rows: it would warn, leave
+    # the defaults in place and undo the ``hspace`` and ``wspace`` above. The
+    # foot holds the key clear of the two frequency labels, and the head holds
+    # the three panel titles clear of the suptitle.
+    fig.subplots_adjust(left=0.068, right=0.985, top=0.875, bottom=0.145)
+    save_figure(output_dir, "meter_tolerance_regions.svg")
     plt.close()

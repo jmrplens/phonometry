@@ -585,6 +585,7 @@ from .vibration import (
     generate_machine_vibration_trend,
     generate_machine_vibration_zones,
     generate_mechanical_mobility,
+    generate_meter_tolerance_regions,
     generate_mobility_random_error,
     generate_mobility_result_lines,
     generate_multiple_shock,
@@ -855,6 +856,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Directive 2002/44/EC): frequency weighting, weighted a_w, daily A(8)
     generate_vibration_weighting,
     generate_vibration_weighting_family,
+    generate_meter_tolerance_regions,
     generate_weighted_acceleration,
     generate_shock_dose_measures,
     generate_daily_vibration_exposure,

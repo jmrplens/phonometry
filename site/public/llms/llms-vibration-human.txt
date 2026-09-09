@@ -58,7 +58,7 @@ analysis](https://jmrplens.github.io/phonometry/signals/) section.
 - [What a seat does to the vibration (ISO 10326-1)](https://jmrplens.github.io/phonometry/vibration/human/seat-vibration/):
   the SEAT factor of a laboratory seat test, the correction to the input the
   test intended, and the transmissibility at resonance of the damping test.
-- [Verifying a vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/):
+- [Verifying a human-vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/):
   the tolerance band around each frequency weighting, the characteristic phase
   deviation, the running r.m.s. decay and the saw-tooth burst indications a
   conforming meter has to reproduce.
@@ -995,25 +995,36 @@ are not implemented.
 <!-- source: docs/vibration/human/meter-verification.md | canonical: https://jmrplens.github.io/phonometry/vibration/human/meter-verification/ -->
 Source: https://jmrplens.github.io/phonometry/vibration/human/meter-verification/
 
-# Verifying a vibration meter (ISO 8041-1)
+# Verifying a human-vibration meter (ISO 8041-1)
 
-Every other page in this section computes something about a vibration: what it
-does to a person, to a machine or to a building. This one computes something
-about the **instrument**. ISO 8041-1 is not a method for measuring vibration;
-it is the specification a general purpose human-vibration meter is designed
-and tested against, and the rest of the section has been quoting one clause of
-it all along, because the nine frequency weightings that
+Every other page in this section computes something about a vibration a
+person is exposed to: what a record does to the body, what repeated shocks do
+to the spine, what a seat passes on. This one computes something about the
+**instrument**. ISO 8041-1 is not a method for measuring vibration; it is the
+specification a general purpose human-vibration meter is designed and tested
+against, and the rest of the section has been quoting one clause of it all
+along, because the nine frequency weightings that
 [human vibration exposure](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/) applies are defined here and
 nowhere else.
 
-The clause that comes right after them is where this page starts: how far a
-real instrument may sit from those weightings before it stops conforming. That
-one is a table of frequencies and percentages, and a subtraction. It turns out
-not to be alone. The characteristic phase deviation, the running r.m.s. decay
-and the saw-tooth signal burst are all specified as numbers a conforming meter
-has to produce, and every one of those numbers can be computed. This page is
-about the parts of a type test that are arithmetic rather than laboratory
-work, and about being clear on where each of them stops.
+The **human** in that name is load-bearing. The standard specifies instruments
+"designed to measure vibration values, for the purpose of assessing human
+response to vibration" (clause 1), for hand-transmitted vibration (ISO 5349-1),
+whole-body vibration (ISO 2631-1, ISO 2631-2 and ISO 2631-4) and low-frequency
+whole-body vibration from 0,1 Hz to 0,5 Hz. **General purpose** separates it
+from ISO 8041-2, which specifies personal vibration exposure meters, and not
+from some other kind of vibration meter: an instrument for machine condition
+monitoring or for damage to buildings is graded against other documents, and
+nothing on this page applies to it.
+
+The clause that comes right after those definitions is where this page starts:
+how far a real instrument may sit from those weightings before it stops
+conforming. That one is a table of frequencies and percentages, and a
+subtraction. It turns out not to be alone. The characteristic phase deviation,
+the running r.m.s. decay and the saw-tooth signal burst are all specified as
+numbers a conforming meter has to produce, and every one of those numbers can
+be computed. This page is about the parts of a type test that are arithmetic
+rather than laboratory work, and about being clear on where each of them stops.
 
 ## 1. Why an instrument standard is in a library of computations
 

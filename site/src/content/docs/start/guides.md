@@ -538,7 +538,7 @@ ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 and DIN 4150-3.
 - [What a seat does to the vibration (ISO 10326-1)](/phonometry/vibration/human/seat-vibration/):
   the SEAT factor of a laboratory seat test, the correction to the intended
   input and the transmissibility at resonance.
-- [Verifying a vibration meter (ISO 8041-1)](/phonometry/vibration/human/meter-verification/):
+- [Verifying a human-vibration meter (ISO 8041-1)](/phonometry/vibration/human/meter-verification/):
   the tolerance band on each frequency weighting, the characteristic phase
   deviation, the running r.m.s. decay and the saw-tooth burst indications.
 

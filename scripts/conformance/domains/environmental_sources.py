@@ -67,7 +67,7 @@ def _chk_cnossos_road_workbook() -> Outcome:
             traffic,
             surface=surfaces[case["surface"]],
             temperature_c=float(case["temperature_c"]),
-            gradient=float(case["gradient_pct"]),
+            road_slope_percent=float(case["gradient_pct"]),
             studded_months=float(case["studded_months"]),
             junction_distance=float(case["junction_distance_m"]),
             junction_type=ph.environment.JunctionType(int(case["junction_type"])),

@@ -856,7 +856,7 @@ def msa_major_axis(
 # phonometry.materials.absorbers.impedance_tube.two_microphone_impedance (ISO 10534-2, Clause 7).
 # --------------------------------------------------------------------------- #
 def spot_tube_upper_frequency(
-    diameter: float, speed_of_sound: float = DEFAULT_SPEED_OF_SOUND
+    diameter_m: float, speed_of_sound: float = DEFAULT_SPEED_OF_SOUND
 ) -> float:
     r"""Upper usable frequency of the spot tube (ISO 13472-2:2010, 5.4.1).
 
@@ -865,17 +865,17 @@ def spot_tube_upper_frequency(
     :math:`f_\mathrm{u} \approx 1972` Hz, comfortably above the 1800 Hz narrow-band
     top.
 
-    :param diameter: Tube diameter ``d``, in metres.
+    :param diameter_m: Tube diameter ``d``, in metres.
     :param speed_of_sound: Speed of sound ``c0``, in metres per second.
     :return: Upper usable frequency ``f_u``, in hertz.
     :raises ValueError: If ``d`` or ``c0`` is not positive.
     """
-    if diameter <= 0.0:
-        msg = "'diameter' must be positive."
+    if diameter_m <= 0.0:
+        msg = "'diameter_m' must be positive."
         raise ValueError(msg)
     if speed_of_sound <= 0.0:
         raise ValueError(_SPEED_POSITIVE)
-    return float(_SPOT_FU_FACTOR * speed_of_sound / diameter)
+    return float(_SPOT_FU_FACTOR * speed_of_sound / diameter_m)
 
 
 def spot_microphone_spacing_bounds(

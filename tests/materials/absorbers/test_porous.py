@@ -381,7 +381,7 @@ class TestLayeredAbsorber:
         f = _grid(100.0, 1000.0, 50)
         res = layered_absorber(f, [AirLayer(0.1)], termination="free")
         np.testing.assert_allclose(np.abs(res.reflection), 0.0, atol=1e-12)
-        res_ob = layered_absorber(f, [AirLayer(0.1)], termination="free", angle=0.7)
+        res_ob = layered_absorber(f, [AirLayer(0.1)], termination="free", angle_rad=0.7)
         np.testing.assert_allclose(np.abs(res_ob.reflection), 0.0, atol=1e-12)
 
     def test_free_termination_admittance_is_the_literal_cosine_over_rho_c(
@@ -448,8 +448,8 @@ class TestLayeredAbsorber:
                 MembraneLayer(float(rng.uniform(0.1, 5.0))),
                 AirLayer(float(rng.uniform(0.01, 0.1))),
             ]
-            angle = float(rng.uniform(0.0, 1.4))
-            res = layered_absorber(f, layers, angle=angle)
+            angle_rad = float(rng.uniform(0.0, 1.4))
+            res = layered_absorber(f, layers, angle_rad=angle_rad)
             assert np.all(res.absorption >= -1e-9)
             assert np.all(res.absorption <= 1.0 + 1e-9)
             assert np.all(np.abs(res.reflection) <= 1.0 + 1e-9)
@@ -477,10 +477,12 @@ class TestLayeredAbsorber:
             AirLayer(0.04),
         ]
         for termination in ("rigid", "free", 800.0 + 200.0j):
-            for angle in (0.0, 0.7, 1.3):
-                res = layered_absorber(f, layers, angle=angle, termination=termination)
+            for angle_rad in (0.0, 0.7, 1.3):
+                res = layered_absorber(
+                    f, layers, angle_rad=angle_rad, termination=termination
+                )
                 t = res.transfer_matrix
-                cos_t = np.cos(angle)
+                cos_t = np.cos(angle_rad)
                 if termination == "rigid":
                     p, u = t[0, 0], t[1, 0]
                 else:
@@ -495,7 +497,7 @@ class TestLayeredAbsorber:
         f = _grid(100.0, 2000.0, 100)
         theta = 0.9
         d = 0.04
-        res = layered_absorber(f, [AirLayer(d)], angle=theta)
+        res = layered_absorber(f, [AirLayer(d)], angle_rad=theta)
         k0 = 2.0 * np.pi * f / C0
         zs_ref = -1j * (RC / np.cos(theta)) / np.tan(k0 * d * np.cos(theta))
         np.testing.assert_allclose(res.surface_impedance, zs_ref, rtol=1e-10)
@@ -507,8 +509,10 @@ class TestLayeredAbsorber:
         layers = [PorousLayer(0.05, med)]
         with pytest.raises(ValueError, match="at least one layer"):
             layered_absorber(f, [])
-        with pytest.raises(ValueError, match=r"'angle' must satisfy 0 <= angle < pi/2"):
-            layered_absorber(f, layers, angle=np.pi / 2.0)
+        with pytest.raises(
+            ValueError, match=r"'angle_rad' must satisfy 0 <= angle < pi/2"
+        ):
+            layered_absorber(f, layers, angle_rad=np.pi / 2.0)
         with pytest.raises(
             ValueError, match=r"'termination' must be .*complex impedance"
         ):
@@ -639,7 +643,9 @@ class TestResonantSheets:
         )
         k0 = 2.0 * np.pi * f / C0
         for theta in (0.0, 0.9):
-            res = layered_absorber(f, [mpp, AirLayer(ref.MAA_FIG5_CAVITY)], angle=theta)
+            res = layered_absorber(
+                f, [mpp, AirLayer(ref.MAA_FIG5_CAVITY)], angle_rad=theta
+            )
             cos_t = np.cos(theta)
             reactance = z_sheet.imag - (
                 1.0 / np.tan(k0 * ref.MAA_FIG5_CAVITY * cos_t) / cos_t
@@ -769,8 +775,10 @@ class TestResonantSheets:
         """
         f = np.array([1000.0])
         layers = [AirLayer(0.05)]
-        with pytest.raises(ValueError, match=r"'angle' must satisfy 0 <= angle < pi/2"):
-            layered_absorber(f, layers, angle=np.pi / 2.0 - 1e-9)
+        with pytest.raises(
+            ValueError, match=r"'angle_rad' must satisfy 0 <= angle < pi/2"
+        ):
+            layered_absorber(f, layers, angle_rad=np.pi / 2.0 - 1e-9)
 
     def test_termination_array_length_mismatch_rejected(self) -> None:
         f = np.array([500.0, 1000.0])

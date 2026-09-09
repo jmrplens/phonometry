@@ -523,7 +523,7 @@ def _loudspeaker_datasheet_example() -> "LoudspeakerCharacteristics":
             piston=electroacoustics.radiating_piston(
                 0.075,
                 np.array([1000.0, 2000.0, 4000.0]),
-                angles=np.radians(np.linspace(0, 90, 46)),
+                angles_rad=np.radians(np.linspace(0, 90, 46)),
             ),
             frequency=2000.0,
         ),
@@ -1116,7 +1116,7 @@ def generate_piston_baffle_geometry(output_dir: str) -> None:
     result = electroacoustics.radiating_piston(
         0.1,
         np.array([500.0, 2000.0, 4000.0]),
-        angles=np.linspace(-np.pi / 2.0, np.pi / 2.0, 181),
+        angles_rad=np.linspace(-np.pi / 2.0, np.pi / 2.0, 181),
     )
     _fig, ax = plt.subplots(figsize=(9.0, 6.2))
     result.plot_geometry(ax=ax, language=_LANG)
@@ -1138,7 +1138,7 @@ def generate_plenum_geometry(output_dir: str) -> None:
 
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     noise_control.plot_plenum_geometry(
-        0.09, 1.2, 6.0, ax=ax, angle=0.35, language=_LANG
+        0.09, 1.2, 6.0, ax=ax, angle_rad=0.35, language=_LANG
     )
     plt.tight_layout()
     save_figure(output_dir, "plenum_geometry.svg")
@@ -1457,7 +1457,7 @@ def generate_in_duct_flow_correction(output_dir: str) -> None:
     # polynomial with both even and odd powers, so the same speed corrects
     # the two sides by different amounts, and the gap widens with frequency
     # as the modal part of the correction grows.
-    diameter = 0.5
+    diameter_m = 0.5
     bands = np.array(
         [
             50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
@@ -1476,7 +1476,7 @@ def generate_in_duct_flow_correction(output_dir: str) -> None:
             (1.0, "-", "o", f"Outlet, $U$ = +{speed:.0f} m/s"),
             (-1.0, "--", "s", f"Inlet, $U$ = −{speed:.0f} m/s"),
         ):
-            c34 = emission.flow_modal_correction(bands, sign * speed, diameter)
+            c34 = emission.flow_modal_correction(bands, sign * speed, diameter_m)
             axf.semilogx(
                 bands,
                 c34,
@@ -1534,7 +1534,7 @@ def generate_in_duct_flow_correction(output_dir: str) -> None:
     ):
         c34 = np.array(
             [
-                float(emission.flow_modal_correction([band], u, diameter)[0])
+                float(emission.flow_modal_correction([band], u, diameter_m)[0])
                 for u in speeds
             ]
         )
@@ -1553,7 +1553,7 @@ def generate_in_duct_flow_correction(output_dir: str) -> None:
         [
             float(
                 emission.flow_modal_correction(
-                    [1000.0], u, diameter, shield="nose-cone"
+                    [1000.0], u, diameter_m, shield="nose-cone"
                 )[0]
             )
             for u in cone_speeds
@@ -3559,12 +3559,12 @@ def generate_hvac_end_reflection(output_dir: str) -> None:
 
     bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
     _fig, ax = plt.subplots(figsize=(10, 6))
-    for diameter, color in (
+    for diameter_m, color in (
         (0.15, COLOR_PRIMARY),
         (0.30, COLOR_SECONDARY),
         (0.60, COLOR_TERTIARY),
     ):
-        er = hvac.end_reflection_loss(bands, diameter=diameter, termination="flush")
+        er = hvac.end_reflection_loss(bands, diameter_m=diameter_m, termination="flush")
         ax.semilogx(
             np.asarray(er.frequencies),
             np.asarray(er.values),
@@ -3572,7 +3572,7 @@ def generate_hvac_end_reflection(output_dir: str) -> None:
             color=color,
             lw=1.8,
             ms=4,
-            label=f"$D$ = {int(diameter * 1000)} mm",
+            label=f"$D$ = {int(diameter_m * 1000)} mm",
         )
     ax.set_xlim(50.0, 2500.0)
     ax.set_ylim(bottom=0.0)
@@ -3678,7 +3678,7 @@ def generate_duct_attenuation_elements(output_dir: str) -> None:
         ("bies", COLOR_PRIMARY, "-"),
         ("long", COLOR_SECONDARY, "--"),
     ):
-        er = hvac.end_reflection_loss(bands[:6], diameter=0.30, method=method)
+        er = hvac.end_reflection_loss(bands[:6], diameter_m=0.30, method=method)
         ax.semilogx(
             bands[:6],
             np.asarray(er.values),
@@ -3761,7 +3761,7 @@ def generate_duct_sheet_verification(output_dir: str) -> None:
         relative_efficiency_percent=80.0,
     )
     flex = hvac.flexible_duct_insertion_loss(
-        bands[:7], diameter=12 * inch, length=6 * foot
+        bands[:7], diameter_m=12 * inch, length=6 * foot
     )
     lined_small = hvac.lined_rectangular_duct_attenuation(
         bands, 18 * inch, 12 * inch, 6 * foot, 1 * inch, include_unlined=True
@@ -6890,7 +6890,7 @@ def generate_silencer_measurement(output_dir: str) -> None:
     ax2 = axes[1]
     bands = np.logspace(np.log10(50.0), np.log10(4000.0), 400)
     area = 0.0962
-    diameter = math.sqrt(4.0 * area / math.pi)
+    diameter_m = math.sqrt(4.0 * area / math.pi)
     for angle, colour, style, label in (
         (math.pi, COLOR_TERTIARY, ":", "$\\Omega = \\pi$, wall and floor"),
         (2.0 * math.pi, COLOR_PRIMARY, "-", "$\\Omega = 2\\pi$, flush in a wall"),
@@ -6907,7 +6907,7 @@ def generate_silencer_measurement(output_dir: str) -> None:
     ax2.plot(
         bands,
         noise_control.end_reflection_loss_closed_form(
-            bands, diameter, termination="flush"
+            bands, diameter_m, termination="flush"
         ).values,
         color=COLOR_QUATERNARY,
         lw=1.8,

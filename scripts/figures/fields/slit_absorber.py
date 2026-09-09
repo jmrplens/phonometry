@@ -42,7 +42,7 @@ def _slit_absorber_design() -> CriticalCouplingResult:
         cavity_side=27.0e-3,
     )
     return materials.critical_coupling_design(
-        _SLIT_ABS_F0, base, lattice_step=_SLIT_ABS_LATTICE, period=_SLIT_ABS_PERIOD
+        _SLIT_ABS_F0, base, lattice_step=_SLIT_ABS_LATTICE, period_m=_SLIT_ABS_PERIOD
     )
 
 
@@ -163,7 +163,7 @@ def _slit_absorber_fields(
                 res,
                 slit_height=_SLIT_ABS_DETUNE * h0,
                 lattice_step=_SLIT_ABS_LATTICE,
-                period=_SLIT_ABS_PERIOD,
+                period_m=_SLIT_ABS_PERIOD,
             ).absorption[0]
         ),
     )
@@ -214,12 +214,12 @@ def _slit_absorber_fields(
         mid = ny // 2
         # Settle to steady state, sampling the exact standing-wave
         # envelope over the final full period.
-        period = round(1.0 / (_SLIT_ABS_F0 * sim.dt))
+        period_m = round(1.0 / (_SLIT_ABS_F0 * sim.dt))
         settle = round(0.020 / sim.dt)
         env = np.zeros(sim.p[mid, :face:2].shape, dtype=np.float32)
         for i in range(settle):
             sim.step()
-            if i >= settle - period:
+            if i >= settle - period_m:
                 np.maximum(env, np.abs(sim.p[mid, :face:2]), out=env)
         tube: list[Any] = []
         cell: list[Any] = []

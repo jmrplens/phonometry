@@ -261,9 +261,9 @@ def test_distortion_from_swept_sine_result() -> None:
 
 def _example_result() -> electroacoustics.LoudspeakerCharacteristics:
     f, spl = _flat_response()
-    angles = np.radians(np.linspace(0.0, 90.0, 40))
+    angles_rad = np.radians(np.linspace(0.0, 90.0, 40))
     pist = electroacoustics.radiating_piston(
-        0.075, np.array([1000.0, 2000.0, 4000.0]), angles=angles
+        0.075, np.array([1000.0, 2000.0, 4000.0]), angles_rad=angles_rad
     )
     fz = np.geomspace(20.0, 20000.0, 200)
     z = 6.6 + 20.0 * np.exp(-((np.log2(fz / 55.0)) ** 2) / 0.12)

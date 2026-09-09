@@ -104,7 +104,7 @@ $D(0) = 1$.
 ```python
 piston_directivity_pattern(
     ka: ArrayLike,
-    angles: ArrayLike | None = None,
+    angles_rad: ArrayLike | None = None,
 ) -> PistonDirectivity
 ```
 
@@ -122,7 +122,7 @@ the first zero of `J1` ($ka \sin\theta = 3.8317$).
 | Name | Description |
 | :--- | :--- |
 | `ka` | Wavenumber-radius product(s) `ka` (scalar or 1-D array), each non-negative. |
-| `angles` | Polar angles `theta` from the axis, rad (1-D). `None` (default) uses 361 points spanning the front hemisphere `-90 deg` to `+90 deg`, 0.5 deg apart. |
+| `angles_rad` | Polar angles `theta` from the axis, rad (1-D). `None` (default) uses 361 points spanning the front hemisphere `-90 deg` to `+90 deg`, 0.5 deg apart. |
 
 **Returns:** A [`PistonDirectivity`](/phonometry/reference/api/electroacoustics/piston/#pistondirectivity).
 
@@ -173,7 +173,7 @@ high `x`.
 
 ```python
 PistonDirectivity(
-    angles: np.ndarray,
+    angles_rad: np.ndarray,
     ka: np.ndarray,
     directivity: np.ndarray,
     directivity_db: np.ndarray,
@@ -194,7 +194,7 @@ plottable bundle around it.
 
 | Name | Description |
 | :--- | :--- |
-| `angles` | Polar angles `theta` from the axis, rad. |
+| `angles_rad` | Polar angles `theta` from the axis, rad. |
 | `ka` | Wavenumber-radius products `ka`, one per pattern (a 1-D array). |
 | `directivity` | Linear directivity $D(\theta)$, normalized so $D(0) = 1$, as a `(len(ka), len(angles))` array; row `i` is the pattern for `ka[i]`. |
 | `directivity_db` | Directivity in dB, $20 \log_{10} \lvert D\rvert$, same shape as `directivity` (the side-lobe nulls floor at a large negative value rather than `-inf`). |
@@ -234,7 +234,7 @@ plot_piston_geometry(
     radius: float,
     ax: Axes | None = ...,
     *,
-    angles: ArrayLike,
+    angles_rad: ArrayLike,
     directivity: ArrayLike,
     lobe_label: str | None = ...,
     language: str = ...,
@@ -254,7 +254,7 @@ plot_piston_geometry(
 Draw a baffled piston to scale, optionally with a directivity lobe.
 
 The rigid baffle is the vertical wall, the piston the plate of radius
-`a` set into it; when `angles`/`directivity` are given the
+`a` set into it; when `angles_rad`/`directivity` are given the
 normalised far-field lobe is overlaid on the radiation side.
 
 **Parameters**
@@ -263,7 +263,7 @@ normalised far-field lobe is overlaid on the radiation side.
 | :--- | :--- |
 | `radius` | Piston radius `a`, in metres. |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `angles` | Far-field angles, in radians (0 on axis), matching `directivity`. |
+| `angles_rad` | Far-field angles, in radians (0 on axis), matching `directivity`. |
 | `directivity` | Linear directivity values in `[0, 1]`. |
 | `lobe_label` | Optional legend label for the lobe (e.g. the `ka`). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
@@ -286,7 +286,7 @@ radiating_piston(
     *,
     speed_of_sound: float = 343.0,
     density: float = 1.206,
-    angles: ArrayLike | None = None,
+    angles_rad: ArrayLike | None = None,
 ) -> RadiatingPistonResult
 ```
 
@@ -297,7 +297,7 @@ Evaluates the piston resistance $R_1(2ka)$ and reactance
 $X_1(2ka)$, the mechanical radiation impedance
 $\rho c S (R_1 + j X_1)$, the low-frequency radiation mass
 $8 \rho a^3 / 3$ and the directivity index over the given
-frequencies (Beranek & Mellow §4.4). Pass `angles` to also sample
+frequencies (Beranek & Mellow §4.4). Pass `angles_rad` to also sample
 the far-field directivity pattern $D(\theta)$.
 
 **Parameters**
@@ -308,7 +308,7 @@ the far-field directivity pattern $D(\theta)$.
 | `frequencies` | Frequencies `f`, Hz (scalar or 1-D array), all > 0. |
 | `speed_of_sound` | Speed of sound `c`, m/s (default 343). |
 | `density` | Air density $\rho$, kg/m3 (default 1.206). |
-| `angles` | Optional polar angles `theta` from the axis, rad, at which to sample the directivity pattern. |
+| `angles_rad` | Optional polar angles `theta` from the axis, rad, at which to sample the directivity pattern. |
 
 **Returns:** A [`RadiatingPistonResult`](/phonometry/reference/api/electroacoustics/piston/#radiatingpistonresult).
 
@@ -324,7 +324,7 @@ RadiatingPistonResult(
     radiation_reactance: np.ndarray,
     radiation_mass: float,
     directivity_index: np.ndarray,
-    angles: np.ndarray | None,
+    angles_rad: np.ndarray | None,
     directivity: np.ndarray | None,
     radius: float,
     speed_of_sound: float,
@@ -346,8 +346,8 @@ Radiation impedance and directivity of a baffled circular piston.
 | `radiation_reactance` | Mechanical radiation reactance $\rho c S X_1$, N s/m. |
 | `radiation_mass` | Low-frequency accreted air mass $M_\mathrm{r} = 8 \rho a^3/3$, kg (a single value; the mass limit of `radiation_reactance / omega`). |
 | `directivity_index` | Directivity index $DI = 10 \log_{10} Q$, dB. |
-| `angles` | Polar angles of `directivity`, rad, or `None` if not requested. |
-| `directivity` | Far-field directivity $D(\theta)$ as a `(n_freq, n_angle)` array, or `None` if `angles` was not given. |
+| `angles_rad` | Polar angles of `directivity`, rad, or `None` if not requested. |
+| `directivity` | Far-field directivity $D(\theta)$ as a `(n_freq, n_angle)` array, or `None` if `angles_rad` was not given. |
 | `radius` | Piston radius `a`, m. |
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 | `density` | Air density $\rho$, kg/m3. |

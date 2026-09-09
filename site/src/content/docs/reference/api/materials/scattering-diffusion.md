@@ -114,7 +114,7 @@ are carried through when supplied.
 ## DiffusionResult
 
 ```python
-DiffusionResult(angles: Real, levels: Real, coefficient: float)
+DiffusionResult(angles_deg: Real, levels: Real, coefficient: float)
 ```
 
 A measured polar response and its diffusion coefficient (ISO 17497-2).
@@ -123,7 +123,7 @@ A measured polar response and its diffusion coefficient (ISO 17497-2).
 
 | Name | Description |
 | :--- | :--- |
-| `angles` | Receiver angles of the polar response, in degrees. |
+| `angles_deg` | Receiver angles of the polar response, in degrees. |
 | `levels` | Reflected sound-pressure level at each angle, in decibels. |
 | `coefficient` | Autocorrelation diffusion coefficient `d` (Formula (5)). |
 
@@ -279,7 +279,7 @@ characterisation, so there is no pass/fail verdict.
 
 ```python
 directional_diffusion(
-    angles: ArrayLike,
+    angles_deg: ArrayLike,
     levels: ArrayLike,
     *,
     weights: ArrayLike | None = None,
@@ -296,7 +296,7 @@ keeps the receiver angles alongside the levels and returns a plottable
 
 | Name | Description |
 | :--- | :--- |
-| `angles` | Receiver angles of the polar response, in degrees (1-D). |
+| `angles_deg` | Receiver angles of the polar response, in degrees (1-D). |
 | `levels` | Reflected sound-pressure level at each angle, in decibels. |
 | `weights` | Optional area weights `N_i` (Formula (8)); `None` uses the equal-area Formula (5). |
 
@@ -306,7 +306,7 @@ keeps the receiver angles alongside the levels and returns a plottable
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if `angles` and `levels` differ in length or are shorter than two receivers. |
+| ValueError | if `angles_deg` and `levels` differ in length or are shorter than two receivers. |
 
 ## directional_diffusion_coefficient
 

@@ -275,7 +275,7 @@ def plot_diffusion_polar(
     if ax is None:
         plt = _import_pyplot()
         _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
-    angles = np.radians(np.asarray(result.angles, dtype=np.float64))
+    angles = np.radians(np.asarray(result.angles_deg, dtype=np.float64))
     levels = np.asarray(result.levels, dtype=np.float64)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("color", _C_PRIMARY)
@@ -430,7 +430,7 @@ def plot_diffusion_polar_report(
     if ax is None:
         plt = _import_pyplot()
         _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
-    angles_deg = np.asarray(result.angles, dtype=np.float64)
+    angles_deg = np.asarray(result.angles_deg, dtype=np.float64)
     angles = np.radians(angles_deg)
     levels = np.asarray(result.levels, dtype=np.float64)
     kwargs.setdefault("marker", "o")
@@ -920,7 +920,7 @@ def plot_layered_absorber(
     """
     from .._i18n import format_number
 
-    angle_deg = np.degrees(result.angle)
+    angle_deg = np.degrees(result.angle_rad)
     if language == "es":
         title = (
             f"Predicción de absorbente multicapa "
@@ -958,7 +958,7 @@ def plot_slit_resonator_absorber(
     """
     from .._i18n import format_number
 
-    angle_deg = np.degrees(result.angle)
+    angle_deg = np.degrees(result.angle_rad)
     if language == "es":
         title = (
             f"Panel ranurado con resonadores de Helmholtz "
@@ -1037,7 +1037,7 @@ def plot_diffuser_polar_response(
     if ax is None:
         plt = _import_pyplot()
         _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
-    angles_deg = np.asarray(result.angles, dtype=np.float64)
+    angles_deg = np.asarray(result.angles_deg, dtype=np.float64)
     angles = np.radians(angles_deg)
     levels = np.asarray(result.levels, dtype=np.float64)
     kwargs.setdefault("marker", "o")

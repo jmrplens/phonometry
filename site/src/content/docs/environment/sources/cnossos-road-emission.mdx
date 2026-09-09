@@ -129,7 +129,7 @@ traffic = [
     environment.RoadTraffic(environment.RoadVehicleCategory.MOTORCYCLES, 60.0, 50.0),
 ]
 result = environment.road_source_power(
-    traffic, surface=environment.RoadSurface.THIN_LAYER_A, temperature_c=12.0, gradient=3.0,
+    traffic, surface=environment.RoadSurface.THIN_LAYER_A, temperature_c=12.0, road_slope_percent=3.0,
     junction_distance=60.0, junction_type=environment.JunctionType.CROSSING,
 )
 print(result.total_line_power.round(1))
@@ -173,7 +173,7 @@ decibels. This is where each of them is read from.
 | `RoadTraffic.studded_fraction`, `studded_months` ($Q_{\mathrm{stud,ratio}}$, $T_\mathrm{s}$) | Fleet share and season | The average ratio of light vehicles per hour fitted with studded tyres **during** the months they are fitted, and the number of those months; the method forms $p_\mathrm{s} = Q_{\mathrm{stud,ratio}}\,T_\mathrm{s}/12$ itself (2.2.7) | Passing the year-averaged share, which applies $T_\mathrm{s}/12$ twice |
 | `junction_distance` ($x$) | Distance to the junction | Measured along the road from the point source to the nearest **intersection of this source line with another source line** (2.2.5) | Measuring to the stop line or the kerb. It is the line crossing, and only the last 100 m is affected |
 | `junction_type` ($k$) | 1 crossing with lights, 2 roundabout | The junction control, not its shape | A priority junction is neither: the correction is defined for signals and roundabouts |
-| `gradient` ($s$) | Signed longitudinal slope, % | The terrain model along the source line, saturating at ±12 % | Applying one sign to a two-way flow. The standard requires splitting the flow in half and correcting one half uphill and the other downhill |
+| `road_slope_percent` ($s$) | Signed longitudinal slope, % | The terrain model along the source line, saturating at ±12 % | Applying one sign to a two-way flow. The standard requires splitting the flow in half and correcting one half uphill and the other downhill |
 | `surface` | Pavement type | The road register, matched to a Table F-4 row **and its declared speed range** | Using a row outside its validity range |
 | geometry | Source line and receiver | One line per lane at the lane centre (one line per carriageway, or one for a two-way road, is also acceptable), the point source 0,05 m above the surface; the Directive's receiver points are 4 m above ground | Placing the source at the kerb, or at a vehicle-body height |
 
@@ -375,9 +375,9 @@ for category in ("1", "2", "3"):
     for speed, style in [(50.0, "--"), (80.0, "-")]:
         flat = a_weighted(environment.road_propulsion_noise(category, speed))
         ax.plot(slopes,
-                [a_weighted(environment.road_propulsion_noise(category, speed, gradient=s)) - flat
+                [a_weighted(environment.road_propulsion_noise(category, speed, road_slope_percent=s)) - flat
                  for s in slopes], style, label=f"Category {category}, {speed:g} km/h")
-ax.set_xlabel("Road gradient s [%]")
+ax.set_xlabel("Road road_slope_percent s [%]")
 ax.set_ylabel("Propulsion-noise correction [dB(A)]")
 ax.legend(fontsize="small")
 plt.show()

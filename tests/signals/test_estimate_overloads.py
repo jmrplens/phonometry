@@ -82,7 +82,7 @@ SOLO = [
     (envelope, {}),
     (envelope_spectrum, {}),
     (multitaper_psd, {}),
-    (time_synchronous_average, {"period": 0.01}),
+    (time_synchronous_average, {"period_s": 0.01}),
     (resample_signal, {"fs_new": 4000.0}),
     (stationarity_test, {}),
     (level_crossing_rate, {}),
@@ -315,7 +315,7 @@ def test_the_arguments_behind_fs_are_keyword_only_and_required() -> None:
     for call, missing in (
         (zoom_fft, r"'f_min'.*'f_max'"),
         (lifter, r"'cutoff'"),
-        (time_synchronous_average, r"'period'"),
+        (time_synchronous_average, r"'period_s'"),
         (resample_signal, r"'fs_new'"),
     ):
         with pytest.raises(

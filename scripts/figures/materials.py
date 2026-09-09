@@ -1170,7 +1170,7 @@ def generate_slow_sound_absorber(output_dir: str) -> None:
     from phonometry import materials
 
     lattice_step = 3.0e-2
-    period = 5.0e-2
+    period_m = 5.0e-2
     f0 = 300.0
     base = materials.HelmholtzResonator(
         neck_length=1.0e-3,
@@ -1182,7 +1182,7 @@ def generate_slow_sound_absorber(output_dir: str) -> None:
         f0,
         base,
         lattice_step=lattice_step,
-        period=period,
+        period_m=period_m,
     )
     h0 = design.slit_height
     f = np.linspace(150.0, 500.0, 700)
@@ -1198,7 +1198,7 @@ def generate_slow_sound_absorber(output_dir: str) -> None:
             design.resonator,
             slit_height=height,
             lattice_step=lattice_step,
-            period=period,
+            period_m=period_m,
         )
         ax.plot(f, res.absorption, ls, color=color, linewidth=2.2, label=label)
     ax.axvline(f0, color=COLOR_FG, linestyle=":", linewidth=1.1, alpha=0.7)
@@ -1283,7 +1283,7 @@ def generate_slit_absorber_geometry(output_dir: str) -> None:
         300.0,
         base,
         lattice_step=3.0e-2,
-        period=5.0e-2,
+        period_m=5.0e-2,
     )
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     materials.plot_slit_absorber_geometry(
@@ -1291,7 +1291,7 @@ def generate_slit_absorber_geometry(output_dir: str) -> None:
         ax=ax,
         slit_height=design.slit_height,
         lattice_step=3.0e-2,
-        period=5.0e-2,
+        period_m=5.0e-2,
         language=_LANG,
     )
     plt.tight_layout()
@@ -1319,7 +1319,7 @@ def generate_qrd_geometry(output_dir: str) -> None:
         depths,
         pitch - fin,
         ax=ax,
-        periods=2,
+        repetitions=2,
         fin_width=fin,
         language=_LANG,
     )
@@ -1367,21 +1367,21 @@ def generate_metadiffuser_polar(output_dir: str) -> None:
     print("Generating metadiffuser_polar...")
     from phonometry import materials
 
-    wells, depth, period = _qr_metadiffuser_wells()
+    wells, depth, period_m = _qr_metadiffuser_wells()
     sequence = np.roll(materials.quadratic_residue_sequence(5), -1)
     qrd_depths = sequence * (343.0 / 500.0) / (2 * 5)
     meta = materials.metadiffuser_polar_response(
         2000.0,
         wells,
         depth=depth,
-        period=period,
-        periods=6,
+        period_m=period_m,
+        repetitions=6,
     )
     qrd = materials.predict_diffuser_polar_response(
-        period,
+        period_m,
         2000.0,
         depths=qrd_depths,
-        periods=6,
+        repetitions=6,
         include_obliquity=False,
     )
     _fig, ax = plt.subplots(
@@ -1432,13 +1432,13 @@ def generate_metadiffuser_geometry(output_dir: str) -> None:
     print("Generating metadiffuser_geometry...")
     from phonometry.materials import plot_metadiffuser_panel_geometry
 
-    wells, depth, period = _qr_metadiffuser_wells()
+    wells, depth, period_m = _qr_metadiffuser_wells()
     _fig, ax = plt.subplots(figsize=(10, 3.4))
     plot_metadiffuser_panel_geometry(
         wells,
         ax=ax,
         depth=depth,
-        period=period,
+        period_m=period_m,
         language=_LANG,
     )
     plt.tight_layout()
@@ -1455,9 +1455,11 @@ def generate_metadiffuser_absorption(output_dir: str) -> None:
     # of the five slits pass through critical coupling above the 2 kHz design
     # frequency, so the panel is a near-lossless phase grating where it is
     # tuned and a quarter-absorbing surface 300 Hz higher up.
-    wells, depth, period = _qr_metadiffuser_wells()
+    wells, depth, period_m = _qr_metadiffuser_wells()
     freqs = np.arange(1800.0, 2601.0, 5.0)
-    panel = materials.metadiffuser_reflection(freqs, wells, depth=depth, period=period)
+    panel = materials.metadiffuser_reflection(
+        freqs, wells, depth=depth, period_m=period_m
+    )
     per_well = np.asarray(panel.well_absorption)
     face = np.asarray(panel.absorption)
     i_design = int(np.argmin(np.abs(freqs - 2000.0)))
@@ -1513,20 +1515,22 @@ def generate_metadiffuser_phase_match(output_dir: str) -> None:
     # Right: the same five phases swept across the band, where the rigid
     # well's linear phase and the resonator-loaded slit's dispersive one part
     # company either side of the crossing.
-    wells, depth, period = _qr_metadiffuser_wells()
+    wells, depth, period_m = _qr_metadiffuser_wells()
     sequence = np.roll(materials.quadratic_residue_sequence(5), -1)
     qrd_depths = np.asarray(sequence) * (343.0 / 500.0) / (2 * 5)
     index = np.arange(1, 6)
 
     at_design = materials.metadiffuser_reflection(
-        np.array([2000.0]), wells, depth=depth, period=period
+        np.array([2000.0]), wells, depth=depth, period_m=period_m
     )
     r_design = np.asarray(at_design.reflection)[:, 0]
     k_design = 2.0 * np.pi * 2000.0 / 343.0
     target_design = np.degrees(np.angle(np.exp(-2j * k_design * qrd_depths)))
 
     freqs = np.linspace(1600.0, 2600.0, 201)
-    swept = materials.metadiffuser_reflection(freqs, wells, depth=depth, period=period)
+    swept = materials.metadiffuser_reflection(
+        freqs, wells, depth=depth, period_m=period_m
+    )
     phases = np.degrees(np.angle(np.asarray(swept.reflection)))
     k = 2.0 * np.pi * freqs / 343.0
     targets = np.degrees(np.angle(np.exp(-2j * np.outer(qrd_depths, k))))
@@ -1640,19 +1644,19 @@ def generate_metadiffuser_spectrum(output_dir: str) -> None:
     # shorter than a wavelength, no grating lobe exists and neither panel can
     # do better than the flat reference: the normalised coefficient of both
     # collapses there for a reason that has nothing to do with the wells.
-    wells, depth, period = _qr_metadiffuser_wells()
+    wells, depth, period_m = _qr_metadiffuser_wells()
     sequence = np.roll(materials.quadratic_residue_sequence(5), -1)
     qrd_depths = np.asarray(sequence) * (343.0 / 500.0) / (2 * 5)
     freqs = np.array(
         [500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000], dtype=float
     )
     meta = materials.metadiffuser_diffusion_spectrum(
-        freqs, wells, depth=depth, period=period, periods=6
+        freqs, wells, depth=depth, period_m=period_m, repetitions=6
     )
     qrd = materials.predicted_diffusion_spectrum(
-        period, freqs, depths=qrd_depths, periods=6, include_obliquity=False
+        period_m, freqs, depths=qrd_depths, repetitions=6, include_obliquity=False
     )
-    f_lobe = 343.0 / (5 * period)
+    f_lobe = 343.0 / (5 * period_m)
 
     _fig, ax = plt.subplots(figsize=(10, 6.3))
     ax.axvspan(freqs[0] * 0.92, f_lobe, color=theme_fill(COLOR_MUTED, ax), zorder=0)
@@ -1724,7 +1728,7 @@ def generate_impedance_tube_geometry(output_dir: str) -> None:
         ax=ax,
         spacing=0.05,
         x1=0.15,
-        diameter=0.10,
+        diameter_m=0.10,
         shape="circular",
         language=_LANG,
     )
@@ -1752,7 +1756,7 @@ def generate_transmission_tube_geometry(output_dir: str) -> None:
         l2=0.20,
         s2=0.05,
         thickness=0.05,
-        diameter=0.10,
+        diameter_m=0.10,
         shape="circular",
         language=_LANG,
     )
@@ -2157,14 +2161,14 @@ def generate_qrd_working_band(output_dir: str) -> None:
     # flat reference at multiples of N f0 (3500 Hz), where every well reflects
     # in phase again, and the single-plane-wave picture inside a well fails
     # above f_max = c / (2 w) = 1715 Hz.
-    c, n_seq, f0, width, periods = 343.0, 7, 500.0, 0.10, 5
+    c, n_seq, f0, width, repetitions = 343.0, 7, 500.0, 0.10, 5
     freqs = np.linspace(200.0, 6000.0, 601)
     depths = materials.qrd_well_depths(n_seq, f0, speed_of_sound=c)
     qrd = materials.predicted_diffusion_spectrum(
         width,
         freqs,
         depths=depths,
-        periods=periods,
+        repetitions=repetitions,
         speed_of_sound=c,
         normalize=False,
     )
@@ -2172,7 +2176,7 @@ def generate_qrd_working_band(output_dir: str) -> None:
         width,
         freqs,
         depths=np.zeros_like(depths),
-        periods=periods,
+        repetitions=repetitions,
         speed_of_sound=c,
         normalize=False,
     )
@@ -2272,8 +2276,8 @@ def generate_diffuser_modulation(output_dir: str) -> None:
             width,
             1000.0,
             depths=depths,
-            periods=1,
-            angles=angles,
+            repetitions=1,
+            angles_deg=angles,
             speed_of_sound=c,
         )
         polar.plot(
@@ -2306,8 +2310,8 @@ def generate_diffuser_modulation(output_dir: str) -> None:
             width,
             freqs,
             depths=depths,
-            periods=1,
-            angles=angles,
+            repetitions=1,
+            angles_deg=angles,
             speed_of_sound=c,
         )
         ax.semilogx(
@@ -2361,7 +2365,7 @@ def generate_diffusion_polar(output_dir: str) -> None:
         3.6 / 42,
         1000.0,
         depths=depths,
-        periods=6,
+        repetitions=6,
         speed_of_sound=343.0,
     )
     result = materials.directional_diffusion(angles, np.round(predicted.levels, 3))
@@ -2369,7 +2373,7 @@ def generate_diffusion_polar(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(8.0, 7.5), subplot_kw={"projection": "polar"})
     # The theta-* setters live on PolarAxes, not the base Axes type.
     polar: Any = ax
-    theta = np.radians(result.angles)
+    theta = np.radians(result.angles_deg)
     polar.plot(
         theta,
         result.levels,
@@ -2420,9 +2424,11 @@ def generate_diffuser_prediction(output_dir: str) -> None:
         float,
     )
     depths = materials.qrd_well_depths(7, 500.0)
-    qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, periods=5)
+    qrd = materials.predicted_diffusion_spectrum(
+        0.10, freqs, depths=depths, repetitions=5
+    )
     flat = materials.predicted_diffusion_spectrum(
-        0.10, freqs, depths=np.zeros_like(depths), periods=5, normalize=False
+        0.10, freqs, depths=np.zeros_like(depths), repetitions=5, normalize=False
     )
 
     _fig, ax = plt.subplots(figsize=(10, 6))
@@ -2954,7 +2960,7 @@ def generate_impedance_tube_result(output_dir: str) -> None:
         x1=x1,
         speed_of_sound=c0,
         characteristic_impedance=407.0,
-        diameter=0.10,
+        diameter_m=0.10,
     )
     result.plot(language=_LANG)
     plt.gcf().set_size_inches(10, 6)
@@ -3485,13 +3491,13 @@ def generate_tube_working_ranges(output_dir: str) -> None:
     )
 
     _fig, ax = plt.subplots(figsize=(11, 5.6))
-    for i, (label, spacing, diameter, astm, color) in enumerate(rows):
+    for i, (label, spacing, diameter_m, astm, color) in enumerate(rows):
         band = (
             materials.plane_wave_frequency_range_astm
             if astm
             else materials.plane_wave_frequency_range
         )
-        f_l, f_u = band(spacing, c0, diameter=diameter)
+        f_l, f_u = band(spacing, c0, diameter_m=diameter_m)
         y = len(rows) - 1 - i
         ax.plot(
             [f_l, f_u],
@@ -3520,7 +3526,7 @@ def generate_tube_working_ranges(output_dir: str) -> None:
             color=COLOR_FG,
         )
         # Which constraint binds the top end: cut-on or the spacing singularity.
-        cut_on = (0.586 if astm else 0.58) * c0 / diameter
+        cut_on = (0.586 if astm else 0.58) * c0 / diameter_m
         binding = (
             r"cut-on $0.58\,c/d$"
             if abs(f_u - cut_on) < 1.0
@@ -3537,8 +3543,8 @@ def generate_tube_working_ranges(output_dir: str) -> None:
         )
 
     # The splice band the large and the small tube share.
-    big = materials.plane_wave_frequency_range(0.100, c0, diameter=0.100)
-    small = materials.plane_wave_frequency_range(0.020, c0, diameter=0.029)
+    big = materials.plane_wave_frequency_range(0.100, c0, diameter_m=0.100)
+    small = materials.plane_wave_frequency_range(0.020, c0, diameter_m=0.029)
     ax.axvspan(small[0], big[1], color=theme_fill(COLOR_TERTIARY, ax), zorder=0)
     ax.text(
         np.sqrt(small[0] * big[1]),
@@ -3569,7 +3575,7 @@ def generate_standing_wave_envelope(output_dir: str) -> None:
     print("Generating standing_wave_envelope...")
     from phonometry import materials
 
-    c0, freq, diameter = 343.2, 500.0, 0.10
+    c0, freq, diameter_m = 343.2, 500.0, 0.10
     k = 2.0 * np.pi * freq / c0
     x = np.linspace(0.0, 1.0, 2400)
 
@@ -3598,7 +3604,7 @@ def generate_standing_wave_envelope(output_dir: str) -> None:
 
     # The same |r| = 0.5 sample with the Eq. (A.18) tube attenuation: the
     # reflected wave has travelled 2x further, so the far notches fill in.
-    atten = float(materials.tube_attenuation_constant(freq, c0, diameter))
+    atten = float(materials.tube_attenuation_constant(freq, c0, diameter_m))
     r_eff = 0.5 * np.exp(-2.0 * atten * x)
     lossy = 10.0 * np.log10(
         1.0 + r_eff**2 + 2.0 * r_eff * np.cos(2 * k * x + np.radians(54.1))
@@ -3906,9 +3912,9 @@ def generate_oblique_absorption(output_dir: str) -> None:
         bulk = np.array(
             [
                 float(
-                    materials.layered_absorber(one, layers, angle=float(t)).absorption[
-                        0
-                    ]
+                    materials.layered_absorber(
+                        one, layers, angle_rad=float(t)
+                    ).absorption[0]
                 )
                 for t in theta
             ]
@@ -4109,7 +4115,7 @@ def _slit_design(target: float = 300.0) -> CriticalCouplingResult:
         cavity_side=27.0e-3,
     )
     return materials.critical_coupling_design(
-        target, base, lattice_step=3.0e-2, period=5.0e-2
+        target, base, lattice_step=3.0e-2, period_m=5.0e-2
     )
 
 
@@ -4133,7 +4139,7 @@ def generate_critical_coupling_impedance(output_dir: str) -> None:
                     design.resonator,
                     slit_height=float(h),
                     lattice_step=3.0e-2,
-                    period=5.0e-2,
+                    period_m=5.0e-2,
                 ).normalized_impedance[0]
             )
             for h in heights
@@ -4193,7 +4199,7 @@ def generate_critical_coupling_impedance(output_dir: str) -> None:
             design.resonator,
             slit_height=factor * h0,
             lattice_step=3.0e-2,
-            period=5.0e-2,
+            period_m=5.0e-2,
         ).normalized_impedance
         ax_l.plot(loc.real, loc.imag, color=color, linewidth=2.0, label=label)
         at300 = complex(loc[int(np.argmin(np.abs(freq - 300.0)))])
@@ -4247,7 +4253,7 @@ def generate_slow_sound_dispersion(output_dir: str) -> None:
         design.resonator,
         slit_height=design.slit_height,
         lattice_step=3.0e-2,
-        period=5.0e-2,
+        period_m=5.0e-2,
     )
     ratio = 2.0 * np.pi * freq / res.effective_wavenumber.real / c0
 
@@ -4346,7 +4352,7 @@ def generate_graded_slit_absorber(output_dir: str) -> None:
     step = float(freq[1] - freq[0])
     for i, (label, resonators, height, color, style) in enumerate(curves):
         alpha = materials.slit_helmholtz_absorber(
-            freq, resonators, slit_height=height, lattice_step=3.0e-2, period=5.0e-2
+            freq, resonators, slit_height=height, lattice_step=3.0e-2, period_m=5.0e-2
         ).absorption
         ax.plot(freq, alpha, color=color, linewidth=2.2, linestyle=style, label=label)
         # The band above 0.8 is not one interval for a chain, so shade where

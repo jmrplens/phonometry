@@ -87,9 +87,9 @@ physics.
 from phonometry import materials
 
 # A 100 mm tube with 100 mm spacing, and a 29 mm tube with 20 mm spacing.
-f_l, f_u = materials.plane_wave_frequency_range(0.100, 343.2, diameter=0.100)
+f_l, f_u = materials.plane_wave_frequency_range(0.100, 343.2, diameter_m=0.100)
 print(round(f_l, 1), round(f_u, 1))     # 171.6 1544.4
-f_l, f_u = materials.plane_wave_frequency_range(0.020, 343.2, diameter=0.029)
+f_l, f_u = materials.plane_wave_frequency_range(0.020, 343.2, diameter_m=0.029)
 print(round(f_l, 1), round(f_u, 1))     # 858.0 6864.0
 ```
 
@@ -113,10 +113,10 @@ $0.45\,c$).*
 <summary>Show the code for this figure</summary>
 
 ```python
-for spacing, diameter in ((0.100, 0.100), (0.050, 0.100), (0.020, 0.029)):
-    iso = materials.plane_wave_frequency_range(spacing, 343.2, diameter=diameter)
-    astm = materials.plane_wave_frequency_range_astm(spacing, 343.2, diameter=diameter)
-    print(f"{diameter * 1e3:.0f} mm bore, s = {spacing * 1e3:.0f} mm:",
+for spacing, diameter_m in ((0.100, 0.100), (0.050, 0.100), (0.020, 0.029)):
+    iso = materials.plane_wave_frequency_range(spacing, 343.2, diameter_m=diameter_m)
+    astm = materials.plane_wave_frequency_range_astm(spacing, 343.2, diameter_m=diameter_m)
+    print(f"{diameter_m * 1e3:.0f} mm bore, s = {spacing * 1e3:.0f} mm:",
           f"ISO {iso[0]:.0f}-{iso[1]:.0f} Hz, ASTM {astm[0]:.0f}-{astm[1]:.0f} Hz")
 ```
 
@@ -125,7 +125,7 @@ for spacing, diameter in ((0.100, 0.100), (0.050, 0.100), (0.020, 0.029)):
 Those limits are easier to see on the hardware itself.
 `plot_impedance_tube_geometry` draws a tube to scale with its plane-wave
 band worked out, and a measured `two_microphone_impedance` result that was
-given its geometry (`spacing`, `x1`, `diameter`) redraws its own setup with
+given its geometry (`spacing`, `x1`, `diameter_m`) redraws its own setup with
 `result.plot_geometry()`.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_geometry.svg" alt="To-scale side view of a 100 mm ISO 10534-2 impedance tube: the loudspeaker at the left end, microphones 1 and 2 flush in the wall at s = 50 mm spacing with microphone 1 at x1 = 150 mm from the specimen face, the specimen against the rigid backing at the right, the circular cross-section beside the tube and the plane-wave working range of 343 to 1991 Hz that this geometry sets" width="92%" />
@@ -142,12 +142,12 @@ one $x_1$ = 150 mm from the specimen face.*
 import matplotlib.pyplot as plt
 from phonometry import materials
 
-materials.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, diameter=0.10)
+materials.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, diameter_m=0.10)
 plt.show()
 
 # A measured result that retains its geometry draws its own tube:
 #   res = materials.two_microphone_impedance(
-#       h12, frequency=f, spacing=0.05, x1=0.15, diameter=0.10, ...)
+#       h12, frequency=f, spacing=0.05, x1=0.15, diameter_m=0.10, ...)
 #   res.plot_geometry()
 ```
 
@@ -192,7 +192,7 @@ in `plane_wave_frequency_range_astm`: ASTM E2611 retains the unrounded
 circular constant ($f\,d < 0.586\,c$, 6.2.4.1), the same rectangular
 $f\,d < 0.500\,c$ (6.2.5), a slightly stricter spacing bound
 $f\,s < 0.40\,c$ (6.5.4) and a laxer low end at 1 % of the wavelength
-(6.2.3). Passing `diameter=` (and `shape=`) to `two_microphone_impedance`,
+(6.2.3). Passing `diameter_m=` (and `shape=`) to `two_microphone_impedance`,
 `wave_decomposition` or the `transfer_matrix_*` solvers turns the matching
 check into an advisory warning, and for the Annex A attenuation estimate of a
 rectangular tube `hydraulic_diameter(width, height)` supplies the $4A/P$
@@ -581,7 +581,7 @@ h12 = (np.exp(1j*k0*x2) + r_true*np.exp(-1j*k0*x2)) / \
       (np.exp(1j*k0*x1) + r_true*np.exp(-1j*k0*x1))
 result = materials.two_microphone_impedance(
     h12, frequency=f, spacing=spacing, x1=x1, speed_of_sound=c0,
-    characteristic_impedance=407.0, diameter=0.10,
+    characteristic_impedance=407.0, diameter_m=0.10,
 )
 
 # One line: alpha(f) with |r| overlaid.
@@ -644,7 +644,7 @@ c0 = float(materials.speed_of_sound_iso10534(temperature_c=20.0))   # 343.29 m/s
 rho_c = fluids.characteristic_impedance(
     float(materials.air_density_iso10534(
         temperature_c=20.0, atmospheric_pressure_kpa=101.0)), c0)   # 405.6 Pa.s/m
-diameter, spacing, x1 = 0.100, 0.050, 0.100
+diameter_m, spacing, x1 = 0.100, 0.050, 0.100
 theta, cavity = 1.0, c0 / (4.0 * 1000.0)          # quarter-wave at 1 kHz: 86 mm
 freqs = np.array([400, 500, 630, 800, 1000, 1250, 1600], dtype=float)
 
@@ -658,7 +658,7 @@ h12_fiche = (np.exp(1j*k0*x2) + r_known*np.exp(-1j*k0*x2)) / \
 
 fiche = materials.two_microphone_impedance(
     h12_fiche, frequency=freqs, spacing=spacing, x1=x1,
-    speed_of_sound=c0, characteristic_impedance=rho_c, diameter=diameter,
+    speed_of_sound=c0, characteristic_impedance=rho_c, diameter_m=diameter_m,
 )
 print(np.round(fiche.absorption, 2))    # [0.68 0.8  0.9  0.97 1.   0.96 0.68]
 
@@ -666,7 +666,7 @@ fiche.report(
     "alpha_fiche.pdf",
     metadata=ReportMetadata(
         specimen="Resistive facing over an 86 mm rigidly-backed air cavity",
-        tube_diameter=diameter,        # m (printed as 100 mm)
+        tube_diameter=diameter_m,        # m (printed as 100 mm)
         mic_spacing=spacing,           # m (printed as 50 mm)
         measurement_standard="ISO 10534-2",
         laboratory="Phonometry Reference Laboratory",
@@ -746,7 +746,7 @@ import matplotlib.pyplot as plt
 from phonometry import materials
 
 materials.plot_transmission_tube_geometry(
-    l1=0.10, s1=0.05, l2=0.20, s2=0.05, thickness=0.05, diameter=0.10,
+    l1=0.10, s1=0.05, l2=0.20, s2=0.05, thickness=0.05, diameter_m=0.10,
 )
 plt.show()
 

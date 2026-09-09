@@ -100,35 +100,35 @@ def test_hydrophone_depths() -> None:
 
 
 def test_hydrophone_depths_rejects_bad_angles() -> None:
-    with pytest.raises(ValueError, match=r"'angles' must be below"):
-        underwater.hydrophone_depths(100.0, angles=(90.0,))
+    with pytest.raises(ValueError, match=r"'angles_deg' must be below"):
+        underwater.hydrophone_depths(100.0, angles_deg=(90.0,))
 
 
 def test_hydrophone_depths_rejects_non_finite_angles() -> None:
     # NaN/inf angles must be rejected, not silently yield NaN depths.
-    with pytest.raises(ValueError, match=r"'angles' must be finite"):
-        underwater.hydrophone_depths(100.0, angles=(np.nan,))
-    with pytest.raises(ValueError, match=r"'angles' must be finite"):
-        underwater.hydrophone_depths(100.0, angles=(np.inf,))
+    with pytest.raises(ValueError, match=r"'angles_deg' must be finite"):
+        underwater.hydrophone_depths(100.0, angles_deg=(np.nan,))
+    with pytest.raises(ValueError, match=r"'angles_deg' must be finite"):
+        underwater.hydrophone_depths(100.0, angles_deg=(np.inf,))
 
 
 def test_hydrophone_depths_rejects_a_nested_angle_grid() -> None:
     # A pair of pairs used to come back as a 2-D "depths" array as if valid.
-    with pytest.raises(ValueError, match="'angles' must be a non-empty 1-D array"):
-        underwater.hydrophone_depths(100.0, angles=((15.0, 30.0), (45.0, 60.0)))  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'angles_deg' must be a non-empty 1-D array"):
+        underwater.hydrophone_depths(100.0, angles_deg=((15.0, 30.0), (45.0, 60.0)))  # type: ignore[arg-type]
 
 
 def test_hydrophone_depths_rejects_a_non_numeric_angle() -> None:
     # A string element used to escape as numpy's anonymous "could not
     # convert string to float" instead of naming the parameter.
-    with pytest.raises(ValueError, match="'angles' must be numeric"):
-        underwater.hydrophone_depths(100.0, angles=("bad",))  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'angles_deg' must be numeric"):
+        underwater.hydrophone_depths(100.0, angles_deg=("bad",))  # type: ignore[arg-type]
 
 
 def test_hydrophone_depths_normalises_a_single_angle() -> None:
     # A bare scalar used to come back 0-d, so the documented per-hydrophone
     # read depths[0] died in numpy; it is normalised to one entry instead.
-    depths = underwater.hydrophone_depths(100.0, angles=45.0)  # type: ignore[arg-type]
+    depths = underwater.hydrophone_depths(100.0, angles_deg=45.0)  # type: ignore[arg-type]
     assert depths.shape == (1,)
     assert float(depths[0]) == pytest.approx(100.0)
 

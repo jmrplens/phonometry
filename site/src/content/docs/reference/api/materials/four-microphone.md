@@ -137,7 +137,7 @@ plane_wave_frequency_range_astm(
     spacing: float,
     speed_of_sound: float,
     *,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str = 'circular',
 ) -> tuple[float, float]
 ```
@@ -146,7 +146,7 @@ Working plane-wave frequency range `(f_l, f_u)` (ASTM E2611-19).
 
 The upper limit is the smaller of the microphone-spacing bound
 $s \le 0.8 c / (2 f_\mathrm{u})$, i.e. $f_\mathrm{u} s < 0.40 c$ (6.5.4), and,
-when the tube `diameter` is given, the cut-on bound
+when the tube `diameter_m` is given, the cut-on bound
 $f_\mathrm{u} < K c / d$ with $K = 0.586$ for a circular tube
 (6.2.4.1, Eq. (2)) or $K = 0.500$ for a rectangular tube with `d`
 the largest section dimension (6.2.5). The lower limit follows 6.2.3: the
@@ -163,7 +163,7 @@ binding for every microphone pair).
 | :--- | :--- |
 | `spacing` | Microphone spacing `s`, in metres. |
 | `speed_of_sound` | Speed of sound `c`, in metres per second. |
-| `diameter` | Tube diameter (circular) or largest section dimension (rectangular/square) `d`, in metres; `None` applies only the spacing bound. |
+| `diameter_m` | Tube diameter (circular) or largest section dimension (rectangular/square) `d`, in metres; `None` applies only the spacing bound. |
 | `shape` | `"circular"`, `"rectangular"` or `"square"`. |
 
 **Returns:** Tuple `(f_l, f_u)` of the lower and upper frequency limits, in Hz.
@@ -206,7 +206,7 @@ transfer_matrix_one_load(
     wavenumber: ArrayLike,
     characteristic_impedance: float,
     frequency: ArrayLike | None = None,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str = 'circular',
 ) -> TransferMatrix
 ```
@@ -234,7 +234,7 @@ $$
 | `wavenumber` | Air wavenumber `k`. |
 | `characteristic_impedance` | Characteristic impedance `rho c`. |
 | `frequency` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/phonometry/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
-| `diameter` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
+| `diameter_m` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
 **Returns:** The specimen [`TransferMatrix`](/phonometry/reference/api/materials/four-microphone/#transfermatrix) (measurement context retained on the result).
@@ -254,7 +254,7 @@ transfer_matrix_two_load(
     wavenumber: ArrayLike,
     characteristic_impedance: float,
     frequency: ArrayLike | None = None,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str = 'circular',
 ) -> TransferMatrix
 ```
@@ -283,7 +283,7 @@ $$
 | `wavenumber` | Air wavenumber `k`. |
 | `characteristic_impedance` | Characteristic impedance `rho c`. |
 | `frequency` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/phonometry/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
-| `diameter` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
+| `diameter_m` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
 **Returns:** The specimen [`TransferMatrix`](/phonometry/reference/api/materials/four-microphone/#transfermatrix) (measurement context retained on the result).
@@ -301,7 +301,7 @@ TransferMatrix(
     l2: float | None = None,
     s2: float | None = None,
     thickness: float | None = None,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str | None = None,
     frequency: Real | None = None,
     air_characteristic_impedance: float | None = None,
@@ -317,7 +317,7 @@ may be scalar or a per-frequency array of matching shape.
 The trailing fields retain the measurement context when the matrix comes
 out of [`transfer_matrix_two_load`](/phonometry/reference/api/materials/four-microphone/#transfer_matrix_two_load) / [`transfer_matrix_one_load`](/phonometry/reference/api/materials/four-microphone/#transfer_matrix_one_load)
 (tube geometry `l1`/`s1`/`l2`/`s2`, specimen `thickness`, tube
-`diameter` and canonical cross-section `shape`, the `frequency`
+`diameter_m` and canonical cross-section `shape`, the `frequency`
 vector when supplied to the solver, and the air
 `air_characteristic_impedance` `rho c`); all default to `None` so a
 hand-built matrix (for example [`air_layer_transfer_matrix`](/phonometry/reference/api/materials/four-microphone/#air_layer_transfer_matrix)) is
@@ -514,7 +514,7 @@ wave_decomposition(
     l2: float,
     s2: float,
     wavenumber: ArrayLike,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str = 'circular',
 ) -> tuple[Complex, Complex, Complex, Complex]
 ```
@@ -563,7 +563,7 @@ air-layer transfer matrix (see [`air_layer_transfer_matrix`](/phonometry/referen
 | `l2` | Distance `l2` from the front reference plane, in metres. |
 | `s2` | Downstream microphone spacing `s2`, in metres. |
 | `wavenumber` | Air wavenumber `k` (real or complex), scalar or per band. |
-| `diameter` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
+| `diameter_m` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
 **Returns:** Tuple `(A, B, C, D)` of complex amplitudes.

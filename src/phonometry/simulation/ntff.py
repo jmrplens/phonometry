@@ -237,7 +237,7 @@ SIMULATION_AIR = Fluid(
 
 def far_field_from_contour(
     contour: ContourPhasors,
-    angles: ArrayLike,
+    angles_deg: ArrayLike,
     *,
     distance: float | None = None,
     origin: tuple[float, float] = (0.0, 0.0),
@@ -289,7 +289,7 @@ def far_field_from_contour(
     :param contour: The contour phasors (from
         :meth:`~phonometry.simulation.FDTD2D.add_contour_probe`, or hand
         built).
-    :param angles: Observation angles [degrees], 1D. ``0`` is ``+x``,
+    :param angles_deg: Observation angles [degrees], 1D. ``0`` is ``+x``,
         ``90`` is ``+y`` of the coordinates ``contour.positions`` live in.
     :param distance: Observation radius [m] for the exact evaluation, or
         ``None`` (default) for the far-field pattern.
@@ -306,7 +306,7 @@ def far_field_from_contour(
     if not isinstance(contour, ContourPhasors):
         msg = "contour must be a ContourPhasors"
         raise TypeError(msg)
-    ang = np.atleast_1d(np.asarray(angles, dtype=np.float64))
+    ang = np.atleast_1d(np.asarray(angles_deg, dtype=np.float64))
     if ang.ndim != 1 or ang.size == 0 or not np.all(np.isfinite(ang)):
         msg = "angles must be a non-empty 1D sequence of finite values in degrees"
         raise ValueError(msg)

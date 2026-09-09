@@ -49,7 +49,7 @@ import numpy as np
 from phonometry import signals
 
 fs = 8192.0
-period = 1.0 / 32.0        # una revolución: 256 muestras a esta frecuencia
+period_s = 1.0 / 32.0        # una revolución: 256 muestras a esta frecuencia
 m, n_avg = 256, 40
 phase = np.arange((n_avg + 1) * m) / m
 periodic = (
@@ -58,7 +58,7 @@ periodic = (
     - 0.3 * np.cos(2.0 * np.pi * 6.0 * phase)
 )
 recording = periodic + signals.noise_signal(fs, phase.size / fs, rms=0.9, seed=11)
-res = signals.time_synchronous_average(recording, fs, period=period, n_averages=n_avg)
+res = signals.time_synchronous_average(recording, fs, period_s=period_s, n_averages=n_avg)
 
 fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(11, 4.6))
 t_ms = 1e3 * res.times
@@ -69,10 +69,10 @@ ax0.plot(t_ms, periodic[:m], "--", color="#d62728", label="Forma verdadera")
 ax0.set_xlabel("Tiempo [ms]"); ax0.set_ylabel("Amplitud"); ax0.legend()
 
 orders = np.linspace(31.0, 33.0, 4000)
-freqs = orders / period
-ax1.plot(orders, signals.comb_filter_response(freqs, period, 32), color="#2ca02c",
+freqs = orders / period_s
+ax1.plot(orders, signals.comb_filter_response(freqs, period_s, 32), color="#2ca02c",
          label="N = 32 (potencia de dos)")
-ax1.plot(orders, signals.comb_filter_response(freqs, period, 20), color="#1f77b4",
+ax1.plot(orders, signals.comb_filter_response(freqs, period_s, 20), color="#1f77b4",
          label="N = 20 (nodo en 32,05)")
 ax1.axvline(32.05, color="#d62728", ls=":", label="Tono interferente")
 ax1.set_xlabel("Frecuencia [órdenes]"); ax1.set_ylabel("Magnitud del filtro peine")
@@ -122,10 +122,10 @@ directamente:
 import numpy as np
 from phonometry import signals
 
-period = 1.0 / 32.0
-signals.comb_filter_response(np.array([16.0 / period]), period, 8)   # 1.0 en un diente
-signals.comb_filter_response(np.array([0.25 / period]), period, 2)   # 1/sqrt(2)
-signals.comb_filter_response(np.array([0.5 / period]), period, 2)    # 0.0 en un nodo
+period_s = 1.0 / 32.0
+signals.comb_filter_response(np.array([16.0 / period_s]), period_s, 8)   # 1.0 en un diente
+signals.comb_filter_response(np.array([0.25 / period_s]), period_s, 2)   # 1/sqrt(2)
+signals.comb_filter_response(np.array([0.5 / period_s]), period_s, 2)    # 0.0 en un nodo
 ```
 
 `SynchronousAverageResult` lleva la respuesta sobre los primeros armónicos en
@@ -142,7 +142,7 @@ es una reducción de potencia de $10\log_{10} N$ dB, declarada como
 `amplitude_snr_gain`:
 
 ```python
-res = signals.time_synchronous_average(recording, fs, period=period, n_averages=100)
+res = signals.time_synchronous_average(recording, fs, period_s=period_s, n_averages=100)
 res.noise_reduction_db      # 20.0 dB = 10*log10(100)
 res.amplitude_snr_gain      # 10.0   = sqrt(100)
 res.plot(language="es")     # forma de onda promediada + el peine aplicado
@@ -165,18 +165,18 @@ from phonometry import signals
 
 fs = 8192.0
 samples = 256
-period = samples / fs
+period_s = samples / fs
 m = np.arange(samples) / fs
-true = (np.cos(2 * np.pi * m / period)
-        + 0.5 * np.cos(2 * np.pi * 3 * m / period + 0.7)
-        + 0.25 * np.cos(2 * np.pi * 5 * m / period + 1.1))
+true = (np.cos(2 * np.pi * m / period_s)
+        + 0.5 * np.cos(2 * np.pi * 3 * m / period_s + 0.7)
+        + 0.25 * np.cos(2 * np.pi * 5 * m / period_s + 1.1))
 rng = np.random.default_rng(5)
 recording = np.tile(true, 128) + rng.standard_normal(128 * samples)
 
 counts = [1, 2, 4, 8, 16, 32, 64, 128]
 errors = []
 for n in counts:
-    res = signals.time_synchronous_average(recording[:n * samples], fs, period=period,
+    res = signals.time_synchronous_average(recording[:n * samples], fs, period_s=period_s,
                                            n_averages=n)
     errors.append(np.sqrt(np.mean((res.period_waveform - true) ** 2)))
 
@@ -227,8 +227,8 @@ promedio de extremo a extremo lo confirma:
 phase = np.arange(41 * 256) / 256
 recording = np.cos(2 * np.pi * 8.0 * phase) + 0.7 * np.cos(2 * np.pi * 32.05 * phase)
 
-leak_20 = signals.time_synchronous_average(recording, fs, period=period, n_averages=20)
-leak_32 = signals.time_synchronous_average(recording, fs, period=period, n_averages=32)
+leak_20 = signals.time_synchronous_average(recording, fs, period_s=period_s, n_averages=20)
+leak_32 = signals.time_synchronous_average(recording, fs, period_s=period_s, n_averages=32)
 # leak_20.period_waveform coincide con el 8.º orden limpio; leak_32 no
 ```
 
@@ -239,7 +239,7 @@ máquina deberían fijar $N$.
 ## De dónde sale el periodo, y cuán estable tiene que ser
 
 Todo lo anterior da $T$ por sabido. En una medición real hay que *medir* $T$, y
-la suposición escondida detrás de un `period` escalar es que el eje mantiene ese
+la suposición escondida detrás de un `period_s` escalar es que el eje mantiene ese
 periodo durante todo el registro, que es el modo de fallo dominante de la
 técnica y falla en silencio.
 
@@ -317,10 +317,10 @@ se recupera dentro de ese error de interpolación (`interpolated` es `True`):
 
 ```python
 fs = 8192.0
-period = 1.0 / 31.7                       # fs * period no es entero
-t = np.arange(int(40 * period * fs)) / fs
-recording = np.cos(2.0 * np.pi * t / period)  # un ciclo por revolución
-res = signals.time_synchronous_average(recording, fs, period=period)
+period_s = 1.0 / 31.7                       # fs * period_s no es entero
+t = np.arange(int(40 * period_s * fs)) / fs
+recording = np.cos(2.0 * np.pi * t / period_s)  # un ciclo por revolución
+res = signals.time_synchronous_average(recording, fs, period_s=period_s)
 res.interpolated                          # True: alineación por retardo fraccionario
 res.samples_per_period                    # muestras enteras de un periodo
 ```

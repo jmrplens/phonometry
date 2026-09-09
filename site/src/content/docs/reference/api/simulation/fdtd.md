@@ -521,7 +521,7 @@ Domain size `(lx, ly)` [m].
 GaussianPulse(
     ix: int,
     iy: int,
-    width: float,
+    half_width_s: float,
     t0: float | None = None,
     amplitude: float = 1.0,
 )
@@ -529,9 +529,9 @@ GaussianPulse(
 
 A soft Gaussian pressure pulse injected at one cell.
 
-$s(t) = \text{amplitude} \cdot e^{-((t - t_0)/\text{width})^2}$
-with `t0` defaulting to `4 * width` so the pulse starts from
-(numerically) zero.
+$s(t) = \text{amplitude} \cdot e^{-((t - t_0)/w)^2}$, with $w$
+the half-width `half_width_s` and `t0` defaulting to
+`4 * half_width_s` so the pulse starts from (numerically) zero.
 
 **Attributes**
 
@@ -539,8 +539,8 @@ with `t0` defaulting to `4 * width` so the pulse starts from
 | :--- | :--- |
 | `ix` | Source column (x) index; the cell centre is at $x = (i_x + 0.5)\,\Delta x$. |
 | `iy` | Source row (y) index. |
-| `width` | Gaussian half-width [s]; sets the pulse bandwidth. |
-| `t0` | Pulse centre time [s] (default `4 * width`). |
+| `half_width_s` | Gaussian half-width $w$ [s]; it sets the pulse bandwidth. The name carries the unit because the perfectly matched layer of this same module measures its own width in cells. |
+| `t0` | Pulse centre time [s] (default `4 * half_width_s`). |
 | `amplitude` | Peak source amplitude [Pa]. |
 
 ### GaussianPulse.value()

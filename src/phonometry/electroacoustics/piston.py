@@ -206,7 +206,7 @@ class PistonDirectivity:
     :meth:`plot`. The maths is :func:`piston_directivity`; this is a thin,
     plottable bundle around it.
 
-    :ivar angles: Polar angles ``theta`` from the axis, rad.
+    :ivar angles_rad: Polar angles ``theta`` from the axis, rad.
     :ivar ka: Wavenumber-radius products ``ka``, one per pattern (a 1-D array).
     :ivar directivity: Linear directivity :math:`D(\theta)`, normalized so
         :math:`D(0) = 1`, as a ``(len(ka), len(angles))`` array; row ``i`` is
@@ -217,7 +217,7 @@ class PistonDirectivity:
         value rather than ``-inf``).
     """
 
-    angles: np.ndarray
+    angles_rad: np.ndarray
     ka: np.ndarray
     directivity: np.ndarray
     directivity_db: np.ndarray
@@ -227,7 +227,7 @@ class PistonDirectivity:
 
         The matrix is indexed by position on both sides: :meth:`plot` loops
         over :attr:`ka` and reads row ``i`` as the pattern of ``ka[i]``,
-        drawing its columns over :attr:`angles`. Neither pairing is recorded
+        drawing its columns over :attr:`angles_rad`. Neither pairing is recorded
         anywhere else, and only one of the ways they can disagree is quiet.
         A matrix one row short runs that loop off the end of it, and the row
         that is not there comes back as an ``IndexError`` out of NumPy; a
@@ -239,11 +239,11 @@ class PistonDirectivity:
 
         :raises ValueError: if the pattern matrix disagrees with either grid.
         """
-        require_ranks(self, angles=1, ka=1, directivity=2, directivity_db=2)
+        require_ranks(self, angles_rad=1, ka=1, directivity=2, directivity_db=2)
         require_same_length(self, "ka", "directivity", "directivity_db", axis="pattern")
         require_same_length(
             self,
-            "angles",
+            "angles_rad",
             ("directivity", 1),
             ("directivity_db", 1),
             axis="polar angle",
@@ -275,7 +275,7 @@ class PistonDirectivity:
 
 def piston_directivity_pattern(
     ka: ArrayLike,
-    angles: ArrayLike | None = None,
+    angles_rad: ArrayLike | None = None,
 ) -> PistonDirectivity:
     r"""Far-field directivity pattern of one or more baffled circular pistons.
 
@@ -288,7 +288,7 @@ def piston_directivity_pattern(
 
     :param ka: Wavenumber-radius product(s) ``ka`` (scalar or 1-D array), each
         non-negative.
-    :param angles: Polar angles ``theta`` from the axis, rad (1-D). ``None``
+    :param angles_rad: Polar angles ``theta`` from the axis, rad (1-D). ``None``
         (default) uses 361 points spanning the front hemisphere ``-90 deg`` to
         ``+90 deg``, 0.5 deg apart.
     :return: A :class:`PistonDirectivity`.
@@ -301,15 +301,15 @@ def piston_directivity_pattern(
         msg = "'ka' must be non-negative and finite."
         raise ValueError(msg)
 
-    if angles is None:
+    if angles_rad is None:
         angle_arr = _DEFAULT_DIRECTIVITY_ANGLES.copy()
     else:
-        angle_arr = np.atleast_1d(np.asarray(angles, dtype=np.float64))
+        angle_arr = np.atleast_1d(np.asarray(angles_rad, dtype=np.float64))
         if angle_arr.ndim != 1 or angle_arr.size == 0:
-            msg = "'angles' must be a non-empty 1-D array."
+            msg = "'angles_rad' must be a non-empty 1-D array."
             raise ValueError(msg)
         if not np.all(np.isfinite(angle_arr)):
-            msg = "'angles' must be finite."
+            msg = "'angles_rad' must be finite."
             raise ValueError(msg)
 
     directivity = np.asarray(
@@ -319,7 +319,7 @@ def piston_directivity_pattern(
     tiny = np.finfo(np.float64).tiny
     directivity_db = 20.0 * np.log10(np.maximum(np.abs(directivity), tiny))
     return PistonDirectivity(
-        angles=angle_arr,
+        angles_rad=angle_arr,
         ka=ka_arr,
         directivity=directivity,
         directivity_db=directivity_db,
@@ -363,10 +363,10 @@ class RadiatingPistonResult:
         ``radiation_reactance / omega``).
     :ivar directivity_index: Directivity index
         :math:`DI = 10 \log_{10} Q`, dB.
-    :ivar angles: Polar angles of ``directivity``, rad, or ``None`` if not
+    :ivar angles_rad: Polar angles of ``directivity``, rad, or ``None`` if not
         requested.
     :ivar directivity: Far-field directivity :math:`D(\theta)` as a
-        ``(n_freq, n_angle)`` array, or ``None`` if ``angles`` was not given.
+        ``(n_freq, n_angle)`` array, or ``None`` if ``angles_rad`` was not given.
     :ivar radius: Piston radius ``a``, m.
     :ivar speed_of_sound: Speed of sound ``c``, m/s.
     :ivar density: Air density :math:`\rho`, kg/m3.
@@ -380,7 +380,7 @@ class RadiatingPistonResult:
     radiation_reactance: np.ndarray
     radiation_mass: float
     directivity_index: np.ndarray
-    angles: np.ndarray | None
+    angles_rad: np.ndarray | None
     directivity: np.ndarray | None
     radius: float
     speed_of_sound: float
@@ -398,8 +398,8 @@ class RadiatingPistonResult:
         states nowhere how long it ought to be, so a pattern short of the
         frequency count draws the lobe of one frequency under the ``ka`` of
         another, silently and to scale. The angle axis is the loud half: a
-        column count that disagrees with :attr:`angles` is already refused
-        further down, by ``'angles' and 'directivity' must match.`` from the
+        column count that disagrees with :attr:`angles_rad` is already refused
+        further down, by ``'angles_rad' and 'directivity' must match.`` from the
         drawing helper. The check keeps it here so that one is raised at
         construction, against the result that carries it, instead of on the
         way to a figure.
@@ -416,7 +416,7 @@ class RadiatingPistonResult:
             radiation_resistance=1,
             radiation_reactance=1,
             directivity_index=1,
-            angles=1,
+            angles_rad=1,
             directivity=2,
         )
         require_same_length(
@@ -431,7 +431,7 @@ class RadiatingPistonResult:
             "directivity",
             axis="frequency",
         )
-        require_same_length(self, "angles", ("directivity", 1), axis="polar angle")
+        require_same_length(self, "angles_rad", ("directivity", 1), axis="polar angle")
         # Finiteness is a construction invariant, not a rendering question:
         # :func:`piston_directivity` validates its inputs and patches the
         # on-axis 0/0 to its limit, so no producer emits a non-finite
@@ -441,7 +441,7 @@ class RadiatingPistonResult:
         # field holding something that is not a number at all is refused by
         # name too, instead of reaching ``np.isfinite`` as an anonymous
         # ``TypeError`` raised from inside numpy.
-        require_finite_fields(self, "angles", "directivity")
+        require_finite_fields(self, "angles_rad", "directivity")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -499,7 +499,7 @@ def radiating_piston(
     *,
     speed_of_sound: float = _C_AIR,
     density: float = _RHO_AIR,
-    angles: ArrayLike | None = None,
+    angles_rad: ArrayLike | None = None,
 ) -> RadiatingPistonResult:
     r"""Radiation impedance and directivity of a rigid baffled circular
     piston.
@@ -508,14 +508,14 @@ def radiating_piston(
     :math:`X_1(2ka)`, the mechanical radiation impedance
     :math:`\rho c S (R_1 + j X_1)`, the low-frequency radiation mass
     :math:`8 \rho a^3 / 3` and the directivity index over the given
-    frequencies (Beranek & Mellow §4.4). Pass ``angles`` to also sample
+    frequencies (Beranek & Mellow §4.4). Pass ``angles_rad`` to also sample
     the far-field directivity pattern :math:`D(\theta)`.
 
     :param radius: Piston radius ``a``, m.
     :param frequencies: Frequencies ``f``, Hz (scalar or 1-D array), all > 0.
     :param speed_of_sound: Speed of sound ``c``, m/s (default 343).
     :param density: Air density :math:`\rho`, kg/m3 (default 1.206).
-    :param angles: Optional polar angles ``theta`` from the axis, rad, at which
+    :param angles_rad: Optional polar angles ``theta`` from the axis, rad, at which
         to sample the directivity pattern.
     :return: A :class:`RadiatingPistonResult`.
     """
@@ -542,13 +542,13 @@ def radiating_piston(
 
     directivity: np.ndarray | None = None
     angle_arr: np.ndarray | None = None
-    if angles is not None:
-        angle_arr = np.atleast_1d(np.asarray(angles, dtype=np.float64))
+    if angles_rad is not None:
+        angle_arr = np.atleast_1d(np.asarray(angles_rad, dtype=np.float64))
         if angle_arr.ndim != 1 or angle_arr.size == 0:
-            msg = "'angles' must be a non-empty 1-D array."
+            msg = "'angles_rad' must be a non-empty 1-D array."
             raise ValueError(msg)
         if not np.all(np.isfinite(angle_arr)):
-            msg = "'angles' must be finite."
+            msg = "'angles_rad' must be finite."
             raise ValueError(msg)
         directivity = np.asarray(
             piston_directivity(ka[:, None], angle_arr[None, :]),
@@ -564,7 +564,7 @@ def radiating_piston(
         radiation_reactance=rho_c_s * x1,
         radiation_mass=radiation_mass,
         directivity_index=di,
-        angles=angle_arr,
+        angles_rad=angle_arr,
         directivity=directivity,
         radius=a,
         speed_of_sound=c,

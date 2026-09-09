@@ -349,7 +349,7 @@ def generate_cnossos_road_emission(output_dir: str) -> None:
         traffic,
         surface=environment.RoadSurface.THIN_LAYER_A,
         temperature_c=12.0,
-        gradient=3.0,
+        road_slope_percent=3.0,
         junction_distance=60.0,
         junction_type=environment.JunctionType.CROSSING,
     )
@@ -2041,7 +2041,7 @@ def generate_cnossos_road_gradient(output_dir: str) -> None:
                 [
                     a_weighted(
                         environment.road_propulsion_noise(
-                            category, speed, gradient=float(s)
+                            category, speed, road_slope_percent=float(s)
                         )
                     )
                     - flat

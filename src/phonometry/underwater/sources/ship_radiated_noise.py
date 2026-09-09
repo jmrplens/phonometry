@@ -79,7 +79,7 @@ def radiated_noise_level(rms_pressure_pa: float, distance: float) -> float:
 
 
 def hydrophone_depths(
-    cpa_distance: float, angles: tuple[float, ...] = _STANDARD_ANGLES
+    cpa_distance: float, angles_deg: tuple[float, ...] = _STANDARD_ANGLES
 ) -> NDArray[np.float64]:
     r"""Hydrophone depths for the ISO 17208-1 deep-water geometry.
 
@@ -91,7 +91,7 @@ def hydrophone_depths(
     :param cpa_distance: Horizontal distance at the closest point of approach,
         in m (:math:`d_{\mathrm{CPA}} = \max(100~\text{m},
         \text{ship length})`).
-    :param angles: Depression angles, in degrees (default 15°, 30°, 45°).
+    :param angles_deg: Depression angles, in degrees (default 15°, 30°, 45°).
     :return: The hydrophone depths, in m.
     :raises ValueError: If the distance or any angle is out of range.
     """
@@ -99,9 +99,9 @@ def hydrophone_depths(
     # The shared guard also pins the shape: a nested pair of pairs used to
     # come back as a 2-D "depths" array, and a bare scalar as a 0-d one whose
     # documented per-hydrophone read depths[0] died in numpy.
-    ang = require_positive_array(angles, "angles")
+    ang = require_positive_array(angles_deg, "angles_deg")
     if np.any(ang >= _VERTICAL_DEG):
-        msg = "'angles' must be below 90 degrees."
+        msg = "'angles_deg' must be below 90 degrees."
         raise ValueError(msg)
     return np.asarray(cpa * np.tan(np.radians(ang)), dtype=np.float64)
 

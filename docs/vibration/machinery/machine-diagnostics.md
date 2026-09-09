@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import signals, vibration
 
-# The bearing: 15 rollers on a 34 mm pitch diameter, 6 mm rollers,
+# The bearing: 15 rollers on a 34 mm pitch diameter_m, 6 mm rollers,
 # 12.96 degrees contact angle, shaft at 2000 r/min.
 faults = vibration.bearing_fault_frequencies(2000.0, 15, 6.0, 34.0,
                                              contact_angle_deg=12.96)

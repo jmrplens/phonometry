@@ -15417,7 +15417,7 @@ import numpy as np
 from phonometry import electroacoustics
 
 res = electroacoustics.radiating_piston(radius=0.1, frequencies=np.geomspace(20, 20000, 200),
-                                        angles=np.linspace(0.0, np.pi / 2, 91))
+                                        angles_rad=np.linspace(0.0, np.pi / 2, 91))
 print(round(res.radiation_mass, 4))               # 8 rho a^3 / 3, kg
 print(round(float(res.directivity_index[0]), 2))  # 3.01 dB half-space limit
 res.plot()                                         # R1 and X1 vs ka
@@ -15450,7 +15450,7 @@ plt.show()
 `radiating_piston` returns a `RadiatingPistonResult` with the normalized
 `resistance`/`reactance`, the mechanical `radiation_resistance`/`radiation_reactance`,
 the `radiation_mass`, the `directivity_index`, the far-field `directivity`
-pattern (when `angles` are given) and `.plot()`. The building blocks
+pattern (when `angles_rad` are given) and `.plot()`. The building blocks
 `piston_resistance`, `piston_reactance` and `piston_directivity` are also
 callable directly. The piston is the companion radiator of the
 [reactive silencers](https://jmrplens.github.io/phonometry/devices/noise-control/silencers/).
@@ -15506,7 +15506,7 @@ import numpy as np
 from phonometry import electroacoustics
 
 res = electroacoustics.radiating_piston(0.1, np.array([500.0, 2000.0, 4000.0]),
-                                        angles=np.linspace(-np.pi / 2, np.pi / 2, 181))
+                                        angles_rad=np.linspace(-np.pi / 2, np.pi / 2, 181))
 
 # One line: the piston in its baffle with the lobe of the highest frequency.
 res.plot_geometry()
@@ -15549,7 +15549,7 @@ result = electroacoustics.loudspeaker_characteristics(
                 0.3 + 2.6 * np.exp(-(np.log2(np.geomspace(50, 5000, 140) / 70.0) ** 2) / 0.45)),
     directivity=electroacoustics.LoudspeakerDirectivity(
         piston=electroacoustics.radiating_piston(0.075, np.array([1000.0, 2000.0, 4000.0]),
-                                                 angles=np.radians(np.linspace(0, 90, 46))),
+                                                 angles_rad=np.radians(np.linspace(0, 90, 46))),
         frequency=2000.0,
     ),
 )
@@ -15675,7 +15675,7 @@ result = electroacoustics.loudspeaker_characteristics(
     freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
     directivity=electroacoustics.LoudspeakerDirectivity(
         piston=electroacoustics.radiating_piston(0.075, np.array([1000.0, 2000.0, 4000.0]),
-                                                 angles=np.radians(np.linspace(0, 90, 46))),
+                                                 angles_rad=np.radians(np.linspace(0, 90, 46))),
         frequency=2000.0,
     ),
 )
@@ -15974,13 +15974,13 @@ response = -10 * np.log10(1 + (30.0 / freqs) ** 4)      # low-frequency roll-off
 response -= 10 * np.log10(1 + (freqs / 19000.0) ** 8)   # high-frequency roll-off
 response += 2.0 * np.exp(-(np.log2(freqs / 9000.0) ** 2) / 0.3)  # presence region
 
-angles = np.linspace(0, 179, 359)
-cardioid = 20 * np.log10((1 + np.cos(np.radians(angles))) / 2)
+angles_rad = np.linspace(0, 179, 359)
+cardioid = 20 * np.log10((1 + np.cos(np.radians(angles_rad))) / 2)
 noise_f = np.geomspace(20, 20000, 31)
 
 result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,          # 12.5 mV/Pa at 1 kHz
-    directivity=electroacoustics.MicrophoneDirectivity(polar=(angles, cardioid), frequency=1000.0),
+    directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, cardioid), frequency=1000.0),
     noise=electroacoustics.MicrophoneNoise(                             # A-weighted, V
         voltage=1.25e-6,
         spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
@@ -16065,12 +16065,12 @@ from phonometry import electroacoustics
 
 freqs = np.geomspace(20, 20000, 400)
 response = -10 * np.log10(1 + (30.0 / freqs) ** 4)
-angles = np.linspace(0, 179, 359)
-cardioid = 20 * np.log10((1 + np.cos(np.radians(angles))) / 2)
+angles_rad = np.linspace(0, 179, 359)
+cardioid = 20 * np.log10((1 + np.cos(np.radians(angles_rad))) / 2)
 
 result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,
-    directivity=electroacoustics.MicrophoneDirectivity(polar=(angles, cardioid), frequency=1000.0),
+    directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, cardioid), frequency=1000.0),
 )
 result.plot(quantity="directivity")
 plt.show()
@@ -21930,7 +21930,7 @@ print(round(modes.plane_wave_limit, 1))         # 263.6 Hz
 
 IN = 0.0254
 print(round(noise_control.plane_wave_limit(width=36 * IN, height=24 * IN), 1))   # 187.6 Hz
-print(round(noise_control.plane_wave_limit(diameter=12 * IN), 1))                # 659.5 Hz
+print(round(noise_control.plane_wave_limit(diameter_m=12 * IN), 1))                # 659.5 Hz
 ```
 
 Those ventilation numbers are blunt: in that duct plane waves are the whole
@@ -22300,7 +22300,7 @@ models end to end, from the fan sound power to the room criterion, is
 from phonometry.noise_control import hvac
 
 bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
-er = hvac.end_reflection_loss(bands, diameter=0.30, termination="flush")
+er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
 el = hvac.elbow_insertion_loss(bands, width=0.3, bend_type="square", lined=True)
 er.plot()   # the band attenuation (or regenerated Lw) in one line (needs matplotlib)
 tl = hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.2)      # Wells' method, dB
@@ -22326,18 +22326,18 @@ from phonometry.noise_control import hvac
 bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
 
 # One line for one duct: the HvacSpectrumResult of the 300 mm flush end.
-er = hvac.end_reflection_loss(bands, diameter=0.30, termination="flush")
+er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
 er.plot()
 plt.show()
 
 # By hand: the family over duct diameters of the concept figure.
 fig, ax = plt.subplots()
-for diameter in (0.15, 0.30, 0.60):
-    er = hvac.end_reflection_loss(bands, diameter=diameter, termination="flush")
+for diameter_m in (0.15, 0.30, 0.60):
+    er = hvac.end_reflection_loss(bands, diameter_m=diameter_m, termination="flush")
     ax.semilogx(er.frequencies, er.values, "o-",
-                label=f"D = {int(diameter * 1000)} mm")
+                label=f"D = {int(diameter_m * 1000)} mm")
 ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("End reflection loss [dB]")
-ax.legend(title="Duct diameter")
+ax.legend(title="Duct diameter_m")
 plt.show()
 ```
 
@@ -22362,7 +22362,7 @@ import matplotlib.pyplot as plt
 from phonometry import noise_control
 
 # The r, S_out and S_w that Wells' formula actually uses, drawn exactly.
-noise_control.plot_plenum_geometry(0.09, 1.2, 6.0, angle=0.35)
+noise_control.plot_plenum_geometry(0.09, 1.2, 6.0, angle_rad=0.35)
 plt.show()
 ```
 
@@ -23378,7 +23378,7 @@ frequency where those modes can propagate in the connected ducts: at least
 and at least 5 dB above that frequency (5.2.2.3). NOTE 2 prints where it is:
 
 ```python
-print(round(noise_control.modal_filter_cut_on(diameter=0.4), 1))          # 505.9 Hz
+print(round(noise_control.modal_filter_cut_on(diameter_m=0.4), 1))          # 505.9 Hz
 print(round(noise_control.modal_filter_cut_on(larger_dimension=0.5), 1))  # 343.0 Hz
 ```
 
@@ -26224,7 +26224,7 @@ with warnings.catch_warnings():
                                                         flow_resistivity=200e3,
                                                         max_range=600.0, max_height=40.0)
         ax.plot(pe.ranges, pe.level_at_height(2.0), label=label)
-# The closed-form boundary of the equivalent linear upward gradient (its
+# The closed-form boundary of the equivalent linear upward gradient_per_s (its
 # 10 m mean), the dotted line of the figure.
 up = cases[2][0]
 grad = float(up.speed_at(10.0) - 340.0) / 10.0
@@ -28197,7 +28197,7 @@ traffic = [
     environment.RoadTraffic(environment.RoadVehicleCategory.MOTORCYCLES, 60.0, 50.0),
 ]
 result = environment.road_source_power(
-    traffic, surface=environment.RoadSurface.THIN_LAYER_A, temperature_c=12.0, gradient=3.0,
+    traffic, surface=environment.RoadSurface.THIN_LAYER_A, temperature_c=12.0, road_slope_percent=3.0,
     junction_distance=60.0, junction_type=environment.JunctionType.CROSSING,
 )
 result.plot()
@@ -30709,16 +30709,16 @@ physics.
 from phonometry import materials
 
 # A 100 mm tube with 100 mm spacing, and a 29 mm tube with 20 mm spacing.
-f_l, f_u = materials.plane_wave_frequency_range(0.100, 343.2, diameter=0.100)
+f_l, f_u = materials.plane_wave_frequency_range(0.100, 343.2, diameter_m=0.100)
 print(round(f_l, 1), round(f_u, 1))     # 171.6 1544.4
-f_l, f_u = materials.plane_wave_frequency_range(0.020, 343.2, diameter=0.029)
+f_l, f_u = materials.plane_wave_frequency_range(0.020, 343.2, diameter_m=0.029)
 print(round(f_l, 1), round(f_u, 1))     # 858.0 6864.0
 ```
 
 Those limits are easier to see on the hardware itself.
 `plot_impedance_tube_geometry` draws a tube to scale with its plane-wave
 band worked out, and a measured `two_microphone_impedance` result that was
-given its geometry (`spacing`, `x1`, `diameter`) redraws its own setup with
+given its geometry (`spacing`, `x1`, `diameter_m`) redraws its own setup with
 `result.plot_geometry()`.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_geometry.svg" alt="To-scale side view of a 100 mm ISO 10534-2 impedance tube: the loudspeaker at the left end, microphones 1 and 2 flush in the wall at s = 50 mm spacing with microphone 1 at x1 = 150 mm from the specimen face, the specimen against the rigid backing at the right, the circular cross-section beside the tube and the plane-wave working range of 343 to 1991 Hz that this geometry sets" width="92%"></picture>
@@ -30735,12 +30735,12 @@ one $x_1$ = 150 mm from the specimen face.*
 import matplotlib.pyplot as plt
 from phonometry import materials
 
-materials.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, diameter=0.10)
+materials.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, diameter_m=0.10)
 plt.show()
 
 # A measured result that retains its geometry draws its own tube:
 #   res = materials.two_microphone_impedance(
-#       h12, frequency=f, spacing=0.05, x1=0.15, diameter=0.10, ...)
+#       h12, frequency=f, spacing=0.05, x1=0.15, diameter_m=0.10, ...)
 #   res.plot_geometry()
 ```
 
@@ -30753,7 +30753,7 @@ in `plane_wave_frequency_range_astm`: ASTM E2611 retains the unrounded
 circular constant ($f\,d < 0.586\,c$, 6.2.4.1), the same rectangular
 $f\,d < 0.500\,c$ (6.2.5), a slightly stricter spacing bound
 $f\,s < 0.40\,c$ (6.5.4) and a laxer low end at 1 % of the wavelength
-(6.2.3). Passing `diameter=` (and `shape=`) to `two_microphone_impedance`,
+(6.2.3). Passing `diameter_m=` (and `shape=`) to `two_microphone_impedance`,
 `wave_decomposition` or the `transfer_matrix_*` solvers turns the matching
 check into an advisory warning, and for the Annex A attenuation estimate of a
 rectangular tube `hydraulic_diameter(width, height)` supplies the $4A/P$
@@ -30953,7 +30953,7 @@ h12 = (np.exp(1j*k0*x2) + r_true*np.exp(-1j*k0*x2)) / \
       (np.exp(1j*k0*x1) + r_true*np.exp(-1j*k0*x1))
 result = materials.two_microphone_impedance(
     h12, frequency=f, spacing=spacing, x1=x1, speed_of_sound=c0,
-    characteristic_impedance=407.0, diameter=0.10,
+    characteristic_impedance=407.0, diameter_m=0.10,
 )
 
 # One line: alpha(f) with |r| overlaid.
@@ -31015,7 +31015,7 @@ c0 = float(materials.speed_of_sound_iso10534(temperature_c=20.0))   # 343.29 m/s
 rho_c = fluids.characteristic_impedance(
     float(materials.air_density_iso10534(
         temperature_c=20.0, atmospheric_pressure_kpa=101.0)), c0)   # 405.6 Pa.s/m
-diameter, spacing, x1 = 0.100, 0.050, 0.100
+diameter_m, spacing, x1 = 0.100, 0.050, 0.100
 theta, cavity = 1.0, c0 / (4.0 * 1000.0)          # quarter-wave at 1 kHz: 86 mm
 freqs = np.array([400, 500, 630, 800, 1000, 1250, 1600], dtype=float)
 
@@ -31029,7 +31029,7 @@ h12_fiche = (np.exp(1j*k0*x2) + r_known*np.exp(-1j*k0*x2)) / \
 
 fiche = materials.two_microphone_impedance(
     h12_fiche, frequency=freqs, spacing=spacing, x1=x1,
-    speed_of_sound=c0, characteristic_impedance=rho_c, diameter=diameter,
+    speed_of_sound=c0, characteristic_impedance=rho_c, diameter_m=diameter_m,
 )
 print(np.round(fiche.absorption, 2))    # [0.68 0.8  0.9  0.97 1.   0.96 0.68]
 
@@ -31037,7 +31037,7 @@ fiche.report(
     "alpha_fiche.pdf",
     metadata=ReportMetadata(
         specimen="Resistive facing over an 86 mm rigidly-backed air cavity",
-        tube_diameter=diameter,        # m (printed as 100 mm)
+        tube_diameter=diameter_m,        # m (printed as 100 mm)
         mic_spacing=spacing,           # m (printed as 50 mm)
         measurement_standard="ISO 10534-2",
         laboratory="Phonometry Reference Laboratory",
@@ -31086,7 +31086,7 @@ import matplotlib.pyplot as plt
 from phonometry import materials
 
 materials.plot_transmission_tube_geometry(
-    l1=0.10, s1=0.05, l2=0.20, s2=0.05, thickness=0.05, diameter=0.10,
+    l1=0.10, s1=0.05, l2=0.20, s2=0.05, thickness=0.05, diameter_m=0.10,
 )
 plt.show()
 
@@ -31466,12 +31466,12 @@ base = materials.HelmholtzResonator(
     neck_length=1.0e-3, neck_side=3.0e-3,
     cavity_length=30.0e-3, cavity_side=27.0e-3,
 )
-design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period=5.0e-2)
+design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period_m=5.0e-2)
 
 f = np.array([300.0])
 res = materials.slit_helmholtz_absorber(
     f, design.resonator, slit_height=design.slit_height,
-    lattice_step=3.0e-2, period=5.0e-2,
+    lattice_step=3.0e-2, period_m=5.0e-2,
 )
 z = res.normalized_impedance[0]
 print(round(z.real, 2), round(z.imag, 2))       # 1.0 -0.0  (matched)
@@ -31505,13 +31505,13 @@ base = materials.HelmholtzResonator(
     neck_length=1.0e-3, neck_side=3.0e-3,
     cavity_length=30.0e-3, cavity_side=27.0e-3,
 )
-design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period=5.0e-2)
+design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period_m=5.0e-2)
 print(round(design.absorption, 4))          # ~1.0 (perfect absorption)
 
 f = np.linspace(150.0, 500.0, 700)
 res = materials.slit_helmholtz_absorber(
     f, design.resonator, slit_height=design.slit_height,
-    lattice_step=3.0e-2, period=5.0e-2,
+    lattice_step=3.0e-2, period_m=5.0e-2,
 )
 res.plot()   # alpha(f) with |R| overlaid; peak = 1 at 300 Hz
 ```
@@ -31563,14 +31563,14 @@ base = materials.HelmholtzResonator(
     cavity_length=30.0e-3, cavity_side=27.0e-3,
 )
 design = materials.critical_coupling_design(
-    300.0, base, lattice_step=3.0e-2, period=5.0e-2,
+    300.0, base, lattice_step=3.0e-2, period_m=5.0e-2,
 )
 
 # The free function draws any resonator list; a slit_helmholtz_absorber
-# result retains its geometry, so res.plot_geometry() draws the same period.
+# result retains its geometry, so res.plot_geometry() draws the same period_m.
 materials.plot_slit_absorber_geometry(
     [design.resonator], slit_height=design.slit_height,
-    lattice_step=3.0e-2, period=5.0e-2,
+    lattice_step=3.0e-2, period_m=5.0e-2,
 )
 plt.show()
 ```
@@ -31593,7 +31593,7 @@ from phonometry import materials
 
 a, d, f0 = 3.0e-2, 5.0e-2, 300.0
 base = materials.HelmholtzResonator(1.0e-3, 3.0e-3, 30.0e-3, 27.0e-3)
-design = materials.critical_coupling_design(f0, base, lattice_step=a, period=d)
+design = materials.critical_coupling_design(f0, base, lattice_step=a, period_m=d)
 h0 = design.slit_height
 
 f = np.linspace(150.0, 500.0, 700)
@@ -31602,7 +31602,7 @@ for factor, label in [(1.0, "critically coupled"),
                       (0.6, "narrow slit"), (1.7, "wide slit")]:
     res = materials.slit_helmholtz_absorber(
         f, design.resonator, slit_height=factor * h0,
-        lattice_step=a, period=d,
+        lattice_step=a, period_m=d,
     )
     ax.plot(f, res.absorption, label=label)
 ax.set(xlabel="Frequency [Hz]", ylabel="Absorption coefficient")
@@ -31637,10 +31637,10 @@ base = materials.HelmholtzResonator(
     neck_length=1.0e-3, neck_side=3.0e-3,
     cavity_length=30.0e-3, cavity_side=27.0e-3,
 )
-design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period=5.0e-2)
+design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period_m=5.0e-2)
 res = materials.slit_helmholtz_absorber(
     np.array([300.0]), design.resonator, slit_height=design.slit_height,
-    lattice_step=3.0e-2, period=5.0e-2,
+    lattice_step=3.0e-2, period_m=5.0e-2,
 )
 
 # Phase speed of the slit mode at the design frequency, from k_eff.
@@ -32423,7 +32423,7 @@ same layer stack.
 
 ## 4. Oblique and random incidence
 
-`layered_absorber(..., angle=theta)` evaluates the full bulk-reacting stack
+`layered_absorber(..., angle_rad=theta)` evaluates the full bulk-reacting stack
 at any polar angle; sheets are locally reacting (angle-independent), fluid
 layers refract per Snell's law; for an MPP over a cavity this reproduces
 Maa's oblique closed form (Eq. 23) exactly. The random-incidence coefficient
@@ -32889,11 +32889,11 @@ from phonometry import materials
 depths = materials.qrd_well_depths(7, 490.0, speed_of_sound=343.0)
 pitch = 3.6 / 42                  # 42 wells across the 3.6 m panel
 fin = 0.005                       # thin fins, included in the pitch
-materials.plot_qrd_geometry(depths, pitch - fin, fin_width=fin, periods=2)
+materials.plot_qrd_geometry(depths, pitch - fin, fin_width=fin, repetitions=2)
 plt.show()
 
 # A predicted DiffuserPolarResponse retains its geometry, so
-# qrd.plot_geometry() draws the profile it was computed for (all 6 periods).
+# qrd.plot_geometry() draws the profile it was computed for (all 6 repetitions).
 ```
 
 </details>
@@ -32901,15 +32901,15 @@ plt.show()
 ```python
 from phonometry import materials
 
-# The published geometry: N = 7 QRD, 6 periods, 3.6 m wide, 0.2 m deep
+# The published geometry: N = 7 QRD, 6 repetitions, 3.6 m wide, 0.2 m deep
 # (Cox & D'Antonio 3rd ed., Appendix B; Hargreaves et al. 2000, Table I).
 # Design frequency 490 Hz puts the deepest well at exactly 0.2 m.
 depths = materials.qrd_well_depths(7, 490.0)   # [0, 0.05, 0.2, 0.1, ...] m
 qrd = materials.predict_diffuser_polar_response(
-    3.6 / 42, 1000.0, depths=depths, periods=6)
+    3.6 / 42, 1000.0, depths=depths, repetitions=6)
 # The flat reference panel: the same 3.6 m footprint with zero-depth wells.
 flat = materials.predict_diffuser_polar_response(
-    3.6 / 42, 1000.0, depths=[0.0] * 7, periods=6)
+    3.6 / 42, 1000.0, depths=[0.0] * 7, repetitions=6)
 
 qrd.plot()   # predicted polar response, d in the title (needs matplotlib)
 
@@ -32939,9 +32939,9 @@ import numpy as np
 from phonometry import materials
 
 # qrd.levels: the 37 predicted QRD levels from the example above.
-angles = np.arange(-90.0, 90.5, 5.0)
+angles_deg = np.arange(-90.0, 90.5, 5.0)
 
-result = materials.directional_diffusion(angles, qrd.levels)
+result = materials.directional_diffusion(angles_deg, qrd.levels)
 print(round(result.coefficient, 2))   # 0.11
 result.plot()   # polar reflected response, d in the title (needs matplotlib)
 ```
@@ -32964,13 +32964,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import materials
 
-# qrd.levels: the 37 predicted levels L_i of the six-period N = 7 QRD from
+# qrd.levels: the 37 predicted levels L_i of the six-period_m N = 7 QRD from
 # the example above (Fraunhofer far-field model, published Cox & D'Antonio
 # Appendix B geometry, 1000 Hz, normal incidence) on the -90..90 deg, 5 deg
 # semicircle. The periodic array concentrates the energy into grating lobes,
 # so the Formula (5) coefficient d is modest.
-angles = np.arange(-90.0, 90.5, 5.0)
-result = materials.directional_diffusion(angles, qrd.levels)
+angles_deg = np.arange(-90.0, 90.5, 5.0)
+result = materials.directional_diffusion(angles_deg, qrd.levels)
 
 # result is the DiffusionResult computed above. One line:
 result.plot()
@@ -32978,7 +32978,7 @@ plt.show()
 
 # By hand: a polar plot of the levels, with d annotated in the title.
 fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
-theta = np.radians(result.angles)
+theta = np.radians(result.angles_deg)
 ax.plot(theta, result.levels, "o-", color="#1f77b4")
 ax.fill(theta, result.levels, color="#1f77b4", alpha=0.15)
 ax.set_theta_zero_location("N")
@@ -33119,10 +33119,10 @@ depths = materials.qrd_well_depths(7, 500.0)   # Eqs. (10.2)/(10.3)
 print(np.round(depths * 100, 1))               # well depths in cm:
                                                # [ 0.   4.9 19.6  9.8  9.8 19.6  4.9]
 
-# Predicted far-field polar response at one frequency (5 repeated periods,
+# Predicted far-field polar response at one frequency (5 repeated repetitions,
 # 10 cm wells), reduced to the ISO 17497-2 directional diffusion coefficient.
 surface = materials.predict_diffuser_polar_response(0.10, 2000.0, depths=depths,
-                                                    periods=5)
+                                                    repetitions=5)
 print(round(surface.coefficient, 3))           # 0.210
 surface.plot()   # predicted polar response, d in the title (needs matplotlib)
 
@@ -33130,11 +33130,11 @@ surface.plot()   # predicted polar response, d in the title (needs matplotlib)
 # reference (Formula (7)): the flat panel maps to exactly zero, the QRD well
 # above it.
 freqs = np.array([500, 1000, 2000, 4000], float)
-qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, periods=5)
+qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, repetitions=5)
 print(np.round(qrd.normalized, 3))             # [0.352 0.275 0.208 0.073]
 
 flat = materials.predicted_diffusion_spectrum(0.10, freqs,
-                                        depths=np.zeros_like(depths), periods=5)
+                                        depths=np.zeros_like(depths), repetitions=5)
 print(np.round(flat.normalized, 3))            # [0. 0. 0. 0.]
 ```
 
@@ -33158,12 +33158,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import materials
 
-# N = 7 QRD (design frequency 500 Hz, 10 cm wells, five periods) versus the
+# N = 7 QRD (design frequency 500 Hz, 10 cm wells, five repetitions) versus the
 # flat panel of the same footprint, over the one-third-octave bands.
 freqs = np.array([250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
                   2000, 2500, 3150, 4000, 5000], float)
 depths = materials.qrd_well_depths(7, 500.0)
-qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, periods=5)
+qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, repetitions=5)
 
 # The DiffusionSpectrum plots the predicted d(f) directly. One line:
 qrd.plot()
@@ -33171,7 +33171,7 @@ plt.show()
 
 # By hand: predicted d(f) for the QRD against the flat reference.
 flat = materials.predicted_diffusion_spectrum(0.10, freqs,
-                                depths=np.zeros_like(depths), periods=5,
+                                depths=np.zeros_like(depths), repetitions=5,
                                 normalize=False)
 fig, ax = plt.subplots()
 ax.semilogx(freqs, qrd.diffusion, "o-", color="#1f77b4", label="N = 7 QRD design")
@@ -33452,7 +33452,7 @@ panel scatters like the 27.4 cm deep QRD it mimics.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_geometry.svg" alt="To-scale cross-section of the published quadratic-residue metadiffuser: a 350 by 20 millimetre panel over a rigid backing with five numbered slits opening at the face, each loaded by two Helmholtz resonators whose necks and cavities shelve sideways into the septum between slits; dimension lines mark the 350 millimetre width, the 70 millimetre pitch, the 14.7 millimetre first slit and the 20 millimetre depth, with the incident sound arriving from above" width="92%"></picture>
 
 As in the published far-field comparison, the polar response repeats the
-five-well sequence six times (`periods=6`, a 2.1 m panel):
+five-well sequence six times (`repetitions=6`, a 2.1 m panel):
 
 ```python
 import numpy as np
@@ -33478,13 +33478,13 @@ wells = [
 ]
 
 f = np.arange(1800.0, 2601.0, 5.0)
-panel = materials.metadiffuser_reflection(f, wells, depth=0.02, period=0.07)
+panel = materials.metadiffuser_reflection(f, wells, depth=0.02, period_m=0.07)
 alpha1 = panel.well_absorption[0]
 print(round(float(alpha1.max()), 2), int(f[alpha1.argmax()]))  # 0.99 2305
 
 # Far-field comparison: the five-well sequence repeated six times (2.1 m).
 polar = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02,
-                                              period=0.07, periods=6)
+                                              period_m=0.07, repetitions=6)
 print(round(polar.coefficient, 2))                             # 0.32
 ```
 
@@ -33514,13 +33514,13 @@ wells = [
 ]
 
 # The metadiffuser panel and the QRD it was tuned to at 2 kHz, both with
-# six repetitions of the period (2.1 m panels).
-meta = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02, period=0.07,
-                                             periods=6)
+# six repetitions of the period_m (2.1 m panels).
+meta = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02, period_m=0.07,
+                                             repetitions=6)
 sequence = np.roll(materials.quadratic_residue_sequence(5), -1)
 depths = sequence * (343.0 / 500.0) / (2 * 5)
 qrd = materials.predict_diffuser_polar_response(
-    0.07, 2000.0, depths=depths, periods=6, include_obliquity=False,
+    0.07, 2000.0, depths=depths, repetitions=6, include_obliquity=False,
 )
 
 ax = meta.plot(marker="", linewidth=2.2, label="Metadiffuser, panel 2 cm")
@@ -33560,7 +33560,7 @@ from phonometry import materials
 
 # wells: the five published slits from the example above.
 panel = materials.metadiffuser_reflection(np.array([2000.0]), wells,
-                                          depth=0.02, period=0.07)
+                                          depth=0.02, period_m=0.07)
 phases = np.degrees(np.angle(panel.reflection[:, 0]))
 print(np.round(np.abs(panel.reflection[:, 0]), 2))  # [0.97 1.   1.   0.97 0.98]
 print(np.round(phases))                             # [ 75. -71. -71.  74.   2.]
@@ -40230,7 +40230,7 @@ documents, one page per module.
 | `rail_roughness` | `function` | **Rail roughness Lr,TR of Table G-1b (as replaced by (EU) 2021/1226).**<br>• `roughness`: `RailRoughnessClass` (only E and M are tabulated) | `lam, lr = environment.rail_roughness(RailRoughnessClass.NORMAL)` |
 | `contact_filter` | `function` | **Contact filter A3 of Table G-2 (as replaced by (EU) 2021/1226).**<br>• `filter_`: `ContactFilter` or (wheel load [kN], wheel diameter [mm]) | `lam, a3 = environment.contact_filter(ContactFilter.LOAD_50_DIAMETER_920)` |
 | `track_transfer` | `function` | **Track transfer function LH,TR of Table G-3a (as replaced by (EU) 2021/1226).**<br>• `track`: `TrackTransferClass` or its column code | `track_transfer("M/M")  # 24 bands [dB/axle]` |
-| `wheel_transfer` | `function` | **Wheel transfer function LH,VEH of Table G-3b.**<br>• `diameter`: `WheelDiameter` or the diameter [mm] | `wheel_transfer(920.0)` |
+| `wheel_transfer` | `function` | **Wheel transfer function LH,VEH of Table G-3b.**<br>• `diameter_mm`: `WheelDiameter` or the diameter_mm [mm] | `wheel_transfer(920.0)` |
 | `superstructure_transfer` | `function` | **Superstructure transfer LH,VEH,SUP of Table G-3c (freight only; 0,0 dB everywhere).**<br>(no parameters) | `superstructure_transfer()` |
 | `impact_roughness_single` | `function` | **Single-impact roughness of Table G-4 (as replaced by (EU) 2021/1226), for nl = 0,01 per m.**<br>(no parameters) | `lam, li = environment.impact_roughness_single()` |
 | `traction_sound_power` | `function` | **Traction sound power of Table G-5; constant speed and idling are equal.**<br>• `vehicle`: `TractionVehicle` | `low, high = environment.traction_sound_power(TractionVehicle.ELECTRIC_LOCO)` |
@@ -40262,12 +40262,12 @@ documents, one page per module.
 | `AERODYNAMIC_THRESHOLD_SPEED` | `float` | **Speed above which aerodynamic noise is relevant [km/h].**<br>(no parameters) | `AERODYNAMIC_THRESHOLD_SPEED  # 200.0` |
 | `AERODYNAMIC_REFERENCE_SPEED` | `float` | **Reference speed v0 of Annex II 2.3.13/2.3.14 [km/h].**<br>(no parameters) | `AERODYNAMIC_REFERENCE_SPEED  # 300.0` |
 | `REFERENCE_JOINT_DENSITY` | `float` | **Joint density Table G-4 is given for [1/m].**<br>(no parameters) | `REFERENCE_JOINT_DENSITY  # 0.01` |
-| `road_source_power` | `function` | **CNOSSOS-EU road source line power (Directive 2002/49/EC Annex II, 2.2.1).**<br>• `traffic`: one `RoadTraffic` or a sequence, at most one per category<br>• `surface`: `RoadSurface`, its description or a `RoadSurfaceCoefficients` (Default: reference surface)<br>• `temperature_c` tau [°C] (Default: 20)<br>• `gradient` s [%] (Default: 0, positive uphill)<br>• `studded_months` Ts (Default: 0)<br>• `junction_distance` x [m], `junction_type` (`JunctionType`)<br>• `coefficients`: Appendix F database (Default: `ROAD_COEFFICIENTS`) | `res = environment.road_source_power([environment.RoadTraffic(RoadVehicleCategory.LIGHT, 1200, 50)])`<br><br>• `RoadEmissionResult` |
+| `road_source_power` | `function` | **CNOSSOS-EU road source line power (Directive 2002/49/EC Annex II, 2.2.1).**<br>• `traffic`: one `RoadTraffic` or a sequence, at most one per category<br>• `surface`: `RoadSurface`, its description or a `RoadSurfaceCoefficients` (Default: reference surface)<br>• `temperature_c` tau [°C] (Default: 20)<br>• `road_slope_percent` s [%] (Default: 0, positive uphill)<br>• `studded_months` Ts (Default: 0)<br>• `junction_distance` x [m], `junction_type` (`JunctionType`)<br>• `coefficients`: Appendix F database (Default: `ROAD_COEFFICIENTS`) | `res = environment.road_source_power([environment.RoadTraffic(RoadVehicleCategory.LIGHT, 1200, 50)])`<br><br>• `RoadEmissionResult` |
 | `RoadTraffic` | `dataclass` | **Traffic of one vehicle category on a source line.**<br>• `category`: `RoadVehicleCategory`<br>• `flow_rate` Qm [veh/h]<br>• `speed` vm [km/h] (powers frozen below 20 km/h)<br>• `studded_fraction` Qstud,ratio (Default: 0, category 1 only) | `RoadTraffic(RoadVehicleCategory.HEAVY, 45.0, 50.0)` |
 | `RoadEmissionResult` | `dataclass` | **CNOSSOS-EU road source-line power per metre.**<br>• `frequencies` [Hz] (63…8000)<br>• `categories`<br>• `rolling`, `propulsion`, `vehicle_power`, `line_power`: (N_cat, 8) [dB]<br>• `total_line_power` [dB re 1 pW/m]<br>• `source_height` (0.05 m)<br>• `.a_weighted_line_power` [dB(A)]<br>• `.plot()` | `res.total_line_power, res.a_weighted_line_power` |
 | `road_vehicle_sound_power` | `function` | **Single-vehicle sound power LW,i,m (Annex II 2.2.2/2.2.3).**<br>• `category`, `speed` [km/h]<br>• same surface/temperature/gradient/studded/junction parameters as `road_source_power` | `lw = environment.road_vehicle_sound_power("1", 90.0)`<br><br>• 8 octave bands [dB]; category 4 takes propulsion alone |
 | `road_rolling_noise` | `function` | **Rolling-noise sound power LWR,i,m (Annex II 2.2.4/2.2.5).**<br>• `category`, `speed` [km/h]<br>• `surface`, `temperature_c`, `studded_fraction`, `studded_months`, `junction_distance`, `junction_type`, `coefficients` | `lwr = environment.road_rolling_noise("1", 90.0, temperature_c=5.0)`<br><br>• AR + BR·lg(v/70) + ΔLWR per band |
-| `road_propulsion_noise` | `function` | **Propulsion-noise sound power LWP,i,m (Annex II 2.2.11/2.2.12).**<br>• `category`, `speed` [km/h]<br>• `surface`, `gradient`, `junction_distance`, `junction_type`, `coefficients` | `lwp = environment.road_propulsion_noise("3", 80.0, gradient=-8.0)`<br><br>• AP + BP·(v−70)/70 + ΔLWP per band |
+| `road_propulsion_noise` | `function` | **Propulsion-noise sound power LWP,i,m (Annex II 2.2.11/2.2.12).**<br>• `category`, `speed` [km/h]<br>• `surface`, `road_slope_percent`, `junction_distance`, `junction_type`, `coefficients` | `lwp = environment.road_propulsion_noise("3", 80.0, road_slope_percent=-8.0)`<br><br>• AP + BP·(v−70)/70 + ΔLWP per band |
 | `road_surface_coefficients` | `function` | **Table F-4 row of a road surface (as replaced by (EU) 2021/1226).**<br>• `surface`: `RoadSurface` or its description | `row = environment.road_surface_coefficients(RoadSurface.THIN_LAYER_A)`<br><br>• `RoadSurfaceCoefficients` |
 | `RoadSurfaceCoefficients` | `dataclass` | **One Table F-4 row.**<br>• `name`<br>• `alpha`: per category, 8 bands [dB]<br>• `beta`: per category<br>• `speed_range` (vmin, vmax) [km/h] or `None` | `row.alpha["1"], row.beta["1"], row.speed_range` |
 | `RoadEmissionCoefficients` | `dataclass` | **Appendix F database (Tables F-1 to F-3 + Km).**<br>• `rolling_a`/`rolling_b`/`propulsion_a`/`propulsion_b`: per category, 8 bands<br>• `studded_a`/`studded_b` (Table F-2)<br>• `junction_c` (Table F-3)<br>• `temperature_k` Km [dB/°C] | `ROAD_COEFFICIENTS.rolling_a["1"]` |
@@ -40292,11 +40292,11 @@ documents, one page per module.
 | `RoadDeviceWarning` | `warning class` | **Raised when the weighted absorption ratio reaches the 0,99 limit, so the rating is the limit rather than the measurement.** | `warnings.catch_warnings()` |
 | `plot_barrier_geometry` | `function` | **Source-barrier-receiver section to scale.**<br>• `source_height`, `barrier_distance`, `barrier_height`, `receiver_distance`, `receiver_height` [m]<br>• `thickness` [m] (Default: None → thin screen)<br>• `language` | `plot_barrier_geometry(source_height=1.5, barrier_distance=5.0, barrier_height=3.0, receiver_distance=20.0, receiver_height=1.5)`<br><br>• Direct + diffracted paths, path difference annotated; also `BarrierInsertionLoss.plot_geometry()` |
 | `BarrierInsertionLoss` | `dataclass` | **Per-band barrier insertion loss.**<br>• `insertion_loss` [dB], `fresnel_number`, `method`, `ground`<br>• `.plot()` (IL vs frequency) | `il.insertion_loss` |
-| `linear_sound_speed_profile` | `function` | **Linear effective sound-speed profile c_eff(z) = c0 + g·z (Salomons Sec. 4.2).**<br>• `gradient` g [s⁻¹]<br>• `ground_speed` c0 [m/s], `max_height` [m] | `p = environment.linear_sound_speed_profile(0.1)`<br><br>• `EffectiveSoundSpeedProfile` |
+| `linear_sound_speed_profile` | `function` | **Linear effective sound-speed profile c_eff(z) = c0 + g·z (Salomons Sec. 4.2).**<br>• `gradient_per_s` g [s⁻¹]<br>• `ground_speed` c0 [m/s], `max_height` [m] | `p = environment.linear_sound_speed_profile(0.1)`<br><br>• `EffectiveSoundSpeedProfile` |
 | `log_linear_sound_speed_profile` | `function` | **Logarithmic surface-layer profile c_eff(z) = c0 + b·ln(1+z/z0) (Salomons Eq. 4.5).**<br>• `b` [m/s] (downward > 0)<br>• `ground_speed` c0, `roughness_length` z0, `max_height` [m], `n_points` | `p = environment.log_linear_sound_speed_profile(1.0)`<br><br>• `EffectiveSoundSpeedProfile` |
 | `EffectiveSoundSpeedProfile` | `dataclass` | **Effective sound-speed profile c_eff(z).**<br>• `heights` z [m], `sound_speeds` [m/s], `description`<br>• `.speed_at(z)`, `.plot()` | `p.speed_at(10.0)` |
-| `ray_curvature_radius` | `function` | **Radius of curvature of a ray in a linear gradient Rc = c0/(&#124;g&#124; cos θ0) (Salomons Sec. 4.4).**<br>• `gradient` g [s⁻¹]<br>• `ground_speed` c0 [m/s], `launch_angle_deg` θ0 | `ray_curvature_radius(0.1)  # 3430 m` |
-| `shadow_zone_distance` | `function` | **Shadow-boundary distance in upward refraction √(2Rc)(√hs+√hr) (Salomons Sec. 4.4).**<br>• `gradient` g < 0 [s⁻¹]<br>• `source_height` hs, `receiver_height` hr [m]<br>• `ground_speed` c0 | `shadow_zone_distance(-0.1, 2, 2)` |
+| `ray_curvature_radius` | `function` | **Radius of curvature of a ray in a linear gradient_per_s Rc = c0/(&#124;g&#124; cos θ0) (Salomons Sec. 4.4).**<br>• `gradient_per_s` g [s⁻¹]<br>• `ground_speed` c0 [m/s], `launch_angle_deg` θ0 | `ray_curvature_radius(0.1)  # 3430 m` |
+| `shadow_zone_distance` | `function` | **Shadow-boundary distance in upward refraction √(2Rc)(√hs+√hr) (Salomons Sec. 4.4).**<br>• `gradient_per_s` g < 0 [s⁻¹]<br>• `source_height` hs, `receiver_height` hr [m]<br>• `ground_speed` c0 | `shadow_zone_distance(-0.1, 2, 2)` |
 | `atmospheric_ray_paths` | `function` | **Ray tracing through a refracting atmosphere (Snell's law, Salomons Eq. 4.3).**<br>• `profile`: `EffectiveSoundSpeedProfile`<br>• `source_height` [m], `launch_angles_deg`<br>• `max_range` [m], `n_steps` | `r = environment.atmospheric_ray_paths(p, source_height=2, launch_angles_deg=[-2,0,2])`<br><br>• `AtmosphericRayResult` |
 | `AtmosphericRayResult` | `dataclass` | **Ray-tracing solution.**<br>• `ranges`, `heights`, `travel_times` [s]<br>• `turning_points`, `ground_reflections`<br>• `.plot()` (ray paths) | `r.heights, r.turning_points` |
 | `atmospheric_parabolic_equation` | `function` | **Relative-level field from the Green's Function PE (Salomons App. H).**<br>• `frequency_hz`, `profile`, `source_height` [m]<br>• `impedance` or `flow_resistivity` σ, `model`<br>• `max_range`/`max_height`/`range_step`/`height_step` [m] | `pe = environment.atmospheric_parabolic_equation(500, p, source_height=2, flow_resistivity=2e5)`<br><br>• `AtmosphericPEResult` |
@@ -40354,15 +40354,15 @@ documents, one page per module.
 | `synchronized_sweep_signal` | `function` | **Synchronized exponential sweep (Novak et al. 2015, Eqs. 47/49).**<br>• `fs`, `f1` < `f2` [Hz], `seconds` (quantized by the rounding)<br>• `amplitude` (Default: 1.0), `fade` (Default: 0.0)<br>Rate L = round(f1·T̃/ln(f2/f1))/f1 → f1·L integer, so a L·ln(n) shift equals the nth harmonic and harmonic phases become system properties | `x = electroacoustics.synchronized_sweep_signal(48000, 20.0, 6000.0, 4.0)`<br><br>• sweep samples (duration L·ln(f2/f1)) |
 | `swept_sine_distortion` | `function` | **Harmonic separation and THD(f) from one sweep (Farina 2000 / Novak et al. 2015).**<br>• `recorded`, `fs`, plus the generator parameters `f1`, `f2`, `seconds`<br>• `method`: 'synchronized' (Default; analytic deconvolution, meaningful phases) / 'farina' (classical ESS, magnitudes only)<br>• `n_harmonics` (Default: 5), `ir_length` (Default: largest power of two fitting the closest arrivals)<br>• `amplitude` (Default: 1.0), `fade` (Default: generator default), `remove_dc` (Default: True) | `res = electroacoustics.swept_sine_distortion(y, fs, 20.0, 6000.0, 4.0)`<br><br>• `SweptSineDistortionResult` |
 | `SweptSineDistortionResult` | `dataclass` | **Swept-sine harmonic separation.**<br>• `frequencies` [Hz], `harmonic_responses`: complex H₁..H_N, `harmonic_irs` (windowed, centred), `delays` L·ln(n) [s]<br>• `thd_frequencies` [Hz], `thd`, `distortion_ratios`: \|Hₙ(n·f)\|/\|H₁(f)\| per order<br>• `fs`, `f1`, `f2`, `duration`, `rate` L, `method`, `n_harmonics`<br>• `.plot()`: \|Hₙ\| magnitudes + THD(f) | `res.thd, res.harmonic_responses` |
-| `radiating_piston` | `function` | **Radiation of a rigid baffled circular piston (Beranek & Mellow §4.19/§13.7).**<br>• `radius` a [m], `frequencies` [Hz]<br>• `speed_of_sound` (Default: 343), `density` (Default: 1.206)<br>• `angles`: directivity polar angles [rad] (Default: None) | `res = electroacoustics.radiating_piston(0.1, freqs)`<br><br>• `RadiatingPistonResult` |
-| `plot_piston_geometry` | `function` | **Baffled piston to scale, optional far-field lobe.**<br>• `radius` a [m]<br>• `angles` [rad] + `directivity` (linear), together<br>• `lobe_label`, `language` | `plot_piston_geometry(0.1, angles=ang, directivity=d)`<br><br>• Also `RadiatingPistonResult.plot_geometry(frequency_index=...)` |
+| `radiating_piston` | `function` | **Radiation of a rigid baffled circular piston (Beranek & Mellow §4.19/§13.7).**<br>• `radius` a [m], `frequencies` [Hz]<br>• `speed_of_sound` (Default: 343), `density` (Default: 1.206)<br>• `angles_rad`: directivity polar angles_rad [rad] (Default: None) | `res = electroacoustics.radiating_piston(0.1, freqs)`<br><br>• `RadiatingPistonResult` |
+| `plot_piston_geometry` | `function` | **Baffled piston to scale, optional far-field lobe.**<br>• `radius` a [m]<br>• `angles_rad` [rad] + `directivity` (linear), together<br>• `lobe_label`, `language` | `plot_piston_geometry(0.1, angles_rad=ang, directivity=d)`<br><br>• Also `RadiatingPistonResult.plot_geometry(frequency_index=...)` |
 | `piston_resistance` / `piston_reactance` | `function` | **Normalized piston radiation impedance R1 = 1−2J1(x)/x, X1 = 2H1(x)/x, x = 2ka (Beranek & Mellow Eqs. 13.117/13.118).** | `piston_resistance(2.0)  # 0.4233` |
 | `piston_directivity` | `function` | **Far-field piston directivity 2·J1(ka·sinθ)/(ka·sinθ).**<br>• `ka`, `theta` [rad] | `piston_directivity(5.0, 0.3)` |
-| `piston_directivity_pattern` | `function` | **Far-field directivity (beam) pattern of one or more baffled pistons.**<br>• `ka` (scalar or 1-D)<br>• `angles` [rad] (Default: front hemisphere −90°…+90°) | `p = electroacoustics.piston_directivity_pattern([3, 8, 16])`<br><br>• `PistonDirectivity` |
+| `piston_directivity_pattern` | `function` | **Far-field directivity (beam) pattern of one or more baffled pistons.**<br>• `ka` (scalar or 1-D)<br>• `angles_rad` [rad] (Default: front hemisphere −90°…+90°) | `p = electroacoustics.piston_directivity_pattern([3, 8, 16])`<br><br>• `PistonDirectivity` |
 | `RadiatingPistonResult` | `dataclass` | **Piston radiation result.**<br>• `ka`, `resistance`/`reactance`, `radiation_resistance`/`radiation_reactance` [N·s/m], `radiation_mass` = 8ρa³/3 [kg], `directivity_index` [dB], `directivity`<br>• `.plot()`: R1/X1 vs ka | `res.radiation_mass` |
-| `PistonDirectivity` | `dataclass` | **Piston directivity-pattern result.**<br>• `angles` [rad], `ka`, `directivity` (linear), `directivity_db`<br>• `.plot()`: polar beam pattern in dB (family over ka) | `p.plot()` |
+| `PistonDirectivity` | `dataclass` | **Piston directivity-pattern result.**<br>• `angles_rad` [rad], `ka`, `directivity` (linear), `directivity_db`<br>• `.plot()`: polar beam pattern in dB (family over ka) | `p.plot()` |
 | `loudspeaker_characteristics` | `function` | **Rated loudspeaker characteristics for an IEC 60268-5 report.**<br>• `frequencies`, `spl_db` (on-axis SPL), `rated_impedance` R [Ω]<br>• `input_voltage` (Default: √R → 1 W), `distance` (Default: 1 m), `sensitivity_band`, `tolerance_db`<br>• `impedance`, `distortion` panels<br>• `directivity`: `LoudspeakerDirectivity` (23), `ratings`: `LoudspeakerRatings` (18/19) | `res = electroacoustics.loudspeaker_characteristics(f, spl, 8.0)`<br><br>• `LoudspeakerCharacteristics` |
-| `LoudspeakerDirectivity` | `dataclass` | **Directional characteristics of the loudspeaker (IEC 60268-5 Clause 23).**<br>• `piston`: a `RadiatingPistonResult` computed with `angles`, or `polar` = (angles_deg, relative_db)<br>• `frequency` [Hz], `index_db` (directivity index, 23.3) | `LoudspeakerDirectivity(piston=res, frequency=2000.0)` |
+| `LoudspeakerDirectivity` | `dataclass` | **Directional characteristics of the loudspeaker (IEC 60268-5 Clause 23).**<br>• `piston`: a `RadiatingPistonResult` computed with `angles_rad`, or `polar` = (angles_deg, relative_db)<br>• `frequency` [Hz], `index_db` (directivity index, 23.3) | `LoudspeakerDirectivity(piston=res, frequency=2000.0)` |
 | `LoudspeakerRatings` | `dataclass` | **Manufacturer-stated ratings (IEC 60268-5 Clauses 18 and 19).**<br>• `frequency_range` (lo, hi) [Hz] (19.1), also the band the 16.1 minimum impedance is scanned over<br>• `noise_power` [W] (18.1), `sinusoidal_power` [W] (18.4), `resonance_frequency` [Hz] (19.2) | `LoudspeakerRatings(frequency_range=(45.0, 22000.0))` |
 | `LoudspeakerCharacteristics` | `dataclass` | **Loudspeaker rated-characteristics result (IEC 60268-5).**<br>• `sensitivity_level_db` (1 W/1 m, 20.3/20.4), `effective_range` (21.2), `reference_level_db`, `characteristic_sensitivity_pa`, `minimum_impedance`<br>• `.report()`: IEC 60268-5 fiche (graphs to IEC 60263) | `res.effective_range` |
 | `feedback_stability` | `function` | **Gain before feedback of a reinforcement loop (Long, Architectural Acoustics 2e, Eqs. 18.16–18.24).**<br>• `open_loop_gain` Zs [dB] (≈ −6 in an auditorium)<br>• `level_loudspeaker_at_microphone` L(H-M) [dB]<br>• `level_loudspeaker_at_listener` L(H-L) [dB]<br>• `microphone_directivity` DM(θ) [dB] (Default: 0)<br>• `open_microphones` Nm (Default: 1), `stability_margin` [dB] (Default: 10) | `res = electroacoustics.feedback_stability(-6.0, 76.0, 80.0)`<br><br>• `FeedbackStabilityResult` |
@@ -40395,16 +40395,16 @@ documents, one page per module.
 | `substitution_area_ratio` / `SURVEY_AREA_RATIO_RANGE` / `SURVEY_MAX_VELOCITY_M_S` / `SURVEY_DIAMETER_RANGE_M` / `SURVEY_BAND_RANGE_HZ` / `SilencerMeasurementWarning` | `function` / `range` / `constant` / `range` / `range` / `warning class` | **The scope ISO 11691 writes for its own survey method.**<br>• `substitution_area_ratio(duct_area, element_area)` [m²], warning outside the 0.6 to 1.7 of 4.5<br>• design velocity up to 15 m/s (1.1), circular diameters 80 mm to 2 m, one-third octaves from 50 Hz to 10 kHz | `noise_control.substitution_area_ratio(0.09, 0.09)  # 1.0` |
 | `open_end_transmission_loss` / `open_end_reflection_coefficient` / `RADIATION_SOLID_ANGLES` | `function` / `function` / `mapping` | **ISO 7235 Eqs. (B.3) and (B.4): what the open end of a duct keeps in, and the reflection that is the same fact said the other way.**<br>• `frequency` [Hz], `area` S [m²], `solid_angle` Ω [sr] (Default: 2π), `sound_speed` [m/s]<br>• `D_td = 10 lg[1 + Ω/(4πf√S/c)²]`, `r = [(1/Ω)(4πf√S/c)² + 1]^(−1/2)`, and the two close through `D_td = −10 lg(1 − r²)`<br>• `RADIATION_SOLID_ANGLES` is Table B.1, the same five values as ISO 5135 Table 1: A 2π, B π, C 4π, D 2π, E 4π<br>• the same physics as `end_reflection_loss_closed_form`, which raises the same argument to 1.88 rather than to 2 | `noise_control.open_end_transmission_loss(bands, 0.0962)` |
 | `measured_transmission_loss` / `flow_noise_power_level` | `function` | **ISO 7235 Eqs. (6) and (7): the two quantities the open-end loss is needed for.**<br>• `measured_transmission_loss(insertion_loss, open_end_loss)`: `D_t = D_i + D_td`, the transmission loss of an air-terminal unit<br>• `flow_noise_power_level(pressure_level, open_end_loss, room_correction)`: `L_W = L_p + D_td + C`, with `L_p` uncorrected for background as 6.4 requires and `C` from ISO 3741 | `noise_control.measured_transmission_loss(d_i, d_td)` |
-| `modal_filter_cut_on` / `CIRCULAR_CUT_ON_COEFFICIENT` / `RECTANGULAR_CUT_ON_COEFFICIENT` / `MODAL_FILTER_ATTENUATION_DB` | `function` / `constant` / `constant` / `constant` | **ISO 7235 Eqs. (4) and (5): where higher-order modes start in the duct the modal filter is connected to.**<br>• exactly one of `diameter` d or `larger_dimension` H [m], plus `sound_speed`<br>• `0.59 c/d` and `0.5 c/H`; the rectangular constant is exact, the circular one sits 0.67 % above the Bessel eigenvalue that `circular_duct_cut_on` uses<br>• `MODAL_FILTER_ATTENUATION_DB = (3.0, 5.0)`, the minimum longitudinal attenuation of 5.2.2.3 below and above it | `noise_control.modal_filter_cut_on(diameter=0.4)  # 506 Hz` |
+| `modal_filter_cut_on` / `CIRCULAR_CUT_ON_COEFFICIENT` / `RECTANGULAR_CUT_ON_COEFFICIENT` / `MODAL_FILTER_ATTENUATION_DB` | `function` / `constant` / `constant` / `constant` | **ISO 7235 Eqs. (4) and (5): where higher-order modes start in the duct the modal filter is connected to.**<br>• exactly one of `diameter_m` d or `larger_dimension` H [m], plus `sound_speed`<br>• `0.59 c/d` and `0.5 c/H`; the rectangular constant is exact, the circular one sits 0.67 % above the Bessel eigenvalue that `circular_duct_cut_on` uses<br>• `MODAL_FILTER_ATTENUATION_DB = (3.0, 5.0)`, the minimum longitudinal attenuation of 5.2.2.3 below and above it | `noise_control.modal_filter_cut_on(diameter_m=0.4)  # 506 Hz` |
 | `normal_air_density` / `ISO7235_GAS_CONSTANT` / `ISO7235_ABSOLUTE_ZERO_OFFSET` | `function` / `constant` / `constant` | **ISO 7235 Eqs. (10), (21) and (22): the gas law with the standard's own two constants.**<br>• `static_gauge_pressure_pa` p_s1 [Pa, relative to ambient], `ambient_pressure_pa` p_a [Pa absolute], `temperature_c` θ [°C]<br>• `R = 287` and `θ + 273`, both as printed rather than 287.05 and 273.15; together 0.069 % high at 20 °C, and both cancel in the pressure loss coefficient | `noise_control.normal_air_density(200.0, 101325.0, 20.0)  # 1.2073` |
 | `volume_flow_rate` / `dynamic_pressure` / `total_pressure` / `DENSITY_RATIO_RANGE` | `function` / `function` / `function` / `constant` | **ISO 7235 Eqs. (8), (9), (11), (13), (16), (19) and (20): the flow quantities the pressure loss coefficient is built from.**<br>• `volume_flow_rate(mass_flow, density)`: q_V = q_m/ρ, with ρ the normalised density of Eq. (10) when the meter and the object leave `DENSITY_RATIO_RANGE` (0.98 to 1.02)<br>• `dynamic_pressure(volume_flow, area, density)`: `(ρ/2)(q_V/S)²`, the velocity head<br>• `total_pressure(static_pressure, volume_flow, area, density)`: static plus dynamic in one plane | `noise_control.dynamic_pressure(1.0, 0.0962, 1.2)  # 64.8 Pa` |
 | `total_pressure_loss` / `pressure_loss_coefficient` / `average_pressure_loss_coefficient` | `function` | **ISO 7235 Eqs. (12), (14), (17) and (18): what an object costs to push air through, in velocity heads.**<br>• `total_pressure_loss(static_pressure_loss_pa, inlet_dynamic_pressure_pa, inlet_area, outlet_area)`: adds `p_d1[1 − (S_1/S_2)²]`, which vanishes when the two ducts match<br>• `pressure_loss_coefficient(total_loss, inlet_dynamic_pressure_pa)`: ζ, the same number at every flow rate the object sees the same flow pattern at, warning at 10 Pa and below<br>• `average_pressure_loss_coefficient(object_static, object_dynamic, substitution_static, substitution_dynamic)`: Eq. (18), a substitution average over each series' own flow rates, warning below five points | `noise_control.pressure_loss_coefficient(45.0, 64.8)  # 0.694` |
 | `upstream_straight_length` / `MINIMUM_FLOW_RATES` / `MINIMUM_PRESSURE_DIFFERENCE_PA` / `UPSTREAM_STRAIGHT_DIAMETERS` / `UPSTREAM_STRAIGHT_MIN_M` / `VELOCITY_PROFILE_TOLERANCE_PERCENT` | `function` / `constant` | **ISO 7235 6.5.2.1 and 6.5.2.2.1: what a flow measurement needs before it counts.**<br>• `upstream_straight_length(area)`: max(5 d_e, 2 m) with `d_e = √(4S/π)`, the two rules crossing at a 0.4 m equivalent diameter<br>• five airflow rates per series, the lowest above 10 Pa, and a velocity profile uniform to ±10 % excluding 15 mm from the walls | `noise_control.upstream_straight_length(0.5)  # 3.99 m` |
 | `duct_sound_power_level` | `function` | **ISO 5135 Eq. (1): from what the room heard back to what the duct carries.**<br>• `room_sound_power_level` L_W [dB] from ISO 3741, `end_reflection_loss` ΔL_r [dB]<br>• ISO 5135 Eq. (2) is ISO 7235 Eq. (B.3) written out, so `open_end_transmission_loss` supplies both, and their two solid-angle tables agree entry for entry<br>• the NOTE to Table 1 offers a transmission element to ISO 7235 as an alternative to correcting at all | `noise_control.duct_sound_power_level(lw, d_td)` |
 | `fit_operating_line` / `OperatingLine` / `EXTRAPOLATION_MAX_DEVIATION_DB` / `EXTRAPOLATION_RANGE_FACTORS` / `REPORTING_RESOLUTION_DB` | `function` / `dataclass` / `constant` | **ISO 5135 5.5.2: the least-squares line a level is read off at a duty the laboratory did not measure at.**<br>• `duty` q_V [m³/s] or Δp_t [Pa], `levels` [dB], at least two points at more than one duty<br>• result: `slope` [dB/decade], `intercept`, `maximum_deviation`, `smallest_duty`, `largest_duty`, `valid_range` (half to twice), `.level_at(duty)`, `.plot()`<br>• warns past the 3 dB of 5.5.2, and again when a duty is read outside the range the clause allows; 8 k) reports to half a decibel | `noise_control.fit_operating_line(q, lwa).level_at(0.3)` |
-| `end_reflection_loss` / `elbow_insertion_loss` | `function` | **HVAC duct end reflection & bend insertion loss (Bies Tables 8.14/8.11, ASHRAE).**<br>• end: `frequencies`, `diameter`, `termination` 'flush'/'free'<br>• elbow: `frequencies`, `width`, `bend_type`, `vanes`, `lined` | `end_reflection_loss(bands, 0.3)`<br><br>• `HvacSpectrumResult` |
-| `plenum_attenuation` | `function` | **Plenum-chamber TL by Wells' method (Bies Eq. 8.275).**<br>• `exit_area`, `line_of_sight`, `wall_area`, `mean_absorption`, `angle` | `plenum_attenuation(0.1, 1.0, 20.0, 0.2)  # dB` |
-| `plot_plenum_geometry` | `function` | **Plenum section honouring r and θ exactly.**<br>• `exit_area` S_out [m²], `line_of_sight` r [m], `wall_area` S_w [m²]<br>• `angle` θ [rad] (Default: 0)<br>• `language` | `plot_plenum_geometry(0.09, 1.2, 6.0, angle=0.35)`<br><br>• Box fixed by r/θ, S_out mouth to scale, S_w annotated |
+| `end_reflection_loss` / `elbow_insertion_loss` | `function` | **HVAC duct end reflection & bend insertion loss (Bies Tables 8.14/8.11, ASHRAE).**<br>• end: `frequencies`, `diameter_m`, `termination` 'flush'/'free'<br>• elbow: `frequencies`, `width`, `bend_type`, `vanes`, `lined` | `end_reflection_loss(bands, 0.3)`<br><br>• `HvacSpectrumResult` |
+| `plenum_attenuation` | `function` | **Plenum-chamber TL by Wells' method (Bies Eq. 8.275).**<br>• `exit_area`, `line_of_sight`, `wall_area`, `mean_absorption`, `angle_rad` | `plenum_attenuation(0.1, 1.0, 20.0, 0.2)  # dB` |
+| `plot_plenum_geometry` | `function` | **Plenum section honouring r and θ exactly.**<br>• `exit_area` S_out [m²], `line_of_sight` r [m], `wall_area` S_w [m²]<br>• `angle_rad` θ [rad] (Default: 0)<br>• `language` | `plot_plenum_geometry(0.09, 1.2, 6.0, angle_rad=0.35)`<br><br>• Box fixed by r/θ, S_out mouth to scale, S_w annotated |
 | `flow_noise_straight_duct` / `flow_noise_bend` | `function` | **HVAC flow-generated (self) noise sound power (VDI 2081, Bies Eqs. 8.251/8.254).**<br>• `frequencies`, `flow_velocity`, `area` (+ `height` for the bend) | `flow_noise_straight_duct(bands, 10.0, 0.04)`<br><br>• `HvacSpectrumResult` |
 | `flow_noise_straight_duct_overall` | `function` | **Overall flow noise of a straight run (VDI 2081 Equations (16) and (17)).**<br>• `flow_velocity` v, `area` S<br>• `weighting='Z'` gives `7 + 50 lg v + 10 lg S`, `'A'` gives `-25 + 70 lg v + 10 lg S`<br>• the octave levels of `flow_noise_straight_duct` do not sum back to it: Figure 16 is a shape, not a partition | `flow_noise_straight_duct_overall(5.83, 0.2)`<br><br>• 38.3 |
 | `HvacSpectrumResult` | `dataclass` | **Per-frequency HVAC attenuation or regenerated Lw.**<br>• `frequencies`, `values`, `quantity`, `label`<br>• `.plot()` | `res.values` |
@@ -40413,13 +40413,13 @@ documents, one page per module.
 | `fan_efficiency_correction` / `blade_passing_frequency` / `fan_casing_attenuation` | `function` | **The three side terms of the fan model (Long Tables 13.6/13.7/13.8, Eq. 13.4).**<br>• `fan_efficiency_correction(relative_efficiency_percent=80.0)` → C_EFF [dB] (6,0 at 80 %)<br>• `blade_passing_frequency(rotational_speed, blades)` = rpm·N/60 [Hz]<br>• `fan_casing_attenuation(frequencies)` → casing-radiated attenuation | `blade_passing_frequency(1200.0, 12)  # 240 Hz` |
 | `HvacWarning` | `warning class` | **A relative efficiency below the 50 % floor Long Table 13.6 is tabulated from.**<br>The table's worst-case row is returned, which is where a caller who passed a fraction such as 0,8 instead of 80 also lands; the two are indistinguishable from the value alone | `warnings.simplefilter("error", noise_control.HvacWarning)` |
 | `unlined_rectangular_duct_attenuation` / `unlined_circular_duct_attenuation` | `function` | **Straight unlined sheet-metal duct attenuation (Long Eqs. 14.9-14.11, Table 14.1).**<br>• rectangular: `frequencies`, `width`, `height`, `length`, `wrapped` (fibreglass blanket doubles 63-250 Hz)<br>• circular: `frequencies`, `length` (about a tenth of the rectangular loss) | `unlined_rectangular_duct_attenuation(bands, 0.9, 0.6, 1.5)`<br><br>• `HvacSpectrumResult` |
-| `lined_rectangular_duct_attenuation` / `lined_circular_duct_attenuation` | `function` | **Lined-duct insertion loss, Reynolds (1990) regressions (Long Eqs. 14.12/14.13, Tables 14.2/14.3).**<br>• rectangular: `frequencies`, `width`, `height`, `length`, `lining_thickness`, `include_unlined`<br>• circular: `frequencies`, `diameter`, `length`, `lining_thickness`<br>• Flanking caps a run at 40 dB | `lined_rectangular_duct_attenuation(None, 0.46, 0.30, 1.8, 0.025)` |
-| `flexible_duct_insertion_loss` | `function` | **Lined round flexible duct IL (Long Table 14.4, ASHRAE 1995), 63 Hz-4 kHz.**<br>• `frequencies`, `diameter` (100-406 mm), `length` (0.9-3.7 m)<br>• Interpolated over length and log diameter | `flexible_duct_insertion_loss(None, 0.305, 1.8)` |
+| `lined_rectangular_duct_attenuation` / `lined_circular_duct_attenuation` | `function` | **Lined-duct insertion loss, Reynolds (1990) regressions (Long Eqs. 14.12/14.13, Tables 14.2/14.3).**<br>• rectangular: `frequencies`, `width`, `height`, `length`, `lining_thickness`, `include_unlined`<br>• circular: `frequencies`, `diameter_m`, `length`, `lining_thickness`<br>• Flanking caps a run at 40 dB | `lined_rectangular_duct_attenuation(None, 0.46, 0.30, 1.8, 0.025)` |
+| `flexible_duct_insertion_loss` | `function` | **Lined round flexible duct IL (Long Table 14.4, ASHRAE 1995), 63 Hz-4 kHz.**<br>• `frequencies`, `diameter_m` (100-406 mm), `length` (0.9-3.7 m)<br>• Interpolated over length and log diameter_m | `flexible_duct_insertion_loss(None, 0.305, 1.8)` |
 | `splitter_silencer_insertion_loss` | `function` | **Parallel-splitter (dissipative) silencer IL: each airway a lined duct of half the splitter thickness, combined by Bies Eq. (8.241).**<br>• `frequencies`, `height`, `length`, `airway_widths` (scalar or per airway), `splitter_thickness`<br>• Prefer the manufacturer's dynamic insertion loss | `splitter_silencer_insertion_loss(None, 0.6, 1.5, [0.1]*3, 0.2)` |
 | `silencer_self_noise` | `function` | **Regenerated (self) noise of a splitter silencer (Long Eq. 14.31 + Table 14.8, Fry 1988).**<br>• `frequencies`, `airway_velocity` V [m/s], `passages` N, `height` H [m]<br>L_W = 55·lg V + 10·lg N + 10·lg(H/1 mm) − 45 | `silencer_self_noise(None, 10.0, 4, 0.9)` |
 | `section_change_loss` | `function` | **Reflection at a sudden change of duct section (VDI 2081 6.3, Figure 26).**<br>• `upstream_area` S1, `downstream_area` S2; the loss is `10 lg (r+1)²/(4r)` in `r = S1/S2`<br>• a sudden reduction reflects in every band; a sudden increase only below the limit frequency of the upstream duct, so `shape` and `upstream_size` are needed for it<br>• `cap` (Default: 5 dB, VDI 3733's recommendation) | `noise_control.section_change_loss(bands, 0.5, 0.2, shape='round')`<br><br>• 0.88 dB |
 | `split_loss` | `function` | **Branch power-division loss at a duct split (Long Eq. 14.17), returned as a positive attenuation.**<br>• `main_area` S_m [m²], `branch_areas` [m²], `branch` index | `split_loss(0.6, [0.15]*4)  # 6.02 dB` |
-| `end_reflection_loss_closed_form` / `equivalent_diameter` | `function` | **Reynolds' closed-form duct end reflection (Long Eqs. 14.14-14.16); the alternative to the `end_reflection_loss` table look-up (`method='long'`).**<br>• `frequencies`, `diameter`, `termination` 'flush'/'free'<br>• `equivalent_diameter(area)` = √(4S/π) for a rectangular duct | `end_reflection_loss(bands, 0.3, method='long')` |
+| `end_reflection_loss_closed_form` / `equivalent_diameter` | `function` | **Reynolds' closed-form duct end reflection (Long Eqs. 14.14-14.16); the alternative to the `end_reflection_loss` table look-up (`method='long'`).**<br>• `frequencies`, `diameter_m`, `termination` 'flush'/'free'<br>• `equivalent_diameter(area)` = √(4S/π) for a rectangular duct | `end_reflection_loss(bands, 0.3, method='long')` |
 | `diffuser_sound_power` | `function` | **Regenerated (self) noise of a grille, register or diffuser (Long Eqs. 13.27-13.33, Reynolds 1990).**<br>• `frequencies`, `face_area` S_G [m²], `volume_flow` Q [m³/s], `pressure_drop_pa` ΔP [Pa]<br>• `shape` 'rectangular'/'round', `count` n (adds 10·lg n)<br>• 18 dB per doubling of approach velocity; peak band at f_P = 48.8·U_G | `diffuser_sound_power(None, 0.372, 0.147, 12.4)` |
 | `air_terminal_velocity_limit` / `air_terminal_damper_correction` | `function` | **Screening checks for grilles, registers and diffusers (ASHRAE 2019 Ch. 49 Tables 9/10); a measured device spectrum to ASHRAE Standard 70 beats both.**<br>• `air_terminal_velocity_limit(design_criterion, opening='supply'/'return')` [m/s]<br>• `air_terminal_damper_correction(pressure_ratio, location='diffuser_neck'/'plenum_inlet'/'supply_duct')` [dB] | `air_terminal_velocity_limit(30)  # 2.2 m/s` |
 | `room_effect` | `function` | **Room effect: the drop from the sound power at the terminal device to the level in the room (Long Eq. 14.40, VDI 2081-1 Eq. 36), as a positive attenuation.**<br>• `distance` r [m]<br>• `room_constant` R [m²] or `absorption_area` A [m²], exactly one, scalar or per band<br>• `directivity` Q (Default: 2, flush in a ceiling), scalar or per band | `room_effect(3.0, room.room_constant(S, alpha))`<br>`room_effect(1.5, absorption_area=20.0, directivity=q_per_band)` |
@@ -40431,9 +40431,9 @@ documents, one page per module.
 | `RoomToRoomResult` | `dataclass` | **Room-to-room chain result.**<br>• `source_level`, `transmission_loss`, `receiving_absorption`, `noise_reduction`, `received_level`<br>• `.rating` (NC/RC), `.criterion_curve`, `.exceedance`, `.meets_target`<br>• `.required_transmission_loss`: the partition TL that just meets the criterion<br>• `.table()`: the rows of the hand calculation; `.plot()`: both spectra, the curve and NR | `res.required_transmission_loss` |
 | `SourceRoom` | `dataclass` | **The source room of the room-to-room chain (Norton 4.7, Table 4.5).**<br>• `level` L_p1 [dB], or `power_level` L_W [dB] + `room_constant` R₁ [m²]<br>• `directivity` Q (Default: 1)<br>• `model`: 'constant_power' (Default) / 'constant_volume' / 'constant_pressure' | `SourceRoom(power_level=lw, room_constant=r1, directivity=4.0, model='constant_volume')` |
 | `DesignCriterion` | `dataclass` | **The design criterion of a composed chain.**<br>• `family`: 'NC' (Default) / 'RC'<br>• `target` (Default: None → no verdict)<br>• `flanking_penalty` [dB] (Default: 0) | `DesignCriterion(target=45.0, flanking_penalty=3.0)` |
-| `circular_duct_cut_on` / `rectangular_duct_cut_on` | `function` | **Higher-order acoustic mode cut-on with mean flow (Norton & Karczub Eqs. 7.6-7.10, Table 7.1).**<br>• circular: `diameter`, `flow_velocity`, `speed_of_sound`, `count` (≤ 12)<br>• rectangular: `width`, `height`, …<br>• Flow lowers every cut-on by √(1 − M²) and shifts it to k_x = −Mκ/√(1 − M²) | `circular_duct_cut_on(0.254, flow_velocity=200.0)`<br><br>• `DuctModeResult` |
+| `circular_duct_cut_on` / `rectangular_duct_cut_on` | `function` | **Higher-order acoustic mode cut-on with mean flow (Norton & Karczub Eqs. 7.6-7.10, Table 7.1).**<br>• circular: `diameter_m`, `flow_velocity`, `speed_of_sound`, `count` (≤ 12)<br>• rectangular: `width`, `height`, …<br>• Flow lowers every cut-on by √(1 − M²) and shifts it to k_x = −Mκ/√(1 − M²) | `circular_duct_cut_on(0.254, flow_velocity=200.0)`<br><br>• `DuctModeResult` |
 | `DuctModeResult` | `dataclass` | **Duct cut-on result.**<br>• `modes` (p, q), `cut_on`, `cut_on_no_flow`, `axial_wavenumber`, `mach`<br>• `.plane_wave_limit`: the lowest cut-on<br>• `.plot()`: the cut-on ladder with and without flow | `res.plane_wave_limit` |
-| `plane_wave_limit` / `PlaneWaveWarning` | `function` / `warning class` | **The frequency above which a duct stops carrying plane waves only, and the warning the plane-wave results raise past it.**<br>• `plane_wave_limit(diameter=…)`, or `width`/`height`, or `area`<br>• `flow_velocity`, `speed_of_sound`<br>• Raised by `duct_path(section=…)` and by every `ReactiveSilencerResult` | `plane_wave_limit(width=0.65, height=0.4)  # 264 Hz` |
+| `plane_wave_limit` / `PlaneWaveWarning` | `function` / `warning class` | **The frequency above which a duct stops carrying plane waves only, and the warning the plane-wave results raise past it.**<br>• `plane_wave_limit(diameter_m=…)`, or `width`/`height`, or `area`<br>• `flow_velocity`, `speed_of_sound`<br>• Raised by `duct_path(section=…)` and by every `ReactiveSilencerResult` | `plane_wave_limit(width=0.65, height=0.4)  # 264 Hz` |
 | `enclosure_insertion_loss` / `ENCLOSURE_MODELS` | `function` / `mapping` | **Machine-enclosure insertion loss IL = R − C (Bies Eqs. 7.103/7.111); panel R supplied by the caller, never predicted.**<br>• `panel_transmission_loss` (per-band array or callable of f)<br>• `external_area`, `internal_area`, `internal_absorption`<br>• `frequencies` (required for a callable R)<br>• `model`: `ENCLOSURE_MODELS` — `'bies'` keeps the 0.3 floor of Eq. 7.111, `'norton'` the bare `C = 10 lg(S_E/R_i)` of Eq. 4.115 | `enclosure_insertion_loss(R, 6.0, 5.0, 0.3)`<br><br>• `EnclosureResult` |
 | `enclosure_required_transmission_loss` | `function` | **The same equation solved for the panel R: `R = IL + C` (Norton Eq. 4.115 design use).**<br>• `insertion_loss` (required IL per band, e.g. the room level minus an NC curve)<br>• `external_area`, `internal_area`, `internal_absorption`, `frequencies`, `model` | `enclosure_required_transmission_loss(lp1 - nc45, 38.75, 59.5, alpha)`<br><br>• `EnclosureResult` whose `panel_transmission_loss` is the required R |
 | `valve_aerodynamic_noise` | `function` | **Control valve aerodynamic noise, the whole of IEC 60534-8-3 Clause 5.**<br>• `stream`: a `GasStream`, `valve`: a `ValveTrim`, `pipe`: a `DownstreamPipe`<br>• the three groups are the standard's own reading order: the operating point, the valve at that travel, and the pipe the noise comes out of | `res = noise_control.valve_aerodynamic_noise(stream, valve, pipe)`<br><br>• `AerodynamicValveNoise` |
@@ -40502,7 +40502,7 @@ documents, one page per module.
 | `UNDERWATER_REFERENCE_PRESSURE` / `UNDERWATER_REFERENCE_EXPOSURE` | `float` | **ISO 18405 reference quantities.**<br>Reference pressure p0 = 1 µPa [Pa] and reference exposure E0 = 1 µPa²·s [Pa²·s] | `UNDERWATER_REFERENCE_PRESSURE  # 1e-06` |
 | `underwater_to_in_air_spl` / `in_air_to_underwater_spl` | `function` | **Re-reference a level between 1 µPa and 20 µPa (∓26.02 dB).**<br>• `level` [dB]<br>Reference change only, not an energy equivalence. | `underwater_to_in_air_spl(120.0)` |
 | `radiated_noise_level` | `function` | **Ship radiated noise level (ISO 17208-1), dB re 1 µPa·m.**<br>• `rms_pressure_pa` [Pa]<br>• `distance` [m]<br>= 20·lg(p/p₀)+20·lg(r/r₀) | `radiated_noise_level(2e-6, 100.0)` |
-| `hydrophone_depths` | `function` | **ISO 17208-1 hydrophone depths from depression angles.**<br>• `cpa_distance` [m]<br>• `angles` (Default: (15,30,45)) [deg]<br>= cpa·tan(angle) | `hydrophone_depths(100.0)` |
+| `hydrophone_depths` | `function` | **ISO 17208-1 hydrophone depths from depression angles_deg.**<br>• `cpa_distance` [m]<br>• `angles_deg` (Default: (15,30,45)) [deg]<br>= cpa·tan(angle_deg) | `hydrophone_depths(100.0)` |
 | `source_level_uncertainty` | `function` | **Tabulated source-level uncertainty (ISO 17208-2).**<br>• `frequency` [Hz]<br>5 dB ≤100 Hz / 3 dB 125 Hz–16 kHz / 4 dB >16 kHz | `source_level_uncertainty(1000.0)  # 3.0` |
 | `monopole_source_level` | `function` | **Equivalent monopole source level (ISO 17208-2).**<br>• `rnl`: RNL [dB re 1 µPa·m] (scalar/array)<br>• `frequency` [Hz]<br>• `draught` D [m]<br>• `c` (Default: 1500) [m/s]<br>Ls = LRN + ΔL, d_s = 0.7·D | `res = underwater.monopole_source_level(rnl, f, 6.0)`<br><br>• `ShipSourceLevelResult` |
 | `ShipSourceLevelResult` | `dataclass` | **Ship source-level result.**<br>• `frequencies` [Hz]<br>• `radiated_noise_level` / `surface_correction` / `source_level` [dB]<br>• `source_depth` [m] / `sound_speed` [m/s]<br>• `.plot()`: RNL/Ls/ΔL vs frequency | `res.source_level, res.surface_correction` |
@@ -40511,7 +40511,7 @@ documents, one page per module.
 | `cumulative_sel_identical` | `function` | **Cumulative SEL of N identical strikes.**<br>• `sel_ss` [dB]<br>• `n_strikes` N (≥ 1)<br>= sel_ss + 10·lg(N) | `cumulative_sel_identical(180.0, 50)` |
 | `pile_strike_metrics` | `function` | **Per-strike pile-driving metrics (ISO 18406).**<br>• `pressure`: one strike (1D) [Pa]<br>• `fs` [Hz] | `res = underwater.pile_strike_metrics(p, fs)`<br><br>• `PileStrikeResult` |
 | `sound_speed_profile` | `function` | **Sound-speed profile over a depth column.**<br>• `depths` (1D, increasing) [m]<br>• `temperatures_c` / `salinities`: array or scalar<br>• `model` / `latitude` | `sound_speed_profile(z, T, S)`<br><br>• `SoundSpeedProfile` |
-| `SoundSpeedProfile` | `dataclass` | **Sound-speed profile.**<br>• `depth` [m] / `sound_speed` [m/s] / `gradient` [(m/s)/m]<br>• `model`<br>• `.plot()`: speed vs depth (depth down) | `prof.sound_speed, prof.gradient` |
+| `SoundSpeedProfile` | `dataclass` | **Sound-speed profile.**<br>• `depth` [m] / `sound_speed` [m/s] / `gradient_per_s` [(m/s)/m]<br>• `model`<br>• `.plot()`: speed vs depth (depth down) | `prof.sound_speed, prof.gradient_per_s` |
 | `spreading_loss` | `function` | **Geometrical spreading loss, dB.**<br>• `range_m` [m] (scalar/array)<br>• `law`: `"spherical"` / `"cylindrical"` / `"practical"`<br>• `transition_range` [m] (for `"practical"`) | `spreading_loss(1000.0)` |
 | `seawater_absorption` | `function` | **Volume absorption α, dB/km.**<br>• `frequency_hz` [Hz] (scalar/array)<br>• `temperature_c` [°C] / `salinity` [ppt] / `depth` [m] / `ph`<br>• `model`: `"francois-garrison"` (default) / `"ainslie-mccolm"` / `"thorp"` | `seawater_absorption(10e3)` |
 | `propagation_loss` | `function` | **Propagation loss PL = spreading + α·R, α in dB/km and R in km.**<br>• `range_m` [m] / `frequency_hz` [Hz]<br>• `law` / `temperature_c` / `salinity` / `depth` / `ph` / `model` / `transition_range` | `propagation_loss(r, 10e3)`<br><br>• `PropagationLossResult` |
@@ -40751,7 +40751,7 @@ documents, one page per module.
 | `plot_junction_geometry` | `function` | **Plate junction (L/T1/T2/X) to scale.**<br>• `junction`, `thickness1`, `thickness2` [m]<br>• `language` | `plot_junction_geometry('X', 0.14, 0.2)`<br><br>• Also `JunctionTransmissionResult.plot_geometry()` |
 | `JunctionTransmissionResult` | `dataclass` | **Angle-resolved bending-wave transmission at a rigid junction (Hopkins 5.2.1.3).**<br>• `chi`, `psi`, `critical_frequency1`/`critical_frequency2` fc [Hz], `angles_deg`, `corner` τ12(θ), `straight` τ13(θ) or None<br>• `corner_average`/`straight_average` (Eq. 5.6), `corner_reduction_index` Kij (symmetric), `.plot()` | `res.corner_average  # 1/12 for identical X` |
 | `junction_wave_parameters` | `function` | **Wave parameters χ, ψ of a plate pair (Hopkins 5.10/5.11).**<br>• two plates' h [m], cL [m/s], ρs [kg/m²]<br>• χ = √(h₁cL₁/h₂cL₂) = √(fc₂/fc₁), ψ = h₂cL₂ρs₂/(h₁cL₁ρs₁) | `junction_wave_parameters(0.1, 3200, 240, 0.2, 3200, 480)  # (√0.5, 4)` |
-| `corner_transmission_coefficient` / `straight_transmission_coefficient` | `function` | **τ12(θ) around a corner (Hopkins 5.12) / τ13(θ) across a straight section (5.13).**<br>• `angle` θ [rad], `chi`, `psi`, `junction`<br>• corner is 0 for χ < sinθ; straight only for 'X'/'T1' | `corner_transmission_coefficient(0.0, 1.0, 1.0, 'X')  # 1/8` |
+| `corner_transmission_coefficient` / `straight_transmission_coefficient` | `function` | **τ12(θ) around a corner (Hopkins 5.12) / τ13(θ) across a straight section (5.13).**<br>• `angle_rad` θ [rad], `chi`, `psi`, `junction`<br>• corner is 0 for χ < sinθ; straight only for 'X'/'T1' | `corner_transmission_coefficient(0.0, 1.0, 1.0, 'X')  # 1/8` |
 | `inline_transmission_coefficient` | `function` | **Normal-incidence transmission across an in-line junction (Hopkins 5.14, Cremer 1973).**<br>• `chi`, `psi`; τ = 1 for identical plates | `inline_transmission_coefficient(1.0, 1.0)  # 1.0` |
 | `angular_average_transmission_coefficient` | `function` | **Diffuse-field angular average ∫₀^{π/2} τ(θ)cosθ dθ (Hopkins 5.6).**<br>• `chi`, `psi`, `junction`, `section`: 'corner'/'straight' | `angular_average_transmission_coefficient(1.0, 1.0, 'X')  # 1/12` |
 | `coupling_loss_factor` | `function` | **SEA coupling loss factor from τ (Hopkins 2.154).**<br>• `transmission_coefficient` τ, `group_velocity` cg [m/s]<br>• `junction_length` L [m], `frequency` f [Hz], `plate_area` S [m²]<br> η = cg·L·τ/(2π²fS) | `coupling_loss_factor(1/12, 200, 4, 500, 10)` |
@@ -40894,9 +40894,9 @@ documents, one page per module.
 | `EnvelopeResult` | `dataclass` | **Envelope analysis.**<br>• `times` [s], `envelope`, `phase` [rad, unwrapped], `instantaneous_frequency` [Hz]<br>• `fs` (output rate), `signal`, `signal_fs`, `decimation_factor`, `antialias`<br>• `.plot()`: signal + envelope, instantaneous frequency | `res.envelope, res.instantaneous_frequency` |
 | `envelope_spectrum` | `function` | **Amplitude spectrum of the envelope: modulations as lines (B&P 13.3).**<br>• `x`, `fs`<br>• `kind`: 'magnitude' (Default) / 'squared' (square-law detector, Fig. 13.11)<br>• `window` (Default: 'hann', coherent-gain corrected), `nfft`<br>• `remove_dc` (Default: True; mean kept in `mean_level`)<br>AM tone A0, m: line A0·m at fm ('magnitude') | `res = signals.envelope_spectrum(x, fs)`<br><br>• `EnvelopeSpectrumResult` |
 | `EnvelopeSpectrumResult` | `dataclass` | **Envelope spectrum.**<br>• `frequencies` [Hz], `amplitude` (line heights), `mean_level`, `kind`<br>• `times`, `envelope` (detector output), `window`, `remove_dc`, `fs`, `nfft`<br>• `.plot()`: envelope + spectrum | `res.amplitude, res.mean_level` |
-| `time_synchronous_average` | `function` | **Extract a periodic waveform of known period by time domain averaging (McFadden 1987 Eq. 5).**<br>• `x`, `fs`, `period` [s] (one revolution)<br>• `n_averages`: whole periods to average (Default: as many as the record holds; choose N so N·q is integer to place a comb node on an interfering order q)<br>• `n_harmonics`: comb-response span (Default: 8)<br>Non-integer fs·period aligned by band-limited fractional delay | `res = signals.time_synchronous_average(x, fs, period=1/32)`<br><br>• `SynchronousAverageResult` |
-| `SynchronousAverageResult` | `dataclass` | **Time synchronous average.**<br>• `period_waveform`, `times` [s], `residual`, `residual_rms`<br>• `n_averages`, `samples_per_period`, `period`, `fs`, `interpolated`<br>• `noise_reduction_db` = 10·log₁₀N, `amplitude_snr_gain` = √N<br>• `comb_frequencies` [Hz], `comb_response` (\|C(f)\|)<br>• `.plot()`: averaged waveform + comb filter | `res.period_waveform, res.noise_reduction_db` |
-| `comb_filter_response` | `function` | **Magnitude of the N-period synchronous-averaging comb filter (McFadden 1987 Eq. 8).**<br>• `frequencies` [Hz], `period` [s], `n_averages`<br>\|C(f)\| = \|sin(N·π·f·T)/(N·sin(π·f·T))\|: unit teeth at harmonics k/T, nodes at j/(N·T) | `c = signals.comb_filter_response(freqs, 1/32, 20)` |
+| `time_synchronous_average` | `function` | **Extract a periodic waveform of known period_s by time domain averaging (McFadden 1987 Eq. 5).**<br>• `x`, `fs`, `period_s` [s] (one revolution)<br>• `n_averages`: whole periods to average (Default: as many as the record holds; choose N so N·q is integer to place a comb node on an interfering order q)<br>• `n_harmonics`: comb-response span (Default: 8)<br>Non-integer fs·period_s aligned by band-limited fractional delay | `res = signals.time_synchronous_average(x, fs, period_s=1/32)`<br><br>• `SynchronousAverageResult` |
+| `SynchronousAverageResult` | `dataclass` | **Time synchronous average.**<br>• `period_waveform`, `times` [s], `residual`, `residual_rms`<br>• `n_averages`, `samples_per_period`, `period_s`, `fs`, `interpolated`<br>• `noise_reduction_db` = 10·log₁₀N, `amplitude_snr_gain` = √N<br>• `comb_frequencies` [Hz], `comb_response` (\|C(f)\|)<br>• `.plot()`: averaged waveform + comb filter | `res.period_waveform, res.noise_reduction_db` |
+| `comb_filter_response` | `function` | **Magnitude of the N-period_s synchronous-averaging comb filter (McFadden 1987 Eq. 8).**<br>• `frequencies` [Hz], `period_s` [s], `n_averages`<br>\|C(f)\| = \|sin(N·π·f·T)/(N·sin(π·f·T))\|: unit teeth at harmonics k/T, nodes at j/(N·T) | `c = signals.comb_filter_response(freqs, 1/32, 20)` |
 | `regularized_inverse_filter` | `function` | **Kirkeby frequency-dependent regularized inversion (Kirkeby & Nelson 1999 Eq. (17)).**<br>• `response`: measured IR (array or `ImpulseResponseResult`; its `fs` rides along)<br>• `fs`: Sample rate [Hz]<br>• `f_range`: (f1, f2) equalized to unity (Required)<br>• `regularization_inside` (Default: 1e-6) / `regularization_outside` (Default: 1.0), fractions of max\|H\|²<br>• `transition_octaves` (Default: 1/3), `n_fft`, `delay` (Default: n_fft//2) | `inv = signals.regularized_inverse_filter(ir, f_range=(100, 10000))`<br><br>• `InverseFilterResult` |
 | `InverseFilterResult` | `dataclass` | **Regularized inverse filter.**<br>• `inverse` (time domain), `spectrum` (with modeling delay), `response_spectrum`, `regularization` = ε(f), `frequencies`, `f_range`, `delay`, `fs`<br>• `flatness_db`: worst in-band deviation of \|H·H_inv\| from 0 dB<br>• `max_gain_db`: out-of-band boost (≤ the 1/(2√ε) cap)<br>• `.apply(x)`: equalize, delay removed; `.plot()` | `flat = inv.apply(recording)` |
 | `cepstrum` | `function` | **Power/real/complex cepstrum (Havelock Chs. 27/87).**<br>• `x`, `fs`<br>• `kind`: 'power' (Default, IDFT of ln\|X\|²) / 'real' (ln\|X\|) / 'complex' (invertible, phase unwrapped)<br>• `nfft`: even, ≥ record (Default: record length)<br>Echo a at t0: rahmonics (−1)^(n+1)·aⁿ/n at n·t0 | `res = signals.cepstrum(x, fs, kind='complex')`<br><br>• `CepstrumResult` |
@@ -40923,16 +40923,16 @@ documents, one page per module.
 | `PrecisionFieldIndicators` | `dataclass` | **Annex B indicators (per band).**<br>• `ft`: temporal variability (= F1) or None<br>• `f_pi_unsigned`: F_pIn unsigned (= F2)<br>• `f_pi_signed`: F_pIn signed (= F3), ≥ unsigned<br>• `fs`: field non-uniformity FS (= F4) | `fi.f_pi_signed, fi.fs` |
 | `precision_qualification` | `function` | **The five ISO 9614-3 Annex C acceptance criteria.**<br>• `indicators`: `PrecisionFieldIndicators`<br>• `scan_intensity_level_1`/`_2`: LIn per scan [dB] (criterion 1)<br>• `pressure_residual_index`: δpI0 [dB] (criterion 2, K = 10)<br>• `field_nonuniformity_1`/`_2`: FS per scan density (criterion 5)<br>• `frequencies` [Hz] or `repeatability_limit`: Table 1 limit s | `q = emission.precision_qualification(fi, pressure_residual_index=18.0)`<br><br>• `PrecisionCriteria` |
 | `PrecisionCriteria` | `dataclass` | **Annex C pass/fail per band.**<br>• `criterion_1`…`criterion_5`: bool arrays or None where not evaluable<br>• `qualified`: conjunction of criteria 1–4 or None | `q.qualified, q.criterion_2` |
-| `plane_wave_frequency_range` | `function` | **Working plane-wave range (f_l, f_u) (ISO 10534-2 §4.2–4.5).**<br>• `spacing` s [m]<br>• `speed_of_sound` c0 [m/s]<br>• `diameter` d [m] (Default: None → spacing bound only)<br>• `shape`: 'circular'/'rectangular'/'square' (Default: 'circular') | `plane_wave_frequency_range(0.05, 343.2, diameter=0.1)  # (343.2, 1990.6)`<br><br>• [Hz] |
-| `plane_wave_frequency_range_astm` | `function` | **Working plane-wave range (f_l, f_u) (ASTM E2611-19 6.2.3–6.2.5, 6.5.4).**<br>• `spacing` s [m]<br>• `speed_of_sound` c [m/s]<br>• `diameter` d [m] (Default: None → spacing bound only)<br>• `shape`: 'circular'/'rectangular'/'square' (Default: 'circular') | `plane_wave_frequency_range_astm(0.05, 343.2, diameter=0.1)  # (68.6, 2011.2)`<br><br>• [Hz]; f_u s < 0.40 c, f_u d < 0.586 c (0.500 rectangular) |
-| `plot_impedance_tube_geometry` | `function` | **To-scale side view of the ISO 10534-2 tube.**<br>• `spacing` s, `x1` [m]<br>• `diameter` d [m], `shape` (Default: 'circular')<br>• `sample_thickness` [m] (Default: 50 mm nominal)<br>• `language` | `plot_impedance_tube_geometry(spacing=0.05, x1=0.15, diameter=0.10)`<br><br>• Dimensioned drawing + plane-wave range; also `ImpedanceTubeResult.plot_geometry()` |
-| `plot_transmission_tube_geometry` | `function` | **To-scale side view of the ASTM E2611 tube.**<br>• `l1`, `s1`, `l2`, `s2`, `thickness` [m]<br>• `diameter` d [m], `shape` (Default: 'circular')<br>• `language` | `plot_transmission_tube_geometry(l1=0.10, s1=0.05, l2=0.20, s2=0.05, thickness=0.05, diameter=0.10)`<br><br>• Four microphones + termination; also `TransferMatrix.plot_geometry()` |
+| `plane_wave_frequency_range` | `function` | **Working plane-wave range (f_l, f_u) (ISO 10534-2 §4.2–4.5).**<br>• `spacing` s [m]<br>• `speed_of_sound` c0 [m/s]<br>• `diameter_m` d [m] (Default: None → spacing bound only)<br>• `shape`: 'circular'/'rectangular'/'square' (Default: 'circular') | `plane_wave_frequency_range(0.05, 343.2, diameter_m=0.1)  # (343.2, 1990.6)`<br><br>• [Hz] |
+| `plane_wave_frequency_range_astm` | `function` | **Working plane-wave range (f_l, f_u) (ASTM E2611-19 6.2.3–6.2.5, 6.5.4).**<br>• `spacing` s [m]<br>• `speed_of_sound` c [m/s]<br>• `diameter_m` d [m] (Default: None → spacing bound only)<br>• `shape`: 'circular'/'rectangular'/'square' (Default: 'circular') | `plane_wave_frequency_range_astm(0.05, 343.2, diameter_m=0.1)  # (68.6, 2011.2)`<br><br>• [Hz]; f_u s < 0.40 c, f_u d < 0.586 c (0.500 rectangular) |
+| `plot_impedance_tube_geometry` | `function` | **To-scale side view of the ISO 10534-2 tube.**<br>• `spacing` s, `x1` [m]<br>• `diameter_m` d [m], `shape` (Default: 'circular')<br>• `sample_thickness` [m] (Default: 50 mm nominal)<br>• `language` | `plot_impedance_tube_geometry(spacing=0.05, x1=0.15, diameter_m=0.10)`<br><br>• Dimensioned drawing + plane-wave range; also `ImpedanceTubeResult.plot_geometry()` |
+| `plot_transmission_tube_geometry` | `function` | **To-scale side view of the ASTM E2611 tube.**<br>• `l1`, `s1`, `l2`, `s2`, `thickness` [m]<br>• `diameter_m` d [m], `shape` (Default: 'circular')<br>• `language` | `plot_transmission_tube_geometry(l1=0.10, s1=0.05, l2=0.20, s2=0.05, thickness=0.05, diameter_m=0.10)`<br><br>• Four microphones + termination; also `TransferMatrix.plot_geometry()` |
 | `speed_of_sound_iso10534` | `function` | **Speed of sound (ISO 10534-2 Eq. 5).**<br>• `temperature_c` t [°C] | `speed_of_sound_iso10534(temperature_c=19.85)  # 343.2`<br><br>• c0 = 343.2 √(T/293) [m/s], T = 273.15 + t |
 | `air_density_iso10534` | `function` | **Air density (ISO 10534-2 Eq. 7).**<br>• `temperature_c` t [°C]<br>• `atmospheric_pressure_kpa` [kPa] (Default: 101.325) | `air_density_iso10534(temperature_c=19.85)  # 1.186`<br><br>• ρ [kg/m³] |
 | `speed_of_sound_astm` | `function` | **Speed of sound (ASTM E2611-19 Eq. 4).**<br>• `temperature_c` T [°C] | `speed_of_sound_astm(temperature_c=20.0)  # 343.2`<br><br>• 20.047 √(273.15 + T) [m/s] |
 | `air_density_astm` | `function` | **Air density (ASTM E2611-19 Eq. 5).**<br>• `temperature_c` T [°C]<br>• `atmospheric_pressure_kpa` P [kPa] (Default: 101.325) | `air_density_astm(temperature_c=20.0)  # 1.202`<br><br>• ρ [kg/m³] |
 | `hydraulic_diameter` | `function` | **Hydraulic diameter of a rectangular tube, 4A/P (ISO 10534-2 A.2.1.5).**<br>• `width` w [m]<br>• `height` h [m] | `hydraulic_diameter(0.08, 0.04)  # 0.0533`<br><br>• d_h = 2wh/(w + h) [m]; feed to `tube_attenuation_constant` |
-| `tube_attenuation_constant` | `function` | **Lower-bound tube attenuation k0″ (ISO 10534-2 Eq. A.18).**<br>• `frequency` f [Hz]<br>• `speed_of_sound` c0 [m/s]<br>• `diameter` d [m] (hydraulic for rectangular) | `tube_attenuation_constant(1000.0, 343.2, 0.1)  # 0.0179`<br><br>• [Np/m] |
+| `tube_attenuation_constant` | `function` | **Lower-bound tube attenuation k0″ (ISO 10534-2 Eq. A.18).**<br>• `frequency` f [Hz]<br>• `speed_of_sound` c0 [m/s]<br>• `diameter_m` d [m] (hydraulic for rectangular) | `tube_attenuation_constant(1000.0, 343.2, 0.1)  # 0.0179`<br><br>• [Np/m] |
 | `tube_wavenumber` | `function` | **Complex wavenumber k0 = k0′ − j k0″ (ISO 10534-2 §2.6).**<br>• `frequency` f [Hz]<br>• `speed_of_sound` c0 [m/s]<br>• `attenuation`: k0″ [Np/m] (Default: None → lossless) | `tube_wavenumber(1000.0, 343.2, attenuation=0.018)`<br><br>• 18.308 − 0.018j [1/m] |
 | `mic_calibration_factor` | `function` | **Microphone-mismatch calibration factor Hc (ISO 10534-2 Eq. 10).**<br>• `h12_config1`: H12 in the standard configuration<br>• `h12_config2`: H12 with the microphones interchanged | `hc = materials.mic_calibration_factor(h12_a, h12_b)`<br><br>• Hc = √(H12ᴵ/H12ᴵᴵ) (complex) |
 | `apply_mic_calibration` | `function` | **Apply the calibration factor (Eq. 13).**<br>• `h12_uncorrected`<br>• `calibration_factor`: Hc | `h12 = materials.apply_mic_calibration(h12_raw, hc)`<br><br>• H12 = H12,raw/Hc |
@@ -40941,20 +40941,20 @@ documents, one page per module.
 | `surface_impedance` | `function` | **Absolute surface impedance Z (Eq. 19).**<br>• `reflection`: complex r<br>• `characteristic_impedance`: ρc0 [rayl] | `surface_impedance(0.5, 407.0)  # 1221`<br><br>• Z = ρc0(1 + r)/(1 − r) [rayl] |
 | `normalized_surface_impedance` | `function` | **Normalised surface impedance Z/(ρc0) (Eq. 19).**<br>• `reflection`: complex r | `normalized_surface_impedance(0.5)  # 3.0` |
 | `normalized_surface_admittance` | `function` | **Normalised surface admittance Gρc0 (Eq. 20).**<br>• `reflection`: complex r | `normalized_surface_admittance(0.5)  # 0.333`<br><br>• (1 − r)/(1 + r) |
-| `two_microphone_impedance` | `function` | **Full two-microphone reduction (ISO 10534-2 Clause 7).**<br>• `h12`: corrected transfer function<br>• `frequency` f [Hz]<br>• `spacing` s [m], `x1` [m]<br>• `speed_of_sound` c0 [m/s], `characteristic_impedance` ρc0 [rayl]<br>• `attenuation`: k0″ [Np/m] (Default: None)<br>• `diameter` + `shape`: activate the plane-wave range check | `res = materials.two_microphone_impedance(h12, frequency=f, spacing=0.05, x1=0.15, speed_of_sound=343.2, characteristic_impedance=407.0)`<br><br>• `ImpedanceTubeResult` |
-| `ImpedanceTubeResult` | `dataclass` | **Two-microphone result per frequency.**<br>• `frequency` [Hz]<br>• `reflection`: complex r (Eq. 17)<br>• `surface_impedance` [rayl], `normalized_impedance` (Eq. 19)<br>• `absorption`: α = 1 − \|r\|² (Eq. 18)<br>• Retains `spacing`, `x1`, `diameter`, `shape` when supplied | `res.absorption, res.normalized_impedance` |
+| `two_microphone_impedance` | `function` | **Full two-microphone reduction (ISO 10534-2 Clause 7).**<br>• `h12`: corrected transfer function<br>• `frequency` f [Hz]<br>• `spacing` s [m], `x1` [m]<br>• `speed_of_sound` c0 [m/s], `characteristic_impedance` ρc0 [rayl]<br>• `attenuation`: k0″ [Np/m] (Default: None)<br>• `diameter_m` + `shape`: activate the plane-wave range check | `res = materials.two_microphone_impedance(h12, frequency=f, spacing=0.05, x1=0.15, speed_of_sound=343.2, characteristic_impedance=407.0)`<br><br>• `ImpedanceTubeResult` |
+| `ImpedanceTubeResult` | `dataclass` | **Two-microphone result per frequency.**<br>• `frequency` [Hz]<br>• `reflection`: complex r (Eq. 17)<br>• `surface_impedance` [rayl], `normalized_impedance` (Eq. 19)<br>• `absorption`: α = 1 − \|r\|² (Eq. 18)<br>• Retains `spacing`, `x1`, `diameter_m`, `shape` when supplied | `res.absorption, res.normalized_impedance` |
 | `ImpedanceTubeWarning` | `warning class` | **ISO 10534-2 advisory.**<br>Emitted by `two_microphone_impedance` for frequencies outside the plane-wave working range (Eqs. 1–4); the results are still returned | `warnings.simplefilter('error', ImpedanceTubeWarning)` |
 | `standing_wave_ratio_from_level` | `function` | **Standing-wave ratio from ΔL (ISO 10534-1 Eq. 15).**<br>• `level_difference`: Lmax − Lmin [dB] | `standing_wave_ratio_from_level(20.0)  # 10.0`<br><br>• s = 10^(ΔL/20) |
 | `standing_wave_reflection_magnitude` | `function` | **Reflection magnitude from the SWR (Eq. 14).**<br>• `swr`: s ≥ 1 | `standing_wave_reflection_magnitude(10.0)  # 0.818`<br><br>• \|r\| = (s − 1)/(s + 1) |
 | `standing_wave_reflection` | `function` | **Complex reflection factor from the standing wave (Eqs. 17–23).**<br>• `swr`: s<br>• `first_min_distance`: x_min1 [m]<br>• `wavelength`: λ0 [m] | `standing_wave_reflection(10.0, 0.05, 0.4)  # -0.818j`<br><br>• phase φ = π(4x_min1/λ0 − 1) |
 | `standing_wave_absorption` | `function` | **Absorption from the SWR (Eqs. 9 + 14).**<br>• `swr`: s ≥ 1 | `standing_wave_absorption(10.0)  # 0.331`<br><br>• α = 4s/(s + 1)² |
 | `standing_wave_normalized_impedance` | `function` | **Normalised impedance from the standing wave (Eqs. 24–26).**<br>• `swr`, `first_min_distance` [m], `wavelength` [m] | `standing_wave_normalized_impedance(10.0, 0.05, 0.4)`<br><br>• 0.198 − 0.98j |
-| `wave_decomposition` | `function` | **Decompose the field into (A, B, C, D) (ASTM E2611-19 Eqs. 17–20).**<br>• `h1`…`h4`: microphone transfer functions<br>• `l1`, `s1`, `l2`, `s2`: geometry [m]<br>• `wavenumber` k<br>• `diameter` + `shape`: activate the plane-wave range check | `A, B, C, D = materials.wave_decomposition(h1, h2, h3, h4, l1=0.2, s1=0.05, l2=0.2, s2=0.05, wavenumber=k)`<br><br>• Forward/backward amplitudes, both sides |
+| `wave_decomposition` | `function` | **Decompose the field into (A, B, C, D) (ASTM E2611-19 Eqs. 17–20).**<br>• `h1`…`h4`: microphone transfer functions<br>• `l1`, `s1`, `l2`, `s2`: geometry [m]<br>• `wavenumber` k<br>• `diameter_m` + `shape`: activate the plane-wave range check | `A, B, C, D = materials.wave_decomposition(h1, h2, h3, h4, l1=0.2, s1=0.05, l2=0.2, s2=0.05, wavenumber=k)`<br><br>• Forward/backward amplitudes, both sides |
 | `face_quantities` | `function` | **Face pressures and velocities (Eq. 21).**<br>• `a`, `b`, `c`, `d`: wave amplitudes<br>• `wavenumber` k, `thickness` d [m], `characteristic_impedance` ρc | `p0, pd, u0, ud = materials.face_quantities(A, B, C, D, wavenumber=k, thickness=0.05, characteristic_impedance=407.0)` |
-| `transfer_matrix_two_load` | `function` | **Two-load transfer matrix (ASTM E2611-19 Eqs. 17–22).**<br>• `load_a`, `load_b`: (H1, H2, H3, H4) per termination<br>• `l1`, `s1`, `l2`, `s2`, `thickness` [m]<br>• `wavenumber`, `characteristic_impedance`<br>• `frequency` (retained for `.plot()`), `diameter` + `shape`: range check | `T = materials.transfer_matrix_two_load(load_a, load_b, l1=0.2, s1=0.05, l2=0.2, s2=0.05, thickness=0.05, wavenumber=k, characteristic_impedance=407.0)`<br><br>• `TransferMatrix` |
+| `transfer_matrix_two_load` | `function` | **Two-load transfer matrix (ASTM E2611-19 Eqs. 17–22).**<br>• `load_a`, `load_b`: (H1, H2, H3, H4) per termination<br>• `l1`, `s1`, `l2`, `s2`, `thickness` [m]<br>• `wavenumber`, `characteristic_impedance`<br>• `frequency` (retained for `.plot()`), `diameter_m` + `shape`: range check | `T = materials.transfer_matrix_two_load(load_a, load_b, l1=0.2, s1=0.05, l2=0.2, s2=0.05, thickness=0.05, wavenumber=k, characteristic_impedance=407.0)`<br><br>• `TransferMatrix` |
 | `transfer_matrix_one_load` | `function` | **One-load transfer matrix, symmetric specimen (Eqs. 23–24).**<br>• `load`: (H1, H2, H3, H4)<br>• Same geometry/frequency/range-check parameters as `transfer_matrix_two_load` | `T = materials.transfer_matrix_one_load(load, l1=0.2, s1=0.05, l2=0.2, s2=0.05, thickness=0.05, wavenumber=k, characteristic_impedance=407.0)`<br><br>• Requires reciprocity + symmetry |
 | `air_layer_transfer_matrix` | `function` | **Analytic loss-free air-layer matrix (validation reference).**<br>• `wavenumber` k<br>• `thickness` d [m]<br>• `characteristic_impedance` ρc [rayl] | `T = materials.air_layer_transfer_matrix(k, 0.05, 407.0)`<br><br>• det(T) = 1, T11 = T22 |
-| `TransferMatrix` | `dataclass` | **Acoustic transfer matrix [[T11, T12], [T21, T22]] (ASTM E2611-19 Eq. 16).**<br>• `t11`, `t12`, `t21`, `t22`: complex, scalar or per frequency<br>• Solver-built matrices retain `l1`/`s1`/`l2`/`s2`, `thickness`, `diameter`, `shape`, `frequency`, `air_characteristic_impedance` (so `.plot()` needs no arguments) | `T.t11, T.t12` |
+| `TransferMatrix` | `dataclass` | **Acoustic transfer matrix [[T11, T12], [T21, T22]] (ASTM E2611-19 Eq. 16).**<br>• `t11`, `t12`, `t21`, `t22`: complex, scalar or per frequency<br>• Solver-built matrices retain `l1`/`s1`/`l2`/`s2`, `thickness`, `diameter_m`, `shape`, `frequency`, `air_characteristic_impedance` (so `.plot()` needs no arguments) | `T.t11, T.t12` |
 | `airflow_resistance` | `function` | **Airflow resistance R = Δp/qv (ISO 9053-1:2018 §3.1).**<br>• `pressure_drop_pa` Δp [Pa]<br>• `volume_flow_rate` qv [m³/s] | `airflow_resistance(2.0, 0.0005)  # 4000.0`<br><br>• [Pa·s/m³] |
 | `specific_airflow_resistance` | `function` | **Specific airflow resistance Rs (§3.2).**<br>• `resistance` R + `area` A, **or** `pressure_drop_pa` Δp + `velocity` u | `specific_airflow_resistance(4000.0, 0.01)  # 40.0`<br><br>• Rs = R·A = Δp/u [Pa·s/m] |
 | `airflow_resistivity` | `function` | **Airflow resistivity σ = Rs/d (§3.3).**<br>• `specific_resistance` Rs [Pa·s/m]<br>• `thickness` d [m] | `airflow_resistivity(40.0, 0.05)  # 800.0`<br><br>• [Pa·s/m²] |
@@ -40984,7 +40984,7 @@ documents, one page per module.
 | `DELANY_BAZLEY_VALIDITY` | `tuple` | **Stated fit range in X = ρf/σ.**<br>(0.01, 1.0) | `DELANY_BAZLEY_VALIDITY  # (0.01, 1.0)` |
 | `MIKI_VALIDITY` | `tuple` | **Miki fit range in f/σ.**<br>(0.01, 1.0) | `MIKI_VALIDITY  # (0.01, 1.0)` |
 | `PUBLISHED_AIR` | `Fluid` | **The air the Johnson-Champoux-Allard model was published with.**<br>343.0 m/s, 1.205 kg/m³, 1.84·10⁻⁵ Pa·s, Pr = 0.71, γ = 1.4, 101325 Pa<br>• a `phonometry.fluids.Fluid`: pass a computed one to depart from the published constants<br>• the `fluid` argument of the slow-sound and metadiffuser models defaults to it | `PUBLISHED_AIR.density  # 1.205` |
-| `layered_absorber` | `function` | **Transfer-matrix multilayer prediction at one angle (Cox & D'Antonio Eq. 2.29; Bies Eq. D.95; Mechel D.4).**<br>• `frequency` f [Hz]<br>• `layers`: stack from the incidence side (`AirLayer`, `PorousLayer`, `PoroelasticLayer`, `PerforatedPlateLayer`, `MicroperforatedPlateLayer`, `MembraneLayer`)<br>• `angle` θ [rad] (Default: 0)<br>• `termination`: 'rigid'/'free'/complex Z [Pa·s/m] (Default: 'rigid')<br>• `fluid`: `Fluid` (Default: `PUBLISHED_AIR`) | `res = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])`<br><br>• `LayeredAbsorberResult` |
+| `layered_absorber` | `function` | **Transfer-matrix multilayer prediction at one angle_rad (Cox & D'Antonio Eq. 2.29; Bies Eq. D.95; Mechel D.4).**<br>• `frequency` f [Hz]<br>• `layers`: stack from the incidence side (`AirLayer`, `PorousLayer`, `PoroelasticLayer`, `PerforatedPlateLayer`, `MicroperforatedPlateLayer`, `MembraneLayer`)<br>• `angle_rad` θ [rad] (Default: 0)<br>• `termination`: 'rigid'/'free'/complex Z [Pa·s/m] (Default: 'rigid')<br>• `fluid`: `Fluid` (Default: `PUBLISHED_AIR`) | `res = materials.layered_absorber(f, [materials.PorousLayer(0.05, med)])`<br><br>• `LayeredAbsorberResult` |
 | `plot_absorber_stack` | `function` | **To-scale cross-section of a layer stack.**<br>• `layers`: front layer first (or a single layer)<br>• `language` | `plot_absorber_stack(layers)`<br><br>• Dimensioned drawing, rigid backing at right; also `LayeredAbsorberResult.plot_geometry()` and `layer.plot()` |
 | `LayeredAbsorberResult` | `dataclass` | **Oblique-incidence prediction.**<br>• `surface_impedance` Zs, `normalized_impedance`<br>• `reflection` R(θ), `absorption` α(θ)<br>• `transfer_matrix`: (2, 2, n) chain matrix (det = 1)<br>• `.plot()`: α(f) with \|R\| overlaid | `res.absorption, res.surface_impedance` |
 | `diffuse_field_absorption` | `function` | **Random-incidence (Paris) absorption (Mechel D.5 Eq. 9).**<br>• `frequency`, `layers`, `termination` as `layered_absorber`<br>• `angle_limit` [rad] (Default: π/2; 75°–87° truncations in use)<br>• `quadrature_points` (Default: 64, Gauss–Legendre) | `dif = materials.diffuse_field_absorption(f, layers)`<br><br>• `DiffuseFieldAbsorptionResult` |
@@ -41003,12 +41003,12 @@ documents, one page per module.
 | `helmholtz_resonance_frequency` | `function` | **Shallow-cavity perforate resonance (Cox Eq. 7.4).**<br>• `cavity_depth` d, `plate_thickness` t, `hole_radius` a [m]<br>• `open_area` ε, `end_correction` δ<br>• `speed_of_sound` | `helmholtz_resonance_frequency(cavity_depth=0.025, plate_thickness=0.006, hole_radius=0.0025, open_area=0.05)`<br><br>• f0 = (c/2π)√(ε/(t′d)) [Hz] |
 | `membrane_resonance_frequency` | `function` | **Membrane mass-spring resonance (Cox Eqs. 7.9/7.10).**<br>• `surface_density` m [kg/m²], `cavity_depth` d [m]<br>• `isothermal` (Default: False)<br>• `fluid`: `Fluid`; the isothermal spring divides by the fluid's own ratio of specific heats (Default: `PUBLISHED_AIR`) | `membrane_resonance_frequency(surface_density=5.0, cavity_depth=0.05)  # ≈120`<br><br>• ≈ 60/√(md) (50/√(md) isothermal) [Hz] |
 | `PorousAbsorberWarning` | `warning class` | **Porous-model advisory.**<br>Emitted when the Delany–Bazley / Miki regressions are evaluated outside their published fit range; values are still returned | `warnings.simplefilter('error', PorousAbsorberWarning)` |
-| `slit_helmholtz_absorber` | `function` | **Slit panel loaded with Helmholtz resonators (Jiménez et al. Appl. Sci. 2017).**<br>• `frequency` f [Hz], `resonators`: one/many `HelmholtzResonator`<br>• `slit_height` h, `lattice_step` a, `period` d [m]<br>• `angle` θ [rad] (Default: 0)<br>• `end_correction`, `slit_radiation` (Default: True)<br>• visco-thermal slit + square-duct losses | `res = materials.slit_helmholtz_absorber(f, hr, slit_height=1e-3, lattice_step=3e-2, period=5e-2)`<br><br>• `SlitResonatorAbsorberResult` |
-| `plot_slit_absorber_geometry` | `function` | **To-scale cross-section of one period of the slit panel.**<br>• `resonators` (one per lattice step)<br>• `slit_height` h, `lattice_step` a, `period` d [m]<br>• `language` | `plot_slit_absorber_geometry([hr], slit_height=1e-3, lattice_step=0.03, period=0.05)`<br><br>• Also `SlitResonatorAbsorberResult.plot_geometry()` |
+| `slit_helmholtz_absorber` | `function` | **Slit panel loaded with Helmholtz resonators (Jiménez et al. Appl. Sci. 2017).**<br>• `frequency` f [Hz], `resonators`: one/many `HelmholtzResonator`<br>• `slit_height` h, `lattice_step` a, `period_m` d [m]<br>• `angle_rad` θ [rad] (Default: 0)<br>• `end_correction`, `slit_radiation` (Default: True)<br>• visco-thermal slit + square-duct losses | `res = materials.slit_helmholtz_absorber(f, hr, slit_height=1e-3, lattice_step=3e-2, period_m=5e-2)`<br><br>• `SlitResonatorAbsorberResult` |
+| `plot_slit_absorber_geometry` | `function` | **To-scale cross-section of one period_m of the slit panel.**<br>• `resonators` (one per lattice step)<br>• `slit_height` h, `lattice_step` a, `period_m` d [m]<br>• `language` | `plot_slit_absorber_geometry([hr], slit_height=1e-3, lattice_step=0.03, period_m=0.05)`<br><br>• Also `SlitResonatorAbsorberResult.plot_geometry()` |
 | `plot_helmholtz_resonator_geometry` | `function` | **To-scale cross-section of a square-section Helmholtz resonator.**<br>• `resonator`: `HelmholtzResonator`<br>• `language` | `plot_helmholtz_resonator_geometry(hr)`<br><br>• Also `HelmholtzResonator.plot()` |
 | `SlitResonatorAbsorberResult` | `dataclass` | **Slow-sound panel prediction.**<br>• `surface_impedance` Z = T11/T21, `normalized_impedance`<br>• `reflection` R(θ), `absorption` α = 1 − \|R\|²<br>• `effective_wavenumber`, `effective_impedance`<br>• `transfer_matrix`: (2, 2, n)<br>• `.plot()`: α(f) with \|R\| overlaid | `res.absorption, res.plot()` |
-| `critical_coupling_design` | `function` | **Solve geometry for perfect absorption at a frequency (critical coupling, Eq. 9).**<br>• `target_frequency` f0 [Hz], base `resonator`<br>• `lattice_step` a, `period` d [m], `angle` θ<br>• tunes cavity length + slit height so the reflection zero is real<br>• warns if α does not reach ≈1 | `d = materials.critical_coupling_design(300.0, hr, lattice_step=3e-2, period=5e-2)`<br><br>• `CriticalCouplingResult` |
-| `CriticalCouplingResult` | `dataclass` | **Perfect-absorption design outcome.**<br>• `resonator`, `slit_height`: solved geometry<br>• `absorption` (≈1), `normalized_impedance` (≈1)<br>• `converged`, `target_frequency`, `angle` | `d.resonator, d.slit_height, d.absorption` |
+| `critical_coupling_design` | `function` | **Solve geometry for perfect absorption at a frequency (critical coupling, Eq. 9).**<br>• `target_frequency` f0 [Hz], base `resonator`<br>• `lattice_step` a, `period_m` d [m], `angle_rad` θ<br>• tunes cavity length + slit height so the reflection zero is real<br>• warns if α does not reach ≈1 | `d = materials.critical_coupling_design(300.0, hr, lattice_step=3e-2, period_m=5e-2)`<br><br>• `CriticalCouplingResult` |
+| `CriticalCouplingResult` | `dataclass` | **Perfect-absorption design outcome.**<br>• `resonator`, `slit_height`: solved geometry<br>• `absorption` (≈1), `normalized_impedance` (≈1)<br>• `converged`, `target_frequency`, `angle_rad` | `d.resonator, d.slit_height, d.absorption` |
 | `HelmholtzResonator` | `dataclass` | **Square-cross-section Helmholtz resonator.**<br>• `neck_length` l_n, `neck_side` w_n [m]<br>• `cavity_length` l_c, `cavity_side` w_c [m] | `HelmholtzResonator(1e-3, 3e-3, 30e-3, 27e-3)` |
 | `helmholtz_resonator_impedance` | `function` | **Resonator acoustic impedance Z_HR with visco-thermal losses (Jiménez et al. APL 2016 Eq. A23).**<br>• `frequency`, `resonator`<br>• `slit_height`, `lattice_step` for neck→slit end correction<br>• `end_correction` (Default: True) | `z = materials.helmholtz_resonator_impedance(f, hr)`<br><br>• complex [Pa·s/m³] |
 | `slit_effective_properties` | `function` | **Narrow-slit visco-thermal ρ_s, κ_s (Stinson 1991; Eq. 6).**<br>• `frequency`, `slit_height` h [m]<br>• `fluid`: `Fluid` (Default: `PUBLISHED_AIR`)<br>• limit jωρ_s → 12η/h² as ω → 0 | `rho_s, kap_s = materials.slit_effective_properties(f, slit_height=1.2e-3)` |
@@ -41039,9 +41039,9 @@ documents, one page per module.
 | `scattering_coefficient_uncertainty` | `function` | **Uncertainty of the scattering coefficient (Eq. A.5).**<br>• `alpha_spec`, `alpha_s`<br>• `u_alpha_spec`, `u_alpha_s` | `u = materials.scattering_coefficient_uncertainty(0.45, 0.30, 0.02, 0.02)`<br><br>• `ScatteringUncertainty` (U = 2u, 95 %) |
 | `ScatteringUncertainty` | `dataclass` | **Scattering uncertainty result.**<br>• `u_scattering`: combined standard u_s<br>• `expanded`: U = 2u_s | `u.u_scattering, u.expanded` |
 | `directional_diffusion_coefficient` | `function` | **Directional diffusion coefficient d_θ (ISO 17497-2 Formulas 5/6).**<br>• `levels`: n ≥ 2 reflected SPL [dB] (−inf = zero energy)<br>• `area_weights`: Ni (Formula 8) (Default: None → equal-area Formula 5) | `directional_diffusion_coefficient([-10., -12., -15., -11., -13.])  # 0.854` |
-| `directional_diffusion` | `function` | **Polar response + its coefficient.**<br>• `angles` [°], `levels` [dB]<br>• `weights`: Ni (Default: None) | `res = materials.directional_diffusion(angles, levels)`<br><br>• `DiffusionResult` |
+| `directional_diffusion` | `function` | **Polar response + its coefficient.**<br>• `angles_deg` [°], `levels` [dB]<br>• `weights`: Ni (Default: None) | `res = materials.directional_diffusion(angles_deg, levels)`<br><br>• `DiffusionResult` |
 | `plot_goniometer_geometry` | `function` | **Free-field diffusion goniometer in plan, to scale.**<br>• `source_distance` (Default: 10 m), `receiver_radius` (Default: 5 m)<br>• `angular_step` (Default: 5°, 37 microphones)<br>• `sample_width` [m] (Default: 0.6)<br>• `language` | `plot_goniometer_geometry()` |
-| `DiffusionResult` | `dataclass` | **Polar diffusion result.**<br>• `angles` [°], `levels` [dB]<br>• `coefficient`: d_θ (autocorrelation)<br>• `.plot()`, `.report()` | `res.coefficient` |
+| `DiffusionResult` | `dataclass` | **Polar diffusion result.**<br>• `angles_deg` [°], `levels` [dB]<br>• `coefficient`: d_θ (autocorrelation)<br>• `.plot()`, `.report()` | `res.coefficient` |
 | `diffusion_spectrum` | `function` | **Diffusion spectrum d(f) (ISO 17497-2 Clause 8.5).**<br>• `frequencies`: one-third-octave centres [Hz]<br>• `diffusion`: d per band (directional, or random-incidence via Clause 8.4)<br>• `normalized`: d_n per band (Default: None) | `res = materials.diffusion_spectrum(f, d, normalized=d_n)`<br><br>• `DiffusionSpectrum` |
 | `DiffusionSpectrum` | `dataclass` | **Diffusion spectrum result.**<br>• `frequencies` [Hz]<br>• `diffusion`: d per band<br>• `normalized`: d_n per band or None<br>• `.plot()`, `.report()` | `res.diffusion` |
 | `normalized_diffusion_coefficient` | `function` | **Normalised coefficient d_θ,n (Formula 7).**<br>• `d_theta`: test surface<br>• `d_theta_reference`: flat reference | `normalized_diffusion_coefficient(0.6, 0.2)  # 0.5`<br><br>• (d − d_r)/(1 − d_r) |
@@ -41051,16 +41051,16 @@ documents, one page per module.
 | `ScatteringDiffusionWarning` | `warning class` | **ISO 17497 advisory.**<br>Emitted for out-of-range scattering/diffusion measurement conditions (e.g. a base plate over the Table 1 limits) | `warnings.simplefilter('error', ScatteringDiffusionWarning)` |
 | `quadratic_residue_sequence` | `function` | **Quadratic residue sequence s_n (Cox & D'Antonio Eq. 10.2).**<br>• `prime`: odd prime generator N | `quadratic_residue_sequence(7)  # [0 1 4 2 2 4 1]`<br><br>• s_n = n² mod N |
 | `qrd_well_depths` | `function` | **QRD well depths d_n (Cox & D'Antonio Eq. 10.3).**<br>• `prime`: generator N<br>• `design_frequency` f0 [Hz]<br>• `speed_of_sound` c [m/s] (Default: 343) | `qrd_well_depths(7, 500.0)  # d_max 0.196 m`<br><br>• d_n = s_n λ0/(2N) |
-| `plot_qrd_geometry` | `function` | **To-scale QRD well profile.**<br>• `depths` d_n [m], `well_width` w [m]<br>• `periods` (Default: 1), `fin_width` [m] (Default: w/12)<br>• `language` | `plot_qrd_geometry(materials.qrd_well_depths(7, 500.0), 0.12, periods=2)`<br><br>• Also `DiffuserPolarResponse.plot_geometry()` |
+| `plot_qrd_geometry` | `function` | **To-scale QRD well profile.**<br>• `depths` d_n [m], `well_width` w [m]<br>• `repetitions` (Default: 1), `fin_width` [m] (Default: w/12)<br>• `language` | `plot_qrd_geometry(materials.qrd_well_depths(7, 500.0), 0.12, repetitions=2)`<br><br>• Also `DiffuserPolarResponse.plot_geometry()` |
 | `MetadiffuserWell` | `dataclass` | **One slit of a metadiffuser panel (Jiménez et al. Sci. Rep. 2017).**<br>• `slit_height` h [m]<br>• `resonators`: tuple of `HelmholtzResonator`, face to backing<br>• `None` in a well sequence = flat rigid strip (R = 1) | `MetadiffuserWell(14.7e-3, (hr, hr))`<br><br>• lattice a = L/M |
-| `metadiffuser_reflection` | `function` | **Per-well reflection spectra R_n(f) of a metadiffuser.**<br>• `frequency` f [Hz], `wells`: `MetadiffuserWell`/`None` sequence<br>• `depth` L, `period` d [m]; `angle` θ [rad] (Default: 0)<br>• `resonator_geometry` `"slit"`/`"square"` (Default: slit)<br>• 2-D visco-thermal TMM per slit | `panel = materials.metadiffuser_reflection(f, wells, depth=0.02, period=0.07)`<br><br>• `MetadiffuserResult` |
-| `MetadiffuserResult` | `dataclass` | **Metadiffuser spectra, one reflection row per well.**<br>• `reflection` (N, F), `well_absorption` (N, F)<br>• `absorption`: face average 1 − mean\|R_n\|²<br>• retains `wells`/`depth`/`period` | `panel.plot()`; `panel.plot_geometry()`<br><br>• `.plot()` α per well; `.plot_geometry()` panel section |
-| `metadiffuser_polar_response` | `function` | **Far-field polar response of a metadiffuser at one frequency.**<br>• `frequency` f [Hz], `wells`, `depth` L, `period` d [m]<br>• `angles` [°], `source_angle` ψ [°], `periods` (Default: 1)<br>• Fraunhofer of R_n(f), no obliquity factor (Sci. Rep. Eq. (1)) | `pol = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02, period=0.07, periods=6)`<br><br>• `DiffuserPolarResponse` |
-| `metadiffuser_diffusion_spectrum` | `function` | **Normalized diffusion spectrum d_n(f) of a metadiffuser.**<br>• `frequencies` [Hz], `wells`, `depth` L, `period` d [m]<br>• normalised against the same-footprint flat panel<br>• ISO 17497-2 directional coefficient per band | `metadiffuser_diffusion_spectrum(f, wells, depth=0.02, period=0.07)`<br><br>• `DiffusionSpectrum` |
-| `plot_metadiffuser_panel_geometry` | `function` | **To-scale metadiffuser panel cross-section.**<br>• `wells`, `depth` L, `period` d [m]<br>• numbered slits, resonators shelved into the septum<br>• `language` | `plot_metadiffuser_panel_geometry(wells, depth=0.02, period=0.07)`<br><br>• Also `MetadiffuserResult.plot_geometry()` |
-| `predict_diffuser_polar_response` | `function` | **Predicted far-field polar response (Cox & D'Antonio Eq. 5.8).**<br>• `well_width` w [m], `frequency` f [Hz]<br>• `depths` d_n [m] or `reflection` R_n (exactly one)<br>• `angles` [°] (Default: semicircle), `source_angle` ψ [°]<br>• `periods` Np (Default: 1) | `s = materials.predict_diffuser_polar_response(0.10, 2000.0, depths=d, periods=5)`<br><br>• `DiffuserPolarResponse` |
-| `predicted_diffusion_spectrum` | `function` | **Predicted diffusion spectrum d(f) of a design.**<br>• `well_width` [m], `frequencies` [Hz]<br>• `depths` d_n [m]<br>• `periods` (Default: 1)<br>• `normalize`: also d_n vs flat reference (Default: True) | `res = materials.predicted_diffusion_spectrum(0.10, f, depths=d, periods=5)`<br><br>• `DiffusionSpectrum` |
-| `DiffuserPolarResponse` | `dataclass` | **Predicted diffuser polar response.**<br>• `frequency` [Hz]<br>• `angles` [°], `levels` [dB] (peak at 0)<br>• `coefficient`: d_θ<br>• `.plot()` | `s.coefficient` |
+| `metadiffuser_reflection` | `function` | **Per-well reflection spectra R_n(f) of a metadiffuser.**<br>• `frequency` f [Hz], `wells`: `MetadiffuserWell`/`None` sequence<br>• `depth` L, `period_m` d [m]; `angle_deg` θ [rad] (Default: 0)<br>• `resonator_geometry` `"slit"`/`"square"` (Default: slit)<br>• 2-D visco-thermal TMM per slit | `panel = materials.metadiffuser_reflection(f, wells, depth=0.02, period_m=0.07)`<br><br>• `MetadiffuserResult` |
+| `MetadiffuserResult` | `dataclass` | **Metadiffuser spectra, one reflection row per well.**<br>• `reflection` (N, F), `well_absorption` (N, F)<br>• `absorption`: face average 1 − mean\|R_n\|²<br>• retains `wells`/`depth`/`period_m` | `panel.plot()`; `panel.plot_geometry()`<br><br>• `.plot()` α per well; `.plot_geometry()` panel section |
+| `metadiffuser_polar_response` | `function` | **Far-field polar response of a metadiffuser at one frequency.**<br>• `frequency` f [Hz], `wells`, `depth` L, `period_m` d [m]<br>• `angles_deg` [°], `source_angle` ψ [°], `repetitions` (Default: 1)<br>• Fraunhofer of R_n(f), no obliquity factor (Sci. Rep. Eq. (1)) | `pol = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02, period_m=0.07, repetitions=6)`<br><br>• `DiffuserPolarResponse` |
+| `metadiffuser_diffusion_spectrum` | `function` | **Normalized diffusion spectrum d_n(f) of a metadiffuser.**<br>• `frequencies` [Hz], `wells`, `depth` L, `period_m` d [m]<br>• normalised against the same-footprint flat panel<br>• ISO 17497-2 directional coefficient per band | `metadiffuser_diffusion_spectrum(f, wells, depth=0.02, period_m=0.07)`<br><br>• `DiffusionSpectrum` |
+| `plot_metadiffuser_panel_geometry` | `function` | **To-scale metadiffuser panel cross-section.**<br>• `wells`, `depth` L, `period_m` d [m]<br>• numbered slits, resonators shelved into the septum<br>• `language` | `plot_metadiffuser_panel_geometry(wells, depth=0.02, period_m=0.07)`<br><br>• Also `MetadiffuserResult.plot_geometry()` |
+| `predict_diffuser_polar_response` | `function` | **Predicted far-field polar response (Cox & D'Antonio Eq. 5.8).**<br>• `well_width` w [m], `frequency` f [Hz]<br>• `depths` d_n [m] or `reflection` R_n (exactly one)<br>• `angles_deg` [°] (Default: semicircle), `source_angle` ψ [°]<br>• `repetitions` Np (Default: 1) | `s = materials.predict_diffuser_polar_response(0.10, 2000.0, depths=d, repetitions=5)`<br><br>• `DiffuserPolarResponse` |
+| `predicted_diffusion_spectrum` | `function` | **Predicted diffusion spectrum d(f) of a design.**<br>• `well_width` [m], `frequencies` [Hz]<br>• `depths` d_n [m]<br>• `repetitions` (Default: 1)<br>• `normalize`: also d_n vs flat reference (Default: True) | `res = materials.predicted_diffusion_spectrum(0.10, f, depths=d, repetitions=5)`<br><br>• `DiffusionSpectrum` |
+| `DiffuserPolarResponse` | `dataclass` | **Predicted diffuser polar response.**<br>• `frequency` [Hz]<br>• `angles_deg` [°], `levels` [dB] (peak at 0)<br>• `coefficient`: d_θ<br>• `.plot()` | `s.coefficient` |
 | `DEFAULT_POLAR_ANGLES` | `tuple` | **ISO 17497-2 single-plane receiver angles.**<br>−90° to 90° in 5° steps (37 receivers) | `DEFAULT_POLAR_ANGLES[0]  # -90` |
 | `adrienne_window` | `function` | **Adrienne temporal window (ISO 13472-1 Clause 6.4).**<br>• `fs` [Hz]<br>• `flat_duration` [s] (Default: 0.005)<br>• `leading_duration` [s] (Default: 0.0005), `trailing_duration` [s] (Default: 0.005)<br>• `leading_edge`/`trailing_edge`: 'blackman-harris' or 'cosine-squared' | `w = materials.adrienne_window(48000)`<br><br>• Rising edge + flat top + falling edge, peak 1.0 |
 | `geometric_spreading_factor` | `function` | **Geometrical-spreading factor Kr (Clause 4.1).**<br>• `source_height` ds [m] (Default: 1.25)<br>• `mic_height` dm [m] (Default: 0.25) | `geometric_spreading_factor()  # 0.6667`<br><br>• Kr = (ds − dm)/(ds + dm) |
@@ -41077,7 +41077,7 @@ documents, one page per module.
 | `absorption_reference_corrected` | `function` | **Reference-corrected road absorption (Annex B).**<br>• `road_reflection` / `reference_reflection`: measured Qp (complex, same geometry) | `alpha = materials.absorption_reference_corrected(q_road, q_ref)`<br><br>• 1 − \|Qp,road/Qp,ref\|²; removes chain error and Kr |
 | `max_sampled_area_radius` | `function` | **Maximum sampled-area radius (Annex A).**<br>• `window_width` Tw [s]<br>• `source_height`, `mic_height`, `speed_of_sound` | `max_sampled_area_radius(0.005)  # 1.34`<br><br>• [m], the Annex A worked example |
 | `msa_major_axis` | `function` | **Major axis of the oblique sampled ellipsoid (Annex F).**<br>• `window_width` Tw [s]<br>• `projected_distance` dp [m]<br>• `source_height`, `mic_height`, `speed_of_sound` | `msa_major_axis(0.005, 0.0)  # 3.2`<br><br>• a = cTw + √((ds + dm)² + dp²) [m] |
-| `spot_tube_upper_frequency` | `function` | **Spot-tube upper frequency (ISO 13472-2 §5.4.1).**<br>• `diameter` d [m]<br>• `speed_of_sound` (Default: 340.0) | `spot_tube_upper_frequency(0.1)  # 1972`<br><br>• f_u = 0.58c0/d [Hz] |
+| `spot_tube_upper_frequency` | `function` | **Spot-tube upper frequency (ISO 13472-2 §5.4.1).**<br>• `diameter_m` d [m]<br>• `speed_of_sound` (Default: 340.0) | `spot_tube_upper_frequency(0.1)  # 1972`<br><br>• f_u = 0.58c0/d [Hz] |
 | `spot_microphone_spacing_bounds` | `function` | **Spacing bounds (s_min, s_max) (§5.4.2).**<br>• `speed_of_sound` (Default: 340.0)<br>• `f_min` (Default: 220), `f_max` (Default: 1800) [Hz] | `spot_microphone_spacing_bounds()  # (0.0773, 0.085)`<br><br>• [m], brackets the nominal 81 mm |
 | `check_spot_frequency_range` | `function` | **Advise outside 250–1600 Hz (ISO 13472-2 Scope).**<br>• `frequency` [Hz] | `check_spot_frequency_range(f)`<br><br>• `RoadAbsorptionWarning` out of range |
 | `spot_internal_loss_correction` | `function` | **Internal-loss (system) correction (Annex A).**<br>• `measured_absorption`, `system_absorption`: same bands<br>• `clip_negative` (Default: True) | `spot_internal_loss_correction([0.12, 0.10], [0.02, 0.03])  # [0.1, 0.07]`<br><br>• Subtractive Part-2 correction |
@@ -41137,17 +41137,17 @@ documents, one page per module.
 | `WBV_ELV_A8` | `float` | **Whole-body A(8) limit value [m/s²].**<br>1.15 | `WBV_ELV_A8  # 1.15` |
 | `WBV_EAV_VDV` | `float` | **Whole-body VDV action value [m/s^1.75].**<br>9.1 | `WBV_EAV_VDV  # 9.1` |
 | `WBV_ELV_VDV` | `float` | **Whole-body VDV limit value [m/s^1.75].**<br>21.0 | `WBV_ELV_VDV  # 21.0` |
-| `fdtd_simulation` | `function` | **2D acoustic FDTD wave simulation (staggered grid, leapfrog).**<br>• `c`: sound-speed map [m/s], `(ny, nx)` array or scalar with `shape`<br>• `dx`: grid spacing [m]<br>• `duration`: physical time to simulate [s]<br>• `sources`: `GaussianPulse` \| `CWSource` \| `SignalSource` list<br>• `probes`: `(ix, iy)` pressure-probe cells<br>• `boundaries`: `"rigid"` \| `"absorbing"` \| per-side mapping (name or real impedance [Pa·s/m])<br>• `obstacle_mask`: boolean `(ny, nx)` rigid-cell map / `rho` / `cfl` / `damping` / `absorbing_layer_cells` / `snapshot_every` | `res = simulation.fdtd_simulation(343, 0.01, 0.02, shape=(200, 300), sources=[simulation.GaussianPulse(ix=60, iy=100, width=3e-4)], probes=[(200, 100)])`<br><br>• `FDTDResult` |
+| `fdtd_simulation` | `function` | **2D acoustic FDTD wave simulation (staggered grid, leapfrog).**<br>• `c`: sound-speed map [m/s], `(ny, nx)` array or scalar with `shape`<br>• `dx`: grid spacing [m]<br>• `duration`: physical time to simulate [s]<br>• `sources`: `GaussianPulse` \| `CWSource` \| `SignalSource` list<br>• `probes`: `(ix, iy)` pressure-probe cells<br>• `boundaries`: `"rigid"` \| `"absorbing"` \| per-side mapping (name or real impedance [Pa·s/m])<br>• `obstacle_mask`: boolean `(ny, nx)` rigid-cell map / `rho` / `cfl` / `damping` / `absorbing_layer_cells` / `snapshot_every` | `res = simulation.fdtd_simulation(343, 0.01, 0.02, shape=(200, 300), sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3e-4)], probes=[(200, 100)])`<br><br>• `FDTDResult` |
 | `FDTDResult` | `dataclass` | **FDTD simulation result.**<br>• `times` [s] / `pressures` [Pa] per probe / `probes` / `probe_positions` [m]<br>• `dx` / `dt` / `shape` / `size` [m] / `sources` / `snapshots` / `snapshot_times` / `obstacle_mask`<br>• `.plot()`: probe histories; `.plot(kind="snapshot")`: pressure field | `res.pressures, res.times`<br>`res.plot()` |
 | `FDTD2D` | `class` | **FDTD stepping engine (frame-by-frame access).**<br>• `c` [m/s] / `dx` [m] / `rho` [kg/m³] / `cfl` / `shape`<br>• `sponge_width` / `sponge_sides` / `sponge_reflection` / `damping`<br>• `edge_impedance`: per-side real impedance [Pa·s/m] / `obstacle_mask` | `sim = simulation.FDTD2D(343, 0.01, shape=(200, 300))`<br>`sim.add_source(src); sim.step(); sim.run(400, record_every=10)`<br>• `sim.p` / `sim.vx` / `sim.vy` / `sim.dt` / `sim.time` / `sim.energy()`<br>• `sim.plot_geometry(probes=...)`: draw the configured domain before running<br>• `sim.add_plane_wave(direction, center=..., width=..., wavelength=...)`: one-way plane packet initial condition<br>• `sim.add_contour_probe(ix0, ix1, iy0, iy1, frequencies=...)`: on-the-fly `p`/`v_n` phasor capture on a closed contour |
-| `GaussianPulse` | `dataclass` | **Gaussian pulse source for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `width` [s] / `t0` [s] (Default: `4*width`) / `amplitude` [Pa] | `GaussianPulse(ix=60, iy=100, width=3e-4)` |
+| `GaussianPulse` | `dataclass` | **Gaussian pulse source for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `width` [s] / `t0` [s] (Default: `4*width`) / `amplitude` [Pa] | `GaussianPulse(ix=60, iy=100, half_width_s=3e-4)` |
 | `PlaneWaveSource` | `dataclass` | **Sustained one-way plane wave injected on a line (TF/SF style).**<br>• `direction`: 'down'/'up'/'left'/'right' (travel)<br>• `waveform`: callable t → p_inc(t) [Pa] (reuse a point source's `.value`)<br>• `offset`: line position in cells from the launch edge (place it just inside a sponge)<br>• `amplitude` (Default: 1.0) | `sim.add_source(simulation.PlaneWaveSource('down', simulation.CWSource(0, 0, frequency=1000.0).value, offset=22))`<br><br>• Transversely plane to machine precision; ~1e-4 residual behind the line |
 | `CWSource` | `dataclass` | **Continuous sine source with raised-cosine onset for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `frequency` [Hz] / `amplitude` [Pa] / `ramp_cycles` | `CWSource(ix=25, iy=25, frequency=170)` |
 | `SignalSource` | `dataclass` | **Arbitrary sampled waveform source for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `samples` [Pa] / `sample_rate` [Hz] / `amplitude`<br>Linearly interpolated onto the simulation time steps | `SignalSource(ix=60, iy=100, samples=sig, sample_rate=48000)` |
 | `ContourProbe` | `class` | **On-the-fly DFT of `p` and `v_n` on a closed rectangular contour.**<br>Created by `FDTD2D.add_contour_probe`; complex accumulators per point and frequency, so CW runs store no time histories<br>• `positions` / `normals` / `frequencies` / `samples`<br>• `.reset()`: restart accumulation once the field is steady<br>• `.phasors(frequency)`: the captured `ContourPhasors` | `probe = sim.add_contour_probe(90, 470, 90, 345, frequencies=[2000.0])`<br>`sim.run(steps); probe.reset(); sim.run(window)`<br>`ph = probe.phasors(2000.0)` |
 | `ContourPhasors` | `dataclass` | **Steady-state `p` and `v_n` phasors on a closed contour (`exp(+jωt)`).**<br>• `frequency` [Hz] / `positions` `(n, 2)` [m] / `normals` (outward)<br>• `pressure` [Pa] / `normal_velocity` [m/s] (complex) / `segment` [m]<br>• `.subtract(reference)`: scattered = total − incident phasors | `scattered = total.subtract(reference)` |
-| `far_field_from_contour` | `function` | **2D near-to-far-field transformation (Kirchhoff-Helmholtz integral).**<br>• `contour`: `ContourPhasors`<br>• `angles` [deg]: observation directions `(cos a, sin a)` in grid axes<br>• `distance`: `None` (far-field pattern `F(a)`, `p → F e^{−jkr}/√r`) or a radius [m] for the exact Hankel evaluation<br>• `origin`: phase-reference point<br>• `fluid`: `Fluid` (Default: `SIMULATION_AIR`, the medium the solver runs in) | `F = simulation.far_field_from_contour(ph, np.arange(-180, 180, 2), origin=(xc, yc))`<br><br>• Complex pattern, one value per angle |
-| `elastic_fdtd_simulation` | `function` | **2D elastic P-SV FDTD wave simulation (velocity-stress, Virieux staggered grid).**<br>• `c_p` / `c_s`: wave-speed maps [m/s], `(ny, nx)` arrays or scalars with `shape` (`c_s = 0` marks fluid cells)<br>• `dx`: grid spacing [m] / `duration` [s] / `rho`: density map [kg/m³]<br>• `sources`: `ExplosionSource` \| `ForceSource` list<br>• `recording`: `ElasticRecording` (probe cells and fields, snapshot cadence and field)<br>• `boundaries`: `ElasticBoundaries` (the four sides and the sponge thickness)<br>• `obstacle_mask` / `cfl` / `damping` | `res = simulation.elastic_fdtd_simulation(6320, 3130, 0.001, 5e-5, rho=2700, shape=(300, 600), sources=[simulation.ForceSource(ix=300, iy=0, direction='y', waveform=simulation.GaussianPulse(0, 0, width=8e-6).value)], boundaries=simulation.ElasticBoundaries({'top': 'free'}))`<br><br>• `ElasticFDTDResult` |
+| `far_field_from_contour` | `function` | **2D near-to-far-field transformation (Kirchhoff-Helmholtz integral).**<br>• `contour`: `ContourPhasors`<br>• `angles_deg` [deg]: observation directions `(cos a, sin a)` in grid axes<br>• `distance`: `None` (far-field pattern `F(a)`, `p → F e^{−jkr}/√r`) or a radius [m] for the exact Hankel evaluation<br>• `origin`: phase-reference point<br>• `fluid`: `Fluid` (Default: `SIMULATION_AIR`, the medium the solver runs in) | `F = simulation.far_field_from_contour(ph, np.arange(-180, 180, 2), origin=(xc, yc))`<br><br>• Complex pattern, one value per angle_deg |
+| `elastic_fdtd_simulation` | `function` | **2D elastic P-SV FDTD wave simulation (velocity-stress, Virieux staggered grid).**<br>• `c_p` / `c_s`: wave-speed maps [m/s], `(ny, nx)` arrays or scalars with `shape` (`c_s = 0` marks fluid cells)<br>• `dx`: grid spacing [m] / `duration` [s] / `rho`: density map [kg/m³]<br>• `sources`: `ExplosionSource` \| `ForceSource` list<br>• `recording`: `ElasticRecording` (probe cells and fields, snapshot cadence and field)<br>• `boundaries`: `ElasticBoundaries` (the four sides and the sponge thickness)<br>• `obstacle_mask` / `cfl` / `damping` | `res = simulation.elastic_fdtd_simulation(6320, 3130, 0.001, 5e-5, rho=2700, shape=(300, 600), sources=[simulation.ForceSource(ix=300, iy=0, direction='y', waveform=simulation.GaussianPulse(0, 0, half_width_s=8e-6).value)], boundaries=simulation.ElasticBoundaries({'top': 'free'}))`<br><br>• `ElasticFDTDResult` |
 | `ElasticFDTDResult` | `dataclass` | **Elastic FDTD simulation result.**<br>• `times` [s] / `signals` `(n_probes, n_fields, n_steps+1)` / `probe_fields` / `probes` / `probe_positions` [m]<br>• `dx` / `dt` / `shape` / `size` [m] / `sources` / `snapshots` / `snapshot_times` / `snapshot_field` / `obstacle_mask` / `free_sides`<br>• `.plot()`: probe histories; `.plot(kind="snapshot")`: recorded field | `res.signals, res.times`<br>`res.plot()` |
 | `ElasticRecording` | `dataclass` | **What an elastic FDTD run records.**<br>• `probes`: `(ix, iy)` cells (Default: none)<br>• `probe_fields`: `("p" \| "vx" \| "vy", ...)` (Default: `("vy",)`)<br>• `snapshot_every` steps (Default: None)<br>• `snapshot_field` (Default: `"p"`) | `ElasticRecording(probes=[(300, 0)], snapshot_every=50, snapshot_field='vy')` |
 | `ElasticBoundaries` | `dataclass` | **How the four edges of the elastic domain end.**<br>• `sides`: `"rigid"` (Default) \| `"absorbing"` \| `"free"` (stress-imaging surface) \| per-side mapping<br>• `absorbing_layer_cells` (Default: 20) | `ElasticBoundaries({'top': 'free'}, absorbing_layer_cells=40)` |
@@ -41157,8 +41157,8 @@ documents, one page per module.
 | `SIMULATION_AIR` | `Fluid` | **The air the acoustic solvers run in.**<br>343.0 m/s, 1.2 kg/m³, the `AIR` `Material` written as a fluid<br>• the `fluid` default of `far_field_from_contour`<br>• a `phonometry.fluids.Fluid`: pass a computed one, or a water, to transform out of the medium the run actually used | `simulation.SIMULATION_AIR.density  # 1.2` |
 | `AIR` / `WATER` / `STEEL` / `ALUMINIUM` / `CONCRETE` | `Material` | **Named media with the nominal properties of the docs and tests.**<br>air 343/0/1.2, water 1480/0/1000, steel 5900/3200/7850, aluminium 6320/3130/2700, concrete 3800/2250/2400 (c_p/c_s/ρ) | `ElasticFDTD2D.from_regions((240, 480), 0.005, background=WATER, regions=[(np.s_[120:, :], STEEL)])` |
 | `scholte_speed` | `function` | **Exact Scholte interface-wave speed of a fluid over an elastic half-space.**<br>• `fluid`: `Material` with `c_s = 0` (or triple)<br>• `solid`: `Material` with `c_s > 0`<br>Root of the exact characteristic equation (Brekhovskikh & Godin Eq. 4.4.20); non-dispersive, below both the fluid speed and the solid shear speed | `scholte_speed(WATER, STEEL)  # 1479.6`<br><br>• v [m/s] |
-| `ExplosionSource` | `dataclass` | **Isotropic (explosive) stress source for the elastic solver.**<br>• `ix` / `iy`: source cell<br>• `waveform`: callable t → injected pressure [Pa] (reuse a point source's `.value`)<br>• `amplitude` (Default: 1.0)<br>Pressure-like sign: equal `-s(t)` increments on both normal stresses | `ExplosionSource(ix=250, iy=250, waveform=simulation.GaussianPulse(0, 0, width=8e-6).value)` |
-| `ForceSource` | `dataclass` | **Directional body-force source for the elastic solver.**<br>• `ix` / `iy`: staggered velocity node<br>• `direction`: `'x'` \| `'y'`<br>• `waveform`: callable t → line force [N/m] / `amplitude`<br>A vertical force under a free surface reproduces Lamb's problem | `ForceSource(ix=300, iy=0, direction='y', amplitude=1e6, waveform=simulation.GaussianPulse(0, 0, width=8e-6).value)` |
+| `ExplosionSource` | `dataclass` | **Isotropic (explosive) stress source for the elastic solver.**<br>• `ix` / `iy`: source cell<br>• `waveform`: callable t → injected pressure [Pa] (reuse a point source's `.value`)<br>• `amplitude` (Default: 1.0)<br>Pressure-like sign: equal `-s(t)` increments on both normal stresses | `ExplosionSource(ix=250, iy=250, waveform=simulation.GaussianPulse(0, 0, half_width_s=8e-6).value)` |
+| `ForceSource` | `dataclass` | **Directional body-force source for the elastic solver.**<br>• `ix` / `iy`: staggered velocity node<br>• `direction`: `'x'` \| `'y'`<br>• `waveform`: callable t → line force [N/m] / `amplitude`<br>A vertical force under a free surface reproduces Lamb's problem | `ForceSource(ix=300, iy=0, direction='y', amplitude=1e6, waveform=simulation.GaussianPulse(0, 0, half_width_s=8e-6).value)` |
 | `PhonometryWarning` | `warning class` | **Base class for all phonometry warnings.**<br>Catch or silence every library advisory at once | `warnings.simplefilter('error', PhonometryWarning)` |
 | `FilterBankWarning` | `warning class` | **Fractional-octave filter-bank advisory.**<br>Emitted for filter-bank processing pitfalls | `warnings.simplefilter('error', FilterBankWarning)` |
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
@@ -52552,7 +52552,7 @@ import numpy as np
 from phonometry import signals
 
 fs = 8192.0
-period = 1.0 / 32.0        # one revolution: 256 samples at this rate
+period_s = 1.0 / 32.0        # one revolution: 256 samples at this rate
 m, n_avg = 256, 40
 phase = np.arange((n_avg + 1) * m) / m
 periodic = (
@@ -52561,21 +52561,21 @@ periodic = (
     - 0.3 * np.cos(2.0 * np.pi * 6.0 * phase)
 )
 recording = periodic + signals.noise_signal(fs, phase.size / fs, rms=0.9, seed=11)
-res = signals.time_synchronous_average(recording, fs, period=period, n_averages=n_avg)
+res = signals.time_synchronous_average(recording, fs, period_s=period_s, n_averages=n_avg)
 
 fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(11, 4.6))
 t_ms = 1e3 * res.times
-ax0.plot(t_ms, recording[:m], color="#cccccc", label="One noisy period")
+ax0.plot(t_ms, recording[:m], color="#cccccc", label="One noisy period_s")
 ax0.plot(t_ms, res.period_waveform, color="#1f77b4", lw=1.8,
          label=f"Average of N = {n_avg} periods")
 ax0.plot(t_ms, periodic[:m], "--", color="#d62728", label="True waveform")
 ax0.set_xlabel("Time [ms]"); ax0.set_ylabel("Amplitude"); ax0.legend()
 
 orders = np.linspace(31.0, 33.0, 4000)
-freqs = orders / period
-ax1.plot(orders, signals.comb_filter_response(freqs, period, 32), color="#2ca02c",
+freqs = orders / period_s
+ax1.plot(orders, signals.comb_filter_response(freqs, period_s, 32), color="#2ca02c",
          label="N = 32 (power of two)")
-ax1.plot(orders, signals.comb_filter_response(freqs, period, 20), color="#1f77b4",
+ax1.plot(orders, signals.comb_filter_response(freqs, period_s, 20), color="#1f77b4",
          label="N = 20 (node on 32.05)")
 ax1.axvline(32.05, color="#d62728", ls=":", label="Interfering tone")
 ax1.set_xlabel("Frequency [orders]"); ax1.set_ylabel("Comb filter magnitude")
@@ -52624,10 +52624,10 @@ every $j$ that is not a multiple of $N$, where the response is exactly zero.
 import numpy as np
 from phonometry import signals
 
-period = 1.0 / 32.0
-signals.comb_filter_response(np.array([16.0 / period]), period, 8)   # 1.0 at a tooth
-signals.comb_filter_response(np.array([0.25 / period]), period, 2)   # 1/sqrt(2)
-signals.comb_filter_response(np.array([0.5 / period]), period, 2)    # 0.0 at a node
+period_s = 1.0 / 32.0
+signals.comb_filter_response(np.array([16.0 / period_s]), period_s, 8)   # 1.0 at a tooth
+signals.comb_filter_response(np.array([0.25 / period_s]), period_s, 2)   # 1/sqrt(2)
+signals.comb_filter_response(np.array([0.5 / period_s]), period_s, 2)    # 0.0 at a node
 ```
 
 `SynchronousAverageResult` carries the response over the first few harmonics
@@ -52644,7 +52644,7 @@ That is a power reduction of $10\log_{10} N$ dB, reported as
 `amplitude_snr_gain`:
 
 ```python
-res = signals.time_synchronous_average(recording, fs, period=period, n_averages=100)
+res = signals.time_synchronous_average(recording, fs, period_s=period_s, n_averages=100)
 res.noise_reduction_db      # 20.0 dB = 10*log10(100)
 res.amplitude_snr_gain      # 10.0   = sqrt(100)
 res.plot()                  # averaged waveform + the comb it applied
@@ -52667,18 +52667,18 @@ from phonometry import signals
 
 fs = 8192.0
 samples = 256
-period = samples / fs
+period_s = samples / fs
 m = np.arange(samples) / fs
-true = (np.cos(2 * np.pi * m / period)
-        + 0.5 * np.cos(2 * np.pi * 3 * m / period + 0.7)
-        + 0.25 * np.cos(2 * np.pi * 5 * m / period + 1.1))
+true = (np.cos(2 * np.pi * m / period_s)
+        + 0.5 * np.cos(2 * np.pi * 3 * m / period_s + 0.7)
+        + 0.25 * np.cos(2 * np.pi * 5 * m / period_s + 1.1))
 rng = np.random.default_rng(5)
 recording = np.tile(true, 128) + rng.standard_normal(128 * samples)
 
 counts = [1, 2, 4, 8, 16, 32, 64, 128]
 errors = []
 for n in counts:
-    res = signals.time_synchronous_average(recording[:n * samples], fs, period=period,
+    res = signals.time_synchronous_average(recording[:n * samples], fs, period_s=period_s,
                                            n_averages=n)
     errors.append(np.sqrt(np.mean((res.period_waveform - true) ** 2)))
 
@@ -52729,8 +52729,8 @@ average confirms it:
 phase = np.arange(41 * 256) / 256
 recording = np.cos(2 * np.pi * 8.0 * phase) + 0.7 * np.cos(2 * np.pi * 32.05 * phase)
 
-leak_20 = signals.time_synchronous_average(recording, fs, period=period, n_averages=20)
-leak_32 = signals.time_synchronous_average(recording, fs, period=period, n_averages=32)
+leak_20 = signals.time_synchronous_average(recording, fs, period_s=period_s, n_averages=20)
+leak_32 = signals.time_synchronous_average(recording, fs, period_s=period_s, n_averages=32)
 # leak_20.period_waveform matches the clean 8th-order tone; leak_32 does not
 ```
 
@@ -52750,12 +52750,12 @@ that interpolation error (`interpolated` is `True`):
 
 ```python
 fs = 8192.0
-period = 1.0 / 31.7                       # fs * period is not an integer
-t = np.arange(int(40 * period * fs)) / fs
-recording = np.cos(2.0 * np.pi * t / period)  # one cycle per revolution
-res = signals.time_synchronous_average(recording, fs, period=period)
+period_s = 1.0 / 31.7                       # fs * period_s is not an integer
+t = np.arange(int(40 * period_s * fs)) / fs
+recording = np.cos(2.0 * np.pi * t / period_s)  # one cycle per revolution
+res = signals.time_synchronous_average(recording, fs, period_s=period_s)
 res.interpolated                          # True: fractional-delay alignment
-res.samples_per_period                    # integer samples of one period
+res.samples_per_period                    # integer samples of one period_s
 ```
 
 By default the average uses as many whole periods as the record holds; pass
@@ -53874,7 +53874,7 @@ res = simulation.elastic_fdtd_simulation(
     6320.0, 3130.0, 0.002, 1.1e-4, rho=2700.0, shape=(501, 501),
     sources=[simulation.ExplosionSource(
         ix=250, iy=250,
-        waveform=simulation.GaussianPulse(0, 0, width=w).value)],
+        waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],
     recording=simulation.ElasticRecording(
         probes=[(350, 250), (470, 250)], probe_fields=("p",)),
 )
@@ -53938,7 +53938,7 @@ res = simulation.elastic_fdtd_simulation(
     6320.0, 3130.0, dx, 7.3e-5, rho=2700.0, shape=(300, 600),
     sources=[simulation.ForceSource(
         ix=300, iy=0, direction="y", amplitude=1e6,
-        waveform=simulation.GaussianPulse(0, 0, width=w).value)],
+        waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],
     boundaries=simulation.ElasticBoundaries({"top": "free"}),
     recording=simulation.ElasticRecording(snapshot_every=steps,
                                           snapshot_field="vy"),
@@ -54401,7 +54401,7 @@ from phonometry import simulation
 # A 3.0 x 2.0 m air domain: 300 x 200 cells of 1 cm.
 res = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
-    sources=[simulation.GaussianPulse(ix=60, iy=100, width=3.0e-4)],
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     probes=[(200, 100)],
 )
 print(res.size)                  # (3.0, 2.0)  metres
@@ -54530,7 +54530,7 @@ mask[25:35, 40:44] = True
 sim = simulation.FDTD2D(343.0, 0.05, shape=(60, 90), sponge_width=8,
                         sponge_sides=("left", "right"),
                         edge_impedance={"top": 413.0}, obstacle_mask=mask)
-sim.add_source(simulation.GaussianPulse(10, 30, width=1e-3))
+sim.add_source(simulation.GaussianPulse(10, 30, half_width_s=1e-3))
 
 # Check the domain before running it: nothing has been stepped yet.
 sim.plot_geometry(probes=[(3.0, 1.5), (4.0, 2.0)])
@@ -54665,10 +54665,10 @@ probe = sim.add_contour_probe(lat - marg, lat + face + marg - 1,
                               frequencies=[f0])
 sim.run(round(8e-3 / sim.dt))             # transient (ramp + ring-up) out
 probe.reset()
-sim.run(round(10.0 / f0 / sim.dt))        # a 10-period DFT window (in steps)
-angles = np.arange(-90.0, 90.1, 5.0)      # from the panel normal
+sim.run(round(10.0 / f0 / sim.dt))        # a 10-period_m DFT window (in steps)
+angles_deg = np.arange(-90.0, 90.1, 5.0)      # from the panel normal
 pattern = simulation.far_field_from_contour(
-    probe.phasors(f0), angles - 90.0,     # the normal points along -y
+    probe.phasors(f0), angles_deg - 90.0,     # the normal points along -y
     origin=((lat + face / 2.0) * dx, r_face * dx))
 levels = 20 * np.log10(np.abs(pattern) / np.abs(pattern).max())
 
@@ -54676,11 +54676,11 @@ wells = [materials.MetadiffuserWell(h * 1e-3,
                                     (materials.HelmholtzResonator(ln * 1e-3, wn * 1e-3,
                                                         lc * 1e-3, wc * 1e-3),) * 2)
          for h, ln, lc, wn, wc in rows]
-model = materials.metadiffuser_polar_response(f0, wells, depth=0.02, period=pitch,
-                                              angles=angles, periods=1)
+model = materials.metadiffuser_polar_response(f0, wells, depth=0.02, period_m=pitch,
+                                              angles_deg=angles_deg, repetitions=1)
 ax = model.plot(color="#1f77b4", marker="", linestyle="--",
                 label="TMM + Fraunhofer model")
-ax.plot(np.radians(angles), levels, color="#d62728", lw=2.2,
+ax.plot(np.radians(angles_deg), levels, color="#d62728", lw=2.2,
         label="FDTD + NTFF, panel meshed at 0.5 mm")
 ax.set_ylim(-40.0, 2.0)
 ax.legend(loc="lower center")
@@ -54716,7 +54716,7 @@ mask = np.zeros((200, 300), dtype=bool)
 mask[60:, 150:154] = True
 res = simulation.fdtd_simulation(
     343.0, 0.01, 9.0e-3, shape=(200, 300),
-    sources=[simulation.GaussianPulse(ix=60, iy=100, width=3.0e-4)],
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     probes=[(100, 100), (240, 100)],
     obstacle_mask=mask,
     boundaries="absorbing", absorbing_layer_cells=30,
@@ -54747,7 +54747,7 @@ lx, ly, dx = 1.0, 0.7, 0.02
 nx, ny = round(lx / dx), round(ly / dx)
 res = simulation.fdtd_simulation(
     343.0, dx, 0.35, shape=(ny, nx),
-    sources=[simulation.GaussianPulse(ix=7, iy=5, width=2.0e-4)],
+    sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     probes=[(nx - 4, ny - 3)],
 )
 p = res.pressures[0]
@@ -54779,7 +54779,7 @@ lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
 nx, ny = round(lx / dx), round(ly / dx)
 res = simulation.fdtd_simulation(
     c, dx, 0.35, shape=(ny, nx),
-    sources=[simulation.GaussianPulse(ix=7, iy=5, width=2.0e-4)],
+    sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     probes=[(nx - 4, ny - 3)],
 )
 
@@ -57600,7 +57600,7 @@ from phonometry import underwater
 # launched 6 degrees downward from 100 m turns back up where Snell gives
 # c(z_t) = c(z_s)/cos(6 deg).
 z = [0.0, 1000.0]
-c = [1490.0, 1507.0]                        # linear gradient, g = 0.017 1/s
+c = [1490.0, 1507.0]                        # linear gradient_per_s, g = 0.017 1/s
 rays = underwater.ray_trace(z, c, source_depth=100.0,
                             launch_angles_deg=[6.0], max_range=40e3,
                             n_steps=20000)
@@ -57609,7 +57609,7 @@ print(round(z_turn, 1))                     # 583.3  analytic turning depth
 print(round(float(rays.depths.max()), 1))   # 583.3  traced
 
 # The arc also fixes the time to that turn: the sound speed cancels and only
-# the launch angle and the gradient are left,
+# the launch angle and the gradient_per_s are left,
 # t = (1/g) ln[(1 + sin theta_0) / cos theta_0].
 th = np.radians(6.0)
 r_turn = np.sin(th) / (np.cos(th) / 1491.7 * 0.017)   # 9222.6 m
@@ -61011,7 +61011,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import signals, vibration
 
-# The bearing: 15 rollers on a 34 mm pitch diameter, 6 mm rollers,
+# The bearing: 15 rollers on a 34 mm pitch diameter_m, 6 mm rollers,
 # 12.96 degrees contact angle, shaft at 2000 r/min.
 faults = vibration.bearing_fault_frequencies(2000.0, 15, 6.0, 34.0,
                                              contact_angle_deg=12.96)

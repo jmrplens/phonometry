@@ -634,7 +634,7 @@ def _polar_from_piston(
     piston: RadiatingPistonResult, polar_frequency: float | None
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], float, float | None]:
     """Derive (angles_deg, relative_db, frequency, DI) from a piston result."""
-    if piston.angles is None or piston.directivity is None:
+    if piston.angles_rad is None or piston.directivity is None:
         msg = (
             "'directivity.piston' must be a radiating-piston result computed with "
             "'angles' so it carries a directivity pattern."
@@ -651,7 +651,7 @@ def _polar_from_piston(
     with np.errstate(divide="ignore"):
         rel_db = 20.0 * np.log10(np.abs(pattern))
     rel_db[~np.isfinite(rel_db)] = -120.0
-    angles_deg = np.degrees(np.asarray(piston.angles, dtype=np.float64))
+    angles_deg = np.degrees(np.asarray(piston.angles_rad, dtype=np.float64))
     di = float(np.asarray(piston.directivity_index, dtype=np.float64)[idx])
     return angles_deg, rel_db, float(freqs[idx]), di
 

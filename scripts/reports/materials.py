@@ -211,7 +211,7 @@ def _impedance_tube_example() -> tuple[object, ReportMetadata, str]:
     )
     rc = ph.fluids.characteristic_impedance(rho, c0)
 
-    diameter, spacing, x1 = 0.100, 0.050, 0.100
+    diameter_m, spacing, x1 = 0.100, 0.050, 0.100
     theta, cavity = 1.0, c0 / (4.0 * 1000.0)
     freqs = np.array([400, 500, 630, 800, 1000, 1250, 1600], dtype=float)
 
@@ -231,14 +231,14 @@ def _impedance_tube_example() -> tuple[object, ReportMetadata, str]:
         x1=x1,
         speed_of_sound=c0,
         characteristic_impedance=rc,
-        diameter=diameter,
+        diameter_m=diameter_m,
         shape="circular",
     )
     metadata = ReportMetadata(
         specimen="Resistive facing over an 86 mm rigidly-backed air cavity",
         client="Example client",
         manufacturer="Example acoustics",
-        tube_diameter=diameter,
+        tube_diameter=diameter_m,
         mic_spacing=spacing,
         mounting="Deliberate 86 mm backing air cavity, rigid termination",
         test_room="Impedance tube B&K 4206 (example)",

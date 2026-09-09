@@ -134,7 +134,7 @@ def _loudspeaker_example() -> tuple[object, ReportMetadata, str]:
 
     angles = np.radians(np.linspace(0.0, 90.0, 46))
     directivity = ph.electroacoustics.radiating_piston(
-        0.075, np.array([1000.0, 2000.0, 4000.0]), angles=angles
+        0.075, np.array([1000.0, 2000.0, 4000.0]), angles_rad=angles
     )
 
     result = ph.electroacoustics.loudspeaker_characteristics(

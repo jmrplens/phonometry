@@ -111,7 +111,7 @@ _MIN_SAMPLES_PER_PERIOD = 2
 
 def comb_filter_response(
     frequencies: NDArray[np.float64] | list[float],
-    period: float,
+    period_s: float,
     n_averages: int,
 ) -> NDArray[np.float64]:
     r"""Magnitude of the N-period synchronous-averaging comb filter.
@@ -124,14 +124,14 @@ def comb_filter_response(
     not a multiple of ``N``.
 
     :param frequencies: Frequencies at which to evaluate, in Hz.
-    :param period: Repetition period ``T``, in seconds.
+    :param period_s: Repetition period ``T``, in seconds.
     :param n_averages: Number of averaged periods ``N`` (at least 1).
     :return: The filter magnitude at each frequency (unitless; bounded by 1,
         though floating-point cancellation immediately beside a tooth can
         return values above 1 by a few parts in 1e9).
     :raises ValueError: If the parameters are invalid.
     """
-    period_v = _positive(period, "period")
+    period_v = _positive(period_s, "period_s")
     n = int(n_averages)
     if n < 1:
         msg = "'n_averages' must be a positive integer."
@@ -145,7 +145,7 @@ def comb_filter_response(
     # (sin(inf) is NaN); reject them so the bounded-response contract holds.
     if not np.all(np.isfinite(n * np.pi * order)):
         msg = (
-            "'frequencies' * 'period' (times n_averages*pi) overflows the "
+            "'frequencies' * 'period_s' (times n_averages*pi) overflows the "
             "floating-point range; the comb filter cannot be evaluated at "
             "such orders."
         )
@@ -178,7 +178,7 @@ class SynchronousAverageResult:
     :ivar n_averages: Number of periods averaged, ``N``.
     :ivar samples_per_period: Integer samples per period ``M`` after any
         alignment.
-    :ivar period: Repetition period ``T``, in seconds.
+    :ivar period_s: Repetition period ``T``, in seconds.
     :ivar fs: Sample rate, in Hz.
     :ivar interpolated: Whether band-limited fractional-delay alignment was
         applied (``True`` when :math:`f_\mathrm{s} T` is not an integer).
@@ -196,7 +196,7 @@ class SynchronousAverageResult:
     residual: NDArray[np.float64]
     n_averages: int
     samples_per_period: int
-    period: float
+    period_s: float
     fs: float
     interpolated: bool
     noise_reduction_db: float
@@ -277,13 +277,13 @@ class SynchronousAverageResult:
         return plot_synchronous_average(self, ax=ax, language=language, **kwargs)
 
 
-def _samples_per_period(fs: float, period: float) -> tuple[float, int]:
+def _samples_per_period(fs: float, period_s: float) -> tuple[float, int]:
     """Exact and integer samples per period, with an integer-fit check."""
-    samples = fs * period
+    samples = fs * period_s
     rounded = round(samples)
     if rounded < _MIN_SAMPLES_PER_PERIOD:
         msg = (
-            "'period' is too short for the sample rate: it must span at "
+            "'period_s' is too short for the sample rate: it must span at "
             f"least {_MIN_SAMPLES_PER_PERIOD} samples."
         )
         raise ValueError(msg)
@@ -333,12 +333,12 @@ def _extract_period(
 
 
 def _comb_grid(
-    period: float, n_averages: int, n_harmonics: int
+    period_s: float, n_averages: int, n_harmonics: int
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Frequency axis (Hz) and comb-filter magnitude over the first teeth."""
     points = max(256, 200 * n_harmonics)
-    freqs = np.linspace(0.0, n_harmonics / period, points)
-    response = comb_filter_response(freqs, period, n_averages)
+    freqs = np.linspace(0.0, n_harmonics / period_s, points)
+    response = comb_filter_response(freqs, period_s, n_averages)
     return freqs, response
 
 
@@ -346,14 +346,14 @@ def time_synchronous_average(
     x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
-    period: float,
+    period_s: float,
     n_averages: int | None = None,
     n_harmonics: int = 8,
 ) -> SynchronousAverageResult:
     r"""Extract a periodic waveform of known period by time domain averaging.
 
     Ensemble-averages ``N`` successive periods of the record (McFadden
-    Eq. 5) to reinforce the component synchronous with ``period`` and
+    Eq. 5) to reinforce the component synchronous with ``period_s`` and
     suppress asynchronous noise, whose residual standard deviation falls as
     :math:`1/\sqrt{N}`. When ``fs * period`` is an integer the periods are
     sliced
@@ -369,7 +369,7 @@ def time_synchronous_average(
     :param fs: Sample rate, in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
-    :param period: Known repetition period ``T``, in seconds (e.g. one
+    :param period_s: Known repetition period ``T``, in seconds (e.g. one
         revolution of a rotating machine).
     :param n_averages: Number of whole periods to average (default: as many
         as the record holds). Choosing ``N`` so that :math:`N q` is an
@@ -383,7 +383,7 @@ def time_synchronous_average(
     """
     xa = _validate_1d_finite(x, "x")
     fs_v = _positive(resolve_fs(x, fs), "fs")
-    period_v = _positive(period, "period")
+    period_v = _positive(period_s, "period_s")
     n_harmonics_v = int(n_harmonics)
     if n_harmonics_v < 1:
         msg = "'n_harmonics' must be a positive integer."
@@ -413,7 +413,7 @@ def time_synchronous_average(
         residual=residual,
         n_averages=n_avg,
         samples_per_period=m_int,
-        period=period_v,
+        period_s=period_v,
         fs=fs_v,
         interpolated=bool(interpolated),
         noise_reduction_db=noise_reduction_db,

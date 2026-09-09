@@ -85,7 +85,7 @@ from phonometry import simulation
 # A 3.0 x 2.0 m air domain: 300 x 200 cells of 1 cm.
 res = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
-    sources=[simulation.GaussianPulse(ix=60, iy=100, width=3.0e-4)],
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     probes=[(200, 100)],
 )
 print(res.size)                  # (3.0, 2.0)  metres
@@ -214,7 +214,7 @@ mask[25:35, 40:44] = True
 sim = simulation.FDTD2D(343.0, 0.05, shape=(60, 90), sponge_width=8,
                         sponge_sides=("left", "right"),
                         edge_impedance={"top": 413.0}, obstacle_mask=mask)
-sim.add_source(simulation.GaussianPulse(10, 30, width=1e-3))
+sim.add_source(simulation.GaussianPulse(10, 30, half_width_s=1e-3))
 
 # Check the domain before running it: nothing has been stepped yet.
 sim.plot_geometry(probes=[(3.0, 1.5), (4.0, 2.0)])
@@ -349,10 +349,10 @@ probe = sim.add_contour_probe(lat - marg, lat + face + marg - 1,
                               frequencies=[f0])
 sim.run(round(8e-3 / sim.dt))             # transient (ramp + ring-up) out
 probe.reset()
-sim.run(round(10.0 / f0 / sim.dt))        # a 10-period DFT window (in steps)
-angles = np.arange(-90.0, 90.1, 5.0)      # from the panel normal
+sim.run(round(10.0 / f0 / sim.dt))        # a 10-period_m DFT window (in steps)
+angles_deg = np.arange(-90.0, 90.1, 5.0)      # from the panel normal
 pattern = simulation.far_field_from_contour(
-    probe.phasors(f0), angles - 90.0,     # the normal points along -y
+    probe.phasors(f0), angles_deg - 90.0,     # the normal points along -y
     origin=((lat + face / 2.0) * dx, r_face * dx))
 levels = 20 * np.log10(np.abs(pattern) / np.abs(pattern).max())
 
@@ -360,11 +360,11 @@ wells = [materials.MetadiffuserWell(h * 1e-3,
                                     (materials.HelmholtzResonator(ln * 1e-3, wn * 1e-3,
                                                         lc * 1e-3, wc * 1e-3),) * 2)
          for h, ln, lc, wn, wc in rows]
-model = materials.metadiffuser_polar_response(f0, wells, depth=0.02, period=pitch,
-                                              angles=angles, periods=1)
+model = materials.metadiffuser_polar_response(f0, wells, depth=0.02, period_m=pitch,
+                                              angles_deg=angles_deg, repetitions=1)
 ax = model.plot(color="#1f77b4", marker="", linestyle="--",
                 label="TMM + Fraunhofer model")
-ax.plot(np.radians(angles), levels, color="#d62728", lw=2.2,
+ax.plot(np.radians(angles_deg), levels, color="#d62728", lw=2.2,
         label="FDTD + NTFF, panel meshed at 0.5 mm")
 ax.set_ylim(-40.0, 2.0)
 ax.legend(loc="lower center")
@@ -400,7 +400,7 @@ mask = np.zeros((200, 300), dtype=bool)
 mask[60:, 150:154] = True
 res = simulation.fdtd_simulation(
     343.0, 0.01, 9.0e-3, shape=(200, 300),
-    sources=[simulation.GaussianPulse(ix=60, iy=100, width=3.0e-4)],
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     probes=[(100, 100), (240, 100)],
     obstacle_mask=mask,
     boundaries="absorbing", absorbing_layer_cells=30,
@@ -431,7 +431,7 @@ lx, ly, dx = 1.0, 0.7, 0.02
 nx, ny = round(lx / dx), round(ly / dx)
 res = simulation.fdtd_simulation(
     343.0, dx, 0.35, shape=(ny, nx),
-    sources=[simulation.GaussianPulse(ix=7, iy=5, width=2.0e-4)],
+    sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     probes=[(nx - 4, ny - 3)],
 )
 p = res.pressures[0]
@@ -463,7 +463,7 @@ lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
 nx, ny = round(lx / dx), round(ly / dx)
 res = simulation.fdtd_simulation(
     c, dx, 0.35, shape=(ny, nx),
-    sources=[simulation.GaussianPulse(ix=7, iy=5, width=2.0e-4)],
+    sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     probes=[(nx - 4, ny - 3)],
 )
 

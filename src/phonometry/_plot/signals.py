@@ -1589,7 +1589,7 @@ def plot_synchronous_average(
     _waveform(axes[0])
     axes[0].set_title(_t("Time synchronous average (McFadden 1987)", language))
 
-    orders = result.comb_frequencies * result.period
+    orders = result.comb_frequencies * result.period_s
     axes[1].plot(orders, result.comb_response, color=_C_PRIMARY, lw=1.2)
     top = int(np.floor(orders[-1] + 1e-9))
     for k in range(1, top + 1):

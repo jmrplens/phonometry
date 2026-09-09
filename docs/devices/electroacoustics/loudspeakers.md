@@ -75,7 +75,7 @@ import numpy as np
 from phonometry import electroacoustics
 
 res = electroacoustics.radiating_piston(radius=0.1, frequencies=np.geomspace(20, 20000, 200),
-                                        angles=np.linspace(0.0, np.pi / 2, 91))
+                                        angles_rad=np.linspace(0.0, np.pi / 2, 91))
 print(round(res.radiation_mass, 4))               # 8 rho a^3 / 3, kg
 print(round(float(res.directivity_index[0]), 2))  # 3.01 dB half-space limit
 res.plot()                                         # R1 and X1 vs ka
@@ -108,7 +108,7 @@ plt.show()
 `radiating_piston` returns a `RadiatingPistonResult` with the normalized
 `resistance`/`reactance`, the mechanical `radiation_resistance`/`radiation_reactance`,
 the `radiation_mass`, the `directivity_index`, the far-field `directivity`
-pattern (when `angles` are given) and `.plot()`. The building blocks
+pattern (when `angles_rad` are given) and `.plot()`. The building blocks
 `piston_resistance`, `piston_reactance` and `piston_directivity` are also
 callable directly. The piston is the companion radiator of the
 [reactive silencers](../noise-control/silencers.md).
@@ -164,7 +164,7 @@ import numpy as np
 from phonometry import electroacoustics
 
 res = electroacoustics.radiating_piston(0.1, np.array([500.0, 2000.0, 4000.0]),
-                                        angles=np.linspace(-np.pi / 2, np.pi / 2, 181))
+                                        angles_rad=np.linspace(-np.pi / 2, np.pi / 2, 181))
 
 # One line: the piston in its baffle with the lobe of the highest frequency.
 res.plot_geometry()
@@ -207,7 +207,7 @@ result = electroacoustics.loudspeaker_characteristics(
                 0.3 + 2.6 * np.exp(-(np.log2(np.geomspace(50, 5000, 140) / 70.0) ** 2) / 0.45)),
     directivity=electroacoustics.LoudspeakerDirectivity(
         piston=electroacoustics.radiating_piston(0.075, np.array([1000.0, 2000.0, 4000.0]),
-                                                 angles=np.radians(np.linspace(0, 90, 46))),
+                                                 angles_rad=np.radians(np.linspace(0, 90, 46))),
         frequency=2000.0,
     ),
 )
@@ -333,7 +333,7 @@ result = electroacoustics.loudspeaker_characteristics(
     freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
     directivity=electroacoustics.LoudspeakerDirectivity(
         piston=electroacoustics.radiating_piston(0.075, np.array([1000.0, 2000.0, 4000.0]),
-                                                 angles=np.radians(np.linspace(0, 90, 46))),
+                                                 angles_rad=np.radians(np.linspace(0, 90, 46))),
         frequency=2000.0,
     ),
 )

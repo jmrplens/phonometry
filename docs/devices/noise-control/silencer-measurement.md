@@ -325,7 +325,7 @@ frequency where those modes can propagate in the connected ducts: at least
 and at least 5 dB above that frequency (5.2.2.3). NOTE 2 prints where it is:
 
 ```python
-print(round(noise_control.modal_filter_cut_on(diameter=0.4), 1))          # 505.9 Hz
+print(round(noise_control.modal_filter_cut_on(diameter_m=0.4), 1))          # 505.9 Hz
 print(round(noise_control.modal_filter_cut_on(larger_dimension=0.5), 1))  # 343.0 Hz
 ```
 

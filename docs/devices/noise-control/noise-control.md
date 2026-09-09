@@ -47,7 +47,7 @@ models end to end, from the fan sound power to the room criterion, is
 from phonometry.noise_control import hvac
 
 bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
-er = hvac.end_reflection_loss(bands, diameter=0.30, termination="flush")
+er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
 el = hvac.elbow_insertion_loss(bands, width=0.3, bend_type="square", lined=True)
 er.plot()   # the band attenuation (or regenerated Lw) in one line (needs matplotlib)
 tl = hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.2)      # Wells' method, dB
@@ -73,18 +73,18 @@ from phonometry.noise_control import hvac
 bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
 
 # One line for one duct: the HvacSpectrumResult of the 300 mm flush end.
-er = hvac.end_reflection_loss(bands, diameter=0.30, termination="flush")
+er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
 er.plot()
 plt.show()
 
 # By hand: the family over duct diameters of the concept figure.
 fig, ax = plt.subplots()
-for diameter in (0.15, 0.30, 0.60):
-    er = hvac.end_reflection_loss(bands, diameter=diameter, termination="flush")
+for diameter_m in (0.15, 0.30, 0.60):
+    er = hvac.end_reflection_loss(bands, diameter_m=diameter_m, termination="flush")
     ax.semilogx(er.frequencies, er.values, "o-",
-                label=f"D = {int(diameter * 1000)} mm")
+                label=f"D = {int(diameter_m * 1000)} mm")
 ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("End reflection loss [dB]")
-ax.legend(title="Duct diameter")
+ax.legend(title="Duct diameter_m")
 plt.show()
 ```
 
@@ -109,7 +109,7 @@ import matplotlib.pyplot as plt
 from phonometry import noise_control
 
 # The r, S_out and S_w that Wells' formula actually uses, drawn exactly.
-noise_control.plot_plenum_geometry(0.09, 1.2, 6.0, angle=0.35)
+noise_control.plot_plenum_geometry(0.09, 1.2, 6.0, angle_rad=0.35)
 plt.show()
 ```
 

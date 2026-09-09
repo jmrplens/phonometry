@@ -33,7 +33,7 @@ pressure-release sea surface and ignores wind; the reported source level is an
 ```python
 hydrophone_depths(
     cpa_distance: float,
-    angles: tuple[float, ...] = (15.0, 30.0, 45.0),
+    angles_deg: tuple[float, ...] = (15.0, 30.0, 45.0),
 ) -> NDArray[np.float64]
 ```
 
@@ -49,7 +49,7 @@ $d = d_{\mathrm{CPA}} \tan(\mathrm{angle})$.
 | Name | Description |
 | :--- | :--- |
 | `cpa_distance` | Horizontal distance at the closest point of approach, in m ($d_{\mathrm{CPA}} = \max(100~\text{m}, \text{ship length})$). |
-| `angles` | Depression angles, in degrees (default 15°, 30°, 45°). |
+| `angles_deg` | Depression angles, in degrees (default 15°, 30°, 45°). |
 
 **Returns:** The hydrophone depths, in m.
 

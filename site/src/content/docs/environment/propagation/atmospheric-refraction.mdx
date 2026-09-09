@@ -310,7 +310,7 @@ for hs, hr, label in [(0.5, 1.5, "0.5 / 1.5 m"), (2.0, 2.0, "2 / 2 m"),
     ax.loglog(gradients,
               [environment.shadow_zone_distance(-g, hs, hr, ground_speed=340.0)
                for g in gradients], label=label)
-ax.set_xlabel("Upward gradient |g| [1/s]")
+ax.set_xlabel("Upward gradient_per_s |g| [1/s]")
 ax.set_ylabel("Shadow-zone distance [m]")
 ax.legend()
 plt.show()
@@ -386,7 +386,7 @@ with warnings.catch_warnings():
                                                         flow_resistivity=200e3,
                                                         max_range=600.0, max_height=40.0)
         ax.plot(pe.ranges, pe.level_at_height(2.0), label=label)
-# The closed-form boundary of the equivalent linear upward gradient (its
+# The closed-form boundary of the equivalent linear upward gradient_per_s (its
 # 10 m mean), the dotted line of the figure.
 up = cases[2][0]
 grad = float(up.speed_at(10.0) - 340.0) / 10.0
@@ -480,7 +480,7 @@ r2 = np.hypot(ranges, 2.0 * zs)
 two_ray = 20.0 * np.log10(np.abs(1.0 + (r1 / r2) * np.exp(1j * k * (r2 - r1))))
 
 fig, (top, bottom) = plt.subplots(2, 1, sharex=True)
-top.plot(ranges, solver, label="GFPE, zero gradient")
+top.plot(ranges, solver, label="GFPE, zero gradient_per_s")
 top.plot(ranges, two_ray, "--", label="Coherent two-ray closed form")
 top.axhline(6.0, ls=":", label="+6 dB")
 top.set_ylabel("Level re free field [dB]")

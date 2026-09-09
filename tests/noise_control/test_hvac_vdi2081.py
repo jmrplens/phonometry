@@ -319,7 +319,7 @@ def test_the_straight_runs_reproduce_table_5() -> None:
         (2.000, PRINTED_ROUND_2M_DB),
     ):
         round_duct = hvac.unlined_circular_duct_attenuation(
-            hvac.OCTAVE_BANDS, run_length, diameter=0.160, model="vdi2081"
+            hvac.OCTAVE_BANDS, run_length, diameter_m=0.160, model="vdi2081"
         )
         assert round_duct.values == pytest.approx(printed, abs=1e-9)
 
@@ -391,7 +391,7 @@ def test_the_junction_is_the_area_split_alone() -> None:
 
 def test_the_vdi_duct_models_refuse_what_they_cannot_answer() -> None:
     """Each one asks for exactly what its own table needs."""
-    with pytest.raises(ValueError, match=r"model='vdi2081' needs 'diameter'"):
+    with pytest.raises(ValueError, match=r"model='vdi2081' needs 'diameter_m'"):
         hvac.unlined_circular_duct_attenuation(None, 1.0, model="vdi2081")
 
     with pytest.raises(ValueError, match=r"'wrapped' has no meaning"):
@@ -400,7 +400,9 @@ def test_the_vdi_duct_models_refuse_what_they_cannot_answer() -> None:
         )
 
     with pytest.raises(ValueError, match=r"outside VDI 2081 Table 5"):
-        hvac.unlined_circular_duct_attenuation(None, 1.0, diameter=1.5, model="vdi2081")
+        hvac.unlined_circular_duct_attenuation(
+            None, 1.0, diameter_m=1.5, model="vdi2081"
+        )
 
     with pytest.raises(ValueError, match=r"prints no row for a bend lined on one"):
         hvac.elbow_insertion_loss(
@@ -564,7 +566,7 @@ def test_the_limit_frequency_is_the_ducts_own_first_cut_on() -> None:
         0.586 * 340.0 / 0.16, rel=2e-4
     )
     assert hvac._vdi2081_limit_frequency("round", 0.16, 340.0) == pytest.approx(
-        nc.plane_wave_limit(diameter=0.16, speed_of_sound=340.0)
+        nc.plane_wave_limit(diameter_m=0.16, speed_of_sound=340.0)
     )
 
 

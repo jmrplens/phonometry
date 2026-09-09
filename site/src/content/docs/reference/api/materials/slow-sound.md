@@ -77,8 +77,8 @@ critical_coupling_design(
     resonator: HelmholtzResonator,
     *,
     lattice_step: float,
-    period: float,
-    angle: float = 0.0,
+    period_m: float,
+    angle_rad: float = 0.0,
     slit_height_bounds: tuple[float, float] = (0.0002, 0.005),
     cavity_length_bounds: tuple[float, float] = (0.002, 0.2),
     end_correction: bool = True,
@@ -107,8 +107,8 @@ point.
 | `target_frequency` | Design frequency `f0`, in hertz. |
 | `resonator` | Base geometry; its `cavity_length` is used as the initial guess and its neck and cavity side are held fixed. |
 | `lattice_step` | Resonator lattice step `a`, in metres. |
-| `period` | Slit array period `d`, in metres. |
-| `angle` | Design angle of incidence `theta`, in radians. |
+| `period_m` | Slit array period `d`, in metres. |
+| `angle_rad` | Design angle of incidence `theta`, in radians. |
 | `slit_height_bounds` | Search bounds for the slit height, in metres. |
 | `cavity_length_bounds` | Search bounds for the cavity length, in metres. |
 | `end_correction` | Include the resonator radiation end corrections. |
@@ -122,7 +122,7 @@ point.
 ```python
 CriticalCouplingResult(
     target_frequency: float,
-    angle: float,
+    angle_rad: float,
     resonator: HelmholtzResonator,
     slit_height: float,
     absorption: float,
@@ -135,7 +135,7 @@ Outcome of a critical-coupling (perfect-absorption) design.
 
 `resonator` and `slit_height` are the solved geometry that places the
 reflection zero on the real-frequency axis at `target_frequency` and
-`angle`; `absorption` is the modelled coefficient there (`~1`) and
+`angle_rad`; `absorption` is the modelled coefficient there (`~1`) and
 `normalized_impedance` the achieved `Z cos(theta) / Z0` (`~1`).
 `converged` flags whether the root find met its tolerance.
 
@@ -264,7 +264,7 @@ plot_slit_absorber_geometry(
     *,
     slit_height: float,
     lattice_step: float,
-    period: float,
+    period_m: float,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -275,7 +275,7 @@ Draw one period of the slit metamaterial absorber, to scale.
 Side cut of the panel: the slit (height `h`) runs from the mouth at the
 left into the panel; `N` Helmholtz resonators load it from below at the
 lattice step `a` (total depth `L = N a`); the panel repeats vertically
-with `period` `d`; rigid back wall at the right.
+with `period_m` `d`; rigid back wall at the right.
 
 **Parameters**
 
@@ -285,7 +285,7 @@ with `period` `d`; rigid back wall at the right.
 | `ax` | Existing axes, or `None` to create a figure. |
 | `slit_height` | Slit height `h`, in metres. |
 | `lattice_step` | Lattice step `a`, in metres. |
-| `period` | Panel period `d`, in metres. |
+| `period_m` | Panel period `d`, in metres. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the slit rectangle. |
 
@@ -390,8 +390,8 @@ slit_helmholtz_absorber(
     *,
     slit_height: float,
     lattice_step: float,
-    period: float,
-    angle: float = 0.0,
+    period_m: float,
+    angle_rad: float = 0.0,
     end_correction: bool = True,
     slit_radiation: bool = True,
     resonator_geometry: str = 'square',
@@ -422,8 +422,8 @@ only the front air impedance carries `cos(theta)`.
 | `resonators` | One [`HelmholtzResonator`](/phonometry/reference/api/materials/slow-sound/#helmholtzresonator) or a sequence of them, ordered from the panel face towards the rigid backing. |
 | `slit_height` | Slit height `h`, in metres. |
 | `lattice_step` | Resonator lattice step `a` along the slit, in metres; the slit depth is $L = N a$. |
-| `period` | Slit array period `d` along the face, in metres ($d \ge h$). |
-| `angle` | Polar angle of incidence `theta`, in radians ($0 \le \theta < \pi/2 - 10^{-6}$). |
+| `period_m` | Slit array period `d` along the face, in metres ($d \ge h$). |
+| `angle_rad` | Polar angle of incidence `theta`, in radians ($0 \le \theta < \pi/2 - 10^{-6}$). |
 | `end_correction` | Include the resonator radiation end corrections. |
 | `slit_radiation` | Include the slit-to-free-air radiation correction. |
 | `fluid` | State of the air the panel radiates into and the slit and resonators are filled with ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)): its speed of sound `c0`, density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0`. |
@@ -435,7 +435,7 @@ only the front air impedance carries `cos(theta)`.
 ```python
 SlitResonatorAbsorberResult(
     frequency: Real,
-    angle: float,
+    angle_rad: float,
     surface_impedance: Complex,
     normalized_impedance: Complex,
     reflection: Complex,
@@ -446,7 +446,7 @@ SlitResonatorAbsorberResult(
     resonators: tuple[HelmholtzResonator, ...] | None = None,
     slit_height: float | None = None,
     lattice_step: float | None = None,
-    period: float | None = None,
+    period_m: float | None = None,
 )
 ```
 
@@ -463,7 +463,7 @@ $\alpha = 1 - \lvert R \rvert^2$, `effective_wavenumber` and
 matrix with shape `(2, 2, len(frequency))`.
 
 The trailing fields retain the panel geometry the prediction was run
-with (`resonators`, `slit_height`, `lattice_step`, `period`) so
+with (`resonators`, `slit_height`, `lattice_step`, `period_m`) so
 `plot_geometry` can draw the cross-section; they are appended after
 the original fields and default to `None` for hand-built results.
 

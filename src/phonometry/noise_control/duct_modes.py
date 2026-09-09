@@ -191,7 +191,7 @@ def _mach(flow_velocity: float, speed_of_sound: float) -> tuple[float, float]:
 
 
 def circular_duct_cut_on(
-    diameter: float,
+    diameter_m: float,
     *,
     flow_velocity: float = 0.0,
     speed_of_sound: float = _C_AIR,
@@ -215,7 +215,7 @@ def circular_duct_cut_on(
     the frequency at which it appears. Only the first twelve modes are
     tabulated by Norton, so ``count`` cannot exceed twelve.
 
-    :param diameter: Internal duct diameter, m (``a_i`` is half of it).
+    :param diameter_m: Internal duct diameter, m (``a_i`` is half of it).
     :param flow_velocity: Mean axial flow speed ``U``, m/s (0 for still air;
         use the centre-line speed for a turbulent profile).
     :param speed_of_sound: Speed of sound ``c`` in the duct fluid, m/s.
@@ -224,7 +224,7 @@ def circular_duct_cut_on(
     :raises ValueError: For a non-positive diameter, a sonic or supersonic
         flow, or a ``count`` outside 1 to 12.
     """
-    d = require_positive(diameter, "diameter")
+    d = require_positive(diameter_m, "diameter_m")
     mach, beta = _mach(flow_velocity, speed_of_sound)
     if not 1 <= count <= len(CIRCULAR_EIGENVALUES):
         msg = f"'count' must be between 1 and {len(CIRCULAR_EIGENVALUES)}."
@@ -308,7 +308,7 @@ def rectangular_duct_cut_on(
 
 def plane_wave_limit(
     *,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     width: float | None = None,
     height: float | None = None,
     area: float | None = None,
@@ -319,11 +319,11 @@ def plane_wave_limit(
 
     A convenience over :func:`circular_duct_cut_on` and
     :func:`rectangular_duct_cut_on` that takes whichever description of the
-    cross section is at hand. Give either ``diameter``, or both ``width`` and
+    cross section is at hand. Give either ``diameter_m``, or both ``width`` and
     ``height``, or ``area`` (treated as a circular duct of the equivalent
     diameter :math:`\sqrt{4S/\pi}`).
 
-    :param diameter: Internal diameter of a circular duct, m.
+    :param diameter_m: Internal diameter of a circular duct, m.
     :param width: Cross-sectional dimension ``a`` of a rectangular duct, m.
     :param height: Cross-sectional dimension ``b`` of a rectangular duct, m.
     :param area: Cross-sectional area, m2, for a duct described by its area.
@@ -340,13 +340,13 @@ def plane_wave_limit(
             speed_of_sound=speed_of_sound,
             count=1,
         ).plane_wave_limit
-    if diameter is None and area is not None:
-        diameter = float(np.sqrt(4.0 * require_positive(area, "area") / np.pi))
-    if diameter is None:
-        msg = "give 'diameter', or both 'width' and 'height', or 'area'."
+    if diameter_m is None and area is not None:
+        diameter_m = float(np.sqrt(4.0 * require_positive(area, "area") / np.pi))
+    if diameter_m is None:
+        msg = "give 'diameter_m', or both 'width' and 'height', or 'area'."
         raise ValueError(msg)
     return circular_duct_cut_on(
-        diameter,
+        diameter_m,
         flow_velocity=flow_velocity,
         speed_of_sound=speed_of_sound,
         count=1,

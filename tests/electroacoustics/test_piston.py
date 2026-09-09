@@ -113,7 +113,7 @@ def test_directivity_index_high_ka() -> None:
 
 def test_result_shapes_and_plot() -> None:
     res = electroacoustics.radiating_piston(
-        0.1, [100.0, 1000.0], angles=[0.0, 0.3, 0.6]
+        0.1, [100.0, 1000.0], angles_rad=[0.0, 0.3, 0.6]
     )
     assert isinstance(res, electroacoustics.RadiatingPistonResult)
     assert res.directivity is not None
@@ -141,7 +141,7 @@ def test_a_directivity_index_column_of_another_length_is_refused() -> None:
     result = electroacoustics.radiating_piston(
         0.1,
         [200.0, 800.0, 3200.0, 6400.0],
-        angles=np.radians(np.linspace(-90.0, 90.0, 37)),
+        angles_rad=np.radians(np.linspace(-90.0, 90.0, 37)),
     )
     one_frequency_short = result.directivity_index[1:]
     with pytest.raises(ValueError, match=r"'directivity_index' \(3\).*per frequency"):
@@ -157,7 +157,7 @@ def test_a_non_finite_directivity_pattern_is_refused() -> None:
     producer emits a non-finite pattern.
     """
     result = electroacoustics.radiating_piston(
-        0.1, [200.0, 800.0], angles=np.radians(np.linspace(-90.0, 90.0, 37))
+        0.1, [200.0, 800.0], angles_rad=np.radians(np.linspace(-90.0, 90.0, 37))
     )
     assert result.directivity is not None
     poisoned = result.directivity.copy()
@@ -170,13 +170,15 @@ def test_a_non_finite_directivity_pattern_is_refused() -> None:
 
 def test_a_non_finite_angle_grid_is_refused() -> None:
     result = electroacoustics.radiating_piston(
-        0.1, [200.0, 800.0], angles=np.radians(np.linspace(-90.0, 90.0, 37))
+        0.1, [200.0, 800.0], angles_rad=np.radians(np.linspace(-90.0, 90.0, 37))
     )
-    assert result.angles is not None
-    poisoned = result.angles.copy()
+    assert result.angles_rad is not None
+    poisoned = result.angles_rad.copy()
     poisoned[3] = np.inf
-    with pytest.raises(ValueError, match="'angles' must contain only finite values"):
-        dataclasses.replace(result, angles=poisoned)
+    with pytest.raises(
+        ValueError, match="'angles_rad' must contain only finite values"
+    ):
+        dataclasses.replace(result, angles_rad=poisoned)
 
 
 def test_a_non_numeric_angle_grid_is_refused_by_name() -> None:
@@ -185,26 +187,26 @@ def test_a_non_numeric_angle_grid_is_refused_by_name() -> None:
     neither the field nor the result it belongs to.
     """
     result = electroacoustics.radiating_piston(
-        0.1, [200.0, 800.0], angles=np.radians(np.linspace(-90.0, 90.0, 37))
+        0.1, [200.0, 800.0], angles_rad=np.radians(np.linspace(-90.0, 90.0, 37))
     )
-    assert result.angles is not None
-    lettered = np.array(["bad"] * result.angles.size, dtype=object)
+    assert result.angles_rad is not None
+    lettered = np.array(["bad"] * result.angles_rad.size, dtype=object)
     with pytest.raises(
-        ValueError, match="RadiatingPistonResult: 'angles' must be numeric"
+        ValueError, match="RadiatingPistonResult: 'angles_rad' must be numeric"
     ):
-        dataclasses.replace(result, angles=lettered)
+        dataclasses.replace(result, angles_rad=lettered)
 
 
 def test_directivity_pattern_result_and_properties() -> None:
     # Default grid is 361 points over the front hemisphere -90 deg .. +90 deg.
     res = electroacoustics.piston_directivity_pattern([3.0, 8.0])
-    assert res.angles.size == 361
+    assert res.angles_rad.size == 361
     assert isinstance(res, electroacoustics.PistonDirectivity)
     assert res.ka.shape == (2,)
-    assert res.directivity.shape == (2, res.angles.size)
+    assert res.directivity.shape == (2, res.angles_rad.size)
     assert res.directivity_db.shape == res.directivity.shape
     # D = 1 (0 dB) on axis (theta = 0) for every ka.
-    i0 = int(np.argmin(np.abs(res.angles)))
+    i0 = int(np.argmin(np.abs(res.angles_rad)))
     assert np.allclose(res.directivity[:, i0], 1.0)
     assert np.allclose(res.directivity_db[:, i0], 0.0)
     # dB echoes the linear directivity: 20 log10 |D|.
@@ -218,7 +220,9 @@ def test_directivity_pattern_first_null() -> None:
     # only once ka > 3.8317. Sample the exact null angle for ka = 6.
     ka = 6.0
     theta_null = math.asin(J1_FIRST_ZERO / ka)
-    res = electroacoustics.piston_directivity_pattern([ka], angles=[0.0, theta_null])
+    res = electroacoustics.piston_directivity_pattern(
+        [ka], angles_rad=[0.0, theta_null]
+    )
     assert abs(res.directivity[0, 1]) < 1e-9
     assert res.directivity_db[0, 1] < -120.0
     # No null for a scalar ka below the first zero of J1.
@@ -280,7 +284,7 @@ def test_a_pattern_matrix_with_a_surplus_row_is_refused() -> None:
     :meth:`plot` loops over ``ka`` and draws row ``i`` as the pattern of
     ``ka[i]``. A missing row runs that loop off the end, as numpy's "index 2 is
     out of bounds for axis 0 with size 2", and a column count that disagrees
-    with ``angles`` is refused by matplotlib; both name no field, but both are
+    with ``angles_rad`` is refused by matplotlib; both name no field, but both are
     heard. A surplus row is not: the loop stops at the last ``ka``, so the
     third pattern of a two-``ka`` bundle reaches neither the figure nor the
     legend.
@@ -298,8 +302,8 @@ def test_directivity_pattern_validation() -> None:
     empty_ka = np.empty(0)
     with pytest.raises(ValueError, match="'ka' must be non-negative"):
         electroacoustics.piston_directivity_pattern(-1.0)
-    with pytest.raises(ValueError, match="'angles' must be finite"):
-        electroacoustics.piston_directivity_pattern(ka_one, angles=infinite_angles)
+    with pytest.raises(ValueError, match="'angles_rad' must be finite"):
+        electroacoustics.piston_directivity_pattern(ka_one, angles_rad=infinite_angles)
     with pytest.raises(ValueError, match="'ka' must be a non-empty"):
         electroacoustics.piston_directivity_pattern(empty_ka)
 

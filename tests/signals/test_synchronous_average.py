@@ -40,9 +40,9 @@ PERIOD = 1.0 / 32.0
 M = round(FS * PERIOD)  # 256 samples per period
 
 
-def _periodic(period: float, m: int, orders: tuple[float, ...]) -> np.ndarray:
-    """A smooth signal periodic in ``period`` sampled on ``m`` points/period."""
-    phase = np.arange(m) * (period / m) / period
+def _periodic(period_s: float, m: int, orders: tuple[float, ...]) -> np.ndarray:
+    """A smooth signal periodic in ``period_s`` sampled on ``m`` points/period."""
+    phase = np.arange(m) * (period_s / m) / period_s
     out = np.zeros(m, dtype=np.float64)
     for k, order in enumerate(orders):
         out += (1.0 / (k + 1)) * np.cos(2.0 * np.pi * order * phase + 0.3 * k)
@@ -114,7 +114,7 @@ def test_mcfadden_node_selection_end_to_end() -> None:
     leak_20 = np.max(
         np.abs(
             ph.signals.time_synchronous_average(
-                signal, FS, period=PERIOD, n_averages=20
+                signal, FS, period_s=PERIOD, n_averages=20
             ).period_waveform
             - true_one
         )
@@ -122,7 +122,7 @@ def test_mcfadden_node_selection_end_to_end() -> None:
     leak_32 = np.max(
         np.abs(
             ph.signals.time_synchronous_average(
-                signal, FS, period=PERIOD, n_averages=32
+                signal, FS, period_s=PERIOD, n_averages=32
             ).period_waveform
             - true_one
         )
@@ -140,7 +140,7 @@ def test_exact_recovery_integer_period() -> None:
     """Noiseless periodic signal, integer M, recovered to machine precision."""
     one = _periodic(PERIOD, M, (1.0, 3.0, 5.0))
     signal = _repeat(one, 24)
-    result = ph.signals.time_synchronous_average(signal, FS, period=PERIOD)
+    result = ph.signals.time_synchronous_average(signal, FS, period_s=PERIOD)
 
     assert result.interpolated is False
     assert result.samples_per_period == M
@@ -151,7 +151,7 @@ def test_exact_recovery_integer_period() -> None:
 
 def test_times_are_the_sampling_grid() -> None:
     one = _periodic(PERIOD, M, (2.0,))
-    result = ph.signals.time_synchronous_average(_repeat(one, 10), FS, period=PERIOD)
+    result = ph.signals.time_synchronous_average(_repeat(one, 10), FS, period_s=PERIOD)
     assert result.times.size == M
     assert result.times[0] == pytest.approx(0.0, abs=1e-15)
     assert result.times[-1] < PERIOD
@@ -170,15 +170,15 @@ def test_noninteger_period_recovered_within_bound() -> None:
     reference is the true waveform evaluated at ``m/fs`` -- exactly the
     grid :attr:`times` reports.
     """
-    period = 1.0 / 31.7  # FS * period is not an integer
-    m_int = round(FS * period)
-    phase = np.arange(30 * m_int) / FS / period
+    period_s = 1.0 / 31.7  # FS * period is not an integer
+    m_int = round(FS * period_s)
+    phase = np.arange(30 * m_int) / FS / period_s
     signal = np.cos(2.0 * np.pi * phase) + 0.4 * np.cos(2.0 * np.pi * 2.0 * phase + 0.3)
-    result = ph.signals.time_synchronous_average(signal, FS, period=period)
+    result = ph.signals.time_synchronous_average(signal, FS, period_s=period_s)
 
     assert result.interpolated is True
     assert np.allclose(result.times, np.arange(m_int) / FS, atol=0.0)
-    ref_phase = result.times / period
+    ref_phase = result.times / period_s
     reference = np.cos(2.0 * np.pi * ref_phase) + 0.4 * np.cos(
         2.0 * np.pi * 2.0 * ref_phase + 0.3
     )
@@ -195,10 +195,10 @@ def test_noninteger_period_samples_on_fs_grid_not_angular_grid() -> None:
     the axis reported before the fix -- misreads them by ~9e-2.
     """
     fs = 1000.0
-    period = 100.37 / fs
-    m_int = round(fs * period)
+    period_s = 100.37 / fs
+    m_int = round(fs * period_s)
     n_avg = 50
-    n_samples = int(np.ceil((n_avg + 1) * fs * period))
+    n_samples = int(np.ceil((n_avg + 1) * fs * period_s))
     t = np.arange(n_samples) / fs
 
     orders = np.arange(1, 13)
@@ -207,12 +207,12 @@ def test_noninteger_period_samples_on_fs_grid_not_angular_grid() -> None:
 
     def wave(tv: np.ndarray) -> np.ndarray:
         return sum(
-            a * np.cos(2.0 * np.pi * k / period * tv + p)
+            a * np.cos(2.0 * np.pi * k / period_s * tv + p)
             for k, a, p in zip(orders, amps, phases, strict=True)
         )
 
     result = ph.signals.time_synchronous_average(
-        wave(t), fs, period=period, n_averages=n_avg
+        wave(t), fs, period_s=period_s, n_averages=n_avg
     )
 
     assert result.interpolated is True
@@ -222,7 +222,7 @@ def test_noninteger_period_samples_on_fs_grid_not_angular_grid() -> None:
     err_fs_grid = np.max(np.abs(result.period_waveform - wave(result.times)))
     assert err_fs_grid < 1e-4  # measured ~2.8e-6
 
-    angular_grid = np.arange(m_int) * (period / m_int)
+    angular_grid = np.arange(m_int) * (period_s / m_int)
     err_angular = np.max(np.abs(result.period_waveform - wave(angular_grid)))
     assert err_angular > 0.05  # the angular grid is the wrong axis
 
@@ -240,7 +240,7 @@ def test_noise_reduction_sqrt_n_law() -> None:
     sigma = 1.0
     signal = _repeat(one, n_avg) + rng.standard_normal(n_avg * M) * sigma
     result = ph.signals.time_synchronous_average(
-        signal, FS, period=PERIOD, n_averages=n_avg
+        signal, FS, period_s=PERIOD, n_averages=n_avg
     )
 
     residual_of_average = result.period_waveform - one
@@ -253,7 +253,7 @@ def test_noise_reduction_sqrt_n_law() -> None:
 
 def test_noise_reduction_db_matches_n() -> None:
     one = _periodic(PERIOD, M, (1.0,))
-    result = ph.signals.time_synchronous_average(_repeat(one, 100), FS, period=PERIOD)
+    result = ph.signals.time_synchronous_average(_repeat(one, 100), FS, period_s=PERIOD)
     assert result.noise_reduction_db == pytest.approx(20.0, abs=1e-9)
     assert result.amplitude_snr_gain == pytest.approx(10.0, abs=1e-9)
 
@@ -265,7 +265,7 @@ def test_noise_reduction_db_matches_n() -> None:
 
 def test_default_n_averages_uses_whole_record() -> None:
     one = _periodic(PERIOD, M, (1.0,))
-    result = ph.signals.time_synchronous_average(_repeat(one, 12), FS, period=PERIOD)
+    result = ph.signals.time_synchronous_average(_repeat(one, 12), FS, period_s=PERIOD)
     assert result.n_averages == 12
 
 
@@ -274,7 +274,7 @@ def test_requested_n_averages_over_available_raises() -> None:
     with pytest.raises(
         ValueError, match=r"'n_averages' = .* exceeds the .* whole periods available"
     ):
-        ph.signals.time_synchronous_average(signal, FS, period=PERIOD, n_averages=6)
+        ph.signals.time_synchronous_average(signal, FS, period_s=PERIOD, n_averages=6)
 
 
 @pytest.mark.parametrize(
@@ -287,20 +287,20 @@ def test_requested_n_averages_over_available_raises() -> None:
 def test_invalid_parameters_raise(kwargs: dict, match: str) -> None:
     signal = _repeat(_periodic(PERIOD, M, (1.0,)), 4)
     with pytest.raises(ValueError, match=match):
-        ph.signals.time_synchronous_average(signal, FS, period=PERIOD, **kwargs)
+        ph.signals.time_synchronous_average(signal, FS, period_s=PERIOD, **kwargs)
 
 
 def test_period_too_short_raises() -> None:
     signal = _repeat(_periodic(PERIOD, M, (1.0,)), 4)
     tiny_period = 1.0 / FS  # spans a single sample
     with pytest.raises(ValueError, match="at least 2 samples"):
-        ph.signals.time_synchronous_average(signal, FS, period=tiny_period)
+        ph.signals.time_synchronous_average(signal, FS, period_s=tiny_period)
 
 
 def test_record_shorter_than_one_period_raises() -> None:
     short = np.zeros(M // 2, dtype=np.float64)
     with pytest.raises(ValueError, match="shorter than one period"):
-        ph.signals.time_synchronous_average(short, FS, period=PERIOD)
+        ph.signals.time_synchronous_average(short, FS, period_s=PERIOD)
 
 
 def test_average_curves_must_run_over_their_own_axis() -> None:
@@ -318,7 +318,7 @@ def test_average_curves_must_run_over_their_own_axis() -> None:
     the end.
     """
     good = ph.signals.time_synchronous_average(
-        _repeat(_periodic(PERIOD, M, (1.0, 3.0)), 8), FS, period=PERIOD
+        _repeat(_periodic(PERIOD, M, (1.0, 3.0)), 8), FS, period_s=PERIOD
     )
     pairs = (
         (("times", "period_waveform"), "one value per period sample"),
@@ -349,7 +349,9 @@ def test_comb_filter_response_validation() -> None:
     one = np.array([1.0])
     with pytest.raises(ValueError, match=r"'n_averages' must be a positive integer"):
         comb_filter_response(one, PERIOD, 0)
-    with pytest.raises(ValueError, match=r"'period' must be a positive, finite number"):
+    with pytest.raises(
+        ValueError, match=r"'period_s' must be a positive, finite number"
+    ):
         comb_filter_response(one, -1.0, 2)
 
 
@@ -360,19 +362,19 @@ def test_comb_filter_response_rejects_overflowing_order() -> None:
     large_frequency = np.array([1e307])
     with pytest.raises(
         ValueError,
-        match=r"'frequencies' \* 'period' .* overflows the floating-point range",
+        match=r"'frequencies' \* 'period_s' .* overflows the floating-point range",
     ):
         comb_filter_response(huge_frequency, 1e308, 3)
     with pytest.raises(
         ValueError,
-        match=r"'frequencies' \* 'period' .* overflows the floating-point range",
+        match=r"'frequencies' \* 'period_s' .* overflows the floating-point range",
     ):
         comb_filter_response(large_frequency, 100.0, 2**40)
 
 
 def test_plot_returns_axes() -> None:
     one = _periodic(PERIOD, M, (1.0, 3.0))
-    result = ph.signals.time_synchronous_average(_repeat(one, 8), FS, period=PERIOD)
+    result = ph.signals.time_synchronous_average(_repeat(one, 8), FS, period_s=PERIOD)
 
     axes = result.plot()
     assert axes.shape == (2,)
@@ -386,7 +388,7 @@ def test_plot_returns_axes() -> None:
 
 def test_plot_rejects_unknown_language() -> None:
     result = ph.signals.time_synchronous_average(
-        _repeat(_periodic(PERIOD, M, (1.0,)), 4), FS, period=PERIOD
+        _repeat(_periodic(PERIOD, M, (1.0,)), 4), FS, period_s=PERIOD
     )
     with pytest.raises(ValueError, match="Unknown language"):
         result.plot(language="fr")

@@ -97,10 +97,14 @@ def _ducting_fields(
     for depth in _DUCT_SRC_DEPTHS:
         sim = fdtd2d.FDTD2D(c_map, dx, rho=1025.0, sponge_width=30)
         iy = round(depth / dx)
-        sim.add_source(fdtd2d.GaussianPulse(ix=100, iy=iy, width=width))
+        sim.add_source(fdtd2d.GaussianPulse(ix=100, iy=iy, half_width_s=width))
         sim.add_source(
             fdtd2d.GaussianPulse(
-                ix=100, iy=iy, width=width, t0=4.0 * width + offset, amplitude=-1.0
+                ix=100,
+                iy=iy,
+                half_width_s=width,
+                t0=4.0 * width + offset,
+                amplitude=-1.0,
             )
         )
         energy = np.zeros_like(sim.p)

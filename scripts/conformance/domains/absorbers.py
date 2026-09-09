@@ -442,12 +442,12 @@ def _chk_biot_rigid_frame_limit() -> Outcome:
     reference = ph.materials.layered_absorber(
         frequency,
         [ph.materials.PorousLayer(0.05, medium)],
-        angle=math.pi / 4.0,
+        angle_rad=math.pi / 4.0,
     ).surface_impedance
     frozen = ph.materials.layered_absorber(
         frequency,
         [_aa_glass_wool_layer(medium, 0.05, 1e8)],
-        angle=math.pi / 4.0,
+        angle_rad=math.pi / 4.0,
     ).surface_impedance
     deviation = float(np.max(np.abs(frozen / reference - 1.0)))
     return numeric(0.0, deviation, 1e-7, places=10)
@@ -492,7 +492,7 @@ def _chk_slow_sound_perfect_absorption() -> Outcome:
         300.0,
         res,
         lattice_step=3.0e-2,
-        period=5.0e-2,
+        period_m=5.0e-2,
         fluid=air,
     )
     out = ph.materials.slit_helmholtz_absorber(
@@ -500,7 +500,7 @@ def _chk_slow_sound_perfect_absorption() -> Outcome:
         design.resonator,
         slit_height=design.slit_height,
         lattice_step=3.0e-2,
-        period=5.0e-2,
+        period_m=5.0e-2,
         fluid=air,
     )
     # The check requires the solver to have converged: a non-converged design

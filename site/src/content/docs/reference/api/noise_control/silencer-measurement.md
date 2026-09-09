@@ -566,7 +566,7 @@ MODAL_FILTER_ATTENUATION_DB = (3.0, 5.0)
 ```python
 modal_filter_cut_on(
     *,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     larger_dimension: float | None = None,
     sound_speed: float = 343.0,
 ) -> float
@@ -596,7 +596,7 @@ the mean-flow correction this equation does not have.
 
 | Name | Description |
 | :--- | :--- |
-| `diameter` | $d$ of a circular duct, in m. Exactly one of the two dimensions is given. |
+| `diameter_m` | $d$ of a circular duct, in m. Exactly one of the two dimensions is given. |
 | `larger_dimension` | $H$, the larger cross-sectional dimension of a rectangular duct, in m. |
 | `sound_speed` | $c$, in m/s. |
 

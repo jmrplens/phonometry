@@ -421,9 +421,9 @@ def multihole_incipient_cavitation_ratio(
         more, or another value is not positive and finite.
     """
     count = _require_count(passages, "passages")
-    diameter = require_positive(hole_diameter, "hole_diameter")
+    diameter_m = require_positive(hole_diameter, "hole_diameter")
     recovery = _require_recovery(pressure_recovery)
-    inner = _MULTIHOLE_OFFSET + _MULTIHOLE_FACTOR * count * diameter**2 / recovery
+    inner = _MULTIHOLE_OFFSET + _MULTIHOLE_FACTOR * count * diameter_m**2 / recovery
     return float(1.0 / math.sqrt(inner))
 
 
@@ -771,8 +771,8 @@ def turbulent_peak_frequency(
     """
     strouhal = require_positive(strouhal_number, "strouhal_number")
     speed = require_positive(velocity, "velocity")
-    diameter = require_positive(jet, "jet")
-    return float(strouhal * speed / diameter)
+    diameter_m = require_positive(jet, "jet")
+    return float(strouhal * speed / diameter_m)
 
 
 def cavitation_peak_frequency(

@@ -473,9 +473,9 @@ def test_coupling_loss_factor_rejects_unreconcilable_shapes() -> None:
 
 
 def test_out_of_range_angle_rejected() -> None:
-    with pytest.raises(ValueError, match=r"'angle' must lie in \[0, pi/2\]"):
+    with pytest.raises(ValueError, match=r"'angle_rad' must lie in \[0, pi/2\]"):
         vibration.corner_transmission_coefficient(2.0, 1.0, 1.0, "X")  # > pi/2
-    with pytest.raises(ValueError, match=r"'angle' must lie in \[0, pi/2\]"):
+    with pytest.raises(ValueError, match=r"'angle_rad' must lie in \[0, pi/2\]"):
         vibration.corner_transmission_coefficient(-0.1, 1.0, 1.0, "X")
 
 

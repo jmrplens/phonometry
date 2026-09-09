@@ -189,7 +189,7 @@ $\bar{\tau} = \int_0^{\pi/2} \tau(\theta) \cos\theta \,\mathrm{d}\theta$, evalua
 
 ```python
 corner_transmission_coefficient(
-    angle: ArrayLike,
+    angle_rad: ArrayLike,
     chi: float,
     psi: float,
     junction: str = 'X',
@@ -205,7 +205,7 @@ Returns `0` for angles beyond the cut-off $\arcsin(\chi)$
 
 | Name | Description |
 | :--- | :--- |
-| `angle` | Incidence angle `theta`, in **radians** (scalar or array, $0 \le \theta \le \pi/2$). |
+| `angle_rad` | Incidence angle `theta`, in **radians** (scalar or array, $0 \le \theta \le \pi/2$). |
 | `chi` | Wave parameter `chi` (Eq. 5.10, > 0). |
 | `psi` | Wave parameter `psi` (Eq. 5.11, > 0). |
 | `junction` | `"X"`, `"T1"`, `"T2"` or `"L"`. |
@@ -624,7 +624,7 @@ of [`junction_wave_parameters`](/phonometry/reference/api/vibration/junction-tra
 
 ```python
 straight_transmission_coefficient(
-    angle: ArrayLike,
+    angle_rad: ArrayLike,
     chi: float,
     psi: float,
     junction: str = 'X',
@@ -641,7 +641,7 @@ covered.
 
 | Name | Description |
 | :--- | :--- |
-| `angle` | Incidence angle `theta`, in **radians** (scalar or array, $0 \le \theta \le \pi/2$). |
+| `angle_rad` | Incidence angle `theta`, in **radians** (scalar or array, $0 \le \theta \le \pi/2$). |
 | `chi` | Wave parameter `chi` (Eq. 5.10, > 0). |
 | `psi` | Wave parameter `psi` (Eq. 5.11, > 0). |
 | `junction` | `"X"` or `"T1"` (the only junctions with a straight section). |

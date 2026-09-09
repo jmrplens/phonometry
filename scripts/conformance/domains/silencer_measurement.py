@@ -379,7 +379,7 @@ def _chk_circular_cut_on() -> Outcome:
     ratio, which is the part that does not depend on the duct.
     """
     exact = ph.noise_control.circular_duct_cut_on(0.4, speed_of_sound=343.0, count=1)
-    found = ph.noise_control.modal_filter_cut_on(diameter=0.4)
+    found = ph.noise_control.modal_filter_cut_on(diameter_m=0.4)
     return numeric(
         0.59 / (1.8412 / math.pi),
         found / float(exact.cut_on_no_flow[0]),

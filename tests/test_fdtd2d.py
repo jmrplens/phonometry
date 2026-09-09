@@ -28,7 +28,7 @@ import fdtd2d
 def _pulse_box(sponge_width: int) -> fdtd2d.FDTD2D:
     """A homogeneous box with a centred Gaussian pulse (odd grid)."""
     sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(81, 101), sponge_width=sponge_width)
-    sim.add_source(fdtd2d.GaussianPulse(ix=50, iy=40, width=6 * sim.dt))
+    sim.add_source(fdtd2d.GaussianPulse(ix=50, iy=40, half_width_s=6 * sim.dt))
     return sim
 
 
@@ -79,7 +79,9 @@ def test_heterogeneous_speed_refracts_faster() -> None:
     c = np.full((ny, nx), 200.0)
     c[:, nx // 2 :] = 400.0
     sim = fdtd2d.FDTD2D(c, 0.05)
-    sim.add_source(fdtd2d.GaussianPulse(ix=nx // 2, iy=ny // 2, width=6 * sim.dt))
+    sim.add_source(
+        fdtd2d.GaussianPulse(ix=nx // 2, iy=ny // 2, half_width_s=6 * sim.dt)
+    )
     sim.run(150)
     row = np.abs(sim.p[ny // 2])
     threshold = 1e-3 * row.max()
@@ -95,7 +97,7 @@ def test_scalar_c_requires_shape() -> None:
 
 def test_source_outside_the_grid_is_rejected() -> None:
     sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(10, 10))
-    pulse = fdtd2d.GaussianPulse(ix=99, iy=0, width=1e-4)
+    pulse = fdtd2d.GaussianPulse(ix=99, iy=0, half_width_s=1e-4)
     with pytest.raises(ValueError, match="source position lies outside the grid"):
         sim.add_source(pulse)
 
@@ -154,10 +156,10 @@ def test_sponge_sides_accepts_a_bare_string() -> None:
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
-        ({"width": 0.0}, "width must be positive"),
-        ({"width": np.inf}, "width must be positive"),
-        ({"width": 1e-4, "amplitude": np.nan}, "amplitude must be finite"),
-        ({"width": 1e-4, "t0": np.inf}, "t0 must be finite"),
+        ({"half_width_s": 0.0}, "half_width_s must be positive"),
+        ({"half_width_s": np.inf}, "half_width_s must be positive"),
+        ({"half_width_s": 1e-4, "amplitude": np.nan}, "amplitude must be finite"),
+        ({"half_width_s": 1e-4, "t0": np.inf}, "t0 must be finite"),
     ],
 )
 def test_gaussian_pulse_rejects_invalid_parameters(

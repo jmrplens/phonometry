@@ -1054,7 +1054,7 @@ to survive.
 
 ## 4. Oblique and random incidence
 
-`layered_absorber(..., angle=theta)` evaluates the full bulk-reacting stack
+`layered_absorber(..., angle_rad=theta)` evaluates the full bulk-reacting stack
 at any polar angle; sheets are locally reacting (angle-independent), fluid
 layers refract per Snell's law; for an MPP over a cavity this reproduces
 Maa's oblique closed form (Eq. 23) exactly. The random-incidence coefficient
@@ -1156,7 +1156,7 @@ against a measured $\alpha_\mathrm{s}$ still has to be closed with a measurement
 
 *The integrand the Paris average consumes, and the two ways of averaging it.
 Left: $\alpha(\theta)$ of the same 50 mm layer at four frequencies, each
-solid bulk-reacting curve (`layered_absorber(..., angle=theta)`, in which the
+solid bulk-reacting curve (`layered_absorber(..., angle_rad=theta)`, in which the
 fluid layers refract) shadowed by the locally reacting curve obtained from the
 same normal-incidence surface impedance. The two agree at normal incidence by
 construction, separate through the 40°–75° range where the Paris integrand
@@ -1175,7 +1175,7 @@ passive impedance can pass.*
 theta = np.radians(np.linspace(0.0, 88.0, 60))
 f_one = np.array([1000.0])
 layers_one = [materials.PorousLayer(0.05, materials.miki(f_one, 20000.0))]
-bulk = [float(materials.layered_absorber(f_one, layers_one, angle=float(t)).absorption[0])
+bulk = [float(materials.layered_absorber(f_one, layers_one, angle_rad=float(t)).absorption[0])
         for t in theta]
 z_normal = materials.layered_absorber(f_one, layers_one).normalized_impedance[0]
 local = [1.0 - abs((z_normal * np.cos(t) - 1.0) / (z_normal * np.cos(t) + 1.0)) ** 2

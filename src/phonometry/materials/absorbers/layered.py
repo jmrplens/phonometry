@@ -248,7 +248,7 @@ class LayeredAbsorberResult:
     """
 
     frequency: Real
-    angle: float
+    angle_rad: float
     surface_impedance: Complex
     normalized_impedance: Complex
     reflection: Complex
@@ -684,7 +684,7 @@ def layered_absorber(
     frequency: ArrayLike,
     layers: list[Layer] | tuple[Layer, ...],
     *,
-    angle: float = 0.0,
+    angle_rad: float = 0.0,
     termination: str | complex | ArrayLike = "rigid",
     fluid: Fluid = PUBLISHED_AIR,
 ) -> LayeredAbsorberResult:
@@ -716,7 +716,7 @@ def layered_absorber(
 
     :param frequency: Frequency vector ``f``, in hertz.
     :param layers: Layer stack from the incidence side to the termination.
-    :param angle: Polar angle of incidence ``theta``, in radians
+    :param angle_rad: Polar angle of incidence ``theta``, in radians
         (:math:`0 \le \theta < \pi/2 - 10^{-6}`; grazing incidence is
         excluded).
     :param termination: ``"rigid"`` (default), ``"free"``, or a non-zero
@@ -731,12 +731,12 @@ def layered_absorber(
     if not layers:
         msg = "'layers' must contain at least one layer."
         raise ValueError(msg)
-    theta = float(angle)
+    theta = float(angle_rad)
     # The last ~3e-8 rad below pi/2 round sin(theta)**2 to 1.0, driving the
     # in-depth wavenumber of an air layer to exactly zero (inf * 0 = nan in
     # the recursion); reject effectively grazing input with a clear error.
     if not 0.0 <= theta < np.pi / 2.0 - 1e-6:
-        msg = "'angle' must satisfy 0 <= angle < pi/2 - 1e-6."
+        msg = "'angle_rad' must satisfy 0 <= angle < pi/2 - 1e-6."
         raise ValueError(msg)
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
@@ -793,7 +793,7 @@ def layered_absorber(
     alpha = 1.0 - np.abs(r) ** 2
     return LayeredAbsorberResult(
         frequency=f,
-        angle=theta,
+        angle_rad=theta,
         surface_impedance=np.asarray(zs, dtype=np.complex128),
         normalized_impedance=np.asarray(zs / rc, dtype=np.complex128),
         reflection=np.asarray(r, dtype=np.complex128),
@@ -856,7 +856,7 @@ def diffuse_field_absorption(
         res = layered_absorber(
             f,
             layers,
-            angle=float(th),
+            angle_rad=float(th),
             termination=termination,
             fluid=fluid,
         )

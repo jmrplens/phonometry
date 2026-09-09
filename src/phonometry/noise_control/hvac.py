@@ -692,7 +692,7 @@ class HvacSpectrumResult:
 
 def end_reflection_loss(
     frequencies: ArrayLike,
-    diameter: float,
+    diameter_m: float,
     *,
     termination: str = "flush",
     method: str = "bies",
@@ -717,7 +717,7 @@ def end_reflection_loss(
     The two agree within a couple of decibels over the bands both cover.
 
     :param frequencies: Frequencies ``f``, Hz (1-D array).
-    :param diameter: Duct internal diameter ``D``, m (use
+    :param diameter_m: Duct internal diameter ``D``, m (use
         :func:`equivalent_diameter` for a rectangular duct of area ``S``).
     :param termination: ``"flush"`` (duct flush with a wall/ceiling) or
         ``"free"`` (free space / suspended in the room).
@@ -736,16 +736,16 @@ def end_reflection_loss(
     """
     if method == "vdi2081":
         bands = _frequencies(frequencies)
-        bore = require_positive(diameter, "diameter")
-        angle = _VDI2081_SOLID_ANGLE.get(termination)
-        if angle is None:
+        bore = require_positive(diameter_m, "diameter_m")
+        angle_rad = _VDI2081_SOLID_ANGLE.get(termination)
+        if angle_rad is None:
             options = sorted(set(_VDI2081_SOLID_ANGLE))
             msg = f"'termination' must be one of {options} for method='vdi2081'."
             raise ValueError(msg)
         values = _vdi2081_end_reflection(
             bands,
             area=math.pi * bore**2 / 4.0,
-            solid_angle_over_pi=angle,
+            solid_angle_over_pi=angle_rad,
             aspect_ratio=require_positive(aspect_ratio, "aspect_ratio"),
             speed_of_sound=require_positive(speed_of_sound, "speed_of_sound"),
         )
@@ -762,12 +762,12 @@ def end_reflection_loss(
     if require_choice(method, "method", ("bies", "long")) == "long":
         return end_reflection_loss_closed_form(
             frequencies,
-            diameter,
+            diameter_m,
             termination=termination,
             speed_of_sound=speed_of_sound,
         )
     f = _frequencies(frequencies)
-    d_mm = require_positive(diameter, "diameter") * 1000.0
+    d_mm = require_positive(diameter_m, "diameter_m") * 1000.0
     if termination == "flush":
         table = _END_REFLECTION_FLUSH
     elif termination == "free":
@@ -788,7 +788,7 @@ def end_reflection_loss(
         frequencies=f,
         values=values,
         quantity="attenuation",
-        label=f"End reflection ({termination}, D = {diameter * 1000:.0f} mm)",
+        label=f"End reflection ({termination}, D = {diameter_m * 1000:.0f} mm)",
     )
 
 
@@ -953,7 +953,7 @@ def plenum_attenuation(
     wall_area: float,
     mean_absorption: ArrayLike,
     *,
-    angle: float = 0.0,
+    angle_rad: float = 0.0,
 ) -> np.ndarray | float:
     r"""Plenum-chamber transmission loss by Wells' method (Bies Eq. (8.275)).
 
@@ -974,20 +974,20 @@ def plenum_attenuation(
     :param wall_area: Total internal wall area ``S_\mathrm{w}``, m2.
     :param mean_absorption: Mean Sabine wall absorption ``alpha`` in ``(0, 1)``
         (scalar or per-band).
-    :param angle: Angle ``theta`` between the inlet axis and the line to the
+    :param angle_rad: Angle ``theta`` between the inlet axis and the line to the
         outlet, in ``[0, pi/2]`` rad (default 0).
     :return: The transmission loss, dB (float for scalar absorption, else a
         per-band array).
     :raises ValueError: If a dimension is not positive, ``mean_absorption``
-        leaves ``(0, 1)`` or ``angle`` leaves ``[0, pi/2]``.
+        leaves ``(0, 1)`` or ``angle_rad`` leaves ``[0, pi/2]``.
     """
     s_out = require_positive(exit_area, "exit_area")
     r = require_positive(line_of_sight, "line_of_sight")
     s_w = require_positive(wall_area, "wall_area")
     # Past pi/2 the direct term of Eq. (8.275) turns negative, which the
     # method does not model; a NaN fails the same comparison and is refused.
-    if not (math.isfinite(angle) and 0.0 <= angle <= math.pi / 2.0):
-        msg = "'angle' must lie in [0, pi/2] radians."
+    if not (math.isfinite(angle_rad) and 0.0 <= angle_rad <= math.pi / 2.0):
+        msg = "'angle_rad' must lie in [0, pi/2] radians."
         raise ValueError(msg)
     alpha = np.asarray(mean_absorption, dtype=np.float64)
     if alpha.ndim > 1 or alpha.size == 0:
@@ -997,7 +997,7 @@ def plenum_attenuation(
         msg = "'mean_absorption' must lie strictly in (0, 1)."
         raise ValueError(msg)
     r_const = np.asarray(room_constant(s_w, alpha), dtype=np.float64)
-    direct = np.cos(angle) / (np.pi * r**2)
+    direct = np.cos(angle_rad) / (np.pi * r**2)
     reverberant = 1.0 / r_const
     tl = -10.0 * np.log10(s_out * (direct + reverberant))
     return float(tl) if tl.ndim == 0 else tl
@@ -1745,7 +1745,7 @@ def _vdi2081_limit_frequency(shape: str, size: float, speed_of_sound: float) -> 
     """
     if shape == "rectangular":
         return plane_wave_limit(width=size, height=size, speed_of_sound=speed_of_sound)
-    return plane_wave_limit(diameter=size, speed_of_sound=speed_of_sound)
+    return plane_wave_limit(diameter_m=size, speed_of_sound=speed_of_sound)
 
 
 def _vdi2081_bend(
@@ -1914,7 +1914,7 @@ def unlined_circular_duct_attenuation(
     frequencies: ArrayLike | None,
     length: float,
     *,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     model: str = "ashrae",
 ) -> HvacSpectrumResult:
     """Attenuation of an unlined circular sheet-metal duct (Long Table 14.1).
@@ -1929,26 +1929,26 @@ def unlined_circular_duct_attenuation(
     does depend on the diameter: a wide round duct is stiffer still and its
     tabulated loss falls to nothing at 63 Hz above 400 mm, where the table
     prints a dash. That is the substantive difference between the two accounts
-    of this element, and it is why ``diameter`` is required there and not here.
+    of this element, and it is why ``diameter_m`` is required there and not here.
 
     :param frequencies: Octave-band centres, Hz; ``None`` uses
         :data:`OCTAVE_BANDS`.
     :param length: Duct run length, m.
-    :param diameter: **VDI 2081 only.** Internal diameter, m, which selects the
+    :param diameter_m: **VDI 2081 only.** Internal diameter, m, which selects the
         Table 5 row. The table stops at 1,00 m.
     :param model: ``"ashrae"`` (default, Long Table 14.1) or ``"vdi2081"``.
     :return: An :class:`HvacSpectrumResult` of the attenuation, dB.
     """
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     if scheme == "vdi2081":
-        if diameter is None:
+        if diameter_m is None:
             msg = (
-                "model='vdi2081' needs 'diameter': Table 5 tabulates a round "
+                "model='vdi2081' needs 'diameter_m': Table 5 tabulates a round "
                 "duct by its bore, where Long Table 14.1 does not."
             )
             raise ValueError(msg)
         bands = _frequencies(OCTAVE_BANDS if frequencies is None else frequencies)
-        bore = require_positive(diameter, "diameter")
+        bore = require_positive(diameter_m, "diameter_m")
         return HvacSpectrumResult(
             frequencies=bands,
             values=_vdi2081_straight_run(
@@ -2029,7 +2029,7 @@ def lined_rectangular_duct_attenuation(
 
 def lined_circular_duct_attenuation(
     frequencies: ArrayLike | None,
-    diameter: float,
+    diameter_m: float,
     length: float,
     lining_thickness: float,
 ) -> HvacSpectrumResult:
@@ -2047,13 +2047,13 @@ def lined_circular_duct_attenuation(
 
     :param frequencies: Octave-band centres, Hz; ``None`` uses
         :data:`OCTAVE_BANDS`.
-    :param diameter: Internal diameter ``d``, m.
+    :param diameter_m: Internal diameter ``d``, m.
     :param length: Duct run length ``l``, m.
     :param lining_thickness: Lining thickness ``t``, m.
     :return: An :class:`HvacSpectrumResult` of the attenuation, dB.
     """
     f, idx = _octave_slots(frequencies)
-    d_in = require_positive(diameter, "diameter") / _M_PER_IN
+    d_in = require_positive(diameter_m, "diameter_m") / _M_PER_IN
     ell = require_positive(length, "length") / _M_PER_FT
     t_in = require_positive(lining_thickness, "lining_thickness") / _M_PER_IN
     a, b, c, d, e, g = (_LINED_ROUND_COEFFS[idx, j] for j in range(6))
@@ -2064,7 +2064,7 @@ def lined_circular_duct_attenuation(
         values=values,
         quantity="attenuation",
         label=(
-            f"Lined circular duct (D = {diameter * 1000:.0f} mm, {length:.2f} m, "
+            f"Lined circular duct (D = {diameter_m * 1000:.0f} mm, {length:.2f} m, "
             f"{lining_thickness * 1000:.0f} mm lining)"
         ),
     )
@@ -2072,7 +2072,7 @@ def lined_circular_duct_attenuation(
 
 def flexible_duct_insertion_loss(
     frequencies: ArrayLike | None,
-    diameter: float,
+    diameter_m: float,
     length: float,
 ) -> HvacSpectrumResult:
     """Insertion loss of a lined round flexible duct (Long Table 14.4, ASHRAE 1995).
@@ -2089,12 +2089,12 @@ def flexible_duct_insertion_loss(
 
     :param frequencies: Octave-band centres, Hz, within 63 Hz to 4 kHz;
         ``None`` uses all seven tabulated bands.
-    :param diameter: Internal diameter, m (100 mm to 406 mm tabulated).
+    :param diameter_m: Internal diameter, m (100 mm to 406 mm tabulated).
     :param length: Duct run length, m (0.9 m to 3.7 m tabulated).
     :return: An :class:`HvacSpectrumResult` of the insertion loss, dB.
     """
     f, idx = _octave_slots(frequencies, _FLEX_BANDS)
-    d_in = require_positive(diameter, "diameter") / _M_PER_IN
+    d_in = require_positive(diameter_m, "diameter_m") / _M_PER_IN
     ell_ft = require_positive(length, "length") / _M_PER_FT
     log_d = np.log(_FLEX_DIAMETERS_IN)
     # Interpolate over length first (linear), then over log diameter.
@@ -2114,7 +2114,7 @@ def flexible_duct_insertion_loss(
         frequencies=f,
         values=values,
         quantity="attenuation",
-        label=f"Flexible duct (D = {diameter * 1000:.0f} mm, {length:.2f} m)",
+        label=f"Flexible duct (D = {diameter_m * 1000:.0f} mm, {length:.2f} m)",
     )
 
 
@@ -2302,7 +2302,7 @@ def split_loss(
 
 def end_reflection_loss_closed_form(
     frequencies: ArrayLike,
-    diameter: float,
+    diameter_m: float,
     *,
     termination: str = "flush",
     speed_of_sound: float = _C_AIR,
@@ -2324,14 +2324,14 @@ def end_reflection_loss_closed_form(
     whose flare smooths the impedance transition into the room.
 
     :param frequencies: Frequencies ``f``, Hz (1-D array).
-    :param diameter: Duct internal diameter ``d``, m.
+    :param diameter_m: Duct internal diameter ``d``, m.
     :param termination: ``"flush"`` (flush with a wall or ceiling) or
         ``"free"`` (free space).
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :return: An :class:`HvacSpectrumResult` of the reflection loss, dB.
     """
     f = _frequencies(frequencies)
-    d = require_positive(diameter, "diameter")
+    d = require_positive(diameter_m, "diameter_m")
     c = require_positive(speed_of_sound, "speed_of_sound")
     kind = require_choice(termination, "termination", ("flush", "free"))
     factor = 0.8 if kind == "flush" else 1.0

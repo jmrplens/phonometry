@@ -312,7 +312,7 @@ one rather than as the width in the plane of the bend.
 ```python
 end_reflection_loss(
     frequencies: ArrayLike,
-    diameter: float,
+    diameter_m: float,
     *,
     termination: str = 'flush',
     method: str = 'bies',
@@ -343,7 +343,7 @@ The two agree within a couple of decibels over the bands both cover.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies `f`, Hz (1-D array). |
-| `diameter` | Duct internal diameter `D`, m (use [`equivalent_diameter`](/phonometry/reference/api/noise_control/hvac/#equivalent_diameter) for a rectangular duct of area `S`). |
+| `diameter_m` | Duct internal diameter `D`, m (use [`equivalent_diameter`](/phonometry/reference/api/noise_control/hvac/#equivalent_diameter) for a rectangular duct of area `S`). |
 | `termination` | `"flush"` (duct flush with a wall/ceiling) or `"free"` (free space / suspended in the room). |
 | `method` | `"bies"` (Table 8.14 look-up), `"long"` (closed form) or `"vdi2081"` (VDI 2081 Part 1 Figure 28). |
 | `aspect_ratio` | **VDI 2081 only.** Nozzle length over height `m` (default 1, a square opening). Figure 28 is drawn from 1 to 30. |
@@ -357,7 +357,7 @@ The two agree within a couple of decibels over the bands both cover.
 ```python
 end_reflection_loss_closed_form(
     frequencies: ArrayLike,
-    diameter: float,
+    diameter_m: float,
     *,
     termination: str = 'flush',
     speed_of_sound: float = 343.0,
@@ -385,7 +385,7 @@ whose flare smooths the impedance transition into the room.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies `f`, Hz (1-D array). |
-| `diameter` | Duct internal diameter `d`, m. |
+| `diameter_m` | Duct internal diameter `d`, m. |
 | `termination` | `"flush"` (flush with a wall or ceiling) or `"free"` (free space). |
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 
@@ -572,7 +572,7 @@ duty point, worth 0,1 dB at the optimum itself.
 ```python
 flexible_duct_insertion_loss(
     frequencies: ArrayLike | None,
-    diameter: float,
+    diameter_m: float,
     length: float,
 ) -> HvacSpectrumResult
 ```
@@ -594,7 +594,7 @@ value is returned.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Octave-band centres, Hz, within 63 Hz to 4 kHz; `None` uses all seven tabulated bands. |
-| `diameter` | Internal diameter, m (100 mm to 406 mm tabulated). |
+| `diameter_m` | Internal diameter, m (100 mm to 406 mm tabulated). |
 | `length` | Duct run length, m (0.9 m to 3.7 m tabulated). |
 
 **Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the insertion loss, dB.
@@ -850,7 +850,7 @@ An HVAC input outside the span the table it feeds was tabulated from.
 ```python
 lined_circular_duct_attenuation(
     frequencies: ArrayLike | None,
-    diameter: float,
+    diameter_m: float,
     length: float,
     lining_thickness: float,
 ) -> HvacSpectrumResult
@@ -873,7 +873,7 @@ ignores it.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Octave-band centres, Hz; `None` uses [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
-| `diameter` | Internal diameter `d`, m. |
+| `diameter_m` | Internal diameter `d`, m. |
 | `length` | Duct run length `l`, m. |
 | `lining_thickness` | Lining thickness `t`, m. |
 
@@ -963,7 +963,7 @@ plenum_attenuation(
     wall_area: float,
     mean_absorption: ArrayLike,
     *,
-    angle: float = 0.0,
+    angle_rad: float = 0.0,
 ) -> np.ndarray | float
 ```
 
@@ -987,7 +987,7 @@ with the wavelength; it underpredicts the low-frequency loss by 5-10 dB.
 | `line_of_sight` | Straight-line inlet-to-outlet distance `r`, m. |
 | `wall_area` | Total internal wall area `S_\mathrm{w}`, m2. |
 | `mean_absorption` | Mean Sabine wall absorption `alpha` in `(0, 1)` (scalar or per-band). |
-| `angle` | Angle `theta` between the inlet axis and the line to the outlet, in `[0, pi/2]` rad (default 0). |
+| `angle_rad` | Angle `theta` between the inlet axis and the line to the outlet, in `[0, pi/2]` rad (default 0). |
 
 **Returns:** The transmission loss, dB (float for scalar absorption, else a per-band array).
 
@@ -995,7 +995,7 @@ with the wavelength; it underpredicts the low-frequency loss by 5-10 dB.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a dimension is not positive, `mean_absorption` leaves `(0, 1)` or `angle` leaves `[0, pi/2]`. |
+| ValueError | If a dimension is not positive, `mean_absorption` leaves `(0, 1)` or `angle_rad` leaves `[0, pi/2]`. |
 
 ## plot_plenum_geometry
 
@@ -1006,7 +1006,7 @@ plot_plenum_geometry(
     wall_area: float,
     ax: Axes | None = None,
     *,
-    angle: float = 0.0,
+    angle_rad: float = 0.0,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -1016,7 +1016,7 @@ Draw the plenum-chamber section honouring the acoustic geometry.
 
 The two truly geometric parameters of
 [`plenum_attenuation`](/phonometry/reference/api/noise_control/hvac/#plenum_attenuation) are drawn exactly:
-the inlet-to-outlet line of sight `r` and its `angle` off the inlet
+the inlet-to-outlet line of sight `r` and its `angle_rad` off the inlet
 axis fix the box; the exit area sets the drawn outlet mouth (square-duct
 side `sqrt(S_out)`) and the wall area is annotated.
 
@@ -1028,7 +1028,7 @@ side `sqrt(S_out)`) and the wall area is annotated.
 | `line_of_sight` | Inlet-to-outlet distance `r`, in metres. |
 | `wall_area` | Total internal wall area `S_w`, in m2 (annotation). |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `angle` | Angle between the inlet axis and the line of sight, in radians (0 \<= angle \< pi/2). |
+| `angle_rad` | Angle between the inlet axis and the line of sight, in radians (0 \<= angle \< pi/2). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the wall-segment `plot` calls (line properties such as `linewidth` or `color`). |
 
@@ -1350,7 +1350,7 @@ unlined_circular_duct_attenuation(
     frequencies: ArrayLike | None,
     length: float,
     *,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     model: str = 'ashrae',
 ) -> HvacSpectrumResult
 ```
@@ -1367,7 +1367,7 @@ up to 250 Hz and 0.05 to 0.07 dB/ft above. The published table stops at
 does depend on the diameter: a wide round duct is stiffer still and its
 tabulated loss falls to nothing at 63 Hz above 400 mm, where the table
 prints a dash. That is the substantive difference between the two accounts
-of this element, and it is why `diameter` is required there and not here.
+of this element, and it is why `diameter_m` is required there and not here.
 
 **Parameters**
 
@@ -1375,7 +1375,7 @@ of this element, and it is why `diameter` is required there and not here.
 | :--- | :--- |
 | `frequencies` | Octave-band centres, Hz; `None` uses [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
 | `length` | Duct run length, m. |
-| `diameter` | **VDI 2081 only.** Internal diameter, m, which selects the Table 5 row. The table stops at 1,00 m. |
+| `diameter_m` | **VDI 2081 only.** Internal diameter, m, which selects the Table 5 row. The table stops at 1,00 m. |
 | `model` | `"ashrae"` (default, Long Table 14.1) or `"vdi2081"`. |
 
 **Returns:** An [`HvacSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.

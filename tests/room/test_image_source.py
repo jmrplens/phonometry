@@ -298,7 +298,7 @@ def test_fdtd_rigid_wall_echo_matches_first_image() -> None:
     nx, ny = round(3.0 / dx), round(2.0 / dx)
     src_x, probe_x = 0.5, 1.0
     width = 0.4e-3
-    src = GaussianPulse(ix=int(src_x / dx), iy=ny // 2, width=width)
+    src = GaussianPulse(ix=int(src_x / dx), iy=ny // 2, half_width_s=width)
     res = fdtd_simulation(
         C,
         dx,
@@ -337,7 +337,7 @@ def test_fdtd_damping_decay_recovers_t60() -> None:
     nx, ny = round(4.0 / dx), round(3.0 / dx)
     t60_target = 0.6
     damping = 3.0 * math.log(10.0) / t60_target
-    src = GaussianPulse(ix=nx // 3, iy=ny // 3, width=1.2e-3)
+    src = GaussianPulse(ix=nx // 3, iy=ny // 3, half_width_s=1.2e-3)
     res = fdtd_simulation(
         C,
         dx,

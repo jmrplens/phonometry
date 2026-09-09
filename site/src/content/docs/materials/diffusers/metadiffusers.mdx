@@ -139,7 +139,7 @@ solves for. This published panel is the QRD case, and at 2 kHz it scatters
 like the 27.4 cm deep diffuser it mimics.
 
 As in the published far-field comparison, the polar response repeats the
-five-well sequence six times (`periods=6`, a 2.1 m panel):
+five-well sequence six times (`repetitions=6`, a 2.1 m panel):
 
 ```python
 import numpy as np
@@ -165,7 +165,7 @@ for h, ln, lc, wn, wc in rows:
     wells.append(materials.MetadiffuserWell(h * mm, (resonator, resonator)))
 
 f = np.arange(1800.0, 2601.0, 5.0)
-panel = materials.metadiffuser_reflection(f, wells, depth=0.02, period=0.07)
+panel = materials.metadiffuser_reflection(f, wells, depth=0.02, period_m=0.07)
 alpha1 = panel.well_absorption[0]
 print(round(float(alpha1.max()), 2), int(f[alpha1.argmax()]))  # 0.99 2305
 
@@ -180,7 +180,7 @@ print(round(float(panel.absorption.max()), 3), peak)
 
 # Far-field comparison: the five-well sequence repeated six times (2.1 m).
 polar = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02,
-                                              period=0.07, periods=6)
+                                              period_m=0.07, repetitions=6)
 print(round(polar.coefficient, 2))                             # 0.32
 ```
 
@@ -205,7 +205,7 @@ plt.show()
 
 # From a bare well list, without computing a reflection first, the same
 # drawing comes from materials.plot_metadiffuser_panel_geometry(
-#     wells, depth=0.02, period=0.07).
+#     wells, depth=0.02, period_m=0.07).
 ```
 
 </details>
@@ -271,13 +271,13 @@ wells = [
 ]
 
 # The metadiffuser panel and the QRD it was tuned to at 2 kHz, both with
-# six repetitions of the period (2.1 m panels).
-meta = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02, period=0.07,
-                                             periods=6)
+# six repetitions of the period_m (2.1 m panels).
+meta = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02, period_m=0.07,
+                                             repetitions=6)
 sequence = np.roll(materials.quadratic_residue_sequence(5), -1)
 depths = sequence * (343.0 / 500.0) / (2 * 5)
 qrd = materials.predict_diffuser_polar_response(
-    0.07, 2000.0, depths=depths, periods=6, include_obliquity=False,
+    0.07, 2000.0, depths=depths, repetitions=6, include_obliquity=False,
 )
 
 ax = meta.plot(marker="", linewidth=2.2, label="Metadiffuser, panel 2 cm")
@@ -320,7 +320,7 @@ from phonometry import materials
 
 # wells: the five published slits from the example above.
 panel = materials.metadiffuser_reflection(np.array([2000.0]), wells,
-                                          depth=0.02, period=0.07)
+                                          depth=0.02, period_m=0.07)
 phases = np.degrees(np.angle(panel.reflection[:, 0]))
 print(np.round(np.abs(panel.reflection[:, 0]), 2))  # [0.97 1.   1.   0.97 0.98]
 print(np.round(phases))                             # [ 75. -71. -71.  74.   2.]
@@ -351,7 +351,7 @@ import matplotlib.pyplot as plt
 
 # `wells` and `depths` come from the blocks above.
 sweep = np.linspace(1600.0, 2600.0, 201)
-swept = materials.metadiffuser_reflection(sweep, wells, depth=0.02, period=0.07)
+swept = materials.metadiffuser_reflection(sweep, wells, depth=0.02, period_m=0.07)
 k_sweep = 2 * np.pi * sweep / 343.0
 target_phase = np.angle(np.exp(-2j * np.outer(depths, k_sweep)))
 error = np.degrees(np.angle(np.exp(1j * (np.angle(swept.reflection)
@@ -394,7 +394,7 @@ def panel_with(cavity_mm):
         resonator = materials.HelmholtzResonator(ln * mm, wn * mm, lc * mm, wc * mm)
         built.append(materials.MetadiffuserWell(h * mm, (resonator, resonator)))
     return materials.metadiffuser_reflection(np.array([2000.0]), built,
-                                             depth=0.02, period=0.07)
+                                             depth=0.02, period_m=0.07)
 
 best = None
 for cavity_mm in np.linspace(4.0, 22.0, 60):
@@ -444,14 +444,14 @@ suggests:
 ```python
 import numpy as np
 
-# Both panels are six periods of five 7 cm wells, so the only difference
+# Both panels are six repetitions of five 7 cm wells, so the only difference
 # between them is how each well reaches its phase.
 bands = np.array([500, 630, 800, 1000, 1250, 1600, 2000,
                   2500, 3150, 4000, 5000], float)
 meta = materials.metadiffuser_diffusion_spectrum(bands, wells, depth=0.02,
-                                                 period=0.07, periods=6)
+                                                 period_m=0.07, repetitions=6)
 qrd = materials.predicted_diffusion_spectrum(
-    0.07, bands, depths=depths, periods=6, include_obliquity=False)
+    0.07, bands, depths=depths, repetitions=6, include_obliquity=False)
 print(np.round(meta.normalized, 2))
 # [0.   0.   0.   0.01 0.08 0.12 0.32 0.17 0.24 0.12 0.06]
 print(np.round(qrd.normalized, 2))

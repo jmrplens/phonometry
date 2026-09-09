@@ -142,7 +142,7 @@ class EffectiveSoundSpeedProfile:
 
 
 def linear_sound_speed_profile(
-    gradient: float,
+    gradient_per_s: float,
     *,
     ground_speed: float = _C_SOUND,
     max_height: float = 100.0,
@@ -150,11 +150,11 @@ def linear_sound_speed_profile(
     r"""Linear effective sound-speed profile (constant vertical gradient).
 
     The profile is :math:`c_\mathrm{eff}(z) = c_0 + \text{gradient} \cdot z`. A
-    positive ``gradient`` (sound speed increasing with height) refracts sound
+    positive ``gradient_per_s`` (sound speed increasing with height) refracts sound
     downward (favourable propagation); a negative gradient refracts it upward
     and creates an acoustic shadow near the ground (Salomons Sec. 4.2).
 
-    :param gradient: Vertical gradient ``dc/dz``, in s^-1 (m/s per m).
+    :param gradient_per_s: Vertical gradient ``dc/dz``, in s^-1 (m/s per m).
     :param ground_speed: Sound speed ``c0`` at the ground, in m/s.
     :param max_height: Top of the sampled profile, in metres.
     :return: A two-point :class:`EffectiveSoundSpeedProfile`.
@@ -163,21 +163,21 @@ def linear_sound_speed_profile(
     """
     c0 = require_positive(ground_speed, "ground_speed")
     h = require_positive(max_height, "max_height")
-    if not np.isfinite(gradient):
-        msg = "'gradient' must be finite."
+    if not np.isfinite(gradient_per_s):
+        msg = "'gradient_per_s' must be finite."
         raise ValueError(msg)
-    top = c0 + gradient * h
+    top = c0 + gradient_per_s * h
     if top <= 0.0:
         msg = (
             "the linear profile reaches a non-positive sound speed within "
             "'max_height'; reduce 'max_height' or the gradient magnitude."
         )
         raise ValueError(msg)
-    sign = "+" if gradient >= 0 else "-"
+    sign = "+" if gradient_per_s >= 0 else "-"
     return EffectiveSoundSpeedProfile(
         heights=np.array([0.0, h], dtype=np.float64),
         sound_speeds=np.array([c0, top], dtype=np.float64),
-        description=f"linear, {sign}{abs(gradient):g} s^-1",
+        description=f"linear, {sign}{abs(gradient_per_s):g} s^-1",
     )
 
 
@@ -272,7 +272,7 @@ def _clean_profile(
 # Closed-form ray geometry (linear profile)
 # ===========================================================================
 def ray_curvature_radius(
-    gradient: float,
+    gradient_per_s: float,
     *,
     ground_speed: float = _C_SOUND,
     launch_angle_deg: float = 0.0,
@@ -286,7 +286,7 @@ def ray_curvature_radius(
     height where the speed is ``ground_speed`` (:math:`c_0`),
     :math:`R_\mathrm{c} = c_0 / (|\text{gradient}| \cos\theta_0)`.
 
-    :param gradient: Vertical gradient ``dc/dz``, in s^-1 (must be non-zero).
+    :param gradient_per_s: Vertical gradient ``dc/dz``, in s^-1 (must be non-zero).
     :param ground_speed: Sound speed at the launch height, in m/s.
     :param launch_angle_deg: Launch angle from the horizontal, in degrees.
     :return: The radius of curvature ``Rc``, in metres (always positive).
@@ -294,17 +294,17 @@ def ray_curvature_radius(
         angle is not within ``(-90, 90)`` degrees.
     """
     c0 = require_positive(ground_speed, "ground_speed")
-    if not (np.isfinite(gradient) and abs(gradient) > 0.0):
-        msg = "'gradient' must be finite and non-zero (a curved ray)."
+    if not (np.isfinite(gradient_per_s) and abs(gradient_per_s) > 0.0):
+        msg = "'gradient_per_s' must be finite and non-zero (a curved ray)."
         raise ValueError(msg)
     if not np.isfinite(launch_angle_deg) or abs(launch_angle_deg) >= _VERTICAL_DEG:
         msg = "'launch_angle_deg' must be within (-90, 90) degrees."
         raise ValueError(msg)
-    return float(c0 / (abs(gradient) * np.cos(np.radians(launch_angle_deg))))
+    return float(c0 / (abs(gradient_per_s) * np.cos(np.radians(launch_angle_deg))))
 
 
 def shadow_zone_distance(
-    gradient: float,
+    gradient_per_s: float,
     source_height: float,
     receiver_height: float,
     *,
@@ -325,7 +325,7 @@ def shadow_zone_distance(
     valid for source and receiver heights :math:`h_\mathrm{s}`, :math:`h_\mathrm{r}` small
     compared with :math:`R_\mathrm{c}`.
 
-    :param gradient: Vertical gradient ``dc/dz``, in s^-1 (must be negative for a
+    :param gradient_per_s: Vertical gradient ``dc/dz``, in s^-1 (must be negative for a
         shadow zone to exist).
     :param source_height: Source height ``hs``, in metres (>= 0).
     :param receiver_height: Receiver height ``hr``, in metres (>= 0).
@@ -334,16 +334,16 @@ def shadow_zone_distance(
     :raises ValueError: If the gradient is not negative, or a height is negative.
     """
     c0 = require_positive(ground_speed, "ground_speed")
-    if not np.isfinite(gradient) or gradient >= 0.0:
+    if not np.isfinite(gradient_per_s) or gradient_per_s >= 0.0:
         msg = (
-            "'gradient' must be negative (an upward-refracting profile) for an "
+            "'gradient_per_s' must be negative (an upward-refracting profile) for an "
             "acoustic shadow zone to exist."
         )
         raise ValueError(msg)
     if source_height < 0.0 or receiver_height < 0.0:
         msg = "Source and receiver heights must be non-negative."
         raise ValueError(msg)
-    rc = c0 / abs(gradient)
+    rc = c0 / abs(gradient_per_s)
     return float(
         np.sqrt(2.0 * rc) * (np.sqrt(source_height) + np.sqrt(receiver_height))
     )

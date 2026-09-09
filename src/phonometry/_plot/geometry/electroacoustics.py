@@ -74,7 +74,7 @@ def plot_piston_geometry(
     radius: float,
     ax: Axes | None = ...,
     *,
-    angles: ArrayLike,
+    angles_rad: ArrayLike,
     directivity: ArrayLike,
     lobe_label: str | None = ...,
     language: str = ...,
@@ -97,7 +97,7 @@ def plot_piston_geometry(
     radius: float,
     ax: Axes | None = None,
     *,
-    angles: ArrayLike | None = None,
+    angles_rad: ArrayLike | None = None,
     directivity: ArrayLike | None = None,
     lobe_label: str | None = None,
     language: str = "en",
@@ -106,12 +106,12 @@ def plot_piston_geometry(
     """Draw a baffled piston to scale, optionally with a directivity lobe.
 
     The rigid baffle is the vertical wall, the piston the plate of radius
-    ``a`` set into it; when ``angles``/``directivity`` are given the
+    ``a`` set into it; when ``angles_rad``/``directivity`` are given the
     normalised far-field lobe is overlaid on the radiation side.
 
     :param radius: Piston radius ``a``, in metres.
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param angles: Far-field angles, in radians (0 on axis), matching
+    :param angles_rad: Far-field angles, in radians (0 on axis), matching
         ``directivity``.
     :param directivity: Linear directivity values in ``[0, 1]``.
     :param lobe_label: Optional legend label for the lobe (e.g. the ``ka``).
@@ -124,8 +124,8 @@ def plot_piston_geometry(
     """
     _check_language(language)
     require_positive(radius, "radius")
-    if (angles is None) != (directivity is None):
-        msg = "Give 'angles' and 'directivity' together."
+    if (angles_rad is None) != (directivity is None):
+        msg = "Give 'angles_rad' and 'directivity' together."
         raise ValueError(msg)
     if ax is None:
         ax = _new_axes()
@@ -149,12 +149,12 @@ def plot_piston_geometry(
     piston = Rectangle((-wall, -a), 0.6 * wall, 2.0 * a, **kwargs)
     ax.add_patch(piston)
     ax.plot([0.0, 3.2 * a], [0.0, 0.0], linestyle=":", linewidth=0.8, color=_C_MUTED)
-    if angles is not None and directivity is not None:
-        ang = np.asarray(angles, dtype=np.float64)
+    if angles_rad is not None and directivity is not None:
+        ang = np.asarray(angles_rad, dtype=np.float64)
         d_lin = np.abs(np.asarray(directivity, dtype=np.float64))
         require_equal_shapes(
             "plot_piston_geometry",
-            {"angles": ang.shape, "directivity": d_lin.shape},
+            {"angles_rad": ang.shape, "directivity": d_lin.shape},
             "angle",
         )
         # The lobe is scaled by its own peak, and one NaN anywhere makes that
@@ -164,7 +164,7 @@ def plot_piston_geometry(
         # patches the on-axis 0/0 to its limit and emits nothing non-finite,
         # and RadiatingPistonResult refuses one at construction, so this
         # guards the direct call, not the library's own pattern.
-        for name, values in (("angles", ang), ("directivity", d_lin)):
+        for name, values in (("angles_rad", ang), ("directivity", d_lin)):
             if not np.all(np.isfinite(values)):
                 msg = f"'{name}' must be finite."
                 raise ValueError(msg)
@@ -198,10 +198,10 @@ def plot_piston_result_geometry(
     directivity, the lobe of the selected frequency is overlaid with its
     ``ka`` in the legend.
     """
-    angles = None
+    angles_rad = None
     lobe = None
     label = None
-    if result.angles is not None and result.directivity is not None:
+    if result.angles_rad is not None and result.directivity is not None:
         directivity = np.asarray(result.directivity, dtype=np.float64)
         ka = np.atleast_1d(np.asarray(result.ka, dtype=np.float64))
         n_rows = int(directivity.shape[0])
@@ -209,7 +209,7 @@ def plot_piston_result_geometry(
             msg = f"'frequency_index' must index the {n_rows} computed frequencies."
             raise ValueError(msg)
         row = directivity[frequency_index]
-        angles = np.asarray(result.angles, dtype=np.float64)
+        angles_rad = np.asarray(result.angles_rad, dtype=np.float64)
         lobe = row
         from ..._i18n import format_number
 
@@ -219,7 +219,7 @@ def plot_piston_result_geometry(
     return plot_piston_geometry(
         result.radius,
         ax=ax,
-        angles=angles,
+        angles_rad=angles_rad,
         directivity=lobe,
         lobe_label=label,
         language=language,

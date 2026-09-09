@@ -60,7 +60,7 @@ def test_rigid_box_modes_match_analytic_eigenfrequencies() -> None:
         dx,
         0.35,
         shape=(ny, nx),
-        sources=[GaussianPulse(ix=7, iy=5, width=2.0e-4)],
+        sources=[GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
         probes=[(nx - 4, ny - 3)],
     )
     for m, n in ((1, 0), (0, 1), (1, 1), (2, 0)):
@@ -80,7 +80,7 @@ def test_tube_resonances_match_analytic_harmonics() -> None:
         dx,
         0.5,
         shape=(3, nx),
-        sources=[GaussianPulse(ix=30, iy=1, width=1.5e-4)],
+        sources=[GaussianPulse(ix=30, iy=1, half_width_s=1.5e-4)],
         probes=[(nx - 5, 1)],
     )
     for m in (1, 2, 3, 4):
@@ -100,7 +100,7 @@ def free_field() -> FDTDResult:
         0.01,
         8.6e-3,
         shape=(320, 420),
-        sources=[GaussianPulse(ix=60, iy=160, width=3.0e-4)],
+        sources=[GaussianPulse(ix=60, iy=160, half_width_s=3.0e-4)],
         probes=[(180, 160), (300, 160)],
         boundaries="absorbing",
         absorbing_layer_cells=40,
@@ -135,7 +135,7 @@ def test_rigid_wall_reflection_matches_image_source() -> None:
         dx,
         7.5e-3,
         shape=(300, 300),
-        sources=[GaussianPulse(ix=50, iy=150, width=1.0e-4)],
+        sources=[GaussianPulse(ix=50, iy=150, half_width_s=1.0e-4)],
         probes=[(100, 150)],
         boundaries={"right": "absorbing", "top": "absorbing", "bottom": "absorbing"},
         absorbing_layer_cells=30,
@@ -203,7 +203,7 @@ def test_impedance_edge_dissipates_energy() -> None:
         shape=(60, 60),
         edge_impedance={"left": RHO0 * C0, "top": 2.0 * RHO0 * C0},
     )
-    sim.add_source(GaussianPulse(ix=30, iy=30, width=10 * sim.dt))
+    sim.add_source(GaussianPulse(ix=30, iy=30, half_width_s=10 * sim.dt))
     sim.run(200)
     e_ref = sim.energy()
     sim.run(3000)
@@ -269,7 +269,7 @@ def test_signal_source_reproduces_gaussian_pulse() -> None:
     # A SignalSource fed with the sampled Gaussian waveform at the
     # simulation rate reproduces the GaussianPulse run.
     sim_a = FDTD2D(C0, 0.05, shape=(40, 50))
-    pulse = GaussianPulse(ix=20, iy=20, width=8 * sim_a.dt)
+    pulse = GaussianPulse(ix=20, iy=20, half_width_s=8 * sim_a.dt)
     sim_a.add_source(pulse)
     sim_a.run(200)
 
@@ -337,7 +337,7 @@ def _slab_run(
         0.02,
         7.0e-3,
         shape=(100, 150),
-        sources=[GaussianPulse(ix=30, iy=50, width=5e-5)],
+        sources=[GaussianPulse(ix=30, iy=50, half_width_s=5e-5)],
         probes=[(110, 50), (30, 90)],  # behind the slab / open path
         obstacle_mask=obstacle,
         boundaries="absorbing",
@@ -373,8 +373,8 @@ def test_obstacle_mask_validation() -> None:
     mask[5, 5] = True
     float_mask = mask.astype(float)
     full_mask = np.ones((10, 10), dtype=bool)
-    masked_source = GaussianPulse(ix=5, iy=5, width=1e-4)
-    open_source = GaussianPulse(ix=1, iy=1, width=1e-4)
+    masked_source = GaussianPulse(ix=5, iy=5, half_width_s=1e-4)
+    open_source = GaussianPulse(ix=1, iy=1, half_width_s=1e-4)
     with pytest.raises(ValueError, match="match the grid shape"):
         FDTD2D(C0, 0.05, shape=(10, 12), obstacle_mask=mask)
     with pytest.raises(ValueError, match=r"obstacle_mask must be a boolean array"):
@@ -411,7 +411,7 @@ def test_boundary_spec_rejects_unknown_values(
     boundaries: object,
     match: str,
 ) -> None:
-    sources = [GaussianPulse(ix=5, iy=5, width=1e-4)]
+    sources = [GaussianPulse(ix=5, iy=5, half_width_s=1e-4)]
     with pytest.raises(ValueError, match=match):
         fdtd_simulation(
             C0, 0.05, 1e-3, shape=(30, 30), sources=sources, boundaries=boundaries
@@ -466,7 +466,7 @@ def _duct_echo(
         0.030,
         rho=RHO0,
         shape=(3, 1200),
-        sources=[GaussianPulse(ix=900, iy=1, width=2e-4)],
+        sources=[GaussianPulse(ix=900, iy=1, half_width_s=2e-4)],
         probes=[(600, 1)],
         boundaries=boundaries,
     )
@@ -507,7 +507,7 @@ def test_damping_through_the_public_api() -> None:
             5e-3,
             shape=(40, 60),
             damping=damping,
-            sources=[GaussianPulse(ix=10, iy=10, width=1e-4)],
+            sources=[GaussianPulse(ix=10, iy=10, half_width_s=1e-4)],
             probes=[(40, 20)],
         )
         return float(np.abs(res.pressures).max())
@@ -520,7 +520,7 @@ def test_damping_through_the_public_api() -> None:
 def test_unstable_or_invalid_cfl_is_rejected(cfl: float) -> None:
     # dt = cfl * dx / (c sqrt(2)); cfl is the Courant number CN of
     # Eq. (4.13) and the explicit scheme requires CN <= 1 (Eq. 4.14).
-    sources = [GaussianPulse(ix=5, iy=5, width=1e-4)]
+    sources = [GaussianPulse(ix=5, iy=5, half_width_s=1e-4)]
     with pytest.raises(
         ValueError, match=r"cfl must lie in.*the leapfrog scheme is unstable"
     ):
@@ -535,7 +535,7 @@ def test_stable_cfl_values_are_accepted() -> None:
             2e-3,
             shape=(20, 20),
             cfl=cfl,
-            sources=[GaussianPulse(ix=5, iy=5, width=1e-4)],
+            sources=[GaussianPulse(ix=5, iy=5, half_width_s=1e-4)],
             probes=[(10, 10)],
         )
         assert np.all(np.isfinite(res.pressures))
@@ -580,7 +580,7 @@ def test_two_runs_are_bit_identical() -> None:
             0.02,
             3e-3,
             shape=(80, 100),
-            sources=[GaussianPulse(ix=50, iy=40, width=1e-4)],
+            sources=[GaussianPulse(ix=50, iy=40, half_width_s=1e-4)],
             probes=[(70, 40)],
             boundaries="absorbing",
             absorbing_layer_cells=15,
@@ -625,7 +625,7 @@ def test_simulation_rejects_invalid_arguments(
 ) -> None:
     full: dict[str, object] = {
         "duration": 1e-3,
-        "sources": [GaussianPulse(ix=5, iy=5, width=1e-4)],
+        "sources": [GaussianPulse(ix=5, iy=5, half_width_s=1e-4)],
         **kwargs,
     }
     duration = full.pop("duration")
@@ -640,7 +640,7 @@ def test_non_integral_counts_and_coordinates_are_rejected() -> None:
     with pytest.raises(ValueError, match="sponge_width must be an integer"):
         FDTD2D(C0, 0.05, shape=(20, 20), sponge_width=2.5)  # type: ignore[arg-type]
     sim = FDTD2D(C0, 0.05, shape=(20, 20))
-    float_source = GaussianPulse(ix=2.5, iy=3, width=1e-4)  # type: ignore[arg-type]
+    float_source = GaussianPulse(ix=2.5, iy=3, half_width_s=1e-4)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="source ix must be an integer"):
         sim.add_source(float_source)
     with pytest.raises(ValueError, match="steps must be an integer"):
@@ -664,7 +664,7 @@ def small_result() -> FDTDResult:
         0.05,
         3e-3,
         shape=(30, 40),
-        sources=[GaussianPulse(ix=8, iy=15, width=1e-4)],
+        sources=[GaussianPulse(ix=8, iy=15, half_width_s=1e-4)],
         probes=[(30, 15)],
         obstacle_mask=mask,
         snapshot_every=20,
@@ -742,7 +742,7 @@ def test_plot_rejects_unknown_kind_and_missing_snapshots() -> None:
         0.05,
         1e-3,
         shape=(20, 20),
-        sources=[GaussianPulse(ix=5, iy=5, width=1e-4)],
+        sources=[GaussianPulse(ix=5, iy=5, half_width_s=1e-4)],
         probes=[(10, 10)],
     )
     with pytest.raises(ValueError, match=r"kind must be 'probes'"):

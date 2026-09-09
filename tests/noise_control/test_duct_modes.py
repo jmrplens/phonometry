@@ -87,16 +87,16 @@ def test_norton_problem_7_2() -> None:
 
 def test_plane_wave_eigenvalue_is_the_first_cut_on() -> None:
     # Norton section 7.3: plane waves only while k a_i < 1.8412.
-    diameter, c = 0.254, 343.0
-    limit = duct_modes.plane_wave_limit(diameter=diameter, speed_of_sound=c)
+    diameter_m, c = 0.254, 343.0
+    limit = duct_modes.plane_wave_limit(diameter_m=diameter_m, speed_of_sound=c)
     k = 2.0 * np.pi * limit / c
-    assert k * (diameter / 2.0) == pytest.approx(
+    assert k * (diameter_m / 2.0) == pytest.approx(
         duct_modes.PLANE_WAVE_EIGENVALUE, rel=1e-12
     )
 
 
 def test_plane_wave_limit_accepts_area_and_rectangle() -> None:
-    from_diameter = duct_modes.plane_wave_limit(diameter=0.4)
+    from_diameter = duct_modes.plane_wave_limit(diameter_m=0.4)
     from_area = duct_modes.plane_wave_limit(area=np.pi * 0.4**2 / 4.0)
     assert from_area == pytest.approx(from_diameter)
     # Eq. 7.10 with p = 1, q = 0: c / (2 a) for the wider side.
@@ -107,7 +107,7 @@ def test_plane_wave_limit_accepts_area_and_rectangle() -> None:
 
 def test_plane_wave_limit_requires_a_cross_section() -> None:
     with pytest.raises(
-        ValueError, match=r"give 'diameter', or both 'width' and 'height', or 'area'"
+        ValueError, match=r"give 'diameter_m', or both 'width' and 'height', or 'area'"
     ):
         duct_modes.plane_wave_limit()
 
@@ -133,17 +133,17 @@ def test_no_warning_below_the_limit() -> None:
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
-        ({"diameter": 0.0}, r"'diameter' must be positive"),
+        ({"diameter_m": 0.0}, r"'diameter_m' must be positive"),
         (
-            {"diameter": 0.2, "flow_velocity": -1.0},
+            {"diameter_m": 0.2, "flow_velocity": -1.0},
             r"'flow_velocity' must be non-negative",
         ),
         (
-            {"diameter": 0.2, "flow_velocity": 400.0},
+            {"diameter_m": 0.2, "flow_velocity": 400.0},
             r"'flow_velocity' must be subsonic",
         ),
-        ({"diameter": 0.2, "count": 0}, r"'count' must be between"),
-        ({"diameter": 0.2, "count": 13}, r"'count' must be between"),
+        ({"diameter_m": 0.2, "count": 0}, r"'count' must be between"),
+        ({"diameter_m": 0.2, "count": 13}, r"'count' must be between"),
     ],
 )
 def test_circular_validation(kwargs: dict[str, float], match: str) -> None:

@@ -460,7 +460,9 @@ class TestModalFilterCutOn:
     """ISO 7235 Equations (4) and (5), and the requirement they serve."""
 
     def test_the_circular_form(self) -> None:
-        assert sm.modal_filter_cut_on(diameter=0.4) == pytest.approx(0.59 * 343.0 / 0.4)
+        assert sm.modal_filter_cut_on(diameter_m=0.4) == pytest.approx(
+            0.59 * 343.0 / 0.4
+        )
 
     def test_the_rectangular_form_is_a_half_wavelength(self) -> None:
         assert sm.modal_filter_cut_on(larger_dimension=0.5) == pytest.approx(343.0)
@@ -481,7 +483,7 @@ class TestModalFilterCutOn:
         from phonometry.noise_control import circular_duct_cut_on
 
         exact = circular_duct_cut_on(0.4, speed_of_sound=343.0, count=1)
-        found = sm.modal_filter_cut_on(diameter=0.4, sound_speed=343.0)
+        found = sm.modal_filter_cut_on(diameter_m=0.4, sound_speed=343.0)
         ratio = found / float(exact.cut_on_no_flow[0])
         assert ratio == pytest.approx(1.0067, abs=5e-5)
 
@@ -494,12 +496,12 @@ class TestModalFilterCutOn:
 
     def test_both_dimensions_are_refused(self) -> None:
         with pytest.raises(ValueError, match="exactly one"):
-            sm.modal_filter_cut_on(diameter=0.4, larger_dimension=0.5)
+            sm.modal_filter_cut_on(diameter_m=0.4, larger_dimension=0.5)
 
     @pytest.mark.parametrize("bad", [0.0, -0.4])
     def test_a_dimension_that_is_not_positive_is_refused(self, bad: float) -> None:
-        with pytest.raises(ValueError, match="diameter"):
-            sm.modal_filter_cut_on(diameter=bad)
+        with pytest.raises(ValueError, match="diameter_m"):
+            sm.modal_filter_cut_on(diameter_m=bad)
 
 
 class TestFlowQuantities:

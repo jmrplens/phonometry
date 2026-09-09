@@ -500,7 +500,7 @@ def duct_path(
         element's self-noise. Long's worked sheet uses 0 dB; pass ``None`` to
         disable the floor entirely.
     :param section: Optional duct cross section for the plane-wave validity
-        check, as ``{"diameter": d}``, ``{"width": a, "height": b}`` or
+        check, as ``{"diameter_m": d}``, ``{"width": a, "height": b}`` or
         ``{"area": s}``, in metres. When given, a
         :class:`~phonometry.noise_control.duct_modes.PlaneWaveWarning` is
         raised for analysis frequencies above the first cut-on.

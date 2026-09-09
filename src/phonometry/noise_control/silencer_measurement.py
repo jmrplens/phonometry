@@ -841,7 +841,7 @@ def flow_noise_power_level(
 
 def modal_filter_cut_on(
     *,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     larger_dimension: float | None = None,
     sound_speed: float = _SOUND_SPEED_M_S,
 ) -> float:
@@ -867,7 +867,7 @@ def modal_filter_cut_on(
     :func:`phonometry.noise_control.circular_duct_cut_on`, which also carries
     the mean-flow correction this equation does not have.
 
-    :param diameter: :math:`d` of a circular duct, in m. Exactly one of the
+    :param diameter_m: :math:`d` of a circular duct, in m. Exactly one of the
         two dimensions is given.
     :param larger_dimension: :math:`H`, the larger cross-sectional dimension
         of a rectangular duct, in m.
@@ -877,11 +877,13 @@ def modal_filter_cut_on(
         is not positive and finite.
     """
     speed = require_positive(sound_speed, "sound_speed")
-    if diameter is not None and larger_dimension is None:
+    if diameter_m is not None and larger_dimension is None:
         return float(
-            CIRCULAR_CUT_ON_COEFFICIENT * speed / require_positive(diameter, "diameter")
+            CIRCULAR_CUT_ON_COEFFICIENT
+            * speed
+            / require_positive(diameter_m, "diameter_m")
         )
-    if larger_dimension is not None and diameter is None:
+    if larger_dimension is not None and diameter_m is None:
         return float(
             RECTANGULAR_CUT_ON_COEFFICIENT
             * speed
@@ -890,14 +892,14 @@ def modal_filter_cut_on(
     given = [
         name
         for name, value in (
-            ("diameter", diameter),
+            ("diameter_m", diameter_m),
             ("larger_dimension", larger_dimension),
         )
         if value is not None
     ]
     msg = (
         "Equation (4) is for a circular duct and Equation (5) for a "
-        "rectangular one, so exactly one of 'diameter' and "
+        "rectangular one, so exactly one of 'diameter_m' and "
         f"'larger_dimension' is expected; got {given or 'neither'}."
     )
     raise ValueError(msg)

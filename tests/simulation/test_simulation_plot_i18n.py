@@ -23,7 +23,7 @@ def _result() -> object:
         9.0e-3,
         3.0e-3,
         shape=(30, 40),
-        sources=[GaussianPulse(ix=7, iy=5, width=3.0e-4)],
+        sources=[GaussianPulse(ix=7, iy=5, half_width_s=3.0e-4)],
         probes=[(10, 5), (24, 10)],
         obstacle_mask=mask,
         snapshot_every=10,

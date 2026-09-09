@@ -107,35 +107,37 @@ def _positive_map(name: str, field: Field2D) -> None:
 class GaussianPulse:
     r"""A soft Gaussian pressure pulse injected at one cell.
 
-    :math:`s(t) = \text{amplitude} \cdot e^{-((t - t_0)/\text{width})^2}`
-    with ``t0`` defaulting to ``4 * width`` so the pulse starts from
-    (numerically) zero.
+    :math:`s(t) = \text{amplitude} \cdot e^{-((t - t_0)/w)^2}`, with :math:`w`
+    the half-width ``half_width_s`` and ``t0`` defaulting to
+    ``4 * half_width_s`` so the pulse starts from (numerically) zero.
 
     :ivar ix: Source column (x) index; the cell centre is at
         :math:`x = (i_x + 0.5)\,\Delta x`.
     :ivar iy: Source row (y) index.
-    :ivar width: Gaussian half-width [s]; sets the pulse bandwidth.
-    :ivar t0: Pulse centre time [s] (default ``4 * width``).
+    :ivar half_width_s: Gaussian half-width :math:`w` [s]; it sets the pulse
+        bandwidth. The name carries the unit because the perfectly matched
+        layer of this same module measures its own width in cells.
+    :ivar t0: Pulse centre time [s] (default ``4 * half_width_s``).
     :ivar amplitude: Peak source amplitude [Pa].
     """
 
     ix: int
     iy: int
-    width: float
+    half_width_s: float
     t0: float | None = None
     amplitude: float = 1.0
 
     def __post_init__(self) -> None:
-        """Require a positive ``width`` and finite ``amplitude`` and ``t0``."""
-        _positive_finite("width", self.width)
+        """Require a positive ``half_width_s`` and finite ``amplitude`` and ``t0``."""
+        _positive_finite("half_width_s", self.half_width_s)
         _finite("amplitude", self.amplitude)
         if self.t0 is not None:
             _finite("t0", self.t0)
 
     def value(self, t: float) -> float:
         """Source waveform at time ``t`` (seconds)."""
-        t0 = 4.0 * self.width if self.t0 is None else self.t0
-        return self.amplitude * float(np.exp(-(((t - t0) / self.width) ** 2)))
+        t0 = 4.0 * self.half_width_s if self.t0 is None else self.t0
+        return self.amplitude * float(np.exp(-(((t - t0) / self.half_width_s) ** 2)))
 
 
 @dataclass(frozen=True)

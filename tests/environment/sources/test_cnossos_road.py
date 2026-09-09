@@ -87,7 +87,7 @@ def _run_case(case: dict[str, str]) -> RoadEmissionResult:
         traffic,
         surface=surfaces[case["surface"]],
         temperature_c=float(case["temperature_c"]),
-        gradient=float(case["gradient_pct"]),
+        road_slope_percent=float(case["gradient_pct"]),
         studded_months=float(case["studded_months"]),
         junction_distance=float(case["junction_distance_m"]),
         junction_type=JunctionType(int(case["junction_type"])),
@@ -414,7 +414,7 @@ def test_gradient_correction_is_zero_inside_the_flat_band(
     base = road_propulsion_noise(category, 70.0)
     for slope in (flat_low, 0.5 * (flat_low + flat_high), flat_high):
         assert np.array_equal(
-            road_propulsion_noise(category, 70.0, gradient=slope), base
+            road_propulsion_noise(category, 70.0, road_slope_percent=slope), base
         )
 
 
@@ -426,15 +426,19 @@ def test_gradient_correction_downhill_branches() -> None:
     """
     v = 70.0
     base_1 = road_propulsion_noise("1", v)
-    assert road_propulsion_noise("1", v, gradient=-10.0) - base_1 == pytest.approx(
-        np.full(8, (10.0 - 6.0) / 1.0), abs=1e-12
-    )
+    assert road_propulsion_noise(
+        "1", v, road_slope_percent=-10.0
+    ) - base_1 == pytest.approx(np.full(8, (10.0 - 6.0) / 1.0), abs=1e-12)
     base_2 = road_propulsion_noise("2", v)
-    assert road_propulsion_noise("2", v, gradient=-10.0) - base_2 == pytest.approx(
+    assert road_propulsion_noise(
+        "2", v, road_slope_percent=-10.0
+    ) - base_2 == pytest.approx(
         np.full(8, (10.0 - 4.0) / 0.7 * (v - 20.0) / 100.0), abs=1e-12
     )
     base_3 = road_propulsion_noise("3", v)
-    assert road_propulsion_noise("3", v, gradient=-10.0) - base_3 == pytest.approx(
+    assert road_propulsion_noise(
+        "3", v, road_slope_percent=-10.0
+    ) - base_3 == pytest.approx(
         np.full(8, (10.0 - 4.0) / 0.5 * (v - 10.0) / 100.0), abs=1e-12
     )
 
@@ -442,15 +446,21 @@ def test_gradient_correction_downhill_branches() -> None:
 def test_gradient_correction_uphill_branches() -> None:
     """The published uphill branches, all three with a speed factor."""
     v = 80.0
-    assert road_propulsion_noise("1", v, gradient=6.0) - road_propulsion_noise(
-        "1", v
-    ) == pytest.approx(np.full(8, (6.0 - 2.0) / 1.5 * v / 100.0), abs=1e-12)
-    assert road_propulsion_noise("2", v, gradient=6.0) - road_propulsion_noise(
-        "2", v
-    ) == pytest.approx(np.full(8, 6.0 / 1.0 * v / 100.0), abs=1e-12)
-    assert road_propulsion_noise("3", v, gradient=6.0) - road_propulsion_noise(
-        "3", v
-    ) == pytest.approx(np.full(8, 6.0 / 0.8 * v / 100.0), abs=1e-12)
+    assert road_propulsion_noise(
+        "1", v, road_slope_percent=6.0
+    ) - road_propulsion_noise("1", v) == pytest.approx(
+        np.full(8, (6.0 - 2.0) / 1.5 * v / 100.0), abs=1e-12
+    )
+    assert road_propulsion_noise(
+        "2", v, road_slope_percent=6.0
+    ) - road_propulsion_noise("2", v) == pytest.approx(
+        np.full(8, 6.0 / 1.0 * v / 100.0), abs=1e-12
+    )
+    assert road_propulsion_noise(
+        "3", v, road_slope_percent=6.0
+    ) - road_propulsion_noise("3", v) == pytest.approx(
+        np.full(8, 6.0 / 0.8 * v / 100.0), abs=1e-12
+    )
 
 
 @pytest.mark.parametrize(
@@ -477,11 +487,11 @@ def test_gradient_dead_band_is_pinned_on_both_sides_of_every_breakpoint(
     base = road_propulsion_noise(category, 70.0)
     for slope in inside:
         assert np.array_equal(
-            road_propulsion_noise(category, 70.0, gradient=slope), base
+            road_propulsion_noise(category, 70.0, road_slope_percent=slope), base
         )
     for slope in just_outside:
         assert not np.array_equal(
-            road_propulsion_noise(category, 70.0, gradient=slope), base
+            road_propulsion_noise(category, 70.0, road_slope_percent=slope), base
         )
 
 
@@ -497,7 +507,7 @@ def test_gradient_correction_never_subtracts() -> None:
         base = road_propulsion_noise(category, 70.0)
         for slope in np.arange(-15.0, 15.001, 0.25):
             assert np.all(
-                road_propulsion_noise(category, 70.0, gradient=float(slope))
+                road_propulsion_noise(category, 70.0, road_slope_percent=float(slope))
                 >= base - 1e-12
             )
 
@@ -506,10 +516,13 @@ def test_gradient_saturates_at_twelve_per_cent() -> None:
     """``Min(12 %, s)`` caps the correction in both directions."""
     for category in ("1", "2", "3"):
         for sign in (1.0, -1.0):
-            capped = road_propulsion_noise(category, 70.0, gradient=sign * 12.0)
+            capped = road_propulsion_noise(
+                category, 70.0, road_slope_percent=sign * 12.0
+            )
             for slope in (sign * 20.0, sign * 100.0):
                 assert np.array_equal(
-                    road_propulsion_noise(category, 70.0, gradient=slope), capped
+                    road_propulsion_noise(category, 70.0, road_slope_percent=slope),
+                    capped,
                 )
 
 
@@ -519,7 +532,7 @@ def test_gradient_does_not_touch_powered_two_wheelers() -> None:
         base = road_propulsion_noise(category, 70.0)
         for slope in (-12.0, -5.0, 5.0, 12.0):
             assert np.array_equal(
-                road_propulsion_noise(category, 70.0, gradient=slope), base
+                road_propulsion_noise(category, 70.0, road_slope_percent=slope), base
             )
 
 

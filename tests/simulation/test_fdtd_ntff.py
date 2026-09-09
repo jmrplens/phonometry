@@ -137,15 +137,17 @@ def monopole_far_field() -> dict[str, object]:
         acc += sim.p[cy, cx + 110] * np.exp(-2j * np.pi * F0 * sim.n * dt)
     amplitude = (2.0 * acc / window) / hankel2(0, K0 * 110 * dx)
     origin = ((cx + 0.5) * dx, (cy + 0.5) * dx)
-    angles = np.arange(0.0, 360.0, 5.0)
+    angles_deg = np.arange(0.0, 360.0, 5.0)
     phasors = probe.phasors(F0)
     return {
         "phasors": phasors,
-        "pattern": far_field_from_contour(phasors, angles, origin=origin),
+        "pattern": far_field_from_contour(phasors, angles_deg, origin=origin),
         "pattern_off": far_field_from_contour(
-            probe_off.phasors(F0), angles, origin=origin
+            probe_off.phasors(F0), angles_deg, origin=origin
         ),
-        "at_060": far_field_from_contour(phasors, angles, distance=0.60, origin=origin),
+        "at_060": far_field_from_contour(
+            phasors, angles_deg, distance=0.60, origin=origin
+        ),
         "amplitude": complex(amplitude),
     }
 
@@ -230,16 +232,16 @@ def test_dipole_pattern_matches_two_source_oracle() -> None:
     sim.run(round(4.5e-3 / dt))
     probe.reset()
     sim.run(round(10.0 / F0 / dt))
-    angles = np.arange(0.0, 360.0, 5.0)
+    angles_deg = np.arange(0.0, 360.0, 5.0)
     pattern = np.abs(
         far_field_from_contour(
-            probe.phasors(F0), angles, origin=((cx + 0.5) * dx, (cy + 0.5) * dx)
+            probe.phasors(F0), angles_deg, origin=((cx + 0.5) * dx, (cy + 0.5) * dx)
         )
     )
-    oracle = np.abs(np.sin(K0 * 3 * dx * np.cos(np.radians(angles))))
+    oracle = np.abs(np.sin(K0 * 3 * dx * np.cos(np.radians(angles_deg))))
     error = pattern / pattern.max() - oracle / oracle.max()
     assert float(np.abs(error).max()) < 0.02
-    broadside = np.isin(angles, (90.0, 270.0))
+    broadside = np.isin(angles_deg, (90.0, 270.0))
     assert float(pattern[broadside].max()) < 0.01 * float(pattern.max())
 
 
@@ -381,8 +383,8 @@ def test_meshed_qrd_far_field_matches_fraunhofer_model(qrd_levels: np.ndarray) -
         PITCH,
         F0,
         depths=QRD_DEPTHS,
-        angles=POLAR_ANGLES,
-        periods=1,
+        angles_deg=POLAR_ANGLES,
+        repetitions=1,
         include_obliquity=True,
     )
     # Full wave vs Fraunhofer: high pattern correlation, lobe-level
@@ -453,17 +455,22 @@ def test_meshed_metadiffuser_far_field_matches_tmm_model(
         for h, l_n, l_c, w_n, w_c in META_ROWS
     ]
     module = metadiffuser_polar_response(
-        F0, wells, depth=META_DEPTH, period=PITCH, angles=POLAR_ANGLES, periods=1
+        F0,
+        wells,
+        depth=META_DEPTH,
+        period_m=PITCH,
+        angles_deg=POLAR_ANGLES,
+        repetitions=1,
     )
     reflection = metadiffuser_reflection(
-        np.asarray([F0]), wells, depth=META_DEPTH, period=PITCH
+        np.asarray([F0]), wells, depth=META_DEPTH, period_m=PITCH
     ).reflection[:, 0]
     obliq = predict_diffuser_polar_response(
         PITCH,
         F0,
         reflection=reflection,
-        angles=POLAR_ANGLES,
-        periods=1,
+        angles_deg=POLAR_ANGLES,
+        repetitions=1,
         include_obliquity=True,
     )
     sel = np.abs(POLAR_ANGLES) <= 60.0

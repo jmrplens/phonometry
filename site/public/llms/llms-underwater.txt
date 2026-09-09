@@ -1650,7 +1650,7 @@ from phonometry import underwater
 # launched 6 degrees downward from 100 m turns back up where Snell gives
 # c(z_t) = c(z_s)/cos(6 deg).
 z = [0.0, 1000.0]
-c = [1490.0, 1507.0]                        # linear gradient, g = 0.017 1/s
+c = [1490.0, 1507.0]                        # linear gradient_per_s, g = 0.017 1/s
 rays = underwater.ray_trace(z, c, source_depth=100.0,
                             launch_angles_deg=[6.0], max_range=40e3,
                             n_steps=20000)
@@ -1659,7 +1659,7 @@ print(round(z_turn, 1))                     # 583.3  analytic turning depth
 print(round(float(rays.depths.max()), 1))   # 583.3  traced
 
 # The arc also fixes the time to that turn: the sound speed cancels and only
-# the launch angle and the gradient are left,
+# the launch angle and the gradient_per_s are left,
 # t = (1/g) ln[(1 + sin theta_0) / cos theta_0].
 th = np.radians(6.0)
 r_turn = np.sin(th) / (np.cos(th) / 1491.7 * 0.017)   # 9222.6 m

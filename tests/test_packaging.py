@@ -340,3 +340,68 @@ def test_pinning_leaves_other_repositories_alone() -> None:
     assert "numpy/numpy/tree/main/doc/" in pinned
     assert "scipy/scipy/main/doc/logo.svg" in pinned
     assert "jmrplens/phonometry/blob/v9.9.9/LICENSE" in pinned
+
+
+# ==========================================================================
+# The release workflow's two version regexes
+# ==========================================================================
+#: Every version the release workflow has to decide about, with what it must
+#: decide: whether the VERSION file is valid at all, and whether the GitHub
+#: Release it creates is a pre-release. The forms with a separator are here
+#: because they are the trap: ``4.0.0-rc1`` and ``04.00.00`` both read like a
+#: version, and the build back end normalises both, so the artefact check two
+#: steps later would look for a wheel that does not exist. A developmental
+#: release of a post-release is here because PEP 440 counts it as a
+#: pre-release and the marker does not sit where the others do.
+_RELEASE_VERSIONS = (
+    ("3.3.0", True, False),
+    ("4.0.0", True, False),
+    ("4.0.0rc1", True, True),
+    ("4.0.0a1", True, True),
+    ("4.0.0b2", True, True),
+    ("4.0.0.dev3", True, True),
+    ("4.0.0.post1", True, False),
+    ("4.0.0.post1.dev1", True, True),
+    ("4.0.0-rc1", False, False),
+    ("4.0.0_rc1", False, False),
+    ("4.0", False, False),
+    ("v4.0.0", False, False),
+    ("4.0.0rc", False, False),
+    ("04.00.00", False, False),
+    ("4.0.0rc01", False, False),
+)
+
+
+def _release_workflow_patterns() -> tuple[str, str]:
+    """The valid-version and the pre-release regex, read off the workflow."""
+    text = (_ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+    found = re.findall(r"grep -Eq '([^']+)'", text)
+    assert len(found) == 2, f"expected two version regexes, found {len(found)}"
+    return found[0], found[1]
+
+
+@pytest.mark.parametrize(("version", "valid", "pre"), _RELEASE_VERSIONS)
+def test_release_workflow_accepts_exactly_the_pep440_normal_form(
+    version: str, valid: bool, pre: bool
+) -> None:
+    """A release candidate has to reach PyPI, and a mis-typed one must not.
+
+    ``prerelease: false`` used to be a literal and the guard rejected any
+    version whose suffix carried no separator, so ``4.0.0rc1`` could not be
+    released at all and ``4.0.0-rc1`` would have gone out marked as the
+    latest stable release.
+    """
+    del pre
+    accepted, _ = _release_workflow_patterns()
+    assert bool(re.search(accepted, version)) is valid
+
+
+@pytest.mark.parametrize(("version", "valid", "pre"), _RELEASE_VERSIONS)
+def test_release_workflow_marks_a_candidate_as_a_pre_release(
+    version: str, valid: bool, pre: bool
+) -> None:
+    """The flag is read off the version, never set by hand."""
+    if not valid:
+        pytest.skip("not a version the workflow would release at all")
+    _, prerelease = _release_workflow_patterns()
+    assert bool(re.search(prerelease, version)) is pre

@@ -188,6 +188,16 @@ def test_c1_reference_value_is_minus_0128() -> None:
     assert mc.c1 == pytest.approx(-0.12819, abs=1e-4)
 
 
+def test_meteorological_corrections_refuse_a_pressure_that_is_not_one() -> None:
+    """The refusal names the argument, and the name carries the unit.
+
+    A caller who reaches for pascals here is off by a thousand, and the only
+    thing that tells them so is the name in the message.
+    """
+    with pytest.raises(ValueError, match=r"'static_pressure_kpa' must be positive"):
+        meteorological_corrections(23.0, 0.0)
+
+
 def test_c1_zero_at_theta0() -> None:
     """C1 temperature term vanishes at 273+theta = theta0 = 314 K (theta=41)."""
     mc = meteorological_corrections(41.0, 101.325)
@@ -452,6 +462,19 @@ def test_uniform_intensity_recovers_lw_exact() -> None:
     assert isinstance(res, PrecisionIntensityResult)
     assert res.sound_power[0] == pytest.approx(w)
     assert res.sound_power_level[0] == pytest.approx(10.0 * np.log10(w / _P0), abs=1e-9)
+
+
+def test_precision_intensity_refuses_a_pressure_that_is_not_one() -> None:
+    """ISO 9614-3 states the barometric pressure in pascals, and so does the name.
+
+    The sister ISO 3745 correction takes kilopascals; the two are a thousand
+    apart and only the argument names keep them straight.
+    """
+    areas = np.array([1.0, 1.0])
+    with pytest.raises(ValueError, match=r"'barometric_pressure_pa' must be positive"):
+        sound_power_intensity_precision(
+            np.full(areas.shape, 1.0e-5), areas, barometric_pressure_pa=0.0
+        )
 
 
 def test_lw_independent_of_segmentation() -> None:

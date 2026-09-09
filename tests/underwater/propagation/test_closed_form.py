@@ -51,6 +51,12 @@ def test_practical_requires_transition_range() -> None:
         spreading_loss([100.0], law="practical")
 
 
+def test_absorption_refuses_a_state_that_is_not_finite() -> None:
+    """The refusal lists the four arguments by name, temperature in Celsius."""
+    with pytest.raises(ValueError, match=r"'temperature_c', 'salinity', 'depth'"):
+        seawater_absorption(1000.0, temperature_c=float("inf"))
+
+
 def test_thorp_absorption_recompute() -> None:
     f_khz = 10.0
     expected = 1.0936 * (

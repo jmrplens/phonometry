@@ -121,6 +121,12 @@ def test_depth_to_pressure_leroy_parthiot() -> None:
     assert depth_to_gauge_pressure_mpa(depth_m=0.0) == pytest.approx(0.0, abs=1e-9)
 
 
+def test_profile_refuses_a_temperature_column_that_is_not_finite() -> None:
+    """The refusal names the column, and the name says it is in Celsius."""
+    with pytest.raises(ValueError, match=r"'temperatures_c' and 'salinities'"):
+        sound_speed_profile([0.0, 100.0], [10.0, float("nan")], 35.0)
+
+
 def test_three_models_agree_in_common_domain() -> None:
     # UNESCO, Del Grosso and Mackenzie must agree within ~1 m/s at a mid-ocean
     # point inside all three domains (10 C, 35 ppt, 1000 m).

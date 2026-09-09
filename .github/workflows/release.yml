@@ -34,14 +34,35 @@ jobs:
         id: version
         run: |
           VERSION=$(tr -d ' \n' < VERSION)
-          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.]+)?$'; then
-            echo "::error::VERSION file does not contain a valid semver: '$VERSION'"
+          # The PEP 440 normal form, which is what the build back end writes
+          # into the artefact names a few steps down. Two ways to get that
+          # wrong both end at the same failure, an artefact whose name is not
+          # the one this file says: a pre-release marker carries no separator
+          # (4.0.0rc1, never 4.0.0-rc1), and no numeric component carries a
+          # leading zero (4.0.0, never 04.00.00, and rc1, never rc01). Both are
+          # normalised by the back end and neither is normalised here.
+          if ! echo "$VERSION" | grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)((a|b|rc)(0|[1-9][0-9]*))?(\.post(0|[1-9][0-9]*))?(\.dev(0|[1-9][0-9]*))?$'; then
+            echo "::error::VERSION is not a PEP 440 normal-form version: '$VERSION'"
             exit 1
           fi
           if git rev-parse "v$VERSION" >/dev/null 2>&1; then
             echo "::notice::Tag v$VERSION already exists — nothing to release."
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
+          fi
+          # A release candidate is published as a pre-release, so it does not
+          # become the repository's "Latest release" and pip leaves it alone
+          # without --pre. Read off the version rather than set by hand: the
+          # VERSION file is the only thing that decides a release here, and a
+          # flag somebody has to remember is a flag that goes out wrong.
+          # PEP 440 counts a developmental release as a pre-release too, and
+          # one can follow a post-release (4.0.0.post1.dev1), so the marker is
+          # looked for anywhere rather than right after the release segment.
+          # The string is already validated above, so nothing else can match.
+          if echo "$VERSION" | grep -Eq '(a|b|rc)[0-9]+|\.dev[0-9]+'; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
           echo "skip=false" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
@@ -162,6 +183,6 @@ jobs:
             See the [changelog](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) for the full details of this release.
           generate_release_notes: true
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.version.outputs.prerelease }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

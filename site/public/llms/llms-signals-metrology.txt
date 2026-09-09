@@ -874,12 +874,14 @@ same caveat: passing every periodic test supports **no general conclusion of
 conformance** to the Part 1 unless the model's pattern approval is on record
 (IEC 61672-3:2013 clause 1; IEC 61260-3:2016 subclause 1.5).
 
-The same honesty applies to this library, in both directions. A verifier
-verdict is a statement about a *design*: the digital transfer function you
-configured fits the Part 1 acceptance mask, with the reported margins, over
-the checked range; every measurement made wholly in software inherits it. It
-is *not* a pattern evaluation, a periodic test, or a certificate for any
-physical device: nothing here has a microphone, a temperature or a serial
+The same honesty applies to this library, in both directions. A verdict from
+one of the four class verifiers is a statement about a *design*: the digital
+transfer function you configured fits the Part 1 acceptance mask, with the
+reported margins, over the checked range; every measurement made wholly in
+software inherits it. A verdict from one of the five that grade a measurement
+is narrower still: it belongs to the numbers somebody put in, on the day they
+were measured, and nothing else inherits it. Neither is a pattern evaluation,
+a periodic test, or a certificate for any physical device: nothing here has a microphone, a temperature or a serial
 number, and a real front end brings its own paper — the meter's periodic
 test per IEC 61672-3 and the calibrator's conformance per IEC 60942, both
 discussed in [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/). A defensible report

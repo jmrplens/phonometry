@@ -229,7 +229,7 @@ print(check.deviation_percent.round(1))
 print(check.failing_frequencies_hz.round(2))    # [31.62]
 print(round(check.worst_deviation_percent, 1))  # -15.0
 
-check.plot()   # la medida dentro de su banda (requiere matplotlib)
+check.plot(language="es")   # la medida dentro de su banda (requiere matplotlib)
 ```
 
 Un canal que lee entre un 2 % y un 3 % de más en todo el rango cumple, porque
@@ -820,7 +820,7 @@ print(check.failing_frequencies_hz.round(2))                         # [63.1]
 print(round(float(check.characteristic_deviation_deg.max()), 2))     # 8.26
 print(round(check.peak_deviation_percent, 1))                        # 6.9
 
-check.plot()   # la desviación característica en su banda (requiere matplotlib)
+check.plot(language="es")   # la desviación característica en su banda (requiere matplotlib)
 ```
 
 Quita el polo y el retardo por sí solo es un error de fase de hasta 57 grados
@@ -847,7 +847,7 @@ import matplotlib.pyplot as plt
 # anteriores.
 
 # Una línea, para la respuesta que califica esta sección:
-check.plot()
+check.plot(language="es")
 plt.show()
 
 # Los dos paneles que comparten eje de frecuencia, desde los campos de los
@@ -1196,7 +1196,7 @@ print(verdict.deviation_percent[:, 2].round(1))
 # [ -2.3  -3.6  -5.9 -11.3 -20.4  -0.2]
 print(verdict.cycle_counts)     # (1, 2, 4, 8, 16, None)
 
-verdict.plot()   # las desviaciones frente a la banda impresa (requiere matplotlib)
+verdict.plot(language="es")   # las desviaciones frente a la banda impresa (requiere matplotlib)
 ```
 
 Las filas de 1, 2 y 4 ciclos cumplen, la fila continua cumple porque los dos
@@ -1463,6 +1463,6 @@ vibrómetro físico, y aquí nada lleva un número de serie.
   de antes y después sobre la que se construye una verificación in situ, y la
   trazabilidad con la que se informa un ensayo de tipo.
 - Referencia de la API:
-  [`vibration.human.instrumentation`](/phonometry/es/reference/api/vibration/instrumentation/).
+  [`vibration.human.instrumentation`](https://jmrplens.github.io/phonometry/reference/api/vibration/instrumentation/).
 
 </SeeAlso>

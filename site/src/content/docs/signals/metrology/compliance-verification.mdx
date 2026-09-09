@@ -347,12 +347,16 @@ IEC 61260-3:2016, subclause 1.5).
 
 The same honesty applies to this library, in both directions:
 
-- **What a verifier verdict is.** A statement about a *design*: the digital
+- **What a class verdict is.** A statement about a *design*: the digital
   transfer function you configured fits the Part 1 acceptance mask, with the
   reported margins, over the checked frequency range. Every measurement made
   wholly in software inherits it, which is why the
   [sound level meter walkthrough](/phonometry/signals/sound-level-meter/) ends by
   running the verifiers on the chain it just built.
+- **What a measurement verdict is.** Narrower still. The five verifiers of the
+  second table are handed numbers somebody read off a bench, so their verdict
+  belongs to that instrument on the day it was measured and nothing inherits
+  it, not even a second run of the same test.
 - **What it is not.** A pattern evaluation, a periodic test, or a certificate
   for any physical device. Nothing here has a microphone, a temperature or a
   serial number; the influence-quantity, immunity and acoustical tests above

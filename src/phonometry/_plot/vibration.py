@@ -55,8 +55,13 @@ if TYPE_CHECKING:
         WeightedSpectrum,
         WeightingResponse,
     )
+    from ..vibration.human.instrumentation import (
+        PhaseVerification,
+        WeightingVerification,
+    )
     from ..vibration.human.multiple_shock import MultipleShockResult
     from ..vibration.human.seat_vibration import SeatTransmissionResult
+    from ..vibration.human.signal_burst import SignalBurstVerification
     from ..vibration.machinery.diagnostics import FaultFrequencyResult
     from ..vibration.machinery.evaluation import VectorChangeResult
     from ..vibration.structural.building_damage import DamageAssessment
@@ -93,6 +98,13 @@ if TYPE_CHECKING:
 _FREQ_LABEL = "Frequency [Hz]"
 #: Mobility ordinate label of the ISO 7626 panels.
 _MOBILITY_LABEL = "Mobility $|Y|$ [m/(N·s)]"
+#: Deviation ordinate shared by the mobility, seat and signal-burst panels.
+_DEVIATION_LABEL = "Deviation [%]"
+#: The three legend entries every ISO 8041-1 verifier panel carries: the band
+#: Table 5 allows, and the two verdicts a measured point can take in it.
+_ISO8041_BAND_LABEL = "ISO 8041-1 tolerance"
+_WITHIN_LABEL = "within tolerance"
+_OUTSIDE_LABEL = "outside tolerance"
 #: Legend entry of the assessed ISO 2631-5 point (stress variable and
 #: injury probability), formatted with ``r`` and ``p``.
 _RISK_LABEL = r"$R$ = {r},  $\Pi$ = {p} %"
@@ -127,6 +139,7 @@ _STRINGS: dict[str, str] = {
     "ISO 10846 dynamic transfer stiffness": "ISO 10846 rigidez dinámica de transferencia",
     "Plate radiation efficiency (Leppington / Maidanik)": "Eficiencia de radiación de placa (Leppington / Maidanik)",
     "Frequency weighting {name} (ISO 8041-1)": "Ponderación en frecuencia {name} (ISO 8041-1)",
+    "Band-limiting weighting of {name} (ISO 8041-1)": "Ponderación limitadora de banda de {name} (ISO 8041-1)",
     "Weighted $W_i a_i$ ({name})": "Ponderada $W_i a_i$ ({name})",
     "{designation} weighted acceleration spectrum  ($a_\\mathrm{{w}}$ = {aw} m/s²)": "{designation} espectro de aceleración ponderada  ($a_\\mathrm{{w}}$ = {aw} m/s²)",
     "Directive 2002/44/EC daily {kind} exposure  ($A(8)$ = {a8} m/s², {zone})": "Directiva 2002/44/CE exposición diaria {kind}  ($A(8)$ = {a8} m/s², {zone})",
@@ -183,6 +196,18 @@ _STRINGS: dict[str, str] = {
     "commercial and industrial": "comercial e industrial",
     "dwellings": "viviendas",
     "especially sensitive": "especialmente sensible",
+    # Instrument verification (ISO 8041-1 Tables 4 and 5).
+    "design goal": "objetivo de diseño",
+    "ISO 8041-1 tolerance": "tolerancia de ISO 8041-1",
+    "accepted with U = {u} %": "aceptado con U = {u} %",
+    "within tolerance": "dentro de tolerancia",
+    "outside tolerance": "fuera de tolerancia",
+    "Weighting factor": "Factor de ponderación",
+    "{w} weighting against ISO 8041-1: {verdict}": "Ponderación {w} frente a ISO 8041-1: {verdict}",
+    "Characteristic phase deviation [deg]": "Desviación característica de fase [grados]",
+    "{w} characteristic phase deviation against ISO 8041-1: {verdict}": "Desviación característica de fase de {w} frente a ISO 8041-1: {verdict}",
+    "PASS": "CUMPLE",  # nosec B105 - verdict label, not a password
+    "FAIL": "NO CUMPLE",
     "measured {v} mm/s at {f} Hz": "medido {v} mm/s a {f} Hz",
     "measured {v} mm/s": "medido {v} mm/s",
     "Building class": "Clase de edificio",
@@ -198,6 +223,19 @@ _STRINGS: dict[str, str] = {
     "height": "altura",
     "height_width": "altura y anchura",
     "slenderness": "esbeltez",
+    # Saw-tooth signal-burst response (ISO 8041-1 Tables 6 to 9).
+    "Saw-tooth cycles per burst": "Ciclos de diente de sierra por ráfaga",
+    "continuous": "continua",
+    "r.m.s. value": "valor eficaz",
+    "MTVV linear": "MTVV lineal",
+    "MTVV exponential": "MTVV exponencial",
+    r"printed tolerance $\pm${p} %": r"tolerancia impresa $\pm${p} %",
+    r"printed tolerance $\pm${p} % (VDV)": r"tolerancia impresa $\pm${p} % (VDV)",
+    "hand-arm": "mano-brazo",
+    "whole-body": "cuerpo entero",
+    "low-frequency whole-body": "cuerpo entero de baja frecuencia",
+    "band limiting": "limitación de banda",
+    "Signal-burst response (ISO 8041-1)\n{name}, {application}": "Respuesta a ráfaga de señal (ISO 8041-1)\n{name}, {application}",
 }
 
 
@@ -232,9 +270,12 @@ def plot_vibration_weighting(
     ax.semilogx(freqs, mag_db, **kwargs)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Weighting factor [dB]", language))
-    ax.set_title(
-        _t("Frequency weighting {name} (ISO 8041-1)", language).format(name=result.name)
+    title = (
+        "Band-limiting weighting of {name} (ISO 8041-1)"
+        if result.band_limiting
+        else "Frequency weighting {name} (ISO 8041-1)"
     )
+    ax.set_title(_t(title, language).format(name=result.name))
     ax.grid(True, which="both", alpha=0.3)
     format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     localize_axes(ax, language)
@@ -554,7 +595,7 @@ def plot_rigid_mass_calibration(
                 label=outside_label,
             )
         axd.set_xlabel(_t(_FREQ_LABEL, language))
-        axd.set_ylabel(_t("Deviation [%]", language))
+        axd.set_ylabel(_t(_DEVIATION_LABEL, language))
         axd.grid(True, which="both", alpha=0.3)
         axd.legend(loc="best", fontsize="small")
 
@@ -748,6 +789,206 @@ def plot_seat_transmission(
         loc="best",
         fontsize="small",
     )
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_weighting_verification(
+    result: WeightingVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """A measured weighting response inside the band ISO 8041-1 allows it.
+
+    The design goal as a line, the Table 5 tolerance band around it as a
+    shaded region, and the measurement as points, the ones outside the band
+    marked apart. The band is drawn from the tolerances rather than from a
+    fixed number of decibels, so it widens at the transition frequencies of
+    Table 4 exactly where the standard widens it.
+
+    :param result: A
+        :class:`~phonometry.vibration.human.instrumentation.WeightingVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured-point ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+    from ..vibration.human.instrumentation import (
+        UNCONSTRAINED_BELOW,
+        weighting_tolerance_percent,
+    )
+
+    ax = ax if ax is not None else _new_axes()
+    order = np.argsort(result.frequencies_hz)
+    freqs = result.frequencies_hz[order]
+    design = result.design[order]
+    measured = result.measured[order]
+    inside = result.within_tolerance[order]
+
+    upper, lower = weighting_tolerance_percent(result.weighting, freqs)
+    ax.fill_between(
+        freqs,
+        design * (1.0 + lower / 100.0),
+        design * (1.0 + upper / 100.0),
+        color=_C_PRIMARY,
+        alpha=0.15,
+        label=_t(_ISO8041_BAND_LABEL, language),
+    )
+    # 13.1 and 14.1 subtract the laboratory's own expanded uncertainty from
+    # both limits, so with one supplied the band a measurement is actually
+    # accepted in is narrower than the printed one. Drawing only the printed
+    # band would put a failing point inside the shaded region with nothing to
+    # explain it. The tail keeps its lower edge, exactly as the verdict does.
+    uncertainty = result.expanded_uncertainty_percent
+    if uncertainty > 0.0:
+        unconstrained = lower <= UNCONSTRAINED_BELOW
+        effective_lower = np.where(unconstrained, lower, lower + uncertainty)
+        ax.fill_between(
+            freqs,
+            design * (1.0 + effective_lower / 100.0),
+            design * (1.0 + (upper - uncertainty) / 100.0),
+            color=_C_PRIMARY,
+            alpha=0.3,
+            label=_t("accepted with U = {u} %", language).format(
+                u=format_number(uncertainty, language, decimals=2, trim=True)
+            ),
+        )
+    ax.plot(freqs, design, color=_C_PRIMARY, lw=2.0, label=_t("design goal", language))
+
+    # Green for the bands that conform and red for the ones that do not, the
+    # pair ``plot_db_hr_assessment`` already uses for a complies/fails
+    # verdict. The measured series cannot take _C_PRIMARY here, which the
+    # design goal and its band already carry, and it must not take
+    # _C_REFERENCE, which would paint a conforming band in the colour of a
+    # refusal.
+    style_default(kwargs, "color", _C_TERTIARY)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "markersize", 5)
+    style_default(kwargs, "ls", "none")
+    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
+    ax.plot(freqs[inside], measured[inside], **kwargs)
+    if not inside.all():
+        ax.plot(
+            freqs[~inside],
+            measured[~inside],
+            color=_C_REFERENCE,
+            marker="X",
+            markersize=9,
+            ls="none",
+            label=_t(_OUTSIDE_LABEL, language),
+        )
+
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Weighting factor", language))
+    verdict = _t("PASS" if result.passes else "FAIL", language)
+    ax.set_title(
+        _t("{w} weighting against ISO 8041-1: {verdict}", language).format(
+            w=result.weighting, verdict=verdict
+        )
+    )
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_phase_verification(
+    result: PhaseVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The characteristic phase deviation inside the band ISO 8041-1 allows it.
+
+    The quantity drawn is Formula (6), not the phase error: a modulus, one
+    value per adjacent pair of frequencies, attributed to the lower one. So
+    the band is drawn from the axis floor up to the Table 5 limit rather than
+    symmetrically about a line, and the two tails, where the standard sets no
+    limit, are filled to the top of the axes.
+
+    :param result: A
+        :class:`~phonometry.vibration.human.instrumentation.PhaseVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured-point ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+    from ..vibration.human.instrumentation import SKIRT_TOLERANCE_PERCENT
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = result.characteristic_frequencies_hz
+    deviation = result.characteristic_deviation_deg
+    inside = result.within_tolerance
+    limits = result.tolerance_deg
+
+    finite = limits[np.isfinite(limits)]
+    tallest = max(
+        float(finite.max()) if finite.size else 0.0,
+        float(deviation.max()) if deviation.size else 0.0,
+    )
+    ceiling = 1.2 * tallest if tallest > 0.0 else float(SKIRT_TOLERANCE_PERCENT[2])
+    band = np.where(np.isfinite(limits), limits, ceiling)
+    # Table 5 is a piecewise-constant limit that steps at the Table 4
+    # transition frequencies, so the band is held between samples and stepped
+    # at them rather than ramped, which would draw a limit the standard never
+    # sets across the one-third octave either side of a corner.
+    ax.fill_between(
+        freqs,
+        np.zeros_like(band),
+        band,
+        step="post",
+        color=_C_PRIMARY,
+        alpha=0.15,
+        label=_t(_ISO8041_BAND_LABEL, language),
+    )
+
+    # Green for the bands that conform and red for the ones that do not, the
+    # pair ``plot_db_hr_assessment`` already uses for a complies/fails
+    # verdict. The measured series cannot take _C_PRIMARY here, which the
+    # design goal and its band already carry, and it must not take
+    # _C_REFERENCE, which would paint a conforming band in the colour of a
+    # refusal.
+    style_default(kwargs, "color", _C_TERTIARY)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "markersize", 5)
+    style_default(kwargs, "ls", "none")
+    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
+    ax.plot(freqs[inside], deviation[inside], **kwargs)
+    if not inside.all():
+        ax.plot(
+            freqs[~inside],
+            deviation[~inside],
+            color=_C_REFERENCE,
+            marker="X",
+            markersize=9,
+            ls="none",
+            label=_t(_OUTSIDE_LABEL, language),
+        )
+
+    # A plain logarithmic axis rather than the octave-centre ticks of
+    # format_frequency_axis, and for the same reason the magnitude verdict
+    # beside this one uses one: the nominal centres that helper labels start
+    # at 1 Hz, and half of the whole-body range is below that.
+    ax.set_xscale("log")
+    ax.set_ylim(0.0, ceiling)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Characteristic phase deviation [deg]", language))
+    verdict = _t("PASS" if result.passes else "FAIL", language)
+    ax.set_title(
+        _t(
+            "{w} characteristic phase deviation against ISO 8041-1: {verdict}",
+            language,
+        ).format(w=result.weighting, verdict=verdict)
+    )
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
 
@@ -1604,5 +1845,145 @@ def plot_vector_change(
     )
     ax.grid(True, alpha=0.3)
     ax.legend(loc="lower left", fontsize="small", bbox_to_anchor=(-0.15, -0.1))
+    localize_axes(ax, language)
+    return ax
+
+
+#: The printed columns of ISO 8041-1 Tables 7 to 9 and the label each series
+#: carries. The two dose values keep their acronyms, which are identifiers.
+_BURST_QUANTITY_LABELS: dict[str, str] = {
+    "rms": "r.m.s. value",
+    "vdv": "VDV",
+    "mtvv_linear": "MTVV linear",
+    "mtvv_exponential": "MTVV exponential",
+    "msdv": "MSDV",
+}
+#: One colour and one marker per printed column, in printed order.
+_BURST_COLORS = (_C_PRIMARY, _C_SECONDARY, _C_TERTIARY, _C_QUATERNARY, _C_REFERENCE)
+_BURST_MARKERS = ("o", "s", "^", "D", "v")
+#: The row of Tables 7 to 9 that grades the band-limiting response, spelled as
+#: :data:`phonometry.vibration.BAND_LIMITING` spells it.
+_BAND_LIMITING_ROW = "band-limiting"
+#: The application keys of Table 6, as a title spells them.
+_BURST_APPLICATIONS: dict[str, str] = {
+    "hand-arm": "hand-arm",
+    "whole-body": "whole-body",
+    "low-frequency-whole-body": "low-frequency whole-body",
+}
+
+
+def plot_signal_burst_verification(
+    result: SignalBurstVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Signal-burst deviations against the tolerance printed beside them.
+
+    One marker series per printed column of Table 7, 8 or 9, across the burst
+    lengths the table prints, inside the shaded band the same table allows.
+    The vibration dose value is allowed 12 % where every other column is
+    allowed 10 %, so the wider pair is drawn as a dashed edge instead of
+    widening the band under all of them.
+
+    :param result: A
+        :class:`~phonometry.vibration.human.signal_burst.SignalBurstVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to every marker series.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    positions = np.arange(len(result.cycle_counts), dtype=np.float64)
+    inner = float(np.min(result.tolerance_percent))
+    outer = float(np.max(result.tolerance_percent))
+    ax.axhspan(
+        -inner,
+        inner,
+        color=_C_MUTED,
+        alpha=0.18,
+        label=_t(r"printed tolerance $\pm${p} %", language).format(
+            p=format_number(inner, language, decimals=0)
+        ),
+    )
+    if outer > inner:
+        wider = _t(r"printed tolerance $\pm${p} % (VDV)", language).format(
+            p=format_number(outer, language, decimals=0)
+        )
+        # The label goes on the first edge only: the pair is one band, and
+        # matplotlib would otherwise list it twice.
+        for index, edge in enumerate((-outer, outer)):
+            ax.axhline(
+                edge,
+                color=_C_MUTED,
+                ls="--",
+                lw=1.0,
+                label=wider if index == 0 else None,
+            )
+    ax.axhline(0.0, color=_C_EDGE, lw=0.8)
+
+    # The continuous row has no burst length, so the axis is a list of rows
+    # and not a scale: a line drawn from the longest burst to it would read as
+    # a trend across an interval that does not exist. The bursts are joined to
+    # one another, the continuous row is left as a detached marker, and a rule
+    # says where the list stops being ordered by anything.
+    detached_from = next(
+        (k for k, cycles in enumerate(result.cycle_counts) if cycles is None),
+        len(result.cycle_counts),
+    )
+    if 0 < detached_from < len(result.cycle_counts):
+        ax.axvline(
+            float(detached_from) - 0.5,
+            color=_C_MUTED,
+            ls=":",
+            lw=0.9,
+            zorder=0,
+        )
+
+    for index, quantity in enumerate(result.quantities):
+        style = dict(kwargs)
+        style_default(style, "color", _BURST_COLORS[index % len(_BURST_COLORS)])
+        style_default(style, "marker", _BURST_MARKERS[index % len(_BURST_MARKERS)])
+        style_default(style, "linewidth", 1.2)
+        style.setdefault("label", _t(_BURST_QUANTITY_LABELS[quantity], language))
+        values = result.deviation_percent[:, index]
+        ax.plot(positions[:detached_from], values[:detached_from], **style)
+        if detached_from < len(result.cycle_counts):
+            detached = {
+                key: value
+                for key, value in style.items()
+                if key not in {"label", "linestyle", "ls"}
+            }
+            detached["ls"] = "none"
+            ax.plot(positions[detached_from:], values[detached_from:], **detached)
+
+    ax.set_xticks(list(positions))
+    ax.set_xticklabels(
+        [
+            _t("continuous", language)
+            if cycles is None
+            else format_number(cycles, language, decimals=0)
+            for cycles in result.cycle_counts
+        ]
+    )
+    ax.set_xlabel(_t("Saw-tooth cycles per burst", language))
+    ax.set_ylabel(_t(_DEVIATION_LABEL, language))
+    row = (
+        _t("band limiting", language)
+        if result.weighting == _BAND_LIMITING_ROW
+        else result.weighting
+    )
+    application = _t(_BURST_APPLICATIONS[result.application], language)
+    ax.set_title(
+        _t(
+            "Signal-burst response (ISO 8041-1)\n{name}, {application}", language
+        ).format(name=row, application=application)
+    )
+    ax.grid(True, axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
+    ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax

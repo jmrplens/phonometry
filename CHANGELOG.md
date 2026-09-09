@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Two verifier figures painted the verdict backwards. The frequency-weighting
+  and phase-response plots of ISO 8041-1 drew the points **inside** the
+  tolerance in red and the ones outside in orange, which is the only pair in
+  the corpus that reads that way and the wrong way round for a drawing whose
+  whole content is a pass or a fail. They use the green and red that
+  `plot_db_hr_assessment` already grades its rows in.
+
+- The signal-burst figure joined the continuous row to the longest burst. Its
+  abscissa is a list of the rows Tables 7 to 9 print, not a scale, and the
+  continuous row has no burst length at all, so that segment drew a trend
+  across an interval the tables never define. The burst lengths are joined to
+  one another, the continuous row is a detached marker, and a rule marks
+  where the ordered part of the axis ends.
+
 - A release tag names the commit its checks ran on. The release step passed
   the tag name and nothing else, and without a commit to point at the tag is
   cut from whatever the default branch holds when that step runs, which is
@@ -54,6 +68,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   already does it, and corepack reads it.
 
 ### Added
+
+- A vibration meter can be given the verdict a sound level meter already gets:
+  the frequency-weighting tolerances of **ISO 8041-1:2017**, in
+  `vibration.verify_weighting`.
+
+  The library has checked A, C and Z against IEC 61672-1 for a long time, and
+  said in as many words, on the vibration section's own page, that no
+  instrument was type-tested. That was the odd half of a pair: ISO 8041-1
+  grades a human-vibration meter by the same kind of table, and its nine
+  weightings were already implemented here because ISO 2631 and ISO 5349 are
+  built on them.
+
+  What was missing is the verdict. Table 5 is not one tolerance but a band
+  that widens away from the middle of the working range, keyed to the four
+  transition frequencies Table 4 gives per weighting: `+12 %` / `-11 %` in the
+  central region, `+26 %` / `-21 %` in the two skirts, and beyond the outer
+  pair no lower limit at all, which is what the printed `-100 %` means and is
+  implemented as the absence of a limit rather than a wide one. The band is
+  read off the factor, not off the decibel, because that is how the page
+  writes it. `vibration.weighting_tolerance_percent` returns it, and
+  `vibration.phase_tolerance_degrees` returns the phase band separately,
+  because footnote a applies it only to an instrument that reports a
+  parameter not based on r.m.s. values.
+
+  The Table 1 reference conditions come with it, and they are the check that
+  the nine weightings were right in the first place:
+  `vibration.reference_indication` reproduces the printed 2,020 m/s2 for Wh
+  and 0,7718 for Wk. Thirty conformance rows pin Tables 1, 2, 4 and 5 against
+  the printed page, including each transition frequency built from the
+  `10**(k/10)` exponent and checked against the rounded decimal beside it.
+
+  A pass is about the frequency weighting and nothing else: indication,
+  linearity, overload and the environmental clauses of the same standard are
+  laboratory measurements on hardware, so the result says so and the
+  documentation says so.
+
+- And the rest of what ISO 8041-1 grades arithmetically, which turned out to
+  be most of clause 5: the phase response, the band-limiting stage on its own,
+  the running r.m.s. decay and the saw-tooth signal burst.
+
+  `vibration.verify_phase_response` closes a printed oracle nobody was using.
+  Annex B tabulates a phase column for all nine weightings, 318 cells of it,
+  and Table 5 prints a tolerance for the characteristic phase deviation, and
+  until now there was nothing in the library to compare against either. The
+  criterion is Formula (6), and it is invariant to the two things a phase
+  measurement legitimately carries: a constant offset, graded at face value,
+  and a constant group delay, graded as zero. It is refused on a grid coarser
+  than the third of an octave 12.11.1 asks for, because the design goal is
+  rebuilt on the grid it is given and a coarser one can land a whole turn away
+  without the verdict noticing. `peak_deviation_percent` is Formula (H.4), the
+  one worked number of the annex: 12 degrees costs about 10 % of a peak
+  reading, and past a quarter turn the formula stops ranking pairs at all and
+  says so instead of returning a negative magnitude.
+
+  `vibration.band_limiting_factors` and `apply_band_limiting` publish the
+  two-pole pair every weighting starts with, which is what the band-limiting
+  row of the burst tables is measured on and what `band_limited_weighting_factor`
+  multiplies the design goal by to give the figure a real meter shows.
+  `verify_running_rms_decay` grades the decay Tables 10 and 11 print, and
+  `mtvv` grows the `method` those tables need to be reachable at all.
+
+  `vibration.verify_signal_burst_response` is clause 5.9: a saw-tooth burst of
+  1, 2, 4, 8 or 16 cycles, or continuous, and the r.m.s., VDV, MTVV and MSDV a
+  conforming meter reads from it. All 228 printed cells of Tables 7, 8 and 9
+  are carried as data and reproduced. Two conventions the printed tables do
+  not state had to be settled by measurement and are documented as decisions:
+  the continuous row starts at t = 0 rather than at the Table 6 start time
+  (0,5649 against the printed 0,565, where the other reading gives 0,5601),
+  and the tables come from a zero-state simulation while this library's
+  weighting filter is circular, a difference worth up to 5,2 % on four of the
+  cells.
+
+  The verdict also learned what a laboratory brings to it. 13.1 and 14.1 say
+  compliance is demonstrated when the deviation, extended by the actual
+  expanded uncertainty of measurement of the testing laboratory, does not
+  exceed the tolerance limits, so `verify_weighting` takes that uncertainty
+  and narrows both limits by it, leaving the tails alone because there is no
+  lower limit there to narrow. The figure draws the narrowed band beside the
+  printed one, since a measurement can now sit inside Table 5 and still fail.
 
 - The wave fields of the clips are solved where they are encoded. The remote
   runner could already ship a field to the CUDA machine named in `.env`, and

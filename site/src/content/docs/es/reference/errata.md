@@ -5256,6 +5256,59 @@ dos ediciones con las mismas entradas y en el mismo orden.
   spectrum)» lo registra.
 - **Estado:** sin comunicar.
 
+## ISO 8041-1:2017, apartado 12.7 («the appropriate weighting factor (see Table 1)» para `Wf`)
+
+- **Localización:** apartado 12.7, folio impreso 30 (página 30 del PDF en la
+  edición de ISO, página 38 del PDF de la copia leída aquí), párrafo cuarto. El
+  apartado empieza en el folio impreso 29.
+- **Lo impreso:** «For each frequency weighting provided, a steady sinusoidal
+  electrical signal shall be applied to the electrical input facility at the
+  appropriate reference frequency. With an input signal adjusted to indicate
+  the reference vibration value on the reference measurement range with
+  band-limiting frequency weighting, the indicated frequency-weighted
+  vibration values shall equal the indicated band-limited weighted vibration
+  value multiplied by the appropriate weighting factor (see Table 1) within
+  the tolerance limits of Table 2.»
+- **El problema:** el puntero a la Tabla 1 nombra una magnitud con la que el
+  ensayo no se puede satisfacer. El ensayo fija la entrada para que la
+  indicación *limitada en banda* marque el valor de referencia, así que la
+  indicación ponderada en frecuencia que muestra un instrumento conforme es
+  $a_\mathrm{ref}\,|H(f_\mathrm{ref})| / |H_\mathrm{BL}(f_\mathrm{ref})|$: el
+  factor que cierra la identidad es el **cociente** de las dos respuestas en la
+  frecuencia de referencia, no la ponderación global que imprime la Tabla 1. En
+  ocho de las nueve ponderaciones la distinción es invisible, porque su
+  ponderación de limitación de banda vale entre 0,999 68 y 0,999 97 en su
+  propia frecuencia de referencia y las dos lecturas coinciden al 0,03 %. La
+  excepción es `Wf`: su frecuencia de referencia, 2,5 rad/s = 0,397 887 Hz,
+  cae dentro de su propia falda de limitación de banda, cuyas esquinas sitúa la
+  Tabla 3 en 0,08 Hz y 0,63 Hz. Ahí la ponderación de limitación de banda vale
+  0,928 078 y la global 0,388 848, valores que la Tabla B.5 imprime como
+  0,927 9 y 0,388 4 en el centro de banda vecino de 0,398 1 Hz. Leído como el
+  0,388 8 de la Tabla 1, el ensayo le pide a un vibrómetro `Wf` conforme un
+  valor que dista un 7,75 % del que muestra, frente al ±5 % que la Tabla 2
+  permite a la vibración de cuerpo entero de baja frecuencia: la mitad otra vez
+  por encima del límite, en un instrumento sin defecto. Leído como el cociente
+  0,418 982, el ensayo es cierto por construcción.
+- **Consecuencia:** ninguna para las tablas de la propia norma. El anexo B
+  tabula la ponderación de limitación de banda y la global en columnas
+  separadas, así que de él se recuperan las dos lecturas; la ambigüedad está
+  solo en la frase del apartado 12.7.
+- **Evidencia:** el apartado impreso frente a la Tabla 1 (folio impreso 9), la
+  Tabla 2 (folio impreso 12), la Tabla 3 (folios impresos 12 y 13) y la
+  Tabla B.5. Las dos respuestas a 2,5 rad/s se evalúan con la cascada de las
+  Fórmulas (1) a (5) que definen esos mismos parámetros de la Tabla 3, y
+  reproducen a cuatro cifras las dos columnas de la Tabla B.5 en el centro de
+  banda vecino. Verificado en la página 38 del PDF (p. impresa 30) de
+  ISO 8041-1:2017(E).
+- **Comportamiento de la biblioteca:**
+  [`band_limited_weighting_factor`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/human/instrumentation.py)
+  devuelve el cociente, que es la lectura con la que el ensayo se puede
+  satisfacer, y su docstring tabula las dos lecturas una al lado de la otra
+  para las nueve ponderaciones, de modo que un informe pueda decir cuál usó.
+  `reference_indication` devuelve el producto de la Tabla 1, que es la otra
+  magnitud y la que trata la fila de condiciones de referencia de esa tabla.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

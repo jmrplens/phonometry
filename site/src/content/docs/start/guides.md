@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 126 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 127 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -110,7 +110,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and twenty-six guides sit in twelve topics, and each topic has its
+This page is the map. A hundred and twenty-seven guides sit in twelve topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -538,6 +538,9 @@ ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 and DIN 4150-3.
 - [What a seat does to the vibration (ISO 10326-1)](/phonometry/vibration/human/seat-vibration/):
   the SEAT factor of a laboratory seat test, the correction to the intended
   input and the transmissibility at resonance.
+- [Verifying a vibration meter (ISO 8041-1)](/phonometry/vibration/human/meter-verification/):
+  the tolerance band on each frequency weighting, the characteristic phase
+  deviation, the running r.m.s. decay and the saw-tooth burst indications.
 
 **[Machinery](/phonometry/vibration/machinery/)**
 

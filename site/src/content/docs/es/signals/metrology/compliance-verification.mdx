@@ -257,6 +257,34 @@ intensidad residual de presión frente a los límites de clase de IEC 61043, y
 con la física del índice residual explicada en
 [Intensidad acústica](/phonometry/es/devices/emission/intensity/).
 
+### Los verificadores que califican una medición, no un diseño
+
+Otras cinco funciones llevan el mismo prefijo `verify_` y responden a una
+pregunta distinta. A las cuatro de arriba se les entrega un filtro que ha
+construido esta biblioteca, e informan de si ese **diseño** cabe en una
+máscara de aceptación; a estas se les entregan números que alguien midió en
+un banco, e informan de si **ese instrumento, el día en que se midió**,
+cumple la norma con la que se vende. No hay clases ni márgenes en decibelios:
+el veredicto es un cumple o no cumple, en la unidad en la que su propia norma
+escribe las tolerancias. Cuatro devuelven un objeto de resultado cuyo `passes`
+lo dice y cuyos demás campos dicen dónde y por cuánto;
+`verify_running_rms_decay` califica una fila impresa y devuelve el `bool`.
+
+| Qué se califica | Verificador | Límites de aceptación | En detalle |
+| :--- | :--- | :--- | :--- |
+| Sistema de medida de ruido de aeronaves | `verify_aircraft_noise_system` | IEC 61265:1995, Tabla 1, y los límites escalares que la acompañan | [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/#verificación-del-sistema-de-medida-iec-61265) |
+| Ponderación frecuencial de vibración en humanos | `verify_weighting` | ISO 8041-1:2017, Tablas 4 y 5 | [Verificación del vibrómetro](/phonometry/es/vibration/human/meter-verification/) |
+| Respuesta de fase de vibración en humanos | `verify_phase_response` | ISO 8041-1:2017, Tabla 5 y Fórmula (6) | [Verificación del vibrómetro](/phonometry/es/vibration/human/meter-verification/) |
+| Indicaciones de la ráfaga en diente de sierra | `verify_signal_burst_response` | ISO 8041-1:2017, Tablas 7 a 9 (la señal, en la Tabla 6) | [Verificación del vibrómetro](/phonometry/es/vibration/human/meter-verification/) |
+| Tiempo de decaimiento del valor eficaz móvil | `verify_running_rms_decay` | ISO 8041-1:2017, Tablas 10 y 11 | [Verificación del vibrómetro](/phonometry/es/vibration/human/meter-verification/) |
+
+Hay una cláusula de la ISO 8041-1 que hace a esas cuatro distintas en
+naturaleza de todo lo demás de esta página. La desviación que informa un
+laboratorio se amplía con la incertidumbre expandida de ese mismo laboratorio
+antes de compararla con el límite (cláusulas 13.1 y 14.1), así que el mismo
+instrumento cumple en un banco y no cumple en otro, y `verify_weighting`
+recibe esa incertidumbre como argumento en vez de darla por despreciable.
+
 ## 3. Leer el informe de conformidad
 
 Los verificadores califican *tu* configuración. El
@@ -346,13 +374,18 @@ apartado 1; IEC 61260-3:2016, apartado 1.5).
 
 La misma honestidad se aplica a esta biblioteca, en las dos direcciones:
 
-- **Qué es un veredicto de verificador.** Una afirmación sobre un *diseño*:
+- **Qué es un veredicto de clase.** Una afirmación sobre un *diseño*:
   la función de transferencia digital que configuraste cabe en la máscara de
   aceptación de la Parte 1, con los márgenes informados, sobre el rango de
   frecuencias comprobado. Toda medición hecha íntegramente en software lo
   hereda, y por eso el
   [recorrido del sonómetro](/phonometry/es/signals/sound-level-meter/)
   termina ejecutando los verificadores sobre la cadena que acaba de montar.
+- **Qué es un veredicto de medición.** Todavía más estrecho. A los cinco
+  verificadores de la segunda tabla se les entregan números que alguien leyó
+  en un banco, así que su veredicto pertenece a ese instrumento el día en que
+  se midió y no lo hereda nada, ni siquiera una segunda pasada del mismo
+  ensayo.
 - **Qué no es.** Un ensayo de tipo, un ensayo periódico ni un certificado de
   ningún equipo físico. Nada aquí tiene un micrófono, una temperatura ni un
   número de serie; los ensayos de magnitudes de influencia, de inmunidad y
@@ -378,9 +411,11 @@ cómo la afirmación se encadena a través de una medición; los verificadores
 públicos (`verify_weighting_class`, `verify_filter_class`,
 `verify_intensity_class`, con `weighting_class_limits` y `class_limits`
 publicando las máscaras, y `filter_class_compliance` /
-`intensity_class_compliance` añadiendo `.plot()` y la ficha acreditada); cómo
-leer y citar el informe de conformidad publicado; y el alcance verificado de
-las partes de ensayo de tipo y de ensayos periódicos.
+`intensity_class_compliance` añadiendo `.plot()` y la ficha acreditada); los
+cinco verificadores que califican un instrumento medido en vez de un diseño, y
+dónde está la página de cada uno; cómo leer y citar el informe de conformidad
+publicado; y el alcance verificado de las partes de ensayo de tipo y de
+ensayos periódicos.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -455,4 +490,9 @@ octava frente a la Tabla 1 de IEC 61260-1:2014 (la máscara de clase 0 de
 del índice residual de un instrumento de intensidad frente a IEC 61043:1993.
 Las tres informan una clase por banda con márgenes en dB, y
 `filter_class_compliance` / `intensity_class_compliance` empaquetan el
-veredicto con `.plot()` y una ficha acreditada `.report()`.
+veredicto con `.plot()` y una ficha acreditada `.report()`. Otros cinco
+verificadores califican una medición en vez de un diseño y devuelven un
+cumple o no cumple: `verify_aircraft_noise_system` frente a IEC 61265:1995, y
+`verify_weighting`, `verify_phase_response`, `verify_signal_burst_response` y
+`verify_running_rms_decay` frente a las tablas de tolerancias de la
+ISO 8041-1:2017.

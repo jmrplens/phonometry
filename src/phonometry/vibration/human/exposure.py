@@ -12,7 +12,11 @@ standards' own analog definitions, clean-room:
   upward step (Formula (4)) realises all nine weightings from the one Table 3
   parameter set: ``Wb, Wc, Wd, We, Wf, Wh, Wj, Wk, Wm``.  The tabulated
   design-goal factors of Annex B (Tables B.1-B.9) are reproduced to their
-  four-significant-figure precision.
+  four-significant-figure precision.  The band-limiting pair
+  :math:`H_\mathrm{h}(s) H_\mathrm{l}(s)` is published on its own as well
+  (:func:`band_limiting_response`), because 5.1 lists the band-limited value
+  among the quantities an instrument must display and Annex B tabulates it in
+  three columns of its own.
 
 * **ISO 2631-1:1997** - whole-body vibration: the weighted r.m.s. acceleration
   ``a_w`` (Eq. (1)/(9)), the vibration total value ``a_v`` with axis
@@ -74,6 +78,8 @@ from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Callable
+
     from matplotlib.axes import Axes
 
     from ..._internal.types import Real
@@ -97,7 +103,10 @@ __all__ = [
     "HumanVibrationWarning",
     "WeightedSpectrum",
     "WeightingResponse",
+    "apply_band_limiting",
     "apply_weighting",
+    "band_limiting_factors",
+    "band_limiting_response",
     "combine_partial_exposures",
     "crest_factor",
     "daily_exposure",
@@ -338,6 +347,56 @@ def _params(name: str) -> _WParams:
         raise ValueError(msg) from None
 
 
+def _band_limiting(p: _WParams, s: Complex) -> Complex:
+    r"""The band-limiting product :math:`H_\mathrm{h}(s) H_\mathrm{l}(s)`.
+
+    Formula (1) (second-order high-pass at ``f1``) times Formula (2)
+    (second-order low-pass at ``f2``), both with the Butterworth ``Q`` of
+    Table 3.  The single place these two formulae are written, so the
+    band-limiting weighting a meter displays on its own and the band-limiting
+    stage inside the overall weighting can never drift apart.
+    """
+    w1 = 2.0 * math.pi * p.f1
+    w2 = 2.0 * math.pi * p.f2
+    hh = 1.0 / (1.0 + w1 / (p.q1 * s) + (w1 / s) ** 2)
+    hl = 1.0 / (1.0 + s / (p.q2 * w2) + (s / w2) ** 2)
+    return np.asarray(hh * hl, dtype=np.complex128)
+
+
+def _evaluate_at(
+    name: str, freq: Real, stages: Callable[[_WParams, Complex], Complex]
+) -> Complex:
+    r"""Evaluate ``stages`` of weighting ``name`` at the frequencies ``freq``.
+
+    An unknown weighting raises before anything is evaluated, and
+    :math:`f \le 0` returns ``0``, because the band-limiting high-pass of
+    Formula (1) is common to both cascades and blocks DC.
+    """
+    p = _params(name)
+    out = np.zeros(freq.shape, dtype=np.complex128)
+    positive = freq > 0.0
+    if not np.any(positive):
+        return out
+    s = np.asarray(
+        1j * 2.0 * math.pi * freq[positive].astype(np.float64), dtype=np.complex128
+    )
+    out[positive] = np.asarray(stages(p, s), dtype=np.complex128)
+    return out
+
+
+def _band_limiting_response(name: str, freq: Real) -> Complex:
+    r"""Complex :math:`H_\mathrm{h}(j2\pi f) H_\mathrm{l}(j2\pi f)` of
+    weighting ``name`` (ISO 8041-1, Formulae (1) and (2)).
+
+    The band-limiting weighting is asked for by weighting name because that
+    is how the standard cites it: 12.7, 12.10 and 12.13 all say "the
+    band-limiting frequency weighting" of the weighting under test.  Only
+    four corner pairs exist among the nine (Table 3), and asking for two
+    weightings that share one returns the same response.
+    """
+    return _evaluate_at(name, freq, _band_limiting)
+
+
 def _weighting_response(name: str, freq: Real) -> Complex:
     r"""Complex :math:`H(j 2\pi f)` of weighting ``name`` (ISO 8041-1,
     Formula (5)).
@@ -347,18 +406,13 @@ def _weighting_response(name: str, freq: Real) -> Complex:
     NOTEs prescribe.  :math:`f \le 0` returns ``0`` (the high-pass blocks
     DC).
     """
-    p = _params(name)
-    out = np.zeros(freq.shape, dtype=np.complex128)
-    positive = freq > 0.0
-    if not np.any(positive):
-        return out
-    s = 1j * 2.0 * math.pi * freq[positive].astype(np.float64)
+    return _evaluate_at(name, freq, _overall_weighting)
 
-    w1 = 2.0 * math.pi * p.f1
-    w2 = 2.0 * math.pi * p.f2
-    # Formula (1) high-pass and Formula (2) low-pass band limiting.
-    hh = 1.0 / (1.0 + w1 / (p.q1 * s) + (w1 / s) ** 2)
-    hl = 1.0 / (1.0 + s / (p.q2 * w2) + (s / w2) ** 2)
+
+def _overall_weighting(p: _WParams, s: Complex) -> Complex:
+    """Formula (5): band limiting times the a-v transition and upward step."""
+    # Formulae (1) and (2), the band-limiting pair.
+    band = _band_limiting(p, s)
 
     # Formula (3) acceleration-velocity transition, gain K.
     ones = np.ones_like(s)
@@ -382,8 +436,7 @@ def _weighting_response(name: str, freq: Real) -> Complex:
             * (w5 / w6) ** 2
         )
 
-    out[positive] = np.asarray(hh * hl * ht * hs, dtype=np.complex128)
-    return out
+    return np.asarray(band * ht * hs, dtype=np.complex128)
 
 
 @dataclass(frozen=True)
@@ -396,6 +449,11 @@ class WeightingResponse:
     :ivar magnitude: Weighting factor :math:`\lvert H \rvert` per frequency.
     :ivar magnitude_db: :math:`20 \log_{10}\lvert H \rvert` per frequency, in
         decibels.
+    :ivar band_limiting: Whether the response is the band-limiting weighting
+        of ``name`` (Formulae (1) and (2) alone) rather than the overall
+        weighting of Formula (5). The standard tabulates the two side by side
+        in Annex B and grades both against Table 5, so the flag is what tells
+        a reader, and ``.plot()``, which of the two curves this is.
     """
 
     name: str
@@ -403,6 +461,7 @@ class WeightingResponse:
     response: Complex
     magnitude: Real
     magnitude_db: Real
+    band_limiting: bool = False
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -420,6 +479,32 @@ class WeightingResponse:
         )
 
 
+def _response_result(
+    name: str, frequencies: ArrayLike, *, band_limiting: bool
+) -> WeightingResponse:
+    """Evaluate one of the two responses of ``name`` and package it."""
+    freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    if freq.ndim != 1 or freq.size == 0:
+        msg = "'frequencies' must be a non-empty 1-D array."
+        raise ValueError(msg)
+    resp = (
+        _band_limiting_response(name, freq)
+        if band_limiting
+        else _weighting_response(name, freq)
+    )
+    mag = np.abs(resp)
+    with np.errstate(divide="ignore"):
+        mag_db = 20.0 * np.log10(mag)
+    return WeightingResponse(
+        name=name,
+        frequencies=freq,
+        response=resp,
+        magnitude=mag,
+        magnitude_db=mag_db,
+        band_limiting=band_limiting,
+    )
+
+
 def frequency_weighting(name: str, frequencies: ArrayLike) -> WeightingResponse:
     """Frequency-weighting response ``H(f)`` (ISO 8041-1:2017, Formula (5)).
 
@@ -431,21 +516,54 @@ def frequency_weighting(name: str, frequencies: ArrayLike) -> WeightingResponse:
     :return: A :class:`WeightingResponse` with ``.plot()``.
     :raises ValueError: if ``name`` is unknown or ``frequencies`` is empty.
     """
-    freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    if freq.ndim != 1 or freq.size == 0:
-        msg = "'frequencies' must be a non-empty 1-D array."
-        raise ValueError(msg)
-    resp = _weighting_response(name, freq)
-    mag = np.abs(resp)
-    with np.errstate(divide="ignore"):
-        mag_db = 20.0 * np.log10(mag)
-    return WeightingResponse(
-        name=name,
-        frequencies=freq,
-        response=resp,
-        magnitude=mag,
-        magnitude_db=mag_db,
-    )
+    return _response_result(name, frequencies, band_limiting=False)
+
+
+def band_limiting_response(name: str, frequencies: ArrayLike) -> WeightingResponse:
+    r"""Band-limiting weighting response (ISO 8041-1:2017, Formulae (1), (2)).
+
+    The band-limiting weighting is the high-pass and low-pass pair of the
+    cascade on its own, :math:`H_\mathrm{h}(s) H_\mathrm{l}(s)`, with the
+    ``f1`` and ``f2`` corners of Table 3 and the Butterworth
+    :math:`Q = 1/\sqrt{2}`. It is a displayed quantity in its own right: 5.1
+    (folio 9) lists the "time-averaged band-limited vibration acceleration
+    value over the measurement duration" among the three things an instrument
+    must be able to display, 5.6.6 (folio 14) says the Table 5 limits "apply
+    to the weightings, including the corresponding band-limiting weightings",
+    and Annex B gives it three columns of its own in every one of Tables B.1
+    to B.9. It is also the signal path the type tests are written on: 12.7,
+    12.10.1, 12.11.2, 12.11.3 and 12.13 all set the meter to the
+    band-limiting frequency weighting first.
+
+    Only four corner pairs exist among the nine weightings, as Table 3 prints
+    them: 0,4 Hz and 100 Hz for ``Wb``, ``Wc``, ``Wd``, ``We``, ``Wj`` and
+    ``Wk``; ``10**(8/10)`` Hz and ``10**(31/10)`` Hz for ``Wh``;
+    ``10**(-0.1)`` Hz and 100 Hz for ``Wm``; 0.08 Hz and 0.63 Hz for ``Wf``.
+    The response is still asked for by weighting name, because that is how
+    the standard cites it.
+
+    :param name: Weighting name (one of :data:`WEIGHTING_NAMES`) whose
+        band-limiting pair is wanted.
+    :param frequencies: Frequencies at which to evaluate, in hertz (> 0).
+    :return: A :class:`WeightingResponse` with ``band_limiting`` true and
+        ``.plot()``.
+    :raises ValueError: if ``name`` is unknown or ``frequencies`` is empty.
+    """
+    return _response_result(name, frequencies, band_limiting=True)
+
+
+def band_limiting_factors(name: str, frequencies: ArrayLike) -> Real:
+    """Band-limiting weighting factors (ISO 8041-1:2017, Annex B).
+
+    Convenience wrapper over :func:`band_limiting_response` returning only the
+    magnitude array, which is the "Band-limiting Factor" column of
+    Tables B.1 to B.9.
+
+    :param name: Weighting name (one of :data:`WEIGHTING_NAMES`).
+    :param frequencies: Band centre frequencies, in hertz.
+    :return: Band-limiting factor per frequency.
+    """
+    return band_limiting_response(name, frequencies).magnitude
 
 
 def weighting_factors(name: str, frequencies: ArrayLike) -> Real:
@@ -483,12 +601,57 @@ def apply_weighting(signal: SignalInput, fs: float | None = None, *, name: str) 
     :raises ValueError: if ``signal`` is not 1-D, ``fs`` is not positive, or
         ``name`` is unknown.
     """
+    return _apply_response(signal, fs, name=name, band_limiting=False)
+
+
+def apply_band_limiting(
+    signal: SignalInput, fs: float | None = None, *, name: str
+) -> Real:
+    """Apply the band-limiting weighting of ``name`` to a time signal.
+
+    The band-limiting weighting of :func:`band_limiting_response` (ISO 8041-1
+    Formulae (1) and (2)) applied the way :func:`apply_weighting` applies the
+    overall weighting: the exact analog response, multiplied in the frequency
+    domain. This is the signal path the type tests of 12.7, 12.10, 12.11 and
+    12.13 put the meter on, and the one the "Band limiting" rows of Tables 7
+    to 9 are measured through.
+
+    The multiplication is circular, exactly as in :func:`apply_weighting`, so
+    the record wraps at its ends. A test that has to reproduce the printed
+    burst responses of 5.9 pads the record with zeros first, because the
+    printed values come from a zero-state digital simulation (5.9, NOTE 1)
+    and the switch-on transient is part of what they measure.
+
+    :param signal: Unweighted acceleration time history (1-D), in m/s2. Accepts a
+        :class:`phonometry.io.Signal` for its rate; a calibration factor it
+        carries is deliberately not applied, because this quantity is an
+        acceleration in m/s2 and not a pressure.
+    :param fs: Sampling frequency, in hertz (> 0). Required for a bare array; a
+        :class:`~phonometry.io.Signal` brings its own, and an explicit value
+        that disagrees with it raises instead of silently winning.
+    :param name: Weighting name (one of :data:`WEIGHTING_NAMES`) whose
+        band-limiting pair is applied.
+    :return: The band-limited acceleration signal, same length as input.
+    :raises ValueError: if ``signal`` is not 1-D, ``fs`` is not positive, or
+        ``name`` is unknown.
+    """
+    return _apply_response(signal, fs, name=name, band_limiting=True)
+
+
+def _apply_response(
+    signal: SignalInput, fs: float | None, *, name: str, band_limiting: bool
+) -> Real:
+    """Multiply a record by one of the two responses of ``name`` (real FFT)."""
     fs = resolve_fs(signal, fs, name="signal")
     x = _weighted_signal(signal)
     fs = _positive_fs(fs)
     n = x.size
     freqs = np.fft.rfftfreq(n, d=1.0 / fs).astype(np.float64)
-    resp = _weighting_response(name, freqs)
+    resp = (
+        _band_limiting_response(name, freqs)
+        if band_limiting
+        else _weighting_response(name, freqs)
+    )
     weighted = np.fft.irfft(np.fft.rfft(x) * resp, n=n)
     return np.asarray(weighted, dtype=np.float64)
 
@@ -704,10 +867,19 @@ def mtvv(
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
+    method: str = "linear",
 ) -> float:
     """Maximum transient vibration value (ISO 2631-1 Eq. (4)).
 
     ``MTVV = max a_w(t0)``, the peak of the 1 s running r.m.s. value.
+
+    The averaging is the one :func:`running_rms` is asked for, because the
+    two give different answers and both are graded: ISO 8041-1 Table 8
+    (folios 18 and 19) prints an "MTVV linear" and an "MTVV exponential"
+    column side by side, 48 cells each with a 10 % tolerance, and Annex D
+    D.3 (folio 79) spends its text on how far apart the two can sit. The
+    default is the linear average of Eq. (2), which is what ISO 2631-1
+    defines the MTVV on.
 
     :param signal: Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
@@ -717,9 +889,17 @@ def mtvv(
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
     :param integration_time: Running-r.m.s. averaging time, in seconds (1 s).
+    :param method: ``"linear"`` (Eq. (2), the default) or ``"exponential"``
+        (Eq. (3)), forwarded to :func:`running_rms`.
     :return: The MTVV, in m/s2.
+    :raises ValueError: for a bad signal, non-positive ``fs``/``tau`` or an
+        unknown ``method``.
     """
-    return float(np.max(running_rms(signal, fs, integration_time=integration_time)))
+    return float(
+        np.max(
+            running_rms(signal, fs, integration_time=integration_time, method=method)
+        )
+    )
 
 
 def vibration_dose_value(signal: SignalInput, fs: float | None = None) -> float:

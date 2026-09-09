@@ -961,7 +961,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   placa delgada, así que el $\pi$ extra la cuenta dos veces y desplazaría
   $f_c$ en un factor $\pi$ (p. ej. un elemento de hormigón de 100 mm con
   $c_L = 3500\ \text{m/s}$: 187 Hz sin el $\pi$, 59 Hz con él, lejos de
-  cualquier valle de coincidencia medido).
+  cualquier caída medida en la coincidencia).
 - **Evidencia:** deducción desde la relación de dispersión de placa delgada
   (Hopkins, *Sound Insulation* (2007), Ec. 2.201,
   $f_c = c_0^2/(1{,}8 c_L h)$); ISO 12354-1:2017 imprime la misma forma sin
@@ -2267,7 +2267,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   m$^{-1}$, $b = 5{,}2553$, $\theta_0 = 314$ K y $\theta_1 = 296$ K en las
   páginas 73 y 74 del PDF (pp. 64 y 65 impresas), todo de BS EN ISO 3744:2010.
   Ambos valores se recalcularon solo a partir de las ecuaciones impresas.
-- **Comportamiento de la biblioteca:** el presupuesto de incertidumbre del
+- **Comportamiento de la biblioteca:** el balance de incertidumbre del
   Anexo H no está modelado, así que ningún número publicado depende de
   ninguna de las dos cifras. La corrección del Anexo G sí se evalúa desde las
   Ecuaciones (G.1) y (G.2) en
@@ -4185,7 +4185,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Evidencia:** las tres frases consecutivas de E.4.2.6.2 leídas una contra
   otra y contra la Ec. (A.1). Verificado en la página 47 del PDF (p. 38
   impresa) y en la página 30 del PDF (p. 21 impresa) de BS EN ISO 3747:2010.
-- **Comportamiento de la biblioteca:** el presupuesto de incertidumbre del
+- **Comportamiento de la biblioteca:** el balance de incertidumbre del
   Anexo E no está modelado; la biblioteca evalúa la Ec. (A.1) tal como está
   impresa
   ([`excess_sound_pressure_level`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/sound_power_in_situ.py)),
@@ -4248,7 +4248,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   parte: la fila correspondiente de ISO 3744:2010 lleva el coeficiente de
   campo libre $c_S = 8{,}7/r$ sin factor de exceso alguno, así que el desliz
   no viene heredado de la familia.
-- **Comportamiento de la biblioteca:** el presupuesto de incertidumbre del
+- **Comportamiento de la biblioteca:** el balance de incertidumbre del
   Anexo E no está modelado, y el exceso se evalúa desde la Ec. (A.1) en
   [`excess_sound_pressure_level`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/sound_power_in_situ.py).
   No cambia ningún número.
@@ -4283,7 +4283,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   presupuesto que la suma, leídos en las páginas 44, 47 y 50 del PDF (pp. 35,
   38 y 41 impresas) de BS EN ISO 3747:2010; la comparación con la familia en
   las páginas 79 y 82 del PDF (pp. 70 y 73 impresas) de BS EN ISO 3744:2010.
-- **Comportamiento de la biblioteca:** el presupuesto de incertidumbre del
+- **Comportamiento de la biblioteca:** el balance de incertidumbre del
   Anexo E no está modelado. La reproducibilidad que publica la biblioteca es
   el $\sigma_{R0}$ tabulado de la Tabla 2, leído por grado de exactitud.
   No cambia ningún número.
@@ -4312,7 +4312,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   BS EN ISO 3747:2010. ISO 3741:2010 imprime el mismo coeficiente como «la
   derivada de $L_W$ respecto de $L'_{p(\mathrm{ST})}$», sin número de
   ecuación, así que el número equivocado es propio de esta parte.
-- **Comportamiento de la biblioteca:** el presupuesto de incertidumbre del
+- **Comportamiento de la biblioteca:** el balance de incertidumbre del
   Anexo E no está modelado, así que ningún número de la biblioteca depende de
   él. Se registra para que un lector futuro que siga la deducción no acabe en
   la ecuación equivocada.

@@ -348,9 +348,11 @@ def test_pinning_leaves_other_repositories_alone() -> None:
 #: Every version the release workflow has to decide about, with what it must
 #: decide: whether the VERSION file is valid at all, and whether the GitHub
 #: Release it creates is a pre-release. The forms with a separator are here
-#: because they are the trap: ``4.0.0-rc1`` reads like a version, and the
-#: build back end normalises it to ``4.0.0rc1``, so the artefact check two
-#: steps later would look for a wheel that does not exist.
+#: because they are the trap: ``4.0.0-rc1`` and ``04.00.00`` both read like a
+#: version, and the build back end normalises both, so the artefact check two
+#: steps later would look for a wheel that does not exist. A developmental
+#: release of a post-release is here because PEP 440 counts it as a
+#: pre-release and the marker does not sit where the others do.
 _RELEASE_VERSIONS = (
     ("3.3.0", True, False),
     ("4.0.0", True, False),
@@ -359,11 +361,14 @@ _RELEASE_VERSIONS = (
     ("4.0.0b2", True, True),
     ("4.0.0.dev3", True, True),
     ("4.0.0.post1", True, False),
+    ("4.0.0.post1.dev1", True, True),
     ("4.0.0-rc1", False, False),
     ("4.0.0_rc1", False, False),
     ("4.0", False, False),
     ("v4.0.0", False, False),
     ("4.0.0rc", False, False),
+    ("04.00.00", False, False),
+    ("4.0.0rc01", False, False),
 )
 
 

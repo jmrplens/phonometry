@@ -4901,6 +4901,57 @@ in the same order.
   "EN 16272-3-1:2012 Clause 6 (DLR on the railway spectrum)" records it.
 - **Status:** unreported.
 
+## ISO 8041-1:2017, clause 12.7 ("the appropriate weighting factor (see Table 1)" for `Wf`)
+
+- **Location:** clause 12.7, printed folio 30 (PDF page 30 of the ISO release,
+  PDF page 38 of the copy read here), fourth paragraph. The clause opens on
+  printed folio 29.
+- **The print:** "For each frequency weighting provided, a steady sinusoidal
+  electrical signal shall be applied to the electrical input facility at the
+  appropriate reference frequency. With an input signal adjusted to indicate
+  the reference vibration value on the reference measurement range with
+  band-limiting frequency weighting, the indicated frequency-weighted
+  vibration values shall equal the indicated band-limited weighted vibration
+  value multiplied by the appropriate weighting factor (see Table 1) within
+  the tolerance limits of Table 2."
+- **The problem:** the pointer to Table 1 names a quantity the test cannot be
+  satisfied with. The test fixes the input so that the *band-limited*
+  indication reads the reference value, so the frequency-weighted indication a
+  conforming meter shows is
+  $a_\mathrm{ref}\,|H(f_\mathrm{ref})| / |H_\mathrm{BL}(f_\mathrm{ref})|$: the
+  factor that closes the identity is the
+  **ratio** of the two responses at the reference frequency, not the overall
+  weighting Table 1 prints. For eight of the nine weightings the distinction is
+  invisible, because their band-limiting weighting sits between 0,999 68 and
+  0,999 97 at their own reference frequency and the two readings agree to
+  0,03 %. `Wf` is the exception: its reference frequency of 2,5 rad/s =
+  0,397 887 Hz falls inside its own band-limiting skirt, whose corners Table 3
+  puts at 0,08 Hz and 0,63 Hz. There the band-limiting weighting is 0,928 078
+  and the overall weighting 0,388 848, which Table B.5 prints as 0,927 9 and
+  0,388 4 at the neighbouring 0,398 1 Hz band centre. Read as the 0,388 8 of
+  Table 1, the row asks a conforming `Wf` meter for a value 7,75 % away from
+  the one it displays, against the ±5 % Table 2 allows low-frequency
+  whole-body vibration: half again over the limit, on an instrument with no
+  defect. Read as the ratio 0,418 982, the row is true by construction.
+- **Evidence:** the printed clause against Table 1 (printed folio 9), Table 2
+  (printed folio 12), Table 3 (printed folios 12 to 13) and Table B.5. The two
+  responses at 2,5 rad/s are evaluated from the Formula (1) to (5) cascade the
+  same Table 3 parameters define, and they reproduce the two Table B.5 columns
+  at the neighbouring band centre to four figures. Verified on PDF page 38
+  (printed p. 30) of ISO 8041-1:2017(E).
+- **Consequence for the standard's own tables:** none. Annex B tabulates the
+  band-limiting weighting and the overall weighting in separate columns, so
+  both readings can be recovered from it; only clause 12.7's one-line
+  instruction is ambiguous.
+- **Library behaviour:**
+  [`band_limited_weighting_factor`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/human/instrumentation.py)
+  returns the ratio, which is the reading that makes the test satisfiable, and
+  its docstring tabulates the two readings side by side for all nine
+  weightings so a report can say which one it used. `reference_indication`
+  returns the Table 1 product, which is the other quantity and the one the
+  reference-conditions row of Table 1 is about.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

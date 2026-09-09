@@ -1247,18 +1247,18 @@ class RotorcraftAtmosphere:
     Eq. 4-7 alone, with no band-by-band absorption to ask the humidity or the
     method about, and at a different reference temperature.
 
-    :ivar temperature: Air temperature, in °C (default 25, ICAO reference).
-    :ivar relative_humidity: Relative humidity, in % (default 70).
-    :ivar pressure: Ambient pressure, in kPa (default 101.325).
+    :ivar temperature_c: Air temperature, in °C (default 25, ICAO reference).
+    :ivar relative_humidity_percent: Relative humidity, in % (default 70).
+    :ivar atmospheric_pressure_kpa: Ambient pressure, in kPa (default 101.325).
     :ivar atmospheric_method: ``"iso9613"`` for the pure-tone Eq. 26/27 term
         (the guidance text), or ``"sae"`` for the SAE ARP 5534 band-integrated
         mapping used by the NORAH2 reference implementation (they agree to
         ~0.05 dB below 3.15 kHz).
     """
 
-    temperature: float = 25.0
-    relative_humidity: float = 70.0
-    pressure: float = 101.325
+    temperature_c: float = 25.0
+    relative_humidity_percent: float = 70.0
+    atmospheric_pressure_kpa: float = 101.325
     atmospheric_method: str = "iso9613"
 
 
@@ -1491,7 +1491,10 @@ def _event_setup(
     off = _per_point(level_offset, t.size, "level_offset")
     offsets = off if off is not None else np.zeros(t.size)
     alpha = _absorption_coefficient(
-        freqs, atmosphere.temperature, atmosphere.relative_humidity, atmosphere.pressure
+        freqs,
+        atmosphere.temperature_c,
+        atmosphere.relative_humidity_percent,
+        atmosphere.atmospheric_pressure_kpa,
     )
     return _EventSetup(
         hemispheres=tuple(hemispheres),

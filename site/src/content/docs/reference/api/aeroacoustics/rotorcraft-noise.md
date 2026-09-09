@@ -536,9 +536,9 @@ received histories to the exposure (`SEL`, Doc 32 Eq. 27) or maximum
 
 ```python
 RotorcraftAtmosphere(
-    temperature: float = 25.0,
-    relative_humidity: float = 70.0,
-    pressure: float = 101.325,
+    temperature_c: float = 25.0,
+    relative_humidity_percent: float = 70.0,
+    atmospheric_pressure_kpa: float = 101.325,
     atmospheric_method: str = 'iso9613',
 )
 ```
@@ -557,9 +557,9 @@ method about, and at a different reference temperature.
 
 | Name | Description |
 | :--- | :--- |
-| `temperature` | Air temperature, in °C (default 25, ICAO reference). |
-| `relative_humidity` | Relative humidity, in % (default 70). |
-| `pressure` | Ambient pressure, in kPa (default 101.325). |
+| `temperature_c` | Air temperature, in °C (default 25, ICAO reference). |
+| `relative_humidity_percent` | Relative humidity, in % (default 70). |
+| `atmospheric_pressure_kpa` | Ambient pressure, in kPa (default 101.325). |
 | `atmospheric_method` | `"iso9613"` for the pure-tone Eq. 26/27 term (the guidance text), or `"sae"` for the SAE ARP 5534 band-integrated mapping used by the NORAH2 reference implementation (they agree to ~0.05 dB below 3.15 kHz). |
 
 ## RotorcraftEventResult

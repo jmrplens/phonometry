@@ -106,12 +106,15 @@ def metadata_pairs(
         (t("Noise source", language), metadata.specimen),
         (t("Test environment", language), metadata.test_room),
         (t("Instrumentation", language), metadata.instrumentation),
-        (t("Temperature [&#176;C]", language), _num(metadata.temperature, language)),
+        (t("Temperature [&#176;C]", language), _num(metadata.temperature_c, language)),
         (
             t("Relative humidity [%]", language),
-            _num(metadata.relative_humidity, language),
+            _num(metadata.relative_humidity_percent, language),
         ),
-        (t("Ambient pressure [kPa]", language), _num(metadata.pressure, language)),
+        (
+            t("Ambient pressure [kPa]", language),
+            _num(metadata.static_pressure_kpa, language),
+        ),
         (t("Date of test", language), metadata.test_date),
     ]
     return escaped_pairs(specs)

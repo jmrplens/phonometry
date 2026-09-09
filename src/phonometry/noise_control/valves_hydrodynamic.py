@@ -259,7 +259,7 @@ _SERIES_LAW_TOLERANCE = 0.05
 
 
 def differential_pressure_ratio(
-    *, inlet_pressure: float, outlet_pressure: float, vapour_pressure: float
+    *, inlet_pressure_pa: float, outlet_pressure_pa: float, vapour_pressure_pa: float
 ) -> float:
     r"""Equation (1): the differential pressure ratio.
 
@@ -271,30 +271,30 @@ def differential_pressure_ratio(
     liquid all the way down to its vapour pressure, so :math:`x_F` says how
     far towards flashing this operating point is, and 1 is the whole way.
 
-    :param inlet_pressure: :math:`p_1`, absolute, in Pa.
-    :param outlet_pressure: :math:`p_2`, absolute, in Pa.
-    :param vapour_pressure: :math:`p_v` of the liquid at the inlet
+    :param inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
+    :param outlet_pressure_pa: :math:`p_2`, absolute, in Pa.
+    :param vapour_pressure_pa: :math:`p_v` of the liquid at the inlet
         temperature, absolute, in Pa.
     :return: :math:`x_F`, dimensionless.
     :raises ValueError: If a pressure is not positive and finite, if the
         valve does not drop pressure, or if the inlet is already at the
         vapour pressure.
     """
-    p1 = require_positive(inlet_pressure, "inlet_pressure")
-    p2 = require_positive(outlet_pressure, "outlet_pressure")
-    pv = require_positive(vapour_pressure, "vapour_pressure")
+    p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
+    p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
+    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
     if p2 > p1:
         msg = (
-            "A control valve drops pressure, so 'outlet_pressure' cannot be "
-            f"above 'inlet_pressure'; got {outlet_pressure!r} and "
-            f"{inlet_pressure!r} Pa."
+            "A control valve drops pressure, so 'outlet_pressure_pa' cannot be "
+            f"above 'inlet_pressure_pa'; got {outlet_pressure_pa!r} and "
+            f"{inlet_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     if pv >= p1:
         msg = (
             "Equation (1) divides by p_1 - p_v, so the liquid must arrive "
-            f"above its vapour pressure; got p_1 = {inlet_pressure!r} Pa and "
-            f"p_v = {vapour_pressure!r} Pa."
+            f"above its vapour pressure; got p_1 = {inlet_pressure_pa!r} Pa and "
+            f"p_v = {vapour_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     return float((p1 - p2) / (p1 - pv))
@@ -302,9 +302,9 @@ def differential_pressure_ratio(
 
 def cavitation_differential(
     *,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    vapour_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
+    vapour_pressure_pa: float,
     pressure_recovery: float,
 ) -> float:
     r"""Equation (2): the differential the jet velocity is computed from.
@@ -321,30 +321,30 @@ def cavitation_differential(
     The printed equation says "lower than … or …", with no ``min`` operator
     and no inequality; the minimum is what it means.
 
-    :param inlet_pressure: :math:`p_1`, absolute, in Pa.
-    :param outlet_pressure: :math:`p_2`, absolute, in Pa.
-    :param vapour_pressure: :math:`p_v`, absolute, in Pa.
+    :param inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
+    :param outlet_pressure_pa: :math:`p_2`, absolute, in Pa.
+    :param vapour_pressure_pa: :math:`p_v`, absolute, in Pa.
     :param pressure_recovery: :math:`F_L` of the valve, dimensionless.
     :return: :math:`\Delta p_c`, in Pa.
     :raises ValueError: If a pressure is not positive and finite, if the
         valve does not drop pressure, or if the recovery factor is outside
         the range a recovery factor lives in.
     """
-    p1 = require_positive(inlet_pressure, "inlet_pressure")
-    p2 = require_positive(outlet_pressure, "outlet_pressure")
-    pv = require_positive(vapour_pressure, "vapour_pressure")
+    p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
+    p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
+    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
     recovery = _require_recovery(pressure_recovery)
     if p2 > p1:
         msg = (
-            "A control valve drops pressure, so 'outlet_pressure' cannot be "
-            f"above 'inlet_pressure'; got {outlet_pressure!r} and "
-            f"{inlet_pressure!r} Pa."
+            "A control valve drops pressure, so 'outlet_pressure_pa' cannot be "
+            f"above 'inlet_pressure_pa'; got {outlet_pressure_pa!r} and "
+            f"{inlet_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     if pv >= p1:
         msg = (
             "Equation (2) needs the inlet above the vapour pressure; got "
-            f"p_1 = {inlet_pressure!r} Pa and p_v = {vapour_pressure!r} Pa."
+            f"p_1 = {inlet_pressure_pa!r} Pa and p_v = {vapour_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     return float(min(p1 - p2, recovery**2 * (p1 - pv)))
@@ -427,7 +427,9 @@ def multihole_incipient_cavitation_ratio(
     return float(1.0 / math.sqrt(inner))
 
 
-def corrected_incipient_ratio(incipient_ratio: float, inlet_pressure: float) -> float:
+def corrected_incipient_ratio(
+    incipient_ratio: float, inlet_pressure_pa: float
+) -> float:
     r"""Equation (3c): the threshold moved to the working inlet pressure.
 
     .. math::
@@ -452,20 +454,20 @@ def corrected_incipient_ratio(incipient_ratio: float, inlet_pressure: float) -> 
 
     :param incipient_ratio: :math:`x_{Fz}` at 6 × 10⁵ Pa, measured or from
         :func:`incipient_cavitation_ratio`.
-    :param inlet_pressure: :math:`p_1`, absolute, in Pa.
+    :param inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
     :return: :math:`x_{Fzp1}`, dimensionless.
     :raises ValueError: If a value is not positive and finite, if
         :math:`x_{Fz}` is at or above 1, or if the correction to this inlet
         pressure carries the threshold to or above 1.
     """
     ratio = _require_threshold(incipient_ratio, "incipient_ratio")
-    p1 = require_positive(inlet_pressure, "inlet_pressure")
+    p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
     corrected = ratio * (REFERENCE_INLET_PRESSURE_PA / p1) ** _INLET_CORRECTION_EXPONENT
     if corrected >= _FLASHING_RATIO:
         msg = (
             "Equation (3c) raises the threshold below 6 x 10^5 Pa, and here "
             f"it carries x_Fz = {incipient_ratio!r} to x_Fzp1 = "
-            f"{corrected:.3f} at p_1 = {inlet_pressure!r} Pa, which is at or "
+            f"{corrected:.3f} at p_1 = {inlet_pressure_pa!r} Pa, which is at or "
             "past flashing and so is not a ratio at which cavitation can be "
             "detected. Check the inlet pressure is absolute and in Pa."
         )
@@ -684,8 +686,8 @@ def jet_strouhal_number(  # noqa: PLR0913
     corrected_ratio: float,
     valve_diameter: float,
     seat_diameter: float,
-    inlet_pressure: float,
-    vapour_pressure: float,
+    inlet_pressure_pa: float,
+    vapour_pressure_pa: float,
     coefficient: str = "Cv",
     form: str = "annex",
 ) -> float:
@@ -715,8 +717,8 @@ def jet_strouhal_number(  # noqa: PLR0913
     :param valve_diameter: :math:`d`, the valve inlet internal diameter, in
         m.
     :param seat_diameter: :math:`d_o`, the seat or orifice diameter, in m.
-    :param inlet_pressure: :math:`p_1`, absolute, in Pa.
-    :param vapour_pressure: :math:`p_v`, absolute, in Pa.
+    :param inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
+    :param vapour_pressure_pa: :math:`p_v`, absolute, in Pa.
     :param coefficient: ``"Cv"`` or ``"Kv"``, selecting :math:`N_{34}`.
     :param form: Which printing of Equation (12) to use, ``"annex"`` or
         ``"clause"``.
@@ -733,12 +735,12 @@ def jet_strouhal_number(  # noqa: PLR0913
     threshold = _require_threshold(corrected_ratio, "corrected_ratio")
     inlet = require_positive(valve_diameter, "valve_diameter")
     seat = require_positive(seat_diameter, "seat_diameter")
-    p1 = require_positive(inlet_pressure, "inlet_pressure")
-    pv = require_positive(vapour_pressure, "vapour_pressure")
+    p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
+    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
     if pv >= p1:
         msg = (
             "Equation (12) divides by p_1 - p_v; got p_1 = "
-            f"{inlet_pressure!r} Pa and p_v = {vapour_pressure!r} Pa."
+            f"{inlet_pressure_pa!r} Pa and p_v = {vapour_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     style = modifier**0.75 if printing == "annex" else 1.0
@@ -1229,18 +1231,18 @@ class LiquidStream:
     r"""The liquid and the operating point, which Clause 4.1 reads first.
 
     :ivar mass_flow: :math:`\dot m`, in kg/s.
-    :ivar inlet_pressure: :math:`p_1`, absolute, in Pa.
-    :ivar outlet_pressure: :math:`p_2`, absolute, in Pa.
-    :ivar vapour_pressure: :math:`p_v` of the liquid at the inlet
+    :ivar inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
+    :ivar outlet_pressure_pa: :math:`p_2`, absolute, in Pa.
+    :ivar vapour_pressure_pa: :math:`p_v` of the liquid at the inlet
         temperature, absolute, in Pa.
     :ivar density: :math:`\rho_L`, in kg/m³.
     :ivar sound_speed: :math:`c_L`, in m/s.
     """
 
     mass_flow: float
-    inlet_pressure: float
-    outlet_pressure: float
-    vapour_pressure: float
+    inlet_pressure_pa: float
+    outlet_pressure_pa: float
+    vapour_pressure_pa: float
     density: float
     sound_speed: float
 
@@ -1334,9 +1336,9 @@ def valve_hydrodynamic_noise(
         Equations (9) and (13) divide by zero.
     """
     mass_flow = stream.mass_flow
-    inlet_pressure = stream.inlet_pressure
-    outlet_pressure = stream.outlet_pressure
-    vapour_pressure = stream.vapour_pressure
+    inlet_pressure_pa = stream.inlet_pressure_pa
+    outlet_pressure_pa = stream.outlet_pressure_pa
+    vapour_pressure_pa = stream.vapour_pressure_pa
     liquid_density = stream.density
     liquid_sound_speed = stream.sound_speed
     flow_coefficient = valve.flow_coefficient
@@ -1353,9 +1355,9 @@ def valve_hydrodynamic_noise(
     pipe_sound_speed = pipe.sound_speed
     air_density = pipe.air_density
     air_sound_speed = pipe.air_sound_speed
-    p1 = require_positive(inlet_pressure, "inlet_pressure")
-    p2 = require_positive(outlet_pressure, "outlet_pressure")
-    pv = require_positive(vapour_pressure, "vapour_pressure")
+    p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
+    p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
+    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
     rho = require_positive(liquid_density, "liquid_density")
     sonic = require_positive(liquid_sound_speed, "liquid_sound_speed")
     recovery = _require_recovery(pressure_recovery)
@@ -1364,7 +1366,7 @@ def valve_hydrodynamic_noise(
     thickness = require_positive(wall_thickness, "wall_thickness")
 
     ratio = differential_pressure_ratio(
-        inlet_pressure=p1, outlet_pressure=p2, vapour_pressure=pv
+        inlet_pressure_pa=p1, outlet_pressure_pa=p2, vapour_pressure_pa=pv
     )
     if ratio >= _FLASHING_RATIO:
         msg = (
@@ -1375,9 +1377,9 @@ def valve_hydrodynamic_noise(
         raise ValueError(msg)
     differential = p1 - p2
     choked = cavitation_differential(
-        inlet_pressure=p1,
-        outlet_pressure=p2,
-        vapour_pressure=pv,
+        inlet_pressure_pa=p1,
+        outlet_pressure_pa=p2,
+        vapour_pressure_pa=pv,
         pressure_recovery=recovery,
     )
     threshold = corrected_incipient_ratio(incipient_ratio, p1)
@@ -1416,8 +1418,8 @@ def valve_hydrodynamic_noise(
         corrected_ratio=threshold,
         valve_diameter=valve_diameter,
         seat_diameter=seat_diameter,
-        inlet_pressure=p1,
-        vapour_pressure=pv,
+        inlet_pressure_pa=p1,
+        vapour_pressure_pa=pv,
         coefficient=coefficient,
         form=strouhal_form,
     )
@@ -1512,25 +1514,25 @@ def valve_hydrodynamic_noise(
 class StageConditions:
     r"""What one throttling stage of a multistage trim sees.
 
-    :ivar inlet_pressure: :math:`p_{1,i}` of Equations (23a) and (23b), in
+    :ivar inlet_pressure_pa: :math:`p_{1,i}` of Equations (23a) and (23b), in
         Pa.
-    :ivar outlet_pressure: :math:`p_{2,i}` of Equations (24a) and (24b), in
+    :ivar outlet_pressure_pa: :math:`p_{2,i}` of Equations (24a) and (24b), in
         Pa.
     :ivar pressure_ratio: :math:`x_{F,i}` of Equation (26), the stage's own
         differential pressure ratio, which 6.3 tests against that stage's
         :math:`x_{Fzp1,i}`.
     """
 
-    inlet_pressure: float
-    outlet_pressure: float
+    inlet_pressure_pa: float
+    outlet_pressure_pa: float
     pressure_ratio: float
 
 
 def stage_conditions(
     *,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    vapour_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
+    vapour_pressure_pa: float,
     stage_coefficients: Sequence[float],
     flow_coefficient: float,
 ) -> tuple[StageConditions, ...]:
@@ -1557,9 +1559,9 @@ def stage_conditions(
     implemented here is the forward one the index :math:`C_{i-1}` calls for;
     see ``docs/ERRATA.md``.
 
-    :param inlet_pressure: :math:`p_1` at the valve, absolute, in Pa.
-    :param outlet_pressure: :math:`p_2` at the valve, absolute, in Pa.
-    :param vapour_pressure: :math:`p_v`, absolute, in Pa.
+    :param inlet_pressure_pa: :math:`p_1` at the valve, absolute, in Pa.
+    :param outlet_pressure_pa: :math:`p_2` at the valve, absolute, in Pa.
+    :param vapour_pressure_pa: :math:`p_v`, absolute, in Pa.
     :param stage_coefficients: :math:`C_i`, the rated flow coefficient of
         each stage in flow order, two or more of them.
     :param flow_coefficient: :math:`C` of the whole valve, in the same units.
@@ -1571,9 +1573,9 @@ def stage_conditions(
         by more than 5 %, which leaves the last stage carrying a differential
         nobody chose.
     """
-    p1 = require_positive(inlet_pressure, "inlet_pressure")
-    p2 = require_positive(outlet_pressure, "outlet_pressure")
-    pv = require_positive(vapour_pressure, "vapour_pressure")
+    p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
+    p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
+    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
     capacity = require_positive(flow_coefficient, "flow_coefficient")
     stages = require_positive_array(stage_coefficients, "stage_coefficients")
     if stages.size < _MINIMUM_STAGES:
@@ -1585,15 +1587,15 @@ def stage_conditions(
         raise ValueError(msg)
     if p2 >= p1:
         msg = (
-            "A control valve drops pressure, so 'outlet_pressure' must be "
-            f"below 'inlet_pressure'; got {outlet_pressure!r} and "
-            f"{inlet_pressure!r} Pa."
+            "A control valve drops pressure, so 'outlet_pressure_pa' must be "
+            f"below 'inlet_pressure_pa'; got {outlet_pressure_pa!r} and "
+            f"{inlet_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     if pv >= p2:
         msg = (
             "Equation (26) needs every stage above the vapour pressure; got "
-            f"p_2 = {outlet_pressure!r} Pa and p_v = {vapour_pressure!r} Pa."
+            f"p_2 = {outlet_pressure_pa!r} Pa and p_v = {vapour_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     shares = float(np.sum((capacity / stages) ** 2))
@@ -1616,15 +1618,15 @@ def stage_conditions(
         msg = (
             "The stage coefficients take more than the valve's differential: "
             f"the last stage would start at {inlets[-1]:.0f} Pa, at or below "
-            f"the outlet pressure {outlet_pressure!r} Pa. The series law "
+            f"the outlet pressure {outlet_pressure_pa!r} Pa. The series law "
             "1/C^2 = sum(1/C_i^2) says each C_i is larger than C."
         )
         raise ValueError(msg)
     outlets = [*inlets[1:], p2]
     return tuple(
         StageConditions(
-            inlet_pressure=float(stage_inlet),
-            outlet_pressure=float(stage_outlet),
+            inlet_pressure_pa=float(stage_inlet),
+            outlet_pressure_pa=float(stage_outlet),
             pressure_ratio=float((stage_inlet - stage_outlet) / (stage_inlet - pv)),
         )
         for stage_inlet, stage_outlet in zip(inlets, outlets, strict=True)
@@ -1661,9 +1663,9 @@ def combine_stage_levels(*levels: float) -> float:
 
 def last_stage_differential(
     *,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    vapour_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
+    vapour_pressure_pa: float,
     corrected_ratio: float,
 ) -> float:
     r"""Equation (28): the differential of the last stage of a fixed device.
@@ -1680,30 +1682,30 @@ def last_stage_differential(
     multistage device is designed so that the last stage never cavitates, and
     the cap says so.
 
-    :param inlet_pressure: :math:`p_{1,n}` of the last stage, in Pa.
-    :param outlet_pressure: :math:`p_2` at the valve outlet, in Pa.
-    :param vapour_pressure: :math:`p_v`, in Pa.
+    :param inlet_pressure_pa: :math:`p_{1,n}` of the last stage, in Pa.
+    :param outlet_pressure_pa: :math:`p_2` at the valve outlet, in Pa.
+    :param vapour_pressure_pa: :math:`p_v`, in Pa.
     :param corrected_ratio: :math:`x_{Fzp1,n}` of the last stage.
     :return: :math:`\Delta p_c`, in Pa.
     :raises ValueError: If a value is not positive and finite, or the last
         stage does not drop pressure.
     """
-    p1n = require_positive(inlet_pressure, "inlet_pressure")
-    p2 = require_positive(outlet_pressure, "outlet_pressure")
-    pv = require_positive(vapour_pressure, "vapour_pressure")
+    p1n = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
+    p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
+    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
     threshold = _require_threshold(corrected_ratio, "corrected_ratio")
     if p2 >= p1n:
         msg = (
-            "The last stage drops pressure, so 'outlet_pressure' must be "
-            f"below 'inlet_pressure'; got {outlet_pressure!r} and "
-            f"{inlet_pressure!r} Pa."
+            "The last stage drops pressure, so 'outlet_pressure_pa' must be "
+            f"below 'inlet_pressure_pa'; got {outlet_pressure_pa!r} and "
+            f"{inlet_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     if pv >= p1n:
         msg = (
             "Equation (28) needs the last stage above the vapour pressure; "
-            f"got p_1n = {inlet_pressure!r} Pa and p_v = "
-            f"{vapour_pressure!r} Pa."
+            f"got p_1n = {inlet_pressure_pa!r} Pa and p_v = "
+            f"{vapour_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     return float(min(p1n - p2, threshold * (p1n - pv)))

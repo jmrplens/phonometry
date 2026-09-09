@@ -67,9 +67,9 @@ the ISO 9613-1 `alpha` via $m = \alpha / (10 \log_{10} e)$.
 ```python
 air_attenuation(
     frequencies: ArrayLike,
-    temperature: float = 20.0,
-    relative_humidity: float = 50.0,
-    pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float = 50.0,
+    atmospheric_pressure_kpa: float = 101.325,
     *,
     exact_midband: bool = False,
 ) -> NDArray[np.float64]
@@ -80,17 +80,17 @@ Pure-tone atmospheric attenuation coefficient (ISO 9613-1, Eq. (5)).
 Evaluates `alpha` in decibels per metre from the oxygen and nitrogen
 relaxation frequencies (Eq. (3)/(4)) and the classical, rotational and
 vibrational absorption terms (Eq. (5)). Fully vectorized over
-`frequencies`; `temperature`, `relative_humidity` and `pressure` are
-scalars.
+`frequencies`; `temperature_c`, `relative_humidity_percent` and
+`atmospheric_pressure_kpa` are scalars.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequency or frequencies `f`, in hertz (array-like). |
-| `temperature` | Ambient air temperature, in degrees Celsius (default 20 degC, i.e. the reference `T0`). A value outside the -20..+50 degC tabulated range emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); a value at or below absolute zero raises `ValueError`. |
-| `relative_humidity` | Relative humidity, in percent, with respect to saturation over liquid water (default 50 %). Outside 10..100 % emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); outside [0, 100] % raises `ValueError`. |
-| `pressure` | Ambient atmospheric pressure `pa`, in kilopascals (default 101.325 kPa = one standard atmosphere = `pr`). Above 200 kPa emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); non-positive raises `ValueError`. |
+| `temperature_c` | Ambient air temperature, in degrees Celsius (default 20 degC, i.e. the reference `T0`). A value outside the -20..+50 degC tabulated range emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); a value at or below absolute zero raises `ValueError`. |
+| `relative_humidity_percent` | Relative humidity, in percent, with respect to saturation over liquid water (default 50 %). Outside 10..100 % emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); outside [0, 100] % raises `ValueError`. |
+| `atmospheric_pressure_kpa` | Ambient atmospheric pressure `pa`, in kilopascals (default 101.325 kPa = one standard atmosphere = `pr`). Above 200 kPa emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); non-positive raises `ValueError`. |
 | `exact_midband` | When `True`, each requested frequency is snapped to the nearest exact one-third-octave midband $f_\mathrm{m} = 1000 \cdot 10^{k/10}$ (Eq. (6)) before evaluation, reproducing the frequencies used for Table 1 (Note 5). Default `False` (use `frequencies` verbatim). |
 
 **Returns:** Attenuation coefficient `alpha`, in dB/m, with the shape of `frequencies`.
@@ -108,9 +108,9 @@ entirely to this `alpha` via $m = \alpha / (10 \log_{10} e)$. Use
 ```python
 air_attenuation_m(
     frequencies: ArrayLike,
-    temperature: float = 20.0,
-    relative_humidity: float = 50.0,
-    pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float = 50.0,
+    atmospheric_pressure_kpa: float = 101.325,
     *,
     exact_midband: bool = False,
 ) -> NDArray[np.float64]
@@ -132,9 +132,9 @@ hand-entering `m`.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequency or frequencies `f`, in hertz (array-like). |
-| `temperature` | Ambient air temperature, in degrees Celsius (default 20). |
-| `relative_humidity` | Relative humidity, in percent (default 50). |
-| `pressure` | Ambient atmospheric pressure, in kilopascals (default 101.325). |
+| `temperature_c` | Ambient air temperature, in degrees Celsius (default 20). |
+| `relative_humidity_percent` | Relative humidity, in percent (default 50). |
+| `atmospheric_pressure_kpa` | Ambient atmospheric pressure, in kilopascals (default 101.325). |
 | `exact_midband` | Snap frequencies to exact midbands; see [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation). |
 
 **Returns:** Power attenuation coefficient `m`, in 1/m, with the shape of `frequencies`.
@@ -144,9 +144,9 @@ hand-entering `m`.
 ```python
 atmospheric_attenuation(
     frequencies: ArrayLike,
-    temperature: float = 20.0,
-    relative_humidity: float = 50.0,
-    pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float = 50.0,
+    atmospheric_pressure_kpa: float = 101.325,
     *,
     exact_midband: bool = False,
     distance: float | None = None,
@@ -166,9 +166,9 @@ unchanged; this is a thin, plottable wrapper around the existing function
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequency or frequencies `f`, in hertz (array-like). |
-| `temperature` | Ambient air temperature, in degrees Celsius (default 20). |
-| `relative_humidity` | Relative humidity, in percent (default 50). |
-| `pressure` | Ambient atmospheric pressure, in kilopascals (default 101.325 kPa, one standard atmosphere). |
+| `temperature_c` | Ambient air temperature, in degrees Celsius (default 20). |
+| `relative_humidity_percent` | Relative humidity, in percent (default 50). |
+| `atmospheric_pressure_kpa` | Ambient atmospheric pressure, in kilopascals (default 101.325 kPa, one standard atmosphere). |
 | `exact_midband` | Snap the frequencies to the exact one-third-octave midbands $f_\mathrm{m} = 1000 \cdot 10^{k/10}$ (Eq. (6)) before evaluation; see [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation). When `True` the stored `frequencies` are the snapped midbands the coefficient was computed at. |
 | `distance` | Optional propagation distance `d`, in metres. When given, the result's [`total_attenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuationtotal_attenuation) returns the total attenuation $A = \alpha d$ over that distance (ISO 9613-2 Eq. (8)). Must be finite and non-negative. |
 
@@ -190,9 +190,9 @@ Advisory for ISO 9613-1 inputs outside the tabulated/validity ranges.
 AtmosphericAttenuation(
     frequencies: NDArray[np.float64],
     attenuation_coefficient: NDArray[np.float64],
-    temperature: float,
-    relative_humidity: float,
-    pressure: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    atmospheric_pressure_kpa: float,
     distance: float | None = None,
 )
 ```
@@ -211,9 +211,9 @@ plottable wrapper and re-runs none of the maths.
 | :--- | :--- |
 | `frequencies` | Frequencies `f` the coefficient is evaluated at, in Hz (the exact one-third-octave midbands when `exact_midband` was used). |
 | `attenuation_coefficient` | Pure-tone attenuation coefficient `alpha`, per frequency, in decibels per metre (Table 1 prints dB/km, i.e. $\times 1000$). |
-| `temperature` | Ambient air temperature, in degrees Celsius. |
-| `relative_humidity` | Relative humidity, in percent. |
-| `pressure` | Ambient atmospheric pressure `pa`, in kilopascals. |
+| `temperature_c` | Ambient air temperature, in degrees Celsius. |
+| `relative_humidity_percent` | Relative humidity, in percent. |
+| `atmospheric_pressure_kpa` | Ambient atmospheric pressure `pa`, in kilopascals. |
 | `distance` | Propagation distance `d`, in metres, or `None` when the result carries only the coefficient. When given, `total_attenuation` returns the total attenuation $A = \alpha d$ over that distance. |
 
 ### AtmosphericAttenuation.plot()

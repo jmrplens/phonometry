@@ -264,8 +264,8 @@ sound_energy_in_situ(
     background_levels: ArrayLike | None = None,
     background_levels_ref: ArrayLike | None = None,
     integration_time: float | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,
     sigma_omc: float | None = None,
     coverage_factor: float = 2.0,
@@ -304,8 +304,8 @@ time-averaged, over 30 s (7.6), exactly as for a steady source.
 | `background_levels` | Octave-band time-averaged background levels `Lpi(B)`, `(n, bands)` or `(bands,)`, in decibels; `None` applies no correction, warns, and leaves `background_requirement_met` `False` in every band (7.5, 8.1). |
 | `background_levels_ref` | Background for the reference-source measurement; `None` reuses `background_levels` (7.5). |
 | `integration_time` | The integration time `T` of the event measurement, in seconds. `None` applies Eq. (14) as printed, subtracting the time-averaged background from the single event level; a value carries the background to the same interval first, $L_{pi(\mathrm{B})} + 10 \log_{10}(T/T_0)$ with `T0` = 1 s (3.4, NOTE 1), so that the margin compares like with like. The two coincide at `T` = 1 s. |
-| `temperature` | Air temperature at the test, in degrees Celsius. |
-| `static_pressure` | Static pressure at the test, in kilopascals, as for [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ); Annex C itself prints pascals. |
+| `temperature_c` | Air temperature at the test, in degrees Celsius. |
+| `static_pressure_kpa` | Static pressure at the test, in kilopascals, as for [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ); Annex C itself prints pascals. |
 | `conditions` | The [`GradeConditions`](/phonometry/reference/api/power/sound-power-in-situ/#gradeconditions) of the determination, as for [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ). |
 | `sigma_omc` | Operating-and-mounting standard deviation, in decibels. |
 | `coverage_factor` | `k` of Eq. (23), 2 by default. |
@@ -329,8 +329,8 @@ sound_power_in_situ(
     *,
     background_levels: ArrayLike | None = None,
     background_levels_ref: ArrayLike | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,
     sigma_omc: float | None = None,
     coverage_factor: float = 2.0,
@@ -366,8 +366,8 @@ conditions of Annex C, and `sound_power_level_a` is the Annex D total.
 | `frequencies` | Nominal octave mid-band frequencies, one per band, from 63 Hz to 8 kHz (Table D.1), in hertz. |
 | `background_levels` | Octave-band time-averaged background levels `Lpi(B)`, `(n, bands)` or one `(bands,)` spectrum for every position, in decibels; `None` applies no correction, warns, and leaves `background_requirement_met` `False` in every band, since 7.5 has the background measured at each position and 8.1 needs the margin to declare the measurement valid. |
 | `background_levels_ref` | Background for the reference-source measurement, same shapes; `None` reuses `background_levels`, since the procedure takes one background reading (7.5). |
-| `temperature` | Air temperature at the test, in degrees Celsius. |
-| `static_pressure` | Static pressure at the test, in kilopascals (see [`static_pressure_from_altitude`](/phonometry/reference/api/power/sound-power-in-situ/#static_pressure_from_altitude)). Annex C prints this quantity in pascals, with $p_{\mathrm{s},0}$ = 1,013 25 x 10^5 Pa, and is alone in its family in doing so: ISO 3741:2010, ISO 3744:2010 and ISO 3745:2012 all print kilopascals. This argument follows the three, so that one unit serves the whole ISO 3740 family; `C2` carries a pressure term and a temperature term, and the pressure enters only as the ratio $p_\mathrm{s}/p_{\mathrm{s},0}$, so converting both together cannot move a result. |
+| `temperature_c` | Air temperature at the test, in degrees Celsius. |
+| `static_pressure_kpa` | Static pressure at the test, in kilopascals (see [`static_pressure_from_altitude`](/phonometry/reference/api/power/sound-power-in-situ/#static_pressure_from_altitude)). Annex C prints this quantity in pascals, with $p_{\mathrm{s},0}$ = 1,013 25 x 10^5 Pa, and is alone in its family in doing so: ISO 3741:2010, ISO 3744:2010 and ISO 3745:2012 all print kilopascals. This argument follows the three, so that one unit serves the whole ISO 3740 family; `C2` carries a pressure term and a temperature term, and the pressure enters only as the ratio $p_\mathrm{s}/p_{\mathrm{s},0}$, so converting both together cannot move a result. |
 | `conditions` | The [`GradeConditions`](/phonometry/reference/api/power/sound-power-in-situ/#gradeconditions) Table 2 reads to decide the accuracy grade: the excess of sound pressure level at each microphone position (Annex A) and the range of the directivity survey of the source (7.2). `None`, or either condition left out, leaves the determination at survey grade. |
 | `sigma_omc` | Standard deviation of the operating and mounting conditions of the source (9.2, E.3), in decibels; `None` leaves `sigma_tot` and the expanded uncertainty `NaN`. |
 | `coverage_factor` | `k` of Eq. (23): 2 for the two-sided 95 % interval (default), 1,6 for a one-sided comparison with a limit. |
@@ -378,7 +378,7 @@ conditions of Annex C, and `sound_power_level_a` is the Annex D total.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if `levels` is not a finite `(n, bands)` array, `levels_ref`, `lw_ref` or either background does not match it, `frequencies` are not the octave centres of Table D.1, `temperature` or `static_pressure` is out of range, `conditions.excess_levels` is supplied and is not one finite value per position, `conditions.directivity_range` or `sigma_omc` is supplied and is negative, or `coverage_factor` is not positive. |
+| ValueError | if `levels` is not a finite `(n, bands)` array, `levels_ref`, `lw_ref` or either background does not match it, `frequencies` are not the octave centres of Table D.1, `temperature_c` or `static_pressure_kpa` is out of range, `conditions.excess_levels` is supplied and is not one finite value per position, `conditions.directivity_range` or `sigma_omc` is supplied and is negative, or `coverage_factor` is not positive. |
 
 ## static_pressure_from_altitude
 
@@ -395,12 +395,12 @@ $$
 
 Annex C prints $p_{\mathrm{s},0}$ = 1,013 25 x 10^5 Pa and states
 the quantity in pascals. The result here is in kilopascals so that it feeds
-`static_pressure` of [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ) directly, matching
+`static_pressure_kpa` of [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ) directly, matching
 ISO 3741, ISO 3744 and ISO 3745, which do print kilopascals. The pressure
 reaches `C2` only as $p_\mathrm{s}/p_{\mathrm{s},0}$, so the two
-unit conventions give the same correction. A site below sea level is admissible (the base exceeds one);
-the formula stops meaning anything where the base reaches zero, some
-44 km up, and that is refused.
+unit conventions give the same correction. A site below sea level is
+admissible (the base exceeds one); the formula stops meaning anything
+where the base reaches zero, some 44 km up, and that is refused.
 
 **Parameters**
 

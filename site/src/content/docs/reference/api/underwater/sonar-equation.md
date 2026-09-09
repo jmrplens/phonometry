@@ -155,7 +155,7 @@ detection_range(
     *,
     law: str = 'spherical',
     transition_range: float | None = None,
-    temperature: float = 10.0,
+    temperature_c: float = 10.0,
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
@@ -182,7 +182,7 @@ merit works for both sonar modes: the active figure of merit returned by
 | `frequency_hz` | Acoustic frequency, in Hz. |
 | `law` | Spreading law (see [`spreading_loss`](/phonometry/reference/api/underwater/closed-form/#spreading_loss)). |
 | `transition_range` | Transition range for the `"practical"` law, in m. |
-| `temperature` | Temperature `T`, in degrees Celsius. |
+| `temperature_c` | Temperature `T`, in degrees Celsius. |
 | `salinity` | Salinity `S`, in parts per thousand. |
 | `depth` | Depth, in metres. |
 | `ph` | Acidity (default 8). |

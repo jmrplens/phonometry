@@ -137,8 +137,8 @@ def _determination(
         scan,
         np.full(_N_SEG, _SEG_AREA),
         frequencies=freqs,
-        temperature=_TEMPERATURE,
-        barometric_pressure=_PRESSURE_PA,
+        temperature_c=_TEMPERATURE,
+        barometric_pressure_pa=_PRESSURE_PA,
     )
 
 
@@ -410,8 +410,8 @@ def test_not_applicable_band_named_with_clause_9_2(tmp_path: Path) -> None:
             scan,
             np.full(_N_SEG, _SEG_AREA),
             frequencies=_FREQS,
-            temperature=_TEMPERATURE,
-            barometric_pressure=_PRESSURE_PA,
+            temperature_c=_TEMPERATURE,
+            barometric_pressure_pa=_PRESSURE_PA,
         )
     indicators, criteria = _qualification(np.full(_FREQS.size, 2.0))
     out = tmp_path / "not_applicable.pdf"
@@ -447,8 +447,8 @@ def test_clause_9_2_band_is_named_without_any_qualification(tmp_path: Path) -> N
             scan,
             np.full(_N_SEG, _SEG_AREA),
             frequencies=_FREQS,
-            temperature=_TEMPERATURE,
-            barometric_pressure=_PRESSURE_PA,
+            temperature_c=_TEMPERATURE,
+            barometric_pressure_pa=_PRESSURE_PA,
         )
     out = tmp_path / "unqualified_negative.pdf"
     res.report(str(out))
@@ -535,8 +535,8 @@ def test_metadata_header_renders(tmp_path: Path) -> None:
         specimen="Air compressor",
         test_room="Machine hall",
         instrumentation="Class 1 p-p probe, s/n 7",
-        temperature=_TEMPERATURE,
-        pressure=95.0,
+        temperature_c=_TEMPERATURE,
+        static_pressure_kpa=95.0,
         laboratory="Acoustics lab",
         report_id="SP-9614-3",
     )
@@ -673,8 +673,8 @@ def test_frequencies_none_falls_back_to_the_band_total(tmp_path: Path) -> None:
     res = sound_power_intensity_precision(
         scan,
         np.full(_N_SEG, _SEG_AREA),
-        temperature=_TEMPERATURE,
-        barometric_pressure=_PRESSURE_PA,
+        temperature_c=_TEMPERATURE,
+        barometric_pressure_pa=_PRESSURE_PA,
     )
     out = tmp_path / "unbanded.pdf"
     res.report(str(out))

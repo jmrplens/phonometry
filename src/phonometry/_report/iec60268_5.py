@@ -106,9 +106,9 @@ def _metadata_pairs(
         (t("Test room", language), metadata.test_room),
         (t("Mounting", language), metadata.mounting),
         (t("Date of test", language), metadata.test_date),
-        (t("Temperature [&#176;C]", language), num(metadata.temperature)),
-        (t("Relative humidity [%]", language), num(metadata.relative_humidity)),
-        (t("Ambient pressure [kPa]", language), num(metadata.pressure)),
+        (t("Temperature [&#176;C]", language), num(metadata.temperature_c)),
+        (t("Relative humidity [%]", language), num(metadata.relative_humidity_percent)),
+        (t("Ambient pressure [kPa]", language), num(metadata.static_pressure_kpa)),
     ]
     return [
         (label, html.escape(str(value))) for label, value in specs if value is not None

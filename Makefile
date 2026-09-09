@@ -154,6 +154,14 @@ fence-names:
 dead-constants:
 	$(PYTHON) scripts/check_dead_constants.py
 
+# A pressure of 101 325 and a pressure of 101.325 are both legitimate values
+# in this tree, so a bare `pressure` loses its unit the moment a caller types
+# a number. This holds every public pressure, temperature and humidity to a
+# name that ends in its unit, or in a suffix that says it carries none. Needs
+# the package importable: the surface it checks is the one a caller reaches.
+parameter-units:
+	$(PYTHON) scripts/check_parameter_units.py
+
 # A conformance row that computes the expected value itself is comparing a
 # formula with a second copy of it, and reports Pass whatever the library does.
 # This resolves what each row reaches, through its helpers and whatever name
@@ -399,4 +407,4 @@ check: lint security test
 	animations animation-freshness posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts fence-names decimal-comma \
-	control-characters hazards dead-constants conformance-rows
+	control-characters hazards dead-constants conformance-rows parameter-units

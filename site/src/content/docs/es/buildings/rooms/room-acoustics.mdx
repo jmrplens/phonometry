@@ -568,42 +568,41 @@ resultado.
 
 `RoomAcousticsResult.report(path)` genera una ficha PDF de una página con el
 formato de un informe de medición de acústica de salas (una sala de
-espectáculos según la ISO 3382-1:2009 o una sala ordinaria según la
-ISO 3382-2:2008, ambos evaluados por el método de la respuesta al impulso
+espectáculos según la ISO 3382-1:2009 o una sala ordinaria según la ISO
+3382-2:2008, ambos evaluados por el método de la respuesta al impulso
 integrada): una línea de base normativa, un bloque opcional de metadatos de
 cabecera, la tabla de parámetros por bandas a ancho completo ($T_{20}$,
-$T_{30}$, EDT, $C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{s}$) sobre la gráfica de tiempos
-de caída por banda del propio resultado (`.plot()`), el resultado enmarcado del
-tiempo de reverberación de frecuencias medias $T_\text{mid}$ (la media de los
-$T_{30}$ de las octavas de 500 Hz y 1000 Hz, el descriptor habitual de la sala)
-con el EDT de medias al lado, y un pie con el descargo de responsabilidad fijo.
-La ISO 3382-1/-2 son normas de **caracterización** sin cumple/no cumple intrínseco,
-por lo que solo aparece una fila de veredicto cuando se aporta un tiempo de
-reverberación objetivo mediante el campo `requirement` de los
-metadatos (`ReportMetadata(requirement=...)`, leído como el valor máximo
-aceptable del descriptor que lleve el recuadro, la forma habitual de un límite
-de aula u oficina diáfana). Un resultado de banda ancha no tiene octavas de
-500 Hz / 1000 Hz que promediar, de modo que su recuadro y su veredicto recurren
-al $T_{30}$ de banda ancha sin afirmación de «500-1000 Hz», y otro tanto le
-ocurre a un rango de bandas que no alcance esas dos octavas y a uno que sí las
-alcance con un $T_{30}$ no evaluable en alguna de ellas, que recurren a la
-primera banda cuyo $T_{30}$ haya podido evaluarse. Usa el mismo contenedor `ReportMetadata` y el
-mismo motor de
-renderizado que la
+$T_{30}$, EDT, $C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{s}$) sobre la gráfica
+de tiempos de caída por banda del propio resultado (`.plot()`), el resultado
+enmarcado del tiempo de reverberación de frecuencias medias $T_\text{mid}$ (la
+media de los $T_{30}$ de las octavas de 500 Hz y 1000 Hz, el descriptor
+habitual de la sala) con el EDT de medias al lado, y un pie con el descargo de
+responsabilidad fijo. La ISO 3382-1/-2 son normas de **caracterización** sin
+cumple/no cumple intrínseco, por lo que solo aparece una fila de veredicto
+cuando se aporta un tiempo de reverberación objetivo mediante el campo
+`requirement` de los metadatos (`ReportMetadata(requirement=...)`, leído como
+el valor máximo aceptable del descriptor que lleve el recuadro, la forma
+habitual de un límite de aula u oficina diáfana). Un resultado de banda ancha
+no tiene octavas de 500 Hz / 1000 Hz que promediar, de modo que su recuadro y
+su veredicto recurren al $T_{30}$ de banda ancha sin afirmación de «500-1000
+Hz», y otro tanto le ocurre a un rango de bandas que no alcance esas dos
+octavas y a uno que sí las alcance con un $T_{30}$ no evaluable en alguna de
+ellas, que recurren a la primera banda cuyo $T_{30}$ haya podido evaluarse. Usa
+el mismo contenedor `ReportMetadata` y el mismo motor de renderizado que la
 [ficha de absorción ISO
 11654](/phonometry/es/materials/absorbers/absorption-measurement/#informe-de-iso-11654-report);
 los campos específicos de sala `room_volume`, `source_positions` y
 `receiver_positions` rellenan la cabecera (la ISO 3382 exige indicar el volumen
 de la sala y el número de posiciones de fuente y de micrófono), junto con
 `test_room` (el nombre de la sala), `specimen` (la descripción de la sala y su
-estado de ocupación), `area`, `instrumentation`, `temperature`,
-`relative_humidity`, `pressure`, `measurement_standard`, `test_date`,
-`laboratory`, `operator`, `report_id` y `notes`. Al pasar `metadata=None` se
-obtiene una ficha de caracterización mínima. El renderizado necesita reportlab
-y, para la figura que incrusta la ficha, matplotlib (`pip install
-"phonometry[report,plot]"`); solo se admite `engine="reportlab"`. La ficha se
-genera en inglés por defecto; pasa `language="es"` para una ficha en español
-(cadenas fijas traducidas y separador decimal de coma).
+estado de ocupación), `area`, `instrumentation`, `temperature_c`,
+`relative_humidity_percent`, `static_pressure_kpa`, `measurement_standard`,
+`test_date`, `laboratory`, `operator`, `report_id` y `notes`. Al pasar
+`metadata=None` se obtiene una ficha de caracterización mínima. El renderizado
+necesita reportlab y, para la figura que incrusta la ficha, matplotlib (`pip
+install "phonometry[report,plot]"`); solo se admite `engine="reportlab"`. La
+ficha se genera en inglés por defecto; pasa `language="es"` para una ficha en
+español (cadenas fijas traducidas y separador decimal de coma).
 
 ```python
 from phonometry import room, ReportMetadata
@@ -621,7 +620,7 @@ result.report(
         source_positions=2, receiver_positions=8,
         # El apartado 9.2 i) exige declarar el grado de exactitud.
         measurement_standard="ISO 3382-2 (grado de ingeniería)",
-        temperature=21.0, relative_humidity=45.0,
+        temperature_c=21.0, relative_humidity_percent=45.0,
         laboratory="Laboratorio de referencia Phonometry",
         notes="16 combinaciones fuente-micrófono, 2 decaimientos cada una; "
               "posiciones y alturas en la planta acotada adjunta",

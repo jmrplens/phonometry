@@ -86,7 +86,7 @@ power-attenuation coefficient $m$ (in neper per metre, from the ISO 9613-1
 ```python
 from phonometry import environment, room
 
-m = environment.air_attenuation_m(2000.0, temperature=20.0, relative_humidity=50.0)
+m = environment.air_attenuation_m(2000.0, temperature_c=20.0, relative_humidity_percent=50.0)
 surfaces = [(40.0, 0.3), (40.0, 0.3), (24.0, 0.3),
             (24.0, 0.3), (15.0, 0.3), (15.0, 0.3)]
 print(round(room.eyring_reverberation_time(120.0, surfaces, air_attenuation=m), 3))
@@ -323,7 +323,7 @@ result.report(
     metadata=ReportMetadata(
         specimen="Classroom, one wall lined with a broadband absorber",
         test_room="Classroom C1",
-        temperature=20.0, relative_humidity=50.0,
+        temperature_c=20.0, relative_humidity_percent=50.0,
         laboratory="Phonometry Reference Laboratory",
         requirement=0.8,          # printed as a target reference line, no verdict
     ),

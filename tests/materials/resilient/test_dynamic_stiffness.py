@@ -59,7 +59,7 @@ def test_enclosed_gas_matches_standard_note() -> None:
 
 def test_enclosed_gas_true_atmosphere() -> None:
     """A real 101 325 Pa can be passed instead of the standard's 0,1 MPa."""
-    sa = materials.enclosed_gas_stiffness(0.02, 0.9, atmospheric_pressure=101_325.0)
+    sa = materials.enclosed_gas_stiffness(0.02, 0.9, atmospheric_pressure_pa=101_325.0)
     assert sa == pytest.approx(101_325.0 / (0.02 * 0.9), rel=1e-12)
 
 

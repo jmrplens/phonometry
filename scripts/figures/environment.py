@@ -243,7 +243,7 @@ def generate_atmospheric_attenuation(output_dir: str) -> None:
     # The result's own .plot() draws alpha in dB/km on a 1k/2k-labelled log
     # frequency axis for the reference 20 degC / 50 % RH atmosphere (ISO 9613-1).
     environment.atmospheric_attenuation(
-        freqs, temperature=20.0, relative_humidity=50.0
+        freqs, temperature_c=20.0, relative_humidity_percent=50.0
     ).plot(ax=ax)
     plt.tight_layout()
     save_figure(output_dir, "atmospheric_attenuation.png")
@@ -269,8 +269,8 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
         ground_middle=1.0,
         ground_receiver=1.0,
         barrier=barrier,
-        temperature=15.0,
-        relative_humidity=70.0,
+        temperature_c=15.0,
+        relative_humidity_percent=70.0,
     )
     x = np.arange(len(bands))
     _fig, ax = plt.subplots(figsize=(11, 6.4))
@@ -348,7 +348,7 @@ def generate_cnossos_road_emission(output_dir: str) -> None:
     result = environment.road_source_power(
         traffic,
         surface=environment.RoadSurface.THIN_LAYER_A,
-        temperature=12.0,
+        temperature_c=12.0,
         gradient=3.0,
         junction_distance=60.0,
         junction_type=environment.JunctionType.CROSSING,
@@ -1343,8 +1343,8 @@ def generate_outdoor_level_cascade(output_dir: str) -> None:
         1.0,
         1.0,
         barrier=barrier,
-        temperature=15.0,
-        relative_humidity=70.0,
+        temperature_c=15.0,
+        relative_humidity_percent=70.0,
     )
     lw = np.full(bands.size, 95.0)
 
@@ -1445,8 +1445,8 @@ def generate_iso9613_screening_anatomy(output_dir: str) -> None:
         1.0,
         1.0,
         barrier=barrier,
-        temperature=15.0,
-        relative_humidity=70.0,
+        temperature_c=15.0,
+        relative_humidity_percent=70.0,
     )
 
     _fig, (left, right) = plt.subplots(1, 2, figsize=(12.5, 5.6))
@@ -1926,7 +1926,7 @@ def generate_cnossos_road_corrections(output_dir: str) -> None:
         ref = a_line(traffic=flow)
         t_ax.plot(
             temps,
-            [a_line(traffic=flow, temperature=float(t)) - ref for t in temps],
+            [a_line(traffic=flow, temperature_c=float(t)) - ref for t in temps],
             color=color,
             linewidth=2.0,
             label=name,
@@ -2614,7 +2614,7 @@ def _qa_levels() -> dict[str, NDArray[np.float64]]:
     d_sloped = math.hypot(d_p, 13.0)
     segments = (40.88, 102.19, 51.10)
     air = env.AtmosphericConditions(
-        temperature=_QA_TEMPERATURE, relative_humidity=_QA_HUMIDITY
+        temperature_c=_QA_TEMPERATURE, relative_humidity_percent=_QA_HUMIDITY
     )
 
     def general(ground: env.GroundFactors, distance: float) -> NDArray[np.float64]:
@@ -2641,8 +2641,8 @@ def _qa_levels() -> dict[str, NDArray[np.float64]]:
             - env.atmospheric_absorption(
                 distance,
                 _QA_BANDS,
-                temperature=_QA_TEMPERATURE,
-                relative_humidity=_QA_HUMIDITY,
+                temperature_c=_QA_TEMPERATURE,
+                relative_humidity_percent=_QA_HUMIDITY,
             )
             - env.ground_attenuation_alternative(distance, mean_height)
         )

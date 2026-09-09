@@ -657,13 +657,13 @@ ReportMetadata(
     room_volume: float | None = None,
     source_positions: int | None = None,
     receiver_positions: int | None = None,
-    temperature: float | None = None,
-    relative_humidity: float | None = None,
-    source_temperature: float | None = None,
-    source_relative_humidity: float | None = None,
-    receiving_temperature: float | None = None,
-    receiving_relative_humidity: float | None = None,
-    pressure: float | None = None,
+    temperature_c: float | None = None,
+    relative_humidity_percent: float | None = None,
+    source_temperature_c: float | None = None,
+    source_relative_humidity_percent: float | None = None,
+    receiving_temperature_c: float | None = None,
+    receiving_relative_humidity_percent: float | None = None,
+    static_pressure_kpa: float | None = None,
     tube_diameter: float | None = None,
     mic_spacing: float | None = None,
     thickness: float | None = None,
@@ -709,13 +709,13 @@ within 0..100 %. A violation raises `ValueError`.
 | `room_volume` | Volume of the single room under test, in m^3. Room acoustics (ISO 3382-1/-2) characterises one enclosure rather than a source/receiving pair, and ISO 3382-2:2008 Clause 9 requires the room volume to be reported; the room-acoustics fiche prints it in the header. Distinct from the `source_volume`/`receiving_volume` pair, which describe a sound-transmission measurement. |
 | `source_positions` | Number of source (loudspeaker/omnidirectional) positions used in the measurement, an integer (ISO 3382-1:2009 Table 1 and ISO 3382-2:2008 Clause 8 require reporting the number of source positions). Printed by the room-acoustics fiche. |
 | `receiver_positions` | Number of microphone (receiver) positions used, an integer (ISO 3382-1:2009 Table 1 and ISO 3382-2:2008 Clause 8 require reporting the number of microphone positions). Printed by the room-acoustics fiche. |
-| `temperature` | Air temperature during the test, in degrees Celsius (a single representative value; use the per-room fields below when the source and receiving rooms are reported separately). |
-| `relative_humidity` | Relative humidity during the test, in %. |
-| `source_temperature` | Source-room air temperature, in degrees Celsius. |
-| `source_relative_humidity` | Source-room relative humidity, in %. |
-| `receiving_temperature` | Receiving-room air temperature, in degrees Celsius. |
-| `receiving_relative_humidity` | Receiving-room relative humidity, in %. |
-| `pressure` | Ambient (static) air pressure during the test, in kPa. |
+| `temperature_c` | Air temperature during the test, in degrees Celsius (a single representative value; use the per-room fields below when the source and receiving rooms are reported separately). |
+| `relative_humidity_percent` | Relative humidity during the test, in %. |
+| `source_temperature_c` | Source-room air temperature, in degrees Celsius. |
+| `source_relative_humidity_percent` | Source-room relative humidity, in %. |
+| `receiving_temperature_c` | Receiving-room air temperature, in degrees Celsius. |
+| `receiving_relative_humidity_percent` | Receiving-room relative humidity, in %. |
+| `static_pressure_kpa` | Ambient (static) air pressure during the test, in kPa. |
 | `test_room` | Test-room / facility identification. |
 | `instrumentation` | Identification and class of the instrumentation used (manufacturer, model, serial number), as free text. The occupational noise-exposure fiche prints it for ISO 9612:2009 Clause 15 c; when it is not supplied that fiche falls back to the result's own instrument class. |
 | `calibration` | Calibration traceability, as free text (calibrator, date and result of the most recent verification, the before/after field checks). Printed by the occupational noise-exposure fiche (ISO 9612:2009 Clause 15 c). |

@@ -123,7 +123,9 @@ def _exact_midband(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def _molar_water_vapour(
-    temperature_k: float, relative_humidity: float, pressure: float
+    temperature_k: float,
+    relative_humidity_percent: float,
+    atmospheric_pressure_kpa: float,
 ) -> float:
     r"""Molar concentration of water vapour ``h`` (%), ISO 9613-1 clause 6.4.
 
@@ -132,39 +134,41 @@ def _molar_water_vapour(
     conversion).
     """
     psat_over_pr = 10.0 ** (-6.8346 * (_T01 / temperature_k) ** 1.261 + 4.6151)
-    return float(relative_humidity * psat_over_pr / (pressure / _PR))
+    return float(
+        relative_humidity_percent * psat_over_pr / (atmospheric_pressure_kpa / _PR)
+    )
 
 
 def _validate(
     freqs: NDArray[np.float64],
-    temperature: float,
-    relative_humidity: float,
-    pressure: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    atmospheric_pressure_kpa: float,
 ) -> None:
     """Raise on non-physical inputs; warn on out-of-tabulated-range inputs."""
     if np.any(freqs <= 0.0):
         msg = "'frequencies' must be positive."
         raise ValueError(msg)
-    require_above_absolute_zero(float(temperature), "temperature")
-    if not 0.0 <= relative_humidity <= _MAX_RELATIVE_HUMIDITY_PERCENT:
-        msg = "'relative_humidity' must be within [0, 100] %."
+    require_above_absolute_zero(float(temperature_c), "temperature_c")
+    if not 0.0 <= relative_humidity_percent <= _MAX_RELATIVE_HUMIDITY_PERCENT:
+        msg = "'relative_humidity_percent' must be within [0, 100] %."
         raise ValueError(msg)
-    if pressure <= 0.0:
-        msg = "'pressure' must be positive."
+    if atmospheric_pressure_kpa <= 0.0:
+        msg = "'atmospheric_pressure_kpa' must be positive."
         raise ValueError(msg)
 
     lo_t, hi_t = _TEMPERATURE_RANGE
-    if not lo_t <= temperature <= hi_t:
+    if not lo_t <= temperature_c <= hi_t:
         warnings.warn(
-            f"Temperature {temperature:g} degC is outside the {lo_t:g}..{hi_t:g} "
+            f"Temperature {temperature_c:g} degC is outside the {lo_t:g}..{hi_t:g} "
             "degC tabulated range of ISO 9613-1:1993; the result is advisory.",
             AtmosphericAbsorptionWarning,
             stacklevel=3,
         )
     lo_h, hi_h = _HUMIDITY_RANGE
-    if not lo_h <= relative_humidity <= hi_h:
+    if not lo_h <= relative_humidity_percent <= hi_h:
         warnings.warn(
-            f"Relative humidity {relative_humidity:g} % is outside the "
+            f"Relative humidity {relative_humidity_percent:g} % is outside the "
             f"{lo_h:g}..{hi_h:g} % tabulated range of ISO 9613-1:1993; the "
             "result is advisory.",
             AtmosphericAbsorptionWarning,
@@ -178,9 +182,9 @@ def _validate(
             AtmosphericAbsorptionWarning,
             stacklevel=3,
         )
-    if pressure > _PRESSURE_MAX:
+    if atmospheric_pressure_kpa > _PRESSURE_MAX:
         warnings.warn(
-            f"Pressure {pressure:g} kPa exceeds the {_PRESSURE_MAX:g} kPa "
+            f"Pressure {atmospheric_pressure_kpa:g} kPa exceeds the {_PRESSURE_MAX:g} kPa "
             "validity envelope of ISO 9613-1:1993 (clause 7); the result is "
             "advisory.",
             AtmosphericAbsorptionWarning,
@@ -190,9 +194,9 @@ def _validate(
 
 def air_attenuation(
     frequencies: ArrayLike,
-    temperature: float = 20.0,
-    relative_humidity: float = 50.0,
-    pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float = 50.0,
+    atmospheric_pressure_kpa: float = 101.325,
     *,
     exact_midband: bool = False,
 ) -> NDArray[np.float64]:
@@ -201,20 +205,20 @@ def air_attenuation(
     Evaluates ``alpha`` in decibels per metre from the oxygen and nitrogen
     relaxation frequencies (Eq. (3)/(4)) and the classical, rotational and
     vibrational absorption terms (Eq. (5)). Fully vectorized over
-    ``frequencies``; ``temperature``, ``relative_humidity`` and ``pressure`` are
-    scalars.
+    ``frequencies``; ``temperature_c``, ``relative_humidity_percent`` and
+    ``atmospheric_pressure_kpa`` are scalars.
 
     :param frequencies: Frequency or frequencies ``f``, in hertz (array-like).
-    :param temperature: Ambient air temperature, in degrees Celsius
+    :param temperature_c: Ambient air temperature, in degrees Celsius
         (default 20 degC, i.e. the reference ``T0``). A value outside the
         -20..+50 degC tabulated range emits an
         :class:`AtmosphericAbsorptionWarning`; a value at or below absolute zero
         raises ``ValueError``.
-    :param relative_humidity: Relative humidity, in percent, with respect to
+    :param relative_humidity_percent: Relative humidity, in percent, with respect to
         saturation over liquid water (default 50 %). Outside 10..100 % emits an
         :class:`AtmosphericAbsorptionWarning`; outside [0, 100] % raises
         ``ValueError``.
-    :param pressure: Ambient atmospheric pressure ``pa``, in kilopascals
+    :param atmospheric_pressure_kpa: Ambient atmospheric pressure ``pa``, in kilopascals
         (default 101.325 kPa = one standard atmosphere = ``pr``). Above 200 kPa
         emits an :class:`AtmosphericAbsorptionWarning`; non-positive raises
         ``ValueError``.
@@ -234,15 +238,17 @@ def air_attenuation(
         :func:`~phonometry.materials.absorbers.sound_absorption.absorption_coefficient`.
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
-    _validate(freqs, temperature, relative_humidity, pressure)
+    _validate(freqs, temperature_c, relative_humidity_percent, atmospheric_pressure_kpa)
     if exact_midband:
         freqs = _exact_midband(freqs)
 
-    temperature_k = temperature + _KELVIN
-    pa_over_pr = pressure / _PR
+    temperature_k = temperature_c + _KELVIN
+    pa_over_pr = atmospheric_pressure_kpa / _PR
     t_ratio = temperature_k / _T0
 
-    h = _molar_water_vapour(temperature_k, relative_humidity, pressure)
+    h = _molar_water_vapour(
+        temperature_k, relative_humidity_percent, atmospheric_pressure_kpa
+    )
     fro = pa_over_pr * (24.0 + 4.04e4 * h * (0.02 + h) / (0.391 + h))
     frn = (
         pa_over_pr
@@ -262,9 +268,9 @@ def air_attenuation(
 
 def air_attenuation_m(
     frequencies: ArrayLike,
-    temperature: float = 20.0,
-    relative_humidity: float = 50.0,
-    pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float = 50.0,
+    atmospheric_pressure_kpa: float = 101.325,
     *,
     exact_midband: bool = False,
 ) -> NDArray[np.float64]:
@@ -280,9 +286,9 @@ def air_attenuation_m(
     hand-entering ``m``.
 
     :param frequencies: Frequency or frequencies ``f``, in hertz (array-like).
-    :param temperature: Ambient air temperature, in degrees Celsius (default 20).
-    :param relative_humidity: Relative humidity, in percent (default 50).
-    :param pressure: Ambient atmospheric pressure, in kilopascals
+    :param temperature_c: Ambient air temperature, in degrees Celsius (default 20).
+    :param relative_humidity_percent: Relative humidity, in percent (default 50).
+    :param atmospheric_pressure_kpa: Ambient atmospheric pressure, in kilopascals
         (default 101.325).
     :param exact_midband: Snap frequencies to exact midbands; see
         :func:`air_attenuation`.
@@ -291,9 +297,9 @@ def air_attenuation_m(
     """
     alpha = air_attenuation(
         frequencies,
-        temperature,
-        relative_humidity,
-        pressure,
+        temperature_c,
+        relative_humidity_percent,
+        atmospheric_pressure_kpa,
         exact_midband=exact_midband,
     )
     return attenuation_from_alpha(alpha)
@@ -317,9 +323,9 @@ class AtmosphericAttenuation:
     :ivar attenuation_coefficient: Pure-tone attenuation coefficient ``alpha``,
         per frequency, in decibels per metre (Table 1 prints dB/km, i.e.
         :math:`\times 1000`).
-    :ivar temperature: Ambient air temperature, in degrees Celsius.
-    :ivar relative_humidity: Relative humidity, in percent.
-    :ivar pressure: Ambient atmospheric pressure ``pa``, in kilopascals.
+    :ivar temperature_c: Ambient air temperature, in degrees Celsius.
+    :ivar relative_humidity_percent: Relative humidity, in percent.
+    :ivar atmospheric_pressure_kpa: Ambient atmospheric pressure ``pa``, in kilopascals.
     :ivar distance: Propagation distance ``d``, in metres, or ``None`` when the
         result carries only the coefficient. When given, :attr:`total_attenuation`
         returns the total attenuation :math:`A = \alpha d` over that distance.
@@ -327,9 +333,9 @@ class AtmosphericAttenuation:
 
     frequencies: NDArray[np.float64]
     attenuation_coefficient: NDArray[np.float64]
-    temperature: float
-    relative_humidity: float
-    pressure: float
+    temperature_c: float
+    relative_humidity_percent: float
+    atmospheric_pressure_kpa: float
     distance: float | None = None
 
     def __post_init__(self) -> None:
@@ -419,9 +425,9 @@ class AtmosphericAttenuation:
 
 def atmospheric_attenuation(
     frequencies: ArrayLike,
-    temperature: float = 20.0,
-    relative_humidity: float = 50.0,
-    pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float = 50.0,
+    atmospheric_pressure_kpa: float = 101.325,
     *,
     exact_midband: bool = False,
     distance: float | None = None,
@@ -435,9 +441,9 @@ def atmospheric_attenuation(
     (the same warnings and the same ``ValueError`` cases apply).
 
     :param frequencies: Frequency or frequencies ``f``, in hertz (array-like).
-    :param temperature: Ambient air temperature, in degrees Celsius (default 20).
-    :param relative_humidity: Relative humidity, in percent (default 50).
-    :param pressure: Ambient atmospheric pressure, in kilopascals
+    :param temperature_c: Ambient air temperature, in degrees Celsius (default 20).
+    :param relative_humidity_percent: Relative humidity, in percent (default 50).
+    :param atmospheric_pressure_kpa: Ambient atmospheric pressure, in kilopascals
         (default 101.325 kPa, one standard atmosphere).
     :param exact_midband: Snap the frequencies to the exact one-third-octave
         midbands :math:`f_\mathrm{m} = 1000 \cdot 10^{k/10}` (Eq. (6)) before
@@ -456,9 +462,9 @@ def atmospheric_attenuation(
     freqs = np.asarray(frequencies, dtype=np.float64)
     alpha = air_attenuation(
         frequencies,
-        temperature,
-        relative_humidity,
-        pressure,
+        temperature_c,
+        relative_humidity_percent,
+        atmospheric_pressure_kpa,
         exact_midband=exact_midband,
     )
     if exact_midband:
@@ -466,8 +472,8 @@ def atmospheric_attenuation(
     return AtmosphericAttenuation(
         frequencies=np.atleast_1d(freqs),
         attenuation_coefficient=np.atleast_1d(alpha),
-        temperature=float(temperature),
-        relative_humidity=float(relative_humidity),
-        pressure=float(pressure),
+        temperature_c=float(temperature_c),
+        relative_humidity_percent=float(relative_humidity_percent),
+        atmospheric_pressure_kpa=float(atmospheric_pressure_kpa),
         distance=None if distance is None else float(distance),
     )

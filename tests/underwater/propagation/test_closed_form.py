@@ -51,6 +51,12 @@ def test_practical_requires_transition_range() -> None:
         spreading_loss([100.0], law="practical")
 
 
+def test_absorption_refuses_a_state_that_is_not_finite() -> None:
+    """The refusal lists the four arguments by name, temperature in Celsius."""
+    with pytest.raises(ValueError, match=r"'temperature_c', 'salinity', 'depth'"):
+        seawater_absorption(1000.0, temperature_c=float("inf"))
+
+
 def test_thorp_absorption_recompute() -> None:
     f_khz = 10.0
     expected = 1.0936 * (
@@ -110,7 +116,7 @@ def test_francois_garrison_part2_table_iv_printed_values(
 ) -> None:
     got = seawater_absorption(
         f_khz * 1000.0,
-        temperature=t,
+        temperature_c=t,
         salinity=s,
         depth=0.0,
         ph=8.0,
@@ -136,7 +142,7 @@ def test_francois_garrison_recompute() -> None:
         a1 * f1 * f**2 / (f**2 + f1**2) + a2 * f2 * f**2 / (f**2 + f2**2) + a3 * f**2
     )
     got = seawater_absorption(
-        10_000.0, temperature=t, salinity=s, depth=z, ph=ph, model="francois-garrison"
+        10_000.0, temperature_c=t, salinity=s, depth=z, ph=ph, model="francois-garrison"
     )
     assert got[0] == pytest.approx(expected, rel=1e-9)
 
@@ -146,7 +152,7 @@ def test_francois_garrison_and_ainslie_mccolm_agree() -> None:
     freqs = np.array([1e3, 1e4, 1e5, 5e5])
     fg = seawater_absorption(
         freqs,
-        temperature=10.0,
+        temperature_c=10.0,
         salinity=35.0,
         depth=0.0,
         ph=8.0,
@@ -154,7 +160,7 @@ def test_francois_garrison_and_ainslie_mccolm_agree() -> None:
     )
     am = seawater_absorption(
         freqs,
-        temperature=10.0,
+        temperature_c=10.0,
         salinity=35.0,
         depth=0.0,
         ph=8.0,
@@ -180,14 +186,18 @@ def test_propagation_loss_is_spreading_plus_absorption() -> None:
         [100.0, 1000.0, 10000.0],
         10_000.0,
         law="spherical",
-        temperature=10.0,
+        temperature_c=10.0,
         salinity=35.0,
         depth=0.0,
         model="francois-garrison",
     )
     assert isinstance(res, PropagationLossResult)
     alpha = seawater_absorption(
-        10_000.0, temperature=10.0, salinity=35.0, depth=0.0, model="francois-garrison"
+        10_000.0,
+        temperature_c=10.0,
+        salinity=35.0,
+        depth=0.0,
+        model="francois-garrison",
     )[0]
     expected = 20.0 * np.log10(res.range_m) + alpha * (res.range_m / 1000.0)
     np.testing.assert_allclose(res.pl, expected, rtol=1e-9)
@@ -259,7 +269,7 @@ def test_ainslie_mccolm_table_i_oceans_within_ten_percent_of_fg() -> None:
     for ph_v, s, t, z_km in oceans:
         fg = seawater_absorption(
             f,
-            temperature=t,
+            temperature_c=t,
             salinity=s,
             depth=z_km * 1000.0,
             ph=ph_v,
@@ -267,7 +277,7 @@ def test_ainslie_mccolm_table_i_oceans_within_ten_percent_of_fg() -> None:
         )
         am = seawater_absorption(
             f,
-            temperature=t,
+            temperature_c=t,
             salinity=s,
             depth=z_km * 1000.0,
             ph=ph_v,
@@ -286,7 +296,7 @@ def test_ainslie_mccolm_book_spot_value_300hz() -> None:
     # rounding.
     alpha = seawater_absorption(
         300.0,
-        temperature=10.0,
+        temperature_c=10.0,
         salinity=35.0,
         depth=0.0,
         ph=8.0,

@@ -191,7 +191,7 @@ def _chk_uwp_thorp() -> Outcome:
     "Absorption agreement at 10 kHz, 10 °C, 35 ‰, 0 m, pH 8, dB/km",
 )
 def _chk_uwp_absorption_agreement() -> Outcome:
-    kw = {"temperature": 10.0, "salinity": 35.0, "depth": 0.0, "ph": 8.0}
+    kw = {"temperature_c": 10.0, "salinity": 35.0, "depth": 0.0, "ph": 8.0}
     fg = float(
         ph.underwater.seawater_absorption(10_000.0, model="francois-garrison", **kw)[0]
     )
@@ -210,7 +210,7 @@ def _chk_uwp_fg_printed_table() -> Outcome:
     # Oracle: the printed absorption table of the source paper (J. Acoust.
     # Soc. Am. 72(6), 1982); tolerance is half a unit of the last printed
     # digit, i.e. the print's own rounding.
-    kw = {"temperature": 10.0, "salinity": 35.0, "depth": 0.0, "ph": 8.0}
+    kw = {"temperature_c": 10.0, "salinity": 35.0, "depth": 0.0, "ph": 8.0}
     got = float(
         ph.underwater.seawater_absorption(100_000.0, model="francois-garrison", **kw)[0]
     )
@@ -297,7 +297,7 @@ def _chk_uwp_thermal_noise() -> Outcome:
     expected = 10.0 * math.log10(p2 / (1e-6) ** 2)
     got = float(
         ph.underwater.thermal_noise_spectrum(
-            f, temperature=t, density=rho, sound_speed=c
+            f, temperature_c=t, density=rho, sound_speed=c
         )[0]
     )
     return numeric(expected, got, 1e-6, unit="dB", places=4)

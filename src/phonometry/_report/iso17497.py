@@ -114,9 +114,9 @@ def _common_metadata_pairs(
     md = metadata if metadata is not None else ReportMetadata()
     area = md.area if include_room_fields else None
     room_volume = md.room_volume if include_room_fields else None
-    temperature = md.temperature
-    humidity = md.relative_humidity
-    pressure = md.pressure
+    temperature_c = md.temperature_c
+    humidity = md.relative_humidity_percent
+    static_pressure_kpa = md.static_pressure_kpa
 
     freq_label = t("Frequency range [Hz]", language)
     specs: list[tuple[str, str | None]] = [
@@ -137,7 +137,7 @@ def _common_metadata_pairs(
         (t("Date of test", language), md.test_date),
         (
             t("Temperature [&#176;C]", language),
-            fmt_meta(temperature, language) if temperature is not None else None,
+            fmt_meta(temperature_c, language) if temperature_c is not None else None,
         ),
         (
             t("Relative humidity [%]", language),
@@ -145,7 +145,9 @@ def _common_metadata_pairs(
         ),
         (
             t("Ambient pressure [kPa]", language),
-            fmt_meta(pressure, language) if pressure is not None else None,
+            fmt_meta(static_pressure_kpa, language)
+            if static_pressure_kpa is not None
+            else None,
         ),
     ]
     return [

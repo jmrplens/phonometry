@@ -646,8 +646,8 @@ the grade-2 one of section 1 — the cost of the grade is mostly time.
 | `background_levels` | 2D array or spectrum | dB | matches `levels_positions` | Enables the per-position $K_{1i}$ of Eq. 11 |
 | `frequencies` | 1D array | Hz | one per band | Enables $L_{W\mathrm{A}}$ and the per-band $C_3$ |
 | `areas` | 1D array | m² | one per position | Unequal segment areas, for a localized investigation (clause 9.4.3.2); equal areas assumed when omitted |
-| `temperature` | float | °C | default `23.0` | Sets $C_1$, $C_2$ |
-| `static_pressure` | float | kPa | default `101.325` | Sets $C_1$, $C_2$ |
+| `temperature_c` | float | °C | default `23.0` | Sets $C_1$, $C_2$ |
+| `static_pressure_kpa` | float | kPa | default `101.325` | Sets $C_1$, $C_2$ |
 | `air_absorption_coefficient` | float or 1D array | dB/m | default `None` | The $C_3$ air-absorption term; supplied, not computed |
 | `sigma_omc` | float | dB | default `0.0` | Operating and mounting standard deviation, clause 10.5 |
 | `coverage_factor` | float | — | default `2.0` | $k$ in $U = k\sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\text{omc}^2}$ |
@@ -1043,7 +1043,7 @@ a ten-thousandth of a decibel.
 ```python
 # A determination at 1 200 m and 8 C, carried to 101.325 kPa and 23 C (Eq. G.3).
 corr = emission.reference_atmosphere_correction(8.0, altitude=1200.0)
-print(round(corr.static_pressure, 1))    # 87.7 kPa, from Eq. G.2
+print(round(corr.static_pressure_kpa, 1))    # 87.7 kPa, from Eq. G.2
 print(round(corr.c1, 3), round(corr.c2, 3), round(corr.total, 2))   # 0.386 0.291 0.68 dB
 lj_ref = burst.sound_energy_level + corr.total    # Eq. G.3; Eq. G.1 adds the same to LW
 ```
@@ -1068,9 +1068,10 @@ Returns a `SoundEnergyResult`: `sound_energy_level` (per-band $L_J$),
 `environmental_correction`, `directivity_index` (per position and band),
 `surface_area`, `sound_energy_level_a` ($L_{J\mathrm{A}}$), `uncertainty`,
 `grade`, `events` ($N_\mathrm{e}$, or `None` when the means were supplied) and
-`integration_time`. `reference_atmosphere_correction(temperature,
-static_pressure=…, altitude=…)` returns a `ReferenceAtmosphereCorrection` with
-`c1`, `c2`, their `total` and the `static_pressure` used.
+`integration_time`. `reference_atmosphere_correction(temperature_c,
+static_pressure_kpa=…, altitude=…)` returns a `ReferenceAtmosphereCorrection`
+with
+`c1`, `c2`, their `total` and the `static_pressure_kpa` used.
 
 ## What this guide covers
 

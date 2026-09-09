@@ -183,7 +183,7 @@ def _a_weighting_corrections(frequencies: np.ndarray) -> np.ndarray:
     return np.asarray(ck, dtype=np.float64)
 
 
-def _validate_meteorology(temperature: float, static_pressure: float) -> None:
+def _validate_meteorology(temperature_c: float, static_pressure_kpa: float) -> None:
     r"""Guard the meteorological inputs before the log10/sqrt of C1/C2 and c.
 
     A non-finite or :math:`\le -273` degC temperature makes
@@ -191,21 +191,21 @@ def _validate_meteorology(temperature: float, static_pressure: float) -> None:
     static pressure makes :math:`\log_{10}(p_\mathrm{s}/p_{\mathrm{s}0})` undefined; both are rejected
     with a clean ``ValueError``.
     """
-    if not np.isfinite(temperature) or temperature <= _ROUNDED_ABS_ZERO_C:
-        msg = "'temperature' must be finite and greater than -273 degC."
+    if not np.isfinite(temperature_c) or temperature_c <= _ROUNDED_ABS_ZERO_C:
+        msg = "'temperature_c' must be finite and greater than -273 degC."
         raise ValueError(msg)
-    if not np.isfinite(static_pressure) or static_pressure <= 0.0:
-        msg = "'static_pressure' must be finite and positive."
+    if not np.isfinite(static_pressure_kpa) or static_pressure_kpa <= 0.0:
+        msg = "'static_pressure_kpa' must be finite and positive."
         raise ValueError(msg)
 
 
-def _c2_correction(temperature: float, static_pressure: float) -> float:
+def _c2_correction(temperature_c: float, static_pressure_kpa: float) -> float:
     """Radiation-impedance correction ``C2`` (ISO 3741:2010 clause 9.1.4,
     ISO 3747:2010 Annex C, Eq. C.1/C.3).
     """
     return float(
-        -10.0 * np.log10(static_pressure / _PS0)
-        + 15.0 * np.log10((273.15 + temperature) / _THETA1)
+        -10.0 * np.log10(static_pressure_kpa / _PS0)
+        + 15.0 * np.log10((273.15 + temperature_c) / _THETA1)
     )
 
 

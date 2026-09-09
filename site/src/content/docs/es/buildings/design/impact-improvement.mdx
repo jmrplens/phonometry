@@ -251,39 +251,40 @@ res.plot()            # el espectro de mejora delta-L(f) de arriba (requiere mat
 ## Informe de mejora a impacto de ISO 16251-1 (`.report()`)
 
 Los apartados 8 y 9 deciden qué tiene que llevar un resultado para ser
-declarable, y la mayor parte la aportas tú, no la calcula la biblioteca. Junto a
-la propia mejora, la tabla debe mostrar el **nivel de aceleración de la placa
+declarable, y la mayor parte la aportas tú, no la calcula la biblioteca. Junto
+a la propia mejora, la tabla debe mostrar el **nivel de aceleración de la placa
 desnuda $L_{a,0}$** con su referencia $a_0$, el $\Delta L$ por bandas de *cada*
 probeta ensayada, su promedio cuando hay más de una, la mejora o mejoras
 ponderadas y el término o términos de adaptación — todo redondeado a **un
 decimal**, y con las bandas cuya corrección de fondo haya llegado al límite de
 1,3 dB escritas como «> $\Delta L$». El informe añade además: la identificación
-del fabricante y del producto, una descripción detallada del revestimiento con el
-número y el tamaño de las probetas, el **método de montaje y, en particular, el
-adhesivo con su masa por unidad de superficie y su tiempo de curado**, la
+del fabricante y del producto, una descripción detallada del revestimiento con
+el número y el tamaño de las probetas, el **método de montaje y, en particular,
+el adhesivo con su masa por unidad de superficie y su tiempo de curado**, la
 temperatura y la humedad durante el ensayo, las **posiciones de la máquina de
 impactos y de los acelerómetros**, y una declaración de si la probeta sufrió
 daños visibles, como compactación. Todo eso se corresponde con los campos
-`manufacturer`, `specimen`, `mounting`, `mass_per_area`, `temperature`,
-`pressure`, `test_date` y `notes` del `ReportMetadata` de más abajo; la
-declaración de daños y el detalle del montaje no tienen campo propio y van en
-`notes`.
+`manufacturer`, `specimen`, `mounting`, `mass_per_area`, `temperature_c`,
+`static_pressure_kpa`, `test_date` y `notes` del `ReportMetadata` de más abajo;
+la declaración de daños y el detalle del montaje no tienen campo propio y van
+en `notes`.
 
 `FloorCoveringImprovementResult.report(path)` escribe una ficha acreditada de
 mejora a impacto de una página: la línea de base normativa, una cabecera de
 metadatos, la tabla por bandas (frecuencia y $\Delta L$, con las bandas en el
 límite de 1,3 dB precedidas por `>`) junto a la curva de mejora $\Delta L(f)$,
-el número único encuadrado $\Delta L_\mathrm{w}\ (C_{\mathrm{I},\Delta})$ (la expresión de
-resultados del apartado 8 e) de ISO 16251-1) y un pie. Pasa un
+el número único encuadrado $\Delta L_\mathrm{w}\ (C_{\mathrm{I},\Delta})$ (la
+expresión de resultados del apartado 8 e) de ISO 16251-1) y un pie. Pasa un
 `ReportMetadata` para la cabecera; los campos aplicables son `specimen` (el
 revestimiento de suelo ensayado), `client`, `manufacturer`, `mounting`,
-`mass_per_area`, `test_room`, `test_date`, `temperature`, `pressure`,
-`measurement_standard`, `laboratory`, `operator`, `report_id`, `notes` y
-`requirement` (una mejora ponderada mayor es mejor, así que el veredicto es cumple
-en cuanto la iguala o la supera). El suelo de referencia desnudo es el suelo
-pesado normalizado de la Tabla 4 de ISO 717-2:2020, fijado por la norma.
-`verbose=True` añade la columna del suelo de referencia con revestimiento
-$L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$, la base de la derivación de $\Delta L_\mathrm{w}$.
+`mass_per_area`, `test_room`, `test_date`, `temperature_c`,
+`static_pressure_kpa`, `measurement_standard`, `laboratory`, `operator`,
+`report_id`, `notes` y `requirement` (una mejora ponderada mayor es mejor, así
+que el veredicto es cumple en cuanto la iguala o la supera). El suelo de
+referencia desnudo es el suelo pesado normalizado de la Tabla 4 de ISO
+717-2:2020, fijado por la norma. `verbose=True` añade la columna del suelo de
+referencia con revestimiento $L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$, la
+base de la derivación de $\Delta L_\mathrm{w}$.
 
 ```python
 from phonometry import building, ReportMetadata

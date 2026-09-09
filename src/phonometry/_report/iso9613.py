@@ -157,23 +157,26 @@ def _attenuation_metadata_pairs(
         ]
     specs.append((t("Distance d [m]", language), _fmt(distance, language, 0)))
     if metadata is not None:
-        if metadata.temperature is not None:
+        if metadata.temperature_c is not None:
             specs.append(
                 (
                     t("Air temperature [&#176;C]", language),
-                    _fmt(metadata.temperature, language),
+                    _fmt(metadata.temperature_c, language),
                 )
             )
-        if metadata.relative_humidity is not None:
+        if metadata.relative_humidity_percent is not None:
             specs.append(
                 (
                     t("Relative humidity [%]", language),
-                    _fmt(metadata.relative_humidity, language, 0),
+                    _fmt(metadata.relative_humidity_percent, language, 0),
                 )
             )
-        if metadata.pressure is not None:
+        if metadata.static_pressure_kpa is not None:
             specs.append(
-                (t("Pressure [kPa]", language), _fmt(metadata.pressure, language))
+                (
+                    t("Pressure [kPa]", language),
+                    _fmt(metadata.static_pressure_kpa, language),
+                )
             )
         specs.append((t("Date of prediction", language), _esc(metadata.test_date)))
     return [(label, value) for label, value in specs if value]

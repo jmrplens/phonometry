@@ -2911,13 +2911,13 @@ class VolumeAbsorption:
     the same as passing this class with its defaults.
 
     :ivar model: ``"francois-garrison"``, ``"ainslie-mccolm"`` or ``"thorp"``.
-    :ivar temperature: Temperature ``T``, in degrees Celsius.
+    :ivar temperature_c: Temperature ``T``, in degrees Celsius.
     :ivar salinity: Salinity ``S``, in parts per thousand.
     :ivar ph: Acidity (Thorp ignores it always).
     """
 
     model: str
-    temperature: float = 10.0
+    temperature_c: float = 10.0
     salinity: float = 35.0
     ph: float = 8.0
 
@@ -2941,7 +2941,7 @@ def _resolve_absorption(
     return key, float(
         seawater_absorption(
             frequency_hz,
-            temperature=spec.temperature,
+            temperature_c=spec.temperature_c,
             salinity=spec.salinity,
             depth=zs,
             ph=spec.ph,

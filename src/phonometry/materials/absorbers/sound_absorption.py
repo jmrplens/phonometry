@@ -134,21 +134,21 @@ def _warn_sample_area(sample_area: float, volume: float, *, stacklevel: int) -> 
         )
 
 
-def _speed_of_sound(temperature: float) -> float:
+def _speed_of_sound(temperature_c: float) -> float:
     """Speed of sound from air temperature (ISO 354:2003, Eq. (6)).
 
-    :param temperature: Air temperature, in degrees Celsius (valid 15..30).
+    :param temperature_c: Air temperature, in degrees Celsius (valid 15..30).
     :return: Propagation speed of sound, in metres per second.
     """
-    return 331.0 + 0.6 * temperature
+    return 331.0 + 0.6 * temperature_c
 
 
-def _resolve_speed(temperature: float, speed_of_sound: float | None) -> float:
-    """Return ``speed_of_sound`` if given, else Eq. (6) from ``temperature``.
+def _resolve_speed(temperature_c: float, speed_of_sound: float | None) -> float:
+    """Return ``speed_of_sound`` if given, else Eq. (6) from ``temperature_c``.
 
     Warns when the speed is derived from a temperature outside the 15..30 degC
     validity range of Eq. (6). An explicit ``speed_of_sound`` bypasses the check.
-    Rejects a physically impossible ``temperature`` outright: Eq. (6) applied at
+    Rejects a physically impossible ``temperature_c`` outright: Eq. (6) applied at
     or below absolute zero would hand back a zero or negative speed of sound.
     """
     if speed_of_sound is not None:
@@ -160,16 +160,16 @@ def _resolve_speed(temperature: float, speed_of_sound: float | None) -> float:
         return float(speed_of_sound)
     # NaN is named alongside the bound: a NaN temperature would otherwise
     # propagate through Eq. (6) into every derived quantity.
-    require_above_absolute_zero(float(temperature), "temperature")
+    require_above_absolute_zero(float(temperature_c), "temperature_c")
     lo, hi = _EQ6_TEMPERATURE_RANGE
-    if not lo <= temperature <= hi:
+    if not lo <= temperature_c <= hi:
         warnings.warn(
-            f"Temperature {temperature} degC is outside the 15..30 degC validity "
+            f"Temperature {temperature_c} degC is outside the 15..30 degC validity "
             "range of ISO 354:2003 Eq. (6); speed of sound may be inaccurate.",
             AbsorptionWarning,
             stacklevel=3,
         )
-    return _speed_of_sound(temperature)
+    return _speed_of_sound(temperature_c)
 
 
 def attenuation_from_alpha(alpha: ArrayLike) -> NDArray[np.float64]:
@@ -237,7 +237,7 @@ def _absorption_area(
     t60: ArrayLike,
     volume: float,
     *,
-    temperature: float,
+    temperature_c: float,
     speed_of_sound: float | None,
     m: ArrayLike,
     t_name: str = "t60",
@@ -254,7 +254,7 @@ def _absorption_area(
     t = np.asarray(t60, dtype=np.float64)
     m_arr = np.asarray(m, dtype=np.float64)
     _validate_area_inputs(t, volume, m_arr, t_name=t_name, m_name=m_name)
-    c = _resolve_speed(temperature, speed_of_sound)
+    c = _resolve_speed(temperature_c, speed_of_sound)
     return _SABINE * volume / (c * t) - 4.0 * volume * m_arr
 
 
@@ -262,7 +262,7 @@ def absorption_area(
     t60: ArrayLike,
     volume: float,
     *,
-    temperature: float = 20.0,
+    temperature_c: float = 20.0,
     speed_of_sound: float | None = None,
     m: ArrayLike = 0.0,
 ) -> NDArray[np.float64]:
@@ -274,13 +274,13 @@ def absorption_area(
 
     :param t60: Reverberation time(s) ``T``, in seconds (scalar or per band).
     :param volume: Room volume ``V``, in cubic metres.
-    :param temperature: Air temperature, in degrees Celsius, used to compute the
+    :param temperature_c: Air temperature, in degrees Celsius, used to compute the
         speed of sound via Eq. (6) when ``speed_of_sound`` is not given
         (default 20 degC, i.e. c = 343 m/s). A temperature outside 15..30 degC
         emits an :class:`AbsorptionWarning`. A room volume below the 150 m3
         minimum of clause 6.1.1 likewise emits an advisory :class:`AbsorptionWarning`.
     :param speed_of_sound: Explicit speed of sound ``c``, in m/s; overrides
-        ``temperature`` and Eq. (6) when supplied.
+        ``temperature_c`` and Eq. (6) when supplied.
     :param m: Power attenuation coefficient of air ``m``, in 1/m (a scalar or an
         array matching the shape of ``t60``; default 0, i.e. no air correction).
         A per-band ``m`` whose shape differs from ``t60`` raises ``ValueError``.
@@ -290,7 +290,7 @@ def absorption_area(
         shape of ``t60``.
     """
     area = _absorption_area(
-        t60, volume, temperature=temperature, speed_of_sound=speed_of_sound, m=m
+        t60, volume, temperature_c=temperature_c, speed_of_sound=speed_of_sound, m=m
     )
     _warn_small_room(volume, stacklevel=3)
     return area
@@ -302,8 +302,8 @@ def absorption_coefficient(
     volume: float,
     sample_area: float,
     *,
-    temperature1: float = 20.0,
-    temperature2: float | None = None,
+    temperature1_c: float = 20.0,
+    temperature2_c: float | None = None,
     speed_of_sound1: float | None = None,
     speed_of_sound2: float | None = None,
     m1: ArrayLike = 0.0,
@@ -339,14 +339,14 @@ def absorption_coefficient(
     :param sample_area: Area ``S`` covered by the test specimen, in square metres
         (for both-sides-exposed absorbers, the area of the two sides;
         Clause 3.7 NOTE 1).
-    :param temperature1: Empty-room air temperature, in degrees Celsius
+    :param temperature1_c: Empty-room air temperature, in degrees Celsius
         (default 20). Used for ``c1`` via Eq. (6) unless ``speed_of_sound1`` is
         given.
-    :param temperature2: With-specimen air temperature, in degrees Celsius;
-        defaults to ``temperature1``. Used for ``c2`` unless ``speed_of_sound2``
+    :param temperature2_c: With-specimen air temperature, in degrees Celsius;
+        defaults to ``temperature1_c``. Used for ``c2`` unless ``speed_of_sound2``
         is given.
-    :param speed_of_sound1: Explicit ``c1`` in m/s; overrides ``temperature1``.
-    :param speed_of_sound2: Explicit ``c2`` in m/s; overrides ``temperature2``.
+    :param speed_of_sound1: Explicit ``c1`` in m/s; overrides ``temperature1_c``.
+    :param speed_of_sound2: Explicit ``c2`` in m/s; overrides ``temperature2_c``.
         Defaults to ``speed_of_sound1`` when that is given but ``c2`` is not, so
         overriding only ``c1`` applies the same speed to both measurements.
     :param m1: Empty-room air attenuation coefficient ``m1``, in 1/m (default 0).
@@ -361,8 +361,8 @@ def absorption_coefficient(
     if volume <= 0.0:
         msg = "'volume' must be positive."
         raise ValueError(msg)
-    if temperature2 is None:
-        temperature2 = temperature1
+    if temperature2_c is None:
+        temperature2_c = temperature1_c
     if speed_of_sound2 is None:
         speed_of_sound2 = speed_of_sound1
     # Advisory setup checks (result still returned). Volume is advised here once
@@ -373,7 +373,7 @@ def absorption_coefficient(
     a1 = _absorption_area(
         t1,
         volume,
-        temperature=temperature1,
+        temperature_c=temperature1_c,
         speed_of_sound=speed_of_sound1,
         m=m1,
         t_name="t1",
@@ -382,7 +382,7 @@ def absorption_coefficient(
     a2 = _absorption_area(
         t2,
         volume,
-        temperature=temperature2,
+        temperature_c=temperature2_c,
         speed_of_sound=speed_of_sound2,
         m=m2,
         t_name="t2",
@@ -429,8 +429,8 @@ class SoundAbsorptionMeasurement:
         ``T2``, per band, in seconds.
     :ivar volume: Reverberation-room volume ``V``, in cubic metres.
     :ivar area: Area ``S`` covered by the test specimen, in square metres.
-    :ivar temperature: Air temperature during the test, in degrees Celsius.
-    :ivar humidity: Relative humidity during the test, in %, or ``None`` when
+    :ivar temperature_c: Air temperature during the test, in degrees Celsius.
+    :ivar relative_humidity_percent: Relative humidity during the test, in %, or ``None`` when
         not recorded. It is informational: humidity enters ISO 354 only through
         the air attenuation coefficient ``m`` (via ISO 9613-1), never directly.
     :ivar speed_of_sound: Propagation speed of sound ``c`` used in the Sabine
@@ -451,8 +451,8 @@ class SoundAbsorptionMeasurement:
     t_specimen: NDArray[np.float64]
     volume: float
     area: float
-    temperature: float
-    humidity: float | None
+    temperature_c: float
+    relative_humidity_percent: float | None
     speed_of_sound: float
     air_attenuation: NDArray[np.float64]
     absorption_area_empty: NDArray[np.float64]
@@ -579,8 +579,8 @@ def measure_sound_absorption(
     *,
     volume: float,
     area: float,
-    temperature: float = 20.0,
-    humidity: float | None = None,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float | None = None,
     speed_of_sound: float | None = None,
     m: ArrayLike = 0.0,
 ) -> SoundAbsorptionMeasurement:
@@ -596,7 +596,7 @@ def measure_sound_absorption(
 
     Both measurements are taken at the same air temperature and, for the air
     attenuation term, the same climatic conditions (ISO 354:2003, 6.3), so a
-    single ``temperature`` and ``m`` apply to both. Use the lower-level
+    single ``temperature_c`` and ``m`` apply to both. Use the lower-level
     :func:`absorption_coefficient` directly when the empty-room and
     with-specimen climates differ.
 
@@ -613,23 +613,23 @@ def measure_sound_absorption(
         area outside the clause 6.2.1.1 range (10 m2 to 12 m2, upper limit
         scaled by :math:`(V/200)^{2/3}` for :math:`V > 200` m3) emits an
         advisory :class:`AbsorptionWarning`.
-    :param temperature: Air temperature during the test, in degrees Celsius
+    :param temperature_c: Air temperature during the test, in degrees Celsius
         (default 20). Used for the speed of sound via Eq. (6) unless
         ``speed_of_sound`` is given; a temperature outside 15..30 degC emits an
         :class:`AbsorptionWarning`.
-    :param humidity: Relative humidity during the test, in % within
+    :param relative_humidity_percent: Relative humidity during the test, in % within
         ``[0, 100]`` (informational; recorded on the result but not used in the
         computation, which sees the climate only through ``m``). ``None``
         leaves it unrecorded.
     :param speed_of_sound: Explicit speed of sound ``c``, in m/s; overrides
-        ``temperature`` and Eq. (6) when supplied.
+        ``temperature_c`` and Eq. (6) when supplied.
     :param m: Power attenuation coefficient of air ``m``, in 1/m (a scalar or a
         per-band array matching ``frequencies``; default 0, i.e. no air
         correction). Obtain it from an ISO 9613-1 attenuation coefficient with
         :func:`attenuation_from_alpha`.
     :return: A frozen :class:`SoundAbsorptionMeasurement`.
     :raises ValueError: If the frequency and reverberation-time arrays do not
-        share one shape, ``humidity`` is not within ``[0, 100]`` %, or an
+        share one shape, ``relative_humidity_percent`` is not within ``[0, 100]`` %, or an
         input is non-physical (see :func:`absorption_coefficient`).
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
@@ -647,29 +647,29 @@ def measure_sound_absorption(
     m_arr = np.broadcast_to(np.asarray(m, dtype=np.float64), freqs.shape).astype(
         np.float64, copy=True
     )
-    if humidity is None:
+    if relative_humidity_percent is None:
         humidity_pct: float | None = None
     else:
         # A non-numeric humidity becomes NaN here so that it fails the range
         # test below and is refused by name, instead of dying inside float():
         # ValueError for a string, TypeError for a list or a 1-d array.
         try:
-            humidity_pct = float(humidity)
+            humidity_pct = float(relative_humidity_percent)
         except (TypeError, ValueError):
             humidity_pct = math.nan
         if not 0.0 <= humidity_pct <= _MAX_RELATIVE_HUMIDITY_PERCENT:
-            msg = "'humidity' must be within [0, 100] %."
+            msg = "'relative_humidity_percent' must be within [0, 100] %."
             raise ValueError(msg)
     # Resolve the speed once (Eq. (6)); this emits the single temperature
     # advisory. Passing the resolved speed to the reused helpers below keeps
     # every advisory to exactly one, since both measurements share the climate.
-    c = _resolve_speed(temperature, speed_of_sound)
+    c = _resolve_speed(temperature_c, speed_of_sound)
     # A1/A2 reuse the Eq. (5)/(7) evaluation.
     a1 = _absorption_area(
-        t1, volume, temperature=temperature, speed_of_sound=c, m=m_arr, t_name="t1"
+        t1, volume, temperature_c=temperature_c, speed_of_sound=c, m=m_arr, t_name="t1"
     )
     a2 = _absorption_area(
-        t2, volume, temperature=temperature, speed_of_sound=c, m=m_arr, t_name="t2"
+        t2, volume, temperature_c=temperature_c, speed_of_sound=c, m=m_arr, t_name="t2"
     )
     # alpha_s reuses the validated Eq. (8)/(9) path (it also emits the volume,
     # sample-area and non-physical advisories exactly once).
@@ -678,7 +678,7 @@ def measure_sound_absorption(
         t2,
         volume,
         area,
-        temperature1=temperature,
+        temperature1_c=temperature_c,
         speed_of_sound1=c,
         m1=m_arr,
         m2=m_arr,
@@ -689,8 +689,8 @@ def measure_sound_absorption(
         t_specimen=t2,
         volume=float(volume),
         area=float(area),
-        temperature=float(temperature),
-        humidity=humidity_pct,
+        temperature_c=float(temperature_c),
+        relative_humidity_percent=humidity_pct,
         speed_of_sound=c,
         air_attenuation=m_arr,
         absorption_area_empty=a1,

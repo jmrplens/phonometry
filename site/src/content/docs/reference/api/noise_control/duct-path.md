@@ -300,7 +300,7 @@ criterion, and a method-basis strip.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the air system, `test_room` the served room, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`) and the footer identity. The design criterion comes from the result's own `target`; a `requirement` in the metadata overrides it. |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the air system, `test_room` the served room, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`) and the footer identity. The design criterion comes from the result's own `target`; a `requirement` in the metadata overrides it. |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the table adds the running level after every element; when `False` only the source, the element attenuations, the regenerated-noise rows and the received spectrum are printed, which keeps a long path on one page. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |

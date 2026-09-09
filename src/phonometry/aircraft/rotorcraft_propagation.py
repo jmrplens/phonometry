@@ -126,9 +126,9 @@ def atmospheric_adjustment(
     frequencies: NDArray[np.float64] | list[float],
     distance: float,
     *,
-    temperature: float = 25.0,
-    relative_humidity: float = 70.0,
-    pressure: float = 101.325,
+    temperature_c: float = 25.0,
+    relative_humidity_percent: float = 70.0,
+    atmospheric_pressure_kpa: float = 101.325,
     reference_distance: float = _RH,
 ) -> NDArray[np.float64]:
     r"""Atmospheric-absorption adjustment ``ΔLa`` of the hemisphere level (Eq. 26/27).
@@ -164,9 +164,9 @@ def atmospheric_adjustment(
     :param distance: Slant distance ``r``, in metres (``> 0``; below ``rh``
         the adjustment is a small positive value, i.e. less absorption than the
         reference path).
-    :param temperature: Air temperature, in °C (default 25 °C, ICAO reference).
-    :param relative_humidity: Relative humidity, in % (default 70 %).
-    :param pressure: Ambient pressure, in kPa (default 101.325).
+    :param temperature_c: Air temperature, in °C (default 25 °C, ICAO reference).
+    :param relative_humidity_percent: Relative humidity, in % (default 70 %).
+    :param atmospheric_pressure_kpa: Ambient pressure, in kPa (default 101.325).
     :param reference_distance: Hemisphere reference distance ``rh``, in metres
         (default 60). Pass :attr:`RotorcraftHemisphere.distance` when the data
         uses a non-standard polar distance.
@@ -177,15 +177,17 @@ def atmospheric_adjustment(
     f = require_positive_array(frequencies, "frequencies")
     r = require_positive(distance, "distance")
     rh = require_positive(reference_distance, "reference_distance")
-    alpha = _absorption_coefficient(f, temperature, relative_humidity, pressure)
+    alpha = _absorption_coefficient(
+        f, temperature_c, relative_humidity_percent, atmospheric_pressure_kpa
+    )
     return np.asarray(-alpha * (r - rh), dtype=np.float64)
 
 
 def _absorption_coefficient(
     frequencies: NDArray[np.float64],
-    temperature: float,
-    relative_humidity: float,
-    pressure: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    atmospheric_pressure_kpa: float,
 ) -> NDArray[np.float64]:
     """ISO 9613-1 pure-tone ``α`` in dB/m at the exact band centres (Eq. 27).
 
@@ -210,7 +212,11 @@ def _absorption_coefficient(
                 category=AtmosphericAbsorptionWarning,
             )
         alpha = air_attenuation(
-            frequencies, temperature, relative_humidity, pressure, exact_midband=True
+            frequencies,
+            temperature_c,
+            relative_humidity_percent,
+            atmospheric_pressure_kpa,
+            exact_midband=True,
         )
     return np.asarray(alpha, dtype=np.float64)
 

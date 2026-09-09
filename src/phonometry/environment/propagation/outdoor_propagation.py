@@ -208,14 +208,14 @@ class AtmosphericConditions:
     function of (ISO 9613-2:1996, Eq. (8) and Table 2). The defaults are the
     reference conditions of the tabulated coefficients.
 
-    :param temperature: Air temperature, in degrees Celsius.
-    :param relative_humidity: Relative humidity, in percent; ``None`` uses 70.
-    :param pressure: Atmospheric pressure, in kilopascals.
+    :param temperature_c: Air temperature, in degrees Celsius.
+    :param relative_humidity_percent: Relative humidity, in percent; ``None`` uses 70.
+    :param atmospheric_pressure_kpa: Atmospheric pressure, in kilopascals.
     """
 
-    temperature: float = 20.0
-    relative_humidity: float | None = None
-    pressure: float = 101.325
+    temperature_c: float = 20.0
+    relative_humidity_percent: float | None = None
+    atmospheric_pressure_kpa: float = 101.325
 
 
 @dataclass(frozen=True)
@@ -413,8 +413,8 @@ class OutdoorAttenuation:
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header identity (``specimen`` the source/situation, ``client``,
-            ``test_room`` the receiver position), the ``temperature`` /
-            ``relative_humidity`` / ``pressure`` conditions and the footer
+            ``test_room`` the receiver position), the ``temperature_c`` /
+            ``relative_humidity_percent`` / ``atmospheric_pressure_kpa`` conditions and the footer
             identity. A supplied ``requirement`` is read as the maximum
             acceptable A-weighted downwind level in dB (used only when a
             ``source_emission`` is given).
@@ -478,9 +478,9 @@ def geometric_divergence(distance: float) -> float:
 def atmospheric_absorption(
     distance: float,
     frequencies: ArrayLike = DEFAULT_FREQUENCIES,
-    temperature: float = 20.0,
-    relative_humidity: float | None = None,
-    pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float | None = None,
+    atmospheric_pressure_kpa: float = 101.325,
 ) -> NDArray[np.float64]:
     r"""Attenuation due to atmospheric absorption (ISO 9613-2:1996, Eq. (8)).
 
@@ -500,14 +500,20 @@ def atmospheric_absorption(
 
     :param distance: Source-to-receiver distance ``d``, in metres.
     :param frequencies: Octave-band midband frequencies, in hertz.
-    :param temperature: Air temperature, in degrees Celsius.
-    :param relative_humidity: Relative humidity, in percent (default 70).
-    :param pressure: Atmospheric pressure, in kilopascals.
+    :param temperature_c: Air temperature, in degrees Celsius.
+    :param relative_humidity_percent: Relative humidity, in percent (default 70).
+    :param atmospheric_pressure_kpa: Atmospheric pressure, in kilopascals.
     :return: ``Aatm`` per band, in decibels.
     """
-    relative_humidity = 70.0 if relative_humidity is None else relative_humidity
+    relative_humidity_percent = (
+        70.0 if relative_humidity_percent is None else relative_humidity_percent
+    )
     alpha = air_attenuation(
-        frequencies, temperature, relative_humidity, pressure, exact_midband=True
+        frequencies,
+        temperature_c,
+        relative_humidity_percent,
+        atmospheric_pressure_kpa,
+        exact_midband=True,
     )
     return np.asarray(alpha * distance, dtype=np.float64)
 
@@ -1050,9 +1056,9 @@ def outdoor_propagation_attenuation(
     ground_middle: float = 0.0,
     ground_receiver: float = 0.0,
     barrier: Barrier | None = None,
-    temperature: float = 20.0,
-    relative_humidity: float | None = None,
-    pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float | None = None,
+    atmospheric_pressure_kpa: float = 101.325,
     projected_distance: float | None = None,
 ) -> OutdoorAttenuation:
     r"""Total octave-band outdoor attenuation (ISO 9613-2:1996, Eq. (4)).
@@ -1078,22 +1084,28 @@ def outdoor_propagation_attenuation(
     :param ground_middle: Ground factor ``Gm`` of the middle region ([0, 1]).
     :param ground_receiver: Ground factor ``Gr`` of the receiver region ([0, 1]).
     :param barrier: Optional screening obstacle (:class:`Barrier`).
-    :param temperature: Air temperature, in degrees Celsius.
-    :param relative_humidity: Relative humidity, in percent (default 70).
-    :param pressure: Atmospheric pressure, in kilopascals.
+    :param temperature_c: Air temperature, in degrees Celsius.
+    :param relative_humidity_percent: Relative humidity, in percent (default 70).
+    :param atmospheric_pressure_kpa: Atmospheric pressure, in kilopascals.
     :param projected_distance: Ground-plane projected distance ``dp``, in metres;
         defaults to :math:`\sqrt{d^2 - (h_\mathrm{s} - h_\mathrm{r})^2}`.
     :return: :class:`OutdoorAttenuation` with the per-band term breakdown.
     :raises ValueError: If ``distance`` is not positive.
     """
-    relative_humidity = 70.0 if relative_humidity is None else relative_humidity
+    relative_humidity_percent = (
+        70.0 if relative_humidity_percent is None else relative_humidity_percent
+    )
     if distance <= 0.0:
         raise ValueError(_DISTANCE_NOT_POSITIVE)
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
 
     a_div = np.full_like(freqs, geometric_divergence(distance))
     a_atm = atmospheric_absorption(
-        distance, freqs, temperature, relative_humidity, pressure
+        distance,
+        freqs,
+        temperature_c,
+        relative_humidity_percent,
+        atmospheric_pressure_kpa,
     )
     a_gr = ground_attenuation(
         distance,
@@ -1172,7 +1184,9 @@ def predicted_receiver_level(
     atmosphere = AtmosphericConditions() if atmosphere is None else atmosphere
     directivity = DirectivityCorrection() if directivity is None else directivity
     humidity = (
-        70.0 if atmosphere.relative_humidity is None else atmosphere.relative_humidity
+        70.0
+        if atmosphere.relative_humidity_percent is None
+        else atmosphere.relative_humidity_percent
     )
     lw = np.atleast_1d(np.asarray(sound_power_level, dtype=np.float64))
     attenuation = outdoor_propagation_attenuation(
@@ -1184,9 +1198,9 @@ def predicted_receiver_level(
         ground.middle,
         ground.receiver,
         barrier,
-        atmosphere.temperature,
+        atmosphere.temperature_c,
         humidity,
-        atmosphere.pressure,
+        atmosphere.atmospheric_pressure_kpa,
         geometry.projected_distance,
     )
     cmet: float | None = None

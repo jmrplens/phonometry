@@ -138,8 +138,8 @@ def _outdoor() -> ph.environment.OutdoorAttenuation:
         ground_middle=1.0,
         ground_receiver=1.0,
         barrier=barrier,
-        temperature=15.0,
-        relative_humidity=70.0,
+        temperature_c=15.0,
+        relative_humidity_percent=70.0,
     )
 
 
@@ -154,7 +154,7 @@ def _cnossos_road() -> ph.environment.RoadEmissionResult:
             ),
         ],
         surface=ph.environment.RoadSurface.THIN_LAYER_A,
-        temperature=12.0,
+        temperature_c=12.0,
         gradient=3.0,
     )
 

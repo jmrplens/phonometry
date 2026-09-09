@@ -121,7 +121,7 @@ def test_static_airflow_plot_curve_through_evaluation_point() -> None:
     x, y = ax.lines[0].get_xdata(), ax.lines[0].get_ydata()
     # x is in mm/s; the fitted curve passes through the evaluation point.
     at_eval = float(np.interp(res.evaluation_velocity * 1e3, x, y))
-    assert at_eval == pytest.approx(res.pressure_drop, rel=1e-3)
+    assert at_eval == pytest.approx(res.pressure_drop_pa, rel=1e-3)
     plt.close("all")
 
 

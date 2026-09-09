@@ -180,7 +180,7 @@ class DiffusionResult:
         :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``
             produces a body-and-disclaimer fiche. The applicable descriptive
             fields are ``client``, ``manufacturer``, ``specimen``, ``mounting``,
-            ``test_room``, ``test_date``, ``temperature``, ``relative_humidity``,
+            ``test_room``, ``test_date``, ``temperature_c``, ``relative_humidity_percent``,
             ``pressure``, ``measurement_standard``, ``laboratory``, ``operator``,
             ``report_id`` and ``notes``. The ``requirement`` field is ignored
             (ISO 17497-2 has no verdict).
@@ -314,7 +314,7 @@ class DiffusionSpectrum:
             produces a body-and-disclaimer fiche whose header shows only the
             measured frequency range. The applicable descriptive fields are
             ``client``, ``manufacturer``, ``specimen``, ``mounting``,
-            ``test_room``, ``test_date``, ``temperature``, ``relative_humidity``,
+            ``test_room``, ``test_date``, ``temperature_c``, ``relative_humidity_percent``,
             ``pressure``, ``measurement_standard``, ``laboratory``, ``operator``,
             ``report_id`` and ``notes``. The ``requirement`` field is ignored
             (ISO 17497-2 has no verdict).

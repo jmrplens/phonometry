@@ -650,7 +650,7 @@ def sound_pressure_level_history(
     fs: float | None = None,
     *,
     dt: float = DEFAULT_SAMPLE_INTERVAL,
-    reference_pressure: float = REFERENCE_PRESSURE,
+    reference_pressure_pa: float = REFERENCE_PRESSURE,
     calibration_offset: float = 0.0,
 ) -> LevelHistory:
     r"""A frequency-weighted, F time-weighted level history ``LpAF`` (Clause 4).
@@ -669,7 +669,7 @@ def sound_pressure_level_history(
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
     :param dt: Target sampling interval of ``LpAF``, in seconds (10-25 ms).
-    :param reference_pressure: Reference pressure, in pascal (default 20 uPa).
+    :param reference_pressure_pa: Reference pressure, in pascal (default 20 uPa).
     :param calibration_offset: Level offset added to ``LpAF``, in dB, for
         signals recorded on a scale other than pascal.
     :return: A :class:`LevelHistory`, which unpacks as ``(times, levels)``
@@ -708,7 +708,7 @@ def sound_pressure_level_history(
     sampled = mean_square[idx]
     floor = np.finfo(np.float64).tiny
     levels = (
-        10.0 * np.log10(np.maximum(sampled, floor) / reference_pressure**2)
+        10.0 * np.log10(np.maximum(sampled, floor) / reference_pressure_pa**2)
         + calibration_offset
     )
     times = idx / fs
@@ -720,7 +720,10 @@ def sound_pressure_level_history(
 
 
 def _equivalent_level(
-    signal: np.ndarray, fs: float, reference_pressure: float, calibration_offset: float
+    signal: np.ndarray,
+    fs: float,
+    reference_pressure_pa: float,
+    calibration_offset: float,
 ) -> float:
     """A-weighted equivalent continuous level ``LAeq`` of the interval, in dB."""
     from ...filters.weighting import weighting_filter
@@ -731,7 +734,7 @@ def _equivalent_level(
     mean_square = float(np.mean(weighted**2))
     floor = np.finfo(np.float64).tiny
     return (
-        float(10.0 * np.log10(max(mean_square, floor) / reference_pressure**2))
+        float(10.0 * np.log10(max(mean_square, floor) / reference_pressure_pa**2))
         + calibration_offset
     )
 
@@ -893,7 +896,7 @@ def impulsive_sound_adjustment(
     fs: float | None = None,
     *,
     dt: float = DEFAULT_SAMPLE_INTERVAL,
-    reference_pressure: float = REFERENCE_PRESSURE,
+    reference_pressure_pa: float = REFERENCE_PRESSURE,
     calibration_offset: float = 0.0,
     onset_rate_method: _OnsetRateMethod = "least_squares",
     laeq: float | None = None,
@@ -915,7 +918,7 @@ def impulsive_sound_adjustment(
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
     :param dt: Target ``LpAF`` sampling interval, in seconds (10-25 ms).
-    :param reference_pressure: Reference pressure, in pascal (default 20 uPa).
+    :param reference_pressure_pa: Reference pressure, in pascal (default 20 uPa).
     :param calibration_offset: Level offset, in dB, for signals not scaled to
         pascal. The adjustment ``KI`` is unaffected by it (Clause 8); only the
         reported levels shift.
@@ -933,7 +936,7 @@ def impulsive_sound_adjustment(
         x,
         fs,
         dt=dt,
-        reference_pressure=reference_pressure,
+        reference_pressure_pa=reference_pressure_pa,
         calibration_offset=calibration_offset,
     )
     realised_dt = float(times[1] - times[0]) if times.size > 1 else dt
@@ -954,7 +957,7 @@ def impulsive_sound_adjustment(
         )
 
     if laeq is None:
-        laeq = _equivalent_level(x, fs, reference_pressure, calibration_offset)
+        laeq = _equivalent_level(x, fs, reference_pressure_pa, calibration_offset)
 
     return ImpulsiveSoundResult(
         times=times,

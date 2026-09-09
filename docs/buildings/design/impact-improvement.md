@@ -106,17 +106,17 @@ res.plot()            # the delta-L(f) improvement spectrum above (needs matplot
 impact-improvement fiche: the ISO 16251-1 basis line, a metadata header, the
 per-band table (frequency and $\Delta L$, bands at the 1.3 dB limit prefixed
 `>`) beside the $\Delta L(f)$ improvement curve, the boxed single-number
-$\Delta L_\mathrm{w}\ (C_{\mathrm{I},\Delta})$ (the ISO 16251-1 Clause 8 e) statement of
-results, rated
-per ISO 717-2) and a footer. The applicable `ReportMetadata` fields are
-`specimen` (the floor covering under test), `client`, `manufacturer`,
-`mounting`, `mass_per_area`, `test_room`, `test_date`, `temperature`,
-`pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id`,
-`notes` and `requirement` (a higher weighted improvement is better, so the
-verdict passes at or above it). The bare reference floor is the standardised
-heavyweight floor of ISO 717-2:2020 Table 4, fixed by the standard.
-`verbose=True` adds the reference-floor-with-covering column
-$L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$, the derivation basis of $\Delta L_\mathrm{w}$.
+$\Delta L_\mathrm{w}\ (C_{\mathrm{I},\Delta})$ (the ISO 16251-1 Clause 8 e)
+statement of results, rated per ISO 717-2) and a footer. The applicable
+`ReportMetadata` fields are `specimen` (the floor covering under test),
+`client`, `manufacturer`, `mounting`, `mass_per_area`, `test_room`,
+`test_date`, `temperature_c`, `static_pressure_kpa`, `measurement_standard`,
+`laboratory`, `operator`, `report_id`, `notes` and `requirement` (a higher
+weighted improvement is better, so the verdict passes at or above it). The bare
+reference floor is the standardised heavyweight floor of ISO 717-2:2020 Table
+4, fixed by the standard. `verbose=True` adds the reference-floor-with-covering
+column $L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$, the derivation basis of
+$\Delta L_\mathrm{w}$.
 
 ```python
 from phonometry import building, ReportMetadata

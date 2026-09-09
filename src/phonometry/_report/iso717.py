@@ -202,12 +202,12 @@ def _metadata_pairs(
 
     # Per-room temperature/humidity when supplied; otherwise a single value.
     per_room_t = (
-        metadata.source_temperature is not None
-        or metadata.receiving_temperature is not None
+        metadata.source_temperature_c is not None
+        or metadata.receiving_temperature_c is not None
     )
     per_room_rh = (
-        metadata.source_relative_humidity is not None
-        or metadata.receiving_relative_humidity is not None
+        metadata.source_relative_humidity_percent is not None
+        or metadata.receiving_relative_humidity_percent is not None
     )
     conditions = group(
         [
@@ -217,11 +217,11 @@ def _metadata_pairs(
             ),
             (
                 t("Source room temp. [&#176;C]", language),
-                num(metadata.source_temperature),
+                num(metadata.source_temperature_c),
             ),
             (
                 t("Source room humidity [%]", language),
-                num(metadata.source_relative_humidity),
+                num(metadata.source_relative_humidity_percent),
             ),
             (
                 t("Receiving room volume [m<super>3</super>]", language),
@@ -229,21 +229,21 @@ def _metadata_pairs(
             ),
             (
                 t("Receiving room temp. [&#176;C]", language),
-                num(metadata.receiving_temperature),
+                num(metadata.receiving_temperature_c),
             ),
             (
                 t("Receiving room humidity [%]", language),
-                num(metadata.receiving_relative_humidity),
+                num(metadata.receiving_relative_humidity_percent),
             ),
             (
                 t("Temperature [&#176;C]", language),
-                None if per_room_t else num(metadata.temperature),
+                None if per_room_t else num(metadata.temperature_c),
             ),
             (
                 t("Relative humidity [%]", language),
-                None if per_room_rh else num(metadata.relative_humidity),
+                None if per_room_rh else num(metadata.relative_humidity_percent),
             ),
-            (t("Ambient pressure [kPa]", language), num(metadata.pressure)),
+            (t("Ambient pressure [kPa]", language), num(metadata.static_pressure_kpa)),
             (
                 t("Mass per unit area [kg/m<super>2</super>]", language),
                 num(metadata.mass_per_area),

@@ -292,7 +292,7 @@ impulsive_sound_adjustment(
     fs: float | None = None,
     *,
     dt: float = 0.02,
-    reference_pressure: float = 2e-05,
+    reference_pressure_pa: float = 2e-05,
     calibration_offset: float = 0.0,
     onset_rate_method: _OnsetRateMethod = 'least_squares',
     laeq: float | None = None,
@@ -313,7 +313,7 @@ together with the source category (Clause 7) and the adjusted `LAeq`.
 | `signal` | Calibrated sound pressure signal of the candidate event, in pascal. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: that factor is what puts them in pascal, and it is a different knob from `calibration_offset`, which shifts the finished level in decibels for a record that never was. |
 | `fs` | Sampling rate of `signal`, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `dt` | Target `LpAF` sampling interval, in seconds (10-25 ms). |
-| `reference_pressure` | Reference pressure, in pascal (default 20 uPa). |
+| `reference_pressure_pa` | Reference pressure, in pascal (default 20 uPa). |
 | `calibration_offset` | Level offset, in dB, for signals not scaled to pascal. The adjustment `KI` is unaffected by it (Clause 8); only the reported levels shift. |
 | `onset_rate_method` | `"least_squares"` (default) or `"upper_half"` for pass-bys (3.5, Note 1). |
 | `laeq` | Equivalent level of the interval, in dB; when omitted it is computed from the A-weighted signal energy. |
@@ -510,7 +510,7 @@ sound_pressure_level_history(
     fs: float | None = None,
     *,
     dt: float = 0.02,
-    reference_pressure: float = 2e-05,
+    reference_pressure_pa: float = 2e-05,
     calibration_offset: float = 0.0,
 ) -> LevelHistory
 ```
@@ -529,7 +529,7 @@ standard.
 | `signal` | Calibrated sound pressure signal, in pascal. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples: that factor is what puts them in pascal, and it is a different knob from `calibration_offset`, which shifts the finished level in decibels for a record that never was. |
 | `fs` | Sampling rate of `signal`, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `dt` | Target sampling interval of `LpAF`, in seconds (10-25 ms). |
-| `reference_pressure` | Reference pressure, in pascal (default 20 uPa). |
+| `reference_pressure_pa` | Reference pressure, in pascal (default 20 uPa). |
 | `calibration_offset` | Level offset added to `LpAF`, in dB, for signals recorded on a scale other than pascal. |
 
 **Returns:** A [`LevelHistory`](/phonometry/reference/api/environment/impulsive-sound/#levelhistory), which unpacks as `(times, levels)` for the callers that always did: the sample times in seconds and `LpAF` in dB. The realised interval is `times[1] - times[0]` and may differ slightly from `dt` because it is an integer number of samples.

@@ -178,8 +178,8 @@ def plot_atmospheric_attenuation(
     # ISO 9613-1 is tabulated down to -20 degC, so the reading really can be
     # negative: fmt_minus signs it typographically without touching the hyphen
     # of an exponent that ":g" may emit.
-    t_str = decimal_comma(fmt_minus(result.temperature, "g"), language)
-    rh_str = decimal_comma(f"{result.relative_humidity:g}", language)
+    t_str = decimal_comma(fmt_minus(result.temperature_c, "g"), language)
+    rh_str = decimal_comma(f"{result.relative_humidity_percent:g}", language)
     rh_unit = "% HR" if language == "es" else "% RH"
     label = f"{t_str} °C, {rh_str} {rh_unit}"
     # dB/km is already a logarithmic quantity, so the ordinate stays linear;

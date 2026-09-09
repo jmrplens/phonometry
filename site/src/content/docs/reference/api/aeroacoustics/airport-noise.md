@@ -40,7 +40,10 @@ Doc 29 5th ed. Vol 3 Part 1 reference workbook.
 ## AerodromeAtmosphere
 
 ```python
-AerodromeAtmosphere(temperature: float = 15.0, pressure: float = 101.325)
+AerodromeAtmosphere(
+    temperature_c: float = 15.0,
+    atmospheric_pressure_kpa: float = 101.325,
+)
 ```
 
 The aerodrome air the NPD levels are corrected to (Eq. 4-6/4-7).
@@ -59,8 +62,8 @@ the ICAO 25 °C/70 % of the hemisphere database, not the 15 °C of Eq. 4-7.
 
 | Name | Description |
 | :--- | :--- |
-| `temperature` | Aerodrome air temperature `T`, in °C (default 15). |
-| `pressure` | Aerodrome air pressure `p`, in kPa (default 101.325). |
+| `temperature_c` | Aerodrome air temperature `T`, in °C (default 15). |
+| `atmospheric_pressure_kpa` | Aerodrome air pressure `p`, in kPa (default 101.325). |
 
 ## duration_correction
 
@@ -226,8 +229,8 @@ Plot the per-segment contributions to the event level.
 
 ```python
 impedance_adjustment(
-    temperature: float = 15.0,
-    pressure: float = 101.325,
+    temperature_c: float = 15.0,
+    atmospheric_pressure_kpa: float = 101.325,
 ) -> float
 ```
 
@@ -245,8 +248,8 @@ added to the NPD levels. Under the standard atmosphere it is +0.074 dB.
 
 | Name | Description |
 | :--- | :--- |
-| `temperature` | Aerodrome air temperature `T`, in °C (default 15 °C). |
-| `pressure` | Aerodrome air pressure `p`, in kPa (default 101.325 kPa). |
+| `temperature_c` | Aerodrome air temperature `T`, in °C (default 15 °C). |
+| `atmospheric_pressure_kpa` | Aerodrome air pressure `p`, in kPa (default 101.325 kPa). |
 
 **Returns:** The impedance adjustment, in dB (added to the NPD level).
 

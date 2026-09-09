@@ -334,7 +334,7 @@ fields; the fiche prints them verbatim in its footer.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds the four Annex B field indicators and the per-band grade cell. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -416,8 +416,8 @@ sound_power_intensity_precision(
     areas: np.ndarray,
     *,
     frequencies: np.ndarray | None = None,
-    temperature: float = 23.0,
-    barometric_pressure: float = 101325.0,
+    temperature_c: float = 23.0,
+    barometric_pressure_pa: float = 101325.0,
 ) -> PrecisionIntensityResult
 ```
 
@@ -443,8 +443,8 @@ $$
 | `partial_intensity` | `(N, NB)` signed normal intensity, W/m^2. |
 | `areas` | `(N,)` partial surface areas `Si`, m^2. |
 | `frequencies` | `(NB,)` nominal mid-band frequencies (Hz), for LWA. |
-| `temperature` | Air temperature `theta` (deg C), for LW0 (Eq. 10). |
-| `barometric_pressure` | Barometric pressure `B` (Pa), for LW0. |
+| `temperature_c` | Air temperature `theta` (deg C), for LW0 (Eq. 10). |
+| `barometric_pressure_pa` | Barometric pressure `B` (Pa), for LW0. |
 
 **Returns:** [`PrecisionIntensityResult`](/phonometry/reference/api/power/sound-power-intensity/#precisionintensityresult).
 
@@ -548,7 +548,7 @@ indicators (`FpI`, `F+/-`) and the Annex B qualification criteria.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds the field indicators `FpI` and `F+/-` and the per-band achieved grade. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |

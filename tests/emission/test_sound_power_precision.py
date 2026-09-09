@@ -188,6 +188,16 @@ def test_c1_reference_value_is_minus_0128() -> None:
     assert mc.c1 == pytest.approx(-0.12819, abs=1e-4)
 
 
+def test_meteorological_corrections_refuse_a_pressure_that_is_not_one() -> None:
+    """The refusal names the argument, and the name carries the unit.
+
+    A caller who reaches for pascals here is off by a thousand, and the only
+    thing that tells them so is the name in the message.
+    """
+    with pytest.raises(ValueError, match=r"'static_pressure_kpa' must be positive"):
+        meteorological_corrections(23.0, 0.0)
+
+
 def test_c1_zero_at_theta0() -> None:
     """C1 temperature term vanishes at 273+theta = theta0 = 314 K (theta=41)."""
     mc = meteorological_corrections(41.0, 101.325)
@@ -212,7 +222,7 @@ def test_c3_from_air_absorption() -> None:
 
 
 def test_meteorological_invalid_pressure_raises() -> None:
-    with pytest.raises(ValueError, match="'static_pressure' must be positive"):
+    with pytest.raises(ValueError, match="'static_pressure_kpa' must be positive"):
         meteorological_corrections(23.0, 0.0)
 
 
@@ -454,6 +464,19 @@ def test_uniform_intensity_recovers_lw_exact() -> None:
     assert res.sound_power_level[0] == pytest.approx(10.0 * np.log10(w / _P0), abs=1e-9)
 
 
+def test_precision_intensity_refuses_a_pressure_that_is_not_one() -> None:
+    """ISO 9614-3 states the barometric pressure in pascals, and so does the name.
+
+    The sister ISO 3745 correction takes kilopascals; the two are a thousand
+    apart and only the argument names keep them straight.
+    """
+    areas = np.array([1.0, 1.0])
+    with pytest.raises(ValueError, match=r"'barometric_pressure_pa' must be positive"):
+        sound_power_intensity_precision(
+            np.full(areas.shape, 1.0e-5), areas, barometric_pressure_pa=0.0
+        )
+
+
 def test_lw_independent_of_segmentation() -> None:
     """LW depends only on the total power, not on the area split."""
     w = 5.0e-5
@@ -481,7 +504,7 @@ def test_lw0_equals_lw_at_reference() -> None:
     areas = np.array([1.0, 1.0])
     i_n = np.full((2,), 1.0e-5)
     res = sound_power_intensity_precision(
-        i_n, areas, temperature=23.0, barometric_pressure=101325.0
+        i_n, areas, temperature_c=23.0, barometric_pressure_pa=101325.0
     )
     assert res.sound_power_level_normalized[0] == pytest.approx(
         res.sound_power_level[0], abs=1e-12
@@ -493,7 +516,7 @@ def test_lw0_shift_off_reference() -> None:
     areas = np.array([1.0, 1.0])
     i_n = np.full((2,), 1.0e-5)
     res = sound_power_intensity_precision(
-        i_n, areas, temperature=20.0, barometric_pressure=100000.0
+        i_n, areas, temperature_c=20.0, barometric_pressure_pa=100000.0
     )
     shift = res.sound_power_level_normalized[0] - res.sound_power_level[0]
     expected = -15.0 * np.log10((100000.0 / 101325.0) * (296.15 / 293.15))
@@ -535,8 +558,8 @@ def test_intensity_temperature_below_absolute_zero_raises() -> None:
     """
     intensity = np.full((2,), 1e-5)
     areas = np.array([1.0, 1.0])
-    with pytest.raises(ValueError, match="'temperature' must be finite and above"):
-        sound_power_intensity_precision(intensity, areas, temperature=-300.0)
+    with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
+        sound_power_intensity_precision(intensity, areas, temperature_c=-300.0)
 
 
 def test_intensity_single_segment_2d_input_not_transposed() -> None:

@@ -432,8 +432,8 @@ class DuctPathResult:
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header (``client``, ``specimen`` the air system, ``test_room``
-            the served room, ``instrumentation``, ``temperature``,
-            ``relative_humidity``, ``pressure``, ``test_date``) and the footer
+            the served room, ``instrumentation``, ``temperature_c``,
+            ``relative_humidity_percent``, ``pressure``, ``test_date``) and the footer
             identity. The design criterion comes from the result's own
             ``target``; a ``requirement`` in the metadata overrides it.
         :param engine: Rendering back end; only ``"reportlab"`` is supported.

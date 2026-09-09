@@ -107,7 +107,7 @@ def _metric_rows(
         ),
         (
             t("Fitted pressure difference &#916;p [Pa]", language),
-            _pa(result.pressure_drop, language),
+            _pa(result.pressure_drop_pa, language),
         ),
         (
             t("Airflow resistance R [Pa&#183;s/m<super>3</super>]", language),

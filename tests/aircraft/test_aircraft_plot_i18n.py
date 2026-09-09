@@ -15,7 +15,9 @@ from phonometry.aircraft.atmospheric_absorption import sae_band_attenuation
 
 def _result() -> object:
     f = np.array([100.0, 1000.0, 4000.0, 8000.0])
-    return sae_band_attenuation(f, 2000.0, temperature=25.0, relative_humidity=70.0)
+    return sae_band_attenuation(
+        f, 2000.0, temperature_c=25.0, relative_humidity_percent=70.0
+    )
 
 
 def test_plot_default_is_english() -> None:

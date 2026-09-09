@@ -667,7 +667,7 @@ class ImpedanceTubeResult:
             fields are ``client``, ``manufacturer``, ``specimen``,
             ``tube_diameter``, ``tube_shape``, ``mic_spacing``, ``mounting``,
             ``test_room``,
-            ``test_date``, ``temperature``, ``pressure``,
+            ``test_date``, ``temperature_c``, ``pressure``,
             ``measurement_standard``, ``laboratory``, ``operator``,
             ``report_id`` and ``notes``. The ``requirement`` field is ignored
             (ISO 10534-2 has no verdict).

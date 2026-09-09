@@ -265,8 +265,8 @@ class ReverberationSoundPowerResult:
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header (``client``, ``specimen`` the noise source, ``test_room``
-            the reverberation test room, ``instrumentation``, ``temperature``,
-            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            the reverberation test room, ``instrumentation``, ``temperature_c``,
+            ``relative_humidity_percent``, ``pressure``, ``test_date``), the footer
             identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
             and, via ``requirement``, a declared A-weighted sound-power limit
             the fiche checks the result against (lower is better).
@@ -292,18 +292,18 @@ class ReverberationSoundPowerResult:
         )
 
 
-def _speed_of_sound(temperature: float) -> float:
+def _speed_of_sound(temperature_c: float) -> float:
     r"""Speed of sound :math:`c = 20.05 \sqrt{273 + \theta}` (ISO 3741,
     clause 9.1.4).
     """
-    return float(20.05 * np.sqrt(273.0 + temperature))
+    return float(20.05 * np.sqrt(273.0 + temperature_c))
 
 
-def _c1_correction(temperature: float, static_pressure: float) -> float:
+def _c1_correction(temperature_c: float, static_pressure_kpa: float) -> float:
     """Reference-quantity correction ``C1`` (ISO 3741:2010 clause 9.1.4)."""
     return float(
-        -10.0 * np.log10(static_pressure / _PS0)
-        + 5.0 * np.log10((273.15 + temperature) / _THETA0)
+        -10.0 * np.log10(static_pressure_kpa / _PS0)
+        + 5.0 * np.log10((273.15 + temperature_c) / _THETA0)
     )
 
 
@@ -524,7 +524,7 @@ class _DirectTerms:
 
 
 def _room_inputs(
-    volume: float, surface_area: float, temperature: float, static_pressure: float
+    volume: float, surface_area: float, temperature_c: float, static_pressure_kpa: float
 ) -> None:
     """Refuse a room or a climate the direct method cannot be evaluated in.
 
@@ -540,7 +540,7 @@ def _room_inputs(
     ):
         msg = "'volume' and 'surface_area' must be positive and finite."
         raise ValueError(msg)
-    _validate_meteorology(temperature, static_pressure)
+    _validate_meteorology(temperature_c, static_pressure_kpa)
 
 
 def _band_inputs(
@@ -571,8 +571,8 @@ def _direct_terms(
     volume: float,
     surface_area: float,
     freqs: np.ndarray,
-    temperature: float,
-    static_pressure: float,
+    temperature_c: float,
+    static_pressure_kpa: float,
 ) -> _DirectTerms:
     r"""Evaluate the bracket of Eq. (20)/(30) for a room, a climate and its bands.
 
@@ -580,9 +580,9 @@ def _direct_terms(
     Waterhouse term :math:`10 \log_{10}(1 + Sc/(8Vf))` and the meteorological
     corrections ``C1``/``C2`` (ISO 3741:2010, clause 9.1.4).
     """
-    c = _speed_of_sound(temperature)
-    c1 = _c1_correction(temperature, static_pressure)
-    c2 = _c2_correction(temperature, static_pressure)
+    c = _speed_of_sound(temperature_c)
+    c1 = _c1_correction(temperature_c, static_pressure_kpa)
+    c2 = _c2_correction(temperature_c, static_pressure_kpa)
     absorption = (_SABINE_CONSTANT / c) * (volume / t60_arr)
     waterhouse = 10.0 * np.log10(1.0 + surface_area * c / (8.0 * volume * freqs))
     bracket = (
@@ -662,8 +662,8 @@ def sound_power_reverberation(
     frequencies: np.ndarray,
     *,
     background_levels: np.ndarray | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundPowerResult:
     r"""Sound power level in a reverberation room, direct method (ISO 3741:2010).
 
@@ -697,11 +697,11 @@ def sound_power_reverberation(
         before the energy average (Eq. 16). With 1D pre-averaged ``levels`` a
         single ``K1`` from the averaged spectra approximates the per-position
         procedure of clause 9.1.2.
-    :param temperature: Air temperature ``theta`` in the room, in degrees Celsius.
-    :param static_pressure: Static pressure ``ps`` in the room, in kilopascals.
+    :param temperature_c: Air temperature ``theta`` in the room, in degrees Celsius.
+    :param static_pressure_kpa: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundPowerResult`.
     """
-    _room_inputs(volume, surface_area, temperature, static_pressure)
+    _room_inputs(volume, surface_area, temperature_c, static_pressure_kpa)
     mean_level = _mean_level(levels)
     n_bands = mean_level.shape[0]
     t60_arr, freqs = _band_inputs(n_bands, t60, frequencies)
@@ -714,7 +714,7 @@ def sound_power_reverberation(
         k1 = np.zeros(n_bands, dtype=np.float64)
 
     terms = _direct_terms(
-        t60_arr, volume, surface_area, freqs, temperature, static_pressure
+        t60_arr, volume, surface_area, freqs, temperature_c, static_pressure_kpa
     )
     lw = np.asarray(mean_level + terms.bracket, dtype=np.float64)
 
@@ -741,8 +741,8 @@ def sound_power_comparison(
     frequencies: np.ndarray | None = None,
     background_levels: np.ndarray | None = None,
     background_levels_ref: np.ndarray | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundPowerResult:
     r"""Sound power level in a reverberation room, comparison method (ISO 3741).
 
@@ -769,11 +769,11 @@ def sound_power_comparison(
         ``levels`` (per position, or a single spectrum; applied per position
         per Eq. 14/15 before the Eq. 16 average when ``levels`` is 2D).
     :param background_levels_ref: Background levels matching ``levels_ref``.
-    :param temperature: Air temperature ``theta`` in the room, in degrees Celsius.
-    :param static_pressure: Static pressure ``ps`` in the room, in kilopascals.
+    :param temperature_c: Air temperature ``theta`` in the room, in degrees Celsius.
+    :param static_pressure_kpa: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundPowerResult` (``method='comparison'``).
     """
-    _validate_meteorology(temperature, static_pressure)
+    _validate_meteorology(temperature_c, static_pressure_kpa)
     lp_st = _mean_level(levels)
     n_bands = lp_st.shape[0]
     lp_rss, lw_rss, freqs = _comparison_inputs(n_bands, levels_ref, lw_ref, frequencies)
@@ -791,7 +791,7 @@ def sound_power_comparison(
         )
     lp_rss = _reference_source_level(lp_rss, levels_ref, background_levels_ref, freqs)
 
-    c2 = _c2_correction(temperature, static_pressure)
+    c2 = _c2_correction(temperature_c, static_pressure_kpa)
     lw = np.asarray(lw_rss + (lp_st - lp_rss + c2), dtype=np.float64)
 
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
@@ -804,7 +804,7 @@ def sound_power_comparison(
         background_correction=k1_st,
         c1=float("nan"),
         c2=c2,
-        speed_of_sound=_speed_of_sound(temperature),
+        speed_of_sound=_speed_of_sound(temperature_c),
         sound_power_level_a=_a_weighted_total(lw, freqs),
         method="comparison",
     )
@@ -981,8 +981,8 @@ def sound_energy_reverberation(
     events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundEnergyResult:
     r"""Sound energy level in a reverberation room, direct method (ISO 3741:2010
     clause 9.2.4).
@@ -1033,14 +1033,14 @@ def sound_energy_reverberation(
         spectra approximates the per-position procedure.
     :param integration_time: The interval ``T`` of the single event levels, in
         seconds; required with ``background_levels``.
-    :param temperature: Air temperature ``theta`` in the room, in degrees Celsius.
-    :param static_pressure: Static pressure ``ps`` in the room, in kilopascals.
+    :param temperature_c: Air temperature ``theta`` in the room, in degrees Celsius.
+    :param static_pressure_kpa: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundEnergyResult` (``method='direct'``).
     :raises ValueError: for a malformed or non-finite level array, a
         non-physical room or climate, a background without its
         ``integration_time``, or mismatched band counts.
     """
-    _room_inputs(volume, surface_area, temperature, static_pressure)
+    _room_inputs(volume, surface_area, temperature_c, static_pressure_kpa)
     event_levels, event_count = _room_event_levels(levels, events)
     if integration_time is not None:
         integration_time = require_positive(integration_time, "integration_time")
@@ -1057,7 +1057,7 @@ def sound_energy_reverberation(
         k1 = np.zeros(n_bands, dtype=np.float64)
 
     terms = _direct_terms(
-        t60_arr, volume, surface_area, freqs, temperature, static_pressure
+        t60_arr, volume, surface_area, freqs, temperature_c, static_pressure_kpa
     )
     lj = np.asarray(mean_level + terms.bracket, dtype=np.float64)
 
@@ -1088,8 +1088,8 @@ def sound_energy_comparison(
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
     background_levels_ref: np.ndarray | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundEnergyResult:
     r"""Sound energy level in a reverberation room, comparison method
     (ISO 3741:2010 clause 9.2.5).
@@ -1130,14 +1130,14 @@ def sound_energy_comparison(
     :param integration_time: The interval ``T`` of the single event levels, in
         seconds; required with ``background_levels``.
     :param background_levels_ref: Background levels matching ``levels_ref``.
-    :param temperature: Air temperature ``theta`` in the room, in degrees Celsius.
-    :param static_pressure: Static pressure ``ps`` in the room, in kilopascals.
+    :param temperature_c: Air temperature ``theta`` in the room, in degrees Celsius.
+    :param static_pressure_kpa: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundEnergyResult` (``method='comparison'``).
     :raises ValueError: for a malformed or non-finite level array, a
         non-physical climate, a background without its ``integration_time``
         or without ``frequencies``, or mismatched band counts.
     """
-    _validate_meteorology(temperature, static_pressure)
+    _validate_meteorology(temperature_c, static_pressure_kpa)
     event_levels, event_count = _room_event_levels(levels, events)
     if integration_time is not None:
         integration_time = require_positive(integration_time, "integration_time")
@@ -1155,7 +1155,7 @@ def sound_energy_comparison(
         )
     lp_rss = _reference_source_level(lp_rss, levels_ref, background_levels_ref, freqs)
 
-    c2 = _c2_correction(temperature, static_pressure)
+    c2 = _c2_correction(temperature_c, static_pressure_kpa)
     lj = np.asarray(lw_rss + (le_st - lp_rss) + c2, dtype=np.float64)
 
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
@@ -1168,7 +1168,7 @@ def sound_energy_comparison(
         background_correction=k1_st,
         c1=float("nan"),
         c2=c2,
-        speed_of_sound=_speed_of_sound(temperature),
+        speed_of_sound=_speed_of_sound(temperature_c),
         sound_energy_level_a=_a_weighted_total(lj, freqs),
         method="comparison",
         events=event_count,

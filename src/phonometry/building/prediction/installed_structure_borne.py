@@ -1080,7 +1080,7 @@ class InstalledSourceResult:
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header (``client``, ``specimen`` the source equipment,
             ``test_room`` the receiving room, ``instrumentation``,
-            ``temperature``, ``relative_humidity``, ``pressure``,
+            ``temperature_c``, ``relative_humidity_percent``, ``pressure``,
             ``test_date``), the footer identity (``laboratory``, ``operator``,
             ``report_id``, ``notes``) and, via ``requirement``, a declared
             upper limit on the overall ``L_n,s`` (lower is better).

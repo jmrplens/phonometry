@@ -264,31 +264,32 @@ room-acoustics measurement report (a performance space per ISO 3382-1:2009 or
 an ordinary room per ISO 3382-2:2008, both evaluated by the integrated
 impulse-response method): a standard-basis line, an optional metadata header
 block, the full-width per-band parameter table ($T_{20}$, $T_{30}$, EDT,
-$C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{s}$) above the result's own per-band decay-time
-plot (`.plot()`), the boxed mid-frequency reverberation time $T_\text{mid}$
-(the mean of the 500 Hz and 1000 Hz octave $T_{30}$) with the mid-frequency EDT
-alongside, and a footer with the fixed disclaimer. ISO 3382-1/-2 are
-characterisation standards with no intrinsic pass/fail, so a verdict row appears
-only when a target reverberation time is supplied through the
-metadata's `requirement` field (`ReportMetadata(requirement=...)`, read as the
-maximum acceptable value of whichever descriptor the box carries); a broadband
-result has no 500 Hz / 1000 Hz octaves to average, so its box and verdict fall
-back to the plain broadband $T_{30}$ with no "500-1000 Hz" claim, and so do a
-band range that misses those two octaves and one that reaches them with a
-non-evaluable $T_{30}$ in either, which fall back to the first band whose
-$T_{30}$ could be evaluated. It uses the same
-`ReportMetadata` container as the [ISO 11654 absorption fiche](../../materials/absorbers/absorption-measurement.md#iso-11654-report-report);
+$C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{s}$) above the result's own per-band
+decay-time plot (`.plot()`), the boxed mid-frequency reverberation time
+$T_\text{mid}$ (the mean of the 500 Hz and 1000 Hz octave $T_{30}$) with the
+mid-frequency EDT alongside, and a footer with the fixed disclaimer. ISO
+3382-1/-2 are characterisation standards with no intrinsic pass/fail, so a
+verdict row appears only when a target reverberation time is supplied through
+the metadata's `requirement` field (`ReportMetadata(requirement=...)`, read as
+the maximum acceptable value of whichever descriptor the box carries); a
+broadband result has no 500 Hz / 1000 Hz octaves to average, so its box and
+verdict fall back to the plain broadband $T_{30}$ with no "500-1000 Hz" claim,
+and so do a band range that misses those two octaves and one that reaches them
+with a non-evaluable $T_{30}$ in either, which fall back to the first band
+whose $T_{30}$ could be evaluated. It uses the same `ReportMetadata` container
+as the [ISO 11654 absorption
+fiche](../../materials/absorbers/absorption-measurement.md#iso-11654-report-report);
 the room-specific fields `room_volume`, `source_positions` and
 `receiver_positions` populate the header (ISO 3382 requires the room volume and
 the number of source and microphone positions to be reported), alongside
-`test_room`, `specimen`, `area`, `instrumentation`, `temperature`,
-`relative_humidity`, `pressure`, `measurement_standard`, `test_date`,
-`laboratory`, `operator`, `report_id` and `notes`. Passing `metadata=None`
-produces a bare characterisation fiche. Rendering needs reportlab and, for the
-figure the fiche embeds, matplotlib (`pip install "phonometry[report,plot]"`);
-only `engine="reportlab"` is supported. The fiche renders in English by default;
-pass `language="es"` for a Spanish fiche (translated fixed strings and a comma
-decimal separator).
+`test_room`, `specimen`, `area`, `instrumentation`, `temperature_c`,
+`relative_humidity_percent`, `static_pressure_kpa`, `measurement_standard`,
+`test_date`, `laboratory`, `operator`, `report_id` and `notes`. Passing
+`metadata=None` produces a bare characterisation fiche. Rendering needs
+reportlab and, for the figure the fiche embeds, matplotlib (`pip install
+"phonometry[report,plot]"`); only `engine="reportlab"` is supported. The fiche
+renders in English by default; pass `language="es"` for a Spanish fiche
+(translated fixed strings and a comma decimal separator).
 
 ```python
 from phonometry import room, ReportMetadata
@@ -302,7 +303,7 @@ result.report(
         room_volume=2830.0, area=340.0,
         source_positions=2, receiver_positions=8,
         measurement_standard="ISO 3382-1",
-        temperature=21.0, relative_humidity=45.0,
+        temperature_c=21.0, relative_humidity_percent=45.0,
         laboratory="Phonometry Reference Laboratory",
         requirement=1.3,           # adds a verdict against a target T_mid
     ),

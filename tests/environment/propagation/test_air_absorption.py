@@ -81,7 +81,7 @@ def test_reference_condition_constants() -> None:
 def test_reference_condition_finite_positive() -> None:
     # At the reference T0 = 20 degC the model must stay finite and positive.
     alpha = environment.air_attenuation(
-        [1000.0], temperature=20.0, relative_humidity=50.0
+        [1000.0], temperature_c=20.0, relative_humidity_percent=50.0
     )
     assert np.all(np.isfinite(alpha))
     assert np.all(alpha > 0.0)
@@ -96,7 +96,9 @@ def test_low_frequency_grows_as_f_squared() -> None:
     f = np.array([10.0, 20.0, 40.0])
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", environment.AtmosphericAbsorptionWarning)
-        a = environment.air_attenuation(f, temperature=20.0, relative_humidity=60.0)
+        a = environment.air_attenuation(
+            f, temperature_c=20.0, relative_humidity_percent=60.0
+        )
     assert a[1] / a[0] == pytest.approx(4.0, rel=0.05)
     assert a[2] / a[1] == pytest.approx(4.0, rel=0.05)
 
@@ -104,7 +106,9 @@ def test_low_frequency_grows_as_f_squared() -> None:
 def test_alpha_strictly_increases_with_frequency() -> None:
     # Table 1 is monotone in frequency at fixed T, RH.
     f = np.array([50.0, 100.0, 250.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0])
-    a = environment.air_attenuation(f, temperature=15.0, relative_humidity=50.0)
+    a = environment.air_attenuation(
+        f, temperature_c=15.0, relative_humidity_percent=50.0
+    )
     assert np.all(np.diff(a) > 0.0)
 
 
@@ -115,7 +119,9 @@ def test_relaxation_absorption_per_f2_rolls_off() -> None:
     # alpha/f^2 = const + relaxation terms frO/(frO^2+f^2) + frN/(frN^2+f^2),
     # both strictly decreasing in f: the vibrational relaxation roll-off.
     f = np.array([100.0, 500.0, 1000.0, 4000.0, 10000.0])
-    a = environment.air_attenuation(f, temperature=20.0, relative_humidity=70.0)
+    a = environment.air_attenuation(
+        f, temperature_c=20.0, relative_humidity_percent=70.0
+    )
     per_f2 = a / f**2
     assert np.all(np.diff(per_f2) < 0.0)
 
@@ -141,10 +147,10 @@ def test_humidity_sweep_has_interior_peak() -> None:
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"temperature": -30.0},  # below -20 degC tabulated range
-        {"temperature": 60.0},  # above +50 degC
-        {"relative_humidity": 5.0},  # below 10 %
-        {"pressure": 250.0},  # above 200 kPa envelope (clause 7)
+        {"temperature_c": -30.0},  # below -20 degC tabulated range
+        {"temperature_c": 60.0},  # above +50 degC
+        {"relative_humidity_percent": 5.0},  # below 10 %
+        {"atmospheric_pressure_kpa": 250.0},  # above 200 kPa envelope (clause 7)
     ],
 )
 def test_out_of_range_warns(kwargs: dict[str, float]) -> None:
@@ -167,15 +173,27 @@ def test_out_of_range_frequency_warns() -> None:
         # absolute zero
         (
             (1000.0,),
-            {"temperature": -273.15},
-            "'temperature' must be finite and above",
+            {"temperature_c": -273.15},
+            "'temperature_c' must be finite and above",
         ),
         # negative RH
-        ((1000.0,), {"relative_humidity": -1.0}, "'relative_humidity' must be within"),
+        (
+            (1000.0,),
+            {"relative_humidity_percent": -1.0},
+            "'relative_humidity_percent' must be within",
+        ),
         # > 100 %
-        ((1000.0,), {"relative_humidity": 120.0}, "'relative_humidity' must be within"),
+        (
+            (1000.0,),
+            {"relative_humidity_percent": 120.0},
+            "'relative_humidity_percent' must be within",
+        ),
         # non-positive pressure
-        ((1000.0,), {"pressure": 0.0}, "'pressure' must be positive"),
+        (
+            (1000.0,),
+            {"atmospheric_pressure_kpa": 0.0},
+            "'atmospheric_pressure_kpa' must be positive",
+        ),
     ],
 )
 def test_invalid_inputs_raise(args: tuple, kwargs: dict, match: str) -> None:
@@ -188,9 +206,13 @@ def test_invalid_inputs_raise(args: tuple, kwargs: dict, match: str) -> None:
 
 def test_vectorized_matches_scalar() -> None:
     freqs = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
-    vec = environment.air_attenuation(freqs, temperature=25.0, relative_humidity=45.0)
+    vec = environment.air_attenuation(
+        freqs, temperature_c=25.0, relative_humidity_percent=45.0
+    )
     for i, f in enumerate(freqs):
-        one = environment.air_attenuation(f, temperature=25.0, relative_humidity=45.0)
+        one = environment.air_attenuation(
+            f, temperature_c=25.0, relative_humidity_percent=45.0
+        )
         assert float(one) == pytest.approx(vec[i], rel=1e-12)
     assert vec.shape == (len(freqs),)
 
@@ -210,8 +232,12 @@ def test_exact_midband_snaps_nominal_to_midband() -> None:
 
 def test_air_attenuation_m_is_alpha_over_10_lg_e() -> None:
     freqs = [125.0, 500.0, 1000.0, 4000.0]
-    alpha = environment.air_attenuation(freqs, temperature=20.0, relative_humidity=50.0)
-    m = environment.air_attenuation_m(freqs, temperature=20.0, relative_humidity=50.0)
+    alpha = environment.air_attenuation(
+        freqs, temperature_c=20.0, relative_humidity_percent=50.0
+    )
+    m = environment.air_attenuation_m(
+        freqs, temperature_c=20.0, relative_humidity_percent=50.0
+    )
     np.testing.assert_allclose(m, materials.attenuation_from_alpha(alpha), rtol=1e-12)
     # m = alpha / (10 lg e) ~ alpha / 4.3429.
     np.testing.assert_allclose(m, alpha / (10.0 * math.log10(math.e)), rtol=1e-12)
@@ -251,7 +277,7 @@ def test_atmospheric_attenuation_wraps_air_attenuation() -> None:
     # and echoes the atmospheric conditions.
     bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
     res = environment.atmospheric_attenuation(
-        bands, temperature=20.0, relative_humidity=50.0
+        bands, temperature_c=20.0, relative_humidity_percent=50.0
     )
     assert isinstance(res, environment.AtmosphericAttenuation)
     np.testing.assert_allclose(
@@ -259,7 +285,11 @@ def test_atmospheric_attenuation_wraps_air_attenuation() -> None:
         environment.air_attenuation(bands, 20.0, 50.0),
     )
     np.testing.assert_allclose(res.frequencies, bands)
-    assert (res.temperature, res.relative_humidity, res.pressure) == (
+    assert (
+        res.temperature_c,
+        res.relative_humidity_percent,
+        res.atmospheric_pressure_kpa,
+    ) == (
         20.0,
         50.0,
         101.325,
@@ -299,9 +329,9 @@ def test_atmospheric_attenuation_total_coerces_list_fields() -> None:
     res = environment.AtmosphericAttenuation(
         frequencies=[100.0],
         attenuation_coefficient=[0.001],
-        temperature=20.0,
-        relative_humidity=50.0,
-        pressure=101.325,
+        temperature_c=20.0,
+        relative_humidity_percent=50.0,
+        atmospheric_pressure_kpa=101.325,
         distance=10.0,
     )
     np.testing.assert_allclose(res.total_attenuation, [0.01])
@@ -332,9 +362,9 @@ def test_atmospheric_attenuation_direct_construction_guards_distance(
         environment.AtmosphericAttenuation(
             frequencies=freqs,
             attenuation_coefficient=alpha,
-            temperature=20.0,
-            relative_humidity=50.0,
-            pressure=101.325,
+            temperature_c=20.0,
+            relative_humidity_percent=50.0,
+            atmospheric_pressure_kpa=101.325,
             distance=bad,
         )
 

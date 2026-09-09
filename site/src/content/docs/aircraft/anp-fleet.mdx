@@ -335,8 +335,8 @@ print(round(float(level.level), 1))    # 89.3 dB
 
 One aerodrome, one atmosphere: the field's temperature and pressure reach the
 Doc 29 impedance adjustment as well as the performance model, so a profile flown
-on a 35 °C day is not corrected for 15 °C by omission. `temperature` and
-`pressure` still override it where the two genuinely differ.
+on a 35 °C day is not corrected for 15 °C by omission. `temperature_c` and
+`atmospheric_pressure_kpa` still override it where the two genuinely differ.
 
 ## 5. Straight to an event level or a contour
 
@@ -359,17 +359,18 @@ banked-segment rule. $z$ is the receiver height above local ground, left at 0 in
 these examples where Doc 29 measures at 1.2 m, normally a difference under a
 decibel.
 
-Three arguments decide the rest, and two of them are silent. The metric defaults
-to the sound exposure level, with `"LAmax"` available on request; the stage
-length defaults to 1, the shortest trip-distance bin and therefore the steepest
-climb and the smallest footprint; and the optional `temperature` and `pressure`
-re-reference the tabulated levels from the reference specific acoustic impedance
-to the air at the aerodrome, defaulting to the 15 °C and 101.325 kPa of the
-standard atmosphere. That last pair is a bookkeeping term and not a weather
-correction: at the standard atmosphere it is worth +0.07 dB, and it rarely
-exceeds a few tenths. The NPD levels still carry the absorption of the
-atmosphere they were reduced to, and the chain offers no humidity-dependent band
-correction, so a hot dry aerodrome is not modelled by passing its temperature.
+Three arguments decide the rest, and two of them are silent. The metric
+defaults to the sound exposure level, with `"LAmax"` available on request; the
+stage length defaults to 1, the shortest trip-distance bin and therefore the
+steepest climb and the smallest footprint; and the optional `temperature_c` and
+`atmospheric_pressure_kpa` re-reference the tabulated levels from the reference
+specific acoustic impedance to the air at the aerodrome, defaulting to the 15
+°C and 101.325 kPa of the standard atmosphere. That last pair is a bookkeeping
+term and not a weather correction: at the standard atmosphere it is worth +0.07
+dB, and it rarely exceeds a few tenths. The NPD levels still carry the
+absorption of the atmosphere they were reduced to, and the chain offers no
+humidity-dependent band correction, so a hot dry aerodrome is not modelled by
+passing its temperature.
 
 ```python
 from phonometry import aircraft

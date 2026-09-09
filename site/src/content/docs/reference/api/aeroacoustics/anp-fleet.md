@@ -85,8 +85,8 @@ AnpAircraft.event_level(
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
     metric: EventMetric = 'exposure',
-    temperature: float | None = None,
-    pressure: float | None = None,
+    temperature_c: float | None = None,
+    atmospheric_pressure_kpa: float | None = None,
 ) -> FlyoverResult
 ```
 
@@ -103,8 +103,8 @@ AnpAircraft.noise_contour(
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
     metric: EventMetric = 'exposure',
-    temperature: float | None = None,
-    pressure: float | None = None,
+    temperature_c: float | None = None,
+    atmospheric_pressure_kpa: float | None = None,
 ) -> NoiseContourResult
 ```
 
@@ -181,8 +181,8 @@ AnpDatabase.event_level(
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
     metric: EventMetric = 'exposure',
-    temperature: float | None = None,
-    pressure: float | None = None,
+    temperature_c: float | None = None,
+    atmospheric_pressure_kpa: float | None = None,
 ) -> FlyoverResult
 ```
 
@@ -201,8 +201,8 @@ Feeds the aircraft's profile and NPD curves into
 | `aerodrome` | Fly the published procedural steps at this field through the Appendix B performance model instead of reading the tabulated fixed-point trajectory. Most ANP types publish only steps, so for them this is not an alternative but the only way in. |
 | `stage_length` | ANP stage length (default 1). |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
-| `temperature` | Air temperature at the field, in °C, for the atmospheric impedance adjustment. Left unset it follows *aerodrome*, or the standard atmosphere when there is none. |
-| `pressure` | Air pressure at the field, in kPa, likewise. |
+| `temperature_c` | Air temperature at the field, in °C, for the atmospheric impedance adjustment. Left unset it follows *aerodrome*, or the standard atmosphere when there is none. |
+| `atmospheric_pressure_kpa` | Air pressure at the field, in kPa, likewise. |
 
 **Returns:** A [`FlyoverResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#flyoverresult).
 
@@ -257,8 +257,8 @@ AnpDatabase.noise_contour(
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
     metric: EventMetric = 'exposure',
-    temperature: float | None = None,
-    pressure: float | None = None,
+    temperature_c: float | None = None,
+    atmospheric_pressure_kpa: float | None = None,
 ) -> NoiseContourResult
 ```
 
@@ -278,8 +278,8 @@ Feeds the aircraft's profile and NPD curves into
 | `aerodrome` | Fly the published procedural steps at this field through the Appendix B performance model instead of reading the tabulated fixed-point trajectory. Most ANP types publish only steps, so for them this is not an alternative but the only way in. |
 | `stage_length` | ANP stage length (default 1). |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
-| `temperature` | Air temperature at the field, in °C, for the atmospheric impedance adjustment. Left unset it follows *aerodrome*, or the standard atmosphere when there is none. |
-| `pressure` | Air pressure at the field, in kPa, likewise. |
+| `temperature_c` | Air temperature at the field, in °C, for the atmospheric impedance adjustment. Left unset it follows *aerodrome*, or the standard atmosphere when there is none. |
+| `atmospheric_pressure_kpa` | Air pressure at the field, in kPa, likewise. |
 
 **Returns:** A [`NoiseContourResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#noisecontourresult).
 

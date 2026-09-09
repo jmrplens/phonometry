@@ -1059,7 +1059,7 @@ propagation-loss curve of that guide's
 ```python
 import numpy as np
 
-env = {"temperature": 10.0, "salinity": 35.0, "depth": 100.0}
+env = {"temperature_c": 10.0, "salinity": 35.0, "depth": 100.0}
 se = underwater.passive_sonar_equation(
     source_level=140.0, propagation_loss=np.linspace(40.0, 120.0, 400),
     noise_level=60.0, directivity_index=15.0, detection_threshold=8.0)

@@ -833,7 +833,7 @@ plt.show()
 **What a phase error costs a peak reading.** Annex H is normative, and
 Formula (H.4) is the
 only worked number in the whole phase argument:
-$\Delta P_\max \approx \pm\max\{0.48 \sin \Delta\varphi_0\} \times 100\ \%$,
+$\Delta P_{\max} \approx \pm\max\{0.48 \sin \Delta\varphi_0\} \times 100\ \%$,
 followed by the sentence that for the maximum characteristic phase deviations
 of 12 degrees the maximum peak-value deviation is approximately 10 %. The
 maximum is inside the printed formula, so the answer is one number for a whole

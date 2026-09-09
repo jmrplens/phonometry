@@ -98,6 +98,13 @@ if TYPE_CHECKING:
 _FREQ_LABEL = "Frequency [Hz]"
 #: Mobility ordinate label of the ISO 7626 panels.
 _MOBILITY_LABEL = "Mobility $|Y|$ [m/(N·s)]"
+#: Deviation ordinate shared by the mobility, seat and signal-burst panels.
+_DEVIATION_LABEL = "Deviation [%]"
+#: The three legend entries every ISO 8041-1 verifier panel carries: the band
+#: Table 5 allows, and the two verdicts a measured point can take in it.
+_ISO8041_BAND_LABEL = "ISO 8041-1 tolerance"
+_WITHIN_LABEL = "within tolerance"
+_OUTSIDE_LABEL = "outside tolerance"
 #: Legend entry of the assessed ISO 2631-5 point (stress variable and
 #: injury probability), formatted with ``r`` and ``p``.
 _RISK_LABEL = r"$R$ = {r},  $\Pi$ = {p} %"
@@ -199,7 +206,7 @@ _STRINGS: dict[str, str] = {
     "{w} weighting against ISO 8041-1: {verdict}": "Ponderación {w} frente a ISO 8041-1: {verdict}",
     "Characteristic phase deviation [deg]": "Desviación característica de fase [grados]",
     "{w} characteristic phase deviation against ISO 8041-1: {verdict}": "Desviación característica de fase de {w} frente a ISO 8041-1: {verdict}",
-    "PASS": "CUMPLE",
+    "PASS": "CUMPLE",  # nosec B105 - verdict label, not a password
     "FAIL": "NO CUMPLE",
     "measured {v} mm/s at {f} Hz": "medido {v} mm/s a {f} Hz",
     "measured {v} mm/s": "medido {v} mm/s",
@@ -588,7 +595,7 @@ def plot_rigid_mass_calibration(
                 label=outside_label,
             )
         axd.set_xlabel(_t(_FREQ_LABEL, language))
-        axd.set_ylabel(_t("Deviation [%]", language))
+        axd.set_ylabel(_t(_DEVIATION_LABEL, language))
         axd.grid(True, which="both", alpha=0.3)
         axd.legend(loc="best", fontsize="small")
 
@@ -828,7 +835,7 @@ def plot_weighting_verification(
         design * (1.0 + upper / 100.0),
         color=_C_PRIMARY,
         alpha=0.15,
-        label=_t("ISO 8041-1 tolerance", language),
+        label=_t(_ISO8041_BAND_LABEL, language),
     )
     # 13.1 and 14.1 subtract the laboratory's own expanded uncertainty from
     # both limits, so with one supplied the band a measurement is actually
@@ -861,7 +868,7 @@ def plot_weighting_verification(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "markersize", 5)
     style_default(kwargs, "ls", "none")
-    kwargs.setdefault("label", _t("within tolerance", language))
+    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
     ax.plot(freqs[inside], measured[inside], **kwargs)
     if not inside.all():
         ax.plot(
@@ -871,7 +878,7 @@ def plot_weighting_verification(
             marker="X",
             markersize=9,
             ls="none",
-            label=_t("outside tolerance", language),
+            label=_t(_OUTSIDE_LABEL, language),
         )
 
     ax.set_xscale("log")
@@ -939,7 +946,7 @@ def plot_phase_verification(
         step="post",
         color=_C_PRIMARY,
         alpha=0.15,
-        label=_t("ISO 8041-1 tolerance", language),
+        label=_t(_ISO8041_BAND_LABEL, language),
     )
 
     # Green for the bands that conform and red for the ones that do not, the
@@ -952,7 +959,7 @@ def plot_phase_verification(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "markersize", 5)
     style_default(kwargs, "ls", "none")
-    kwargs.setdefault("label", _t("within tolerance", language))
+    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
     ax.plot(freqs[inside], deviation[inside], **kwargs)
     if not inside.all():
         ax.plot(
@@ -962,7 +969,7 @@ def plot_phase_verification(
             marker="X",
             markersize=9,
             ls="none",
-            label=_t("outside tolerance", language),
+            label=_t(_OUTSIDE_LABEL, language),
         )
 
     # A plain logarithmic axis rather than the octave-centre ticks of
@@ -1963,7 +1970,7 @@ def plot_signal_burst_verification(
         ]
     )
     ax.set_xlabel(_t("Saw-tooth cycles per burst", language))
-    ax.set_ylabel(_t("Deviation [%]", language))
+    ax.set_ylabel(_t(_DEVIATION_LABEL, language))
     row = (
         _t("band limiting", language)
         if result.weighting == _BAND_LIMITING_ROW

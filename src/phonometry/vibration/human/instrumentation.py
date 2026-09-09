@@ -83,6 +83,10 @@ if TYPE_CHECKING:
 #: Table 4: the four transition frequencies, in hertz, that key the tolerance
 #: regions of Table 5 to a weighting. The standard prints them as powers
 #: ``10**(k/10)``, so they are built that way here rather than from the
+#: What the three entry points that take a frequency vector refuse it for.
+#: One text, so a caller matching on it matches all three.
+_FREQUENCIES_MSG = "'frequencies' must be positive and finite."
+
 #: rounded decimals printed beside them: the exponents are the exact values
 #: and the decimals are the courtesy.
 _WHOLE_BODY_TRANSITIONS = (-6, -2, 18, 22)
@@ -278,7 +282,7 @@ def weighting_tolerance_percent(
     weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
     f = np.asarray(frequencies, dtype=np.float64)
     if f.size and not np.all(np.isfinite(f) & (f > 0.0)):
-        msg = "'frequencies' must be positive and finite."
+        msg = _FREQUENCIES_MSG
         raise ValueError(msg)
     ft1, ft2, ft3, ft4 = TRANSITION_FREQUENCIES_HZ[weighting]
 
@@ -307,7 +311,7 @@ def phase_tolerance_degrees(name: str, frequencies: ArrayLike) -> NDArray[np.flo
     weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
     f = np.asarray(frequencies, dtype=np.float64)
     if f.size and not np.all(np.isfinite(f) & (f > 0.0)):
-        msg = "'frequencies' must be positive and finite."
+        msg = _FREQUENCIES_MSG
         raise ValueError(msg)
     ft1, ft2, ft3, ft4 = TRANSITION_FREQUENCIES_HZ[weighting]
     limits = np.full(f.shape, TAIL_TOLERANCE_PERCENT[2], dtype=np.float64)
@@ -463,7 +467,7 @@ def verify_weighting(
         quantity="frequency",
     )
     if not np.all(np.isfinite(f) & (f > 0.0)):
-        msg = "'frequencies' must be positive and finite."
+        msg = _FREQUENCIES_MSG
         raise ValueError(msg)
     if not np.all(np.isfinite(measured) & (measured >= 0.0)):
         msg = "'measured_factors' must be non-negative and finite."

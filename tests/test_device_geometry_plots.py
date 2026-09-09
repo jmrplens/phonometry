@@ -454,7 +454,7 @@ def test_a_slit_result_refuses_a_retained_hole_radius() -> None:
 def test_piston_geometry_with_and_without_lobe() -> None:
     angles = np.linspace(-np.pi / 2, np.pi / 2, 91)
     with_lobe = pm.electroacoustics.radiating_piston(
-        0.1, np.array([500.0, 4000.0]), angles=angles
+        0.1, np.array([500.0, 4000.0]), angles_rad=angles
     )
     ax = with_lobe.plot_geometry()
     assert ax.get_legend() is not None
@@ -463,11 +463,13 @@ def test_piston_geometry_with_and_without_lobe() -> None:
     assert ax.get_legend() is None
     with pytest.raises(ValueError, match=r"'radius' must be positive\."):
         pm.electroacoustics.plot_piston_geometry(0.0)
-    with pytest.raises(ValueError, match=r"Give 'angles' and 'directivity' together"):
-        pm.electroacoustics.plot_piston_geometry(0.1, angles=angles)
+    with pytest.raises(
+        ValueError, match=r"Give 'angles_rad' and 'directivity' together"
+    ):
+        pm.electroacoustics.plot_piston_geometry(0.1, angles_rad=angles)
     with pytest.raises(ValueError, match=r"'directivity'.*same shape"):
         pm.electroacoustics.plot_piston_geometry(
-            0.1, angles=angles, directivity=np.ones(angles.size - 1)
+            0.1, angles_rad=angles, directivity=np.ones(angles.size - 1)
         )
 
 
@@ -479,15 +481,17 @@ def test_piston_geometry_refuses_a_nan_directivity() -> None:
     lobe = np.abs(np.sinc(2.0 * np.sin(angles)))
     lobe[40] = float("nan")
     with pytest.raises(ValueError, match="'directivity' must be finite"):
-        pm.electroacoustics.plot_piston_geometry(0.05, angles=angles, directivity=lobe)
+        pm.electroacoustics.plot_piston_geometry(
+            0.05, angles_rad=angles, directivity=lobe
+        )
 
 
 def test_piston_geometry_refuses_a_nan_angle() -> None:
     angles = np.linspace(-np.pi / 2, np.pi / 2, 91)
     angles[3] = float("nan")
-    with pytest.raises(ValueError, match="'angles' must be finite"):
+    with pytest.raises(ValueError, match="'angles_rad' must be finite"):
         pm.electroacoustics.plot_piston_geometry(
-            0.05, angles=angles, directivity=np.ones(angles.size)
+            0.05, angles_rad=angles, directivity=np.ones(angles.size)
         )
 
 
@@ -495,12 +499,12 @@ def test_piston_geometry_refuses_a_nan_angle() -> None:
 # Plenum.
 # ---------------------------------------------------------------------------
 def test_plenum_geometry_draws_and_validates() -> None:
-    ax = pm.noise_control.plot_plenum_geometry(0.09, 1.2, 6.0, angle=0.35)
+    ax = pm.noise_control.plot_plenum_geometry(0.09, 1.2, 6.0, angle_rad=0.35)
     assert ax.get_aspect() == 1.0
     with pytest.raises(ValueError, match="'exit_area' must be positive"):
         pm.noise_control.plot_plenum_geometry(0.0, 1.2, 6.0)
-    with pytest.raises(ValueError, match=r"'angle' must be in \[0, pi/2\)"):
-        pm.noise_control.plot_plenum_geometry(0.09, 1.2, 6.0, angle=2.0)
+    with pytest.raises(ValueError, match=r"'angle_rad' must be in \[0, pi/2\)"):
+        pm.noise_control.plot_plenum_geometry(0.09, 1.2, 6.0, angle_rad=2.0)
 
 
 def test_plenum_geometry_refuses_a_nan_wall_area() -> None:
@@ -533,7 +537,7 @@ def test_fdtd_domain_preview() -> None:
         edge_impedance={"top": 413.0},
         obstacle_mask=mask,
     )
-    sim.add_source(GaussianPulse(8, 20, width=1e-3))
+    sim.add_source(GaussianPulse(8, 20, half_width_s=1e-3))
     assert sim.sponge_width == 6
     assert sim.sponge_sides == ("left", "right")
     assert set(sim.edge_impedance) == {"top"}

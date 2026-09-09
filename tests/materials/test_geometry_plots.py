@@ -64,11 +64,11 @@ def _geometry_axes() -> Iterator[Axes]:
         [_resonator()] * 3,
         slit_height=0.002,
         lattice_step=0.015,
-        period=0.02,
+        period_m=0.02,
     )
-    yield m.plot_qrd_geometry(m.qrd_well_depths(7, 500.0), 0.12, periods=2)
+    yield m.plot_qrd_geometry(m.qrd_well_depths(7, 500.0), 0.12, repetitions=2)
     yield m.plot_impedance_tube_geometry(
-        spacing=0.05, x1=0.15, diameter=0.1, shape="circular"
+        spacing=0.05, x1=0.15, diameter_m=0.1, shape="circular"
     )
     yield m.plot_transmission_tube_geometry(
         l1=0.1,
@@ -76,7 +76,7 @@ def _geometry_axes() -> Iterator[Axes]:
         l2=0.15,
         s2=0.03,
         thickness=0.05,
-        diameter=0.1,
+        diameter_m=0.1,
         shape="square",
     )
 
@@ -112,7 +112,7 @@ def test_layered_result_retains_layers_and_draws() -> None:
     assert res.plot_geometry() is not None
     bare = m.LayeredAbsorberResult(
         frequency=res.frequency,
-        angle=res.angle,
+        angle_rad=res.angle_rad,
         surface_impedance=res.surface_impedance,
         normalized_impedance=res.normalized_impedance,
         reflection=res.reflection,
@@ -136,20 +136,20 @@ def test_slit_result_retains_geometry_and_draws() -> None:
         [_resonator()] * 3,
         slit_height=0.002,
         lattice_step=0.015,
-        period=0.02,
+        period_m=0.02,
     )
     assert res.resonators == (_resonator(),) * 3
     assert res.slit_height == pytest.approx(0.002)
     assert res.lattice_step == pytest.approx(0.015)
-    assert res.period == pytest.approx(0.02)
+    assert res.period_m == pytest.approx(0.02)
     assert res.plot_geometry() is not None
 
 
 def test_diffuser_response_retains_wells_and_draws() -> None:
     depths = m.qrd_well_depths(7, 500.0)
-    res = m.predict_diffuser_polar_response(0.12, 1000.0, depths=depths, periods=2)
+    res = m.predict_diffuser_polar_response(0.12, 1000.0, depths=depths, repetitions=2)
     assert res.well_width == pytest.approx(0.12)
-    assert res.periods == 2
+    assert res.repetitions == 2
     assert res.depths is not None
     assert np.allclose(res.depths, depths)
     assert res.plot_geometry() is not None
@@ -172,7 +172,7 @@ def test_impedance_tube_result_draws_from_retained_geometry() -> None:
         x1=0.15,
         speed_of_sound=343.2,
         characteristic_impedance=413.0,
-        diameter=0.1,
+        diameter_m=0.1,
     )
     assert res.plot_geometry() is not None
     bare = m.two_microphone_impedance(
@@ -201,7 +201,7 @@ def test_transfer_matrix_geometry_paths() -> None:
 def test_impedance_tube_sample_patch_is_to_scale() -> None:
     thickness = 0.08
     ax = m.plot_impedance_tube_geometry(
-        spacing=0.05, x1=0.15, diameter=0.1, sample_thickness=thickness
+        spacing=0.05, x1=0.15, diameter_m=0.1, sample_thickness=thickness
     )
     from matplotlib.patches import Rectangle
 
@@ -220,8 +220,8 @@ def test_qrd_geometry_validation() -> None:
         m.plot_qrd_geometry([-0.01], 0.12)
     with pytest.raises(ValueError, match=r"'well_width' must be positive"):
         m.plot_qrd_geometry([0.05], 0.0)
-    with pytest.raises(ValueError, match=r"'periods' must be >="):
-        m.plot_qrd_geometry([0.05], 0.12, periods=0)
+    with pytest.raises(ValueError, match=r"'repetitions' must be >="):
+        m.plot_qrd_geometry([0.05], 0.12, repetitions=0)
 
 
 def test_qrd_geometry_refuses_a_nan_well_depth() -> None:
@@ -245,9 +245,9 @@ def test_transmission_tube_validation() -> None:
         m.plot_transmission_tube_geometry(
             l1=0.1, s1=0.0, l2=0.15, s2=0.03, thickness=0.05
         )
-    with pytest.raises(ValueError, match=r"'diameter' must be positive"):
+    with pytest.raises(ValueError, match=r"'diameter_m' must be positive"):
         m.plot_transmission_tube_geometry(
-            l1=0.1, s1=0.03, l2=0.15, s2=0.03, thickness=0.05, diameter=-1.0
+            l1=0.1, s1=0.03, l2=0.15, s2=0.03, thickness=0.05, diameter_m=-1.0
         )
 
 
@@ -291,7 +291,7 @@ def test_insitu_geometry_refuses_a_nan_source_height() -> None:
 def test_metadiffuser_panel_geometry_refuses_a_nan_depth() -> None:
     with pytest.raises(ValueError, match="'depth' must be positive"):
         m.plot_metadiffuser_panel_geometry(
-            [None, None], depth=float("nan"), period=0.02
+            [None, None], depth=float("nan"), period_m=0.02
         )
 
 
@@ -302,15 +302,15 @@ def test_slit_absorber_geometry_refuses_a_nan_lattice_step() -> None:
             resonator,
             slit_height=0.002,
             lattice_step=float("nan"),
-            period=0.02,
+            period_m=0.02,
         )
 
 
 def test_impedance_tube_validation() -> None:
     with pytest.raises(ValueError, match="'x1' must exceed 'spacing'"):
         m.plot_impedance_tube_geometry(spacing=0.05, x1=0.04)
-    with pytest.raises(ValueError, match=r"'diameter' must be positive"):
-        m.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, diameter=-0.1)
+    with pytest.raises(ValueError, match=r"'diameter_m' must be positive"):
+        m.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, diameter_m=-0.1)
     with pytest.raises(ValueError, match=r"'sample_thickness' must be positive"):
         m.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, sample_thickness=0.0)
     with pytest.raises(ValueError, match="Unknown language"):
@@ -321,13 +321,13 @@ def test_slit_geometry_validation() -> None:
     resonator = _resonator()
     with pytest.raises(ValueError, match="'slit_height' must be positive"):
         m.plot_slit_absorber_geometry(
-            resonator, slit_height=0.0, lattice_step=0.015, period=0.02
+            resonator, slit_height=0.0, lattice_step=0.015, period_m=0.02
         )
     with pytest.raises(
         ValueError, match=r"'resonators' must contain at least one resonator"
     ):
         m.plot_slit_absorber_geometry(
-            [], slit_height=0.002, lattice_step=0.015, period=0.02
+            [], slit_height=0.002, lattice_step=0.015, period_m=0.02
         )
 
 
@@ -348,7 +348,7 @@ def _texts(ax: Axes) -> str:
 
 def test_spanish_strings_rendered() -> None:
     ax = m.plot_impedance_tube_geometry(
-        spacing=0.05, x1=0.15, diameter=0.1, language="es"
+        spacing=0.05, x1=0.15, diameter_m=0.1, language="es"
     )
     joined = _texts(ax)
     assert "Altavoz" in joined

@@ -749,7 +749,7 @@ def road_propulsion_noise(
     speed: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
-    gradient: float = 0.0,
+    road_slope_percent: float = 0.0,
     junction_distance: float | None = None,
     junction_type: JunctionType = JunctionType.NONE,
     coefficients: RoadEmissionCoefficients = ROAD_COEFFICIENTS,
@@ -769,7 +769,7 @@ def road_propulsion_noise(
         raised to 20 km/h (2.2.1).
     :param surface: Road surface, as a :class:`RoadSurface`, its description or
         an explicit :class:`RoadSurfaceCoefficients`.
-    :param gradient: Road slope ``s``, in per cent, positive uphill in the
+    :param road_slope_percent: Road slope ``s``, in per cent, positive uphill in the
         direction of travel. For a bidirectional flow, split the flow in two
         and correct one half uphill and the other downhill.
     :param junction_distance: Distance ``x`` to the junction, in m.
@@ -794,7 +794,9 @@ def road_propulsion_noise(
         if junction_type is not JunctionType.NONE
         else 0.0
     )
-    d_grad = _gradient_correction(key, _finite(gradient, "gradient"), v)
+    d_grad = _gradient_correction(
+        key, _finite(road_slope_percent, "road_slope_percent"), v
+    )
     return np.asarray(base + d_road + d_acc + d_grad, dtype=np.float64)
 
 
@@ -812,7 +814,7 @@ def road_vehicle_sound_power(
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
     temperature_c: float = ROAD_REFERENCE_TEMPERATURE,
-    gradient: float = 0.0,
+    road_slope_percent: float = 0.0,
     studded_fraction: float = 0.0,
     studded_months: float = 0.0,
     junction_distance: float | None = None,
@@ -829,7 +831,7 @@ def road_vehicle_sound_power(
     :param speed: Average speed ``v_m``, in km/h.
     :param surface: Road surface (Table F-4).
     :param temperature_c: Air temperature ``tau``, in degrees Celsius.
-    :param gradient: Road slope ``s``, in per cent.
+    :param road_slope_percent: Road slope ``s``, in per cent.
     :param studded_fraction: ``Q_stud,ratio`` of (2.2.7).
     :param studded_months: ``T_s`` of (2.2.7), in months.
     :param junction_distance: Distance ``x`` to the junction, in m.
@@ -843,7 +845,7 @@ def road_vehicle_sound_power(
         key,
         speed,
         surface=surface,
-        gradient=gradient,
+        road_slope_percent=road_slope_percent,
         junction_distance=junction_distance,
         junction_type=junction_type,
         coefficients=coefficients,
@@ -997,7 +999,7 @@ def road_source_power(
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
     temperature_c: float = ROAD_REFERENCE_TEMPERATURE,
-    gradient: float = 0.0,
+    road_slope_percent: float = 0.0,
     studded_months: float = 0.0,
     junction_distance: float | None = None,
     junction_type: JunctionType = JunctionType.NONE,
@@ -1020,7 +1022,7 @@ def road_source_power(
     :param surface: Road surface (Table F-4).
     :param temperature_c: Yearly average air temperature ``tau``, in degrees
         Celsius (the reference condition is 20 degC).
-    :param gradient: Road slope ``s``, in per cent, positive uphill.
+    :param road_slope_percent: Road slope ``s``, in per cent, positive uphill.
     :param studded_months: ``T_s`` of (2.2.7), the months per year over which
         studded tyres are in use.
     :param junction_distance: Distance ``x`` from the source to the nearest
@@ -1062,7 +1064,7 @@ def road_source_power(
             key,
             v,
             surface=surface,
-            gradient=gradient,
+            road_slope_percent=road_slope_percent,
             junction_distance=junction_distance,
             junction_type=junction_type,
             coefficients=coefficients,

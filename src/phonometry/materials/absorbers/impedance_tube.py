@@ -80,7 +80,7 @@ _ISO_KU_SPACING = 0.45
 _ISO_LOWER_WAVELENGTH_FRACTION = 20.0
 
 #: Shared validation message for the tube diameter arguments.
-_DIAMETER_POSITIVE = "'diameter' must be positive."
+_DIAMETER_POSITIVE = "'diameter_m' must be positive."
 
 #: Shared validation message for the speed-of-sound arguments.
 _SPEED_OF_SOUND_POSITIVE = "'speed_of_sound' must be positive."
@@ -205,7 +205,7 @@ def hydraulic_diameter(width: float, height: float) -> float:
 
 
 def tube_attenuation_constant(
-    frequency: ArrayLike, speed_of_sound: float, diameter: float
+    frequency: ArrayLike, speed_of_sound: float, diameter_m: float
 ) -> Real:
     r"""Lower-bound tube attenuation constant ``k0''`` (ISO 10534-2, Eq. (A.18)).
 
@@ -215,21 +215,21 @@ def tube_attenuation_constant(
 
     :param frequency: Frequency ``f``, in hertz (scalar or per band).
     :param speed_of_sound: Speed of sound ``c0``, in metres per second.
-    :param diameter: Circular-tube diameter ``d``, in metres, or the hydraulic
+    :param diameter_m: Circular-tube diameter ``d``, in metres, or the hydraulic
         diameter ``4 * area / perimeter`` for a rectangular tube (see
         :func:`hydraulic_diameter`).
     :return: Attenuation constant ``k0''``, in nepers per metre.
     """
     if speed_of_sound <= 0.0:
         raise ValueError(_SPEED_OF_SOUND_POSITIVE)
-    if diameter <= 0.0:
+    if diameter_m <= 0.0:
         raise ValueError(_DIAMETER_POSITIVE)
     f = np.asarray(frequency, dtype=np.float64)
     if np.any(f < 0.0):
         msg = "'frequency' must be non-negative."
         raise ValueError(msg)
     return np.asarray(
-        _ISO_ATTEN_CONST * np.sqrt(f) / (speed_of_sound * diameter),
+        _ISO_ATTEN_CONST * np.sqrt(f) / (speed_of_sound * diameter_m),
         dtype=np.float64,
     )
 
@@ -432,13 +432,13 @@ def plane_wave_frequency_range(
     spacing: float,
     speed_of_sound: float,
     *,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str = "circular",
 ) -> tuple[float, float]:
     r"""Working plane-wave frequency range ``(f_l, f_u)`` (ISO 10534-2, 4.2-4.5).
 
     The upper limit is the smaller of the microphone-spacing bound
-    :math:`f_\mathrm{u} s < 0.45 c_0` (Eq. (4)) and, when the tube ``diameter`` is
+    :math:`f_\mathrm{u} s < 0.45 c_0` (Eq. (4)) and, when the tube ``diameter_m`` is
     given, the cut-on bound :math:`f_\mathrm{u} d < 0.58 c_0` for a circular tube
     (Eq. (2)) or :math:`f_\mathrm{u} d < 0.50 c_0` for a rectangular tube (Eq. (3)).
     The lower limit uses the Clause 4.2 guideline that the spacing exceed
@@ -446,7 +446,7 @@ def plane_wave_frequency_range(
 
     :param spacing: Microphone spacing ``s``, in metres.
     :param speed_of_sound: Speed of sound ``c0``, in metres per second.
-    :param diameter: Tube diameter (circular) or maximum lateral dimension
+    :param diameter_m: Tube diameter (circular) or maximum lateral dimension
         (rectangular/square) ``d``, in metres; ``None`` applies only the
         spacing bound.
     :param shape: ``"circular"``, ``"rectangular"`` or ``"square"`` (a square
@@ -456,7 +456,7 @@ def plane_wave_frequency_range(
     return _frequency_range(
         spacing,
         speed_of_sound,
-        diameter=diameter,
+        diameter_m=diameter_m,
         shape=shape,
         ku_circular=_ISO_KU_CIRCULAR,
         ku_rectangular=_ISO_KU_RECTANGULAR,
@@ -469,7 +469,7 @@ def _frequency_range(
     spacing: float,
     speed_of_sound: float,
     *,
-    diameter: float | None,
+    diameter_m: float | None,
     shape: str,
     ku_circular: float,
     ku_rectangular: float,
@@ -484,11 +484,11 @@ def _frequency_range(
         raise ValueError(_SPEED_OF_SOUND_POSITIVE)
     canonical = _canonical_shape(shape)
     f_upper = ku_spacing * speed_of_sound / spacing
-    if diameter is not None:
-        if diameter <= 0.0:
+    if diameter_m is not None:
+        if diameter_m <= 0.0:
             raise ValueError(_DIAMETER_POSITIVE)
         factor = ku_circular if canonical == "circular" else ku_rectangular
-        f_upper = min(f_upper, factor * speed_of_sound / diameter)
+        f_upper = min(f_upper, factor * speed_of_sound / diameter_m)
     f_lower = speed_of_sound / (lower_fraction * spacing)
     return f_lower, f_upper
 
@@ -524,7 +524,7 @@ class ImpedanceTubeResult:
 
     The trailing fields retain the tube geometry the reduction was run with
     (microphone ``spacing`` ``s``, distance ``x1`` from the sample to the
-    farther microphone, tube ``diameter`` and cross-section ``shape``, stored
+    farther microphone, tube ``diameter_m`` and cross-section ``shape``, stored
     canonically as ``"circular"``/``"rectangular"`` - a ``"square"`` input is
     kept as ``"rectangular"``); they default to ``None`` when not supplied to
     :func:`two_microphone_impedance`.
@@ -537,7 +537,7 @@ class ImpedanceTubeResult:
     absorption: Real
     spacing: float | None = None
     x1: float | None = None
-    diameter: float | None = None
+    diameter_m: float | None = None
     shape: str | None = None
 
     def __post_init__(self) -> None:
@@ -702,14 +702,14 @@ def two_microphone_impedance(
     speed_of_sound: float,
     characteristic_impedance: float,
     attenuation: ArrayLike | None = None,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str = "circular",
 ) -> ImpedanceTubeResult:
     """Full two-microphone reduction (ISO 10534-2:2001, Clause 7).
 
     Builds the complex wavenumber (Clause 2.6), the reflection factor
     (Eq. (17)), the surface impedance (Eq. (19)) and the absorption coefficient
-    (Eq. (18)) from the measured transfer function ``H12``. When ``diameter`` is
+    (Eq. (18)) from the measured transfer function ``H12``. When ``diameter_m`` is
     supplied, frequencies outside the plane-wave range (Eqs. (1)-(4)) raise an
     :class:`ImpedanceTubeWarning`; the results are still returned.
 
@@ -723,7 +723,7 @@ def two_microphone_impedance(
         rayls.
     :param attenuation: Optional tube attenuation constant ``k0''``, in
         nepers/m (see :func:`tube_attenuation_constant`).
-    :param diameter: Optional tube diameter/lateral dimension, in metres, that
+    :param diameter_m: Optional tube diameter/lateral dimension, in metres, that
         activates the plane-wave range check.
     :param shape: Tube cross-section, ``"circular"``, ``"rectangular"`` or
         ``"square"``.
@@ -738,9 +738,9 @@ def two_microphone_impedance(
     k0 = tube_wavenumber(f, speed_of_sound, attenuation=attenuation)
     r = reflection_factor(h, spacing=spacing, x1=x1, wavenumber=k0)
     canonical = _canonical_shape(shape)
-    if diameter is not None:
+    if diameter_m is not None:
         f_lower, f_upper = plane_wave_frequency_range(
-            spacing, speed_of_sound, diameter=diameter, shape=canonical
+            spacing, speed_of_sound, diameter_m=diameter_m, shape=canonical
         )
         _warn_frequency_range(f, f_lower, f_upper, stacklevel=2)
     return ImpedanceTubeResult(
@@ -751,6 +751,6 @@ def two_microphone_impedance(
         absorption=absorption_from_reflection(r),
         spacing=spacing,
         x1=x1,
-        diameter=diameter,
-        shape=canonical if diameter is not None else None,
+        diameter_m=diameter_m,
+        shape=canonical if diameter_m is not None else None,
     )

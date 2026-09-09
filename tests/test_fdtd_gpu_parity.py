@@ -598,7 +598,7 @@ def _source_cases() -> dict[str, tuple[list[dict[str, Any]], list[Any]]]:
         ),
         "point_gaussian": (
             [fdtd_dispatch.point(44, 18, fdtd_dispatch.gaussian(_PULSE_WIDTH_S))],
-            [GaussianPulse(ix=44, iy=18, width=_PULSE_WIDTH_S)],
+            [GaussianPulse(ix=44, iy=18, half_width_s=_PULSE_WIDTH_S)],
         ),
         "point_gaussian_shifted": (
             [
@@ -608,7 +608,7 @@ def _source_cases() -> dict[str, tuple[list[dict[str, Any]], list[Any]]]:
             ],
             [
                 GaussianPulse(
-                    ix=30, iy=30, width=_PULSE_WIDTH_S, t0=5.0e-4, amplitude=0.4
+                    ix=30, iy=30, half_width_s=_PULSE_WIDTH_S, t0=5.0e-4, amplitude=0.4
                 )
             ],
         ),

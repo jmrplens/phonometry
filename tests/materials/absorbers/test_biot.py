@@ -575,8 +575,8 @@ def _reference_field(
     return np.array([v1s, v3s, v3f, s33s, s13s, s33f])
 
 
-@pytest.mark.parametrize("angle", [0.0, 0.4, 1.2])
-def test_gamma_matches_the_field_rebuilt_from_the_potentials(angle: float) -> None:
+@pytest.mark.parametrize("angle_rad", [0.0, 0.4, 1.2])
+def test_gamma_matches_the_field_rebuilt_from_the_potentials(angle_rad: float) -> None:
     """A&A Table 11.1 against Eqs. (11.22)-(11.28), on the same amplitudes.
 
     The table is a transcription of those equations, so re-deriving the six
@@ -587,7 +587,7 @@ def test_gamma_matches_the_field_rebuilt_from_the_potentials(angle: float) -> No
     rng = np.random.default_rng(20260730)
     for frequency in (120.0, 900.0, 3000.0):
         waves = _glass_wool_waves(np.array([frequency]))
-        k_t = 2.0 * np.pi * frequency / 343.0 * np.sin(angle)
+        k_t = 2.0 * np.pi * frequency / 343.0 * np.sin(angle_rad)
         for x3 in (0.0, -0.013, -0.05):
             gamma_x = _gamma(waves, x3, np.asarray(k_t, dtype=np.complex128))
             amplitudes = rng.normal(size=6) + 1j * rng.normal(size=6)
@@ -870,11 +870,13 @@ def test_splitting_a_block_is_exact(monkeypatch: pytest.MonkeyPatch) -> None:
         materials.AirLayer(0.02),
     ]
     monkeypatch.setattr(biot_module, "_BLOCK_NEPERS", 1.0e9)
-    unsplit = materials.layered_absorber(frequency, layers, angle=0.4).surface_impedance
+    unsplit = materials.layered_absorber(
+        frequency, layers, angle_rad=0.4
+    ).surface_impedance
     for budget in (5.0, 2.0, 1.0):
         monkeypatch.setattr(biot_module, "_BLOCK_NEPERS", budget)
         split = materials.layered_absorber(
-            frequency, layers, angle=0.4
+            frequency, layers, angle_rad=0.4
         ).surface_impedance
         assert np.allclose(split, unsplit, rtol=1e-11, atol=0.0)
 
@@ -882,9 +884,9 @@ def test_splitting_a_block_is_exact(monkeypatch: pytest.MonkeyPatch) -> None:
 # ---------------------------------------------------------------------------
 # The rigid-frame limit: convergence on the already-anchored JCA fluid
 # ---------------------------------------------------------------------------
-@pytest.mark.parametrize("angle", [0.0, np.pi / 6.0, np.pi / 4.0, np.pi / 3.0])
+@pytest.mark.parametrize("angle_rad", [0.0, np.pi / 6.0, np.pi / 4.0, np.pi / 3.0])
 def test_rigid_frame_limit_converges_on_the_jca_equivalent_fluid(
-    angle: float,
+    angle_rad: float,
 ) -> None:
     """The strongest anchor: an exact limit against oracled code.
 
@@ -905,14 +907,14 @@ def test_rigid_frame_limit_converges_on_the_jca_equivalent_fluid(
     frequency = np.geomspace(50.0, 5000.0, 60)
     medium = _glass_wool_medium(frequency)
     reference = materials.layered_absorber(
-        frequency, [materials.PorousLayer(0.05, medium)], angle=angle
+        frequency, [materials.PorousLayer(0.05, medium)], angle_rad=angle_rad
     ).surface_impedance
     residuals = []
     for scale in (1e2, 1e4, 1e6, 1e8):
         result = materials.layered_absorber(
             frequency,
             [_glass_wool_layer(frequency, 0.05, scale=scale)],
-            angle=angle,
+            angle_rad=angle_rad,
         )
         residuals.append(
             float(np.max(np.abs(result.surface_impedance / reference - 1.0)))
@@ -966,12 +968,12 @@ def test_rigid_frame_limit_holds_through_a_multilayer_stack() -> None:
     medium = _glass_wool_medium(frequency)
     head: list = [materials.MembraneLayer(0.2), materials.AirLayer(0.02)]
     reference = materials.layered_absorber(
-        frequency, [*head, materials.PorousLayer(0.05, medium)], angle=0.3
+        frequency, [*head, materials.PorousLayer(0.05, medium)], angle_rad=0.3
     )
     frozen = materials.layered_absorber(
         frequency,
         [*head, _glass_wool_layer(frequency, 0.05, scale=1e8)],
-        angle=0.3,
+        angle_rad=0.3,
     )
     assert np.allclose(frozen.surface_impedance, reference.surface_impedance, rtol=1e-7)
 
@@ -1086,9 +1088,9 @@ def test_limp_and_rigid_limits_of_the_same_layer_differ_at_low_frequency() -> No
 def test_absorption_is_physical_and_reflection_is_passive() -> None:
     """A passive layer cannot reflect more energy than it receives."""
     frequency = np.geomspace(50.0, 5000.0, 80)
-    for angle in (0.0, np.pi / 4.0):
+    for angle_rad in (0.0, np.pi / 4.0):
         result = materials.layered_absorber(
-            frequency, [_glass_wool_layer(frequency, 0.05)], angle=angle
+            frequency, [_glass_wool_layer(frequency, 0.05)], angle_rad=angle_rad
         )
         assert np.all(result.absorption >= 0.0)
         assert np.all(result.absorption <= 1.0)

@@ -118,7 +118,7 @@ identical simulation without the scatterer and subtract its
 ```python
 far_field_from_contour(
     contour: ContourPhasors,
-    angles: ArrayLike,
+    angles_deg: ArrayLike,
     *,
     distance: float | None = None,
     origin: tuple[float, float] = (0.0, 0.0),
@@ -172,7 +172,7 @@ cancellation (below 0.01 dB on the validation scenes).
 | Name | Description |
 | :--- | :--- |
 | `contour` | The contour phasors (from `add_contour_probe`, or hand built). |
-| `angles` | Observation angles [degrees], 1D. `0` is `+x`, `90` is `+y` of the coordinates `contour.positions` live in. |
+| `angles_deg` | Observation angles [degrees], 1D. `0` is `+x`, `90` is `+y` of the coordinates `contour.positions` live in. |
 | `distance` | Observation radius [m] for the exact evaluation, or `None` (default) for the far-field pattern. |
 | `origin` | Phase-reference point `(x, y)` [m]; the centre of the observation circle when `distance` is given. Default the grid origin. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`SIMULATION_AIR`](/phonometry/reference/api/simulation/ntff/#simulation_air), the air this package's solvers run in). |

@@ -248,7 +248,7 @@ def test_reflection_factor_round_trip(reflection: complex) -> None:
 def test_reflection_factor_round_trip_with_attenuation() -> None:
     f = np.array([500.0, 1200.0])
     x1, spacing = 0.12, 0.03
-    att = tube_attenuation_constant(f, C0, diameter=0.05)
+    att = tube_attenuation_constant(f, C0, diameter_m=0.05)
     k0 = tube_wavenumber(f, C0, attenuation=att)
     reflection = 0.6 - 0.2j
     h12 = _synth_h12(reflection, np.asarray(k0), x1, spacing)
@@ -370,7 +370,7 @@ def test_mic_calibration_removes_known_mismatch() -> None:
 # ---------------------------------------------------------------------------
 def test_plane_wave_range_bounds() -> None:
     f_lower, f_upper = plane_wave_frequency_range(
-        0.03, C0, diameter=0.05, shape="circular"
+        0.03, C0, diameter_m=0.05, shape="circular"
     )
     # Upper is min(spacing bound 0.45 c/s, tube bound 0.58 c/d).
     assert f_upper == pytest.approx(min(0.45 * C0 / 0.03, 0.58 * C0 / 0.05))
@@ -378,7 +378,7 @@ def test_plane_wave_range_bounds() -> None:
 
 
 def test_frequency_range_warning_fires() -> None:
-    f_lower, f_upper = plane_wave_frequency_range(0.03, C0, diameter=0.05)
+    f_lower, f_upper = plane_wave_frequency_range(0.03, C0, diameter_m=0.05)
     f = np.array([f_lower * 0.5, 1000.0, f_upper * 1.5])
     h12 = _synth_h12(0.3 + 0.1j, np.asarray(tube_wavenumber(f, C0)), 0.12, 0.03)
     with pytest.warns(ImpedanceTubeWarning):
@@ -389,7 +389,7 @@ def test_frequency_range_warning_fires() -> None:
             x1=0.12,
             speed_of_sound=C0,
             characteristic_impedance=RC,
-            diameter=0.05,
+            diameter_m=0.05,
         )
 
 
@@ -397,7 +397,7 @@ def test_plane_wave_range_rectangular_bound() -> None:
     # ISO 10534-2 Eq. (3): a rectangular tube cuts on at 0,50 c0 / d with d the
     # maximum side length (stricter than the 0,58 circular factor of Eq. (2)).
     f_lower, f_upper = plane_wave_frequency_range(
-        0.03, C0, diameter=0.05, shape="rectangular"
+        0.03, C0, diameter_m=0.05, shape="rectangular"
     )
     assert f_upper == pytest.approx(min(0.45 * C0 / 0.03, 0.50 * C0 / 0.05))
     assert f_lower == pytest.approx(C0 / (20.0 * 0.03))
@@ -407,16 +407,16 @@ def test_plane_wave_range_square_alias() -> None:
     # A square tube is the rectangular case with d the side length, in both
     # the ISO 10534-2 and the ASTM E2611-19 bounds.
     for fn in (plane_wave_frequency_range, plane_wave_frequency_range_astm):
-        square = fn(0.03, C0, diameter=0.05, shape="square")
-        rectangular = fn(0.03, C0, diameter=0.05, shape="rectangular")
+        square = fn(0.03, C0, diameter_m=0.05, shape="square")
+        rectangular = fn(0.03, C0, diameter_m=0.05, shape="rectangular")
         assert square == rectangular
 
 
 def test_plane_wave_range_invalid_shape() -> None:
     with pytest.raises(ValueError, match=r"'shape' must be"):
-        plane_wave_frequency_range(0.03, C0, diameter=0.05, shape="oval")
+        plane_wave_frequency_range(0.03, C0, diameter_m=0.05, shape="oval")
     with pytest.raises(ValueError, match=r"'shape' must be"):
-        plane_wave_frequency_range_astm(0.03, C0, diameter=0.05, shape="oval")
+        plane_wave_frequency_range_astm(0.03, C0, diameter_m=0.05, shape="oval")
 
 
 def test_plane_wave_range_astm_bounds() -> None:
@@ -424,12 +424,12 @@ def test_plane_wave_range_astm_bounds() -> None:
     # (6.2.4.1) or 0,500 c/d rectangular (6.2.5)); lower = c / (100 s), the
     # spacing greater than 1 % of the wavelength (6.2.3).
     f_lower, f_upper = plane_wave_frequency_range_astm(
-        0.03, C0, diameter=0.05, shape="circular"
+        0.03, C0, diameter_m=0.05, shape="circular"
     )
     assert f_upper == pytest.approx(min(0.40 * C0 / 0.03, 0.586 * C0 / 0.05))
     assert f_lower == pytest.approx(C0 / (100.0 * 0.03))
     _, f_upper_rect = plane_wave_frequency_range_astm(
-        0.03, C0, diameter=0.05, shape="rectangular"
+        0.03, C0, diameter_m=0.05, shape="rectangular"
     )
     assert f_upper_rect == pytest.approx(min(0.40 * C0 / 0.03, 0.50 * C0 / 0.05))
 
@@ -455,12 +455,12 @@ def test_result_retains_tube_geometry() -> None:
         x1=0.12,
         speed_of_sound=C0,
         characteristic_impedance=RC,
-        diameter=0.05,
+        diameter_m=0.05,
         shape="square",
     )
     assert res.spacing == pytest.approx(0.03)
     assert res.x1 == pytest.approx(0.12)
-    assert res.diameter == pytest.approx(0.05)
+    assert res.diameter_m == pytest.approx(0.05)
     # "square" is stored canonically as the rectangular case.
     assert res.shape == "rectangular"
     # Without a diameter no cross-section claim is retained.
@@ -472,7 +472,7 @@ def test_result_retains_tube_geometry() -> None:
         speed_of_sound=C0,
         characteristic_impedance=RC,
     )
-    assert res_no_d.diameter is None
+    assert res_no_d.diameter_m is None
     assert res_no_d.shape is None
 
 
@@ -490,7 +490,7 @@ def test_frequency_range_no_warning_in_band() -> None:
             x1=0.12,
             speed_of_sound=C0,
             characteristic_impedance=RC,
-            diameter=0.05,
+            diameter_m=0.05,
         )
 
 
@@ -872,7 +872,7 @@ def test_astm_solvers_warn_outside_plane_wave_range() -> None:
             thickness=THICKNESS,
             wavenumber=k,
             characteristic_impedance=RC,
-            diameter=0.10,
+            diameter_m=0.10,
             **GEOM,
         )
     with pytest.warns(ImpedanceTubeWarning, match=_OUTSIDE_ASTM_RANGE):
@@ -881,14 +881,14 @@ def test_astm_solvers_warn_outside_plane_wave_range() -> None:
             thickness=THICKNESS,
             wavenumber=k,
             characteristic_impedance=RC,
-            diameter=0.10,
+            diameter_m=0.10,
             **GEOM,
         )
     with pytest.warns(ImpedanceTubeWarning, match=_OUTSIDE_ASTM_RANGE):
         wave_decomposition(
             *load_a,
             wavenumber=k,
-            diameter=0.10,
+            diameter_m=0.10,
             **GEOM,
         )
 
@@ -901,7 +901,7 @@ def test_astm_solvers_warn_below_lower_bound() -> None:
     tm = air_layer_transfer_matrix(k, THICKNESS, RC)
     load = _synth_four_mics(tm, np.asarray(k), 1.0 + 0.0j, 0.3 + 0.0j)
     with pytest.warns(ImpedanceTubeWarning, match=_OUTSIDE_ASTM_RANGE):
-        wave_decomposition(*load, wavenumber=k, diameter=0.10, **GEOM)
+        wave_decomposition(*load, wavenumber=k, diameter_m=0.10, **GEOM)
 
 
 def test_astm_solvers_silent_in_band_and_without_diameter() -> None:
@@ -921,7 +921,7 @@ def test_astm_solvers_silent_in_band_and_without_diameter() -> None:
             thickness=THICKNESS,
             wavenumber=k,
             characteristic_impedance=RC,
-            diameter=0.10,
+            diameter_m=0.10,
             **GEOM,
         )
         # No diameter -> no range check, as in the ISO branch.
@@ -955,7 +955,7 @@ def test_transfer_matrix_retains_measurement_context() -> None:
         wavenumber=k,
         characteristic_impedance=RC,
         frequency=f,
-        diameter=0.10,
+        diameter_m=0.10,
         shape="square",
         **GEOM,
     )
@@ -964,7 +964,7 @@ def test_transfer_matrix_retains_measurement_context() -> None:
     assert rec.l2 == pytest.approx(GEOM["l2"])
     assert rec.s2 == pytest.approx(GEOM["s2"])
     assert rec.thickness == pytest.approx(THICKNESS)
-    assert rec.diameter == pytest.approx(0.10)
+    assert rec.diameter_m == pytest.approx(0.10)
     assert rec.shape == "rectangular"
     assert rec.frequency is not None
     assert np.allclose(rec.frequency, f)

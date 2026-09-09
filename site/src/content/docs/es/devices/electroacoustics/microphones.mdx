@@ -371,13 +371,13 @@ response = -10 * np.log10(1 + (30.0 / freqs) ** 4)      # caída en baja frecuen
 response -= 10 * np.log10(1 + (freqs / 19000.0) ** 8)   # caída en alta frecuencia
 response += 2.0 * np.exp(-(np.log2(freqs / 9000.0) ** 2) / 0.3)  # región de presencia
 
-angles = np.linspace(0, 179, 359)
-cardioid = 20 * np.log10((1 + np.cos(np.radians(angles))) / 2)
+angles_rad = np.linspace(0, 179, 359)
+cardioid = 20 * np.log10((1 + np.cos(np.radians(angles_rad))) / 2)
 noise_f = np.geomspace(20, 20000, 31)
 
 result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,          # 12,5 mV/Pa a 1 kHz
-    directivity=electroacoustics.MicrophoneDirectivity(polar=(angles, cardioid), frequency=1000.0),
+    directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, cardioid), frequency=1000.0),
     noise=electroacoustics.MicrophoneNoise(                             # ponderada A, V
         voltage=1.25e-6,
         spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
@@ -402,10 +402,10 @@ print(round(result.signal_to_noise_ratio_db, 1))        # 80.0 dB re 1 Pa
 # 11.2.2 a): b = 1/2 y b = 1 devuelven el mismo índice desde formas opuestas.
 for b in (0.0, 0.5, 1.0):
     polar = 20 * np.log10(
-        np.maximum(np.abs((1 - b) + b * np.cos(np.radians(angles))), 1e-3))
+        np.maximum(np.abs((1 - b) + b * np.cos(np.radians(angles_rad))), 1e-3))
     family = electroacoustics.microphone_characteristics(
         freqs, response, 12.5, tolerance_db=3.0,
-        directivity=electroacoustics.MicrophoneDirectivity(polar=(angles, polar),
+        directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, polar),
                                                            frequency=1000.0))
     print(b, round(family.directivity_index_db, 1))     # 0.0 / 4.8 / 4.8 dB
 
@@ -516,12 +516,12 @@ from phonometry import electroacoustics
 
 freqs = np.geomspace(20, 20000, 400)
 response = -10 * np.log10(1 + (30.0 / freqs) ** 4)
-angles = np.linspace(0, 179, 359)
-cardioid = 20 * np.log10((1 + np.cos(np.radians(angles))) / 2)
+angles_rad = np.linspace(0, 179, 359)
+cardioid = 20 * np.log10((1 + np.cos(np.radians(angles_rad))) / 2)
 
 result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,
-    directivity=electroacoustics.MicrophoneDirectivity(polar=(angles, cardioid), frequency=1000.0),
+    directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, cardioid), frequency=1000.0),
 )
 result.plot(quantity="directivity", language="es")
 plt.show()

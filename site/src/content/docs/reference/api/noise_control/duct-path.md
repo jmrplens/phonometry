@@ -128,7 +128,7 @@ calculation of Long Table 14.9 and of AHRI 885 Table 8.
 | `criterion` | Room-criterion family, `"NC"` (default) or `"RC"`. |
 | `target` | The design criterion value (e.g. `30`), or `None`. |
 | `self_noise_floor` | Default regenerated sound power level, dB re 1 pW, applied where an element declares none and as a floor under every element's self-noise. Long's worked sheet uses 0 dB; pass `None` to disable the floor entirely. |
-| `section` | Optional duct cross section for the plane-wave validity check, as `{"diameter": d}`, `{"width": a, "height": b}` or `{"area": s}`, in metres. When given, a [`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) is raised for analysis frequencies above the first cut-on. |
+| `section` | Optional duct cross section for the plane-wave validity check, as `{"diameter_m": d}`, `{"width": a, "height": b}` or `{"area": s}`, in metres. When given, a [`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) is raised for analysis frequencies above the first cut-on. |
 | `flow_velocity` | Mean axial flow speed in that section, m/s, used for the cut-on Mach correction. |
 | `speed_of_sound` | Speed of sound, m/s, for the same check. |
 | `label` | A short human label of the path. |

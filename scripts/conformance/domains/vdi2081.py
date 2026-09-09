@@ -214,7 +214,7 @@ def _chk_rectangular_run() -> Outcome:
 def _chk_round_run() -> Outcome:
     """The round rows of Table 5, which do depend on the bore."""
     values = ph.noise_control.unlined_circular_duct_attenuation(
-        np.array(_PRINTED_BANDS), 1.000, diameter=0.160, model="vdi2081"
+        np.array(_PRINTED_BANDS), 1.000, diameter_m=0.160, model="vdi2081"
     ).values
     return _worst_band(_PRINTED_ROUND, values, 1e-6)
 
@@ -235,7 +235,7 @@ def _chk_limit_frequency() -> Outcome:
     return numeric(
         1245.0,
         ph.noise_control.plane_wave_limit(
-            diameter=_BEND_DIAMETER, speed_of_sound=_EXAMPLE_SPEED
+            diameter_m=_BEND_DIAMETER, speed_of_sound=_EXAMPLE_SPEED
         ),
         0.5,
         unit="Hz",

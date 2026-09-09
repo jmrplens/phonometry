@@ -183,11 +183,11 @@ def test_medwin_depth_derivative_matches_equation_1_4() -> None:
     """ "∂c/∂z ≈ 0.016 m/s per meter" -- exact for the Medwin form."""
     h = 1e-3
     kw = {"model": "medwin"}
-    gradient = (
+    gradient_per_s = (
         sea_water_sound_speed(10.0, 35.0, 500.0 + h, **kw)
         - sea_water_sound_speed(10.0, 35.0, 500.0 - h, **kw)
     ) / (2.0 * h)
-    assert gradient == pytest.approx(0.016, abs=1e-6)
+    assert gradient_per_s == pytest.approx(0.016, abs=1e-6)
 
 
 def test_medwin_agrees_with_the_other_three_over_the_common_domain() -> None:
@@ -208,7 +208,7 @@ def test_medwin_profile_gradient_is_constant_in_isothermal_water() -> None:
     depths = np.linspace(0.0, 1000.0, 21)
     profile = sound_speed_profile(depths, 10.0, 35.0, model="medwin")
     assert profile.model == "medwin"
-    assert np.allclose(profile.gradient, 0.016, atol=1e-9)
+    assert np.allclose(profile.gradient_per_s, 0.016, atol=1e-9)
 
 
 def test_surface_speed_increases_with_temperature() -> None:
@@ -234,10 +234,10 @@ def test_profile_gradient_and_shape() -> None:
     )
     assert isinstance(prof, SoundSpeedProfile)
     assert prof.sound_speed.shape == depths.shape
-    assert prof.gradient.shape == depths.shape
+    assert prof.gradient_per_s.shape == depths.shape
     # Isothermal/isohaline column: speed rises with depth (pressure), gradient > 0.
     assert np.all(np.diff(prof.sound_speed) > 0.0)
-    assert np.all(prof.gradient > 0.0)
+    assert np.all(prof.gradient_per_s > 0.0)
 
 
 def test_profile_requires_increasing_depths() -> None:
@@ -250,7 +250,7 @@ def test_profile_columns_must_run_over_one_depth_grid() -> None:
 
     The figure draws ``sound_speed`` against ``depth``, so that half of a
     mismatch surfaces only as matplotlib's "x and y must have same first
-    dimension" and two bare shapes, naming neither column. ``gradient``
+    dimension" and two bare shapes, naming neither column. ``gradient_per_s``
     reaches no figure at all and is silent in both directions, yet the depth
     of the sound-channel axis and the ray curvature radius are read off it
     entry by entry beside ``depth``. An extra axis is quieter still: an
@@ -265,11 +265,11 @@ def test_profile_columns_must_run_over_one_depth_grid() -> None:
         ("sound_speed", good.sound_speed[:-1], per_depth),
         ("sound_speed", np.append(good.sound_speed, 1500.0), per_depth),
         # np.diff is the obvious hand-rolled gradient, and it is one short.
-        ("gradient", np.diff(good.sound_speed) / np.diff(good.depth), per_depth),
-        ("gradient", np.append(good.gradient, 0.0), per_depth),
+        ("gradient_per_s", np.diff(good.sound_speed) / np.diff(good.depth), per_depth),
+        ("gradient_per_s", np.append(good.gradient_per_s, 0.0), per_depth),
         ("depth", np.column_stack([good.depth] * 2), one_axis),
         ("sound_speed", np.column_stack([good.sound_speed] * 2), one_axis),
-        ("gradient", np.column_stack([good.gradient] * 2), one_axis),
+        ("gradient_per_s", np.column_stack([good.gradient_per_s] * 2), one_axis),
     )
     for field, value, fragment in cases:
         with pytest.raises(ValueError, match=rf"'{field}'.*{fragment}"):

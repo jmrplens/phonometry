@@ -1059,7 +1059,7 @@ Wheel roughness `L_r,VEH` of Table G-1a.
 ## wheel_transfer
 
 ```python
-wheel_transfer(diameter: WheelDiameter | float) -> NDArray[np.float64]
+wheel_transfer(diameter_mm: WheelDiameter | float) -> NDArray[np.float64]
 ```
 
 Wheel transfer function `L_H,VEH,i` of Table G-3b, in dB per axle.
@@ -1068,7 +1068,7 @@ Wheel transfer function `L_H,VEH,i` of Table G-3b, in dB per axle.
 
 | Name | Description |
 | :--- | :--- |
-| `diameter` | A [`WheelDiameter`](/phonometry/reference/api/environment/cnossos-rail/#wheeldiameter) member or the diameter in mm. |
+| `diameter_mm` | A [`WheelDiameter`](/phonometry/reference/api/environment/cnossos-rail/#wheeldiameter) member or the diameter in mm. |
 
 **Returns:** The 24 1/3-octave values, in dB.
 

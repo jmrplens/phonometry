@@ -340,11 +340,11 @@ from phonometry import materials
 depths = materials.qrd_well_depths(7, 490.0, speed_of_sound=343.0)
 pitch = 3.6 / 42                  # 42 wells across the 3.6 m panel
 fin = 0.005                       # thin fins, included in the pitch
-materials.plot_qrd_geometry(depths, pitch - fin, fin_width=fin, periods=2)
+materials.plot_qrd_geometry(depths, pitch - fin, fin_width=fin, repetitions=2)
 plt.show()
 
 # A predicted DiffuserPolarResponse retains its geometry, so
-# qrd.plot_geometry() draws the profile it was computed for (all 6 periods).
+# qrd.plot_geometry() draws the profile it was computed for (all 6 repetitions).
 ```
 
 </details>
@@ -352,15 +352,15 @@ plt.show()
 ```python
 from phonometry import materials
 
-# The published geometry: N = 7 QRD, 6 periods, 3.6 m wide, 0.2 m deep
+# The published geometry: N = 7 QRD, 6 repetitions, 3.6 m wide, 0.2 m deep
 # (Cox & D'Antonio 3rd ed., Appendix B; Hargreaves et al. 2000, Table I).
 # Design frequency 490 Hz puts the deepest well at exactly 0.2 m.
 depths = materials.qrd_well_depths(7, 490.0)   # [0, 0.05, 0.2, 0.1, ...] m
 qrd = materials.predict_diffuser_polar_response(
-    3.6 / 42, 1000.0, depths=depths, periods=6)
+    3.6 / 42, 1000.0, depths=depths, repetitions=6)
 # The flat reference panel: the same 3.6 m footprint with zero-depth wells.
 flat = materials.predict_diffuser_polar_response(
-    3.6 / 42, 1000.0, depths=[0.0] * 7, periods=6)
+    3.6 / 42, 1000.0, depths=[0.0] * 7, repetitions=6)
 
 qrd.plot()   # predicted polar response, d in the title (needs matplotlib)
 
@@ -390,9 +390,9 @@ import numpy as np
 from phonometry import materials
 
 # qrd.levels: the 37 predicted QRD levels from the example above.
-angles = np.arange(-90.0, 90.5, 5.0)
+angles_deg = np.arange(-90.0, 90.5, 5.0)
 
-result = materials.directional_diffusion(angles, qrd.levels)
+result = materials.directional_diffusion(angles_deg, qrd.levels)
 print(round(result.coefficient, 2))   # 0.11
 result.plot()   # polar reflected response, d in the title (needs matplotlib)
 ```
@@ -415,13 +415,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import materials
 
-# qrd.levels: the 37 predicted levels L_i of the six-period N = 7 QRD from
+# qrd.levels: the 37 predicted levels L_i of the six-period_m N = 7 QRD from
 # the example above (Fraunhofer far-field model, published Cox & D'Antonio
 # Appendix B geometry, 1000 Hz, normal incidence) on the -90..90 deg, 5 deg
 # semicircle. The periodic array concentrates the energy into grating lobes,
 # so the Formula (5) coefficient d is modest.
-angles = np.arange(-90.0, 90.5, 5.0)
-result = materials.directional_diffusion(angles, qrd.levels)
+angles_deg = np.arange(-90.0, 90.5, 5.0)
+result = materials.directional_diffusion(angles_deg, qrd.levels)
 
 # result is the DiffusionResult computed above. One line:
 result.plot()
@@ -429,7 +429,7 @@ plt.show()
 
 # By hand: a polar plot of the levels, with d annotated in the title.
 fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
-theta = np.radians(result.angles)
+theta = np.radians(result.angles_deg)
 ax.plot(theta, result.levels, "o-", color="#1f77b4")
 ax.fill(theta, result.levels, color="#1f77b4", alpha=0.15)
 ax.set_theta_zero_location("N")
@@ -570,10 +570,10 @@ depths = materials.qrd_well_depths(7, 500.0)   # Eqs. (10.2)/(10.3)
 print(np.round(depths * 100, 1))               # well depths in cm:
                                                # [ 0.   4.9 19.6  9.8  9.8 19.6  4.9]
 
-# Predicted far-field polar response at one frequency (5 repeated periods,
+# Predicted far-field polar response at one frequency (5 repeated repetitions,
 # 10 cm wells), reduced to the ISO 17497-2 directional diffusion coefficient.
 surface = materials.predict_diffuser_polar_response(0.10, 2000.0, depths=depths,
-                                                    periods=5)
+                                                    repetitions=5)
 print(round(surface.coefficient, 3))           # 0.210
 surface.plot()   # predicted polar response, d in the title (needs matplotlib)
 
@@ -581,11 +581,11 @@ surface.plot()   # predicted polar response, d in the title (needs matplotlib)
 # reference (Formula (7)): the flat panel maps to exactly zero, the QRD well
 # above it.
 freqs = np.array([500, 1000, 2000, 4000], float)
-qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, periods=5)
+qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, repetitions=5)
 print(np.round(qrd.normalized, 3))             # [0.352 0.275 0.208 0.073]
 
 flat = materials.predicted_diffusion_spectrum(0.10, freqs,
-                                        depths=np.zeros_like(depths), periods=5)
+                                        depths=np.zeros_like(depths), repetitions=5)
 print(np.round(flat.normalized, 3))            # [0. 0. 0. 0.]
 ```
 
@@ -609,12 +609,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import materials
 
-# N = 7 QRD (design frequency 500 Hz, 10 cm wells, five periods) versus the
+# N = 7 QRD (design frequency 500 Hz, 10 cm wells, five repetitions) versus the
 # flat panel of the same footprint, over the one-third-octave bands.
 freqs = np.array([250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
                   2000, 2500, 3150, 4000, 5000], float)
 depths = materials.qrd_well_depths(7, 500.0)
-qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, periods=5)
+qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, repetitions=5)
 
 # The DiffusionSpectrum plots the predicted d(f) directly. One line:
 qrd.plot()
@@ -622,7 +622,7 @@ plt.show()
 
 # By hand: predicted d(f) for the QRD against the flat reference.
 flat = materials.predicted_diffusion_spectrum(0.10, freqs,
-                                depths=np.zeros_like(depths), periods=5,
+                                depths=np.zeros_like(depths), repetitions=5,
                                 normalize=False)
 fig, ax = plt.subplots()
 ax.semilogx(freqs, qrd.diffusion, "o-", color="#1f77b4", label="N = 7 QRD design")
@@ -826,7 +826,7 @@ panel scatters like the 27.4 cm deep QRD it mimics.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/metadiffuser_geometry.svg" alt="To-scale cross-section of the published quadratic-residue metadiffuser: a 350 by 20 millimetre panel over a rigid backing with five numbered slits opening at the face, each loaded by two Helmholtz resonators whose necks and cavities shelve sideways into the septum between slits; dimension lines mark the 350 millimetre width, the 70 millimetre pitch, the 14.7 millimetre first slit and the 20 millimetre depth, with the incident sound arriving from above" width="92%"></picture>
 
 As in the published far-field comparison, the polar response repeats the
-five-well sequence six times (`periods=6`, a 2.1 m panel):
+five-well sequence six times (`repetitions=6`, a 2.1 m panel):
 
 ```python
 import numpy as np
@@ -852,13 +852,13 @@ wells = [
 ]
 
 f = np.arange(1800.0, 2601.0, 5.0)
-panel = materials.metadiffuser_reflection(f, wells, depth=0.02, period=0.07)
+panel = materials.metadiffuser_reflection(f, wells, depth=0.02, period_m=0.07)
 alpha1 = panel.well_absorption[0]
 print(round(float(alpha1.max()), 2), int(f[alpha1.argmax()]))  # 0.99 2305
 
 # Far-field comparison: the five-well sequence repeated six times (2.1 m).
 polar = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02,
-                                              period=0.07, periods=6)
+                                              period_m=0.07, repetitions=6)
 print(round(polar.coefficient, 2))                             # 0.32
 ```
 
@@ -888,13 +888,13 @@ wells = [
 ]
 
 # The metadiffuser panel and the QRD it was tuned to at 2 kHz, both with
-# six repetitions of the period (2.1 m panels).
-meta = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02, period=0.07,
-                                             periods=6)
+# six repetitions of the period_m (2.1 m panels).
+meta = materials.metadiffuser_polar_response(2000.0, wells, depth=0.02, period_m=0.07,
+                                             repetitions=6)
 sequence = np.roll(materials.quadratic_residue_sequence(5), -1)
 depths = sequence * (343.0 / 500.0) / (2 * 5)
 qrd = materials.predict_diffuser_polar_response(
-    0.07, 2000.0, depths=depths, periods=6, include_obliquity=False,
+    0.07, 2000.0, depths=depths, repetitions=6, include_obliquity=False,
 )
 
 ax = meta.plot(marker="", linewidth=2.2, label="Metadiffuser, panel 2 cm")
@@ -934,7 +934,7 @@ from phonometry import materials
 
 # wells: the five published slits from the example above.
 panel = materials.metadiffuser_reflection(np.array([2000.0]), wells,
-                                          depth=0.02, period=0.07)
+                                          depth=0.02, period_m=0.07)
 phases = np.degrees(np.angle(panel.reflection[:, 0]))
 print(np.round(np.abs(panel.reflection[:, 0]), 2))  # [0.97 1.   1.   0.97 0.98]
 print(np.round(phases))                             # [ 75. -71. -71.  74.   2.]

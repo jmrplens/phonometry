@@ -544,7 +544,7 @@ def _chk_diffuser_qrd_depth() -> Outcome:
 )
 def _chk_diffuser_flat_normalized() -> Outcome:
     spectrum = ph.materials.predicted_diffusion_spectrum(
-        0.10, [2000.0], depths=[0.0] * 7, periods=5
+        0.10, [2000.0], depths=[0.0] * 7, repetitions=5
     )
     assert spectrum.normalized is not None
     return numeric(
@@ -563,7 +563,7 @@ def _chk_diffuser_flat_normalized() -> Outcome:
 def _chk_diffuser_qrd_normalized() -> Outcome:
     depths = ph.materials.qrd_well_depths(7, 500.0, speed_of_sound=343.0)
     spectrum = ph.materials.predicted_diffusion_spectrum(
-        0.10, [2000.0], depths=depths, periods=5
+        0.10, [2000.0], depths=depths, repetitions=5
     )
     assert spectrum.normalized is not None
     return numeric(

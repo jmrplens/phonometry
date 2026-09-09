@@ -139,14 +139,14 @@ def body_waves() -> ElasticFDTDResult:
         shape=(501, 501),
         sources=[
             ExplosionSource(
-                ix=250, iy=250, waveform=GaussianPulse(0, 0, width=w).value
+                ix=250, iy=250, waveform=GaussianPulse(0, 0, half_width_s=w).value
             ),
             ForceSource(
                 ix=250,
                 iy=250,
                 direction="y",
                 amplitude=1e6,
-                waveform=GaussianPulse(0, 0, width=w).value,
+                waveform=GaussianPulse(0, 0, half_width_s=w).value,
             ),
         ],
         recording=ElasticRecording(
@@ -206,7 +206,7 @@ def test_rayleigh_wave_speed_matches_characteristic_equation() -> None:
                 iy=0,
                 direction="y",
                 amplitude=1e6,
-                waveform=GaussianPulse(0, 0, width=w).value,
+                waveform=GaussianPulse(0, 0, half_width_s=w).value,
             )
         ],
         recording=ElasticRecording(probes=[(300, 0), (600, 0)], probe_fields=("vy",)),
@@ -273,7 +273,7 @@ def test_flexural_dispersion_of_thin_plate_strip() -> None:
             iy=4,
             direction="y",
             amplitude=1e6,
-            waveform=GaussianPulse(0, 0, width=w).value,
+            waveform=GaussianPulse(0, 0, half_width_s=w).value,
         )
     )
     n_steps = round(9.0e-3 / sim.dt)
@@ -468,9 +468,11 @@ def test_mu_zero_everywhere_reproduces_acoustic_fdtd() -> None:
     )
     assert elastic.dt == acoustic.dt
     width = 8 * acoustic.dt
-    acoustic.add_source(GaussianPulse(ix=20, iy=20, width=width))
+    acoustic.add_source(GaussianPulse(ix=20, iy=20, half_width_s=width))
     elastic.add_source(
-        ExplosionSource(ix=20, iy=20, waveform=GaussianPulse(0, 0, width=width).value)
+        ExplosionSource(
+            ix=20, iy=20, waveform=GaussianPulse(0, 0, half_width_s=width).value
+        )
     )
     for _ in range(400):
         acoustic.step()
@@ -491,7 +493,9 @@ def test_energy_is_conserved_in_a_closed_domain() -> None:
     # leapfrog energy oscillation).
     sim = ElasticFDTD2D(CP_AL, CS_AL, 0.002, rho=RHO_AL, shape=(120, 120))
     sim.add_source(
-        ExplosionSource(ix=60, iy=60, waveform=GaussianPulse(0, 0, width=1e-6).value)
+        ExplosionSource(
+            ix=60, iy=60, waveform=GaussianPulse(0, 0, half_width_s=1e-6).value
+        )
     )
     sim.add_source(
         ForceSource(
@@ -499,7 +503,7 @@ def test_energy_is_conserved_in_a_closed_domain() -> None:
             iy=40,
             direction="x",
             amplitude=100.0,
-            waveform=GaussianPulse(0, 0, width=1e-6).value,
+            waveform=GaussianPulse(0, 0, half_width_s=1e-6).value,
         )
     )
     sim.run(300)
@@ -665,7 +669,9 @@ def test_simulation_rejects_invalid_arguments(
     full: dict[str, object] = {
         "duration": 1e-3,
         "sources": [
-            ExplosionSource(ix=5, iy=5, waveform=GaussianPulse(0, 0, width=1e-4).value)
+            ExplosionSource(
+                ix=5, iy=5, waveform=GaussianPulse(0, 0, half_width_s=1e-4).value
+            )
         ],
         **kwargs,
     }
@@ -692,7 +698,7 @@ def _small_run(**kwargs: object) -> ElasticFDTDResult:
     defaults: dict[str, object] = {
         "sources": [
             ExplosionSource(
-                ix=10, iy=15, waveform=GaussianPulse(0, 0, width=2e-5).value
+                ix=10, iy=15, waveform=GaussianPulse(0, 0, half_width_s=2e-5).value
             )
         ],
         "recording": _SMALL_RECORDING,
@@ -742,7 +748,7 @@ def test_positive_waveform_injects_positive_pressure() -> None:
     sim = ElasticFDTD2D(6000.0, 3000.0, 0.01, rho=2700.0, shape=(30, 30))
     sim.add_source(
         ExplosionSource(
-            ix=15, iy=15, waveform=GaussianPulse(0, 0, width=8 * sim.dt).value
+            ix=15, iy=15, waveform=GaussianPulse(0, 0, half_width_s=8 * sim.dt).value
         )
     )
     sim.run(20)
@@ -763,7 +769,7 @@ def test_orthogonal_free_sides_pin_both_corner_stresses() -> None:
     )
     sim.add_source(
         ExplosionSource(
-            ix=20, iy=20, waveform=GaussianPulse(0, 0, width=8 * sim.dt).value
+            ix=20, iy=20, waveform=GaussianPulse(0, 0, half_width_s=8 * sim.dt).value
         )
     )
     sim.run(400)

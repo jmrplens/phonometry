@@ -692,20 +692,20 @@ def test_scattering_spectrum_plot_returns_axes() -> None:
 
 
 def test_directional_diffusion_coefficient_matches_scalar() -> None:
-    angles = np.arange(-90.0, 90.5, 5.0)
+    angles_deg = np.arange(-90.0, 90.5, 5.0)
     rng = np.random.default_rng(3)
     levels = (
         70.0
-        + 2.0 * np.sin(np.radians(angles) * 3.0)
-        + rng.normal(0.0, 1.0, angles.size)
+        + 2.0 * np.sin(np.radians(angles_deg) * 3.0)
+        + rng.normal(0.0, 1.0, angles_deg.size)
     )
-    result = directional_diffusion(angles, levels)
+    result = directional_diffusion(angles_deg, levels)
 
     assert isinstance(result, DiffusionResult)
     assert result.coefficient == pytest.approx(
         directional_diffusion_coefficient(levels)
     )
-    np.testing.assert_allclose(result.angles, angles)
+    np.testing.assert_allclose(result.angles_deg, angles_deg)
     np.testing.assert_allclose(result.levels, levels)
 
 
@@ -726,7 +726,7 @@ def test_diffusion_result_rejects_a_non_finite_coefficient() -> None:
     """
     with pytest.raises(ValueError, match=r"DiffusionResult: 'coefficient' must be"):
         DiffusionResult(
-            angles=np.array([-30.0, 0.0, 30.0]),
+            angles_deg=np.array([-30.0, 0.0, 30.0]),
             levels=np.array([70.0, 72.0, 69.0]),
             coefficient=float("nan"),
         )
@@ -748,7 +748,7 @@ def test_diffusion_result_rejects_an_unreadable_level(bad: float) -> None:
         ValueError, match=r"DiffusionResult: 'levels' must be finite, or -inf"
     ):
         DiffusionResult(
-            angles=np.array([-30.0, 0.0, 30.0]),
+            angles_deg=np.array([-30.0, 0.0, 30.0]),
             levels=levels,
             coefficient=0.5,
         )
@@ -761,10 +761,10 @@ def test_diffusion_result_admits_a_silent_receiver() -> None:
     Formula (5)/(6): the coefficient stays ordinary and finite, so the guard
     above must let this response through and the fiche must keep printing it.
     """
-    angles = np.array([-30.0, 0.0, 30.0])
+    angles_deg = np.array([-30.0, 0.0, 30.0])
     levels = np.array([70.0, -np.inf, 69.0])
 
-    result = directional_diffusion(angles, levels)
+    result = directional_diffusion(angles_deg, levels)
 
     assert math.isfinite(result.coefficient)
     assert result.levels[1] == -np.inf

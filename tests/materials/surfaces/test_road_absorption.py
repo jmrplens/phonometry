@@ -488,7 +488,7 @@ def test_spot_internal_loss_clips_negative() -> None:
 
 
 def test_spot_guards() -> None:
-    with pytest.raises(ValueError, match="'diameter' must be positive"):
+    with pytest.raises(ValueError, match="'diameter_m' must be positive"):
         spot_tube_upper_frequency(0.0)
     with pytest.raises(ValueError, match="'f_min' must be less than 'f_max'"):
         spot_microphone_spacing_bounds(340.0, f_min=1800.0, f_max=220.0)

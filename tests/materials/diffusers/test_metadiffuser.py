@@ -91,7 +91,7 @@ def test_qr_first_slit_reaches_critical_coupling() -> None:
     # Paper: "at f = 2270 Hz the reflection coefficient vanishes at the
     # n = 1 slit" of the QR-metadiffuser.
     f = np.arange(2000.0, 2601.0, 5.0)
-    result = metadiffuser_reflection(f, QR_WELLS, depth=0.02, period=0.07)
+    result = metadiffuser_reflection(f, QR_WELLS, depth=0.02, period_m=0.07)
     alpha = result.well_absorption[0]
     peak = int(np.argmax(alpha))
     assert alpha[peak] > 0.95
@@ -108,7 +108,7 @@ def test_qr_reflection_matches_target_qrd_at_evaluation_frequency() -> None:
     k = 2.0 * np.pi * 2000.0 / c0
     target = np.exp(-2j * k * depths)
     result = metadiffuser_reflection(
-        np.array([2000.0]), QR_WELLS, depth=0.02, period=0.07
+        np.array([2000.0]), QR_WELLS, depth=0.02, period_m=0.07
     )
     mismatch = np.degrees(np.abs(np.angle(result.reflection[:, 0] * np.conj(target))))
     assert float(mismatch.max()) < 10.0
@@ -119,7 +119,7 @@ def test_qr_panel_diffuses_like_the_supplementary_says() -> None:
     # 2 kHz evaluation. The polar reduction differs in discretisation from
     # the paper's, so the bound is soft.
     spectrum = metadiffuser_diffusion_spectrum(
-        np.array([2000.0]), QR_WELLS, depth=0.02, period=0.07
+        np.array([2000.0]), QR_WELLS, depth=0.02, period_m=0.07
     )
     assert 0.4 < float(spectrum.normalized[0]) < 0.8
 
@@ -127,7 +127,7 @@ def test_qr_panel_diffuses_like_the_supplementary_says() -> None:
 def test_pa_state_is_a_perfect_absorber_at_500_hz() -> None:
     # Table 3 zero state: critical coupling at the 500 Hz design point.
     f = np.arange(420.0, 601.0, 2.0)
-    result = metadiffuser_reflection(f, [ABSORBER, ABSORBER], depth=0.03, period=0.10)
+    result = metadiffuser_reflection(f, [ABSORBER, ABSORBER], depth=0.03, period_m=0.10)
     alpha = result.well_absorption[0]
     peak = int(np.argmax(alpha))
     assert alpha[peak] > 0.99
@@ -139,7 +139,7 @@ def test_inverter_state_reflects_out_of_phase() -> None:
     # quadrature at the design frequency (the paper itself reports the
     # inverting slits as imperfect due to the thermo-viscous losses).
     result = metadiffuser_reflection(
-        np.array([500.0]), [INVERTER, INVERTER], depth=0.03, period=0.10
+        np.array([500.0]), [INVERTER, INVERTER], depth=0.03, period_m=0.10
     )
     r = result.reflection[0, 0]
     assert abs(r) > 0.9
@@ -150,7 +150,7 @@ def test_pr_metadiffuser_sharp_absorption_peak() -> None:
     # Fig. 5(d): one slit of the PR-metadiffuser shows a sharp absorption
     # peak at 1510 Hz (quasi-perfect, not critically coupled).
     f = np.arange(1300.0, 1701.0, 5.0)
-    result = metadiffuser_reflection(f, PR_WELLS, depth=0.035, period=0.07)
+    result = metadiffuser_reflection(f, PR_WELLS, depth=0.035, period_m=0.07)
     per_slit_peak = result.well_absorption.max(axis=1)
     best = int(np.argmax(per_slit_peak))
     assert per_slit_peak[best] > 0.8
@@ -162,10 +162,10 @@ def test_pr_metadiffuser_specular_notch() -> None:
     # The PRD-like scattered field presents a notch at the specular
     # direction (Fig. 4(g), evaluated with 6 repetitions at 1 kHz).
     polar = metadiffuser_polar_response(
-        1000.0, PR_WELLS, depth=0.035, period=0.07, periods=6
+        1000.0, PR_WELLS, depth=0.035, period_m=0.07, repetitions=6
     )
-    angles = np.asarray(polar.angles)
-    specular = float(polar.levels[np.abs(angles) < 3.0].mean())
+    angles_deg = np.asarray(polar.angles_deg)
+    specular = float(polar.levels[np.abs(angles_deg) < 3.0].mean())
     assert specular < -15.0
 
 
@@ -177,13 +177,13 @@ def test_ternary_sequence_suppresses_the_specular_beam() -> None:
         500.0,
         wells,
         depth=0.03,
-        period=0.10,
-        periods=6,
-        angles=np.arange(-90.0, 91.0, 1.0),
+        period_m=0.10,
+        repetitions=6,
+        angles_deg=np.arange(-90.0, 91.0, 1.0),
     )
-    angles = np.asarray(polar.angles)
-    specular = float(polar.levels[angles == 0.0][0])
-    off_peak = float(polar.levels[np.abs(angles) > 2.0].max())
+    angles_deg = np.asarray(polar.angles_deg)
+    specular = float(polar.levels[angles_deg == 0.0][0])
+    off_peak = float(polar.levels[np.abs(angles_deg) > 2.0].max())
     assert specular < off_peak - 2.0
 
 
@@ -194,7 +194,7 @@ def test_broadband_panel_soft_bounds() -> None:
     wells = [_well(*row) for row in BROADBAND_ROWS]
     with pytest.warns(SlowSoundAbsorberWarning):
         spectrum = metadiffuser_diffusion_spectrum(
-            np.array([1000.0]), wells, depth=0.03, period=0.12
+            np.array([1000.0]), wells, depth=0.03, period_m=0.12
         )
     assert 0.4 < float(spectrum.normalized[0]) < 0.8
 
@@ -203,31 +203,31 @@ def test_face_average_and_flat_strips() -> None:
     # A None well is a rigid strip with R = 1 exactly, and the
     # face-averaged absorption is the mean of the per-well coefficients.
     f = np.array([500.0, 1000.0])
-    result = metadiffuser_reflection(f, [ABSORBER, None], depth=0.03, period=0.10)
+    result = metadiffuser_reflection(f, [ABSORBER, None], depth=0.03, period_m=0.10)
     assert np.allclose(result.reflection[1], 1.0)
     assert np.allclose(result.absorption, result.well_absorption.mean(axis=0))
     assert result.depth == pytest.approx(0.03)
-    assert result.period == pytest.approx(0.10)
+    assert result.period_m == pytest.approx(0.10)
 
 
 def test_panel_validation() -> None:
     f = np.array([500.0])
     with pytest.raises(ValueError, match="at least two wells"):
-        metadiffuser_reflection(f, [ABSORBER], depth=0.03, period=0.10)
+        metadiffuser_reflection(f, [ABSORBER], depth=0.03, period_m=0.10)
     not_a_well = [ABSORBER, 0.01]
     with pytest.raises(
         TypeError, match=r"wells\[1\] must be a MetadiffuserWell or None"
     ):
-        metadiffuser_reflection(f, not_a_well, depth=0.03, period=0.10)
+        metadiffuser_reflection(f, not_a_well, depth=0.03, period_m=0.10)
     too_tall = [ABSORBER, _well(110.0, 5.0, 20.0, 4.0, 20.0)]
     with pytest.raises(ValueError, match="smaller than the period"):
-        metadiffuser_reflection(f, too_tall, depth=0.03, period=0.10)
+        metadiffuser_reflection(f, too_tall, depth=0.03, period_m=0.10)
     empty_band = np.array([])
     with pytest.raises(
         ValueError, match=r"'frequencies' must be a non-empty 1-D sequence"
     ):
         metadiffuser_diffusion_spectrum(
-            empty_band, [ABSORBER, None], depth=0.03, period=0.10
+            empty_band, [ABSORBER, None], depth=0.03, period_m=0.10
         )
     with pytest.raises(ValueError, match="at least one resonator"):
         MetadiffuserWell(0.01, ())
@@ -241,7 +241,7 @@ def test_square_resonator_geometry_and_validation() -> None:
         f,
         [ABSORBER, None],
         depth=0.03,
-        period=0.10,
+        period_m=0.10,
         resonator_geometry="square",
     )
     assert result.reflection.shape == (2, 2)
@@ -250,7 +250,7 @@ def test_square_resonator_geometry_and_validation() -> None:
             f,
             [ABSORBER, None],
             depth=0.03,
-            period=0.10,
+            period_m=0.10,
             resonator_geometry="round",
         )
 
@@ -265,7 +265,7 @@ def test_result_plots_render_and_validate() -> None:
     from phonometry.materials.diffusers.metadiffuser import MetadiffuserResult
 
     f = np.arange(400.0, 601.0, 50.0)
-    result = metadiffuser_reflection(f, [ABSORBER, INVERTER], depth=0.03, period=0.10)
+    result = metadiffuser_reflection(f, [ABSORBER, INVERTER], depth=0.03, period_m=0.10)
     for language in ("en", "es"):
         ax = result.plot(language=language)
         assert ax.get_lines()

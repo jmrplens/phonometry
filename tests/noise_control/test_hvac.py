@@ -113,17 +113,19 @@ def test_plenum_per_band() -> None:
 
 def test_plenum_angle_endpoints_accepted() -> None:
     # cos(pi/2) = 0: at the endpoint only the reverberant term is left.
-    grazing = hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.2, angle=math.pi / 2.0)
-    head_on = hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.2, angle=0.0)
+    grazing = hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.2, angle_rad=math.pi / 2.0)
+    head_on = hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.2, angle_rad=0.0)
     assert grazing > head_on
 
 
-@pytest.mark.parametrize("angle", [math.nan, math.pi, -0.3], ids=["nan", "pi", "neg"])
-def test_plenum_angle_outside_range_raises(angle: float) -> None:
+@pytest.mark.parametrize(
+    "angle_rad", [math.nan, math.pi, -0.3], ids=["nan", "pi", "neg"]
+)
+def test_plenum_angle_outside_range_raises(angle_rad: float) -> None:
     # A NaN used to come back as a NaN result and an obtuse angle drove
     # log10 negative with only a RuntimeWarning; both refuse by name now.
-    with pytest.raises(ValueError, match=r"'angle' must lie in \[0, pi/2\]"):
-        hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.2, angle=angle)
+    with pytest.raises(ValueError, match=r"'angle_rad' must lie in \[0, pi/2\]"):
+        hvac.plenum_attenuation(0.1, 1.0, 20.0, 0.2, angle_rad=angle_rad)
 
 
 def test_plenum_empty_absorption_raises() -> None:

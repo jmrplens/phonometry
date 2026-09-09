@@ -86,7 +86,7 @@ No resampling onto an `M`-point angular grid is performed.
 ```python
 comb_filter_response(
     frequencies: NDArray[np.float64] | list[float],
-    period: float,
+    period_s: float,
     n_averages: int,
 ) -> NDArray[np.float64]
 ```
@@ -104,7 +104,7 @@ not a multiple of `N`.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies at which to evaluate, in Hz. |
-| `period` | Repetition period `T`, in seconds. |
+| `period_s` | Repetition period `T`, in seconds. |
 | `n_averages` | Number of averaged periods `N` (at least 1). |
 
 **Returns:** The filter magnitude at each frequency (unitless; bounded by 1, though floating-point cancellation immediately beside a tooth can return values above 1 by a few parts in 1e9).
@@ -124,7 +124,7 @@ SynchronousAverageResult(
     residual: NDArray[np.float64],
     n_averages: int,
     samples_per_period: int,
-    period: float,
+    period_s: float,
     fs: float,
     interpolated: bool,
     noise_reduction_db: float,
@@ -145,7 +145,7 @@ Time synchronous average of a periodic waveform in noise.
 | `residual` | Input minus the periodic reconstruction, over the analysed span (`n_averages * samples_per_period` samples, aligned to the integer period grid): what is left after the synchronous component is removed. |
 | `n_averages` | Number of periods averaged, `N`. |
 | `samples_per_period` | Integer samples per period `M` after any alignment. |
-| `period` | Repetition period `T`, in seconds. |
+| `period_s` | Repetition period `T`, in seconds. |
 | `fs` | Sample rate, in Hz. |
 | `interpolated` | Whether band-limited fractional-delay alignment was applied (`True` when $f_\mathrm{s} T$ is not an integer). |
 | `noise_reduction_db` | Power reduction of asynchronous noise, $10 \log_{10} N$ dB (amplitude SNR gain $\sqrt{N}$). |
@@ -187,7 +187,7 @@ time_synchronous_average(
     x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
-    period: float,
+    period_s: float,
     n_averages: int | None = None,
     n_harmonics: int = 8,
 ) -> SynchronousAverageResult
@@ -196,7 +196,7 @@ time_synchronous_average(
 Extract a periodic waveform of known period by time domain averaging.
 
 Ensemble-averages `N` successive periods of the record (McFadden
-Eq. 5) to reinforce the component synchronous with `period` and
+Eq. 5) to reinforce the component synchronous with `period_s` and
 suppress asynchronous noise, whose residual standard deviation falls as
 $1/\sqrt{N}$. When `fs * period` is an integer the periods are
 sliced
@@ -211,7 +211,7 @@ and recovered within that interpolation error.
 | :--- | :--- |
 | `x` | Signal, 1-D, containing the periodic component plus noise. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the period waveform, the residual and its RMS come out in Pa. The noise reduction in dB is a ratio and does not move. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `period` | Known repetition period `T`, in seconds (e.g. one revolution of a rotating machine). |
+| `period_s` | Known repetition period `T`, in seconds (e.g. one revolution of a rotating machine). |
 | `n_averages` | Number of whole periods to average (default: as many as the record holds). Choosing `N` so that $N q$ is an integer places a comb node on an interfering tone at order `q` and maximises its rejection (McFadden's revised-model result). |
 | `n_harmonics` | Number of harmonics of `1/T` spanned by the returned comb-filter response (default 8). |
 

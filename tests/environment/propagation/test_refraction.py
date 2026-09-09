@@ -80,7 +80,7 @@ def test_log_linear_profile_matches_salomons_eq_4_5() -> None:
 
 
 def test_profile_validation() -> None:
-    with pytest.raises(ValueError, match="'gradient' must be finite"):
+    with pytest.raises(ValueError, match="'gradient_per_s' must be finite"):
         linear_sound_speed_profile(np.nan)
     with pytest.raises(
         ValueError, match="linear profile reaches a non-positive sound speed"
@@ -107,7 +107,9 @@ def test_ray_curvature_radius_closed_form() -> None:
 
 
 def test_ray_curvature_radius_validation() -> None:
-    with pytest.raises(ValueError, match="'gradient' must be finite and non-zero"):
+    with pytest.raises(
+        ValueError, match="'gradient_per_s' must be finite and non-zero"
+    ):
         ray_curvature_radius(0.0)  # straight ray
     with pytest.raises(
         ValueError, match=r"'launch_angle_deg' must be within \(-90, 90\)"
@@ -132,7 +134,7 @@ def test_shadow_zone_distance_closed_form() -> None:
 def test_shadow_zone_requires_upward_refraction() -> None:
     with pytest.raises(
         ValueError,
-        match=r"'gradient' must be negative \(an upward-refracting profile\)",
+        match=r"'gradient_per_s' must be negative \(an upward-refracting profile\)",
     ):
         shadow_zone_distance(0.1, 2.0, 2.0)  # downward refraction: no shadow
 
@@ -149,13 +151,15 @@ def _circle_fit_radius(x: np.ndarray, y: np.ndarray) -> float:
 
 
 @pytest.mark.parametrize(
-    ("gradient", "angle"), [(0.1, 20.0), (-0.05, 30.0), (0.2, 10.0)]
+    ("gradient_per_s", "angle"), [(0.1, 20.0), (-0.05, 30.0), (0.2, 10.0)]
 )
-def test_ray_is_exact_circular_arc(gradient: float, angle: float) -> None:
+def test_ray_is_exact_circular_arc(gradient_per_s: float, angle: float) -> None:
     # A ray launched at the ground (where c = ground_speed) is an exact circle
     # of the closed-form radius; a circle fit recovers it to <0.01 %.
-    prof = linear_sound_speed_profile(gradient, ground_speed=C0, max_height=3000.0)
-    rc = ray_curvature_radius(gradient, ground_speed=C0, launch_angle_deg=angle)
+    prof = linear_sound_speed_profile(
+        gradient_per_s, ground_speed=C0, max_height=3000.0
+    )
+    rc = ray_curvature_radius(gradient_per_s, ground_speed=C0, launch_angle_deg=angle)
     res = atmospheric_ray_paths(
         prof,
         source_height=0.0,
@@ -170,9 +174,11 @@ def test_ray_is_exact_circular_arc(gradient: float, angle: float) -> None:
 
 def test_turning_height_matches_geometry() -> None:
     # A ray in downward refraction turns at height Rc(1 - cos theta0).
-    gradient, angle = 0.2, 10.0
-    prof = linear_sound_speed_profile(gradient, ground_speed=C0, max_height=3000.0)
-    rc = ray_curvature_radius(gradient, ground_speed=C0, launch_angle_deg=angle)
+    gradient_per_s, angle = 0.2, 10.0
+    prof = linear_sound_speed_profile(
+        gradient_per_s, ground_speed=C0, max_height=3000.0
+    )
+    rc = ray_curvature_radius(gradient_per_s, ground_speed=C0, launch_angle_deg=angle)
     res = atmospheric_ray_paths(
         prof,
         source_height=0.0,
@@ -223,7 +229,7 @@ def test_ground_reflection_costs_no_accuracy() -> None:
     The agreement is exact rather than merely close because once the step is
     split the two rays are, step for step, the same arithmetic.
     """
-    prof = linear_sound_speed_profile(gradient=0.2, max_height=500.0)
+    prof = linear_sound_speed_profile(gradient_per_s=0.2, max_height=500.0)
     for n_steps in (201, 2001, 20_001):
         kw = {"source_height": 0.0, "max_range": 3000.0, "n_steps": n_steps}
         up = atmospheric_ray_paths(prof, launch_angles_deg=[10.0], **kw)

@@ -120,7 +120,7 @@ road_propulsion_noise(
     speed: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = ...,
-    gradient: float = 0.0,
+    road_slope_percent: float = 0.0,
     junction_distance: float | None = None,
     junction_type: JunctionType = ...,
     coefficients: RoadEmissionCoefficients = ...,
@@ -143,7 +143,7 @@ propulsion noise, a noisy one does not increase it.
 | `category` | Vehicle category (Table [2.2.a]). |
 | `speed` | Average speed `v_m`, in km/h; values below 20 km/h are raised to 20 km/h (2.2.1). |
 | `surface` | Road surface, as a [`RoadSurface`](/phonometry/reference/api/environment/cnossos-road/#roadsurface), its description or an explicit [`RoadSurfaceCoefficients`](/phonometry/reference/api/environment/cnossos-road/#roadsurfacecoefficients). |
-| `gradient` | Road slope `s`, in per cent, positive uphill in the direction of travel. For a bidirectional flow, split the flow in two and correct one half uphill and the other downhill. |
+| `road_slope_percent` | Road slope `s`, in per cent, positive uphill in the direction of travel. For a bidirectional flow, split the flow in two and correct one half uphill and the other downhill. |
 | `junction_distance` | Distance `x` to the junction, in m. |
 | `junction_type` | Junction type `k` (Table F-3). |
 | `coefficients` | The Appendix F database to use. |
@@ -235,7 +235,7 @@ road_source_power(
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = ...,
     temperature_c: float = 20.0,
-    gradient: float = 0.0,
+    road_slope_percent: float = 0.0,
     studded_months: float = 0.0,
     junction_distance: float | None = None,
     junction_type: JunctionType = ...,
@@ -262,7 +262,7 @@ temperature, the gradient, the studded-tyre season and the junction.
 | `traffic` | One [`RoadTraffic`](/phonometry/reference/api/environment/cnossos-road/#roadtraffic) or a sequence of them, at most one per vehicle category. |
 | `surface` | Road surface (Table F-4). |
 | `temperature_c` | Yearly average air temperature `tau`, in degrees Celsius (the reference condition is 20 degC). |
-| `gradient` | Road slope `s`, in per cent, positive uphill. |
+| `road_slope_percent` | Road slope `s`, in per cent, positive uphill. |
 | `studded_months` | `T_s` of (2.2.7), the months per year over which studded tyres are in use. |
 | `junction_distance` | Distance `x` from the source to the nearest junction, in m; `None` (the default) means no junction in range. |
 | `junction_type` | Junction type `k` (Table F-3). |
@@ -309,7 +309,7 @@ road_vehicle_sound_power(
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = ...,
     temperature_c: float = 20.0,
-    gradient: float = 0.0,
+    road_slope_percent: float = 0.0,
     studded_fraction: float = 0.0,
     studded_months: float = 0.0,
     junction_distance: float | None = None,
@@ -332,7 +332,7 @@ propulsion term is the whole of it (2.2.3).
 | `speed` | Average speed `v_m`, in km/h. |
 | `surface` | Road surface (Table F-4). |
 | `temperature_c` | Air temperature `tau`, in degrees Celsius. |
-| `gradient` | Road slope `s`, in per cent. |
+| `road_slope_percent` | Road slope `s`, in per cent. |
 | `studded_fraction` | `Q_stud,ratio` of (2.2.7). |
 | `studded_months` | `T_s` of (2.2.7), in months. |
 | `junction_distance` | Distance `x` to the junction, in m. |

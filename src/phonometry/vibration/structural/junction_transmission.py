@@ -288,27 +288,27 @@ def _obliquity_sum(chi: float, sin2: NDArray[np.float64]) -> NDArray[np.float64]
     return np.asarray(first + second, dtype=np.float64)
 
 
-def _check_angle(angle: ArrayLike) -> NDArray[np.float64]:
+def _check_angle(angle_rad: ArrayLike) -> NDArray[np.float64]:
     """Incidence angle(s) in radians, restricted to ``[0, pi/2]``."""
-    theta = np.asarray(angle, dtype=np.float64)
+    theta = np.asarray(angle_rad, dtype=np.float64)
     if not np.all(np.isfinite(theta)):
-        msg = "'angle' must be finite."
+        msg = "'angle_rad' must be finite."
         raise ValueError(msg)
     if np.any(theta < 0.0) or np.any(theta > math.pi / 2.0 + 1e-9):
-        msg = "'angle' must lie in [0, pi/2] radians."
+        msg = "'angle_rad' must lie in [0, pi/2] radians."
         raise ValueError(msg)
     return theta
 
 
 def corner_transmission_coefficient(
-    angle: ArrayLike, chi: float, psi: float, junction: str = "X"
+    angle_rad: ArrayLike, chi: float, psi: float, junction: str = "X"
 ) -> NDArray[np.float64]:
     r"""Transmission around a corner ``tau12(theta)`` (Hopkins Eq. 5.12).
 
     Returns ``0`` for angles beyond the cut-off :math:`\arcsin(\chi)`
     (only reached when :math:`\chi < 1`).
 
-    :param angle: Incidence angle ``theta``, in **radians** (scalar or array,
+    :param angle_rad: Incidence angle ``theta``, in **radians** (scalar or array,
         :math:`0 \le \theta \le \pi/2`).
     :param chi: Wave parameter ``chi`` (Eq. 5.10, > 0).
     :param psi: Wave parameter ``psi`` (Eq. 5.11, > 0).
@@ -317,7 +317,7 @@ def corner_transmission_coefficient(
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
         angle or an unknown junction.
     """
-    theta = _check_angle(angle)
+    theta = _check_angle(angle_rad)
     c = require_positive(chi, "chi")
     p = require_positive(psi, "psi")
     j1, j2, _ = _junction(junction)
@@ -331,7 +331,7 @@ def corner_transmission_coefficient(
 
 
 def straight_transmission_coefficient(
-    angle: ArrayLike, chi: float, psi: float, junction: str = "X"
+    angle_rad: ArrayLike, chi: float, psi: float, junction: str = "X"
 ) -> NDArray[np.float64]:
     r"""Transmission across a straight section ``tau13(theta)`` (Hopkins 5.13).
 
@@ -339,7 +339,7 @@ def straight_transmission_coefficient(
     regimes :math:`\chi \ge \sin\theta` and :math:`\chi < \sin\theta` are
     covered.
 
-    :param angle: Incidence angle ``theta``, in **radians** (scalar or array,
+    :param angle_rad: Incidence angle ``theta``, in **radians** (scalar or array,
         :math:`0 \le \theta \le \pi/2`).
     :param chi: Wave parameter ``chi`` (Eq. 5.10, > 0).
     :param psi: Wave parameter ``psi`` (Eq. 5.11, > 0).
@@ -349,7 +349,7 @@ def straight_transmission_coefficient(
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
         angle, or a junction without a straight section.
     """
-    theta = _check_angle(angle)
+    theta = _check_angle(angle_rad)
     c = require_positive(chi, "chi")
     p = require_positive(psi, "psi")
     _, _, j3 = _junction(junction)

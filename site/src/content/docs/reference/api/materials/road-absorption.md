@@ -817,7 +817,7 @@ SPOT_NARROW_BAND_RANGE = (220.0, 1800.0)
 
 ```python
 spot_tube_upper_frequency(
-    diameter: float,
+    diameter_m: float,
     speed_of_sound: float = 340.0,
 ) -> float
 ```
@@ -833,7 +833,7 @@ top.
 
 | Name | Description |
 | :--- | :--- |
-| `diameter` | Tube diameter `d`, in metres. |
+| `diameter_m` | Tube diameter `d`, in metres. |
 | `speed_of_sound` | Speed of sound `c0`, in metres per second. |
 
 **Returns:** Upper usable frequency `f_u`, in hertz.

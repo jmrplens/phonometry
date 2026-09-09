@@ -647,7 +647,7 @@ same layer stack.
 
 ## 4. Oblique and random incidence
 
-`layered_absorber(..., angle=theta)` evaluates the full bulk-reacting stack
+`layered_absorber(..., angle_rad=theta)` evaluates the full bulk-reacting stack
 at any polar angle; sheets are locally reacting (angle-independent), fluid
 layers refract per Snell's law; for an MPP over a cavity this reproduces
 Maa's oblique closed form (Eq. 23) exactly. The random-incidence coefficient

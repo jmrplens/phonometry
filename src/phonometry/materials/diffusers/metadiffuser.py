@@ -101,7 +101,7 @@ class MetadiffuserResult:
     :math:`\alpha(f) = 1 - \operatorname{mean}_n \lvert R_n \rvert^2` and
     ``well_absorption`` the per-well
     :math:`\alpha_n = 1 - \lvert R_n \rvert^2`. The trailing fields retain the geometry the
-    prediction was run with (``wells``, ``depth``, ``period``) so
+    prediction was run with (``wells``, ``depth``, ``period_m``) so
     :meth:`plot_geometry` can draw the panel section; they default to
     ``None`` for hand-built results.
     """
@@ -112,7 +112,7 @@ class MetadiffuserResult:
     well_absorption: Real
     wells: tuple[MetadiffuserWell | None, ...] | None = None
     depth: float | None = None
-    period: float | None = None
+    period_m: float | None = None
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -146,11 +146,11 @@ class MetadiffuserResult:
 
 
 def _check_panel(
-    wells: Sequence[MetadiffuserWell | None], depth: float, period: float
+    wells: Sequence[MetadiffuserWell | None], depth: float, period_m: float
 ) -> tuple[MetadiffuserWell | None, ...]:
     """Validate the well sequence against the panel depth and period."""
     require_positive(depth, "depth")
-    require_positive(period, "period")
+    require_positive(period_m, "period_m")
     cells = tuple(wells)
     if len(cells) < _MIN_WELLS:
         msg = "'wells' must contain at least two wells."
@@ -164,7 +164,7 @@ def _check_panel(
                 f"got {type(well).__name__}."
             )
             raise TypeError(msg)
-        if well.slit_height >= period:
+        if well.slit_height >= period_m:
             msg = f"wells[{i}].slit_height must be smaller than the period."
             raise ValueError(msg)
     return cells
@@ -175,8 +175,8 @@ def metadiffuser_reflection(
     wells: Sequence[MetadiffuserWell | None],
     *,
     depth: float,
-    period: float,
-    angle: float = 0.0,
+    period_m: float,
+    angle_rad: float = 0.0,
     resonator_geometry: str = "slit",
     fluid: Fluid = PUBLISHED_AIR,
 ) -> MetadiffuserResult:
@@ -189,15 +189,15 @@ def metadiffuser_reflection(
     :math:`a = L / M`, and ``None`` wells are flat rigid strips with
     :math:`R = 1`.
     The panel is locally reacting, so a well's reflection does not depend on
-    its neighbours and the incidence ``angle`` enters only through the front
+    its neighbours and the incidence ``angle_rad`` enters only through the front
     air impedance.
 
     :param frequency: Frequency vector ``f``, in hertz.
     :param wells: Sequence of :class:`MetadiffuserWell` (or ``None`` for a
         flat rigid strip) describing one period of the panel face.
     :param depth: Panel depth ``L`` common to all slits, in metres.
-    :param period: Well pitch ``d`` along the panel face, in metres.
-    :param angle: Polar angle of incidence ``theta``, in radians.
+    :param period_m: Well pitch ``d`` along the panel face, in metres.
+    :param angle_rad: Polar angle of incidence ``theta``, in radians.
     :param resonator_geometry: ``"slit"`` (default) for the paper's
         two-dimensional resonators, ``"square"`` for square-duct necks
         and cavities.
@@ -210,7 +210,7 @@ def metadiffuser_reflection(
     :return: A :class:`MetadiffuserResult` with one reflection row per well.
     """
     f = require_positive_array(frequency, "frequency")
-    cells = _check_panel(wells, depth, period)
+    cells = _check_panel(wells, depth, period_m)
     rows = np.empty((len(cells), f.size), dtype=np.complex128)
     for i, well in enumerate(cells):
         if well is None:
@@ -221,8 +221,8 @@ def metadiffuser_reflection(
             well.resonators,
             slit_height=well.slit_height,
             lattice_step=depth / len(well.resonators),
-            period=period,
-            angle=angle,
+            period_m=period_m,
+            angle_rad=angle_rad,
             resonator_geometry=resonator_geometry,
             fluid=fluid,
         )
@@ -235,7 +235,7 @@ def metadiffuser_reflection(
         well_absorption=np.asarray(well_alpha, dtype=np.float64),
         wells=cells,
         depth=float(depth),
-        period=float(period),
+        period_m=float(period_m),
     )
 
 
@@ -244,10 +244,10 @@ def metadiffuser_polar_response(
     wells: Sequence[MetadiffuserWell | None],
     *,
     depth: float,
-    period: float,
-    angles: ArrayLike = DEFAULT_POLAR_ANGLES,
+    period_m: float,
+    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES,
     source_angle: float = 0.0,
-    periods: int = 1,
+    repetitions: int = 1,
     resonator_geometry: str = "slit",
     fluid: Fluid = PUBLISHED_AIR,
 ) -> DiffuserPolarResponse:
@@ -264,12 +264,12 @@ def metadiffuser_polar_response(
     :param wells: Sequence of :class:`MetadiffuserWell` (or ``None`` for a
         flat rigid strip) describing one period of the panel face.
     :param depth: Panel depth ``L`` common to all slits, in metres.
-    :param period: Well pitch ``d`` along the panel face, in metres; it is
+    :param period_m: Well pitch ``d`` along the panel face, in metres; it is
         the ``well_width`` of the far-field model.
-    :param angles: Receiver reflection angles ``theta``, in degrees.
+    :param angles_deg: Receiver reflection angles ``theta``, in degrees.
     :param source_angle: Angle of incidence ``psi`` of the source, in
         degrees; also applied to the local slit reflection.
-    :param periods: Number of repetitions ``N_p`` of the single period; the
+    :param repetitions: Number of repetitions ``N_p`` of the single period; the
         grating lobes of a Schroeder-like design require ``periods >= 2``.
     :param resonator_geometry: ``"slit"`` (default) for the paper's
         two-dimensional resonators, ``"square"`` for square-duct necks
@@ -286,8 +286,8 @@ def metadiffuser_polar_response(
         np.asarray([f]),
         wells,
         depth=depth,
-        period=period,
-        angle=float(np.radians(source_angle)),
+        period_m=period_m,
+        angle_rad=float(np.radians(source_angle)),
         resonator_geometry=resonator_geometry,
         fluid=fluid,
     )
@@ -295,12 +295,12 @@ def metadiffuser_polar_response(
     # piecewise-constant wells carry the aperture factor, but there is no
     # Kirchhoff obliquity term, so it is disabled here for fidelity.
     return predict_diffuser_polar_response(
-        period,
+        period_m,
         f,
         reflection=result.reflection[:, 0],
-        angles=angles,
+        angles_deg=angles_deg,
         source_angle=source_angle,
-        periods=periods,
+        repetitions=repetitions,
         speed_of_sound=fluid.speed_of_sound,
         include_obliquity=False,
     )
@@ -311,10 +311,10 @@ def metadiffuser_diffusion_spectrum(
     wells: Sequence[MetadiffuserWell | None],
     *,
     depth: float,
-    period: float,
-    angles: ArrayLike = DEFAULT_POLAR_ANGLES,
+    period_m: float,
+    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES,
     source_angle: float = 0.0,
-    periods: int = 1,
+    repetitions: int = 1,
     resonator_geometry: str = "slit",
     fluid: Fluid = PUBLISHED_AIR,
 ) -> DiffusionSpectrum:
@@ -331,10 +331,10 @@ def metadiffuser_diffusion_spectrum(
     :param wells: Sequence of :class:`MetadiffuserWell` (or ``None`` for a
         flat rigid strip) describing one period of the panel face.
     :param depth: Panel depth ``L`` common to all slits, in metres.
-    :param period: Well pitch ``d`` along the panel face, in metres.
-    :param angles: Receiver reflection angles ``theta``, in degrees.
+    :param period_m: Well pitch ``d`` along the panel face, in metres.
+    :param angles_deg: Receiver reflection angles ``theta``, in degrees.
     :param source_angle: Angle of incidence ``psi``, in degrees.
-    :param periods: Number of repetitions ``N_p`` of the single period.
+    :param repetitions: Number of repetitions ``N_p`` of the single period.
     :param resonator_geometry: ``"slit"`` (default) for the paper's
         two-dimensional resonators, ``"square"`` for square-duct necks
         and cavities.
@@ -350,14 +350,14 @@ def metadiffuser_diffusion_spectrum(
     if freqs.ndim != 1 or freqs.size == 0:
         msg = "'frequencies' must be a non-empty 1-D sequence."
         raise ValueError(msg)
-    cells = _check_panel(wells, depth, period)
+    cells = _check_panel(wells, depth, period_m)
     flat = np.ones(len(cells), dtype=np.complex128)
     result = metadiffuser_reflection(
         freqs,
         cells,
         depth=depth,
-        period=period,
-        angle=float(np.radians(source_angle)),
+        period_m=period_m,
+        angle_rad=float(np.radians(source_angle)),
         resonator_geometry=resonator_geometry,
         fluid=fluid,
     )
@@ -365,22 +365,22 @@ def metadiffuser_diffusion_spectrum(
     norm = np.empty(freqs.size, dtype=np.float64)
     for i, f in enumerate(freqs):
         surface = predict_diffuser_polar_response(
-            period,
+            period_m,
             float(f),
             reflection=result.reflection[:, i],
-            angles=angles,
+            angles_deg=angles_deg,
             source_angle=source_angle,
-            periods=periods,
+            repetitions=repetitions,
             speed_of_sound=fluid.speed_of_sound,
             include_obliquity=False,
         )
         reference = predict_diffuser_polar_response(
-            period,
+            period_m,
             float(f),
             reflection=flat,
-            angles=angles,
+            angles_deg=angles_deg,
             source_angle=source_angle,
-            periods=periods,
+            repetitions=repetitions,
             speed_of_sound=fluid.speed_of_sound,
             include_obliquity=False,
         )

@@ -647,16 +647,16 @@ def coincidence_frequencies(
     :return: The three frequencies, in Hz.
     :raises ValueError: If any argument is not positive and finite.
     """
-    diameter = require_positive(internal_diameter, "internal_diameter")
+    diameter_m = require_positive(internal_diameter, "internal_diameter")
     thickness = require_positive(wall_thickness, "wall_thickness")
     downstream = require_positive(downstream_sound_speed, "downstream_sound_speed")
     wall = require_positive(pipe_sound_speed, "pipe_sound_speed")
     air = require_positive(air_sound_speed, "air_sound_speed")
-    values = (diameter, thickness, downstream, wall, air)
+    values = (diameter_m, thickness, downstream, wall, air)
     if not all(math.isfinite(value) for value in values):
         msg = "The coincidence frequencies need finite arguments."
         raise ValueError(msg)
-    ring = wall / (math.pi * diameter)
+    ring = wall / (math.pi * diameter_m)
     return PipeFrequencies(
         ring=float(ring),
         internal_coincidence=float((ring / 4.0) * (downstream / air)),
@@ -698,13 +698,13 @@ def _frequency_factors(
 
 def _damping_factor(valve_outlet_diameter: float) -> float:
     """Equation (20b): the damping factor, a cubic in the outlet diameter."""
-    diameter = valve_outlet_diameter
-    if diameter > _UNDAMPED_OUTLET_M:
+    diameter_m = valve_outlet_diameter
+    if diameter_m > _UNDAMPED_OUTLET_M:
         return 0.0
-    if diameter < _FULLY_DAMPED_OUTLET_M:
+    if diameter_m < _FULLY_DAMPED_OUTLET_M:
         return 9.0
     return float(
-        -16660.0 * diameter**3 + 6370.0 * diameter**2 - 813.0 * diameter + 35.8
+        -16660.0 * diameter_m**3 + 6370.0 * diameter_m**2 - 813.0 * diameter_m + 35.8
     )
 
 
@@ -952,13 +952,13 @@ def multiple_passage_jet_diameter(
     capacity = require_positive(flow_coefficient, "flow_coefficient")
     modifier = require_positive(style_modifier, "style_modifier")
     length = require_positive(passage_length, "passage_length")
-    diameter = require_positive(passage_diameter, "passage_diameter")
+    diameter_m = require_positive(passage_diameter, "passage_diameter")
     if not all(
-        math.isfinite(value) for value in (capacity, modifier, length, diameter)
+        math.isfinite(value) for value in (capacity, modifier, length, diameter_m)
     ):
         msg = "The jet diameter needs finite arguments."
         raise ValueError(msg)
-    aspect = min(length / diameter, MAXIMUM_PASSAGE_ASPECT)
+    aspect = min(length / diameter_m, MAXIMUM_PASSAGE_ASPECT)
     recovery = 0.9 - 0.06 * aspect
     return float(
         FLOW_COEFFICIENT_CONSTANTS[kind] * modifier * math.sqrt(capacity * recovery)

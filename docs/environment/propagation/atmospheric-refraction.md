@@ -269,7 +269,7 @@ with warnings.catch_warnings():
                                                         flow_resistivity=200e3,
                                                         max_range=600.0, max_height=40.0)
         ax.plot(pe.ranges, pe.level_at_height(2.0), label=label)
-# The closed-form boundary of the equivalent linear upward gradient (its
+# The closed-form boundary of the equivalent linear upward gradient_per_s (its
 # 10 m mean), the dotted line of the figure.
 up = cases[2][0]
 grad = float(up.speed_at(10.0) - 340.0) / 10.0

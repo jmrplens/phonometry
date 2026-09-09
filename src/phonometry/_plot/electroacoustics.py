@@ -580,7 +580,7 @@ def plot_piston_directivity(
         )
         raise ValueError(msg)
     ax = ax if ax is not None else _new_polar_axes()
-    theta = np.asarray(result.angles, dtype=np.float64)
+    theta = np.asarray(result.angles_rad, dtype=np.float64)
     ka = np.asarray(result.ka, dtype=np.float64)
     levels = np.clip(
         np.asarray(result.directivity_db, dtype=np.float64),

@@ -2197,9 +2197,9 @@ _ES: dict[str, str] = {
     "the chi-square CIs and error formulas hold": "los IC chi-cuadrado y las fórmulas de error valen",
     'the runs test (method="runs") is the two-sided companion: too many runs is as suspect as too few': 'el test de rachas (method="runs") es el compañero bilateral: '
     "demasiadas rachas son tan sospechosas como muy pocas",
-    'a frequency glide can hide from the mean square: test statistic="mean" or band-filtered copies too': "un deslizamiento en frecuencia puede esconderse de la media "
-    'cuadrática: prueba statistic="mean" o copias filtradas por '
-    "bandas",
+    'a frequency glide can hide from the mean square: test statistic="mean" or band-filtered copies too': "un deslizamiento en frecuencia puede esconderse del valor "
+    'cuadrático medio: prueba statistic="mean" o copias filtradas '
+    "por bandas",
     # Sound-quality metric family (DIN 45692 + ECMA-418-2)
     "Sound quality beyond loudness: four calibrated sensations": "Calidad sonora más allá de la sonoridad: cuatro sensaciones",
     "Calibrated signal $x(t)$ in pascals": "Señal calibrada $x(t)$ en pascales",

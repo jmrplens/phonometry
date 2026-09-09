@@ -502,7 +502,9 @@ freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # tercios 50 Hz-10 kHz
 fig, ax = plt.subplots()
 # continua: atenuación de banda SAE, discontinua: tono puro medio de banda
 for s in (1000.0, 7620.0):
-    att = aircraft.sae_band_attenuation(freqs, s, temperature=25.0, relative_humidity=70.0)
+    att = aircraft.sae_band_attenuation(
+        freqs, s, temperature_c=25.0, relative_humidity_percent=70.0
+    )
     line, = ax.semilogx(att.frequency, att.band_attenuation, marker="o",
                         markersize=3, label=f"Banda SAE ({s:.0f} m)")
     ax.semilogx(att.frequency, att.midband_attenuation, "--", alpha=0.6,
@@ -522,7 +524,7 @@ from phonometry import aircraft
 
 freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # tercios 50 Hz–10 kHz
 att = aircraft.sae_band_attenuation(freqs, path_length=7620.0,
-                              temperature=25.0, relative_humidity=70.0)
+                              temperature_c=25.0, relative_humidity_percent=70.0)
 att.plot()   # banda frente a tono puro medio de banda (requiere matplotlib)
 ```
 

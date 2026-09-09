@@ -685,7 +685,7 @@ segment_levels = 10 * np.log10(segment_intensity / 1e-12) + margin
 
 precise = emission.sound_power_intensity_precision(
     scanned, faces, frequencies=third_octave,
-    temperature=28.0, barometric_pressure=94_000.0,
+    temperature_c=28.0, barometric_pressure_pa=94_000.0,
 )
 annex_b = emission.precision_field_indicators(segment_intensity, segment_levels)
 scan_intensity = np.average(scanned, axis=0, weights=faces)  # unequal faces
@@ -705,7 +705,7 @@ precise.report(
         specimen="Grupo hidráulico (de suelo)",
         test_room="Nave con ruido de fondo estacionario",
         instrumentation="Sonda de intensidad p-p clase 1 (IEC 61043), separador de 12 mm",
-        temperature=28.0, relative_humidity=40.0, pressure=94.0,
+        temperature_c=28.0, relative_humidity_percent=40.0, static_pressure_kpa=94.0,
         laboratory="Laboratorio de referencia Phonometry",
         report_id="EXAMPLE-9614-3",
         requirement=98.0,

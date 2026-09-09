@@ -71,7 +71,7 @@ from phonometry import environment
 bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]   # octave-band centres [Hz]
 
 # Pure-tone attenuation coefficient alpha [dB/m] at 20 °C, 50 % RH, one atmosphere
-alpha = environment.air_attenuation(bands, temperature=20.0, relative_humidity=50.0)
+alpha = environment.air_attenuation(bands, temperature_c=20.0, relative_humidity_percent=50.0)
 print(np.round(alpha * 1000.0, 2))          # in dB/km, as Table 1 tabulates
 # [  0.12   0.44   1.31   2.73   4.66   9.89  29.67 105.29]
 
@@ -80,7 +80,8 @@ cell = environment.air_attenuation(1000.0, 10.0, 70.0, exact_midband=True) * 100
 print(round(float(cell), 2))                # 3.66  (dB/km, Table 1)
 
 # Feed real conditions into the ISO 354 power attenuation coefficient m [1/m]
-m = environment.air_attenuation_m([1000.0, 4000.0], temperature=20.0, relative_humidity=50.0)
+m = environment.air_attenuation_m([1000.0, 4000.0], temperature_c=20.0,
+                                  relative_humidity_percent=50.0)
 print(np.round(m, 5))                        # [0.00107 0.00683]
 ```
 
@@ -104,9 +105,9 @@ atmospheric conditions straight into `absorption_area` /
 | Parameter | Type / shape | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `frequencies` | scalar or 1D array | Hz | > 0 | Vectorized; 50–10 000 Hz tabulated |
-| `temperature` | float | °C | default `20.0` | −20…+50 tabulated; outside warns |
-| `relative_humidity` | float | % | default `50.0` | 10…100 tabulated; `[0, 100]` allowed |
-| `pressure` | float | kPa | default `101.325` | ≤ 200 valid (Clause 7); above warns |
+| `temperature_c` | float | °C | default `20.0` | −20…+50 tabulated; outside warns |
+| `relative_humidity_percent` | float | % | default `50.0` | 10…100 tabulated; `[0, 100]` allowed |
+| `atmospheric_pressure_kpa` | float | kPa | default `101.325` | ≤ 200 valid (Clause 7); above warns |
 | `exact_midband` | bool | — | default `False` | Snap to $f_\mathrm{m} = 1000\cdot10^{k/10}$ (reproduces Table 1) |
 
 `air_attenuation` returns $\alpha$ in dB/m; `air_attenuation_m` returns
@@ -127,7 +128,7 @@ from phonometry import environment
 
 res = environment.atmospheric_attenuation(
     [63, 125, 250, 500, 1000, 2000, 4000, 8000],
-    temperature=20.0, relative_humidity=50.0,
+    temperature_c=20.0, relative_humidity_percent=50.0,
 )
 res.plot()   # alpha in dB/km against frequency (needs matplotlib)
 ```
@@ -148,7 +149,7 @@ from phonometry import environment
 
 # One line: the coefficient curve straight from the result.
 res = environment.atmospheric_attenuation(
-    np.geomspace(50.0, 10000.0, 400), temperature=20.0, relative_humidity=50.0,
+    np.geomspace(50.0, 10000.0, 400), temperature_c=20.0, relative_humidity_percent=50.0,
 )
 res.plot()
 plt.show()
@@ -240,8 +241,8 @@ bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 barrier = environment.Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
 att = environment.outdoor_propagation_attenuation(
     200.0, 1.5, 1.5, bands, ground_source=1.0, ground_middle=1.0,
-    ground_receiver=1.0, barrier=barrier, temperature=15.0,
-    relative_humidity=70.0,
+    ground_receiver=1.0, barrier=barrier, temperature_c=15.0,
+    relative_humidity_percent=70.0,
 )
 
 # One line — the same stacked breakdown with the total overlaid:
@@ -286,7 +287,7 @@ barrier = environment.Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
 att = environment.outdoor_propagation_attenuation(
     200.0, source_height=1.5, receiver_height=1.5, frequencies=bands,
     ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
-    barrier=barrier, temperature=15.0, relative_humidity=70.0,
+    barrier=barrier, temperature_c=15.0, relative_humidity_percent=70.0,
 )
 print(np.round(att.a_div, 1))     # [57. 57. 57. 57. 57. 57. 57. 57.]  divergence
 print(np.round(att.a_gr, 2))      # [-4.65  2.34 13.79  9.76  1.3  -0.   -0.   -0.  ]
@@ -303,7 +304,7 @@ lp = environment.predicted_receiver_level(
     ground=environment.GroundFactors(1.0, 1.0, 1.0),    # Gs, Gm, Gr
     barrier=barrier,
     atmosphere=environment.AtmosphericConditions(
-        temperature=15.0, relative_humidity=70.0),
+        temperature_c=15.0, relative_humidity_percent=70.0),
 )
 print(np.round(lp, 1))            # [28.8 26.7 24.  21.1 17.9 16.2 12.7 -0.8]
 ```
@@ -444,7 +445,7 @@ works when the wavelength is short next to the path difference.
 | `frequencies` | 1D array | Hz | default 8 octaves 63–8000 | `DEFAULT_FREQUENCIES` |
 | `ground_source` / `ground_middle` / `ground_receiver` | float | — | `[0, 1]`, default `0.0` | Ground factor $G$ (0 hard, 1 porous) |
 | `barrier` | `Barrier` or None | — | default `None` | Screening obstacle |
-| `temperature` / `relative_humidity` / `pressure` | float | °C / % / kPa | 20 / 70 / 101.325 | Passed to $A_\mathrm{atm}$ |
+| `temperature_c` / `relative_humidity_percent` / `atmospheric_pressure_kpa` | float | °C / % / kPa | 20 / 70 / 101.325 | Passed to $A_\mathrm{atm}$ |
 | `projected_distance` | float or None | m | default $\sqrt{d^2-(h_\mathrm{s}-h_\mathrm{r})^2}$ | Ground-plane $d_\mathrm{p}$ |
 
 Returns an `OutdoorAttenuation` with `a_div`, `a_atm`, `a_gr`, `a_bar`,
@@ -641,7 +642,7 @@ lw = np.array([95, 100, 103, 105, 104, 101, 95, 88], dtype=float)
 result = environment.outdoor_propagation_attenuation(
     200.0, 4.0, 2.0, freqs, 1.0, 1.0, 1.0,
     barrier=environment.Barrier(source_to_edge=105.0, edge_to_receiver=105.0),
-    temperature=10.0, relative_humidity=70.0,
+    temperature_c=10.0, relative_humidity_percent=70.0,
 )
 result.report(
     "outdoor_attenuation.pdf",

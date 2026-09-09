@@ -490,9 +490,9 @@ def _regime_state(
     boundaries: RegimeBoundaries,
     gamma: float,
     recovery: float,
-    inlet_pressure: float,
+    inlet_pressure_pa: float,
     inlet_density: float,
-    inlet_temperature: float,
+    inlet_temperature_k: float,
 ) -> tuple[float, float, float, float]:
     """Table 3's Mach number, temperature, sonic velocity and velocity head.
 
@@ -506,15 +506,17 @@ def _regime_state(
         mach = math.sqrt(
             (2.0 / (gamma - 1.0)) * (subsonic ** ((1.0 - gamma) / gamma) - 1.0)
         )
-        temperature = inlet_temperature * subsonic ** ((gamma - 1.0) / gamma)
+        temperature_k = inlet_temperature_k * subsonic ** ((gamma - 1.0) / gamma)
         sonic = math.sqrt(
             gamma
-            * (inlet_pressure / inlet_density)
+            * (inlet_pressure_pa / inlet_density)
             * subsonic ** ((gamma - 1.0) / gamma)
         )
-        return mach, temperature, sonic, mach * sonic
-    temperature = 2.0 * inlet_temperature / (gamma + 1.0)
-    sonic = math.sqrt((2.0 * gamma / (gamma + 1.0)) * (inlet_pressure / inlet_density))
+        return mach, temperature_k, sonic, mach * sonic
+    temperature_k = 2.0 * inlet_temperature_k / (gamma + 1.0)
+    sonic = math.sqrt(
+        (2.0 * gamma / (gamma + 1.0)) * (inlet_pressure_pa / inlet_density)
+    )
     if regime == REGIME_CONSTANT_EFFICIENCY:
         mach = math.sqrt(
             (2.0 / (gamma - 1.0))
@@ -529,7 +531,7 @@ def _regime_state(
                 - 1.0
             )
         )
-    return mach, temperature, sonic, sonic
+    return mach, temperature_k, sonic, sonic
 
 
 def _acoustical_efficiency(
@@ -717,8 +719,8 @@ def pipe_transmission_loss(
     pipe_density: float,
     pipe_sound_speed: float = PIPE_SOUND_SPEED_M_S,
     air_sound_speed: float = AIR_SOUND_SPEED_M_S,
-    atmospheric_pressure: float = 1.01325e5,
-    standard_pressure: float = 1.01325e5,
+    atmospheric_pressure_pa: float = 1.01325e5,
+    standard_pressure_pa: float = 1.01325e5,
 ) -> NDArray[np.float64]:
     r"""Equation (20a): what the pipe wall keeps in, band by band.
 
@@ -745,8 +747,8 @@ def pipe_transmission_loss(
     :param pipe_density: :math:`\rho_s` of the pipe material, in kg/m³.
     :param pipe_sound_speed: :math:`c_s`, in m/s.
     :param air_sound_speed: :math:`c_a`, in m/s.
-    :param atmospheric_pressure: :math:`p_a`, in Pa.
-    :param standard_pressure: :math:`p_s`, in Pa.
+    :param atmospheric_pressure_pa: :math:`p_a`, in Pa.
+    :param standard_pressure_pa: :math:`p_s`, in Pa.
     :return: The transmission loss in each band, in dB, negative.
     :raises ValueError: If an argument is not positive and finite.
     """
@@ -762,8 +764,8 @@ def pipe_transmission_loss(
     density = require_positive(downstream_density, "downstream_density")
     sound_speed = require_positive(downstream_sound_speed, "downstream_sound_speed")
     wall_density = require_positive(pipe_density, "pipe_density")
-    ambient = require_positive(atmospheric_pressure, "atmospheric_pressure")
-    reference = require_positive(standard_pressure, "standard_pressure")
+    ambient = require_positive(atmospheric_pressure_pa, "atmospheric_pressure_pa")
+    reference = require_positive(standard_pressure_pa, "standard_pressure_pa")
 
     pipe = coincidence_frequencies(
         internal_diameter,
@@ -815,7 +817,7 @@ class MultistageConditions:
     r"""What a multistage trim hands Clause 5 in place of the valve inlet.
 
     :ivar flow_coefficient: :math:`C_n` of the last stage, Equation (27).
-    :ivar stagnation_pressure: :math:`p_n` at the inlet of the last stage,
+    :ivar stagnation_pressure_pa: :math:`p_n` at the inlet of the last stage,
         in Pa, from whichever of Equations (28a) to (28c) NOTE 3 selects.
     :ivar stagnation_density: :math:`\rho_n` there, in kg/m³,
         Equation (29).
@@ -825,15 +827,15 @@ class MultistageConditions:
     """
 
     flow_coefficient: float
-    stagnation_pressure: float
+    stagnation_pressure_pa: float
     stagnation_density: float
     equation: str
 
 
 def multistage_trim_conditions(
     *,
-    inlet_pressure: float,
-    outlet_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
     inlet_density: float,
     flow_coefficient: float,
     last_stage_coefficient: float,
@@ -864,8 +866,8 @@ def multistage_trim_conditions(
     be :math:`2 p_2` or more. Below a valve ratio of two, (28c) applies
     directly.
 
-    :param inlet_pressure: :math:`p_1` at the valve inlet, absolute, in Pa.
-    :param outlet_pressure: :math:`p_2` at the valve outlet, in Pa.
+    :param inlet_pressure_pa: :math:`p_1` at the valve inlet, absolute, in Pa.
+    :param outlet_pressure_pa: :math:`p_2` at the valve outlet, in Pa.
     :param inlet_density: :math:`\rho_1` at the valve inlet, in kg/m³.
     :param flow_coefficient: :math:`C` of the whole valve.
     :param last_stage_coefficient: :math:`C_n` of the last stage, from
@@ -878,16 +880,16 @@ def multistage_trim_conditions(
     :raises ValueError: If a value is not positive and finite, or the outlet
         pressure is not below the inlet.
     """
-    p1 = require_positive(inlet_pressure, "inlet_pressure")
-    p2 = require_positive(outlet_pressure, "outlet_pressure")
+    p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
+    p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
     rho1 = require_positive(inlet_density, "inlet_density")
     capacity = require_positive(flow_coefficient, "flow_coefficient")
     last = require_positive(last_stage_coefficient, "last_stage_coefficient")
     if p2 >= p1:
         msg = (
-            "A multistage trim drops pressure, so 'outlet_pressure' must be "
-            f"below 'inlet_pressure'; got {outlet_pressure!r} and "
-            f"{inlet_pressure!r} Pa."
+            "A multistage trim drops pressure, so 'outlet_pressure_pa' must be "
+            f"below 'inlet_pressure_pa'; got {outlet_pressure_pa!r} and "
+            f"{inlet_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
 
@@ -905,7 +907,7 @@ def multistage_trim_conditions(
         equation = "28c"
     return MultistageConditions(
         flow_coefficient=float(last),
-        stagnation_pressure=float(pressure),
+        stagnation_pressure_pa=float(pressure),
         stagnation_density=float(rho1 * (pressure / p1)),
         equation=equation,
     )
@@ -966,8 +968,8 @@ def multiple_passage_jet_diameter(
 def stage_level_correction(
     last_stage_level: float,
     stages: int,
-    inlet_pressure: float,
-    stagnation_pressure: float,
+    inlet_pressure_pa: float,
+    stagnation_pressure_pa: float,
 ) -> float:
     r"""Equation (31): what the stages before the last one add.
 
@@ -984,8 +986,8 @@ def stage_level_correction(
     :param last_stage_level: :math:`L_{pi,n}` of Equation (18) computed on
         the last stage, in dB.
     :param stages: :math:`n`, the number of throttling stages, at least two.
-    :param inlet_pressure: :math:`p_1` at the valve inlet, in Pa.
-    :param stagnation_pressure: :math:`p_n` at the last stage, in Pa.
+    :param inlet_pressure_pa: :math:`p_1` at the valve inlet, in Pa.
+    :param stagnation_pressure_pa: :math:`p_n` at the last stage, in Pa.
     :return: :math:`L_{pi}` for the whole trim, in dB.
     :raises ValueError: If the stage count is below two, or a pressure is not
         positive and finite, or the stagnation pressure exceeds the inlet.
@@ -997,13 +999,13 @@ def stage_level_correction(
             f"'stages' must be a whole number of two or more; got {stages!r}."
         )
         raise ValueError(msg)
-    p1 = require_positive(inlet_pressure, "inlet_pressure")
-    pn = require_positive(stagnation_pressure, "stagnation_pressure")
+    p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
+    pn = require_positive(stagnation_pressure_pa, "stagnation_pressure_pa")
     if pn > p1:
         msg = (
             "The stagnation pressure at the last stage cannot exceed the "
-            f"valve inlet; got {stagnation_pressure!r} against "
-            f"{inlet_pressure!r} Pa."
+            f"valve inlet; got {stagnation_pressure_pa!r} against "
+            f"{inlet_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     return float(
@@ -1214,7 +1216,7 @@ class AerodynamicValveNoise:
     :ivar regime: Which of the five regimes of Clause 5.2 the valve is in.
     :ivar boundaries: The four pressure ratios that placed it there.
     :ivar pressure_ratio: :math:`x` of Equation (1).
-    :ivar vena_contracta_pressure: :math:`p_{vc}` of Equation (2), in Pa. It
+    :ivar vena_contracta_pressure_pa: :math:`p_{vc}` of Equation (2), in Pa. It
         goes negative past the choking point, where the equation is being
         read outside the range it means anything in.
     :ivar jet_diameter: :math:`D_j` of Equation (9), in m.
@@ -1248,7 +1250,7 @@ class AerodynamicValveNoise:
     regime: int
     boundaries: RegimeBoundaries
     pressure_ratio: float
-    vena_contracta_pressure: float
+    vena_contracta_pressure_pa: float
     jet_diameter: float
     mach: float
     acoustical_efficiency: float
@@ -1281,19 +1283,19 @@ class GasStream:
     r"""The gas and the operating point, which Clause 5.1 reads first.
 
     :ivar mass_flow: :math:`\dot m`, in kg/s.
-    :ivar inlet_pressure: :math:`p_1`, absolute, in Pa.
-    :ivar outlet_pressure: :math:`p_2`, absolute, in Pa.
+    :ivar inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
+    :ivar outlet_pressure_pa: :math:`p_2`, absolute, in Pa.
     :ivar inlet_density: :math:`\rho_1`, in kg/m³.
-    :ivar inlet_temperature: :math:`T_1`, absolute, in K.
+    :ivar inlet_temperature_k: :math:`T_1`, absolute, in K.
     :ivar specific_heat_ratio: :math:`\gamma`.
     :ivar molecular_mass: :math:`M`, in kg/kmol.
     """
 
     mass_flow: float
-    inlet_pressure: float
-    outlet_pressure: float
+    inlet_pressure_pa: float
+    outlet_pressure_pa: float
     inlet_density: float
-    inlet_temperature: float
+    inlet_temperature_k: float
     specific_heat_ratio: float
     molecular_mass: float
 
@@ -1339,8 +1341,8 @@ class DownstreamPipe:
     :ivar density: :math:`\rho_s` of the pipe material, in kg/m³.
     :ivar sound_speed: :math:`c_s` in the pipe wall, in m/s.
     :ivar air_sound_speed: :math:`c_a` outside the pipe, in m/s.
-    :ivar atmospheric_pressure: :math:`p_a`, in Pa.
-    :ivar standard_pressure: :math:`p_s`, in Pa.
+    :ivar atmospheric_pressure_pa: :math:`p_a`, in Pa.
+    :ivar standard_pressure_pa: :math:`p_s`, in Pa.
     """
 
     internal_diameter: float
@@ -1348,8 +1350,8 @@ class DownstreamPipe:
     density: float
     sound_speed: float = PIPE_SOUND_SPEED_M_S
     air_sound_speed: float = AIR_SOUND_SPEED_M_S
-    atmospheric_pressure: float = STANDARD_ATMOSPHERE_PA
-    standard_pressure: float = STANDARD_ATMOSPHERE_PA
+    atmospheric_pressure_pa: float = STANDARD_ATMOSPHERE_PA
+    standard_pressure_pa: float = STANDARD_ATMOSPHERE_PA
 
 
 def valve_aerodynamic_noise(
@@ -1384,10 +1386,10 @@ def valve_aerodynamic_noise(
         written for.
     """
     mass_flow = stream.mass_flow
-    inlet_pressure = stream.inlet_pressure
-    outlet_pressure = stream.outlet_pressure
+    inlet_pressure_pa = stream.inlet_pressure_pa
+    outlet_pressure_pa = stream.outlet_pressure_pa
     inlet_density = stream.inlet_density
-    inlet_temperature = stream.inlet_temperature
+    inlet_temperature_k = stream.inlet_temperature_k
     specific_heat_ratio = stream.specific_heat_ratio
     molecular_mass = stream.molecular_mass
     flow_coefficient = valve.flow_coefficient
@@ -1402,20 +1404,20 @@ def valve_aerodynamic_noise(
     pipe_density = pipe.density
     pipe_sound_speed = pipe.sound_speed
     air_sound_speed = pipe.air_sound_speed
-    atmospheric_pressure = pipe.atmospheric_pressure
-    standard_pressure = pipe.standard_pressure
-    p1 = require_positive(inlet_pressure, "inlet_pressure")
-    p2 = require_positive(outlet_pressure, "outlet_pressure")
+    atmospheric_pressure_pa = pipe.atmospheric_pressure_pa
+    standard_pressure_pa = pipe.standard_pressure_pa
+    p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
+    p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
     if p2 >= p1:
         msg = (
-            "A control valve drops pressure, so 'outlet_pressure' must be "
-            f"below 'inlet_pressure'; got {outlet_pressure!r} and "
-            f"{inlet_pressure!r} Pa."
+            "A control valve drops pressure, so 'outlet_pressure_pa' must be "
+            f"below 'inlet_pressure_pa'; got {outlet_pressure_pa!r} and "
+            f"{inlet_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     flow = require_positive(mass_flow, "mass_flow")
     rho1 = require_positive(inlet_density, "inlet_density")
-    t1 = require_positive(inlet_temperature, "inlet_temperature")
+    t1 = require_positive(inlet_temperature_k, "inlet_temperature_k")
     mass = require_positive(molecular_mass, "molecular_mass")
     outlet = require_positive(valve_outlet_diameter, "valve_outlet_diameter")
     bore = require_positive(internal_diameter, "internal_diameter")
@@ -1425,7 +1427,7 @@ def valve_aerodynamic_noise(
     recovery = float(pressure_recovery)
     x = (p1 - p2) / p1
     regime = flow_regime(x, boundaries)
-    vena_contracta_pressure = p1 * (1.0 - x / recovery**2)
+    vena_contracta_pressure_pa = p1 * (1.0 - x / recovery**2)
     jet = jet_diameter(
         flow_coefficient, style_modifier, recovery, coefficient=coefficient
     )
@@ -1436,9 +1438,9 @@ def valve_aerodynamic_noise(
         boundaries=boundaries,
         gamma=gamma,
         recovery=recovery,
-        inlet_pressure=p1,
+        inlet_pressure_pa=p1,
         inlet_density=rho1,
-        inlet_temperature=t1,
+        inlet_temperature_k=t1,
     )
     efficiency = _acoustical_efficiency(
         regime,
@@ -1506,8 +1508,8 @@ def valve_aerodynamic_noise(
         pipe_density=pipe_density,
         pipe_sound_speed=pipe_sound_speed,
         air_sound_speed=air_sound_speed,
-        atmospheric_pressure=atmospheric_pressure,
-        standard_pressure=standard_pressure,
+        atmospheric_pressure_pa=atmospheric_pressure_pa,
+        standard_pressure_pa=standard_pressure_pa,
     )
     spreading = 10.0 * np.log10(
         (bore + 2.0 * wall_thickness + 2.0 * _MEASUREMENT_DISTANCE_M)
@@ -1528,7 +1530,7 @@ def valve_aerodynamic_noise(
         regime=regime,
         boundaries=boundaries,
         pressure_ratio=float(x),
-        vena_contracta_pressure=float(vena_contracta_pressure),
+        vena_contracta_pressure_pa=float(vena_contracta_pressure_pa),
         jet_diameter=float(jet),
         mach=float(mach),
         acoustical_efficiency=float(efficiency),

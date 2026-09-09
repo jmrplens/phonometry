@@ -681,7 +681,7 @@ def road_rolling_noise(
     speed: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
-    temperature: float = ROAD_REFERENCE_TEMPERATURE,
+    temperature_c: float = ROAD_REFERENCE_TEMPERATURE,
     studded_fraction: float = 0.0,
     studded_months: float = 0.0,
     junction_distance: float | None = None,
@@ -702,7 +702,7 @@ def road_rolling_noise(
         raised to 20 km/h (2.2.1).
     :param surface: Road surface, as a :class:`RoadSurface`, its description or
         an explicit :class:`RoadSurfaceCoefficients`.
-    :param temperature: Air temperature ``tau``, in degrees Celsius.
+    :param temperature_c: Air temperature ``tau``, in degrees Celsius.
     :param studded_fraction: ``Q_stud,ratio`` of (2.2.7).
     :param studded_months: ``T_s`` of (2.2.7), the months per year over which
         studded tyres are in use.
@@ -739,7 +739,7 @@ def road_rolling_noise(
     )
     # (2.2.10) air-temperature correction, equal in every octave band.
     d_temp = coefficients.temperature_k[key] * (
-        ROAD_REFERENCE_TEMPERATURE - _finite(temperature, "temperature")
+        ROAD_REFERENCE_TEMPERATURE - _finite(temperature_c, "temperature_c")
     )
     return np.asarray(base + d_road + d_stud + d_acc + d_temp, dtype=np.float64)
 
@@ -811,7 +811,7 @@ def road_vehicle_sound_power(
     speed: float,
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
-    temperature: float = ROAD_REFERENCE_TEMPERATURE,
+    temperature_c: float = ROAD_REFERENCE_TEMPERATURE,
     gradient: float = 0.0,
     studded_fraction: float = 0.0,
     studded_months: float = 0.0,
@@ -828,7 +828,7 @@ def road_vehicle_sound_power(
     :param category: Vehicle category (Table [2.2.a]).
     :param speed: Average speed ``v_m``, in km/h.
     :param surface: Road surface (Table F-4).
-    :param temperature: Air temperature ``tau``, in degrees Celsius.
+    :param temperature_c: Air temperature ``tau``, in degrees Celsius.
     :param gradient: Road slope ``s``, in per cent.
     :param studded_fraction: ``Q_stud,ratio`` of (2.2.7).
     :param studded_months: ``T_s`` of (2.2.7), in months.
@@ -854,7 +854,7 @@ def road_vehicle_sound_power(
         key,
         speed,
         surface=surface,
-        temperature=temperature,
+        temperature_c=temperature_c,
         studded_fraction=studded_fraction,
         studded_months=studded_months,
         junction_distance=junction_distance,
@@ -996,7 +996,7 @@ def road_source_power(
     traffic: RoadTraffic | list[RoadTraffic] | tuple[RoadTraffic, ...],
     *,
     surface: RoadSurface | str | RoadSurfaceCoefficients = RoadSurface.REFERENCE,
-    temperature: float = ROAD_REFERENCE_TEMPERATURE,
+    temperature_c: float = ROAD_REFERENCE_TEMPERATURE,
     gradient: float = 0.0,
     studded_months: float = 0.0,
     junction_distance: float | None = None,
@@ -1018,7 +1018,7 @@ def road_source_power(
     :param traffic: One :class:`RoadTraffic` or a sequence of them, at most one
         per vehicle category.
     :param surface: Road surface (Table F-4).
-    :param temperature: Yearly average air temperature ``tau``, in degrees
+    :param temperature_c: Yearly average air temperature ``tau``, in degrees
         Celsius (the reference condition is 20 degC).
     :param gradient: Road slope ``s``, in per cent, positive uphill.
     :param studded_months: ``T_s`` of (2.2.7), the months per year over which
@@ -1051,7 +1051,7 @@ def road_source_power(
             key,
             v,
             surface=surface,
-            temperature=temperature,
+            temperature_c=temperature_c,
             studded_fraction=flow.studded_fraction,
             studded_months=studded_months,
             junction_distance=junction_distance,

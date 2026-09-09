@@ -461,7 +461,7 @@ WITHDRAWN_FLUID_FLOATS = frozenset(
     {
         "air",
         "air_density",
-        "atmospheric_pressure",
+        "atmospheric_pressure_pa",
         "density",
         "heat_capacity_ratio",
         "prandtl_number",

@@ -215,7 +215,7 @@ def generate_underwater_propagation_loss(output_dir: str) -> None:
         10_000.0,
         law="practical",
         transition_range=1000.0,
-        temperature=10.0,
+        temperature_c=10.0,
         salinity=35.0,
         depth=100.0,
         model="francois-garrison",
@@ -803,7 +803,7 @@ def generate_seawater_absorption(output_dir: str) -> None:
     from phonometry import underwater
 
     freqs = np.logspace(1.0, 6.0, 500)
-    kw = {"temperature": 10.0, "salinity": 35.0, "depth": 100.0}
+    kw = {"temperature_c": 10.0, "salinity": 35.0, "depth": 100.0}
     alpha = {
         m: np.asarray(underwater.seawater_absorption(freqs, model=m, **kw), dtype=float)
         for m in ("francois-garrison", "ainslie-mccolm", "thorp")
@@ -1201,7 +1201,7 @@ def generate_sonar_budget(output_dir: str) -> None:
             freq,
             law=law,
             transition_range=r0,
-            temperature=10.0,
+            temperature_c=10.0,
             salinity=35.0,
             depth=100.0,
         )
@@ -1221,7 +1221,7 @@ def generate_sonar_budget(output_dir: str) -> None:
                         freq,
                         law=law,
                         transition_range=r0,
-                        temperature=10.0,
+                        temperature_c=10.0,
                         salinity=35.0,
                         depth=100.0,
                     ).detection_range

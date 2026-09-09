@@ -219,9 +219,9 @@ def _header_grid(
     test_room = metadata.test_room if metadata is not None else None
     specimen = metadata.specimen if metadata is not None else None
     test_date = metadata.test_date if metadata is not None else None
-    temperature = metadata.temperature if metadata is not None else None
-    humidity = metadata.relative_humidity if metadata is not None else None
-    pressure = metadata.pressure if metadata is not None else None
+    temperature_c = metadata.temperature_c if metadata is not None else None
+    humidity = metadata.relative_humidity_percent if metadata is not None else None
+    static_pressure_kpa = metadata.static_pressure_kpa if metadata is not None else None
 
     specs: list[tuple[str, str | None]] = [
         (t("Client", language), client),
@@ -231,7 +231,7 @@ def _header_grid(
         *extra_pairs,
         (
             t("Temperature [&#176;C]", language),
-            fmt_meta(temperature, language) if temperature is not None else None,
+            fmt_meta(temperature_c, language) if temperature_c is not None else None,
         ),
         (
             t("Relative humidity [%]", language),
@@ -239,7 +239,9 @@ def _header_grid(
         ),
         (
             t("Ambient pressure [kPa]", language),
-            fmt_meta(pressure, language) if pressure is not None else None,
+            fmt_meta(static_pressure_kpa, language)
+            if static_pressure_kpa is not None
+            else None,
         ),
         (t("Date of prediction", language), test_date),
     ]

@@ -662,7 +662,7 @@ def generate_airflow_resistance(output_dir: str) -> None:
     ax.axvline(u_ref * 1e3, color=COLOR_FG, linestyle=":", alpha=0.4)
     ax.plot(
         u_ref * 1e3,
-        result.pressure_drop,
+        result.pressure_drop_pa,
         "D",
         color=COLOR_TERTIARY,
         markersize=9,
@@ -670,8 +670,8 @@ def generate_airflow_resistance(output_dir: str) -> None:
     )
     ax.annotate(
         "evaluation at 0.5 mm/s",
-        xy=(u_ref * 1e3, result.pressure_drop),
-        xytext=(2.0, result.pressure_drop + 40),
+        xy=(u_ref * 1e3, result.pressure_drop_pa),
+        xytext=(2.0, result.pressure_drop_pa + 40),
         fontsize=10,
         zorder=7,
         bbox={
@@ -2918,7 +2918,7 @@ def generate_sound_absorption_measurement(output_dir: str) -> None:
         ]
     )
     m = materials.measure_sound_absorption(
-        freqs, t_empty, t_specimen, volume=200.0, area=10.8, temperature=20.0
+        freqs, t_empty, t_specimen, volume=200.0, area=10.8, temperature_c=20.0
     )
     m.plot(language=_LANG)
     plt.gcf().set_size_inches(10, 6)
@@ -3130,7 +3130,7 @@ def generate_sound_absorption_inversion(output_dir: str) -> None:
     )
     area = 10.8
     meas = materials.measure_sound_absorption(
-        freqs, t_empty, t_specimen, volume=200.0, area=area, temperature=20.0
+        freqs, t_empty, t_specimen, volume=200.0, area=area, temperature_c=20.0
     )
 
     band = np.arange(freqs.size)

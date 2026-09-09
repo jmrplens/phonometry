@@ -186,7 +186,7 @@ a depth.
 
 ```python
 sea_water_sound_speed(
-    temperature: float,
+    temperature_c: float,
     salinity: float,
     depth: float,
     *,
@@ -195,7 +195,7 @@ sea_water_sound_speed(
 ) -> float
 
 sea_water_sound_speed(
-    temperature: ArrayLike,
+    temperature_c: ArrayLike,
     salinity: ArrayLike,
     depth: ArrayLike,
     *,
@@ -210,7 +210,7 @@ Speed of sound in sea water, in metres per second.
 
 | Name | Description |
 | :--- | :--- |
-| `temperature` | Temperature `T`, in degrees Celsius. |
+| `temperature_c` | Temperature `T`, in degrees Celsius. |
 | `salinity` | Salinity `S`, in parts per thousand (PSU). |
 | `depth` | Depth below the surface, in metres (`>= 0`). |
 | `model` | `"unesco"` (default), `"del_grosso"`, `"mackenzie"` or `"medwin"`. |

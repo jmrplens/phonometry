@@ -65,7 +65,7 @@ by the frequency-independent convective term (equation (8)):
 with :math:`c` the speed of sound, which clause 5.3.4.3 prints as 340 m/s
 "under normal conditions". A whole determination knows the duct air, so
 :func:`sound_power_in_duct` evaluates Eq. (8) with the :math:`c` its
-``temperature`` gives, the "speed of sound in the test duct" of Table 1;
+``temperature_c`` gives, the "speed of sound in the test duct" of Table 1;
 the 340 m/s is the default of :func:`flow_modal_correction` called on its own.
 
 The A-weighted sound power level is the energy sum of the band levels with the
@@ -1010,7 +1010,7 @@ def in_duct_reproducibility(frequencies: ArrayLike) -> np.ndarray:
     return np.asarray([table[band] for band in _band_keys(freqs)], dtype=np.float64)
 
 
-def _check_air(temperature: float, static_pressure: float) -> tuple[float, float]:
+def _check_air(temperature_c: float, static_pressure_kpa: float) -> tuple[float, float]:
     r"""The duct air's speed of sound and characteristic impedance.
 
     The temperature is refused outside the -50 degC to +70 degC the method is
@@ -1022,19 +1022,19 @@ def _check_air(temperature: float, static_pressure: float) -> tuple[float, float
 
     :return: ``(c, rho_c)`` in m/s and N s/m^3.
     """
-    theta = _as_scalar(temperature, "temperature")
+    theta = _as_scalar(temperature_c, "temperature_c")
     if (
         not math.isfinite(theta)
         or theta < _TEMPERATURE_MIN_C
         or theta > _TEMPERATURE_MAX_C
     ):
         msg = (
-            "'temperature' must be between -50 degC and 70 degC, the air "
-            f"temperature range of ISO 5136 (clause 1.1); got {temperature!r}."
+            "'temperature_c' must be between -50 degC and 70 degC, the air "
+            f"temperature range of ISO 5136 (clause 1.1); got {temperature_c!r}."
         )
         raise ValueError(msg)
     ps = require_positive(
-        _as_scalar(static_pressure, "static_pressure"), "static_pressure"
+        _as_scalar(static_pressure_kpa, "static_pressure_kpa"), "static_pressure_kpa"
     )
     c = _speed_of_sound(theta)
     # kPa to Pa in the numerator; the ideal-gas density of dry air.
@@ -1089,8 +1089,8 @@ def sound_power_in_duct(
     shield: MicrophoneShield = "sampling-tube",
     microphone_correction: ArrayLike = 0.0,
     shield_correction: ArrayLike = 0.0,
-    temperature: float = 20.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    static_pressure_kpa: float = 101.325,
 ) -> InDuctSoundPowerResult:
     r"""Sound power radiated into a test duct, in-duct method (ISO 5136:2003).
 
@@ -1128,14 +1128,14 @@ def sound_power_in_duct(
     :param shield_correction: :math:`C_2`, the frequency response correction
         of the shield determined per clause 5.3.3.2 c) or 5.3.4.2, in
         decibels, per band or scalar.
-    :param temperature: Air temperature in the duct, in degrees Celsius,
+    :param temperature_c: Air temperature in the duct, in degrees Celsius,
         -50 degC to 70 degC; sets :math:`c` and :math:`\rho`. The :math:`c`
         it sets is also the one Eq. (8) is evaluated with for the
         omni-directional shields, Table 1 defining :math:`c` as the speed of
         sound in the test duct; over the -50 degC to 70 degC of clause 1.1
         that moves :math:`C_{3,4}` by up to 0,08 dB against the 340 m/s
         :func:`flow_modal_correction` uses on its own.
-    :param static_pressure: Static pressure in the duct, in kilopascals;
+    :param static_pressure_kpa: Static pressure in the duct, in kilopascals;
         sets :math:`\rho`.
     :return: :class:`InDuctSoundPowerResult`.
     :raises ValueError: for levels of the wrong shape or not finite, a band
@@ -1149,7 +1149,7 @@ def sound_power_in_duct(
     _check_shield(shield)
     d = _check_duct_diameter(duct_diameter)
     u = _check_flow_velocity(flow_velocity, shield)
-    c, rho_c = _check_air(temperature, static_pressure)
+    c, rho_c = _check_air(temperature_c, static_pressure_kpa)
     c1 = require_per_band(
         microphone_correction, "microphone_correction", freqs, "frequencies"
     )

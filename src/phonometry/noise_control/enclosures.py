@@ -206,7 +206,7 @@ class EnclosureResult:
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header (``client``, ``specimen`` the enclosed machine,
             ``test_room`` the test environment, ``instrumentation``,
-            ``temperature``, ``relative_humidity``, ``pressure``, ``test_date``),
+            ``temperature_c``, ``relative_humidity_percent``, ``pressure``, ``test_date``),
             the footer identity (``laboratory``, ``operator``, ``report_id``,
             ``notes``) and, via ``requirement``, a declared minimum mean
             insertion loss (more insertion loss is better). The surface areas

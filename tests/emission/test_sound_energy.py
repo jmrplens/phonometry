@@ -374,8 +374,8 @@ def test_annex_g_corrections_at_the_reference_atmosphere() -> None:
     assert corr.c1 == pytest.approx(-0.1271, abs=5e-5)
     assert corr.c2 == pytest.approx(0.0033, abs=5e-5)
     assert corr.total == pytest.approx(corr.c1 + corr.c2)
-    assert corr.static_pressure == pytest.approx(101.325)
-    assert corr.temperature == pytest.approx(23.0)
+    assert corr.static_pressure_kpa == pytest.approx(101.325)
+    assert corr.temperature_c == pytest.approx(23.0)
 
 
 def test_annex_g_static_pressure_from_altitude_eq_g2() -> None:
@@ -384,8 +384,8 @@ def test_annex_g_static_pressure_from_altitude_eq_g2() -> None:
     """
     corr = emission.reference_atmosphere_correction(23.0, altitude=500.0)
     ps = 101.325 * (1.0 - 2.2560e-5 * 500.0) ** 5.2553
-    assert corr.static_pressure == pytest.approx(ps, rel=1e-12)
-    assert corr.static_pressure == pytest.approx(95.46, abs=5e-3)
+    assert corr.static_pressure_kpa == pytest.approx(ps, rel=1e-12)
+    assert corr.static_pressure_kpa == pytest.approx(95.46, abs=5e-3)
     p_term = -10.0 * np.log10(ps / 101.325)
     assert corr.c1 == pytest.approx(p_term + 5.0 * np.log10(296.15 / 314.0), abs=1e-12)
     assert corr.c2 == pytest.approx(p_term + 15.0 * np.log10(296.15 / 296.0), abs=1e-12)
@@ -416,15 +416,15 @@ def test_annex_g_applies_alike_to_lw_and_lj() -> None:
 
 
 def test_annex_g_refusals() -> None:
-    with pytest.raises(ValueError, match="Give one of 'static_pressure'"):
+    with pytest.raises(ValueError, match="Give one of 'static_pressure_kpa'"):
         emission.reference_atmosphere_correction(23.0)
     with pytest.raises(ValueError, match="not both"):
         emission.reference_atmosphere_correction(23.0, 101.0, altitude=100.0)
-    with pytest.raises(ValueError, match="'static_pressure' must be positive"):
+    with pytest.raises(ValueError, match="'static_pressure_kpa' must be positive"):
         emission.reference_atmosphere_correction(23.0, 0.0)
     with pytest.raises(ValueError, match="'altitude' must be finite and below"):
         emission.reference_atmosphere_correction(23.0, altitude=50000.0)
-    with pytest.raises(ValueError, match="'temperature' must be finite and above"):
+    with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
         emission.reference_atmosphere_correction(-273.15, 101.325)
 
 
@@ -472,7 +472,13 @@ def test_direct_method_exact_inversion_eq30() -> None:
     lj_target = np.array([90.0, 95.0, 100.0, 92.0, 85.0])
     le = lj_target - _bracket(t60, volume, surface, _ROOM_FREQS, theta, ps)
     res = emission.sound_energy_reverberation(
-        le, t60, volume, surface, _ROOM_FREQS, temperature=theta, static_pressure=ps
+        le,
+        t60,
+        volume,
+        surface,
+        _ROOM_FREQS,
+        temperature_c=theta,
+        static_pressure_kpa=ps,
     )
     assert isinstance(res, emission.ReverberationSoundEnergyResult)
     assert res.method == "direct"
@@ -493,11 +499,11 @@ def test_direct_method_identity_lj_equals_lw_plus_10lg_t() -> None:
     shift = 10.0 * np.log10(5.0)
     lw = emission.sound_power_reverberation(
         lp, t60, 200.0, 210.0, _ROOM_FREQS, background_levels=bg,
-        temperature=20.0, static_pressure=100.0,
+        temperature_c=20.0, static_pressure_kpa=100.0,
     )  # fmt: skip
     lj = emission.sound_energy_reverberation(
         lp + shift, t60, 200.0, 210.0, _ROOM_FREQS, background_levels=bg,
-        integration_time=5.0, temperature=20.0, static_pressure=100.0,
+        integration_time=5.0, temperature_c=20.0, static_pressure_kpa=100.0,
     )  # fmt: skip
     np.testing.assert_allclose(lj.sound_energy_level, lw.sound_power_level + shift)
     np.testing.assert_allclose(lj.background_correction, lw.background_correction)
@@ -586,7 +592,7 @@ def test_comparison_method_eq31_exact_by_construction() -> None:
     le = np.array([84.0, 85.5, 83.0])
     lp_rss = np.array([78.0, 79.0, 76.0])
     res = emission.sound_energy_comparison(
-        le, lp_rss, lw_ref, temperature=theta, static_pressure=ps
+        le, lp_rss, lw_ref, temperature_c=theta, static_pressure_kpa=ps
     )
     expected = lw_ref + (le - lp_rss) + _c2(theta, ps)
     np.testing.assert_allclose(res.sound_energy_level, expected, atol=1e-12)

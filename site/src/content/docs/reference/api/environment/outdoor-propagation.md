@@ -54,9 +54,9 @@ left to the caller. Accuracy of the method is stated in Table 5 (clause 9): with
 atmospheric_absorption(
     distance: float,
     frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
-    temperature: float = 20.0,
-    relative_humidity: float | None = None,
-    pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float | None = None,
+    atmospheric_pressure_kpa: float = 101.325,
 ) -> NDArray[np.float64]
 ```
 
@@ -82,9 +82,9 @@ the nearest exact midband.
 | :--- | :--- |
 | `distance` | Source-to-receiver distance `d`, in metres. |
 | `frequencies` | Octave-band midband frequencies, in hertz. |
-| `temperature` | Air temperature, in degrees Celsius. |
-| `relative_humidity` | Relative humidity, in percent (default 70). |
-| `pressure` | Atmospheric pressure, in kilopascals. |
+| `temperature_c` | Air temperature, in degrees Celsius. |
+| `relative_humidity_percent` | Relative humidity, in percent (default 70). |
+| `atmospheric_pressure_kpa` | Atmospheric pressure, in kilopascals. |
 
 **Returns:** `Aatm` per band, in decibels.
 
@@ -92,9 +92,9 @@ the nearest exact midband.
 
 ```python
 AtmosphericConditions(
-    temperature: float = 20.0,
-    relative_humidity: float | None = None,
-    pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float | None = None,
+    atmospheric_pressure_kpa: float = 101.325,
 )
 ```
 
@@ -108,9 +108,9 @@ reference conditions of the tabulated coefficients.
 
 | Name | Description |
 | :--- | :--- |
-| `temperature` | Air temperature, in degrees Celsius. |
-| `relative_humidity` | Relative humidity, in percent; `None` uses 70. |
-| `pressure` | Atmospheric pressure, in kilopascals. |
+| `temperature_c` | Air temperature, in degrees Celsius. |
+| `relative_humidity_percent` | Relative humidity, in percent; `None` uses 70. |
+| `atmospheric_pressure_kpa` | Atmospheric pressure, in kilopascals. |
 
 ## Barrier
 
@@ -498,9 +498,9 @@ outdoor_propagation_attenuation(
     ground_middle: float = 0.0,
     ground_receiver: float = 0.0,
     barrier: Barrier | None = None,
-    temperature: float = 20.0,
-    relative_humidity: float | None = None,
-    pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float | None = None,
+    atmospheric_pressure_kpa: float = 101.325,
     projected_distance: float | None = None,
 ) -> OutdoorAttenuation
 ```
@@ -528,9 +528,9 @@ barrier $A_\mathrm{bar} = D_z$
 | `ground_middle` | Ground factor `Gm` of the middle region ([0, 1]). |
 | `ground_receiver` | Ground factor `Gr` of the receiver region ([0, 1]). |
 | `barrier` | Optional screening obstacle ([`Barrier`](/phonometry/reference/api/environment/outdoor-propagation/#barrier)). |
-| `temperature` | Air temperature, in degrees Celsius. |
-| `relative_humidity` | Relative humidity, in percent (default 70). |
-| `pressure` | Atmospheric pressure, in kilopascals. |
+| `temperature_c` | Air temperature, in degrees Celsius. |
+| `relative_humidity_percent` | Relative humidity, in percent (default 70). |
+| `atmospheric_pressure_kpa` | Atmospheric pressure, in kilopascals. |
 | `projected_distance` | Ground-plane projected distance `dp`, in metres; defaults to $\sqrt{d^2 - (h_\mathrm{s} - h_\mathrm{r})^2}$. |
 
 **Returns:** [`OutdoorAttenuation`](/phonometry/reference/api/environment/outdoor-propagation/#outdoorattenuation) with the per-band term breakdown.
@@ -628,7 +628,7 @@ the total attenuation `A`.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position), the `temperature` / `relative_humidity` / `pressure` conditions and the footer identity. A supplied `requirement` is read as the maximum acceptable A-weighted downwind level in dB (used only when a `source_emission` is given). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header identity (`specimen` the source/situation, `client`, `test_room` the receiver position), the `temperature_c` / `relative_humidity_percent` / `atmospheric_pressure_kpa` conditions and the footer identity. A supplied `requirement` is read as the maximum acceptable A-weighted downwind level in dB (used only when a `source_emission` is given). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When True and a `source_emission` is supplied, the per-band table adds the A-weighted band level (`LfT(DW)` plus the band A-weighting), whose energy sum is the boxed `LAT(DW)`. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |

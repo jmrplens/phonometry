@@ -602,7 +602,8 @@ just as readily as a qualified pair.
 `r_i_modified`, `rating`, `rating_modified`);
 `intensity_element_normalized_difference()` an
 `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
-`surface_pressure_intensity_indicator()` and `combine_subareas()` return arrays.
+`surface_pressure_intensity_indicator()` and `combine_subareas()` return
+arrays.
 
 ## ISO 15186-1 intensity test report (`.report()`)
 
@@ -813,7 +814,7 @@ res = building.low_frequency_intensity_reduction(
     frequencies=freqs,
 )
 print(np.round(res.r_i, 1))                         # [16.8 18.2 20.5 23.1 25.4 27.9]
-print(np.round(res.surface_pressure_intensity, 1))  # [12.4 11.1  9.6  8.2  7.1  6.4]
+print(np.round(res.surface_pressure_intensity_indicator, 1))  # [12.4 11.1  9.6  8.2  7.1  6.4]
 print(res.qualified.tolist())    # [False, False, True, True, True, True]
 ```
 
@@ -873,7 +874,7 @@ $\rho c = 427\sqrt{273/(273+\theta)}\cdot B/B_0$ and $c = 331 + 0{,}6\,\theta$.
 # Annex A, Table A.1: 12,5 mm plaster board, 10 kg/m2, over a 10 m2 opening.
 calc = building.limp_panel_reduction_index(
     freqs, surface_mass=10.0, area=10.0,
-    temperature=23.0, static_pressure=101300.0,
+    temperature_c=23.0, static_pressure_pa=101300.0,
 )
 print(np.round(calc, 1))    # [10.7 11.9 13.4 14.8 16.3 17.9]
 ```

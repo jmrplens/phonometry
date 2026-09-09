@@ -241,17 +241,17 @@ def _outdoor_attenuation_example() -> tuple[object, ReportMetadata, str]:
         1.0,
         1.0,
         barrier=barrier,
-        temperature=10.0,
-        relative_humidity=70.0,
+        temperature_c=10.0,
+        relative_humidity_percent=70.0,
     )
     emission = ph.environment.SourceEmission(sound_power_level=lw)
     metadata = ReportMetadata(
         specimen="Industrial fan plant (point source)",
         client="Example client",
         test_room="Nearest dwelling facade",
-        temperature=10.0,
-        relative_humidity=70.0,
-        pressure=101.3,
+        temperature_c=10.0,
+        relative_humidity_percent=70.0,
+        static_pressure_kpa=101.3,
         test_date="2026-07-22",
         laboratory="Phonometry reference example",
         operator="phonometry",

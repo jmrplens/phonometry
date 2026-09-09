@@ -149,9 +149,9 @@ def _full_metadata(**overrides: float) -> ReportMetadata:
         "mass_per_area": 460.0,
         "source_volume": 53.0,
         "receiving_volume": 51.0,
-        "temperature": 21.5,
-        "relative_humidity": 45.0,
-        "pressure": 101.3,
+        "temperature_c": 21.5,
+        "relative_humidity_percent": 45.0,
+        "static_pressure_kpa": 101.3,
         "test_room": "Transmission suite T1",
         "mounting": "Rigid, mortar-sealed perimeter",
         "measurement_standard": "ISO 10140-2",
@@ -168,18 +168,18 @@ def _full_metadata(**overrides: float) -> ReportMetadata:
 def test_metadata_allows_non_positive_temperature() -> None:
     """Test temperatures of 0 C or below are valid (cold field conditions)."""
     md = ReportMetadata(
-        temperature=-5.0, source_temperature=0.0, receiving_temperature=-12.3
+        temperature_c=-5.0, source_temperature_c=0.0, receiving_temperature_c=-12.3
     )
-    assert md.temperature == -5.0
+    assert md.temperature_c == -5.0
 
 
 def test_metadata_rejects_out_of_range_humidity() -> None:
     """Relative humidity outside 0..100 % is rejected."""
     with pytest.raises(
         ValueError,
-        match=r"ReportMetadata\.relative_humidity must be a relative humidity",
+        match=r"ReportMetadata\.relative_humidity_percent must be a relative",
     ):
-        ReportMetadata(relative_humidity=150.0)
+        ReportMetadata(relative_humidity_percent=150.0)
 
 
 def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:

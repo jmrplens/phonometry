@@ -19,7 +19,7 @@ it; this module builds a column out of them.
 ```python
 sound_speed_profile(
     depths: NDArray[np.float64] | list[float],
-    temperatures: NDArray[np.float64] | list[float] | float,
+    temperatures_c: NDArray[np.float64] | list[float] | float,
     salinities: NDArray[np.float64] | list[float] | float,
     *,
     model: str = 'unesco',
@@ -34,7 +34,7 @@ Evaluate a sound-speed profile over a depth column.
 | Name | Description |
 | :--- | :--- |
 | `depths` | Depths, in metres (1-D, non-negative, increasing). |
-| `temperatures` | Temperature per depth, in °C (array or a scalar broadcast to every depth). |
+| `temperatures_c` | Temperature per depth, in °C (array or a scalar broadcast to every depth). |
 | `salinities` | Salinity per depth, in PSU (array or scalar). |
 | `model` | Sound-speed equation (see [`sea_water_sound_speed`](/phonometry/reference/api/fluids/water/#sea_water_sound_speed)). |
 | `latitude` | Latitude for the depth→pressure conversion, in degrees. |

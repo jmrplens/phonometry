@@ -73,8 +73,8 @@ def test_direct_method_exact_inversion() -> None:
         volume,
         surface,
         freqs,
-        temperature=theta,
-        static_pressure=ps,
+        temperature_c=theta,
+        static_pressure_kpa=ps,
     )
     assert isinstance(res, emission.ReverberationSoundPowerResult)
     assert np.allclose(res.sound_power_level, lw_target, atol=1e-9, rtol=0.0)
@@ -127,8 +127,8 @@ def test_comparison_method_exact_by_construction() -> None:
         lp_st,
         lp_rss,
         lw_ref,
-        temperature=theta,
-        static_pressure=ps,
+        temperature_c=theta,
+        static_pressure_kpa=ps,
     )
     assert isinstance(res, emission.ReverberationSoundPowerResult)
     assert res.method == "comparison"
@@ -451,7 +451,7 @@ def test_mismatched_shapes_raise() -> None:
 def test_direct_method_invalid_temperature_raises(theta: float) -> None:
     lp, t60, freqs = np.array([80.0]), np.array([1.5]), np.array([1000.0])
     with pytest.raises(
-        ValueError, match=r"'temperature' must be finite and greater than"
+        ValueError, match=r"'temperature_c' must be finite and greater than"
     ):
         emission.sound_power_reverberation(
             lp,
@@ -459,7 +459,7 @@ def test_direct_method_invalid_temperature_raises(theta: float) -> None:
             200.0,
             210.0,
             freqs,
-            temperature=theta,
+            temperature_c=theta,
         )
 
 
@@ -467,7 +467,7 @@ def test_direct_method_invalid_temperature_raises(theta: float) -> None:
 def test_direct_method_invalid_pressure_raises(ps: float) -> None:
     lp, t60, freqs = np.array([80.0]), np.array([1.5]), np.array([1000.0])
     with pytest.raises(
-        ValueError, match=r"'static_pressure' must be finite and positive"
+        ValueError, match=r"'static_pressure_kpa' must be finite and positive"
     ):
         emission.sound_power_reverberation(
             lp,
@@ -475,24 +475,28 @@ def test_direct_method_invalid_pressure_raises(ps: float) -> None:
             200.0,
             210.0,
             freqs,
-            static_pressure=ps,
+            static_pressure_kpa=ps,
         )
 
 
 def test_comparison_method_invalid_temperature_raises() -> None:
     levels, levels_ref, lw_ref = (np.array([80.0]), np.array([70.0]), np.array([90.0]))
     with pytest.raises(
-        ValueError, match=r"'temperature' must be finite and greater than"
+        ValueError, match=r"'temperature_c' must be finite and greater than"
     ):
-        emission.sound_power_comparison(levels, levels_ref, lw_ref, temperature=-300.0)
+        emission.sound_power_comparison(
+            levels, levels_ref, lw_ref, temperature_c=-300.0
+        )
 
 
 def test_comparison_method_invalid_pressure_raises() -> None:
     levels, levels_ref, lw_ref = (np.array([80.0]), np.array([70.0]), np.array([90.0]))
     with pytest.raises(
-        ValueError, match=r"'static_pressure' must be finite and positive"
+        ValueError, match=r"'static_pressure_kpa' must be finite and positive"
     ):
-        emission.sound_power_comparison(levels, levels_ref, lw_ref, static_pressure=0.0)
+        emission.sound_power_comparison(
+            levels, levels_ref, lw_ref, static_pressure_kpa=0.0
+        )
 
 
 # --------------------------------------------------------------------------

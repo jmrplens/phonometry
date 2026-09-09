@@ -65,7 +65,7 @@ $$
 with $c$ the speed of sound, which clause 5.3.4.3 prints as 340 m/s
 "under normal conditions". A whole determination knows the duct air, so
 [`sound_power_in_duct`](/phonometry/reference/api/power/sound-power-in-duct/#sound_power_in_duct) evaluates Eq. (8) with the $c$ its
-`temperature` gives, the "speed of sound in the test duct" of Table 1;
+`temperature_c` gives, the "speed of sound in the test duct" of Table 1;
 the 340 m/s is the default of [`flow_modal_correction`](/phonometry/reference/api/power/sound-power-in-duct/#flow_modal_correction) called on its own.
 
 The A-weighted sound power level is the energy sum of the band levels with the
@@ -271,8 +271,8 @@ sound_power_in_duct(
     shield: MicrophoneShield = 'sampling-tube',
     microphone_correction: ArrayLike = 0.0,
     shield_correction: ArrayLike = 0.0,
-    temperature: float = 20.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 20.0,
+    static_pressure_kpa: float = 101.325,
 ) -> InDuctSoundPowerResult
 ```
 
@@ -306,8 +306,8 @@ Table 2, is carried per band.
 | `shield` | Microphone shield, `"sampling-tube"` (default), `"nose-cone"` or `"foam-ball"`. |
 | `microphone_correction` | $C_1$, the manufacturer's free-field correction of the microphone, in decibels, per band or scalar. |
 | `shield_correction` | $C_2$, the frequency response correction of the shield determined per clause 5.3.3.2 c) or 5.3.4.2, in decibels, per band or scalar. |
-| `temperature` | Air temperature in the duct, in degrees Celsius, -50 degC to 70 degC; sets $c$ and $\rho$. The $c$ it sets is also the one Eq. (8) is evaluated with for the omni-directional shields, Table 1 defining $c$ as the speed of sound in the test duct; over the -50 degC to 70 degC of clause 1.1 that moves $C_{3,4}$ by up to 0,08 dB against the 340 m/s [`flow_modal_correction`](/phonometry/reference/api/power/sound-power-in-duct/#flow_modal_correction) uses on its own. |
-| `static_pressure` | Static pressure in the duct, in kilopascals; sets $\rho$. |
+| `temperature_c` | Air temperature in the duct, in degrees Celsius, -50 degC to 70 degC; sets $c$ and $\rho$. The $c$ it sets is also the one Eq. (8) is evaluated with for the omni-directional shields, Table 1 defining $c$ as the speed of sound in the test duct; over the -50 degC to 70 degC of clause 1.1 that moves $C_{3,4}$ by up to 0,08 dB against the 340 m/s [`flow_modal_correction`](/phonometry/reference/api/power/sound-power-in-duct/#flow_modal_correction) uses on its own. |
+| `static_pressure_kpa` | Static pressure in the duct, in kilopascals; sets $\rho$. |
 
 **Returns:** [`InDuctSoundPowerResult`](/phonometry/reference/api/power/sound-power-in-duct/#inductsoundpowerresult).
 

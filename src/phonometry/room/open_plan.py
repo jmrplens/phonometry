@@ -167,7 +167,7 @@ class OpenPlanResult:
             and ``receiver_positions`` (the number of measurement positions)
             populate the header, alongside ``client``, ``test_room`` (the
             office or zone), ``specimen`` (the description and furnishing
-            state), ``instrumentation``, ``temperature``, ``relative_humidity``,
+            state), ``instrumentation``, ``temperature_c``, ``relative_humidity_percent``,
             ``pressure``, ``measurement_standard``, ``test_date``,
             ``laboratory``, ``operator``, ``report_id`` and ``notes``;
             ``requirement`` is read as the minimum acceptable ``D2,S``.

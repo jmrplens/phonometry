@@ -121,6 +121,12 @@ def test_depth_to_pressure_leroy_parthiot() -> None:
     assert depth_to_gauge_pressure_mpa(depth_m=0.0) == pytest.approx(0.0, abs=1e-9)
 
 
+def test_profile_refuses_a_temperature_column_that_is_not_finite() -> None:
+    """The refusal names the column, and the name says it is in Celsius."""
+    with pytest.raises(ValueError, match=r"'temperatures_c' and 'salinities'"):
+        sound_speed_profile([0.0, 100.0], [10.0, float("nan")], 35.0)
+
+
 def test_three_models_agree_in_common_domain() -> None:
     # UNESCO, Del Grosso and Mackenzie must agree within ~1 m/s at a mid-ocean
     # point inside all three domains (10 C, 35 ppt, 1000 m).
@@ -152,8 +158,10 @@ def test_medwin_matches_hand_evaluation_of_equation_1_2() -> None:
     )
 
 
-@pytest.mark.parametrize("temperature", [0.0, 10.0, 20.0, 30.0])
-def test_medwin_temperature_derivative_matches_equation_1_3(temperature: float) -> None:
+@pytest.mark.parametrize("temperature_c", [0.0, 10.0, 20.0, 30.0])
+def test_medwin_temperature_derivative_matches_equation_1_3(
+    temperature_c: float,
+) -> None:
     """ "∂c/∂T ≈ 4.6 − 0.110·T m/s per degree Celsius", neglecting the bracketed terms.
 
     Ainslie states 3.5 m/s per °C at T = 10 °C.
@@ -161,13 +169,13 @@ def test_medwin_temperature_derivative_matches_equation_1_3(temperature: float) 
     h = 1e-5
     kw = {"model": "medwin"}
     full = (
-        sea_water_sound_speed(temperature + h, 35.0, 0.0, **kw)
-        - sea_water_sound_speed(temperature - h, 35.0, 0.0, **kw)
+        sea_water_sound_speed(temperature_c + h, 35.0, 0.0, **kw)
+        - sea_water_sound_speed(temperature_c - h, 35.0, 0.0, **kw)
     ) / (2.0 * h)
     # Remove the derivative of the bracketed cubic term the equation excludes.
-    reduced = full - 3.0 * 2.9e-4 * temperature**2
-    assert reduced == pytest.approx(4.6 - 0.110 * temperature, abs=1e-4)
-    if temperature == 10.0:
+    reduced = full - 3.0 * 2.9e-4 * temperature_c**2
+    assert reduced == pytest.approx(4.6 - 0.110 * temperature_c, abs=1e-4)
+    if temperature_c == 10.0:
         assert reduced == pytest.approx(3.5, abs=1e-4)
 
 
@@ -222,7 +230,7 @@ def test_negative_depth_rejected() -> None:
 def test_profile_gradient_and_shape() -> None:
     depths = np.linspace(0.0, 2000.0, 21)
     prof = sound_speed_profile(
-        depths, temperatures=10.0, salinities=35.0, model="unesco"
+        depths, temperatures_c=10.0, salinities=35.0, model="unesco"
     )
     assert isinstance(prof, SoundSpeedProfile)
     assert prof.sound_speed.shape == depths.shape

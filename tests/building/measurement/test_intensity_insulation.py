@@ -330,8 +330,8 @@ def test_limp_panel_reproduces_printed_table_a1_plaster_column() -> None:
         ref.ISO15186_3_ANNEX_A_BANDS,
         surface_mass=ref.ISO15186_3_PLASTER_SURFACE_MASS,
         area=ref.ISO15186_3_PLASTER_AREA,
-        temperature=ref.ISO15186_3_ANNEX_A_TEMPERATURE,
-        static_pressure=ref.ISO15186_3_ANNEX_A_PRESSURE,
+        temperature_c=ref.ISO15186_3_ANNEX_A_TEMPERATURE,
+        static_pressure_pa=ref.ISO15186_3_ANNEX_A_PRESSURE,
     )
     # The table prints one decimal, so agreement is asserted at that
     # resolution: every band rounds to the published value.
@@ -341,15 +341,15 @@ def test_limp_panel_reproduces_printed_table_a1_plaster_column() -> None:
 def test_limp_panel_climate_enters_through_a4_and_a5() -> None:
     """Colder air is denser, so rho c rises and the mass law reads lower."""
     warm = building.limp_panel_reduction_index(
-        [100.0], surface_mass=10.0, area=10.0, temperature=23.0
+        [100.0], surface_mass=10.0, area=10.0, temperature_c=23.0
     )
     cold = building.limp_panel_reduction_index(
-        [100.0], surface_mass=10.0, area=10.0, temperature=0.0
+        [100.0], surface_mass=10.0, area=10.0, temperature_c=0.0
     )
     assert cold[0] < warm[0]
     # Formula (A.4) is linear in B, and (A.2) takes 20 lg of its reciprocal.
     half = building.limp_panel_reduction_index(
-        [100.0], surface_mass=10.0, area=10.0, static_pressure=101300.0 / 2.0
+        [100.0], surface_mass=10.0, area=10.0, static_pressure_pa=101300.0 / 2.0
     )
     assert half[0] - warm[0] == pytest.approx(20.0 * np.log10(2.0))
 
@@ -375,8 +375,11 @@ def test_limp_panel_refuses_area_below_one_square_metre() -> None:
     ("kwargs", "match"),
     [
         ({"surface_mass": 0.0, "area": 10.0}, "surface_mass"),
-        ({"surface_mass": 10.0, "area": 10.0, "static_pressure": -1.0}, "pressure"),
-        ({"surface_mass": 10.0, "area": 10.0, "temperature": -300.0}, "temperature"),
+        ({"surface_mass": 10.0, "area": 10.0, "static_pressure_pa": -1.0}, "pressure"),
+        (
+            {"surface_mass": 10.0, "area": 10.0, "temperature_c": -300.0},
+            "temperature_c",
+        ),
         ({"surface_mass": np.nan, "area": 10.0}, "surface_mass"),
     ],
 )
@@ -427,7 +430,7 @@ def test_low_frequency_indicator_is_formula_5() -> None:
         area=10.0,
         l_p=[84.0, 86.0],
     )
-    assert r.surface_pressure_intensity == pytest.approx([14.0, 7.0])
+    assert r.surface_pressure_intensity_indicator == pytest.approx([14.0, 7.0])
 
 
 def test_low_frequency_indicator_is_not_the_source_room_level() -> None:
@@ -435,7 +438,7 @@ def test_low_frequency_indicator_is_not_the_source_room_level() -> None:
     r = building.low_frequency_intensity_reduction(
         [84.0, 86.0], [70.0, 79.0], measurement_area=10.0, area=10.0
     )
-    assert r.surface_pressure_intensity is None
+    assert r.surface_pressure_intensity_indicator is None
     assert r.qualified is None
     # Same source-room levels, two different receiving-side pressures: the
     # index cannot tell them apart, the indicator does.
@@ -471,7 +474,7 @@ def test_low_frequency_qualification_follows_clause_6_4_2(
     assert r.indicator_limit == limit
     # 11, 9 and 6 dB: the limit itself is satisfactory, the clause refuses
     # only what exceeds it.
-    assert r.surface_pressure_intensity == pytest.approx([11.0, 9.0, 6.0])
+    assert r.surface_pressure_intensity_indicator == pytest.approx([11.0, 9.0, 6.0])
     assert r.qualified is not None
     assert r.qualified.tolist() == qualified
 
@@ -624,13 +627,13 @@ def test_low_frequency_element_carries_the_clause_6_4_2_verdict() -> None:
         absorbing_specimen_surface=False,
     )
     assert r.indicator_limit == 10.0
-    assert r.surface_pressure_intensity == pytest.approx([8.0, 15.0])
+    assert r.surface_pressure_intensity_indicator == pytest.approx([8.0, 15.0])
     assert r.qualified is not None
     assert r.qualified.tolist() == [True, False]
     bare = building.low_frequency_element_normalized_difference(
         [90.0], [60.0], measurement_area=10.0
     )
-    assert bare.surface_pressure_intensity is None
+    assert bare.surface_pressure_intensity_indicator is None
     assert bare.qualified is None
 
 
@@ -761,7 +764,7 @@ def test_low_frequency_element_rejects_a_non_finite_indicator() -> None:
         [90.0], [60.0], measurement_area=10.0, l_p=[70.0]
     )
     with pytest.raises(ValueError, match="finite"):
-        dataclasses.replace(r, surface_pressure_intensity=np.array([np.nan]))
+        dataclasses.replace(r, surface_pressure_intensity_indicator=np.array([np.nan]))
 
 
 @pytest.mark.parametrize("bad", [[], [np.nan], [np.inf]])

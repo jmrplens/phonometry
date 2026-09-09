@@ -561,7 +561,7 @@ print(np.round(ten_seconds.sound_energy_level - steady.sound_power_level, 6))   
 
 # Annex G: a determination at 1 200 m and 8 C carried to 101.325 kPa and 23 C (Eq. G.3).
 corr = emission.reference_atmosphere_correction(8.0, altitude=1200.0)
-print(round(corr.static_pressure, 1), round(corr.total, 2))   # 87.7 kPa, C1 + C2 = 0.68 dB
+print(round(corr.static_pressure_kpa, 1), round(corr.total, 2))   # 87.7 kPa, C1 + C2 = 0.68 dB
 lj_ref = burst.sound_energy_level + corr.total
 
 burst.plot()   # LJ per band, LJA in the title (needs matplotlib)

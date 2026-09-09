@@ -282,8 +282,8 @@ arrays it accepts directly.
 
 ```python
 reference_atmosphere_correction(
-    temperature: float,
-    static_pressure: float | None = None,
+    temperature_c: float,
+    static_pressure_kpa: float | None = None,
     *,
     altitude: float | None = None,
 ) -> ReferenceAtmosphereCorrection
@@ -317,8 +317,8 @@ $a = 2.2560 \times 10^{-5}$ m^-1 and $b = 5.2553$.
 
 | Name | Description |
 | :--- | :--- |
-| `temperature` | Air temperature `theta` at the test, in degrees C. |
-| `static_pressure` | Static pressure `ps` at the test, in kilopascals; give this or `altitude`. |
+| `temperature_c` | Air temperature `theta` at the test, in degrees C. |
+| `static_pressure_kpa` | Static pressure `ps` at the test, in kilopascals; give this or `altitude`. |
 | `altitude` | Altitude `Ha` of the test site, in metres, from which `ps` is estimated by Eq. (G.2) when it was not measured. |
 
 **Returns:** [`ReferenceAtmosphereCorrection`](/phonometry/reference/api/power/sound-power/#referenceatmospherecorrection) with `c1`, `c2`, their `total` and the static pressure used.
@@ -327,7 +327,7 @@ $a = 2.2560 \times 10^{-5}$ m^-1 and $b = 5.2553$.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if neither or both of `static_pressure` and `altitude` are given, or either is out of range, or `temperature` is not above absolute zero. |
+| ValueError | if neither or both of `static_pressure_kpa` and `altitude` are given, or either is out of range, or `temperature_c` is not above absolute zero. |
 
 ## ReferenceAtmosphereCorrection
 
@@ -335,8 +335,8 @@ $a = 2.2560 \times 10^{-5}$ m^-1 and $b = 5.2553$.
 ReferenceAtmosphereCorrection(
     c1: float,
     c2: float,
-    static_pressure: float,
-    temperature: float,
+    static_pressure_kpa: float,
+    temperature_c: float,
 )
 ```
 
@@ -345,10 +345,10 @@ The two Annex G corrections to reference meteorological conditions.
 `c1` is the reference-quantity correction and `c2` the
 radiation-impedance correction of ISO 3744:2010 Annex G, both in
 decibels; `total` is their sum, the whole of what Eq. (G.1) adds to
-$L_W$ and Eq. (G.3) to $L_J$. `static_pressure` is the
+$L_W$ and Eq. (G.3) to $L_J$. `static_pressure_kpa` is the
 $p_\mathrm{s}$ the corrections were evaluated at, in kilopascals,
 whether it was measured or estimated from the altitude by Eq. (G.2), and
-`temperature` the air temperature $\theta$, in degrees Celsius.
+`temperature_c` the air temperature $\theta$, in degrees Celsius.
 
 ### ReferenceAtmosphereCorrection.total
 
@@ -724,7 +724,7 @@ applied background (`K1`) and environmental (`K2`) corrections.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds the energy-averaged level `Lp'` and the background (`K1`) and environmental (`K2`) corrections. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |

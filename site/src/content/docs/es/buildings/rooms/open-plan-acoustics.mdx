@@ -423,37 +423,36 @@ posición puede medirse a su vez con las herramientas STIPA de la
 
 `OpenPlanResult.report(path)` renderiza una ficha PDF de una página con el
 formato de un informe de medición de privacidad acústica en oficinas diáfanas:
-la línea de base normativa, un bloque de cabecera de metadatos opcional, una tabla
-compacta de las cuatro magnitudes que devuelve `open_plan_metrics` ($D_\mathrm{2,S}$,
-$L_{p,\mathrm{A,S},4\,\mathrm{m}}$, la distancia de distracción $r_\mathrm{D}$ y la distancia de privacidad
-$r_\mathrm{P}$) apilada sobre la gráfica de decaimiento espacial a todo el ancho del
-resultado (`.plot()`, la regresión del apartado 6.2 en el eje logarítmico de
-distancia con la lectura a 4 m y los cruces $r_\mathrm{D}$ / $r_\mathrm{P}$ marcados, la curva al
-estilo de la Figura 3), el $D_\mathrm{2,S}$ enmarcado con las demás magnitudes al lado,
-y un pie
-con el descargo fijo. La ISO 3382-3 **caracteriza** un espacio en lugar de
-definir un cumple/no cumple intrínseco, por lo que la fila de veredicto aparece solo
-cuando se suministra una tasa de decaimiento espacial objetivo a través del
-campo `requirement` de los metadatos (`ReportMetadata(requirement=...)`,
-interpretada como el $D_\mathrm{2,S}$ mínimo aceptable en dB, según los intervalos de
-calidad informativos del Anexo A donde un mayor decaimiento espacial es mejor;
-la sala cumple igualando o superando el objetivo). Usa el mismo contenedor
-`ReportMetadata` y el mismo motor de renderizado que la
-[ficha de acústica de salas ISO
+la línea de base normativa, un bloque de cabecera de metadatos opcional, una
+tabla compacta de las cuatro magnitudes que devuelve `open_plan_metrics`
+($D_\mathrm{2,S}$, $L_{p,\mathrm{A,S},4\,\mathrm{m}}$, la distancia de
+distracción $r_\mathrm{D}$ y la distancia de privacidad $r_\mathrm{P}$) apilada
+sobre la gráfica de decaimiento espacial a todo el ancho del resultado
+(`.plot()`, la regresión del apartado 6.2 en el eje logarítmico de distancia
+con la lectura a 4 m y los cruces $r_\mathrm{D}$ / $r_\mathrm{P}$ marcados, la
+curva al estilo de la Figura 3), el $D_\mathrm{2,S}$ enmarcado con las demás
+magnitudes al lado, y un pie con el descargo fijo. La ISO 3382-3
+**caracteriza** un espacio en lugar de definir un cumple/no cumple intrínseco,
+por lo que la fila de veredicto aparece solo cuando se suministra una tasa de
+decaimiento espacial objetivo a través del campo `requirement` de los metadatos
+(`ReportMetadata(requirement=...)`, interpretada como el $D_\mathrm{2,S}$
+mínimo aceptable en dB, según los intervalos de calidad informativos del Anexo
+A donde un mayor decaimiento espacial es mejor; la sala cumple igualando o
+superando el objetivo). Usa el mismo contenedor `ReportMetadata` y el mismo
+motor de renderizado que la [ficha de acústica de salas ISO
 3382-1/-2](/phonometry/es/buildings/rooms/room-acoustics/#informe-iso-3382-report);
-los
-campos propios de oficinas diáfanas `area` (superficie del suelo),
+los campos propios de oficinas diáfanas `area` (superficie del suelo),
 `source_positions` y `receiver_positions` (el número de posiciones de medición)
 rellenan la cabecera, junto con `client`, `test_room` (la oficina o zona),
 `specimen` (la descripción y el estado de amueblamiento), `instrumentation`,
-`temperature`, `relative_humidity`, `pressure`, `measurement_standard`,
-`test_date`, `laboratory`, `operator`, `report_id` y `notes`. Al pasar
-`metadata=None` se obtiene una ficha de caracterización simple. La ficha
-incrusta la gráfica de decaimiento espacial, por lo que el renderizado necesita
-tanto reportlab como matplotlib (`pip install "phonometry[report,plot]"`); solo
-se admite `engine="reportlab"`. La ficha se renderiza en inglés por defecto; pasa
-`language="es"` para una ficha en español (cadenas fijas traducidas y separador
-decimal de coma).
+`temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`,
+`measurement_standard`, `test_date`, `laboratory`, `operator`, `report_id` y
+`notes`. Al pasar `metadata=None` se obtiene una ficha de caracterización
+simple. La ficha incrusta la gráfica de decaimiento espacial, por lo que el
+renderizado necesita tanto reportlab como matplotlib (`pip install
+"phonometry[report,plot]"`); solo se admite `engine="reportlab"`. La ficha se
+renderiza en inglés por defecto; pasa `language="es"` para una ficha en español
+(cadenas fijas traducidas y separador decimal de coma).
 
 ```python
 import numpy as np
@@ -473,7 +472,7 @@ result.report(
         specimen="Amueblada, desocupada, con ruido de fondo",
         area=420.0, source_positions=2, receiver_positions=7,
         measurement_standard="ISO 3382-3",
-        temperature=22.0, relative_humidity=45.0,
+        temperature_c=22.0, relative_humidity_percent=45.0,
         laboratory="Laboratorio de referencia Phonometry",
         requirement=7.0,          # añade un veredicto frente a un D2,S objetivo
     ),

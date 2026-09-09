@@ -634,7 +634,7 @@ def plot_static_airflow(
     ax.plot(u * 1e3, dp, **kwargs)
     ax.plot(
         [u_eval * 1e3],
-        [result.pressure_drop],
+        [result.pressure_drop_pa],
         "D",
         color=_C_REFERENCE,
         ms=7,

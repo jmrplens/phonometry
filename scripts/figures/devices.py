@@ -1279,8 +1279,8 @@ def generate_sound_power_reverberation_result(output_dir: str) -> None:
         volume=200.0,
         surface_area=220.0,
         frequencies=freqs,
-        temperature=20.0,
-        static_pressure=101.0,
+        temperature_c=20.0,
+        static_pressure_kpa=101.0,
     )
 
     lw = result.sound_power_level
@@ -2531,8 +2531,8 @@ def generate_reverberation_correction_terms(output_dir: str) -> None:
         volume=200.0,
         surface_area=surface_area,
         frequencies=freqs,
-        temperature=20.0,
-        static_pressure=101.0,
+        temperature_c=20.0,
+        static_pressure_kpa=101.0,
     )
 
     absorption = 10.0 * np.log10(res.absorption_area)
@@ -3770,7 +3770,7 @@ def generate_duct_sheet_verification(output_dir: str) -> None:
         bands, 36 * inch, 24 * inch, 5 * foot, 1 * inch, include_unlined=True
     )
     diffuser = hvac.diffuser_sound_power(
-        bands, (24 * inch) ** 2, volume_flow=312 * cfm, pressure_drop=0.05 * in_wg
+        bands, (24 * inch) ** 2, volume_flow=312 * cfm, pressure_drop_pa=0.05 * in_wg
     )
     nc30 = np.asarray(room.nc_curve(30), dtype=float)[2:]  # OCTAVE_BANDS is 16 Hz up
 
@@ -3882,7 +3882,10 @@ def generate_duct_regenerated_noise(output_dir: str) -> None:
         (1248.0, COLOR_SECONDARY),
     ):
         res = hvac.diffuser_sound_power(
-            bands, (24 * inch) ** 2, volume_flow=flow * cfm, pressure_drop=0.05 * in_wg
+            bands,
+            (24 * inch) ** 2,
+            volume_flow=flow * cfm,
+            pressure_drop_pa=0.05 * in_wg,
         )
         velocity = flow * cfm / (24 * inch) ** 2
         peak = 48.8 * velocity / 0.3048
@@ -3944,7 +3947,7 @@ def generate_fan_sound_power(output_dir: str) -> None:
     from phonometry import noise_control
 
     cfm, in_wg = 0.0004719474432, 249.0
-    volume_flow, static_pressure = 5000 * cfm, 2 * in_wg
+    volume_flow, static_pressure_pa = 5000 * cfm, 2 * in_wg
     fan_type = "forward_curved"
     _fig, ax = plt.subplots(figsize=(10, 6.4))
     for efficiency, color, style in (
@@ -3954,7 +3957,7 @@ def generate_fan_sound_power(output_dir: str) -> None:
     ):
         fan = noise_control.fan_sound_power(
             volume_flow,
-            fan_static_pressure_pa=static_pressure,
+            fan_static_pressure_pa=static_pressure_pa,
             fan_type=fan_type,
             relative_efficiency_percent=efficiency,
         )
@@ -3971,7 +3974,7 @@ def generate_fan_sound_power(output_dir: str) -> None:
         )
     tone = noise_control.fan_sound_power(
         volume_flow,
-        fan_static_pressure_pa=static_pressure,
+        fan_static_pressure_pa=static_pressure_pa,
         fan_type=fan_type,
         relative_efficiency_percent=80.0,
         blade_frequency=2000.0,
@@ -6350,8 +6353,8 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
     from phonometry import noise_control
 
     liquid: dict[str, Any] = {
-        "inlet_pressure": 1.0e6,
-        "vapour_pressure": 2.32e3,
+        "inlet_pressure_pa": 1.0e6,
+        "vapour_pressure_pa": 2.32e3,
         "density": 997.0,
         "sound_speed": 1400.0,
     }
@@ -6380,16 +6383,16 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
         """
         outlet = inlet - ratio * (inlet - vapour)
         choked = noise_control.cavitation_differential(
-            inlet_pressure=inlet,
-            outlet_pressure=outlet,
-            vapour_pressure=vapour,
+            inlet_pressure_pa=inlet,
+            outlet_pressure_pa=outlet,
+            vapour_pressure_pa=vapour,
             pressure_recovery=0.92,
         )
         return noise_control.valve_hydrodynamic_noise(
             noise_control.LiquidStream(
                 **liquid,
                 mass_flow=30.0 * math.sqrt(choked / 2.0e5),
-                outlet_pressure=outlet,
+                outlet_pressure_pa=outlet,
             ),
             noise_control.LiquidTrim(**trim, incipient_ratio=incipient),
             water_pipe,
@@ -6603,9 +6606,9 @@ def generate_control_valve_noise(output_dir: str) -> None:
     from phonometry import noise_control
 
     stream: dict[str, Any] = {
-        "inlet_pressure": 1.0e6,
+        "inlet_pressure_pa": 1.0e6,
         "inlet_density": 5.3,
-        "inlet_temperature": 450.0,
+        "inlet_temperature_k": 450.0,
         "specific_heat_ratio": 1.22,
         "molecular_mass": 19.8,
     }
@@ -6637,7 +6640,7 @@ def generate_control_valve_noise(output_dir: str) -> None:
     for x in ratios:
         result = noise_control.valve_aerodynamic_noise(
             noise_control.GasStream(
-                **stream, mass_flow=2.22, outlet_pressure=1.0e6 * (1.0 - x)
+                **stream, mass_flow=2.22, outlet_pressure_pa=1.0e6 * (1.0 - x)
             ),
             trim,
             pipe,
@@ -6696,7 +6699,7 @@ def generate_control_valve_noise(output_dir: str) -> None:
     # -- Middle: what the pipe wall does to the spectrum.
     ax2 = axes[1]
     result = noise_control.valve_aerodynamic_noise(
-        noise_control.GasStream(**stream, mass_flow=2.22, outlet_pressure=7.2e5),
+        noise_control.GasStream(**stream, mass_flow=2.22, outlet_pressure_pa=7.2e5),
         trim,
         pipe,
     )

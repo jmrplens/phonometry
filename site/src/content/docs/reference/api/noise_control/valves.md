@@ -76,7 +76,7 @@ AerodynamicValveNoise(
     regime: int,
     boundaries: RegimeBoundaries,
     pressure_ratio: float,
-    vena_contracta_pressure: float,
+    vena_contracta_pressure_pa: float,
     jet_diameter: float,
     mach: float,
     acoustical_efficiency: float,
@@ -107,7 +107,7 @@ What IEC 60534-8-3 Clause 5 says about one operating point.
 | `regime` | Which of the five regimes of Clause 5.2 the valve is in. |
 | `boundaries` | The four pressure ratios that placed it there. |
 | `pressure_ratio` | $x$ of Equation (1). |
-| `vena_contracta_pressure` | $p_{vc}$ of Equation (2), in Pa. It goes negative past the choking point, where the equation is being read outside the range it means anything in. |
+| `vena_contracta_pressure_pa` | $p_{vc}$ of Equation (2), in Pa. It goes negative past the choking point, where the equation is being read outside the range it means anything in. |
 | `jet_diameter` | $D_j$ of Equation (9), in m. |
 | `mach` | The Mach number Table 3 uses in this regime. |
 | `acoustical_efficiency` | $\eta$, the fraction of the stream power that leaves as sound. |
@@ -215,8 +215,8 @@ DownstreamPipe(
     density: float,
     sound_speed: float = 5000.0,
     air_sound_speed: float = 343.0,
-    atmospheric_pressure: float = 101325.0,
-    standard_pressure: float = 101325.0,
+    atmospheric_pressure_pa: float = 101325.0,
+    standard_pressure_pa: float = 101325.0,
 )
 ```
 
@@ -235,8 +235,8 @@ not settings anyone is expected to change.
 | `density` | $\rho_s$ of the pipe material, in kg/m³. |
 | `sound_speed` | $c_s$ in the pipe wall, in m/s. |
 | `air_sound_speed` | $c_a$ outside the pipe, in m/s. |
-| `atmospheric_pressure` | $p_a$, in Pa. |
-| `standard_pressure` | $p_s$, in Pa. |
+| `atmospheric_pressure_pa` | $p_a$, in Pa. |
+| `standard_pressure_pa` | $p_s$, in Pa. |
 
 ## Expander
 
@@ -400,10 +400,10 @@ normative text and its list is consistent, so this follows the clause;
 ```python
 GasStream(
     mass_flow: float,
-    inlet_pressure: float,
-    outlet_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
     inlet_density: float,
-    inlet_temperature: float,
+    inlet_temperature_k: float,
     specific_heat_ratio: float,
     molecular_mass: float,
 )
@@ -416,10 +416,10 @@ The gas and the operating point, which Clause 5.1 reads first.
 | Name | Description |
 | :--- | :--- |
 | `mass_flow` | $\dot m$, in kg/s. |
-| `inlet_pressure` | $p_1$, absolute, in Pa. |
-| `outlet_pressure` | $p_2$, absolute, in Pa. |
+| `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
+| `outlet_pressure_pa` | $p_2$, absolute, in Pa. |
 | `inlet_density` | $\rho_1$, in kg/m³. |
-| `inlet_temperature` | $T_1$, absolute, in K. |
+| `inlet_temperature_k` | $T_1$, absolute, in K. |
 | `specific_heat_ratio` | $\gamma$. |
 | `molecular_mass` | $M$, in kg/kmol. |
 
@@ -615,8 +615,8 @@ passes 0,2.
 ```python
 multistage_trim_conditions(
     *,
-    inlet_pressure: float,
-    outlet_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
     inlet_density: float,
     flow_coefficient: float,
     last_stage_coefficient: float,
@@ -650,8 +650,8 @@ directly.
 
 | Name | Description |
 | :--- | :--- |
-| `inlet_pressure` | $p_1$ at the valve inlet, absolute, in Pa. |
-| `outlet_pressure` | $p_2$ at the valve outlet, in Pa. |
+| `inlet_pressure_pa` | $p_1$ at the valve inlet, absolute, in Pa. |
+| `outlet_pressure_pa` | $p_2$ at the valve outlet, in Pa. |
 | `inlet_density` | $\rho_1$ at the valve inlet, in kg/m³. |
 | `flow_coefficient` | $C$ of the whole valve. |
 | `last_stage_coefficient` | $C_n$ of the last stage, from [`last_stage_flow_coefficient`](/phonometry/reference/api/noise_control/valves/#last_stage_flow_coefficient) or from the manufacturer. |
@@ -669,7 +669,7 @@ directly.
 ```python
 MultistageConditions(
     flow_coefficient: float,
-    stagnation_pressure: float,
+    stagnation_pressure_pa: float,
     stagnation_density: float,
     equation: str,
 )
@@ -682,7 +682,7 @@ What a multistage trim hands Clause 5 in place of the valve inlet.
 | Name | Description |
 | :--- | :--- |
 | `flow_coefficient` | $C_n$ of the last stage, Equation (27). |
-| `stagnation_pressure` | $p_n$ at the inlet of the last stage, in Pa, from whichever of Equations (28a) to (28c) NOTE 3 selects. |
+| `stagnation_pressure_pa` | $p_n$ at the inlet of the last stage, in Pa, from whichever of Equations (28a) to (28c) NOTE 3 selects. |
 | `stagnation_density` | $\rho_n$ there, in kg/m³, Equation (29). |
 | `equation` | Which of `"28a"`, `"28b"` and `"28c"` was used, because the branch is a reading of NOTE 3 rather than an arithmetic fact and a report should say which one it took. |
 
@@ -708,8 +708,8 @@ pipe_transmission_loss(
     pipe_density: float,
     pipe_sound_speed: float = 5000.0,
     air_sound_speed: float = 343.0,
-    atmospheric_pressure: float = 101325.0,
-    standard_pressure: float = 101325.0,
+    atmospheric_pressure_pa: float = 101325.0,
+    standard_pressure_pa: float = 101325.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -735,8 +735,8 @@ internal level, so the sign is not a convention this module chose.
 | `pipe_density` | $\rho_s$ of the pipe material, in kg/m³. |
 | `pipe_sound_speed` | $c_s$, in m/s. |
 | `air_sound_speed` | $c_a$, in m/s. |
-| `atmospheric_pressure` | $p_a$, in Pa. |
-| `standard_pressure` | $p_s$, in Pa. |
+| `atmospheric_pressure_pa` | $p_a$, in Pa. |
+| `standard_pressure_pa` | $p_s$, in Pa. |
 
 **Returns:** The transmission loss in each band, in dB, negative.
 
@@ -886,8 +886,8 @@ The four pressure ratios that cut Clause 5.2 into five regimes.
 stage_level_correction(
     last_stage_level: float,
     stages: int,
-    inlet_pressure: float,
-    stagnation_pressure: float,
+    inlet_pressure_pa: float,
+    stagnation_pressure_pa: float,
 ) -> float
 ```
 
@@ -908,8 +908,8 @@ only a few decibels.
 | :--- | :--- |
 | `last_stage_level` | $L_{pi,n}$ of Equation (18) computed on the last stage, in dB. |
 | `stages` | $n$, the number of throttling stages, at least two. |
-| `inlet_pressure` | $p_1$ at the valve inlet, in Pa. |
-| `stagnation_pressure` | $p_n$ at the last stage, in Pa. |
+| `inlet_pressure_pa` | $p_1$ at the valve inlet, in Pa. |
+| `stagnation_pressure_pa` | $p_n$ at the last stage, in Pa. |
 
 **Returns:** $L_{pi}$ for the whole trim, in dB.
 

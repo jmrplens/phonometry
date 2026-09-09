@@ -64,7 +64,7 @@ absorption_area(
     t60: ArrayLike,
     volume: float,
     *,
-    temperature: float = 20.0,
+    temperature_c: float = 20.0,
     speed_of_sound: float | None = None,
     m: ArrayLike = 0.0,
 ) -> NDArray[np.float64]
@@ -82,8 +82,8 @@ with-specimen area `A2` from `T2` (both equations have identical form).
 | :--- | :--- |
 | `t60` | Reverberation time(s) `T`, in seconds (scalar or per band). |
 | `volume` | Room volume `V`, in cubic metres. |
-| `temperature` | Air temperature, in degrees Celsius, used to compute the speed of sound via Eq. (6) when `speed_of_sound` is not given (default 20 degC, i.e. c = 343 m/s). A temperature outside 15..30 degC emits an [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). A room volume below the 150 m3 minimum of clause 6.1.1 likewise emits an advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
-| `speed_of_sound` | Explicit speed of sound `c`, in m/s; overrides `temperature` and Eq. (6) when supplied. |
+| `temperature_c` | Air temperature, in degrees Celsius, used to compute the speed of sound via Eq. (6) when `speed_of_sound` is not given (default 20 degC, i.e. c = 343 m/s). A temperature outside 15..30 degC emits an [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). A room volume below the 150 m3 minimum of clause 6.1.1 likewise emits an advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
+| `speed_of_sound` | Explicit speed of sound `c`, in m/s; overrides `temperature_c` and Eq. (6) when supplied. |
 | `m` | Power attenuation coefficient of air `m`, in 1/m (a scalar or an array matching the shape of `t60`; default 0, i.e. no air correction). A per-band `m` whose shape differs from `t60` raises `ValueError`. Obtain it from an ISO 9613-1 attenuation coefficient with [`attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#attenuation_from_alpha). |
 
 **Returns:** Equivalent sound absorption area `A`, in square metres, with the shape of `t60`.
@@ -97,8 +97,8 @@ absorption_coefficient(
     volume: float,
     sample_area: float,
     *,
-    temperature1: float = 20.0,
-    temperature2: float | None = None,
+    temperature1_c: float = 20.0,
+    temperature2_c: float | None = None,
     speed_of_sound1: float | None = None,
     speed_of_sound2: float | None = None,
     m1: ArrayLike = 0.0,
@@ -136,10 +136,10 @@ advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorpt
 | `t2` | With-specimen reverberation time(s) `T2`, in seconds. |
 | `volume` | Room volume `V`, in cubic metres. |
 | `sample_area` | Area `S` covered by the test specimen, in square metres (for both-sides-exposed absorbers, the area of the two sides; Clause 3.7 NOTE 1). |
-| `temperature1` | Empty-room air temperature, in degrees Celsius (default 20). Used for `c1` via Eq. (6) unless `speed_of_sound1` is given. |
-| `temperature2` | With-specimen air temperature, in degrees Celsius; defaults to `temperature1`. Used for `c2` unless `speed_of_sound2` is given. |
-| `speed_of_sound1` | Explicit `c1` in m/s; overrides `temperature1`. |
-| `speed_of_sound2` | Explicit `c2` in m/s; overrides `temperature2`. Defaults to `speed_of_sound1` when that is given but `c2` is not, so overriding only `c1` applies the same speed to both measurements. |
+| `temperature1_c` | Empty-room air temperature, in degrees Celsius (default 20). Used for `c1` via Eq. (6) unless `speed_of_sound1` is given. |
+| `temperature2_c` | With-specimen air temperature, in degrees Celsius; defaults to `temperature1_c`. Used for `c2` unless `speed_of_sound2` is given. |
+| `speed_of_sound1` | Explicit `c1` in m/s; overrides `temperature1_c`. |
+| `speed_of_sound2` | Explicit `c2` in m/s; overrides `temperature2_c`. Defaults to `speed_of_sound1` when that is given but `c2` is not, so overriding only `c1` applies the same speed to both measurements. |
 | `m1` | Empty-room air attenuation coefficient `m1`, in 1/m (default 0). |
 | `m2` | With-specimen air attenuation coefficient `m2`, in 1/m (default 0). |
 
@@ -183,8 +183,8 @@ measure_sound_absorption(
     *,
     volume: float,
     area: float,
-    temperature: float = 20.0,
-    humidity: float | None = None,
+    temperature_c: float = 20.0,
+    relative_humidity_percent: float | None = None,
     speed_of_sound: float | None = None,
     m: ArrayLike = 0.0,
 ) -> SoundAbsorptionMeasurement
@@ -202,7 +202,7 @@ $\alpha_\mathrm{s} = (A_2 - A_1)/S$ from Eq. (8)/(9) (delegated to
 
 Both measurements are taken at the same air temperature and, for the air
 attenuation term, the same climatic conditions (ISO 354:2003, 6.3), so a
-single `temperature` and `m` apply to both. Use the lower-level
+single `temperature_c` and `m` apply to both. Use the lower-level
 [`absorption_coefficient`](/phonometry/reference/api/materials/sound-absorption/#absorption_coefficient) directly when the empty-room and
 with-specimen climates differ.
 
@@ -215,9 +215,9 @@ with-specimen climates differ.
 | `t_specimen` | With-specimen reverberation time `T2`, per band, in seconds. |
 | `volume` | Reverberation-room volume `V`, in cubic metres. A volume below the 150 m3 minimum of clause 6.1.1 emits an advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
 | `area` | Area `S` covered by the test specimen, in square metres. An area outside the clause 6.2.1.1 range (10 m2 to 12 m2, upper limit scaled by $(V/200)^{2/3}$ for $V > 200$ m3) emits an advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
-| `temperature` | Air temperature during the test, in degrees Celsius (default 20). Used for the speed of sound via Eq. (6) unless `speed_of_sound` is given; a temperature outside 15..30 degC emits an [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
-| `humidity` | Relative humidity during the test, in % within `[0, 100]` (informational; recorded on the result but not used in the computation, which sees the climate only through `m`). `None` leaves it unrecorded. |
-| `speed_of_sound` | Explicit speed of sound `c`, in m/s; overrides `temperature` and Eq. (6) when supplied. |
+| `temperature_c` | Air temperature during the test, in degrees Celsius (default 20). Used for the speed of sound via Eq. (6) unless `speed_of_sound` is given; a temperature outside 15..30 degC emits an [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorption/#absorptionwarning). |
+| `relative_humidity_percent` | Relative humidity during the test, in % within `[0, 100]` (informational; recorded on the result but not used in the computation, which sees the climate only through `m`). `None` leaves it unrecorded. |
+| `speed_of_sound` | Explicit speed of sound `c`, in m/s; overrides `temperature_c` and Eq. (6) when supplied. |
 | `m` | Power attenuation coefficient of air `m`, in 1/m (a scalar or a per-band array matching `frequencies`; default 0, i.e. no air correction). Obtain it from an ISO 9613-1 attenuation coefficient with [`attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#attenuation_from_alpha). |
 
 **Returns:** A frozen [`SoundAbsorptionMeasurement`](/phonometry/reference/api/materials/sound-absorption/#soundabsorptionmeasurement).
@@ -226,7 +226,7 @@ with-specimen climates differ.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the frequency and reverberation-time arrays do not share one shape, `humidity` is not within `[0, 100]` %, or an input is non-physical (see [`absorption_coefficient`](/phonometry/reference/api/materials/sound-absorption/#absorption_coefficient)). |
+| ValueError | If the frequency and reverberation-time arrays do not share one shape, `relative_humidity_percent` is not within `[0, 100]` %, or an input is non-physical (see [`absorption_coefficient`](/phonometry/reference/api/materials/sound-absorption/#absorption_coefficient)). |
 
 ## SoundAbsorptionMeasurement
 
@@ -237,8 +237,8 @@ SoundAbsorptionMeasurement(
     t_specimen: NDArray[np.float64],
     volume: float,
     area: float,
-    temperature: float,
-    humidity: float | None,
+    temperature_c: float,
+    relative_humidity_percent: float | None,
     speed_of_sound: float,
     air_attenuation: NDArray[np.float64],
     absorption_area_empty: NDArray[np.float64],
@@ -272,8 +272,8 @@ is therefore not produced here; pass `alpha_s` to
 | `t_specimen` | Mean reverberation time of the room with the specimen `T2`, per band, in seconds. |
 | `volume` | Reverberation-room volume `V`, in cubic metres. |
 | `area` | Area `S` covered by the test specimen, in square metres. |
-| `temperature` | Air temperature during the test, in degrees Celsius. |
-| `humidity` | Relative humidity during the test, in %, or `None` when not recorded. It is informational: humidity enters ISO 354 only through the air attenuation coefficient `m` (via ISO 9613-1), never directly. |
+| `temperature_c` | Air temperature during the test, in degrees Celsius. |
+| `relative_humidity_percent` | Relative humidity during the test, in %, or `None` when not recorded. It is informational: humidity enters ISO 354 only through the air attenuation coefficient `m` (via ISO 9613-1), never directly. |
 | `speed_of_sound` | Propagation speed of sound `c` used in the Sabine inversion, in m/s (from Eq. (6) unless it was given explicitly). |
 | `air_attenuation` | Power attenuation coefficient of air `m`, per band, in 1/m (`0` when no air correction was applied). |
 | `absorption_area_empty` | Equivalent sound absorption area of the empty room `A1` (Eq. (5)), per band, in square metres. |

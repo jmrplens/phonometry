@@ -176,7 +176,7 @@ _T0_C = 15.0
 
 
 def impedance_adjustment(
-    temperature: float = _T0_C, pressure: float = _P0_KPA
+    temperature_c: float = _T0_C, atmospheric_pressure_kpa: float = _P0_KPA
 ) -> float:
     r"""Acoustic-impedance adjustment of the standard NPD data (Eq. 4-6/4-7).
 
@@ -188,18 +188,18 @@ def impedance_adjustment(
     :math:`10 \cdot \log_{10}(\rho c/409.81)` is
     added to the NPD levels. Under the standard atmosphere it is +0.074 dB.
 
-    :param temperature: Aerodrome air temperature ``T``, in °C (default 15 °C).
-    :param pressure: Aerodrome air pressure ``p``, in kPa (default 101.325 kPa).
+    :param temperature_c: Aerodrome air temperature ``T``, in °C (default 15 °C).
+    :param atmospheric_pressure_kpa: Aerodrome air pressure ``p``, in kPa (default 101.325 kPa).
     :return: The impedance adjustment, in dB (added to the NPD level).
     :raises ValueError: If the pressure is not positive, the temperature is at
         or below -273,15 degC, or either input is non-finite.
     """
-    t = float(temperature)
-    p = float(pressure)
+    t = float(temperature_c)
+    p = float(atmospheric_pressure_kpa)
     if not (np.isfinite(t) and np.isfinite(p) and p > 0.0):
-        msg = "'pressure' must be positive and inputs finite."
+        msg = "'atmospheric_pressure_kpa' must be positive and inputs finite."
         raise ValueError(msg)
-    require_above_absolute_zero(t, "temperature")
+    require_above_absolute_zero(t, "temperature_c")
     delta = p / _P0_KPA
     theta = (t + 273.15) / (_T0_C + 273.15)
     zc = _ZC_STD * delta / np.sqrt(theta)
@@ -220,12 +220,12 @@ class AerodromeAtmosphere:
     the humidity and the absorption method, and its reference conditions are
     the ICAO 25 °C/70 % of the hemisphere database, not the 15 °C of Eq. 4-7.
 
-    :ivar temperature: Aerodrome air temperature ``T``, in °C (default 15).
-    :ivar pressure: Aerodrome air pressure ``p``, in kPa (default 101.325).
+    :ivar temperature_c: Aerodrome air temperature ``T``, in °C (default 15).
+    :ivar atmospheric_pressure_kpa: Aerodrome air pressure ``p``, in kPa (default 101.325).
     """
 
-    temperature: float = _T0_C
-    pressure: float = _P0_KPA
+    temperature_c: float = _T0_C
+    atmospheric_pressure_kpa: float = _P0_KPA
 
 
 #: The standard atmosphere (δ = θ = 1), the default of the event entry points.
@@ -1362,7 +1362,9 @@ def event_level(
     bk = _validate_bank(segments.bank, pts.shape[0])
     p, d, le = _clean_table(powers, distances, exposure_levels)
     _, _, lm = _clean_table(powers, distances, maximum_levels)
-    imp = impedance_adjustment(atmosphere.temperature, atmosphere.pressure)
+    imp = impedance_adjustment(
+        atmosphere.temperature_c, atmosphere.atmospheric_pressure_kpa
+    )
     total, seg_arr = _event_level_core(
         pts, obs, p, d, le, lm, float(reference_speed), imp, mounting, key, gr, lr, bk
     )
@@ -1471,7 +1473,9 @@ def noise_contour(
     p, d, le = _clean_table(powers, distances, exposure_levels)
     _, _, lm = _clean_table(powers, distances, maximum_levels)
     vref = float(reference_speed)
-    imp = impedance_adjustment(atmosphere.temperature, atmosphere.pressure)
+    imp = impedance_adjustment(
+        atmosphere.temperature_c, atmosphere.atmospheric_pressure_kpa
+    )
     # One vectorised pass per flight-path segment over the whole grid (the
     # per-point scalar loop is O(grid × segments) Python calls; this is
     # numerically identical, see _grid_event_levels).

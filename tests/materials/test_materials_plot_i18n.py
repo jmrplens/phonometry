@@ -81,7 +81,7 @@ def _measurement() -> materials.SoundAbsorptionMeasurement:
     t1 = np.array([7.8, 7.4, 6.9, 5.8, 4.6])
     t2 = np.array([6.5, 4.2, 2.85, 2.5, 2.7])
     return measure_sound_absorption(
-        freqs, t1, t2, volume=200.0, area=10.8, temperature=20.0
+        freqs, t1, t2, volume=200.0, area=10.8, temperature_c=20.0
     )
 
 

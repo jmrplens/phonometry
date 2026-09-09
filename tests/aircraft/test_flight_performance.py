@@ -252,7 +252,7 @@ def _assert_matches(
 @pytest.mark.parametrize("case", sorted(DEPARTURE_CASES))
 def test_departure_case_reproduces_every_profile_point(case: int) -> None:
     """Each Doc 29 Volume 3 departure case, point by point and column by column."""
-    aircraft_id, procedure, elevation, temperature, headwind, pressure = (
+    aircraft_id, procedure, elevation, temperature_c, headwind, pressure = (
         DEPARTURE_CASES[case]
     )
     profile = departure_profile(
@@ -261,7 +261,7 @@ def test_departure_case_reproduces_every_profile_point(case: int) -> None:
         weight_lb=DEFAULT_WEIGHTS[(aircraft_id, "D", "1")],
         aerodrome=Aerodrome(
             elevation_ft=elevation,
-            temperature_c=temperature,
+            temperature_c=temperature_c,
             sea_level_pressure_inhg=pressure,
             headwind_kt=headwind,
         ),
@@ -273,7 +273,7 @@ def test_departure_case_reproduces_every_profile_point(case: int) -> None:
 @pytest.mark.parametrize("case", sorted(ARRIVAL_CASES))
 def test_arrival_case_reproduces_every_profile_point(case: str) -> None:
     """Each Doc 29 Volume 3 arrival case, point by point and column by column."""
-    aircraft_id, procedure, elevation, temperature, headwind, pressure, _local = (
+    aircraft_id, procedure, elevation, temperature_c, headwind, pressure, _local = (
         ARRIVAL_CASES[case]
     )
     profile = approach_profile(
@@ -281,7 +281,7 @@ def test_arrival_case_reproduces_every_profile_point(case: str) -> None:
         _approach_steps(aircraft_id, procedure),
         aerodrome=Aerodrome(
             elevation_ft=elevation,
-            temperature_c=temperature,
+            temperature_c=temperature_c,
             sea_level_pressure_inhg=pressure,
             headwind_kt=headwind,
         ),
@@ -336,7 +336,7 @@ def test_climb_step_below_an_accelerate_step_is_skipped() -> None:
     that aims at 5500 ft is dropped and the profile is one point shorter than
     the procedure has steps. Without the rule the profile descends.
     """
-    aircraft_id, procedure, elevation, temperature, headwind, pressure = (
+    aircraft_id, procedure, elevation, temperature_c, headwind, pressure = (
         DEPARTURE_CASES[54]
     )
     steps = _departure_steps(aircraft_id, procedure)
@@ -346,7 +346,7 @@ def test_climb_step_below_an_accelerate_step_is_skipped() -> None:
         weight_lb=DEFAULT_WEIGHTS[(aircraft_id, "D", "1")],
         aerodrome=Aerodrome(
             elevation_ft=elevation,
-            temperature_c=temperature,
+            temperature_c=temperature_c,
             sea_level_pressure_inhg=pressure,
             headwind_kt=headwind,
         ),
@@ -363,7 +363,7 @@ def test_thrust_rating_change_inserts_a_transition_point() -> None:
     point for either, which is the asymmetry with an arrival, where a flap
     change alone calls for one.
     """
-    aircraft_id, procedure, elevation, temperature, headwind, pressure = (
+    aircraft_id, procedure, elevation, temperature_c, headwind, pressure = (
         DEPARTURE_CASES[82]
     )
     profile = departure_profile(
@@ -372,7 +372,7 @@ def test_thrust_rating_change_inserts_a_transition_point() -> None:
         weight_lb=DEFAULT_WEIGHTS[(aircraft_id, "D", "1")],
         aerodrome=Aerodrome(
             elevation_ft=elevation,
-            temperature_c=temperature,
+            temperature_c=temperature_c,
             sea_level_pressure_inhg=pressure,
             headwind_kt=headwind,
         ),

@@ -578,7 +578,7 @@ def test_diffuser_sound_power_counts_identical_devices() -> None:
     [
         ({"face_area": 0.0}, r"'face_area' must be positive"),
         ({"volume_flow": 0.0}, r"'volume_flow' must be positive"),
-        ({"pressure_drop": -1.0}, r"'pressure_drop' must be positive"),
+        ({"pressure_drop_pa": -1.0}, r"'pressure_drop_pa' must be positive"),
         ({"shape": "slot"}, r"'shape' must be one of"),
         ({"count": 0}, r"'count' must be a positive integer"),
         ({"count": 1.5}, "'count' must be a positive integer"),
@@ -589,7 +589,7 @@ def test_diffuser_sound_power_validation(kwargs: dict[str, object], match: str) 
         "frequencies": None,
         "face_area": 0.37,
         "volume_flow": 0.15,
-        "pressure_drop": 12.0,
+        "pressure_drop_pa": 12.0,
     }
     call.update(kwargs)
     with pytest.raises(ValueError, match=match):
@@ -706,11 +706,11 @@ def test_room_effect_two_dimensional_room_constant_raises() -> None:
 def test_fan_pressure_cannot_be_given_positionally() -> None:
     """The fan's pressure rise is not an ambient pressure, and the name says so.
 
-    ``static_pressure`` in the ISO 3740 family is an absolute ambient pressure
-    in kilopascals; this one is a gauge pressure rise in pascals. No guard can
-    separate them, because 101 325 Pa is a legitimate duty for a panel or
-    propeller fan, so only the name keeps them apart. Keyword-only is what
-    makes the name unavoidable.
+    ``static_pressure_kpa`` in the ISO 3740 family is an absolute ambient
+    pressure in kilopascals; this one is a gauge pressure rise in pascals. No
+    guard can separate them, because 101 325 Pa is a legitimate duty for a
+    panel or propeller fan, so only the name keeps them apart. Keyword-only is
+    what makes the name unavoidable.
     """
     with pytest.raises(TypeError, match="positional"):
         hvac.fan_sound_power(2.0, 500.0)  # type: ignore[misc]

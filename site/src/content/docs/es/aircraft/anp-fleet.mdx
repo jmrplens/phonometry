@@ -344,7 +344,8 @@ print(round(float(level.level), 1))    # 89.3 dB
 Un aeródromo, una atmósfera: la temperatura y la presión del campo llegan al
 ajuste de impedancia de Doc 29 igual que al modelo de actuaciones, de modo que
 un perfil volado a 35 °C no queda corregido para 15 °C por omisión.
-`temperature` y `pressure` siguen mandando cuando las dos difieren de verdad.
+`temperature_c` y `atmospheric_pressure_kpa` siguen mandando cuando las dos
+difieren de verdad.
 
 ## 5. Directo a un nivel de evento o un contorno
 
@@ -369,18 +370,19 @@ de depresión de la regla de segmento en viraje. $z$ es la altura del receptor
 sobre el terreno local, dejada en 0 en estos ejemplos, donde Doc 29 mide a
 1,2 m, normalmente una diferencia por debajo del decibelio.
 
-Tres argumentos deciden el resto, y dos de ellos son silenciosos. La métrica vale
-por defecto el nivel de exposición sonora, con `"LAmax"` disponible si se pide;
-la longitud de etapa vale por defecto 1, el tramo de distancia de viaje más corto
-y por tanto la subida más empinada y la huella más pequeña; y los opcionales
-`temperature` y `pressure` vuelven a referir los niveles tabulados desde la
-impedancia acústica específica de referencia al aire del aeródromo, y valen por
-defecto los 15 °C y 101,325 kPa de la atmósfera estándar. Ese último par es un
-término de contabilidad y no una corrección meteorológica: en la atmósfera
-estándar vale +0,07 dB, y rara vez pasa de unas décimas. Los niveles NPD siguen
-llevando dentro la absorción de la atmósfera a la que se redujeron, y la cadena
-no ofrece ninguna corrección de banda dependiente de la humedad, así que un
-aeródromo caluroso y seco no se modela pasándole su temperatura.
+Tres argumentos deciden el resto, y dos de ellos son silenciosos. La métrica
+vale por defecto el nivel de exposición sonora, con `"LAmax"` disponible si se
+pide; la longitud de etapa vale por defecto 1, el tramo de distancia de viaje
+más corto y por tanto la subida más empinada y la huella más pequeña; y los
+opcionales `temperature_c` y `atmospheric_pressure_kpa` vuelven a referir los
+niveles tabulados desde la impedancia acústica específica de referencia al aire
+del aeródromo, y valen por defecto los 15 °C y 101,325 kPa de la atmósfera
+estándar. Ese último par es un término de contabilidad y no una corrección
+meteorológica: en la atmósfera estándar vale +0,07 dB, y rara vez pasa de unas
+décimas. Los niveles NPD siguen llevando dentro la absorción de la atmósfera a
+la que se redujeron, y la cadena no ofrece ninguna corrección de banda
+dependiente de la humedad, así que un aeródromo caluroso y seco no se modela
+pasándole su temperatura.
 
 ```python
 from phonometry import aircraft

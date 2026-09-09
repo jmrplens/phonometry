@@ -104,7 +104,7 @@ $C_{3,4} = 10 \lg[1/(1 - U/c)^2]$, donde $c$ es la velocidad del sonido en el
 conducto de ensayo; el apartado 5.3.4.3 imprime 340 m/s "en condiciones
 normales", que es lo que usa `flow_modal_correction()` por su cuenta,
 mientras que una determinación completa conoce el aire del conducto y evalúa
-la Ec. 8 con el $c$ que da `temperature`, hasta 0,08 dB de diferencia en el
+la Ec. 8 con el $c$ que da `temperature_c`, hasta 0,08 dB de diferencia en el
 rango del apartado 1.1. Rige el mismo convenio de signos, así que es positiva
 en el lado de impulsión
 y negativa en el de aspiración, unas décimas de decibelio a las velocidades
@@ -197,7 +197,7 @@ c2 = np.array([0.0] * 11 + [0.2, 0.3, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5, 1.9,
 duct = emission.sound_power_in_duct(
     levels, freqs, duct_diameter=0.63, flow_velocity=12.0,
     shield="sampling-tube", microphone_correction=c1, shield_correction=c2,
-    temperature=20.0, static_pressure=101.325,
+    temperature_c=20.0, static_pressure_kpa=101.325,
 )
 print(round(float(duct.mean_pressure_level[5]), 1))       # 87.9 dB a 160 Hz
 print(round(float(duct.flow_modal_correction[13]), 2))    # C3,4 = 2.31 dB a 1 kHz
@@ -307,8 +307,8 @@ print(round(cone.sound_power_level_a, 1))                 # 86.6 dB(A)
 | `shield` | str | | `'sampling-tube'` (por defecto), `'nose-cone'`, `'foam-ball'` | Selecciona la Ec. 7 con el Anexo A o la Ec. 8, y el límite de velocidad |
 | `microphone_correction` | float o array 1D | dB | por defecto `0.0` | $C_1$ de los datos del fabricante |
 | `shield_correction` | float o array 1D | dB | por defecto `0.0` | $C_2$ medida según 5.3.3.2 c) o 5.3.4.2 |
-| `temperature` | float | °C | de −50 a 70, por defecto `20.0` | Aire del conducto; fija $c$ y $\rho$, y con ellos el $c$ de la Ec. 8 para las pantallas omnidireccionales |
-| `static_pressure` | float | kPa | por defecto `101.325` | Aire del conducto; fija $\rho$ |
+| `temperature_c` | float | °C | de −50 a 70, por defecto `20.0` | Aire del conducto; fija $c$ y $\rho$, y con ellos el $c$ de la Ec. 8 para las pantallas omnidireccionales |
+| `static_pressure_kpa` | float | kPa | por defecto `101.325` | Aire del conducto; fija $\rho$ |
 
 La función devuelve un `InDuctSoundPowerResult` con el $L_W$ por banda
 (`sound_power_level`), el total ponderado A del Anexo C

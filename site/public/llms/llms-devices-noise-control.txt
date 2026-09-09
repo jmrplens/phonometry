@@ -435,7 +435,7 @@ IN, CFM, IN_WG = 0.0254, 0.0004719474432, 249.0
 # The supply diffuser of Long's worked sheet: 24 x 24 in, 312 cfm, 0.05 in pd.
 print(np.round(noise_control.diffuser_sound_power(None, (24 * IN) ** 2,
                                                   volume_flow=312 * CFM,
-                                                  pressure_drop=0.05 * IN_WG).values, 1))
+                                                  pressure_drop_pa=0.05 * IN_WG).values, 1))
 # [ 33.4  32.4  29.1  23.6  15.9   5.9  -6.4 -21. ]
 # Long Table 14.9 prints 33/32/29/23/15/4/0/0 for that row.
 ```

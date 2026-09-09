@@ -74,12 +74,15 @@ Neither part defines a temperature/atmospheric normalisation of the result.
 ## airflow_resistance
 
 ```python
-airflow_resistance(pressure_drop: float, volume_flow_rate: float) -> float
+airflow_resistance(
+    pressure_drop_pa: float,
+    volume_flow_rate: float,
+) -> float
 ```
 
 Airflow resistance $R = \Delta p / q_v$ (ISO 9053-1:2018, 3.1).
 
-`pressure_drop` is the pressure difference $\Delta p$ across the
+`pressure_drop_pa` is the pressure difference $\Delta p$ across the
 specimen (Pa) and `volume_flow_rate` is the volumetric airflow rate
 `q_v` (m3/s). Returns `R` in Pa\*s/m3.
 
@@ -109,7 +112,7 @@ alternating_airflow_resistance(
     piston_stroke_termination: float,
     frequency: float,
     cavity_volume: float,
-    static_pressure: float = 101325.0,
+    static_pressure_pa: float = 101325.0,
     kappa_prime: float = 1.4,
     background_level: float | None = None,
 ) -> float
@@ -128,7 +131,7 @@ cavity sound pressure levels (dB) with the specimen cell and the airtight
 termination; `piston_stroke_specimen` (`h_s`) and
 `piston_stroke_termination` (`h_t`) the corresponding stroke amplitudes
 (m); `frequency` the piston frequency `f` (Hz, 1-4 Hz); `cavity_volume`
-the airtight-termination cavity volume `V` (m3); `static_pressure` the
+the airtight-termination cavity volume `V` (m3); `static_pressure_pa` the
 atmospheric pressure `P_S` (Pa, default 101325); `kappa_prime` the
 effective ratio of specific heats `kappa'`; `background_level` the optional
 cavity background level `L_pb` (dB) for the Formula (4) check. Returns `R` in
@@ -221,7 +224,7 @@ specific_airflow_resistance(
     resistance: float | None = None,
     area: float | None = None,
     *,
-    pressure_drop: float | None = None,
+    pressure_drop_pa: float | None = None,
     velocity: float | None = None,
 ) -> float
 ```
@@ -232,7 +235,7 @@ Two equivalent routes are accepted; supply exactly one:
 
 - `resistance` (`R`, Pa\*s/m3) and `area` (`A`, m2):
   $R_\mathrm{s} = R\,A$.
-- `pressure_drop` ($\Delta p$, Pa) and `velocity` (`u`, m/s):
+- `pressure_drop_pa` ($\Delta p$, Pa) and `velocity` (`u`, m/s):
   $R_\mathrm{s} = \Delta p / u$ (from $R_\mathrm{s} = R\,A$ with
   $u = q_v / A$).
 
@@ -243,7 +246,7 @@ The unit is pascal second per metre (Pa\*s/m), not Pa\*s/m2.
 ```python
 static_airflow_resistance(
     velocities: ArrayLike,
-    pressure_drops: ArrayLike,
+    pressure_drops_pa: ArrayLike,
     area: float,
     thickness: float | None = None,
     *,
@@ -259,7 +262,7 @@ $\Delta p = a u + b u^2$, and evaluates the resistances at
 `evaluation_velocity` (the clause 7.5 reference `0.5e-3 m/s` by default).
 
 `velocities` are the linear airflow velocities `u` (m/s) and
-`pressure_drops` the matching pressure differences $\Delta p$ (Pa)
+`pressure_drops_pa` the matching pressure differences $\Delta p$ (Pa)
 of at least two measurement steps; `area` is the cross-section `A` (m2)
 and `thickness` the specimen thickness `d` (m, optional, enabling
 `sigma`).
@@ -277,7 +280,7 @@ StaticAirflowResult(
     specific_resistance: float,
     resistivity: float | None,
     evaluation_velocity: float,
-    pressure_drop: float,
+    pressure_drop_pa: float,
     linear_coefficient: float,
     quadratic_coefficient: float,
 )
@@ -291,7 +294,7 @@ are evaluated at `evaluation_velocity` (m/s, the ISO 9053-1 clause 7.5
 reference 0.5 mm/s by default). `linear_coefficient` (`a`) and
 `quadratic_coefficient` (`b`) are the through-origin fit
 $\Delta p = a u + b u^2$ (clause 7.5); `a` is the zero-velocity
-specific airflow resistance (Pa\*s/m). `pressure_drop` is the fitted
+specific airflow resistance (Pa\*s/m). `pressure_drop_pa` is the fitted
 $\Delta p$ at `evaluation_velocity` (Pa).
 
 ### StaticAirflowResult.plot()
@@ -352,7 +355,7 @@ place (mm/s).
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `thickness` (the specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature`, `relative_humidity`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 9053-1 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `thickness` (the specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 9053-1 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the airflow-resistance fiche has a single body layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |

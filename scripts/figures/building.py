@@ -669,7 +669,7 @@ def generate_low_frequency_intensity(output_dir: str) -> None:
     twin = ax_ri.twinx()
     twin.plot(
         x,
-        result.surface_pressure_intensity,
+        result.surface_pressure_intensity_indicator,
         "-o",
         color=COLOR_TERTIARY,
         linewidth=2.4,
@@ -709,7 +709,7 @@ def generate_low_frequency_intensity(output_dir: str) -> None:
     # Right: Annex A. The calculated limp-panel curve, the 4,0 dB the annex
     # allows either side of it, and a measurement that stays inside.
     calculated = building.limp_panel_reduction_index(
-        freqs, surface_mass=10.0, area=10.0, temperature=23.0
+        freqs, surface_mass=10.0, area=10.0, temperature_c=23.0
     )
     measured = calculated + np.array([2.6, -1.8, 1.1, -2.9, 0.7, -1.4])
     xq = _band_index_axis(ax_qual, freqs)

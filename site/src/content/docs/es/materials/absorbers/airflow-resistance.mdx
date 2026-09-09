@@ -60,15 +60,15 @@ $$
 
 con $\Delta p$ la diferencia de presión a través de la probeta, $q_v$ el flujo
 volumétrico, $A$ la sección transversal y $d$ el espesor. Nótese que la
-resistencia específica al flujo de aire $R_\mathrm{s}$ está en **Pa·s/m** (no Pa·s/m²); la
-resistividad al flujo de aire $\sigma$ es $R_\mathrm{s}$ por metro de espesor. Dos
-funciones auxiliares recorren esa cadena desde lo que muestra realmente un
-instrumento: `linear_airflow_velocity(q_v, area)` es la definición
+resistencia específica al flujo de aire $R_\mathrm{s}$ está en **Pa·s/m** (no
+Pa·s/m²); la resistividad al flujo de aire $\sigma$ es $R_\mathrm{s}$ por metro
+de espesor. Dos funciones auxiliares recorren esa cadena desde lo que muestra
+realmente un instrumento: `linear_airflow_velocity(q_v, area)` es la definición
 $u = q_v/A$ del apartado 3.4 (un banco lee un flujo volumétrico en un
 rotámetro, nunca una velocidad), y `specific_airflow_resistance(resistance,
-area)` es el $R_\mathrm{s} = R\,A$ del apartado 3.2, que además admite la otra vía,
-`specific_airflow_resistance(pressure_drop=…, velocity=…)`, para un banco que
-registra $\Delta p$ y $u$ y nunca llega a formar $R$.
+area)` es el $R_\mathrm{s} = R\,A$ del apartado 3.2, que además admite la otra
+vía, `specific_airflow_resistance(pressure_drop_pa=…, velocity=…)`, para un
+banco que registra $\Delta p$ y $u$ y nunca llega a formar $R$.
 
 **En qué dirección debe ir el flujo.** $A$ se define como el área
 *perpendicular a la dirección del flujo*, y esa dirección es una elección, no
@@ -139,7 +139,7 @@ dp_fit = r.linear_coefficient * u_fit + r.quadratic_coefficient * u_fit**2
 fig, ax = plt.subplots()
 ax.plot(u_fit * 1e3, dp_fit, label="Ajuste por el origen  dp = a u + b u^2")
 ax.plot(u * 1e3, dp, "o", label="Caída de presión medida")
-ax.plot(r.evaluation_velocity * 1e3, r.pressure_drop, "D",
+ax.plot(r.evaluation_velocity * 1e3, r.pressure_drop_pa, "D",
         label="Evaluación a 0.5 mm/s")
 ax.set_xlabel("Velocidad lineal del flujo u [mm/s]")
 ax.set_ylabel("Caída de presión dp [Pa]")
@@ -172,7 +172,7 @@ r.plot()   # la figura de arriba: dp(u) ajustada con el punto de evaluación
 
 # El mismo R_s directamente desde la pareja que dan el manómetro y el rotámetro,
 # sin formar antes R (apartado 3.2, segunda forma de llamada).
-print(round(materials.specific_airflow_resistance(pressure_drop=8.1, velocity=0.5e-3)))
+print(round(materials.specific_airflow_resistance(pressure_drop_pa=8.1, velocity=0.5e-3)))
 ```
 
 Esos seis caudales son lo que necesita una celda de 100 mm para cubrir el rango
@@ -271,8 +271,8 @@ material, por lo que la ficha no lleva veredicto de conformidad.
 Usa el mismo contenedor `ReportMetadata` y el mismo motor de renderizado que las
 demás fichas. Los campos descriptivos que aplican aquí son `client`,
 `manufacturer`, `specimen`, `thickness` (el espesor de la probeta $d$, en metros,
-mostrado en milímetros), `test_room`, `test_date`, `temperature`,
-`relative_humidity`, `measurement_standard`, `laboratory`, `operator`,
+mostrado en milímetros), `test_room`, `test_date`, `temperature_c`,
+`relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`,
 `report_id` y `notes`. El campo `requirement` se ignora (la ISO 9053-1 no tiene
 veredicto). La ficha incrusta la curva ajustada, por lo que la generación
 necesita tanto reportlab como matplotlib

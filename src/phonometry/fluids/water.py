@@ -239,7 +239,7 @@ def _del_grosso(
 
 @overload
 def sea_water_sound_speed(
-    temperature: float,
+    temperature_c: float,
     salinity: float,
     depth: float,
     *,
@@ -250,7 +250,7 @@ def sea_water_sound_speed(
 
 @overload
 def sea_water_sound_speed(
-    temperature: ArrayLike,
+    temperature_c: ArrayLike,
     salinity: ArrayLike,
     depth: ArrayLike,
     *,
@@ -260,7 +260,7 @@ def sea_water_sound_speed(
 
 
 def sea_water_sound_speed(
-    temperature: ArrayLike,
+    temperature_c: ArrayLike,
     salinity: ArrayLike,
     depth: ArrayLike,
     *,
@@ -269,7 +269,7 @@ def sea_water_sound_speed(
 ) -> float | NDArray[np.float64]:
     """Speed of sound in sea water, in metres per second.
 
-    :param temperature: Temperature ``T``, in degrees Celsius.
+    :param temperature_c: Temperature ``T``, in degrees Celsius.
     :param salinity: Salinity ``S``, in parts per thousand (PSU).
     :param depth: Depth below the surface, in metres (``>= 0``).
     :param model: ``"unesco"`` (default), ``"del_grosso"``, ``"mackenzie"`` or
@@ -290,8 +290,8 @@ def sea_water_sound_speed(
         Ainslie's words) and drifts by a few m/s against the UNESCO standard
         away from mid-range temperatures and shallow depths.
     """
-    scalar = np.isscalar(temperature) and np.isscalar(salinity) and np.isscalar(depth)
-    t = require_above_absolute_zero_array(temperature, "temperature")
+    scalar = np.isscalar(temperature_c) and np.isscalar(salinity) and np.isscalar(depth)
+    t = require_above_absolute_zero_array(temperature_c, "temperature_c")
     s = require_finite_array(salinity, "salinity")
     z = require_finite_array(depth, "depth")
     t, s, z = np.broadcast_arrays(t, s, z)

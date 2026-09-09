@@ -755,7 +755,7 @@ from phonometry import underwater
 # 10 kHz at 10 °C, 35 ppt, 100 m depth; practical spreading with R0 = 1000 m.
 ranges = np.linspace(10.0, 20_000.0, 400)
 pl = underwater.propagation_loss(ranges, 10e3, law="practical",
-                                  transition_range=1000.0, temperature=10.0,
+                                  transition_range=1000.0, temperature_c=10.0,
                                   salinity=35.0, depth=100.0)
 print(f"alpha = {pl.absorption_coefficient:.2f} dB/km")   # alpha = 0.95 dB/km
 pl.plot()   # total PL with the spreading and absorption contributions
@@ -770,13 +770,13 @@ from phonometry import underwater
 
 # Absorption coefficient at 10 kHz, 10 °C, 35 ppt, 100 m, pH 8 (dB/km).
 # seawater_absorption accepts scalar or array frequencies and returns an array.
-alpha = underwater.seawater_absorption(10e3, temperature=10.0, salinity=35.0,
+alpha = underwater.seawater_absorption(10e3, temperature_c=10.0, salinity=35.0,
                                depth=100.0, model="francois-garrison")[0]
 print(f"α = {alpha:.3f} dB/km")
 
 ranges = np.linspace(10.0, 20_000.0, 400)
 pl = underwater.propagation_loss(ranges, 10e3, law="practical", transition_range=1000.0,
-                          temperature=10.0, salinity=35.0, depth=100.0)
+                          temperature_c=10.0, salinity=35.0, depth=100.0)
 print(pl.absorption_coefficient, pl.pl[-1])
 pl.plot()   # PL vs range with the spreading/absorption split (needs matplotlib)
 ```

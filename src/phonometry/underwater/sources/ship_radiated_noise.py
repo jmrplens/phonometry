@@ -58,19 +58,19 @@ _UNCERTAINTY_LOW_BAND_MAX_HZ = 100.0
 _UNCERTAINTY_MID_BAND_MAX_HZ = 16000.0
 
 
-def radiated_noise_level(rms_pressure: float, distance: float) -> float:
+def radiated_noise_level(rms_pressure_pa: float, distance: float) -> float:
     r"""Radiated noise level ``LRN`` (ISO 17208-1), dB re 1 µPa·m.
 
     :math:`L_{\mathrm{RN}} = 20 \log_{10}(p_{\mathrm{rms}}/p_0) + 20 \log_{10}(r/r_0)` --
     the level of the product of the far-field RMS sound pressure and the
     source distance, referred to 1 µPa·m.
 
-    :param rms_pressure: Far-field RMS sound pressure ``p_rms``, in Pa.
+    :param rms_pressure_pa: Far-field RMS sound pressure ``p_rms``, in Pa.
     :param distance: Distance ``r`` from the ship reference point, in m.
     :return: Radiated noise level, in dB re 1 µPa·m.
     :raises ValueError: If the pressure or distance is not positive.
     """
-    p = _positive(rms_pressure, "rms_pressure")
+    p = _positive(rms_pressure_pa, "rms_pressure_pa")
     r = _positive(distance, "distance")
     return float(
         20.0 * np.log10(p / UNDERWATER_REFERENCE_PRESSURE)

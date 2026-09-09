@@ -456,8 +456,8 @@ class AnpAircraft:
         aerodrome: Aerodrome | None = None,
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",
-        temperature: float | None = None,
-        pressure: float | None = None,
+        temperature_c: float | None = None,
+        atmospheric_pressure_kpa: float | None = None,
     ) -> FlyoverResult:
         """Single-event level at a receiver (see :meth:`AnpDatabase.event_level`)."""
         return self._database.event_level(
@@ -467,8 +467,8 @@ class AnpAircraft:
             aerodrome=aerodrome,
             stage_length=stage_length,
             metric=metric,
-            temperature=temperature,
-            pressure=pressure,
+            temperature_c=temperature_c,
+            atmospheric_pressure_kpa=atmospheric_pressure_kpa,
         )
 
     def noise_contour(
@@ -480,8 +480,8 @@ class AnpAircraft:
         aerodrome: Aerodrome | None = None,
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",
-        temperature: float | None = None,
-        pressure: float | None = None,
+        temperature_c: float | None = None,
+        atmospheric_pressure_kpa: float | None = None,
     ) -> NoiseContourResult:
         """Single-event ground contour (see :meth:`AnpDatabase.noise_contour`)."""
         return self._database.noise_contour(
@@ -492,8 +492,8 @@ class AnpAircraft:
             aerodrome=aerodrome,
             stage_length=stage_length,
             metric=metric,
-            temperature=temperature,
-            pressure=pressure,
+            temperature_c=temperature_c,
+            atmospheric_pressure_kpa=atmospheric_pressure_kpa,
         )
 
 
@@ -1024,8 +1024,8 @@ class AnpDatabase:
         aerodrome: Aerodrome | None = None,
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",
-        temperature: float | None = None,
-        pressure: float | None = None,
+        temperature_c: float | None = None,
+        atmospheric_pressure_kpa: float | None = None,
     ) -> FlyoverResult:
         """Doc 29 single-event level of an ANP aircraft at a receiver.
 
@@ -1041,10 +1041,10 @@ class AnpDatabase:
             steps, so for them this is not an alternative but the only way in.
         :param stage_length: ANP stage length (default 1).
         :param metric: ``"exposure"`` (SEL) or ``"maximum"`` (LAmax).
-        :param temperature: Air temperature at the field, in °C, for the
+        :param temperature_c: Air temperature at the field, in °C, for the
             atmospheric impedance adjustment. Left unset it follows
             *aerodrome*, or the standard atmosphere when there is none.
-        :param pressure: Air pressure at the field, in kPa, likewise.
+        :param atmospheric_pressure_kpa: Air pressure at the field, in kPa, likewise.
         :return: A :class:`~phonometry.aircraft.airport_noise.FlyoverResult`.
         """
         acft, prof, p, d, sel, lmax = self._doc29_inputs(
@@ -1059,7 +1059,9 @@ class AnpDatabase:
             lmax,
             mounting=acft.mounting,
             metric=metric,
-            atmosphere=_impedance_atmosphere(aerodrome, temperature, pressure),
+            atmosphere=_impedance_atmosphere(
+                aerodrome, temperature_c, atmospheric_pressure_kpa
+            ),
             segments=FlightSegmentState(
                 ground_roll=prof.ground_roll, landing_roll=prof.landing_roll
             ),
@@ -1075,8 +1077,8 @@ class AnpDatabase:
         aerodrome: Aerodrome | None = None,
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",
-        temperature: float | None = None,
-        pressure: float | None = None,
+        temperature_c: float | None = None,
+        atmospheric_pressure_kpa: float | None = None,
     ) -> NoiseContourResult:
         """Doc 29 single-event ground contour of an ANP aircraft.
 
@@ -1093,10 +1095,10 @@ class AnpDatabase:
             steps, so for them this is not an alternative but the only way in.
         :param stage_length: ANP stage length (default 1).
         :param metric: ``"exposure"`` (SEL) or ``"maximum"`` (LAmax).
-        :param temperature: Air temperature at the field, in °C, for the
+        :param temperature_c: Air temperature at the field, in °C, for the
             atmospheric impedance adjustment. Left unset it follows
             *aerodrome*, or the standard atmosphere when there is none.
-        :param pressure: Air pressure at the field, in kPa, likewise.
+        :param atmospheric_pressure_kpa: Air pressure at the field, in kPa, likewise.
         :return: A :class:`~phonometry.aircraft.airport_noise.NoiseContourResult`.
         """
         acft, prof, p, d, sel, lmax = self._doc29_inputs(
@@ -1112,7 +1114,9 @@ class AnpDatabase:
             y=y,
             mounting=acft.mounting,
             metric=metric,
-            atmosphere=_impedance_atmosphere(aerodrome, temperature, pressure),
+            atmosphere=_impedance_atmosphere(
+                aerodrome, temperature_c, atmospheric_pressure_kpa
+            ),
             segments=FlightSegmentState(
                 ground_roll=prof.ground_roll, landing_roll=prof.landing_roll
             ),
@@ -1120,7 +1124,9 @@ class AnpDatabase:
 
 
 def _impedance_atmosphere(
-    aerodrome: Aerodrome | None, temperature: float | None, pressure: float | None
+    aerodrome: Aerodrome | None,
+    temperature_c: float | None,
+    atmospheric_pressure_kpa: float | None,
 ) -> AerodromeAtmosphere:
     """Conditions for the Doc 29 atmospheric impedance adjustment.
 
@@ -1137,15 +1143,17 @@ def _impedance_atmosphere(
     """
     if aerodrome is None:
         return AerodromeAtmosphere(
-            15.0 if temperature is None else temperature,
-            _STANDARD_PRESSURE_KPA if pressure is None else pressure,
+            15.0 if temperature_c is None else temperature_c,
+            _STANDARD_PRESSURE_KPA
+            if atmospheric_pressure_kpa is None
+            else atmospheric_pressure_kpa,
         )
     at_field_kpa = (
         aerodrome.pressure_ratio(aerodrome.elevation_ft) * _STANDARD_PRESSURE_KPA
     )
     return AerodromeAtmosphere(
-        aerodrome.temperature_c if temperature is None else temperature,
-        at_field_kpa if pressure is None else pressure,
+        aerodrome.temperature_c if temperature_c is None else temperature_c,
+        at_field_kpa if atmospheric_pressure_kpa is None else atmospheric_pressure_kpa,
     )
 
 

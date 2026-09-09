@@ -351,7 +351,7 @@ def detection_range(
     *,
     law: str = "spherical",
     transition_range: float | None = None,
-    temperature: float = 10.0,
+    temperature_c: float = 10.0,
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
@@ -373,7 +373,7 @@ def detection_range(
     :param law: Spreading law (see
         :func:`~phonometry.underwater.propagation.spreading_loss`).
     :param transition_range: Transition range for the ``"practical"`` law, in m.
-    :param temperature: Temperature ``T``, in degrees Celsius.
+    :param temperature_c: Temperature ``T``, in degrees Celsius.
     :param salinity: Salinity ``S``, in parts per thousand.
     :param depth: Depth, in metres.
     :param ph: Acidity (default 8).
@@ -398,7 +398,7 @@ def detection_range(
         raise ValueError(msg)
     options = {
         "law": law,
-        "temperature": temperature,
+        "temperature_c": temperature_c,
         "salinity": salinity,
         "depth": depth,
         "ph": ph,

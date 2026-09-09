@@ -143,9 +143,9 @@ CAPACITY_SCALE_CONSTANTS = {'Cv': 1.17, 'Kv': 1.0}
 ```python
 cavitation_differential(
     *,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    vapour_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
+    vapour_pressure_pa: float,
     pressure_recovery: float,
 ) -> float
 ```
@@ -168,9 +168,9 @@ and no inequality; the minimum is what it means.
 
 | Name | Description |
 | :--- | :--- |
-| `inlet_pressure` | $p_1$, absolute, in Pa. |
-| `outlet_pressure` | $p_2$, absolute, in Pa. |
-| `vapour_pressure` | $p_v$, absolute, in Pa. |
+| `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
+| `outlet_pressure_pa` | $p_2$, absolute, in Pa. |
+| `vapour_pressure_pa` | $p_v$, absolute, in Pa. |
 | `pressure_recovery` | $F_L$ of the valve, dimensionless. |
 
 **Returns:** $\Delta p_c$, in Pa.
@@ -403,7 +403,7 @@ stage is absorbed inside the trim.
 ```python
 corrected_incipient_ratio(
     incipient_ratio: float,
-    inlet_pressure: float,
+    inlet_pressure_pa: float,
 ) -> float
 ```
 
@@ -433,7 +433,7 @@ later.
 | Name | Description |
 | :--- | :--- |
 | `incipient_ratio` | $x_{Fz}$ at 6 × 10⁵ Pa, measured or from [`incipient_cavitation_ratio`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#incipient_cavitation_ratio). |
-| `inlet_pressure` | $p_1$, absolute, in Pa. |
+| `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
 
 **Returns:** $x_{Fzp1}$, dimensionless.
 
@@ -448,9 +448,9 @@ later.
 ```python
 differential_pressure_ratio(
     *,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    vapour_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
+    vapour_pressure_pa: float,
 ) -> float
 ```
 
@@ -468,9 +468,9 @@ far towards flashing this operating point is, and 1 is the whole way.
 
 | Name | Description |
 | :--- | :--- |
-| `inlet_pressure` | $p_1$, absolute, in Pa. |
-| `outlet_pressure` | $p_2$, absolute, in Pa. |
-| `vapour_pressure` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
+| `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
+| `outlet_pressure_pa` | $p_2$, absolute, in Pa. |
+| `vapour_pressure_pa` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
 
 **Returns:** $x_F$, dimensionless.
 
@@ -649,8 +649,8 @@ jet_strouhal_number(
     corrected_ratio: float,
     valve_diameter: float,
     seat_diameter: float,
-    inlet_pressure: float,
-    vapour_pressure: float,
+    inlet_pressure_pa: float,
+    vapour_pressure_pa: float,
     coefficient: str = 'Cv',
     form: str = 'annex',
 ) -> float
@@ -683,8 +683,8 @@ and comes out anywhere between about 0,2 and 0,5.
 | `corrected_ratio` | $x_{Fzp1}$ of Equation (3c). |
 | `valve_diameter` | $d$, the valve inlet internal diameter, in m. |
 | `seat_diameter` | $d_o$, the seat or orifice diameter, in m. |
-| `inlet_pressure` | $p_1$, absolute, in Pa. |
-| `vapour_pressure` | $p_v$, absolute, in Pa. |
+| `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
+| `vapour_pressure_pa` | $p_v$, absolute, in Pa. |
 | `coefficient` | `"Cv"` or `"Kv"`, selecting $N_{34}$. |
 | `form` | Which printing of Equation (12) to use, `"annex"` or `"clause"`. |
 
@@ -701,9 +701,9 @@ and comes out anywhere between about 0,2 and 0,5.
 ```python
 last_stage_differential(
     *,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    vapour_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
+    vapour_pressure_pa: float,
     corrected_ratio: float,
 ) -> float
 ```
@@ -725,9 +725,9 @@ the cap says so.
 
 | Name | Description |
 | :--- | :--- |
-| `inlet_pressure` | $p_{1,n}$ of the last stage, in Pa. |
-| `outlet_pressure` | $p_2$ at the valve outlet, in Pa. |
-| `vapour_pressure` | $p_v$, in Pa. |
+| `inlet_pressure_pa` | $p_{1,n}$ of the last stage, in Pa. |
+| `outlet_pressure_pa` | $p_2$ at the valve outlet, in Pa. |
+| `vapour_pressure_pa` | $p_v$, in Pa. |
 | `corrected_ratio` | $x_{Fzp1,n}$ of the last stage. |
 
 **Returns:** $\Delta p_c$, in Pa.
@@ -807,9 +807,9 @@ The pipe the noise comes out of, and the air around it.
 ```python
 LiquidStream(
     mass_flow: float,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    vapour_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
+    vapour_pressure_pa: float,
     density: float,
     sound_speed: float,
 )
@@ -822,9 +822,9 @@ The liquid and the operating point, which Clause 4.1 reads first.
 | Name | Description |
 | :--- | :--- |
 | `mass_flow` | $\dot m$, in kg/s. |
-| `inlet_pressure` | $p_1$, absolute, in Pa. |
-| `outlet_pressure` | $p_2$, absolute, in Pa. |
-| `vapour_pressure` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
+| `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
+| `outlet_pressure_pa` | $p_2$, absolute, in Pa. |
+| `vapour_pressure_pa` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
 | `density` | $\rho_L$, in kg/m³. |
 | `sound_speed` | $c_L$, in m/s. |
 
@@ -1029,9 +1029,9 @@ out at −44,7 dB.
 ```python
 stage_conditions(
     *,
-    inlet_pressure: float,
-    outlet_pressure: float,
-    vapour_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
+    vapour_pressure_pa: float,
     stage_coefficients: Sequence[float],
     flow_coefficient: float,
 ) -> tuple[StageConditions, ...]
@@ -1061,9 +1061,9 @@ see `docs/ERRATA.md`.
 
 | Name | Description |
 | :--- | :--- |
-| `inlet_pressure` | $p_1$ at the valve, absolute, in Pa. |
-| `outlet_pressure` | $p_2$ at the valve, absolute, in Pa. |
-| `vapour_pressure` | $p_v$, absolute, in Pa. |
+| `inlet_pressure_pa` | $p_1$ at the valve, absolute, in Pa. |
+| `outlet_pressure_pa` | $p_2$ at the valve, absolute, in Pa. |
+| `vapour_pressure_pa` | $p_v$, absolute, in Pa. |
 | `stage_coefficients` | $C_i$, the rated flow coefficient of each stage in flow order, two or more of them. |
 | `flow_coefficient` | $C$ of the whole valve, in the same units. |
 
@@ -1080,8 +1080,8 @@ see `docs/ERRATA.md`.
 
 ```python
 StageConditions(
-    inlet_pressure: float,
-    outlet_pressure: float,
+    inlet_pressure_pa: float,
+    outlet_pressure_pa: float,
     pressure_ratio: float,
 )
 ```
@@ -1092,8 +1092,8 @@ What one throttling stage of a multistage trim sees.
 
 | Name | Description |
 | :--- | :--- |
-| `inlet_pressure` | $p_{1,i}$ of Equations (23a) and (23b), in Pa. |
-| `outlet_pressure` | $p_{2,i}$ of Equations (24a) and (24b), in Pa. |
+| `inlet_pressure_pa` | $p_{1,i}$ of Equations (23a) and (23b), in Pa. |
+| `outlet_pressure_pa` | $p_{2,i}$ of Equations (24a) and (24b), in Pa. |
 | `pressure_ratio` | $x_{F,i}$ of Equation (26), the stage's own differential pressure ratio, which 6.3 tests against that stage's $x_{Fzp1,i}$. |
 
 ## STROUHAL_CONSTANTS

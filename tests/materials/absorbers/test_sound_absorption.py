@@ -154,16 +154,16 @@ def test_two_temperature_correction_eq8() -> None:
     c1, c2 = _speed_of_sound(18.0), _speed_of_sound(22.0)
     expected_at = 55.3 * v * (1.0 / (c2 * t2) - 1.0 / (c1 * t1))
     alpha = materials.absorption_coefficient(
-        t1, t2, v, s, temperature1=18.0, temperature2=22.0
+        t1, t2, v, s, temperature1_c=18.0, temperature2_c=22.0
     )
     assert float(np.asarray(alpha)) == pytest.approx(expected_at / s, abs=1e-9)
 
 
 def test_temperature2_defaults_to_temperature1() -> None:
     v, s = 200.0, 10.0
-    a = materials.absorption_coefficient(5.0, 3.0, v, s, temperature1=25.0)
+    a = materials.absorption_coefficient(5.0, 3.0, v, s, temperature1_c=25.0)
     b = materials.absorption_coefficient(
-        5.0, 3.0, v, s, temperature1=25.0, temperature2=25.0
+        5.0, 3.0, v, s, temperature1_c=25.0, temperature2_c=25.0
     )
     assert float(np.asarray(a)) == pytest.approx(float(np.asarray(b)))
 
@@ -327,19 +327,19 @@ def test_negative_t1_raises() -> None:
 def test_temperature_outside_eq6_range_warns() -> None:
     # Eq. (6) is valid 15..30 degC; outside that range we still compute but warn.
     with pytest.warns(materials.AbsorptionWarning):
-        materials.absorption_area(3.0, 200.0, temperature=5.0)
+        materials.absorption_area(3.0, 200.0, temperature_c=5.0)
 
 
 def test_temperature_below_absolute_zero_raises() -> None:
     # Below -273,15 degC Eq. (6) would hand back a non-positive speed of
     # sound; the refusal is a hard error, not the out-of-range advisory.
-    with pytest.raises(ValueError, match="'temperature' must be finite and above"):
-        materials.absorption_area(3.0, 200.0, temperature=-600.0)
+    with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
+        materials.absorption_area(3.0, 200.0, temperature_c=-600.0)
 
 
 def test_nan_temperature_raises() -> None:
-    with pytest.raises(ValueError, match="'temperature' must be finite and above"):
-        materials.absorption_area(3.0, 200.0, temperature=float("nan"))
+    with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
+        materials.absorption_area(3.0, 200.0, temperature_c=float("nan"))
 
 
 def test_nan_speed_of_sound_raises() -> None:
@@ -368,7 +368,7 @@ def test_non_positive_speed_of_sound_raises() -> None:
 def test_no_temperature_warning_when_speed_supplied() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        materials.absorption_area(3.0, 200.0, temperature=5.0, speed_of_sound=340.0)
+        materials.absorption_area(3.0, 200.0, temperature_c=5.0, speed_of_sound=340.0)
 
 
 # --- Synergy with room_parameters -------------------------------------------
@@ -475,8 +475,8 @@ def _measurement() -> materials.SoundAbsorptionMeasurement:
         _T2,
         volume=200.0,
         area=10.8,
-        temperature=20.0,
-        humidity=54.0,
+        temperature_c=20.0,
+        relative_humidity_percent=54.0,
     )
 
 
@@ -488,7 +488,7 @@ def test_measurement_speed_of_sound_from_eq6() -> None:
 def test_measurement_alpha_s_matches_absorption_coefficient() -> None:
     # The result must reuse the validated Eq. (8)/(9) path, not re-derive it.
     res = _measurement()
-    ref = materials.absorption_coefficient(_T1, _T2, 200.0, 10.8, temperature1=20.0)
+    ref = materials.absorption_coefficient(_T1, _T2, 200.0, 10.8, temperature1_c=20.0)
     np.testing.assert_allclose(res.alpha_s, np.asarray(ref), rtol=0, atol=1e-12)
 
 
@@ -521,40 +521,53 @@ def test_measurement_carries_conditions() -> None:
     res = _measurement()
     assert res.volume == 200.0
     assert res.area == 10.8
-    assert res.temperature == 20.0
-    assert res.humidity == 54.0
+    assert res.temperature_c == 20.0
+    assert res.relative_humidity_percent == 54.0
     np.testing.assert_array_equal(res.frequencies, _FREQS)
     np.testing.assert_allclose(res.air_attenuation, np.zeros_like(_FREQS))
 
 
 def test_measurement_negative_humidity_raises() -> None:
-    with pytest.raises(ValueError, match=r"'humidity' must be within \[0, 100\]"):
+    with pytest.raises(
+        ValueError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
+    ):
         materials.measure_sound_absorption(
-            _FREQS, _T1, _T2, volume=200.0, area=10.8, humidity=-40.0
+            _FREQS, _T1, _T2, volume=200.0, area=10.8, relative_humidity_percent=-40.0
         )
 
 
 def test_measurement_humidity_above_saturation_raises() -> None:
-    with pytest.raises(ValueError, match=r"'humidity' must be within \[0, 100\]"):
+    with pytest.raises(
+        ValueError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
+    ):
         materials.measure_sound_absorption(
-            _FREQS, _T1, _T2, volume=200.0, area=10.8, humidity=150.0
+            _FREQS, _T1, _T2, volume=200.0, area=10.8, relative_humidity_percent=150.0
         )
 
 
 def test_measurement_non_numeric_humidity_raises_by_name() -> None:
     # Not float()'s anonymous "could not convert string to float".
-    with pytest.raises(ValueError, match=r"'humidity' must be within \[0, 100\]"):
+    with pytest.raises(
+        ValueError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
+    ):
         materials.measure_sound_absorption(
-            _FREQS, _T1, _T2, volume=200.0, area=10.8, humidity="wet"
+            _FREQS, _T1, _T2, volume=200.0, area=10.8, relative_humidity_percent="wet"
         )
 
 
 def test_measurement_one_element_array_humidity_raises_by_name() -> None:
     # float() refuses a 1-d array with TypeError, not ValueError; the guard
     # renames that failure too instead of dying inside float().
-    with pytest.raises(ValueError, match=r"'humidity' must be within \[0, 100\]"):
+    with pytest.raises(
+        ValueError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
+    ):
         materials.measure_sound_absorption(
-            _FREQS, _T1, _T2, volume=200.0, area=10.8, humidity=np.array([54.0])
+            _FREQS,
+            _T1,
+            _T2,
+            volume=200.0,
+            area=10.8,
+            relative_humidity_percent=np.array([54.0]),
         )
 
 
@@ -562,7 +575,7 @@ def test_measurement_air_attenuation_reduces_area() -> None:
     # A non-zero m subtracts the 4 V m term (Eq. (5)/(7)).
     m = 1e-3
     res = materials.measure_sound_absorption(
-        _FREQS, _T1, _T2, volume=200.0, area=10.8, temperature=20.0, m=m
+        _FREQS, _T1, _T2, volume=200.0, area=10.8, temperature_c=20.0, m=m
     )
     expected_a1 = 55.3 * 200.0 / (343.0 * _T1) - 4.0 * 200.0 * m
     np.testing.assert_allclose(res.absorption_area_empty, expected_a1)
@@ -591,7 +604,7 @@ def test_measurement_small_room_warns_once() -> None:
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         materials.measure_sound_absorption(
-            _FREQS, _T1, _T2, volume=100.0, area=10.8, temperature=20.0
+            _FREQS, _T1, _T2, volume=100.0, area=10.8, temperature_c=20.0
         )
     volume_warnings = [
         w
@@ -606,7 +619,7 @@ def test_measurement_temperature_out_of_range_warns_once() -> None:
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         materials.measure_sound_absorption(
-            _FREQS, _T1, _T2, volume=200.0, area=10.8, temperature=5.0
+            _FREQS, _T1, _T2, volume=200.0, area=10.8, temperature_c=5.0
         )
     temp_warnings = [
         w

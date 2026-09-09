@@ -314,7 +314,7 @@ class FloorCoveringImprovementResult:
             measured frequency range. The applicable descriptive fields are
             ``client``, ``manufacturer``, ``specimen`` (the floor covering under
             test), ``mounting``, ``mass_per_area``, ``test_room``,
-            ``test_date``, ``temperature``, ``pressure``,
+            ``test_date``, ``temperature_c``, ``pressure``,
             ``measurement_standard``, ``laboratory``, ``operator``,
             ``report_id`` and ``notes``. The bare reference floor is the
             standardised heavyweight floor of ISO 717-2:2020 Table 4, fixed by

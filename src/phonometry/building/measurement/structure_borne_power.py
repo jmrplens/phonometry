@@ -326,7 +326,7 @@ class StructureBornePowerResult:
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header (``client``, ``specimen`` the source equipment,
             ``test_room`` the test environment, ``instrumentation``,
-            ``temperature``, ``relative_humidity``, ``pressure``,
+            ``temperature_c``, ``relative_humidity_percent``, ``pressure``,
             ``test_date``), the footer identity (``laboratory``, ``operator``,
             ``report_id``, ``notes``) and, via ``requirement``, a declared
             upper limit on the total ``L_Ws`` (lower is better). The plate mass

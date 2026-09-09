@@ -1047,7 +1047,7 @@ print(np.round(ten_seconds.sound_energy_level - steady.sound_power_level, 6))   
 
 # Annex G: a determination at 1 200 m and 8 C carried to 101.325 kPa and 23 C (Eq. G.3).
 corr = emission.reference_atmosphere_correction(8.0, altitude=1200.0)
-print(round(corr.static_pressure, 1), round(corr.total, 2))   # 87.7 kPa, C1 + C2 = 0.68 dB
+print(round(corr.static_pressure_kpa, 1), round(corr.total, 2))   # 87.7 kPa, C1 + C2 = 0.68 dB
 lj_ref = burst.sound_energy_level + corr.total
 
 burst.plot()   # LJ per band, LJA in the title (needs matplotlib)
@@ -1225,7 +1225,7 @@ t60 = np.full(freqs.size, 2.0)
 
 rev = emission.sound_power_reverberation(
     lp, t60, volume=200.0, surface_area=220.0, frequencies=freqs,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 print(round(rev.speed_of_sound, 1))                     # c = 343.2 m/s
 print(round(float(rev.absorption_area[0]), 1))          # A = 16.1 m^2 at 100 Hz
@@ -1236,7 +1236,7 @@ print(round(rev.sound_power_level_a, 1))                # LWA = 92.1 dB
 # Comparison method: a reference source of known LW measured at the same spots.
 lw_rss = np.full(freqs.size, 85.0)
 lp_rss = np.linspace(78.0, 69.0, freqs.size)
-cmp = emission.sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature=20.0)
+cmp = emission.sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature_c=20.0)
 print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 
 rev.plot()   # reverberation-room LW spectrum, LWA in the title (needs matplotlib)
@@ -1264,7 +1264,7 @@ lp = np.linspace(80.0, 70.0, freqs.size)
 t60 = np.full(freqs.size, 2.0)
 rev = emission.sound_power_reverberation(
     lp, t60, volume=200.0, surface_area=220.0, frequencies=freqs,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 
 # rev is the ReverberationSoundPowerResult computed above. One line:
@@ -1309,12 +1309,12 @@ counterpart of $L_W$ defined in the same clauses, is section 3.
 | `surface_area` | float | m² | > 0 | Total room surface $S$ (Waterhouse, $A/S$) |
 | `frequencies` | 1D array | Hz | one per band | Required (Waterhouse needs $f$); enables $L_{W\mathrm{A}}$ |
 | `background_levels` | 1D or 2D array | dB | matches `levels` | $K_{1i}$ per microphone position (Eq. 14/15, before the Eq. 16 average; frequency-dependent criterion) |
-| `temperature` | float | °C | default `23.0` | Sets $c$, $C_1$, $C_2$ |
-| `static_pressure` | float | kPa | default `101.325` | Sets $C_1$, $C_2$ |
+| `temperature_c` | float | °C | default `23.0` | Sets $c$, $C_1$, $C_2$ |
+| `static_pressure_kpa` | float | kPa | default `101.325` | Sets $C_1$, $C_2$ |
 
 `sound_power_comparison(levels, levels_ref, lw_ref, *, frequencies=None,
-background_levels=…, background_levels_ref=…, temperature=23.0,
-static_pressure=101.325)` takes the same room levels plus the reference
+background_levels=…, background_levels_ref=…, temperature_c=23.0,
+static_pressure_kpa=101.325)` takes the same room levels plus the reference
 source's levels and known power.
 
 | Parameter | Type | Units | Range / default | Notes |
@@ -1363,7 +1363,7 @@ freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], float)
 lp = np.array([80.0, 83.0, 85.0, 84.0, 80.0, 75.0, 68.0])
 res = emission.sound_power_reverberation(
     lp, 2.0, volume=200.0, surface_area=240.0, frequencies=freqs,
-    temperature=20.0, static_pressure=101.325,
+    temperature_c=20.0, static_pressure_kpa=101.325,
 )
 
 res.report(
@@ -1449,7 +1449,7 @@ slams = slam + rng.normal(0.0, 0.6, size=(5, 6, thirds.size))
 slam_lj = emission.sound_energy_reverberation(
     slams, t60_thirds, volume=200.0, surface_area=220.0, frequencies=thirds,
     background_levels=np.full(thirds.size, 45.0),   # time-averaged over the same 4 s
-    integration_time=4.0, temperature=20.0, static_pressure=101.0,
+    integration_time=4.0, temperature_c=20.0, static_pressure_kpa=101.0,
 )
 print(slam_lj.events, slam_lj.method)                    # 5 direct
 print(np.round(slam_lj.sound_energy_level[:3], 1))       # [96.  94.9 94.2] dB re 1 pJ
@@ -1457,7 +1457,7 @@ print(round(slam_lj.sound_energy_level_a, 1))            # LJA = 99.0 dB(A)
 
 # Comparison method: the reference source of section 1, run steadily.
 slam_cmp = emission.sound_energy_comparison(
-    slams, lp_rss, lw_rss, frequencies=thirds, temperature=20.0,
+    slams, lp_rss, lw_rss, frequencies=thirds, temperature_c=20.0,
 )
 print(round(float(slam_cmp.sound_energy_level[0]), 1), slam_cmp.method)   # 95.0 comparison
 
@@ -1467,11 +1467,11 @@ print(octaves)                        # [ 125.  250.  500. 1000. 2000. 4000. 800
 lp_thirds = np.linspace(80.0, 70.0, thirds.size)     # the mean room SPL of section 1
 steady = emission.sound_power_reverberation(
     lp_thirds, t60_thirds, volume=200.0, surface_area=220.0, frequencies=thirds,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 ten_seconds = emission.sound_energy_reverberation(
     lp_thirds + 10.0, t60_thirds, volume=200.0, surface_area=220.0, frequencies=thirds,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 print(np.round(ten_seconds.sound_energy_level - steady.sound_power_level, 6)[:3])   # 10.0
 
@@ -1717,8 +1717,8 @@ print(round(two.sound_power_level_a, 1))        # 96.5 dB(A)
 | `frequencies` | 1D array | Hz | 63 Hz to 8 kHz octaves | Nominal octave mid-band frequencies of Table D.1; required. Clause 3.11 puts the general-purpose range at 125 Hz to 8 kHz; the 63 Hz row of Table D.1 carries footnote a, which allows it only where the test environment, the reference sound source and the instrumentation are satisfactory at that frequency |
 | `background_levels` | 1D or 2D array | dB | `(bands,)` or `(n, bands)` | $L_{pi(\mathrm{B})}$; one spectrum serves every position. `None` warns and leaves `background_requirement_met` `False` in every band, since 7.5 measures it at each position and 8.1 needs the margin |
 | `background_levels_ref` | 1D or 2D array | dB | same shapes | Background for the reference-source reading; `None` reuses `background_levels` (7.5) |
-| `temperature` | float | °C | default `23.0` | Air temperature at the test, for $C_2$ |
-| `static_pressure` | float | kPa | default `101.325` | Static pressure at the test, for $C_2$; see `static_pressure_from_altitude` |
+| `temperature_c` | float | °C | default `23.0` | Air temperature at the test, for $C_2$ |
+| `static_pressure_kpa` | float | kPa | default `101.325` | Static pressure at the test, for $C_2$; see `static_pressure_from_altitude` |
 | `conditions` | `GradeConditions` | | | The two conditions Table 2 reads together: `excess_levels`, the $\Delta L_{f\mathrm{A}}$ at each position `(n,)` in decibels (Annex A), and `directivity_range`, the half-width of the A-weighted directivity survey in decibels (7.2). Either one left out leaves the determination at survey grade |
 | `sigma_omc` | float | dB | $\ge 0$ | Standard deviation of the operating and mounting conditions (9.2); `None` leaves the uncertainty `NaN` |
 | `coverage_factor` | float | | default `2.0` | $k$ of Eq. 23; 1,6 for a one-sided comparison with a limit |
@@ -1798,7 +1798,7 @@ the inputs are the same: grade 2, $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 | `event_levels` | 3D or 2D array | dB | `(n, N, bands)` or `(n, bands)` | $L'_{Ei,q(\mathrm{ST})}$ per event, or $L'_{Ei,N(\mathrm{ST})}$ of one measurement over $N$ events |
 | `events` | int | | $\ge 1$ | $N$ for the 2D form (Eq. 17); must be `None` with the 3D form. Clause 7.6 asks for at least five events, so fewer than five warns and the determination is nonconforming, on either form |
 | `integration_time` | float | s | $> 0$ | $T$ of the event measurement; `None` applies Eq. 14 as printed |
-| `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature`, `static_pressure`, `excess_levels`, `directivity_range`, `sigma_omc`, `coverage_factor` | | | | As in `sound_power_in_situ()` |
+| `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc`, `coverage_factor` | | | | As in `sound_power_in_situ()` |
 
 ## 3. Grade, uncertainty and reference conditions
 
@@ -1844,7 +1844,7 @@ ps = emission.static_pressure_from_altitude(640.0)
 print(round(ps, 2))                                 # 93.87 kPa (Eq. C.2)
 high = emission.sound_power_in_situ(
     st, rss, lw_rss, freqs, background_levels=background,
-    temperature=27.0, static_pressure=ps,
+    temperature_c=27.0, static_pressure_kpa=ps,
 )
 print(round(high.c2, 3))                            # 0.423 dB
 print(round(float(high.sound_power_level[3]), 2), round(float(high.sound_power_level_ref[3]), 2))
@@ -2009,7 +2009,7 @@ convective term of Eq. 8, $C_{3,4} = 10 \lg[1/(1 - U/c)^2]$, where $c$ is
 the speed of sound in the test duct; clause 5.3.4.3 prints 340 m/s "under
 normal conditions", which is what `flow_modal_correction()` uses on its own,
 while a whole determination knows the duct air and evaluates Eq. 8 with the
-$c$ that `temperature` gives, up to 0.08 dB away over the range of
+$c$ that `temperature_c` gives, up to 0.08 dB away over the range of
 clause 1.1. The same sign convention applies, so
 it is positive on the outlet side and negative on the inlet side, a few
 tenths of a decibel at the velocities those shields are allowed (15 m/s for
@@ -2098,7 +2098,7 @@ c2 = np.array([0.0] * 11 + [0.2, 0.3, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5, 1.9,
 duct = emission.sound_power_in_duct(
     levels, freqs, duct_diameter=0.63, flow_velocity=12.0,
     shield="sampling-tube", microphone_correction=c1, shield_correction=c2,
-    temperature=20.0, static_pressure=101.325,
+    temperature_c=20.0, static_pressure_kpa=101.325,
 )
 print(round(float(duct.mean_pressure_level[5]), 1))       # 87.9 dB at 160 Hz
 print(round(float(duct.flow_modal_correction[13]), 2))    # C3,4 = 2.31 dB at 1 kHz
@@ -2199,8 +2199,8 @@ print(round(cone.sound_power_level_a, 1))                 # 86.6 dB(A)
 | `shield` | str | | `'sampling-tube'` (default), `'nose-cone'`, `'foam-ball'` | Selects Eq. 7 with Annex A or Eq. 8, and the velocity limit |
 | `microphone_correction` | float or 1D array | dB | default `0.0` | $C_1$ from the manufacturer's data |
 | `shield_correction` | float or 1D array | dB | default `0.0` | $C_2$ measured per 5.3.3.2 c) or 5.3.4.2 |
-| `temperature` | float | °C | −50 to 70, default `20.0` | Duct air; sets $c$ and $\rho$, and with them the $c$ of Eq. 8 for the omni-directional shields |
-| `static_pressure` | float | kPa | default `101.325` | Duct air; sets $\rho$ |
+| `temperature_c` | float | °C | −50 to 70, default `20.0` | Duct air; sets $c$ and $\rho$, and with them the $c$ of Eq. 8 for the omni-directional shields |
+| `static_pressure_kpa` | float | kPa | default `101.325` | Duct air; sets $\rho$ |
 
 The function returns an `InDuctSoundPowerResult` with the band $L_W$
 (`sound_power_level`), the A-weighted total of Annex C
@@ -2563,13 +2563,14 @@ applied method alongside.
 
 The relevant `ReportMetadata` fields are `client`, `specimen` (the
 machine/source), `test_room` (the test environment), `instrumentation`,
-`temperature`, `relative_humidity`, `pressure`, `test_date` and the footer
-identity `laboratory`, `operator`, `report_id` and `notes`; the radiating area
-$S$ comes from the result itself. Supplying `requirement` adds a PASS/FAIL
-verdict against a declared A-weighted sound-power limit (lower is better).
-`verbose=True` adds the radiation factor $\varepsilon$ column, and `language="es"`
-renders the Spanish fiche (comma decimals). Rendering needs the optional
-`phonometry[report]` extra (reportlab), plus matplotlib for the spectrum.
+`temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`,
+`test_date` and the footer identity `laboratory`, `operator`, `report_id` and
+`notes`; the radiating area $S$ comes from the result itself. Supplying
+`requirement` adds a PASS/FAIL verdict against a declared A-weighted
+sound-power limit (lower is better). `verbose=True` adds the radiation factor
+$\varepsilon$ column, and `language="es"` renders the Spanish fiche (comma
+decimals). Rendering needs the optional `phonometry[report]` extra (reportlab),
+plus matplotlib for the spectrum.
 
 ```python
 import numpy as np

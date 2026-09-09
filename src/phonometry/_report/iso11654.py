@@ -137,9 +137,9 @@ def _metadata_pairs(
         (t("Mounting", language), metadata.mounting),
         (t("Test room", language), metadata.test_room),
         (t("Date of test", language), metadata.test_date),
-        (t("Temperature [&#176;C]", language), num(metadata.temperature)),
-        (t("Relative humidity [%]", language), num(metadata.relative_humidity)),
-        (t("Ambient pressure [kPa]", language), num(metadata.pressure)),
+        (t("Temperature [&#176;C]", language), num(metadata.temperature_c)),
+        (t("Relative humidity [%]", language), num(metadata.relative_humidity_percent)),
+        (t("Ambient pressure [kPa]", language), num(metadata.static_pressure_kpa)),
     ]
     # Values are user-supplied free text; escape XML specials so a '&' or '<'
     # cannot break reportlab's Paragraph parser. Labels carry intentional markup.

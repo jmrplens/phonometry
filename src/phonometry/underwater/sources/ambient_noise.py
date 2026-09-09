@@ -96,7 +96,7 @@ def wind_noise_spectrum(
 def thermal_noise_spectrum(
     frequency_hz: NDArray[np.float64] | list[float] | float,
     *,
-    temperature: float = 16.85,
+    temperature_c: float = 16.85,
     density: float = 1025.0,
     sound_speed: float = 1500.0,
 ) -> NDArray[np.float64]:
@@ -106,7 +106,7 @@ def thermal_noise_spectrum(
     level is :math:`10 \log_{10}(\langle p^2 \rangle / p_0^2)`.
 
     :param frequency_hz: Frequency, in Hz (scalar or array).
-    :param temperature: Water temperature, in degrees Celsius (default 16.85 °C
+    :param temperature_c: Water temperature, in degrees Celsius (default 16.85 °C
         = 290 K).
     :param density: Water density :math:`\rho`, in kg/m³ (default 1025).
     :param sound_speed: Sound speed ``c``, in m/s (default 1500).
@@ -114,7 +114,9 @@ def thermal_noise_spectrum(
     :raises ValueError: If the inputs are invalid.
     """
     f = require_positive_array(frequency_hz, "frequency_hz")
-    t_kelvin = require_above_absolute_zero(float(temperature), "temperature") + 273.15
+    t_kelvin = (
+        require_above_absolute_zero(float(temperature_c), "temperature_c") + 273.15
+    )
     rho = require_positive(density, "density")
     c = require_positive(sound_speed, "sound_speed")
     p2 = 4.0 * np.pi * _BOLTZMANN * t_kelvin * rho * f**2 / c
@@ -191,7 +193,7 @@ def ocean_ambient_noise(
     *,
     wind_speed_knots: float,
     shipping: NDArray[np.float64] | list[float] | None = None,
-    temperature: float = 16.85,
+    temperature_c: float = 16.85,
     density: float = 1025.0,
     sound_speed: float = 1500.0,
 ) -> AmbientNoiseResult:
@@ -204,7 +206,7 @@ def ocean_ambient_noise(
     :param wind_speed_knots: Wind speed ``U``, in knots.
     :param shipping: Optional shipping-noise spectrum level per frequency, in dB
         re 1 µPa²/Hz (same length as ``frequency_hz``), or ``None``.
-    :param temperature: Water temperature, in degrees Celsius.
+    :param temperature_c: Water temperature, in degrees Celsius.
     :param density: Water density, in kg/m³.
     :param sound_speed: Sound speed, in m/s.
     :return: An :class:`AmbientNoiseResult`.
@@ -213,7 +215,7 @@ def ocean_ambient_noise(
     f = require_positive_array(frequency_hz, "frequency_hz")
     wind = wind_noise_spectrum(f, wind_speed_knots)
     thermal = thermal_noise_spectrum(
-        f, temperature=temperature, density=density, sound_speed=sound_speed
+        f, temperature_c=temperature_c, density=density, sound_speed=sound_speed
     )
     energies = 10.0 ** (wind / 10.0) + 10.0 ** (thermal / 10.0)
     ship_arr: NDArray[np.float64] | None = None

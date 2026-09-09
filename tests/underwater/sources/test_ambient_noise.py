@@ -73,7 +73,7 @@ def test_thermal_matches_mellen_formula() -> None:
     t, rho, c = 16.85, 1025.0, 1500.0
     p2 = 4.0 * np.pi * _BOLTZMANN * (t + 273.15) * rho * f**2 / c
     expected = 10.0 * np.log10(p2 / _P_REF**2)
-    got = thermal_noise_spectrum(f, temperature=t, density=rho, sound_speed=c)
+    got = thermal_noise_spectrum(f, temperature_c=t, density=rho, sound_speed=c)
     assert np.allclose(got, expected, atol=1e-9)
 
 

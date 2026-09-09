@@ -187,7 +187,7 @@ class StaticAirflowResult:
     reference 0.5 mm/s by default). ``linear_coefficient`` (``a``) and
     ``quadratic_coefficient`` (``b``) are the through-origin fit
     :math:`\Delta p = a u + b u^2` (clause 7.5); ``a`` is the zero-velocity
-    specific airflow resistance (Pa*s/m). ``pressure_drop`` is the fitted
+    specific airflow resistance (Pa*s/m). ``pressure_drop_pa`` is the fitted
     :math:`\Delta p` at ``evaluation_velocity`` (Pa).
     """
 
@@ -195,7 +195,7 @@ class StaticAirflowResult:
     specific_resistance: float
     resistivity: float | None
     evaluation_velocity: float
-    pressure_drop: float
+    pressure_drop_pa: float
     linear_coefficient: float
     quadratic_coefficient: float
 
@@ -234,7 +234,7 @@ class StaticAirflowResult:
             "resistance",
             "specific_resistance",
             "evaluation_velocity",
-            "pressure_drop",
+            "pressure_drop_pa",
             "linear_coefficient",
             "quadratic_coefficient",
         )
@@ -300,7 +300,7 @@ class StaticAirflowResult:
             produces a body-and-disclaimer fiche. The applicable descriptive
             fields are ``client``, ``manufacturer``, ``specimen``, ``thickness``
             (the specimen thickness ``d``, in metres, shown in millimetres),
-            ``test_room``, ``test_date``, ``temperature``, ``relative_humidity``,
+            ``test_room``, ``test_date``, ``temperature_c``, ``relative_humidity_percent``,
             ``measurement_standard``, ``laboratory``, ``operator``, ``report_id``
             and ``notes``. The ``requirement`` field is ignored (ISO 9053-1 has
             no verdict).
@@ -341,27 +341,27 @@ def linear_airflow_velocity(volume_flow_rate: float, area: float) -> float:
     return volume_flow_rate / area
 
 
-def airflow_resistance(pressure_drop: float, volume_flow_rate: float) -> float:
+def airflow_resistance(pressure_drop_pa: float, volume_flow_rate: float) -> float:
     r"""Airflow resistance :math:`R = \Delta p / q_v` (ISO 9053-1:2018, 3.1).
 
-    ``pressure_drop`` is the pressure difference :math:`\Delta p` across the
+    ``pressure_drop_pa`` is the pressure difference :math:`\Delta p` across the
     specimen (Pa) and ``volume_flow_rate`` is the volumetric airflow rate
     ``q_v`` (m3/s). Returns ``R`` in Pa*s/m3.
     """
-    if pressure_drop < 0.0:
-        msg = "'pressure_drop' must be non-negative."
+    if pressure_drop_pa < 0.0:
+        msg = "'pressure_drop_pa' must be non-negative."
         raise ValueError(msg)
     if volume_flow_rate <= 0.0:
         msg = "'volume_flow_rate' must be positive."
         raise ValueError(msg)
-    return pressure_drop / volume_flow_rate
+    return pressure_drop_pa / volume_flow_rate
 
 
 def specific_airflow_resistance(
     resistance: float | None = None,
     area: float | None = None,
     *,
-    pressure_drop: float | None = None,
+    pressure_drop_pa: float | None = None,
     velocity: float | None = None,
 ) -> float:
     r"""Specific airflow resistance ``R_s`` in Pa*s/m (ISO 9053-1:2018, 3.2).
@@ -370,18 +370,18 @@ def specific_airflow_resistance(
 
     - ``resistance`` (``R``, Pa*s/m3) and ``area`` (``A``, m2):
       :math:`R_\mathrm{s} = R\,A`.
-    - ``pressure_drop`` (:math:`\Delta p`, Pa) and ``velocity`` (``u``, m/s):
+    - ``pressure_drop_pa`` (:math:`\Delta p`, Pa) and ``velocity`` (``u``, m/s):
       :math:`R_\mathrm{s} = \Delta p / u` (from :math:`R_\mathrm{s} = R\,A` with
       :math:`u = q_v / A`).
 
     The unit is pascal second per metre (Pa*s/m), not Pa*s/m2.
     """
     from_resistance = resistance is not None and area is not None
-    from_pressure = pressure_drop is not None and velocity is not None
+    from_pressure = pressure_drop_pa is not None and velocity is not None
     if from_resistance == from_pressure:
         msg = (
             "Provide exactly one route: ('resistance' and 'area') or "
-            "('pressure_drop' and 'velocity')."
+            "('pressure_drop_pa' and 'velocity')."
         )
         raise ValueError(msg)
     if resistance is not None and area is not None:
@@ -391,17 +391,17 @@ def specific_airflow_resistance(
         if area <= 0.0:
             raise ValueError(_AREA_POSITIVE_MSG)
         return resistance * area
-    if pressure_drop is not None and velocity is not None:
-        if pressure_drop < 0.0:
-            msg = "'pressure_drop' must be non-negative."
+    if pressure_drop_pa is not None and velocity is not None:
+        if pressure_drop_pa < 0.0:
+            msg = "'pressure_drop_pa' must be non-negative."
             raise ValueError(msg)
         if velocity <= 0.0:
             msg = "'velocity' must be positive."
             raise ValueError(msg)
-        return pressure_drop / velocity
+        return pressure_drop_pa / velocity
     msg = (
         "Provide exactly one route: ('resistance' and 'area') or "
-        "('pressure_drop' and 'velocity')."
+        "('pressure_drop_pa' and 'velocity')."
     )
     raise ValueError(  # pragma: no cover - unreachable, guarded above
         msg
@@ -440,7 +440,7 @@ def _warn_static_velocity_range(
 
 def static_airflow_resistance(
     velocities: ArrayLike,
-    pressure_drops: ArrayLike,
+    pressure_drops_pa: ArrayLike,
     area: float,
     thickness: float | None = None,
     *,
@@ -454,7 +454,7 @@ def static_airflow_resistance(
     ``evaluation_velocity`` (the clause 7.5 reference ``0.5e-3 m/s`` by default).
 
     ``velocities`` are the linear airflow velocities ``u`` (m/s) and
-    ``pressure_drops`` the matching pressure differences :math:`\Delta p` (Pa)
+    ``pressure_drops_pa`` the matching pressure differences :math:`\Delta p` (Pa)
     of at least two measurement steps; ``area`` is the cross-section ``A`` (m2)
     and ``thickness`` the specimen thickness ``d`` (m, optional, enabling
     ``sigma``).
@@ -465,20 +465,20 @@ def static_airflow_resistance(
     :class:`AirflowResistanceWarning`.
     """
     u = np.asarray(velocities, dtype=np.float64)
-    dp = np.asarray(pressure_drops, dtype=np.float64)
+    dp = np.asarray(pressure_drops_pa, dtype=np.float64)
     if u.ndim != 1 or dp.ndim != 1:
-        msg = "'velocities' and 'pressure_drops' must be 1-D."
+        msg = "'velocities' and 'pressure_drops_pa' must be 1-D."
         raise ValueError(msg)
     require_equal_shapes(
         "static_airflow_resistance",
-        {"velocities": u.shape, "pressure_drops": dp.shape},
+        {"velocities": u.shape, "pressure_drops_pa": dp.shape},
         "measurement step",
     )
     if u.size < _MIN_MEASUREMENT_STEPS:
         msg = "At least two measurement steps are required."
         raise ValueError(msg)
     if not (np.all(np.isfinite(u)) and np.all(np.isfinite(dp))):
-        msg = "'velocities' and 'pressure_drops' must contain only finite values."
+        msg = "'velocities' and 'pressure_drops_pa' must contain only finite values."
         raise ValueError(msg)
     if bool(np.any(u <= 0.0)):
         msg = "All velocities must be positive."
@@ -515,7 +515,7 @@ def static_airflow_resistance(
         specific_resistance=specific,
         resistivity=resistivity,
         evaluation_velocity=evaluation_velocity,
-        pressure_drop=dp_eval,
+        pressure_drop_pa=dp_eval,
         linear_coefficient=a,
         quadratic_coefficient=b,
     )
@@ -659,7 +659,7 @@ def alternating_airflow_resistance(
     piston_stroke_termination: float,
     frequency: float,
     cavity_volume: float,
-    static_pressure: float = _STANDARD_STATIC_PRESSURE,
+    static_pressure_pa: float = _STANDARD_STATIC_PRESSURE,
     kappa_prime: float = _ADIABATIC_KAPPA,
     background_level: float | None = None,
 ) -> float:
@@ -677,7 +677,7 @@ def alternating_airflow_resistance(
     termination; ``piston_stroke_specimen`` (``h_s``) and
     ``piston_stroke_termination`` (``h_t``) the corresponding stroke amplitudes
     (m); ``frequency`` the piston frequency ``f`` (Hz, 1-4 Hz); ``cavity_volume``
-    the airtight-termination cavity volume ``V`` (m3); ``static_pressure`` the
+    the airtight-termination cavity volume ``V`` (m3); ``static_pressure_pa`` the
     atmospheric pressure ``P_S`` (Pa, default 101325); ``kappa_prime`` the
     effective ratio of specific heats ``kappa'``; ``background_level`` the optional
     cavity background level ``L_pb`` (dB) for the Formula (4) check. Returns ``R`` in
@@ -708,8 +708,8 @@ def alternating_airflow_resistance(
     if piston_stroke_termination <= 0.0:
         msg = "'piston_stroke_termination' must be positive."
         raise ValueError(msg)
-    if static_pressure <= 0.0:
-        msg = "'static_pressure' must be positive."
+    if static_pressure_pa <= 0.0:
+        msg = "'static_pressure_pa' must be positive."
         raise ValueError(msg)
     if kappa_prime <= 0.0:
         msg = "'kappa_prime' must be positive."
@@ -732,6 +732,6 @@ def alternating_airflow_resistance(
     )
 
     prefactor = (
-        kappa_prime * static_pressure / (2.0 * math.pi * frequency * cavity_volume)
+        kappa_prime * static_pressure_pa / (2.0 * math.pi * frequency * cavity_volume)
     )
     return prefactor * ratio_term

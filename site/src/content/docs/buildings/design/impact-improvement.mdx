@@ -239,36 +239,38 @@ res.plot()            # the delta-L(f) improvement spectrum above (needs matplot
 ## ISO 16251-1 impact-improvement report (`.report()`)
 
 Clauses 8 and 9 decide what a result has to carry to be reportable, and most of
-it is yours to supply rather than the library's to compute. Beside the improvement
-itself the table must show the **bare-plate acceleration level $L_{a,0}$** with
-its reference $a_0$, the per-band $\Delta L$ of *every* sample tested, their
-average where there is more than one, the weighted improvement(s) and the
-adaptation term(s) — all rounded to **one decimal place**, with any band whose
-background correction hit the 1,3 dB limit written as "> $\Delta L$". The report
-then adds: the manufacturer and product identification, a detailed description of
-the covering with the number and size of the specimens, the **method of mounting,
-in particular the adhesive with its mass per area and curing time**, the
-temperature and humidity during the test, the **positions of the tapping machine
-and the accelerometers**, and a statement of whether the specimen suffered
-visible damage such as compaction. Those map onto the `manufacturer`, `specimen`,
-`mounting`, `mass_per_area`, `temperature`, `pressure`, `test_date` and `notes`
-fields of `ReportMetadata` below; the damage statement and the mounting detail
-have no field of their own and belong in `notes`.
+it is yours to supply rather than the library's to compute. Beside the
+improvement itself the table must show the **bare-plate acceleration level
+$L_{a,0}$** with its reference $a_0$, the per-band $\Delta L$ of *every* sample
+tested, their average where there is more than one, the weighted improvement(s)
+and the adaptation term(s) — all rounded to **one decimal place**, with any
+band whose background correction hit the 1,3 dB limit written as "> $\Delta
+L$". The report then adds: the manufacturer and product identification, a
+detailed description of the covering with the number and size of the specimens,
+the **method of mounting, in particular the adhesive with its mass per area and
+curing time**, the temperature and humidity during the test, the **positions of
+the tapping machine and the accelerometers**, and a statement of whether the
+specimen suffered visible damage such as compaction. Those map onto the
+`manufacturer`, `specimen`, `mounting`, `mass_per_area`, `temperature_c`,
+`static_pressure_kpa`, `test_date` and `notes` fields of `ReportMetadata`
+below; the damage statement and the mounting detail have no field of their own
+and belong in `notes`.
 
 `FloorCoveringImprovementResult.report(path)` writes a one-page accredited
 impact-improvement fiche: the standard-basis line, a metadata header, the
 per-band table (frequency and $\Delta L$, bands at the 1.3 dB limit prefixed
 `>`) beside the $\Delta L(f)$ improvement curve, the boxed single-number
-$\Delta L_\mathrm{w}\ (C_{\mathrm{I},\Delta})$ (the ISO 16251-1 Clause 8 e) statement of results),
-and a footer. Pass a `ReportMetadata` for the header; the applicable fields are
-`specimen` (the floor covering under test), `client`, `manufacturer`,
-`mounting`, `mass_per_area`, `test_room`, `test_date`, `temperature`,
-`pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id`,
-`notes` and `requirement` (a higher weighted improvement is better, so the
-verdict passes at or above it). The bare reference floor is the standardised
-heavyweight floor of ISO 717-2:2020 Table 4, fixed by the standard.
-`verbose=True` adds the reference-floor-with-covering column
-$L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$, the derivation basis of $\Delta L_\mathrm{w}$.
+$\Delta L_\mathrm{w}\ (C_{\mathrm{I},\Delta})$ (the ISO 16251-1 Clause 8 e)
+statement of results), and a footer. Pass a `ReportMetadata` for the header;
+the applicable fields are `specimen` (the floor covering under test), `client`,
+`manufacturer`, `mounting`, `mass_per_area`, `test_room`, `test_date`,
+`temperature_c`, `static_pressure_kpa`, `measurement_standard`, `laboratory`,
+`operator`, `report_id`, `notes` and `requirement` (a higher weighted
+improvement is better, so the verdict passes at or above it). The bare
+reference floor is the standardised heavyweight floor of ISO 717-2:2020 Table
+4, fixed by the standard. `verbose=True` adds the reference-floor-with-covering
+column $L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$, the derivation basis of
+$\Delta L_\mathrm{w}$.
 
 ```python
 from phonometry import building, ReportMetadata

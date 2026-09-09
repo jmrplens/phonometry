@@ -377,7 +377,7 @@ def test_duct_air_impedance_at_20_degrees() -> None:
     -10 lg(413,25 / 400) = -0,1416 dB.
     """
     res = emission.sound_power_in_duct(
-        _flat(80.0), _BANDS, 0.5, 0.0, temperature=20.0, static_pressure=101.325
+        _flat(80.0), _BANDS, 0.5, 0.0, temperature_c=20.0, static_pressure_kpa=101.325
     )
     assert res.speed_of_sound == pytest.approx(20.05 * math.sqrt(293.0), abs=1e-9)
     assert res.characteristic_impedance == pytest.approx(413.25, abs=0.01)
@@ -393,7 +393,7 @@ def test_rho_c_scales_with_pressure_and_temperature() -> None:
     """
     full = emission.sound_power_in_duct(_flat(80.0), _BANDS, 0.5, 0.0)
     half = emission.sound_power_in_duct(
-        _flat(80.0), _BANDS, 0.5, 0.0, static_pressure=101.325 / 2.0
+        _flat(80.0), _BANDS, 0.5, 0.0, static_pressure_kpa=101.325 / 2.0
     )
     assert half.speed_of_sound == full.speed_of_sound
     assert half.characteristic_impedance == pytest.approx(
@@ -651,8 +651,8 @@ def test_the_informative_velocity_range_survives_below_10_khz() -> None:
     [
         ("duct_diameter", {"duct_diameter": np.array([0.5, 0.6])}),
         ("flow_velocity", {"flow_velocity": np.array([10.0, 20.0])}),
-        ("temperature", {"temperature": np.array([20.0, 21.0])}),
-        ("static_pressure", {"static_pressure": np.array([101.0, 102.0])}),
+        ("temperature_c", {"temperature_c": np.array([20.0, 21.0])}),
+        ("static_pressure_kpa", {"static_pressure_kpa": np.array([101.0, 102.0])}),
     ],
 )
 def test_refuses_a_non_scalar_where_one_measurement_is_meant(
@@ -689,26 +689,28 @@ def test_refuses_a_sonic_flow_for_the_omnidirectional_shields() -> None:
         )
 
 
-@pytest.mark.parametrize("temperature", [-50.5, 70.5, float("nan")])
-def test_refuses_a_temperature_outside_the_scope(temperature: float) -> None:
+@pytest.mark.parametrize("temperature_c", [-50.5, 70.5, float("nan")])
+def test_refuses_a_temperature_outside_the_scope(temperature_c: float) -> None:
     """Clause 1.1: -50 degC to +70 degC."""
-    with pytest.raises(ValueError, match="'temperature' must be between"):
+    with pytest.raises(ValueError, match="'temperature_c' must be between"):
         emission.sound_power_in_duct(
-            [80.0], [1000.0], 0.5, 10.0, temperature=temperature
+            [80.0], [1000.0], 0.5, 10.0, temperature_c=temperature_c
         )
 
 
 def test_accepts_the_temperature_edges() -> None:
-    for temperature in (-50.0, 70.0):
+    for temperature_c in (-50.0, 70.0):
         res = emission.sound_power_in_duct(
-            [80.0], [1000.0], 0.5, 10.0, temperature=temperature
+            [80.0], [1000.0], 0.5, 10.0, temperature_c=temperature_c
         )
         assert np.isfinite(res.sound_power_level).all()
 
 
 def test_refuses_a_non_positive_static_pressure() -> None:
-    with pytest.raises(ValueError, match="'static_pressure' must be positive"):
-        emission.sound_power_in_duct([80.0], [1000.0], 0.5, 10.0, static_pressure=0.0)
+    with pytest.raises(ValueError, match="'static_pressure_kpa' must be positive"):
+        emission.sound_power_in_duct(
+            [80.0], [1000.0], 0.5, 10.0, static_pressure_kpa=0.0
+        )
 
 
 def test_refuses_levels_of_the_wrong_band_count() -> None:

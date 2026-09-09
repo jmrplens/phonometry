@@ -46,7 +46,7 @@ propagation_loss(
     frequency_hz: float,
     *,
     law: str = 'spherical',
-    temperature: float = 10.0,
+    temperature_c: float = 10.0,
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
@@ -65,7 +65,7 @@ $\mathrm{PL} = \text{spreading} + \alpha R$ versus range.
 | `range_m` | Range(s) from the source, in metres (scalar or array). |
 | `frequency_hz` | Acoustic frequency, in Hz. |
 | `law` | Spreading law (see [`spreading_loss`](/phonometry/reference/api/underwater/closed-form/#spreading_loss)). |
-| `temperature` | Temperature `T`, in degrees Celsius. |
+| `temperature_c` | Temperature `T`, in degrees Celsius. |
 | `salinity` | Salinity `S`, in parts per thousand. |
 | `depth` | Depth, in metres. |
 | `ph` | Acidity (default 8). |
@@ -129,7 +129,7 @@ Plot the propagation loss versus range with its two contributions.
 seawater_absorption(
     frequency_hz: NDArray[np.float64] | list[float] | float,
     *,
-    temperature: float = 10.0,
+    temperature_c: float = 10.0,
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
@@ -144,11 +144,11 @@ Volume absorption coefficient $\alpha$, in dB/km.
 | Name | Description |
 | :--- | :--- |
 | `frequency_hz` | Acoustic frequency, in Hz (scalar or array). |
-| `temperature` | Temperature `T`, in degrees Celsius. |
+| `temperature_c` | Temperature `T`, in degrees Celsius. |
 | `salinity` | Salinity `S`, in parts per thousand. |
 | `depth` | Depth, in metres (`>= 0`). |
 | `ph` | Acidity (used by Francois-Garrison and Ainslie-McColm; default 8). |
-| `model` | `"francois-garrison"` (default), `"ainslie-mccolm"` or `"thorp"` (the Thorp 1967 frequency-only form of Etter, valid below ~50 kHz; ignores `temperature`/`salinity`/`depth`/`ph`). |
+| `model` | `"francois-garrison"` (default), `"ainslie-mccolm"` or `"thorp"` (the Thorp 1967 frequency-only form of Etter, valid below ~50 kHz; ignores `temperature_c`/`salinity`/`depth`/`ph`). |
 
 **Returns:** Absorption coefficient per frequency, in dB/km.
 

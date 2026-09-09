@@ -863,8 +863,8 @@ def limp_panel_reduction_index(
     *,
     surface_mass: float,
     area: float,
-    temperature: float = 23.0,
-    static_pressure: float = _ANNEX_A_B0,
+    temperature_c: float = 23.0,
+    static_pressure_pa: float = _ANNEX_A_B0,
 ) -> np.ndarray:
     r"""Sound reduction index of a limp panel (ISO 15186-3:2002, Annex A).
 
@@ -915,8 +915,8 @@ def limp_panel_reduction_index(
     :param area: Panel area ``S``, in m². Formula (A.3) is stated valid for
         at least 1 m², so a smaller one is refused rather than extrapolated.
         A panel used to qualify a facility has to exceed 1 m² (A.1).
-    :param temperature: Air temperature ``theta``, in degrees Celsius.
-    :param static_pressure: Static pressure ``B``, in pascals.
+    :param temperature_c: Air temperature ``theta``, in degrees Celsius.
+    :param static_pressure_pa: Static pressure ``B``, in pascals.
     :return: The calculated sound reduction index per band, in dB.
     :raises ValueError: for a non-finite or non-positive frequency, surface
         mass, area below 1 m², or a climate the formulas cannot be evaluated
@@ -940,14 +940,16 @@ def limp_panel_reduction_index(
             f"panel that large (ISO 15186-3:2002, A.1); got {s:g} m2."
         )
         raise ValueError(msg)
-    theta = float(temperature)
-    b = require_positive(static_pressure, "static_pressure")
+    theta = float(temperature_c)
+    b = require_positive(static_pressure_pa, "static_pressure_pa")
     if not np.isfinite(theta) or theta <= -_ANNEX_A_KELVIN:
-        msg = "'temperature' must be finite and above -273 degC."
+        msg = "'temperature_c' must be finite and above -273 degC."
         raise ValueError(msg)
     c = _ANNEX_A_C0 + _ANNEX_A_C_PER_DEGREE * theta
     if c <= 0.0:
-        msg = "'temperature' puts the speed of sound of Formula (A.5) at or below zero."
+        msg = (
+            "'temperature_c' puts the speed of sound of Formula (A.5) at or below zero."
+        )
         raise ValueError(msg)
     rho_c = (
         _ANNEX_A_RHO_C0
@@ -1083,11 +1085,11 @@ def _check_low_frequency_bands(
 
 def _check_indicator_pair(owner: object) -> None:
     """Reject a result carrying only one half of the Clause 6.4.2 answer."""
-    indicator = owner.surface_pressure_intensity  # type: ignore[attr-defined]
+    indicator = owner.surface_pressure_intensity_indicator  # type: ignore[attr-defined]
     qualified = owner.qualified  # type: ignore[attr-defined]
     if (indicator is None) != (qualified is None):
         msg = (
-            "'surface_pressure_intensity' and 'qualified' are the two "
+            "'surface_pressure_intensity_indicator' and 'qualified' are the two "
             "halves of one Clause 6.4.2 answer and are given together or "
             "not at all."
         )
@@ -1106,7 +1108,7 @@ class LowFrequencyIntensityResult:
     :ivar r_i: Intensity sound reduction index
         :math:`R_\mathrm{I} = L_{p\mathrm{S}} - 9 - [L_{I\mathrm{n}} + 10\lg(S_\mathrm{m}/S)]`
         per band, in dB.
-    :ivar surface_pressure_intensity: Surface-pressure intensity indicator
+    :ivar surface_pressure_intensity_indicator: Surface-pressure intensity indicator
         :math:`F_{pI} = L_p - L_{I\mathrm{n}}` per band, in dB (Formula (5)),
         which Clause 7 requires to be reported beside the index, or ``None``
         where the receiving-side pressure level was not measured alongside
@@ -1125,7 +1127,7 @@ class LowFrequencyIntensityResult:
     """
 
     r_i: np.ndarray
-    surface_pressure_intensity: np.ndarray | None
+    surface_pressure_intensity_indicator: np.ndarray | None
     qualified: np.ndarray | None
     frequencies: np.ndarray | None
     area: float
@@ -1147,18 +1149,20 @@ class LowFrequencyIntensityResult:
         """
         require_ranks(self, r_i=1)
         _check_indicator_pair(self)
-        if self.surface_pressure_intensity is not None:
-            require_ranks(self, surface_pressure_intensity=1, qualified=1)
-            require_same_length(self, "r_i", "surface_pressure_intensity", "qualified")
+        if self.surface_pressure_intensity_indicator is not None:
+            require_ranks(self, surface_pressure_intensity_indicator=1, qualified=1)
+            require_same_length(
+                self, "r_i", "surface_pressure_intensity_indicator", "qualified"
+            )
         if self.frequencies is not None:
             require_equal_counts(
                 "LowFrequencyIntensityResult",
                 {"frequencies": self.frequencies.size, "r_i": self.r_i.size},
             )
-        if self.surface_pressure_intensity is None:
+        if self.surface_pressure_intensity_indicator is None:
             require_finite_fields(self, "r_i")
         else:
-            require_finite_fields(self, "r_i", "surface_pressure_intensity")
+            require_finite_fields(self, "r_i", "surface_pressure_intensity_indicator")
         _positive_area(self.area, "area")
         _positive_area(self.measurement_area, "measurement_area")
 
@@ -1288,7 +1292,7 @@ def low_frequency_intensity_reduction(
     )
     return LowFrequencyIntensityResult(
         r_i=r_i,
-        surface_pressure_intensity=f_pi,
+        surface_pressure_intensity_indicator=f_pi,
         qualified=qualified,
         frequencies=freqs,
         area=s,
@@ -1309,7 +1313,7 @@ class LowFrequencyElementResult:
     :ivar d_i_n_e: Intensity element normalized level difference
         :math:`D_{I\mathrm{n,e}} = L_{p\mathrm{S}} - 9 -
         [L_{I\mathrm{n}} - 10\lg(A_0/S_\mathrm{m}) - 10\lg N]` per band, in dB.
-    :ivar surface_pressure_intensity: Surface-pressure intensity indicator
+    :ivar surface_pressure_intensity_indicator: Surface-pressure intensity indicator
         :math:`F_{pI}` per band, in dB (Formula (5)), or ``None`` where the
         receiving-side pressure level was not measured alongside the
         intensity.
@@ -1324,7 +1328,7 @@ class LowFrequencyElementResult:
     """
 
     d_i_n_e: np.ndarray
-    surface_pressure_intensity: np.ndarray | None
+    surface_pressure_intensity_indicator: np.ndarray | None
     qualified: np.ndarray | None
     frequencies: np.ndarray | None
     measurement_area: float
@@ -1340,20 +1344,22 @@ class LowFrequencyElementResult:
         """
         require_ranks(self, d_i_n_e=1)
         _check_indicator_pair(self)
-        if self.surface_pressure_intensity is not None:
-            require_ranks(self, surface_pressure_intensity=1, qualified=1)
+        if self.surface_pressure_intensity_indicator is not None:
+            require_ranks(self, surface_pressure_intensity_indicator=1, qualified=1)
             require_same_length(
-                self, "d_i_n_e", "surface_pressure_intensity", "qualified"
+                self, "d_i_n_e", "surface_pressure_intensity_indicator", "qualified"
             )
         if self.frequencies is not None:
             require_equal_counts(
                 "LowFrequencyElementResult",
                 {"frequencies": self.frequencies.size, "d_i_n_e": self.d_i_n_e.size},
             )
-        if self.surface_pressure_intensity is None:
+        if self.surface_pressure_intensity_indicator is None:
             require_finite_fields(self, "d_i_n_e")
         else:
-            require_finite_fields(self, "d_i_n_e", "surface_pressure_intensity")
+            require_finite_fields(
+                self, "d_i_n_e", "surface_pressure_intensity_indicator"
+            )
         _positive_area(self.measurement_area, "measurement_area")
 
     @property
@@ -1458,7 +1464,7 @@ def low_frequency_element_normalized_difference(
     )
     return LowFrequencyElementResult(
         d_i_n_e=d_i_n_e,
-        surface_pressure_intensity=f_pi,
+        surface_pressure_intensity_indicator=f_pi,
         qualified=qualified,
         frequencies=freqs,
         measurement_area=sm,

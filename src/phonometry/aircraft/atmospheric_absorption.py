@@ -73,9 +73,9 @@ class AircraftBandAttenuation:
     :ivar coefficient: Pure-tone mid-band attenuation coefficient ``α`` per band,
         in dB/m.
     :ivar path_length: Propagation path length ``s``, in metres.
-    :ivar temperature: Air temperature, in degrees Celsius.
-    :ivar relative_humidity: Relative humidity, in percent.
-    :ivar pressure: Ambient atmospheric pressure, in kPa.
+    :ivar temperature_c: Air temperature, in degrees Celsius.
+    :ivar relative_humidity_percent: Relative humidity, in percent.
+    :ivar atmospheric_pressure_kpa: Ambient atmospheric pressure, in kPa.
     """
 
     frequency: NDArray[np.float64]
@@ -83,9 +83,9 @@ class AircraftBandAttenuation:
     midband_attenuation: NDArray[np.float64]
     coefficient: NDArray[np.float64]
     path_length: float
-    temperature: float
-    relative_humidity: float
-    pressure: float
+    temperature_c: float
+    relative_humidity_percent: float
+    atmospheric_pressure_kpa: float
 
     def __post_init__(self) -> None:
         """Reject an attenuation whose arrays do not all run over the same bands.
@@ -142,9 +142,9 @@ def sae_band_attenuation(
     frequencies: NDArray[np.float64] | list[float],
     path_length: float,
     *,
-    temperature: float = 25.0,
-    relative_humidity: float = 70.0,
-    pressure: float = 101.325,
+    temperature_c: float = 25.0,
+    relative_humidity_percent: float = 70.0,
+    atmospheric_pressure_kpa: float = 101.325,
 ) -> AircraftBandAttenuation:
     r"""One-third-octave-band atmospheric attenuation (SAE ARP 5534, SAE Method).
 
@@ -157,11 +157,11 @@ def sae_band_attenuation(
     :param frequencies: Nominal one-third-octave-band centre frequencies, in Hz
         (standard range 50 Hz-10 kHz; the method extends to 25 Hz-20 kHz).
     :param path_length: Propagation path length ``s``, in metres (``>= 0``).
-    :param temperature: Air temperature, in degrees Celsius (SAE window
+    :param temperature_c: Air temperature, in degrees Celsius (SAE window
         ~6-32 °C; default 25 °C, the ARP 5534 reference point).
-    :param relative_humidity: Relative humidity, in percent (SAE window
+    :param relative_humidity_percent: Relative humidity, in percent (SAE window
         ~20-95 %; default 70 %).
-    :param pressure: Ambient atmospheric pressure, in kPa (default 101.325).
+    :param atmospheric_pressure_kpa: Ambient atmospheric pressure, in kPa (default 101.325).
     :return: An :class:`AircraftBandAttenuation`.
     :raises ValueError: If the inputs are invalid.
     """
@@ -170,7 +170,11 @@ def sae_band_attenuation(
 
     # Pure-tone coefficient at the exact mid-band frequency (ISO 9613-1).
     alpha = air_attenuation(
-        f, temperature, relative_humidity, pressure, exact_midband=True
+        f,
+        temperature_c,
+        relative_humidity_percent,
+        atmospheric_pressure_kpa,
+        exact_midband=True,
     )
     delta_t = alpha * s
     delta_b = _sae_band(delta_t)
@@ -180,7 +184,7 @@ def sae_band_attenuation(
         midband_attenuation=np.asarray(delta_t, dtype=np.float64),
         coefficient=np.asarray(alpha, dtype=np.float64),
         path_length=s,
-        temperature=float(temperature),
-        relative_humidity=float(relative_humidity),
-        pressure=float(pressure),
+        temperature_c=float(temperature_c),
+        relative_humidity_percent=float(relative_humidity_percent),
+        atmospheric_pressure_kpa=float(atmospheric_pressure_kpa),
     )

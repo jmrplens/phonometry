@@ -227,7 +227,7 @@ from phonometry import underwater
 # 10 kHz at 10 °C, 35 ppt, 100 m depth; practical spreading with R0 = 1000 m.
 ranges = np.linspace(10.0, 20_000.0, 400)
 pl = underwater.propagation_loss(ranges, 10e3, law="practical",
-                                  transition_range=1000.0, temperature=10.0,
+                                  transition_range=1000.0, temperature_c=10.0,
                                   salinity=35.0, depth=100.0)
 print(f"alpha = {pl.absorption_coefficient:.2f} dB/km")   # alpha = 0.95 dB/km
 pl.plot()   # total PL with the spreading and absorption contributions
@@ -242,7 +242,7 @@ from phonometry import underwater
 
 ranges = np.linspace(10.0, 20_000.0, 400)
 pl = underwater.propagation_loss(ranges, 10e3, law="practical", transition_range=1000.0,
-                          temperature=10.0, salinity=35.0, depth=100.0)
+                          temperature_c=10.0, salinity=35.0, depth=100.0)
 print(round(pl.absorption_coefficient, 3), round(float(pl.pl[-1]), 1))
 # 0.95 dB/km, 92.0 dB at 20 km
 
@@ -250,7 +250,7 @@ print(round(pl.absorption_coefficient, 3), round(float(pl.pl[-1]), 1))
 # above is checkable rather than asserted:
 for model in ("ainslie-mccolm", "thorp"):
     other = underwater.propagation_loss(ranges, 10e3, law="practical",
-                              transition_range=1000.0, temperature=10.0,
+                              transition_range=1000.0, temperature_c=10.0,
                               salinity=35.0, depth=100.0, model=model)
     print(model, round(other.absorption_coefficient, 3))   # 0.973 / 1.15
 
@@ -286,7 +286,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 freqs = np.logspace(1.0, 6.0, 500)
-env = {"temperature": 10.0, "salinity": 35.0, "depth": 100.0}
+env = {"temperature_c": 10.0, "salinity": 35.0, "depth": 100.0}
 alpha = {m: np.asarray(underwater.seawater_absorption(freqs, model=m, **env))
          for m in ("francois-garrison", "ainslie-mccolm", "thorp")}
 

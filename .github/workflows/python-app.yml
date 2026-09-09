@@ -334,6 +334,36 @@ jobs:
     - name: Check docs/reference/api/index.md coverage
       run: python scripts/check_api_reference.py
 
+  # A pressure of 101 325 and a pressure of 101.325 are both legitimate values
+  # here: the ISO 3740 family prints kilopascals, IEC 61094-2 and ISO 15186-3
+  # print pascals, and the result of the mix-up is still a float. No guard by
+  # magnitude can separate them, because either reading is a real duty
+  # somewhere else in the tree, so the unit lives in the parameter name and
+  # this holds it there. It walks the imported package rather than the source
+  # tree, because ReportMetadata is published from the root and defined in a
+  # private module, and a scan by file path does not see it.
+  parameter-units:
+    name: Every public quantity names its unit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install runtime dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+    - name: Check that no pressure, temperature or humidity hides its unit
+      run: python scripts/check_parameter_units.py
+
   # The committed documentation figures (.github/images) must match a fresh
   # `make graphs` run. The rendering + compute stack is pinned in
   # requirements-figures.txt so SVG *structure* (elements, text, colours) and

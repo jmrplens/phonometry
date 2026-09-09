@@ -76,7 +76,7 @@ t60 = np.full(freqs.size, 2.0)
 
 rev = emission.sound_power_reverberation(
     lp, t60, volume=200.0, surface_area=220.0, frequencies=freqs,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 print(round(rev.speed_of_sound, 1))                     # c = 343.2 m/s
 print(round(float(rev.absorption_area[0]), 1))          # A = 16.1 m^2 at 100 Hz
@@ -87,7 +87,7 @@ print(round(rev.sound_power_level_a, 1))                # LWA = 92.1 dB
 # Comparison method: a reference source of known LW measured at the same spots.
 lw_rss = np.full(freqs.size, 85.0)
 lp_rss = np.linspace(78.0, 69.0, freqs.size)
-cmp = emission.sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature=20.0)
+cmp = emission.sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature_c=20.0)
 print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 
 rev.plot()   # reverberation-room LW spectrum, LWA in the title (needs matplotlib)
@@ -115,7 +115,7 @@ lp = np.linspace(80.0, 70.0, freqs.size)
 t60 = np.full(freqs.size, 2.0)
 rev = emission.sound_power_reverberation(
     lp, t60, volume=200.0, surface_area=220.0, frequencies=freqs,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 
 # rev is the ReverberationSoundPowerResult computed above. One line:
@@ -160,12 +160,12 @@ counterpart of $L_W$ defined in the same clauses, is section 3.
 | `surface_area` | float | m² | > 0 | Total room surface $S$ (Waterhouse, $A/S$) |
 | `frequencies` | 1D array | Hz | one per band | Required (Waterhouse needs $f$); enables $L_{W\mathrm{A}}$ |
 | `background_levels` | 1D or 2D array | dB | matches `levels` | $K_{1i}$ per microphone position (Eq. 14/15, before the Eq. 16 average; frequency-dependent criterion) |
-| `temperature` | float | °C | default `23.0` | Sets $c$, $C_1$, $C_2$ |
-| `static_pressure` | float | kPa | default `101.325` | Sets $C_1$, $C_2$ |
+| `temperature_c` | float | °C | default `23.0` | Sets $c$, $C_1$, $C_2$ |
+| `static_pressure_kpa` | float | kPa | default `101.325` | Sets $C_1$, $C_2$ |
 
 `sound_power_comparison(levels, levels_ref, lw_ref, *, frequencies=None,
-background_levels=…, background_levels_ref=…, temperature=23.0,
-static_pressure=101.325)` takes the same room levels plus the reference
+background_levels=…, background_levels_ref=…, temperature_c=23.0,
+static_pressure_kpa=101.325)` takes the same room levels plus the reference
 source's levels and known power.
 
 | Parameter | Type | Units | Range / default | Notes |
@@ -214,7 +214,7 @@ freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], float)
 lp = np.array([80.0, 83.0, 85.0, 84.0, 80.0, 75.0, 68.0])
 res = emission.sound_power_reverberation(
     lp, 2.0, volume=200.0, surface_area=240.0, frequencies=freqs,
-    temperature=20.0, static_pressure=101.325,
+    temperature_c=20.0, static_pressure_kpa=101.325,
 )
 
 res.report(
@@ -300,7 +300,7 @@ slams = slam + rng.normal(0.0, 0.6, size=(5, 6, thirds.size))
 slam_lj = emission.sound_energy_reverberation(
     slams, t60_thirds, volume=200.0, surface_area=220.0, frequencies=thirds,
     background_levels=np.full(thirds.size, 45.0),   # time-averaged over the same 4 s
-    integration_time=4.0, temperature=20.0, static_pressure=101.0,
+    integration_time=4.0, temperature_c=20.0, static_pressure_kpa=101.0,
 )
 print(slam_lj.events, slam_lj.method)                    # 5 direct
 print(np.round(slam_lj.sound_energy_level[:3], 1))       # [96.  94.9 94.2] dB re 1 pJ
@@ -308,7 +308,7 @@ print(round(slam_lj.sound_energy_level_a, 1))            # LJA = 99.0 dB(A)
 
 # Comparison method: the reference source of section 1, run steadily.
 slam_cmp = emission.sound_energy_comparison(
-    slams, lp_rss, lw_rss, frequencies=thirds, temperature=20.0,
+    slams, lp_rss, lw_rss, frequencies=thirds, temperature_c=20.0,
 )
 print(round(float(slam_cmp.sound_energy_level[0]), 1), slam_cmp.method)   # 95.0 comparison
 
@@ -318,11 +318,11 @@ print(octaves)                        # [ 125.  250.  500. 1000. 2000. 4000. 800
 lp_thirds = np.linspace(80.0, 70.0, thirds.size)     # the mean room SPL of section 1
 steady = emission.sound_power_reverberation(
     lp_thirds, t60_thirds, volume=200.0, surface_area=220.0, frequencies=thirds,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 ten_seconds = emission.sound_energy_reverberation(
     lp_thirds + 10.0, t60_thirds, volume=200.0, surface_area=220.0, frequencies=thirds,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 print(np.round(ten_seconds.sound_energy_level - steady.sound_power_level, 6)[:3])   # 10.0
 

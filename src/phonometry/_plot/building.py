@@ -2326,12 +2326,12 @@ def _plot_low_frequency(
     handles, texts = ax.get_legend_handles_labels()
     # The indicator only exists where the receiving-side pressure was measured
     # alongside the intensity, so the twin axis is drawn only then.
-    if result.surface_pressure_intensity is not None:
+    if result.surface_pressure_intensity_indicator is not None:
         limit = result.indicator_limit
         twin = ax.twinx()
         twin.plot(
             positions,
-            np.asarray(result.surface_pressure_intensity, dtype=np.float64),
+            np.asarray(result.surface_pressure_intensity_indicator, dtype=np.float64),
             color=_C_SECONDARY,
             lw=2.0,
             marker="o",
@@ -2372,7 +2372,7 @@ def plot_low_frequency_intensity(
     :class:`~phonometry.building.measurement.intensity_insulation.LowFrequencyIntensityResult`.
 
     :param result: A low-frequency result exposing ``r_i``,
-        ``surface_pressure_intensity``, ``qualified`` and ``frequencies``.
+        ``surface_pressure_intensity_indicator``, ``qualified`` and ``frequencies``.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``RI`` bar call.
@@ -2403,7 +2403,7 @@ def plot_low_frequency_element(
     :class:`~phonometry.building.measurement.intensity_insulation.LowFrequencyElementResult`.
 
     :param result: An element result exposing ``d_i_n_e``,
-        ``surface_pressure_intensity``, ``qualified`` and ``frequencies``.
+        ``surface_pressure_intensity_indicator``, ``qualified`` and ``frequencies``.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``DI,n,e`` bar call.

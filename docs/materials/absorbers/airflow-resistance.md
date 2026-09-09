@@ -67,7 +67,7 @@ dp_fit = r.linear_coefficient * u_fit + r.quadratic_coefficient * u_fit**2
 fig, ax = plt.subplots()
 ax.plot(u_fit * 1e3, dp_fit, label="Through-origin fit  dp = a u + b u^2")
 ax.plot(u * 1e3, dp, "o", label="Measured pressure drop")
-ax.plot(r.evaluation_velocity * 1e3, r.pressure_drop, "D",
+ax.plot(r.evaluation_velocity * 1e3, r.pressure_drop_pa, "D",
         label="Evaluation at 0.5 mm/s")
 ax.set_xlabel("Linear airflow velocity u [mm/s]")
 ax.set_ylabel("Pressure drop dp [Pa]")
@@ -110,13 +110,14 @@ material characterisation, so the fiche carries no pass/fail verdict.
 It uses the same `ReportMetadata` container and rendering engine as the other
 fiches. The descriptive fields that apply here are `client`, `manufacturer`,
 `specimen`, `thickness` (the specimen thickness $d$, in metres, shown in
-millimetres), `test_room`, `test_date`, `temperature`, `relative_humidity`,
-`measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The
-`requirement` field is ignored (ISO 9053-1 has no verdict). The fiche embeds
-the fitted curve, so rendering needs both reportlab and matplotlib
-(`pip install "phonometry[report,plot]"`); only `engine="reportlab"` is
-supported. The fiche renders in English by default; pass `language="es"` for a
-Spanish fiche (translated fixed strings and a comma decimal separator).
+millimetres), `test_room`, `test_date`, `temperature_c`,
+`relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`,
+`report_id` and `notes`. The `requirement` field is ignored (ISO 9053-1 has no
+verdict). The fiche embeds the fitted curve, so rendering needs both reportlab
+and matplotlib (`pip install "phonometry[report,plot]"`); only
+`engine="reportlab"` is supported. The fiche renders in English by default;
+pass `language="es"` for a Spanish fiche (translated fixed strings and a comma
+decimal separator).
 
 ```python
 from phonometry import materials, ReportMetadata

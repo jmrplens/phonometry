@@ -184,7 +184,9 @@ def test_impedance_adjustment() -> None:
     assert impedance_adjustment(15.0, 101.325) == pytest.approx(0.074, abs=5e-4)
     # Hotter, lower-pressure air is less dense: negative adjustment.
     assert impedance_adjustment(35.0, 95.0) < 0.0
-    with pytest.raises(ValueError, match=r"'pressure' must be positive"):
+    with pytest.raises(
+        ValueError, match=r"'atmospheric_pressure_kpa' must be positive"
+    ):
         impedance_adjustment(15.0, 0.0)
 
 
@@ -705,7 +707,7 @@ def test_event_level_invalid_inputs() -> None:
 def test_impedance_adjustment_rejects_absolute_zero() -> None:
     from phonometry.aircraft.airport_noise import impedance_adjustment
 
-    with pytest.raises(ValueError, match=r"'temperature' must be finite and above"):
+    with pytest.raises(ValueError, match=r"'temperature_c' must be finite and above"):
         impedance_adjustment(-300.0, 101.325)
 
 

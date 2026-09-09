@@ -86,7 +86,7 @@ def _run_case(case: dict[str, str]) -> RoadEmissionResult:
     return road_source_power(
         traffic,
         surface=surfaces[case["surface"]],
-        temperature=float(case["temperature_c"]),
+        temperature_c=float(case["temperature_c"]),
         gradient=float(case["gradient_pct"]),
         studded_months=float(case["studded_months"]),
         junction_distance=float(case["junction_distance_m"]),
@@ -310,12 +310,12 @@ def test_zero_flow_contributes_nothing() -> None:
 
 def test_temperature_correction_is_linear_and_zero_at_20_degrees() -> None:
     """(2.2.10): ``K_m (tau_ref - tau)``, equal in every octave band."""
-    base = road_rolling_noise("1", 50.0, temperature=20.0)
-    warm = road_rolling_noise("1", 50.0, temperature=30.0)
-    cold = road_rolling_noise("1", 50.0, temperature=-5.0)
+    base = road_rolling_noise("1", 50.0, temperature_c=20.0)
+    warm = road_rolling_noise("1", 50.0, temperature_c=30.0)
+    cold = road_rolling_noise("1", 50.0, temperature_c=-5.0)
     assert warm - base == pytest.approx(np.full(8, -0.8), abs=1e-12)
     assert cold - base == pytest.approx(np.full(8, 2.0), abs=1e-12)
-    heavy = road_rolling_noise("3", 50.0, temperature=0.0) - road_rolling_noise(
+    heavy = road_rolling_noise("3", 50.0, temperature_c=0.0) - road_rolling_noise(
         "3", 50.0
     )
     assert heavy == pytest.approx(np.full(8, 0.8), abs=1e-12)
@@ -661,8 +661,8 @@ def test_unknown_category_and_surface_are_rejected() -> None:
 def test_invalid_inputs_are_rejected() -> None:
     with pytest.raises(ValueError, match="'speed' must be a positive number of km/h"):
         road_rolling_noise("1", 0.0)
-    with pytest.raises(ValueError, match=r"'temperature' must be a finite number"):
-        road_rolling_noise("1", 50.0, temperature=float("nan"))
+    with pytest.raises(ValueError, match=r"'temperature_c' must be a finite number"):
+        road_rolling_noise("1", 50.0, temperature_c=float("nan"))
     with pytest.raises(ValueError, match="at least one vehicle category"):
         road_source_power([])
     repeated = [

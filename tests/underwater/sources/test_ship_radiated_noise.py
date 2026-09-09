@@ -50,7 +50,7 @@ def test_radiated_noise_level_closed_form() -> None:
 
 def test_radiated_noise_level_rejects_bad_input() -> None:
     with pytest.raises(
-        ValueError, match=r"'rms_pressure' must be a positive, finite number"
+        ValueError, match=r"'rms_pressure_pa' must be a positive, finite number"
     ):
         underwater.radiated_noise_level(0.0, 100.0)
     with pytest.raises(

@@ -253,8 +253,8 @@ print(round(two.sound_power_level_a, 1))        # 96.5 dB(A)
 | `frequencies` | array 1D | Hz | octavas de 63 Hz a 8 kHz | Frecuencias centrales nominales de octava de la Tabla D.1; obligatorio. El apartado 3.11 fija el rango de uso general en 125 Hz a 8 kHz; la fila de 63 Hz de la Tabla D.1 lleva la nota a, que solo la admite donde el entorno de ensayo, la fuente sonora de referencia y la instrumentación sean satisfactorios en esa frecuencia |
 | `background_levels` | array 1D o 2D | dB | `(bandas,)` o `(n, bandas)` | $L_{pi(\mathrm{B})}$; un espectro sirve para todas las posiciones. `None` avisa y deja `background_requirement_met` a `False` en todas las bandas, porque el 7.5 lo mide en cada posición y el 8.1 necesita el margen |
 | `background_levels_ref` | array 1D o 2D | dB | mismas formas | Ruido de fondo de la lectura de la fuente de referencia; `None` reutiliza `background_levels` (7.5) |
-| `temperature` | float | °C | por defecto `23.0` | Temperatura del aire en el ensayo, para $C_2$ |
-| `static_pressure` | float | kPa | por defecto `101.325` | Presión estática en el ensayo, para $C_2$; véase `static_pressure_from_altitude` |
+| `temperature_c` | float | °C | por defecto `23.0` | Temperatura del aire en el ensayo, para $C_2$ |
+| `static_pressure_kpa` | float | kPa | por defecto `101.325` | Presión estática en el ensayo, para $C_2$; véase `static_pressure_from_altitude` |
 | `conditions` | `GradeConditions` | | | Las dos condiciones que la Tabla 2 lee juntas: `excess_levels`, el $\Delta L_{f\mathrm{A}}$ en cada posición `(n,)` en decibelios (Anexo A), y `directivity_range`, la semiamplitud del barrido de directividad ponderado A en decibelios (7.2). Si falta cualquiera de las dos, la determinación se queda en grado de control |
 | `sigma_omc` | float | dB | $\ge 0$ | Desviación típica de las condiciones de funcionamiento y montaje (9.2); `None` deja la incertidumbre en `NaN` |
 | `coverage_factor` | float | | por defecto `2.0` | $k$ de la Ec. 23; 1,6 para una comparación unilateral con un límite |
@@ -346,7 +346,7 @@ $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 | `event_levels` | array 3D o 2D | dB | `(n, N, bandas)` o `(n, bandas)` | $L'_{Ei,q(\mathrm{ST})}$ por suceso, o $L'_{Ei,N(\mathrm{ST})}$ de una medición sobre $N$ sucesos |
 | `events` | int | | $\ge 1$ | $N$ para la forma 2D (Ec. 17); debe ser `None` con la forma 3D. El apartado 7.6 pide al menos cinco sucesos, así que menos de cinco avisa y la determinación no es conforme, en cualquiera de las dos formas |
 | `integration_time` | float | s | $> 0$ | $T$ de la medición del suceso; `None` aplica la Ec. 14 tal como está impresa |
-| `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature`, `static_pressure`, `excess_levels`, `directivity_range`, `sigma_omc`, `coverage_factor` | | | | Como en `sound_power_in_situ()` |
+| `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc`, `coverage_factor` | | | | Como en `sound_power_in_situ()` |
 
 ## 3. Grado, incertidumbre y condiciones de referencia
 
@@ -425,7 +425,7 @@ ps = emission.static_pressure_from_altitude(640.0)
 print(round(ps, 2))                                 # 93.87 kPa (Ec. C.2)
 high = emission.sound_power_in_situ(
     st, rss, lw_rss, freqs, background_levels=background,
-    temperature=27.0, static_pressure=ps,
+    temperature_c=27.0, static_pressure_kpa=ps,
 )
 print(round(high.c2, 3))                            # 0.423 dB
 print(round(float(high.sound_power_level[3]), 2), round(float(high.sound_power_level_ref[3]), 2))

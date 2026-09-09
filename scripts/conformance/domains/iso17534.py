@@ -115,7 +115,7 @@ def _general_method(
         frequencies=np.array(_BANDS),
         ground=ground,
         atmosphere=ph.environment.AtmosphericConditions(
-            temperature=_TEMPERATURE, relative_humidity=_HUMIDITY
+            temperature_c=_TEMPERATURE, relative_humidity_percent=_HUMIDITY
         ),
     )
 
@@ -133,7 +133,7 @@ def _alternative_method(mean_height: float, distance: float) -> np.ndarray:
     d_omega = ph.environment.directivity_omega(_SOURCE[2], _RECEIVER[2], _DP)
     a_div = ph.environment.geometric_divergence(distance)
     a_atm = ph.environment.atmospheric_absorption(
-        distance, bands, temperature=_TEMPERATURE, relative_humidity=_HUMIDITY
+        distance, bands, temperature_c=_TEMPERATURE, relative_humidity_percent=_HUMIDITY
     )
     return _LW + d_omega - a_div - a_atm - a_gr
 

@@ -101,8 +101,8 @@ def _metadata_pairs(
     mounting = md.mounting
     test_room = md.test_room
     test_date = md.test_date
-    temperature = md.temperature
-    pressure = md.pressure
+    temperature_c = md.temperature_c
+    static_pressure_kpa = md.static_pressure_kpa
 
     freqs = np.asarray(result.frequency, dtype=np.float64)
     freq_range = None
@@ -135,11 +135,13 @@ def _metadata_pairs(
         (t("Date of test", language), test_date),
         (
             t("Temperature [&#176;C]", language),
-            fmt_meta(temperature, language) if temperature is not None else None,
+            fmt_meta(temperature_c, language) if temperature_c is not None else None,
         ),
         (
             t("Ambient pressure [kPa]", language),
-            fmt_meta(pressure, language) if pressure is not None else None,
+            fmt_meta(static_pressure_kpa, language)
+            if static_pressure_kpa is not None
+            else None,
         ),
     ]
     # The frequency range is a formatted (label-safe) string; the remaining

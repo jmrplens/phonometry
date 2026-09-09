@@ -322,12 +322,12 @@ def static_pressure_from_altitude(altitude: float) -> float:
 
     Annex C prints :math:`p_{\mathrm{s},0}` = 1,013 25 x 10^5 Pa and states
     the quantity in pascals. The result here is in kilopascals so that it feeds
-    ``static_pressure`` of :func:`sound_power_in_situ` directly, matching
+    ``static_pressure_kpa`` of :func:`sound_power_in_situ` directly, matching
     ISO 3741, ISO 3744 and ISO 3745, which do print kilopascals. The pressure
     reaches ``C2`` only as :math:`p_\mathrm{s}/p_{\mathrm{s},0}`, so the two
-    unit conventions give the same correction. A site below sea level is admissible (the base exceeds one);
-    the formula stops meaning anything where the base reaches zero, some
-    44 km up, and that is refused.
+    unit conventions give the same correction. A site below sea level is
+    admissible (the base exceeds one); the formula stops meaning anything
+    where the base reaches zero, some 44 km up, and that is refused.
 
     :param altitude: Altitude of the test site ``Ha``, in metres, one site at
         a time.
@@ -656,8 +656,8 @@ class _Comparison:
     lw_ref: ArrayLike
     frequencies: ArrayLike
     background_levels_ref: ArrayLike | None
-    temperature: float
-    static_pressure: float
+    temperature_c: float
+    static_pressure_kpa: float
     conditions: GradeConditions | None
     sigma_omc: float | None
     coverage_factor: float
@@ -779,7 +779,7 @@ def _determine(
         # it comes from is per location: evaluated per (j, i).
         k1_ref, met = _background_correction(ref - bg_ref[None, :, :])
         met_ref = np.all(met, axis=(0, 1))
-    _validate_meteorology(comparison.temperature, comparison.static_pressure)
+    _validate_meteorology(comparison.temperature_c, comparison.static_pressure_kpa)
     corrected_ref = ref - k1_ref
     per_location = energy_mean(corrected_ref, axis=1)  # Eq. (9) / (10)
     mean_ref = energy_mean(per_location, axis=0)  # second term of Eq. (12)
@@ -803,7 +803,7 @@ def _determine(
         background_correction=np.asarray(background_correction, dtype=np.float64),
         background_correction_ref=np.asarray(k1_ref, dtype=np.float64),
         background_requirement_met=np.asarray(met_source & met_ref, dtype=bool),
-        c2=_c2_correction(comparison.temperature, comparison.static_pressure),
+        c2=_c2_correction(comparison.temperature_c, comparison.static_pressure_kpa),
         grade=grade,
         sigma_r0=sigma_r0,
         sigma_omc=omc,
@@ -824,8 +824,8 @@ def sound_power_in_situ(
     *,
     background_levels: ArrayLike | None = None,
     background_levels_ref: ArrayLike | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,
     sigma_omc: float | None = None,
     coverage_factor: float = _COVERAGE_TWO_SIDED,
@@ -871,8 +871,8 @@ def sound_power_in_situ(
     :param background_levels_ref: Background for the reference-source
         measurement, same shapes; ``None`` reuses ``background_levels``,
         since the procedure takes one background reading (7.5).
-    :param temperature: Air temperature at the test, in degrees Celsius.
-    :param static_pressure: Static pressure at the test, in kilopascals
+    :param temperature_c: Air temperature at the test, in degrees Celsius.
+    :param static_pressure_kpa: Static pressure at the test, in kilopascals
         (see :func:`static_pressure_from_altitude`). Annex C prints this
         quantity in pascals, with :math:`p_{\mathrm{s},0}` = 1,013 25 x 10^5
         Pa, and is alone in its family in doing so: ISO 3741:2010,
@@ -896,7 +896,7 @@ def sound_power_in_situ(
     :raises ValueError: if ``levels`` is not a finite ``(n, bands)`` array,
         ``levels_ref``, ``lw_ref`` or either background does not match it,
         ``frequencies`` are not the octave centres of Table D.1,
-        ``temperature`` or ``static_pressure`` is out of range,
+        ``temperature_c`` or ``static_pressure_kpa`` is out of range,
         ``conditions.excess_levels`` is supplied and is not one finite value
         per position, ``conditions.directivity_range`` or ``sigma_omc`` is
         supplied and is
@@ -925,8 +925,8 @@ def sound_power_in_situ(
             lw_ref=lw_ref,
             frequencies=frequencies,
             background_levels_ref=background_levels_ref,
-            temperature=temperature,
-            static_pressure=static_pressure,
+            temperature_c=temperature_c,
+            static_pressure_kpa=static_pressure_kpa,
             conditions=conditions,
             sigma_omc=sigma_omc,
             coverage_factor=coverage_factor,
@@ -944,8 +944,8 @@ def sound_energy_in_situ(
     background_levels: ArrayLike | None = None,
     background_levels_ref: ArrayLike | None = None,
     integration_time: float | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,
     sigma_omc: float | None = None,
     coverage_factor: float = _COVERAGE_TWO_SIDED,
@@ -995,8 +995,8 @@ def sound_energy_in_situ(
         :math:`L_{pi(\mathrm{B})} + 10 \log_{10}(T/T_0)` with ``T0`` = 1 s
         (3.4, NOTE 1), so that the margin compares like with like. The two
         coincide at ``T`` = 1 s.
-    :param temperature: Air temperature at the test, in degrees Celsius.
-    :param static_pressure: Static pressure at the test, in kilopascals, as
+    :param temperature_c: Air temperature at the test, in degrees Celsius.
+    :param static_pressure_kpa: Static pressure at the test, in kilopascals, as
         for :func:`sound_power_in_situ`; Annex C itself prints pascals.
     :param conditions: The :class:`GradeConditions` of the determination, as
         for :func:`sound_power_in_situ`.
@@ -1043,8 +1043,8 @@ def sound_energy_in_situ(
             lw_ref=lw_ref,
             frequencies=frequencies,
             background_levels_ref=background_levels_ref,
-            temperature=temperature,
-            static_pressure=static_pressure,
+            temperature_c=temperature_c,
+            static_pressure_kpa=static_pressure_kpa,
             conditions=conditions,
             sigma_omc=sigma_omc,
             coverage_factor=coverage_factor,

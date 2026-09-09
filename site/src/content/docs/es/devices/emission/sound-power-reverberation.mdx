@@ -202,7 +202,7 @@ t60 = np.full(freqs.size, 2.0)
 
 rev = emission.sound_power_reverberation(
     lp, t60, volume=200.0, surface_area=220.0, frequencies=freqs,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 print(round(rev.speed_of_sound, 1))                     # c = 343.2 m/s
 print(round(float(rev.absorption_area[0]), 1))          # A = 16.1 m^2 a 100 Hz
@@ -213,7 +213,7 @@ print(round(rev.sound_power_level_a, 1))                # LWA = 92.1 dB
 # Método de comparación: una fuente de referencia de LW conocido medida en los mismos puntos.
 lw_rss = np.full(freqs.size, 85.0)
 lp_rss = np.linspace(78.0, 69.0, freqs.size)
-cmp = emission.sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature=20.0)
+cmp = emission.sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature_c=20.0)
 print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 
 rev.plot()   # espectro LW de la cámara reverberante; LWA en el título (requiere matplotlib)
@@ -242,7 +242,7 @@ lp = np.linspace(80.0, 70.0, freqs.size)
 t60 = np.full(freqs.size, 2.0)
 rev = emission.sound_power_reverberation(
     lp, t60, volume=200.0, surface_area=220.0, frequencies=freqs,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 
 # rev es el ReverberationSoundPowerResult calculado arriba. Una línea:
@@ -328,8 +328,8 @@ plt.show()
 | `surface_area` | float | m² | > 0 | Superficie total de la cámara $S$ (Waterhouse, $A/S$) |
 | `frequencies` | array 1D | Hz | uno por banda | Obligatorio (Waterhouse necesita $f$); habilita $L_{W\mathrm{A}}$ |
 | `background_levels` | array 1D o 2D | dB | coincide con `levels` | $K_1$ por banda (criterio dependiente de la frecuencia) |
-| `temperature` | float | °C | por defecto `23.0` | Fija $c$, $C_1$, $C_2$ |
-| `static_pressure` | float | kPa | por defecto `101.325` | Fija $C_1$, $C_2$ |
+| `temperature_c` | float | °C | por defecto `23.0` | Fija $c$, $C_1$, $C_2$ |
+| `static_pressure_kpa` | float | kPa | por defecto `101.325` | Fija $C_1$, $C_2$ |
 
 Tanto esta función como el método de comparación de la sección 2 devuelven un
 `ReverberationSoundPowerResult`
@@ -389,9 +389,9 @@ de las dos fuentes.
 ### Parámetros de `sound_power_comparison()`
 
 `sound_power_comparison(levels, levels_ref, lw_ref, *, frequencies=None,
-background_levels=…, background_levels_ref=…, temperature=23.0,
-static_pressure=101.325)` toma los mismos niveles de cámara más los niveles de la
-fuente de referencia y su potencia conocida.
+background_levels=…, background_levels_ref=…, temperature_c=23.0,
+static_pressure_kpa=101.325)` toma los mismos niveles de cámara más los niveles
+de la fuente de referencia y su potencia conocida.
 
 | Parámetro | Tipo | Unidades | Rango / defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
@@ -437,7 +437,7 @@ freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], float)
 lp = np.array([80.0, 83.0, 85.0, 84.0, 80.0, 75.0, 68.0])
 res = emission.sound_power_reverberation(
     lp, 2.0, volume=200.0, surface_area=240.0, frequencies=freqs,
-    temperature=20.0, static_pressure=101.325,
+    temperature_c=20.0, static_pressure_kpa=101.325,
 )
 
 res.report(
@@ -534,7 +534,7 @@ slams = slam + rng.normal(0.0, 0.6, size=(5, 6, thirds.size))
 slam_lj = emission.sound_energy_reverberation(
     slams, t60_thirds, volume=200.0, surface_area=220.0, frequencies=thirds,
     background_levels=np.full(thirds.size, 45.0),   # promediado en los mismos 4 s
-    integration_time=4.0, temperature=20.0, static_pressure=101.0,
+    integration_time=4.0, temperature_c=20.0, static_pressure_kpa=101.0,
 )
 print(slam_lj.events, slam_lj.method)                    # 5 direct
 print(np.round(slam_lj.sound_energy_level[:3], 1))       # [96.  94.9 94.2] dB re 1 pJ
@@ -542,7 +542,7 @@ print(round(slam_lj.sound_energy_level_a, 1))            # LJA = 99.0 dB(A)
 
 # Método de comparación: la fuente de referencia de la sección 2, en régimen estacionario.
 slam_cmp = emission.sound_energy_comparison(
-    slams, lp_rss, lw_rss, frequencies=thirds, temperature=20.0,
+    slams, lp_rss, lw_rss, frequencies=thirds, temperature_c=20.0,
 )
 print(round(float(slam_cmp.sound_energy_level[0]), 1), slam_cmp.method)   # 95.0 comparison
 
@@ -561,11 +561,11 @@ Ec. 20 expresa $L_W$:
 lp_thirds = np.linspace(80.0, 70.0, thirds.size)     # el SPL medio de cámara de la sección 1
 steady = emission.sound_power_reverberation(
     lp_thirds, t60_thirds, volume=200.0, surface_area=220.0, frequencies=thirds,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 ten_seconds = emission.sound_energy_reverberation(
     lp_thirds + 10.0, t60_thirds, volume=200.0, surface_area=220.0, frequencies=thirds,
-    temperature=20.0, static_pressure=101.0,
+    temperature_c=20.0, static_pressure_kpa=101.0,
 )
 print(np.round(ten_seconds.sound_energy_level - steady.sound_power_level, 6)[:3])   # 10.0
 ```
@@ -597,7 +597,7 @@ print(np.round(lj_octave, 1))         # de 99.8 dB a 87.7 dB, tres tercios sumad
 | `events` | int o None | | `>= 1`, por defecto `None` | $N_\mathrm{e}$ abarcados por una lectura (Ec. 23); al menos 5 sin aviso |
 | `background_levels` | array 1D o 2D | dB | coincide con `levels` | Fondo promediado en el tiempo sobre la misma ventana; $K_{1i}$ por posición (Ec. 25/26) |
 | `integration_time` | float | s | > 0, obligatorio con `background_levels` | La ventana $T$; el fondo se compara como $L_{pi(\mathrm{B})} + 10\log_{10}(T/T_0)$ |
-| `temperature`, `static_pressure` | float | °C, kPa | por defecto `23.0`, `101.325` | Fijan $c$, $C_1$, $C_2$ como en la sección 1 |
+| `temperature_c`, `static_pressure_kpa` | float | °C, kPa | por defecto `23.0`, `101.325` | Fijan $c$, $C_1$, $C_2$ como en la sección 1 |
 
 Ambas devuelven un `ReverberationSoundEnergyResult` (`sound_energy_level`,
 `mean_event_level`, `absorption_area`, `waterhouse_correction`,

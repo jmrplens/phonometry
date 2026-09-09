@@ -45,8 +45,8 @@ _IEC60534_8_4 = "Control valve noise (IEC 60534-8-4)"
 
 #: A.1's given data, shared by the three columns, in SI units.
 _LIQUID: dict[str, Any] = {
-    "inlet_pressure": 1.0e6,
-    "vapour_pressure": 2.32e3,
+    "inlet_pressure_pa": 1.0e6,
+    "vapour_pressure_pa": 2.32e3,
     "density": 997.0,
     "sound_speed": 1400.0,
 }
@@ -70,9 +70,9 @@ _INCIPIENT = ph.noise_control.incipient_cavitation_ratio(90.0, 0.42, 0.92)
 #: The per-column data. The third column is the second with the annex's own
 #: "Calculation with x_Fz = x_Fz + 0,1".
 _EXAMPLES: dict[int, dict[str, Any]] = {
-    1: {"mass_flow": 30.0, "outlet_pressure": 8.0e5, "shift": 0.0},
-    2: {"mass_flow": 40.0, "outlet_pressure": 6.5e5, "shift": 0.0},
-    3: {"mass_flow": 40.0, "outlet_pressure": 6.5e5, "shift": 0.1},
+    1: {"mass_flow": 30.0, "outlet_pressure_pa": 8.0e5, "shift": 0.0},
+    2: {"mass_flow": 40.0, "outlet_pressure_pa": 6.5e5, "shift": 0.0},
+    3: {"mass_flow": 40.0, "outlet_pressure_pa": 6.5e5, "shift": 0.1},
 }
 
 #: The band Table A.1 evaluates the frequency route at, in Hz.
@@ -86,7 +86,7 @@ def _example(index: int) -> HydrodynamicValveNoise:
         ph.noise_control.LiquidStream(
             **_LIQUID,
             mass_flow=case["mass_flow"],
-            outlet_pressure=case["outlet_pressure"],
+            outlet_pressure_pa=case["outlet_pressure_pa"],
         ),
         ph.noise_control.LiquidTrim(
             **_VALVE, incipient_ratio=_INCIPIENT + case["shift"]

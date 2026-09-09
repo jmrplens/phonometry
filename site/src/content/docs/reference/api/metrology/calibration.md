@@ -19,7 +19,7 @@ The calibration reference recording looks unreliable.
 sensitivity(
     ref_signal: SignalInput,
     target_spl: float = ...,
-    ref_pressure: float = ...,
+    reference_pressure_pa: float = ...,
     *,
     fs: int,
     validate: bool = ...,
@@ -31,7 +31,7 @@ sensitivity(
 sensitivity(
     ref_signal: SignalInput,
     target_spl: float = ...,
-    ref_pressure: float = ...,
+    reference_pressure_pa: float = ...,
     fs: int | None = ...,
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
@@ -69,7 +69,7 @@ integrator attack).
 | :--- | :--- |
 | `ref_signal` | Recording of the calibration tone. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately **not** applied, because this function is what produces such a factor and folding an existing one in would calibrate the calibration. |
 | `target_spl` | The known SPL level of the calibrator (default 94 dB). |
-| `ref_pressure` | Reference pressure (default 20 microPascals). |
+| `reference_pressure_pa` | Reference pressure (default 20 microPascals). |
 | `fs` | Sample rate of the recording in Hz. Required for the stability validation; without it the check is skipped. A [`Signal`](/phonometry/reference/api/io/io/#signal) supplies it, so a read take gets the validation for free, and an explicit value that disagrees raises. |
 | `validate` | If True (default) and `fs` is given, warn when the recording's short-term level fluctuation exceeds the limit. |
 | `max_fluctuation_db` | Explicit fluctuation limit in dB. Default (None) resolves the IEC 60942:2017 Table 2 class 1 limit for `frequency`. |

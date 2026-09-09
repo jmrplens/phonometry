@@ -253,7 +253,7 @@ none of them is optional in practice:
 | `dt` | `0.02` s | The logging interval of the level history. The method needs 10 ms to 25 ms; a coarser grid flattens the fitted onset rate and under-reports $P$, which is the caveat two paragraphs down made settable |
 | `calibration_offset` | `0.0` dB | Added to the level history to bridge a digital scale to a calibrated one: the difference between the calibrator's known level and the level this same processing reports for the calibration recording. It moves $L_\mathrm{Aeq}$ and the adjusted $L_\mathrm{Aeq}$ and leaves $K_\mathrm{I}$ alone |
 | `laeq` | `None` | Supply the $L_\mathrm{Aeq}$ measured over the assessment period instead of letting it be computed from the excerpt, which is what a real report does |
-| `reference_pressure` | `2e-05` Pa | Only change it for a non-air medium |
+| `reference_pressure_pa` | `2e-05` Pa | Only change it for a non-air medium |
 | `onset_rate_method` | `'least_squares'` | The fit over the detected rise |
 
 `environment.sound_pressure_level_history(signal, fs, *, dt=..., calibration_offset=...)`

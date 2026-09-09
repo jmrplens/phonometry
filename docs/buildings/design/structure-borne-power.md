@@ -190,15 +190,16 @@ spectrum with a nominal band axis, and a boxed band-summed total $L_{W\mathrm{s}
 
 The relevant `ReportMetadata` fields are `client`, `specimen` (the source
 equipment), `test_room` (the test environment), `instrumentation`,
-`temperature`, `relative_humidity`, `pressure`, `test_date` and the footer
-identity `laboratory`, `operator`, `report_id` and `notes`; the plate mass and
-area come from the result itself. Supplying `requirement` adds a PASS/FAIL
-verdict against a declared upper limit on the total $L_{W\mathrm{s}}$ (lower is better).
-`verbose=True` adds the plate loss factor $\eta$ column, and `language="es"`
-renders the Spanish fiche. The basis strip states Formula 14 and the conversion
-to the plate-independent source quantities (Formulae 15/17) required before
-EN 12354-5. Rendering needs the optional `phonometry[report]` extra (reportlab),
-plus matplotlib for the spectrum.
+`temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`,
+`test_date` and the footer identity `laboratory`, `operator`, `report_id` and
+`notes`; the plate mass and area come from the result itself. Supplying
+`requirement` adds a PASS/FAIL verdict against a declared upper limit on the
+total $L_{W\mathrm{s}}$ (lower is better). `verbose=True` adds the plate loss
+factor $\eta$ column, and `language="es"` renders the Spanish fiche. The basis
+strip states Formula 14 and the conversion to the plate-independent source
+quantities (Formulae 15/17) required before EN 12354-5. Rendering needs the
+optional `phonometry[report]` extra (reportlab), plus matplotlib for the
+spectrum.
 
 ```python
 import numpy as np

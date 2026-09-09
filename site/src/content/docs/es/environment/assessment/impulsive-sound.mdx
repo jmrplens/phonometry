@@ -256,7 +256,7 @@ ninguno es opcional en la práctica:
 | `dt` | `0.02` s | El intervalo de registro del historial de nivel. El método necesita de 10 ms a 25 ms; una rejilla más gruesa aplana la tasa de crecimiento ajustada y subestima $P$, que es la advertencia de dos párrafos más abajo hecha configurable |
 | `calibration_offset` | `0.0` dB | Se suma al historial de nivel para tender un puente entre una escala digital y una calibrada: la diferencia entre el nivel conocido del calibrador y el nivel que este mismo procesado declara para la grabación de calibración. Mueve el $L_\mathrm{Aeq}$ y el $L_\mathrm{Aeq}$ ajustado, y deja $K_\mathrm{I}$ en paz |
 | `laeq` | `None` | Pasa el $L_\mathrm{Aeq}$ medido sobre el periodo de evaluación en vez de dejar que se calcule a partir del extracto, que es lo que hace un informe real |
-| `reference_pressure` | `2e-05` Pa | Solo se cambia para un medio distinto del aire |
+| `reference_pressure_pa` | `2e-05` Pa | Solo se cambia para un medio distinto del aire |
 | `onset_rate_method` | `'least_squares'` | El ajuste sobre la subida detectada |
 
 `environment.sound_pressure_level_history(signal, fs, *, dt=..., calibration_offset=...)`

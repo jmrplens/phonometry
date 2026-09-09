@@ -670,8 +670,8 @@ de grado 2 de la sección 1: el coste del grado es sobre todo tiempo.
 | `background_levels` | array 2D o espectro | dB | coincide con `levels_positions` | Habilita el $K_{1i}$ por posición de la Ec. 11 |
 | `frequencies` | array 1D | Hz | una por banda | Habilita $L_{W\mathrm{A}}$ y el $C_3$ por banda |
 | `areas` | array 1D | m² | una por posición | Áreas de segmento desiguales, para una investigación localizada (apartado 9.4.3.2); si se omite se suponen iguales |
-| `temperature` | float | °C | por defecto `23.0` | Fija $C_1$, $C_2$ |
-| `static_pressure` | float | kPa | por defecto `101.325` | Fija $C_1$, $C_2$ |
+| `temperature_c` | float | °C | por defecto `23.0` | Fija $C_1$, $C_2$ |
+| `static_pressure_kpa` | float | kPa | por defecto `101.325` | Fija $C_1$, $C_2$ |
 | `air_absorption_coefficient` | float o array 1D | dB/m | por defecto `None` | El término $C_3$ de absorción del aire; se aporta, no se calcula |
 | `sigma_omc` | float | dB | por defecto `0.0` | Desviación típica de funcionamiento y montaje, apartado 10.5 |
 | `coverage_factor` | float | — | por defecto `2.0` | La $k$ de $U = k\sqrt{\sigma_{\mathrm{R}0}^2 + \sigma_\text{omc}^2}$ |
@@ -1083,7 +1083,7 @@ diezmilésima de decibelio.
 ```python
 # Una determinación a 1 200 m y 8 C, llevada a 101.325 kPa y 23 C (Ec. G.3).
 corr = emission.reference_atmosphere_correction(8.0, altitude=1200.0)
-print(round(corr.static_pressure, 1))    # 87.7 kPa, de la Ec. G.2
+print(round(corr.static_pressure_kpa, 1))    # 87.7 kPa, de la Ec. G.2
 print(round(corr.c1, 3), round(corr.c2, 3), round(corr.total, 2))   # 0.386 0.291 0.68 dB
 lj_ref = burst.sound_energy_level + corr.total    # Ec. G.3; la Ec. G.1 suma lo mismo a LW
 ```
@@ -1108,9 +1108,10 @@ Devuelve un `SoundEnergyResult`: `sound_energy_level` ($L_J$ por banda),
 `environmental_correction`, `directivity_index` (por posición y banda),
 `surface_area`, `sound_energy_level_a` ($L_{J\mathrm{A}}$), `uncertainty`,
 `grade`, `events` ($N_\mathrm{e}$, o `None` cuando se aportaron las medias) e
-`integration_time`. `reference_atmosphere_correction(temperature,
-static_pressure=…, altitude=…)` devuelve un `ReferenceAtmosphereCorrection`
-con `c1`, `c2`, su `total` y la `static_pressure` empleada.
+`integration_time`. `reference_atmosphere_correction(temperature_c,
+static_pressure_kpa=…, altitude=…)` devuelve un
+`ReferenceAtmosphereCorrection`
+con `c1`, `c2`, su `total` y la `static_pressure_kpa` empleada.
 
 ## Qué cubre esta guía
 

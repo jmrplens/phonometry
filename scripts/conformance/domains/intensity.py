@@ -253,7 +253,7 @@ def _chk_reverberation_lw() -> Outcome:
     lw_target = np.array([80.0, 85.0, 90.0, 82.0, 75.0])
     lp = lw_target - _reverb_bracket(t60, volume, surface, freqs, theta, ps)
     res = ph.emission.sound_power_reverberation(
-        lp, t60, volume, surface, freqs, temperature=theta, static_pressure=ps
+        lp, t60, volume, surface, freqs, temperature_c=theta, static_pressure_kpa=ps
     )
     worst = float(np.max(np.abs(np.asarray(res.sound_power_level) - lw_target)))
     return numeric(0.0, worst, 1e-9, unit="dB", places=9, expected_label="0 dB error")
@@ -328,7 +328,7 @@ def _chk_reverberation_lj() -> Outcome:
     lj_target = np.array([90.0, 95.0, 100.0, 92.0, 85.0])
     le = lj_target - _reverb_bracket(t60, volume, surface, freqs, theta, ps)
     res = ph.emission.sound_energy_reverberation(
-        le, t60, volume, surface, freqs, temperature=theta, static_pressure=ps
+        le, t60, volume, surface, freqs, temperature_c=theta, static_pressure_kpa=ps
     )
     worst = float(np.max(np.abs(np.asarray(res.sound_energy_level) - lj_target)))
     return numeric(0.0, worst, 1e-9, unit="dB", places=9, expected_label="0 dB error")
@@ -731,11 +731,11 @@ def _chk_iso3747_eq11_vs_iso3741() -> Outcome:
         warnings.simplefilter("ignore", ph.emission.SoundPowerWarning)
         room = ph.emission.sound_power_comparison(
             _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS,
-            frequencies=_ISO3747_FREQS, temperature=20.0, static_pressure=100.0,
+            frequencies=_ISO3747_FREQS, temperature_c=20.0, static_pressure_kpa=100.0,
         )  # fmt: skip
     res = ph.emission.sound_power_in_situ(
         _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS,
-        temperature=20.0, static_pressure=100.0,
+        temperature_c=20.0, static_pressure_kpa=100.0,
     )  # fmt: skip
     worst = float(np.max(np.abs(res.sound_power_level_ref - room.sound_power_level)))
     return numeric(

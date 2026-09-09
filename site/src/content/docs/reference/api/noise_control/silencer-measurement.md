@@ -91,10 +91,10 @@ which a duct stops carrying plane waves alone is in
 
 ```python
 average_pressure_loss_coefficient(
-    object_static_pressure: ArrayLike,
-    object_dynamic_pressure: ArrayLike,
-    substitution_static_pressure: ArrayLike,
-    substitution_dynamic_pressure: ArrayLike,
+    object_static_pressure_pa: ArrayLike,
+    object_dynamic_pressure_pa: ArrayLike,
+    substitution_static_pressure_pa: ArrayLike,
+    substitution_dynamic_pressure_pa: ArrayLike,
 ) -> float
 ```
 
@@ -119,10 +119,10 @@ and the lowest has to produce more than
 
 | Name | Description |
 | :--- | :--- |
-| `object_static_pressure` | $p_{s1(\mathrm{I})i}$, the upstream static pressures of the series with the test object, in Pa. |
-| `object_dynamic_pressure` | $p_{\mathrm{d}i}$ of that series, in Pa, from [`dynamic_pressure`](/phonometry/reference/api/noise_control/silencer-measurement/#dynamic_pressure). |
-| `substitution_static_pressure` | $p_{s1(\mathrm{II})k}$ of the series with the substitution duct, in Pa. |
-| `substitution_dynamic_pressure` | $p_{\mathrm{d}k}$ of that series, in Pa. |
+| `object_static_pressure_pa` | $p_{s1(\mathrm{I})i}$, the upstream static pressures of the series with the test object, in Pa. |
+| `object_dynamic_pressure_pa` | $p_{\mathrm{d}i}$ of that series, in Pa, from [`dynamic_pressure`](/phonometry/reference/api/noise_control/silencer-measurement/#dynamic_pressure). |
+| `substitution_static_pressure_pa` | $p_{s1(\mathrm{II})k}$ of the series with the substitution duct, in Pa. |
+| `substitution_dynamic_pressure_pa` | $p_{\mathrm{d}k}$ of that series, in Pa. |
 
 **Returns:** $\zeta$, dimensionless.
 
@@ -612,9 +612,9 @@ the mean-flow correction this equation does not have.
 
 ```python
 normal_air_density(
-    static_gauge_pressure: float,
-    ambient_pressure: float,
-    temperature_celsius: float,
+    static_gauge_pressure_pa: float,
+    ambient_pressure_pa: float,
+    temperature_c: float,
 ) -> float
 ```
 
@@ -649,9 +649,9 @@ carry them as printed.
 
 | Name | Description |
 | :--- | :--- |
-| `static_gauge_pressure` | $p_{s1}$, the duct static pressure relative to the ambient, in Pa. |
-| `ambient_pressure` | $p_a$, the absolute ambient pressure, in Pa. |
-| `temperature_celsius` | $\theta_1$, in °C. |
+| `static_gauge_pressure_pa` | $p_{s1}$, the duct static pressure relative to the ambient, in Pa. |
+| `ambient_pressure_pa` | $p_a$, the absolute ambient pressure, in Pa. |
+| `temperature_c` | $\theta_1$, in °C. |
 
 **Returns:** $\rho_{1n}$, in kg/m³.
 
@@ -901,7 +901,7 @@ The duties 5.5.2 lets the line be read at, half to twice.
 ```python
 pressure_loss_coefficient(
     total_loss: float,
-    inlet_dynamic_pressure: float,
+    inlet_dynamic_pressure_pa: float,
 ) -> float
 ```
 
@@ -923,7 +923,7 @@ of the fundamental method, $\Delta p_{tot,n} / p_{dn}$.
 | Name | Description |
 | :--- | :--- |
 | `total_loss` | $\Delta p_\mathrm{t}$ or $\Delta p_{tot,n}$, in Pa. |
-| `inlet_dynamic_pressure` | $p_\mathrm{d1}$ or $p_\mathrm{dn}$, in Pa. |
+| `inlet_dynamic_pressure_pa` | $p_\mathrm{d1}$ or $p_\mathrm{dn}$, in Pa. |
 
 **Returns:** $\zeta$, dimensionless.
 
@@ -1122,7 +1122,7 @@ what makes it a survey standard.
 
 ```python
 total_pressure(
-    static_pressure: float,
+    static_pressure_pa: float,
     volume_flow: float,
     area: float,
     density: float,
@@ -1139,7 +1139,7 @@ $$
 
 | Name | Description |
 | :--- | :--- |
-| `static_pressure` | $p_\mathrm{s}$, in Pa, in the same reference as the answer is wanted in. |
+| `static_pressure_pa` | $p_\mathrm{s}$, in Pa, in the same reference as the answer is wanted in. |
 | `volume_flow` | $q_V$, in m³/s. |
 | `area` | $S$, in m². |
 | `density` | $\rho$, in kg/m³. |
@@ -1156,8 +1156,8 @@ $$
 
 ```python
 total_pressure_loss(
-    static_pressure_loss: float,
-    inlet_dynamic_pressure: float,
+    static_pressure_loss_pa: float,
+    inlet_dynamic_pressure_pa: float,
     inlet_area: float,
     outlet_area: float,
 ) -> float
@@ -1180,8 +1180,8 @@ to it: as a rule $S_1 = S_2$, and it vanishes.
 
 | Name | Description |
 | :--- | :--- |
-| `static_pressure_loss` | $\Delta p_\mathrm{s}$, in Pa. |
-| `inlet_dynamic_pressure` | $p_\mathrm{d1}$ from [`dynamic_pressure`](/phonometry/reference/api/noise_control/silencer-measurement/#dynamic_pressure) at the inlet, in Pa. |
+| `static_pressure_loss_pa` | $\Delta p_\mathrm{s}$, in Pa. |
+| `inlet_dynamic_pressure_pa` | $p_\mathrm{d1}$ from [`dynamic_pressure`](/phonometry/reference/api/noise_control/silencer-measurement/#dynamic_pressure) at the inlet, in Pa. |
 | `inlet_area` | $S_1$, the inlet test duct, in m². |
 | `outlet_area` | $S_2$, the outlet test duct, in m². |
 

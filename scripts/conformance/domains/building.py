@@ -1195,8 +1195,8 @@ def _chk_low_frequency_limp_panel() -> Outcome:
         ref.ISO15186_3_ANNEX_A_BANDS,
         surface_mass=ref.ISO15186_3_PLASTER_SURFACE_MASS,
         area=ref.ISO15186_3_PLASTER_AREA,
-        temperature=ref.ISO15186_3_ANNEX_A_TEMPERATURE,
-        static_pressure=ref.ISO15186_3_ANNEX_A_PRESSURE,
+        temperature_c=ref.ISO15186_3_ANNEX_A_TEMPERATURE,
+        static_pressure_pa=ref.ISO15186_3_ANNEX_A_PRESSURE,
     )
     printed = np.asarray(ref.ISO15186_3_PLASTER_TABLE_A1, dtype=float)
     worst = float(np.max(np.abs(calculated - printed)))

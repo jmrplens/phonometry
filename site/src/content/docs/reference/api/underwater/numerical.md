@@ -958,7 +958,7 @@ Plot the ray paths (depth increasing downward).
 ```python
 VolumeAbsorption(
     model: str,
-    temperature: float = 10.0,
+    temperature_c: float = 10.0,
     salinity: float = 35.0,
     ph: float = 8.0,
 )
@@ -978,6 +978,6 @@ the same as passing this class with its defaults.
 | Name | Description |
 | :--- | :--- |
 | `model` | `"francois-garrison"`, `"ainslie-mccolm"` or `"thorp"`. |
-| `temperature` | Temperature `T`, in degrees Celsius. |
+| `temperature_c` | Temperature `T`, in degrees Celsius. |
 | `salinity` | Salinity `S`, in parts per thousand. |
 | `ph` | Acidity (Thorp ignores it always). |

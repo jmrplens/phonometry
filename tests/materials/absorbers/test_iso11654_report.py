@@ -232,9 +232,9 @@ def _full_metadata(**overrides: object) -> ReportMetadata:
         "test_room": "Reverberation room R1",
         "measurement_standard": "ISO 354",
         "test_date": "2026-07-20",
-        "temperature": 21.4,
-        "relative_humidity": 54.0,
-        "pressure": 101.0,
+        "temperature_c": 21.4,
+        "relative_humidity_percent": 54.0,
+        "static_pressure_kpa": 101.0,
         "laboratory": "Phonometry Reference Laboratory",
         "operator": "Jose Manuel Requena Plens",
         "report_id": "PHN-2026-11654",
@@ -293,7 +293,7 @@ def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     out = tmp_path / "absorption_es.pdf"
     result.report(
         str(out),
-        metadata=ReportMetadata(requirement=0.55, temperature=21.4),
+        metadata=ReportMetadata(requirement=0.55, temperature_c=21.4),
         language="es",
     )
     assert_one_page(str(out))

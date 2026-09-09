@@ -271,7 +271,7 @@ and the speed of sound.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the reverberation test room, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the noise source, `test_room` the reverberation test room, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared A-weighted sound-power limit the fiche checks the result against (lower is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` the per-band table adds the background correction `K1` and, for the direct method, the equivalent absorption area `A` and the Waterhouse boundary correction `Cw`. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |
@@ -298,8 +298,8 @@ sound_energy_comparison(
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
     background_levels_ref: np.ndarray | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundEnergyResult
 ```
 
@@ -338,8 +338,8 @@ time-averaged correction of 9.1.2.
 | `background_levels` | Time-averaged background levels for the `K1` correction of `levels` (per position, or a single spectrum). |
 | `integration_time` | The interval `T` of the single event levels, in seconds; required with `background_levels`. |
 | `background_levels_ref` | Background levels matching `levels_ref`. |
-| `temperature` | Air temperature `theta` in the room, in degrees Celsius. |
-| `static_pressure` | Static pressure `ps` in the room, in kilopascals. |
+| `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |
+| `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 
 **Returns:** [`ReverberationSoundEnergyResult`](/phonometry/reference/api/power/sound-power-reverberation/#reverberationsoundenergyresult) (`method='comparison'`).
 
@@ -362,8 +362,8 @@ sound_energy_reverberation(
     events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundEnergyResult
 ```
 
@@ -408,8 +408,8 @@ NOTE 1), so that the energies Eq. (25) subtracts share one reference;
 | `events` | The number of events `Ne` one measurement encompasses (Eq. 23); `None` when `levels` is per event or already the mean of one event. |
 | `background_levels` | Time-averaged background levels for `K1`: per-position `(NM, NB)` (or a single `(NB,)` spectrum used at every position) with per-position `levels`, applied per position before the energy average; with 1D `levels` a single `K1` from the averaged spectra approximates the per-position procedure. |
 | `integration_time` | The interval `T` of the single event levels, in seconds; required with `background_levels`. |
-| `temperature` | Air temperature `theta` in the room, in degrees Celsius. |
-| `static_pressure` | Static pressure `ps` in the room, in kilopascals. |
+| `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |
+| `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 
 **Returns:** [`ReverberationSoundEnergyResult`](/phonometry/reference/api/power/sound-power-reverberation/#reverberationsoundenergyresult) (`method='direct'`).
 
@@ -430,8 +430,8 @@ sound_power_comparison(
     frequencies: np.ndarray | None = None,
     background_levels: np.ndarray | None = None,
     background_levels_ref: np.ndarray | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundPowerResult
 ```
 
@@ -460,8 +460,8 @@ the two sources, so the room absorption need not be known.
 | `frequencies` | Band mid-frequencies (Hz) for the A-weighted total. |
 | `background_levels` | Background levels for the `K1` correction of `levels` (per position, or a single spectrum; applied per position per Eq. 14/15 before the Eq. 16 average when `levels` is 2D). |
 | `background_levels_ref` | Background levels matching `levels_ref`. |
-| `temperature` | Air temperature `theta` in the room, in degrees Celsius. |
-| `static_pressure` | Static pressure `ps` in the room, in kilopascals. |
+| `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |
+| `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 
 **Returns:** [`ReverberationSoundPowerResult`](/phonometry/reference/api/power/sound-power-reverberation/#reverberationsoundpowerresult) (`method='comparison'`).
 
@@ -476,8 +476,8 @@ sound_power_reverberation(
     frequencies: np.ndarray,
     *,
     background_levels: np.ndarray | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
 ) -> ReverberationSoundPowerResult
 ```
 
@@ -509,7 +509,7 @@ reference meteorological conditions (clause 4).
 | `surface_area` | Total room surface area `S`, in square metres. |
 | `frequencies` | One-third-octave (or octave) band mid-frequencies, Hz. |
 | `background_levels` | Background levels for the `K1` correction: per-position `(NM, NB)` (or a single `(NB,)` spectrum used at every position) with per-position `levels`, applied per position (Eq. 14/15) before the energy average (Eq. 16). With 1D pre-averaged `levels` a single `K1` from the averaged spectra approximates the per-position procedure of clause 9.1.2. |
-| `temperature` | Air temperature `theta` in the room, in degrees Celsius. |
-| `static_pressure` | Static pressure `ps` in the room, in kilopascals. |
+| `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |
+| `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 
 **Returns:** [`ReverberationSoundPowerResult`](/phonometry/reference/api/power/sound-power-reverberation/#reverberationsoundpowerresult).

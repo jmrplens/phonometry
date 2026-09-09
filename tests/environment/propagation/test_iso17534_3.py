@@ -80,7 +80,7 @@ def _receiver_levels(ground: environment.GroundFactors, distance: float) -> np.n
         frequencies=BANDS,
         ground=ground,
         atmosphere=environment.AtmosphericConditions(
-            temperature=TEMPERATURE_C, relative_humidity=RELATIVE_HUMIDITY_PCT
+            temperature_c=TEMPERATURE_C, relative_humidity_percent=RELATIVE_HUMIDITY_PCT
         ),
     )
 
@@ -99,8 +99,8 @@ def _alternative_levels(mean_height: float, distance: float) -> np.ndarray:
         - environment.atmospheric_absorption(
             distance,
             BANDS,
-            temperature=TEMPERATURE_C,
-            relative_humidity=RELATIVE_HUMIDITY_PCT,
+            temperature_c=TEMPERATURE_C,
+            relative_humidity_percent=RELATIVE_HUMIDITY_PCT,
         )
         - environment.ground_attenuation_alternative(distance, mean_height)
     )

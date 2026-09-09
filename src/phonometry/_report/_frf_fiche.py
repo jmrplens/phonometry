@@ -80,8 +80,8 @@ def frf_metadata_pairs(
         (t("Date of test", language), metadata.test_date),
         (
             t("Temperature [&#176;C]", language),
-            fmt_meta(metadata.temperature, language)
-            if metadata.temperature is not None
+            fmt_meta(metadata.temperature_c, language)
+            if metadata.temperature_c is not None
             else None,
         ),
     ]

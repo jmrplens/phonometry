@@ -109,8 +109,8 @@ def _result() -> SoundAbsorptionMeasurement:
         _T2,
         volume=200.0,
         area=10.8,
-        temperature=20.0,
-        humidity=54.0,
+        temperature_c=20.0,
+        relative_humidity_percent=54.0,
     )
 
 
@@ -122,7 +122,7 @@ def _metadata(**overrides: object) -> ReportMetadata:
         "mounting": "Type A (against a rigid wall)",
         "test_room": "Reverberation room R1",
         "measurement_standard": "ISO 354",
-        "pressure": 101.0,
+        "static_pressure_kpa": 101.0,
         "test_date": "2026-07-21",
         "laboratory": "Phonometry Reference Laboratory",
         "operator": "Jose Manuel Requena Plens",
@@ -247,7 +247,7 @@ def test_non_evaluable_band_prints_the_em_dash(tmp_path: Path) -> None:
     t2 = _T2.copy()
     t2[5] = np.nan  # 315 Hz band
     result = measure_sound_absorption(
-        _FREQS, _T1, t2, volume=200.0, area=10.8, temperature=20.0
+        _FREQS, _T1, t2, volume=200.0, area=10.8, temperature_c=20.0
     )
     assert not np.isfinite(result.alpha_s[5])
     plain = tmp_path / "iso354_nan.pdf"

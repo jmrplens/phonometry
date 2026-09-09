@@ -4,11 +4,15 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 
 from phonometry import vibration
+
+if TYPE_CHECKING:
+    from phonometry.vibration.human.instrumentation import PhaseVerification
 
 
 def _result() -> vibration.MobilityResult:
@@ -688,7 +692,7 @@ def test_the_meter_verification_speaks_spanish() -> None:
         res.plot(language="xx")
 
 
-def _phase_verdict(weighting: str, offset_deg: float) -> object:
+def _phase_verdict(weighting: str, offset_deg: float) -> PhaseVerification:
     """A phase response sitting ``offset_deg`` from the design goal."""
     f = np.array([10.0 ** (n / 10.0) for n in range(-10, 27)])
     response = vibration.frequency_weighting(weighting, f).response

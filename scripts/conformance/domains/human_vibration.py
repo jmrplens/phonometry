@@ -213,7 +213,8 @@ def _chk_directive_2002_44() -> Outcome:
 # ---------------------------------------------------------------------------
 #: Sampled band-limiting factors, one per printed corner shape: the shared
 #: 0,4 Hz / 100 Hz pair (Table B.8), and the three weightings whose corners
-#: differ (Tables B.5, B.6 and B.9). ``(weighting, band number, printed)``.
+#: differ (Tables B.5, B.6 and B.9).
+#: ``(weighting, band number, printed label, printed factor)``.
 _BAND_LIMITING_SAMPLES = (
     ("Wk", -2, "0,631", 0.9279),
     ("Wf", -4, "0,3981", 0.9279),

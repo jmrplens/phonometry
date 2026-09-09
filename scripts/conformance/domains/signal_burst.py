@@ -120,18 +120,24 @@ def _register_tables() -> None:
         )(_check)
 
 
+#: The row name of the band-limiting stage, taken from the library rather
+#: than spelled again: `_rows_of` already selects it through the same
+#: constant, and two spellings of one row is how a table starts sampling
+#: cells that no longer exist.
+_BAND_LIMITING_ROW = ph.vibration.BAND_LIMITING
+
 #: The sampled cells: application, row, burst length, column, the figure on the
 #: page and the relative tolerance the row is judged at.
 _SAMPLED: tuple[tuple[str, str, int | None, str, float, float], ...] = (
-    ("hand-arm", "band-limiting", 1, "rms", 0.0448, 5e-3),
-    ("hand-arm", "band-limiting", None, "rms", 0.565, 5e-3),
+    ("hand-arm", _BAND_LIMITING_ROW, 1, "rms", 0.0448, 5e-3),
+    ("hand-arm", _BAND_LIMITING_ROW, None, "rms", 0.565, 5e-3),
     ("hand-arm", "Wh", 16, "rms", 0.0309, 5e-3),
-    ("whole-body", "band-limiting", None, "rms", 0.546, 5e-3),
+    ("whole-body", _BAND_LIMITING_ROW, None, "rms", 0.546, 5e-3),
     ("whole-body", "Wb", 4, "rms", 0.0614, 5e-3),
     ("whole-body", "Wk", 1, "vdv", 0.323, 5e-3),
     ("whole-body", "Wk", 16, "mtvv_exponential", 0.289, 5e-3),
     ("whole-body", "Wk", None, "mtvv_linear", 0.364, 5e-3),
-    ("low-frequency-whole-body", "band-limiting", None, "msdv", 21.51, 1e-2),
+    ("low-frequency-whole-body", _BAND_LIMITING_ROW, None, "msdv", 21.51, 1e-2),
     ("low-frequency-whole-body", "Wf", 1, "rms", 0.0197, 5e-3),
 )
 

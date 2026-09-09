@@ -87,6 +87,10 @@ risk.
 - [What a seat does to the vibration (ISO 10326-1)](human/seat-vibration.md):
   the SEAT factor of a laboratory seat test, the correction to the input the
   test intended, and the transmissibility at resonance of the damping test.
+- [Verifying a vibration meter (ISO 8041-1)](human/meter-verification.md):
+  the tolerance band on each frequency weighting, the characteristic phase
+  deviation, the running r.m.s. decay and the saw-tooth burst indications a
+  conforming meter has to reproduce.
 
 ## [Machinery](machinery/index.md)
 

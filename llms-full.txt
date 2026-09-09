@@ -816,7 +816,9 @@ freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz-10 kHz thirds
 fig, ax = plt.subplots()
 # solid: SAE band attenuation, dashed: pure-tone mid-band
 for s in (1000.0, 7620.0):
-    att = aircraft.sae_band_attenuation(freqs, s, temperature_c=25.0, relative_humidity_percent=70.0)
+    att = aircraft.sae_band_attenuation(
+        freqs, s, temperature_c=25.0, relative_humidity_percent=70.0
+    )
     line, = ax.semilogx(att.frequency, att.band_attenuation, marker="o",
                         markersize=3, label=f"SAE band ({s:.0f} m)")
     ax.semilogx(att.frequency, att.midband_attenuation, "--", alpha=0.6,
@@ -1453,17 +1455,17 @@ print(round(float(flyover.level), 1))     # 100.4 dB
 ```
 
 The observer is `(x, y, z)` in metres in the runway frame, whose origin is not
-the airport boundary: `x` runs along the runway centre line with `x = 0` at start
-of roll for a departure and at the landing threshold for an arrival, so arrival
-profiles carry negative `x` on final approach and the two frames sit nearly 35 km
-apart. `y` is the lateral offset from the extended centre line, positive to
-starboard, and its sign selects the depression-angle branch of the banked-segment
-rule; `z` is the receiver height above local ground, left at 0 here where Doc 29
-measures at 1.2 m. The metric defaults to the sound exposure level and the stage
-length to 1, and the optional `temperature_c` and `atmospheric_pressure_kpa` arguments feed the
-Doc 29 atmospheric impedance adjustment, defaulting to the 15 °C and 101.325 kPa
-of the standard atmosphere — a bookkeeping term worth +0.07 dB there, not a
-weather correction.
+the airport boundary: `x` runs along the runway centre line with `x = 0` at
+start of roll for a departure and at the landing threshold for an arrival, so
+arrival profiles carry negative `x` on final approach and the two frames sit
+nearly 35 km apart. `y` is the lateral offset from the extended centre line,
+positive to starboard, and its sign selects the depression-angle branch of the
+banked-segment rule; `z` is the receiver height above local ground, left at 0
+here where Doc 29 measures at 1.2 m. The metric defaults to the sound exposure
+level and the stage length to 1, and the optional `temperature_c` and
+`atmospheric_pressure_kpa` arguments feed the Doc 29 atmospheric impedance
+adjustment, defaulting to the 15 °C and 101.325 kPa of the standard atmosphere
+— a bookkeeping term worth +0.07 dB there, not a weather correction.
 
 ```python
 import numpy as np
@@ -2879,17 +2881,17 @@ res.plot()            # the delta-L(f) improvement spectrum above (needs matplot
 impact-improvement fiche: the ISO 16251-1 basis line, a metadata header, the
 per-band table (frequency and $\Delta L$, bands at the 1.3 dB limit prefixed
 `>`) beside the $\Delta L(f)$ improvement curve, the boxed single-number
-$\Delta L_\mathrm{w}\ (C_{\mathrm{I},\Delta})$ (the ISO 16251-1 Clause 8 e) statement of
-results, rated
-per ISO 717-2) and a footer. The applicable `ReportMetadata` fields are
-`specimen` (the floor covering under test), `client`, `manufacturer`,
-`mounting`, `mass_per_area`, `test_room`, `test_date`, `temperature_c`,
-`static_pressure_kpa`, `measurement_standard`, `laboratory`, `operator`, `report_id`,
-`notes` and `requirement` (a higher weighted improvement is better, so the
-verdict passes at or above it). The bare reference floor is the standardised
-heavyweight floor of ISO 717-2:2020 Table 4, fixed by the standard.
-`verbose=True` adds the reference-floor-with-covering column
-$L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$, the derivation basis of $\Delta L_\mathrm{w}$.
+$\Delta L_\mathrm{w}\ (C_{\mathrm{I},\Delta})$ (the ISO 16251-1 Clause 8 e)
+statement of results, rated per ISO 717-2) and a footer. The applicable
+`ReportMetadata` fields are `specimen` (the floor covering under test),
+`client`, `manufacturer`, `mounting`, `mass_per_area`, `test_room`,
+`test_date`, `temperature_c`, `static_pressure_kpa`, `measurement_standard`,
+`laboratory`, `operator`, `report_id`, `notes` and `requirement` (a higher
+weighted improvement is better, so the verdict passes at or above it). The bare
+reference floor is the standardised heavyweight floor of ISO 717-2:2020 Table
+4, fixed by the standard. `verbose=True` adds the reference-floor-with-covering
+column $L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$, the derivation basis of
+$\Delta L_\mathrm{w}$.
 
 ```python
 from phonometry import building, ReportMetadata
@@ -5391,15 +5393,16 @@ spectrum with a nominal band axis, and a boxed band-summed total $L_{W\mathrm{s}
 
 The relevant `ReportMetadata` fields are `client`, `specimen` (the source
 equipment), `test_room` (the test environment), `instrumentation`,
-`temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`, `test_date` and the footer
-identity `laboratory`, `operator`, `report_id` and `notes`; the plate mass and
-area come from the result itself. Supplying `requirement` adds a PASS/FAIL
-verdict against a declared upper limit on the total $L_{W\mathrm{s}}$ (lower is better).
-`verbose=True` adds the plate loss factor $\eta$ column, and `language="es"`
-renders the Spanish fiche. The basis strip states Formula 14 and the conversion
-to the plate-independent source quantities (Formulae 15/17) required before
-EN 12354-5. Rendering needs the optional `phonometry[report]` extra (reportlab),
-plus matplotlib for the spectrum.
+`temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`,
+`test_date` and the footer identity `laboratory`, `operator`, `report_id` and
+`notes`; the plate mass and area come from the result itself. Supplying
+`requirement` adds a PASS/FAIL verdict against a declared upper limit on the
+total $L_{W\mathrm{s}}$ (lower is better). `verbose=True` adds the plate loss
+factor $\eta$ column, and `language="es"` renders the Spanish fiche. The basis
+strip states Formula 14 and the conversion to the plate-independent source
+quantities (Formulae 15/17) required before EN 12354-5. Rendering needs the
+optional `phonometry[report]` extra (reportlab), plus matplotlib for the
+spectrum.
 
 ```python
 import numpy as np
@@ -7788,7 +7791,8 @@ just as readily as a qualified pair.
 `r_i_modified`, `rating`, `rating_modified`);
 `intensity_element_normalized_difference()` an
 `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
-`surface_pressure_intensity_indicator()` and `combine_subareas()` return arrays.
+`surface_pressure_intensity_indicator()` and `combine_subareas()` return
+arrays.
 
 ## ISO 15186-1 intensity test report (`.report()`)
 
@@ -10686,28 +10690,30 @@ the background capture are the operator's responsibility, not the library's.
 `OpenPlanResult.report(path)` renders a one-page PDF fiche laid out like an
 open-plan-office speech-privacy measurement report: a standard-basis line, an
 optional metadata header block, a compact metrics table of the four
-single-number quantities of Clause 4 ($D_\mathrm{2,S}$, $L_{p,\mathrm{A,S},4\,\mathrm{m}}$, the
-distraction distance $r_\mathrm{D}$ and the privacy distance $r_\mathrm{P}$) stacked above the
-full-width spatial-decay plot (`.plot()`, the Clause 6.2 regression on the
-logarithmic distance axis with the 4 m read-off and the $r_\mathrm{D}$ / $r_\mathrm{P}$ crossings
-marked), the boxed $D_\mathrm{2,S}$ with the other quantities alongside, and a footer with the
-fixed disclaimer. ISO 3382-3 **characterises** a space rather than defining an
-intrinsic pass/fail, so a verdict row appears only when a target spatial decay
-rate is supplied through the metadata's `requirement` field
-(`ReportMetadata(requirement=...)`, read as the minimum acceptable $D_\mathrm{2,S}$ in
-dB, reflecting the informative quality ranges of Annex A where a larger spatial
-decay is better; the room passes at or above it). It uses the same
-`ReportMetadata` container as the [ISO 3382-1/-2 room-acoustics fiche](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/#iso-3382-report-report);
-the open-plan-specific fields `area` (floor area), `source_positions` and
-`receiver_positions` (the number of measurement positions) populate the header,
-alongside `client`, `test_room`, `specimen`, `instrumentation`, `temperature_c`,
-`relative_humidity_percent`, `static_pressure_kpa`, `measurement_standard`, `test_date`,
-`laboratory`, `operator`, `report_id` and `notes`. Passing `metadata=None`
-produces a bare characterisation fiche. The fiche embeds the spatial-decay
-chart, so rendering needs both reportlab and matplotlib
-(`pip install "phonometry[report,plot]"`); only `engine="reportlab"` is
-supported. The fiche renders in English by default; pass `language="es"` for a
-Spanish fiche (translated fixed strings and a comma decimal separator).
+single-number quantities of Clause 4 ($D_\mathrm{2,S}$,
+$L_{p,\mathrm{A,S},4\,\mathrm{m}}$, the distraction distance $r_\mathrm{D}$ and
+the privacy distance $r_\mathrm{P}$) stacked above the full-width spatial-decay
+plot (`.plot()`, the Clause 6.2 regression on the logarithmic distance axis
+with the 4 m read-off and the $r_\mathrm{D}$ / $r_\mathrm{P}$ crossings
+marked), the boxed $D_\mathrm{2,S}$ with the other quantities alongside, and a
+footer with the fixed disclaimer. ISO 3382-3 **characterises** a space rather
+than defining an intrinsic pass/fail, so a verdict row appears only when a
+target spatial decay rate is supplied through the metadata's `requirement`
+field (`ReportMetadata(requirement=...)`, read as the minimum acceptable
+$D_\mathrm{2,S}$ in dB, reflecting the informative quality ranges of Annex A
+where a larger spatial decay is better; the room passes at or above it). It
+uses the same `ReportMetadata` container as the [ISO 3382-1/-2 room-acoustics
+fiche](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/#iso-3382-report-report); the open-plan-specific fields
+`area` (floor area), `source_positions` and `receiver_positions` (the number of
+measurement positions) populate the header, alongside `client`, `test_room`,
+`specimen`, `instrumentation`, `temperature_c`, `relative_humidity_percent`,
+`static_pressure_kpa`, `measurement_standard`, `test_date`, `laboratory`,
+`operator`, `report_id` and `notes`. Passing `metadata=None` produces a bare
+characterisation fiche. The fiche embeds the spatial-decay chart, so rendering
+needs both reportlab and matplotlib (`pip install "phonometry[report,plot]"`);
+only `engine="reportlab"` is supported. The fiche renders in English by
+default; pass `language="es"` for a Spanish fiche (translated fixed strings and
+a comma decimal separator).
 
 ```python
 import numpy as np
@@ -11806,31 +11812,32 @@ room-acoustics measurement report (a performance space per ISO 3382-1:2009 or
 an ordinary room per ISO 3382-2:2008, both evaluated by the integrated
 impulse-response method): a standard-basis line, an optional metadata header
 block, the full-width per-band parameter table ($T_{20}$, $T_{30}$, EDT,
-$C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{s}$) above the result's own per-band decay-time
-plot (`.plot()`), the boxed mid-frequency reverberation time $T_\text{mid}$
-(the mean of the 500 Hz and 1000 Hz octave $T_{30}$) with the mid-frequency EDT
-alongside, and a footer with the fixed disclaimer. ISO 3382-1/-2 are
-characterisation standards with no intrinsic pass/fail, so a verdict row appears
-only when a target reverberation time is supplied through the
-metadata's `requirement` field (`ReportMetadata(requirement=...)`, read as the
-maximum acceptable value of whichever descriptor the box carries); a broadband
-result has no 500 Hz / 1000 Hz octaves to average, so its box and verdict fall
-back to the plain broadband $T_{30}$ with no "500-1000 Hz" claim, and so do a
-band range that misses those two octaves and one that reaches them with a
-non-evaluable $T_{30}$ in either, which fall back to the first band whose
-$T_{30}$ could be evaluated. It uses the same
-`ReportMetadata` container as the [ISO 11654 absorption fiche](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/#iso-11654-report-report);
+$C_{50}$, $C_{80}$, $D_{50}$, $T_\mathrm{s}$) above the result's own per-band
+decay-time plot (`.plot()`), the boxed mid-frequency reverberation time
+$T_\text{mid}$ (the mean of the 500 Hz and 1000 Hz octave $T_{30}$) with the
+mid-frequency EDT alongside, and a footer with the fixed disclaimer. ISO
+3382-1/-2 are characterisation standards with no intrinsic pass/fail, so a
+verdict row appears only when a target reverberation time is supplied through
+the metadata's `requirement` field (`ReportMetadata(requirement=...)`, read as
+the maximum acceptable value of whichever descriptor the box carries); a
+broadband result has no 500 Hz / 1000 Hz octaves to average, so its box and
+verdict fall back to the plain broadband $T_{30}$ with no "500-1000 Hz" claim,
+and so do a band range that misses those two octaves and one that reaches them
+with a non-evaluable $T_{30}$ in either, which fall back to the first band
+whose $T_{30}$ could be evaluated. It uses the same `ReportMetadata` container
+as the [ISO 11654 absorption
+fiche](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/#iso-11654-report-report);
 the room-specific fields `room_volume`, `source_positions` and
 `receiver_positions` populate the header (ISO 3382 requires the room volume and
 the number of source and microphone positions to be reported), alongside
 `test_room`, `specimen`, `area`, `instrumentation`, `temperature_c`,
-`relative_humidity_percent`, `static_pressure_kpa`, `measurement_standard`, `test_date`,
-`laboratory`, `operator`, `report_id` and `notes`. Passing `metadata=None`
-produces a bare characterisation fiche. Rendering needs reportlab and, for the
-figure the fiche embeds, matplotlib (`pip install "phonometry[report,plot]"`);
-only `engine="reportlab"` is supported. The fiche renders in English by default;
-pass `language="es"` for a Spanish fiche (translated fixed strings and a comma
-decimal separator).
+`relative_humidity_percent`, `static_pressure_kpa`, `measurement_standard`,
+`test_date`, `laboratory`, `operator`, `report_id` and `notes`. Passing
+`metadata=None` produces a bare characterisation fiche. Rendering needs
+reportlab and, for the figure the fiche embeds, matplotlib (`pip install
+"phonometry[report,plot]"`); only `engine="reportlab"` is supported. The fiche
+renders in English by default; pass `language="es"` for a Spanish fiche
+(translated fixed strings and a comma decimal separator).
 
 ```python
 from phonometry import room, ReportMetadata
@@ -18713,7 +18720,7 @@ precise.report(
         specimen="Hydraulic power pack (floor-standing)",
         test_room="Machine hall with steady background noise",
         instrumentation="Class 1 p-p intensity probe (IEC 61043), 12 mm spacer",
-        temperature_c=28.0, relative_humidity_percent=40.0, pressure=94.0,
+        temperature_c=28.0, relative_humidity_percent=40.0, static_pressure_kpa=94.0,
         laboratory="Phonometry reference example",
         report_id="EXAMPLE-9614-3",
         requirement=98.0,
@@ -20441,13 +20448,14 @@ applied method alongside.
 
 The relevant `ReportMetadata` fields are `client`, `specimen` (the
 machine/source), `test_room` (the test environment), `instrumentation`,
-`temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`, `test_date` and the footer
-identity `laboratory`, `operator`, `report_id` and `notes`; the radiating area
-$S$ comes from the result itself. Supplying `requirement` adds a PASS/FAIL
-verdict against a declared A-weighted sound-power limit (lower is better).
-`verbose=True` adds the radiation factor $\varepsilon$ column, and `language="es"`
-renders the Spanish fiche (comma decimals). Rendering needs the optional
-`phonometry[report]` extra (reportlab), plus matplotlib for the spectrum.
+`temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`,
+`test_date` and the footer identity `laboratory`, `operator`, `report_id` and
+`notes`; the radiating area $S$ comes from the result itself. Supplying
+`requirement` adds a PASS/FAIL verdict against a declared A-weighted
+sound-power limit (lower is better). `verbose=True` adds the radiation factor
+$\varepsilon$ column, and `language="es"` renders the Spanish fiche (comma
+decimals). Rendering needs the optional `phonometry[report]` extra (reportlab),
+plus matplotlib for the spectrum.
 
 ```python
 import numpy as np
@@ -26946,7 +26954,8 @@ cell = environment.air_attenuation(1000.0, 10.0, 70.0, exact_midband=True) * 100
 print(round(float(cell), 2))                # 3.66  (dB/km, Table 1)
 
 # Feed real conditions into the ISO 354 power attenuation coefficient m [1/m]
-m = environment.air_attenuation_m([1000.0, 4000.0], temperature_c=20.0, relative_humidity_percent=50.0)
+m = environment.air_attenuation_m([1000.0, 4000.0], temperature_c=20.0,
+                                  relative_humidity_percent=50.0)
 print(np.round(m, 5))                        # [0.00107 0.00683]
 ```
 
@@ -29901,12 +29910,12 @@ fiches. The specimen area $S$, room volume $V$, speed of sound $c$, temperature
 and humidity are taken from the measurement result (they drove the Sabine
 inversion); the descriptive `ReportMetadata` fields that apply here are
 `client`, `manufacturer`, `specimen`, `mounting`, `test_room`, `test_date`,
-`static_pressure_kpa`, `measurement_standard`, `laboratory`, `operator`, `report_id` and
-`notes`. The `requirement` field is ignored (ISO 354 has no verdict). Rendering
-needs reportlab and, for the figure the fiche embeds, matplotlib (`pip install
-"phonometry[report,plot]"`); only `engine="reportlab"` is supported. The fiche
-renders in English by default; pass `language="es"` for a Spanish fiche
-(translated fixed strings and a comma decimal separator).
+`static_pressure_kpa`, `measurement_standard`, `laboratory`, `operator`,
+`report_id` and `notes`. The `requirement` field is ignored (ISO 354 has no
+verdict). Rendering needs reportlab and, for the figure the fiche embeds,
+matplotlib (`pip install "phonometry[report,plot]"`); only `engine="reportlab"`
+is supported. The fiche renders in English by default; pass `language="es"` for
+a Spanish fiche (translated fixed strings and a comma decimal separator).
 
 ```python
 from phonometry import materials, ReportMetadata
@@ -30471,13 +30480,14 @@ material characterisation, so the fiche carries no pass/fail verdict.
 It uses the same `ReportMetadata` container and rendering engine as the other
 fiches. The descriptive fields that apply here are `client`, `manufacturer`,
 `specimen`, `thickness` (the specimen thickness $d$, in metres, shown in
-millimetres), `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`,
-`measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The
-`requirement` field is ignored (ISO 9053-1 has no verdict). The fiche embeds
-the fitted curve, so rendering needs both reportlab and matplotlib
-(`pip install "phonometry[report,plot]"`); only `engine="reportlab"` is
-supported. The fiche renders in English by default; pass `language="es"` for a
-Spanish fiche (translated fixed strings and a comma decimal separator).
+millimetres), `test_room`, `test_date`, `temperature_c`,
+`relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`,
+`report_id` and `notes`. The `requirement` field is ignored (ISO 9053-1 has no
+verdict). The fiche embeds the fitted curve, so rendering needs both reportlab
+and matplotlib (`pip install "phonometry[report,plot]"`); only
+`engine="reportlab"` is supported. The fiche renders in English by default;
+pass `language="es"` for a Spanish fiche (translated fixed strings and a comma
+decimal separator).
 
 ```python
 from phonometry import materials, ReportMetadata
@@ -30979,15 +30989,15 @@ random-incidence $\alpha_\mathrm{s}$/$\alpha_\mathrm{w}$ of ISO 354 / ISO 11654.
 It uses the same `ReportMetadata` container and rendering engine as the other
 fiches. The measured frequency range is taken from the result; the applicable
 descriptive and geometric `ReportMetadata` fields are `client`, `manufacturer`,
-`specimen`, `tube_diameter`, `tube_shape`, `mic_spacing`, `mounting`, `test_room`,
-`test_date`, `temperature_c`, `static_pressure_kpa`, `measurement_standard`, `laboratory`,
-`operator`, `report_id` and `notes` (`tube_diameter` and `mic_spacing` are given
-in metres and printed in millimetres). The `requirement` field is ignored
-(ISO 10534-2 has no verdict). Rendering needs reportlab and, for the figure the
-fiche embeds, matplotlib (`pip install "phonometry[report,plot]"`); only
-`engine="reportlab"` is supported. The fiche renders in English by default; pass
-`language="es"` for a Spanish fiche (translated fixed strings and a comma
-decimal separator).
+`specimen`, `tube_diameter`, `tube_shape`, `mic_spacing`, `mounting`,
+`test_room`, `test_date`, `temperature_c`, `static_pressure_kpa`,
+`measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`
+(`tube_diameter` and `mic_spacing` are given in metres and printed in
+millimetres). The `requirement` field is ignored (ISO 10534-2 has no verdict).
+Rendering needs reportlab and, for the figure the fiche embeds, matplotlib
+(`pip install "phonometry[report,plot]"`); only `engine="reportlab"` is
+supported. The fiche renders in English by default; pass `language="es"` for a
+Spanish fiche (translated fixed strings and a comma decimal separator).
 
 The block below is the specimen of the fiche underneath it: a resistive facing
 of normalised flow resistance $\theta = 1$ over an 86 mm rigidly-backed air

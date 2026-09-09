@@ -80,8 +80,8 @@ Pure-tone atmospheric attenuation coefficient (ISO 9613-1, Eq. (5)).
 Evaluates `alpha` in decibels per metre from the oxygen and nitrogen
 relaxation frequencies (Eq. (3)/(4)) and the classical, rotational and
 vibrational absorption terms (Eq. (5)). Fully vectorized over
-`frequencies`; `temperature_c`, `relative_humidity_percent` and `atmospheric_pressure_kpa` are
-scalars.
+`frequencies`; `temperature_c`, `relative_humidity_percent` and
+`atmospheric_pressure_kpa` are scalars.
 
 **Parameters**
 

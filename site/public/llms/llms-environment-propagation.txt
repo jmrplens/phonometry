@@ -194,7 +194,8 @@ cell = environment.air_attenuation(1000.0, 10.0, 70.0, exact_midband=True) * 100
 print(round(float(cell), 2))                # 3.66  (dB/km, Table 1)
 
 # Feed real conditions into the ISO 354 power attenuation coefficient m [1/m]
-m = environment.air_attenuation_m([1000.0, 4000.0], temperature_c=20.0, relative_humidity_percent=50.0)
+m = environment.air_attenuation_m([1000.0, 4000.0], temperature_c=20.0,
+                                  relative_humidity_percent=50.0)
 print(np.round(m, 5))                        # [0.00107 0.00683]
 ```
 

@@ -398,9 +398,9 @@ the quantity in pascals. The result here is in kilopascals so that it feeds
 `static_pressure_kpa` of [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ) directly, matching
 ISO 3741, ISO 3744 and ISO 3745, which do print kilopascals. The pressure
 reaches `C2` only as $p_\mathrm{s}/p_{\mathrm{s},0}$, so the two
-unit conventions give the same correction. A site below sea level is admissible (the base exceeds one);
-the formula stops meaning anything where the base reaches zero, some
-44 km up, and that is refused.
+unit conventions give the same correction. A site below sea level is
+admissible (the base exceeds one); the formula stops meaning anything
+where the base reaches zero, some 44 km up, and that is refused.
 
 **Parameters**
 

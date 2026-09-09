@@ -602,7 +602,8 @@ just as readily as a qualified pair.
 `r_i_modified`, `rating`, `rating_modified`);
 `intensity_element_normalized_difference()` an
 `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
-`surface_pressure_intensity_indicator()` and `combine_subareas()` return arrays.
+`surface_pressure_intensity_indicator()` and `combine_subareas()` return
+arrays.
 
 ## ISO 15186-1 intensity test report (`.report()`)
 

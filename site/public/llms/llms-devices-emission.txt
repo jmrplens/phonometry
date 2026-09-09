@@ -2563,13 +2563,14 @@ applied method alongside.
 
 The relevant `ReportMetadata` fields are `client`, `specimen` (the
 machine/source), `test_room` (the test environment), `instrumentation`,
-`temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`, `test_date` and the footer
-identity `laboratory`, `operator`, `report_id` and `notes`; the radiating area
-$S$ comes from the result itself. Supplying `requirement` adds a PASS/FAIL
-verdict against a declared A-weighted sound-power limit (lower is better).
-`verbose=True` adds the radiation factor $\varepsilon$ column, and `language="es"`
-renders the Spanish fiche (comma decimals). Rendering needs the optional
-`phonometry[report]` extra (reportlab), plus matplotlib for the spectrum.
+`temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`,
+`test_date` and the footer identity `laboratory`, `operator`, `report_id` and
+`notes`; the radiating area $S$ comes from the result itself. Supplying
+`requirement` adds a PASS/FAIL verdict against a declared A-weighted
+sound-power limit (lower is better). `verbose=True` adds the radiation factor
+$\varepsilon$ column, and `language="es"` renders the Spanish fiche (comma
+decimals). Rendering needs the optional `phonometry[report]` extra (reportlab),
+plus matplotlib for the spectrum.
 
 ```python
 import numpy as np

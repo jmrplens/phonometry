@@ -238,6 +238,33 @@ spectrum against the IEC 61043 class limits, and `intensity_class_compliance`
 wraps it with `.plot()` and its own fiche, with the residual-index physics
 explained in [Sound Intensity](/phonometry/devices/emission/intensity/).
 
+### The verifiers that grade a measurement, not a design
+
+Five more functions carry the same `verify_` prefix and answer a different
+question. The four above are handed a filter this library built, and report
+whether that **design** fits an acceptance mask; these are handed numbers
+somebody measured on a bench, and report whether **that instrument, on the day
+it was measured**, meets the standard it is sold against. There are no classes
+and no decibel margins in them: the verdict is a pass or a fail, in the unit
+its own standard writes its tolerances in. Four of them return a result object
+whose `passes` says so and whose other fields say where and by how much;
+`verify_running_rms_decay` grades one printed row and returns the `bool`.
+
+| What is graded | Verifier | Acceptance limits | Deep dive |
+| :--- | :--- | :--- | :--- |
+| Aircraft-noise measurement system | `verify_aircraft_noise_system` | IEC 61265:1995 Table 1, and the scalar limits beside it | [Aircraft Noise](/phonometry/aircraft/aircraft-noise/#measurement-system-verification-iec-61265) |
+| Human-vibration frequency weighting | `verify_weighting` | ISO 8041-1:2017 Tables 4 and 5 | [Verifying a Human-Vibration Meter](/phonometry/vibration/human/meter-verification/) |
+| Human-vibration phase response | `verify_phase_response` | ISO 8041-1:2017 Table 5 and Formula (6) | [Verifying a Human-Vibration Meter](/phonometry/vibration/human/meter-verification/) |
+| Saw-tooth burst indications | `verify_signal_burst_response` | ISO 8041-1:2017 Tables 7 to 9 (the signal is Table 6) | [Verifying a Human-Vibration Meter](/phonometry/vibration/human/meter-verification/) |
+| Running r.m.s. decay time | `verify_running_rms_decay` | ISO 8041-1:2017 Tables 10 and 11 | [Verifying a Human-Vibration Meter](/phonometry/vibration/human/meter-verification/) |
+
+One clause of ISO 8041-1 makes those four different in kind from everything
+else on this page. The deviation a laboratory reports is extended by that
+laboratory's own expanded uncertainty before it is compared with the limit
+(clauses 13.1 and 14.1), so the same instrument passes on one bench and fails
+on another, and `verify_weighting` takes that uncertainty as an argument
+rather than assuming it away.
+
 ## 3. Reading the conformance report
 
 The verifiers grade *your* configuration. The
@@ -320,12 +347,16 @@ IEC 61260-3:2016, subclause 1.5).
 
 The same honesty applies to this library, in both directions:
 
-- **What a verifier verdict is.** A statement about a *design*: the digital
+- **What a class verdict is.** A statement about a *design*: the digital
   transfer function you configured fits the Part 1 acceptance mask, with the
   reported margins, over the checked frequency range. Every measurement made
   wholly in software inherits it, which is why the
   [sound level meter walkthrough](/phonometry/signals/sound-level-meter/) ends by
   running the verifiers on the chain it just built.
+- **What a measurement verdict is.** Narrower still. The five verifiers of the
+  second table are handed numbers somebody read off a bench, so their verdict
+  belongs to that instrument on the day it was measured and nothing inherits
+  it, not even a second run of the same test.
 - **What it is not.** A pattern evaluation, a periodic test, or a certificate
   for any physical device. Nothing here has a microphone, a temperature or a
   serial number; the influence-quantity, immunity and acoustical tests above
@@ -349,8 +380,10 @@ how the claim chains through a measurement; the public verifiers
 (`verify_weighting_class`, `verify_filter_class`, `verify_intensity_class`,
 with `weighting_class_limits` and `class_limits` publishing the masks, and
 `filter_class_compliance` / `intensity_class_compliance` adding `.plot()` and
-the accredited fiche); how to read and cite the published conformance report;
-and the verified scope of the pattern-evaluation and periodic-test parts.
+the accredited fiche); the five verifiers that grade a measured instrument
+rather than a design, and where each one's page is; how to read and cite the
+published conformance report; and the verified scope of the
+pattern-evaluation and periodic-test parts.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
@@ -420,4 +453,8 @@ against IEC 61260-1:2014 Table 1 (the 1995 class 0 mask via
 instrument's residual-index spectrum against IEC 61043:1993. All three report
 a per-band class with margins in dB, and `filter_class_compliance` /
 `intensity_class_compliance` package the verdict with `.plot()` and an
-accredited `.report()` fiche.
+accredited `.report()` fiche. Five more verifiers grade a measurement rather
+than a design and return a plain pass or fail:
+`verify_aircraft_noise_system` against IEC 61265:1995, and `verify_weighting`,
+`verify_phase_response`, `verify_signal_burst_response` and
+`verify_running_rms_decay` against the tolerance tables of ISO 8041-1:2017.

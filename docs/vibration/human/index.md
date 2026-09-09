@@ -6,8 +6,10 @@ Vibration transmitted to a person is evaluated with a measurement chain
 deliberately parallel to a sound level meter's: the acceleration is
 **frequency-weighted** to reflect how the body responds at each frequency,
 reduced to a **weighted r.m.s.** value or a dose, combined across axes, and
-normalised to a **daily exposure** that regulation can act on. The two pages
-of this section cover the general chain and the special case that breaks it.
+normalised to a **daily exposure** that regulation can act on. Four pages
+cover it: the general chain, the special case that breaks it, what a seat does
+to the vibration it passes on, and whether the instrument doing the measuring
+is entitled to be believed.
 
 [Human Vibration](human-vibration.md) is the general chain.
 It covers the whole-body and hand-arm frequency weightings of **ISO 8041-1**,
@@ -49,13 +51,24 @@ analysis](../../signals/index.md) section.
 - [What a seat does to the vibration (ISO 10326-1)](seat-vibration.md):
   the SEAT factor of a laboratory seat test, the correction to the input the
   test intended, and the transmissibility at resonance of the damping test.
+- [Verifying a vibration meter (ISO 8041-1)](meter-verification.md):
+  the tolerance band around each frequency weighting, the characteristic phase
+  deviation, the running r.m.s. decay and the saw-tooth burst indications a
+  conforming meter has to reproduce.
 
 ## What this section does not cover
 
-**No meter is type-tested.** ISO 8041-1's own subject — the design and
-type-testing of general-purpose human-vibration meters — is not implemented;
-only its frequency-weighting definitions are taken from it, so nothing here
-assigns a class to an instrument.
+**A meter is graded on the clauses that can be computed.** The tolerance
+tables of ISO 8041-1 are implemented, and so is every other criterion of it
+that is arithmetic: the band-limiting stage on its own, the characteristic
+phase deviation, the running r.m.s. decay times and the 228 saw-tooth burst
+indications the standard prints, which
+is what [meter
+verification](meter-verification.md) is about. The
+design and type-testing clauses of that standard, from indication and
+linearity to the environmental tests, are laboratory measurements on hardware
+and stay outside: a pass on any of these is a necessary condition for
+conformity, not a certificate of it.
 
 **Building vibration stops at the weighting.** Of ISO 2631-2 the library
 implements the direction-independent `Wm` curve and nothing else, and that is

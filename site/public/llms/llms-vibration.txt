@@ -94,6 +94,10 @@ risk.
 - [What a seat does to the vibration (ISO 10326-1)](https://jmrplens.github.io/phonometry/vibration/human/seat-vibration/):
   the SEAT factor of a laboratory seat test, the correction to the input the
   test intended, and the transmissibility at resonance of the damping test.
+- [Verifying a vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/):
+  the tolerance band on each frequency weighting, the characteristic phase
+  deviation, the running r.m.s. decay and the saw-tooth burst indications a
+  conforming meter has to reproduce.
 
 ## [Machinery](https://jmrplens.github.io/phonometry/vibration/machinery/)
 
@@ -105,10 +109,15 @@ Turning a vibration spectrum into a diagnosis of the machine that made it.
 
 ## What this section does not cover
 
-**No instrument is type-tested.** ISO 8041-1's own subject, the design and
-type-testing of human-vibration meters, is not implemented: only its frequency
-weightings are taken from it, so a class verdict for a hand-held meter is not
-something this library can give.
+**An instrument is graded on the clauses that can be computed.** Every
+criterion of ISO 8041-1 that is arithmetic is implemented, on the [meter
+verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/) page: the
+tolerance band around each frequency weighting, the band-limiting stage on its
+own, the characteristic phase deviation, the running r.m.s. decay times and
+the 228 saw-tooth burst indications the standard prints. The rest of that standard, the indication,
+linearity, overload, temperature, humidity and electromagnetic clauses, is a
+set of laboratory tests on hardware, so a pass here is a necessary condition
+for conformity and never a certificate of it.
 
 **No severity verdict is issued for a machine.** The machinery pages predict
 *where* a line would be, never whether it is present or whether the machine is

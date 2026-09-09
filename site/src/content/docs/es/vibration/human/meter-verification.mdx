@@ -1,0 +1,1468 @@
+---
+title: "Verificación del vibrómetro"
+description: "Los apartados de la ISO 8041-1 que son aritmética: la banda de tolerancia de la Tabla 5 alrededor de cada ponderación frecuencial con la incertidumbre expandida del propio laboratorio, la desviación característica de fase de la Fórmula (6), los tiempos de decaimiento del valor eficaz móvil de las Tablas 10 y 11, y las 228 indicaciones de la ráfaga en diente de sierra de las Tablas 7 a 9."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Human response to vibration — Measuring instrumentation — Part 1: General purpose vibration meters"
+    designation: "ISO 8041-1:2017"
+    primary: true
+    note: "Los tres niveles de ensayo de prestaciones (apartado 1), las condiciones ambientales de referencia (apartado 4), los valores y frecuencias de vibración de referencia de la Tabla 1, las tres filas de la Tabla 2, los parámetros de ponderación de la Tabla 3 y las funciones de transferencia de 5.6, las frecuencias de transición de la Tabla 4 y las tolerancias de la Tabla 5 con su nota a, la desviación característica de fase de la Fórmula (6), la ráfaga de señal en diente de sierra de 5.9 con su Tabla 6 y las respuestas impresas de las Tablas 7 a 9, el promediado temporal del valor eficaz móvil de 5.13 con las Tablas 10 y 11, las incertidumbres expandidas máximas de 12.1 y la malla de ensayo de 12.11.1, la demostración de conformidad de 13.1 y 14.1, las ponderaciones y fases del objetivo de diseño tabuladas del anexo B, y el argumento de fase del anexo H con sus fórmulas (H.1), (H.3) y (H.4). Los apartados de diseño y de ensayo de tipo que necesitan un banco no están implementados: cumplir en cualquier apartado de aquí es una afirmación sobre ese apartado y nunca un certificado de conformidad de un instrumento."
+  - type: book
+    authors: ["Griffin, M. J."]
+    year: 1996
+    title: "Handbook of human vibration"
+    publisher: "Academic Press"
+    url: "https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2"
+    note: "ISBN 978-0-12-303041-2. La cadena de medida que hay detrás de la especificación: transductores, montaje, ponderación frecuencial y la práctica de instrumentación para la que la norma escribe requisitos."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Todas las demás páginas de esta sección calculan algo sobre una vibración: lo
+que le hace a una persona, a una máquina o a un edificio. Esta calcula algo
+sobre el **instrumento**. La ISO 8041-1 no es un método para medir vibración;
+es la especificación frente a la que se diseña y se ensaya un vibrómetro de
+uso general para vibración en humanos, y el resto de la sección lleva todo
+este tiempo citando uno de sus apartados, porque las nueve ponderaciones
+frecuenciales que aplica la [exposición humana a
+vibración](/phonometry/es/vibration/human/human-vibration/) se definen aquí y en ningún otro sitio.
+
+El apartado que viene justo después de ellas es donde empieza esta página:
+cuánto puede apartarse un instrumento real de esas ponderaciones antes de
+dejar de ser conforme. Ese apartado es una tabla de frecuencias y porcentajes,
+y una resta. Resulta que no está solo. La desviación característica de fase,
+el decaimiento del valor eficaz móvil y la ráfaga de señal en diente de sierra están
+especificados los tres como números que un vibrómetro conforme tiene que
+producir, y todos y cada uno de esos números se pueden calcular. Esta página
+trata de las partes del ensayo de un instrumento que son aritmética y no trabajo de
+laboratorio, y de dejar claro dónde termina cada una.
+
+## 1. Por qué una norma de instrumentación está en una biblioteca de cálculo
+
+La ISO 8041-1 define tres niveles de ensayo de prestaciones (apartado 1): el
+**ensayo de tipo**, un ensayo completo del instrumento frente a todas las
+especificaciones del documento, con la **validación** como su forma reducida
+para un instrumento de ejemplar único; la **verificación periódica**, un
+conjunto intermedio de ensayos que confirma que un instrumento sigue
+funcionando según lo especificado; y las **comprobaciones in situ**, el mínimo
+que indica que probablemente esté funcionando. Los tres son trabajo sobre
+hardware, hecho en un laboratorio o en campo. Ninguno de ellos se
+ejecuta aquí.
+
+Lo que se repite dentro de los tres es un único cálculo. Alguien midió la
+respuesta en frecuencia de un canal de ponderación; la norma imprime la
+respuesta que debería haber tenido y la banda dentro de la que se le permite
+quedarse; ¿cae la medición dentro de la banda? Para responder a eso no hacen
+falta ni excitador, ni transductor de referencia, ni cámara climática, solo el
+objetivo de diseño y dos tablas. Eso es lo que hace `verify_weighting`, y es
+todo lo que hace.
+
+Así que el alcance de esta página es muy acotado, y conviene enunciarlo antes que
+nada. Lo que la biblioteca tiene es la aritmética: el objetivo de diseño (las
+funciones de transferencia exactas del apartado 5.6, ya usadas para ponderar
+señales en otras páginas de esta sección), las frecuencias de transición de la
+Tabla 4 y las bandas de tolerancia de la Tabla 5, las condiciones de
+referencia de la Tabla 1 y las tolerancias de indicación de la Tabla 2, la
+desviación característica de fase de la Fórmula (6), los tiempos de
+decaimiento del valor eficaz móvil de las Tablas 10 y 11, y las 228 indicaciones de
+la ráfaga de señal de las Tablas 7 a 9. Cada una de esas cosas es o bien un
+número que la norma imprime o bien un número que la norma define en forma cerrada,
+y cada una es un lado de una comparación cuyo otro lado sale de un banco de
+ensayo.
+
+Lo que la biblioteca no tiene es el banco de ensayo. La exactitud de la
+indicación en condiciones de referencia (5.5), la linealidad de amplitud
+(5.7), el ruido del instrumento (5.8), la indicación de sobrecarga y la de
+señal por debajo del rango (5.10 y 5.11), la diafonía eléctrica (5.16), el
+montaje del apartado 6 y los criterios ambientales y electromagnéticos del
+apartado 7 son medidas sobre hardware; y también lo es, en el momento en
+que alguien tiene que hacer vibrar un transductor y leer una pantalla,
+cualquier ensayo de esta página. **Superar la comprobación de ponderación es
+condición necesaria para la conformidad y nunca un certificado de ella.**
+
+Conviene llevarse una frase del 5.6.6 al resto de la página: los límites de
+tolerancia *incluyen* las incertidumbres expandidas máximas de medida
+aplicables. La banda no es la holgura del instrumento con la incertidumbre
+de la medida en el banco añadida aparte; esa incertidumbre tiene que caber
+también dentro de la banda. Hay una segunda frase sobre incertidumbre, en 13.1
+y 14.1, y dice algo distinto; distinguir las dos es de lo que trata la
+sección 4.
+## 2. Las nueve ponderaciones, y la banda que se ensancha a su alrededor
+
+El objetivo de diseño no es una tabla de números, es una función de
+transferencia. El apartado 5.6 construye cada ponderación a partir de cuatro
+etapas analógicas, un par paso alto y paso bajo Butterworth de segundo orden que
+limita la banda, una transición aceleración-velocidad que porta la ganancia
+global y un escalón ascendente, multiplicadas entre sí como
+$H(s) = H_\mathrm{h}(s)\,H_\mathrm{l}(s)\,H_\mathrm{t}(s)\,H_\mathrm{s}(s)$
+(Fórmula (5)). [Vibración en humanos](/phonometry/es/vibration/human/human-vibration/) cubre esa cascada y el
+conjunto de parámetros de la Tabla 3 que la especializa en las nueve
+ponderaciones `Wb`, `Wc`, `Wd`, `We`, `Wf`, `Wh`, `Wj`, `Wk` y `Wm`.
+`weighting_factors` evalúa esa función a cualquier frecuencia, y es ese valor, y
+no uno tabulado, con el que se compara una medida. El Anexo B sí tabula esas
+mismas ponderaciones con cuatro cifras significativas, y dice de sí mismo que
+los valores se calcularon a partir de los objetivos de diseño en vez de
+definirlos.
+
+Alrededor del objetivo de diseño está la **Tabla 5**, y es fácil leerla como una
+sola tolerancia cuando son tres. Las filas van referidas a cuatro frecuencias de
+transición, de $f_\mathrm{t1}$ a $f_\mathrm{t4}$, que la **Tabla 4** da para
+cada ponderación y que cortan el eje en cinco regiones; las cinco filas impresas
+solo llevan tres pares de límites, distintos entre sí, porque las dos faldas comparten los
+suyos y las dos colas también:
+
+| Región de frecuencia | Tolerancia de magnitud | Desviación característica de fase |
+| :--- | :---: | :---: |
+| $f \le f_\mathrm{t1}$ | +26 %, −100 % | ±∞ |
+| $f_\mathrm{t1} < f < f_\mathrm{t2}$ | +26 %, −21 % | ±12° |
+| $f_\mathrm{t2} \le f \le f_\mathrm{t3}$ | +12 %, −11 % | ±6° |
+| $f_\mathrm{t3} < f < f_\mathrm{t4}$ | +26 %, −21 % | ±12° |
+| $f_\mathrm{t4} \le f$ | +26 %, −100 % | ±∞ |
+
+Fíjate en qué filas son cerradas. La región central incluye sus dos cortes, las
+faldas excluyen los suyos, así que una medida justo en $f_\mathrm{t2}$ o en
+$f_\mathrm{t3}$ toma el límite más estrecho y no el más ancho que hay al otro
+lado.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_tolerance_regions.svg" alt="Tres paneles sobre un mismo eje logarítmico de frecuencia de 0,1 a 400 Hz, con las cuatro frecuencias de transición de la Tabla 4 para Wk como sus marcas: 0,2512, 0,631, 63,1 y 158,5 Hz. El panel izquierdo dibuja el objetivo de diseño de Wk en log-log con la banda que la Tabla 5 permite a su alrededor, coloreada por regiones, una franja estrecha a lo largo de la región central, otra más ancha en las dos faldas y, en las dos colas, un relleno que se sale por la parte inferior del panel porque ahí no hay ningún límite inferior. El panel superior derecho dibuja esa misma banda dividida por el objetivo de diseño, en porcentaje, donde el escalón del más 12 y menos 11 del centro al más 26 y menos 21 de las faldas está a escala. El panel inferior derecho dibuja el límite de la desviación característica de fase sobre los mismos cuatro cortes, 6 grados en el centro, 12 en las faldas y más o menos infinito en las colas, con la nota que restringe esa columna a los instrumentos cuyo parámetro de medida no se basa en valores eficaces" width="96%" />
+
+La Tabla 4 imprime cada corte dos veces, como potencia $10^{k/10}$ y como
+decimal redondeado al lado, y la biblioteca los construye a partir de los
+exponentes. Así que $f_\mathrm{t3}$ de `Wk` son 63,0957 Hz y los 63,1 Hz
+impresos al lado son la cortesía, no el valor:
+
+```python
+from phonometry import vibration
+
+# La Tabla 4 para Wk: ft1, ft2, ft3, ft4.
+print([round(f, 4) for f in vibration.TRANSITION_FREQUENCIES_HZ["Wk"]])
+# [0.2512, 0.631, 63.0957, 158.4893]
+
+# La Tabla 5 leída a lo largo de ellas: cola, falda, central, falda, cola.
+upper, lower = vibration.weighting_tolerance_percent(
+    "Wk", [0.2, 0.5, 16.0, 100.0, 200.0]
+)
+print(upper)   # [26. 26. 12. 26. 26.]
+print(lower)   # [-100.  -21.  -11.  -21. -100.]
+```
+
+Los centros de tercio de octava son también potencias exactas, $f_\mathrm{c}(n) =
+10^{n/10}$ Hz (Fórmula (B.1)), que es lo que hace que los cortes caigan sobre
+centros de banda y no al lado de ellos. La banda 18 es $10^{1{,}8}$ Hz y es la
+última banda de la región central, exactamente como lo enseña la columna de
+tolerancia del Anexo B; esa misma medida introducida como los 63,1 Hz impresos
+cae unas milésimas de hercio por encima de $f_\mathrm{t3}$ y se califica contra
+la falda en su lugar. El Anexo B dice lo mismo de los factores de ponderación:
+usa las frecuencias centrales verdaderas, nunca las etiquetas nominales de
+banda.
+
+```python
+print(vibration.weighting_tolerance_percent("Wk", [10 ** 1.8, 63.1])[1])
+# [-11. -21.]
+```
+
+**Dónde caen los cortes.** La Tabla 1 da además un rango nominal de frecuencias
+para cada aplicación, y los cortes de la Tabla 4 quedan a caballo de él en vez
+de coincidir con él. La vibración de cuerpo entero se especifica de 0,5 Hz a
+80 Hz mientras que la región estrecha va de 0,631 Hz a 63,1 Hz; la vibración
+transmitida a la mano, de 8 Hz a 1 000 Hz frente a 10 Hz a 794,3 Hz; la
+vibración de cuerpo entero de baja frecuencia, de 0,1 Hz a 0,5 Hz frente a
+0,1259 Hz a 0,3981 Hz. En los tres casos los dos extremos del rango de trabajo
+caen en una falda, y las colas empiezan más allá.
+
+**Por qué la banda se ensancha al alejarse del centro.** Los porcentajes crecen
+hacia fuera, y el margen que representan no. Un porcentaje no dice nada de
+cuánto error deja pasar hasta que se multiplica por el factor del que es
+porcentaje. En el corte superior el factor de diseño ya ha caído más de una
+década, y en el inferior, a una quinta parte de su máximo:
+
+```python
+from phonometry import vibration
+
+ft1, ft2, ft3, ft4 = vibration.TRANSITION_FREQUENCIES_HZ["Wk"]
+corners = [ft1, ft2, 6.31, ft3, ft4]
+design = vibration.weighting_factors("Wk", corners)
+upper, _ = vibration.weighting_tolerance_percent("Wk", corners)
+
+print(design.round(4))                   # [0.1832 0.4588 1.0544 0.1857 0.0292]
+print((design * upper / 100).round(4))   # [0.0476 0.0551 0.1265 0.0223 0.0076]
+```
+
+A 6,31 Hz el ajustado +12 % vale 0,1265 en unidades de factor; a 158,5 Hz el
+generoso +26 % vale 0,0076, unas diecisiete veces menos. La lectura que hay
+detrás de eso, que la norma no explicita, es la forma de la respuesta: fuera del
+rango de trabajo la ponderación está en la caída abrupta de la limitación de
+banda, donde un error pequeño en una frecuencia de corte se convierte en un
+error porcentual grande en el factor, mientras que esa misma banda no aporta
+casi nada a un valor eficaz ponderado. Donde la contribución es grande, en el
+centro, la norma es estricta.
+
+**Calificar una respuesta medida.** `verify_weighting` toma las frecuencias a
+las que se midió una respuesta y los factores leídos en ellas, evalúa el
+objetivo de diseño en esas mismas frecuencias y aplica el criterio de aceptación
+en el que están escritas las columnas de tolerancia,
+$(\text{medida} / \text{diseño} - 1) \times 100$ frente a la banda de la región
+en la que cae cada frecuencia:
+
+```python
+import numpy as np
+from phonometry import vibration
+
+# Un barrido de banco del canal Wk de un vibrómetro de cuerpo entero. Los
+# centros se construyen con la Fórmula (B.1) en vez de escribirse como
+# decimales: 63.096 redondea hacia arriba por encima de ft3 y se calificaría
+# frente a la falda, como avisa el párrafo de arriba.
+bands = np.array([-3, 0, 3, 6, 9, 12, 15, 18, 19])
+frequencies = 10.0 ** (bands / 10.0)
+measured = np.array([0.4314, 0.4969, 0.5466, 0.9937, 1.068,
+                     0.7897, 0.3427, 0.1894, 0.1366])
+
+check = vibration.verify_weighting("Wk", frequencies, measured)
+print(check.passes)                             # False
+print(check.deviation_percent.round(1))
+# [  3.   3.   3.   3.   3.   2. -15.   2.   2.]
+print(check.failing_frequencies_hz.round(2))    # [31.62]
+print(round(check.worst_deviation_percent, 1))  # -15.0
+
+check.plot(language="es")   # la medida dentro de su banda (requiere matplotlib)
+```
+
+Un canal que lee entre un 2 % y un 3 % de más en todo el rango cumple, porque
+eso está dentro del +12 % y dentro del +26 %. La única banda que lee un 15 % de
+menos incumple, e incumple por dónde está: 31,62 Hz cae en la región central,
+cuyo límite inferior es el −11 %. Lleva ese mismo déficit a 79,43 Hz, que está
+entre $f_\mathrm{t3}$ y $f_\mathrm{t4}$, y el instrumento es conforme:
+
+```python
+moved = np.array([0.4314, 0.4969, 0.5466, 0.9937, 1.068,
+                  0.7897, 0.4112, 0.1894, 0.1138])
+print(vibration.verify_weighting("Wk", frequencies, moved).passes)   # True
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_weighting_verification.svg" alt="Dos paneles sobre un mismo eje logarítmico de frecuencia, de 0,2512 a 158,5 Hz. Arriba, el objetivo de diseño de Wk dentro de su banda de la Tabla 5, el barrido tal como se lee en círculos rojos rellenos y el mismo barrido, con su déficit desplazado, en anillos verdes huecos: en siete bandas un mismo punto lleva las dos marcas, y a 31,62 Hz el círculo rojo queda solo justo por debajo del borde inferior, con una nota que dice un 4,0 por ciento del objetivo de diseño por debajo del límite del menos 11 por ciento. Abajo, los mismos puntos en porcentaje frente al más 12 y menos 11 del centro y al más 26 y menos 21 de las faldas: el punto de 31,62 Hz está un 15 por ciento bajo, y una flecha lo lleva más allá del escalón de 63,1 Hz hasta 79,43 Hz, por encima del menos 21 y conforme" width="94%" />
+
+<details>
+<summary>Mostrar el código de la vista de la banda de tolerancia con un solo barrido</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration
+
+check = vibration.verify_weighting("Wk", frequencies, measured)
+
+# En una línea:
+check.plot(language="es")
+plt.show()
+
+# A mano, a partir de los campos del resultado, replicando lo que dibuja
+# WeightingVerification.plot():
+upper, lower = vibration.weighting_tolerance_percent(
+    check.weighting, check.frequencies_hz
+)
+inside = check.within_tolerance
+fig, ax = plt.subplots()
+ax.fill_between(check.frequencies_hz,
+                check.design * (1.0 + lower / 100.0),
+                check.design * (1.0 + upper / 100.0),
+                color="#1f77b4", alpha=0.15, label="tolerancia de ISO 8041-1")
+ax.plot(check.frequencies_hz, check.design, color="#1f77b4", lw=2.0,
+        label="objetivo de diseño")
+ax.plot(check.frequencies_hz[inside], check.measured[inside], "o",
+        color="#2ca02c", label="dentro de tolerancia")
+ax.plot(check.frequencies_hz[~inside], check.measured[~inside], "X",
+        color="#d62728", markersize=9, label="fuera de tolerancia")
+ax.set(xscale="log", yscale="log", xlabel="Frecuencia [Hz]",
+       ylabel="Factor de ponderación")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
+## 3. El `−100 %` es la ausencia de un límite inferior, no uno ancho
+
+La celda de la Tabla 5 que más se presta a leerse mal es el `−100 %` de sus
+filas primera y última. Parece una tolerancia extremadamente generosa. No es
+ninguna tolerancia: un factor un 100 % por debajo del objetivo de diseño es
+cero, y ningún factor de ponderación puede ser negativo, así que ese límite
+admite todas las respuestas que existen. Por debajo de $f_\mathrm{t1}$ y por
+encima de $f_\mathrm{t4}$ la norma restringe la respuesta por arriba y deja de
+restringirla por abajo del todo. Un instrumento puede caer fuera del rango de
+trabajo tan abruptamente como quiera quien lo diseñe, y uno que ahí fuera no lea
+nada en absoluto es conforme:
+
+```python
+from phonometry import vibration
+
+# El objetivo de diseño a 0.1259 Hz, por debajo de ft1 = 0.2512 Hz para Wk.
+print(vibration.weighting_factors("Wk", [0.1259]).round(5))   # [0.04932]
+
+# Un canal que ahí no lee nada en absoluto sigue siendo conforme.
+dead = vibration.verify_weighting("Wk", [0.1259], [0.0])
+print(dead.passes, dead.deviation_percent.round(1))   # True [-100.]
+
+# El límite superior es la mitad de la celda que sí puede fallar: +26 %,
+# sea cola o no.
+high = vibration.verify_weighting("Wk", [0.1259], [0.0626])
+print(high.passes, high.deviation_percent.round(1))   # False [26.9]
+```
+
+No pierdas de vista la asimetría, porque es el sentido de esas dos filas. Lo que
+la norma impide ahí fuera es un instrumento que **responda a vibración que
+debería estar ignorando**, nunca uno que la ignore demasiado bien. El valor se
+publica como `UNCONSTRAINED_BELOW` para que un informe pueda nombrarlo en vez de
+escribir un número pelado, y la verificación lo compara como un límite
+cualquiera: las filas de cola no necesitan ningún caso especial, ya que todo
+factor no negativo las satisface por construcción.
+## 4. La incertidumbre del laboratorio mueve la medición, no la banda
+
+Dos frases de la norma hablan de incertidumbre expandida y es fácil leerlas
+como una sola. No lo son, y un veredicto calculado con la que no toca se
+equivoca en la dirección que deja pasar un instrumento.
+
+La primera es la frase del 5.6.6 citada al final de la sección 1: los límites
+de tolerancia de la Tabla 5 *incluyen* las **máximas** incertidumbres
+expandidas de medida aplicables. Eso es una afirmación sobre cómo se trazó la
+tabla. Es la razón de que `weighting_tolerance_percent` devuelva +12 % y
+−11 % y nunca nada más ancho: la holgura que se le concede a un banco
+cuidadoso ya está dentro de esos números, y sumarles algo sería gastarla dos
+veces.
+
+La segunda está en el 13.1 y en el 14.1, palabra por palabra en los dos: la
+conformidad queda demostrada cuando la desviación medida respecto de un
+objetivo de diseño, **extendida con la incertidumbre expandida de medida real
+del laboratorio de ensayo**, no supera los límites de tolerancia
+especificados. Eso es una afirmación sobre un laboratorio en un día concreto.
+Mueve la desviación, no la banda, así que la comparación pasa a ser
+`deviation + U <= upper` y `deviation - U >= lower`, y el número `U` es el del
+propio laboratorio, calculado con el factor de cobertura `k = 2` que imprimen
+los dos apartados.
+
+Las dos son coherentes porque hablan de números distintos. El 12.1 acota la
+`U` del laboratorio: un laboratorio de ensayo no puede siquiera realizar un
+ensayo si su incertidumbre expandida real supera el máximo que ese apartado
+permite, y son esos máximos los que el 5.6.6 dice que ya están dentro de los
+límites impresos. La biblioteca publica los dos lados, indexados por número de
+apartado, para que un informe pueda nombrar la cifra que usó:
+
+```python
+from phonometry import vibration
+
+# Lo máximo que el 12.11.2 deja llevar a un laboratorio a un ensayo mecánico
+# de respuesta en frecuencia, y el factor de cobertura con el que se expande.
+print(vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT["12.11.2"])   # 4.5
+print(vibration.ISO8041_COVERAGE_FACTOR)                       # 2.0
+```
+
+Esto es lo que la diferencia le hace a un veredicto. Una banda de un barrido
+de `Wk` lee un 9 % por encima del objetivo de diseño a 6,31 Hz, que está
+dentro del +12 % de la región central con tres puntos de sobra:
+
+```python
+frequency = [10 ** 0.8]
+measured = vibration.weighting_factors("Wk", frequency) * 1.09
+
+bare = vibration.verify_weighting("Wk", frequency, measured)
+print(bare.passes, bare.deviation_percent.round(1))    # True [9.]
+```
+
+Ahora el laboratorio declara el 4,5 % que le permite el 12.11.2. Nada del
+instrumento ha cambiado, y la desviación informada tampoco cambia:
+
+```python
+declared = vibration.verify_weighting(
+    "Wk", frequency, measured, expanded_uncertainty_percent=4.5
+)
+print(declared.passes, declared.deviation_percent.round(1))   # False [9.]
+print(declared.expanded_uncertainty_percent)                  # 4.5
+```
+
+El instrumento se rechaza porque 9 % + 4,5 % es más que 12 %, y la norma
+pregunta si la desviación *ampliada* se mantiene dentro del límite. Leído al
+revés, un laboratorio que carga con un 4,5 % solo puede certificar
+desviaciones de hasta el 7,5 % en la región central, y un banco que mide con
+más cuidado certifica más instrumentos. Ese es todo el sentido del apartado:
+la incertidumbre no es una holgura gratuita, es un coste.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_uncertainty_allowance.svg" alt="Dos paneles que comparten un mismo eje de desviación. A la izquierda, la desviación de un barrido de banco de Wk en tanto por ciento de 0,1 a 400 Hz frente a los límites de la Tabla 5 de la ISO 8041-1, dibujados como una escalera que salta en las cuatro frecuencias de transición 0,2512, 0,631, 63,1 y 158,5 Hz: +26 y -21 por ciento en las dos faldas, +12 y -11 en la región central, y ningún límite inferior en las dos colas, donde el relleno se sale por el borde inferior del panel. Todos los puntos medidos quedan dentro de la banda impresa, y cada uno lleva una barra de más y menos el 4,5 por ciento que permite el apartado 12.11.2, con un solo brazo en las dos colas. Dos puntos van marcados con un aspa roja porque la punta de la barra se sale de la banda aunque el punto en sí no: uno que lee un 9 por ciento de más a 6,31 Hz y otro que lee un 17,5 por ciento de menos a 125,9 Hz. A la derecha, lo que un laboratorio todavía puede certificar a medida que su propia incertidumbre expandida U crece de 0 a 5 por ciento: tres cuñas anidadas que se estrechan hacia la derecha, la central, que va de -11 a +12 por ciento con U = 0 y de -6,5 a +7,5 por ciento con 4,5 por ciento, y la cuña de las colas conservando su suelo abierto." width="96%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration
+
+# El barrido de banco al que la figura pone nota: centros de tercio de octava de
+# la Fórmula (B.1), y una respuesta que está dentro de la banda impresa en
+# todos y cada uno de ellos.
+sweep_bands = np.arange(-8, 25)
+sweep_hz = 10.0 ** (sweep_bands / 10.0)
+
+# Cuatro de esos centros SON frecuencias de transición de Wk, y los dos lados
+# de esa comparación son una potencia cuyo último bit decide cada plataforma.
+# Se ajustan al valor de la propia tabla: un centro que cae a un bit de una
+# frecuencia de transición se califica contra la región vecina, y dos de
+# estos cuatro imprimirían entonces un veredicto distinto más abajo.
+corners = np.array(vibration.TRANSITION_FREQUENCIES_HZ["Wk"])
+for corner in corners:
+    sweep_hz[np.isclose(sweep_hz, corner, rtol=1e-9, atol=0.0)] = corner
+
+sweep_deviations = np.array([
+    -27.0, -24.0, -21.0, -13.0, -9.0, -6.0, -4.0, -2.0, -0.5, 1.0, 2.0, 2.5,
+    3.0, 3.5, 4.5, 6.5, 9.0, 6.0, 4.0, 2.5, 1.5, 0.5, -0.5, -1.5, -3.0, -4.5,
+    -6.0, -9.0, -13.0, -17.5, -22.0, -25.0, -28.0,
+])
+sweep_measured = (vibration.weighting_factors("Wk", sweep_hz)
+                  * (1 + sweep_deviations / 100))
+
+u = vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT["12.11.2"]
+print(vibration.verify_weighting("Wk", sweep_hz, sweep_measured).passes)   # True
+graded = vibration.verify_weighting(
+    "Wk", sweep_hz, sweep_measured, expanded_uncertainty_percent=u
+)
+print(graded.passes)                              # False
+print(graded.failing_frequencies_hz.round(2))     # [  6.31 125.89]
+
+# En una línea: el renderizador dibuja la banda impresa y, dentro de ella, la
+# banda más estrecha que deja la incertidumbre declarada.
+graded.plot(language="es")
+plt.show()
+
+# A mano, el mismo veredicto leído como desviaciones: la banda se queda donde
+# la imprime la Tabla 5 y a la medición le crece una barra. Los límites son
+# constantes entre las cuatro frecuencias de transición, así que un par de
+# puntos a cada lado de cada una dibuja la escalera exactamente.
+edges = np.sort(np.concatenate((corners * (1 - 1e-9), corners * (1 + 1e-9),
+                                [0.1, 400.0])))
+band_upper, band_lower = vibration.weighting_tolerance_percent("Wk", edges)
+
+# En las dos colas el límite inferior es -100 %, al que verify_weighting no le
+# resta nada, así que allí la barra tiene un solo brazo.
+_ceiling, floor = vibration.weighting_tolerance_percent("Wk", sweep_hz)
+arms = np.vstack((np.where(floor <= vibration.UNCONSTRAINED_BELOW, 0.0, u),
+                  np.full(sweep_hz.shape, u)))
+kept = graded.within_tolerance
+
+fig, ax = plt.subplots()
+ax.fill_between(edges, band_lower, band_upper, color="#1f77b4", alpha=0.15,
+                label="tolerancia de ISO 8041-1")
+ax.errorbar(sweep_hz[kept], graded.deviation_percent[kept],
+            yerr=arms[:, kept], color="#2ca02c", marker="o", ls="none",
+            capsize=2.5, label="desviación extendida conforme")
+ax.errorbar(sweep_hz[~kept], graded.deviation_percent[~kept],
+            yerr=arms[:, ~kept], color="#d62728", marker="X", markersize=9,
+            ls="none", capsize=2.5, label="desviación extendida rechazada")
+ax.set(xscale="log", xlim=(0.1, 400.0), ylim=(-33.0, 31.0),
+       xlabel="Frecuencia [Hz]", ylabel="Desviación respecto al objetivo de diseño [%]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
+El valor por defecto es `None`, que compara la desviación sin extender y es la
+lectura que solo es correcta cuando se ha demostrado que la incertidumbre de
+medida es despreciable. Una cifra negativa o infinita se rechaza en lugar de
+ignorarse en silencio, porque ignorarla devolvería exactamente el veredicto
+que el 13.1 dice que no basta.
+
+Hay un sitio deliberadamente exento. El `−100 %` de las dos colas es la
+ausencia de límite inferior, no un límite ancho, como lo plantea la sección 3,
+así que no se le resta nada. Un canal que no lee absolutamente nada por debajo
+de $f_\mathrm{t1}$ cumple por muy cuidadosamente que se haya medido, y sería
+una regla extraña la que lo rechazara por el cuidado:
+
+```python
+dead = vibration.verify_weighting(
+    "Wk", [0.1259], [0.0], expanded_uncertainty_percent=4.5
+)
+print(dead.passes, dead.deviation_percent.round(1))   # True [-100.]
+```
+
+## 5. Las condiciones de referencia, donde las ponderaciones no valen 1
+
+La Tabla 1 fija el punto en el que se calibra un vibrómetro y se comprueba su
+indicación. Da, por aplicación, una frecuencia de referencia impresa primero
+en radianes por segundo (100 rad/s para la vibración de cuerpo entero,
+500 rad/s para la vibración transmitida a la mano y 2,5 rad/s para la
+vibración de cuerpo entero de baja frecuencia) con los hercios entre
+paréntesis, una aceleración eficaz de referencia (1 m/s², 10 m/s² y 0,1 m/s²
+respectivamente) y el rango de frecuencias nominal de la aplicación
+(`NOMINAL_FREQUENCY_RANGE_HZ`, los números redondos de la columna impresa y no
+centros de banda). Las condiciones ambientales de referencia están en otro
+sitio, en el apartado 4: temperatura del aire 23 °C y humedad relativa 50 %.
+La biblioteca deriva las frecuencias de los radianes por segundo en vez de
+transcribir los hercios redondeados que van a su lado.
+
+Luego viene la parte que sorprende a la gente en el banco. **Las
+ponderaciones no valen la unidad en su frecuencia de referencia.** `Wk` a
+15,915 Hz vale 0,7718, `Wh` a 79,58 Hz vale 0,2020 y `Wf` a 0,3979 Hz vale
+0,3888. Un vibrómetro conforme al que se le aplique la vibración de referencia
+no muestra, por tanto, la aceleración de referencia; muestra el producto de
+las dos, que es la última columna de la Tabla 1 y lo que devuelve
+`reference_indication`:
+
+```python
+from phonometry import vibration
+
+for name in ("Wk", "Wh", "Wf"):
+    print(
+        name,
+        round(vibration.REFERENCE_FREQUENCY_HZ[name], 4),      # Hz
+        vibration.REFERENCE_ACCELERATION_M_S2[name],           # m/s^2
+        round(vibration.reference_indication(name), 5),        # m/s^2
+        vibration.indication_tolerance_percent(name),          # %
+    )
+# Wk 15.9155 1.0 0.77182 4.0
+# Wh 79.5775 10.0 2.02019 4.0
+# Wf 0.3979 0.1 0.03888 5.0
+```
+
+La última columna es la Tabla 2, la tolerancia de indicación en la frecuencia
+de referencia en condiciones ambientales de referencia: ±4 % para la
+vibración transmitida a la mano y la de cuerpo entero, ±5 % para la vibración
+de cuerpo entero de baja frecuencia, que es el caso de `Wf` y el único que
+difiere. Juntas dan la ventana en la que tiene que caer un canal `Wk` cuando
+se le aplica 1 m/s² a 15,915 Hz:
+
+```python
+indication = vibration.reference_indication("Wk")
+tolerance = vibration.indication_tolerance_percent("Wk")
+print(round(indication * (1 - tolerance / 100), 4),
+      round(indication * (1 + tolerance / 100), 4))
+# 0.7409 0.8027
+```
+
+La biblioteca publica esa ventana; no puede comprobarla. Comprobarla significa
+aplicar una vibración sinusoidal a la base del transductor con el instrumento
+en su rango de medida de referencia y leer la pantalla, que es el apartado 5.5
+y es una medición de laboratorio. Para lo que sirven los dos números es para
+el informe: una indicación de 0,75 m/s² está dentro de la ventana y una
+indicación de 0,80 m/s² también lo está, mientras que el 1,00 m/s² que un
+lector podría esperar no lo está, y saber cuál de esas tres muestra el
+vibrómetro es la diferencia entre una calibración y un malentendido.
+## 6. La ponderación de limitación de banda, calificada por su cuenta
+
+La cascada de la Fórmula (5) tiene cuatro etapas, y las dos primeras tienen
+vida propia. $H_\mathrm{h}(s)\,H_\mathrm{l}(s)$, el par Butterworth de segundo
+orden, paso alto y paso bajo, con las esquinas `f1` y `f2` de la Tabla 3, es la
+**ponderación de limitación de banda**, y la norma la trata como una magnitud
+que el instrumento indica, no como un resultado intermedio. El apartado 5.1
+enumera el valor de banda limitada promediado en el tiempo entre lo que un
+instrumento tiene que poder mostrar; el 5.6.6 dice que los límites de la
+Tabla 5 se aplican a las ponderaciones «incluidas las ponderaciones de
+limitación de banda correspondientes»; el Anexo B le da tres columnas propias
+en cada una de las Tablas B.1 a B.9; y los ensayos de tipo de 12.7, 12.10,
+12.11 y 12.13 ponen todos el vibrómetro en el ajuste de limitación de banda
+antes de que ocurra nada más.
+
+Entre las nueve ponderaciones solo hay cuatro pares de esquinas distintos, así
+que seis de las nueve comparten una misma respuesta de limitación de banda, y
+aun así se pide por el nombre de la ponderación, porque es como la cita la
+norma. `band_limiting_factors` devuelve la magnitud, que es la columna
+«Factor de limitación de banda» del Anexo B, y `band_limiting_response`
+devuelve la respuesta compleja entera, que expone un `.plot()`:
+
+```python
+import numpy as np
+from phonometry import vibration
+
+centres = 10.0 ** (np.array([-2, 8, 18, 20]) / 10.0)
+print(centres.round(4))
+# [  0.631    6.3096  63.0957 100.    ]
+
+print(vibration.band_limiting_factors("Wk", centres).round(4))
+# [0.9279 1.     0.9291 0.7071]
+print(vibration.weighting_factors("Wk", centres).round(4))
+# [0.4588 1.0544 0.1857 0.0887]
+
+# Wm es una de las tres que no comparten la esquina de 0,4 Hz.
+print(vibration.band_limiting_factors("Wm", centres).round(4))
+# [0.5336 0.9999 0.9291 0.7071]
+```
+
+Ahí se ven dos cosas. La respuesta de limitación de banda es plana en el centro
+y cae a $1/\sqrt{2}$ a 100 Hz, que es lo que hace una esquina Butterworth; y la
+ponderación global tiene una forma completamente distinta, porque las etapas de
+transición y de escalón de la cascada son las que hacen que una `Wk` sea una
+`Wk`. La fila de limitación de banda no es una versión más débil de la fila de
+la ponderación, es la otra mitad del mismo producto.
+
+**La fila de la Tabla 2 que califica el par.** La Tabla 2 tiene tres filas, y
+la sección 5 solo usó la primera. La segunda admite un 3 % entre el valor
+indicado de una magnitud ponderada en frecuencia y el valor indicado de la
+medida de limitación de banda correspondiente multiplicado por el factor de
+ponderación apropiado, para una sinusoide estacionaria a la frecuencia de
+referencia y con el valor de vibración de referencia. `apply_band_limiting`
+hace pasar una señal por el camino de limitación de banda igual que
+`apply_weighting` la hace pasar por el completo, así que la fila se puede
+ejercitar de extremo a extremo:
+
+```python
+def rms(x):
+    return float(np.sqrt(np.mean(x**2)))
+
+fs = 2000.0
+t = np.arange(int(60 * fs)) / fs
+a = np.sqrt(2.0) * np.sin(2 * np.pi * vibration.REFERENCE_FREQUENCY_HZ["Wk"] * t)
+
+band_limited = rms(vibration.apply_band_limiting(a, fs, name="Wk"))
+weighted = rms(vibration.apply_weighting(a, fs, name="Wk"))
+
+print(round(band_limited, 4), round(weighted, 4))   # 0.9997 0.7718
+print(round(weighted / band_limited, 6))            # 0.772019
+print(round(vibration.band_limited_weighting_factor("Wk"), 6))   # 0.772066
+print(vibration.WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT)         # 3.0
+```
+
+**Cuál es «el factor de ponderación apropiado».** La fila no define la
+expresión, y el 12.7 apunta a la Tabla 1, cuya columna de factor de ponderación
+dice 0,7718 para `Wk`.
+El cociente de las dos respuestas a la frecuencia de referencia es 0,772066,
+así que para `Wk` la elección no supone ninguna diferencia medible: su
+ponderación de limitación de banda vale ahí 0,9997, y las dos lecturas
+coinciden hasta tres partes en diez mil frente a una tolerancia del 3 %. Ocho
+de las nueve ponderaciones se comportan así.
+
+`Wf` no, y la razón es geométrica y no numérica. Su frecuencia de referencia es
+2,5 rad/s, o sea 0,3979 Hz, y sus propias esquinas de limitación de banda están
+en 0,08 Hz y 0,63 Hz, así que la frecuencia de referencia cae dentro de su
+propia falda:
+
+```python
+f_ref = vibration.REFERENCE_FREQUENCY_HZ["Wf"]
+skirt = float(vibration.band_limiting_factors("Wf", [f_ref])[0])
+ratio = vibration.band_limited_weighting_factor("Wf")
+print(round(skirt, 6), round(ratio, 6))     # 0.928078 0.418982
+
+# La Tabla 1 imprime 0,3888 para Wf. Leído como el factor de la fila, un
+# vibrómetro conforme incumple la fila por:
+print(round((ratio / 0.3888 - 1) * 100, 2))   # 7.76
+```
+
+Un canal `Wf` conforme incumple la fila por más del doble de su tolerancia si
+se usa el número de la Tabla 1, y la cumple por construcción si se usa el
+cociente. `band_limited_weighting_factor` devuelve el cociente, que es la única
+lectura con la que la fila se puede cumplir, y la ambigüedad queda registrada
+como errata en lugar de resolverse en silencio.
+
+## 7. La banda de fase, y el instrumento al que se aplica
+
+La Tabla 5 tiene una tercera columna, y su nota al pie *a* la mantiene apartada
+de la mayoría de los instrumentos: las tolerancias de la desviación
+característica de fase **solo se aplican a los instrumentos que proporcionan
+parámetros de medida que no están basados en valores eficaces**. Un valor
+eficaz es insensible a la fase de lo que promedia; un pico, un MTVV o un VDV no
+lo son, y el Anexo H nombra esos tres. Así que los límites de fase no son una
+versión más estricta de los límites de magnitud, son un requisito sobre otro
+conjunto de instrumentos, y por eso la biblioteca los devuelve desde una
+función propia y no como un tercer array junto a la banda de magnitud. A un
+vibrómetro que solo da valores eficaces nunca se le entrega un veredicto de
+fase al que no está sujeto.
+
+```python
+from phonometry import vibration
+
+print(vibration.phase_tolerance_degrees("Wk", [0.2, 0.5, 16.0, 100.0, 200.0]))
+# [inf 12.  6. 12. inf]
+```
+
+El `inf` de las colas es la misma construcción que el `−100 %` de la sección 3:
+una celda que se lee como un límite y es la ausencia de límite, impresa en la
+Tabla 5 como ±∞.
+
+La magnitud que se limita tampoco es la que parece a primera vista. El apartado
+5.6.6 es explícito: los errores que causa una desviación de fase dependen de la
+**velocidad de variación** del error de fase con la frecuencia y no de su valor
+absoluto, así que la norma define una **desviación característica de fase**
+$\Delta\varphi_0$ a partir de los errores de fase en dos centros de tercio de
+octava contiguos (Fórmula (6)), y los límites de ±6° y ±12° los pone sobre
+ella. El Anexo H da la razón: un retardo de grupo constante es una desviación
+de fase proporcional a la frecuencia, y no afecta ni a los parámetros medidos
+ni a $\Delta\varphi_0$, mientras que unas tolerancias escritas sobre el error de
+fase en bruto tendrían que ser extremadamente estrechas para comprar la misma
+exactitud de medida.
+
+`phase_tolerance_degrees` devuelve esa banda y nada más: el límite que se
+aplica a cada frecuencia, sin opinión alguna sobre qué se compara con él.
+Calcular un $\Delta\varphi_0$ a partir de una respuesta de fase medida y
+calificarlo frente a la banda es la sección siguiente.
+## 8. Calificar una respuesta de fase: la Fórmula (6) y lo que ignora
+
+La Fórmula (6) convierte dos errores de fase contiguos en un solo número:
+
+$$
+\Delta\varphi_0 = \left\lvert
+\frac{f_n \, \Delta\varphi_{n+1} - f_{n+1} \, \Delta\varphi_n}
+     {f_{n+1} - f_n} \right\rvert
+$$
+
+Es una pendiente escrita como ordenada en el origen. Lee los dos errores de fase
+como dos puntos de una recta frente a la frecuencia: la cantidad que va dentro
+de las barras es donde esa recta cruza $f = 0$. Así que un error de fase que
+pasa recto por el origen se califica con un cero redondo, y un error de fase
+desplazado del origen se califica con el tamaño del desplazamiento. La Fórmula
+(H.3) del Anexo H normativo imprime la misma cantidad con los dos productos
+intercambiados, que es el mismo número dentro de las barras, y zanja dónde va la
+respuesta: `N` frecuencias dan `N − 1` valores, cada uno atribuido a la
+frecuencia **inferior** de su par. Eso es lo que decide qué región de la Tabla 5
+califica un par que queda a caballo de una frecuencia de transición.
+
+Las dos invariancias merecen verse en lugar de leerse, porque son toda la
+justificación de un criterio que parece tan indirecto:
+
+```python
+import numpy as np
+from phonometry import vibration
+
+bands = np.arange(-10, 27)
+frequencies = 10.0 ** (bands / 10.0)
+
+# Un error de fase constante se califica por su valor.
+constant = vibration.characteristic_phase_deviation(
+    frequencies, np.full(frequencies.shape, 4.0)
+)
+print(round(float(constant.min()), 6), round(float(constant.max()), 6))
+# 4.0 4.0
+
+# Un error de fase proporcional a la frecuencia es un retardo de grupo
+# constante, y se califica como cero por grande que llegue a ser. Este
+# es de 2 ms.
+delay_deg = -360.0 * frequencies * 2e-3
+print(round(float(delay_deg.min()), 1), round(float(delay_deg.max()), 1))
+# -286.6 -0.1
+ramp = vibration.characteristic_phase_deviation(frequencies, delay_deg)
+print(float(np.max(ramp)) < 1e-10)   # True
+```
+
+Un error de fase de hasta 287 grados, calificado como cero. La NOTA 1 del
+apartado H.2.1 dice exactamente eso de un retardo de grupo constante:
+«probablemente superaría con mucho las tolerancias sobre la desviación de fase,
+pero no influiría ni en los parámetros de vibración que se van a medir ni en los
+valores de la desviación característica de fase». Un vibrómetro que lo retrasa
+todo el mismo tiempo ha cambiado cuándo llega la forma de onda, no qué aspecto
+tiene, y el pico, el MTVV y el VDV de una forma de onda retrasada son el pico,
+el MTVV y el VDV. Unas tolerancias escritas sobre el error de fase en bruto
+tendrían que ser brutalmente estrechas para dejar sitio a un retardo que tiene
+cualquier instrumento real.
+
+**El oráculo.** El Anexo B imprime una columna de fase para la ponderación
+global en todas y cada una de las Tablas B.1 a B.9, calculada a partir de la
+Fórmula (H.1), que es el argumento del mismo $H(s)$ del que salen las
+magnitudes. Esas columnas recorren una sola rama continua, desde cerca de
++180 grados en la parte baja de cada tabla hasta bastante más allá de −180 en la
+parte alta, y el objetivo de diseño se sigue a lo largo de esa rama en lugar de
+plegarse en la media vuelta a cada lado del cero. Cinco filas de la Tabla B.8,
+calculadas en vez de transcritas:
+
+```python
+# frequencies es la malla de tercios de octava del bloque anterior.
+design = vibration.verify_phase_response(
+    "Wk", frequencies, np.zeros_like(frequencies)
+).design_phase_deg
+
+for band in (-10, 0, 8, 18, 26):
+    index = band + 10
+    print(band, round(float(frequencies[index]), 4),
+          round(float(design[index]), 4))
+# -10 0.1 159.7661
+# 0 1.0 40.0607
+# 8 6.3096 -6.8409
+# 18 63.0957 -137.5858
+# 26 398.1072 -247.9414
+```
+
+La Tabla B.8 imprime 159,8; 40,06; −6,841; −137,6 y −247,9 en esas filas. El
+último es la clave: −247,9 grados no es una fase que muestre el instrumento de
+nadie, es adonde ha llegado la rama, y es también donde tiene que llegar la
+medición. Plegar cualquiera de los dos lados dentro de $(-180°, +180°]$ destruye
+la invariancia frente al retardo, que es lo único para lo que existe el
+criterio. El apartado H.2.3.4 g) a m) es la receta que da la propia norma para
+reconstruir la curva continua a partir de las lecturas enrolladas de un medidor
+de fase, y su sitio está antes de la llamada, no dentro: en una malla de tercios
+de octava un enrollado y una rampa de retardo son el mismo salto, así que nada
+aguas abajo podría distinguirlos.
+
+**Un veredicto.** El instrumento de abajo tiene dos defectos. Uno es un retardo
+de grupo de 2 ms, al que el criterio es ciego. El otro es un polo de más en
+100 Hz, un filtro antialias colocado donde el objetivo de diseño ya tiene
+su esquina de limitación de banda, y a eso el criterio no es ciego en absoluto.
+La malla es el rango de frecuencias nominal de un vibrómetro de cuerpo entero,
+sobre los centros exactos de la Fórmula (B.1):
+
+```python
+bands = np.arange(-3, 20)
+frequencies = 10.0 ** (bands / 10.0)
+print(round(float(frequencies[0]), 4), round(float(frequencies[-1]), 4))
+# 0.5012 79.4328
+
+design = vibration.verify_phase_response(
+    "Wk", frequencies, np.zeros_like(frequencies)
+).design_phase_deg
+delay = -360.0 * frequencies * 2e-3
+spare_pole = -np.degrees(np.arctan(frequencies / 100.0))
+
+check = vibration.verify_phase_response(
+    "Wk", frequencies, design + delay + spare_pole
+)
+print(check.passes)                                                  # False
+print(check.failing_frequencies_hz.round(2))                         # [63.1]
+print(round(float(check.characteristic_deviation_deg.max()), 2))     # 8.26
+print(round(check.peak_deviation_percent, 1))                        # 6.9
+
+check.plot(language="es")   # la desviación característica en su banda (requiere matplotlib)
+```
+
+Quita el polo y el retardo por sí solo es un error de fase de hasta 57 grados
+que el criterio califica como cero:
+
+```python
+delayed = vibration.verify_phase_response("Wk", frequencies, design + delay)
+print(round(float(delayed.deviation_deg.min()), 1),
+      round(float(delayed.deviation_deg.max()), 1))
+# -57.2 -0.4
+print(delayed.passes)   # True
+print(float(delayed.characteristic_deviation_deg.max()) < 1e-10)   # True
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_phase_verification.svg" alt="Tres paneles del error de fase de un mismo instrumento, sobre los centros de tercio de octava de 0,5012 a 79,43 Hz. Arriba a la izquierda, el error de fase frente a un eje de frecuencia logarítmico sin ninguna banda de tolerancia, porque la Tabla 5 no fija ninguna sobre esta magnitud y su nota a al pie aplica la columna de fase solo a los instrumentos cuyo parámetro de medida no se basa en valores eficaces: una constante de más 4 grados, 2 ms de retardo de grupo que cae hasta menos 57,2 grados, y ese mismo retardo con un polo de más en 100 Hz que cae hasta menos 95,7. Abajo a la izquierda, sobre el mismo eje de frecuencia, la desviación característica de fase de la Fórmula (6) dentro de la banda de la Tabla 5, 6 grados en la región central, 12 en las dos faldas y sin límite en las dos colas, con las cuatro frecuencias de transición de la Tabla 4 marcadas: el error constante se califica con 4,00 grados en todos los pares, el retardo de grupo con 0,00 grados en todos los pares, y la respuesta que lleva el polo de más sube por encima de su límite en el último par, 8,26 grados atribuidos a 63,1 Hz donde la región central permite 6, mientras que el otro extremo de ese mismo par, en 79,4 Hz, habría quedado dentro de los 12 grados de la falda. A la derecha, los mismos tres errores de fase sobre un eje de frecuencia lineal con la recta que pasa por el último par prolongada hasta f = 0, donde las tres rectas se cruzan en más 4, 0 y menos 8,26 grados, cada cruce rotulado con su propio valor en el margen: esa ordenada en el origen, sin su signo, es lo que lee la Fórmula (6)" width="96%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# frequencies, design, delay, spare_pole y check vienen de los bloques
+# anteriores.
+
+# Una línea, para la respuesta que califica esta sección:
+check.plot(language="es")
+plt.show()
+
+# Los dos paneles que comparten eje de frecuencia, desde los campos de los
+# resultados: el error de fase que la Tabla 5 nunca califica, y la desviación
+# característica que sí.
+errors = {
+    "una constante de +4 grados": np.full(frequencies.shape, 4.0),
+    "2 ms de retardo de grupo por sí solo": delay,
+    "el mismo retardo con un polo de más en 100 Hz": delay + spare_pole,
+}
+attributed = frequencies[:-1]
+limit = vibration.phase_tolerance_degrees("Wk", attributed)
+
+fig, (ax_error, ax_graded) = plt.subplots(2, 1, sharex=True, figsize=(9, 7))
+for label, error in errors.items():
+    graded = vibration.verify_phase_response("Wk", frequencies, design + error)
+    ax_error.semilogx(frequencies, graded.deviation_deg, marker="o", label=label)
+    ax_graded.semilogx(attributed, graded.characteristic_deviation_deg, marker="o")
+ax_graded.plot(attributed, limit, color="#1f77b4", ls="--", drawstyle="steps-post",
+               label="el límite de la Tabla 5")
+ax_error.set_ylabel("Error de fase [grados]")
+ax_error.legend(fontsize="small")
+ax_graded.set(xlabel="Frecuencia [Hz]",
+              ylabel="Desviación característica de fase [grados]")
+ax_graded.legend(fontsize="small")
+for ax in (ax_error, ax_graded):
+    ax.grid(True, which="both", alpha=0.3)
+plt.show()
+```
+
+</details>
+
+**Lo que un error de fase le cuesta a una lectura de pico.** El Anexo H es
+normativo, y la Fórmula (H.4) es el único número calculado de todo el
+razonamiento sobre la fase:
+$\Delta P_{\max} \approx \pm\max\{0.48 \sin \Delta\varphi_0\} \times 100\ \%$,
+seguida de la frase de que para las desviaciones características de fase máximas
+de 12 grados la desviación máxima del valor de pico es aproximadamente del 10 %.
+El máximo va dentro de la fórmula impresa, así que el resultado es un solo
+número para toda una respuesta y no uno por frecuencia, y es lo que cuesta el
+peor par:
+
+```python
+print(round(vibration.peak_deviation_percent([12.0]), 2))   # 9.98
+print(round(vibration.peak_deviation_percent([6.0]), 2))    # 5.02
+```
+
+De ahí salen los ±6 grados y los ±12 grados de la Tabla 5: una región central
+sujeta al 5 % en una lectura de pico y unas faldas sujetas al 10 %. Es también
+el 6,9 % que se le cobró por sus 8,26 grados al vibrómetro que falla más arriba,
+y que `PhaseVerification.peak_deviation_percent` calcula a partir del peor par.
+La NOTA 2 del apartado H.2.1 acota la aproximación dos veces, y las dos cotas
+conviene conocerlas. Se aplica a valores por debajo de 30 grados, así que uno
+mayor se deja pasar con un aviso; y es un peor caso que combina dos componentes
+de la forma más desfavorable, así que la desviación efectiva del valor de pico
+de una forma de onda real normalmente es menor.
+
+**La malla.** `verify_phase_response` rechaza una malla más gruesa que el tercio
+de octava, y cita el apartado 12.11.1, que pide un ensayo de respuesta en
+frecuencia «en pasos no mayores de un tercio de octava». La razón es que la fase
+de diseño se reconstruye sobre la malla que se le da: la rama se sigue de
+frecuencia en frecuencia, y en una malla gruesa un paso de más de media vuelta
+es indistinguible de la rama siguiente. El diseño entero caería a 360 grados de
+distancia, y la Fórmula (6) convertiría ese desplazamiento, en un par muy
+separado, en un puñado de grados, que puede quedarse cómodamente dentro de la
+tolerancia. El fallo es silencioso y puede ir en cualquiera de los dos sentidos,
+así que se rechaza en lugar de avisar de él:
+
+```python
+octaves = 2.0 ** np.arange(0.0, 7.0)
+try:
+    vibration.verify_phase_response("Wk", octaves, np.zeros_like(octaves))
+except ValueError as error:
+    print(error)
+# verify_phase_response: 'frequencies_hz' steps by a ratio of up to 2, and
+# ISO 8041-1:2017 12.11.1 asks for steps of not more than one third of an
+# octave (1.259). The design-goal phase is rebuilt on the grid it is given,
+# and on a coarser one it can land a whole turn away without the verdict
+# noticing.
+```
+
+Conviene conocer un último caso, porque el veredicto es correcto y el
+diagnóstico no. Una medición que está a media vuelta del objetivo de diseño en
+todas las frecuencias es una señal invertida, y la Fórmula (6) califica un
+desplazamiento constante por su valor, así que falla por 180 grados y falla a
+gritos. El apartado H.2.3.4 k) dice que el criterio «no es aplicable a la
+inversión de señal» y que la polaridad tiene su propio procedimiento de ensayo,
+así que el veredicto viene con un aviso que lo dice: el número es real, y el
+defecto al que apunta es un ensayo que esta función no realiza.
+## 9. Cuánto tarda en olvidar el valor eficaz móvil
+
+El apartado 5.13 es la ponderación temporal, y su ensayo es un cronómetro. Una
+sinusoide estable a la frecuencia de referencia se mantiene el tiempo suficiente
+para llenar el promedio, al menos 5 constantes de tiempo para el lineal y 20
+para el exponencial; entonces se corta, y se toma el tiempo desde el corte hasta
+el instante en que el valor indicado baja del 10 % del que tenía. Las Tablas 10
+y 11 imprimen ese tiempo para tres constantes de tiempo, con la tolerancia al
+lado:
+
+```python
+from phonometry import vibration
+
+print(vibration.RUNNING_RMS_DECAY_TIME_S["linear"])
+# ((0.125, 0.124, 0.005), (1.0, 0.99, 0.05), (8.0, 7.92, 0.2))
+print(vibration.RUNNING_RMS_DECAY_TIME_S["exponential"])
+# ((0.125, 0.58, 0.03), (1.0, 4.61, 0.25), (8.0, 36.8, 2.0))
+```
+
+Los dos promediados tienen forma cerrada, y ninguno es una constante ajustada. El
+promediado lineal conserva los últimos $\tau$ segundos del registro, así que $t$
+segundos después del corte su ventana todavía guarda $(\tau - t)/\tau$ del
+valor cuadrático medio original y la indicación cae como $\sqrt{(\tau - t)/\tau}$,
+hasta llegar a la décima parte en $t = 0{,}99\,\tau$. El promediado exponencial
+decae en potencia como $e^{-t/\tau}$, así que la indicación cae como
+$e^{-t/2\tau}$ y llega a la décima parte en $t = 2\tau\ln 10 = 4{,}6052\,\tau$.
+`running_rms_decay_time` son esas dos expresiones, y caen sobre los números
+impresos:
+
+```python
+for method in ("linear", "exponential"):
+    print(method, [round(vibration.running_rms_decay_time(tau, method=method), 4)
+                   for tau in (0.125, 1.0, 8.0)])
+# linear [0.1237, 0.99, 7.92]
+# exponential [0.5756, 4.6052, 36.8414]
+```
+
+Ejecutar el ensayo sobre una señal da la misma respuesta, que es para lo que
+sirve tener la forma cerrada. La señal de abajo ya está ponderada, porque la
+ponderación temporal va después de la ponderación frecuencial en la cadena:
+
+```python
+import numpy as np
+
+fs = 2000.0
+cut_s = 10.0
+t = np.arange(int(20 * fs)) / fs
+a = np.sqrt(2.0) * np.sin(2 * np.pi * vibration.REFERENCE_FREQUENCY_HZ["Wk"] * t)
+a[t >= cut_s] = 0.0
+
+for method in ("linear", "exponential"):
+    trace = vibration.running_rms(a, fs, integration_time=1.0, method=method)
+    initial = float(trace[int(cut_s * fs) - 1])
+    crossed = np.flatnonzero((t >= cut_s) & (trace < 0.1 * initial))
+    decay_s = float(t[crossed[0]] - cut_s)
+    print(method, round(decay_s, 3),
+          vibration.verify_running_rms_decay(
+              decay_s, integration_time_s=1.0, method=method))
+# linear 0.98 True
+# exponential 4.605 True
+```
+
+La lectura lineal sale a 0,98 s en vez de los 0,99 s de la forma cerrada, y eso es
+el ensayo comportándose como un ensayo y no como aritmética. En el instante del
+cruce, la ventana deslizante solo guarda unas pocas muestras finales de una
+sinusoide, y su valor cuadrático medio depende del punto del ciclo en el que se cortó
+la señal. La banda impresa es 0,99 ± 0,05 s, lo bastante ancha para absorberlo,
+y por eso el veredicto se escribe contra la banda y no contra la forma cerrada.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_running_rms_decay.svg" alt="El ensayo de caída del apartado 5.13 de la ISO 8041-1 dibujado en tres paneles, para un tiempo de promediado de 1 s. El panel superior dibuja las dos indicaciones de valor eficaz móvil cayendo desde el instante en que se corta una sinusoide estable a la frecuencia de referencia de 15,9155 Hz, en decibelios por debajo del valor del que partía cada una: el promediado lineal se hunde suavemente y luego se desploma en 1 s, el promediado exponencial cae como una recta, y cada uno cruza el criterio del 10 % en menos 20 decibelios dentro de la banda impresa dibujada a su alrededor, 0,99 más o menos 0,05 s para el promediado lineal y 4,61 más o menos 0,25 s para el exponencial. El panel inferior izquierdo amplía el cruce del lineal, donde la traza medida discurre por debajo de la forma cerrada en lugar de alrededor de ella, en 193 de las 199 muestras en las que el promediado lineal todavía tiene algún nivel, y por eso cruza antes: los dos cruces están rotulados donde caen sobre la línea del criterio, el medido en 0,98 s y la forma cerrada en 0,99 s, y los dos quedan holgadamente dentro de la banda impresa. El panel inferior derecho pone las dos columnas de la Tabla 11 sobre un mismo eje adimensional para las tres constantes de tiempo impresas de 0,125, 1 y 8 s: el tiempo de caída impreso abarca de unas 0,94 a unas 1,06 veces la forma cerrada en todas las filas, y la velocidad de caída impresa leída como tiempo de caída abarca de unas 0,87 a unas 1,14, así que la columna del tiempo es la afirmación más estrecha de las dos." width="96%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+tau = 1.0
+cut = int(cut_s * fs)
+since_cut = np.arange(t.size - cut) / fs
+# El 10 % del apartado, leído a partir de la forma cerrada en lugar de
+# tecleado: el promediado exponencial cae como exp(-t / 2 tau), así que la
+# fracción es lo que vale esa expresión en el instante que devuelve
+# running_rms_decay_time.
+fraction = np.exp(-vibration.running_rms_decay_time(tau, method="exponential") / (2 * tau))
+
+fig, ax = plt.subplots()
+for method, colour in (("linear", "#1f77b4"), ("exponential", "#2ca02c")):
+    trace = np.asarray(vibration.running_rms(a, fs, integration_time=tau, method=method))
+    relative = trace[cut:] / trace[cut - 1]
+    # El promediado lineal se vacía una constante de tiempo después del corte, y
+    # el nivel no está definido donde el valor cuadrático medio de la ventana es
+    # exactamente cero.
+    level_db = np.full(relative.shape, np.nan)
+    level_db[relative > 0.0] = 20.0 * np.log10(relative[relative > 0.0])
+    ax.plot(since_cut, level_db, color=colour, lw=1.8, label=f"promediado {method}")
+
+    # La banda impresa en la que tiene que caer el cruce, de la Tabla 10 o la
+    # Tabla 11.
+    printed, tolerance = {
+        row[0]: row[1:] for row in vibration.RUNNING_RMS_DECAY_TIME_S[method]
+    }[tau]
+    ax.axvspan(printed - tolerance, printed + tolerance, color=colour, alpha=0.12)
+
+ax.axhline(20.0 * np.log10(fraction), color="0.4", lw=1.0)
+ax.set(xlim=(0.0, 6.2), ylim=(-34.0, 2.0),
+       xlabel="Tiempo desde el corte de la señal [s]",
+       ylabel="Indicación, relativa a su valor inicial [dB]")
+ax.grid(True, alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
+`verify_running_rms_decay` califica una fila impresa, y solo las tres constantes
+de tiempo que imprimen las dos tablas. Cualquier otra cosa se rechaza en lugar de
+juzgarse contra una banda que la norma no da:
+
+```python
+try:
+    vibration.verify_running_rms_decay(
+        2.0, integration_time_s=2.0, method="linear"
+    )
+except ValueError as error:
+    print(error)
+# 'integration_time_s' must be one of the time constants Tables 10 and 11
+# print (0.125, 1, 8 s); 2 s has no printed decay band.
+```
+
+**Por qué la columna del tiempo y no la de la velocidad.** La Tabla 11 imprime
+una segunda manera de decir lo mismo, una velocidad de caída equivalente en
+decibelios por segundo, y deliberadamente no es el criterio:
+
+```python
+print(vibration.RUNNING_RMS_DECAY_RATE_DB_PER_S)
+# ((0.125, 31.0, 40.0), (1.0, 3.8, 4.9), (8.0, 0.48, 0.62))
+print(round(20 * np.log10(np.e) / 2.0, 4))   # 4.3429
+```
+
+La velocidad en forma cerrada de un promediado exponencial es
+$20\lg(e)/(2\tau) = 4{,}3429/\tau$ decibelios por segundo, que para $\tau = 1$ s
+vale 4,3429 y queda en el centro del intervalo impreso de 3,8 a 4,9. Pero ese intervalo va de
+0,875 a 1,128 veces la forma cerrada, mientras que el tiempo impreso de la misma
+fila, 4,61 ± 0,25 s, va de 0,947 a 1,055 veces $2\tau\ln 10$: aproximadamente la
+mitad de ancho, y las otras dos filas se dividen de la misma manera. Las dos columnas no son
+recíprocas la una de la otra: la columna del tiempo es la vinculante y la de la
+velocidad es la afirmación más laxa de la misma caída, así que el veredicto se
+escribe sobre la más estrecha.
+
+Aquí entra también la tercera fila de la Tabla 2. Admite un 2 % entre la
+indicación del valor eficaz móvil y el valor eficaz promediado linealmente en el
+tiempo, ambos limitados en banda, para cualquier tiempo de medición, y se
+publica como `RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT`. Para una sinusoide
+estable, el valor eficaz móvil oscila alrededor del promedio temporal con un
+rizado de un 0,3 % aproximadamente, holgadamente dentro de ese margen.
+## 10. La ráfaga en diente de sierra, y los 228 números que tiene que reproducir
+
+El apartado 5.9 es el único sitio de todo el documento donde la ISO 8041-1
+imprime un oráculo en vez de un requisito. Define una señal de ensayo en la
+Tabla 6 y luego imprime en las Tablas 7, 8 y 9 las indicaciones que un
+vibrómetro conforme tiene que mostrar cuando se le aplica esa señal, cada una
+con la tolerancia contra la que se la juzga: 228 celdas en total. La NOTA 1
+dice de dónde salen, y es la frase sin la cual esta sección no sería posible en
+absoluto: «La respuesta a la ráfaga de señal en diente de sierra se determina
+por simulación digital de las características del filtro». Son aritmética, así
+que una biblioteca que tenga las ponderaciones y las cuatro magnitudes de
+indicación puede reproducirlas.
+
+**La señal.** La Figura 3 dibuja un diente de sierra bipolar de amplitud
+1 m/s²: una rampa lineal ascendente y una caída vertical, y toda ráfaga empieza
+en un paso por cero ascendente y termina en otro. Esa geometría no es un
+adorno, pesa: una ráfaga empezada en el pico lee un 28 % por encima en la fila
+de un solo ciclo de la Tabla 8, casi tres veces su tolerancia del 10 %. La Tabla 6 aporta
+lo demás para cada aplicación, y `SAWTOOTH_BURST_TESTS` es esa tabla:
+
+```python
+import numpy as np
+from phonometry import vibration
+
+test = vibration.SAWTOOTH_BURST_TESTS["whole-body"]
+print(test.weightings)
+# ('Wb', 'Wc', 'Wd', 'We', 'Wj', 'Wk', 'Wm')
+print(round(test.frequency_hz, 4), test.start_time_s, test.repeat_time_s,
+      test.duration_s, test.burst_count)
+# 15.9155 1.0 10.0 60.0 6
+print(test.cycle_counts, test.recommended_sampling_rate_hz)
+# (1, 2, 4, 8, 16) 20000.0
+
+record = vibration.sawtooth_burst("whole-body", 2)
+print(record.size, np.count_nonzero(record))            # 1200000 15078
+print(round(float(record.max()), 4), round(float(record.min()), 4))
+# 0.9995 -0.9999
+```
+
+Seis ráfagas de dos ciclos cada una, en un minuto de registro por lo demás en
+silencio. La frecuencia de muestreo recomendada es una elección de la propia
+biblioteca, no una cifra normativa: la norma no prescribe ninguna, y es la
+frecuencia a la que las celdas impresas salen con unas pocas décimas de por
+ciento de diferencia.
+
+**Reproducir una fila.** `signal_burst_indications` recorre la cadena que
+describe la norma y devuelve las columnas impresas de la tabla de esa
+aplicación:
+
+```python
+got = vibration.signal_burst_indications("whole-body", "Wk", 4)
+printed = vibration.SIGNAL_BURST_RESPONSE["whole-body", "Wk", 4]
+for column, cell in printed.items():
+    print(column, cell, round(got[column], 5))
+# rms 0.0577 0.05775
+# vdv 0.455 0.45597
+# mtvv_linear 0.182 0.18261
+# mtvv_exponential 0.171 0.17123
+```
+
+Cuatro columnas porque la Tabla 8 imprime cuatro. La Tabla 7 imprime una, un
+valor eficaz, y la Tabla 9 imprime dos, un valor eficaz y un valor de dosis de
+mareo; el juego de columnas lo fija la aplicación, no quien llama. Dos de las
+columnas de la Tabla 8 son el mismo MTVV calculado dos veces, y de ahí que
+`mtvv` tenga un `method`: el promediado lineal de la ec. (2) de la ISO 2631-1 y
+el promediado exponencial de la ec. (3) dan respuestas distintas, y la norma
+califica los dos.
+
+`verify_signal_burst_response` compara un juego de indicaciones medidas con
+las celdas impresas, fila a fila y columna a columna, cada una contra la
+tolerancia impresa a su lado:
+
+```python
+rows = {
+    cycles: vibration.signal_burst_indications("whole-body", "Wk", cycles)
+    for cycles in (1, 2, 4, 8, 16, None)
+}
+check = vibration.verify_signal_burst_response("whole-body", "Wk", rows)
+print(check.quantities)
+# ('rms', 'vdv', 'mtvv_linear', 'mtvv_exponential')
+print(check.tolerance_percent)          # [10. 12. 10. 10.]
+print(check.passes, round(check.worst_deviation_percent, 2))   # True 0.34
+```
+
+`None` es la fila continua, la que las tablas imprimen sin longitud de ráfaga.
+El valor de dosis de vibración es la única columna a la que se le admite un
+12 % en vez de un 10 %, en las 48 celdas que tiene.
+
+Aquí hay un vibrómetro que no cumple, y no cumple de forma instructiva.
+Calcula su MTVV con un promediado exponencial y lo informa en la columna
+lineal:
+
+```python
+swapped = {
+    cycles: {**row, "mtvv_linear": row["mtvv_exponential"]}
+    for cycles, row in rows.items()
+}
+verdict = vibration.verify_signal_burst_response("whole-body", "Wk", swapped)
+print(verdict.passes, round(verdict.worst_deviation_percent, 1))   # False -20.4
+print(verdict.deviation_percent[:, 2].round(1))
+# [ -2.3  -3.6  -5.9 -11.3 -20.4  -0.2]
+print(verdict.cycle_counts)     # (1, 2, 4, 8, 16, None)
+
+verdict.plot(language="es")   # las desviaciones frente a la banda impresa (requiere matplotlib)
+```
+
+Las filas de 1, 2 y 4 ciclos cumplen, la fila continua cumple porque los dos
+promediados coinciden en una señal que no para nunca, y las filas de 8 y 16
+ciclos son donde se ve la confusión. Una batería de ensayos que solo hubiera
+pasado ráfagas cortas habría dado por bueno el instrumento.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_signal_burst_response.svg" alt="Tres paneles del ensayo de ráfaga de señal de la ISO 8041-1. Arriba a la izquierda, un minuto del registro de ensayo de cuerpo entero: seis ráfagas de 16 ciclos de diente de sierra, la primera empieza en 1 s y luego una cada 10 s, cada una de aproximadamente un segundo de señal en un registro por lo demás en silencio. Arriba a la derecha, una ráfaga sobre un eje de ciclos de diente de sierra: una subida lineal y una caída vertical repetidas 16 veces entre +1 y −1 m/s^2, con el inicio y las cinco longitudes de ráfaga impresas de 1, 2, 4, 8 y 16 ciclos marcadas sobre los pasos por cero ascendentes en los que caen. Abajo, a todo lo ancho, la desviación de las indicaciones de un vibrómetro respecto a las celdas impresas de la fila Wk de la Tabla 8, frente a la longitud de la ráfaga: las columnas de valor eficaz, valor de dosis de vibración y MTVV exponencial quedan sobre el cero, mientras que la columna del MTVV lineal, que este vibrómetro rellena con su promediado exponencial, cae de −2,3 % en un ciclo a −11,3 % en ocho y −20,4 % en dieciséis, se sale de la banda sombreada de tolerancia del 10 % en esas dos últimas longitudes y vuelve a −0,2 % en la fila continua. El 12 % que se le admite al valor de dosis de vibración está marcado por un par de bordes discontinuos cortos que cuelgan a la izquierda del eje, junto a sus propias marcas del eje." width="96%" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# En una línea, a partir del veredicto de arriba:
+verdict.plot(language="es")
+plt.show()
+
+# A mano, a partir de los campos del resultado: una serie por cada columna
+# impresa de la Tabla 8, dentro de la banda que esa misma tabla admite, con la
+# tolerancia más ancha del valor de dosis de vibración dibujada como un par de
+# bordes y no como una segunda banda bajo todas las columnas. La fila continua
+# queda al otro lado de una línea de puntos y sin ninguna línea trazada hasta
+# ella, igual que en la figura: la Tabla 6 no le da longitud de ráfaga, así
+# que unirla al punto de 16 ciclos dibujaría una tendencia sobre un hueco que
+# no existe.
+positions = np.arange(len(verdict.cycle_counts))
+inner = float(np.min(verdict.tolerance_percent))
+outer = float(np.max(verdict.tolerance_percent))
+
+fig, ax = plt.subplots(figsize=(9.0, 4.5))
+ax.axhspan(-inner, inner, color="#9e9e9e", alpha=0.25,
+           label=f"±{inner:.0f} % en todas las columnas menos una")
+# El par más ancho es solo del valor de dosis de vibración, así que se dibuja
+# como un tramo corto en el borde y no de lado a lado del panel, donde una
+# línea en -12 % pasaría por la celda de 8 ciclos marcada con un círculo, de
+# una columna a la que no se aplica.
+for edge in (-outer, outer):
+    ax.plot([positions[0] - 0.4, positions[0] + 0.4], [edge, edge],
+            color="#9e9e9e", ls="--", lw=1.0)
+ax.axhline(0.0, color="black", lw=0.8, alpha=0.4)
+ax.axvline(positions[-1] - 0.5, color="#9e9e9e", ls=":", lw=1.0)
+for index, quantity in enumerate(verdict.quantities):
+    deviations = verdict.deviation_percent[:, index]
+    burst_rows, = ax.plot(positions[:-1], deviations[:-1], marker="o",
+                          label=quantity)
+    ax.plot(positions[-1:], deviations[-1:], marker="o", ls="none",
+            color=burst_rows.get_color())
+outside = ~verdict.within_tolerance
+ax.plot(positions[np.nonzero(outside)[0]], verdict.deviation_percent[outside],
+        "o", markersize=14, markerfacecolor="none", markeredgecolor="#d62728",
+        ls="none", label="las celdas en las que este vibrómetro no cumple")
+ax.set_xticks(positions)
+ax.set_xticklabels(["1", "2", "4", "8", "16", "continua"])
+ax.set(xlabel="Ciclos de diente de sierra por ráfaga",
+       ylabel="Desviación respecto a la celda impresa [%]")
+ax.grid(True, axis="x", alpha=0.3)
+ax.legend(fontsize="small")
+plt.show()
+```
+
+</details>
+
+**Dos convenciones que las tablas no imprimen.** Las celdas impresas son la
+salida de una simulación que nadie publicó, así que dos lecturas del mismo
+apartado dan dos juegos de números distintos, y esta rama eligió midiendo qué
+lectura reproduce la página. Las dos son decisiones y no deducciones, y las dos
+conviene declararlas sin rodeos.
+
+*La fila continua empieza en t = 0* y ocupa la duración impresa. No empieza en
+el instante de inicio de la Tabla 6, que es el de las ráfagas. Leída desde
+cero, la celda continua de limitación de banda de la Tabla 7 sale 0,5649 frente
+al 0,565 impreso; leída desde el instante de inicio sale 0,5602:
+
+```python
+test = vibration.SAWTOOTH_BURST_TESTS["hand-arm"]
+fs = test.recommended_sampling_rate_hz
+printed = vibration.SIGNAL_BURST_RESPONSE[
+    "hand-arm", vibration.BAND_LIMITING, None
+]["rms"]
+from_zero = vibration.signal_burst_indications(
+    "hand-arm", vibration.BAND_LIMITING, None
+)["rms"]
+print(printed, round(from_zero, 4), round((from_zero / printed - 1) * 100, 2))
+# 0.565 0.5649 -0.02
+
+# La lectura que la rama descartó: el mismo diente de sierra empezado tarde.
+samples = round(test.duration_s * fs)
+t = np.arange(samples) / fs
+elapsed = test.frequency_hz * (t - test.start_time_s)
+saw = 2.0 * np.mod(elapsed + 0.5, 1.0) - 1.0
+late = np.where(t >= test.start_time_s, saw, 0.0)
+padded = np.concatenate([late, np.zeros(samples)])
+weighted = vibration.apply_band_limiting(
+    padded, fs, name=test.band_limiting_weighting
+)
+from_start = float(np.sqrt(np.mean(weighted[:samples] ** 2)))
+print(round(from_start, 4), round((from_start / printed - 1) * 100, 2))
+# 0.5602 -0.86
+```
+
+Fíjate en que las dos lecturas cumplen, porque la tolerancia es del 10 % y la
+peor de las dos se desvía un 0,86 %. Justo por eso la cuestión hubo que
+zanjarla por cuál de las dos reproduce los dígitos impresos: la tolerancia es,
+con diferencia, demasiado ancha para decidirlo.
+
+*El filtrado parte de estado nulo.* `apply_weighting` multiplica en el dominio
+de la frecuencia sin relleno de ceros, que es una convolución circular, y su
+propia documentación lo dice. Sobre un registro de ráfagas eso apenas importa.
+Sobre la fila continua enrolla la cola del registro sobre su principio y borra
+el transitorio de arranque, que es justo lo que el MTVV lineal de esa fila está
+hecho para captar. La verificación de ráfagas rellena antes el registro con
+ceros y se queda con el principio, que es un filtro que se enciende en `t = 0`
+sin nada guardado dentro:
+
+```python
+fs = vibration.SAWTOOTH_BURST_TESTS["whole-body"].recommended_sampling_rate_hz
+record = vibration.sawtooth_burst("whole-body", None)
+
+for name in ("Wc", "Wm", "Wd", "We"):
+    cell = vibration.SIGNAL_BURST_RESPONSE["whole-body", name, None]
+    printed = cell["mtvv_linear"]
+    wrapped = vibration.apply_weighting(record, fs, name=name)
+    circular = vibration.mtvv(wrapped, fs)
+    from_rest = vibration.signal_burst_indications(
+        "whole-body", name, None
+    )["mtvv_linear"]
+    print(name,
+          round((circular / printed - 1) * 100, 2),
+          round((from_rest / printed - 1) * 100, 2))
+# Wc -0.81 -0.17
+# Wm -1.1 -0.31
+# Wd -3.24 -0.36
+# We -5.19 -0.52
+```
+
+Hasta un 5,2 % en cuatro celdas, por una elección sobre lo que el filtro tenía
+dentro antes de que empezara el registro. El comportamiento por defecto
+de `apply_weighting` se deja a propósito como está: el relleno de ceros es de
+este ensayo, no de toda señal ponderada, y quien lo necesite en otro sitio
+rellena antes el registro con ceros y quita el relleno después, que es lo que
+hace el fragmento anterior.
+
+Lo que vale la reproducción, en las tres aplicaciones y en las 228 celdas
+impresas, es un 2,3 % en el peor caso frente a tolerancias impresas del 10 % y
+del 12 %. Y lo que significa un cumple sigue siendo estrecho: la respuesta
+temporal de una cadena de ponderación coincide con la tabla impresa el día en
+que se midió.
+## 11. La misma comprobación al otro lado de la frontera
+
+Un sonómetro recibe exactamente este trato, de otro comité y en otra unidad.
+La IEC 61672-1 imprime objetivos de diseño para las ponderaciones A, C y Z y
+límites de aceptación a su alrededor, y
+[`verify_weighting_class`](/phonometry/es/signals/levels/weighting/) convierte una
+respuesta en un veredicto frente a ellos. Los dos verificadores son la misma
+idea aplicada a uno y otro lado de la frontera entre acústica y vibración:
+
+```python
+import numpy as np
+from phonometry import filters, vibration
+
+# Sonido: un filtro de ponderación que diseñó esta biblioteca, frente a la Tabla 3 de IEC 61672-1.
+wf = filters.WeightingFilter(48000, "A")
+print(filters.verify_weighting_class(wf)["overall_class"])   # 1
+
+# Vibración: el barrido de banco de la sección 2, frente a las Tablas 4 y 5 de ISO 8041-1.
+sweep = 10.0 ** (np.array([-3, 0, 3, 6, 9, 12, 15, 18, 19]) / 10.0)
+read = np.array([0.4314, 0.4969, 0.5466, 0.9937, 1.068,
+                 0.7897, 0.3427, 0.1894, 0.1366])
+print(vibration.verify_weighting("Wk", sweep, read).passes)   # False
+```
+
+Conviene nombrar tres diferencias, porque son las que hacen tropezar al lector
+que pasa de una página a la otra.
+
+**No hay clases.** La IEC 61672-1 especifica dos categorías de prestaciones, y
+el veredicto es cuál de ellas cumple una respuesta. La ISO 8041-1 no tiene
+ninguna: imprime un solo juego de tolerancias, y el veredicto es un cumple o no
+cumple frente a él.
+
+**Los límites son porcentajes, no decibelios.** La ISO 8041-1 escribe sus
+tolerancias de magnitud como porcentajes del factor de ponderación, y la
+biblioteca las mantiene así. El Anexo B, informativo, imprime al lado los
+equivalentes en decibelios, +1 dB / −1 dB en la región central y +2 dB / −2 dB
+en las faldas, pero el requisito está escrito en porcentaje.
+
+**Se califican frente a cosas distintas.** `verify_weighting_class` lee un
+filtro digital que ha construido esta biblioteca e informa de si ese *diseño*
+cabe en la máscara, así que toda medición hecha en software hereda el veredicto.
+A `verify_weighting` se le entregan números de un banco, y su veredicto
+pertenece a *esa medición de ese instrumento*, el día en que se hizo. Ninguno de
+los dos es un ensayo de tipo, una verificación periódica ni una comprobación in
+situ, y ninguno de los dos tiene un micrófono, un transductor ni un número de
+serie.
+[Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/)
+es el mapa de todos los verificadores de la biblioteca y de dónde termina la
+afirmación de cada uno.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+La **banda de tolerancia alrededor de una ponderación frecuencial**: las cuatro
+frecuencias de transición de la Tabla 4 construidas a partir de sus exponentes
+impresos, los tres pares de límites distintos que la Tabla 5 reparte entre
+ellas, y el veredicto de `verify_weighting` sobre una respuesta medida, con la
+incertidumbre expandida del laboratorio de ensayo ampliando la desviación como
+exigen 13.1 y 14.1.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+La **desviación característica de fase** de la Fórmula (6), calculada sobre la
+malla que pide el 12.11.1 y calificada frente a la columna de fase de la
+Tabla 5, con el coste en valor de pico de la Fórmula (H.4) al lado.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+La **etapa de limitación de banda por separado**, los **tiempos de decaimiento
+del valor eficaz móvil** de las Tablas 10 y 11 en forma cerrada, y las **228
+indicaciones de la ráfaga en diente de sierra** de las Tablas 7 a 9 reproducidas
+a partir de la señal que define la Tabla 6.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+Las **condiciones de referencia** de la Tabla 1 y la **tolerancia de
+indicación** de la Tabla 2, publicadas como la ventana en la que tiene que caer
+una indicación. Se publican, no se comprueban: leer una pantalla es una medición
+de banco.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+**Ningún banco, en ninguna parte.** Todo criterio de aquí es un lado de una
+comparación cuyo otro lado alguien tiene que medir sobre hardware. La
+exactitud de indicación, la linealidad, el ruido del instrumento, la sobrecarga,
+la diafonía, las características del transductor, el montaje y el apartado
+ambiental y electromagnético entero no están implementados ni son implementables
+aquí.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ningún veredicto de conformidad para un instrumento.** Cumplir en cualquier
+apartado de esta página es una afirmación sobre ese apartado. El ensayo de tipo,
+la verificación periódica y la comprobación in situ son procedimientos sobre un
+vibrómetro físico, y aquí nada lleva un número de serie.
+</ScopeClaim>
+
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Exposición humana a vibración (ISO 2631, ISO 5349)](/phonometry/es/vibration/human/human-vibration/): las
+  ponderaciones frente a las que esta página califica un instrumento, y la
+  cadena de exposición que las consume.
+- [Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/):
+  los demás verificadores, y qué solo puede atestiguar un laboratorio.
+- [Ponderación frecuencial (A, C, Z)](/phonometry/es/signals/levels/weighting/): las
+  ponderaciones del sonómetro y los límites de aceptación de IEC 61672-1 de la
+  sección 11.
+- [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/): la comprobación
+  de antes y después sobre la que se construye una verificación in situ, y la
+  trazabilidad con la que se informa un ensayo de tipo.
+- Referencia de la API:
+  [`vibration.human.instrumentation`](https://jmrplens.github.io/phonometry/reference/api/vibration/instrumentation/).
+
+</SeeAlso>

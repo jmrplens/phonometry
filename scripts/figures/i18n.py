@@ -418,6 +418,166 @@ _ES_EXACT = {
     "0.59 to 0.74 Hz": "0,59 a 0,74 Hz",
     "0.90 to 1.20 Hz": "0,90 a 1,20 Hz",
     "$f = 46/h$: 0.77 Hz": "$f = 46/h$: 0,77 Hz",
+    # meter_phase_verification (ISO 8041-1 Formula (6) and Table 5): the two
+    # invariances of the characteristic phase deviation, and the verdict on
+    # an instrument carrying 2 ms of group delay and a spare pole at 100 Hz.
+    "Grading a Phase Response: What ISO 8041-1 Formula (6) Ignores, and What It Catches": "Calificar una respuesta de fase: qué ignora la fórmula (6) de la ISO 8041-1 y qué detecta",
+    "The Phase Error Itself, Which Table 5 Never Grades": "El error de fase en sí, que la tabla 5 nunca califica",
+    "The Characteristic Phase Deviation, Which It Grades": "La desviación de fase característica, que sí califica",
+    "The Same Errors on a Linear Frequency Axis, Read at $f = 0$": "Los mismos errores en un eje de frecuencia lineal, leídos en $f = 0$",
+    "Phase error, measured minus design (degrees)": "Error de fase, medido menos objetivo de diseño (grados)",
+    "Characteristic phase deviation $\\Delta\\varphi_0$ (degrees)": "Desviación característica de fase $\\Delta\\varphi_0$ (grados)",
+    # The three responses, in the order the key at the foot lists them.
+    "a constant phase error of +4°": "un error de fase constante de +4°",
+    "2 ms of group delay on its own": "2 ms de retardo de grupo, y nada más",
+    "the same delay with a spare pole at 100 Hz": "el mismo retardo con un polo de más a 100 Hz",
+    # The three distinct rows of Table 5, named by the only column this
+    # figure grades. "faldas" and "colas" are the words the magnitude figure
+    # on the same page already uses for the same two pairs of regions.
+    "the central region, where Table 5 allows ±6°": "la región central, donde la tabla 5 permite ±6°",
+    "the two skirts, where it allows ±12°": "las dos faldas, donde permite ±12°",
+    "the two tails, where it allows ±∞": "las dos colas, donde permite ±∞",
+    # The five notes. Every decimal inside a sentence carries the Spanish
+    # comma in its twin, and the typographic minus is the same U+2212 the
+    # English side draws.
+    "Table 5 sets no limit on this quantity: its phase column\ngrades the characteristic phase deviation in the panel below,\nand footnote a applies that column only to instruments whose\nmeasurement parameter is not based on r.m.s. values. At 79.4 Hz\nthe delay alone is −57.2°, and with the pole −95.7°": "La tabla 5 no fija ningún límite a esta magnitud: su columna\nde fase califica la desviación de fase característica del panel\ninferior, y la nota a aplica esa columna solo a instrumentos\ncuyo parámetro de medida no se basa en valores eficaces.\nA 79,4 Hz el retardo solo vale −57,2°, y con el polo, −95,7°",
+    "8.26° against the ±6° of the central region: each value\nis attributed to the lower frequency of its pair, so this one\nis graded at $f_\\mathrm{t3}$ = 63.1 Hz, which Table 5 keeps\ninside the region, and not at 79.4 Hz, where it allows ±12°": "8,26° frente a los ±6° de la región central: cada valor\nse atribuye a la frecuencia inferior de su par, así que este\nse califica en $f_\\mathrm{t3}$ = 63,1 Hz, que la tabla 5 deja\ndentro de la región, y no en 79,4 Hz, donde permite ±12°",
+    "a constant +4° error is graded 4.00° at every pair;\n2 ms of group delay is graded 0.00° at every pair": "un error constante de +4° se califica 4,00° en cada par;\n2 ms de retardo de grupo se califican 0,00° en cada par",
+    "the two dashed lines mark the pair\nthe dotted lines are drawn through": "las dos líneas discontinuas marcan\nel par por el que pasan las de puntos",
+    "$\\Delta\\varphi_0$ is where the line through a pair of adjacent\npoints crosses $f = 0$, taken without its sign. A line through\nthe origin gives zero, and a horizontal one gives its own\nheight: that is the whole of Formula (6)": "$\\Delta\\varphi_0$ es donde la recta que pasa por un par de puntos\nadyacentes corta $f = 0$, tomada sin signo. Una recta por el\norigen da cero, y una horizontal da su propia altura:\neso es toda la fórmula (6)",
+    # meter_weighting_verification (ISO 8041-1 Tables 3, 4 and 5): one Wk
+    # bench sweep refused for a band reading 15 % low, and the same
+    # shortfall accepted one region further out.
+    "The Same Shortfall, Refused in One Region and Accepted in the Next": "El mismo déficit, rechazado en una región y aceptado en la siguiente",
+    "The Bench Sweep Inside a Band That Narrows in the Middle": "El barrido de banco dentro de una banda que se estrecha en el centro",
+    "The Same Sweep in Per Cent, Where the Two Verdicts Part": "El mismo barrido en porcentaje, donde los dos veredictos se separan",
+    "Weighting factor of the Wk channel": "Factor de ponderación del canal Wk",
+    "Deviation from the design goal (%)": "Desviación respecto al objetivo de diseño (%)",
+    "the design goal the deviation is measured from": "el objetivo de diseño desde el que se mide la desviación",
+    "the Table 5 band: +12 % / −11 % centrally, +26 % / −21 % in a skirt": "la banda de la tabla 5: +12 % / −11 % en el centro, +26 % / −21 % en una falda",
+    "the sweep as read: −15.0 % at 31.62 Hz, and it does not conform": "el barrido tal como se lee: −15,0 % a 31,62 Hz, y no es conforme",
+    "the same shortfall moved to 79.43 Hz, and it conforms": "el mismo déficit llevado a 79,43 Hz, y sí es conforme",
+    "31.62 Hz falls in the central region, and the point sits\n4.0 % of the design goal below the −11 % limit": "31,62 Hz cae en la región central, y el punto queda\nun 4,0 % del objetivo de diseño por debajo del límite del −11 %",
+    "the same shortfall, −15.0 %, twice: outside the −11 %\nof the central region, inside the −21 % of the upper skirt": "el mismo déficit, −15,0 %, dos veces: fuera del −11 %\nde la región central, dentro del −21 % de la falda superior",
+    # meter_uncertainty_allowance (ISO 8041-1 5.6.6 against 13.1 and 14.1):
+    # the printed band never widens, and the laboratory's own expanded
+    # uncertainty extends the measured deviation instead, so a sweep that
+    # is inside the band can still be refused and a wider U certifies less.
+    "The Band Does Not Move: ISO 8041-1 Extends the Measurement Instead": "La banda no se mueve: la ISO 8041-1 extiende la medida en su lugar",
+    "What the Laboratory's Own Uncertainty Adds to Each Point": "Lo que la incertidumbre del propio laboratorio añade a cada punto",
+    "What a Bench Carrying $U$ Can Certify": "Lo que puede certificar un banco con $U$",
+    # (the shared "Deviation from the design goal (%)" y label is keyed once,
+    # in the meter_weighting_verification block above.)
+    "Expanded uncertainty $U$ of the laboratory (%), $k$ = 2": "Incertidumbre expandida $U$ del laboratorio (%), $k$ = 2",
+    "the central region of Table 5": "la región central de la tabla 5",
+    "the two skirts of Table 5": "las dos faldas de la tabla 5",
+    "the two tails, with no lower limit": "las dos colas, sin límite inferior",
+    "the extended deviation conforms": "la desviación extendida cumple",
+    "the extended deviation is refused": "la desviación extendida se rechaza",
+    # The reading on the dashed rule of the right panel, which carries the
+    # clause the rule belongs to so the abscissa beyond it is not read as
+    # available to the test the left panel grades.
+    "4.5 %, the most clause 12.11.2 allows": "4,5 %, lo máximo que permite el apartado 12.11.2",
+    # The three notes. All of them write decimals inside a sentence, which
+    # the save-time comma pass would reach but the Spanish twin should not
+    # have to rely on, so the commas are written here; the clause numbers
+    # keep their dots, which is what the "apartado" token in front of 13.1
+    # is for (_CLAUSE_REF_RE) and what the three-part 12.11.2 gets for free.
+    # "clause" is "apartado" and never "cláusula": the glossary of
+    # plan/work/live/es-traduccion is firm on it, from the UNE adoptions.
+    "at 6.31 Hz the deviation is 9 %,\ninside the +12 % of the central region;\n9 % + 4.5 % = 13.5 % is not, and\nclause 13.1 grades the extended figure": "a 6,31 Hz la desviación es del 9 %,\ndentro del +12 % de la región central;\n9 % + 4,5 % = 13,5 % no lo está, y\nel apartado 13.1 juzga la cifra extendida",
+    "in the two tails the bar has one arm:\nthere is no lower limit to extend, so a\nchannel reading nothing at all conforms": "en las dos colas la barra tiene un solo brazo:\nno hay límite inferior que extender, así que un\ncanal que no lee nada en absoluto cumple",
+    "a bench carrying 4.5 % can certify\nonly −6.5 % to +7.5 %, where\nTable 5 prints −11 % to +12 %": "un banco con 4,5 % solo puede certificar\nde −6,5 % a +7,5 %, donde\nla tabla 5 imprime de −11 % a +12 %",
+    # meter_running_rms_decay (ISO 8041-1 5.13, Tables 10 and 11): the fall
+    # of both running-r.m.s. averages after the reference sinusoid is cut,
+    # the printed decay times their crossings have to land in, and the
+    # decay-rate column that is deliberately not the criterion.
+    "The Running r.m.s. Decay of ISO 8041-1: Tables 10 and 11, Timed From the Cut": "La caída del valor eficaz móvil en la ISO 8041-1: las tablas 10 y 11, cronometradas desde el corte",
+    "The Two Averages Falling Away From the Cut": "Los dos promediados cayendo desde el corte",
+    "The Linear Crossing, Sample by Sample": "El cruce del promediado lineal, muestra a muestra",
+    "Table 11's Two Columns, Against Its Own Closed Form": "La tabla 11: dos columnas frente a su forma cerrada",
+    "Time since the signal was cut [s]": "Tiempo desde el corte de la señal [s]",
+    "Indication, relative to its initial value [dB]": "Indicación, respecto a su valor inicial [dB]",
+    "Decay time, as a multiple of $2\\tau\\ln 10$": "Tiempo de caída, en múltiplos de $2\\tau\\ln 10$",
+    "Averaging time $\\tau$ [s]": "Tiempo de promediado $\\tau$ [s]",
+    "the linear average of Table 10 ($\\tau$ = 1 s)": "el promediado lineal de la tabla 10 ($\\tau$ = 1 s)",
+    "the exponential average of Table 11 ($\\tau$ = 1 s)": "el promediado exponencial de la tabla 11 ($\\tau$ = 1 s)",
+    "the closed form of each average": "la forma cerrada de cada promediado",
+    "the printed decay time and its tolerance, in seconds": "el tiempo de caída impreso y su tolerancia, en segundos",
+    "the time column of Table 11, as a multiple": "la columna de tiempo de la tabla 11, en múltiplos",
+    "the rate column of Table 11, read as a decay time": "la columna de velocidad de la tabla 11, leída como tiempo de caída",
+    # The seven sentences the drawing writes out. Every one of them reads a
+    # number back off the data or off a library constant, which is why they
+    # are listed with the number in the key. Exact entries rather than a
+    # pattern, for the reason above; the decimals inside a sentence carry the
+    # Spanish comma here, since the save-time pass only reaches tick labels.
+    # The clause number is the exception that runs the other way: it is not a
+    # decimal, so the Spanish twin puts "apartado" in front of it, which is
+    # the token _decimal_comma's carve-out looks for before leaving a dot
+    # alone. Without it the pass writes "5,13".
+    "clause 5.13 times the fall to here:\n10 % of the initial indication,\nwhich is −20 dB": "el apartado 5.13 cronometra la caída\nhasta aquí: el 10 % de la indicación\ninicial, que son −20 dB",
+    "Table 10 prints 0.99 ± 0.05 s;\nthe trace crosses at 0.98 s": "la tabla 10 imprime 0,99 ± 0,05 s;\nla traza cruza en 0,98 s",
+    "Table 11 prints 4.61 ± 0.25 s;\nthe trace crosses at 4.61 s": "la tabla 11 imprime 4,61 ± 0,25 s;\nla traza cruza en 4,61 s",
+    "at the crossing the sliding window holds only\nthe last few samples of the 15.9155 Hz sinusoid,\nand their mean square depends on where in\nthe cycle the signal was cut": "en el cruce la ventana deslizante solo guarda\nlas últimas muestras de la sinusoide de 15,9155 Hz,\ny su valor cuadrático medio depende del punto\ndel ciclo en que se cortó la señal",
+    # The two markers of the zoom, each named where it stands. Both carry a
+    # decimal inside a sentence, so both take the Spanish comma here.
+    "the measured crossing, 0.98 s": "el cruce medido, 0,98 s",
+    "the closed form, 0.99 s": "la forma cerrada, 0,99 s",
+    "a decay rate of $R$ dB/s reaches the same 10 % in 20/$R$ s;\nin all three printed rows the time column is the narrower statement": "una velocidad de caída de $R$ dB/s alcanza ese mismo 10 % en 20/$R$ s;\nen las tres filas impresas la columna de tiempo es la más estrecha",
+    # meter_signal_burst_response (ISO 8041-1 5.9, Tables 6 to 9): the
+    # saw-tooth burst a meter is fed, and the deviations of one instrument
+    # against the printed cells of Table 8, row by row and column by column.
+    "The Saw-Tooth Burst of ISO 8041-1, and the 228 Numbers a Conforming Meter Has to Reproduce": "La ráfaga en diente de sierra de la ISO 8041-1, y los 228 números que un instrumento conforme tiene que reproducir",
+    "Where the Bursts Sit in the Record": "Dónde caen las ráfagas dentro del registro",
+    "One Burst, and the Five Lengths the Tables Grade": "Una ráfaga, y las cinco longitudes que las tablas califican",
+    "Wk: A Meter That Reports Its Exponential Average in the Linear Column": "Wk: un instrumento que da su promediado exponencial en la columna lineal",
+    "Saw-tooth cycles from the start of the burst": "Ciclos de diente de sierra desde el inicio de la ráfaga",
+    "Saw-tooth cycles per burst": "Ciclos de diente de sierra por ráfaga",
+    "Deviation from the printed cell [%]": "Desviación respecto de la celda impresa [%]",
+    "continuous (no bursts)": "continua (sin ráfagas)",
+    # The four legend rows and the two band edges. Exact entries rather than a
+    # pattern: the percentages are fixed by the printed tables, and every
+    # _ES_PATTERNS entry is part of the fingerprint each clip is sealed with.
+    "±10 %, the tolerance on every column but one": "±10 %, la tolerancia de todas las columnas menos una",
+    "±12 %, the one on the vibration dose value, in all 48 of its cells": "±12 %, la del valor de dosis de vibración, en sus 48 celdas",
+    "the linear MTVV column": "la columna del MTVV lineal",
+    "the vibration dose value column": "la columna del valor de dosis de vibración",
+    "the r.m.s. and exponential MTVV columns, which the defect does not reach": "las columnas del valor eficaz y del MTVV exponencial, a las que no llega el defecto",
+    "the cells this meter fails": "las celdas que este instrumento incumple",
+    # The five readings the drawing writes out. The decimals inside a sentence
+    # carry the Spanish comma here, since the save-time pass only reaches tick
+    # labels.
+    "the whole-body row of Table 6: 6 bursts of 16\ncycles in a 60 s record, the first at 1 s and then one every 10 s": "la fila de cuerpo entero de la tabla 6: 6 ráfagas de 16\nciclos en un registro de 60 s, la primera a 1 s y luego una cada 10 s",
+    "a linear rise and a vertical fall, and every printed length starting\nand ending on an upward zero crossing: 15.9155 Hz, 16 cycles in 1.005 s": "una rampa lineal y una caída vertical, y cada longitud impresa empieza\ny acaba en un paso ascendente por cero: 15,9155 Hz, 16 ciclos en 1,005 s",
+    "read in the right column, the same chain reproduces\nall 24 of Wk's printed cells to 0.34 %": "leída en la columna correcta, la misma cadena reproduce\nlas 24 celdas impresas de Wk dentro del 0,34 %",
+    "only the 8 and 16 cycle rows leave the band, at\n−11.3 % and −20.4 %: a test suite that ran only short\nbursts would have signed this meter off": "solo las filas de 8 y 16 ciclos salen de la banda, con\n−11,3 % y −20,4 %: una campaña de ensayo con ráfagas\ncortas habría dado por bueno este instrumento",
+    "the continuous row passes too:\non a signal that never stops,\nthe two averages agree": "la fila continua también cumple:\nen una señal que no se detiene,\nlos dos promediados coinciden",
+    # meter_tolerance_regions (ISO 8041-1 Tables 4 and 5): the band a
+    # human-vibration meter's frequency weighting has to stay inside, the
+    # width of that band in per cent, and the phase limit that hangs off the
+    # same four transition frequencies.
+    "The Shape of the ISO 8041-1 Tolerance: Tables 4 and 5 on One Frequency Axis": "La forma de la tolerancia de la ISO 8041-1: las tablas 4 y 5 sobre un mismo eje de frecuencia",
+    "The Band Around Wk, and Where It Changes Width": "La banda alrededor de Wk, y dónde cambia de anchura",
+    "The Magnitude Tolerance, to Scale": "La tolerancia de magnitud, a escala",
+    "The Phase Tolerance, on the Same Corners": "La tolerancia de fase, sobre los mismos cortes",
+    "Wk weighting factor": "Factor de ponderación Wk",
+    "Magnitude tolerance on the factor (%)": "Tolerancia de magnitud sobre el factor (%)",
+    "Limit on $\\Delta\\varphi_0$ (degrees)": "Límite de $\\Delta\\varphi_0$ (grados)",
+    "Wk, the design goal of Table 3": "Wk, el objetivo de diseño de la tabla 3",
+    # The three distinct rows of Table 5, named and written as the table
+    # prints them, both graded columns included. Exact entries rather than a
+    # pattern: the percentages and the degrees are fixed by the table, and
+    # every _ES_PATTERNS entry is part of the fingerprint each clip is
+    # sealed with.
+    "the central region: +12 %, −11 %, ±6°": "la región central: +12 %, −11 %, ±6°",
+    "the two skirts: +26 %, −21 %, ±12°": "las dos faldas: +26 %, −21 %, ±12°",
+    "the two tails: +26 %, −100 %, ±∞": "las dos colas: +26 %, −100 %, ±∞",
+    "−100 %: below $f_\\mathrm{t1}$ and\nabove $f_\\mathrm{t4}$ the standard sets\nno lower limit at all": "−100 %: por debajo de $f_\\mathrm{t1}$ y\npor encima de $f_\\mathrm{t4}$ la norma no fija\nningún límite inferior",
+    "footnote a: the phase column applies only\nto instruments whose measurement parameter\nis not based on r.m.s. values": "nota a: la columna de fase solo se aplica\na instrumentos cuyo parámetro de medida\nno se basa en valores eficaces",
+    # The Table 4 note on the left panel. The four frequencies are the
+    # printed decimals of the two rows, so the Spanish twin carries the
+    # commas the save-time pass would otherwise have to find.
+    "Table 4 gives every weighting its own four:\nWk's run from 0.2512 Hz to 158.5 Hz,\nand Wh's from 3.981 Hz to 1995 Hz": "La tabla 4 da a cada ponderación sus cuatro:\nlas de Wk van de 0,2512 Hz a 158,5 Hz,\ny las de Wh, de 3,981 Hz a 1995 Hz",
     "limit of zone A ($Z$ = 1)": "límite de la zona A ($Z$ = 1)",
     "limit of zone B ($Z$ = 2.56)": "límite de la zona B ($Z$ = 2,56)",
     "limit of zone C ($Z$ = 6.4)": "límite de la zona C ($Z$ = 6,4)",

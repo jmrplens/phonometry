@@ -84,6 +84,11 @@ UNITS: frozenset[str] = frozenset(
         "m/s",
         "mm/s",
         "m/s per °C",
+        # The vibration dose value and the motion sickness dose value carry
+        # fractional powers of the second, which have no superscript spelling
+        # to be written in: ISO 2631-1 prints them with a caret as well.
+        "m/s^1.5",
+        "m/s^1.75",
         "m/s²",
         "m²",
         "m²/s",

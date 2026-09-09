@@ -18,7 +18,11 @@ standards' own analog definitions, clean-room:
   upward step (Formula (4)) realises all nine weightings from the one Table 3
   parameter set: `Wb, Wc, Wd, We, Wf, Wh, Wj, Wk, Wm`.  The tabulated
   design-goal factors of Annex B (Tables B.1-B.9) are reproduced to their
-  four-significant-figure precision.
+  four-significant-figure precision.  The band-limiting pair
+  $H_\mathrm{h}(s) H_\mathrm{l}(s)$ is published on its own as well
+  ([`band_limiting_response`](/phonometry/reference/api/vibration/exposure/#band_limiting_response)), because 5.1 lists the band-limited value
+  among the quantities an instrument must display and Annex B tabulates it in
+  three columns of its own.
 
 * **ISO 2631-1:1997** - whole-body vibration: the weighted r.m.s. acceleration
   `a_w` (Eq. (1)/(9)), the vibration total value `a_v` with axis
@@ -57,6 +61,48 @@ by applying the exact analog response of ISO 8041-1 in the frequency domain.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
+## apply_band_limiting
+
+```python
+apply_band_limiting(
+    signal: SignalInput,
+    fs: float | None = None,
+    *,
+    name: str,
+) -> Real
+```
+
+Apply the band-limiting weighting of `name` to a time signal.
+
+The band-limiting weighting of [`band_limiting_response`](/phonometry/reference/api/vibration/exposure/#band_limiting_response) (ISO 8041-1
+Formulae (1) and (2)) applied the way [`apply_weighting`](/phonometry/reference/api/vibration/exposure/#apply_weighting) applies the
+overall weighting: the exact analog response, multiplied in the frequency
+domain. This is the signal path the type tests of 12.7, 12.10, 12.11 and
+12.13 put the meter on, and the one the "Band limiting" rows of Tables 7
+to 9 are measured through.
+
+The multiplication is circular, exactly as in [`apply_weighting`](/phonometry/reference/api/vibration/exposure/#apply_weighting), so
+the record wraps at its ends. A test that has to reproduce the printed
+burst responses of 5.9 pads the record with zeros first, because the
+printed values come from a zero-state digital simulation (5.9, NOTE 1)
+and the switch-on transient is part of what they measure.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `signal` | Unweighted acceleration time history (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `fs` | Sampling frequency, in hertz (> 0). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)) whose band-limiting pair is applied. |
+
+**Returns:** The band-limited acceleration signal, same length as input.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if `signal` is not 1-D, `fs` is not positive, or `name` is unknown. |
+
 ## apply_weighting
 
 ```python
@@ -92,6 +138,73 @@ negligible, as for any block frequency-domain filtering.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `signal` is not 1-D, `fs` is not positive, or `name` is unknown. |
+
+## band_limiting_factors
+
+```python
+band_limiting_factors(name: str, frequencies: ArrayLike) -> Real
+```
+
+Band-limiting weighting factors (ISO 8041-1:2017, Annex B).
+
+Convenience wrapper over [`band_limiting_response`](/phonometry/reference/api/vibration/exposure/#band_limiting_response) returning only the
+magnitude array, which is the "Band-limiting Factor" column of
+Tables B.1 to B.9.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)). |
+| `frequencies` | Band centre frequencies, in hertz. |
+
+**Returns:** Band-limiting factor per frequency.
+
+## band_limiting_response
+
+```python
+band_limiting_response(
+    name: str,
+    frequencies: ArrayLike,
+) -> WeightingResponse
+```
+
+Band-limiting weighting response (ISO 8041-1:2017, Formulae (1), (2)).
+
+The band-limiting weighting is the high-pass and low-pass pair of the
+cascade on its own, $H_\mathrm{h}(s) H_\mathrm{l}(s)$, with the
+`f1` and `f2` corners of Table 3 and the Butterworth
+$Q = 1/\sqrt{2}$. It is a displayed quantity in its own right: 5.1
+(folio 9) lists the "time-averaged band-limited vibration acceleration
+value over the measurement duration" among the three things an instrument
+must be able to display, 5.6.6 (folio 14) says the Table 5 limits "apply
+to the weightings, including the corresponding band-limiting weightings",
+and Annex B gives it three columns of its own in every one of Tables B.1
+to B.9. It is also the signal path the type tests are written on: 12.7,
+12.10.1, 12.11.2, 12.11.3 and 12.13 all set the meter to the
+band-limiting frequency weighting first.
+
+Only four corner pairs exist among the nine weightings, as Table 3 prints
+them: 0,4 Hz and 100 Hz for `Wb`, `Wc`, `Wd`, `We`, `Wj` and
+`Wk`; `10**(8/10)` Hz and `10**(31/10)` Hz for `Wh`;
+`10**(-0.1)` Hz and 100 Hz for `Wm`; 0.08 Hz and 0.63 Hz for `Wf`.
+The response is still asked for by weighting name, because that is how
+the standard cites it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/exposure/#weighting_names)) whose band-limiting pair is wanted. |
+| `frequencies` | Frequencies at which to evaluate, in hertz (> 0). |
+
+**Returns:** A [`WeightingResponse`](/phonometry/reference/api/vibration/exposure/#weightingresponse) with `band_limiting` true and `.plot()`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if `name` is unknown or `frequencies` is empty. |
 
 ## combine_partial_exposures
 
@@ -527,12 +640,21 @@ mtvv(
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
+    method: str = 'linear',
 ) -> float
 ```
 
 Maximum transient vibration value (ISO 2631-1 Eq. (4)).
 
 `MTVV = max a_w(t0)`, the peak of the 1 s running r.m.s. value.
+
+The averaging is the one [`running_rms`](/phonometry/reference/api/vibration/exposure/#running_rms) is asked for, because the
+two give different answers and both are graded: ISO 8041-1 Table 8
+(folios 18 and 19) prints an "MTVV linear" and an "MTVV exponential"
+column side by side, 48 cells each with a 10 % tolerance, and Annex D
+D.3 (folio 79) spends its text on how far apart the two can sit. The
+default is the linear average of Eq. (2), which is what ISO 2631-1
+defines the MTVV on.
 
 **Parameters**
 
@@ -541,8 +663,15 @@ Maximum transient vibration value (ISO 2631-1 Eq. (4)).
 | `signal` | Frequency-weighted acceleration signal (1-D), in m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `integration_time` | Running-r.m.s. averaging time, in seconds (1 s). |
+| `method` | `"linear"` (Eq. (2), the default) or `"exponential"` (Eq. (3)), forwarded to [`running_rms`](/phonometry/reference/api/vibration/exposure/#running_rms). |
 
 **Returns:** The MTVV, in m/s2.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a bad signal, non-positive `fs`/`tau` or an unknown `method`. |
 
 ## partial_exposure
 
@@ -867,6 +996,7 @@ WeightingResponse(
     response: Complex,
     magnitude: Real,
     magnitude_db: Real,
+    band_limiting: bool = False,
 )
 ```
 
@@ -881,6 +1011,7 @@ A frequency-weighting magnitude response (ISO 8041-1, Formula (5)).
 | `response` | Complex weighting $H(j2\pi f)$ per frequency. |
 | `magnitude` | Weighting factor $\lvert H \rvert$ per frequency. |
 | `magnitude_db` | $20 \log_{10}\lvert H \rvert$ per frequency, in decibels. |
+| `band_limiting` | Whether the response is the band-limiting weighting of `name` (Formulae (1) and (2) alone) rather than the overall weighting of Formula (5). The standard tabulates the two side by side in Annex B and grades both against Table 5, so the flag is what tells a reader, and `.plot()`, which of the two curves this is. |
 
 ### WeightingResponse.plot()
 

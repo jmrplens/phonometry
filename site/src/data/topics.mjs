@@ -320,6 +320,7 @@ export const topics = [
           'vibration/human/human-vibration',
           'vibration/human/multiple-shock-vibration',
           'vibration/human/seat-vibration',
+          'vibration/human/meter-verification',
         ],
       },
       {

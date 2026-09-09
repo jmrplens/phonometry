@@ -53,7 +53,7 @@ La cualificación es una decisión, no un estadístico, así que se lee mejor
 como un flujo: segmentar el registro, contar inversiones, y dejar que la
 región de la Tabla A.6 diga si se puede promediar.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_data_qualification.svg" alt="Diagrama de flujo de decisión de la cualificación de datos: un registro temporal, antes de confiar en cualquier promedio PSD, Leq o GUM, se divide en 20 segmentos iguales cuyas medias cuadráticas forman una secuencia, el recuento de inversiones A con media sin tendencia 95 se compara con la región de aceptación de la Tabla A.6, mayor que 64 y como máximo 125, al nivel del 5 por ciento, y el rombo se bifurca hacia una caja verde de estacionario, ruido estable con A igual a 91 aceptado de modo que valen los intervalos chi-cuadrado y las fórmulas de error, o hacia una caja roja de no estacionario, una rampa de ganancia del 20 por ciento con A igual a 7 rechazada, aconsejando dividir en el cambio o pasar a análisis de corto plazo; las notas al pie nombran el test de rachas como compañero y el punto ciego de la media cuadrática ante deslizamientos de frecuencia" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_data_qualification.svg" alt="Diagrama de flujo de decisión de la cualificación de datos: un registro temporal, antes de confiar en cualquier promedio PSD, Leq o GUM, se divide en 20 segmentos iguales cuyas medias cuadráticas forman una secuencia, el recuento de inversiones A con media sin tendencia 95 se compara con la región de aceptación de la Tabla A.6, mayor que 64 y como máximo 125, al nivel del 5 por ciento, y el rombo se bifurca hacia una caja verde de estacionario, ruido estable con A igual a 91 aceptado de modo que valen los intervalos chi-cuadrado y las fórmulas de error, o hacia una caja roja de no estacionario, una rampa de ganancia del 20 por ciento con A igual a 7 rechazada, aconsejando dividir en el cambio o pasar a análisis de corto plazo; las notas al pie nombran el test de rachas como compañero y el punto ciego del valor cuadrático medio ante deslizamientos de frecuencia" width="92%" />
 
 ## 0. Antes de los tests: validar el registro
 
@@ -207,7 +207,7 @@ consulta a una tabla.
 El procedimiento de la Sec. 10.3.1.1 de B&P convierte el test de tendencia
 en un test de estacionariedad para una única historia temporal: divide el
 registro en $N$ intervalos iguales lo bastante largos para ser
-independientes, calcula una **media cuadrática por intervalo** y prueba
+independientes, calcula un **valor cuadrático medio por intervalo** y prueba
 esa secuencia. No hace falta saber nada del ancho de banda del registro, de
 su distribución ni de sus unidades, y el test funciona igual de bien sobre
 medias, valores eficaces o varianzas (`statistic=`). Una deriva de ganancia
@@ -291,7 +291,7 @@ libro - más segmentos resuelven derivas más rápidas, pero cada intervalo debe
 seguir siendo largo frente a las frecuencias más bajas del registro para que los
 valores sean independientes.
 
-**¿Cómo de pequeña es la deriva que llega a ver?** Cada media cuadrática de
+**¿Cómo de pequeña es la deriva que llega a ver?** Cada valor cuadrático medio de
 segmento es ella misma una variable aleatoria: para una banda de anchura $B$
 observada durante $T_\text{seg}$ segundos, su error aleatorio normalizado es
 $1/\sqrt{B\,T_\text{seg}}$. Toma los 20 segmentos por defecto sobre un registro
@@ -321,7 +321,7 @@ respuesta honesta suele ser trocear el registro por régimen (`segment_times`
 enseña dónde) y cualificar cada parte por separado.
 
 Merece la pena repetir dos salvedades del libro. Un registro puede ser no
-estacionario con media cuadrática estacionaria (un barrido de frecuencia,
+estacionario con valor cuadrático medio estacionario (un barrido de frecuencia,
 por ejemplo), así que pasa `statistic="mean"` o prueba versiones
 filtradas por bandas cuando importe; y el test necesita que la *tendencia*
 sea lenta frente a la longitud del segmento, o se disuelve en la
@@ -334,7 +334,7 @@ verla:
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stationarity_glide_blind_spot.svg" alt="Tres paneles apilados. Arriba: la frecuencia instantánea de un barrido de amplitud constante que sube linealmente de 200 Hz a 2 kHz en ocho segundos, con la banda de 200 a 400 Hz sombreada. En medio: las veinte medias cuadráticas de segmento del registro de banda completa, planas en 0,5 con un recuento de inversiones de 96 dentro de la región de aceptación, aceptado. Abajo: el mismo registro limitado a la banda de 200 a 400 Hz, cuyas medias cuadráticas de segmento se desploman a cero a partir del tercer segmento, dando un recuento de 173 por encima de la cota superior, rechazado" width="88%" />
 
 *Un barrido de amplitud constante de 200 Hz a 2 kHz es todo lo no estacionario
-que puede ser un registro, y la media cuadrática de banda completa no lo ve: los
+que puede ser un registro, y el valor cuadrático medio de banda completa no lo ve: los
 veinte valores de segmento van de 0,4998 a 0,5002 y el conteo $A = 96$ se queda
 cómodamente dentro de $(64, 125]$. Limita antes el mismo registro a 200-400 Hz y
 los valores de segmento se desploman en cuanto el barrido abandona la banda,
@@ -712,7 +712,7 @@ módulo.
 ## Véase también
 
 - [Análisis espectral](/phonometry/es/signals/spectra/spectral-analysis/): el intervalo de confianza chi-cuadrado que da por supuesta la estacionariedad que esta página comprueba.
-- [Análisis tiempo-frecuencia](/phonometry/es/signals/spectra/time-frequency/): la vista de corto plazo para los registros que suspenden el test, y para los barridos que su media cuadrática no ve.
+- [Análisis tiempo-frecuencia](/phonometry/es/signals/spectra/time-frequency/): la vista de corto plazo para los registros que suspenden el test, y para los barridos que su valor cuadrático medio no ve.
 - [Incertidumbre GUM](/phonometry/es/signals/metrology/gum-uncertainty/): propagar el error aleatorio que le queda a un promedio ya cualificado.
 - [Niveles](/phonometry/es/signals/levels/levels/): el $L_\mathrm{eq}$ cuya definición supone una única medición estacionaria.
 - Referencia de la API: [`metrology.data_qualification`](/phonometry/es/reference/api/metrology/data-qualification/).

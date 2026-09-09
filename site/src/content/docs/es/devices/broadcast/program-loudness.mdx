@@ -68,7 +68,7 @@ Toda la Recomendación es una cadena de medición, y cada sección de abajo
 detalla uno de sus bloques. El diagrama la despliega primero, con los
 números de los ejemplos de esta página.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_program_loudness.svg" alt="Diagrama de bloques de la cadena de sonoridad de programa de BS.1770 y EBU R 128: el programa ponderado por canal, anclado para que una sinusoide de 997 hercios a plena escala en un canal frontal marque menos 3,01 LKFS, pasa la ponderación K de realce de cabeza esférica de más 4 decibelios y paso alto RLB, se mide en bloques de media cuadrática de 400 milisegundos con 75 por ciento de solape, se filtra con la puerta absoluta de menos 70 LUFS y la relativa 10 unidades de sonoridad bajo los supervivientes, menos 39,0 LUFS en el ejemplo de 10 segundos de programa más 30 segundos de silencio, y da una sonoridad integrada de menos 23,1 LUFS frente al objetivo de menos 23,0; sendas ramas muestran el rango de sonoridad de 10,0 unidades en el caso de dos escalones de Tech 3342 y el pico verdadero de más 0,12 dBTP donde el pico muestral marca menos 3,01 decibelios, bajo el techo de producción de menos 1 dBTP" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_program_loudness.svg" alt="Diagrama de bloques de la cadena de sonoridad de programa de BS.1770 y EBU R 128: el programa ponderado por canal, anclado para que una sinusoide de 997 hercios a plena escala en un canal frontal marque menos 3,01 LKFS, pasa la ponderación K de realce de cabeza esférica de más 4 decibelios y paso alto RLB, se mide en bloques de valor cuadrático medio de 400 milisegundos con 75 por ciento de solape, se filtra con la puerta absoluta de menos 70 LUFS y la relativa 10 unidades de sonoridad bajo los supervivientes, menos 39,0 LUFS en el ejemplo de 10 segundos de programa más 30 segundos de silencio, y da una sonoridad integrada de menos 23,1 LUFS frente al objetivo de menos 23,0; sendas ramas muestran el rango de sonoridad de 10,0 unidades en el caso de dos escalones de Tech 3342 y el pico verdadero de más 0,12 dBTP donde el pico muestral marca menos 3,01 decibelios, bajo el techo de producción de menos 1 dBTP" width="92%" />
 
 ## 1. La ponderación K y la medida de sonoridad (Anexo 1)
 
@@ -173,7 +173,7 @@ plt.show()
 
 </details>
 
-Ese es todo el modelo: dos biquads y una media cuadrática. Conviene decir con
+Ese es todo el modelo: dos biquads y un valor cuadrático medio. Conviene decir con
 claridad qué no puede hacer una medida así, porque la pregunta con la que llega
 el lector suele ser «¿es esta *la* sonoridad?». La cadena es lineal e
 independiente del nivel por construcción — duplicar la ganancia de un programa

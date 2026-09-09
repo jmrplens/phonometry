@@ -12,7 +12,7 @@ un compresor: un número por programa, con puerta para que el silencio no lo
 diluya, y un rango que dice cuánto se mueve el programa.
 
 La palabra *sonoridad* tiene dos significados en este sitio, y no son versiones
-uno del otro. Aquí es una **medida energética**: una media cuadrática ponderada
+uno del otro. Aquí es una **medida energética**: un valor cuadrático medio ponderado
 en K sobre el programa entero, con puertas, expresada en LUFS, pensada para que
 dos programas normalizados al mismo número suenen igual de sonoros en la misma
 cadena de reproducción. En
@@ -33,7 +33,7 @@ tratamiento dinámico antes de normalizarlo.
 Cuatro documentos son dueños de cuatro cosas distintas, y la sección se lee
 mejor una vez que eso está claro. **UIT-R BS.1770** define el algoritmo: el
 prefiltro de ponderación K — un realce de cabeza esférica de unos +4 dB seguido
-del paso alto RLB —, la media cuadrática en bloques de 400 ms con 75 % de
+del paso alto RLB —, el valor cuadrático medio en bloques de 400 ms con 75 % de
 solape, la suma ponderada por canal y la **puerta en dos etapas** que hace el
 número utilizable sobre programa real (una puerta absoluta en −70 LKFS descarta
 el silencio digital, y después una puerta relativa 10 LU por debajo de la media

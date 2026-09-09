@@ -603,7 +603,7 @@ res = building.low_frequency_intensity_reduction(
     l_p=l_p, frequencies=freqs,
 )
 print(np.round(res.r_i, 1))                         # [16.8 18.2 20.5 23.1 25.4 27.9]
-print(np.round(res.surface_pressure_intensity, 1))  # [12.4 11.1  9.6  8.2  7.1  6.4]
+print(np.round(res.surface_pressure_intensity_indicator, 1))  # [12.4 11.1  9.6  8.2  7.1  6.4]
 print(res.qualified.tolist())   # [False, False, True, True, True, True]
 print(res.indicator_limit)      # 10.0
 
@@ -611,7 +611,7 @@ print(res.indicator_limit)      # 10.0
 desnudo = building.low_frequency_intensity_reduction(
     lp_superficie, l_in, measurement_area=12.6, area=10.0, frequencies=freqs,
 )
-print(desnudo.surface_pressure_intensity, desnudo.qualified)   # None None
+print(desnudo.surface_pressure_intensity_indicator, desnudo.qualified)   # None None
 ```
 
 Una banda rechazada se marca, no se descarta. La respuesta de la norma a un
@@ -640,7 +640,7 @@ plt.show()
 
 # A mano, y el panel del anexo A al lado.
 calculado = building.limp_panel_reduction_index(
-    freqs, surface_mass=10.0, area=10.0, temperature=23.0,
+    freqs, surface_mass=10.0, area=10.0, temperature_c=23.0,
 )
 medido = calculado + np.array([2.6, -1.8, 1.1, -2.9, 0.7, -1.4])
 x = np.arange(len(freqs))
@@ -652,7 +652,7 @@ for barra, ok in zip(barras, res.qualified, strict=True):
 axi.set_xticks(x, [f"{f:g}" for f in freqs])
 axi.set(xlabel="Frecuencia [Hz]", ylabel="Índice de reducción acústica [dB]")
 gemelo = axi.twinx()
-gemelo.plot(x, res.surface_pressure_intensity, "-o", color="#2ca02c", label="FpI")
+gemelo.plot(x, res.surface_pressure_intensity_indicator, "-o", color="#2ca02c", label="FpI")
 gemelo.axhline(res.indicator_limit, ls="--", color="#d62728", label="límite de FpI")
 gemelo.set_ylabel("Indicador presión-intensidad superficial [dB]")
 gemelo.legend()
@@ -725,7 +725,7 @@ sobre todo para el rango de 50 Hz a 80 Hz.
 # 10 m2, a 1 013 hPa y 23 grados Celsius.
 calc = building.limp_panel_reduction_index(
     freqs, surface_mass=10.0, area=10.0,
-    temperature=23.0, static_pressure=101300.0,
+    temperature_c=23.0, static_pressure_pa=101300.0,
 )
 print(np.round(calc, 1))    # [10.7 11.9 13.4 14.8 16.3 17.9]
 ```
@@ -752,10 +752,10 @@ oráculo.
 | `absorbing_specimen_surface` | bool | — | defecto `False` | `True` estrecha el límite del 6.4.2 a 6 dB |
 | `elements` | int | unidades | ≥ 1, defecto `1` | Número $N$ de unidades (solo `low_frequency_element_normalized_difference`) |
 | `surface_mass` | float | kg/m² | > 0 | Masa superficial $m$ del panel flexible (`limp_panel_reduction_index`) |
-| `temperature` / `static_pressure` | float | °C / Pa | defecto 23 °C, 101 300 Pa | El clima de las Fórmulas (A.4) y (A.5) |
+| `temperature_c` / `static_pressure_pa` | float | °C / Pa | defecto 23 °C, 101 300 Pa | El clima de las Fórmulas (A.4) y (A.5) |
 
 `low_frequency_intensity_reduction()` devuelve un
-`LowFrequencyIntensityResult` (`r_i`, `surface_pressure_intensity`,
+`LowFrequencyIntensityResult` (`r_i`, `surface_pressure_intensity_indicator`,
 `qualified`, `indicator_limit`),
 `low_frequency_element_normalized_difference()` un
 `LowFrequencyElementResult` (`d_i_n_e` y los tres mismos), y

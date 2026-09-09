@@ -43,9 +43,9 @@ _IEC60534 = "Control valve noise (IEC 60534-8-3)"
 #: ``F_LP/F_p`` with the 0,984 the annex computed with rather than the 0,98 it
 #: printed.
 _STREAM: dict[str, Any] = {
-    "inlet_pressure": 1.0e6,
+    "inlet_pressure_pa": 1.0e6,
     "inlet_density": 5.3,
-    "inlet_temperature": 450.0,
+    "inlet_temperature_k": 450.0,
     "specific_heat_ratio": 1.22,
     "molecular_mass": 19.8,
 }
@@ -170,7 +170,7 @@ def _example(
         warnings.simplefilter("ignore", ph.noise_control.ValveNoiseWarning)
         return ph.noise_control.valve_aerodynamic_noise(
             ph.noise_control.GasStream(
-                **_STREAM, mass_flow=flow, outlet_pressure=outlet
+                **_STREAM, mass_flow=flow, outlet_pressure_pa=outlet
             ),
             ph.noise_control.ValveTrim(
                 **_VALVE,
@@ -223,7 +223,7 @@ def _chk_vena_contracta() -> Outcome:
     """Equation (2) across the six columns, including the two negative ones."""
     worst = max(
         (
-            abs(_example(i).vena_contracta_pressure - _PRINTED_VENA_CONTRACTA[i]),
+            abs(_example(i).vena_contracta_pressure_pa - _PRINTED_VENA_CONTRACTA[i]),
             i,
         )
         for i in _EXAMPLES
@@ -231,7 +231,7 @@ def _chk_vena_contracta() -> Outcome:
     index = worst[1]
     return numeric(
         _PRINTED_VENA_CONTRACTA[index],
-        _example(index).vena_contracta_pressure,
+        _example(index).vena_contracta_pressure_pa,
         2.0,
         unit="Pa",
         places=0,
@@ -400,10 +400,10 @@ def _chk_external_with_expander() -> Outcome:
 #: 5.4.2 prints for free jets rather than from the table.
 _EXAMPLE_7 = {
     "mass_flow": 23.1,
-    "inlet_pressure": 7.0e6,
-    "outlet_pressure": 1.4e6,
+    "inlet_pressure_pa": 7.0e6,
+    "outlet_pressure_pa": 1.4e6,
     "inlet_density": 55.3,
-    "inlet_temperature": 290.0,
+    "inlet_temperature_k": 290.0,
     "specific_heat_ratio": 1.31,
     "molecular_mass": 19.0,
     "flow_coefficient": 81.5,
@@ -448,8 +448,8 @@ def _example_seven() -> ph.noise_control.AerodynamicValveNoise:
     """Example 7, through Clause 6's substitution and then Clause 5."""
     case = _EXAMPLE_7
     conditions = ph.noise_control.multistage_trim_conditions(
-        inlet_pressure=case["inlet_pressure"],
-        outlet_pressure=case["outlet_pressure"],
+        inlet_pressure_pa=case["inlet_pressure_pa"],
+        outlet_pressure_pa=case["outlet_pressure_pa"],
         inlet_density=case["inlet_density"],
         flow_coefficient=case["flow_coefficient"],
         last_stage_coefficient=ph.noise_control.last_stage_flow_coefficient(
@@ -460,10 +460,10 @@ def _example_seven() -> ph.noise_control.AerodynamicValveNoise:
     return ph.noise_control.valve_aerodynamic_noise(
         ph.noise_control.GasStream(
             mass_flow=case["mass_flow"],
-            inlet_pressure=conditions.stagnation_pressure,
-            outlet_pressure=case["outlet_pressure"],
+            inlet_pressure_pa=conditions.stagnation_pressure_pa,
+            outlet_pressure_pa=case["outlet_pressure_pa"],
             inlet_density=conditions.stagnation_density,
-            inlet_temperature=case["inlet_temperature"],
+            inlet_temperature_k=case["inlet_temperature_k"],
             specific_heat_ratio=case["specific_heat_ratio"],
             molecular_mass=case["molecular_mass"],
         ),
@@ -498,8 +498,8 @@ def _chk_multistage_conditions() -> Outcome:
     below the 2 that would send it to (28b).
     """
     conditions = ph.noise_control.multistage_trim_conditions(
-        inlet_pressure=_EXAMPLE_7["inlet_pressure"],
-        outlet_pressure=_EXAMPLE_7["outlet_pressure"],
+        inlet_pressure_pa=_EXAMPLE_7["inlet_pressure_pa"],
+        outlet_pressure_pa=_EXAMPLE_7["outlet_pressure_pa"],
         inlet_density=_EXAMPLE_7["inlet_density"],
         flow_coefficient=_EXAMPLE_7["flow_coefficient"],
         last_stage_coefficient=ph.noise_control.last_stage_flow_coefficient(
@@ -508,9 +508,9 @@ def _chk_multistage_conditions() -> Outcome:
     )
     computed = {
         "C_n": round(conditions.flow_coefficient),
-        "p_n (x1e6 Pa)": round(conditions.stagnation_pressure / 1.0e6, 1),
+        "p_n (x1e6 Pa)": round(conditions.stagnation_pressure_pa / 1.0e6, 1),
         "p_n/p_2": round(
-            conditions.stagnation_pressure / _EXAMPLE_7["outlet_pressure"], 1
+            conditions.stagnation_pressure_pa / _EXAMPLE_7["outlet_pressure_pa"], 1
         ),
         "(28a) rather than (28b)": float(conditions.equation == "28a"),
     }
@@ -545,7 +545,7 @@ def _chk_example_seven() -> Outcome:
     found = _example_seven()
     computed = {
         "x": round(found.pressure_ratio, 3),
-        "p_vc": round(found.vena_contracta_pressure),
+        "p_vc": round(found.vena_contracta_pressure_pa),
         "F_d": round(_example_seven_modifier(), 3),
         "W_a": round(found.sound_power, 1),
         "L_pi": round(found.internal_level, 1),

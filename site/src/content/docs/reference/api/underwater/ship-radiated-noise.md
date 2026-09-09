@@ -103,7 +103,7 @@ depth is $d_\mathrm{s} = 0.7 D$ (Formula 1).
 ## radiated_noise_level
 
 ```python
-radiated_noise_level(rms_pressure: float, distance: float) -> float
+radiated_noise_level(rms_pressure_pa: float, distance: float) -> float
 ```
 
 Radiated noise level `LRN` (ISO 17208-1), dB re 1 µPa·m.
@@ -116,7 +116,7 @@ source distance, referred to 1 µPa·m.
 
 | Name | Description |
 | :--- | :--- |
-| `rms_pressure` | Far-field RMS sound pressure `p_rms`, in Pa. |
+| `rms_pressure_pa` | Far-field RMS sound pressure `p_rms`, in Pa. |
 | `distance` | Distance `r` from the ship reference point, in m. |
 
 **Returns:** Radiated noise level, in dB re 1 µPa·m.

@@ -230,9 +230,14 @@ def test_eq11_agrees_with_the_iso3741_comparison_method() -> None:
     with warnings.catch_warnings():  # four positions trip the ISO 3741 advisory
         warnings.simplefilter("ignore", emission.SoundPowerWarning)
         room = emission.sound_power_comparison(
-            ST, RSS, LW_RSS, frequencies=FREQS, temperature=20.0, static_pressure=100.0
+            ST,
+            RSS,
+            LW_RSS,
+            frequencies=FREQS,
+            temperature_c=20.0,
+            static_pressure_kpa=100.0,
         )
-    res = _power(temperature=20.0, static_pressure=100.0)
+    res = _power(temperature_c=20.0, static_pressure_kpa=100.0)
     np.testing.assert_allclose(
         res.sound_power_level_ref, room.sound_power_level, atol=1e-12
     )
@@ -609,15 +614,15 @@ def test_background_shapes_are_checked_by_name() -> None:
 
 @pytest.mark.parametrize("theta", [-273.0, -300.0, float("nan")])
 def test_temperature_is_validated(theta: float) -> None:
-    with pytest.raises(ValueError, match="'temperature' must be finite and greater"):
-        _power(temperature=theta)
+    with pytest.raises(ValueError, match="'temperature_c' must be finite and greater"):
+        _power(temperature_c=theta)
 
 
 def test_static_pressure_is_validated() -> None:
     with pytest.raises(
-        ValueError, match="'static_pressure' must be finite and positive"
+        ValueError, match="'static_pressure_kpa' must be finite and positive"
     ):
-        _power(static_pressure=0.0)
+        _power(static_pressure_kpa=0.0)
 
 
 def test_grade_indicators_are_validated() -> None:

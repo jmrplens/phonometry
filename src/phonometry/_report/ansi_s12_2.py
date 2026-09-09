@@ -114,9 +114,9 @@ def _metadata_pairs(
         (t("Room volume V [m<super>3</super>]", language), num(metadata.room_volume)),
         (t("Floor area S [m<super>2</super>]", language), num(metadata.area)),
         (t("Instrumentation", language), metadata.instrumentation),
-        (t("Temperature [&#176;C]", language), num(metadata.temperature)),
-        (t("Relative humidity [%]", language), num(metadata.relative_humidity)),
-        (t("Ambient pressure [kPa]", language), num(metadata.pressure)),
+        (t("Temperature [&#176;C]", language), num(metadata.temperature_c)),
+        (t("Relative humidity [%]", language), num(metadata.relative_humidity_percent)),
+        (t("Ambient pressure [kPa]", language), num(metadata.static_pressure_kpa)),
         (t("Date of test", language), metadata.test_date),
     ]
     return escaped_pairs(specs)

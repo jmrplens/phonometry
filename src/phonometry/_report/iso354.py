@@ -116,7 +116,7 @@ def _metadata_pairs(
     mounting = metadata.mounting if metadata is not None else None
     test_room = metadata.test_room if metadata is not None else None
     test_date = metadata.test_date if metadata is not None else None
-    pressure = metadata.pressure if metadata is not None else None
+    static_pressure_kpa = metadata.static_pressure_kpa if metadata is not None else None
 
     specs: list[tuple[str, str | None]] = [
         (t("Client", language), client),
@@ -137,16 +137,21 @@ def _metadata_pairs(
         (t("Mounting", language), mounting),
         (t("Test room", language), test_room),
         (t("Date of test", language), test_date),
-        (t("Temperature [&#176;C]", language), fmt_meta(result.temperature, language)),
+        (
+            t("Temperature [&#176;C]", language),
+            fmt_meta(result.temperature_c, language),
+        ),
         (
             t("Relative humidity [%]", language),
-            fmt_meta(result.humidity, language)
-            if result.humidity is not None
+            fmt_meta(result.relative_humidity_percent, language)
+            if result.relative_humidity_percent is not None
             else None,
         ),
         (
             t("Ambient pressure [kPa]", language),
-            fmt_meta(pressure, language) if pressure is not None else None,
+            fmt_meta(static_pressure_kpa, language)
+            if static_pressure_kpa is not None
+            else None,
         ),
     ]
     # Values are user-supplied free text; escape XML specials so a '&' or '<'

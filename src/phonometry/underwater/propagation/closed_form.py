@@ -183,7 +183,7 @@ def _ainslie_mccolm(
 def seawater_absorption(
     frequency_hz: NDArray[np.float64] | list[float] | float,
     *,
-    temperature: float = 10.0,
+    temperature_c: float = 10.0,
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
@@ -192,27 +192,27 @@ def seawater_absorption(
     r"""Volume absorption coefficient :math:`\alpha`, in dB/km.
 
     :param frequency_hz: Acoustic frequency, in Hz (scalar or array).
-    :param temperature: Temperature ``T``, in degrees Celsius.
+    :param temperature_c: Temperature ``T``, in degrees Celsius.
     :param salinity: Salinity ``S``, in parts per thousand.
     :param depth: Depth, in metres (``>= 0``).
     :param ph: Acidity (used by Francois-Garrison and Ainslie-McColm; default 8).
     :param model: ``"francois-garrison"`` (default), ``"ainslie-mccolm"`` or
         ``"thorp"`` (the Thorp 1967 frequency-only form of Etter, valid below
-        ~50 kHz; ignores ``temperature``/``salinity``/``depth``/``ph``).
+        ~50 kHz; ignores ``temperature_c``/``salinity``/``depth``/``ph``).
     :return: Absorption coefficient per frequency, in dB/km.
     :raises ValueError: If ``model`` is unknown or an input is invalid.
     """
     f_khz = _positive_array(frequency_hz, "frequency_hz") / 1000.0
-    t = float(temperature)
+    t = float(temperature_c)
     s = float(salinity)
     z = float(depth)
     if not (np.isfinite(t) and np.isfinite(s) and np.isfinite(z) and np.isfinite(ph)):
-        msg = "'temperature', 'salinity', 'depth' and 'ph' must be finite."
+        msg = "'temperature_c', 'salinity', 'depth' and 'ph' must be finite."
         raise ValueError(msg)
     if s < 0.0 or z < 0.0:
         msg = "'salinity' and 'depth' must be non-negative."
         raise ValueError(msg)
-    require_above_absolute_zero(t, "temperature")
+    require_above_absolute_zero(t, "temperature_c")
     key = model.strip().lower()
     if key == "thorp":
         return _thorp(f_khz)
@@ -225,7 +225,7 @@ def seawater_absorption(
         # normative and stays; the guard goes in front of it.
         if _FG_KELVIN_OFFSET + t <= 0.0:
             msg = (
-                "'temperature' must exceed -273 degC for the francois-garrison "
+                "'temperature_c' must exceed -273 degC for the francois-garrison "
                 "model, whose relaxation frequencies are printed as "
                 "1245/(273 + t) and 1990/(273 + t)."
             )
@@ -319,7 +319,7 @@ def propagation_loss(
     frequency_hz: float,
     *,
     law: str = "spherical",
-    temperature: float = 10.0,
+    temperature_c: float = 10.0,
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
@@ -332,7 +332,7 @@ def propagation_loss(
     :param range_m: Range(s) from the source, in metres (scalar or array).
     :param frequency_hz: Acoustic frequency, in Hz.
     :param law: Spreading law (see :func:`spreading_loss`).
-    :param temperature: Temperature ``T``, in degrees Celsius.
+    :param temperature_c: Temperature ``T``, in degrees Celsius.
     :param salinity: Salinity ``S``, in parts per thousand.
     :param depth: Depth, in metres.
     :param ph: Acidity (default 8).
@@ -347,7 +347,7 @@ def propagation_loss(
     alpha = float(
         seawater_absorption(
             f,
-            temperature=temperature,
+            temperature_c=temperature_c,
             salinity=salinity,
             depth=depth,
             ph=ph,

@@ -301,7 +301,7 @@ def test_low_frequency_intensity_plot_draws_index_and_indicator() -> None:
     # The indicator lives on the twin axis, with its limit beside it.
     (twin,) = [other for other in ax.figure.axes if other is not ax]
     np.testing.assert_allclose(
-        twin.lines[0].get_ydata(), res.surface_pressure_intensity
+        twin.lines[0].get_ydata(), res.surface_pressure_intensity_indicator
     )
     assert res.indicator_limit == 10.0
     assert twin.lines[1].get_ydata()[0] == res.indicator_limit
@@ -346,7 +346,7 @@ def test_low_frequency_intensity_plot_labels_bands_without_centres() -> None:
         [84.0, 86.0], [70.0, 73.0], measurement_area=12.0, area=10.0
     )
     assert res.frequencies is None
-    assert res.surface_pressure_intensity is None
+    assert res.surface_pressure_intensity_indicator is None
     ax = res.plot()
     assert [t.get_text() for t in ax.get_xticklabels()] == ["Band 1", "Band 2"]
     # No indicator measured, so no twin axis and no limit line to draw.

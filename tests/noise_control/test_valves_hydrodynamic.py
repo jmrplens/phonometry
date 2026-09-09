@@ -31,8 +31,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 #: A.1's given data, shared by the three columns, in SI units: the water and
 #: the pipe are the same in every one, and so is the valve.
 LIQUID: dict[str, Any] = {
-    "inlet_pressure": 1.0e6,
-    "vapour_pressure": 2.32e3,
+    "inlet_pressure_pa": 1.0e6,
+    "vapour_pressure_pa": 2.32e3,
     "density": 997.0,
     "sound_speed": 1400.0,
 }
@@ -62,12 +62,12 @@ def _pipe() -> hydro.LiquidPipe:
 
 
 def _chain(
-    *, mass_flow: float, outlet_pressure: float, incipient: float, **kwargs: Any
+    *, mass_flow: float, outlet_pressure_pa: float, incipient: float, **kwargs: Any
 ) -> hydro.HydrodynamicValveNoise:
     """The whole method on A.1's valve, for one column of the table."""
     return hydro.valve_hydrodynamic_noise(
         hydro.LiquidStream(
-            **LIQUID, mass_flow=mass_flow, outlet_pressure=outlet_pressure
+            **LIQUID, mass_flow=mass_flow, outlet_pressure_pa=outlet_pressure_pa
         ),
         _valve(incipient),
         _pipe(),
@@ -81,9 +81,9 @@ INCIPIENT = hydro.incipient_cavitation_ratio(90.0, 0.42, 0.92)
 #: The per-column data of Table A.1. The third column is the second with
 #: "Calculation with x_Fz = x_Fz + 0,1", as the annex prints it.
 EXAMPLES: list[dict[str, Any]] = [
-    {"example": 1, "mass_flow": 30.0, "outlet_pressure": 8.0e5, "shift": 0.0},
-    {"example": 2, "mass_flow": 40.0, "outlet_pressure": 6.5e5, "shift": 0.0},
-    {"example": 3, "mass_flow": 40.0, "outlet_pressure": 6.5e5, "shift": 0.1},
+    {"example": 1, "mass_flow": 30.0, "outlet_pressure_pa": 8.0e5, "shift": 0.0},
+    {"example": 2, "mass_flow": 40.0, "outlet_pressure_pa": 6.5e5, "shift": 0.0},
+    {"example": 3, "mass_flow": 40.0, "outlet_pressure_pa": 6.5e5, "shift": 0.1},
 ]
 
 #: The band Table A.1 evaluates the frequency route at.
@@ -95,7 +95,7 @@ def _run(index: int) -> hydro.HydrodynamicValveNoise:
     case = dict(EXAMPLES[index - 1])
     return _chain(
         mass_flow=case["mass_flow"],
-        outlet_pressure=case["outlet_pressure"],
+        outlet_pressure_pa=case["outlet_pressure_pa"],
         incipient=INCIPIENT + case["shift"],
     )
 
@@ -130,9 +130,9 @@ class TestPreliminaryCalculations:
         # is above all three printed differentials, so Equation (2) returns
         # p_1 - p_2 in every column. Push p_2 down and the cap binds.
         choked = hydro.cavitation_differential(
-            inlet_pressure=1.0e6,
-            outlet_pressure=1.0e5,
-            vapour_pressure=2.32e3,
+            inlet_pressure_pa=1.0e6,
+            outlet_pressure_pa=1.0e5,
+            vapour_pressure_pa=2.32e3,
             pressure_recovery=0.92,
         )
         assert choked == pytest.approx(0.92**2 * (1.0e6 - 2.32e3), rel=1e-12)
@@ -144,7 +144,7 @@ class TestPreliminaryCalculations:
         # F_L^2 (p_1 - p_v). Equation (5) then runs on the cap and not on the
         # differential, which is 3 % less velocity than the full drop would
         # give and 8 % less stream power.
-        result = _chain(mass_flow=60.0, outlet_pressure=1.0e5, incipient=INCIPIENT)
+        result = _chain(mass_flow=60.0, outlet_pressure_pa=1.0e5, incipient=INCIPIENT)
         assert result.differential == pytest.approx(9.0e5)
         assert result.cavitation_differential == pytest.approx(844436.35, abs=0.1)
         assert result.velocity == pytest.approx(44.737, abs=5e-3)
@@ -297,7 +297,7 @@ class TestEfficiencies:
     def test_the_power_ratio_scales_the_sound_power(self) -> None:
         # Table 2 is the only place r_W enters, and it enters linearly.
         louder = hydro.valve_hydrodynamic_noise(
-            hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure=8.0e5),
+            hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure_pa=8.0e5),
             hydro.LiquidTrim(
                 **{**VALVE, "power_ratio": 0.5}, incipient_ratio=INCIPIENT
             ),
@@ -354,8 +354,8 @@ class TestPeakFrequencies:
             "style_modifier": 0.42,
             "pressure_recovery": 0.92,
             "corrected_ratio": 0.2386,
-            "inlet_pressure": 1.0e6,
-            "vapour_pressure": 2.32e3,
+            "inlet_pressure_pa": 1.0e6,
+            "vapour_pressure_pa": 2.32e3,
         }
         wide = hydro.jet_strouhal_number(
             **shared, valve_diameter=0.1, seat_diameter=0.05
@@ -377,8 +377,8 @@ class TestPeakFrequencies:
             "corrected_ratio": 0.2386,
             "valve_diameter": 0.1,
             "seat_diameter": 0.1,
-            "inlet_pressure": 1.0e6,
-            "vapour_pressure": 2.32e3,
+            "inlet_pressure_pa": 1.0e6,
+            "vapour_pressure_pa": 2.32e3,
         }
         annex = hydro.jet_strouhal_number(**shared, form="annex")
         clause = hydro.jet_strouhal_number(**shared, form="clause")
@@ -395,8 +395,8 @@ class TestPeakFrequencies:
             "corrected_ratio": 0.2386,
             "valve_diameter": 0.1,
             "seat_diameter": 0.1,
-            "inlet_pressure": 1.0e6,
-            "vapour_pressure": 2.32e3,
+            "inlet_pressure_pa": 1.0e6,
+            "vapour_pressure_pa": 2.32e3,
         }
         assert hydro.jet_strouhal_number(**shared, form="annex") == pytest.approx(
             hydro.jet_strouhal_number(**shared, form="clause"), rel=1e-12
@@ -592,7 +592,7 @@ class TestBandRoute:
     def test_a_band_set_can_be_given_instead(self) -> None:
         result = _chain(
             mass_flow=30.0,
-            outlet_pressure=8.0e5,
+            outlet_pressure_pa=8.0e5,
             incipient=INCIPIENT,
             frequency=[63.0, 125.0, 250.0],
         )
@@ -734,7 +734,7 @@ class TestWholeChain:
 
     def test_a_thicker_wall_lets_less_out(self) -> None:
         thick = hydro.valve_hydrodynamic_noise(
-            hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure=8.0e5),
+            hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure_pa=8.0e5),
             _valve(INCIPIENT),
             hydro.LiquidPipe(**{**PIPE, "wall_thickness": 0.010}),
         )
@@ -747,15 +747,15 @@ class TestWholeChain:
         # corrected one, and so does this chain. See ``docs/ERRATA.md``.
         ratio = 0.5 * (INCIPIENT + hydro.corrected_incipient_ratio(INCIPIENT, 1.0e6))
         outlet = 1.0e6 - ratio * (1.0e6 - 2.32e3)
-        result = _chain(mass_flow=35.0, outlet_pressure=outlet, incipient=INCIPIENT)
+        result = _chain(mass_flow=35.0, outlet_pressure_pa=outlet, incipient=INCIPIENT)
         assert result.corrected_ratio < result.pressure_ratio < INCIPIENT
         assert result.regime == "cavitating"
 
     def test_the_chain_stops_at_flashing(self) -> None:
         stream = hydro.LiquidStream(
-            **{**LIQUID, "vapour_pressure": 8.0e5},
+            **{**LIQUID, "vapour_pressure_pa": 8.0e5},
             mass_flow=30.0,
-            outlet_pressure=7.0e5,
+            outlet_pressure_pa=7.0e5,
         )
         valve = _valve(INCIPIENT)
         pipe = _pipe()
@@ -771,41 +771,41 @@ class TestMultistageTrim:
         # C = 90 valve C_i = 90 sqrt(3), and each then takes a third of the
         # 6 bar the valve drops.
         stages = hydro.stage_conditions(
-            inlet_pressure=1.0e6,
-            outlet_pressure=4.0e5,
-            vapour_pressure=2.32e3,
+            inlet_pressure_pa=1.0e6,
+            outlet_pressure_pa=4.0e5,
+            vapour_pressure_pa=2.32e3,
             stage_coefficients=[90.0 * math.sqrt(3.0)] * 3,
             flow_coefficient=90.0,
         )
-        assert [s.inlet_pressure for s in stages] == pytest.approx(
+        assert [s.inlet_pressure_pa for s in stages] == pytest.approx(
             [1.0e6, 8.0e5, 6.0e5], abs=1.0
         )
-        assert [s.outlet_pressure for s in stages] == pytest.approx(
+        assert [s.outlet_pressure_pa for s in stages] == pytest.approx(
             [8.0e5, 6.0e5, 4.0e5], abs=1.0
         )
 
     def test_the_first_stage_starts_at_the_valve_inlet(self) -> None:
         stages = hydro.stage_conditions(
-            inlet_pressure=1.0e6,
-            outlet_pressure=4.0e5,
-            vapour_pressure=2.32e3,
+            inlet_pressure_pa=1.0e6,
+            outlet_pressure_pa=4.0e5,
+            vapour_pressure_pa=2.32e3,
             stage_coefficients=[110.0, 156.5],
             flow_coefficient=90.0,
         )
-        assert stages[0].inlet_pressure == 1.0e6
-        assert stages[-1].outlet_pressure == 4.0e5
+        assert stages[0].inlet_pressure_pa == 1.0e6
+        assert stages[-1].outlet_pressure_pa == 4.0e5
 
     def test_the_pressure_falls_along_the_trim(self) -> None:
         # Equation (23b) is printed with p_1,i+1 on the right, which would
         # run the pressure the other way. See ``docs/ERRATA.md``.
         stages = hydro.stage_conditions(
-            inlet_pressure=1.0e6,
-            outlet_pressure=4.0e5,
-            vapour_pressure=2.32e3,
+            inlet_pressure_pa=1.0e6,
+            outlet_pressure_pa=4.0e5,
+            vapour_pressure_pa=2.32e3,
             stage_coefficients=[130.0, 160.0, 199.1],
             flow_coefficient=90.0,
         )
-        inlets = [s.inlet_pressure for s in stages]
+        inlets = [s.inlet_pressure_pa for s in stages]
         assert inlets == sorted(inlets, reverse=True)
 
     def test_an_increasing_flow_area_leaves_the_last_stage_the_least_to_do(
@@ -814,13 +814,13 @@ class TestMultistageTrim:
         # Three stages that satisfy the series law with increasing
         # capacities, which is the device of Figure 2.
         stages = hydro.stage_conditions(
-            inlet_pressure=1.0e6,
-            outlet_pressure=4.0e5,
-            vapour_pressure=2.32e3,
+            inlet_pressure_pa=1.0e6,
+            outlet_pressure_pa=4.0e5,
+            vapour_pressure_pa=2.32e3,
             stage_coefficients=[130.0, 160.0, 199.1],
             flow_coefficient=90.0,
         )
-        drops = [s.inlet_pressure - s.outlet_pressure for s in stages]
+        drops = [s.inlet_pressure_pa - s.outlet_pressure_pa for s in stages]
         assert drops[0] > drops[1] > drops[2]
         # The last stage takes whatever is left, and with the series law
         # satisfied that is exactly its own share.
@@ -828,9 +828,9 @@ class TestMultistageTrim:
 
     def test_each_stage_carries_its_own_pressure_ratio(self) -> None:
         stages = hydro.stage_conditions(
-            inlet_pressure=1.0e6,
-            outlet_pressure=4.0e5,
-            vapour_pressure=2.32e3,
+            inlet_pressure_pa=1.0e6,
+            outlet_pressure_pa=4.0e5,
+            vapour_pressure_pa=2.32e3,
             stage_coefficients=[90.0 * math.sqrt(3.0)] * 3,
             flow_coefficient=90.0,
         )
@@ -845,9 +845,9 @@ class TestMultistageTrim:
     def test_it_refuses_stages_that_take_more_than_the_valve_has(self) -> None:
         with pytest.raises(ValueError, match="series law"):
             hydro.stage_conditions(
-                inlet_pressure=1.0e6,
-                outlet_pressure=4.0e5,
-                vapour_pressure=2.32e3,
+                inlet_pressure_pa=1.0e6,
+                outlet_pressure_pa=4.0e5,
+                vapour_pressure_pa=2.32e3,
                 stage_coefficients=[95.0, 95.0, 95.0],
                 flow_coefficient=90.0,
             )
@@ -855,9 +855,9 @@ class TestMultistageTrim:
     def test_it_refuses_a_single_stage(self) -> None:
         with pytest.raises(ValueError, match="at least 2 values"):
             hydro.stage_conditions(
-                inlet_pressure=1.0e6,
-                outlet_pressure=4.0e5,
-                vapour_pressure=2.32e3,
+                inlet_pressure_pa=1.0e6,
+                outlet_pressure_pa=4.0e5,
+                vapour_pressure_pa=2.32e3,
                 stage_coefficients=[200.0],
                 flow_coefficient=90.0,
             )
@@ -878,9 +878,9 @@ class TestMultistageTrim:
         # Equation (28) caps with x_Fzp1,n, not with F_L^2 as Equation (2)
         # does, and the cap is the smaller of the two.
         capped = hydro.last_stage_differential(
-            inlet_pressure=6.0e5,
-            outlet_pressure=4.0e5,
-            vapour_pressure=2.32e3,
+            inlet_pressure_pa=6.0e5,
+            outlet_pressure_pa=4.0e5,
+            vapour_pressure_pa=2.32e3,
             corrected_ratio=0.25,
         )
         assert capped == pytest.approx(0.25 * (6.0e5 - 2.32e3), rel=1e-12)
@@ -888,9 +888,9 @@ class TestMultistageTrim:
 
     def test_a_last_stage_below_its_threshold_keeps_its_differential(self) -> None:
         kept = hydro.last_stage_differential(
-            inlet_pressure=6.0e5,
-            outlet_pressure=5.5e5,
-            vapour_pressure=2.32e3,
+            inlet_pressure_pa=6.0e5,
+            outlet_pressure_pa=5.5e5,
+            vapour_pressure_pa=2.32e3,
             corrected_ratio=0.25,
         )
         assert kept == pytest.approx(5.0e4, rel=1e-12)
@@ -919,28 +919,32 @@ class TestGuards:
     def test_it_refuses_a_valve_that_raises_the_pressure(self) -> None:
         with pytest.raises(ValueError, match="drops pressure"):
             hydro.differential_pressure_ratio(
-                inlet_pressure=8.0e5, outlet_pressure=1.0e6, vapour_pressure=2.32e3
+                inlet_pressure_pa=8.0e5,
+                outlet_pressure_pa=1.0e6,
+                vapour_pressure_pa=2.32e3,
             )
 
     def test_it_refuses_an_inlet_at_the_vapour_pressure(self) -> None:
         with pytest.raises(ValueError, match="vapour pressure"):
             hydro.differential_pressure_ratio(
-                inlet_pressure=1.0e6, outlet_pressure=8.0e5, vapour_pressure=1.0e6
+                inlet_pressure_pa=1.0e6,
+                outlet_pressure_pa=8.0e5,
+                vapour_pressure_pa=1.0e6,
             )
 
     def test_the_differential_refuses_the_same_two_things(self) -> None:
         with pytest.raises(ValueError, match="drops pressure"):
             hydro.cavitation_differential(
-                inlet_pressure=8.0e5,
-                outlet_pressure=1.0e6,
-                vapour_pressure=2.32e3,
+                inlet_pressure_pa=8.0e5,
+                outlet_pressure_pa=1.0e6,
+                vapour_pressure_pa=2.32e3,
                 pressure_recovery=0.92,
             )
         with pytest.raises(ValueError, match="vapour pressure"):
             hydro.cavitation_differential(
-                inlet_pressure=1.0e6,
-                outlet_pressure=8.0e5,
-                vapour_pressure=1.2e6,
+                inlet_pressure_pa=1.0e6,
+                outlet_pressure_pa=8.0e5,
+                vapour_pressure_pa=1.2e6,
                 pressure_recovery=0.92,
             )
 
@@ -991,8 +995,8 @@ class TestGuards:
                 corrected_ratio=0.2386,
                 valve_diameter=0.1,
                 seat_diameter=0.1,
-                inlet_pressure=1.0e6,
-                vapour_pressure=2.32e3,
+                inlet_pressure_pa=1.0e6,
+                vapour_pressure_pa=2.32e3,
                 form="table",
             )
 
@@ -1027,7 +1031,7 @@ class TestGuards:
     def test_it_refuses_a_power_ratio_read_as_a_percentage(self, bad: float) -> None:
         # Table 2 prints 0,25 and 0,5. Read as percentages they would add
         # 20 dB to the answer without a word.
-        stream = hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure=8.0e5)
+        stream = hydro.LiquidStream(**LIQUID, mass_flow=30.0, outlet_pressure_pa=8.0e5)
         valve = hydro.LiquidTrim(
             **{**VALVE, "power_ratio": bad}, incipient_ratio=INCIPIENT
         )
@@ -1056,9 +1060,9 @@ class TestGuards:
         # the last stage, whose pressure ratio is the number 6.3 tests.
         with pytest.warns(ValveNoiseWarning, match="series law"):
             hydro.stage_conditions(
-                inlet_pressure=1.0e6,
-                outlet_pressure=4.0e5,
-                vapour_pressure=2.32e3,
+                inlet_pressure_pa=1.0e6,
+                outlet_pressure_pa=4.0e5,
+                vapour_pressure_pa=2.32e3,
                 stage_coefficients=[900.0, 900.0, 900.0],
                 flow_coefficient=90.0,
             )
@@ -1098,9 +1102,9 @@ class TestGuards:
         # Before the guard the pair reached Equation (12) and was rejected
         # there under the name of an argument the caller never passed.
         stream = hydro.LiquidStream(
-            **{**LIQUID, "inlet_pressure": 1.0e5},
+            **{**LIQUID, "inlet_pressure_pa": 1.0e5},
             mass_flow=30.0,
-            outlet_pressure=0.6e5,
+            outlet_pressure_pa=0.6e5,
         )
         valve, pipe = _valve(0.9), _pipe()
         with pytest.raises(ValueError, match="x_Fzp1"):
@@ -1112,4 +1116,4 @@ class TestGuards:
 
     def test_the_chain_refuses_it_too(self) -> None:
         with pytest.raises(ValueError, match="not a percentage"):
-            _chain(mass_flow=30.0, outlet_pressure=8.0e5, incipient=25.0)
+            _chain(mass_flow=30.0, outlet_pressure_pa=8.0e5, incipient=25.0)

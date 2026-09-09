@@ -199,8 +199,8 @@ def test_the_aerodrome_also_answers_for_the_impedance_adjustment() -> None:
         observer,
         "departure",
         aerodrome=hot,
-        temperature=35.0,
-        pressure=at_field_kpa,
+        temperature_c=35.0,
+        atmospheric_pressure_kpa=at_field_kpa,
     )
     assert followed.level == pytest.approx(stated.level)
     # Leaving the standard atmosphere in place instead does change it, which is
@@ -210,8 +210,8 @@ def test_the_aerodrome_also_answers_for_the_impedance_adjustment() -> None:
         observer,
         "departure",
         aerodrome=hot,
-        temperature=15.0,
-        pressure=101.325,
+        temperature_c=15.0,
+        atmospheric_pressure_kpa=101.325,
     )
     assert standard_day.level != pytest.approx(followed.level)
 
@@ -223,7 +223,11 @@ def test_no_aerodrome_leaves_the_fixed_point_chain_exactly_as_it_was() -> None:
     # Spelling out the old defaults reaches the same number, so the None
     # sentinels resolve to what the signature used to name.
     spelled = _DB.event_level(
-        "747100", [3000.0, 500.0, 0.0], "departure", temperature=15.0, pressure=101.325
+        "747100",
+        [3000.0, 500.0, 0.0],
+        "departure",
+        temperature_c=15.0,
+        atmospheric_pressure_kpa=101.325,
     )
     assert flyover.level == pytest.approx(spelled.level)
 

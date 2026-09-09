@@ -534,8 +534,8 @@ def precision_background_correction(
 
 
 def meteorological_corrections(
-    temperature: float = 23.0,
-    static_pressure: float = _PS0_KPA,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = _PS0_KPA,
     *,
     air_absorption_coefficient: float | np.ndarray | None = None,
     radius: float = 1.0,
@@ -566,25 +566,25 @@ def meteorological_corrections(
     C3 requires the atmospheric attenuation coefficient :math:`\alpha(f)`
     from ISO 9613-1 (not computed here); without it :math:`C_3 = 0`.
 
-    :param temperature: Air temperature ``theta`` at the test, in degrees C.
-    :param static_pressure: Static pressure ``ps`` at the test, in kilopascals.
+    :param temperature_c: Air temperature ``theta`` at the test, in degrees C.
+    :param static_pressure_kpa: Static pressure ``ps`` at the test, in kilopascals.
     :param air_absorption_coefficient: ``a(f)`` (dB/m), scalar or per band, for
         C3; ``None`` leaves :math:`C_3 = 0`.
     :param radius: Measurement radius ``r`` (m), used only in
         :math:`A_0 = \alpha(f)\,r`.
     :return: :class:`MeteorologicalCorrection`.
     """
-    if static_pressure <= 0.0:
-        msg = "'static_pressure' must be positive (kPa)."
+    if static_pressure_kpa <= 0.0:
+        msg = "'static_pressure_kpa' must be positive (kPa)."
         raise ValueError(msg)
-    if temperature <= _ROUNDED_ABS_ZERO_C:
-        msg = "'temperature' must be above -273 degrees Celsius."
+    if temperature_c <= _ROUNDED_ABS_ZERO_C:
+        msg = "'temperature_c' must be above -273 degrees Celsius."
         raise ValueError(msg)
     if radius <= 0.0:
         msg = "'radius' must be positive."
         raise ValueError(msg)
-    theta_k = 273.0 + temperature
-    p_term = -10.0 * np.log10(static_pressure / _PS0_KPA)
+    theta_k = 273.0 + temperature_c
+    p_term = -10.0 * np.log10(static_pressure_kpa / _PS0_KPA)
     c1 = float(p_term + 5.0 * np.log10(theta_k / _THETA0_K))
     c2 = float(p_term + 15.0 * np.log10(theta_k / _THETA1_K))
     if air_absorption_coefficient is None:
@@ -742,8 +742,8 @@ def sound_power_anechoic(
     background_levels: np.ndarray,
     frequencies: np.ndarray,
     areas: np.ndarray | None = ...,
-    temperature: float = ...,
-    static_pressure: float = ...,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
     air_absorption_coefficient: float | np.ndarray | None = ...,
     sigma_omc: float = ...,
     coverage_factor: float = ...,
@@ -758,8 +758,8 @@ def sound_power_anechoic(
     radius: float,
     frequencies: np.ndarray | None = ...,
     areas: np.ndarray | None = ...,
-    temperature: float = ...,
-    static_pressure: float = ...,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
     air_absorption_coefficient: float | np.ndarray | None = ...,
     sigma_omc: float = ...,
     coverage_factor: float = ...,
@@ -774,8 +774,8 @@ def sound_power_anechoic(
     background_levels: np.ndarray | None = None,
     frequencies: np.ndarray | None = None,
     areas: np.ndarray | None = None,
-    temperature: float = 23.0,
-    static_pressure: float = _PS0_KPA,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = _PS0_KPA,
     air_absorption_coefficient: float | np.ndarray | None = None,
     sigma_omc: float = 0.0,
     coverage_factor: float = 2.0,
@@ -811,8 +811,8 @@ def sound_power_anechoic(
         K1 criterion, the A-weighted total and the per-band uncertainty.
     :param areas: ``(NM,)`` partial areas ``Si`` for the area-weighted average
         (Eq. 13); omit for the equal-area average (Eq. 12).
-    :param temperature: Air temperature ``theta`` (deg C), for C1/C2.
-    :param static_pressure: Static pressure ``ps`` (kPa), for C1/C2.
+    :param temperature_c: Air temperature ``theta`` (deg C), for C1/C2.
+    :param static_pressure_kpa: Static pressure ``ps`` (kPa), for C1/C2.
     :param air_absorption_coefficient: ``a(f)`` (dB/m) for C3, scalar or
         per band; ``None`` leaves :math:`C_3 = 0`.
     :param sigma_omc: Operating/mounting standard deviation, dB.
@@ -849,8 +849,8 @@ def sound_power_anechoic(
 
     # --- meteorological corrections C1, C2, C3 (Eq. 14) -------------------
     mc = meteorological_corrections(
-        temperature,
-        static_pressure,
+        temperature_c,
+        static_pressure_kpa,
         air_absorption_coefficient=air_absorption_coefficient,
         radius=radius,
     )

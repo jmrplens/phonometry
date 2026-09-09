@@ -95,7 +95,7 @@ class SoundSpeedProfile:
 
 def sound_speed_profile(
     depths: NDArray[np.float64] | list[float],
-    temperatures: NDArray[np.float64] | list[float] | float,
+    temperatures_c: NDArray[np.float64] | list[float] | float,
     salinities: NDArray[np.float64] | list[float] | float,
     *,
     model: str = "unesco",
@@ -104,7 +104,7 @@ def sound_speed_profile(
     """Evaluate a sound-speed profile over a depth column.
 
     :param depths: Depths, in metres (1-D, non-negative, increasing).
-    :param temperatures: Temperature per depth, in °C (array or a scalar
+    :param temperatures_c: Temperature per depth, in °C (array or a scalar
         broadcast to every depth).
     :param salinities: Salinity per depth, in PSU (array or scalar).
     :param model: Sound-speed equation (see :func:`sea_water_sound_speed`).
@@ -122,12 +122,12 @@ def sound_speed_profile(
     if np.any(np.diff(z) <= 0.0):
         msg = "'depths' must be strictly increasing."
         raise ValueError(msg)
-    temp = np.broadcast_to(np.asarray(temperatures, dtype=np.float64), z.shape)
+    temp = np.broadcast_to(np.asarray(temperatures_c, dtype=np.float64), z.shape)
     sal = np.broadcast_to(np.asarray(salinities, dtype=np.float64), z.shape)
     if not (np.all(np.isfinite(temp)) and np.all(np.isfinite(sal))):
-        msg = "'temperatures' and 'salinities' must be finite."
+        msg = "'temperatures_c' and 'salinities' must be finite."
         raise ValueError(msg)
-    require_above_absolute_zero_array(temp, "temperatures")
+    require_above_absolute_zero_array(temp, "temperatures_c")
     if np.any(sal < 0.0):
         msg = "'salinities' must be non-negative."
         raise ValueError(msg)

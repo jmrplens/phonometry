@@ -48,7 +48,7 @@ def _class1_fluctuation_limit(frequency: float) -> float:
 def sensitivity(
     ref_signal: SignalInput,
     target_spl: float = ...,
-    ref_pressure: float = ...,
+    reference_pressure_pa: float = ...,
     *,
     fs: int,
     validate: bool = ...,
@@ -62,7 +62,7 @@ def sensitivity(
 def sensitivity(
     ref_signal: SignalInput,
     target_spl: float = ...,
-    ref_pressure: float = ...,
+    reference_pressure_pa: float = ...,
     fs: int | None = ...,
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
@@ -74,7 +74,7 @@ def sensitivity(
 def sensitivity(
     ref_signal: SignalInput,
     target_spl: float = 94.0,
-    ref_pressure: float = 2e-5,
+    reference_pressure_pa: float = 2e-5,
     fs: int | None = None,
     validate: bool = True,
     max_fluctuation_db: float | None = None,
@@ -108,7 +108,7 @@ def sensitivity(
         what produces such a factor and folding an existing one in would
         calibrate the calibration.
     :param target_spl: The known SPL level of the calibrator (default 94 dB).
-    :param ref_pressure: Reference pressure (default 20 microPascals).
+    :param reference_pressure_pa: Reference pressure (default 20 microPascals).
     :param fs: Sample rate of the recording in Hz. Required for the
         stability validation; without it the check is skipped. A
         :class:`~phonometry.io.Signal` supplies it, so a read take gets the
@@ -161,7 +161,7 @@ def sensitivity(
         )
         _validate_reference_stability(signal_arr, fs, limit)
 
-    factor = (ref_pressure * 10 ** (target_spl / 20)) / rms_ref
+    factor = (reference_pressure_pa * 10 ** (target_spl / 20)) / rms_ref
     return float(factor)
 
 

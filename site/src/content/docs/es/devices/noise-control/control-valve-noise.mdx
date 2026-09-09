@@ -158,10 +158,10 @@ from phonometry import noise_control
 result = noise_control.valve_aerodynamic_noise(
     noise_control.GasStream(
         mass_flow=2.22,                # kg/s
-        inlet_pressure=1.0e6,          # Pa, absoluta
-        outlet_pressure=7.2e5,
+        inlet_pressure_pa=1.0e6,          # Pa, absoluta
+        outlet_pressure_pa=7.2e5,
         inlet_density=5.3,             # kg/m3
-        inlet_temperature=450.0,       # K
+        inlet_temperature_k=450.0,       # K
         specific_heat_ratio=1.22,
         molecular_mass=19.8,           # kg/kmol
     ),
@@ -288,8 +288,8 @@ from phonometry import noise_control
 
 case = dict(
     stream=noise_control.GasStream(
-        mass_flow=0.89, inlet_pressure=1.0e6, outlet_pressure=5.0e4,
-        inlet_density=5.3, inlet_temperature=450.0, specific_heat_ratio=1.22,
+        mass_flow=0.89, inlet_pressure_pa=1.0e6, outlet_pressure_pa=5.0e4,
+        inlet_density=5.3, inlet_temperature_k=450.0, specific_heat_ratio=1.22,
         molecular_mass=19.8,
     ),
     valve=noise_control.ValveTrim(
@@ -413,12 +413,12 @@ resultado dice qué rama tomó, porque un informe no tiene por qué adivinarlo.
 from phonometry import noise_control
 
 conditions = noise_control.multistage_trim_conditions(
-    inlet_pressure=7.0e6, outlet_pressure=1.4e6, inlet_density=55.3,
+    inlet_pressure_pa=7.0e6, outlet_pressure_pa=1.4e6, inlet_density=55.3,
     flow_coefficient=81.5,
     last_stage_coefficient=noise_control.last_stage_flow_coefficient(6.44e-3),
 )
 print(round(conditions.flow_coefficient))        # 315
-print(round(conditions.stagnation_pressure))     # 2102410  Pa
+print(round(conditions.stagnation_pressure_pa))     # 2102410  Pa
 print(round(conditions.stagnation_density, 1))   # 16.6     kg/m3
 print(conditions.equation)                       # 28a
 ```

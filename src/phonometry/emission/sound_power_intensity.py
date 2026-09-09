@@ -338,8 +338,8 @@ class SoundPowerIntensityResult:
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header (``client``, ``specimen`` the noise source, ``test_room``
-            the test environment, ``instrumentation``, ``temperature``,
-            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            the test environment, ``instrumentation``, ``temperature_c``,
+            ``relative_humidity_percent``, ``pressure``, ``test_date``), the footer
             identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
             and, via ``requirement``, a declared A-weighted sound-power limit
             the fiche checks the result against (lower is better).
@@ -1072,8 +1072,8 @@ class PrecisionIntensityResult:
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header (``client``, ``specimen`` the noise source, ``test_room``
-            the test environment, ``instrumentation``, ``temperature``,
-            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            the test environment, ``instrumentation``, ``temperature_c``,
+            ``relative_humidity_percent``, ``pressure``, ``test_date``), the footer
             identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
             and, via ``requirement``, a declared A-weighted sound-power limit
             the fiche checks the result against (lower is better).
@@ -1400,8 +1400,8 @@ def sound_power_intensity_precision(
     areas: np.ndarray,
     *,
     frequencies: np.ndarray | None = None,
-    temperature: float = 23.0,
-    barometric_pressure: float = 101325.0,
+    temperature_c: float = 23.0,
+    barometric_pressure_pa: float = 101325.0,
 ) -> PrecisionIntensityResult:
     r"""Sound power by intensity scanning, precision (ISO 9614-3:2002).
 
@@ -1422,8 +1422,8 @@ def sound_power_intensity_precision(
     :param partial_intensity: ``(N, NB)`` signed normal intensity, W/m^2.
     :param areas: ``(N,)`` partial surface areas ``Si``, m^2.
     :param frequencies: ``(NB,)`` nominal mid-band frequencies (Hz), for LWA.
-    :param temperature: Air temperature ``theta`` (deg C), for LW0 (Eq. 10).
-    :param barometric_pressure: Barometric pressure ``B`` (Pa), for LW0.
+    :param temperature_c: Air temperature ``theta`` (deg C), for LW0 (Eq. 10).
+    :param barometric_pressure_pa: Barometric pressure ``B`` (Pa), for LW0.
     :return: :class:`PrecisionIntensityResult`.
     """
     raw_intensity = np.asarray(partial_intensity, dtype=np.float64)
@@ -1454,9 +1454,9 @@ def sound_power_intensity_precision(
     if np.any(seg <= 0.0):
         msg = "All 'areas' must be positive."
         raise ValueError(msg)
-    require_above_absolute_zero(float(temperature), "temperature")
-    if barometric_pressure <= 0.0:
-        msg = "'barometric_pressure' must be positive (Pa)."
+    require_above_absolute_zero(float(temperature_c), "temperature_c")
+    if barometric_pressure_pa <= 0.0:
+        msg = "'barometric_pressure_pa' must be positive (Pa)."
         raise ValueError(msg)
     n_bands = intensity.shape[1]
     if frequencies is not None and np.asarray(frequencies).shape != (n_bands,):
@@ -1475,7 +1475,7 @@ def sound_power_intensity_precision(
 
     # Eq. 10: meteorological normalization to 23 deg C / 101 325 Pa.
     norm = 15.0 * np.log10(
-        (barometric_pressure / 101325.0) * (296.15 / (273.15 + temperature))
+        (barometric_pressure_pa / 101325.0) * (296.15 / (273.15 + temperature_c))
     )
     lw0 = lw - norm
 

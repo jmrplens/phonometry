@@ -56,16 +56,16 @@ class ReportMetadata:
         an integer (ISO 3382-1:2009 Table 1 and ISO 3382-2:2008 Clause 8
         require reporting the number of microphone positions). Printed by the
         room-acoustics fiche.
-    :ivar temperature: Air temperature during the test, in degrees Celsius (a
+    :ivar temperature_c: Air temperature during the test, in degrees Celsius (a
         single representative value; use the per-room fields below when the
         source and receiving rooms are reported separately).
-    :ivar relative_humidity: Relative humidity during the test, in %.
-    :ivar source_temperature: Source-room air temperature, in degrees Celsius.
-    :ivar source_relative_humidity: Source-room relative humidity, in %.
-    :ivar receiving_temperature: Receiving-room air temperature, in degrees
+    :ivar relative_humidity_percent: Relative humidity during the test, in %.
+    :ivar source_temperature_c: Source-room air temperature, in degrees Celsius.
+    :ivar source_relative_humidity_percent: Source-room relative humidity, in %.
+    :ivar receiving_temperature_c: Receiving-room air temperature, in degrees
         Celsius.
-    :ivar receiving_relative_humidity: Receiving-room relative humidity, in %.
-    :ivar pressure: Ambient (static) air pressure during the test, in kPa.
+    :ivar receiving_relative_humidity_percent: Receiving-room relative humidity, in %.
+    :ivar static_pressure_kpa: Ambient (static) air pressure during the test, in kPa.
     :ivar test_room: Test-room / facility identification.
     :ivar instrumentation: Identification and class of the instrumentation used
         (manufacturer, model, serial number), as free text. The occupational
@@ -137,13 +137,13 @@ class ReportMetadata:
     room_volume: float | None = None
     source_positions: int | None = None
     receiver_positions: int | None = None
-    temperature: float | None = None
-    relative_humidity: float | None = None
-    source_temperature: float | None = None
-    source_relative_humidity: float | None = None
-    receiving_temperature: float | None = None
-    receiving_relative_humidity: float | None = None
-    pressure: float | None = None
+    temperature_c: float | None = None
+    relative_humidity_percent: float | None = None
+    source_temperature_c: float | None = None
+    source_relative_humidity_percent: float | None = None
+    receiving_temperature_c: float | None = None
+    receiving_relative_humidity_percent: float | None = None
+    static_pressure_kpa: float | None = None
     tube_diameter: float | None = None
     mic_spacing: float | None = None
     thickness: float | None = None
@@ -170,7 +170,7 @@ class ReportMetadata:
         "source_volume",
         "receiving_volume",
         "room_volume",
-        "pressure",
+        "static_pressure_kpa",
         "tube_diameter",
         "mic_spacing",
         "thickness",
@@ -187,16 +187,16 @@ class ReportMetadata:
     #: legitimately negative, so only its finiteness is checked here; each
     #: rating's ``report`` gives it a physical meaning and pass direction).
     _FINITE_FIELDS = (
-        "temperature",
-        "source_temperature",
-        "receiving_temperature",
+        "temperature_c",
+        "source_temperature_c",
+        "receiving_temperature_c",
         "requirement",
     )
     #: Relative-humidity fields: finite and within 0..100 %.
     _HUMIDITY_FIELDS = (
-        "relative_humidity",
-        "source_relative_humidity",
-        "receiving_relative_humidity",
+        "relative_humidity_percent",
+        "source_relative_humidity_percent",
+        "receiving_relative_humidity_percent",
     )
     #: Upper bound of the relative-humidity percentage scale (saturation).
     _MAX_RELATIVE_HUMIDITY_PERCENT = 100.0

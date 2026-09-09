@@ -77,8 +77,8 @@ def _result() -> ReverberationSoundPowerResult:
         volume=_VOLUME,
         surface_area=_SURFACE,
         frequencies=_FREQS,
-        temperature=_THETA,
-        static_pressure=_PS,
+        temperature_c=_THETA,
+        static_pressure_kpa=_PS,
     )
 
 
@@ -205,8 +205,8 @@ def test_comparison_method_reports_eq21(tmp_path: Path) -> None:
         lp_rss,
         lw_rss,
         frequencies=_FREQS,
-        temperature=_THETA,
-        static_pressure=_PS,
+        temperature_c=_THETA,
+        static_pressure_kpa=_PS,
     )
     out = tmp_path / "comparison.pdf"
     res.report(str(out))

@@ -904,9 +904,9 @@ def modal_filter_cut_on(
 
 
 def normal_air_density(
-    static_gauge_pressure: float,
-    ambient_pressure: float,
-    temperature_celsius: float,
+    static_gauge_pressure_pa: float,
+    ambient_pressure_pa: float,
+    temperature_c: float,
 ) -> float:
     r"""ISO 7235 Equations (10), (21) and (22): the density where it matters.
 
@@ -936,27 +936,27 @@ def normal_air_density(
     :data:`ISO7235_ABSOLUTE_ZERO_OFFSET` and :data:`ISO7235_GAS_CONSTANT`
     carry them as printed.
 
-    :param static_gauge_pressure: :math:`p_{s1}`, the duct static pressure
+    :param static_gauge_pressure_pa: :math:`p_{s1}`, the duct static pressure
         relative to the ambient, in Pa.
-    :param ambient_pressure: :math:`p_a`, the absolute ambient pressure, in
+    :param ambient_pressure_pa: :math:`p_a`, the absolute ambient pressure, in
         Pa.
-    :param temperature_celsius: :math:`\theta_1`, in °C.
+    :param temperature_c: :math:`\theta_1`, in °C.
     :return: :math:`\rho_{1n}`, in kg/m³.
     :raises ValueError: If the ambient pressure is not positive and finite,
         if the gauge pressure is not finite, if the absolute pressure they
         make is not positive, or if the temperature is at or below the
         printed absolute zero.
     """
-    ambient = require_positive(ambient_pressure, "ambient_pressure")
-    gauge = _require_finite_scalar(static_gauge_pressure, "static_gauge_pressure")
-    celsius = _require_finite_scalar(temperature_celsius, "temperature_celsius")
+    ambient = require_positive(ambient_pressure_pa, "ambient_pressure_pa")
+    gauge = _require_finite_scalar(static_gauge_pressure_pa, "static_gauge_pressure_pa")
+    celsius = _require_finite_scalar(temperature_c, "temperature_c")
     absolute = gauge + ambient
     if absolute <= 0.0:
         msg = (
-            "'static_gauge_pressure' is measured against the ambient, so the "
+            "'static_gauge_pressure_pa' is measured against the ambient, so the "
             "two add to the absolute pressure of the gas law, which has to "
-            f"be positive; got {static_gauge_pressure!r} Pa against "
-            f"{ambient_pressure!r} Pa."
+            f"be positive; got {static_gauge_pressure_pa!r} Pa against "
+            f"{ambient_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     kelvin = celsius + ISO7235_ABSOLUTE_ZERO_OFFSET
@@ -964,7 +964,7 @@ def normal_air_density(
         msg = (
             "Equation (10) divides by the absolute temperature, which "
             f"ISO 7235 writes as theta + {ISO7235_ABSOLUTE_ZERO_OFFSET:.0f} "
-            f"degrees Celsius; got {temperature_celsius!r} °C."
+            f"degrees Celsius; got {temperature_c!r} °C."
         )
         raise ValueError(msg)
     return float(absolute / (ISO7235_GAS_CONSTANT * kelvin))
@@ -1024,7 +1024,7 @@ def dynamic_pressure(volume_flow: float, area: float, density: float) -> float:
 
 
 def total_pressure(
-    static_pressure: float, volume_flow: float, area: float, density: float
+    static_pressure_pa: float, volume_flow: float, area: float, density: float
 ) -> float:
     r"""ISO 7235 Equation (11): static plus dynamic, in one plane.
 
@@ -1033,7 +1033,7 @@ def total_pressure(
        p_\mathrm{t} = p_\mathrm{s} + \frac{\rho}{2}
                       \left(\frac{q_V}{S}\right)^{2}
 
-    :param static_pressure: :math:`p_\mathrm{s}`, in Pa, in the same
+    :param static_pressure_pa: :math:`p_\mathrm{s}`, in Pa, in the same
         reference as the answer is wanted in.
     :param volume_flow: :math:`q_V`, in m³/s.
     :param area: :math:`S`, in m².
@@ -1042,13 +1042,13 @@ def total_pressure(
     :raises ValueError: If the static pressure is not finite, or if another
         value is not positive and finite.
     """
-    static = _require_finite_scalar(static_pressure, "static_pressure")
+    static = _require_finite_scalar(static_pressure_pa, "static_pressure_pa")
     return static + dynamic_pressure(volume_flow, area, density)
 
 
 def total_pressure_loss(
-    static_pressure_loss: float,
-    inlet_dynamic_pressure: float,
+    static_pressure_loss_pa: float,
+    inlet_dynamic_pressure_pa: float,
     inlet_area: float,
     outlet_area: float,
 ) -> float:
@@ -1066,8 +1066,8 @@ def total_pressure_loss(
     that correction, and the NOTE to Equation (14) says what usually happens
     to it: as a rule :math:`S_1 = S_2`, and it vanishes.
 
-    :param static_pressure_loss: :math:`\Delta p_\mathrm{s}`, in Pa.
-    :param inlet_dynamic_pressure: :math:`p_\mathrm{d1}` from
+    :param static_pressure_loss_pa: :math:`\Delta p_\mathrm{s}`, in Pa.
+    :param inlet_dynamic_pressure_pa: :math:`p_\mathrm{d1}` from
         :func:`dynamic_pressure` at the inlet, in Pa.
     :param inlet_area: :math:`S_1`, the inlet test duct, in m².
     :param outlet_area: :math:`S_2`, the outlet test duct, in m².
@@ -1075,15 +1075,15 @@ def total_pressure_loss(
     :raises ValueError: If the static loss is not finite, or if another value
         is not positive and finite.
     """
-    static = _require_finite_scalar(static_pressure_loss, "static_pressure_loss")
-    head = require_positive(inlet_dynamic_pressure, "inlet_dynamic_pressure")
+    static = _require_finite_scalar(static_pressure_loss_pa, "static_pressure_loss_pa")
+    head = require_positive(inlet_dynamic_pressure_pa, "inlet_dynamic_pressure_pa")
     first = require_positive(inlet_area, "inlet_area")
     second = require_positive(outlet_area, "outlet_area")
     return float(static + head * (1.0 - (first / second) ** 2))
 
 
 def pressure_loss_coefficient(
-    total_loss: float, inlet_dynamic_pressure: float
+    total_loss: float, inlet_dynamic_pressure_pa: float
 ) -> float:
     r"""ISO 7235 Equations (14) and (17): the loss in velocity heads.
 
@@ -1100,7 +1100,7 @@ def pressure_loss_coefficient(
 
     :param total_loss: :math:`\Delta p_\mathrm{t}` or
         :math:`\Delta p_{tot,n}`, in Pa.
-    :param inlet_dynamic_pressure: :math:`p_\mathrm{d1}` or
+    :param inlet_dynamic_pressure_pa: :math:`p_\mathrm{d1}` or
         :math:`p_\mathrm{dn}`, in Pa.
     :return: :math:`\zeta`, dimensionless.
     :raises ValueError: If the loss is not finite, or if the dynamic pressure
@@ -1111,7 +1111,7 @@ def pressure_loss_coefficient(
         is one the series may not be built from and warns like any below it.
     """
     loss = _require_finite_scalar(total_loss, "total_loss")
-    head = require_positive(inlet_dynamic_pressure, "inlet_dynamic_pressure")
+    head = require_positive(inlet_dynamic_pressure_pa, "inlet_dynamic_pressure_pa")
     if abs(loss) <= MINIMUM_PRESSURE_DIFFERENCE_PA:
         msg = (
             "6.5.2.1 wants the lowest airflow rate of a series to produce a "
@@ -1124,10 +1124,10 @@ def pressure_loss_coefficient(
 
 
 def average_pressure_loss_coefficient(
-    object_static_pressure: ArrayLike,
-    object_dynamic_pressure: ArrayLike,
-    substitution_static_pressure: ArrayLike,
-    substitution_dynamic_pressure: ArrayLike,
+    object_static_pressure_pa: ArrayLike,
+    object_dynamic_pressure_pa: ArrayLike,
+    substitution_static_pressure_pa: ArrayLike,
+    substitution_dynamic_pressure_pa: ArrayLike,
 ) -> float:
     r"""ISO 7235 Equation (18): the substitution method, averaged.
 
@@ -1149,13 +1149,13 @@ def average_pressure_loss_coefficient(
     and the lowest has to produce more than
     :data:`MINIMUM_PRESSURE_DIFFERENCE_PA`.
 
-    :param object_static_pressure: :math:`p_{s1(\mathrm{I})i}`, the upstream
+    :param object_static_pressure_pa: :math:`p_{s1(\mathrm{I})i}`, the upstream
         static pressures of the series with the test object, in Pa.
-    :param object_dynamic_pressure: :math:`p_{\mathrm{d}i}` of that series,
+    :param object_dynamic_pressure_pa: :math:`p_{\mathrm{d}i}` of that series,
         in Pa, from :func:`dynamic_pressure`.
-    :param substitution_static_pressure: :math:`p_{s1(\mathrm{II})k}` of the
+    :param substitution_static_pressure_pa: :math:`p_{s1(\mathrm{II})k}` of the
         series with the substitution duct, in Pa.
-    :param substitution_dynamic_pressure: :math:`p_{\mathrm{d}k}` of that
+    :param substitution_dynamic_pressure_pa: :math:`p_{\mathrm{d}k}` of that
         series, in Pa.
     :return: :math:`\zeta`, dimensionless.
     :raises ValueError: If a value is not finite, if a dynamic pressure is
@@ -1163,26 +1163,26 @@ def average_pressure_loss_coefficient(
     :warns SilencerMeasurementWarning: If either series has fewer points than
         the five 6.5.2.2.1 asks for.
     """
-    first = require_finite_array(object_static_pressure, "object_static_pressure")
+    first = require_finite_array(object_static_pressure_pa, "object_static_pressure_pa")
     first_head = require_positive_array(
-        object_dynamic_pressure, "object_dynamic_pressure"
+        object_dynamic_pressure_pa, "object_dynamic_pressure_pa"
     )
     second = require_finite_array(
-        substitution_static_pressure, "substitution_static_pressure"
+        substitution_static_pressure_pa, "substitution_static_pressure_pa"
     )
     second_head = require_positive_array(
-        substitution_dynamic_pressure, "substitution_dynamic_pressure"
+        substitution_dynamic_pressure_pa, "substitution_dynamic_pressure_pa"
     )
     _require_matching_bands(
         {
-            "object_static_pressure": first.size,
-            "object_dynamic_pressure": first_head.size,
+            "object_static_pressure_pa": first.size,
+            "object_dynamic_pressure_pa": first_head.size,
         }
     )
     _require_matching_bands(
         {
-            "substitution_static_pressure": second.size,
-            "substitution_dynamic_pressure": second_head.size,
+            "substitution_static_pressure_pa": second.size,
+            "substitution_dynamic_pressure_pa": second_head.size,
         }
     )
     for name, size in (("test object", first.size), ("substitution duct", second.size)):

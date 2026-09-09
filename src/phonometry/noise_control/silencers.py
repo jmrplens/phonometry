@@ -675,8 +675,8 @@ class ReactiveSilencerResult:
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header (``client``, ``specimen`` the device, ``test_room`` the
-            test environment, ``instrumentation``, ``temperature``,
-            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            test environment, ``instrumentation``, ``temperature_c``,
+            ``relative_humidity_percent``, ``pressure``, ``test_date``), the footer
             identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
             and, via ``requirement``, a declared minimum mean transmission loss
             (more transmission loss is better).

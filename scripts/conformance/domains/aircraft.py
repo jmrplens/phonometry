@@ -607,7 +607,7 @@ def _chk_arp5534_coefficient() -> Outcome:
         ph.environment.air_attenuation(1000.0, 25.0, 70.0, 101.325, exact_midband=True)
     )
     res = ph.aircraft.sae_band_attenuation(
-        [1000.0], 1000.0, temperature=25.0, relative_humidity=70.0
+        [1000.0], 1000.0, temperature_c=25.0, relative_humidity_percent=70.0
     )
     return numeric(expected, float(res.coefficient[0]), 1e-9, unit="dB/m", places=6)
 

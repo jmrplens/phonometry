@@ -421,8 +421,8 @@ class SoundPowerResult:
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header (``client``, ``specimen`` the noise source, ``test_room``
-            the test environment, ``instrumentation``, ``temperature``,
-            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            the test environment, ``instrumentation``, ``temperature_c``,
+            ``relative_humidity_percent``, ``pressure``, ``test_date``), the footer
             identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
             and, via ``requirement``, a declared A-weighted sound-power limit
             the fiche checks the result against (lower is better).
@@ -1081,16 +1081,16 @@ class ReferenceAtmosphereCorrection:
     ``c1`` is the reference-quantity correction and ``c2`` the
     radiation-impedance correction of ISO 3744:2010 Annex G, both in
     decibels; ``total`` is their sum, the whole of what Eq. (G.1) adds to
-    :math:`L_W` and Eq. (G.3) to :math:`L_J`. ``static_pressure`` is the
+    :math:`L_W` and Eq. (G.3) to :math:`L_J`. ``static_pressure_kpa`` is the
     :math:`p_\mathrm{s}` the corrections were evaluated at, in kilopascals,
     whether it was measured or estimated from the altitude by Eq. (G.2), and
-    ``temperature`` the air temperature :math:`\theta`, in degrees Celsius.
+    ``temperature_c`` the air temperature :math:`\theta`, in degrees Celsius.
     """
 
     c1: float
     c2: float
-    static_pressure: float
-    temperature: float
+    static_pressure_kpa: float
+    temperature_c: float
 
     @property
     def total(self) -> float:
@@ -1269,8 +1269,8 @@ def _static_pressure_at_altitude(altitude: float) -> float:
 
 
 def reference_atmosphere_correction(
-    temperature: float,
-    static_pressure: float | None = None,
+    temperature_c: float,
+    static_pressure_kpa: float | None = None,
     *,
     altitude: float | None = None,
 ) -> ReferenceAtmosphereCorrection:
@@ -1301,39 +1301,42 @@ def reference_atmosphere_correction(
     :math:`p_\mathrm{s} = p_{\mathrm{s},0}(1 - aH_\mathrm{a})^b`, with
     :math:`a = 2.2560 \times 10^{-5}` m^-1 and :math:`b = 5.2553`.
 
-    :param temperature: Air temperature ``theta`` at the test, in degrees C.
-    :param static_pressure: Static pressure ``ps`` at the test, in
+    :param temperature_c: Air temperature ``theta`` at the test, in degrees C.
+    :param static_pressure_kpa: Static pressure ``ps`` at the test, in
         kilopascals; give this or ``altitude``.
     :param altitude: Altitude ``Ha`` of the test site, in metres, from which
         ``ps`` is estimated by Eq. (G.2) when it was not measured.
     :return: :class:`ReferenceAtmosphereCorrection` with ``c1``, ``c2``, their
         ``total`` and the static pressure used.
-    :raises ValueError: if neither or both of ``static_pressure`` and
-        ``altitude`` are given, or either is out of range, or ``temperature``
+    :raises ValueError: if neither or both of ``static_pressure_kpa`` and
+        ``altitude`` are given, or either is out of range, or ``temperature_c``
         is not above absolute zero.
     """
-    if not math.isfinite(temperature) or temperature <= -_KELVIN_OFFSET:
-        msg = f"'temperature' must be finite and above {-_KELVIN_OFFSET} degrees C."
+    if not math.isfinite(temperature_c) or temperature_c <= -_KELVIN_OFFSET:
+        msg = f"'temperature_c' must be finite and above {-_KELVIN_OFFSET} degrees C."
         raise ValueError(msg)
-    if static_pressure is not None and altitude is not None:
+    if static_pressure_kpa is not None and altitude is not None:
         msg = (
-            "Give either 'static_pressure' (kPa, measured) or 'altitude' (m, for "
+            "Give either 'static_pressure_kpa' (kPa, measured) or 'altitude' (m, for "
             "Eq. G.2), not both."
         )
         raise ValueError(msg)
     if altitude is not None:
         ps = _static_pressure_at_altitude(float(altitude))
-    elif static_pressure is not None:
-        ps = require_positive(static_pressure, "static_pressure")
+    elif static_pressure_kpa is not None:
+        ps = require_positive(static_pressure_kpa, "static_pressure_kpa")
     else:
-        msg = "Give one of 'static_pressure' (kPa) or 'altitude' (m)."
+        msg = "Give one of 'static_pressure_kpa' (kPa) or 'altitude' (m)."
         raise ValueError(msg)
     p_term = -10.0 * math.log10(ps / _PS0_KPA)
-    theta_k = _KELVIN_OFFSET + temperature
+    theta_k = _KELVIN_OFFSET + temperature_c
     c1 = p_term + 5.0 * math.log10(theta_k / _THETA0_K)
     c2 = p_term + 15.0 * math.log10(theta_k / _THETA1_K)
     return ReferenceAtmosphereCorrection(
-        c1=float(c1), c2=float(c2), static_pressure=ps, temperature=float(temperature)
+        c1=float(c1),
+        c2=float(c2),
+        static_pressure_kpa=ps,
+        temperature_c=float(temperature_c),
     )
 
 

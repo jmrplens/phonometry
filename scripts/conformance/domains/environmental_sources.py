@@ -66,7 +66,7 @@ def _chk_cnossos_road_workbook() -> Outcome:
         result = ph.environment.road_source_power(
             traffic,
             surface=surfaces[case["surface"]],
-            temperature=float(case["temperature_c"]),
+            temperature_c=float(case["temperature_c"]),
             gradient=float(case["gradient_pct"]),
             studded_months=float(case["studded_months"]),
             junction_distance=float(case["junction_distance_m"]),

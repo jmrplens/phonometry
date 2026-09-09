@@ -174,7 +174,7 @@ frequencies are shown to 0,1 Hz.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mass_per_area` (the total mass per unit area `m't`), `thickness` (the loaded specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature`, `relative_humidity`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (EN 29052-1 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche. The applicable descriptive fields are `client`, `manufacturer`, `specimen`, `mass_per_area` (the total mass per unit area `m't`), `thickness` (the loaded specimen thickness `d`, in metres, shown in millimetres), `test_room`, `test_date`, `temperature_c`, `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (EN 29052-1 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | Accepted for a uniform `.report()` signature; the dynamic-stiffness fiche has a single body layout, so it has no effect. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
@@ -199,7 +199,7 @@ enclosed_gas_stiffness(
     thickness: ArrayLike,
     porosity: float,
     *,
-    atmospheric_pressure: float = 100000.0,
+    atmospheric_pressure_pa: float = 100000.0,
 ) -> np.ndarray | float
 ```
 
@@ -214,7 +214,7 @@ with the material's structure: $s'_\mathrm{a} = p_0 / (d\,\epsilon)$.
 | :--- | :--- |
 | `thickness` | Thickness `d` of the specimen under the static load, in **metres** (scalar or array). |
 | `porosity` | Porosity `epsilon` of the specimen (0-1). |
-| `atmospheric_pressure` | Atmospheric pressure `p0`, in pascals (default `STANDARD_ATMOSPHERIC_PRESSURE`, the standard's 0,1 MPa). |
+| `atmospheric_pressure_pa` | Atmospheric pressure `p0`, in pascals (default `STANDARD_ATMOSPHERIC_PRESSURE`, the standard's 0,1 MPa). |
 
 **Returns:** The enclosed-gas dynamic stiffness per unit area `s'a`, in N/m3.
 
@@ -235,7 +235,7 @@ floating_floor_resonance(
     airflow_resistivity: float = inf,
     thickness: float | None = None,
     porosity: float | None = None,
-    atmospheric_pressure: float = 100000.0,
+    atmospheric_pressure_pa: float = 100000.0,
 ) -> DynamicStiffnessResult
 ```
 
@@ -256,7 +256,7 @@ frequency (Formula 2).
 | `airflow_resistivity` | Lateral airflow resistivity `r`, in kPa.s/m2 (default `inf` -> the high-resistivity case $s' = s'_\mathrm{t}$). |
 | `thickness` | Specimen thickness `d` under load, in metres. Required together with `porosity` for the enclosed-gas term, which applies when $r < 100$ kPa.s/m2. That condition is on the *value* of `airflow_resistivity` rather than on a literal, so a signature cannot state it: it is checked here and raises. |
 | `porosity` | Specimen porosity `epsilon`, required with `thickness` (see above). |
-| `atmospheric_pressure` | Atmospheric pressure `p0`, in pascals. |
+| `atmospheric_pressure_pa` | Atmospheric pressure `p0`, in pascals. |
 
 **Returns:** The [`DynamicStiffnessResult`](/phonometry/reference/api/materials/dynamic-stiffness/#dynamicstiffnessresult).
 

@@ -100,7 +100,7 @@ convective term of Eq. 8, $C_{3,4} = 10 \lg[1/(1 - U/c)^2]$, where $c$ is
 the speed of sound in the test duct; clause 5.3.4.3 prints 340 m/s "under
 normal conditions", which is what `flow_modal_correction()` uses on its own,
 while a whole determination knows the duct air and evaluates Eq. 8 with the
-$c$ that `temperature` gives, up to 0.08 dB away over the range of
+$c$ that `temperature_c` gives, up to 0.08 dB away over the range of
 clause 1.1. The same sign convention applies, so
 it is positive on the outlet side and negative on the inlet side, a few
 tenths of a decibel at the velocities those shields are allowed (15 m/s for
@@ -189,7 +189,7 @@ c2 = np.array([0.0] * 11 + [0.2, 0.3, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5, 1.9,
 duct = emission.sound_power_in_duct(
     levels, freqs, duct_diameter=0.63, flow_velocity=12.0,
     shield="sampling-tube", microphone_correction=c1, shield_correction=c2,
-    temperature=20.0, static_pressure=101.325,
+    temperature_c=20.0, static_pressure_kpa=101.325,
 )
 print(round(float(duct.mean_pressure_level[5]), 1))       # 87.9 dB at 160 Hz
 print(round(float(duct.flow_modal_correction[13]), 2))    # C3,4 = 2.31 dB at 1 kHz
@@ -297,8 +297,8 @@ print(round(cone.sound_power_level_a, 1))                 # 86.6 dB(A)
 | `shield` | str | | `'sampling-tube'` (default), `'nose-cone'`, `'foam-ball'` | Selects Eq. 7 with Annex A or Eq. 8, and the velocity limit |
 | `microphone_correction` | float or 1D array | dB | default `0.0` | $C_1$ from the manufacturer's data |
 | `shield_correction` | float or 1D array | dB | default `0.0` | $C_2$ measured per 5.3.3.2 c) or 5.3.4.2 |
-| `temperature` | float | °C | −50 to 70, default `20.0` | Duct air; sets $c$ and $\rho$, and with them the $c$ of Eq. 8 for the omni-directional shields |
-| `static_pressure` | float | kPa | default `101.325` | Duct air; sets $\rho$ |
+| `temperature_c` | float | °C | −50 to 70, default `20.0` | Duct air; sets $c$ and $\rho$, and with them the $c$ of Eq. 8 for the omni-directional shields |
+| `static_pressure_kpa` | float | kPa | default `101.325` | Duct air; sets $\rho$ |
 
 The function returns an `InDuctSoundPowerResult` with the band $L_W$
 (`sound_power_level`), the A-weighted total of Annex C

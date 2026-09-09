@@ -34,9 +34,9 @@ STROUHAL = 0.2
 #: The shared given data of A.2, in SI units: the gas is the same in every
 #: column, and so is everything about the valve except its capacity.
 STREAM: dict[str, Any] = {
-    "inlet_pressure": 1.0e6,
+    "inlet_pressure_pa": 1.0e6,
     "inlet_density": 5.3,
-    "inlet_temperature": 450.0,
+    "inlet_temperature_k": 450.0,
     "specific_heat_ratio": 1.22,
     "molecular_mass": 19.8,
 }
@@ -52,7 +52,7 @@ EXAMPLES = [
     {
         "example": 1,
         "mass_flow": 2.22,
-        "outlet_pressure": 7.2e5,
+        "outlet_pressure_pa": 7.2e5,
         "flow_coefficient": 90.0,
         "valve_outlet_diameter": 0.1,
         "internal_diameter": 0.2031,
@@ -61,7 +61,7 @@ EXAMPLES = [
     {
         "example": 2,
         "mass_flow": 2.29,
-        "outlet_pressure": 6.9e5,
+        "outlet_pressure_pa": 6.9e5,
         "flow_coefficient": 90.0,
         "valve_outlet_diameter": 0.1,
         "internal_diameter": 0.2031,
@@ -70,7 +70,7 @@ EXAMPLES = [
     {
         "example": 3,
         "mass_flow": 2.59,
-        "outlet_pressure": 4.8e5,
+        "outlet_pressure_pa": 4.8e5,
         "flow_coefficient": 90.0,
         "valve_outlet_diameter": 0.1,
         "internal_diameter": 0.2031,
@@ -79,7 +79,7 @@ EXAMPLES = [
     {
         "example": 4,
         "mass_flow": 1.18,
-        "outlet_pressure": 4.2e5,
+        "outlet_pressure_pa": 4.2e5,
         "flow_coefficient": 40.0,
         "valve_outlet_diameter": 0.2031,
         "internal_diameter": 0.2031,
@@ -88,7 +88,7 @@ EXAMPLES = [
     {
         "example": 5,
         "mass_flow": 1.19,
-        "outlet_pressure": 5.0e4,
+        "outlet_pressure_pa": 5.0e4,
         "flow_coefficient": 40.0,
         "valve_outlet_diameter": 0.2031,
         "internal_diameter": 0.2031,
@@ -97,7 +97,7 @@ EXAMPLES = [
     {
         "example": 6,
         "mass_flow": 0.89,
-        "outlet_pressure": 5.0e4,
+        "outlet_pressure_pa": 5.0e4,
         "flow_coefficient": 30.0,
         "valve_outlet_diameter": 0.1,
         "internal_diameter": 0.15,
@@ -116,7 +116,7 @@ def _stream(case: dict[str, Any]) -> valves.GasStream:
     return valves.GasStream(
         **STREAM,
         mass_flow=case["mass_flow"],
-        outlet_pressure=case["outlet_pressure"],
+        outlet_pressure_pa=case["outlet_pressure_pa"],
     )
 
 
@@ -273,7 +273,9 @@ class TestPrintedExamples:
     ) -> None:
         # Examples 5 and 6 print it negative: Equation (2) is being read far
         # past the choking point, where it has stopped meaning a pressure.
-        assert _run(index).vena_contracta_pressure == pytest.approx(expected, abs=2.0)
+        assert _run(index).vena_contracta_pressure_pa == pytest.approx(
+            expected, abs=2.0
+        )
 
     @pytest.mark.parametrize(
         ("index", "expected"),
@@ -382,7 +384,7 @@ class TestPipeTransmission:
     def test_the_transmission_loss_matches_every_printed_band(self) -> None:
         bands = np.asarray(
             valves.valve_aerodynamic_noise(
-                valves.GasStream(**STREAM, mass_flow=2.22, outlet_pressure=7.2e5),
+                valves.GasStream(**STREAM, mass_flow=2.22, outlet_pressure_pa=7.2e5),
                 valves.ValveTrim(
                     **VALVE,
                     flow_coefficient=90.0,
@@ -483,7 +485,7 @@ class TestWholeChain:
 
     def test_the_pipe_wall_is_what_the_level_outside_depends_on(self) -> None:
         thin = valves.valve_aerodynamic_noise(
-            valves.GasStream(**STREAM, mass_flow=2.22, outlet_pressure=7.2e5),
+            valves.GasStream(**STREAM, mass_flow=2.22, outlet_pressure_pa=7.2e5),
             valves.ValveTrim(
                 **VALVE,
                 flow_coefficient=90.0,
@@ -503,7 +505,7 @@ class TestWholeChain:
         )
 
     def test_it_refuses_a_valve_that_does_not_drop_pressure(self) -> None:
-        stream = valves.GasStream(**STREAM, mass_flow=2.22, outlet_pressure=1.2e6)
+        stream = valves.GasStream(**STREAM, mass_flow=2.22, outlet_pressure_pa=1.2e6)
         trim = valves.ValveTrim(
             **VALVE,
             flow_coefficient=90.0,
@@ -686,10 +688,10 @@ class TestPrintedTables:
 #: Annex A.3's example 7: a multipath, multistage cage in a DN 200 line.
 EXAMPLE_7 = {
     "mass_flow": 23.1,
-    "inlet_pressure": 7.0e6,
-    "outlet_pressure": 1.4e6,
+    "inlet_pressure_pa": 7.0e6,
+    "outlet_pressure_pa": 1.4e6,
     "inlet_density": 55.3,
-    "inlet_temperature": 290.0,
+    "inlet_temperature_k": 290.0,
     "specific_heat_ratio": 1.31,
     "molecular_mass": 19.0,
     "flow_coefficient": 81.5,
@@ -712,8 +714,8 @@ def _example_seven() -> valves.AerodynamicValveNoise:
     """Example 7, through Clause 6's substitution and then Clause 5."""
     case = EXAMPLE_7
     conditions = valves.multistage_trim_conditions(
-        inlet_pressure=case["inlet_pressure"],
-        outlet_pressure=case["outlet_pressure"],
+        inlet_pressure_pa=case["inlet_pressure_pa"],
+        outlet_pressure_pa=case["outlet_pressure_pa"],
         inlet_density=case["inlet_density"],
         flow_coefficient=case["flow_coefficient"],
         last_stage_coefficient=valves.last_stage_flow_coefficient(
@@ -727,10 +729,10 @@ def _example_seven() -> valves.AerodynamicValveNoise:
     return valves.valve_aerodynamic_noise(
         valves.GasStream(
             mass_flow=case["mass_flow"],
-            inlet_pressure=conditions.stagnation_pressure,
-            outlet_pressure=case["outlet_pressure"],
+            inlet_pressure_pa=conditions.stagnation_pressure_pa,
+            outlet_pressure_pa=case["outlet_pressure_pa"],
             inlet_density=conditions.stagnation_density,
-            inlet_temperature=case["inlet_temperature"],
+            inlet_temperature_k=case["inlet_temperature_k"],
             specific_heat_ratio=case["specific_heat_ratio"],
             molecular_mass=case["molecular_mass"],
         ),
@@ -774,20 +776,20 @@ class TestMultistageTrim:
         # NOTE 3: p_1/p_2 is 5, so (28a) is tried first, and its answer is
         # 1,5 times p_2, which is below the 2 that would send it to (28b).
         found = valves.multistage_trim_conditions(
-            inlet_pressure=7.0e6,
-            outlet_pressure=1.4e6,
+            inlet_pressure_pa=7.0e6,
+            outlet_pressure_pa=1.4e6,
             inlet_density=55.3,
             flow_coefficient=81.5,
             last_stage_coefficient=315.0,
         )
         assert found.equation == "28a"
-        assert found.stagnation_pressure == pytest.approx(2.1e6, rel=0.01)
+        assert found.stagnation_pressure_pa == pytest.approx(2.1e6, rel=0.01)
         assert found.stagnation_density == pytest.approx(16.6, abs=0.1)
 
     def test_a_trim_that_barely_throttles_takes_the_third_branch(self) -> None:
         found = valves.multistage_trim_conditions(
-            inlet_pressure=1.5e6,
-            outlet_pressure=1.0e6,
+            inlet_pressure_pa=1.5e6,
+            outlet_pressure_pa=1.0e6,
             inlet_density=10.0,
             flow_coefficient=80.0,
             last_stage_coefficient=300.0,
@@ -800,20 +802,22 @@ class TestMultistageTrim:
         # With C_n close to C the first branch overshoots 2 p_2 and NOTE 3
         # falls through to (28b).
         found = valves.multistage_trim_conditions(
-            inlet_pressure=7.0e6,
-            outlet_pressure=1.4e6,
+            inlet_pressure_pa=7.0e6,
+            outlet_pressure_pa=1.4e6,
             inlet_density=55.3,
             flow_coefficient=81.5,
             last_stage_coefficient=90.0,
         )
         assert found.equation == "28b"
-        assert found.stagnation_pressure == pytest.approx(7.0e6 * 81.5 / 90.0, rel=1e-9)
+        assert found.stagnation_pressure_pa == pytest.approx(
+            7.0e6 * 81.5 / 90.0, rel=1e-9
+        )
 
     def test_it_refuses_a_trim_that_does_not_drop_pressure(self) -> None:
         with pytest.raises(ValueError, match="drops pressure"):
             valves.multistage_trim_conditions(
-                inlet_pressure=1.0e6,
-                outlet_pressure=1.2e6,
+                inlet_pressure_pa=1.0e6,
+                outlet_pressure_pa=1.2e6,
                 inlet_density=10.0,
                 flow_coefficient=80.0,
                 last_stage_coefficient=300.0,
@@ -823,7 +827,7 @@ class TestMultistageTrim:
         ("name", "expected"),
         [
             ("pressure_ratio", 0.334),
-            ("vena_contracta_pressure", 1371038.0),
+            ("vena_contracta_pressure_pa", 1371038.0),
             ("sound_power", 10.3),
             ("internal_level", 156.9),
             ("peak_frequency", 14381.0),

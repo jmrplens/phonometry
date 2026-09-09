@@ -35,7 +35,9 @@ def _sae_oracle(delta_t: float) -> float:
 
 def test_coefficient_is_iso9613_at_exact_midband() -> None:
     f = np.array([50.0, 500.0, 1000.0, 8000.0])
-    res = sae_band_attenuation(f, 500.0, temperature=15.0, relative_humidity=60.0)
+    res = sae_band_attenuation(
+        f, 500.0, temperature_c=15.0, relative_humidity_percent=60.0
+    )
     assert isinstance(res, AircraftBandAttenuation)
     expected = air_attenuation(f, 15.0, 60.0, 101.325, exact_midband=True)
     assert np.allclose(res.coefficient, expected)
@@ -44,7 +46,9 @@ def test_coefficient_is_iso9613_at_exact_midband() -> None:
 
 def test_band_attenuation_matches_regression_oracle() -> None:
     f = np.array([100.0, 1000.0, 4000.0, 8000.0])
-    res = sae_band_attenuation(f, 2000.0, temperature=25.0, relative_humidity=70.0)
+    res = sae_band_attenuation(
+        f, 2000.0, temperature_c=25.0, relative_humidity_percent=70.0
+    )
     for i in range(f.size):
         assert res.band_attenuation[i] == pytest.approx(
             _sae_oracle(float(res.midband_attenuation[i])), abs=1e-9
@@ -61,7 +65,9 @@ def test_piecewise_continuity_at_150_db() -> None:
 
 def test_small_absorption_band_close_to_pure_tone() -> None:
     # For small δ_t the band attenuation is within a few percent of pure-tone.
-    res = sae_band_attenuation([200.0], 100.0, temperature=25.0, relative_humidity=70.0)
+    res = sae_band_attenuation(
+        [200.0], 100.0, temperature_c=25.0, relative_humidity_percent=70.0
+    )
     ratio = float(res.band_attenuation[0] / res.midband_attenuation[0])
     assert 1.0 <= ratio < 1.05
 
@@ -74,10 +80,10 @@ def test_zero_path_length_gives_zero() -> None:
 
 def test_attenuation_increases_with_frequency_and_distance() -> None:
     near = sae_band_attenuation(
-        [2000.0], 500.0, temperature=25.0, relative_humidity=70.0
+        [2000.0], 500.0, temperature_c=25.0, relative_humidity_percent=70.0
     )
     far = sae_band_attenuation(
-        [2000.0], 5000.0, temperature=25.0, relative_humidity=70.0
+        [2000.0], 5000.0, temperature_c=25.0, relative_humidity_percent=70.0
     )
     assert far.band_attenuation[0] > near.band_attenuation[0]
     spec = sae_band_attenuation([500.0, 8000.0], 2000.0)
@@ -92,7 +98,10 @@ def test_large_attenuation_no_nan_or_warning() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", RuntimeWarning)
         res = sae_band_attenuation(
-            [8000.0, 10000.0], 50_000.0, temperature=25.0, relative_humidity=70.0
+            [8000.0, 10000.0],
+            50_000.0,
+            temperature_c=25.0,
+            relative_humidity_percent=70.0,
         )
     assert np.all(np.isfinite(res.band_attenuation))
     # Above 150 dB the linear branch applies: δ_B = 9.2 + 0.765·δ_t.

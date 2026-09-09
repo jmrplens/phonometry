@@ -73,7 +73,7 @@ def test_quantity_chain_round_trip() -> None:
 
     # R_s via both routes: R*A and dp/u must agree (Pa*s/m).
     r_s_from_r = specific_airflow_resistance(resistance, area)
-    r_s_from_dp = specific_airflow_resistance(pressure_drop=dp, velocity=velocity)
+    r_s_from_dp = specific_airflow_resistance(pressure_drop_pa=dp, velocity=velocity)
     assert r_s_from_r == pytest.approx(160.0)  # 20000 * 0.008
     assert r_s_from_dp == pytest.approx(160.0)
     assert r_s_from_r == pytest.approx(r_s_from_dp)
@@ -85,7 +85,9 @@ def test_quantity_chain_round_trip() -> None:
 
 def test_specific_resistance_requires_exactly_one_route() -> None:
     with pytest.raises(ValueError, match="Provide exactly one route"):
-        specific_airflow_resistance(20000.0, 0.008, pressure_drop=20.0, velocity=0.125)
+        specific_airflow_resistance(
+            20000.0, 0.008, pressure_drop_pa=20.0, velocity=0.125
+        )
     with pytest.raises(ValueError, match="Provide exactly one route"):
         specific_airflow_resistance()
 
@@ -95,7 +97,7 @@ def test_specific_resistance_requires_exactly_one_route() -> None:
     [
         (
             lambda: airflow_resistance(-1.0, 0.001),
-            "'pressure_drop' must be non-negative",
+            "'pressure_drop_pa' must be non-negative",
         ),
         (lambda: airflow_resistance(20.0, 0.0), "'volume_flow_rate' must be positive"),
         (lambda: airflow_resistivity(160.0, 0.0), "'thickness' must be positive"),
@@ -105,7 +107,7 @@ def test_specific_resistance_requires_exactly_one_route() -> None:
             "'resistance' must be non-negative",
         ),
         (
-            lambda: specific_airflow_resistance(pressure_drop=20.0, velocity=0.0),
+            lambda: specific_airflow_resistance(pressure_drop_pa=20.0, velocity=0.0),
             "'velocity' must be positive",
         ),
     ],
@@ -141,7 +143,7 @@ def test_static_regression_recovers_zero_velocity_intercept() -> None:
     assert result.specific_resistance == pytest.approx(r_s_eval)
     assert result.resistance == pytest.approx(r_s_eval / area)
     assert result.resistivity == pytest.approx(r_s_eval / thickness)
-    assert result.pressure_drop == pytest.approx(r_s_eval * 0.5e-3)
+    assert result.pressure_drop_pa == pytest.approx(r_s_eval * 0.5e-3)
 
 
 @pytest.mark.parametrize(
@@ -151,7 +153,7 @@ def test_static_regression_recovers_zero_velocity_intercept() -> None:
         "specific_resistance",
         "resistivity",
         "evaluation_velocity",
-        "pressure_drop",
+        "pressure_drop_pa",
         "linear_coefficient",
         "quadratic_coefficient",
     ],
@@ -182,7 +184,7 @@ def test_a_non_finite_determination_quantity_is_refused(field_name: str) -> None
         "resistance",
         "specific_resistance",
         "evaluation_velocity",
-        "pressure_drop",
+        "pressure_drop_pa",
         "linear_coefficient",
         "quadratic_coefficient",
     ],
@@ -256,11 +258,11 @@ def test_static_velocity_above_limit_warns() -> None:
         ),
         (  # nan u (would otherwise die inside np.linalg.lstsq)
             lambda: static_airflow_resistance([1e-3, np.nan], [12.0, 24.0], 0.008),
-            "'velocities' and 'pressure_drops' must contain only finite",
+            "'velocities' and 'pressure_drops_pa' must contain only finite",
         ),
         (  # inf dp (would otherwise return a result full of NaNs)
             lambda: static_airflow_resistance([1e-3, 2e-3], [12.0, np.inf], 0.008),
-            "'velocities' and 'pressure_drops' must contain only finite",
+            "'velocities' and 'pressure_drops_pa' must contain only finite",
         ),
         (  # area
             lambda: static_airflow_resistance([1e-3, 2e-3], [12.0, 24.0], 0.0),
@@ -366,7 +368,7 @@ def test_alternating_frequency_out_of_range_warns() -> None:
             {"piston_stroke_termination": 0.0},
             "'piston_stroke_termination' must be positive",
         ),
-        ({"static_pressure": 0.0}, "'static_pressure' must be positive"),
+        ({"static_pressure_pa": 0.0}, "'static_pressure_pa' must be positive"),
         ({"kappa_prime": 0.0}, "'kappa_prime' must be positive"),
     ],
 )

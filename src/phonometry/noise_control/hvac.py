@@ -662,8 +662,8 @@ class HvacSpectrumResult:
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata` supplying
             the header (``client``, ``specimen`` the duct element, ``test_room``
-            the test environment, ``instrumentation``, ``temperature``,
-            ``relative_humidity``, ``pressure``, ``test_date``), the footer
+            the test environment, ``instrumentation``, ``temperature_c``,
+            ``relative_humidity_percent``, ``pressure``, ``test_date``), the footer
             identity (``laboratory``, ``operator``, ``report_id``, ``notes``)
             and, via ``requirement``, a declared maximum A-weighted sound power
             level for a regenerated-noise spectrum (lower is better) or a
@@ -1442,7 +1442,7 @@ def fan_sound_power(  # noqa: PLR0913
         ``P_\mathrm{F}``, in
         **pascals gauge**. This is the pressure rise the fan produces across
         itself, not an ambient pressure, and it shares neither the unit nor the
-        datum of the ``static_pressure`` the ISO 3740 family takes in
+        datum of the ``static_pressure_kpa`` the ISO 3740 family takes in
         kilopascals absolute. No plausibility guard can separate the two:
         101,325 Pa is a legitimate duty for a panel or propeller fan, so the
         name is what keeps them apart.
@@ -2551,7 +2551,7 @@ def diffuser_sound_power(
     frequencies: ArrayLike | None,
     face_area: float,
     volume_flow: float,
-    pressure_drop: float,
+    pressure_drop_pa: float,
     *,
     shape: str = "rectangular",
     count: int = 1,
@@ -2602,7 +2602,7 @@ def diffuser_sound_power(
         :data:`OCTAVE_BANDS`.
     :param face_area: Cross-sectional face area ``S_\mathrm{G}`` of one device, m2.
     :param volume_flow: Volume flow ``Q`` through one device, m3/s.
-    :param pressure_drop: Static pressure drop ``dP`` across the device, Pa.
+    :param pressure_drop_pa: Static pressure drop ``dP`` across the device, Pa.
     :param shape: ``"rectangular"`` (Eq. 13.31, includes slot diffusers) or
         ``"round"`` (Eq. 13.30).
     :param count: Number of identical devices ``n`` in the room.
@@ -2614,7 +2614,7 @@ def diffuser_sound_power(
     f = OCTAVE_BANDS.copy() if frequencies is None else _frequencies(frequencies)
     area_ft2 = require_positive(face_area, "face_area") / _M_PER_FT**2
     flow_cfm = require_positive(volume_flow, "volume_flow") / _M3S_PER_CFM
-    drop_in_wg = require_positive(pressure_drop, "pressure_drop") / _PA_PER_IN_WG
+    drop_in_wg = require_positive(pressure_drop_pa, "pressure_drop_pa") / _PA_PER_IN_WG
     profile = require_choice(shape, "shape", ("rectangular", "round"))
     if count <= 0 or not float(count).is_integer():
         msg = "'count' must be a positive integer."

@@ -210,7 +210,7 @@ result.report(
         specimen="Meeting room, furnished",
         test_room="Meeting room M2",
         measurement_standard="EN 12354-6",
-        temperature=20.0, relative_humidity=55.0,
+        temperature_c=20.0, relative_humidity_percent=55.0,
         laboratory="Phonometry Reference Laboratory",
         requirement=0.6,          # printed as a target reference line, no verdict
     ),

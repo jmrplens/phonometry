@@ -18,20 +18,20 @@ from phonometry._internal.validation import ABSOLUTE_ZERO_C
 
 def test_sea_water_sound_speed_refuses_absolute_zero() -> None:
     """It used to return -31 457 m/s, a negative speed of sound."""
-    with pytest.raises(ValueError, match="'temperature' must be finite and above"):
+    with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
         fluids.sea_water_sound_speed(ABSOLUTE_ZERO_C, 35.0, 0.0)
 
 
 def test_sound_speed_profile_refuses_absolute_zero() -> None:
     """The array path checked only finiteness, so -300 degC went straight through."""
-    with pytest.raises(ValueError, match="'temperatures' must be finite and above"):
+    with pytest.raises(ValueError, match="'temperatures_c' must be finite and above"):
         underwater.sound_speed_profile([0.0, 100.0], -300.0, 35.0)
 
 
 def test_seawater_absorption_refuses_absolute_zero() -> None:
     """It returned 0.495 dB/km at -300 degC, beside 0.0185 for real cold water."""
-    with pytest.raises(ValueError, match="'temperature' must be finite and above"):
-        underwater.seawater_absorption(1e3, temperature=-300.0)
+    with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
+        underwater.seawater_absorption(1e3, temperature_c=-300.0)
 
 
 @pytest.mark.parametrize("temperature_c", [-273.1, -273.05, -273.0])
@@ -46,14 +46,14 @@ def test_francois_garrison_refuses_its_own_pole(temperature_c: float) -> None:
     """
     with pytest.raises(ValueError, match="francois-garrison"):
         underwater.seawater_absorption(
-            1e3, temperature=temperature_c, model="francois-garrison"
+            1e3, temperature_c=temperature_c, model="francois-garrison"
         )
 
 
 def test_just_above_the_pole_still_answers() -> None:
     """The guard is drawn at the pole, not above it: -272,9 degC is computable."""
     value = underwater.seawater_absorption(
-        1e3, temperature=-272.9, model="francois-garrison"
+        1e3, temperature_c=-272.9, model="francois-garrison"
     )
     assert np.all(np.isfinite(value))
 
@@ -61,7 +61,7 @@ def test_just_above_the_pole_still_answers() -> None:
 @pytest.mark.parametrize("model", ["thorp", "ainslie-mccolm"])
 def test_the_other_models_have_no_pole_of_their_own(model: str) -> None:
     """Only the Francois-Garrison branch needs the second guard."""
-    value = underwater.seawater_absorption(1e3, temperature=-272.9, model=model)
+    value = underwater.seawater_absorption(1e3, temperature_c=-272.9, model=model)
     assert np.all(np.isfinite(value))
 
 

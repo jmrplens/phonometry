@@ -544,7 +544,7 @@ metadata = ReportMetadata(
     client="Cliente de Ensayos Acústicos S.L.",
     area=10.0, mass_per_area=460.0,
     source_volume=53.0, receiving_volume=51.0,
-    temperature=21.5, relative_humidity=45.0, pressure=101.3,
+    temperature_c=21.5, relative_humidity_percent=45.0, static_pressure_kpa=101.3,
     test_room="Sala de transmisión T1",
     measurement_standard="ISO 10140-2",
     test_date="2026-07-18",
@@ -592,9 +592,9 @@ rango físico.
 | `specimen`, `client`, `mounted_by`, `manufacturer` | `str` | Identidad de cabecera del elemento ensayado y para quién / quién lo montó |
 | `area`, `mass_per_area` | `float > 0` | Superficie del elemento de ensayo $S$ (m²) y masa por unidad de superficie medida (kg/m²) |
 | `source_volume`, `receiving_volume` | `float > 0` | Volúmenes de las salas (m³) |
-| `temperature`, `relative_humidity` | `float` | Clima representativo único: temperatura del aire (°C, cualquier signo), humedad relativa (0–100 %) |
-| `pressure` | `float > 0` | Presión (estática) ambiente durante el ensayo (kPa) |
-| `source_temperature`, `source_relative_humidity`, `receiving_temperature`, `receiving_relative_humidity` | `float` | Clima por recinto cuando el recinto emisor y el receptor se informan por separado (mismos rangos que arriba) |
+| `temperature_c`, `relative_humidity_percent` | `float` | Clima representativo único: temperatura del aire (°C, cualquier signo), humedad relativa (0–100 %) |
+| `static_pressure_kpa` | `float > 0` | Presión (estática) ambiente durante el ensayo (kPa) |
+| `source_temperature_c`, `source_relative_humidity_percent`, `receiving_temperature_c`, `receiving_relative_humidity_percent` | `float` | Clima por recinto cuando el recinto emisor y el receptor se informan por separado (mismos rangos que arriba) |
 | `test_room`, `mounting`, `measurement_standard`, `test_date` | `str` | Instalación, condición de montaje, norma de medición (forma la línea de base normativa) y fecha de ensayo |
 | `laboratory`, `operator`, `report_id`, `notes` | `str` | Pie: institución, línea de firma del operador, número de informe y observaciones libres |
 | `requirement` | `float` | Valor objetivo de un solo número; añade la fila de veredicto (el aéreo cumple si es mayor o igual, el de impactos si es menor o igual) |

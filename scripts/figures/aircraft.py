@@ -110,7 +110,7 @@ def generate_aircraft_atmospheric_absorption(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6))
     for s, color in ((1000.0, COLOR_SECONDARY), (7620.0, COLOR_PRIMARY)):
         res = aircraft.sae_band_attenuation(
-            freqs, s, temperature=25.0, relative_humidity=70.0
+            freqs, s, temperature_c=25.0, relative_humidity_percent=70.0
         )
         ax.plot(
             res.frequency,

@@ -104,9 +104,9 @@ def _metadata_pairs(
         (t("Source positions", language), count(metadata.source_positions)),
         (t("Measurement positions", language), count(metadata.receiver_positions)),
         (t("Instrumentation", language), metadata.instrumentation),
-        (t("Temperature [&#176;C]", language), num(metadata.temperature)),
-        (t("Relative humidity [%]", language), num(metadata.relative_humidity)),
-        (t("Ambient pressure [kPa]", language), num(metadata.pressure)),
+        (t("Temperature [&#176;C]", language), num(metadata.temperature_c)),
+        (t("Relative humidity [%]", language), num(metadata.relative_humidity_percent)),
+        (t("Ambient pressure [kPa]", language), num(metadata.static_pressure_kpa)),
         (t("Date of test", language), metadata.test_date),
     ]
     return escaped_pairs(specs)

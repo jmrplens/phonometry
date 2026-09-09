@@ -579,7 +579,7 @@ res = building.low_frequency_intensity_reduction(
     l_p=l_p, frequencies=freqs,
 )
 print(np.round(res.r_i, 1))                       # [16.8 18.2 20.5 23.1 25.4 27.9]
-print(np.round(res.surface_pressure_intensity, 1))  # [12.4 11.1  9.6  8.2  7.1  6.4]
+print(np.round(res.surface_pressure_intensity_indicator, 1))  # [12.4 11.1  9.6  8.2  7.1  6.4]
 print(res.qualified.tolist())   # [False, False, True, True, True, True]
 print(res.indicator_limit)      # 10.0
 
@@ -587,7 +587,7 @@ print(res.indicator_limit)      # 10.0
 bare = building.low_frequency_intensity_reduction(
     lp_surface, l_in, measurement_area=12.6, area=10.0, frequencies=freqs,
 )
-print(bare.surface_pressure_intensity, bare.qualified)   # None None
+print(bare.surface_pressure_intensity_indicator, bare.qualified)   # None None
 ```
 
 A refused band is flagged, not dropped. The standard's answer to
@@ -615,7 +615,7 @@ plt.show()
 
 # By hand, and the Annex A panel beside it.
 calculated = building.limp_panel_reduction_index(
-    freqs, surface_mass=10.0, area=10.0, temperature=23.0,
+    freqs, surface_mass=10.0, area=10.0, temperature_c=23.0,
 )
 measured = calculated + np.array([2.6, -1.8, 1.1, -2.9, 0.7, -1.4])
 x = np.arange(len(freqs))
@@ -627,7 +627,7 @@ for bar, ok in zip(bars, res.qualified, strict=True):
 axl.set_xticks(x, [f"{f:g}" for f in freqs])
 axl.set(xlabel="Frequency [Hz]", ylabel="Sound reduction index [dB]")
 twin = axl.twinx()
-twin.plot(x, res.surface_pressure_intensity, "-o", color="#2ca02c", label="FpI")
+twin.plot(x, res.surface_pressure_intensity_indicator, "-o", color="#2ca02c", label="FpI")
 twin.axhline(res.indicator_limit, ls="--", color="#d62728", label="FpI limit")
 twin.set_ylabel("Surface pressure-intensity indicator [dB]")
 twin.legend()
@@ -699,7 +699,7 @@ mainly intended for 50 Hz to 80 Hz.
 # at 1 013 hPa and 23 degC.
 calc = building.limp_panel_reduction_index(
     freqs, surface_mass=10.0, area=10.0,
-    temperature=23.0, static_pressure=101300.0,
+    temperature_c=23.0, static_pressure_pa=101300.0,
 )
 print(np.round(calc, 1))    # [10.7 11.9 13.4 14.8 16.3 17.9]
 ```
@@ -725,14 +725,15 @@ not used as an oracle.
 | `absorbing_specimen_surface` | bool | — | default `False` | `True` tightens the Clause 6.4.2 limit to 6 dB |
 | `elements` | int | element units | ≥ 1, default `1` | Number $N$ of units (`low_frequency_element_normalized_difference` only) |
 | `surface_mass` | float | kg/m² | > 0 | Limp-panel surface mass $m$ (`limp_panel_reduction_index`) |
-| `temperature` / `static_pressure` | float | °C / Pa | default 23 °C, 101 300 Pa | The climate of Formulas (A.4) and (A.5) |
+| `temperature_c` / `static_pressure_pa` | float | °C / Pa | default 23 °C, 101 300 Pa | The climate of Formulas (A.4) and (A.5) |
 
 `low_frequency_intensity_reduction()` returns a `LowFrequencyIntensityResult`
-(`r_i`, `surface_pressure_intensity`, `qualified`, `indicator_limit`),
-`low_frequency_element_normalized_difference()` a `LowFrequencyElementResult`
-(`d_i_n_e` and the same three), and `limp_panel_reduction_index()` a plain
-array. Neither result carries a rating: Clause 7 asks for the index to one
-decimal beside the indicator, and six bands cannot feed ISO 717-1.
+(`r_i`, `surface_pressure_intensity_indicator`, `qualified`,
+`indicator_limit`), `low_frequency_element_normalized_difference()` a
+`LowFrequencyElementResult` (`d_i_n_e` and the same three), and
+`limp_panel_reduction_index()` a plain array. Neither result carries a rating:
+Clause 7 asks for the index to one decimal beside the indicator, and six bands
+cannot feed ISO 717-1.
 
 ## What this guide covers
 

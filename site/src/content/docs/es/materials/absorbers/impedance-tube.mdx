@@ -642,15 +642,16 @@ se añade la columna del módulo del factor de reflexión $|r|$.
 Usa el mismo contenedor `ReportMetadata` y el mismo motor que las demás fichas.
 El rango de frecuencias medido se toma del resultado; los campos descriptivos y
 geométricos de `ReportMetadata` que aplican aquí son `client`, `manufacturer`,
-`specimen`, `tube_diameter`, `tube_shape`, `mic_spacing`, `mounting`, `test_room`,
-`test_date`, `temperature`, `pressure`, `measurement_standard`, `laboratory`,
-`operator`, `report_id` y `notes` (`tube_diameter` y `mic_spacing` se dan en
-metros y se imprimen en milímetros). El campo `requirement` se ignora (la
-ISO 10534-2 no tiene veredicto). La generación necesita reportlab y, para la
-figura que incrusta la ficha, matplotlib (`pip install
-"phonometry[report,plot]"`); solo se admite `engine="reportlab"`. La ficha se
-genera en inglés por defecto; pasa `language="es"` para una ficha en español
-(cadenas fijas traducidas y coma decimal).
+`specimen`, `tube_diameter`, `tube_shape`, `mic_spacing`, `mounting`,
+`test_room`, `test_date`, `temperature_c`, `static_pressure_kpa`,
+`measurement_standard`, `laboratory`, `operator`, `report_id` y `notes`
+(`tube_diameter` y `mic_spacing` se dan en metros y se imprimen en milímetros).
+El campo `requirement` se ignora (la ISO 10534-2 no tiene veredicto). La
+generación necesita reportlab y, para la figura que incrusta la ficha,
+matplotlib (`pip install "phonometry[report,plot]"`); solo se admite
+`engine="reportlab"`. La ficha se genera en inglés por defecto; pasa
+`language="es"` para una ficha en español (cadenas fijas traducidas y coma
+decimal).
 
 El bloque de abajo es la probeta de la ficha que va debajo: una capa resistiva
 de resistencia al flujo normalizada $\theta = 1$ sobre una cavidad de aire de

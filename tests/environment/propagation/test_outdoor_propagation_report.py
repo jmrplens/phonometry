@@ -186,7 +186,7 @@ def test_attenuation_metadata_header_and_distance(tmp_path: Path) -> None:
         specimen="Industrial fan plant",
         client="Acoustic Consultants Ltd.",
         test_room="Nearest dwelling",
-        temperature=10.0,
+        temperature_c=10.0,
         laboratory="Phonometry Reference Laboratory",
     )
     out = tmp_path / "meta.pdf"

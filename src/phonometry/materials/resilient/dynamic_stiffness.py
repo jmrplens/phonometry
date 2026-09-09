@@ -138,7 +138,7 @@ def enclosed_gas_stiffness(
     thickness: ArrayLike,
     porosity: float,
     *,
-    atmospheric_pressure: float = STANDARD_ATMOSPHERIC_PRESSURE,
+    atmospheric_pressure_pa: float = STANDARD_ATMOSPHERIC_PRESSURE,
 ) -> np.ndarray | float:
     r"""Enclosed-gas dynamic stiffness per unit area ``s'a`` (Formula 7).
 
@@ -148,7 +148,7 @@ def enclosed_gas_stiffness(
     :param thickness: Thickness ``d`` of the specimen under the static load, in
         **metres** (scalar or array).
     :param porosity: Porosity ``epsilon`` of the specimen (0-1).
-    :param atmospheric_pressure: Atmospheric pressure ``p0``, in pascals
+    :param atmospheric_pressure_pa: Atmospheric pressure ``p0``, in pascals
         (default :data:`STANDARD_ATMOSPHERIC_PRESSURE`, the standard's 0,1 MPa).
     :return: The enclosed-gas dynamic stiffness per unit area ``s'a``, in N/m3.
 
@@ -157,8 +157,8 @@ def enclosed_gas_stiffness(
         this reduces to :math:`s'_\mathrm{a} = 111/d` MN/m3 for ``d`` in millimetres
         (clause 8.2 NOTE).
     """
-    atmospheric_pressure = require_positive(
-        atmospheric_pressure, "atmospheric_pressure"
+    atmospheric_pressure_pa = require_positive(
+        atmospheric_pressure_pa, "atmospheric_pressure_pa"
     )
     if not 0.0 < porosity <= 1.0:
         msg = "'porosity' must be in the range (0, 1]."
@@ -167,7 +167,7 @@ def enclosed_gas_stiffness(
     if np.any(d <= 0.0):
         msg = "'thickness' must be positive."
         raise ValueError(msg)
-    return as_float_or_array(atmospheric_pressure / (d * porosity))
+    return as_float_or_array(atmospheric_pressure_pa / (d * porosity))
 
 
 def installed_dynamic_stiffness(
@@ -355,7 +355,7 @@ class DynamicStiffnessResult:
             ``mass_per_area`` (the total mass per unit area ``m't``),
             ``thickness`` (the loaded specimen thickness ``d``, in metres, shown
             in millimetres), ``test_room``,
-            ``test_date``, ``temperature``, ``relative_humidity``,
+            ``test_date``, ``temperature_c``, ``relative_humidity_percent``,
             ``measurement_standard``, ``laboratory``, ``operator``,
             ``report_id`` and ``notes``. The ``requirement`` field is ignored
             (EN 29052-1 has no verdict).
@@ -390,7 +390,7 @@ def floating_floor_resonance(
     airflow_resistivity: float = float("inf"),
     thickness: float | None = None,
     porosity: float | None = None,
-    atmospheric_pressure: float = STANDARD_ATMOSPHERIC_PRESSURE,
+    atmospheric_pressure_pa: float = STANDARD_ATMOSPHERIC_PRESSURE,
 ) -> DynamicStiffnessResult:
     r"""Full EN 29052-1 chain: measured resonance -> installed ``s'`` and ``f0``.
 
@@ -411,7 +411,7 @@ def floating_floor_resonance(
         cannot state it: it is checked here and raises.
     :param porosity: Specimen porosity ``epsilon``, required with
         ``thickness`` (see above).
-    :param atmospheric_pressure: Atmospheric pressure ``p0``, in pascals.
+    :param atmospheric_pressure_pa: Atmospheric pressure ``p0``, in pascals.
     :return: The :class:`DynamicStiffnessResult`.
     """
     s_apparent = float(
@@ -427,7 +427,7 @@ def floating_floor_resonance(
             raise ValueError(msg)
         s_gas = float(
             enclosed_gas_stiffness(
-                thickness, porosity, atmospheric_pressure=atmospheric_pressure
+                thickness, porosity, atmospheric_pressure_pa=atmospheric_pressure_pa
             )
         )
     s_installed = installed_dynamic_stiffness(

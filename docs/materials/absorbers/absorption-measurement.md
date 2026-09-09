@@ -49,7 +49,7 @@ t_specimen = np.array([8.4, 8.2, 7.7, 7.2, 6.5, 5.7, 4.9, 4.2, 3.6, 3.15,
                        2.85, 2.65, 2.55, 2.5, 2.55, 2.6, 2.7, 2.85])
 
 m = materials.measure_sound_absorption(
-    freqs, t_empty, t_specimen, volume=200.0, area=10.8, temperature=20.0
+    freqs, t_empty, t_specimen, volume=200.0, area=10.8, temperature_c=20.0
 )
 print(m.alpha_s[7])   # alpha_s at 500 Hz: 0.328...
 m.plot()              # alpha_s versus one-third-octave frequency
@@ -78,7 +78,7 @@ t_empty = np.array([9.0, 9.0, 8.8, 8.6, 8.4, 8.2, 8.0, 7.8, 7.5, 7.2,
 t_specimen = np.array([8.4, 8.2, 7.7, 7.2, 6.5, 5.7, 4.9, 4.2, 3.6, 3.15,
                        2.85, 2.65, 2.55, 2.5, 2.55, 2.6, 2.7, 2.85])
 m = materials.measure_sound_absorption(
-    freqs, t_empty, t_specimen, volume=200.0, area=10.8, temperature=20.0
+    freqs, t_empty, t_specimen, volume=200.0, area=10.8, temperature_c=20.0
 )
 
 # One line: the alpha_s spectrum over the one-third-octave band axis.
@@ -114,19 +114,19 @@ fiches. The specimen area $S$, room volume $V$, speed of sound $c$, temperature
 and humidity are taken from the measurement result (they drove the Sabine
 inversion); the descriptive `ReportMetadata` fields that apply here are
 `client`, `manufacturer`, `specimen`, `mounting`, `test_room`, `test_date`,
-`pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id` and
-`notes`. The `requirement` field is ignored (ISO 354 has no verdict). Rendering
-needs reportlab and, for the figure the fiche embeds, matplotlib (`pip install
-"phonometry[report,plot]"`); only `engine="reportlab"` is supported. The fiche
-renders in English by default; pass `language="es"` for a Spanish fiche
-(translated fixed strings and a comma decimal separator).
+`static_pressure_kpa`, `measurement_standard`, `laboratory`, `operator`,
+`report_id` and `notes`. The `requirement` field is ignored (ISO 354 has no
+verdict). Rendering needs reportlab and, for the figure the fiche embeds,
+matplotlib (`pip install "phonometry[report,plot]"`); only `engine="reportlab"`
+is supported. The fiche renders in English by default; pass `language="es"` for
+a Spanish fiche (translated fixed strings and a comma decimal separator).
 
 ```python
 from phonometry import materials, ReportMetadata
 
 m = materials.measure_sound_absorption(
     freqs, t_empty, t_specimen, volume=200.0, area=10.8,
-    temperature=20.0, humidity=54.0,
+    temperature_c=20.0, relative_humidity_percent=54.0,
 )
 m.report(
     "alpha_s_fiche.pdf",
@@ -178,11 +178,11 @@ from phonometry import materials
 t1 = np.array([5.0, 4.0, 3.0])
 t2 = np.array([3.0, 2.5, 2.0])
 
-a_empty = materials.absorption_area(t1, volume=200.0, temperature=20.0)
+a_empty = materials.absorption_area(t1, volume=200.0, temperature_c=20.0)
 print(np.round(a_empty, 2))                    # [ 6.45  8.06 10.75] m^2
 
 alpha = materials.absorption_coefficient(t1, t2, volume=200.0, sample_area=10.8,
-                               temperature1=20.0)
+                               temperature1_c=20.0)
 print(np.round(alpha, 3))                      # [0.398 0.448 0.498]
 ```
 
@@ -221,7 +221,7 @@ here checks any of it.
 | `t60` / `t1`, `t2` | 1D array | s | > 0 | Reverberation time(s); `t1` empty, `t2` with specimen |
 | `volume` | float | m³ | > 0 | Room volume $V$ (advisory below 150 m³) |
 | `sample_area` | float | m² | > 0 | Area $S$ the specimen covers (coefficient only) |
-| `temperature` / `temperature1`, `temperature2` | float | °C | default `20.0`, 15–30 | Sets $c$ via Eq. (6); `temperature2` defaults to `temperature1` |
+| `temperature_c` / `temperature1_c`, `temperature2_c` | float | °C | default `20.0`, 15–30 | Sets $c$ via Eq. (6); `temperature2_c` defaults to `temperature1_c` |
 | `speed_of_sound` (`…1`, `…2`) | float, optional | m/s | > 0 | Overrides the temperature-derived $c$ |
 | `m` (`m1`, `m2`) | float or 1D array | 1/m | ≥ 0, default `0` | Air power attenuation coefficient |
 
@@ -367,7 +367,7 @@ result.report(
         specimen="50 mm porous absorber over a 100 mm air gap",
         area=10.8, mounting="Type A (against a rigid wall)",
         measurement_standard="ISO 354",
-        temperature=21.4, relative_humidity=54.0,
+        temperature_c=21.4, relative_humidity_percent=54.0,
         laboratory="Phonometry Reference Laboratory",
         requirement=0.55,          # adds the PASS/FAIL verdict row
     ),

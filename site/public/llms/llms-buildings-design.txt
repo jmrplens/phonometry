@@ -2001,8 +2001,8 @@ $\Delta L_\mathrm{w}\ (C_{\mathrm{I},\Delta})$ (the ISO 16251-1 Clause 8 e) stat
 results, rated
 per ISO 717-2) and a footer. The applicable `ReportMetadata` fields are
 `specimen` (the floor covering under test), `client`, `manufacturer`,
-`mounting`, `mass_per_area`, `test_room`, `test_date`, `temperature`,
-`pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id`,
+`mounting`, `mass_per_area`, `test_room`, `test_date`, `temperature_c`,
+`static_pressure_kpa`, `measurement_standard`, `laboratory`, `operator`, `report_id`,
 `notes` and `requirement` (a higher weighted improvement is better, so the
 verdict passes at or above it). The bare reference floor is the standardised
 heavyweight floor of ISO 717-2:2020 Table 4, fixed by the standard.
@@ -2782,7 +2782,7 @@ spectrum with a nominal band axis, and a boxed band-summed total $L_{W\mathrm{s}
 
 The relevant `ReportMetadata` fields are `client`, `specimen` (the source
 equipment), `test_room` (the test environment), `instrumentation`,
-`temperature`, `relative_humidity`, `pressure`, `test_date` and the footer
+`temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`, `test_date` and the footer
 identity `laboratory`, `operator`, `report_id` and `notes`; the plate mass and
 area come from the result itself. Supplying `requirement` adds a PASS/FAIL
 verdict against a declared upper limit on the total $L_{W\mathrm{s}}$ (lower is better).

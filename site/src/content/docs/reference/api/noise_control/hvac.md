@@ -186,7 +186,7 @@ diffuser_sound_power(
     frequencies: ArrayLike | None,
     face_area: float,
     volume_flow: float,
-    pressure_drop: float,
+    pressure_drop_pa: float,
     *,
     shape: str = 'rectangular',
     count: int = 1,
@@ -243,7 +243,7 @@ which is what `count` applies.
 | `frequencies` | Octave-band centres, Hz; `None` uses [`OCTAVE_BANDS`](/phonometry/reference/api/materials/rating/#octave_bands). |
 | `face_area` | Cross-sectional face area `S_\mathrm{G}` of one device, m2. |
 | `volume_flow` | Volume flow `Q` through one device, m3/s. |
-| `pressure_drop` | Static pressure drop `dP` across the device, Pa. |
+| `pressure_drop_pa` | Static pressure drop `dP` across the device, Pa. |
 | `shape` | `"rectangular"` (Eq. 13.31, includes slot diffusers) or `"round"` (Eq. 13.30). |
 | `count` | Number of identical devices `n` in the room. |
 
@@ -552,7 +552,7 @@ duty point, worth 0,1 dB at the optimum itself.
 | Name | Description |
 | :--- | :--- |
 | `volume_flow` | Volume flow through the fan `Q_\mathrm{F}`, m3/s. |
-| `fan_static_pressure_pa` | **ASHRAE only.** Fan static pressure `P_\mathrm{F}`, in **pascals gauge**. This is the pressure rise the fan produces across itself, not an ambient pressure, and it shares neither the unit nor the datum of the `static_pressure` the ISO 3740 family takes in kilopascals absolute. No plausibility guard can separate the two: 101,325 Pa is a legitimate duty for a panel or propeller fan, so the name is what keeps them apart. |
+| `fan_static_pressure_pa` | **ASHRAE only.** Fan static pressure `P_\mathrm{F}`, in **pascals gauge**. This is the pressure rise the fan produces across itself, not an ambient pressure, and it shares neither the unit nor the datum of the `static_pressure_kpa` the ISO 3740 family takes in kilopascals absolute. No plausibility guard can separate the two: 101,325 Pa is a legitimate duty for a panel or propeller fan, so the name is what keeps them apart. |
 | `fan_type` | **ASHRAE only.** One of `"airfoil_large"` / `"airfoil_small"` (backward-curved or backward-inclined centrifugal wheels above and below 36 in diameter), `"forward_curved"`, `"radial_low"` / `"radial_medium"` / `"radial_high"` (radial blades by total pressure), `"vaneaxial_hub_low"` / `"vaneaxial_hub_medium"` / `"vaneaxial_hub_high"` (hub ratios 0.3-0.4, 0.4-0.6 and 0.6-0.8), `"tubeaxial_large"` / `"tubeaxial_small"` (above and below 40 in wheel diameter) or `"propeller"`. |
 | `relative_efficiency_percent` | Static efficiency as a **percentage** of the peak (default 80, Long's recommendation when the peak is unknown). Table 13.6 is tabulated from 50 % up, so a fraction such as 0,8 falls through to the table's bottom row and returns its worst-case 16 dB correction instead of the 6 dB that 80 % earns. That is what [`HvacWarning`](/phonometry/reference/api/noise_control/hvac/#hvacwarning) says when it fires below the floor. |
 | `blade_frequency` | **ASHRAE only.** Blade passing frequency `f_bp`, Hz (from [`blade_passing_frequency`](/phonometry/reference/api/noise_control/hvac/#blade_passing_frequency)). `None` (default) places the increment in the octave band Table 13.7 tabulates for the fan type. |
@@ -827,7 +827,7 @@ relation.
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the duct element, `test_room` the test environment, `instrumentation`, `temperature`, `relative_humidity`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared maximum A-weighted sound power level for a regenerated-noise spectrum (lower is better) or a declared minimum mean attenuation for an attenuation spectrum (more is better). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata) supplying the header (`client`, `specimen` the duct element, `test_room` the test environment, `instrumentation`, `temperature_c`, `relative_humidity_percent`, `pressure`, `test_date`), the footer identity (`laboratory`, `operator`, `report_id`, `notes`) and, via `requirement`, a declared maximum A-weighted sound power level for a regenerated-noise spectrum (lower is better) or a declared minimum mean attenuation for an attenuation spectrum (more is better). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` a regenerated-noise table adds the A-weighting correction and the A-weighted band level columns. |
 | `language` | Fiche language: `"en"` (default) or `"es"`. |

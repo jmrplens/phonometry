@@ -49,8 +49,8 @@ reproducibility standard deviation from Table 3 (anechoic) or Table 2
 
 ```python
 meteorological_corrections(
-    temperature: float = 23.0,
-    static_pressure: float = 101.325,
+    temperature_c: float = 23.0,
+    static_pressure_kpa: float = 101.325,
     *,
     air_absorption_coefficient: float | np.ndarray | None = None,
     radius: float = 1.0,
@@ -86,8 +86,8 @@ from ISO 9613-1 (not computed here); without it $C_3 = 0$.
 
 | Name | Description |
 | :--- | :--- |
-| `temperature` | Air temperature `theta` at the test, in degrees C. |
-| `static_pressure` | Static pressure `ps` at the test, in kilopascals. |
+| `temperature_c` | Air temperature `theta` at the test, in degrees C. |
+| `static_pressure_kpa` | Static pressure `ps` at the test, in kilopascals. |
 | `air_absorption_coefficient` | `a(f)` (dB/m), scalar or per band, for C3; `None` leaves $C_3 = 0$. |
 | `radius` | Measurement radius `r` (m), used only in $A_0 = \alpha(f)\,r$. |
 
@@ -314,8 +314,8 @@ sound_power_anechoic(
     background_levels: np.ndarray,
     frequencies: np.ndarray,
     areas: np.ndarray | None = ...,
-    temperature: float = ...,
-    static_pressure: float = ...,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
     air_absorption_coefficient: float | np.ndarray | None = ...,
     sigma_omc: float = ...,
     coverage_factor: float = ...,
@@ -328,8 +328,8 @@ sound_power_anechoic(
     radius: float,
     frequencies: np.ndarray | None = ...,
     areas: np.ndarray | None = ...,
-    temperature: float = ...,
-    static_pressure: float = ...,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
     air_absorption_coefficient: float | np.ndarray | None = ...,
     sigma_omc: float = ...,
     coverage_factor: float = ...,
@@ -366,8 +366,8 @@ environmental term. The reproducibility `sigma_R0` is taken from Table 3
 | `background_levels` | `(NM, NB)` (or single-spectrum) background levels for `K1i`; requires `frequencies`. |
 | `frequencies` | `(NB,)` nominal mid-band frequencies (Hz), for the K1 criterion, the A-weighted total and the per-band uncertainty. |
 | `areas` | `(NM,)` partial areas `Si` for the area-weighted average (Eq. 13); omit for the equal-area average (Eq. 12). |
-| `temperature` | Air temperature `theta` (deg C), for C1/C2. |
-| `static_pressure` | Static pressure `ps` (kPa), for C1/C2. |
+| `temperature_c` | Air temperature `theta` (deg C), for C1/C2. |
+| `static_pressure_kpa` | Static pressure `ps` (kPa), for C1/C2. |
 | `air_absorption_coefficient` | `a(f)` (dB/m) for C3, scalar or per band; `None` leaves $C_3 = 0$. |
 | `sigma_omc` | Operating/mounting standard deviation, dB. |
 | `coverage_factor` | `k` (2 two-sided, 1.6 one-sided). |

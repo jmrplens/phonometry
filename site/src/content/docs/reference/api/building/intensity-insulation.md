@@ -498,8 +498,8 @@ limp_panel_reduction_index(
     *,
     surface_mass: float,
     area: float,
-    temperature: float = 23.0,
-    static_pressure: float = 101300.0,
+    temperature_c: float = 23.0,
+    static_pressure_pa: float = 101300.0,
 ) -> np.ndarray
 ```
 
@@ -556,8 +556,8 @@ that range and nowhere else.
 | `frequencies` | One-third-octave mid-band frequencies, in hertz. |
 | `surface_mass` | Surface mass `m` of the panel, in kg/m². |
 | `area` | Panel area `S`, in m². Formula (A.3) is stated valid for at least 1 m², so a smaller one is refused rather than extrapolated. A panel used to qualify a facility has to exceed 1 m² (A.1). |
-| `temperature` | Air temperature `theta`, in degrees Celsius. |
-| `static_pressure` | Static pressure `B`, in pascals. |
+| `temperature_c` | Air temperature `theta`, in degrees Celsius. |
+| `static_pressure_pa` | Static pressure `B`, in pascals. |
 
 **Returns:** The calculated sound reduction index per band, in dB.
 
@@ -699,7 +699,7 @@ energy-averaged. Sub-areas scanned separately are combined first with
 ```python
 LowFrequencyElementResult(
     d_i_n_e: np.ndarray,
-    surface_pressure_intensity: np.ndarray | None,
+    surface_pressure_intensity_indicator: np.ndarray | None,
     qualified: np.ndarray | None,
     frequencies: np.ndarray | None,
     measurement_area: float,
@@ -720,7 +720,7 @@ and ISO 717-1 needs sixteen.
 | Name | Description |
 | :--- | :--- |
 | `d_i_n_e` | Intensity element normalized level difference $D_{I\mathrm{n,e}} = L_{p\mathrm{S}} - 9 - [L_{I\mathrm{n}} - 10\lg(A_0/S_\mathrm{m}) - 10\lg N]$ per band, in dB. |
-| `surface_pressure_intensity` | Surface-pressure intensity indicator $F_{pI}$ per band, in dB (Formula (5)), or `None` where the receiving-side pressure level was not measured alongside the intensity. |
+| `surface_pressure_intensity_indicator` | Surface-pressure intensity indicator $F_{pI}$ per band, in dB (Formula (5)), or `None` where the receiving-side pressure level was not measured alongside the intensity. |
 | `qualified` | The Clause 6.4.2 verdict per band, or `None` throughout when the indicator itself is `None`. |
 | `frequencies` | Mid-band frequencies, in hertz, or `None`. |
 | `measurement_area` | Measurement-surface area `Sm`, in m². |
@@ -762,7 +762,7 @@ Draw `DI,n,e` per band, hatching any band Clause 6.4.2 refuses.
 ```python
 LowFrequencyIntensityResult(
     r_i: np.ndarray,
-    surface_pressure_intensity: np.ndarray | None,
+    surface_pressure_intensity_indicator: np.ndarray | None,
     qualified: np.ndarray | None,
     frequencies: np.ndarray | None,
     area: float,
@@ -783,7 +783,7 @@ specimen, where part 1 subtracts 6 dB from a room average.
 | Name | Description |
 | :--- | :--- |
 | `r_i` | Intensity sound reduction index $R_\mathrm{I} = L_{p\mathrm{S}} - 9 - [L_{I\mathrm{n}} + 10\lg(S_\mathrm{m}/S)]$ per band, in dB. |
-| `surface_pressure_intensity` | Surface-pressure intensity indicator $F_{pI} = L_p - L_{I\mathrm{n}}$ per band, in dB (Formula (5)), which Clause 7 requires to be reported beside the index, or `None` where the receiving-side pressure level was not measured alongside the intensity. Clause 6.4.2 only asks for that measurement "if possible". |
+| `surface_pressure_intensity_indicator` | Surface-pressure intensity indicator $F_{pI} = L_p - L_{I\mathrm{n}}$ per band, in dB (Formula (5)), which Clause 7 requires to be reported beside the index, or `None` where the receiving-side pressure level was not measured alongside the intensity. Clause 6.4.2 only asks for that measurement "if possible". |
 | `qualified` | `True` in each band whose `FpI` is within the limit Clause 6.4.2 sets, `False` where the measurement surface is not qualified and the index is not a result the standard admits, and `None` throughout when the indicator itself is `None`. |
 | `frequencies` | Mid-band frequencies, in hertz, or `None`. |
 | `area` | Test-object area `S`, in m². |

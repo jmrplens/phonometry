@@ -2,15 +2,14 @@
 
 # Verifying a human-vibration meter (ISO 8041-1)
 
-Every other page in this section computes something about a vibration a
-person is exposed to: what a record does to the body, what repeated shocks do
-to the spine, what a seat passes on. This one computes something about the
+Every other page in this section computes something about a vibration a person
+is exposed to: what a day of it does to the body, what repeated shocks do to
+the spine, what a seat passes on. This one computes something about the
 **instrument**. ISO 8041-1 is not a method for measuring vibration; it is the
-specification a general purpose human-vibration meter is designed and tested
+specification a general-purpose human-vibration meter is designed and tested
 against, and the rest of the section has been quoting one clause of it all
-along, because the nine frequency weightings that
-[human vibration exposure](human-vibration.md) applies are defined here and
-nowhere else.
+along, because the nine frequency weightings that [human vibration
+exposure](human-vibration.md) applies are defined here and nowhere else.
 
 The **human** in that name is load-bearing. The standard specifies instruments
 "designed to measure vibration values, for the purpose of assessing human

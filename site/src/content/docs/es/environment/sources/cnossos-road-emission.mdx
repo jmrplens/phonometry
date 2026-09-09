@@ -132,7 +132,7 @@ traffic = [
     environment.RoadTraffic(environment.RoadVehicleCategory.MOTORCYCLES, 60.0, 50.0),
 ]
 result = environment.road_source_power(
-    traffic, surface=environment.RoadSurface.THIN_LAYER_A, temperature_c=12.0, gradient=3.0,
+    traffic, surface=environment.RoadSurface.THIN_LAYER_A, temperature_c=12.0, road_slope_percent=3.0,
     junction_distance=60.0, junction_type=environment.JunctionType.CROSSING,
 )
 print(result.total_line_power.round(1))
@@ -177,7 +177,7 @@ mapa queda desviado varios decibelios. De aquí se lee cada uno.
 | `RoadTraffic.studded_fraction`, `studded_months` ($Q_{\mathrm{stud,ratio}}$, $T_\mathrm{s}$) | Cuota de flota y temporada | La proporción media de vehículos ligeros por hora con neumáticos con clavos **durante** los meses en que los llevan, y el número de esos meses; el propio método forma $p_\mathrm{s} = Q_{\mathrm{stud,ratio}}\,T_\mathrm{s}/12$ (2.2.7) | Pasar la cuota promediada al año, que aplica $T_\mathrm{s}/12$ dos veces |
 | `junction_distance` ($x$) | Distancia al cruce | Medida a lo largo de la vía desde la fuente puntual hasta la **intersección más próxima de esta línea fuente con otra línea fuente** (2.2.5) | Medir hasta la línea de detención o hasta el bordillo. Es el cruce de líneas, y solo afectan los últimos 100 m |
 | `junction_type` ($k$) | 1 cruce con semáforo, 2 glorieta | La regulación del cruce, no su forma | Un cruce con prioridad no es ninguno de los dos: la corrección está definida para semáforos y glorietas |
-| `gradient` ($s$) | Pendiente longitudinal con signo, % | El modelo del terreno a lo largo de la línea fuente, saturando en ±12 % | Aplicar un solo signo a un flujo bidireccional. La norma exige partir el flujo por la mitad y corregir una mitad en subida y la otra en bajada |
+| `road_slope_percent` ($s$) | Pendiente longitudinal con signo, % | El modelo del terreno a lo largo de la línea fuente, saturando en ±12 % | Aplicar un solo signo a un flujo bidireccional. La norma exige partir el flujo por la mitad y corregir una mitad en subida y la otra en bajada |
 | `surface` | Tipo de pavimento | El inventario de firmes, emparejado con una fila de la Tabla F-4 **y su rango de velocidad declarado** | Usar una fila fuera de su rango de validez |
 | geometría | Línea fuente y receptor | Una línea por carril en el centro del carril (también se admite una línea por calzada, o una para una vía de doble sentido), con la fuente puntual a 0,05 m sobre el pavimento; los puntos receptores de la Directiva están a 4 m del suelo | Situar la fuente en el bordillo, o a la altura de la carrocería |
 
@@ -389,7 +389,7 @@ for category in ("1", "2", "3"):
     for speed, style in [(50.0, "--"), (80.0, "-")]:
         plano = a_weighted(environment.road_propulsion_noise(category, speed))
         ax.plot(pendientes,
-                [a_weighted(environment.road_propulsion_noise(category, speed, gradient=s)) - plano
+                [a_weighted(environment.road_propulsion_noise(category, speed, road_slope_percent=s)) - plano
                  for s in pendientes], style, label=f"Categoría {category}, {speed:g} km/h")
 ax.set_xlabel("Pendiente de la vía s [%]")
 ax.set_ylabel("Corrección del ruido de propulsión [dB(A)]")

@@ -76,7 +76,7 @@ from phonometry.noise_control import hvac
 bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
 
 # Reflexión de baja frecuencia en el extremo abierto (ASHRAE Tabla 8.14).
-er = hvac.end_reflection_loss(bands, diameter=0.30, termination="flush")
+er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
 er.plot()   # la atenuación por banda (o la Lw regenerada) en una línea (necesita matplotlib)
 
 # Pérdida por inserción de un codo cuadrado a 90 grados con revestimiento (Tabla 8.11).
@@ -113,16 +113,16 @@ from phonometry.noise_control import hvac
 bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
 
 # Una línea para un conducto: el HvacSpectrumResult del extremo enrasado de 300 mm.
-er = hvac.end_reflection_loss(bands, diameter=0.30, termination="flush")
+er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
 er.plot(language="es")
 plt.show()
 
 # A mano: la familia sobre diámetros de conducto de la figura de concepto.
 fig, ax = plt.subplots()
-for diameter in (0.15, 0.30, 0.60):
-    er = hvac.end_reflection_loss(bands, diameter=diameter, termination="flush")
+for diameter_m in (0.15, 0.30, 0.60):
+    er = hvac.end_reflection_loss(bands, diameter_m=diameter_m, termination="flush")
     ax.semilogx(er.frequencies, er.values, "o-",
-                label=f"D = {int(diameter * 1000)} mm")
+                label=f"D = {int(diameter_m * 1000)} mm")
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("Pérdida por reflexión del extremo [dB]")
 ax.legend(title="Diámetro del conducto")
@@ -260,7 +260,7 @@ import matplotlib.pyplot as plt
 from phonometry import noise_control
 
 # Las r, S_out y S_w que la fórmula de Wells usa de verdad, dibujadas exactas.
-noise_control.plot_plenum_geometry(0.09, 1.2, 6.0, angle=0.35, language="es")
+noise_control.plot_plenum_geometry(0.09, 1.2, 6.0, angle_rad=0.35, language="es")
 plt.show()
 ```
 

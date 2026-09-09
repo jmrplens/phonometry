@@ -155,7 +155,7 @@ def _cnossos_road() -> ph.environment.RoadEmissionResult:
         ],
         surface=ph.environment.RoadSurface.THIN_LAYER_A,
         temperature_c=12.0,
-        gradient=3.0,
+        road_slope_percent=3.0,
     )
 
 

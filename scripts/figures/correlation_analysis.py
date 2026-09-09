@@ -243,7 +243,7 @@ def generate_synchronous_average(output_dir: str) -> None:
     from phonometry import signals
 
     fs = 8192.0
-    period = 1.0 / 32.0  # one revolution: 256 samples at this rate
+    period_s = 1.0 / 32.0  # one revolution: 256 samples at this rate
     m = 256
     n_avg = 40
     phase = np.arange((n_avg + 1) * m) / m
@@ -253,7 +253,9 @@ def generate_synchronous_average(output_dir: str) -> None:
         - 0.3 * np.cos(2.0 * np.pi * 6.0 * phase)
     )
     signal = periodic + signals.noise_signal(fs, phase.size / fs, rms=0.9, seed=11)
-    res = signals.time_synchronous_average(signal, fs, period=period, n_averages=n_avg)
+    res = signals.time_synchronous_average(
+        signal, fs, period_s=period_s, n_averages=n_avg
+    )
     true_one = periodic[:m]
 
     _fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(11, 4.6))
@@ -278,7 +280,7 @@ def generate_synchronous_average(output_dir: str) -> None:
         linewidth=1.2,
         label="True periodic waveform",
     )
-    ax0.set_xlim(0.0, 1e3 * period)
+    ax0.set_xlim(0.0, 1e3 * period_s)
     ax0.set_xlabel("Time [ms]")
     ax0.set_ylabel("Amplitude")
     ax0.set_title("Periodic Waveform Extracted from Noise", pad=10)
@@ -307,9 +309,9 @@ def generate_synchronous_average(output_dir: str) -> None:
 
     # Panel (b): comb filter, node selection at 32.05 orders.
     orders = np.linspace(31.0, 33.0, 4000)
-    freqs = orders / period
-    c20 = signals.comb_filter_response(freqs, period, 20)
-    c32 = signals.comb_filter_response(freqs, period, 32)
+    freqs = orders / period_s
+    c20 = signals.comb_filter_response(freqs, period_s, 20)
+    c32 = signals.comb_filter_response(freqs, period_s, 32)
     ax1.plot(
         orders,
         c32,
@@ -695,12 +697,12 @@ def generate_tsa_noise_reduction(output_dir: str) -> None:
 
     fs = 8192.0
     samples = 256
-    period = samples / fs
+    period_s = samples / fs
     m = np.arange(samples) / fs
     true = (
-        np.cos(2.0 * np.pi * m / period)
-        + 0.5 * np.cos(2.0 * np.pi * 3.0 * m / period + 0.7)
-        + 0.25 * np.cos(2.0 * np.pi * 5.0 * m / period + 1.1)
+        np.cos(2.0 * np.pi * m / period_s)
+        + 0.5 * np.cos(2.0 * np.pi * 3.0 * m / period_s + 0.7)
+        + 0.25 * np.cos(2.0 * np.pi * 5.0 * m / period_s + 1.1)
     )
     rng = np.random.default_rng(5)
     n_max = 128
@@ -710,7 +712,7 @@ def generate_tsa_noise_reduction(output_dir: str) -> None:
     errors = []
     for n in counts:
         res = signals.time_synchronous_average(
-            x[: n * samples], fs, period=period, n_averages=n
+            x[: n * samples], fs, period_s=period_s, n_averages=n
         )
         errors.append(float(np.sqrt(np.mean((res.period_waveform - true) ** 2))))
 

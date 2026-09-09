@@ -52,13 +52,13 @@ def generate_metadiffuser_ntff_polar(output_dir: str) -> None:
     print("Generating metadiffuser_ntff_polar...")
     from phonometry import materials
 
-    wells, depth, period = _qr_metadiffuser_wells()
+    wells, depth, period_m = _qr_metadiffuser_wells()
     model = materials.metadiffuser_polar_response(
         2000.0,
         wells,
         depth=depth,
-        period=period,
-        periods=1,
+        period_m=period_m,
+        repetitions=1,
     )
     angles, levels = _meshed_metadiffuser_ntff_levels()
     _fig, ax = plt.subplots(
@@ -120,7 +120,7 @@ def generate_fdtd_domain_geometry(output_dir: str) -> None:
         edge_impedance={"top": 413.0},
         obstacle_mask=mask,
     )
-    sim.add_source(GaussianPulse(10, 30, width=1e-3))
+    sim.add_source(GaussianPulse(10, 30, half_width_s=1e-3))
     _fig, ax = plt.subplots(figsize=(10, 6.6))
     sim.plot_geometry(ax=ax, probes=[(3.0, 1.5), (4.0, 2.0)], language=_LANG)
     plt.tight_layout()
@@ -144,7 +144,7 @@ def generate_fdtd_simulation(output_dir: str) -> None:
         dx,
         9.0e-3,
         shape=(200, 300),
-        sources=[simulation.GaussianPulse(ix=60, iy=100, width=3.0e-4)],
+        sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
         probes=[(100, 100), (240, 100)],
         obstacle_mask=mask,
         boundaries="absorbing",
@@ -194,7 +194,7 @@ def generate_elastic_halfspace_waves(output_dir: str) -> None:
                 iy=0,
                 direction="y",
                 amplitude=1e6,
-                waveform=simulation.GaussianPulse(0, 0, width=width).value,
+                waveform=simulation.GaussianPulse(0, 0, half_width_s=width).value,
             )
         ],
         boundaries=simulation.ElasticBoundaries({"top": "free"}),
@@ -345,7 +345,7 @@ def generate_fdtd_room_modes(output_dir: str) -> None:
         dx,
         0.35,
         shape=(ny, nx),
-        sources=[simulation.GaussianPulse(ix=7, iy=5, width=2.0e-4)],
+        sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
         probes=[(nx - 4, ny - 3)],
     )
     p = res.pressures[0]
@@ -610,7 +610,7 @@ def generate_metadiffuser_meshed_panel(output_dir: str) -> None:
 
     from .materials import _qr_metadiffuser_wells
 
-    wells, depth, period = _qr_metadiffuser_wells()
+    wells, depth, period_m = _qr_metadiffuser_wells()
     dx = 0.0005
     mask, ix = _meshed_metadiffuser_mask(dx)
     r0 = ix["r_face"] - 40
@@ -626,7 +626,7 @@ def generate_metadiffuser_meshed_panel(output_dir: str) -> None:
     ax_z = fig.add_subplot(gs[2])
 
     plot_metadiffuser_panel_geometry(
-        wells, ax=ax_m, depth=depth, period=period, language=_LANG
+        wells, ax=ax_m, depth=depth, period_m=period_m, language=_LANG
     )
     ax_m.set_title(
         "What the transfer matrix homogenises: five slit "
@@ -650,8 +650,8 @@ def generate_metadiffuser_meshed_panel(output_dir: str) -> None:
         r"obstacle mask at $\Delta x$ = 0.5 mm",
         pad=10,
     )
-    z0 = ix["lat"] + round(4 * period / dx)
-    z1 = z0 + round(period / dx)
+    z0 = ix["lat"] + round(4 * period_m / dx)
+    z1 = z0 + round(period_m / dx)
     ax_g.add_patch(
         Rectangle(
             (z0 * dx, r0 * dx),
@@ -683,7 +683,7 @@ def generate_metadiffuser_meshed_panel(output_dir: str) -> None:
         pad=10,
     )
     neck_y = (ix["r_face"] + round(0.005 / dx)) * dx
-    neck_x = (ix["lat"] + round((4.12 * period + 20.3e-3) / dx)) * dx
+    neck_x = (ix["lat"] + round((4.12 * period_m + 20.3e-3) / dx)) * dx
     ax_z.annotate(
         "3.2 mm neck = 6 cells",
         xy=(neck_x, neck_y),

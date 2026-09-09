@@ -728,7 +728,7 @@ from phonometry import materials
 depths = materials.qrd_well_depths(7, 490.0, speed_of_sound=343.0)
 pitch = 3.6 / 42                  # 42 pozos a lo ancho del panel de 3,6 m
 fin = 0.005                       # aletas finas, incluidas en el paso
-materials.plot_qrd_geometry(depths, pitch - fin, fin_width=fin, periods=2,
+materials.plot_qrd_geometry(depths, pitch - fin, fin_width=fin, repetitions=2,
                             language="es")
 plt.show()
 
@@ -747,10 +747,10 @@ from phonometry import materials
 # exactamente 0,2 m.
 depths = materials.qrd_well_depths(7, 490.0)   # [0, 0.05, 0.2, 0.1, ...] m
 qrd = materials.predict_diffuser_polar_response(
-    3.6 / 42, 1000.0, depths=depths, periods=6)
+    3.6 / 42, 1000.0, depths=depths, repetitions=6)
 # El panel de referencia plano: la misma huella de 3,6 m con pozos a cero.
 flat = materials.predict_diffuser_polar_response(
-    3.6 / 42, 1000.0, depths=[0.0] * 7, periods=6)
+    3.6 / 42, 1000.0, depths=[0.0] * 7, repetitions=6)
 
 qrd.plot()   # respuesta polar predicha, d en el título (requiere matplotlib)
 
@@ -783,9 +783,9 @@ import numpy as np
 from phonometry import materials
 
 # qrd.levels: los 37 niveles predichos del QRD del ejemplo de arriba.
-angles = np.arange(-90.0, 90.5, 5.0)
+angles_deg = np.arange(-90.0, 90.5, 5.0)
 
-result = materials.directional_diffusion(angles, qrd.levels)
+result = materials.directional_diffusion(angles_deg, qrd.levels)
 print(round(result.coefficient, 2))   # 0.11
 result.plot()   # respuesta polar reflejada, d en el título (requiere matplotlib)
 ```
@@ -815,8 +815,8 @@ from phonometry import materials
 # semicírculo de -90 a 90 grados con espaciado de 5 grados. La matriz
 # periódica concentra la energía en lóbulos de red, así que el coeficiente d
 # de la fórmula (5) es modesto.
-angles = np.arange(-90.0, 90.5, 5.0)
-result = materials.directional_diffusion(angles, qrd.levels)
+angles_deg = np.arange(-90.0, 90.5, 5.0)
+result = materials.directional_diffusion(angles_deg, qrd.levels)
 
 # result es el DiffusionResult calculado arriba. En una línea:
 result.plot(language="es")
@@ -824,7 +824,7 @@ plt.show()
 
 # A mano: un diagrama polar de los niveles, con d anotado en el título.
 fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
-theta = np.radians(result.angles)
+theta = np.radians(result.angles_deg)
 ax.plot(theta, result.levels, "o-", color="#1f77b4")
 ax.fill(theta, result.levels, color="#1f77b4", alpha=0.15)
 ax.set_theta_zero_location("N")
@@ -1002,10 +1002,10 @@ c, width = 343.0, 0.10
 grid = np.linspace(200.0, 6000.0, 601)
 depths = materials.qrd_well_depths(7, 500.0, speed_of_sound=c)
 qrd = materials.predicted_diffusion_spectrum(width, grid, depths=depths,
-                                             periods=5, normalize=False)
+                                             repetitions=5, normalize=False)
 flat = materials.predicted_diffusion_spectrum(width, grid,
                                               depths=np.zeros_like(depths),
-                                              periods=5, normalize=False)
+                                              repetitions=5, normalize=False)
 fig, ax = plt.subplots()
 ax.axvspan(c / (2 * width), grid[-1], color="#9e9e9e", alpha=0.16)
 ax.axvline(7 * 500.0, color="#d62728", linestyle="--")
@@ -1047,7 +1047,7 @@ bands = np.array([250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000], float)
 fig, ax = plt.subplots()
 for depths, label in ((periodic, "Periódico"), (modulated, "Modulado")):
     spectrum = materials.predicted_diffusion_spectrum(0.10, bands,
-                                                      depths=depths, periods=1)
+                                                      depths=depths, repetitions=1)
     ax.semilogx(bands, spectrum.normalized, "o-", label=label)
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("Coeficiente de difusión normalizado")
@@ -1094,7 +1094,7 @@ print(np.round(depths * 100, 1))               # profundidades de pozo en cm:
 # repetidos, pozos de 10 cm), reducida al coeficiente de difusión direccional
 # ISO 17497-2.
 surface = materials.predict_diffuser_polar_response(0.10, 2000.0, depths=depths,
-                                                    periods=5)
+                                                    repetitions=5)
 print(round(surface.coefficient, 3))           # 0.210
 surface.plot()   # respuesta polar predicha, d en el título (requiere matplotlib)
 
@@ -1102,11 +1102,11 @@ surface.plot()   # respuesta polar predicha, d en el título (requiere matplotli
 # de la misma huella (Fórmula (7)): el panel plano se aplica a cero exacto y el
 # QRD queda muy por encima.
 freqs = np.array([500, 1000, 2000, 4000], float)
-qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, periods=5)
+qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, repetitions=5)
 print(np.round(qrd.normalized, 3))             # [0.352 0.275 0.208 0.073]
 
 flat = materials.predicted_diffusion_spectrum(0.10, freqs,
-                                        depths=np.zeros_like(depths), periods=5)
+                                        depths=np.zeros_like(depths), repetitions=5)
 print(np.round(flat.normalized, 3))            # [0. 0. 0. 0.]
 ```
 
@@ -1136,7 +1136,7 @@ from phonometry import materials
 freqs = np.array([250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
                   2000, 2500, 3150, 4000, 5000], float)
 depths = materials.qrd_well_depths(7, 500.0)
-qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, periods=5)
+qrd = materials.predicted_diffusion_spectrum(0.10, freqs, depths=depths, repetitions=5)
 
 # El DiffusionSpectrum dibuja la d(f) predicha directamente. Una línea:
 qrd.plot(language="es")
@@ -1144,7 +1144,7 @@ plt.show()
 
 # A mano: d(f) predicha para el QRD frente a la referencia plana.
 flat = materials.predicted_diffusion_spectrum(0.10, freqs,
-                                depths=np.zeros_like(depths), periods=5,
+                                depths=np.zeros_like(depths), repetitions=5,
                                 normalize=False)
 fig, ax = plt.subplots()
 ax.semilogx(freqs, qrd.diffusion, "o-", color="#1f77b4", label="Diseño QRD N = 7")

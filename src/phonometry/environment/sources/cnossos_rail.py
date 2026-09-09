@@ -1886,14 +1886,18 @@ class WheelDiameter(Enum):
     MM_1200 = 1200.0
 
 
-def wheel_transfer(diameter: WheelDiameter | float) -> NDArray[np.float64]:
+def wheel_transfer(diameter_mm: WheelDiameter | float) -> NDArray[np.float64]:
     """Wheel transfer function ``L_H,VEH,i`` of Table G-3b, in dB per axle.
 
-    :param diameter: A :class:`WheelDiameter` member or the diameter in mm.
+    :param diameter_mm: A :class:`WheelDiameter` member or the diameter in mm.
     :return: The 24 1/3-octave values, in dB.
     :raises ValueError: If the diameter is not tabulated.
     """
-    key = diameter.value if isinstance(diameter, WheelDiameter) else float(diameter)
+    key = (
+        diameter_mm.value
+        if isinstance(diameter_mm, WheelDiameter)
+        else float(diameter_mm)
+    )
     if key not in _TABLE_G3B:
         raise ValueError(
             f"Unknown wheel diameter {key!r} mm; Table G-3b tabulates: "

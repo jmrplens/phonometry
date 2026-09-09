@@ -77,19 +77,19 @@ _MIN_RECEIVERS = 2
 class DiffusionResult:
     """A measured polar response and its diffusion coefficient (ISO 17497-2).
 
-    :ivar angles: Receiver angles of the polar response, in degrees.
+    :ivar angles_deg: Receiver angles of the polar response, in degrees.
     :ivar levels: Reflected sound-pressure level at each angle, in decibels.
     :ivar coefficient: Autocorrelation diffusion coefficient ``d`` (Formula (5)).
     """
 
-    angles: Real
+    angles_deg: Real
     levels: Real
     coefficient: float
 
     def __post_init__(self) -> None:
         """Reject a polar response whose columns disagree or cannot be read.
 
-        The fiche draws ``levels`` against ``angles`` one receiver at a time,
+        The fiche draws ``levels`` against ``angles_deg`` one receiver at a time,
         so the two must agree on how many receivers there are, and the
         receiver angles are an axis no measurement can leave undetermined, so
         they must be finite.
@@ -119,14 +119,14 @@ class DiffusionResult:
         without this pin the fiche boxes the headline ``d = nan`` on an
         otherwise normal accredited page.
 
-        :raises ValueError: if ``angles`` and ``levels`` disagree, if
-            ``angles`` / ``coefficient`` is non-finite, or if ``levels``
+        :raises ValueError: if ``angles_deg`` and ``levels`` disagree, if
+            ``angles_deg`` / ``coefficient`` is non-finite, or if ``levels``
             carries a ``NaN`` or a ``+inf``.
         """
-        require_ranks(self, angles=1, levels=1)
-        require_same_length(self, "angles", "levels", axis="receiver")
-        if not np.all(np.isfinite(np.asarray(self.angles, dtype=np.float64))):
-            msg = "DiffusionResult: 'angles' must contain only finite values."
+        require_ranks(self, angles_deg=1, levels=1)
+        require_same_length(self, "angles_deg", "levels", axis="receiver")
+        if not np.all(np.isfinite(np.asarray(self.angles_deg, dtype=np.float64))):
+            msg = "DiffusionResult: 'angles_deg' must contain only finite values."
             raise ValueError(msg)
         lev = np.asarray(self.levels, dtype=np.float64)
         if np.any(np.isnan(lev)) or np.any(lev == np.inf):
@@ -390,7 +390,7 @@ def diffusion_spectrum(
 
 
 def directional_diffusion(
-    angles: ArrayLike,
+    angles_deg: ArrayLike,
     levels: ArrayLike,
     *,
     weights: ArrayLike | None = None,
@@ -401,23 +401,23 @@ def directional_diffusion(
     keeps the receiver angles alongside the levels and returns a plottable
     :class:`DiffusionResult`.
 
-    :param angles: Receiver angles of the polar response, in degrees (1-D).
+    :param angles_deg: Receiver angles of the polar response, in degrees (1-D).
     :param levels: Reflected sound-pressure level at each angle, in decibels.
     :param weights: Optional area weights ``N_i`` (Formula (8)); ``None`` uses
         the equal-area Formula (5).
     :return: A :class:`DiffusionResult` with ``.plot()``.
-    :raises ValueError: if ``angles`` and ``levels`` differ in length or are
+    :raises ValueError: if ``angles_deg`` and ``levels`` differ in length or are
         shorter than two receivers.
     """
-    ang = np.atleast_1d(np.asarray(angles, dtype=np.float64))
+    ang = np.atleast_1d(np.asarray(angles_deg, dtype=np.float64))
     lev = np.atleast_1d(np.asarray(levels, dtype=np.float64))
     require_equal_shapes(
         "directional_diffusion",
-        {"angles": ang.shape, "levels": lev.shape},
+        {"angles_deg": ang.shape, "levels": lev.shape},
         "receiver",
     )
     d = float(directional_diffusion_coefficient(lev, area_weights=weights))
-    return DiffusionResult(angles=ang, levels=lev, coefficient=d)
+    return DiffusionResult(angles_deg=ang, levels=lev, coefficient=d)
 
 
 # ---------------------------------------------------------------------------

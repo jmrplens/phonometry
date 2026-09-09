@@ -591,9 +591,9 @@ _TSA = "Time synchronous averaging (McFadden 1987)"
     "Comb-filter tooth height at a harmonic equals unity (any N)",
 )
 def _chk_tsa_comb_tooth() -> Outcome:
-    period = 1.0 / 32.0
+    period_s = 1.0 / 32.0
     value = float(
-        ph.signals.comb_filter_response(np.array([16.0 / period]), period, 8)[0]
+        ph.signals.comb_filter_response(np.array([16.0 / period_s]), period_s, 8)[0]
     )
     return numeric(1.0, value, 1e-10, places=8)
 
@@ -604,9 +604,9 @@ def _chk_tsa_comb_tooth() -> Outcome:
     "Comb-filter magnitude = 1/sqrt(2) at order 0.25",
 )
 def _chk_tsa_comb_midbin() -> Outcome:
-    period = 1.0 / 32.0
+    period_s = 1.0 / 32.0
     value = float(
-        ph.signals.comb_filter_response(np.array([0.25 / period]), period, 2)[0]
+        ph.signals.comb_filter_response(np.array([0.25 / period_s]), period_s, 2)[0]
     )
     return numeric(1.0 / math.sqrt(2.0), value, 1e-10, places=8)
 
@@ -617,10 +617,10 @@ def _chk_tsa_comb_midbin() -> Outcome:
     r"N = 20 places a comb node on 32.05 orders (\|C\| = 0), not the power-of-2 N = 32",
 )
 def _chk_tsa_node_selection() -> Outcome:
-    period = 1.0 / 32.0
-    freq = np.array([32.05 / period])
-    c20 = float(ph.signals.comb_filter_response(freq, period, 20)[0])
-    c32 = float(ph.signals.comb_filter_response(freq, period, 32)[0])
+    period_s = 1.0 / 32.0
+    freq = np.array([32.05 / period_s])
+    c20 = float(ph.signals.comb_filter_response(freq, period_s, 20)[0])
+    c32 = float(ph.signals.comb_filter_response(freq, period_s, 32)[0])
     if not c32 > 0.15:  # sanity: the power-of-two choice does not reject it
         return numeric(0.0, c32, 0.0, places=8)
     return numeric(0.0, c20, 1e-10, places=10)
@@ -633,11 +633,11 @@ def _chk_tsa_node_selection() -> Outcome:
 )
 def _chk_tsa_exact_recovery() -> Outcome:
     fs = 8192.0
-    period = 1.0 / 32.0
+    period_s = 1.0 / 32.0
     m = 256
     phase = np.arange(m) / m
     one = np.cos(2.0 * np.pi * phase) + 0.5 * np.cos(2.0 * np.pi * 3.0 * phase + 0.4)
-    res = ph.signals.time_synchronous_average(np.tile(one, 24), fs, period=period)
+    res = ph.signals.time_synchronous_average(np.tile(one, 24), fs, period_s=period_s)
     err = float(np.max(np.abs(res.period_waveform - one)))
     return numeric(0.0, err, 1e-10, places=12)
 
@@ -649,7 +649,7 @@ def _chk_tsa_exact_recovery() -> Outcome:
 )
 def _chk_tsa_sqrt_n_law() -> Outcome:
     fs = 8192.0
-    period = 1.0 / 32.0
+    period_s = 1.0 / 32.0
     m = 256
     n_avg = 64
     phase = np.arange(m) / m
@@ -657,7 +657,7 @@ def _chk_tsa_sqrt_n_law() -> Outcome:
     rng = np.random.default_rng(2024)
     noise = rng.standard_normal(n_avg * m)
     res = ph.signals.time_synchronous_average(
-        np.tile(one, n_avg) + noise, fs, period=period, n_averages=n_avg
+        np.tile(one, n_avg) + noise, fs, period_s=period_s, n_averages=n_avg
     )
     measured = float(np.std(res.period_waveform - one))
     return numeric(1.0 / math.sqrt(n_avg), measured, 0.15, rel=True, places=5)

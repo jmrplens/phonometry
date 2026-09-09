@@ -839,7 +839,7 @@ def plot_plenum_geometry(
     wall_area: float,
     ax: Axes | None = None,
     *,
-    angle: float = 0.0,
+    angle_rad: float = 0.0,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -847,7 +847,7 @@ def plot_plenum_geometry(
 
     The two truly geometric parameters of
     :func:`~phonometry.noise_control.plenum_attenuation` are drawn exactly:
-    the inlet-to-outlet line of sight ``r`` and its ``angle`` off the inlet
+    the inlet-to-outlet line of sight ``r`` and its ``angle_rad`` off the inlet
     axis fix the box; the exit area sets the drawn outlet mouth (square-duct
     side ``sqrt(S_out)``) and the wall area is annotated.
 
@@ -855,7 +855,7 @@ def plot_plenum_geometry(
     :param line_of_sight: Inlet-to-outlet distance ``r``, in metres.
     :param wall_area: Total internal wall area ``S_w``, in m2 (annotation).
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param angle: Angle between the inlet axis and the line of sight, in
+    :param angle_rad: Angle between the inlet axis and the line of sight, in
         radians (0 <= angle < pi/2).
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the wall-segment ``plot`` calls
@@ -875,8 +875,8 @@ def plot_plenum_geometry(
     require_positive(exit_area, "exit_area")
     require_positive(line_of_sight, "line_of_sight")
     require_positive(wall_area, "wall_area")
-    if not 0.0 <= angle < 0.5 * np.pi:
-        msg = "'angle' must be in [0, pi/2)."
+    if not 0.0 <= angle_rad < 0.5 * np.pi:
+        msg = "'angle_rad' must be in [0, pi/2)."
         raise ValueError(msg)
     if ax is None:
         ax = _new_axes()
@@ -884,8 +884,8 @@ def plot_plenum_geometry(
     mouth = float(np.sqrt(exit_area))
     duct = max(mouth, 0.18 * r)
     margin = max(0.5 * duct, 0.12 * r)
-    width = r * float(np.cos(angle))
-    rise = r * float(np.sin(angle))
+    width = r * float(np.cos(angle_rad))
+    rise = r * float(np.sin(angle_rad))
     box_w = width
     box_h = rise + 2.0 * margin
     y_in = margin
@@ -944,7 +944,7 @@ def plot_plenum_geometry(
     ax.plot(
         [0.0, box_w], [y_in, y_out], linestyle="--", linewidth=1.2, color=_C_SECONDARY
     )
-    slope = float(np.degrees(angle))
+    slope = float(np.degrees(angle_rad))
     ax.text(
         0.5 * box_w,
         0.5 * (y_in + y_out) + 0.03 * r,

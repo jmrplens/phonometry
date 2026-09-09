@@ -144,7 +144,7 @@ res = simulation.elastic_fdtd_simulation(
     6320.0, 3130.0, 0.002, 1.1e-4, rho=2700.0, shape=(501, 501),
     sources=[simulation.ExplosionSource(
         ix=250, iy=250,
-        waveform=simulation.GaussianPulse(0, 0, width=w).value)],
+        waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],
     recording=simulation.ElasticRecording(
         probes=[(350, 250), (470, 250)], probe_fields=("p",)),
 )
@@ -261,7 +261,7 @@ res = simulation.elastic_fdtd_simulation(
     6320.0, 3130.0, dx, 7.3e-5, rho=2700.0, shape=(300, 600),
     sources=[simulation.ForceSource(
         ix=300, iy=0, direction="y", amplitude=1e6,
-        waveform=simulation.GaussianPulse(0, 0, width=w).value)],
+        waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],
     boundaries=simulation.ElasticBoundaries({"top": "free"}),
     recording=simulation.ElasticRecording(snapshot_every=steps,
                                           snapshot_field="vy"),

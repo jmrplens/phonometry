@@ -620,7 +620,7 @@ print(round(modes.plane_wave_limit, 1))         # 263.6 Hz
 
 IN = 0.0254
 print(round(noise_control.plane_wave_limit(width=36 * IN, height=24 * IN), 1))   # 187.6 Hz
-print(round(noise_control.plane_wave_limit(diameter=12 * IN), 1))                # 659.5 Hz
+print(round(noise_control.plane_wave_limit(diameter_m=12 * IN), 1))                # 659.5 Hz
 ```
 
 Those ventilation numbers are blunt: in that duct plane waves are the whole

@@ -314,7 +314,7 @@ Piecewise-linear effective sound speed at one or more heights.
 
 ```python
 linear_sound_speed_profile(
-    gradient: float,
+    gradient_per_s: float,
     *,
     ground_speed: float = 343.0,
     max_height: float = 100.0,
@@ -324,7 +324,7 @@ linear_sound_speed_profile(
 Linear effective sound-speed profile (constant vertical gradient).
 
 The profile is $c_\mathrm{eff}(z) = c_0 + \text{gradient} \cdot z$. A
-positive `gradient` (sound speed increasing with height) refracts sound
+positive `gradient_per_s` (sound speed increasing with height) refracts sound
 downward (favourable propagation); a negative gradient refracts it upward
 and creates an acoustic shadow near the ground (Salomons Sec. 4.2).
 
@@ -332,7 +332,7 @@ and creates an acoustic shadow near the ground (Salomons Sec. 4.2).
 
 | Name | Description |
 | :--- | :--- |
-| `gradient` | Vertical gradient `dc/dz`, in s^-1 (m/s per m). |
+| `gradient_per_s` | Vertical gradient `dc/dz`, in s^-1 (m/s per m). |
 | `ground_speed` | Sound speed `c0` at the ground, in m/s. |
 | `max_height` | Top of the sampled profile, in metres. |
 
@@ -388,7 +388,7 @@ near the ground is resolved by sampling the height grid logarithmically.
 
 ```python
 ray_curvature_radius(
-    gradient: float,
+    gradient_per_s: float,
     *,
     ground_speed: float = 343.0,
     launch_angle_deg: float = 0.0,
@@ -408,7 +408,7 @@ $R_\mathrm{c} = c_0 / (|\text{gradient}| \cos\theta_0)$.
 
 | Name | Description |
 | :--- | :--- |
-| `gradient` | Vertical gradient `dc/dz`, in s^-1 (must be non-zero). |
+| `gradient_per_s` | Vertical gradient `dc/dz`, in s^-1 (must be non-zero). |
 | `ground_speed` | Sound speed at the launch height, in m/s. |
 | `launch_angle_deg` | Launch angle from the horizontal, in degrees. |
 
@@ -424,7 +424,7 @@ $R_\mathrm{c} = c_0 / (|\text{gradient}| \cos\theta_0)$.
 
 ```python
 shadow_zone_distance(
-    gradient: float,
+    gradient_per_s: float,
     source_height: float,
     receiver_height: float,
     *,
@@ -451,7 +451,7 @@ compared with $R_\mathrm{c}$.
 
 | Name | Description |
 | :--- | :--- |
-| `gradient` | Vertical gradient `dc/dz`, in s^-1 (must be negative for a shadow zone to exist). |
+| `gradient_per_s` | Vertical gradient `dc/dz`, in s^-1 (must be negative for a shadow zone to exist). |
 | `source_height` | Source height `hs`, in metres (>= 0). |
 | `receiver_height` | Receiver height `hr`, in metres (>= 0). |
 | `ground_speed` | Sound speed `c0` at the ground, in m/s. |

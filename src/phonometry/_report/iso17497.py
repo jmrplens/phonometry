@@ -527,7 +527,7 @@ def _polar_table(result: DiffusionResult, language: str = "en") -> Table:
     from ._layout import fiche_paragraph
 
     head_style = band_table_header_style()
-    angles = np.asarray(result.angles, dtype=np.float64)
+    angles = np.asarray(result.angles_deg, dtype=np.float64)
     levels = np.asarray(result.levels, dtype=np.float64)
     header = [
         fiche_paragraph(t("Angle &#952; [&#176;]", language), head_style),
@@ -573,7 +573,7 @@ def render_diffusion_polar_report(
         raise ImportError(_REPORTLAB_HINT) from exc
     accent = colors.HexColor(_ACCENT_HEX)
 
-    angles = np.asarray(result.angles, dtype=np.float64)
+    angles = np.asarray(result.angles_deg, dtype=np.float64)
     levels = np.asarray(result.levels, dtype=np.float64)
     require_equal_shapes(
         "DiffusionResult.report",

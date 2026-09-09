@@ -64,7 +64,7 @@ def _pulse_spectrum(
         _C,
         dx,
         steps * dt,
-        sources=[GaussianPulse(ix=source[0], iy=source[1], width=pulse_width)],
+        sources=[GaussianPulse(ix=source[0], iy=source[1], half_width_s=pulse_width)],
         shape=obstacle.shape,
         probes=[probe],
         boundaries={

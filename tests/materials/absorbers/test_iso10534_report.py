@@ -75,7 +75,7 @@ def _result() -> ImpedanceTubeResult:
         x1=_X1,
         speed_of_sound=c0,
         characteristic_impedance=rc,
-        diameter=_DIAMETER,
+        diameter_m=_DIAMETER,
         shape="circular",
     )
 

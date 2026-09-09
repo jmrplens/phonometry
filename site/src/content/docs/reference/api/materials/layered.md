@@ -136,7 +136,7 @@ layered_absorber(
     frequency: ArrayLike,
     layers: list[Layer] | tuple[Layer, ...],
     *,
-    angle: float = 0.0,
+    angle_rad: float = 0.0,
     termination: str | complex | ArrayLike = 'rigid',
     fluid: Fluid = ...,
 ) -> LayeredAbsorberResult
@@ -174,7 +174,7 @@ extremely attenuating layers); the raw chain matrix is still returned in
 | :--- | :--- |
 | `frequency` | Frequency vector `f`, in hertz. |
 | `layers` | Layer stack from the incidence side to the termination. |
-| `angle` | Polar angle of incidence `theta`, in radians ($0 \le \theta < \pi/2 - 10^{-6}$; grazing incidence is excluded). |
+| `angle_rad` | Polar angle of incidence `theta`, in radians ($0 \le \theta < \pi/2 - 10^{-6}$; grazing incidence is excluded). |
 | `termination` | `"rigid"` (default), `"free"`, or a non-zero complex impedance (scalar or per-frequency array), in Pa s/m. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
@@ -185,7 +185,7 @@ extremely attenuating layers); the raw chain matrix is still returned in
 ```python
 LayeredAbsorberResult(
     frequency: Real,
-    angle: float,
+    angle_rad: float,
     surface_impedance: Complex,
     normalized_impedance: Complex,
     reflection: Complex,

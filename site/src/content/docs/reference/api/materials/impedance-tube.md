@@ -141,7 +141,7 @@ ImpedanceTubeResult(
     absorption: Real,
     spacing: float | None = None,
     x1: float | None = None,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str | None = None,
 )
 ```
@@ -157,7 +157,7 @@ $\alpha = 1 - \lvert r\rvert^2$ (Eq. (18)).
 
 The trailing fields retain the tube geometry the reduction was run with
 (microphone `spacing` `s`, distance `x1` from the sample to the
-farther microphone, tube `diameter` and cross-section `shape`, stored
+farther microphone, tube `diameter_m` and cross-section `shape`, stored
 canonically as `"circular"`/`"rectangular"` - a `"square"` input is
 kept as `"rectangular"`); they default to `None` when not supplied to
 [`two_microphone_impedance`](/phonometry/reference/api/materials/impedance-tube/#two_microphone_impedance).
@@ -319,7 +319,7 @@ plane_wave_frequency_range(
     spacing: float,
     speed_of_sound: float,
     *,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str = 'circular',
 ) -> tuple[float, float]
 ```
@@ -327,7 +327,7 @@ plane_wave_frequency_range(
 Working plane-wave frequency range `(f_l, f_u)` (ISO 10534-2, 4.2-4.5).
 
 The upper limit is the smaller of the microphone-spacing bound
-$f_\mathrm{u} s < 0.45 c_0$ (Eq. (4)) and, when the tube `diameter` is
+$f_\mathrm{u} s < 0.45 c_0$ (Eq. (4)) and, when the tube `diameter_m` is
 given, the cut-on bound $f_\mathrm{u} d < 0.58 c_0$ for a circular tube
 (Eq. (2)) or $f_\mathrm{u} d < 0.50 c_0$ for a rectangular tube (Eq. (3)).
 The lower limit uses the Clause 4.2 guideline that the spacing exceed
@@ -339,7 +339,7 @@ The lower limit uses the Clause 4.2 guideline that the spacing exceed
 | :--- | :--- |
 | `spacing` | Microphone spacing `s`, in metres. |
 | `speed_of_sound` | Speed of sound `c0`, in metres per second. |
-| `diameter` | Tube diameter (circular) or maximum lateral dimension (rectangular/square) `d`, in metres; `None` applies only the spacing bound. |
+| `diameter_m` | Tube diameter (circular) or maximum lateral dimension (rectangular/square) `d`, in metres; `None` applies only the spacing bound. |
 | `shape` | `"circular"`, `"rectangular"` or `"square"` (a square tube is the rectangular bound with `d` the side length). |
 
 **Returns:** Tuple `(f_l, f_u)` of the lower and upper frequency limits, in Hz.
@@ -352,7 +352,7 @@ plot_impedance_tube_geometry(
     *,
     spacing: float,
     x1: float,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str | None = 'circular',
     sample_thickness: float | None = None,
     speed_of_sound: float = 343.2,
@@ -376,7 +376,7 @@ working range of [`plane_wave_frequency_range`](/phonometry/reference/api/materi
 | `ax` | Existing axes, or `None` to create a figure. |
 | `spacing` | Microphone spacing `s`, in metres. |
 | `x1` | Distance from the sample face to the farther microphone, in metres. |
-| `diameter` | Inner diameter (circular) or lateral dimension (rectangular/square), in metres; `None` draws a nominal bore and omits the bore dimension and the cut-on bound. |
+| `diameter_m` | Inner diameter (circular) or lateral dimension (rectangular/square), in metres; `None` draws a nominal bore and omits the bore dimension and the cut-on bound. |
 | `shape` | `"circular"`, `"rectangular"`, `"square"` or `None`. |
 | `sample_thickness` | Drawn sample thickness, in metres; `None` draws a 50 mm nominal sample. |
 | `speed_of_sound` | Speed of sound for the working range, in m/s. |
@@ -402,7 +402,7 @@ plot_transmission_tube_geometry(
     l2: float,
     s2: float,
     thickness: float,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str | None = 'circular',
     speed_of_sound: float = 343.2,
     language: str = 'en',
@@ -430,7 +430,7 @@ range of
 | `l2` | Front face to the nearer downstream microphone, in metres. |
 | `s2` | Downstream microphone spacing, in metres. |
 | `thickness` | Specimen thickness, in metres; must be smaller than `l2` (the downstream microphones sit past the back face). |
-| `diameter` | Inner diameter (circular) or largest section dimension (rectangular/square), in metres; `None` draws a nominal bore and omits the bore dimension and the cut-on bound. |
+| `diameter_m` | Inner diameter (circular) or largest section dimension (rectangular/square), in metres; `None` draws a nominal bore and omits the bore dimension and the cut-on bound. |
 | `shape` | `"circular"`, `"rectangular"`, `"square"` or `None`. |
 | `speed_of_sound` | Speed of sound for the working range, in m/s. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
@@ -530,7 +530,7 @@ $Z = \rho c_0 (1 + r) / (1 - r)$.
 tube_attenuation_constant(
     frequency: ArrayLike,
     speed_of_sound: float,
-    diameter: float,
+    diameter_m: float,
 ) -> Real
 ```
 
@@ -546,7 +546,7 @@ porous-wall and object losses and is therefore a lower limit (Clause A.2.1.5).
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or per band). |
 | `speed_of_sound` | Speed of sound `c0`, in metres per second. |
-| `diameter` | Circular-tube diameter `d`, in metres, or the hydraulic diameter `4 * area / perimeter` for a rectangular tube (see [`hydraulic_diameter`](/phonometry/reference/api/materials/impedance-tube/#hydraulic_diameter)). |
+| `diameter_m` | Circular-tube diameter `d`, in metres, or the hydraulic diameter `4 * area / perimeter` for a rectangular tube (see [`hydraulic_diameter`](/phonometry/reference/api/materials/impedance-tube/#hydraulic_diameter)). |
 
 **Returns:** Attenuation constant `k0''`, in nepers per metre.
 
@@ -589,7 +589,7 @@ two_microphone_impedance(
     speed_of_sound: float,
     characteristic_impedance: float,
     attenuation: ArrayLike | None = None,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     shape: str = 'circular',
 ) -> ImpedanceTubeResult
 ```
@@ -598,7 +598,7 @@ Full two-microphone reduction (ISO 10534-2:2001, Clause 7).
 
 Builds the complex wavenumber (Clause 2.6), the reflection factor
 (Eq. (17)), the surface impedance (Eq. (19)) and the absorption coefficient
-(Eq. (18)) from the measured transfer function `H12`. When `diameter` is
+(Eq. (18)) from the measured transfer function `H12`. When `diameter_m` is
 supplied, frequencies outside the plane-wave range (Eqs. (1)-(4)) raise an
 [`ImpedanceTubeWarning`](/phonometry/reference/api/materials/impedance-tube/#impedancetubewarning); the results are still returned.
 
@@ -613,7 +613,7 @@ supplied, frequencies outside the plane-wave range (Eqs. (1)-(4)) raise an
 | `speed_of_sound` | Speed of sound `c0`, in m/s (see [`speed_of_sound_iso10534`](/phonometry/reference/api/materials/impedance-tube/#speed_of_sound_iso10534)). |
 | `characteristic_impedance` | Characteristic impedance `rho c0`, in rayls. |
 | `attenuation` | Optional tube attenuation constant `k0''`, in nepers/m (see [`tube_attenuation_constant`](/phonometry/reference/api/materials/impedance-tube/#tube_attenuation_constant)). |
-| `diameter` | Optional tube diameter/lateral dimension, in metres, that activates the plane-wave range check. |
+| `diameter_m` | Optional tube diameter/lateral dimension, in metres, that activates the plane-wave range check. |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
 **Returns:** An [`ImpedanceTubeResult`](/phonometry/reference/api/materials/impedance-tube/#impedancetuberesult) (the tube geometry is retained on the result).

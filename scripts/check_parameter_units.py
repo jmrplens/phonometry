@@ -46,14 +46,47 @@ if TYPE_CHECKING:
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 #: The quantities whose unit a caller can get wrong by a factor of a thousand
-#: (kPa against Pa) or by 273 (degrees Celsius against kelvin).
+#: (kPa against Pa) or by 273 (degrees Celsius against kelvin). A quantity
+#: earns its place here by having had two units competing for one name in this
+#: tree, which is what makes the mistake silent; the ones that only ever had
+#: one unit are not listed, because a suffix there would restate the
+#: convention rather than resolve anything. Matched anywhere in the name.
 QUANTITIES = ("pressure", "temperature", "humid")
+
+#: The same rule for the geometric quantities, matched against the whole name
+#: rather than any part of it. ``diameter`` was metres in twenty places and
+#: millimetres in one, ``angles`` degrees in ten and radians in four,
+#: ``period`` a lattice pitch in metres in seven and a repetition time in
+#: seconds in three, ``gradient`` a road slope in per cent in three and a
+#: sound-speed gradient in s^-1 in four.
+#:
+#: The compound names built on the same words (``critical_angle``,
+#: ``duct_diameter``, ``path_angles`` and seventy more) are a second pass, not
+#: an exemption: ``WestonRegimeBoundaries.critical_angle`` is in radians while
+#: ``weston_regime_boundaries(critical_angle=...)`` one screen below it takes
+#: degrees, which is the same trap at 57 times over. Widening this tuple to
+#: whole-word matching is what that pass ends with.
+WHOLE_NAME_QUANTITIES = ("diameter", "angle", "angles", "period", "periods", "gradient")
 
 #: The unit suffixes the tree uses. Every one of them is already in the
 #: published API. ``_ft`` is here because a pressure altitude is a length: the
 #: quantity a name says is not always the quantity it holds, and the unit still
 #: has to be on it.
-UNITS = ("_kpa", "_pa", "_inhg", "_percent", "_c", "_k", "_ft")
+UNITS = (
+    "_kpa",
+    "_pa",
+    "_inhg",
+    "_percent",
+    "_c",
+    "_k",
+    "_ft",
+    "_mm",
+    "_m",
+    "_rad",
+    "_deg",
+    "_s",
+    "_per_s",
+)
 
 #: Suffixes that say the quantity has no unit of its own: a level is in
 #: decibels and names its reference elsewhere, a ratio and an index are pure
@@ -115,6 +148,23 @@ EXEMPT: dict[tuple[str, str, str], str] = {
     ): _ACOUSTIC,
     ("phonometry.simulation.ntff", "ContourPhasors", "pressure"): _ACOUSTIC,
     ("phonometry.simulation.fdtd", "FDTDResult", "pressures"): _ACOUSTIC,
+    # An evaluation period is not a length of time here: it is which of the
+    # three the assessment is about, or the assessments themselves.
+    (
+        "phonometry.environment.assessment.spain",
+        "PeriodAssessment",
+        "period",
+    ): 'the label "day", "evening" or "night", not a duration',
+    (
+        "phonometry.environment.assessment.spain",
+        "ActivityAssessment",
+        "periods",
+    ): "the per-period assessments themselves, one result object each",
+    (
+        "phonometry.environment.assessment.rating",
+        "composite_rating_level",
+        "periods",
+    ): "(level, hours, adjustment) triples; each carries its own unit",
 }
 
 
@@ -197,8 +247,11 @@ def public_parameters() -> Iterator[Parameter]:
 
 
 def names_a_quantity(name: str) -> bool:
-    """Whether the parameter name says pressure, temperature or humidity."""
-    return any(quantity in name.lower() for quantity in QUANTITIES)
+    """Whether the parameter name says one of the quantities under the rule."""
+    lowered = name.lower()
+    if lowered in WHOLE_NAME_QUANTITIES:
+        return True
+    return any(quantity in lowered for quantity in QUANTITIES)
 
 
 def declares_its_unit(name: str) -> bool:
@@ -230,9 +283,7 @@ def main() -> int:
 
     found, stale = offenders()
     if not found and not stale:
-        print(
-            "Every public pressure, temperature and humidity parameter names its unit."
-        )
+        print("Every public parameter under the rule names its unit.")
         return 0
     if found:
         print("::error::a public parameter names a quantity without its unit")

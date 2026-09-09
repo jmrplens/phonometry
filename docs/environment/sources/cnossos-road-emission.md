@@ -77,7 +77,7 @@ traffic = [
     environment.RoadTraffic(environment.RoadVehicleCategory.MOTORCYCLES, 60.0, 50.0),
 ]
 result = environment.road_source_power(
-    traffic, surface=environment.RoadSurface.THIN_LAYER_A, temperature_c=12.0, gradient=3.0,
+    traffic, surface=environment.RoadSurface.THIN_LAYER_A, temperature_c=12.0, road_slope_percent=3.0,
     junction_distance=60.0, junction_type=environment.JunctionType.CROSSING,
 )
 result.plot()

@@ -216,7 +216,7 @@ def test_panel_absorption_bounds_and_shapes() -> None:
         res,
         slit_height=1.0e-3,
         lattice_step=3.0e-2,
-        period=5.0e-2,
+        period_m=5.0e-2,
     )
     assert isinstance(out, SlitResonatorAbsorberResult)
     assert out.absorption.shape == f.shape
@@ -246,7 +246,7 @@ def test_panel_optional_correction_branches_stay_passive() -> None:
             res,
             slit_height=1.0e-3,
             lattice_step=3.0e-2,
-            period=5.0e-2,
+            period_m=5.0e-2,
             end_correction=end_correction,
             slit_radiation=slit_radiation,
         )
@@ -270,7 +270,7 @@ def test_slit_radiation_correction_lowers_resonance() -> None:
     """
     f = np.linspace(300.0, 450.0, 3001)
     res = _base_resonator()
-    kwargs = {"slit_height": 1.0e-3, "lattice_step": 3.0e-2, "period": 5.0e-2}
+    kwargs = {"slit_height": 1.0e-3, "lattice_step": 3.0e-2, "period_m": 5.0e-2}
     without = slit_helmholtz_absorber(f, res, slit_radiation=False, **kwargs)
     with_rad = slit_helmholtz_absorber(f, res, slit_radiation=True, **kwargs)
     peak_without = float(f[int(np.argmax(without.absorption))])
@@ -300,8 +300,8 @@ def test_panel_passivity_random_geometries() -> None:
             res,
             slit_height=h,
             lattice_step=a,
-            period=d,
-            angle=0.35,
+            period_m=d,
+            angle_rad=0.35,
         )
         assert np.all(out.absorption >= -1e-9)
         assert np.all(out.absorption <= 1.0 + 1e-9)
@@ -316,7 +316,7 @@ def test_panel_accepts_multiple_resonators() -> None:
         res,
         slit_height=1.2e-3,
         lattice_step=1.2e-2,
-        period=7.0e-2,
+        period_m=7.0e-2,
     )
     # slit depth L = N * a is reflected in the effective wavenumber array
     assert out.effective_wavenumber.shape == f.shape
@@ -327,17 +327,19 @@ def test_panel_accepts_multiple_resonators() -> None:
 # Critical coupling: the analytic perfect-absorption anchor
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize(
-    ("f0", "angle"), [(250.0, 0.0), (300.0, 0.0), (350.0, np.radians(20.0))]
+    ("f0", "angle_rad"), [(250.0, 0.0), (300.0, 0.0), (350.0, np.radians(20.0))]
 )
-def test_critical_coupling_gives_perfect_absorption(f0: float, angle: float) -> None:
+def test_critical_coupling_gives_perfect_absorption(
+    f0: float, angle_rad: float
+) -> None:
     """The designed geometry yields alpha ~ 1 at the design frequency."""
     res = _base_resonator()
     design = critical_coupling_design(
         f0,
         res,
         lattice_step=3.0e-2,
-        period=5.0e-2,
-        angle=angle,
+        period_m=5.0e-2,
+        angle_rad=angle_rad,
     )
     assert isinstance(design, CriticalCouplingResult)
     assert design.converged
@@ -349,8 +351,8 @@ def test_critical_coupling_gives_perfect_absorption(f0: float, angle: float) -> 
         design.resonator,
         slit_height=design.slit_height,
         lattice_step=3.0e-2,
-        period=5.0e-2,
-        angle=angle,
+        period_m=5.0e-2,
+        angle_rad=angle_rad,
     )
     assert float(out.absorption[0]) == pytest.approx(1.0, abs=1e-3)
 
@@ -359,14 +361,14 @@ def test_critical_coupling_peak_at_design_frequency() -> None:
     """The absorption spectrum peaks at (near) the design frequency."""
     res = _base_resonator()
     f0 = 300.0
-    design = critical_coupling_design(f0, res, lattice_step=3.0e-2, period=5.0e-2)
+    design = critical_coupling_design(f0, res, lattice_step=3.0e-2, period_m=5.0e-2)
     f = np.linspace(200.0, 450.0, 1000)
     out = slit_helmholtz_absorber(
         f,
         design.resonator,
         slit_height=design.slit_height,
         lattice_step=3.0e-2,
-        period=5.0e-2,
+        period_m=5.0e-2,
     )
     f_peak = float(f[int(np.argmax(out.absorption))])
     assert f_peak == pytest.approx(f0, abs=8.0)
@@ -380,7 +382,7 @@ def test_critical_coupling_warns_when_infeasible() -> None:
             300.0,
             res,
             lattice_step=3.0e-2,
-            period=5.0e-2,
+            period_m=5.0e-2,
             cavity_length_bounds=(1.0e-3, 1.2e-3),
             slit_height_bounds=(0.5e-3, 0.6e-3),
         )
@@ -394,14 +396,21 @@ def test_invalid_inputs() -> None:
     res = _base_resonator()
     f = np.array([300.0])
     with pytest.raises(ValueError, match="at least one resonator"):
-        slit_helmholtz_absorber(f, [], slit_height=1e-3, lattice_step=3e-2, period=5e-2)
-    with pytest.raises(ValueError, match="'slit_height' must not exceed 'period'"):
         slit_helmholtz_absorber(
-            f, res, slit_height=6e-2, lattice_step=3e-2, period=5e-2
+            f, [], slit_height=1e-3, lattice_step=3e-2, period_m=5e-2
         )
-    with pytest.raises(ValueError, match="'angle' must satisfy"):
+    with pytest.raises(ValueError, match="'slit_height' must not exceed 'period_m'"):
         slit_helmholtz_absorber(
-            f, res, slit_height=1e-3, lattice_step=3e-2, period=5e-2, angle=np.pi / 2.0
+            f, res, slit_height=6e-2, lattice_step=3e-2, period_m=5e-2
+        )
+    with pytest.raises(ValueError, match="'angle_rad' must satisfy"):
+        slit_helmholtz_absorber(
+            f,
+            res,
+            slit_height=1e-3,
+            lattice_step=3e-2,
+            period_m=5e-2,
+            angle_rad=np.pi / 2.0,
         )
 
 
@@ -421,6 +430,6 @@ def test_bad_geometry_names_the_argument_the_caller_passed() -> None:
             res,
             slit_height=1e-3,
             lattice_step=3e-2,
-            period=5e-2,
+            period_m=5e-2,
             resonator_geometry="squre",
         )

@@ -47,7 +47,7 @@ caller's behalf.
 
 ```python
 circular_duct_cut_on(
-    diameter: float,
+    diameter_m: float,
     *,
     flow_velocity: float = 0.0,
     speed_of_sound: float = 343.0,
@@ -78,7 +78,7 @@ tabulated by Norton, so `count` cannot exceed twelve.
 
 | Name | Description |
 | :--- | :--- |
-| `diameter` | Internal duct diameter, m (`a_i` is half of it). |
+| `diameter_m` | Internal duct diameter, m (`a_i` is half of it). |
 | `flow_velocity` | Mean axial flow speed `U`, m/s (0 for still air; use the centre-line speed for a turbulent profile). |
 | `speed_of_sound` | Speed of sound `c` in the duct fluid, m/s. |
 | `count` | How many higher-order modes to return, 1 to 12. |
@@ -155,7 +155,7 @@ Requires matplotlib (`pip install phonometry[plot]`).
 ```python
 plane_wave_limit(
     *,
-    diameter: float | None = None,
+    diameter_m: float | None = None,
     width: float | None = None,
     height: float | None = None,
     area: float | None = None,
@@ -168,7 +168,7 @@ The first cut-on frequency of a duct: plane waves only below it.
 
 A convenience over [`circular_duct_cut_on`](/phonometry/reference/api/noise_control/duct-modes/#circular_duct_cut_on) and
 [`rectangular_duct_cut_on`](/phonometry/reference/api/noise_control/duct-modes/#rectangular_duct_cut_on) that takes whichever description of the
-cross section is at hand. Give either `diameter`, or both `width` and
+cross section is at hand. Give either `diameter_m`, or both `width` and
 `height`, or `area` (treated as a circular duct of the equivalent
 diameter $\sqrt{4S/\pi}$).
 
@@ -176,7 +176,7 @@ diameter $\sqrt{4S/\pi}$).
 
 | Name | Description |
 | :--- | :--- |
-| `diameter` | Internal diameter of a circular duct, m. |
+| `diameter_m` | Internal diameter of a circular duct, m. |
 | `width` | Cross-sectional dimension `a` of a rectangular duct, m. |
 | `height` | Cross-sectional dimension `b` of a rectangular duct, m. |
 | `area` | Cross-sectional area, m2, for a duct described by its area. |

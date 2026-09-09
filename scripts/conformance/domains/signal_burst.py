@@ -95,9 +95,20 @@ def _register_tables() -> None:
 
         def _check(application: str = application, cells: int = cells) -> Outcome:
             inside, total = _cells_within_tolerance(application)
+            # Counted against the printed cell count and not against the cells
+            # the tables happen to hold: the coverage is part of the claim, so
+            # a row that disappeared from SAWTOOTH_BURST_TESTS or from
+            # SIGNAL_BURST_RESPONSE has to fail here rather than shrink the
+            # denominator with the numerator and pass on a smaller table.
+            if total != cells:
+                msg = (
+                    f"{application}: the tables now hold {total} cells where "
+                    f"the printed count is {cells}."
+                )
+                raise AssertionError(msg)
             return count(
                 inside,
-                total,
+                cells,
                 subject="printed cells",
                 expected_label=f"{cells} cells inside the printed tolerance",
             )

@@ -60,8 +60,9 @@ analysis](../../signals/index.md) section.
 
 **A meter is graded on the clauses that can be computed.** The tolerance
 tables of ISO 8041-1 are implemented, and so is every other criterion of it
-that is arithmetic: the characteristic phase deviation, the running r.m.s.
-decay times and the 228 saw-tooth burst indications the standard prints, which
+that is arithmetic: the band-limiting stage on its own, the characteristic
+phase deviation, the running r.m.s. decay times and the 228 saw-tooth burst
+indications the standard prints, which
 is what [meter
 verification](meter-verification.md) is about. The
 design and type-testing clauses of that standard, from indication and

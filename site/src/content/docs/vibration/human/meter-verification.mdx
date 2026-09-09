@@ -74,9 +74,10 @@ What the library does not hold is the bench. The accuracy of indication under
 reference conditions (5.5), amplitude linearity (5.7), instrument noise (5.8),
 overload and under-range indication (5.10 and 5.11), electrical cross-talk
 (5.16), the mounting of clause 6 and the environmental and electromagnetic
-criteria of clause 7 are measurements on hardware; and so, at the moment
-somebody has to shake a transducer and read a display, is every test on this
-page. **Passing the weighting check is a necessary condition for conformity
+criteria of clause 7 are measurements on hardware, and none of them is here.
+What is here is one half of each of the other comparisons: the standard's own
+side of them, arithmetic that runs without a bench. The other half always
+needs one, because somebody has to shake a transducer and read a display. **Passing the weighting check is a necessary condition for conformity
 and never a certificate of it.**
 
 One sentence of 5.6.6 is worth carrying through the rest of the page: the
@@ -1072,7 +1073,7 @@ quantities can reproduce them.
 linear rising ramp and a vertical fall, with every burst starting at an upward
 zero crossing and ending at one. That geometry carries weight rather than
 decoration, because a burst started at the peak reads 28 % high on the
-single-cycle row of Table 8, four times its tolerance. Table 6 supplies the
+single-cycle row of Table 8, nearly three times its 10 % tolerance. Table 6 supplies the
 rest per application, and `SAWTOOTH_BURST_TESTS` is that table:
 
 ```python

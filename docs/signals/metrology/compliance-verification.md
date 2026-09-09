@@ -105,15 +105,17 @@ above are handed a filter this library built, and report whether that *design*
 fits an acceptance mask; these are handed numbers somebody measured on a
 bench, and report whether *that instrument, on the day it was measured*, meets
 the standard it is sold against. There are no classes and no decibel margins
-in them: the verdict is a plain pass or fail, in the unit its own standard
-writes its tolerances in.
+in them: the verdict is a pass or a fail, in the unit its own standard writes
+its tolerances in. Four of them return a result object whose `passes` says so
+and whose other fields say where and by how much; `verify_running_rms_decay`
+grades one printed row and returns the `bool`.
 
 | What is graded | Verifier | Acceptance limits |
 | :--- | :--- | :--- |
 | Aircraft-noise measurement system | `verify_aircraft_noise_system` | IEC 61265:1995 Table 1, and the scalar limits beside it |
 | Human-vibration frequency weighting | `verify_weighting` | ISO 8041-1:2017 Tables 4 and 5 |
 | Human-vibration phase response | `verify_phase_response` | ISO 8041-1:2017 Table 5 and Formula (6) |
-| Saw-tooth burst indications | `verify_signal_burst_response` | ISO 8041-1:2017 Tables 6 to 9 |
+| Saw-tooth burst indications | `verify_signal_burst_response` | ISO 8041-1:2017 Tables 7 to 9 (the signal is Table 6) |
 | Running r.m.s. decay time | `verify_running_rms_decay` | ISO 8041-1:2017 Tables 10 and 11 |
 
 One clause of ISO 8041-1 makes those four different in kind from everything

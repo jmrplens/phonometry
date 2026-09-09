@@ -958,7 +958,7 @@ print(vibration.RUNNING_RMS_DECAY_TIME_S["exponential"])
 
 Los dos promediados tienen forma cerrada, y ninguno es una constante ajustada. El
 promediado lineal conserva los últimos $\tau$ segundos del registro, así que $t$
-segundos después del corte su ventana todavía guarda $(\tau - t)/\tau$ de la
+segundos después del corte su ventana todavía guarda $(\tau - t)/\tau$ del
 valor cuadrático medio original y la indicación cae como $\sqrt{(\tau - t)/\tau}$,
 hasta llegar a la décima parte en $t = 0{,}99\,\tau$. El promediado exponencial
 decae en potencia como $e^{-t/\tau}$, así que la indicación cae como
@@ -1110,7 +1110,7 @@ indicación puede reproducirlas.
 1 m/s²: una rampa lineal ascendente y una caída vertical, y toda ráfaga empieza
 en un paso por cero ascendente y termina en otro. Esa geometría no es un
 adorno, pesa: una ráfaga empezada en el pico lee un 28 % por encima en la fila
-de un solo ciclo de la Tabla 8, cuatro veces su tolerancia. La Tabla 6 aporta
+de un solo ciclo de la Tabla 8, casi tres veces su tolerancia del 10 %. La Tabla 6 aporta
 lo demás para cada aplicación, y `SAWTOOTH_BURST_TESTS` es esa tabla:
 
 ```python

@@ -307,7 +307,19 @@ def _measured_decay_time_s(integration_time_s: float, method: str) -> float:
         signal, fs, integration_time=integration_time_s, method=method
     )
     after = indicated[held - 1 :]
-    return float(np.argmax(after < 0.1 * after[0])) / fs
+    # ``argmax`` on an all-false mask is 0, which would report a decay of
+    # 0.000 s and, in the rate row that divides 20 dB by it, end the whole
+    # report on a ZeroDivisionError instead of failing this one row. The
+    # simulated tail is long enough for every printed time constant, so a
+    # crossing that never happens means the tail is too short.
+    below = after < 0.1 * after[0]
+    if not below.any():
+        msg = (
+            f"the {method} running r.m.s. of tau = {integration_time_s} s did "
+            f"not fall to 10 % inside the {decay:.3g} s simulated after the cut."
+        )
+        raise AssertionError(msg)
+    return float(np.argmax(below)) / fs
 
 
 def _register_decay_times() -> None:

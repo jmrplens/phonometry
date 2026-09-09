@@ -266,14 +266,16 @@ máscara de aceptación; a estas se les entregan números que alguien midió en
 un banco, e informan de si **ese instrumento, el día en que se midió**,
 cumple la norma con la que se vende. No hay clases ni márgenes en decibelios:
 el veredicto es un cumple o no cumple, en la unidad en la que su propia norma
-escribe las tolerancias.
+escribe las tolerancias. Cuatro devuelven un objeto de resultado cuyo `passes`
+lo dice y cuyos demás campos dicen dónde y por cuánto;
+`verify_running_rms_decay` califica una fila impresa y devuelve el `bool`.
 
 | Qué se califica | Verificador | Límites de aceptación | En detalle |
 | :--- | :--- | :--- | :--- |
 | Sistema de medida de ruido de aeronaves | `verify_aircraft_noise_system` | IEC 61265:1995, Tabla 1, y los límites escalares que la acompañan | [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/#verificación-del-sistema-de-medida-iec-61265) |
 | Ponderación frecuencial de vibración en humanos | `verify_weighting` | ISO 8041-1:2017, Tablas 4 y 5 | [Verificación del vibrómetro](/phonometry/es/vibration/human/meter-verification/) |
 | Respuesta de fase de vibración en humanos | `verify_phase_response` | ISO 8041-1:2017, Tabla 5 y Fórmula (6) | [Verificación del vibrómetro](/phonometry/es/vibration/human/meter-verification/) |
-| Indicaciones de la ráfaga en diente de sierra | `verify_signal_burst_response` | ISO 8041-1:2017, Tablas 6 a 9 | [Verificación del vibrómetro](/phonometry/es/vibration/human/meter-verification/) |
+| Indicaciones de la ráfaga en diente de sierra | `verify_signal_burst_response` | ISO 8041-1:2017, Tablas 7 a 9 (la señal, en la Tabla 6) | [Verificación del vibrómetro](/phonometry/es/vibration/human/meter-verification/) |
 | Tiempo de decaimiento del valor eficaz móvil | `verify_running_rms_decay` | ISO 8041-1:2017, Tablas 10 y 11 | [Verificación del vibrómetro](/phonometry/es/vibration/human/meter-verification/) |
 
 Hay una cláusula de la ISO 8041-1 que hace a esas cuatro distintas en

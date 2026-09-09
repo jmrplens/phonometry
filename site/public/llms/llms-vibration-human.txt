@@ -67,8 +67,9 @@ analysis](https://jmrplens.github.io/phonometry/signals/) section.
 
 **A meter is graded on the clauses that can be computed.** The tolerance
 tables of ISO 8041-1 are implemented, and so is every other criterion of it
-that is arithmetic: the characteristic phase deviation, the running r.m.s.
-decay times and the 228 saw-tooth burst indications the standard prints, which
+that is arithmetic: the band-limiting stage on its own, the characteristic
+phase deviation, the running r.m.s. decay times and the 228 saw-tooth burst
+indications the standard prints, which
 is what [meter
 verification](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/) is about. The
 design and type-testing clauses of that standard, from indication and
@@ -1047,9 +1048,10 @@ What the library does not hold is the bench. The accuracy of indication under
 reference conditions (5.5), amplitude linearity (5.7), instrument noise (5.8),
 overload and under-range indication (5.10 and 5.11), electrical cross-talk
 (5.16), the mounting of clause 6 and the environmental and electromagnetic
-criteria of clause 7 are measurements on hardware; and so, at the moment
-somebody has to shake a transducer and read a display, is every test on this
-page. **Passing the weighting check is a necessary condition for conformity
+criteria of clause 7 are measurements on hardware, and none of them is here.
+What is here is one half of each of the other comparisons: the standard's own
+side of them, arithmetic that runs without a bench. The other half always
+needs one, because somebody has to shake a transducer and read a display. **Passing the weighting check is a necessary condition for conformity
 and never a certificate of it.**
 
 One sentence of 5.6.6 is worth carrying through the rest of the page: the
@@ -1827,7 +1829,7 @@ plt.show()
 **What a phase error costs a peak reading.** Annex H is normative, and
 Formula (H.4) is the
 only worked number in the whole phase argument:
-$\Delta P_\max \approx \pm\max\{0.48 \sin \Delta\varphi_0\} \times 100\ \%$,
+$\Delta P_{\max} \approx \pm\max\{0.48 \sin \Delta\varphi_0\} \times 100\ \%$,
 followed by the sentence that for the maximum characteristic phase deviations
 of 12 degrees the maximum peak-value deviation is approximately 10 %. The
 maximum is inside the printed formula, so the answer is one number for a whole
@@ -2045,7 +2047,7 @@ quantities can reproduce them.
 linear rising ramp and a vertical fall, with every burst starting at an upward
 zero crossing and ending at one. That geometry carries weight rather than
 decoration, because a burst started at the peak reads 28 % high on the
-single-cycle row of Table 8, four times its tolerance. Table 6 supplies the
+single-cycle row of Table 8, nearly three times its 10 % tolerance. Table 6 supplies the
 rest per application, and `SAWTOOTH_BURST_TESTS` is that table:
 
 ```python

@@ -134,7 +134,7 @@ the laboratory rig, not this record.
 | :--- | :--- |
 | `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). |
 | `cycles` | Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or `None` for the continuous row. |
-| `fs` | Sampling frequency, in hertz. `None` takes the recommended rate of the application. |
+| `fs` | Sampling frequency, in hertz. Finite, positive, and above twice the upper band-limiting corner of the weighting under test, below which the pass band is not represented and the indications would be an artefact of the sampling. `None` takes the recommended rate of the application. |
 | `amplitude_m_s2` | Zero-to-peak amplitude, in m/s2. The printed responses are for 1 m/s2 and scale with it. |
 
 **Returns:** The record, in m/s2, `round(duration_s * fs)` samples long.
@@ -232,7 +232,7 @@ the linear and the exponential average of Annex D.
 | `application` | One of the keys of [`SAWTOOTH_BURST_TESTS`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst_tests). |
 | `name` | A weighting of that application, or [`BAND_LIMITING`](/phonometry/reference/api/vibration/signal-burst/#band_limiting) for the band-limiting row. |
 | `cycles` | Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or `None` for the continuous row. |
-| `fs` | Sampling frequency, in hertz. `None` takes the recommended rate of the application. |
+| `fs` | Sampling frequency, in hertz. Finite, positive, and above twice the upper band-limiting corner of the weighting under test, below which the pass band is not represented and the indications would be an artefact of the sampling. `None` takes the recommended rate of the application. |
 
 **Returns:** The indications for a 1 m/s2 amplitude burst, keyed by the printed column names of that application's table (`"rms"`, `"vdv"`, `"mtvv_linear"`, `"mtvv_exponential"`, `"msdv"`), in the units of each quantity.
 

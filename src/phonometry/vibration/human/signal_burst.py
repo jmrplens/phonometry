@@ -482,8 +482,11 @@ def sawtooth_burst(
     :param application: One of the keys of :data:`SAWTOOTH_BURST_TESTS`.
     :param cycles: Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or ``None``
         for the continuous row.
-    :param fs: Sampling frequency, in hertz. ``None`` takes the recommended
-        rate of the application.
+    :param fs: Sampling frequency, in hertz. Finite, positive, and above twice
+        the upper band-limiting corner of the weighting under test, below
+        which the pass band is not represented and the indications would be an
+        artefact of the sampling. ``None`` takes the recommended rate of the
+        application.
     :param amplitude_m_s2: Zero-to-peak amplitude, in m/s2. The printed
         responses are for 1 m/s2 and scale with it.
     :return: The record, in m/s2, ``round(duration_s * fs)`` samples long.
@@ -607,8 +610,11 @@ def signal_burst_indications(
         the band-limiting row.
     :param cycles: Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or ``None``
         for the continuous row.
-    :param fs: Sampling frequency, in hertz. ``None`` takes the recommended
-        rate of the application.
+    :param fs: Sampling frequency, in hertz. Finite, positive, and above twice
+        the upper band-limiting corner of the weighting under test, below
+        which the pass band is not represented and the indications would be an
+        artefact of the sampling. ``None`` takes the recommended rate of the
+        application.
     :return: The indications for a 1 m/s2 amplitude burst, keyed by the
         printed column names of that application's table (``"rms"``,
         ``"vdv"``, ``"mtvv_linear"``, ``"mtvv_exponential"``, ``"msdv"``), in

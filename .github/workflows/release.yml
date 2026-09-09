@@ -34,14 +34,31 @@ jobs:
         id: version
         run: |
           VERSION=$(tr -d ' \n' < VERSION)
-          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.]+)?$'; then
-            echo "::error::VERSION file does not contain a valid semver: '$VERSION'"
+          # The PEP 440 normal form, which is what the build back end writes
+          # into the artefact names a few steps down: a pre-release marker
+          # carries no separator (4.0.0rc1, never 4.0.0-rc1), so accepting the
+          # hyphen here would pass a version whose wheel is then named
+          # something else and fail at the artefact check instead.
+          if ! echo "$VERSION" |
+            grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+)?(\.post[0-9]+)?(\.dev[0-9]+)?$'; then
+            echo "::error::VERSION is not a PEP 440 normal-form version: '$VERSION'"
             exit 1
           fi
           if git rev-parse "v$VERSION" >/dev/null 2>&1; then
             echo "::notice::Tag v$VERSION already exists — nothing to release."
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
+          fi
+          # A release candidate is published as a pre-release, so it does not
+          # become the repository's "Latest release" and pip leaves it alone
+          # without --pre. Read off the version rather than set by hand: the
+          # VERSION file is the only thing that decides a release here, and a
+          # flag somebody has to remember is a flag that goes out wrong.
+          if echo "$VERSION" |
+            grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+|\.dev[0-9]+)'; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
           echo "skip=false" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
@@ -162,6 +179,6 @@ jobs:
             See the [changelog](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) for the full details of this release.
           generate_release_notes: true
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.version.outputs.prerelease }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

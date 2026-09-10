@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1030/1030 conformance checks pass** across 78 domains and 410 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1030/1030 conformance checks pass** across 78 domains and 409 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -790,41 +790,41 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
-| DIN 45669-1:2010-09 5.2.3.2 | Band limitation at the lower corner 0,8 f_u, magnitude | 0.70711 (+/-0.00005) | 0.70711 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 5.2.3.2 | Band limitation at the upper corner f_o / 0,8, magnitude | 0.70711 (+/-0.00005) | 0.70711 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 5.2.3.2 | KB weighting at its own corner 5,6 Hz, relative to the band limitation | 0.70711 (+/-0.00005) | 0.70711 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 2 | Lower limit of F(f) inside the band, % | 10 % (+/-0 %) | 10 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 2 | Lower limit of F(f) in the skirt, % | 20 % (+/-0 %) | 20 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 3 | Upper limit of F(f) outside the band, % | 20 % (+/-0 %) | 20 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 9 | KB_F of a 1 mm/s sine at 1 Hz | 0.103 (+/-0.001) | 0.1027 | -0.0003 | 30 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 9 | KB_Fmax of a 1 mm/s sine at 1 Hz | 0.13 (+/-0.001) | 0.1298 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 9 | KB_F of a 1 mm/s sine at 5.6 Hz | 0.5 (+/-0.001) | 0.4994 | -0.0006 | 60 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 9 | KB_Fmax of a 1 mm/s sine at 5.6 Hz | 0.528 (+/-0.001) | 0.5274 | -0.0006 | 60 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 9 | KB_F of a 1 mm/s sine at 31.5 Hz | 0.693 (+/-0.001) | 0.6928 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 9 | KB_Fmax of a 1 mm/s sine at 31.5 Hz | 0.7 (+/-0.001) | 0.6998 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 9 | KB_F of a 1 mm/s sine at 80 Hz | 0.594 (+/-0.001) | 0.5941 | 0.0001 | 10 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 9 | KB_Fmax of a 1 mm/s sine at 80 Hz | 0.597 (+/-0.001) | 0.5965 | -0.0005 | 50 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 9 | KB_F of a 1 mm/s sine at 315 Hz | 0.071 (+/-0.001) | 0.0708 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table 9 | KB_Fmax of a 1 mm/s sine at 315 Hz | 0.071 (+/-0.001) | 0.0709 | -0.0001 | 10 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 6.2.3.12 | KB_F under the reference conditions (1 mm/s, 16 Hz) | 0.667 (+/-0.001) | 0.6671 | 0.0001 | 10 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 6.2.3.12 | KB_Fmax under the reference conditions (1 mm/s, 16 Hz) | 0.68 (+/-0.001) | 0.6803 | 0.0003 | 30 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, continuous, % of continuous | 100.4 % (+/-0.7 %) | 100.397 % | -0.003 % | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 800 ms, % of continuous | 100.3 % (+/-0.7 %) | 100.335 % | 0.035 % | 5 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 400 ms, % of continuous | 98.3 % (+/-0.7 %) | 98.337 % | 0.037 % | 5 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 200 ms, % of continuous | 89.7 % (+/-0.7 %) | 89.648 % | -0.052 % | 7 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 100 ms, % of continuous | 74.5 % (+/-0.7 %) | 74.405 % | -0.095 % | 14 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 50 ms, % of continuous | 57.6 % (+/-0.7 %) | 57.59 % | -0.01 % | 1 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 25 ms, % of continuous | 42.7 % (+/-0.7 %) | 42.886 % | 0.186 % | 27 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 12.5 ms, % of continuous | 30.9 % (+/-0.7 %) | 31.427 % | 0.527 % | 75 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table E.1 | Assessment weighting H_vB, commercial, at 50 Hz | 0.5 (+/-0.00005) | 0.5 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table E.1 | Assessment weighting H_vB, commercial, at 100 Hz | 0.4 (+/-0.00005) | 0.4 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table E.1 | Assessment weighting H_vB, residential, at 50 Hz | 0.33333 (+/-0.00005) | 0.33333 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table E.1 | Assessment weighting H_vB, residential, at 100 Hz | 0.25 (+/-0.00005) | 0.25 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table E.1 | Assessment weighting H_vB, sensitive, at 50 Hz | 0.375 (+/-0.00005) | 0.375 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table E.1 | Assessment weighting H_vB, sensitive, at 100 Hz | 0.3 (+/-0.00005) | 0.3 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table E.2 | Guideline assessment velocity, commercial, mm/s | 20 mm/s (+/-0.0005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table E.2 | Guideline assessment velocity, residential, mm/s | 5 mm/s (+/-0.0005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45669-1:2010-09 Table E.2 | Guideline assessment velocity, sensitive, mm/s | 3 mm/s (+/-0.0005 mm/s) | 3 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 5.2.3.2 | Band limitation at the lower corner 0,8 f_u, magnitude | 0.70711 (+/-0.00005) | 0.70711 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 5.2.3.2 | Band limitation at the upper corner f_o / 0,8, magnitude | 0.70711 (+/-0.00005) | 0.70711 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 5.2.3.2 | KB weighting at its own corner 5,6 Hz, relative to the band limitation | 0.70711 (+/-0.00005) | 0.70711 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 2 | Lower limit of F(f) inside the band, % | 10 % (+/-0 %) | 10 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 2 | Lower limit of F(f) in the skirt, % | 20 % (+/-0 %) | 20 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 3 | Upper limit of F(f) outside the band, % | 20 % (+/-0 %) | 20 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 9 | KB_F of a 1 mm/s sine at 1 Hz | 0.103 (+/-0.001) | 0.1027 | -0.0003 | 30 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 9 | KB_Fmax of a 1 mm/s sine at 1 Hz | 0.13 (+/-0.001) | 0.1298 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 9 | KB_F of a 1 mm/s sine at 5.6 Hz | 0.5 (+/-0.001) | 0.4994 | -0.0006 | 60 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 9 | KB_Fmax of a 1 mm/s sine at 5.6 Hz | 0.528 (+/-0.001) | 0.5274 | -0.0006 | 60 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 9 | KB_F of a 1 mm/s sine at 31.5 Hz | 0.693 (+/-0.001) | 0.6928 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 9 | KB_Fmax of a 1 mm/s sine at 31.5 Hz | 0.7 (+/-0.001) | 0.6998 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 9 | KB_F of a 1 mm/s sine at 80 Hz | 0.594 (+/-0.001) | 0.5941 | 0.0001 | 10 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 9 | KB_Fmax of a 1 mm/s sine at 80 Hz | 0.597 (+/-0.001) | 0.5965 | -0.0005 | 50 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 9 | KB_F of a 1 mm/s sine at 315 Hz | 0.071 (+/-0.001) | 0.0708 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Table 9 | KB_Fmax of a 1 mm/s sine at 315 Hz | 0.071 (+/-0.001) | 0.0709 | -0.0001 | 10 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 6.2.3.12 | KB_F under the reference conditions (1 mm/s, 16 Hz) | 0.667 (+/-0.001) | 0.6671 | 0.0001 | 10 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 6.2.3.12 | KB_Fmax under the reference conditions (1 mm/s, 16 Hz) | 0.68 (+/-0.001) | 0.6803 | 0.0003 | 30 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Ber 1, Table 8 | KB_Fmax of an 80 Hz burst train, continuous, % of continuous | 100.4 % (+/-0.7 %) | 100.397 % | -0.003 % | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Ber 1, Table 8 | KB_Fmax of an 80 Hz burst train, 800 ms, % of continuous | 100.3 % (+/-0.7 %) | 100.335 % | 0.035 % | 5 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Ber 1, Table 8 | KB_Fmax of an 80 Hz burst train, 400 ms, % of continuous | 98.3 % (+/-0.7 %) | 98.337 % | 0.037 % | 5 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Ber 1, Table 8 | KB_Fmax of an 80 Hz burst train, 200 ms, % of continuous | 89.7 % (+/-0.7 %) | 89.648 % | -0.052 % | 7 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Ber 1, Table 8 | KB_Fmax of an 80 Hz burst train, 100 ms, % of continuous | 74.5 % (+/-0.7 %) | 74.405 % | -0.095 % | 14 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Ber 1, Table 8 | KB_Fmax of an 80 Hz burst train, 50 ms, % of continuous | 57.6 % (+/-0.7 %) | 57.59 % | -0.01 % | 1 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Ber 1, Table 8 | KB_Fmax of an 80 Hz burst train, 25 ms, % of continuous | 42.7 % (+/-0.7 %) | 42.886 % | 0.186 % | 27 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Ber 1, Table 8 | KB_Fmax of an 80 Hz burst train, 12.5 ms, % of continuous | 30.9 % (+/-0.7 %) | 31.427 % | 0.527 % | 75 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Annex E, Table E.1 | Assessment weighting H_vB, commercial, at 50 Hz | 0.5 (+/-0.00005) | 0.5 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Annex E, Table E.1 | Assessment weighting H_vB, commercial, at 100 Hz | 0.4 (+/-0.00005) | 0.4 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Annex E, Table E.1 | Assessment weighting H_vB, residential, at 50 Hz | 0.33333 (+/-0.00005) | 0.33333 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Annex E, Table E.1 | Assessment weighting H_vB, residential, at 100 Hz | 0.25 (+/-0.00005) | 0.25 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Annex E, Table E.1 | Assessment weighting H_vB, sensitive, at 50 Hz | 0.375 (+/-0.00005) | 0.375 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Annex E, Table E.1 | Assessment weighting H_vB, sensitive, at 100 Hz | 0.3 (+/-0.00005) | 0.3 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Annex E, Table E.2 | Guideline assessment velocity, commercial, mm/s | 20 mm/s (+/-0.0005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Annex E, Table E.2 | Guideline assessment velocity, residential, mm/s | 5 mm/s (+/-0.0005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010 Annex E, Table E.2 | Guideline assessment velocity, sensitive, mm/s | 3 mm/s (+/-0.0005 mm/s) | 3 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

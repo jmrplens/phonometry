@@ -114,6 +114,8 @@ everything downstream is built on.
 <summary>Figure code</summary>
 
 ```python
+import matplotlib.pyplot as plt
+import numpy as np
 
 from phonometry import vibration
 
@@ -139,6 +141,7 @@ The magnitudes of both are printed as Formulae (5) and (6), and the library
 returns the complex responses so a phase check has something to read:
 
 ```python
+import numpy as np
 
 from phonometry import vibration
 
@@ -176,6 +179,8 @@ easy to read past:
 <summary>Figure code</summary>
 
 ```python
+import matplotlib.pyplot as plt
+import numpy as np
 
 from phonometry import vibration
 
@@ -201,6 +206,7 @@ somewhere nearby, and two events. Running it through the chain gives the four
 numbers, and the third clock interval is where Formula (2) shows its teeth.
 
 ```python
+import numpy as np
 
 from phonometry import vibration
 
@@ -268,6 +274,7 @@ conformity one. What is left is graded band by band: 10 % from `1,25 f_u` to
 constraining the response from below altogether.
 
 ```python
+import numpy as np
 
 from phonometry import vibration
 
@@ -295,6 +302,7 @@ the Fourier transform of the whole event, and says plainly that they can
 disagree. They do:
 
 ```python
+import numpy as np
 
 from phonometry import vibration
 
@@ -320,6 +328,8 @@ single number that no longer depends on frequency: 20, 5 or 3 mm/s (Table E.2).
 <summary>Figure code</summary>
 
 ```python
+import matplotlib.pyplot as plt
+import numpy as np
 
 from phonometry import vibration
 
@@ -348,6 +358,7 @@ FIR is the type it names, and the library designs one.
 The two routes agree, which is the point of the annex:
 
 ```python
+import numpy as np
 
 from phonometry import vibration
 

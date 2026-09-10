@@ -1,6 +1,6 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1030 numerical conformance checks against 410 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1030 numerical conformance checks against 409 standards enforced in CI.
 
 phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1030 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 78 domains.
 
@@ -56212,7 +56212,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1030 numerical conformance checks across 78 domains and 410 standards, covering
+1030 numerical conformance checks across 78 domains and 409 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise
@@ -61183,6 +61183,8 @@ everything downstream is built on.
 <summary>Figure code</summary>
 
 ```python
+import matplotlib.pyplot as plt
+import numpy as np
 
 from phonometry import vibration
 
@@ -61208,6 +61210,7 @@ The magnitudes of both are printed as Formulae (5) and (6), and the library
 returns the complex responses so a phase check has something to read:
 
 ```python
+import numpy as np
 
 from phonometry import vibration
 
@@ -61245,6 +61248,8 @@ easy to read past:
 <summary>Figure code</summary>
 
 ```python
+import matplotlib.pyplot as plt
+import numpy as np
 
 from phonometry import vibration
 
@@ -61270,6 +61275,7 @@ somewhere nearby, and two events. Running it through the chain gives the four
 numbers, and the third clock interval is where Formula (2) shows its teeth.
 
 ```python
+import numpy as np
 
 from phonometry import vibration
 
@@ -61337,6 +61343,7 @@ conformity one. What is left is graded band by band: 10 % from `1,25 f_u` to
 constraining the response from below altogether.
 
 ```python
+import numpy as np
 
 from phonometry import vibration
 
@@ -61364,6 +61371,7 @@ the Fourier transform of the whole event, and says plainly that they can
 disagree. They do:
 
 ```python
+import numpy as np
 
 from phonometry import vibration
 
@@ -61389,6 +61397,8 @@ single number that no longer depends on frequency: 20, 5 or 3 mm/s (Table E.2).
 <summary>Figure code</summary>
 
 ```python
+import matplotlib.pyplot as plt
+import numpy as np
 
 from phonometry import vibration
 
@@ -61417,6 +61427,7 @@ FIR is the type it names, and the library designs one.
 The two routes agree, which is the point of the annex:
 
 ```python
+import numpy as np
 
 from phonometry import vibration
 

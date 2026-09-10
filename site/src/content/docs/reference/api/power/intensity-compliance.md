@@ -100,35 +100,6 @@ reduces to the looser of the two component classes.
 | :--- | :--- |
 | ValueError | If either class is not 1 or 2. The non-real-time class 2X of clause 4 is not modelled here. |
 
-## intensity_class_compliance
-
-```python
-intensity_class_compliance(
-    residual_index: list[float] | np.ndarray,
-    frequencies: list[float] | np.ndarray,
-    *,
-    device: str = 'instrument',
-    spacing: float = 0.025,
-) -> IntensityInstrumentComplianceResult
-```
-
-Verify a `delta_pI0` spectrum and package the verdict as a result.
-
-Runs [`verify_intensity_class`](/phonometry/reference/api/power/intensity-compliance/#verify_intensity_class) and stores the outcome together with
-the measured spectrum and the two rescaled Table 2 masks, so the returned
-object exposes `.plot()` and an accredited `.report()` fiche.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `residual_index` | Measured `delta_pI0` per band, in decibels. |
-| `frequencies` | Band centre frequencies in Hz, one per entry. |
-| `device` | `"probe"`, `"processor"` or `"instrument"`. |
-| `spacing` | Microphone separation in metres (default 0.025). |
-
-**Returns:** An [`IntensityInstrumentComplianceResult`](/phonometry/reference/api/power/intensity-compliance/#intensityinstrumentcomplianceresult).
-
 ## IntensityInstrumentComplianceResult
 
 ```python
@@ -148,7 +119,7 @@ IntensityInstrumentComplianceResult(
 
 IEC 61043:1993 class verdict of a p-p sound-intensity chain.
 
-Wraps the outcome of [`verify_intensity_class`](/phonometry/reference/api/power/intensity-compliance/#verify_intensity_class) together with the
+What [`verify_intensity_class`](/phonometry/reference/api/power/intensity-compliance/#verify_intensity_class) returns: the verdict together with the
 measured spectrum and the two Table 2 masks it was judged against, so the
 result can redraw itself and render an accredited fiche.
 
@@ -157,7 +128,7 @@ result can redraw itself and render an accredited fiche.
 | Name | Description |
 | :--- | :--- |
 | `overall_class` | The strictest class every band meets (1 or 2), or `None` when at least one band meets neither. It is the *largest* per-band class, because a band meeting class 1 meets class 2 as well. |
-| `bands` | The per-band verdict dictionaries of [`verify_intensity_class`](/phonometry/reference/api/power/intensity-compliance/#verify_intensity_class), as an immutable tuple. |
+| `bands` | The per-band verdicts, as an immutable tuple. |
 | `frequency` | Nominal band centre frequencies, in Hz. |
 | `residual_index` | Measured `delta_pI0` per band, in dB. |
 | `limit_class1` | Class 1 minimum `delta_pI0` per band, in dB, already rescaled to `spacing`. |
@@ -434,7 +405,7 @@ verify_intensity_class(
     *,
     device: str = 'instrument',
     spacing: float = 0.025,
-) -> dict[str, Any]
+) -> IntensityInstrumentComplianceResult
 ```
 
 Verify a measured `delta_pI0` spectrum against IEC 61043:1993 Table 2.
@@ -470,7 +441,7 @@ intervals across the whole 50 Hz to 6.3 kHz range.
 | `device` | `"probe"`, `"processor"` or `"instrument"`. |
 | `spacing` | Microphone separation in metres (default 0.025). |
 
-**Returns:** Dict with `overall_class` (1, 2 or `None`), `range_limited`, `bands` (a list of `{"freq", "class", "residual_index_db", "limit_class1_db", "limit_class2_db", "margin_class1_db", "margin_class2_db"}`), `device`, `spacing` and `spacing_offset_db` (the Note 1 term applied to the table).
+**Returns:** An [`IntensityInstrumentComplianceResult`](/phonometry/reference/api/power/intensity-compliance/#intensityinstrumentcomplianceresult), which carries the verdict together with the measured spectrum and the two rescaled Table 2 masks, so it exposes `.plot()` and an accredited `.report()` fiche.
 
 **Raises**
 

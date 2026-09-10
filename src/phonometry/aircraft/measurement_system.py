@@ -12,11 +12,13 @@ and is not repeated here.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 
 __all__ = [
+    "AircraftSystemComplianceResult",
     "verify_aircraft_noise_system",
 ]
 
@@ -71,13 +73,51 @@ def _iec61265_directional_limit(frequency: float, angle: float) -> float:
     return row[col]
 
 
+@dataclass(frozen=True)
+class AircraftSystemComplianceResult:
+    """IEC 61265:1995 verdict on an aircraft-noise measurement chain.
+
+    What :func:`verify_aircraft_noise_system` returns: the verdict together
+    with the individual checks it is the conjunction of.
+
+    :ivar passed: Whether every supplied measurement met its limit.
+    :ivar checks: One entry per checked quantity, ``{"quantity", "limit",
+        "value", "ok", ...}``, as an immutable tuple.
+    """
+
+    passed: bool
+    checks: tuple[dict[str, Any], ...]
+
+    def __post_init__(self) -> None:
+        """Reject a verdict the checks under it do not support.
+
+        The chain is qualified by the conjunction of what was actually
+        measured, so a stated ``passed`` that does not restate the table
+        prints a pass over a row whose ``ok`` is ``False``. A call that
+        supplies no measurement carries no check and does not pass: nothing
+        was measured, so nothing was qualified.
+
+        :raises ValueError: if ``passed`` is not the conjunction of the
+            checks, or is stated over no check at all.
+        """
+        derived = bool(self.checks) and all(bool(check["ok"]) for check in self.checks)
+        if self.passed != derived:
+            msg = (
+                f"{type(self).__name__}: 'passed' must be the conjunction of "
+                f"the checks, and False over no check at all; got "
+                f"{self.passed!r} over {len(self.checks)} check(s) where they "
+                f"give {derived!r}."
+            )
+            raise ValueError(msg)
+
+
 def verify_aircraft_noise_system(
     *,
     directional: dict[float, dict[float, float]] | None = None,
     frequency_response: dict[float, float] | None = None,
     linearity: dict[str, float] | None = None,
     resolution: float | None = None,
-) -> dict[str, Any]:
+) -> AircraftSystemComplianceResult:
     """Verify measured performance against IEC 61265:1995 tolerances.
 
     Each supplied measurement is checked against the standard's limit; the
@@ -91,8 +131,9 @@ def verify_aircraft_noise_system(
     :param linearity: Level non-linearity ``{"reference": dB, "other": dB}``
         against the ±0.4/±0.5 dB limits (§4.5.2).
     :param resolution: Readout resolution, in dB, against the 0.1 dB limit (§4.7).
-    :return: ``{"passed": bool, "checks": [{"quantity", "limit", "value", "ok",
-        ...}]}``; ``passed`` is the conjunction of every check.
+    :return: An :class:`AircraftSystemComplianceResult`, whose ``passed`` is
+        the conjunction of every check and ``False`` when no measurement was
+        supplied.
     :raises ValueError: If a frequency or angle is out of the tabulated range.
     """
     checks: list[dict[str, Any]] = []
@@ -105,8 +146,10 @@ def verify_aircraft_noise_system(
     if resolution is not None:
         checks.append(_resolution_check(resolution))
 
-    passed = bool(checks) and all(c["ok"] for c in checks)
-    return {"passed": passed, "checks": checks}
+    return AircraftSystemComplianceResult(
+        passed=bool(checks) and all(c["ok"] for c in checks),
+        checks=tuple(checks),
+    )
 
 
 def _directional_checks(

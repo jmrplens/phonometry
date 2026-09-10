@@ -78,9 +78,9 @@ from phonometry import filters
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6)
 result = filters.verify_filter_class(bank)
-print(result["overall_class"])          # 1
-print(result["range_limited"])          # True for a decimated bank
-print(result["bands"][0])
+print(result.overall_class)          # 1
+print(result.range_limited)          # True for a decimated bank
+print(result.bands[0])
 # {'freq': 12.589254117941678, 'class': 1, 'checked_to_omega': 3.8127755266765493, 'margin_class1_db': 0.3999999999999595, 'margin_class2_db': 0.5999999999999595}
 ```
 
@@ -193,8 +193,8 @@ fs = 48000
 bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
 
 result = filters.verify_filter_class(bank, edition="1995")   # classes 0, 1, 2
-print(result["overall_class"])          # 0  (the default Butterworth clears it)
-print(result["bands"][0]["margin_class0_db"])
+print(result.overall_class)          # 0  (the default Butterworth clears it)
+print(result.bands[0]["margin_class0_db"])
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_class0_mask.svg" alt="Nested pass-band acceptance corridors for class 0, 1 and 2 of IEC 61260:1995 with the order-6 Butterworth response sitting inside the tightest class 0 corridor" width="80%" />
@@ -306,7 +306,7 @@ Butterworth at the top because class 0 no longer exists to separate them.
 limit just inside the band edges, where their ripple lives; Bessel leaves it
 along the skirt, because it never falls fast enough. The red samples are the
 ones `verify_filter_class` counted against the design, and this is exactly what
-`filter_class_compliance(bank).plot()` draws for a bank of your own — note that
+`verify_filter_class(bank).plot()` draws for a bank of your own — note that
 the plot shades the corridor of the class each design came closest to, so the
 three failing panels show the class 2 corridor.*
 
@@ -323,7 +323,7 @@ for ax, ftype in zip(axes.ravel(), ("butter", "cheby1", "ellip", "bessel")):
     bank = filters.OctaveFilterBank(
         fs, fraction=1, order=6, limits=[800, 1200],
         design=filters.FilterDesign(filter_type=ftype))
-    result = filters.filter_class_compliance(bank)
+    result = filters.verify_filter_class(bank)
     result.plot(ax=ax)
     ax.set_title(f"{ftype}: overall_class = {result.overall_class}")
 plt.tight_layout()
@@ -365,9 +365,9 @@ calibrator — is in
 
 ## 4. The compliance fiche (`.report()`)
 
-`filter_class_compliance(bank)` wraps the same verification as a result object
-that exposes `.plot()` and `.report()`, so a type-test verdict can be rendered
-as a one-page accredited fiche. The fiche lists every band's achieved class and
+`verify_filter_class(bank)` returns a result object that exposes `.plot()`
+and `.report()`, so a type-test verdict can be rendered as a one-page
+accredited fiche. The fiche lists every band's achieved class and
 its binding margin, overlays the worst-margin band's measured relative
 attenuation on the class corridor, and boxes the overall class-compliance
 result. Pass a `required_class` on the `ReportMetadata` to add a PASS/FAIL
@@ -381,7 +381,7 @@ a comma decimal separator), e.g.
 from phonometry import ReportMetadata, filters
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
-result = filters.filter_class_compliance(bank)   # overall_class == 1
+result = filters.verify_filter_class(bank)   # overall_class == 1
 result.plot()   # the worst-margin band on its class corridor
 
 result.report(
@@ -410,7 +410,7 @@ dropped, so a modest order-6 bank can be certified to class 0:
 
 ```python
 bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
-result = filters.filter_class_compliance(bank, edition="1995")   # overall_class == 0
+result = filters.verify_filter_class(bank, edition="1995")   # overall_class == 0
 result.plot()   # the class-0 corridor of the 1995 edition
 result.report("iec61260_1995.pdf",
               metadata=ReportMetadata(measurement_standard="IEC 61260:1995",
@@ -433,7 +433,7 @@ fractional-octave breakpoint mapping and the log-frequency interpolation of
 the standard), checked band by band by `verify_filter_class` and published as
 a mask by `class_limits`; the withdrawn IEC 61260:1995 / ANSI S1.11-2004 class
 0 mask, reachable with `edition="1995"`; and the accredited one-page fiche of
-`filter_class_compliance().report()`, with its optional `required_class`
+`verify_filter_class().report()`, with its optional `required_class`
 PASS/FAIL verdict, in English and Spanish.
 </ScopeClaim>
 

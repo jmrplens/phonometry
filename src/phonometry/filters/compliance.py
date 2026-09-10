@@ -59,7 +59,6 @@ if TYPE_CHECKING:
 __all__ = [
     "FilterComplianceResult",
     "class_limits",
-    "filter_class_compliance",
     "verify_filter_class",
 ]
 
@@ -293,8 +292,8 @@ def _verify_band(
 
 
 def verify_filter_class(
-    bank: OctaveFilterBank, num_points: int = 2**15, *, edition: str = "2014"
-) -> dict[str, Any]:
+    bank: OctaveFilterBank, *, num_points: int = 2**15, edition: str = "2014"
+) -> FilterComplianceResult:
     """Verify a filter bank against the IEC 61260 class limits.
 
     Each band's relative attenuation (referenced to the attenuation at its
@@ -315,16 +314,11 @@ def verify_filter_class(
     :param num_points: Number of frequency grid points per band (>= 16).
     :param edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
         (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0).
-    :return: Dict with ``overall_class`` (the strictest class every band meets,
-        or ``None``), ``range_limited`` (``True`` when at least one band's
-        stop-band mask extends beyond its processing Nyquist, so the returned
-        class attests the verified frequency range rather than the full
-        Table 1 mask; see above) and ``bands``: a list of ``{"freq", "class",
-        "checked_to_omega", "margin_class<c>_db"}`` for each class ``c`` of
-        the edition, where a positive margin means the limits are met with
-        that much room and ``checked_to_omega`` is the highest normalized
-        frequency the band's verification could reach (its processing Nyquist
-        over ``f_m``).
+    :return: A :class:`FilterComplianceResult`, which carries the verdict
+        together with the sections, mid-band frequencies, decimation factors
+        and sampling rate it was measured through, so it can redraw the
+        relative attenuation and render an accredited ``.report()`` fiche
+        without keeping a reference to the (possibly stateful) bank.
     """
     if num_points < _MIN_GRID_POINTS:
         msg = "'num_points' must be at least 16."
@@ -362,14 +356,26 @@ def verify_filter_class(
 
     if not bands:
         # No bands to verify: never report compliance vacuously.
-        return {"overall_class": None, "range_limited": False, "bands": []}
+        overall: int | None = None
+        range_limited = False
+    else:
+        classes = [band["class"] for band in bands]
+        # The strictest class every band meets is the worst (largest) per-band
+        # class; None if any band meets no class.
+        overall = None if None in classes else max(classes)
 
-    classes = [band["class"] for band in bands]
-    # The strictest class every band meets is the worst (largest) per-band class;
-    # None if any band meets no class.
-    overall: int | None = None if None in classes else max(classes)
-
-    return {"overall_class": overall, "range_limited": range_limited, "bands": bands}
+    return FilterComplianceResult(
+        overall_class=overall,
+        bands=tuple(bands),
+        fraction=int(bank.fraction),
+        edition=edition,
+        sos=tuple(np.asarray(s, dtype=np.float64) for s in bank.sos),
+        band_frequencies=np.asarray(bank.freq, dtype=np.float64),
+        factors=tuple(int(f) for f in bank.factor),
+        fs=float(bank.fs),
+        num_points=int(num_points),
+        range_limited=range_limited,
+    )
 
 
 def _margin_classes(band: dict[str, Any]) -> list[int]:
@@ -414,15 +420,14 @@ def _require_margin_classes(
 class FilterComplianceResult:
     """IEC 61260-1 class-compliance verdict of an :class:`OctaveFilterBank`.
 
-    Wraps the dictionary of :func:`verify_filter_class` together with the
+    What :func:`verify_filter_class` returns: the verdict together with the
     minimal filter-bank data needed to redraw the measured relative-attenuation
     curve, so the result exposes the standard ``plot`` / ``report`` pair without
     holding a reference to the (possibly stateful) bank.
 
     :ivar overall_class: The strictest class every band meets (0/1/2), or
         ``None`` when at least one band meets no class of the edition.
-    :ivar bands: The per-band verdict dictionaries of
-        :func:`verify_filter_class` (one ``{"freq", "class",
+    :ivar bands: The per-band verdicts (one ``{"freq", "class",
         "margin_class<c>_db", ...}`` per band), as an immutable tuple.
     :ivar fraction: Bandwidth designator ``b`` (1 for octave, 3 for
         one-third-octave).
@@ -633,38 +638,6 @@ class FilterComplianceResult:
         return render_iec61260_report(
             self, path, metadata=metadata, verbose=verbose, language=language
         )
-
-
-def filter_class_compliance(
-    bank: OctaveFilterBank, *, num_points: int = 2**15, edition: str = "2014"
-) -> FilterComplianceResult:
-    """Verify a filter bank and package the verdict as a reportable result.
-
-    Runs :func:`verify_filter_class` and stores the outcome together with the
-    bank's second-order sections, mid-band frequencies, per-band decimation
-    factors and sampling rate, so the returned object can redraw the measured
-    relative attenuation and render an accredited ``.report()`` fiche without
-    keeping a reference to the bank.
-
-    :param bank: The filter bank to verify.
-    :param num_points: Frequency grid points per band (>= 16).
-    :param edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
-        (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0).
-    :return: A :class:`FilterComplianceResult`.
-    """
-    verdict = verify_filter_class(bank, num_points, edition=edition)
-    return FilterComplianceResult(
-        overall_class=verdict["overall_class"],
-        bands=tuple(verdict["bands"]),
-        fraction=int(bank.fraction),
-        edition=edition,
-        sos=tuple(np.asarray(s, dtype=np.float64) for s in bank.sos),
-        band_frequencies=np.asarray(bank.freq, dtype=np.float64),
-        factors=tuple(int(f) for f in bank.factor),
-        fs=float(bank.fs),
-        num_points=int(num_points),
-        range_limited=bool(verdict["range_limited"]),
-    )
 
 
 #: The frequency-weighting transcriptions this module used to carry went to

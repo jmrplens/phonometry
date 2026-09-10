@@ -58,14 +58,14 @@ from phonometry import filters
 
 wf = filters.WeightingFilter(48000, "A")
 weighting = filters.verify_weighting_class(wf)
-print(weighting["overall_class"])       # 1
-print(weighting["range_limited"])       # False
+print(weighting.overall_class)       # 1
+print(weighting.range_limited)       # False
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6,
                                 limits=[100, 10000])
 bands = filters.verify_filter_class(bank)
-print(bands["overall_class"])           # 1
-print(bands["range_limited"])           # True for a decimated bank
+print(bands.overall_class)           # 1
+print(bands.range_limited)           # True for a decimated bank
 ```
 
 Read the flags, not just the class: `range_limited` is `True` on the
@@ -78,17 +78,17 @@ side is section 6 of [Frequency weighting](../levels/weighting.md).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_class_mask_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_class_mask.svg" alt="A and C weighting deviations at 48 kHz threading within the IEC 61672-1 Table 3 class 1 acceptance corridor, with the wider class 2 limits dotted" width="80%"></picture>
 
-When the verdict has to leave the console, `filter_class_compliance` wraps
-the same verification as a result object with `.plot()` and `.report()`, the
-one-page accredited fiche with an optional PASS/FAIL row against a required
-class; `intensity_class_compliance` does the same for the IEC 61043
-residual-index verdict:
+When the verdict has to leave the console, the same call answers: what
+`verify_filter_class` returns carries `.plot()` and `.report()`, the one-page
+accredited fiche with an optional PASS/FAIL row against a required class, and
+`verify_intensity_class` does the same for the IEC 61043 residual-index
+verdict:
 
 ```python
 from phonometry import ReportMetadata, filters
 
 bank_11 = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
-result = filters.filter_class_compliance(bank_11)   # result.overall_class == 1
+result = filters.verify_filter_class(bank_11)   # result.overall_class == 1
 result.report(
     "iec61260.pdf",
     metadata=ReportMetadata(

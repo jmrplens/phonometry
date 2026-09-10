@@ -71,13 +71,13 @@ def _chk_butter_class0_1995() -> Outcome:
         design=filters.FilterDesign(filter_type="butter"),
     )
     result = ph.filters.verify_filter_class(bank, edition="1995")
-    margin = min(b["margin_class0_db"] for b in result["bands"])
-    ok = result["overall_class"] == 0
+    margin = min(b["margin_class0_db"] for b in result.bands)
+    ok = result.overall_class == 0
     return Outcome(
         expected="class 0",
         computed=(
-            f"class {result['overall_class']}"
-            if result["overall_class"] is not None
+            f"class {result.overall_class}"
+            if result.overall_class is not None
             else "none"
         )
         + f" (margin {margin:+.3f} dB)",
@@ -95,13 +95,13 @@ def _weighting_type0_check(curve: str, fs: int) -> Outcome:
     """
     wf = filters.WeightingFilter(fs, curve)
     result = ph.filters.verify_weighting_class(wf, edition="1979")
-    margin = min(b["margin_class0_db"] for b in result["bands"])
-    ok = result["overall_class"] == 0
+    margin = min(b["margin_class0_db"] for b in result.bands)
+    ok = result.overall_class == 0
     return Outcome(
         expected="Type 0",
         computed=(
-            f"Type {result['overall_class']}"
-            if result["overall_class"] is not None
+            f"Type {result.overall_class}"
+            if result.overall_class is not None
             else "none"
         )
         + f" (margin {margin:+.3f} dB)",

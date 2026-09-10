@@ -48,6 +48,7 @@ from phonometry.broadcast import (
     BS468_BALLISTICS,
     DBQPS_REFERENCE,
     QuasiPeakBallistics,
+    QuasiPeakDynamicsResult,
     QuasiPeakResult,
     quasi_peak_meter,
     verify_quasi_peak_dynamics,
@@ -82,7 +83,7 @@ def _steady_sine(rms: float, fs: float, seconds: float = 3.0) -> np.ndarray:
 
 
 @pytest.fixture(scope="module")
-def dynamics() -> dict[float, dict[str, object]]:
+def dynamics() -> dict[float, QuasiPeakDynamicsResult]:
     """The eleven windows at every rate, computed once for the whole module.
 
     44.1 kHz warns from ``tone_burst``: 25 cycles of 5 kHz span 220.5 samples
@@ -107,14 +108,14 @@ def dynamics() -> dict[float, dict[str, object]]:
     ids=[f"{d:g}ms" for d, *_ in BS468_TABLE2_SINGLE_BURSTS],
 )
 def test_a_single_burst_lands_inside_its_table_2_window(
-    dynamics: dict[float, dict[str, object]],
+    dynamics: dict[float, QuasiPeakDynamicsResult],
     duration_ms: float,
     lower: float,
     upper: float,
 ) -> None:
     """Table 2: one 5 kHz burst of an integral number of periods, weighted."""
-    rows = dynamics[FS]["stimuli"]
-    assert isinstance(rows, list)
+    rows = dynamics[FS].stimuli
+    assert isinstance(rows, tuple)
     row = next(r for r in rows if r["stimulus"] == f"{duration_ms:g} ms")
     assert lower <= row["reading_percent"] <= upper
 
@@ -125,37 +126,37 @@ def test_a_single_burst_lands_inside_its_table_2_window(
     ids=[f"{r:g}per_s" for r, *_ in BS468_TABLE3_BURST_TRAINS],
 )
 def test_a_burst_train_lands_inside_its_table_3_window(
-    dynamics: dict[float, dict[str, object]],
+    dynamics: dict[float, QuasiPeakDynamicsResult],
     rate: float,
     lower: float,
     upper: float,
 ) -> None:
     """Table 3: 5 ms bursts at 2, 10 and 100 per second, the decay constraint."""
-    rows = dynamics[FS]["stimuli"]
-    assert isinstance(rows, list)
+    rows = dynamics[FS].stimuli
+    assert isinstance(rows, tuple)
     row = next(r for r in rows if r["stimulus"] == f"{rate:g} bursts/s")
     assert lower <= row["reading_percent"] <= upper
 
 
 @pytest.mark.parametrize("fs", RATES, ids=[f"{f:g}Hz" for f in RATES])
 def test_every_window_is_met_at_every_sample_rate(
-    dynamics: dict[float, dict[str, object]], fs: float
+    dynamics: dict[float, QuasiPeakDynamicsResult], fs: float
 ) -> None:
     """The verifier's own verdict, at each rate, with the margin it reports."""
     report = dynamics[fs]
-    assert report["passed"]
-    assert report["fs"] == fs
-    margin = report["worst_margin_db"]
+    assert report.passed
+    assert report.fs == fs
+    margin = report.worst_margin_db
     assert isinstance(margin, float)
     assert margin > 0.0
 
 
 def test_the_verifier_reports_all_eleven_stimuli(
-    dynamics: dict[float, dict[str, object]],
+    dynamics: dict[float, QuasiPeakDynamicsResult],
 ) -> None:
     """Eight single bursts and three trains, each with its printed window."""
-    rows = dynamics[FS]["stimuli"]
-    assert isinstance(rows, list)
+    rows = dynamics[FS].stimuli
+    assert isinstance(rows, tuple)
     assert len(rows) == len(BS468_TABLE2_SINGLE_BURSTS) + len(BS468_TABLE3_BURST_TRAINS)
     printed = {
         f"{d:g} ms": (lo, ref, hi)
@@ -183,14 +184,14 @@ def test_the_verifier_reports_all_eleven_stimuli(
 
 
 def test_the_readings_stay_near_the_printed_reference_column(
-    dynamics: dict[float, dict[str, object]],
+    dynamics: dict[float, QuasiPeakDynamicsResult],
 ) -> None:
     """Not conformance: BS.468-4 requires the window, not the reference.
 
     Pinned anyway, because the windows are 0.5 to 4.0 dB wide and a refit
     that moved a reading by a decibel would still pass every one of them.
     """
-    worst = dynamics[FS]["worst_deviation_db"]
+    worst = dynamics[FS].worst_deviation_db
     assert isinstance(worst, float)
     assert worst < REFERENCE_BOUND_DB
 
@@ -201,7 +202,7 @@ def test_the_readings_stay_near_the_printed_reference_column(
     + [f"{r:g} bursts/s" for r, *_ in BS468_TABLE3_BURST_TRAINS],
 )
 def test_a_reading_barely_moves_between_sample_rates(
-    dynamics: dict[float, dict[str, object]], stimulus: str
+    dynamics: dict[float, QuasiPeakDynamicsResult], stimulus: str
 ) -> None:
     """The property the whole discretisation rests on, per stimulus.
 
@@ -214,8 +215,8 @@ def test_a_reading_barely_moves_between_sample_rates(
     readings = []
     window_db = 0.0
     for fs in RATES:
-        rows = dynamics[fs]["stimuli"]
-        assert isinstance(rows, list)
+        rows = dynamics[fs].stimuli
+        assert isinstance(rows, tuple)
         row = next(r for r in rows if r["stimulus"] == stimulus)
         readings.append(row["reading_percent"])
         window_db = 20.0 * math.log10(row["upper_percent"] / row["lower_percent"])
@@ -612,12 +613,12 @@ def test_each_published_edge_is_a_conforming_instrument(field: str) -> None:
     low, high, _, _ = _IDENTIFIED[field]
     for value in (low, high):
         outcome = verify_quasi_peak_dynamics(
-            48000.0, replace(BS468_BALLISTICS, **{field: value})
+            48000.0, ballistics=replace(BS468_BALLISTICS, **{field: value})
         )
-        assert outcome["passed"], (
+        assert outcome.passed, (
             f"{field} = {value * 1e3:g} ms is published as an edge of the "
             f"identified range and does not conform: worst margin "
-            f"{outcome['worst_margin_db']:+.4f} dB"
+            f"{outcome.worst_margin_db:+.4f} dB"
         )
 
 
@@ -627,9 +628,9 @@ def test_the_published_range_is_not_quietly_wider(field: str) -> None:
     _, _, below, above = _IDENTIFIED[field]
     for value in (below, above):
         outcome = verify_quasi_peak_dynamics(
-            48000.0, replace(BS468_BALLISTICS, **{field: value})
+            48000.0, ballistics=replace(BS468_BALLISTICS, **{field: value})
         )
-        assert not outcome["passed"], (
+        assert not outcome.passed, (
             f"{field} = {value * 1e3:g} ms lies outside the published range "
             f"and conforms, so the range is understated"
         )
@@ -642,9 +643,9 @@ def test_two_constants_at_their_edges_leave_the_region() -> None:
     box is the natural mistake and it is wrong by more than a decibel.
     """
     corner = replace(BS468_BALLISTICS, charge=1.02e-3, reading_device=96.0e-3)
-    outcome = verify_quasi_peak_dynamics(48000.0, corner)
-    assert not outcome["passed"]
-    assert outcome["worst_margin_db"] < -1.0
+    outcome = verify_quasi_peak_dynamics(48000.0, ballistics=corner)
+    assert not outcome.passed
+    assert outcome.worst_margin_db < -1.0
 
 
 def test_the_verifier_answers_for_the_ballistics_it_is_given() -> None:
@@ -655,6 +656,40 @@ def test_the_verifier_answers_for_the_ballistics_it_is_given() -> None:
     then the fitted set, which must still conform.
     """
     outside = replace(BS468_BALLISTICS, charge=0.3e-3)
-    assert not verify_quasi_peak_dynamics(48000.0, outside)["passed"]
-    assert verify_quasi_peak_dynamics(48000.0, BS468_BALLISTICS)["passed"]
-    assert verify_quasi_peak_dynamics(48000.0)["passed"]
+    assert not verify_quasi_peak_dynamics(48000.0, ballistics=outside).passed
+    assert verify_quasi_peak_dynamics(48000.0, ballistics=BS468_BALLISTICS).passed
+    assert verify_quasi_peak_dynamics(48000.0).passed
+
+
+# ---------------------------------------------------------------------------
+# The verdict object: a summary its own eleven rows do not support is refused
+# ---------------------------------------------------------------------------
+
+
+def test_a_verdict_over_no_stimulus_is_rejected() -> None:
+    """Clause 2 has eleven windows; none of them is not a conformance run."""
+    report = verify_quasi_peak_dynamics()
+    with pytest.raises(ValueError, match=r"cannot be attested over no stimulus"):
+        replace(report, stimuli=(), passed=False)
+
+
+def test_a_non_positive_sample_rate_is_rejected() -> None:
+    report = verify_quasi_peak_dynamics()
+    with pytest.raises(ValueError, match=r"'fs' must be positive"):
+        replace(report, fs=0.0)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("passed", False), ("worst_margin_db", 99.0), ("worst_deviation_db", 0.0)],
+)
+def test_a_summary_the_rows_do_not_derive_is_rejected(field: str, value: float) -> None:
+    """The three summaries are the conjunction, the minimum and the maximum.
+
+    A sheet that says the chain passed above a row whose margin is negative is
+    the one this refusal exists to make impossible, and every number on it is
+    inside its plausible range.
+    """
+    report = verify_quasi_peak_dynamics()
+    with pytest.raises(ValueError, match=rf"'{field}' must be the value"):
+        replace(report, **{field: value})

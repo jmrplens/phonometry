@@ -50,7 +50,10 @@ from .flight_performance import (
     approach_profile,
     departure_profile,
 )
-from .measurement_system import verify_aircraft_noise_system
+from .measurement_system import (
+    AircraftSystemComplianceResult,
+    verify_aircraft_noise_system,
+)
 from .rotorcraft_noise import (
     FlightConditionInterpolation,
     FlightPathKinematics,
@@ -82,11 +85,11 @@ from .rotorcraft_propagation import (
 )
 
 __all__ = [
-    "NOY_BANDS",
     "Aerodrome",
     "AerodromeAtmosphere",
     "AerodynamicCoefficients",
     "AircraftBandAttenuation",
+    "AircraftSystemComplianceResult",
     "AnpAircraft",
     "AnpDatabase",
     "AnpNpdCurves",
@@ -101,6 +104,7 @@ __all__ = [
     "FlyoverResult",
     "JetEngineCoefficients",
     "MeanGroundPlaneResult",
+    "NOY_BANDS",
     "NoiseContourResult",
     "NpdLevelResult",
     "PerformanceAircraft",

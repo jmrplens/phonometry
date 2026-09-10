@@ -51,7 +51,7 @@ verify_weighting_class(
     *,
     sweep_points: int = 4096,
     edition: str = '2013',
-) -> dict[str, Any]
+) -> WeightingComplianceResult
 ```
 
 Verify a frequency-weighting filter against its standard's tolerances.
@@ -138,7 +138,7 @@ over the standard's full frequency range.
 | `sweep_points` | Number of points of the 5.5.7 between-nominals sweep (>= 64). |
 | `edition` | `"2013"` (IEC 61672-1:2013, classes 1/2) or `"1979"` (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3). |
 
-**Returns:** Dict with `overall_class` (the strictest class of the edition that every checked frequency and the sweep meet, or `None`), `range_limited` (see above), `bands`: a list of `{"freq", "class", "deviation_db", "margin_class<c>_db"}` for each class `c` of the edition, where `freq` is the nominal label and a positive margin means the limits are met with that much room, and `between_nominals`: `{"worst_freq", "margin_class<c>_db"}` for the sweep.
+**Returns:** A [`WeightingComplianceResult`](/phonometry/reference/api/filters/weighting-compliance/#weightingcomplianceresult), which carries the class together with the per-frequency verdicts it rests on, the between-nominals sweep and the filter it was measured on.
 
 **Raises**
 
@@ -181,3 +181,37 @@ footnote makes one mask govern every weighting characteristic, B included.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the edition is unknown or does not define the requested class. |
+
+## WeightingComplianceResult
+
+```python
+WeightingComplianceResult(
+    overall_class: int | None,
+    bands: tuple[dict[str, Any], ...],
+    between_nominals: dict[str, float] | None,
+    curve: str,
+    edition: str,
+    fs: float,
+    sweep_points: int,
+    range_limited: bool = False,
+)
+```
+
+Class verdict of a [`WeightingFilter`](/phonometry/reference/api/filters/weighting/#weightingfilter).
+
+What [`verify_weighting_class`](/phonometry/reference/api/filters/weighting-compliance/#verify_weighting_class) returns: the verdict together with the
+two readings it rests on, the tabulated frequencies and the sweep between
+them, and the filter it was measured on.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `overall_class` | The strictest class of the edition met at every tabulated frequency *and* across the between-nominals sweep, or `None` when neither reading meets any class. |
+| `bands` | The per-frequency verdicts (one `{"freq", "class", "deviation_db", "margin_class<c>_db"}` per tabulated frequency below the Nyquist frequency), as an immutable tuple. |
+| `between_nominals` | The subclause 5.5.7 sweep, `{"worst_freq", "margin_class<c>_db"}`, or `None` when no tabulated frequency was in range and there was nothing to sweep between. |
+| `curve` | The weighting the verdict is about (`"A"`, `"B"`, `"C"`, `"AU"` or `"Z"`). |
+| `edition` | `"2013"` (IEC 61672-1:2013, classes 1/2) or `"1979"` (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3). |
+| `fs` | Sampling rate of the verified filter, in Hz. It is what puts rows out of range, so the verdict carries it. |
+| `sweep_points` | Grid frequencies used by the 5.5.7 sweep. |
+| `range_limited` | `True` when a row carrying a finite lower limit falls at or above the Nyquist frequency, so the stated class attests the checked frequencies and not the standard's full range. |

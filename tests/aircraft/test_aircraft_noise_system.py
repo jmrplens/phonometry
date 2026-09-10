@@ -7,6 +7,8 @@ transcribed verbatim, plus the scalar tolerance limits of clauses 4.5-4.7.
 
 from __future__ import annotations
 
+import dataclasses
+
 import pytest
 
 from phonometry import aircraft
@@ -31,14 +33,14 @@ def test_directional_intermediate_angle_uses_greater() -> None:
 def test_directional_pass() -> None:
     meas = {4000.0: {30: 0.4, 60: 0.9, 90: 1.9, 120: 2.4, 150: 2.4}}
     result = aircraft.verify_aircraft_noise_system(directional=meas)
-    assert result["passed"] is True
-    assert all(c["ok"] for c in result["checks"])
+    assert result.passed is True
+    assert all(c["ok"] for c in result.checks)
 
 
 def test_directional_fail() -> None:
     meas = {4000.0: {90: 2.5}}  # limit is 2.0 dB at 4 kHz / 90 deg
     result = aircraft.verify_aircraft_noise_system(directional=meas)
-    assert result["passed"] is False
+    assert result.passed is False
 
 
 def test_scalar_checks() -> None:
@@ -47,10 +49,10 @@ def test_scalar_checks() -> None:
         linearity={"reference": 0.3, "other": 0.6},  # 0.6 > 0.5 -> fail
         resolution=0.1,
     )
-    by_q = {(c["quantity"], c.get("frequency")): c["ok"] for c in result["checks"]}
+    by_q = {(c["quantity"], c.get("frequency")): c["ok"] for c in result.checks}
     assert by_q[("frequency_response", 1000.0)] is True
     assert by_q[("frequency_response", 8000.0)] is False
-    assert result["passed"] is False
+    assert result.passed is False
 
 
 def test_out_of_range_frequency_raises() -> None:
@@ -75,8 +77,18 @@ def test_linearity_rejects_unknown_key() -> None:
 
 
 def test_resolution_rejects_negative() -> None:
-    assert aircraft.verify_aircraft_noise_system(resolution=-1.0)["passed"] is False
+    assert aircraft.verify_aircraft_noise_system(resolution=-1.0).passed is False
 
 
 def test_empty_call_not_passed() -> None:
-    assert aircraft.verify_aircraft_noise_system()["passed"] is False
+    assert aircraft.verify_aircraft_noise_system().passed is False
+
+
+def test_a_verdict_the_checks_do_not_support_is_rejected() -> None:
+    """``passed`` is the conjunction of the checks, and False over none."""
+    result = aircraft.verify_aircraft_noise_system(resolution=0.1)
+    assert result.passed is True
+    with pytest.raises(ValueError, match=r"must be the conjunction of the checks"):
+        dataclasses.replace(result, passed=False)
+    with pytest.raises(ValueError, match=r"must be the conjunction of the checks"):
+        dataclasses.replace(result, checks=())

@@ -1,6 +1,6 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Fail on a public parameter that names a pressure, a temperature or a humidity
-without saying which unit it is in.
+"""Fail on a public parameter that names a quantity without saying which unit
+it is in.
 
 A number the caller types is where a unit is lost, and the loss is silent: a
 static pressure of 101 325 handed to a function that wants kilopascals is a
@@ -10,11 +10,12 @@ values of the same quantity elsewhere in this library, so the unit has to be
 in the name, where the caller writes it and where a reader of the call site
 can see it.
 
-The rule is one line: a public parameter whose name says pressure, temperature
-or humidity ends either in a unit (:data:`UNITS`) or in a suffix that says the
-quantity carries no unit of its own (:data:`DIMENSIONLESS`, which covers the
-decibel levels, the ratios and the indicators). Anything else keeps its unit
-in the docstring, which is not where the mistake is made.
+The rule is one line: a public parameter whose name says one of the quantities
+this tree has written in two units (:data:`QUANTITIES` and
+:data:`WORD_QUANTITIES`) ends either in a unit (:data:`UNITS`) or in a suffix
+that says the quantity carries no unit of its own (:data:`DIMENSIONLESS`, which
+covers the decibel levels, the ratios and the indicators). Anything else keeps
+its unit in the docstring, which is not where the mistake is made.
 
 The surface is the one a caller reaches: every name in the ``__all__`` of every
 public module, the public methods and properties of the classes among them, and
@@ -23,8 +24,13 @@ imported package rather than the source tree: :class:`ReportMetadata` is
 published from the root and defined in a private module, and a scan by file
 path would never see it.
 
-:data:`EXEMPT` is the escape hatch, keyed by module, qualified name and
-parameter, and each entry carries the reason it is one.
+The second half of the rule is where the name has to appear: a parameter under
+the rule that carries a default is keyword-only, so the number cannot be
+written as a bare positional argument with the name nowhere on the line.
+
+:data:`EXEMPT` is the escape hatch for the first half and :data:`POSITIONAL`
+for the second, both keyed by module, qualified name and parameter, and each
+entry carries the reason it is one.
 """
 
 from __future__ import annotations

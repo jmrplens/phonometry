@@ -505,6 +505,7 @@ class ImpulseOnset:
     level_difference: float
     onset_rate: float
     prominence: float
+    _: KW_ONLY
     qualifies: bool
 
 

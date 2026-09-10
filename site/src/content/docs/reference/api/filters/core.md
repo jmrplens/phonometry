@@ -12,7 +12,7 @@ Core processing logic and FilterBank class for phonometry.
 ## BlockProcessing
 
 ```python
-BlockProcessing(stateful: bool = False, steady_ic: bool = False)
+BlockProcessing(*, stateful: bool = False, steady_ic: bool = False)
 ```
 
 How the bank carries its filter state from one block to the next.
@@ -35,6 +35,7 @@ FilterDesign(
     filter_type: str = 'butter',
     ripple: float = 0.1,
     attenuation: float = 72.0,
+    *,
     resample: bool = True,
 )
 ```
@@ -56,7 +57,7 @@ sections, evaluated band by band on a decimated sample rate.
 ## LevelCalibration
 
 ```python
-LevelCalibration(factor: float = 1.0, dbfs: bool = False)
+LevelCalibration(factor: float = 1.0, *, dbfs: bool = False)
 ```
 
 How the energy in a band becomes a level reading.
@@ -202,6 +203,7 @@ Initialize the Octave Filter Bank.
 ```python
 OctaveFilterBank.filter(
     x: Signal | list[float] | np.ndarray,
+    *,
     sigbands: Literal[False] = False,
     mode: str = 'rms',
     detrend: bool = True,
@@ -212,6 +214,7 @@ OctaveFilterBank.filter(
 
 OctaveFilterBank.filter(
     x: Signal | list[float] | np.ndarray,
+    *,
     sigbands: Literal[True],
     mode: str = 'rms',
     detrend: bool = True,
@@ -222,6 +225,7 @@ OctaveFilterBank.filter(
 
 OctaveFilterBank.filter(
     x: Signal | list[float] | np.ndarray,
+    *,
     sigbands: Literal[False] = False,
     mode: str = 'rms',
     detrend: bool = True,
@@ -232,6 +236,7 @@ OctaveFilterBank.filter(
 
 OctaveFilterBank.filter(
     x: Signal | list[float] | np.ndarray,
+    *,
     sigbands: Literal[True],
     mode: str = 'rms',
     detrend: bool = True,
@@ -242,6 +247,7 @@ OctaveFilterBank.filter(
 
 OctaveFilterBank.filter(
     x: Signal | list[float] | np.ndarray,
+    *,
     sigbands: Literal[False] = False,
     mode: str = 'rms',
     detrend: bool = True,
@@ -252,6 +258,7 @@ OctaveFilterBank.filter(
 
 OctaveFilterBank.filter(
     x: Signal | list[float] | np.ndarray,
+    *,
     sigbands: Literal[True],
     mode: str = 'rms',
     detrend: bool = True,
@@ -262,6 +269,7 @@ OctaveFilterBank.filter(
 
 OctaveFilterBank.filter(
     x: Signal | list[float] | np.ndarray,
+    *,
     sigbands: Literal[False] = False,
     mode: str = 'rms',
     detrend: bool = True,
@@ -272,6 +280,7 @@ OctaveFilterBank.filter(
 
 OctaveFilterBank.filter(
     x: Signal | list[float] | np.ndarray,
+    *,
     sigbands: Literal[True],
     mode: str = 'rms',
     detrend: bool = True,
@@ -305,6 +314,7 @@ OctaveFilterBank.spectrogram(
     window_time: float = 0.125,
     overlap: float = 0.5,
     mode: str = 'rms',
+    *,
     detrend: bool = True,
     zero_phase: bool = False,
 ) -> tuple[np.ndarray, list[float], np.ndarray]
@@ -328,7 +338,7 @@ Short-time fractional-octave analysis: level per band over time.
 ## ResponsePlot
 
 ```python
-ResponsePlot(show: bool = False, file: str | None = None)
+ResponsePlot(*, show: bool = False, file: str | None = None)
 ```
 
 The filter-response plot drawn while the bank is being designed.

@@ -81,7 +81,7 @@ closed forms and on the special cases he states in words.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -191,6 +191,7 @@ class FeedbackStabilityResult:
     stability_margin: float
     margin: float
     headroom: float
+    _: KW_ONLY
     is_stable: bool
     maximum_open_loop_gain: float
     maximum_level_at_microphone: float

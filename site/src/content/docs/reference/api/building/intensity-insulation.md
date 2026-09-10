@@ -704,6 +704,7 @@ LowFrequencyElementResult(
     frequencies: np.ndarray | None,
     measurement_area: float,
     elements: int,
+    *,
     absorbing_specimen_surface: bool,
 )
 ```
@@ -767,6 +768,7 @@ LowFrequencyIntensityResult(
     frequencies: np.ndarray | None,
     area: float,
     measurement_area: float,
+    *,
     absorbing_specimen_surface: bool,
 )
 ```

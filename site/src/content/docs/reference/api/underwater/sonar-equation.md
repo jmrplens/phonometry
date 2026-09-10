@@ -361,6 +361,7 @@ SonarEquationResult(
     directivity_index: float,
     detection_threshold: float,
     target_strength: float | None,
+    *,
     reverberation_limited: bool,
 )
 ```

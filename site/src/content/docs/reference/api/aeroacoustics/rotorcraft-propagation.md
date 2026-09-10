@@ -442,6 +442,7 @@ whose diffraction equations follow CNOSSOS-EU.
 TerrainScreeningResult(
     frequencies: NDArray[np.float64],
     adjustment: NDArray[np.float64],
+    *,
     screened: bool,
     path_difference: float,
     diffraction_points: NDArray[np.float64],

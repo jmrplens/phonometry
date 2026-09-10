@@ -25,7 +25,7 @@ the library expects from a bare array.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -65,6 +65,7 @@ class SignalOrigin:
     container: str
     format_name: str
     bit_depth: int | None
+    _: KW_ONLY
     lossy: bool
 
 

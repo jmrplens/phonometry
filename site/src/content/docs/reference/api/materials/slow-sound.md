@@ -127,6 +127,7 @@ CriticalCouplingResult(
     slit_height: float,
     absorption: float,
     normalized_impedance: complex,
+    *,
     converged: bool,
 )
 ```

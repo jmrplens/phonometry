@@ -101,7 +101,7 @@ conformity evidence is the eleven windows, and its home is
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
@@ -461,6 +461,7 @@ class QuasiPeakResult:
     reference: float
     trace: np.ndarray
     fs: float
+    _: KW_ONLY
     weighted: bool
 
     def __post_init__(self) -> None:

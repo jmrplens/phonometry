@@ -1478,7 +1478,7 @@ def generate_sel_concept(output_dir: str) -> None:
     env = filters.time_weighting(x, fs, mode="fast")
     level = 10 * np.log10(np.maximum(env, 1e-12))
     l_sel = float(signals.sel(x, fs, dbfs=True))
-    l_eq = float(signals.leq(x, fs, dbfs=True))
+    l_eq = float(signals.leq(x, dbfs=True))
 
     _, ax = plt.subplots(figsize=(10, 6))
     ax.plot(

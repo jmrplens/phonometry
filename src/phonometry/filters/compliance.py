@@ -35,7 +35,7 @@ network applied to the whole signal against a design-goal response, live in
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -461,6 +461,7 @@ class FilterComplianceResult:
     factors: tuple[int, ...]
     fs: float
     num_points: int
+    _: KW_ONLY
     range_limited: bool = False
 
     def __post_init__(self) -> None:

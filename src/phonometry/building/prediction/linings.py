@@ -32,7 +32,7 @@ Performance" says which pieces have an oracle and which do not.
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
@@ -339,6 +339,7 @@ class LiningImprovementResult:
     delta_rw: float
     delta_ra: float
     delta_ratr: float
+    _: KW_ONLY
     anchors: bool = False
     glued_area: float | None = None
 

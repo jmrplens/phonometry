@@ -38,7 +38,7 @@ sirenians, ``PCW``/``OCW`` phocid and otariid carnivores in water and
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -71,31 +71,50 @@ class AudiogramParameters:
     a: float
     b: float
     r_squared: float
+    _: KW_ONLY
     in_air: bool
 
 
 #: Southall et al. (2019) Table 2, printed p. 144: estimated group audiograms
 #: fitted to the original (absolute) median behavioural thresholds.
 _AUDIOGRAM_ORIGINAL: dict[str, AudiogramParameters] = {
-    "HF": AudiogramParameters("HF", 46.2, 25.9, 47.8, 35.5, 3.56, 0.977, False),
-    "VHF": AudiogramParameters("VHF", 46.4, 7.57, 126.0, 42.3, 17.1, 0.968, False),
-    "SI": AudiogramParameters("SI", -40.4, 3990.0, 3.8, 37.3, 1.7, 0.982, False),
-    "PCW": AudiogramParameters("PCW", 43.7, 10.2, 3.97, 20.1, 1.41, 0.907, False),
-    "OCW": AudiogramParameters("OCW", 63.1, 3.06, 11.8, 30.1, 3.23, 0.939, False),
-    "PCA": AudiogramParameters("PCA", -110.0, 5.56, 1.02e-6, 69.1, 0.289, 0.973, True),
-    "OCA": AudiogramParameters("OCA", 6.24, 1.54, 8.24, 55.6, 2.76, 0.978, True),
+    "HF": AudiogramParameters("HF", 46.2, 25.9, 47.8, 35.5, 3.56, 0.977, in_air=False),
+    "VHF": AudiogramParameters(
+        "VHF", 46.4, 7.57, 126.0, 42.3, 17.1, 0.968, in_air=False
+    ),
+    "SI": AudiogramParameters("SI", -40.4, 3990.0, 3.8, 37.3, 1.7, 0.982, in_air=False),
+    "PCW": AudiogramParameters(
+        "PCW", 43.7, 10.2, 3.97, 20.1, 1.41, 0.907, in_air=False
+    ),
+    "OCW": AudiogramParameters(
+        "OCW", 63.1, 3.06, 11.8, 30.1, 3.23, 0.939, in_air=False
+    ),
+    "PCA": AudiogramParameters(
+        "PCA", -110.0, 5.56, 1.02e-6, 69.1, 0.289, 0.973, in_air=True
+    ),
+    "OCA": AudiogramParameters("OCA", 6.24, 1.54, 8.24, 55.6, 2.76, 0.978, in_air=True),
 }
 
 #: Southall et al. (2019) Table 3, printed p. 144: the same fits on thresholds
 #: normalised so that the frequency of best sensitivity sits at 0 dB.
 _AUDIOGRAM_NORMALIZED: dict[str, AudiogramParameters] = {
-    "HF": AudiogramParameters("HF", 3.61, 12.7, 64.4, 31.8, 4.5, 0.960, False),
-    "VHF": AudiogramParameters("VHF", 2.48, 9.68, 126.0, 40.1, 17.0, 0.969, False),
-    "SI": AudiogramParameters("SI", -109.0, 5590.0, 2.62, 38.1, 1.53, 0.963, False),
-    "PCW": AudiogramParameters("PCW", -39.6, 368.0, 2.21, 20.5, 1.23, 0.907, False),
-    "OCW": AudiogramParameters("OCW", 2.36, 0.366, 12.8, 73.5, 3.4, 0.958, False),
-    "PCA": AudiogramParameters("PCA", -71.3, 4.8, 6.33e-5, 63.0, 0.364, 0.975, True),
-    "OCA": AudiogramParameters("OCA", -1.55, 1.6, 8.66, 54.9, 2.91, 0.968, True),
+    "HF": AudiogramParameters("HF", 3.61, 12.7, 64.4, 31.8, 4.5, 0.960, in_air=False),
+    "VHF": AudiogramParameters(
+        "VHF", 2.48, 9.68, 126.0, 40.1, 17.0, 0.969, in_air=False
+    ),
+    "SI": AudiogramParameters(
+        "SI", -109.0, 5590.0, 2.62, 38.1, 1.53, 0.963, in_air=False
+    ),
+    "PCW": AudiogramParameters(
+        "PCW", -39.6, 368.0, 2.21, 20.5, 1.23, 0.907, in_air=False
+    ),
+    "OCW": AudiogramParameters(
+        "OCW", 2.36, 0.366, 12.8, 73.5, 3.4, 0.958, in_air=False
+    ),
+    "PCA": AudiogramParameters(
+        "PCA", -71.3, 4.8, 6.33e-5, 63.0, 0.364, 0.975, in_air=True
+    ),
+    "OCA": AudiogramParameters("OCA", -1.55, 1.6, 8.66, 54.9, 2.91, 0.968, in_air=True),
 }
 
 #: Hearing groups with a published group audiogram (Southall et al. 2019).
@@ -164,6 +183,7 @@ class AudiogramResult:
     threshold: NDArray[np.float64]
     group: str
     source: str
+    _: KW_ONLY
     in_air: bool
     best_frequency: float
     best_threshold: float

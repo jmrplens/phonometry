@@ -849,6 +849,7 @@ TappingForceResult(
     power_input: np.ndarray,
     cut_off_frequency: float,
     limiting_frequency: float,
+    *,
     over_critical: bool,
     contact_stiffness: float,
     impedance: float,

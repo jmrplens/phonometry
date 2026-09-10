@@ -33,6 +33,7 @@ sensitivity(
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     fs: int | None = ...,
+    *,
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,

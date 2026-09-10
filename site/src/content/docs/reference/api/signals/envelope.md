@@ -186,6 +186,7 @@ EnvelopeResult(
     signal: NDArray[np.float64],
     signal_fs: float,
     decimation_factor: int,
+    *,
     antialias: bool,
 )
 ```
@@ -239,6 +240,7 @@ EnvelopeSpectrumResult(
     times: NDArray[np.float64],
     envelope: NDArray[np.float64],
     window: str,
+    *,
     remove_dc: bool,
     fs: float,
     nfft: int,

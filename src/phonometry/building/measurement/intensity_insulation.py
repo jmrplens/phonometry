@@ -75,7 +75,7 @@ supplied.
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
@@ -1132,6 +1132,7 @@ class LowFrequencyIntensityResult:
     frequencies: np.ndarray | None
     area: float
     measurement_area: float
+    _: KW_ONLY
     absorbing_specimen_surface: bool
 
     def __post_init__(self) -> None:
@@ -1333,6 +1334,7 @@ class LowFrequencyElementResult:
     frequencies: np.ndarray | None
     measurement_area: float
     elements: int
+    _: KW_ONLY
     absorbing_specimen_surface: bool
 
     def __post_init__(self) -> None:

@@ -164,6 +164,7 @@ WindTurbineTonalityResult(
     tonality: float,
     audibility_criterion: float,
     tonal_audibility: float,
+    *,
     is_audible: bool,
     has_identified_tone: bool,
     frequencies: NDArray[np.float64],

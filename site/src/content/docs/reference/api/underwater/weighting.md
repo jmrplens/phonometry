@@ -167,6 +167,7 @@ Published TTS and injury onset criteria of a hearing group.
 ExposureCriteria(
     group: str,
     guidance: str,
+    *,
     impulsive: bool,
     tts_sel: float | None,
     injury_sel: float | None,
@@ -287,6 +288,7 @@ WeightedExposureResult(
     tts_margin: float | None,
     peak_margin: float | None,
     tts_peak_margin: float | None,
+    *,
     exceeds_injury: bool,
     exceeds_tts: bool,
     guidance: str,
@@ -381,6 +383,7 @@ WeightingParameters(
     c_db: float,
     c_db_as_printed: float,
     k_db: float,
+    *,
     in_air: bool,
     hearing_range_hz: tuple[float, float] | None,
 )

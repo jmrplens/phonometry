@@ -126,6 +126,7 @@ SynchronousAverageResult(
     samples_per_period: int,
     period_s: float,
     fs: float,
+    *,
     interpolated: bool,
     noise_reduction_db: float,
     residual_rms: float,

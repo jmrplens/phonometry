@@ -26,6 +26,7 @@ signatures are unchanged -- a plain array with an explicit `fs` and
 laeq(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
+    *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
 ) -> float | np.ndarray
@@ -50,6 +51,7 @@ A-weighted equivalent continuous sound level (LAeq).
 lc_peak(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
+    *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
     oversample: int = 8,
@@ -88,6 +90,7 @@ maximum is taken, recovering the inter-sample peak to within about
 ```python
 leq(
     x: Signal | list[float] | np.ndarray,
+    *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
 ) -> float | np.ndarray
@@ -143,6 +146,7 @@ ln_levels(
     n: Sequence[int] = (10, 50, 90),
     mode: str = 'fast',
     weighting: str | None = None,
+    *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
 ) -> dict[int, float | np.ndarray]
@@ -174,6 +178,7 @@ sel(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
     weighting: str | None = None,
+    *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
 ) -> float | np.ndarray

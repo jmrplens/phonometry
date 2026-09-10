@@ -46,7 +46,7 @@ library cannot make), no dithering, no channel mixing.
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -98,6 +98,7 @@ class AudioFileInfo:
     frames: int
     duration: float
     bit_depth: int | None
+    _: KW_ONLY
     lossy: bool
     channel_mask: int | None = None
     channel_labels: tuple[str, ...] | None = None

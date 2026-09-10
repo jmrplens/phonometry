@@ -89,6 +89,7 @@ BandUncertainty(
     situation: str,
     frequencies: tuple[float, ...],
     uncertainties: tuple[float, ...],
+    *,
     upper_limit: bool = False,
 )
 ```
@@ -166,6 +167,7 @@ COVERAGE_FACTORS = {(0.68, False): 1.0, (0.8, False): 1.28, (0.9, False): 1.65, 
 ```python
 insulation_coverage_factor(
     confidence: float = 0.95,
+    *,
     one_sided: bool = False,
 ) -> float
 ```
@@ -191,6 +193,7 @@ Return the coverage factor `k` for a confidence level (Table 8).
 insulation_expanded_uncertainty(
     u: float,
     coverage: float = 0.95,
+    *,
     one_sided: bool = False,
 ) -> float
 ```
@@ -438,6 +441,7 @@ UncertainValue(
     coverage_factor: float,
     expanded_uncertainty: float,
     confidence: float,
+    *,
     one_sided: bool,
 )
 ```

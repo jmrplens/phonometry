@@ -66,6 +66,7 @@ def _validate_level_input(x_proc: np.ndarray, calibration_factor: float) -> None
 
 def leq(
     x: Signal | list[float] | np.ndarray,
+    *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
 ) -> float | np.ndarray:
@@ -94,6 +95,7 @@ def leq(
 def laeq(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
+    *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
 ) -> float | np.ndarray:
@@ -114,7 +116,11 @@ def laeq(
     fs = _resolve_fs(x, fs)
     calibration = _resolve_calibration(x, calibration_factor)
     x_proc = _resolve_samples_raw(x, calibrate=False)
-    return leq(weighting_filter(x_proc, fs, "A"), calibration, dbfs)
+    return leq(
+        weighting_filter(x_proc, fs, "A"),
+        calibration_factor=calibration,
+        dbfs=dbfs,
+    )
 
 
 def ln_levels(
@@ -123,6 +129,7 @@ def ln_levels(
     n: Sequence[int] = (10, 50, 90),
     mode: str = "fast",
     weighting: str | None = None,
+    *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
 ) -> dict[int, float | np.ndarray]:
@@ -182,6 +189,7 @@ def ln_levels(
 def lc_peak(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
+    *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
     oversample: int = 8,
@@ -233,6 +241,7 @@ def sel(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
     weighting: str | None = None,
+    *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
 ) -> float | np.ndarray:
@@ -269,7 +278,7 @@ def sel(
     if weighting is not None and weighting.upper() != "Z":
         x_proc = weighting_filter(x_proc, fs, weighting)
     duration_s = x_proc.shape[-1] / fs
-    base = leq(x_proc, calibration_factor, dbfs)
+    base = leq(x_proc, calibration_factor=calibration_factor, dbfs=dbfs)
     out = np.asarray(base) + 10 * np.log10(duration_s)
     return as_float_or_array(out)
 

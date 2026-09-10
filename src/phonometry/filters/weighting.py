@@ -87,7 +87,7 @@ each of them used to be a documented limitation of this module:
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any, cast, overload
 
@@ -545,6 +545,7 @@ class WeightingFilter:
         self,
         fs: int,
         curve: str = "A",
+        *,
         stateful: bool = False,
         steady_ic: bool = False,
         high_accuracy: bool | None = None,
@@ -783,6 +784,7 @@ class TimeWeightedEnvelope:
     mean_square: np.ndarray
     fs: int
     mode: str
+    _: KW_ONLY
     calibrated: bool
 
     def __array__(
@@ -849,6 +851,7 @@ def weighting_filter(
     x: Signal,
     fs: int | None = ...,
     curve: str = ...,
+    *,
     high_accuracy: bool = ...,
 ) -> Signal: ...
 
@@ -858,6 +861,7 @@ def weighting_filter(
     x: list[float] | np.ndarray,
     fs: int,
     curve: str = ...,
+    *,
     high_accuracy: bool = ...,
 ) -> np.ndarray: ...
 
@@ -866,6 +870,7 @@ def weighting_filter(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
     curve: str = "A",
+    *,
     high_accuracy: bool = True,
 ) -> Signal | np.ndarray:
     """Apply a frequency weighting to a signal.

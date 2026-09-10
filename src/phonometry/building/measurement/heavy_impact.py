@@ -97,7 +97,7 @@ used when the *measurement* is reported in octaves.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -412,6 +412,7 @@ class HeavyImpactSourceCheck:
     tolerance: np.ndarray
     deviation: np.ndarray
     within_tolerance: np.ndarray
+    _: KW_ONLY
     passed: bool
 
     def __post_init__(self) -> None:

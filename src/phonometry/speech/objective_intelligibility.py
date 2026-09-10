@@ -39,7 +39,7 @@ dependency).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -109,6 +109,7 @@ class STOIResult:
     """
 
     value: float
+    _: KW_ONLY
     extended: bool
     segment_scores: NDArray[np.float64]
     band_scores: NDArray[np.float64] | None

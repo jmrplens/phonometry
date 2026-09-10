@@ -143,6 +143,14 @@ extend-exclude = ["*.md"]
 #               that a standard spells that way.
 #   T20   (600) prints, which is what the scripts in `scripts/` are for.
 #   COM  (5992) trailing commas, which the formatter already decides.
+#   FBT   (229) a boolean argument that can be passed by position. The rule is
+#               right and the tree obeys it, but ruff reads the source, so it
+#               holds every private helper to a rule about the shape of a
+#               published call: 154 findings inside `src` against the handful
+#               that a caller could actually reach. The public half is checked
+#               by `scripts/check_public_flags.py`, which walks the imported
+#               package. FBT003, the call side, is a different matter: it
+#               reads `ax.grid(True)` as the defect it is not.
 select = [
     "E4", "E7", "E9", "F",  # ruff's default set
     "W",                    # whitespace, which the formatter also settles

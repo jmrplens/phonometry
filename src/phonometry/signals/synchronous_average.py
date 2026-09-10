@@ -78,7 +78,7 @@ No resampling onto an ``M``-point angular grid is performed.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -198,6 +198,7 @@ class SynchronousAverageResult:
     samples_per_period: int
     period_s: float
     fs: float
+    _: KW_ONLY
     interpolated: bool
     noise_reduction_db: float
     residual_rms: float

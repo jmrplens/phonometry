@@ -73,6 +73,7 @@ monte_carlo(
     trials: int = 1000000,
     coverage: float = 0.95,
     seed: int | None = None,
+    *,
     keep_samples: bool = False,
 ) -> MonteCarloResult
 ```

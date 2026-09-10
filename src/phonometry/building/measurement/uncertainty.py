@@ -45,7 +45,7 @@ Clause/table numbers refer to ISO 12999-1:2020(E).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from math import sqrt
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -416,6 +416,7 @@ class BandUncertainty:
     situation: str
     frequencies: tuple[float, ...]
     uncertainties: tuple[float, ...]
+    _: KW_ONLY
     upper_limit: bool = False
 
     def to_arrays(self) -> tuple[np.ndarray, np.ndarray]:
@@ -457,6 +458,7 @@ class UncertainValue:
     coverage_factor: float
     expanded_uncertainty: float
     confidence: float
+    _: KW_ONLY
     one_sided: bool
 
     @property
@@ -590,7 +592,7 @@ def maximum_repeatability_standard_deviation() -> BandUncertainty:
 # Coverage factors and expansion (Clause 8, Table 8).
 # --------------------------------------------------------------------------- #
 def insulation_coverage_factor(
-    confidence: float = 0.95, one_sided: bool = False
+    confidence: float = 0.95, *, one_sided: bool = False
 ) -> float:
     """Return the coverage factor ``k`` for a confidence level (Table 8).
 
@@ -616,6 +618,7 @@ def insulation_coverage_factor(
 def insulation_expanded_uncertainty(
     u: float,
     coverage: float = 0.95,
+    *,
     one_sided: bool = False,
 ) -> float:
     r"""Return the expanded uncertainty :math:`U = k\,u` (Formula 2, Clause 8).
@@ -631,7 +634,7 @@ def insulation_expanded_uncertainty(
     if u < 0:
         msg = "Standard uncertainty u must be non-negative."
         raise ValueError(msg)
-    k = max(insulation_coverage_factor(coverage, one_sided), 1.0)
+    k = max(insulation_coverage_factor(coverage, one_sided=one_sided), 1.0)
     return k * u
 
 
@@ -660,7 +663,7 @@ def uncertain_value(
     :param upper_limit: Use the ``σR95`` upper limit (airborne, situation A).
     """
     u = single_number_uncertainty(quantity, situation, upper_limit=upper_limit)
-    k = max(insulation_coverage_factor(coverage, one_sided), 1.0)
+    k = max(insulation_coverage_factor(coverage, one_sided=one_sided), 1.0)
     return UncertainValue(
         value=value,
         standard_uncertainty=u,

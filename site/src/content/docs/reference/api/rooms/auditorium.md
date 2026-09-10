@@ -61,6 +61,7 @@ AuditoriumQuantity(
     aspect: str,
     averaging_bands_hz: tuple[float, ...],
     just_noticeable_difference: float | None,
+    *,
     relative_jnd: bool,
     typical_range: tuple[float, float],
     energy_averaged: bool,

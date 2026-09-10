@@ -52,7 +52,7 @@ the ARP verification cases.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -597,6 +597,7 @@ class TerrainScreeningResult:
 
     frequencies: NDArray[np.float64]
     adjustment: NDArray[np.float64]
+    _: KW_ONLY
     screened: bool
     path_difference: float
     diffraction_points: NDArray[np.float64]

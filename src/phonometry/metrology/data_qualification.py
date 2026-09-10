@@ -71,7 +71,7 @@ expectations.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -447,6 +447,7 @@ class TrendTestResult:
     std: float
     bounds: tuple[int, int]
     p_value: float
+    _: KW_ONLY
     trend_free: bool
     alpha: float
     median: float | None = None
@@ -681,6 +682,7 @@ class StationarityTestResult:
     std: float
     bounds: tuple[int, int]
     p_value: float
+    _: KW_ONLY
     stationary: bool
     alpha: float
     n_segments: int

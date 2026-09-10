@@ -122,6 +122,7 @@ MultitaperSpectralDensityResult(
     time_half_bandwidth: float,
     n_tapers: int,
     resolution_bandwidth: float,
+    *,
     adaptive: bool,
     scaling: str,
 )

@@ -70,7 +70,7 @@ random error with its < 5 % averaging criterion (:func:`random_error_percent`).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -300,6 +300,7 @@ class RigidMassCalibrationResult:
     expected: np.ndarray
     deviation: np.ndarray
     within_tolerance: np.ndarray
+    _: KW_ONLY
     passed: bool
     mass: float
     quantity: str
@@ -470,6 +471,7 @@ class MobilityResult:
 
     frequencies: np.ndarray
     mobility: np.ndarray
+    _: KW_ONLY
     driving_point: bool = True
 
     def __post_init__(self) -> None:

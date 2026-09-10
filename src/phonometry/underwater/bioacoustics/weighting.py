@@ -57,7 +57,7 @@ injury = TTS + 20 dB identities.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -109,6 +109,7 @@ class WeightingParameters:
     c_db: float
     c_db_as_printed: float
     k_db: float
+    _: KW_ONLY
     in_air: bool
     hearing_range_hz: tuple[float, float] | None
 
@@ -403,6 +404,7 @@ class ExposureCriteria:
 
     group: str
     guidance: str
+    _: KW_ONLY
     impulsive: bool
     tts_sel: float | None
     injury_sel: float | None
@@ -759,6 +761,7 @@ class WeightedExposureResult:
     tts_margin: float | None
     peak_margin: float | None
     tts_peak_margin: float | None
+    _: KW_ONLY
     exceeds_injury: bool
     exceeds_tts: bool
     guidance: str

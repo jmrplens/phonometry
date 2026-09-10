@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from functools import lru_cache
 from typing import Literal, cast, overload
 
@@ -63,6 +63,7 @@ class FilterDesign:
     filter_type: str = "butter"
     ripple: float = 0.1
     attenuation: float = 72.0
+    _: KW_ONLY
     resample: bool = True
 
 
@@ -78,6 +79,7 @@ class LevelCalibration:
     """
 
     factor: float = 1.0
+    _: KW_ONLY
     dbfs: bool = False
 
 
@@ -91,6 +93,7 @@ class BlockProcessing:
         filter (default False).
     """
 
+    _: KW_ONLY
     stateful: bool = False
     steady_ic: bool = False
 
@@ -103,6 +106,7 @@ class ResponsePlot:
     :ivar file: Path to save the filter response plot (default None).
     """
 
+    _: KW_ONLY
     show: bool = False
     file: str | None = None
 
@@ -344,6 +348,7 @@ class OctaveFilterBank:
     def filter(
         self,
         x: Signal | list[float] | np.ndarray,
+        *,
         sigbands: Literal[False] = False,
         mode: str = "rms",
         detrend: bool = True,
@@ -356,6 +361,7 @@ class OctaveFilterBank:
     def filter(
         self,
         x: Signal | list[float] | np.ndarray,
+        *,
         sigbands: Literal[True],
         mode: str = "rms",
         detrend: bool = True,
@@ -368,6 +374,7 @@ class OctaveFilterBank:
     def filter(
         self,
         x: Signal | list[float] | np.ndarray,
+        *,
         sigbands: Literal[False] = False,
         mode: str = "rms",
         detrend: bool = True,
@@ -380,6 +387,7 @@ class OctaveFilterBank:
     def filter(
         self,
         x: Signal | list[float] | np.ndarray,
+        *,
         sigbands: Literal[True],
         mode: str = "rms",
         detrend: bool = True,
@@ -392,6 +400,7 @@ class OctaveFilterBank:
     def filter(
         self,
         x: Signal | list[float] | np.ndarray,
+        *,
         sigbands: Literal[False] = False,
         mode: str = "rms",
         detrend: bool = True,
@@ -404,6 +413,7 @@ class OctaveFilterBank:
     def filter(
         self,
         x: Signal | list[float] | np.ndarray,
+        *,
         sigbands: Literal[True],
         mode: str = "rms",
         detrend: bool = True,
@@ -416,6 +426,7 @@ class OctaveFilterBank:
     def filter(
         self,
         x: Signal | list[float] | np.ndarray,
+        *,
         sigbands: Literal[False] = False,
         mode: str = "rms",
         detrend: bool = True,
@@ -428,6 +439,7 @@ class OctaveFilterBank:
     def filter(
         self,
         x: Signal | list[float] | np.ndarray,
+        *,
         sigbands: Literal[True],
         mode: str = "rms",
         detrend: bool = True,
@@ -439,6 +451,7 @@ class OctaveFilterBank:
     def filter(
         self,
         x: Signal | list[float] | np.ndarray,
+        *,
         sigbands: bool = False,
         mode: str = "rms",
         detrend: bool = True,
@@ -568,6 +581,7 @@ class OctaveFilterBank:
         window_time: float = 0.125,
         overlap: float = 0.5,
         mode: str = "rms",
+        *,
         detrend: bool = True,
         zero_phase: bool = False,
     ) -> tuple[np.ndarray, list[float], np.ndarray]:

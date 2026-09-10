@@ -307,6 +307,7 @@ ResidualCorrectionResult(
     corrected_level: float,
     reportable_upper_bound: float,
     margin: float,
+    *,
     reliable: bool,
 )
 ```

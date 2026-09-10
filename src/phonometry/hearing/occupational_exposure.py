@@ -45,7 +45,7 @@ refer to ISO 9612:2009(E).
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass, field, replace
+from dataclasses import KW_ONLY, dataclass, field, replace
 from math import isfinite, log10, sqrt
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -323,6 +323,7 @@ class TaskContribution:
     lex_8h_contribution: float  # Eq 8, dB
     n_samples: int
     sample_range_db: float  # max - min of the samples, dB
+    _: KW_ONLY
     spread_advisory: bool  # True when the 3 dB spread rule (9.3) is triggered
     u1a: float  # sampling standard uncertainty (Eq C.6), dB
     c1a: float  # noise sensitivity coefficient (Eq C.4)
@@ -400,6 +401,7 @@ class ExposureResult:
     u2: float | None = None
     u3: float | None = None
     n_samples: int | None = None
+    _: KW_ONLY
     sampling_advisory: bool = False  # c1*u1 > 3.5 dB, or 3 dB spread on 3 samples
     instrument: InstrumentClass | None = None
     tasks: tuple[TaskContribution, ...] = field(default_factory=tuple)
@@ -662,6 +664,7 @@ def task_based_exposure(
     tasks: Sequence[Task],
     instrument: InstrumentClass = "personal_exposimeter",
     u3: float = _U3_DEFAULT,
+    *,
     include_duration_uncertainty: bool = True,
     warn: bool = True,
 ) -> ExposureResult:
@@ -787,6 +790,7 @@ def job_based_exposure(
     u3: float = _U3_DEFAULT,
     n_workers: int | None = None,
     sample_duration_hours: float | None = None,
+    *,
     warn: bool = True,
 ) -> ExposureResult:
     r"""Daily noise exposure level from job-based measurements (ISO 9612:2009 Clause 10).
@@ -842,6 +846,7 @@ def full_day_exposure(
     effective_duration_hours: float,
     instrument: InstrumentClass = "personal_exposimeter",
     u3: float = _U3_DEFAULT,
+    *,
     warn: bool = True,
 ) -> ExposureResult:
     """Daily noise exposure level from full-day measurements (ISO 9612:2009 Clause 11).

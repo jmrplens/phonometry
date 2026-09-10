@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -220,6 +220,7 @@ class WindTurbineTonalityResult:
     tonality: float
     audibility_criterion: float
     tonal_audibility: float
+    _: KW_ONLY
     is_audible: bool
     has_identified_tone: bool
     frequencies: NDArray[np.float64]

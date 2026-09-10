@@ -51,6 +51,7 @@ decay_curve(
     fs: int | None = None,
     band: float | None = None,
     fraction: int = 1,
+    *,
     zero_phase: bool = False,
 ) -> DecayCurve
 ```
@@ -285,6 +286,7 @@ room_parameters(
     fs: int | None = None,
     limits: tuple[float, float] | None = (125.0, 4000.0),
     fraction: int = 1,
+    *,
     zero_phase: bool = False,
 ) -> RoomAcousticsResult
 ```

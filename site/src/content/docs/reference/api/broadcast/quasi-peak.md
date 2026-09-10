@@ -224,6 +224,7 @@ QuasiPeakResult(
     reference: float,
     trace: np.ndarray,
     fs: float,
+    *,
     weighted: bool,
 )
 ```

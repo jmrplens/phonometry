@@ -366,6 +366,7 @@ HeavyImpactSourceCheck(
     tolerance: np.ndarray,
     deviation: np.ndarray,
     within_tolerance: np.ndarray,
+    *,
     passed: bool,
 )
 ```

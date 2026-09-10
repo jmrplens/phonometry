@@ -122,6 +122,7 @@ Barrier(
     edge_to_receiver: float,
     parallel_distance: float = 0.0,
     edge_separation: float | None = None,
+    *,
     ground_reflections_by_image: bool = False,
     lateral: bool = False,
     line_of_sight_clear: bool = False,

@@ -139,6 +139,7 @@ FRF_UNITS = {'receptance': 'm/N', 'mobility': 'm/(N·s)', 'accelerance': '1/kg',
 MobilityResult(
     frequencies: np.ndarray,
     mobility: np.ndarray,
+    *,
     driving_point: bool = True,
 )
 ```
@@ -345,6 +346,7 @@ RigidMassCalibrationResult(
     expected: np.ndarray,
     deviation: np.ndarray,
     within_tolerance: np.ndarray,
+    *,
     passed: bool,
     mass: float,
     quantity: str,

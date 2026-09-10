@@ -94,6 +94,7 @@ ToneAssessment(
     frequency: float,
     ratio_db: float,
     criterion_db: float,
+    *,
     prominent: bool,
 )
 ```

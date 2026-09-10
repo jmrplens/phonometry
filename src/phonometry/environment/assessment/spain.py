@@ -79,7 +79,7 @@ operation (Article 25.2) only the last two apply.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
@@ -1071,6 +1071,7 @@ class PeriodAssessment:
     reported_long_term: int | None
     limit: float
     max_phase_level: float
+    _: KW_ONLY
     phase_pass: bool
     daily_pass: bool
     long_term_pass: bool | None
@@ -1130,6 +1131,7 @@ class ActivityAssessment:
 
     periods: tuple[PeriodAssessment, ...]
     limits: RegulationLimits
+    _: KW_ONLY
     new_activity: bool
 
     def __post_init__(self) -> None:

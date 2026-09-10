@@ -598,6 +598,7 @@ def monte_carlo(
     trials: int = 1_000_000,
     coverage: float = 0.95,
     seed: int | None = None,
+    *,
     keep_samples: bool = False,
 ) -> MonteCarloResult:
     r"""Propagate uncertainty by the Monte Carlo method (Supplement 1).

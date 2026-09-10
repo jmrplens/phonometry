@@ -78,7 +78,7 @@ about 1,8 m2 specimens; larger windows insulate less, and the CEC corrects
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
@@ -754,6 +754,7 @@ class DbHrCheck:
     value: float
     reported: float
     margin: float
+    _: KW_ONLY
     complies: bool
 
     def __post_init__(self) -> None:

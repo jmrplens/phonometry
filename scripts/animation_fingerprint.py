@@ -349,11 +349,49 @@ class Sources:
 # -- hashing ----------------------------------------------------------------
 
 
+#: Stands in for "this parameter has no default" in the canonical argument
+#: list of :func:`_flatten_parameters`. It is only ever dumped, never compiled,
+#: so any node that cannot be confused with a real default will do; a bare name
+#: no source can spell is the least confusable one.
+_NO_DEFAULT = ast.Name(id="<no default>", ctx=ast.Load())
+
+
+def _flatten_parameters(args: ast.arguments) -> None:
+    """Rewrite *args* so that where the bare ``*`` sits stops mattering.
+
+    Making a parameter keyword-only decides how a caller may write the call.
+    It cannot change what the function computes, and therefore cannot change a
+    frame, so it belongs with the docstrings and the import order rather than
+    with the things this fingerprint watches. Without this, moving one star in
+    one shared helper marks every clip that reaches it stale, and the
+    re-render proves the frames identical.
+
+    The parameters are laid out in source order with their defaults beside
+    them, one slot each, so a parameter that gains or loses a default still
+    moves the hash. The result is not a legal signature -- ``defaults`` is no
+    longer a suffix -- but it is never compiled, only dumped.
+    """
+    ordered = [*args.posonlyargs, *args.args, *args.kwonlyargs]
+    positional = len(args.posonlyargs) + len(args.args)
+    padding = [_NO_DEFAULT] * (positional - len(args.defaults))
+    defaults = [
+        *padding,
+        *args.defaults,
+        *(d if d is not None else _NO_DEFAULT for d in args.kw_defaults),
+    ]
+    args.posonlyargs = []
+    args.args = ordered
+    args.kwonlyargs = []
+    args.defaults = defaults
+    args.kw_defaults = []
+
+
 def _strip_docstrings(node: ast.AST) -> ast.AST:
-    """A copy of *node* with every docstring removed.
+    """A copy of *node* with every docstring removed and its stars flattened.
 
     Rewriting a docstring cannot change a frame, and a fingerprint that moves
-    when the prose does would be ignored within a week.
+    when the prose does would be ignored within a week. The same goes for
+    where the keyword-only star sits; see :func:`_flatten_parameters`.
     """
     import copy
 
@@ -370,6 +408,8 @@ def _strip_docstrings(node: ast.AST) -> ast.AST:
                 and isinstance(body[0].value.value, str)
             ):
                 child.body = body[1:] or [ast.Pass()]
+        if isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+            _flatten_parameters(child.args)
     return clone
 
 

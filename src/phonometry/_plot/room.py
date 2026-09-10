@@ -321,7 +321,7 @@ def plot_room_acoustics(
     ax_times.set_ylabel(_t("Reverberation time [s]", language))
     ax_times.set_title(_t("ISO 3382 decay times and clarity", language))
     _band_axis(ax_times, labels, xlabel=None, language=language)
-    ax_times.grid(True, axis="y", alpha=0.3)
+    ax_times.grid(visible=True, axis="y", alpha=0.3)
     ax_times.legend(loc="best", fontsize="small")
 
     if single:
@@ -352,7 +352,7 @@ def plot_room_acoustics(
         xlabel=_t(_FREQUENCY_LABEL if use_freq_axis else "Band", language),
         language=language,
     )
-    ax_clarity.grid(True, alpha=0.3)
+    ax_clarity.grid(visible=True, alpha=0.3)
     ax_clarity.legend(loc="best", fontsize="small")
     _localize_band_axes(ax_times, language)
     _localize_band_axes(ax_clarity, language)
@@ -453,7 +453,7 @@ def plot_sound_strength(
         xlabel=_t(_FREQUENCY_LABEL, language) if single and use_freq_axis else None,
         language=language,
     )
-    ax_strength.grid(True, axis="y", alpha=0.3)
+    ax_strength.grid(visible=True, axis="y", alpha=0.3)
     ax_strength.legend(loc="best", fontsize="small")
 
     if single:
@@ -482,7 +482,7 @@ def plot_sound_strength(
         xlabel=_t(_FREQUENCY_LABEL if use_freq_axis else "Band", language),
         language=language,
     )
-    ax_levels.grid(True, alpha=0.3)
+    ax_levels.grid(visible=True, alpha=0.3)
     ax_levels.legend(loc="best", fontsize="small")
     _localize_band_axes(ax_strength, language)
     _localize_band_axes(ax_levels, language)
@@ -548,7 +548,7 @@ def plot_lateral_energy(
         xlabel=_t(_FREQUENCY_LABEL if use_freq_axis else "Band", language),
         language=language,
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     _localize_band_axes(ax, language)
     return ax
@@ -610,7 +610,7 @@ def plot_late_lateral(
         xlabel=_t(_FREQUENCY_LABEL if use_freq_axis else "Band", language),
         language=language,
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     _localize_band_axes(ax, language)
     return ax
@@ -667,7 +667,7 @@ def plot_stage_support(
         xlabel=_t(_FREQUENCY_LABEL if use_freq_axis else "Band", language),
         language=language,
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     _localize_band_axes(ax, language)
     return ax
@@ -721,7 +721,7 @@ def plot_interaural_correlation(
     ax.set_ylabel(_t(_IACF_LABEL, language))
     ax.set_title(_t("ISO 3382-1 interaural cross correlation", language))
     ax.set_xlim(float(lag_ms[0]), float(lag_ms[-1]))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc="best", fontsize="small", ncol=2)
     localize_axes(ax, language)
     return ax
@@ -730,6 +730,7 @@ def plot_interaural_correlation(
 def plot_decay_curve(
     result: DecayCurve,
     ax: Axes | None = None,
+    *,
     fits: bool = True,
     language: str = "en",
     **kwargs: Any,
@@ -773,7 +774,7 @@ def plot_decay_curve(
         fb = _format_freq(float(band))
         title += f"  (banda {fb} Hz)" if language == "es" else f"  ({fb} Hz band)"
     ax.set_title(title)
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -840,7 +841,7 @@ def plot_impulse_response(
         axd.set_xlim(
             left=float(time[0]) if n else 0.0, right=float(time[-1]) if n else None
         )
-        axd.grid(True, alpha=0.3)
+        axd.grid(visible=True, alpha=0.3)
         axd.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
         localize_axes(axd, language)
 
@@ -853,7 +854,7 @@ def plot_impulse_response(
     axes[0].plot(time, h / norm, color=color, lw=0.8, **kwargs)
     axes[0].set_ylabel(_t("Amplitude (norm.)", language))
     axes[0].set_title(title)
-    axes[0].grid(True, alpha=0.3)
+    axes[0].grid(visible=True, alpha=0.3)
     localize_axes(axes[0], language)
     _decay(axes[1])
     return axes
@@ -914,7 +915,7 @@ def plot_noise_criterion(
     ax.set_ylabel(_t(_OCTAVE_BAND_SPL_LABEL, language))
     ax.set_title(f"ANSI/ASA S12.2 {result.label}")
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -972,7 +973,7 @@ def plot_room_criterion(
     ax.set_ylabel(_t(_OCTAVE_BAND_SPL_LABEL, language))
     ax.set_title(f"ANSI/ASA S12.2 {result.label}")
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1002,7 +1003,7 @@ def plot_enclosed_space_absorption(
     ax.set_ylabel(_t(_REVERBERATION_TIME_LABEL, language))
     ax.set_title(_t("EN 12354-6 reverberation time", language))
     ax.set_ylim(bottom=0.0)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1058,7 +1059,7 @@ def plot_reverberation_models(
     )
     ax.set_ylim(bottom=0.0)
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1141,7 +1142,7 @@ def plot_open_plan(
     ax.set_ylabel(_t("A-weighted SPL of speech [dB]", language))
     ax.set_title(_t("ISO 3382-3 spatial decay of speech", language))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1209,7 +1210,7 @@ def plot_excitation(
             )
         else:
             ax_time.set_title(f"ISO 18233 MLS excitation (first {show} of {n} samples)")
-        ax_time.grid(True, alpha=0.3)
+        ax_time.grid(visible=True, alpha=0.3)
         localize_axes(ax_time, language)
         if not two_panel:
             return ax_time
@@ -1227,7 +1228,7 @@ def plot_excitation(
         ax_f.set_xlabel(_t(_FREQUENCY_LABEL, language))
         ax_f.set_ylabel(_t("Magnitude [dB]", language))
         ax_f.set_title(_t("Magnitude spectrum (flat)", language))
-        ax_f.grid(True, which="both", alpha=0.3)
+        ax_f.grid(visible=True, which="both", alpha=0.3)
         format_frequency_axis(ax_f, float(freqs[1]), float(freqs[-1]))
         localize_axes(ax_f, language)
         return axes
@@ -1237,7 +1238,7 @@ def plot_excitation(
     ax_time.set_xlabel(_t(_TIME_LABEL, language))
     ax_time.set_ylabel(_t("Amplitude", language))
     ax_time.set_title(_t("ISO 18233 exponential sine sweep", language))
-    ax_time.grid(True, alpha=0.3)
+    ax_time.grid(visible=True, alpha=0.3)
     localize_axes(ax_time, language)
     if not two_panel:
         return ax_time
@@ -1348,7 +1349,7 @@ def plot_image_source_reflectogram(
         ax.set_title(
             f"Image-source reflectogram — {dims} m room, order ≤ {result.max_order}"
         )
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -1427,7 +1428,7 @@ def plot_steady_field(
             f"Steady-state room field — $L_W$ = {lw} dB, "
             f"$R$ = {result.room_constant:.0f} m², $Q$ = {q}"
         )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -1510,7 +1511,7 @@ def plot_shaped_sweep(
         axs.set_xlabel(_t(_FREQUENCY_LABEL, language))
         axs.set_ylabel(_t("Level re in-band max [dB]", language))
         axs.set_ylim(bottom=-60.0, top=8.0)
-        axs.grid(True, which="both", alpha=0.3)
+        axs.grid(visible=True, which="both", alpha=0.3)
         axs.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
         format_frequency_axis(
             axs, max(f1 / 4.0, float(freqs_w[1])), min(2.0 * f2, fs / 2.0)
@@ -1528,7 +1529,7 @@ def plot_shaped_sweep(
     axes[0].set_xlabel(xlabel)
     axes[0].set_ylabel(_t("Amplitude", language))
     axes[0].set_title(f"{title} — {_t('Crest factor', language)} {crest} dB")
-    axes[0].grid(True, alpha=0.3)
+    axes[0].grid(visible=True, alpha=0.3)
     axes[0].set_xlim(float(time[0]), float(time[-1]))
     localize_axes(axes[0], language)
     _spectrum(axes[1])
@@ -1597,7 +1598,7 @@ def plot_room_modes(
             lz=format_number(lz, language, decimals=1, trim=True),
         )
     )
-    ladder.grid(True, axis="x", alpha=0.3)
+    ladder.grid(visible=True, axis="x", alpha=0.3)
 
     fs = result.schroeder_frequency
     if fs is not None and np.isfinite(fs):
@@ -1623,7 +1624,7 @@ def plot_room_modes(
         )
         density_axes.set_ylabel(_t("Modal density [modes/Hz]", language))
         density_axes.set_xlabel(_t(_FREQUENCY_LABEL, language))
-        density_axes.grid(True, alpha=0.3)
+        density_axes.grid(visible=True, alpha=0.3)
         density_axes.legend(loc="upper left", fontsize="small")
         localize_axes(density_axes, language)
 
@@ -1699,7 +1700,7 @@ def plot_crowd_noise(
             lw=format_number(result.sound_power_level, language, decimals=0)
         )
     )
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc="lower right", fontsize="small")
     localize_axes(ax, language)
     return ax

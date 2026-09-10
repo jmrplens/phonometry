@@ -218,7 +218,7 @@ def animate_fdtd_dispersion(output_dir: str) -> None:
     exacts: list[Any] = []
     pills: list[Any] = []
     for i, (ax, tube, color) in enumerate(zip(axes, tubes, colors, strict=True)):
-        ax.grid(False)
+        ax.grid(visible=False)
         ax.set_xlim(0.0, _DISP_LSHOW)
         # Headroom above the trace, not around it: the packet never leaves
         # +-1, and the label and the readout need a band of their own or

@@ -275,7 +275,7 @@ class TestFreeFieldReferenceLevel:
             (lambda: room.sound_strength_from_power([80.0], 100.0), False),
         ],
     )
-    def test_a_scalar_in_gives_a_float_out(self, call, scalar: bool) -> None:  # noqa: ANN001
+    def test_a_scalar_in_gives_a_float_out(self, call, *, scalar: bool) -> None:  # noqa: ANN001
         # The level-domain functions keep the shape they are handed, so a
         # caller working in plain numbers is not handed a one-element array
         # to unwrap.

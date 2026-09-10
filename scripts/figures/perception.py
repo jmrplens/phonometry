@@ -1990,7 +1990,7 @@ def generate_stoi_intelligibility(output_dir: str) -> None:
 
     snrs = np.arange(-15.0, 20.1, 5.0)
 
-    def curve(masker: np.ndarray, extended: bool) -> np.ndarray:
+    def curve(masker: np.ndarray, *, extended: bool) -> np.ndarray:
         p_m = float(np.sqrt(np.mean(masker**2)))
         out = []
         for snr in snrs:
@@ -2007,7 +2007,7 @@ def generate_stoi_intelligibility(output_dir: str) -> None:
     ):
         ax.plot(
             snrs,
-            curve(base_noise, extended),
+            curve(masker=base_noise, extended=extended),
             "o-",
             color=COLOR_PRIMARY,
             linewidth=1.7,
@@ -2015,7 +2015,7 @@ def generate_stoi_intelligibility(output_dir: str) -> None:
         )
         ax.plot(
             snrs,
-            curve(modulated, extended),
+            curve(masker=modulated, extended=extended),
             "s--",
             color=COLOR_SECONDARY,
             linewidth=1.7,
@@ -2809,7 +2809,7 @@ def generate_htlan_compression(output_dir: str) -> None:
         hh, nn, removed, levels=levels[::2], colors=ink, linewidths=0.7, alpha=0.55
     )
     ax.clabel(lines, fmt="%.0f dB", fontsize=9, colors=ink)
-    ax.grid(False)
+    ax.grid(visible=False)
     cbar = _fig.colorbar(cs, ax=ax)
     cbar.set_label("Decibels removed by $HN/120$")
     ax.plot(
@@ -3879,7 +3879,7 @@ def generate_sti_occupancy_adjustment(output_dir: str) -> None:
         "Annex M: what the empty hall would score with the audience in",
         pad=12,
     )
-    ax.grid(True, axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.grid(visible=True, axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="upper left", fontsize=9)
 
@@ -3897,7 +3897,7 @@ def generate_sti_occupancy_adjustment(output_dir: str) -> None:
     ax_delta.set_xticklabels(["125", "250", "500", "1k", "2k", "4k", "8k"])
     ax_delta.set_xlabel(LABEL_FREQ_HZ)
     ax_delta.set_ylabel("Change from the\nmeasured MTI")
-    ax_delta.grid(True, axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_delta.grid(visible=True, axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax_delta.set_axisbelow(True)
 
     fig.align_ylabels((ax, ax_delta))

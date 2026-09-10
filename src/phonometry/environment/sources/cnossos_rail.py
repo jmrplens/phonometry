@@ -2497,6 +2497,7 @@ def _rolling_and_bridge(
     track: RailwayTrack,
     roughness_speed: float,
     interpolation: RoughnessInterpolation,
+    *,
     include_impact: bool,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64] | None]:
     """Rolling noise at source A and, where present, the bridge source."""

@@ -224,7 +224,7 @@ def animate_elastic_plate_junction(output_dir: str) -> None:
         (axes[0], titles[0], v_ctrl, False),
         (axes[1], titles[1], v_junc, True),
     ):
-        ax.grid(False)
+        ax.grid(visible=False)
         im = ax.imshow(
             data[0],
             origin="upper",
@@ -655,7 +655,7 @@ def animate_elastic_coincidence(output_dir: str) -> None:
     for col, (ax, title, data) in enumerate(
         ((axes[0], titles[0], p_lo), (axes[1], titles[1], p_hi))
     ):
-        ax.grid(False)
+        ax.grid(visible=False)
         im = ax.imshow(
             data[0],
             origin="upper",

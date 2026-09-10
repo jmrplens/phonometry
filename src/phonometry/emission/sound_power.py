@@ -699,7 +699,7 @@ def environmental_correction(
 
 
 def _hemisphere_position_table(
-    grade: Grade, reflecting_planes: int, tones: bool
+    grade: Grade, reflecting_planes: int, *, tones: bool
 ) -> tuple[np.ndarray, tuple[int, ...]]:
     """Coordinate table and row selection for the hemisphere key positions.
 
@@ -768,7 +768,9 @@ def measurement_positions(
         msg = _REFLECTING_PLANES_MSG
         raise ValueError(msg)
     grade = _check_grade(grade)
-    table, index = _hemisphere_position_table(grade, reflecting_planes, tones)
+    table, index = _hemisphere_position_table(
+        grade=grade, reflecting_planes=reflecting_planes, tones=tones
+    )
     return np.asarray(table[list(index)] * radius, dtype=np.float64)
 
 

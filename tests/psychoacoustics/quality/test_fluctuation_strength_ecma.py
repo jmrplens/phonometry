@@ -301,7 +301,7 @@ def test_result_structure(
 @pytest.mark.parametrize("trim", [True, False])
 @pytest.mark.xdist_group("ecma-fluctuation-ref")
 def test_a_trace_off_its_time_axis_is_refused(
-    ref_calibration: psychoacoustics.EcmaFluctuationStrength, trim: bool
+    ref_calibration: psychoacoustics.EcmaFluctuationStrength, *, trim: bool
 ) -> None:
     """The time panel is one ``plot`` call pairing ``time`` with F(l50).
 

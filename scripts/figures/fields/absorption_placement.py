@@ -290,7 +290,7 @@ def animate_fdtd_absorption_placement(output_dir: str) -> None:
         ax_r = fig.add_subplot(gs[1, col])
         rms_axes.append(ax_r)
         for row, ax in enumerate((ax_p, ax_r)):
-            ax.grid(False)
+            ax.grid(visible=False)
             kwargs: dict[str, Any] = (
                 {"cmap": CMAP_FIELD, "vmin": -vmax, "vmax": vmax}
                 if row == 0
@@ -411,7 +411,7 @@ def animate_fdtd_absorption_placement(output_dir: str) -> None:
     ax_d.set_xlabel(T("Time [ms]"), fontsize=8.5, labelpad=1.5)
     ax_d.set_ylabel(T("Total energy [dB]"), fontsize=8.5)
     ax_d.tick_params(labelsize=7)
-    ax_d.grid(True, color=COLOR_GRID, lw=0.6)
+    ax_d.grid(visible=True, color=COLOR_GRID, lw=0.6)
     # The statistical band both rooms share, hung from the decay's peak:
     # Sabine above, Eyring below, and neither can tell the rooms apart.
     k_pk = int(np.argmax(lev_a))

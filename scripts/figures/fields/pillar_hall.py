@@ -213,7 +213,7 @@ def animate_fdtd_pillar_hall(output_dir: str) -> None:
     ax.set_xlim(*_PILLAR_VIEW)
     ax.set_ylim(0.0, _PILLAR_LY)
     ax.set_aspect("auto")
-    ax.grid(False)
+    ax.grid(visible=False)
     ax.axis("off")
     caption_bbox = {
         "facecolor": "black" if dark else "white",

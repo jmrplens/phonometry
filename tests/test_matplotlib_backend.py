@@ -180,7 +180,7 @@ _PLACEMENTS = [
     _PLACEMENTS,
     ids=[label for label, _, _ in _PLACEMENTS],
 )
-def test_eager_import_classifier(label: str, source: str, eager: bool) -> None:
+def test_eager_import_classifier(label: str, source: str, *, eager: bool) -> None:
     """The classifier behind the gate reports exactly the eager placements."""
     found = _eager_matplotlib_imports(ast.parse(source).body)
     assert bool(found) is eager, (

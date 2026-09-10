@@ -35,7 +35,7 @@ def _t(text: str, language: str = "en", **fmt: Any) -> str:
     return s.format(**fmt) if fmt else s
 
 
-def _db_waveform(y: np.ndarray, calibrated: bool) -> np.ndarray:
+def _db_waveform(y: np.ndarray, *, calibrated: bool) -> np.ndarray:
     """Pointwise ``20 lg(|p| / 20 uPa)`` of a calibrated waveform.
 
     :param y: Samples already scaled to pascals.
@@ -132,7 +132,7 @@ def plot_signal(
     calibrated = factor is not None
     y = result.data if factor is None else result.data * factor
     if scale == "db":
-        y = _db_waveform(y, calibrated)
+        y = _db_waveform(y=y, calibrated=calibrated)
         ylabel = "Sound pressure [dB re 20 uPa]"
     else:
         ylabel = "Sound pressure [Pa]" if calibrated else "Amplitude [FS]"
@@ -144,7 +144,7 @@ def plot_signal(
     _draw_channels(axw, t, y, result, language, kwargs)
     axw.set_xlabel(_t(_TIME_LABEL, language))
     axw.set_ylabel(_t(ylabel, language))
-    axw.grid(True, alpha=0.3)
+    axw.grid(visible=True, alpha=0.3)
     if new_figure:
         axw.set_title(_t("Calibrated waveform" if calibrated else "Waveform", language))
     localize_axes(axw, language)

@@ -608,7 +608,7 @@ def test_party_wall_requirement_clause_2_1_1_c() -> None:
     ],
 )
 def test_reverberation_requirements_clause_2_2(
-    room_use: str, furnished: bool, quantity: str, limit: float, unit: str
+    room_use: str, *, furnished: bool, quantity: str, limit: float, unit: str
 ) -> None:
     """DB-HR 2.2: 0,7 s / 0,5 s classrooms, 0,9 s restaurants, A/V >= 0,2 m2/m3."""
     req = hr.db_hr_reverberation_requirement(room_use, furnished=furnished)

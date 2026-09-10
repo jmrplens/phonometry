@@ -209,6 +209,7 @@ def test_scholte_speed_rejects_wrong_material_roles() -> None:
 
 def _oblique_water_trace(
     theta_deg: float,
+    *,
     with_steel: bool,
 ) -> tuple[np.ndarray, float]:
     """Probe pressure of a tilted carrier beam over water or water/steel.

@@ -179,7 +179,7 @@ def plot_zwicker_loudness(
             ln=format_number(result.loudness_level, language, decimals=1),
         )
     )
-    ax_specific.grid(True, alpha=0.3)
+    ax_specific.grid(visible=True, alpha=0.3)
 
     if not time_varying:
         localize_axes(ax_specific, language)
@@ -247,7 +247,7 @@ def plot_zwicker_loudness_time(
     ax_time.set_xlabel(_t(_AXIS_TIME, language))
     ax_time.set_ylabel(_t("Loudness $N$ [sone]", language))
     ax_time.set_ylim(bottom=0.0)
-    ax_time.grid(True, alpha=0.3)
+    ax_time.grid(visible=True, alpha=0.3)
     ax_time.legend(loc="best", fontsize="small")
     localize_axes(ax_time, language)
     return ax_time
@@ -305,7 +305,7 @@ def plot_ecma_loudness(
             n=format_number(result.loudness, language, decimals=2),
         )
     )
-    ax_specific.grid(True, alpha=0.3)
+    ax_specific.grid(visible=True, alpha=0.3)
 
     if not two_panel:
         localize_axes(ax_specific, language)
@@ -318,7 +318,7 @@ def plot_ecma_loudness(
     ax_time.set_xlabel(_t(_AXIS_TIME, language))
     ax_time.set_ylabel(_t(r"Loudness $N$ [$\mathrm{sone}_{\mathrm{HMS}}$]", language))
     ax_time.set_ylim(bottom=0.0)
-    ax_time.grid(True, alpha=0.3)
+    ax_time.grid(visible=True, alpha=0.3)
     ax_time.legend(loc="best", fontsize="small")
     localize_axes(ax_specific, language)
     localize_axes(ax_time, language)
@@ -360,7 +360,7 @@ def plot_moore_glasberg_loudness(
             ln=format_number(result.loudness_level, language, decimals=1),
         )
     )
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -414,7 +414,7 @@ def plot_moore_glasberg_time_loudness(
         )
     )
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -471,7 +471,7 @@ def plot_ecma_tonality(
             t=format_number(result.tonality, language, decimals=2),
         )
     )
-    ax_specific.grid(True, alpha=0.3)
+    ax_specific.grid(visible=True, alpha=0.3)
 
     if not two_panel:
         localize_axes(ax_specific, language)
@@ -484,7 +484,7 @@ def plot_ecma_tonality(
     ax_time.set_xlabel(_t(_AXIS_TIME, language))
     ax_time.set_ylabel(_t(r"Tonality $T$ [$\mathrm{tu}_{\mathrm{HMS}}$]", language))
     ax_time.set_ylim(bottom=0.0)
-    ax_time.grid(True, alpha=0.3)
+    ax_time.grid(visible=True, alpha=0.3)
     ax_time.legend(loc="best", fontsize="small")
     localize_axes(ax_specific, language)
     localize_axes(ax_time, language)
@@ -528,7 +528,7 @@ def _plot_hms_time_and_heatmap(
     ax_time.set_ylabel(ylabel)
     ax_time.set_ylim(bottom=0.0)
     ax_time.set_title(title)
-    ax_time.grid(True, alpha=0.3)
+    ax_time.grid(visible=True, alpha=0.3)
 
     if not two_panel:
         localize_axes(ax_time, language)
@@ -674,7 +674,7 @@ def plot_fluctuation_strength(
         )
     )
     ax.set_ylim(bottom=0.0)
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.set_axisbelow(True)
     localize_axes(ax, language)
     return ax
@@ -719,7 +719,7 @@ def plot_psychoacoustic_annoyance(
             n5=format_number(result.n5, language, decimals=1),
         )
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     ax.set_axisbelow(True)
     # localize_axes leaves the categorical x-axis (a FuncFormatter) alone.
     localize_axes(ax, language)
@@ -824,7 +824,7 @@ def plot_tone_assessment(
     ax.set_ylabel(_t(ylabel, language))
     format_frequency_axis(ax, *_TONE_RANGE_HZ)
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="major", alpha=0.3)
+    ax.grid(visible=True, which="major", alpha=0.3)
     ax.set_axisbelow(True)
     localize_axes(ax, language)
     return ax
@@ -881,7 +881,7 @@ def plot_tone_audibility(
     ax.set_ylabel(_t(r"Audibility $\Delta L$ [dB]", language))
     ax.set_title(_t("ISO/PAS 20065 tonal audibility", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     ax.set_axisbelow(True)
     # localize_axes leaves the categorical x-axis (a FuncFormatter) alone, so the
     # comma-localized tick labels set above survive.
@@ -995,7 +995,7 @@ def plot_tone_audibility_levels(
     ax.set_title(_t("ISO 1996-2 tone-audibility analysis", language))
     format_frequency_axis(ax, float(f1.min()), float(f2.max()))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="major", axis="y", alpha=0.3)
+    ax.grid(visible=True, which="major", axis="y", alpha=0.3)
     ax.set_axisbelow(True)
     localize_axes(ax, language)
     return ax
@@ -1060,7 +1060,7 @@ def plot_equal_loudness_contours(
     ax.set_xlabel(_t(_AXIS_FREQUENCY, language))
     ax.set_ylabel(_t("Sound pressure level [dB re 20 µPa]", language))
     ax.set_title(_t("ISO 226:2023 equal-loudness contours", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="upper right", fontsize="small")
     # Subtle footnote so the standalone figure is self-explanatory: the 90 phon
     # contour stops at 4 kHz and no higher contours exist by the standard.

@@ -332,6 +332,7 @@ def _slit_resonator_ducts(
     wc: float,
     slit_height: float | None,
     lattice_step: float | None,
+    *,
     end_correction: bool,
     fluid: Fluid,
 ) -> tuple[Complex, Complex, Complex, Complex, Complex, Complex, float]:
@@ -367,6 +368,7 @@ def _square_resonator_ducts(
     wc: float,
     slit_height: float | None,
     lattice_step: float | None,
+    *,
     end_correction: bool,
     fluid: Fluid,
     sum_terms: int,
@@ -459,24 +461,24 @@ def helmholtz_resonator_impedance(
     omega = 2.0 * np.pi * f
     if geometry == "slit":
         rho_n, kap_n, rho_c, kap_c, z_n, z_c, dl = _slit_resonator_ducts(
-            f,
-            wn,
-            wc,
-            slit_height,
-            lattice_step,
-            end_correction,
-            fluid,
+            f=f,
+            wn=wn,
+            wc=wc,
+            slit_height=slit_height,
+            lattice_step=lattice_step,
+            end_correction=end_correction,
+            fluid=fluid,
         )
     else:
         rho_n, kap_n, rho_c, kap_c, z_n, z_c, dl = _square_resonator_ducts(
-            f,
-            wn,
-            wc,
-            slit_height,
-            lattice_step,
-            end_correction,
-            fluid,
-            sum_terms,
+            f=f,
+            wn=wn,
+            wc=wc,
+            slit_height=slit_height,
+            lattice_step=lattice_step,
+            end_correction=end_correction,
+            fluid=fluid,
+            sum_terms=sum_terms,
         )
     k_n = omega * np.sqrt(rho_n / kap_n)
     k_c = omega * np.sqrt(rho_c / kap_c)

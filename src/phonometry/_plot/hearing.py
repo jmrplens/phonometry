@@ -150,7 +150,7 @@ def plot_age_threshold(
         )
     )
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -217,7 +217,7 @@ def plot_nipts(
         )
     )
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -271,7 +271,7 @@ def plot_htlan(
         )
     )
     ax.legend(loc="lower left", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -345,7 +345,7 @@ def plot_occupational_exposure(
         )
     )
     ax.legend(loc="lower right", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     # localize_axes leaves the categorical task-label axis (a FuncFormatter) alone.
     localize_axes(ax, language)
     return ax
@@ -417,7 +417,7 @@ def plot_assumed_protection(
         )
     )
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -486,7 +486,7 @@ def plot_hml_rating(
     ax.set_ylabel(_t(_REDUCTION_LABEL, language))
     ax.set_title(_t(_HML_TITLE, language).format(h=high, m=medium, l=low))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -544,7 +544,7 @@ def plot_snr_rating(
         )
     )
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -601,6 +601,6 @@ def plot_protected_level(
         ).format(x=performance, level=result.reported_level)
     )
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax

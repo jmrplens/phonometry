@@ -156,7 +156,7 @@ def _basis(result: SoundPowerIntensityResult, language: str = "en") -> str:
 
 
 def _value_table(
-    result: SoundPowerIntensityResult, verbose: bool, language: str = "en"
+    result: SoundPowerIntensityResult, *, verbose: bool, language: str = "en"
 ) -> Table:
     """Build the full-width per-band table (nominal frequency, LW, indicators).
 
@@ -338,7 +338,7 @@ def render_intensity_power_report(
                 _criteria_strip(result, language),
             ],
         ),
-        value_table=_value_table(result, verbose, language),
+        value_table=_value_table(result=result, verbose=verbose, language=language),
         metadata=metadata,
         language=language,
     )
@@ -447,6 +447,7 @@ def _precision_value_table(
     result: PrecisionIntensityResult,
     indicators: PrecisionFieldIndicators | None,
     criteria: PrecisionCriteria | None,
+    *,
     verbose: bool,
     language: str = "en",
 ) -> Table:
@@ -891,7 +892,11 @@ def render_precision_intensity_report(
             ],
         ),
         value_table=_precision_value_table(
-            result, indicators, criteria, verbose, language
+            result=result,
+            indicators=indicators,
+            criteria=criteria,
+            verbose=verbose,
+            language=language,
         ),
         metadata=metadata,
         language=language,

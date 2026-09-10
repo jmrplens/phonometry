@@ -165,7 +165,7 @@ def _render_survey(
         is_impact=is_impact,
         curve_attr=curve_attr,
         build_columns=iso717_columns_builder(
-            rating, is_impact, spec["symbol"], band_set=band_set
+            rating=rating, is_impact=is_impact, symbol=spec["symbol"], band_set=band_set
         ),
         metadata=metadata,
         verbose=verbose,

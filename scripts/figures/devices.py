@@ -1519,7 +1519,7 @@ def generate_in_duct_flow_correction(output_dir: str) -> None:
     axf.set_xlabel(LABEL_FREQ_HZ)
     axf.set_ylabel("Correction $C_{3,4}$ [dB]")
     axf.set_title("Sampling-tube correction $C_{3,4}$ (ISO 5136), $d$ = 0.5 m", pad=12)
-    axf.grid(True, which="major", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    axf.grid(visible=True, which="major", color=COLOR_GRID, linestyle="--", alpha=0.5)
     axf.set_axisbelow(True)
     axf.legend(loc="upper left", fontsize=9, ncol=2)
 
@@ -1603,7 +1603,7 @@ def generate_in_duct_flow_correction(output_dir: str) -> None:
     axu.set_xlabel("Mean flow velocity $U$ [m/s]")
     axu.set_ylabel("Correction $C_{3,4}$ [dB]")
     axu.set_title("The same correction against the flow velocity", pad=12)
-    axu.grid(True, color=COLOR_GRID, linestyle="--", alpha=0.5)
+    axu.grid(visible=True, color=COLOR_GRID, linestyle="--", alpha=0.5)
     axu.set_axisbelow(True)
     axu.legend(loc="upper left", bbox_to_anchor=(0.01, 0.9), fontsize=9)
     fig.tight_layout()
@@ -2127,7 +2127,7 @@ def generate_silencer_expansion_chamber(output_dir: str) -> None:
     ax.set_xlim(20.0, 2000.0)
     ax.set_ylim(0.0, 20.0)
     format_frequency_axis(ax, 20.0, 2000.0)
-    ax.grid(True, which="both", alpha=0.4)
+    ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(
         loc="upper right",
         fontsize="small",
@@ -2227,7 +2227,7 @@ def generate_silencer_insertion_loss(output_dir: str) -> None:
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 1.0},
     )
-    ax.grid(True, which="both", alpha=0.4)
+    ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(loc="upper left", fontsize="small")
     plt.tight_layout()
     save_figure(output_dir, "silencer_insertion_loss.svg")
@@ -2320,7 +2320,7 @@ def generate_silencer_selection(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Attenuation [dB]")
     ax.set_title("Choosing the family: where each one is worth having", pad=10)
-    ax.grid(True, which="both", alpha=0.4)
+    ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(loc="upper left", fontsize="small")
     plt.tight_layout()
     save_figure(output_dir, "silencer_selection.svg")
@@ -2412,7 +2412,7 @@ def generate_silencer_extended_tube(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Transmission loss [dB]")
     ax.set_title("Extended-tube chamber: quarter-wave branches buried inside", pad=10)
-    ax.grid(True, which="both", alpha=0.4)
+    ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(loc="upper right", fontsize="small")
     plt.tight_layout()
     save_figure(output_dir, "silencer_extended_tube.svg")
@@ -3545,7 +3545,7 @@ def generate_silencer_side_branch(output_dir: str) -> None:
     ax.set_title(
         "Side-branch resonators: transmission loss (Bies Eqs. 8.44, 8.46)", pad=10
     )
-    ax.grid(True, which="both", alpha=0.4)
+    ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(loc="upper right", fontsize="small")
     plt.tight_layout()
     save_figure(output_dir, "silencer_side_branch.svg")
@@ -3580,7 +3580,7 @@ def generate_hvac_end_reflection(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("End reflection loss [dB]")
     ax.set_title("Duct end reflection loss (ASHRAE Table 8.14)", pad=10)
-    ax.grid(True, which="both", alpha=0.4)
+    ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(loc="upper right", fontsize="small", title="Duct diameter")
     plt.tight_layout()
     save_figure(output_dir, "hvac_end_reflection.svg")
@@ -3737,7 +3737,7 @@ def generate_duct_attenuation_elements(output_dir: str) -> None:
             ax.set_xlim(50.0, 10000.0)
             ax.set_ylim(bottom=0.0)
             format_frequency_axis(ax, 50.0, 10000.0)
-            ax.grid(True, which="both", alpha=0.4)
+            ax.grid(visible=True, which="both", alpha=0.4)
             ax.legend(loc="upper left", fontsize="x-small")
     plt.tight_layout()
     save_figure(output_dir, "duct_attenuation_elements.svg")
@@ -3823,7 +3823,7 @@ def generate_duct_sheet_verification(output_dir: str) -> None:
         )
         ax.set_xlim(50.0, 10000.0)
         format_frequency_axis(ax, 50.0, 10000.0)
-        ax.grid(True, which="both", alpha=0.4)
+        ax.grid(visible=True, which="both", alpha=0.4)
         ax.legend(loc="best", fontsize="x-small")
     for ax in axes[1]:
         ax.set_xlabel(LABEL_FREQ_HZ)
@@ -3935,7 +3935,7 @@ def generate_duct_regenerated_noise(output_dir: str) -> None:
         ax.set_xlim(50.0, 10000.0)
         format_frequency_axis(ax, 50.0, 10000.0)
         ax.set_xlabel(LABEL_FREQ_HZ)
-        ax.grid(True, which="both", alpha=0.4)
+        ax.grid(visible=True, which="both", alpha=0.4)
     plt.tight_layout()
     save_figure(output_dir, "duct_regenerated_noise.svg")
     plt.close()
@@ -4024,7 +4024,7 @@ def generate_fan_sound_power(output_dir: str) -> None:
     ax.set_title(
         "The fan row: 5000 cfm at 2 in w.g., forward curved (Long Eq. 13.1)", pad=10
     )
-    ax.grid(True, which="both", alpha=0.4)
+    ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(loc="upper right", fontsize="small")
 
     inset = ax.inset_axes((0.07, 0.22, 0.33, 0.26))
@@ -4045,7 +4045,7 @@ def generate_fan_sound_power(output_dir: str) -> None:
     inset.set_xlabel("static efficiency [% of peak]", fontsize="x-small")
     inset.set_ylabel("$C_{\\mathrm{EFF}}$ [dB]", fontsize="x-small")
     inset.tick_params(labelsize="x-small")
-    inset.grid(True, alpha=0.4)
+    inset.grid(visible=True, alpha=0.4)
     plt.tight_layout()
     save_figure(output_dir, "fan_sound_power.svg")
     plt.close()
@@ -4094,7 +4094,7 @@ def generate_hvac_elbow_flow_noise(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Insertion loss [dB per bend]")
     ax.set_title("Elbow insertion loss (ASHRAE Table 8.11)", pad=10)
-    ax.grid(True, which="both", alpha=0.4)
+    ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(loc="upper left", fontsize="small")
 
     ax = axes[1]
@@ -4139,7 +4139,7 @@ def generate_hvac_elbow_flow_noise(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Regenerated $L_W$ [dB re 1 pW]")
     ax.set_title("Flow-generated sound power (VDI 2081, Bies Eq. 8.252)", pad=10)
-    ax.grid(True, which="both", alpha=0.4)
+    ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(loc="upper right", fontsize="small")
 
     plt.tight_layout()
@@ -4358,7 +4358,7 @@ def generate_enclosure_required_tl(output_dir: str) -> None:
     ax.set_ylabel("Level [dB]")
     ax.set_title("What the enclosure panels have to be: Norton problem 4.16", pad=10)
     ax.set_ylim(-5.0, 45.0)
-    ax.grid(True, axis="y", alpha=0.4)
+    ax.grid(visible=True, axis="y", alpha=0.4)
     ax.legend(loc="upper left", fontsize="small", ncol=2)
     plt.tight_layout()
     save_figure(output_dir, "enclosure_required_tl.svg")
@@ -4431,7 +4431,7 @@ def generate_room_to_room_partitions(output_dir: str) -> None:
     ax.set_ylim(-4.0, 6.5)
     ax.set_ylabel("NR − TL [dB]")
     ax.set_title("What the receiving room adds to (or takes from) the wall", pad=10)
-    ax.grid(True, which="both", alpha=0.4)
+    ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(loc="upper left", fontsize="small")
 
     ax = axes[1]
@@ -4473,7 +4473,7 @@ def generate_room_to_room_partitions(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Area [m²]")
     ax.set_title("Why: the same room, band by band", pad=10)
-    ax.grid(True, which="both", alpha=0.4)
+    ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(loc="upper left", fontsize="small")
 
     plt.tight_layout()
@@ -6254,7 +6254,7 @@ def generate_workstation_emission(output_dir: str) -> None:
     ax.set_xlabel("Ratio $z$")
     ax.set_ylabel("Local environmental correction $K_3$ (dB)")
     ax.set_title("What the room adds, and where grade 2 ends")
-    ax.grid(True, which="both", color=COLOR_GRID, ls="--", alpha=0.5)
+    ax.grid(visible=True, which="both", color=COLOR_GRID, ls="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.annotate(
         "capped at 7 dB, which is\n$-10\\,\\lg 0.2$ to a tenth of a decibel",

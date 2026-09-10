@@ -96,7 +96,7 @@ def _render_probe_lines(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     if labels:
         ax.legend(loc="upper right", fontsize="small")
     localize_axes(ax, language)

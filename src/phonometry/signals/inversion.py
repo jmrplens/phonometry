@@ -81,7 +81,7 @@ class TimedResponse(Protocol):
     def fs(self) -> float | None: ...
 
     def __array__(
-        self, dtype: DTypeLike | None = None, copy: bool | None = None
+        self, dtype: DTypeLike | None = None, *, copy: bool | None = None
     ) -> np.ndarray: ...
 
 
@@ -260,7 +260,7 @@ class InverseFilterResult:
         _require_band_flatness(self)
 
     def __array__(
-        self, dtype: DTypeLike | None = None, copy: bool | None = None
+        self, dtype: DTypeLike | None = None, *, copy: bool | None = None
     ) -> np.ndarray:
         """Return the inverse-filter samples as an array."""
         return np.asarray(self.inverse, dtype=dtype, copy=copy)

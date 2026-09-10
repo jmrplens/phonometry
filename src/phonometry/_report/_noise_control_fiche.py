@@ -229,7 +229,9 @@ def render_noise_control_fiche(
     )
     if verdict is not None:
         text, passed = verdict
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
 
     basis_style_strip = measurement_basis_style()
     flow.extend(fiche_paragraph(strip, basis_style_strip) for strip in basis_strips)

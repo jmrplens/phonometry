@@ -49,7 +49,7 @@ def _render(tmp_path: pathlib.Path, name: str) -> pathlib.Path:
     return path
 
 
-def _shaded_figure(dark: bool, *, faint: bool) -> None:
+def _shaded_figure(*, dark: bool, faint: bool) -> None:
     """A band chart whose shaded corridor is either alpha-faint or derived."""
     plt.style.use("dark_background" if dark else "default")
     _fig, ax = plt.subplots()
@@ -61,9 +61,9 @@ def _shaded_figure(dark: bool, *, faint: bool) -> None:
 
 
 @pytest.mark.parametrize("dark", [False, True])
-def test_a_faint_alpha_fill_is_reported(tmp_path: pathlib.Path, dark: bool) -> None:
+def test_a_faint_alpha_fill_is_reported(tmp_path: pathlib.Path, *, dark: bool) -> None:
     """A 10 % wash of a mid hue is below the threshold on either page."""
-    _shaded_figure(dark, faint=True)
+    _shaded_figure(dark=dark, faint=True)
     regions = cfc.measure(_render(tmp_path, "faint"))
     assert len(regions) == 1
     assert not regions[0].ok
@@ -71,9 +71,9 @@ def test_a_faint_alpha_fill_is_reported(tmp_path: pathlib.Path, dark: bool) -> N
 
 
 @pytest.mark.parametrize("dark", [False, True])
-def test_a_derived_fill_passes(tmp_path: pathlib.Path, dark: bool) -> None:
+def test_a_derived_fill_passes(tmp_path: pathlib.Path, *, dark: bool) -> None:
     """The same corridor drawn with ``theme_fill`` clears the threshold."""
-    _shaded_figure(dark, faint=False)
+    _shaded_figure(dark=dark, faint=False)
     regions = cfc.measure(_render(tmp_path, "derived"))
     assert len(regions) == 1
     assert regions[0].ok

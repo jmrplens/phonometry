@@ -1038,7 +1038,7 @@ def _plot_level_history(
     ax.plot(result.times, result.levels, label=labels["level"], **kwargs)
     ax.set_xlabel(labels["xlabel"])
     ax.set_ylabel(labels["ylabel"])
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, lang)
     return ax
 
@@ -1113,5 +1113,5 @@ def _plot_impulsive_sound(
     ax.set_ylabel(labels["ylabel"])
     ax.set_title(f"{labels['title']}\n{summary}")
     ax.legend(loc="best")
-    ax.grid(True, ls=":", alpha=0.5)
+    ax.grid(visible=True, ls=":", alpha=0.5)
     return ax

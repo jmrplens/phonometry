@@ -130,6 +130,7 @@ def _basis(
 
 def _value_table(
     result: SoundPowerResult | PrecisionSoundPowerResult,
+    *,
     verbose: bool,
     language: str = "en",
 ) -> Table:
@@ -333,7 +334,7 @@ def render_sound_power_report(
                 _a_weighting_strip(result, language),
             ],
         ),
-        value_table=_value_table(result, verbose, language),
+        value_table=_value_table(result=result, verbose=verbose, language=language),
         metadata=metadata,
         language=language,
     )

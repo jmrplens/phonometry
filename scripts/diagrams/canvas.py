@@ -285,7 +285,7 @@ def _comment(s: str) -> str:
     return f"<!-- {_esc(s).replace('--', '‐‐')} -->"
 
 
-def _math_tokens(run: str, s: str, script: bool = False) -> list[tuple[str, str]]:
+def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, str]]:
     r"""Split one math run into ``(kind, text)`` chunks.
 
     ``var`` is set in italic: at the baseline a single letter -- Latin or
@@ -448,7 +448,7 @@ def _math_runs(s: str) -> list[tuple[str, bool, float, float]]:
     chunks: list[tuple[str, bool, float, float]] = []
 
     def add(
-        text: str, italic: bool = False, shift: float = 0.0, scale: float = 1.0
+        text: str, *, italic: bool = False, shift: float = 0.0, scale: float = 1.0
     ) -> None:
         if not text:
             return
@@ -684,6 +684,7 @@ class SVG:
         size: int = 17,
         fill: str = "",
         anchor: str = "middle",
+        *,
         bold: bool = False,
         mono: bool = False,
         italic: bool = False,
@@ -838,7 +839,9 @@ class SVG:
         self.line(x, capsule_top + cap_h + body_h, x, ground, th.fg, 2.2)
         self.line(x - 16 * s, ground, x + 16 * s, ground, th.fg, 2.2)
 
-    def person(self, x: float, y: float, h: float = 90.0, seated: bool = False) -> None:
+    def person(
+        self, x: float, y: float, h: float = 90.0, *, seated: bool = False
+    ) -> None:
         """Simple engineering-style human silhouette; (x, y) = feet."""
         th = self.th
         r = h * 0.10

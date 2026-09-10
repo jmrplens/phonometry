@@ -181,7 +181,7 @@ def render_iso16283_report(
     is_impact = quantity in _IMPACT_QUANTITIES
 
     def build_columns(
-        value_header: str, curve: np.ndarray, verbose: bool, language: str
+        value_header: str, curve: np.ndarray, *, verbose: bool, language: str
     ) -> tuple[Sequence[Column], str, Any]:
         """The field table: ``f | value`` or, verbose, the measurement chain."""
         from reportlab.lib.units import mm
@@ -347,7 +347,9 @@ def render_iso16283_facade_report(
         spec=spec,
         is_impact=False,
         curve_attr=quantity,
-        build_columns=iso717_columns_builder(rating, False, spec["symbol"]),
+        build_columns=iso717_columns_builder(
+            rating=rating, is_impact=False, symbol=spec["symbol"]
+        ),
         metadata=metadata,
         verbose=verbose,
         language=language,

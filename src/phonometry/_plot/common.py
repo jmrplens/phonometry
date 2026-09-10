@@ -956,7 +956,9 @@ def _plot_rating(
         color=_C_REFERENCE,
         label=_t("Shifted reference", language),
     )
-    unfavourable = _unfavourable_mask(measured, reference, impact)
+    unfavourable = _unfavourable_mask(
+        measured=measured, reference=reference, impact=impact
+    )
     ax.fill_between(
         band_centers,
         measured,
@@ -972,13 +974,13 @@ def _plot_rating(
     if ylim is not None:
         ax.set_ylim(*ylim)
     ax.set_title(title)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     return ax
 
 
 def _unfavourable_mask(
-    measured: np.ndarray, reference: np.ndarray, impact: bool
+    measured: np.ndarray, reference: np.ndarray, *, impact: bool
 ) -> np.ndarray:
     """Bands whose deviation is unfavourable.
 
@@ -1301,7 +1303,7 @@ def _plot_band_level_bars(
     ax.set_ylabel(ylabel)
     ax.set_title(title)
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     return ax
 
 
@@ -1379,7 +1381,7 @@ def _plot_insulation_bands(
     ax.set_ylabel(ylabel)
     ax.set_title(title)
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     return ax
 
 

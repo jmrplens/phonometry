@@ -109,7 +109,7 @@ def plot_sti(
             rating=result.rating,
         )
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     # localize_axes leaves the categorical band axis (a FuncFormatter) alone.
     localize_axes(ax, language)
     return ax
@@ -173,7 +173,7 @@ def plot_stoi(
             v=format_number(result.value, language, decimals=3),
         )
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     # localize_axes leaves the categorical band labels (a FuncFormatter) alone,
     # so the comma-localized labels set above survive.
     localize_axes(ax, language)
@@ -224,7 +224,7 @@ def plot_sii(
         )
     )
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     # localize_axes leaves the categorical band axis (a FuncFormatter) alone.
     localize_axes(ax, language)
     return ax
@@ -284,7 +284,7 @@ def plot_sii_procedure(
     format_frequency_axis(ax)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -333,7 +333,7 @@ def plot_standard_speech_spectrum(
     ax.set_ylabel(_t("Speech spectrum level [dB SPL]", language))
     ax.set_title(_t("ANSI S3.5-1997 standard speech spectrum", language))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     # localize_axes leaves the categorical band axis (a FuncFormatter) alone.
     localize_axes(ax, language)
     return ax

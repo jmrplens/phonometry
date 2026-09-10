@@ -213,7 +213,9 @@ def test_combined_paths_sheet_lists_its_contributions(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize("verbose", [False, True])
-def test_a_long_path_still_renders_on_one_page(tmp_path: Path, verbose: bool) -> None:
+def test_a_long_path_still_renders_on_one_page(
+    tmp_path: Path, *, verbose: bool
+) -> None:
     """A fiche is one page: a path too long for it elides its middle rows."""
     _reportlab()
     res = duct_path(

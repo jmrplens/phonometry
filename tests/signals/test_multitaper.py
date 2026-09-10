@@ -159,7 +159,7 @@ def test_multitaper_tone_band_power_recovers_amplitude() -> None:
 
 
 @pytest.mark.parametrize("adaptive", [False, True])
-def test_multitaper_spectrum_scaling_reads_tone_peak(adaptive: bool) -> None:
+def test_multitaper_spectrum_scaling_reads_tone_peak(*, adaptive: bool) -> None:
     """'spectrum' scaling reads A^2/2 at the tone bin, like Welch."""
     n = 4096
     t = np.arange(n) / FS

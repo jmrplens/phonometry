@@ -173,7 +173,7 @@ def test_assessment_period_defaults_and_validates() -> None:
 # Per-impulse columns that do not agree
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
-def test_per_impulse_columns_that_disagree_are_refused(trim: bool) -> None:
+def test_per_impulse_columns_that_disagree_are_refused(*, trim: bool) -> None:
     """The prominence is taken over the whole set the table prints.
 
     A column short of a row leaves a sheet whose headline covers an impulse

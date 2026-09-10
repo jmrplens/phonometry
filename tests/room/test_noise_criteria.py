@@ -321,7 +321,7 @@ def test_nc_verdict_long_hvac_receiver_spectrum() -> None:
 # A spectrum that does not run over its own band axis
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
-def test_an_nc_rating_refuses_levels_off_the_band_axis(trim: bool) -> None:
+def test_an_nc_rating_refuses_levels_off_the_band_axis(*, trim: bool) -> None:
     """The rating names a governing band, so the two axes must agree.
 
     A spectrum of the wrong length would have the rating name a band the

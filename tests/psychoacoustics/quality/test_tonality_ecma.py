@@ -296,7 +296,7 @@ def test_result_structure(ref_1k_40: psychoacoustics.EcmaTonality) -> None:
 @pytest.mark.xdist_group("ecma-tonality-ref")
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
 def test_tonal_frequencies_off_the_band_axis_are_refused(
-    ref_1k_40: psychoacoustics.EcmaTonality, trim: bool
+    ref_1k_40: psychoacoustics.EcmaTonality, *, trim: bool
 ) -> None:
     """A per-band tonal frequency array of the wrong length is refused.
 
@@ -315,7 +315,7 @@ def test_tonal_frequencies_off_the_band_axis_are_refused(
 @pytest.mark.xdist_group("ecma-tonality-ref")
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
 def test_tonal_frequency_vs_time_off_the_block_axis_is_refused(
-    ref_1k_40: psychoacoustics.EcmaTonality, trim: bool
+    ref_1k_40: psychoacoustics.EcmaTonality, *, trim: bool
 ) -> None:
     """The time-dependent tonal frequency is pinned to the block axis.
 

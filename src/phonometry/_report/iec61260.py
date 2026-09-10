@@ -303,7 +303,9 @@ def render_iec61260_report(
             )
             raise ValueError(msg)
         text, passed = _verdict(result, metadata.required_class, language)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
     flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)

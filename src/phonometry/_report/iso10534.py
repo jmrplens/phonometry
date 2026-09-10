@@ -160,7 +160,7 @@ def _metadata_pairs(
 
 
 def _value_table(
-    result: ImpedanceTubeResult, verbose: bool, language: str = "en"
+    result: ImpedanceTubeResult, *, verbose: bool, language: str = "en"
 ) -> Table:
     """Build the per-frequency value table (~102 mm wide).
 
@@ -252,7 +252,7 @@ def _basis_line(metadata: ReportMetadata | None, language: str = "en") -> str:
     )
 
 
-def _caption(verbose: bool, language: str = "en") -> str:
+def _caption(*, verbose: bool, language: str = "en") -> str:
     """The left-panel caption, listing the columns present for this fiche."""
     if verbose:
         return t(
@@ -264,6 +264,7 @@ def _caption(verbose: bool, language: str = "en") -> str:
 
 def _body(
     result: ImpedanceTubeResult,
+    *,
     verbose: bool,
     caption_style: ParagraphStyle,
     language: str = "en",
@@ -277,8 +278,8 @@ def _body(
     from ._layout import fiche_paragraph
 
     left_cell = [
-        fiche_paragraph(_caption(verbose, language), caption_style),
-        _value_table(result, verbose, language),
+        fiche_paragraph(_caption(verbose=verbose, language=language), caption_style),
+        _value_table(result=result, verbose=verbose, language=language),
     ]
     plot_drawing = render_figure_drawing(
         result.plot, 82 * mm, y_top=None, language=language
@@ -357,7 +358,14 @@ def render_iso10534_report(
         flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
-    flow.append(_body(result, verbose, caption_style, language))
+    flow.append(
+        _body(
+            result=result,
+            verbose=verbose,
+            caption_style=caption_style,
+            language=language,
+        )
+    )
     flow.append(Spacer(1, 8))
 
     # ISO 10534-2 is a characterisation: a headline label, no single-number

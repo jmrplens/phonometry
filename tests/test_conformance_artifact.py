@@ -65,9 +65,7 @@ def test_a_numpy_verdict_is_coerced_to_a_builtin_bool() -> None:
     ``abs(delta) <= limit`` then hands back a ``numpy.bool_``. Coercing in the
     constructor is what catches the outcomes built by hand as well.
     """
-    outcome = registry.Outcome(
-        expected="1", computed="1", delta="0", passed=np.bool_(True)
-    )
+    outcome = registry.Outcome(expected="1", computed="1", delta="0", passed=np.True_)
     assert type(outcome.passed) is bool
     assert outcome.verdict is registry.Verdict.PASS
 
@@ -701,7 +699,7 @@ def test_a_verdict_is_printed_and_never_re_derived() -> None:
 
 def test_a_missing_panel_is_named() -> None:
     with pytest.raises(KeyError, match="carries no 'filter-class' panel"):
-        cr._numerical_validation_section({"panels": []}, True)
+        cr._numerical_validation_section({"panels": []}, filters_ok=True)
 
 
 def test_a_missing_artefact_says_how_to_make_one(tmp_path: pathlib.Path) -> None:

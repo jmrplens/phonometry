@@ -371,7 +371,7 @@ def _anchor_hz(fs: float, band: tuple[float, float], f_ref: float) -> float:
 
 
 def _quadratic_group(
-    block: np.ndarray, omega: np.ndarray, omega2: np.ndarray, grad: bool
+    block: np.ndarray, omega: np.ndarray, omega2: np.ndarray, *, grad: bool
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""``|s^2 + b1 s + b0|^2`` per factor at ``s = j omega``, and the gradient.
 
@@ -394,7 +394,7 @@ def _quadratic_group(
 
 
 def _linear_group(
-    block: np.ndarray, omega2: np.ndarray, grad: bool
+    block: np.ndarray, omega2: np.ndarray, *, grad: bool
 ) -> tuple[np.ndarray, np.ndarray]:
     """``|s + b1|^2`` per factor at ``s = j omega``, and the ``log`` gradient."""
     b1 = _scalar_exp(block)[None, :]
@@ -405,7 +405,7 @@ def _linear_group(
 
 
 def _log_mag2(
-    theta: np.ndarray, layout: _Layout, omega: np.ndarray, grad: bool = False
+    theta: np.ndarray, layout: _Layout, omega: np.ndarray, *, grad: bool = False
 ) -> tuple[np.ndarray, np.ndarray]:
     r""":math:`\log |\tilde{H}(j\Omega)|^2` up to a constant, and its Jacobian.
 
@@ -440,9 +440,11 @@ def _log_mag2(
         if block.size == 0:
             continue
         if quadratic:
-            denominator, jacobian = _quadratic_group(block, omega, omega2, grad)
+            denominator, jacobian = _quadratic_group(
+                block=block, omega=omega, omega2=omega2, grad=grad
+            )
         else:
-            denominator, jacobian = _linear_group(block, omega2, grad)
+            denominator, jacobian = _linear_group(block=block, omega2=omega2, grad=grad)
         pieces.append(denominator)
         spans.append((start, start + denominator.shape[1], sign))
         start += denominator.shape[1]

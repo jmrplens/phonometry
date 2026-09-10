@@ -131,7 +131,7 @@ def plot_reactive_silencer(
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Loss [dB]", language))
     ax.set_title(f"{_t('Reactive silencer', language)}: {result.kind}")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     format_frequency_axis(ax)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
@@ -170,7 +170,7 @@ def plot_hvac_spectrum(
         else _t("Attenuation [dB]", language)
     )
     ax.set_title(result.label)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     format_frequency_axis(ax)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
@@ -279,7 +279,7 @@ def plot_duct_path(
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(_LEVEL_LABEL, language))
     ax.set_title(f"{_t('Duct-borne noise path', language)}: {result.label}")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     format_frequency_axis(ax)
     ax.legend(
         loc="upper right",
@@ -344,7 +344,7 @@ def plot_room_to_room(
     ax.semilogx(f, np.asarray(result.received_level), **kwargs)
     ax.set_ylabel(_t(_LEVEL_LABEL, language))
     ax.set_title(f"{_t('Room-to-room transmission', language)}: {result.label}")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
 
     twin = ax.twinx()
     twin.plot(
@@ -367,7 +367,7 @@ def plot_room_to_room(
     )
     twin.set_ylabel(_t("Loss and noise reduction [dB]", language), color=_C_TERTIARY)
     twin.tick_params(axis="y", labelcolor=_C_TERTIARY)
-    twin.grid(False)
+    twin.grid(visible=False)
     handles, labels = ax.get_legend_handles_labels()
     extra_handles, extra_labels = twin.get_legend_handles_labels()
     ax.legend(
@@ -439,7 +439,7 @@ def plot_duct_modes(
     ax.set_xlabel(_t("Mode order ($p$, $q$)", language))
     ax.set_ylabel(_t("Cut-on frequency [Hz]", language))
     ax.set_title(f"{_t('Duct higher-order-mode cut-on', language)}: {result.label}")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -495,7 +495,7 @@ def plot_enclosure(
     ax.plot(x, np.asarray(result.insertion_loss), **kwargs)
     ax.set_ylabel(_t(_LEVEL_LABEL, language))
     ax.set_title(_t("Machine enclosure insertion loss", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     if continuous:
         ax.set_xlabel(_t(_FREQ_LABEL, language))
         format_frequency_axis(ax)
@@ -585,7 +585,7 @@ def plot_operating_line(
         + decimal_comma(f"{result.maximum_deviation:.2f}", language)
         + " dB"
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="upper left", fontsize="small")
     localize_axes(ax, language)
     return ax

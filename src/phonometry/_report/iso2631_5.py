@@ -301,7 +301,7 @@ def _classification_table(result: MultipleShockResult, language: str = "en") -> 
         ),
     ]
 
-    def _mark(is_active: bool) -> str:
+    def _mark(*, is_active: bool) -> str:
         if is_active:
             return (
                 f"<font color='{_ACCENT_HEX}'>&#9679; "
@@ -323,7 +323,7 @@ def _classification_table(result: MultipleShockResult, language: str = "en") -> 
                 fiche_paragraph(band, label_style),
                 fiche_paragraph(probability, value_style),
                 fiche_paragraph(r_range, value_style),
-                fiche_paragraph(_mark(index == active), label_style),
+                fiche_paragraph(_mark(is_active=index == active), label_style),
             ]
         )
     table = stacked_table(data, [40 * mm, 36 * mm, 62 * mm, 36 * mm])

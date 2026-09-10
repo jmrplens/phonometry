@@ -1017,7 +1017,7 @@ def _validated_absorbing_flag(absorbing_specimen_surface: object) -> bool:
     return bool(absorbing_specimen_surface)
 
 
-def _low_frequency_limit(absorbing_specimen_surface: bool) -> float:
+def _low_frequency_limit(*, absorbing_specimen_surface: bool) -> float:
     """The Clause 6.4.2 limit on ``FpI`` for this kind of test specimen."""
     if absorbing_specimen_surface:
         return _FPI_LIMIT_ABSORBING
@@ -1041,7 +1041,9 @@ def _low_frequency_qualification(
     lp_receiving = _as_band_levels(l_p, "l_p")
     require_equal_shapes(owner, {"l_p": lp_receiving.shape, "l_in": l_in.shape}, "band")
     f_pi = surface_pressure_intensity_indicator(lp_receiving, l_in)
-    limit = _low_frequency_limit(_validated_absorbing_flag(absorbing_specimen_surface))
+    limit = _low_frequency_limit(
+        absorbing_specimen_surface=_validated_absorbing_flag(absorbing_specimen_surface)
+    )
     return f_pi, np.asarray(f_pi <= limit, dtype=bool)
 
 
@@ -1177,7 +1179,9 @@ class LowFrequencyIntensityResult:
         :return: 6.0 dB when the specimen presents a sound-absorbing surface in
             the receiving room, 10.0 dB when it is sound-reflecting.
         """
-        return _low_frequency_limit(self.absorbing_specimen_surface)
+        return _low_frequency_limit(
+            absorbing_specimen_surface=self.absorbing_specimen_surface
+        )
 
     def plot(self, ax: Axes | None = None, language: str = "en", **kwargs: Any) -> Axes:
         """Draw the index per band, hatching any band Clause 6.4.2 refuses.
@@ -1371,7 +1375,9 @@ class LowFrequencyElementResult:
         :return: 6.0 dB when the specimen presents a sound-absorbing surface
             in the receiving room, 10.0 dB when it is sound-reflecting.
         """
-        return _low_frequency_limit(self.absorbing_specimen_surface)
+        return _low_frequency_limit(
+            absorbing_specimen_surface=self.absorbing_specimen_surface
+        )
 
     def plot(self, ax: Axes | None = None, language: str = "en", **kwargs: Any) -> Axes:
         """Draw ``DI,n,e`` per band, hatching any band Clause 6.4.2 refuses.

@@ -191,6 +191,16 @@ def test_the_same_sources_give_the_same_fingerprint(tmp_path: pathlib.Path) -> N
         ("i18n", '"solo en el clip uno"', '"solo en el primer clip"', {"anim_one"}),
         ("i18n", '"rótulo compartido"', '"el rótulo compartido"', {"anim_one"}),
         ("i18n", r'r"nivel \1,\2 dB"', r'r"nivel de \1,\2 dB"', {"anim_one"}),
+        # Flattening the star must not flatten the defaults with it: a
+        # parameter that gains one, loses one or changes it is a different
+        # frame, and the canonical argument list keeps each default beside
+        # the parameter it belongs to.
+        (
+            "theme",
+            "def set_theme(dark):",
+            "def set_theme(dark=True):",
+            {"anim_one", "anim_two"},
+        ),
     ],
 )
 def test_a_change_that_reaches_a_clip_moves_its_fingerprint(
@@ -244,6 +254,16 @@ def test_a_change_that_reaches_a_clip_moves_its_fingerprint(
             "from .media import _render_clip, _translate_str\n"
             "if TYPE_CHECKING:\n"
             "    from matplotlib.axes import Axes",
+        ),
+        # Where the keyword-only star sits. It decides how a caller may write
+        # the call and not what the function computes, so it cannot move a
+        # frame. Without this the flag sweep of #759 would have marked all
+        # forty-three clips stale over one star in one shared helper.
+        ("theme", "def set_theme(dark):", "def set_theme(*, dark):"),
+        (
+            "schematics",
+            "def _shared_label(ax):",
+            "def _shared_label(ax, /):",
         ),
     ],
 )

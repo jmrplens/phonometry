@@ -55,6 +55,9 @@ export const topics = [
       // the area overviews stay the breadcrumb ancestors of their own guides.
       { slug: 'start/guides', label: 'All guides', translations: { es: 'Todas las guías' } },
       'start/why-phonometry',
+      // Only useful to somebody arriving from 3.x, so it sits after the pages
+      // a new reader wants and before the ones about the project itself.
+      { slug: 'start/upgrading', label: 'Upgrading from 3.3', translations: { es: 'Actualizar de la 3.3' } },
       'start/about',
       'start/support',
     ],

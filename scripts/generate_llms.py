@@ -117,6 +117,7 @@ AREAS: tuple[tuple[str, str], ...] = (
 START_ROUTES = (
     "start/getting-started",
     "start/why-phonometry",
+    "start/upgrading",
     "start/about",
     "start/support",
 )

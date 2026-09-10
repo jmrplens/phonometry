@@ -9,7 +9,7 @@ las definen — ISO, IEC, ANSI y ASTM, el anexo CNOSSOS-EU de la Directiva
 el apartado que implementa. Qué te aporta eso, y cómo se comprueba, está en
 [Por qué phonometry](/phonometry/es/start/why-phonometry/).
 
-Seis páginas breves, pensadas para leerse una vez antes que nada. Cada una
+Siete páginas breves, pensadas para leerse una vez antes que nada. Cada una
 responde a una pregunta, y están en el orden en que llegan las preguntas.
 
 **¿Puedo instalarla y sacar un número?**
@@ -24,6 +24,12 @@ sonómetro](/phonometry/es/signals/sound-level-meter/), que recorre la cadena
 entera de principio a fin en una sola página, y [Calibración y
 dBFS](/phonometry/es/signals/metrology/calibration/) es la guía de fondo del
 paso que más importa.
+
+**Mi código está escrito contra la 3.3 y los imports fallan.**
+[Actualizar de la 3.3 a la 4.0](/phonometry/es/start/upgrading/) es el mapa: la
+única regla que mueve casi todos los imports, un resolvedor para pegar cuando
+no quieras buscar un nombre a mano, los tres sitios donde el arreglo evidente
+es el equivocado y los diez nombres que ya no existen.
 
 **Tengo un trabajo, no un tema. ¿Cuál es mi página?**
 [¿Qué necesitas medir?](/phonometry/es/start/tasks/) indexa la biblioteca por

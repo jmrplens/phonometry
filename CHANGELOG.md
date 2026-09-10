@@ -5464,6 +5464,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the `Requires-Dist` of the built wheel and sdist, which is what a resolver
   actually reads.
 
+## [4.0.0rc1] - 2026-09-10
+
+The first release candidate of 4.0.0, published as a pre-release: `pip` leaves
+it alone without `--pre`, and it does not become the repository's latest
+release.
+
+4.0.0 is a hard break with no compatibility layer. What it removes, moves and
+renames is written above under `[Unreleased]`, where the notes stay until the
+final release stamps them, and
+[Upgrading from 3.3 to 4.0](https://jmrplens.github.io/phonometry/start/upgrading/)
+is the short version: the one rule for imports, the five modules that split
+rather than moved, the three places where the obvious fix is the wrong one,
+and the table of what each name became.
+
+This is also where the `PyOctaveBand` transition package stops. Its pin has
+capped phonometry below the next major since it was published, so `pip install
+-U PyOctaveBand` keeps resolving the 3.x line and nothing an installed user has
+breaks. What changes is what the published page says: PyOctaveBand 2.2.0 states
+that the bridge ends at 3.x, why a stub that followed 4.0 could not keep its
+promise, and where the map out is, and the shim's own `FutureWarning` now
+carries that link too. The test that used to fail the build when the tree left
+the pin is replaced by the ones that hold the page to the decision taken: the
+requirement it prints has to be the requirement the resolver reads, and once
+the tree is outside it the page may no longer say that renaming the import is
+the whole of the migration.
+
 ## [3.3.0] - 2026-07-27
 
 ### Added

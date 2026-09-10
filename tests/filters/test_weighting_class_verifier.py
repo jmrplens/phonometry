@@ -305,8 +305,9 @@ def _a_verdict() -> filters.WeightingComplianceResult:
 
 
 def test_unknown_edition_is_rejected() -> None:
+    verdict = _a_verdict()
     with pytest.raises(ValueError, match=r"'edition' must be one of"):
-        dataclasses.replace(_a_verdict(), edition="2020")
+        dataclasses.replace(verdict, edition="2020")
 
 
 def test_rows_carrying_another_edition_class_are_rejected() -> None:
@@ -329,14 +330,16 @@ def test_rows_that_disagree_among_themselves_are_rejected() -> None:
 
 def test_a_sweep_without_rows_is_rejected() -> None:
     """The sweep runs between the rows, so it cannot outlive them."""
+    verdict = _a_verdict()
     with pytest.raises(ValueError, match=r"present exactly when there is a row"):
-        dataclasses.replace(_a_verdict(), bands=())
+        dataclasses.replace(verdict, bands=())
 
 
 def test_a_class_that_is_no_designation_is_rejected() -> None:
     """``1.0`` reads as class 1 and builds ``margin_class1.0_db``, a key nobody has."""
+    verdict = _a_verdict()
     with pytest.raises(ValueError, match=r"must be a class of \[1, 2\] or None"):
-        dataclasses.replace(_a_verdict(), overall_class=1.0)
+        dataclasses.replace(verdict, overall_class=1.0)
 
 
 def test_a_class_the_margins_do_not_derive_is_rejected() -> None:

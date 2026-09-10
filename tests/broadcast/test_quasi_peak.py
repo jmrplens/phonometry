@@ -668,15 +668,15 @@ def test_the_verifier_answers_for_the_ballistics_it_is_given() -> None:
 
 def test_a_verdict_over_no_stimulus_is_rejected() -> None:
     """Clause 2 has eleven windows; none of them is not a conformance run."""
-    with pytest.raises(FrozenInstanceError):
-        verify_quasi_peak_dynamics().fs = 1.0  # type: ignore[misc]
+    report = verify_quasi_peak_dynamics()
     with pytest.raises(ValueError, match=r"cannot be attested over no stimulus"):
-        replace(verify_quasi_peak_dynamics(), stimuli=(), passed=False)
+        replace(report, stimuli=(), passed=False)
 
 
 def test_a_non_positive_sample_rate_is_rejected() -> None:
+    report = verify_quasi_peak_dynamics()
     with pytest.raises(ValueError, match=r"'fs' must be positive"):
-        replace(verify_quasi_peak_dynamics(), fs=0.0)
+        replace(report, fs=0.0)
 
 
 @pytest.mark.parametrize(
@@ -690,5 +690,6 @@ def test_a_summary_the_rows_do_not_derive_is_rejected(field: str, value: float) 
     the one this refusal exists to make impossible, and every number on it is
     inside its plausible range.
     """
+    report = verify_quasi_peak_dynamics()
     with pytest.raises(ValueError, match=rf"'{field}' must be the value"):
-        replace(verify_quasi_peak_dynamics(), **{field: value})
+        replace(report, **{field: value})

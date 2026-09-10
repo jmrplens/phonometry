@@ -111,7 +111,7 @@ whose criteria are numbered differently, is
 :func:`phonometry.emission.sound_power_intensity`. And it does not grade the
 instrument: :math:`\delta_{pI0}` is a property of the probe-spacer-analyser
 chain, classified against IEC 61043:1993 Table 2 by
-:func:`phonometry.emission.intensity_class_compliance`.
+:func:`phonometry.emission.verify_intensity_class`.
 """
 
 from __future__ import annotations

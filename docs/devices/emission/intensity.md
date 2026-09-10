@@ -336,8 +336,9 @@ same 3 dB per doubling the previous section arrived at from the physics.
 
 `verify_intensity_class` compares a measured $\delta_{pI0}$ spectrum
 against both
-masks band by band and returns the class the chain actually meets:
-the loosest class every band clears, or `None` when some band clears neither:
+masks band by band and returns an `IntensityInstrumentComplianceResult` holding
+the class the chain actually meets: the loosest class every band clears, or
+`None` when some band clears neither.
 
 ```python
 from phonometry import emission

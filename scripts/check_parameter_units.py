@@ -308,13 +308,16 @@ def public_parameters() -> Iterator[Parameter]:
                         and parameter.kind is parameter.POSITIONAL_OR_KEYWORD
                     )
                     annotation = parameter.annotation
+                    declared = (
+                        "" if annotation is inspect.Parameter.empty else str(annotation)
+                    )
                     yield Parameter(
                         home,
                         qualname,
                         parameter.name,
                         _where(target),
                         loose,
-                        "" if annotation is inspect.Parameter.empty else str(annotation),
+                        declared,
                         parameter.kind is parameter.POSITIONAL_OR_KEYWORD,
                     )
 

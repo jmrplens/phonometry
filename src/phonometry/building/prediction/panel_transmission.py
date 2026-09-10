@@ -898,7 +898,7 @@ def orthotropic_critical_frequencies(
 
 
 def _limiting_sin_squared(
-    area: float | None, limiting_angle: float, wavelength: float
+    area: float | None, limiting_angle_deg: float, wavelength: float
 ) -> float:
     r"""Upper limit :math:`\sin^{2}\theta_\mathrm{L}` of the diffuse-field integral.
 
@@ -909,7 +909,7 @@ def _limiting_sin_squared(
     at :math:`\sin^{2}\theta_\mathrm{L} = 0.96`).
     """
     if area is None:
-        return float(math.sin(math.radians(limiting_angle)) ** 2)
+        return float(math.sin(math.radians(limiting_angle_deg)) ** 2)
     cos2 = min(wavelength / (2.0 * math.pi * math.sqrt(area)), 0.9)
     return float(1.0 - cos2)
 
@@ -1033,7 +1033,7 @@ def orthotropic_transmission_loss(
     loss_factor: float = 0.01,
     method: str = "integral",
     area: float | None = None,
-    limiting_angle: float = 78.0,
+    limiting_angle_deg: float = 78.0,
     band: str = "third",
     fluid: Fluid = PUBLISHED_AIR,
 ) -> SoundReductionResult:
@@ -1105,7 +1105,7 @@ def orthotropic_transmission_loss(
     :param area: Panel area ``S``, in m^2 (> 0), selecting the size-dependent
         limiting angle of Bies Eq. (7.36) (Default: ``None``); used only by
         ``method="integral"``, but validated on both routes.
-    :param limiting_angle: Fixed limiting angle ``theta_L``, in degrees
+    :param limiting_angle_deg: Fixed limiting angle ``theta_L``, in degrees
         (:math:`0 < \theta_\mathrm{L} < 90`, Default: 78.0), used when *area* is
         ``None`` and only by ``method="integral"``, but validated on both
         routes.
@@ -1135,8 +1135,8 @@ def orthotropic_transmission_loss(
     # whichever method it was passed with, even where the method ignores it.
     if area is not None:
         require_positive(area, "area")
-    elif not 0.0 < limiting_angle < _GRAZING_INCIDENCE_DEG:
-        msg = "'limiting_angle' must lie in (0, 90) degrees."
+    elif not 0.0 < limiting_angle_deg < _GRAZING_INCIDENCE_DEG:
+        msg = "'limiting_angle_deg' must lie in (0, 90) degrees."
         raise ValueError(msg)
     f = _band_axis(frequency)
     z0 = rho0 * c0
@@ -1174,7 +1174,7 @@ def orthotropic_transmission_loss(
                 fc2,
                 eta,
                 z0,
-                _limiting_sin_squared(area, limiting_angle, c0 / float(freq)),
+                _limiting_sin_squared(area, limiting_angle_deg, c0 / float(freq)),
             )
             for freq in f
         ],

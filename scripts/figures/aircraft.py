@@ -1690,7 +1690,7 @@ def generate_rotorcraft_kinematics(output_dir: str) -> None:
             low, high = scale.get_ylim()
             span = high - low
             scale.set_ylim(low - 0.16 * span, high + 0.34 * span)
-        peak = float(np.nanmax(np.abs(kin.bank_angle)))
+        peak = float(np.nanmax(np.abs(kin.bank_angle_deg)))
         axis.text(
             0.02,
             0.04,

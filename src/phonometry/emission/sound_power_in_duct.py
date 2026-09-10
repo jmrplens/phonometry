@@ -626,7 +626,7 @@ class InDuctSoundPowerResult:
     sampling tube; clause 4 NOTE 5 expects the figures to grow for the other
     shields and gives no others, so the same values are reported for them.
 
-    ``duct_diameter`` and ``duct_area`` are :math:`d` and :math:`S`,
+    ``duct_diameter_m`` and ``duct_area`` are :math:`d` and :math:`S`,
     ``characteristic_impedance`` is the :math:`\rho c` of the duct air and
     ``speed_of_sound`` its :math:`c`, ``flow_velocity`` is the signed :math:`U`
     (negative on the inlet side) and ``shield`` names the microphone shield.
@@ -643,7 +643,7 @@ class InDuctSoundPowerResult:
     reproducibility_standard_deviation: np.ndarray
     expanded_uncertainty: np.ndarray
     information_only_band: np.ndarray
-    duct_diameter: float
+    duct_diameter_m: float
     duct_area: float
     characteristic_impedance: float
     speed_of_sound: float
@@ -700,7 +700,7 @@ class InDuctSoundPowerResult:
             "combined_correction",
             "reproducibility_standard_deviation",
             "expanded_uncertainty",
-            "duct_diameter",
+            "duct_diameter_m",
             "duct_area",
             "characteristic_impedance",
             "speed_of_sound",
@@ -784,17 +784,19 @@ def _as_scalar(value: object, name: str) -> float:
         raise ValueError(msg) from exc
 
 
-def _check_duct_diameter(duct_diameter: float) -> float:
+def _check_duct_diameter(duct_diameter_m: float) -> float:
     """The test-duct diameter, refused outside the 0,15 m to 2 m of clause 1.1.
 
     The informative Annexes H and I carry coefficient tables for smaller and
     larger ducts, but the standard says they are not part of itself and this
     module does not reach past its scope.
     """
-    d = require_positive(_as_scalar(duct_diameter, "duct_diameter"), "duct_diameter")
+    d = require_positive(
+        _as_scalar(duct_diameter_m, "duct_diameter_m"), "duct_diameter_m"
+    )
     if d < _DUCT_DIAMETER_MIN or d > _DUCT_DIAMETER_MAX:
         msg = (
-            "'duct_diameter' must be between 0.15 m and 2 m, the test-duct "
+            "'duct_diameter_m' must be between 0.15 m and 2 m, the test-duct "
             f"range of ISO 5136 (clause 1.1); got {d:g} m."
         )
         raise ValueError(msg)
@@ -868,15 +870,15 @@ def _check_informative_bands(frequencies: np.ndarray, flow_velocity: float) -> N
     raise ValueError(msg)
 
 
-def _annex_a_rows(duct_diameter: float) -> _Rows:
+def _annex_a_rows(duct_diameter_m: float) -> _Rows:
     """The Annex A table whose diameter range holds *duct_diameter*."""
     for edge, rows in _ANNEX_A_TABLES:
-        if duct_diameter < edge:
+        if duct_diameter_m < edge:
             return rows
     return _ANNEX_A_TABLES[-1][1]
 
 
-def _warn_reconstructed_coefficient(duct_diameter: float, freqs: np.ndarray) -> None:
+def _warn_reconstructed_coefficient(duct_diameter_m: float, freqs: np.ndarray) -> None:
     """Say so when a band is answered with a coefficient that is a reading.
 
     One cell of Annex A is not legible: the ``a3`` of the 5 000 Hz row of
@@ -889,7 +891,9 @@ def _warn_reconstructed_coefficient(duct_diameter: float, freqs: np.ndarray) -> 
     Table D.1 is tabulated for a diameter served by Table A.4.
     """
     low, high = _RECONSTRUCTED_DIAMETER_RANGE_M
-    if not (low <= duct_diameter < high) or not np.any(freqs == _RECONSTRUCTED_BAND_HZ):
+    if not (low <= duct_diameter_m < high) or not np.any(
+        freqs == _RECONSTRUCTED_BAND_HZ
+    ):
         return
     warnings.warn(
         f"The {_RECONSTRUCTED_BAND_HZ:g} Hz coefficient a3 of Table A.5 "
@@ -913,7 +917,7 @@ def _annex_a_coefficients(rows: _Rows, band: int) -> tuple[float, ...]:
 def flow_modal_correction(
     frequencies: ArrayLike,
     flow_velocity: float,
-    duct_diameter: float,
+    duct_diameter_m: float,
     *,
     shield: MicrophoneShield = "sampling-tube",
     speed_of_sound: float = _C_NORMAL,
@@ -949,7 +953,7 @@ def flow_modal_correction(
         hertz, 50 Hz to 20 kHz.
     :param flow_velocity: Mean flow velocity :math:`U` at the microphone
         position, in metres per second, negative on the inlet side.
-    :param duct_diameter: Test-duct diameter :math:`d`, in metres, 0,15 m
+    :param duct_diameter_m: Test-duct diameter :math:`d`, in metres, 0,15 m
         to 2 m; it selects the Annex A table for the sampling tube and is
         checked against the scope for the other shields.
     :param shield: ``"sampling-tube"`` (default), ``"nose-cone"`` or
@@ -968,7 +972,7 @@ def flow_modal_correction(
     """
     freqs = _nominal_bands(frequencies)
     _check_shield(shield)
-    _check_duct_diameter(duct_diameter)
+    _check_duct_diameter(duct_diameter_m)
     u = _check_flow_velocity(flow_velocity, shield)
     c = require_positive(speed_of_sound, "speed_of_sound")
     if shield != "sampling-tube":
@@ -979,8 +983,8 @@ def flow_modal_correction(
         value = 10.0 * math.log10(1.0 / (1.0 - u / c) ** 2)
         return np.full(freqs.shape, value, dtype=np.float64)
     _check_informative_bands(freqs, u)
-    rows = _annex_a_rows(duct_diameter)
-    _warn_reconstructed_coefficient(duct_diameter, freqs)
+    rows = _annex_a_rows(duct_diameter_m)
+    _warn_reconstructed_coefficient(duct_diameter_m, freqs)
     return np.asarray(
         [
             np.polynomial.polynomial.polyval(u, _annex_a_coefficients(rows, band))
@@ -1083,7 +1087,7 @@ def _position_levels(levels: ArrayLike, n_bands: int) -> np.ndarray:
 def sound_power_in_duct(
     levels: ArrayLike,
     frequencies: ArrayLike,
-    duct_diameter: float,
+    duct_diameter_m: float,
     flow_velocity: float,
     *,
     shield: MicrophoneShield = "sampling-tube",
@@ -1116,7 +1120,7 @@ def sound_power_in_duct(
         or an already averaged ``(bands,)`` spectrum.
     :param frequencies: Nominal one-third-octave centre frequencies of the
         bands, in hertz, 50 Hz to 20 kHz.
-    :param duct_diameter: Test-duct diameter :math:`d`, in metres, 0,15 m
+    :param duct_diameter_m: Test-duct diameter :math:`d`, in metres, 0,15 m
         to 2 m.
     :param flow_velocity: Mean flow velocity :math:`U` at the microphone
         position, in metres per second; negative on the inlet side, positive
@@ -1147,7 +1151,7 @@ def sound_power_in_duct(
     """
     freqs = _nominal_bands(frequencies)
     _check_shield(shield)
-    d = _check_duct_diameter(duct_diameter)
+    d = _check_duct_diameter(duct_diameter_m)
     u = _check_flow_velocity(flow_velocity, shield)
     c, rho_c = _check_air(temperature_c, static_pressure_kpa)
     c1 = require_per_band(
@@ -1200,7 +1204,7 @@ def sound_power_in_duct(
         reproducibility_standard_deviation=sigma_r,
         expanded_uncertainty=_COVERAGE_FACTOR * sigma_r,
         information_only_band=information_only,
-        duct_diameter=d,
+        duct_diameter_m=d,
         duct_area=area,
         characteristic_impedance=rho_c,
         speed_of_sound=c,

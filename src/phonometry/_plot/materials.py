@@ -992,7 +992,7 @@ def plot_diffuse_field_absorption(
     """
     from .._i18n import format_number
 
-    limit_deg = np.degrees(result.angle_limit)
+    limit_deg = np.degrees(result.angle_limit_rad)
     if language == "es":
         title = (
             f"Absorción a incidencia aleatoria "

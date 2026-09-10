@@ -2280,7 +2280,7 @@ def generate_wind_turbine_apparent_power(output_dir: str) -> None:
     print("Generating wind_turbine_apparent_power.svg...")
     from phonometry import environment
 
-    r1 = environment.slant_distance(hub_height=80.0, rotor_diameter=100.0)
+    r1 = environment.slant_distance(hub_height=80.0, rotor_diameter_m=100.0)
     bins = np.arange(4.0, 12.5, 0.5)
     shape = np.array([-4.0, -1.5, 0.0, -1.0, -3.0])  # 250 Hz to 1 kHz
     lwa = np.array(

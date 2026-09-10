@@ -85,7 +85,7 @@ def _metadata(**overrides: object) -> ReportMetadata:
         "specimen": "Resistive facing over an 86 mm rigidly-backed air cavity",
         "client": "Acoustic Test Client Ltd.",
         "manufacturer": "Acoustics Works Inc.",
-        "tube_diameter": _DIAMETER,
+        "tube_diameter_m": _DIAMETER,
         "mic_spacing": _SPACING,
         "mounting": "Deliberate 86 mm backing air cavity",
         "test_room": "Impedance tube R1",
@@ -270,14 +270,14 @@ def test_spanish_fiche_uses_comma_decimal(tmp_path: Path) -> None:
     assert "0,80" in _text(str(out))  # Spanish decimal comma
 
 
-@pytest.mark.parametrize("field", ["tube_diameter", "mic_spacing"])
+@pytest.mark.parametrize("field", ["tube_diameter_m", "mic_spacing"])
 @pytest.mark.parametrize(
     "value", [-0.05, 0.0, float("nan"), float("inf"), -float("inf")]
 )
 def test_metadata_rejects_invalid_geometry(field: str, value: float) -> None:
     """The impedance-tube geometry fields must be finite and strictly positive.
 
-    A negative, zero or non-finite (NaN / +-inf) ``tube_diameter`` or
+    A negative, zero or non-finite (NaN / +-inf) ``tube_diameter_m`` or
     ``mic_spacing`` violates the finite-positive contract and raises.
     """
     with pytest.raises(ValueError, match=field):

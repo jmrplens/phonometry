@@ -103,9 +103,9 @@ _PRINTED_VENA_CONTRACTA = {
 #: Table A.2's pipe: DN 200 with 8 mm walls, and the fluid leaving the valve
 #: at 11,1 kg/m3 and 408 m/s.
 _EXAMPLE_7_PIPE: dict[str, Any] = {
-    "internal_diameter": 0.200,
+    "internal_diameter_m": 0.200,
     "wall_thickness": 0.008,
-    "valve_outlet_diameter": 0.200,
+    "valve_outlet_diameter_m": 0.200,
     "downstream_density": 11.1,
     "downstream_sound_speed": 408.0,
     "pipe_density": 8000.0,
@@ -176,9 +176,9 @@ def _example(
                 **_VALVE,
                 flow_coefficient=coefficient,
                 style_modifier=_style_modifier(),
-                outlet_diameter=diameter,
+                outlet_diameter_m=diameter,
             ),
-            ph.noise_control.DownstreamPipe(**_PIPE, internal_diameter=bore),
+            ph.noise_control.DownstreamPipe(**_PIPE, internal_diameter_m=bore),
             expander=ph.noise_control.Expander() if expander else None,
         )
 
@@ -211,7 +211,7 @@ def _chk_style_modifier() -> Outcome:
 @register(_IEC60534, "IEC 60534-8-3:2010", "Jet diameter D_j, example 1 (Eq. (9))")
 def _chk_jet_diameter() -> Outcome:
     """Equation (9) on the first column."""
-    return numeric(0.012, _example(1).jet_diameter, 5e-4, unit="m", places=4)
+    return numeric(0.012, _example(1).jet_diameter_m, 5e-4, unit="m", places=4)
 
 
 @register(
@@ -471,12 +471,12 @@ def _example_seven() -> ph.noise_control.AerodynamicValveNoise:
             flow_coefficient=conditions.flow_coefficient,
             style_modifier=modifier,
             pressure_recovery=case["last_stage_recovery"],
-            outlet_diameter=case["diameter"],
+            outlet_diameter_m=case["diameter"],
             efficiency_correction=case["efficiency_correction"],
             strouhal_number=case["strouhal_number"],
         ),
         ph.noise_control.DownstreamPipe(
-            internal_diameter=case["diameter"],
+            internal_diameter_m=case["diameter"],
             wall_thickness=case["wall_thickness"],
             density=case["pipe_density"],
         ),

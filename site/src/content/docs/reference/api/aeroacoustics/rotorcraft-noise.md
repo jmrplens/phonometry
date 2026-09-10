@@ -58,9 +58,9 @@ levels and event metrics).
 ```python
 flight_condition_weights(
     airspeeds: NDArray[np.float64] | list[float],
-    path_angles: NDArray[np.float64] | list[float],
+    path_angles_deg: NDArray[np.float64] | list[float],
     airspeed: float,
-    path_angle: float,
+    path_angle_deg: float,
     *,
     scaling_factor: float = 2.0,
     triangles: NDArray[np.int_] | list[list[int]] | None = None,
@@ -89,7 +89,7 @@ reference implementation operate, and it degrades to the Doc 32 behaviour
 outside the measured envelope.
 
 The scaling is span-based, so the weights do not depend on the units of
-`airspeeds` or `path_angles` as long as the query uses the same units
+`airspeeds` or `path_angles_deg` as long as the query uses the same units
 as the database conditions.
 
 **Parameters**
@@ -97,9 +97,9 @@ as the database conditions.
 | Name | Description |
 | :--- | :--- |
 | `airspeeds` | Database hemisphere airspeeds `V_j`, shape `(J,)`. |
-| `path_angles` | Database hemisphere path angles `γ_j`, in degrees, shape `(J,)` (negative for descent). |
+| `path_angles_deg` | Database hemisphere path angles `γ_j`, in degrees, shape `(J,)` (negative for descent). |
 | `airspeed` | Query airspeed `V_A` (the airspeed, not the ground speed, selects the hemisphere; guidance §A.3.3). |
-| `path_angle` | Query path angle `γ`, in degrees. |
+| `path_angle_deg` | Query path angle `γ`, in degrees. |
 | `scaling_factor` | Flight-condition scaling factor `F_fc` applied to the normalised path angle (default 2, the guidance's empirical value). |
 | `triangles` | Optional precomputed triangulation, shape `(T, 3)` 0-based indices into the database conditions (guidance §A.3.1 step 4 admits a lookup table; the NORAH database ships one per type). Default `None` computes the Delaunay triangulation of the normalised conditions. The shipped NORAH lookup tables triangulate the raw `(V, γ)` plane instead of the normalised one, so passing them reproduces the reference implementation bin for bin. |
 
@@ -182,8 +182,8 @@ FlightPathKinematics(
     airspeed: NDArray[np.float64],
     heading: NDArray[np.float64],
     curvature: NDArray[np.float64],
-    bank_angle: NDArray[np.float64],
-    path_angle: NDArray[np.float64],
+    bank_angle_deg: NDArray[np.float64],
+    path_angle_deg: NDArray[np.float64],
 )
 ```
 
@@ -201,8 +201,8 @@ All rates come from central finite differences around each track point.
 | `airspeed` | Airspeed `V_A` (Eq. 17, zero-wind), in m/s, shape `(N,)`. |
 | `heading` | Heading $\Theta = \operatorname{atan2}(\Delta X, \Delta Y)$ (Eq. 19), in degrees, shape `(N,)`. |
 | `curvature` | Track curvature $K = \Delta\Theta/\Delta S$ (Eq. 18), in rad/m, shape `(N,)` (zero where the ground speed vanishes). |
-| `bank_angle` | Bank angle $\Phi = \arctan(K \cdot V_\mathrm{g}^2/g)$ (Eq. 20), in degrees, positive starboard down, shape `(N,)`. |
-| `path_angle` | Path angle $\gamma = \arctan(\Delta Z/\Delta S)$ (Doc 32 Eq. 10), in degrees, positive climbing, shape `(N,)`. |
+| `bank_angle_deg` | Bank angle $\Phi = \arctan(K \cdot V_\mathrm{g}^2/g)$ (Eq. 20), in degrees, positive starboard down, shape `(N,)`. |
+| `path_angle_deg` | Path angle $\gamma = \arctan(\Delta Z/\Delta S)$ (Doc 32 Eq. 10), in degrees, positive climbing, shape `(N,)`. |
 
 :::note
 The guidance prints Eq. 21 as
@@ -376,9 +376,9 @@ and the propagation adjustments honour as the reference distance.
 interpolated_source_level(
     hemispheres: Sequence[RotorcraftHemisphere],
     airspeeds: NDArray[np.float64] | list[float],
-    path_angles: NDArray[np.float64] | list[float],
+    path_angles_deg: NDArray[np.float64] | list[float],
     airspeed: float,
-    path_angle: float,
+    path_angle_deg: float,
     azimuth_deg: float,
     polar_deg: float,
     *,
@@ -398,9 +398,9 @@ by [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcra
 | :--- | :--- |
 | `hemispheres` | The database hemispheres, one per flight condition. |
 | `airspeeds` | Database airspeeds `V_j`, shape `(J,)`. |
-| `path_angles` | Database path angles `γ_j`, in degrees, shape `(J,)`. |
+| `path_angles_deg` | Database path angles `γ_j`, in degrees, shape `(J,)`. |
 | `airspeed` | Query airspeed `V_A` (same units as `airspeeds`). |
-| `path_angle` | Query path angle `γ`, in degrees. |
+| `path_angle_deg` | Query path angle `γ`, in degrees. |
 | `azimuth_deg` | Emission azimuth `φ`, in degrees. |
 | `polar_deg` | Emission polar angle `θ`, in degrees. |
 | `scaling_factor` | Flight-condition scaling factor `F_fc` (default 2). |
@@ -420,7 +420,7 @@ by [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcra
 rotorcraft_event_level(
     hemispheres: Sequence[RotorcraftHemisphere],
     airspeeds: NDArray[np.float64] | list[float],
-    path_angles: NDArray[np.float64] | list[float],
+    path_angles_deg: NDArray[np.float64] | list[float],
     times: NDArray[np.float64] | list[float],
     positions: NDArray[np.float64] | list[list[float]],
     receiver: tuple[float, float] | NDArray[np.float64] | list[float],
@@ -460,7 +460,7 @@ oriented by the heading and tilted by the bank angle in turns (guidance
 | :--- | :--- |
 | `hemispheres` | The database hemispheres, one per flight condition. |
 | `airspeeds` | Database airspeeds `V_j`, shape `(J,)` (same units as the `airspeed` values used for selection). |
-| `path_angles` | Database path angles `γ_j`, in degrees, shape `(J,)`. |
+| `path_angles_deg` | Database path angles `γ_j`, in degrees, shape `(J,)`. |
 | `times` | Track times, in s, strictly increasing, shape `(N,)`. |
 | `positions` | Track positions `(x, y, z)`, in metres, shape `(N, 3)` (z up, above the ground elevation datum). |
 | `receiver` | Receiver ground position `(x, y)`, in metres. |
@@ -484,7 +484,7 @@ oriented by the heading and tilted by the bank angle in turns (guidance
 rotorcraft_noise_contour(
     hemispheres: Sequence[RotorcraftHemisphere],
     airspeeds: NDArray[np.float64] | list[float],
-    path_angles: NDArray[np.float64] | list[float],
+    path_angles_deg: NDArray[np.float64] | list[float],
     times: NDArray[np.float64] | list[float],
     positions: NDArray[np.float64] | list[list[float]],
     *,
@@ -512,7 +512,7 @@ received histories to the exposure (`SEL`, Doc 32 Eq. 27) or maximum
 | :--- | :--- |
 | `hemispheres` | The database hemispheres, one per flight condition. |
 | `airspeeds` | Database airspeeds `V_j`, shape `(J,)`. |
-| `path_angles` | Database path angles `γ_j`, in degrees, shape `(J,)`. |
+| `path_angles_deg` | Database path angles `γ_j`, in degrees, shape `(J,)`. |
 | `times` | Track times, in s, strictly increasing, shape `(N,)`. |
 | `positions` | Track positions `(x, y, z)`, in metres, shape `(N, 3)`. |
 | `x` | Grid x coordinates, in metres (at least 2). |
@@ -742,10 +742,11 @@ Plot filled noise contours over the ground plane.
 
 ```python
 RotorcraftTrackState(
+    *,
     airspeed: float | NDArray[np.float64] | list[float] | None = None,
-    path_angle: float | NDArray[np.float64] | list[float] | None = None,
+    path_angle_deg: float | NDArray[np.float64] | list[float] | None = None,
     heading: float | NDArray[np.float64] | list[float] | None = None,
-    bank_angle: float | NDArray[np.float64] | list[float] | None = None,
+    bank_angle_deg: float | NDArray[np.float64] | list[float] | None = None,
 )
 ```
 
@@ -761,6 +762,6 @@ smoothed these quantities hands them over instead. Each is a scalar
 | Name | Description |
 | :--- | :--- |
 | `airspeed` | Airspeed `V_A`, in the units of the database `airspeeds` (the derived values are in m/s). |
-| `path_angle` | Path angle `γ`, in degrees (negative descending). |
+| `path_angle_deg` | Path angle `γ`, in degrees (negative descending). |
 | `heading` | Heading `Θ`, in degrees. |
-| `bank_angle` | Bank angle `Φ`, in degrees (positive starboard down). |
+| `bank_angle_deg` | Bank angle `Φ`, in degrees (positive starboard down). |

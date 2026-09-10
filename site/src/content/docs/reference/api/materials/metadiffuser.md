@@ -41,7 +41,7 @@ metadiffuser_diffusion_spectrum(
     depth: float,
     period_m: float,
     angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
-    source_angle: float = 0.0,
+    source_angle_deg: float = 0.0,
     repetitions: int = 1,
     resonator_geometry: str = 'slit',
     fluid: Fluid = ...,
@@ -66,7 +66,7 @@ exactly as the paper reports `delta_n`.
 | `depth` | Panel depth `L` common to all slits, in metres. |
 | `period_m` | Well pitch `d` along the panel face, in metres. |
 | `angles_deg` | Receiver reflection angles `theta`, in degrees. |
-| `source_angle` | Angle of incidence `psi`, in degrees. |
+| `source_angle_deg` | Angle of incidence `psi`, in degrees. |
 | `repetitions` | Number of repetitions `N_p` of the single period. |
 | `resonator_geometry` | `"slit"` (default) for the paper's two-dimensional resonators, `"square"` for square-duct necks and cavities. |
 | `fluid` | State of the air the panel radiates into and the slits and resonators are filled with ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); its speed of sound `c0` also carries the far field. |
@@ -83,7 +83,7 @@ metadiffuser_polar_response(
     depth: float,
     period_m: float,
     angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
-    source_angle: float = 0.0,
+    source_angle_deg: float = 0.0,
     repetitions: int = 1,
     resonator_geometry: str = 'slit',
     fluid: Fluid = ...,
@@ -94,7 +94,7 @@ Far-field polar response of a metadiffuser at one frequency.
 
 Computes the per-well complex reflection sequence at `frequency` with
 [`metadiffuser_reflection`](/phonometry/reference/api/materials/metadiffuser/#metadiffuser_reflection) (the panel is locally reacting, so the
-slit chains see the incidence angle `source_angle`) and evaluates the
+slit chains see the incidence angle `source_angle_deg`) and evaluates the
 Fraunhofer far field and ISO 17497-2 directional diffusion coefficient
 with
 [`predict_diffuser_polar_response`](/phonometry/reference/api/materials/design/#predict_diffuser_polar_response).
@@ -108,7 +108,7 @@ with
 | `depth` | Panel depth `L` common to all slits, in metres. |
 | `period_m` | Well pitch `d` along the panel face, in metres; it is the `well_width` of the far-field model. |
 | `angles_deg` | Receiver reflection angles `theta`, in degrees. |
-| `source_angle` | Angle of incidence `psi` of the source, in degrees; also applied to the local slit reflection. |
+| `source_angle_deg` | Angle of incidence `psi` of the source, in degrees; also applied to the local slit reflection. |
 | `repetitions` | Number of repetitions `N_p` of the single period; the grating lobes of a Schroeder-like design require `periods >= 2`. |
 | `resonator_geometry` | `"slit"` (default) for the paper's two-dimensional resonators, `"square"` for square-duct necks and cavities. |
 | `fluid` | State of the air the panel radiates into and the slits and resonators are filled with ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); its speed of sound `c0` also carries the far field. |
@@ -164,6 +164,7 @@ MetadiffuserResult(
     reflection: Complex,
     absorption: Real,
     well_absorption: Real,
+    *,
     wells: tuple[MetadiffuserWell | None, ...] | None = None,
     depth: float | None = None,
     period_m: float | None = None,

@@ -665,9 +665,9 @@ def test_ray_fan_must_line_up_with_its_histories() -> None:
     """A launch fan off its histories changes the answer without saying so.
 
     ``plot_ray_trace`` loops over the rows of ``ranges`` alone and never opens
-    ``launch_angles``, so nothing in the picture reacts to the mismatch.
+    ``launch_angles_deg``, so nothing in the picture reacts to the mismatch.
     Measured unguarded on a 193-ray fan through an isovelocity 100 m guide,
-    with ``launch_angles`` rolled one entry short: the figure drew all 193 rays
+    with ``launch_angles_deg`` rolled one entry short: the figure drew all 193 rays
     without complaint, and :func:`eigenrays` to (500 m, 75 m) returned 11
     arrivals where the aligned fan returns 12 -- an answer, not an error, since
     it sorts the angles and indexes ``depths`` through that order. The other
@@ -682,7 +682,11 @@ def test_ray_fan_must_line_up_with_its_histories() -> None:
         n_steps=101,
     )
     cases = (
-        ("launch_angles", good.launch_angles[:-1], rf"'launch_angles'.*{_PER_RAY}"),
+        (
+            "launch_angles_deg",
+            good.launch_angles_deg[:-1],
+            rf"'launch_angles_deg'.*{_PER_RAY}",
+        ),
         ("travel_times", good.travel_times[:-1], rf"'travel_times'.*{_PER_RAY}"),
         (
             "arc_lengths",

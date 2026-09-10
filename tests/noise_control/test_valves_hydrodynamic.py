@@ -41,11 +41,11 @@ VALVE: dict[str, Any] = {
     "style_modifier": 0.42,
     "pressure_recovery": 0.92,
     "power_ratio": 0.25,
-    "valve_diameter": 0.1,
-    "seat_diameter": 0.1,
+    "valve_diameter_m": 0.1,
+    "seat_diameter_m": 0.1,
 }
 PIPE: dict[str, Any] = {
-    "internal_diameter": 0.1071,
+    "internal_diameter_m": 0.1071,
     "wall_thickness": 0.0036,
     "density": 7800.0,
 }
@@ -210,7 +210,7 @@ class TestPreliminaryCalculations:
 
     @pytest.mark.parametrize("index", [1, 2, 3])
     def test_the_jet_diameter_matches_equation_4(self, index: int) -> None:
-        assert _run(index).jet_diameter == pytest.approx(0.01758, abs=5e-6)
+        assert _run(index).jet_diameter_m == pytest.approx(0.01758, abs=5e-6)
 
     @pytest.mark.parametrize(
         ("index", "expected"), [(1, 21.772), (2, 28.801), (3, 28.801)]
@@ -326,7 +326,7 @@ class TestInternalLevel:
             sound_power=0.00234,
             density=997.0,
             sound_speed=1400.0,
-            internal_diameter=0.1071,
+            internal_diameter_m=0.1071,
         )
         assert with_density == pytest.approx(149.596, abs=5e-3)
         assert with_density - 10.0 * math.log10(997.0) == pytest.approx(119.6, abs=0.1)
@@ -358,10 +358,10 @@ class TestPeakFrequencies:
             "vapour_pressure_pa": 2.32e3,
         }
         wide = hydro.jet_strouhal_number(
-            **shared, valve_diameter=0.1, seat_diameter=0.05
+            **shared, valve_diameter_m=0.1, seat_diameter_m=0.05
         )
         narrow = hydro.jet_strouhal_number(
-            **shared, valve_diameter=0.05, seat_diameter=0.1
+            **shared, valve_diameter_m=0.05, seat_diameter_m=0.1
         )
         assert wide == pytest.approx(narrow, rel=1e-12)
         assert wide == pytest.approx(2.0 * 0.399, abs=1e-3)
@@ -375,8 +375,8 @@ class TestPeakFrequencies:
             "style_modifier": 0.42,
             "pressure_recovery": 0.92,
             "corrected_ratio": 0.2386,
-            "valve_diameter": 0.1,
-            "seat_diameter": 0.1,
+            "valve_diameter_m": 0.1,
+            "seat_diameter_m": 0.1,
             "inlet_pressure_pa": 1.0e6,
             "vapour_pressure_pa": 2.32e3,
         }
@@ -393,8 +393,8 @@ class TestPeakFrequencies:
             "style_modifier": crossing,
             "pressure_recovery": 0.92,
             "corrected_ratio": 0.2386,
-            "valve_diameter": 0.1,
-            "seat_diameter": 0.1,
+            "valve_diameter_m": 0.1,
+            "seat_diameter_m": 0.1,
             "inlet_pressure_pa": 1.0e6,
             "vapour_pressure_pa": 2.32e3,
         }
@@ -993,8 +993,8 @@ class TestGuards:
                 style_modifier=0.42,
                 pressure_recovery=0.92,
                 corrected_ratio=0.2386,
-                valve_diameter=0.1,
-                seat_diameter=0.1,
+                valve_diameter_m=0.1,
+                seat_diameter_m=0.1,
                 inlet_pressure_pa=1.0e6,
                 vapour_pressure_pa=2.32e3,
                 form="table",

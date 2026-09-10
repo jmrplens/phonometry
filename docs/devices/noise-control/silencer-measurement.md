@@ -258,7 +258,7 @@ duct:
 
 ```python
 free = noise_control.open_end_transmission_loss(
-    bands, area, solid_angle=noise_control.RADIATION_SOLID_ANGLES["C"],
+    bands, area, solid_angle_sr=noise_control.RADIATION_SOLID_ANGLES["C"],
 )
 print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
 ```

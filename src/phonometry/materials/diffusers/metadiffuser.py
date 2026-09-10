@@ -26,7 +26,7 @@ reduced to the ISO 17497-2 directional diffusion coefficient.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -110,6 +110,7 @@ class MetadiffuserResult:
     reflection: Complex
     absorption: Real
     well_absorption: Real
+    _: KW_ONLY
     wells: tuple[MetadiffuserWell | None, ...] | None = None
     depth: float | None = None
     period_m: float | None = None
@@ -246,7 +247,7 @@ def metadiffuser_polar_response(
     depth: float,
     period_m: float,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES,
-    source_angle: float = 0.0,
+    source_angle_deg: float = 0.0,
     repetitions: int = 1,
     resonator_geometry: str = "slit",
     fluid: Fluid = PUBLISHED_AIR,
@@ -255,7 +256,7 @@ def metadiffuser_polar_response(
 
     Computes the per-well complex reflection sequence at ``frequency`` with
     :func:`metadiffuser_reflection` (the panel is locally reacting, so the
-    slit chains see the incidence angle ``source_angle``) and evaluates the
+    slit chains see the incidence angle ``source_angle_deg``) and evaluates the
     Fraunhofer far field and ISO 17497-2 directional diffusion coefficient
     with
     :func:`~phonometry.materials.diffusers.design.predict_diffuser_polar_response`.
@@ -267,7 +268,7 @@ def metadiffuser_polar_response(
     :param period_m: Well pitch ``d`` along the panel face, in metres; it is
         the ``well_width`` of the far-field model.
     :param angles_deg: Receiver reflection angles ``theta``, in degrees.
-    :param source_angle: Angle of incidence ``psi`` of the source, in
+    :param source_angle_deg: Angle of incidence ``psi`` of the source, in
         degrees; also applied to the local slit reflection.
     :param repetitions: Number of repetitions ``N_p`` of the single period; the
         grating lobes of a Schroeder-like design require ``periods >= 2``.
@@ -287,7 +288,7 @@ def metadiffuser_polar_response(
         wells,
         depth=depth,
         period_m=period_m,
-        angle_rad=float(np.radians(source_angle)),
+        angle_rad=float(np.radians(source_angle_deg)),
         resonator_geometry=resonator_geometry,
         fluid=fluid,
     )
@@ -299,7 +300,7 @@ def metadiffuser_polar_response(
         f,
         reflection=result.reflection[:, 0],
         angles_deg=angles_deg,
-        source_angle=source_angle,
+        source_angle_deg=source_angle_deg,
         repetitions=repetitions,
         speed_of_sound=fluid.speed_of_sound,
         include_obliquity=False,
@@ -313,7 +314,7 @@ def metadiffuser_diffusion_spectrum(
     depth: float,
     period_m: float,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES,
-    source_angle: float = 0.0,
+    source_angle_deg: float = 0.0,
     repetitions: int = 1,
     resonator_geometry: str = "slit",
     fluid: Fluid = PUBLISHED_AIR,
@@ -333,7 +334,7 @@ def metadiffuser_diffusion_spectrum(
     :param depth: Panel depth ``L`` common to all slits, in metres.
     :param period_m: Well pitch ``d`` along the panel face, in metres.
     :param angles_deg: Receiver reflection angles ``theta``, in degrees.
-    :param source_angle: Angle of incidence ``psi``, in degrees.
+    :param source_angle_deg: Angle of incidence ``psi``, in degrees.
     :param repetitions: Number of repetitions ``N_p`` of the single period.
     :param resonator_geometry: ``"slit"`` (default) for the paper's
         two-dimensional resonators, ``"square"`` for square-duct necks
@@ -357,7 +358,7 @@ def metadiffuser_diffusion_spectrum(
         cells,
         depth=depth,
         period_m=period_m,
-        angle_rad=float(np.radians(source_angle)),
+        angle_rad=float(np.radians(source_angle_deg)),
         resonator_geometry=resonator_geometry,
         fluid=fluid,
     )
@@ -369,7 +370,7 @@ def metadiffuser_diffusion_spectrum(
             float(f),
             reflection=result.reflection[:, i],
             angles_deg=angles_deg,
-            source_angle=source_angle,
+            source_angle_deg=source_angle_deg,
             repetitions=repetitions,
             speed_of_sound=fluid.speed_of_sound,
             include_obliquity=False,
@@ -379,7 +380,7 @@ def metadiffuser_diffusion_spectrum(
             float(f),
             reflection=flat,
             angles_deg=angles_deg,
-            source_angle=source_angle,
+            source_angle_deg=source_angle_deg,
             repetitions=repetitions,
             speed_of_sound=fluid.speed_of_sound,
             include_obliquity=False,

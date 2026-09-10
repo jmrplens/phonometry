@@ -1113,7 +1113,7 @@ $$
 $$
 
 evaluada por cuadratura de Gauss–Legendre en `diffuse_field_absorption`
-(``angle_limit`` por defecto 90°; se usan truncamientos a 75–87°). Ese
+(``angle_limit_rad`` por defecto 90°; se usan truncamientos a 75–87°). Ese
 truncamiento no es decoración y merece una regla de decisión. El integrando
 pondera sobre todo los ángulos oblicuos, y es justo cerca de la incidencia
 rasante donde la teoría del plano infinito deja de describir un ensayo real:
@@ -1148,7 +1148,7 @@ diffuse.plot()   # alpha_dif(f); superpón normal.absorption para comparar
 print(round(float(materials.statistical_absorption(1.567 + 0j)), 3))  # 0.951
 
 # Cuánto vale el truncamiento, sobre la misma capa.
-truncated = materials.diffuse_field_absorption(f, layers, angle_limit=np.radians(78.0))
+truncated = materials.diffuse_field_absorption(f, layers, angle_limit_rad=np.radians(78.0))
 print(np.round(truncated.absorption - diffuse.absorption, 3))
 # [-0.001  0.01   0.019  0.018]  unas centésimas, y van en el sentido correcto
 ```

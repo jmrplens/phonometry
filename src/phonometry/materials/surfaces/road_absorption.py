@@ -197,7 +197,7 @@ def geometric_spreading_factor(
 
 
 def geometric_spreading_factor_angle(
-    incidence_angle: float,
+    incidence_angle_rad: float,
     source_height: float = DEFAULT_SOURCE_HEIGHT,
     mic_height: float = DEFAULT_MIC_HEIGHT,
 ) -> float:
@@ -208,13 +208,13 @@ def geometric_spreading_factor_angle(
     :math:`\theta = 0` the
     cosine is unity and ``Kr,theta`` collapses to ``Kr`` (Clause 4.1).
 
-    :param incidence_angle: Incidence angle ``theta``, in **radians**.
+    :param incidence_angle_rad: Incidence angle ``theta``, in **radians**.
     :param source_height: Source-to-reference-plane distance ``ds``, in metres.
     :param mic_height: Microphone-to-reference-plane distance ``dm``, in metres.
     :return: Oblique factor ``Kr,theta`` (positive root, dimensionless).
     """
     kr = geometric_spreading_factor(source_height, mic_height)
-    cos_sq = float(np.cos(incidence_angle)) ** 2
+    cos_sq = float(np.cos(incidence_angle_rad)) ** 2
     return float(np.sqrt(1.0 - cos_sq * (1.0 - kr**2)))
 
 
@@ -385,7 +385,7 @@ def insitu_reflection_factor(
     *,
     source_height: float = DEFAULT_SOURCE_HEIGHT,
     mic_height: float = DEFAULT_MIC_HEIGHT,
-    incidence_angle: float = 0.0,
+    incidence_angle_rad: float = 0.0,
     fs: float | None = None,
     delay: float | None = None,
     n: int | None = None,
@@ -395,7 +395,7 @@ def insitu_reflection_factor(
     :math:`r(f) = (1 / K_\mathrm{r}) H_\mathrm{r}(f) / H_\mathrm{i}(f)` from the windowed reflected and
     incident
     impulse responses, with ``Hr``/``Hi`` their real FFTs and ``Kr`` the
-    geometrical-spreading factor (or ``Kr,theta`` when ``incidence_angle`` is
+    geometrical-spreading factor (or ``Kr,theta`` when ``incidence_angle_rad`` is
     given, Annex F). When both ``fs`` and ``delay`` are supplied the
     reflected-path time offset is undone by
     :math:`\exp(+j 2 \pi f \, \text{delay})`, yielding
@@ -415,7 +415,7 @@ def insitu_reflection_factor(
         the shared factor cancel rather than skew the ratio.
     :param source_height: Source-to-plane distance ``ds``, in metres.
     :param mic_height: Microphone-to-plane distance ``dm``, in metres.
-    :param incidence_angle: Incidence angle ``theta``, in radians (0 = normal).
+    :param incidence_angle_rad: Incidence angle ``theta``, in radians (0 = normal).
     :param fs: Sampling frequency, in hertz; required with ``delay`` for phase
         restoration, and otherwise unused. Either record may be a
         :class:`~phonometry.io.Signal` and supply it; an explicit value that
@@ -428,7 +428,9 @@ def insitu_reflection_factor(
     :raises ValueError: On empty inputs, invalid geometry, or ``delay`` given
         without ``fs``.
     """
-    kr = geometric_spreading_factor_angle(incidence_angle, source_height, mic_height)
+    kr = geometric_spreading_factor_angle(
+        incidence_angle_rad, source_height, mic_height
+    )
     fs = resolve_optional_pair_fs(
         incident_ir, reflected_ir, fs, names=("incident_ir", "reflected_ir")
     )
@@ -469,7 +471,7 @@ def power_reflection_coefficient(
     *,
     source_height: float = DEFAULT_SOURCE_HEIGHT,
     mic_height: float = DEFAULT_MIC_HEIGHT,
-    incidence_angle: float = 0.0,
+    incidence_angle_rad: float = 0.0,
     n: int | None = None,
 ) -> Real:
     r"""Sound-power reflection factor ``QW(f)`` (ISO 13472-1, 4.1 / Annex C).
@@ -491,11 +493,13 @@ def power_reflection_coefficient(
         different rates are refused rather than arbitrated.
     :param source_height: Source-to-plane distance ``ds``, in metres.
     :param mic_height: Microphone-to-plane distance ``dm``, in metres.
-    :param incidence_angle: Incidence angle ``theta``, in radians.
+    :param incidence_angle_rad: Incidence angle ``theta``, in radians.
     :param n: FFT length; defaults to the longer input.
     :return: Sound-power reflection factor ``QW(f)`` (real).
     """
-    kr = geometric_spreading_factor_angle(incidence_angle, source_height, mic_height)
+    kr = geometric_spreading_factor_angle(
+        incidence_angle_rad, source_height, mic_height
+    )
     hi, hr, _length = _transfer_functions(incident_ir, reflected_ir, n)
     ratio = np.abs(hr) / np.abs(hi)
     return np.asarray((ratio / kr) ** 2, dtype=np.float64)
@@ -507,7 +511,7 @@ def insitu_absorption_coefficient(
     *,
     source_height: float = DEFAULT_SOURCE_HEIGHT,
     mic_height: float = DEFAULT_MIC_HEIGHT,
-    incidence_angle: float = 0.0,
+    incidence_angle_rad: float = 0.0,
     n: int | None = None,
 ) -> Real:
     r"""Normal-incidence absorption coefficient ``alpha(f)`` (ISO 13472-1, 4.1).
@@ -529,7 +533,7 @@ def insitu_absorption_coefficient(
         different rates are refused rather than arbitrated.
     :param source_height: Source-to-plane distance ``ds``, in metres.
     :param mic_height: Microphone-to-plane distance ``dm``, in metres.
-    :param incidence_angle: Incidence angle ``theta``, in radians (0 = normal).
+    :param incidence_angle_rad: Incidence angle ``theta``, in radians (0 = normal).
     :param n: FFT length; defaults to the longer input.
     :return: Absorption coefficient ``alpha(f)`` at the ``rfft`` frequency bins.
     """
@@ -538,7 +542,7 @@ def insitu_absorption_coefficient(
         reflected_ir,
         source_height=source_height,
         mic_height=mic_height,
-        incidence_angle=incidence_angle,
+        incidence_angle_rad=incidence_angle_rad,
         n=n,
     )
     return np.asarray(1.0 - qw, dtype=np.float64)
@@ -693,7 +697,7 @@ def insitu_absorption_spectrum(
     *,
     source_height: float = DEFAULT_SOURCE_HEIGHT,
     mic_height: float = DEFAULT_MIC_HEIGHT,
-    incidence_angle: float = 0.0,
+    incidence_angle_rad: float = 0.0,
     n: int | None = None,
     f_min: float = PART1_FREQUENCY_RANGE[0],
     f_max: float = PART1_FREQUENCY_RANGE[1],
@@ -722,7 +726,7 @@ def insitu_absorption_spectrum(
         rather than arbitrated.
     :param source_height: Source-to-plane distance ``ds``, in metres.
     :param mic_height: Microphone-to-plane distance ``dm``, in metres.
-    :param incidence_angle: Incidence angle ``theta``, in radians (0 = normal).
+    :param incidence_angle_rad: Incidence angle ``theta``, in radians (0 = normal).
     :param n: FFT length; defaults to the longer of the two impulse responses.
     :param f_min: Lowest band centre to report, in hertz (default 250 Hz).
     :param f_max: Highest band centre to report, in hertz (default 4000 Hz).
@@ -750,7 +754,7 @@ def insitu_absorption_spectrum(
         hr_t,
         source_height=source_height,
         mic_height=mic_height,
-        incidence_angle=incidence_angle,
+        incidence_angle_rad=incidence_angle_rad,
         n=length,
     )
     freq = np.fft.rfftfreq(length, d=1.0 / fs)

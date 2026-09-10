@@ -305,8 +305,8 @@ The guidance recommends smoothing radar tracks (e.g. spline resampling to a
 ```python
 kin = aircraft.flight_path_kinematics(times, positions)   # positions (N, 3), m
 kin.plot()                                # speed and angle profiles
-kin.airspeed, kin.path_angle              # select the hemisphere per point
-kin.bank_angle                            # tilts the hemisphere in turns
+kin.airspeed, kin.path_angle_deg              # select the hemisphere per point
+kin.bank_angle_deg                            # tilts the hemisphere in turns
 ```
 
 ## 6. The single event: `SEL`, `LASmax` and `EPNL`
@@ -366,8 +366,8 @@ plt.show()
 
 </details>
 
-Radar-track workflows can hand the smoothed per-point `airspeed`, `path_angle`,
-`heading` and `bank_angle` of a `RotorcraftTrackState` directly instead of
+Radar-track workflows can hand the smoothed per-point `airspeed`, `path_angle_deg`,
+`heading` and `bank_angle_deg` of a `RotorcraftTrackState` directly instead of
 deriving them from the positions; when they are derived, the track is in metres and seconds, so the
 database airspeeds must then be in m/s.
 

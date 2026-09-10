@@ -236,7 +236,7 @@ $d_\mathrm{m} = 0.25$ m gives $K_\mathrm{r} = 2/3$ (Clause 4.2).
 
 ```python
 geometric_spreading_factor_angle(
-    incidence_angle: float,
+    incidence_angle_rad: float,
     source_height: float = 1.25,
     mic_height: float = 0.25,
 ) -> float
@@ -253,7 +253,7 @@ cosine is unity and `Kr,theta` collapses to `Kr` (Clause 4.1).
 
 | Name | Description |
 | :--- | :--- |
-| `incidence_angle` | Incidence angle `theta`, in **radians**. |
+| `incidence_angle_rad` | Incidence angle `theta`, in **radians**. |
 | `source_height` | Source-to-reference-plane distance `ds`, in metres. |
 | `mic_height` | Microphone-to-reference-plane distance `dm`, in metres. |
 
@@ -268,7 +268,7 @@ insitu_absorption_coefficient(
     *,
     source_height: float = 1.25,
     mic_height: float = 0.25,
-    incidence_angle: float = 0.0,
+    incidence_angle_rad: float = 0.0,
     n: int | None = None,
 ) -> Real
 ```
@@ -289,7 +289,7 @@ is treated as absorbed, so `alpha` may be slightly overestimated
 | `reflected_ir` | Windowed reflected impulse response `hr(t)`, real. Same treatment as `incident_ir`; two Signals recorded at different rates are refused rather than arbitrated. |
 | `source_height` | Source-to-plane distance `ds`, in metres. |
 | `mic_height` | Microphone-to-plane distance `dm`, in metres. |
-| `incidence_angle` | Incidence angle `theta`, in radians (0 = normal). |
+| `incidence_angle_rad` | Incidence angle `theta`, in radians (0 = normal). |
 | `n` | FFT length; defaults to the longer input. |
 
 **Returns:** Absorption coefficient `alpha(f)` at the `rfft` frequency bins.
@@ -326,7 +326,7 @@ insitu_absorption_spectrum(
     *,
     source_height: float = 1.25,
     mic_height: float = 0.25,
-    incidence_angle: float = 0.0,
+    incidence_angle_rad: float = 0.0,
     n: int | None = None,
     f_min: float = 250.0,
     f_max: float = 4000.0,
@@ -351,7 +351,7 @@ in a plottable [`InsituAbsorptionResult`](/phonometry/reference/api/materials/ro
 | `fs` | Sampling frequency, in hertz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `source_height` | Source-to-plane distance `ds`, in metres. |
 | `mic_height` | Microphone-to-plane distance `dm`, in metres. |
-| `incidence_angle` | Incidence angle `theta`, in radians (0 = normal). |
+| `incidence_angle_rad` | Incidence angle `theta`, in radians (0 = normal). |
 | `n` | FFT length; defaults to the longer of the two impulse responses. |
 | `f_min` | Lowest band centre to report, in hertz (default 250 Hz). |
 | `f_max` | Highest band centre to report, in hertz (default 4000 Hz). |
@@ -374,7 +374,7 @@ insitu_reflection_factor(
     *,
     source_height: float = 1.25,
     mic_height: float = 0.25,
-    incidence_angle: float = 0.0,
+    incidence_angle_rad: float = 0.0,
     fs: float | None = None,
     delay: float | None = None,
     n: int | None = None,
@@ -386,7 +386,7 @@ Complex pressure reflection factor `r(f)` (ISO 13472-1, Clause 4.1).
 $r(f) = (1 / K_\mathrm{r}) H_\mathrm{r}(f) / H_\mathrm{i}(f)$ from the windowed reflected and
 incident
 impulse responses, with `Hr`/`Hi` their real FFTs and `Kr` the
-geometrical-spreading factor (or `Kr,theta` when `incidence_angle` is
+geometrical-spreading factor (or `Kr,theta` when `incidence_angle_rad` is
 given, Annex F). When both `fs` and `delay` are supplied the
 reflected-path time offset is undone by
 $\exp(+j 2 \pi f \, \text{delay})$, yielding
@@ -402,7 +402,7 @@ Annex C; the frequency-dependent form of Annex G).
 | `reflected_ir` | Windowed reflected-path impulse response `hr(t)`, real, same sampling as `incident_ir`. Same treatment as `incident_ir`: its calibration is applied too, which is what makes the shared factor cancel rather than skew the ratio. |
 | `source_height` | Source-to-plane distance `ds`, in metres. |
 | `mic_height` | Microphone-to-plane distance `dm`, in metres. |
-| `incidence_angle` | Incidence angle `theta`, in radians (0 = normal). |
+| `incidence_angle_rad` | Incidence angle `theta`, in radians (0 = normal). |
 | `fs` | Sampling frequency, in hertz; required with `delay` for phase restoration, and otherwise unused. Either record may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it; an explicit value that disagrees with one raises, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `delay` | Reflected-path delay `dtau` to undo, in seconds; `None` returns the raw spectral ratio. |
 | `n` | FFT length; defaults to the longer of the two impulse responses. |
@@ -653,7 +653,7 @@ power_reflection_coefficient(
     *,
     source_height: float = 1.25,
     mic_height: float = 0.25,
-    incidence_angle: float = 0.0,
+    incidence_angle_rad: float = 0.0,
     n: int | None = None,
 ) -> Real
 ```
@@ -675,7 +675,7 @@ independent of any reflected-path time offset.
 | `reflected_ir` | Windowed reflected impulse response `hr(t)`, real. Same treatment as `incident_ir`; two Signals recorded at different rates are refused rather than arbitrated. |
 | `source_height` | Source-to-plane distance `ds`, in metres. |
 | `mic_height` | Microphone-to-plane distance `dm`, in metres. |
-| `incidence_angle` | Incidence angle `theta`, in radians. |
+| `incidence_angle_rad` | Incidence angle `theta`, in radians. |
 | `n` | FFT length; defaults to the longer input. |
 
 **Returns:** Sound-power reflection factor `QW(f)` (real).

@@ -59,7 +59,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -134,6 +134,7 @@ class ImpulseProminenceResult:
     qualifies: np.ndarray
     prominence: float
     adjustment: float
+    _: KW_ONLY
     assessment_period_min: float = DEFAULT_ASSESSMENT_PERIOD_MIN
 
     def __post_init__(self) -> None:

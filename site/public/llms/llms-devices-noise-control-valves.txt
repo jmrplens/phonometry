@@ -99,7 +99,7 @@ from phonometry import noise_control
 fd = noise_control.valve_style_modifier(0.00137, 0.181, 6)
 print(round(fd, 3))                                        # 0.296
 
-print(round(noise_control.jet_diameter(90.0, fd, 0.792 / 0.984), 4))
+print(round(noise_control.jet_diameter_m(90.0, fd, 0.792 / 0.984), 4))
 # 0.0116  m
 ```
 
@@ -139,12 +139,12 @@ result = noise_control.valve_aerodynamic_noise(
         flow_coefficient=90.0,         # C_v
         style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
         pressure_recovery=0.792 / 0.984,
-        outlet_diameter=0.1,           # m
+        outlet_diameter_m=0.1,           # m
         efficiency_correction=-3.8,    # A_eta, Table 4
         strouhal_number=0.2,           # St_p, Table 4
     ),
     noise_control.DownstreamPipe(
-        internal_diameter=0.2031,      # m
+        internal_diameter_m=0.2031,      # m
         wall_thickness=0.008,          # m
         density=8000.0,                # kg/m3, steel
     ),
@@ -222,9 +222,9 @@ from phonometry import noise_control
 bands = np.array([200.0, 1000.0, 2500.0])
 loss = noise_control.pipe_transmission_loss(
     bands,
-    internal_diameter=0.200,
+    internal_diameter_m=0.200,
     wall_thickness=0.008,
-    valve_outlet_diameter=0.200,
+    valve_outlet_diameter_m=0.200,
     downstream_density=11.1,
     downstream_sound_speed=408.0,
     pipe_density=8000.0,
@@ -263,11 +263,11 @@ case = dict(
     valve=noise_control.ValveTrim(
         flow_coefficient=30.0,
         style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
-        pressure_recovery=0.792 / 0.984, outlet_diameter=0.1,
+        pressure_recovery=0.792 / 0.984, outlet_diameter_m=0.1,
         efficiency_correction=-3.8, strouhal_number=0.2,
     ),
     pipe=noise_control.DownstreamPipe(
-        internal_diameter=0.15, wall_thickness=0.008, density=8000.0
+        internal_diameter_m=0.15, wall_thickness=0.008, density=8000.0
     ),
 )
 both = noise_control.valve_aerodynamic_noise(
@@ -603,11 +603,11 @@ res = noise_control.valve_hydrodynamic_noise(
         pressure_recovery=0.92,        # F_L
         incipient_ratio=x_fz,          # x_Fz, at 6e5 Pa
         power_ratio=0.25,              # r_W, Table 2
-        valve_diameter=0.1,            # m
-        seat_diameter=0.1,             # m
+        valve_diameter_m=0.1,            # m
+        seat_diameter_m=0.1,             # m
     ),
     noise_control.LiquidPipe(
-        internal_diameter=0.1071,      # m
+        internal_diameter_m=0.1071,      # m
         wall_thickness=0.0036,         # m
         density=7800.0,                # kg/m3, steel
     ),
@@ -685,8 +685,8 @@ form = dict(
     style_modifier=0.42,
     pressure_recovery=0.92,
     corrected_ratio=0.2386,
-    valve_diameter=0.1,
-    seat_diameter=0.1,
+    valve_diameter_m=0.1,
+    seat_diameter_m=0.1,
     inlet_pressure_pa=1.0e6,
     vapour_pressure_pa=2.32e3,
 )

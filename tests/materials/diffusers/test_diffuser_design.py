@@ -117,7 +117,7 @@ def test_obliquity_factor_is_symmetric_kirchhoff(psi: float) -> None:
     reflection = np.exp(-2j * k * depths)
     angles_deg = np.asarray(DEFAULT_POLAR_ANGLES, dtype=np.float64)
     common = {
-        "source_angle": psi,
+        "source_angle_deg": psi,
         "repetitions": 3,
         "speed_of_sound": c,
         "include_aperture": True,

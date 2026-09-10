@@ -201,6 +201,7 @@ ImpulseProminenceResult(
     qualifies: np.ndarray,
     prominence: float,
     adjustment: float,
+    *,
     assessment_period_min: float = 30.0,
 )
 ```

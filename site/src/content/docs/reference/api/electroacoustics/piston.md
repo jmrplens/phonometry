@@ -104,6 +104,7 @@ $D(0) = 1$.
 ```python
 piston_directivity_pattern(
     ka: ArrayLike,
+    *,
     angles_rad: ArrayLike | None = None,
 ) -> PistonDirectivity
 ```

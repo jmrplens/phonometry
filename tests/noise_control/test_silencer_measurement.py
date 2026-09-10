@@ -368,10 +368,10 @@ class TestOpenEnd:
     def test_a_duct_in_free_space_reflects_less_than_a_flush_one(self) -> None:
         # Twice the solid angle is twice the room to radiate into.
         flush = sm.open_end_transmission_loss(
-            BANDS, DUCT_AREA, solid_angle=sm.RADIATION_SOLID_ANGLES["A"]
+            BANDS, DUCT_AREA, solid_angle_sr=sm.RADIATION_SOLID_ANGLES["A"]
         )
         free = sm.open_end_transmission_loss(
-            BANDS, DUCT_AREA, solid_angle=sm.RADIATION_SOLID_ANGLES["C"]
+            BANDS, DUCT_AREA, solid_angle_sr=sm.RADIATION_SOLID_ANGLES["C"]
         )
         assert np.all(free > flush)
 
@@ -379,9 +379,9 @@ class TestOpenEnd:
         # (B.3) and (B.4) are the same physics said twice: what is not
         # transmitted is reflected, so D_td = -10 lg(1 - r^2) exactly.
         for angle in sm.RADIATION_SOLID_ANGLES.values():
-            loss = sm.open_end_transmission_loss(BANDS, DUCT_AREA, solid_angle=angle)
+            loss = sm.open_end_transmission_loss(BANDS, DUCT_AREA, solid_angle_sr=angle)
             reflected = sm.open_end_reflection_coefficient(
-                BANDS, DUCT_AREA, solid_angle=angle
+                BANDS, DUCT_AREA, solid_angle_sr=angle
             )
             assert loss == pytest.approx(-10.0 * np.log10(1.0 - reflected**2))
 
@@ -414,8 +414,8 @@ class TestOpenEnd:
 
     @pytest.mark.parametrize("bad", [0.0, -1.0])
     def test_a_solid_angle_that_is_not_positive_is_refused(self, bad: float) -> None:
-        with pytest.raises(ValueError, match="solid_angle"):
-            sm.open_end_reflection_coefficient(BANDS, DUCT_AREA, solid_angle=bad)
+        with pytest.raises(ValueError, match="solid_angle_sr"):
+            sm.open_end_reflection_coefficient(BANDS, DUCT_AREA, solid_angle_sr=bad)
 
 
 class TestMeasuredTransmissionLoss:
@@ -721,7 +721,7 @@ class TestDuctSoundPowerLevel:
             printed = 10.0 * np.log10(
                 1.0 + (c / (4.0 * math.pi * BANDS)) ** 2 * (angle / area)
             )
-            found = sm.open_end_transmission_loss(BANDS, area, solid_angle=angle)
+            found = sm.open_end_transmission_loss(BANDS, area, solid_angle_sr=angle)
             assert found == pytest.approx(printed)
 
     def test_the_two_solid_angle_tables_agree_entry_for_entry(self) -> None:

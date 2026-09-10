@@ -1,12 +1,19 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """vibration domain of phonometry (see module docstrings).
 
-Three families since 4.0, by who reads them: :mod:`~phonometry.vibration.structural`
+Four families, by who reads them: :mod:`~phonometry.vibration.structural`
 is the structural acoustics that feeds building prediction (mobility, junctions,
 radiation, SEA), :mod:`~phonometry.vibration.human` is exposure of people
-(ISO 2631, ISO 5349) and :mod:`~phonometry.vibration.machinery` is condition
-monitoring. Every public name is still exported here, so
-``from phonometry import vibration`` reads exactly as it did.
+(ISO 2631, ISO 5349), :mod:`~phonometry.vibration.machinery` is condition
+monitoring and :mod:`~phonometry.vibration.immission` is the German
+immission-control chain (DIN 45669, DIN 45672).
+
+Every public name is exported here, so ``from phonometry import vibration``
+reads exactly as it did. That flat namespace is why the DIN 45669-1 constants
+carry the chain they belong to in their names: the reference frequency of a
+human-vibration meter and of a building-vibration meter are different numbers
+in different standards, and ``KB_REFERENCE_FREQUENCY_HZ`` beside
+``REFERENCE_FREQUENCY_HZ`` says which is which at the call site.
 """
 
 from __future__ import annotations
@@ -116,6 +123,43 @@ from .human import (
     weighted_acceleration,
     weighting_factors,
     weighting_tolerance_percent,
+)
+from .immission import (
+    ASSESSMENT_GUIDE_VALUES_MM_S,
+    ASSESSMENT_WEIGHTING_TOLERANCE,
+    BAND_LIMIT_CORNER_FACTOR,
+    KB_CORNER_HZ,
+    KB_DETECTION_LIMIT,
+    KB_INDICATION_TOLERANCE_PERCENT,
+    KB_PULSE_RESPONSE_PERCENT,
+    KB_REFERENCE_FREQUENCY_HZ,
+    KB_REFERENCE_INDICATIONS,
+    KB_TEST_INDICATIONS,
+    KB_TIME_CONSTANT_S,
+    RESPONSE_TOLERANCE_LOWER_PERCENT,
+    RESPONSE_TOLERANCE_UPPER_PERCENT,
+    TAKT_DURATION_S,
+    TAKT_SUPPRESSION_THRESHOLD,
+    VELOCITY_DETECTION_LIMIT_MM_S,
+    WORKING_RANGES_HZ,
+    AssessmentVelocity,
+    DominantFrequency,
+    VibrationMeterReading,
+    VibrationMeterVerification,
+    assess_short_term_vibration,
+    assessment_velocity,
+    assessment_weighting_response,
+    assessment_weighting_taps,
+    band_limitation_response,
+    dominant_frequency,
+    kb_signal,
+    kb_weighting_response,
+    kbf_signal,
+    measure_vibration_immission,
+    response_tolerance_percent,
+    takt_maxima,
+    takt_maximum_rms,
+    verify_vibration_meter,
 )
 from .machinery import (
     GEAR_ACCEPTANCE_HEADROOM,
@@ -475,4 +519,40 @@ __all__ = [
     "verify_running_rms_decay",
     "verify_weighting",
     "weighting_tolerance_percent",
+    # Measuring vibration immission (DIN 45669-1).
+    "ASSESSMENT_GUIDE_VALUES_MM_S",
+    "ASSESSMENT_WEIGHTING_TOLERANCE",
+    "BAND_LIMIT_CORNER_FACTOR",
+    "KB_CORNER_HZ",
+    "KB_DETECTION_LIMIT",
+    "KB_INDICATION_TOLERANCE_PERCENT",
+    "KB_PULSE_RESPONSE_PERCENT",
+    "KB_REFERENCE_FREQUENCY_HZ",
+    "KB_REFERENCE_INDICATIONS",
+    "KB_TEST_INDICATIONS",
+    "KB_TIME_CONSTANT_S",
+    "RESPONSE_TOLERANCE_LOWER_PERCENT",
+    "RESPONSE_TOLERANCE_UPPER_PERCENT",
+    "TAKT_DURATION_S",
+    "TAKT_SUPPRESSION_THRESHOLD",
+    "VELOCITY_DETECTION_LIMIT_MM_S",
+    "WORKING_RANGES_HZ",
+    "AssessmentVelocity",
+    "DominantFrequency",
+    "VibrationMeterReading",
+    "VibrationMeterVerification",
+    "assess_short_term_vibration",
+    "assessment_velocity",
+    "assessment_weighting_response",
+    "assessment_weighting_taps",
+    "band_limitation_response",
+    "dominant_frequency",
+    "kb_signal",
+    "kb_weighting_response",
+    "kbf_signal",
+    "measure_vibration_immission",
+    "response_tolerance_percent",
+    "takt_maxima",
+    "takt_maximum_rms",
+    "verify_vibration_meter",
 ]

@@ -1,0 +1,86 @@
+#  Copyright (c) 2026. Jose Manuel Requena Plens
+"""vibration.immission subdomain of phonometry: measuring vibration immission.
+
+The German immission-control chain: DIN 45669-1 defines the vibration meter
+that DIN 4150-2 and DIN 4150-3 presuppose, and its Annex E turns the
+frequency-dependent guideline curve of DIN 4150-3 into a comparison with one
+number.
+"""
+
+from __future__ import annotations
+
+from .vibration_meter import (
+    ASSESSMENT_GUIDE_VALUES_MM_S,
+    ASSESSMENT_WEIGHTING_TOLERANCE,
+    BAND_LIMIT_CORNER_FACTOR,
+    KB_CORNER_HZ,
+    KB_DETECTION_LIMIT,
+    KB_INDICATION_TOLERANCE_PERCENT,
+    KB_PULSE_RESPONSE_PERCENT,
+    KB_REFERENCE_FREQUENCY_HZ,
+    KB_REFERENCE_INDICATIONS,
+    KB_TEST_INDICATIONS,
+    KB_TIME_CONSTANT_S,
+    RESPONSE_TOLERANCE_LOWER_PERCENT,
+    RESPONSE_TOLERANCE_UPPER_PERCENT,
+    TAKT_DURATION_S,
+    TAKT_SUPPRESSION_THRESHOLD,
+    VELOCITY_DETECTION_LIMIT_MM_S,
+    WORKING_RANGES_HZ,
+    AssessmentVelocity,
+    DominantFrequency,
+    VibrationMeterReading,
+    VibrationMeterVerification,
+    assess_short_term_vibration,
+    assessment_velocity,
+    assessment_weighting_response,
+    assessment_weighting_taps,
+    band_limitation_response,
+    dominant_frequency,
+    kb_signal,
+    kb_weighting_response,
+    kbf_signal,
+    measure_vibration_immission,
+    response_tolerance_percent,
+    takt_maxima,
+    takt_maximum_rms,
+    verify_vibration_meter,
+)
+
+__all__ = [
+    "ASSESSMENT_GUIDE_VALUES_MM_S",
+    "ASSESSMENT_WEIGHTING_TOLERANCE",
+    "BAND_LIMIT_CORNER_FACTOR",
+    "KB_DETECTION_LIMIT",
+    "VELOCITY_DETECTION_LIMIT_MM_S",
+    "KB_INDICATION_TOLERANCE_PERCENT",
+    "KB_CORNER_HZ",
+    "KB_TIME_CONSTANT_S",
+    "RESPONSE_TOLERANCE_LOWER_PERCENT",
+    "KB_PULSE_RESPONSE_PERCENT",
+    "KB_REFERENCE_FREQUENCY_HZ",
+    "KB_REFERENCE_INDICATIONS",
+    "TAKT_DURATION_S",
+    "TAKT_SUPPRESSION_THRESHOLD",
+    "KB_TEST_INDICATIONS",
+    "RESPONSE_TOLERANCE_UPPER_PERCENT",
+    "WORKING_RANGES_HZ",
+    "AssessmentVelocity",
+    "DominantFrequency",
+    "VibrationMeterReading",
+    "VibrationMeterVerification",
+    "assess_short_term_vibration",
+    "assessment_velocity",
+    "assessment_weighting_response",
+    "assessment_weighting_taps",
+    "band_limitation_response",
+    "dominant_frequency",
+    "kb_signal",
+    "kb_weighting_response",
+    "kbf_signal",
+    "measure_vibration_immission",
+    "response_tolerance_percent",
+    "takt_maxima",
+    "takt_maximum_rms",
+    "verify_vibration_meter",
+]

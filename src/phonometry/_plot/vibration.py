@@ -62,6 +62,11 @@ if TYPE_CHECKING:
     from ..vibration.human.multiple_shock import MultipleShockResult
     from ..vibration.human.seat_vibration import SeatTransmissionResult
     from ..vibration.human.signal_burst import SignalBurstVerification
+    from ..vibration.immission.vibration_meter import (
+        AssessmentVelocity,
+        VibrationMeterReading,
+        VibrationMeterVerification,
+    )
     from ..vibration.machinery.diagnostics import FaultFrequencyResult
     from ..vibration.machinery.evaluation import VectorChangeResult
     from ..vibration.structural.building_damage import DamageAssessment
@@ -236,6 +241,24 @@ _STRINGS: dict[str, str] = {
     "low-frequency whole-body": "cuerpo entero de baja frecuencia",
     "band limiting": "limitación de banda",
     "Signal-burst response (ISO 8041-1)\n{name}, {application}": "Respuesta a ráfaga de señal (ISO 8041-1)\n{name}, {application}",
+    # Vibration immission meter (DIN 45669-1 Tables 2 and 3, 5.1.6, Annex E).
+    "Time [s]": "Tiempo [s]",
+    "DIN 45669-1 tolerance": "tolerancia de DIN 45669-1",
+    "Response deviation $F(f)$ [%]": "Desviación de la respuesta $F(f)$ [%]",
+    "{weighting} response against DIN 45669-1: {verdict}": "Respuesta {weighting} frente a DIN 45669-1: {verdict}",
+    "KB": "KB",
+    "unweighted": "sin ponderar",
+    "Weighted vibration severity $KB_F$": "Intensidad de vibración ponderada $KB_F$",
+    r"$KB_{{F\mathrm{{max}}}}$ = {value}": r"$KB_{{F\mathrm{{max}}}}$ = {value}",
+    r"$KB_{{FTm}}$ = {value}": r"$KB_{{FTm}}$ = {value}",
+    "clock maximum": "máximo por intervalo",
+    "Vibration immission over {duration} s ({range} range)": "Inmisión de vibración en {duration} s (rango {range})",
+    "building": "edificios",
+    "railway": "ferrocarril",
+    "Assessment velocity $v_B$ [mm/s]": "Velocidad de valoración $v_B$ [mm/s]",
+    "guideline {value} mm/s": "valor de referencia {value} mm/s",
+    "peak {value} mm/s": "pico {value} mm/s",
+    "Short-term vibration by DIN 45669-1 Annex E ({cls}): {verdict}": "Vibración de corta duración según DIN 45669-1, anexo E ({cls}): {verdict}",
 }
 
 
@@ -1984,6 +2007,231 @@ def plot_signal_burst_verification(
     )
     ax.grid(visible=True, axis="y", alpha=0.3)
     ax.set_axisbelow(True)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_vibration_meter_verification(
+    result: VibrationMeterVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """A measured response inside the band DIN 45669-1 Tables 2 and 3 allow.
+
+    The deviation ``F(f)`` of Formula (7) against frequency, with the two
+    limits as a shaded region around zero. The band is drawn from the tables
+    rather than from a fixed number, so it steps out from 10 % to 20 % at
+    ``1,25 f_u`` and ``0,8 f_o`` exactly where the standard steps it, and the
+    frequencies where the lower limit is 100 % are where the standard stops
+    constraining the response from below at all.
+
+    :param result: A
+        :class:`~phonometry.vibration.immission.vibration_meter.VibrationMeterVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured-point ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    order = np.argsort(result.frequencies_hz)
+    freqs = result.frequencies_hz[order]
+    deviation = result.deviation_percent[order]
+    lower = result.lower_percent[order]
+    upper = result.upper_percent[order]
+    inside = result.within_tolerance[order]
+
+    # The upper limit is infinite where the measured response sits below the
+    # 0,01 of footnote a. Drawing an infinite edge would blank the axes, so
+    # the band is closed at the largest finite limit and the points still
+    # carry the verdict.
+    finite_upper = upper[np.isfinite(upper)]
+    ceiling = float(np.max(finite_upper)) if finite_upper.size else 100.0
+    ax.fill_between(
+        freqs,
+        -lower,
+        np.where(np.isfinite(upper), upper, ceiling),
+        color=_C_PRIMARY,
+        alpha=0.15,
+        label=_t("DIN 45669-1 tolerance", language),
+    )
+    ax.axhline(0.0, color=_C_PRIMARY, lw=1.5)
+
+    style_default(kwargs, "color", _C_TERTIARY)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "markersize", 5)
+    style_default(kwargs, "ls", "none")
+    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
+    ax.plot(freqs[inside], deviation[inside], **kwargs)
+    if not inside.all():
+        ax.plot(
+            freqs[~inside],
+            deviation[~inside],
+            color=_C_REFERENCE,
+            marker="X",
+            markersize=9,
+            ls="none",
+            label=_t(_OUTSIDE_LABEL, language),
+        )
+
+    ax.set_xscale("log")
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Response deviation $F(f)$ [%]", language))
+    ax.set_title(
+        _t("{weighting} response against DIN 45669-1: {verdict}", language).format(
+            weighting=_t("KB" if result.weighting == "kb" else "unweighted", language),
+            verdict=_t("PASS" if result.passes else "FAIL", language),
+        )
+    )
+    format_frequency_axis(ax, float(freqs[0]), float(freqs[-1]), language=language)
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_vibration_meter_reading(
+    result: VibrationMeterReading,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The weighted vibration severity of one record, with what it reduces to.
+
+    ``KB_F(t)`` against time, the maximum it reaches, and the clock maxima
+    that Formula (2) averages, each drawn at the middle of the 30 s interval
+    it belongs to. The two horizontal lines are the numbers a meter displays,
+    and the distance between them is what a long quiet stretch does to a
+    reading dominated by a short event.
+
+    :param result: A
+        :class:`~phonometry.vibration.immission.vibration_meter.VibrationMeterReading`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the ``KB_F(t)`` ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    times = np.arange(result.kbf.size) / result.fs_hz
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.2)
+    kwargs.setdefault("label", _t("Weighted vibration severity $KB_F$", language))
+    ax.plot(times, result.kbf, **kwargs)
+    ax.axhline(
+        result.kbf_max,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.5,
+        label=_t(r"$KB_{{F\mathrm{{max}}}}$ = {value}", language).format(
+            value=format_number(result.kbf_max, language, decimals=3, trim=True)
+        ),
+    )
+    if result.takt_maxima.size:
+        takt_s = result.averaging_time_s / result.takt_maxima.size
+        centres = (np.arange(result.takt_maxima.size) + 0.5) * takt_s
+        ax.plot(
+            centres,
+            result.takt_maxima,
+            color=_C_TERTIARY,
+            marker="s",
+            markersize=6,
+            ls="none",
+            label=_t("clock maximum", language),
+        )
+        ax.axhline(
+            result.kbf_takt_rms,
+            color=_C_TERTIARY,
+            ls=":",
+            lw=1.5,
+            label=_t(r"$KB_{{FTm}}$ = {value}", language).format(
+                value=format_number(
+                    result.kbf_takt_rms, language, decimals=3, trim=True
+                )
+            ),
+        )
+    ax.set_xlabel(_t("Time [s]", language))
+    ax.set_ylabel(_t("Weighted vibration severity $KB_F$", language))
+    ax.set_title(
+        _t("Vibration immission over {duration} s ({range} range)", language).format(
+            duration=format_number(
+                result.measuring_time_s, language, decimals=0, trim=True
+            ),
+            range=_t(result.working_range, language),
+        )
+    )
+    ax.set_ylim(bottom=0.0)
+    ax.grid(visible=True, alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_assessment_velocity(
+    result: AssessmentVelocity,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The Annex E assessment velocity against the one value it is judged by.
+
+    ``v_B(t)`` against time with the guideline value of Table E.2 as a pair of
+    lines, above and below zero because the quantity judged is the largest
+    absolute value. There is no frequency axis and no guideline curve: that is
+    the whole point of Annex E.
+
+    :param result: An
+        :class:`~phonometry.vibration.immission.vibration_meter.AssessmentVelocity`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the ``v_B(t)`` ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    times = np.arange(result.velocity_mm_s.size) / result.fs_hz
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.0)
+    kwargs.setdefault(
+        "label",
+        _t("peak {value} mm/s", language).format(
+            value=format_number(
+                result.assessment_velocity_mm_s, language, decimals=2, trim=True
+            )
+        ),
+    )
+    ax.plot(times, result.velocity_mm_s, **kwargs)
+    guide = result.guide_value_mm_s
+    ax.axhline(
+        guide,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.5,
+        label=_t("guideline {value} mm/s", language).format(
+            value=format_number(guide, language, decimals=0, trim=True)
+        ),
+    )
+    ax.axhline(-guide, color=_C_REFERENCE, ls="--", lw=1.5)
+    ax.set_xlabel(_t("Time [s]", language))
+    ax.set_ylabel(_t("Assessment velocity $v_B$ [mm/s]", language))
+    ax.set_title(
+        _t(
+            "Short-term vibration by DIN 45669-1 Annex E ({cls}): {verdict}",
+            language,
+        ).format(
+            cls=_t(_DAMAGE_CLASS_LABELS[result.building_class], language),
+            verdict=_t("PASS" if result.within_guideline else "FAIL", language),
+        )
+    )
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax

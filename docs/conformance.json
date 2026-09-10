@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 995,
-    "passing": 995,
+    "checks": 1030,
+    "passing": 1030,
     "failing": 0,
-    "domains": 77,
-    "standards": 408,
-    "citations": 689,
-    "designations": 146,
+    "domains": 78,
+    "standards": 410,
+    "citations": 697,
+    "designations": 148,
     "sources": 83
   },
   "units": [
@@ -227,6 +227,12 @@
       "title": "Building response prediction (ISO 4866)",
       "checks": 15,
       "passing": 15
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669",
+      "title": "Vibration immission measurement (DIN 45669)",
+      "checks": 35,
+      "passing": 35
     },
     {
       "id": "speech-intelligibility-ansi-s3-5-1997",
@@ -15386,6 +15392,965 @@
         "value": 2.1
       },
       "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-5-2-3-2/band-limitation-at-the-lower-corner-0-8-f-u-magnitude",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 5.2.3.2",
+        "cite": "DIN 45669-1:2010-09 5.2.3.2"
+      },
+      "quantity": "Band limitation at the lower corner 0,8 f_u, magnitude",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7071067811865475
+      },
+      "computed": {
+        "value": 0.70711
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": -1.45e-09
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-5-2-3-2/band-limitation-at-the-upper-corner-f-o-0-8-magnitude",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 5.2.3.2",
+        "cite": "DIN 45669-1:2010-09 5.2.3.2"
+      },
+      "quantity": "Band limitation at the upper corner f_o / 0,8, magnitude",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7071067811865475
+      },
+      "computed": {
+        "value": 0.70711
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": -1.45e-09
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-5-2-3-2/kb-weighting-at-its-own-corner-5-6-hz-relative-to-the-band-limitation",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 5.2.3.2",
+        "cite": "DIN 45669-1:2010-09 5.2.3.2"
+      },
+      "quantity": "KB weighting at its own corner 5,6 Hz, relative to the band limitation",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7071067811865475
+      },
+      "computed": {
+        "value": 0.70711
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-2/lower-limit-of-f-f-inside-the-band",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 2",
+        "cite": "DIN 45669-1:2010-09 Table 2"
+      },
+      "quantity": "Lower limit of F(f) inside the band, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.0
+      },
+      "computed": {
+        "value": 10.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-2/lower-limit-of-f-f-in-the-skirt",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 2",
+        "cite": "DIN 45669-1:2010-09 Table 2"
+      },
+      "quantity": "Lower limit of F(f) in the skirt, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-3/upper-limit-of-f-f-outside-the-band",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 3",
+        "cite": "DIN 45669-1:2010-09 Table 3"
+      },
+      "quantity": "Upper limit of F(f) outside the band, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-f-of-a-1-mm-s-sine-at-1-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_F of a 1 mm/s sine at 1 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.103
+      },
+      "computed": {
+        "value": 0.1027
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0003
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-fmax-of-a-1-mm-s-sine-at-1-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_Fmax of a 1 mm/s sine at 1 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.13
+      },
+      "computed": {
+        "value": 0.1298
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-f-of-a-1-mm-s-sine-at-5-6-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_F of a 1 mm/s sine at 5.6 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.5
+      },
+      "computed": {
+        "value": 0.4994
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0006
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-fmax-of-a-1-mm-s-sine-at-5-6-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_Fmax of a 1 mm/s sine at 5.6 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.528
+      },
+      "computed": {
+        "value": 0.5274
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0006
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-f-of-a-1-mm-s-sine-at-31-5-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_F of a 1 mm/s sine at 31.5 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.693
+      },
+      "computed": {
+        "value": 0.6928
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-fmax-of-a-1-mm-s-sine-at-31-5-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_Fmax of a 1 mm/s sine at 31.5 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7
+      },
+      "computed": {
+        "value": 0.6998
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-f-of-a-1-mm-s-sine-at-80-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_F of a 1 mm/s sine at 80 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.594
+      },
+      "computed": {
+        "value": 0.5941
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-fmax-of-a-1-mm-s-sine-at-80-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_Fmax of a 1 mm/s sine at 80 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.597
+      },
+      "computed": {
+        "value": 0.5965
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0005
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-f-of-a-1-mm-s-sine-at-315-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_F of a 1 mm/s sine at 315 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.071
+      },
+      "computed": {
+        "value": 0.0708
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-fmax-of-a-1-mm-s-sine-at-315-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_Fmax of a 1 mm/s sine at 315 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.071
+      },
+      "computed": {
+        "value": 0.0709
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-6-2-3-12/kb-f-under-the-reference-conditions-1-mm-s-16-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 6.2.3.12",
+        "cite": "DIN 45669-1:2010-09 6.2.3.12"
+      },
+      "quantity": "KB_F under the reference conditions (1 mm/s, 16 Hz)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.667
+      },
+      "computed": {
+        "value": 0.6671
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-6-2-3-12/kb-fmax-under-the-reference-conditions-1-mm-s-16-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 6.2.3.12",
+        "cite": "DIN 45669-1:2010-09 6.2.3.12"
+      },
+      "quantity": "KB_Fmax under the reference conditions (1 mm/s, 16 Hz)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.68
+      },
+      "computed": {
+        "value": 0.6803
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 0.0003
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-continuous-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "clause": "Ber 1:2012-12 Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, continuous, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 100.4
+      },
+      "computed": {
+        "value": 100.397
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": -0.003
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-800-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "clause": "Ber 1:2012-12 Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 800 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 100.3
+      },
+      "computed": {
+        "value": 100.335
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": 0.035
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-400-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "clause": "Ber 1:2012-12 Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 400 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 98.3
+      },
+      "computed": {
+        "value": 98.337
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": 0.037
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-200-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "clause": "Ber 1:2012-12 Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 200 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 89.7
+      },
+      "computed": {
+        "value": 89.648
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": -0.052
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-100-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "clause": "Ber 1:2012-12 Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 100 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 74.5
+      },
+      "computed": {
+        "value": 74.405
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": -0.095
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-50-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "clause": "Ber 1:2012-12 Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 50 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 57.6
+      },
+      "computed": {
+        "value": 57.59
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": -0.01
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-25-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "clause": "Ber 1:2012-12 Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 25 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 42.7
+      },
+      "computed": {
+        "value": 42.886
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": 0.186
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-12-5-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "clause": "Ber 1:2012-12 Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 12.5 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 30.9
+      },
+      "computed": {
+        "value": 31.427
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": 0.527
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-e-1/assessment-weighting-h-vb-commercial-at-50-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table E.1",
+        "cite": "DIN 45669-1:2010-09 Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, commercial, at 50 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.5
+      },
+      "computed": {
+        "value": 0.5
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-e-1/assessment-weighting-h-vb-commercial-at-100-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table E.1",
+        "cite": "DIN 45669-1:2010-09 Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, commercial, at 100 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.4
+      },
+      "computed": {
+        "value": 0.4
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-e-1/assessment-weighting-h-vb-residential-at-50-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table E.1",
+        "cite": "DIN 45669-1:2010-09 Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, residential, at 50 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.3333333333333333
+      },
+      "computed": {
+        "value": 0.33333
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-e-1/assessment-weighting-h-vb-residential-at-100-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table E.1",
+        "cite": "DIN 45669-1:2010-09 Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, residential, at 100 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.25
+      },
+      "computed": {
+        "value": 0.25
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-e-1/assessment-weighting-h-vb-sensitive-at-50-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table E.1",
+        "cite": "DIN 45669-1:2010-09 Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, sensitive, at 50 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.375
+      },
+      "computed": {
+        "value": 0.375
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-e-1/assessment-weighting-h-vb-sensitive-at-100-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table E.1",
+        "cite": "DIN 45669-1:2010-09 Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, sensitive, at 100 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.3
+      },
+      "computed": {
+        "value": 0.3
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-e-2/guideline-assessment-velocity-commercial-mm-s",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table E.2",
+        "cite": "DIN 45669-1:2010-09 Table E.2"
+      },
+      "quantity": "Guideline assessment velocity, commercial, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-e-2/guideline-assessment-velocity-residential-mm-s",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table E.2",
+        "cite": "DIN 45669-1:2010-09 Table E.2"
+      },
+      "quantity": "Guideline assessment velocity, residential, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.0
+      },
+      "computed": {
+        "value": 5.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-e-2/guideline-assessment-velocity-sensitive-mm-s",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN",
+        "clause": "45669-1:2010-09 Table E.2",
+        "cite": "DIN 45669-1:2010-09 Table E.2"
+      },
+      "quantity": "Guideline assessment velocity, sensitive, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.0
+      },
+      "computed": {
+        "value": 3.0
+      },
+      "unit": "mm/s",
       "tolerance": {
         "mode": "absolute",
         "value": 0.0005

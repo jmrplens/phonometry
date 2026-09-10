@@ -1,0 +1,421 @@
+---
+title: "Medida de la inmisión de vibración (DIN 45669-1)"
+description: "El instrumento que dan por supuesto la DIN 4150-2 y la DIN 4150-3: la limitación de banda y la ponderación KB de las fórmulas (3) y (4), la intensidad de vibración ponderada KB_F y el eficaz de los máximos por intervalo de la fórmula (2), las bandas de tolerancia de las tablas 2 y 3, y la velocidad de valoración del anexo E, que juzga un edificio sin frecuencia dominante."
+references:
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2010
+    title: "Messung von Schwingungsimmissionen — Teil 1: Schwingungsmesser — Anforderungen und Prüfungen"
+    designation: "DIN 45669-1:2010-09"
+    primary: true
+    note: "Los rangos de trabajo del 5.2.3.1, la limitación de banda y la ponderación frecuencial de las fórmulas (3) a (6), el valor eficaz móvil de la fórmula (1) y el eficaz de los máximos por intervalo de la fórmula (2), las magnitudes de indicación del 5.1.6, los límites de detección del 5.2.2, las tolerancias de la respuesta en amplitud de las tablas 2 y 3 con la desviación de la fórmula (7), las condiciones de referencia del 5.2.10 y las indicaciones de referencia del 6.2.3.12 con la tabla 9, los métodos de frecuencia dominante del anexo D y las ponderaciones de valoración y valores de referencia del anexo E con las tablas E.1 y E.2. Los apartados de diseño y de ensayo de tipo que exigen banco de ensayo no están implementados."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2012
+    title: "Messung von Schwingungsimmissionen — Teil 1: Schwingungsmesser — Anforderungen und Prüfungen, Berichtigung 1"
+    designation: "DIN 45669-1 Ber 1:2012-12"
+    note: "La redacción corregida de la tabla 8: las ocho duraciones de impulso de una señal de 80 Hz y el KB_Fmax que cada una debe mostrar en porcentaje de la indicación de la señal continua."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 1999
+    title: "Erschütterungen im Bauwesen — Teil 3: Einwirkungen auf bauliche Anlagen"
+    designation: "DIN 4150-3:1999-02"
+    note: "La tabla 1, cuya curva de valores de referencia invierten las ponderaciones del anexo E, y las tres clases de edificio para las que están escritas."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+La protección alemana frente a inmisiones juzga la vibración en edificios con
+dos normas que imprimen umbrales y casi no dicen nada sobre cómo se formó el
+número que llega a ellos. La DIN 4150-2 fija a qué pueden estar expuestas las
+personas dentro de un edificio y la [DIN
+4150-3](/phonometry/es/vibration/structural/structural-damage/) fija lo que
+aguantan los propios edificios. Las dos son tablas de valores para una magnitud
+que tiene que salir de algún sitio, y ese sitio es la DIN 45669-1: la
+especificación del **vibrómetro**, que es también la definición de las
+magnitudes que esas tablas comparan.
+
+Eso convierte esta página en la otra mitad de una pareja. La página de daños lee
+un valor de referencia en una tabla; esta construye, a partir de un registro de
+velocidad, el número con el que se lee, y después juzga a un instrumento que
+dice producirlo. Las dos normas se encuentran dos veces: una porque el
+vibrómetro es con lo que se hace una medida según la DIN 4150, y otra en el
+anexo E, donde la curva de valores de referencia de la DIN 4150-3 vuelve
+convertida en un filtro.
+
+## 1. La cadena, en el orden en que la construye la norma
+
+Entra una señal de velocidad y salen cuatro números. Entre medias hay tres
+etapas, cada una impresa como una función de transferencia exacta o como un
+promediado exacto.
+
+La **limitación de banda** (5.2.3.2, fórmula (3)) son dos parejas de
+Butterworth: un paso alto de dos polos en `0,8 f_u` y un paso bajo de dos polos
+en `f_o / 0,8`. El rango de trabajo es de 1 Hz a 80 Hz para edificios, así que
+esas esquinas caen en 0,8 Hz y 100 Hz. Junto a una vía férrea el rango es de
+4 Hz a 315 Hz, que es donde trabaja la DIN 45672-1, y también hace falta en
+voladuras y en ruido estructural.
+
+La **ponderación frecuencial** (fórmula (4)) divide lo anterior por
+`1 − j 5,6 Hz / f`, un polo y un cero más. Normalizar el resultado con 1 mm/s
+lo convierte en la **señal KB**, que es adimensional y es sobre lo que se
+construye todo lo que viene después.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/kb_weighting.svg" alt="Un eje de frecuencia logarítmico de 0,2 a 800 hercios con tres curvas en decibelios. Una curva gris a trazos es la limitación de banda del rango de trabajo de 1 a 80 hercios por sí sola, plana entre unos 2 y 60 hercios y cayendo con dos polos a cada lado. Una curva azul es la ponderación KB de ese mismo rango, que es la curva gris con una caída adicional de primer orden por debajo de su esquina, hasta unos menos 17 decibelios a 1 hercio. Una curva verde es la ponderación KB del rango ferroviario de 4 a 315 hercios, idéntica a la azul en el centro y con la parte plana extendida hasta unos 250 hercios. Una línea roja vertical marca 5,6 hercios, con un punto sobre la curva ponderada tres decibelios por debajo de su parte plana y una etiqueta que dice 5,6 hercios, la esquina de la fórmula (4)" width="94%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+freqs = np.geomspace(0.2, 800.0, 600)
+building = np.abs(vibration.kb_weighting_response(freqs))
+railway = np.abs(vibration.kb_weighting_response(freqs, working_range="railway"))
+band = np.abs(vibration.band_limitation_response(freqs))
+
+fig, ax = plt.subplots(figsize=(10, 6.2))
+ax.semilogx(freqs, 20 * np.log10(band), "--", label="solo limitación de banda")
+ax.semilogx(freqs, 20 * np.log10(building), label="ponderación KB, 1 Hz a 80 Hz")
+ax.semilogx(freqs, 20 * np.log10(railway), label="ponderación KB, 4 Hz a 315 Hz")
+ax.axvline(vibration.KB_CORNER_HZ)
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("Factor de ponderación [dB]")
+ax.set_ylim(-40, 3)
+ax.legend()
+```
+
+</details>
+
+Los módulos de ambas están impresos como fórmulas (5) y (6), y la biblioteca
+devuelve las respuestas complejas para que una comprobación de fase tenga algo
+que leer:
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+kb = np.abs(vibration.kb_weighting_response([16.0]))
+print(f"ponderación KB en la frecuencia de referencia: {kb[0]:.4f}")  # 0.9435
+
+corners = np.abs(vibration.band_limitation_response([0.8, 100.0]))
+print(f"las dos esquinas de la limitación de banda: {corners.round(4)}")  # [0.7071 0.7071]
+```
+
+## 2. Qué indica un vibrómetro, y las dos reglas de la fórmula (2)
+
+La señal KB se promedia, y el promediado es el que un sonómetro llama Fast: un
+valor eficaz móvil con `τ = 0,125 s` (fórmula (1)). Su valor en cada instante es
+la **intensidad de vibración ponderada** `KB_F(t)`, y el 3.10.1.2 dice por qué
+esa constante de tiempo: la DIN 4150-2 juzga con ella el efecto sobre las
+personas, y la indicación fluctuante que da por debajo de 5 Hz se tuvo en cuenta
+al escribir esos criterios de valoración.
+
+De esa señal salen los tres números con los que se informa una medida. El máximo
+`KB_Fmax` sobre la duración de promediado. El máximo dentro de cada **intervalo
+de 30 s** (*Takt*), que fija la DIN 4150-2. Y el eficaz de esos máximos por
+intervalo, `KB_FTm`, de la fórmula (2), que lleva dentro dos reglas fáciles de
+pasar por alto:
+
+- un máximo por intervalo igual o menor que **0,1** entra en la suma como cero,
+  y el intervalo del que sale **sigue contando en N**, así que un tramo tranquilo
+  tira del promedio hacia abajo en lugar de quedar fuera de él;
+- un intervalo que la medida no llenó no es un intervalo (5.1.6.4), así que la
+  duración de promediado siempre abarca un número entero de ellos.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/kb_time_response.svg" alt="Dos paneles apilados que comparten un eje de tiempo de noventa segundos. El panel superior es el registro de velocidad en milímetros por segundo: un fondo continuo débil y dos ráfagas, una grande de unos 1,8 milímetros por segundo de pico entre los 22 y los 25 segundos y otra menor de unos 0,9 entre los 68 y los 71 segundos. El panel inferior es la intensidad de vibración ponderada de ese mismo registro, con dos picos que llegan a 1,21 y 0,62 y el fondo en torno a 0,013. Una línea roja a trazos marca KB F max en 1,210, una línea verde punteada marca KB FTm en 0,785, unas rayas verticales finas cortan el eje en 30 y 60 segundos, y tres cuadrados verdes se sitúan en el centro de cada intervalo en 1,21, 0,013 y 0,62, el del medio por debajo del 0,1 que la fórmula (2) mete como cero" width="96%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048.0
+t = np.arange(int(90.0 * fs_hz)) / fs_hz
+record = 0.02 * np.sin(2 * np.pi * 11.0 * t)
+for start, amplitude, frequency in ((22.0, 1.8, 17.0), (68.0, 0.9, 26.0)):
+    window = (t >= start) & (t < start + 3.0)
+    record[window] += (
+        amplitude
+        * np.hanning(int(window.sum()))
+        * np.sin(2 * np.pi * frequency * t[window])
+    )
+
+reading = vibration.measure_vibration_immission(record, fs_hz)
+reading.plot(language="es")
+```
+
+</details>
+
+El registro de arriba se parece a lo que es una medida real: una máquina en
+marcha por ahí cerca, y dos sucesos. Pasarlo por la cadena da los cuatro
+números, y el tercer intervalo es donde la fórmula (2) enseña los dientes.
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048.0
+t = np.arange(int(90.0 * fs_hz)) / fs_hz
+record = 0.02 * np.sin(2 * np.pi * 11.0 * t)
+for start, amplitude, frequency in ((22.0, 1.8, 17.0), (68.0, 0.9, 26.0)):
+    window = (t >= start) & (t < start + 3.0)
+    record[window] += (
+        amplitude
+        * np.hanning(int(window.sum()))
+        * np.sin(2 * np.pi * frequency * t[window])
+    )
+
+reading = vibration.measure_vibration_immission(record, fs_hz)
+print(f"|v|max            = {reading.peak_velocity_mm_s:.3f} mm/s")  # 1.816 mm/s
+print(f"KB_Fmax           = {reading.kbf_max:.3f}")                  # 1.210
+print(f"máximos por Takt  = {reading.takt_maxima.round(3)}")         # [1.21 0.013 0.62]
+print(f"KB_FTm            = {reading.kbf_takt_rms:.3f}")             # 0.785
+
+quiet = reading.takt_maxima[1]
+counted = np.array([reading.takt_maxima[0], 0.0, reading.takt_maxima[2]])
+print(f"el intervalo tranquilo marca {quiet:.3f}, entra como 0 y sigue contando:")
+print(f"  raíz de la media de los cuadrados entre 3 = {np.sqrt(np.mean(counted**2)):.3f}")
+```
+
+**Empieza el registro antes del suceso.** Todos los filtros de aquí arrancan en
+reposo, así que un registro que empieza con la señal ya a plena amplitud lleva
+dentro el transitorio de arranque del propio filtro, y el pico es un retenedor
+de máximo que se lo queda. Un seno de 1 mm/s arrancado en un paso por cero
+marca 1,06 mm/s en lugar de los 1,00 mm/s del 6.2.3.12. Eso es una propiedad del
+registro, no de la cadena, y un segundo de silencio por delante del suceso lo
+quita.
+
+## 3. Los números que la norma imprime para que un vibrómetro los reproduzca
+
+Dos tablas hacen que la cadena se pueda comprobar y no solo especificar. La
+tabla 9 (folio impreso 35) dice qué tiene que marcar un seno de 1 mm/s en cinco
+frecuencias, y la tabla 8, en la redacción que le da la [corrección
+1](/phonometry/es/reference/errata/), dice lo mismo para un tren de ráfagas.
+Están publicadas aquí como datos, y el informe de conformidad las ejecuta:
+
+```python
+from phonometry import vibration
+
+for frequency_hz, (kbf, kbf_max, kbf_takt) in vibration.KB_TEST_INDICATIONS.items():
+    print(f"{frequency_hz:6.1f} Hz -> KB_F {kbf:.3f}, KB_Fmax {kbf_max:.3f}")
+
+print(vibration.KB_REFERENCE_INDICATIONS)
+# {'peak_velocity_mm_s': 1.0, 'kbf': 0.667, 'kbf_max': 0.68, 'kbf_takt_rms': 0.68}
+```
+
+Que `KB_Fmax` esté por encima de `KB_F` en todas las filas no es una ganancia:
+es la **ondulación** del valor eficaz móvil de un seno, de la que trata el anexo
+B, y es lo que hace que estos valores merezcan la pena como oráculo. En ningún
+sitio hay una forma cerrada para la pareja, así que una comprobación que los
+reproduce comprueba la cadena entera: filtro, cuadrado, promediado y máximo a la
+vez.
+
+## 4. Juzgar un vibrómetro: tablas 2 y 3
+
+La tolerancia no es sobre la respuesta sino sobre su **forma**. La fórmula (7)
+divide la respuesta medida por la de diseño, cada una normalizada en la
+frecuencia de referencia de 16 Hz, así que un error de ganancia plano es asunto
+de calibración y no de conformidad. Lo que queda se juzga banda a banda: 10 %
+desde `1,25 f_u` hasta `0,8 f_o`, 20 % hasta `0,5 f_u` y `2 f_o`, y por debajo
+de eso la tabla 2 deja de acotar la respuesta por abajo.
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+frequencies_hz = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
+measured = np.abs(vibration.kb_weighting_response(frequencies_hz))
+measured[5] *= 1.15  # un vibrómetro un 15 % alto en 31,5 Hz
+
+result = vibration.verify_vibration_meter(frequencies_hz, measured)
+print(f"cumple: {result.passes}")                          # False
+print(f"peor frecuencia: {result.worst_frequency_hz} Hz")  # 31.5 Hz
+```
+
+La frecuencia de referencia no lleva requisito, porque la norma escribe cada
+límite «para toda f distinta de f_r», así que se cae del veredicto en lugar de
+aprobar de oficio. Y un veredicto aquí es un apartado: el capítulo 6 pide además
+linealidad, sobrecarga, tratamiento del factor de cresta, temperatura, humedad y
+ensayos electromagnéticos, y todos ellos son medidas sobre hardware.
+
+## 5. Anexo E: juzgar un edificio sin frecuencia dominante
+
+La DIN 4150-3 compara una velocidad de pico con un valor de referencia que
+**depende de la frecuencia**, lo que obliga a asignarle una a un suceso de corta
+duración. El anexo D da dos maneras de encontrarla, los pasos por cero alrededor
+de la amplitud mayor y la transformada de Fourier del suceso entero, y dice sin
+rodeos que pueden no coincidir. No coinciden:
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048.0
+t = np.arange(int(3.0 * fs_hz)) / fs_hz
+event = np.sin(2 * np.pi * 17.0 * t) * np.hanning(t.size)
+
+print(vibration.dominant_frequency(event, fs_hz).frequency_hz)  # 17.07 Hz
+print(vibration.dominant_frequency(event, fs_hz, method="fourier").frequency_hz)
+```
+
+La discrepancia importa porque la frecuencia elige el valor de referencia, así
+que puede cambiar el veredicto. El anexo E quita la pregunta en vez de afinarla.
+Cada clase de edificio de la tabla 1 de la DIN 4150-3 recibe un **filtro de
+ponderación** cuyo módulo objetivo es la curva de valores de referencia de esa
+clase invertida y normalizada al valor que mantiene de 1 Hz a 10 Hz. Se filtra
+la velocidad con él y el pico de lo que sale, la **velocidad de valoración**
+`v_Bn`, se compara con un único número que ya no depende de la frecuencia: 20, 5
+o 3 mm/s (tabla E.2).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/assessment_weighting.svg" alt="Dos paneles uno al lado del otro sobre ejes de frecuencia logarítmicos de 1 a 315 hercios. El panel izquierdo es lo que pide la tabla 1 de la DIN 4150-3: tres curvas de valores de referencia en milímetros por segundo, planas hasta 10 hercios en 20, 5 y 3, subiendo por dos tramos rectos hasta 50 y 100 hercios y planas por encima en 50, 20 y 10. El panel derecho es la ponderación que quita la frecuencia: esas mismas tres curvas invertidas y normalizadas a su valor de baja frecuencia, planas de 1 a 10 hercios y cayendo hasta 0,4, 0,25 y 0,3, con una banda verde pálida de más menos cinco por ciento dibujada alrededor de la curva de viviendas, que es la tolerancia que la tabla E.1 permite a un filtro realizado" width="96%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+freqs = np.geomspace(1.0, 315.0, 500)
+fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.4))
+for cls in vibration.ASSESSMENT_GUIDE_VALUES_MM_S:
+    axes[0].plot(freqs, vibration.guideline_velocity(cls, freqs), label=cls)
+    axes[1].plot(
+        freqs,
+        vibration.assessment_weighting_response(freqs, building_class=cls),
+        label=cls,
+    )
+for ax in axes:
+    ax.set_xscale("log")
+    ax.set_xlabel("Frecuencia [Hz]")
+    ax.legend()
+```
+
+</details>
+
+El filtro se especifica como un módulo objetivo con una banda de ±5 % y una
+**fase lineal**, y el anexo dice por qué la fase: una ponderación que retrasa
+unas frecuencias más que otras cambia el pico que está ahí para medir. Un FIR
+simétrico es el tipo que nombra, y la biblioteca diseña uno.
+
+Los dos caminos coinciden, que es de lo que va el anexo:
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048.0
+t = np.arange(int(3.0 * fs_hz)) / fs_hz
+event = 1.8 * np.sin(2 * np.pi * 17.0 * t) * np.hanning(t.size)
+
+# El camino de la DIN 4150-3: encontrar la frecuencia y leer allí el valor.
+peak_mm_s = float(np.max(np.abs(event)))
+guideline = float(vibration.guideline_velocity("residential", 17.0))
+print(f"pico {peak_mm_s:.3f} mm/s frente a {guideline:.2f} mm/s en 17 Hz")
+print(f"  razón {peak_mm_s / guideline:.3f}")  # 0.269
+
+# El camino del anexo E: ninguna frecuencia por ningún lado.
+assessment = vibration.assess_short_term_vibration(
+    event, fs_hz, building_class="residential"
+)
+print(f"|v_B2|max {assessment.assessment_velocity_mm_s:.3f} mm/s frente a 5 mm/s")
+print(f"  razón {assessment.ratio:.3f}")  # 0.271
+print(f"  dentro del valor de referencia: {assessment.within_guideline}")
+```
+
+El veredicto se lee como se lee el de la DIN 4150-3: mantenerse por debajo del
+valor es sobre lo que la norma tiene evidencia, y superarlo no significa que se
+haya producido un daño, solo que se acabó la comprobación barata y hay que hacer
+en su lugar lo que dicen los apartados 4.2 a 4.4.
+
+## 6. Lo que esta página no es
+
+La DIN 45669 tiene una segunda parte, y es con la que de verdad se planifica una
+medida: la DIN 45669-2 fija dónde van los captadores, cómo se acoplan a un
+forjado o al terreno, cuánto dura una medida y qué perturbaciones hay que dejar
+fuera. Nada de eso es aritmética y nada de eso está aquí. Lo que hay aquí es el
+instrumento que las dos partes describen entre las dos, y las magnitudes que se
+le exige producir.
+
+<Scope>
+
+## Qué cubre esta guía
+
+<ScopeClaim status="covered">
+La **limitación de banda** de la fórmula (3) y la **ponderación KB** de la
+fórmula (4), complejas, sobre los dos rangos de trabajo del 5.2.3.1, con los
+módulos de las fórmulas (5) y (6) como sus valores absolutos.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+La **intensidad de vibración ponderada** `KB_F(t)` de la fórmula (1), su máximo,
+los **máximos por intervalo** de los tramos de 30 s del 5.1.6.4 y el **eficaz de
+los máximos por intervalo** de la fórmula (2), con sus dos reglas de recuento
+incluidas, y los límites de detección del 5.2.2.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+Las **tolerancias de la respuesta en amplitud** de las tablas 2 y 3 con la
+desviación de la fórmula (7), como veredicto sobre una respuesta medida; y los
+valores de comprobación impresos de la tabla 9, del 6.2.3.12 y de la tabla 8 en
+la redacción de la corrección 1, reproducidos ejecutando la cadena.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+El **anexo E** entero: las tres ponderaciones de valoración de la tabla E.1 como
+módulo objetivo y como FIR de fase lineal, la velocidad de valoración que
+producen y los valores de referencia independientes de la frecuencia de la tabla
+E.2. Y el **anexo D**, los dos métodos de encontrar una frecuencia dominante.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="Qué no cubre">
+**Ningún banco de ensayo.** El capítulo 6 juzga además la linealidad, la
+sobrecarga, el tratamiento del factor de cresta, las interfaces digitales, la
+temperatura, la humedad y la susceptibilidad electromagnética. Son medidas sobre
+hardware, y aprobar en la respuesta no es un certificado de conformidad de un
+instrumento.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ningún procedimiento de medida.** El acoplamiento de los captadores, los
+puntos de medida, la duración y el tratamiento de las perturbaciones son la DIN
+45669-2, y la valoración de lo medido son la DIN 4150-2 y la DIN 4150-3.
+</ScopeClaim>
+
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Daños por vibración en estructuras (DIN 4150-3)](/phonometry/es/vibration/structural/structural-damage/):
+  los valores de referencia que invierten las ponderaciones del anexo E, y la
+  valoración a la que alimenta esta cadena.
+- [Verificación de un vibrómetro para personas (ISO 8041-1)](/phonometry/es/vibration/human/meter-verification/):
+  la misma clase de norma de instrumento, para el otro tipo de vibrómetro, con
+  sus propias tablas de tolerancia.
+- [Vibración en humanos](/phonometry/es/vibration/human/human-vibration/): el
+  lado de las personas de la misma medida, ponderado de otra manera y juzgado
+  por otros documentos.
+- Referencia de API:
+  [`vibration.immission.vibration_meter`](/phonometry/es/reference/api/vibration/vibration-meter/).
+
+</SeeAlso>

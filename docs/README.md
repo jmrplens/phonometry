@@ -201,6 +201,10 @@ the diagnostic signature of a machine.
 - [Evaluating machine vibration (ISO 20816-1)](vibration/machinery/machine-vibration-evaluation.md): grading a machine from one broad-band measurement: the four evaluation zones, the frequency-shaped velocity criterion of Figure 9 with the zone factors of Annex C.2, the typical boundary ranges of Table C.1, the vector reading of a change that a magnitude comparison misses, and the printed zone boundaries and ALARM and TRIP settings ISO 10816-3 gives for industrial machines
 - [Machine fault frequencies](vibration/machinery/machine-diagnostics.md): the kinematic fault-frequency families of rotating machinery (Norton & Karczub Section 8.4) overlaid on a measured envelope spectrum: rolling-contact bearing BPFO, BPFI, BSF and cage frequencies, gear-mesh frequency and sideband families, induction-motor supply, slip, pole-pass and rotor-slot harmonics, and fan, blower and pump blade-passing frequencies with the lobed interaction patterns of a ducted axial fan
 
+**[Vibration immission](vibration/immission/index.md)**
+
+- [Measuring vibration immission (DIN 45669-1)](vibration/immission/vibration-meter.md): the instrument DIN 4150-2 and DIN 4150-3 presuppose, with the band limitation and KB weighting of Formulae (3) and (4), the weighted vibration severity of Formula (1) and the clock maximum r.m.s. of Formula (2) with its two counting rules, the tolerance bands of Tables 2 and 3, the printed check values of Table 9 and of Table 8 as Corrigendum 1 redrafts it, and the Annex E assessment velocity that judges a building against one number instead of a curve
+
 ### [Environment and transport](environment/index.md)
 
 The source-path-receiver problem stretched over open ground: emission models

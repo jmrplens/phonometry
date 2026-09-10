@@ -568,6 +568,7 @@ from .underwater import (
     generate_weston_regimes,
 )
 from .vibration import (
+    generate_assessment_weighting,
     generate_bearing_fault_envelope,
     generate_building_frequency_prediction,
     generate_daily_vibration_exposure,
@@ -580,6 +581,8 @@ from .vibration import (
     generate_junction_kij_thickness,
     generate_junction_plate_geometry,
     generate_junction_transmission,
+    generate_kb_time_response,
+    generate_kb_weighting,
     generate_machine_alarm_trip,
     generate_machine_fault_families,
     generate_machine_vector_change,
@@ -862,6 +865,12 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Directive 2002/44/EC): frequency weighting, weighted a_w, daily A(8)
     generate_vibration_weighting,
     generate_vibration_weighting_family,
+    # Vibration immission (DIN 45669-1): the KB weighting of a building
+    # vibration meter, what it reduces a record to, and the Annex E
+    # weightings against the DIN 4150-3 curve they invert.
+    generate_kb_weighting,
+    generate_kb_time_response,
+    generate_assessment_weighting,
     generate_meter_tolerance_regions,
     generate_meter_signal_burst_response,
     generate_meter_running_rms_decay,

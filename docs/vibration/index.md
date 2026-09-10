@@ -100,6 +100,16 @@ Turning a vibration spectrum into a diagnosis of the machine that made it.
   the characteristic bearing, gear and shaft frequencies, and the envelope
   analysis that finds them under the broadband noise of a running machine.
 
+## [Vibration immission](immission/index.md)
+
+The instrument the German immission-control standards presuppose, and the
+assessment it makes possible.
+
+- [Measuring vibration immission (DIN 45669-1)](immission/vibration-meter.md):
+  the KB weighting and the weighted vibration severity a DIN 4150 measurement
+  is reported in, the tolerance bands a meter is graded by, and the Annex E
+  assessment velocity that judges a building without a dominant frequency.
+
 ## What this section does not cover
 
 **An instrument is graded on the clauses that can be computed.** Every

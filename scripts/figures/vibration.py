@@ -5816,3 +5816,208 @@ def generate_meter_signal_burst_response(output_dir: str) -> None:
     )
     save_figure(output_dir, "meter_signal_burst_response.svg")
     plt.close()
+
+
+def generate_kb_weighting(output_dir: str) -> None:
+    """DIN 45669-1: the KB weighting over both working ranges (Formula (6))."""
+    print("Generating kb_weighting...")
+    from phonometry import vibration
+
+    freqs = np.geomspace(0.2, 800.0, 600)
+    building = np.abs(vibration.kb_weighting_response(freqs))
+    railway = np.abs(vibration.kb_weighting_response(freqs, working_range="railway"))
+    band = np.abs(vibration.band_limitation_response(freqs))
+
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.semilogx(
+        freqs,
+        20.0 * np.log10(band),
+        color=COLOR_MUTED,
+        linewidth=1.4,
+        linestyle="--",
+        label="band limitation alone, 1 Hz to 80 Hz",
+    )
+    ax.semilogx(
+        freqs,
+        20.0 * np.log10(building),
+        color=COLOR_PRIMARY,
+        linewidth=2.0,
+        label="KB weighting, 1 Hz to 80 Hz",
+    )
+    ax.semilogx(
+        freqs,
+        20.0 * np.log10(railway),
+        color=COLOR_TERTIARY,
+        linewidth=2.0,
+        label="KB weighting, 4 Hz to 315 Hz",
+    )
+    ax.axvline(
+        vibration.KB_CORNER_HZ, color=COLOR_SECONDARY, linewidth=1.0, alpha=0.7
+    )
+    ax.plot(
+        [vibration.KB_CORNER_HZ],
+        [20.0 * math.log10(1.0 / math.sqrt(2.0))],
+        color=COLOR_SECONDARY,
+        marker="o",
+        markersize=6,
+        linestyle="none",
+    )
+    ax.text(
+        6.6,
+        -9.0,
+        "5.6 Hz, the corner of Formula (4)",
+        fontsize=10,
+        color=COLOR_FG,
+        ha="left",
+        va="center",
+        bbox={
+            "boxstyle": "round,pad=0.4",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax.set_title("The KB weighting of a building vibration meter (DIN 45669-1)", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Weighting factor [dB]")
+    ax.set_xlim(0.2, 800.0)
+    ax.set_ylim(-40.0, 3.0)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower center", fontsize=10)
+    format_frequency_axis(ax, 0.2, 800.0)
+    plt.tight_layout()
+    save_figure(output_dir, "kb_weighting.svg")
+    plt.close()
+
+
+def _immission_record(fs_hz: float) -> np.ndarray:
+    """Ninety seconds of ground vibration with two events in it, in mm/s."""
+    t = np.arange(int(90.0 * fs_hz)) / fs_hz
+    record = 0.02 * np.sin(2.0 * np.pi * 11.0 * t)  # a machine running nearby
+    for start, amplitude, frequency in ((22.0, 1.8, 17.0), (68.0, 0.9, 26.0)):
+        window = (t >= start) & (t < start + 3.0)
+        shape = np.hanning(int(window.sum()))
+        record[window] += (
+            amplitude * shape * np.sin(2.0 * np.pi * frequency * t[window])
+        )
+    return record
+
+
+def generate_kb_time_response(output_dir: str) -> None:
+    """DIN 45669-1: what a meter reduces a record to (Formulae (1) and (2))."""
+    print("Generating kb_time_response...")
+    from phonometry import vibration
+
+    fs_hz = 2048.0
+    record = _immission_record(fs_hz)
+    reading = vibration.measure_vibration_immission(record, fs_hz)
+    times = np.arange(record.size) / fs_hz
+
+    _fig, axes = plt.subplots(2, 1, figsize=(10, 7.0), sharex=True)
+    axes[0].plot(times, record, color=COLOR_MUTED, linewidth=0.6)
+    axes[0].set_ylabel("Velocity $v$ [mm/s]")
+    axes[0].set_title(
+        "One record, and the four numbers a meter shows for it (DIN 45669-1)", pad=12
+    )
+    axes[0].grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
+    axes[0].set_axisbelow(True)
+
+    axes[1].plot(
+        times,
+        reading.kbf,
+        color=COLOR_PRIMARY,
+        linewidth=1.2,
+        label="$KB_F(t)$, running r.m.s. with $\\tau$ = 0.125 s",
+    )
+    axes[1].axhline(
+        reading.kbf_max,
+        color=COLOR_SECONDARY,
+        linestyle="--",
+        linewidth=1.4,
+        label=f"$KB_{{F\\mathrm{{max}}}}$ = {reading.kbf_max:.3f}",
+    )
+    takt_s = vibration.TAKT_DURATION_S
+    centres = (np.arange(reading.takt_maxima.size) + 0.5) * takt_s
+    axes[1].plot(
+        centres,
+        reading.takt_maxima,
+        color=COLOR_TERTIARY,
+        marker="s",
+        markersize=7,
+        linestyle="none",
+        label="clock maxima, one per 30 s",
+    )
+    axes[1].axhline(
+        reading.kbf_takt_rms,
+        color=COLOR_TERTIARY,
+        linestyle=":",
+        linewidth=1.4,
+        label=f"$KB_{{FTm}}$ = {reading.kbf_takt_rms:.3f}",
+    )
+    for edge in np.arange(takt_s, 90.0, takt_s):
+        axes[1].axvline(edge, color=COLOR_GRID, linewidth=0.8, alpha=0.8)
+    axes[1].set_xlabel("Time [s]")
+    axes[1].set_ylabel("Weighted vibration severity $KB_F$")
+    axes[1].set_xlim(0.0, 90.0)
+    axes[1].set_ylim(0.0, 1.55)
+    axes[1].grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
+    axes[1].set_axisbelow(True)
+    axes[1].legend(loc="upper right", fontsize=10)
+    plt.tight_layout()
+    save_figure(output_dir, "kb_time_response.svg")
+    plt.close()
+
+
+def generate_assessment_weighting(output_dir: str) -> None:
+    """DIN 45669-1 Annex E: the three weightings and what they invert."""
+    print("Generating assessment_weighting...")
+    from phonometry import vibration
+
+    freqs = np.geomspace(1.0, 315.0, 500)
+    colors = {
+        "commercial": COLOR_PRIMARY,
+        "residential": COLOR_TERTIARY,
+        "sensitive": COLOR_SECONDARY,
+    }
+    labels = {
+        "commercial": "$v_{B1}$, commercial and industrial",
+        "residential": "$v_{B2}$, dwellings",
+        "sensitive": "$v_{B3}$, especially sensitive",
+    }
+
+    _fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.4))
+    for cls, color in colors.items():
+        guideline = vibration.guideline_velocity(cls, freqs)
+        axes[0].plot(freqs, guideline, color=color, linewidth=2.0, label=labels[cls])
+        weighting = vibration.assessment_weighting_response(freqs, building_class=cls)
+        axes[1].plot(freqs, weighting, color=color, linewidth=2.0, label=labels[cls])
+    tolerance = vibration.ASSESSMENT_WEIGHTING_TOLERANCE
+    residential = vibration.assessment_weighting_response(
+        freqs, building_class="residential"
+    )
+    axes[1].fill_between(
+        freqs,
+        residential * (1.0 - tolerance),
+        residential * (1.0 + tolerance),
+        color=theme_fill(COLOR_TERTIARY, axes[1]),
+        label="$\\pm$5 % of Table E.1",
+    )
+    axes[0].set_xscale("log")
+    axes[0].set_title("What DIN 4150-3 Table 1 asks for", pad=10)
+    axes[0].set_xlabel(LABEL_FREQ_HZ)
+    axes[0].set_ylabel("Guideline peak velocity [mm/s]")
+    axes[0].set_ylim(0.0, 55.0)
+    axes[1].set_xscale("log")
+    axes[1].set_title("The weighting that removes the frequency", pad=10)
+    axes[1].set_xlabel(LABEL_FREQ_HZ)
+    axes[1].set_ylabel("Weighting factor $H_{vB}$")
+    axes[1].set_ylim(0.0, 1.15)
+    for ax in axes:
+        ax.set_xlim(1.0, 315.0)
+        ax.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.5)
+        ax.set_axisbelow(True)
+        ax.legend(loc="best", fontsize=9)
+        format_frequency_axis(ax, 1.0, 315.0)
+    plt.tight_layout()
+    save_figure(output_dir, "assessment_weighting.svg")
+    plt.close()

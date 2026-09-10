@@ -7,6 +7,7 @@ transcription are cross-checked against the independent ``reference_data``
 copy shared with the CI conformance report, so a typo in either surfaces.
 """
 
+import dataclasses
 import inspect
 import math
 
@@ -291,3 +292,74 @@ def test_response_is_deterministic() -> None:
     a = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
     b = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
     assert [x["deviation_db"] for x in a.bands] == [x["deviation_db"] for x in b.bands]
+
+
+# ---------------------------------------------------------------------------
+# The verdict object: a summary its own two readings do not derive is refused
+# ---------------------------------------------------------------------------
+
+
+def _a_verdict() -> filters.WeightingComplianceResult:
+    """A class 1 A-weighting verdict at 48 kHz, for the rejection tests."""
+    return filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
+
+
+def test_unknown_edition_is_rejected() -> None:
+    with pytest.raises(ValueError, match=r"'edition' must be one of"):
+        dataclasses.replace(_a_verdict(), edition="2020")
+
+
+def test_rows_carrying_another_edition_class_are_rejected() -> None:
+    """A row whose margins name a class the edition does not define."""
+    verdict = _a_verdict()
+    rows = [{**verdict.bands[0], "margin_class7_db": 1.0}, *verdict.bands[1:]]
+    with pytest.raises(ValueError, match=r"must carry margins for classes of edition"):
+        dataclasses.replace(verdict, bands=tuple(rows))
+
+
+def test_rows_that_disagree_among_themselves_are_rejected() -> None:
+    """Reading only the first row would let a later short one through."""
+    verdict = _a_verdict()
+    thin = dict(verdict.bands[-1])
+    del thin["margin_class2_db"]
+    rows = [*verdict.bands[:-1], thin]
+    with pytest.raises(ValueError, match=r"must carry the same classes"):
+        dataclasses.replace(verdict, bands=tuple(rows))
+
+
+def test_a_sweep_without_rows_is_rejected() -> None:
+    """The sweep runs between the rows, so it cannot outlive them."""
+    with pytest.raises(ValueError, match=r"present exactly when there is a row"):
+        dataclasses.replace(_a_verdict(), bands=())
+
+
+def test_a_class_that_is_no_designation_is_rejected() -> None:
+    """``1.0`` reads as class 1 and builds ``margin_class1.0_db``, a key nobody has."""
+    with pytest.raises(ValueError, match=r"must be a class of \[1, 2\] or None"):
+        dataclasses.replace(_a_verdict(), overall_class=1.0)
+
+
+def test_a_class_the_margins_do_not_derive_is_rejected() -> None:
+    """A class 1 filter cannot be boxed as class 2, nor as no class at all."""
+    verdict = _a_verdict()
+    assert verdict.overall_class == 1
+    with pytest.raises(ValueError, match=r"must be the class the margins derive"):
+        dataclasses.replace(verdict, overall_class=2)
+    with pytest.raises(ValueError, match=r"must be the class the margins derive"):
+        dataclasses.replace(verdict, overall_class=None)
+
+
+def test_the_sweep_can_only_loosen_the_class() -> None:
+    """Every row clears class 1 and the sweep does not: the verdict is class 2.
+
+    The summary is not the strictest class the rows meet, which is why it is
+    recomputed from both readings rather than checked against the per-row
+    classes.
+    """
+    verdict = _a_verdict()
+    assert all(row["margin_class1_db"] >= 0.0 for row in verdict.bands)
+    dipped = {**verdict.between_nominals, "margin_class1_db": -0.5}
+    loosened = dataclasses.replace(verdict, between_nominals=dipped, overall_class=2)
+    assert loosened.overall_class == 2
+    with pytest.raises(ValueError, match=r"must be the class the margins derive"):
+        dataclasses.replace(verdict, between_nominals=dipped)

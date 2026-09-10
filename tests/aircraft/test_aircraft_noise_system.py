@@ -7,6 +7,8 @@ transcribed verbatim, plus the scalar tolerance limits of clauses 4.5-4.7.
 
 from __future__ import annotations
 
+import dataclasses
+
 import pytest
 
 from phonometry import aircraft
@@ -80,3 +82,13 @@ def test_resolution_rejects_negative() -> None:
 
 def test_empty_call_not_passed() -> None:
     assert aircraft.verify_aircraft_noise_system().passed is False
+
+
+def test_a_verdict_the_checks_do_not_support_is_rejected() -> None:
+    """``passed`` is the conjunction of the checks, and False over none."""
+    result = aircraft.verify_aircraft_noise_system(resolution=0.1)
+    assert result.passed is True
+    with pytest.raises(ValueError, match=r"must be the conjunction of the checks"):
+        dataclasses.replace(result, passed=False)
+    with pytest.raises(ValueError, match=r"must be the conjunction of the checks"):
+        dataclasses.replace(result, checks=())

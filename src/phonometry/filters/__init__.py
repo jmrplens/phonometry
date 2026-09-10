@@ -30,7 +30,11 @@ from .weighting import (
     time_weighting,
     weighting_filter,
 )
-from .weighting_compliance import verify_weighting_class, weighting_class_limits
+from .weighting_compliance import (
+    WeightingComplianceResult,
+    verify_weighting_class,
+    weighting_class_limits,
+)
 
 __all__ = [
     "BlockProcessing",
@@ -45,6 +49,7 @@ __all__ = [
     "ResponsePlot",
     "TimeWeightedEnvelope",
     "TimeWeighting",
+    "WeightingComplianceResult",
     "WeightingFilter",
     "class_limits",
     "linkwitz_riley",

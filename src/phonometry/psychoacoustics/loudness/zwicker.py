@@ -308,7 +308,7 @@ def _band_center_frequency(band: int) -> float:
 
 
 def _third_octave_levels(
-    x: np.ndarray, stationary: bool, skip_samples: int = 0
+    x: np.ndarray, *, stationary: bool, skip_samples: int = 0
 ) -> np.ndarray:
     """One-third-octave band levels of a 48 kHz pressure signal.
 
@@ -408,7 +408,7 @@ def _lcb_levels(intensities: np.ndarray) -> np.ndarray:
     return lcb
 
 
-def _core_loudness(levels: np.ndarray, lcb: np.ndarray, diffuse: bool) -> np.ndarray:
+def _core_loudness(levels: np.ndarray, lcb: np.ndarray, *, diffuse: bool) -> np.ndarray:
     """Core loudness of the 20 critical bands (clause 5.4, Tables A.4-A.7).
 
     Applies the a0 transmission correction (Table A.4), optionally the
@@ -797,11 +797,11 @@ def _validate_field(field: str) -> bool:
     return field == "diffuse"
 
 
-def _core_loudness_from_levels(levels: np.ndarray, diffuse: bool) -> np.ndarray:
+def _core_loudness_from_levels(levels: np.ndarray, *, diffuse: bool) -> np.ndarray:
     """Band levels (28, T) -> corrected core loudness (21, T)."""
     intensities = _corrected_intensities(levels)
     lcb = _lcb_levels(intensities)
-    core = _core_loudness(levels, lcb, diffuse)
+    core = _core_loudness(levels=levels, lcb=lcb, diffuse=diffuse)
     _correct_lowest_band(core)
     return core
 
@@ -834,7 +834,9 @@ def loudness_zwicker_from_spectrum(
     if not np.all(np.isfinite(band_levels)):
         msg = "'levels' must contain only finite values."
         raise ValueError(msg)
-    core = _core_loudness_from_levels(band_levels[:, np.newaxis], diffuse)
+    core = _core_loudness_from_levels(
+        levels=band_levels[:, np.newaxis], diffuse=diffuse
+    )
     loudness, specific = _slopes_over_time(core)
     total = float(loudness[0])
     return ZwickerLoudness(
@@ -967,8 +969,10 @@ def loudness_zwicker(
         )
         raise ValueError(msg)
 
-    levels = _third_octave_levels(pressure, stationary, skip_samples)
-    core = _core_loudness_from_levels(levels, diffuse)
+    levels = _third_octave_levels(
+        x=pressure, stationary=stationary, skip_samples=skip_samples
+    )
+    core = _core_loudness_from_levels(levels=levels, diffuse=diffuse)
 
     if stationary:
         loudness, specific = _slopes_over_time(core)

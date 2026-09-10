@@ -194,7 +194,7 @@ def plot_ship_source_level(
     )
     ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
     ax.set_ylabel(_t("Level [dB re 1 µPa·m]", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.set_axisbelow(True)
 
     twin = ax.twinx()
@@ -263,7 +263,7 @@ def plot_pile_strike(
             label=f"{_t('Peak', language)} ({format_number(result.peak_spl, language, decimals=0)} dB re 1 µPa)",
         )
         axw.set_ylabel(_t("Pressure [Pa]", language))
-        axw.grid(True, alpha=0.3)
+        axw.grid(visible=True, alpha=0.3)
         axw.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
     if ax is not None:
@@ -292,7 +292,7 @@ def plot_pile_strike(
     axes[1].set_title(
         f"{_t('90 % pulse duration', language)} = {format_number(result.pulse_duration * 1e3, language, decimals=0)} ms"
     )
-    axes[1].grid(True, alpha=0.3)
+    axes[1].grid(visible=True, alpha=0.3)
     localize_axes(axes[0], language)
     localize_axes(axes[1], language)
     return axes
@@ -325,7 +325,7 @@ def plot_sound_speed_profile(
     ax.set_xlabel(_t("Sound speed [m/s]", language))
     ax.set_ylabel(_t(_DEPTH_LABEL, language))
     ax.set_title(_t("Sea-water sound-speed profile", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_LOWER_LEFT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -379,7 +379,7 @@ def plot_propagation_loss(
     ax.set_title(f"{_t('Underwater propagation loss', language)} ({result.model})")
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_LOWER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -429,7 +429,7 @@ def plot_sonar_equation(
     ax.set_xlabel(_t(_PROPAGATION_LOSS_LABEL, language))
     ax.set_ylabel(_t("Signal excess [dB]", language))
     ax.set_title(_t("Sonar equation", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -476,7 +476,7 @@ def plot_bottom_loss(
     ax.set_xlabel(_t(_GRAZING_ANGLE_LABEL, language))
     ax.set_ylabel(_t("Bottom loss [dB]", language))
     ax.set_title(_t("Seabed reflection loss", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -520,7 +520,7 @@ def plot_seabed_reflection(
     ax.set_xlim(0.0, 90.0)
     ax.set_ylabel(f"{_t('Reflection coefficient magnitude', language)} $|R|$")
     ax.set_title(_t("Seabed reflection coefficient", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -580,7 +580,7 @@ def plot_ambient_noise(
     ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
     ax.set_ylabel(_t("Spectrum level [dB re 1 µPa²/Hz]", language))
     ax.set_title(_t("Ocean ambient noise", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     format_frequency_axis(ax, float(f.min()), float(f.max()))
     localize_axes(ax, language)
@@ -616,7 +616,7 @@ def plot_ship_traffic_spectrum(
     ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
     ax.set_ylabel(_t("Source spectral density [dB re 1 µPa²/Hz at 1 m]", language))
     ax.set_title(_t("Ship traffic source level", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     format_frequency_axis(ax, float(f.min()), float(f.max()))
     localize_axes(ax, language)
@@ -652,7 +652,7 @@ def plot_normal_modes(
     ax.set_title(_t("Normal-mode propagation loss", language))
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_LOWER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -697,7 +697,7 @@ def plot_ray_trace(
     ax.set_title(_t("Ray trace", language))
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_LOWER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -804,7 +804,7 @@ def plot_eigenrays(
     ax.set_xlabel(_t("Travel time [s]", language))
     ax.set_ylabel(_t(_PROPAGATION_LOSS_LABEL, language))
     ax.set_title(_t("Eigenray arrivals", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -964,7 +964,7 @@ def _spectrum_axes(
     ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
     ax.set_ylabel(_t(ylabel, language))
     ax.set_title(_t(title, language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.set_axisbelow(True)
     format_frequency_axis(ax, float(np.min(freqs)), float(np.max(freqs)))
     return ax
@@ -1037,7 +1037,7 @@ def plot_weston_regimes(
         f"({format_number(result.frequency, language, decimals=0)} Hz, "
         f"$H$ = {format_number(result.water_depth, language, decimals=0)} m, {result.seabed})"
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.set_axisbelow(True)
     ax.legend(loc=_LEGEND_LOWER_LEFT, fontsize="small")
     localize_axes(ax, language)
@@ -1304,7 +1304,7 @@ def plot_detection_range(
     ax.set_title(_t("Propagation loss vs figure of merit", language))
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.set_axisbelow(True)
     ax.legend(loc=_LEGEND_LOWER_LEFT, fontsize="small")
     localize_axes(ax, language)

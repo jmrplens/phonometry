@@ -162,14 +162,6 @@ dead-constants:
 parameter-units:
 	$(PYTHON) scripts/check_parameter_units.py
 
-# `bank.filter(x, True)` says nothing about which of five flags was thrown,
-# and a flag inserted before it changes what the same call means without
-# changing a character of it. This holds every public boolean to a
-# keyword-only slot, so the call site carries the name. Same surface, and the
-# same reason for walking the imported package rather than the source tree.
-public-flags:
-	$(PYTHON) scripts/check_public_flags.py
-
 # A conformance row that computes the expected value itself is comparing a
 # formula with a second copy of it, and reports Pass whatever the library does.
 # This resolves what each row reaches, through its helpers and whatever name
@@ -415,5 +407,4 @@ check: lint security test
 	animations animation-freshness posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts fence-names decimal-comma \
-	control-characters hazards dead-constants conformance-rows parameter-units \
-	public-flags
+	control-characters hazards dead-constants conformance-rows parameter-units

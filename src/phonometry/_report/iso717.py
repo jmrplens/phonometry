@@ -260,6 +260,7 @@ def _value_table(
     shifted: np.ndarray,
     deviations: np.ndarray,
     value_header: str,
+    *,
     verbose: bool,
     language: str = "en",
 ) -> Table:
@@ -518,7 +519,13 @@ def render_iso717_report(
     # Two-panel body: the one-third-octave table on the left (~70 mm), the
     # vector plot on the right filling the rest of the content width.
     value_table = _value_table(
-        centers, measured, shifted, deviations, value_header, verbose, language
+        centers=centers,
+        measured=measured,
+        shifted=shifted,
+        deviations=deviations,
+        value_header=value_header,
+        verbose=verbose,
+        language=language,
     )
     # ISO 717-1:2020 Clause 5.3 / ISO 717-2:2020 Clause 4.4 require stating
     # whether the rating came from one-third-octave or octave bands; the
@@ -546,7 +553,9 @@ def render_iso717_report(
     flow.append(result_box(statement, styles, accent, _extended_terms(result)))
     if metadata is not None and metadata.requirement is not None:
         text, passed = _verdict(result, metadata.requirement, language, symbol)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
     flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)

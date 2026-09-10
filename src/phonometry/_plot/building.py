@@ -379,7 +379,7 @@ def plot_sound_reduction(
     ax.set_ylabel(_t(_R_INDEX_LABEL, language))
     ax.set_title(f"{_t('Predicted sound insulation', language)} ({result.model})")
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -413,7 +413,7 @@ def plot_aperture_transmission(
     ax.set_ylabel(_t(_R_INDEX_LABEL, language))
     ax.set_title(_t("Aperture sound transmission (Gomperts / Wilson-Soroka)", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -591,7 +591,7 @@ def _plot_extended_rating(
     _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -754,7 +754,7 @@ def plot_facade_insulation(
     ax.set_ylabel(_t(_LEVEL_DIFFERENCE_LABEL, language))
     ax.set_title(_t("Façade sound insulation (ISO 16283-3)", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -806,7 +806,7 @@ def plot_facade_prediction(
     ax.set_ylabel(_t("Reduction index / level difference [dB]", language))
     ax.set_title(_t("Façade insulation prediction (EN 12354-3)", language))
     ax.legend(loc="best", fontsize="small", ncol=2)
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -858,7 +858,7 @@ def plot_radiated_power(
     ax.set_ylabel(_t("Radiated sound power level [dB]", language))
     ax.set_title(_t("Radiated sound power (EN 12354-4)", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -906,7 +906,7 @@ def plot_vibration_reduction(
         )
     ax.set_ylabel(_t("Vibration reduction index $K_{ij}$ [dB]", language))
     ax.set_title(_t("Vibration reduction index (ISO 10848)", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend()
     localize_axes(ax, language)
     return ax
@@ -988,7 +988,7 @@ def plot_installed_structure_borne(
     ax.set_ylabel(_t(r"Normalised SPL $L_\mathrm{n,s}$ [dB]", language))
     ax.set_title(_t("EN 12354-5 installed structure-borne sound", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     if result.frequencies is not None:
         format_frequency_axis(ax, float(x.min()), float(x.max()))
     localize_axes(ax, language)
@@ -1034,7 +1034,7 @@ def plot_airborne_prediction(
         rf"($R_\mathrm{{Dd,w}}$ = "
         rf"{format_number(result.r_direct_w, language, decimals=1)} dB)"
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1085,7 +1085,7 @@ def plot_impact_prediction(
         rf"$L^{{\prime}}_\mathrm{{n,w}}$ = "
         rf"{format_number(result.l_prime_n_w, language, decimals=1)} dB"
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1191,7 +1191,7 @@ def _plot_path_shares(
         fontsize="small",
         ncol=2,
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     localize_axes(twin, language)
     return ax
@@ -1305,7 +1305,7 @@ def plot_in_situ_element(
     ax.set_title(
         f"{_t('In-situ element performance (ISO 12354)', language)} — {result.label}"
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     localize_axes(ax, language)
@@ -1427,7 +1427,7 @@ def plot_low_frequency_procedure(
     ax.set_ylabel(_t(_SPL_LABEL, language))
     ax.set_title(_t(_LOW_FREQUENCY_TITLE, language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1463,7 +1463,7 @@ def plot_band_uncertainty(
         f"ISO 12999-1 {_t('band uncertainty', language)} ({quantity}) — "
         f"{result.measurand}, {_t('situation', language)} {result.situation}"
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1514,7 +1514,7 @@ def plot_floor_covering_improvement(
             f"{decimal_comma(str(result.delta_lw), language)} dB)"
         )
     ax.set_title(title)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     if ax.get_legend_handles_labels()[0]:
         ax.legend()
     localize_axes(ax, language)
@@ -1592,7 +1592,7 @@ def plot_db_hr_global_index(
         loc="upper left",
         fontsize="small",
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     localize_axes(twin, language)
     return ax
@@ -1647,7 +1647,7 @@ def plot_db_hr_assessment(
     ax.set_xlabel(_t("Value", language))
     ax.set_title(_t("CTE DB-HR requirement check", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="x", alpha=0.3)
+    ax.grid(visible=True, axis="x", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1705,7 +1705,7 @@ def _plot_shaded_band_pair(
     )
     ax.set_ylabel(_t(ylabel, language))
     ax.set_title(title)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     return ax
 
@@ -1772,7 +1772,7 @@ def plot_heavy_impact_source(
     ax.set_title(
         f"{_t('Heavy impact source conformance', language)}: {source} ({verdict})"
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -1860,7 +1860,7 @@ def plot_a_weighted_maximum_impact(
         f"({_t(_HEAVY_IMPACT_BAND_LABELS[result.band], language)}, "
         f"{format_number(result.unrounded, language, decimals=2)} dB)"
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -1995,7 +1995,7 @@ def plot_wall_tie_coupling(
         f"({format_number(result.ties_per_area, language, decimals=1)} "
         f"{_t('ties/m²', language)}{stiffness})"
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -2035,7 +2035,7 @@ def _plot_improvement_spectrum(
         )
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(_IMPROVEMENT_LABEL, language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
 
@@ -2096,7 +2096,7 @@ def plot_tapping_force(
     ax.set_title(
         f"{_t('ISO tapping machine force spectrum', language)} ({_t(regime, language)})"
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     localize_axes(ax, language)
@@ -2251,7 +2251,7 @@ def plot_lining_improvement(
         f"{_t('Additional-layer rating (ISO 12354-1 Annex D)', language)} "
         f"— {result.system}"
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     format_frequency_axis(ax, float(sweep.min()), float(sweep.max()))
     localize_axes(ax, language)
@@ -2353,7 +2353,7 @@ def _plot_low_frequency(
         texts += extra_texts
         localize_axes(twin, language)
     ax.legend(handles, texts, loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 

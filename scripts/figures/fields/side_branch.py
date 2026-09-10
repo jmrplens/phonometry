@@ -272,7 +272,7 @@ def animate_fdtd_side_branch(output_dir: str) -> None:
     pills: list[Any] = []
     trims: list[Any] = []
     for panel, (ax, title) in enumerate(zip(axes, titles, strict=True)):
-        ax.grid(False)
+        ax.grid(visible=False)
         # The walls are NaN in the frames; a grey slab behind the imshow
         # renders them as solid hardware, and the air path draws over it.
         ax.add_patch(
@@ -404,7 +404,7 @@ def animate_fdtd_side_branch(output_dir: str) -> None:
     # the canvas bottom once the Spanish text lengthens it.
     ax_t.set_ylabel(T("closed-end\npressure [Pa]"), fontsize=8)
     ax_t.tick_params(labelsize=7)
-    ax_t.grid(True, color=COLOR_GRID, lw=0.6)
+    ax_t.grid(visible=True, color=COLOR_GRID, lw=0.6)
     # The +-1 guides are the incident amplitude; the footer says so, which
     # keeps the axis clear of a label the red curve would run through.
     for y in (1.0, -1.0):

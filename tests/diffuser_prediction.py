@@ -83,7 +83,7 @@ def predicted_band_normalized_diffusion(
         band_center * 2.0 ** (-1.0 / 6.0), band_center * 2.0 ** (1.0 / 6.0), 7
     )
 
-    def band_levels(flat: bool) -> np.ndarray:
+    def band_levels(*, flat: bool) -> np.ndarray:
         energy = np.zeros(37, dtype=np.float64)
         for f in freqs:
             arc = predicted_arc(float(f), flat=flat, source_angle_deg=source_angle_deg)

@@ -19,8 +19,7 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
@@ -45,6 +44,8 @@ from ._layout import (
 from .iso717 import _Y_TOP_AIRBORNE, _Y_TOP_IMPACT, _metadata_pairs
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
     from reportlab.platypus import Table
 
@@ -57,15 +58,31 @@ if TYPE_CHECKING:
 #: A per-band table column: header markup, values and decimal places.
 Column = tuple[str, np.ndarray, int]
 
+
 #: Builder of the left-hand table content for one report: given the reported
 #: quantity's value header (already translated), its per-band curve, the
 #: verbose flag and the language, it returns the ordered columns following the
 #: frequency column, the panel caption and either explicit column widths (for
 #: the multi-column verbose table) or ``None`` (the two-column ``f | value``
 #: form, whose widths are fixed here).
-ColumnsBuilder = Callable[
-    [str, np.ndarray, bool, str], tuple[Sequence[Column], str, list[float] | None]
-]
+class ColumnsBuilder(Protocol):
+    """The call shape of a columns builder.
+
+    A ``Callable[...]`` alias cannot say that a parameter is keyword-only, and
+    ``verbose`` is one: it is a flag, and a flag is written by name. So the
+    shape is declared as a protocol instead of an alias.
+    """
+
+    def __call__(
+        self,
+        value_header: str,
+        curve: np.ndarray,
+        *,
+        verbose: bool,
+        language: str,
+    ) -> tuple[Sequence[Column], str, list[float] | None]:
+        """Build the columns that follow the frequency column."""
+        ...
 
 
 def single_number_statement(
@@ -161,9 +178,9 @@ def band_value_table(
 
 def iso717_columns_builder(
     rating: WeightedRatingResult | ImpactRatingResult,
+    *,
     is_impact: bool,
     symbol: str,
-    *,
     band_set: str = "One-third-octave",
 ) -> ColumnsBuilder:
     """Build the left-table callback shared by the ISO 717-rated fiches.
@@ -180,7 +197,7 @@ def iso717_columns_builder(
     """
 
     def build(
-        value_header: str, curve: np.ndarray, verbose: bool, language: str
+        value_header: str, curve: np.ndarray, *, verbose: bool, language: str
     ) -> tuple[Sequence[Column], str, Any]:
         from reportlab.lib.units import mm
 
@@ -314,7 +331,9 @@ def render_insulation_fiche(
     # Left panel: the report-specific table content; right panel: the rating's
     # own measured-versus-shifted-reference curve.
     value_header = t("{vh} [dB]", language).format(vh=spec["symbol"])
-    columns, caption, col_widths = build_columns(value_header, curve, verbose, language)
+    columns, caption, col_widths = build_columns(
+        value_header, curve, verbose=verbose, language=language
+    )
     value_table = band_value_table(centers, columns, language, col_widths)
     left_cell = [fiche_paragraph(caption, caption_style), value_table]
 
@@ -347,7 +366,9 @@ def render_insulation_fiche(
         text, passed = requirement_verdict(
             rating, rating_symbol, metadata.requirement, language
         )
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
     flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title_text)

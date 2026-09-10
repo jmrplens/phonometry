@@ -732,6 +732,7 @@ def _sampled_exposure(
     instrument: InstrumentClass,
     u3: float,
     strategy: str,
+    *,
     warn: bool,
     spread_advisory: bool,
 ) -> ExposureResult:
@@ -818,12 +819,12 @@ def job_based_exposure(
         msg = "'sample_duration_hours' must be positive."
         raise ValueError(msg)
     result = _sampled_exposure(
-        samples,
-        effective_duration_hours,
-        instrument,
-        u3,
-        "job",
-        warn,
+        samples=samples,
+        effective_duration_hours=effective_duration_hours,
+        instrument=instrument,
+        u3=u3,
+        strategy="job",
+        warn=warn,
         spread_advisory=False,
     )
     if n_workers is not None and sample_duration_hours is not None:
@@ -878,11 +879,11 @@ def full_day_exposure(
             stacklevel=2,
         )
     return _sampled_exposure(
-        samples,
-        effective_duration_hours,
-        instrument,
-        u3,
-        "full_day",
-        warn,
+        samples=samples,
+        effective_duration_hours=effective_duration_hours,
+        instrument=instrument,
+        u3=u3,
+        strategy="full_day",
+        warn=warn,
         spread_advisory=spread,
     )

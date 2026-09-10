@@ -917,7 +917,7 @@ def test_the_spanish_pass_is_measured_and_says_so(
     try:
         for lang, dark in (("en", False), ("es", False), ("es", True)):
             i18n.set_lang(lang)
-            theme.set_theme(dark)
+            theme.set_theme(dark=dark)
             fig, ax = _blank()
             ax.plot([0.45, 1.0], [0.5, 0.5], color="black", linewidth=6.0)
             ax.text(0.02, 0.5, english, ha="left", va="center")
@@ -927,7 +927,7 @@ def test_the_spanish_pass_is_measured_and_says_so(
         # ``set_lang`` and ``set_theme`` rebind module globals and the whole
         # rcParams; the next test must not inherit a dark Spanish figure.
         i18n.set_lang("en")
-        theme.set_theme(False)
+        theme.set_theme(dark=False)
         mpl.rcParams.update(saved)
 
     assert audit._FOUND["probe"] == []

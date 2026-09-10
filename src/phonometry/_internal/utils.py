@@ -123,7 +123,7 @@ def _downsamplingfactor(
 
 
 def _sos_initial_state(
-    sos: np.ndarray, x_proc: np.ndarray, steady_ic: bool
+    sos: np.ndarray, x_proc: np.ndarray, *, steady_ic: bool
 ) -> np.ndarray:
     """Initial ``zi`` for an SOS cascade, sized to match the input shape."""
     n_sections = sos.shape[0]

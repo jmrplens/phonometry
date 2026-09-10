@@ -143,7 +143,7 @@ class Signal:
         return self.data[0] if self.data.shape[0] == 1 else self.data
 
     def __array__(
-        self, dtype: DTypeLike | None = None, copy: bool | None = None
+        self, dtype: DTypeLike | None = None, *, copy: bool | None = None
     ) -> np.ndarray:
         """Return the samples as an array (optionally recast)."""
         return np.asarray(self._view, dtype=dtype, copy=copy)

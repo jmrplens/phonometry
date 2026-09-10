@@ -290,7 +290,7 @@ def animate_fdtd_impedance_tube(output_dir: str) -> None:
         (axes[0], titles[0], False),
         (axes[1], titles[1], True),
     ):
-        ax.grid(False)
+        ax.grid(visible=False)
         im = ax.imshow(
             np.zeros((20, 240)),
             origin="lower",
@@ -521,7 +521,7 @@ def animate_fdtd_transmission_tube(output_dir: str) -> None:
         (axes[0], titles[0], False),
         (axes[1], titles[1], True),
     ):
-        ax.grid(False)
+        ax.grid(visible=False)
         im = ax.imshow(
             np.zeros((20, 320)),
             origin="lower",

@@ -133,7 +133,7 @@ def _metadata_pairs(
     ]
 
 
-def _band_table(result: SIIResult, verbose: bool, language: str = "en") -> Table:
+def _band_table(result: SIIResult, *, verbose: bool, language: str = "en") -> Table:
     """Build the left-hand per-band audibility table of the procedure.
 
     The default table carries the equivalent speech spectrum level ``Ei'``, the
@@ -317,7 +317,7 @@ def render_sii_report(
             ),
             caption_style,
         ),
-        _band_table(result, verbose, language),
+        _band_table(result=result, verbose=verbose, language=language),
     ]
     # The verbose table adds a column, so the two-panel split is rebalanced to
     # keep the wider table beside a still-legible plot on the same page.
@@ -341,7 +341,9 @@ def render_sii_report(
     flow.append(result_box(_statement(result, language), styles, accent))
     if metadata is not None and metadata.requirement is not None:
         text, passed = _verdict(result, metadata.requirement, language)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
     flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)

@@ -214,7 +214,7 @@ def animate_fdtd_duct_cut_on(output_dir: str) -> None:
         ((p_lo, titles[0], vmaxes[0]), (p_hi, titles[1], vmaxes[1]))
     ):
         ax = fig.add_subplot(grid[row, 0])
-        ax.grid(False)
+        ax.grid(visible=False)
         im = ax.imshow(
             data[0],
             origin="lower",
@@ -297,7 +297,7 @@ def animate_fdtd_duct_cut_on(output_dir: str) -> None:
         v_txts.append(v_txt)
 
         pax = fig.add_subplot(grid[row, 1])
-        pax.grid(False)
+        pax.grid(visible=False)
         pax.set_xlim(-p_lim, p_lim)
         pax.set_ylim(0.0, _DUCT_A)
         pax.set_yticks([])

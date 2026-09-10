@@ -1294,7 +1294,7 @@ class ExtendedImpactRatingResult:
         return plot_extended_impact_rating(self, ax=ax, language=language, **kwargs)
 
 
-def _reduce(value: float, one_decimal: bool) -> float:
+def _reduce(value: float, *, one_decimal: bool) -> float:
     """Round half-up to an integer, or to one decimal (ISO 80000-1 footnote)."""
     if one_decimal:
         return math.floor(value * 10.0 + 0.5) / 10.0
@@ -1402,7 +1402,7 @@ def weighted_rating_extended(
 
     def _term(bands: np.ndarray, spectrum: Sequence[int]) -> float:
         x_aj = -energy_sum(np.asarray(spectrum, dtype=np.float64) - bands)
-        return _reduce(float(x_aj), one_decimal) - rating
+        return _reduce(value=float(x_aj), one_decimal=one_decimal) - rating
 
     c = _term(core_measured, _SPECTRUM1_THIRD)
     ctr = _term(core_measured, _SPECTRUM2_THIRD)
@@ -1477,7 +1477,7 @@ def weighted_impact_rating_extended(
     rating = float(_REF_IMPACT_THIRD_OCTAVE[_INDEX_500_THIRD]) - shift
 
     def _ci_over(bands: np.ndarray) -> float:
-        l_sum = _reduce(float(energy_sum(bands)), one_decimal)
+        l_sum = _reduce(value=float(energy_sum(bands)), one_decimal=one_decimal)
         return l_sum - 15.0 - rating
 
     ci = _ci_over(core_measured[:_CI_THIRD_OCTAVE_BANDS])

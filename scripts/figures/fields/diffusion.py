@@ -225,7 +225,7 @@ def animate_fdtd_diffusion(output_dir: str) -> None:
         )
         ax_t.set_title(titles[col], fontsize=10)
         for ax in (ax_t, ax_s):
-            ax.grid(False)
+            ax.grid(visible=False)
             ax.add_patch(
                 Polygon(
                     polys[col],

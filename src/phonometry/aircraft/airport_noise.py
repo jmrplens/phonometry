@@ -776,6 +776,7 @@ def _attenuation_geometry(
     phi: float,
     lateral: float,
     key: str,
+    *,
     roll_behind: bool,
     roll_ahead: bool,
 ) -> tuple[float, float, float]:
@@ -806,6 +807,7 @@ def _segment_noise_fraction(
     q: float,
     length: float,
     d_lambda: float,
+    *,
     roll_behind: bool,
     roll_ahead: bool,
 ) -> float:
@@ -821,6 +823,7 @@ def _start_of_roll_correction(
     q: float,
     ds: float,
     engine: str,
+    *,
     roll_behind: bool,
 ) -> float:
     """Start-of-roll directivity, zero away from the takeoff roll (Eq. 4-22/4-25)."""
@@ -830,12 +833,12 @@ def _start_of_roll_correction(
     return start_of_roll_directivity(azimuth_deg, max(ds, 1e-9), engine)
 
 
-def _npd_slant_distance(ds: float, dp: float, on_roll: bool) -> float:
+def _npd_slant_distance(ds: float, dp: float, *, on_roll: bool) -> float:
     """NPD lookup distance: nearest segment point on a roll, else perpendicular."""
     return max(ds if on_roll else dp, _NPD_FLOOR_M)
 
 
-def _segment_speed(v1: float, v2: float, frac: float, on_roll: bool) -> float:
+def _segment_speed(v1: float, v2: float, frac: float, *, on_roll: bool) -> float:
     """Mean segment speed, in m/s, for the duration correction (Eq. 4-13b)."""
     if on_roll:
         # Eq. 4-13b: runway segments use the arithmetic mean speed, regardless
@@ -907,24 +910,44 @@ def _event_level_core(
         roll_behind = is_takeoff and q < 0.0  # behind the start of roll
         roll_ahead = is_landing and q > length  # ahead of the landing rollout
         beta_att, ell_att, phi_att = _attenuation_geometry(
-            s1, s2, obs, q, length, beta, phi, lateral, key, roll_behind, roll_ahead
+            s1=s1,
+            s2=s2,
+            obs=obs,
+            q=q,
+            length=length,
+            beta=beta,
+            phi=phi,
+            lateral=lateral,
+            key=key,
+            roll_behind=roll_behind,
+            roll_ahead=roll_ahead,
         )
         frac = np.clip(q / length, 0.0, 1.0)
         p_seg = np.sqrt(max(p1**2 + frac * (p2**2 - p1**2), 0.0))
         lam_att = lateral_attenuation(beta_att, ell_att)
         di = engine_installation_correction(phi_att, mounting)
-        sor = _start_of_roll_correction(q, ds, engine, roll_behind)
+        sor = _start_of_roll_correction(
+            q=q, ds=ds, engine=engine, roll_behind=roll_behind
+        )
         if key == "maximum":
             base = float(npd_level(p, d, lm, p_seg, max(ds, _NPD_FLOOR_M))[0])
             seg_levels.append(base + imp + di - lam_att + sor)
         else:
-            dist = _npd_slant_distance(ds, dp, roll_behind or roll_ahead)
+            dist = _npd_slant_distance(ds=ds, dp=dp, on_roll=roll_behind or roll_ahead)
             le_d = float(npd_level(p, d, le, p_seg, dist)[0])
             lm_d = float(npd_level(p, d, lm, p_seg, dist)[0])
-            v_seg = _segment_speed(v1, v2, frac, is_takeoff or is_landing)
+            v_seg = _segment_speed(
+                v1=v1, v2=v2, frac=frac, on_roll=is_takeoff or is_landing
+            )
             dv = duration_correction(vref, v_seg)
             d_lambda = _D0_M * 10.0 ** ((le_d - lm_d) / 10.0)
-            df = _segment_noise_fraction(q, length, d_lambda, roll_behind, roll_ahead)
+            df = _segment_noise_fraction(
+                q=q,
+                length=length,
+                d_lambda=d_lambda,
+                roll_behind=roll_behind,
+                roll_ahead=roll_ahead,
+            )
             seg_levels.append(le_d + imp + dv + di - lam_att + df + sor)
 
     seg_arr = np.asarray(seg_levels, dtype=np.float64)
@@ -1104,6 +1127,7 @@ def _grid_sor(
     q: NDArray[np.float64],
     ds: NDArray[np.float64],
     roll_behind: NDArray[np.bool_],
+    *,
     engine_jet: bool,
 ) -> NDArray[np.float64]:
     """``ΔSOR`` (Eq. 4-22..4-25), the array form of :func:`start_of_roll_directivity`."""
@@ -1183,6 +1207,7 @@ def _grid_segment_level(
     ctx: _GridContext,
     seg_pts: NDArray[np.float64],
     eps: float,
+    *,
     is_takeoff: bool,
     is_landing: bool,
 ) -> NDArray[np.float64]:
@@ -1216,7 +1241,11 @@ def _grid_segment_level(
     frac = np.clip(q / length, 0.0, 1.0)
     p1, p2 = seg_pts[0, 3], seg_pts[1, 3]
     p_seg = np.sqrt(np.maximum(p1**2 + frac * (p2**2 - p1**2), 0.0))
-    sor = _grid_sor(q, ds, roll_behind, ctx.engine_jet) if is_takeoff else 0.0
+    sor = (
+        _grid_sor(q=q, ds=ds, roll_behind=roll_behind, engine_jet=ctx.engine_jet)
+        if is_takeoff
+        else 0.0
+    )
     if ctx.maximum:
         base = _npd_level_grid(
             ctx.p, ctx.lm, ctx.logd_tab, p_seg, np.maximum(ds, _NPD_FLOOR_M)
@@ -1291,11 +1320,11 @@ def _grid_event_levels(
         any_segment = True
         eps = float(bank[i]) if bank is not None else 0.0
         seg_level = _grid_segment_level(
-            ctx,
-            pts[i : i + 2],
-            eps,
-            ground_roll is not None and bool(ground_roll[i]),
-            landing_roll is not None and bool(landing_roll[i]),
+            ctx=ctx,
+            seg_pts=pts[i : i + 2],
+            eps=eps,
+            is_takeoff=ground_roll is not None and bool(ground_roll[i]),
+            is_landing=landing_roll is not None and bool(landing_roll[i]),
         )
         if ctx.maximum:
             total = np.maximum(total, seg_level)

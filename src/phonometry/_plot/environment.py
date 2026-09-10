@@ -193,7 +193,7 @@ def plot_atmospheric_attenuation(
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(r"Attenuation coefficient $\alpha$ [dB/km]", language))
     ax.set_title(_t("ISO 9613-1 atmospheric attenuation", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_LEFT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -254,7 +254,7 @@ def plot_wind_turbine_tonality(
     ax.set_title(
         f"{_t('IEC 61400-11 tonal audibility', language)} $\\Delta L_\\mathrm{{a}}$ = {format_number(result.tonal_audibility, language)} dB"
     )
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -318,7 +318,7 @@ def plot_impulse_prominence(
     ax.set_title(_t("NT ACOU 112 — impulse adjustment to $L_\\mathrm{Aeq}$", language))
     ax.set_ylim(bottom=0.0)
     ax.legend(loc=_LEGEND_UPPER_LEFT, fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -372,7 +372,7 @@ def plot_tonal_adjustment(
     ax.set_title(_t("ISO 1996-2 tonal adjustment", language))
     ax.set_ylim(bottom=0.0)
     ax.legend(loc=_LEGEND_UPPER_LEFT, fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -431,7 +431,7 @@ def plot_outdoor_attenuation(
     ax.set_ylabel(_t("Attenuation $A$ [dB]", language))
     ax.set_title(_t("ISO 9613-2 attenuation breakdown", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -492,7 +492,7 @@ def plot_cnossos_rail_emission(
     ax.set_ylabel(r"$L^{\prime}_{W,\mathrm{eq,line}}$ [dB re 1 pW/m]")
     ax.set_title(_t("CNOSSOS-EU railway source line power", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -546,7 +546,7 @@ def plot_spherical_ground(
     ax.set_ylabel(_t(_FREE_FIELD_LABEL, language))
     ax.set_title(_t("Spherical-wave ground effect (Weyl-Van der Pol)", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -607,7 +607,7 @@ def plot_barrier_insertion_loss(
     ax.set_ylabel(_t("Insertion loss [dB]", language))
     ax.set_title(_t("Barrier insertion loss", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -638,7 +638,7 @@ def plot_sound_speed_profile(
     ax.set_xlabel(_t("Effective sound speed [m/s]", language))
     ax.set_ylabel(_t(_HEIGHT_LABEL, language))
     ax.set_title(_t("Effective sound-speed profile", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -679,7 +679,7 @@ def plot_atmospheric_rays(
     ax.set_ylabel(_t(_HEIGHT_LABEL, language))
     ax.set_ylim(bottom=0.0)
     ax.set_title(_t("Atmospheric ray paths", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -814,7 +814,7 @@ def plot_tonal_correction_rd1367(
         loc=_LEGEND_UPPER_LEFT,
         fontsize="small",
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     localize_axes(twin, language)
     return ax
@@ -935,7 +935,7 @@ def plot_activity_assessment(
     ax.set_ylabel(_t("Corrected level [dB]", language))
     ax.set_title(_t("RD 1367/2007 assessment vs limit values", language))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small", ncol=2)
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1016,7 +1016,7 @@ def plot_cnossos_road_emission(
     ax.set_ylabel(r"$L^{\prime}_{W,\mathrm{eq,line}}$ [dB re 1 pW/m]")
     ax.set_title(_t("CNOSSOS-EU road source line power", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1083,6 +1083,6 @@ def plot_road_device_rating(
     handles, labels = ax.get_legend_handles_labels()
     extra = spectrum.get_legend_handles_labels()
     ax.legend(handles + extra[0], labels + extra[1], loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax

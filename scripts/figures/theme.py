@@ -140,7 +140,7 @@ def series_colors(count: int, cmap: str = "viridis") -> np.ndarray:
     return np.asarray(plt.get_cmap(cmap)(np.linspace(lo, hi, count)))
 
 
-def set_theme(dark: bool) -> None:
+def set_theme(*, dark: bool) -> None:
     """Switch between the light (default) and dark documentation themes."""
     global COLOR_FG, COLOR_GRID, COLOR_PANEL, _FILENAME_SUFFIX
     global CMAP_FIELD, FIELD_INK, FIELD_STROKE, _SERIES_SPAN

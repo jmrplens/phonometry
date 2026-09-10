@@ -158,7 +158,7 @@ class EnvelopeResult:
 
 
 def _decimate_envelope(
-    env: NDArray[np.float64], factor: int, antialias: bool
+    env: NDArray[np.float64], factor: int, *, antialias: bool
 ) -> NDArray[np.float64]:
     """Decimate the envelope, anti-aliased (zero-phase FIR) or plain."""
     if not antialias:
@@ -230,7 +230,7 @@ def envelope(
     inst_freq = np.asarray(np.gradient(phase) * fs_v / (2.0 * np.pi), dtype=np.float64)
 
     if factor > 1:
-        env = _decimate_envelope(env, factor, antialias)
+        env = _decimate_envelope(env=env, factor=factor, antialias=antialias)
         phase = phase[::factor].copy()
         inst_freq = inst_freq[::factor].copy()
 

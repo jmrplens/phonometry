@@ -251,7 +251,7 @@ def test_frequency_labels_off_the_band_count_are_refused() -> None:
 
 
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
-def test_a_room_constant_off_the_band_axis_is_refused(trim: bool) -> None:
+def test_a_room_constant_off_the_band_axis_is_refused(*, trim: bool) -> None:
     """``R_i`` is the column a fiche prints without complaining.
 
     ``R``, ``C`` and ``IL`` are drawn against one x axis in the embedded

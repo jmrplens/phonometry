@@ -310,24 +310,24 @@ class OctaveFilterBank:
             self.factor = np.ones(self.num_bands, dtype=int)
 
         self.sos = _design_sos_filter(
-            self.freq,
-            self.freq_d,
-            self.freq_u,
-            fs,
-            order,
-            self.factor,
-            design.filter_type,
-            design.ripple,
-            design.attenuation,
-            response_plot.show,
-            response_plot.file,
+            freq=self.freq,
+            freq_d=self.freq_d,
+            freq_u=self.freq_u,
+            fs=fs,
+            order=order,
+            factor=self.factor,
+            filter_type=design.filter_type,
+            ripple=design.ripple,
+            attenuation=design.attenuation,
+            show=response_plot.show,
+            plot_file=response_plot.file,
         )
 
         # Calculate initial conditions for filter state
         if self.stateful:
-            self._init_filter_state(block_processing.steady_ic)
+            self._init_filter_state(steady_ic=block_processing.steady_ic)
 
-    def _init_filter_state(self, steady_ic: bool) -> None:
+    def _init_filter_state(self, *, steady_ic: bool) -> None:
         """Initialize filter state (zi) for stateful block-wise processing.
 
         Uses lazy initialization: zi arrays are allocated on first use in
@@ -498,14 +498,14 @@ class OctaveFilterBank:
             raise ValueError(msg)
         mode = _require_level_mode(mode)
 
-        x_proc, is_multichannel = self._prepare_signal(x, detrend)
+        x_proc, is_multichannel = self._prepare_signal(x=x, detrend=detrend)
         num_channels = x_proc.shape[0]
 
         # Process signal across all bands and channels
         spl, xb = self._process_bands(
-            x_proc,
-            num_channels,
-            sigbands,
+            x_proc=x_proc,
+            num_channels=num_channels,
+            sigbands=sigbands,
             mode=mode,
             calculate_level=calculate_level,
             zero_phase=zero_phase,
@@ -537,7 +537,7 @@ class OctaveFilterBank:
         return spl, freq_out
 
     def _prepare_signal(
-        self, x: Signal | list[float] | np.ndarray, detrend: bool
+        self, x: Signal | list[float] | np.ndarray, *, detrend: bool
     ) -> tuple[np.ndarray, bool]:
         """Coerce the input to a 2D ``[channels, samples]`` array for filtering.
 
@@ -665,6 +665,7 @@ class OctaveFilterBank:
         self,
         x_proc: np.ndarray,
         num_channels: int,
+        *,
         sigbands: bool,
         mode: str = "rms",
         calculate_level: bool = True,
@@ -687,7 +688,9 @@ class OctaveFilterBank:
 
         for idx in range(self.num_bands):
             # Vectorized processing for all channels
-            filtered_signal = self._filter_and_resample(x_proc, idx, zero_phase)
+            filtered_signal = self._filter_and_resample(
+                x=x_proc, idx=idx, zero_phase=zero_phase
+            )
 
             if calculate_level and spl is not None:
                 # Sound Level Calculation (returns array of shape [num_channels])
@@ -704,7 +707,7 @@ class OctaveFilterBank:
         return spl, xb
 
     def _filter_and_resample(
-        self, x: np.ndarray, idx: int, zero_phase: bool = False
+        self, x: np.ndarray, idx: int, *, zero_phase: bool = False
     ) -> np.ndarray:
         """Resample and filter for a specific band (vectorized)."""
         if self.factor[idx] > 1:

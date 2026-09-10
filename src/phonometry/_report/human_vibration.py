@@ -165,7 +165,7 @@ def _metadata_pairs(
 
 
 def _operations_table(
-    result: DailyVibrationExposure, verbose: bool = False, language: str = "en"
+    result: DailyVibrationExposure, *, verbose: bool = False, language: str = "en"
 ) -> Table:
     """The per-operation exposure-analysis table (ISO 5349-1/-2 Eqs. (2)/(3)).
 
@@ -308,7 +308,9 @@ def _assessment_table(result: DailyVibrationExposure, language: str = "en") -> T
                 fiche_paragraph(label, label_style),
                 fiche_paragraph(threshold, value_style),
                 fiche_paragraph(measured, value_style),
-                fiche_paragraph(exceedance_markup(exceeded, language), label_style),
+                fiche_paragraph(
+                    exceedance_markup(exceeded=exceeded, language=language), label_style
+                ),
             ]
         )
     return stacked_table(data, [66 * mm, 32 * mm, 42 * mm, 34 * mm])
@@ -456,7 +458,7 @@ def render_human_vibration_report(
     flow.append(Spacer(1, 8))
 
     flow.append(fiche_paragraph(t("Exposure analysis", language), caption_style))
-    flow.append(_operations_table(result, verbose, language))
+    flow.append(_operations_table(result=result, verbose=verbose, language=language))
     flow.append(Spacer(1, 10))
     # Full-width, landscape per-operation contribution chart (self-scaling).
     flow.append(
@@ -481,7 +483,9 @@ def render_human_vibration_report(
     )
     flow.append(_assessment_table(result, language))
     text, passed = _verdict(result, language)
-    flow.extend(verdict_flow(text, passed, styles, language))
+    flow.extend(
+        verdict_flow(text=text, passed=passed, styles=styles, language=language)
+    )
 
     note_style = ParagraphStyle(
         "humanvib_notes",

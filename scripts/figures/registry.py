@@ -1374,10 +1374,10 @@ if not _ANIM_FIELDS.keys() <= _ANIMATIONS.keys():
     raise RuntimeError(msg)
 
 
-def _render_anim_variant(clip: str, output_dir: str, lang: str, dark: bool) -> None:
+def _render_anim_variant(clip: str, output_dir: str, lang: str, *, dark: bool) -> None:
     """Render one language/theme variant of *clip* (fork child entry)."""
     set_lang(lang)
-    set_theme(dark)
+    set_theme(dark=dark)
     try:
         _ANIMATIONS[clip](output_dir)
     finally:
@@ -1400,7 +1400,7 @@ def _render_anim_variants(clip: str, output_dir: str) -> None:
     builder = _ANIM_FIELDS.get(clip)
     if builder is None or "fork" not in mp.get_all_start_methods():
         for lang, dark in _VARIANTS:
-            _render_anim_variant(clip, output_dir, lang, dark)
+            _render_anim_variant(clip=clip, output_dir=output_dir, lang=lang, dark=dark)
         return
     builder()
     ctx = mp.get_context("fork")
@@ -1581,7 +1581,7 @@ def _run_figure_task(
     try:
         for lang, dark in variants:
             set_lang(lang)
-            set_theme(dark)
+            set_theme(dark=dark)
             func(img_dir)
     finally:
         plt.close("all")
@@ -1740,7 +1740,7 @@ def _run_anim_task(clip: str, img_dir: str) -> str:
     try:
         for lang, dark in _VARIANTS:
             set_lang(lang)
-            set_theme(dark)
+            set_theme(dark=dark)
             func(img_dir)
     finally:
         plt.close("all")
@@ -1886,7 +1886,7 @@ def main(argv: list[str] | None = None) -> None:
         if jobs == 1:
             for lang, dark in _VARIANTS:
                 set_lang(lang)
-                set_theme(dark)
+                set_theme(dark=dark)
                 print(
                     f"--- Generating {lang} {'dark' if dark else 'light'} theme figures ---"
                 )

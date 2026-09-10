@@ -180,7 +180,7 @@ def mark_html(verdict: str, ref: str) -> str:
     return f'<img src="{asset_url(mark.filename, ref)}" alt="{alt}">'
 
 
-def outcome_mark(ok: bool, ref: str, *, html: bool = False) -> str:
+def outcome_mark(*, ok: bool, ref: str, html: bool = False) -> str:
     """The pass or the fail mark, for a yes/no result that is not a verdict.
 
     The test table in the pull-request comment is the case: a Python version

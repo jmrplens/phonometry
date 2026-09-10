@@ -301,7 +301,7 @@ def animate_fdtd_slit_absorber(output_dir: str) -> None:
             (x_neck[1], y_neck[0], x_end - x_neck[1], y_neck[1] - y_neck[0]),
         ]
         ax = fig.add_subplot(gs[row, 0])
-        ax.grid(False)
+        ax.grid(visible=False)
         im = ax.imshow(
             np.zeros((2, 2)),
             origin="lower",
@@ -388,7 +388,7 @@ def animate_fdtd_slit_absorber(output_dir: str) -> None:
         )
         # Zoom: the last 45 mm at full grid resolution, geometry to scale.
         ax_z = fig.add_subplot(gs[row, 1])
-        ax_z.grid(False)
+        ax_z.grid(visible=False)
         im_z = ax_z.imshow(
             np.zeros((2, 2)),
             origin="lower",

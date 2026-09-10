@@ -95,7 +95,7 @@ def _basis(result: ReverberationSoundPowerResult, language: str = "en") -> str:
 
 
 def _value_table(
-    result: ReverberationSoundPowerResult, verbose: bool, language: str = "en"
+    result: ReverberationSoundPowerResult, *, verbose: bool, language: str = "en"
 ) -> Table:
     """Build the full-width per-band table (nominal frequency, Lp, LW).
 
@@ -266,7 +266,7 @@ def render_reverberation_power_report(
                 _a_weighting_strip(language),
             ],
         ),
-        value_table=_value_table(result, verbose, language),
+        value_table=_value_table(result=result, verbose=verbose, language=language),
         metadata=metadata,
         language=language,
     )

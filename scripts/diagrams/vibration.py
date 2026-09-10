@@ -205,16 +205,16 @@ def _d_hand_arm_vibration(s: SVG, th: Theme) -> None:
     s.dim(hand_x0, 272, hand_x1, 272, "gripping zone ≈ 100 mm", size=12)
 
     # The transducer positions of 6.1.3, in the order the clause prefers them.
-    def _pos(x: float, under: bool, tag: str, cy: float) -> None:
+    def _pos(x: float, *, under: bool, tag: str, cy: float) -> None:
         top = bar_bot if under else bar_top - 19
         s.rect(x - 12, top, 24, 19, th.secondary, th.fg, rx=3, sw=1.5)
         s.circle(x, cy, 12, th.secondary, th.bg, 2)
         s.text(x, cy + 5, tag, 14, th.bg, "middle", bold=True)
 
-    _pos(280, True, "1", 174)
-    _pos(196, False, "2", 148)
-    _pos(372, False, "2", 148)
-    _pos(372, True, "3", 253)
+    _pos(x=280, under=True, tag="1", cy=174)
+    _pos(x=196, under=False, tag="2", cy=148)
+    _pos(x=372, under=False, tag="2", cy=148)
+    _pos(x=372, under=True, tag="3", cy=253)
 
     s.text(520, 100, "chain-saw front handle,", 13, th.muted, "end")
     s.text(520, 118, "Ø 30 mm tube", 13, th.muted, "end")

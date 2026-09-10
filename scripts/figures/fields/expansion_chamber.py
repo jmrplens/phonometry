@@ -168,7 +168,7 @@ def animate_fdtd_expansion_chamber(output_dir: str) -> None:
     for (ax, title, vmax), env in zip(
         zip(axes, titles, vmaxes, strict=True), (e_pass, e_stop), strict=True
     ):
-        ax.grid(False)
+        ax.grid(visible=False)
         im = ax.imshow(
             np.zeros((2, 2)),
             origin="lower",

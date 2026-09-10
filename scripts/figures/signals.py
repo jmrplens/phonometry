@@ -102,7 +102,7 @@ def generate_filter_type_comparison(output_dir: str) -> None:
     # Sub-plot styling (Zoom around 1kHz and -3dB)
     axins.set_xlim(650, 1500)
     axins.set_ylim(-4, 0.5)  # Adjusted: from -4 to 0.5
-    axins.grid(True, which="both", alpha=0.3)
+    axins.grid(visible=True, which="both", alpha=0.3)
     axins.set_title("Zoom at −3 dB (Log Scale)", fontsize=9)
 
     # Fix x-ticks for log scale zoom to look right
@@ -420,7 +420,7 @@ def generate_decomposition_plot(output_dir: str) -> None:
 
     for ax in axes:
         ax.set_ylabel("Amplitude")
-        ax.grid(True, which="both", alpha=0.4, linestyle=":")
+        ax.grid(visible=True, which="both", alpha=0.4, linestyle=":")
 
     plt.tight_layout()
     save_figure(output_dir, "signal_decomposition.png")
@@ -486,7 +486,7 @@ def generate_weighting_responses(output_dir: str) -> None:
     axins.axhline(0, color=COLOR_FG, linestyle=":", alpha=0.4, linewidth=1)
     axins.set_xlim(500, 8000)
     axins.set_ylim(-3, 2)
-    axins.grid(True, which="both", alpha=0.3)
+    axins.grid(visible=True, which="both", alpha=0.3)
     axins.set_title(
         "Zoom: A-weighting is positive (max +1.27 dB @ 2.5 kHz)", fontsize=9
     )
@@ -1130,7 +1130,7 @@ def generate_block_processing_continuity(output_dir: str) -> None:
     x = rng.standard_normal(n_blocks * block)
     t = np.arange(len(x)) / fs
 
-    def band_output(stateful: bool) -> np.ndarray:
+    def band_output(*, stateful: bool) -> np.ndarray:
         bank = filters.OctaveFilterBank(
             fs,
             fraction=1,

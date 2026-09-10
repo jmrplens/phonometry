@@ -416,7 +416,7 @@ def animate_fdtd_metadiffuser(output_dir: str) -> None:
         )
         ax_t.set_title(titles[col], fontsize=10)
         for ax in (ax_t, ax_s):
-            ax.grid(False)
+            ax.grid(visible=False)
             if col == 1:
                 ax.add_patch(
                     Polygon(

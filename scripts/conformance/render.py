@@ -181,7 +181,9 @@ def _panel(document: Mapping[str, Any], panel_id: str) -> Mapping[str, Any]:
     raise KeyError(msg)
 
 
-def _numerical_validation_section(document: Mapping[str, Any], filters_ok: bool) -> str:
+def _numerical_validation_section(
+    document: Mapping[str, Any], *, filters_ok: bool
+) -> str:
     # Collapsed like the per-domain groups so the report stays compact by
     # default; it springs open whenever the filters/weightings domain has a
     # failing row, exactly like those groups do.
@@ -442,7 +444,7 @@ def render_markdown(document: Mapping[str, Any] | None = None) -> tuple[str, int
     if closest:
         out.append(closest)
         out.append("")
-    out.append(_numerical_validation_section(source, filters_ok))
+    out.append(_numerical_validation_section(document=source, filters_ok=filters_ok))
     out.append("")
 
     by_domain: dict[str, list[Mapping[str, Any]]] = {}

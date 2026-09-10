@@ -346,7 +346,7 @@ def plot_sound_power(
         )
     if np.any(neg) or "label" in kwargs:
         ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -406,7 +406,7 @@ def plot_sound_energy(
     ax.set_title(title)
     if "label" in kwargs:
         ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -473,7 +473,7 @@ def plot_in_situ_sound_power(
         )
     if handles or "label" in kwargs:
         ax.legend(handles=handles or None, loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -521,7 +521,7 @@ def plot_intensity(
     )
     _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t("Level [dB]", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
 
     twin = ax.twinx()
     twin.bar(
@@ -615,7 +615,7 @@ def plot_field_indicators(
         )
     _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t("Indicator [dB]", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
 
     twin = ax.twinx()
     twin.bar(
@@ -820,6 +820,6 @@ def plot_intensity_class(
         )
     )
     ax.legend(loc="lower right", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax

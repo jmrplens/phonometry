@@ -125,7 +125,7 @@ def plot_uncertainty_budget(
     value = decimal_comma(fmt_minus(result.value, ".4g"), language)
     ax.set_title(_t("GUM uncertainty budget — $y$ = {value}", language, value=value))
     ax.legend(loc="lower right", fontsize="small")
-    ax.grid(True, axis="x", alpha=0.3)
+    ax.grid(visible=True, axis="x", alpha=0.3)
     return ax
 
 
@@ -183,7 +183,7 @@ def plot_monte_carlo(
         )
     )
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -283,7 +283,7 @@ def plot_trend_test(
         _draw_sequence_median(ax, result.median, language)
     ax.set_xlabel(_t("Sample index", language))
     ax.set_ylabel(_t("Sequence value", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -325,7 +325,7 @@ def plot_stationarity_test(
         _draw_sequence_median(ax, float(np.median(result.segment_values)), language)
     ax.set_xlabel(_t("Segment index", language))
     ax.set_ylabel(_t(_SEGMENT_LABELS[result.statistic], language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -372,7 +372,7 @@ def plot_level_crossing_rate(
     ax.set_yscale("log")
     ax.set_xlabel(_t("Level $a$ [signal units]", language))
     ax.set_ylabel(_t("Crossings per second [1/s]", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -449,7 +449,7 @@ def plot_peak_statistics(
     ax.set_ylim(bottom=floor)
     ax.set_xlabel(_t(r"Standardized peak height $z = a/\sigma_x$", language))
     ax.set_ylabel(_t("Prob[peak > $z$]", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax

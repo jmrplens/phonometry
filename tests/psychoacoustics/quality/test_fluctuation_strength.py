@@ -237,7 +237,7 @@ def reference_result() -> psychoacoustics.FluctuationStrengthResult:
 
 @pytest.mark.parametrize("trim", [True, False])
 def test_a_specific_curve_off_the_filter_axis_is_refused(
-    reference_result: psychoacoustics.FluctuationStrengthResult, trim: bool
+    reference_result: psychoacoustics.FluctuationStrengthResult, *, trim: bool
 ) -> None:
     """``specific`` and ``bark_axis`` are one axis of 47 filters, written twice.
 

@@ -89,7 +89,7 @@ def test_normalized_audiogram_removes_the_absolute_sensitivity() -> None:
 
 @pytest.mark.parametrize("group", AUDIOGRAM_GROUPS)
 @pytest.mark.parametrize("normalized", [False, True])
-def test_best_frequency_agrees_with_table_4(group: str, normalized: bool) -> None:
+def test_best_frequency_agrees_with_table_4(group: str, *, normalized: bool) -> None:
     """The fit minimum lands on the ``f0`` column of Table 4 (printed p. 148).
 
     Table 4 is quoted to two significant figures and comes from the measured

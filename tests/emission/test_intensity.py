@@ -668,7 +668,7 @@ def test_an_f1_off_the_band_axis_is_refused(kind: str) -> None:
 @pytest.mark.parametrize("field_name", ["intensity", "direction", "bias_correction"])
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
 def test_an_intensity_band_quantity_off_the_band_axis_is_refused(
-    field_name: str, trim: bool
+    field_name: str, *, trim: bool
 ) -> None:
     """The three per-band columns no reader touches are pinned as well.
 

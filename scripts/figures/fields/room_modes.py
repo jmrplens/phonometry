@@ -110,7 +110,7 @@ def animate_fdtd_room_modes(output_dir: str) -> None:
     ims: list[Any] = []
     for col in range(2):
         ax_p = fig.add_subplot(gs[0, col])
-        ax_p.grid(False)
+        ax_p.grid(visible=False)
         im_p = ax_p.imshow(
             p_all[col][0],
             origin="lower",
@@ -142,7 +142,7 @@ def animate_fdtd_room_modes(output_dir: str) -> None:
         )
         ax_p.tick_params(labelsize=7, labelbottom=False)
         ax_r = fig.add_subplot(gs[1, col])
-        ax_r.grid(False)
+        ax_r.grid(visible=False)
         im_r = ax_r.imshow(
             r_all[col][0],
             origin="lower",

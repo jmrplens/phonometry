@@ -384,13 +384,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     # They are all editing mistakes, so they get the same one-line diagnostic
     # rather than a traceback.
     try:
-        return _run(args.write, root)
+        return _run(writing=args.write, root=root)
     except ValueError as error:
         print(error, file=sys.stderr)
         return 1
 
 
-def _run(writing: bool, root: pathlib.Path) -> int:
+def _run(*, writing: bool, root: pathlib.Path) -> int:
     """Body of :func:`main`, once the arguments are settled."""
     expected = expected_counts(root)
     summary = (

@@ -127,7 +127,7 @@ def _esc(value: str | None) -> str | None:
     return html.escape(value) if value else None
 
 
-def _present_markup(present: bool, language: str = "en") -> str:
+def _present_markup(*, present: bool, language: str = "en") -> str:
     """Inline markup for the per-tone present/absent column.
 
     A tone is *present* when its audibility exceeds the masking threshold
@@ -149,7 +149,7 @@ def _type_label(group_size: int | None, language: str = "en") -> str:
 
 
 def _key_quantity_table(
-    result: ToneAudibilityResult, verbose: bool = False, language: str = "en"
+    result: ToneAudibilityResult, *, verbose: bool = False, language: str = "en"
 ) -> Table:
     """The full-width per-tone key-quantity table (ISO/PAS 20065 Table E.2 style).
 
@@ -204,7 +204,9 @@ def _key_quantity_table(
             fiche_paragraph(_fmt(lpn[i], language), value_style),
             fiche_paragraph(_fmt(dfc[i], language, decimals=0), value_style),
             fiche_paragraph(emph(_fmt(delta[i], language)), value_style),
-            fiche_paragraph(_present_markup(present, language), value_style),
+            fiche_paragraph(
+                _present_markup(present=present, language=language), value_style
+            ),
         ]
         if show_u and uncertainties is not None:
             row.insert(
@@ -359,7 +361,7 @@ def render_tone_audibility_report(
     flow.append(Spacer(1, 8))
 
     flow.append(fiche_paragraph(t("Detected tones", language), caption_style))
-    flow.append(_key_quantity_table(result, verbose, language))
+    flow.append(_key_quantity_table(result=result, verbose=verbose, language=language))
     flow.append(Spacer(1, 8))
 
     # Full-width, landscape level-versus-frequency analysis plot: the tone
@@ -387,7 +389,9 @@ def render_tone_audibility_report(
 
     if metadata is not None and metadata.requirement is not None:
         text, passed = _verdict(result, metadata.requirement, language)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
 
     # Prominence note: whether a prominent tone is present and K applies.
     delta = display_round(result.decisive_audibility)

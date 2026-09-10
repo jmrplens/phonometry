@@ -95,7 +95,7 @@ def _basis(result: VibrationSoundPowerResult, language: str = "en") -> str:
 
 
 def _value_table(
-    result: VibrationSoundPowerResult, verbose: bool, language: str = "en"
+    result: VibrationSoundPowerResult, *, verbose: bool, language: str = "en"
 ) -> Table:
     """Build the full-width per-band table (nominal frequency, Lv, LW).
 
@@ -263,7 +263,7 @@ def render_vibration_power_report(
                 _factor_strip(result, language),
             ],
         ),
-        value_table=_value_table(result, verbose, language),
+        value_table=_value_table(result=result, verbose=verbose, language=language),
         metadata=metadata,
         language=language,
     )

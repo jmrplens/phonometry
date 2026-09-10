@@ -199,7 +199,7 @@ def animate_fdtd_ground_effect(output_dir: str) -> None:
     arc_x = 1.6 + _GROUND_ARC_R * np.cos(rad)
     arc_y = _GROUND_ARC_R * np.sin(rad)
     for ax in (ax_p, ax_r):
-        ax.grid(False)
+        ax.grid(visible=False)
         ax.set_ylim(-1.9, 8.0)
         ax.fill_between(
             [0.0, 14.0],

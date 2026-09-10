@@ -235,7 +235,7 @@ def animate_fdtd_refraction(output_dir: str) -> None:
             ax_c.set_xlabel(T(r"$c_{\mathrm{eff}}(z)$ [m/s]"), fontsize=7)
 
         ax_f = fig.add_subplot(gs[row, 1])
-        ax_f.grid(False)
+        ax_f.grid(visible=False)
         im = ax_f.imshow(
             p_all[row][0],
             origin="lower",

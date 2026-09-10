@@ -328,7 +328,7 @@ def test_validation() -> None:
 
 
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
-def test_a_four_pole_stack_off_the_frequency_axis_is_refused(trim: bool) -> None:
+def test_a_four_pole_stack_off_the_frequency_axis_is_refused(*, trim: bool) -> None:
     """The stack is the field no reader would ever complain about.
 
     ``TL``, ``IL`` and the frequencies meet in the figure ``.plot()`` draws

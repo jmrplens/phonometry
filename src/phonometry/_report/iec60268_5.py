@@ -430,7 +430,9 @@ def render_iec60268_5_report(
     flow.append(result_box(_statement(result, language), styles, accent))
     if metadata is not None and metadata.requirement is not None:
         text, passed = _verdict(result, metadata.requirement, language)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
     flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)

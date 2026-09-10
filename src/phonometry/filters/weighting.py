@@ -472,7 +472,7 @@ def _analog_weighting_zpk(curve: str) -> tuple[np.ndarray, np.ndarray, float]:
 
 
 @lru_cache(maxsize=64)
-def _cached_weighting_sos(curve: str, fs: int, high_accuracy: bool) -> np.ndarray:
+def _cached_weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.ndarray:
     """The shared, read-only design behind :func:`_weighting_sos`."""
     zeros, poles, gain = _analog_weighting_zpk(curve)
     if high_accuracy:
@@ -491,7 +491,7 @@ def _cached_weighting_sos(curve: str, fs: int, high_accuracy: bool) -> np.ndarra
     return shared
 
 
-def _weighting_sos(curve: str, fs: int, high_accuracy: bool) -> np.ndarray:
+def _weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.ndarray:
     """Second-order sections of *curve* at *fs*, cached on the three inputs.
 
     Two designs live here, and ``high_accuracy`` picks between them:
@@ -533,7 +533,7 @@ def _weighting_sos(curve: str, fs: int, high_accuracy: bool) -> np.ndarray:
         appends a notch section to one), so what the cache holds must not be
         the same array.
     """
-    return _cached_weighting_sos(curve, fs, high_accuracy).copy()
+    return _cached_weighting_sos(curve, fs, high_accuracy=high_accuracy).copy()
 
 
 class WeightingFilter:
@@ -641,7 +641,9 @@ class WeightingFilter:
             )
             raise ValueError(msg)
 
-        self.sos = _weighting_sos(self.curve, fs, self.high_accuracy)
+        self.sos = _weighting_sos(
+            curve=self.curve, fs=fs, high_accuracy=self.high_accuracy
+        )
 
         # Initialize filter state for stateful block-wise processing.
         # Uses lazy allocation: zi is sized on first filter() call so that
@@ -652,7 +654,9 @@ class WeightingFilter:
 
     def _init_filter_state(self, x_proc: np.ndarray) -> None:
         """Allocate or reallocate ``zi`` to match the input shape."""
-        self.zi = _sos_initial_state(self.sos, x_proc, self._steady_ic)
+        self.zi = _sos_initial_state(
+            sos=self.sos, x_proc=x_proc, steady_ic=self._steady_ic
+        )
 
     def _needs_zi_reinit(self, x_proc: np.ndarray) -> bool:
         """Check whether ``zi`` must be (re)allocated for *x_proc*."""
@@ -720,7 +724,7 @@ def _runtime_frequency_response(
 
 @lru_cache(maxsize=32)
 def _cached_weighting_filter(
-    fs: int, curve: str, high_accuracy: bool
+    fs: int, curve: str, *, high_accuracy: bool
 ) -> WeightingFilter:
     """Reuse the (immutable, non-stateful) weighting-filter object.
 
@@ -788,7 +792,7 @@ class TimeWeightedEnvelope:
     calibrated: bool
 
     def __array__(
-        self, dtype: DTypeLike | None = None, copy: bool | None = None
+        self, dtype: DTypeLike | None = None, *, copy: bool | None = None
     ) -> np.ndarray:
         """Return the envelope as an array (optionally recast)."""
         return np.asarray(self.mean_square, dtype=dtype, copy=copy)
@@ -896,7 +900,7 @@ def weighting_filter(
         already in pascals and whose factor therefore reads 1.0.
     """
     fs = resolve_fs(x, fs)
-    wf = _cached_weighting_filter(fs, curve, high_accuracy)
+    wf = _cached_weighting_filter(fs, curve, high_accuracy=high_accuracy)
     # The object form wraps for itself now, so hand it the caller's input
     # rather than the resolved samples: doing both would wrap twice.
     return wf.filter(x)

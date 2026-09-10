@@ -80,6 +80,7 @@ def _design_sos_filter(
     filter_type: str,
     ripple: float,
     attenuation: float,
+    *,
     show: bool = False,
     plot_file: str | None = None,
 ) -> list[np.ndarray]:
@@ -144,7 +145,16 @@ def _design_sos_filter(
             )
 
     if show or plot_file:
-        _showfilter(sos, freq, freq_u, freq_d, fs, factor, show, plot_file)
+        _showfilter(
+            sos=sos,
+            freq=freq,
+            freq_u=freq_u,
+            freq_d=freq_d,
+            fs=fs,
+            factor=factor,
+            show=show,
+            plot_file=plot_file,
+        )
 
     return sos
 
@@ -156,6 +166,7 @@ def _showfilter(
     freq_d: list[float],
     fs: int,
     factor: np.ndarray,
+    *,
     show: bool = False,
     plot_file: str | None = None,
     close: bool = True,

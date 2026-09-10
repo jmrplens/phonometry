@@ -178,7 +178,7 @@ def _nipts_metadata_pairs(
 
 
 def _nipts_table(
-    result: NiptsResult, verbose: bool = False, language: str = "en"
+    result: NiptsResult, *, verbose: bool = False, language: str = "en"
 ) -> Table:
     """The per-audiometric-frequency NIPTS table (median and fractile value)."""
     from reportlab.lib.units import mm
@@ -316,7 +316,7 @@ def render_nipts_report(
 
     left_cell = [
         fiche_paragraph(t("Threshold shift by frequency", language), caption_style),
-        _nipts_table(result, verbose, language),
+        _nipts_table(result=result, verbose=verbose, language=language),
     ]
     left_width = 96.0 if verbose else 66.0
     plot_drawing = render_figure_drawing(
@@ -340,7 +340,9 @@ def render_nipts_report(
     flow.append(result_box(statement, styles, accent, extended))
     if metadata is not None and metadata.requirement is not None:
         text, passed = _nipts_verdict(result, metadata.requirement, language)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
 
     is_handicap, _, _ = _representative(result.frequencies, result.value)
     flow.extend(
@@ -361,7 +363,7 @@ def render_nipts_report(
 # HTLAN fiche.
 # --------------------------------------------------------------------------- #
 def _htlan_table(
-    result: HtlanResult, verbose: bool = False, language: str = "en"
+    result: HtlanResult, *, verbose: bool = False, language: str = "en"
 ) -> Table:
     """The per-audiometric-frequency HTLAN table (age, noise and combined)."""
     from reportlab.lib.units import mm
@@ -500,7 +502,7 @@ def render_htlan_report(
 
     left_cell = [
         fiche_paragraph(t("Threshold level by frequency", language), caption_style),
-        _htlan_table(result, verbose, language),
+        _htlan_table(result=result, verbose=verbose, language=language),
     ]
     left_width = 92.0 if verbose else 74.0
     plot_drawing = render_figure_drawing(
@@ -524,7 +526,9 @@ def render_htlan_report(
     flow.append(result_box(statement, styles, accent, extended))
     if metadata is not None and metadata.requirement is not None:
         text, passed = _htlan_verdict(result, metadata.requirement, language)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
 
     is_handicap, _, _ = _representative(result.frequencies, result.threshold)
     flow.extend(

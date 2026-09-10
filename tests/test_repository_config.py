@@ -219,7 +219,7 @@ def test_the_jit_job_comment_quotes_the_numba_floor_that_is_declared() -> None:
     ],
 )
 def test_the_glob_translation_agrees_with_the_matcher_coderabbit_uses(
-    pattern: str, path: str, expected: bool
+    pattern: str, path: str, *, expected: bool
 ) -> None:
     """Pinned against minimatch and picomatch, run by hand on these cases."""
     assert bool(_glob_to_regex(pattern).fullmatch(path)) is expected

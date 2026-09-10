@@ -323,7 +323,7 @@ def animate_fdtd_critical_angle(output_dir: str) -> None:
     ims: list[Any] = []
     pills: list[Any] = []
     for i, ((name, c2, rho2), ax) in enumerate(zip(_SB_BOTTOMS, axes, strict=True)):
-        ax.grid(False)
+        ax.grid(visible=False)
         ims.append(
             ax.imshow(
                 np.zeros((2, 2)),
@@ -451,7 +451,7 @@ def animate_fdtd_critical_angle(output_dir: str) -> None:
     ax_f.set_yticklabels(["0.01", "0.1", "1"])
     ax_f.set_yticks([], minor=True)
     ax_f.tick_params(labelsize=7.5)
-    ax_f.grid(True, color=COLOR_GRID, lw=0.6)
+    ax_f.grid(visible=True, color=COLOR_GRID, lw=0.6)
     f_lines: list[Any] = []
     for (name, _, _), color, form in zip(_SB_BOTTOMS, colors, closed, strict=True):
         ax_f.plot(

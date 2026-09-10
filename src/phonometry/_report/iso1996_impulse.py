@@ -121,7 +121,7 @@ def _select_rows(per_impulse: np.ndarray, governing: int) -> tuple[list[int], in
     return sorted(top), n - len(top)
 
 
-def _qualifies_markup(qualifies: bool, language: str = "en") -> str:
+def _qualifies_markup(*, qualifies: bool, language: str = "en") -> str:
     """Inline markup for the per-impulse qualifies column.
 
     An onset qualifies as an impulse when its onset rate exceeds 10 dB/s
@@ -213,7 +213,8 @@ def _per_impulse_table(result: ImpulseProminenceResult, language: str = "en") ->
                 fiche_paragraph(_fmt(ld[i], language), value_style),
                 fiche_paragraph(emph(_fmt(per[i], language, decimals=2)), value_style),
                 fiche_paragraph(
-                    _qualifies_markup(bool(qualifies[i]), language), value_style
+                    _qualifies_markup(qualifies=bool(qualifies[i]), language=language),
+                    value_style,
                 ),
             ]
         )
@@ -417,7 +418,9 @@ def render_impulse_prominence_report(
 
     if metadata is not None and metadata.requirement is not None:
         text, passed = _verdict(result, metadata.requirement, language)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
 
     basis_strip_style = measurement_basis_style()
     flow.append(fiche_paragraph(_prominence_note(result, language), basis_strip_style))

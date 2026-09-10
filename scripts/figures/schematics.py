@@ -102,7 +102,7 @@ def _half_width(fig: Figure, ax: Axes, artist: Artist) -> float:
 
 def _grid_axes(ax: Axes) -> None:
     """Apply the standard documentation grid to a data axes."""
-    ax.grid(True, color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.grid(visible=True, color=COLOR_GRID, linestyle="--", alpha=0.5)
 
 
 def _schematic_axes(
@@ -117,7 +117,7 @@ def _schematic_axes(
     ax.set_ylim(*ylim)
     if equal:
         ax.set_aspect("equal")
-    ax.grid(False)
+    ax.grid(visible=False)
     ax.axis("off")
 
 
@@ -432,7 +432,9 @@ def _flow_box(
     return {"box": box, "title": title_t, "value": value_t}
 
 
-def _light_box(box: dict[str, Any], value: str, color: str, fill: bool = False) -> None:
+def _light_box(
+    box: dict[str, Any], value: str, color: str, *, fill: bool = False
+) -> None:
     """Light a pipeline box up: colored edge, full-strength title, a value."""
     from matplotlib.colors import to_rgba
 
@@ -2086,7 +2088,7 @@ def animate_sweep_deconvolution(output_dir: str) -> None:
     )
 
     ax_s = fig.add_subplot(gs[1, 0])
-    ax_s.grid(False)
+    ax_s.grid(visible=False)
     disp = np.full_like(sxx_db, sxx_db.min())
     im = ax_s.imshow(
         disp,

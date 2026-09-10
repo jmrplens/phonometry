@@ -382,7 +382,7 @@ def _release_workflow_patterns() -> tuple[str, str]:
 
 @pytest.mark.parametrize(("version", "valid", "pre"), _RELEASE_VERSIONS)
 def test_release_workflow_accepts_exactly_the_pep440_normal_form(
-    version: str, valid: bool, pre: bool
+    version: str, *, valid: bool, pre: bool
 ) -> None:
     """A release candidate has to reach PyPI, and a mis-typed one must not.
 
@@ -398,7 +398,7 @@ def test_release_workflow_accepts_exactly_the_pep440_normal_form(
 
 @pytest.mark.parametrize(("version", "valid", "pre"), _RELEASE_VERSIONS)
 def test_release_workflow_marks_a_candidate_as_a_pre_release(
-    version: str, valid: bool, pre: bool
+    version: str, *, valid: bool, pre: bool
 ) -> None:
     """The flag is read off the version, never set by hand."""
     if not valid:

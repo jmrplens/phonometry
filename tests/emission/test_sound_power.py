@@ -648,7 +648,7 @@ def _ten_position_determination() -> object:
 
 
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
-def test_a_per_band_quantity_off_the_band_axis_is_refused(trim: bool) -> None:
+def test_a_per_band_quantity_off_the_band_axis_is_refused(*, trim: bool) -> None:
     """The boxed A-weighted total sums every band of ``sound_power_level``.
 
     A spectrum of another length than the band axis gives a sheet whose

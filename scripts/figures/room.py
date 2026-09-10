@@ -3463,7 +3463,7 @@ def generate_directivity_and_tables(output_dir: str) -> None:
     ax3.invert_yaxis()
     ax3.set_xlabel(LABEL_FREQ_HZ)
     ax3.set_title("What each single number of Table A.1 averages")
-    ax3.grid(False)
+    ax3.grid(visible=False)
     ax3.annotate(
         "five quantities average two bands and two average four;\n"
         "only the red row is averaged over energy, by Equation (A.17)",

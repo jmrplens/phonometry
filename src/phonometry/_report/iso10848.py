@@ -218,7 +218,9 @@ def render_flanking_level_difference_report(
         spec=spec,
         is_impact=False,
         curve_attr="d_n_f",
-        build_columns=iso717_columns_builder(rating, False, spec["symbol"]),
+        build_columns=iso717_columns_builder(
+            rating=rating, is_impact=False, symbol=spec["symbol"]
+        ),
         metadata=metadata,
         verbose=verbose,
         language=language,
@@ -262,7 +264,9 @@ def render_flanking_impact_level_report(
         spec=spec,
         is_impact=True,
         curve_attr="l_n_f",
-        build_columns=iso717_columns_builder(rating, True, spec["symbol"]),
+        build_columns=iso717_columns_builder(
+            rating=rating, is_impact=True, symbol=spec["symbol"]
+        ),
         metadata=metadata,
         verbose=verbose,
         language=language,
@@ -317,6 +321,7 @@ def _kij_value_table(
     k_ij: np.ndarray,
     bracketed: np.ndarray | None,
     in_mean: np.ndarray,
+    *,
     verbose: bool,
     language: str,
 ) -> Table:
@@ -470,7 +475,14 @@ def render_vibration_reduction_report(
     caption = t("Vibration reduction index per band", language)
     left_cell = [
         fiche_paragraph(caption, caption_style),
-        _kij_value_table(frequencies, k_ij, bracketed, in_mean, verbose, language),
+        _kij_value_table(
+            frequencies=frequencies,
+            k_ij=k_ij,
+            bracketed=bracketed,
+            in_mean=in_mean,
+            verbose=verbose,
+            language=language,
+        ),
     ]
     plot_drawing = render_figure_drawing(
         result.plot, 116 * mm, y_top=None, figsize=(6.4, 5.8), language=language

@@ -3001,6 +3001,7 @@ def _resolve_fan(
 
 def _retire_stopped_beams(
     march: RayMarch,
+    *,
     sloping: bool,
     n_steps: int,
     widths: NDArray[np.float64],
@@ -3438,7 +3439,11 @@ def gaussian_beams(
         pl = -20.0 * np.log10(np.abs(pressure))
 
     ray_depths, ray_widths, ray_curvatures = _retire_stopped_beams(
-        march, bathy is not None, n_steps, widths, curvatures
+        march=march,
+        sloping=bathy is not None,
+        n_steps=n_steps,
+        widths=widths,
+        curvatures=curvatures,
     )
 
     return GaussianBeamResult(

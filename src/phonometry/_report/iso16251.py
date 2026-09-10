@@ -260,6 +260,7 @@ def _box_statement(result: FloorCoveringImprovementResult, language: str = "en")
 
 def _body(
     result: FloorCoveringImprovementResult,
+    *,
     verbose: bool,
     caption_style: ParagraphStyle,
     language: str = "en",
@@ -310,7 +311,7 @@ def _verdict_row(
     text = t(
         "&#916;L<sub>w</sub> = {value} dB, required &#8805; {req} dB", language
     ).format(value=result.delta_lw, req=fmt_num(requirement, language))
-    return verdict_flow(text, passed, styles, language)
+    return verdict_flow(text=text, passed=passed, styles=styles, language=language)
 
 
 def render_iso16251_report(
@@ -372,7 +373,14 @@ def render_iso16251_report(
         flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
-    flow.append(_body(result, verbose, caption_style, language))
+    flow.append(
+        _body(
+            result=result,
+            verbose=verbose,
+            caption_style=caption_style,
+            language=language,
+        )
+    )
     flow.append(Spacer(1, 8))
 
     flow.append(result_box(_box_statement(result, language), styles, accent))

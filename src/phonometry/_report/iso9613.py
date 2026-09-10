@@ -185,6 +185,7 @@ def _attenuation_metadata_pairs(
 def _attenuation_table(
     result: OutdoorAttenuation,
     levels: _AttenuationLevels | None,
+    *,
     verbose: bool,
     language: str,
 ) -> Table:
@@ -400,7 +401,11 @@ def render_outdoor_attenuation_report(
     flow.append(Spacer(1, 8))
 
     flow.append(fiche_paragraph(t("Attenuation breakdown", language), caption_style))
-    flow.append(_attenuation_table(result, levels, verbose, language))
+    flow.append(
+        _attenuation_table(
+            result=result, levels=levels, verbose=verbose, language=language
+        )
+    )
     flow.append(Spacer(1, 8))
     flow.append(
         render_figure_drawing(
@@ -420,7 +425,9 @@ def render_outdoor_attenuation_report(
             text, passed = _attenuation_verdict(
                 la_dw, float(metadata.requirement), language
             )
-            flow.extend(verdict_flow(text, passed, styles, language))
+            flow.extend(
+                verdict_flow(text=text, passed=passed, styles=styles, language=language)
+            )
     else:
         flow.append(result_box(_breakdown_statement(result, language), styles, accent))
 
@@ -504,7 +511,9 @@ def _barrier_metadata_pairs(
     return [(label, value) for label, value in specs if value]
 
 
-def _barrier_table(result: BarrierInsertionLoss, verbose: bool, language: str) -> Table:
+def _barrier_table(
+    result: BarrierInsertionLoss, *, verbose: bool, language: str
+) -> Table:
     """The per-band barrier insertion-loss table (``IL`` and, verbose, ``N``)."""
     from reportlab.lib.units import mm
 
@@ -610,7 +619,7 @@ def render_barrier_insertion_loss_report(
 
     left_cell = [
         fiche_paragraph(t("Insertion loss per band", language), caption_style),
-        _barrier_table(result, verbose, language),
+        _barrier_table(result=result, verbose=verbose, language=language),
     ]
     plot_drawing = render_figure_drawing(
         result.plot, 116 * mm, y_top=None, figsize=(6.4, 5.4), language=language
@@ -623,7 +632,9 @@ def render_barrier_insertion_loss_report(
 
     if metadata is not None and metadata.requirement is not None:
         text, passed = _barrier_verdict(mean_il, float(metadata.requirement), language)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
 
     basis_strip_style = measurement_basis_style()
     flow.append(

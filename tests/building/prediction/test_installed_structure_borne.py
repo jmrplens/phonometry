@@ -445,7 +445,7 @@ def _annex_i_prediction() -> building.InstalledSourceResult:
 )
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
 def test_a_per_band_quantity_off_the_band_axis_is_refused(
-    field_name: str, trim: bool
+    field_name: str, *, trim: bool
 ) -> None:
     """The band axis is pinned when the prediction is built, either direction."""
     import dataclasses

@@ -380,7 +380,7 @@ def _flyover() -> EPNLResult:
 
 
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
-def test_a_tone_correction_off_the_record_axis_is_refused(trim: bool) -> None:
+def test_a_tone_correction_off_the_record_axis_is_refused(*, trim: bool) -> None:
     """``tone_correction`` is the history nothing downstream measures.
 
     The figure draws PNL and PNLT against ``times`` and the fiche prints

@@ -207,7 +207,7 @@ def plot_harmonic_distortion(
         f"{thd_r}% (R); SINAD = {sinad} dB "
         f"($f_1$ = {freq}Hz)"
     )
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.set_axisbelow(True)
     localize_axes(ax, language)
     return ax
@@ -320,7 +320,7 @@ def plot_modulation_distortion(
         f"IEC 60268-3 $d_2$ = {d2}%, $d_3$ = {d3}%; SMPTE = {smpte}% "
         f"($f_1$ = {f_low}Hz, $f_2$ = {f_high}Hz)"
     )
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.set_axisbelow(True)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
@@ -361,7 +361,7 @@ def plot_frequency_response(
         kwargs.setdefault("label", f"$|H|$ ({result.estimator})")
         axm.semilogx(freqs[pos], mag[pos], color=color, **kwargs)
         axm.set_ylabel(_t(_MAGNITUDE_LABEL, language))
-        axm.grid(True, which="both", alpha=0.3)
+        axm.grid(visible=True, which="both", alpha=0.3)
         axm.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
     fmin, fmax = float(freqs[pos].min()), float(freqs[pos].max())
@@ -381,12 +381,12 @@ def plot_frequency_response(
     )
     axes[1].semilogx(freqs[pos], phase_deg[pos], color=_C_SECONDARY)
     axes[1].set_ylabel(_t("Phase [deg]", language))
-    axes[1].grid(True, which="both", alpha=0.3)
+    axes[1].grid(visible=True, which="both", alpha=0.3)
     axes[2].semilogx(freqs[pos], coh[pos], color=_C_TERTIARY)
     axes[2].set_ylabel(_t(r"Coherence $\gamma^2$", language))
     axes[2].set_xlabel(_t(_FREQ_LABEL, language))
     axes[2].set_ylim(0.0, 1.05)
-    axes[2].grid(True, which="both", alpha=0.3)
+    axes[2].grid(visible=True, which="both", alpha=0.3)
     for axf in axes:
         format_frequency_axis(axf, fmin, fmax)
         localize_axes(axf, language)
@@ -430,7 +430,7 @@ def plot_swept_sine_distortion(
             **kwargs,
         )
         axt.set_ylabel(_t(_THD_LABEL, language))
-        axt.grid(True, which="both", alpha=0.3)
+        axt.grid(visible=True, which="both", alpha=0.3)
         axt.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
     if ax is not None:
@@ -469,7 +469,7 @@ def plot_swept_sine_distortion(
             method=result.method,
         )
     )
-    axes[0].grid(True, which="both", alpha=0.3)
+    axes[0].grid(visible=True, which="both", alpha=0.3)
     axes[0].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     format_frequency_axis(axes[0])
     localize_axes(axes[0], language)
@@ -522,7 +522,7 @@ def plot_piston_impedance(
         _t(r"Normalized radiation impedance $Z_\mathrm{r} / \rho c S$", language)
     )
     ax.set_title(_t("Baffled circular piston radiation impedance", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -611,7 +611,7 @@ def plot_piston_directivity(
     ax.set_yticks([-40.0, -30.0, -20.0, -10.0, 0.0])
     ax.set_yticklabels(["−40", "−30", "−20", "−10", "0 dB"], fontsize="x-small")
     ax.tick_params(axis="x", labelsize="x-small")
-    ax.grid(True, ls=":", lw=0.4, alpha=0.7)
+    ax.grid(visible=True, ls=":", lw=0.4, alpha=0.7)
     ax.set_title(_t("Baffled circular piston directivity", language))
     if ka.size > 1:
         ax.legend(
@@ -653,7 +653,7 @@ def _freq_label(value: float, language: str) -> str:
 
 def _grid(ax: Axes) -> None:
     """The dotted both-scale grid the datasheet panels share."""
-    ax.grid(True, which="both", ls=":", lw=0.4, alpha=0.6)
+    ax.grid(visible=True, which="both", ls=":", lw=0.4, alpha=0.6)
 
 
 def _draw_loudspeaker_response(
@@ -766,7 +766,7 @@ def _draw_datasheet_polar(
     ax.set_yticks([-20.0, -15.0, -10.0, -5.0, 0.0])
     ax.set_yticklabels(["−20", "", "−10", "", "0 dB"], fontsize="x-small")
     ax.tick_params(axis="x", labelsize="x-small")
-    ax.grid(True, ls=":", lw=0.4, alpha=0.7)
+    ax.grid(visible=True, ls=":", lw=0.4, alpha=0.7)
     title = _t("Directional response", language)
     if result.polar_frequency is not None:
         title = _t(
@@ -1106,7 +1106,7 @@ def plot_feedback_stability(
         if result.is_stable
         else _t("Gain before feedback — unstable by {head} dB", language, head=head)
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax

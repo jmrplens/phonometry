@@ -468,6 +468,7 @@ def _stipa_sine_signal(
     m: float,
     seconds: float = 16.0,
     bands: tuple[int, ...] | None = None,
+    *,
     edge_carriers: bool = False,
     flat_levels: bool = False,
 ) -> np.ndarray:

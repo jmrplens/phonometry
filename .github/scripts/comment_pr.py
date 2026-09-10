@@ -129,7 +129,9 @@ def parse_test_results(test_dir: str, ref: str) -> tuple[str, int, int]:
             # image can 404: a fork's head commit is not always servable from
             # this repository's raw host.
             passed = failures == 0
-            status = f"{outcome_mark(passed, ref)} {'Passed' if passed else 'Failed'}"
+            status = (
+                f"{outcome_mark(ok=passed, ref=ref)} {'Passed' if passed else 'Failed'}"
+            )
             summary.append(
                 f"| {version} | {tests} | {failures} | {coverage_pct} | {status} |"
             )
@@ -440,7 +442,7 @@ def main() -> None:
     )
     # Raw <img>: the summary line below sits inside the <details> HTML block,
     # where Markdown image syntax ships as literal text.
-    verdict = outcome_mark(ran and failures == 0, sha, html=True)
+    verdict = outcome_mark(ok=ran and failures == 0, ref=sha, html=True)
     blob = f"https://github.com/{repo}/blob/{sha}"
 
     # Hidden marker so the CI updates one sticky comment instead of posting a

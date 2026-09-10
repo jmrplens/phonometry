@@ -862,3 +862,26 @@ def test_clause_poles_are_not_migrated_to_the_physical_bound() -> None:
             f"{relative} guards the pole of its own clause, printed with "
             f"{printed}, not absolute zero"
         )
+
+
+def test_the_grid_flag_is_named_the_way_matplotlib_names_it() -> None:
+    """The 295 ``ax.grid(visible=...)`` sites rest on one matplotlib name.
+
+    A boolean is written by name, at the definition and at the call, and for
+    the plot corpus the call almost always means ``ax.grid``. matplotlib
+    declares that parameter ``visible``; every site was rewritten to say so
+    rather than to pass it by position. If a matplotlib release renames it,
+    those sites become a ``TypeError`` at the first figure, and the failure
+    would arrive as a wall of unrelated red. This pins the assumption instead,
+    so the upgrade that breaks it says which name moved.
+    """
+    import inspect
+
+    from matplotlib.axes import Axes
+
+    names = [n for n in inspect.signature(Axes.grid).parameters if n != "self"]
+    first = names[0]
+    assert first == "visible", (
+        f"matplotlib now calls the first grid parameter {first!r}; the plot "
+        "corpus passes it as 'visible'"
+    )

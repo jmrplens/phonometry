@@ -138,7 +138,7 @@ def plot_program_loudness(
     ax.set_xlabel(_t(_TIME_LABEL, language))
     ax.set_ylabel(_t("Loudness [LUFS]", language))
     ax.set_title(_t("Programme loudness (EBU R 128)", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize=9)
     localize_axes(ax, language)
     return ax
@@ -198,7 +198,7 @@ def plot_k_weighting_response(
     ax.set_xlabel(_t("Frequency [Hz]", language))
     ax.set_ylabel(_t("Magnitude [dB]", language))
     ax.set_title(_t("K-weighting frequency response (ITU-R BS.1770)", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="lower right", fontsize=9)
     localize_axes(ax, language)
     return ax
@@ -253,7 +253,7 @@ def plot_quasi_peak(
     )
     ax.set_title(_t(title, language))
     ax.set_ylim(bottom=0.0)
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     # Lower right, not the upper right its neighbours use: the needle starts
     # at zero and the reading line sits at the top of the axes, so the upper
     # corners are exactly where this curve lives.

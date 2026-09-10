@@ -137,7 +137,7 @@ def test_bands_are_the_printed_three() -> None:
     ],
 )
 def test_trigger_is_strict_below_25_after_rounding(
-    volume: float, applies: bool
+    volume: float, *, applies: bool
 ) -> None:
     """The printed condition, at every boundary it has."""
     assert low_frequency_procedure_applies(volume) is applies

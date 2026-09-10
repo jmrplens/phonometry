@@ -199,7 +199,7 @@ def render_iso15186_report(
     )
 
     def build_columns(
-        value_header: str, curve: np.ndarray, verbose: bool, language: str
+        value_header: str, curve: np.ndarray, *, verbose: bool, language: str
     ) -> tuple[Sequence[Column], str, Any]:
         """The table: ``f | RI`` plus the optional ``RI,M`` / ``FpI`` / ``δpI0``."""
         from reportlab.lib.units import mm
@@ -348,15 +348,15 @@ def render_iso15186_element_report(
         fpi, residual_index, int(np.asarray(result.d_i_n_e).size)
     )
     iso717_build = iso717_columns_builder(
-        rating, False, _DINE_SPEC["symbol"], band_set=band_set
+        rating=rating, is_impact=False, symbol=_DINE_SPEC["symbol"], band_set=band_set
     )
 
     def build_columns(
-        value_header: str, curve: np.ndarray, verbose: bool, language: str
+        value_header: str, curve: np.ndarray, *, verbose: bool, language: str
     ) -> tuple[Sequence[Column], str, Any]:
         """The ISO 717 table; the ``FpI`` / ``δpI0`` columns replace verbose."""
         if not extra:
-            return iso717_build(value_header, curve, verbose, language)
+            return iso717_build(value_header, curve, verbose=verbose, language=language)
         # The compact left cell cannot hold the verbose ISO 717 evaluation
         # plus the qualification columns, so the Clause 8 i) content takes
         # precedence whenever it is supplied.

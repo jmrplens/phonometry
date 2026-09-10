@@ -146,7 +146,7 @@ def _metadata_pairs(
 
 
 def _phase_table(
-    result: ActivityAssessment, verbose: bool = False, language: str = "en"
+    result: ActivityAssessment, *, verbose: bool = False, language: str = "en"
 ) -> Table:
     """The full-width *fases de ruido* table.
 
@@ -202,7 +202,7 @@ def _phase_table(
     return stacked_table(data, [w * mm for w in widths])
 
 
-def _status_markup(passed: bool | None, language: str = "en") -> str:
+def _status_markup(*, passed: bool | None, language: str = "en") -> str:
     """Inline PASS / FAIL / not-assessed markup for a criterion cell."""
     if passed is None:
         return f"<font color='{_MUTED_HEX}'>&#8211;</font>"
@@ -212,7 +212,7 @@ def _status_markup(passed: bool | None, language: str = "en") -> str:
 
 
 def _criterion_cell(
-    value: float | None, limit: float, passed: bool | None, language: str
+    value: float | None, limit: float, *, passed: bool | None, language: str
 ) -> str:
     """``value / limit`` markup for one Article 25 criterion."""
     if value is None:
@@ -241,34 +241,36 @@ def _result_row(
         fiche_paragraph(_fmt(period.limit, language, decimals=0), value_style),
         fiche_paragraph(
             _criterion_cell(
-                period.max_phase_level,
-                period.phase_limit,
-                period.phase_pass,
-                language,
+                value=period.max_phase_level,
+                limit=period.phase_limit,
+                passed=period.phase_pass,
+                language=language,
             ),
             value_style,
         ),
         fiche_paragraph(
             _criterion_cell(
-                float(period.reported_level),
-                period.daily_limit,
-                period.daily_pass,
-                language,
+                value=float(period.reported_level),
+                limit=period.daily_limit,
+                passed=period.daily_pass,
+                language=language,
             ),
             value_style,
         ),
         fiche_paragraph(
             _criterion_cell(
-                None
+                value=None
                 if period.reported_long_term is None
                 else float(period.reported_long_term),
-                period.limit,
-                period.long_term_pass,
-                language,
+                limit=period.limit,
+                passed=period.long_term_pass,
+                language=language,
             ),
             value_style,
         ),
-        fiche_paragraph(_status_markup(period.complies, language), value_style),
+        fiche_paragraph(
+            _status_markup(passed=period.complies, language=language), value_style
+        ),
     ]
 
 
@@ -427,7 +429,7 @@ def render_activity_report(
     flow.append(Spacer(1, 6))
 
     flow.append(fiche_paragraph(t("Noise phases", language), caption_style))
-    flow.append(_phase_table(result, verbose, language))
+    flow.append(_phase_table(result=result, verbose=verbose, language=language))
     flow.append(Spacer(1, 6))
 
     flow.append(fiche_paragraph(t("Assessment by period", language), caption_style))
@@ -466,7 +468,9 @@ def render_activity_report(
     flow.append(result_box(statement, styles, accent, extended))
 
     text, passed = _verdict(result, language)
-    flow.extend(verdict_flow(text, passed, styles, language))
+    flow.extend(
+        verdict_flow(text=text, passed=passed, styles=styles, language=language)
+    )
 
     basis_strip_style = measurement_basis_style()
     flow.append(

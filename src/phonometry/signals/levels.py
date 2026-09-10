@@ -41,7 +41,7 @@ _REF_PRESSURE = 2e-5
 
 
 def _level_db(
-    mean_square: np.ndarray, calibration_factor: float, dbfs: bool
+    mean_square: np.ndarray, calibration_factor: float, *, dbfs: bool
 ) -> np.ndarray:
     """Convert mean-square values to dB SPL (re 20 uPa) or dBFS."""
     eps = np.finfo(float).eps
@@ -88,7 +88,9 @@ def leq(
     x_proc = _resolve_samples_raw(x, calibrate=False)
     _validate_level_input(x_proc, calibration)
     ms = np.mean(x_proc**2, axis=-1)
-    out = _level_db(np.asarray(ms), calibration, dbfs)
+    out = _level_db(
+        mean_square=np.asarray(ms), calibration_factor=calibration, dbfs=dbfs
+    )
     return as_float_or_array(out)
 
 
@@ -177,7 +179,11 @@ def ln_levels(
     # _validate_reference_stability already uses in calibration.py.
     tau = {"fast": 0.125, "slow": 1.0, "impulse": 0.035}[mode.lower()]
     skip = min(int(5 * tau * fs), envelope.shape[-1] // 2)
-    levels_db = _level_db(envelope[..., skip:], calibration_factor, dbfs)
+    levels_db = _level_db(
+        mean_square=envelope[..., skip:],
+        calibration_factor=calibration_factor,
+        dbfs=dbfs,
+    )
 
     result: dict[int, float | np.ndarray] = {}
     for value in n:
@@ -233,7 +239,11 @@ def lc_peak(
     _validate_level_input(x_proc, calibration_factor)
     weighted = weighting_filter(x_proc, fs, "C")
     peak = inter_sample_peak(weighted, int(oversample))
-    out = _level_db(np.asarray(peak) ** 2, calibration_factor, dbfs)
+    out = _level_db(
+        mean_square=np.asarray(peak) ** 2,
+        calibration_factor=calibration_factor,
+        dbfs=dbfs,
+    )
     return as_float_or_array(out)
 
 

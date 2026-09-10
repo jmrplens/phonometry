@@ -43,7 +43,7 @@ from __future__ import annotations
 
 import html
 import math
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
@@ -233,7 +233,7 @@ def _assemble_left(
 
 
 def _nc_left_cell(
-    result: NCResult, verbose: bool, caption_style: ParagraphStyle, language: str
+    result: NCResult, *, verbose: bool, caption_style: ParagraphStyle, language: str
 ) -> tuple[list[Any], list[float]]:
     """The NC fiche left cell (caption + table) and its two-panel column widths."""
     from reportlab.lib.units import mm
@@ -255,7 +255,7 @@ def _nc_left_cell(
 
 
 def _rc_left_cell(
-    result: RCResult, verbose: bool, caption_style: ParagraphStyle, language: str
+    result: RCResult, *, verbose: bool, caption_style: ParagraphStyle, language: str
 ) -> tuple[list[Any], list[float]]:
     """The RC fiche left cell (caption + table) and its two-panel column widths."""
     from reportlab.lib.units import mm
@@ -444,14 +444,31 @@ def _verdict(
     return text, passed
 
 
+class LeftCellBuilder[R: NCResult | RCResult](Protocol):
+    """The call shape of a left-cell builder.
+
+    A ``Callable[...]`` alias cannot say that a parameter is keyword-only, and
+    ``verbose`` is one, so the shape is declared as a protocol.
+    """
+
+    def __call__(
+        self,
+        result: R,
+        *,
+        verbose: bool,
+        caption_style: ParagraphStyle,
+        language: str,
+    ) -> tuple[list[Any], list[float]]:
+        """Build the left cell and the two panel widths."""
+        ...
+
+
 def _render_room_noise[R: NCResult | RCResult](
     result: R,
     path: str,
     *,
     basis_template: str,
-    left_builder: Callable[
-        [R, bool, ParagraphStyle, str], tuple[list[Any], list[float]]
-    ],
+    left_builder: LeftCellBuilder[R],
     statement_builder: Callable[[R, str], tuple[str, list[str]]],
     symbol: str,
     metadata: ReportMetadata | None,
@@ -496,7 +513,7 @@ def _render_room_noise[R: NCResult | RCResult](
     flow.append(Spacer(1, 8))
 
     left_cell, (left_width, plot_width) = left_builder(
-        result, verbose, caption_style, language
+        result, verbose=verbose, caption_style=caption_style, language=language
     )
     plot_drawing = render_figure_drawing(
         result.plot, (plot_width - 2.0) * mm, y_top=None, language=language
@@ -525,7 +542,9 @@ def _render_room_noise[R: NCResult | RCResult](
             language,
             out_of_range=oor if isinstance(oor, str) else None,
         )
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
     flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)

@@ -89,7 +89,9 @@ def _caption(result: EnclosureResult, language: str = "en") -> str:
     return t("One-third-octave-band insertion loss", language)
 
 
-def _value_table(result: EnclosureResult, verbose: bool, language: str = "en") -> Table:
+def _value_table(
+    result: EnclosureResult, *, verbose: bool, language: str = "en"
+) -> Table:
     """Build the per-band table (nominal frequency, R, C, IL; verbose adds R_i).
 
     Called only after the renderer has imported reportlab.
@@ -220,7 +222,7 @@ def render_enclosure_report(
         title=t("Machine enclosure insertion loss", language),
         basis=_basis(language),
         caption=_caption(result, language),
-        value_table=_value_table(result, verbose, language),
+        value_table=_value_table(result=result, verbose=verbose, language=language),
         statement=statement,
         extended=extended,
         basis_strips=[_basis_strip(language)],

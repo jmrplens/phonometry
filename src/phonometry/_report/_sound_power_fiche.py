@@ -515,10 +515,14 @@ def render_sound_power_fiche(
     # requirement comparison. The two paths are mutually exclusive.
     if verdict is not None:
         text, passed = verdict
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
     elif metadata is not None and metadata.requirement is not None:
         text, passed = power_verdict(result, metadata.requirement, language)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
 
     basis_style_strip = measurement_basis_style()
     flow.extend(

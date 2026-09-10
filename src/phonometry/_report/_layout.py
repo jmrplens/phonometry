@@ -866,7 +866,7 @@ def analysis_cell_styles(prefix: str) -> tuple[Any, Any, Any]:
     return header_style, label_style, value_style
 
 
-def exceedance_markup(exceeded: bool | None, language: str = "en") -> str:
+def exceedance_markup(*, exceeded: bool | None, language: str = "en") -> str:
     """Inline status markup for an exceeded / not-exceeded assessment row.
 
     Shared by the exposure fiches (occupational noise, human vibration): a red
@@ -974,7 +974,7 @@ def result_box(
 
 
 def verdict_flow(
-    text: str, passed: bool, styles: StyleSheet1, language: str = "en"
+    text: str, *, passed: bool, styles: StyleSheet1, language: str = "en"
 ) -> list[Any]:
     """The PASS/FAIL verdict paragraph for a precomputed comparison.
 

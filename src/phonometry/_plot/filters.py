@@ -215,7 +215,7 @@ def plot_filter_class(
         )
     )
     ax.legend(loc="upper center", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -304,7 +304,7 @@ def plot_parametric_eq(
             0.0, color=theme_line(_C_REFERENCE, axm, quiet=0.6), linestyle=":", lw=0.8
         )
         axm.set_ylabel(_t("Magnitude [dB]", language))
-        axm.grid(True, which="both", alpha=0.3)
+        axm.grid(visible=True, which="both", alpha=0.3)
         axm.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
     if ax is not None:
@@ -320,7 +320,7 @@ def plot_parametric_eq(
     axes[1].semilogx(freqs, np.degrees(result.phase_rad), color=color, lw=1.4)
     axes[1].set_ylabel(_t("Phase [deg]", language))
     axes[1].set_xlabel(_t(_FREQ_LABEL, language))
-    axes[1].grid(True, which="both", alpha=0.3)
+    axes[1].grid(visible=True, which="both", alpha=0.3)
     for axf in axes:
         format_frequency_axis(axf, fmin, fmax, language=language)
         localize_axes(axf, language)
@@ -387,7 +387,7 @@ def plot_time_weighted_envelope(
             language,
         )
     )
-    axw.grid(True, alpha=0.3)
+    axw.grid(visible=True, alpha=0.3)
     if new_figure:
         axw.set_title(
             _t(

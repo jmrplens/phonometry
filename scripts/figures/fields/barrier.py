@@ -197,7 +197,7 @@ def animate_fdtd_barrier(output_dir: str) -> None:
         )
         ax_p.set_title(titles[col], fontsize=10)
         for ax in (ax_p, ax_r):
-            ax.grid(False)
+            ax.grid(visible=False)
             ax.set_ylim(-0.5, 7.0)
             ax.add_patch(
                 Rectangle(

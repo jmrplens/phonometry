@@ -953,7 +953,7 @@ def generate_panel_insulation_concept(output_dir: str) -> None:
     ax.set_ylabel(r_label)
     ax.set_xlabel("Frequency [Hz]")
     ax.legend(loc="upper left", fontsize=9)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     format_frequency_axis(ax, float(bands.min()), float(bands.max()))
 
     # (b) Double wall: mass-spring-mass resonance and cavity gain.
@@ -983,7 +983,7 @@ def generate_panel_insulation_concept(output_dir: str) -> None:
     ax.set_ylabel(r_label)
     ax.set_xlabel("Frequency [Hz]")
     ax.legend(loc="upper left", fontsize=9)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     format_frequency_axis(ax, float(bands.min()), float(bands.max()))
 
     # (c) Radiation efficiency of a bending plate.
@@ -1004,7 +1004,7 @@ def generate_panel_insulation_concept(output_dir: str) -> None:
     ax.set_ylabel(r"Radiation efficiency $\sigma$")
     ax.set_xlabel("Frequency [Hz]")
     ax.legend(loc="upper left", fontsize=9)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     format_frequency_axis(ax, float(bands.min()), float(bands.max()))
 
     # (d) Composite wall with a small aperture (open-area cap).
@@ -1052,7 +1052,7 @@ def generate_panel_insulation_concept(output_dir: str) -> None:
     ax.set_ylabel(r_label)
     ax.set_xlabel("Frequency [Hz]")
     ax.legend(loc="upper left", fontsize=9)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     format_frequency_axis(ax, float(bands.min()), float(bands.max()))
 
     fig.suptitle(

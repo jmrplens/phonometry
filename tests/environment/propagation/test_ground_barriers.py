@@ -435,7 +435,7 @@ def test_the_method_docstring_names_every_model_and_counts_them_right() -> None:
 @pytest.mark.parametrize("field_name", ["insertion_loss", "fresnel_number"])
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
 def test_a_barrier_series_off_the_frequency_axis_is_refused(
-    field_name: str, trim: bool
+    field_name: str, *, trim: bool
 ) -> None:
     """The fiche and the plot both pair these two with the frequency axis.
 

@@ -51,7 +51,7 @@ verify_weighting_class(
     *,
     sweep_points: int = 4096,
     edition: str = '2013',
-) -> dict[str, Any]
+) -> WeightingComplianceResult
 ```
 
 Verify a frequency-weighting filter against its standard's tolerances.
@@ -138,7 +138,7 @@ over the standard's full frequency range.
 | `sweep_points` | Number of points of the 5.5.7 between-nominals sweep (>= 64). |
 | `edition` | `"2013"` (IEC 61672-1:2013, classes 1/2) or `"1979"` (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3). |
 
-**Returns:** Dict with `overall_class` (the strictest class of the edition that every checked frequency and the sweep meet, or `None`), `range_limited` (see above), `bands`: a list of `{"freq", "class", "deviation_db", "margin_class<c>_db"}` for each class `c` of the edition, where `freq` is the nominal label and a positive margin means the limits are met with that much room, and `between_nominals`: `{"worst_freq", "margin_class<c>_db"}` for the sweep.
+**Returns:** A `WeightingComplianceResult`, which carries the class together with the per-frequency verdicts it rests on, the between-nominals sweep and the filter it was measured on.
 
 **Raises**
 

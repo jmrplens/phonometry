@@ -414,7 +414,7 @@ within 5 dB of the calibration level and stepping it in 5 dB intervals, refined
 to 1 dB around the ends of the linear range and the overload point. Run and
 report the periodic test in a controlled environment (19-25 °C, 100-102 kPa,
 40-70 % relative humidity) with a calibrator traceable to national standards.
-Read `report["passed"]` as a verdict on data you supplied: a failed check
+Read `report.passed` as a verdict on data you supplied: a failed check
 invalidates the certification data, it is not a correction to apply. Band-filter
 conformance is a separate matter — Annex 16 §3.7.3 requires IEC 61260 class 1,
 with class 2 admissible only if the certificating authority allows it, and the
@@ -427,7 +427,7 @@ report = aircraft.verify_aircraft_noise_system(
     directional={4000.0: {30: 0.4, 60: 0.9, 90: 1.9, 120: 2.4, 150: 2.4}},
     frequency_response={1000.0: 1.2},
 )
-print(report["passed"], report["checks"])
+print(report.passed, report.checks)
 ```
 
 ## Atmospheric absorption (SAE ARP 5534)

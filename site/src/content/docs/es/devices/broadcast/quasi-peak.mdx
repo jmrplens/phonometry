@@ -254,8 +254,8 @@ ponderación) y lee cada uno frente a la lectura permanente de la misma cadena.
 from phonometry import broadcast
 
 report = broadcast.verify_quasi_peak_dynamics(48000.0)
-print(report["passed"], round(report["worst_margin_db"], 3))   # True 0.259
-row = report["stimuli"][0]
+print(report.passed, round(report.worst_margin_db, 3))   # True 0.259
+row = report.stimuli[0]
 print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.94
 ```
 

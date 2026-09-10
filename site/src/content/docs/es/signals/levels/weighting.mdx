@@ -499,10 +499,10 @@ las frecuencias comprobadas, no la conformidad completa de 10 Hz a 20 kHz):
 from phonometry import filters
 
 result = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
-print(result["overall_class"])          # 1
-print(result["range_limited"])          # False
-print(result["between_nominals"])       # {'worst_freq': ..., 'margin_class1_db': ...}
-print(result["bands"][20])
+print(result.overall_class)          # 1
+print(result.range_limited)          # False
+print(result.between_nominals)       # {'worst_freq': ..., 'margin_class1_db': ...}
+print(result.bands[20])
 # {'freq': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
 ```
 
@@ -526,8 +526,8 @@ from phonometry import filters
 result = filters.verify_weighting_class(
     filters.WeightingFilter(48000, "A"), edition="1979"
 )
-print(result["overall_class"])                             # 0
-print(min(b["margin_class0_db"] for b in result["bands"])) # 0.650...
+print(result.overall_class)                             # 0
+print(min(b["margin_class0_db"] for b in result.bands)) # 0.650...
 ```
 
 Es una máscara distinta, no un cambio de nombre, y ve errores que la clase 1
@@ -568,7 +568,7 @@ ax.plot(freqs, upper2, ":", drawstyle="steps-mid", label="Límite superior/infer
 ax.plot(freqs, lo2, ":", drawstyle="steps-mid", color="C2")
 
 for curve, marker in (("A", "o"), ("C", "s")):
-    bands = filters.verify_weighting_class(filters.WeightingFilter(48000, curve))["bands"]
+    bands = filters.verify_weighting_class(filters.WeightingFilter(48000, curve)).bands
     f = [b["freq"] for b in bands]
     dev = [b["deviation_db"] for b in bands]
     ax.plot(f, dev, marker=marker, label=f"Desviación de la ponderación {curve} (48 kHz)")

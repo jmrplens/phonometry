@@ -78,35 +78,6 @@ rows, which the masks match
 exactly.
 :::
 
-## filter_class_compliance
-
-```python
-filter_class_compliance(
-    bank: OctaveFilterBank,
-    *,
-    num_points: int = 32768,
-    edition: str = '2014',
-) -> FilterComplianceResult
-```
-
-Verify a filter bank and package the verdict as a reportable result.
-
-Runs [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) and stores the outcome together with the
-bank's second-order sections, mid-band frequencies, per-band decimation
-factors and sampling rate, so the returned object can redraw the measured
-relative attenuation and render an accredited `.report()` fiche without
-keeping a reference to the bank.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `bank` | The filter bank to verify. |
-| `num_points` | Frequency grid points per band (>= 16). |
-| `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0). |
-
-**Returns:** A [`FilterComplianceResult`](/phonometry/reference/api/filters/compliance/#filtercomplianceresult).
-
 ## FilterComplianceResult
 
 ```python
@@ -126,7 +97,7 @@ FilterComplianceResult(
 
 IEC 61260-1 class-compliance verdict of an [`OctaveFilterBank`](/phonometry/reference/api/filters/core/#octavefilterbank).
 
-Wraps the dictionary of [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) together with the
+What [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) returns: the verdict together with the
 minimal filter-bank data needed to redraw the measured relative-attenuation
 curve, so the result exposes the standard `plot` / `report` pair without
 holding a reference to the (possibly stateful) bank.
@@ -136,7 +107,7 @@ holding a reference to the (possibly stateful) bank.
 | Name | Description |
 | :--- | :--- |
 | `overall_class` | The strictest class every band meets (0/1/2), or `None` when at least one band meets no class of the edition. |
-| `bands` | The per-band verdict dictionaries of [`verify_filter_class`](/phonometry/reference/api/filters/compliance/#verify_filter_class) (one `{"freq", "class", "margin_class<c>_db", ...}` per band), as an immutable tuple. |
+| `bands` | The per-band verdicts (one `{"freq", "class", "margin_class<c>_db", ...}` per band), as an immutable tuple. |
 | `fraction` | Bandwidth designator `b` (1 for octave, 3 for one-third-octave). |
 | `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2). |
 | `sos` | Per-band second-order sections of the analysed bank (one array per band), kept so the relative attenuation can be recomputed with `scipy.signal.sosfreqz` exactly as the verifier does. |
@@ -249,10 +220,10 @@ class-compliance result, an optional verdict row against a supplied
 ```python
 verify_filter_class(
     bank: OctaveFilterBank,
-    num_points: int = 32768,
     *,
+    num_points: int = 32768,
     edition: str = '2014',
-) -> dict[str, Any]
+) -> FilterComplianceResult
 ```
 
 Verify a filter bank against the IEC 61260 class limits.
@@ -278,4 +249,4 @@ per-band `checked_to_omega` records how far the check reached.
 | `num_points` | Number of frequency grid points per band (>= 16). |
 | `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0). |
 
-**Returns:** Dict with `overall_class` (the strictest class every band meets, or `None`), `range_limited` (`True` when at least one band's stop-band mask extends beyond its processing Nyquist, so the returned class attests the verified frequency range rather than the full Table 1 mask; see above) and `bands`: a list of `{"freq", "class", "checked_to_omega", "margin_class<c>_db"}` for each class `c` of the edition, where a positive margin means the limits are met with that much room and `checked_to_omega` is the highest normalized frequency the band's verification could reach (its processing Nyquist over `f_m`).
+**Returns:** A [`FilterComplianceResult`](/phonometry/reference/api/filters/compliance/#filtercomplianceresult), which carries the verdict together with the sections, mid-band frequencies, decimation factors and sampling rate it was measured through, so it can redraw the relative attenuation and render an accredited `.report()` fiche without keeping a reference to the (possibly stateful) bank.

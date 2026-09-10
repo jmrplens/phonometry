@@ -76,15 +76,15 @@ def test_high_accuracy_weighting_verdicts(fs: int, curve: str) -> None:
     """The verdict of each default A/C/Z filter, at four sample rates."""
     expected = _EXPECTED_CLASS[(curve, fs)]
     result = filters.verify_weighting_class(filters.WeightingFilter(fs, curve))
-    assert result["overall_class"] == expected
+    assert result.overall_class == expected
     if expected == 1:
-        assert all(b["class"] == 1 for b in result["bands"])
-        assert all(b["margin_class1_db"] >= 0 for b in result["bands"])
+        assert all(b["class"] == 1 for b in result.bands)
+        assert all(b["margin_class1_db"] >= 0 for b in result.bands)
     else:
         # Exactly one row, the one nearest Nyquist, is what costs the class.
-        off = [b for b in result["bands"] if b["class"] != 1]
+        off = [b for b in result.bands if b["class"] != 1]
         assert len(off) == 1
-        assert off[0]["freq"] == max(b["freq"] for b in result["bands"])
+        assert off[0]["freq"] == max(b["freq"] for b in result.bands)
 
 
 def test_high_accuracy_docstring_states_what_the_plain_design_earns() -> None:
@@ -106,7 +106,7 @@ def test_high_accuracy_docstring_states_what_the_plain_design_earns() -> None:
 
     def plain(fs: int, curve: str) -> int | None:
         wf = filters.WeightingFilter(fs, curve, high_accuracy=False)
-        verdict: int | None = filters.verify_weighting_class(wf)["overall_class"]
+        verdict: int | None = filters.verify_weighting_class(wf).overall_class
         return verdict
 
     for curve in ("A", "C"):
@@ -117,19 +117,19 @@ def test_high_accuracy_docstring_states_what_the_plain_design_earns() -> None:
         assert plain(16000, curve) is None
         # And the fitted design earns class 1 where the plain one cannot.
         wf = filters.WeightingFilter(16000, curve)
-        assert filters.verify_weighting_class(wf)["overall_class"] == 1
+        assert filters.verify_weighting_class(wf).overall_class == 1
 
 
 def test_z_weighting_zero_deviation() -> None:
     """Z is a flat bypass: zero deviation and full class-1 margin everywhere."""
     result = filters.verify_weighting_class(filters.WeightingFilter(48000, "Z"))
-    assert all(b["deviation_db"] == 0.0 for b in result["bands"])
-    assert result["overall_class"] == 1
+    assert all(b["deviation_db"] == 0.0 for b in result.bands)
+    assert result.overall_class == 1
 
 
 def test_band_dict_keys_and_deviation_sign() -> None:
     result = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
-    band = result["bands"][0]
+    band = result.bands[0]
     assert set(band) == {
         "freq",
         "class",
@@ -149,7 +149,7 @@ def test_frequencies_above_nyquist_are_dropped() -> None:
     7 943.3 Hz, is below Nyquist) while 10 kHz and above are dropped.
     """
     result = filters.verify_weighting_class(filters.WeightingFilter(16000, "A"))
-    assert max(b["freq"] for b in result["bands"]) == 8000.0
+    assert max(b["freq"] for b in result.bands) == 8000.0
 
 
 def test_low_fs_verdict_is_flagged_range_limited() -> None:
@@ -158,9 +158,9 @@ def test_low_fs_verdict_is_flagged_range_limited() -> None:
     system cannot demonstrate full class-1 conformance over 10 Hz-20 kHz.
     """
     result = filters.verify_weighting_class(filters.WeightingFilter(16000, "A"))
-    assert result["range_limited"] is True
+    assert result.range_limited is True
     result_full = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
-    assert result_full["range_limited"] is False
+    assert result_full.range_limited is False
 
 
 def test_deviation_evaluated_at_exact_base10_frequency() -> None:
@@ -172,7 +172,7 @@ def test_deviation_evaluated_at_exact_base10_frequency() -> None:
     """
     wf = filters.WeightingFilter(96000, "A")
     band = next(
-        b for b in filters.verify_weighting_class(wf)["bands"] if b["freq"] == 16000.0
+        b for b in filters.verify_weighting_class(wf).bands if b["freq"] == 16000.0
     )
     ref_1k = _tone_gain_db(wf, 96000, 1000.0)
     at_exact = _tone_gain_db(wf, 96000, 15848.93192) - ref_1k - (-6.6)
@@ -199,7 +199,7 @@ def test_verdict_measures_the_path_a_signal_takes(fs: int, label: float) -> None
     """
     wf = filters.WeightingFilter(fs, "A")
     band = next(
-        b for b in filters.verify_weighting_class(wf)["bands"] if b["freq"] == label
+        b for b in filters.verify_weighting_class(wf).bands if b["freq"] == label
     )
     exact = 10.0 ** (round(10.0 * math.log10(label)) / 10.0)
     design = {row[0]: row[1] for row in _WEIGHTING_TABLE3}[label]
@@ -219,16 +219,16 @@ def test_notch_between_nominals_fails_the_sweep() -> None:
     b, a = sg.iirnotch(900.0, 30.0, fs=wf.fs)
     wf.sos = np.vstack([wf.sos, sg.tf2sos(b, a)])
     result = filters.verify_weighting_class(wf)
-    assert all(bd["class"] == 1 for bd in result["bands"])
-    assert result["between_nominals"]["margin_class1_db"] < 0.0
-    assert result["between_nominals"]["margin_class2_db"] < 0.0
-    assert 800.0 < result["between_nominals"]["worst_freq"] < 1000.0
-    assert result["overall_class"] is None
+    assert all(bd["class"] == 1 for bd in result.bands)
+    assert result.between_nominals["margin_class1_db"] < 0.0
+    assert result.between_nominals["margin_class2_db"] < 0.0
+    assert 800.0 < result.between_nominals["worst_freq"] < 1000.0
+    assert result.overall_class is None
 
 
 def test_sweep_result_reported_for_compliant_filter() -> None:
     result = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
-    between = result["between_nominals"]
+    between = result.between_nominals
     assert set(between) == {"worst_freq", "margin_class1_db", "margin_class2_db"}
     assert between["margin_class1_db"] >= 0.0
     wf = filters.WeightingFilter(48000, "A")
@@ -242,8 +242,8 @@ def test_plain_bilinear_degrades_to_class2(fs: int, expected: int) -> None:
     result = filters.verify_weighting_class(
         filters.WeightingFilter(fs, "A", high_accuracy=False)
     )
-    assert result["overall_class"] == expected
-    assert any(b["class"] != 1 for b in result["bands"])
+    assert result.overall_class == expected
+    assert any(b["class"] != 1 for b in result.bands)
 
 
 def test_invalid_class_raises() -> None:
@@ -277,8 +277,7 @@ def test_deviation_matches_independent_tone_measurement() -> None:
     fs = 48000
     wf = filters.WeightingFilter(fs, "A")  # stateless, so it can be reused per tone
     bands = {
-        b["freq"]: b["deviation_db"]
-        for b in filters.verify_weighting_class(wf)["bands"]
+        b["freq"]: b["deviation_db"] for b in filters.verify_weighting_class(wf).bands
     }
     ref_1k = _tone_gain_db(wf, fs, 1000.0)
     for f0 in (63.0, 250.0, 1000.0, 4000.0, 8000.0):
@@ -291,6 +290,4 @@ def test_response_is_deterministic() -> None:
     """The response is computed in closed form, so repeated runs are identical."""
     a = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
     b = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
-    assert [x["deviation_db"] for x in a["bands"]] == [
-        x["deviation_db"] for x in b["bands"]
-    ]
+    assert [x["deviation_db"] for x in a.bands] == [x["deviation_db"] for x in b.bands]

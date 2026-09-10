@@ -84,7 +84,6 @@ if TYPE_CHECKING:
 __all__ = [
     "IntensityInstrumentComplianceResult",
     "instrument_class_from_components",
-    "intensity_class_compliance",
     "phase_mismatch_from_residual_index",
     "residual_index_from_phase_mismatch",
     "residual_index_limits",
@@ -301,7 +300,7 @@ def verify_intensity_class(
     *,
     device: str = "instrument",
     spacing: float = REFERENCE_SPACING,
-) -> dict[str, Any]:
+) -> IntensityInstrumentComplianceResult:
     r"""Verify a measured ``delta_pI0`` spectrum against IEC 61043:1993 Table 2.
 
     Each band's measured pressure-residual intensity index is compared with the
@@ -332,11 +331,10 @@ def verify_intensity_class(
         centres behind them.
     :param device: ``"probe"``, ``"processor"`` or ``"instrument"``.
     :param spacing: Microphone separation in metres (default 0.025).
-    :return: Dict with ``overall_class`` (1, 2 or ``None``), ``range_limited``,
-        ``bands`` (a list of ``{"freq", "class", "residual_index_db",
-        "limit_class1_db", "limit_class2_db", "margin_class1_db",
-        "margin_class2_db"}``), ``device``, ``spacing`` and
-        ``spacing_offset_db`` (the Note 1 term applied to the table).
+    :return: An :class:`IntensityInstrumentComplianceResult`, which carries the
+        verdict together with the measured spectrum and the two rescaled
+        Table 2 masks, so it exposes ``.plot()`` and an accredited
+        ``.report()`` fiche.
     :raises ValueError: If the inputs disagree in length, a frequency is not a
         tabulated band, a band is repeated, or ``device``/``spacing`` are
         invalid.
@@ -385,29 +383,38 @@ def verify_intensity_class(
     )
     range_limited = not full_range
 
-    return {
-        "overall_class": overall,
-        "range_limited": range_limited,
-        "bands": bands,
-        "device": device,
-        "spacing": float(spacing),
-        "spacing_offset_db": _spacing_offset(spacing),
-    }
+    return IntensityInstrumentComplianceResult(
+        overall_class=overall,
+        bands=tuple(bands),
+        frequency=np.asarray([b["freq"] for b in bands], dtype=np.float64),
+        residual_index=np.asarray(
+            [b["residual_index_db"] for b in bands], dtype=np.float64
+        ),
+        limit_class1=np.asarray(
+            [b["limit_class1_db"] for b in bands], dtype=np.float64
+        ),
+        limit_class2=np.asarray(
+            [b["limit_class2_db"] for b in bands], dtype=np.float64
+        ),
+        device=device,
+        spacing=float(spacing),
+        spacing_offset_db=_spacing_offset(spacing),
+        range_limited=range_limited,
+    )
 
 
 @dataclass(frozen=True)
 class IntensityInstrumentComplianceResult:
     r"""IEC 61043:1993 class verdict of a p-p sound-intensity chain.
 
-    Wraps the outcome of :func:`verify_intensity_class` together with the
+    What :func:`verify_intensity_class` returns: the verdict together with the
     measured spectrum and the two Table 2 masks it was judged against, so the
     result can redraw itself and render an accredited fiche.
 
     :ivar overall_class: The strictest class every band meets (1 or 2), or
         ``None`` when at least one band meets neither. It is the *largest*
         per-band class, because a band meeting class 1 meets class 2 as well.
-    :ivar bands: The per-band verdict dictionaries of
-        :func:`verify_intensity_class`, as an immutable tuple.
+    :ivar bands: The per-band verdicts, as an immutable tuple.
     :ivar frequency: Nominal band centre frequencies, in Hz.
     :ivar residual_index: Measured ``delta_pI0`` per band, in dB.
     :ivar limit_class1: Class 1 minimum ``delta_pI0`` per band, in dB, already
@@ -601,49 +608,6 @@ class IntensityInstrumentComplianceResult:
         return render_iec61043_report(
             self, path, metadata=metadata, verbose=verbose, language=language
         )
-
-
-def intensity_class_compliance(
-    residual_index: list[float] | np.ndarray,
-    frequencies: list[float] | np.ndarray,
-    *,
-    device: str = "instrument",
-    spacing: float = REFERENCE_SPACING,
-) -> IntensityInstrumentComplianceResult:
-    """Verify a ``delta_pI0`` spectrum and package the verdict as a result.
-
-    Runs :func:`verify_intensity_class` and stores the outcome together with
-    the measured spectrum and the two rescaled Table 2 masks, so the returned
-    object exposes ``.plot()`` and an accredited ``.report()`` fiche.
-
-    :param residual_index: Measured ``delta_pI0`` per band, in decibels.
-    :param frequencies: Band centre frequencies in Hz, one per entry.
-    :param device: ``"probe"``, ``"processor"`` or ``"instrument"``.
-    :param spacing: Microphone separation in metres (default 0.025).
-    :return: An :class:`IntensityInstrumentComplianceResult`.
-    """
-    verdict = verify_intensity_class(
-        residual_index, frequencies, device=device, spacing=spacing
-    )
-    bands = verdict["bands"]
-    return IntensityInstrumentComplianceResult(
-        overall_class=verdict["overall_class"],
-        bands=tuple(bands),
-        frequency=np.asarray([b["freq"] for b in bands], dtype=np.float64),
-        residual_index=np.asarray(
-            [b["residual_index_db"] for b in bands], dtype=np.float64
-        ),
-        limit_class1=np.asarray(
-            [b["limit_class1_db"] for b in bands], dtype=np.float64
-        ),
-        limit_class2=np.asarray(
-            [b["limit_class2_db"] for b in bands], dtype=np.float64
-        ),
-        device=str(verdict["device"]),
-        spacing=float(verdict["spacing"]),
-        spacing_offset_db=float(verdict["spacing_offset_db"]),
-        range_limited=bool(verdict["range_limited"]),
-    )
 
 
 # ---------------------------------------------------------------------------

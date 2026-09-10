@@ -3491,7 +3491,7 @@ def generate_intensity_class(output_dir: str) -> None:
     # that drops out of class 1 and drags the whole verdict down to class 2.
     measured = measured - 4.0 * np.exp(-(((np.log(freqs / 100.0)) / 0.25) ** 2))
 
-    result = emission.intensity_class_compliance(measured, freqs, spacing=spacing)
+    result = emission.verify_intensity_class(measured, freqs, spacing=spacing)
     _fig, ax = plt.subplots(figsize=(10, 6))
     # The result's own .plot() shades the pass region of the achieved class and
     # rings the bands that cost the chain the next class up.

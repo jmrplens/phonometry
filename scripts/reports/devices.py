@@ -25,7 +25,7 @@ def _filter_class_example() -> tuple[object, ReportMetadata, str]:
     bank = ph.filters.OctaveFilterBank(
         fs=48000, fraction=1, order=6, limits=[125, 4000]
     )
-    result = ph.filters.filter_class_compliance(bank)
+    result = ph.filters.verify_filter_class(bank)
     metadata = ReportMetadata(
         specimen="1/1-octave filter bank",
         client="Example client",
@@ -52,7 +52,7 @@ def _filter_class_1995_example() -> tuple[object, ReportMetadata, str]:
     bank = ph.filters.OctaveFilterBank(
         fs=48000, fraction=1, order=6, limits=[250, 4000]
     )
-    result = ph.filters.filter_class_compliance(bank, edition="1995")
+    result = ph.filters.verify_filter_class(bank, edition="1995")
     metadata = ReportMetadata(
         specimen="1/1-octave filter bank",
         client="Example client",
@@ -88,7 +88,7 @@ def _intensity_class_example() -> tuple[object, ReportMetadata, str]:
         phase_mismatch, freqs, spacing
     )
     measured = measured - 4.0 * np.exp(-((np.log(freqs / 100.0) / 0.25) ** 2))
-    result = ph.emission.intensity_class_compliance(measured, freqs, spacing=spacing)
+    result = ph.emission.verify_intensity_class(measured, freqs, spacing=spacing)
     metadata = ReportMetadata(
         specimen="p-p sound intensity probe and analyser, 12 mm spacer",
         client="Example client",

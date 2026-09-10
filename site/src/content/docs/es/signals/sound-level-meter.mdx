@@ -342,10 +342,10 @@ contra los límites de la Tabla 1 de IEC 61260-1.
 
 ```python
 wf = filters.WeightingFilter(fs, curve="A")
-print(filters.verify_weighting_class(wf)["overall_class"])   # 1
+print(filters.verify_weighting_class(wf).overall_class)   # 1
 
 bank = filters.OctaveFilterBank(fs, fraction=3)
-print(filters.verify_filter_class(bank)["overall_class"])    # 1
+print(filters.verify_filter_class(bank).overall_class)    # 1
 ```
 
 Los veredictos también llegan por banda, de modo que puedes ver exactamente

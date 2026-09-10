@@ -121,7 +121,7 @@ whose criteria are numbered differently, is
 [`phonometry.emission.sound_power_intensity`](/phonometry/reference/api/power/sound-power-intensity/). And it does not grade the
 instrument: $\delta_{pI0}$ is a property of the probe-spacer-analyser
 chain, classified against IEC 61043:1993 Table 2 by
-[`phonometry.emission.intensity_class_compliance`](/phonometry/reference/api/power/intensity-compliance/#intensity_class_compliance).
+`phonometry.emission.intensity_class_compliance`.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 

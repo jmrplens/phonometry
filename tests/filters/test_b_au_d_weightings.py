@@ -140,9 +140,9 @@ def test_b_sits_between_a_and_c_at_low_frequency() -> None:
 def test_b_verifier_reaches_type1() -> None:
     """verify_weighting_class attests the ANSI Type 1 mask for B."""
     result = filters.verify_weighting_class(filters.WeightingFilter(48000, "B"))
-    assert result["overall_class"] == 1
-    assert result["range_limited"] is False
-    assert all(b["margin_class1_db"] >= 0 for b in result["bands"])
+    assert result.overall_class == 1
+    assert result.range_limited is False
+    assert all(b["margin_class1_db"] >= 0 for b in result.bands)
 
 
 # ---------------------------------------------------------------------------
@@ -216,13 +216,13 @@ def test_au_matches_a_weighting_through_the_audio_band() -> None:
 def test_au_verifier_flags_range_limited_at_48k() -> None:
     """At fs = 48 kHz the 25-40 kHz Table 1 rows cannot be demonstrated."""
     result = filters.verify_weighting_class(filters.WeightingFilter(48000, "AU"))
-    assert result["overall_class"] == 1
-    assert result["range_limited"] is True
+    assert result.overall_class == 1
+    assert result.range_limited is True
     result_full = filters.verify_weighting_class(filters.WeightingFilter(96000, "AU"))
-    assert result_full["overall_class"] == 1
-    assert result_full["range_limited"] is False
+    assert result_full.overall_class == 1
+    assert result_full.range_limited is False
     # Single tolerance set: both verdict slots carry the same margin.
-    for band in result_full["bands"]:
+    for band in result_full.bands:
         assert band["margin_class1_db"] == band["margin_class2_db"]
 
 

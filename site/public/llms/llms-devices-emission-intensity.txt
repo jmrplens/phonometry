@@ -812,7 +812,7 @@ for the nominal 25 mm microphone separation. Note 1 rescales the whole table
 for any other spacer by $+10\log_{10}(x/25)$ with $x$ in millimetres, which is the
 same 3 dB per doubling the previous section arrived at from the physics.
 
-`intensity_class_compliance` compares a measured $\delta_{pI0}$ spectrum
+`verify_intensity_class` compares a measured $\delta_{pI0}$ spectrum
 against both
 masks band by band and returns the class the chain actually meets:
 the loosest class every band clears, or `None` when some band clears neither:
@@ -828,8 +828,8 @@ measured_delta_pi0 = [11.0, 11.9, 11.2, 10.0, 13.2, 15.9, 17.0, 18.0,
                       19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 24.0, 24.0,
                       24.0, 24.0, 24.0, 24.0, 24.0, 24.0]   # dB, 22 bands
 
-res = emission.intensity_class_compliance(measured_delta_pi0, freqs,
-                                           device="instrument", spacing=0.012)
+res = emission.verify_intensity_class(measured_delta_pi0, freqs,
+                                      device="instrument", spacing=0.012)
 print(res.overall_class)          # 2: one band misses the class 1 minimum
 print(res.binding_margin())       # smallest per-band margin to that class [dB]
 print(res.failing_bands(1))       # the band centres that cost it class 1 [Hz]
@@ -867,7 +867,7 @@ measured = emission.residual_index_from_phase_mismatch(phase_mismatch, freqs,
                                                         spacing)
 measured = measured - 4.0 * np.exp(-((np.log(freqs / 100.0) / 0.25) ** 2))
 
-res = emission.intensity_class_compliance(measured, freqs, spacing=spacing)
+res = emission.verify_intensity_class(measured, freqs, spacing=spacing)
 res.plot()
 plt.show()
 ```

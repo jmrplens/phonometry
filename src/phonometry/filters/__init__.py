@@ -6,7 +6,6 @@ from __future__ import annotations
 from .compliance import (
     FilterComplianceResult,
     class_limits,
-    filter_class_compliance,
     verify_filter_class,
 )
 from .core import (
@@ -48,7 +47,6 @@ __all__ = [
     "TimeWeighting",
     "WeightingFilter",
     "class_limits",
-    "filter_class_compliance",
     "linkwitz_riley",
     "nominal_frequencies",
     "normalized_frequencies",

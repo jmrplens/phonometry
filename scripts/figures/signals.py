@@ -1437,8 +1437,8 @@ def generate_weighting_class_mask(output_dir: str) -> None:
 
     for curve, colour, marker in (("A", COLOR_PRIMARY, "o"), ("C", "#9467bd", "s")):
         result = filters.verify_weighting_class(filters.WeightingFilter(48000, curve))
-        f = np.array([b["freq"] for b in result["bands"]])
-        dev = np.array([b["deviation_db"] for b in result["bands"]])
+        f = np.array([b["freq"] for b in result.bands])
+        dev = np.array([b["deviation_db"] for b in result.bands])
         ax.plot(
             f,
             dev,
@@ -2488,7 +2488,7 @@ def generate_class_mask_architectures(output_dir: str) -> None:
             limits=[800, 1200],
             design=filters.FilterDesign(filter_type=ftype),
         )
-        result = filters.filter_class_compliance(bank)
+        result = filters.verify_filter_class(bank)
         result.plot(ax=ax)
         verdict = result.overall_class
         ax.set_title(f"{title}   (overall_class = {verdict})", pad=10)

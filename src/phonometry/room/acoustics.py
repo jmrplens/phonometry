@@ -433,6 +433,7 @@ def decay_curve(
     fs: int | None = None,
     band: float | None = None,
     fraction: int = 1,
+    *,
     zero_phase: bool = False,
 ) -> DecayCurve:
     """Schroeder decay curve of an impulse response.
@@ -518,6 +519,7 @@ def room_parameters(
     fs: int | None = None,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
     fraction: int = 1,
+    *,
     zero_phase: bool = False,
 ) -> RoomAcousticsResult:
     """Room acoustic parameters per ISO 3382-1:2009 / ISO 3382-2:2008.

@@ -172,6 +172,7 @@ FeedbackStabilityResult(
     stability_margin: float,
     margin: float,
     headroom: float,
+    *,
     is_stable: bool,
     maximum_open_loop_gain: float,
     maximum_level_at_microphone: float,

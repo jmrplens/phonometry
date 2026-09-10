@@ -53,6 +53,7 @@ AudioFileInfo(
     frames: int,
     duration: float,
     bit_depth: int | None,
+    *,
     lossy: bool,
     channel_mask: int | None = None,
     channel_labels: tuple[str, ...] | None = None,
@@ -562,6 +563,7 @@ SignalOrigin(
     container: str,
     format_name: str,
     bit_depth: int | None,
+    *,
     lossy: bool,
 )
 ```

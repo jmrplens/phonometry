@@ -536,6 +536,7 @@ class ParametricEQ:
         self,
         fs: float,
         sections: EQSection | Sequence[EQSection],
+        *,
         stateful: bool = False,
         steady_ic: bool = False,
     ) -> None:

@@ -172,6 +172,7 @@ ground-roll segments, and combines them into the exposure level `SEL`
 
 ```python
 FlightSegmentState(
+    *,
     ground_roll: NDArray[np.bool_] | list[bool] | None = None,
     landing_roll: NDArray[np.bool_] | list[bool] | None = None,
     bank: NDArray[np.float64] | list[float] | None = None,

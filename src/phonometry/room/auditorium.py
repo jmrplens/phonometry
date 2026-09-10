@@ -51,7 +51,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -1495,6 +1495,7 @@ class AuditoriumQuantity:
     aspect: str
     averaging_bands_hz: tuple[float, ...]
     just_noticeable_difference: float | None
+    _: KW_ONLY
     relative_jnd: bool
     typical_range: tuple[float, float]
     energy_averaged: bool

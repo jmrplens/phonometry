@@ -16,7 +16,7 @@ caller's responsibility.
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -149,6 +149,7 @@ class ToneAssessment:
     frequency: float
     ratio_db: float
     criterion_db: float
+    _: KW_ONLY
     prominent: bool
 
     def plot(
@@ -394,7 +395,7 @@ def tone_to_noise_ratio(
     tnr = float(10 * np.log10(p_tone / p_noise))
     criterion = float(_tnr_criterion(ft))
     prominent = tnr >= criterion and _F_MIN <= ft < _F_MAX
-    return ToneAssessment(ft, tnr, criterion, prominent)
+    return ToneAssessment(ft, tnr, criterion, prominent=prominent)
 
 
 # ECMA-418-1:2024 Table 2 (p. 17): f_1,L = C0 + C1*ft + C2*ft^2 (Formula 21).
@@ -506,4 +507,4 @@ def prominence_ratio(
 
     criterion = float(_pr_criterion(ft))
     prominent = float(pr) >= criterion and _F_MIN <= ft < _F_MAX
-    return ToneAssessment(ft, float(pr), criterion, prominent)
+    return ToneAssessment(ft, float(pr), criterion, prominent=prominent)

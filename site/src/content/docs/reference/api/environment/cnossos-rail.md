@@ -636,6 +636,7 @@ RollingStock(
     traction: tuple[Any, Any] | None = None,
     aerodynamic: tuple[Any, Any] | None = None,
     aerodynamic_alpha: float = 50.0,
+    *,
     tram: bool = False,
 )
 ```

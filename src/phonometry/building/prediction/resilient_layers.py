@@ -71,7 +71,7 @@ pieces have an oracle and which do not.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
@@ -486,6 +486,7 @@ class TappingForceResult:
     power_input: np.ndarray
     cut_off_frequency: float
     limiting_frequency: float
+    _: KW_ONLY
     over_critical: bool
     contact_stiffness: float
     impedance: float

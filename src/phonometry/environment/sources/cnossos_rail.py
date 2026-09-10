@@ -74,7 +74,7 @@ convenience, not a normative chain.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import KW_ONLY, dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
@@ -2316,6 +2316,7 @@ class RollingStock:
     traction: tuple[Any, Any] | None = None
     aerodynamic: tuple[Any, Any] | None = None
     aerodynamic_alpha: float = _AERODYNAMIC_ALPHA
+    _: KW_ONLY
     tram: bool = False
 
 

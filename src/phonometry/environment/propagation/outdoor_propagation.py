@@ -43,7 +43,7 @@ left to the caller. Accuracy of the method is stated in Table 5 (clause 9): with
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -137,6 +137,7 @@ class Barrier:
     edge_to_receiver: float
     parallel_distance: float = 0.0
     edge_separation: float | None = None
+    _: KW_ONLY
     ground_reflections_by_image: bool = False
     lateral: bool = False
     line_of_sight_clear: bool = False

@@ -98,7 +98,7 @@ Fresnel number :math:`N = (2/\lambda)(A + B + e - d)` (Bies Eq. (5.157)).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
@@ -640,6 +640,7 @@ class BarrierInsertionLoss:
     insertion_loss: Real
     fresnel_number: Real
     method: str
+    _: KW_ONLY
     ground: bool
     source_height: float | None = None
     barrier_distance: float | None = None

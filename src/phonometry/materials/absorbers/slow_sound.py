@@ -776,6 +776,7 @@ class CriticalCouplingResult:
     slit_height: float
     absorption: float
     normalized_impedance: complex
+    _: KW_ONLY
     converged: bool
 
 

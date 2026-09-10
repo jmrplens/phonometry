@@ -170,6 +170,7 @@ ImpulseOnset(
     level_difference: float,
     onset_rate: float,
     prominence: float,
+    *,
     qualifies: bool,
 )
 ```

@@ -47,7 +47,7 @@ repeated-measurement standard uncertainty (Formulae (17)–(20)) are provided.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
@@ -365,6 +365,7 @@ class ResidualCorrectionResult:
     corrected_level: float
     reportable_upper_bound: float
     margin: float
+    _: KW_ONLY
     reliable: bool
 
 

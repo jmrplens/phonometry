@@ -102,7 +102,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -186,6 +186,7 @@ class EmissionPressureResult:
     background_correction_db: float | NDArray[np.float64]
     local_correction_db: float | NDArray[np.float64]
     grade: Grade
+    _: KW_ONLY
     upper_bound: bool
     standard: str
 

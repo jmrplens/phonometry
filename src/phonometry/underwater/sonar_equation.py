@@ -48,7 +48,7 @@ range at which the detection probability is 50 %:
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -130,6 +130,7 @@ class SonarEquationResult:
     directivity_index: float
     detection_threshold: float
     target_strength: float | None
+    _: KW_ONLY
     reverberation_limited: bool
 
     def __post_init__(self) -> None:

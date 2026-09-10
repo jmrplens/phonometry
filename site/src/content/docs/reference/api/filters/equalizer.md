@@ -178,6 +178,7 @@ Convenience wrapper around [`ParametricEQ`](/phonometry/reference/api/filters/eq
 ParametricEQ(
     fs: float,
     sections: EQSection | Sequence[EQSection],
+    *,
     stateful: bool = False,
     steady_ic: bool = False,
 )

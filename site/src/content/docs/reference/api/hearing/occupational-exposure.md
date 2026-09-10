@@ -73,6 +73,7 @@ ExposureResult(
     u2: float | None = None,
     u3: float | None = None,
     n_samples: int | None = None,
+    *,
     sampling_advisory: bool = False,
     instrument: InstrumentClass | None = None,
     tasks: tuple[TaskContribution, ...] = ...,
@@ -171,6 +172,7 @@ full_day_exposure(
     effective_duration_hours: float,
     instrument: InstrumentClass = 'personal_exposimeter',
     u3: float = 1.0,
+    *,
     warn: bool = True,
 ) -> ExposureResult
 ```
@@ -212,6 +214,7 @@ job_based_exposure(
     u3: float = 1.0,
     n_workers: int | None = None,
     sample_duration_hours: float | None = None,
+    *,
     warn: bool = True,
 ) -> ExposureResult
 ```
@@ -315,6 +318,7 @@ task_based_exposure(
     tasks: Sequence[Task],
     instrument: InstrumentClass = 'personal_exposimeter',
     u3: float = 1.0,
+    *,
     include_duration_uncertainty: bool = True,
     warn: bool = True,
 ) -> ExposureResult
@@ -349,6 +353,7 @@ TaskContribution(
     lex_8h_contribution: float,
     n_samples: int,
     sample_range_db: float,
+    *,
     spread_advisory: bool,
     u1a: float,
     c1a: float,

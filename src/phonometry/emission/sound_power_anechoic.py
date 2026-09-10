@@ -534,9 +534,9 @@ def precision_background_correction(
 
 
 def meteorological_corrections(
+    *,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = _PS0_KPA,
-    *,
     air_absorption_coefficient: float | np.ndarray | None = None,
     radius: float = 1.0,
 ) -> MeteorologicalCorrection:
@@ -849,8 +849,8 @@ def sound_power_anechoic(
 
     # --- meteorological corrections C1, C2, C3 (Eq. 14) -------------------
     mc = meteorological_corrections(
-        temperature_c,
-        static_pressure_kpa,
+        temperature_c=temperature_c,
+        static_pressure_kpa=static_pressure_kpa,
         air_absorption_coefficient=air_absorption_coefficient,
         radius=radius,
     )

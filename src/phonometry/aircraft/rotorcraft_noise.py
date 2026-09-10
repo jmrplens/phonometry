@@ -1235,7 +1235,7 @@ def _reference_distance(hemispheres: Sequence[RotorcraftHemisphere]) -> float:
     return require_positive(rref, "hemisphere distance")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RotorcraftAtmosphere:
     """The air a rotorcraft event propagates through (Eq. 26/27).
 

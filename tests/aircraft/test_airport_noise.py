@@ -181,13 +181,15 @@ def test_impedance_adjustment() -> None:
     # Under the standard atmosphere (15 °C, 101.325 kPa) the adjustment is the
     # ECAC-documented +0.074 dB (Doc 29 Vol 2 §4.2.1).
     assert impedance_adjustment() == pytest.approx(0.074, abs=5e-4)
-    assert impedance_adjustment(15.0, 101.325) == pytest.approx(0.074, abs=5e-4)
+    assert impedance_adjustment(
+        temperature_c=15.0, atmospheric_pressure_kpa=101.325
+    ) == pytest.approx(0.074, abs=5e-4)
     # Hotter, lower-pressure air is less dense: negative adjustment.
-    assert impedance_adjustment(35.0, 95.0) < 0.0
+    assert impedance_adjustment(temperature_c=35.0, atmospheric_pressure_kpa=95.0) < 0.0
     with pytest.raises(
         ValueError, match=r"'atmospheric_pressure_kpa' must be positive"
     ):
-        impedance_adjustment(15.0, 0.0)
+        impedance_adjustment(temperature_c=15.0, atmospheric_pressure_kpa=0.0)
 
 
 def test_event_level_long_level_flyover_matches_infinite_path() -> None:
@@ -708,7 +710,7 @@ def test_impedance_adjustment_rejects_absolute_zero() -> None:
     from phonometry.aircraft.airport_noise import impedance_adjustment
 
     with pytest.raises(ValueError, match=r"'temperature_c' must be finite and above"):
-        impedance_adjustment(-300.0, 101.325)
+        impedance_adjustment(temperature_c=-300.0, atmospheric_pressure_kpa=101.325)
 
 
 # --------------------------------------------------------------------------- #

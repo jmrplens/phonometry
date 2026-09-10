@@ -39,7 +39,13 @@ def test_coefficient_is_iso9613_at_exact_midband() -> None:
         f, 500.0, temperature_c=15.0, relative_humidity_percent=60.0
     )
     assert isinstance(res, AircraftBandAttenuation)
-    expected = air_attenuation(f, 15.0, 60.0, 101.325, exact_midband=True)
+    expected = air_attenuation(
+        f,
+        temperature_c=15.0,
+        relative_humidity_percent=60.0,
+        atmospheric_pressure_kpa=101.325,
+        exact_midband=True,
+    )
     assert np.allclose(res.coefficient, expected)
     assert np.allclose(res.midband_attenuation, expected * 500.0)
 

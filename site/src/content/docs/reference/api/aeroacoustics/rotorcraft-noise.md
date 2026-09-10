@@ -536,6 +536,7 @@ received histories to the exposure (`SEL`, Doc 32 Eq. 27) or maximum
 
 ```python
 RotorcraftAtmosphere(
+    *,
     temperature_c: float = 25.0,
     relative_humidity_percent: float = 70.0,
     atmospheric_pressure_kpa: float = 101.325,

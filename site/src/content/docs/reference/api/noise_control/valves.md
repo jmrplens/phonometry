@@ -213,6 +213,7 @@ DownstreamPipe(
     internal_diameter: float,
     wall_thickness: float,
     density: float,
+    *,
     sound_speed: float = 5000.0,
     air_sound_speed: float = 343.0,
     atmospheric_pressure_pa: float = 101325.0,

@@ -51,7 +51,7 @@ frequencies in Hz. The water column has a pressure-release surface at z = 0.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
@@ -2917,6 +2917,7 @@ class VolumeAbsorption:
     """
 
     model: str
+    _: KW_ONLY
     temperature_c: float = 10.0
     salinity: float = 35.0
     ph: float = 8.0

@@ -53,6 +53,7 @@ left to the caller. Accuracy of the method is stated in Table 5 (clause 9): with
 ```python
 atmospheric_absorption(
     distance: float,
+    *,
     frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
@@ -92,6 +93,7 @@ the nearest exact midband.
 
 ```python
 AtmosphericConditions(
+    *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
     atmospheric_pressure_kpa: float = 101.325,
@@ -493,6 +495,7 @@ outdoor_propagation_attenuation(
     distance: float,
     source_height: float,
     receiver_height: float,
+    *,
     frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
     ground_source: float = 0.0,
     ground_middle: float = 0.0,

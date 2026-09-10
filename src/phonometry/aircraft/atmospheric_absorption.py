@@ -171,9 +171,9 @@ def sae_band_attenuation(
     # Pure-tone coefficient at the exact mid-band frequency (ISO 9613-1).
     alpha = air_attenuation(
         f,
-        temperature_c,
-        relative_humidity_percent,
-        atmospheric_pressure_kpa,
+        temperature_c=temperature_c,
+        relative_humidity_percent=relative_humidity_percent,
+        atmospheric_pressure_kpa=atmospheric_pressure_kpa,
         exact_midband=True,
     )
     delta_t = alpha * s

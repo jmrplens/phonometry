@@ -177,14 +177,14 @@ def test_k1_frequency_length_mismatch_raises() -> None:
 # ==========================================================================
 def test_c2_zero_at_reference() -> None:
     """At 23 deg C, 101,325 kPa the ratio (273+theta)/theta1 = 1 -> C2 = 0."""
-    mc = meteorological_corrections(23.0, 101.325)
+    mc = meteorological_corrections(temperature_c=23.0, static_pressure_kpa=101.325)
     assert isinstance(mc, MeteorologicalCorrection)
     assert mc.c2 == pytest.approx(0.0, abs=1e-12)
 
 
 def test_c1_reference_value_is_minus_0128() -> None:
     """At 23 deg C, ps = ps0 -> C1 = 5*lg(296/314) = -0,128 dB."""
-    mc = meteorological_corrections(23.0, 101.325)
+    mc = meteorological_corrections(temperature_c=23.0, static_pressure_kpa=101.325)
     assert mc.c1 == pytest.approx(-0.12819, abs=1e-4)
 
 
@@ -195,18 +195,18 @@ def test_meteorological_corrections_refuse_a_pressure_that_is_not_one() -> None:
     thing that tells them so is the name in the message.
     """
     with pytest.raises(ValueError, match=r"'static_pressure_kpa' must be positive"):
-        meteorological_corrections(23.0, 0.0)
+        meteorological_corrections(temperature_c=23.0, static_pressure_kpa=0.0)
 
 
 def test_c1_zero_at_theta0() -> None:
     """C1 temperature term vanishes at 273+theta = theta0 = 314 K (theta=41)."""
-    mc = meteorological_corrections(41.0, 101.325)
+    mc = meteorological_corrections(temperature_c=41.0, static_pressure_kpa=101.325)
     assert mc.c1 == pytest.approx(0.0, abs=1e-9)
 
 
 def test_c3_zero_without_air_absorption() -> None:
     """No attenuation coefficient supplied -> C3 = 0."""
-    mc = meteorological_corrections(23.0, 101.325)
+    mc = meteorological_corrections(temperature_c=23.0, static_pressure_kpa=101.325)
     assert mc.c3 == 0.0
 
 
@@ -214,7 +214,10 @@ def test_c3_from_air_absorption() -> None:
     """C3 = A0*(1,005 3 - 0,001 2*A0)^1,6, A0 = a(f)*r."""
     a, r = 0.02, 3.0
     mc = meteorological_corrections(
-        23.0, 101.325, air_absorption_coefficient=a, radius=r
+        temperature_c=23.0,
+        static_pressure_kpa=101.325,
+        air_absorption_coefficient=a,
+        radius=r,
     )
     a0 = a * r
     expected = a0 * (1.0053 - 0.0012 * a0) ** 1.6
@@ -223,7 +226,7 @@ def test_c3_from_air_absorption() -> None:
 
 def test_meteorological_invalid_pressure_raises() -> None:
     with pytest.raises(ValueError, match="'static_pressure_kpa' must be positive"):
-        meteorological_corrections(23.0, 0.0)
+        meteorological_corrections(temperature_c=23.0, static_pressure_kpa=0.0)
 
 
 # ==========================================================================
@@ -260,7 +263,7 @@ def test_hemisphere_uniform_field_lw() -> None:
     r = 2.0
     lp = 70.0
     res = sound_power_anechoic(np.full((40, 1), lp), "hemisphere", radius=r)
-    mc = meteorological_corrections(23.0, 101.325)
+    mc = meteorological_corrections(temperature_c=23.0, static_pressure_kpa=101.325)
     expected = lp + 10.0 * np.log10(2.0 * np.pi * r**2) + mc.c1 + mc.c2
     assert res.surface_area == pytest.approx(2.0 * np.pi * r**2)
     assert res.sound_power_level[0] == pytest.approx(expected, abs=1e-9)
@@ -272,7 +275,7 @@ def test_sphere_uniform_field_lw_uses_4pi() -> None:
     r = 1.0
     lp = 65.0
     res = sound_power_anechoic(np.full((40, 1), lp), "sphere", radius=r)
-    mc = meteorological_corrections(23.0, 101.325)
+    mc = meteorological_corrections(temperature_c=23.0, static_pressure_kpa=101.325)
     expected = lp + 10.0 * np.log10(4.0 * np.pi * r**2) + mc.c1 + mc.c2
     assert res.surface_area == pytest.approx(4.0 * np.pi * r**2)
     assert res.sound_power_level[0] == pytest.approx(expected, abs=1e-9)
@@ -345,7 +348,7 @@ def test_anechoic_full_chain_with_k1() -> None:
     )
     k1 = precision_background_correction(src, bg, freqs)
     lp_bar = 80.0 - k1[0, 0]
-    mc = meteorological_corrections(23.0, 101.325)
+    mc = meteorological_corrections(temperature_c=23.0, static_pressure_kpa=101.325)
     expected = lp_bar + 10.0 * np.log10(2.0 * np.pi * r**2) + mc.c1 + mc.c2
     assert res.sound_power_level[0] == pytest.approx(expected, abs=1e-9)
     assert np.allclose(res.background_correction, k1)

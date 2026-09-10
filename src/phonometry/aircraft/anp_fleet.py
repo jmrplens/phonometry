@@ -1143,8 +1143,8 @@ def _impedance_atmosphere(
     """
     if aerodrome is None:
         return AerodromeAtmosphere(
-            15.0 if temperature_c is None else temperature_c,
-            _STANDARD_PRESSURE_KPA
+            temperature_c=15.0 if temperature_c is None else temperature_c,
+            atmospheric_pressure_kpa=_STANDARD_PRESSURE_KPA
             if atmospheric_pressure_kpa is None
             else atmospheric_pressure_kpa,
         )
@@ -1152,8 +1152,12 @@ def _impedance_atmosphere(
         aerodrome.pressure_ratio(aerodrome.elevation_ft) * _STANDARD_PRESSURE_KPA
     )
     return AerodromeAtmosphere(
-        aerodrome.temperature_c if temperature_c is None else temperature_c,
-        at_field_kpa if atmospheric_pressure_kpa is None else atmospheric_pressure_kpa,
+        temperature_c=aerodrome.temperature_c
+        if temperature_c is None
+        else temperature_c,
+        atmospheric_pressure_kpa=at_field_kpa
+        if atmospheric_pressure_kpa is None
+        else atmospheric_pressure_kpa,
     )
 
 

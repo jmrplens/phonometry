@@ -35,7 +35,14 @@ def _iso9613_table1(point: tuple[float, float, float, float]) -> Outcome:
     """Compare air_attenuation against an ISO 9613-1 Table 1 grid point (dB/km)."""
     temp, rh, freq, alpha_km = point
     computed = (
-        float(ph.environment.air_attenuation(freq, temp, rh, exact_midband=True)[()])
+        float(
+            ph.environment.air_attenuation(
+                freq,
+                temperature_c=temp,
+                relative_humidity_percent=rh,
+                exact_midband=True,
+            )[()]
+        )
         * 1000.0
     )  # dB/m -> dB/km
     # Tolerance = 1 in the last printed (3-significant-figure) digit.
@@ -77,7 +84,11 @@ def _chk_iso9613_2_table2_grid() -> Outcome:
     for (temp, rh), row in ref.ISO9613_2_TABLE2.items():
         alpha = (
             ph.environment.air_attenuation(
-                ref.ISO9613_2_TABLE2_BANDS, temp, rh, 101.325, exact_midband=True
+                ref.ISO9613_2_TABLE2_BANDS,
+                temperature_c=temp,
+                relative_humidity_percent=rh,
+                atmospheric_pressure_kpa=101.325,
+                exact_midband=True,
             )
             * 1000.0
         )
@@ -640,7 +651,9 @@ def _chk_iso3745_k1_floor() -> Outcome:
     _PRECISION_POWER, "ISO 3745:2012 Eq (16)", "Meteorological C1 at 23 C reference"
 )
 def _chk_iso3745_c1() -> Outcome:
-    c1 = ph.emission.meteorological_corrections(23.0, 101.325).c1
+    c1 = ph.emission.meteorological_corrections(
+        temperature_c=23.0, static_pressure_kpa=101.325
+    ).c1
     return numeric(ref.ISO3745_C1_REFERENCE, c1, 1e-4, unit="dB", places=4)
 
 

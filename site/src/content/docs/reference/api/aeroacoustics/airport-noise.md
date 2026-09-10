@@ -41,6 +41,7 @@ Doc 29 5th ed. Vol 3 Part 1 reference workbook.
 
 ```python
 AerodromeAtmosphere(
+    *,
     temperature_c: float = 15.0,
     atmospheric_pressure_kpa: float = 101.325,
 )
@@ -229,6 +230,7 @@ Plot the per-segment contributions to the event level.
 
 ```python
 impedance_adjustment(
+    *,
     temperature_c: float = 15.0,
     atmospheric_pressure_kpa: float = 101.325,
 ) -> float

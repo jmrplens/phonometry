@@ -169,7 +169,7 @@ class ImpulseResponseResult:
     method: str
 
     def __array__(
-        self, dtype: DTypeLike | None = None, copy: bool | None = None
+        self, dtype: DTypeLike | None = None, *, copy: bool | None = None
     ) -> np.ndarray:
         """Return the impulse response as an array (optionally recast)."""
         return np.asarray(self.ir, dtype=dtype, copy=copy)
@@ -901,7 +901,7 @@ class ShapedSweepResult:
         )
 
     def __array__(
-        self, dtype: DTypeLike | None = None, copy: bool | None = None
+        self, dtype: DTypeLike | None = None, *, copy: bool | None = None
     ) -> np.ndarray:
         """Return the sweep samples as an array (optionally recast)."""
         return np.asarray(self.signal, dtype=dtype, copy=copy)

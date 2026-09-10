@@ -782,6 +782,7 @@ def _side_ground(
     sigma_seg: NDArray[np.float64],
     p_lo: tuple[float, float],
     p_hi: tuple[float, float],
+    *,
     clamp_lo: bool,
     clamp_hi: bool,
 ) -> tuple[NDArray[np.float64], float, float, float]:
@@ -829,7 +830,16 @@ def _screening_core(
     above[interior] = z[interior] > los[interior]
 
     # Clear line of sight: mean-ground-plane ground effect over the full path.
-    clear, _, _, _ = _side_ground(f, d, z, sigma_seg, src, rcv, True, True)
+    clear, _, _, _ = _side_ground(
+        f=f,
+        d=d,
+        z=z,
+        sigma_seg=sigma_seg,
+        p_lo=src,
+        p_hi=rcv,
+        clamp_lo=True,
+        clamp_hi=True,
+    )
     if not np.any(above):
         return clear, False, float("nan"), np.empty((0, 2))
 
@@ -850,8 +860,26 @@ def _screening_core(
 
     o_first = (float(edges[0, 0]), float(edges[0, 1]))
     o_last = (float(edges[-1, 0]), float(edges[-1, 1]))
-    ag_s, zs, zo_s, a_s = _side_ground(f, d, z, sigma_seg, src, o_first, True, False)
-    ag_r, zo_r, zr, a_r = _side_ground(f, d, z, sigma_seg, o_last, rcv, False, True)
+    ag_s, zs, zo_s, a_s = _side_ground(
+        f=f,
+        d=d,
+        z=z,
+        sigma_seg=sigma_seg,
+        p_lo=src,
+        p_hi=o_first,
+        clamp_lo=True,
+        clamp_hi=False,
+    )
+    ag_r, zo_r, zr, a_r = _side_ground(
+        f=f,
+        d=d,
+        z=z,
+        sigma_seg=sigma_seg,
+        p_lo=o_last,
+        p_hi=rcv,
+        clamp_lo=False,
+        clamp_hi=True,
+    )
     h0 = max(max(zo_s, 0.0), max(zo_r, 0.0))
 
     delta_img_s = _image_path_difference(

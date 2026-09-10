@@ -613,7 +613,7 @@ def _check_target_suffix(path: str | Path, target: Path) -> None:
 
 
 def _check_sidecar_request(
-    x: Signal | NDArray[np.generic] | list[float], sidecar: bool
+    x: Signal | NDArray[np.generic] | list[float], *, sidecar: bool
 ) -> None:
     """Refuse a sidecar request without a calibrated Signal behind it."""
     if sidecar and (not isinstance(x, Signal) or x.calibration_factor is None):
@@ -791,7 +791,7 @@ def write(
     """
     target = Path(path)
     _check_target_suffix(path, target)
-    _check_sidecar_request(x, sidecar)
+    _check_sidecar_request(x=x, sidecar=sidecar)
     if rng is not None and dither is None:
         msg = (
             "rng seeds the TPDF dither noise and does nothing without it; "
@@ -801,7 +801,7 @@ def write(
     data, rate = _resolve_input(x, fs)
     if target.suffix.lower() == ".flac":
         _write_flac(path, x, data, rate, subtype, bext, dither, rng)
-        _write_signal_sidecar(path, x, sidecar)
+        _write_signal_sidecar(path=path, x=x, sidecar=sidecar)
         return
     resolved = _resolve_subtype(data, subtype)
     _check_dither(dither, resolved)
@@ -811,18 +811,19 @@ def write(
         _scipy_write(path, rate, data)
     elif resolved == "PCM_24":
         _write_pcm24(path, data, rate, resolved, dither, rng, bext_payload)
-        _write_signal_sidecar(path, x, sidecar)
+        _write_signal_sidecar(path=path, x=x, sidecar=sidecar)
         return
     else:
         _write_through_scipy(path, data, rate, resolved, dither, rng)
     if bext_payload is not None:
         append_riff_chunk(path, b"bext", bext_payload)
-    _write_signal_sidecar(path, x, sidecar)
+    _write_signal_sidecar(path=path, x=x, sidecar=sidecar)
 
 
 def _write_signal_sidecar(
     path: str | Path,
     x: Signal | NDArray[np.generic] | list[float],
+    *,
     sidecar: bool,
 ) -> None:
     """Write the calibration sidecar for a just-written Signal, on request.

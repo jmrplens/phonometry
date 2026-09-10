@@ -235,6 +235,7 @@ def _bundle(
     threshold: NDArray[np.float64],
     group: str,
     source: str,
+    *,
     in_air: bool,
 ) -> AudiogramResult:
     best = int(np.argmin(threshold))
@@ -276,11 +277,11 @@ def group_audiogram(
     )
     table = "Table 3 (normalized)" if normalized else "Table 2 (original)"
     return _bundle(
-        f_khz * 1000.0,
-        np.asarray(threshold, dtype=np.float64),
-        params.group,
-        f"Southall et al. (2019) Eq. (1), {table}",
-        params.in_air,
+        freq_hz=f_khz * 1000.0,
+        threshold=np.asarray(threshold, dtype=np.float64),
+        group=params.group,
+        source=f"Southall et al. (2019) Eq. (1), {table}",
+        in_air=params.in_air,
     )
 
 
@@ -327,9 +328,9 @@ def orca_audiogram(
         ),
     )
     return _bundle(
-        f_khz * 1000.0,
-        np.asarray(threshold, dtype=np.float64),
-        "orca",
-        "Wensveen & Van Roij (2007) via Ainslie (2010) Eq. (11.159)",
-        False,
+        freq_hz=f_khz * 1000.0,
+        threshold=np.asarray(threshold, dtype=np.float64),
+        group="orca",
+        source="Wensveen & Van Roij (2007) via Ainslie (2010) Eq. (11.159)",
+        in_air=False,
     )

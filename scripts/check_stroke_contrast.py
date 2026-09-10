@@ -100,7 +100,7 @@ def _is_field(element: ET.Element) -> bool:
 
 
 def _strokes(
-    element: ET.Element, on_field: bool = False
+    element: ET.Element, *, on_field: bool = False
 ) -> list[tuple[tuple[int, int, int], float, float]]:
     """Every measurable stroke in a subtree, as ``(rgb, opacity, width)``."""
     group = _group_id(element)
@@ -115,7 +115,7 @@ def _strokes(
         if rgb is not None and rgb not in SCAFFOLDING:
             found.append((rgb, alpha, width))
     for child in element:
-        found.extend(_strokes(child, on_field))
+        found.extend(_strokes(element=child, on_field=on_field))
     return found
 
 

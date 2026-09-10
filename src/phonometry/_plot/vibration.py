@@ -276,7 +276,7 @@ def plot_vibration_weighting(
         else "Frequency weighting {name} (ISO 8041-1)"
     )
     ax.set_title(_t(title, language).format(name=result.name))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     localize_axes(ax, language)
     return ax
@@ -345,7 +345,7 @@ def plot_weighted_spectrum(
         )
     )
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     # localize_axes leaves the categorical band axis (a FuncFormatter) alone.
     localize_axes(ax, language)
     return ax
@@ -461,7 +461,7 @@ def plot_daily_exposure(
         frameon=True,
         framealpha=0.9,
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     ax.set_axisbelow(True)
     localize_axes(ax, language)
     return ax
@@ -512,7 +512,7 @@ def plot_mobility(
     ax.set_ylabel(_t(_MOBILITY_LABEL, language))
     ax.set_title(_t("ISO 7626-1 mechanical mobility", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -596,7 +596,7 @@ def plot_rigid_mass_calibration(
             )
         axd.set_xlabel(_t(_FREQ_LABEL, language))
         axd.set_ylabel(_t(_DEVIATION_LABEL, language))
-        axd.grid(True, which="both", alpha=0.3)
+        axd.grid(visible=True, which="both", alpha=0.3)
         axd.legend(loc="best", fontsize="small")
 
     if ax is not None:
@@ -629,7 +629,7 @@ def plot_rigid_mass_calibration(
             label=outside_label,
         )
     axm.set_ylabel(mag_ylabel)
-    axm.grid(True, which="both", alpha=0.3)
+    axm.grid(visible=True, which="both", alpha=0.3)
     axm.legend(loc="best", fontsize="small")
     if result.passed:
         verdict = "CORRECTO" if language == "es" else "PASS"
@@ -673,7 +673,7 @@ def plot_transfer_stiffness(
     ax.set_ylabel(_t("Transfer stiffness level $L_k$ [dB re 1 N/m]", language))
     ax.set_title(_t("ISO 10846 dynamic transfer stiffness", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -717,7 +717,7 @@ def plot_radiation_efficiency(
     ax.set_ylabel(_t(r"Radiation efficiency $\sigma$", language))
     ax.set_title(_t("Plate radiation efficiency (Leppington / Maidanik)", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -779,7 +779,7 @@ def plot_seat_transmission(
             value=format_number(result.seat_factor, language, decimals=2)
         )
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     ax.set_axisbelow(True)
     # Each mean beside the set it belongs to: matplotlib would otherwise list
     # the two dashed lines first, leaving colour as the only clue to which
@@ -891,7 +891,7 @@ def plot_weighting_verification(
             w=result.weighting, verdict=verdict
         )
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -987,7 +987,7 @@ def plot_phase_verification(
             language,
         ).format(w=result.weighting, verdict=verdict)
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -1138,7 +1138,7 @@ def plot_damage_assessment(
     ax.set_title(_damage_title(result, language))
     ax.set_ylim(bottom=0.0)
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     ax.set_axisbelow(True)
     localize_axes(ax, language)
     return ax
@@ -1205,7 +1205,7 @@ def plot_building_frequency(
     ax.set_title(
         _t("Empirical fundamental frequency of a building (ISO 4866 D.3)", language)
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -1265,7 +1265,7 @@ def plot_multiple_shock(
     ax.set_xlim(left=0.0)
     ax.set_ylim(0.0, 100.0)
     ax.legend(loc="lower right", fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1587,7 +1587,7 @@ def plot_fault_frequencies(
     # The legend belongs to the spectrum, so it is anchored to the part of the
     # axes the spectrum has: above the strip start there are only line names.
     ax.legend(loc="upper right", fontsize="small", bbox_to_anchor=(0.0, 0.0, 1.0, band))
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1655,7 +1655,7 @@ def plot_power_injection(
         )
     )
     ax.legend(loc="best", fontsize="small", ncol=2)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1731,7 +1731,7 @@ def plot_junction_transmission(
             psi=format_number(result.psi, language, decimals=3),
         )
     )
-    ax.grid(True, color=_C_MUTED, alpha=0.3)
+    ax.grid(visible=True, color=_C_MUTED, alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -1843,7 +1843,7 @@ def plot_vector_change(
             + suffix,
         )
     )
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc="lower left", fontsize="small", bbox_to_anchor=(-0.15, -0.1))
     localize_axes(ax, language)
     return ax
@@ -1982,7 +1982,7 @@ def plot_signal_burst_verification(
             "Signal-burst response (ISO 8041-1)\n{name}, {application}", language
         ).format(name=row, application=application)
     )
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     ax.set_axisbelow(True)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)

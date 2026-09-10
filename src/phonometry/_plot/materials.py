@@ -222,7 +222,7 @@ def plot_sound_absorption(
     top = max(1.05, float(np.nanmax(alpha)) * 1.05) if alpha.size else 1.05
     ax.set_ylim(0.0, top)
     ax.set_title(_t("ISO 354 reverberation-room sound absorption", language))
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     _localize_band_axes(ax, language)
     return ax
 
@@ -256,7 +256,7 @@ def plot_scattering_coefficient(
     top = max(1.05, float(np.nanmax(s)) * 1.05) if s.size else 1.05
     ax.set_ylim(0.0, top)
     ax.set_title(_t(_SCATTERING_TITLE, language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -349,7 +349,7 @@ def plot_scattering_report(
     top = max(1.05, float(np.nanmax(s)) * 1.05) if s.size else 1.05
     ax.set_ylim(0.0, top)
     ax.set_title(_t(_SCATTERING_TITLE, language))
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     _localize_band_axes(ax, language)
     return ax
 
@@ -407,7 +407,7 @@ def plot_diffusion_report(
     ax.set_ylabel(_t("Coefficient", language))
     ax.set_ylim(0.0, 1.05)
     ax.set_title(_t(_DIFFUSION_TITLE, language))
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     _localize_band_axes(ax, language)
     return ax
 
@@ -499,7 +499,7 @@ def plot_insitu_absorption(
     ax.set_ylabel(_t("Absorption coefficient", language))
     ax.set_ylim(0.0, 1.0)
     ax.set_title(_t("In-situ road-surface absorption (ISO 13472-1)", language))
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     _localize_band_axes(ax, language)
     return ax
 
@@ -553,7 +553,7 @@ def plot_dynamic_stiffness(
     ax.set_title(_t("EN 29052-1 floating-floor resonance", language))
     ax.set_ylim(bottom=0.0)
     ax.legend(loc="upper left", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -599,7 +599,7 @@ def plot_impedance_tube(
     ax.set_ylim(0.0, 1.05)
     ax.set_title(_t("ISO 10534-2 normal-incidence absorption", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -651,7 +651,7 @@ def plot_static_airflow(
         f"{decimal_comma(f'{result.specific_resistance:.3g}', language)} Pa s/m"
     )
     ax.legend(loc="upper left", fontsize="small")
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -713,7 +713,7 @@ def plot_absorption_uncertainty(
         f"{_t('ISO 12999-2 absorption uncertainty', language)} "
         f"({sigma}) — {_t(result.condition, language)}"
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend()
     localize_axes(ax, language)
     return ax
@@ -740,7 +740,7 @@ def _absorption_spectrum_axes(
     ax.set_ylabel(_t(r"Absorption coefficient $\alpha$", language))
     ax.set_ylim(0.0, 1.05)
     ax.set_title(title)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     localize_axes(ax, language)
     return ax
@@ -826,7 +826,7 @@ def plot_porous_medium(
         f"$\\sigma$ = {decimal_comma(f'{result.flow_resistivity:g}', language)} Pa s/m²"
     )
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -897,7 +897,7 @@ def plot_biot_waves(
     ax.set_ylabel(_t("Wavenumber [rad/m]", language))
     ax.set_title(_t("Biot waves in a poroelastic layer", language))
     ax.legend(loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -1138,7 +1138,7 @@ def plot_transfer_matrix(
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
     ax.legend(lines + tlines, labels + tlabels, loc="best", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     localize_axes(twin, language)
     return ax

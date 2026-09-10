@@ -324,7 +324,9 @@ def _adaptive_multitaper_weights(
     return np.where(np.sum(d, axis=0) > 0.0, d, lam)
 
 
-def _multitaper_dof(d: NDArray[np.float64], nyquist_bin: bool) -> NDArray[np.float64]:
+def _multitaper_dof(
+    d: NDArray[np.float64], *, nyquist_bin: bool
+) -> NDArray[np.float64]:
     r"""Equivalent degrees of freedom
     :math:`\nu(f) = 2 \left( \sum_k d_k \right)^2 / \sum_k d_k^2`.
 

@@ -180,7 +180,7 @@ def plot_epnl(
         f"ICAO EPNL = {format_number(result.epnl, language)} EPNdB "
         f"($D$ = {decimal_comma(fmt_minus(result.duration_correction, '+.1f'), language)} dB)"
     )
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -231,7 +231,7 @@ def plot_aircraft_band_attenuation(
     ax.set_xlabel(_t("Frequency [Hz]", language))
     ax.set_ylabel(_t("Attenuation [dB]", language))
     ax.set_title(_t("Aircraft atmospheric absorption (SAE ARP 5534)", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="upper left", fontsize="small")
     format_frequency_axis(ax, float(f.min()), float(f.max()))
     localize_axes(ax, language)
@@ -267,7 +267,7 @@ def plot_npd_level(
     ax.set_xlabel(_t(_SLANT_DISTANCE_LABEL, language))
     ax.set_ylabel(_t(_EVENT_LEVEL_LABEL, language))
     ax.set_title(_t("Noise-power-distance curve (ECAC Doc 29)", language))
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -312,7 +312,7 @@ def plot_flyover(
     ax.set_xlabel(_t("Segment index", language))
     ax.set_ylabel(_t("Segment {metric} [dB]", language, metric=metric))
     ax.set_title(_t("Single-event segment contributions (ECAC Doc 29)", language))
-    ax.grid(True, axis="y", alpha=0.3)
+    ax.grid(visible=True, axis="y", alpha=0.3)
     if np.isfinite(result.level):
         ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
@@ -372,7 +372,7 @@ def plot_rotorcraft_hemisphere(
         )
     )
     ax.set_title(_t("Rotorcraft noise hemisphere directivity (ECAC Doc 32)", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -492,7 +492,7 @@ def plot_flight_path_kinematics(
         fontsize="small",
     )
     ax.set_title(_t("Rotorcraft flight-path kinematics (ECAC Doc 32)", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -548,7 +548,7 @@ def plot_rotorcraft_event(
     ax.set_xlabel(_t("Recorded time [s]", language))
     ax.set_ylabel(_t("A-weighted level [dB(A)]", language))
     ax.set_title(_t("Rotorcraft flyover time history (ECAC Doc 32)", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -642,7 +642,7 @@ def plot_mean_ground_plane(
     ax.set_xlabel(_t(_SECTION_DISTANCE_LABEL, language))
     ax.set_ylabel(_t(_HEIGHT_LABEL, language))
     ax.set_title(_t("Mean ground plane (NORAH2 guidance Eq. 36-40)", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -718,7 +718,7 @@ def plot_terrain_screening(
     ax.set_xlabel(_t(_SECTION_DISTANCE_LABEL, language))
     ax.set_ylabel(_t(_HEIGHT_LABEL, language))
     ax.set_title(_t("Terrain screening (ECAC Doc 32 / NORAH2 guidance)", language))
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -755,7 +755,7 @@ def plot_anp_npd(
         f"{_t('ANP NPD curves', language)} - {result.aircraft_id} "
         f"({result.metric}, {result.operation})"
     )
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -802,7 +802,7 @@ def plot_anp_profile(
         f"{_t('ANP default profile', language)} - {result.aircraft_id} "
         f"({result.operation})"
     )
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 
@@ -867,7 +867,7 @@ def plot_flight_profile(
     )
     handles = ax.get_lines()[:1] + thrust_ax.get_lines()[:1]
     ax.legend(handles, [str(h.get_label()) for h in handles], loc=_LEGEND_UPPER_RIGHT)
-    ax.grid(True, alpha=0.3)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     localize_axes(thrust_ax, language)
     return ax

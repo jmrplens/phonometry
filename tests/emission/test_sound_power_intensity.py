@@ -579,7 +579,7 @@ def _five_band_determination() -> object:
 )
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
 def test_a_per_band_quantity_off_the_band_axis_is_refused(
-    field_name: str, trim: bool
+    field_name: str, *, trim: bool
 ) -> None:
     """Every per-band quantity is pinned to the band axis at construction.
 

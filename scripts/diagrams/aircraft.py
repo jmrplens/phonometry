@@ -722,7 +722,7 @@ def _d_aircraft_noise_station(s: SVG, th: Theme) -> None:
 
 
 def _heli_glyph(
-    s: SVG, x: float, y: float, side: bool = True, scale: float = 1.0
+    s: SVG, x: float, y: float, *, side: bool = True, scale: float = 1.0
 ) -> None:
     """Small helicopter: side view flying right, or rear view seen from astern."""
     th, k = s.th, scale
@@ -774,7 +774,7 @@ def _d_rotorcraft_hemisphere(s: SVG, th: Theme) -> None:
     )
     s.text(ax, ay + r + 50.0, "measured polar band $θ_{t1}$ … $θ_{t2}$,", 11, th.accent)
     s.text(ax, ay + r + 68.0, "the two 10 dB-down instants", 11, th.muted)
-    _heli_glyph(s, ax, ay, True, 1.0)
+    _heli_glyph(s=s, x=ax, y=ay, side=True, scale=1.0)
 
     # --- (b) the azimuth, in the plane across the aircraft (θ = 90) --------
     bx, by = 664.0, 162.0
@@ -799,7 +799,7 @@ def _d_rotorcraft_hemisphere(s: SVG, th: Theme) -> None:
     s.text(bx, by + r + 26.0, "$φ$ = 0 beneath", 12, th.fg)
     s.text(bx, by + r + 50.0, "measured lateral band $−60° ≤ φ ≤ 60°$,", 11, th.accent)
     s.text(bx, by + r + 68.0, "outside it the bins are gap-filled", 11, th.muted)
-    _heli_glyph(s, bx, by, False, 1.0)
+    _heli_glyph(s=s, x=bx, y=by, side=False, scale=1.0)
 
     # --- (c) the sphere on a track ----------------------------------------
     gy = 532.0
@@ -817,7 +817,7 @@ def _d_rotorcraft_hemisphere(s: SVG, th: Theme) -> None:
     s.line(70.0, hy, 520.0, hy, th.muted, 1.2, dash="8,6")
     s.arrow(486.0, hy, 528.0, hy, th.fg, 1.8)
     s.circle(hx, hy, 38.0, "none", th.primary, 1.3)
-    _heli_glyph(s, hx, hy, True, 0.8)
+    _heli_glyph(s=s, x=hx, y=hy, side=True, scale=0.8)
     s.text(hx - 46.0, hy - 26.0, "60 m", 11, th.primary, anchor="end")
     s.mic(742.0, gy - 22.0, gy, 0.6)
     s.line(hx + 26.0, hy + 26.0, 740.0, gy - 26.0, th.primary, 2.2)

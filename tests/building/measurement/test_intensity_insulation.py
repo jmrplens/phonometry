@@ -460,7 +460,7 @@ def test_low_frequency_indicator_is_not_the_source_room_level() -> None:
     [(False, 10.0, [False, True, True]), (True, 6.0, [False, False, True])],
 )
 def test_low_frequency_qualification_follows_clause_6_4_2(
-    absorbing: bool, limit: float, qualified: list[bool]
+    *, absorbing: bool, limit: float, qualified: list[bool]
 ) -> None:
     """FpI above 10 dB (or 6 dB for an absorbing specimen) is not qualified."""
     r = building.low_frequency_intensity_reduction(

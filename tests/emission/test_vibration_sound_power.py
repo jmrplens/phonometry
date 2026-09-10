@@ -194,7 +194,7 @@ def _four_band_determination() -> emission.VibrationSoundPowerResult:
 @pytest.mark.parametrize("field_name", ["velocity_level", "radiation_factor"])
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
 def test_a_vibration_band_quantity_off_the_band_axis_is_refused(
-    field_name: str, trim: bool
+    field_name: str, *, trim: bool
 ) -> None:
     """The fiche reads these two columns at the row indices of ``LW``.
 

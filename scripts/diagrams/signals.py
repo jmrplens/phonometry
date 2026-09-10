@@ -571,7 +571,7 @@ def _d_block_processing(s: SVG, th: Theme) -> None:
 
     x0, blk_w, nblk, amp = 150.0, 190.0, 3, 66.0
 
-    def _lane(gy: float, reset: bool, color: str) -> None:
+    def _lane(gy: float, *, reset: bool, color: str) -> None:
         s.line(x0, gy, x0 + nblk * blk_w, gy, th.muted, 1.4)
         for k in range(nblk + 1):
             bx = x0 + k * blk_w

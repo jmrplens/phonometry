@@ -153,6 +153,7 @@ def _value_table(
     measured: np.ndarray,
     shifted: np.ndarray,
     deviations: np.ndarray,
+    *,
     verbose: bool,
     language: str = "en",
 ) -> Table:
@@ -309,6 +310,7 @@ def _left_table(
     measured: np.ndarray,
     shifted: np.ndarray,
     deviations: np.ndarray,
+    *,
     verbose: bool,
     language: str,
 ) -> tuple[Any, str]:
@@ -332,7 +334,14 @@ def _left_table(
     alpha_s = result.third_octave_alpha_s
     bands = result.third_octave_bands
     if verbose or alpha_s is None or bands is None:
-        table = _value_table(centers, measured, shifted, deviations, verbose, language)
+        table = _value_table(
+            centers=centers,
+            measured=measured,
+            shifted=shifted,
+            deviations=deviations,
+            verbose=verbose,
+            language=language,
+        )
         return table, t("Octave-band &#945;<sub>p</sub>", language)
     third_octave_bands = np.asarray(bands, dtype=np.float64)
     third_octave_alpha_s = np.asarray(alpha_s, dtype=np.float64)
@@ -430,7 +439,13 @@ def render_iso11654_report(
     flow.append(Spacer(1, 8))
 
     value_table, caption = _left_table(
-        result, centers, measured, shifted, deviations, verbose, language
+        result=result,
+        centers=centers,
+        measured=measured,
+        shifted=shifted,
+        deviations=deviations,
+        verbose=verbose,
+        language=language,
     )
     left_cell = [
         fiche_paragraph(caption, caption_style),
@@ -475,7 +490,9 @@ def render_iso11654_report(
         )
     if metadata is not None and metadata.requirement is not None:
         text, passed = _verdict(result, metadata.requirement, language)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
     flow.extend(footer_flow(metadata, language))
 
     return build_document(path, flow, title)

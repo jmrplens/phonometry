@@ -113,7 +113,7 @@ def test_force_limits_differ_by_6_db_in_mean_square() -> None:
     ],
 )
 def test_hopkins_four_plates_critical_case(
-    name: str, thickness: float, mass_per_area: float, over_critical: bool
+    name: str, thickness: float, mass_per_area: float, *, over_critical: bool
 ) -> None:
     """The printed over/under-critical classification of H Figs. 3.30 and 3.31.
 

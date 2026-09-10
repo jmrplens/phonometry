@@ -276,7 +276,9 @@ def test_validation() -> None:
     ],
 )
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
-def test_a_spectrum_off_the_band_axis_is_refused(field_name: str, trim: bool) -> None:
+def test_a_spectrum_off_the_band_axis_is_refused(
+    field_name: str, *, trim: bool
+) -> None:
     """A chain cannot carry a row that runs over other bands than the header.
 
     :meth:`RoomToRoomResult.table` writes the chain out as one row per link

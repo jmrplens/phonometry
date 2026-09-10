@@ -295,7 +295,11 @@ def render_iso3382_3_report(
     if metadata is not None and metadata.requirement is not None:
         verdict = _verdict(result, metadata.requirement, language)
         if verdict is not None:
-            flow.extend(verdict_flow(verdict[0], verdict[1], styles, language))
+            flow.extend(
+                verdict_flow(
+                    text=verdict[0], passed=verdict[1], styles=styles, language=language
+                )
+            )
 
     basis_strip_style = measurement_basis_style()
     flow.append(

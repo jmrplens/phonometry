@@ -584,7 +584,9 @@ class ParametricEQ:
             )
 
         if _sos_state_mismatch(self.zi, x_proc):
-            self.zi = _sos_initial_state(self.sos, x_proc, self._steady_ic)
+            self.zi = _sos_initial_state(
+                sos=self.sos, x_proc=x_proc, steady_ic=self._steady_ic
+            )
         y, self.zi = signal.sosfilt(self.sos, x_proc, axis=-1, zi=self.zi)
         return like_input(x, cast(np.ndarray, y))
 

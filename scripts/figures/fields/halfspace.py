@@ -234,7 +234,7 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
         ((vy_free, tr_free, titles[0], True), (vy_rigid, tr_rigid, titles[1], False))
     ):
         ax = fig.add_subplot(grid[row, 0])
-        ax.grid(False)
+        ax.grid(visible=False)
         im = ax.imshow(
             data[0],
             origin="upper",
@@ -348,7 +348,7 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
         v_txts.append(v_txt)
 
         tax = fig.add_subplot(grid[row, 1])
-        tax.grid(False)
+        tax.grid(visible=False)
         tax.set_xlim(0.0, float(t_us[-1]))
         tax.set_ylim(-1.15, 1.15)
         tax.set_yticks([])

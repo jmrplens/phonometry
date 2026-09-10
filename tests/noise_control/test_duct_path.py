@@ -430,7 +430,9 @@ def test_combine_of_one_path_is_that_path() -> None:
     ["attenuation", "attenuated", "self_noise", "level"],
 )
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
-def test_a_stage_row_off_the_band_axis_is_refused(field_name: str, trim: bool) -> None:
+def test_a_stage_row_off_the_band_axis_is_refused(
+    field_name: str, *, trim: bool
+) -> None:
     """A calculation sheet cannot carry a row of the wrong width.
 
     The sheet prints one row per element under a single band header with a

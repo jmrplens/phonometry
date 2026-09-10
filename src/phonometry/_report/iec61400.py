@@ -330,7 +330,9 @@ def render_wind_turbine_tonality_report(
 
     if metadata is not None and metadata.requirement is not None:
         text, passed = _verdict(result, metadata.requirement, language)
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
 
     basis_strip_style = measurement_basis_style()
     flow.append(fiche_paragraph(_decision_note(result, language), basis_strip_style))

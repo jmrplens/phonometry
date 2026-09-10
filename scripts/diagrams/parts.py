@@ -175,6 +175,7 @@ def _exciter(
     stinger: float = 22.0,
     w: float = 74.0,
     h: float = 48.0,
+    *,
     up: bool = False,
 ) -> None:
     """Electrodynamic exciter body with a stinger driving the point (x, y).

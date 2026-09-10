@@ -283,7 +283,7 @@ def animate_elastic_mode_conversion(output_dir: str) -> None:
     ims: list[Any] = []
     v_txts: list[Any] = []
     for ax, theta, data, gain in zip(axes, _MC_ANGLES, shown, gains, strict=True):
-        ax.grid(False)
+        ax.grid(visible=False)
         im = ax.imshow(
             data[0],
             origin="upper",

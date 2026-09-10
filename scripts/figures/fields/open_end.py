@@ -180,7 +180,7 @@ def animate_fdtd_open_end(output_dir: str) -> None:
         ((p_low, _OPEN_FREQS[0]), (p_high, _OPEN_FREQS[1]))
     ):
         ax = fig.add_subplot(grid[row, 0])
-        ax.grid(False)
+        ax.grid(visible=False)
         limit = 1.05 * float(np.nanquantile(np.abs(frames[-1]), 0.999))
         ims.append(
             ax.imshow(

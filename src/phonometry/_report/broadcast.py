@@ -397,7 +397,9 @@ def render_program_loudness_report(
 
     flow.append(result_box(_statement(result, language), styles, accent))
     text, passed = _verdict(result, target, tolerance, language)
-    flow.extend(verdict_flow(text, passed, styles, language))
+    flow.extend(
+        verdict_flow(text=text, passed=passed, styles=styles, language=language)
+    )
 
     basis_strip_style = ParagraphStyle(
         "fiche_measurement_basis",

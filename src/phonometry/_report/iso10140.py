@@ -120,7 +120,7 @@ def render_iso10140_report(
     is_impact = quantity == "l_n"
 
     def build_columns(
-        value_header: str, curve: np.ndarray, verbose: bool, language: str
+        value_header: str, curve: np.ndarray, *, verbose: bool, language: str
     ) -> tuple[Sequence[Column], str, Any]:
         """The laboratory table: ``f | value`` or, verbose, ``f | A | value``."""
         from reportlab.lib.units import mm

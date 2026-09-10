@@ -246,7 +246,9 @@ def _render_prediction_fiche(
             is_impact=is_impact,
             language=language,
         )
-        flow.extend(verdict_flow(text, passed, styles, language))
+        flow.extend(
+            verdict_flow(text=text, passed=passed, styles=styles, language=language)
+        )
 
     flow.extend(
         footer_flow(
@@ -398,6 +400,7 @@ _DETAILED_STATEMENT = (
 
 def _detailed_path_rows(
     result: DetailedAirborneResult | DetailedImpactResult,
+    *,
     verbose: bool,
     language: str,
 ) -> list[tuple[str, str]]:
@@ -481,7 +484,9 @@ def render_iso12354_detailed_airborne_report(
         rating_value=float(rating.rating),
         rating_symbol="R&#8242;<sub>w</sub>",
         left_caption_key="Transmission paths - share of energy",
-        metric_rows=_detailed_path_rows(result, verbose, language),
+        metric_rows=_detailed_path_rows(
+            result=result, verbose=verbose, language=language
+        ),
         is_impact=False,
         metadata=metadata,
         language=language,
@@ -530,7 +535,9 @@ def render_iso12354_detailed_impact_report(
         rating_value=float(rating.rating),
         rating_symbol="L&#8242;<sub>n,w</sub>",
         left_caption_key="Transmission paths - share of energy",
-        metric_rows=_detailed_path_rows(result, verbose, language),
+        metric_rows=_detailed_path_rows(
+            result=result, verbose=verbose, language=language
+        ),
         is_impact=True,
         metadata=metadata,
         language=language,

@@ -210,7 +210,7 @@ def _header_flow(
 # ISO 17497-1: random-incidence scattering coefficient.
 # ---------------------------------------------------------------------------
 def _scattering_table(
-    result: ScatteringResult, verbose: bool, language: str = "en"
+    result: ScatteringResult, *, verbose: bool, language: str = "en"
 ) -> Table:
     """Build the per-band ``f | alpha_s | s`` table (``alpha_spec`` if verbose)."""
     from reportlab.lib.units import mm
@@ -344,7 +344,7 @@ def render_scattering_report(
     )
     left_cell = [
         fiche_paragraph(caption, caption_style),
-        _scattering_table(result, verbose, language),
+        _scattering_table(result=result, verbose=verbose, language=language),
     ]
     plot_fn = functools.partial(plot_scattering_report, result)
     if verbose:
@@ -378,7 +378,7 @@ def render_scattering_report(
 # ISO 17497-2: directional diffusion coefficient spectrum d(f).
 # ---------------------------------------------------------------------------
 def _diffusion_table(
-    result: DiffusionSpectrum, show_normalized: bool, language: str = "en"
+    result: DiffusionSpectrum, *, show_normalized: bool, language: str = "en"
 ) -> Table:
     """Build the per-band ``f | d`` table (adds ``d_n`` when requested)."""
     from reportlab.lib.units import mm
@@ -498,7 +498,9 @@ def render_diffusion_spectrum_report(
     )
     left_cell = [
         fiche_paragraph(caption, caption_style),
-        _diffusion_table(result, show_normalized, language),
+        _diffusion_table(
+            result=result, show_normalized=show_normalized, language=language
+        ),
     ]
     plot_fn = functools.partial(plot_diffusion_report, result)
     plot_drawing = render_figure_drawing(

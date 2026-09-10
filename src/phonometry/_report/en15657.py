@@ -91,7 +91,7 @@ def _eta_cell(value: float, language: str = "en") -> str:
 
 
 def _value_table(
-    result: StructureBornePowerResult, verbose: bool, language: str = "en"
+    result: StructureBornePowerResult, *, verbose: bool, language: str = "en"
 ) -> Table:
     """Build the full-width per-band table (nominal frequency, Lv, L_Ws).
 
@@ -233,7 +233,7 @@ def render_structure_borne_power_report(
             extended=extended,
             basis_strips=[_relation_strip(language), _conversion_strip(language)],
         ),
-        value_table=_value_table(result, verbose, language),
+        value_table=_value_table(result=result, verbose=verbose, language=language),
         metadata=metadata,
         language=language,
         verdict=verdict,

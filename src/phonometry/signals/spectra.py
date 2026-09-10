@@ -315,6 +315,7 @@ def _chi2_interval(
     gxx: NDArray[np.float64],
     nd: float,
     confidence: float,
+    *,
     nyquist_bin: bool,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""Chi-square confidence interval for the autospectrum (Eq. 8.163).

@@ -392,7 +392,7 @@ def test_immersed_plate_reproduces_normal_incidence_mass_law() -> None:
     ny, nx = 2600, 3
     f0 = 50e3
 
-    def run(with_plate: bool) -> np.ndarray:
+    def run(*, with_plate: bool) -> np.ndarray:
         c_p = np.full((ny, nx), CP_W)
         c_s = np.zeros((ny, nx))
         rho = np.full((ny, nx), RHO_W)

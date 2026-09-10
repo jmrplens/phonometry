@@ -164,7 +164,7 @@ def _esc(value: str | None) -> str | None:
 
 
 def _task_table(
-    result: ExposureResult, verbose: bool = False, language: str = "en"
+    result: ExposureResult, *, verbose: bool = False, language: str = "en"
 ) -> Table:
     """The Clause 15 b/d work-analysis table of a task-based result.
 
@@ -363,7 +363,9 @@ def _assessment_table(result: ExposureResult, language: str = "en") -> Table:
                 fiche_paragraph(label, label_style),
                 fiche_paragraph(threshold, value_style),
                 fiche_paragraph(measured, value_style),
-                fiche_paragraph(exceedance_markup(exceeded, language), label_style),
+                fiche_paragraph(
+                    exceedance_markup(exceeded=exceeded, language=language), label_style
+                ),
             ]
         )
     return stacked_table(data, [74 * mm, 24 * mm, 42 * mm, 34 * mm])
@@ -465,7 +467,7 @@ def render_iso9612_report(
 
     if result.tasks:
         flow.append(fiche_paragraph(t("Work analysis", language), caption_style))
-        flow.append(_task_table(result, verbose, language))
+        flow.append(_task_table(result=result, verbose=verbose, language=language))
         flow.append(Spacer(1, 6))
         # Full-width, landscape per-task contribution chart (self-scaling axis).
         flow.append(
@@ -494,7 +496,9 @@ def render_iso9612_report(
     )
     flow.append(_assessment_table(result, language))
     text, passed = _verdict(result, language)
-    flow.extend(verdict_flow(text, passed, styles, language))
+    flow.extend(
+        verdict_flow(text=text, passed=passed, styles=styles, language=language)
+    )
 
     note_style = ParagraphStyle(
         "iso9612_notes",

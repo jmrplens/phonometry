@@ -102,7 +102,7 @@ def _column_widths(n_columns: int) -> list[float]:
 
 
 def _value_table(
-    result: InstalledSourceResult, verbose: bool, language: str = "en"
+    result: InstalledSourceResult, *, verbose: bool, language: str = "en"
 ) -> Table:
     """Build the full-width per-band multi-path table.
 
@@ -239,7 +239,7 @@ def render_installed_structure_borne_report(
             extended=extended,
             basis_strips=[_relation_strip(language), _prediction_strip(language)],
         ),
-        value_table=_value_table(result, verbose, language),
+        value_table=_value_table(result=result, verbose=verbose, language=language),
         metadata=metadata,
         language=language,
         verdict=verdict,

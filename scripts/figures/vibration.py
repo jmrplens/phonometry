@@ -2763,7 +2763,7 @@ def generate_building_frequency_prediction(output_dir: str) -> None:
     ax_spread.set_xlim(0.0, 1.62)
     ax_spread.set_xlabel("Fundamental frequency $f$ (Hz)")
     ax_spread.set_title("What the Choice of Code Costs, on One Building", pad=10)
-    ax_spread.grid(False)
+    ax_spread.grid(visible=False)
     ax_spread.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, axis="x")
     ax_spread.set_axisbelow(True)
     ax_spread.legend(loc="lower left", fontsize=8.5)
@@ -4237,7 +4237,7 @@ def generate_meter_phase_verification(output_dir: str) -> None:
     plt.close()
 
 
-def _verdict_clause(passes: bool) -> str:
+def _verdict_clause(*, passes: bool) -> str:
     """The verdict of one sweep, as the clause the legend ends on.
 
     Taken from ``WeightingVerification.passes`` rather than typed, so a
@@ -4373,11 +4373,11 @@ def generate_meter_weighting_verification(output_dir: str) -> None:
     # both marks rather than one mark hiding the other.
     accepted_label = (
         f"the same shortfall moved to {moved_hz:.2f} Hz, "
-        + _verdict_clause(accepted.passes)
+        + _verdict_clause(passes=accepted.passes)
     )
     refused_label = (
         f"the sweep as read: {shortfall} % at {refused_hz:.2f} Hz, "
-        + _verdict_clause(refused.passes)
+        + _verdict_clause(passes=refused.passes)
     )
     for panel, read_values, moved_values in (
         (ax_band, refused.measured, accepted.measured),

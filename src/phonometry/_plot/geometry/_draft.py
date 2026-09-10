@@ -183,7 +183,9 @@ def _dim(
     if angle > _MAX_READABLE_ROTATION or angle <= -_MAX_READABLE_ROTATION:
         angle += 180.0
     shift = normal * (9.0 * label_side)
-    ha, va, rotation = _dim_label_anchor(shift, angle, label_upright)
+    ha, va, rotation = _dim_label_anchor(
+        shift=shift, angle=angle, upright=label_upright
+    )
     ax.annotate(
         label,
         xy=(mid[0], mid[1]),
@@ -215,7 +217,7 @@ def _dim_extension_lines(
 
 
 def _dim_label_anchor(
-    shift: np.ndarray, angle: float, upright: bool
+    shift: np.ndarray, angle: float, *, upright: bool
 ) -> tuple[str, str, float]:
     """Alignment and rotation of a dimension label.
 

@@ -330,7 +330,7 @@ def animate_elastic_radiation_efficiency(output_dir: str) -> None:
     v_txts: list[Any] = []
     for row, (data, title) in enumerate(((p_lo, titles[0]), (p_hi, titles[1]))):
         ax = axes[row]
-        ax.grid(False)
+        ax.grid(visible=False)
         im = ax.imshow(
             data[0],
             origin="lower",

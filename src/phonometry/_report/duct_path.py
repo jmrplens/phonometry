@@ -104,7 +104,7 @@ def _regenerates(row: dict[str, Any]) -> bool:
     return bool(np.any(np.asarray(row["values"]) > 0.0))
 
 
-def _visible_rows(rows: list[dict[str, Any]], verbose: bool) -> list[dict[str, Any]]:
+def _visible_rows(rows: list[dict[str, Any]], *, verbose: bool) -> list[dict[str, Any]]:
     """Select the rows a sheet prints at the requested level of detail.
 
     Every row the cascade produces is meaningful, but a fiche is one page, so
@@ -122,11 +122,11 @@ def _visible_rows(rows: list[dict[str, Any]], verbose: bool) -> list[dict[str, A
     return [
         row
         for position, row in enumerate(rows)
-        if _prints(row, rows[position + 1 :], verbose)
+        if _prints(row=row, rest=rows[position + 1 :], verbose=verbose)
     ]
 
 
-def _prints(row: dict[str, Any], rest: list[dict[str, Any]], verbose: bool) -> bool:
+def _prints(row: dict[str, Any], rest: list[dict[str, Any]], *, verbose: bool) -> bool:
     """Whether one sheet row survives the selection of :func:`_visible_rows`."""
     kind = row["kind"]
     if kind == "self_noise":
@@ -215,6 +215,7 @@ def _element_label(row: dict[str, Any], language: str) -> str:
 
 def _sheet_table(
     result: DuctPathResult,
+    *,
     verbose: bool,
     language: str,
     rows: list[dict[str, Any]] | None = None,
@@ -229,7 +230,7 @@ def _sheet_table(
 
     frequencies = np.asarray(result.frequencies, dtype=np.float64)
     if rows is None:
-        rows = _visible_rows(result.table(), verbose)
+        rows = _visible_rows(rows=result.table(), verbose=verbose)
     data: list[list[Any]] = [_band_header(frequencies, language)]
     data.extend(
         [row["code"], _element_label(row, language)]
@@ -428,8 +429,10 @@ def render_duct_path_report(
             flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 7))
 
-    rows = _visible_rows(result.table(), verbose)
-    table, _count = _sheet_table(result, verbose, language, rows)
+    rows = _visible_rows(rows=result.table(), verbose=verbose)
+    table, _count = _sheet_table(
+        result=result, verbose=verbose, language=language, rows=rows
+    )
     flow.append(
         fiche_paragraph(t("Octave-band path calculation, dB", language), caption_style)
     )
@@ -441,7 +444,11 @@ def render_duct_path_report(
     left_cell: list[Any] = [result_box(statement, styles, accent, extended)]
     verdict = _verdict(result, language)
     if verdict is not None:
-        left_cell.extend(verdict_flow(verdict[0], verdict[1], styles, language))
+        left_cell.extend(
+            verdict_flow(
+                text=verdict[0], passed=verdict[1], styles=styles, language=language
+            )
+        )
     # The verbose sheet prints the running Sum and Combined rows, so the chart
     # gives up the height the extra rows need and the fiche stays on one page.
     plot_width = 88.0 if verbose else 96.0
@@ -487,7 +494,14 @@ def render_duct_path_report(
     )
     flow.extend(footer_flow(metadata, language, disclaimer=PREDICTION_DISCLAIMER))
 
-    _fit_to_one_page(flow, table_index, result, rows, verbose, language)
+    _fit_to_one_page(
+        flow=flow,
+        table_index=table_index,
+        result=result,
+        rows=rows,
+        verbose=verbose,
+        language=language,
+    )
     return build_document(path, flow, t("Duct-borne noise path calculation", language))
 
 
@@ -496,6 +510,7 @@ def _fit_to_one_page(
     table_index: int,
     result: DuctPathResult,
     rows: list[dict[str, Any]],
+    *,
     verbose: bool,
     language: str,
 ) -> None:
@@ -518,4 +533,6 @@ def _fit_to_one_page(
         if len(trimmed) >= len(rows):
             return
         rows = trimmed
-        flow[table_index], _count = _sheet_table(result, verbose, language, rows)
+        flow[table_index], _count = _sheet_table(
+            result=result, verbose=verbose, language=language, rows=rows
+        )

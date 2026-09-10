@@ -184,7 +184,7 @@ def animate_fdtd_aperture_slit(output_dir: str) -> None:
         )
         ax_p.set_title(titles[col], fontsize=10)
         for ax in (ax_p, ax_r):
-            ax.grid(False)
+            ax.grid(visible=False)
             for y0, y1 in ((0.0, 2.5 - gap / 2.0), (2.5 + gap / 2.0, 5.0)):
                 ax.add_patch(
                     Rectangle(

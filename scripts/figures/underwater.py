@@ -616,7 +616,7 @@ def generate_ocean_ambient_noise(output_dir: str) -> None:
 
 
 def _plot_ambient_curve(
-    res: object, wind_speed: float, color: str, label_components: bool = False
+    res: object, wind_speed: float, color: str, *, label_components: bool = False
 ) -> None:
     ax = plt.gca()
     ax.plot(
@@ -1561,7 +1561,7 @@ def generate_gaussian_beam_caustic(output_dir: str) -> None:
     ax.set_xlabel("Range [m]")
     ax.set_ylabel("Depth [m]")
     ax.set_title("Where Rays Give Infinity and Nothing, Beams Give a Level", pad=12)
-    ax.grid(False)
+    ax.grid(visible=False)
     plt.tight_layout()
     save_figure(output_dir, "gaussian_beam_caustic.svg")
     plt.close(fig)

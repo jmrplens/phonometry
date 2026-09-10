@@ -52,7 +52,7 @@ def _add_noise(clean: np.ndarray, snr_db: float, seed: int) -> np.ndarray:
 
 
 @pytest.mark.parametrize("extended", [False, True])
-def test_identical_signals_score_one(extended: bool) -> None:
+def test_identical_signals_score_one(*, extended: bool) -> None:
     # A degraded signal equal to the clean reference is a perfect correlation.
     x = _speech_like(1)
     assert speech.stoi(x, x, FS, extended=extended).value == pytest.approx(
@@ -61,7 +61,7 @@ def test_identical_signals_score_one(extended: bool) -> None:
 
 
 @pytest.mark.parametrize("extended", [False, True])
-def test_uncorrelated_noise_scores_low(extended: bool) -> None:
+def test_uncorrelated_noise_scores_low(*, extended: bool) -> None:
     # An unrelated signal has no envelope correlation with the clean speech.
     x = _speech_like(1)
     y = _speech_like(999)  # independent, same statistics
@@ -70,7 +70,7 @@ def test_uncorrelated_noise_scores_low(extended: bool) -> None:
 
 
 @pytest.mark.parametrize("extended", [False, True])
-def test_monotonic_with_snr(extended: bool) -> None:
+def test_monotonic_with_snr(*, extended: bool) -> None:
     # Higher SNR must not lower the index (monotonic relation with quality).
     x = _speech_like(2)
     values = [
@@ -146,7 +146,7 @@ def test_too_short_signal_raises() -> None:
 
 @pytest.mark.parametrize("extended", [False, True])
 @pytest.mark.parametrize("snr_db", [20.0, 10.0, 0.0, -10.0])
-def test_matches_pystoi_reference(extended: bool, snr_db: float) -> None:
+def test_matches_pystoi_reference(*, extended: bool, snr_db: float) -> None:
     pystoi = pytest.importorskip("pystoi")
     x = _speech_like(1)
     y = _add_noise(x, snr_db, seed=10)

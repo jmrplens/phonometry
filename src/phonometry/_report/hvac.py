@@ -191,6 +191,7 @@ def _caption(result: HvacSpectrumResult, language: str = "en") -> str:
 
 def _value_table(
     result: HvacSpectrumResult,
+    *,
     verbose: bool,
     corrections: np.ndarray | None,
     language: str = "en",
@@ -376,7 +377,9 @@ def render_hvac_report(
         title=t("HVAC duct noise spectrum", language),
         basis=_basis(result, language),
         caption=_caption(result, language),
-        value_table=_value_table(result, verbose, corrections, language),
+        value_table=_value_table(
+            result=result, verbose=verbose, corrections=corrections, language=language
+        ),
         statement=statement,
         extended=extended,
         basis_strips=_basis_strip(result, corrections, language),

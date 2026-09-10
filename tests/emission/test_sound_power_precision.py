@@ -408,7 +408,7 @@ def _forty_position_determination() -> PrecisionSoundPowerResult:
 
 
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
-def test_a_per_band_column_off_the_band_axis_is_refused(trim: bool) -> None:
+def test_a_per_band_column_off_the_band_axis_is_refused(*, trim: bool) -> None:
     """``uncertainty_bands`` is per band and nothing downstream says so.
 
     The fiche never opens the column, so a length other than the band axis
@@ -872,7 +872,7 @@ def _four_band_indicators() -> PrecisionFieldIndicators:
 )
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
 def test_a_determination_column_off_the_band_axis_is_refused(
-    field_name: str, trim: bool
+    field_name: str, *, trim: bool
 ) -> None:
     """Every per-band quantity of the determination is pinned at construction.
 

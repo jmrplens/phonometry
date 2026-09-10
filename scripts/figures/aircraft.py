@@ -1100,7 +1100,7 @@ def generate_anp_contour(output_dir: str) -> None:
 # --------------------------------------------------------------------------- #
 
 
-def _synthetic_hemisphere(masked: bool = False) -> "RotorcraftHemisphere":
+def _synthetic_hemisphere(*, masked: bool = False) -> "RotorcraftHemisphere":
     """A helicopter-like hemisphere on the Doc 32 grid, for the figures.
 
     The library implements the method and ships no hemisphere database, so

@@ -331,7 +331,7 @@ def _time_figures() -> None:
     import generate_graphs as gg
 
     gg.set_lang("en")
-    gg.set_theme(False)
+    gg.set_theme(dark=False)
     out_dir = str(_ROOT / ".github" / "images")
     rows: list[tuple[float, str]] = []
     import inspect

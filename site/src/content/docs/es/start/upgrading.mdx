@@ -59,7 +59,7 @@ import phonometry
 
 def whereis(name):
     """Cada módulo público que publica `name`, del menos profundo al que más."""
-    found = []
+    found = ["phonometry"] if name in phonometry.__all__ else []
     for attribute in phonometry.__all__:
         package = getattr(phonometry, attribute)
         if not hasattr(package, "__path__"):
@@ -81,12 +81,16 @@ def whereis(name):
 print(whereis("laeq")[0])                  # phonometry.signals
 print(whereis("reverberation_time")[0])    # phonometry.room
 print(whereis("sensitivity")[0])           # phonometry.metrology
+print(whereis("Signal")[0])                # phonometry
 ```
 
 Recorre el árbol en unos dos segundos. Cuando devuelve varias rutas, la menos
 profunda es el import canónico: un subpaquete reexporta lo que publican sus
-propios módulos, y esa ruta corta es la que usan las guías y los tests. Una
-lista vacía significa que el nombre está en la última sección de esta página.
+propios módulos, y esa ruta corta es la que usan las guías y los tests. Los
+cuatro nombres que la raíz sigue publicando por su cuenta, `Signal`,
+`PhonometryWarning`, `ReportMetadata` y `__version__`, vuelven como
+`phonometry` a secas. Una lista vacía significa que el nombre está en la
+última sección de esta página.
 
 ## Módulos que se partieron en vez de mudarse
 

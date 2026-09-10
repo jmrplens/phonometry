@@ -56,7 +56,7 @@ import phonometry
 
 def whereis(name):
     """Every public module that publishes `name`, shallowest first."""
-    found = []
+    found = ["phonometry"] if name in phonometry.__all__ else []
     for attribute in phonometry.__all__:
         package = getattr(phonometry, attribute)
         if not hasattr(package, "__path__"):
@@ -78,12 +78,16 @@ def whereis(name):
 print(whereis("laeq")[0])                  # phonometry.signals
 print(whereis("reverberation_time")[0])    # phonometry.room
 print(whereis("sensitivity")[0])           # phonometry.metrology
+print(whereis("Signal")[0])                # phonometry
 ```
 
 It walks the tree in about two seconds. When it returns several paths the
 shallowest one is the canonical import: a subpackage re-exports what its own
 modules publish, and that shallow path is the one the guides and the tests
-use. An empty list means the name is in the last section of this page.
+use. The four names the root still publishes on its own, `Signal`,
+`PhonometryWarning`, `ReportMetadata` and `__version__`, come back as
+`phonometry` itself. An empty list means the name is in the last section of
+this page.
 
 ## Modules that split rather than moved
 

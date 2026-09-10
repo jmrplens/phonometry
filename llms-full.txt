@@ -55526,7 +55526,7 @@ define them — ISO, IEC, ANSI and ASTM, the CNOSSOS-EU annex to Directive
 the clause it implements. What that buys you, and how it is checked, is
 [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/).
 
-Six short pages, meant to be read once before anything else. Each answers one
+Seven short pages, meant to be read once before anything else. Each answers one
 question, and they are in the order the questions arrive.
 
 **Can I install it and get a number out?**
@@ -55541,6 +55541,12 @@ meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/), which 
 to end on one page, and [Calibration and
 dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/) is the deep guide behind the
 one step that matters most.
+
+**My code is written against 3.3 and the imports fail.**
+[Upgrading from 3.3 to 4.0](https://jmrplens.github.io/phonometry/start/upgrading/) is the map: the one rule
+that moves almost every import, a resolver to paste when you would rather not
+look a name up, the three places where the obvious fix is the wrong one, and
+the ten names that are gone.
 
 **I have a job, not a subject. Which page is it?**
 [What do you need to measure?](https://jmrplens.github.io/phonometry/start/tasks/) indexes the library by
@@ -55746,7 +55752,7 @@ import phonometry
 
 def whereis(name):
     """Every public module that publishes `name`, shallowest first."""
-    found = []
+    found = ["phonometry"] if name in phonometry.__all__ else []
     for attribute in phonometry.__all__:
         package = getattr(phonometry, attribute)
         if not hasattr(package, "__path__"):
@@ -55768,12 +55774,16 @@ def whereis(name):
 print(whereis("laeq")[0])                  # phonometry.signals
 print(whereis("reverberation_time")[0])    # phonometry.room
 print(whereis("sensitivity")[0])           # phonometry.metrology
+print(whereis("Signal")[0])                # phonometry
 ```
 
 It walks the tree in about two seconds. When it returns several paths the
 shallowest one is the canonical import: a subpackage re-exports what its own
 modules publish, and that shallow path is the one the guides and the tests
-use. An empty list means the name is in the last section of this page.
+use. The four names the root still publishes on its own, `Signal`,
+`PhonometryWarning`, `ReportMetadata` and `__version__`, come back as
+`phonometry` itself. An empty list means the name is in the last section of
+this page.
 
 ## Modules that split rather than moved
 

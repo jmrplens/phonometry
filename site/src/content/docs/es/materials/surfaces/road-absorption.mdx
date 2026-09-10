@@ -417,7 +417,7 @@ expuestas:
 - El factor de divergencia geométrica adquiere una forma angular,
   $K_{\mathrm{r},\theta}^2 = 1 - \cos^2\theta\,(1 - K_\mathrm{r}^2)$, que calcula
   `geometric_spreading_factor_angle` y que usa automáticamente
-  `insitu_absorption_spectrum` cuando se le da un `incidence_angle`. Las dos
+  `insitu_absorption_spectrum` cuando se le da un `incidence_angle_rad`. Las dos
   toman el ángulo en **radianes**, al contrario que los grados que cita el resto
   de esta página.
 - El área muestreada deja de ser el círculo de la figura de arriba. Pasa a ser
@@ -664,7 +664,7 @@ Anexo A (`materials.max_sampled_area_radius`), con la corrección de superficie
 de referencia del Anexo B (`materials.absorption_reference_corrected`) y el
 caso de incidencia oblicua del Anexo F
 (`materials.geometric_spreading_factor_angle`, `materials.msa_major_axis` y el
-argumento `incidence_angle` de `materials.insitu_absorption_spectrum`); y el
+argumento `incidence_angle_rad` de `materials.insitu_absorption_spectrum`); y el
 límite de frecuencia de onda plana, la geometría de separación de micrófonos y
 la corrección de pérdidas internas del Anexo A del método puntual de la ISO
 13472-2:2010 (`materials.spot_tube_upper_frequency`,

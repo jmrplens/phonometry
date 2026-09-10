@@ -59,7 +59,7 @@ directly.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
@@ -195,7 +195,7 @@ def _scattered_pressure(
     frequency: float,
     angles_deg: Real,
     *,
-    source_angle: float,
+    source_angle_deg: float,
     repetitions: int,
     speed_of_sound: float,
     include_aperture: bool,
@@ -218,7 +218,7 @@ def _scattered_pressure(
     # change |p|, but a symmetric array keeps a normal-incidence response even).
     centres = (np.arange(m, dtype=np.float64) - (m - 1) / 2.0) * well_width
     theta = np.radians(angles_deg)
-    psi = math.radians(source_angle)
+    psi = math.radians(source_angle_deg)
     spatial = np.sin(theta) + math.sin(psi)  # (A,)
     phase = np.exp(1j * k * centres[None, :] * spatial[:, None])  # (A, M)
     pressure = phase @ r_all  # (A,)
@@ -262,7 +262,7 @@ class DiffuserPolarResponse:
         decibels, referenced to the peak of the response (peak at 0 dB).
     :ivar coefficient: Directional diffusion coefficient ``d_theta`` of the
         predicted response (ISO 17497-2, Formula (5)).
-    :ivar source_angle: Angle of incidence ``psi`` of the source, in degrees.
+    :ivar source_angle_deg: Angle of incidence ``psi`` of the source, in degrees.
     :ivar well_width: Well width ``w`` of the predicted surface, in metres,
         always retained by the predictor (with ``repetitions``) so
         :meth:`plot_geometry` can draw the well profile; appended after the
@@ -277,7 +277,8 @@ class DiffuserPolarResponse:
     angles_deg: Real
     levels: Real
     coefficient: float
-    source_angle: float = 0.0
+    _: KW_ONLY
+    source_angle_deg: float = 0.0
     well_width: float | None = None
     depths: Real | None = None
     repetitions: int | None = None
@@ -354,7 +355,7 @@ def _prepare_geometry(
     well_width: float,
     frequency: float,
     angles_deg: ArrayLike,
-    source_angle: float,
+    source_angle_deg: float,
     repetitions: int,
     speed_of_sound: float,
 ) -> tuple[float, float, Real, float, int, float]:
@@ -369,9 +370,9 @@ def _prepare_geometry(
     if not np.all(np.isfinite(ang)):
         msg = "'angles_deg' values must be finite."
         raise ValueError(msg)
-    psi = float(source_angle)
+    psi = float(source_angle_deg)
     if not math.isfinite(psi):
-        msg = "'source_angle' must be finite."
+        msg = "'source_angle_deg' must be finite."
         raise ValueError(msg)
     n_periods = int(repetitions)
     if n_periods != repetitions or n_periods < 1:
@@ -387,7 +388,7 @@ def predict_diffuser_polar_response(
     *,
     depths: ArrayLike,
     angles_deg: ArrayLike = ...,
-    source_angle: float = ...,
+    source_angle_deg: float = ...,
     repetitions: int = ...,
     speed_of_sound: float = ...,
     include_aperture: bool = ...,
@@ -402,7 +403,7 @@ def predict_diffuser_polar_response(
     *,
     reflection: ArrayLike,
     angles_deg: ArrayLike = ...,
-    source_angle: float = ...,
+    source_angle_deg: float = ...,
     repetitions: int = ...,
     speed_of_sound: float = ...,
     include_aperture: bool = ...,
@@ -417,7 +418,7 @@ def predict_diffuser_polar_response(
     depths: ArrayLike | None = None,
     reflection: ArrayLike | None = None,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES,
-    source_angle: float = 0.0,
+    source_angle_deg: float = 0.0,
     repetitions: int = 1,
     speed_of_sound: float = _C_DEFAULT,
     include_aperture: bool = True,
@@ -441,7 +442,7 @@ def predict_diffuser_polar_response(
         ``depths``.
     :param angles_deg: Receiver reflection angles ``theta``, in degrees; defaults to
         the ISO 17497-2 semicircle :data:`DEFAULT_POLAR_ANGLES`.
-    :param source_angle: Angle of incidence ``psi`` of the source, in degrees
+    :param source_angle_deg: Angle of incidence ``psi`` of the source, in degrees
         (0 = normal incidence).
     :param repetitions: Number of repetitions ``N_p`` of the single period; the
         grating lobes that define a Schroeder diffuser require ``periods >= 2``.
@@ -459,7 +460,7 @@ def predict_diffuser_polar_response(
         and ``reflection`` is supplied.
     """
     w, f, ang, psi, n_periods, c = _prepare_geometry(
-        well_width, frequency, angles_deg, source_angle, repetitions, speed_of_sound
+        well_width, frequency, angles_deg, source_angle_deg, repetitions, speed_of_sound
     )
     r_period = _resolve_reflection(depths, reflection, f, c)
     pressure = _scattered_pressure(
@@ -467,7 +468,7 @@ def predict_diffuser_polar_response(
         w,
         f,
         ang,
-        source_angle=psi,
+        source_angle_deg=psi,
         repetitions=n_periods,
         speed_of_sound=c,
         include_aperture=include_aperture,
@@ -480,7 +481,7 @@ def predict_diffuser_polar_response(
         angles_deg=ang,
         levels=levels,
         coefficient=coefficient,
-        source_angle=psi,
+        source_angle_deg=psi,
         well_width=w,
         depths=(np.asarray(depths, dtype=np.float64) if depths is not None else None),
         repetitions=n_periods,
@@ -494,7 +495,7 @@ def predicted_diffusion_spectrum(
     depths: ArrayLike,
     reflection_of: None = None,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES,
-    source_angle: float = 0.0,
+    source_angle_deg: float = 0.0,
     repetitions: int = 1,
     speed_of_sound: float = _C_DEFAULT,
     include_aperture: bool = True,
@@ -525,7 +526,7 @@ def predicted_diffusion_spectrum(
         models; must be ``None``.
     :param angles_deg: Receiver reflection angles ``theta``, in degrees; defaults to
         :data:`DEFAULT_POLAR_ANGLES`.
-    :param source_angle: Angle of incidence ``psi``, in degrees.
+    :param source_angle_deg: Angle of incidence ``psi``, in degrees.
     :param repetitions: Number of repetitions ``N_p`` of the single period.
     :param speed_of_sound: Speed of sound ``c``, in metres per second.
     :param include_aperture: Include the single-well aperture directivity.
@@ -559,7 +560,7 @@ def predicted_diffusion_spectrum(
             float(f),
             depths=d_period,
             angles_deg=angles_deg,
-            source_angle=source_angle,
+            source_angle_deg=source_angle_deg,
             repetitions=repetitions,
             speed_of_sound=speed_of_sound,
             include_aperture=include_aperture,
@@ -572,7 +573,7 @@ def predicted_diffusion_spectrum(
                 float(f),
                 depths=flat,
                 angles_deg=angles_deg,
-                source_angle=source_angle,
+                source_angle_deg=source_angle_deg,
                 repetitions=repetitions,
                 speed_of_sound=speed_of_sound,
                 include_aperture=include_aperture,

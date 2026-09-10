@@ -642,10 +642,10 @@ se añade la columna del módulo del factor de reflexión $|r|$.
 Usa el mismo contenedor `ReportMetadata` y el mismo motor que las demás fichas.
 El rango de frecuencias medido se toma del resultado; los campos descriptivos y
 geométricos de `ReportMetadata` que aplican aquí son `client`, `manufacturer`,
-`specimen`, `tube_diameter`, `tube_shape`, `mic_spacing`, `mounting`,
+`specimen`, `tube_diameter_m`, `tube_shape`, `mic_spacing`, `mounting`,
 `test_room`, `test_date`, `temperature_c`, `static_pressure_kpa`,
 `measurement_standard`, `laboratory`, `operator`, `report_id` y `notes`
-(`tube_diameter` y `mic_spacing` se dan en metros y se imprimen en milímetros).
+(`tube_diameter_m` y `mic_spacing` se dan en metros y se imprimen en milímetros).
 El campo `requirement` se ignora (la ISO 10534-2 no tiene veredicto). La
 generación necesita reportlab y, para la figura que incrusta la ficha,
 matplotlib (`pip install "phonometry[report,plot]"`); solo se admite
@@ -692,7 +692,7 @@ fiche.report(
     "alpha_fiche.pdf",
     metadata=ReportMetadata(
         specimen="Capa resistiva sobre cavidad de aire de 86 mm con respaldo rígido",
-        tube_diameter=diameter_m,        # m (se imprime como 100 mm)
+        tube_diameter_m=diameter_m,        # m (se imprime como 100 mm)
         mic_spacing=spacing,           # m (se imprime como 50 mm)
         measurement_standard="ISO 10534-2",
         laboratory="Laboratorio de referencia Phonometry",

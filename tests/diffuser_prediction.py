@@ -47,7 +47,7 @@ def published_qrd_depths() -> np.ndarray:
 
 
 def predicted_arc(
-    frequency: float, *, flat: bool = False, source_angle: float = 0.0
+    frequency: float, *, flat: bool = False, source_angle_deg: float = 0.0
 ) -> DiffuserPolarResponse:
     """Model polar response of the published geometry (or its flat reference).
 
@@ -62,13 +62,13 @@ def predicted_arc(
         frequency,
         depths=depths,
         repetitions=ref.ISO17497_2_QRD_PERIODS,
-        source_angle=source_angle,
+        source_angle_deg=source_angle_deg,
         speed_of_sound=ref.ISO17497_2_SPEED_OF_SOUND,
     )
 
 
 def predicted_band_normalized_diffusion(
-    band_center: float, *, source_angle: float = 0.0
+    band_center: float, *, source_angle_deg: float = 0.0
 ) -> float:
     """One-third-octave band-averaged normalised diffusion coefficient d_n.
 
@@ -86,7 +86,7 @@ def predicted_band_normalized_diffusion(
     def band_levels(flat: bool) -> np.ndarray:
         energy = np.zeros(37, dtype=np.float64)
         for f in freqs:
-            arc = predicted_arc(float(f), flat=flat, source_angle=source_angle)
+            arc = predicted_arc(float(f), flat=flat, source_angle_deg=source_angle_deg)
             energy += 10.0 ** (np.asarray(arc.levels, dtype=np.float64) / 10.0)
         return np.asarray(10.0 * np.log10(energy / freqs.size))
 

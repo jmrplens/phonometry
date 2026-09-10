@@ -658,7 +658,7 @@ def normal_modes(
 class RayTraceResult:
     r"""Ray-tracing solution through a sound-speed profile.
 
-    :ivar launch_angles: Launch angles from the horizontal, in degrees.
+    :ivar launch_angles_deg: Launch angles from the horizontal, in degrees.
     :ivar ranges: Per-ray horizontal ranges, in metres, shape
         ``(n_rays, n_steps)``.
     :ivar depths: Per-ray depths, in metres, shape ``(n_rays, n_steps)``.
@@ -722,7 +722,7 @@ class RayTraceResult:
         marcher reflected off.
     """
 
-    launch_angles: NDArray[np.float64]
+    launch_angles_deg: NDArray[np.float64]
     ranges: NDArray[np.float64]
     depths: NDArray[np.float64]
     travel_times: NDArray[np.float64]
@@ -741,7 +741,7 @@ class RayTraceResult:
 
         The six history arrays are one block, one row per ray and one column
         per range sample. The figure draws row ``i`` of ``depths`` against row
-        ``i`` of ``ranges``, and :func:`eigenrays` sorts ``launch_angles`` into
+        ``i`` of ``ranges``, and :func:`eigenrays` sorts ``launch_angles_deg`` into
         an order it then indexes ``depths`` with to raise its brackets, so the
         launch fan is as much a row of that block as the histories are. A block
         one row short makes both of those read past their array; a block with a
@@ -761,7 +761,7 @@ class RayTraceResult:
         """
         require_ranks(
             self,
-            launch_angles=1,
+            launch_angles_deg=1,
             ranges=2,
             depths=2,
             travel_times=2,
@@ -775,7 +775,7 @@ class RayTraceResult:
         )
         require_same_length(
             self,
-            "launch_angles",
+            "launch_angles_deg",
             "ranges",
             "depths",
             "travel_times",
@@ -954,7 +954,7 @@ def ray_trace(
         ray_s = np.where(gone, np.nan, ray_s)
 
     return RayTraceResult(
-        launch_angles=angles,
+        launch_angles_deg=angles,
         ranges=ray_r,
         depths=ray_z,
         travel_times=ray_t,
@@ -1029,10 +1029,10 @@ class EigenrayResult:
     transform of that sum, a spike of complex weight :math:`a_j` at each
     :math:`\tau_j`.
 
-    :ivar launch_angles: Launch angle of each eigenray at the source, from the
+    :ivar launch_angles_deg: Launch angle of each eigenray at the source, from the
         horizontal, in degrees, positive downward: the same convention the
         fan was launched with.
-    :ivar arrival_angles: The angle each eigenray crosses the receiver with,
+    :ivar arrival_angles_deg: The angle each eigenray crosses the receiver with,
         same convention. In a range-independent medium its magnitude is fixed
         by Snell's invariant at the receiver depth; its sign says whether the
         arrival is descending or climbing, which is what a vertical array
@@ -1066,8 +1066,8 @@ class EigenrayResult:
     :ivar water_depth: Water-column depth, in metres.
     """
 
-    launch_angles: NDArray[np.float64]
-    arrival_angles: NDArray[np.float64]
+    launch_angles_deg: NDArray[np.float64]
+    arrival_angles_deg: NDArray[np.float64]
     travel_times: NDArray[np.float64]
     amplitudes: NDArray[np.complex128]
     surface_reflections: NDArray[np.int_]
@@ -1097,8 +1097,8 @@ class EigenrayResult:
         """
         require_ranks(
             self,
-            launch_angles=1,
-            arrival_angles=1,
+            launch_angles_deg=1,
+            arrival_angles_deg=1,
             travel_times=1,
             amplitudes=1,
             surface_reflections=1,
@@ -1107,8 +1107,8 @@ class EigenrayResult:
         )
         require_same_length(
             self,
-            "launch_angles",
-            "arrival_angles",
+            "launch_angles_deg",
+            "arrival_angles_deg",
             "travel_times",
             "amplitudes",
             "surface_reflections",
@@ -1201,11 +1201,13 @@ def _bracket_launches(
     bisection of :func:`_refine_brackets` trusts it.
     """
     launch = np.radians(
-        np.sort(np.asarray(trace.launch_angles, dtype=np.float64).ravel())
+        np.sort(np.asarray(trace.launch_angles_deg, dtype=np.float64).ravel())
     )
     col = int(np.clip(np.searchsorted(r_grid, r_rec), 1, r_grid.size - 1))
     w = (r_rec - r_grid[col - 1]) / (r_grid[col] - r_grid[col - 1])
-    fan_order = np.argsort(np.asarray(trace.launch_angles, dtype=np.float64).ravel())
+    fan_order = np.argsort(
+        np.asarray(trace.launch_angles_deg, dtype=np.float64).ravel()
+    )
     fan_depth = (
         trace.depths[fan_order, col - 1] * (1.0 - w) + trace.depths[fan_order, col] * w
     )
@@ -1500,7 +1502,7 @@ def eigenrays(
     if int(max_arrivals) < 1:
         msg = "'max_arrivals' must be at least 1."
         raise ValueError(msg)
-    if trace.launch_angles.size < 2:  # noqa: PLR2004
+    if trace.launch_angles_deg.size < 2:  # noqa: PLR2004
         msg = "'trace' must carry at least two rays to bracket between."
         raise ValueError(msg)
     if n_steps is None:
@@ -1519,8 +1521,8 @@ def eigenrays(
     if refined.size == 0:
         empty = np.zeros(0)
         return EigenrayResult(
-            launch_angles=empty,
-            arrival_angles=np.zeros(0),
+            launch_angles_deg=empty,
+            arrival_angles_deg=np.zeros(0),
             travel_times=np.zeros(0),
             amplitudes=np.zeros(0, dtype=np.complex128),
             surface_reflections=np.zeros(0, dtype=np.int_),
@@ -1569,8 +1571,8 @@ def eigenrays(
     order = _earliest_arrivals(times, max_arrivals)
 
     return EigenrayResult(
-        launch_angles=np.degrees(refined[order]),
-        arrival_angles=np.asarray(arrival)[order],
+        launch_angles_deg=np.degrees(refined[order]),
+        arrival_angles_deg=np.asarray(arrival)[order],
         travel_times=np.asarray(times)[order],
         amplitudes=np.asarray(amplitudes, dtype=np.complex128)[order],
         surface_reflections=n_surface[order],
@@ -1701,7 +1703,7 @@ class GaussianBeamResult:
         the module's own :math:`e^{-i\omega t}` convention (the conjugate of
         the one Jensen Eq. (3.88) is printed in) and normalised to unit
         pressure at 1 m, so ``propagation_loss = -20 lg|pressure|``.
-    :ivar launch_angles: Launch angle of each beam's central ray, from the
+    :ivar launch_angles_deg: Launch angle of each beam's central ray, from the
         horizontal, in degrees.
     :ivar ray_ranges: Range of each central ray at each marching step, in
         metres, shape ``(n_beams, n_steps)``. This is the marching grid, which
@@ -1758,7 +1760,7 @@ class GaussianBeamResult:
     depths: NDArray[np.float64]
     propagation_loss: NDArray[np.float64]
     pressure: NDArray[np.complex128]
-    launch_angles: NDArray[np.float64]
+    launch_angles_deg: NDArray[np.float64]
     ray_ranges: NDArray[np.float64]
     ray_depths: NDArray[np.float64]
     beam_widths: NDArray[np.float64]
@@ -1789,7 +1791,7 @@ class GaussianBeamResult:
 
         The beam histories are a second block on two axes of their own: one
         row per beam of the fan, one column per marching step, with
-        ``launch_angles`` and ``initial_beam_widths`` naming the beams those
+        ``launch_angles_deg`` and ``initial_beam_widths`` naming the beams those
         rows belong to. Their step grid is finer than, and independent of,
         ``ranges``, which is exactly why it cannot be pinned to it.
 
@@ -1802,7 +1804,7 @@ class GaussianBeamResult:
             depths=1,
             propagation_loss=2,
             pressure=2,
-            launch_angles=1,
+            launch_angles_deg=1,
             ray_ranges=2,
             ray_depths=2,
             beam_widths=2,
@@ -1823,7 +1825,7 @@ class GaussianBeamResult:
         )
         require_same_length(
             self,
-            "launch_angles",
+            "launch_angles_deg",
             "initial_beam_widths",
             "ray_ranges",
             "ray_depths",
@@ -3445,7 +3447,7 @@ def gaussian_beams(
         depths=receivers,
         propagation_loss=np.asarray(pl, dtype=np.float64),
         pressure=np.asarray(pressure, dtype=np.complex128),
-        launch_angles=np.degrees(launch),
+        launch_angles_deg=np.degrees(launch),
         ray_ranges=np.broadcast_to(
             np.arange(n_steps) * dr, march.positions.shape
         ).copy(),

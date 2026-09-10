@@ -409,7 +409,7 @@ are exposed:
 - The geometrical-spreading factor acquires an angular form,
   $K_{\mathrm{r},\theta}^2 = 1 - \cos^2\theta\,(1 - K_\mathrm{r}^2)$, computed by
   `geometric_spreading_factor_angle` and used automatically when
-  `insitu_absorption_spectrum` is given an `incidence_angle`. Both take the
+  `insitu_absorption_spectrum` is given an `incidence_angle_rad`. Both take the
   angle in **radians**, unlike the degrees the rest of this page quotes.
 - The sampled area stops being the circle in the figure above. It becomes the
   intersection of the surface with an ellipsoid of revolution whose foci are
@@ -640,7 +640,7 @@ ISO 13472-1:2002's subtraction technique: the Clause 4.1 geometrical spreading
 (`materials.max_sampled_area_radius`), with the Annex B reference-surface
 correction (`materials.absorption_reference_corrected`) and the Annex F
 oblique-incidence case (`materials.geometric_spreading_factor_angle`,
-`materials.msa_major_axis`, and the `incidence_angle` argument of
+`materials.msa_major_axis`, and the `incidence_angle_rad` argument of
 `materials.insitu_absorption_spectrum`); and ISO 13472-2:2010's spot-method
 plane-wave frequency limit, microphone-spacing geometry and Annex A
 internal-loss correction (`materials.spot_tube_upper_frequency`,

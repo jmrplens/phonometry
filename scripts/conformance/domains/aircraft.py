@@ -840,11 +840,41 @@ def _chk_doc29_approach_thrust() -> Outcome:
     # The eight steps are sheet C-6.2's Descend rows for JETW, each parameter
     # taken to the one decimal that sheet prints it to.
     steps = [
-        ph.aircraft.ApproachStep("Descend", "ZERO", 6000.0, 250.0, 2.8),
-        ph.aircraft.ApproachStep("Descend", "5", 3000.0, 180.0, 3.0),
-        ph.aircraft.ApproachStep("Descend", "25", 1500.0, 150.0, 3.0),
-        ph.aircraft.ApproachStep("Descend", "30", 1000.0, 135.0, 3.0),
-        ph.aircraft.ApproachStep("Descend", "30", 49.9, 135.0, 3.0),
+        ph.aircraft.ApproachStep(
+            "Descend",
+            "ZERO",
+            start_altitude_ft=6000.0,
+            start_calibrated_airspeed_kt=250.0,
+            descent_angle_deg=2.8,
+        ),
+        ph.aircraft.ApproachStep(
+            "Descend",
+            "5",
+            start_altitude_ft=3000.0,
+            start_calibrated_airspeed_kt=180.0,
+            descent_angle_deg=3.0,
+        ),
+        ph.aircraft.ApproachStep(
+            "Descend",
+            "25",
+            start_altitude_ft=1500.0,
+            start_calibrated_airspeed_kt=150.0,
+            descent_angle_deg=3.0,
+        ),
+        ph.aircraft.ApproachStep(
+            "Descend",
+            "30",
+            start_altitude_ft=1000.0,
+            start_calibrated_airspeed_kt=135.0,
+            descent_angle_deg=3.0,
+        ),
+        ph.aircraft.ApproachStep(
+            "Descend",
+            "30",
+            start_altitude_ft=49.9,
+            start_calibrated_airspeed_kt=135.0,
+            descent_angle_deg=3.0,
+        ),
         ph.aircraft.ApproachStep("Land", "30", touchdown_roll_ft=304.1),
         ph.aircraft.ApproachStep(
             "Decelerate",

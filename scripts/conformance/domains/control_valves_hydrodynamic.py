@@ -55,11 +55,11 @@ _VALVE: dict[str, Any] = {
     "style_modifier": 0.42,
     "pressure_recovery": 0.92,
     "power_ratio": 0.25,
-    "valve_diameter": 0.1,
-    "seat_diameter": 0.1,
+    "valve_diameter_m": 0.1,
+    "seat_diameter_m": 0.1,
 }
 _PIPE: dict[str, Any] = {
-    "internal_diameter": 0.1071,
+    "internal_diameter_m": 0.1071,
     "wall_thickness": 0.0036,
     "density": 7800.0,
 }
@@ -169,7 +169,7 @@ def _chk_incipient_ratios() -> Outcome:
 @register(_IEC60534_8_4, "IEC 60534-8-4:2005", "Jet diameter D_j (Eq. (4))")
 def _chk_jet_diameter() -> Outcome:
     """Equation (4), the same in all three columns."""
-    return numeric(0.01758, _example(1).jet_diameter, 5e-6, unit="m", places=5)
+    return numeric(0.01758, _example(1).jet_diameter_m, 5e-6, unit="m", places=5)
 
 
 @register(

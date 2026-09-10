@@ -225,8 +225,8 @@ weston_propagation_loss(
     sound_speed: float = 1500.0,
     source_depth: float | None = None,
     receiver_depth: float | None = None,
-    critical_angle: float | None = None,
-    reflection_loss_gradient_value: float | None = None,
+    critical_angle_deg: float | None = None,
+    reflection_loss_gradient_value_np_per_rad: float | None = None,
 ) -> WestonPropagationResult
 ```
 
@@ -248,8 +248,8 @@ whole range grid so the transitions can be drawn.
 | `sound_speed` | Water sound speed `c_w`, in m/s. |
 | `source_depth` | Source depth `z0`, in metres; defaults to `H/2` (used only by the single-mode formula). |
 | `receiver_depth` | Receiver depth `z`, in metres; defaults to `H/2`. |
-| `critical_angle` | Override $\psi_\mathrm{c}$, in degrees (`90` for an ideal totally reflecting waveguide). |
-| `reflection_loss_gradient_value` | Override $\eta$, in Np/rad (`0` for a lossless bottom: no mode stripping, no single-mode regime). |
+| `critical_angle_deg` | Override $\psi_\mathrm{c}$, in degrees (`90` for an ideal totally reflecting waveguide). |
+| `reflection_loss_gradient_value_np_per_rad` | Override $\eta$, in Np/rad (`0` for a lossless bottom: no mode stripping, no single-mode regime). |
 
 **Returns:** A [`WestonPropagationResult`](/phonometry/reference/api/underwater/weston-regimes/#westonpropagationresult).
 
@@ -268,8 +268,8 @@ weston_regime_boundaries(
     *,
     seabed: str | WestonSeabed = 'sand',
     sound_speed: float = 1500.0,
-    critical_angle: float | None = None,
-    reflection_loss_gradient_value: float | None = None,
+    critical_angle_deg: float | None = None,
+    reflection_loss_gradient_value_np_per_rad: float | None = None,
 ) -> WestonRegimeBoundaries
 ```
 
@@ -283,8 +283,8 @@ Regime boundaries of a shallow-water waveguide (Ainslie §9.1.1.2).
 | `water_depth` | Water-column depth `H`, in metres. |
 | `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/phonometry/reference/api/underwater/weston-regimes/#westonseabed). |
 | `sound_speed` | Water sound speed `c_w`, in m/s. |
-| `critical_angle` | Override the seabed critical angle $\psi_\mathrm{c}$, in degrees. Use `90` for the ideal totally reflecting waveguide. |
-| `reflection_loss_gradient_value` | Override $\eta$, in Np/rad. Use `0` for a lossless bottom (no mode stripping, no single-mode regime). |
+| `critical_angle_deg` | Override the seabed critical angle $\psi_\mathrm{c}$, in degrees. Use `90` for the ideal totally reflecting waveguide. |
+| `reflection_loss_gradient_value_np_per_rad` | Override $\eta$, in Np/rad. Use `0` for a lossless bottom (no mode stripping, no single-mode regime). |
 
 **Returns:** A [`WestonRegimeBoundaries`](/phonometry/reference/api/underwater/weston-regimes/#westonregimeboundaries).
 
@@ -295,11 +295,11 @@ Regime boundaries of a shallow-water waveguide (Ainslie §9.1.1.2).
 | ValueError | If an input is invalid. |
 
 :::note
-The two overrides are independent: overriding `critical_angle`
+The two overrides are independent: overriding `critical_angle_deg`
 alone leaves $\eta$ computed from the seabed's *own* critical
 angle through Equation (9.51), which mixes two different bottoms.
 Pass both together (as the ideal-waveguide case
-`critical_angle=90` with
+`critical_angle_deg=90` with
 `reflection_loss_gradient_value=0` does) whenever the intent is a
 hypothetical seabed rather than a tweak of the tabulated one.
 :::
@@ -317,7 +317,7 @@ WESTON_REGIMES = ('spherical', 'cylindrical', 'mode-stripping', 'single-mode')
 *Constant* (`dict`).
 
 ```python
-WESTON_SEABEDS = {'sand': WestonSeabed(name='sand', grain_size=1.5, sound_speed_ratio=1.2, density_ratio=2.1, attenuation_db_per_wavelength=0.88, loss_parameter=0.0161, sound_speed_gradient=0.0), 'mud': WestonSeabed(name='mud', grain_size=8.0, sound_speed_ratio=1.0, density_ratio=1.4, attenuation_db_per_wavelength=0.09, loss_parameter=0.00165, sound_speed_gradient=1.0)}
+WESTON_SEABEDS = {'sand': WestonSeabed(name='sand', grain_size=1.5, sound_speed_ratio=1.2, density_ratio=2.1, attenuation_db_per_wavelength=0.88, loss_parameter=0.0161, sound_speed_gradient_per_s=0.0), 'mud': WestonSeabed(name='mud', grain_size=8.0, sound_speed_ratio=1.0, density_ratio=1.4, attenuation_db_per_wavelength=0.09, loss_parameter=0.00165, sound_speed_gradient_per_s=1.0)}
 ```
 
 ## WestonPropagationResult
@@ -384,8 +384,8 @@ WestonRegimeBoundaries(
     spherical_to_cylindrical: float,
     cylindrical_to_mode_stripping: float,
     mode_stripping_to_single_mode: float,
-    critical_angle: float,
-    reflection_loss_gradient: float,
+    critical_angle_rad: float,
+    reflection_loss_gradient_np_per_rad: float,
     effective_depth: float,
     cutoff_frequency: float,
     mode_count: float,
@@ -401,8 +401,8 @@ Range boundaries between Weston's four propagation regimes.
 | `spherical_to_cylindrical` | Range at which $1/r^2$ and $2\psi_\mathrm{c}/(r H)$ are equal, $H/(2\psi_\mathrm{c})$, in metres. |
 | `cylindrical_to_mode_stripping` | Ainslie Eq. (9.50) $r_{\mathrm{CS}} = \pi H/(4 \eta \psi_\mathrm{c}^2)$, in metres (`inf` for a lossless bottom). |
 | `mode_stripping_to_single_mode` | $r_{\mathrm{MS}} = k^2 H_\mathrm{e}^2 H/(9 \pi \eta)$, in metres (`inf` for a lossless bottom). See the module note on Eq. (9.57). |
-| `critical_angle` | Critical grazing angle $\psi_\mathrm{c}$, in radians. |
-| `reflection_loss_gradient` | $\eta$, in Np/rad. |
+| `critical_angle_rad` | Critical grazing angle $\psi_\mathrm{c}$, in radians. |
+| `reflection_loss_gradient_np_per_rad` | $\eta$, in Np/rad. |
 | `effective_depth` | Weston effective depth `He`, in metres. |
 | `cutoff_frequency` | Waveguide cut-off frequency, in Hz (`nan` when the seabed has no critical angle). |
 | `mode_count` | Number of cut-on modes, $(\omega/c_\mathrm{w}) H_\mathrm{e} \sin \psi_\mathrm{c} / \pi$ (Eq. 9.58), as a real number. |
@@ -417,7 +417,7 @@ WestonSeabed(
     density_ratio: float,
     attenuation_db_per_wavelength: float,
     loss_parameter: float,
-    sound_speed_gradient: float,
+    sound_speed_gradient_per_s: float,
 )
 ```
 
@@ -433,4 +433,4 @@ Characteristic seabed properties (Ainslie Table 9.1, printed p. 454).
 | `density_ratio` | $\rho_{\mathrm{sed}}/\rho_\mathrm{w}$. |
 | `attenuation_db_per_wavelength` | $\beta_{\mathrm{sed}}$, in dB per wavelength. |
 | `loss_parameter` | $\varepsilon = \beta_{\mathrm{sed}}/(40 \pi \log_{10} e)$ (Equation 9.23). |
-| `sound_speed_gradient` | `c'`, the sediment sound-speed gradient, in s⁻¹ (0 for sand, 1 for mud). |
+| `sound_speed_gradient_per_s` | `c'`, the sediment sound-speed gradient, in s⁻¹ (0 for sand, 1 for mud). |

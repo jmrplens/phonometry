@@ -237,7 +237,7 @@ def test_the_near_field_survives_a_beam_whose_foot_lands_on_the_source() -> None
     # Not asserted as exact equality: the fan is built in radians and read back
     # in degrees, so -45 lands on a rung to within a rounding rather than by
     # construction. A rounding of a degree is close enough to be the same test.
-    assert np.abs(res.launch_angles + 45.0).min() < 1e-9, (
+    assert np.abs(res.launch_angles_deg + 45.0).min() < 1e-9, (
         "the singular beam has to be in the fan"
     )
     slant = np.hypot(res.ranges[None, :], res.depths[:, None] - zs)
@@ -1289,7 +1289,7 @@ def _free_space_beam() -> tuple[GaussianBeamResult, np.ndarray, float]:
         n_depth_points=2,
         ranges_m=np.array([rmax]),
     )
-    arc = res.ray_ranges / np.cos(np.radians(res.launch_angles))[:, None]
+    arc = res.ray_ranges / np.cos(np.radians(res.launch_angles_deg))[:, None]
     return res, arc, rayleigh
 
 

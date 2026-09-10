@@ -333,7 +333,7 @@ def r22_set(norah_root: pathlib.Path) -> dict:
     return {
         "hemispheres": objs,
         "airspeeds": np.array(speeds),
-        "path_angles": np.array(angles),
+        "path_angles_deg": np.array(angles),
         "triangles": np.array(triangles),
     }
 
@@ -346,7 +346,7 @@ def _run_event(case: pathlib.Path, r22: dict) -> tuple[dict, np.ndarray, object]
         res = rotorcraft_event_level(
             r22["hemispheres"],
             r22["airspeeds"],
-            r22["path_angles"],
+            r22["path_angles_deg"],
             inp["times"],
             inp["positions"],
             (header["XMICM"], header["YMICM"]),
@@ -358,9 +358,9 @@ def _run_event(case: pathlib.Path, r22: dict) -> tuple[dict, np.ndarray, object]
             ),
             track_state=RotorcraftTrackState(
                 airspeed=inp["speed"],
-                path_angle=inp["vang"],
+                path_angle_deg=inp["vang"],
                 heading=inp["heading"],
-                bank_angle=inp["roll"],
+                bank_angle_deg=inp["roll"],
             ),
             interpolation=FlightConditionInterpolation(triangles=r22["triangles"]),
             atmosphere=RotorcraftAtmosphere(atmospheric_method="sae"),
@@ -431,7 +431,7 @@ def test_hover_ring_rim_reproduces_ring_rows(norah_root: pathlib.Path) -> None:
             pos,
             (100.0, 0.0),
             track_state=RotorcraftTrackState(
-                airspeed=0.0, path_angle=0.0, heading=0.0, bank_angle=0.0
+                airspeed=0.0, path_angle_deg=0.0, heading=0.0, bank_angle_deg=0.0
             ),
         )
     assert np.isfinite(res.la_max)
@@ -462,9 +462,9 @@ def test_case4_hover_ogh_event(norah_root: pathlib.Path) -> None:
     pos = np.repeat(inp["positions"], 2, axis=0)
     state = RotorcraftTrackState(
         airspeed=float(inp["speed"][0]),
-        path_angle=float(inp["vang"][0]),
+        path_angle_deg=float(inp["vang"][0]),
         heading=float(inp["heading"][0]),
-        bank_angle=float(inp["roll"][0]),
+        bank_angle_deg=float(inp["roll"][0]),
     )
     nadir = None
     for mic in mics:
@@ -588,9 +588,9 @@ def test_case2_contour_grid(norah_root: pathlib.Path, r22_set: dict) -> None:
         "level_offset": inp["ddb"],
         "track_state": RotorcraftTrackState(
             airspeed=inp["speed"],
-            path_angle=inp["vang"],
+            path_angle_deg=inp["vang"],
             heading=inp["heading"],
-            bank_angle=inp["roll"],
+            bank_angle_deg=inp["roll"],
         ),
         "interpolation": FlightConditionInterpolation(triangles=r22_set["triangles"]),
         "atmosphere": RotorcraftAtmosphere(atmospheric_method="sae"),
@@ -604,7 +604,7 @@ def test_case2_contour_grid(norah_root: pathlib.Path, r22_set: dict) -> None:
         sel = rotorcraft_noise_contour(
             r22_set["hemispheres"],
             r22_set["airspeeds"],
-            r22_set["path_angles"],
+            r22_set["path_angles_deg"],
             inp["times"],
             inp["positions"],
             metric="exposure",
@@ -614,7 +614,7 @@ def test_case2_contour_grid(norah_root: pathlib.Path, r22_set: dict) -> None:
         lam = rotorcraft_noise_contour(
             r22_set["hemispheres"],
             r22_set["airspeeds"],
-            r22_set["path_angles"],
+            r22_set["path_angles_deg"],
             inp["times"],
             inp["positions"],
             metric="maximum",
@@ -703,9 +703,9 @@ def test_case3_contour_with_elevation_grid(
         ),
         "track_state": RotorcraftTrackState(
             airspeed=inp["speed"],
-            path_angle=inp["vang"],
+            path_angle_deg=inp["vang"],
             heading=inp["heading"],
-            bank_angle=inp["roll"],
+            bank_angle_deg=inp["roll"],
         ),
         "interpolation": FlightConditionInterpolation(triangles=r22_set["triangles"]),
         "atmosphere": RotorcraftAtmosphere(atmospheric_method="sae"),
@@ -713,7 +713,7 @@ def test_case3_contour_with_elevation_grid(
     sel = rotorcraft_noise_contour(
         r22_set["hemispheres"],
         r22_set["airspeeds"],
-        r22_set["path_angles"],
+        r22_set["path_angles_deg"],
         inp["times"],
         inp["positions"],
         metric="exposure",
@@ -722,7 +722,7 @@ def test_case3_contour_with_elevation_grid(
     lam = rotorcraft_noise_contour(
         r22_set["hemispheres"],
         r22_set["airspeeds"],
-        r22_set["path_angles"],
+        r22_set["path_angles_deg"],
         inp["times"],
         inp["positions"],
         metric="maximum",
@@ -767,9 +767,9 @@ def test_case2_contour_single_call_with_sigma_map(
         ),
         "track_state": RotorcraftTrackState(
             airspeed=inp["speed"],
-            path_angle=inp["vang"],
+            path_angle_deg=inp["vang"],
             heading=inp["heading"],
-            bank_angle=inp["roll"],
+            bank_angle_deg=inp["roll"],
         ),
         "interpolation": FlightConditionInterpolation(triangles=r22_set["triangles"]),
         "atmosphere": RotorcraftAtmosphere(atmospheric_method="sae"),
@@ -777,7 +777,7 @@ def test_case2_contour_single_call_with_sigma_map(
     sel = rotorcraft_noise_contour(
         r22_set["hemispheres"],
         r22_set["airspeeds"],
-        r22_set["path_angles"],
+        r22_set["path_angles_deg"],
         inp["times"],
         inp["positions"],
         metric="exposure",
@@ -786,7 +786,7 @@ def test_case2_contour_single_call_with_sigma_map(
     lam = rotorcraft_noise_contour(
         r22_set["hemispheres"],
         r22_set["airspeeds"],
-        r22_set["path_angles"],
+        r22_set["path_angles_deg"],
         inp["times"],
         inp["positions"],
         metric="maximum",

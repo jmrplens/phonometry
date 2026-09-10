@@ -298,10 +298,10 @@ def _chk_open_end_identity() -> Outcome:
     worst = 0.0
     for angle in ph.noise_control.RADIATION_SOLID_ANGLES.values():
         loss = ph.noise_control.open_end_transmission_loss(
-            _BANDS, _DUCT_AREA, solid_angle=angle
+            _BANDS, _DUCT_AREA, solid_angle_sr=angle
         )
         reflected = ph.noise_control.open_end_reflection_coefficient(
-            _BANDS, _DUCT_AREA, solid_angle=angle
+            _BANDS, _DUCT_AREA, solid_angle_sr=angle
         )
         closed = -10.0 * np.log10(1.0 - reflected**2)
         worst = max(worst, float(np.max(np.abs(loss - closed))))
@@ -584,7 +584,7 @@ def _chk_iso5135_end_reflection() -> Outcome:
             + (343.0 / (4.0 * math.pi * np.asarray(_BANDS))) ** 2 * (angle / _DUCT_AREA)
         )
         iso7235 = ph.noise_control.open_end_transmission_loss(
-            _BANDS, _DUCT_AREA, solid_angle=angle
+            _BANDS, _DUCT_AREA, solid_angle_sr=angle
         )
         worst = max(worst, float(np.max(np.abs(iso5135 - iso7235))))
     return numeric(

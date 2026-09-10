@@ -1066,7 +1066,7 @@ $$
 $$
 
 evaluated by Gauss–Legendre quadrature in `diffuse_field_absorption`
-(``angle_limit`` defaults to 90°; truncations at 75–87° are in use). That
+(``angle_limit_rad`` defaults to 90°; truncations at 75–87° are in use). That
 truncation is not decoration and deserves a decision rule. The integrand
 weights oblique angles most heavily, and it is precisely near grazing
 incidence that the infinite-plane theory stops describing a real test: a
@@ -1100,7 +1100,7 @@ diffuse.plot()   # alpha_dif(f); overlay normal.absorption to compare
 print(round(float(materials.statistical_absorption(1.567 + 0j)), 3))  # 0.951
 
 # What the truncation is worth, on the same layer.
-truncated = materials.diffuse_field_absorption(f, layers, angle_limit=np.radians(78.0))
+truncated = materials.diffuse_field_absorption(f, layers, angle_limit_rad=np.radians(78.0))
 print(np.round(truncated.absorption - diffuse.absorption, 3))
 # [-0.001  0.01   0.019  0.018]  a few hundredths, and it goes the right way
 ```

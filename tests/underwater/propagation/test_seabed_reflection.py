@@ -64,7 +64,7 @@ def test_total_reflection_below_critical_angle() -> None:
     assert np.all(np.array([5.0, 15.0, 24.0]) < phi_c)
     assert np.allclose(np.abs(res.reflection_coefficient), 1.0, atol=1e-9)
     assert np.allclose(res.reflection_loss, 0.0, atol=1e-6)
-    assert res.critical_angle == pytest.approx(phi_c)
+    assert res.critical_angle_deg == pytest.approx(phi_c)
 
 
 def test_no_critical_angle_for_slow_bottom() -> None:
@@ -72,7 +72,7 @@ def test_no_critical_angle_for_slow_bottom() -> None:
     with pytest.raises(ValueError, match=r"critical angle exists only when c2 > c1"):
         critical_angle(1500.0, 1450.0)
     res = bottom_reflection_loss(45.0, rho1=1000.0, c1=1500.0, rho2=1500.0, c2=1450.0)
-    assert res.critical_angle is None
+    assert res.critical_angle_deg is None
     assert np.all(res.reflection_loss > 0.0)
 
 
@@ -106,7 +106,7 @@ def test_intromission_angle_slow_bottom_closed_form() -> None:
         res = bottom_reflection_loss(phi_i, rho1=rho1, c1=c1, rho2=rho2, c2=c2)
     assert float(np.abs(res.reflection_coefficient[0])) == pytest.approx(0.0, abs=1e-12)
     assert float(res.reflection_loss[0]) > 100.0  # inf at the exact zero of R
-    assert res.critical_angle is None
+    assert res.critical_angle_deg is None
 
 
 def test_exact_intromission_zero_gives_inf_loss_without_warning() -> None:
@@ -127,7 +127,7 @@ def test_exact_intromission_zero_gives_inf_loss_without_warning() -> None:
 
 
 def test_grazing_angle_out_of_range_rejected() -> None:
-    with pytest.raises(ValueError, match=r"'grazing_angle' must be within"):
+    with pytest.raises(ValueError, match=r"'grazing_angle_deg' must be within"):
         reflection_coefficient(120.0, **_WATER, **_SAND)
 
 
@@ -147,13 +147,13 @@ def test_seabed_reflection_result_bundles_the_maths() -> None:
     assert np.allclose(res.magnitude, np.abs(r))
     assert np.allclose(res.bottom_loss, -20.0 * np.log10(np.abs(r)))
     assert (res.rho1, res.c1, res.rho2, res.c2) == (1000.0, 1500.0, 1900.0, 1650.0)
-    assert res.critical_angle == pytest.approx(critical_angle(1500.0, 1650.0))
+    assert res.critical_angle_deg == pytest.approx(critical_angle(1500.0, 1650.0))
 
 
 def test_seabed_reflection_total_reflection_below_critical() -> None:
     # |R| = 1 below the critical grazing angle for a faster sediment.
     res = seabed_reflection(np.array([5.0, 15.0, 24.0]), **_WATER, **_SAND)
-    assert np.all(np.array([5.0, 15.0, 24.0]) < res.critical_angle)
+    assert np.all(np.array([5.0, 15.0, 24.0]) < res.critical_angle_deg)
     assert np.allclose(res.magnitude, 1.0, atol=1e-9)
 
 
@@ -166,7 +166,7 @@ def test_seabed_reflection_normal_incidence_magnitude() -> None:
 
 def test_seabed_reflection_no_critical_angle_for_slow_bottom() -> None:
     res = seabed_reflection(45.0, rho1=1000.0, c1=1500.0, rho2=1500.0, c2=1450.0)
-    assert res.critical_angle is None
+    assert res.critical_angle_deg is None
     assert np.all(res.magnitude < 1.0)
 
 
@@ -182,7 +182,7 @@ _ONE_AXIS = "must have one axis"
 def test_bottom_loss_columns_must_run_over_one_angle_sweep() -> None:
     """A loss curve off its angle axis is refused when built, not when read.
 
-    ``.plot()`` draws ``reflection_loss`` against ``grazing_angle``, so that
+    ``.plot()`` draws ``reflection_loss`` against ``grazing_angle_deg``, so that
     half of a mismatch surfaces only as matplotlib's "x and y must have same
     first dimension" and two bare shapes, naming neither field.
     ``reflection_coefficient`` reaches no figure at all: a short one is drawn
@@ -193,11 +193,11 @@ def test_bottom_loss_columns_must_run_over_one_angle_sweep() -> None:
     """
     good = bottom_reflection_loss(np.linspace(0.0, 90.0, 91), **_WATER, **_SAND)
     cases = (
-        ("grazing_angle", good.grazing_angle[:-1], _PER_ANGLE),
+        ("grazing_angle_deg", good.grazing_angle_deg[:-1], _PER_ANGLE),
         ("reflection_loss", good.reflection_loss[:-1], _PER_ANGLE),
         ("reflection_loss", np.append(good.reflection_loss, 0.0), _PER_ANGLE),
         ("reflection_coefficient", good.reflection_coefficient[:1], _PER_ANGLE),
-        ("grazing_angle", np.column_stack([good.grazing_angle] * 2), _ONE_AXIS),
+        ("grazing_angle_deg", np.column_stack([good.grazing_angle_deg] * 2), _ONE_AXIS),
         ("reflection_loss", np.column_stack([good.reflection_loss] * 2), _ONE_AXIS),
     )
     for field, value, fragment in cases:
@@ -208,7 +208,7 @@ def test_bottom_loss_columns_must_run_over_one_angle_sweep() -> None:
 def test_seabed_reflection_columns_must_run_over_one_angle_sweep() -> None:
     """The bundled record is refused unless its four columns are one sweep.
 
-    ``.plot()`` draws only ``magnitude`` against ``grazing_angle``; the
+    ``.plot()`` draws only ``magnitude`` against ``grazing_angle_deg``; the
     complex ``R`` and the bottom loss beside them reach no figure, so a
     ``bottom_loss`` of the wrong length lets a complete ``|R|`` curve be drawn
     over every angle while the decibels a sonar budget spends are wrong and
@@ -217,7 +217,7 @@ def test_seabed_reflection_columns_must_run_over_one_angle_sweep() -> None:
     """
     good = seabed_reflection(np.linspace(0.0, 90.0, 91), **_WATER, **_SAND)
     cases = (
-        ("grazing_angle", good.grazing_angle[:-1], _PER_ANGLE),
+        ("grazing_angle_deg", good.grazing_angle_deg[:-1], _PER_ANGLE),
         ("magnitude", good.magnitude[:-1], _PER_ANGLE),
         ("bottom_loss", good.bottom_loss[:-1], _PER_ANGLE),
         ("bottom_loss", np.append(good.bottom_loss, 0.0), _PER_ANGLE),

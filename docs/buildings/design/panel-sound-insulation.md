@@ -273,7 +273,7 @@ $f_{\mathrm{c}1} = f_{\mathrm{c}2}$ recovers Cremer's isotropic impedance exactl
   deep the coincidence region really goes. The near-grazing angles are excluded
   by a limiting angle: pass `area` for the size-dependent limit of Bies
   Eq. 7.36 (Vigran writes it as Eq. 6.113), or leave it out for the fixed
-  `limiting_angle` (78 degrees by default, Sharp's value, which is Vigran's
+  `limiting_angle_deg` (78 degrees by default, Sharp's value, which is Vigran's
   $\sin^2\varphi = 0.96$).
 - `method="heckl"` is Heckl's closed-form approximation for $\eta = 0$, the
   design chart of Bies Fig. 7.9(b): field-incidence mass law below $f_{\mathrm{c}1}/2$,

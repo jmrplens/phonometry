@@ -473,8 +473,8 @@ def test_aerodrome_refuses_a_pressure_that_is_not_positive() -> None:
 
 
 def test_aerodrome_refuses_a_runway_gradient_of_one() -> None:
-    with pytest.raises(ValueError, match=r"Aerodrome: 'runway_gradient'"):
-        Aerodrome(elevation_ft=0.0, runway_gradient=1.0)
+    with pytest.raises(ValueError, match=r"Aerodrome: 'runway_gradient_ratio'"):
+        Aerodrome(elevation_ft=0.0, runway_gradient_ratio=1.0)
 
 
 def test_approach_step_refuses_a_negative_length() -> None:
@@ -752,7 +752,7 @@ def test_takeoff_refuses_a_headwind_that_reaches_the_rotation_speed() -> None:
 def test_takeoff_refuses_a_runway_too_steep_to_accelerate_along() -> None:
     """Eq. B-18's divisor ``a - g GR`` goes negative and shortens the roll."""
     aircraft = _aircraft("JETW")
-    cliff = Aerodrome(elevation_ft=0.0, temperature_c=15.0, runway_gradient=0.9)
+    cliff = Aerodrome(elevation_ft=0.0, temperature_c=15.0, runway_gradient_ratio=0.9)
     with pytest.raises(ValueError, match=r"Eq\. B-18"):
         departure_profile(aircraft, [_TAKEOFF], weight_lb=165347.0, aerodrome=cliff)
 

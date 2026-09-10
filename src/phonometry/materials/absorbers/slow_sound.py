@@ -67,7 +67,7 @@ phonometry (a passive medium has :math:`\operatorname{Im}(k) < 0`):
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -521,6 +521,7 @@ class SlitResonatorAbsorberResult:
     effective_wavenumber: Complex
     effective_impedance: Complex
     transfer_matrix: Complex
+    _: KW_ONLY
     resonators: tuple[HelmholtzResonator, ...] | None = None
     slit_height: float | None = None
     lattice_step: float | None = None

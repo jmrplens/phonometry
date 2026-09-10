@@ -1102,7 +1102,7 @@ def flow_noise_bend(
     *,
     density: float = 1.206,
     model: str = "ashrae",
-    branch_diameter: float | None = None,
+    branch_diameter_m: float | None = None,
     approach_velocity: float | None = None,
     rounding_ratio: float | None = None,
 ) -> HvacSpectrumResult:
@@ -1151,7 +1151,7 @@ def flow_noise_bend(
     :param height: Duct height ``H`` in the plane of the bend, m.
     :param density: Air density ``rho``, kg/m3.
     :param model: ``"ashrae"`` (default, Bies) or ``"vdi2081"``.
-    :param branch_diameter: **VDI 2081 only.** Diameter of the branch duct
+    :param branch_diameter_m: **VDI 2081 only.** Diameter of the branch duct
         ``d_a``, m; for a bend, the duct's own diameter.
     :param approach_velocity: **VDI 2081 only.** Flow speed in the main duct
         ahead of the junction ``v_h``, m/s. ``None`` (default) takes it equal
@@ -1170,9 +1170,9 @@ def flow_noise_bend(
     f = _frequencies(frequencies)
     u = require_positive(flow_velocity, "flow_velocity")
     if require_choice(model, "model", ("ashrae", "vdi2081")) == "vdi2081":
-        if branch_diameter is None:
+        if branch_diameter_m is None:
             msg = (
-                "model='vdi2081' needs 'branch_diameter': Equation (18) is "
+                "model='vdi2081' needs 'branch_diameter_m': Equation (18) is "
                 "written on the diameter of the branch duct, which the Bies "
                 "form does not take."
             )
@@ -1182,7 +1182,9 @@ def flow_noise_bend(
             frequencies=f,
             values=_vdi2081_branch_flow_noise(
                 f,
-                branch_diameter=require_positive(branch_diameter, "branch_diameter"),
+                branch_diameter_m=require_positive(
+                    branch_diameter_m, "branch_diameter_m"
+                ),
                 branch_velocity=u,
                 approach_velocity=require_positive(approach, "approach_velocity"),
                 rounding_ratio=rounding_ratio,
@@ -1697,7 +1699,7 @@ def _vdi2081_straight_flow_noise(
 def _vdi2081_branch_flow_noise(
     bands: NDArray[np.float64],
     *,
-    branch_diameter: float,
+    branch_diameter_m: float,
     branch_velocity: float,
     approach_velocity: float,
     rounding_ratio: float | None,
@@ -1709,7 +1711,7 @@ def _vdi2081_branch_flow_noise(
     is returned as no contribution rather than extrapolated: the fit turns
     over there and ``(lg St)^1.268`` is not real for ``St < 1``.
     """
-    strouhal = bands * branch_diameter / branch_velocity
+    strouhal = bands * branch_diameter_m / branch_velocity
     lg_st = np.log10(np.where(strouhal > 1.0, strouhal, 1.0))
     ratio = math.log10(approach_velocity / branch_velocity)
     normalised = 12.0 - 21.5 * lg_st**1.268 + (32.0 + 13.0 * lg_st) * ratio
@@ -1723,7 +1725,7 @@ def _vdi2081_branch_flow_noise(
     level = (
         normalised
         + 10.0 * np.log10(_vdi2081_octave_bandwidth(bands))
-        + 30.0 * math.log10(branch_diameter)
+        + 30.0 * math.log10(branch_diameter_m)
         + 50.0 * math.log10(branch_velocity)
         + correction
     )

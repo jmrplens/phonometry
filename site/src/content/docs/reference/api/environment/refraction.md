@@ -226,7 +226,7 @@ Plot the relative-level field over the range-height plane.
 
 ```python
 AtmosphericRayResult(
-    launch_angles: NDArray[np.float64],
+    launch_angles_deg: NDArray[np.float64],
     ranges: NDArray[np.float64],
     heights: NDArray[np.float64],
     travel_times: NDArray[np.float64],
@@ -242,7 +242,7 @@ Ray-tracing solution through an effective sound-speed profile.
 
 | Name | Description |
 | :--- | :--- |
-| `launch_angles` | Launch angles from the horizontal, in degrees. |
+| `launch_angles_deg` | Launch angles from the horizontal, in degrees. |
 | `ranges` | Per-ray horizontal ranges, in metres, shape `(n_rays, n_steps)`. |
 | `heights` | Per-ray heights, in metres, shape `(n_rays, n_steps)`. |
 | `travel_times` | Per-ray cumulative travel times, in seconds, shape `(n_rays, n_steps)`. |

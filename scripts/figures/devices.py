@@ -5779,7 +5779,7 @@ def generate_vdi2081_chain_cascade(output_dir: str) -> None:
             0.30,
             0.6,
             model="vdi2081",
-            branch_diameter=0.62,
+            branch_diameter_m=0.62,
             approach_velocity=(16000.0 / 3600.0) / 0.90,
             rounding_ratio=0.025,
         ).values
@@ -6363,11 +6363,11 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
         "style_modifier": 0.42,
         "pressure_recovery": 0.92,
         "power_ratio": 0.25,
-        "valve_diameter": 0.1,
-        "seat_diameter": 0.1,
+        "valve_diameter_m": 0.1,
+        "seat_diameter_m": 0.1,
     }
     water_pipe = noise_control.LiquidPipe(
-        internal_diameter=0.1071, wall_thickness=0.0036, density=7800.0
+        internal_diameter_m=0.1071, wall_thickness=0.0036, density=7800.0
     )
     inlet, vapour = 1.0e6, 2.32e3
     threshold = noise_control.incipient_cavitation_ratio(90.0, 0.42, 0.92)
@@ -6616,12 +6616,12 @@ def generate_control_valve_noise(output_dir: str) -> None:
         flow_coefficient=90.0,
         style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
         pressure_recovery=0.792 / 0.984,
-        outlet_diameter=0.1,
+        outlet_diameter_m=0.1,
         efficiency_correction=-3.8,
         strouhal_number=0.2,
     )
     pipe = noise_control.DownstreamPipe(
-        internal_diameter=0.2031, wall_thickness=0.008, density=8000.0
+        internal_diameter_m=0.2031, wall_thickness=0.008, density=8000.0
     )
     bounds = noise_control.pressure_ratio_boundaries(1.22, 0.792 / 0.984)
 
@@ -6898,7 +6898,7 @@ def generate_silencer_measurement(output_dir: str) -> None:
     ):
         ax2.plot(
             bands,
-            noise_control.open_end_transmission_loss(bands, area, solid_angle=angle),
+            noise_control.open_end_transmission_loss(bands, area, solid_angle_sr=angle),
             color=colour,
             lw=2.4,
             ls=style,

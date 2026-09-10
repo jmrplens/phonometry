@@ -342,7 +342,7 @@ def _flow_noise_outcome(index: int) -> Outcome:
         0.30,
         0.6,
         model="vdi2081",
-        branch_diameter=0.62,
+        branch_diameter_m=0.62,
         approach_velocity=_JUNCTION_APPROACH,
         rounding_ratio=0.025,
     ).values
@@ -381,7 +381,7 @@ def _chk_bend_flow_noise() -> Outcome:
         _BEND_AREA,
         0.16,
         model="vdi2081",
-        branch_diameter=0.160,
+        branch_diameter_m=0.160,
     ).values
     return _worst_band(_PRINTED_BEND_NOISE, values, _PRINTED_TOLERANCE)
 
@@ -544,7 +544,7 @@ def _chk_chain() -> Outcome:
         0.30,
         0.6,
         model="vdi2081",
-        branch_diameter=0.62,
+        branch_diameter_m=0.62,
         approach_velocity=_JUNCTION_APPROACH,
         rounding_ratio=0.025,
     ).values

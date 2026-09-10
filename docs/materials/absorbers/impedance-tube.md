@@ -330,10 +330,10 @@ random-incidence $\alpha_\mathrm{s}$/$\alpha_\mathrm{w}$ of ISO 354 / ISO 11654.
 It uses the same `ReportMetadata` container and rendering engine as the other
 fiches. The measured frequency range is taken from the result; the applicable
 descriptive and geometric `ReportMetadata` fields are `client`, `manufacturer`,
-`specimen`, `tube_diameter`, `tube_shape`, `mic_spacing`, `mounting`,
+`specimen`, `tube_diameter_m`, `tube_shape`, `mic_spacing`, `mounting`,
 `test_room`, `test_date`, `temperature_c`, `static_pressure_kpa`,
 `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`
-(`tube_diameter` and `mic_spacing` are given in metres and printed in
+(`tube_diameter_m` and `mic_spacing` are given in metres and printed in
 millimetres). The `requirement` field is ignored (ISO 10534-2 has no verdict).
 Rendering needs reportlab and, for the figure the fiche embeds, matplotlib
 (`pip install "phonometry[report,plot]"`); only `engine="reportlab"` is
@@ -378,7 +378,7 @@ fiche.report(
     "alpha_fiche.pdf",
     metadata=ReportMetadata(
         specimen="Resistive facing over an 86 mm rigidly-backed air cavity",
-        tube_diameter=diameter_m,        # m (printed as 100 mm)
+        tube_diameter_m=diameter_m,        # m (printed as 100 mm)
         mic_spacing=spacing,           # m (printed as 50 mm)
         measurement_standard="ISO 10534-2",
         laboratory="Phonometry Reference Laboratory",

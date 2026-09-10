@@ -330,7 +330,7 @@ def _fig627(
     method: str = "integral",
     loss_factor: float = 0.01,
     area: float | None = None,
-    limiting_angle: float = 78.0,
+    limiting_angle_deg: float = 78.0,
     fluid: Fluid = PUBLISHED_AIR,
 ) -> building.SoundReductionResult:
     """The Figure 6.27 panel: 7,5 kg/m2 with the range 400 Hz to 4000 Hz."""
@@ -342,7 +342,7 @@ def _fig627(
         method=method,
         loss_factor=loss_factor,
         area=area,
-        limiting_angle=limiting_angle,
+        limiting_angle_deg=limiting_angle_deg,
         fluid=fluid,
     )
 
@@ -454,7 +454,7 @@ def test_orthotropic_integral_reduces_to_the_exact_mass_law_integral() -> None:
         m2,
         critical_frequency_lower=4.0e5,
         critical_frequency_upper=4.0e6,
-        limiting_angle=angle,
+        limiting_angle_deg=angle,
     )
     z0 = 1.205 * 343.0
     q = 2.0 * math.pi * f * m2 / (2.0 * z0)
@@ -494,7 +494,7 @@ def test_orthotropic_integral_reduces_to_the_isotropic_integral() -> None:
             critical_frequency_lower=fc,
             critical_frequency_upper=fc * (1.0 + 1e-12),
             loss_factor=eta,
-            limiting_angle=angle,
+            limiting_angle_deg=angle,
         )
         assert float(res.transmission_loss[0]) == pytest.approx(expected, abs=1e-4)
 
@@ -571,12 +571,14 @@ def test_orthotropic_area_limits_the_incidence_angle() -> None:
     area, f = 10.0, 1000.0
     cos2 = (343.0 / f) / (2.0 * math.pi * math.sqrt(area))
     sized = _fig627([f], area=area)
-    fixed = _fig627([f], limiting_angle=math.degrees(math.asin(math.sqrt(1.0 - cos2))))
+    fixed = _fig627(
+        [f], limiting_angle_deg=math.degrees(math.asin(math.sqrt(1.0 - cos2)))
+    )
     assert float(sized.transmission_loss[0]) == pytest.approx(
         float(fixed.transmission_loss[0]), abs=1e-6
     )
     clamped = _fig627([50.0], area=0.05)
-    capped = _fig627([50.0], limiting_angle=math.degrees(math.asin(math.sqrt(0.1))))
+    capped = _fig627([50.0], limiting_angle_deg=math.degrees(math.asin(math.sqrt(0.1))))
     assert float(clamped.transmission_loss[0]) == pytest.approx(
         float(capped.transmission_loss[0]), abs=1e-6
     )
@@ -654,8 +656,8 @@ def test_orthotropic_rejects_bad_input() -> None:
             critical_frequency_lower=FIG627_FC1,
             critical_frequency_upper=FIG627_FC2,
         )
-    with pytest.raises(ValueError, match=r"'limiting_angle' must lie in"):
-        _fig627(BANDS, limiting_angle=95.0)
+    with pytest.raises(ValueError, match=r"'limiting_angle_deg' must lie in"):
+        _fig627(BANDS, limiting_angle_deg=95.0)
     with pytest.raises(ValueError, match=r"'area' must be positive"):
         _fig627(BANDS, area=0.0)
 
@@ -671,8 +673,8 @@ def test_orthotropic_validates_every_argument_on_both_routes(method: str) -> Non
     """
     with pytest.raises(ValueError, match=r"'area' must be positive"):
         _fig627(BANDS, method=method, area=-5.0)
-    with pytest.raises(ValueError, match=r"'limiting_angle' must lie in"):
-        _fig627(BANDS, method=method, limiting_angle=170.0)
+    with pytest.raises(ValueError, match=r"'limiting_angle_deg' must lie in"):
+        _fig627(BANDS, method=method, limiting_angle_deg=170.0)
     with pytest.raises(ValueError, match=r"'loss_factor' must be positive"):
         _fig627(BANDS, method=method, loss_factor=-0.01)
 

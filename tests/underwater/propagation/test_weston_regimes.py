@@ -113,11 +113,15 @@ def test_cylindrical_to_mode_stripping_boundary_equates_the_two_laws() -> None:
     """r_CS = π·H/(4·η·ψc²) (Eq. 9.50) is where Eq. (9.42) and Eq. (9.49) meet."""
     h, f = 50.0, 250.0
     b = weston_regime_boundaries(f, h, seabed="sand")
-    expected = np.pi * h / (4.0 * b.reflection_loss_gradient * b.critical_angle**2)
+    expected = (
+        np.pi
+        * h
+        / (4.0 * b.reflection_loss_gradient_np_per_rad * b.critical_angle_rad**2)
+    )
     assert b.cylindrical_to_mode_stripping == pytest.approx(expected, rel=1e-12)
     r = b.cylindrical_to_mode_stripping
-    f_cs = 2.0 * b.critical_angle / (r * h)
-    f_ms = np.sqrt(np.pi / (b.reflection_loss_gradient * h)) * r**-1.5
+    f_cs = 2.0 * b.critical_angle_rad / (r * h)
+    f_ms = np.sqrt(np.pi / (b.reflection_loss_gradient_np_per_rad * h)) * r**-1.5
     assert f_cs == pytest.approx(f_ms, rel=1e-12)
 
 
@@ -134,7 +138,7 @@ def test_mode_stripping_boundary_equates_theta_eff_with_mode_3_over_2() -> None:
     h, f, c = 50.0, 250.0, 1500.0
     b = weston_regime_boundaries(f, h, seabed="sand", sound_speed=c)
     k = 2.0 * np.pi * f / c
-    eta = b.reflection_loss_gradient
+    eta = b.reflection_loss_gradient_np_per_rad
     r = b.mode_stripping_to_single_mode
     # Equation (9.56) at n = 3/2, halfway between the first two mode angles.
     theta_32 = 1.5 * np.pi / (k * b.effective_depth)
@@ -168,9 +172,9 @@ def test_composite_loss_and_the_boundary_use_the_same_effective_angle() -> None:
     res = weston_propagation_loss(r, f, h, seabed="sand", sound_speed=c)
     # Recover θ_eff from the printed Eq. (9.46) F_MP = (2·θ_eff/(r·H))·erf(...)
     # by inverting the closed form the module evaluates.
-    theta_eff = np.sqrt(np.pi * h / (4.0 * b.reflection_loss_gradient * r))
+    theta_eff = np.sqrt(np.pi * h / (4.0 * b.reflection_loss_gradient_np_per_rad * r))
     expected = (2.0 * theta_eff / (r * h)) * erf(
-        np.sqrt(np.pi) * b.critical_angle / (2.0 * theta_eff)
+        np.sqrt(np.pi) * b.critical_angle_rad / (2.0 * theta_eff)
     )
     assert res.multipath[0] == pytest.approx(-10.0 * np.log10(expected), rel=1e-12)
 
@@ -180,7 +184,7 @@ def test_spherical_to_cylindrical_boundary() -> None:
     h, f = 50.0, 250.0
     b = weston_regime_boundaries(f, h, seabed="sand")
     assert b.spherical_to_cylindrical == pytest.approx(
-        h / (2.0 * b.critical_angle), rel=1e-12
+        h / (2.0 * b.critical_angle_rad), rel=1e-12
     )
 
 
@@ -246,7 +250,7 @@ def test_mud_is_lossier_than_sand_at_long_range() -> None:
     """Table 9.1 mud has no critical angle and a much larger η at 250 Hz."""
     h, f = 50.0, 250.0
     sand = weston_propagation_loss(20_000.0, f, h, seabed="sand")
-    mud = weston_propagation_loss(20_000.0, f, h, seabed="mud", critical_angle=90.0)
+    mud = weston_propagation_loss(20_000.0, f, h, seabed="mud", critical_angle_deg=90.0)
     assert mud.propagation_loss[0] > sand.propagation_loss[0]
 
 
@@ -256,7 +260,7 @@ def test_mud_is_lossier_than_sand_at_long_range() -> None:
 
 #: An ideal waveguide: pressure-release surface and bottom, no reflection loss,
 #: so ψc = 90° and the flux result reduces to F = π/(r·H) exactly.
-_IDEAL = {"critical_angle": 90.0, "reflection_loss_gradient_value": 0.0}
+_IDEAL = {"critical_angle_deg": 90.0, "reflection_loss_gradient_value_np_per_rad": 0.0}
 
 
 def test_ideal_waveguide_cylindrical_factor_is_pi_over_rh() -> None:
@@ -361,9 +365,12 @@ def test_plot_returns_axes() -> None:
     [
         ({"seabed": "gravel"}, "seabed"),
         ({"sound_speed": 0.0}, "sound_speed"),
-        ({"critical_angle": 0.0}, "critical_angle"),
-        ({"critical_angle": 120.0}, "critical_angle"),
-        ({"reflection_loss_gradient_value": -1.0}, "reflection_loss_gradient_value"),
+        ({"critical_angle_deg": 0.0}, "critical_angle_deg"),
+        ({"critical_angle_deg": 120.0}, "critical_angle_deg"),
+        (
+            {"reflection_loss_gradient_value_np_per_rad": -1.0},
+            "reflection_loss_gradient_value_np_per_rad",
+        ),
         ({"source_depth": 1e6}, "source_depth"),
     ],
 )
@@ -410,9 +417,11 @@ def test_refracting_branch_requires_a_sediment_gradient() -> None:
         density_ratio=1.4,
         attenuation_db_per_wavelength=0.09,
         loss_parameter=0.00165,
-        sound_speed_gradient=0.0,
+        sound_speed_gradient_per_s=0.0,
     )
-    with pytest.raises(ValueError, match=r"needs a positive 'sound_speed_gradient'"):
+    with pytest.raises(
+        ValueError, match=r"needs a positive 'sound_speed_gradient_per_s'"
+    ):
         reflection_loss_gradient(flat, frequency_hz=250.0)
 
 

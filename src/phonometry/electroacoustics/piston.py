@@ -275,6 +275,7 @@ class PistonDirectivity:
 
 def piston_directivity_pattern(
     ka: ArrayLike,
+    *,
     angles_rad: ArrayLike | None = None,
 ) -> PistonDirectivity:
     r"""Far-field directivity pattern of one or more baffled circular pistons.

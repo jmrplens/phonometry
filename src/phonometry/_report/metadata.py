@@ -76,7 +76,7 @@ class ReportMetadata:
         date and result of the most recent verification, the before/after
         field checks). Printed by the occupational noise-exposure fiche
         (ISO 9612:2009 Clause 15 c).
-    :ivar tube_diameter: Impedance-tube inner diameter ``d`` (circular tube) or
+    :ivar tube_diameter_m: Impedance-tube inner diameter ``d`` (circular tube) or
         maximum lateral dimension (rectangular tube), in metres. Printed by the
         impedance-tube fiche (ISO 10534-2), where it fixes the upper plane-wave
         cut-on frequency.
@@ -144,7 +144,7 @@ class ReportMetadata:
     receiving_temperature_c: float | None = None
     receiving_relative_humidity_percent: float | None = None
     static_pressure_kpa: float | None = None
-    tube_diameter: float | None = None
+    tube_diameter_m: float | None = None
     mic_spacing: float | None = None
     thickness: float | None = None
     test_room: str | None = None
@@ -169,7 +169,7 @@ class ReportMetadata:
         "receiving_volume",
         "room_volume",
         "static_pressure_kpa",
-        "tube_diameter",
+        "tube_diameter_m",
         "mic_spacing",
         "thickness",
     )

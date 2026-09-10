@@ -470,14 +470,14 @@ def plot_flight_path_kinematics(
     ax2 = ax.twinx()
     ax2.plot(
         t,
-        result.path_angle,
+        result.path_angle_deg,
         color=_C_TERTIARY,
         lw=1.4,
         label=_t("Path angle $\\gamma$", language),
     )
     ax2.plot(
         t,
-        result.bank_angle,
+        result.bank_angle_deg,
         color=_C_MUTED,
         lw=1.4,
         ls=":",

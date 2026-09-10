@@ -296,6 +296,7 @@ TransferMatrix(
     t12: Complex,
     t21: Complex,
     t22: Complex,
+    *,
     l1: float | None = None,
     s1: float | None = None,
     l2: float | None = None,

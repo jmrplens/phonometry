@@ -356,7 +356,7 @@ def shadow_zone_distance(
 class AtmosphericRayResult:
     """Ray-tracing solution through an effective sound-speed profile.
 
-    :ivar launch_angles: Launch angles from the horizontal, in degrees.
+    :ivar launch_angles_deg: Launch angles from the horizontal, in degrees.
     :ivar ranges: Per-ray horizontal ranges, in metres, shape
         ``(n_rays, n_steps)``.
     :ivar heights: Per-ray heights, in metres, shape ``(n_rays, n_steps)``.
@@ -367,7 +367,7 @@ class AtmosphericRayResult:
     :ivar source_height: Source height, in metres.
     """
 
-    launch_angles: NDArray[np.float64]
+    launch_angles_deg: NDArray[np.float64]
     ranges: NDArray[np.float64]
     heights: NDArray[np.float64]
     travel_times: NDArray[np.float64]
@@ -397,7 +397,7 @@ class AtmosphericRayResult:
         """
         require_ranks(
             self,
-            launch_angles=1,
+            launch_angles_deg=1,
             ranges=2,
             heights=2,
             travel_times=2,
@@ -406,7 +406,7 @@ class AtmosphericRayResult:
         )
         require_same_length(
             self,
-            "launch_angles",
+            "launch_angles_deg",
             "ranges",
             "heights",
             "travel_times",
@@ -560,7 +560,7 @@ def atmospheric_ray_paths(
     ray_r = np.broadcast_to(ranges, ray_z.shape).copy()
 
     return AtmosphericRayResult(
-        launch_angles=angles,
+        launch_angles_deg=angles,
         ranges=ray_r,
         heights=ray_z,
         travel_times=ray_t,

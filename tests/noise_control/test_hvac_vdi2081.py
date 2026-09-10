@@ -613,7 +613,7 @@ def test_the_junction_flow_noise_reproduces_element_3() -> None:
         0.30,
         0.6,
         model="vdi2081",
-        branch_diameter=JUNCTION_BRANCH_DIAMETER,
+        branch_diameter_m=JUNCTION_BRANCH_DIAMETER,
         approach_velocity=JUNCTION_APPROACH_VELOCITY,
         rounding_ratio=JUNCTION_ROUNDING_RATIO,
     )
@@ -633,7 +633,7 @@ def test_a_bend_is_the_same_law_with_one_velocity() -> None:
         BEND_AREA_M2,
         0.16,
         model="vdi2081",
-        branch_diameter=0.160,
+        branch_diameter_m=0.160,
     )
     assert bend.values == pytest.approx(PRINTED_BEND_NOISE_DB, abs=0.05)
 
@@ -643,7 +643,7 @@ def test_a_bend_is_the_same_law_with_one_velocity() -> None:
         BEND_AREA_M2,
         0.16,
         model="vdi2081",
-        branch_diameter=0.160,
+        branch_diameter_m=0.160,
         rounding_ratio=0.0,
     )
     # K falls with frequency, from 6,3 dB at 63 Hz to 1,9 dB at 8 kHz, so a
@@ -659,7 +659,7 @@ def test_a_bend_is_the_same_law_with_one_velocity() -> None:
         BEND_AREA_M2,
         0.16,
         model="vdi2081",
-        branch_diameter=0.160,
+        branch_diameter_m=0.160,
         rounding_ratio=0.15,
     )
     assert crossing.values == pytest.approx(bend.values, abs=1e-9)
@@ -678,7 +678,7 @@ def test_below_a_strouhal_number_of_one_the_fit_does_not_apply() -> None:
         0.05,
         0.2,
         model="vdi2081",
-        branch_diameter=0.05,
+        branch_diameter_m=0.05,
     )
     below = hvac.OCTAVE_BANDS * 0.05 / 20.0 <= 1.0
     assert np.all(np.isneginf(slow.values[below]))
@@ -687,7 +687,7 @@ def test_below_a_strouhal_number_of_one_the_fit_does_not_apply() -> None:
 
 def test_the_vdi_flow_noise_asks_for_the_branch_it_is_written_on() -> None:
     """Equation (18) is written on the branch diameter, which Bies does not take."""
-    with pytest.raises(ValueError, match=r"model='vdi2081' needs 'branch_diameter'"):
+    with pytest.raises(ValueError, match=r"model='vdi2081' needs 'branch_diameter_m'"):
         hvac.flow_noise_bend(hvac.OCTAVE_BANDS, 5.0, 0.2, 0.4, model="vdi2081")
 
 
@@ -921,7 +921,7 @@ def test_the_chain_carries_the_example_from_the_fan_to_the_second_junction() -> 
         0.30,
         0.6,
         model="vdi2081",
-        branch_diameter=JUNCTION_BRANCH_DIAMETER,
+        branch_diameter_m=JUNCTION_BRANCH_DIAMETER,
         approach_velocity=JUNCTION_APPROACH_VELOCITY,
         rounding_ratio=JUNCTION_ROUNDING_RATIO,
     ).values

@@ -493,7 +493,7 @@ print(round(float(abs(arr.amplitudes[0])) * 500.1, 6))  # 1.0: eso es 1/R
 # El primer eco salió de la fuente hacia arriba y llega desde arriba, con el
 # signo invertido una vez por la superficie de presión nula.
 print(int(arr.surface_reflections[1]), int(arr.bottom_reflections[1]))  # 1 0
-print(round(float(arr.launch_angles[1]), 2))            # -9.31 grados: arriba
+print(round(float(arr.launch_angles_deg[1]), 2))            # -9.31 grados: arriba
 arr.plot(language="es")   # el esqueleto de la respuesta al impulso
 ```
 
@@ -608,7 +608,7 @@ beams = underwater.gaussian_beams(600.0, z_beam, c_beam, source_depth=992.5,
                                   fan=underwater.BeamFan(max_angle_deg=45.0),
                                   n_depth_points=80)
 print(beams.propagation_loss.shape)            # (80, 101)  profundidad x distancia
-print(beams.launch_angles.size)                # 439 haces entre +-45 grados
+print(beams.launch_angles_deg.size)                # 439 haces entre +-45 grados
 print(round(float(beams.initial_beam_widths[0]), 1))  # 35,9 m: W0, Ec. (3.86)
 beams.plot(language="es")   # el campo de PL, en el marco de parabolic_equation
 ```

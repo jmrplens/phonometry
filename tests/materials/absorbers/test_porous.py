@@ -814,7 +814,7 @@ class TestRandomIncidence:
         # verified against the reference quadrature too.
         z = np.append(z, [0.7 + 0.0j, 2.0 + 0.0j, 5.0 + 0.0j])
         for lim in (np.pi / 2.0, np.radians(78.0)):
-            closed = statistical_absorption(z, angle_limit=lim)
+            closed = statistical_absorption(z, angle_limit_rad=lim)
             theta = np.linspace(0.0, lim, 20001)
             g = 1.0 / z[:, None]
             cos = np.cos(theta)[None, :]
@@ -886,9 +886,9 @@ class TestRandomIncidence:
         med = miki(f, 15000.0)
         layers = [PorousLayer(0.05, med)]
         with pytest.raises(
-            ValueError, match=r"'angle_limit' must satisfy 0 < angle_limit <= pi/2"
+            ValueError, match=r"'angle_limit_rad' must satisfy 0 < angle_limit <= pi/2"
         ):
-            diffuse_field_absorption(f, layers, angle_limit=2.0)
+            diffuse_field_absorption(f, layers, angle_limit_rad=2.0)
         with pytest.raises(ValueError, match=r"'quadrature_points' must be at least 2"):
             diffuse_field_absorption(f, layers, quadrature_points=1)
         negative_real = np.array([-1.0 + 0.5j])

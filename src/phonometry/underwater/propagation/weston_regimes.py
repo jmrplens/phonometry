@@ -66,7 +66,7 @@ if TYPE_CHECKING:
 WESTON_REGIMES = ("spherical", "cylindrical", "mode-stripping", "single-mode")
 
 # Normal incidence, the largest grazing angle a ray can have: the upper edge
-# of the (0, 90] degree validity range for a 'critical_angle' override.
+# of the (0, 90] degree validity range for a 'critical_angle_deg' override.
 _NORMAL_INCIDENCE_DEG = 90.0
 
 
@@ -83,7 +83,7 @@ class WestonSeabed:
     :ivar loss_parameter:
         :math:`\varepsilon = \beta_{\mathrm{sed}}/(40 \pi \log_{10} e)`
         (Equation 9.23).
-    :ivar sound_speed_gradient: ``c'``, the sediment sound-speed gradient, in
+    :ivar sound_speed_gradient_per_s: ``c'``, the sediment sound-speed gradient, in
         s⁻¹ (0 for sand, 1 for mud).
     """
 
@@ -93,7 +93,7 @@ class WestonSeabed:
     density_ratio: float
     attenuation_db_per_wavelength: float
     loss_parameter: float
-    sound_speed_gradient: float
+    sound_speed_gradient_per_s: float
 
 
 #: The two characteristic seabeds tabulated in Ainslie Table 9.1: medium sand
@@ -107,7 +107,7 @@ WESTON_SEABEDS: dict[str, WestonSeabed] = {
         density_ratio=2.1,
         attenuation_db_per_wavelength=0.88,
         loss_parameter=0.0161,
-        sound_speed_gradient=0.0,
+        sound_speed_gradient_per_s=0.0,
     ),
     "mud": WestonSeabed(
         name="mud",
@@ -116,7 +116,7 @@ WESTON_SEABEDS: dict[str, WestonSeabed] = {
         density_ratio=1.4,
         attenuation_db_per_wavelength=0.09,
         loss_parameter=0.00165,
-        sound_speed_gradient=1.0,
+        sound_speed_gradient_per_s=1.0,
     ),
 }
 
@@ -201,9 +201,9 @@ def reflection_loss_gradient(
             * np.cos(psi_c) ** 2
             / np.sin(psi_c) ** 3
         )
-    if bed.sound_speed_gradient <= 0.0:
+    if bed.sound_speed_gradient_per_s <= 0.0:
         msg = (
-            "a seabed without a critical angle needs a positive 'sound_speed_gradient'"
+            "a seabed without a critical angle needs a positive 'sound_speed_gradient_per_s'"
             " to use the refracting branch of Equation (9.53)."
         )
         raise ValueError(msg)
@@ -212,7 +212,7 @@ def reflection_loss_gradient(
         raise ValueError(msg)
     f = require_positive(frequency_hz, "frequency_hz")
     return float(
-        2.0 * (2.0 * np.pi * f) * bed.loss_parameter / bed.sound_speed_gradient
+        2.0 * (2.0 * np.pi * f) * bed.loss_parameter / bed.sound_speed_gradient_per_s
     )
 
 
@@ -298,8 +298,8 @@ class WestonRegimeBoundaries:
     :ivar mode_stripping_to_single_mode:
         :math:`r_{\mathrm{MS}} = k^2 H_\mathrm{e}^2 H/(9 \pi \eta)`, in metres
         (``inf`` for a lossless bottom). See the module note on Eq. (9.57).
-    :ivar critical_angle: Critical grazing angle :math:`\psi_\mathrm{c}`, in radians.
-    :ivar reflection_loss_gradient: :math:`\eta`, in Np/rad.
+    :ivar critical_angle_rad: Critical grazing angle :math:`\psi_\mathrm{c}`, in radians.
+    :ivar reflection_loss_gradient_np_per_rad: :math:`\eta`, in Np/rad.
     :ivar effective_depth: Weston effective depth ``He``, in metres.
     :ivar cutoff_frequency: Waveguide cut-off frequency, in Hz (``nan`` when
         the seabed has no critical angle).
@@ -311,8 +311,8 @@ class WestonRegimeBoundaries:
     spherical_to_cylindrical: float
     cylindrical_to_mode_stripping: float
     mode_stripping_to_single_mode: float
-    critical_angle: float
-    reflection_loss_gradient: float
+    critical_angle_rad: float
+    reflection_loss_gradient_np_per_rad: float
     effective_depth: float
     cutoff_frequency: float
     mode_count: float
@@ -324,8 +324,8 @@ def weston_regime_boundaries(
     *,
     seabed: str | WestonSeabed = "sand",
     sound_speed: float = 1500.0,
-    critical_angle: float | None = None,
-    reflection_loss_gradient_value: float | None = None,
+    critical_angle_deg: float | None = None,
+    reflection_loss_gradient_value_np_per_rad: float | None = None,
 ) -> WestonRegimeBoundaries:
     r"""Regime boundaries of a shallow-water waveguide (Ainslie §9.1.1.2).
 
@@ -333,20 +333,20 @@ def weston_regime_boundaries(
     :param water_depth: Water-column depth ``H``, in metres.
     :param seabed: ``"sand"``, ``"mud"`` or a :class:`WestonSeabed`.
     :param sound_speed: Water sound speed ``c_w``, in m/s.
-    :param critical_angle: Override the seabed critical angle :math:`\psi_\mathrm{c}`,
+    :param critical_angle_deg: Override the seabed critical angle :math:`\psi_\mathrm{c}`,
         in degrees. Use ``90`` for the ideal totally reflecting waveguide.
-    :param reflection_loss_gradient_value: Override :math:`\eta`, in Np/rad.
+    :param reflection_loss_gradient_value_np_per_rad: Override :math:`\eta`, in Np/rad.
         Use ``0`` for a lossless bottom (no mode stripping, no single-mode
         regime).
     :return: A :class:`WestonRegimeBoundaries`.
     :raises ValueError: If an input is invalid.
 
     .. note::
-        The two overrides are independent: overriding ``critical_angle``
+        The two overrides are independent: overriding ``critical_angle_deg``
         alone leaves :math:`\eta` computed from the seabed's *own* critical
         angle through Equation (9.51), which mixes two different bottoms.
         Pass both together (as the ideal-waveguide case
-        ``critical_angle=90`` with
+        ``critical_angle_deg=90`` with
         ``reflection_loss_gradient_value=0`` does) whenever the intent is a
         hypothetical seabed rather than a tweak of the tabulated one.
     """
@@ -355,7 +355,7 @@ def weston_regime_boundaries(
     c = require_positive(sound_speed, "sound_speed")
     bed = _seabed(seabed)
     psi_c, eta = _angle_and_gradient(
-        bed, f, critical_angle, reflection_loss_gradient_value
+        bed, f, critical_angle_deg, reflection_loss_gradient_value_np_per_rad
     )
     k = 2.0 * np.pi * f / c
     if psi_c < np.pi / 2.0 and bed.sound_speed_ratio > 1.0:
@@ -381,8 +381,8 @@ def weston_regime_boundaries(
         spherical_to_cylindrical=float(r_ss_cs),
         cylindrical_to_mode_stripping=float(r_cs),
         mode_stripping_to_single_mode=float(r_ms),
-        critical_angle=float(psi_c),
-        reflection_loss_gradient=float(eta),
+        critical_angle_rad=float(psi_c),
+        reflection_loss_gradient_np_per_rad=float(eta),
         effective_depth=float(h_eff),
         cutoff_frequency=float(f_cut),
         mode_count=float(k * h_eff * np.sin(psi_c) / np.pi),
@@ -392,24 +392,24 @@ def weston_regime_boundaries(
 def _angle_and_gradient(
     bed: WestonSeabed,
     frequency_hz: float,
-    critical_angle: float | None,
+    critical_angle_deg: float | None,
     gradient: float | None,
 ) -> tuple[float, float]:
     r"""Resolve :math:`(\psi_\mathrm{c}, \eta)` from the seabed and the optional
     overrides.
     """
-    if critical_angle is None:
+    if critical_angle_deg is None:
         psi_c = critical_grazing_angle(bed.sound_speed_ratio)
         if psi_c <= 0.0:
             msg = (
-                f"seabed {bed.name!r} has no critical angle; pass 'critical_angle'"
+                f"seabed {bed.name!r} has no critical angle; pass 'critical_angle_deg'"
                 " explicitly (in degrees) to fix the trapped-ray cone."
             )
             raise ValueError(msg)
     else:
-        deg = float(critical_angle)
+        deg = float(critical_angle_deg)
         if not np.isfinite(deg) or not (0.0 < deg <= _NORMAL_INCIDENCE_DEG):
-            msg = "'critical_angle' must lie in (0, 90] degrees."
+            msg = "'critical_angle_deg' must lie in (0, 90] degrees."
             raise ValueError(msg)
         psi_c = np.radians(deg)
     if gradient is None:
@@ -417,7 +417,7 @@ def _angle_and_gradient(
     else:
         eta = float(gradient)
         if not np.isfinite(eta) or eta < 0.0:
-            msg = "'reflection_loss_gradient_value' must be non-negative and finite."
+            msg = "'reflection_loss_gradient_value_np_per_rad' must be non-negative and finite."
             raise ValueError(msg)
     return float(psi_c), float(eta)
 
@@ -555,8 +555,8 @@ def weston_propagation_loss(
     sound_speed: float = 1500.0,
     source_depth: float | None = None,
     receiver_depth: float | None = None,
-    critical_angle: float | None = None,
-    reflection_loss_gradient_value: float | None = None,
+    critical_angle_deg: float | None = None,
+    reflection_loss_gradient_value_np_per_rad: float | None = None,
 ) -> WestonPropagationResult:
     r"""Propagation loss across Weston's four shallow-water regimes.
 
@@ -574,9 +574,9 @@ def weston_propagation_loss(
     :param source_depth: Source depth ``z0``, in metres; defaults to ``H/2``
         (used only by the single-mode formula).
     :param receiver_depth: Receiver depth ``z``, in metres; defaults to ``H/2``.
-    :param critical_angle: Override :math:`\psi_\mathrm{c}`, in degrees (``90`` for an
+    :param critical_angle_deg: Override :math:`\psi_\mathrm{c}`, in degrees (``90`` for an
         ideal totally reflecting waveguide).
-    :param reflection_loss_gradient_value: Override :math:`\eta`, in Np/rad
+    :param reflection_loss_gradient_value_np_per_rad: Override :math:`\eta`, in Np/rad
         (``0`` for a lossless bottom: no mode stripping, no single-mode
         regime).
     :return: A :class:`WestonPropagationResult`.
@@ -605,11 +605,11 @@ def weston_propagation_loss(
         h,
         seabed=bed,
         sound_speed=c,
-        critical_angle=critical_angle,
-        reflection_loss_gradient_value=reflection_loss_gradient_value,
+        critical_angle_deg=critical_angle_deg,
+        reflection_loss_gradient_value_np_per_rad=reflection_loss_gradient_value_np_per_rad,
     )
-    psi_c = bounds.critical_angle
-    eta = bounds.reflection_loss_gradient
+    psi_c = bounds.critical_angle_rad
+    eta = bounds.reflection_loss_gradient_np_per_rad
     h_eff = bounds.effective_depth
     lam = c / f
 

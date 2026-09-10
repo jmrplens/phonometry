@@ -28,7 +28,7 @@ that module.
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -385,6 +385,7 @@ class TransferMatrix:
     t12: Complex
     t21: Complex
     t22: Complex
+    _: KW_ONLY
     l1: float | None = None
     s1: float | None = None
     l2: float | None = None

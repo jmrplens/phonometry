@@ -215,7 +215,7 @@ def _seabed_fields() -> tuple[Any, ...]:
             (1.0 - np.abs(np.asarray(res.magnitude)) ** 2)
             * np.sin(np.radians(psi)) ** 2
         )
-        criticals.append(res.critical_angle)
+        criticals.append(res.critical_angle_deg)
     # Each curve is scaled on its own maximum outside the source's near
     # field: what the panel compares is the *shape* of the two, and above
     # all where each of them stops, not an absolute level that a 2D model

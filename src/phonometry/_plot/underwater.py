@@ -453,7 +453,7 @@ def plot_bottom_loss(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    phi = np.asarray(result.grazing_angle, dtype=np.float64)
+    phi = np.asarray(result.grazing_angle_deg, dtype=np.float64)
     loss = np.asarray(result.reflection_loss, dtype=np.float64)
     ax.plot(
         phi,
@@ -465,13 +465,13 @@ def plot_bottom_loss(
             **kwargs,
         },
     )
-    if result.critical_angle is not None:
+    if result.critical_angle_deg is not None:
         ax.axvline(
-            result.critical_angle,
+            result.critical_angle_deg,
             color=_C_REFERENCE,
             ls="--",
             lw=1.0,
-            label=f"{_t('Critical angle', language)} = {format_number(result.critical_angle, language)}°",
+            label=f"{_t('Critical angle', language)} = {format_number(result.critical_angle_deg, language)}°",
         )
     ax.set_xlabel(_t(_GRAZING_ANGLE_LABEL, language))
     ax.set_ylabel(_t("Bottom loss [dB]", language))
@@ -503,18 +503,18 @@ def plot_seabed_reflection(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    phi = np.asarray(result.grazing_angle, dtype=np.float64)
+    phi = np.asarray(result.grazing_angle_deg, dtype=np.float64)
     magnitude = np.asarray(result.magnitude, dtype=np.float64)
     ax.plot(
         phi, magnitude, **{"color": _C_PRIMARY, "lw": 1.6, "label": "$|R|$", **kwargs}
     )
-    if result.critical_angle is not None:
+    if result.critical_angle_deg is not None:
         ax.axvline(
-            result.critical_angle,
+            result.critical_angle_deg,
             color=_C_REFERENCE,
             ls="--",
             lw=1.0,
-            label=f"{_t('Critical angle', language)} = {format_number(result.critical_angle, language)}°",
+            label=f"{_t('Critical angle', language)} = {format_number(result.critical_angle_deg, language)}°",
         )
     ax.set_xlabel(_t(_GRAZING_ANGLE_LABEL, language))
     ax.set_xlim(0.0, 90.0)

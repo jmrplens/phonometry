@@ -92,7 +92,7 @@ module.
 flow_modal_correction(
     frequencies: ArrayLike,
     flow_velocity: float,
-    duct_diameter: float,
+    duct_diameter_m: float,
     *,
     shield: MicrophoneShield = 'sampling-tube',
     speed_of_sound: float = 340.0,
@@ -132,7 +132,7 @@ coefficient in the annex is transcribed and none of them warns.
 | :--- | :--- |
 | `frequencies` | Nominal one-third-octave centre frequencies, in hertz, 50 Hz to 20 kHz. |
 | `flow_velocity` | Mean flow velocity $U$ at the microphone position, in metres per second, negative on the inlet side. |
-| `duct_diameter` | Test-duct diameter $d$, in metres, 0,15 m to 2 m; it selects the Annex A table for the sampling tube and is checked against the scope for the other shields. |
+| `duct_diameter_m` | Test-duct diameter $d$, in metres, 0,15 m to 2 m; it selects the Annex A table for the sampling tube and is checked against the scope for the other shields. |
 | `shield` | `"sampling-tube"` (default), `"nose-cone"` or `"foam-ball"`. |
 | `speed_of_sound` | The $c$ of Eq. (8), in metres per second; the 340 m/s clause 5.3.4.3 states for normal conditions by default. [`sound_power_in_duct`](/phonometry/reference/api/power/sound-power-in-duct/#sound_power_in_duct) passes the duct air's own $c$ instead. Unused by the sampling tube. |
 
@@ -188,7 +188,7 @@ InDuctSoundPowerResult(
     reproducibility_standard_deviation: np.ndarray,
     expanded_uncertainty: np.ndarray,
     information_only_band: np.ndarray,
-    duct_diameter: float,
+    duct_diameter_m: float,
     duct_area: float,
     characteristic_impedance: float,
     speed_of_sound: float,
@@ -220,7 +220,7 @@ those above 10 kHz, and every band when the sampling tube is used between
 sampling tube; clause 4 NOTE 5 expects the figures to grow for the other
 shields and gives no others, so the same values are reported for them.
 
-`duct_diameter` and `duct_area` are $d$ and $S$,
+`duct_diameter_m` and `duct_area` are $d$ and $S$,
 `characteristic_impedance` is the $\rho c$ of the duct air and
 `speed_of_sound` its $c$, `flow_velocity` is the signed $U$
 (negative on the inlet side) and `shield` names the microphone shield.
@@ -265,7 +265,7 @@ $L_{W\mathrm{A}}$ of Annex C in the title. Requires matplotlib
 sound_power_in_duct(
     levels: ArrayLike,
     frequencies: ArrayLike,
-    duct_diameter: float,
+    duct_diameter_m: float,
     flow_velocity: float,
     *,
     shield: MicrophoneShield = 'sampling-tube',
@@ -301,7 +301,7 @@ Table 2, is carried per band.
 | :--- | :--- |
 | `levels` | Sound pressure levels, in decibels, `(positions, bands)` or an already averaged `(bands,)` spectrum. |
 | `frequencies` | Nominal one-third-octave centre frequencies of the bands, in hertz, 50 Hz to 20 kHz. |
-| `duct_diameter` | Test-duct diameter $d$, in metres, 0,15 m to 2 m. |
+| `duct_diameter_m` | Test-duct diameter $d$, in metres, 0,15 m to 2 m. |
 | `flow_velocity` | Mean flow velocity $U$ at the microphone position, in metres per second; negative on the inlet side, positive on the outlet side. |
 | `shield` | Microphone shield, `"sampling-tube"` (default), `"nose-cone"` or `"foam-ball"`. |
 | `microphone_correction` | $C_1$, the manufacturer's free-field correction of the microphone, in decibels, per band or scalar. |

@@ -438,7 +438,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # sends to IEC 60534-8-3 for all three, so a plain scan sees them twice.
     "AIR_SOUND_SPEED_M_S": "phonometry.noise_control.valves",
     "PIPE_SOUND_SPEED_M_S": "phonometry.noise_control.valves",
-    "jet_diameter": "phonometry.noise_control.valves",
+    "jet_diameter_m": "phonometry.noise_control.valves",
     # The ERB_N / Cam constants are owned by erb_scale and imported by the
     # ISO 532-2 loudness model, so a plain scan sees them in both modules.
     "ERB_C1": "phonometry.psychoacoustics.erb_scale",

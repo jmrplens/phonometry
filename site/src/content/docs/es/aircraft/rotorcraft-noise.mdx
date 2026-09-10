@@ -574,8 +574,8 @@ recomienda suavizar las trazas radar
 
 ```python
 kin = aircraft.flight_path_kinematics(times, positions)   # posiciones (N, 3), m
-kin.airspeed, kin.path_angle          # seleccionan el hemisferio por punto
-kin.bank_angle                        # inclina el hemisferio en virajes
+kin.airspeed, kin.path_angle_deg          # seleccionan el hemisferio por punto
+kin.bank_angle_deg                        # inclina el hemisferio en virajes
 kin.plot()                            # perfiles de velocidad y ángulos
 ```
 
@@ -710,7 +710,7 @@ plt.show()
 </details>
 
 Los flujos de trabajo con trazas radar pueden pasar directamente los valores
-suavizados por punto de `airspeed`, `path_angle`, `heading` y `bank_angle` de un
+suavizados por punto de `airspeed`, `path_angle_deg`, `heading` y `bank_angle_deg` de un
 `RotorcraftTrackState` en lugar de derivarlos de las posiciones; cuando se
 derivan, la trayectoria está en metros y segundos, así que la base de datos de
 velocidades debe estar entonces en m/s.

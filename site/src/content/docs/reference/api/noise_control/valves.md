@@ -77,7 +77,7 @@ AerodynamicValveNoise(
     boundaries: RegimeBoundaries,
     pressure_ratio: float,
     vena_contracta_pressure_pa: float,
-    jet_diameter: float,
+    jet_diameter_m: float,
     mach: float,
     acoustical_efficiency: float,
     stream_power: float,
@@ -108,7 +108,7 @@ What IEC 60534-8-3 Clause 5 says about one operating point.
 | `boundaries` | The four pressure ratios that placed it there. |
 | `pressure_ratio` | $x$ of Equation (1). |
 | `vena_contracta_pressure_pa` | $p_{vc}$ of Equation (2), in Pa. It goes negative past the choking point, where the equation is being read outside the range it means anything in. |
-| `jet_diameter` | $D_j$ of Equation (9), in m. |
+| `jet_diameter_m` | $D_j$ of Equation (9), in m. |
 | `mach` | The Mach number Table 3 uses in this regime. |
 | `acoustical_efficiency` | $\eta$, the fraction of the stream power that leaves as sound. |
 | `stream_power` | $W_m$, in W. |
@@ -139,7 +139,7 @@ AIR_SOUND_SPEED_M_S = 343.0
 
 ```python
 coincidence_frequencies(
-    internal_diameter: float,
+    internal_diameter_m: float,
     wall_thickness: float,
     downstream_sound_speed: float,
     *,
@@ -158,7 +158,7 @@ $$
 
 | Name | Description |
 | :--- | :--- |
-| `internal_diameter` | $D_i$ of the downstream pipe, in m. |
+| `internal_diameter_m` | $D_i$ of the downstream pipe, in m. |
 | `wall_thickness` | $t_S$ of the pipe wall, in m. |
 | `downstream_sound_speed` | $c_2$ in the fluid downstream of the valve, in m/s. |
 | `pipe_sound_speed` | $c_s$, 5 000 m/s for steel by NOTE 4. |
@@ -210,7 +210,7 @@ takes through the wall.
 
 ```python
 DownstreamPipe(
-    internal_diameter: float,
+    internal_diameter_m: float,
     wall_thickness: float,
     density: float,
     *,
@@ -231,7 +231,7 @@ not settings anyone is expected to change.
 
 | Name | Description |
 | :--- | :--- |
-| `internal_diameter` | $D_i$, in m. |
+| `internal_diameter_m` | $D_i$, in m. |
 | `wall_thickness` | $t_S$, in m. |
 | `density` | $\rho_s$ of the pipe material, in kg/m³. |
 | `sound_speed` | $c_s$ in the pipe wall, in m/s. |
@@ -273,8 +273,8 @@ expander_noise(
     mass_flow: float,
     downstream_density: float,
     downstream_sound_speed: float,
-    internal_diameter: float,
-    throat_diameter: float,
+    internal_diameter_m: float,
+    throat_diameter_m: float,
     velocity_correction: float,
     expander: Expander = ...,
 ) -> ExpanderNoise
@@ -302,8 +302,8 @@ computed as supersonic is computed at Mach one instead.
 | `mass_flow` | $\dot m$, in kg/s. |
 | `downstream_density` | $\rho_2$, in kg/m³. |
 | `downstream_sound_speed` | $c_2$, in m/s. |
-| `internal_diameter` | $D_i$ of the downstream pipe, in m. |
-| `throat_diameter` | $d_i$, the smaller of the valve outlet and the expander inlet, in m. |
+| `internal_diameter_m` | $D_i$ of the downstream pipe, in m. |
+| `throat_diameter_m` | $d_i$, the smaller of the valve outlet and the expander inlet, in m. |
 | `velocity_correction` | $L_g$ of Equation (16), in dB, which Equation (41) adds exactly as Equation (18) does. |
 | `expander` | The transition piece. |
 
@@ -470,10 +470,10 @@ puts 3 dB there for octave bands instead.
 | :--- | :--- |
 | ValueError | If the peak frequency is not positive and finite, or a band centre is not. |
 
-## jet_diameter
+## jet_diameter_m
 
 ```python
-jet_diameter(
+jet_diameter_m(
     flow_coefficient: float,
     style_modifier: float,
     pressure_recovery: float,
@@ -570,7 +570,7 @@ multiple_passage_jet_diameter(
     flow_coefficient: float,
     style_modifier: float,
     passage_length: float,
-    passage_diameter: float,
+    passage_diameter_m: float,
     *,
     coefficient: str = 'Cv',
 ) -> float
@@ -600,7 +600,7 @@ passes 0,2.
 | `flow_coefficient` | $C$ of the valve. |
 | `style_modifier` | $F_d$, from [`valve_style_modifier`](/phonometry/reference/api/noise_control/valves/#valve_style_modifier). |
 | `passage_length` | $l$ of one flow passage, in m. |
-| `passage_diameter` | $d$ of one flow passage, in m; the hydraulic diameter for a passage that is not round. |
+| `passage_diameter_m` | $d$ of one flow passage, in m; the hydraulic diameter for a passage that is not round. |
 | `coefficient` | `"Cv"` or `"Kv"`, selecting $N_{14}$. |
 
 **Returns:** $D_j$, in m.
@@ -701,9 +701,9 @@ PIPE_SOUND_SPEED_M_S = 5000.0
 pipe_transmission_loss(
     frequency: NDArray[np.float64],
     *,
-    internal_diameter: float,
+    internal_diameter_m: float,
     wall_thickness: float,
-    valve_outlet_diameter: float,
+    valve_outlet_diameter_m: float,
     downstream_density: float,
     downstream_sound_speed: float,
     pipe_density: float,
@@ -728,9 +728,9 @@ internal level, so the sign is not a convention this module chose.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | The band centre frequencies, in Hz. |
-| `internal_diameter` | $D_i$, in m. |
+| `internal_diameter_m` | $D_i$, in m. |
 | `wall_thickness` | $t_S$, in m. |
-| `valve_outlet_diameter` | $D$, in m, which selects the damping factor of Equation (20b) and is the valve outlet and not the pipe. |
+| `valve_outlet_diameter_m` | $D$, in m, which selects the damping factor of Equation (20b) and is the valve outlet and not the pipe. |
 | `downstream_density` | $\rho_2$, in kg/m³. |
 | `downstream_sound_speed` | $c_2$, in m/s. |
 | `pipe_density` | $\rho_s$ of the pipe material, in kg/m³. |
@@ -1036,7 +1036,7 @@ ValveTrim(
     flow_coefficient: float,
     style_modifier: float,
     pressure_recovery: float,
-    outlet_diameter: float,
+    outlet_diameter_m: float,
     efficiency_correction: float,
     strouhal_number: float,
     coefficient: str = 'Cv',
@@ -1056,7 +1056,7 @@ typical only.
 | `flow_coefficient` | $C$. |
 | `style_modifier` | $F_d$, from [`valve_style_modifier`](/phonometry/reference/api/noise_control/valves/#valve_style_modifier). |
 | `pressure_recovery` | $F_L$, or $F_{LP}/F_p$ with attached fittings. |
-| `outlet_diameter` | $D$ of the valve outlet, in m. |
+| `outlet_diameter_m` | $D$ of the valve outlet, in m. |
 | `efficiency_correction` | $A_\eta$ from Table 4. |
 | `strouhal_number` | $St_p$ from Table 4. |
 | `coefficient` | Which flow coefficient `flow_coefficient` is, `"Cv"` or `"Kv"`, which selects $N_{14}$ from Table 1. |

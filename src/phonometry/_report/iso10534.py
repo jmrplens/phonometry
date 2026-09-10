@@ -95,7 +95,7 @@ def _metadata_pairs(
     client = md.client
     manufacturer = md.manufacturer
     specimen = md.specimen
-    tube_diameter = md.tube_diameter
+    tube_diameter_m = md.tube_diameter_m
     mic_spacing = md.mic_spacing
     tube_shape = md.tube_shape
     mounting = md.mounting
@@ -117,8 +117,8 @@ def _metadata_pairs(
         (t("Description", language), specimen),
         (
             t("Tube diameter d [mm]", language),
-            fmt_meta(tube_diameter * 1e3, language)
-            if tube_diameter is not None
+            fmt_meta(tube_diameter_m * 1e3, language)
+            if tube_diameter_m is not None
             else None,
         ),
         (

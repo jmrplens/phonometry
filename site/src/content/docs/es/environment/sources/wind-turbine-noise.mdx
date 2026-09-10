@@ -55,7 +55,7 @@ from phonometry import environment
 # Niveles de banda de tercio de octava ponderados A y corregidos de fondo L_p,i (dB),
 # aquí las bandas de 250 Hz a 1 kHz de una medida sobre placa a sotavento.
 band_levels = [55.0, 58.0, 60.0, 57.0, 54.0]          # 250, 400, 500, 800, 1000 Hz
-r1 = environment.slant_distance(hub_height=80.0, rotor_diameter=100.0)
+r1 = environment.slant_distance(hub_height=80.0, rotor_diameter_m=100.0)
 print(round(r1, 2))                                   # 152.64 m
 lwa = environment.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 print(round(float(lwa), 2))                           # 112.98 dB(A) re 1 pW
@@ -180,7 +180,7 @@ import numpy as np
 # `environment` se importa en el fragmento de arriba. Los niveles de banda por
 # intervalo de aquí son sintéticos: una campaña real los aporta, corregidos de
 # fondo e interpolados al centro del intervalo.
-r1 = environment.slant_distance(hub_height=80.0, rotor_diameter=100.0)
+r1 = environment.slant_distance(hub_height=80.0, rotor_diameter_m=100.0)
 bins = np.arange(4.0, 12.5, 0.5)
 shape = np.array([-4.0, -1.5, 0.0, -1.0, -3.0])   # de 250 Hz a 1 kHz
 lwa = [float(environment.apparent_sound_power_level(

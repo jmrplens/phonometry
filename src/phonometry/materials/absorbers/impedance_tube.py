@@ -31,7 +31,7 @@ degrees Celsius and whose forward wave carries the opposite exponent sign.
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -535,6 +535,7 @@ class ImpedanceTubeResult:
     surface_impedance: Complex
     normalized_impedance: Complex
     absorption: Real
+    _: KW_ONLY
     spacing: float | None = None
     x1: float | None = None
     diameter_m: float | None = None
@@ -665,7 +666,7 @@ class ImpedanceTubeResult:
             produces a body-and-disclaimer fiche whose header shows only the
             measured frequency range. The applicable descriptive/geometric
             fields are ``client``, ``manufacturer``, ``specimen``,
-            ``tube_diameter``, ``tube_shape``, ``mic_spacing``, ``mounting``,
+            ``tube_diameter_m``, ``tube_shape``, ``mic_spacing``, ``mounting``,
             ``test_room``,
             ``test_date``, ``temperature_c``, ``pressure``,
             ``measurement_standard``, ``laboratory``, ``operator``,

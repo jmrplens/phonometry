@@ -30,7 +30,7 @@ from phonometry import environment
 
 # Background-corrected A-weighted one-third-octave band levels L_p,i (dB).
 band_levels = [55.0, 58.0, 60.0, 57.0, 54.0]
-r1 = environment.slant_distance(hub_height=80.0, rotor_diameter=100.0)
+r1 = environment.slant_distance(hub_height=80.0, rotor_diameter_m=100.0)
 lwa = environment.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 ```
 

@@ -659,7 +659,7 @@ $$
 $$
 
 evaluated by Gauss–Legendre quadrature in `diffuse_field_absorption`
-(``angle_limit`` defaults to 90°; truncations at 75–87° are in use). For a
+(``angle_limit_rad`` defaults to 90°; truncations at 75–87° are in use). For a
 *locally reacting* surface with known normalised impedance the integral has
 the closed form of Mechel Eq. 10, exposed as `statistical_absorption`; its
 maximum over all passive impedances is the published **0.951** (at

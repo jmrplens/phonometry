@@ -671,7 +671,7 @@ def open_end_transmission_loss(
     frequency: ArrayLike,
     area: float,
     *,
-    solid_angle: float = 2.0 * math.pi,
+    solid_angle_sr: float = 2.0 * math.pi,
     sound_speed: float = _SOUND_SPEED_M_S,
 ) -> NDArray[np.float64]:
     r"""ISO 7235 Equation (B.3): what the open end of a duct keeps in.
@@ -710,7 +710,7 @@ def open_end_transmission_loss(
 
     :param frequency: Band centre frequencies :math:`f`, in Hz.
     :param area: :math:`S`, the cross-sectional area of the duct, in m².
-    :param solid_angle: :math:`\Omega`, the solid angle of radiation at the
+    :param solid_angle_sr: :math:`\Omega`, the solid angle of radiation at the
         duct end, in sr. The five configurations of Table B.1 are in
         :data:`RADIATION_SOLID_ANGLES`; the default is a duct flush with one
         surface.
@@ -720,7 +720,7 @@ def open_end_transmission_loss(
     """
     bands = require_positive_array(frequency, "frequency")
     section = require_positive(area, "area")
-    angle = require_positive(solid_angle, "solid_angle")
+    angle = require_positive(solid_angle_sr, "solid_angle_sr")
     speed = require_positive(sound_speed, "sound_speed")
     mouth = 4.0 * math.pi * bands * math.sqrt(section) / speed
     return np.asarray(10.0 * np.log10(1.0 + angle / mouth**2), dtype=np.float64)
@@ -730,7 +730,7 @@ def open_end_reflection_coefficient(
     frequency: ArrayLike,
     area: float,
     *,
-    solid_angle: float = 2.0 * math.pi,
+    solid_angle_sr: float = 2.0 * math.pi,
     sound_speed: float = _SOUND_SPEED_M_S,
 ) -> NDArray[np.float64]:
     r"""ISO 7235 Equation (B.4): the pressure reflection coefficient there.
@@ -752,14 +752,14 @@ def open_end_reflection_coefficient(
 
     :param frequency: Band centre frequencies :math:`f`, in Hz.
     :param area: :math:`S`, the cross-sectional area of the duct, in m².
-    :param solid_angle: :math:`\Omega`, in sr.
+    :param solid_angle_sr: :math:`\Omega`, in sr.
     :param sound_speed: :math:`c`, in m/s.
     :return: :math:`r`, dimensionless, one value per frequency.
     :raises ValueError: If a value is not positive and finite.
     """
     bands = require_positive_array(frequency, "frequency")
     section = require_positive(area, "area")
-    angle = require_positive(solid_angle, "solid_angle")
+    angle = require_positive(solid_angle_sr, "solid_angle_sr")
     speed = require_positive(sound_speed, "sound_speed")
     mouth = 4.0 * math.pi * bands * math.sqrt(section) / speed
     return np.asarray((mouth**2 / angle + 1.0) ** -0.5, dtype=np.float64)

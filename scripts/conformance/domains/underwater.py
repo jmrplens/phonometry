@@ -418,8 +418,8 @@ def _chk_uww_flux_vs_modes() -> Outcome:
         ranges,
         100.0,
         100.0,
-        critical_angle=90.0,
-        reflection_loss_gradient_value=0.0,
+        critical_angle_deg=90.0,
+        reflection_loss_gradient_value_np_per_rad=0.0,
     )
     expected = -10.0 * math.log10(
         float(np.mean(10.0 ** (-flux.propagation_loss / 10.0)))

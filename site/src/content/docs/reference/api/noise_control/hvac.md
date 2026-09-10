@@ -610,7 +610,7 @@ flow_noise_bend(
     *,
     density: float = 1.206,
     model: str = 'ashrae',
-    branch_diameter: float | None = None,
+    branch_diameter_m: float | None = None,
     approach_velocity: float | None = None,
     rounding_ratio: float | None = None,
 ) -> HvacSpectrumResult
@@ -663,7 +663,7 @@ $\lg St$ is not real below one.
 | `height` | Duct height `H` in the plane of the bend, m. |
 | `density` | Air density `rho`, kg/m3. |
 | `model` | `"ashrae"` (default, Bies) or `"vdi2081"`. |
-| `branch_diameter` | **VDI 2081 only.** Diameter of the branch duct `d_a`, m; for a bend, the duct's own diameter. |
+| `branch_diameter_m` | **VDI 2081 only.** Diameter of the branch duct `d_a`, m; for a bend, the duct's own diameter. |
 | `approach_velocity` | **VDI 2081 only.** Flow speed in the main duct ahead of the junction `v_h`, m/s. `None` (default) takes it equal to `flow_velocity`, which is the bend case. |
 | `rounding_ratio` | **VDI 2081 only.** Rounding radius over branch diameter `r / d_a`, which applies the correction of Figure 18. `None` (default) leaves it out altogether, which is how the guideline's own worked example treats a bend: Figure 18 is drawn for the rounding of a **junction**, and its curves all cross zero at `r / d_a = 0,15`, so passing 0 asks for a sharp-cornered junction and is worth over 6 dB rather than nothing. Figure 18 is drawn from 0 to 0,20. |
 

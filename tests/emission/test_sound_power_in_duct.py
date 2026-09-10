@@ -561,14 +561,14 @@ def test_refuses_a_non_positive_band() -> None:
 @pytest.mark.parametrize("diameter", [0.1, 0.149, 2.01, 7.1])
 def test_refuses_a_duct_outside_the_scope(diameter: float) -> None:
     """Clause 1.1: 0,15 m to 2 m; Annexes H and I are not implemented."""
-    with pytest.raises(ValueError, match="'duct_diameter' must be between"):
+    with pytest.raises(ValueError, match="'duct_diameter_m' must be between"):
         emission.flow_modal_correction([1000.0], 10.0, diameter)
-    with pytest.raises(ValueError, match="'duct_diameter' must be between"):
+    with pytest.raises(ValueError, match="'duct_diameter_m' must be between"):
         emission.sound_power_in_duct([80.0], [1000.0], diameter, 10.0)
 
 
 def test_refuses_a_non_positive_duct_diameter() -> None:
-    with pytest.raises(ValueError, match="'duct_diameter' must be positive"):
+    with pytest.raises(ValueError, match="'duct_diameter_m' must be positive"):
         emission.flow_modal_correction([1000.0], 10.0, 0.0)
 
 
@@ -649,7 +649,7 @@ def test_the_informative_velocity_range_survives_below_10_khz() -> None:
 @pytest.mark.parametrize(
     ("name", "kwargs"),
     [
-        ("duct_diameter", {"duct_diameter": np.array([0.5, 0.6])}),
+        ("duct_diameter_m", {"duct_diameter_m": np.array([0.5, 0.6])}),
         ("flow_velocity", {"flow_velocity": np.array([10.0, 20.0])}),
         ("temperature_c", {"temperature_c": np.array([20.0, 21.0])}),
         ("static_pressure_kpa", {"static_pressure_kpa": np.array([101.0, 102.0])}),
@@ -660,7 +660,7 @@ def test_refuses_a_non_scalar_where_one_measurement_is_meant(
 ) -> None:
     """A per-band array where a single number belongs names its parameter."""
     call: dict[str, object] = {
-        "duct_diameter": 0.5,
+        "duct_diameter_m": 0.5,
         "flow_velocity": 10.0,
         **kwargs,
     }
@@ -831,7 +831,7 @@ def test_result_records_the_inputs() -> None:
     res = emission.sound_power_in_duct(
         _flat(80.0), _BANDS, 0.63, -12.0, shield="sampling-tube"
     )
-    assert res.duct_diameter == 0.63
+    assert res.duct_diameter_m == 0.63
     assert res.flow_velocity == -12.0
     assert res.shield == "sampling-tube"
     np.testing.assert_array_equal(res.frequencies, _BANDS)

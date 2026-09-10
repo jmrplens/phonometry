@@ -54,8 +54,8 @@ EXAMPLES = [
         "mass_flow": 2.22,
         "outlet_pressure_pa": 7.2e5,
         "flow_coefficient": 90.0,
-        "valve_outlet_diameter": 0.1,
-        "internal_diameter": 0.2031,
+        "valve_outlet_diameter_m": 0.1,
+        "internal_diameter_m": 0.2031,
         "regime": 1,
     },
     {
@@ -63,8 +63,8 @@ EXAMPLES = [
         "mass_flow": 2.29,
         "outlet_pressure_pa": 6.9e5,
         "flow_coefficient": 90.0,
-        "valve_outlet_diameter": 0.1,
-        "internal_diameter": 0.2031,
+        "valve_outlet_diameter_m": 0.1,
+        "internal_diameter_m": 0.2031,
         "regime": 2,
     },
     {
@@ -72,8 +72,8 @@ EXAMPLES = [
         "mass_flow": 2.59,
         "outlet_pressure_pa": 4.8e5,
         "flow_coefficient": 90.0,
-        "valve_outlet_diameter": 0.1,
-        "internal_diameter": 0.2031,
+        "valve_outlet_diameter_m": 0.1,
+        "internal_diameter_m": 0.2031,
         "regime": 3,
     },
     {
@@ -81,8 +81,8 @@ EXAMPLES = [
         "mass_flow": 1.18,
         "outlet_pressure_pa": 4.2e5,
         "flow_coefficient": 40.0,
-        "valve_outlet_diameter": 0.2031,
-        "internal_diameter": 0.2031,
+        "valve_outlet_diameter_m": 0.2031,
+        "internal_diameter_m": 0.2031,
         "regime": 4,
     },
     {
@@ -90,8 +90,8 @@ EXAMPLES = [
         "mass_flow": 1.19,
         "outlet_pressure_pa": 5.0e4,
         "flow_coefficient": 40.0,
-        "valve_outlet_diameter": 0.2031,
-        "internal_diameter": 0.2031,
+        "valve_outlet_diameter_m": 0.2031,
+        "internal_diameter_m": 0.2031,
         "regime": 5,
     },
     {
@@ -99,8 +99,8 @@ EXAMPLES = [
         "mass_flow": 0.89,
         "outlet_pressure_pa": 5.0e4,
         "flow_coefficient": 30.0,
-        "valve_outlet_diameter": 0.1,
-        "internal_diameter": 0.15,
+        "valve_outlet_diameter_m": 0.1,
+        "internal_diameter_m": 0.15,
         "regime": 5,
     },
 ]
@@ -126,7 +126,7 @@ def _trim(case: dict[str, Any]) -> valves.ValveTrim:
         **VALVE,
         flow_coefficient=case["flow_coefficient"],
         style_modifier=_style_modifier(),
-        outlet_diameter=case["valve_outlet_diameter"],
+        outlet_diameter_m=case["valve_outlet_diameter_m"],
     )
 
 
@@ -144,7 +144,9 @@ def _run(index: int) -> valves.AerodynamicValveNoise:
         return valves.valve_aerodynamic_noise(
             _stream(case),
             _trim(case),
-            valves.DownstreamPipe(**PIPE, internal_diameter=case["internal_diameter"]),
+            valves.DownstreamPipe(
+                **PIPE, internal_diameter_m=case["internal_diameter_m"]
+            ),
         )
 
 
@@ -215,7 +217,7 @@ class TestGeometry:
     def test_the_jet_diameter_matches_every_column(
         self, index: int, expected: float
     ) -> None:
-        assert _run(index).jet_diameter == pytest.approx(expected, abs=5e-4)
+        assert _run(index).jet_diameter_m == pytest.approx(expected, abs=5e-4)
 
     def test_the_two_flow_coefficients_agree_to_the_rounding_of_table_one(
         self,
@@ -224,14 +226,14 @@ class TestGeometry:
         # same jet: Table 1 rounds both constants to two digits, and
         # 4,9/4,6 = 1,065 against the sqrt(1,156) = 1,075 the conversion
         # asks for. The gap is 1 %, which is the rounding and not a choice.
-        as_cv = valves.jet_diameter(90.0, 0.3, 0.8, coefficient="Cv")
-        as_kv = valves.jet_diameter(90.0 / 1.156, 0.3, 0.8, coefficient="Kv")
+        as_cv = valves.jet_diameter_m(90.0, 0.3, 0.8, coefficient="Cv")
+        as_kv = valves.jet_diameter_m(90.0 / 1.156, 0.3, 0.8, coefficient="Kv")
         assert as_kv == pytest.approx(as_cv, rel=0.01)
         assert as_kv < as_cv
 
     def test_it_refuses_a_coefficient_the_table_does_not_print(self) -> None:
         with pytest.raises(ValueError, match="coefficient"):
-            valves.jet_diameter(90.0, 0.3, 0.8, coefficient="Av")
+            valves.jet_diameter_m(90.0, 0.3, 0.8, coefficient="Av")
 
     @pytest.mark.parametrize("bad", [0, -3, 2.5])
     def test_it_refuses_a_passage_count_that_is_not_a_whole_number(
@@ -355,9 +357,9 @@ class TestPipeTransmission:
     """
 
     PIPE = {
-        "internal_diameter": 0.200,
+        "internal_diameter_m": 0.200,
         "wall_thickness": 0.008,
-        "valve_outlet_diameter": 0.200,
+        "valve_outlet_diameter_m": 0.200,
         "downstream_density": 11.1,
         "downstream_sound_speed": 408.0,
         "pipe_density": 8000.0,
@@ -389,9 +391,9 @@ class TestPipeTransmission:
                     **VALVE,
                     flow_coefficient=90.0,
                     style_modifier=_style_modifier(),
-                    outlet_diameter=0.1,
+                    outlet_diameter_m=0.1,
                 ),
-                valves.DownstreamPipe(**PIPE, internal_diameter=0.2031),
+                valves.DownstreamPipe(**PIPE, internal_diameter_m=0.2031),
             ).frequency
         )
         loss = valves.pipe_transmission_loss(bands, **self.PIPE)
@@ -403,10 +405,10 @@ class TestPipeTransmission:
     ) -> None:
         bands = np.array([1000.0])
         wide = valves.pipe_transmission_loss(
-            bands, **{**self.PIPE, "valve_outlet_diameter": 0.2}
+            bands, **{**self.PIPE, "valve_outlet_diameter_m": 0.2}
         )
         narrow = valves.pipe_transmission_loss(
-            bands, **{**self.PIPE, "valve_outlet_diameter": 0.04}
+            bands, **{**self.PIPE, "valve_outlet_diameter_m": 0.04}
         )
         assert wide[0] - narrow[0] == pytest.approx(9.0, abs=1e-9)
 
@@ -419,14 +421,14 @@ class TestPipeTransmission:
         # 0,151 m one are a decibel apart.
         bands = np.array([1000.0])
         base = valves.pipe_transmission_loss(
-            bands, **{**self.PIPE, "valve_outlet_diameter": 0.2}
+            bands, **{**self.PIPE, "valve_outlet_diameter_m": 0.2}
         )[0]
 
         def damping(diameter: float) -> float:
             return float(
                 base
                 - valves.pipe_transmission_loss(
-                    bands, **{**self.PIPE, "valve_outlet_diameter": diameter}
+                    bands, **{**self.PIPE, "valve_outlet_diameter_m": diameter}
                 )[0]
             )
 
@@ -481,7 +483,9 @@ class TestWholeChain:
         # 93 dB(A) from the valve alone against the 94 the annex prints, which
         # is the valve and the expander together.
         assert round(_run(6).external_level) == 93
-        assert EXAMPLES[5]["valve_outlet_diameter"] < EXAMPLES[5]["internal_diameter"]
+        assert (
+            EXAMPLES[5]["valve_outlet_diameter_m"] < EXAMPLES[5]["internal_diameter_m"]
+        )
 
     def test_the_pipe_wall_is_what_the_level_outside_depends_on(self) -> None:
         thin = valves.valve_aerodynamic_noise(
@@ -490,10 +494,10 @@ class TestWholeChain:
                 **VALVE,
                 flow_coefficient=90.0,
                 style_modifier=_style_modifier(),
-                outlet_diameter=0.1,
+                outlet_diameter_m=0.1,
             ),
             valves.DownstreamPipe(
-                **{**PIPE, "wall_thickness": 0.004}, internal_diameter=0.2031
+                **{**PIPE, "wall_thickness": 0.004}, internal_diameter_m=0.2031
             ),
         )
         assert thin.external_level > _run(1).external_level
@@ -510,9 +514,9 @@ class TestWholeChain:
             **VALVE,
             flow_coefficient=90.0,
             style_modifier=_style_modifier(),
-            outlet_diameter=0.1,
+            outlet_diameter_m=0.1,
         )
-        pipe = valves.DownstreamPipe(**PIPE, internal_diameter=0.2031)
+        pipe = valves.DownstreamPipe(**PIPE, internal_diameter_m=0.2031)
         with pytest.raises(ValueError, match="drops pressure"):
             valves.valve_aerodynamic_noise(stream, trim, pipe)
 
@@ -530,7 +534,9 @@ class TestExpander:
         return valves.valve_aerodynamic_noise(
             _stream(case),
             _trim(case),
-            valves.DownstreamPipe(**PIPE, internal_diameter=case["internal_diameter"]),
+            valves.DownstreamPipe(
+                **PIPE, internal_diameter_m=case["internal_diameter_m"]
+            ),
             expander=valves.Expander(),
         )
 
@@ -574,7 +580,7 @@ class TestExpander:
         stream = _stream(case)
         trim = _trim(case)
         pipe = valves.DownstreamPipe(
-            **PIPE, internal_diameter=case["internal_diameter"]
+            **PIPE, internal_diameter_m=case["internal_diameter_m"]
         )
         with pytest.warns(valves.ValveNoiseWarning, match="Clause 7"):
             valves.valve_aerodynamic_noise(stream, trim, pipe)
@@ -584,7 +590,7 @@ class TestExpander:
         stream = _stream(case)
         trim = _trim(case)
         pipe = valves.DownstreamPipe(
-            **PIPE, internal_diameter=case["internal_diameter"]
+            **PIPE, internal_diameter_m=case["internal_diameter_m"]
         )
         with warnings.catch_warnings():
             warnings.simplefilter("error", valves.ValveNoiseWarning)
@@ -601,8 +607,8 @@ class TestExpander:
                 mass_flow=50.0,
                 downstream_density=0.265,
                 downstream_sound_speed=480.0,
-                internal_diameter=0.15,
-                throat_diameter=0.1,
+                internal_diameter_m=0.15,
+                throat_diameter_m=0.1,
                 velocity_correction=bad,
             )
 
@@ -614,8 +620,8 @@ class TestExpander:
             mass_flow=50.0,
             downstream_density=0.265,
             downstream_sound_speed=480.0,
-            internal_diameter=0.15,
-            throat_diameter=0.1,
+            internal_diameter_m=0.15,
+            throat_diameter_m=0.1,
             velocity_correction=0.0,
         )
         assert fast.pipe_velocity == pytest.approx(
@@ -628,8 +634,8 @@ class TestExpander:
             mass_flow=50.0,
             downstream_density=0.265,
             downstream_sound_speed=480.0,
-            internal_diameter=0.15,
-            throat_diameter=0.05,
+            internal_diameter_m=0.15,
+            throat_diameter_m=0.05,
             velocity_correction=0.0,
         )
         assert fast.inlet_velocity == pytest.approx(480.0)
@@ -642,8 +648,8 @@ class TestExpander:
                 mass_flow=1.0,
                 downstream_density=1.0,
                 downstream_sound_speed=340.0,
-                internal_diameter=0.1,
-                throat_diameter=0.2,
+                internal_diameter_m=0.1,
+                throat_diameter_m=0.2,
                 velocity_correction=0.0,
             )
 
@@ -740,12 +746,12 @@ def _example_seven() -> valves.AerodynamicValveNoise:
             flow_coefficient=conditions.flow_coefficient,
             style_modifier=modifier,
             pressure_recovery=case["last_stage_recovery"],
-            outlet_diameter=case["diameter"],
+            outlet_diameter_m=case["diameter"],
             efficiency_correction=case["efficiency_correction"],
             strouhal_number=case["strouhal_number"],
         ),
         valves.DownstreamPipe(
-            internal_diameter=case["diameter"],
+            internal_diameter_m=case["diameter"],
             wall_thickness=case["wall_thickness"],
             density=case["pipe_density"],
         ),
@@ -831,7 +837,7 @@ class TestMultistageTrim:
             ("sound_power", 10.3),
             ("internal_level", 156.9),
             ("peak_frequency", 14381.0),
-            ("jet_diameter", 0.0022),
+            ("jet_diameter_m", 0.0022),
         ],
     )
     def test_every_printed_intermediate_of_example_seven(
@@ -839,7 +845,7 @@ class TestMultistageTrim:
     ) -> None:
         # The annex prints the jet diameter to two figures, so the tolerance
         # is half of its last printed place rather than a relative one.
-        tolerance = 5e-5 if name == "jet_diameter" else abs(expected) * 2e-3
+        tolerance = 5e-5 if name == "jet_diameter_m" else abs(expected) * 2e-3
         found = float(getattr(_example_seven(), name))
         assert found == pytest.approx(expected, abs=tolerance)
 
@@ -897,7 +903,7 @@ class TestMultiplePassageTrim:
     def test_the_bracket_is_what_replaces_the_recovery_factor(self) -> None:
         # At l/d = 4 the bracket is 0,9 - 0,24 = 0,66, so Equation (26) is
         # Equation (9) with that in place of F_LP/F_p.
-        printed = valves.jet_diameter(90.0, 0.094, 0.66)
+        printed = valves.jet_diameter_m(90.0, 0.094, 0.66)
         assert valves.multiple_passage_jet_diameter(
             90.0, 0.094, 0.040, 0.010
         ) == pytest.approx(printed, rel=1e-12)

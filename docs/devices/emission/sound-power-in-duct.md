@@ -167,7 +167,7 @@ c2 = np.array([0.0] * 11 + [0.2, 0.3, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5, 1.9,
                             2.3, 2.8, 3.4, 4.0])         # sampling tube, dB
 
 duct = emission.sound_power_in_duct(
-    levels, freqs, duct_diameter=0.63, flow_velocity=12.0,
+    levels, freqs, duct_diameter_m=0.63, flow_velocity=12.0,
     shield="sampling-tube", microphone_correction=c1, shield_correction=c2,
     temperature_c=20.0, static_pressure_kpa=101.325,
 )
@@ -230,7 +230,7 @@ lower:
 
 ```python
 inlet = emission.sound_power_in_duct(
-    levels, freqs, duct_diameter=0.63, flow_velocity=-12.0,
+    levels, freqs, duct_diameter_m=0.63, flow_velocity=-12.0,
     microphone_correction=c1, shield_correction=c2,
 )
 print(round(float(inlet.flow_modal_correction[13]), 2))   # 1.39 dB at 1 kHz
@@ -252,7 +252,7 @@ shields are limited to low velocities and the sampling tube is preferred
 
 ```python
 cone = emission.sound_power_in_duct(
-    levels, freqs, duct_diameter=0.63, flow_velocity=12.0,
+    levels, freqs, duct_diameter_m=0.63, flow_velocity=12.0,
     shield="nose-cone", microphone_correction=c1,
 )
 print(round(float(cone.flow_modal_correction[0]), 2))     # 0.31 dB, every band
@@ -265,7 +265,7 @@ print(round(cone.sound_power_level_a, 1))                 # 86.6 dB(A)
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | 1D or 2D array | dB | `(bands,)` or `(positions, bands)` | Time-averaged in-duct SPL; 2D is energy-averaged over the positions (Eq. 9), 1D is a multiplexed or traversed level (Eq. 11) |
 | `frequencies` | 1D array | Hz | nominal thirds, 50 Hz to 20 kHz | Required: the coefficients, the A-weighting and $\sigma_R$ are all keyed by the nominal centre |
-| `duct_diameter` | float | m | 0.15 to 2 | Test-duct diameter $d$ (clause 1.1); selects the Annex A table |
+| `duct_diameter_m` | float | m | 0.15 to 2 | Test-duct diameter $d$ (clause 1.1); selects the Annex A table |
 | `flow_velocity` | float | m/s | signed; ≤ 40 sampling tube (60 for information, but ≤ 40 whenever a band above 10 kHz is asked for), ≤ 20 nose cone, ≤ 15 foam ball | Mean flow velocity $U$ at the microphone; negative on the inlet side |
 | `shield` | str | | `'sampling-tube'` (default), `'nose-cone'`, `'foam-ball'` | Selects Eq. 7 with Annex A or Eq. 8, and the velocity limit |
 | `microphone_correction` | float or 1D array | dB | default `0.0` | $C_1$ from the manufacturer's data |
@@ -281,7 +281,7 @@ their sum (`microphone_correction`, `shield_correction`,
 `flow_modal_correction`, `combined_correction`), the uncertainty statement of
 the next section (`reproducibility_standard_deviation`,
 `expanded_uncertainty`, `information_only_band`) and the geometry and air it
-was computed with (`duct_diameter`, `duct_area`, `characteristic_impedance`,
+was computed with (`duct_diameter_m`, `duct_area`, `characteristic_impedance`,
 `speed_of_sound`, `flow_velocity`, `shield`). `flow_modal_correction()` gives
 $C_{3,4}$ on its own for any band, velocity, diameter and shield, and
 `in_duct_reproducibility()` the $\sigma_R$ of the next section.

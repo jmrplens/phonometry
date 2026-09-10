@@ -238,7 +238,7 @@ def _impedance_tube_example() -> tuple[object, ReportMetadata, str]:
         specimen="Resistive facing over an 86 mm rigidly-backed air cavity",
         client="Example client",
         manufacturer="Example acoustics",
-        tube_diameter=diameter_m,
+        tube_diameter_m=diameter_m,
         mic_spacing=spacing,
         mounting="Deliberate 86 mm backing air cavity, rigid termination",
         test_room="Impedance tube B&K 4206 (example)",

@@ -665,7 +665,7 @@ class ImpedanceTubeResult:
             produces a body-and-disclaimer fiche whose header shows only the
             measured frequency range. The applicable descriptive/geometric
             fields are ``client``, ``manufacturer``, ``specimen``,
-            ``tube_diameter``, ``tube_shape``, ``mic_spacing``, ``mounting``,
+            ``tube_diameter_m``, ``tube_shape``, ``mic_spacing``, ``mounting``,
             ``test_room``,
             ``test_date``, ``temperature_c``, ``pressure``,
             ``measurement_standard``, ``laboratory``, ``operator``,

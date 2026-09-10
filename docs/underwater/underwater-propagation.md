@@ -111,7 +111,7 @@ ranges = np.logspace(1.0, 5.3, 500)
 res = underwater.weston_propagation_loss(ranges, 250.0, 50.0, seabed="sand",
                                          source_depth=10.0, receiver_depth=25.0)
 b = res.boundaries
-print(f"psi_c = {np.degrees(b.critical_angle):.1f} deg, eta = {b.reflection_loss_gradient:.2f} Np/rad")
+print(f"psi_c = {np.degrees(b.critical_angle_rad):.1f} deg, eta = {b.reflection_loss_gradient_np_per_rad:.2f} Np/rad")
 print(f"boundaries: {b.spherical_to_cylindrical:.0f} / "
       f"{b.cylindrical_to_mode_stripping:.0f} / {b.mode_stripping_to_single_mode:.0f} m")
 res.plot()   # composite loss with each regime law and the boundaries
@@ -146,8 +146,8 @@ import numpy as np
 from phonometry import underwater
 
 ranges = np.linspace(20_000.0, 30_000.0, 2001)
-flux = underwater.weston_propagation_loss(ranges, 100.0, 100.0, critical_angle=90.0,
-                                          reflection_loss_gradient_value=0.0)
+flux = underwater.weston_propagation_loss(ranges, 100.0, 100.0, critical_angle_deg=90.0,
+                                          reflection_loss_gradient_value_np_per_rad=0.0)
 modes = underwater.normal_modes(100.0, [0.0, 100.0], [1500.0, 1500.0],
                                 source_depth=41.0, receiver_depth=57.0, ranges_m=ranges)
 mean = lambda pl: -10.0 * np.log10(np.mean(10.0 ** (-pl / 10.0)))
@@ -397,7 +397,7 @@ from phonometry import underwater
 phi = np.linspace(0.0, 90.0, 361)
 bl = underwater.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,
                                        rho2=1900.0, c2=1650.0)
-print(f"critical angle = {bl.critical_angle:.1f} deg")   # critical angle = 24.6 deg
+print(f"critical angle = {bl.critical_angle_deg:.1f} deg")   # critical angle = 24.6 deg
 bl.plot()   # bottom loss vs grazing angle
 plt.show()
 ```
@@ -411,12 +411,12 @@ from phonometry import underwater
 phi = np.linspace(0.0, 90.0, 361)   # grazing angle from the interface, degrees
 bl = underwater.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,  # water
                                rho2=1900.0, c2=1650.0)         # sand
-print(bl.critical_angle)            # 24.6° for this sand/water pair
+print(bl.critical_angle_deg)            # 24.6° for this sand/water pair
 bl.plot()                           # bottom loss vs grazing angle (needs matplotlib)
 ```
 
 `bottom_reflection_loss` returns a `BottomLossResult` with `reflection_loss`,
-the complex `reflection_coefficient` and the `critical_angle` (`None` for a
+the complex `reflection_coefficient` and the `critical_angle_deg` (`None` for a
 slower bottom). `reflection_coefficient(…)` and `critical_angle(c1, c2)` are
 also exposed directly. The model is lossless (real densities and sound speeds);
 sediment attenuation is out of scope.

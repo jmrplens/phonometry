@@ -357,8 +357,8 @@ def generate_weston_regimes(output_dir: str) -> None:
         0.98,
         0.05,
         "$f$ = 250 Hz, $H$ = 50 m, medium sand\n"
-        f"$\\psi_\\mathrm{{c}}$ = {np.degrees(bounds.critical_angle):.1f}°, "
-        f"$\\eta$ = {bounds.reflection_loss_gradient:.2f} Np/rad, "
+        f"$\\psi_\\mathrm{{c}}$ = {np.degrees(bounds.critical_angle_rad):.1f}°, "
+        f"$\\eta$ = {bounds.reflection_loss_gradient_np_per_rad:.2f} Np/rad, "
         f"{bounds.mode_count:.0f} modes",
         transform=ax.transAxes,
         va="bottom",
@@ -511,19 +511,19 @@ def generate_seabed_reflection(output_dir: str) -> None:
     )
     _fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(
-        res.grazing_angle,
+        res.grazing_angle_deg,
         res.reflection_loss,
         color=COLOR_PRIMARY,
         linewidth=2.0,
         label="Bottom loss (sand)",
     )
-    if res.critical_angle is not None:
+    if res.critical_angle_deg is not None:
         ax.axvline(
-            res.critical_angle,
+            res.critical_angle_deg,
             color=COLOR_SECONDARY,
             linestyle="--",
             linewidth=1.4,
-            label=f"Critical angle ({res.critical_angle:.1f}°)",
+            label=f"Critical angle ({res.critical_angle_deg:.1f}°)",
         )
     ax.set_xlabel("Grazing angle [°]")
     ax.set_ylabel("Bottom loss [dB]")
@@ -556,19 +556,19 @@ def generate_seabed_reflection_coefficient(output_dir: str) -> None:
     )
     _fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(
-        res.grazing_angle,
+        res.grazing_angle_deg,
         res.magnitude,
         color=COLOR_PRIMARY,
         linewidth=2.0,
         label="Reflection coefficient magnitude $|R|$ (sand)",
     )
-    if res.critical_angle is not None:
+    if res.critical_angle_deg is not None:
         ax.axvline(
-            res.critical_angle,
+            res.critical_angle_deg,
             color=COLOR_SECONDARY,
             linestyle="--",
             linewidth=1.4,
-            label=f"Critical angle ({res.critical_angle:.1f}°)",
+            label=f"Critical angle ({res.critical_angle_deg:.1f}°)",
         )
     ax.set_xlabel("Grazing angle [°]")
     ax.set_ylabel("Reflection coefficient magnitude $|R|$")
@@ -1539,7 +1539,7 @@ def generate_gaussian_beam_caustic(output_dir: str) -> None:
         0.985,
         0.06,
         f"{int(freq)} Hz, $n^2$-linear profile (Jensen Eq. 3.77)\n"
-        f"{beams.launch_angles.size} beams over ±45°, "
+        f"{beams.launch_angles_deg.size} beams over ±45°, "
         # Deep water: the per-angle default collapses to one width here,
         # so the label reads it off any beam of the fan.
         f"$W_0$ = {float(beams.initial_beam_widths[0]):.1f} m",

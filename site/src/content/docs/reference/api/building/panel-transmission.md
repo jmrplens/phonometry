@@ -462,7 +462,7 @@ orthotropic_transmission_loss(
     loss_factor: float = 0.01,
     method: str = 'integral',
     area: float | None = None,
-    limiting_angle: float = 78.0,
+    limiting_angle_deg: float = 78.0,
     band: str = 'third',
     fluid: Fluid = ...,
 ) -> SoundReductionResult
@@ -531,7 +531,7 @@ no smooth model predicts.
 | `loss_factor` | Total loss factor `eta` (> 0, Default: 0.01); used only by `method="integral"`, but validated on both routes. |
 | `method` | `"integral"` (Default) or `"heckl"`. |
 | `area` | Panel area `S`, in m^2 (> 0), selecting the size-dependent limiting angle of Bies Eq. (7.36) (Default: `None`); used only by `method="integral"`, but validated on both routes. |
-| `limiting_angle` | Fixed limiting angle `theta_L`, in degrees ($0 < \theta_\mathrm{L} < 90$, Default: 78.0), used when *area* is `None` and only by `method="integral"`, but validated on both routes. |
+| `limiting_angle_deg` | Fixed limiting angle `theta_L`, in degrees ($0 < \theta_\mathrm{L} < 90$, Default: 78.0), used when *area* is `None` and only by `method="integral"`, but validated on both routes. |
 | `band` | Band width for the field correction of the Heckl mass-law branch (`"third"`/`"octave"`). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air these models are published with). |
 

@@ -554,9 +554,9 @@ def hover_derived_hemisphere(
 
 def flight_condition_weights(
     airspeeds: NDArray[np.float64] | list[float],
-    path_angles: NDArray[np.float64] | list[float],
+    path_angles_deg: NDArray[np.float64] | list[float],
     airspeed: float,
-    path_angle: float,
+    path_angle_deg: float,
     *,
     scaling_factor: float = 2.0,
     triangles: NDArray[np.int_] | list[list[int]] | None = None,
@@ -585,15 +585,15 @@ def flight_condition_weights(
     outside the measured envelope.
 
     The scaling is span-based, so the weights do not depend on the units of
-    ``airspeeds`` or ``path_angles`` as long as the query uses the same units
+    ``airspeeds`` or ``path_angles_deg`` as long as the query uses the same units
     as the database conditions.
 
     :param airspeeds: Database hemisphere airspeeds ``V_j``, shape ``(J,)``.
-    :param path_angles: Database hemisphere path angles ``γ_j``, in degrees,
+    :param path_angles_deg: Database hemisphere path angles ``γ_j``, in degrees,
         shape ``(J,)`` (negative for descent).
     :param airspeed: Query airspeed ``V_A`` (the airspeed, not the ground
         speed, selects the hemisphere; guidance §A.3.3).
-    :param path_angle: Query path angle ``γ``, in degrees.
+    :param path_angle_deg: Query path angle ``γ``, in degrees.
     :param scaling_factor: Flight-condition scaling factor ``F_fc`` applied to
         the normalised path angle (default 2, the guidance's empirical value).
     :param triangles: Optional precomputed triangulation, shape ``(T, 3)``
@@ -607,24 +607,24 @@ def flight_condition_weights(
     :raises ValueError: If the inputs are invalid.
     """
     v = np.atleast_1d(np.asarray(airspeeds, dtype=np.float64))
-    g = np.atleast_1d(np.asarray(path_angles, dtype=np.float64))
+    g = np.atleast_1d(np.asarray(path_angles_deg, dtype=np.float64))
     require_equal_shapes(
         "flight_condition_weights",
-        {"airspeeds": v.shape, "path_angles": g.shape},
+        {"airspeeds": v.shape, "path_angles_deg": g.shape},
         "flight condition",
     )
     if v.ndim != 1 or v.size < 1:
         msg = (
-            "'airspeeds' and 'path_angles' must be 1-D and non-empty; "
+            "'airspeeds' and 'path_angles_deg' must be 1-D and non-empty; "
             f"got shape {v.shape}."
         )
         raise ValueError(msg)
     if not (np.all(np.isfinite(v)) and np.all(np.isfinite(g))):
-        msg = "'airspeeds' and 'path_angles' must be finite."
+        msg = "'airspeeds' and 'path_angles_deg' must be finite."
         raise ValueError(msg)
     ffc = require_positive(scaling_factor, "scaling_factor")
-    if not np.isfinite(airspeed) or not np.isfinite(path_angle):
-        msg = "'airspeed' and 'path_angle' must be finite."
+    if not np.isfinite(airspeed) or not np.isfinite(path_angle_deg):
+        msg = "'airspeed' and 'path_angle_deg' must be finite."
         raise ValueError(msg)
     if v.size == 1:
         return [(0, 1.0)]
@@ -634,7 +634,7 @@ def flight_condition_weights(
     vn = v / vspan if vspan > 0.0 else np.zeros_like(v)
     gn = ffc * g / gspan if gspan > 0.0 else np.zeros_like(g)
     qv = airspeed / vspan if vspan > 0.0 else 0.0
-    qg = ffc * path_angle / gspan if gspan > 0.0 else 0.0
+    qg = ffc * path_angle_deg / gspan if gspan > 0.0 else 0.0
     pts = np.column_stack([vn, gn])
     q = np.array([qv, qg])
     delta = np.hypot(vn - qv, gn - qg)
@@ -706,9 +706,9 @@ def _simplex_from_table(
 def interpolated_source_level(
     hemispheres: Sequence[RotorcraftHemisphere],
     airspeeds: NDArray[np.float64] | list[float],
-    path_angles: NDArray[np.float64] | list[float],
+    path_angles_deg: NDArray[np.float64] | list[float],
     airspeed: float,
-    path_angle: float,
+    path_angle_deg: float,
     azimuth_deg: float,
     polar_deg: float,
     *,
@@ -722,9 +722,9 @@ def interpolated_source_level(
 
     :param hemispheres: The database hemispheres, one per flight condition.
     :param airspeeds: Database airspeeds ``V_j``, shape ``(J,)``.
-    :param path_angles: Database path angles ``γ_j``, in degrees, shape ``(J,)``.
+    :param path_angles_deg: Database path angles ``γ_j``, in degrees, shape ``(J,)``.
     :param airspeed: Query airspeed ``V_A`` (same units as ``airspeeds``).
-    :param path_angle: Query path angle ``γ``, in degrees.
+    :param path_angle_deg: Query path angle ``γ``, in degrees.
     :param azimuth_deg: Emission azimuth ``φ``, in degrees.
     :param polar_deg: Emission polar angle ``θ``, in degrees.
     :param scaling_factor: Flight-condition scaling factor ``F_fc`` (default 2).
@@ -736,9 +736,9 @@ def interpolated_source_level(
     freqs = _common_frequencies(hemispheres, airspeeds)
     weights = flight_condition_weights(
         airspeeds,
-        path_angles,
+        path_angles_deg,
         airspeed,
-        path_angle,
+        path_angle_deg,
         scaling_factor=scaling_factor,
         triangles=triangles,
     )
@@ -792,10 +792,10 @@ class FlightPathKinematics:
     :ivar curvature: Track curvature :math:`K = \Delta\Theta/\Delta S`
         (Eq. 18), in rad/m, shape
         ``(N,)`` (zero where the ground speed vanishes).
-    :ivar bank_angle: Bank angle
+    :ivar bank_angle_deg: Bank angle
         :math:`\Phi = \arctan(K \cdot V_\mathrm{g}^2/g)` (Eq. 20), in degrees,
         positive starboard down, shape ``(N,)``.
-    :ivar path_angle: Path angle
+    :ivar path_angle_deg: Path angle
         :math:`\gamma = \arctan(\Delta Z/\Delta S)` (Doc 32 Eq. 10), in
         degrees, positive climbing, shape ``(N,)``.
 
@@ -813,8 +813,8 @@ class FlightPathKinematics:
     airspeed: NDArray[np.float64]
     heading: NDArray[np.float64]
     curvature: NDArray[np.float64]
-    bank_angle: NDArray[np.float64]
-    path_angle: NDArray[np.float64]
+    bank_angle_deg: NDArray[np.float64]
+    path_angle_deg: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a track whose per-point quantities do not line up.
@@ -839,8 +839,8 @@ class FlightPathKinematics:
             airspeed=1,
             heading=1,
             curvature=1,
-            bank_angle=1,
-            path_angle=1,
+            bank_angle_deg=1,
+            path_angle_deg=1,
         )
         require_same_length(
             self,
@@ -850,8 +850,8 @@ class FlightPathKinematics:
             "airspeed",
             "heading",
             "curvature",
-            "bank_angle",
-            "path_angle",
+            "bank_angle_deg",
+            "path_angle_deg",
             axis="track point",
         )
 
@@ -911,7 +911,7 @@ def flight_path_kinematics(
     # K·V_g² = (ΔΘ/Δt)·V_g (Eq. 20): the product form cannot overflow through
     # the intermediate 1/V_g division when the ground speed is minute.
     bank = np.degrees(np.arctan(dtheta_dt * vg / g0))
-    path_angle = np.degrees(np.arctan2(vz, vg))
+    path_angle_deg = np.degrees(np.arctan2(vz, vg))
     return FlightPathKinematics(
         times=t,
         positions=p,
@@ -919,8 +919,8 @@ def flight_path_kinematics(
         airspeed=va,
         heading=heading,
         curvature=np.asarray(curvature, dtype=np.float64),
-        bank_angle=bank,
-        path_angle=path_angle,
+        bank_angle_deg=bank,
+        path_angle_deg=path_angle_deg,
     )
 
 
@@ -1329,15 +1329,15 @@ class RotorcraftTrackState:
 
     :ivar airspeed: Airspeed ``V_A``, in the units of the database
         ``airspeeds`` (the derived values are in m/s).
-    :ivar path_angle: Path angle ``γ``, in degrees (negative descending).
+    :ivar path_angle_deg: Path angle ``γ``, in degrees (negative descending).
     :ivar heading: Heading ``Θ``, in degrees.
-    :ivar bank_angle: Bank angle ``Φ``, in degrees (positive starboard down).
+    :ivar bank_angle_deg: Bank angle ``Φ``, in degrees (positive starboard down).
     """
 
     airspeed: float | NDArray[np.float64] | list[float] | None = None
-    path_angle: float | NDArray[np.float64] | list[float] | None = None
+    path_angle_deg: float | NDArray[np.float64] | list[float] | None = None
     heading: float | NDArray[np.float64] | list[float] | None = None
-    bank_angle: float | NDArray[np.float64] | list[float] | None = None
+    bank_angle_deg: float | NDArray[np.float64] | list[float] | None = None
 
 
 @dataclass(frozen=True)
@@ -1378,7 +1378,7 @@ class _EventSetup:
 
     hemispheres: tuple[RotorcraftHemisphere, ...]
     airspeeds: NDArray[np.float64]
-    path_angles: NDArray[np.float64]
+    path_angles_deg: NDArray[np.float64]
     frequencies: NDArray[np.float64]
     times: NDArray[np.float64]
     positions: NDArray[np.float64]
@@ -1406,7 +1406,7 @@ class _EventSetup:
         own position, orientation and offset, and the absorption coefficient
         multiplies the source spectrum band by band. Each piece is validated
         as it is assembled but not against the others, which leaves two holes:
-        ``path_angles`` first meets the rest of the database inside the
+        ``path_angles_deg`` first meets the rest of the database inside the
         vectorised pass, and the four track-state arrays skip the per-point
         check on the branch that derives them from the track kinematics.
         Pinning the axes here names the one that disagrees before a single
@@ -1425,7 +1425,7 @@ class _EventSetup:
         require_ranks(
             self,
             airspeeds=1,
-            path_angles=1,
+            path_angles_deg=1,
             frequencies=1,
             times=1,
             positions=2,
@@ -1437,7 +1437,7 @@ class _EventSetup:
             alpha=1,
         )
         require_same_length(
-            self, "hemispheres", "airspeeds", "path_angles", axis="flight condition"
+            self, "hemispheres", "airspeeds", "path_angles_deg", axis="flight condition"
         )
         require_same_length(self, "frequencies", "alpha")
         require_same_length(
@@ -1456,7 +1456,7 @@ class _EventSetup:
 def _event_setup(
     hemispheres: Sequence[RotorcraftHemisphere],
     airspeeds: NDArray[np.float64] | list[float],
-    path_angles: NDArray[np.float64] | list[float],
+    path_angles_deg: NDArray[np.float64] | list[float],
     times: NDArray[np.float64] | list[float],
     positions: NDArray[np.float64] | list[list[float]],
     *,
@@ -1499,7 +1499,7 @@ def _event_setup(
     return _EventSetup(
         hemispheres=tuple(hemispheres),
         airspeeds=np.atleast_1d(np.asarray(airspeeds, dtype=np.float64)),
-        path_angles=np.atleast_1d(np.asarray(path_angles, dtype=np.float64)),
+        path_angles_deg=np.atleast_1d(np.asarray(path_angles_deg, dtype=np.float64)),
         frequencies=freqs,
         times=t,
         positions=p,
@@ -1693,7 +1693,7 @@ def _event_histories(
         if weights is None:
             weights = flight_condition_weights(
                 setup.airspeeds,
-                setup.path_angles,
+                setup.path_angles_deg,
                 key[0],
                 key[1],
                 scaling_factor=setup.scaling_factor,
@@ -1873,22 +1873,22 @@ def _resolved_track_state(
     """Per-point ``(V_A, γ, Θ, Φ)``: explicit overrides, else derived (Eq. 16-21)."""
     n = times.size
     spd = _per_point(state.airspeed, n, "airspeed")
-    gam = _per_point(state.path_angle, n, "path_angle")
+    gam = _per_point(state.path_angle_deg, n, "path_angle_deg")
     hdg = _per_point(state.heading, n, "heading")
-    bank = _per_point(state.bank_angle, n, "bank_angle")
+    bank = _per_point(state.bank_angle_deg, n, "bank_angle_deg")
     if spd is None or gam is None or hdg is None or bank is None:
         kin = flight_path_kinematics(times, positions)
         spd = kin.airspeed if spd is None else spd
-        gam = kin.path_angle if gam is None else gam
+        gam = kin.path_angle_deg if gam is None else gam
         hdg = kin.heading if hdg is None else hdg
-        bank = kin.bank_angle if bank is None else bank
+        bank = kin.bank_angle_deg if bank is None else bank
     return spd, gam, hdg, bank
 
 
 def rotorcraft_event_level(
     hemispheres: Sequence[RotorcraftHemisphere],
     airspeeds: NDArray[np.float64] | list[float],
-    path_angles: NDArray[np.float64] | list[float],
+    path_angles_deg: NDArray[np.float64] | list[float],
     times: NDArray[np.float64] | list[float],
     positions: NDArray[np.float64] | list[list[float]],
     receiver: tuple[float, float] | NDArray[np.float64] | list[float],
@@ -1923,7 +1923,7 @@ def rotorcraft_event_level(
     :param hemispheres: The database hemispheres, one per flight condition.
     :param airspeeds: Database airspeeds ``V_j``, shape ``(J,)`` (same units as
         the ``airspeed`` values used for selection).
-    :param path_angles: Database path angles ``γ_j``, in degrees, shape ``(J,)``.
+    :param path_angles_deg: Database path angles ``γ_j``, in degrees, shape ``(J,)``.
     :param times: Track times, in s, strictly increasing, shape ``(N,)``.
     :param positions: Track positions ``(x, y, z)``, in metres, shape ``(N, 3)``
         (z up, above the ground elevation datum).
@@ -1951,7 +1951,7 @@ def rotorcraft_event_level(
     setup = _event_setup(
         hemispheres,
         airspeeds,
-        path_angles,
+        path_angles_deg,
         times,
         positions,
         level_offset=level_offset,
@@ -2022,7 +2022,7 @@ def _track_emission_geometry(
 def rotorcraft_noise_contour(
     hemispheres: Sequence[RotorcraftHemisphere],
     airspeeds: NDArray[np.float64] | list[float],
-    path_angles: NDArray[np.float64] | list[float],
+    path_angles_deg: NDArray[np.float64] | list[float],
     times: NDArray[np.float64] | list[float],
     positions: NDArray[np.float64] | list[list[float]],
     *,
@@ -2044,7 +2044,7 @@ def rotorcraft_noise_contour(
 
     :param hemispheres: The database hemispheres, one per flight condition.
     :param airspeeds: Database airspeeds ``V_j``, shape ``(J,)``.
-    :param path_angles: Database path angles ``γ_j``, in degrees, shape ``(J,)``.
+    :param path_angles_deg: Database path angles ``γ_j``, in degrees, shape ``(J,)``.
     :param times: Track times, in s, strictly increasing, shape ``(N,)``.
     :param positions: Track positions ``(x, y, z)``, in metres, shape ``(N, 3)``.
     :param x: Grid x coordinates, in metres (at least 2).
@@ -2070,7 +2070,7 @@ def rotorcraft_noise_contour(
     setup = _event_setup(
         hemispheres,
         airspeeds,
-        path_angles,
+        path_angles_deg,
         times,
         positions,
         level_offset=level_offset,

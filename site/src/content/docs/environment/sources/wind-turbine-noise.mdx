@@ -54,7 +54,7 @@ from phonometry import environment
 # Background-corrected A-weighted one-third-octave band levels L_p,i (dB),
 # here the 250 Hz to 1 kHz bands of a downwind ground-board measurement.
 band_levels = [55.0, 58.0, 60.0, 57.0, 54.0]          # 250, 400, 500, 800, 1000 Hz
-r1 = environment.slant_distance(hub_height=80.0, rotor_diameter=100.0)
+r1 = environment.slant_distance(hub_height=80.0, rotor_diameter_m=100.0)
 print(round(r1, 2))                                   # 152.64 m
 lwa = environment.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 print(round(float(lwa), 2))                           # 112.98 dB(A) re 1 pW
@@ -170,7 +170,7 @@ import numpy as np
 # `environment` is imported by the snippet above. The per-bin band levels here
 # are synthetic: a real campaign supplies them, background-corrected and
 # interpolated to the bin centre.
-r1 = environment.slant_distance(hub_height=80.0, rotor_diameter=100.0)
+r1 = environment.slant_distance(hub_height=80.0, rotor_diameter_m=100.0)
 bins = np.arange(4.0, 12.5, 0.5)
 shape = np.array([-4.0, -1.5, 0.0, -1.0, -3.0])   # 250 Hz to 1 kHz
 lwa = [float(environment.apparent_sound_power_level(

@@ -172,8 +172,8 @@ def test_the_ideal_waveguide_arrivals_are_the_image_lattice_exactly() -> None:
     for i, (t, launch, arrival, n_s, n_b) in enumerate(exact):
         slant = t * _C
         assert res.travel_times[i] == pytest.approx(t, abs=1e-9)
-        assert res.launch_angles[i] == pytest.approx(launch, abs=1e-6)
-        assert res.arrival_angles[i] == pytest.approx(arrival, abs=1e-6)
+        assert res.launch_angles_deg[i] == pytest.approx(launch, abs=1e-6)
+        assert res.arrival_angles_deg[i] == pytest.approx(arrival, abs=1e-6)
         assert int(res.surface_reflections[i]) == n_s
         assert int(res.bottom_reflections[i]) == n_b
         amp = (-1.0) ** (n_s + n_b) / slant  # pressure-release both ways
@@ -204,8 +204,8 @@ def test_a_rigid_bottom_flips_exactly_the_bottom_signs() -> None:
         n_steps=_GUIDE_STEPS,
     )
     assert np.array_equal(rigid.travel_times, soft.travel_times)
-    assert np.array_equal(rigid.launch_angles, soft.launch_angles)
-    assert np.array_equal(rigid.arrival_angles, soft.arrival_angles)
+    assert np.array_equal(rigid.launch_angles_deg, soft.launch_angles_deg)
+    assert np.array_equal(rigid.arrival_angles_deg, soft.arrival_angles_deg)
     np.testing.assert_allclose(
         rigid.amplitudes,
         soft.amplitudes * (-1.0) ** soft.bottom_reflections,
@@ -412,10 +412,10 @@ def test_the_upward_refracted_eigenray_matches_the_closed_form_parabola() -> Non
     res = eigenrays(trace, receiver_range=r_rec, receiver_depth=z_rec, n_steps=501)
     assert res.travel_times.size == 1
     assert res.travel_times[0] == pytest.approx(t_exact, abs=2e-6)
-    assert res.launch_angles[0] == pytest.approx(theta0, abs=1e-3)
+    assert res.launch_angles_deg[0] == pytest.approx(theta0, abs=1e-3)
     arrival_exact = float(np.degrees(np.arctan(zp(r_rec))))
     assert arrival_exact > 0.0  # past the apex: arriving downward again
-    assert res.arrival_angles[0] == pytest.approx(arrival_exact, abs=2e-3)
+    assert res.arrival_angles_deg[0] == pytest.approx(arrival_exact, abs=2e-3)
     assert int(res.surface_reflections[0]) == 0
     assert int(res.bottom_reflections[0]) == 0
     assert int(res.caustic_crossings[0]) == 0
@@ -451,7 +451,7 @@ def test_a_root_on_a_fan_rung_is_recovered_by_the_widened_bracket() -> None:
     )
     res = eigenrays(trace, receiver_range=1000.0, receiver_depth=z_rec, n_steps=301)
     assert res.travel_times.size == 1
-    assert res.launch_angles[0] == pytest.approx(-11.0, abs=5e-3)
+    assert res.launch_angles_deg[0] == pytest.approx(-11.0, abs=5e-3)
 
 
 # --- The pieces on their own ------------------------------------------------

@@ -40,7 +40,7 @@ consistent unit works (kg/m³ by convention).
 
 ```python
 bottom_reflection_loss(
-    grazing_angle: NDArray[np.float64] | list[float] | float,
+    grazing_angle_deg: NDArray[np.float64] | list[float] | float,
     *,
     rho1: float = 1000.0,
     c1: float = 1500.0,
@@ -60,7 +60,7 @@ returned without warning.
 
 | Name | Description |
 | :--- | :--- |
-| `grazing_angle` | Grazing angle(s) $\varphi$ from the interface, in degrees. |
+| `grazing_angle_deg` | Grazing angle(s) $\varphi$ from the interface, in degrees. |
 | `rho1` | Water density $\rho_1$ (default 1000 kg/m³). |
 | `c1` | Sound speed in the water `c1`, in m/s (default 1500). |
 | `rho2` | Sediment density $\rho_2$. |
@@ -78,10 +78,10 @@ returned without warning.
 
 ```python
 BottomLossResult(
-    grazing_angle: NDArray[np.float64],
+    grazing_angle_deg: NDArray[np.float64],
     reflection_loss: NDArray[np.float64],
     reflection_coefficient: NDArray[np.complex128],
-    critical_angle: float | None,
+    critical_angle_deg: float | None,
 )
 ```
 
@@ -92,10 +92,10 @@ model).
 
 | Name | Description |
 | :--- | :--- |
-| `grazing_angle` | Grazing angles, in degrees. |
+| `grazing_angle_deg` | Grazing angles, in degrees. |
 | `reflection_loss` | Bottom loss $\mathrm{BL} = -20 \log_{10} \lvert R \rvert$ per angle, in dB. |
 | `reflection_coefficient` | Complex reflection coefficient per angle. |
-| `critical_angle` | The critical grazing angle, in degrees, or `None` if the sediment is not faster than the water. |
+| `critical_angle_deg` | The critical grazing angle, in degrees, or `None` if the sediment is not faster than the water. |
 
 ### BottomLossResult.plot()
 
@@ -141,7 +141,7 @@ below this grazing angle the wave is totally reflected.
 
 ```python
 reflection_coefficient(
-    grazing_angle: NDArray[np.float64] | list[float] | float,
+    grazing_angle_deg: NDArray[np.float64] | list[float] | float,
     *,
     rho1: float,
     c1: float,
@@ -156,7 +156,7 @@ Complex plane-wave pressure reflection coefficient at the seabed.
 
 | Name | Description |
 | :--- | :--- |
-| `grazing_angle` | Grazing angle(s) $\varphi$ from the interface, in degrees (`0` grazing to `90` normal incidence). |
+| `grazing_angle_deg` | Grazing angle(s) $\varphi$ from the interface, in degrees (`0` grazing to `90` normal incidence). |
 | `rho1` | Water density $\rho_1$ (any consistent unit; kg/m³ by convention). |
 | `c1` | Sound speed in the water `c1`, in m/s. |
 | `rho2` | Sediment density $\rho_2$. |
@@ -174,7 +174,7 @@ Complex plane-wave pressure reflection coefficient at the seabed.
 
 ```python
 seabed_reflection(
-    grazing_angle: NDArray[np.float64] | list[float] | float,
+    grazing_angle_deg: NDArray[np.float64] | list[float] | float,
     *,
     rho1: float = 1000.0,
     c1: float = 1500.0,
@@ -186,7 +186,7 @@ seabed_reflection(
 Build a plottable seabed reflection-coefficient result (Rayleigh
 model).
 
-Evaluates [`reflection_coefficient`](/phonometry/reference/api/underwater/seabed-reflection/#reflection_coefficient) at `grazing_angle` for the given
+Evaluates [`reflection_coefficient`](/phonometry/reference/api/underwater/seabed-reflection/#reflection_coefficient) at `grazing_angle_deg` for the given
 fluid-fluid interface and bundles the complex `R`, its magnitude `|R|`,
 the bottom loss $\mathrm{BL} = -20 \log_{10} \lvert R \rvert$ and the
 interface parameters into a [`SeabedReflection`](/phonometry/reference/api/underwater/seabed-reflection/#seabedreflection) that exposes
@@ -199,7 +199,7 @@ transmission), returned without warning.
 
 | Name | Description |
 | :--- | :--- |
-| `grazing_angle` | Grazing angle(s) $\varphi$ from the interface, in degrees (`0` grazing to `90` normal incidence). |
+| `grazing_angle_deg` | Grazing angle(s) $\varphi$ from the interface, in degrees (`0` grazing to `90` normal incidence). |
 | `rho1` | Water density $\rho_1$ (default 1000 kg/m³). |
 | `c1` | Sound speed in the water `c1`, in m/s (default 1500). |
 | `rho2` | Sediment density $\rho_2$. |
@@ -217,11 +217,11 @@ transmission), returned without warning.
 
 ```python
 SeabedReflection(
-    grazing_angle: NDArray[np.float64],
+    grazing_angle_deg: NDArray[np.float64],
     reflection_coefficient: NDArray[np.complex128],
     magnitude: NDArray[np.float64],
     bottom_loss: NDArray[np.float64],
-    critical_angle: float | None,
+    critical_angle_deg: float | None,
     rho1: float,
     c1: float,
     rho2: float,
@@ -243,11 +243,11 @@ maths.
 
 | Name | Description |
 | :--- | :--- |
-| `grazing_angle` | Grazing angles $\varphi$ from the interface, in degrees. |
+| `grazing_angle_deg` | Grazing angles $\varphi$ from the interface, in degrees. |
 | `reflection_coefficient` | Complex pressure reflection coefficient `R` per grazing angle. |
 | `magnitude` | Reflection-coefficient magnitude `\|R\|` per grazing angle (`1` below the critical angle for a faster sediment). |
 | `bottom_loss` | Bottom loss $\mathrm{BL} = -20 \log_{10} \lvert R \rvert$ per grazing angle, in dB. |
-| `critical_angle` | The critical grazing angle, in degrees, or `None` if the sediment is not faster than the water. |
+| `critical_angle_deg` | The critical grazing angle, in degrees, or `None` if the sediment is not faster than the water. |
 | `rho1` | Water density $\rho_1$. |
 | `c1` | Sound speed in the water `c1`, in m/s. |
 | `rho2` | Sediment density $\rho_2$. |

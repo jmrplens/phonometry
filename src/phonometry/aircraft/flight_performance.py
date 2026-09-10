@@ -270,7 +270,7 @@ class Aerodrome:
         ``Papt`` -- the QNH, not the pressure at the field -- in inHg.
     :ivar headwind_kt: Headwind component ``w``, kt; negative for a tailwind.
         Defaults to Doc 29's own modelling default of 8 kt (B4.4).
-    :ivar runway_gradient: Runway gradient ``GR``, positive uphill,
+    :ivar runway_gradient_ratio: Runway gradient ``GR``, positive uphill,
         dimensionless: the rise over the run between the two runway ends.
 
     The validity envelope Doc 29 claims for the coefficients is "air
@@ -285,7 +285,7 @@ class Aerodrome:
     temperature_c: float = 15.0
     sea_level_pressure_inhg: float = _STANDARD_PRESSURE_INHG
     headwind_kt: float = DEFAULT_HEADWIND_KT
-    runway_gradient: float = 0.0
+    runway_gradient_ratio: float = 0.0
 
     def __post_init__(self) -> None:
         """Reject an aerodrome the atmosphere equations cannot be evaluated at.
@@ -311,7 +311,7 @@ class Aerodrome:
             "temperature_c",
             "sea_level_pressure_inhg",
             "headwind_kt",
-            "runway_gradient",
+            "runway_gradient_ratio",
         )
         if self.sea_level_pressure_inhg <= 0.0:
             msg = (
@@ -319,10 +319,10 @@ class Aerodrome:
                 f"{self.sea_level_pressure_inhg!r} inHg."
             )
             raise ValueError(msg)
-        if abs(self.runway_gradient) >= 1.0:
+        if abs(self.runway_gradient_ratio) >= 1.0:
             msg = (
-                "Aerodrome: 'runway_gradient' must be below 1 in magnitude (a "
-                f"rise over a run, not an angle); got {self.runway_gradient!r}."
+                "Aerodrome: 'runway_gradient_ratio' must be below 1 in magnitude (a "
+                f"rise over a run, not an angle); got {self.runway_gradient_ratio!r}."
             )
             raise ValueError(msg)
 
@@ -1543,12 +1543,12 @@ def _gradient_corrected_roll_ft(
     """
     speed_ft_s = _KT_FT_S * rotation_tas_kt
     acceleration = speed_ft_s**2 / (2.0 * roll_wind_ft)
-    resisted = acceleration - _G_FT_S2 * flight.aerodrome.runway_gradient
+    resisted = acceleration - _G_FT_S2 * flight.aerodrome.runway_gradient_ratio
     if resisted <= 0.0:
         msg = (
             "the runway gradient must leave a positive mean acceleration "
-            f"(Eq. B-18); {flight.aerodrome.runway_gradient!r} takes "
-            f"{_G_FT_S2 * flight.aerodrome.runway_gradient:.3f} ft/s^2 from a "
+            f"(Eq. B-18); {flight.aerodrome.runway_gradient_ratio!r} takes "
+            f"{_G_FT_S2 * flight.aerodrome.runway_gradient_ratio:.3f} ft/s^2 from a "
             f"mean acceleration of {acceleration:.3f} ft/s^2."
         )
         raise ValueError(msg)

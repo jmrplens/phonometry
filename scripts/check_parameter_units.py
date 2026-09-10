@@ -46,27 +46,21 @@ if TYPE_CHECKING:
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 #: The quantities whose unit a caller can get wrong by a factor of a thousand
-#: (kPa against Pa) or by 273 (degrees Celsius against kelvin). A quantity
-#: earns its place here by having had two units competing for one name in this
-#: tree, which is what makes the mistake silent; the ones that only ever had
-#: one unit are not listed, because a suffix there would restate the
-#: convention rather than resolve anything. Matched anywhere in the name.
+#: (kPa against Pa), by 273 (degrees Celsius against kelvin) or by 57 (degrees
+#: against radians). A quantity earns its place here by having had two units
+#: competing for one name in this tree, which is what makes the mistake
+#: silent; the ones that only ever had one unit are not listed, because a
+#: suffix there would restate the convention rather than resolve anything.
+#:
+#: ``pressure``, ``temperature`` and ``humid`` are matched anywhere in a name.
+#: The geometric ones are matched as whole words inside it, so ``critical_angle``
+#: and ``duct_diameter`` are held to the rule and ``triangles`` is not.
 QUANTITIES = ("pressure", "temperature", "humid")
 
-#: The same rule for the geometric quantities, matched against the whole name
-#: rather than any part of it. ``diameter`` was metres in twenty places and
-#: millimetres in one, ``angles`` degrees in ten and radians in four,
-#: ``period`` a lattice pitch in metres in seven and a repetition time in
-#: seconds in three, ``gradient`` a road slope in per cent in three and a
-#: sound-speed gradient in s^-1 in four.
-#:
-#: The compound names built on the same words (``critical_angle``,
-#: ``duct_diameter``, ``path_angles`` and seventy more) are a second pass, not
-#: an exemption: ``WestonRegimeBoundaries.critical_angle`` is in radians while
-#: ``weston_regime_boundaries(critical_angle=...)`` one screen below it takes
-#: degrees, which is the same trap at 57 times over. Widening this tuple to
-#: whole-word matching is what that pass ends with.
-WHOLE_NAME_QUANTITIES = ("diameter", "angle", "angles", "period", "periods", "gradient")
+#: Matched as a word of the name, split on underscores.
+WORD_QUANTITIES = frozenset(
+    {"diameter", "angle", "angles", "period", "periods", "gradient"}
+)
 
 #: The unit suffixes the tree uses. Every one of them is already in the
 #: published API. ``_ft`` is here because a pressure altitude is a length: the
@@ -84,8 +78,12 @@ UNITS = (
     "_m",
     "_rad",
     "_deg",
+    "_sr",
     "_s",
     "_per_s",
+    "_np_per_rad",
+    "_min",
+    "_hours",
 )
 
 #: Suffixes that say the quantity has no unit of its own: a level is in
@@ -165,6 +163,34 @@ EXEMPT: dict[tuple[str, str, str], str] = {
         "composite_rating_level",
         "periods",
     ): "(level, hours, adjustment) triples; each carries its own unit",
+    # Counts and waveforms built on the word, not quantities in its unit.
+    (
+        "phonometry.signals.synchronous_average",
+        "SynchronousAverageResult",
+        "period_waveform",
+    ): "the averaged waveform itself, in the unit of the record it came from",
+    (
+        "phonometry.signals.synchronous_average",
+        "SynchronousAverageResult",
+        "samples_per_period",
+    ): "a count of samples, which is what the name already says",
+    (
+        "phonometry.signals.test_signals",
+        "ToneBurstResult",
+        "period_samples",
+    ): "a count of samples, which is what the name already says",
+    # The bearing formulae use the two diameters as a ratio d/D, so the unit
+    # cancels and the docstring asks only that both be the same one.
+    (
+        "phonometry.vibration.machinery.diagnostics",
+        "bearing_fault_frequencies",
+        "element_diameter",
+    ): "d of the ratio d/D; any unit, as long as it matches pitch_diameter",
+    (
+        "phonometry.vibration.machinery.diagnostics",
+        "bearing_fault_frequencies",
+        "pitch_diameter",
+    ): "D of the ratio d/D; any unit, as long as it matches element_diameter",
 }
 
 
@@ -278,7 +304,7 @@ def public_parameters() -> Iterator[Parameter]:
 def names_a_quantity(name: str) -> bool:
     """Whether the parameter name says one of the quantities under the rule."""
     lowered = name.lower()
-    if lowered in WHOLE_NAME_QUANTITIES:
+    if set(lowered.split("_")) & WORD_QUANTITIES:
         return True
     return any(quantity in lowered for quantity in QUANTITIES)
 

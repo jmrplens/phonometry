@@ -470,7 +470,7 @@ print(round(float(abs(arr.amplitudes[0])) * 500.1, 6))  # 1.0: that is 1/R
 # The first echo left the source upward and arrives from above, its sign
 # flipped once by the pressure-release surface.
 print(int(arr.surface_reflections[1]), int(arr.bottom_reflections[1]))  # 1 0
-print(round(float(arr.launch_angles[1]), 2))            # -9.31 degrees: up
+print(round(float(arr.launch_angles_deg[1]), 2))            # -9.31 degrees: up
 arr.plot()   # the impulse-response skeleton: per-path loss against delay
 ```
 
@@ -579,7 +579,7 @@ beams = underwater.gaussian_beams(600.0, z_beam, c_beam, source_depth=992.5,
                                   fan=underwater.BeamFan(max_angle_deg=45.0),
                                   n_depth_points=80)
 print(beams.propagation_loss.shape)            # (80, 101)  depth x range
-print(beams.launch_angles.size)                # 439 beams over +-45 degrees
+print(beams.launch_angles_deg.size)                # 439 beams over +-45 degrees
 print(round(float(beams.initial_beam_widths[0]), 1))  # 35.9 m: W0, Eq. (3.86)
 beams.plot()   # the PL field, on the same frame as parabolic_equation
 ```

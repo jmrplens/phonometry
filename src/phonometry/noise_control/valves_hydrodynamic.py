@@ -79,7 +79,7 @@ from .valves import (
     AIR_SOUND_SPEED_M_S,
     PIPE_SOUND_SPEED_M_S,
     ValveNoiseWarning,
-    jet_diameter,
+    jet_diameter_m,
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -396,7 +396,7 @@ def incipient_cavitation_ratio(
 
 
 def multihole_incipient_cavitation_ratio(
-    passages: int, hole_diameter: float, pressure_recovery: float
+    passages: int, hole_diameter_m: float, pressure_recovery: float
 ) -> float:
     r"""Equation (3b): the same threshold for a multihole trim.
 
@@ -413,7 +413,7 @@ def multihole_incipient_cavitation_ratio(
 
     :param passages: :math:`N_o`, the number of independent, identical flow
         passages.
-    :param hole_diameter: :math:`d_H`, the hole diameter, in m.
+    :param hole_diameter_m: :math:`d_H`, the hole diameter, in m.
     :param pressure_recovery: :math:`F_L`, dimensionless.
     :return: :math:`x_{Fz}` at an inlet pressure of 6 × 10⁵ Pa,
         dimensionless.
@@ -421,7 +421,7 @@ def multihole_incipient_cavitation_ratio(
         more, or another value is not positive and finite.
     """
     count = _require_count(passages, "passages")
-    diameter_m = require_positive(hole_diameter, "hole_diameter")
+    diameter_m = require_positive(hole_diameter_m, "hole_diameter_m")
     recovery = _require_recovery(pressure_recovery)
     inner = _MULTIHOLE_OFFSET + _MULTIHOLE_FACTOR * count * diameter_m**2 / recovery
     return float(1.0 / math.sqrt(inner))
@@ -641,7 +641,7 @@ def internal_sound_pressure_level(
     sound_power: float,
     density: float,
     sound_speed: float,
-    internal_diameter: float,
+    internal_diameter_m: float,
 ) -> float:
     r"""Equation (10): the level inside, at the pipe wall.
 
@@ -665,14 +665,14 @@ def internal_sound_pressure_level(
     :param sound_power: :math:`W_a` of Equation (7a) or (7b), in W.
     :param density: :math:`\rho_L` of the liquid, in kg/m³.
     :param sound_speed: :math:`c_L` in the liquid, in m/s.
-    :param internal_diameter: :math:`D_i` of the downstream pipe, in m.
+    :param internal_diameter_m: :math:`D_i` of the downstream pipe, in m.
     :return: :math:`L_{pi}`, in dB re 2 × 10⁻⁵ Pa.
     :raises ValueError: If a value is not positive and finite.
     """
     power = require_positive(sound_power, "sound_power")
     rho = require_positive(density, "density")
     sonic = require_positive(sound_speed, "sound_speed")
-    bore = require_positive(internal_diameter, "internal_diameter")
+    bore = require_positive(internal_diameter_m, "internal_diameter_m")
     return float(
         10.0 * math.log10(_INTERNAL_LEVEL_COEFFICIENT * power * rho * sonic / bore**2)
     )
@@ -684,8 +684,8 @@ def jet_strouhal_number(  # noqa: PLR0913
     style_modifier: float,
     pressure_recovery: float,
     corrected_ratio: float,
-    valve_diameter: float,
-    seat_diameter: float,
+    valve_diameter_m: float,
+    seat_diameter_m: float,
     inlet_pressure_pa: float,
     vapour_pressure_pa: float,
     coefficient: str = "Cv",
@@ -714,9 +714,9 @@ def jet_strouhal_number(  # noqa: PLR0913
     :param style_modifier: :math:`F_d`, used only by the ``"annex"`` form.
     :param pressure_recovery: :math:`F_L`, dimensionless.
     :param corrected_ratio: :math:`x_{Fzp1}` of Equation (3c).
-    :param valve_diameter: :math:`d`, the valve inlet internal diameter, in
+    :param valve_diameter_m: :math:`d`, the valve inlet internal diameter, in
         m.
-    :param seat_diameter: :math:`d_o`, the seat or orifice diameter, in m.
+    :param seat_diameter_m: :math:`d_o`, the seat or orifice diameter, in m.
     :param inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
     :param vapour_pressure_pa: :math:`p_v`, absolute, in Pa.
     :param coefficient: ``"Cv"`` or ``"Kv"``, selecting :math:`N_{34}`.
@@ -733,8 +733,8 @@ def jet_strouhal_number(  # noqa: PLR0913
     modifier = require_positive(style_modifier, "style_modifier")
     recovery = _require_recovery(pressure_recovery)
     threshold = _require_threshold(corrected_ratio, "corrected_ratio")
-    inlet = require_positive(valve_diameter, "valve_diameter")
-    seat = require_positive(seat_diameter, "seat_diameter")
+    inlet = require_positive(valve_diameter_m, "valve_diameter_m")
+    seat = require_positive(seat_diameter_m, "seat_diameter_m")
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
     pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
     if pv >= p1:
@@ -823,7 +823,7 @@ def cavitation_peak_frequency(
 
 
 def pipe_ring_frequency(
-    internal_diameter: float, *, pipe_sound_speed: float = PIPE_SOUND_SPEED_M_S
+    internal_diameter_m: float, *, pipe_sound_speed: float = PIPE_SOUND_SPEED_M_S
 ) -> float:
     r"""Equation (14): the ring frequency of the pipe.
 
@@ -837,18 +837,18 @@ def pipe_ring_frequency(
     anchored at this frequency and Equations (16b) and (22b) only ever make
     it worse.
 
-    :param internal_diameter: :math:`D_i`, in m.
+    :param internal_diameter_m: :math:`D_i`, in m.
     :param pipe_sound_speed: :math:`c_p`, 5 000 m/s for steel, in m/s.
     :return: :math:`f_r`, in Hz.
     :raises ValueError: If a value is not positive and finite.
     """
-    bore = require_positive(internal_diameter, "internal_diameter")
+    bore = require_positive(internal_diameter_m, "internal_diameter_m")
     wall = require_positive(pipe_sound_speed, "pipe_sound_speed")
     return float(wall / (math.pi * bore))
 
 
 def reference_transmission_loss(  # noqa: PLR0913
-    internal_diameter: float,
+    internal_diameter_m: float,
     wall_thickness: float,
     *,
     pipe_density: float,
@@ -870,7 +870,7 @@ def reference_transmission_loss(  # noqa: PLR0913
     the way to Equation (18). A DN 100 steel pipe with a 3,6 mm wall comes
     out at −44,7 dB.
 
-    :param internal_diameter: :math:`D_i`, in m.
+    :param internal_diameter_m: :math:`D_i`, in m.
     :param wall_thickness: :math:`t_p`, in m.
     :param pipe_density: :math:`\rho_p`, 7 800 kg/m³ for steel.
     :param pipe_sound_speed: :math:`c_p`, 5 000 m/s for steel, in m/s.
@@ -879,7 +879,7 @@ def reference_transmission_loss(  # noqa: PLR0913
     :return: :math:`TL_{fr}`, in dB, negative.
     :raises ValueError: If a value is not positive and finite.
     """
-    bore = require_positive(internal_diameter, "internal_diameter")
+    bore = require_positive(internal_diameter_m, "internal_diameter_m")
     thickness = require_positive(wall_thickness, "wall_thickness")
     rho_pipe = require_positive(pipe_density, "pipe_density")
     wall = require_positive(pipe_sound_speed, "pipe_sound_speed")
@@ -1125,7 +1125,7 @@ def band_internal_levels(
     return np.asarray(internal_level + 10.0 * np.log10(mixed), dtype=np.float64)
 
 
-def _spreading(internal_diameter: float, wall_thickness: float) -> float:
+def _spreading(internal_diameter_m: float, wall_thickness: float) -> float:
     r"""The geometric term of Equations (18a), (18b) and (21).
 
     .. math::
@@ -1136,7 +1136,7 @@ def _spreading(internal_diameter: float, wall_thickness: float) -> float:
     metres, so both diameters have to be in metres for the bracket to mean
     anything. For a DN 100 pipe it is 12,7 dB.
     """
-    outside = internal_diameter + 2.0 * wall_thickness
+    outside = internal_diameter_m + 2.0 * wall_thickness
     return float(10.0 * math.log10((outside + 2.0 * _MEASUREMENT_DISTANCE_M) / outside))
 
 
@@ -1156,7 +1156,7 @@ class HydrodynamicValveNoise:
     :ivar corrected_ratio: :math:`x_{Fzp1}` of Equation (3c), the threshold
         at the working inlet pressure. This is the number the regime test is
         made against.
-    :ivar jet_diameter: :math:`D_j` of Equation (4), in m.
+    :ivar jet_diameter_m: :math:`D_j` of Equation (4), in m.
     :ivar velocity: :math:`U_{vc}` of Equation (5), in m/s.
     :ivar stream_power: :math:`W_m` of Equation (6), in W.
     :ivar turbulent_efficiency: :math:`\eta_{turb}` of Equation (8).
@@ -1195,7 +1195,7 @@ class HydrodynamicValveNoise:
     cavitation_differential: float
     incipient_ratio: float
     corrected_ratio: float
-    jet_diameter: float
+    jet_diameter_m: float
     velocity: float
     stream_power: float
     turbulent_efficiency: float
@@ -1261,8 +1261,8 @@ class LiquidTrim:
         working inlet pressure.
     :ivar power_ratio: :math:`r_W` from Table 2, the share of the sound power
         radiated into the pipe. See :data:`ACOUSTIC_POWER_RATIOS`.
-    :ivar valve_diameter: :math:`d`, the valve inlet internal diameter, in m.
-    :ivar seat_diameter: :math:`d_o`, in m.
+    :ivar valve_diameter_m: :math:`d`, the valve inlet internal diameter, in m.
+    :ivar seat_diameter_m: :math:`d_o`, in m.
     :ivar coefficient: Which flow coefficient :attr:`flow_coefficient` is,
         ``"Cv"`` or ``"Kv"``.
     """
@@ -1272,8 +1272,8 @@ class LiquidTrim:
     pressure_recovery: float
     incipient_ratio: float
     power_ratio: float
-    valve_diameter: float
-    seat_diameter: float
+    valve_diameter_m: float
+    seat_diameter_m: float
     coefficient: str = "Cv"
 
 
@@ -1281,7 +1281,7 @@ class LiquidTrim:
 class LiquidPipe:
     r"""The pipe the noise comes out of, and the air around it.
 
-    :ivar internal_diameter: :math:`D_i`, in m.
+    :ivar internal_diameter_m: :math:`D_i`, in m.
     :ivar wall_thickness: :math:`t_p`, in m.
     :ivar density: :math:`\rho_p` of the pipe material, in kg/m³.
     :ivar sound_speed: :math:`c_p` in the pipe wall, in m/s.
@@ -1289,7 +1289,7 @@ class LiquidPipe:
     :ivar air_sound_speed: :math:`c_o` outside the pipe, in m/s.
     """
 
-    internal_diameter: float
+    internal_diameter_m: float
     wall_thickness: float
     density: float
     sound_speed: float = PIPE_SOUND_SPEED_M_S
@@ -1346,10 +1346,10 @@ def valve_hydrodynamic_noise(
     pressure_recovery = valve.pressure_recovery
     incipient_ratio = valve.incipient_ratio
     power_ratio = valve.power_ratio
-    valve_diameter = valve.valve_diameter
-    seat_diameter = valve.seat_diameter
+    valve_diameter_m = valve.valve_diameter_m
+    seat_diameter_m = valve.seat_diameter_m
     coefficient = valve.coefficient
-    internal_diameter = pipe.internal_diameter
+    internal_diameter_m = pipe.internal_diameter_m
     wall_thickness = pipe.wall_thickness
     pipe_density = pipe.density
     pipe_sound_speed = pipe.sound_speed
@@ -1362,7 +1362,7 @@ def valve_hydrodynamic_noise(
     sonic = require_positive(liquid_sound_speed, "liquid_sound_speed")
     recovery = _require_recovery(pressure_recovery)
     share = _require_share(power_ratio, "power_ratio")
-    bore = require_positive(internal_diameter, "internal_diameter")
+    bore = require_positive(internal_diameter_m, "internal_diameter_m")
     thickness = require_positive(wall_thickness, "wall_thickness")
 
     ratio = differential_pressure_ratio(
@@ -1385,7 +1385,7 @@ def valve_hydrodynamic_noise(
     threshold = corrected_incipient_ratio(incipient_ratio, p1)
     cavitating = differential > threshold * (p1 - pv)
 
-    jet = jet_diameter(
+    jet = jet_diameter_m(
         flow_coefficient, style_modifier, recovery, coefficient=coefficient
     )
     velocity = vena_contracta_velocity(choked, rho, recovery)
@@ -1408,7 +1408,7 @@ def valve_hydrodynamic_noise(
         sound_power=sound_power,
         density=rho,
         sound_speed=sonic,
-        internal_diameter=bore,
+        internal_diameter_m=bore,
     )
 
     strouhal = jet_strouhal_number(
@@ -1416,8 +1416,8 @@ def valve_hydrodynamic_noise(
         style_modifier=style_modifier,
         pressure_recovery=recovery,
         corrected_ratio=threshold,
-        valve_diameter=valve_diameter,
-        seat_diameter=seat_diameter,
+        valve_diameter_m=valve_diameter_m,
+        seat_diameter_m=seat_diameter_m,
         inlet_pressure_pa=p1,
         vapour_pressure_pa=pv,
         coefficient=coefficient,
@@ -1478,7 +1478,7 @@ def valve_hydrodynamic_noise(
         cavitation_differential=float(choked),
         incipient_ratio=float(incipient_ratio),
         corrected_ratio=float(threshold),
-        jet_diameter=float(jet),
+        jet_diameter_m=float(jet),
         velocity=float(velocity),
         stream_power=float(stream_power),
         turbulent_efficiency=float(turbulent),

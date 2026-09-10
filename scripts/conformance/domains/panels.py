@@ -233,7 +233,7 @@ def _chk_orthotropic_mass_law_integral() -> Outcome:
             mass,
             critical_frequency_lower=4.0e5,
             critical_frequency_upper=4.0e6,
-            limiting_angle=angle,
+            limiting_angle_deg=angle,
         ).transmission_loss[0]
     )
     q = 2.0 * math.pi * f * mass / (2.0 * 1.205 * 343.0)

@@ -300,7 +300,7 @@ class DiffuseFieldAbsorptionResult:
 
     frequency: Real
     absorption: Real
-    angle_limit: float
+    angle_limit_rad: float
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -807,7 +807,7 @@ def diffuse_field_absorption(
     frequency: ArrayLike,
     layers: list[Layer] | tuple[Layer, ...],
     *,
-    angle_limit: float = np.pi / 2.0,
+    angle_limit_rad: float = np.pi / 2.0,
     quadrature_points: int = 64,
     termination: str | complex | ArrayLike = "rigid",
     fluid: Fluid = PUBLISHED_AIR,
@@ -825,11 +825,11 @@ def diffuse_field_absorption(
     :math:`\alpha(\theta)` of :func:`layered_absorber` (Sect. D.6 notes the
     bulk integral generally must be evaluated numerically). Some references
     truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
-    ``angle_limit`` accordingly.
+    ``angle_limit_rad`` accordingly.
 
     :param frequency: Frequency vector ``f``, in hertz.
     :param layers: Layer stack, as in :func:`layered_absorber`.
-    :param angle_limit: Upper integration angle ``theta_lim``, in radians
+    :param angle_limit_rad: Upper integration angle ``theta_lim``, in radians
         (0 < theta_lim <= pi/2; default pi/2).
     :param quadrature_points: Gauss-Legendre order (default 64).
     :param termination: As in :func:`layered_absorber`.
@@ -840,9 +840,9 @@ def diffuse_field_absorption(
     :return: A :class:`DiffuseFieldAbsorptionResult`.
     """
     f = require_positive_array(frequency, "frequency")
-    lim = float(angle_limit)
+    lim = float(angle_limit_rad)
     if not 0.0 < lim <= np.pi / 2.0:
-        msg = "'angle_limit' must satisfy 0 < angle_limit <= pi/2."
+        msg = "'angle_limit_rad' must satisfy 0 < angle_limit <= pi/2."
         raise ValueError(msg)
     n = int(quadrature_points)
     if n < _MIN_QUADRATURE_POINTS:
@@ -865,14 +865,14 @@ def diffuse_field_absorption(
     return DiffuseFieldAbsorptionResult(
         frequency=f,
         absorption=np.asarray(alpha_dif, dtype=np.float64),
-        angle_limit=lim,
+        angle_limit_rad=lim,
     )
 
 
 def statistical_absorption(
     normalized_impedance: ArrayLike,
     *,
-    angle_limit: float = np.pi / 2.0,
+    angle_limit_rad: float = np.pi / 2.0,
 ) -> Real:
     r"""Closed-form Paris integral for a locally reacting plane.
 
@@ -896,7 +896,7 @@ def statistical_absorption(
     :param normalized_impedance: Normalised surface impedance
         :math:`z = Z_\mathrm{s} / (\rho c)` (complex scalar or array), with
         :math:`\operatorname{Re}(z) > 0`.
-    :param angle_limit: Upper integration angle ``theta_lim``, in radians
+    :param angle_limit_rad: Upper integration angle ``theta_lim``, in radians
         (0 < theta_lim <= pi/2; default pi/2).
     :return: Statistical absorption coefficient ``alpha_dif``.
     """
@@ -904,9 +904,9 @@ def statistical_absorption(
     if np.any(z.real <= 0.0):
         msg = "'normalized_impedance' must have a positive real part."
         raise ValueError(msg)
-    lim = float(angle_limit)
+    lim = float(angle_limit_rad)
     if not 0.0 < lim <= np.pi / 2.0:
-        msg = "'angle_limit' must satisfy 0 < angle_limit <= pi/2."
+        msg = "'angle_limit_rad' must satisfy 0 < angle_limit <= pi/2."
         raise ValueError(msg)
     g = 1.0 / z
     g1 = g.real

@@ -89,7 +89,7 @@ __all__ = [
     "GasStream",
     "GLOBE_CONTRACTION_COEFFICIENT",
     "internal_spectrum",
-    "jet_diameter",
+    "jet_diameter_m",
     "LAST_STAGE_AREA_CONSTANTS",
     "last_stage_flow_coefficient",
     "MACH_LIMIT_STANDARD_TRIM",
@@ -445,7 +445,7 @@ def valve_style_modifier(
     return float(hydraulic / orifice)
 
 
-def jet_diameter(
+def jet_diameter_m(
     flow_coefficient: float,
     style_modifier: float,
     pressure_recovery: float,
@@ -623,7 +623,7 @@ class PipeFrequencies:
 
 
 def coincidence_frequencies(
-    internal_diameter: float,
+    internal_diameter_m: float,
     wall_thickness: float,
     downstream_sound_speed: float,
     *,
@@ -638,7 +638,7 @@ def coincidence_frequencies(
        f_o = \frac{f_r}{4}\left(\frac{c_2}{c_a}\right), \qquad
        f_g = \frac{\sqrt{3}}{\pi t_S}\frac{c_a^2}{c_s}
 
-    :param internal_diameter: :math:`D_i` of the downstream pipe, in m.
+    :param internal_diameter_m: :math:`D_i` of the downstream pipe, in m.
     :param wall_thickness: :math:`t_S` of the pipe wall, in m.
     :param downstream_sound_speed: :math:`c_2` in the fluid downstream of the
         valve, in m/s.
@@ -647,7 +647,7 @@ def coincidence_frequencies(
     :return: The three frequencies, in Hz.
     :raises ValueError: If any argument is not positive and finite.
     """
-    diameter_m = require_positive(internal_diameter, "internal_diameter")
+    diameter_m = require_positive(internal_diameter_m, "internal_diameter_m")
     thickness = require_positive(wall_thickness, "wall_thickness")
     downstream = require_positive(downstream_sound_speed, "downstream_sound_speed")
     wall = require_positive(pipe_sound_speed, "pipe_sound_speed")
@@ -696,9 +696,9 @@ def _frequency_factors(
     )
 
 
-def _damping_factor(valve_outlet_diameter: float) -> float:
+def _damping_factor(valve_outlet_diameter_m: float) -> float:
     """Equation (20b): the damping factor, a cubic in the outlet diameter."""
-    diameter_m = valve_outlet_diameter
+    diameter_m = valve_outlet_diameter_m
     if diameter_m > _UNDAMPED_OUTLET_M:
         return 0.0
     if diameter_m < _FULLY_DAMPED_OUTLET_M:
@@ -711,9 +711,9 @@ def _damping_factor(valve_outlet_diameter: float) -> float:
 def pipe_transmission_loss(
     frequency: NDArray[np.float64],
     *,
-    internal_diameter: float,
+    internal_diameter_m: float,
     wall_thickness: float,
-    valve_outlet_diameter: float,
+    valve_outlet_diameter_m: float,
     downstream_density: float,
     downstream_sound_speed: float,
     pipe_density: float,
@@ -738,9 +738,9 @@ def pipe_transmission_loss(
     internal level, so the sign is not a convention this module chose.
 
     :param frequency: The band centre frequencies, in Hz.
-    :param internal_diameter: :math:`D_i`, in m.
+    :param internal_diameter_m: :math:`D_i`, in m.
     :param wall_thickness: :math:`t_S`, in m.
-    :param valve_outlet_diameter: :math:`D`, in m, which selects the damping
+    :param valve_outlet_diameter_m: :math:`D`, in m, which selects the damping
         factor of Equation (20b) and is the valve outlet and not the pipe.
     :param downstream_density: :math:`\rho_2`, in kg/m³.
     :param downstream_sound_speed: :math:`c_2`, in m/s.
@@ -760,7 +760,7 @@ def pipe_transmission_loss(
         msg = "'frequency' must carry positive, finite band centres in Hz."
         raise ValueError(msg)
     thickness = require_positive(wall_thickness, "wall_thickness")
-    outlet = require_positive(valve_outlet_diameter, "valve_outlet_diameter")
+    outlet = require_positive(valve_outlet_diameter_m, "valve_outlet_diameter_m")
     density = require_positive(downstream_density, "downstream_density")
     sound_speed = require_positive(downstream_sound_speed, "downstream_sound_speed")
     wall_density = require_positive(pipe_density, "pipe_density")
@@ -768,7 +768,7 @@ def pipe_transmission_loss(
     reference = require_positive(standard_pressure_pa, "standard_pressure_pa")
 
     pipe = coincidence_frequencies(
-        internal_diameter,
+        internal_diameter_m,
         thickness,
         sound_speed,
         pipe_sound_speed=pipe_sound_speed,
@@ -917,7 +917,7 @@ def multiple_passage_jet_diameter(
     flow_coefficient: float,
     style_modifier: float,
     passage_length: float,
-    passage_diameter: float,
+    passage_diameter_m: float,
     *,
     coefficient: str = "Cv",
 ) -> float:
@@ -941,7 +941,7 @@ def multiple_passage_jet_diameter(
     :param flow_coefficient: :math:`C` of the valve.
     :param style_modifier: :math:`F_d`, from :func:`valve_style_modifier`.
     :param passage_length: :math:`l` of one flow passage, in m.
-    :param passage_diameter: :math:`d` of one flow passage, in m; the
+    :param passage_diameter_m: :math:`d` of one flow passage, in m; the
         hydraulic diameter for a passage that is not round.
     :param coefficient: ``"Cv"`` or ``"Kv"``, selecting :math:`N_{14}`.
     :return: :math:`D_j`, in m.
@@ -952,7 +952,7 @@ def multiple_passage_jet_diameter(
     capacity = require_positive(flow_coefficient, "flow_coefficient")
     modifier = require_positive(style_modifier, "style_modifier")
     length = require_positive(passage_length, "passage_length")
-    diameter_m = require_positive(passage_diameter, "passage_diameter")
+    diameter_m = require_positive(passage_diameter_m, "passage_diameter_m")
     if not all(
         math.isfinite(value) for value in (capacity, modifier, length, diameter_m)
     ):
@@ -1075,8 +1075,8 @@ def expander_noise(  # noqa: PLR0913
     mass_flow: float,
     downstream_density: float,
     downstream_sound_speed: float,
-    internal_diameter: float,
-    throat_diameter: float,
+    internal_diameter_m: float,
+    throat_diameter_m: float,
     velocity_correction: float,
     expander: Expander = DEFAULT_EXPANDER,
 ) -> ExpanderNoise:
@@ -1105,8 +1105,8 @@ def expander_noise(  # noqa: PLR0913
     :param mass_flow: :math:`\dot m`, in kg/s.
     :param downstream_density: :math:`\rho_2`, in kg/m³.
     :param downstream_sound_speed: :math:`c_2`, in m/s.
-    :param internal_diameter: :math:`D_i` of the downstream pipe, in m.
-    :param throat_diameter: :math:`d_i`, the smaller of the valve outlet and
+    :param internal_diameter_m: :math:`D_i` of the downstream pipe, in m.
+    :param throat_diameter_m: :math:`d_i`, the smaller of the valve outlet and
         the expander inlet, in m.
     :param velocity_correction: :math:`L_g` of Equation (16), in dB, which
         Equation (41) adds exactly as Equation (18) does.
@@ -1122,14 +1122,14 @@ def expander_noise(  # noqa: PLR0913
     flow = require_positive(mass_flow, "mass_flow")
     rho2 = require_positive(downstream_density, "downstream_density")
     c2 = require_positive(downstream_sound_speed, "downstream_sound_speed")
-    bore = require_positive(internal_diameter, "internal_diameter")
-    throat = require_positive(throat_diameter, "throat_diameter")
+    bore = require_positive(internal_diameter_m, "internal_diameter_m")
+    throat = require_positive(throat_diameter_m, "throat_diameter_m")
     beta = require_positive(expander.contraction, "expander.contraction")
     if throat > bore:
         msg = (
-            "'throat_diameter' is the smaller of the valve outlet and the "
+            "'throat_diameter_m' is the smaller of the valve outlet and the "
             f"expander inlet, so it cannot exceed the pipe bore; got "
-            f"{throat_diameter!r} m against {internal_diameter!r} m."
+            f"{throat_diameter_m!r} m against {internal_diameter_m!r} m."
         )
         raise ValueError(msg)
     signed = {
@@ -1219,7 +1219,7 @@ class AerodynamicValveNoise:
     :ivar vena_contracta_pressure_pa: :math:`p_{vc}` of Equation (2), in Pa. It
         goes negative past the choking point, where the equation is being
         read outside the range it means anything in.
-    :ivar jet_diameter: :math:`D_j` of Equation (9), in m.
+    :ivar jet_diameter_m: :math:`D_j` of Equation (9), in m.
     :ivar mach: The Mach number Table 3 uses in this regime.
     :ivar acoustical_efficiency: :math:`\eta`, the fraction of the stream
         power that leaves as sound.
@@ -1251,7 +1251,7 @@ class AerodynamicValveNoise:
     boundaries: RegimeBoundaries
     pressure_ratio: float
     vena_contracta_pressure_pa: float
-    jet_diameter: float
+    jet_diameter_m: float
     mach: float
     acoustical_efficiency: float
     stream_power: float
@@ -1312,7 +1312,7 @@ class ValveTrim:
     :ivar style_modifier: :math:`F_d`, from :func:`valve_style_modifier`.
     :ivar pressure_recovery: :math:`F_L`, or :math:`F_{LP}/F_p` with attached
         fittings.
-    :ivar outlet_diameter: :math:`D` of the valve outlet, in m.
+    :ivar outlet_diameter_m: :math:`D` of the valve outlet, in m.
     :ivar efficiency_correction: :math:`A_\eta` from Table 4.
     :ivar strouhal_number: :math:`St_p` from Table 4.
     :ivar coefficient: Which flow coefficient :attr:`flow_coefficient` is,
@@ -1322,7 +1322,7 @@ class ValveTrim:
     flow_coefficient: float
     style_modifier: float
     pressure_recovery: float
-    outlet_diameter: float
+    outlet_diameter_m: float
     efficiency_correction: float
     strouhal_number: float
     coefficient: str = "Cv"
@@ -1336,7 +1336,7 @@ class DownstreamPipe:
     in air at atmospheric pressure, and they are defaults for that reason,
     not settings anyone is expected to change.
 
-    :ivar internal_diameter: :math:`D_i`, in m.
+    :ivar internal_diameter_m: :math:`D_i`, in m.
     :ivar wall_thickness: :math:`t_S`, in m.
     :ivar density: :math:`\rho_s` of the pipe material, in kg/m³.
     :ivar sound_speed: :math:`c_s` in the pipe wall, in m/s.
@@ -1345,7 +1345,7 @@ class DownstreamPipe:
     :ivar standard_pressure_pa: :math:`p_s`, in Pa.
     """
 
-    internal_diameter: float
+    internal_diameter_m: float
     wall_thickness: float
     density: float
     _: KW_ONLY
@@ -1396,11 +1396,11 @@ def valve_aerodynamic_noise(
     flow_coefficient = valve.flow_coefficient
     style_modifier = valve.style_modifier
     pressure_recovery = valve.pressure_recovery
-    valve_outlet_diameter = valve.outlet_diameter
+    valve_outlet_diameter_m = valve.outlet_diameter_m
     efficiency_correction = valve.efficiency_correction
     strouhal_number = valve.strouhal_number
     coefficient = valve.coefficient
-    internal_diameter = pipe.internal_diameter
+    internal_diameter_m = pipe.internal_diameter_m
     wall_thickness = pipe.wall_thickness
     pipe_density = pipe.density
     pipe_sound_speed = pipe.sound_speed
@@ -1420,8 +1420,8 @@ def valve_aerodynamic_noise(
     rho1 = require_positive(inlet_density, "inlet_density")
     t1 = require_positive(inlet_temperature_k, "inlet_temperature_k")
     mass = require_positive(molecular_mass, "molecular_mass")
-    outlet = require_positive(valve_outlet_diameter, "valve_outlet_diameter")
-    bore = require_positive(internal_diameter, "internal_diameter")
+    outlet = require_positive(valve_outlet_diameter_m, "valve_outlet_diameter_m")
+    bore = require_positive(internal_diameter_m, "internal_diameter_m")
 
     boundaries = pressure_ratio_boundaries(specific_heat_ratio, pressure_recovery)
     gamma = float(specific_heat_ratio)
@@ -1429,7 +1429,7 @@ def valve_aerodynamic_noise(
     x = (p1 - p2) / p1
     regime = flow_regime(x, boundaries)
     vena_contracta_pressure_pa = p1 * (1.0 - x / recovery**2)
-    jet = jet_diameter(
+    jet = jet_diameter_m(
         flow_coefficient, style_modifier, recovery, coefficient=coefficient
     )
 
@@ -1482,8 +1482,8 @@ def valve_aerodynamic_noise(
             mass_flow=flow,
             downstream_density=rho2,
             downstream_sound_speed=c2,
-            internal_diameter=bore,
-            throat_diameter=min(outlet, bore),
+            internal_diameter_m=bore,
+            throat_diameter_m=min(outlet, bore),
             velocity_correction=velocity_correction,
             expander=expander,
         )
@@ -1501,9 +1501,9 @@ def valve_aerodynamic_noise(
         )
     band_loss = pipe_transmission_loss(
         bands,
-        internal_diameter=bore,
+        internal_diameter_m=bore,
         wall_thickness=wall_thickness,
-        valve_outlet_diameter=outlet,
+        valve_outlet_diameter_m=outlet,
         downstream_density=rho2,
         downstream_sound_speed=c2,
         pipe_density=pipe_density,
@@ -1532,7 +1532,7 @@ def valve_aerodynamic_noise(
         boundaries=boundaries,
         pressure_ratio=float(x),
         vena_contracta_pressure_pa=float(vena_contracta_pressure_pa),
-        jet_diameter=float(jet),
+        jet_diameter_m=float(jet),
         mach=float(mach),
         acoustical_efficiency=float(efficiency),
         stream_power=float(stream_power),

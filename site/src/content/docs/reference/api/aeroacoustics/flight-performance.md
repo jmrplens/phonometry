@@ -53,7 +53,7 @@ Aerodrome(
     temperature_c: float = 15.0,
     sea_level_pressure_inhg: float = 29.92,
     headwind_kt: float = 8.0,
-    runway_gradient: float = 0.0,
+    runway_gradient_ratio: float = 0.0,
 )
 ```
 
@@ -71,7 +71,7 @@ one of them.
 | `temperature_c` | Air temperature at the aerodrome `Tapt`, in degC. Doc 29 writes it in degF; it is taken in degC here because that is what the reference cases, the thrust equations and the rest of this package use, and converted on the way in. |
 | `sea_level_pressure_inhg` | Aerodrome pressure reduced to sea level `Papt` -- the QNH, not the pressure at the field -- in inHg. |
 | `headwind_kt` | Headwind component `w`, kt; negative for a tailwind. Defaults to Doc 29's own modelling default of 8 kt (B4.4). |
-| `runway_gradient` | Runway gradient `GR`, positive uphill, dimensionless: the rise over the run between the two runway ends. |
+| `runway_gradient_ratio` | Runway gradient `GR`, positive uphill, dimensionless: the rise over the run between the two runway ends. |
 
 The validity envelope Doc 29 claims for the coefficients is "air
 temperatures up to 43 degrees C, aerodrome altitudes up to 6,000 ft and

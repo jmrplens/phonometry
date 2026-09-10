@@ -193,7 +193,7 @@ def test_oblique_incidence_uses_kr_theta() -> None:
     theta = np.pi / 4.0
     kr_theta = geometric_spreading_factor_angle(theta)
     hr = kr_theta * 0.3 * np.roll(hi, 64)
-    alpha = insitu_absorption_coefficient(hi, hr, incidence_angle=theta)
+    alpha = insitu_absorption_coefficient(hi, hr, incidence_angle_rad=theta)
     np.testing.assert_allclose(alpha[1:], 1.0 - 0.3**2, atol=1e-9)
 
 

@@ -365,7 +365,7 @@ ranges = np.logspace(1.0, 5.3, 500)
 res = underwater.weston_propagation_loss(ranges, 250.0, 50.0, seabed="sand",
                                          source_depth=10.0, receiver_depth=25.0)
 b = res.boundaries
-print(f"psi_c = {np.degrees(b.critical_angle):.1f} deg, eta = {b.reflection_loss_gradient:.2f} Np/rad")
+print(f"psi_c = {np.degrees(b.critical_angle_rad):.1f} deg, eta = {b.reflection_loss_gradient_np_per_rad:.2f} Np/rad")
 res.plot()   # composite loss with each regime law and the boundaries
 plt.show()
 ```
@@ -792,7 +792,7 @@ from phonometry import underwater
 psi = np.linspace(0.0, 90.0, 361)
 bl = underwater.bottom_reflection_loss(psi, rho1=1000.0, c1=1500.0,
                                        rho2=1900.0, c2=1650.0)
-print(f"critical angle = {bl.critical_angle:.1f} deg")   # critical angle = 24.6 deg
+print(f"critical angle = {bl.critical_angle_deg:.1f} deg")   # critical angle = 24.6 deg
 bl.plot()   # bottom loss vs grazing angle
 plt.show()
 ```
@@ -806,7 +806,7 @@ from phonometry import underwater
 psi = np.linspace(0.0, 90.0, 361)   # grazing angle from the interface, degrees
 bl = underwater.bottom_reflection_loss(psi, rho1=1000.0, c1=1500.0,   # water
                                rho2=1900.0, c2=1650.0)          # sand
-print(bl.critical_angle)            # 24.6°
+print(bl.critical_angle_deg)            # 24.6°
 bl.plot()   # bottom loss vs grazing angle (needs matplotlib)
 ```
 

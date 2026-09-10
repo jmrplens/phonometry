@@ -62,7 +62,7 @@ diffuse_field_absorption(
     frequency: ArrayLike,
     layers: list[Layer] | tuple[Layer, ...],
     *,
-    angle_limit: float = 1.5707963267948966,
+    angle_limit_rad: float = 1.5707963267948966,
     quadrature_points: int = 64,
     termination: str | complex | ArrayLike = 'rigid',
     fluid: Fluid = ...,
@@ -80,7 +80,7 @@ with fixed-order Gauss-Legendre quadrature over the bulk-reacting
 $\alpha(\theta)$ of [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber) (Sect. D.6 notes the
 bulk integral generally must be evaluated numerically). Some references
 truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
-`angle_limit` accordingly.
+`angle_limit_rad` accordingly.
 
 **Parameters**
 
@@ -88,7 +88,7 @@ truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 | :--- | :--- |
 | `frequency` | Frequency vector `f`, in hertz. |
 | `layers` | Layer stack, as in [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber). |
-| `angle_limit` | Upper integration angle `theta_lim`, in radians (0 \< theta_lim \<= pi/2; default pi/2). |
+| `angle_limit_rad` | Upper integration angle `theta_lim`, in radians (0 \< theta_lim \<= pi/2; default pi/2). |
 | `quadrature_points` | Gauss-Legendre order (default 64). |
 | `termination` | As in [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
@@ -101,7 +101,7 @@ truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 DiffuseFieldAbsorptionResult(
     frequency: Real,
     absorption: Real,
-    angle_limit: float,
+    angle_limit_rad: float,
 )
 ```
 
@@ -338,7 +338,7 @@ is passed to [`layered_absorber`](/phonometry/reference/api/materials/layered/#l
 statistical_absorption(
     normalized_impedance: ArrayLike,
     *,
-    angle_limit: float = 1.5707963267948966,
+    angle_limit_rad: float = 1.5707963267948966,
 ) -> Real
 ```
 
@@ -361,6 +361,6 @@ Sect. D.5).
 | Name | Description |
 | :--- | :--- |
 | `normalized_impedance` | Normalised surface impedance $z = Z_\mathrm{s} / (\rho c)$ (complex scalar or array), with $\operatorname{Re}(z) > 0$. |
-| `angle_limit` | Upper integration angle `theta_lim`, in radians (0 \< theta_lim \<= pi/2; default pi/2). |
+| `angle_limit_rad` | Upper integration angle `theta_lim`, in radians (0 \< theta_lim \<= pi/2; default pi/2). |
 
 **Returns:** Statistical absorption coefficient `alpha_dif`.

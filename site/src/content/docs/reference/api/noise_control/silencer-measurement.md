@@ -705,7 +705,7 @@ open_end_reflection_coefficient(
     frequency: ArrayLike,
     area: float,
     *,
-    solid_angle: float = 6.283185307179586,
+    solid_angle_sr: float = 6.283185307179586,
     sound_speed: float = 343.0,
 ) -> NDArray[np.float64]
 ```
@@ -732,7 +732,7 @@ reflection coefficient is no greater than 0,3.
 | :--- | :--- |
 | `frequency` | Band centre frequencies $f$, in Hz. |
 | `area` | $S$, the cross-sectional area of the duct, in m². |
-| `solid_angle` | $\Omega$, in sr. |
+| `solid_angle_sr` | $\Omega$, in sr. |
 | `sound_speed` | $c$, in m/s. |
 
 **Returns:** $r$, dimensionless, one value per frequency.
@@ -750,7 +750,7 @@ open_end_transmission_loss(
     frequency: ArrayLike,
     area: float,
     *,
-    solid_angle: float = 6.283185307179586,
+    solid_angle_sr: float = 6.283185307179586,
     sound_speed: float = 343.0,
 ) -> NDArray[np.float64]
 ```
@@ -793,7 +793,7 @@ the middle.
 | :--- | :--- |
 | `frequency` | Band centre frequencies $f$, in Hz. |
 | `area` | $S$, the cross-sectional area of the duct, in m². |
-| `solid_angle` | $\Omega$, the solid angle of radiation at the duct end, in sr. The five configurations of Table B.1 are in [`RADIATION_SOLID_ANGLES`](/phonometry/reference/api/noise_control/silencer-measurement/#radiation_solid_angles); the default is a duct flush with one surface. |
+| `solid_angle_sr` | $\Omega$, the solid angle of radiation at the duct end, in sr. The five configurations of Table B.1 are in [`RADIATION_SOLID_ANGLES`](/phonometry/reference/api/noise_control/silencer-measurement/#radiation_solid_angles); the default is a duct flush with one surface. |
 | `sound_speed` | $c$, in m/s. |
 
 **Returns:** $D_\mathrm{td}$, in dB, one value per frequency.

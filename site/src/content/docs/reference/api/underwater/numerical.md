@@ -86,8 +86,8 @@ move one lever.
 
 ```python
 EigenrayResult(
-    launch_angles: NDArray[np.float64],
-    arrival_angles: NDArray[np.float64],
+    launch_angles_deg: NDArray[np.float64],
+    arrival_angles_deg: NDArray[np.float64],
     travel_times: NDArray[np.float64],
     amplitudes: NDArray[np.complex128],
     surface_reflections: NDArray[np.int_],
@@ -122,8 +122,8 @@ $\tau_j$.
 
 | Name | Description |
 | :--- | :--- |
-| `launch_angles` | Launch angle of each eigenray at the source, from the horizontal, in degrees, positive downward: the same convention the fan was launched with. |
-| `arrival_angles` | The angle each eigenray crosses the receiver with, same convention. In a range-independent medium its magnitude is fixed by Snell's invariant at the receiver depth; its sign says whether the arrival is descending or climbing, which is what a vertical array steers on. |
+| `launch_angles_deg` | Launch angle of each eigenray at the source, from the horizontal, in degrees, positive downward: the same convention the fan was launched with. |
+| `arrival_angles_deg` | The angle each eigenray crosses the receiver with, same convention. In a range-independent medium its magnitude is fixed by Snell's invariant at the receiver depth; its sign says whether the arrival is descending or climbing, which is what a vertical array steers on. |
 | `travel_times` | Travel time of each eigenray, in seconds: the marcher's third Runge-Kutta state read at the receiver, not a quadrature over the finished path. |
 | `amplitudes` | Complex amplitude of each arrival, dimensionless, normalised to unit pressure at 1 m from the source (the reference of Jensen Eqs. (3.67)-(3.68), the same one every field solver of this module reports its loss against). The magnitude is the classical ray amplitude of Eq. (3.65), $\vert c(z_\mathrm{R})\cos\theta_0 / (c(z_\mathrm{S})\, r\, q(r))\vert ^{1/2}$ with $q$ integrated from the point-source initial conditions of Eq. (3.63); the phase is the caustic factor $(-i)^m$ of Eq. (3.79) times the boundary factors $(-1)^{n_\mathrm{s}}$ and $\mathcal{R}^{n_b}$ (Eqs. 3.125-3.126). See [`eigenrays`](/phonometry/reference/api/underwater/numerical/#eigenrays) for why that convention and not another. |
 | `surface_reflections` | Sea-surface touches of each eigenray. |
@@ -564,7 +564,7 @@ GaussianBeamResult(
     depths: NDArray[np.float64],
     propagation_loss: NDArray[np.float64],
     pressure: NDArray[np.complex128],
-    launch_angles: NDArray[np.float64],
+    launch_angles_deg: NDArray[np.float64],
     ray_ranges: NDArray[np.float64],
     ray_depths: NDArray[np.float64],
     beam_widths: NDArray[np.float64],
@@ -596,7 +596,7 @@ can be subtracted.
 | `depths` | Depth grid of the field, in metres. |
 | `propagation_loss` | Propagation-loss field `PL(z, r)`, in dB, shape `(n_depths, n_ranges)`. Infinite where the field is exactly zero, which happens in the wedge no beam of the fan reaches: each beam is summed out to four half-widths, 140 dB below its own axis, so a point that far from every one of them is outside the traced aperture rather than merely in shadow. The graded penumbra just past a limiting ray, which is the part of a shadow zone worth having, is finite and carries the beams' tails. Many ordinary cases have no infinity at all: an isovelocity 1000 m guide at 300 Hz over 10 km, everything default, has none in 80200 cells. The source column is **not** one of the infinities, and is not to be read. [`parabolic_equation`](/phonometry/reference/api/underwater/numerical/#parabolic_equation) divides by $\sqrt{r}$ and so genuinely diverges at `r = 0`; the beam sum does not, and hands back a finite number there instead, 13.6 dB in the case above. It means nothing, and neither does anything else within about three initial beam widths of the source: see [`gaussian_beams`](/phonometry/reference/api/underwater/numerical/#gaussian_beams) on why this method has no near field. The plausible size of these numbers is the point worth knowing about them. |
 | `pressure` | The complex field the loss was taken from, same shape, in the module's own $e^{-i\omega t}$ convention (the conjugate of the one Jensen Eq. (3.88) is printed in) and normalised to unit pressure at 1 m, so `propagation_loss = -20 lg\|pressure\|`. |
-| `launch_angles` | Launch angle of each beam's central ray, from the horizontal, in degrees. |
+| `launch_angles_deg` | Launch angle of each beam's central ray, from the horizontal, in degrees. |
 | `ray_ranges` | Range of each central ray at each marching step, in metres, shape `(n_beams, n_steps)`. This is the marching grid, which is finer than (and independent of) `ranges`. |
 | `ray_depths` | Depth of each central ray on that grid, in metres. |
 | `beam_widths` | Beam half-width $W(s)$ on that grid, in metres: Jensen Eq. (3.89), the distance at which the beam's own pressure has fallen by $e^{-1}$ and its intensity by $e^{-2}$. |
@@ -904,7 +904,7 @@ per ray, are the entire per-bounce record a downstream amplitude needs.
 
 ```python
 RayTraceResult(
-    launch_angles: NDArray[np.float64],
+    launch_angles_deg: NDArray[np.float64],
     ranges: NDArray[np.float64],
     depths: NDArray[np.float64],
     travel_times: NDArray[np.float64],
@@ -926,7 +926,7 @@ Ray-tracing solution through a sound-speed profile.
 
 | Name | Description |
 | :--- | :--- |
-| `launch_angles` | Launch angles from the horizontal, in degrees. |
+| `launch_angles_deg` | Launch angles from the horizontal, in degrees. |
 | `ranges` | Per-ray horizontal ranges, in metres, shape `(n_rays, n_steps)`. |
 | `depths` | Per-ray depths, in metres, shape `(n_rays, n_steps)`. |
 | `travel_times` | Per-ray cumulative travel times, in seconds, shape `(n_rays, n_steps)` (zero at the source, increasing along the ray). |

@@ -1146,11 +1146,13 @@ def test_fc_weights_lookup_table_is_honoured() -> None:
 
 
 def test_fc_weights_validation() -> None:
-    with pytest.raises(ValueError, match=r"'path_angles'.*same shape"):
+    with pytest.raises(ValueError, match=r"'path_angles_deg'.*same shape"):
         flight_condition_weights([50.0, 60.0], [0.0], 55.0, 0.0)
     with pytest.raises(ValueError, match=r"'airspeeds'.*non-empty"):
         flight_condition_weights([[50.0, 60.0]], [[0.0, 1.0]], 55.0, 0.0)
-    with pytest.raises(ValueError, match=r"'airspeed' and 'path_angle' must be finite"):
+    with pytest.raises(
+        ValueError, match=r"'airspeed' and 'path_angle_deg' must be finite"
+    ):
         flight_condition_weights([50.0, 60.0], [0.0, 0.0], np.nan, 0.0)
     with pytest.raises(ValueError, match=r"'triangles' must have shape"):
         flight_condition_weights(
@@ -1226,9 +1228,9 @@ def test_kinematics_straight_climb_closed_form() -> None:
     assert np.allclose(kin.ground_speed, 40.0)
     assert np.allclose(kin.airspeed, 40.0 / np.cos(gamma))
     assert np.allclose(kin.heading, 30.0)
-    assert np.allclose(kin.path_angle, 5.0)
+    assert np.allclose(kin.path_angle_deg, 5.0)
     assert np.allclose(kin.curvature, 0.0, atol=1e-12)
-    assert np.allclose(kin.bank_angle, 0.0, atol=1e-9)
+    assert np.allclose(kin.bank_angle_deg, 0.0, atol=1e-9)
 
 
 def test_kinematics_turn_bank_closed_form() -> None:
@@ -1250,8 +1252,8 @@ def test_kinematics_turn_bank_closed_form() -> None:
     assert np.allclose(kin.ground_speed[mid], speed, rtol=1e-3)
     assert np.allclose(kin.curvature[mid], 1.0 / radius, rtol=1e-2)
     expected_bank = np.degrees(np.arctan(speed**2 / (9.80665 * radius)))
-    assert np.allclose(kin.bank_angle[mid], expected_bank, atol=0.2)
-    assert np.all(kin.bank_angle[mid] > 0.0)
+    assert np.allclose(kin.bank_angle_deg[mid], expected_bank, atol=0.2)
+    assert np.all(kin.bank_angle_deg[mid] > 0.0)
 
 
 def test_kinematics_descent_negative_path_angle() -> None:
@@ -1260,7 +1262,7 @@ def test_kinematics_descent_negative_path_angle() -> None:
         [np.zeros_like(t), 30.0 * t, 300.0 - 30.0 * np.tan(np.radians(6.0)) * t]
     )
     kin = flight_path_kinematics(t, pos)
-    assert np.allclose(kin.path_angle, -6.0)
+    assert np.allclose(kin.path_angle_deg, -6.0)
 
 
 def test_kinematics_hover_is_finite() -> None:
@@ -1269,7 +1271,7 @@ def test_kinematics_hover_is_finite() -> None:
     kin = flight_path_kinematics(t, pos)
     assert np.allclose(kin.ground_speed, 0.0)
     assert np.all(np.isfinite(kin.curvature))
-    assert np.allclose(kin.bank_angle, 0.0)
+    assert np.allclose(kin.bank_angle_deg, 0.0)
 
 
 def test_kinematics_validation() -> None:
@@ -1342,7 +1344,7 @@ def test_event_bank_tilt_moves_azimuth() -> None:
     # phi = +25 deg in the tilted hemisphere frame (guidance §A.3.4).
     _, _, level_res = _flyover(bands=[31.5])
     _, _, banked = _flyover(
-        bands=[31.5], track_state=RotorcraftTrackState(bank_angle=25.0)
+        bands=[31.5], track_state=RotorcraftTrackState(bank_angle_deg=25.0)
     )
     k = int(np.argmin(level_res.distance))
     assert level_res.azimuth[k] == pytest.approx(0.0, abs=1e-6)

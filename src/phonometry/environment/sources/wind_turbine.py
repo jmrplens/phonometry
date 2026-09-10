@@ -74,7 +74,7 @@ def _positive(value: float, name: str) -> float:
 
 
 def slant_distance(
-    hub_height: float, rotor_diameter: float, *, rotor_axis: str = "horizontal"
+    hub_height: float, rotor_diameter_m: float, *, rotor_axis: str = "horizontal"
 ) -> float:
     r"""Slant distance ``R1`` from the rotor centre to the ground microphone.
 
@@ -87,7 +87,7 @@ def slant_distance(
 
     :param hub_height: Hub height ``H`` (ground to rotor centre; for a
         vertical-axis turbine, to the rotor equator), in m.
-    :param rotor_diameter: Rotor diameter ``D``, in m.
+    :param rotor_diameter_m: Rotor diameter ``D``, in m.
     :param rotor_axis: ``"horizontal"`` (Formula 1, the default) or
         ``"vertical"`` (Formula 2).
     :return: The slant distance ``R1``, in m.
@@ -95,7 +95,7 @@ def slant_distance(
         not one of the two orientations.
     """
     h = _positive(hub_height, "hub_height")
-    d = _positive(rotor_diameter, "rotor_diameter")
+    d = _positive(rotor_diameter_m, "rotor_diameter_m")
     if rotor_axis == "horizontal":
         r0 = h + d / 2.0
     elif rotor_axis == "vertical":

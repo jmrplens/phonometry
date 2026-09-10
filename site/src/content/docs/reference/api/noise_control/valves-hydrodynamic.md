@@ -490,7 +490,7 @@ HydrodynamicValveNoise(
     cavitation_differential: float,
     incipient_ratio: float,
     corrected_ratio: float,
-    jet_diameter: float,
+    jet_diameter_m: float,
     velocity: float,
     stream_power: float,
     turbulent_efficiency: float,
@@ -525,7 +525,7 @@ What IEC 60534-8-4 says about one operating point on a liquid line.
 | `cavitation_differential` | $\Delta p_c$ of Equation (2), in Pa. It stops following the differential once the flow chokes. |
 | `incipient_ratio` | $x_{Fz}$, the threshold as given, at 6 × 10⁵ Pa. |
 | `corrected_ratio` | $x_{Fzp1}$ of Equation (3c), the threshold at the working inlet pressure. This is the number the regime test is made against. |
-| `jet_diameter` | $D_j$ of Equation (4), in m. |
+| `jet_diameter_m` | $D_j$ of Equation (4), in m. |
 | `velocity` | $U_{vc}$ of Equation (5), in m/s. |
 | `stream_power` | $W_m$ of Equation (6), in W. |
 | `turbulent_efficiency` | $\eta_{turb}$ of Equation (8). |
@@ -599,7 +599,7 @@ internal_sound_pressure_level(
     sound_power: float,
     density: float,
     sound_speed: float,
-    internal_diameter: float,
+    internal_diameter_m: float,
 ) -> float
 ```
 
@@ -628,7 +628,7 @@ $\rho_L$ intact, which settles it.
 | `sound_power` | $W_a$ of Equation (7a) or (7b), in W. |
 | `density` | $\rho_L$ of the liquid, in kg/m³. |
 | `sound_speed` | $c_L$ in the liquid, in m/s. |
-| `internal_diameter` | $D_i$ of the downstream pipe, in m. |
+| `internal_diameter_m` | $D_i$ of the downstream pipe, in m. |
 
 **Returns:** $L_{pi}$, in dB re 2 × 10⁻⁵ Pa.
 
@@ -647,8 +647,8 @@ jet_strouhal_number(
     style_modifier: float,
     pressure_recovery: float,
     corrected_ratio: float,
-    valve_diameter: float,
-    seat_diameter: float,
+    valve_diameter_m: float,
+    seat_diameter_m: float,
     inlet_pressure_pa: float,
     vapour_pressure_pa: float,
     coefficient: str = 'Cv',
@@ -681,8 +681,8 @@ and comes out anywhere between about 0,2 and 0,5.
 | `style_modifier` | $F_d$, used only by the `"annex"` form. |
 | `pressure_recovery` | $F_L$, dimensionless. |
 | `corrected_ratio` | $x_{Fzp1}$ of Equation (3c). |
-| `valve_diameter` | $d$, the valve inlet internal diameter, in m. |
-| `seat_diameter` | $d_o$, the seat or orifice diameter, in m. |
+| `valve_diameter_m` | $d$, the valve inlet internal diameter, in m. |
+| `seat_diameter_m` | $d_o$, the seat or orifice diameter, in m. |
 | `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
 | `vapour_pressure_pa` | $p_v$, absolute, in Pa. |
 | `coefficient` | `"Cv"` or `"Kv"`, selecting $N_{34}$. |
@@ -780,7 +780,7 @@ metres, so divide by 1 000 before passing it on.
 
 ```python
 LiquidPipe(
-    internal_diameter: float,
+    internal_diameter_m: float,
     wall_thickness: float,
     density: float,
     sound_speed: float = 5000.0,
@@ -795,7 +795,7 @@ The pipe the noise comes out of, and the air around it.
 
 | Name | Description |
 | :--- | :--- |
-| `internal_diameter` | $D_i$, in m. |
+| `internal_diameter_m` | $D_i$, in m. |
 | `wall_thickness` | $t_p$, in m. |
 | `density` | $\rho_p$ of the pipe material, in kg/m³. |
 | `sound_speed` | $c_p$ in the pipe wall, in m/s. |
@@ -837,8 +837,8 @@ LiquidTrim(
     pressure_recovery: float,
     incipient_ratio: float,
     power_ratio: float,
-    valve_diameter: float,
-    seat_diameter: float,
+    valve_diameter_m: float,
+    seat_diameter_m: float,
     coefficient: str = 'Cv',
 )
 ```
@@ -854,8 +854,8 @@ The valve, at the travel being examined.
 | `pressure_recovery` | $F_L$. |
 | `incipient_ratio` | $x_{Fz}$ at 6 × 10⁵ Pa, measured to IEC 60534-8-2 or estimated with [`incipient_cavitation_ratio`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#incipient_cavitation_ratio). Equation (3c) corrects it to the working inlet pressure. |
 | `power_ratio` | $r_W$ from Table 2, the share of the sound power radiated into the pipe. See [`ACOUSTIC_POWER_RATIOS`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#acoustic_power_ratios). |
-| `valve_diameter` | $d$, the valve inlet internal diameter, in m. |
-| `seat_diameter` | $d_o$, in m. |
+| `valve_diameter_m` | $d$, the valve inlet internal diameter, in m. |
+| `seat_diameter_m` | $d_o$, in m. |
 | `coefficient` | Which flow coefficient `flow_coefficient` is, `"Cv"` or `"Kv"`. |
 
 ## mechanical_stream_power
@@ -900,7 +900,7 @@ $10^{-6}$ of this and calls it sound.
 ```python
 multihole_incipient_cavitation_ratio(
     passages: int,
-    hole_diameter: float,
+    hole_diameter_m: float,
     pressure_recovery: float,
 ) -> float
 ```
@@ -922,7 +922,7 @@ counts get the same threshold here.
 | Name | Description |
 | :--- | :--- |
 | `passages` | $N_o$, the number of independent, identical flow passages. |
-| `hole_diameter` | $d_H$, the hole diameter, in m. |
+| `hole_diameter_m` | $d_H$, the hole diameter, in m. |
 | `pressure_recovery` | $F_L$, dimensionless. |
 
 **Returns:** $x_{Fz}$ at an inlet pressure of 6 × 10⁵ Pa, dimensionless.
@@ -937,7 +937,7 @@ counts get the same threshold here.
 
 ```python
 pipe_ring_frequency(
-    internal_diameter: float,
+    internal_diameter_m: float,
     *,
     pipe_sound_speed: float = 5000.0,
 ) -> float
@@ -959,7 +959,7 @@ it worse.
 
 | Name | Description |
 | :--- | :--- |
-| `internal_diameter` | $D_i$, in m. |
+| `internal_diameter_m` | $D_i$, in m. |
 | `pipe_sound_speed` | $c_p$, 5 000 m/s for steel, in m/s. |
 
 **Returns:** $f_r$, in Hz.
@@ -982,7 +982,7 @@ REFERENCE_INLET_PRESSURE_PA = 600000.0
 
 ```python
 reference_transmission_loss(
-    internal_diameter: float,
+    internal_diameter_m: float,
     wall_thickness: float,
     *,
     pipe_density: float,
@@ -1009,7 +1009,7 @@ out at −44,7 dB.
 
 | Name | Description |
 | :--- | :--- |
-| `internal_diameter` | $D_i$, in m. |
+| `internal_diameter_m` | $D_i$, in m. |
 | `wall_thickness` | $t_p$, in m. |
 | `pipe_density` | $\rho_p$, 7 800 kg/m³ for steel. |
 | `pipe_sound_speed` | $c_p$, 5 000 m/s for steel, in m/s. |

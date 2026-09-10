@@ -76,7 +76,7 @@ DiffuserPolarResponse(
     angles_deg: Real,
     levels: Real,
     coefficient: float,
-    source_angle: float = 0.0,
+    source_angle_deg: float = 0.0,
     well_width: float | None = None,
     depths: Real | None = None,
     repetitions: int | None = None,
@@ -93,7 +93,7 @@ A predicted far-field polar response of a diffuser at one frequency.
 | `angles_deg` | Receiver reflection angles, in degrees. |
 | `levels` | Predicted reflected sound-pressure level at each angle, in decibels, referenced to the peak of the response (peak at 0 dB). |
 | `coefficient` | Directional diffusion coefficient `d_theta` of the predicted response (ISO 17497-2, Formula (5)). |
-| `source_angle` | Angle of incidence `psi` of the source, in degrees. |
+| `source_angle_deg` | Angle of incidence `psi` of the source, in degrees. |
 | `well_width` | Well width `w` of the predicted surface, in metres, always retained by the predictor (with `repetitions`) so `plot_geometry` can draw the well profile; appended after the original fields and `None` only for hand-built responses. |
 | `depths` | Well depths `d_n` of one period, in metres, when the response was predicted from depths; `None` otherwise (explicit `reflection` surfaces have no drawable well profile). |
 | `repetitions` | Number of repeated periods of the prediction. |
@@ -187,7 +187,7 @@ predict_diffuser_polar_response(
     *,
     depths: ArrayLike,
     angles_deg: ArrayLike = ...,
-    source_angle: float = ...,
+    source_angle_deg: float = ...,
     repetitions: int = ...,
     speed_of_sound: float = ...,
     include_aperture: bool = ...,
@@ -200,7 +200,7 @@ predict_diffuser_polar_response(
     *,
     reflection: ArrayLike,
     angles_deg: ArrayLike = ...,
-    source_angle: float = ...,
+    source_angle_deg: float = ...,
     repetitions: int = ...,
     speed_of_sound: float = ...,
     include_aperture: bool = ...,
@@ -226,7 +226,7 @@ exactly one.
 | `depths` | Well depths `d_n` of one period, in metres (1-D, at least two wells); mutually exclusive with `reflection`. |
 | `reflection` | Explicit per-well complex pressure reflection coefficient of one period (1-D, at least two wells); mutually exclusive with `depths`. |
 | `angles_deg` | Receiver reflection angles `theta`, in degrees; defaults to the ISO 17497-2 semicircle [`DEFAULT_POLAR_ANGLES`](/phonometry/reference/api/materials/design/#default_polar_angles). |
-| `source_angle` | Angle of incidence `psi` of the source, in degrees (0 = normal incidence). |
+| `source_angle_deg` | Angle of incidence `psi` of the source, in degrees (0 = normal incidence). |
 | `repetitions` | Number of repetitions `N_p` of the single period; the grating lobes that define a Schroeder diffuser require `periods >= 2`. |
 | `speed_of_sound` | Speed of sound `c`, in metres per second. |
 | `include_aperture` | Include the single-well aperture directivity $\operatorname{sinc}(kw(\sin\psi + \sin\theta)/2)$ of Eq. (9.32); defaults to `True`. |
@@ -250,7 +250,7 @@ predicted_diffusion_spectrum(
     depths: ArrayLike,
     reflection_of: None = None,
     angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
-    source_angle: float = 0.0,
+    source_angle_deg: float = 0.0,
     repetitions: int = 1,
     speed_of_sound: float = 343.0,
     include_aperture: bool = True,
@@ -284,7 +284,7 @@ for this helper (build the spectrum yourself from
 | `depths` | Well depths `d_n` of one period, in metres (1-D, at least two wells). |
 | `reflection_of` | Reserved for future frequency-dependent reflection models; must be `None`. |
 | `angles_deg` | Receiver reflection angles `theta`, in degrees; defaults to [`DEFAULT_POLAR_ANGLES`](/phonometry/reference/api/materials/design/#default_polar_angles). |
-| `source_angle` | Angle of incidence `psi`, in degrees. |
+| `source_angle_deg` | Angle of incidence `psi`, in degrees. |
 | `repetitions` | Number of repetitions `N_p` of the single period. |
 | `speed_of_sound` | Speed of sound `c`, in metres per second. |
 | `include_aperture` | Include the single-well aperture directivity. |

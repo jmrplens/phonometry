@@ -124,6 +124,7 @@ area they sit in (Article 24.1).
 ActivityAssessment(
     periods: tuple[PeriodAssessment, ...],
     limits: RegulationLimits,
+    *,
     new_activity: bool,
 )
 ```
@@ -639,6 +640,7 @@ PeriodAssessment(
     reported_long_term: int | None,
     limit: float,
     max_phase_level: float,
+    *,
     phase_pass: bool,
     daily_pass: bool,
     long_term_pass: bool | None,

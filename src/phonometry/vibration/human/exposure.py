@@ -58,7 +58,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -461,6 +461,7 @@ class WeightingResponse:
     response: Complex
     magnitude: Real
     magnitude_db: Real
+    _: KW_ONLY
     band_limiting: bool = False
 
     def plot(
@@ -1209,6 +1210,7 @@ class ExposureAssessment:
     metric: str
     action_value: float
     limit_value: float
+    _: KW_ONLY
     exceeds_action: bool
     exceeds_limit: bool
     zone: str

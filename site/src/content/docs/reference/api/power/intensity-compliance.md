@@ -142,6 +142,7 @@ IntensityInstrumentComplianceResult(
     device: str,
     spacing: float,
     spacing_offset_db: float,
+    *,
     range_limited: bool = False,
 )
 ```

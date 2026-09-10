@@ -25,7 +25,7 @@ of the same record are directly comparable.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -131,6 +131,7 @@ class MultitaperSpectralDensityResult:
     time_half_bandwidth: float
     n_tapers: int
     resolution_bandwidth: float
+    _: KW_ONLY
     adaptive: bool
     scaling: str
 

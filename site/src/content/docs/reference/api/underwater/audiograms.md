@@ -91,6 +91,7 @@ AudiogramParameters(
     a: float,
     b: float,
     r_squared: float,
+    *,
     in_air: bool,
 )
 ```
@@ -118,6 +119,7 @@ AudiogramResult(
     threshold: NDArray[np.float64],
     group: str,
     source: str,
+    *,
     in_air: bool,
     best_frequency: float,
     best_threshold: float,

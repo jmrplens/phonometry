@@ -161,6 +161,7 @@ TimeWeightedEnvelope(
     mean_square: np.ndarray,
     fs: int,
     mode: str,
+    *,
     calibrated: bool,
 )
 ```
@@ -305,6 +306,7 @@ weighting_filter(
     x: Signal,
     fs: int | None = ...,
     curve: str = ...,
+    *,
     high_accuracy: bool = ...,
 ) -> Signal
 
@@ -312,6 +314,7 @@ weighting_filter(
     x: list[float] | np.ndarray,
     fs: int,
     curve: str = ...,
+    *,
     high_accuracy: bool = ...,
 ) -> np.ndarray
 ```
@@ -335,6 +338,7 @@ Apply a frequency weighting to a signal.
 WeightingFilter(
     fs: int,
     curve: str = 'A',
+    *,
     stateful: bool = False,
     steady_ic: bool = False,
     high_accuracy: bool | None = None,

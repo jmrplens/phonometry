@@ -32,7 +32,7 @@ Doc 29 5th ed. Vol 3 Part 1 reference workbook.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
 
 import numpy as np
@@ -607,6 +607,7 @@ class FlightSegmentState:
         :math:`\phi = \beta - \varepsilon` for observers to port (§4.5.2).
     """
 
+    _: KW_ONLY
     ground_roll: NDArray[np.bool_] | list[bool] | None = None
     landing_roll: NDArray[np.bool_] | list[bool] | None = None
     bank: NDArray[np.float64] | list[float] | None = None

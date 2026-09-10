@@ -63,7 +63,7 @@ ISO 9614 dynamic capability :math:`L_\mathrm{d} = \delta_{pI0} - K` follows from
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -431,6 +431,7 @@ class IntensityInstrumentComplianceResult:
     device: str
     spacing: float
     spacing_offset_db: float
+    _: KW_ONLY
     range_limited: bool = False
 
     def __post_init__(self) -> None:

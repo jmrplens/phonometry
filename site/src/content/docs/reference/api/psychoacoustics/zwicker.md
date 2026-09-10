@@ -31,6 +31,7 @@ loudness_zwicker(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
     field: Literal['free', 'diffuse'] = 'free',
+    *,
     stationary: bool = False,
     calibration_factor: float | None = None,
     time_skip: float = 0.0,

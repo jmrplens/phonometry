@@ -224,6 +224,11 @@ class Parameter(NamedTuple):
     name: str
     where: str
     positional_with_default: bool = False
+    #: The annotation as written, so a sibling guard can read the type off it
+    #: without walking the API a second time.
+    annotation: str = ""
+    #: ``True`` when a caller can still pass this one by position.
+    positional: bool = False
 
 
 def _is_public(name: str) -> bool:
@@ -302,8 +307,15 @@ def public_parameters() -> Iterator[Parameter]:
                         and parameter.default is not inspect.Parameter.empty
                         and parameter.kind is parameter.POSITIONAL_OR_KEYWORD
                     )
+                    annotation = parameter.annotation
                     yield Parameter(
-                        home, qualname, parameter.name, _where(target), loose
+                        home,
+                        qualname,
+                        parameter.name,
+                        _where(target),
+                        loose,
+                        "" if annotation is inspect.Parameter.empty else str(annotation),
+                        parameter.kind is parameter.POSITIONAL_OR_KEYWORD,
                     )
 
 

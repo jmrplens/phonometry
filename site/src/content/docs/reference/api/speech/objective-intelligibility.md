@@ -86,6 +86,7 @@ envelopes, and compared over 384 ms segments.
 ```python
 STOIResult(
     value: float,
+    *,
     extended: bool,
     segment_scores: NDArray[np.float64],
     band_scores: NDArray[np.float64] | None,

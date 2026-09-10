@@ -363,6 +363,8 @@ jobs:
         pip install -e .
     - name: Check that no pressure, temperature or humidity hides its unit
       run: python scripts/check_parameter_units.py
+    - name: Check that no public flag can be thrown without naming it
+      run: python scripts/check_public_flags.py
 
   # The committed documentation figures (.github/images) must match a fresh
   # `make graphs` run. The rendering + compute stack is pinned in

@@ -48,7 +48,7 @@ modulation lines read low by the taper's scalloping loss.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -103,6 +103,7 @@ class EnvelopeResult:
     signal: NDArray[np.float64]
     signal_fs: float
     decimation_factor: int
+    _: KW_ONLY
     antialias: bool
 
     def __post_init__(self) -> None:
@@ -283,6 +284,7 @@ class EnvelopeSpectrumResult:
     times: NDArray[np.float64]
     envelope: NDArray[np.float64]
     window: str
+    _: KW_ONLY
     remove_dc: bool
     fs: float
     nfft: int

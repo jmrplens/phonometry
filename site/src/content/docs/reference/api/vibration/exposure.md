@@ -483,6 +483,7 @@ ExposureAssessment(
     metric: str,
     action_value: float,
     limit_value: float,
+    *,
     exceeds_action: bool,
     exceeds_limit: bool,
     zone: str,
@@ -996,6 +997,7 @@ WeightingResponse(
     response: Complex,
     magnitude: Real,
     magnitude_db: Real,
+    *,
     band_limiting: bool = False,
 )
 ```

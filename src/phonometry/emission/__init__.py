@@ -24,7 +24,6 @@ from .intensity import (
 from .intensity_compliance import (
     IntensityInstrumentComplianceResult,
     instrument_class_from_components,
-    intensity_class_compliance,
     phase_mismatch_from_residual_index,
     residual_index_from_phase_mismatch,
     residual_index_limits,
@@ -181,7 +180,6 @@ __all__ = [
     "grade_from_local_correction",
     "in_duct_reproducibility",
     "instrument_class_from_components",
-    "intensity_class_compliance",
     "local_environmental_correction",
     "mean_single_event_level",
     "mean_velocity_level",

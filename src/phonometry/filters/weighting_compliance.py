@@ -38,13 +38,16 @@ around each mid-band frequency, live in :mod:`phonometry.filters.compliance`.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 
+from .._internal.validation import is_class_designation, require_choice
 from .weighting import WeightingFilter, _runtime_frequency_response
 
 __all__ = [
+    "WeightingComplianceResult",
     "verify_weighting_class",
     "weighting_class_limits",
 ]
@@ -672,9 +675,147 @@ def _overall_class(
     return None
 
 
+@dataclass(frozen=True)
+class WeightingComplianceResult:
+    """Class verdict of a :class:`~phonometry.WeightingFilter`.
+
+    What :func:`verify_weighting_class` returns: the verdict together with the
+    two readings it rests on, the tabulated frequencies and the sweep between
+    them, and the filter it was measured on.
+
+    :ivar overall_class: The strictest class of the edition met at every
+        tabulated frequency *and* across the between-nominals sweep, or
+        ``None`` when neither reading meets any class.
+    :ivar bands: The per-frequency verdicts (one ``{"freq", "class",
+        "deviation_db", "margin_class<c>_db"}`` per tabulated frequency below
+        the Nyquist frequency), as an immutable tuple.
+    :ivar between_nominals: The subclause 5.5.7 sweep, ``{"worst_freq",
+        "margin_class<c>_db"}``, or ``None`` when no tabulated frequency was
+        in range and there was nothing to sweep between.
+    :ivar curve: The weighting the verdict is about (``"A"``, ``"B"``,
+        ``"C"``, ``"AU"`` or ``"Z"``).
+    :ivar edition: ``"2013"`` (IEC 61672-1:2013, classes 1/2) or ``"1979"``
+        (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3).
+    :ivar fs: Sampling rate of the verified filter, in Hz. It is what puts
+        rows out of range, so the verdict carries it.
+    :ivar sweep_points: Grid frequencies used by the 5.5.7 sweep.
+    :ivar range_limited: ``True`` when a row carrying a finite lower limit
+        falls at or above the Nyquist frequency, so the stated class attests
+        the checked frequencies and not the standard's full range.
+    """
+
+    overall_class: int | None
+    bands: tuple[dict[str, Any], ...]
+    between_nominals: dict[str, float] | None
+    curve: str
+    edition: str
+    fs: float
+    sweep_points: int
+    range_limited: bool = False
+
+    def __post_init__(self) -> None:
+        """Reject a verdict its own two readings do not derive.
+
+        The class is not the strictest one the tabulated rows meet: a filter
+        that clears every row and dips outside the mask between two of them
+        has not met the class, so the sweep can only ever loosen the answer.
+        Nothing downstream can tell the two readings apart once they are
+        summarised, which is why the summary is recomputed here from the
+        margins rather than checked against the per-row classes.
+
+        The edition is pinned first, and the margin keys of every row against
+        it: a verdict carried over from the other edition's table would be
+        recomputed against classes its rows carry no margins for, and die in
+        a bare :class:`KeyError` naming neither the row nor the edition. Every
+        class the edition defines has to be there, not a subset of them: rows
+        that carry only the looser margin would settle the verdict on a class
+        the filter was never denied. The sweep is held to the same keys,
+        because the class is read from the two together.
+
+        The sweep is pinned as present exactly when there is a row to sweep
+        between. A filter whose every tabulated frequency is above the Nyquist
+        frequency is an outcome :func:`verify_weighting_class` does produce,
+        and it always pairs it with no rows, no sweep and no class.
+
+        :raises ValueError: if the edition is unknown, a row carries margins
+            for other classes, the sweep and the rows disagree on being
+            empty, or the stated class is not the one the margins derive.
+        """
+        require_choice(self.edition, "edition", tuple(_WEIGHTING_EDITIONS))
+        classes = _WEIGHTING_EDITIONS[self.edition]["classes"]
+        who = type(self).__name__
+        carried = _margin_classes(self.bands[0]) if self.bands else []
+        if self.bands and carried != list(classes):
+            msg = (
+                f"{who}: the rows must carry a margin for every class of "
+                f"edition {self.edition!r} ({list(classes)}); they carry "
+                f"{carried}. A row short of the strictest class would let the "
+                "verdict settle on a looser one that was never denied."
+            )
+            raise ValueError(msg)
+        for band in self.bands:
+            if _margin_classes(band) != carried:
+                msg = (
+                    f"{who}: every row must carry the same classes; the "
+                    f"{band.get('freq', '?')} Hz row carries "
+                    f"{_margin_classes(band)} where the first carries "
+                    f"{carried}."
+                )
+                raise ValueError(msg)
+        if (self.between_nominals is None) != (not self.bands):
+            msg = (
+                f"{who}: 'between_nominals' is the sweep between the rows, so "
+                "it is present exactly when there is a row: got "
+                f"{len(self.bands)} rows and "
+                f"{'no sweep' if self.between_nominals is None else 'a sweep'}."
+            )
+            raise ValueError(msg)
+        if (
+            self.between_nominals is not None
+            and _margin_classes(self.between_nominals) != carried
+        ):
+            msg = (
+                f"{who}: the sweep is read for the same classes as the rows, "
+                f"so it must carry margins for {carried}; it carries "
+                f"{_margin_classes(self.between_nominals)}."
+            )
+            raise ValueError(msg)
+        if self.overall_class is not None and not is_class_designation(
+            self.overall_class, classes
+        ):
+            msg = (
+                f"{who}: 'overall_class' must be a class of {list(classes)} or "
+                f"None; got {self.overall_class!r}."
+            )
+            raise ValueError(msg)
+        derived = (
+            None
+            if self.between_nominals is None
+            else _overall_class(list(self.bands), self.between_nominals, tuple(carried))
+        )
+        if self.overall_class != derived:
+            msg = (
+                f"{who}: 'overall_class' must be the class the margins derive, "
+                "the strictest one met at every tabulated frequency and across "
+                f"the sweep; got {self.overall_class!r} where they derive "
+                f"{derived!r}."
+            )
+            raise ValueError(msg)
+
+
+def _margin_classes(band: dict[str, Any]) -> list[int]:
+    """The classes one row carries margins for, read off its keys."""
+    prefix, suffix = "margin_class", "_db"
+    return sorted(
+        int(key[len(prefix) : -len(suffix)])
+        for key in band
+        if key.startswith(prefix) and key.endswith(suffix)
+    )
+
+
 def verify_weighting_class(
     wf: WeightingFilter, *, sweep_points: int = 4096, edition: str = "2013"
-) -> dict[str, Any]:
+) -> WeightingComplianceResult:
     r"""Verify a frequency-weighting filter against its standard's tolerances.
 
     ``A``/``C``/``Z`` are checked against IEC 61672-1:2013 Table 3 (classes 1
@@ -757,14 +898,9 @@ def verify_weighting_class(
         (>= 64).
     :param edition: ``"2013"`` (IEC 61672-1:2013, classes 1/2) or ``"1979"``
         (IEC 651:1979, Types 0/1/2/3 offered as classes 0-3).
-    :return: Dict with ``overall_class`` (the strictest class of the edition
-        that every checked frequency and the sweep meet, or ``None``),
-        ``range_limited`` (see above), ``bands``: a list of ``{"freq",
-        "class", "deviation_db", "margin_class<c>_db"}`` for each class ``c``
-        of the edition, where ``freq`` is the nominal label and a positive
-        margin means the limits are met with that much room, and
-        ``between_nominals``: ``{"worst_freq", "margin_class<c>_db"}`` for the
-        sweep.
+    :return: A :class:`WeightingComplianceResult`, which carries the class
+        together with the per-frequency verdicts it rests on, the
+        between-nominals sweep and the filter it was measured on.
     :raises ValueError: if the edition is unknown, the edition does not define
         the filter's curve, or ``sweep_points`` is below 64.
     """
@@ -803,19 +939,18 @@ def verify_weighting_class(
 
     bands = _weighting_band_verdicts(freqs_nom, deviation, masks)
 
-    if not bands:
-        return {
-            "overall_class": None,
-            "range_limited": range_limited,
-            "bands": [],
-            "between_nominals": None,
-        }
+    between = (
+        _between_nominals_sweep(wf, freqs_exact, masks, sweep_points) if bands else None
+    )
+    overall = None if between is None else _overall_class(bands, between, tuple(masks))
 
-    between = _between_nominals_sweep(wf, freqs_exact, masks, sweep_points)
-
-    return {
-        "overall_class": _overall_class(bands, between, tuple(masks)),
-        "range_limited": range_limited,
-        "bands": bands,
-        "between_nominals": between,
-    }
+    return WeightingComplianceResult(
+        overall_class=overall,
+        bands=tuple(bands),
+        between_nominals=between,
+        curve=str(wf.curve),
+        edition=edition,
+        fs=float(wf.fs),
+        sweep_points=int(sweep_points),
+        range_limited=range_limited,
+    )

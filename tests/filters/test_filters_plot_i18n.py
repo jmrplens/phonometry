@@ -48,12 +48,12 @@ def _add4(a: float, b: float, c: float, d: float) -> float:
 
 
 def test_filter_class_es() -> None:
-    from phonometry.filters.compliance import filter_class_compliance
+    from phonometry.filters.compliance import verify_filter_class
 
     bank = ph.filters.OctaveFilterBank(
         fs=48000, fraction=1, order=6, limits=[500, 2000]
     )
-    res = filter_class_compliance(bank)
+    res = verify_filter_class(bank)
     ax = res.plot(language="es")
     assert "Máscara clase" in ax.get_title()
     assert ax.get_ylabel() == "Atenuación relativa [dB]"

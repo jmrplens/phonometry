@@ -158,7 +158,7 @@ def test_filter_binding_detail_matches_library_margin() -> None:
             limits=[100, 10000],
             design=filters.FilterDesign(filter_type=arch),
         )
-        bands = verify_filter_class(bank)["bands"]
+        bands = verify_filter_class(bank).bands
         lib_min = min(b["margin_class1_db"] for b in bands)
         assert fc.min_margin1 == pytest.approx(lib_min, abs=1e-9)
         # The binding measured value must sit on the reported side of the limit.

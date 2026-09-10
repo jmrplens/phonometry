@@ -48,7 +48,7 @@ _FS = 48000.0
 def _dynamics() -> dict[str, dict[str, Any]]:
     """The eleven readings, keyed by the stimulus label, computed once."""
     report = ph.broadcast.verify_quasi_peak_dynamics(_FS)
-    return {row["stimulus"]: row for row in report["stimuli"]}
+    return {row["stimulus"]: row for row in report.stimuli}
 
 
 def _window_outcome(stimulus: str) -> Outcome:

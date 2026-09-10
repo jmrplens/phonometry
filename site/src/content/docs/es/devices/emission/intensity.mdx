@@ -489,7 +489,7 @@ clase 1 y clase 2, impreso para la separación nominal entre micrófonos de
 $+10\log_{10}(x/25)$, con $x$ en milímetros: los mismos 3 dB por duplicación a los
 que llegaba el apartado anterior a partir de la física.
 
-`intensity_class_compliance` compara un espectro de $\delta_{pI0}$ medido con
+`verify_intensity_class` compara un espectro de $\delta_{pI0}$ medido con
 ambas
 máscaras banda a banda y devuelve un `IntensityInstrumentComplianceResult` que
 lleva la clase que la cadena cumple realmente: la clase más laxa que superan
@@ -506,8 +506,8 @@ measured_delta_pi0 = [11.0, 11.9, 11.2, 10.0, 13.2, 15.9, 17.0, 18.0,
                       19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 24.0, 24.0,
                       24.0, 24.0, 24.0, 24.0, 24.0, 24.0]   # dB, 22 bandas
 
-res = emission.intensity_class_compliance(measured_delta_pi0, freqs,
-                                           device="instrument", spacing=0.012)
+res = emission.verify_intensity_class(measured_delta_pi0, freqs,
+                                      device="instrument", spacing=0.012)
 print(res.overall_class)          # 2: una banda no llega al mínimo de clase 1
 print(res.binding_margin())       # menor margen por banda hasta esa clase [dB]
 print(res.failing_bands(1))       # las bandas que le cuestan la clase 1 [Hz]
@@ -547,7 +547,7 @@ measured = emission.residual_index_from_phase_mismatch(phase_mismatch, freqs,
                                                         spacing)
 measured = measured - 4.0 * np.exp(-((np.log(freqs / 100.0) / 0.25) ** 2))
 
-res = emission.intensity_class_compliance(measured, freqs, spacing=spacing)
+res = emission.verify_intensity_class(measured, freqs, spacing=spacing)
 res.plot()
 plt.show()
 ```
@@ -1045,7 +1045,7 @@ error de fase del instrumento, y la clasificación del instrumento construida
 sobre él: los mínimos por banda de la tabla 2 para sondas, procesadores e
 instrumentos con la regla de separación de la nota 1, los rangos de frecuencia
 del apartado 6.1 y la regla de combinación de componentes del apartado 8
-(`intensity_class_compliance`, `residual_index_limits`,
+(`verify_intensity_class`, `residual_index_limits`,
 `instrument_class_from_components`), además de la conversión entre
 $\delta_{pI0}$ y desfase en ambos sentidos. ISO 9614-1:1993 para los
 indicadores de campo del Anexo A $F_1$ a $F_4$

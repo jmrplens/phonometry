@@ -7,6 +7,7 @@ transcription are cross-checked against the independent ``reference_data``
 copy shared with the CI conformance report, so a typo in either surfaces.
 """
 
+import dataclasses
 import inspect
 import math
 
@@ -76,15 +77,15 @@ def test_high_accuracy_weighting_verdicts(fs: int, curve: str) -> None:
     """The verdict of each default A/C/Z filter, at four sample rates."""
     expected = _EXPECTED_CLASS[(curve, fs)]
     result = filters.verify_weighting_class(filters.WeightingFilter(fs, curve))
-    assert result["overall_class"] == expected
+    assert result.overall_class == expected
     if expected == 1:
-        assert all(b["class"] == 1 for b in result["bands"])
-        assert all(b["margin_class1_db"] >= 0 for b in result["bands"])
+        assert all(b["class"] == 1 for b in result.bands)
+        assert all(b["margin_class1_db"] >= 0 for b in result.bands)
     else:
         # Exactly one row, the one nearest Nyquist, is what costs the class.
-        off = [b for b in result["bands"] if b["class"] != 1]
+        off = [b for b in result.bands if b["class"] != 1]
         assert len(off) == 1
-        assert off[0]["freq"] == max(b["freq"] for b in result["bands"])
+        assert off[0]["freq"] == max(b["freq"] for b in result.bands)
 
 
 def test_high_accuracy_docstring_states_what_the_plain_design_earns() -> None:
@@ -106,7 +107,7 @@ def test_high_accuracy_docstring_states_what_the_plain_design_earns() -> None:
 
     def plain(fs: int, curve: str) -> int | None:
         wf = filters.WeightingFilter(fs, curve, high_accuracy=False)
-        verdict: int | None = filters.verify_weighting_class(wf)["overall_class"]
+        verdict: int | None = filters.verify_weighting_class(wf).overall_class
         return verdict
 
     for curve in ("A", "C"):
@@ -117,19 +118,19 @@ def test_high_accuracy_docstring_states_what_the_plain_design_earns() -> None:
         assert plain(16000, curve) is None
         # And the fitted design earns class 1 where the plain one cannot.
         wf = filters.WeightingFilter(16000, curve)
-        assert filters.verify_weighting_class(wf)["overall_class"] == 1
+        assert filters.verify_weighting_class(wf).overall_class == 1
 
 
 def test_z_weighting_zero_deviation() -> None:
     """Z is a flat bypass: zero deviation and full class-1 margin everywhere."""
     result = filters.verify_weighting_class(filters.WeightingFilter(48000, "Z"))
-    assert all(b["deviation_db"] == 0.0 for b in result["bands"])
-    assert result["overall_class"] == 1
+    assert all(b["deviation_db"] == 0.0 for b in result.bands)
+    assert result.overall_class == 1
 
 
 def test_band_dict_keys_and_deviation_sign() -> None:
     result = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
-    band = result["bands"][0]
+    band = result.bands[0]
     assert set(band) == {
         "freq",
         "class",
@@ -149,7 +150,7 @@ def test_frequencies_above_nyquist_are_dropped() -> None:
     7 943.3 Hz, is below Nyquist) while 10 kHz and above are dropped.
     """
     result = filters.verify_weighting_class(filters.WeightingFilter(16000, "A"))
-    assert max(b["freq"] for b in result["bands"]) == 8000.0
+    assert max(b["freq"] for b in result.bands) == 8000.0
 
 
 def test_low_fs_verdict_is_flagged_range_limited() -> None:
@@ -158,9 +159,9 @@ def test_low_fs_verdict_is_flagged_range_limited() -> None:
     system cannot demonstrate full class-1 conformance over 10 Hz-20 kHz.
     """
     result = filters.verify_weighting_class(filters.WeightingFilter(16000, "A"))
-    assert result["range_limited"] is True
+    assert result.range_limited is True
     result_full = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
-    assert result_full["range_limited"] is False
+    assert result_full.range_limited is False
 
 
 def test_deviation_evaluated_at_exact_base10_frequency() -> None:
@@ -172,7 +173,7 @@ def test_deviation_evaluated_at_exact_base10_frequency() -> None:
     """
     wf = filters.WeightingFilter(96000, "A")
     band = next(
-        b for b in filters.verify_weighting_class(wf)["bands"] if b["freq"] == 16000.0
+        b for b in filters.verify_weighting_class(wf).bands if b["freq"] == 16000.0
     )
     ref_1k = _tone_gain_db(wf, 96000, 1000.0)
     at_exact = _tone_gain_db(wf, 96000, 15848.93192) - ref_1k - (-6.6)
@@ -199,7 +200,7 @@ def test_verdict_measures_the_path_a_signal_takes(fs: int, label: float) -> None
     """
     wf = filters.WeightingFilter(fs, "A")
     band = next(
-        b for b in filters.verify_weighting_class(wf)["bands"] if b["freq"] == label
+        b for b in filters.verify_weighting_class(wf).bands if b["freq"] == label
     )
     exact = 10.0 ** (round(10.0 * math.log10(label)) / 10.0)
     design = {row[0]: row[1] for row in _WEIGHTING_TABLE3}[label]
@@ -219,16 +220,16 @@ def test_notch_between_nominals_fails_the_sweep() -> None:
     b, a = sg.iirnotch(900.0, 30.0, fs=wf.fs)
     wf.sos = np.vstack([wf.sos, sg.tf2sos(b, a)])
     result = filters.verify_weighting_class(wf)
-    assert all(bd["class"] == 1 for bd in result["bands"])
-    assert result["between_nominals"]["margin_class1_db"] < 0.0
-    assert result["between_nominals"]["margin_class2_db"] < 0.0
-    assert 800.0 < result["between_nominals"]["worst_freq"] < 1000.0
-    assert result["overall_class"] is None
+    assert all(bd["class"] == 1 for bd in result.bands)
+    assert result.between_nominals["margin_class1_db"] < 0.0
+    assert result.between_nominals["margin_class2_db"] < 0.0
+    assert 800.0 < result.between_nominals["worst_freq"] < 1000.0
+    assert result.overall_class is None
 
 
 def test_sweep_result_reported_for_compliant_filter() -> None:
     result = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
-    between = result["between_nominals"]
+    between = result.between_nominals
     assert set(between) == {"worst_freq", "margin_class1_db", "margin_class2_db"}
     assert between["margin_class1_db"] >= 0.0
     wf = filters.WeightingFilter(48000, "A")
@@ -242,8 +243,8 @@ def test_plain_bilinear_degrades_to_class2(fs: int, expected: int) -> None:
     result = filters.verify_weighting_class(
         filters.WeightingFilter(fs, "A", high_accuracy=False)
     )
-    assert result["overall_class"] == expected
-    assert any(b["class"] != 1 for b in result["bands"])
+    assert result.overall_class == expected
+    assert any(b["class"] != 1 for b in result.bands)
 
 
 def test_invalid_class_raises() -> None:
@@ -277,8 +278,7 @@ def test_deviation_matches_independent_tone_measurement() -> None:
     fs = 48000
     wf = filters.WeightingFilter(fs, "A")  # stateless, so it can be reused per tone
     bands = {
-        b["freq"]: b["deviation_db"]
-        for b in filters.verify_weighting_class(wf)["bands"]
+        b["freq"]: b["deviation_db"] for b in filters.verify_weighting_class(wf).bands
     }
     ref_1k = _tone_gain_db(wf, fs, 1000.0)
     for f0 in (63.0, 250.0, 1000.0, 4000.0, 8000.0):
@@ -291,6 +291,88 @@ def test_response_is_deterministic() -> None:
     """The response is computed in closed form, so repeated runs are identical."""
     a = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
     b = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
-    assert [x["deviation_db"] for x in a["bands"]] == [
-        x["deviation_db"] for x in b["bands"]
-    ]
+    assert [x["deviation_db"] for x in a.bands] == [x["deviation_db"] for x in b.bands]
+
+
+# ---------------------------------------------------------------------------
+# The verdict object: a summary its own two readings do not derive is refused
+# ---------------------------------------------------------------------------
+
+
+def _a_verdict() -> filters.WeightingComplianceResult:
+    """A class 1 A-weighting verdict at 48 kHz, for the rejection tests."""
+    return filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
+
+
+def test_unknown_edition_is_rejected() -> None:
+    verdict = _a_verdict()
+    with pytest.raises(ValueError, match=r"'edition' must be one of"):
+        dataclasses.replace(verdict, edition="2020")
+
+
+def test_rows_carrying_another_edition_class_are_rejected() -> None:
+    """A row whose margins name a class the edition does not define."""
+    verdict = _a_verdict()
+    rows = [{**verdict.bands[0], "margin_class7_db": 1.0}, *verdict.bands[1:]]
+    with pytest.raises(ValueError, match=r"must carry a margin for every class"):
+        dataclasses.replace(verdict, bands=tuple(rows))
+
+
+def test_rows_that_disagree_among_themselves_are_rejected() -> None:
+    """Reading only the first row would let a later short one through."""
+    verdict = _a_verdict()
+    thin = dict(verdict.bands[-1])
+    del thin["margin_class2_db"]
+    rows = [*verdict.bands[:-1], thin]
+    with pytest.raises(ValueError, match=r"must carry the same classes"):
+        dataclasses.replace(verdict, bands=tuple(rows))
+
+
+def test_a_sweep_without_rows_is_rejected() -> None:
+    """The sweep runs between the rows, so it cannot outlive them."""
+    verdict = _a_verdict()
+    with pytest.raises(ValueError, match=r"present exactly when there is a row"):
+        dataclasses.replace(verdict, bands=())
+
+
+def test_a_class_that_is_no_designation_is_rejected() -> None:
+    """``1.0`` reads as class 1 and builds ``margin_class1.0_db``, a key nobody has."""
+    verdict = _a_verdict()
+    with pytest.raises(ValueError, match=r"must be a class of \[1, 2\] or None"):
+        dataclasses.replace(verdict, overall_class=1.0)
+
+
+def test_a_class_the_margins_do_not_derive_is_rejected() -> None:
+    """A class 1 filter cannot be boxed as class 2, nor as no class at all."""
+    verdict = _a_verdict()
+    assert verdict.overall_class == 1
+    with pytest.raises(ValueError, match=r"must be the class the margins derive"):
+        dataclasses.replace(verdict, overall_class=2)
+    with pytest.raises(ValueError, match=r"must be the class the margins derive"):
+        dataclasses.replace(verdict, overall_class=None)
+
+
+def test_the_sweep_can_only_loosen_the_class() -> None:
+    """Every row clears class 1 and the sweep does not: the verdict is class 2.
+
+    The summary is not the strictest class the rows meet, which is why it is
+    recomputed from both readings rather than checked against the per-row
+    classes.
+    """
+    verdict = _a_verdict()
+    assert all(row["margin_class1_db"] >= 0.0 for row in verdict.bands)
+    dipped = {**verdict.between_nominals, "margin_class1_db": -0.5}
+    loosened = dataclasses.replace(verdict, between_nominals=dipped, overall_class=2)
+    assert loosened.overall_class == 2
+    with pytest.raises(ValueError, match=r"must be the class the margins derive"):
+        dataclasses.replace(verdict, between_nominals=dipped)
+
+
+def test_a_sweep_read_for_other_classes_is_rejected() -> None:
+    """The class comes from the rows and the sweep together, on the same keys."""
+    verdict = _a_verdict()
+    thin = {
+        k: v for k, v in verdict.between_nominals.items() if k != "margin_class2_db"
+    }
+    with pytest.raises(ValueError, match=r"the sweep is read for the same classes"):
+        dataclasses.replace(verdict, between_nominals=thin)

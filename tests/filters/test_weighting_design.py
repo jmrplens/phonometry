@@ -993,10 +993,10 @@ def test_a_and_c_earn_class_1_at_every_rate_the_library_claims(
     A verdict alone would still read class 1 with 0.69 dB of that gone.
     """
     result = filters.verify_weighting_class(filters.WeightingFilter(fs, curve))
-    assert result["overall_class"] == 1, f"{curve} at fs={fs}"
-    worst = min(band["margin_class1_db"] for band in result["bands"])
+    assert result.overall_class == 1, f"{curve} at fs={fs}"
+    worst = min(band["margin_class1_db"] for band in result.bands)
     assert worst == pytest.approx(0.7, abs=0.01), f"{curve} at fs={fs}: {worst:+.4f} dB"
-    assert result["between_nominals"]["margin_class1_db"] > 0.9
+    assert result.between_nominals["margin_class1_db"] > 0.9
 
 
 def test_the_design_is_paid_for_once_per_curve_rate_and_mode() -> None:

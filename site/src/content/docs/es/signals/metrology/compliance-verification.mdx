@@ -144,14 +144,14 @@ from phonometry import filters
 
 wf = filters.WeightingFilter(48000, "A")
 weighting = filters.verify_weighting_class(wf)
-print(weighting["overall_class"])       # 1
-print(weighting["range_limited"])       # False
+print(weighting.overall_class)       # 1
+print(weighting.range_limited)       # False
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6,
                                 limits=[100, 10000])
 bands = filters.verify_filter_class(bank)
-print(bands["overall_class"])           # 1
-print(bands["range_limited"])           # True en un banco diezmado
+print(bands.overall_class)           # 1
+print(bands.range_limited)           # True en un banco diezmado
 ```
 
 Lee las banderas, no solo la clase. `range_limited` en el banco es `True`
@@ -162,9 +162,9 @@ comprueba las 34 frecuencias nominales e informa `False`. Los márgenes dicen
 cuánto le faltó al veredicto:
 
 ```python
-worst = min(bands["bands"], key=lambda b: b["margin_class1_db"])
+worst = min(bands.bands, key=lambda b: b["margin_class1_db"])
 print(round(worst["margin_class1_db"], 3))   # 0.4
-print(weighting["bands"][20])
+print(weighting.bands[20])
 # {'freq': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
 ```
 
@@ -207,8 +207,8 @@ ax.plot(freqs, lo2, ":", drawstyle="steps-mid", color="C2")
 
 for curve, marker in (("A", "o"), ("C", "s")):
     verdict = filters.verify_weighting_class(filters.WeightingFilter(48000, curve))
-    f = [b["freq"] for b in verdict["bands"]]
-    dev = [b["deviation_db"] for b in verdict["bands"]]
+    f = [b["freq"] for b in verdict.bands]
+    dev = [b["deviation_db"] for b in verdict.bands]
     ax.plot(f, dev, marker=marker,
             label=f"Desviación de la ponderación {curve} (48 kHz)")
 
@@ -221,17 +221,17 @@ plt.show()
 
 </details>
 
-Cuando el veredicto tiene que salir de la consola, `filter_class_compliance`
-envuelve la misma verificación en un objeto resultado con `.plot()` (la
-banda de peor margen dibujada sobre su corredor de clase) y `.report()`, la
-ficha acreditada de una página con una fila opcional de CUMPLE/NO CUMPLE
-frente a una clase exigida:
+Cuando el veredicto tiene que salir de la consola, responde la misma
+llamada: lo que devuelve `verify_filter_class` lleva `.plot()` (la banda de
+peor margen dibujada sobre su corredor de clase) y `.report()`, la ficha
+acreditada de una página con una fila opcional de CUMPLE/NO CUMPLE frente a
+una clase exigida:
 
 ```python
 from phonometry import ReportMetadata, filters
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
-result = filters.filter_class_compliance(bank)   # result.overall_class == 1
+result = filters.verify_filter_class(bank)   # result.overall_class == 1
 result.report(
     "iec61260_es.pdf",
     metadata=ReportMetadata(
@@ -252,9 +252,9 @@ result.report(
 
 El verificador de intensidad sigue el mismo patrón un dominio más allá:
 `verify_intensity_class` califica un espectro medido del índice de
-intensidad residual de presión frente a los límites de clase de IEC 61043, y
-`intensity_class_compliance` lo envuelve con `.plot()` y su propia ficha,
-con la física del índice residual explicada en
+intensidad residual de presión frente a los límites de clase de IEC 61043 y
+devuelve un resultado con `.plot()` y su propia ficha, con la física del
+índice residual explicada en
 [Intensidad acústica](/phonometry/es/devices/emission/intensity/).
 
 ### Los verificadores que califican una medición, no un diseño
@@ -410,9 +410,9 @@ Qué afirma una clase de prestaciones en IEC 61672-1:2013 e IEC 61260-1:2014 y
 cómo la afirmación se encadena a través de una medición; los verificadores
 públicos (`verify_weighting_class`, `verify_filter_class`,
 `verify_intensity_class`, con `weighting_class_limits` y `class_limits`
-publicando las máscaras, y `filter_class_compliance` /
-`intensity_class_compliance` añadiendo `.plot()` y la ficha acreditada); los
-cinco verificadores que califican un instrumento medido en vez de un diseño, y
+publicando las máscaras, y los dos últimos devolviendo un resultado que lleva
+`.plot()` y la ficha acreditada); los cinco verificadores que califican un
+instrumento medido en vez de un diseño, y
 dónde está la página de cada uno; cómo leer y citar el informe de conformidad
 publicado; y el alcance verificado de las partes de ensayo de tipo y de
 ensayos periódicos.
@@ -488,9 +488,9 @@ IEC 61012:1990), `verify_filter_class` comprueba un banco de fracción de
 octava frente a la Tabla 1 de IEC 61260-1:2014 (la máscara de clase 0 de
 1995 vía `edition="1995"`), y `verify_intensity_class` comprueba el espectro
 del índice residual de un instrumento de intensidad frente a IEC 61043:1993.
-Las tres informan una clase por banda con márgenes en dB, y
-`filter_class_compliance` / `intensity_class_compliance` empaquetan el
-veredicto con `.plot()` y una ficha acreditada `.report()`. Otros cinco
+Las tres informan una clase por banda con márgenes en dB, y los dos últimos
+devuelven un resultado que lleva `.plot()` y una ficha acreditada
+`.report()`. Otros cinco
 verificadores califican una medición en vez de un diseño y devuelven un
 cumple o no cumple: `verify_aircraft_noise_system` frente a IEC 61265:1995, y
 `verify_weighting`, `verify_phase_response`, `verify_signal_burst_response` y

@@ -118,8 +118,8 @@ def test_fitted_design_earns_type0(fs: int, curve: str) -> None:
     result = filters.verify_weighting_class(
         filters.WeightingFilter(fs, curve), edition="1979"
     )
-    assert result["overall_class"] == 0
-    worst = min(band["margin_class0_db"] for band in result["bands"])
+    assert result.overall_class == 0
+    worst = min(band["margin_class0_db"] for band in result.bands)
     # The binding rows are the +/-0.7 dB pass-band cells, cleared by ~0.65 dB.
     assert worst > 0.6, f"{curve} at {fs} Hz binds at {worst:+.3f} dB"
 
@@ -137,19 +137,17 @@ def test_plain_bilinear_fails_type0_while_passing_class1() -> None:
     wf = filters.WeightingFilter(48000, "A", high_accuracy=False)
 
     modern = filters.verify_weighting_class(wf)
-    assert modern["overall_class"] == 1
-    assert all(band["margin_class1_db"] >= 0 for band in modern["bands"])
+    assert modern.overall_class == 1
+    assert all(band["margin_class1_db"] >= 0 for band in modern.bands)
 
     historic = filters.verify_weighting_class(wf, edition="1979")
-    assert historic["overall_class"] == 1
-    failed = {
-        band["freq"] for band in historic["bands"] if band["margin_class0_db"] < 0
-    }
+    assert historic.overall_class == 1
+    failed = {band["freq"] for band in historic.bands if band["margin_class0_db"] < 0}
     assert failed == {16000.0, 20000.0}
     # Same deviation, opposite verdict: the mask is what differs, not the
     # measurement.
-    per_freq = {band["freq"]: band for band in historic["bands"]}
-    modern_per_freq = {band["freq"]: band for band in modern["bands"]}
+    per_freq = {band["freq"]: band for band in historic.bands}
+    modern_per_freq = {band["freq"]: band for band in modern.bands}
     for freq in failed:
         assert per_freq[freq]["deviation_db"] == modern_per_freq[freq]["deviation_db"]
         assert per_freq[freq]["class"] == 1
@@ -161,9 +159,9 @@ def test_band_and_sweep_carry_one_margin_per_type() -> None:
         filters.WeightingFilter(48000, "A"), edition="1979"
     )
     expected = [f"margin_class{cls}_db" for cls in (0, 1, 2, 3)]
-    for band in result["bands"]:
+    for band in result.bands:
         assert list(band) == ["freq", "class", "deviation_db", *expected]
-    assert list(result["between_nominals"]) == ["worst_freq", *expected]
+    assert list(result.between_nominals) == ["worst_freq", *expected]
 
 
 def test_b_is_graded_against_table_v_not_the_ansi_mask() -> None:
@@ -176,8 +174,8 @@ def test_b_is_graded_against_table_v_not_the_ansi_mask() -> None:
     """
     wf = filters.WeightingFilter(48000, "B")
     result = filters.verify_weighting_class(wf, edition="1979")
-    assert result["overall_class"] == 0
-    band_10 = next(band for band in result["bands"] if band["freq"] == 10.0)
+    assert result.overall_class == 0
+    band_10 = next(band for band in result.bands if band["freq"] == 10.0)
     # Upper-only: the margin is the distance to the +2 dB ceiling alone.
     assert band_10["margin_class0_db"] == pytest.approx(
         2.0 - band_10["deviation_db"], abs=1e-9

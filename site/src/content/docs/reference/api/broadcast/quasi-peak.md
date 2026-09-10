@@ -187,6 +187,34 @@ Time constants of the quasi-peak chain, in seconds.
 | `discharge` | Fall time constant of the peak rectifier. |
 | `reading_device` | Time constant of the symmetric first-order reading device that follows it (clause 2.5's "reading device"). |
 
+## QuasiPeakDynamicsResult
+
+```python
+QuasiPeakDynamicsResult(
+    fs: float,
+    passed: bool,
+    worst_margin_db: float,
+    worst_deviation_db: float,
+    stimuli: tuple[dict[str, Any], ...],
+)
+```
+
+The eleven acceptance windows of clause 2, read on one chain.
+
+What [`verify_quasi_peak_dynamics`](/phonometry/reference/api/broadcast/quasi-peak/#verify_quasi_peak_dynamics) returns: the verdict together with
+the eleven rows it is the conjunction of, and the sample rate they were
+run at.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `fs` | Sample rate the stimuli were run at, in Hz. |
+| `passed` | Whether every reading fell inside its window. |
+| `worst_margin_db` | The smallest of the eleven margins, negative when one reading is outside its window. |
+| `worst_deviation_db` | The largest departure from a printed reference reading. It is a regression bound, not conformance: the reference is printed to two significant figures on nine of the eleven cells. |
+| `stimuli` | The eleven rows, `{"stimulus", "table", "reading_percent", "lower_percent", "reference_percent", "upper_percent", "deviation_db", "margin_db"}` each. |
+
 ## QuasiPeakResult
 
 ```python
@@ -270,8 +298,9 @@ Time of each sample of `trace`, in seconds.
 ```python
 verify_quasi_peak_dynamics(
     fs: float = 48000.0,
+    *,
     ballistics: QuasiPeakBallistics = ...,
-) -> dict[str, Any]
+) -> QuasiPeakDynamicsResult
 ```
 
 Check the detector against the eleven acceptance windows of clause 2.
@@ -306,7 +335,7 @@ answer by construction.
 | `fs` | Sample rate to run the stimuli at, in Hz. At 44.1 kHz the 25-cycle burst is not sample-exact (it spans 220.5 samples) and [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst) warns; the consequence measures 0.006 dB against a 2.626 dB window. |
 | `ballistics` | The chain to check, defaulting to the fitted [`BS468_BALLISTICS`](/phonometry/reference/api/broadcast/quasi-peak/#bs468_ballistics). Passing another set is how the published statement about how far each constant can move is reproduced, and the reason the chain takes them as an argument at all. |
 
-**Returns:** Dict with `fs`, `passed` (every reading inside its window), `worst_margin_db` (the smallest margin over the eleven, negative when one is outside), `worst_deviation_db` (the largest departure from a printed reference reading) and `stimuli`: eleven rows of `{"stimulus", "table", "reading_percent", "lower_percent", "reference_percent", "upper_percent", "deviation_db", "margin_db"}`.
+**Returns:** A [`QuasiPeakDynamicsResult`](/phonometry/reference/api/broadcast/quasi-peak/#quasipeakdynamicsresult), which carries the verdict together with the eleven rows it is the conjunction of.
 
 **Raises**
 

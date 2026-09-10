@@ -717,9 +717,71 @@ def _window_row(
     }
 
 
+@dataclass(frozen=True)
+class QuasiPeakDynamicsResult:
+    """The eleven acceptance windows of clause 2, read on one chain.
+
+    What :func:`verify_quasi_peak_dynamics` returns: the verdict together with
+    the eleven rows it is the conjunction of, and the sample rate they were
+    run at.
+
+    :ivar fs: Sample rate the stimuli were run at, in Hz.
+    :ivar passed: Whether every reading fell inside its window.
+    :ivar worst_margin_db: The smallest of the eleven margins, negative when
+        one reading is outside its window.
+    :ivar worst_deviation_db: The largest departure from a printed reference
+        reading. It is a regression bound, not conformance: the reference is
+        printed to two significant figures on nine of the eleven cells.
+    :ivar stimuli: The eleven rows, ``{"stimulus", "table",
+        "reading_percent", "lower_percent", "reference_percent",
+        "upper_percent", "deviation_db", "margin_db"}`` each.
+    """
+
+    fs: float
+    passed: bool
+    worst_margin_db: float
+    worst_deviation_db: float
+    stimuli: tuple[dict[str, Any], ...]
+
+    def __post_init__(self) -> None:
+        """Reject a verdict its own eleven rows do not support.
+
+        The three summary numbers are not independent of the table: they are
+        the conjunction, the minimum and the maximum of the same column a
+        reader prints beside them. A verdict that says the chain passed above
+        a row whose margin is negative is the one sheet this class exists to
+        make impossible, and nothing further down objects to it, because every
+        number on it is inside its plausible range.
+
+        :raises ValueError: if there are no rows, or a summary is not the one
+            the rows derive.
+        """
+        if not self.stimuli:
+            msg = (
+                f"{type(self).__name__}: a verdict cannot be attested over no "
+                "stimulus; clause 2 has eleven."
+            )
+            raise ValueError(msg)
+        require_positive(self.fs, "fs")
+        margins = [float(row["margin_db"]) for row in self.stimuli]
+        deviations = [abs(float(row["deviation_db"])) for row in self.stimuli]
+        for field, stated, derived in (
+            ("passed", self.passed, all(m >= 0.0 for m in margins)),
+            ("worst_margin_db", self.worst_margin_db, min(margins)),
+            ("worst_deviation_db", self.worst_deviation_db, max(deviations)),
+        ):
+            if stated != derived:
+                msg = (
+                    f"{type(self).__name__}: '{field}' must be the value the "
+                    f"eleven rows derive; got {stated!r} where they give "
+                    f"{derived!r}."
+                )
+                raise ValueError(msg)
+
+
 def verify_quasi_peak_dynamics(
-    fs: float = 48000.0, ballistics: QuasiPeakBallistics = BS468_BALLISTICS
-) -> dict[str, Any]:
+    fs: float = 48000.0, *, ballistics: QuasiPeakBallistics = BS468_BALLISTICS
+) -> QuasiPeakDynamicsResult:
     """Check the detector against the eleven acceptance windows of clause 2.
 
     Runs the clause 2.1 and 2.2 stimuli exactly as they are specified: a
@@ -749,12 +811,8 @@ def verify_quasi_peak_dynamics(
         25-cycle burst is not sample-exact (it spans 220.5 samples) and
         :func:`~phonometry.signals.tone_burst` warns; the consequence
         measures 0.006 dB against a 2.626 dB window.
-    :return: Dict with ``fs``, ``passed`` (every reading inside its window),
-        ``worst_margin_db`` (the smallest margin over the eleven, negative
-        when one is outside), ``worst_deviation_db`` (the largest departure
-        from a printed reference reading) and ``stimuli``: eleven rows of
-        ``{"stimulus", "table", "reading_percent", "lower_percent",
-        "reference_percent", "upper_percent", "deviation_db", "margin_db"}``.
+    :return: A :class:`QuasiPeakDynamicsResult`, which carries the verdict
+        together with the eleven rows it is the conjunction of.
     :param ballistics: The chain to check, defaulting to the fitted
         :data:`BS468_BALLISTICS`. Passing another set is how the published
         statement about how far each constant can move is reproduced, and
@@ -790,10 +848,10 @@ def verify_quasi_peak_dynamics(
         )
         for rate, lower, reference, upper in _TABLE_3
     ]
-    return {
-        "fs": float(fs),
-        "passed": all(row["margin_db"] >= 0.0 for row in rows),
-        "worst_margin_db": min(row["margin_db"] for row in rows),
-        "worst_deviation_db": max(abs(row["deviation_db"]) for row in rows),
-        "stimuli": rows,
-    }
+    return QuasiPeakDynamicsResult(
+        fs=float(fs),
+        passed=all(row["margin_db"] >= 0.0 for row in rows),
+        worst_margin_db=min(row["margin_db"] for row in rows),
+        worst_deviation_db=max(abs(row["deviation_db"]) for row in rows),
+        stimuli=tuple(rows),
+    )

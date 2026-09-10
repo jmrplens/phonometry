@@ -54,30 +54,30 @@ def test_class_limits_low_side_is_reciprocal() -> None:
 def test_butter_order6_third_octave_meets_class1() -> None:
     bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[100, 5000])
     result = filters.verify_filter_class(bank)
-    assert result["overall_class"] == 1, result
+    assert result.overall_class == 1, result
 
 
 def test_butter_order6_octave_meets_class1() -> None:
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
     result = filters.verify_filter_class(bank)
-    assert result["overall_class"] == 1, result
+    assert result.overall_class == 1, result
 
 
 def test_low_order_fails_class1() -> None:
     """A 1st-order bank cannot reach the class stopband attenuations."""
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=1, limits=[500, 2000])
     result = filters.verify_filter_class(bank)
-    assert result["overall_class"] is None
+    assert result.overall_class is None
 
 
 def test_result_has_per_band_details() -> None:
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000])
     result = filters.verify_filter_class(bank)
-    assert len(result["bands"]) == bank.num_bands
-    for band in result["bands"]:
+    assert len(result.bands) == bank.num_bands
+    for band in result.bands:
         assert set(band) >= {"freq", "class", "margin_class1_db", "margin_class2_db"}
     # margins must be finite floats
-    assert all(np.isfinite(b["margin_class1_db"]) for b in result["bands"])
+    assert all(np.isfinite(b["margin_class1_db"]) for b in result.bands)
 
 
 def test_stateful_bank_matches_stateless_design() -> None:
@@ -99,8 +99,8 @@ def test_stateful_bank_matches_stateless_design() -> None:
     )
     r_stateful = filters.verify_filter_class(stateful)
     r_stateless = filters.verify_filter_class(stateless)
-    assert r_stateful["overall_class"] == r_stateless["overall_class"]
-    for a, b in zip(r_stateful["bands"], r_stateless["bands"], strict=True):
+    assert r_stateful.overall_class == r_stateless.overall_class
+    for a, b in zip(r_stateful.bands, r_stateless.bands, strict=True):
         assert a["margin_class1_db"] == pytest.approx(b["margin_class1_db"])
 
 
@@ -119,9 +119,9 @@ def test_coarse_grid_breakpoints_evaluated_exactly() -> None:
     )
     dense = filters.verify_filter_class(bank)
     coarse = filters.verify_filter_class(bank, num_points=16)
-    assert coarse["overall_class"] == dense["overall_class"] == 1
-    m_dense = min(b["margin_class1_db"] for b in dense["bands"])
-    m_coarse = min(b["margin_class1_db"] for b in coarse["bands"])
+    assert coarse.overall_class == dense.overall_class == 1
+    m_dense = min(b["margin_class1_db"] for b in dense.bands)
+    m_coarse = min(b["margin_class1_db"] for b in coarse.bands)
     assert m_coarse == pytest.approx(m_dense, abs=0.05)
 
 
@@ -187,8 +187,8 @@ def test_butter_meets_class0_1995() -> None:
     """The default order-6 Butterworth bank clears the strict 1995 class 0."""
     bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6)
     result = filters.verify_filter_class(bank, edition="1995")
-    assert result["overall_class"] == 0, result
-    band = result["bands"][0]
+    assert result.overall_class == 0, result
+    band = result.bands[0]
     assert set(band) == {
         "freq",
         "class",
@@ -198,7 +198,7 @@ def test_butter_meets_class0_1995() -> None:
         "margin_class2_db",
     }
     # A class-0 band must clear class 1 and class 2 by at least as much.
-    for b in result["bands"]:
+    for b in result.bands:
         assert b["margin_class0_db"] <= b["margin_class1_db"] + 1e-9
         assert b["margin_class1_db"] <= b["margin_class2_db"] + 1e-9
 
@@ -207,8 +207,8 @@ def test_2014_default_unaffected_by_edition_support() -> None:
     """The default edition still reports only classes 1/2 (no class-0 key)."""
     bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6)
     result = filters.verify_filter_class(bank)
-    assert result["overall_class"] == 1
-    assert set(result["bands"][0]) == {
+    assert result.overall_class == 1
+    assert set(result.bands[0]) == {
         "freq",
         "class",
         "checked_to_omega",
@@ -227,8 +227,8 @@ def test_range_limited_flag_reports_unverifiable_stopband() -> None:
     """
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
     result = filters.verify_filter_class(bank)
-    assert result["range_limited"] is True
-    for band in result["bands"]:
+    assert result.range_limited is True
+    for band in result.bands:
         # The checked range covers the band edge but not the G^4 mask end.
         assert 10**0.15 < band["checked_to_omega"] < 15.0
 
@@ -278,7 +278,7 @@ def test_a_filter_verdict_refuses_per_band_entries_that_disagree() -> None:
 
     from phonometry.filters.core import OctaveFilterBank
 
-    result = filters.filter_class_compliance(
+    result = filters.verify_filter_class(
         OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
     )
     short = result.bands[:-1]
@@ -297,7 +297,7 @@ def test_a_filter_verdict_refuses_a_class_its_bands_carry_no_margins_for() -> No
 
     from phonometry.filters.core import OctaveFilterBank
 
-    result = filters.filter_class_compliance(
+    result = filters.verify_filter_class(
         OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
     )
     # 'got 0' is what separates this from the non-integer case below, which
@@ -314,7 +314,7 @@ def test_a_filter_verdict_refuses_an_edition_that_disagrees_with_its_bands() -> 
 
     from phonometry.filters.core import OctaveFilterBank
 
-    result = filters.filter_class_compliance(
+    result = filters.verify_filter_class(
         OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
     )
     with pytest.raises(ValueError, match=r"'edition' \('1995'\) defines classes"):
@@ -337,7 +337,7 @@ def test_a_filter_verdict_refuses_a_later_band_short_of_a_margin_key() -> None:
 
     from phonometry.filters.core import OctaveFilterBank
 
-    result = filters.filter_class_compliance(
+    result = filters.verify_filter_class(
         OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
     )
     # The producer's own bands all carry the same margin keys, so the guard
@@ -362,7 +362,7 @@ def test_a_filter_verdict_refuses_a_non_finite_per_band_value() -> None:
 
     from phonometry.filters.core import OctaveFilterBank
 
-    result = filters.filter_class_compliance(
+    result = filters.verify_filter_class(
         OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
     )
     bands = tuple(copy.deepcopy(band) for band in result.bands)
@@ -384,7 +384,7 @@ def test_a_filter_verdict_refuses_a_class_stated_over_no_bands() -> None:
 
     from phonometry.filters.core import OctaveFilterBank
 
-    result = filters.filter_class_compliance(
+    result = filters.verify_filter_class(
         OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
     )
     empty = {
@@ -405,7 +405,7 @@ def test_a_filter_verdict_refuses_an_unknown_edition() -> None:
 
     from phonometry.filters.core import OctaveFilterBank
 
-    result = filters.filter_class_compliance(
+    result = filters.verify_filter_class(
         OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
     )
     with pytest.raises(ValueError, match="'edition' must be one of"):
@@ -427,7 +427,7 @@ def test_a_filter_verdict_refuses_a_class_its_bands_do_not_derive() -> None:
 
     from phonometry.filters.core import OctaveFilterBank
 
-    result = filters.filter_class_compliance(
+    result = filters.verify_filter_class(
         OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
     )
     assert result.overall_class == 1
@@ -453,7 +453,7 @@ def test_a_filter_verdict_refuses_a_class_over_a_band_that_meets_none() -> None:
 
     from phonometry.filters.core import OctaveFilterBank
 
-    result = filters.filter_class_compliance(
+    result = filters.verify_filter_class(
         OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
     )
     bands = tuple(copy.deepcopy(band) for band in result.bands)
@@ -481,7 +481,7 @@ def test_a_filter_verdict_refuses_a_class_that_is_no_designation() -> None:
 
     from phonometry.filters.core import OctaveFilterBank
 
-    result = filters.filter_class_compliance(
+    result = filters.verify_filter_class(
         OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
     )
     bands = tuple(copy.deepcopy(band) for band in result.bands)
@@ -504,7 +504,7 @@ def test_a_filter_verdict_refuses_a_band_carrying_no_class_at_all() -> None:
 
     from phonometry.filters.core import OctaveFilterBank
 
-    result = filters.filter_class_compliance(
+    result = filters.verify_filter_class(
         OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
     )
     bands = tuple(copy.deepcopy(band) for band in result.bands)

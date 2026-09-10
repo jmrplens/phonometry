@@ -1006,8 +1006,8 @@ from phonometry import filters
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6)
 result = filters.verify_filter_class(bank)
-print(result["overall_class"])          # 1
-print(result["bands"][0])
+print(result.overall_class)          # 1
+print(result.bands[0])
 # {'freq': 12.589254117941678, 'class': 1, 'checked_to_omega': 3.8127755266765493, 'margin_class1_db': 0.3999999999999595, 'margin_class2_db': 0.5999999999999595}
 ```
 
@@ -1082,8 +1082,8 @@ fs = 48000
 bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
 
 result = filters.verify_filter_class(bank, edition="1995")   # classes 0, 1, 2
-print(result["overall_class"])          # 0  (the default Butterworth clears it)
-print(result["bands"][0]["margin_class0_db"])
+print(result.overall_class)          # 0  (the default Butterworth clears it)
+print(result.bands[0]["margin_class0_db"])
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_class0_mask_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_class0_mask.svg" alt="Nested pass-band acceptance corridors for class 0, 1 and 2 of IEC 61260:1995 with the order-6 Butterworth response sitting inside the tightest class 0 corridor" width="80%"></picture>
@@ -1180,9 +1180,9 @@ raise the order if a band needs more margin.
 
 ## 4. The compliance fiche (`.report()`)
 
-`filter_class_compliance(bank)` wraps the same verification as a result object
-that exposes `.plot()` and `.report()`, so a type-test verdict can be rendered
-as a one-page accredited fiche: a per-band classification table, the
+`verify_filter_class(bank)` returns a result object that exposes `.plot()`
+and `.report()`, so a type-test verdict can be rendered as a one-page
+accredited fiche: a per-band classification table, the
 worst-margin band's measured relative attenuation overlaid on the class
 corridor, and the boxed overall class-compliance result. Pass a `required_class`
 on the `ReportMetadata` to add a PASS/FAIL verdict row (a bank "meets class N"
@@ -1195,7 +1195,7 @@ Spanish fiche (translated fixed strings and a comma decimal separator), e.g.
 from phonometry import ReportMetadata, filters
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
-result = filters.filter_class_compliance(bank)   # overall_class == 1
+result = filters.verify_filter_class(bank)   # overall_class == 1
 result.plot()   # the worst-margin band on its class corridor
 
 result.report(
@@ -1223,7 +1223,7 @@ dropped; the default order-6 Butterworth bank can then be certified to class 0:
 
 ```python
 bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
-result = filters.filter_class_compliance(bank, edition="1995")   # overall_class == 0
+result = filters.verify_filter_class(bank, edition="1995")   # overall_class == 0
 result.plot()   # the class-0 corridor of the 1995 edition
 result.report(
     "iec61260_1995.pdf",

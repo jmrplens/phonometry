@@ -1374,7 +1374,7 @@ from phonometry import filters, vibration
 
 # Sonido: un filtro de ponderación que diseñó esta biblioteca, frente a la Tabla 3 de IEC 61672-1.
 wf = filters.WeightingFilter(48000, "A")
-print(filters.verify_weighting_class(wf)["overall_class"])   # 1
+print(filters.verify_weighting_class(wf).overall_class)   # 1
 
 # Vibración: el barrido de banco de la sección 2, frente a las Tablas 4 y 5 de ISO 8041-1.
 sweep = 10.0 ** (np.array([-3, 0, 3, 6, 9, 12, 15, 18, 19]) / 10.0)

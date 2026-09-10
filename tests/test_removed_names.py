@@ -230,7 +230,7 @@ def test_the_names_the_4_0_moves_carried_are_all_reachable() -> None:
     assert callable(ph.signals.leq)
     assert callable(ph.filters.octave_filter)
     assert callable(ph.speech.sti_from_impulse_response)
-    assert callable(ph.emission.intensity_class_compliance)
+    assert callable(ph.emission.verify_intensity_class)
     assert callable(ph.environment.lden)
     assert callable(ph.room.impulse_response)
 
@@ -245,10 +245,26 @@ def test_a_namespace_does_not_serve_a_name_that_left_it() -> None:
     for namespace, name in (
         (ph.metrology, "leq"),
         (ph.metrology, "octave_filter"),
-        (ph.metrology, "intensity_class_compliance"),
+        (ph.metrology, "verify_intensity_class"),
         (ph.hearing, "sti_from_impulse_response"),
         (ph.hearing, "speech_intelligibility_index"),
         (ph.filters, "verify_aircraft_noise_system"),
+    ):
+        with pytest.raises(AttributeError):
+            getattr(namespace, name)
+
+
+def test_the_verdict_wrappers_the_4_0_folded_in_are_gone() -> None:
+    """The two twins that only wrapped a verdict dictionary went with it.
+
+    ``filter_class_compliance`` and ``intensity_class_compliance`` existed to
+    package what their ``verify_*`` sibling returned as a dictionary. The
+    verifier returns the result object itself now, so the second door onto the
+    same computation is gone rather than kept as an alias.
+    """
+    for namespace, name in (
+        (ph.filters, "filter_class_compliance"),
+        (ph.emission, "intensity_class_compliance"),
     ):
         with pytest.raises(AttributeError):
             getattr(namespace, name)

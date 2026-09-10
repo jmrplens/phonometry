@@ -325,10 +325,10 @@ Table 1 limits.
 
 ```python
 wf = filters.WeightingFilter(fs, curve="A")
-print(filters.verify_weighting_class(wf)["overall_class"])   # 1
+print(filters.verify_weighting_class(wf).overall_class)   # 1
 
 bank = filters.OctaveFilterBank(fs, fraction=3)
-print(filters.verify_filter_class(bank)["overall_class"])    # 1
+print(filters.verify_filter_class(bank).overall_class)    # 1
 ```
 
 The verdicts also come per band, so you can see exactly where a design would

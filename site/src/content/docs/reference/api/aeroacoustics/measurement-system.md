@@ -17,6 +17,27 @@ and is not repeated here.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
+## AircraftSystemComplianceResult
+
+```python
+AircraftSystemComplianceResult(
+    passed: bool,
+    checks: tuple[dict[str, Any], ...],
+)
+```
+
+IEC 61265:1995 verdict on an aircraft-noise measurement chain.
+
+What [`verify_aircraft_noise_system`](/phonometry/reference/api/aeroacoustics/measurement-system/#verify_aircraft_noise_system) returns: the verdict together
+with the individual checks it is the conjunction of.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `passed` | Whether every supplied measurement met its limit. |
+| `checks` | One entry per checked quantity, `{"quantity", "limit", "value", "ok", ...}`, as an immutable tuple. |
+
 ## verify_aircraft_noise_system
 
 ```python
@@ -26,7 +47,7 @@ verify_aircraft_noise_system(
     frequency_response: dict[float, float] | None = None,
     linearity: dict[str, float] | None = None,
     resolution: float | None = None,
-) -> dict[str, Any]
+) -> AircraftSystemComplianceResult
 ```
 
 Verify measured performance against IEC 61265:1995 tolerances.
@@ -44,7 +65,7 @@ verification (subclause 4.6) and is not repeated here.
 | `linearity` | Level non-linearity `{"reference": dB, "other": dB}` against the ±0.4/±0.5 dB limits (§4.5.2). |
 | `resolution` | Readout resolution, in dB, against the 0.1 dB limit (§4.7). |
 
-**Returns:** `{"passed": bool, "checks": [{"quantity", "limit", "value", "ok", ...}]}`; `passed` is the conjunction of every check.
+**Returns:** An [`AircraftSystemComplianceResult`](/phonometry/reference/api/aeroacoustics/measurement-system/#aircraftsystemcomplianceresult), whose `passed` is the conjunction of every check and `False` when no measurement was supplied.
 
 **Raises**
 

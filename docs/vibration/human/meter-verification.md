@@ -1306,7 +1306,7 @@ from phonometry import filters, vibration
 
 # Sound: a weighting filter this library designed, against IEC 61672-1 Table 3.
 wf = filters.WeightingFilter(48000, "A")
-print(filters.verify_weighting_class(wf)["overall_class"])   # 1
+print(filters.verify_weighting_class(wf).overall_class)   # 1
 
 # Vibration: the bench sweep of section 2, against ISO 8041-1 Tables 4 and 5.
 sweep = 10.0 ** (np.array([-3, 0, 3, 6, 9, 12, 15, 18, 19]) / 10.0)

@@ -246,7 +246,7 @@ def test_cheby2_default_bank_meets_class1(fraction: float) -> None:
         design=filters.FilterDesign(filter_type="cheby2"),
     )
     result = filters.verify_filter_class(bank)
-    assert result["overall_class"] == 1, result
+    assert result.overall_class == 1, result
 
 
 def test_functional_octavefilter_cheby2_default_meets_class1() -> None:
@@ -271,7 +271,7 @@ def test_functional_octavefilter_cheby2_default_meets_class1() -> None:
         limits=[100, 5000],
         design=filters.FilterDesign(filter_type="cheby2", attenuation=default_att),
     )
-    assert filters.verify_filter_class(bank)["overall_class"] == 1
+    assert filters.verify_filter_class(bank).overall_class == 1
     x = np.random.default_rng(0).standard_normal(48000)
     spl, _ = filters.octave_filter(
         x,

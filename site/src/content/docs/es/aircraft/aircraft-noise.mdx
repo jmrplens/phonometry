@@ -440,7 +440,7 @@ baja distorsión a menos de 5 dB del nivel de calibración e ir escalonándola e
 intervalos de 5 dB, afinados a 1 dB alrededor de los extremos del margen lineal y
 del punto de sobrecarga. El ensayo periódico se hace y se informa en un entorno
 controlado (19-25 °C, 100-102 kPa, 40-70 % de humedad relativa) con un calibrador
-trazable a patrones nacionales. `report["passed"]` se lee como un veredicto sobre
+trazable a patrones nacionales. `report.passed` se lee como un veredicto sobre
 los datos que has aportado: una comprobación fallida invalida los datos de
 certificación, no es una corrección que aplicar. La conformidad de los filtros de
 banda es asunto aparte: el §3.7.3 del Anexo 16 exige clase 1 de IEC 61260, y la
@@ -454,7 +454,7 @@ report = aircraft.verify_aircraft_noise_system(
     directional={4000.0: {30: 0.4, 60: 0.9, 90: 1.9, 120: 2.4, 150: 2.4}},
     frequency_response={1000.0: 1.2},
 )
-print(report["passed"], report["checks"])
+print(report.passed, report.checks)
 ```
 
 ## Absorción atmosférica (SAE ARP 5534)

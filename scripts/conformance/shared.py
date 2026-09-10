@@ -88,7 +88,7 @@ def _filter_class(arch: str, fraction: float) -> FilterClass:
         design=filters.FilterDesign(filter_type=arch),
     )
     result = verify_filter_class(bank)
-    bands = result["bands"]
+    bands = result.bands
     worst = min(bands, key=lambda b: b["margin_class1_db"])
     idx = [b["freq"] for b in bands].index(worst["freq"])
     fm = float(bank.freq[idx])
@@ -113,7 +113,7 @@ def _filter_class(arch: str, fraction: float) -> FilterClass:
         bind_side = "floor" if omega_h <= _pass_edge(bank.fraction) else "stop"
         bind_limit = float(minimum[j])
     return FilterClass(
-        overall_class=result["overall_class"],
+        overall_class=result.overall_class,
         min_margin1=min(b["margin_class1_db"] for b in bands),
         min_margin2=min(b["margin_class2_db"] for b in bands),
         bind_freq=fm,

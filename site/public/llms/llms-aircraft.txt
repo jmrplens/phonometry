@@ -310,7 +310,7 @@ report = aircraft.verify_aircraft_noise_system(
     directional={4000.0: {30: 0.4, 60: 0.9, 90: 1.9, 120: 2.4, 150: 2.4}},
     frequency_response={1000.0: 1.2},
 )
-print(report["passed"], report["checks"])
+print(report.passed, report.checks)
 ```
 
 ## 5. Atmospheric absorption (SAE ARP 5534)

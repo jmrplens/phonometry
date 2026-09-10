@@ -80,9 +80,9 @@ from phonometry import filters
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6)
 result = filters.verify_filter_class(bank)
-print(result["overall_class"])          # 1
-print(result["range_limited"])          # True en un banco diezmado
-print(result["bands"][0])
+print(result.overall_class)          # 1
+print(result.range_limited)          # True en un banco diezmado
+print(result.bands[0])
 # {'freq': 12.589254117941678, 'class': 1, 'checked_to_omega': 3.8127755266765493, 'margin_class1_db': 0.3999999999999595, 'margin_class2_db': 0.5999999999999595}
 ```
 
@@ -202,8 +202,8 @@ fs = 48000
 bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
 
 result = filters.verify_filter_class(bank, edition="1995")   # clases 0, 1, 2
-print(result["overall_class"])          # 0  (el Butterworth por defecto la supera)
-print(result["bands"][0]["margin_class0_db"])
+print(result.overall_class)          # 0  (el Butterworth por defecto la supera)
+print(result.bands[0]["margin_class0_db"])
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_class0_mask.svg" alt="Corredores de aceptación anidados en la banda de paso para las clases 0, 1 y 2 de IEC 61260:1995 con la respuesta Butterworth de orden 6 dentro del corredor de clase 0 más estrecho" width="80%" />
@@ -322,7 +322,7 @@ para separarlos.
 encima del límite justo por dentro de los bordes de banda, donde vive su rizado;
 Bessel se sale a lo largo de la falda, porque nunca cae lo bastante rápido. Las
 muestras en rojo son las que `verify_filter_class` anotó en contra del diseño, y
-esto es exactamente lo que dibuja `filter_class_compliance(bank).plot()` para un
+esto es exactamente lo que dibuja `verify_filter_class(bank).plot()` para un
 banco tuyo. Ojo a un detalle: la gráfica sombrea el corredor de la clase a la
 que más se acercó cada diseño, así que los tres paneles que fallan muestran el
 corredor de clase 2.*
@@ -340,7 +340,7 @@ for ax, ftype in zip(axes.ravel(), ("butter", "cheby1", "ellip", "bessel")):
     bank = filters.OctaveFilterBank(
         fs, fraction=1, order=6, limits=[800, 1200],
         design=filters.FilterDesign(filter_type=ftype))
-    result = filters.filter_class_compliance(bank)
+    result = filters.verify_filter_class(bank)
     result.plot(ax=ax, language="es")
     ax.set_title(f"{ftype}: overall_class = {result.overall_class}")
 plt.tight_layout()
@@ -384,9 +384,9 @@ IEC 60942 para el calibrador — está en
 
 ## 4. La ficha de conformidad (`.report()`)
 
-`filter_class_compliance(bank)` envuelve la misma verificación en un objeto de
-resultado que expone `.plot()` y `.report()`, de modo que el veredicto del
-ensayo de tipo puede renderizarse como una ficha acreditada de una página. La
+`verify_filter_class(bank)` devuelve un objeto de resultado que expone
+`.plot()` y `.report()`, de modo que el veredicto del ensayo de tipo puede
+renderizarse como una ficha acreditada de una página. La
 ficha lista la clase alcanzada por cada banda y su margen vinculante, superpone
 la atenuación relativa medida de la banda de peor margen sobre el corredor de la
 clase y encuadra el resultado global de conformidad. Pasa un `required_class` en
@@ -401,7 +401,7 @@ traducidas y coma como separador decimal), p. ej.
 from phonometry import ReportMetadata, filters
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
-result = filters.filter_class_compliance(bank)   # overall_class == 1
+result = filters.verify_filter_class(bank)   # overall_class == 1
 result.plot(language="es")   # la banda de peor margen sobre su corredor de clase
 
 result.report(
@@ -430,7 +430,7 @@ eliminó, de modo que un banco de orden 6 puede certificarse a clase 0:
 
 ```python
 bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
-result = filters.filter_class_compliance(bank, edition="1995")   # overall_class == 0
+result = filters.verify_filter_class(bank, edition="1995")   # overall_class == 0
 result.plot(language="es")   # el corredor de clase 0 de la edición de 1995
 result.report("iec61260_1995.pdf",
               metadata=ReportMetadata(measurement_standard="IEC 61260:1995",
@@ -454,7 +454,7 @@ y la interpolación logarítmica de la norma), comprobados banda a banda por
 `verify_filter_class` y publicados como máscara por `class_limits`; la máscara
 de clase 0 de la edición retirada IEC 61260:1995 / ANSI S1.11-2004, accesible
 con `edition="1995"`; y la ficha acreditada de una página de
-`filter_class_compliance().report()`, con su veredicto opcional CUMPLE/NO
+`verify_filter_class().report()`, con su veredicto opcional CUMPLE/NO
 CUMPLE frente a `required_class`, en inglés y en español.
 </ScopeClaim>
 

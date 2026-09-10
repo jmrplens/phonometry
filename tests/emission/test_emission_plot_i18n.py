@@ -18,8 +18,8 @@ import numpy as np
 import pytest
 
 from phonometry.emission.intensity_compliance import (
-    intensity_class_compliance,
     residual_index_limits,
+    verify_intensity_class,
 )
 
 
@@ -36,7 +36,7 @@ def _labels(obj: object) -> str:
 
 def test_intensity_class_es() -> None:
     freqs, class1, _ = residual_index_limits("probe")
-    res = intensity_class_compliance(class1 + 1.0, freqs, device="probe")
+    res = verify_intensity_class(class1 + 1.0, freqs, device="probe")
     ax = res.plot(language="es")
     assert "Tabla 2 de IEC 61043" in ax.get_title()
     assert "sonda" in ax.get_title()

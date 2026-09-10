@@ -170,7 +170,7 @@ for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
     print(f"{ftype:8s} {mag[np.argmin(abs(w - 2 * f_m))]:7.1f} dB "
           f"{mag[np.argmin(abs(w - 4 * f_m))]:7.1f} dB "
           f"{delay[len(delay) // 2] * 1e3:5.2f} ms "
-          f"clase {filters.verify_filter_class(banked)['overall_class']}")
+          f"clase {filters.verify_filter_class(banked).overall_class}")
 ```
 
 </details>

@@ -40,7 +40,7 @@ bands = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
 alpha_x = [0.06, 0.07, 0.08, 0.09, 0.10, 0.10]
 alpha_y = [0.12, 0.14, 0.16, 0.18, 0.20, 0.20]
 alpha_z = [0.30, 0.50, 0.65, 0.78, 0.82, 0.80]
-m = environment.air_attenuation_m(bands, 20.0, 50.0)   # air at 20 C / 50 % RH
+m = environment.air_attenuation_m(bands, temperature_c=20.0, relative_humidity_percent=50.0)   # air at 20 C / 50 % RH
 res = room.reverberation_time_models((10.0, 7.0, 3.5),
                                      (alpha_x, alpha_y, alpha_z),
                                      air_attenuation=m, frequencies=bands)
@@ -180,7 +180,11 @@ res.plot()   # the five model curves per band (the figure above)
 import matplotlib.pyplot as plt
 from phonometry import environment, room
 
-m = environment.air_attenuation_m([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0], 20.0, 50.0)
+m = environment.air_attenuation_m(
+    [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0],
+    temperature_c=20.0,
+    relative_humidity_percent=50.0,
+)
 room.reverberation_time_models(
     (10.0, 7.0, 3.5),
     (

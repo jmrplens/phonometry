@@ -48,7 +48,15 @@ def test_table1_digit_exact(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", environment.AtmosphericAbsorptionWarning)
         computed_km = (
-            float(environment.air_attenuation(freq, temp, rh, exact_midband=True)) * 1e3
+            float(
+                environment.air_attenuation(
+                    freq,
+                    temperature_c=temp,
+                    relative_humidity_percent=rh,
+                    exact_midband=True,
+                )
+            )
+            * 1e3
         )
     assert computed_km == pytest.approx(alpha_km, abs=_last_digit_ulp(alpha_km))
 
@@ -60,7 +68,14 @@ def test_table1_agreement_is_tight() -> None:
         warnings.simplefilter("ignore", environment.AtmosphericAbsorptionWarning)
         for temp, rh, freq, alpha_km in ref.ISO9613_1_TABLE1:
             got = (
-                float(environment.air_attenuation(freq, temp, rh, exact_midband=True))
+                float(
+                    environment.air_attenuation(
+                        freq,
+                        temperature_c=temp,
+                        relative_humidity_percent=rh,
+                        exact_midband=True,
+                    )
+                )
                 * 1e3
             )
             worst = max(worst, abs(got - alpha_km) / alpha_km)
@@ -133,7 +148,14 @@ def test_humidity_sweep_has_interior_peak() -> None:
     rhs = np.array([10.0, 30.0, 50.0, 70.0, 80.0, 90.0, 100.0])
     alphas = np.array(
         [
-            float(environment.air_attenuation(1000.0, -20.0, rh, exact_midband=True))
+            float(
+                environment.air_attenuation(
+                    1000.0,
+                    temperature_c=-20.0,
+                    relative_humidity_percent=rh,
+                    exact_midband=True,
+                )
+            )
             for rh in rhs
         ]
     )
@@ -256,7 +278,11 @@ def test_iso9613_2_table2_grid_exact_midbands() -> None:
     for (temp, rh), row in ref.ISO9613_2_TABLE2.items():
         alpha = (
             environment.air_attenuation(
-                ref.ISO9613_2_TABLE2_BANDS, temp, rh, 101.325, exact_midband=True
+                ref.ISO9613_2_TABLE2_BANDS,
+                temperature_c=temp,
+                relative_humidity_percent=rh,
+                atmospheric_pressure_kpa=101.325,
+                exact_midband=True,
             )
             * 1000.0
         )
@@ -282,7 +308,9 @@ def test_atmospheric_attenuation_wraps_air_attenuation() -> None:
     assert isinstance(res, environment.AtmosphericAttenuation)
     np.testing.assert_allclose(
         res.attenuation_coefficient,
-        environment.air_attenuation(bands, 20.0, 50.0),
+        environment.air_attenuation(
+            bands, temperature_c=20.0, relative_humidity_percent=50.0
+        ),
     )
     np.testing.assert_allclose(res.frequencies, bands)
     assert (
@@ -303,7 +331,10 @@ def test_atmospheric_attenuation_matches_table1_cell() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", environment.AtmosphericAbsorptionWarning)
         res = environment.atmospheric_attenuation(
-            1000.0, 10.0, 70.0, exact_midband=True
+            1000.0,
+            temperature_c=10.0,
+            relative_humidity_percent=70.0,
+            exact_midband=True,
         )
     assert float(res.attenuation_coefficient[0]) * 1e3 == pytest.approx(3.66, abs=0.01)
     # exact_midband stores the snapped midband the coefficient was computed at.
@@ -313,7 +344,10 @@ def test_atmospheric_attenuation_matches_table1_cell() -> None:
 def test_atmospheric_attenuation_total_over_distance() -> None:
     # total_attenuation is alpha (dB/m) times the distance (m): A = alpha * d [dB].
     res = environment.atmospheric_attenuation(
-        [1000.0, 4000.0], 20.0, 50.0, distance=200.0
+        [1000.0, 4000.0],
+        temperature_c=20.0,
+        relative_humidity_percent=50.0,
+        distance=200.0,
     )
     np.testing.assert_allclose(
         res.total_attenuation, res.attenuation_coefficient * 200.0
@@ -339,7 +373,9 @@ def test_atmospheric_attenuation_total_coerces_list_fields() -> None:
 
 def test_atmospheric_attenuation_zero_distance_is_allowed() -> None:
     # A zero-length path is degenerate but well defined: A = 0 everywhere.
-    res = environment.atmospheric_attenuation([1000.0], 20.0, 50.0, distance=0.0)
+    res = environment.atmospheric_attenuation(
+        [1000.0], temperature_c=20.0, relative_humidity_percent=50.0, distance=0.0
+    )
     np.testing.assert_allclose(res.total_attenuation, 0.0)
 
 
@@ -347,7 +383,9 @@ def test_atmospheric_attenuation_zero_distance_is_allowed() -> None:
 def test_atmospheric_attenuation_rejects_bad_distance(bad: float) -> None:
     # A negative or non-finite distance is non-physical and raises.
     with pytest.raises(ValueError, match="'distance' must be a finite"):
-        environment.atmospheric_attenuation([1000.0], 20.0, 50.0, distance=bad)
+        environment.atmospheric_attenuation(
+            [1000.0], temperature_c=20.0, relative_humidity_percent=50.0, distance=bad
+        )
 
 
 @pytest.mark.parametrize("bad", [-1.0, math.inf, math.nan])
@@ -375,8 +413,12 @@ def test_atmospheric_attenuation_rejects_stacked_coefficient() -> None:
     # count and reaches plot(), which draws one curve per column over the one
     # frequency axis and prints the single set of stored conditions once per
     # curve ('20 °C, 50 % RH' twice). __post_init__ refuses it instead.
-    cold = environment.atmospheric_attenuation([63.0, 250.0, 1000.0], 5.0, 80.0)
-    warm = environment.atmospheric_attenuation([63.0, 250.0, 1000.0], 20.0, 50.0)
+    cold = environment.atmospheric_attenuation(
+        [63.0, 250.0, 1000.0], temperature_c=5.0, relative_humidity_percent=80.0
+    )
+    warm = environment.atmospheric_attenuation(
+        [63.0, 250.0, 1000.0], temperature_c=20.0, relative_humidity_percent=50.0
+    )
     stacked = np.column_stack(
         [cold.attenuation_coefficient, warm.attenuation_coefficient]
     )
@@ -388,7 +430,9 @@ def test_atmospheric_attenuation_rejects_coefficient_of_other_length() -> None:
     # The loud half, named here rather than left to matplotlib's 'x and y must
     # have same first dimension' from inside the plotter: a coefficient one
     # value short of its frequency axis is refused at construction.
-    res = environment.atmospheric_attenuation([63.0, 250.0, 1000.0], 20.0, 50.0)
+    res = environment.atmospheric_attenuation(
+        [63.0, 250.0, 1000.0], temperature_c=20.0, relative_humidity_percent=50.0
+    )
     short = res.attenuation_coefficient[:-1]
     with pytest.raises(ValueError, match="'attenuation_coefficient'.*same shape"):
         dataclasses.replace(res, attenuation_coefficient=short)
@@ -401,7 +445,11 @@ def test_atmospheric_attenuation_plot_returns_axes() -> None:
     mpl.use("Agg")
     from matplotlib.axes import Axes
 
-    res = environment.atmospheric_attenuation([63.0, 250.0, 1000.0, 4000.0], 20.0, 50.0)
+    res = environment.atmospheric_attenuation(
+        [63.0, 250.0, 1000.0, 4000.0],
+        temperature_c=20.0,
+        relative_humidity_percent=50.0,
+    )
     ax_en = res.plot()
     assert isinstance(ax_en, Axes)
     assert ax_en.get_xlabel() == "Frequency [Hz]"
@@ -421,6 +469,8 @@ def test_atmospheric_attenuation_plot_rejects_unknown_language() -> None:
     import matplotlib as mpl
 
     mpl.use("Agg")
-    res = environment.atmospheric_attenuation([1000.0], 20.0, 50.0)
+    res = environment.atmospheric_attenuation(
+        [1000.0], temperature_c=20.0, relative_humidity_percent=50.0
+    )
     with pytest.raises(ValueError, match="Unknown language"):
         res.plot(language="xx")

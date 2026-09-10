@@ -67,10 +67,10 @@ the ISO 9613-1 `alpha` via $m = \alpha / (10 \log_{10} e)$.
 ```python
 air_attenuation(
     frequencies: ArrayLike,
+    *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
     atmospheric_pressure_kpa: float = 101.325,
-    *,
     exact_midband: bool = False,
 ) -> NDArray[np.float64]
 ```
@@ -108,10 +108,10 @@ entirely to this `alpha` via $m = \alpha / (10 \log_{10} e)$. Use
 ```python
 air_attenuation_m(
     frequencies: ArrayLike,
+    *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
     atmospheric_pressure_kpa: float = 101.325,
-    *,
     exact_midband: bool = False,
 ) -> NDArray[np.float64]
 ```
@@ -144,10 +144,10 @@ hand-entering `m`.
 ```python
 atmospheric_attenuation(
     frequencies: ArrayLike,
+    *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
     atmospheric_pressure_kpa: float = 101.325,
-    *,
     exact_midband: bool = False,
     distance: float | None = None,
 ) -> AtmosphericAttenuation

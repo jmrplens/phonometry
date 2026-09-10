@@ -35,7 +35,13 @@ _BANDS = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 def _attenuation() -> ph.environment.OutdoorAttenuation:
     """A porous-ground attenuation over 200 m (a tested clause-7 geometry)."""
     return ph.environment.outdoor_propagation_attenuation(
-        200.0, 2.0, 2.0, _BANDS, 1.0, 1.0, 1.0
+        200.0,
+        2.0,
+        2.0,
+        frequencies=_BANDS,
+        ground_source=1.0,
+        ground_middle=1.0,
+        ground_receiver=1.0,
     )
 
 

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ReportMetadata:
     """Descriptive metadata for the accredited ISO 717 report fiche.
 
@@ -159,8 +159,6 @@ class ReportMetadata:
     requirement: float | None = None
     required_class: int | None = None
     notes: str | None = None
-    # Appended after the original fields so the positional constructor order
-    # of this public dataclass is preserved.
     tube_shape: str | None = None
 
     #: Numeric fields that must be finite and strictly positive.

@@ -49,9 +49,9 @@ reproducibility standard deviation from Table 3 (anechoic) or Table 2
 
 ```python
 meteorological_corrections(
+    *,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
-    *,
     air_absorption_coefficient: float | np.ndarray | None = None,
     radius: float = 1.0,
 ) -> MeteorologicalCorrection

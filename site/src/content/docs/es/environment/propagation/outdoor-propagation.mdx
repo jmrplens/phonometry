@@ -126,7 +126,7 @@ from phonometry import environment
 freqs = np.geomspace(50.0, 10000.0, 400)
 fig, ax = plt.subplots()
 for temp, rh in [(20.0, 50.0), (20.0, 10.0), (0.0, 70.0), (30.0, 80.0)]:
-    ax.loglog(freqs, environment.air_attenuation(freqs, temp, rh) * 1000.0,
+    ax.loglog(freqs, environment.air_attenuation(freqs, temperature_c=temp, relative_humidity_percent=rh) * 1000.0,
               label=f"{temp:g} °C, {rh:g} % HR")
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("Coeficiente de atenuación alpha [dB/km]")
@@ -148,7 +148,8 @@ print(np.round(alpha * 1000.0, 2))          # en dB/km, como tabula la Tabla 1
 # [  0.12   0.44   1.31   2.73   4.66   9.89  29.67 105.29]
 
 # Reproduce exactamente una celda de la Tabla 1 de la ISO 9613-1 (10 °C, 70 %, 1 kHz)
-cell = environment.air_attenuation(1000.0, 10.0, 70.0, exact_midband=True) * 1000.0
+cell = environment.air_attenuation(1000.0, temperature_c=10.0, relative_humidity_percent=70.0,
+                                exact_midband=True) * 1000.0
 print(round(float(cell), 2))                # 3.66  (dB/km, Tabla 1)
 
 # Alimenta condiciones reales al coeficiente de atenuación de potencia m [1/m] de la ISO 354
@@ -233,7 +234,7 @@ plt.show()
 # O a mano desde air_attenuation (dB/m, escala por 1000 para dB/km):
 freqs = np.geomspace(50.0, 10000.0, 400)
 fig, ax = plt.subplots()
-ax.semilogx(freqs, environment.air_attenuation(freqs, 20.0, 50.0) * 1000.0)
+ax.semilogx(freqs, environment.air_attenuation(freqs, temperature_c=20.0, relative_humidity_percent=50.0) * 1000.0)
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("Coeficiente de atenuación alpha [dB/km]")
 plt.show()
@@ -395,9 +396,9 @@ from phonometry import environment
 bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 barrier = environment.Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
 att = environment.outdoor_propagation_attenuation(
-    200.0, 1.5, 1.5, bands, ground_source=1.0, ground_middle=1.0,
-    ground_receiver=1.0, barrier=barrier, temperature_c=15.0,
-    relative_humidity_percent=70.0,
+    200.0, source_height=1.5, receiver_height=1.5, frequencies=bands,
+    ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
+    barrier=barrier, temperature_c=15.0, relative_humidity_percent=70.0,
 )
 
 # En una línea — el mismo desglose apilado con el total superpuesto:
@@ -978,7 +979,8 @@ from phonometry import ReportMetadata, environment
 freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
 lw = np.array([95, 100, 103, 105, 104, 101, 95, 88], dtype=float)
 result = environment.outdoor_propagation_attenuation(
-    200.0, 4.0, 2.0, freqs, 1.0, 1.0, 1.0,
+    200.0, source_height=4.0, receiver_height=2.0, frequencies=freqs,
+    ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
     barrier=environment.Barrier(source_to_edge=105.0, edge_to_receiver=105.0),
     temperature_c=10.0, relative_humidity_percent=70.0,
 )

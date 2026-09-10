@@ -67,29 +67,54 @@ class TestAtmosphericAbsorption:
         # nominal labels (the ISO 9613-2 Table 2 convention).
         d = 500.0
         alpha = environment.air_attenuation(
-            BANDS, 15.0, 70.0, 101.325, exact_midband=True
+            BANDS,
+            temperature_c=15.0,
+            relative_humidity_percent=70.0,
+            atmospheric_pressure_kpa=101.325,
+            exact_midband=True,
         )
-        got = environment.atmospheric_absorption(d, BANDS, 15.0, 70.0, 101.325)
+        got = environment.atmospheric_absorption(
+            d,
+            frequencies=BANDS,
+            temperature_c=15.0,
+            relative_humidity_percent=70.0,
+            atmospheric_pressure_kpa=101.325,
+        )
         assert np.allclose(got, alpha * d)
 
     def test_exact_midband_convention_at_8khz(self) -> None:
         # At 8 kHz / 20 C / 70 % the nominal-frequency alpha runs ~1.3 % high
         # (77.6 vs 76.6 dB/km); Aatm must follow the exact-midband value.
-        got = environment.atmospheric_absorption(1000.0, [8000.0], 20.0, 70.0, 101.325)
-        exact = environment.air_attenuation(
-            [8000.0], 20.0, 70.0, 101.325, exact_midband=True
+        got = environment.atmospheric_absorption(
+            1000.0,
+            frequencies=[8000.0],
+            temperature_c=20.0,
+            relative_humidity_percent=70.0,
+            atmospheric_pressure_kpa=101.325,
         )
-        nominal = environment.air_attenuation([8000.0], 20.0, 70.0, 101.325)
+        exact = environment.air_attenuation(
+            [8000.0],
+            temperature_c=20.0,
+            relative_humidity_percent=70.0,
+            atmospheric_pressure_kpa=101.325,
+            exact_midband=True,
+        )
+        nominal = environment.air_attenuation(
+            [8000.0],
+            temperature_c=20.0,
+            relative_humidity_percent=70.0,
+            atmospheric_pressure_kpa=101.325,
+        )
         assert got[0] == pytest.approx(float(exact[0]) * 1000.0)
         assert got[0] < float(nominal[0]) * 1000.0
 
     def test_scales_linearly_with_distance(self) -> None:
-        a1 = environment.atmospheric_absorption(100.0, BANDS)
-        a2 = environment.atmospheric_absorption(300.0, BANDS)
+        a1 = environment.atmospheric_absorption(100.0, frequencies=BANDS)
+        a2 = environment.atmospheric_absorption(300.0, frequencies=BANDS)
         assert np.allclose(a2, 3.0 * a1)
 
     def test_grows_with_frequency(self) -> None:
-        a = environment.atmospheric_absorption(1000.0, BANDS)
+        a = environment.atmospheric_absorption(1000.0, frequencies=BANDS)
         assert np.all(np.diff(a) > 0.0)
 
 
@@ -345,23 +370,46 @@ class TestMeteorologicalCorrection:
 class TestOutdoorPropagation:
     def test_breakdown_sums_to_total(self) -> None:
         r = environment.outdoor_propagation_attenuation(
-            200.0, 2.0, 2.0, BANDS, 1.0, 1.0, 1.0
+            200.0,
+            2.0,
+            2.0,
+            frequencies=BANDS,
+            ground_source=1.0,
+            ground_middle=1.0,
+            ground_receiver=1.0,
         )
         assert isinstance(r, environment.OutdoorAttenuation)
         assert np.allclose(r.a_total, r.a_div + r.a_atm + r.a_gr + r.a_bar)
 
     def test_total_grows_with_distance(self) -> None:
-        near = environment.outdoor_propagation_attenuation(100.0, 2.0, 2.0, BANDS)
-        far = environment.outdoor_propagation_attenuation(400.0, 2.0, 2.0, BANDS)
+        near = environment.outdoor_propagation_attenuation(
+            100.0, 2.0, 2.0, frequencies=BANDS
+        )
+        far = environment.outdoor_propagation_attenuation(
+            400.0, 2.0, 2.0, frequencies=BANDS
+        )
         assert np.all(far.a_total > near.a_total)
 
     def test_barrier_increases_attenuation(self) -> None:
         no_bar = environment.outdoor_propagation_attenuation(
-            100.0, 1.0, 1.0, BANDS, 0.0, 0.0, 0.0
+            100.0,
+            1.0,
+            1.0,
+            frequencies=BANDS,
+            ground_source=0.0,
+            ground_middle=0.0,
+            ground_receiver=0.0,
         )
         bar = environment.Barrier(source_to_edge=52.0, edge_to_receiver=52.0)
         with_bar = environment.outdoor_propagation_attenuation(
-            100.0, 1.0, 1.0, BANDS, 0.0, 0.0, 0.0, barrier=bar
+            100.0,
+            1.0,
+            1.0,
+            frequencies=BANDS,
+            ground_source=0.0,
+            ground_middle=0.0,
+            ground_receiver=0.0,
+            barrier=bar,
         )
         assert np.all(with_bar.a_total >= no_bar.a_total - 1e-9)
         assert with_bar.a_total[-1] > no_bar.a_total[-1]
@@ -370,7 +418,14 @@ class TestOutdoorPropagation:
         # Note 13: with a top-edge barrier, Agr + Abar == Dz (ground cancels).
         bar = environment.Barrier(source_to_edge=52.0, edge_to_receiver=52.0)
         r = environment.outdoor_propagation_attenuation(
-            100.0, 1.0, 1.0, BANDS, 0.0, 0.0, 0.0, barrier=bar
+            100.0,
+            1.0,
+            1.0,
+            frequencies=BANDS,
+            ground_source=0.0,
+            ground_middle=0.0,
+            ground_receiver=0.0,
+            barrier=bar,
         )
         dz = environment.barrier_attenuation(bar, 100.0, BANDS)
         # Where the barrier is effective (Dz - Agr > 0) the sum equals Dz.
@@ -380,7 +435,7 @@ class TestOutdoorPropagation:
     def test_barrier_helps_more_at_high_frequency(self) -> None:
         bar = environment.Barrier(source_to_edge=52.0, edge_to_receiver=52.0)
         with_bar = environment.outdoor_propagation_attenuation(
-            100.0, 1.0, 1.0, BANDS, barrier=bar
+            100.0, 1.0, 1.0, frequencies=BANDS, barrier=bar
         )
         gain = with_bar.a_bar
         # Screening gain is larger at 4 kHz than at 63 Hz.
@@ -395,7 +450,13 @@ class TestPredictedReceiverLevel:
     def test_composition_eq3(self) -> None:
         lw = np.full(len(BANDS), 100.0)
         r = environment.outdoor_propagation_attenuation(
-            200.0, 2.0, 2.0, BANDS, 1.0, 1.0, 1.0
+            200.0,
+            2.0,
+            2.0,
+            frequencies=BANDS,
+            ground_source=1.0,
+            ground_middle=1.0,
+            ground_receiver=1.0,
         )
         level = environment.predicted_receiver_level(
             lw,

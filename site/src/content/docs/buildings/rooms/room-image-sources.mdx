@@ -267,7 +267,7 @@ argument takes tens of per cent off the top band.*
 import matplotlib.pyplot as plt
 # `np`, `room`, `freqs` and `alpha` come from the per-band block above.
 
-# environment.air_attenuation_m(freqs, 20.0, 50.0), Np/m at 20 C / 50 % RH
+# environment.air_attenuation_m(freqs, temperature_c=20.0, relative_humidity_percent=50.0), Np/m at 20 C / 50 % RH
 m = [3.02e-4, 6.28e-4, 1.074e-3, 2.277e-3, 6.831e-3]
 
 fig, ax = plt.subplots()

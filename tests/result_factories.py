@@ -133,7 +133,7 @@ def _outdoor() -> ph.environment.OutdoorAttenuation:
         200.0,
         1.5,
         1.5,
-        bands,
+        frequencies=bands,
         ground_source=1.0,
         ground_middle=1.0,
         ground_receiver=1.0,

@@ -958,6 +958,7 @@ Plot the ray paths (depth increasing downward).
 ```python
 VolumeAbsorption(
     model: str,
+    *,
     temperature_c: float = 10.0,
     salinity: float = 35.0,
     ph: float = 8.0,

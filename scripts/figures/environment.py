@@ -213,7 +213,12 @@ def generate_air_absorption_alpha(output_dir: str) -> None:
     ]
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     for temp, rh, color in conditions:
-        alpha_km = environment.air_attenuation(freqs, temp, rh) * 1000.0
+        alpha_km = (
+            environment.air_attenuation(
+                freqs, temperature_c=temp, relative_humidity_percent=rh
+            )
+            * 1000.0
+        )
         ax.loglog(
             freqs,
             alpha_km,
@@ -264,7 +269,7 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
         200.0,
         1.5,
         1.5,
-        bands,
+        frequencies=bands,
         ground_source=1.0,
         ground_middle=1.0,
         ground_receiver=1.0,
@@ -1338,10 +1343,10 @@ def generate_outdoor_level_cascade(output_dir: str) -> None:
         200.0,
         1.5,
         1.5,
-        bands,
-        1.0,
-        1.0,
-        1.0,
+        frequencies=bands,
+        ground_source=1.0,
+        ground_middle=1.0,
+        ground_receiver=1.0,
         barrier=barrier,
         temperature_c=15.0,
         relative_humidity_percent=70.0,
@@ -1440,10 +1445,10 @@ def generate_iso9613_screening_anatomy(output_dir: str) -> None:
         200.0,
         1.5,
         1.5,
-        bands,
-        1.0,
-        1.0,
-        1.0,
+        frequencies=bands,
+        ground_source=1.0,
+        ground_middle=1.0,
+        ground_receiver=1.0,
         barrier=barrier,
         temperature_c=15.0,
         relative_humidity_percent=70.0,
@@ -2640,7 +2645,7 @@ def _qa_levels() -> dict[str, NDArray[np.float64]]:
             - env.geometric_divergence(distance)
             - env.atmospheric_absorption(
                 distance,
-                _QA_BANDS,
+                frequencies=_QA_BANDS,
                 temperature_c=_QA_TEMPERATURE,
                 relative_humidity_percent=_QA_HUMIDITY,
             )

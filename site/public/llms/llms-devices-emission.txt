@@ -780,7 +780,7 @@ k1 = emission.precision_background_correction(
 print(round(float(k1[0, 0]), 4))      # 1.2563
 
 # Meteorological corrections at the 23 C, 101.325 kPa reference (Eq. 16):
-mc = emission.meteorological_corrections(23.0, 101.325)
+mc = emission.meteorological_corrections(temperature_c=23.0, static_pressure_kpa=101.325)
 print(round(mc.c1, 4), round(mc.c2, 4))   # -0.1282 0.0
 
 # Expanded uncertainty (Clause 10.5 EXAMPLE): sigma_R0 = 0.5, sigma_omc = 2.0,

@@ -1270,8 +1270,8 @@ def _static_pressure_at_altitude(altitude: float) -> float:
 
 def reference_atmosphere_correction(
     temperature_c: float,
-    static_pressure_kpa: float | None = None,
     *,
+    static_pressure_kpa: float | None = None,
     altitude: float | None = None,
 ) -> ReferenceAtmosphereCorrection:
     r"""Corrections to reference meteorological conditions (ISO 3744 Annex G).

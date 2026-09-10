@@ -368,7 +368,7 @@ def test_annex_g_corrections_at_the_reference_atmosphere() -> None:
     """At 23 C and 101,325 kPa: C1 = 5 lg(296.15/314) = -0.1271 dB and
     C2 = 15 lg(296.15/296) = +0.0033 dB, both by hand.
     """
-    corr = emission.reference_atmosphere_correction(23.0, 101.325)
+    corr = emission.reference_atmosphere_correction(23.0, static_pressure_kpa=101.325)
     assert corr.c1 == pytest.approx(5.0 * np.log10(296.15 / 314.0), abs=1e-12)
     assert corr.c2 == pytest.approx(15.0 * np.log10(296.15 / 296.0), abs=1e-12)
     assert corr.c1 == pytest.approx(-0.1271, abs=5e-5)
@@ -419,13 +419,15 @@ def test_annex_g_refusals() -> None:
     with pytest.raises(ValueError, match="Give one of 'static_pressure_kpa'"):
         emission.reference_atmosphere_correction(23.0)
     with pytest.raises(ValueError, match="not both"):
-        emission.reference_atmosphere_correction(23.0, 101.0, altitude=100.0)
+        emission.reference_atmosphere_correction(
+            23.0, static_pressure_kpa=101.0, altitude=100.0
+        )
     with pytest.raises(ValueError, match="'static_pressure_kpa' must be positive"):
-        emission.reference_atmosphere_correction(23.0, 0.0)
+        emission.reference_atmosphere_correction(23.0, static_pressure_kpa=0.0)
     with pytest.raises(ValueError, match="'altitude' must be finite and below"):
         emission.reference_atmosphere_correction(23.0, altitude=50000.0)
     with pytest.raises(ValueError, match="'temperature_c' must be finite and above"):
-        emission.reference_atmosphere_correction(-273.15, 101.325)
+        emission.reference_atmosphere_correction(-273.15, static_pressure_kpa=101.325)
 
 
 # --------------------------------------------------------------------------

@@ -58,7 +58,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -1348,6 +1348,7 @@ class DownstreamPipe:
     internal_diameter: float
     wall_thickness: float
     density: float
+    _: KW_ONLY
     sound_speed: float = PIPE_SOUND_SPEED_M_S
     air_sound_speed: float = AIR_SOUND_SPEED_M_S
     atmospheric_pressure_pa: float = STANDARD_ATMOSPHERE_PA

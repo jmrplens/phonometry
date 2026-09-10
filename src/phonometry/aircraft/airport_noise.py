@@ -176,7 +176,7 @@ _T0_C = 15.0
 
 
 def impedance_adjustment(
-    temperature_c: float = _T0_C, atmospheric_pressure_kpa: float = _P0_KPA
+    *, temperature_c: float = _T0_C, atmospheric_pressure_kpa: float = _P0_KPA
 ) -> float:
     r"""Acoustic-impedance adjustment of the standard NPD data (Eq. 4-6/4-7).
 
@@ -206,7 +206,7 @@ def impedance_adjustment(
     return float(10.0 * np.log10(zc / _ZC_REF))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class AerodromeAtmosphere:
     """The aerodrome air the NPD levels are corrected to (Eq. 4-6/4-7).
 
@@ -1363,7 +1363,8 @@ def event_level(
     p, d, le = _clean_table(powers, distances, exposure_levels)
     _, _, lm = _clean_table(powers, distances, maximum_levels)
     imp = impedance_adjustment(
-        atmosphere.temperature_c, atmosphere.atmospheric_pressure_kpa
+        temperature_c=atmosphere.temperature_c,
+        atmospheric_pressure_kpa=atmosphere.atmospheric_pressure_kpa,
     )
     total, seg_arr = _event_level_core(
         pts, obs, p, d, le, lm, float(reference_speed), imp, mounting, key, gr, lr, bk
@@ -1474,7 +1475,8 @@ def noise_contour(
     _, _, lm = _clean_table(powers, distances, maximum_levels)
     vref = float(reference_speed)
     imp = impedance_adjustment(
-        atmosphere.temperature_c, atmosphere.atmospheric_pressure_kpa
+        temperature_c=atmosphere.temperature_c,
+        atmospheric_pressure_kpa=atmosphere.atmospheric_pressure_kpa,
     )
     # One vectorised pass per flight-path segment over the whole grid (the
     # per-point scalar loop is O(grid × segments) Python calls; this is

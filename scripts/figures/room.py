@@ -1280,7 +1280,9 @@ def generate_reverberation_models(output_dir: str) -> None:
     alpha_x = [0.06, 0.07, 0.08, 0.09, 0.10, 0.10]  # hard end walls
     alpha_y = [0.12, 0.14, 0.16, 0.18, 0.20, 0.20]  # lightly treated side walls
     alpha_z = [0.30, 0.50, 0.65, 0.78, 0.82, 0.80]  # carpet + acoustic ceiling
-    m = environment.air_attenuation_m(bands, 20.0, 50.0)
+    m = environment.air_attenuation_m(
+        bands, temperature_c=20.0, relative_humidity_percent=50.0
+    )
     res = room.reverberation_time_models(
         (10.0, 7.0, 3.5),
         (alpha_x, alpha_y, alpha_z),
@@ -2379,7 +2381,9 @@ def generate_image_source_bands(output_dir: str) -> None:
 
     freqs = [250.0, 500.0, 1000.0, 2000.0, 4000.0]
     alpha = np.array([[0.10, 0.15, 0.25, 0.40, 0.50]] * 6)
-    m = environment.air_attenuation_m(freqs, 20.0, 50.0)
+    m = environment.air_attenuation_m(
+        freqs, temperature_c=20.0, relative_humidity_percent=50.0
+    )
 
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     colours = series_colors(len(freqs))

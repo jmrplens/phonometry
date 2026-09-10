@@ -646,6 +646,7 @@ disclaimer.
 
 ```python
 ReportMetadata(
+    *,
     specimen: str | None = None,
     client: str | None = None,
     mounted_by: str | None = None,

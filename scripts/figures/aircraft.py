@@ -1011,9 +1011,9 @@ def generate_airport_segment_corrections(output_dir: str) -> None:
         0.96,
         "impedance adjustment (Eq. 4-6/4-7), for scale:\n"
         f"15 °C, 101.3 kPa: {_fmt_minus(aircraft.impedance_adjustment(), '+.2f')} dB\n"
-        f"30 °C, 101.3 kPa: {_fmt_minus(aircraft.impedance_adjustment(30.0), '+.2f')} dB\n"
+        f"30 °C, 101.3 kPa: {_fmt_minus(aircraft.impedance_adjustment(temperature_c=30.0), '+.2f')} dB\n"
         f"15 °C, 95.0 kPa: "
-        f"{_fmt_minus(aircraft.impedance_adjustment(15.0, 95.0), '+.2f')} dB",
+        f"{_fmt_minus(aircraft.impedance_adjustment(temperature_c=15.0, atmospheric_pressure_kpa=95.0), '+.2f')} dB",
         transform=ax_v.transAxes,
         ha="right",
         va="top",

@@ -49,6 +49,7 @@ Source (clean-room, implemented from the published standard): ECAC.CEAC Doc 29,
 ```python
 Aerodrome(
     elevation_ft: float,
+    *,
     temperature_c: float = 15.0,
     sea_level_pressure_inhg: float = 29.92,
     headwind_kt: float = 8.0,

@@ -168,6 +168,22 @@ EXEMPT: dict[tuple[str, str, str], str] = {
 }
 
 
+#: Conditions that keep their positional slot, with the reason. The bar is a
+#: signature the caller cannot reach any other way, not a call site that would
+#: be tedious to update.
+POSITIONAL: dict[tuple[str, str, str], str] = {
+    (
+        "phonometry.metrology.calibration",
+        "sensitivity",
+        "reference_pressure_pa",
+    ): (
+        "the positional form is part of the Signal overload contract of this "
+        "function, so it moves with that contract and not with a sweep of the "
+        "ambient conditions"
+    ),
+}
+
+
 class Parameter(NamedTuple):
     """One public parameter, and where a reader finds it."""
 
@@ -175,6 +191,7 @@ class Parameter(NamedTuple):
     qualname: str
     name: str
     where: str
+    positional_with_default: bool = False
 
 
 def _is_public(name: str) -> bool:
@@ -236,14 +253,26 @@ def public_parameters() -> Iterator[Parameter]:
                 except (TypeError, ValueError):
                     continue
                 home = getattr(target, "__module__", module_name)
-                for parameter in signature.parameters:
-                    if parameter in {"self", "cls"}:
+                params = list(signature.parameters.values())
+                for position, parameter in enumerate(params):
+                    if parameter.name in {"self", "cls"}:
                         continue
-                    key = (home, qualname, parameter)
+                    key = (home, qualname, parameter.name)
                     if key in seen:
                         continue
                     seen.add(key)
-                    yield Parameter(home, qualname, parameter, _where(target))
+                    # The second half of the rule: a condition that carries a
+                    # default and is not what the call is about should be
+                    # written by name. Three bare numbers in a row is the
+                    # order nobody remembers.
+                    loose = (
+                        position > 0
+                        and parameter.default is not inspect.Parameter.empty
+                        and parameter.kind is parameter.POSITIONAL_OR_KEYWORD
+                    )
+                    yield Parameter(
+                        home, qualname, parameter.name, _where(target), loose
+                    )
 
 
 def names_a_quantity(name: str) -> bool:
@@ -260,20 +289,28 @@ def declares_its_unit(name: str) -> bool:
     return lowered.endswith(UNITS) or lowered.endswith(DIMENSIONLESS)
 
 
-def offenders() -> tuple[list[Parameter], list[tuple[str, str, str]]]:
-    """The parameters that keep their unit off the name, and the stale exemptions."""
-    found: list[Parameter] = []
+def offenders() -> tuple[list[Parameter], list[Parameter], list[tuple[str, str, str]]]:
+    """The unnamed units, the ones a caller can still pass by position, and stale keys."""
+    unnamed: list[Parameter] = []
+    loose: list[Parameter] = []
     used: set[tuple[str, str, str]] = set()
     for parameter in public_parameters():
         if not names_a_quantity(parameter.name):
             continue
         key = (parameter.module, parameter.qualname, parameter.name)
-        if key in EXEMPT:
+        if key in EXEMPT or key in POSITIONAL:
             used.add(key)
-        elif not declares_its_unit(parameter.name):
-            found.append(parameter)
-    stale = [key for key in EXEMPT if key not in used]
-    return found, stale
+            if key in POSITIONAL and not declares_its_unit(parameter.name):
+                unnamed.append(parameter)
+            continue
+        if not declares_its_unit(parameter.name):
+            unnamed.append(parameter)
+        # Only the dimensional half: a level, a ratio or an index carries no
+        # unit to get wrong, so nothing is lost by passing one by position.
+        if parameter.positional_with_default and parameter.name.lower().endswith(UNITS):
+            loose.append(parameter)
+    stale = [k for k in (*EXEMPT, *POSITIONAL) if k not in used]
+    return unnamed, loose, stale
 
 
 def main() -> int:
@@ -281,14 +318,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.parse_args()
 
-    found, stale = offenders()
-    if not found and not stale:
-        print("Every public parameter under the rule names its unit.")
+    unnamed, loose, stale = offenders()
+    if not unnamed and not loose and not stale:
+        print("Every public parameter under the rule names its unit and asks for it.")
         return 0
-    if found:
+    if unnamed:
         print("::error::a public parameter names a quantity without its unit")
-        print(f"{len(found)} parameter(s) keep the unit out of the name:")
-        for parameter in sorted(found):
+        print(f"{len(unnamed)} parameter(s) keep the unit out of the name:")
+        for parameter in sorted(unnamed):
             print(f"  {parameter.qualname}({parameter.name})  <- {parameter.where}")
         print(
             "  -> end the name in one of "
@@ -298,8 +335,19 @@ def main() -> int:
             + "; an acoustic waveform goes in EXEMPT at the top of "
             "scripts/check_parameter_units.py with its reason."
         )
+    if loose:
+        print("::error::a public condition can still be passed as a bare number")
+        print(f"{len(loose)} parameter(s) carry a default and stay positional:")
+        for parameter in sorted(loose):
+            print(f"  {parameter.qualname}({parameter.name})  <- {parameter.where}")
+        print(
+            "  -> put a bare '*' before it in the signature, or KW_ONLY before "
+            "the field, so the unit in the name is written at the call site; "
+            "a signature that has to keep its positional form goes in "
+            "POSITIONAL with the reason."
+        )
     for key in stale:
-        print(f"::error::EXEMPT lists {key}, which no longer exists")
+        print(f"::error::EXEMPT or POSITIONAL lists {key}, which no longer exists")
     return 1
 
 

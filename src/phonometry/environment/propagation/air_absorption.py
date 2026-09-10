@@ -194,10 +194,10 @@ def _validate(
 
 def air_attenuation(
     frequencies: ArrayLike,
+    *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
     atmospheric_pressure_kpa: float = 101.325,
-    *,
     exact_midband: bool = False,
 ) -> NDArray[np.float64]:
     r"""Pure-tone atmospheric attenuation coefficient (ISO 9613-1, Eq. (5)).
@@ -268,10 +268,10 @@ def air_attenuation(
 
 def air_attenuation_m(
     frequencies: ArrayLike,
+    *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
     atmospheric_pressure_kpa: float = 101.325,
-    *,
     exact_midband: bool = False,
 ) -> NDArray[np.float64]:
     r"""ISO 354 air power-attenuation coefficient ``m`` (1/m) from conditions.
@@ -297,9 +297,9 @@ def air_attenuation_m(
     """
     alpha = air_attenuation(
         frequencies,
-        temperature_c,
-        relative_humidity_percent,
-        atmospheric_pressure_kpa,
+        temperature_c=temperature_c,
+        relative_humidity_percent=relative_humidity_percent,
+        atmospheric_pressure_kpa=atmospheric_pressure_kpa,
         exact_midband=exact_midband,
     )
     return attenuation_from_alpha(alpha)
@@ -425,10 +425,10 @@ class AtmosphericAttenuation:
 
 def atmospheric_attenuation(
     frequencies: ArrayLike,
+    *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
     atmospheric_pressure_kpa: float = 101.325,
-    *,
     exact_midband: bool = False,
     distance: float | None = None,
 ) -> AtmosphericAttenuation:
@@ -462,9 +462,9 @@ def atmospheric_attenuation(
     freqs = np.asarray(frequencies, dtype=np.float64)
     alpha = air_attenuation(
         frequencies,
-        temperature_c,
-        relative_humidity_percent,
-        atmospheric_pressure_kpa,
+        temperature_c=temperature_c,
+        relative_humidity_percent=relative_humidity_percent,
+        atmospheric_pressure_kpa=atmospheric_pressure_kpa,
         exact_midband=exact_midband,
     )
     if exact_midband:

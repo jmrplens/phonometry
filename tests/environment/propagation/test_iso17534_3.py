@@ -98,7 +98,7 @@ def _alternative_levels(mean_height: float, distance: float) -> np.ndarray:
         - environment.geometric_divergence(distance)
         - environment.atmospheric_absorption(
             distance,
-            BANDS,
+            frequencies=BANDS,
             temperature_c=TEMPERATURE_C,
             relative_humidity_percent=RELATIVE_HUMIDITY_PCT,
         )

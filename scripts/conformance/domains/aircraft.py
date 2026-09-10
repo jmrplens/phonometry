@@ -604,7 +604,13 @@ def _chk_doc32_screening_delta() -> Outcome:
 def _chk_arp5534_coefficient() -> Outcome:
     # ARP 5534 §3.1: the pure-tone coefficient is the ISO 9613-1 one.
     expected = float(
-        ph.environment.air_attenuation(1000.0, 25.0, 70.0, 101.325, exact_midband=True)
+        ph.environment.air_attenuation(
+            1000.0,
+            temperature_c=25.0,
+            relative_humidity_percent=70.0,
+            atmospheric_pressure_kpa=101.325,
+            exact_midband=True,
+        )
     )
     res = ph.aircraft.sae_band_attenuation(
         [1000.0], 1000.0, temperature_c=25.0, relative_humidity_percent=70.0

@@ -41,7 +41,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from dataclasses import dataclass, field
+from dataclasses import KW_ONLY, dataclass, field
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -281,6 +281,7 @@ class Aerodrome:
     """
 
     elevation_ft: float
+    _: KW_ONLY
     temperature_c: float = 15.0
     sea_level_pressure_inhg: float = _STANDARD_PRESSURE_INHG
     headwind_kt: float = DEFAULT_HEADWIND_KT

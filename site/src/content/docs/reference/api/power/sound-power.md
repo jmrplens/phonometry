@@ -283,8 +283,8 @@ arrays it accepts directly.
 ```python
 reference_atmosphere_correction(
     temperature_c: float,
-    static_pressure_kpa: float | None = None,
     *,
+    static_pressure_kpa: float | None = None,
     altitude: float | None = None,
 ) -> ReferenceAtmosphereCorrection
 ```

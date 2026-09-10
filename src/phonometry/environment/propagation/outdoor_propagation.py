@@ -200,7 +200,7 @@ class GroundFactors:
     receiver: float = 0.0
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class AtmosphericConditions:
     """State of the air behind the atmospheric absorption term ``Aatm``.
 
@@ -477,6 +477,7 @@ def geometric_divergence(distance: float) -> float:
 
 def atmospheric_absorption(
     distance: float,
+    *,
     frequencies: ArrayLike = DEFAULT_FREQUENCIES,
     temperature_c: float = 20.0,
     relative_humidity_percent: float | None = None,
@@ -510,9 +511,9 @@ def atmospheric_absorption(
     )
     alpha = air_attenuation(
         frequencies,
-        temperature_c,
-        relative_humidity_percent,
-        atmospheric_pressure_kpa,
+        temperature_c=temperature_c,
+        relative_humidity_percent=relative_humidity_percent,
+        atmospheric_pressure_kpa=atmospheric_pressure_kpa,
         exact_midband=True,
     )
     return np.asarray(alpha * distance, dtype=np.float64)
@@ -1051,6 +1052,7 @@ def outdoor_propagation_attenuation(
     distance: float,
     source_height: float,
     receiver_height: float,
+    *,
     frequencies: ArrayLike = DEFAULT_FREQUENCIES,
     ground_source: float = 0.0,
     ground_middle: float = 0.0,
@@ -1102,10 +1104,10 @@ def outdoor_propagation_attenuation(
     a_div = np.full_like(freqs, geometric_divergence(distance))
     a_atm = atmospheric_absorption(
         distance,
-        freqs,
-        temperature_c,
-        relative_humidity_percent,
-        atmospheric_pressure_kpa,
+        frequencies=freqs,
+        temperature_c=temperature_c,
+        relative_humidity_percent=relative_humidity_percent,
+        atmospheric_pressure_kpa=atmospheric_pressure_kpa,
     )
     a_gr = ground_attenuation(
         distance,
@@ -1193,15 +1195,15 @@ def predicted_receiver_level(
         geometry.distance,
         geometry.source_height,
         geometry.receiver_height,
-        frequencies,
-        ground.source,
-        ground.middle,
-        ground.receiver,
-        barrier,
-        atmosphere.temperature_c,
-        humidity,
-        atmosphere.atmospheric_pressure_kpa,
-        geometry.projected_distance,
+        frequencies=frequencies,
+        ground_source=ground.source,
+        ground_middle=ground.middle,
+        ground_receiver=ground.receiver,
+        barrier=barrier,
+        temperature_c=atmosphere.temperature_c,
+        relative_humidity_percent=humidity,
+        atmospheric_pressure_kpa=atmosphere.atmospheric_pressure_kpa,
+        projected_distance=geometry.projected_distance,
     )
     cmet: float | None = None
     if c0 is not None:

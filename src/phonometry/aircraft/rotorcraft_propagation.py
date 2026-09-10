@@ -213,9 +213,9 @@ def _absorption_coefficient(
             )
         alpha = air_attenuation(
             frequencies,
-            temperature_c,
-            relative_humidity_percent,
-            atmospheric_pressure_kpa,
+            temperature_c=temperature_c,
+            relative_humidity_percent=relative_humidity_percent,
+            atmospheric_pressure_kpa=atmospheric_pressure_kpa,
             exact_midband=True,
         )
     return np.asarray(alpha, dtype=np.float64)

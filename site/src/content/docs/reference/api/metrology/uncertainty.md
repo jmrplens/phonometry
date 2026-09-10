@@ -64,6 +64,42 @@ Combined standard uncertainty by the GUM law of propagation (clause 5).
 | :--- | :--- |
 | ValueError | for no inputs, a malformed correlation matrix, or a model that is not finite at the estimates or one evaluation step either side of them. |
 
+## coverage_factor
+
+```python
+coverage_factor(coverage: float = 0.95, dof: float = inf) -> float
+```
+
+Coverage factor `k` from the t-distribution (GUM clause 6, Annex G).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `coverage` | Coverage probability in (0, 1). |
+| `dof` | Effective degrees of freedom; `inf` gives the normal quantile. |
+
+**Returns:** The two-sided coverage factor $k = t_p(\text{dof})$.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a coverage outside (0, 1). |
+
+## expanded_uncertainty
+
+```python
+expanded_uncertainty(
+    result: UncertaintyResult,
+    coverage: float = 0.95,
+) -> tuple[float, float]
+```
+
+Coverage factor and expanded uncertainty of a GUM result (clause 6).
+
+Convenience wrapper for [`UncertaintyResult.expanded`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresultexpanded).
+
 ## monte_carlo
 
 ```python

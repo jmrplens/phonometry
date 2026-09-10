@@ -16,7 +16,10 @@ the unbounded pin would have carried the next major into a shim whose promise
 that release breaks.
 
 These tests execute the shipped shim and hold the published prose and the
-published pin to what it actually does.
+published pin to what it actually does. With 4.0 the ceiling started to bite:
+the tree left the pin, the bridge ends at the 3.x line rather than being
+republished against the new one, and what the page owes its reader from here
+is the way out rather than the promise it used to make.
 """
 
 from __future__ import annotations
@@ -62,6 +65,20 @@ _WARNING_CLASS = re.compile(r"\b([A-Z][A-Za-z]*Warning)\b")
 # The migration notice, matched on its stable half so the assertion survives
 # an edit to the wording.
 _NOTICE = "renamed to 'phonometry'"
+
+# The claim the stub was written on: that the whole of the migration is typing
+# the other name. True for as long as the pin resolves to a line with the same
+# API, and false the moment the tree leaves it. Matched in the three shapes the
+# published page used to state it in.
+_RENAME_IS_ENOUGH = re.compile(
+    r"renam\w+ the import[^.]*\b(?:complete|whole)\b"
+    r"|\b(?:complete|whole) (?:of the )?migration\b"
+    r"|\bAPI is identical\b",
+    re.IGNORECASE,
+)
+
+# Where a reader who has left the pin has to be sent instead.
+_UPGRADE_GUIDE = "jmrplens.github.io/phonometry/start/upgrading/"
 
 
 def _gate(tool: str) -> tuple[str, str]:
@@ -188,19 +205,50 @@ def test_stub_pin_excludes_the_major_that_may_break_its_promise() -> None:
     )
 
 
-def test_tree_version_still_falls_inside_the_pin_the_stub_publishes() -> None:
-    """A forcing gate for the day the ceiling above starts to bite.
+def test_the_readme_prints_the_pin_the_resolver_is_given() -> None:
+    """The two places the ceiling is stated have to agree.
 
-    When this tree becomes the major the stub excludes, the published
-    PyOctaveBand stops tracking the library and its README has to be rewritten
-    to say so, or the stub has to be republished against the new line. Neither
-    is a decision to discover from a user's traceback.
+    A reader decides whether the stub still tracks the library by reading the
+    requirement in the prose; `pip` decides it by reading the one in the
+    metadata. Comparing the parsed specifiers rather than the strings lets the
+    README write the pin in the order a person reads it.
     """
+    printed = re.findall(r"`(phonometry[<>=!~][^`]*)`", _README.read_text("utf-8"))
+    assert printed, "the README must print the pin the stub ships"
+    requirement = _phonometry_requirement()
+    for text in printed:
+        quoted = Requirement(text)
+        assert quoted.name == requirement.name
+        assert quoted.specifier == requirement.specifier, (
+            f"stub/README.md says '{text}', stub/pyproject.toml resolves "
+            f"'{requirement}'"
+        )
+
+
+def test_the_readme_routes_off_the_bridge_once_the_tree_has_left_the_pin() -> None:
+    """Where 4.0 left the stub, and what the published page then has to say.
+
+    The ceiling above started to bite with 4.0: this tree is outside the pin,
+    so ``pip install -U PyOctaveBand`` no longer tracks the library. The
+    decision taken was that the bridge ends at the 3.x line rather than being
+    republished against the new one, which makes two sentences of the old
+    README false. Renaming the import is no longer the whole of the migration,
+    because 4.0 moved every name into the module of its domain, and a reader
+    who is told it is has been sent to a traceback instead of to the map.
+    """
+    readme = _README.read_text(encoding="utf-8")
     specifier: SpecifierSet = _phonometry_requirement().specifier
-    assert specifier.contains(Version(phonometry.__version__)), (
-        f"phonometry {phonometry.__version__} is outside the transition stub's "
-        f"pin '{specifier}'. Decide what PyOctaveBand should now install and "
-        f"say it in stub/README.md before releasing."
+    tracks_tree = specifier.contains(Version(phonometry.__version__))
+    overpromise = _RENAME_IS_ENOUGH.search(readme)
+    assert tracks_tree or overpromise is None, (
+        f"phonometry {phonometry.__version__} is outside the stub's pin "
+        f"'{specifier}', so stub/README.md must not say "
+        f"'{overpromise.group(0) if overpromise else ''}'"
+    )
+    assert tracks_tree or _UPGRADE_GUIDE in readme, (
+        f"phonometry {phonometry.__version__} is outside the stub's pin "
+        f"'{specifier}'. The published page is where a user of the old name "
+        f"finds that out, so it has to link {_UPGRADE_GUIDE}"
     )
 
 

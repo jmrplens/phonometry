@@ -9,7 +9,7 @@ define them — ISO, IEC, ANSI and ASTM, the CNOSSOS-EU annex to Directive
 the clause it implements. What that buys you, and how it is checked, is
 [Why phonometry](/phonometry/start/why-phonometry/).
 
-Six short pages, meant to be read once before anything else. Each answers one
+Seven short pages, meant to be read once before anything else. Each answers one
 question, and they are in the order the questions arrive.
 
 **Can I install it and get a number out?**
@@ -24,6 +24,12 @@ meter](/phonometry/signals/sound-level-meter/), which runs the whole chain end
 to end on one page, and [Calibration and
 dBFS](/phonometry/signals/metrology/calibration/) is the deep guide behind the
 one step that matters most.
+
+**My code is written against 3.3 and the imports fail.**
+[Upgrading from 3.3 to 4.0](/phonometry/start/upgrading/) is the map: the one rule
+that moves almost every import, a resolver to paste when you would rather not
+look a name up, the three places where the obvious fix is the wrong one, and
+the ten names that are gone.
 
 **I have a job, not a subject. Which page is it?**
 [What do you need to measure?](/phonometry/start/tasks/) indexes the library by

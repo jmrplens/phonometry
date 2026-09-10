@@ -314,7 +314,7 @@ def test_rows_carrying_another_edition_class_are_rejected() -> None:
     """A row whose margins name a class the edition does not define."""
     verdict = _a_verdict()
     rows = [{**verdict.bands[0], "margin_class7_db": 1.0}, *verdict.bands[1:]]
-    with pytest.raises(ValueError, match=r"must carry margins for classes of edition"):
+    with pytest.raises(ValueError, match=r"must carry a margin for every class"):
         dataclasses.replace(verdict, bands=tuple(rows))
 
 
@@ -366,3 +366,13 @@ def test_the_sweep_can_only_loosen_the_class() -> None:
     assert loosened.overall_class == 2
     with pytest.raises(ValueError, match=r"must be the class the margins derive"):
         dataclasses.replace(verdict, between_nominals=dipped)
+
+
+def test_a_sweep_read_for_other_classes_is_rejected() -> None:
+    """The class comes from the rows and the sweep together, on the same keys."""
+    verdict = _a_verdict()
+    thin = {
+        k: v for k, v in verdict.between_nominals.items() if k != "margin_class2_db"
+    }
+    with pytest.raises(ValueError, match=r"the sweep is read for the same classes"):
+        dataclasses.replace(verdict, between_nominals=thin)

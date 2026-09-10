@@ -726,7 +726,11 @@ class WeightingComplianceResult:
         The edition is pinned first, and the margin keys of every row against
         it: a verdict carried over from the other edition's table would be
         recomputed against classes its rows carry no margins for, and die in
-        a bare :class:`KeyError` naming neither the row nor the edition.
+        a bare :class:`KeyError` naming neither the row nor the edition. Every
+        class the edition defines has to be there, not a subset of them: rows
+        that carry only the looser margin would settle the verdict on a class
+        the filter was never denied. The sweep is held to the same keys,
+        because the class is read from the two together.
 
         The sweep is pinned as present exactly when there is a row to sweep
         between. A filter whose every tabulated frequency is above the Nyquist
@@ -741,10 +745,12 @@ class WeightingComplianceResult:
         classes = _WEIGHTING_EDITIONS[self.edition]["classes"]
         who = type(self).__name__
         carried = _margin_classes(self.bands[0]) if self.bands else []
-        if self.bands and (not carried or not set(carried) <= set(classes)):
+        if self.bands and carried != list(classes):
             msg = (
-                f"{who}: the rows must carry margins for classes of edition "
-                f"{self.edition!r} ({list(classes)}); they carry {carried}."
+                f"{who}: the rows must carry a margin for every class of "
+                f"edition {self.edition!r} ({list(classes)}); they carry "
+                f"{carried}. A row short of the strictest class would let the "
+                "verdict settle on a looser one that was never denied."
             )
             raise ValueError(msg)
         for band in self.bands:
@@ -762,6 +768,16 @@ class WeightingComplianceResult:
                 "it is present exactly when there is a row: got "
                 f"{len(self.bands)} rows and "
                 f"{'no sweep' if self.between_nominals is None else 'a sweep'}."
+            )
+            raise ValueError(msg)
+        if (
+            self.between_nominals is not None
+            and _margin_classes(self.between_nominals) != carried
+        ):
+            msg = (
+                f"{who}: the sweep is read for the same classes as the rows, "
+                f"so it must carry margins for {carried}; it carries "
+                f"{_margin_classes(self.between_nominals)}."
             )
             raise ValueError(msg)
         if self.overall_class is not None and not is_class_designation(

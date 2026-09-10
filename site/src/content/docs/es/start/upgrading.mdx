@@ -1,0 +1,308 @@
+---
+title: "Actualizar de la 3.3 a la 4.0"
+description: "Lo que la 4.0 movió, renombró y retiró, y cómo encontrar la grafía nueva de cualquier cosa: el recorte de la raíz, los módulos que se partieron, los tres sitios donde el arreglo evidente es el equivocado, las unidades que ahora van en el nombre del parámetro y los veredictos que pasaron a ser objetos de resultado."
+---
+
+La 4.0 rompe duro y no lleva capa de compatibilidad. Casi nada se ha borrado:
+de los 885 nombres que la raíz exportaba en la 3.3.0, diez no existen ya en
+ningún sitio y el resto simplemente vive en una dirección con nombre en vez de
+en una plana. Así que el trabajo es sobre todo un barrido de imports, y esta
+página es sobre todo un mapa.
+
+Con las dos primeras secciones arreglas los imports. La tercera léela aunque
+tengas prisa, porque en tres sitios el arreglo evidente es el equivocado, y uno
+de esos tres cambia un número sin levantar nada.
+
+## La regla única: los imports bajan un nivel
+
+En la 3.3.0 la raíz reexportaba la biblioteca entera, así que `from phonometry
+import laeq` funcionaba para casi cualquier nombre. Hoy la raíz exporta
+veinticuatro cosas: los veinte subpaquetes, las tres clases que no pertenecen a
+ningún dominio concreto (`Signal`, `ReportMetadata`, `PhonometryWarning`) y
+`__version__`.
+
+```python
+import phonometry
+
+print(len(phonometry.__all__))          # 24
+print("laeq" in phonometry.__all__)     # False
+
+from phonometry.signals import laeq     # esta es la grafía nueva
+```
+
+Medido sobre la superficie entera, 872 de aquellos 885 nombres de la raíz los
+publica hoy exactamente un subpaquete, ninguno dos, y ninguno necesita una ruta
+más profunda que `phonometry.<subpaquete>`. Otros tres siguen en la raíz, donde
+siempre estuvieron. Así que el cambio no tiene ambigüedad: busca el subpaquete e
+importa de él.
+
+La forma de atributo no se retiró nunca, que es el cambio más pequeño posible
+para el código que tiraba de la raíz:
+
+```python
+from phonometry import filters
+
+_, _, _, labels = filters.nominal_frequencies(1)
+print(labels)
+```
+
+### Encontrar la casa nueva de un nombre
+
+En vez de buscar cada uno en la referencia, pregúntaselo al paquete instalado:
+
+```python
+import importlib
+import pkgutil
+
+import phonometry
+
+
+def whereis(name):
+    """Cada módulo público que publica `name`, del menos profundo al que más."""
+    found = []
+    for attribute in phonometry.__all__:
+        package = getattr(phonometry, attribute)
+        if not hasattr(package, "__path__"):
+            continue
+        modules = [package.__name__]
+        modules += [m.name for m in pkgutil.walk_packages(package.__path__, package.__name__ + ".")]
+        for module_name in modules:
+            if any(part.startswith("_") for part in module_name.split(".")):
+                continue
+            try:
+                module = importlib.import_module(module_name)
+            except ImportError:
+                continue
+            if name in getattr(module, "__all__", ()):
+                found.append(module_name)
+    return sorted(found, key=lambda path: path.count("."))
+
+
+print(whereis("laeq")[0])                  # phonometry.signals
+print(whereis("reverberation_time")[0])    # phonometry.room
+print(whereis("sensitivity")[0])           # phonometry.metrology
+```
+
+Recorre el árbol en unos dos segundos. Cuando devuelve varias rutas, la menos
+profunda es el import canónico: un subpaquete reexporta lo que publican sus
+propios módulos, y esa ruta corta es la que usan las guías y los tests. Una
+lista vacía significa que el nombre está en la última sección de esta página.
+
+## Módulos que se partieron en vez de mudarse
+
+Cinco de los treinta módulos que cambiaron de ruta no se mudaron a una
+dirección nueva. Se dividieron, y quien siga sólo la primera mitad de la
+partición se lleva un `ImportError` por el resto. Merece la pena revisarlos uno
+a uno, y el paquete privado de renderizado va con ellos porque le pasó lo
+mismo:
+
+| Módulo en 3.3.0 | Dónde está hoy su contenido |
+| --- | --- |
+| `phonometry.impedance_tube` | `materials.absorbers.impedance_tube` (función de transferencia de dos micrófonos), `materials.absorbers.four_microphone` (`TransferMatrix`, `transfer_matrix_one_load`, `wave_decomposition`, `face_quantities`, `air_layer_transfer_matrix`), `materials.absorbers.standing_wave` y `fluids` |
+| `phonometry.scattering_diffusion` | `materials.diffusers.reverberation_room_scattering` para la parte de cámara reverberante (`ScatteringResult`, `ScatteringUncertainty`, `BASE_PLATE_BANDS` y el resto), `materials.diffusers.scattering_diffusion` para los nueve nombres de campo libre |
+| `phonometry.materials.porous_absorber` | `materials.absorbers.porous` para los modelos de material en masa, `materials.absorbers.layered` para toda la API multicapa (`layered_absorber`, `AirLayer`, `MembraneLayer`, `PerforatedPlateLayer`, `MicroperforatedPlateLayer`, `LayeredAbsorberResult`) |
+| `phonometry.metrology.spectra` | `signals.spectra`, más `signals.multitaper` (`multitaper_psd`) y `signals.windows` (`window_metrics`) |
+| `phonometry.compliance` | `filters.compliance` (`FilterComplianceResult`, `class_limits`, `verify_filter_class`), `filters.weighting_compliance` (`verify_weighting_class`, `weighting_class_limits`), `aircraft.measurement_system` (`verify_aircraft_noise_system`) |
+| `phonometry._plotting` | `phonometry._plot.<dominio>`: los 82 renderizadores se repartieron por dominio, así que `plot_airborne_insulation` está en `_plot.building` y `plot_age_threshold` en `_plot.hearing`. Privado en ambos casos, y la vía soportada es el `.plot()` del resultado |
+
+Los otros veinticinco se mudaron enteros, y el resolutor de arriba los
+encuentra sin leer esta tabla. Cada uno de los tres primeros era alcanzable por
+dos rutas en la 3.3.0, la plana y la de dentro de su paquete, y las dos han
+desaparecido.
+
+## Tres sitios donde el arreglo evidente es el equivocado
+
+Todo lo demás de esta página se anuncia en cuanto lo ejecutas, y el arreglo es
+el que parece. Estos tres no son así.
+
+### Los auxiliares del tubo de impedancia tomaban kelvin
+
+`air_density_iso` y `speed_of_sound_iso` documentaban y consumían su
+temperatura en **kelvin**. Sus sucesores toman grados Celsius, como el resto de
+la biblioteca. El nombre cambió, así que el import falla y te enteras, pero el
+problema es el argumento que arrastras: 293,15 es un número de aspecto
+legítimo en cualquiera de las dos unidades.
+
+```python
+from phonometry.materials import speed_of_sound_iso10534
+
+print(round(float(speed_of_sound_iso10534(temperature_c=20.0)), 5))      # 343.28784
+print(round(float(speed_of_sound_iso10534(temperature_c=293.15)), 5))    # 477.13003
+```
+
+343,29 m/s frente a 477,13 m/s: un 39 % de error, sin excepción ninguna, y
+cada coeficiente de absorción calculado a partir de ahí sale mal en una
+cantidad de aspecto plausible. Convierte el valor, no te limites a renombrar la
+palabra clave.
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `impedance_tube.air_density_iso(T_kelvin, p_kPa)` | `materials.air_density_iso10534(temperature_c=T_kelvin - 273.15, atmospheric_pressure_kpa=p_kPa)` |
+| `impedance_tube.speed_of_sound_iso(T_kelvin)` | `materials.speed_of_sound_iso10534(temperature_c=T_kelvin - 273.15)` |
+
+Con la conversión aplicada, los dos devuelven exactamente lo que devolvían en
+la 3.3.0, bit a bit.
+
+### `scattering_diffusion.speed_of_sound` tomaba Celsius, y su sustituto responde distinto
+
+El auxiliar de ISO 17497-1 que se llamaba igual tomaba grados Celsius, así que
+ahí no hay conversión que hacer. La trampa es el sustituto. `fluids.air()` usa
+un modelo del medio más completo que aquella fórmula de una línea de la
+ISO 17497-1, y a 20 °C responde 343,99 m/s donde el auxiliar viejo respondía
+343,20 m/s. Es poco, y no es nada despreciable si estás reproduciendo una
+medición hecha con el número antiguo. El apartado 8 de la ISO 17497-1 imprime
+la fórmula si necesitas ese apartado exacto.
+
+### El campo `tl` de un resultado submarino es `pl`
+
+`transmission_loss` pasó a `propagation_loss`, cosa que el import detecta, y
+con él se renombró el campo de dentro del resultado. Ese no levanta nada: un
+`PropagationLossResult` no tiene `.tl`, así que el `AttributeError` aparece
+allí donde lo leas, que puede quedar lejos de la llamada.
+
+```python
+from phonometry.underwater.propagation.closed_form import propagation_loss
+
+result = propagation_loss([1000.0], 1000.0)
+print(round(float(result.pl[0]), 5))    # 60.06013, el número que guardaba .tl
+```
+
+El mismo renombrado llega a `underwater.sonar_equation`, cuyo parámetro
+`transmission_loss` es ahora `propagation_loss`.
+
+## El entorno se metió en una dataclase
+
+Cinco puntos de entrada ya no toman las condiciones ambientales como números
+sueltos. Ahí no basta con renombrar la palabra clave, porque el parámetro ha
+desaparecido del todo:
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `airport_noise.event_level(..., temperature=15.0, pressure=101.325)` | `event_level(..., atmosphere=AerodromeAtmosphere(temperature_c=15.0, atmospheric_pressure_kpa=101.325))` |
+| `airport_noise.noise_contour(...)` | lo mismo, con `AerodromeAtmosphere` |
+| `rotorcraft_noise.rotorcraft_event_level(..., temperature=15.0, relative_humidity=70.0)` | `rotorcraft_event_level(..., atmosphere=RotorcraftAtmosphere(temperature_c=15.0, relative_humidity_percent=70.0))` |
+| `rotorcraft_noise.rotorcraft_noise_contour(...)` | lo mismo, con `RotorcraftAtmosphere` |
+| `outdoor_propagation.predicted_receiver_level(..., humidity=70.0)` | `predicted_receiver_level(..., atmosphere=AtmosphericConditions(relative_humidity_percent=70.0))` |
+
+Las sustituciones punto a punto del rotorcraft fueron por el mismo camino:
+`bank_angle` y `path_angle` son ahora
+`RotorcraftTrackState(bank_angle_deg=..., path_angle_deg=...)`.
+
+```python
+from phonometry.aircraft.airport_noise import AerodromeAtmosphere
+
+atmosphere = AerodromeAtmosphere(temperature_c=15.0, atmospheric_pressure_kpa=101.325)
+print(atmosphere.temperature_c, atmosphere.atmospheric_pressure_kpa)
+```
+
+## Un parámetro que nombra una magnitud lleva su unidad
+
+En todo lo demás, las condiciones ambientales conservaron su sitio y ganaron un
+sufijo. La regla es que un parámetro público que nombra una magnitud dimensional
+termina en la unidad que teclea quien llama, porque el número es donde se pierde
+la unidad y ninguna guardia puede cazarlo por magnitud: 101,325 y 101325 son
+las dos presiones legítimas en esta biblioteca.
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `temperature=` | `temperature_c=` |
+| `pressure=`, `static_pressure=`, `barometric_pressure=`, `ambient_pressure=`, `atmospheric_pressure=` | `atmospheric_pressure_kpa=`, o `_pa=` donde el apartado esté escrito en pascales |
+| `humidity=`, `relative_humidity=` | `relative_humidity_percent=` |
+| `diameter=` y sus trece compuestos | `diameter_m=` |
+| `angle=`, `angles=`, `bank_angle=`, `path_angle=`, `grazing_angle=`, `launch_angles=` | `_deg=` o `_rad=`, según lo que lea la función |
+| `runway_gradient=` | `runway_gradient_ratio=` |
+| `sound_speed_gradient=` | `sound_speed_gradient_per_s=` |
+
+Un caso merece mención propia porque era una trampa y no una incomodidad.
+`critical_angle` era un campo en radianes en un resultado y un parámetro en
+grados en las dos funciones que estaban una pantalla más abajo, o sea la misma
+palabra para dos cosas separadas por un factor 57. Ahora es
+`critical_angle_rad` en el resultado y `critical_angle_deg` en los parámetros.
+
+`transmission_loss=` pasó a `propagation_loss=` sólo en los resultados de sónar
+y de propagación numérica submarina. `ReactiveSilencerResult` y
+`SoundReductionResult` siguen llamando al suyo `transmission_loss=`, y con
+razón: es como lo llaman las normas que hay detrás.
+
+## Las condiciones y las banderas se escriben por su nombre
+
+Dos reglas dejaron 37 firmas keyword-only. Una condición o una opción que lleva
+valor por defecto se escribe por su nombre, y toda bandera booleana pública es
+keyword-only. Las dos existen porque el sitio donde se pierde el significado es
+la llamada: `air_attenuation(freqs, 20.0, 50.0, 101.325)` son una temperatura,
+una humedad y una presión en un orden que no recuerda nadie, y
+`bank.filter(x, True)` no dice cuál de cinco banderas se ha activado.
+
+El fallo es ruidoso, que es de lo que se trata:
+
+```python
+import numpy as np
+
+from phonometry.signals import leq
+
+x = np.random.default_rng(1).standard_normal(4800) * 0.01
+
+try:
+    leq(x, 48000)
+except TypeError as error:
+    print(error)      # leq() takes 1 positional argument but 2 were given
+```
+
+Esa llamada merece una segunda mirada. `leq` nunca tuvo `fs`, porque una media
+energética no lo necesita, así que en la 3.3.0 el 48000 se ligaba en silencio a
+`calibration_factor` y la respuesta salía 93,6 dB alta sin una queja. Ahora es
+un `TypeError`, que es lo que siempre debió ser.
+
+```python
+print(round(float(leq(x, dbfs=True)), 3))
+```
+
+## Los veredictos son objetos de resultado, no diccionarios
+
+Las cinco funciones `verify_*` devolvían `dict[str, Any]` y ahora devuelven una
+dataclase congelada, como cualquier otro resultado de la biblioteca. Dos
+envoltorios públicos que existían sólo para empaquetar ese diccionario se
+fueron con el cambio, ya que el verificador devuelve ahora el objeto él mismo.
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `verify_filter_class(bank)["overall_class"]` | `verify_filter_class(bank).overall_class` |
+| `verify_weighting_class(wf)["overall_class"]` | `verify_weighting_class(wf).overall_class` |
+| `verify_intensity_class(...)["bands"]` | `verify_intensity_class(...).bands` |
+| `verify_quasi_peak_dynamics()["passed"]` | `verify_quasi_peak_dynamics().passed` |
+| `verify_aircraft_noise_system(...)["passed"]` | `verify_aircraft_noise_system(...).passed` |
+| `filter_class_compliance(bank)` | `verify_filter_class(bank)`, que devuelve el mismo `FilterComplianceResult` |
+
+```python
+from phonometry.filters import OctaveFilterBank, verify_filter_class
+
+verdict = verify_filter_class(OctaveFilterBank(48000, fraction=1, limits=[125, 4000]))
+print(verdict.overall_class, len(verdict.bands))
+```
+
+## Los diez nombres que ya no están
+
+Todo lo demás se movió. Estos diez no existen en ningún módulo público:
+
+| Ya no está | Qué escribir en su lugar |
+| --- | --- |
+| `octavefilter`, `getansifrequencies`, `normalizedfreq` | `filters.octave_filter`, `filters.nominal_frequencies`, `filters.normalized_frequencies`. Eran las grafías originales de PyOctaveBand, renombradas en la 3.1 y conservadas como alias hasta la 4.0 |
+| `calculate_sensitivity` | `metrology.sensitivity`, el mismo renombrado de la 3.1 |
+| `filter_class_compliance` | `filters.verify_filter_class` |
+| `air_density_iso`, `speed_of_sound_iso` | `materials.air_density_iso10534`, `materials.speed_of_sound_iso10534`, y lee el aviso de los kelvin de más arriba |
+| `speed_of_sound` | `fluids.air(temperature_c=...).speed_of_sound` para el medio. Usa un modelo más completo que aquella fórmula de una línea de la ISO 17497-1, así que el número se mueve: 343,99 m/s frente a 343,20 m/s a 20 °C |
+| `depth_to_pressure` | `fluids.depth_to_gauge_pressure_mpa(depth_m=...)`, que devuelve el mismo número, o `fluids.depth_to_absolute_pressure_pa` para la absoluta. Las dos son keyword-only y las dos toman un `latitude_deg` opcional |
+| `TransmissionLossResult` | `PropagationLossResult`, con `.tl` renombrado a `.pl` |
+
+## Lo que no ha cambiado
+
+Los números. El informe de conformidad son las mismas 995 comprobaciones contra
+las mismas normas con los mismos valores esperados que tenía antes de la
+reorganización, y de cada renombrado de esta página se comprobó que devuelve lo
+que devolvía su predecesor. Si un resultado se mueve después de que termines de
+actualizar, eso es un defecto y merece la pena
+[avisar](https://github.com/jmrplens/phonometry/issues).
+
+`.plot()`, `.report()` y el contrato de `Signal` están intactos, y también lo
+está cada fórmula. La 4.0 recolocó los muebles y puso la unidad en la etiqueta;
+no recalculó nada.

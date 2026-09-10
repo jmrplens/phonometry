@@ -8,13 +8,24 @@ dynamic = ["version"]
 authors = [
   { name="José Manuel Requena Plens", email="mail@jmrp.io" },
 ]
-description = "Acoustic measurement toolkit: fractional octave-band filters, A/C/Z and time weighting, and sound level metrology per IEC 61260-1 and IEC 61672-1."
+# The one line PyPI shows under the name and in a search result. It froze at
+# 3.x on the three things the library started as, and named none of the
+# eleven domains it grew. A description is frozen per release, so it is
+# rewritten here rather than left to the next one. The counts stay out: the
+# long description carries them and is regenerated from README.md, which the
+# conformance-claims checker keeps honest.
+description = "Acoustic measurement, analysis and prediction for Python: levels and metrology, psychoacoustics, rooms and buildings, materials, vibration, environmental, aircraft and underwater acoustics, each implemented from its governing standard."
 # The PyPI long description is generated from README.md (which uses
 # theme-aware <picture> elements that PyPI's renderer strips) by
 # scripts/generate_pypi_readme.py; `make pypi-readme` refreshes it and the
 # packaging tests fail on drift.
 readme = "README_PYPI.md"
 requires-python = ">=3.13"
+# PEP 639, which setuptools 84 wants: the expression and the file, not the
+# classifier. The classifier is deprecated and raised four
+# SetuptoolsDeprecationWarning on every build.
+license = "MIT"
+license-files = ["LICENSE"]
 # Search terms for PyPI: the domains the library actually covers, plus the
 # designations of the standards its metrics are implemented from, so a search
 # for a standard number finds the package.
@@ -73,7 +84,6 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
     "Topic :: Multimedia :: Sound/Audio :: Analysis",

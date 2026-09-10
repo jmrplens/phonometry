@@ -31,7 +31,7 @@ degrees Celsius and whose forward wave carries the opposite exponent sign.
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -535,6 +535,7 @@ class ImpedanceTubeResult:
     surface_impedance: Complex
     normalized_impedance: Complex
     absorption: Real
+    _: KW_ONLY
     spacing: float | None = None
     x1: float | None = None
     diameter_m: float | None = None

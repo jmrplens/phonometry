@@ -76,6 +76,7 @@ DiffuserPolarResponse(
     angles_deg: Real,
     levels: Real,
     coefficient: float,
+    *,
     source_angle_deg: float = 0.0,
     well_width: float | None = None,
     depths: Real | None = None,

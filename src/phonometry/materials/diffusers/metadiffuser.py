@@ -26,7 +26,7 @@ reduced to the ISO 17497-2 directional diffusion coefficient.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -110,6 +110,7 @@ class MetadiffuserResult:
     reflection: Complex
     absorption: Real
     well_absorption: Real
+    _: KW_ONLY
     wells: tuple[MetadiffuserWell | None, ...] | None = None
     depth: float | None = None
     period_m: float | None = None

@@ -59,7 +59,7 @@ directly.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
@@ -277,6 +277,7 @@ class DiffuserPolarResponse:
     angles_deg: Real
     levels: Real
     coefficient: float
+    _: KW_ONLY
     source_angle_deg: float = 0.0
     well_width: float | None = None
     depths: Real | None = None

@@ -79,7 +79,7 @@ def radiated_noise_level(rms_pressure_pa: float, distance: float) -> float:
 
 
 def hydrophone_depths(
-    cpa_distance: float, angles_deg: tuple[float, ...] = _STANDARD_ANGLES
+    cpa_distance: float, *, angles_deg: tuple[float, ...] = _STANDARD_ANGLES
 ) -> NDArray[np.float64]:
     r"""Hydrophone depths for the ISO 17208-1 deep-water geometry.
 

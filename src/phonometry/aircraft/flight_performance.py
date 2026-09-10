@@ -738,6 +738,7 @@ class DepartureStep:
     step_type: str
     thrust_rating: str
     flap_id: str
+    _: KW_ONLY
     end_altitude_ft: float | None = None
     rate_of_climb_ft_per_min: float | None = None
     end_calibrated_airspeed_kt: float | None = None
@@ -854,6 +855,7 @@ class ApproachStep:
 
     step_type: str
     flap_id: str
+    _: KW_ONLY
     start_altitude_ft: float | None = None
     start_calibrated_airspeed_kt: float | None = None
     descent_angle_deg: float | None = None

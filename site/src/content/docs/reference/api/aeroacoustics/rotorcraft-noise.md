@@ -742,6 +742,7 @@ Plot filled noise contours over the ground plane.
 
 ```python
 RotorcraftTrackState(
+    *,
     airspeed: float | NDArray[np.float64] | list[float] | None = None,
     path_angle_deg: float | NDArray[np.float64] | list[float] | None = None,
     heading: float | NDArray[np.float64] | list[float] | None = None,

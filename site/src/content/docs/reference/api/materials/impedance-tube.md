@@ -139,6 +139,7 @@ ImpedanceTubeResult(
     surface_impedance: Complex,
     normalized_impedance: Complex,
     absorption: Real,
+    *,
     spacing: float | None = None,
     x1: float | None = None,
     diameter_m: float | None = None,

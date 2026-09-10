@@ -235,6 +235,7 @@ forwards from the same anchor, so touchdown is where the two sweeps meet.
 ApproachStep(
     step_type: str,
     flap_id: str,
+    *,
     start_altitude_ft: float | None = None,
     start_calibrated_airspeed_kt: float | None = None,
     descent_angle_deg: float | None = None,
@@ -318,6 +319,7 @@ DepartureStep(
     step_type: str,
     thrust_rating: str,
     flap_id: str,
+    *,
     end_altitude_ft: float | None = None,
     rate_of_climb_ft_per_min: float | None = None,
     end_calibrated_airspeed_kt: float | None = None,

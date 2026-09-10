@@ -443,6 +443,7 @@ SlitResonatorAbsorberResult(
     effective_wavenumber: Complex,
     effective_impedance: Complex,
     transfer_matrix: Complex,
+    *,
     resonators: tuple[HelmholtzResonator, ...] | None = None,
     slit_height: float | None = None,
     lattice_step: float | None = None,

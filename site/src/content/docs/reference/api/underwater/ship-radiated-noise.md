@@ -33,6 +33,7 @@ pressure-release sea surface and ignores wind; the reported source level is an
 ```python
 hydrophone_depths(
     cpa_distance: float,
+    *,
     angles_deg: tuple[float, ...] = (15.0, 30.0, 45.0),
 ) -> NDArray[np.float64]
 ```

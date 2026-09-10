@@ -49,7 +49,7 @@ levels and event metrics).
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final
 
@@ -1334,6 +1334,7 @@ class RotorcraftTrackState:
     :ivar bank_angle_deg: Bank angle ``Φ``, in degrees (positive starboard down).
     """
 
+    _: KW_ONLY
     airspeed: float | NDArray[np.float64] | list[float] | None = None
     path_angle_deg: float | NDArray[np.float64] | list[float] | None = None
     heading: float | NDArray[np.float64] | list[float] | None = None

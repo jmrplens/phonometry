@@ -164,6 +164,7 @@ MetadiffuserResult(
     reflection: Complex,
     absorption: Real,
     well_absorption: Real,
+    *,
     wells: tuple[MetadiffuserWell | None, ...] | None = None,
     depth: float | None = None,
     period_m: float | None = None,

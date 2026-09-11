@@ -107,6 +107,9 @@ _MOBILITY_LABEL = "Mobility $|Y|$ [m/(N·s)]"
 _DEVIATION_LABEL = "Deviation [%]"
 #: The three legend entries every ISO 8041-1 verifier panel carries: the band
 #: Table 5 allows, and the two verdicts a measured point can take in it.
+_ISO8041_BAND_LABEL = "ISO 8041-1 tolerance"
+_WITHIN_LABEL = "within tolerance"
+_OUTSIDE_LABEL = "outside tolerance"
 #: The DIN 45669-1 reading figure: its time axis, its ordinate and the two
 #: numbers a meter displays, named once so the label a line carries and the
 #: key its translation is filed under cannot drift apart.
@@ -114,9 +117,6 @@ _TIME_LABEL = "Time [s]"
 _KBF_LABEL = "Weighted vibration severity $KB_F$"
 _KBF_MAX_LABEL = r"$KB_{{F\mathrm{{max}}}}$ = {value}"
 _KBFTM_LABEL = r"$KB_{{FTm}}$ = {value}"
-_ISO8041_BAND_LABEL = "ISO 8041-1 tolerance"
-_WITHIN_LABEL = "within tolerance"
-_OUTSIDE_LABEL = "outside tolerance"
 #: Legend entry of the assessed ISO 2631-5 point (stress variable and
 #: injury probability), formatted with ``r`` and ``p``.
 _RISK_LABEL = r"$R$ = {r},  $\Pi$ = {p} %"

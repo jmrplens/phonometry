@@ -11,14 +11,17 @@ themselves may take; DIN 45669-1 specifies the **instrument** both of them
 presuppose, and DIN 45669-2 the procedure it is used with, of which the
 mounting limits and the instrument's share of the error are numbers.
 
-This section is the instrument half of that set. The other half already has a
-page: the guideline values of DIN 4150-3 are in [Vibration damage to
+This section is the instrument of that set and the assessment for people that
+reads it. The buildings already had a page: the guideline values of DIN 4150-3
+are in [Vibration damage to
 structures](../structural/structural-damage.md), and they used
 to say, at the end, that the instrument requirements of DIN 45669 were not
 implemented. They are now, which closes the loop: the quantity a guideline
 value is compared against is defined by the meter, and the meter is defined by
 its band limitation, its KB weighting and the running r.m.s. it averages them
-with.
+with. And the people have theirs: the guide values of DIN 4150-2 by area and
+time of day, the order the standard reads them in, and the assessment
+vibration severity that sums a day of exposure into one number.
 
 The section also carries the piece of DIN 45669-1 that reaches furthest into
 practice. Annex E turns the frequency-dependent guideline curve of DIN 4150-3
@@ -47,6 +50,12 @@ the track before a mitigation measure with the track after it.
   referred to an hour, the third-octave spectra of Figure 6, the narrow-band
   density and Table 1 (DIN 45672-2:1995-07), and the ground constants from two
   wave speeds (DIN 45672-1:2009-12, Clause 4.5).
+- [Vibration and people in buildings (DIN 4150-2)](people-in-buildings.md):
+  the guide values of Table 1 by area, time of day and source, the procedure
+  of 6.2 as a verdict, the assessment vibration severity of Formulae (4) and
+  (5) with the rest-time weight, the rules of 6.5 for blasting, roads,
+  railways and construction sites with Table 2, the railway classes of Annex A
+  and the estimate of Clause 7 from a peak velocity (DIN 4150-2:1999-06).
 
 ## See also
 
@@ -68,10 +77,12 @@ numbers are on the meter page: the limits a transducer may be set down loose
 within, the mass it may add and the meter's own share of the error. The rest
 is text and is not here.
 
-**No assessment of people in buildings.** DIN 4150-2 judges what the weighted
-vibration severity means for the people who feel it, with its own tables of
-reference values by time of day and use of the room. The quantity is computed
-here; the judgement it feeds is not implemented.
+**No decision on the cases DIN 4150-2 leaves open.** An existing railway line,
+a construction site beyond 78 working days, a hospital next to one and
+whatever 6.2 sends to an individual assessment are judged case by case in the
+standard, and they are not judged here. The guide
+values, the procedure and the assessment vibration severity are on the people
+page; where they do not reach, neither does the library.
 
 **No railway measuring procedure.** DIN 45672-1 fixes the measurement points
 on the way from the track to the building, the directions, the trains to

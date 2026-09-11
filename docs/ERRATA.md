@@ -5070,6 +5070,35 @@ in the same order.
   carries the loose-mounting limits of 5.3.2 and 5.3.3 and the ground
   deviation of 5.3.4.1, and its docstring names each by the clause that
   prints it.
+- **Status:** not reported.
+
+## DIN 4150-2:1999-06, Annex A, Formula (A.1b) (a clock maximum r.m.s. equated to a mean of squares)
+
+- **Location:** Annex A, Formulae (A.1a) and (A.1b) on printed page 11 (PDF
+  page 11 of the copy read here, which prints its folios without an offset).
+- **The print:** Formula (A.1a) reads $KB_{FTm,j} = \sqrt{\frac{1}{M_j}
+  \sum_{i=1}^{M_j} KB^2_{FTi,j}}$ and, "oder", Formula (A.1b) reads
+  $KB_{FTm,j} = \frac{1}{Z_j} \sum_{i=1}^{Z_j} KB^2_{FTi,j}$, for the case
+  that only $Z_j$ occupied clock intervals of class $j$ were measured.
+- **The problem:** the second formula has no root over its sum, so its left
+  side is a clock maximum r.m.s. and its right side a mean of squares. The two
+  formulas are printed as alternatives for the same quantity and differ in
+  nothing but the count they average over, so both need the root or neither
+  does; Formula (A.2) beneath them takes $KB^2_{FTm,j}$ as the mean of the
+  squares, which is what the right side of (A.1b) is, and the worked Example
+  8 on printed page 17 applies (A.1b) with the root: $KB_{FTm,1} =
+  \sqrt{\tfrac{1}{3}(0{,}92^2 + 0{,}6^2 + 0{,}9^2)} = 0{,}82$ "aus Gleichung
+  (A.1b)". Either the root was lost from (A.1b) or its left side should read
+  $KB^2_{FTm,j}$.
+- **Evidence:** the two formulas on printed page 11 and the example on
+  printed page 17. Verified on PDF page 11 (printed p. 11) and PDF page 17
+  (printed p. 17) of DIN 4150-2:1999-06: the radical of (A.1a) is drawn and
+  that of (A.1b) is absent on the page.
+- **Consequence for the standard's own tables:** none; the example that uses
+  the formula uses the correct one.
+- **Library behaviour:**
+  [`railway_takt_maximum_rms`](../src/phonometry/vibration/immission/people.py)
+  takes the root, and the tests hold it to the 0,82 and 0,22 of Example 8.
 - **Status:** unreported.
 
 ## Related source properties that are not errata

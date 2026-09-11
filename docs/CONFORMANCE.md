@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1034/1034 conformance checks pass** across 79 domains and 411 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1055/1055 conformance checks pass** across 80 domains and 412 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -34,6 +34,8 @@
 | Standard | Quantity | Computed | &#916; | Used |
 |:---|:---|:---|:---|:---:|
 | ISO/TR 17534-3:2015 Table 3 | Ground-projected path length dp, m | 194.165 m | 0.005 m | 100 % |
+| DIN 4150-2:1999-06 Annex C, Example 5 | KB_FTr with hammer b) in the rest hours, Formula (5) | 0.195 | -0.005 | 100 % |
+| DIN 4150-2:1999-06 Annex C, Example 8 | KB_FTm over the record with the passage maxima alone | 0.3175 | -0.0005 | 100 % |
 | Long 2e Table 14.9 (worked duct-borne sheet, supply path) | Fan to room, 8 octave bands -> 52/42/30/18/9/-2/-2/-1 dB at the receiver | 1 dB | 1 dB | 100 % |
 | IEC 60268-16 Annex M | Step 2 printed intermediates: the measurement condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.993 | 99 % |
 | VDI 2081 Blatt 2:2005-05 Table 1, element 14 | Bend flow noise, worst octave deviation, dB | 0.0496 dB | 0.0496 dB | 99 % |
@@ -41,8 +43,6 @@
 | IEC 60268-16 Annex M | Step 3 printed intermediates: the operational condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.987 | 99 % |
 | VDI 2081 Blatt 2:2005-05 Table 1, element 20 | Sound pressure level in room 102, worst octave deviation, dB | 0.4913 dB | 0.4913 dB | 98 % |
 | ISO 5136:2003 Table D.1 | C3,4 of the sampling tube for d = 0,5 m at U = +/-5, +/-15, +/-30 m/s, 27 bands | max absolute deviation 0.049 dB | 0.049 dB | 98 % |
-| ISO 11200:2014 Table B.2 local environmental correction | K_3A at a work station 1,6 m from the dominating source, dB | 3.749 dB | 0.049 dB | 98 % |
-| ISO 9053-2:2020 Annex A.3 | Thermal boundary-layer thickness b | 0.00183 m | 0 m | 97 % |
 
 <details>
 <summary><b>Numerical validation - filters &amp; weightings</b>: class showcase (IEC 61260-1 · IEC 61672-1 · ISO 7196)</summary>
@@ -837,6 +837,35 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | DIN 45672-2:1995-07 7.1 | Relative bandwidth of a third octave, % | 23 % (+/-0.5 %) | 23.0768 % | 0.0768 % | 15 % | ![Pass][cv-pass] Pass |
 | DIN 45672-2:1995-07 Clause 4 | Shortfall of the running mean square after 2 tau, % | 14 % (+/-0.5 %) | 13.53 % | -0.466 % | 93 % | ![Pass][cv-pass] Pass |
 | DIN 45672-2:1995-07 Clause 4 | Shortfall of the running mean square after 4 tau, % | 2 % (+/-0.5 %) | 1.83 % | -0.168 % | 34 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Vibration and people in buildings (DIN 4150-2)</b>: 100% (21/21)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| DIN 4150-2:1999-06 Annex C, Example 2 | Admissible exposure at A_r, h | 1.48 h (+/-0.005 h) | 1.482 h | 0.002 h | 40 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 4 | KB_FTr of two hammers, Formula (4a) | 0.15 (+/-0.005) | 0.154 | 0.004 | 80 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 5 | KB_FTr with hammer b) in the rest hours, Formula (5) | 0.2 (+/-0.005) | 0.195 | -0.005 | 100 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 6 | KB_FTr of hammer a) over 16 h with 4 h in the rest hours | 0.18 (+/-0.005) | 0.179 | -0.001 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 7 | KB*_Fmax from 4 mm/s at 14 Hz, Formulae (6) and (7) | 2.1 (+/-0.05) | 2.101 | 0.001 | 2 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 8 | KB_FTm of class 1 by Formula (A.1) | 0.82 (+/-0.005) | 0.8198 | -0.0002 | 4 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 8 | KB_FTm of class 2 by Formula (A.1) | 0.22 (+/-0.005) | 0.2209 | 0.0009 | 18 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 8 | s(KB²_FTm) of class 1 by Formula (A.2) | 0.27 (+/-0.005) | 0.2709 | 0.0009 | 18 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 8 | s(KB²_FTm) of class 2 by Formula (A.2) | 0.012 (+/-0.0005) | 0.0124 | 0.0004 | 80 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 8 | KB_FTr of both classes by Formula (A.3) | 0.325 (+/-0.0005) | 0.3251 | 0.0001 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 8 | KB_FTr one spread up, above the value | 0.059 (+/-0.0005) | 0.0591 | 0.0001 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 8 | KB_FTr one spread down, below the value | 0.073 (+/-0.0015) | 0.0725 | -0.0005 | 33 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 8 | KB_FTm over the 20 intervals of the record, Formula (3) | 0.325 (+/-0.0005) | 0.3251 | 0.0001 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex C, Example 8 | KB_FTm over the record with the passage maxima alone | 0.318 (+/-0.0005) | 0.3175 | -0.0005 | 100 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Figure 3 | Stage I A_u interpolated for 2 working days | 0.73 (+/-0.005) | 0.73 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Figure 3 | Stage I A_u interpolated for 3 working days | 0.67 (+/-0.005) | 0.67 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Figure 3 | Stage I A_u interpolated for 4 working days | 0.6 (+/-0.005) | 0.6 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Figure 3 | Stage I A_u interpolated for 5 working days | 0.53 (+/-0.005) | 0.53 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Figure 3 | Stage I A_u interpolated for 6 working days | 0.47 (+/-0.005) | 0.47 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex D, Figure D.1 | Trains an hour at KB_FTm = 0,2 for A_r = 0.05 | 7 (+/-0) | 7 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-2:1999-06 Annex D, Figure D.1 | Trains an hour at KB_FTm = 0,2 for A_r = 0.07 | 14 (+/-0) | 14 | 0 | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

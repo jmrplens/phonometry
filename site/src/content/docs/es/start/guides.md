@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 129 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 130 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -111,7 +111,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento veintinueve guías repartidas en doce temas, y cada
+Esta página es el mapa. Ciento treinta guías repartidas en doce temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -596,6 +596,12 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 y DIN 4150-3.
   una hora de tráfico a los espectros en tercios de octava y la densidad en
   banda estrecha que hay detrás, y las constantes del terreno de la DIN 45672-1
   a partir de dos velocidades de onda.
+- [Vibración y personas en edificios (DIN 4150-2)](/phonometry/es/vibration/immission/people-in-buildings/):
+  los valores de referencia de la tabla 1 por zona y franja horaria, el orden en
+  que los lee la DIN 4150-2, la intensidad de valoración que resume un día de
+  exposición en un número, las reglas para voladuras, carreteras, ferrocarriles
+  y obras, y la estimación desde una velocidad de pico donde no se registró
+  nada ponderado.
 
 ## [Medio ambiente y transporte](/phonometry/es/environment/)
 

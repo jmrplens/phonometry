@@ -197,6 +197,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`vibration.immission.vibration_meter`](/phonometry/reference/api/vibration/vibration-meter/) | The vibration meter of DIN 45669-1:2010-09 (with Corrigendum 1:2012-12). |
 | [`vibration.immission.railway`](/phonometry/reference/api/vibration/railway/) | Evaluating the vibration of a passing train (DIN 45672-2:1995-07). |
 | [`vibration.immission.ground`](/phonometry/reference/api/vibration/ground/) | The elastic properties of the ground from its wave speeds (DIN 45672-1:2009-12). |
+| [`vibration.immission.coupling`](/phonometry/reference/api/vibration/coupling/) | Mounting the transducer, and what the meter may be wrong by (DIN 45669-2:2005-06). |
 
 ## Environmental acoustics
 

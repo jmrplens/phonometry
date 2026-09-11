@@ -5391,6 +5391,37 @@ dos ediciones con las mismas entradas y en el mismo orden.
   fórmula (1) arrancada desde reposo, que es la lectura que encaja con ellos.
 - **Estado:** sin comunicar.
 
+## DIN 45669-2:2005-06, apartado 5.1.4 (un apartado de acoplamiento citado con el número equivocado)
+
+- **Localización:** apartado 5.1.4, último párrafo de la página impresa 6
+  (página 6 del PDF de la copia leída aquí, que imprime sus folios sin
+  desplazamiento).
+- **Lo impreso:** «Bei Messungen am Erdreich sollten für die Schwingungsaufnehmer
+  die Ankopplungsverfahren nach 5.3.3 angewandt und müssen die durch die
+  Ankopplung verursachten Messabweichungen nach 8.2.3 beachtet werden»: en las
+  medidas sobre el terreno se aplican los procedimientos de acoplamiento del
+  5.3.3 y se tienen en cuenta las desviaciones del 8.2.3.
+- **El problema:** el 5.3.3 es «Ankopplung bei weichen Unterlagen», el
+  acoplamiento sobre revestimientos blandos de suelo, cuyo procedimiento es el
+  útil de puntas de la figura 1 a) clavado a través de una moqueta. El
+  acoplamiento al terreno es el 5.3.4, «Ankopplung an das Erdreich», y sus
+  procedimientos, la piqueta, el captador enterrado, el sondeo y la placa
+  asentada, son el 5.3.4.2 con la tabla 2. La otra referencia de la misma frase,
+  el 8.2.3, es «Ankopplung an das Erdreich» y remite al 5.3.4, que es lo que la
+  primera referencia quería decir.
+- **Evidencia:** la frase de la página impresa 6, el título del 5.3.3 en la
+  página impresa 8 y el título del 5.3.4 en la página impresa 9. Verificado en
+  la página 6 del PDF (p. impresa 6), la página 8 del PDF (p. impresa 8) y la
+  página 9 del PDF (p. impresa 9) de la DIN 45669-2:2005-06.
+- **Consecuencia para las tablas de la propia norma:** ninguna; quien siga el
+  número va a parar al útil de moqueta en lugar de a la tabla 2.
+- **Comportamiento de la biblioteca:**
+  [`vibration.immission.coupling`](../src/phonometry/vibration/immission/coupling.py)
+  lleva los límites de montaje suelto del 5.3.2 y el 5.3.3 y la desviación en
+  terreno del 5.3.4.1, y su docstring nombra cada uno por el apartado que lo
+  imprime.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

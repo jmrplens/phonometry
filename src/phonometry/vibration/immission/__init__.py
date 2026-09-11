@@ -4,13 +4,29 @@
 The German immission-control chain: DIN 45669-1 defines the vibration meter
 that DIN 4150-2 and DIN 4150-3 presuppose, and its Annex E turns the
 frequency-dependent guideline curve of DIN 4150-3 into a comparison with one
-number. DIN 45672-2 reduces the record of a passing train with that meter, and
-Clause 4.5 of DIN 45672-1 reads the elastic constants of the ground from its
-wave speeds.
+number. DIN 45669-2 is the procedure the meter is used with, of which the
+mounting limits and the instrument's share of the error are numbers. DIN
+45672-2 reduces the record of a passing train with that meter, and Clause 4.5
+of DIN 45672-1 reads the elastic constants of the ground from its wave speeds.
 """
 
 from __future__ import annotations
 
+from .coupling import (
+    CLEARANCE_TO_DISTURBING_BODY_FACTOR,
+    EMISSION_POINT_TRACK_DISTANCE_M,
+    GROUND_COUPLING_DEVIATION_DB,
+    INSTRUMENT_CONFIDENCE_LIMITS_PERCENT,
+    LOOSE_MOUNTING_LIMITS_HZ,
+    LOOSE_MOUNTING_PEAK_ACCELERATION_M_S2,
+    MASS_LOADING_RATIO_LIMIT,
+    SPIKED_DEVICE_MASS_KG,
+    WAX_MOUNTING_HORIZONTAL_LIMIT_HZ,
+    MountingCheck,
+    check_loose_mounting,
+    instrument_confidence_limit_percent,
+    mass_loading_ratio,
+)
 from .ground import (
     GROUND_WAVE_SPEED_RANGES_M_S,
     SHEAR_STRAIN_LINEAR_LIMIT,
@@ -91,8 +107,12 @@ __all__ = [
     "ASSESSMENT_GUIDE_VALUES_MM_S",
     "ASSESSMENT_WEIGHTING_TOLERANCE",
     "BAND_LIMIT_CORNER_FACTOR",
+    "CLEARANCE_TO_DISTURBING_BODY_FACTOR",
+    "EMISSION_POINT_TRACK_DISTANCE_M",
     "EVENT_REFERENCE_DURATION_S",
+    "GROUND_COUPLING_DEVIATION_DB",
     "GROUND_WAVE_SPEED_RANGES_M_S",
+    "INSTRUMENT_CONFIDENCE_LIMITS_PERCENT",
     "KB_CORNER_HZ",
     "KB_DETECTION_LIMIT",
     "KB_INDICATION_TOLERANCE_PERCENT",
@@ -101,21 +121,27 @@ __all__ = [
     "KB_REFERENCE_INDICATIONS",
     "KB_TEST_INDICATIONS",
     "KB_TIME_CONSTANT_S",
+    "LOOSE_MOUNTING_LIMITS_HZ",
+    "LOOSE_MOUNTING_PEAK_ACCELERATION_M_S2",
+    "MASS_LOADING_RATIO_LIMIT",
     "NARROWBAND_RESOLUTION_HZ",
     "PASSAGE_BANDS_HZ",
     "RESPONSE_TOLERANCE_LOWER_PERCENT",
     "RESPONSE_TOLERANCE_UPPER_PERCENT",
     "SHEAR_STRAIN_LINEAR_LIMIT",
+    "SPIKED_DEVICE_MASS_KG",
     "T1_DURATION_S",
     "TAKT_DURATION_S",
     "TAKT_SUPPRESSION_THRESHOLD",
     "THIRD_OCTAVE_LINES",
     "VELOCITY_DETECTION_LIMIT_MM_S",
     "VELOCITY_LEVEL_REFERENCE_MM_S",
+    "WAX_MOUNTING_HORIZONTAL_LIMIT_HZ",
     "WORKING_RANGES_HZ",
     "AmplitudeDistribution",
     "AssessmentVelocity",
     "DominantFrequency",
+    "MountingCheck",
     "TrainPassage",
     "VibrationMeterReading",
     "VibrationMeterVerification",
@@ -127,6 +153,7 @@ __all__ = [
     "band_limitation_response",
     "band_sum_level",
     "centred_interval",
+    "check_loose_mounting",
     "combined_event_velocity",
     "compression_wave_speed",
     "dominant_frequency",
@@ -134,10 +161,12 @@ __all__ = [
     "evaluate_train_passage",
     "event_velocity",
     "event_velocity_level",
+    "instrument_confidence_limit_percent",
     "interval_rms",
     "kb_signal",
     "kb_weighting_response",
     "kbf_signal",
+    "mass_loading_ratio",
     "measure_vibration_immission",
     "narrowband_psd",
     "passage_average_level",

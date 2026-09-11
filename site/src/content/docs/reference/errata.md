@@ -5069,6 +5069,35 @@ in the same order.
   started from rest, which is the reading that matches them.
 - **Status:** unreported.
 
+## DIN 45669-2:2005-06, Clause 5.1.4 (a coupling clause cited by the wrong number)
+
+- **Location:** Clause 5.1.4, last paragraph of printed page 6 (PDF page 6 of
+  the copy read here, which prints its folios without an offset).
+- **The print:** "Bei Messungen am Erdreich sollten für die Schwingungsaufnehmer
+  die Ankopplungsverfahren nach 5.3.3 angewandt und müssen die durch die
+  Ankopplung verursachten Messabweichungen nach 8.2.3 beachtet werden": for
+  measurements on the ground, the coupling methods of 5.3.3 apply and the
+  deviations of 8.2.3 are to be observed.
+- **The problem:** 5.3.3 is "Ankopplung bei weichen Unterlagen", the coupling
+  on soft floor coverings, whose method is the spiked device of Figure 1 a)
+  pressed through a carpet. The coupling to the ground is 5.3.4, "Ankopplung
+  an das Erdreich", and its methods, the stake, the buried transducer, the
+  borehole and the bedded plate, are 5.3.4.2 with Table 2. The other reference
+  in the same sentence, 8.2.3, is "Ankopplung an das Erdreich" and points back
+  to 5.3.4, which is what the first reference was meant to be.
+- **Evidence:** the sentence on printed page 6, the heading of 5.3.3 on
+  printed page 8 and the heading of 5.3.4 on printed page 9. Verified on PDF
+  page 6 (printed p. 6), PDF page 8 (printed p. 8) and PDF page 9 (printed
+  p. 9) of DIN 45669-2:2005-06.
+- **Consequence for the standard's own tables:** none; a reader who follows
+  the number lands on the carpet device instead of on Table 2.
+- **Library behaviour:**
+  [`vibration.immission.coupling`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/coupling.py)
+  carries the loose-mounting limits of 5.3.2 and 5.3.3 and the ground
+  deviation of 5.3.4.1, and its docstring names each by the clause that
+  prints it.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

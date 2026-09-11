@@ -5353,6 +5353,83 @@ dos ediciones con las mismas entradas y en el mismo orden.
   que muestra un registro se calcula del registro y no de una tabla.
 - **Estado:** sin comunicar.
 
+## DIN 45672-1:2009-12, apartado 4.5.1, fórmulas (1) y (5) (la velocidad de la onda de compresión en una barra delgada, y un radicando al que le falta un factor 2)
+
+- **Localización:** apartado 4.5.1, fórmulas (1) a (4) en la página impresa 7
+  y fórmula (5) en la página impresa 8 (páginas 7 y 8 del PDF de la copia leída
+  aquí, que imprime sus folios sin desplazamiento).
+- **Lo impreso:** la fórmula (1) da la velocidad de la onda de compresión como
+  $v_p = \sqrt{E/\rho} = \sqrt{G(1-\nu)/(\rho(1-2\nu))}$, la fórmula (3) da
+  el coeficiente de Poisson como $\nu = (v_p^2 - 2 v_s^2)/(2(v_p^2 - v_s^2))$,
+  y la fórmula (5) da los dos módulos como $G = v_s^2 \rho$ y $E = v_p^2 \rho$.
+- **El problema:** las tres no pueden cumplirse a la vez. En el continuo
+  ilimitado que el apartado dice describir, la onda de compresión viaja a
+  $v_p = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}$, y la fórmula (3) es exactamente la
+  inversa de eso junto con $v_s = \sqrt{G/\rho}$ de la fórmula (2). Al segundo
+  radical de la fórmula (1) le falta el factor 2, lo que lo deja $\sqrt{2}$
+  veces lento con cualquier coeficiente de Poisson. El primero, $\sqrt{E/\rho}$,
+  es la velocidad de una onda longitudinal en una barra delgada: con
+  $E = 2G(1+\nu)$ da $v_p^2/v_s^2 = 2(1+\nu)$, frente a $2(1-\nu)/(1-2\nu)$ en
+  el continuo. Las dos expresiones que la fórmula (1) iguala solo coinciden
+  entre sí en $\nu = (\sqrt{17}-1)/8 \approx 0{,}39$. La fórmula (5) es la
+  velocidad de la barra despejada para $E$, así que a partir de un $v_p$ medido
+  devuelve el módulo de onda P $M = 2G(1-\nu)/(1-2\nu)$ en lugar de $E$, lo que
+  sobrestima $E$ un 35 % con $\nu = 0{,}3$ y 3,8 veces con $\nu = 0{,}45$, el
+  rango de un suelo saturado.
+- **Evidencia:** las tres fórmulas entre sí en las mismas dos páginas, y frente
+  a la velocidad de la onda P de un continuo elástico isótropo. Verificado en la
+  página 7 del PDF (p. impresa 7) para las fórmulas (1) a (4) y en la página 8
+  del PDF (p. impresa 8) para la fórmula (5) de la DIN 45672-1:2009-12: los
+  radicales, el factor $(1-\nu)$ sobre $(1-2\nu)$ y la ausencia del factor 2 se
+  leen en la página.
+- **Consecuencia para las tablas de la propia norma:** ninguna; el apartado no
+  imprime valores resueltos. Lo que cambia es un módulo leído de dos
+  velocidades medidas.
+- **Comportamiento de la biblioteca:**
+  [`compression_wave_speed`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/ground.py)
+  y
+  [`youngs_modulus_from_wave_speeds`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/ground.py)
+  implementan las relaciones del continuo de las que la fórmula (3) es la
+  inversa, y los tests fijan las dos formas impresas a los factores de arriba,
+  así que una edición de vuelta a lo impreso falla.
+- **Estado:** sin comunicar.
+
+## DIN 45672-2:1995-07, apartado 4 (el arranque del valor eficaz móvil, dado en cuadrado medio)
+
+- **Localización:** apartado 4, último párrafo de la página impresa 3, y la
+  Figura 3 de la página impresa 4 (páginas 3 y 4 del PDF de la copia leída
+  aquí, que imprime sus folios sin desplazamiento).
+- **Lo impreso:** el valor eficaz móvil «erst nach einer Dauer von 2τ mit einer
+  Unsicherheit von 14 % und nach einer Dauer von 4τ mit einer Unsicherheit von
+  2 % zur Verfügung steht, wobei der Mittelwert des gleitenden Effektivwertes
+  für ein harmonisches Signal zugrunde gelegt wurde (siehe Bild 3)»: solo está
+  disponible tras $2\tau$ con un 14 % y tras $4\tau$ con un 2 %, tomando la
+  media del valor eficaz móvil de una señal armónica.
+- **El problema:** el 14 % y el 2 % son lo que le falta al cuadrado medio móvil,
+  $e^{-2} = 13{,}5$ % y $e^{-4} = 1{,}8$ %, y no al valor eficaz móvil que nombra
+  la frase. La fórmula (1) arrancada desde reposo da un cuadrado medio que crece
+  como $(1 - e^{-t/\tau})$ de su valor final una vez promediado el rizado, así
+  que el valor eficaz crece como la raíz de eso, y le falta
+  $1 - \sqrt{1 - e^{-2}} = 7{,}0$ % tras $2\tau$ y
+  $1 - \sqrt{1 - e^{-4}} = 0{,}9$ % tras $4\tau$: más o menos la mitad de lo
+  impreso.
+- **Evidencia:** la fórmula (1) en la misma página y la Figura 3 en la
+  siguiente, que dibuja $\tilde v_F/\hat v$ de un seno de 8 Hz y de uno de
+  20 Hz frente al tiempo en unidades de $\tau$, con la media marcada en 0,707.
+  En $2\tau$ las dos curvas oscilan alrededor de 0,66, que es el 93 % de 0,707,
+  y en $4\tau$ alrededor de 0,70. Verificado en la página 3 del PDF (p.
+  impresa 3) y en la página 4 del PDF (p. impresa 4) de la DIN 45672-2:1995-07.
+- **Consecuencia para las tablas de la propia norma:** ninguna. El consejo que
+  da la frase, arrancar el promediado antes de que llegue el tren, vale de las
+  dos maneras; lo que queda sobrestimado es el tamaño del error que cuesta un
+  arranque tardío.
+- **Comportamiento de la biblioteca:**
+  [`running_velocity_rms`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/railway.py)
+  dice a qué magnitud pertenece cada cifra, y el informe de conformidad
+  reproduce el 14 % y el 2 % impresos a partir del cuadrado medio de la
+  fórmula (1) arrancada desde reposo, que es la lectura que encaja con ellos.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

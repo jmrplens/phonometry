@@ -1,6 +1,6 @@
 ---
 title: "Inmisión de vibración"
-description: "La cadena alemana de protección frente a inmisiones: el vibrómetro de la DIN 45669-1 que dan por supuesto la DIN 4150-2 y la DIN 4150-3, su ponderación KB y su intensidad de vibración ponderada, y la velocidad de valoración del anexo E, que juzga un edificio sin frecuencia dominante."
+description: "La cadena alemana de protección frente a inmisiones: el vibrómetro de la DIN 45669-1 que dan por supuesto la DIN 4150-2 y la DIN 4150-3, la velocidad de valoración del anexo E, que juzga un edificio sin frecuencia dominante, y la reducción de la DIN 45672 de un paso de tren, con las constantes del terreno que atraviesa a partir de dos velocidades de onda."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -31,6 +31,13 @@ edificio, y con ellos un suceso de corta duración se juzga contra un único
 número en lugar de contra una curva leída en una frecuencia sobre la que dos
 métodos discrepan.
 
+El vibrómetro tiene un segundo rango de trabajo, de 4 Hz a 315 Hz, y existe para
+la fuente que con más frecuencia mete vibración en una casa: el ferrocarril. La
+DIN 45672 es la pareja de normas para él, un método de medida junto a la vía y un
+método de reducción de lo medido, para que la vibración de un tren se pueda
+comparar con la del siguiente, un punto del camino hasta el edificio con otro, y
+la vía antes de una medida correctora con la vía después.
+
 ## Páginas de esta sección
 
 - [Medida de la inmisión de vibración (DIN 45669-1)](/phonometry/es/vibration/immission/vibration-meter/):
@@ -39,6 +46,12 @@ métodos discrepan.
   las fórmulas (1) y (2), las bandas de tolerancia de las tablas 2 y 3, los
   valores de comprobación impresos de las tablas 8 y 9, y la velocidad de
   valoración del anexo E (DIN 45669-1:2010-09 con la corrección 1:2012-12).
+- [Vibración junto a una vía férrea (DIN 45672)](/phonometry/es/vibration/immission/railway-vibration/):
+  los tres tramos de un paso, el valor eficaz móvil y el valor de suceso
+  referido a una hora, los espectros en tercios de octava de la figura 6, la
+  densidad en banda estrecha y la tabla 1 (DIN 45672-2:1995-07), y las
+  constantes del terreno a partir de dos velocidades de onda
+  (DIN 45672-1:2009-12, apartado 4.5).
 
 <SeeAlso>
 
@@ -73,8 +86,9 @@ La magnitud se calcula aquí; el juicio al que alimenta no está implementado.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">
-**Nada de ferrocarril todavía.** La DIN 45672 mide y evalúa la vibración junto a
-las vías férreas, que es para lo que existe el rango de trabajo de 4 Hz a 315 Hz
-del vibrómetro. Su método de evaluación no está implementado.
+**Ningún procedimiento de medida junto a la vía.** La DIN 45672-1 fija los
+puntos de medida en el camino de la vía al edificio, las direcciones, los trenes
+que registrar y el informe que redactar. Solo su apartado 4.5, las constantes del
+terreno, es aritmética, y solo eso está aquí.
 </ScopeClaim>
 </Scope>

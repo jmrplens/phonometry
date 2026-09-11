@@ -579,3 +579,19 @@ def _assessment_velocity() -> object:
     return assess_short_term_vibration(
         _immission_record(), 2048.0, building_class="residential"
     )
+
+
+def _train_passage() -> object:
+    """DIN 45672-2: a twelve-second passage with two tones and some noise."""
+    from phonometry.vibration.immission import evaluate_train_passage
+
+    fs = 2048
+    t = np.arange(12 * fs) / fs
+    envelope = np.clip((t - 2.0) / 2.0, 0.0, 1.0) * np.clip((10.0 - t) / 2.0, 0.0, 1.0)
+    rng = np.random.default_rng(4)
+    record = envelope * (
+        0.3 * np.sin(2.0 * np.pi * 40.0 * t)
+        + 0.1 * np.sin(2.0 * np.pi * 63.0 * t)
+        + 0.03 * rng.standard_normal(t.size)
+    )
+    return evaluate_train_passage(record, fs, t2_s=(3.0, 9.0))

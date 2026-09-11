@@ -343,6 +343,7 @@ export const topics = [
         items: [
           { slug: 'vibration/immission', label: 'Overview', translations: { es: 'Resumen' } },
           'vibration/immission/vibration-meter',
+          'vibration/immission/railway-vibration',
         ],
       },
       apiGroup('vibration'),

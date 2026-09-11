@@ -197,6 +197,8 @@ export const apiSections = {
       'reference/api/vibration/instrumentation',
       'reference/api/vibration/signal-burst',
       'reference/api/vibration/vibration-meter',
+      'reference/api/vibration/railway',
+      'reference/api/vibration/ground',
     ],
   },
   'environment': {

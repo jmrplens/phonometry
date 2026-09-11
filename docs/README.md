@@ -204,6 +204,7 @@ the diagnostic signature of a machine.
 **[Vibration immission](vibration/immission/index.md)**
 
 - [Measuring vibration immission (DIN 45669-1)](vibration/immission/vibration-meter.md): the instrument DIN 4150-2 and DIN 4150-3 presuppose, with the band limitation and KB weighting of Formulae (3) and (4), the weighted vibration severity of Formula (1) and the clock maximum r.m.s. of Formula (2) with its two counting rules, the tolerance bands of Tables 2 and 3, the printed check values of Table 9 and of Table 8 as Corrigendum 1 redrafts it, and the Annex E assessment velocity that judges a building against one number instead of a curve
+- [Vibration next to a railway (DIN 45672)](vibration/immission/railway-vibration.md): one train passage reduced the way DIN 45672-2 reduces it, from the three stretches of Clause 5 and the running r.m.s. to the event value of an hour of traffic, the third-octave spectra of Figure 6 and the narrow-band density with Table 1, and the ground constants of DIN 45672-1 from two wave speeds, with the two formulas of Clause 4.5 that are printed wrong
 
 ### [Environment and transport](environment/index.md)
 

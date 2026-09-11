@@ -224,6 +224,12 @@ def test_clock_maxima_drop_a_partial_interval() -> None:
     assert im.takt_maxima(np.ones(int(29.0 * FS_HZ)), FS_HZ).size == 0
 
 
+def test_a_bad_display_is_reported_under_its_own_name() -> None:
+    """``takt_maxima`` takes ``kbf``, so an error names ``kbf``."""
+    with pytest.raises(ValueError, match="'kbf' must be a non-empty 1-D array"):
+        im.takt_maxima(np.ones((2, 2)), FS_HZ)
+
+
 def test_formula_2_counts_a_suppressed_interval_in_n() -> None:
     """A clock maximum at or below 0,1 enters as zero and still counts."""
     loud = 0.8

@@ -153,8 +153,9 @@ are described but not computed for you.
 
 ## Before and after these pages
 
-Every quantity here starts from an acceleration record and a spectral estimate,
-so the filtering, the weighting curves and the spectral estimators behind them
+Every quantity here starts from a record of acceleration or of velocity, which
+the signature of each function names, and most of them from a spectral estimate
+as well, so the filtering, the weighting curves and the spectral estimators behind them
 are in [Signal analysis](../signals/index.md), and [Spectral
 analysis](../signals/spectra/spectral-analysis.md) is the page the
 machinery diagnostics build on. The derivations are in [Vibration

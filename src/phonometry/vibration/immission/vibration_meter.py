@@ -279,11 +279,13 @@ def _frequencies(frequencies_hz: ArrayLike) -> NDArray[np.float64]:
     return require_positive_array(frequencies_hz, "frequencies_hz")
 
 
-def _velocity(velocity_mm_s: ArrayLike) -> NDArray[np.float64]:
-    """A finite one-dimensional velocity record as a float array."""
-    x = require_finite_array(velocity_mm_s, "velocity_mm_s")
+def _velocity(
+    velocity_mm_s: ArrayLike, name: str = "velocity_mm_s"
+) -> NDArray[np.float64]:
+    """A finite one-dimensional record as a float array, reported as *name*."""
+    x = require_finite_array(velocity_mm_s, name)
     if x.ndim != 1 or x.size == 0:
-        msg = "'velocity_mm_s' must be a non-empty 1-D array."
+        msg = f"{name!r} must be a non-empty 1-D array."
         raise ValueError(msg)
     return x
 
@@ -624,7 +626,7 @@ def takt_maxima(
         record is shorter than one interval.
     :raises ValueError: For a bad signal or a non-positive rate or interval.
     """
-    y = _velocity(kbf)
+    y = _velocity(kbf, "kbf")
     fs = require_positive(fs_hz, "fs_hz")
     duration_s = require_positive(takt_duration_s, "takt_duration_s")
     per_takt = int(round(duration_s * fs))

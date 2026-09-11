@@ -2481,7 +2481,7 @@ export const glossary = [
         id: "s-3",
         symbol: "$S$",
         unit: "acum",
-        standard: "DIN 45692:2009",
+        standard: "DIN 45692:2009-08",
         clause: {
           en: "clause 6",
           es: "apartado 6",

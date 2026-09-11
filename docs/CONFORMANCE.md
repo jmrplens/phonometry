@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**995/995 conformance checks pass** across 77 domains and 408 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1030/1030 conformance checks pass** across 78 domains and 410 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -36,10 +36,10 @@
 | ISO/TR 17534-3:2015 Table 3 | Ground-projected path length dp, m | 194.165 m | 0.005 m | 100 % |
 | Long 2e Table 14.9 (worked duct-borne sheet, supply path) | Fan to room, 8 octave bands -> 52/42/30/18/9/-2/-2/-1 dB at the receiver | 1 dB | 1 dB | 100 % |
 | IEC 60268-16 Annex M | Step 2 printed intermediates: the measurement condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.993 | 99 % |
-| VDI 2081 Blatt 2:2005 Table 1, element 14 | Bend flow noise, worst octave deviation, dB | 0.0496 dB | 0.0496 dB | 99 % |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 14 | Bend flow noise, worst octave deviation, dB | 0.0496 dB | 0.0496 dB | 99 % |
 | ISO 11691:1995 | Bounds of the octave insertion loss (Eq. (2)) | 9.744 dB | headroom 0.027 dB | 99 % |
 | IEC 60268-16 Annex M | Step 3 printed intermediates: the operational condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.987 | 99 % |
-| VDI 2081 Blatt 2:2005 Table 1, element 20 | Sound pressure level in room 102, worst octave deviation, dB | 0.4913 dB | 0.4913 dB | 98 % |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 20 | Sound pressure level in room 102, worst octave deviation, dB | 0.4913 dB | 0.4913 dB | 98 % |
 | ISO 5136:2003 Table D.1 | C3,4 of the sampling tube for d = 0,5 m at U = +/-5, +/-15, +/-30 m/s, 27 bands | max absolute deviation 0.049 dB | 0.049 dB | 98 % |
 | ISO 11200:2014 Table B.2 local environmental correction | K_3A at a work station 1,6 m from the dominating source, dB | 3.749 dB | 0.049 dB | 98 % |
 | ISO 9053-2:2020 Annex A.3 | Thermal boundary-layer thickness b | 0.00183 m | 0 m | 97 % |
@@ -277,8 +277,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 532-1:2017 Annex B.2 | Zwicker loudness N, stationary test signal 1 | 83.2957 sone (+/-0.1%) | 83.2957 sone | 0 sone | - | ![Pass][cv-pass] Pass |
 | ISO 532-1:2017 Annex B.5 | Time-varying loudness Nmax, technical signal 14 (aircraft, free field) | 22.6399 sone (+/-0.1%) | 22.6399 sone | 0 sone | 0 % | ![Pass][cv-pass] Pass |
 | ISO 532-1:2017 Annex B.5 | Time-varying loudness Nmax, technical signal 15 (vehicle interior, diffuse field) | 9.6059 sone (+/-0.1%) | 9.6059 sone | 0 sone | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45692:2009 Clause 6 | Sharpness of the standard 1 kHz reference signal | 1 acum (+/-0 acum) | 1 acum | 0 acum | 0 % | ![Pass][cv-pass] Pass |
-| DIN 45692:2009 Table A.2 | Sharpness of critical-band noise at 2.5 kHz (2320-2700 Hz, 4 sone) | 1.78 acum (+/-0.089 acum) | 1.747 acum | -0.033 acum | 37 % | ![Pass][cv-pass] Pass |
+| DIN 45692:2009-08 Clause 6 | Sharpness of the standard 1 kHz reference signal | 1 acum (+/-0 acum) | 1 acum | 0 acum | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45692:2009-08 Table A.2 | Sharpness of critical-band noise at 2.5 kHz (2320-2700 Hz, 4 sone) | 1.78 acum (+/-0.089 acum) | 1.747 acum | -0.033 acum | 37 % | ![Pass][cv-pass] Pass |
 | ISO 226:2023 Table B.1 | Equal-loudness contour, 60 phon @ 100 Hz | 78.5 dB SPL (+/-0.05 dB SPL) | 78.504 dB SPL | 0.004 dB SPL | 8 % | ![Pass][cv-pass] Pass |
 | ECMA-418-2:2025 Clause 5.1.8 | HMS loudness of a 1 kHz / 40 dB tone (c_N=0.0211964) | 1 sone_HMS (+/-0.03 sone_HMS) | 0.9843 sone_HMS | -0.0157 sone_HMS | 52 % | ![Pass][cv-pass] Pass |
 | ECMA-418-2:2025 Clause 6.2.8 | HMS tonality of a 1 kHz / 40 dB tone (c_T=2.8758615) | 1 tu_HMS (+/-0.03 tu_HMS) | 0.9998 tu_HMS | -0.0002 tu_HMS | 1 % | ![Pass][cv-pass] Pass |
@@ -732,33 +732,33 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 1 Hz | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 10 Hz | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 50 Hz | 40 mm/s (+/-0.005 mm/s) | 40 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 100 Hz | 50 mm/s (+/-0.005 mm/s) | 50 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, dwellings, 1 Hz | 5 mm/s (+/-0.005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, dwellings, 10 Hz | 5 mm/s (+/-0.005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, dwellings, 50 Hz | 15 mm/s (+/-0.005 mm/s) | 15 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, dwellings, 100 Hz | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 1 Hz | 3 mm/s (+/-0.005 mm/s) | 3 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 10 Hz | 3 mm/s (+/-0.005 mm/s) | 3 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 50 Hz | 8 mm/s (+/-0.005 mm/s) | 8 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 100 Hz | 10 mm/s (+/-0.005 mm/s) | 10 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi in the topmost floor plane, commercial and industrial buildings | 40 mm/s (+/-0.005 mm/s) | 40 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi in the topmost floor plane, dwellings | 15 mm/s (+/-0.005 mm/s) | 15 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 1 | Short-term guideline vi in the topmost floor plane, especially sensitive buildings | 8 mm/s (+/-0.005 mm/s) | 8 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 3 | Long-term guideline vi in the topmost floor plane, commercial and industrial buildings | 10 mm/s (+/-0.005 mm/s) | 10 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 3 | Long-term guideline vi in the topmost floor plane, dwellings | 5 mm/s (+/-0.005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 3 | Long-term guideline vi in the topmost floor plane, especially sensitive buildings | 2.5 mm/s (+/-0.005 mm/s) | 2.5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 2 | Short-term guideline vi on a buried pipeline, welded steel | 100 mm/s (+/-0.005 mm/s) | 100 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 2 | Short-term guideline vi on a buried pipeline, concrete and flanged metal | 80 mm/s (+/-0.005 mm/s) | 80 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Table 2 | Short-term guideline vi on a buried pipeline, masonry and plastic | 50 mm/s (+/-0.005 mm/s) | 50 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Clause 6.3 | Long-term reduction of the pipeline guideline values | 0.5 (+/-0.0005) | 0.5 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Clause 5.1 | Massive engineering structures, factor on the row 1 values | 2 (+/-0.0005) | 2 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Clause 5.2 | Vertical guideline vz for a ceiling or floor, mm/s | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Bild 1 | Guideline vi inside a band, dwellings, 30 Hz | 10 mm/s (+/-0.005 mm/s) | 10 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Bild 1 | Guideline vi inside a band, commercial and industrial buildings, 75 Hz | 45 mm/s (+/-0.005 mm/s) | 45 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
-| DIN 4150-3:1999 Clause 6.4 | Lowest horizontal natural frequency of a ten-storey building, Hz | 1 Hz (+/-0.0005 Hz) | 1 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 1 Hz | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 10 Hz | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 50 Hz | 40 mm/s (+/-0.005 mm/s) | 40 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, commercial and industrial buildings, 100 Hz | 50 mm/s (+/-0.005 mm/s) | 50 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, dwellings, 1 Hz | 5 mm/s (+/-0.005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, dwellings, 10 Hz | 5 mm/s (+/-0.005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, dwellings, 50 Hz | 15 mm/s (+/-0.005 mm/s) | 15 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, dwellings, 100 Hz | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 1 Hz | 3 mm/s (+/-0.005 mm/s) | 3 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 10 Hz | 3 mm/s (+/-0.005 mm/s) | 3 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 50 Hz | 8 mm/s (+/-0.005 mm/s) | 8 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi at the foundation, especially sensitive buildings, 100 Hz | 10 mm/s (+/-0.005 mm/s) | 10 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi in the topmost floor plane, commercial and industrial buildings | 40 mm/s (+/-0.005 mm/s) | 40 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi in the topmost floor plane, dwellings | 15 mm/s (+/-0.005 mm/s) | 15 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 1 | Short-term guideline vi in the topmost floor plane, especially sensitive buildings | 8 mm/s (+/-0.005 mm/s) | 8 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 3 | Long-term guideline vi in the topmost floor plane, commercial and industrial buildings | 10 mm/s (+/-0.005 mm/s) | 10 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 3 | Long-term guideline vi in the topmost floor plane, dwellings | 5 mm/s (+/-0.005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 3 | Long-term guideline vi in the topmost floor plane, especially sensitive buildings | 2.5 mm/s (+/-0.005 mm/s) | 2.5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 2 | Short-term guideline vi on a buried pipeline, welded steel | 100 mm/s (+/-0.005 mm/s) | 100 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 2 | Short-term guideline vi on a buried pipeline, concrete and flanged metal | 80 mm/s (+/-0.005 mm/s) | 80 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Table 2 | Short-term guideline vi on a buried pipeline, masonry and plastic | 50 mm/s (+/-0.005 mm/s) | 50 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Clause 6.3 | Long-term reduction of the pipeline guideline values | 0.5 (+/-0.0005) | 0.5 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Clause 5.1 | Massive engineering structures, factor on the row 1 values | 2 (+/-0.0005) | 2 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Clause 5.2 | Vertical guideline vz for a ceiling or floor, mm/s | 20 mm/s (+/-0.005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Bild 1 | Guideline vi inside a band, dwellings, 30 Hz | 10 mm/s (+/-0.005 mm/s) | 10 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Bild 1 | Guideline vi inside a band, commercial and industrial buildings, 75 Hz | 45 mm/s (+/-0.005 mm/s) | 45 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 4150-3:1999-02 Clause 6.4 | Lowest horizontal natural frequency of a ten-storey building, Hz | 1 Hz (+/-0.0005 Hz) | 1 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 
@@ -782,6 +782,49 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 4866:2010 D.3 | Lower end of the error band an empirical prediction carries, Hz | 1 Hz (+/-0.0005 Hz) | 1 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
 | ISO 4866:2010 D.4 | Lowest damping ratio measured on a building, % of critical | 0.5 % (+/-0.0005 %) | 0.5 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
 | ISO 4866:2010 D.4 | Highest damping ratio measured on a building, % of critical | 2.1 % (+/-0.0005 %) | 2.1 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Vibration immission measurement (DIN 45669)</b>: 100% (35/35)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| DIN 45669-1:2010-09 5.2.3.2 | Band limitation at the lower corner 0,8 f_u, magnitude | 0.70711 (+/-0.00005) | 0.70711 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 5.2.3.2 | Band limitation at the upper corner f_o / 0,8, magnitude | 0.70711 (+/-0.00005) | 0.70711 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 5.2.3.2 | KB weighting at its own corner 5,6 Hz, relative to the band limitation | 0.70711 (+/-0.00005) | 0.70711 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 2 | Lower limit of F(f) inside the band, % | 10 % (+/-0 %) | 10 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 2 | Lower limit of F(f) in the skirt, % | 20 % (+/-0 %) | 20 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 3 | Upper limit of F(f) outside the band, % | 20 % (+/-0 %) | 20 % | 0 % | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 9 | KB_F of a 1 mm/s sine at 1 Hz | 0.103 (+/-0.001) | 0.1027 | -0.0003 | 30 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 9 | KB_Fmax of a 1 mm/s sine at 1 Hz | 0.13 (+/-0.001) | 0.1298 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 9 | KB_F of a 1 mm/s sine at 5.6 Hz | 0.5 (+/-0.001) | 0.4994 | -0.0006 | 60 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 9 | KB_Fmax of a 1 mm/s sine at 5.6 Hz | 0.528 (+/-0.001) | 0.5274 | -0.0006 | 60 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 9 | KB_F of a 1 mm/s sine at 31.5 Hz | 0.693 (+/-0.001) | 0.6928 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 9 | KB_Fmax of a 1 mm/s sine at 31.5 Hz | 0.7 (+/-0.001) | 0.6998 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 9 | KB_F of a 1 mm/s sine at 80 Hz | 0.594 (+/-0.001) | 0.5941 | 0.0001 | 10 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 9 | KB_Fmax of a 1 mm/s sine at 80 Hz | 0.597 (+/-0.001) | 0.5965 | -0.0005 | 50 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 9 | KB_F of a 1 mm/s sine at 315 Hz | 0.071 (+/-0.001) | 0.0708 | -0.0002 | 20 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Table 9 | KB_Fmax of a 1 mm/s sine at 315 Hz | 0.071 (+/-0.001) | 0.0709 | -0.0001 | 10 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 6.2.3.12 | KB_F under the reference conditions (1 mm/s, 16 Hz) | 0.667 (+/-0.001) | 0.6671 | 0.0001 | 10 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 6.2.3.12 | KB_Fmax under the reference conditions (1 mm/s, 16 Hz) | 0.68 (+/-0.001) | 0.6803 | 0.0003 | 30 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, continuous, % of continuous | 100.4 % (+/-0.7 %) | 100.397 % | -0.003 % | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 800 ms, % of continuous | 100.3 % (+/-0.7 %) | 100.335 % | 0.035 % | 5 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 400 ms, % of continuous | 98.3 % (+/-0.7 %) | 98.337 % | 0.037 % | 5 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 200 ms, % of continuous | 89.7 % (+/-0.7 %) | 89.648 % | -0.052 % | 7 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 100 ms, % of continuous | 74.5 % (+/-0.7 %) | 74.405 % | -0.095 % | 14 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 50 ms, % of continuous | 57.6 % (+/-0.7 %) | 57.59 % | -0.01 % | 1 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 25 ms, % of continuous | 42.7 % (+/-0.7 %) | 42.886 % | 0.186 % | 27 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1 Ber 1:2012-12 Table 8 | KB_Fmax of an 80 Hz burst train, 12.5 ms, % of continuous | 30.9 % (+/-0.7 %) | 31.427 % | 0.527 % | 75 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Annex E, Table E.1 | Assessment weighting H_vB, commercial, at 50 Hz | 0.5 (+/-0.00005) | 0.5 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Annex E, Table E.1 | Assessment weighting H_vB, commercial, at 100 Hz | 0.4 (+/-0.00005) | 0.4 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Annex E, Table E.1 | Assessment weighting H_vB, residential, at 50 Hz | 0.33333 (+/-0.00005) | 0.33333 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Annex E, Table E.1 | Assessment weighting H_vB, residential, at 100 Hz | 0.25 (+/-0.00005) | 0.25 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Annex E, Table E.1 | Assessment weighting H_vB, sensitive, at 50 Hz | 0.375 (+/-0.00005) | 0.375 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Annex E, Table E.1 | Assessment weighting H_vB, sensitive, at 100 Hz | 0.3 (+/-0.00005) | 0.3 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Annex E, Table E.2 | Guideline assessment velocity, commercial, mm/s | 20 mm/s (+/-0.0005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Annex E, Table E.2 | Guideline assessment velocity, residential, mm/s | 5 mm/s (+/-0.0005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45669-1:2010-09 Annex E, Table E.2 | Guideline assessment velocity, sensitive, mm/s | 3 mm/s (+/-0.0005 mm/s) | 3 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 
@@ -1605,63 +1648,63 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
-| VDI 2081 Blatt 2:2005 Table 1, element 1 | Supply fan sound power at 63 Hz, dB | 90.4 dB (+/-0.05 dB) | 90.41 dB | 0.006 dB | 12 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 1 | Supply fan sound power at 125 Hz, dB | 88.8 dB (+/-0.05 dB) | 88.82 dB | 0.022 dB | 44 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 1 | Supply fan sound power at 250 Hz, dB | 86.3 dB (+/-0.05 dB) | 86.32 dB | 0.019 dB | 38 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 1 | Supply fan sound power at 500 Hz, dB | 82.9 dB (+/-0.05 dB) | 82.91 dB | 0.01 dB | 20 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 1 | Supply fan sound power at 1000 Hz, dB | 78.6 dB (+/-0.05 dB) | 78.59 dB | -0.006 dB | 12 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 1 | Supply fan sound power at 2000 Hz, dB | 73.4 dB (+/-0.05 dB) | 73.37 dB | -0.027 dB | 54 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 1 | Supply fan sound power at 4000 Hz, dB | 67.2 dB (+/-0.05 dB) | 67.24 dB | 0.045 dB | 90 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 1 | Supply fan sound power at 8000 Hz, dB | 60.2 dB (+/-0.05 dB) | 60.21 dB | 0.011 dB | 22 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Eq. (13) | Fan sound power level L_W4 from the duty, dB | 96 dB (+/-0.05 dB) | 96.041 dB | 0.041 dB | 82 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 1 | Supply fan total sound power level, dB | 94.1 dB (+/-0.05 dB) | 94.124 dB | 0.024 dB | 48 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 1 | Supply fan A-weighted sound power level, dB | 84.5 dB (+/-0.05 dB) | 84.511 dB | 0.011 dB | 22 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 5 | Rectangular duct 500 x 400 mm over 4 m, worst octave deviation, dB | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 13 | Round duct 160 mm over 1 m, worst octave deviation, dB | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Eq. (34) | Limit frequency of a 160 mm round duct, Hz | 1245 Hz (+/-0.5 Hz) | 1245.4 Hz | 0.403 Hz | 81 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 14 | Round bend 160 mm, Table 7 shifted onto its limit frequency, worst octave deviation, dB | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 3 | Junction into 0.3 m2 of 1.08 m2 total, dB | 5.6 dB (+/-0.05 dB) | 5.563 dB | -0.037 dB | 74 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 7 | Junction into 0.049 m2 of 0.147 m2 total, dB | 4.8 dB (+/-0.05 dB) | 4.771 dB | -0.029 dB | 58 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 16 | Junction into 0.02 m2 of 0.04 m2 total, dB | 3 dB (+/-0.05 dB) | 3.01 dB | 0.01 dB | 20 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Eq. (16) | Flow noise of a straight duct, overall sound power level, dB | 38 dB (+/-0.5 dB) | 38.31 dB | 0.306 dB | 61 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Eq. (17) | Flow noise of a straight duct, A-weighted sound power level, dB | 22 dB (+/-0.5 dB) | 21.62 dB | -0.376 dB | 75 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 3 | Junction flow noise at 63 Hz, dB | 39.1 dB (+/-0.05 dB) | 39.09 dB | -0.011 dB | 22 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 3 | Junction flow noise at 125 Hz, dB | 33.5 dB (+/-0.05 dB) | 33.53 dB | 0.031 dB | 62 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 3 | Junction flow noise at 250 Hz, dB | 27.4 dB (+/-0.05 dB) | 27.36 dB | -0.039 dB | 78 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 3 | Junction flow noise at 500 Hz, dB | 20.7 dB (+/-0.05 dB) | 20.72 dB | 0.021 dB | 42 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 3 | Junction flow noise at 1000 Hz, dB | 13.7 dB (+/-0.05 dB) | 13.67 dB | -0.034 dB | 68 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 3 | Junction flow noise at 2000 Hz, dB | 6.2 dB (+/-0.05 dB) | 6.24 dB | 0.038 dB | 76 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 3 | Junction flow noise at 4000 Hz, dB | -1.5 dB (+/-0.05 dB) | -1.53 dB | -0.028 dB | 56 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 3 | Junction flow noise at 8000 Hz, dB | -9.6 dB (+/-0.05 dB) | -9.61 dB | -0.006 dB | 12 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 14 | Bend flow noise, worst octave deviation, dB | 0 dB (+/-0.05 dB) | 0.0496 dB | 0.0496 dB | 99 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Eq. (49) | Splitter silencer self-noise, A-weighted sound power level, dB | 52 dB (+/-0.5 dB) | 52.099 dB | 0.099 dB | 20 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 2 | Splitter silencer self-noise at 63 Hz, dB | 62.7 dB (+/-0.05 dB) | 62.74 dB | 0.036 dB | 72 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 2 | Splitter silencer self-noise at 125 Hz, dB | 58.3 dB (+/-0.05 dB) | 58.26 dB | -0.038 dB | 76 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 2 | Splitter silencer self-noise at 250 Hz, dB | 53.7 dB (+/-0.05 dB) | 53.72 dB | 0.019 dB | 38 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 2 | Splitter silencer self-noise at 500 Hz, dB | 49.4 dB (+/-0.05 dB) | 49.39 dB | -0.005 dB | 10 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 2 | Splitter silencer self-noise at 1000 Hz, dB | 45.4 dB (+/-0.05 dB) | 45.43 dB | 0.026 dB | 52 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 2 | Splitter silencer self-noise at 2000 Hz, dB | 41.9 dB (+/-0.05 dB) | 41.85 dB | -0.046 dB | 92 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 2 | Splitter silencer self-noise at 4000 Hz, dB | 38.6 dB (+/-0.05 dB) | 38.62 dB | 0.017 dB | 34 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 2 | Splitter silencer self-noise at 8000 Hz, dB | 35.6 dB (+/-0.05 dB) | 35.56 dB | -0.041 dB | 82 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 2, element 18 | End reflection of a 200 mm nozzle in a ceiling, worst octave deviation, dB | 0 dB (+/-0.05 dB) | 0.0449 dB | 0.0449 dB | 90 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Section 1.1 | Spectral assessment correction K_A, worst octave deviation, dB | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, elements 1 to 3 | Chained level after fan, silencer and junction, worst octave deviation, dB | 0 dB (+/-0.1 dB) | 0.0719 dB | 0.0719 dB | 72 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 20 | Room attenuation of a ceiling diffuser, worst octave deviation, dB | 0 dB (+/-0.05 dB) | 0.0467 dB | 0.0467 dB | 93 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Eq. (36) | Room attenuation of a hemispherical outlet, dB | 5.7 dB (+/-0.05 dB) | 5.675 dB | -0.025 dB | 50 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 20 | Sound pressure level in room 102, worst octave deviation, dB | 0 dB (+/-0.5 dB) | 0.4913 dB | 0.4913 dB | 98 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 20 | Total sound pressure level in room 102, dB | 51.4 dB (+/-0.05 dB) | 51.384 dB | -0.016 dB | 32 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 2:2005 Table 1, element 20 | A-weighted sound pressure level in room 102, dB | 40 dB (+/-0.05 dB) | 40.037 dB | 0.037 dB | 74 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Section 6.3, Figure 26 | Reflection at a section change of ratio 0.05, dB | 7.4135 dB (+/-0.05 dB) | 7.4135 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Section 6.3, Figure 26 | Reflection at a section change of ratio 0.1, dB | 4.8073 dB (+/-0.05 dB) | 4.8073 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Section 6.3, Figure 26 | Reflection at a section change of ratio 0.2, dB | 2.5527 dB (+/-0.05 dB) | 2.5527 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Section 6.3, Figure 26 | Reflection at a section change of ratio 0.5, dB | 0.5115 dB (+/-0.05 dB) | 0.5115 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Section 6.3, Figure 26 | Reflection at a section change of ratio 1, dB | 0 dB (+/-0.05 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Section 6.3, Figure 26 | Reflection at a section change of ratio 2, dB | 0.5115 dB (+/-0.05 dB) | 0.5115 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Section 6.3, Figure 26 | Reflection at a section change of ratio 5, dB | 2.5527 dB (+/-0.05 dB) | 2.5527 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Section 6.3, Figure 26 | Reflection at a section change of ratio 7, dB | 3.5902 dB (+/-0.05 dB) | 3.5902 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Section 6.3, Figure 26 | Reflection at a section change of ratio 10, dB | 4.8073 dB (+/-0.05 dB) | 4.8073 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Section 6.3, Figure 26 | Bands a sudden increase still reflects in, of eight | 2 (+/-0.5) | 2 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| VDI 2081 Blatt 1:2001 Section 6.3 | Ceiling VDI 3733 recommends for a section change, dB | 5 dB (+/-0.05 dB) | 5 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 1 | Supply fan sound power at 63 Hz, dB | 90.4 dB (+/-0.05 dB) | 90.41 dB | 0.006 dB | 12 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 1 | Supply fan sound power at 125 Hz, dB | 88.8 dB (+/-0.05 dB) | 88.82 dB | 0.022 dB | 44 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 1 | Supply fan sound power at 250 Hz, dB | 86.3 dB (+/-0.05 dB) | 86.32 dB | 0.019 dB | 38 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 1 | Supply fan sound power at 500 Hz, dB | 82.9 dB (+/-0.05 dB) | 82.91 dB | 0.01 dB | 20 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 1 | Supply fan sound power at 1000 Hz, dB | 78.6 dB (+/-0.05 dB) | 78.59 dB | -0.006 dB | 12 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 1 | Supply fan sound power at 2000 Hz, dB | 73.4 dB (+/-0.05 dB) | 73.37 dB | -0.027 dB | 54 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 1 | Supply fan sound power at 4000 Hz, dB | 67.2 dB (+/-0.05 dB) | 67.24 dB | 0.045 dB | 90 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 1 | Supply fan sound power at 8000 Hz, dB | 60.2 dB (+/-0.05 dB) | 60.21 dB | 0.011 dB | 22 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Eq. (13) | Fan sound power level L_W4 from the duty, dB | 96 dB (+/-0.05 dB) | 96.041 dB | 0.041 dB | 82 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 1 | Supply fan total sound power level, dB | 94.1 dB (+/-0.05 dB) | 94.124 dB | 0.024 dB | 48 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 1 | Supply fan A-weighted sound power level, dB | 84.5 dB (+/-0.05 dB) | 84.511 dB | 0.011 dB | 22 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 5 | Rectangular duct 500 x 400 mm over 4 m, worst octave deviation, dB | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 13 | Round duct 160 mm over 1 m, worst octave deviation, dB | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Eq. (34) | Limit frequency of a 160 mm round duct, Hz | 1245 Hz (+/-0.5 Hz) | 1245.4 Hz | 0.403 Hz | 81 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 14 | Round bend 160 mm, Table 7 shifted onto its limit frequency, worst octave deviation, dB | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 3 | Junction into 0.3 m2 of 1.08 m2 total, dB | 5.6 dB (+/-0.05 dB) | 5.563 dB | -0.037 dB | 74 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 7 | Junction into 0.049 m2 of 0.147 m2 total, dB | 4.8 dB (+/-0.05 dB) | 4.771 dB | -0.029 dB | 58 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 16 | Junction into 0.02 m2 of 0.04 m2 total, dB | 3 dB (+/-0.05 dB) | 3.01 dB | 0.01 dB | 20 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Eq. (16) | Flow noise of a straight duct, overall sound power level, dB | 38 dB (+/-0.5 dB) | 38.31 dB | 0.306 dB | 61 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Eq. (17) | Flow noise of a straight duct, A-weighted sound power level, dB | 22 dB (+/-0.5 dB) | 21.62 dB | -0.376 dB | 75 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 3 | Junction flow noise at 63 Hz, dB | 39.1 dB (+/-0.05 dB) | 39.09 dB | -0.011 dB | 22 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 3 | Junction flow noise at 125 Hz, dB | 33.5 dB (+/-0.05 dB) | 33.53 dB | 0.031 dB | 62 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 3 | Junction flow noise at 250 Hz, dB | 27.4 dB (+/-0.05 dB) | 27.36 dB | -0.039 dB | 78 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 3 | Junction flow noise at 500 Hz, dB | 20.7 dB (+/-0.05 dB) | 20.72 dB | 0.021 dB | 42 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 3 | Junction flow noise at 1000 Hz, dB | 13.7 dB (+/-0.05 dB) | 13.67 dB | -0.034 dB | 68 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 3 | Junction flow noise at 2000 Hz, dB | 6.2 dB (+/-0.05 dB) | 6.24 dB | 0.038 dB | 76 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 3 | Junction flow noise at 4000 Hz, dB | -1.5 dB (+/-0.05 dB) | -1.53 dB | -0.028 dB | 56 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 3 | Junction flow noise at 8000 Hz, dB | -9.6 dB (+/-0.05 dB) | -9.61 dB | -0.006 dB | 12 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 14 | Bend flow noise, worst octave deviation, dB | 0 dB (+/-0.05 dB) | 0.0496 dB | 0.0496 dB | 99 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Eq. (49) | Splitter silencer self-noise, A-weighted sound power level, dB | 52 dB (+/-0.5 dB) | 52.099 dB | 0.099 dB | 20 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 2 | Splitter silencer self-noise at 63 Hz, dB | 62.7 dB (+/-0.05 dB) | 62.74 dB | 0.036 dB | 72 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 2 | Splitter silencer self-noise at 125 Hz, dB | 58.3 dB (+/-0.05 dB) | 58.26 dB | -0.038 dB | 76 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 2 | Splitter silencer self-noise at 250 Hz, dB | 53.7 dB (+/-0.05 dB) | 53.72 dB | 0.019 dB | 38 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 2 | Splitter silencer self-noise at 500 Hz, dB | 49.4 dB (+/-0.05 dB) | 49.39 dB | -0.005 dB | 10 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 2 | Splitter silencer self-noise at 1000 Hz, dB | 45.4 dB (+/-0.05 dB) | 45.43 dB | 0.026 dB | 52 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 2 | Splitter silencer self-noise at 2000 Hz, dB | 41.9 dB (+/-0.05 dB) | 41.85 dB | -0.046 dB | 92 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 2 | Splitter silencer self-noise at 4000 Hz, dB | 38.6 dB (+/-0.05 dB) | 38.62 dB | 0.017 dB | 34 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 2 | Splitter silencer self-noise at 8000 Hz, dB | 35.6 dB (+/-0.05 dB) | 35.56 dB | -0.041 dB | 82 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 2, element 18 | End reflection of a 200 mm nozzle in a ceiling, worst octave deviation, dB | 0 dB (+/-0.05 dB) | 0.0449 dB | 0.0449 dB | 90 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Section 1.1 | Spectral assessment correction K_A, worst octave deviation, dB | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, elements 1 to 3 | Chained level after fan, silencer and junction, worst octave deviation, dB | 0 dB (+/-0.1 dB) | 0.0719 dB | 0.0719 dB | 72 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 20 | Room attenuation of a ceiling diffuser, worst octave deviation, dB | 0 dB (+/-0.05 dB) | 0.0467 dB | 0.0467 dB | 93 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Eq. (36) | Room attenuation of a hemispherical outlet, dB | 5.7 dB (+/-0.05 dB) | 5.675 dB | -0.025 dB | 50 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 20 | Sound pressure level in room 102, worst octave deviation, dB | 0 dB (+/-0.5 dB) | 0.4913 dB | 0.4913 dB | 98 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 20 | Total sound pressure level in room 102, dB | 51.4 dB (+/-0.05 dB) | 51.384 dB | -0.016 dB | 32 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 2:2005-05 Table 1, element 20 | A-weighted sound pressure level in room 102, dB | 40 dB (+/-0.05 dB) | 40.037 dB | 0.037 dB | 74 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26 | Reflection at a section change of ratio 0.05, dB | 7.4135 dB (+/-0.05 dB) | 7.4135 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26 | Reflection at a section change of ratio 0.1, dB | 4.8073 dB (+/-0.05 dB) | 4.8073 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26 | Reflection at a section change of ratio 0.2, dB | 2.5527 dB (+/-0.05 dB) | 2.5527 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26 | Reflection at a section change of ratio 0.5, dB | 0.5115 dB (+/-0.05 dB) | 0.5115 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26 | Reflection at a section change of ratio 1, dB | 0 dB (+/-0.05 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26 | Reflection at a section change of ratio 2, dB | 0.5115 dB (+/-0.05 dB) | 0.5115 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26 | Reflection at a section change of ratio 5, dB | 2.5527 dB (+/-0.05 dB) | 2.5527 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26 | Reflection at a section change of ratio 7, dB | 3.5902 dB (+/-0.05 dB) | 3.5902 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26 | Reflection at a section change of ratio 10, dB | 4.8073 dB (+/-0.05 dB) | 4.8073 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26 | Bands a sudden increase still reflects in, of eight | 2 (+/-0.5) | 2 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| VDI 2081 Blatt 1:2001-07 Section 6.3 | Ceiling VDI 3733 recommends for a section change, dB | 5 dB (+/-0.05 dB) | 5 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

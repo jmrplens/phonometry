@@ -81,7 +81,7 @@ def _register_foundation() -> None:
         for index, frequency in enumerate(_TABLE_1_FREQUENCIES):
             register(
                 _STRUCTURAL_DAMAGE,
-                "DIN 4150-3:1999 Table 1",
+                "DIN 4150-3:1999-02 Table 1",
                 f"Short-term guideline vi at the foundation, {label}, {frequency:g} Hz",
             )(functools.partial(_chk_foundation, building_class, index))
 
@@ -103,7 +103,7 @@ def _register_top_floor() -> None:
     for building_class, label in _CLASS_LABELS.items():
         register(
             _STRUCTURAL_DAMAGE,
-            "DIN 4150-3:1999 Table 1",
+            "DIN 4150-3:1999-02 Table 1",
             f"Short-term guideline vi in the topmost floor plane, {label}",
         )(functools.partial(_chk_top_floor, building_class))
 
@@ -127,7 +127,7 @@ def _register_long_term() -> None:
     for building_class, label in _CLASS_LABELS.items():
         register(
             _STRUCTURAL_DAMAGE,
-            "DIN 4150-3:1999 Table 3",
+            "DIN 4150-3:1999-02 Table 3",
             f"Long-term guideline vi in the topmost floor plane, {label}",
         )(functools.partial(_chk_long_term, building_class))
 
@@ -154,7 +154,7 @@ def _register_pipelines() -> None:
     for material, label in _PIPE_LABELS.items():
         register(
             _STRUCTURAL_DAMAGE,
-            "DIN 4150-3:1999 Table 2",
+            "DIN 4150-3:1999-02 Table 2",
             f"Short-term guideline vi on a buried pipeline, {label}",
         )(functools.partial(_chk_pipeline, material))
 
@@ -164,7 +164,7 @@ _register_pipelines()
 
 @register(
     _STRUCTURAL_DAMAGE,
-    "DIN 4150-3:1999 Clause 6.3",
+    "DIN 4150-3:1999-02 Clause 6.3",
     "Long-term reduction of the pipeline guideline values",
 )
 def _chk_pipeline_long_term() -> Outcome:
@@ -178,7 +178,7 @@ def _chk_pipeline_long_term() -> Outcome:
 
 @register(
     _STRUCTURAL_DAMAGE,
-    "DIN 4150-3:1999 Clause 5.1",
+    "DIN 4150-3:1999-02 Clause 5.1",
     "Massive engineering structures, factor on the row 1 values",
 )
 def _chk_massive_factor() -> Outcome:
@@ -192,7 +192,7 @@ def _chk_massive_factor() -> Outcome:
 
 @register(
     _STRUCTURAL_DAMAGE,
-    "DIN 4150-3:1999 Clause 5.2",
+    "DIN 4150-3:1999-02 Clause 5.2",
     "Vertical guideline vz for a ceiling or floor, mm/s",
 )
 def _chk_floor_vertical() -> Outcome:
@@ -214,7 +214,7 @@ def _register_bild_1() -> None:
     for building_class, frequency in _BILD_1_MIDPOINTS:
         register(
             _STRUCTURAL_DAMAGE,
-            "DIN 4150-3:1999 Bild 1",
+            "DIN 4150-3:1999-02 Bild 1",
             f"Guideline vi inside a band, {_CLASS_LABELS[building_class]}, "
             f"{frequency:g} Hz",
         )(functools.partial(_chk_bild_1, building_class, frequency))
@@ -225,7 +225,7 @@ _register_bild_1()
 
 @register(
     _STRUCTURAL_DAMAGE,
-    "DIN 4150-3:1999 Clause 6.4",
+    "DIN 4150-3:1999-02 Clause 6.4",
     "Lowest horizontal natural frequency of a ten-storey building, Hz",
 )
 def _chk_storey_frequency() -> Outcome:

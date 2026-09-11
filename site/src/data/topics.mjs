@@ -336,6 +336,15 @@ export const topics = [
           'vibration/machinery/machine-vibration-evaluation',
         ],
       },
+      {
+        label: 'Vibration immission',
+        translations: { es: 'Inmisión de vibración' },
+        collapsed: true,
+        items: [
+          { slug: 'vibration/immission', label: 'Overview', translations: { es: 'Resumen' } },
+          'vibration/immission/vibration-meter',
+        ],
+      },
       apiGroup('vibration'),
     ],
   },

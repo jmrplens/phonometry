@@ -160,7 +160,7 @@ def sharpness_din(
     method: Literal["din", "aures", "bismarck"] = "din",
     calibration_factor: float | None = None,
 ) -> float:
-    """Sharpness of a signal per DIN 45692:2009 (stationary analysis).
+    """Sharpness of a signal per DIN 45692:2009-08 (stationary analysis).
 
     The specific loudness comes from the ISO 532-1 Zwicker stationary
     method (the DIN 45631 basis named by DIN 45692); the sharpness is its

@@ -69,6 +69,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- The instrument DIN 4150 presupposes: **DIN 45669-1:2010-09** with
+  **Berichtigung 1:2012-12**, in the new `vibration.immission` family.
+
+  The damage page has been saying, at the end, that the instrument
+  requirements of DIN 45669 are not implemented. They are the other half of
+  the pair: DIN 4150-2 and DIN 4150-3 print thresholds for a quantity, and the
+  quantity is defined by the meter. The chain is now here end to end, the band
+  limitation of Formula (3) and the KB weighting of Formula (4) as complex
+  responses over both working ranges, the weighted vibration severity `KB_F`
+  of Formula (1), and the clock maxima and their r.m.s. from Formula (2) with
+  both of its counting rules: a maximum at or below 0,1 enters as zero and its
+  30 s interval still counts in N, and an interval the record did not fill is
+  not an interval at all.
+
+  It is checkable rather than merely specified, which is why it is worth
+  having. Table 9 prints what a 1 mm/s sine must display at five frequencies
+  and Table 8, in the redraft the corrigendum gives it, prints the same for a
+  train of 80 Hz bursts. Thirty-five conformance rows run those signals
+  through the chain and reproduce the printed values to the three decimals they
+  carry, ripple and all, which is a check no closed form could stand in for:
+  `KB_Fmax` sits above `KB_F` by the ripple of a running r.m.s. of a sine and
+  nothing prints a formula for the pair.
+
+  `verify_vibration_meter` grades a measured response against Tables 2 and 3
+  the way `verify_weighting` grades one against ISO 8041-1, on the shape rather
+  than the gain: Formula (7) normalises both responses at the 16 Hz reference,
+  so a flat calibration error is not a conformity finding, and the reference
+  frequency itself is dropped from the verdict because the standard writes
+  every limit "for all f not equal to f_r".
+
+  Annex E is the part that reaches furthest. DIN 4150-3 compares a peak
+  velocity with a guideline value that depends on frequency, and Annex D gives
+  two ways of finding that frequency which do not agree. Annex E removes the
+  question: three weighting filters, one per building class, each the guideline
+  curve inverted and normalised to its 1 Hz to 10 Hz value, and a comparison
+  with a single number, 20, 5 or 3 mm/s. The two routes agree to one per cent
+  on the same event, which is the annex working.
+
+  One row of Table 9 is not published here and `docs/ERRATA.md` says why: its
+  peak-velocity row contradicts the standard's own Formula (5) at two of its
+  five frequencies, and the `KB_F` row of the same two columns follows the
+  formula, so the table disagrees with itself rather than with the library.
+
 - A vibration meter can be given the verdict a sound level meter already gets:
   the frequency-weighting tolerances of **ISO 8041-1:2017**, in
   `vibration.verify_weighting`.

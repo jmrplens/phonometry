@@ -152,7 +152,7 @@ def _chk_iso532_b5_diffuse() -> Outcome:
 
 @register(
     "Psychoacoustics",
-    "DIN 45692:2009 Clause 6",
+    "DIN 45692:2009-08 Clause 6",
     "Sharpness of the standard 1 kHz reference signal",
 )
 def _chk_sharpness_reference() -> Outcome:
@@ -164,7 +164,7 @@ def _chk_sharpness_reference() -> Outcome:
 
 @register(
     "Psychoacoustics",
-    "DIN 45692:2009 Table A.2",
+    "DIN 45692:2009-08 Table A.2",
     "Sharpness of critical-band noise at 2.5 kHz (2320-2700 Hz, 4 sone)",
 )
 def _chk_sharpness_table_a2() -> Outcome:

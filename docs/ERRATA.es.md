@@ -5270,6 +5270,50 @@ dos ediciones con las mismas entradas y en el mismo orden.
   magnitud y la que trata la fila de condiciones de referencia de esa tabla.
 - **Estado:** sin comunicar.
 
+## DIN 45669-1:2010-09, Tabla 9 (una fila de velocidad de pico que contradice la fórmula (5), y la fila KB_F que tiene al lado)
+
+- **Localización:** Tabla 9, folio impreso 35 (página 35 del PDF de la copia
+  leída aquí, que imprime sus folios sin desplazamiento), filas «|v|max in mm/s
+  bei f_u = 1 Hz und f_o = 80 Hz» y «KB_F(t) ± 2 % Schwankung».
+- **Lo impreso:** para una entrada sinusoidal en las frecuencias de ensayo, la
+  fila de pico marca 0,852 a 1 Hz, 1,000 a 5,6 Hz, 1,000 a 31,5 Hz, 0,843 a
+  80 Hz y 0,249 a 315 Hz; la fila $KB_F$ de esas mismas cinco columnas marca
+  0,103, 0,500, 0,693, 0,594 y 0,071.
+- **El problema:** las dos filas están calculadas sobre limitaciones de banda
+  distintas, y la fila de pico no sigue la fórmula (5) de la propia norma. Con
+  $f_u = 1$ Hz y $f_o = 80$ Hz esa fórmula da $|H_{u\mathrm{Soll}}|$ = 0,995 a
+  31,5 Hz y 0,100 a 315 Hz, frente a los 1,000 y 0,249 impresos. La fila $KB_F$
+  resuelve cuál de las dos es la lectura pretendida: $KB_F$ es
+  $|H_{B\mathrm{Soll}}|/\sqrt{2}$ para un seno de 1 mm/s, y a 31,5 Hz eso es
+  0,6928 partiendo de 0,995 y 0,6962 partiendo de 1,000, así que el 0,693
+  impreso es lo primero; a 315 Hz es 0,0709 partiendo de 0,100 y 0,176
+  partiendo de 0,249, así que el 0,071 impreso vuelve a ser lo primero, por un
+  factor de dos y medio. El 0,852 a 1 Hz es la misma clase de desviación en el
+  otro extremo, frente al 0,842 de la fórmula (5).
+- **Evidencia:** la tabla impresa frente a las fórmulas (5) y (6) del folio
+  impreso 18 y la nota bajo la fórmula (3), que sitúa las dos esquinas en
+  0,8 Hz y 100 Hz. Verificado en la página 35 del PDF (p. impresa 35) de la
+  DIN 45669-1:2010-09; las dos filas son celdas contiguas de una misma columna, así que no hay ninguna cuestión de
+  desplazamiento ni de transcripción. Con lo que sí encajan las dos celdas
+  anómalas es con el máximo que muestra un retenedor de máximo cuando se
+  incluye el transitorio de arranque de la limitación de banda: un seno de
+  1 mm/s arrancado en un paso por cero da 0,852 a 1 Hz y 0,248 a 315 Hz a
+  través de ese mismo filtro. Esa lectura, sin embargo, no es la que muestran
+  las otras tres celdas de la fila, así que la fila no sigue de forma
+  consistente ni un criterio ni el otro.
+- **Consecuencia para las tablas de la propia norma:** se limita a esa fila. La
+  Berichtigung 1:2012-12 reescribe la Tabla 8 y no toca la Tabla 9, y las
+  indicaciones de referencia del 6.2.3.12, que son los valores que produce la
+  misma señal de ensayo a 16 Hz, las reproducen exactamente las fórmulas.
+- **Comportamiento de la biblioteca:**
+  [`KB_TEST_INDICATIONS`](../src/phonometry/vibration/immission/vibration_meter.py)
+  publica las tres filas de la Tabla 9 que siguen a las fórmulas, y el informe
+  de conformidad pasa un seno de 1 mm/s por la cadena entera y reproduce los
+  quince valores con los tres decimales con que están impresos. La fila de pico
+  ni se publica ni se comprueba; el docstring del módulo dice por qué, y el pico
+  que muestra un registro se calcula del registro y no de una tabla.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

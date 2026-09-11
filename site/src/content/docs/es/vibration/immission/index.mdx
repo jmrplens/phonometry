@@ -1,0 +1,80 @@
+---
+title: "Inmisión de vibración"
+description: "La cadena alemana de protección frente a inmisiones: el vibrómetro de la DIN 45669-1 que dan por supuesto la DIN 4150-2 y la DIN 4150-3, su ponderación KB y su intensidad de vibración ponderada, y la velocidad de valoración del anexo E, que juzga un edificio sin frecuencia dominante."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+
+*Inmisión* es lo que llega, frente a *emisión*, que es lo que sale: la vibración
+que reciben de verdad un edificio o las personas que hay dentro, venga de donde
+venga. Se regula por ese lado del camino de transmisión, y los documentos que lo
+hacen son un conjunto y no una norma suelta. La DIN 4150-2 fija a qué pueden
+estar expuestas las personas dentro de un edificio; la DIN 4150-3, lo que
+aguantan los propios edificios; la DIN 45669-1 especifica el **instrumento** que
+las dos dan por supuesto, y la DIN 45669-2, el procedimiento con el que se usa.
+
+Esta sección es la mitad del instrumento. La otra mitad ya tenía página: los
+valores de referencia de la DIN 4150-3 están en [Daños por vibración en
+estructuras](/phonometry/es/vibration/structural/structural-damage/), y decían
+al final que los requisitos de instrumento de la DIN 45669 no estaban
+implementados. Ya lo están, y eso cierra el círculo: la magnitud con la que se
+compara un valor de referencia la define el vibrómetro, y al vibrómetro lo
+definen su limitación de banda, su ponderación KB y el valor eficaz móvil con el
+que las promedia.
+
+La sección lleva además la parte de la DIN 45669-1 que más lejos llega en la
+práctica. El anexo E convierte la curva de valores de referencia de la
+DIN 4150-3, que depende de la frecuencia, en tres filtros, uno por clase de
+edificio, y con ellos un suceso de corta duración se juzga contra un único
+número en lugar de contra una curva leída en una frecuencia sobre la que dos
+métodos discrepan.
+
+## Páginas de esta sección
+
+- [Medida de la inmisión de vibración (DIN 45669-1)](/phonometry/es/vibration/immission/vibration-meter/):
+  la limitación de banda y la ponderación KB de las fórmulas (3) y (4), la
+  intensidad de vibración ponderada y el eficaz de los máximos por intervalo de
+  las fórmulas (1) y (2), las bandas de tolerancia de las tablas 2 y 3, los
+  valores de comprobación impresos de las tablas 8 y 9, y la velocidad de
+  valoración del anexo E (DIN 45669-1:2010-09 con la corrección 1:2012-12).
+
+<SeeAlso>
+
+## Véase también
+
+- [Daños por vibración en estructuras (DIN 4150-3)](/phonometry/es/vibration/structural/structural-damage/):
+  los valores de referencia para los que esta cadena produce los números.
+- [Verificación de un vibrómetro para personas (ISO 8041-1)](/phonometry/es/vibration/human/meter-verification/):
+  la misma idea para el vibrómetro que mide sobre personas, con sus propias
+  ponderaciones y sus propias tablas de tolerancia.
+- [Respuesta del edificio y frecuencia fundamental (ISO 4866)](/phonometry/es/vibration/structural/building-response/):
+  la frecuencia a la que responde un edificio, que es una pregunta distinta de la
+  frecuencia del suceso.
+
+</SeeAlso>
+
+## Qué no cubre esta sección
+
+<Scope>
+<ScopeClaim status="not-covered">
+**Ningún procedimiento de medida.** La DIN 45669-2 fija los puntos de medida, el
+acoplamiento de un captador a un forjado o al terreno, la duración de la medida y
+las perturbaciones que hay que dejar fuera. Nada de eso es aritmética y nada de
+eso está aquí.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ninguna valoración de las personas en edificios.** La DIN 4150-2 juzga qué
+significa la intensidad de vibración ponderada para quien la siente, con sus
+propias tablas de valores de referencia por franja horaria y por uso del local.
+La magnitud se calcula aquí; el juicio al que alimenta no está implementado.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Nada de ferrocarril todavía.** La DIN 45672 mide y evalúa la vibración junto a
+las vías férreas, que es para lo que existe el rango de trabajo de 4 Hz a 315 Hz
+del vibrómetro. Su método de evaluación no está implementado.
+</ScopeClaim>
+</Scope>

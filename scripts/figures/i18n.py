@@ -418,6 +418,30 @@ _ES_EXACT = {
     "0.59 to 0.74 Hz": "0,59 a 0,74 Hz",
     "0.90 to 1.20 Hz": "0,90 a 1,20 Hz",
     "$f = 46/h$: 0.77 Hz": "$f = 46/h$: 0,77 Hz",
+    # kb_weighting, kb_time_response and assessment_weighting (DIN 45669-1):
+    # the KB chain of a building vibration meter, what it reduces a record to,
+    # and the Annex E weightings. The two readings carry their own digits for
+    # the reason the entries above give: a pattern would restamp every clip.
+    "The KB weighting of a building vibration meter (DIN 45669-1)": "La ponderación KB de un vibrómetro de edificios (DIN 45669-1)",
+    "band limitation alone, 1 Hz to 80 Hz": "solo limitación de banda, 1 Hz a 80 Hz",
+    "KB weighting, 1 Hz to 80 Hz": "ponderación KB, 1 Hz a 80 Hz",
+    "KB weighting, 4 Hz to 315 Hz": "ponderación KB, 4 Hz a 315 Hz",
+    "5.6 Hz, the corner of Formula (4)": "5,6 Hz, la esquina de la fórmula (4)",
+    "One record, and the four numbers a meter shows for it (DIN 45669-1)": "Un registro, y los cuatro números que muestra de él un vibrómetro (DIN 45669-1)",
+    "Velocity $v$ [mm/s]": "Velocidad $v$ [mm/s]",
+    "Weighted vibration severity $KB_F$": "Intensidad de vibración ponderada $KB_F$",
+    "$KB_F(t)$, running r.m.s. with $\\tau$ = 0.125 s": "$KB_F(t)$, valor eficaz móvil con $\\tau$ = 0,125 s",
+    "$KB_{F\\mathrm{max}}$ = 1.210": "$KB_{F\\mathrm{max}}$ = 1,210",
+    "$KB_{FTm}$ = 0.785": "$KB_{FTm}$ = 0,785",
+    "clock maxima, one per 30 s": "máximos por intervalo, uno cada 30 s",
+    "What DIN 4150-3 Table 1 asks for": "Lo que pide la tabla 1 de la DIN 4150-3",
+    "The weighting that removes the frequency": "La ponderación que quita la frecuencia",
+    "Guideline peak velocity [mm/s]": "Velocidad de pico de referencia [mm/s]",
+    "Weighting factor $H_{vB}$": "Factor de ponderación $H_{vB}$",
+    "$v_{B1}$, commercial and industrial": "$v_{B1}$, comercial e industrial",
+    "$v_{B2}$, dwellings": "$v_{B2}$, viviendas",
+    "$v_{B3}$, especially sensitive": "$v_{B3}$, especialmente sensible",
+    "$\\pm$5 % of Table E.1": "$\\pm$5 % de la tabla E.1",
     # meter_phase_verification (ISO 8041-1 Formula (6) and Table 5): the two
     # invariances of the characteristic phase deviation, and the verdict on
     # an instrument carrying 2 ms of group delay and a spare pole at 100 Hz.

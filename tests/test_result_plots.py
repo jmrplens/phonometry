@@ -43,6 +43,7 @@ from result_factories import (
     _airborne_insulation,
     _airborne_prediction,
     _airborne_rating,
+    _assessment_velocity,
     _band_uncertainty,
     _cnossos_road,
     _diffuse_absorption,
@@ -76,6 +77,8 @@ from result_factories import (
     _sound_power,
     _static_airflow,
     _sti,
+    _vibration_meter_reading,
+    _vibration_meter_verification,
     _zwicker_stationary,
 )
 
@@ -194,6 +197,9 @@ _KWARG_PLOT_CASES = [
     ("diffuse_absorption", _diffuse_absorption, "line"),
     ("monte_carlo", _monte_carlo, "bar"),
     ("exposure", _exposure, "bar"),
+    ("vibration_meter_reading", _vibration_meter_reading, "line"),
+    ("vibration_meter_verification", _vibration_meter_verification, "line"),
+    ("assessment_velocity", _assessment_velocity, "line"),
     (
         "assumed_protection",
         lambda: ph.hearing.assumed_protection_value(_PROTECTOR_ATTENUATION),
